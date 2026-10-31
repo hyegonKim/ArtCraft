@@ -1,0 +1,183 @@
+import { CRAFTING_APPS, craftAppName } from "./crafting-apps";
+import { cdnMediaUrl, mediaUrl } from "./links";
+
+// Product feature roster, ported from the shipping landing page. Copy is the
+// approved marketing copy — edit deliberately, not casually.
+export type Feature = {
+  index: string;
+  label: string;
+  title: string;
+  description: string;
+  video: string;
+};
+
+export const FEATURES: Feature[] = [
+  {
+    index: "01",
+    label: "Worlds",
+    title: "Image to Location",
+    description:
+      "Place virtual actors into physical environments. Establish single-location consistency and film multiple shots in a room without things disappearing.",
+    video: mediaUrl("/videos/features/WorldLabs_Demo_2.webm"),
+  },
+  {
+    index: "02",
+    label: "3D Compositing",
+    title: "Build scenes with depth",
+    description:
+      "Use images, backdrops, foreground elements, and props in scenes with real depth. A couple of images blends naturally into a finished composition.",
+    video: mediaUrl("/videos/features/Panel.webm"),
+  },
+  {
+    index: "03",
+    label: "2D Compositing",
+    title: "Precise layered control",
+    description:
+      "Combine images, background removal, layers, and simple drawing tools to compose a scene exactly the way you imagined it.",
+    video: mediaUrl("/videos/features/Editor.webm"),
+  },
+  {
+    index: "04",
+    label: "3D Mesh",
+    title: "Image to 3D Mesh",
+    description:
+      "Turning images into 3D helps position elements exactingly. Block complex scenes with intentional geometry instead of fighting prompts.",
+    video: mediaUrl("/videos/features/Make_3D.webm"),
+  },
+  {
+    index: "05",
+    label: "Mixed Assets",
+    title: "Mix every kind of asset",
+    description:
+      "Combine image cutouts, worlds, and 3D meshes in one canvas to lay out scenes with precision and intention.",
+    video: mediaUrl("/videos/features/Mixed.webm"),
+  },
+  {
+    index: "06",
+    label: "Posing",
+    title: "Character Posing",
+    description:
+      'Dynamically pose your characters to nail the precise character, scene, and camera blocking before calling "action".',
+    video: mediaUrl("/videos/features/Character-Pose.webm"),
+  },
+  {
+    index: "07",
+    label: "Cutouts",
+    title: "Background Removal",
+    description:
+      "Instantly remove backgrounds from images to create assets for your scenes. Clean, precise, and ready for compositing.",
+    video: mediaUrl("/videos/features/Background.webm"),
+  },
+];
+
+export const HERO_VIDEO_URL =
+  "https://pub-f7441936e5804042a1ea2bdc92e4dc71.r2.dev/website-commercial-2026.05.mp4";
+
+// Clips for the hero's render wall. `aspect` is width/height of the panel
+// plane (the texture is cover-fitted, so any source aspect works), and the
+// wall adapts to any count and mix of aspects, so the count below is the
+// only thing to change when clips are added or dropped.
+//
+// Sources live on the R2 CDN as /videos/001.mp4 .. /videos/035.mp4 (see
+// cdnMediaUrl; it must keep sending CORS headers for the WebGL textures). When more clips are uploaded, raising
+// this count is the only change needed — every card/clip ratio works (cards
+// share clip textures; repeats are spread by least-recently-shown rebirth).
+const SHOWCASE_CLIP_COUNT = 35;
+
+export type SeedanceClip = {
+  src: string;
+  aspect: number;
+};
+
+export const SEEDANCE_SHOWCASE: SeedanceClip[] = Array.from(
+  { length: SHOWCASE_CLIP_COUNT },
+  (_, i) => ({
+    src: cdnMediaUrl(`/videos/${String(i + 1).padStart(3, "0")}.mp4`),
+    aspect: 16 / 9,
+  }),
+);
+
+// The scroll ruler's section roster, in document order. `id` must match a
+// DOM id on the page; sections missing from the DOM are silently skipped so
+// the ruler still works on future pages. The hero is special-cased by id
+// (its heading is the wordmark itself — see heading-flow.tsx).
+export type RulerSection = {
+  id: string;
+  label: string;
+};
+
+export const HERO_SECTION_ID = "hero";
+
+// ORDER MATTERS: the ruler assumes anchors increase with roster index, and
+// each page mounts only its own ids (the rest are skipped), so one roster
+// serves the whole site as long as every page's sections appear here in
+// the order they appear in that page's DOM. Page-header ids (01) come
+// before the interior section ids they precede.
+export const RULER_SECTIONS: RulerSection[] = [
+  { id: HERO_SECTION_ID, label: "ARTCRAFT" },
+  // Campaign page heroes, then their own sections, then the landing
+  // sections they reuse (features/ownership/made-with/start).
+  { id: "seedance-2", label: "SEEDANCE 2.0" },
+  { id: "seedance-2-5", label: "SEEDANCE 2.5" },
+  { id: "minimax-h3", label: "MINIMAX H3" },
+  // Crafting Apps: the /apps hub header and each /apps/<slug> hero.
+  { id: "apps", label: "CRAFTING APPS" },
+  ...CRAFTING_APPS.map((app) => ({
+    id: app.slug,
+    label: craftAppName(app).toUpperCase(),
+  })),
+  { id: "creator", label: "SPOTLIGHT" },
+  { id: "overview", label: "OVERVIEW" },
+  { id: "highlights", label: "HIGHLIGHTS" },
+  { id: "lineup", label: "LINEUP" },
+  { id: "principles", label: "PRINCIPLES" },
+  { id: "gallery", label: "SCREENSHOTS" },
+  { id: "get-it", label: "GET IT" },
+  { id: "family", label: "THE FAMILY" },
+  { id: "examples", label: "EXAMPLES" },
+  { id: "tips", label: "PROMPT TIPS" },
+  { id: "campaign-faq", label: "FAQ" },
+  { id: "manifesto", label: "MANIFESTO" },
+  { id: "the-work", label: "THE WORK" },
+  { id: "craft", label: "THE CRAFT" },
+  { id: "features", label: "FEATURES" },
+  { id: "ownership", label: "OWNERSHIP" },
+  { id: "reasons", label: "WHY ARTCRAFT" },
+  { id: "made-with", label: "COMMUNITY" },
+  { id: "community", label: "JOIN US" },
+  { id: "start", label: "GET STARTED" },
+  // Interior marketing pages.
+  { id: "pricing", label: "PRICING" },
+  { id: "download", label: "DOWNLOAD" },
+  { id: "tutorials", label: "TUTORIALS" },
+  { id: "news", label: "NEWS" },
+  { id: "faq", label: "FAQ" },
+  { id: "support", label: "SUPPORT" },
+  { id: "press-kit", label: "PRESS KIT" },
+  { id: "beta", label: "BETA" },
+  { id: "plans", label: "PLANS" },
+  { id: "enterprise", label: "ENTERPRISE" },
+  { id: "credits", label: "CREDITS" },
+  { id: "platforms", label: "PLATFORMS" },
+  { id: "quick-start", label: "QUICK START" },
+  { id: "articles", label: "ARTICLES" },
+  { id: "contact", label: "CONTACT" },
+];
+
+export const MADE_WITH_YOUTUBE_IDS = [
+  "HDdsKJl92H4",
+  "oqoCWdOwr2U",
+  "H4NFXGMuwpY",
+];
+
+export const TICKER_ITEMS = [
+  "Seedance 2.5",
+  "Nano Banana 2",
+  "Image to Location",
+  "3D Compositing",
+  "Character Posing",
+  "Image to 3D Mesh",
+  "Background Removal",
+  "2D Compositing",
+  "Mixed Assets",
+];

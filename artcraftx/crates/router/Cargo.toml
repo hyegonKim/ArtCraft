@@ -1,0 +1,48 @@
+[package]
+name = "router"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "router"
+path = "src/lib.rs"
+
+[dependencies]
+# cargo-hakari workspace hack (faster compile times)
+workspace-build-acceleration.workspace = true
+
+# Internal
+artcraft_client.workspace = true
+file_hashing.workspace = true
+browser_emulation.workspace = true
+fal_client.workspace = true
+gmicloud_client.workspace = true
+grok_api_client.workspace = true
+grok_consumer_client.workspace = true
+higgsfield_client.workspace = true
+midjourney_client.workspace = true
+seedance2pro_client.workspace = true
+sqlite_identifiers.workspace = true
+url_utils.workspace = true
+
+# External
+anyhow.workspace = true
+async-trait.workspace = true
+log.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+wreq.workspace = true
+serde_derive.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+test_data.workspace = true
+test_utils.workspace = true
+strum.workspace = true
+serde_json.workspace = true
+

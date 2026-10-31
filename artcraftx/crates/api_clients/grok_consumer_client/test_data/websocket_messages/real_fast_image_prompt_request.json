@@ -1,0 +1,26 @@
+{
+  "type": "conversation.item.create",
+  "timestamp": 1787523809686,
+  "item": {
+    "type": "message",
+    "content": [
+      {
+        "requestId": "2542de9d-9018-4b13-bef9-74f1fc8c4422",
+        "text": "Race car",
+        "type": "input_text",
+        "properties": {
+          "section_count": 0,
+          "is_kids_mode": false,
+          "enable_nsfw": true,
+          "skip_upsampler": false,
+          "enable_side_by_side": true,
+          "is_initial": false,
+          "aspect_ratio": "3:2",
+          "enable_pro": false,
+          "num_generations": 2,
+          "enable_watermark": false
+        }
+      }
+    ]
+  }
+}

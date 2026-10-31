@@ -1,0 +1,26 @@
+[package]
+name = "datadome_mitigation"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "datadome_mitigation"
+path = "src/lib.rs"
+
+[dependencies]
+# cargo-hakari workspace hack (faster compile times)
+workspace-build-acceleration.workspace = true
+
+# Internal
+browser_emulation.workspace = true
+datadome_errors.workspace = true
+
+# External
+# (None)
+
+[dev-dependencies]
+# (None)

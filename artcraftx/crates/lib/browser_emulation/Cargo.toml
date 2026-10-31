@@ -1,0 +1,23 @@
+[package]
+name = "browser_emulation"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "browser_emulation"
+path = "src/lib.rs"
+
+[dependencies]
+# Workspace hack (faster compile times)
+workspace-build-acceleration.workspace = true
+
+# External
+wreq.workspace = true
+wreq-util.workspace = true
+
+[dev-dependencies]
+# None yet

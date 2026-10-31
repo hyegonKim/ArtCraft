@@ -1,0 +1,25 @@
+{
+  "status": "authenticated",
+  "session": {
+    "userId": "00000000-0000-4000-8000-000000000000",
+    "email": "user@example.com",
+    "emailDomain": "example.com",
+    "givenName": "Test",
+    "familyName": "User",
+    "profileImage": "users/00000000-0000-4000-8000-000000000000/scrubbed-profile-picture.webp",
+    "xUserId": "",
+    "organizationId": "",
+    "organizationRole": 0,
+    "organizationType": 0,
+    "organizationKind": 0,
+    "isOrgAdmin": false,
+    "hasPassword": false,
+    "emailConfirmed": true,
+    "googleEmail": "user@example.com",
+    "xSubscriptionType": "",
+    "createTime": 1787514616739,
+    "sessionId": "88888888-8888-4888-8888-888888888888",
+    "signInMethod": 2,
+    "isIntegrationSession": false
+  }
+}

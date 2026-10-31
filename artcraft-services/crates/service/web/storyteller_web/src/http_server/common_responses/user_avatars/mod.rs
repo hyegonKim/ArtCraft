@@ -1,0 +1,2 @@
+pub mod default_avatar_color_from_username;
+pub mod default_avatar_from_username;

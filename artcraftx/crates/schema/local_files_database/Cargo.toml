@@ -1,0 +1,34 @@
+[package]
+name = "local_files_database"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "local_files_database"
+path = "src/lib.rs"
+
+[dependencies]
+# cargo-hakari workspace hack (faster compile times)
+workspace-build-acceleration.workspace = true
+
+# Internal
+errors.workspace = true
+
+# External
+chrono.workspace = true
+log.workspace = true
+
+# NB: Unlike `sqlite_database`, this crate uses RUNTIME queries (no sqlx
+# compile-time macros). The workspace's `.sqlx` offline data and the single
+# global DATABASE_URL can only describe one schema; runtime queries keep this
+# second database free of the `cargo sqlx prepare` dance.
+sqlx = { package = "sqlx", version = "0.7.4", features = ["runtime-tokio-rustls", "sqlite", "chrono"] }
+
+[dev-dependencies]
+# Integration tests run queries against a throwaway migrated database.
+tempfile.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

@@ -1,0 +1,41 @@
+[package]
+name = "higgsfield_client"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "higgsfield_client"
+path = "src/lib.rs"
+
+[dependencies]
+# Workspace hack (faster compile times)
+workspace-build-acceleration.workspace = true
+
+# Internal
+browser_emulation.workspace = true
+cloudflare_errors.workspace = true
+cloudflare_mitigation.workspace = true
+datadome_errors.workspace = true
+datadome_mitigation.workspace = true
+errors.workspace = true
+jwt_light.workspace = true
+
+# External
+chrono.workspace = true
+log.workspace = true
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { version = "1", features = ["sync", "time"] }
+wreq.workspace = true
+
+[dev-dependencies]
+anyhow.workspace = true
+base64.workspace = true
+toml.workspace = true
+env_logger.workspace = true
+tokio = { version = "1", features = ["full"] }

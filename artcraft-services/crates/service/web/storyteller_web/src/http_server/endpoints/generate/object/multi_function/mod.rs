@@ -1,0 +1,1 @@
+pub mod generate_hunyuan3d_v3_multi_function_object_handler;

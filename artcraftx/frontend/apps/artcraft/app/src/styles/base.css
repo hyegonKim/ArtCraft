@@ -1,0 +1,978 @@
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(226 232 244 / 0.15) #121316;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #121316;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(226 232 244 / 0.15);
+  border-radius: 999px;
+  border: 2px solid #121316;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(226 232 244 / 0.25);
+}
+
+/* Light theme: the scrollbar track/thumb must be light, not the dark defaults. */
+.theme-light {
+  scrollbar-color: #c4c4c8 #ececef;
+}
+
+.theme-light *::-webkit-scrollbar-track {
+  background: #ececef;
+}
+
+.theme-light *::-webkit-scrollbar-thumb {
+  background-color: #c4c4c8;
+  border: 2px solid #ececef;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Headings share the body face (Instrument Sans) like the marketing site;
+   Archivo is reserved for explicit display text (.ax-display / font-display). */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family:
+    "Instrument Sans Variable",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--st-fg);
+  background-color: var(--st-bg);
+  color-scheme: var(--st-color-scheme, dark);
+  user-select: none;
+}
+
+::selection {
+  background: rgb(77 124 251 / 0.32);
+  color: #fff;
+}
+
+/* ===================== THEME VARIABLES ===================== */
+/* Default theme: the ArtCraft-X marketing site's dark graphite palette.
+   Every shared lib component (modals, toasts, settings, promptbox) reads
+   these surfaces, so the reskin lands app-wide from here. */
+:root {
+  --st-bg: #121316;
+  /* carbon */
+  --st-panel: #17191d;
+  /* graphite */
+  --st-panel-border: rgb(226 232 244 / 0.08);
+  --st-modal: #1d2025;
+  /* umber */
+  --st-controls: #1d2025;
+  --st-controls-rgb: 29 32 37;
+  --st-controls-border: rgb(226 232 244 / 0.16);
+  --st-fg: #edeff3;
+  /* bone */
+  --st-fg-rgb: 237 239 243;
+  --st-divider: rgb(226 232 244 / 0.08);
+  --st-gallery-vignette-alpha: 0.6;
+  /* Photo tint (default neutral) */
+  --st-photo-tint-rgb: 0 0 0;
+  --st-photo-tint-alpha: 0;
+  --st-photo-grayscale: 1;
+  /* Theme-aware badge alpha (default dark) */
+  --st-badge-alpha: 0.4;
+
+  /* shadcn design tokens consumed by @storyteller/ui-video-editor.
+     Dark-theme palette — the editor only runs in dark mode today.
+     --primary matches the webapp's brand blue (#2d81ff) so the
+     selection ring is consistent across hosts. */
+  --background: 225 10% 8%;
+  --foreground: 220 20% 96%;
+  --card: 222 11% 10%;
+  --card-foreground: 220 20% 96%;
+  --popover: 222 12% 13%;
+  --popover-foreground: 220 20% 96%;
+  --primary: 224 96% 64%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 222 12% 13%;
+  --secondary-foreground: 220 20% 96%;
+  --muted: 222 12% 13%;
+  --muted-foreground: 216 8% 56%;
+  --accent: 222 12% 16%;
+  --accent-foreground: 220 20% 96%;
+  --destructive: 8 48% 52%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 222 12% 16%;
+  --input: 222 12% 16%;
+  --ring: 224 96% 64%;
+}
+
+/* ==================== LEGACY THEMES (parked) ====================
+   Kept for a future theme picker. None of these classes are applied today —
+   index.tsx strips theme-* on boot so the ax palette in :root is the single
+   look. Re-enable via ENABLE_LEGACY_THEMES in index.tsx. */
+
+/* Light theme */
+.theme-light {
+  --st-bg: #ffffff;
+  --st-panel: #f8f8f8;
+  --st-panel-border: #e5e7eb;
+  --st-modal: #f8f8f8;
+  --st-controls: #eeeeef;
+  /* requested light button surface */
+  --st-controls-rgb: 238 238 239;
+  --st-controls-border: #dcdcdf;
+  /* requested light button border */
+  --st-fg: #111827;
+  --st-fg-rgb: 17 24 39;
+  --st-divider: #d1d5db;
+  --st-color-scheme: light;
+  --st-photo-tint-rgb: 0 0 0;
+  --st-photo-tint-alpha: 0;
+  --st-photo-grayscale: 1;
+  /* lighter badge background for light themes */
+  --st-badge-alpha: 0.1;
+}
+
+/* Gray (legacy default) */
+.theme-gray {
+  --st-bg: #121212;
+  --st-panel: #1f1f1f;
+  --st-panel-border: #272727;
+  --st-modal: #1f1f1f;
+  --st-controls: #3e3e41;
+  --st-controls-rgb: 62 62 65;
+  --st-controls-border: #464646;
+  --st-fg: #ffffff;
+  --st-fg-rgb: 255 255 255;
+  --st-divider: #272727;
+  --st-color-scheme: dark;
+  --st-gallery-vignette-alpha: 0.3;
+  --st-photo-tint-rgb: 0 0 0;
+  --st-photo-tint-alpha: 0.6;
+  --st-photo-grayscale: 1;
+  --st-badge-alpha: 0.4;
+}
+
+/* Full black */
+.theme-black {
+  --st-bg: #000000;
+  --st-panel: #0a0a0a;
+  --st-panel-border: #242424;
+  --st-modal: #0a0a0a;
+  --st-controls: #111111;
+  --st-controls-rgb: 17 17 17;
+  --st-controls-border: #242424;
+  --st-fg: #ffffff;
+  --st-fg-rgb: 255 255 255;
+  --st-divider: #303030;
+  --st-color-scheme: dark;
+  --st-photo-tint-rgb: 0 0 0;
+  --st-photo-tint-alpha: 0;
+  --st-photo-grayscale: 1;
+  --st-badge-alpha: 0.4;
+}
+
+/* Aurora gradient theme */
+.theme-aurora,
+.theme-gradient {
+  --st-bg:
+    radial-gradient(1200px 600px at 10% -10%, #2d81ff22, transparent),
+    radial-gradient(900px 480px at 110% 110%, #1cb6be22, transparent), #070a12;
+  --st-panel: #0f1220;
+  --st-panel-border: #1e2237;
+  --st-modal:
+    radial-gradient(560px 280px at 12% -10%, #2d81ff33, transparent),
+    radial-gradient(520px 280px at 110% 120%, #1cb6be33, transparent), #0f1220;
+  --st-controls: #1a1f35;
+  --st-controls-rgb: 26 31 53;
+  --st-controls-border: #1e2237;
+  --st-fg: #f8fafc;
+  --st-fg-rgb: 248 250 252;
+  --st-divider: #2a3152;
+  --st-color-scheme: dark;
+  --st-photo-tint-rgb: 22 32 56;
+  /* slightly darker bluish tint */
+  --st-photo-tint-alpha: 0.34;
+  --st-photo-grayscale: 0;
+  --st-badge-alpha: 0.4;
+}
+
+/* Sunset gradient theme: purple to orange */
+.theme-sunset {
+  --st-bg:
+    radial-gradient(1100px 520px at 10% -10%, #8b5cf635, transparent),
+    radial-gradient(1400px 720px at 115% 120%, #fb923c66, transparent), #140b12;
+  --st-panel: #1a121a;
+  --st-panel-border: #3a253a;
+  --st-modal:
+    radial-gradient(560px 260px at 12% -10%, #8b5cf640, transparent),
+    radial-gradient(700px 360px at 115% 120%, #fb923c88, transparent), #1a121a;
+  --st-controls: #271927;
+  --st-controls-rgb: 39 25 39;
+  --st-controls-border: #3a253a;
+  --st-fg: #f8fafc;
+  --st-fg-rgb: 248 250 252;
+  --st-divider: #4a2e3a;
+  --st-color-scheme: dark;
+  --st-photo-tint-rgb: 96 32 48;
+  /* warmer tint for images */
+  --st-photo-tint-alpha: 0.3;
+  --st-photo-grayscale: 0;
+  --st-badge-alpha: 0.4;
+}
+
+/* Fallback classes hooking common UI areas to variables without refactors */
+.bg-ui-background {
+  background: var(--st-bg);
+}
+
+.bg-ui-panel {
+  background: var(--st-panel);
+}
+
+.bg-ui-panel-gradient {
+  background:
+    radial-gradient(
+      60.68% 60.68% at 50% 0%,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(0, 0, 0, 0) 70%
+    ),
+    var(--st-panel);
+  background-color: var(--st-panel);
+}
+
+.bg-ui-modal {
+  background: var(--st-modal);
+}
+
+.border-ui-panel-border {
+  border-color: var(--st-panel-border);
+}
+
+.border-ui-controls-border {
+  border-color: var(--st-controls-border);
+}
+
+.bg-ui-controls {
+  background: var(--st-controls);
+}
+
+.bg-ui-badge {
+  background-color: rgba(0, 0, 0, var(--st-badge-alpha));
+}
+
+.text-base-fg {
+  color: rgb(var(--st-fg-rgb) / 1);
+}
+
+.border-ui-divider {
+  border-color: var(--st-divider);
+}
+
+/* Tauri custom titlebar drag regions */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+.tauri-no-drag,
+[data-tauri-drag-region] .no-drag,
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] input,
+[data-tauri-drag-region] textarea,
+[data-tauri-drag-region] select {
+  -webkit-app-region: no-drag;
+}
+
+img {
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Icon auto-contrast: invert only in dark themes */
+.icon-auto-contrast {
+  filter: invert(1);
+}
+
+.theme-light .icon-auto-contrast {
+  filter: none;
+}
+
+/* Hide native scrollbars while preserving scrollability */
+/* Minimal thin scrollbar for prompt textareas */
+.promptbox-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar:vertical {
+  width: 4px;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar:horizontal {
+  height: 4px;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+.promptbox-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Light theme: white thumb is invisible on the light glass — use a dark tint. */
+.theme-light .promptbox-scrollbar {
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+.theme-light .promptbox-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.theme-light .promptbox-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.promptbox-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.promptbox-scrollbar::-webkit-resizer {
+  background: transparent;
+  border: none;
+}
+
+.promptbox-resize-wrap {
+  position: relative;
+}
+
+.promptbox-resize-wrap::after {
+  content: "";
+  position: absolute;
+  bottom: 16px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.5) 40%,
+    rgba(255, 255, 255, 0.5) 45%,
+    transparent 45%,
+    transparent 55%,
+    rgba(255, 255, 255, 0.5) 55%,
+    rgba(255, 255, 255, 0.5) 60%,
+    transparent 60%,
+    transparent 70%,
+    rgba(255, 255, 255, 0.5) 70%,
+    rgba(255, 255, 255, 0.5) 75%,
+    transparent 75%
+  );
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+.topbar-spacer {
+  height: 40px;
+  width: 100vw;
+}
+
+.prevent-select {
+  -webkit-user-select: none;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
+  pointer-events: none;
+}
+
+.text-overflow-ellipsis {
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/*!
+ * three-dots - v0.3.2
+ * CSS loading animations made with single element
+ * https://nzbin.github.io/three-dots/
+ *
+ * Copyright (c) 2018 nzbin
+ * Released under MIT License
+ */
+
+/**
+ * ==============================================
+ * Dot Typing
+ * ==============================================
+ */
+.dot-typing {
+  position: relative;
+  left: -9999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #ffffff30;
+  color: #ffffff30;
+  box-shadow:
+    9984px 0 0 0 #ffffff30,
+    9999px 0 0 0 #ffffff30,
+    10014px 0 0 0 #ffffff30;
+  animation: dot-typing 1.5s infinite linear;
+}
+
+@keyframes dot-typing {
+  0% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+
+  16.667% {
+    box-shadow:
+      9984px -10px 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+
+  33.333% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+
+  50% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px -10px 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+
+  66.667% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+
+  83.333% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px -10px 0 0 #ffffff30;
+  }
+
+  100% {
+    box-shadow:
+      9984px 0 0 0 #ffffff30,
+      9999px 0 0 0 #ffffff30,
+      10014px 0 0 0 #ffffff30;
+  }
+}
+
+/**
+  * ==============================================
+  * Dot Bricks
+  * ==============================================
+  */
+.dot-bricks {
+  position: relative;
+  top: 8px;
+  left: -9999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #ffffff30;
+  color: #ffffff30;
+  box-shadow:
+    9991px -16px 0 0 #ffffff30,
+    9991px 0 0 0 #ffffff30,
+    10007px 0 0 0 #ffffff30;
+  animation: dot-bricks 2s infinite ease;
+}
+
+@keyframes dot-bricks {
+  0% {
+    box-shadow:
+      9991px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30;
+  }
+
+  8.333% {
+    box-shadow:
+      10007px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30;
+  }
+
+  16.667% {
+    box-shadow:
+      10007px -16px 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30;
+  }
+
+  25% {
+    box-shadow:
+      10007px -16px 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30;
+  }
+
+  33.333% {
+    box-shadow:
+      10007px 0 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30;
+  }
+
+  41.667% {
+    box-shadow:
+      10007px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30;
+  }
+
+  50% {
+    box-shadow:
+      10007px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30;
+  }
+
+  58.333% {
+    box-shadow:
+      9991px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30;
+  }
+
+  66.666% {
+    box-shadow:
+      9991px 0 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30,
+      9991px -16px 0 0 #ffffff30;
+  }
+
+  75% {
+    box-shadow:
+      9991px 0 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30;
+  }
+
+  83.333% {
+    box-shadow:
+      9991px -16px 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30;
+  }
+
+  91.667% {
+    box-shadow:
+      9991px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30,
+      10007px -16px 0 0 #ffffff30;
+  }
+
+  100% {
+    box-shadow:
+      9991px -16px 0 0 #ffffff30,
+      9991px 0 0 0 #ffffff30,
+      10007px 0 0 0 #ffffff30;
+  }
+}
+
+.ReactCrop__crop-selection:focus {
+  outline: none !important;
+}
+
+/* Editor3D HistoryStack pending running border (continuous) */
+.st-loading-tile {
+  position: relative;
+}
+
+.st-border-svg {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  pointer-events: none;
+}
+
+/* base rect style for runner */
+.st-border-svg rect {
+  fill: none;
+  stroke: rgba(59, 130, 246, 1);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Single runner: a solid line chasing its tail */
+/* Continuous runner with wrapping to avoid flicker at corners */
+.st-border-solid {
+  stroke-dasharray: 90 110;
+  /* shorter visible segment + larger gap = clearer motion */
+  stroke-dashoffset: 0;
+  animation: st-solid-wrap 1.6s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))
+    drop-shadow(0 0 18px rgba(59, 130, 246, 0.5));
+}
+
+@keyframes st-solid-wrap {
+  0% {
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dashoffset: -200;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Shimmer skeleton used by the shared generation-list rows (matches the
+   webapp's .animate-shimmer — gradient sweep over a translucent base). */
+@keyframes generation-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: generation-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Prompt box drag & drop overlay (mirrors the webapp's styles.css) */
+@keyframes promptbox-drop-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.promptbox-drop-overlay {
+  animation: promptbox-drop-overlay-in 0.15s ease-out both;
+}
+
+@keyframes promptbox-drop-chip-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+    scale: 0.9;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+.promptbox-drop-chip {
+  animation: promptbox-drop-chip-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ==================== ARTCRAFT-X DESIGN LANGUAGE ====================
+   Ported from the marketing site (artcraftx-website styles.css). Only the
+   pieces the app uses — marketing-only effects (grain, field, collage,
+   marquee, reveal) intentionally left behind. */
+
+:root {
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Semi-expanded Archivo, solid near-white. */
+.ax-display {
+  font-family: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 118%;
+  font-weight: 620;
+  letter-spacing: -0.03em;
+  color: #edeff3;
+}
+
+.ax-hairline {
+  height: 1px;
+  background: rgb(226 232 244 / 0.08);
+}
+
+/* The site's titlebar sits on the ax-window glass: top-light strip over the
+   window's graphite gradient. */
+.ax-titlebar {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(237 239 243 / 0.045),
+      rgb(237 239 243 / 0.008)
+    ),
+    linear-gradient(180deg, rgb(26 28 33 / 0.88), rgb(15 16 19 / 0.92)),
+    rgb(8 9 11);
+  border-bottom: 1px solid rgb(226 232 244 / 0.08);
+}
+
+/* Mono structural label — spec sheets, readouts, metadata. */
+.ax-spec {
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Section marker: spec label with a signal tick. */
+.ax-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ax-marker::before {
+  content: "";
+  width: 10px;
+  height: 2px;
+  background: #4d7cfb;
+}
+
+/* Big metric numerals. */
+.ax-readout {
+  font-family: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 110%;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #edeff3;
+}
+
+/* Nav links: a hairline that grows from the left, like a meter filling. */
+.ax-navlink {
+  position: relative;
+  transition: color 0.4s var(--ease-soft);
+}
+
+.ax-navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0.65;
+  transition: transform 0.55s var(--ease-expo);
+}
+
+.ax-navlink:hover::after {
+  transform: scaleX(1);
+}
+
+.ax-navlink[aria-current="page"]::after {
+  transform: scaleX(1);
+  background: #4d7cfb;
+  opacity: 1;
+}
+
+.ax-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 1.05em;
+  translate: 0 0.14em;
+  background: #4d7cfb;
+  animation: ax-blink 1.05s steps(1, end) infinite;
+}
+
+@keyframes ax-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.ax-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0px 7px 0px 7px;
+  border-radius: 6px;
+  border: 1px solid rgb(226 232 244 / 0.16);
+  background: rgb(226 232 244 / 0.06);
+  animation: ax-chip-in 0.42s var(--ease-expo) both;
+}
+
+@keyframes ax-chip-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ax-progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.ax-progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(237 239 243 / 0.45),
+    transparent
+  );
+  animation: ax-scan 1.5s var(--ease-soft) infinite;
+}
+
+@keyframes ax-scan {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(220%, 0, 0);
+  }
+}
+
+/* Blinking REC dot. */
+.ax-rec {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 1.5px;
+  background: #4d7cfb;
+  animation: ax-rec 1.6s steps(1, end) infinite;
+}
+
+@keyframes ax-rec {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* Disk receipt entrance. */
+.ax-toast {
+  animation: ax-toast-in 0.6s var(--ease-expo) both;
+}
+
+@keyframes ax-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-caret,
+  .ax-progress-bar::after,
+  .ax-chip,
+  .ax-toast {
+    animation: none !important;
+  }
+
+  .ax-rec {
+    animation: none !important;
+    opacity: 1;
+  }
+}

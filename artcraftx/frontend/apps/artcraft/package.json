@@ -1,0 +1,92 @@
+{
+  "name": "artcraft",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "nx": {
+    "name": "artcraft",
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview --port 8080",
+    "dev": "echo 'artcraft' && vite dev",
+    "production-preview": "echo 'artcraft dev with production preview' && vite build --debug --emptyOutDir --logLevel info && vite preview --port 5173",
+    "staging-build": "vite build",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint playground/* .",
+    "typecheck": "tsc",
+    "chromatic": "npx chromatic --project-token=chpt_0945f90d5d3626c",
+    "prepare": "husky",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@preact/signals-react": "^2.0.1",
+    "@remix-run/deno": "^2.8.1",
+    "@remix-run/node": "^2.8.1",
+    "@remix-run/react": "^2.17.4",
+    "@tauri-apps/plugin-http": "2.4.3",
+    "csstype": "^3.1.3",
+    "dayjs": "^1.11.10",
+    "deep-equal": "^2.2.3",
+    "detect-gpu": "^5.0.38",
+    "lucide-react": "^0.512.0",
+    "nx": "^21.1.1",
+    "posthog-js": "^1.141.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-drag-drop-files": "^2.3.10",
+    "react-resizable-panels": "*",
+    "react-hot-toast": "^2.5.2",
+    "react-router": "^6.26.1",
+    "react-router-dom": "^6.26.1",
+    "tailwind-merge": "^2.2.2",
+    "terser": "^5.30.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.8.1",
+    "@types/deep-equal": "^1.0.4",
+    "@types/jest": "^29.5.12",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.162.0",
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "autoprefixer": "^10.4.18",
+    "chromatic": "^11.3.2",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "postcss": "^8.4.37",
+    "postcss-import": "^16.0.1",
+    "postcss-nesting": "^12.1.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.12",
+    "tailwindcss": "^3.4.1",
+    "terser": "^5.30.3",
+    "ts-jest": "^29.1.4",
+    "typescript": "^5.1.6",
+    "vite": "^5.4.0",
+    "vite-tsconfig-paths": "^4.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "version": "0.0.1",
+  "lint-staged": {
+    "*.js": "eslint --cache --fix --ignore-pattern 'playground/**'",
+    "*.{js,css,md}": "prettier --write"
+  }
+}

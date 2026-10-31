@@ -1,0 +1,3 @@
+pub mod get_voice_conversion_result;
+pub mod get_voice_conversion_result_for_inference;
+pub mod insert_voice_conversion_result;

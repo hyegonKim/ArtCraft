@@ -1,0 +1,127 @@
+{
+  "conversations": [
+    {
+      "conversationId": "9db05fac-a4df-4a42-aa81-4dee6d37f4a8",
+      "title": "Video Generation with AI",
+      "starred": false,
+      "createTime": "2026-08-23T20:00:41.151254Z",
+      "modifyTime": "2026-08-23T20:01:10.569116Z",
+      "systemPromptName": "",
+      "temporary": false,
+      "mediaTypes": [],
+      "workspaces": [],
+      "taskResult": {},
+      "latestAssetMetadata": {
+        "assetId": "98db6014-be3a-4c92-9aec-91c80123ccac",
+        "mimeType": "video/mp4",
+        "name": "generated_video.mp4",
+        "sizeBytes": 5800655,
+        "createTime": "2026-08-23T20:01:10.223Z",
+        "lastUseTime": "2026-08-23T20:01:10.235Z",
+        "summary": "",
+        "previewImageKey": "",
+        "key": "users/00000000-0000-4000-8000-000000000000/generated/98db6014-be3a-4c92-9aec-91c80123ccac/generated_video.mp4",
+        "auxKeys": {
+          "image_edit_is_root_user_uploaded": "false",
+          "image_references": "[\"https://assets.grok.com/users/00000000-0000-4000-8000-000000000000/generated/d3d5e751-b4a7-4683-9d09-df7d5bc37f74/image.jpg\"]",
+          "is_ext": "false",
+          "is_root_celebrity": "false",
+          "moderated": "false",
+          "preview-image": "users/00000000-0000-4000-8000-000000000000/generated/98db6014-be3a-4c92-9aec-91c80123ccac/preview_image.jpg",
+          "thumbhash": "DvgJBIAHZ4iOhImJhnn2cY0Ldw=="
+        },
+        "responseId": "07091ea3-8286-4e37-a517-871c4820ab31",
+        "isDeleted": false,
+        "fileSource": "IMAGINE_GENERATED_FILE_SOURCE",
+        "currentConversationId": "9db05fac-a4df-4a42-aa81-4dee6d37f4a8",
+        "sourceConversationId": "9db05fac-a4df-4a42-aa81-4dee6d37f4a8",
+        "isModelGenerated": true,
+        "updateTime": "2026-08-23T20:01:10.235Z",
+        "isLatest": true,
+        "inlineStatus": "DEFAULT_ARTIFACT_INLINE_STATUS",
+        "isRootAssetCreatedByModel": true,
+        "rootAssetSourceConversationId": "9db05fac-a4df-4a42-aa81-4dee6d37f4a8",
+        "sharedWithTeam": false,
+        "sharedWithUserIds": [],
+        "width": 736,
+        "height": 400,
+        "rRated": false,
+        "thumbhash": "DvgJBIAHZ4iOhImJhnn2cY0Ldw==",
+        "mediaGenInput": {
+          "imageToVideo": {
+            "inputAssets": [
+              "d3d5e751-b4a7-4683-9d09-df7d5bc37f74"
+            ],
+            "aspectRatio": "16:9",
+            "duration": 6,
+            "resolutionName": "480p",
+            "modelName": "imagine-video-gen",
+            "mode": "normal",
+            "skipAudio": false
+          }
+        },
+        "ownerUserId": "00000000-0000-4000-8000-000000000000"
+      },
+      "kind": "CONVERSATION_KIND_IMAGINE"
+    },
+    {
+      "conversationId": "e851b4f1-0605-4a41-b624-d629c2c1638d",
+      "title": "",
+      "starred": false,
+      "createTime": "2026-08-23T19:56:02.282356Z",
+      "modifyTime": "2026-08-23T19:56:02.284Z",
+      "systemPromptName": "",
+      "temporary": false,
+      "mediaTypes": [],
+      "workspaces": [],
+      "taskResult": {},
+      "latestAssetMetadata": {
+        "assetId": "8d0b3727-f040-4b33-abf0-16e7d4364e6c",
+        "mimeType": "image/jpeg",
+        "name": "image.jpg",
+        "sizeBytes": 517902,
+        "createTime": "2026-08-23T19:56:19.599Z",
+        "lastUseTime": "2026-08-23T19:56:19.599Z",
+        "summary": "",
+        "previewImageKey": "",
+        "key": "users/00000000-0000-4000-8000-000000000000/generated/8d0b3727-f040-4b33-abf0-16e7d4364e6c/image.jpg",
+        "auxKeys": {
+          "image_edit_is_root_user_uploaded": "false",
+          "is_root_celebrity": "false",
+          "moderated": "false",
+          "original-image": "users/00000000-0000-4000-8000-000000000000/generated/8d0b3727-f040-4b33-abf0-16e7d4364e6c/original_image.jpg",
+          "thumbhash": "DvgJBIAYV3iPdIeIdnjSV28HVQ=="
+        },
+        "responseId": "781acbe5-14bc-412c-9c3d-4610b19b627d",
+        "isDeleted": false,
+        "fileSource": "IMAGINE_GENERATED_FILE_SOURCE",
+        "currentConversationId": "e851b4f1-0605-4a41-b624-d629c2c1638d",
+        "sourceConversationId": "e851b4f1-0605-4a41-b624-d629c2c1638d",
+        "isModelGenerated": true,
+        "updateTime": "2026-08-23T19:56:19.599Z",
+        "isLatest": true,
+        "inlineStatus": "DEFAULT_ARTIFACT_INLINE_STATUS",
+        "isRootAssetCreatedByModel": true,
+        "rootAssetSourceConversationId": "e851b4f1-0605-4a41-b624-d629c2c1638d",
+        "sharedWithTeam": false,
+        "sharedWithUserIds": [],
+        "width": 1280,
+        "height": 720,
+        "rRated": false,
+        "thumbhash": "DvgJBIAYV3iPdIeIdnjSV28HVQ==",
+        "mediaGenInput": {
+          "textToImage": {
+            "prompt": "A pirate ship in the middle of the forest",
+            "numOfImages": 2,
+            "aspectRatio": "16:9",
+            "modelName": "imagine-image-gen",
+            "mode": "quality"
+          }
+        },
+        "ownerUserId": "00000000-0000-4000-8000-000000000000"
+      },
+      "kind": "CONVERSATION_KIND_IMAGINE"
+    }
+  ],
+  "textSearchMatches": []
+}

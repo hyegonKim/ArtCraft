@@ -1,0 +1,6 @@
+{
+  "type": "error",
+  "err_code": "rate_limit_exceeded",
+  "err_msg": "Image rate limit exceeded",
+  "request_id": "5c8fdd50-11ab-4e7c-9f64-301902eb6678"
+}

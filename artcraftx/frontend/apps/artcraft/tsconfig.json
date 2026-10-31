@@ -1,0 +1,113 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "env.d.ts",
+    "app/**/*.js",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "netlify-edge-plugin.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // Vite takes care of building everything, not tsc.
+    "noEmit": true
+  },
+  "references": [
+    {
+      "path": "../../libs/omni-gen"
+    },
+    {
+      "path": "../../libs/components/toaster"
+    },
+    {
+      "path": "../../libs/soundboard"
+    },
+    {
+      "path": "../../libs/state/subscription"
+    },
+    {
+      "path": "../../libs/components/provider-setup-modal"
+    },
+    {
+      "path": "../../libs/components/provider-billing-modal"
+    },
+    {
+      "path": "../../libs/analytics/google-analytics"
+    },
+    {
+      "path": "../../libs/state/credits"
+    },
+    {
+      "path": "../../libs/common"
+    },
+    {
+      "path": "../../libs/api-enums"
+    },
+    {
+      "path": "../../libs/components/action-reminder-modal"
+    },
+    {
+      "path": "../../libs/components/close-button"
+    },
+    {
+      "path": "../../libs/model-list"
+    },
+    {
+      "path": "../../libs/components/gallery-modal"
+    },
+    {
+      "path": "../../libs/components/pricing-modal"
+    },
+    {
+      "path": "../../libs/components/model-selector"
+    },
+    {
+      "path": "../../libs/components/settings-modal"
+    },
+    {
+      "path": "../../libs/components/tooltip"
+    },
+    {
+      "path": "../../libs/components/popover"
+    },
+    {
+      "path": "../../libs/components/promptbox"
+    },
+    {
+      "path": "../../libs/components/upload-modal"
+    },
+    {
+      "path": "../../libs/tauri-events"
+    },
+    {
+      "path": "../../libs/components/button"
+    },
+    {
+      "path": "../../libs/components/modal"
+    },
+    {
+      "path": "../../libs/tauri-api"
+    },
+    {
+      "path": "../../libs/api"
+    },
+    {
+      "path": "../../libs/tauri-utils"
+    }
+  ]
+}

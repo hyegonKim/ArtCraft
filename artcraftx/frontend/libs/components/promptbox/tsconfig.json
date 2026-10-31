@@ -1,0 +1,67 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../../tauri-utils"
+    },
+    {
+      "path": "../slider-v2"
+    },
+    {
+      "path": "../../api-enums"
+    },
+    {
+      "path": "../../analytics/google-analytics"
+    },
+    {
+      "path": "../../model-list"
+    },
+    {
+      "path": "../../omni-gen"
+    },
+    {
+      "path": "../popover"
+    },
+    {
+      "path": "../../tauri-api"
+    },
+    {
+      "path": "../../common"
+    },
+    {
+      "path": "../tooltip"
+    },
+    {
+      "path": "../action-reminder-modal"
+    },
+    {
+      "path": "../label"
+    },
+    {
+      "path": "../button"
+    },
+    {
+      "path": "../input"
+    },
+    {
+      "path": "../gallery-modal"
+    },
+    {
+      "path": "../toaster"
+    },
+    {
+      "path": "../../api"
+    },
+    {
+      "path": "../modal"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
+  "extends": "../../../tsconfig.base.json"
+}

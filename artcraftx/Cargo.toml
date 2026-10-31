@@ -1,0 +1,189 @@
+[workspace]
+resolver = "2"
+
+# This block defines the workspace members.
+# When we add a library or binary crate, it needs an entry here.
+members = [
+  # API clients for external services
+  # These might be custom implementations or wrappers over other client libraries.
+  "crates/api_clients/artcraft_client",
+  "crates/api_clients/fal_client",
+  "crates/api_clients/gmicloud_client",
+  "crates/api_clients/grok_api_client",
+  "crates/api_clients/grok_consumer_client",
+  "crates/api_clients/grok_consumer_statsig",
+  "crates/api_clients/higgsfield_client",
+  "crates/api_clients/midjourney_client",
+  "crates/router",
+  "crates/api_clients/seedance2pro_client",
+
+  # Desktop apps
+  "crates/artcraftx",
+
+  # Highest-level shared types: enums and identifiers used across the workspace
+  "crates/core_types",
+
+  # Every generation model (image, video, mesh, splat, audio) and its capabilities
+  "crates/models",
+
+  # Shared libraries
+  "crates/lib/browser_emulation",
+  "crates/lib/build_metadata",
+  "crates/lib/caching/memory_store",
+  "crates/lib/cloudflare_errors",
+  "crates/lib/cloudflare_mitigation",
+  "crates/lib/cookie_store_wrapper",
+  "crates/lib/datadome_errors",
+  "crates/lib/datadome_mitigation",
+  "crates/lib/data/primitives",
+  "crates/lib/data/web_base64",
+  "crates/lib/errors",
+  "crates/lib/files/file_hashing",
+  "crates/lib/files/file_to_base64_url",
+  "crates/lib/files/filesys",
+  "crates/lib/files/images",
+  "crates/lib/files/mimetypes",
+  "crates/lib/files/thumbnails",
+  "crates/lib/http_headers",
+  "crates/lib/jwt_light",
+  "crates/lib/url_utils",
+  "crates/lib/uuid_utils",
+
+  # Local task storage (SQLite, embedded migrations)
+  "crates/schema/local_files_database",
+  "crates/schema/sqlite_database",
+  "crates/schema/sqlite_identifiers",
+
+  # Schema (public): common strongly-typed tokens, ids, payloads, etc.
+
+  # Testing code
+  "crates/testing/test_data",
+  "crates/testing/test_utils",
+
+  # Vendored code
+  "crates/vendor/tauri-plugin-http",
+
+  # cargo-hakari workspace hack (compilation speedup hack)
+  # NB: Currently disabled (empty crate); kept so member crates can depend on it.
+  "crates/workspace-build-acceleration",
+]
+
+[workspace.package]
+# Common inheritable settings for monorepo packages
+publish = false
+
+# NB: Profiles must live at the workspace root; profiles in member crates are ignored.
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.
+
+[profile.release]
+codegen-units = 1 # Allows LLVM to perform better optimization.
+lto = true # Enables link-time-optimizations.
+opt-level = 3 # `s` prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort" # Higher performance by disabling panic handlers.
+strip = true # Ensures debug symbols are removed.
+
+[workspace.dependencies]
+# Hakari workspace hack (faster compile times)
+workspace-build-acceleration = { path = "crates/workspace-build-acceleration" }
+
+# Internal libs
+# Setting paths here ensures we don't need to do so in every crate's Cargo.toml
+# It makes refactoring much easier.
+artcraft_client = { path = "crates/api_clients/artcraft_client" }
+build_metadata = { path = "crates/lib/build_metadata" }
+cloudflare_errors = { path = "crates/lib/cloudflare_errors" }
+cloudflare_mitigation = { path = "crates/lib/cloudflare_mitigation" }
+datadome_errors = { path = "crates/lib/datadome_errors" }
+datadome_mitigation = { path = "crates/lib/datadome_mitigation" }
+browser_emulation = { path = "crates/lib/browser_emulation" }
+cookie_store_wrapper = { path = "crates/lib/cookie_store_wrapper" }
+errors = { path = "crates/lib/errors" }
+fal_client = { path = "crates/api_clients/fal_client" }
+file_hashing = { path = "crates/lib/files/file_hashing" }
+file_to_base64_url = { path = "crates/lib/files/file_to_base64_url" }
+filesys = { path = "crates/lib/files/filesys" }
+gmicloud_client = { path = "crates/api_clients/gmicloud_client" }
+grok_api_client = { path = "crates/api_clients/grok_api_client" }
+grok_consumer_client = { path = "crates/api_clients/grok_consumer_client" }
+higgsfield_client = { path = "crates/api_clients/higgsfield_client" }
+grok_consumer_statsig = { path = "crates/api_clients/grok_consumer_statsig" }
+http_headers = { path = "crates/lib/http_headers" }
+core_types = { path = "crates/core_types" }
+models = { path = "crates/models" }
+images = { path = "crates/lib/files/images" }
+jwt_light = { path = "crates/lib/jwt_light" }
+memory_store = { path = "crates/lib/caching/memory_store" }
+midjourney_client = { path = "crates/api_clients/midjourney_client" }
+mimetypes = { path = "crates/lib/files/mimetypes" }
+primitives = { path = "crates/lib/data/primitives" }
+router = { path = "crates/router" }
+seedance2pro_client = { path = "crates/api_clients/seedance2pro_client" }
+local_files_database = { path = "crates/schema/local_files_database" }
+sqlite_database = { path = "crates/schema/sqlite_database" }
+sqlite_identifiers = { path = "crates/schema/sqlite_identifiers" }
+test_data = { path = "crates/testing/test_data" }
+thumbnails = { path = "crates/lib/files/thumbnails" }
+test_utils = { path = "crates/testing/test_utils" }
+url_utils = { path = "crates/lib/url_utils" }
+uuid_utils = { path = "crates/lib/uuid_utils" }
+web_base64 = { path = "crates/lib/data/web_base64" }
+
+# External libs
+# Centrally pinned versions so that we can uniformly upgrade/downgrade versions across the workspace
+# If a crate needs to use an older/newer version, the dependency should be managed in that crate's own Cargo.toml
+anyhow = "1.0.102"
+assertor = "0.0.3"
+base64 = "0.22.1"
+async-trait = "0.1.89"
+blake3 = "1.5"
+bstr = "1.12.1"
+byteorder = "1.5.0"
+bytes = "1.11.1"
+chrono = { version = "0.4.44", features = ["serde"] }
+cookie = "0.18.1"
+env = "1.0.1"
+env_logger = "0.11.9"
+futures = { version = "0.3.32" }
+indexmap = { version = "2.13.0", features = ["serde"] }
+log = "0.4.29"
+mp4 = "0.14.0"
+openh264 = "0.8.0"
+once_cell = "1.21.4"
+rand = "0.9.1"
+regex = "1.12.3"
+reqwest = { version = "0.12.23", default-features = false, features = [ "charset", "http2", "system-proxy", "json", "cookies", "rustls-tls", "gzip" ] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_derive = "1.0.228"
+serde_json = "1.0.149"
+sha2 = "0.11.0-rc.5"
+sha3 = "0.10.8"
+strum = { version = "0.28.0", features = ["derive"] }
+tauri = { version = "2.11.2", features = ["unstable", "devtools", "protocol-asset"] } # NB: "devtools" prevents App Store distribution; "unstable" is needed for window access
+tauri-plugin-dialog = "2.7.1"
+tauri-plugin-fs = "2.5.1"
+tauri-plugin-log = "2.8.0"
+tauri-plugin-upload = "2.4.0"
+tempdir = "0.3.7"
+tempfile = "3.27.0"
+thiserror = "2.0.18"
+tokio = { version = "1.50.0", features = ["macros"] }
+tokio-util = "0.7.12"
+toml = "1.0.7+spec-1.1.0"
+url = { version = "2.5.8", features = ["serde"] }
+uuid = "1.22.0"
+walkdir = "2.4.0"
+webp-animation = "0.9.0"
+
+# NB: wreq gets past fingerprinting, but we have to deal with platform-specific build issues.
+#
+# Mac:
+#   brew install --formula cmake pkg-config llvm
+# Windows:
+#   choco install cmake -y
+#   choco install strawberryperl -y
+#   choco install pkgconfiglite -y
+#   choco install llvm -y
+#   choco install nasm -y
+wreq-util = "3.0.0-rc.10"
+wreq = { version = "6.0.0-rc.28", features = ["json", "query", "form", "multipart", "cookies", "ws", "stream", "gzip", "brotli", "zstd", "deflate"] }

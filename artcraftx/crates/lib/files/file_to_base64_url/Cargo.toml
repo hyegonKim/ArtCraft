@@ -1,0 +1,28 @@
+[package]
+name = "file_to_base64_url"
+edition = "2021"
+version = "0.0.1"
+publish = false
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[lib]
+name = "fal_client"
+path = "src/lib.rs"
+
+[dependencies]
+
+# Workspace hack (faster compile times)
+workspace-build-acceleration = { workspace =  true }
+
+# Internal
+errors.workspace = true
+
+# External
+anyhow.workspace = true
+base64.workspace = true
+mimetypes.workspace = true
+
+[dev-dependencies]
+test_utils = { path = "../../../testing/test_utils" }

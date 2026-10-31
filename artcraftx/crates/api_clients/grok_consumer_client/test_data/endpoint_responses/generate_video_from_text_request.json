@@ -1,0 +1,22 @@
+{
+  "modelName": "imagine-video-gen",
+  "message": "An asteroid hits the city. --mode=custom",
+  "enableImageStreaming": true,
+  "enableSideBySide": true,
+  "sendFinalMetadata": true,
+  "responseMetadata": {
+    "experiments": [],
+    "modelConfigOverride": {
+      "modelMap": {}
+    }
+  },
+  "mediaGenInput": {
+    "textToVideo": {
+      "prompt": "An asteroid hits the city.",
+      "aspectRatio": "2:3",
+      "duration": 6,
+      "resolutionName": "480p"
+    }
+  },
+  "kind": "CONVERSATION_KIND_IMAGINE"
+}

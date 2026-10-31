@@ -1,0 +1,752 @@
+use crate::creds::kinovi_web_session::KinoviWebSession;
+use crate::error::kinovi_web_error::KinoviWebError;
+use crate::pricing::kinovi_cost_calculator_trait::KinoviCostCalculatorTrait;
+use crate::pricing::cost::kinovi_fractional_generation_cost::KinoviFractionalGenerationCost;
+use crate::pricing::kinovi_pricing_rate::KinoviPricingRate;
+use crate::pricing::kinovi_pricing_tier::KinoviPricingTier;
+use crate::requests::kinovi_host::KinoviHost;
+use crate::requests::workflow_run_task::workflow_run_task::{
+  workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviModelTypeRaw,
+  KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest,
+};
+
+// ── Args ──
+
+pub struct GenerateSeedance2p5PreviewArgs<'a> {
+  pub request: GenerateSeedance2p5PreviewRequest,
+  pub session: &'a KinoviWebSession,
+  pub host_override: Option<KinoviHost>,
+}
+
+// ── Request ──
+
+/// Seedance 2.5 Preview only supports reference mode (there is no keyframe
+/// start/end frame mode), 480p/720p output, and durations of 4–30 seconds.
+#[derive(Clone, Debug)]
+pub struct GenerateSeedance2p5PreviewRequest {
+  pub prompt: String,
+  pub aspect_ratio: Option<KinoviSeedance2p5PreviewAspectRatio>,
+  pub output_resolution: Option<KinoviSeedance2p5PreviewOutputResolution>,
+  pub duration_seconds: u8,
+  pub batch_count: Option<KinoviSeedance2p5PreviewBatchCount>,
+  /// Reference images, referenced in prompts as @image1, @image2, etc.
+  pub reference_image_urls: Option<Vec<String>>,
+  /// Reference videos, referenced in prompts as @video1, @video2, etc.
+  pub reference_video_urls: Option<Vec<String>>,
+  /// Reference audio, referenced in prompts as @audio1, @audio2, etc.
+  pub reference_audio_urls: Option<Vec<String>>,
+  /// Controls `faceBlurMode`: true sends "on"; false or None sends "off"
+  /// (the model always sends the field, unlike older Seedance models).
+  pub use_face_blur_hack: Option<bool>,
+}
+
+// ── Enums ──
+
+#[derive(Debug, Clone, Copy)]
+pub enum KinoviSeedance2p5PreviewAspectRatio {
+  Landscape16x9,
+  UltraWide21x9,
+  Portrait9x16,
+  Square1x1,
+  Standard4x3,
+  Portrait3x4,
+}
+
+/// Output resolution. 2.5 Preview supports only 480p and 720p.
+#[derive(Debug, Clone, Copy)]
+pub enum KinoviSeedance2p5PreviewOutputResolution {
+  FourEightyP,
+  SevenTwentyP,
+}
+
+/// Number of videos to generate in one request (1–8).
+#[derive(Debug, Clone, Copy)]
+pub enum KinoviSeedance2p5PreviewBatchCount {
+  One,
+  Two,
+  Three,
+  Four,
+  Five,
+  Six,
+  Seven,
+  Eight,
+}
+
+// ── Pricing ──
+//
+// Seedance 2.5 Preview credit pricing (per second of output duration):
+//
+// | Resolution | Consumer credits/sec | Enterprise credits/sec |
+// |------------|----------------------|------------------------|
+// | 480p       |                46.15 |                  42.13 |
+// | 720p       |                92.03 |                  84.26 |
+//
+// References (images, videos, and audio) do NOT affect the cost — unlike the
+// Seedance 2.0 models, there is no video-reference surcharge. Default
+// resolution (None) is 720p.
+
+/// Per-second credit rates for Seedance 2.5 Preview at 480p.
+const SEEDANCE_2P5_PREVIEW_480P: KinoviPricingRate = KinoviPricingRate {
+  consumer_credits: 46.15,
+  maybe_enterprise_credits: Some(42.13),
+};
+
+/// Per-second credit rates for Seedance 2.5 Preview at 720p.
+const SEEDANCE_2P5_PREVIEW_720P: KinoviPricingRate = KinoviPricingRate {
+  consumer_credits: 92.03,
+  maybe_enterprise_credits: Some(84.26),
+};
+
+impl KinoviCostCalculatorTrait for GenerateSeedance2p5PreviewRequest {
+  type Cost = KinoviFractionalGenerationCost;
+
+  /// Calculate the cost of this generation request, in Kinovi credits
+  /// (fractional) and USD cents, at the given pricing tier.
+  ///
+  /// `cost_from_credits` snaps to the nearest hundredth of a credit, so the
+  /// totals land exactly on the observed values (e.g. consumer 480p × 15s =
+  /// 692.25, not a 692.250000000001 float artifact).
+  fn calculate_costs(&self, tier: KinoviPricingTier) -> KinoviFractionalGenerationCost {
+    let rate = match self.output_resolution {
+      Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP) => SEEDANCE_2P5_PREVIEW_480P,
+      Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP) | None => SEEDANCE_2P5_PREVIEW_720P,
+    };
+    let batch_multiplier: f64 = match self.batch_count {
+      None | Some(KinoviSeedance2p5PreviewBatchCount::One) => 1.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Two) => 2.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Three) => 3.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Four) => 4.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Five) => 5.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Six) => 6.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Seven) => 7.0,
+      Some(KinoviSeedance2p5PreviewBatchCount::Eight) => 8.0,
+    };
+
+    let total_credits = rate.credits(tier) * f64::from(self.duration_seconds) * batch_multiplier;
+    tier.cost_from_credits(total_credits)
+  }
+}
+
+// ── Response ──
+
+pub struct GenerateSeedance2p5PreviewResponse {
+  pub task_id: String,
+  pub order_id: String,
+  pub task_ids: Option<Vec<String>>,
+  pub order_ids: Option<Vec<String>>,
+}
+
+// ── Entry point ──
+
+pub async fn generate_seedance_2p5_preview(
+  args: GenerateSeedance2p5PreviewArgs<'_>,
+) -> Result<GenerateSeedance2p5PreviewResponse, KinoviWebError> {
+  let raw_response = workflow_run_task(WorkflowRunTaskArgs {
+    request: to_raw_request(args.request),
+    session: args.session,
+    host_override: args.host_override,
+  }).await?;
+
+  Ok(GenerateSeedance2p5PreviewResponse {
+    task_id: raw_response.task_id,
+    order_id: raw_response.order_id,
+    task_ids: raw_response.task_ids,
+    order_ids: raw_response.order_ids,
+  })
+}
+
+// ── Mapping helpers ──
+
+fn to_raw_request(req: GenerateSeedance2p5PreviewRequest) -> WorkflowRunTaskRequest {
+  WorkflowRunTaskRequest {
+    model_type: KinoviModelTypeRaw::Seedance2p5Preview,
+    prompt: req.prompt,
+    aspect_ratio: map_aspect_ratio(req.aspect_ratio),
+    output_resolution: Some(map_output_resolution(req.output_resolution)),
+    duration_seconds: req.duration_seconds,
+    batch_count: map_batch_count(req.batch_count),
+    start_frame_url: None,
+    end_frame_url: None,
+    reference_image_urls: req.reference_image_urls,
+    reference_video_urls: req.reference_video_urls,
+    reference_audio_urls: req.reference_audio_urls,
+    character_ids: None,
+    use_face_blur_hack: req.use_face_blur_hack,
+    bitrate: None,
+    maybe_output_format: None,
+    maybe_generate_audio: None,
+  }
+}
+
+fn map_aspect_ratio(ar: Option<KinoviSeedance2p5PreviewAspectRatio>) -> KinoviAspectRatioRaw {
+  match ar {
+    Some(KinoviSeedance2p5PreviewAspectRatio::Landscape16x9) => KinoviAspectRatioRaw::Landscape16x9,
+    Some(KinoviSeedance2p5PreviewAspectRatio::UltraWide21x9) => KinoviAspectRatioRaw::UltraWide21x9,
+    Some(KinoviSeedance2p5PreviewAspectRatio::Portrait9x16) => KinoviAspectRatioRaw::Portrait9x16,
+    Some(KinoviSeedance2p5PreviewAspectRatio::Square1x1) => KinoviAspectRatioRaw::Square1x1,
+    Some(KinoviSeedance2p5PreviewAspectRatio::Standard4x3) => KinoviAspectRatioRaw::Landscape4x3,
+    Some(KinoviSeedance2p5PreviewAspectRatio::Portrait3x4) => KinoviAspectRatioRaw::Portrait3x4,
+    None => KinoviAspectRatioRaw::Landscape16x9,
+  }
+}
+
+fn map_output_resolution(res: Option<KinoviSeedance2p5PreviewOutputResolution>) -> KinoviOutputResolutionRaw {
+  match res {
+    Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP) => KinoviOutputResolutionRaw::FourEightyP,
+    // Unset resolves to 720p — MUST stay in lockstep with calculate_costs(),
+    // which prices None as 720p.
+    Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP) | None => KinoviOutputResolutionRaw::SevenTwentyP,
+  }
+}
+
+fn map_batch_count(bc: Option<KinoviSeedance2p5PreviewBatchCount>) -> KinoviBatchCountRaw {
+  match bc {
+    Some(KinoviSeedance2p5PreviewBatchCount::One) | None => KinoviBatchCountRaw::One,
+    Some(KinoviSeedance2p5PreviewBatchCount::Two) => KinoviBatchCountRaw::Two,
+    Some(KinoviSeedance2p5PreviewBatchCount::Three) => KinoviBatchCountRaw::Three,
+    Some(KinoviSeedance2p5PreviewBatchCount::Four) => KinoviBatchCountRaw::Four,
+    Some(KinoviSeedance2p5PreviewBatchCount::Five) => KinoviBatchCountRaw::Five,
+    Some(KinoviSeedance2p5PreviewBatchCount::Six) => KinoviBatchCountRaw::Six,
+    Some(KinoviSeedance2p5PreviewBatchCount::Seven) => KinoviBatchCountRaw::Seven,
+    Some(KinoviSeedance2p5PreviewBatchCount::Eight) => KinoviBatchCountRaw::Eight,
+  }
+}
+
+// ── Tests ──
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::creds::kinovi_web_session::KinoviWebSession;
+  use crate::test_utils::get_test_cookies::get_test_cookies;
+  use crate::test_utils::setup_test_logging::setup_test_logging;
+  use errors::AnyhowResult;
+  use log::LevelFilter;
+
+  mod pricing_tests {
+    use super::*;
+
+    /// Expected fractional cents are written to 4 decimal places.
+    const FLOAT_TOLERANCE: f64 = 0.0001;
+
+    // ── Full pricing tables (credits) ──
+    //
+    // The exact per-duration tables for Seedance 2.5 Preview at each tier:
+    // consumer 480p = 46.15 credits/sec, 720p = 92.03 credits/sec;
+    // enterprise 480p = 42.13 credits/sec, 720p = 84.26 credits/sec.
+
+    mod consumer_pricing_table {
+      use super::*;
+
+      #[test]
+      fn table_480p() {
+        assert_eq!(r480(4).calculate_consumer_costs().kinovi_credits, 184.6);
+        assert_eq!(r480(10).calculate_consumer_costs().kinovi_credits, 461.5);
+        assert_eq!(r480(15).calculate_consumer_costs().kinovi_credits, 692.25);
+        assert_eq!(r480(20).calculate_consumer_costs().kinovi_credits, 923.0);
+        assert_eq!(r480(25).calculate_consumer_costs().kinovi_credits, 1153.75);
+        assert_eq!(r480(30).calculate_consumer_costs().kinovi_credits, 1384.5);
+      }
+
+      #[test]
+      fn table_720p() {
+        assert_eq!(r720(4).calculate_consumer_costs().kinovi_credits, 368.12);
+        assert_eq!(r720(10).calculate_consumer_costs().kinovi_credits, 920.3);
+        assert_eq!(r720(15).calculate_consumer_costs().kinovi_credits, 1380.45);
+        assert_eq!(r720(20).calculate_consumer_costs().kinovi_credits, 1840.6);
+        assert_eq!(r720(25).calculate_consumer_costs().kinovi_credits, 2300.75);
+        assert_eq!(r720(30).calculate_consumer_costs().kinovi_credits, 2760.9);
+      }
+
+      #[test]
+      fn explicit_720p_same_as_default() {
+        let default = r720(10).calculate_consumer_costs();
+        let explicit = build_request(10, Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP)).calculate_consumer_costs();
+        assert_eq!(default, explicit);
+      }
+    }
+
+    mod enterprise_pricing_table {
+      use super::*;
+
+      #[test]
+      fn table_480p() {
+        assert_eq!(r480(4).calculate_enterprise_costs().kinovi_credits, 168.52);
+        assert_eq!(r480(10).calculate_enterprise_costs().kinovi_credits, 421.3);
+        assert_eq!(r480(15).calculate_enterprise_costs().kinovi_credits, 631.95);
+        assert_eq!(r480(20).calculate_enterprise_costs().kinovi_credits, 842.6);
+        assert_eq!(r480(25).calculate_enterprise_costs().kinovi_credits, 1053.25);
+        assert_eq!(r480(30).calculate_enterprise_costs().kinovi_credits, 1263.9);
+      }
+
+      #[test]
+      fn table_720p() {
+        assert_eq!(r720(4).calculate_enterprise_costs().kinovi_credits, 337.04);
+        assert_eq!(r720(10).calculate_enterprise_costs().kinovi_credits, 842.6);
+        assert_eq!(r720(15).calculate_enterprise_costs().kinovi_credits, 1263.9);
+        assert_eq!(r720(20).calculate_enterprise_costs().kinovi_credits, 1685.2);
+        assert_eq!(r720(25).calculate_enterprise_costs().kinovi_credits, 2106.5);
+        assert_eq!(r720(30).calculate_enterprise_costs().kinovi_credits, 2527.8);
+      }
+
+      #[test]
+      fn explicit_720p_same_as_default() {
+        let default = r720(10).calculate_enterprise_costs();
+        let explicit = build_request(10, Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP)).calculate_enterprise_costs();
+        assert_eq!(default, explicit);
+      }
+    }
+
+    // ── Tier dispatch ──
+
+    #[test]
+    fn convenience_methods_match_explicit_tier() {
+      let request = r480(10);
+      assert_eq!(request.calculate_consumer_costs(), request.calculate_costs(KinoviPricingTier::Consumer));
+      assert_eq!(request.calculate_enterprise_costs(), request.calculate_costs(KinoviPricingTier::Enterprise));
+    }
+
+    // ── References don't affect cost ──
+    //
+    // Unlike the Seedance 2.0 models, 2.5 Preview has no video-reference
+    // surcharge: adding or removing references of any type leaves the cost
+    // unchanged at either tier.
+
+    mod references_do_not_affect_cost {
+      use super::*;
+
+      #[test]
+      fn table_480p_with_references_is_identical() {
+        for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
+          for duration in [4u8, 10, 15, 20, 25, 30] {
+            assert_eq!(
+              with_all_reference_types(r480(duration)).calculate_costs(tier),
+              r480(duration).calculate_costs(tier),
+              "480p at {duration}s ({tier:?})",
+            );
+          }
+        }
+      }
+
+      #[test]
+      fn table_720p_with_references_is_identical() {
+        for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
+          for duration in [4u8, 10, 15, 20, 25, 30] {
+            assert_eq!(
+              with_all_reference_types(r720(duration)).calculate_costs(tier),
+              r720(duration).calculate_costs(tier),
+              "720p at {duration}s ({tier:?})",
+            );
+          }
+        }
+      }
+
+      #[test]
+      fn video_reference_alone_adds_no_surcharge() {
+        let mut request = r720(10);
+        request.reference_video_urls = Some(vec!["https://example.com/ref.mp4".to_string()]);
+        assert_eq!(request.calculate_consumer_costs().kinovi_credits, 920.3);
+        assert_eq!(request.calculate_enterprise_costs().kinovi_credits, 842.6);
+      }
+    }
+
+    // ── USD cents conversion ──
+    //
+    // usd_cents = credits × 100 / credits_per_dollar. Consumer converts at
+    // 192.98 credits/$1; enterprise converts at the bulk rate of 243.16
+    // credits/$1.
+
+    mod usd_cents {
+      use super::*;
+
+      #[test]
+      fn consumer_cents_480p_4s() {
+        let cost = r480(4).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 184.6);
+        assert_eq!(cost.usd_cents_rounded_up, 96);
+        assert_eq!(cost.usd_cents_rounded_down, 95);
+        assert!((cost.usd_cents_fractional - 95.6576).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn consumer_cents_480p_10s() {
+        let cost = r480(10).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 461.5);
+        assert_eq!(cost.usd_cents_rounded_up, 240);
+        assert_eq!(cost.usd_cents_rounded_down, 239);
+        assert!((cost.usd_cents_fractional - 239.144).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn consumer_cents_480p_15s() {
+        let cost = r480(15).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 692.25);
+        assert_eq!(cost.usd_cents_rounded_up, 359);
+        assert_eq!(cost.usd_cents_rounded_down, 358);
+        assert!((cost.usd_cents_fractional - 358.7159).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn consumer_cents_720p_4s() {
+        let cost = r720(4).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 368.12);
+        assert_eq!(cost.usd_cents_rounded_up, 191);
+        assert_eq!(cost.usd_cents_rounded_down, 190);
+        assert!((cost.usd_cents_fractional - 190.7555).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn consumer_cents_720p_10s() {
+        let cost = r720(10).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 920.3);
+        assert_eq!(cost.usd_cents_rounded_up, 477);
+        assert_eq!(cost.usd_cents_rounded_down, 476);
+        assert!((cost.usd_cents_fractional - 476.8888).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn consumer_cents_720p_30s() {
+        let cost = r720(30).calculate_consumer_costs();
+        assert_eq!(cost.kinovi_credits, 2760.9);
+        assert_eq!(cost.usd_cents_rounded_up, 1431);
+        assert_eq!(cost.usd_cents_rounded_down, 1430);
+        assert!((cost.usd_cents_fractional - 1430.6664).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_480p_4s() {
+        let cost = r480(4).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 168.52);
+        assert_eq!(cost.usd_cents_rounded_up, 70);
+        assert_eq!(cost.usd_cents_rounded_down, 69);
+        assert!((cost.usd_cents_fractional - 69.3042).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_480p_10s() {
+        let cost = r480(10).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 421.3);
+        assert_eq!(cost.usd_cents_rounded_up, 174);
+        assert_eq!(cost.usd_cents_rounded_down, 173);
+        assert!((cost.usd_cents_fractional - 173.2604).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_480p_15s() {
+        let cost = r480(15).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 631.95);
+        assert_eq!(cost.usd_cents_rounded_up, 260);
+        assert_eq!(cost.usd_cents_rounded_down, 259);
+        assert!((cost.usd_cents_fractional - 259.8906).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_720p_4s() {
+        let cost = r720(4).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 337.04);
+        assert_eq!(cost.usd_cents_rounded_up, 139);
+        assert_eq!(cost.usd_cents_rounded_down, 138);
+        assert!((cost.usd_cents_fractional - 138.6083).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_720p_10s() {
+        let cost = r720(10).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 842.6);
+        assert_eq!(cost.usd_cents_rounded_up, 347);
+        assert_eq!(cost.usd_cents_rounded_down, 346);
+        assert!((cost.usd_cents_fractional - 346.5208).abs() < FLOAT_TOLERANCE);
+      }
+
+      #[test]
+      fn enterprise_cents_720p_30s() {
+        let cost = r720(30).calculate_enterprise_costs();
+        assert_eq!(cost.kinovi_credits, 2527.8);
+        assert_eq!(cost.usd_cents_rounded_up, 1040);
+        assert_eq!(cost.usd_cents_rounded_down, 1039);
+        assert!((cost.usd_cents_fractional - 1039.5624).abs() < FLOAT_TOLERANCE);
+      }
+    }
+
+    // ── Relative pricing ──
+
+    mod relative_tests {
+      use super::*;
+
+      #[test]
+      fn enterprise_720p_is_exactly_double_480p() {
+        // 84.26 = 2 × 42.13.
+        for duration in [4u8, 10, 15, 20, 25, 30] {
+          let c480 = r480(duration).calculate_enterprise_costs().kinovi_credits;
+          let c720 = r720(duration).calculate_enterprise_costs().kinovi_credits;
+          assert_eq!(c720, c480 * 2.0, "enterprise 720p should be 2× 480p at {duration}s");
+        }
+      }
+
+      #[test]
+      fn consumer_720p_is_slightly_less_than_double_480p() {
+        // 92.03 < 2 × 46.15 = 92.30, so consumer 720p is just under double.
+        for duration in [4u8, 10, 15, 20, 25, 30] {
+          let c480 = r480(duration).calculate_consumer_costs().kinovi_credits;
+          let c720 = r720(duration).calculate_consumer_costs().kinovi_credits;
+          assert!(c720 < c480 * 2.0, "consumer 720p should be under 2× 480p at {duration}s");
+        }
+      }
+
+      #[test]
+      fn enterprise_is_cheaper_than_consumer() {
+        for resolution in [
+          Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP),
+          Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP),
+        ] {
+          let request = build_request(10, resolution);
+          let consumer = request.calculate_consumer_costs();
+          let enterprise = request.calculate_enterprise_costs();
+          assert!(enterprise.kinovi_credits < consumer.kinovi_credits);
+          assert!(enterprise.usd_cents_fractional < consumer.usd_cents_fractional);
+        }
+      }
+
+      #[test]
+      fn cost_scales_linearly_with_duration() {
+        assert_eq!(r480(1).calculate_consumer_costs().kinovi_credits, 46.15);
+        assert_eq!(r480(1).calculate_enterprise_costs().kinovi_credits, 42.13);
+        for duration in [4u8, 10, 15, 20, 25, 30] {
+          let expected_consumer = (4_615 * u64::from(duration)) as f64 / 100.0;
+          let expected_enterprise = (4_213 * u64::from(duration)) as f64 / 100.0;
+          assert_eq!(r480(duration).calculate_consumer_costs().kinovi_credits, expected_consumer);
+          assert_eq!(r480(duration).calculate_enterprise_costs().kinovi_credits, expected_enterprise);
+        }
+      }
+    }
+
+    // ── Aspect ratio doesn't affect cost ──
+
+    #[test]
+    fn aspect_ratio_does_not_affect_credits() {
+      let baseline = r720(10).calculate_consumer_costs().kinovi_credits;
+
+      let ratios = [
+        KinoviSeedance2p5PreviewAspectRatio::Landscape16x9,
+        KinoviSeedance2p5PreviewAspectRatio::UltraWide21x9,
+        KinoviSeedance2p5PreviewAspectRatio::Portrait9x16,
+        KinoviSeedance2p5PreviewAspectRatio::Square1x1,
+        KinoviSeedance2p5PreviewAspectRatio::Standard4x3,
+        KinoviSeedance2p5PreviewAspectRatio::Portrait3x4,
+      ];
+
+      for ar in &ratios {
+        let mut request = r720(10);
+        request.aspect_ratio = Some(*ar);
+        assert_eq!(
+          request.calculate_consumer_costs().kinovi_credits, baseline,
+          "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,
+        );
+      }
+    }
+
+    mod batch_tests {
+      use super::*;
+      use crate::test_utils::assert_batch_cost::assert_batch_cost;
+
+      const BATCHES: [KinoviSeedance2p5PreviewBatchCount; 8] = [
+        KinoviSeedance2p5PreviewBatchCount::One,
+        KinoviSeedance2p5PreviewBatchCount::Two,
+        KinoviSeedance2p5PreviewBatchCount::Three,
+        KinoviSeedance2p5PreviewBatchCount::Four,
+        KinoviSeedance2p5PreviewBatchCount::Five,
+        KinoviSeedance2p5PreviewBatchCount::Six,
+        KinoviSeedance2p5PreviewBatchCount::Seven,
+        KinoviSeedance2p5PreviewBatchCount::Eight,
+      ];
+
+      // Each pair is (credits, USD cents rounded up), for batches 1 through 8.
+      // Pin literal totals so rate changes fail independently of scaling checks.
+      #[test]
+      fn fixed_five_second_batch_prices_with_and_without_references() {
+        let cases = [
+          (KinoviSeedance2p5PreviewOutputResolution::FourEightyP, KinoviPricingTier::Consumer, [
+            (230.75, 120), (461.50, 240), (692.25, 359), (923.00, 479),
+            (1153.75, 598), (1384.50, 718), (1615.25, 838), (1846.00, 957),
+          ]),
+          (KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP, KinoviPricingTier::Consumer, [
+            (460.15, 239), (920.30, 477), (1380.45, 716), (1840.60, 954),
+            (2300.75, 1193), (2760.90, 1431), (3221.05, 1670), (3681.20, 1908),
+          ]),
+          (KinoviSeedance2p5PreviewOutputResolution::FourEightyP, KinoviPricingTier::Enterprise, [
+            (210.65, 87), (421.30, 174), (631.95, 260), (842.60, 347),
+            (1053.25, 434), (1263.90, 520), (1474.55, 607), (1685.20, 694),
+          ]),
+          (KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP, KinoviPricingTier::Enterprise, [
+            (421.3, 174), (842.6, 347), (1263.9, 520), (1685.2, 694),
+            (2106.5, 867), (2527.8, 1040), (2949.1, 1213), (3370.4, 1387),
+          ]),
+        ];
+        for (resolution, tier, prices) in cases {
+          for has_references in [false, true] {
+            for (batch, (credits, usd_cents)) in BATCHES.into_iter().zip(prices) {
+              let mut request = build_request(5, Some(resolution));
+              request.batch_count = Some(batch);
+              if has_references {
+                request = with_all_reference_types(request);
+              }
+              let cost = request.calculate_costs(tier);
+              assert_eq!(
+                (cost.kinovi_credits, cost.usd_cents_rounded_up),
+                (credits, usd_cents),
+                "{resolution:?} {tier:?} {batch:?} references={has_references}",
+              );
+            }
+          }
+        }
+      }
+
+      #[test]
+      fn all_batches_scale_every_resolution_with_and_without_references() {
+        let batches = [
+          (None, 1),
+          (Some(KinoviSeedance2p5PreviewBatchCount::One), 1),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Two), 2),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Three), 3),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Four), 4),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Five), 5),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Six), 6),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Seven), 7),
+          (Some(KinoviSeedance2p5PreviewBatchCount::Eight), 8),
+        ];
+        for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
+          for resolution in [
+            None,
+            Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP),
+            Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP),
+          ] {
+            for duration in [4, 5, 30] {
+              for has_references in [false, true] {
+                let mut request = build_request(duration, resolution);
+                if has_references {
+                  request = with_all_reference_types(request);
+                }
+                let single = request.calculate_costs(tier);
+                for (batch, count) in batches {
+                  request.batch_count = batch;
+                  let batched = request.calculate_costs(tier);
+                  let context = format!("{tier:?} {resolution:?} {duration}s {batch:?} references={has_references}");
+                  assert_batch_cost(single, batched, count, tier, &context);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      #[test]
+      fn batch_costs_and_request_count_agree() {
+        let mut request = r480(4);
+        request.batch_count = Some(KinoviSeedance2p5PreviewBatchCount::Eight);
+        assert_eq!(request.calculate_consumer_costs().kinovi_credits, 1476.8);
+        assert_eq!(request.calculate_enterprise_costs().kinovi_credits, 1348.16);
+        assert!(matches!(to_raw_request(request).batch_count, KinoviBatchCountRaw::Eight));
+      }
+    }
+
+    // ── Helpers ──
+
+    fn build_request(
+      duration_seconds: u8,
+      output_resolution: Option<KinoviSeedance2p5PreviewOutputResolution>,
+    ) -> GenerateSeedance2p5PreviewRequest {
+      GenerateSeedance2p5PreviewRequest {
+        batch_count: None,
+        prompt: String::new(),
+        aspect_ratio: None,
+        output_resolution,
+        duration_seconds,
+        reference_image_urls: None,
+        reference_video_urls: None,
+        reference_audio_urls: None,
+        use_face_blur_hack: None,
+      }
+    }
+
+    fn r480(dur: u8) -> GenerateSeedance2p5PreviewRequest {
+      build_request(dur, Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP))
+    }
+
+    fn r720(dur: u8) -> GenerateSeedance2p5PreviewRequest {
+      build_request(dur, None)
+    }
+
+    fn with_all_reference_types(mut request: GenerateSeedance2p5PreviewRequest) -> GenerateSeedance2p5PreviewRequest {
+      request.reference_image_urls = Some(vec![
+        "https://example.com/a.jpg".to_string(),
+        "https://example.com/b.png".to_string(),
+      ]);
+      request.reference_video_urls = Some(vec!["https://example.com/ref.mp4".to_string()]);
+      request.reference_audio_urls = Some(vec!["https://example.com/ref.wav".to_string()]);
+      request
+    }
+  }
+
+  mod real_requests {
+    use super::*;
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_text_to_video_480p() -> AnyhowResult<()> {
+      setup_test_logging(LevelFilter::Trace);
+      let session = test_session()?;
+      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs {
+        session: &session,
+        host_override: None,
+        request: GenerateSeedance2p5PreviewRequest {
+          batch_count: None,
+          prompt: "A man is running from a t-rex".to_string(),
+          aspect_ratio: Some(KinoviSeedance2p5PreviewAspectRatio::Landscape16x9),
+          output_resolution: Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP),
+          duration_seconds: 4,
+          reference_image_urls: None,
+          reference_video_urls: None,
+          reference_audio_urls: None,
+          use_face_blur_hack: None,
+        },
+      }).await?;
+      println!("t2v 480p — task_id={}, order_id={}", result.task_id, result.order_id);
+      assert!(!result.task_id.is_empty());
+      assert!(!result.order_id.is_empty());
+      assert_eq!(1, 2, "Inspect output above");
+      Ok(())
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_text_to_video_720p_default() -> AnyhowResult<()> {
+      setup_test_logging(LevelFilter::Trace);
+      let session = test_session()?;
+      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs {
+        session: &session,
+        host_override: None,
+        request: GenerateSeedance2p5PreviewRequest {
+          batch_count: None,
+          prompt: "A corgi and a shiba are playing chess against one another".to_string(),
+          aspect_ratio: None,
+          output_resolution: None,
+          duration_seconds: 4,
+          reference_image_urls: None,
+          reference_video_urls: None,
+          reference_audio_urls: None,
+          use_face_blur_hack: None,
+        },
+      }).await?;
+      println!("t2v 720p — task_id={}, order_id={}", result.task_id, result.order_id);
+      assert!(!result.task_id.is_empty());
+      assert!(!result.order_id.is_empty());
+      assert_eq!(1, 2, "Inspect output above");
+      Ok(())
+    }
+
+    fn test_session() -> AnyhowResult<KinoviWebSession> {
+      let cookies = get_test_cookies()?;
+      Ok(KinoviWebSession::from_cookies_string(cookies))
+    }
+  }
+}

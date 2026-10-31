@@ -1,0 +1,5 @@
+# This is meant to be used in emergency DDoS scenarios.
+# Disable the following endpoints that *start with* the following strings.
+
+# Just an example
+/disable

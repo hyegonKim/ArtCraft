@@ -1,0 +1,19 @@
+[package]
+name = "domains"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[lib]
+name = "domains"
+path = "src/lib.rs"
+
+[features]
+default = []
+# Adds `Domain::https_url()`, returning a cached `&'static url::Url`.
+url = ["dep:url"]
+
+# No dependencies by default: the domain constants and their string forms are
+# built entirely at compile time.
+[dependencies]
+url = { workspace = true, optional = true }

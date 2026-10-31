@@ -1,0 +1,26 @@
+# Toolchain & backups
+.toolchain/
+_review-backup-*/
+
+# Rust / Cargo build outputs
+**/target/
+**/*.rs.bk
+**/*.pdb
+**/*.dwp
+**/*.rlib
+**/*.rmeta
+
+# Node / Web build outputs
+**/node_modules/
+**/dist/
+**/.next/
+**/.turbo/
+**/.vite/
+
+# OS / IDE / temp files
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.log
+*.swp

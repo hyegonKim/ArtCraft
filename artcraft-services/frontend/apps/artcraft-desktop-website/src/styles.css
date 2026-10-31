@@ -1,0 +1,523 @@
+/*
+ * desktop.getartcraft.com — ported from the getartcraft.com design tokens
+ * (apps/artcraft-website-next/src/app/globals.css). Same language: hairline
+ * rules, hard edges, mono HUD labels, a single blue accent, light "blueprint"
+ * and dark "viewport" themes following the system preference.
+ */
+
+:root {
+  --bg: #f2f1ee;
+  --bg-raised: #faf9f7;
+  --bg-sunken: #e9e8e4;
+  --ink: #101014;
+  --ink-strong: #000000;
+  --muted: rgba(16, 16, 20, 0.62);
+  --faint: rgba(16, 16, 20, 0.42);
+  --line: rgba(16, 16, 20, 0.16);
+  --line-strong: rgba(16, 16, 20, 0.4);
+  --accent: #2d81ff;
+  --accent-ink: #1659c4;
+  --invert-bg: #101014;
+  --invert-fg: #f2f1ee;
+
+  --font-display: 'Archivo', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail: 1280px;
+  --pad: 24px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121316;
+    --bg-raised: #101014;
+    --bg-sunken: #060607;
+    --ink: #f2f1ee;
+    --ink-strong: #ffffff;
+    --muted: rgba(242, 241, 238, 0.6);
+    --faint: rgba(242, 241, 238, 0.38);
+    --line: rgba(242, 241, 238, 0.15);
+    --line-strong: rgba(242, 241, 238, 0.4);
+    --accent-ink: #74aaff;
+    --invert-bg: #ffffff;
+    --invert-fg: #0b0b0c;
+
+    color-scheme: dark;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --pad: 40px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+p,
+h1,
+figure,
+ul {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+/* ---------- Micro vocabulary ---------- */
+
+.hud-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--muted);
+}
+.faint {
+  color: var(--faint);
+}
+.accent-ink {
+  color: var(--accent-ink);
+}
+.slash {
+  margin: 0 0.5rem;
+}
+
+/* Crosshair tick straddling a grid intersection. */
+.tick {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  pointer-events: none;
+  z-index: 2;
+}
+.tick::before,
+.tick::after {
+  content: '';
+  position: absolute;
+  background: var(--line-strong);
+}
+.tick::before {
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.tick::after {
+  top: 5px;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+/* Half tick for marks sitting on a top edge. */
+.tick-half::before {
+  top: 5px;
+}
+
+/* Signature interaction: blocks invert on hover. */
+.invert-block {
+  transition:
+    background-color 120ms linear,
+    color 120ms linear;
+}
+.invert-block:hover {
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+}
+
+/* ---------- Nav ---------- */
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: 48px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-right: 1px solid var(--line);
+  color: var(--ink-strong);
+}
+.nav-logo:hover {
+  opacity: 0.7;
+}
+.nav-logo svg {
+  height: 24px;
+  width: auto;
+}
+
+.nav-links {
+  display: flex;
+  align-items: stretch;
+}
+
+.nav-link {
+  display: none;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--muted);
+}
+.nav-link span {
+  padding: 2px 6px;
+}
+.nav-link:hover {
+  color: var(--ink);
+}
+.nav-link:hover span {
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+}
+@media (min-width: 640px) {
+  .nav-link {
+    display: flex;
+  }
+}
+
+.nav-cta {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 0 20px;
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+  font-weight: 700;
+}
+.nav-cta:hover {
+  opacity: 0.8;
+}
+
+/* ---------- Rails ---------- */
+
+.shell {
+  position: relative;
+  border-top: 1px solid var(--line);
+}
+
+.rail {
+  position: relative;
+  max-width: var(--rail);
+  margin: 0 auto;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px var(--pad);
+  border-bottom: 1px solid var(--line);
+}
+
+.hide-sm {
+  display: none;
+}
+@media (min-width: 640px) {
+  .hide-sm {
+    display: block;
+  }
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: 56px var(--pad) 64px;
+}
+@media (min-width: 768px) {
+  .hero {
+    padding-top: 80px;
+    padding-bottom: 88px;
+  }
+}
+
+/* Poster wordmark: Archivo at the poster width (wdth 125) with the logo-A
+   standing in for the first letter — the getartcraft.com hero setting.
+   The word's advance run measures ~7.0em at this cut, so sizing the font
+   from the container width justifies it flush across the rail. */
+.wordmark-wrap {
+  container-type: inline-size;
+}
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-weight: 750;
+  font-stretch: 125%;
+  font-size: calc(100cqw / 7.05);
+  line-height: 1;
+  white-space: nowrap;
+  animation: fade-up 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+.wordmark-logo {
+  flex: none;
+  width: calc(0.7em * 116.34 / 97.5);
+  height: 0.7em;
+  margin-right: 0.05em;
+  align-self: baseline;
+  transform: translateY(0.006em);
+}
+
+.wordmark-sub {
+  margin-top: 16px;
+  animation: fade-up 0.7s 0.08s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.headline {
+  max-width: 48rem;
+  margin-top: 40px;
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 620;
+  font-stretch: 118%;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  animation: fade-up 0.7s 0.16s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+.headline em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: normal;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 640px) {
+  .headline {
+    font-size: 3rem;
+  }
+}
+@media (min-width: 768px) {
+  .headline {
+    font-size: 3.75rem;
+  }
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+  animation: fade-up 0.7s 0.24s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.meta {
+  margin-top: 20px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    background-color 150ms linear,
+    color 150ms linear,
+    border-color 150ms linear,
+    opacity 150ms linear;
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-primary {
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+}
+.btn-primary:hover {
+  opacity: 0.8;
+}
+
+.btn-secondary {
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  color: var(--ink);
+}
+.btn-secondary:hover {
+  border-color: transparent;
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+}
+
+/* ---------- Screenshot ---------- */
+
+.shot {
+  border-top: 1px solid var(--line);
+}
+
+.shot-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px var(--pad);
+  border-bottom: 1px solid var(--line);
+}
+
+.shot-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+.shot-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shot-frame .tick {
+  opacity: 0.6;
+}
+
+/* ---------- Socials ---------- */
+
+.socials {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  padding: 0;
+  list-style: none;
+  background: var(--line);
+}
+@media (min-width: 768px) {
+  .socials {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+/* Odd count on the 2-up grid: the last cell spans the row. */
+.socials li:last-child {
+  grid-column: 1 / -1;
+}
+@media (min-width: 768px) {
+  .socials li:last-child {
+    grid-column: auto;
+  }
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 24px var(--pad);
+  background: var(--bg);
+  color: var(--ink);
+}
+@media (min-width: 768px) {
+  .social {
+    padding: 32px 28px;
+  }
+}
+.social svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.social-arrow {
+  margin-left: auto;
+  color: var(--faint);
+  font-family: var(--font-mono);
+}
+.social:hover .social-arrow {
+  color: inherit;
+}
+
+/* ---------- Footer ---------- */
+
+.footer-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px var(--pad);
+}
+@media (min-width: 768px) {
+  .footer-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+.footer-mail:hover {
+  color: var(--ink);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,31 @@
+[package]
+name = "uuid_utils"
+edition = "2018"
+version = "0.0.1"
+authors = [
+    "Brandon Thomas <bt@brand.io>",
+    "Brandon Thomas <echelon@gmail.com>",
+]
+publish = false
+
+[lib]
+name = "uuid_utils"
+path = "src/lib.rs"
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["workspace-build-acceleration"]
+
+[dependencies]
+# Internal
+# errors = { path = "../../lib/errors" }
+# (None yet)
+
+# Workspace hack (faster compile times)
+workspace-build-acceleration = { version = "0.1", path = "../../workspace-build-acceleration" }
+
+# External
+uuid = { version = "1.8.0", features = ["v4"] }
+
+[dev-dependencies]
+# None yet
+# (None yet)

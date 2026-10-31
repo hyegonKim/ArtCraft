@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n    UPDATE tasks\n    SET\n      on_complete_directory_location = ?,\n      on_complete_first_file_location = ?\n    WHERE id = ?\n  ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "831db74e7eb2bed43f24f9efc275df9b1bac4fd78115a698f8e9faef30e39f4a"
+}

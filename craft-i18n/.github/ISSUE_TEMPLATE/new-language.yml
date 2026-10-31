@@ -1,0 +1,46 @@
+name: Request a language
+description: Ask for an interface language the Crafting Apps don't have yet, or offer to translate one.
+title: "Language request: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [`locales/`](https://github.com/storytold/craft-i18n/tree/main/locales) first: if your language is there, its catalog can be added to with a pull request instead.
+        Happy to translate yourself? The README's **Add a language** guide starts the files for you.
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Its name in English and in the language itself.
+      placeholder: Esperanto / Esperanto
+    validations:
+      required: true
+  - type: input
+    id: locale
+    attributes:
+      label: Locale code, if you know it
+      description: Lowercase BCP 47, e.g. `eo`, `pt-br`, `zh-hans`.
+  - type: input
+    id: apps
+    attributes:
+      label: Apps
+      description: Which Crafting Apps you want in this language.
+      placeholder: WordCraft, PdfCraft
+    validations:
+      required: true
+  - type: dropdown
+    id: help
+    attributes:
+      label: Can you help translate or review?
+      options:
+        - I can translate
+        - I can review someone else's translation
+        - No, request only
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Script or direction (right-to-left), regional variants, terminology you'd like used.

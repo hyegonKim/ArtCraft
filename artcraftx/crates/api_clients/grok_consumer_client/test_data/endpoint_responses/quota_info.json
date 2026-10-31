@@ -1,0 +1,16 @@
+{
+  "image": null,
+  "imagePro": {
+    "available": true,
+    "remainingQueries": 4,
+    "windowSizeSeconds": 86400
+  },
+  "imageEdit": null,
+  "video": null,
+  "video720p": {
+    "available": true,
+    "remainingQueries": 0,
+    "windowSizeSeconds": 86400,
+    "nextAvailableAt": "2026-08-24T21:00:41.230702760Z"
+  }
+}

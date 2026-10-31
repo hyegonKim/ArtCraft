@@ -1,0 +1,44 @@
+[package]
+name = "grok_consumer_statsig"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[lib]
+name = "grok_consumer_statsig"
+path = "src/lib.rs"
+
+# Live statsig harvester. Launches a real WebView, so it is gated behind the
+# `webview-harvest` feature that pulls in wry/tao.
+[[bin]]
+name = "harvest_statsig"
+path = "src/bin/harvest_statsig.rs"
+required-features = ["webview-harvest"]
+
+[features]
+# Pull in the WebView stack (wry/tao) for the live statsig harvester. Off by
+# default so ordinary library builds stay lean.
+webview-harvest = ["dep:wry", "dep:tao", "dep:env_logger"]
+
+[dependencies]
+# Internal
+errors.workspace = true
+
+# External
+base64.workspace = true
+chrono.workspace = true
+log.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["sync", "time", "macros", "rt"] }
+toml.workspace = true
+
+# Harvest (live): only compiled with `--features webview-harvest`.
+wry = { version = "0.55", optional = true }
+tao = { version = "0.35", optional = true }
+env_logger = { workspace = true, optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["sync", "time", "macros", "rt", "rt-multi-thread"] }
