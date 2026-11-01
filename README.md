@@ -1,5 +1,7 @@
 # ArtCraft Monorepo
 
+ArtCraft monorepo containing all 19 projects, including the integrated FilmCraft upstream, Mac Codex, and PC changes.
+
 Unified **ArtCraft & Craft Suite** repository containing all 19 applications, libraries, services, and reverse-engineering tools under their respective project directories:
 
 ## Applications & Suites
