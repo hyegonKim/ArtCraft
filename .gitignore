@@ -1,6 +1,7 @@
 # Toolchain & backups
 .toolchain/
 _review-backup-*/
+**/.local-backups/
 
 # Rust / Cargo build outputs
 **/target/
