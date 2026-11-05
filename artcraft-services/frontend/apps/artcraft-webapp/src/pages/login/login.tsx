@@ -30,6 +30,10 @@ const Login = () => {
 
   const handleLogin = async () => {
     setError(null);
+    if (!email.trim() || !password) {
+      setError("Enter your email or username and password.");
+      return;
+    }
     setIsLoading(true);
 
     const api = new UsersApi();
@@ -86,7 +90,7 @@ const Login = () => {
         }}
       >
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 text-sm text-center">
+          <div role="alert" className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 text-sm text-center">
             {error}
           </div>
         )}
