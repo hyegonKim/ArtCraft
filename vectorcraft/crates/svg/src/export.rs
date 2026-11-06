@@ -1792,6 +1792,9 @@ impl Writer<'_> {
                     sd(*radius)
                 ),
                 RasterFx::GaussianBlur { radius } => format!("<feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"{}\"/>", sd(*radius)),
+                RasterFx::GaussianBlurAxes { radius_x, radius_y } => {
+                    format!("<feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"{} {}\"/>", sd(*radius_x), sd(*radius_y))
+                }
                 RasterFx::Pixel(_) | RasterFx::Rasterize(_) => continue,
             };
             // Filters composite normally: a shadow's or glow's other blend mode is recorded for import.

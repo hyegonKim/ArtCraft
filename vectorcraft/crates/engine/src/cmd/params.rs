@@ -269,6 +269,11 @@ pub fn check_effect_params(id: &str, effect: &str, params: &Value) -> Result<()>
         }
         match defaults.and_then(|d| d.get(key)) {
             Some(Value::Number(_)) if !v.is_number() => return Err(bad(id, format!("`{key}` must be a number"))),
+            // Gaussian ratios are optional renderer defaults. Keep them out of stored
+            // dialog defaults while holding supplied ratios to their numeric type.
+            None if effect == "blur.gaussian" && matches!(key.as_str(), "anisotropyX" | "anisotropyY") && !v.is_number() => {
+                return Err(bad(id, format!("`{key}` must be a number")));
+            }
             Some(Value::Bool(_)) if !v.is_boolean() => return Err(bad(id, format!("`{key}` must be true or false"))),
             // (A colour is also taken as `[r, g, b]` or as a colour object.)
             Some(Value::String(_)) if v.is_number() || v.is_boolean() => return Err(bad(id, format!("`{key}` must be a string"))),

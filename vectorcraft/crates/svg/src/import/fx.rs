@@ -312,6 +312,46 @@ fn eval(f: &Filter, k: f64) -> Option<V> {
     Some(last)
 }
 
+/// A plain SourceGraphic Gaussian can keep both axes without changing any filter graph.
+fn single_gaussian(filter: &Filter) -> Option<(f64, f64)> {
+    let [primitive] = filter.primitives() else { return None };
+    let Kind::GaussianBlur(blur) = primitive.kind() else { return None };
+    matches!(blur.input(), Input::SourceGraphic).then(|| (blur.std_dev_x().get() as f64, blur.std_dev_y().get() as f64))
+}
+
+/// Diagonal entries of A diag(sx², sy²) Aᵀ when the transformed Gaussian remains axis-aligned.
+/// This covers nonuniform scale, reflection and quarter-turns without averaging the axes.
+fn gaussian_axes(ts: Affine, sx: f64, sy: f64) -> Option<(f64, f64)> {
+    let [a, b, c, d, _, _] = ts.as_coeffs();
+    let (xx, yy, xy) = (a * a * sx * sx + c * c * sy * sy, b * b * sx * sx + d * d * sy * sy, a * b * sx * sx + c * d * sy * sy);
+    if ![xx, yy, xy].iter().all(|value| value.is_finite()) || xy.abs() > 1e-9 * xx.max(yy).max(1.0) {
+        return None;
+    }
+    let axes = (xx.max(0.0).sqrt(), yy.max(0.0).sqrt());
+    // Live effect radii are bounded at 1000 pt; do not claim a clipped radius is exact.
+    (axes.0.max(axes.1) <= 500.0).then_some(axes)
+}
+
+/// Whether the retained legacy live-effect approximation cannot preserve every blur axis.
+/// Preserve that existing appearance, but make the loss observable through the import report.
+pub(super) fn approximates(filters: &[Arc<Filter>], ts: Affine) -> bool {
+    let [a, b, c, d, _, _] = ts.as_coeffs();
+    let conformal = (a * a + b * b - c * c - d * d).abs() < 1e-8 && (a * c + b * d).abs() < 1e-8;
+    filters.iter().any(|filter| {
+        if let Some((sx, sy)) = single_gaussian(filter) {
+            return gaussian_axes(ts, sx, sy).is_none();
+        }
+        filter.primitives().iter().any(|primitive| {
+            let axes = match primitive.kind() {
+                Kind::GaussianBlur(blur) => Some((blur.std_dev_x().get(), blur.std_dev_y().get())),
+                Kind::DropShadow(shadow) => Some((shadow.std_dev_x().get(), shadow.std_dev_y().get())),
+                _ => None,
+            };
+            axes.is_some_and(|(x, y)| x != y || (!conformal && x.max(y) > 0.0))
+        })
+    })
+}
+
 /// The live effects `filters` (in the order they apply) stand for, in user space mapped to the
 /// document by `ts`; `blends`: the modes our export recorded ([`blends`]). `None` when one of
 /// them isn't an effect the canvas draws.
@@ -322,6 +362,20 @@ pub(super) fn effects(filters: &[Arc<Filter>], ts: Affine, blends: &HashMap<Stri
     let num = |v: f64| (v * 1000.0).round() / 1000.0;
     let mut out = vec![];
     for f in filters {
+        if let Some((sx, sy)) = single_gaussian(f).and_then(|(x, y)| gaussian_axes(ts, x, y)) {
+            let (x, y) = (num(2.0 * sx), num(2.0 * sy));
+            let radius = x.max(y);
+            if radius <= 0.0 {
+                continue;
+            }
+            let params = if (x - y).abs() < 1e-6 {
+                json!({"radius": radius})
+            } else {
+                json!({"radius": radius, "anisotropyX": x / radius, "anisotropyY": y / radius})
+            };
+            out.push(Effect { id: "blur.gaussian".into(), params, visible: true });
+            continue;
+        }
         let blur = |sd: f64| num(2.0 * sd * k);
         let mode = blends.get(f.id()).map_or("normal", String::as_str);
         let paint = |c: Color, o: f32| (c.to_hex(), num(o as f64 * 100.0));

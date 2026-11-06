@@ -105,17 +105,24 @@ fn effect_params_are_the_effects_own() {
         check_effect_params("effect.apply", e.id, &e.defaults).unwrap_or_else(|why| panic!("{}'s defaults: {why}", e.id));
     }
     let apply = |effect: &str, params| json!({"effect": effect, "params": params});
-    assert_eq!(refusal("effect.apply", apply("blur.gaussian", json!({"blurr": 3}))), "unknown parameter `blurr`; the command takes: radius");
+    assert_eq!(
+        refusal("effect.apply", apply("blur.gaussian", json!({"blurr": 3}))),
+        "unknown parameter `blurr`; the command takes: radius, anisotropyX, anisotropyY"
+    );
     assert_eq!(
         refusal("appearance.addEffect", apply("stylize.dropShadow", json!({"opacty": 50}))),
         "unknown parameter `opacty`; did you mean `opacity`?"
     );
     assert_eq!(refusal("effect.apply", apply("blur.gaussian", json!({"radius": "big"}))), "`radius` must be a number");
+    assert_eq!(refusal("effect.apply", apply("blur.gaussian", json!({"anisotropyX": "wide"}))), "`anisotropyX` must be a number");
+    assert_eq!(refusal("effect.apply", apply("blur.gaussian", json!({"anisotropyY": false}))), "`anisotropyY` must be a number");
     assert_eq!(refusal("effect.apply", apply("threeD.revolve", json!({"shade": 1}))), "`shade` must be true or false");
     assert_eq!(refusal("effect.apply", apply("threeD.revolve", json!({"edge": 1}))), "`edge` must be a string");
     // Out of range is the effect's to clamp; a key only its description names is one it takes;
     // a plug-in's are its manifest's; an unknown effect is the command's to report.
     for (effect, params) in [
+        ("blur.gaussian", json!({"radius": 12, "anisotropyX": 1, "anisotropyY": 0})),
+        ("blur.gaussian", json!({"anisotropyX": 0.25, "anisotropyY": 0.75})),
         ("stylize.dropShadow", json!({"opacity": 500, "x": -3, "color": "#ff0000"})),
         ("stylize.dropShadow", json!({"color": [1, 0, 0]})),
         ("threeD.revolve", json!({"segments": 100000})),
@@ -125,16 +132,39 @@ fn effect_params_are_the_effects_own() {
     ] {
         assert!(check_params("effect.apply", &apply(effect, params.clone())).is_ok(), "{effect} {params}");
     }
+    // The optional ratios stay absent from legacy defaults. Numeric bounds are drawing
+    // clamps, not parameter errors; missing axes still mean one and equal axes use the
+    // legacy scalar blur. Exercise the actual public effect-construction/parser path.
+    use vectorcraft_render::effects::{RasterFx, new_effect, raster_effects};
+    assert_eq!(new_effect("blur.gaussian", &json!({})).unwrap().params, json!({"radius": 5.0}));
+    for (params, expected) in [
+        (json!({}), RasterFx::GaussianBlur { radius: 5.0 }),
+        (json!({"radius": 8}), RasterFx::GaussianBlur { radius: 8.0 }),
+        (json!({"radius": 8, "anisotropyX": 0.25}), RasterFx::GaussianBlurAxes { radius_x: 2.0, radius_y: 8.0 }),
+        (json!({"radius": 8, "anisotropyY": 0.25}), RasterFx::GaussianBlurAxes { radius_x: 8.0, radius_y: 2.0 }),
+        (json!({"radius": 8, "anisotropyX": -2, "anisotropyY": 3}), RasterFx::GaussianBlurAxes { radius_x: 0.0, radius_y: 8.0 }),
+        (json!({"radius": 8, "anisotropyX": 2, "anisotropyY": 2}), RasterFx::GaussianBlur { radius: 8.0 }),
+        (json!({"radius": 8, "anisotropyX": 0.5, "anisotropyY": 0.5}), RasterFx::GaussianBlur { radius: 4.0 }),
+    ] {
+        assert!(check_params("effect.apply", &apply("blur.gaussian", params.clone())).is_ok(), "{params}");
+        assert_eq!(raster_effects(&[new_effect("blur.gaussian", &params).unwrap()]), vec![expected], "{params}");
+    }
     // `effect.setParams` names an index: the session knows the effect there.
     let mut s = Session::new();
     s.execute("file.new", &json!({})).unwrap();
     s.execute("shape.rectangle", &json!({"x": 10, "y": 10, "width": 50, "height": 40})).unwrap();
     s.execute("effect.apply", &apply("blur.gaussian", json!({"radius": 2}))).unwrap();
-    for (params, why) in [(json!({"blurr": 3}), "unknown parameter `blurr`"), (json!({"radius": true}), "`radius` must be a number")] {
+    for (params, why) in [
+        (json!({"blurr": 3}), "unknown parameter `blurr`"),
+        (json!({"radius": true}), "`radius` must be a number"),
+        (json!({"anisotropyX": "wide"}), "`anisotropyX` must be a number"),
+        (json!({"anisotropyY": false}), "`anisotropyY` must be a number"),
+    ] {
         let e = s.execute("effect.setParams", &json!({"index": 0, "params": params})).unwrap_err().to_string();
         assert!(e.contains(why), "{e}");
     }
     s.execute("effect.setParams", &json!({"index": 0, "params": {"radius": 1e9}, "visible": false})).unwrap();
+    s.execute("effect.setParams", &json!({"index": 0, "params": {"anisotropyX": 0.25, "anisotropyY": 0}})).unwrap();
     // No effect at the index: the command says so, not the check.
     assert!(s.check_params("effect.setParams", &json!({"index": 7, "params": {"blurr": 3}})).is_ok());
 }

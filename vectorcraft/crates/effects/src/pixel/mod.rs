@@ -1046,28 +1046,45 @@ pub(super) fn box_blur(px: &mut [Px16], w: usize, r: usize) {
 /// Gaussian-blur `w`-wide rows of premultiplied pixels in place (σ = `sigma` pixels, three box
 /// passes per axis, transparent past the edges).
 pub(super) fn gaussian(px: &mut [Px16], w: usize, sigma: f64) {
-    if sigma < 0.2 || w == 0 {
+    gaussian_axes(px, w, sigma, sigma);
+}
+
+fn gaussian_axes(px: &mut [Px16], w: usize, sigma_x: f64, sigma_y: f64) {
+    if w == 0 || (sigma_x < 0.2 && sigma_y < 0.2) {
         return;
     }
     let mut tmp = vec![[0u16; 4]; px.len()];
-    for r in gauss_boxes(sigma) {
-        box_rows(px, &mut tmp, w, r);
-        px.copy_from_slice(&tmp);
+    if sigma_x >= 0.2 {
+        for r in gauss_boxes(sigma_x) {
+            box_rows(px, &mut tmp, w, r);
+            px.copy_from_slice(&tmp);
+        }
     }
-    for r in gauss_boxes(sigma) {
-        box_cols(px, &mut tmp, w, r);
-        px.copy_from_slice(&tmp);
+    if sigma_y >= 0.2 {
+        for r in gauss_boxes(sigma_y) {
+            box_cols(px, &mut tmp, w, r);
+            px.copy_from_slice(&tmp);
+        }
     }
 }
 
 /// Gaussian-blur `data`, `w` × `h` premultiplied RGBA8 pixels, in place (σ = `sigma` pixels). Does
 /// nothing when the sizes don't match.
 pub fn gaussian_rgba(data: &mut [u8], w: usize, h: usize, sigma: f64) {
+    gaussian_rgba_axes(data, w, h, sigma, sigma);
+}
+
+/// Axis-specific Gaussian approximation over premultiplied RGBA8. A zero axis is never
+/// broadened; equal axes follow exactly the legacy horizontal-then-vertical box passes.
+/// Invalid dimensions are a no-op, and non-finite/negative deviations act as zero.
+pub fn gaussian_rgba_axes(data: &mut [u8], w: usize, h: usize, sigma_x: f64, sigma_y: f64) {
+    let valid = |sigma: f64| if sigma.is_finite() { sigma.max(0.0) } else { 0.0 };
+    let (sigma_x, sigma_y) = (valid(sigma_x), valid(sigma_y));
     if let Some(px) = pixels(data, w, h)
-        && sigma >= 0.2
+        && (sigma_x >= 0.2 || sigma_y >= 0.2)
     {
         let mut wide = to16(px);
-        gaussian(&mut wide, w, sigma);
+        gaussian_axes(&mut wide, w, sigma_x, sigma_y);
         for (p, q) in px.iter_mut().zip(&wide) {
             *p = q.map(to8);
         }

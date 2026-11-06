@@ -358,7 +358,7 @@ pub fn effect_catalog() -> Vec<EffectInfo> {
             json!({"mode": "screen", "opacity": 75.0, "blur": 5.0, "color": "#ffff00"}),
         ),
         r("stylize.feather", "Feather…", STYLIZE, "{radius: pt (5)}", json!({"radius": 5.0})),
-        r("blur.gaussian", "Gaussian Blur…", BLUR, "{radius: pt (5)}", json!({"radius": 5.0})),
+        r("blur.gaussian", "Gaussian Blur…", BLUR, "{radius: pt (5), anisotropyX?: 0..1 (1), anisotropyY?: 0..1 (1)}", json!({"radius": 5.0})),
         r(
             "artistic.coloredPencil",
             "Colored Pencil…",

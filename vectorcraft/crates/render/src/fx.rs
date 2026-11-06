@@ -46,6 +46,176 @@
 //! ([`effects::evaluate_container`]: their fills and strokes painting the members, their geometry
 //! effects reshaping them), so their raster effects apply to the composite (one combined shadow).
 
+/// Opt-in diagnostics for the existing anisotropic viewport regression only. No production
+/// symbols or work remain when `cfg(test)` is off; a guard restores this thread's prior state.
+#[cfg(test)]
+pub(super) mod anisotropic_trace {
+    use std::{
+        cell::{Cell, RefCell},
+        marker::PhantomData,
+        rc::Rc,
+    };
+
+    use serde_json::{Value, json};
+
+    use super::{Affine, Frame, effects};
+
+    const MAX_EVENTS: usize = 48;
+    const MAX_MOMENT_PIXELS: usize = 512 * 512;
+
+    struct State {
+        label: &'static str,
+        events: Vec<Value>,
+        dropped: usize,
+    }
+
+    thread_local! {
+        static TRACE: RefCell<Option<State>> = const { RefCell::new(None) };
+        static FINAL_SAMPLER: Cell<Option<super::peniko::ImageQuality>> = const { Cell::new(None) };
+    }
+
+    pub(crate) struct FinalSamplerOverride {
+        previous: Option<super::peniko::ImageQuality>,
+        _thread: PhantomData<Rc<()>>,
+    }
+
+    pub(crate) fn override_final_sampler(quality: Option<super::peniko::ImageQuality>) -> FinalSamplerOverride {
+        let previous = FINAL_SAMPLER.with(|flag| flag.replace(quality));
+        FinalSamplerOverride { previous, _thread: PhantomData }
+    }
+
+    impl Drop for FinalSamplerOverride {
+        fn drop(&mut self) {
+            FINAL_SAMPLER.with(|flag| flag.set(self.previous));
+        }
+    }
+
+    pub(crate) fn final_sampler_override() -> Option<super::peniko::ImageQuality> {
+        FINAL_SAMPLER.with(Cell::get)
+    }
+
+    pub(crate) struct Guard {
+        previous: Option<State>,
+        // A guard belongs to the thread whose diagnostic state it restores.
+        _thread: PhantomData<Rc<()>>,
+    }
+
+    pub(crate) fn begin(label: &'static str) -> Option<Guard> {
+        if std::env::var_os("VECTORCRAFT_TRACE_ANISOTROPIC_BLUR").as_deref() != Some(std::ffi::OsStr::new("1")) {
+            return None;
+        }
+        let previous = TRACE.with(|slot| slot.replace(Some(State { label, events: Vec::new(), dropped: 0 })));
+        Some(Guard { previous, _thread: PhantomData })
+    }
+
+    impl Drop for Guard {
+        fn drop(&mut self) {
+            let current = TRACE.with(|slot| slot.replace(self.previous.take()));
+            // Restore before formatting, including when the regression's unchanged assertion
+            // unwinds. Pixel buffers are never retained or printed.
+            if let Some(state) = current {
+                eprintln!("VEC_ANISO_TRACE {} {}", state.label, json!({ "events": state.events, "dropped": state.dropped }));
+            }
+        }
+    }
+
+    fn emit(event: impl FnOnce() -> Value) {
+        TRACE.with(|slot| {
+            let mut slot = slot.borrow_mut();
+            let Some(state) = slot.as_mut() else { return };
+            if state.events.len() < MAX_EVENTS {
+                state.events.push(event());
+            } else {
+                state.dropped = state.dropped.saturating_add(1);
+            }
+        });
+    }
+
+    pub(crate) fn frame(stage: &'static str, f: &Frame) {
+        emit(|| json!({ "stage": stage, "view": f.view.as_coeffs(), "px": f.px, "determinant": f.view.determinant(), "mt": f.mt }));
+    }
+
+    pub(crate) fn grid(f: &Frame, visible: super::Rect, size: (u16, u16), sampling: (f64, f64), px: f64, view: Affine) {
+        let (requested_px, major_stretch) = sampling;
+        emit(|| {
+            json!({ "stage": "document_axes.grid", "input_view": f.view.as_coeffs(), "input_px": f.px,
+            "visible": [visible.x0, visible.y0, visible.x1, visible.y1], "size": [size.0, size.1],
+            "requested_px": requested_px, "major_stretch": major_stretch,
+            "budget_scale": requested_px / px, "px": px, "view": view.as_coeffs() })
+        });
+    }
+
+    pub(crate) fn cache(f: &Frame, linear: [u64; 4], whole: bool, k: f64, hit: bool) {
+        emit(|| {
+            json!({ "stage": "pixel_content.cache", "view": f.view.as_coeffs(), "px": f.px,
+            "linear": linear, "whole": whole, "k": k, "hit": hit })
+        });
+    }
+
+    pub(crate) fn kernel(f: &Frame, k: f64, sigma: [f64; 2]) {
+        emit(|| {
+            json!({ "stage": "gaussian_axes.kernel", "view": f.view.as_coeffs(), "px": f.px, "k": k,
+            "sigma": sigma, "axis_enabled": sigma.map(|s| s >= 0.2),
+            "boxes": sigma.map(effects::pixel::gauss_boxes) })
+        });
+    }
+
+    pub(crate) fn pixels(stage: &'static str, view: Affine, px: f64, size: (usize, usize), data: &[u8]) {
+        emit(|| {
+            let (width, height) = size;
+            let count = width.checked_mul(height);
+            if width == 0 || count.is_none_or(|n| n > MAX_MOMENT_PIXELS || n.checked_mul(4) != Some(data.len())) {
+                return json!({ "stage": stage, "view": view.as_coeffs(), "px": px,
+                    "size": [width, height], "moments_skipped": "invalid dimensions or diagnostic pixel bound" });
+            }
+            let (mut mass, mut sum) = (0.0, [0.0; 5]);
+            for (index, pixel) in data.as_chunks::<4>().0.iter().enumerate() {
+                let weight = f64::from(pixel[3]);
+                let (x, y) = ((index % width) as f64 + 0.5, (index / width) as f64 + 0.5);
+                mass += weight;
+                for (value, sample) in sum.iter_mut().zip([x, y, x * x, x * y, y * y]) {
+                    *value += sample * weight;
+                }
+            }
+            let (centroid, covariance) = if mass > 0.0 {
+                let (x, y) = (sum[0] / mass, sum[1] / mass);
+                (Some([x, y]), Some([sum[2] / mass - x * x, sum[3] / mass - x * y, sum[4] / mass - y * y]))
+            } else {
+                (None, None)
+            };
+            json!({ "stage": stage, "view": view.as_coeffs(), "px": px, "size": [width, height],
+                "mass": mass, "centroid": centroid, "covariance": covariance })
+        });
+    }
+
+    pub(crate) fn output(stage: &'static str, view: Affine, image: &crate::Rendered) {
+        pixels(stage, view, 1.0 / view.determinant().abs().sqrt().max(1e-12), (image.width as usize, image.height as usize), &image.pixels);
+    }
+
+    #[test]
+    fn high_final_override_restores_after_nesting_panic_and_across_threads() {
+        use super::peniko::ImageQuality::{High, Medium};
+        assert_eq!(final_sampler_override(), None);
+        let outer = override_final_sampler(Some(High));
+        assert_eq!(final_sampler_override(), Some(High));
+        assert_eq!(std::thread::spawn(final_sampler_override).join().unwrap(), None);
+        {
+            let _inner = override_final_sampler(Some(Medium));
+            assert_eq!(final_sampler_override(), Some(Medium));
+        }
+        assert_eq!(final_sampler_override(), Some(High));
+        let result = std::panic::catch_unwind(|| {
+            let _inner = override_final_sampler(Some(Medium));
+            assert_eq!(final_sampler_override(), Some(Medium));
+            panic!("intentional test-only sampler guard unwind probe");
+        });
+        assert!(result.is_err());
+        assert_eq!(final_sampler_override(), Some(High));
+        drop(outer);
+        assert_eq!(final_sampler_override(), None);
+    }
+}
+
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::{Arc, Weak};
 
@@ -623,7 +793,10 @@ fn doc_raster_ppi(doc: &Document) -> f64 {
 /// The effects [`Renderer::pixel_content`] runs on the content's pixels (those changing the
 /// content itself), in stack order.
 fn content_changing(fx: &&RasterFx) -> bool {
-    matches!(fx, RasterFx::Feather { .. } | RasterFx::GaussianBlur { .. } | RasterFx::Pixel(_) | RasterFx::Rasterize(_))
+    matches!(
+        fx,
+        RasterFx::Feather { .. } | RasterFx::GaussianBlur { .. } | RasterFx::GaussianBlurAxes { .. } | RasterFx::Pixel(_) | RasterFx::Rasterize(_)
+    )
 }
 
 /// Is the content drawn with hard edges for `chain` into a raster of pixels `px` wide (document
@@ -638,6 +811,7 @@ fn hard_edged(chain: &[&RasterFx], px: f64) -> bool {
 fn looks_around(fx: &RasterFx) -> Option<f64> {
     match fx {
         RasterFx::Feather { radius } | RasterFx::GaussianBlur { radius } => Some(1.5 * radius),
+        RasterFx::GaussianBlurAxes { radius_x, radius_y } => Some(1.5 * radius_x.max(*radius_y)),
         RasterFx::Pixel(p) => p.reach(),
         RasterFx::Rasterize(r) => Some(r.reach()),
         _ => Some(0.0),
@@ -770,6 +944,12 @@ fn draw_scaled(ctx: &mut RenderContext, image: std::sync::Arc<vello_cpu::Pixmap>
 /// Draw `image` with its pixels placed by `xf` (pixels to device pixels). On whole pixels at full
 /// size it is drawn as [`draw_scaled`] draws it.
 fn draw_placed(ctx: &mut RenderContext, image: std::sync::Arc<vello_cpu::Pixmap>, xf: Affine) {
+    draw_placed_quality(ctx, image, xf, peniko::ImageQuality::Medium);
+}
+
+/// Share placement and the exact integer-copy shortcut; only document-axis Gaussian effects
+/// request High's f32 bicubic sampling. Existing placed-raster callers retain Medium.
+fn draw_placed_quality(ctx: &mut RenderContext, image: std::sync::Arc<vello_cpu::Pixmap>, xf: Affine, quality: peniko::ImageQuality) {
     let [a, b, c, d, e, f] = xf.as_coeffs();
     let near = |v: f64, to: f64| (v - to).abs() < 1e-6;
     if near(a, 1.0) && near(b, 0.0) && near(c, 0.0) && near(d, 1.0) && near(e, e.round()) && near(f, f.round()) {
@@ -777,11 +957,97 @@ fn draw_placed(ctx: &mut RenderContext, image: std::sync::Arc<vello_cpu::Pixmap>
     }
     let (w, h) = (image.width() as f64, image.height() as f64);
     ctx.set_transform(xf);
-    let sampler = peniko::ImageSampler { quality: peniko::ImageQuality::Medium, ..Default::default() };
+    let sampler = peniko::ImageSampler { quality, ..Default::default() };
     ctx.reset_paint_transform();
     ctx.set_paint(vello_cpu::Image { image: vello_cpu::ImageSource::Pixmap(image), sampler });
     ctx.fill_rect(&Rect::new(0.0, 0.0, w, h));
     ctx.set_transform(Affine::IDENTITY);
+}
+
+/// Requested document pitch and maximum view stretch for an axis-specific raster. The largest
+/// singular value, rather than the area scale, avoids magnifying a fitting grid along one axis.
+fn document_axis_sampling(view: Affine) -> Option<(f64, f64)> {
+    let [a, b, c, d, _, _] = view.as_coeffs();
+    if ![a, b, c, d].iter().all(|value| value.is_finite()) {
+        return None;
+    }
+    // Scale the inputs before adding: finite inputs can overflow in a+d before hypot runs.
+    let (a, b, c, d) = (0.5 * a, 0.5 * b, 0.5 * c, 0.5 * d);
+    let major_stretch = (a + d).hypot(b - c) + (a - d).hypot(b + c);
+    if !major_stretch.is_finite() || major_stretch <= 0.0 {
+        return None;
+    }
+    let requested_px = 1.0 / major_stretch;
+    (requested_px.is_finite() && requested_px > 0.0).then_some((requested_px, major_stretch))
+}
+
+/// A positive uniform grid whose integer pixel boundaries are anchored at the document origin.
+struct DocumentAxisGrid {
+    visible: Rect,
+    view: Affine,
+    px: f64,
+    size: (u16, u16),
+}
+
+/// Cover the padded document rectangle without changing the requested pitch just to fill an
+/// integer allocation. Only a real side/pixel-budget overflow chooses a coarser lattice.
+fn document_axis_grid(visible: Rect, nominal_px: f64, budget: f64) -> Option<DocumentAxisGrid> {
+    let (width, height) = (visible.width() / nominal_px, visible.height() / nominal_px);
+    if ![visible.x0, visible.y0, visible.x1, visible.y1, nominal_px, width, height, budget].iter().all(|v| v.is_finite())
+        || nominal_px <= 0.0
+        || width <= 0.0
+        || height <= 0.0
+        || budget <= 4.0
+    {
+        return None;
+    }
+    let side = f64::from(crate::MAX_RASTER_SIDE);
+    let snap = |px: f64| {
+        let indices = [(visible.x0 / px).floor(), (visible.y0 / px).floor(), (visible.x1 / px).ceil(), (visible.y1 / px).ceil()];
+        let [x0, y0, x1, y1] = indices;
+        let (w, h) = (x1 - x0, y1 - y0);
+        (indices.iter().all(|v| v.is_finite()) && w.is_finite() && h.is_finite() && w >= 1.0 && h >= 1.0).then_some((indices, w, h))
+    };
+    let fits = |w: f64, h: f64| w <= side && h <= side && w * h <= budget;
+    let (mut indices, mut w, mut h) = snap(nominal_px)?;
+    let mut px = nominal_px;
+    if !fits(w, h) {
+        let mut scale = (budget / (width * height)).sqrt().min(side / width).min(side / height).min(1.0);
+        if !scale.is_finite() || scale <= 0.0 {
+            return None;
+        }
+        // Outward alignment can add less than two cells to each continuous span. Reserve
+        // those cells before allocating; a final check below uses the actual integer sizes.
+        let (u, v) = (width * scale, height * scale);
+        let b = 2.0 * (u + v);
+        let area_scale = 2.0 * (budget - 4.0) / (b + (b * b + 4.0 * u * v * (budget - 4.0)).sqrt());
+        scale *= area_scale.min((side - 2.0) / u).min((side - 2.0) / v).min(1.0);
+        px = nominal_px / scale;
+        if !px.is_finite() || px <= 0.0 {
+            return None;
+        }
+        (indices, w, h) = snap(px)?;
+    }
+    let [x0, y0, x1, y1] = indices;
+    let snapped = Rect::new(x0 * px, y0 * px, x1 * px, y1 * px);
+    let inverse_px = 1.0 / px;
+    if !fits(w, h)
+        || ![snapped.x0, snapped.y0, snapped.x1, snapped.y1, inverse_px].iter().all(|v| v.is_finite())
+        || inverse_px <= 0.0
+        || snapped.x0 > visible.x0
+        || snapped.y0 > visible.y0
+        || snapped.x1 < visible.x1
+        || snapped.y1 < visible.y1
+    {
+        return None;
+    }
+    Some(DocumentAxisGrid {
+        visible: snapped,
+        // Integer translation preserves the lattice phase even for a fractional viewport pan.
+        view: Affine::new([inverse_px, 0.0, 0.0, inverse_px, -x0, -y0]),
+        px,
+        size: (w as u16, h as u16),
+    })
 }
 
 /// A cached shadow / glow raster: premultiplied, already tinted and faded, positioned relative to
@@ -1719,7 +1985,11 @@ impl Renderer {
         // The content itself (blurred / feathered / filtered), on its pixels: a filter layer's blur
         // works on a coarser grid tied to the canvas, so the blurred art shifted by up to a pixel
         // and looked blocky as the view moved by parts of a pixel (#755).
-        let blurs = rfx.iter().any(|fx| matches!(fx, RasterFx::Feather { radius } | RasterFx::GaussianBlur { radius } if *radius > 0.0));
+        let blurs = rfx.iter().any(|fx| match fx {
+            RasterFx::Feather { radius } | RasterFx::GaussianBlur { radius } => *radius > 0.0,
+            RasterFx::GaussianBlurAxes { radius_x, radius_y } => *radius_x > 0.0 || *radius_y > 0.0,
+            _ => false,
+        });
         if blurs || rfx.iter().any(|fx| matches!(fx, RasterFx::Pixel(_) | RasterFx::Rasterize(_))) {
             self.pixel_content(ctx, f, content, rfx, paint);
         } else {
@@ -1787,6 +2057,18 @@ impl Renderer {
         paint: &mut dyn FnMut(&mut Self, &mut RenderContext, &Frame),
     ) {
         let chain: Vec<&RasterFx> = rfx.iter().filter(content_changing).collect();
+        #[cfg(test)]
+        {
+            anisotropic_trace::frame("pixel_content.entry", f);
+        }
+        let [a, b, c, d, _, _] = f.view.as_coeffs();
+        let axis_grid = a > 0.0 && d > 0.0 && b.abs() < 1e-12 && c.abs() < 1e-12 && (a - d).abs() < 1e-12;
+        if !axis_grid && chain.iter().any(|effect| matches!(effect, RasterFx::GaussianBlurAxes { .. })) {
+            // The anisotropic axes are document axes. Filtering device rows/columns would
+            // rotate them away from the art when the canvas view rotates or reflects.
+            self.pixel_content_on_document_axes(ctx, f, content, rfx, paint);
+            return;
+        }
         // When the first draw of this content kept its raster, that raster is drawn.
         if let Some(KeptImage::Raster(image, place)) = content.kept.and_then(|k| k.image.borrow().clone()) {
             draw_placed(ctx, image, f.view * place);
@@ -1803,6 +2085,10 @@ impl Renderer {
             }
             None => (f, Rect::new(0.0, 0.0, ctx.width() as f64, ctx.height() as f64)),
         };
+        #[cfg(test)]
+        {
+            anisotropic_trace::frame("pixel_content.effective", f);
+        }
         // Where the result can paint: each effect spreads what the ones before it painted.
         let reach = chain.iter().fold(content.reach, |r, fx| {
             let o = fx.outset(r);
@@ -1863,6 +2149,10 @@ impl Renderer {
             self.move_pixel_content(f, content, key, &chain, channels, inputs, paint);
         }
         if let Some(e) = key.and_then(|key| self.pixel_fx.get_mut(&key)).filter(|e| exact(e)) {
+            #[cfg(test)]
+            {
+                anisotropic_trace::cache(f, linear, whole, e.k, true);
+            }
             e.stamp = stamp;
             self.stats.moved += usize::from(e.moved);
             let p = f.view * e.anchor;
@@ -1886,6 +2176,11 @@ impl Renderer {
         let to_doc = view.inverse();
         let px = f.px / k;
         let frame = Frame { mt: false, view, visible: to_doc.transform_rect_bbox(Rect::new(0.0, 0.0, w, h)), px, ..*f };
+        #[cfg(test)]
+        {
+            anisotropic_trace::cache(f, linear, whole, k, false);
+            anisotropic_trace::frame("pixel_content.raster_frame", &frame);
+        }
         let line = 72.0 / ppi;
         let (before, decoded) = (self.stats.moved, crate::paint::decode_failures());
         // A Rasterize first in the chain draws the content on its image's own grid instead, unless
@@ -1926,6 +2221,10 @@ impl Renderer {
             off.flush();
             off.render(&mut pm, &mut self.resources);
         }
+        #[cfg(test)]
+        {
+            anisotropic_trace::pixels("pixel_content.before_filters", frame.view, frame.px, (wu as usize, hu as usize), pm.data_as_u8_slice());
+        }
         let failed = crate::paint::decode_failures() - decoded;
         // Content drawn over moved rasters makes a moved raster.
         let moved = self.stats.moved > before;
@@ -1952,6 +2251,13 @@ impl Renderer {
             let outline = image_outline.as_ref().map(|g| (g, FillRule::NonZero)).or(content.outline);
             match fx {
                 RasterFx::GaussianBlur { radius } => effects::pixel::gaussian_rgba(pm.data_as_u8_slice_mut(), wz, hz, radius / 2.0 / px),
+                RasterFx::GaussianBlurAxes { radius_x, radius_y } => {
+                    #[cfg(test)]
+                    {
+                        anisotropic_trace::kernel(&frame, k, [radius_x / 2.0 / px, radius_y / 2.0 / px]);
+                    }
+                    effects::pixel::gaussian_rgba_axes(pm.data_as_u8_slice_mut(), wz, hz, radius_x / 2.0 / px, radius_y / 2.0 / px);
+                }
                 RasterFx::Feather { radius } => {
                     effects::pixel::gaussian_rgba(pm.data_as_u8_slice_mut(), wz, hz, radius / 2.0 / px);
                     if let Some((g, rule)) = outline {
@@ -1976,6 +2282,10 @@ impl Renderer {
                 }
                 _ => {}
             }
+        }
+        #[cfg(test)]
+        {
+            anisotropic_trace::pixels("pixel_content.after_filters", frame.view, frame.px, (wu as usize, hu as usize), pm.data_as_u8_slice());
         }
         let image = std::sync::Arc::new(pm);
         // A raster kept for this view alone at a lower resolution than the view's is resampled to the
@@ -2008,6 +2318,50 @@ impl Renderer {
             }
             None => draw_scaled(ctx, image, (x0, y0), k),
         }
+    }
+
+    /// Draw axis-specific effects on a document-aligned grid, then apply the complete view
+    /// affine once. A positive uniform diagonal grid makes the recursive entry above false.
+    /// The extra surface follows the existing pixel/side budgets; draw_placed resamples it
+    /// for rotation, reflection or nonuniform scale rather than changing the blur covariance.
+    fn pixel_content_on_document_axes(
+        &mut self,
+        ctx: &mut RenderContext,
+        f: &Frame,
+        content: &Content,
+        rfx: &[RasterFx],
+        paint: &mut dyn FnMut(&mut Self, &mut RenderContext, &Frame),
+    ) {
+        #[cfg(test)]
+        {
+            anisotropic_trace::frame("document_axes.entry", f);
+        }
+        if !f.px.is_finite() || f.px <= 0.0 || !f.view.determinant().is_finite() || f.view.determinant().abs() < 1e-15 {
+            return;
+        }
+        let screen = Rect::new(0.0, 0.0, ctx.width() as f64, ctx.height() as f64);
+        let visible = f.view.inverse().transform_rect_bbox(screen).inflate(2.0 * f.px, 2.0 * f.px);
+        let budget = if f.opts.dragging && f.mt { DRAG_PIXEL_BUDGET } else { PIXEL_BUDGET };
+        let Some(sampling) = document_axis_sampling(f.view) else { return };
+        let Some(DocumentAxisGrid { visible, view, px, size: (w, h) }) = document_axis_grid(visible, sampling.0, budget) else { return };
+        let aligned = Frame { view, visible, px, mt: false, ..*f };
+        #[cfg(test)]
+        {
+            anisotropic_trace::grid(f, visible, (w, h), sampling, px, view);
+        }
+        let mut offscreen = f.offscreen_context(w, h);
+        self.pixel_content(&mut offscreen, &aligned, content, rfx, paint);
+        offscreen.flush();
+        let mut image = vello_cpu::Pixmap::new(w, h);
+        offscreen.render(&mut image, &mut self.resources);
+        #[cfg(test)]
+        {
+            anisotropic_trace::pixels("document_axes.composited", aligned.view, aligned.px, (w as usize, h as usize), image.data_as_u8_slice());
+        }
+        let quality = peniko::ImageQuality::High;
+        #[cfg(test)]
+        let quality = anisotropic_trace::final_sampler_override().unwrap_or(quality);
+        draw_placed_quality(ctx, std::sync::Arc::new(image), f.view * view.inverse(), quality);
     }
 
     /// `image` as [`draw_scaled`] draws it with its top-left at (`x`, `y`) device pixels, `1 / k`
@@ -2416,6 +2770,330 @@ mod tests {
     use super::{DRAG_PIXEL_BUDGET, Drawn, PIXEL_BUDGET, drag_scale, filter_region, filter_region_within};
     use crate::tests_fontchange::fonts_steady;
     use crate::{RenderOptions, Rendered, Renderer};
+
+    fn test_constant_pixmap(w: u16, h: u16, rgba: [u8; 4]) -> vello_cpu::Pixmap {
+        let mut image = vello_cpu::Pixmap::new(w, h);
+        for pixel in image.data_as_u8_slice_mut().as_chunks_mut::<4>().0 {
+            pixel.copy_from_slice(&rgba);
+        }
+        image
+    }
+
+    fn test_premul_at(image: &vello_cpu::Pixmap, x: usize, y: usize) -> [u8; 4] {
+        let offset = (y * usize::from(image.width()) + x) * 4;
+        image.data_as_u8_slice()[offset..offset + 4].try_into().unwrap()
+    }
+
+    fn test_assert_premul(data: &[u8]) {
+        assert!(data.as_chunks::<4>().0.iter().all(|p| p[..3].iter().all(|c| *c <= p[3])), "raw Pixmap/Rendered.pixels are premultiplied");
+    }
+
+    #[test]
+    fn placed_quality_integer_copy_keeps_all_alpha_values_and_negative_crop_exact() {
+        let mut source = vello_cpu::Pixmap::new(256, 4);
+        for (index, pixel) in source.data_as_u8_slice_mut().as_chunks_mut::<4>().0.iter_mut().enumerate() {
+            let a = (index % 256) as u8;
+            let rgba = match index / 256 {
+                0 => [a, 0, 0, a],
+                1 => [0, a, 0, a],
+                2 => [0, 0, a, a],
+                _ => [a, a / 2, a / 3, a],
+            };
+            pixel.copy_from_slice(&rgba);
+        }
+        let source = std::sync::Arc::new(source);
+        for quality in [super::peniko::ImageQuality::Medium, super::peniko::ImageQuality::High] {
+            for (dx, dy) in [(2i32, 2i32), (-3, -1)] {
+                let mut context = crate::single_threaded_context(260, 8);
+                // A preceding pattern/gradient must not resample an otherwise exact copy.
+                context.set_paint_transform(Affine::rotate(0.31) * Affine::scale(1.7));
+                super::draw_placed_quality(&mut context, source.clone(), Affine::translate((f64::from(dx), f64::from(dy))), quality);
+                context.flush();
+                let mut output = vello_cpu::Pixmap::new(260, 8);
+                context.render(&mut output, &mut vello_cpu::Resources::new());
+                for y in 0..8usize {
+                    for x in 0..260usize {
+                        let (sx, sy) = (x as i32 - dx, y as i32 - dy);
+                        let expected =
+                            if (0..256).contains(&sx) && (0..4).contains(&sy) { test_premul_at(&source, sx as usize, sy as usize) } else { [0; 4] };
+                        assert_eq!(test_premul_at(&output, x, y), expected, "{quality:?}, offset({dx},{dy}), pixel({x},{y})");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn high_final_keeps_premultiplied_color_source_over_clip_and_straight_api_boundary() {
+        let source = std::sync::Arc::new(test_constant_pixmap(16, 16, [32, 64, 96, 128]));
+        let view = Affine::translate((32.0, 32.0)) * Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75) * Affine::translate((-8.0, -8.0));
+        for (background_alpha, expected_alpha) in [(0, 128), (64, 160), (255, 255)] {
+            let mut context = crate::single_threaded_context(64, 64);
+            let clip = vectorcraft_geom::Shape::to_path(&Rect::new(0.0, 0.0, 32.0, 64.0), 0.1);
+            context.push_clip_path(&clip);
+            super::draw_placed_quality(&mut context, source.clone(), view, super::peniko::ImageQuality::High);
+            context.pop_clip_path();
+            context.flush();
+            let mut output = test_constant_pixmap(64, 64, [0, 0, 0, background_alpha]);
+            context.render_with(
+                &mut output,
+                &mut vello_cpu::Resources::new(),
+                vello_cpu::RasterizerSettings { composite_mode: vello_cpu::CompositeMode::SrcOver, ..Default::default() },
+            );
+            // Both locations lie inside the transformed constant source, but only the left is
+            // inside the clip. These are independent solid-color/source-over expectations.
+            assert_eq!(test_premul_at(&output, 28, 32), [32, 64, 96, expected_alpha]);
+            assert_eq!(test_premul_at(&output, 36, 32), [0, 0, 0, background_alpha]);
+            test_assert_premul(output.data_as_u8_slice());
+            if background_alpha < expected_alpha {
+                assert!(
+                    output.data_as_u8_slice().as_chunks::<4>().0.iter().any(|p| p[3] > background_alpha && p[3] < expected_alpha),
+                    "antialiased boundary exercised"
+                );
+            }
+            if background_alpha == 0 {
+                let rendered = Rendered { width: 64, height: 64, pixels: output.data_as_u8_slice().to_vec() };
+                assert_eq!(rendered.pixel(28, 32), [64, 128, 191, 128]);
+                let straight = rendered.to_straight();
+                let offset = (32 * 64 + 28) * 4;
+                assert_eq!(&straight[offset..offset + 4], &[64, 128, 191, 128]);
+                // Straight blue191 > alpha128 is valid; C<=A was checked on raw pixels only.
+            }
+        }
+    }
+
+    #[test]
+    fn high_constant_image_multiply_matches_independent_solid_color_fill() {
+        let source = std::sync::Arc::new(test_constant_pixmap(16, 16, [32, 64, 96, 128]));
+        let view = Affine::translate((32.0, 32.0)) * Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75) * Affine::translate((-8.0, -8.0));
+        let mut results = Vec::new();
+        for image_paint in [false, true] {
+            let mut context = crate::single_threaded_context(64, 64);
+            context.push_layer(None, Some(crate::blend_mode(vectorcraft_color::BlendMode::Multiply)), Some(1.0), None, None);
+            if image_paint {
+                super::draw_placed_quality(&mut context, source.clone(), view, super::peniko::ImageQuality::High);
+            } else {
+                context.set_transform(view);
+                context.set_paint(super::peniko::Color::from_rgba8(64, 128, 192, 128));
+                context.fill_rect(&Rect::new(0.0, 0.0, 16.0, 16.0));
+                context.set_transform(Affine::IDENTITY);
+            }
+            context.pop_layer();
+            context.flush();
+            let mut output = test_constant_pixmap(64, 64, [128, 128, 128, 255]);
+            context.render_with(
+                &mut output,
+                &mut vello_cpu::Resources::new(),
+                vello_cpu::RasterizerSettings { composite_mode: vello_cpu::CompositeMode::SrcOver, ..Default::default() },
+            );
+            test_assert_premul(output.data_as_u8_slice());
+            results.push([test_premul_at(&output, 28, 32), test_premul_at(&output, 32, 32), test_premul_at(&output, 36, 32)]);
+        }
+        assert_eq!(results[0], results[1]);
+    }
+
+    fn test_colored_blur_document(params: serde_json::Value) -> Document {
+        let mut document = Document::new(128.0, 128.0);
+        let layer = document.layers[0].id;
+        let mut node = Node::path(
+            document.alloc_id(),
+            shapes::rectangle(Rect::new(32.0, 32.0, 96.0, 96.0)),
+            Appearance::basic(Paint::solid(Color::rgb(1.0, 0.5, 0.25)), Paint::None, 0.0),
+        );
+        node.opacity = 0.5;
+        node.appearance.effects.push(Effect { id: "blur.gaussian".into(), params, visible: true });
+        document.insert(Some(layer), 0, node).unwrap();
+        document
+    }
+
+    #[test]
+    fn legacy_scalar_and_equal_axis_documents_ignore_final_sampler_override() {
+        let view =
+            Affine::translate((96.23, 95.59)) * Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75) * Affine::translate((-64.0, -64.0));
+        let options = RenderOptions { background: None, artboards: false, ..Default::default() };
+        for params in [json!({"radius": 7.0}), json!({"radius": 7.0, "anisotropyX": 1.0, "anisotropyY": 1.0})] {
+            let document = test_colored_blur_document(params);
+            let mut results = Vec::new();
+            for quality in [None, Some(super::peniko::ImageQuality::Medium), Some(super::peniko::ImageQuality::High)] {
+                let _override = super::anisotropic_trace::override_final_sampler(quality);
+                let mut renderer = Renderer::new();
+                renderer.threads = 1;
+                results.push(renderer.render(&document, 192, 192, view, &options).pixels);
+            }
+            assert_eq!(results[0], results[1]);
+            assert_eq!(results[0], results[2]);
+        }
+    }
+
+    #[test]
+    fn anisotropic_high_color_matches_fresh_cache_and_large_drag_budget_contracts() {
+        let _production = super::anisotropic_trace::override_final_sampler(None);
+        let document = test_colored_blur_document(json!({"radius": 7.0, "anisotropyX": 1.0, "anisotropyY": 0.25}));
+        let mut cached = Renderer::new();
+        cached.threads = 1;
+        for (size, dragging, coarser) in [((192u32, 192u32), false, false), ((1600, 1500), false, true), ((800, 600), true, true)] {
+            let view = Affine::translate((f64::from(size.0) / 2.0 + 0.23, f64::from(size.1) / 2.0 - 0.41))
+                * Affine::rotate(0.53)
+                * Affine::scale_non_uniform(1.5, 0.75)
+                * Affine::translate((-64.0, -64.0));
+            let geometric_px = 1.0 / view.determinant().abs().sqrt();
+            let requested_px = super::document_axis_sampling(view).unwrap().0;
+            let visible = view
+                .inverse()
+                .transform_rect_bbox(Rect::new(0.0, 0.0, f64::from(size.0), f64::from(size.1)))
+                .inflate(2.0 * geometric_px, 2.0 * geometric_px);
+            let budget = if dragging { DRAG_PIXEL_BUDGET } else { PIXEL_BUDGET };
+            let grid = super::document_axis_grid(visible, requested_px, budget).unwrap();
+            assert_eq!(grid.px > requested_px, coarser);
+            assert!(f64::from(grid.size.0) * f64::from(grid.size.1) <= budget);
+            assert!(u32::from(grid.size.0) <= crate::MAX_RASTER_SIDE && u32::from(grid.size.1) <= crate::MAX_RASTER_SIDE);
+            let options = RenderOptions { background: None, artboards: false, interacting: dragging, dragging, ..Default::default() };
+            let mut renderer = Renderer::new();
+            renderer.threads = 1;
+            let fresh = renderer.render(&document, size.0, size.1, view, &options);
+            test_assert_premul(&fresh.pixels);
+            assert!(fresh.pixels.as_chunks::<4>().0.iter().any(|p| p[3] > 0 && p[3] < 128), "colored translucent blur edge exercised");
+            if !coarser {
+                let _forced = super::anisotropic_trace::override_final_sampler(Some(super::peniko::ImageQuality::High));
+                let mut forced = Renderer::new();
+                forced.threads = 1;
+                assert_eq!(forced.render(&document, size.0, size.1, view, &options).pixels, fresh.pixels, "default is production High");
+            }
+            for _ in 0..2 {
+                assert_eq!(
+                    cached.render(&document, size.0, size.1, view, &options).pixels,
+                    fresh.pixels,
+                    "fresh/cache at {size:?}, dragging={dragging}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn document_axis_sampling_matches_known_rotated_reflected_and_nonuniform_scales() {
+        for (view, expected_stretch) in [
+            (Affine::IDENTITY, 1.0),
+            (Affine::rotate(std::f64::consts::FRAC_PI_2), 1.0),
+            (Affine::rotate(0.53), 1.0),
+            (Affine::scale_non_uniform(-1.0, 1.0), 1.0),
+            (Affine::scale(3.5), 3.5),
+            (Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75), 1.5),
+            (Affine::rotate(0.53) * Affine::scale_non_uniform(0.75, 1.5), 1.5),
+            // Adding these finite diagonal entries before halving would overflow.
+            (Affine::scale(1.0e308), 1.0e308),
+        ] {
+            let (px, stretch) = super::document_axis_sampling(view).unwrap();
+            assert_eq!(stretch, expected_stretch);
+            assert_eq!(px, 1.0 / expected_stretch);
+            assert!(px.is_finite() && px > 0.0);
+        }
+        for view in [Affine::scale(0.0), Affine::scale(f64::NAN), Affine::scale(f64::INFINITY)] {
+            assert!(super::document_axis_sampling(view).is_none());
+        }
+    }
+
+    #[test]
+    fn document_axis_sampling_agrees_with_independent_gram_eigenvalues_for_shears() {
+        for [a, b, c, d] in [[1.0, 0.0, 1.0, 1.0], [1.0, 0.0, 2.0, 1.0], [1.0, 0.0, -1.0, 1.0], [1.0, 1.0, 0.0, 1.0]] {
+            let view = Affine::new([a, b, c, d, 23.4, -19.7]);
+            let (px, actual) = super::document_axis_sampling(view).unwrap();
+            // Independently solve the larger eigenvalue of A^T A, without the half-hypot formula.
+            let (xx, xy, yy) = (a * a + b * b, a * c + b * d, c * c + d * d);
+            let expected = (0.5 * (xx + yy + ((xx - yy) * (xx - yy) + 4.0 * xy * xy).sqrt())).sqrt();
+            assert_eq!(actual, expected, "{view:?}");
+            assert_eq!(px, 1.0 / expected);
+        }
+    }
+
+    #[test]
+    fn document_axis_sampling_nonuniform_trace99_case_fits_without_pixel_magnification() {
+        let view =
+            Affine::new([1.2942106057721414, 0.7583000118072705, -0.37915000590363523, 0.6471053028860707, 35.94575800920457, 1.6216279714661255]);
+        let geometric_px = 1.0 / view.determinant().abs().sqrt();
+        let (requested_px, stretch) = super::document_axis_sampling(view).unwrap();
+        assert_eq!(stretch, 1.5);
+        assert_eq!(requested_px, 2.0 / 3.0);
+        // The existing visible rectangle and its geometric-frame padding do not change.
+        let visible = view.inverse().transform_rect_bbox(Rect::new(0.0, 0.0, 200.0, 200.0)).inflate(2.0 * geometric_px, 2.0 * geometric_px);
+        let grid = super::document_axis_grid(visible, requested_px, PIXEL_BUDGET).unwrap();
+        assert_eq!(grid.px, requested_px);
+        assert_eq!(grid.px * stretch, 1.0);
+        assert_eq!(grid.size, (280, 554));
+        assert!(grid.visible.x0 <= visible.x0 && grid.visible.y0 <= visible.y0);
+        assert!(grid.visible.x1 >= visible.x1 && grid.visible.y1 >= visible.y1);
+        assert!(u32::from(grid.size.0) <= crate::MAX_RASTER_SIDE && u32::from(grid.size.1) <= crate::MAX_RASTER_SIDE);
+        assert!(f64::from(grid.size.0) * f64::from(grid.size.1) <= PIXEL_BUDGET);
+        let constrained = super::document_axis_grid(visible, requested_px, 10_000.0).unwrap();
+        assert!(constrained.px > requested_px && constrained.px * stretch > 1.0, "a capped raster remains an explicit approximation");
+        assert!(f64::from(constrained.size.0) * f64::from(constrained.size.1) <= 10_000.0);
+    }
+
+    #[test]
+    fn document_axis_grid_keeps_requested_pitch_and_integer_phase_when_it_fits() {
+        for transform in [
+            Affine::rotate(std::f64::consts::FRAC_PI_2),
+            Affine::rotate(0.53),
+            Affine::scale_non_uniform(-1.0, 1.0),
+            Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75),
+        ] {
+            for pan in [(0.0, 0.0), (0.23, -0.41), (-0.7, 0.6)] {
+                let view = Affine::translate((100.0 + pan.0, 100.0 + pan.1)) * transform * Affine::translate((-70.0, -70.0));
+                let px = 1.0 / view.determinant().abs().sqrt();
+                let visible = view.inverse().transform_rect_bbox(Rect::new(0.0, 0.0, 200.0, 200.0)).inflate(2.0 * px, 2.0 * px);
+                let grid = super::document_axis_grid(visible, px, PIXEL_BUDGET).unwrap();
+                assert_eq!(grid.px.to_bits(), px.to_bits(), "a fitting allocation cannot rescale the grid");
+                let [a, b, c, d, tx, ty] = grid.view.as_coeffs();
+                assert_eq!([a, b, c, d], [1.0 / px, 0.0, 0.0, 1.0 / px]);
+                assert_eq!([tx, ty], [tx.round(), ty.round()], "the phase is anchored to the document lattice");
+                assert!(grid.visible.x0 <= visible.x0 && grid.visible.y0 <= visible.y0);
+                assert!(grid.visible.x1 >= visible.x1 && grid.visible.y1 >= visible.y1);
+                assert!(u32::from(grid.size.0) <= crate::MAX_RASTER_SIDE && u32::from(grid.size.1) <= crate::MAX_RASTER_SIDE);
+                assert!(f64::from(grid.size.0) * f64::from(grid.size.1) <= PIXEL_BUDGET);
+            }
+        }
+        // The actual failing view from trace83, without an allocation-induced scale or phase.
+        let grid =
+            super::document_axis_grid(Rect::new(-68.8340411719608, -68.83404117196079, 208.8340411719608, 208.8340411719608), 1.0, PIXEL_BUDGET)
+                .unwrap();
+        assert_eq!(grid.px, 1.0);
+        assert_eq!(grid.size, (278, 278));
+        assert_eq!(grid.view.as_coeffs(), [1.0, 0.0, 0.0, 1.0, 69.0, 69.0]);
+    }
+
+    #[test]
+    fn document_axis_grid_only_coarsens_after_outward_integer_sizes_exceed_a_limit() {
+        let side = f64::from(crate::MAX_RASTER_SIDE);
+        for (visible, budget, coarser) in [
+            (Rect::new(0.0, 0.0, 100.0, 100.0), 10_000.0, false),
+            (Rect::new(-0.25, -0.25, 99.75, 99.75), 10_000.0, true),
+            (Rect::new(0.0, 0.0, side, 1.0), PIXEL_BUDGET, false),
+            (Rect::new(0.0, 0.0, side + 1.0, 1.0), PIXEL_BUDGET, true),
+            (Rect::new(0.0, 0.0, 4096.0, 4096.0), PIXEL_BUDGET, true),
+            (Rect::new(-3000.3, -2999.7, 1095.7, 1096.3), DRAG_PIXEL_BUDGET, true),
+        ] {
+            let grid = super::document_axis_grid(visible, 1.0, budget).unwrap();
+            assert_eq!(grid.px > 1.0, coarser);
+            assert!(grid.visible.x0 <= visible.x0 && grid.visible.y0 <= visible.y0);
+            assert!(grid.visible.x1 >= visible.x1 && grid.visible.y1 >= visible.y1);
+            assert!(grid.size.0 > 0 && grid.size.1 > 0);
+            assert!(u32::from(grid.size.0) <= crate::MAX_RASTER_SIDE && u32::from(grid.size.1) <= crate::MAX_RASTER_SIDE);
+            assert!(f64::from(grid.size.0) * f64::from(grid.size.1) <= budget, "actual outward-aligned allocation");
+        }
+    }
+
+    #[test]
+    fn document_axis_grid_rejects_invalid_dimensions_and_nonfinite_inputs() {
+        let visible = Rect::new(0.0, 0.0, 100.0, 100.0);
+        for px in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            assert!(super::document_axis_grid(visible, px, PIXEL_BUDGET).is_none());
+        }
+        for budget in [0.0, 4.0, f64::NAN, f64::INFINITY] {
+            assert!(super::document_axis_grid(visible, 1.0, budget).is_none());
+        }
+        for rect in [Rect::new(0.0, 0.0, 0.0, 10.0), Rect::new(10.0, 0.0, 0.0, 10.0), Rect::new(f64::NAN, 0.0, 10.0, 10.0)] {
+            assert!(super::document_axis_grid(rect, 1.0, PIXEL_BUDGET).is_none());
+        }
+    }
 
     /// #1706: the raster a shadow or glow is filtered in stays within the pixel budget however
     /// far the blur spreads at the zoom (it was up to 65535 pixels a side: 16 GB).

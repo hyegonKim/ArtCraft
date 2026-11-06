@@ -213,6 +213,61 @@ fn a_gaussian_blur_becomes_the_effect_with_its_radius() {
     assert_eq!(effects(&d)[0].params["radius"], json!(12.0));
 }
 
+#[test]
+fn axis_specific_gaussian_preserves_axes_pixels_and_svg_roundtrip() {
+    for deviation in ["10 0", "0 10", "6 2"] {
+        let body = format!(
+            r##"<defs><filter id="b" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="{deviation}" color-interpolation-filters="sRGB"/></filter></defs><rect x="70" y="45" width="60" height="30" fill="#000" filter="url(#b)"/>"##
+        );
+        let (document, warnings) = open(&body);
+        assert!(warnings.is_empty(), "{warnings:?}");
+        let fx = effects(&document);
+        assert!(matches!(vectorcraft_effects::raster_effects(&fx).as_slice(), [RasterFx::GaussianBlurAxes { .. }]));
+        let image = render_artboard(&document);
+        let sample = |x: usize, y: usize| image.rgba[(y * 200 + x) * 4];
+        if deviation == "10 0" {
+            assert!(sample(65, 60) < 250, "horizontal blur reaches left of rectangle");
+            assert_eq!(sample(100, 40), 255, "zero vertical deviation must not blur upwards");
+        } else if deviation == "0 10" {
+            assert!(sample(100, 40) < 250, "vertical blur reaches above rectangle");
+            assert_eq!(sample(65, 60), 255, "zero horizontal deviation must not blur leftwards");
+        }
+        assert_similar(&image, &resvg_render(&svg(&body), 200, 120), 24.0, 0.02);
+        // The native format's generic effect params must preserve both axes and exact pixels.
+        vectorcraft_testkit::invariants::check_native_roundtrip_exact(&document).unwrap();
+        let native = vectorcraft_testkit::format::save_with(&document, &Default::default()).unwrap();
+        let reopened = vectorcraft_testkit::format::load(&native).unwrap();
+        assert_eq!(effects(&reopened), fx);
+        assert_eq!(render_artboard(&reopened).rgba, image.rgba);
+        let output = export(&document, &ExportOptions::default());
+        let (back, warnings) = import_with_report(&output).unwrap();
+        assert!(warnings.is_empty(), "{warnings:?}");
+        assert_eq!(effects(&back), fx);
+        assert_eq!(render_artboard(&back).rgba, image.rgba);
+    }
+}
+
+#[test]
+fn gaussian_axes_follow_nonuniform_scale_and_quarter_turns() {
+    let body = r##"<defs><filter id="b"><feGaussianBlur stdDeviation="3 1"/></filter></defs><g transform="translate(150 10) rotate(90) scale(2 3)"><rect width="20" height="30" fill="#000" filter="url(#b)"/></g>"##;
+    let (document, warnings) = open(body);
+    assert!(warnings.is_empty(), "{warnings:?}");
+    let fx = vectorcraft_effects::raster_effects(&effects(&document));
+    assert_eq!(fx, vec![RasterFx::GaussianBlurAxes { radius_x: 6.0, radius_y: 12.0 }]);
+}
+
+#[test]
+fn unsupported_or_compound_anisotropy_keeps_the_legacy_appearance_with_a_warning() {
+    for body in [
+        r##"<defs><filter id="b"><feGaussianBlur stdDeviation="10 0"/></filter></defs><g transform="rotate(30 100 60)"><rect x="70" y="45" width="60" height="30" filter="url(#b)"/></g>"##,
+        r##"<defs><filter id="b"><feDropShadow stdDeviation="10 0" dx="3" dy="4"/></filter></defs><rect x="70" y="45" width="60" height="30" filter="url(#b)"/>"##,
+    ] {
+        let (document, warnings) = open(body);
+        assert!(warnings.iter().any(|warning| warning.contains("anisotropic blur is approximated")), "{warnings:?}");
+        assert!(!effects(&document).is_empty(), "retain the old approximation rather than dropping the effect");
+    }
+}
+
 /// The one drop shadow of the only object: (dx, dy, blur, colour, opacity %).
 fn shadow(d: &Document) -> (f64, f64, f64, Color, f32) {
     let fx = vectorcraft_effects::raster_effects(&effects(d));

@@ -1195,6 +1195,12 @@ impl Importer {
         };
         let mask = g.mask().and_then(|m| self.opacity_mask(m, ts, &label));
         // Blurs, shadows and glows become live effects (see [`fx`]).
+        if fx::approximates(g.filters(), ts) {
+            self.warn(format!(
+                "filter {} on {label}: non-axis-aligned or compound anisotropic blur is approximated by an even blur",
+                filter_names(g.filters())
+            ));
+        }
         let effects = match g.filters() {
             [] => vec![],
             filters => fx::effects(filters, ts, &self.blends).unwrap_or_else(|| {

@@ -140,3 +140,241 @@ fn blurred_type_doesnt_wobble_as_the_view_moves_by_parts_of_a_pixel() {
         }
     }
 }
+
+/// Covariance of one blurred dot follows the full canvas affine, including its zero-width axis.
+#[test]
+fn anisotropic_blur_follows_rotated_reflected_and_nonuniform_views() {
+    fn moments(image: &Rendered, width: usize) -> (Point, [f64; 3]) {
+        let mut mass = 0.0;
+        let mut sum = [0.0; 5];
+        for (index, pixel) in image.pixels.as_chunks::<4>().0.iter().enumerate() {
+            let weight = f64::from(pixel[3]);
+            let (x, y) = ((index % width) as f64 + 0.5, (index / width) as f64 + 0.5);
+            mass += weight;
+            for (value, sample) in sum.iter_mut().zip([x, y, x * x, x * y, y * y]) {
+                *value += sample * weight;
+            }
+        }
+        assert!(mass > 0.0);
+        let (x, y) = (sum[0] / mass, sum[1] / mass);
+        (Point::new(x, y), [sum[2] / mass - x * x, sum[3] / mass - x * y, sum[4] / mass - y * y])
+    }
+    let mut document = Document::new(140.0, 140.0);
+    let layer = document.layers[0].id;
+    let mut dot = Node::path(
+        document.alloc_id(),
+        shapes::rectangle(Rect::new(69.0, 69.0, 71.0, 71.0)),
+        Appearance::basic(Paint::solid(Color::WHITE), Paint::None, 0.0),
+    );
+    dot.appearance.effects.push(Effect {
+        id: "blur.gaussian".into(),
+        params: json!({"radius": 12.0, "anisotropyX": 1.0, "anisotropyY": 0.0}),
+        visible: true,
+    });
+    document.insert(Some(layer), 0, dot).unwrap();
+    let base_trace = super::fx::anisotropic_trace::begin("base");
+    let base = render(&document, 1, Affine::IDENTITY, (140, 140));
+    super::fx::anisotropic_trace::output("base.final", Affine::IDENTITY, &base);
+    drop(base_trace);
+    let (center, covariance) = moments(&base, 140);
+    assert!(covariance[0] > 20.0 && covariance[2] < 1.0, "{covariance:?}");
+    // Reuse a renderer across view changes as the real canvas does. A fresh renderer alone
+    // cannot detect an incorrectly reused view-dependent filtered raster.
+    let mut cached = Renderer::new();
+    cached.threads = 1;
+    let _ = cached.render(&document, 140, 140, Affine::IDENTITY, &screen());
+    for transform in [
+        Affine::rotate(std::f64::consts::FRAC_PI_2),
+        Affine::rotate(0.53),
+        Affine::scale_non_uniform(-1.0, 1.0),
+        Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75),
+    ] {
+        let view = Affine::translate((100.0, 100.0)) * transform * Affine::translate((-center.x, -center.y));
+        let _view_trace = super::fx::anisotropic_trace::begin("view");
+        let actual = render(&document, 1, view, (200, 200));
+        super::fx::anisotropic_trace::output("view.final", view, &actual);
+        let (position, got) = moments(&actual, 200);
+        assert!((position.x - 100.0).abs() < 1.0 && (position.y - 100.0).abs() < 1.0, "{position:?}");
+        let [a, b, c, d, _, _] = transform.as_coeffs();
+        let [xx, xy, yy] = covariance;
+        let expected =
+            [a * a * xx + 2.0 * a * c * xy + c * c * yy, a * b * xx + (a * d + b * c) * xy + c * d * yy, b * b * xx + 2.0 * b * d * xy + d * d * yy];
+        // The medium-quality final affine resampling may add less than a pixel of spread.
+        let tolerance = 1.0 + 0.08 * expected[0].max(expected[2]);
+        for (actual, expected) in got.into_iter().zip(expected) {
+            assert!((actual - expected).abs() < tolerance, "view={view:?}, got={got:?}, expected={expected:?}");
+        }
+        assert_eq!(render(&document, 1, view, (200, 200)).pixels, actual.pixels);
+        for _ in 0..2 {
+            assert_eq!(
+                cached.render(&document, 200, 200, view, &screen()).pixels,
+                actual.pixels,
+                "a reused canvas renderer must match a fresh one after {view:?}"
+            );
+        }
+    }
+}
+
+/// Fractional viewport pans preserve the document's blur axes and its cached raster contract.
+#[test]
+fn anisotropic_blur_fractional_pan_keeps_covariance_and_fresh_cached_pixels() {
+    fn moments(image: &Rendered) -> (Point, [f64; 3]) {
+        let mut mass = 0.0;
+        let mut sum = [0.0; 5];
+        for (index, pixel) in image.pixels.as_chunks::<4>().0.iter().enumerate() {
+            let weight = f64::from(pixel[3]);
+            let (x, y) = ((index % image.width as usize) as f64 + 0.5, (index / image.width as usize) as f64 + 0.5);
+            mass += weight;
+            for (value, sample) in sum.iter_mut().zip([x, y, x * x, x * y, y * y]) {
+                *value += sample * weight;
+            }
+        }
+        assert!(mass > 0.0);
+        let (x, y) = (sum[0] / mass, sum[1] / mass);
+        (Point::new(x, y), [sum[2] / mass - x * x, sum[3] / mass - x * y, sum[4] / mass - y * y])
+    }
+    let mut document = Document::new(140.0, 140.0);
+    let layer = document.layers[0].id;
+    let mut dot = Node::path(
+        document.alloc_id(),
+        shapes::rectangle(Rect::new(69.0, 69.0, 71.0, 71.0)),
+        Appearance::basic(Paint::solid(Color::WHITE), Paint::None, 0.0),
+    );
+    dot.appearance.effects.push(Effect {
+        id: "blur.gaussian".into(),
+        params: json!({"radius": 12.0, "anisotropyX": 1.0, "anisotropyY": 0.0}),
+        visible: true,
+    });
+    document.insert(Some(layer), 0, dot).unwrap();
+    let base = render(&document, 1, Affine::IDENTITY, (140, 140));
+    let (center, [xx, xy, yy]) = moments(&base);
+    let mut cached = Renderer::new();
+    cached.threads = 1;
+    let _ = cached.render(&document, 140, 140, Affine::IDENTITY, &screen());
+    for transform in [
+        Affine::rotate(std::f64::consts::FRAC_PI_2),
+        Affine::rotate(0.53),
+        Affine::scale_non_uniform(-1.0, 1.0),
+        Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75),
+    ] {
+        let [a, b, c, d, _, _] = transform.as_coeffs();
+        let expected =
+            [a * a * xx + 2.0 * a * c * xy + c * c * yy, a * b * xx + (a * d + b * c) * xy + c * d * yy, b * b * xx + 2.0 * b * d * xy + d * d * yy];
+        // Keep the existing regression's covariance bound, including the sharp zero axis.
+        let tolerance = 1.0 + 0.08 * expected[0].max(expected[2]);
+        for (dx, dy) in [(0.13, -0.27), (-0.41, 0.36), (0.71, -0.64)] {
+            let view = Affine::translate((100.0 + dx, 100.0 + dy)) * transform * Affine::translate((-center.x, -center.y));
+            let fresh = render(&document, 1, view, (200, 200));
+            let (position, got) = moments(&fresh);
+            assert!((position.x - 100.0 - dx).abs() < 1.0 && (position.y - 100.0 - dy).abs() < 1.0, "{position:?}");
+            for (actual, expected) in got.into_iter().zip(expected) {
+                assert!((actual - expected).abs() < tolerance, "view={view:?}, got={got:?}, expected={expected:?}");
+            }
+            assert_eq!(render(&document, 1, view, (200, 200)).pixels, fresh.pixels);
+            for _ in 0..2 {
+                assert_eq!(cached.render(&document, 200, 200, view, &screen()).pixels, fresh.pixels, "fractional-pan cached canvas {view:?}");
+            }
+        }
+    }
+}
+
+/// Observation only: compare the existing precise modes without changing the failing oracle.
+/// Root collects println output with RUST_TEST_NOCAPTURE=1 and the existing opt-in stage trace.
+#[test]
+fn anisotropic_blur_precision_ab_diagnostic() {
+    fn moments(image: &Rendered) -> (f64, Point, [f64; 3]) {
+        let mut mass = 0.0;
+        let mut sum = [0.0; 5];
+        for (index, pixel) in image.pixels.as_chunks::<4>().0.iter().enumerate() {
+            let weight = f64::from(pixel[3]);
+            let (x, y) = ((index % image.width as usize) as f64 + 0.5, (index / image.width as usize) as f64 + 0.5);
+            mass += weight;
+            for (value, sample) in sum.iter_mut().zip([x, y, x * x, x * y, y * y]) {
+                *value += sample * weight;
+            }
+        }
+        assert!(mass > 0.0);
+        let (x, y) = (sum[0] / mass, sum[1] / mass);
+        (mass, Point::new(x, y), [sum[2] / mass - x * x, sum[3] / mass - x * y, sum[4] / mass - y * y])
+    }
+
+    let mut document = Document::new(140.0, 140.0);
+    let layer = document.layers[0].id;
+    let mut dot = Node::path(
+        document.alloc_id(),
+        shapes::rectangle(Rect::new(69.0, 69.0, 71.0, 71.0)),
+        Appearance::basic(Paint::solid(Color::WHITE), Paint::None, 0.0),
+    );
+    dot.appearance.effects.push(Effect {
+        id: "blur.gaussian".into(),
+        params: json!({"radius": 12.0, "anisotropyX": 1.0, "anisotropyY": 0.0}),
+        visible: true,
+    });
+    document.insert(Some(layer), 0, dot).unwrap();
+    let options = screen();
+    let transform = Affine::rotate(0.53) * Affine::scale_non_uniform(1.5, 0.75);
+    let (mut reference_center, mut reference_covariance) = (Point::ZERO, [0.0; 3]);
+    for (case, pan, size, labels) in [
+        ("base", None, (140, 140), ("precision.base.false", "precision.base.true", "precision.base.high_fast")),
+        ("nonuniform", Some((0.0, 0.0)), (200, 200), ("precision.nonuniform.false", "precision.nonuniform.true", "precision.nonuniform.high_fast")),
+        ("fractional_pan", Some((0.13, -0.27)), (200, 200), ("precision.pan.false", "precision.pan.true", "precision.pan.high_fast")),
+    ] {
+        let view = match pan {
+            Some((dx, dy)) => Affine::translate((100.0 + dx, 100.0 + dy)) * transform * Affine::translate((-reference_center.x, -reference_center.y)),
+            None => Affine::IDENTITY,
+        };
+        let mut fast_pixels: Option<Vec<u8>> = None;
+        for (mode, precise, high, label) in
+            [("MediumFast", false, false, labels.0), ("MediumPrecise", true, false, labels.1), ("HighFast", false, true, labels.2)]
+        {
+            let opts = RenderOptions { precise, ..options.clone() };
+            let sampler = if high { vello_cpu::peniko::ImageQuality::High } else { vello_cpu::peniko::ImageQuality::Medium };
+            let sampler_override = super::fx::anisotropic_trace::override_final_sampler(Some(sampler));
+            let trace = super::fx::anisotropic_trace::begin(label);
+            let mut renderer = Renderer::new();
+            renderer.threads = 1;
+            let image = renderer.render(&document, size.0, size.1, view, &opts);
+            super::fx::anisotropic_trace::output("precision_ab.final", view, &image);
+            drop(trace);
+            drop(sampler_override);
+            assert_eq!((image.width, image.height), size);
+            assert_eq!(image.pixels.len(), size.0 as usize * size.1 as usize * 4);
+            let (mass, center, covariance) = moments(&image);
+            if case == "base" && mode == "MediumFast" {
+                reference_center = center;
+                reference_covariance = covariance;
+            }
+            let [a, b, c, d, _, _] = view.as_coeffs();
+            let [xx, xy, yy] = reference_covariance;
+            let expected = [
+                a * a * xx + 2.0 * a * c * xy + c * c * yy,
+                a * b * xx + (a * d + b * c) * xy + c * d * yy,
+                b * b * xx + 2.0 * b * d * xy + d * d * yy,
+            ];
+            let expected_center = view * reference_center;
+            let tolerance = 1.0 + 0.08 * expected[0].max(expected[2]);
+            let covariance_within_bound = covariance.into_iter().zip(expected).all(|(got, want)| (got - want).abs() < tolerance);
+            let centroid_within_bound = (center.x - expected_center.x).abs() < 1.0 && (center.y - expected_center.y).abs() < 1.0;
+            let images_equal = fast_pixels.as_ref().map(|pixels| pixels == &image.pixels);
+            let different_pixels = fast_pixels
+                .as_ref()
+                .map(|pixels| pixels.as_chunks::<4>().0.iter().zip(image.pixels.as_chunks::<4>().0.iter()).filter(|(a, b)| a != b).count());
+            println!(
+                "VEC_PRECISION_AB {}",
+                json!({ "case": case, "mode": mode, "precise": precise, "sampler": if high { "High" } else { "Medium" },
+                    "high_final_override": high, "sampler_override": if high { "SomeHigh" } else { "SomeMedium" },
+                    "production_default_sampler": "High", "reference_mode": "MediumFast", "view": view.as_coeffs(), "size": [image.width, image.height],
+                    "mass": mass, "centroid": [center.x, center.y], "covariance": covariance,
+                    "reference_covariance": reference_covariance, "expected_covariance": expected,
+                    "expected_centroid": [expected_center.x, expected_center.y], "existing_covariance_tolerance": tolerance,
+                    "centroid_within_existing_bound": centroid_within_bound, "covariance_within_existing_bound": covariance_within_bound,
+                    "within_existing_view_oracle": centroid_within_bound && covariance_within_bound,
+                    "images_equal_to_fast": images_equal, "different_pixels_from_fast": different_pixels,
+                    "observation_only": true })
+            );
+            if mode == "MediumFast" {
+                fast_pixels = Some(image.pixels);
+            }
+        }
+    }
+}

@@ -52,6 +52,11 @@ pub enum RasterFx {
     GaussianBlur {
         radius: f64,
     },
+    /// Axis-specific Gaussian blur; a zero radius leaves that axis untouched.
+    GaussianBlurAxes {
+        radius_x: f64,
+        radius_y: f64,
+    },
     /// A Photoshop-style filter over the object's pixels (Radial Blur, Unsharp Mask…).
     Pixel(PixelFx),
     /// Effect › Rasterize: the object drawn as an image of square pixels.
@@ -78,6 +83,7 @@ impl RasterFx {
             RasterFx::OuterGlow { blur, .. } => 1.5 * blur,
             RasterFx::InnerGlow { .. } | RasterFx::Feather { .. } => 0.0,
             RasterFx::GaussianBlur { radius } => 1.5 * radius,
+            RasterFx::GaussianBlurAxes { radius_x, radius_y } => 1.5 * radius_x.max(*radius_y),
             RasterFx::Pixel(p) => p.outset(bounds),
             RasterFx::Rasterize(r) => r.outset(),
         }
@@ -416,7 +422,18 @@ pub fn raster_effects(effects: &[Effect]) -> Vec<RasterFx> {
                     center: text(&p, "source", "edge").eq_ignore_ascii_case("center"),
                 },
                 "stylize.feather" => RasterFx::Feather { radius: num(&p, "radius", 5.0).clamp(0.0, 1000.0) },
-                "blur.gaussian" => RasterFx::GaussianBlur { radius: num(&p, "radius", 5.0).clamp(0.0, 1000.0) },
+                "blur.gaussian" => {
+                    let radius = num(&p, "radius", 5.0).clamp(0.0, 1000.0);
+                    // Ratios are dimensionless: the existing radius control and Scale Effects
+                    // scale both imported axes together without silently discarding their shape.
+                    let x = num(&p, "anisotropyX", 1.0).clamp(0.0, 1.0);
+                    let y = num(&p, "anisotropyY", 1.0).clamp(0.0, 1.0);
+                    if x == y {
+                        RasterFx::GaussianBlur { radius: radius * x }
+                    } else {
+                        RasterFx::GaussianBlurAxes { radius_x: radius * x, radius_y: radius * y }
+                    }
+                }
                 RASTERIZE => RasterFx::Rasterize(Rasterize::parse(&p)),
                 id => RasterFx::Pixel(pixel::parse(id, &p)?),
             })

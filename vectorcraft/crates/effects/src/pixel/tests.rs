@@ -874,6 +874,60 @@ fn lengths_are_document_units() {
 }
 
 #[test]
+fn axis_specific_gaussian_keeps_a_zero_axis_sharp_and_transposes() {
+    let (w, h) = (41, 41);
+    let source = image(w, h, |x, y| if x == 20 && y == 20 { grey(255) } else { [0; 4] });
+    let (mut horizontal, mut vertical) = (source.clone(), source.clone());
+    gaussian_rgba_axes(&mut horizontal, w, h, 3.0, 0.0);
+    gaussian_rgba_axes(&mut vertical, w, h, 0.0, 3.0);
+    assert!(at(&horizontal, w, 18, 20)[3] > 0);
+    for y in 0..h {
+        for x in 0..w {
+            assert_eq!(at(&horizontal, w, x, y), at(&vertical, w, y, x));
+            if y != 20 {
+                assert_eq!(at(&horizontal, w, x, y), [0; 4]);
+            }
+        }
+    }
+    let mut unchanged = source.clone();
+    gaussian_rgba_axes(&mut unchanged, w, h, 0.0, 0.0);
+    assert_eq!(unchanged, source);
+}
+
+#[test]
+fn axis_specific_gaussian_equal_axes_preserve_legacy_bytes_and_invalid_inputs() {
+    let (w, h) = (19, 17);
+    let source = image(w, h, |x, y| [(x * 7) as u8, (y * 9) as u8, ((x ^ y) * 5) as u8, 255]);
+    for sigma in [0.0, 0.1, 0.5, 2.0, 5.0] {
+        let (mut old, mut axes) = (source.clone(), source.clone());
+        let px = pixels(&mut old, w, h).unwrap();
+        let mut wide = to16(px);
+        // The legacy oracle runs all horizontal box passes, then all vertical ones.
+        if sigma >= 0.2 {
+            let mut temporary = wide.clone();
+            for radius in gauss_boxes(sigma) {
+                box_rows(&wide, &mut temporary, w, radius);
+                wide.copy_from_slice(&temporary);
+            }
+            for radius in gauss_boxes(sigma) {
+                box_cols(&wide, &mut temporary, w, radius);
+                wide.copy_from_slice(&temporary);
+            }
+        }
+        for (pixel, value) in px.iter_mut().zip(&wide) {
+            *pixel = value.map(to8);
+        }
+        gaussian_rgba_axes(&mut axes, w, h, sigma, sigma);
+        assert_eq!(axes, old, "sigma {sigma}");
+    }
+    let mut invalid = source.clone();
+    gaussian_rgba_axes(&mut invalid, 0, h, 3.0, 2.0);
+    gaussian_rgba_axes(&mut invalid, w, h + 1, 3.0, 2.0);
+    gaussian_rgba_axes(&mut invalid, w, h, f64::NAN, f64::INFINITY);
+    assert_eq!(invalid, source);
+}
+
+#[test]
 fn gaussian_and_plane_blurs_keep_their_mass() {
     let (w, h) = (30, 30);
     let mut d = image(w, h, |x, y| if (10..20).contains(&x) && (10..20).contains(&y) { grey(255) } else { [0, 0, 0, 0] });
