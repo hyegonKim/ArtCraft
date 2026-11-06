@@ -125,14 +125,14 @@ pub struct ArtcraftApp {
 }
 
 impl ArtcraftApp {
-  pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+  pub fn new(cc: &eframe::CreationContext<'_>, launch: &crate::launch::LaunchOptions) -> Self {
     theme::apply(&cc.egui_ctx);
     egui_extras::install_image_loaders(&cc.egui_ctx);
     let mut saved: Saved = cc.storage.and_then(|s| eframe::get_value(s, STORAGE_KEY)).unwrap_or_default();
     if let Some(page) = std::env::var("ARTCRAFT_PAGE").ok().and_then(|p| Page::from_slug(&p)) {
       saved.page = page;
     }
-    let backend = Backend::new(cc.egui_ctx.clone());
+    let backend = Backend::new(cc.egui_ctx.clone(), launch);
     let cache = MediaCache::new(backend.runtime(), backend.http());
     let player = AudioPlayer::new(backend.runtime(), backend.http());
     for modality in MODALITIES {
@@ -457,14 +457,22 @@ impl ArtcraftApp {
         self.navigate(Page::CreateVideo);
       },
       AppRequest::SendRgbaToEditImage { width, height, pixels, layer_name } => {
-        self.edit_image.import_rgba_layer(width, height, pixels, layer_name);
-        self.toasts.success("Sent the image to Edit Image as a new layer");
-        self.navigate(Page::EditImage);
+        match self.edit_image.import_rgba_layer(width, height, pixels, layer_name) {
+          Ok(()) => {
+            self.toasts.success("Sent the image to Edit Image at its original resolution");
+            self.navigate(Page::EditImage);
+          },
+          Err(err) => self.toasts.error(format!("Couldn't add the image: {err}")),
+        }
       },
       AppRequest::SendRgbaToRemoveBg { width, height, pixels } => {
-        self.remove_bg.import_source_rgba(width, height, pixels);
-        self.toasts.success("Sent the image to BG Remove");
-        self.navigate(Page::RemoveBackground);
+        match self.remove_bg.import_source_rgba(width, height, pixels) {
+          Ok(()) => {
+            self.toasts.success("Sent the image to BG Remove at its original resolution");
+            self.navigate(Page::RemoveBackground);
+          },
+          Err(err) => self.toasts.error(format!("Couldn't send the image to BG Remove: {err}")),
+        }
       },
       AppRequest::SendRgbaToStage3d { width, height, pixels, card_name } => {
         self.stage_3d.add_cutout_card(card_name, width, height, pixels);
@@ -679,6 +687,7 @@ impl ArtcraftApp {
             Page::Stage3d => other::local_preview(ui, Page::Stage3d, |ui| self.stage_3d.ui(ui, &mut env)),
             Page::RemoveBackground => other::local_preview(ui, Page::RemoveBackground, |ui| self.remove_bg.ui(ui, &mut env)),
             Page::Library => other::library(ui, &mut env, &mut self.library),
+            Page::CraftSuite => crate::pages::craft_suite::ui(ui, &mut env),
             page => other::coming_soon(ui, page),
           }
         });

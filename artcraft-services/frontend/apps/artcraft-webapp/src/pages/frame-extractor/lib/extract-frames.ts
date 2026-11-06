@@ -54,9 +54,7 @@ export async function captureFrameAt(
   await ensureVideoReady(video);
   const canvas = createCanvasFor(video);
   const target = clampToDuration(timeSec, video.duration);
-  // Seek even when the playhead already sits at the target: it's cheap, and it
-  // guarantees the presented frame matches currentTime (a paused video that
-  // was never seeked can still be showing the poster frame).
+  // An idle decoded target is drawable; a seek to that same target must finish.
   await seekTo(video, target);
   return drawFrame(video, canvas, target);
 }
@@ -111,11 +109,12 @@ async function ensureVideoReady(video: HTMLVideoElement): Promise<void> {
     const timeout = setTimeout(() => {
       cleanup();
       reject(
-        new FrameExtractionError("timeout", "Video failed to load metadata"),
+        new FrameExtractionError("timeout", "Video failed to load frame data"),
       );
     }, METADATA_TIMEOUT_MS);
 
     const handleLoadedData = () => {
+      if (video.readyState < 2) return;
       cleanup();
       resolve();
     };
@@ -131,6 +130,8 @@ async function ensureVideoReady(video: HTMLVideoElement): Promise<void> {
 
     video.addEventListener("loadeddata", handleLoadedData);
     video.addEventListener("error", handleError);
+    if (video.error) handleError();
+    else handleLoadedData();
   });
 
   if (!video.videoWidth || !video.videoHeight) {
@@ -156,7 +157,8 @@ function clampToDuration(timeSec: number, duration: number): number {
 async function seekTo(video: HTMLVideoElement, timeSec: number): Promise<void> {
   // Already there (e.g. the first burst frame starts at the playhead): the
   // current frame is already presented and drawable.
-  if (Math.abs(video.currentTime - timeSec) < SEEK_EPSILON_SEC) return;
+  const alreadyAtTarget = Math.abs(video.currentTime - timeSec) < SEEK_EPSILON_SEC;
+  if (alreadyAtTarget && !video.seeking) return;
 
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -174,7 +176,7 @@ async function seekTo(video: HTMLVideoElement, timeSec: number): Promise<void> {
     };
 
     video.addEventListener("seeked", handleSeeked, { once: true });
-    video.currentTime = timeSec;
+    if (!alreadyAtTarget) video.currentTime = timeSec;
   });
 
   // "seeked" can fire before the new frame is actually presented (notably

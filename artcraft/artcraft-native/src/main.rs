@@ -6,6 +6,7 @@ mod app;
 mod backend;
 mod feed;
 mod models;
+mod launch;
 mod overlays;
 mod pages;
 mod prompt_box;
@@ -16,6 +17,9 @@ mod ui;
 const APP_ID: &str = "ai.artcraft.native";
 
 fn main() -> eframe::Result {
+  let launch = launch::LaunchOptions::parse(std::env::args_os().skip(1)).map_err(|message| {
+    eframe::Error::AppCreation(std::io::Error::new(std::io::ErrorKind::InvalidInput, message).into())
+  })?;
   env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
   let mut viewport = egui::ViewportBuilder::default().with_title("ArtCraft").with_app_id(APP_ID).with_inner_size([1440.0, 900.0]).with_min_inner_size([960.0, 640.0]);
   if let Some(icon) = app_icon() {
@@ -23,8 +27,8 @@ fn main() -> eframe::Result {
   }
   // The app draws its own title bar; macOS keeps its traffic lights over it.
   viewport = if cfg!(target_os = "macos") { viewport.with_fullsize_content_view(true).with_titlebar_shown(false).with_title_shown(false) } else { viewport.with_decorations(false) };
-  let options = eframe::NativeOptions { viewport, persist_window: true, ..Default::default() };
-  eframe::run_native("ArtCraft", options, Box::new(|cc| Ok(Box::new(app::ArtcraftApp::new(cc)))))
+  let options = launch.native_options(viewport);
+  eframe::run_native("ArtCraft", options, Box::new(move |cc| Ok(Box::new(app::ArtcraftApp::new(cc, &launch)))))
 }
 
 /// The window and taskbar icon.

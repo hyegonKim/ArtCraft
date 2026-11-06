@@ -36,6 +36,7 @@ pub enum Page {
   RemoveBackground,
   FrameExtractor,
   Library,
+  CraftSuite,
 }
 
 impl Page {
@@ -53,6 +54,7 @@ impl Page {
       Page::RemoveBackground => "BG Remove",
       Page::FrameExtractor => "Frame Extract",
       Page::Library => "Library",
+      Page::CraftSuite => "Craft Suite",
     }
   }
 
@@ -68,6 +70,7 @@ impl Page {
       Page::VideoEditor | Page::FrameExtractor => Icon::Film,
       Page::RemoveBackground => Icon::Wand,
       Page::Library => Icon::Library,
+      Page::CraftSuite => Icon::LayoutGrid,
     }
   }
 
@@ -77,6 +80,7 @@ impl Page {
       Page::Home => ("ArtCraft", "Home"),
       Page::CreateImage | Page::CreateVideo | Page::CreateAudio | Page::Object3d | Page::World3d => ("Create", self.label()),
       Page::Library => ("Assets", "Library"),
+      Page::CraftSuite => ("ArtCraft", "Craft Suite"),
       _ => ("Studio", self.label()),
     }
   }
@@ -96,13 +100,14 @@ impl Page {
       "create-vfx" | "remove-background" | "bg-remove" => Page::RemoveBackground,
       "frame-extractor" | "frame-extract" => Page::FrameExtractor,
       "library" => Page::Library,
+      "craft-suite" | "suite" => Page::CraftSuite,
       _ => return None,
     })
   }
 
   /// Pages the native app has; the rest open a "coming soon" page or a local preview.
   pub fn is_ready(self) -> bool {
-    matches!(self, Page::Home | Page::CreateImage | Page::CreateVideo | Page::CreateAudio | Page::Library)
+    matches!(self, Page::Home | Page::CreateImage | Page::CreateVideo | Page::CreateAudio | Page::Library | Page::CraftSuite)
   }
 
   /// The same tool in the web app.
@@ -118,12 +123,13 @@ impl Page {
       Page::FrameExtractor => "/frame-extractor",
       Page::CreateVideo => "/create-video",
       Page::Library => "/library",
+      Page::CraftSuite => "/",
       _ => "/create-image",
     }
   }
 }
 
-const SECTIONS: [(&str, &[Page]); 3] = [("Create", &[Page::CreateImage, Page::CreateVideo, Page::CreateAudio, Page::Object3d, Page::World3d]), ("Studio", &[Page::EditImage, Page::Stage3d, Page::VideoEditor, Page::RemoveBackground, Page::FrameExtractor]), ("Assets", &[Page::Library])];
+const SECTIONS: [(&str, &[Page]); 3] = [("Create", &[Page::CreateImage, Page::CreateVideo, Page::CreateAudio, Page::Object3d, Page::World3d]), ("Studio", &[Page::EditImage, Page::Stage3d, Page::VideoEditor, Page::RemoveBackground, Page::FrameExtractor]), ("Assets", &[Page::Library, Page::CraftSuite])];
 
 /// Who's signed in, for the sidebar and top bar.
 pub struct Account<'a> {

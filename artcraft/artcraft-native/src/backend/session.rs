@@ -52,7 +52,11 @@ pub fn api_host(root: &Path) -> ApiHost {
 }
 
 /// The saved session, or the Tauri app's (imported and saved for next time).
-pub fn load(root: &Path) -> Option<Credentials> {
+pub fn load(root: &Path, allow_tauri_import: bool) -> Option<Credentials> {
+  load_with_importer(root, allow_tauri_import, import_tauri_cookies)
+}
+
+fn load_with_importer(root: &Path, allow_tauri_import: bool, import: impl FnOnce() -> Option<Credentials>) -> Option<Credentials> {
   let path = credentials_path(root);
   if let Ok(text) = fs::read_to_string(&path) {
     match serde_json::from_str::<Credentials>(&text) {
@@ -61,7 +65,10 @@ pub fn load(root: &Path) -> Option<Credentials> {
       Err(err) => warn!("Ignoring unreadable {}: {err}", path.display()),
     }
   }
-  let imported = import_tauri_cookies()?;
+  if !allow_tauri_import {
+    return None;
+  }
+  let imported = import()?;
   info!("Imported the ArtCraft login from the desktop app's cookie jar");
   save(root, &imported);
   Some(imported)
@@ -115,4 +122,96 @@ fn import_tauri_cookies() -> Option<Credentials> {
     }
   }
   (!creds.session.is_empty()).then_some(creds)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::backend::providers::accounts::ProviderAccounts;
+  use crate::backend::providers::jobs::{JobStore, ProviderJob};
+  use crate::backend::providers::Provider;
+  use crate::launch::LaunchOptions;
+
+  #[test]
+  fn isolated_missing_session_never_imports_legacy_cookies() {
+    let dir = tempfile::tempdir().unwrap();
+    let loaded = load_with_importer(dir.path(), false, || panic!("must not access global cookie jar"));
+    assert!(loaded.is_none());
+    assert!(!credentials_path(dir.path()).exists());
+    assert!(load(dir.path(), false).is_none());
+  }
+
+  #[test]
+  fn isolated_invalid_session_does_not_fall_back_or_rewrite_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = credentials_path(dir.path());
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    fs::write(&path, "invalid fixture session").unwrap();
+    assert!(load_with_importer(dir.path(), false, || panic!("must not import after a parse failure")).is_none());
+    assert_eq!(fs::read_to_string(path).unwrap(), "invalid fixture session");
+  }
+
+  #[test]
+  fn existing_session_has_precedence_without_importing() {
+    let dir = tempfile::tempdir().unwrap();
+    save(dir.path(), &Credentials { session: "existing-fixture".into(), visitor: Some("fixture-visitor".into()) });
+    for allow_import in [false, true] {
+      let loaded = load_with_importer(dir.path(), allow_import, || panic!("saved session must win")).unwrap();
+      assert_eq!(loaded.session, "existing-fixture");
+      assert_eq!(loaded.visitor.as_deref(), Some("fixture-visitor"));
+    }
+  }
+
+  #[test]
+  fn default_mode_still_imports_and_saves_a_legacy_session() {
+    let dir = tempfile::tempdir().unwrap();
+    let loaded = load_with_importer(dir.path(), true, || Some(Credentials { session: "imported-fixture".into(), visitor: None })).unwrap();
+    assert_eq!(loaded.session, "imported-fixture");
+    assert!(credentials_path(dir.path()).is_file());
+    assert_eq!(load(dir.path(), false).unwrap().session, "imported-fixture");
+  }
+
+  #[test]
+  fn explicit_root_owns_session_providers_jobs_and_ui_storage() {
+    let dir = tempfile::tempdir().unwrap();
+    let root = dir.path().join("isolated");
+    let unrelated = dir.path().join("unrelated");
+    fs::create_dir_all(&unrelated).unwrap();
+    fs::write(unrelated.join("sentinel"), "unchanged").unwrap();
+    fs::create_dir_all(root.join("settings")).unwrap();
+    fs::write(root.join("settings/env_configs.json"), r#"{"storyteller_host":"production.invalid"}"#).unwrap();
+    let launch = LaunchOptions::parse([
+      "--data-dir".into(), root.clone().into_os_string(),
+      "--api-base-url".into(), "http://localhost:4203".into(),
+    ]).unwrap();
+    let settings = launch.resolve(|| panic!("must not read global root or settings"));
+    assert_eq!(settings.api_host.to_api_hostname_and_scheme(), "http://localhost:4203");
+    assert!(!settings.import_tauri_cookies);
+    assert!(load(&settings.data_root, settings.import_tauri_cookies).is_none());
+
+    save(&settings.data_root, &Credentials { session: "isolated-fixture".into(), visitor: None });
+    assert_eq!(load(&settings.data_root, false).unwrap().session, "isolated-fixture");
+    let accounts = ProviderAccounts::load(&settings.data_root);
+    assert_eq!(accounts.midjourney_account(), None);
+    accounts.set_fal_key("isolated-fixture-key").unwrap();
+    assert_eq!(ProviderAccounts::load(&root).fal_key().as_deref(), Some("isolated-fixture-key"));
+    let job = ProviderJob {
+      id: "local_isolated".into(), provider: Provider::Fal, model_id: "fixture-model".into(), prompt: "fixture".into(),
+      created_at: 1, batch_count: 1, provider_job_id: "fixture-job".into(), maybe_status_url: None, maybe_response_url: None,
+      maybe_prompt_token: None, batch_token: "fixture-batch".into(), upload_tokens: vec![], uploaded: vec![],
+    };
+    JobStore::load(&settings.data_root).put(job.clone());
+    assert_eq!(JobStore::load(&root).all(), vec![job]);
+    assert!(root.join("credentials/native_session.json").is_file());
+    assert!(root.join("credentials/fal.api_key.txt").is_file());
+    assert!(root.join("state/native_provider_jobs.json").is_file());
+    assert_eq!(launch.native_options(egui::ViewportBuilder::default()).persistence_path, Some(root.join("ui/app.ron")));
+    accounts.clear_fal_key().unwrap();
+    JobStore::load(&root).remove("local_isolated");
+    delete(&root);
+    assert!(JobStore::load(&root).all().is_empty());
+    assert!(!credentials_path(&root).exists());
+    assert_eq!(fs::read_to_string(unrelated.join("sentinel")).unwrap(), "unchanged");
+    assert_eq!(fs::read_dir(&unrelated).unwrap().count(), 1);
+  }
 }

@@ -8,20 +8,20 @@ use egui::{Color32, Rect, Sense, Stroke, TextureHandle, TextureOptions, Ui, pos2
 use rfd::FileDialog;
 
 use crate::pages::common::{self, AppRequest, Env};
-use crate::pages::edit_image::{fit_dims, fit_rect, refine_edges_rgba, resample_rgba};
+use crate::pages::edit_image::{checked_rgba_len, decode_original_rgba, fit_dims, fit_rect, refine_edges_rgba, resample_rgba, validate_rgba};
 use crate::prompt_box::refs::RefKind;
 use crate::theme;
 use crate::ui::icons::Icon;
 use crate::ui::widgets::{self, Kind};
 
-/// The largest matte size. Sources are scaled to fit inside it, keeping their aspect ratio.
-pub const MATTE_MAX_W: u32 = 320;
-pub const MATTE_MAX_H: u32 = 200;
+/// Dimensions of the built-in example only. Imported images retain their own dimensions.
+const SAMPLE_W: u32 = 320;
+const SAMPLE_H: u32 = 200;
 
 pub struct RemoveBgPage {
   pub src_rgba: Vec<u8>,
   pub cutout_rgba: Vec<u8>,
-  /// The matte size: the source fitted inside `MATTE_MAX_W x MATTE_MAX_H`.
+  /// The original source/matte dimensions, independent of the display preview.
   pub width: u32,
   pub height: u32,
   pub mode: KeyMode,
@@ -59,10 +59,10 @@ pub enum BackdropPreview {
 impl Default for RemoveBgPage {
   fn default() -> Self {
     let mut page = Self {
-      src_rgba: sample_image(MATTE_MAX_W, MATTE_MAX_H),
+      src_rgba: sample_image(SAMPLE_W, SAMPLE_H),
       cutout_rgba: Vec::new(),
-      width: MATTE_MAX_W,
-      height: MATTE_MAX_H,
+      width: SAMPLE_W,
+      height: SAMPLE_H,
       mode: KeyMode::CornerColor,
       backdrop: BackdropPreview::Checkerboard,
       threshold: 0.36,
@@ -76,29 +76,43 @@ impl Default for RemoveBgPage {
       texture: None,
       dirty: true,
     };
-    page.recompute_matte();
+    page.recompute_matte().expect("valid built-in background-removal sample");
     page
   }
 }
 
 impl RemoveBgPage {
-  /// Replaces the source with an RGBA buffer (fitted inside the matte bounds) and re-keys it.
-  pub fn import_source_rgba(&mut self, width: u32, height: u32, pixels: Vec<u8>) {
-    let (w, h) = fit_dims(width, height, MATTE_MAX_W, MATTE_MAX_H);
-    self.src_rgba = resample_rgba(&pixels, width, height, w, h);
-    self.width = w;
-    self.height = h;
-    self.recompute_matte();
+  /// Replaces the source without resampling. Validation never changes the existing image.
+  pub fn import_source_rgba(&mut self, width: u32, height: u32, pixels: Vec<u8>) -> Result<(), String> {
+    validate_rgba(width, height, &pixels)?;
+    let cutout = self.matte_for(&pixels, width, height)?;
+    self.src_rgba = pixels;
+    self.width = width;
+    self.height = height;
+    self.cutout_rgba = cutout;
+    self.dirty = true;
+    Ok(())
   }
 
   /// Keys `src_rgba` into `cutout_rgba` with the current settings.
-  pub fn recompute_matte(&mut self) {
-    let mut out = compute_alpha_matte(&self.src_rgba, self.width, self.height, self.mode, self.threshold, self.feather_radius, self.edge_decontaminate, self.spill_suppression);
-    if self.edge_sharpen > 1e-4 || self.edge_contrast > 1e-4 || self.edge_shift.abs() > 1e-4 {
-      refine_edges_rgba(&mut out, self.width, self.height, self.edge_sharpen, self.edge_contrast, self.edge_shift);
-    }
+  pub fn recompute_matte(&mut self) -> Result<(), String> {
+    let out = self.matte_for(&self.src_rgba, self.width, self.height)?;
     self.cutout_rgba = out;
     self.dirty = true;
+    Ok(())
+  }
+
+  fn matte_for(&self, source: &[u8], width: u32, height: u32) -> Result<Vec<u8>, String> {
+    let mut out = compute_alpha_matte(source, width, height, self.mode, self.threshold, self.feather_radius, self.edge_decontaminate, self.spill_suppression)?;
+    if self.edge_sharpen > 1e-4 || self.edge_contrast > 1e-4 || self.edge_shift.abs() > 1e-4 {
+      refine_edges_rgba(&mut out, width, height, self.edge_sharpen, self.edge_contrast, self.edge_shift)?;
+    }
+    // Keying and edge refinement may remove opacity, but cannot recreate pixels that were
+    // transparent in the source handed over by the image editor.
+    for (pixel, source) in out.chunks_exact_mut(4).zip(source.chunks_exact(4)) {
+      pixel[3] = pixel[3].min(source[3]);
+    }
+    Ok(out)
   }
 
   /// The share of the matte that is mostly opaque, in percent.
@@ -150,13 +164,13 @@ impl RemoveBgPage {
     }
     ui.add_space(4.0);
     if widgets::button(ui, Some(Icon::RotateCw), "Use Sample Image", Kind::Secondary, ui.available_width(), 32.0).clicked() {
-      self.src_rgba = sample_image(MATTE_MAX_W, MATTE_MAX_H);
-      self.width = MATTE_MAX_W;
-      self.height = MATTE_MAX_H;
+      self.src_rgba = sample_image(SAMPLE_W, SAMPLE_H);
+      self.width = SAMPLE_W;
+      self.height = SAMPLE_H;
       changed = true;
     }
     if changed {
-      self.recompute_matte();
+      if let Err(error) = self.recompute_matte() { env.toasts.error(error); }
     }
   }
 
@@ -189,10 +203,16 @@ impl RemoveBgPage {
     ui.add_space(6.0);
     ui.horizontal(|ui| {
       if widgets::button(ui, Some(Icon::Pencil), "Send Cutout to Edit Image", Kind::Accent, 185.0, 34.0).clicked() {
-        env.requests.push(AppRequest::SendRgbaToEditImage { width: self.width, height: self.height, pixels: self.cutout_rgba.clone(), layer_name: "Cutout".into() });
+        match self.copy_cutout() {
+          Ok(pixels) => env.requests.push(AppRequest::SendRgbaToEditImage { width: self.width, height: self.height, pixels, layer_name: "Cutout".into() }),
+          Err(error) => env.toasts.error(error),
+        }
       }
       if widgets::button(ui, Some(Icon::Box), "Send Cutout to 3D Stage", Kind::Secondary, 180.0, 34.0).clicked() {
-        env.requests.push(AppRequest::SendRgbaToStage3d { width: self.width, height: self.height, pixels: self.cutout_rgba.clone(), card_name: "Cutout Card".into() });
+        match self.copy_cutout() {
+          Ok(pixels) => env.requests.push(AppRequest::SendRgbaToStage3d { width: self.width, height: self.height, pixels, card_name: "Cutout Card".into() }),
+          Err(error) => env.toasts.error(error),
+        }
       }
     });
   }
@@ -230,11 +250,12 @@ impl RemoveBgPage {
       return;
     };
     let name = common::file_name(&path);
-    match image::open(&path) {
-      Ok(img) => {
-        let rgba = img.to_rgba8();
-        self.import_source_rgba(rgba.width(), rgba.height(), rgba.into_raw());
-        env.toasts.success(format!("Loaded {name}"));
+    match decode_original_rgba(&path) {
+      Ok(rgba) => {
+        match self.import_source_rgba(rgba.width(), rgba.height(), rgba.into_raw()) {
+          Ok(()) => env.toasts.success(format!("Loaded {name} at its original resolution")),
+          Err(err) => env.toasts.error(format!("Couldn't load {name}: {err}")),
+        }
       },
       Err(err) => env.toasts.error(format!("Couldn't open {name}: {err}")),
     }
@@ -254,12 +275,32 @@ impl RemoveBgPage {
     }
   }
 
+  fn copy_cutout(&self) -> Result<Vec<u8>, String> {
+    validate_rgba(self.width, self.height, &self.cutout_rgba)?;
+    let mut pixels = Vec::new();
+    pixels.try_reserve_exact(self.cutout_rgba.len()).map_err(|_| "Not enough memory to send the original-size cutout")?;
+    pixels.extend_from_slice(&self.cutout_rgba);
+    Ok(pixels)
+  }
+
   fn refresh_texture(&mut self, ctx: &egui::Context) {
     if !self.dirty && self.texture.is_some() {
       return;
     }
-    let preview = render_backdrop_preview(&self.src_rgba, &self.cutout_rgba, self.width, self.height, self.backdrop, self.split_wipe);
-    let image = egui::ColorImage::from_rgba_unmultiplied([self.width as usize, self.height as usize], &preview);
+    let side = ctx.input(|input| input.max_texture_side).min(2048).max(1) as u32;
+    let (width, height) = if self.width > side || self.height > side {
+      fit_dims(self.width, self.height, side, side)
+    } else {
+      (self.width, self.height)
+    };
+    let preview = if (width, height) == (self.width, self.height) {
+      render_backdrop_preview(&self.src_rgba, &self.cutout_rgba, width, height, self.backdrop, self.split_wipe)
+    } else {
+      let source = resample_rgba(&self.src_rgba, self.width, self.height, width, height);
+      let cutout = resample_rgba(&self.cutout_rgba, self.width, self.height, width, height);
+      render_backdrop_preview(&source, &cutout, width, height, self.backdrop, self.split_wipe)
+    };
+    let image = egui::ColorImage::from_rgba_unmultiplied([width as usize, height as usize], &preview);
     match &mut self.texture {
       Some(tex) => tex.set(image, TextureOptions::LINEAR),
       None => self.texture = Some(ctx.load_texture("remove_bg_preview", image, TextureOptions::LINEAR)),
@@ -320,11 +361,10 @@ pub fn sample_image(width: u32, height: u32) -> Vec<u8> {
 /// Keys an RGBA8 image: scores each pixel by `mode`, thresholds it into a soft alpha, box-feathers
 /// the alpha, then suppresses green spill and pulls the backdrop color out of soft edges.
 #[allow(clippy::too_many_arguments)]
-pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, threshold: f32, feather_radius: f32, edge_decontaminate: f32, spill_suppression: f32) -> Vec<u8> {
-  let count = width as usize * height as usize;
-  if width == 0 || height == 0 || src.len() < count * 4 {
-    return vec![0u8; count * 4];
-  }
+pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, threshold: f32, feather_radius: f32, edge_decontaminate: f32, spill_suppression: f32) -> Result<Vec<u8>, String> {
+  validate_rgba(width, height, src)?;
+  let len = checked_rgba_len(width, height)?;
+  let count = len / 4;
   // The backdrop reference: the average of the four corner pixels.
   let corner = |x: u32, y: u32| {
     let p = ((y * width + x) * 4) as usize;
@@ -334,7 +374,9 @@ pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, t
   let [bg_r, bg_g, bg_b] = [0, 1, 2].map(|c| corners.iter().map(|k| k[c]).sum::<f32>() / 4.0);
 
   let thresh = threshold.clamp(0.05, 0.95);
-  let mut alpha: Vec<f32> = src
+  let mut alpha = Vec::new();
+  alpha.try_reserve_exact(count).map_err(|_| "Not enough memory for the full-resolution matte")?;
+  alpha.extend(src
     .chunks_exact(4)
     .take(count)
     .map(|px| {
@@ -346,30 +388,18 @@ pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, t
       };
       ((score - thresh) / 0.14).clamp(0.0, 1.0)
     })
-    .collect();
+  );
 
   let rad = feather_radius.round() as i32;
   if rad >= 1 {
-    let prev = alpha.clone();
-    let (w, h) = (width as i32, height as i32);
-    for y in 0..h {
-      for x in 0..w {
-        let mut sum = 0.0;
-        let mut n = 0.0;
-        for dy in -rad..=rad {
-          for dx in -rad..=rad {
-            let nx = (x + dx).clamp(0, w - 1);
-            let ny = (y + dy).clamp(0, h - 1);
-            sum += prev[(ny * w + nx) as usize];
-            n += 1.0;
-          }
-        }
-        alpha[(y * w + x) as usize] = sum / n;
-      }
-    }
+    // Separable sliding windows retain clamped-edge box feathering with linear work per
+    // pixel, rather than a nested neighbourhood scan for every full-resolution pixel.
+    box_feather(&mut alpha, width as usize, height as usize, rad.clamp(1, 64) as usize)?;
   }
 
-  let mut out = src[..count * 4].to_vec();
+  let mut out = Vec::new();
+  out.try_reserve_exact(len).map_err(|_| "Not enough memory for the original-size cutout")?;
+  out.extend_from_slice(src);
   let spill = spill_suppression.clamp(0.0, 1.0);
   for (px, &a) in out.chunks_exact_mut(4).zip(&alpha) {
     let a = a.clamp(0.0, 1.0);
@@ -388,18 +418,41 @@ pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, t
     px[0] = r.clamp(0.0, 255.0).round() as u8;
     px[1] = g.clamp(0.0, 255.0).round() as u8;
     px[2] = b.clamp(0.0, 255.0).round() as u8;
-    px[3] = (a * 255.0).round() as u8;
+    px[3] = (a * px[3] as f32).round() as u8;
   }
-  out
+  Ok(out)
+}
+
+fn box_feather(alpha: &mut [f32], width: usize, height: usize, radius: usize) -> Result<(), String> {
+  let mut horizontal = Vec::new();
+  horizontal.try_reserve_exact(alpha.len()).map_err(|_| "Not enough memory for full-resolution feathering")?;
+  horizontal.resize(alpha.len(), 0.0f32);
+  let divisor = (radius * 2 + 1) as f64;
+  for y in 0..height {
+    let row = y * width;
+    let sample = |x: isize| alpha[row + x.clamp(0, width as isize - 1) as usize] as f64;
+    let mut sum: f64 = (-(radius as isize)..=radius as isize).map(sample).sum();
+    for x in 0..width {
+      horizontal[row + x] = (sum / divisor) as f32;
+      sum += sample((x + radius + 1) as isize) - sample(x as isize - radius as isize);
+    }
+  }
+  for x in 0..width {
+    let sample = |y: isize| horizontal[y.clamp(0, height as isize - 1) as usize * width + x] as f64;
+    let mut sum: f64 = (-(radius as isize)..=radius as isize).map(sample).sum();
+    for y in 0..height {
+      alpha[y * width + x] = (sum / divisor) as f32;
+      sum += sample((y + radius + 1) as isize) - sample(y as isize - radius as isize);
+    }
+  }
+  Ok(())
 }
 
 /// The preview: the source left of `split_wipe`, the cutout over `backdrop` to its right.
 pub fn render_backdrop_preview(src: &[u8], cutout: &[u8], width: u32, height: u32, backdrop: BackdropPreview, split_wipe: f32) -> Vec<u8> {
-  let len = width as usize * height as usize * 4;
+  let Ok(len) = checked_rgba_len(width, height) else { return Vec::new(); };
+  if src.len() != len || cutout.len() != len { return Vec::new(); }
   let mut out = vec![0u8; len];
-  if src.len() < len || cutout.len() < len {
-    return out;
-  }
   let wipe_x = (split_wipe.clamp(0.0, 1.0) * width as f32).round() as u32;
   for y in 0..height {
     for x in 0..width {
@@ -446,20 +499,79 @@ mod tests {
   #[test]
   fn green_screen_key_drops_green_and_keeps_other_colors() {
     let mut page = RemoveBgPage::default();
-    page.import_source_rgba(2, 1, [20, 220, 20, 255, 220, 40, 40, 255].to_vec());
+    page.import_source_rgba(2, 1, [20, 220, 20, 255, 220, 40, 40, 255].to_vec()).unwrap();
     page.mode = KeyMode::GreenScreen;
     page.feather_radius = 0.0;
-    page.recompute_matte();
+    page.recompute_matte().unwrap();
     let alpha_at = |x: u32| page.cutout_rgba[((page.height / 2 * page.width + x) * 4 + 3) as usize];
-    assert_eq!(alpha_at(10), 0, "green is keyed out");
-    assert_eq!(alpha_at(page.width - 10), 255, "red is kept");
+    assert_eq!(alpha_at(0), 0, "green is keyed out");
+    assert_eq!(alpha_at(1), 255, "red is kept");
   }
 
   #[test]
   fn imported_sources_keep_their_aspect_ratio() {
     let mut page = RemoveBgPage::default();
-    page.import_source_rgba(100, 50, [10, 200, 10, 255].repeat(100 * 50));
-    assert_eq!((page.width, page.height), (320, 160));
-    assert_eq!(page.cutout_rgba.len(), 320 * 160 * 4);
+    page.import_source_rgba(100, 50, [10, 200, 10, 255].repeat(100 * 50)).unwrap();
+    assert_eq!((page.width, page.height), (100, 50));
+    assert_eq!(page.cutout_rgba.len(), 100 * 50 * 4);
+  }
+
+  #[test]
+  fn original_size_and_transparency_survive_background_removal_and_png_export() {
+    let mut page = RemoveBgPage::default();
+    let (width, height) = (803, 601);
+    let mut source = [220, 40, 40, 255].repeat(width * height);
+    source[3] = 0;
+    source[7] = 96;
+    let mut editor = crate::pages::edit_image::EditImagePage::default();
+    editor.import_rgba_layer(width as u32, height as u32, source.clone(), "Original".into()).unwrap();
+    page.mode = KeyMode::GreenScreen;
+    page.edge_shift = 1.0;
+    let layer = &editor.layers[0];
+    page.import_source_rgba(layer.width, layer.height, layer.pixels.as_ref().clone()).unwrap();
+    assert_eq!((page.width, page.height), (803, 601));
+    assert_eq!(page.src_rgba, source);
+    assert!(page.cutout_rgba.chunks_exact(4).zip(source.chunks_exact(4)).all(|(out, src)| out[3] <= src[3]));
+    let mut destination = crate::pages::edit_image::EditImagePage::default();
+    destination.import_rgba_layer(page.width, page.height, page.cutout_rgba.clone(), "Cutout".into()).unwrap();
+    let png = destination.composite_png().unwrap();
+    let decoded = image::load_from_memory(&png).unwrap().to_rgba8();
+    assert_eq!(decoded.dimensions(), (803, 601));
+    assert_eq!(decoded.into_raw(), page.cutout_rgba);
+  }
+
+  #[test]
+  fn invalid_import_does_not_replace_the_existing_source() {
+    let mut page = RemoveBgPage::default();
+    let original = (page.width, page.height, page.src_rgba.clone(), page.cutout_rgba.clone());
+    for (width, height, pixels) in [(0, 1, vec![]), (2, 2, vec![0; 4]), (u32::MAX, u32::MAX, vec![])] {
+      assert!(page.import_source_rgba(width, height, pixels).is_err());
+      assert_eq!((page.width, page.height, page.src_rgba.clone(), page.cutout_rgba.clone()), original);
+    }
+  }
+
+  #[test]
+  fn separable_feather_matches_clamped_neighbourhood_reference() {
+    for (width, height) in [(1, 1), (1, 7), (9, 1), (5, 7)] {
+      for radius in [1, 2, 5] {
+        let input: Vec<f32> = (0..width * height).map(|i| ((i * 17 + 3) % 101) as f32 / 100.0).collect();
+        let mut actual = input.clone();
+        box_feather(&mut actual, width, height, radius).unwrap();
+        for y in 0..height {
+          for x in 0..width {
+            let mut sum = 0.0f64;
+            for dy in -(radius as isize)..=radius as isize {
+              for dx in -(radius as isize)..=radius as isize {
+                let sx = (x as isize + dx).clamp(0, width as isize - 1) as usize;
+                let sy = (y as isize + dy).clamp(0, height as isize - 1) as usize;
+                sum += input[sy * width + sx] as f64;
+              }
+            }
+            let expected = (sum / ((radius * 2 + 1).pow(2)) as f64) as f32;
+            assert!((actual[y * width + x] - expected).abs() < 1e-6);
+          }
+        }
+      }
+    }
   }
 }

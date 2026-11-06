@@ -236,7 +236,7 @@ export const VideoScrubber = ({
           className="h-full w-full bg-black"
           onClick={togglePlayPause}
           onError={onVideoError}
-          preload="metadata"
+          preload="auto"
           playsInline
           crossOrigin={useCrossOrigin ? "anonymous" : undefined}
         />
