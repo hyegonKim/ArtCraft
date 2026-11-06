@@ -1,5 +1,21 @@
 # ArtCraft Monorepo
 
+## 기존 ArtCraft 대비 변경 사항
+
+검증한 아래 변경의 소스가 `main`에 반영되어 있습니다. [통합 커밋 `4fd6a81`](https://github.com/hyegonKim/ArtCraft/commit/4fd6a810f6875c9f52e62d637aed06437060a9b6)
+
+| 기능 | 달라진 점 |
+| --- | --- |
+| [Native 이미지 편집](./artcraft/artcraft-native/src/pages/edit_image.rs) | 320 × 200 고정 캔버스를 제거했습니다. 원본 해상도와 투명도를 유지해 편집하고 PNG로 저장할 수 있습니다. 레이어 마스크, 변형, RGB 및 채널별 Curves, 연속 브러시·지우개, 실행 취소·다시 실행을 추가했습니다. |
+| [편집 프로젝트](./artcraft/artcraft-native/src/pages/image_project.rs) | `.acraft`로 레이어, 마스크, 변형, Levels, Curves를 보존하고 다시 열 수 있습니다. |
+| [이미지·비디오 모델 미리보기](./artcraft-services/frontend/apps/artcraft-webapp/model-preview) | API 연결 없이 각 화면에서 모델 22개를 고를 수 있습니다. 미리보기의 생성 버튼은 비활성화되어 있습니다. |
+| [웹 로그인](./artcraft-services/frontend/apps/artcraft-webapp/src/pages/login/login.tsx) | 빈 비밀번호 또는 비어 있거나 공백뿐인 사용자 이름은 서버 요청 전에 안내합니다. |
+| [영상 프레임 추출](./artcraft-services/frontend/apps/artcraft-webapp/src/pages/frame-extractor) | MP4를 재생하기 전에 첫 프레임을 캡처하고 PNG로 저장할 수 있습니다. |
+| [Craft Suite 실행 연동](./artcraft/artcraft-native/src/pages/craft_suite.rs) | Native 앱에서 설치된 Craft Suite 도구를 열 수 있습니다. |
+| [Ghidra SDK 엔진](./ghidra-hopper-rs/sdk-engine) | Rust CLI에서 실제 Ghidra SDK로 분석할 수 있는 별도 크레이트를 추가했습니다. |
+
+통합본에서 웹 테스트 45개, Native 테스트 166개, Ghidra 엔진 테스트 165개가 통과했습니다. 브라우저에서 모델 선택, 빈 로그인 입력 차단, 첫 프레임 캡처를 확인했고 실제 Ghidra SDK 디컴파일도 검증했습니다.
+
 ArtCraft monorepo containing all 19 projects, including the integrated FilmCraft upstream, Mac Codex, and PC changes.
 
 Unified **ArtCraft & Craft Suite** repository containing all 19 applications, libraries, services, and reverse-engineering tools under their respective project directories:
