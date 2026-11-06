@@ -372,18 +372,25 @@ mod tests {
 
     use super::imp::run;
 
-    /// A loopback peer that accepts one connection and never reads from it; returns its
-    /// `host:port` and the accepted stream's keeper (drop it to let the connection go).
-    fn stalled_peer() -> (String, mpsc::Sender<()>) {
+    /// Open a connection through the production dispatcher to a loopback peer that never
+    /// reads. Return only after its accepted socket has the bounded receive buffer installed.
+    /// Dropping the keeper releases the peer.
+    fn stalled_peer() -> (u32, mpsc::Sender<()>, usize) {
         let l = TcpListener::bind("127.0.0.1:0").unwrap();
         socket2::SockRef::from(&l).set_recv_buffer_size(4096).unwrap();
         let host = l.local_addr().unwrap().to_string();
         let (stop, wait) = mpsc::channel::<()>();
+        let (accepted, ready) = mpsc::channel();
         std::thread::spawn(move || {
-            let (_s, _): (TcpStream, _) = l.accept().unwrap();
+            let (s, _): (TcpStream, _) = l.accept().unwrap();
+            let peer = socket2::SockRef::from(&s);
+            peer.set_recv_buffer_size(4096).unwrap();
+            accepted.send(peer.recv_buffer_size().unwrap()).unwrap();
             let _ = wait.recv_timeout(Duration::from_secs(120));
         });
-        (host, stop)
+        let id = open(&host);
+        let receive_capacity = ready.recv_timeout(Duration::from_secs(5)).expect("peer accepted and set its receive buffer");
+        (id, stop, receive_capacity)
     }
 
     /// Open a test connection through the production socket dispatcher.
@@ -394,19 +401,42 @@ mod tests {
 
     /// Fill bounded socket buffers nonblocking, rather than assuming a 64 MiB write stalls.
     /// In particular, Windows may accept that entire write with its default send buffering.
-    fn backpressure(id: u32) {
+    fn backpressure(id: u32, receive_capacity: usize) {
         let mut stream = super::imp::test_stream(id);
-        socket2::SockRef::from(&stream).set_send_buffer_size(4096).unwrap();
+        let send_capacity = {
+            let sender = socket2::SockRef::from(&stream);
+            sender.set_send_buffer_size(4096).unwrap();
+            sender.send_buffer_size().unwrap()
+        };
+        assert!(
+            send_capacity.saturating_add(receive_capacity) < 64 * 1024,
+            "fixture buffers must not hold the 64 KiB test write: send={send_capacity}, receive={receive_capacity}"
+        );
         stream.set_nonblocking(true).unwrap();
         let start = Instant::now();
         let chunk = [b'x'; 4096];
         let mut sent = 0;
+        let mut blocked_since = None;
         loop {
-            assert!(sent < 16 * 1024 * 1024 && start.elapsed() < Duration::from_secs(5), "could not establish backpressure");
-            match stream.write(&chunk) {
+            assert!(
+                sent < 16 * 1024 * 1024 && start.elapsed() < Duration::from_secs(5),
+                "could not establish backpressure: sent={sent}, send={send_capacity}, receive={receive_capacity}"
+            );
+            match stream.write(&chunk[..(16 * 1024 * 1024 - sent).min(chunk.len())]) {
                 Ok(0) => panic!("peer closed while establishing backpressure"),
-                Ok(n) => sent += n,
-                Err(e) if e.kind() == ErrorKind::WouldBlock => break,
+                Ok(n) => {
+                    sent += n;
+                    blocked_since = None;
+                }
+                Err(e) if e.kind() == ErrorKind::WouldBlock => {
+                    // A first WouldBlock may only mean the local send queue is temporarily
+                    // full while TCP still transfers bytes to the peer's receive queue.
+                    let since = blocked_since.get_or_insert_with(Instant::now);
+                    if since.elapsed() >= Duration::from_millis(200) {
+                        break;
+                    }
+                    std::thread::sleep(Duration::from_millis(5));
+                }
                 Err(e) if e.kind() == ErrorKind::Interrupted => continue,
                 Err(e) => panic!("establishing backpressure: {e}"),
             }
@@ -427,9 +457,8 @@ mod tests {
     #[test]
     fn a_write_to_a_peer_that_stops_reading_fails_after_the_timeout() {
         // #1248: it used to block for good.
-        let (host, _keep) = stalled_peer();
-        let id = open(&host);
-        backpressure(id);
+        let (id, _keep, receive_capacity) = stalled_peer();
+        backpressure(id, receive_capacity);
         let data = "x".repeat(64 * 1024);
         let t0 = Instant::now();
         let r = within(Duration::from_secs(20), move || run("write", id, &json!({"data": data, "timeout": 1}))).expect("the write gave up");
@@ -441,18 +470,27 @@ mod tests {
     /// Closing a stalled stream interrupts its writer without blocking another socket.
     #[test]
     fn a_blocked_socket_doesnt_hold_up_the_others_and_close_interrupts_it() {
-        let (host_a, _keep_a) = stalled_peer();
-        let (host_b, _keep_b) = stalled_peer();
-        let (a, b) = (open(&host_a), open(&host_b));
+        let (a, _keep_a, receive_capacity) = stalled_peer();
+        let (b, _keep_b, _) = stalled_peer();
         // A write on A that would wait a minute.
-        backpressure(a);
+        backpressure(a, receive_capacity);
         let data = "x".repeat(64 * 1024);
         let (tx, blocked) = mpsc::channel();
+        let (writing, entered) = mpsc::channel();
         std::thread::spawn(move || {
-            let _ = tx.send(run("write", a, &json!({"data": data, "timeout": 60})));
+            let result = super::imp::run_with_mode("write", a, &json!({"data": data, "timeout": 60}), |stream, nonblocking| {
+                stream.set_nonblocking(nonblocking)?;
+                if nonblocking {
+                    // Observe the real writer after it holds A's lock; do not replace I/O.
+                    let _ = writing.send(());
+                }
+                Ok(())
+            });
+            let _ = tx.send(result);
         });
-        std::thread::sleep(Duration::from_millis(500));
-        assert!(matches!(blocked.try_recv(), Err(mpsc::TryRecvError::Empty)), "A must still be writing before close");
+        entered.recv_timeout(Duration::from_secs(3)).expect("A entered its real write with its socket locked");
+        let early = blocked.recv_timeout(Duration::from_millis(500));
+        assert!(matches!(early, Err(mpsc::RecvTimeoutError::Timeout)), "A must still be writing before close: {early:?}");
         // Socket B answers meanwhile (the table isn't locked by A's write).
         let r = within(Duration::from_secs(3), move || run("connected", b, &json!({}))).expect("socket B answered while A was blocked");
         assert_eq!(r["value"], true, "{r}");
@@ -467,8 +505,7 @@ mod tests {
     #[test]
     fn mode_restoration_failure_retires_streams() {
         for (op, fail_nonblocking) in [("write", false), ("connected", false), ("write", true), ("connected", true)] {
-            let (host, _keep) = stalled_peer();
-            let id = open(&host);
+            let (id, _keep, _) = stalled_peer();
             let result = super::imp::run_with_mode(op, id, &json!({"data": "hello"}), |s, nonblocking| {
                 if nonblocking == fail_nonblocking { Err(std::io::Error::other("injected mode failure")) } else { s.set_nonblocking(nonblocking) }
             });
@@ -487,8 +524,7 @@ mod tests {
     /// A preceding write error cannot hide the failure that makes the stream unusable.
     #[test]
     fn restoration_failure_preserves_the_write_error_too() {
-        let (host, _keep) = stalled_peer();
-        let id = open(&host);
+        let (id, _keep, _) = stalled_peer();
         let result = super::imp::run_with_mode("write", id, &json!({"data": "hello"}), |s, nonblocking| {
             if nonblocking {
                 s.set_nonblocking(true)?;

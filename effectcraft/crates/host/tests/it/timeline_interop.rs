@@ -172,3 +172,45 @@ fn export_prerenders_and_reimports_the_same_pixels() {
     let e = s.execute("file.importTimeline", json!({"path": "/x/a.prproj"})).unwrap_err().to_string();
     assert!(e.contains("Final Cut Pro XML"), "{e}");
 }
+
+/// Inverting the composite of overlapping translucent layers differs from inverting each
+/// isolated layer. Export must bake their actual shared adjustment context exactly once.
+#[test]
+fn adjustment_composition_prerender_reimports_the_same_pixels() {
+    let red = png("adjustment_red.png", [255, 0, 0]);
+    let mut session = effectcraft_host::session();
+    session.execute("comp.new", json!({"name": "Adjusted", "width": W, "height": H, "frameRate": 25, "duration": 0.4})).unwrap();
+    let original = session.active_comp_id().unwrap();
+    let item = session.execute("file.import", json!({"paths": [red]})).unwrap()["items"][0].as_u64().unwrap();
+    let bottom = session.execute("layer.addItem", json!({"item": item})).unwrap()["layer"].as_u64().unwrap();
+    session.execute("prop.set", json!({"layer": bottom, "path": "transform/opacity", "value": 60})).unwrap();
+    let top = session.execute("layer.newSolid", json!({"color": "#00ffff", "width": 16, "height": 12})).unwrap()["layer"].as_u64().unwrap();
+    session.execute("prop.set", json!({"layer": top, "path": "transform/opacity", "value": 50})).unwrap();
+    let adjustment = session.execute("layer.newAdjustment", json!({"name": "Composite invert"})).unwrap()["layer"].as_u64().unwrap();
+    session.execute("effect.apply", json!({"layers": [adjustment], "effect": "Invert"})).unwrap();
+    for mode in ["unsupported", "all"] {
+        let output = tmp(&format!("Adjusted_{mode}.xml"));
+        let exported = session.execute("file.exportTimeline", json!({"comp": original.0, "path": output, "prerender": mode})).unwrap();
+        assert_eq!(exported["videoTracks"], 1);
+        assert_eq!(exported["prerendered"].as_array().unwrap().len(), 1);
+        assert!(
+            exported["warnings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|warning| warning.as_str().is_some_and(|warning| warning.contains("flattened to one video clip")))
+        );
+        let imported = session.execute("file.importTimeline", json!({"path": output})).unwrap();
+        assert!(imported["missing"].as_array().unwrap().is_empty());
+        let back = ItemId(imported["comps"][0].as_u64().unwrap());
+        assert_eq!(session.project.comp(back).unwrap().layers.len(), 1);
+        for time in [0.0, 0.2] {
+            let (before, after) = (render(&session, original, time), render(&session, back, time));
+            for (x, y) in [(1, 1), (W / 2, H / 2), (W - 2, H - 2)] {
+                let (expected, actual) = (px(&before, x, y), px(&after, x, y));
+                assert!(close(actual, [expected[0], expected[1], expected[2]], 0.04), "{mode} time={time} ({x},{y}) {expected:?} vs {actual:?}");
+                assert!((expected[3] - actual[3]).abs() <= 0.02, "alpha {expected:?} vs {actual:?}");
+            }
+        }
+    }
+}

@@ -129,6 +129,39 @@ fn prerender(s: &Session, cid: ItemId, lid: LayerId, path: &str) -> std::result:
     Ok(Prerendered { path: r.path, width: comp.width, height: comp.height, frame_rate: comp.frame_rate, duration: end - start })
 }
 
+/// Bake the original complete visual composition once, with its real adjustment/mask/blend
+/// context. Audio is intentionally off here: interchange retains its separate audio tracks.
+fn prerender_composition(s: &Session, cid: ItemId, path: &str) -> std::result::Result<Prerendered, String> {
+    let exporter = s.exporter.clone().ok_or("export is not available in this build")?;
+    if !exporter.formats().contains(&OutputFormat::ProRes) {
+        return Err("ProRes export is not available in this build".into());
+    }
+    let comp = s.project.comp(cid).ok_or("no composition")?;
+    if comp.width == 0 || comp.height == 0 || comp.duration <= effectcraft_time::Tick::ZERO || comp.frame_rate.num <= 0 || comp.frame_rate.den <= 0 {
+        return Err("the composition has no renderable picture or duration".into());
+    }
+    let mut item = RenderQueueItem::new(0, cid);
+    item.settings.time_span = TimeSpan::Custom { start: effectcraft_time::Tick::ZERO, end: comp.duration };
+    item.output = OutputModule::for_format(OutputFormat::ProRes);
+    item.output.channels = Channels::Rgba;
+    item.output.prores_profile = ProResProfile::P4444;
+    item.output.audio = AudioOutput::Off;
+    item.output.output = path.to_string();
+    let job = crate::ExportJob {
+        project: &s.project,
+        footage: s.footage.as_ref(),
+        expr: s.expr.as_deref(),
+        accel: s.accel.as_deref(),
+        item: &item,
+        path,
+        storage: None,
+        label: "Pre-render complete composition".into(),
+        nested_switches: s.prefs.general.switches_affect_nested_comps,
+    };
+    let result = exporter.export(&job, &mut |_, _| true)?;
+    Ok(Prerendered { path: result.path, width: comp.width, height: comp.height, frame_rate: comp.frame_rate, duration: comp.duration })
+}
+
 fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "file.exportTimeline";
     let mut path = str_p(p, "path").ok_or_else(|| bad(CMD, "missing `path`"))?.to_string();
@@ -161,7 +194,20 @@ fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
     let mut pre: HashMap<(ItemId, LayerId), Prerendered> = HashMap::new();
     let mut rendered = vec![];
     let mut errors = vec![];
-    for (c, l) in effectcraft_interchange::plan_prerender(&s.project, cid, &opts) {
+    let plan = effectcraft_interchange::plan_prerender_with_compositions(&s.project, cid, &opts);
+    let mut composition_pre = HashMap::new();
+    for comp in plan.compositions {
+        let comp_name = s.project.item(comp).map(|item| item.name.clone()).unwrap_or_default();
+        let file = dir.join(format!("{stem}_{}_{}_composition.mov", safe(&comp_name), comp.0)).to_string_lossy().to_string();
+        match prerender_composition(s, comp, &file) {
+            Ok(result) => {
+                rendered.push(result.path.clone());
+                composition_pre.insert(comp, result);
+            }
+            Err(error) => errors.push(format!("{comp_name} ▸ complete composition: {error}")),
+        }
+    }
+    for (c, l) in plan.layers {
         let comp_name = s.project.item(c).map(|i| i.name.clone()).unwrap_or_default();
         let layer_name = s.project.comp(c).and_then(|cc| cc.layer(l)).map(|x| x.name.clone()).unwrap_or_default();
         let file = dir.join(format!("{stem}_{}_{}_{}.mov", safe(&comp_name), safe(&layer_name), l.0)).to_string_lossy().to_string();
@@ -173,14 +219,20 @@ fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
             Err(e) => errors.push(format!("{comp_name} ▸ {layer_name}: {e}")),
         }
     }
-    let out = effectcraft_interchange::export(&s.project, cid, &opts, &pre).map_err(|e| EngineError::Other(e.to_string()))?;
+    let out =
+        effectcraft_interchange::export_with_compositions(&s.project, cid, &opts, &pre, &composition_pre).map_err(|e| EngineError::Other(e.to_string()))?;
     s.services.write_file(&path, &out.bytes).map_err(|e| EngineError::Other(format!("cannot write {path}: {e}")))?;
     let mut warnings = out.warnings.clone();
     warnings.extend(errors.iter().map(|e| format!("pre-render failed: {e}")));
-    s.toast(match format {
+    let mut notice = match format {
         TimelineFormat::Fcp7Xml => format!("Exported {path} (Final Cut Pro XML; import it in Premiere Pro with File ▸ Import)"),
         _ => format!("Exported {path} ({})", format.label()),
-    });
+    };
+    if !warnings.is_empty() {
+        notice.push_str("\nExport warnings: ");
+        notice.push_str(&warnings.join("; "));
+    }
+    s.toast(notice);
     Ok(json!({
         "path": path,
         "format": format.id(),

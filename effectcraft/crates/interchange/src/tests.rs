@@ -537,3 +537,73 @@ fn deeply_nested_documents_error_instead_of_overflowing_the_stack() {
     assert_eq!(super::import::xml_depth(b"<a><!-- <b><b> --><c x='>'/><![CDATA[<d>]]><e></e></a>"), 2);
     assert_eq!(super::import::json_depth(br#"{"a": "[[[{{", "b": [[1], {"c": "\\\"["}]}"#), 3);
 }
+
+#[test]
+fn adjustment_context_plans_a_composition_without_changing_legacy_layer_plan() {
+    let (mut project, id) = ae_project();
+    let comp = project.comp_mut(id).unwrap();
+    comp.layers[0].switches.adjustment = true;
+    for mode in [PrerenderMode::All, PrerenderMode::Unsupported] {
+        let opts = ExportOptions { prerender: mode, ..Default::default() };
+        let plan = plan_prerender_with_compositions(&project, id, &opts);
+        assert_eq!(plan.compositions, [id]);
+        assert!(plan.layers.is_empty());
+        assert_eq!(plan_composition_prerender(&project, id, &opts), [id]);
+    }
+    let none = ExportOptions { prerender: PrerenderMode::None, ..Default::default() };
+    assert!(plan_prerender_with_compositions(&project, id, &none).compositions.is_empty());
+    project.comp_mut(id).unwrap().layers[0].switches.video = false;
+    assert!(plan_prerender_with_compositions(&project, id, &ExportOptions::default()).compositions.is_empty());
+    project.comp_mut(id).unwrap().layers[0].switches.video = true;
+    // Legacy API keeps planning isolated layers for its existing consumers.
+    assert!(!plan_prerender(&project, id, &ExportOptions { prerender: PrerenderMode::All, ..Default::default() }).is_empty());
+}
+
+#[test]
+fn composition_bake_exports_one_visual_clip_keeps_audio_markers_and_timing() {
+    let (mut project, id) = ae_project();
+    let comp = project.comp_mut(id).unwrap();
+    comp.layers[0].switches.adjustment = true;
+    comp.markers.push(effectcraft_project::Marker { time: t(1.0), comment: "Keep this marker".into(), ..Default::default() });
+    let duration = comp.duration;
+    let mut rendered = HashMap::new();
+    rendered.insert(id, Prerendered { path: "/render/composite.mov".into(), width: W, height: H, frame_rate: FrameRate::FPS_25, duration });
+    for format in [TimelineFormat::Fcp7Xml, TimelineFormat::Fcpxml, TimelineFormat::Otio] {
+        let opts = ExportOptions { format, prerender: PrerenderMode::All, ..Default::default() };
+        let output = export_with_compositions(&project, id, &opts, &HashMap::new(), &rendered).unwrap();
+        assert_eq!(output.video_tracks, 1, "{format:?}: {output:?}");
+        assert_eq!(output.audio_tracks, 1);
+        assert_eq!(output.prerendered, 1);
+        assert!(output.warnings.iter().any(|warning| warning.contains("flattened to one video clip")));
+        assert!(!output.warnings.iter().any(|warning| warning.contains("adjustment layer (")), "the adjustment was baked, not dropped");
+        let (back, imported) = import_doc(&output.bytes, &format!("Main.{}", format.extension()), &mut probe);
+        let comp = back.comp(imported.comps[0]).unwrap();
+        assert_eq!(comp.layers.iter().filter(|layer| layer.switches.video).count(), 1);
+        let picture = comp.layers.iter().find(|layer| layer.switches.video).unwrap();
+        assert_eq!(picture.in_point, Tick::ZERO);
+        assert_eq!(picture.start_time, Tick::ZERO);
+        assert_eq!(picture.out_point, duration);
+        assert_eq!(picture.stretch, 100.0);
+        assert_eq!(comp.frame_rate, FrameRate::FPS_25);
+        assert!(comp.markers.iter().any(|marker| marker.comment == "Keep this marker"));
+    }
+}
+
+#[test]
+fn absent_or_incompatible_composition_bakes_have_actionable_fidelity_warnings() {
+    let (mut project, id) = ae_project();
+    project.comp_mut(id).unwrap().layers[0].switches.adjustment = true;
+    let opts = ExportOptions { prerender: PrerenderMode::All, ..Default::default() };
+    let legacy = export(&project, id, &opts, &HashMap::new()).unwrap();
+    assert!(legacy.warnings.iter().any(|warning| warning.contains("needs a full-composition pre-render")));
+    let comp = project.comp(id).unwrap();
+    for invalid in [
+        Prerendered { path: "/render/composite.mov".into(), width: W + 1, height: H, frame_rate: comp.frame_rate, duration: comp.duration },
+        Prerendered { path: "/render/composite.mov".into(), width: W, height: H, frame_rate: FrameRate::FPS_24, duration: comp.duration },
+        Prerendered { path: "/render/composite.mov".into(), width: W, height: H, frame_rate: comp.frame_rate, duration: Tick::ZERO },
+    ] {
+        let output = export_with_compositions(&project, id, &opts, &HashMap::new(), &HashMap::from([(id, invalid)])).unwrap();
+        assert_eq!(output.prerendered, 0);
+        assert!(output.warnings.iter().any(|warning| warning.contains("missing or incompatible")));
+    }
+}

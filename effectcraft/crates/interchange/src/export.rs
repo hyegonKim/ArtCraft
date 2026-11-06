@@ -24,7 +24,8 @@ pub enum PrerenderMode {
     /// mattes, expressions, time remapping…) are pre-rendered.
     #[default]
     Unsupported,
-    /// Every visual layer is pre-rendered (what you see is what Premiere shows).
+    /// Every visual layer is pre-rendered. Compositions with enabled adjustment layers
+    /// use one composition video to preserve their shared visual context.
     All,
 }
 
@@ -239,14 +240,78 @@ pub fn plan_prerender(project: &Project, comp: ItemId, opts: &ExportOptions) -> 
     out
 }
 
-/// Export composition `comp` (with the precomps it nests) as a timeline document.
+/// A context-preserving plan: a composition containing enabled adjustment layers is baked
+/// as one video, because an adjustment applies to the composite below it, not each layer alone.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct PrerenderPlan {
+    pub layers: Vec<(ItemId, LayerId)>,
+    pub compositions: Vec<ItemId>,
+}
+
+fn needs_composition_prerender(comp: &Comp, opts: &ExportOptions) -> bool {
+    opts.prerender != PrerenderMode::None
+        && comp.layers.iter().any(|layer| {
+            layer.switches.adjustment && layer.switches.video && !layer.switches.guide && layer.in_point < comp.duration && layer.out_point > Tick::ZERO
+        })
+}
+
+/// Plan both ordinary isolated layers and compositions whose appearance depends on layers
+/// together. The legacy [`plan_prerender`] remains unchanged for existing isolated-layer callers.
+pub fn plan_prerender_with_compositions(project: &Project, comp: ItemId, opts: &ExportOptions) -> PrerenderPlan {
+    fn walk(project: &Project, id: ItemId, opts: &ExportOptions, seen: &mut Vec<ItemId>, out: &mut PrerenderPlan) {
+        if seen.contains(&id) {
+            return;
+        }
+        seen.push(id);
+        let Some(comp) = project.comp(id) else { return };
+        if needs_composition_prerender(comp, opts) {
+            out.compositions.push(id);
+            return;
+        }
+        for layer in &comp.layers {
+            match plan(project, comp, layer, opts) {
+                Plan::Render(_) => out.layers.push((id, layer.id)),
+                Plan::Nest => {
+                    if let LayerSource::Comp { item } = layer.source {
+                        walk(project, item, opts, seen, out);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    let mut out = PrerenderPlan::default();
+    walk(project, comp, opts, &mut Vec::new(), &mut out);
+    out
+}
+
+/// Composition ids in the context-preserving pre-render plan.
+pub fn plan_composition_prerender(project: &Project, comp: ItemId, opts: &ExportOptions) -> Vec<ItemId> {
+    plan_prerender_with_compositions(project, comp, opts).compositions
+}
+
+/// Export composition `comp` (with the precomps it nests) as a timeline document. Legacy callers
+/// retain per-layer behavior, with a warning when no required composition bake was supplied.
 pub fn export(project: &Project, comp: ItemId, opts: &ExportOptions, prerendered: &HashMap<(ItemId, LayerId), Prerendered>) -> Result<ExportOutput> {
+    export_with_compositions(project, comp, opts, prerendered, &HashMap::new())
+}
+
+/// Export with composition-wide pre-renders. Audio remains on its original timeline tracks;
+/// only the visual stack is replaced, preserving adjustment/mask/blend context exactly once.
+pub fn export_with_compositions(
+    project: &Project,
+    comp: ItemId,
+    opts: &ExportOptions,
+    prerendered: &HashMap<(ItemId, LayerId), Prerendered>,
+    compositions: &HashMap<ItemId, Prerendered>,
+) -> Result<ExportOutput> {
     project.comp(comp).ok_or(Error::NoComp(comp.0))?;
     let name = project.item(comp).map(|i| i.name.clone()).unwrap_or_else(|| "Composition".into());
     let mut ex = Exporter {
         p: project,
         opts,
         pre: prerendered,
+        composition_pre: compositions,
         fp: fp::Project::new(&name),
         out: ExportOutput::default(),
         seqs: HashMap::new(),
@@ -269,6 +334,7 @@ struct Exporter<'a> {
     p: &'a Project,
     opts: &'a ExportOptions,
     pre: &'a HashMap<(ItemId, LayerId), Prerendered>,
+    composition_pre: &'a HashMap<ItemId, Prerendered>,
     fp: fp::Project,
     out: ExportOutput,
     seqs: HashMap<ItemId, fp::ItemId>,
@@ -351,10 +417,15 @@ impl Exporter<'_> {
     }
 
     fn prerendered_item(&mut self, name: &str, r: &Prerendered) -> fp::ItemId {
+        self.prerendered_item_with_par(name, r, 1.0)
+    }
+
+    fn prerendered_item_with_par(&mut self, name: &str, r: &Prerendered, pixel_aspect: f64) -> fp::ItemId {
         if let Some(id) = self.media.get(&r.path) {
             return *id;
         }
-        let info = media_info(name, MediaKind::Movie, r.duration, Some((r.width, r.height, r.frame_rate, 1.0, "Apple ProRes 4444".into(), true)), false);
+        let info =
+            media_info(name, MediaKind::Movie, r.duration, Some((r.width, r.height, r.frame_rate, pixel_aspect, "Apple ProRes 4444".into(), true)), false);
         let clip = media_clip(fp::MediaRef::File { path: r.path.clone() }, info);
         let bin = match self.bins.get(&ItemId(u64::MAX)) {
             Some(b) => Some(*b),
@@ -414,61 +485,93 @@ impl Exporter<'_> {
         let rate = comp.frame_rate;
         let mut video: Vec<fp::Track> = vec![];
         let mut audio: Vec<fp::Track> = vec![];
+        let mut flattened = false;
+        if needs_composition_prerender(&comp, self.opts) {
+            if let Some(rendered) = self.composition_pre.get(&cid).cloned().filter(|rendered| {
+                !rendered.path.is_empty()
+                    && rendered.width == comp.width
+                    && rendered.height == comp.height
+                    && rendered.frame_rate == comp.frame_rate
+                    && rendered.duration >= comp.duration
+                    && comp.duration > Tick::ZERO
+            }) {
+                let item = self.prerendered_item_with_par(&format!("{name} (composition pre-rendered)"), &rendered, comp.pixel_aspect);
+                let tm = Timing { start: Tick::ZERO, duration: comp.duration, source_in: Tick::ZERO, speed: 1.0, reverse: false };
+                if let Some(clip) = self.track_item(item, &name, fp::TrackKind::Video, &tm, rate) {
+                    let mut track = fp::Track::new(fp::TrackId(self.fp.alloc_id()), fp::TrackKind::Video, "Composition".into());
+                    track.items.push(clip);
+                    video.push(track);
+                    self.out.clips += 1;
+                    self.out.prerendered += 1;
+                    flattened = true;
+                    self.warn(format!(
+                        "composition \"{name}\" was flattened to one video clip to preserve adjustment layers; audio remains on separate tracks"
+                    ));
+                }
+            }
+            if !flattened {
+                self.warn(format!("composition \"{name}\" needs a full-composition pre-render to preserve adjustment layers; the bake is missing or incompatible and per-layer output does not preserve that appearance"));
+            }
+        }
         for l in comp.layers.iter().rev() {
             let pl = plan(self.p, &comp, l, self.opts);
             let Some(tm) = timing(l, &comp) else { continue };
             let link = self.fp.alloc_id();
             let mut has_video_clip = false;
-            let clip = match &pl {
-                Plan::Skip(why) => {
-                    if !why.is_empty() {
-                        self.warn(format!("layer \"{}\" was left out ({why})", l.name));
-                    }
-                    None
-                }
-                Plan::AudioOnly => None,
-                Plan::Render(why) => match self.pre.get(&(cid, l.id)).cloned() {
-                    Some(r) => {
-                        let item = self.prerendered_item(&format!("{} (pre-rendered)", l.name), &r);
-                        self.track_item(item, &l.name, fp::TrackKind::Video, &tm, rate).map(|mut ti| {
-                            ti.source_in = filmcraft_time::Tick::ZERO;
-                            ti.speed = 1.0;
-                            ti.reverse = false;
-                            self.out.prerendered += 1;
-                            ti
-                        })
-                    }
-                    None => {
-                        self.warn(format!("layer \"{}\" was left out ({why}; pre-rendering is off or unavailable)", l.name));
+            let clip = if flattened {
+                None
+            } else {
+                match &pl {
+                    Plan::Skip(why) => {
+                        if !why.is_empty() {
+                            self.warn(format!("layer \"{}\" was left out ({why})", l.name));
+                        }
                         None
                     }
-                },
-                Plan::Native | Plan::Nest => {
-                    if self.opts.prerender == PrerenderMode::None
-                        && let Some(w) = unsupported(self.p, &comp, l, self.opts.format)
-                    {
-                        self.warn(format!("layer \"{}\": {w} not exported", l.name));
-                    }
-                    let item = match &l.source {
-                        LayerSource::Footage { item } => match self.p.item(*item).map(|i| &i.kind) {
-                            Some(ItemKind::Footage(f)) => Some(self.footage_item(*item, &f.clone())),
-                            _ => None,
-                        },
-                        LayerSource::Solid { item } => match self.p.item(*item).map(|i| &i.kind) {
-                            Some(ItemKind::Solid(s)) => Some(self.solid_item(*item, s.color, &comp)),
-                            _ => None,
-                        },
-                        LayerSource::Comp { item } if !self.stack.contains(item) => self.sequence(*item),
-                        _ => None,
-                    };
-                    item.and_then(|item| {
-                        let mut ti = self.track_item(item, &l.name, fp::TrackKind::Video, &tm, rate)?;
-                        self.motion(&mut ti, l, &comp, &tm);
-                        if let Some(h) = l.props.get("timeRemap").filter(|p| !p.is_animated()) {
-                            ti.frame_hold = Some(tick_out(Tick::from_seconds_f64(h.value.as_f64())));
+                    Plan::AudioOnly => None,
+                    Plan::Render(why) => match self.pre.get(&(cid, l.id)).cloned() {
+                        Some(r) => {
+                            let item = self.prerendered_item(&format!("{} (pre-rendered)", l.name), &r);
+                            self.track_item(item, &l.name, fp::TrackKind::Video, &tm, rate).map(|mut ti| {
+                                ti.source_in = filmcraft_time::Tick::ZERO;
+                                ti.speed = 1.0;
+                                ti.reverse = false;
+                                self.out.prerendered += 1;
+                                ti
+                            })
                         }
-                        Some(ti)
-                    })
+                        None => {
+                            self.warn(format!("layer \"{}\" was left out ({why}; pre-rendering is off or unavailable)", l.name));
+                            None
+                        }
+                    },
+                    Plan::Native | Plan::Nest => {
+                        if self.opts.prerender == PrerenderMode::None
+                            && let Some(w) = unsupported(self.p, &comp, l, self.opts.format)
+                        {
+                            self.warn(format!("layer \"{}\": {w} not exported", l.name));
+                        }
+                        let item = match &l.source {
+                            LayerSource::Footage { item } => match self.p.item(*item).map(|i| &i.kind) {
+                                Some(ItemKind::Footage(f)) => Some(self.footage_item(*item, &f.clone())),
+                                _ => None,
+                            },
+                            LayerSource::Solid { item } => match self.p.item(*item).map(|i| &i.kind) {
+                                Some(ItemKind::Solid(s)) => Some(self.solid_item(*item, s.color, &comp)),
+                                _ => None,
+                            },
+                            LayerSource::Comp { item } if !self.stack.contains(item) => self.sequence(*item),
+                            _ => None,
+                        };
+                        item.and_then(|item| {
+                            let mut ti = self.track_item(item, &l.name, fp::TrackKind::Video, &tm, rate)?;
+                            self.motion(&mut ti, l, &comp, &tm);
+                            if let Some(h) = l.props.get("timeRemap").filter(|p| !p.is_animated()) {
+                                ti.frame_hold = Some(tick_out(Tick::from_seconds_f64(h.value.as_f64())));
+                            }
+                            Some(ti)
+                        })
+                    }
                 }
             };
             if let Some(mut ti) = clip {

@@ -36,7 +36,10 @@ mod import;
 #[cfg(test)]
 mod tests;
 
-pub use export::{ExportOptions, ExportOutput, PrecompMode, PrerenderMode, Prerendered, export, plan_prerender, prerender_reason};
+pub use export::{
+    ExportOptions, ExportOutput, PrecompMode, PrerenderMode, PrerenderPlan, Prerendered, export, export_with_compositions, plan_composition_prerender,
+    plan_prerender, plan_prerender_with_compositions, prerender_reason,
+};
 pub use import::{ImportOptions, ImportResult, import};
 
 pub use filmcraft_geom as fc_geom;
