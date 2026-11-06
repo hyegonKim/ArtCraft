@@ -21,7 +21,8 @@
     "typecheck": "tsc",
     "chromatic": "npx chromatic --project-token=chpt_0945f90d5d3626c",
     "prepare": "husky",
-    "test": "jest"
+    "test": "jest",
+    "test-api-contracts": "vitest run --config vitest.config.ts app/src/Classes/ApiManager/ApiManager.spec.ts"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.20",

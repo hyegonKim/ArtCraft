@@ -48,7 +48,7 @@ export class ApiManager {
       query &&
       Object.entries(query).reduce(
         (allOptions, [key, value]) => {
-          if (!value) {
+          if (value === undefined || value === null) {
             return allOptions;
           }
           allOptions[key] = value.toString();
@@ -165,10 +165,6 @@ export class ApiManager {
     console.log(`HELLO${formData}`);
     return this.fetchMultipartFormData<T>(endpoint, {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
-      credentials: "include",
       body: formData,
     });
   }
@@ -182,11 +178,15 @@ export class ApiManager {
   ): Record<string, string> {
     return Object.entries(params).reduce(
       (allParams, [key, value]) => {
-        if (!value) {
+        if (value === undefined || value === null) {
           return allParams;
         }
         const snakeKey = this.camelToSnakeCase(key);
         if (Array.isArray(value)) {
+          // An empty filter list means no filter, as before.
+          if (value.length === 0) {
+            return allParams;
+          }
           return { ...allParams, [snakeKey]: value.join(",") };
         }
         return { ...allParams, [snakeKey]: value.toString() };
@@ -199,7 +199,7 @@ export class ApiManager {
     params: NonNullableObject<T>,
   ): B {
     return Object.entries(params).reduce((allParams, [key, value]) => {
-      if (!value) {
+      if (value === undefined || value === null) {
         return allParams;
       }
       const snakeKey = this.camelToSnakeCase(key);

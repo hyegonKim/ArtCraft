@@ -35,7 +35,7 @@ export class ApiManager {
       query &&
       Object.entries(query).reduce(
         (allOptions, [key, value]) => {
-          if (!value) {
+          if (value === undefined || value === null) {
             return allOptions;
           }
           allOptions[key] = value.toString();
@@ -48,7 +48,7 @@ export class ApiManager {
       ? endpoint + "?" + new URLSearchParams(queryInString)
       : endpoint;
 
-    const bodyInString = body ? JSON.stringify(body) : undefined;
+    const bodyInString = body === undefined || body === null ? undefined : JSON.stringify(body);
 
     const response = await fetch(endpointWithQueries, {
       method,
