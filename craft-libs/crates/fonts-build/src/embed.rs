@@ -194,6 +194,9 @@ impl Embed {
 
         let selected = match &dir {
             None => Err(Error::NotSet),
+            // Generated include_bytes! paths must be Unicode even on filesystems that reject
+            // such a directory before it can be created. Preserve the explicit path error.
+            Some(dir) if self.serve.is_none() && dir.to_str().is_none() => Err(Error::NonUtf8Path { path: dir.clone() }),
             Some(dir) => self.select(dir, cargo).and_then(|faces| if required { self.check_required(dir, faces) } else { Ok(faces) }),
         };
         let mut selected = selected;
