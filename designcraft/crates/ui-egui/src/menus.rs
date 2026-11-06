@@ -4532,7 +4532,7 @@ mod tests {
         assert!(at("view.nextSpread") < at("view.previousSpread"));
         assert!(at("view.previousSpread") < at("view.goToPage"));
         let shift = egui::Modifiers::SHIFT;
-        let cmd_shift = egui::Modifiers { shift: true, command: true, ctrl: true, ..Default::default() };
+        let cmd_shift = egui::Modifiers { shift: true, ..crate::test_window::command_modifiers() };
         let alt = egui::Modifiers::ALT;
         // Pages 1 | 2-3 | 4-5 | 6-7.
         frame(&mut app, key(egui::Key::PageDown, shift));
@@ -4601,7 +4601,7 @@ mod tests {
         assert_eq!(at("view.goBack"), at("view.goToPage") + 1);
         assert_eq!(at("view.goForward"), at("view.goBack") + 1);
         assert_eq!(can(&app), (false, false), "one page viewed: nowhere to go");
-        let cmd = egui::Modifiers { command: true, ctrl: true, ..Default::default() };
+        let cmd = crate::test_window::command_modifiers();
         let cmd_shift = egui::Modifiers { shift: true, ..cmd };
         let shift = egui::Modifiers::SHIFT;
         // Pages viewed: 1, 5, 7.
@@ -4687,7 +4687,7 @@ mod tests {
             ]
         };
         let page = |app: &crate::DesignApp| crate::canvas::current_page(app).unwrap();
-        let cmd = egui::Modifiers { command: true, ctrl: true, ..Default::default() };
+        let cmd = crate::test_window::command_modifiers();
         let alt = egui::Modifiers::ALT;
         frame(&mut app, vec![]);
         frame(&mut app, vec![]);
@@ -4731,7 +4731,7 @@ mod tests {
             let st = app.session.active().unwrap();
             crate::canvas::current_slot(app, &designcraft_tools::layout::CanvasLayout::new(&st.doc, false)).unwrap()
         };
-        let cmd = egui::Modifiers { command: true, ctrl: true, ..Default::default() };
+        let cmd = crate::test_window::command_modifiers();
         let alt = egui::Modifiers::ALT;
         frame(&mut app, vec![]);
         frame(&mut app, vec![]);
@@ -4803,7 +4803,7 @@ mod tests {
             let st = app.session.active().unwrap();
             crate::canvas::current_slot(app, &designcraft_tools::layout::CanvasLayout::new(&st.doc, false)).unwrap()
         };
-        let cmd = egui::Modifiers { command: true, ctrl: true, ..Default::default() };
+        let cmd = crate::test_window::command_modifiers();
         frame(&mut app, vec![]);
         frame(&mut app, vec![]);
         // Scrolled off the page's centre, so the place Go Back returns to is not just the page.

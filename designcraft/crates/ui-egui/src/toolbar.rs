@@ -816,7 +816,8 @@ mod tests {
         for double in [false, true] {
             let h = test_window::open(app(double), vec2(1400.0, 900.0));
             let _ = rect(&h, "Gradient Swatch Tool (G)");
-            let _ = rect(&h, "Gradient Feather Tool (Shift+G)");
+            let feather = if cfg!(target_os = "macos") { "Gradient Feather Tool (⇧G)" } else { "Gradient Feather Tool (Shift+G)" };
+            let _ = rect(&h, feather);
             let _ = rect(&h, "View Options");
             let split = ["Content Placer Tool (B)", "Apply Color (,)", "Apply Gradient (.)", "Normal"];
             for label in split {

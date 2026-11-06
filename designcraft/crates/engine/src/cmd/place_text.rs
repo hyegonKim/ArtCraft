@@ -886,6 +886,89 @@ mod reflow_tests {
         assert_eq!(s.doc().unwrap().doc.page_count(), 1);
     }
 
+    /// A user deleting a threaded page deletes its frame, not the surviving story's text.
+    /// That explicit layout choice persists through edits unrelated to text composition.
+    #[test]
+    fn smart_reflow_respects_page_deletion_until_composition_changes() {
+        let mut s = Session::new();
+        s.execute("file.new", &json!({"pages": 1, "primaryTextFrame": true})).unwrap();
+        let sid = s.doc().unwrap().doc.settings.primary_story.unwrap();
+        let text = "Words keep coming and the page fills up quickly with them. ".repeat(250);
+        s.execute("text.select", &json!({"story": sid.0, "anchor": 0, "focus": 0})).unwrap();
+        s.execute("text.insert", &json!({"text": text})).unwrap();
+        let full = s.doc().unwrap().doc.clone();
+        let pages = full.page_count();
+        assert!(pages >= 3);
+        let history = s.doc().unwrap().history.undo.len();
+        s.execute("layout.pages.delete", &json!({"pages": [pages - 1]})).unwrap();
+        assert_eq!(s.doc().unwrap().history.undo.len(), history + 1);
+        let deleted = s.doc().unwrap().doc.clone();
+        assert_eq!(deleted.page_count(), pages - 1);
+        assert_eq!(deleted.story(sid).unwrap().text, text, "deleting a frame preserves threaded text");
+        assert!(designcraft_compose::compose_story(&deleted, sid, &Default::default()).overset_at.is_some());
+        deleted.check().unwrap();
+        s.execute("edit.undo", &json!({})).unwrap();
+        assert_eq!(*s.doc().unwrap().doc, *full, "one undo restores the entire deleted page");
+        s.execute("edit.redo", &json!({})).unwrap();
+        assert_eq!(*s.doc().unwrap().doc, *deleted, "redo preserves deletion and overset text");
+        let frame = s.execute("frame.create", &json!({"rect": [36, 36, 80, 80]})).unwrap()["id"].clone();
+        s.execute("object.fill", &json!({"ids": [frame], "swatch": "[Black]"})).unwrap();
+        assert_eq!(s.doc().unwrap().doc.page_count(), pages - 1, "unrelated commands do not recreate the page");
+        s.execute("style.object.create", &json!({"name": "Unrelated object", "fromSelection": true})).unwrap();
+        s.execute("style.paragraph.create", &json!({"name": "Unused paragraph", "chars": {"size": 30}})).unwrap();
+        s.execute("style.character.create", &json!({"name": "Unused character", "chars": {"size": 30}})).unwrap();
+        assert_eq!(s.doc().unwrap().doc.page_count(), pages - 1, "unused style definitions are also unrelated");
+        s.execute("text.select", &json!({"story": sid.0, "anchor": text.len(), "focus": text.len()})).unwrap();
+        let history = s.doc().unwrap().history.undo.len();
+        s.execute("text.insert", &json!({"text": "More text."})).unwrap();
+        assert!(s.doc().unwrap().doc.page_count() >= pages, "a real text edit resumes automatic flow");
+        assert_eq!(s.doc().unwrap().history.undo.len(), history + 1, "typing and its reflow remain one undo step");
+        s.execute("edit.undo", &json!({})).unwrap();
+        assert_eq!(s.doc().unwrap().doc.page_count(), pages - 1);
+        assert_eq!(s.doc().unwrap().doc.story(sid).unwrap().text, text);
+    }
+
+    #[test]
+    fn smart_reflow_resumes_for_typography_frame_geometry_and_text_wrap() {
+        for change in ["typography", "frame", "wrap"] {
+            let mut s = Session::new();
+            s.execute("file.new", &json!({"pages": 1, "primaryTextFrame": true})).unwrap();
+            let sid = s.doc().unwrap().doc.settings.primary_story.unwrap();
+            s.execute("text.select", &json!({"story": sid.0, "anchor": 0, "focus": 0})).unwrap();
+            s.execute("text.insert", &json!({"text": "Words keep coming and the page fills up quickly with them. ".repeat(250)})).unwrap();
+            let pages = s.doc().unwrap().doc.page_count();
+            assert!(pages >= 3);
+            s.execute("layout.pages.delete", &json!({"pages": [pages - 1]})).unwrap();
+            assert_eq!(s.doc().unwrap().doc.page_count(), pages - 1);
+            match change {
+                "typography" => {
+                    let n = s.doc().unwrap().doc.story(sid).unwrap().len();
+                    s.execute("text.select", &json!({"story": sid.0, "anchor": 0, "focus": n})).unwrap();
+                    s.execute("type.char", &json!({"size": 14})).unwrap();
+                }
+                "frame" => {
+                    let d = &s.doc().unwrap().doc;
+                    let frame = d.story(sid).unwrap().frames[0];
+                    let r = d.item(frame).unwrap().bounds();
+                    s.execute(
+                        "transform.resize",
+                        &json!({"ids": [frame.0], "from": [r.x0, r.y0, r.x1, r.y1], "to": [r.x0, r.y0, r.center().x, r.y1]}),
+                    )
+                    .unwrap();
+                }
+                _ => {
+                    let frame = s.execute("frame.create", &json!({"rect": [36, 36, 300, 600]})).unwrap()["id"].clone();
+                    assert_eq!(s.doc().unwrap().doc.page_count(), pages - 1, "a non-wrapping object is unrelated");
+                    s.execute("object.textWrap", &json!({"ids": [frame], "mode": "boundingBox"})).unwrap();
+                }
+            }
+            let d = &s.doc().unwrap().doc;
+            assert!(d.page_count() > pages - 1, "{change} resumes automatic flow");
+            assert!(designcraft_compose::compose_story(d, sid, &Default::default()).overset_at.is_none(), "{change} fits again");
+            d.check().unwrap();
+        }
+    }
+
     #[test]
     fn smart_text_reflow_adds_primary_frames_with_the_page_columns() {
         let mut s = Session::new();

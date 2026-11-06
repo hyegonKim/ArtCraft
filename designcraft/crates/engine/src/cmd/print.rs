@@ -130,24 +130,18 @@ mod tests {
         let id = s.execute("frame.create", &json!({"rect": [72, 72, 200, 200]})).unwrap()["id"].clone();
         s.execute("object.fill", &json!({"ids": [id], "swatch": "C=100 M=0 Y=0 K=0"})).unwrap();
         s.execute("object.dropShadow", &json!({"ids": [id], "on": true, "distance": 8, "size": 6})).unwrap();
-        let params = json!({"standard": "x4"});
-        // The creation date is in whole seconds: an attempt can straddle a second boundary.
-        let mut matched = false;
-        for _ in 0..3 {
-            let exported = s.execute("file.exportPdf", &params).unwrap();
-            let mut printed = Vec::new();
-            let r = print_with(&mut s, &params, |pdf, _| {
-                printed = pdf.to_vec();
-                Ok("request id is Office-1".into())
-            })
-            .unwrap();
-            assert_eq!(r["warnings"], exported["warnings"]);
-            assert!(r["warnings"].as_array().unwrap().iter().any(|w| w.as_str().unwrap().contains("soft effects")), "{r}");
-            if printed == super::super::file::base64_decode(exported["base64"].as_str().unwrap()) {
-                matched = true;
-                break;
-            }
-        }
-        assert!(matched, "File › Print spools Export PDF's bytes");
+        // Use the public date option so slow renders cannot cross clock seconds between
+        // the two exports. The entire spooled PDF must match, including its metadata.
+        let params = json!({"standard": "x4", "created": 1_700_000_000});
+        let exported = s.execute("file.exportPdf", &params).unwrap();
+        let mut printed = Vec::new();
+        let r = print_with(&mut s, &params, |pdf, _| {
+            printed = pdf.to_vec();
+            Ok("request id is Office-1".into())
+        })
+        .unwrap();
+        assert_eq!(r["warnings"], exported["warnings"]);
+        assert!(r["warnings"].as_array().unwrap().iter().any(|w| w.as_str().unwrap().contains("soft effects")), "{r}");
+        assert_eq!(printed, super::super::file::base64_decode(exported["base64"].as_str().unwrap()), "File › Print spools Export PDF's bytes");
     }
 }

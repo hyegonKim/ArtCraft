@@ -327,6 +327,7 @@ const SYSTEM_UI_FONTS: &[(&str, char, &[&str])] = &[
     ("Hant", '中', &["PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC"]),
     ("Kore", '한', &["Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR", "Source Han Sans K", "NanumGothic", "UnDotum"]),
     // Scripts the built-in faces lack, after the CJK ones (text in the Story Editor, font names).
+    ("Arab", 'خ', &["Geeza Pro", "Noto Sans Arabic", "Noto Naskh Arabic", "DejaVu Sans", "Arial", "Tahoma"]),
     ("Taml", 'த', &["Tamil Sangam MN", "Tamil MN", "Nirmala UI", "Latha", "Noto Sans Tamil", "Noto Sans Tamil UI", "Lohit Tamil"]),
     ("Deva", 'क', &["Kohinoor Devanagari", "Devanagari Sangam MN", "Nirmala UI", "Mangal", "Noto Sans Devanagari", "Lohit Devanagari"]),
     ("Beng", 'ক', &["Kohinoor Bangla", "Bangla Sangam MN", "Nirmala UI", "Vrinda", "Noto Sans Bengali", "Lohit Bengali"]),
@@ -449,12 +450,17 @@ pub(crate) fn add_system_fallbacks(fonts: &mut FontDefinitions, system: &[System
         .chain(system.iter().filter(|f| !CJK.contains(&f.script)))
         .map(name)
         .collect();
+    let arabic_first: Vec<String> = system.iter().filter(|f| f.script == "Arab").map(name).collect();
     for (family, stack) in fonts.families.iter_mut() {
-        // The Arabic families keep their own order (see `font_definitions`).
+        // An installed Arabic face, like an embedded one, owns spaces as well as letters
+        // in Arabic runs. Other families keep their current UI/CJK precedence.
         let arabic = matches!(family, FontFamily::Name(n) if n.starts_with("arabic"));
         let at = if arabic { stack.len() } else { stack.iter().position(|n| n.starts_with("craft-")).unwrap_or(stack.len()) };
         stack.splice(at..at, preferred.iter().cloned());
-        stack.extend(rest.iter().cloned());
+        if arabic {
+            stack.splice(0..0, arabic_first.iter().cloned());
+        }
+        stack.extend(rest.iter().filter(|n| !arabic || !arabic_first.contains(n)).cloned());
     }
 }
 
@@ -527,6 +533,13 @@ pub(crate) fn font_definitions(craft: &'static [designcraft_fonts::CraftFont], l
             .chain(last_resort.iter().cloned());
         let mut seen = std::collections::HashSet::new();
         fonts.families.insert(FontFamily::Name(family.into()), stack.filter(|n| seen.insert(n.clone())).collect());
+    }
+    // The already embedded JetBrains Mono covers keyboard symbols (notably Return)
+    // absent from the proportional UI face. Use it only after each family's own faces.
+    for stack in fonts.families.values_mut() {
+        if !stack.iter().any(|name| name == "mono") {
+            stack.push("mono".into());
+        }
     }
     fonts
 }
@@ -643,6 +656,51 @@ mod japanese_font_tests {
         let defs = super::font_definitions(designcraft_fonts::CRAFT_FONTS, "ja");
         let stack = &defs.families[&egui::FontFamily::Proportional];
         assert_eq!(stack.iter().find(|n| n.starts_with("craft-")).map(String::as_str), Some("craft-BIZ UDPGothic-Regular"));
+    }
+
+    #[test]
+    fn bundled_ui_fallbacks_cover_option_and_return_without_craft_fonts() {
+        let ctx = egui::Context::default();
+        ctx.set_fonts(super::font_definitions(&[], ""));
+        let mut output = ctx.run_ui(egui::RawInput::default(), |_| {});
+        output.textures_delta.clear();
+        ctx.fonts_mut(|fonts| {
+            for family in families() {
+                let font = egui::FontId::new(13.0, family);
+                for ch in "⌥⏎".chars() {
+                    assert!(fonts.has_glyph(&font, ch), "missing {ch} in {:?}", font.family);
+                }
+            }
+        });
+    }
+
+    #[test]
+    fn installed_arabic_face_is_discovered_without_craft_fonts() {
+        let dir = std::env::temp_dir().join(format!("dc-ui-arabic-fonts-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let chars = ['خ', 'ص', 'ا', 'ئ'];
+        std::fs::write(dir.join("arabic.ttf"), designcraft_fonts::testing::font_with("Noto Sans Arabic", &chars).unwrap()).unwrap();
+        let db = designcraft_fonts::FontDb::with_font_dirs(vec![dir.clone()]);
+        let system = super::installed_ui_fonts(&db, &[]);
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(system.iter().map(|f| (f.script, f.family.as_str())).collect::<Vec<_>>(), [("Arab", "Noto Sans Arabic")]);
+        let mut defs = super::font_definitions(&[], "ar");
+        super::add_system_fallbacks(&mut defs, &system, "ar");
+        for family in ["arabic", "arabic-semibold"] {
+            assert_eq!(defs.families[&egui::FontFamily::Name(family.into())].first().map(String::as_str), Some("system-Noto Sans Arabic"));
+        }
+        let ctx = egui::Context::default();
+        ctx.set_fonts(defs);
+        let mut output = ctx.run_ui(egui::RawInput::default(), |_| {});
+        output.textures_delta.clear();
+        ctx.fonts_mut(|fonts| {
+            for family in families() {
+                let font = egui::FontId::new(13.0, family);
+                for ch in chars {
+                    assert!(fonts.has_glyph(&font, ch), "missing {ch} in {:?}", font.family);
+                }
+            }
+        });
     }
 
     /// Without craft-fonts, an installed Japanese face gives the interface its glyphs (here a

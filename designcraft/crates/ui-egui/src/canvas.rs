@@ -4925,12 +4925,12 @@ mod tests {
             assert_ne!(pasted.0, id);
             st.doc.item(pasted).unwrap().bounds()
         };
-        let linux = egui::Modifiers { alt: true, ctrl: true, shift: true, mac_cmd: false, command: true };
-        assert_eq!(paste(&mut h, linux), original, "Paste in Place");
+        let in_place = egui::Modifiers { alt: true, shift: true, ..crate::test_window::command_modifiers() };
+        assert_eq!(paste(&mut h, in_place), original, "Paste in Place");
         let moved = paste(&mut h, egui::Modifiers::COMMAND);
         assert!((moved.x0 - original.x0 - 12.0).abs() < 1e-9 && (moved.y0 - original.y0 - 12.0).abs() < 1e-9, "{moved:?}");
         // The modifiers went down in an earlier frame than the paste.
-        h.event_modifiers(egui::Event::Paste(clip.clone()), linux);
+        h.event_modifiers(egui::Event::Paste(clip.clone()), in_place);
         h.run_steps(2);
         let st = h.state().session.doc().unwrap();
         let pasted = *st.selection.items.first().expect("the copy is selected");

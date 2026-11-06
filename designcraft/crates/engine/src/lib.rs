@@ -18,6 +18,7 @@ pub mod io;
 pub mod links;
 pub mod math;
 pub mod recovery;
+mod reflow;
 pub mod sample;
 pub mod script;
 pub mod separations;
@@ -581,7 +582,13 @@ impl Session {
             st.active_layer = st.doc.default_layer();
         }
         self.record_transform(id, params);
-        if self.prefs.smart_text_reflow && spec.undoable {
+        // An explicit page deletion preserves threaded text as overset. Reflow is driven
+        // by changed composition data, not every unrelated subsequent edit or new Arc.
+        if self.prefs.smart_text_reflow
+            && spec.undoable
+            && id != "layout.pages.delete"
+            && before.as_ref().zip(self.active()).is_some_and(|((uid, old, _), st)| st.uid == *uid && reflow::inputs_changed(old, &st.doc))
+        {
             self.smart_reflow();
         }
         // Live captions follow their sources.

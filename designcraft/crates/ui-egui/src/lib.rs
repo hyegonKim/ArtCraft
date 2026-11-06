@@ -4786,6 +4786,28 @@ pub(crate) mod test_window {
         ready: bool,
     }
 
+    /// An ordinary primary command key, without adding the distinct macOS Control key.
+    pub fn command_modifiers() -> egui::Modifiers {
+        egui::Modifiers { command: true, mac_cmd: cfg!(target_os = "macos"), ctrl: !cfg!(target_os = "macos"), ..Default::default() }
+    }
+
+    /// A panel rendered after the same font/theme setup as the app, including the first
+    /// deferred font-installation frame. Keep the panel's real interaction assertions.
+    pub fn panel(app: crate::DesignApp, size: egui::Vec2, draw: fn(&mut crate::DesignApp, &mut egui::Ui)) -> Harness<'static, crate::DesignApp> {
+        let mut ready = false;
+        Harness::builder().with_size(size).build_ui_state(
+            move |ui, app: &mut crate::DesignApp| {
+                app.ui_setup(ui.ctx());
+                if !ready {
+                    ready = true;
+                    return;
+                }
+                draw(app, ui);
+            },
+            app,
+        )
+    }
+
     /// The window at `size` with a new document open.
     pub fn open(app: crate::DesignApp, size: egui::Vec2) -> Harness<'static, Window> {
         open_scaled(app, size, 1.0)
