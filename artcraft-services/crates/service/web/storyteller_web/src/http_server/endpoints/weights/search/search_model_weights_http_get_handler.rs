@@ -21,8 +21,8 @@ use crate::state::server_state::ServerState;
     (status = 500, description = "Server error", body = SearchModelWeightsError),
   ),
   params(
-    ("request" = SearchModelWeightsRequest, description = "Payload for Request"),
-  )
+    SearchModelWeightsRequest,
+  ),
 )]
 pub async fn search_model_weights_http_get_handler(
   http_request: HttpRequest,

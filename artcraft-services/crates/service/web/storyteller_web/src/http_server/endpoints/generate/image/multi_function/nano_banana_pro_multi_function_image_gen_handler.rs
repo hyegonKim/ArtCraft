@@ -52,9 +52,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = NanoBananaProMultiFunctionImageGenResponse),
   ),
-  params(
-    ("request" = NanoBananaProMultiFunctionImageGenRequest, description = "Payload for Request"),
-  )
+  request_body = NanoBananaProMultiFunctionImageGenRequest,
 )]
 pub async fn nano_banana_pro_multi_function_image_gen_handler(
   http_request: HttpRequest,

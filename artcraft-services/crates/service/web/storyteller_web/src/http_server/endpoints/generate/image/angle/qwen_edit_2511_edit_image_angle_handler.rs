@@ -37,9 +37,7 @@ use tokens::tokens::generic_inference_jobs::InferenceJobToken;
   responses(
     (status = 200, description = "Success", body = QwenEdit2511EditImageAngleResponse),
   ),
-  params(
-    ("request" = QwenEdit2511EditImageAngleRequest, description = "Payload for Request"),
-  )
+  request_body = QwenEdit2511EditImageAngleRequest,
 )]
 pub async fn qwen_edit_2511_edit_image_angle_handler(
   http_request: HttpRequest,

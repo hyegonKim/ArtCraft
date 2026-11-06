@@ -40,9 +40,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = SeedEdit3EditImageResponse),
   ),
-  params(
-    ("request" = SeedEdit3EditImageRequest, description = "Payload for Request"),
-  )
+  request_body = SeedEdit3EditImageRequest,
 )]
 pub async fn seededit_3_edit_image_handler(
   http_request: HttpRequest,

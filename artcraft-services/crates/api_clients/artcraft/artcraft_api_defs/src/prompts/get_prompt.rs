@@ -18,6 +18,8 @@ use enums::common::generation::common_model_class::CommonModelClass;
 pub const GET_PROMPT_PATH: &str = "/v1/prompts/{token}";
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetPromptPathInfo {
   pub token: PromptToken,
 }

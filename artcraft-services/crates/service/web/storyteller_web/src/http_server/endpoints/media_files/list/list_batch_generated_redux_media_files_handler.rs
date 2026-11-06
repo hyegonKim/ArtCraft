@@ -34,8 +34,8 @@ use utoipa::{IntoParams, ToSchema};
     (status = 200, description = "Success", body = ListBatchGeneratedReduxMediaFilesSuccessResponse),
   ),
   params(
-    ("request" = ListBatchGeneratedReduxMediaFilesPathInfo, description = "Payload for Request"),
-  )
+    ListBatchGeneratedReduxMediaFilesPathInfo,
+  ),
 )]
 pub async fn list_batch_generated_redux_media_files_handler(
   http_request: HttpRequest,

@@ -24,6 +24,8 @@ use crate::http_server::user_lookup::api_or_web_session::require_api_or_web_sess
 use crate::state::server_state::ServerState;
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListMediaFilesByJobPathInfo {
   job_token: InferenceJobToken,
 }
@@ -41,8 +43,8 @@ pub struct ListMediaFilesByJobPathInfo {
     (status = 500, description = "Server error"),
   ),
   params(
-    ("path" = ListMediaFilesByJobPathInfo, description = "Path for Request")
-  )
+    ListMediaFilesByJobPathInfo,
+  ),
 )]
 pub async fn list_media_files_by_job_handler(
   http_request: HttpRequest,

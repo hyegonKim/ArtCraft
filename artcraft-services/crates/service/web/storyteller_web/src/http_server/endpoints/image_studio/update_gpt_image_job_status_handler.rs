@@ -71,9 +71,7 @@ pub struct UpdateGptImageJobStatusSuccessResponse {
     (status = 200, body = UpdateGptImageJobStatusSuccessResponse),
     (status = 500, body = CommonWebError),
   ),
-  params(
-    ("request" = UpdateGptImageJobStatusRequest, description = "Request"),
-  )
+  request_body = UpdateGptImageJobStatusRequest,
 )]
 pub async fn update_gpt_image_job_status_handler(
   http_request: HttpRequest,

@@ -28,19 +28,19 @@ use utoipa::ToSchema;
 
 /// Delete a media file. (Files and records are soft deleted.)
 #[utoipa::path(
-    delete,
-    tag = "Media Files",
-    path = "/v1/media_files/file/{token}",
-    responses(
+  delete,
+  tag = "Media Files",
+  path = "/v1/media_files/file/{token}",
+  responses(
         (status = 200, description = "Success Delete", body = SimpleGenericJsonSuccess),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("request" = DeleteMediaFileRequest, description = "Payload for Request"),
-        ("path" = DeleteMediaFilePathInfo, description = "Path for Request")
-    )
+  params(
+    DeleteMediaFilePathInfo,
+  ),
+  request_body = DeleteMediaFileRequest,
 )]
 pub async fn delete_media_file_handler(
     http_request: HttpRequest,

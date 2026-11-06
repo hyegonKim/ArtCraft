@@ -28,6 +28,8 @@ use crate::util::check_creator_tokens::{check_creator_tokens, CheckCreatorTokenA
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct UploadSavedSceneMediaFilePathInfo {
   token: MediaFileToken,
 }
@@ -76,12 +78,9 @@ pub struct UploadSavedSceneMediaFileSuccessResponse {
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
   params(
-    ("path" = UploadSavedSceneMediaFilePathInfo, description = "Path for Request"),
-    (
-      "request" = UploadSavedSceneMediaFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UploadSavedSceneMediaFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+    UploadSavedSceneMediaFilePathInfo,
+  ),
+  request_body(content = UploadSavedSceneMediaFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_saved_scene_media_file_handler(
   http_request: HttpRequest,

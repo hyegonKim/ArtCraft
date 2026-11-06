@@ -15,6 +15,8 @@ pub const LIST_BATCH_GENERATED_REDUX_MEDIA_FILES_URL_PATH: &str = "/v1/media_fil
 
 /// For the URL PathInfo
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListBatchGeneratedReduxMediaFilesPathInfo {
   pub token: BatchGenerationToken,
 }

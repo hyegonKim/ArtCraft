@@ -36,9 +36,9 @@ pub struct RenameMediaFileRequest {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("request" = RenameMediaFileRequest, description = "Payload for Request"),
-    ("path" = MediaFileTokenPathInfo, description = "Path for Request")
-  )
+    MediaFileTokenPathInfo,
+  ),
+  request_body = RenameMediaFileRequest,
 )]
 pub async fn rename_media_file_handler(
   http_request: HttpRequest,

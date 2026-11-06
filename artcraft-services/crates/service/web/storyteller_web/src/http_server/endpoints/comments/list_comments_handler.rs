@@ -29,6 +29,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListCommentsPathInfo {
   entity_type: CommentEntityType,
   entity_token: String,
@@ -118,12 +120,12 @@ impl fmt::Display for ListCommentsError {
   get,
   tag = "Comments",
   path = "/v1/comments/list/{entity_type}/{entity_token}",
-  params(
-    ("path" = ListCommentsPathInfo, description = "Path for Request"),
-  ),
   responses(
     (status = 200, description = "Success", body = ListCommentsSuccessResponse),
     (status = 500, description = "Server error", body = ListCommentsError),
+  ),
+  params(
+    ListCommentsPathInfo,
   ),
 )]
 pub async fn list_comments_handler(

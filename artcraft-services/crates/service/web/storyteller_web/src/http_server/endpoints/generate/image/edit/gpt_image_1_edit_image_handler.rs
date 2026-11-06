@@ -47,9 +47,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GptImage1EditImageResponse),
   ),
-  params(
-    ("request" = GptImage1EditImageRequest, description = "Payload for Request"),
-  )
+  request_body = GptImage1EditImageRequest,
 )]
 pub async fn gpt_image_1_edit_image_handler(
   http_request: HttpRequest,

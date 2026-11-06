@@ -126,12 +126,7 @@ static ALLOWED_MIME_TYPES : Lazy<HashSet<&'static str>> = Lazy::new(|| {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    (
-      "request" = OmniUploadVideoMediaFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `OmniUploadVideoMediaFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = OmniUploadVideoMediaFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn omni_upload_video_media_file_handler(
   http_request: HttpRequest,

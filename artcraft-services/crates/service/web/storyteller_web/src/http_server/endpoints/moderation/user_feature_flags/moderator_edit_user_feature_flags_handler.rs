@@ -32,6 +32,8 @@ use artcraft_api_defs::common::responses::simple_generic_json_success::SimpleGen
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct EditUserFeatureFlagPathInfo {
   username_or_token: String,
 }
@@ -74,9 +76,9 @@ pub enum EditUserFeatureFlagsOption {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("path" = EditUserFeatureFlagPathInfo, description = "Path for Request"),
-    ("request" = EditUserFeatureFlagsRequest, description = "Payload for Request"),
-  )
+    EditUserFeatureFlagPathInfo,
+  ),
+  request_body = EditUserFeatureFlagsRequest,
 )]
 pub async fn moderator_edit_user_feature_flags_handler(
   http_request: HttpRequest,

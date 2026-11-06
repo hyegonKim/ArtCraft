@@ -41,9 +41,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateHunyuan20ImageTo3dResponse),
   ),
-  params(
-    ("request" = GenerateHunyuan20ImageTo3dRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateHunyuan20ImageTo3dRequest,
 )]
 pub async fn generate_hunyuan_2_0_image_to_3d_handler(
   http_request: HttpRequest,

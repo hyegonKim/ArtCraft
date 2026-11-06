@@ -39,6 +39,19 @@ static ALLOWED_MIME_TYPES : Lazy<HashSet<&'static str>> = Lazy::new(|| {
   ])
 });
 
+/// Multipart wire fields accepted by the deprecated streaming upload parser.
+/// This schema is documentation only; the handler keeps its streaming parser.
+#[derive(utoipa::ToSchema)]
+pub struct LegacyVideoUploadForm {
+  pub uuid_idempotency_token: String,
+  #[schema(value_type = String, format = Binary)]
+  pub file: Vec<u8>,
+  /// Optional source hint: file or device.
+  pub source: Option<String>,
+  pub title: Option<String>,
+  pub visibility: Option<String>,
+}
+
 /// DEPRECATED: Use the "new video" endpoint instead.
 #[deprecated]
 #[utoipa::path(
@@ -52,9 +65,7 @@ static ALLOWED_MIME_TYPES : Lazy<HashSet<&'static str>> = Lazy::new(|| {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    ("request" = (), description = "Ask Brandon. This is form-multipart."),
-  )
+  request_body(content = LegacyVideoUploadForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_video_media_file_handler(
   http_request: HttpRequest,

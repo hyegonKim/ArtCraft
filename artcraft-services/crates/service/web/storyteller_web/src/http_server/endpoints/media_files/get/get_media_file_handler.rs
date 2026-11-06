@@ -37,6 +37,8 @@ use utoipa::ToSchema;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetMediaFilePathInfo {
   token: MediaFileToken,
 }
@@ -205,8 +207,8 @@ pub struct GetMediaFileModelInfo {
     (status = 500, description = "Server error"),
   ),
   params(
-    ("path" = GetMediaFilePathInfo, description = "Path for Request")
-  )
+    GetMediaFilePathInfo,
+  ),
 )]
 pub async fn get_media_file_handler(
   http_request: HttpRequest,

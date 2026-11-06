@@ -33,9 +33,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = RemoveImageBackgroundResponse),
   ),
-  params(
-    ("request" = RemoveImageBackgroundRequest, description = "Payload for Request"),
-  )
+  request_body = RemoveImageBackgroundRequest,
 )]
 pub async fn remove_image_background_handler(
   http_request: HttpRequest,

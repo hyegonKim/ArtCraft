@@ -6,11 +6,14 @@ use crate::media_file::list::user_media_file_list_item::MediaFileForUserListItem
 pub const LIST_MEDIA_FILES_FOR_USER_V2_URL_PATH: &str = "/v1/media_files/list_v2/user/{username}";
 
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListMediaFilesForUserV2PathInfo {
   pub username: String,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListMediaFilesForUserV2QueryParams {
   pub sort_ascending: Option<bool>,
   pub page_size: Option<usize>,

@@ -168,17 +168,17 @@ pub struct EnqueueVideoStyleTransferSuccessResponse {
 /// DEPRECATED. Use /v1/workflows/enqueue_studio or /v1/workflows/enqueue_vst
 #[deprecated(note = "Use /v1/workflows/enqueue_studio")]
 #[utoipa::path(
-    post,
-    tag = "Video Style Transfer",
-    path = "/v1/video/enqueue_vst",
-    responses(
+  post,
+  tag = "Video Style Transfer",
+  path = "/v1/video/enqueue_vst",
+  responses(
         (status = 200, description = "Success", body = EnqueueVideoStyleTransferSuccessResponse),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 429, description = "Rate limited", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError)
     ),
-    params(("request" = EnqueueVideoStyleTransferRequest, description = "Payload for request"))
+  request_body = EnqueueVideoStyleTransferRequest,
 )]
 pub async fn enqueue_video_style_transfer_handler(
     http_request: HttpRequest,

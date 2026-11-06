@@ -51,9 +51,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = Sora2ProMultiFunctionVideoGenResponse),
   ),
-  params(
-    ("request" = Sora2ProMultiFunctionVideoGenRequest, description = "Payload for Request"),
-  )
+  request_body = Sora2ProMultiFunctionVideoGenRequest,
 )]
 pub async fn sora_2_pro_multi_function_video_gen_handler(
   http_request: HttpRequest,

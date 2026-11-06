@@ -51,9 +51,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GptImage1p5MultiFunctionImageGenResponse),
   ),
-  params(
-    ("request" = GptImage1p5MultiFunctionImageGenRequest, description = "Payload for Request"),
-  )
+  request_body = GptImage1p5MultiFunctionImageGenRequest,
 )]
 pub async fn gpt_image_1p5_multi_function_image_gen_handler(
   http_request: HttpRequest,

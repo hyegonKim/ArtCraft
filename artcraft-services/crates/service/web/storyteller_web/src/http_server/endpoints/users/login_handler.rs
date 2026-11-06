@@ -99,9 +99,7 @@ impl LoginErrorResponse {
     (status = 401, description = "Invalid credentials", body = LoginErrorResponse),
     (status = 500, description = "Server error", body = LoginErrorResponse),
   ),
-  params(
-    ("request" = LoginRequest, description = "Payload for Request"),
-  )
+  request_body = LoginRequest,
 )]
 pub async fn login_handler(
   http_request: HttpRequest,

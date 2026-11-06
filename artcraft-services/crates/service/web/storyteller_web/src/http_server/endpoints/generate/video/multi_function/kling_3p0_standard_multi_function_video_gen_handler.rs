@@ -51,9 +51,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = Kling3p0StandardMultiFunctionVideoGenResponse),
   ),
-  params(
-    ("request" = Kling3p0StandardMultiFunctionVideoGenRequest, description = "Payload for Request"),
-  )
+  request_body = Kling3p0StandardMultiFunctionVideoGenRequest,
 )]
 pub async fn kling_3p0_standard_multi_function_video_gen_handler(
   http_request: HttpRequest,

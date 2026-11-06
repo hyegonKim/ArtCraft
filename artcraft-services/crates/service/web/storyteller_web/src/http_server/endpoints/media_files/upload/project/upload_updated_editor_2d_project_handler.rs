@@ -29,12 +29,9 @@ use crate::state::server_state::ServerState;
     (status = 500, description = "Server error"),
   ),
   params(
-    ("path" = UploadUpdatedEditor2dProjectPathInfo, description = "Path for Request"),
-    (
-      "request" = UpdateProjectMultipartForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UpdateProjectMultipartForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+    UploadUpdatedEditor2dProjectPathInfo,
+  ),
+  request_body(content = UpdateProjectMultipartForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_updated_editor_2d_project_handler(
   http_request: HttpRequest,

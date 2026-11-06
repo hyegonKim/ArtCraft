@@ -82,9 +82,7 @@ impl fmt::Display for LogBrowserSessionError {
     (status = 401, description = "Not authorized", body = LogBrowserSessionError),
     (status = 500, description = "Server error", body = LogBrowserSessionError),
   ),
-  params(
-    ("request" = LogBrowserSessionRequest, description = "Payload for Request"),
-  )
+  request_body = LogBrowserSessionRequest,
 )]
 pub async fn log_browser_session_handler(
   http_request: HttpRequest,

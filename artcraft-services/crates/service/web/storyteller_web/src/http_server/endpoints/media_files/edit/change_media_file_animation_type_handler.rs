@@ -35,19 +35,19 @@ pub struct ChangeMediaFileAnimationTypeRequest {
 ///
 /// Only characters, expressions, and animations can have an animation type.
 #[utoipa::path(
-    post,
-    tag = "Media Files",
-    path = "/v1/media_files/animation_type/{token}",
-    responses(
+  post,
+  tag = "Media Files",
+  path = "/v1/media_files/animation_type/{token}",
+  responses(
         (status = 200, description = "Success", body = SimpleResponse),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("request" = ChangeMediaFileAnimationTypeRequest, description = "Payload for Request"),
-        ("path" = MediaFileTokenPathInfo, description = "Path for Request")
-    )
+  params(
+    MediaFileTokenPathInfo,
+  ),
+  request_body = ChangeMediaFileAnimationTypeRequest,
 )]
 pub async fn change_media_file_animation_type_handler(
     http_request: HttpRequest,

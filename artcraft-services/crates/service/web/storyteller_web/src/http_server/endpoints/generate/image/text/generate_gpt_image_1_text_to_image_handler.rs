@@ -43,9 +43,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateGptImage1TextToImageResponse),
   ),
-  params(
-    ("request" = GenerateGptImage1TextToImageRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateGptImage1TextToImageRequest,
 )]
 pub async fn generate_gpt_image_1_text_to_image_handler(
   http_request: HttpRequest,

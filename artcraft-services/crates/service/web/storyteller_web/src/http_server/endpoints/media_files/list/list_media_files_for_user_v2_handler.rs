@@ -40,11 +40,14 @@ use crate::util::allowed_studio_access::allowed_studio_access;
   get,
   tag = "Media Files",
   path = "/v1/media_files/list_v2/user/{username}",
-  params(ListMediaFilesForUserV2QueryParams),
   responses(
     (status = 200, description = "Faster user-media page with has_more; no full-library count", body = ListMediaFilesForUserV2SuccessResponse),
     (status = 400, description = "Invalid pagination"),
     (status = 500, description = "Server error"),
+  ),
+  params(
+    ListMediaFilesForUserV2PathInfo,
+    ListMediaFilesForUserV2QueryParams,
   ),
 )]
 pub async fn list_media_files_for_user_v2_handler(

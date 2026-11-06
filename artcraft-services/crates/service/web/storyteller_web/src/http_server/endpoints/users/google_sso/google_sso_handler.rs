@@ -125,9 +125,7 @@ pub struct GoogleCreateAccountSuccessResponse {
     (status = 401, description = "Not authorized", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = GoogleCreateAccountRequest, description = "Payload for Request"),
-  )
+  request_body = GoogleCreateAccountRequest,
 )]
 pub async fn google_sso_handler(
   http_request: HttpRequest,

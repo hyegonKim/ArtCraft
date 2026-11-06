@@ -65,9 +65,7 @@ pub struct VideoInfoUploadForm {
     (status = 400, description = "Bad input", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = VideoInfoUploadForm, description = "Multipart form with a single `file` video upload."),
-  )
+  request_body(content = VideoInfoUploadForm, content_type = "multipart/form-data"),
 )]
 pub async fn video_info_upload_handler(
   http_request: HttpRequest,

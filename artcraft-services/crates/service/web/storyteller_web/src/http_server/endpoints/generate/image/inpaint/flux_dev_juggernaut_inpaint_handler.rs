@@ -40,9 +40,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = FluxDevJuggernautInpaintImageResponse),
   ),
-  params(
-    ("request" = FluxDevJuggernautInpaintImageRequest, description = "Payload for Request"),
-  )
+  request_body = FluxDevJuggernautInpaintImageRequest,
 )]
 pub async fn flux_dev_juggernaut_inpaint_image_handler(
   http_request: HttpRequest,

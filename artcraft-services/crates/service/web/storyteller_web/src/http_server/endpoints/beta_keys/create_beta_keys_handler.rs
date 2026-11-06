@@ -51,9 +51,7 @@ pub struct CreateBetaKeysSuccessResponse {
     (status = 401, description = "Not authorized", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = CreateBetaKeysRequest, description = "Payload for Request"),
-  )
+  request_body = CreateBetaKeysRequest,
 )]
 pub async fn create_beta_keys_handler(
   http_request: HttpRequest,

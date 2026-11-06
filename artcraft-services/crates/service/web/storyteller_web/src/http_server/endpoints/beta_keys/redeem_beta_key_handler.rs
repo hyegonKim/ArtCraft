@@ -43,9 +43,7 @@ pub struct RedeemBetaKeySuccessResponse {
     (status = 429, description = "Rate limited", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = RedeemBetaKeyRequest, description = "Payload for Request"),
-  )
+  request_body = RedeemBetaKeyRequest,
 )]
 pub async fn redeem_beta_key_handler(
   http_request: HttpRequest,

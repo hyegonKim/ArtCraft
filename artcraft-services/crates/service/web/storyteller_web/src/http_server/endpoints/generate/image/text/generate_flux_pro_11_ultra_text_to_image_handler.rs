@@ -41,9 +41,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateFluxPro11UltraTextToImageResponse),
   ),
-  params(
-    ("request" = GenerateFluxPro11UltraTextToImageRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateFluxPro11UltraTextToImageRequest,
 )]
 pub async fn generate_flux_pro_11_ultra_text_to_image_handler(
   http_request: HttpRequest,

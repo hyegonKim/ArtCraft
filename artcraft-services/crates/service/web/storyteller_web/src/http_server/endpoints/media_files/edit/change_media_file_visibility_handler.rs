@@ -27,19 +27,19 @@ pub struct ChangeMediaFileVisibilityRequest {
 
 /// Change the visibility (public, hidden, private) of a media file.
 #[utoipa::path(
-    post,
-    tag = "Media Files",
-    path = "/v1/media_files/visibility/{token}",
-    responses(
+  post,
+  tag = "Media Files",
+  path = "/v1/media_files/visibility/{token}",
+  responses(
         (status = 200, description = "Success", body = SimpleGenericJsonSuccess),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("request" = ChangeMediaFileVisibilityRequest, description = "Payload for Request"),
-        ("path" = MediaFileTokenPathInfo, description = "Path for Request")
-    )
+  params(
+    MediaFileTokenPathInfo,
+  ),
+  request_body = ChangeMediaFileVisibilityRequest,
 )]
 pub async fn change_media_file_visibility_handler(
     http_request: HttpRequest,

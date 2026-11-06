@@ -20,6 +20,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct TerminateInferenceJobPathInfo {
   token: InferenceJobToken,
 }
@@ -37,12 +39,12 @@ pub struct TerminateInferenceJobSuccessResponse {
   delete,
   tag = "Jobs",
   path = "/v1/jobs/job/{token}",
-  params(
-    ("path" = TerminateInferenceJobPathInfo, description = "Path params for Request")
-  ),
   responses(
     (status = 200, body = TerminateInferenceJobSuccessResponse),
     (status = 500, body = CommonWebError),
+  ),
+  params(
+    TerminateInferenceJobPathInfo,
   ),
 )]
 pub async fn terminate_inference_job_handler(

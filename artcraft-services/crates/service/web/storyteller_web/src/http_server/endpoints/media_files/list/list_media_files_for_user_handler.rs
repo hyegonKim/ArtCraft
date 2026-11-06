@@ -21,11 +21,14 @@ use crate::state::server_state::ServerState;
 use crate::util::allowed_studio_access::allowed_studio_access;
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListMediaFilesForUserPathInfo {
   username: String,
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListMediaFilesForUserQueryParams {
   pub sort_ascending: Option<bool>,
   pub page_size: Option<usize>,
@@ -83,12 +86,13 @@ pub struct ListMediaFilesForUserSuccessResponse {
   get,
   tag = "Media Files",
   path = "/v1/media_files/list/user/{username}",
-  params(
-     ListMediaFilesForUserQueryParams,
-  ),
   responses(
     (status = 200, description = "List Featured Media Files", body = ListMediaFilesForUserSuccessResponse),
     (status = 500, description = "Server error"),
+  ),
+  params(
+    ListMediaFilesForUserPathInfo,
+    ListMediaFilesForUserQueryParams,
   ),
 )]
 pub async fn list_media_files_for_user_handler(

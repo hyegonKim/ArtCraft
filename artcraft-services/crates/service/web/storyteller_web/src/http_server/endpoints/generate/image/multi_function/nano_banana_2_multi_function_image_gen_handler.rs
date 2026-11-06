@@ -39,9 +39,7 @@ use tokens::tokens::generic_inference_jobs::InferenceJobToken;
   responses(
     (status = 200, description = "Success", body = NanaBanana2MultiFunctionImageGenResponse),
   ),
-  params(
-    ("request" = NanaBanana2MultiFunctionImageGenRequest, description = "Payload for Request"),
-  )
+  request_body = NanaBanana2MultiFunctionImageGenRequest,
 )]
 pub async fn nano_banana_2_multi_function_image_gen_handler(
   http_request: HttpRequest,

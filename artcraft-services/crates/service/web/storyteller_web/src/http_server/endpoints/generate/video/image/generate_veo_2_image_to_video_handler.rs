@@ -50,9 +50,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateVeo2ImageToVideoResponse),
   ),
-  params(
-    ("request" = GenerateVeo2ImageToVideoRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateVeo2ImageToVideoRequest,
 )]
 pub async fn generate_veo_2_image_to_video_handler(
   http_request: HttpRequest,

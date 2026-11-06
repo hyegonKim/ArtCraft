@@ -41,9 +41,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = FluxProKontextMaxEditImageResponse),
   ),
-  params(
-    ("request" = FluxProKontextMaxEditImageRequest, description = "Payload for Request"),
-  )
+  request_body = FluxProKontextMaxEditImageRequest,
 )]
 pub async fn flux_pro_kontext_max_edit_image_handler(
   http_request: HttpRequest,

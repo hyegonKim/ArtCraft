@@ -19,6 +19,8 @@ use utoipa::ToSchema;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetSessionCreditsPathInfo {
   namespace: PaymentsNamespace,
 }
@@ -31,8 +33,8 @@ pub struct GetSessionCreditsPathInfo {
     (status = 200, description = "Success", body = GetSessionCreditsResponse),
   ),
   params(
-    ("path" = GetSessionCreditsPathInfo, description = "Path for Request")
-  )
+    GetSessionCreditsPathInfo,
+  ),
 )]
 pub async fn get_session_credits_handler(
   http_request: HttpRequest,

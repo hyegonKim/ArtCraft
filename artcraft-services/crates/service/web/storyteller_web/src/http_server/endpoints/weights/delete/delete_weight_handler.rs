@@ -20,6 +20,8 @@ use crate::state::server_state::ServerState;
 use crate::util::delete_role_disambiguation::{delete_role_disambiguation, DeleteRole};
 
 #[derive(Deserialize,ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct DeleteWeightPathInfo {
   weight_token: String, 
 }
@@ -44,9 +46,9 @@ pub struct DeleteWeightRequest {
       (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-      ("request" = DeleteWeightRequest, description = "Payload for Request"),
-      ("path" = DeleteWeightPathInfo, description = "Path for Request")
-  )
+    DeleteWeightPathInfo,
+  ),
+  request_body = DeleteWeightRequest,
 )]
 pub async fn delete_weight_handler(
     http_request: HttpRequest,

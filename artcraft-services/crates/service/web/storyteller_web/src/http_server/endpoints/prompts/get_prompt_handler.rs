@@ -29,8 +29,8 @@ use crate::state::server_state::ServerState;
     (status = 500, description = "Server error"),
   ),
   params(
-    ("path" = GetPromptPathInfo, description = "Path for Request")
-  )
+    GetPromptPathInfo,
+  ),
 )]
 pub async fn get_prompt_handler(
   http_request: HttpRequest,

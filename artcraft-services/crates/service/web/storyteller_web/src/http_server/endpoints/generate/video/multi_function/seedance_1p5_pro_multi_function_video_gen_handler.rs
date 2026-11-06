@@ -44,9 +44,7 @@ use tokens::tokens::non_unique::debug_logs_event_token::DebugLogEventToken;
   responses(
     (status = 200, description = "Success", body = Seedance1p5ProMultiFunctionVideoGenResponse),
   ),
-  params(
-    ("request" = Seedance1p5ProMultiFunctionVideoGenRequest, description = "Payload for Request"),
-  )
+  request_body = Seedance1p5ProMultiFunctionVideoGenRequest,
 )]
 pub async fn seedance_1p5_pro_multi_function_video_gen_handler(
   http_request: HttpRequest,

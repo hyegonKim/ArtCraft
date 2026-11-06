@@ -87,12 +87,7 @@ pub struct UploadStudioShotSuccessResponse {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    (
-      "request" = UploadStudioShotFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UploadStudioShotFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = UploadStudioShotFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_studio_shot_media_file_handler(
   http_request: HttpRequest,

@@ -82,23 +82,25 @@ pub struct GetWeightResponse {
 }
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetWeightPathInfo {
     weight_token: ModelWeightToken,
 }
 #[utoipa::path(
-    get,
-    tag = "Model Weights",
-    path = "/v1/weights/weight/{weight_token}",
-    responses(
+  get,
+  tag = "Model Weights",
+  path = "/v1/weights/weight/{weight_token}",
+  responses(
         (status = 200, description = "Success Update", body = GetWeightResponse),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("path" = GetWeightPathInfo, description = "Path for Request")
-    )
-  )]
+  params(
+    GetWeightPathInfo,
+  ),
+)]
 pub async fn get_weight_handler(
     http_request: HttpRequest,
     path: Path<GetWeightPathInfo>,

@@ -803,8 +803,11 @@ use crate::http_server::endpoints::media_files::list::list_batch_generated_redux
     ZsVoiceDatasetToken,
 
     // Internal (worker fleets)
+    LegacyGenericUploadForm,
+    LegacyVideoUploadForm,
     MarkMinimaxJobFailureRequest,
     MarkMinimaxJobFailureResponse,
+    crate::http_server::endpoints::internal::minimax_jobs::mark_minimax_job_success_handler::MarkMinimaxJobSuccessForm,
     MarkMinimaxJobSuccessResponse,
     MinimaxJobMediaReference,
     MinimaxJobPromptDetails,
@@ -1639,3 +1642,97 @@ use crate::http_server::endpoints::media_files::list::list_batch_generated_redux
   ))
 )]
 pub struct ApiDoc;
+
+#[cfg(test)]
+mod openapi_contract_tests {
+  use std::collections::BTreeSet;
+  use serde_json::Value;
+  use utoipa::OpenApi;
+  use super::ApiDoc;
+
+  fn document() -> Value {
+    serde_json::to_value(ApiDoc::openapi()).expect("OpenAPI must serialize")
+  }
+
+  #[test]
+  fn every_local_reference_resolves_in_the_generated_document() {
+    fn visit(value: &Value, root: &Value) {
+      match value {
+        Value::Object(object) => {
+          if let Some(reference) = object.get("$ref").and_then(Value::as_str) {
+            if let Some(pointer) = reference.strip_prefix('#') {
+              assert!(root.pointer(pointer).is_some(), "Unresolved OpenAPI reference: {}", reference);
+            }
+          }
+          for child in object.values() { visit(child, root); }
+        }
+        Value::Array(array) => for child in array { visit(child, root); },
+        _ => {},
+      }
+    }
+    let root = document();
+    visit(&root, &root);
+  }
+
+  #[test]
+  fn operation_path_parameters_match_the_uri_template_and_are_required() {
+    let root = document();
+    for (path, item) in root["paths"].as_object().unwrap() {
+      let expected: BTreeSet<_> = path.split('{').skip(1)
+        .map(|part| part.split_once('}').expect("closed URI parameter").0.to_owned())
+        .collect();
+      for method in ["get", "put", "post", "delete", "options", "head", "patch", "trace"] {
+        let Some(operation) = item.get(method) else { continue; };
+        let mut actual = BTreeSet::new();
+        for parameters in [item.get("parameters"), operation.get("parameters")] {
+          if let Some(parameters) = parameters.and_then(Value::as_array) {
+            for parameter in parameters {
+              if parameter["in"] == "path" {
+                assert_eq!(parameter["required"], true, "{} {}", method, path);
+                let name = parameter["name"].as_str().expect("parameter name").to_owned();
+                assert!(actual.insert(name), "Duplicate path parameter: {} {}", method, path);
+              }
+            }
+          }
+        }
+        assert_eq!(actual, expected, "{} {}", method, path);
+      }
+    }
+  }
+
+  #[test]
+  fn json_bodies_and_query_fields_use_their_actual_transport() {
+    let root = document();
+    let password = &root["paths"]["/v1/user/change_password"]["post"];
+    assert!(password["requestBody"]["content"]["application/json"]["schema"].is_object());
+    let search = &root["paths"]["/v1/weights/search"]["get"];
+    assert!(search.get("requestBody").is_none());
+    let parameters = search["parameters"].as_array().unwrap();
+    assert!(parameters.iter().any(|p| p["name"] == "search_term" && p["in"] == "query" && p["required"] == true));
+    assert!(!parameters.iter().any(|p| p["name"] == "request"));
+    let featured = &root["paths"]["/v1/featured_item/is_featured/{entity_type}/{entity_token}"]["get"];
+    assert!(featured.get("requestBody").is_none());
+  }
+
+  #[test]
+  fn multipart_uploads_describe_binary_files_and_optional_numeric_metadata() {
+    let root = document();
+    let operation = &root["paths"]["/v1/internal/minimax_jobs/job/{job_token}/success"]["post"];
+    let schema = &operation["requestBody"]["content"]["multipart/form-data"]["schema"];
+    let reference = schema["$ref"].as_str().expect("registered multipart schema");
+    let form = root.pointer(reference.strip_prefix('#').unwrap()).unwrap();
+    assert_eq!(form["properties"]["file"]["type"], "string");
+    assert_eq!(form["properties"]["file"]["format"], "binary");
+    let required = form["required"].as_array().unwrap();
+    assert!(required.iter().any(|name| name == "file"));
+    for name in ["duration_millis", "width", "height", "execution_duration_millis", "inference_duration_millis"] {
+      let field = &form["properties"][name];
+      assert!(field["type"] == "integer" || field["type"].as_array().is_some_and(|types| types.iter().any(|kind| kind == "integer")), "{}", name);
+      assert!(field.get("format").and_then(Value::as_str) != Some("binary"));
+      assert!(!required.iter().any(|required_name| required_name == name));
+    }
+    for path in ["/v1/media_files/upload", "/v1/media_files/upload/video"] {
+      assert!(root["paths"][path]["post"]["requestBody"]["content"]["multipart/form-data"].is_object());
+    }
+  }
+}

@@ -10,6 +10,8 @@ pub const LOG_ACTIVE_USER_V1_PATH: &str = "/v1/analytics/active_user";
 pub const LOG_ACTIVE_USER_V2_PATH: &str = "/v1/analytics/active_user_v2";
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Default)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct LogAppActiveUserRequest {
   /// Clientside-generated session token.
   /// If present, it'll be validated against an expected format.

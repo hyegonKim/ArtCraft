@@ -24,6 +24,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct DeleteCommentPathInfo {
   comment_token: CommentToken,
 }
@@ -76,16 +78,16 @@ impl fmt::Display for DeleteCommentError {
   post,
   tag = "Comments",
   path = "/v1/comments/delete/{comment_token}",
-  params(
-    ("request" = DeleteCommentRequest, description = "Payload for Request"),
-    ("path" = DeleteCommentPathInfo, description = "Path for Request"),
-  ),
   responses(
     (status = 200, description = "Success", body = SimpleGenericJsonSuccess),
     (status = 400, description = "Bad input", body = DeleteCommentError),
     (status = 401, description = "Not authorized", body = DeleteCommentError),
     (status = 500, description = "Server error", body = DeleteCommentError),
   ),
+  params(
+    DeleteCommentPathInfo,
+  ),
+  request_body = DeleteCommentRequest,
 )]
 pub async fn delete_comment_handler(
   http_request: HttpRequest,

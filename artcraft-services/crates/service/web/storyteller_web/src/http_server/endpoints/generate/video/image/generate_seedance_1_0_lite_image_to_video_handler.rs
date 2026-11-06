@@ -52,9 +52,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateSeedance10LiteImageToVideoResponse),
   ),
-  params(
-    ("request" = GenerateSeedance10LiteImageToVideoRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateSeedance10LiteImageToVideoRequest,
 )]
 pub async fn generate_seedance_1_0_lite_image_to_video_handler(
   http_request: HttpRequest,

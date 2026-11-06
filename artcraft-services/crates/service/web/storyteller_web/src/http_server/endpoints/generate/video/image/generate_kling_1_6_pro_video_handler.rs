@@ -43,9 +43,7 @@ use enums::common::generation::common_generation_mode::CommonGenerationMode;
   responses(
     (status = 200, description = "Success", body = GenerateKling16ProImageToVideoResponse),
   ),
-  params(
-    ("request" = GenerateKling16ProImageToVideoRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateKling16ProImageToVideoRequest,
 )]
 pub async fn generate_kling_1_6_pro_video_handler(
   http_request: HttpRequest,

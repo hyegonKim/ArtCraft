@@ -44,9 +44,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = Gemini25FlashEditImageResponse),
   ),
-  params(
-    ("request" = Gemini25FlashEditImageRequest, description = "Payload for Request"),
-  )
+  request_body = Gemini25FlashEditImageRequest,
 )]
 #[deprecated(note="use `nano_banana_multi_function_image_gen_handler` instead")]
 pub async fn gemini_25_flash_edit_image_handler(

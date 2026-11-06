@@ -37,9 +37,7 @@ use tokens::tokens::generic_inference_jobs::InferenceJobToken;
   responses(
     (status = 200, description = "Success", body = Flux2LoraEditImageAngleResponse),
   ),
-  params(
-    ("request" = Flux2LoraEditImageAngleRequest, description = "Payload for Request"),
-  )
+  request_body = Flux2LoraEditImageAngleRequest,
 )]
 pub async fn flux_2_lora_edit_image_angle_handler(
   http_request: HttpRequest,

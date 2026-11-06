@@ -25,9 +25,7 @@ use mysql_queries::queries::prompts::insert_prompt::{insert_prompt, InsertPrompt
   responses(
     (status = 200, description = "Success", body = CreatePromptResponse),
   ),
-  params(
-    ("request" = CreatePromptRequest, description = "Payload for Request"),
-  )
+  request_body = CreatePromptRequest,
 )]
 pub async fn create_prompt_handler(
   http_request: HttpRequest,

@@ -93,9 +93,7 @@ struct DebugLogContext<'a> {
   responses(
     (status = 200, description = "Success", body = Seedance2p0MultiFunctionVideoGenResponse),
   ),
-  params(
-    ("request" = Seedance2p0MultiFunctionVideoGenRequest, description = "Payload for Request"),
-  )
+  request_body = Seedance2p0MultiFunctionVideoGenRequest,
 )]
 pub async fn seedance_2p0_multi_function_video_gen_handler(
   http_request: HttpRequest,

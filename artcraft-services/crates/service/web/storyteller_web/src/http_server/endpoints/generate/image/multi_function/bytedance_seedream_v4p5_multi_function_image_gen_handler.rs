@@ -51,9 +51,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = BytedanceSeedreamV4p5MultiFunctionImageGenResponse),
   ),
-  params(
-    ("request" = BytedanceSeedreamV4p5MultiFunctionImageGenRequest, description = "Payload for Request"),
-  )
+  request_body = BytedanceSeedreamV4p5MultiFunctionImageGenRequest,
 )]
 pub async fn bytedance_seedream_v4p5_multi_function_image_gen_handler(
   http_request: HttpRequest,

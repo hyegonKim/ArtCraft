@@ -29,9 +29,7 @@ use password::bcrypt_hash_password::bcrypt_hash_password;
     (status = 401, description = "Not authorized", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = ChangePasswordRequest, description = "Payload for Request"),
-  )
+  request_body = ChangePasswordRequest,
 )]
 pub async fn change_password_handler(
   http_request: HttpRequest,

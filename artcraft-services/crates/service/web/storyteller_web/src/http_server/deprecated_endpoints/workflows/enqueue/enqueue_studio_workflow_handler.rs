@@ -69,7 +69,7 @@ const DEFAULT_STRENGTH : f32 = 1.0;
     (status = 429, description = "Rate limited", body = VstError),
     (status = 500, description = "Server error", body = VstError)
   ),
-  params(("request" = VstRequest, description = "Payload for request"))
+  request_body = VstRequest,
 )]
 pub async fn enqueue_studio_workflow_handler(
   http_request: HttpRequest,

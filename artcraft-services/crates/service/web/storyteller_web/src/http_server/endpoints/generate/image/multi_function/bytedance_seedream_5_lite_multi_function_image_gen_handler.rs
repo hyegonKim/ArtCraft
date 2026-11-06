@@ -39,9 +39,7 @@ use tokens::tokens::generic_inference_jobs::InferenceJobToken;
   responses(
     (status = 200, description = "Success", body = BytedanceSeedream5LiteMultiFunctionImageGenResponse),
   ),
-  params(
-    ("request" = BytedanceSeedream5LiteMultiFunctionImageGenRequest, description = "Payload for Request"),
-  )
+  request_body = BytedanceSeedream5LiteMultiFunctionImageGenRequest,
 )]
 pub async fn bytedance_seedream_5_lite_multi_function_image_gen_handler(
   http_request: HttpRequest,

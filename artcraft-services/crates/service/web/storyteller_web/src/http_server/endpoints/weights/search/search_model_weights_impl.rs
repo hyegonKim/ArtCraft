@@ -25,6 +25,8 @@ use crate::http_server::web_utils::response_error_helpers::to_simple_json_error;
 use crate::state::server_state::ServerState;
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct SearchModelWeightsRequest {
   pub search_term: String,
   pub weight_type: Option<WeightsType>,

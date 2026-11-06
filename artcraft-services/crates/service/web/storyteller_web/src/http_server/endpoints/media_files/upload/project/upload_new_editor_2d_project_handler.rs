@@ -29,12 +29,7 @@ use crate::state::server_state::ServerState;
     (status = 401, description = "Not authorized"),
     (status = 500, description = "Server error"),
   ),
-  params(
-    (
-      "request" = NewProjectMultipartForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `NewProjectMultipartForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = NewProjectMultipartForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_new_editor_2d_project_handler(
   http_request: HttpRequest,

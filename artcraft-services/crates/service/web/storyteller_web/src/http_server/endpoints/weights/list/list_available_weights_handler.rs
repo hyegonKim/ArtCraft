@@ -28,6 +28,8 @@ use crate::state::server_state::ServerState;
 use crate::util::title_to_url_slug::title_to_url_slug;
 
 #[derive(Deserialize,ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListAvailableWeightsQuery {
     pub sort_ascending: Option<bool>,
     pub page_size: Option<u16>,
@@ -129,17 +131,17 @@ impl ResponseError for ListWeightError {
 }
 
 #[utoipa::path(
-    get,
-    tag = "Model Weights",
-    path = "/v1/weights/list",
-    responses(
+  get,
+  tag = "Model Weights",
+  path = "/v1/weights/list",
+  responses(
         (status = 200, description = "List Weights", body = ListAvailableWeightsSuccessResponse),
         (status = 401, description = "Not authorized", body = ListWeightError),
         (status = 500, description = "Server error", body = ListWeightError),
     ),
-    params(
-        ("request" = ListAvailableWeightsQuery, description = "Payload for Request"),
-    )
+  params(
+    ListAvailableWeightsQuery,
+  ),
 )]
 pub async fn list_available_weights_handler(
     http_request: HttpRequest,

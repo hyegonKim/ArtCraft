@@ -12,6 +12,8 @@ pub struct DeleteMediaFileRequest {
 
 /// For the URL PathInfo
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct DeleteMediaFilePathInfo {
   pub token: MediaFileToken,
 }

@@ -90,9 +90,7 @@ impl fmt::Display for CreateCommentError {
     (status = 401, description = "Not authorized", body = CreateCommentError),
     (status = 500, description = "Server error", body = CreateCommentError),
   ),
-  params(
-    ("request" = CreateCommentRequest, description = "Payload for Request"),
-  )
+  request_body = CreateCommentRequest,
 )]
 pub async fn create_comment_handler(
   http_request: HttpRequest,

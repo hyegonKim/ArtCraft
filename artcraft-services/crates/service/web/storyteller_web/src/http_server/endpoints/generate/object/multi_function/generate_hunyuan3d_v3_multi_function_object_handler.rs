@@ -54,9 +54,7 @@ use tokens::tokens::media_files::MediaFileToken;
   responses(
     (status = 200, description = "Success", body = Hunyuan3dV3MultiFunctionObjectGenResponse),
   ),
-  params(
-    ("request" = Hunyuan3dV3MultiFunctionObjectGenRequest, description = "Payload for Request"),
-  )
+  request_body = Hunyuan3dV3MultiFunctionObjectGenRequest,
 )]
 pub async fn generate_hunyuan3d_v3_multi_function_object_handler(
   http_request: HttpRequest,

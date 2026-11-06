@@ -29,6 +29,8 @@ pub struct SetModelWeightCoverImageResponse {
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct SetModelWeightCoverImagePathInfo {
   token: ModelWeightToken,
 }
@@ -40,7 +42,7 @@ pub struct SetModelWeightCoverImagePathInfo {
 #[utoipa::path(
   post,
   tag = "Model Weights",
-  path = "/v1/weights/weight/{weight_token}/cover_image",
+  path = "/v1/weights/weight/{token}/cover_image",
   responses(
     (status = 200, description = "Success Update", body = SetModelWeightCoverImageResponse),
     (status = 400, description = "Bad input", body = CommonWebError),
@@ -48,9 +50,9 @@ pub struct SetModelWeightCoverImagePathInfo {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("request" = SetModelWeightCoverImageRequest, description = "Payload for Request"),
-    ("path" = SetModelWeightCoverImagePathInfo, description = "Path for Request")
-  )
+    SetModelWeightCoverImagePathInfo,
+  ),
+  request_body = SetModelWeightCoverImageRequest,
 )]
 pub async fn set_model_weight_cover_image_handler(
   http_request: HttpRequest,

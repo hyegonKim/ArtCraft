@@ -140,9 +140,7 @@ impl ResponseError for CreateAccountErrorResponse {
     (status = 401, description = "Not authorized", body = CreateAccountErrorResponse),
     (status = 500, description = "Server error", body = CreateAccountErrorResponse),
   ),
-  params(
-    ("request" = CreateAccountRequest, description = "Payload for Request"),
-  )
+  request_body = CreateAccountRequest,
 )]
 pub async fn create_account_handler(
   http_request: HttpRequest,

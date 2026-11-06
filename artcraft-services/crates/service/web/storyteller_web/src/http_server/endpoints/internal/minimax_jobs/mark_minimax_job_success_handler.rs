@@ -42,6 +42,8 @@ use crate::state::server_state::ServerState;
 const BUCKET_PATH_PREFIX: Option<&str> = Some("artcraft_");
 
 #[derive(Deserialize)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct MarkMinimaxJobSuccessPathInfo {
   job_token: InferenceJobToken,
 }
@@ -52,32 +54,32 @@ pub struct MarkMinimaxJobSuccessPathInfo {
 pub struct MarkMinimaxJobSuccessForm {
   /// The generated video file bytes.
   #[multipart(limit = "1 GiB")]
-  #[schema(value_type = Vec<u8>, format = Binary)]
+  #[schema(value_type = String, format = Binary)]
   file: TempFile,
 
   /// Optional: video duration in milliseconds. Probed from the file if absent.
   #[multipart(limit = "2 KiB")]
-  #[schema(value_type = Option<u64>, format = Binary)]
+  #[schema(value_type = Option<u64>)]
   duration_millis: Option<Text<u64>>,
 
   /// Optional: video frame width in pixels. Probed from the file if absent.
   #[multipart(limit = "2 KiB")]
-  #[schema(value_type = Option<u32>, format = Binary)]
+  #[schema(value_type = Option<u32>)]
   width: Option<Text<u32>>,
 
   /// Optional: video frame height in pixels. Probed from the file if absent.
   #[multipart(limit = "2 KiB")]
-  #[schema(value_type = Option<u32>, format = Binary)]
+  #[schema(value_type = Option<u32>)]
   height: Option<Text<u32>>,
 
   /// Optional: total wall-clock runtime of the job, in milliseconds.
   #[multipart(limit = "2 KiB")]
-  #[schema(value_type = Option<u64>, format = Binary)]
+  #[schema(value_type = Option<u64>)]
   execution_duration_millis: Option<Text<u64>>,
 
   /// Optional: inference-only runtime of the job, in milliseconds.
   #[multipart(limit = "2 KiB")]
-  #[schema(value_type = Option<u64>, format = Binary)]
+  #[schema(value_type = Option<u64>)]
   inference_duration_millis: Option<Text<u64>>,
 }
 
@@ -89,13 +91,6 @@ pub struct MarkMinimaxJobSuccessForm {
   post,
   tag = "Internal (Minimax Jobs)",
   path = "/v1/internal/minimax_jobs/job/{job_token}/success",
-  params(
-    ("job_token" = String, Path, description = "The inference job token"),
-    (
-      "request" = MarkMinimaxJobSuccessForm,
-      description = "Multipart form: `file` (video bytes) plus optional `duration_millis` / `width` / `height` metadata."
-    ),
-  ),
   responses(
     (status = 200, description = "Success", body = MarkMinimaxJobSuccessResponse),
     (status = 400, description = "Bad input (unreadable or non-video file)"),
@@ -103,6 +98,10 @@ pub struct MarkMinimaxJobSuccessForm {
     (status = 404, description = "No such minimax job"),
     (status = 500, description = "Server error"),
   ),
+  params(
+    MarkMinimaxJobSuccessPathInfo,
+  ),
+  request_body(content = MarkMinimaxJobSuccessForm, content_type = "multipart/form-data"),
 )]
 pub async fn mark_minimax_job_success_handler(
   http_request: HttpRequest,

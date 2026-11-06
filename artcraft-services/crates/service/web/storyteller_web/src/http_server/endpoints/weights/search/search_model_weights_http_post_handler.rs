@@ -22,9 +22,7 @@ use crate::state::server_state::ServerState;
     (status = 200, description = "Successful search", body = SearchModelWeightsSuccessResponse),
     (status = 500, description = "Server error", body = SearchModelWeightsError),
   ),
-  params(
-    ("request" = SearchModelWeightsRequest, description = "Payload for Request"),
-  )
+  request_body = SearchModelWeightsRequest,
 )]
 pub async fn search_model_weights_http_post_handler(
   http_request: HttpRequest,

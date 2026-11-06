@@ -7,6 +7,8 @@ pub const UPLOAD_UPDATED_EDITOR_2D_PROJECT_URL_PATH: &str = "/v1/media_files/upl
 
 /// For the URL PathInfo
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct UploadUpdatedEditor2dProjectPathInfo {
   pub token: MediaFileToken,
 }

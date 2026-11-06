@@ -20,6 +20,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct EditBetaKeyDistributedFlagPathInfo {
   token: BetaKeyToken,
 }
@@ -48,9 +50,9 @@ pub struct EditBetaKeyDistributedFlagSuccessResponse {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("request" = EditBetaKeyDistributedFlagRequest, description = "Payload for Request"),
-    ("path" = EditBetaKeyDistributedFlagPathInfo, description = "Path for Request")
-  )
+    EditBetaKeyDistributedFlagPathInfo,
+  ),
+  request_body = EditBetaKeyDistributedFlagRequest,
 )]
 pub async fn edit_beta_key_distributed_flag_handler(
   http_request: HttpRequest,

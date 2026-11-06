@@ -7,6 +7,8 @@ pub const UPLOAD_UPDATED_SCENE_3D_PROJECT_URL_PATH: &str = "/v1/media_files/uplo
 
 /// For the URL PathInfo
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct UploadUpdatedScene3dProjectPathInfo {
   pub token: MediaFileToken,
 }

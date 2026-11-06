@@ -107,7 +107,7 @@ impl std::fmt::Display for EnqueueFbxToGltfRequestError {
     (status = 429, description = "Rate limited", body = EnqueueFbxToGltfRequestError),
     (status = 500, description = "Server error", body = EnqueueFbxToGltfRequestError)
   ),
-  params(("request" = EnqueueFbxToGltfRequest, description = "Payload for FBX to GLTF Request"))
+  request_body = EnqueueFbxToGltfRequest,
 )]
 pub async fn enqueue_fbx_to_gltf_handler(
     http_request: HttpRequest,

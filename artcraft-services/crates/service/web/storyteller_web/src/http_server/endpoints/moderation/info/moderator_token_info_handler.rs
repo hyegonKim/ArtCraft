@@ -31,6 +31,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ModeratorTokenInfoPath {
   token: String,
 }
@@ -52,8 +54,8 @@ pub struct ModeratorTokenInfoResponse {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("path" = ModeratorTokenInfoPath, description = "Path for Request")
-  )
+    ModeratorTokenInfoPath,
+  ),
 )]
 pub async fn moderator_get_token_info_handler(
   path: Path<ModeratorTokenInfoPath>,

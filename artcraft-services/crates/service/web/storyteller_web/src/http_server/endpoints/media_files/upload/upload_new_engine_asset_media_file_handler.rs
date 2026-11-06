@@ -100,12 +100,7 @@ pub struct UploadNewEngineAssetSuccessResponse {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    (
-      "request" = UploadNewEngineAssetFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UploadNewEngineAssetFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = UploadNewEngineAssetFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_new_engine_asset_media_file_handler(
   http_request: HttpRequest,

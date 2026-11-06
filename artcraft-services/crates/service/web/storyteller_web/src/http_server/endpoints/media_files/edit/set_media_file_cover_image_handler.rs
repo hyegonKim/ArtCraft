@@ -42,9 +42,9 @@ pub struct SetMediaFileCoverImageRequest {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("request" = SetMediaFileCoverImageRequest, description = "Payload for Request"),
-    ("path" = MediaFileTokenPathInfo, description = "Path for Request")
-  )
+    MediaFileTokenPathInfo,
+  ),
+  request_body = SetMediaFileCoverImageRequest,
 )]
 pub async fn set_media_file_cover_image_handler(
   http_request: HttpRequest,

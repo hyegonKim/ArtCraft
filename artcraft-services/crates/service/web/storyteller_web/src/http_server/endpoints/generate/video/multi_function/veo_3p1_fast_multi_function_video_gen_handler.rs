@@ -50,9 +50,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = Veo3p1FastMultiFunctionVideoGenResponse),
   ),
-  params(
-    ("request" = Veo3p1FastMultiFunctionVideoGenRequest, description = "Payload for Request"),
-  )
+  request_body = Veo3p1FastMultiFunctionVideoGenRequest,
 )]
 pub async fn veo_3p1_fast_multi_function_video_gen_handler(
   http_request: HttpRequest,

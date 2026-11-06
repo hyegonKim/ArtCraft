@@ -22,11 +22,14 @@ const MAX_LIMIT: u32 = 1000;
 // --- Request ---
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListImpersonationRequestsPathInfo {
   user_token: UserToken,
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListImpersonationRequestsQueryParams {
   pub cursor: Option<String>,
   pub limit: Option<u32>,
@@ -63,13 +66,14 @@ pub struct UserImpersonationRequestResponse {
   get,
   tag = "Moderation",
   path = "/v1/moderation/user_sessions/impersonation_requests/user/{user_token}",
-  params(
-    ListImpersonationRequestsQueryParams,
-  ),
   responses(
     (status = 200, description = "Success", body = ListUserImpersonationRequestsSuccessResponse),
     (status = 401, description = "Unauthorized"),
     (status = 500, description = "Server error"),
+  ),
+  params(
+    ListImpersonationRequestsPathInfo,
+    ListImpersonationRequestsQueryParams,
   ),
 )]
 pub async fn moderator_list_user_session_impersonation_requests_for_user_handler(

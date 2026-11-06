@@ -36,6 +36,8 @@ use utoipa::ToSchema;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetInferenceJobStatusPathInfo {
   token: InferenceJobToken,
 }
@@ -137,13 +139,13 @@ pub struct ResultDetailsResponse {
   get,
   tag = "Jobs",
   path = "/v1/jobs/job/{token}",
-  params(
-    ("path" = GetInferenceJobStatusPathInfo, description = "Path params for Request")
-  ),
   responses(
     (status = 200, body = GetInferenceJobStatusSuccessResponse),
     (status = 404),
     (status = 500),
+  ),
+  params(
+    GetInferenceJobStatusPathInfo,
   ),
 )]
 pub async fn get_inference_job_status_handler(

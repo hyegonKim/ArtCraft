@@ -34,11 +34,14 @@ use crate::state::server_state::ServerState;
 use crate::util::allowed_studio_access::allowed_studio_access;
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListMediaFilesByBatchPathInfo {
   token: BatchGenerationToken,
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListMediaFilesByBatchQueryParams {
   pub sort_ascending: Option<bool>,
   pub page_size: Option<usize>,
@@ -147,12 +150,13 @@ pub struct MediaFilesByBatchListItem {
   get,
   tag = "Media Files",
   path = "/v1/media_files/batch/{token}",
-  params(
-    ListMediaFilesByBatchQueryParams,
-  ),
   responses(
     (status = 200, description = "List Media Files by Batch", body = ListMediaFilesByBatchSuccessResponse),
     (status = 500, description = "Server error"),
+  ),
+  params(
+    ListMediaFilesByBatchPathInfo,
+    ListMediaFilesByBatchQueryParams,
   ),
 )]
 pub async fn list_media_files_by_batch_token_handler(

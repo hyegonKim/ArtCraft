@@ -40,9 +40,7 @@ use mysql_queries::queries::prompts::insert_prompt::{insert_prompt, InsertPrompt
   responses(
     (status = 200, description = "Success", body = GenerateHunyuan21ImageTo3dResponse),
   ),
-  params(
-    ("request" = GenerateHunyuan21ImageTo3dRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateHunyuan21ImageTo3dRequest,
 )]
 pub async fn generate_hunyuan_2_1_image_to_3d_handler(
   http_request: HttpRequest,

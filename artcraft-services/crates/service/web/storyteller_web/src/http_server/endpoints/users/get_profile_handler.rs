@@ -88,6 +88,8 @@ pub struct ProfileSuccessResponse {
 }
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetProfilePathInfo {
   username: String,
 }
@@ -102,8 +104,8 @@ pub struct GetProfilePathInfo {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("path" = GetProfilePathInfo, description = "Path for Request")
-  )
+    GetProfilePathInfo,
+  ),
 )]
 pub async fn get_profile_handler(
   http_request: HttpRequest,

@@ -29,9 +29,7 @@ use users::email::validate_email_address_format::validate_email_address_format;
     (status = 401, description = "Not authorized", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError),
   ),
-  params(
-    ("request" = EditEmailRequest, description = "Payload for Request"),
-  )
+  request_body = EditEmailRequest,
 )]
 pub async fn edit_email_handler(
   http_request: HttpRequest,

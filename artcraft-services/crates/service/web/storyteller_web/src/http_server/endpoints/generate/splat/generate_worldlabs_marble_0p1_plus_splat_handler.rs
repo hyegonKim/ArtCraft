@@ -41,9 +41,7 @@ use worldlabs_api_client::pricing::check_pricing::{calculate_cost, InputType};
   responses(
     (status = 200, description = "Success", body = GenerateWorldlabsMarble0p1PlusSplatResponse),
   ),
-  params(
-    ("request" = GenerateWorldlabsMarble0p1PlusSplatRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateWorldlabsMarble0p1PlusSplatRequest,
 )]
 pub async fn generate_worldlabs_marble_0p1_plus_splat_handler(
   http_request: HttpRequest,

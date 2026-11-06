@@ -21,6 +21,8 @@ use crate::http_server::common_responses::common_web_error::CommonWebError;
 use crate::state::server_state::ServerState;
 
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetIsFeaturedItemPathInfo {
   entity_token: String,
   entity_type: FeaturedItemEntityType,
@@ -37,11 +39,13 @@ pub struct GetIsFeaturedItemSuccessResponse {
   get,
   tag = "Featured Items",
   path = "/v1/featured_item/is_featured/{entity_type}/{entity_token}",
-  request_body = GetIsFeaturedItemPathInfo,
   responses(
     (status = 200, body = GetIsFeaturedItemSuccessResponse),
     (status = 400, body = CommonWebError),
-  )
+  ),
+  params(
+    GetIsFeaturedItemPathInfo,
+  ),
 )]
 pub async fn get_is_featured_item_handler(
   http_request: HttpRequest,

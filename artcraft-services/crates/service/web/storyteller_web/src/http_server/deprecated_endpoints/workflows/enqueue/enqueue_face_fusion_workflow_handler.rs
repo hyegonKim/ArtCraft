@@ -90,7 +90,7 @@ pub struct EnqueueFaceFusionWorkflowSuccessResponse {
     (status = 429, description = "Rate limited", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError)
   ),
-  params(("request" = EnqueueFaceFusionWorkflowRequest, description = "Payload for request"))
+  request_body = EnqueueFaceFusionWorkflowRequest,
 )]
 pub async fn enqueue_face_fusion_workflow_handler(
   http_request: HttpRequest,

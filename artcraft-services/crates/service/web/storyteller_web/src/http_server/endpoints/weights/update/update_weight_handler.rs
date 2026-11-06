@@ -52,6 +52,8 @@ pub struct UpdateWeightResponse {
 
 /// For the URL PathInfo
 #[derive(Deserialize,ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct UpdateWeightPathInfo {
     weight_token: String,
 }
@@ -62,20 +64,20 @@ pub struct UpdateWeightPathInfo {
 
 /// Handle updates to model weight metadata (using sparse field updates!)
 #[utoipa::path(
-    post,
-    tag = "Model Weights",
-    path = "/v1/weights/weight/{weight_token}",
-    responses(
+  post,
+  tag = "Model Weights",
+  path = "/v1/weights/weight/{weight_token}",
+  responses(
         (status = 200, description = "Success Update", body = SimpleGenericJsonSuccess),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("request" = UpdateWeightRequest, description = "Payload for Request"),
-        ("path" = UpdateWeightPathInfo, description = "Path for Request")
-    )
-  )]
+  params(
+    UpdateWeightPathInfo,
+  ),
+  request_body = UpdateWeightRequest,
+)]
 pub async fn update_weight_handler(
     http_request: HttpRequest,
     path: Path<UpdateWeightPathInfo>,

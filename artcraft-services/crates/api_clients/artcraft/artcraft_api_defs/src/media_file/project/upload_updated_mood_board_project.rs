@@ -7,6 +7,8 @@ pub const UPLOAD_UPDATED_MOOD_BOARD_PROJECT_URL_PATH: &str = "/v1/media_files/up
 
 /// For the URL PathInfo
 #[derive(Serialize, Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct UploadUpdatedMoodBoardProjectPathInfo {
   pub token: MediaFileToken,
 }

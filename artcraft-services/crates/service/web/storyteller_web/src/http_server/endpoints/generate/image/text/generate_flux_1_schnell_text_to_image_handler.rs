@@ -35,9 +35,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateFlux1SchnellTextToImageResponse),
   ),
-  params(
-    ("request" = GenerateFlux1SchnellTextToImageRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateFlux1SchnellTextToImageRequest,
 )]
 pub async fn generate_flux_1_schnell_text_to_image_handler(
   http_request: HttpRequest,

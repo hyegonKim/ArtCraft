@@ -37,15 +37,13 @@ pub struct CreateCheckoutSessionSuccessResponse {
   get,
   tag = "Billing",
   path = "/v1/billing/stripe/checkout/create_redirect",
-  params(
-    ("request" = CreateCheckoutSessionRequest, description = "Payload for Request"),
-  ),
   responses(
     (status = 200, description = "Success Delete", body = CreateCheckoutSessionSuccessResponse),
     (status = 400, description = "Bad input", body = CreateCheckoutSessionError),
     (status = 401, description = "Not authorized", body = CreateCheckoutSessionError),
     (status = 500, description = "Server error", body = CreateCheckoutSessionError),
   ),
+  request_body = CreateCheckoutSessionRequest,
 )]
 pub async fn stripe_create_checkout_session_json_handler(
   http_request: HttpRequest,

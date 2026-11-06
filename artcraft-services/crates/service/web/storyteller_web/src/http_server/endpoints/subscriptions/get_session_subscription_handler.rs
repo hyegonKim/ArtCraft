@@ -18,6 +18,8 @@ use utoipa::ToSchema;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct GetSessionSubscriptionPathInfo {
   namespace: PaymentsNamespace,
 }
@@ -37,8 +39,8 @@ pub struct GetSessionSubscriptionPathInfo {
     (status = 200, description = "Success", body = GetSessionSubscriptionResponse),
   ),
   params(
-    ("path" = GetSessionSubscriptionPathInfo, description = "Path for Request")
-  )
+    GetSessionSubscriptionPathInfo,
+  ),
 )]
 pub async fn get_session_subscription_handler(
   http_request: HttpRequest,

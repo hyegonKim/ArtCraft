@@ -22,14 +22,14 @@ use crate::state::server_state::ServerState;
   get,
   tag = "Omni API",
   path = "/v1/omni_api/job_status/job/{token}",
-  params(
-    ("path" = OmniApiGetJobStatusPathInfo, description = "Path params for Request")
-  ),
   responses(
     (status = 200, body = OmniApiGetJobStatusSuccessResponse),
     (status = 401, description = "Unauthorized"),
     (status = 404),
     (status = 500),
+  ),
+  params(
+    OmniApiGetJobStatusPathInfo,
   ),
 )]
 pub async fn omni_api_get_job_status_handler(

@@ -19,6 +19,8 @@ use crate::state::server_state::ServerState;
 
 /// For the URL PathInfo
 #[derive(Deserialize, ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct EditBetaKeyNotePathInfo {
   token: BetaKeyToken,
 }
@@ -47,9 +49,9 @@ pub struct EditBetaKeyNoteSuccessResponse {
     (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-    ("request" = EditBetaKeyNoteRequest, description = "Payload for Request"),
-    ("path" = EditBetaKeyNotePathInfo, description = "Path for Request")
-  )
+    EditBetaKeyNotePathInfo,
+  ),
+  request_body = EditBetaKeyNoteRequest,
 )]
 pub async fn edit_beta_key_note_handler(
   http_request: HttpRequest,

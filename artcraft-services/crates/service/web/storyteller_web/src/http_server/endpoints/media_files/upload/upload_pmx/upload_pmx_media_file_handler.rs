@@ -92,12 +92,7 @@ pub struct UploadPmxSuccessResponse {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    (
-      "request" = UploadPmxFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UploadPmxFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = UploadPmxFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_pmx_media_file_handler(
   http_request: HttpRequest,

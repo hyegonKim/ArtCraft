@@ -84,6 +84,7 @@ pub struct ListWeightsByUserSuccessResponse {
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListWeightsForUserQueryParams {
   pub sort_ascending: Option<bool>,
   pub page_size: Option<usize>,
@@ -100,6 +101,8 @@ pub struct ListWeightsForUserQueryParams {
 }
 
 #[derive(Deserialize,ToSchema)]
+#[derive(utoipa::IntoParams)]
+#[into_params(parameter_in = Path)]
 pub struct ListWeightsByUserPathInfo {
   username: String,
 }
@@ -113,9 +116,9 @@ pub struct ListWeightsByUserPathInfo {
       (status = 500, description = "Server error", body = CommonWebError),
   ),
   params(
-      ("path" = ListWeightsByUserPathInfo, description = "Payload for Request"),
-      ListWeightsForUserQueryParams
-  )
+    ListWeightsByUserPathInfo,
+    ListWeightsForUserQueryParams,
+  ),
 )]
 pub async fn list_weights_by_user_handler(
   http_request: HttpRequest,

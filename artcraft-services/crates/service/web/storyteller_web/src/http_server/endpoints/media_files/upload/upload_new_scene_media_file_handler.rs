@@ -79,12 +79,7 @@ pub struct UploadNewSceneMediaFileSuccessResponse {
     (status = 429, description = "Too many requests", body = MediaFileUploadError),
     (status = 500, description = "Server error", body = MediaFileUploadError),
   ),
-  params(
-    (
-      "request" = UploadNewSceneMediaFileForm,
-      description = "IF VIEWING DOCS, PLEASE SEE BOTTOM OF PAGE `UploadNewSceneMediaFileForm` (Under 'Schema') FOR DETAILS ON FIELDS AND NULLABILITY."
-    ),
-  )
+  request_body(content = UploadNewSceneMediaFileForm, content_type = "multipart/form-data"),
 )]
 pub async fn upload_new_scene_media_file_handler(
   http_request: HttpRequest,

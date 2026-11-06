@@ -99,7 +99,7 @@ pub struct EnqueueLivePortraitWorkflowSuccessResponse {
     (status = 429, description = "Rate limited", body = CommonWebError),
     (status = 500, description = "Server error", body = CommonWebError)
   ),
-  params(("request" = EnqueueLivePortraitWorkflowRequest, description = "Payload for request"))
+  request_body = EnqueueLivePortraitWorkflowRequest,
 )]
 pub async fn enqueue_live_portrait_workflow_handler(
   http_request: HttpRequest,

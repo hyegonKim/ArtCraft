@@ -42,9 +42,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = GenerateVeo3FastImageToVideoResponse),
   ),
-  params(
-    ("request" = GenerateVeo3FastImageToVideoRequest, description = "Payload for Request"),
-  )
+  request_body = GenerateVeo3FastImageToVideoRequest,
 )]
 pub async fn generate_veo_3_fast_image_to_video_handler(
   http_request: HttpRequest,

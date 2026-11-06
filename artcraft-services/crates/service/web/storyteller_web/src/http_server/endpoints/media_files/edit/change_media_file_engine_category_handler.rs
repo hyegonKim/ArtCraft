@@ -32,19 +32,19 @@ pub struct ChangeMediaFileEngineCategoryRequest {
 ///
 /// Only certain transitions are allowed.
 #[utoipa::path(
-    post,
-    tag = "Media Files",
-    path = "/v1/media_files/engine_category/{token}",
-    responses(
+  post,
+  tag = "Media Files",
+  path = "/v1/media_files/engine_category/{token}",
+  responses(
         (status = 200, description = "Success", body = SimpleResponse),
         (status = 400, description = "Bad input", body = CommonWebError),
         (status = 401, description = "Not authorized", body = CommonWebError),
         (status = 500, description = "Server error", body = CommonWebError),
     ),
-    params(
-        ("request" = ChangeMediaFileEngineCategoryRequest, description = "Payload for Request"),
-        ("path" = MediaFileTokenPathInfo, description = "Path for Request")
-    )
+  params(
+    MediaFileTokenPathInfo,
+  ),
+  request_body = ChangeMediaFileEngineCategoryRequest,
 )]
 pub async fn change_media_file_engine_category_handler(
     http_request: HttpRequest,

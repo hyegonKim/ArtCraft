@@ -44,9 +44,7 @@ use utoipa::ToSchema;
   responses(
     (status = 200, description = "Success", body = QwenEditImageResponse),
   ),
-  params(
-    ("request" = QwenEditImageRequest, description = "Payload for Request"),
-  )
+  request_body = QwenEditImageRequest,
 )]
 pub async fn qwen_edit_image_handler(
   http_request: HttpRequest,
