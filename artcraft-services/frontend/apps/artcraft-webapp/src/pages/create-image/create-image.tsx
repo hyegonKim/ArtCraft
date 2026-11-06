@@ -71,7 +71,12 @@ import {
   getModelFamilyName,
   getModelInfo,
   modelCreatorFromBackend,
+  IMAGE_MODELS,
 } from "@storyteller/model-list";
+import {
+  buildPreviewModelItems,
+  MODEL_PREVIEW_NOTICE,
+} from "../../lib/model-catalog-preview";
 import { toast } from "../../components/toast/toast";
 import { useSignupCta } from "../../components/signup-cta-modal";
 import { useInsufficientCredits } from "../../components/insufficient-credits-modal";
@@ -121,7 +126,9 @@ export default function CreateImage() {
   const { promptBoxRef, promptHeight } = usePromptHeight();
 
   // Fetch models from API
-  const { models: apiModels } = useOmniGenImageModels();
+  const { models: apiModels, error: modelCatalogError } = useOmniGenImageModels();
+  const isModelPreview = modelCatalogError !== null;
+  const [previewModelId, setPreviewModelId] = useState(IMAGE_MODELS[0].id);
 
   // UI state
   const ui = useCreateImageStore((s) => s.ui);
@@ -284,15 +291,18 @@ export default function CreateImage() {
   });
 
   const modelItems = useMemo(
-    () => buildModelPopoverItems(apiModels, selectedModel?.model ?? ""),
-    [apiModels, selectedModel?.model],
+    () =>
+      isModelPreview
+        ? buildPreviewModelItems(IMAGE_MODELS, previewModelId)
+        : buildModelPopoverItems(apiModels, selectedModel?.model ?? ""),
+    [apiModels, isModelPreview, previewModelId, selectedModel?.model],
   );
   // Family-grouped variant for the desktop picker. The mobile bottom sheet
   // keeps the flat `modelItems` (no flyouts on touch).
   const modelPickerStyle = useModelPickerStyleStore((s) => s.style);
   const groupedModelItems = useMemo(
     () =>
-      modelPickerStyle === "grouped"
+      !isModelPreview && modelPickerStyle === "grouped"
         ? groupModelItems(modelItems, (item) =>
             getModelFamilyName(
               item.action,
@@ -304,7 +314,7 @@ export default function CreateImage() {
             ),
           )
         : modelItems,
-    [modelItems, modelPickerStyle],
+    [isModelPreview, modelItems, modelPickerStyle],
   );
 
   const hasContent =
@@ -406,6 +416,10 @@ export default function CreateImage() {
 
   const handleModelChange = useCallback(
     (item: PopoverItem) => {
+      if (isModelPreview) {
+        if (item.action) setPreviewModelId(item.action);
+        return;
+      }
       const model = item.action ? _modelLookup.get(item.action) : undefined;
       if (!model) return;
       // Only switch the model — aspect ratio / count / resolution / quality are
@@ -413,7 +427,7 @@ export default function CreateImage() {
       // choices survive model switches instead of resetting to defaults.
       setUi({ selectedModelId: model.model });
     },
-    [setUi],
+    [isModelPreview, setUi],
   );
 
   const handleLibraryImageSelect = useCallback(
@@ -439,6 +453,7 @@ export default function CreateImage() {
   );
 
   const handleGenerate = useCallback(async () => {
+    if (isModelPreview) return;
     if (!loggedIn) {
       openSignupCta();
       return;
@@ -530,6 +545,7 @@ export default function CreateImage() {
       setIsGenerating(false);
     }
   }, [
+    isModelPreview,
     loggedIn,
     openSignupCta,
     openInsufficientCredits,
@@ -576,15 +592,24 @@ export default function CreateImage() {
       prompt={prompt}
       onPromptChange={setPrompt}
       onSubmit={handleGenerate}
+      disabled={isModelPreview}
       isSubmitting={isGenerating}
       credits={estimatedCredits}
       placeholder="Describe what you want in the image..."
-      autoAdvance={loggedIn && !!prompt.trim() && !isGenerating}
+      autoAdvance={!isModelPreview && loggedIn && !!prompt.trim() && !isGenerating}
+      banner={
+        isModelPreview ? (
+          <p role="status" className="mb-2 text-sm text-base-fg">
+            {MODEL_PREVIEW_NOTICE}
+          </p>
+        ) : undefined
+      }
       modelField={
         <MobileSelectField
           label="Model"
           title="Select Model"
           items={modelItems}
+          disabled={modelItems.length === 0}
           onSelect={handleModelChange}
         />
       }
@@ -717,10 +742,16 @@ export default function CreateImage() {
             left: "var(--ac-sidebar-offset, 0px)",
           }}
         >
+          {isModelPreview && (
+            <p role="status" className="mb-2 text-sm text-base-fg">
+              {MODEL_PREVIEW_NOTICE}
+            </p>
+          )}
           <PromptBox
             prompt={prompt}
             onPromptChange={setPrompt}
             onSubmit={handleGenerate}
+            disabled={isModelPreview ? true : undefined}
             isSubmitting={isGenerating}
             credits={estimatedCredits}
             maxPromptLength={maxPromptLength}
@@ -747,7 +778,7 @@ export default function CreateImage() {
                   triggerIcon={
                     <img
                       src={getCreatorIconPathForModelId(
-                        selectedModel?.model ?? "",
+                        isModelPreview ? previewModelId : selectedModel?.model ?? "",
                       )}
                       alt=""
                       className="h-4 w-4 icon-auto-contrast"

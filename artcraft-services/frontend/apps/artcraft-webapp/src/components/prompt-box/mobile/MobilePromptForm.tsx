@@ -12,6 +12,7 @@ interface MobilePromptFormProps {
   onPromptChange: (value: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  disabled?: boolean;
   placeholder?: string;
   submitLabel?: string;
   credits?: number | null;
@@ -38,6 +39,7 @@ export function MobilePromptForm({
   onPromptChange,
   onSubmit,
   isSubmitting,
+  disabled = false,
   placeholder = "Describe what you want...",
   submitLabel = "Create",
   credits,
@@ -102,7 +104,7 @@ export function MobilePromptForm({
         <GenerateButton
           className="h-11 flex-1 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
           onClick={handleCreate}
-          disabled={!prompt.trim() || isSubmitting}
+          disabled={disabled || !prompt.trim() || isSubmitting}
           loading={isSubmitting}
           credits={credits}
         >

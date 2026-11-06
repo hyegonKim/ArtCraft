@@ -80,7 +80,12 @@ import {
   getModelFamilyName,
   getModelInfo,
   modelCreatorFromBackend,
+  VIDEO_MODELS,
 } from "@storyteller/model-list";
+import {
+  buildPreviewModelItems,
+  MODEL_PREVIEW_NOTICE,
+} from "../../lib/model-catalog-preview";
 import { useSignupCta } from "../../components/signup-cta-modal";
 import { useInsufficientCredits } from "../../components/insufficient-credits-modal";
 import { toast } from "../../components/toast/toast";
@@ -292,7 +297,9 @@ export default function CreateVideo() {
   const { promptBoxRef, promptHeight } = usePromptHeight();
 
   // Fetch models from API
-  const { models: apiModels } = useOmniGenVideoModels();
+  const { models: apiModels, error: modelCatalogError } = useOmniGenVideoModels();
+  const isModelPreview = modelCatalogError !== null;
+  const [previewModelId, setPreviewModelId] = useState(VIDEO_MODELS[0].id);
 
   // UI state
   const ui = useCreateVideoStore((s) => s.ui);
@@ -670,15 +677,18 @@ export default function CreateVideo() {
       : "Describe the video you want to generate...";
 
   const modelItems = useMemo(
-    () => buildModelPopoverItems(apiModels, selectedModel?.model ?? ""),
-    [apiModels, selectedModel?.model],
+    () =>
+      isModelPreview
+        ? buildPreviewModelItems(VIDEO_MODELS, previewModelId)
+        : buildModelPopoverItems(apiModels, selectedModel?.model ?? ""),
+    [apiModels, isModelPreview, previewModelId, selectedModel?.model],
   );
   // Family-grouped variant for the desktop picker. The mobile bottom sheet
   // keeps the flat `modelItems` (no flyouts on touch).
   const modelPickerStyle = useModelPickerStyleStore((s) => s.style);
   const groupedModelItems = useMemo(
     () =>
-      modelPickerStyle === "grouped"
+      !isModelPreview && modelPickerStyle === "grouped"
         ? groupModelItems(modelItems, (item) =>
             getModelFamilyName(
               item.action,
@@ -690,7 +700,7 @@ export default function CreateVideo() {
             ),
           )
         : modelItems,
-    [modelItems, modelPickerStyle],
+    [isModelPreview, modelItems, modelPickerStyle],
   );
   const sizeItems = useMemo(
     () =>
@@ -967,6 +977,10 @@ export default function CreateVideo() {
 
   const handleModelChange = useCallback(
     (item: PopoverItem) => {
+      if (isModelPreview) {
+        if (item.action) setPreviewModelId(item.action);
+        return;
+      }
       const model = item.action ? _modelLookup.get(item.action) : undefined;
       if (!model) return;
       const currentState = useCreateVideoStore.getState().ui;
@@ -1006,7 +1020,7 @@ export default function CreateVideo() {
         setReferenceAudios([]);
       }
     },
-    [setUi],
+    [isModelPreview, setUi],
   );
 
   const handleSizeChange = useCallback(
@@ -1251,6 +1265,7 @@ export default function CreateVideo() {
   );
 
   const handleGenerate = useCallback(async () => {
+    if (isModelPreview) return;
     if (!loggedIn) {
       openSignupCta();
       return;
@@ -1447,6 +1462,7 @@ export default function CreateVideo() {
     setIsGenerating(false);
     isGeneratingRef.current = false;
   }, [
+    isModelPreview,
     loggedIn,
     openSignupCta,
     openInsufficientCredits,
@@ -1521,15 +1537,20 @@ export default function CreateVideo() {
       prompt={prompt}
       onPromptChange={setPrompt}
       onSubmit={handleGenerate}
+      disabled={isModelPreview}
       isSubmitting={isGenerating}
       credits={estimatedCredits}
       placeholder={promptPlaceholder}
       mentionItems={mentionItems.length > 0 ? mentionItems : undefined}
       onMentionSelect={handleMentionSelect}
       mentionSelections={mentionSelections}
-      autoAdvance={loggedIn && !!prompt.trim() && !isGenerating && !needsImage}
+      autoAdvance={!isModelPreview && loggedIn && !!prompt.trim() && !isGenerating && !needsImage}
       banner={
-        requiresImageInput ? (
+        isModelPreview ? (
+          <p role="status" className="mb-2 text-sm text-base-fg">
+            {MODEL_PREVIEW_NOTICE}
+          </p>
+        ) : requiresImageInput ? (
           <div className="flex items-start gap-2.5 border border-amber-500/40 bg-ui-panel px-3.5 py-2.5 text-xs text-amber-100">
             <InfoIcon className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
             <span>
@@ -1569,6 +1590,7 @@ export default function CreateVideo() {
           label="Model"
           title="Select Model"
           items={modelItems}
+          disabled={modelItems.length === 0}
           onSelect={handleModelChange}
         />
       }
@@ -1783,10 +1805,16 @@ export default function CreateVideo() {
               </span>
             </div>
           )}
+          {isModelPreview && (
+            <p role="status" className="mb-2 text-sm text-base-fg">
+              {MODEL_PREVIEW_NOTICE}
+            </p>
+          )}
           <PromptBox
             prompt={prompt}
             onPromptChange={setPrompt}
             onSubmit={handleGenerate}
+            disabled={isModelPreview ? true : undefined}
             isSubmitting={isGenerating}
             credits={estimatedCredits}
             maxPromptLength={maxPromptLength}
@@ -1827,7 +1855,7 @@ export default function CreateVideo() {
                   triggerIcon={
                     <img
                       src={getCreatorIconPathForModelId(
-                        selectedModel?.model ?? "",
+                        isModelPreview ? previewModelId : selectedModel?.model ?? "",
                       )}
                       alt=""
                       className="h-4 w-4 icon-auto-contrast"
