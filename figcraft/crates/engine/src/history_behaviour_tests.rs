@@ -616,3 +616,72 @@ fn comments_and_restores_in_a_live_session() {
     assert_eq!(x, 0.0, "the restore reached everyone");
     assert!(doc.comment(c).is_some() && doc.comment(d).is_some(), "comments made since the version are kept");
 }
+
+// Local history restores the saved import, including legacy sizing that the first edit normalizes.
+fn imported_text_history_fixture() -> (Session, NodeId) {
+    // Match native/headless text readiness before the SVG parser first asks for its fonts.
+    figcraft_text::scan_system_fonts_on_demand();
+    let svg = br#"<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720"><text x="100" y="620" font-family="Helvetica" font-size="72">Snapshot history</text></svg>"#;
+    let (doc, _) = crate::cmd::file::load_bytes(svg, "snapshot-history.svg").unwrap();
+    let text = doc.nodes().find(|n| n.kind.text().is_some()).unwrap().id;
+    assert_eq!(doc.node(text).unwrap().child_layout, figcraft_doc::ChildLayout::default());
+    assert!(doc.dirty().contains(&text), "the imported snapshot must retain pending text settlement");
+    let mut s = Session::with_document(doc);
+    ex(&mut s, "select.set", json!({"ids": [text]}));
+    s.ds_mut().unwrap().mark_saved();
+    assert!(!s.ds().unwrap().is_dirty());
+    assert_eq!(s.undo_depth(), (0, 0));
+    (s, text)
+}
+
+#[test]
+fn imported_text_command_undo_restores_exact_saved_document() {
+    let (mut s, text) = imported_text_history_fixture();
+    let before = serde_json::to_value(s.doc().unwrap()).unwrap();
+    let geometry = (s.doc().unwrap().node(text).unwrap().width, s.doc().unwrap().node(text).unwrap().height);
+    ex(&mut s, "node.set", json!({"id": text, "props": {"fontSize": 80}}));
+    let edited = serde_json::to_value(s.doc().unwrap()).unwrap();
+    assert_ne!(edited, before);
+    let n = s.doc().unwrap().node(text).unwrap();
+    assert_eq!(n.kind.text().unwrap().style.font_size, 80.0);
+    assert_eq!(
+        (n.child_layout.sizing_h, n.child_layout.sizing_v),
+        (figcraft_doc::Sizing::Hug, figcraft_doc::Sizing::Hug),
+        "ordinary edits still normalize imported auto-width text"
+    );
+    assert!(s.ds().unwrap().is_dirty());
+    assert_eq!(s.undo_depth(), (1, 0));
+    for _ in 0..2 {
+        assert_eq!(ex(&mut s, "edit.undo", json!({}))["undone"], true);
+        assert_eq!(serde_json::to_value(s.doc().unwrap()).unwrap(), before, "Undo restores the whole saved document, not just font size");
+        let n = s.doc().unwrap().node(text).unwrap();
+        assert_eq!(n.kind.text().unwrap().style.font_size, 72.0);
+        assert_eq!((n.width, n.height), geometry);
+        assert!(!s.ds().unwrap().is_dirty(), "Undo reaches the saved Arc baseline");
+        assert_eq!(s.undo_depth(), (0, 1));
+        assert_eq!(ex(&mut s, "edit.redo", json!({}))["redone"], true);
+        assert_eq!(serde_json::to_value(s.doc().unwrap()).unwrap(), edited, "Redo restores the complete edited snapshot");
+        assert!(s.ds().unwrap().is_dirty());
+        assert_eq!(s.undo_depth(), (1, 0));
+    }
+    assert_eq!(ex(&mut s, "edit.undo", json!({}))["undone"], true);
+    assert_eq!(ex(&mut s, "edit.undo", json!({}))["undone"], false, "an exhausted history stays unchanged");
+    assert_eq!(serde_json::to_value(s.doc().unwrap()).unwrap(), before);
+    assert!(!s.ds().unwrap().is_dirty());
+    assert_eq!(s.undo_depth(), (0, 1));
+}
+
+#[test]
+fn imported_text_direct_undo_control_restores_exact_saved_document() {
+    let (mut s, text) = imported_text_history_fixture();
+    let before = serde_json::to_value(s.doc().unwrap()).unwrap();
+    ex(&mut s, "node.set", json!({"id": text, "props": {"fontSize": 80}}));
+    let edited = serde_json::to_value(s.doc().unwrap()).unwrap();
+    assert!(s.undo().unwrap());
+    assert_eq!(serde_json::to_value(s.doc().unwrap()).unwrap(), before);
+    assert!(!s.ds().unwrap().is_dirty());
+    assert_eq!(s.undo_depth(), (0, 1));
+    assert!(s.redo().unwrap());
+    assert_eq!(serde_json::to_value(s.doc().unwrap()).unwrap(), edited);
+    assert_eq!(s.undo_depth(), (1, 0));
+}

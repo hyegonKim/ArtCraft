@@ -924,6 +924,16 @@ fn b(p: &Value, k: &str) -> bool {
     p.get(k).and_then(Value::as_bool).unwrap_or(false)
 }
 
+/// Translate the control protocol's platform accelerator (`cmd`) and physical Control key
+/// independently. On Mac, Command never implies Control; on other platforms either flag maps
+/// to Control, which egui also exposes as `command`. The receiving context determines the OS.
+fn input_modifiers(p: &Value, os: egui::os::OperatingSystem) -> egui::Modifiers {
+    let mac = os == egui::os::OperatingSystem::Mac;
+    let cmd = b(p, "cmd");
+    let ctrl = b(p, "ctrl");
+    egui::Modifiers { alt: b(p, "alt"), ctrl: ctrl || !mac && cmd, shift: b(p, "shift"), mac_cmd: mac && cmd, command: cmd || !mac && ctrl }
+}
+
 /// Handle one control method (also used by tests and the headless snapshot tool).
 pub fn handle(app: &mut FigApp, ctx: &Context, method: &str, p: &Value) -> Result<Value, String> {
     match method {
@@ -1045,8 +1055,7 @@ pub fn handle(app: &mut FigApp, ctx: &Context, method: &str, p: &Value) -> Resul
                 } else {
                     egui::PointerButton::Primary
                 };
-                let command = b(e, "cmd") || b(e, "ctrl");
-                let mods = egui::Modifiers { alt: b(e, "alt"), ctrl: command, shift: b(e, "shift"), mac_cmd: false, command };
+                let mods = input_modifiers(e, ctx.os());
                 if let Some(p) = e.get("move").and_then(pos) {
                     events.push(egui::Event::PointerMoved(p));
                 } else if let Some((p, pressed)) =
@@ -1076,13 +1085,7 @@ pub fn handle(app: &mut FigApp, ctx: &Context, method: &str, p: &Value) -> Resul
                 } else if b(e, "leave") {
                     events.push(egui::Event::PointerGone);
                 } else if let Some(h) = e.get("hold") {
-                    let held = egui::Modifiers {
-                        alt: b(h, "alt"),
-                        ctrl: b(h, "cmd") || b(h, "ctrl"),
-                        shift: b(h, "shift"),
-                        mac_cmd: false,
-                        command: b(h, "cmd") || b(h, "ctrl"),
-                    };
+                    let held = input_modifiers(h, ctx.os());
                     events.push(egui::Event::ModifiersChanged(held));
                 } else {
                     return Err(format!("unknown input event {e}"));
@@ -1467,3 +1470,78 @@ mod roots_tests;
 #[cfg(test)]
 #[path = "control_capture_tests.rs"]
 mod capture_tests;
+
+#[cfg(test)]
+mod input_modifier_tests {
+    use super::*;
+    use egui::os::OperatingSystem;
+    use figcraft_engine::keymap::{self, Platform};
+
+    #[test]
+    fn control_modifiers_keep_mac_command_and_physical_control_distinct() {
+        for os in [OperatingSystem::Mac, OperatingSystem::Windows, OperatingSystem::Nix, OperatingSystem::Unknown] {
+            for (cmd, ctrl) in [(false, false), (true, false), (false, true), (true, true)] {
+                let mac = os == OperatingSystem::Mac;
+                let got = input_modifiers(&json!({"cmd": cmd, "ctrl": ctrl, "shift": true, "alt": true}), os);
+                assert_eq!(
+                    got,
+                    egui::Modifiers {
+                        shift: true,
+                        alt: true,
+                        ctrl: if mac { ctrl } else { cmd || ctrl },
+                        mac_cmd: mac && cmd,
+                        command: if mac { cmd } else { cmd || ctrl },
+                    },
+                    "{os:?}, cmd={cmd}, ctrl={ctrl}"
+                );
+            }
+            assert_eq!(input_modifiers(&json!({}), os), egui::Modifiers::NONE);
+        }
+    }
+
+    #[test]
+    fn injected_copy_shortcut_resolves_without_an_extra_mac_control_key() {
+        let lookup = |os, flags: Value, platform| {
+            let modifiers = crate::shortcuts::mods(input_modifiers(&flags, os));
+            keymap::lookup(platform, keymap::Context::Canvas, "C", modifiers).map(|binding| binding.id)
+        };
+        assert_eq!(lookup(OperatingSystem::Mac, json!({"shift": true, "cmd": true}), Platform::Mac), Some("edit.copyAsPng"));
+        assert_ne!(lookup(OperatingSystem::Mac, json!({"shift": true, "ctrl": true}), Platform::Mac), Some("edit.copyAsPng"));
+        assert_ne!(lookup(OperatingSystem::Mac, json!({"shift": true, "cmd": true, "ctrl": true}), Platform::Mac), Some("edit.copyAsPng"));
+        for flag in ["cmd", "ctrl"] {
+            let mut flags = json!({"shift": true});
+            flags[flag] = json!(true);
+            assert_eq!(lookup(OperatingSystem::Windows, flags, Platform::Other), Some("edit.copyAsPng"));
+        }
+    }
+
+    #[test]
+    fn injected_keys_pointer_wheel_and_hold_share_the_context_modifier_contract() {
+        for os in [OperatingSystem::Mac, OperatingSystem::Windows] {
+            let ctx = Context::default();
+            ctx.set_os(os);
+            let mut app = FigApp::new(figcraft_engine::Session::new(), Box::new(crate::NoServices));
+            let flags = json!({"shift": true, "cmd": true});
+            let params = json!({"events": [
+                {"key": "C", "shift": true, "cmd": true},
+                {"down": [10, 20], "shift": true, "cmd": true},
+                {"scroll": [0, 10], "shift": true, "cmd": true},
+                {"hold": flags},
+            ]});
+            handle(&mut app, &ctx, "ui.input", &params).unwrap();
+            let expected = input_modifiers(&flags, os);
+            let modifiers: Vec<_> = app
+                .control_input
+                .iter()
+                .filter_map(|event| match event {
+                    egui::Event::Key { modifiers, .. }
+                    | egui::Event::PointerButton { modifiers, .. }
+                    | egui::Event::MouseWheel { modifiers, .. }
+                    | egui::Event::ModifiersChanged(modifiers) => Some(*modifiers),
+                    _ => None,
+                })
+                .collect();
+            assert_eq!(modifiers, vec![expected; 5], "both key edges, pointer, wheel and hold on {os:?}");
+        }
+    }
+}

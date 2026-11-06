@@ -1083,11 +1083,14 @@ impl Session {
             }
             return;
         };
+        // Local history restores an exact snapshot; pending import settlement belongs to the
+        // next edit, not to Undo or Redo. Live history still follows the recompute pipeline.
+        let local_snapshot_travel = matches!(spec.id, "edit.undo" | "edit.redo") && !self.live_doc(uid);
         let Some(ds) = self.docs.iter_mut().find(|d| d.uid == uid) else { return };
         let changed = !Arc::ptr_eq(&ds.doc, &bdoc);
         // Saving may adopt the chosen filename as the document title. The encoded snapshot is
         // already final; normalising it again would detach it from the saved baseline.
-        if changed && !matches!(spec.id, "file.save" | "file.saveAs") {
+        if changed && !local_snapshot_travel && !matches!(spec.id, "file.save" | "file.saveAs") {
             normalize(ds.doc_mut(), &bdoc);
         }
         let edit = changed && ds.interaction.is_none();

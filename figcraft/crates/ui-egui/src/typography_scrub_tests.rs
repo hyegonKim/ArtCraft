@@ -79,13 +79,17 @@ fn typography_icon_drag_changes_each_spacing_field_in_one_undo_step() {
     for (key, before) in [("ty_lh", 24.0), ("ty_ls", 0.0), ("ty_ps", 12.0)] {
         let mut f = Fields::new();
         let undo = f.app.session.undo_depth().0;
+        let before_doc = serde_json::to_value(f.app.session.doc().unwrap()).unwrap();
         f.drag(key, 16.0, Modifiers::NONE);
+        let edited_doc = serde_json::to_value(f.app.session.doc().unwrap()).unwrap();
         assert_eq!(f.value(key), before + 16.0, "{key}: dragging the icon must change the value");
         assert_eq!(f.app.session.undo_depth().0, undo + 1, "{key}: one gesture, one undo step");
-        f.app.session.undo().unwrap();
+        assert_eq!(f.app.run("edit.undo", json!({})).unwrap()["undone"], true);
         assert_eq!(f.value(key), before);
-        f.app.session.redo().unwrap();
+        assert_eq!(serde_json::to_value(f.app.session.doc().unwrap()).unwrap(), before_doc);
+        assert_eq!(f.app.run("edit.redo", json!({})).unwrap()["redone"], true);
         assert_eq!(f.value(key), before + 16.0);
+        assert_eq!(serde_json::to_value(f.app.session.doc().unwrap()).unwrap(), edited_doc);
     }
 }
 
@@ -203,4 +207,46 @@ fn typography_spacing_fields_still_accept_typed_units_and_escape_cancels() {
     );
     assert_eq!(f.value("ty_lh"), 150.0);
     assert_eq!(f.app.session.undo_depth().0, undo);
+}
+
+#[test]
+fn typography_imported_text_history_commands_restore_full_document() {
+    // Match native/headless text readiness before the SVG parser first asks for its fonts.
+    figcraft_text::scan_system_fonts_on_demand();
+    let svg = br#"<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720"><text x="100" y="620" font-family="Helvetica" font-size="72">Typography history</text></svg>"#;
+    let (doc, _) = figcraft_engine::cmd::file::load_bytes(svg, "typography-history.svg").unwrap();
+    let text = doc.nodes().find(|n| n.kind.text().is_some()).unwrap().id;
+    assert_eq!(doc.node(text).unwrap().child_layout, figcraft_doc::ChildLayout::default());
+    assert!(doc.dirty().contains(&text));
+    let mut session = Session::with_document(doc);
+    session.execute("select.set", &json!({"ids": [text]})).unwrap();
+    session.ds_mut().unwrap().mark_saved();
+    let mut app = FigApp::new(session, Box::new(NoServices));
+    let before = serde_json::to_value(app.session.doc().unwrap()).unwrap();
+    assert!(!app.session.ds().unwrap().is_dirty());
+    assert_eq!(app.session.undo_depth(), (0, 0));
+    app.run("node.set", json!({"id": text, "props": {"fontSize": 80}})).unwrap();
+    let edited = serde_json::to_value(app.session.doc().unwrap()).unwrap();
+    let n = app.session.doc().unwrap().node(text).unwrap();
+    assert_eq!(n.kind.text().unwrap().style.font_size, 80.0);
+    assert_eq!((n.child_layout.sizing_h, n.child_layout.sizing_v), (figcraft_doc::Sizing::Hug, figcraft_doc::Sizing::Hug));
+    assert_ne!(edited, before);
+    assert!(app.session.ds().unwrap().is_dirty());
+    assert_eq!(app.session.undo_depth(), (1, 0));
+    for _ in 0..2 {
+        assert_eq!(app.run("edit.undo", json!({})).unwrap()["undone"], true);
+        assert_eq!(serde_json::to_value(app.session.doc().unwrap()).unwrap(), before, "the public UI command must restore every saved property");
+        assert!(!app.session.ds().unwrap().is_dirty());
+        assert_eq!(app.session.undo_depth(), (0, 1));
+        assert_eq!(app.run("edit.redo", json!({})).unwrap()["redone"], true);
+        assert_eq!(serde_json::to_value(app.session.doc().unwrap()).unwrap(), edited);
+        assert!(app.session.ds().unwrap().is_dirty());
+        assert_eq!(app.session.undo_depth(), (1, 0));
+    }
+    assert_eq!(app.run("edit.undo", json!({})).unwrap()["undone"], true);
+    assert_eq!(app.run("edit.undo", json!({})).unwrap()["undone"], false);
+    assert_eq!(serde_json::to_value(app.session.doc().unwrap()).unwrap(), before);
+    assert!(!app.session.ds().unwrap().is_dirty());
+    assert_eq!(app.session.undo_depth(), (0, 1));
+    assert!(app.ui.last_error.is_none());
 }

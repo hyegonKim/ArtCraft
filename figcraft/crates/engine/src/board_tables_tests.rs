@@ -182,6 +182,14 @@ fn table_edits_add_and_remove_rows_and_columns_keeping_text() {
 
 #[test]
 fn a_double_click_types_in_the_cell_and_its_row_grows_with_the_text() {
+    // Like native startup, discover system fonts when the optional embedded catalog is absent.
+    // This typography test needs a face before both the initial table and edited text are sized;
+    // another test's font scan must not decide whether the row grows.
+    figcraft_text::scan_system_fonts();
+    assert!(
+        figcraft_text::db().write().unwrap().default_face().is_some(),
+        "the table typography fixture needs a usable font after startup discovery"
+    );
     let mut s = board();
     let r = s.execute("board.table", &json!({"x": 0, "y": 0})).unwrap();
     let t = id(&r, "id");
