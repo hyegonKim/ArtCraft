@@ -1097,15 +1097,18 @@ impl<'h> Evaluator<'h> {
 
     /// The function argument of a LAMBDA helper; a function given by name takes `arity`
     /// arguments.
-    fn lambda_arg(&mut self, e: Option<&Expr>, arity: usize) -> Option<Arc<Lambda>> {
+    fn lambda_arg(&mut self, e: Option<&Expr>, arity: usize) -> Result<Arc<Lambda>, CellError> {
         if let Some(f) = e.and_then(|x| self.function_by_name(x)) {
             let params: Vec<String> = (0..arity).map(|i| format!("_xleta.{i}")).collect();
             let body = Expr::Call(f, params.iter().map(|p| Expr::Name(p.clone())).collect());
-            return Some(Arc::new(Lambda { params, body, env: Vec::new() }));
+            return Ok(Arc::new(Lambda { params, body, env: Vec::new() }));
         }
         match e.map(|x| self.eval(x)) {
-            Some(Ev::L(l)) => Some(l),
-            _ => None,
+            Some(Ev::L(l)) => Ok(l),
+            // A guard or formula error is not an invalid function argument. Keep its identity
+            // just as direct and named lambda calls do, including #NUM! at recursion limits.
+            Some(Ev::V(Value::Error(e))) => Err(e),
+            _ => Err(CellError::Value),
         }
     }
 
@@ -1121,7 +1124,10 @@ impl<'h> Evaluator<'h> {
                 if args.len() < 2 {
                     return err(CellError::Value);
                 }
-                let Some(l) = self.lambda_arg(args.last(), args.len() - 1) else { return err(CellError::Value) };
+                let l = match self.lambda_arg(args.last(), args.len() - 1) {
+                    Ok(l) => l,
+                    Err(e) => return err(e),
+                };
                 let arrays: Vec<Arc<Array>> = args[..args.len() - 1].iter().map(|a| as_array(self.value(a))).collect();
                 let rows = arrays.iter().map(|a| a.rows).max().unwrap_or(1);
                 let cols = arrays.iter().map(|a| a.cols).max().unwrap_or(1);
@@ -1147,7 +1153,10 @@ impl<'h> Evaluator<'h> {
                 }
                 let mut acc = self.value(&args[0]);
                 let arr = as_array(self.value(&args[1]));
-                let Some(l) = self.lambda_arg(args.get(2), 2) else { return err(CellError::Value) };
+                let l = match self.lambda_arg(args.get(2), 2) {
+                    Ok(l) => l,
+                    Err(e) => return err(e),
+                };
                 if l.params.len() != 2 {
                     return err(CellError::Value);
                 }
@@ -1172,7 +1181,10 @@ impl<'h> Evaluator<'h> {
                     return err(CellError::Value);
                 }
                 let arr = as_array(self.value(&args[0]));
-                let Some(l) = self.lambda_arg(args.get(1), 1) else { return err(CellError::Value) };
+                let l = match self.lambda_arg(args.get(1), 1) {
+                    Ok(l) => l,
+                    Err(e) => return err(e),
+                };
                 let Some(p) = l.params.first().cloned() else { return err(CellError::Value) };
                 if l.params.len() != 1 {
                     return err(CellError::Value);
@@ -1205,7 +1217,10 @@ impl<'h> Evaluator<'h> {
                 if rows < 1.0 || cols < 1.0 || rows * cols > MAX_CELLS as f64 {
                     return err(CellError::Value);
                 }
-                let Some(l) = self.lambda_arg(args.get(2), 2) else { return err(CellError::Value) };
+                let l = match self.lambda_arg(args.get(2), 2) {
+                    Ok(l) => l,
+                    Err(e) => return err(e),
+                };
                 if l.params.len() != 2 {
                     return err(CellError::Value);
                 }
@@ -2085,6 +2100,59 @@ mod fuel_tests {
         let mut ev = Evaluator::new(&mut host, 0, CellRef::new(0, 0));
         ev.fuel = fuel;
         ev.value(&gridcraft_formula::parser::parse(src).unwrap_or_else(|e| panic!("{e}")))
+    }
+
+    #[test]
+    fn lambda_resolution_keeps_a_depth_budget_error() {
+        let mut host = Empty { wb: Workbook::default() };
+        let mut ev = Evaluator::new(&mut host, 0, CellRef::new(0, 0));
+        // Arrive at the existing semantic limit without consuming the native stack. Resolving
+        // the function argument must preserve the guard's #NUM!, not classify it as a bad type.
+        ev.depth = MAX_DEPTH;
+        ev.stack_top = stack_position();
+        let lambda = gridcraft_formula::parser::parse("LAMBDA(x,x)").unwrap();
+        assert!(matches!(ev.lambda_arg(Some(&lambda), 1), Err(CellError::Num)));
+    }
+
+    #[test]
+    fn lambda_helpers_keep_errors_from_their_function_argument() {
+        for code in ["#NUM!", "#DIV/0!", "#N/A"] {
+            let expected = match code {
+                "#NUM!" => CellError::Num,
+                "#DIV/0!" => CellError::Div0,
+                _ => CellError::NA,
+            };
+            for formula in [
+                format!("=MAP({{1}}, {code})"),
+                format!("=REDUCE(0, {{1}}, {code})"),
+                format!("=SCAN(0, {{1}}, {code})"),
+                format!("=BYROW({{1}}, {code})"),
+                format!("=BYCOL({{1}}, {code})"),
+                format!("=MAKEARRAY(1, 1, {code})"),
+            ] {
+                assert_eq!(eval_with(LAMBDA_FUEL, &formula), Value::Error(expected), "{formula}");
+            }
+        }
+    }
+
+    #[test]
+    fn lambda_helpers_still_reject_non_functions_and_wrong_parameter_counts() {
+        for formula in [
+            "=MAP({1},7)",
+            "=REDUCE(0,{1},7)",
+            "=SCAN(0,{1},7)",
+            "=BYROW({1},7)",
+            "=BYCOL({1},7)",
+            "=MAKEARRAY(1,1,7)",
+            "=MAP({1},LAMBDA(x,y,x))",
+            "=REDUCE(0,{1},LAMBDA(x,x))",
+            "=SCAN(0,{1},LAMBDA(x,x))",
+            "=BYROW({1},LAMBDA(x,y,x))",
+            "=BYCOL({1},LAMBDA(x,y,x))",
+            "=MAKEARRAY(1,1,LAMBDA(x,x))",
+        ] {
+            assert_eq!(eval_with(LAMBDA_FUEL, formula), Value::Error(CellError::Value), "{formula}");
+        }
     }
 
     #[test]

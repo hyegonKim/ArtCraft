@@ -1146,6 +1146,57 @@ fn a_recursive_lambda_that_reads_another_cells_recursive_lambda_shares_the_stack
 }
 
 #[test]
+fn recursive_lambdas_keep_their_results_on_a_real_two_mib_caller_stack() {
+    let (direct, cells) = std::thread::Builder::new()
+        .stack_size(2 << 20)
+        .spawn(|| {
+            let mut wb = Workbook::new();
+            wb.names.push(gridcraft_model::DefinedName {
+                name: "CNT".into(),
+                scope: None,
+                formula: "LAMBDA(n,IF(n=0,0,1+CNT(n-1)))".into(),
+                comment: String::new(),
+                hidden: false,
+            });
+            let tail = |n: u32| format!("=LET(F,LAMBDA(me,n,IF(n=0,0,me(me,n-1))),F(F,{n}))");
+            let wrapped = |n: u32| format!("=LET(W,LAMBDA(f,k,f(f,k)),F,LAMBDA(me,n,IF(n<=0,0,1+W(me,n-1))),F(F,{n}))");
+            let direct = [
+                tail(139),
+                tail(140),
+                wrapped(69),
+                wrapped(70),
+                "=CNT(131)".into(),
+                "=LET(f,LAMBDA(g,x,g(g,x)),f(f,1))".into(),
+                "=LET(F,LAMBDA(me,n,IF(n<=0,0,1+SUM(MAP({1},LAMBDA(v,me(me,n-1)))))),F(F,100000))".into(),
+            ]
+            .map(|formula| crate::evaluate(&wb, 0, c("D1"), &formula));
+            // A normal worker's stack must also support on-demand cell calculation at the
+            // deepest lambda call. These are synthetic formulas, not files or live workbooks.
+            let countdown = |then: &str| format!("=LET(F,LAMBDA(me,n,IF(n<=0,{then},1+me(me,n-1))),F(F,131))");
+            let sheet = wb.sheet_mut(0).unwrap();
+            for (at, formula) in [
+                ("A1", countdown("A2")),
+                ("A2", countdown("A3")),
+                ("A3", countdown("0")),
+                ("B1", countdown("B2")),
+                ("B2", "=LET(f,LAMBDA(g,x,g(g,x)),f(f,1))".into()),
+            ] {
+                sheet.cells.set(c(at), Cell::formula(Formula::new(&formula)));
+            }
+            let mut calc = Calc::new();
+            calc.recalc_all(&mut wb);
+            let cells = ["A1", "A2", "A3", "B1", "B2"].map(|at| wb.sheet(0).unwrap().value(c(at)));
+            (direct, cells)
+        })
+        .expect("spawn a real 2 MiB caller")
+        .join()
+        .expect("recursion must not overflow a 2 MiB caller's stack");
+    let num = Value::Error(CellError::Num);
+    assert_eq!(direct, [Value::Number(0.0), num.clone(), Value::Number(69.0), num.clone(), Value::Number(131.0), num.clone(), num.clone()]);
+    assert_eq!(cells, [Value::Number(393.0), Value::Number(262.0), Value::Number(131.0), num.clone(), num]);
+}
+
+#[test]
 fn names_and_sheets() {
     let mut t = T::new();
     t.wb.names.push(gridcraft_model::DefinedName { name: "Rate".into(), scope: None, formula: "0.5".into(), comment: String::new(), hidden: false });
