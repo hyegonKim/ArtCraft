@@ -320,7 +320,7 @@ fn big(app: &mut SlideApp, ui: &mut Ui, icon: Icon, label: &str, id: &str, p: Va
         let name = label.replace('\n', " ");
         r.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, en, &name));
     }
-    let r = r.on_hover_text(tip(id, label));
+    let r = r.on_hover_text(tip(ui, id, label));
     if r.clicked() {
         run(app, id, p.clone());
     }
@@ -331,7 +331,7 @@ fn big(app: &mut SlideApp, ui: &mut Ui, icon: Icon, label: &str, id: &str, p: Va
 fn photo_album_button(app: &mut SlideApp, ui: &mut Ui) {
     let en = enabled(app, "insert.photoAlbum");
     let (main, arrow) = big_button_ex(ui, Icon::Picture, "Photo\nAlbum", en, true, false);
-    let _ = main.clone().on_hover_text(tip("insert.photoAlbum", "Photo Album…"));
+    let _ = main.clone().on_hover_text(tip(ui, "insert.photoAlbum", "Photo Album…"));
     main.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, en, "Photo Album…"));
     if let Some(a) = &arrow {
         let _ = a.clone().on_hover_text("Photo Album options");
@@ -350,7 +350,7 @@ fn photo_album_button(app: &mut SlideApp, ui: &mut Ui) {
 
 fn small(app: &mut SlideApp, ui: &mut Ui, icon: Icon, label: &str, id: &str, p: Value) {
     let en = enabled(app, id);
-    let r = small_button(ui, icon, label, en, false).on_hover_text(tip(id, label));
+    let r = small_button(ui, icon, label, en, false).on_hover_text(tip(ui, id, label));
     if r.clicked() {
         run(app, id, p.clone());
     }
@@ -359,15 +359,16 @@ fn small(app: &mut SlideApp, ui: &mut Ui, icon: Icon, label: &str, id: &str, p: 
 
 fn toggle(app: &mut SlideApp, ui: &mut Ui, icon: Icon, label: &str, id: &str, on: bool) {
     let en = enabled(app, id);
-    if icon_toggle(ui, icon, &tip(id, label), en, on).clicked() {
+    let hint = tip(ui, id, label);
+    if icon_toggle(ui, icon, &hint, en, on).clicked() {
         run(app, id, json!({}));
     }
 }
 
-fn tip(id: &str, label: &str) -> String {
+fn tip(ui: &Ui, id: &str, label: &str) -> String {
     let sc = deckcraft_engine::find_command(id).and_then(|c| c.shortcut).or_else(|| crate::UI_COMMANDS.iter().find(|c| c.0 == id).and_then(|c| c.2));
     match sc {
-        Some(s) => format!("{label} ({})", pretty_shortcut(s)),
+        Some(s) => format!("{label} ({})", pretty_shortcut_for_ui(ui, s)),
         None => label.to_string(),
     }
 }
@@ -378,6 +379,39 @@ pub fn pretty_shortcut(s: &str) -> String {
     } else {
         s.replace("Cmd+", "Ctrl+")
     }
+}
+
+/// Format a visible shortcut using the active proportional font's coverage. Taking a Ui
+/// keeps font queries inside a real pass, including its first pass: Context fonts are not
+/// available before Context::run_ui. The existing pure formatter remains usable without a Ui.
+pub fn pretty_shortcut_for_ui(ui: &Ui, s: &str) -> String {
+    let shown = pretty_shortcut(s);
+    if !shown.chars().any(|c| matches!(c, '⌘' | '⇧' | '⌥' | '⌃')) {
+        return shown;
+    }
+    let font = egui::FontId::proportional(13.0);
+    ui.fonts_mut(|fonts| shortcut_with_coverage(&shown, |glyph| fonts.has_glyph(&font, glyph)))
+}
+
+fn shortcut_with_coverage(shown: &str, mut covered: impl FnMut(char) -> bool) -> String {
+    let mut out = String::with_capacity(shown.len());
+    for glyph in shown.chars() {
+        let name = match glyph {
+            '⌘' => Some("Cmd+"),
+            '⇧' => Some("Shift+"),
+            '⌥' => Some("Option+"),
+            '⌃' => Some("Ctrl+"),
+            _ => None,
+        };
+        if let Some(name) = name
+            && !covered(glyph)
+        {
+            out.push_str(name);
+        } else {
+            out.push(glyph);
+        }
+    }
+    out
 }
 
 fn scheme(app: &SlideApp) -> deckcraft_color::ColorScheme {
@@ -2267,7 +2301,7 @@ fn record(app: &mut SlideApp, ui: &mut Ui) {
 
 fn comment_nav(app: &mut SlideApp, ui: &mut Ui, forward: bool) {
     let (icon, label, id) = if forward { (Icon::NextComment, "Next", "comment.next") } else { (Icon::PrevComment, "Previous", "comment.prev") };
-    if small_button(ui, icon, label, enabled(app, id), false).on_hover_text(tip(id, label)).clicked() {
+    if small_button(ui, icon, label, enabled(app, id), false).on_hover_text(tip(ui, id, label)).clicked() {
         let params = match app.ui.comment_focus {
             Some((slide, index)) if app.session.active().is_some_and(|d| d.selection.slide == slide) => json!({"slide": slide, "index": index}),
             _ => json!({}),
@@ -3570,6 +3604,58 @@ fn chart_menu_types() -> Vec<Option<deckcraft_model::chart::ChartType>> {
 mod tests {
     use super::*;
     use deckcraft_model::anim::TextBuild;
+
+    #[test]
+    fn shortcut_fallback_only_replaces_missing_modifier_symbols_and_keeps_unicode_keys() {
+        assert_eq!(shortcut_with_coverage("⌘⇧⌥⌃V", |_| true), "⌘⇧⌥⌃V");
+        assert_eq!(shortcut_with_coverage("⌘⇧⌥⌃V", |_| false), "Cmd+Shift+Option+Ctrl+V");
+        assert_eq!(shortcut_with_coverage("⌘⌥é한", |c| c != '⌥'), "⌘Option+é한");
+    }
+
+    #[test]
+    fn visible_shortcuts_are_safe_on_the_first_default_font_pass() {
+        let ctx = egui::Context::default();
+        // Deliberately no craft-fonts or installed-font fallback. This is the same
+        // default repertoire that lacked Option in the original start-screen failure.
+        ctx.set_fonts(egui::FontDefinitions::default());
+        let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+            let missing_option = ui.fonts_mut(|fonts| !fonts.has_glyph(&egui::FontId::proportional(13.0), '⌥'));
+            assert!(missing_option, "fixture must exercise the missing Option glyph");
+            let text = pretty_shortcut_for_ui(ui, "Cmd+Alt+Shift+V");
+            if cfg!(target_os = "macos") {
+                assert!(text.contains("Option+") && !text.contains('⌥'), "{text}");
+            } else {
+                assert_eq!(text, "Ctrl+Alt+Shift+V");
+            }
+            ui.label(text);
+        });
+        output.textures_delta.clear();
+    }
+
+    #[test]
+    fn visible_shortcuts_keep_symbols_the_context_can_draw() {
+        let ctx = egui::Context::default();
+        let mut defs = egui::FontDefinitions::default();
+        for chain in defs.families.values_mut() {
+            if !chain.iter().any(|name| name == "Hack") {
+                chain.push("Hack".into());
+            }
+        }
+        ctx.set_fonts(defs);
+        let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+            let mut supported = 0;
+            for (token, glyph) in [("Cmd+", '⌘'), ("Shift+", '⇧'), ("Alt+", '⌥'), ("Ctrl+", '⌃')] {
+                let has = ui.fonts_mut(|fonts| fonts.has_glyph(&egui::FontId::proportional(13.0), glyph));
+                if has {
+                    supported += 1;
+                    let chord = format!("{token}V");
+                    assert_eq!(pretty_shortcut_for_ui(ui, &chord), pretty_shortcut(&chord), "supported {glyph} stays unchanged");
+                }
+            }
+            assert!(supported > 0, "exercise an actually supported modifier, not a vacuous comparison");
+        });
+        output.textures_delta.clear();
+    }
 
     /// Paints one transition tile and one animation tile and returns the colour of every label.
     fn tile_label_colours(dark: bool) -> Vec<Color32> {

@@ -101,11 +101,11 @@ fn run(app: &mut SlideApp, q: &QatItem) {
     }
 }
 
-fn tip(q: &QatItem) -> String {
+fn tip(ui: &Ui, q: &QatItem) -> String {
     let sc =
         deckcraft_engine::find_command(&q.id).and_then(|c| c.shortcut).or_else(|| crate::UI_COMMANDS.iter().find(|c| c.0 == q.id).and_then(|c| c.2));
     match sc {
-        Some(s) => format!("{} ({})", q.label, crate::ribbon::pretty_shortcut(s)),
+        Some(s) => format!("{} ({})", q.label, crate::ribbon::pretty_shortcut_for_ui(ui, s)),
         None => q.label.clone(),
     }
 }
@@ -120,7 +120,8 @@ pub fn show(app: &mut SlideApp, ui: &mut Ui) {
             "file.save" | "show.fromStart" | "review.spelling" | "app.find" => app.session.active().is_some(),
             id => crate::ribbon::enabled(app, id),
         };
-        let r = crate::widgets::icon_toggle(ui, q.icon(), &tip(q), en, on);
+        let hint = tip(ui, q);
+        let r = crate::widgets::icon_toggle(ui, q.icon(), &hint, en, on);
         if r.clicked() {
             run(app, q);
         }

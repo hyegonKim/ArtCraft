@@ -331,6 +331,39 @@ fn failure(src: &[u8]) -> std::result::Result<Manifest, (String, (usize, usize))
 /// nearest first, and a patch is kept only if the parse then gets further. (Files saved since
 /// [`finite::Finite`] never contain such `null`s; this reads older ones.)
 fn parse_manifest(json: &[u8]) -> Result<Manifest> {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        // Shape's tagged-enum/content visitors need more stack than an ordinary 2 MiB
+        // caller provides for the 32 nested groups the editor permits. Keep every legacy
+        // null-repair retry on one bounded worker, borrowing the input rather than copying
+        // it into a detached thread. Leave serde_json's recursion guard enabled.
+        std::thread::scope(|scope| {
+            let worker = std::thread::Builder::new()
+                .name("deckcraft-manifest".into())
+                .stack_size(8 * 1024 * 1024)
+                .spawn_scoped(scope, || parse_manifest_inner(json));
+            parser_worker_result(worker.map(|worker| worker.join()))
+        })
+    }
+    #[cfg(target_family = "wasm")]
+    {
+        // Browser/WASM builds cannot generally create native scoped threads. This is the
+        // existing caller-stack parser, not a claim of equivalent stack isolation.
+        parse_manifest_inner(json)
+    }
+}
+
+/// Keep worker setup and join failures recoverable, without retrying on the caller's small
+/// stack. The result boundary also lets tests inject OS/panic failures without exhausting
+/// the machine's threads or memory.
+#[cfg(not(target_family = "wasm"))]
+fn parser_worker_result(result: std::io::Result<std::thread::Result<Result<Manifest>>>) -> Result<Manifest> {
+    result
+        .map_err(|e| FormatError::Damaged(format!("couldn't start parser: {e}")))?
+        .map_err(|_| FormatError::Damaged("couldn't finish parser: worker panicked".into()))?
+}
+
+fn parse_manifest_inner(json: &[u8]) -> Result<Manifest> {
     let mut src = json.to_vec();
     let mut last = match failure(&src) {
         Ok(m) => return Ok(m),
@@ -675,6 +708,87 @@ pub fn slides_to_outline(p: &Presentation) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Exercise the public file path from an explicitly ordinary-size native caller,
+    /// independent of the test runner's stack setting. The old parser aborted here at opt0.
+    #[cfg(not(target_family = "wasm"))]
+    #[test]
+    fn thirty_two_nested_groups_reopen_from_a_two_mib_caller() {
+        use deckcraft_model::{Shape, ShapeId, table::Table};
+        let mut table = Table::new(2, 2, 200.0, 30.0);
+        table.rows[1].cells[1].text = TextBody::from_text("deepest cell");
+        let mut shape = Shape { id: ShapeId(1), kind: ShapeKind::Table(table), ..Default::default() };
+        for level in 0..32 {
+            shape =
+                Shape { id: ShapeId(level + 2), kind: ShapeKind::Group { children: vec![shape], child: Default::default() }, ..Default::default() };
+        }
+        let mut p = Presentation::default();
+        Arc::make_mut(&mut p.slides[0]).shapes = vec![shape];
+        let bytes = save(&p).expect("save 32 groups with a table");
+        let back = std::thread::Builder::new()
+            .name("two-mib-file-caller".into())
+            .stack_size(2 * 1024 * 1024)
+            .spawn(move || load(&bytes))
+            .expect("start 2 MiB caller")
+            .join()
+            .expect("caller must not panic")
+            .expect("32 groups must reopen");
+        let mut shape = &back.slides[0].shapes[0];
+        for _ in 0..32 {
+            let ShapeKind::Group { children, .. } = &shape.kind else { panic!("expected all 32 groups") };
+            assert_eq!(children.len(), 1);
+            shape = &children[0];
+        }
+        let ShapeKind::Table(table) = &shape.kind else { panic!("expected the deepest table") };
+        assert_eq!((table.n_rows(), table.n_cols()), (2, 2));
+        assert_eq!(table.rows[1].cells[1].text.text(), "deepest cell");
+    }
+
+    #[cfg(not(target_family = "wasm"))]
+    #[test]
+    fn parser_worker_preserves_bad_json_and_recursion_errors() {
+        for bad in [b"{".as_slice(), b"null", br#"{"format":"deckcraft","version":1,"generator":"t","presentation":{}} trailing"#] {
+            assert!(matches!(parse_manifest(bad), Err(FormatError::Damaged(_))));
+        }
+        // Construct hostile JSON bytes directly; building/serializing a model this deep
+        // would exercise unrelated recursive code before reaching the parser under test.
+        let nested_json = |depth| {
+            let mut json = br#"{"format":"deckcraft","version":1,"generator":"t","presentation":{"slides":[{"shapes":["#.to_vec();
+            for _ in 0..depth {
+                json.extend_from_slice(
+                    br#"{"kind":{"type":"group","child":{"x":0,"y":0,"w":1,"h":1,"rot":0,"flipH":false,"flipV":false},"children":["#,
+                );
+            }
+            json.extend_from_slice(br#"{"kind":{"type":"shape"}}"#);
+            for _ in 0..depth {
+                json.extend_from_slice(b"]}}");
+            }
+            json.extend_from_slice(b"]}]}}");
+            json
+        };
+        // Prove the same schema reaches the recursive model, rather than silently putting
+        // `type`/`children` into unknown Shape fields that serde intentionally ignores.
+        let shallow = parse_manifest(&nested_json(1)).unwrap_or_else(|e| panic!("valid shallow group: {e}"));
+        let ShapeKind::Group { children, .. } = &shallow.presentation.slides[0].shapes[0].kind else { panic!("fixture must decode a group") };
+        assert_eq!(children.len(), 1);
+        assert!(matches!(children[0].kind, ShapeKind::Shape));
+        let error = parse_manifest(&nested_json(160)).err().expect("excessive nesting must fail");
+        assert!(matches!(error, FormatError::Damaged(_)));
+        assert!(error.to_string().contains("recursion limit"), "{error}");
+    }
+
+    #[cfg(not(target_family = "wasm"))]
+    #[test]
+    fn parser_worker_start_and_join_failures_are_results() {
+        let error = parser_worker_result(Err(std::io::Error::other("injected thread creation failure")))
+            .err()
+            .expect("thread creation failure must be returned");
+        assert!(matches!(error, FormatError::Damaged(_)));
+        assert!(error.to_string().contains("couldn't start parser: injected thread creation failure"), "{error}");
+        let error = parser_worker_result(Ok(Err(Box::new("injected worker panic")))).err().expect("worker panic must be returned");
+        assert!(matches!(error, FormatError::Damaged(_)));
+        assert!(error.to_string().contains("couldn't finish parser: worker panicked"), "{error}");
+    }
 
     #[test]
     fn chart_sidecars_are_optional_for_older_native_files() {

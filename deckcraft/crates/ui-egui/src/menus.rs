@@ -136,7 +136,7 @@ pub fn palette(app: &mut SlideApp, ctx: &egui::Context) {
                         let resp = ui.selectable_label(k == sel, label);
                         if let Some(s) = sc {
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                ui.label(egui::RichText::new(crate::ribbon::pretty_shortcut(s)).color(t.text_faint));
+                                ui.label(egui::RichText::new(crate::ribbon::pretty_shortcut_for_ui(ui, s)).color(t.text_faint));
                             });
                         }
                         resp
