@@ -146,6 +146,7 @@ impl RawFormat {
                 | RawFormat::Raf
                 | RawFormat::Rw2
                 | RawFormat::Pef
+                | RawFormat::Orf
                 | RawFormat::CfaTiff
                 | RawFormat::Srw
                 | RawFormat::KodakDcs

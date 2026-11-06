@@ -514,6 +514,20 @@ mod tests {
         r.cfa.unwrap().name()
     }
 
+    /// A container that reaches the public sensor decoder must be advertised as supported.
+    #[test]
+    fn decoded_orf_is_advertised_as_supported() {
+        let (w, h) = (16u32, 4u32);
+        let samples: Vec<u8> = (0..w * h).flat_map(|i| ((200 + i * 37) as u16).to_le_bytes()).collect();
+        let bytes = orf_with(w, h, 16, samples, Some(RGGB));
+        let decoded = crate::decode(&bytes).unwrap();
+        assert_eq!(decoded.format, RawFormat::Orf);
+        assert_eq!(crate::probe_info(&bytes).unwrap(), decoded.info());
+        let format = crate::probe(&bytes).unwrap();
+        assert_eq!(format, RawFormat::Orf);
+        assert!(format.is_supported(), "a successfully decoded ORF must not be classified as preview-only");
+    }
+
     #[test]
     fn exif_cfa_pattern_states_the_layout() {
         let (w, h) = (160usize, 144usize);
