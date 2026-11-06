@@ -256,6 +256,23 @@ fn import_warnings_reach_status_notice_and_control_response() {
 }
 
 #[test]
+fn layer_export_encoder_warnings_reach_status_notice_and_control_response() {
+    let mut s = photocraft_engine::Session::new();
+    s.execute("file.new", json!({"width": 4, "height": 4})).unwrap();
+    s.execute("layer.newAdjustmentLayer.levels", json!({})).unwrap();
+    s.execute("layer.new.groupFromLayers", json!({"name": "Pack"})).unwrap();
+    let mut app = PhotocraftApp::new(s, Services::default());
+    let directory = tempfile::tempdir().unwrap();
+    let ctx = egui::Context::default();
+    let result = menus::invoke(&mut app, &ctx, "file.export.layersToFiles", json!({"dir": directory.path(), "prefix": "doc"})).unwrap();
+    assert_eq!(result["files"].as_array().unwrap().len(), 2);
+    assert!(result["warnings"].as_array().unwrap().iter().any(|warning| warning.as_str().is_some_and(|text| text.contains("flattened"))));
+    assert_eq!(result["fileWarnings"][0]["file"], "doc_0000_Pack.png");
+    assert!(app.ui.status.contains("Pack.png") && app.ui.status.contains("flattened"), "{}", app.ui.status);
+    assert_eq!(app.ui.notices.len(), 1);
+}
+
+#[test]
 fn export_warnings_reach_status_notice_and_control_response() {
     let (mut app, _) = app_with(Vec::new());
     let ctx = egui::Context::default();

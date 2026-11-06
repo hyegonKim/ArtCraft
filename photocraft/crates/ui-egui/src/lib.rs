@@ -1334,6 +1334,18 @@ impl PhotocraftApp {
         if gate.is_some() {
             self.session.authorize = None;
         }
+        // Batch layer exports use the engine encoder, not the shell's Save job. Keep its
+        // fidelity diagnostics visible instead of silently dropping flattening warnings.
+        if id == "file.export.layersToFiles"
+            && let Ok(value) = &result
+        {
+            let warnings: Vec<String> = value
+                .get("warnings")
+                .and_then(Value::as_array)
+                .map(|values| values.iter().filter_map(Value::as_str).map(str::to_string).collect())
+                .unwrap_or_default();
+            notices::io_warnings(self, "Exported layers", &warnings);
+        }
         // An explicit channel target (⌘2, ⌘\, ⌘3…) decides what the Layers panel targets too:
         // ⌘2 after the mask was targeted goes back to the layer's pixels.
         if result.is_ok() && id.starts_with("channel.target") {

@@ -137,6 +137,27 @@ struct Parser<'a> {
     values: usize,
 }
 
+// Pending operations are explicit, so supported nesting never consumes native call frames.
+// At most four continuations per active field list are needed; arrays schedule one element
+// at a time. Parsed objects reference their children by ObjId, keeping error cleanup flat too.
+const MAX_WORK: usize = MAX_DEPTH * 4 + 8;
+
+enum Work {
+    Fields { tagged: bool, class: Tag, fields: Vec<(Tag, Value)> },
+    FieldValue { tagged: bool, class: Tag, fields: Vec<(Tag, Value)>, tag: Tag },
+    Value { code: u8, tagged: bool, class: Tag, inline_class: Option<Tag> },
+    Object { class: Tag, kind: Kind },
+    Shared { id: ObjId, chain: Vec<Tag>, fields: Vec<(Tag, Value)> },
+    SharedFields { id: ObjId, chain: Vec<Tag>, fields: Vec<(Tag, Value)>, final_fields: bool },
+    Array { code: u8, class: Tag, inline_class: Option<Tag>, left: usize, values: Vec<Value> },
+    ArrayValue { code: u8, class: Tag, inline_class: Option<Tag>, left: usize, values: Vec<Value> },
+}
+
+enum Produced {
+    Value(Value),
+    Fields(Vec<(Tag, Value)>),
+}
+
 /// Parse a stream (`00 FF 4B 53` header). Bytes after the root's terminator are ignored.
 pub fn parse(bytes: &[u8]) -> Result<Stream, Error> {
     let mut c = Cursor::new(bytes, 0);
@@ -196,24 +217,184 @@ impl Parser<'_> {
     }
 
     fn fields(&mut self, tagged: bool, class: Tag) -> Result<Vec<(Tag, Value)>, Error> {
+        let mut work = Vec::new();
+        work.try_reserve_exact(MAX_WORK).map_err(|_| Error::Limit("not enough memory for the document stream"))?;
+        self.begin_fields(&mut work, tagged, class)?;
+        let mut produced = None;
+        while let Some(next) = work.pop() {
+            match next {
+                Work::Fields { tagged, class, fields } => {
+                    let t = self.c.u8()?;
+                    let code = t & 0x7f;
+                    if code == 0 {
+                        self.depth -= 1;
+                        produced = Some(Produced::Fields(fields));
+                    } else {
+                        self.spend(1)?;
+                        let tag = if tagged { Tag(self.c.u32()?) } else { Tag(0) };
+                        Self::schedule(&mut work, Work::FieldValue { tagged, class, fields, tag })?;
+                        if t & 0x80 != 0 && matches!(code, 0x30..=0x32) {
+                            let left = self.count(1)?;
+                            let inline_class = if code == 0x32 {
+                                let class = Tag(self.c.u32()?);
+                                self.c.u16()?;
+                                Some(class)
+                            } else {
+                                None
+                            };
+                            let values = self.vec(left)?;
+                            Self::schedule(&mut work, Work::Array { code, class, inline_class, left, values })?;
+                        } else if t & 0x80 != 0 {
+                            produced = Some(Produced::Value(self.array(code)?));
+                        } else {
+                            Self::schedule(&mut work, Work::Value { code, tagged, class, inline_class: None })?;
+                        }
+                    }
+                }
+                Work::FieldValue { tagged, class, mut fields, tag } => {
+                    fields.push((tag, Self::take_value(&mut produced)?));
+                    Self::schedule(&mut work, Work::Fields { tagged, class, fields })?;
+                }
+                Work::Value { code, tagged, class, inline_class } => match code {
+                    0x30 => {
+                        Self::schedule(&mut work, Work::Object { class, kind: Kind::Positional })?;
+                        self.begin_fields(&mut work, false, class)?;
+                    }
+                    0x31 | 0x32 if !tagged => return Err(Error::Malformed("object without a field tag")),
+                    0x31 => {
+                        let flag = self.c.u8()?;
+                        if flag == 0 {
+                            produced = Some(Produced::Value(Value::Obj(None)));
+                            continue;
+                        }
+                        let key = self.c.u32()?;
+                        match flag {
+                            2 => {
+                                let id = self.shared.get(&key).copied().ok_or(Error::Malformed("reference to an undefined object"))?;
+                                produced = Some(Produced::Value(Value::Obj(Some(id))));
+                            }
+                            1 => {
+                                if self.shared.contains_key(&key) {
+                                    return Err(Error::Malformed("object defined twice"));
+                                }
+                                // Register before fields, so self-references keep the same meaning.
+                                let id = self.push(Object::new(Tag(0), Kind::Shared, Vec::new(), Vec::new()))?;
+                                self.shared.insert(key, id);
+                                Self::schedule(&mut work, Work::Shared { id, chain: Vec::new(), fields: Vec::new() })?;
+                            }
+                            _ => return Err(Error::Malformed("object marker")),
+                        }
+                    }
+                    0x32 => {
+                        match self.c.u8()? {
+                            0 => {
+                                produced = Some(Produced::Value(Value::Obj(None)));
+                                continue;
+                            }
+                            1 => {}
+                            _ => return Err(Error::Malformed("object marker")),
+                        }
+                        let class = match inline_class {
+                            Some(class) => class,
+                            None => {
+                                let class = Tag(self.c.u32()?);
+                                self.c.u16()?;
+                                class
+                            }
+                        };
+                        Self::schedule(&mut work, Work::Object { class, kind: Kind::Inline })?;
+                        self.begin_fields(&mut work, true, class)?;
+                    }
+                    _ => produced = Some(Produced::Value(self.scalar(code)?)),
+                },
+                Work::Object { class, kind } => {
+                    let fields = Self::take_fields(&mut produced)?;
+                    let chain = if kind == Kind::Inline { vec![class] } else { Vec::new() };
+                    let id = self.push(Object::new(class, kind, chain, fields))?;
+                    produced = Some(Produced::Value(Value::Obj(Some(id))));
+                }
+                Work::Shared { id, mut chain, fields } => {
+                    let final_fields = match self.c.u8()? {
+                        0 => {
+                            let tag = Tag(self.c.u32()?);
+                            self.c.u16()?;
+                            chain.push(tag);
+                            Self::schedule(&mut work, Work::SharedFields { id, chain, fields, final_fields: false })?;
+                            self.begin_fields(&mut work, true, tag)?;
+                            continue;
+                        }
+                        1 => {
+                            chain.push(Tag(self.c.u32()?));
+                            true
+                        }
+                        2 => true,
+                        _ => return Err(Error::Malformed("object class chain")),
+                    };
+                    let class = chain.first().copied().unwrap_or(Tag(0));
+                    Self::schedule(&mut work, Work::SharedFields { id, chain, fields, final_fields })?;
+                    self.begin_fields(&mut work, true, class)?;
+                }
+                Work::SharedFields { id, chain, mut fields, final_fields } => {
+                    fields.extend(Self::take_fields(&mut produced)?);
+                    if final_fields {
+                        let class = chain.first().copied().unwrap_or(Tag(0));
+                        if let Some(object) = self.objects.get_mut(id) {
+                            *object = Object::new(class, Kind::Shared, chain, fields);
+                        }
+                        produced = Some(Produced::Value(Value::Obj(Some(id))));
+                    } else {
+                        if chain.len() > 64 {
+                            return Err(Error::Limit("object class chain too long"));
+                        }
+                        Self::schedule(&mut work, Work::Shared { id, chain, fields })?;
+                    }
+                }
+                Work::Array { code, class, inline_class, left, values } => {
+                    if left == 0 {
+                        produced = Some(Produced::Value(Value::Array(values)));
+                    } else {
+                        Self::schedule(&mut work, Work::ArrayValue { code, class, inline_class, left: left - 1, values })?;
+                        Self::schedule(&mut work, Work::Value { code, tagged: true, class, inline_class })?;
+                    }
+                }
+                Work::ArrayValue { code, class, inline_class, left, mut values } => {
+                    values.push(Self::take_value(&mut produced)?);
+                    Self::schedule(&mut work, Work::Array { code, class, inline_class, left, values })?;
+                }
+            }
+        }
+        Self::take_fields(&mut produced)
+    }
+
+    fn begin_fields(&mut self, work: &mut Vec<Work>, tagged: bool, class: Tag) -> Result<(), Error> {
         self.depth += 1;
         if self.depth > MAX_DEPTH {
             return Err(Error::Limit("objects nested too deeply"));
         }
-        let mut out = Vec::new();
-        loop {
-            let t = self.c.u8()?;
-            let code = t & 0x7F;
-            if code == 0 {
-                break;
-            }
-            self.spend(1)?;
-            let tag = if tagged { Tag(self.c.u32()?) } else { Tag(0) };
-            let v = if t & 0x80 != 0 { self.array(code, class)? } else { self.scalar(code, tagged, class)? };
-            out.push((tag, v));
+        Self::schedule(work, Work::Fields { tagged, class, fields: Vec::new() })
+    }
+
+    fn schedule(work: &mut Vec<Work>, next: Work) -> Result<(), Error> {
+        if work.len() >= MAX_WORK {
+            return Err(Error::Limit("objects nested too deeply"));
         }
-        self.depth -= 1;
-        Ok(out)
+        // Capacity for the bounded work stack was reserved fallibly before parsing.
+        work.push(next);
+        Ok(())
+    }
+
+    fn take_value(produced: &mut Option<Produced>) -> Result<Value, Error> {
+        match produced.take() {
+            Some(Produced::Value(value)) => Ok(value),
+            _ => Err(Error::Malformed("document stream decoder state")),
+        }
+    }
+
+    fn take_fields(produced: &mut Option<Produced>) -> Result<Vec<(Tag, Value)>, Error> {
+        match produced.take() {
+            Some(Produced::Fields(fields)) => Ok(fields),
+            _ => Err(Error::Malformed("document stream decoder state")),
+        }
     }
 
     fn string(&mut self) -> Result<String, Error> {
@@ -229,7 +410,7 @@ impl Parser<'_> {
         Ok(Value::Floats(v))
     }
 
-    fn scalar(&mut self, code: u8, tagged: bool, class: Tag) -> Result<Value, Error> {
+    fn scalar(&mut self, code: u8) -> Result<Value, Error> {
         let c = &mut self.c;
         Ok(match code {
             0x01 => Value::UInt(c.u8()?.into()),
@@ -279,19 +460,11 @@ impl Parser<'_> {
                 b.get_mut(..n).ok_or(Error::Malformed("flags"))?.copy_from_slice(c.take(n)?);
                 Value::Flags(u64::from_le_bytes(b))
             }
-            0x30 => {
-                let fields = self.fields(false, class)?;
-                let id = self.push(Object::new(class, Kind::Positional, Vec::new(), fields))?;
-                Value::Obj(Some(id))
-            }
-            0x31 | 0x32 if !tagged => return Err(Error::Malformed("object without a field tag")),
-            0x31 => self.shared()?,
-            0x32 => self.inline(None)?,
             _ => return Err(Error::Unsupported("unknown field type in document stream")),
         })
     }
 
-    fn array(&mut self, code: u8, class: Tag) -> Result<Value, Error> {
+    fn array(&mut self, code: u8) -> Result<Value, Error> {
         let min = match code {
             0x01 | 0x05 | 0x29 => 1,
             0x02 | 0x06 => 2,
@@ -342,91 +515,15 @@ impl Parser<'_> {
                 }
                 Ok(Value::Array(v))
             }
-            0x32 => {
-                let n = self.count(1)?;
-                let class = Tag(self.c.u32()?);
-                self.c.u16()?;
-                let mut v = self.vec(n)?;
-                for _ in 0..n {
-                    v.push(self.inline(Some(class))?);
-                }
-                Ok(Value::Array(v))
-            }
             0x2d | 0x33 | 0x75 => Err(Error::Malformed("array of an unarrayable type")),
             _ => {
                 let n = self.count(min)?;
                 let mut v = self.vec(n)?;
                 for _ in 0..n {
-                    v.push(self.scalar(code, true, class)?);
+                    v.push(self.scalar(code)?);
                 }
                 Ok(Value::Array(v))
             }
         }
-    }
-
-    /// Inline object; `class` is given once for a whole array of them.
-    fn inline(&mut self, class: Option<Tag>) -> Result<Value, Error> {
-        match self.c.u8()? {
-            0 => return Ok(Value::Obj(None)),
-            1 => {}
-            _ => return Err(Error::Malformed("object marker")),
-        }
-        let class = match class {
-            Some(c) => c,
-            None => {
-                let c = Tag(self.c.u32()?);
-                self.c.u16()?;
-                c
-            }
-        };
-        let fields = self.fields(true, class)?;
-        let id = self.push(Object::new(class, Kind::Inline, vec![class], fields))?;
-        Ok(Value::Obj(Some(id)))
-    }
-
-    fn shared(&mut self) -> Result<Value, Error> {
-        let flag = self.c.u8()?;
-        if flag == 0 {
-            return Ok(Value::Obj(None));
-        }
-        let key = self.c.u32()?;
-        match flag {
-            2 => return self.shared.get(&key).map(|id| Value::Obj(Some(*id))).ok_or(Error::Malformed("reference to an undefined object")),
-            1 => {}
-            _ => return Err(Error::Malformed("object marker")),
-        }
-        if self.shared.contains_key(&key) {
-            return Err(Error::Malformed("object defined twice"));
-        }
-        // Register before the fields: an object's own fields may refer back to it.
-        let id = self.push(Object::new(Tag(0), Kind::Shared, Vec::new(), Vec::new()))?;
-        self.shared.insert(key, id);
-        let mut chain = Vec::new();
-        let mut fields = Vec::new();
-        loop {
-            match self.c.u8()? {
-                0 => {
-                    let tag = Tag(self.c.u32()?);
-                    self.c.u16()?;
-                    chain.push(tag);
-                    fields.extend(self.fields(true, tag)?);
-                }
-                1 => {
-                    chain.push(Tag(self.c.u32()?));
-                    break;
-                }
-                2 => break,
-                _ => return Err(Error::Malformed("object class chain")),
-            }
-            if chain.len() > 64 {
-                return Err(Error::Limit("object class chain too long"));
-            }
-        }
-        let class = chain.first().copied().unwrap_or(Tag(0));
-        fields.extend(self.fields(true, class)?);
-        if let Some(o) = self.objects.get_mut(id) {
-            *o = Object::new(class, Kind::Shared, chain, fields);
-        }
-        Ok(Value::Obj(Some(id)))
     }
 }

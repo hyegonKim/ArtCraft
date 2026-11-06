@@ -1712,7 +1712,7 @@ fn layers_to_files(s: &mut Session, p: &Value) -> Result<Value> {
     let dir = str_param(p, "dir", cmd).or_else(|_| str_param(p, "output", cmd))?.to_string();
     let report = export_layers_report_with(s, p, |name, bytes| write_file(&join(&dir, name), bytes))?;
     let files: Vec<String> = report.files.iter().map(|name| join(&dir, name)).collect();
-    Ok(json!({"files": files, "skipped": report.skipped}))
+    Ok(json!({"files": files, "skipped": report.skipped, "warnings": report.warnings, "fileWarnings": report.file_warnings}))
 }
 
 /// The bodies of `file.export.layersToFiles`, streamed to `write` as a single-component filename
@@ -1734,11 +1734,23 @@ pub struct SkippedExportLayer {
     pub reason: &'static str,
 }
 
-/// Filenames written and layers skipped, each in top-to-bottom order.
+/// Fidelity diagnostics for one successfully written layer file.
+#[derive(Debug, serde::Serialize)]
+pub struct ExportLayerWarnings {
+    pub layer: u64,
+    pub name: String,
+    pub file: String,
+    pub warnings: Vec<String>,
+}
+
+/// Filenames, skipped layers and encoder diagnostics, each in top-to-bottom order.
 #[derive(Debug, Default)]
 pub struct LayerExportReport {
     pub files: Vec<String>,
     pub skipped: Vec<SkippedExportLayer>,
+    /// Display-ready diagnostics, with the output filename for context.
+    pub warnings: Vec<String>,
+    pub file_warnings: Vec<ExportLayerWarnings>,
 }
 
 /// The same export as [`export_layers_with`], with an explanation for every omitted top-level
@@ -1776,8 +1788,12 @@ pub fn export_layers_report_with(s: &Session, p: &Value, mut write: impl FnMut(&
         only.clipped = false;
         one.layers = vec![only];
         let name = format!("{}_{:04}_{}.{format}", sanitize(&prefix), index, sanitize(&l.name));
-        let (bytes, _warnings) = encode(&one, &name, save)?;
+        let (bytes, warnings) = encode(&one, &name, save)?;
         write(&name, &bytes)?;
+        if !warnings.is_empty() {
+            report.warnings.extend(warnings.iter().map(|warning| format!("{name}: {warning}")));
+            report.file_warnings.push(ExportLayerWarnings { layer: l.id.0, name: l.name.clone(), file: name.clone(), warnings });
+        }
         report.files.push(name);
     }
     Ok(report)

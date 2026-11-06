@@ -297,10 +297,117 @@ mod archive {
         assert_eq!(Archive::open(&file, Limits::default()).unwrap_err(), Error::Malformed("allocation tables form a cycle"));
     }
 
+    /// Flat bytes for deep inline/shared/positional objects, their object arrays, or a mix.
+    /// Layout 6 cycles array kinds: even inside positional fields, their elements are tagged.
+    fn nested_stream(depth: usize, layout: u8) -> Vec<u8> {
+        let mut bytes = synth::stream(&[]);
+        assert_eq!(bytes.pop(), Some(0));
+        let mut tagged = true;
+        for index in 0..depth {
+            let shape = if layout == 6 { 3 + (index % 3) as u8 } else { layout };
+            let code = match shape {
+                0 => 0x32,
+                1 => 0x31,
+                2 => 0x30,
+                3 => 0xb2,
+                4 => 0xb1,
+                5 => 0xb0,
+                _ => panic!("test layout"),
+            };
+            bytes.push(code);
+            if tagged {
+                bytes.extend(tag(b"Chld").0.to_le_bytes());
+            }
+            if shape >= 3 {
+                bytes.extend(1u32.to_le_bytes());
+            }
+            match shape {
+                0 | 3 => {
+                    if shape == 0 {
+                        bytes.push(1);
+                    }
+                    bytes.extend(tag(b"Grup").0.to_le_bytes());
+                    bytes.extend(0u16.to_le_bytes());
+                    if shape == 3 {
+                        bytes.push(1);
+                    }
+                    tagged = true;
+                }
+                1 | 4 => {
+                    bytes.push(1);
+                    bytes.extend((index as u32 + 1).to_le_bytes());
+                    bytes.push(1);
+                    bytes.extend(tag(b"Grup").0.to_le_bytes());
+                    tagged = true;
+                }
+                2 | 5 => tagged = false,
+                _ => panic!("test layout"),
+            }
+        }
+        bytes.push(0x03);
+        if tagged {
+            bytes.extend(tag(b"Leaf").0.to_le_bytes());
+        }
+        bytes.extend(0x12345678u32.to_le_bytes());
+        bytes.extend(std::iter::repeat_n(0, depth + 1));
+        bytes
+    }
+
+    #[test]
+    fn supported_nesting_and_hostile_objects_use_a_bounded_stack_on_a_two_mib_caller() {
+        std::thread::Builder::new()
+            .name("affinity-small-stack".into())
+            .stack_size(2 * 1024 * 1024)
+            .spawn(|| {
+                for layout in 0..=6 {
+                    let depth = stream::MAX_DEPTH - 1; // The root field list also counts.
+                    let parsed = stream::parse(&nested_stream(depth, layout)).unwrap();
+                    assert_eq!(parsed.root, 0);
+                    assert_eq!(parsed.objects.len(), stream::MAX_DEPTH);
+                    let mut current = parsed.root;
+                    for index in 0..depth {
+                        let object = &parsed.objects[current];
+                        assert_eq!(object.fields.len(), 1);
+                        let mut value = &object.fields[0].1;
+                        if let Value::Array(values) = value {
+                            assert_eq!(values.len(), 1);
+                            value = &values[0];
+                        }
+                        let Value::Obj(Some(child)) = value else { panic!("missing child") };
+                        let shape = if layout == 6 { 3 + (index % 3) as u8 } else { layout };
+                        assert_eq!(
+                            parsed.objects[*child].kind,
+                            match shape {
+                                0 | 3 => Kind::Inline,
+                                1 | 4 => Kind::Shared,
+                                _ => Kind::Positional,
+                            }
+                        );
+                        if layout == 0 || layout == 2 || layout == 3 || layout == 5 {
+                            assert_eq!(*child, depth - index);
+                        }
+                        if layout == 1 || layout == 4 {
+                            assert_eq!(*child, index + 1);
+                        }
+                        current = *child;
+                    }
+                    assert_eq!(parsed.objects[current].fields[0].1, Value::UInt(0x12345678));
+                    for depth in [stream::MAX_DEPTH, 2000] {
+                        assert_eq!(stream::parse(&nested_stream(depth, layout)).unwrap_err(), Error::Limit("objects nested too deeply"));
+                    }
+                }
+            })
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
     #[test]
     fn hostile_streams_fail_cleanly() {
-        let deep = (0..2000).fold(Vec::new(), |inner, _| vec![(tag(b"Chld"), F::Obj(tag(b"Grup"), inner))]);
-        assert_eq!(stream::parse(&synth::stream(&deep)).unwrap_err(), Error::Limit("objects nested too deeply"));
+        // Write and drop flat bytes, so this assertion exercises the production parser rather
+        // than the synthetic tree encoder's or a 2000-level F value's recursive destructor.
+        let deep = nested_stream(2000, 0);
+        assert_eq!(stream::parse(&deep).unwrap_err(), Error::Limit("objects nested too deeply"));
         // An array claiming four billion elements in a few bytes.
         let huge = synth::stream(&[(tag(b"Big_"), F::Raw(vec![0x81, b'_', b'g', b'i', b'B', 0xff, 0xff, 0xff, 0xff, 0]))]);
         assert_eq!(stream::parse(&huge).unwrap_err(), Error::Malformed("array longer than its data"));
@@ -347,6 +454,132 @@ mod archive {
             assert!(file.len() < d.len() / 100, "{} of {}", file.len(), d.len());
             let entry = Archive::open(&file, Limits::default()).unwrap().read("doc.dat").unwrap();
             assert_eq!(stream::parse(&entry).unwrap_err(), Error::Limit("too many values in the document stream"));
+        }
+    }
+
+    fn scalar_fixture() -> BoxedStrategy<F> {
+        prop_oneof![
+            any::<u8>().prop_map(F::U8),
+            any::<u32>().prop_map(F::U32),
+            any::<i32>().prop_map(F::I32),
+            (-10000.0f32..10000.0).prop_map(F::F32),
+            (-10000.0f64..10000.0).prop_map(F::F64),
+            any::<bool>().prop_map(F::Bool),
+            (any::<u16>(), any::<u16>()).prop_map(|(id, version)| F::Enum(id, version)),
+            "[a-zA-Z0-9 ]{0,24}".prop_map(F::Str),
+            "[a-zA-Z0-9/]{0,24}".prop_map(F::Entry),
+            prop::collection::vec(-10000.0f64..10000.0, 2..7).prop_map(F::F64s),
+            prop::collection::vec(any::<u8>(), 1..65).prop_map(F::Struct),
+            prop::collection::vec(any::<u8>(), 0..24).prop_map(F::U8s),
+            prop::collection::vec(any::<[u8; 3]>(), 0..8).prop_map(|records| F::Records(3, records.into_iter().map(|record| record.to_vec()).collect())),
+        ]
+        .boxed()
+    }
+
+    fn valid_fixture() -> BoxedStrategy<F> {
+        prop_oneof![scalar_fixture(), Just(F::Null)]
+            .prop_recursive(5, 64, 4, |inner| {
+                prop_oneof![
+                    prop::collection::vec(inner.clone(), 0..4)
+                        .prop_map(|values| F::Obj(tag(b"Grup"), values.into_iter().map(|value| (tag(b"Dupe"), value)).collect())),
+                    prop::collection::vec(prop::collection::vec(inner, 0..4), 0..4).prop_map(|objects| F::Objs(
+                        tag(b"Grup"),
+                        objects.into_iter().map(|values| values.into_iter().map(|value| (tag(b"Dupe"), value)).collect()).collect()
+                    )),
+                    prop::collection::vec(scalar_fixture(), 0..8).prop_map(F::Pos),
+                    prop::collection::vec(any::<bool>(), 0..8)
+                        .prop_map(|values| F::Shared(values.into_iter().map(|reference| if reference { F::Ref(42) } else { F::Null }).collect())),
+                ]
+            })
+            .boxed()
+    }
+
+    /// Independent small-tree semantic oracle. It does not parse bytes or use decoder helpers;
+    /// generated trees have at most five levels, so this reference itself needs no deep stack.
+    fn expected_objects(root: &[(Tag, F)]) -> Vec<stream::Object> {
+        use std::collections::HashMap;
+        fn fields(input: &[(Tag, F)], class: Tag, objects: &mut Vec<stream::Object>, shared: &mut HashMap<u32, usize>) -> Vec<(Tag, Value)> {
+            input.iter().map(|(tag, value)| (*tag, value_of(value, class, objects, shared))).collect()
+        }
+        fn value_of(input: &F, class: Tag, objects: &mut Vec<stream::Object>, shared: &mut HashMap<u32, usize>) -> Value {
+            match input {
+                F::U8(value) => Value::UInt((*value).into()),
+                F::U32(value) => Value::UInt((*value).into()),
+                F::I32(value) => Value::Int((*value).into()),
+                F::F32(value) => Value::Float((*value).into()),
+                F::F64(value) => Value::Float(*value),
+                F::Bool(value) => Value::Bool(*value),
+                F::Enum(id, version) => Value::Enum { id: *id, version: *version },
+                F::Str(value) => Value::Str(value.clone()),
+                F::F64s(values) => Value::Floats(values.clone()),
+                F::Struct(bytes) => Value::Bytes(bytes.clone()),
+                F::Records(_, records) => Value::Array(records.iter().cloned().map(Value::Bytes).collect()),
+                F::U8s(values) => Value::Array(values.iter().map(|value| Value::UInt((*value).into())).collect()),
+                F::Entry(value) => Value::Entry(value.clone()),
+                F::Null => Value::Obj(None),
+                F::Ref(key) => Value::Obj(Some(shared[key])),
+                F::Def(key, chain, input) => {
+                    let id = objects.len();
+                    objects.push(stream::Object::new(Tag(0), Kind::Shared, vec![], vec![]));
+                    shared.insert(*key, id);
+                    let class = chain.first().copied().unwrap();
+                    let decoded = fields(input, class, objects, shared);
+                    objects[id] = stream::Object::new(class, Kind::Shared, chain.clone(), decoded);
+                    Value::Obj(Some(id))
+                }
+                F::Obj(class, input) => {
+                    let decoded = fields(input, *class, objects, shared);
+                    let id = objects.len();
+                    objects.push(stream::Object::new(*class, Kind::Inline, vec![*class], decoded));
+                    Value::Obj(Some(id))
+                }
+                F::Pos(input) => {
+                    let decoded = input.iter().map(|value| (Tag(0), value_of(value, class, objects, shared))).collect();
+                    let id = objects.len();
+                    objects.push(stream::Object::new(class, Kind::Positional, vec![], decoded));
+                    Value::Obj(Some(id))
+                }
+                F::Shared(input) => Value::Array(input.iter().map(|value| value_of(value, class, objects, shared)).collect()),
+                F::Objs(class, input) => Value::Array(
+                    input
+                        .iter()
+                        .map(|input| {
+                            let decoded = fields(input, *class, objects, shared);
+                            let id = objects.len();
+                            objects.push(stream::Object::new(*class, Kind::Inline, vec![*class], decoded));
+                            Value::Obj(Some(id))
+                        })
+                        .collect(),
+                ),
+                F::Raw(_) => panic!("raw bytes are malformed-input fixtures, not semantic generators"),
+            }
+        }
+        let class = tag(b"Pers");
+        let mut objects = vec![stream::Object::new(class, Kind::Root, vec![class], vec![])];
+        let decoded = fields(root, class, &mut objects, &mut HashMap::new());
+        objects[0] = stream::Object::new(class, Kind::Root, vec![class], decoded);
+        objects
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(128))]
+        #[test]
+        fn generated_valid_streams_preserve_types_values_order_ids_and_self_references(value in valid_fixture()) {
+            let fields = vec![
+                (tag(b"Dupe"), F::U32(17)),
+                (tag(b"Dupe"), F::Def(42, vec![tag(b"Derv"), tag(b"Base")], vec![(tag(b"Self"), F::Ref(42)), (tag(b"Tree"), value)])),
+                (tag(b"Back"), F::Ref(42)),
+            ];
+            let parsed = stream::parse(&synth::stream(&fields)).unwrap();
+            prop_assert_eq!(parsed.root, 0);
+            prop_assert_eq!(&parsed.objects, &expected_objects(&fields));
+            prop_assert_eq!(parsed.objects[0].get(tag(b"Dupe")), Some(&Value::UInt(17)));
+            prop_assert_eq!(parsed.objects[1].get(tag(b"Self")), Some(&Value::Obj(Some(1))));
+            for object in &parsed.objects {
+                for (tag, _) in &object.fields {
+                    if tag.0 != 0 { prop_assert_eq!(object.get(*tag), object.fields.iter().find(|(candidate, _)| candidate == tag).map(|(_, value)| value)); }
+                }
+            }
         }
     }
 

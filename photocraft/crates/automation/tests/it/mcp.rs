@@ -799,6 +799,30 @@ async fn doc_exports_and_data_set_import_are_capability_scoped() {
     cleanup(&base);
 }
 
+/// The capability-scoped path reports the same per-file fidelity loss as the ambient command.
+#[tokio::test(flavor = "multi_thread")]
+async fn doc_export_layers_preserves_encoder_warnings() {
+    let base = tmp("layer-export-warnings");
+    let client = connect(headless_in(&base)).await;
+    json_of(&call(&client, "doc_new", json!({"width": 4, "height": 4, "background": "white", "name": "card"})).await);
+    json_of(&call(&client, "command_run", json!({"id": "layer.newAdjustmentLayer.levels"})).await);
+    json_of(&call(&client, "command_run", json!({"id": "layer.new.groupFromLayers", "params": {"name": "Pack"}})).await);
+    let result = json_of(&call(&client, "doc_export_layers", json!({"dir": "layers", "prefix": "card"})).await);
+    assert_eq!(result["count"], 2);
+    assert!(
+        result["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|warning| warning.as_str().is_some_and(|text| text.contains("Pack.png") && text.contains("flattened")))
+    );
+    assert_eq!(result["fileWarnings"][0]["name"], "Pack");
+    assert_eq!(result["fileWarnings"][0]["file"], "card_0000_Pack.png");
+    assert!(result["fileWarnings"][0]["warnings"].as_array().unwrap().iter().any(|warning| warning.as_str().is_some_and(|text| text.contains("flattened"))));
+    client.cancel().await.unwrap();
+    cleanup(&base);
+}
+
 /// Skipped-layer details survive the MCP tool result, including the all-skipped case.
 #[tokio::test(flavor = "multi_thread")]
 async fn doc_export_layers_reports_skipped_layers() {

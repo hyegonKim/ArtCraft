@@ -196,12 +196,14 @@ impl Headless {
             let report = file_cmds::export_layers_report_with(&this.session, params, |name, bytes| {
                 outputs.write(name, bytes).map_err(|e| photocraft_engine::EngineError::Other(e.to_string()))
             });
-            let (written, skipped) = match report {
-                Ok(report) => (Ok(report.files), report.skipped),
-                Err(error) => (Err(error), Vec::new()),
+            let (written, skipped, warnings, file_warnings) = match report {
+                Ok(report) => (Ok(report.files), report.skipped, report.warnings, report.file_warnings),
+                Err(error) => (Err(error), Vec::new(), Vec::new(), Vec::new()),
             };
             let mut result = exported(dir, written, &mut outputs)?;
             result["skipped"] = json!(skipped);
+            result["warnings"] = json!(warnings);
+            result["fileWarnings"] = json!(file_warnings);
             Ok(result)
         })
     }

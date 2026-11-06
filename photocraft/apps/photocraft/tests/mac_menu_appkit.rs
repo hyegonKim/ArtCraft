@@ -94,6 +94,8 @@ fn main() {
     };
 
     let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), photocraft_ui_egui::Services::default());
+    // The assertions below use English menu labels regardless of the host language.
+    app.session.edit_prefs(|prefs| prefs.interface.language = "en".into());
     let ctx = egui::Context::default();
     let frame = |app: &mut PhotocraftApp, raw: egui::RawInput| {
         let mut out = ctx.run_ui(raw, |ui| {

@@ -1129,6 +1129,11 @@ fn layers_to_files_reports_groups_as_exports_and_failures_as_errors() {
     assert_eq!(names, vec!["doc_0000_Pack.png", "doc_0001_Background.png"]);
     assert_eq!(report.files, names);
     assert!(report.skipped.is_empty(), "a group's adjustment is not an omitted top-level layer");
+    assert_eq!(report.file_warnings.len(), 1, "a flattened group must retain its encoder diagnostics");
+    assert_eq!(report.file_warnings[0].file, "doc_0000_Pack.png");
+    assert_eq!(report.file_warnings[0].name, "Pack");
+    assert!(report.file_warnings[0].warnings.iter().any(|warning| warning.contains("flattened")));
+    assert!(report.warnings.iter().any(|warning| warning.contains("doc_0000_Pack.png") && warning.contains("flattened")));
     assert_eq!(export_layers_with(&s, &params, |_, _| Ok(())).unwrap(), names, "legacy Rust helper remains compatible");
     assert!(export_layers_report_with(&s, &params, |_, _| Err(EngineError::Other("disk full".into()))).unwrap_err().to_string().contains("disk full"));
     assert!(export_layers_report_with(&s, &json!({"format": "not-a-format"}), |_, _| panic!("must not write")).is_err());
@@ -1141,6 +1146,8 @@ fn layers_to_files_reports_groups_as_exports_and_failures_as_errors() {
     let empty = export_layers_report_with(&s, &params, |_, _| panic!("must not write")).unwrap();
     assert!(empty.files.is_empty());
     assert!(empty.skipped.is_empty());
+    assert!(empty.warnings.is_empty());
+    assert!(empty.file_warnings.is_empty());
 }
 
 #[test]
