@@ -23,7 +23,7 @@
 | [DeckCraft](./deckcraft) | 프레젠테이션·PPTX 처리와 단축키 표시가 있었습니다. | 추가·수정 없음. | 중첩된 문서 로더의 스택 처리와 단축키 글리프 대체 표시. 포맷 43개와 UI 테스트 420개 통과. 제품 전체 검사 완료 전까지 미반영. |
 | [GridCraft](./gridcraft) | XLSX·CSV와 수식 계산을 지원했습니다. | 추가·수정 없음. | LAMBDA 인수 처리에서 기존 오류 값 보존. 기본 프로필로 수식 계산 테스트 95개 통과. 제품 전체 검사 완료 전까지 미반영. |
 | [CadCraft](./cadcraft) | 2D 도면 편집, 기하 제약과 DXF/DWG 처리 경로가 있었습니다. | 추가·수정 없음. | 빌드·기본 실행을 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
-| [Craft Launcher](./craft-launcher) | 도구 카탈로그와 설치·업데이트·실행을 관리했습니다. | 추가·수정 없음. | 관리 경로의 심볼릭 링크 차단과 `bin`·`share` 갱신 실패 시 복원. 관련 테스트 10개와 Clippy·WebAssembly 검사 통과. macOS 설치 검사를 완료하기 전까지 미반영. |
+| [Craft Launcher](./craft-launcher) | 도구 카탈로그와 설치·업데이트·실행을 관리했습니다. | **수정:** Linux 관리 경로에서 심볼릭 링크를 차단하고, `bin`·`share` 갱신 중 오류가 나면 기존 설치를 복원합니다. | 네이티브 테스트 168개, Clippy 및 WebAssembly 검사 통과. 기존 환경 의존 테스트 4개는 제외 상태. `main` 반영. |
 | [Craft Libraries](./craft-libs) | UI·미디어·글꼴 등 공통 기능을 제공했습니다. | 추가·수정 없음. | 번들 글꼴 인덱스 체크섬과 줄바꿈 처리. 인덱스 고정값 테스트 1개와 글꼴 빌드 테스트 18개 통과. 전체 검사 완료 전까지 미반영. |
 | [Craft i18n](./craft-i18n) | 앱별 번역 카탈로그와 카탈로그 검사 도구를 제공했습니다. | 추가·수정 없음. | 기존 빌드와 검사를 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
 | [ghidra-hopper-rs](./ghidra-hopper-rs) | 번들 Rust CLI에서 분석·PE 검사·MCP 기능을 제공했습니다. | **추가:** Rust CLI에서 실제 headless Ghidra SDK로 디컴파일하는 [독립 엔진](./ghidra-hopper-rs/sdk-engine). | Ghidra SDK로 테스트 바이너리의 함수 분석을 다시 확인했습니다. |

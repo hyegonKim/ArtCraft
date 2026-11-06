@@ -660,6 +660,123 @@ fn swap_into_place_via(staged: &Path, dest: &Path, rename: impl Fn(&Path, &Path)
     Ok(())
 }
 
+/// Linux's managed tarball tree, kept portable so its filesystem rules can be tested on every
+/// desktop host. Reject pre-existing symlinks all the way to the destination, rather than using
+/// a lexical `starts_with` check that can lead deletion or replacement outside the managed tree.
+/// This intentionally refuses symlinked install ancestors; callers must use their real path.
+#[cfg(any(target_os = "linux", test))]
+fn managed_tree_root(apps: &Path, id: &str, create: bool) -> Result<PathBuf, String> {
+    use std::path::Component;
+    if !apps.is_absolute() || !matches!(Path::new(id).components().collect::<Vec<_>>().as_slice(), [Component::Normal(_)]) {
+        return Err("the managed app needs an absolute apps folder and a single app id".into());
+    }
+    let root = apps.join(id);
+    let mut here = PathBuf::new();
+    for part in root.components() {
+        match part {
+            Component::Prefix(_) | Component::RootDir | Component::Normal(_) => here.push(part),
+            _ => return Err("the managed app path contains a relative component".into()),
+        }
+        if create && matches!(std::fs::symlink_metadata(&here), Err(e) if e.kind() == std::io::ErrorKind::NotFound) {
+            std::fs::create_dir(&here).map_err(|e| format!("couldn't create {} ({e})", here.display()))?;
+        }
+        checked_tree_directory(&here)?;
+    }
+    // Validate the whole destination before touching either component. `home` belongs to the
+    // app/user and is deliberately never traversed, renamed or removed by these operations.
+    for name in ["bin", "share"] {
+        checked_tree_directory(&root.join(name))?;
+    }
+    Ok(root)
+}
+
+/// A missing directory is allowed, but a symlink (including a dangling one) or other file is not.
+#[cfg(any(target_os = "linux", test))]
+fn checked_tree_directory(path: &Path) -> Result<bool, String> {
+    match std::fs::symlink_metadata(path) {
+        Ok(meta) if meta.file_type().is_symlink() => Err(format!("{} is a symlink; use a real managed app folder", path.display())),
+        Ok(meta) if meta.is_dir() => Ok(true),
+        Ok(_) => Err(format!("{} isn't a managed app directory", path.display())),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(e) => Err(format!("couldn't check {} ({e})", path.display())),
+    }
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn install_managed_tree(apps: &Path, id: &str, tree: &Path) -> Result<PathBuf, String> {
+    install_managed_tree_via(apps, id, tree, |from, to| std::fs::rename(from, to))
+}
+
+/// Swap the managed components as one transaction. The reserved backup owns BOTH old components
+/// until success; on error, even a failed rollback must not delete the only recoverable old copy.
+#[cfg(any(target_os = "linux", test))]
+fn install_managed_tree_via(apps: &Path, id: &str, tree: &Path, rename: impl Fn(&Path, &Path) -> std::io::Result<()>) -> Result<PathBuf, String> {
+    checked_tree_directory(tree)?;
+    let mut components = [("bin", false, false), ("share", false, false)];
+    let mut present = [false; 2];
+    for (index, (name, _, _)) in components.iter().enumerate() {
+        present[index] = checked_tree_directory(&tree.join(name))?;
+    }
+    if !present[0] {
+        return Err("the staged app has no bin directory".into());
+    }
+    let root = managed_tree_root(apps, id, true)?;
+    let backup = tempfile::Builder::new()
+        .prefix(".artcraft-launcher-backup-")
+        .tempdir_in(&root)
+        .map_err(|e| format!("couldn't reserve a backup in {} ({e})", root.display()))?;
+    let install = (|| {
+        for (index, (name, had_old, installed)) in components.iter_mut().enumerate() {
+            if !present[index] {
+                continue;
+            }
+            let dest = root.join(*name);
+            if checked_tree_directory(&dest)? {
+                rename(&dest, &backup.path().join(*name)).map_err(|e| format!("couldn't move the old {name} aside ({e})"))?;
+                *had_old = true;
+            }
+            rename(&tree.join(*name), &dest).map_err(|e| format!("couldn't put the new {name} in place ({e})"))?;
+            *installed = true;
+        }
+        Ok::<(), String>(())
+    })();
+    if let Err(error) = install {
+        let mut failures = Vec::new();
+        for (name, had_old, installed) in components.iter().rev() {
+            let dest = root.join(name);
+            if *installed && let Err(e) = rename(&dest, &tree.join(name)) {
+                failures.push(format!("couldn't move the new {name} back to staging ({e})"));
+                // Keep the old copy safely in the backup instead of replacing the new one.
+                continue;
+            }
+            if *had_old && let Err(e) = rename(&backup.path().join(name), &dest) {
+                failures.push(format!("couldn't restore the old {name} ({e})"));
+            }
+        }
+        if !failures.is_empty() {
+            let saved = backup.keep();
+            return Err(format!("{error}; {}; recovery copies were kept at {}", failures.join("; "), saved.display()));
+        }
+        return Err(error);
+    }
+    // Only now may TempDir remove the old bin AND share. The app's home is outside the backup.
+    Ok(root.join("bin").join(id))
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn remove_managed_tree(apps: &Path, id: &str) -> Result<bool, String> {
+    let root = managed_tree_root(apps, id, false)?;
+    let mut removed = false;
+    for name in ["bin", "share"] {
+        let path = root.join(name);
+        if checked_tree_directory(&path)? {
+            std::fs::remove_dir_all(&path).map_err(|e| format!("couldn't remove {} ({e})", path.display()))?;
+            removed = true;
+        }
+    }
+    Ok(removed)
+}
+
 /// After unpacking an archive into `dir`: its single top-level folder, if it has one.
 #[allow(dead_code)]
 fn single_top_folder(dir: &Path) -> Result<PathBuf, String> {
@@ -1026,7 +1143,7 @@ pub(crate) mod linux {
     /// Unpacks a release tarball (`bin/<app>`, `share/…`) into `<data>/apps/<app>`, a folder
     /// only the launcher owns, and returns the app's binary. This is the fallback for the
     /// Flatpak launcher when the host has no usable Flatpak: the app then runs inside the
-    /// sandbox instead of on the host. `bin` and `share` are swapped in one at a time, so an
+    /// sandbox instead of on the host. `bin` and `share` share one rollback transaction; an
     /// update leaves the app's own `home/` beside them untouched.
     pub fn install_tree(app: &CraftApp, file: &Path, paths: &Paths) -> Result<PathBuf, String> {
         let staged = paths.cache.join(format!("{}.new", app.id));
@@ -1051,14 +1168,7 @@ pub(crate) mod linux {
         // (e.g. a symlinked app binary) must never disturb the installed tree it replaces.
         let staged_bin = tree.join("bin").join(app.id);
         make_runnable_within(&tree, &staged_bin)?;
-        let root = paths.apps().join(app.id);
-        std::fs::create_dir_all(&root).map_err(|e| format!("couldn't create {} ({e})", root.display()))?;
-        for dir in ["bin", "share"] {
-            if tree.join(dir).is_dir() {
-                swap_into_place(&tree.join(dir), &root.join(dir))?;
-            }
-        }
-        Ok(root.join("bin").join(app.id))
+        super::install_managed_tree(&paths.apps(), app.id, &tree)
     }
 
     /// Makes `bin` executable (0755) without ever following an archive-controlled symlink out of
@@ -1098,16 +1208,7 @@ pub(crate) mod linux {
     /// settings and projects in it are the user's, not the installer's. Only the two folders the
     /// launcher put there are removed, and only inside the launcher's own apps folder.
     pub fn remove_tree(app: &CraftApp, paths: &Paths) -> Result<(), String> {
-        let root = paths.apps().join(app.id);
-        let mut removed = false;
-        for dir in ["bin", "share"] {
-            let path = root.join(dir);
-            if path.starts_with(paths.apps()) && path.is_dir() {
-                std::fs::remove_dir_all(&path).map_err(|e| format!("couldn't remove {} ({e})", path.display()))?;
-                removed = true;
-            }
-        }
-        if removed { Ok(()) } else { Err(format!("{} isn't installed in this folder", app.name)) }
+        if super::remove_managed_tree(&paths.apps(), app.id)? { Ok(()) } else { Err(format!("{} isn't installed in this folder", app.name)) }
     }
 
     /// Where menu entries and icons go: `$XDG_DATA_HOME`, else `~/.local/share`. Inside the
@@ -1222,7 +1323,7 @@ pub mod macos {
 
     use artcraft_launcher_core::version::Version;
 
-    use super::{CraftApp, InstallSource, Installed, Path, PathBuf, Paths, Release, process, staging_dir, swap_into_place};
+    use super::{CraftApp, InstallSource, Installed, Path, PathBuf, Paths, Release, process, swap_into_place};
 
     /// `/Applications` when we can write there, else `~/Applications`.
     fn applications_dir(existing: Option<&Installed>, destination: Option<&Path>) -> Result<PathBuf, String> {
@@ -1925,6 +2026,233 @@ mod tests {
         assert_eq!(occupied(None), Some(dir.path().join("photocraft")));
         let old = record("0.5.0", PackageKind::PortableZip, dir.path().join("photocraft/photocraft.exe"), vec![], false);
         assert_eq!(occupied(Some(&old)), None);
+    }
+
+    // All managed-tree tests use canonical paths inside fresh temporary directories. No real
+    // app install, home folder, package manager, network endpoint or elevated command is used.
+    fn managed_tree_fixture(base: &Path) -> (PathBuf, PathBuf, PathBuf) {
+        let base = base.canonicalize().unwrap();
+        let apps = base.join("data/apps");
+        let root = apps.join("wordcraft");
+        let tree = base.join("staged");
+        for (parent, version) in [(&root, "old"), (&tree, "new")] {
+            for name in ["bin", "share"] {
+                std::fs::create_dir_all(parent.join(name)).unwrap();
+                std::fs::write(parent.join(name).join("version"), version).unwrap();
+            }
+        }
+        std::fs::create_dir(root.join("home")).unwrap();
+        std::fs::write(root.join("home/project"), "user project").unwrap();
+        (apps, root, tree)
+    }
+
+    fn assert_managed_version(root: &Path, version: &str) {
+        for name in ["bin", "share"] {
+            assert_eq!(std::fs::read_to_string(root.join(name).join("version")).unwrap(), version);
+        }
+        assert_eq!(std::fs::read_to_string(root.join("home/project")).unwrap(), "user project");
+    }
+
+    fn transaction_backups(root: &Path) -> Vec<PathBuf> {
+        std::fs::read_dir(root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| path.file_name().unwrap().to_string_lossy().starts_with(".artcraft-launcher-backup-"))
+            .collect()
+    }
+
+    #[test]
+    fn managed_tree_updates_and_removal_preserve_home() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        assert_eq!(install_managed_tree(&apps, "wordcraft", &tree).unwrap(), root.join("bin/wordcraft"));
+        assert_managed_version(&root, "new");
+        assert!(transaction_backups(&root).is_empty());
+        assert!(remove_managed_tree(&apps, "wordcraft").unwrap());
+        assert!(!root.join("bin").exists() && !root.join("share").exists());
+        assert_eq!(std::fs::read_to_string(root.join("home/project")).unwrap(), "user project");
+        assert!(!remove_managed_tree(&apps, "wordcraft").unwrap());
+    }
+
+    #[test]
+    fn managed_tree_fresh_install_creates_only_real_managed_directories() {
+        let dir = tempfile::tempdir().unwrap();
+        let (_, old_root, tree) = managed_tree_fixture(dir.path());
+        let apps = dir.path().canonicalize().unwrap().join("fresh/data/apps");
+        let root = apps.join("wordcraft");
+        assert_eq!(install_managed_tree(&apps, "wordcraft", &tree).unwrap(), root.join("bin/wordcraft"));
+        for name in ["bin", "share"] {
+            assert_eq!(std::fs::read_to_string(root.join(name).join("version")).unwrap(), "new");
+        }
+        assert!(!root.join("home").exists());
+        assert_managed_version(&old_root, "old");
+        assert!(transaction_backups(&root).is_empty());
+    }
+
+    #[test]
+    fn managed_tree_rejects_relative_roots_and_multi_component_ids() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, _) = managed_tree_fixture(dir.path());
+        assert!(managed_tree_root(Path::new("relative/apps"), "wordcraft", true).is_err());
+        for id in ["", ".", "..", "../wordcraft", "wordcraft/bin", "/wordcraft"] {
+            assert!(managed_tree_root(&apps, id, true).is_err(), "{id}");
+        }
+        assert_managed_version(&root, "old");
+    }
+
+    #[test]
+    fn managed_tree_fresh_install_rolls_back_when_share_cannot_be_installed() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        std::fs::remove_dir_all(root.join("bin")).unwrap();
+        std::fs::remove_dir_all(root.join("share")).unwrap();
+        let error = install_managed_tree_via(&apps, "wordcraft", &tree, |from, to| {
+            if from == tree.join("share") { Err(std::io::Error::other("new share blocked")) } else { std::fs::rename(from, to) }
+        })
+        .unwrap_err();
+        assert!(error.contains("new share blocked"));
+        assert!(!root.join("bin").exists() && !root.join("share").exists());
+        assert_eq!(std::fs::read_to_string(tree.join("bin/version")).unwrap(), "new");
+        assert_eq!(std::fs::read_to_string(tree.join("share/version")).unwrap(), "new");
+        assert!(transaction_backups(&root).is_empty());
+        assert_eq!(std::fs::read_to_string(root.join("home/project")).unwrap(), "user project");
+    }
+
+    #[test]
+    fn managed_tree_second_swap_failure_restores_both_old_components() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        let error = install_managed_tree_via(&apps, "wordcraft", &tree, |from, to| {
+            if from == tree.join("share") { Err(std::io::Error::other("new share blocked")) } else { std::fs::rename(from, to) }
+        })
+        .unwrap_err();
+        assert!(error.contains("new share blocked"));
+        assert_managed_version(&root, "old");
+        assert_eq!(std::fs::read_to_string(tree.join("bin/version")).unwrap(), "new");
+        assert_eq!(std::fs::read_to_string(tree.join("share/version")).unwrap(), "new");
+        assert!(transaction_backups(&root).is_empty());
+    }
+
+    #[test]
+    fn managed_tree_failed_rollback_retains_old_component_and_reports_recovery_path() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        let error = install_managed_tree_via(&apps, "wordcraft", &tree, |from, to| {
+            if from == tree.join("share") {
+                Err(std::io::Error::other("new share blocked"))
+            } else if to == root.join("bin") && from != tree.join("bin") {
+                Err(std::io::Error::other("old bin restore blocked"))
+            } else {
+                std::fs::rename(from, to)
+            }
+        })
+        .unwrap_err();
+        assert!(error.contains("new share blocked") && error.contains("old bin restore blocked"));
+        let backups = transaction_backups(&root);
+        assert_eq!(backups.len(), 1);
+        let saved = &backups[0];
+        assert!(error.contains(&saved.display().to_string()));
+        assert_eq!(std::fs::read_to_string(saved.join("bin/version")).unwrap(), "old");
+        assert_eq!(std::fs::read_to_string(root.join("share/version")).unwrap(), "old");
+        assert_eq!(std::fs::read_to_string(tree.join("bin/version")).unwrap(), "new");
+        assert_eq!(std::fs::read_to_string(root.join("home/project")).unwrap(), "user project");
+    }
+
+    #[test]
+    fn managed_tree_failed_new_component_rollback_keeps_its_original_backup() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        let error = install_managed_tree_via(&apps, "wordcraft", &tree, |from, to| {
+            if from == tree.join("share") || from == root.join("bin") && to == tree.join("bin") {
+                Err(std::io::Error::other("move blocked"))
+            } else {
+                std::fs::rename(from, to)
+            }
+        })
+        .unwrap_err();
+        let backups = transaction_backups(&root);
+        assert_eq!(backups.len(), 1);
+        assert!(error.contains(&backups[0].display().to_string()));
+        assert_eq!(std::fs::read_to_string(backups[0].join("bin/version")).unwrap(), "old");
+        assert_eq!(std::fs::read_to_string(root.join("bin/version")).unwrap(), "new");
+        assert_eq!(std::fs::read_to_string(root.join("share/version")).unwrap(), "old");
+        assert_eq!(std::fs::read_to_string(root.join("home/project")).unwrap(), "user project");
+    }
+
+    #[test]
+    fn managed_tree_rejects_non_directory_components_before_replacing_bin() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        std::fs::remove_dir_all(root.join("share")).unwrap();
+        std::fs::write(root.join("share"), "user file").unwrap();
+        assert!(install_managed_tree(&apps, "wordcraft", &tree).is_err());
+        assert!(remove_managed_tree(&apps, "wordcraft").is_err());
+        assert_eq!(std::fs::read_to_string(root.join("bin/version")).unwrap(), "old");
+        assert_eq!(std::fs::read_to_string(root.join("share")).unwrap(), "user file");
+        assert!(transaction_backups(&root).is_empty());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn managed_tree_symlinked_ancestors_and_components_leave_external_files_untouched() {
+        for target in ["data", "apps", "wordcraft", "bin", "share"] {
+            let dir = tempfile::tempdir().unwrap();
+            let (apps, root, tree) = managed_tree_fixture(dir.path());
+            let outside = dir.path().canonicalize().unwrap().join("outside");
+            std::fs::create_dir(&outside).unwrap();
+            std::fs::write(outside.join("keep.txt"), "external file").unwrap();
+            let link = match target {
+                "data" => apps.parent().unwrap().to_path_buf(),
+                "apps" => apps.clone(),
+                "wordcraft" => root.clone(),
+                name => root.join(name),
+            };
+            // Moving rather than deleting the fixture also proves no ordinary home is lost.
+            let original = dir.path().canonicalize().unwrap().join("original");
+            std::fs::rename(&link, &original).unwrap();
+            // Mirror the resolved path, so the old lexical deletion would actually reach
+            // these external bin/share folders through a data/apps/app ancestor symlink.
+            let external_tree = match target {
+                "data" => outside.join("apps/wordcraft"),
+                "apps" => outside.join("wordcraft"),
+                _ => outside.clone(),
+            };
+            for name in ["bin", "share"] {
+                std::fs::create_dir_all(external_tree.join(name)).unwrap();
+                std::fs::write(external_tree.join(name).join("keep.txt"), "external component").unwrap();
+            }
+            std::os::unix::fs::symlink(&outside, &link).unwrap();
+            assert!(install_managed_tree(&apps, "wordcraft", &tree).unwrap_err().contains("symlink"), "{target}");
+            assert!(remove_managed_tree(&apps, "wordcraft").unwrap_err().contains("symlink"), "{target}");
+            assert_eq!(std::fs::read_link(&link).unwrap(), outside);
+            assert_eq!(std::fs::read_to_string(outside.join("keep.txt")).unwrap(), "external file");
+            for name in ["bin", "share"] {
+                assert_eq!(std::fs::read_to_string(external_tree.join(name).join("keep.txt")).unwrap(), "external component");
+                assert_eq!(std::fs::read_to_string(tree.join(name).join("version")).unwrap(), "new");
+            }
+            let original_home = match target {
+                "data" => original.join("apps/wordcraft/home/project"),
+                "apps" => original.join("wordcraft/home/project"),
+                "wordcraft" => original.join("home/project"),
+                _ => root.join("home/project"),
+            };
+            assert_eq!(std::fs::read_to_string(original_home).unwrap(), "user project");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn managed_tree_dangling_symlink_and_symlinked_staged_component_are_rejected() {
+        let dir = tempfile::tempdir().unwrap();
+        let (apps, root, tree) = managed_tree_fixture(dir.path());
+        std::fs::remove_dir_all(tree.join("share")).unwrap();
+        std::os::unix::fs::symlink(dir.path().join("missing"), tree.join("share")).unwrap();
+        assert!(install_managed_tree(&apps, "wordcraft", &tree).unwrap_err().contains("symlink"));
+        assert_managed_version(&root, "old");
+        std::fs::remove_dir_all(root.join("share")).unwrap();
+        std::os::unix::fs::symlink(dir.path().join("missing"), root.join("share")).unwrap();
+        assert!(remove_managed_tree(&apps, "wordcraft").unwrap_err().contains("symlink"));
+        assert_eq!(std::fs::read_to_string(root.join("bin/version")).unwrap(), "old");
     }
 
     #[test]
