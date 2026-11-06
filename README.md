@@ -2,19 +2,41 @@
 
 ## 기존 ArtCraft 대비 변경 사항
 
-검증한 아래 변경의 소스가 `main`에 반영되어 있습니다. [통합 커밋 `4fd6a81`](https://github.com/hyegonKim/ArtCraft/commit/4fd6a810f6875c9f52e62d637aed06437060a9b6)
+아래 표는 **같은 제품의 기존 버전과 현재 버전**을 비교합니다. 기준은 19개 프로젝트를 처음 모은 커밋 `484843e`이고, 비교 대상은 기능이 합쳐진 `main`의 `4fd6a81`입니다. 오른쪽 열은 별도로 검증한 로컬 작업이며, 이 비교의 `main`에는 포함되지 않습니다. [GitHub 소스 비교](https://github.com/hyegonKim/ArtCraft/compare/484843e...4fd6a81)
 
-| 기능 | 달라진 점 |
-| --- | --- |
-| [Native 이미지 편집](./artcraft/artcraft-native/src/pages/edit_image.rs) | 320 × 200 고정 캔버스를 제거했습니다. 원본 해상도와 투명도를 유지해 편집하고 PNG로 저장할 수 있습니다. 레이어 마스크, 변형, RGB 및 채널별 Curves, 연속 브러시·지우개, 실행 취소·다시 실행을 추가했습니다. |
-| [편집 프로젝트](./artcraft/artcraft-native/src/pages/image_project.rs) | `.acraft`로 레이어, 마스크, 변형, Levels, Curves를 보존하고 다시 열 수 있습니다. |
-| [이미지·비디오 모델 미리보기](./artcraft-services/frontend/apps/artcraft-webapp/model-preview) | API 연결 없이 각 화면에서 모델 22개를 고를 수 있습니다. 미리보기의 생성 버튼은 비활성화되어 있습니다. |
-| [웹 로그인](./artcraft-services/frontend/apps/artcraft-webapp/src/pages/login/login.tsx) | 빈 비밀번호 또는 비어 있거나 공백뿐인 사용자 이름은 서버 요청 전에 안내합니다. |
-| [영상 프레임 추출](./artcraft-services/frontend/apps/artcraft-webapp/src/pages/frame-extractor) | MP4를 재생하기 전에 첫 프레임을 캡처하고 PNG로 저장할 수 있습니다. |
-| [Craft Suite 실행 연동](./artcraft/artcraft-native/src/pages/craft_suite.rs) | Native 앱에서 설치된 Craft Suite 도구를 열 수 있습니다. |
-| [Ghidra SDK 엔진](./ghidra-hopper-rs/sdk-engine) | Rust CLI에서 실제 Ghidra SDK로 분석할 수 있는 별도 크레이트를 추가했습니다. |
+### 제품별 비교
 
-통합본에서 웹 테스트 45개, Native 테스트 166개, Ghidra 엔진 테스트 165개가 통과했습니다. 브라우저에서 모델 선택, 빈 로그인 입력 차단, 첫 프레임 캡처를 확인했고 실제 Ghidra SDK 디컴파일도 검증했습니다.
+| 제품 | 기존 버전 | 현재 `main`의 추가·수정 | 로컬에서 검증한 후속 작업 |
+| --- | --- | --- | --- |
+| [ArtCraft Native / Desktop](./artcraft) | Native 이미지 편집은 320 × 200 고정 캔버스를 사용했습니다. | **추가:** 연결 레이어 마스크, 비파괴 변형, RGB·채널별 Curves, 편집 가능한 `.acraft`, Craft Suite 실행 메뉴. **수정:** 원본 크기와 투명도를 유지하는 편집·PNG 저장, 연속 브러시·지우개와 획 단위 Undo/Redo. | Tauri 웹 화면과 일부 API 요청에서 `false`·`0`을 보존하는 수정의 계약을 검증했습니다. |
+| [ArtCraft Services](./artcraft-services) | 모델 선택 화면은 API 목록에 의존했습니다. 빈 로그인도 요청을 보냈고, 재생 전 첫 프레임 캡처가 실패할 수 있었습니다. | **추가:** API 없이 이미지·비디오 모델을 각 22개 고르는 독립 미리보기. **수정:** 빈 로그인 입력을 요청 전에 차단하고, 재생 전 첫 프레임 캡처를 안정화했습니다. | OpenAPI의 미해결 참조 4개와 경로 매개변수 127곳을 바로잡고 문서 계약을 검증했습니다. |
+| [ArtCraftX](./artcraftx) | 이미지·비디오·오디오·3D 생성 화면을 갖춘 별도 데스크톱 앱입니다. | 추가·수정 없음. | 프런트엔드 빌드와 실제 Tauri 창의 작업 화면 5개, 네이티브 읽기 명령 4개를 확인했습니다. 검증 자체는 기능 추가로 집계하지 않았습니다. |
+| [FilmCraft](./filmcraft) | 모노레포 최초 스냅샷에 타임라인과 편집·내보내기 도구가 있었습니다. | **추가:** FilmCraft 0.15 통합과 Windows 설치 정책 검사. **수정:** 공식 소스와 Mac·PC 변경을 합치면서 한국어 전사 흐름과 내보내기 준비 동작을 보존하고, 전사 작업의 Undo와 실험적 Premiere 프로젝트 가져오기의 마커 호환성을 수정했습니다. [통합 기록](./filmcraft/docs/source-integration.json) | EDL에서 프레임레이트나 드롭 프레임 모드와 맞지 않는 타임코드에 경고를 추가했습니다. |
+| [PhotoCraft](./photocraft) | 레이어와 마스크를 편집하고 PSD 및 일반 이미지로 내보낼 수 있었습니다. | 추가·수정 없음. | 레이어별 파일 내보내기에서 포맷 변환 경고를 결과와 UI에 전달하고, 깊게 중첩된 Affinity 문서의 파싱을 수정했습니다. |
+| [VectorCraft](./vectorcraft) | SVG 가져오기·내보내기를 지원했으며, 가로·세로 강도가 다른 Gaussian Blur를 하나의 평균값으로 근사했습니다. | 추가·수정 없음. | SVG 흐림 효과의 가로·세로 값을 독립적으로 처리하도록 수정했습니다. |
+| [LightCraft](./lightcraft) | 일부 ORF RAW를 디코딩할 수 있었지만 지원 여부 검사에서 ORF를 제외했습니다. | 추가·수정 없음. | 지원하는 비압축 ORF가 정상 디코딩 경로를 사용하도록 지원 여부 검사를 수정했습니다. |
+| [EffectCraft](./effectcraft) | 합성·키프레임·타임라인 내보내기가 있었으며, 프리렌더에서 조정 레이어 효과가 빠질 수 있었습니다. | 추가·수정 없음. | 조정 레이어가 포함된 합성 결과를 렌더에 반영하고 평면화 경고를 표시하도록 수정했습니다. |
+| [DesignCraft](./designcraft) | 자동 텍스트 재배치가 사용자가 명시적으로 삭제한 페이지를 다시 만들 수 있었습니다. | 추가·수정 없음. | 페이지 삭제와 Undo에서 스토리 텍스트를 보존하고, 필요한 조판 변경에서 재배치가 실행되도록 수정했습니다. |
+| [SoundCraft](./soundcraft) | 오디오 편집·믹싱·DSP와 플러그인 호스트를 갖췄습니다. | 추가·수정 없음. | 빌드·기본 실행을 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
+| [FigCraft](./figcraft) | 프레임·컴포넌트·프로토타입과 SVG 텍스트 편집이 있었습니다. | 추가·수정 없음. | macOS Command와 Ctrl 입력을 구분했습니다. SVG 텍스트 크기 변경 후 Undo/Redo와 저장·재열기도 검증했습니다. |
+| [WordCraft](./wordcraft) | DOCX 편집·저장과 PDF 출력이 있었습니다. | 추가·수정 없음. | 실제 UI에서 DOCX 편집·Undo/Redo·저장·재열기를 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
+| [DeckCraft](./deckcraft) | 프레젠테이션·PPTX 처리와 단축키 표시가 있었습니다. | 추가·수정 없음. | 중첩된 문서 로더의 스택 문제와 단축키 글리프가 없을 때의 표시를 수정했습니다. |
+| [GridCraft](./gridcraft) | XLSX·CSV와 수식 계산을 지원했습니다. | 추가·수정 없음. | LAMBDA 인수 처리에서 기존 오류 값이 보존되도록 수정했습니다. |
+| [CadCraft](./cadcraft) | 2D 도면 편집, 기하 제약과 DXF/DWG 처리 경로가 있었습니다. | 추가·수정 없음. | 빌드·기본 실행을 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
+| [Craft Launcher](./craft-launcher) | 도구 카탈로그와 설치·업데이트·실행을 관리했습니다. | 추가·수정 없음. | Linux 관리 경로에서 심볼릭 링크를 거부하고, `bin`·`share` 갱신 중 오류가 나면 복원하도록 수정했습니다. |
+| [Craft Libraries](./craft-libs) | UI·미디어·글꼴 등 공통 기능을 제공했습니다. | 추가·수정 없음. | 번들 글꼴 인덱스의 줄바꿈과 체크섬 검증이 일치하도록 수정했습니다. |
+| [Craft i18n](./craft-i18n) | 앱별 번역 카탈로그와 카탈로그 검사 도구를 제공했습니다. | 추가·수정 없음. | 기존 빌드와 검사를 확인했습니다. 별도 기능 변경은 확인되지 않았습니다. |
+| [ghidra-hopper-rs](./ghidra-hopper-rs) | 번들 Rust CLI에서 분석·PE 검사·MCP 기능을 제공했습니다. | **추가:** Rust CLI에서 실제 headless Ghidra SDK로 디컴파일하는 [독립 엔진](./ghidra-hopper-rs/sdk-engine). | Ghidra SDK로 테스트 바이너리의 함수 분석을 다시 확인했습니다. |
+
+### 기존 ArtCraft에 없었던 기능
+
+- **편집 가능한 Native 프로젝트** — `.acraft`로 원본 레이어, 마스크, 변형, Levels와 Curves를 보존하고 다시 열 수 있습니다. [프로젝트 구현](./artcraft/artcraft-native/src/pages/image_project.rs)
+- **원본 해상도 편집** — 기존 고정 캔버스의 한계를 없애고 원본 크기와 투명도를 유지하는 편집·PNG 저장을 구현했습니다. macOS에서 4097 × 2305 프로젝트의 편집과 재열기를 확인했습니다. [편집기 구현](./artcraft/artcraft-native/src/pages/edit_image.rs)
+- **API 없는 모델 선택** — 이미지와 비디오 화면에서 모델을 고르고, 두 화면을 오가도 선택이 유지됩니다. 실제 생성은 미리보기에서 비활성화되어 있습니다. [실행 및 빌드 방법](./artcraft-services/frontend/apps/artcraft-webapp/model-preview)
+- **Native에서 도구 실행** — ArtCraft Native의 Craft Suite 메뉴에서 설치된 편집기를 열 수 있습니다. [실행 메뉴 구현](./artcraft/artcraft-native/src/pages/craft_suite.rs)
+- **실제 Ghidra SDK 호출** — 별도 Rust 명령으로 headless Ghidra에 분석을 요청하고 디컴파일 결과를 받을 수 있습니다. [SDK 엔진 실행 방법](./ghidra-hopper-rs/sdk-engine)
+
+통합본에서 웹 테스트 45개, Native 테스트 166개, Ghidra 엔진 테스트 165개가 통과했습니다. 브라우저에서 모델 선택, 빈 로그인 입력 차단과 첫 프레임 캡처를 확인했고 실제 Ghidra SDK 디컴파일도 검증했습니다. [기능 통합 커밋](https://github.com/hyegonKim/ArtCraft/commit/4fd6a810f6875c9f52e62d637aed06437060a9b6)
 
 ArtCraft monorepo containing all 19 projects, including the integrated FilmCraft upstream, Mac Codex, and PC changes.
 
