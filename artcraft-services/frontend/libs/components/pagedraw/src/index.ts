@@ -26,3 +26,7 @@ export { useRightPanelLayoutManagement } from "./lib/hooks/useRightPanelLayoutMa
 // UI components (used by PageEdit)
 export { ContextMenuContainer } from "./lib/components/ui/ContextMenu";
 export { default as SplitPane } from "./lib/components/ui/SplitPane";
+
+// Portable, versioned layer documents used by host project-storage UIs.
+export { captureLayerProject, restoreLayerProject, validateLayerProject } from './lib/layer-project';
+export type { LayerProject } from './lib/layer-project';

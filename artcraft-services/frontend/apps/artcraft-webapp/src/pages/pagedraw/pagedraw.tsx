@@ -5,6 +5,8 @@ import { useSidebar } from "../../components/ui/sidebar";
 import { TopBarActions } from "../../components/topbar/TopBarActions";
 import { useWebPageDrawAdapter } from "./web-adapter";
 
+import { LayerProjectControls } from "./LayerProjectControls";
+
 export default function PageDraw() {
   const adapter = useWebPageDrawAdapter();
   // The global top bar is hidden on this route (desktop) so the editor
@@ -44,6 +46,7 @@ export default function PageDraw() {
           // Cost/help live in the webapp's own chrome, not over the canvas.
           showBottomRightControls={false}
         />
+        <LayerProjectControls />
         {/* With the global top bar hidden on desktop, float the same
             credits / pricing / task-queue / profile cluster in the top-right
             corner so those actions stay reachable while editing. */}
