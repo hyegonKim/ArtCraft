@@ -4,12 +4,31 @@
 
 아래 표는 **같은 제품의 기존 버전과 현재 버전**을 비교합니다. 기준은 19개 프로젝트를 처음 모은 커밋 `484843e`입니다. 현재 버전 열에는 GitHub `main`에 반영된 변경을, 마지막 열에는 후속 검증 결과와 반영 상태를 기록합니다. [GitHub 소스 비교](https://github.com/hyegonKim/ArtCraft/compare/484843e...main)
 
+### 인증 스테이징 배포와 실제 검증 — 2026-11-07
+
+웹 프런트엔드는 [비공개 Netlify 스테이징](https://artcraft-web-private-staging.netlify.app/)에, 인증 API는 Hostinger 실행 VPS에 배포했습니다. 별도 Hostinger VPS에서 Linux 이미지를 빌드한 뒤 실행 VPS로 옮겼습니다. Google 로그인은 ArtCraft Staging 전용 프로젝트의 웹 클라이언트와 테스트 계정으로 검증했습니다.
+
+| 항목         | 배포 구성 / 실제 확인 결과                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 인증 서버      | storyteller-web + MySQL 8.4 + Redis 7. 격리된 Compose 프로젝트·볼륨을 사용하고 API를 127.0.0.1:12346에 바인딩합니다.                          |
+| HTTPS      | artcraft-auth-staging.ncubestudio.cloud. 기존 Traefik과 Let’s Encrypt 인증서를 사용하며 지정한 스테이징 출처·인증 경로·메서드만 라우팅합니다.             |
+| 프런트엔드      | VITE_ARTCRAFT_API_ORIGIN과 VITE_GOOGLE_CLIENT_ID로 연결합니다. Google SDK의 실제 버튼을 표시하고 CSP에 필요한 인증 경로와 Google 스크립트·프레임을 허용합니다. |
+| 이메일 가입·로그인 | 실제 Netlify 주소에서 테스트 계정 생성, 계정 생성 성공·환영 화면 확인, 로그아웃, 같은 계정으로 재로그인, 사용자 메뉴 표시를 확인했습니다.                                    |
+| Google 로그인 | 실제 Google 계정 선택과 사용자 동의를 거쳐 /pricing으로 이동하고 사용자 메뉴가 표시됐습니다. 새로고침 후에도 로그인 세션이 유지됐습니다.                                    |
+| 접근 제어      | Netlify 기본 주소·배포별 주소·웹 번들에 대한 비로그인 요청은 401입니다. 인증 API의 다른 출처와 생성·관리 경로는 404로 차단됐습니다.                                    |
+| 모델 미리보기    | 이미지·비디오 화면 각각 22개 모델 표시, 다른 모델 선택 반영, Create 비활성 상태를 실제 배포 주소에서 확인했습니다.                                                 |
+| 소스 검사      | CORS 회귀 테스트 79개와 웹 로그인·브리지 테스트 26개 통과. Rust 백엔드 검사·Linux 바이너리/런타임 이미지 빌드, 개별 Vite 라이브러리·웹앱 빌드, Compose 병합 검사를 통과했습니다.   |
+
+검증된 Netlify 배포는 `6aee8f4dd234b04876ca4ed6`이며 빌드의 기준 소스는 `678be91`에 이번 인증 수정을 적용한 상태입니다. 게시 중 확인된 개발용 JSX 혼입 오류는 프로덕션 라이브러리를 다시 빌드해 수정했고, 실제 가입·로그인 검증은 수정 배포에서 수행했습니다. 전체 Nx 빌드는 별도 `apps/genhub/vite.config.ts`의 프로젝트 그래프 오류로 통과하지 못했습니다. 위 빌드 결과는 개별 Vite 빌드와 실제 배포 검증 결과입니다.
+
+Netlify 접근 제어는 프로젝트의 비공개 설정에서 관리합니다. 이 소스 커밋이 Netlify 사이트를 자동 재배포하지는 않습니다. 이메일 수신·비밀번호 재설정 메일, 결제, 유료 AI 생성은 이번 검증 범위에 포함하지 않았습니다. 서버 비밀값과 테스트 계정 자격증명은 저장소에 포함하지 않습니다. [실행 구성과 재현 방법](./artcraft-services/build/selfhost/README.md#private-staging-authentication)
+
 ### 제품별 비교
 
 | 제품 | 기존 버전 | 현재 `main`의 추가·수정 | 후속 검증 및 반영 상태 |
 | --- | --- | --- | --- |
 | [ArtCraft Native / Desktop](./artcraft) | Native 이미지 편집은 320 × 200 고정 캔버스를 사용했습니다. | **추가:** 연결 레이어 마스크, 비파괴 변형, RGB·채널별 Curves, 편집 가능한 `.acraft`, Craft Suite 실행 메뉴. **수정:** 원본 크기와 투명도를 유지하는 편집·PNG 저장, 연속 브러시·지우개와 획 단위 Undo/Redo, 웹 API 요청의 명시적인 `false`·`0`·빈 문자열 보존. | API 라이브러리·앱 테스트 13개와 라이브러리 빌드 통과. `main` 반영. |
-| [ArtCraft Services](./artcraft-services) | 모델 선택 화면은 API 목록에 의존했습니다. 빈 로그인도 요청을 보냈고, 재생 전 첫 프레임 캡처가 실패할 수 있었습니다. | **추가:** API 없이 이미지·비디오 모델을 각 22개 고르는 독립 미리보기. **수정:** 일반 웹앱에서도 모델 API에 연결할 수 없으면 내장 목록으로 전환하고 생성 버튼을 비활성화합니다. 빈 로그인 입력을 요청 전에 차단하고, 재생 전 첫 프레임 캡처를 안정화했습니다. 웹 API·Dashboard 요청의 명시적인 `false`·`0`·빈 문자열을 보존하고, OpenAPI의 미해결 참조 4개와 경로 매개변수 127곳을 바로잡았습니다. | 웹 API 테스트 10개, Dashboard 테스트 4개, 생성된 OpenAPI 계약 검사 4개 통과. `main` 반영. |
+| [ArtCraft Services](./artcraft-services) | 모델 선택 화면은 API 목록에 의존했습니다. 빈 로그인도 요청을 보냈고, 재생 전 첫 프레임 캡처가 실패할 수 있었습니다. | **추가:** API 없이 이미지·비디오 모델을 각 22개 고르는 독립 미리보기와 HTTPS 인증 스테이징. **수정:** 일반 웹앱에서도 모델 API에 연결할 수 없으면 내장 목록으로 전환하고 생성 버튼을 비활성화합니다. 환경변수로 자체 인증 API·Google 웹 클라이언트를 연결하고 공식 Google 버튼을 표시합니다. 빈 로그인 입력을 요청 전에 차단하고, 재생 전 첫 프레임 캡처를 안정화했습니다. 웹 API·Dashboard 요청의 명시적인 `false`·`0`·빈 문자열을 보존하고, OpenAPI의 미해결 참조 4개와 경로 매개변수 127곳을 바로잡았습니다. | 실제 이메일 가입·재로그인·Google 로그인·새로고침 후 세션 유지, Netlify 비로그인 401 차단, CORS 79개·웹 인증 26개 통과. 웹 API 테스트 10개, Dashboard 테스트 4개, 생성된 OpenAPI 계약 검사 4개 통과. `main` 반영. |
 | [ArtCraftX](./artcraftx) | 이미지·비디오·오디오·3D 생성 화면을 갖춘 별도 데스크톱 앱입니다. | **수정:** 웹 API 요청의 명시적인 `false`·`0`·빈 문자열 보존. | API 라이브러리·앱 테스트 12개와 라이브러리 빌드 통과. `main` 반영. 앞선 실제 Tauri 검증에서는 작업 화면 5개와 네이티브 읽기 명령 4개를 확인했습니다. |
 | [FilmCraft](./filmcraft) | 모노레포 최초 스냅샷에 타임라인과 편집·내보내기 도구가 있었습니다. | **추가:** FilmCraft 0.15 통합과 Windows 설치 정책 검사. **수정:** 공식 소스와 Mac·PC 변경을 합치면서 한국어 전사 흐름과 내보내기 준비 동작을 보존하고, 전사 작업의 Undo와 실험적 Premiere 프로젝트 가져오기의 마커 호환성을 수정했습니다. [통합 기록](./filmcraft/docs/source-integration.json) EDL에서 프레임레이트나 드롭 프레임 모드와 맞지 않는 타임코드에 경고를 표시합니다. | 교환 형식 테스트 139개 통과. UI 테스트를 직렬로 재실행해 문서 테스트·WebAssembly를 포함한 제품 전체 검사 통과. `main` 반영. |
 | [PhotoCraft](./photocraft) | 레이어와 마스크를 편집하고 PSD 및 일반 이미지로 내보낼 수 있었습니다. | **수정:** 레이어별 파일 내보내기에서 포맷 변환 경고를 UI와 API 결과에 전달하고, 깊게 중첩된 Affinity 문서를 안정적으로 파싱합니다. | Affinity 32개, 레이어 내보내기 엔진·API 4개와 제품 전체 검사 9단계 통과. 첫 실행 메뉴를 한국어·일본어·영어로 확인. `main` 반영. |
@@ -59,7 +78,7 @@ Unified **ArtCraft & Craft Suite** repository containing all 19 applications, li
 - **Desktop workflows.** Verified the basic launch and interaction flows for ArtCraft Native and 13 Craft Suite tools. ArtCraftX verification also exercised five workspaces and four native Tauri read commands.
 - **Ghidra integration.** Built the Rust engine and verified it against the actual Ghidra SDK. The standalone SDK engine is in [`ghidra-hopper-rs/sdk-engine`](./ghidra-hopper-rs/sdk-engine). The integration covered 16 analysis cases and seven production CLI checks.
 
-The native editor verification covered editing, PNG export, Undo/Redo, and reopening a 4097 × 2305 project on macOS. The web preview was tested in a browser with API access blocked. Live account sign-in, billing, and paid AI generation require a configured backend. The Adobe products listed below are workflow references.
+The native editor verification covered editing, PNG export, Undo/Redo, and reopening a 4097 × 2305 project on macOS. The web preview was tested in a browser with API access blocked. Email sign-up, password sign-in, and Google sign-in were verified against the private staging authentication backend on 2026-11-07. Billing and paid AI generation were outside this authentication verification. The Adobe products listed below are workflow references.
 
 ## Applications & Suites
 

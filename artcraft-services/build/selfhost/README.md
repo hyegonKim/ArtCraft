@@ -69,6 +69,110 @@ the repository README:
 VITE_USE_LOCAL_API=true npx nx dev artcraft-webapp
 ```
 
+### Private staging authentication
+
+Use a separate deployment directory and `.env` for staging. Set
+`ARTCRAFT_WEBAPP_EXTRA_ORIGIN` to the exact protected web app origin and
+`ARTCRAFT_GOOGLE_CLIENT_ID` to the staging Google web client ID. Generate
+independent database passwords and signing secrets, and set `COOKIE_SECURE=true`
+and `COOKIE_DOMAIN` to the staging API hostname. Build the web app with
+`VITE_ARTCRAFT_API_ORIGIN` set to the HTTPS API origin and `VITE_GOOGLE_CLIENT_ID`
+set to the same client ID.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml config -q
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up --no-build -d
+curl --fail http://127.0.0.1:12346/_status
+```
+
+The staging overlay requires Compose 2.24.4 or newer. Build the image on a
+separate machine and import it before running the overlay. Set
+`ARTCRAFT_STAGING_IMAGE` in the staging `.env` to that local image tag.
+The overlay uses a separate project and volumes. It starts MySQL, migrations,
+Redis, and the API with memory limits for the authentication smoke test.
+Search and media are unavailable. Check migration completion and measure
+actual memory use during sign-up and sign-in before enabling an HTTPS route.
+
+The runtime image used in the staging verification was packaged with
+[Dockerfile.staging-runtime](./Dockerfile.staging-runtime). Its build context
+contains the Linux `storyteller-web` binary, the repository's `includes/`
+directory, and the public `storyteller-web.common.env`,
+`storyteller-web.production.env`, and `storyteller-web.development.env` files.
+Supply deployment secrets through the separate Compose `.env` file.
+
+```bash
+# Run on the Linux build host after cargo build --locked --bin storyteller-web.
+mkdir -p runtime-image
+cp target/debug/storyteller-web runtime-image/
+cp -a includes runtime-image/
+cp crates/service/web/storyteller_web/config/storyteller-web.{common,production,development}.env runtime-image/
+docker build -f build/selfhost/Dockerfile.staging-runtime -t artcraft-services:auth-staging-678be91 runtime-image
+```
+
+The API binds to VPS loopback. On a shared VPS, use a dedicated virtual host
+in the existing HTTPS proxy. Expose only the staging authentication endpoints
+with appropriate request limits.
+
+The deployed Traefik configuration is in
+[docker-compose.staging-https.yml](./docker-compose.staging-https.yml).
+It uses the existing `websecure` entrypoint and `letsencrypt` resolver.
+After internal authentication checks pass, apply it with the other two files.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.staging-https.yml config -q
+docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.staging-https.yml up -d --no-build --no-deps storyteller-web
+```
+
+The router's Origin match and CORS are browser request controls.
+Netlify project visibility supplies the site access gate.
+The HTTPS router also restricts paths and methods and limits request rates.
+
+Keep Netlify visitor protection enabled for both the main staging URL and
+previews. In the staging CSP, allow only the necessary authentication API URLs
+and the [Google Identity Services URLs](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#content_security_policy).
+Check that anonymous requests to Netlify still return 401 and that model
+selection still uses the local preview catalog with Create disabled.
+
+### Verified staging deployment — 2026-11-07
+
+The protected frontend is `artcraft-web-private-staging.netlify.app`.
+The authentication API origin is
+`https://artcraft-auth-staging.ncubestudio.cloud`.
+The deployed web bundle is `assets/index-CgqxJjkJ.js` in Netlify deploy
+`6aee8f4dd234b04876ca4ed6`.
+
+- MySQL migrations completed, Redis returned PONG, and the API passed local
+  CORS, email sign-up, signed-session, password-login, and invalid Google
+  credential checks.
+- Live Chrome checks completed email sign-up, logout, password sign-in,
+  Google account selection and consent, and session persistence after reload.
+- The main Netlify URL, deploy permalink, and JavaScript bundle returned 401
+  without a Netlify session. Disallowed API origins and generation/admin paths
+  returned 404.
+- Both model pickers listed 22 models, applied another selection, and kept
+  Create disabled.
+- CORS regression tests passed 79 cases. Web authentication tests passed 26
+  cases. The Linux binary and runtime image built successfully.
+- The full Nx project graph failed in `apps/genhub/vite.config.ts` with
+  `Cannot read properties of undefined (reading 'getStatus')`.
+  Individual Vite library and webapp builds passed. Rebuilding the changed
+  libraries in production fixed the earlier `jsxDEV is not a function`
+  browser failure.
+
+For a manual Netlify deployment, copy the tested staging files into the
+webapp's publish directory after the production build.
+
+```bash
+cp apps/artcraft-webapp/staging/_headers apps/artcraft-webapp/dist/
+cp apps/artcraft-webapp/staging/_redirects apps/artcraft-webapp/dist/
+cp apps/artcraft-webapp/staging/_staging-unavailable.html apps/artcraft-webapp/dist/
+```
+
+These files configure CSP, popup compatibility, and static routing.
+The Netlify project and preview visibility must also be Private.
+Email delivery, password-reset emails, billing, and paid generation were
+outside this verification.
+
 ## Limitations
 
 - Only the HTTP API is included. Background workers (provider polling, video

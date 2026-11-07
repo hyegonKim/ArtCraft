@@ -1,0 +1,3 @@
+/api/* /_staging-unavailable.html 404!
+/v1/* /_staging-unavailable.html 404!
+/* /index.html 200

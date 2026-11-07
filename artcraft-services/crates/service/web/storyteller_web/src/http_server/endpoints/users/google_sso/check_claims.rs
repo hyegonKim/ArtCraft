@@ -6,6 +6,10 @@ use google_sign_in::decode_and_verify_token_claims::decode_and_verify_token_clai
 use google_sign_in::VerificationOptions;
 use log::warn;
 use std::collections::HashSet;
+use std::env;
+
+const DEFAULT_GOOGLE_CLIENT_ID: &str =
+    "788843034237-uqcg8tbgofrcf1to37e1bqphd924jaf6.apps.googleusercontent.com";
 
 pub async fn check_claims(
   request: &GoogleCreateAccountRequest,
@@ -49,16 +53,16 @@ pub async fn check_claims(
   Ok(claims)
 }
 
-// TODO(bt,2024-09-22): Make this configurable via env vars.
 fn build_options() -> VerificationOptions {
+  let client_id = env::var("ARTCRAFT_GOOGLE_CLIENT_ID")
+      .unwrap_or_else(|_| DEFAULT_GOOGLE_CLIENT_ID.to_string());
+
   VerificationOptions {
     allowed_issuers: Some(HashSet::from([
       "https://accounts.google.com".to_string(),
       "accounts.google.com".to_string(),
     ])),
-    allowed_audiences: Some(HashSet::from([
-      "788843034237-uqcg8tbgofrcf1to37e1bqphd924jaf6.apps.googleusercontent.com".to_string(),
-    ])),
+    allowed_audiences: Some(HashSet::from([client_id])),
     ..Default::default()
   }
 }

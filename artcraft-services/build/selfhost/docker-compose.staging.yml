@@ -1,0 +1,42 @@
+# Run the authentication smoke test with a prebuilt image and separate data.
+name: artcraft-auth-staging
+
+services:
+  mysql:
+    mem_limit: 640m
+    command: ["--innodb-buffer-pool-size=128M", "--max-connections=25"]
+
+  migrate:
+    mem_limit: 128m
+
+  redis:
+    mem_limit: 96m
+    command: ["redis-server", "--maxmemory", "48mb"]
+
+  elasticsearch:
+    profiles: ["media"]
+
+  seaweedfs:
+    profiles: ["media"]
+
+  storage-init:
+    profiles: ["media"]
+
+  storyteller-web:
+    build: !reset null
+    image: ${ARTCRAFT_STAGING_IMAGE:?set a prebuilt ArtCraft staging image}
+    pull_policy: never
+    mem_limit: 512m
+    depends_on: !override
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    environment:
+      NUM_WORKERS: 2
+      # Auth handlers do not use these clients. Refuse connections if another
+      # endpoint attempts to use search or storage during this smoke test.
+      ELASTICSEARCH_URL: http://127.0.0.1:9
+      S3_COMPATIBLE_ENDPOINT_URL: http://127.0.0.1:9
+    ports: !override
+      - "127.0.0.1:12346:12345"

@@ -14,6 +14,7 @@ captureLoginBridgeContext();
 const isLoginBridge = window.location.pathname === LOGIN_BRIDGE_PATH;
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const configuredApiOrigin = import.meta.env.VITE_ARTCRAFT_API_ORIGIN?.trim();
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -37,6 +38,12 @@ if (import.meta.env.DEV) {
   } catch (e) {
     console.warn("Failed to set dev API host override", e);
   }
+} else if (configuredApiOrigin) {
+  const apiUrl = new URL(configuredApiOrigin);
+  if (apiUrl.protocol !== "https:" || apiUrl.origin !== configuredApiOrigin) {
+    throw new Error("VITE_ARTCRAFT_API_ORIGIN must be an HTTPS origin without a path");
+  }
+  StorytellerApiHostStore.getInstance().setApiSchemeAndHost(apiUrl.origin);
 }
 
 // Surface omni model/generation outages through this app's toast component.

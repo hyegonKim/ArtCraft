@@ -1,0 +1,18 @@
+services:
+  storyteller-web:
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.artcraft-auth-staging.entrypoints: websecure
+      traefik.http.routers.artcraft-auth-staging.tls: 'true'
+      traefik.http.routers.artcraft-auth-staging.tls.certresolver: letsencrypt
+      traefik.http.routers.artcraft-auth-staging.rule: >-
+        Host(`artcraft-auth-staging.ncubestudio.cloud`) &&
+        Header(`Origin`, `https://artcraft-web-private-staging.netlify.app`) &&
+        ((Method(`POST`) && (Path(`/v1/create_account`) || Path(`/v1/accounts/google_sso`) || Path(`/v1/login`) || Path(`/v1/logout`) || Path(`/v1/web_referrals/record`))) ||
+        (Method(`GET`) && (Path(`/v1/session`) || Path(`/v1/billing/active_subscriptions`))) ||
+        (Method(`OPTIONS`) && (Path(`/v1/create_account`) || Path(`/v1/accounts/google_sso`) || Path(`/v1/login`) || Path(`/v1/web_referrals/record`) || Path(`/v1/session`) || Path(`/v1/logout`) || Path(`/v1/billing/active_subscriptions`))))
+      traefik.http.routers.artcraft-auth-staging.middlewares: artcraft-auth-staging-limit
+      traefik.http.middlewares.artcraft-auth-staging-limit.ratelimit.average: '30'
+      traefik.http.middlewares.artcraft-auth-staging-limit.ratelimit.period: 1m
+      traefik.http.middlewares.artcraft-auth-staging-limit.ratelimit.burst: '15'
+      traefik.http.services.artcraft-auth-staging.loadbalancer.server.port: '12345'
