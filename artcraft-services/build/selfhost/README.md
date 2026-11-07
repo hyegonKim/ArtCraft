@@ -133,7 +133,40 @@ and the [Google Identity Services URLs](https://developers.google.com/identity/g
 Check that anonymous requests to Netlify still return 401 and that model
 selection still uses the local preview catalog with Create disabled.
 
-### Verified staging deployment — 2026-11-07
+### Latest private staging redeployment — 2026-11-07
+
+The protected frontend remains
+[artcraft-web-private-staging.netlify.app](https://artcraft-web-private-staging.netlify.app/).
+The deployed application source is commit
+[`cbd1dc095f0107b32263dc8e4730bf48a7aa3618`](https://github.com/hyegonKim/ArtCraft/commit/cbd1dc095f0107b32263dc8e4730bf48a7aa3618).
+Netlify deploy `6aeeae405ca34d4620ca48ee` was published at 13:51 KST.
+Its web bundle is `assets/index-AeQiLn3A.js`; the served
+`artcraft-build.json` commit and browser-loaded script matched the build.
+
+- The production Vite build passed with the existing staging API origin,
+  Google web client, CSP, and static routing configuration.
+- Live Chrome checks created a new test email account, displayed the welcome
+  screen, signed out, signed in with that email, and retained the session
+  after reload.
+- The official Google button opened account selection. Selecting the existing
+  test account returned to `/pricing`; the user menu and the same signed-in
+  account remained available after reload.
+- All 22 image models and all 22 video models were individually selected.
+  Each selection updated the picker and kept Create disabled. Entering a
+  nonempty prompt on each page also kept Create disabled.
+- Production visibility and Deploy Preview visibility both remained Private.
+  Eight cookie-free requests returned 401: the main URL, `/signup`, `/login`,
+  `/create-image`, `/create-video`, the new bundle, `/artcraft-build.json`,
+  and the new deploy permalink.
+
+This documentation-only update does not republish the app or change visitor
+access. Test credentials and server secrets are excluded from the repository.
+Paid generation, billing, email delivery, password-reset emails, and all
+editors' GPU behavior were outside this deployment verification. Some separate
+WASM initialization requests logged `Failed to fetch` on initial load; the
+listed authentication and model-selection checks completed successfully.
+
+### Initial staging deployment — 2026-11-07
 
 The protected frontend is `artcraft-web-private-staging.netlify.app`.
 The authentication API origin is
@@ -162,8 +195,9 @@ The deployed web bundle is `assets/index-CgqxJjkJ.js` in Netlify deploy
 - Dashboard's TypeScript/Vite build and four tests passed. The standalone Next
   website's production build, typecheck, and 31 fixture-backed Playwright media
   tests passed. See the root README for the commands and source fixes.
-- These follow-up checks are local. The Netlify deployment above was retained;
-  its main URL, deploy permalink, and bundle still returned 401 anonymously.
+- These follow-up checks were local. At that stage the initial deployment
+  was retained; its main URL, deploy permalink, and bundle still returned 401
+  anonymously.
   Rebuilding the changed libraries in production had fixed the earlier
   `jsxDEV is not a function` browser failure.
 
