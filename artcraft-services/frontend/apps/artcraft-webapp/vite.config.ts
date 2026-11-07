@@ -1,5 +1,6 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
+import { ammoAssetsPlugin } from './vite-ammo-assets';
 import react from '@vitejs/plugin-react';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
@@ -93,7 +94,7 @@ export default defineConfig(() => ({
     port: 4301,
     host: 'localhost',
   },
-  plugins: [cdnProxyPlugin(), nxViteTsPaths(), react(), wasm(), topLevelAwait()],
+  plugins: [ammoAssetsPlugin(), cdnProxyPlugin(), nxViteTsPaths(), react(), wasm(), topLevelAwait()],
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [ nxViteTsPaths() ],

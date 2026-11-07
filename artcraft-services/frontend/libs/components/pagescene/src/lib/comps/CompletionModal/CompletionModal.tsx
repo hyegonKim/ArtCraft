@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { CloudUploadIcon, LoaderCircleIcon, RotateCwIcon, TrashIcon, TriangleAlertIcon } from "lucide-react";
+import { DownloadIcon, CloudUploadIcon, LoaderCircleIcon, RotateCwIcon, TrashIcon, TriangleAlertIcon } from "lucide-react";
 import { EngineContext } from "../../contexts/EngineContext";
 import { usePageSceneStore, type ProducedArtifact } from "../../PageSceneStore";
 
@@ -134,6 +134,15 @@ export const CompletionModal = () => {
             <TrashIcon  className="h-3.5 w-3.5" />
             Discard
           </button>
+
+          <a
+            href={artifact.objectUrl}
+            download={artifact.fileName}
+            className="flex h-9 items-center gap-2 rounded-[3px] px-3 text-sm text-base-fg hover:bg-white/10"
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
+            Download
+          </a>
 
           {status === "error" ? (
             <button

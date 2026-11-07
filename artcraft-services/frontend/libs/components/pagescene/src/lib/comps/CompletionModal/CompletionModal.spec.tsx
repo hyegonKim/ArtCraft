@@ -119,3 +119,13 @@ function setArtifact(kind: "image" | "video"): ProducedArtifact {
   usePageSceneStore.getState().setProducedArtifact(artifact);
   return artifact;
 }
+
+it("keeps a local download available when image upload is unavailable", async () => {
+  const artifact = setArtifact("image");
+  renderModal({});
+  await screen.findByRole("alert");
+  const download = screen.getByRole("link", { name: "Download" });
+  expect(download.getAttribute("href")).toBe(artifact.objectUrl);
+  expect(download.getAttribute("download")).toBe(artifact.fileName);
+  expect(usePageSceneStore.getState().producedArtifact).toBe(artifact);
+});

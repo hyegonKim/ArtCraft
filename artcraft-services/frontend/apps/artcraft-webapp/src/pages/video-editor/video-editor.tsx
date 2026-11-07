@@ -10,6 +10,8 @@ import {
   type TProject,
   type VideoEditorAdapters,
 } from "@storyteller/ui-video-editor";
+import { createLocalEditingAdapters } from "./adapters/local-editing-adapters";
+
 import { webappToastAdapter } from "./adapters/toast-adapter";
 import { webappAuthUserAdapter } from "./adapters/auth-user-adapter";
 import { webappMediaSourceAdapter } from "./adapters/media-source-adapter";
@@ -22,6 +24,8 @@ import {
 } from "./adapters/project-storage-adapter";
 import { VideoEditorProjectsLanding } from "./VideoEditorProjectsLanding";
 import { TopBarActions } from "../../components/topbar/TopBarActions";
+
+const LOCAL_EDITING = import.meta.env.VITE_ARTCRAFT_LOCAL_EDITING === "true";
 
 // Webapp host for the @storyteller/ui-video-editor lib.
 //
@@ -67,9 +71,11 @@ export default function VideoEditorPage() {
   const { adapter: assetGalleryAdapter, modal: galleryModal } =
     useWebappAssetGalleryAdapter();
 
+  const localEditing = useMemo(() => LOCAL_EDITING ? createLocalEditingAdapters() : null, []);
+
   const projectStorage = useMemo(
     () =>
-      createWebappProjectStorage({
+      localEditing?.projectStorage ?? createWebappProjectStorage({
         onProjectCreated: ({ localId, token }) => {
           // First save of a fresh project: re-key the active project to
           // the server token, then swap the URL. The session effect's
@@ -98,24 +104,25 @@ export default function VideoEditorPage() {
           }
         },
       }),
-    [],
+    [localEditing],
   );
 
   const adapters = useMemo<Partial<VideoEditorAdapters>>(
     () => ({
       toast: webappToastAdapter,
       authUser: webappAuthUserAdapter,
-      mediaSource: webappMediaSourceAdapter,
+      mediaSource: localEditing?.mediaSource ?? webappMediaSourceAdapter,
       assetGallery: assetGalleryAdapter,
-      exportSink: webappExportSinkAdapter,
+      exportSink: localEditing?.exportSink ?? webappExportSinkAdapter,
       projectStorage,
     }),
-    [assetGalleryAdapter, projectStorage],
+    [assetGalleryAdapter, projectStorage, localEditing],
   );
 
   if (!projectId) {
     return (
       <VideoEditorProjectsLanding
+        localEditing={LOCAL_EDITING}
         projectStorage={projectStorage}
         onNewProject={() => navigate(`/video-editor/${makeLocalProjectId()}`)}
         onOpenProject={(token) => navigate(`/video-editor/${token}`)}
@@ -164,20 +171,33 @@ function VideoEditorSession({
     if (editor.project.getActive()?.metadata.id === projectId) {
       setStatus("ready");
     } else if (isLocalProjectId(projectId)) {
-      // Tear down whatever project was open before bootstrapping — this
-      // path is reachable without the header's exit flow (Back button,
-      // "New project"), and a leftover media bin or undo stack would
-      // bleed into the fresh project and persist on its first save.
-      editor.project.closeProject();
-      const project = buildBootstrapProject({ id: projectId });
-      editor.project.setActiveProject({ project });
-      editor.scenes.initializeScenes({
-        scenes: project.scenes,
-        currentSceneId: project.currentSceneId,
-      });
-      // closeProject stopped the autosave subscriptions; re-arm them.
-      editor.save.start();
-      setStatus("ready");
+      const bootstrap = () => {
+        // Tear down whatever project was open before bootstrapping — this
+        // path is reachable without the header's exit flow (Back button,
+        // "New project"), and a leftover media bin or undo stack would
+        // bleed into the fresh project and persist on its first save.
+        editor.project.closeProject();
+        const project = buildBootstrapProject({ id: projectId });
+        editor.project.setActiveProject({ project });
+        editor.scenes.initializeScenes({
+          scenes: project.scenes,
+          currentSceneId: project.currentSceneId,
+        });
+        // closeProject stopped the autosave subscriptions; re-arm them.
+        editor.save.start();
+        setStatus("ready");
+      };
+      if (LOCAL_EDITING) {
+        setStatus("pending");
+        editor.project.openProject({ id: projectId }).then((project) => {
+          if (cancelled) return;
+          if (project) setStatus("ready");
+          else bootstrap();
+        }).catch((error) => {
+          console.error("Failed to open local project:", error);
+          if (!cancelled) setStatus("missing");
+        });
+      } else bootstrap();
     } else {
       setStatus("pending");
       // openProject performs its own full teardown of any prior project.
@@ -235,7 +255,7 @@ function VideoEditorSession({
       <VideoEditor
         projectId={projectId}
         adapters={adapters}
-        headerEndSlot={<TopBarActions />}
+        headerEndSlot={<>{LOCAL_EDITING && <span className="text-xs text-white/60">Local editing · saved on this device</span>}<TopBarActions /></>}
         exitTo="/video-editor"
       />
       {galleryModal}

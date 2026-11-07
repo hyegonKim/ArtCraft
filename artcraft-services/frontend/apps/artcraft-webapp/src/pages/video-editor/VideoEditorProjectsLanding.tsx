@@ -27,12 +27,14 @@ const GRID_CLASSES =
 const SKELETON_COUNT = 8;
 
 interface VideoEditorProjectsLandingProps {
+  localEditing?: boolean;
   projectStorage: WebappProjectStorage;
   onNewProject: () => void;
   onOpenProject: (token: string) => void;
 }
 
 export function VideoEditorProjectsLanding({
+  localEditing = false,
   projectStorage,
   onNewProject,
   onOpenProject,
@@ -146,6 +148,7 @@ export function VideoEditorProjectsLanding({
           <p className="mt-2 text-base text-white/60">
             Pick up where you left off, or start something new.
           </p>
+          {localEditing && <p className="mt-2 text-sm text-white/60">Local projects and media are saved only in this browser.</p>}
         </header>
 
         {status === "loading" && (
@@ -204,6 +207,13 @@ export function VideoEditorProjectsLanding({
                 Something went wrong while fetching your saved edits.
               </p>
             </div>
+            <p className="text-sm text-white/60">
+              You can still start a new edit and export it locally. If saving is
+              unavailable, export your work before leaving.
+            </p>
+            <Button variant="primary" icon={SparklesIcon} onClick={onNewProject}>
+              New project
+            </Button>
             <Button variant="secondary" onClick={() => void refresh()}>
               Try again
             </Button>
