@@ -24,17 +24,25 @@ export const useSessionStore = create<SessionState>((set) => ({
 let inflight: Promise<void> | null = null;
 let cachedAt = 0;
 const CACHE_TTL_MS = 30_000;
-const TIMEOUT_MS = 1500;
+const TIMEOUT_MS = 10_000;
+let sessionRequestVersion = 0;
 
 async function fetchAndStoreSession(): Promise<void> {
-  try {
-    const response = await Promise.race([
-      new UsersApi().GetSession(),
-      new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("session-timeout")), TIMEOUT_MS);
-      }),
-    ]);
-
+  const version = ++sessionRequestVersion;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const unavailable = () => {
+    if (version !== sessionRequestVersion) return;
+    inflight = null;
+    cachedAt = 0;
+    // A transport failure does not establish that an existing login expired.
+    useSessionStore.getState().setSession({ authChecked: true });
+  };
+  const request = new UsersApi().GetSession().then((response) => {
+    if (version !== sessionRequestVersion) return;
+    if (!response.success) {
+      unavailable();
+      return;
+    }
     const loggedIn = !!(response.success && response.data?.loggedIn && response.data.user);
     useSessionStore.getState().setSession({
       user: loggedIn ? response.data!.user : undefined,
@@ -44,17 +52,15 @@ async function fetchAndStoreSession(): Promise<void> {
         ? !!response.data!.onboarding?.password_not_set
         : false,
     });
-  } catch {
-    // Backend unreachable or timed out — clear cache so next call retries.
-    inflight = null;
-    cachedAt = 0;
-    useSessionStore.getState().setSession({
-      user: undefined,
-      loggedIn: false,
-      authChecked: true,
-      passwordNotSet: false,
-    });
-  }
+    cachedAt = Date.now();
+    inflight ??= Promise.resolve();
+  }).catch(unavailable).finally(() => clearTimeout(timeout));
+
+  // Let the request finish after the UI deadline. A slow cold 3D startup must
+  // still acquire its valid session; a superseded request must never undo logout.
+  await Promise.race([request, new Promise<void>((resolve) => {
+    timeout = setTimeout(() => { unavailable(); resolve(); }, TIMEOUT_MS);
+  })]);
 }
 
 export function refreshSession(force = false): Promise<void> {
@@ -68,6 +74,7 @@ export function refreshSession(force = false): Promise<void> {
 }
 
 export function invalidateSession(): void {
+  sessionRequestVersion += 1;
   inflight = null;
   cachedAt = 0;
 }

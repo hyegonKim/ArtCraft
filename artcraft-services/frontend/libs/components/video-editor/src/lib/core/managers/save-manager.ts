@@ -71,14 +71,16 @@ export class SaveManager {
     return this.hasPendingSave || this.isSaving;
   }
 
-  private queueSave(): void {
+  private queueSave(delayMs = this.debounceMs): void {
     if (this.isSaving) return;
     if (this.saveTimer) {
       clearTimeout(this.saveTimer);
     }
     this.saveTimer = setTimeout(() => {
-      void this.saveNow();
-    }, this.debounceMs);
+      // Storage adapters surface failures. Keep autosave rejections handled;
+      // explicit flush() callers can still observe the failure.
+      void this.saveNow().catch(() => {});
+    }, delayMs);
   }
 
   private async saveNow(): Promise<void> {
@@ -94,12 +96,17 @@ export class SaveManager {
     this.hasPendingSave = false;
     this.clearTimer();
 
+    let failed = false;
     try {
       await this.editor.project.saveCurrentProject();
+    } catch (error) {
+      failed = true;
+      this.hasPendingSave = true;
+      throw error;
     } finally {
       this.isSaving = false;
-      if (this.hasPendingSave) {
-        this.queueSave();
+      if (this.hasPendingSave && !this.isPaused && this.unsubscribeHandlers.length > 0) {
+        this.queueSave(failed ? Math.max(5000, this.debounceMs) : this.debounceMs);
       }
     }
   }

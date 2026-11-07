@@ -1,5 +1,5 @@
 import type { MediaKind } from "@storyteller/ui-video-editor";
-import { MediaUploadApi } from "@storyteller/api";
+import { EIntermediateFile, MediaUploadApi } from "@storyteller/api";
 
 // Single dispatch from MediaKind to the right MediaUploadApi endpoint.
 // Both the media-source adapter (uploadLocalFile) and the export-sink
@@ -24,10 +24,10 @@ export async function uploadByKind({
 
   const response =
     kind === "video"
-      ? await api.UploadNewVideo({ uuid, blob, fileName, maybe_title })
+      ? await api.UploadNewVideo({ uuid, blob, fileName, maybe_title, is_intermediate_system_file: EIntermediateFile.false })
       : kind === "audio"
         ? await api.UploadAudio({ uuid, blob, fileName, maybe_title })
-        : await api.UploadImage({ uuid, blob, fileName, maybe_title });
+        : await api.UploadImage({ uuid, blob, fileName, maybe_title, is_intermediate_system_file: EIntermediateFile.false });
 
   if (!response.success || !response.data) {
     throw new Error(response.errorMessage || "Upload failed");

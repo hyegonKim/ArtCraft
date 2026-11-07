@@ -1,0 +1,64 @@
+# Append after staging + staging-https. Keeps the auth-only overlay usable.
+services:
+  seaweedfs:
+    profiles: !reset []
+    mem_limit: 384m
+    command: >-
+      server -dir=/data -volume.max=8 -master.volumeSizeLimitMB=512
+      -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    configs:
+      - source: staging-seaweed-master
+        target: /etc/seaweedfs/master.toml
+  storage-init:
+    profiles: !reset []
+    mem_limit: 96m
+  storyteller-web:
+    environment:
+      S3_COMPATIBLE_ENDPOINT_URL: http://seaweedfs:8333
+    depends_on:
+      storage-init:
+        condition: service_completed_successfully
+  media-gateway:
+    image: python:3.12-alpine
+    restart: unless-stopped
+    mem_limit: 320m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "65534:65534"
+    command: [python, -B, /app/staging-media-gateway.py]
+    volumes:
+      - ./staging-media-gateway.py:/app/staging-media-gateway.py:ro
+    environment:
+      ARTCRAFT_WEBAPP_EXTRA_ORIGIN: ${ARTCRAFT_WEBAPP_EXTRA_ORIGIN:?set staging web origin}
+      MEDIA_PUBLIC_ORIGIN: https://artcraft-auth-staging.ncubestudio.cloud
+      MEDIA_LINK_SECRET: ${MEDIA_LINK_SECRET:?set a random secret of at least 32 bytes}
+    depends_on:
+      storyteller-web:
+        condition: service_started
+      seaweedfs:
+        condition: service_healthy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.artcraft-media-staging.entrypoints: websecure
+      traefik.http.routers.artcraft-media-staging.tls: "true"
+      traefik.http.routers.artcraft-media-staging.tls.certresolver: letsencrypt
+      traefik.http.routers.artcraft-media-staging.rule: >-
+        Host(`artcraft-auth-staging.ncubestudio.cloud`) &&
+        (PathPrefix(`/v1/media_files/`) || PathPrefix(`/staging-media/`) ||
+        Path(`/v1/folders/list_all`) || Path(`/v1/folders/media_files_without_folder`) || Path(`/v1/tags/list`))
+      traefik.http.routers.artcraft-media-staging.priority: "200"
+      traefik.http.routers.artcraft-media-staging.middlewares: artcraft-media-staging-limit
+      traefik.http.middlewares.artcraft-media-staging-limit.ratelimit.average: "120"
+      traefik.http.middlewares.artcraft-media-staging-limit.ratelimit.period: 1m
+      traefik.http.middlewares.artcraft-media-staging-limit.ratelimit.burst: "30"
+      traefik.http.services.artcraft-media-staging.loadbalancer.server.port: "8080"
+
+configs:
+  staging-seaweed-master:
+    content: |
+      [master.volume_growth]
+      copy_1 = 1
+      copy_2 = 1
+      copy_3 = 1
+      copy_other = 1

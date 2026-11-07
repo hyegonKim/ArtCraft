@@ -33,7 +33,14 @@ export function getThumbnailUrl(
 
 export function addCorsParam(url: string | null | undefined): string | null {
   if (!url) return null;
-  return `${url}?cors=1`;
+  if (/^(data:|blob:)/.test(url)) return url;
+  const hashIndex = url.indexOf("#");
+  const base = hashIndex < 0 ? url : url.slice(0, hashIndex);
+  const fragment = hashIndex < 0 ? "" : url.slice(hashIndex);
+  // Query URLs already have a distinct cache key and may be signed. Appending
+  // another '?' corrupts their query; changing signed parameters can deny access.
+  if (base.includes("?")) return url;
+  return `${base}?cors=1${fragment}`;
 }
 
 interface MediaThumbnailOptions {

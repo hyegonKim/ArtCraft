@@ -1480,9 +1480,10 @@ export const useSceneStore = create<SceneState>((set, get, store) => ({
       imgBitmap.onerror = null;
     };
     imgBitmap.crossOrigin = "anonymous";
-    const isDataUrl =
-      typeof image.url === "string" && image.url.startsWith("data:");
-    imgBitmap.src = isDataUrl ? image.url : image.url + "?basecanvasimg";
+    // Signed storage links already carry a query string. Appending another
+    // '?' changes the signature; blob/data URLs must also remain untouched.
+    const preserveUrl = /^(data:|blob:)/.test(image.url) || /[?#]/.test(image.url);
+    imgBitmap.src = preserveUrl ? image.url : image.url + "?basecanvasimg";
   },
 
   clearLineNodes() {

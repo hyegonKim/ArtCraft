@@ -151,7 +151,7 @@ export const HistoryStack = ({
     if (!!image.thumbnailUrlTemplate) {
       return image.thumbnailUrlTemplate.replace("{WIDTH}", "256");
     }
-    if (image.url.startsWith("data:") || image.url.startsWith("blob:")) {
+    if (image.url.startsWith("data:") || image.url.startsWith("blob:") || /[?#]/.test(image.url)) {
       return image.url;
     }
     console.warn("Using older image source for history stack image", image);
@@ -205,7 +205,8 @@ export const HistoryStack = ({
                               <img
                                 src={
                                   blurredBackgroundUrl?.startsWith("data:") ||
-                                  blurredBackgroundUrl?.startsWith("blob:")
+                                  blurredBackgroundUrl?.startsWith("blob:") ||
+                                  /[?#]/.test(blurredBackgroundUrl)
                                     ? blurredBackgroundUrl
                                     : `${blurredBackgroundUrl}?placeholderbg`
                                 }

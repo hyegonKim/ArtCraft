@@ -48,6 +48,7 @@ export function createWebappProjectStorage({
 
   // local-{uuid} → media_file_token, filled by the first create.
   const localToRemote = new Map<string, string>();
+  const remoteNames = new Map<string, string>();
   // Per-project save chain: SaveManager already serializes autosaves, but
   // renames call saveCurrentProject directly — the chain guarantees a
   // create can never race a second create for the same project.
@@ -87,6 +88,7 @@ export function createWebappProjectStorage({
         throw new Error(response.errorMessage || "Upload failed");
       }
       localToRemote.set(envelope.id, response.data);
+      remoteNames.set(response.data, name);
       onProjectCreated?.({ localId: envelope.id, token: response.data });
       return;
     }
@@ -102,6 +104,12 @@ export function createWebappProjectStorage({
     if (!response.success) {
       throw new Error(response.errorMessage || "Update failed");
     }
+    // The update endpoint writes document bytes only; it ignores maybe_title.
+    if (remoteNames.get(resolved) !== name) {
+      const renamed = await filesApi.RenameMediaFileByToken({ mediaToken: resolved, name });
+      if (!renamed.success) throw new Error(renamed.errorMessage || "Rename failed");
+      remoteNames.set(resolved, name);
+    }
   };
 
   return {
@@ -114,15 +122,14 @@ export function createWebappProjectStorage({
           // so brand-new projects get a cover immediately.
           maybeCaptureCover(envelope.id);
         } catch (error) {
-          // Saves ship the full document, so a failed save is fully
-          // recovered by the next successful one — surface it and move
-          // on instead of leaving an unhandled rejection in the
-          // autosave path.
+          // Preserve the rejection so SaveManager retains the dirty state
+          // and retries the full document rather than marking a failed save clean.
           console.error("Project save failed:", error);
           webappToastAdapter.error("Couldn't save project", {
             description:
               error instanceof Error ? error.message : "Please try again",
           });
+          throw error;
         }
       };
       const prior = saveQueues.get(queueKey) ?? Promise.resolve();
@@ -130,9 +137,10 @@ export function createWebappProjectStorage({
       saveQueues.set(queueKey, next);
       // Drop the chain entry once it settles with no successor queued, so
       // ids (especially one-shot local-{uuid}s) don't accumulate forever.
-      void next.finally(() => {
+      const cleanQueue = () => {
         if (saveQueues.get(queueKey) === next) saveQueues.delete(queueKey);
-      });
+      };
+      void next.then(cleanQueue, cleanQueue);
       await next;
     },
 
@@ -149,11 +157,26 @@ export function createWebappProjectStorage({
 
       const documentResponse = await fetch(cdnUrl);
       if (!documentResponse.ok) return null;
-      const data: unknown = await documentResponse.json();
+      let data: unknown = await documentResponse.json();
+      const name = media.maybe_title ?? UNTITLED_PROJECT_NAME;
+      remoteNames.set(token, name);
+      // The first uploaded document still contains its temporary local id.
+      // Title-only renames also leave the JSON unchanged. The server row is
+      // authoritative for identity and title when opening either document shape.
+      if (data && typeof data === "object") {
+        const project = "project" in data ? data.project : data;
+        if (project && typeof project === "object" && "metadata" in project &&
+            project.metadata && typeof project.metadata === "object") {
+          const restored = { ...project, metadata: {
+            ...project.metadata, id: token, name, updatedAt: media.updated_at,
+          } };
+          data = "project" in data ? { ...data, project: restored } : restored;
+        }
+      }
 
       return {
         id: token,
-        name: media.maybe_title ?? UNTITLED_PROJECT_NAME,
+        name,
         updatedAt: new Date(media.updated_at).getTime(),
         data,
       };
@@ -205,6 +228,7 @@ export function createWebappProjectStorage({
       if (!response.success) {
         throw new Error(response.errorMessage || "Rename failed");
       }
+      remoteNames.set(token, name);
     },
 
     async createProject(name) {
