@@ -204,11 +204,55 @@ remains open. The server identity and title override temporary/stale JSON
 metadata on reopen. 3D scenes use their Save / Load my scene controls. Image
 uploads can be reopened from the account library. The image editor also has
 Save project / Save copy / Open project controls for editor_2d layer documents.
-These use explicit manual saves and show unsaved changes or request failures. Existing browser-local
+Layer edits and names now autosave after one second of inactivity, with a
+five-second retry after failures while the editor remains open. Save project
+remains an immediate flush; Save copy creates a separate project. Existing browser-local
 projects are not migrated automatically. This provides account-based persistence,
 not live multi-tab merging or an offline upload queue.
 
-### 2D layer-project verification — 2026-11-07
+### 2D autosave and retry verification — 2026-11-07
+
+- Source: `e63f4779325a9646161a1ff5300db5d79aa3a6a3`.
+  Private deploy: `6aef349a4fbafd43f9fc64de`.
+  Actual bundle: `assets/index-CkhqOjBo.js`; deployed build metadata matches.
+- A per-document controller debounces edits for one second, serializes uploads,
+  and retries the latest unsaved revision five seconds after failure. In-flight
+  edits remain dirty until a subsequent save acknowledges them. Pause, reset,
+  disposal, React StrictMode replay, capture failure, and Save copy retry have
+  regression coverage. Opening a clean project does not create another save.
+- The legacy server reserves UUIDs and rejects reuse even for some failed
+  uploads, so each HTTP attempt gets a fresh UUID. Once a create is acknowledged,
+  updates keep its project token. A successful first create whose response is
+  lost can still leave an extra private project on retry; the API does not offer
+  a recoverable create acknowledgment. Unchanged names skip rename requests.
+- Actual UI deleted a brush layer from a dedicated 1920 x 1080 fixture, saved
+  automatically without pressing Save, and restored the two remaining layers
+  in a new tab. Undo autosaved the three layers again, and reload restored them.
+  The mask, original embedded image bytes, coordinates, and settings matched.
+- A controlled media-gateway outage left authentication at HTTP 200 and caused
+  the editor to show an error and five-second retry status. Undo performed after
+  that failure was retained. After the gateway restarted, retry saved the latest
+  three-layer document and renamed title to the same token without a manual
+  Save. Reload and the server document confirmed them; media access returned 200.
+  The gateway was restored immediately, with a temporary 60-second restart
+  watchdog also protecting against an interrupted test.
+- A new Full HD canvas and name created a private server project automatically.
+  Reload restored 1920 x 1080, the title appeared once in the account project
+  list, and another account's read returned 404.
+- All 63 frontend test targets completed with 294 actual passing tests (valid
+  Nx cache retained), including 76 webapp tests. App TypeScript and the uncached
+  production webapp plus 53 dependency tasks passed; the release ZIP guard passed.
+- Production and Deploy Preview visibility stayed Private. Eight anonymous
+  requests to the app/editor/project routes, final JS, build manifest, and
+  deployment permalink returned HTTP 401.
+
+Autosave runs while this editor is open. Wait for Saved on server before closing
+or reloading. New/Open pauses pending work, and changing document or unmounting
+cancels old retries and ignores late callbacks. This does not add a persistent
+offline queue, multi-tab conflict resolution, or durable undo history. No VPS
+configuration or backend schema change was needed; no paid generation was run.
+
+### Previous manual 2D layer-project verification — 2026-11-07
 
 The image editor now stores versioned, portable `editor_2d` documents on the
 existing API. No new VPS service, endpoint, port, or secret is required.
@@ -234,8 +278,8 @@ existing API. No new VPS service, endpoint, port, or secret is required.
 - All 63 frontend test targets completed with 283 actual passing tests (valid Nx cache retained): webapp 65 and PageDraw 15. App TypeScript and the final uncached production webapp plus its 53 dependency build tasks passed.
 - Production and Deploy Preview remain Private. Eight anonymous requests to the main/editor/project routes, final JavaScript, build manifest, and deploy permalink returned 401. The deployed build manifest matches source b368683e and the browser loaded the bundle above.
 
-These are manual document saves, not autosave, offline queuing, or concurrent-tab
-merge. Undo history, clipboard, selection, generation tasks, and external 3D-model
+That deployment used manual document saves. Its verification did not cover
+autosave, offline queuing, or concurrent-tab merge. Undo history, clipboard, selection, generation tasks, and external 3D-model
 source archives are not project assets; rasterized 3D image layers retain their
 pixels. The 64 MiB upload limit includes base64/JSON/multipart overhead. Back up
 MySQL and SeaweedFS together as described above. No paid generation was run.
