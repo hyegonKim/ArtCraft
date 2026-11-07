@@ -202,12 +202,45 @@ source tree. No signing secret is read by this browser build script.
 Video projects autosave full documents and retry failed saves while the editor
 remains open. The server identity and title override temporary/stale JSON
 metadata on reopen. 3D scenes use their Save / Load my scene controls. Image
-uploads can be reopened from the account library; the 2D project API is available,
-but a layer-project Save / Open UI has not been connected. Existing browser-local
+uploads can be reopened from the account library. The image editor also has
+Save project / Save copy / Open project controls for editor_2d layer documents.
+These use explicit manual saves and show unsaved changes or request failures. Existing browser-local
 projects are not migrated automatically. This provides account-based persistence,
 not live multi-tab merging or an offline upload queue.
 
-### Live cloud verification — 2026-11-07
+### 2D layer-project verification — 2026-11-07
+
+The image editor now stores versioned, portable `editor_2d` documents on the
+existing API. No new VPS service, endpoint, port, or secret is required.
+
+- Source: `b368683edad42586f4428aebbf351e180ee10c85`.
+  Private deploy: `6aef03fd9278c7c4919c2856`; actual bundle: `assets/index-Bb0xhcFJ.js`.
+- Save project creates a private row, then updates the same token. Save copy
+  creates a separate row. Project names use the existing rename endpoint.
+  Open project lists only the account's 2D documents with cursor pagination.
+  The `?project=...` URL restores the saved document on reload.
+- Base images and image layers are embedded without resampling. Temporary
+  signed/blob links are not needed when reopening. Dimensions, ordered shapes
+  and strokes, transforms, locks, paint/eraser blending, masks, and paint settings
+  are retained. Every asset decodes before the current document is replaced.
+- Save errors keep the dirty indicator and allow retry. New/Open use an in-app
+  Keep editing / Discard changes dialog. Native browser confirmation had blocked
+  the embedded validation browser and was replaced. Unsaved browser unload still
+  uses the browser's normal beforeunload protection.
+- Actual UI opened an API-seeded 1920 x 1080 document containing a shape, an image, a translucent brush stroke, and a mask. Shape deletion, Undo/Redo, Save copy, rename/update, reload, and New -> Open list restore passed. The final deployment restored the remaining image/brush order and one mask; API checks confirmed the deleted shape stayed absent, coordinates/settings persisted, and original image bytes matched. The final in-app Keep editing and Discard changes flows both passed.
+- Actual PNG import, new project save, and reload restored the 1280 x 720 base
+  image. Base and layer image bytes matched the original PNG exactly. Another
+  account received 404 when reading the newly saved layer project.
+- All 63 frontend test targets completed with 283 actual passing tests (valid Nx cache retained): webapp 65 and PageDraw 15. App TypeScript and the final uncached production webapp plus its 53 dependency build tasks passed.
+- Production and Deploy Preview remain Private. Eight anonymous requests to the main/editor/project routes, final JavaScript, build manifest, and deploy permalink returned 401. The deployed build manifest matches source b368683e and the browser loaded the bundle above.
+
+These are manual document saves, not autosave, offline queuing, or concurrent-tab
+merge. Undo history, clipboard, selection, generation tasks, and external 3D-model
+source archives are not project assets; rasterized 3D image layers retain their
+pixels. The 64 MiB upload limit includes base64/JSON/multipart overhead. Back up
+MySQL and SeaweedFS together as described above. No paid generation was run.
+
+### Previous live cloud verification — 2026-11-07
 
 - Verified source: `fbafc5501ff52eb26c4d3059a0cb9a953d877a10`.
   Private Netlify deploy: `6aeeee7743023190c3b66265`.
@@ -245,7 +278,7 @@ not live multi-tab merging or an offline upload queue.
   requests to app routes, the final bundle, Ammo JS/WASM, build manifest, and
   deploy permalink returned 401. Issued media bearer URLs remain usable by
   their holder until their 30-minute expiry; this is distinct from Netlify auth.
-- Layered 2D project Save/Open UI, automated migration of browser-local projects,
+- At that earlier deployment, layered 2D project Save/Open UI, automated migration of browser-local projects,
   conflict merging, disaster recovery, background workers, mail delivery, paid
   generation, and billing were not validated or added by this change.
 
