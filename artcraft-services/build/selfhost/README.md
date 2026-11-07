@@ -133,7 +133,45 @@ and the [Google Identity Services URLs](https://developers.google.com/identity/g
 Check that anonymous requests to Netlify still return 401 and that model
 selection still uses the local preview catalog with Create disabled.
 
-### Latest private staging redeployment — 2026-11-07
+### Current private staging editor verification — 2026-11-07
+
+The deployed app source is `ddc9da82e0b4e3d21730bac4a607d2fa990f0c28`.
+Netlify deploy `6aeec364f5b4bc32e48a40e3` serves `assets/index-Ca42bwNO.js`.
+The served build metadata matched that commit. Production and Deploy Preview
+visibility both remain Private.
+
+- Allow `data:` and `blob:` in staging `connect-src` for embedded Spark WASM
+  and browser-local video restoration. Remote API origins/paths stay restricted.
+- Emit the installed Three.js Ammo JS/WASM pair at `/jsm/libs/`. Initialize
+  the runtime once using root-relative URLs and allow retries after failure.
+- Keep a local download link for 3D captures even if gallery upload fails.
+- Offer New project when video-project listing fails. This staging build sets
+  `VITE_ARTCRAFT_LOCAL_EDITING=true`: video projects and source Files persist
+  in browser IndexedDB, and exports download to disk. Server adapters remain
+  the default in builds without this explicit option.
+- Actual Chrome image-editor checks covered a Full HD blank canvas, a brush
+  stroke, Undo, and Redo. 3D checks covered Cube insertion, transforms with
+  Undo/Redo, Build/Record switching without losing the object, and a downloaded
+  1280x720 PNG capture.
+- Actual Chrome video checks covered new-project creation, MP4 import,
+  preview/playback, trimming with Undo/Redo, renaming, disk export, and reload
+  with the source media, timeline edit, and project name restored. The exported
+  test MP4 was H.264, 64x64, 25fps, 13 frames, and 0.52 seconds. Only Save to
+  disk was selected.
+- All 63 Nx test targets completed with 243 actual tests passing. The affected
+  3D and webapp suites passed 25 and 46 cases; webapp TypeScript and production
+  library/webapp builds passed. Browser regression probes reproduced the old
+  Spark/Blob failures and passed with the corrected CSP; emitted Ammo WASM
+  initialized and computed vector (1, 2, 3).
+- Eight anonymous requests returned 401: the main URL, all three editor URLs,
+  the bundle, Ammo JS, Ammo WASM, and the new deploy permalink.
+
+Cloud gallery uploads and server project synchronization remain unavailable
+on the authentication-only backend. A 3D capture upload still reports failure;
+its local PNG download succeeds. Paid generation, billing, and exhaustive
+codec/browser compatibility were outside this verification.
+
+### Earlier authentication redeployment — 2026-11-07
 
 The protected frontend remains
 [artcraft-web-private-staging.netlify.app](https://artcraft-web-private-staging.netlify.app/).
