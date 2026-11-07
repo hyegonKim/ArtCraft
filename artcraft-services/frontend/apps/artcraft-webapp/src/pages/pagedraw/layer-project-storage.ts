@@ -4,21 +4,26 @@ import { validateLayerProject, type LayerProject } from '@storyteller/ui-pagedra
 export function createLayerProjectStorage() {
   const projects = new ProjectsApi();
   const files = new MediaFilesApi();
+  const names = new Map<string, string>();
   return {
-    async save(document: LayerProject, name: string, token?: string) {
+    async save(document: LayerProject, name: string, token?: string, requestId: string = crypto.randomUUID()) {
       validateLayerProject(document);
       const args = { projectType: 'editor_2d' as const,
         blob: new Blob([JSON.stringify(document)], { type: 'application/json' }),
-        fileName: 'project.editor.json', uuid: crypto.randomUUID(), maybe_title: name };
+        fileName: 'project.editor.json', uuid: requestId, maybe_title: name };
       if (!token) {
         const response = await projects.UploadNewProject({ ...args, maybe_visibility: Visibility.Private });
         if (!response.success || !response.data) throw new Error(response.errorMessage || 'Could not save the project.');
+        names.set(response.data, name);
         return response.data;
       }
       const response = await projects.UpdateProject({ ...args, token });
       if (!response.success) throw new Error(response.errorMessage || 'Could not update the project.');
-      const renamed = await files.RenameMediaFileByToken({ mediaToken: token, name });
-      if (!renamed.success) throw new Error(renamed.errorMessage || 'Saved layers, but could not update the name. Retry Save.');
+      if (names.get(token) !== name) {
+        const renamed = await files.RenameMediaFileByToken({ mediaToken: token, name });
+        if (!renamed.success) throw new Error(renamed.errorMessage || 'Saved layers, but could not update the name. Retry Save.');
+        names.set(token, name);
+      }
       return token;
     },
     async list(cursor?: string) {
@@ -32,7 +37,10 @@ export function createLayerProjectStorage() {
       if (!file?.media_links?.cdn_url) throw new Error('This 2D project is unavailable.');
       const bytes = await fetch(file.media_links.cdn_url, { cache: 'no-store' });
       if (!bytes.ok) throw new Error('Could not read the saved project.');
-      return { document: validateLayerProject(await bytes.json()), name: file.maybe_title || 'Untitled image project' };
+      const document = validateLayerProject(await bytes.json());
+      const name = file.maybe_title || 'Untitled image project';
+      names.set(token, name);
+      return { document, name };
     },
   };
 }

@@ -4,6 +4,7 @@ import { captureLayerProject, restoreLayerProject, useSceneStore } from '@storyt
 import type { ProjectMediaFileInfo } from '@storyteller/api';
 import { useSession } from '../../lib/session';
 import { createLayerProjectStorage } from './layer-project-storage';
+import { LayerAutosave, type LayerSaveState } from './layer-autosave';
 
 const fields = ['drawNodes', 'inpaintLineNodes', 'baseImageInfo', 'brushColor', 'brushSize',
   'brushOpacity', 'eraserSize', 'fillColor', 'aspectRatioType', 'inpaintBrushSize', 'inpaintOperation'] as const;
@@ -16,8 +17,13 @@ export function LayerProjectControls() {
   const requested = query.get('project') ?? undefined;
   const [token, setToken] = useState<string>();
   const [name, setName] = useState('Untitled image project');
-  const [revision, setRevision] = useState(0);
-  const [savedRevision, setSavedRevision] = useState(-1);
+  const [saveState, setSaveState] = useState<LayerSaveState>({ dirty: false, saving: false, error: '', retrying: false });
+  const nameRef = useRef(name);
+  const onSaved = useRef<(token: string) => void>(() => {});
+  const autosave = useMemo(() => new LayerAutosave({
+    capture: captureLayerProject, getName: () => nameRef.current, save: storage.save,
+    onSaved: saved => onSaved.current(saved), onState: setSaveState,
+  }), [storage]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [showProjects, setShowProjects] = useState(false);
@@ -34,13 +40,22 @@ export function LayerProjectControls() {
   const bitmap = useSceneStore(s => s.baseImageBitmap);
   const layers = useSceneStore(s => s.drawNodes);
   const masks = useSceneStore(s => s.inpaintLineNodes);
-  const dirty = !!base && revision !== savedRevision;
+  const dirty = !!base && saveState.dirty;
+  const saving = saveState.saving;
+  onSaved.current = saved => {
+    opened.current = saved; setToken(saved); setQuery({ project: saved }, { replace: true });
+  };
+  useEffect(() => { autosave.activate(); return () => autosave.dispose(); }, [autosave]);
+  useEffect(() => {
+    autosave.setEnabled(loggedIn && !!base && (!!bitmap || !!base.isBlankCanvas) && !busy && !pendingDiscard &&
+      (!requested || requested === opened.current));
+  }, [autosave, loggedIn, base, bitmap, busy, pendingDiscard, requested]);
   const dirtyRef = useRef(dirty);
   dirtyRef.current = dirty;
 
   useEffect(() => useSceneStore.subscribe((state, previous) => {
-    if (!loading.current && fields.some(field => state[field] !== previous[field])) setRevision(n => n + 1);
-  }), []);
+    if (!loading.current && fields.some(field => state[field] !== previous[field])) autosave.markDirty();
+  }), [autosave]);
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (dirtyRef.current) { event.preventDefault(); event.returnValue = ''; }
@@ -51,14 +66,16 @@ export function LayerProjectControls() {
 
   async function open(projectToken: string, confirmed = false) {
     if (dirtyRef.current && !confirmed) { setPendingDiscard({ token: projectToken }); return; }
+    if (autosave.state.saving) return;
+    autosave.setEnabled(false);
     const version = ++operation.current;
     setBusy(true); setError(''); loading.current = true;
     try {
       const project = await storage.load(projectToken);
       if (version !== operation.current) return;
       await restoreLayerProject(project.document, () => version === operation.current);
-      opened.current = projectToken; setToken(projectToken); setName(project.name);
-      setRevision(0); setSavedRevision(0); setShowProjects(false);
+      opened.current = projectToken; setToken(projectToken); nameRef.current = project.name; setName(project.name);
+      autosave.reset(projectToken); setShowProjects(false);
       setQuery({ project: projectToken }, { replace: true });
     } catch (error) { if (version === operation.current) setError(error instanceof Error ? error.message : 'Could not open project.'); }
     finally { if (version === operation.current) { loading.current = false; setBusy(false); } }
@@ -70,15 +87,9 @@ export function LayerProjectControls() {
   }, [requested, loggedIn]);
 
   async function save(asCopy = false) {
-    setBusy(true); setError('');
-    const capturedRevision = revision;
-    try {
-      const document = await captureLayerProject();
-      const saved = await storage.save(document, name.trim() || 'Untitled image project', asCopy ? undefined : token);
-      opened.current = saved; setToken(saved); setSavedRevision(capturedRevision);
-      setQuery({ project: saved }, { replace: true });
-    } catch (error) { setError(error instanceof Error ? error.message : 'Could not save project.'); }
-    finally { setBusy(false); }
+    setError('');
+    if (!autosave.state.dirty && !asCopy) autosave.markDirty();
+    await autosave.flush(asCopy);
   }
   async function list(cursor?: string) {
     setListing(true); setError('');
@@ -90,26 +101,28 @@ export function LayerProjectControls() {
   }
   function startNew(confirmed = false) {
     if (dirty && !confirmed) { setPendingDiscard({}); return; }
+    if (autosave.state.saving) return;
+    autosave.setEnabled(false); autosave.reset();
     loading.current = true;
     useSceneStore.getState().setBaseImageInfo(null);
     useSceneStore.getState().RESET();
-    opened.current = undefined; setToken(undefined); setQuery({}); setName('Untitled image project');
-    setRevision(0); setSavedRevision(-1); setError(''); loading.current = false;
+    opened.current = undefined; setToken(undefined); setQuery({}); nameRef.current = 'Untitled image project'; setName(nameRef.current);
+    setError(''); loading.current = false;
   }
   return <>
     <section aria-label="2D cloud project" className="pointer-events-auto absolute left-3 top-3 z-40 max-w-[calc(100%-1.5rem)] md:max-w-[55%] rounded bg-[#101010]/95 p-2 text-white">
       <div className="flex flex-wrap items-center gap-1">
         <input aria-label="2D project name" maxLength={120} value={name} disabled={busy}
           className="w-36 rounded border border-white/20 bg-transparent px-2 py-1 text-xs"
-          onChange={event => { setName(event.target.value); setRevision(n => n + 1); }} />
-        <button className={button} disabled={busy || !loggedIn || !base} onClick={() => void save()}>Save project</button>
-        <button className={button} disabled={busy || !loggedIn || !base} onClick={() => void save(true)}>Save copy</button>
-        <button className={button} disabled={busy || !loggedIn} onClick={() => { setShowProjects(true); void list(); }}>Open project</button>
-        <button className={button} disabled={busy} onClick={() => startNew()}>New</button>
+          onChange={event => { nameRef.current = event.target.value; setName(event.target.value); autosave.markDirty(); }} />
+        <button className={button} disabled={busy || saving || !loggedIn || !base} onClick={() => void save()}>Save project</button>
+        <button className={button} disabled={busy || saving || !loggedIn || !base} onClick={() => void save(true)}>Save copy</button>
+        <button className={button} disabled={busy || saving || !loggedIn} onClick={() => { setShowProjects(true); void list(); }}>Open project</button>
+        <button className={button} disabled={busy || saving} onClick={() => startNew()}>New</button>
         <button className={button} aria-expanded={showLayers} onClick={() => setShowLayers(v => !v)}>Layers ({layers.length})</button>
       </div>
-      <p role="status" className="mt-1 text-xs text-white/60">{busy ? 'Working…' : !loggedIn ? 'Sign in to save projects' : dirty ? 'Unsaved changes' : token ? 'Saved on server' : 'Create a canvas or open an image'}</p>
-      {error && <p role="alert" className="mt-1 max-w-md text-xs text-red-300">{error}</p>}
+      <p role="status" className="mt-1 text-xs text-white/60">{busy ? 'Working…' : !loggedIn ? 'Sign in to save projects' : saving ? 'Saving…' : saveState.retrying ? 'Save failed · retrying in 5 seconds' : dirty ? 'Unsaved changes · autosave pending' : token ? 'Saved on server · autosave on' : 'Create a canvas or open an image'}</p>
+      {(error || saveState.error) && <p role="alert" className="mt-1 max-w-md text-xs text-red-300">{error || saveState.error}</p>}
       {showLayers && <div aria-label="Project layers" className="mt-2 max-h-60 overflow-y-auto text-xs">
         <p>Canvas {base?.blankCanvasWidth ?? bitmap?.naturalWidth} × {base?.blankCanvasHeight ?? bitmap?.naturalHeight} · {masks.length} mask strokes</p>
         <ol aria-label="Layer order (top first)">{[...layers].reverse().map((layer, index) => <li key={layer.id}>

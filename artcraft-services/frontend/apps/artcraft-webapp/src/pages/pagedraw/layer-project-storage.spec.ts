@@ -48,3 +48,13 @@ it('lists only 2D projects with pagination and propagates list failures', async 
   expect(calls.list).toHaveBeenCalledWith({ filter_project_type: 'editor_2d', page_size: 30, cursor: 'cursor' });
   await expect(storage.list()).rejects.toThrow('Could not load');
 });
+
+it('does not issue a redundant rename on every autosave when the name is unchanged', async () => {
+  calls.create.mockResolvedValue({ success: true, data: 'm_saved' });
+  calls.update.mockResolvedValue({ success: true });
+  const storage = createLayerProjectStorage();
+  const token = await storage.save(document, 'Unchanged');
+  await storage.save(document, 'Unchanged', token, 'retry-request-id');
+  expect(calls.rename).not.toHaveBeenCalled();
+  expect(calls.update.mock.calls[0][0].uuid).toBe('retry-request-id');
+});
