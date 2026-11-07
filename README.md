@@ -4,6 +4,10 @@
 
 아래 표는 **같은 제품의 기존 버전과 현재 버전**을 비교합니다. 기준은 19개 프로젝트를 처음 모은 커밋 `484843e`입니다. 현재 버전 열에는 GitHub `main`에 반영된 변경을, 마지막 열에는 후속 검증 결과와 반영 상태를 기록합니다. [GitHub 소스 비교](https://github.com/hyegonKim/ArtCraft/compare/484843e...main)
 
+### 내장 Spark WASM 초기화 수정 — 2026-11-07
+
+Spark 3D 라이브러리가 내장 WASM을 `data:application/wasm;base64,...` URL로 읽을 때 스테이징 CSP의 `connect-src`에 의해 차단됐습니다. 실제 Spark WASM(32,266바이트)과 같은 CSP를 적용한 브라우저 회귀 확인에서 수정 전 `TypeError: Failed to fetch`를 재현했고, `connect-src`에 `data:`를 허용한 후 읽기·컴파일과 6개 내보내기 확인이 통과했습니다. 외부 API 출처·경로와 Netlify 비공개 설정은 유지합니다. 아래 이전 배포 기록의 WASM 오류는 수정 전 관찰입니다.
+
 ### 최신 비공개 스테이징 재배포·실제 검증 — 2026-11-07
 
 [ArtCraft 비공개 스테이징](https://artcraft-web-private-staging.netlify.app/)을 [검증된 프런트엔드 소스 `cbd1dc09`](https://github.com/hyegonKim/ArtCraft/commit/cbd1dc095f0107b32263dc8e4730bf48a7aa3618)로 다시 빌드해 기존 사이트에 게시했습니다. 아래는 새 배포 주소에서 실제 Chrome UI와 비로그인 HTTP 요청으로 확인한 결과입니다.
