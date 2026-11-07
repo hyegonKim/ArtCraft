@@ -153,11 +153,19 @@ The deployed web bundle is `assets/index-CgqxJjkJ.js` in Netlify deploy
   Create disabled.
 - CORS regression tests passed 79 cases. Web authentication tests passed 26
   cases. The Linux binary and runtime image built successfully.
-- The full Nx project graph failed in `apps/genhub/vite.config.ts` with
-  `Cannot read properties of undefined (reading 'getStatus')`.
-  Individual Vite library and webapp builds passed. Rebuilding the changed
-  libraries in production fixed the earlier `jsxDEV is not a function`
-  browser failure.
+- The earlier GenHub `getStatus` project-graph error did not reproduce after
+  an isolated dependency install and uncached graph generation. The follow-up
+  clean `npm ci` and `nx sync:check` passed. All 66 Nx build targets passed
+  with zero TypeScript declaration diagnostics; all 63 test targets completed,
+  with 236 actual tests passing. Eighteen targets have no test files and one
+  existing spec file contains no tests; these are not counted as test cases.
+- Dashboard's TypeScript/Vite build and four tests passed. The standalone Next
+  website's production build, typecheck, and 31 fixture-backed Playwright media
+  tests passed. See the root README for the commands and source fixes.
+- These follow-up checks are local. The Netlify deployment above was retained;
+  its main URL, deploy permalink, and bundle still returned 401 anonymously.
+  Rebuilding the changed libraries in production had fixed the earlier
+  `jsxDEV is not a function` browser failure.
 
 For a manual Netlify deployment, copy the tested staging files into the
 webapp's publish directory after the production build.

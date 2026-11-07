@@ -158,12 +158,12 @@ export class MouseControls {
 
   focus() {
     if (this.deps.isViewportLocked()) return;
-    if (this.lockControls && this.selected) {
-      this.lockControls.camera.lookAt(this.selected[0].position);
-      this.lockControls.camera.position.copy(this.selected[0].position);
+    if (this.lockControls && this.selected?.length) {
+      this.lockControls.object.lookAt(this.selected[0].position);
+      this.lockControls.object.position.copy(this.selected[0].position);
       this.lockControls.moveForward(-5);
-      this.lockControls.camera.position.add(new THREE.Vector3(0, 5, 0));
-      this.lockControls.camera.lookAt(this.selected[0].position);
+      this.lockControls.object.position.add(new THREE.Vector3(0, 5, 0));
+      this.lockControls.object.lookAt(this.selected[0].position);
     }
   }
 

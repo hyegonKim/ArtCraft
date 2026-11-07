@@ -1,12 +1,10 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { Select } from './select';
 
-import Select from './select';
-
-describe('Select', () => {
-  
-  it('should render successfully', () => {
-    const { baseElement } = render(<Select />);
-    expect(baseElement).toBeTruthy();
+describe('select', () => {
+  it('renders with its public props and supports the expected behavior', () => {
+    render(<Select options={[{ label: 'First', value: 'first' }]} value="first" onChange={vi.fn()} />);
+    expect(screen.getByRole('button').textContent).toContain('First');
   });
-  
 });

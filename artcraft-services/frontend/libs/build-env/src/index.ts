@@ -1,2 +1,3 @@
 
-export * from './lib/build-env';
+export * from './lib/BuildEnv';
+export * from './lib/BuildEnvType';

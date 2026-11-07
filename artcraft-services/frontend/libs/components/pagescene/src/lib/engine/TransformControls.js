@@ -36,6 +36,15 @@ const _mouseDownEvent = { type: "mouseDown" };
 const _mouseUpEvent = { type: "mouseUp", mode: null };
 const _objectChangeEvent = { type: "objectChange" };
 
+/**
+ * @extends {Object3D<import("three").Object3DEventMap & {
+ *   change: {},
+ *   "dragging-changed": { value: boolean },
+ *   mouseDown: {},
+ *   mouseUp: { mode: string | null },
+ *   objectChange: {}
+ * }>}
+ */
 class TransformControls extends Object3D {
   constructor(camera, domElement) {
     super();

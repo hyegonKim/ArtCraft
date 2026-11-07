@@ -4,6 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "./app";
 
+// Import only the controls the editor uses: the Addons barrel also initializes
+// an unrelated Lottie canvas renderer that is unavailable in jsdom.
+vi.mock("three/examples/jsm/Addons.js", async () => ({
+  ...(await import("three/examples/jsm/controls/OrbitControls.js")),
+  ...(await import("three/examples/jsm/controls/PointerLockControls.js")),
+  ...(await import("three/examples/jsm/animation/MMDAnimationHelper.js")),
+  ...(await import("three/examples/jsm/objects/Water.js")),
+}));
+
 vi.mock("../lib/session", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../lib/session")>()),
   useSession: () => ({ authChecked: true, loggedIn: false, user: null }),

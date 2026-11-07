@@ -10,6 +10,9 @@ interface QualityPickerProps {
 }
 
 const QUALITY_LABELS: Record<CommonQuality, string> = {
+  [CommonQuality.Auto]: "Auto",
+  [CommonQuality.Max]: "Max",
+  [CommonQuality.XHigh]: "Extra High",
   [CommonQuality.High]: "High",
   [CommonQuality.Medium]: "Medium",
   [CommonQuality.Low]: "Low",

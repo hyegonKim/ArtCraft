@@ -85,9 +85,6 @@ export class InfiniteGridHelper extends THREE.Mesh {
                     if (gl_FragColor.a <= 0.0) discard;
                 }
             `,
-      extensions: {
-        derivatives: true,
-      },
       blending: THREE.AdditiveBlending,
       depthTest: true,
       depthWrite: false,

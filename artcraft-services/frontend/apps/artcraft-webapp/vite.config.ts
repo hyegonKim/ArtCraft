@@ -107,6 +107,9 @@ export default defineConfig(() => ({
     },
   },
   test: {
+    // jsdom exercises the browser renderer, without the optional node-canvas backend.
+    alias: [{ find: /^konva$/, replacement: `${__dirname}/../../node_modules/konva/lib/index.js` }],
+    server: { deps: { inline: ["react-konva"] } },
     watch: false,
     globals: true,
     environment: 'jsdom',
