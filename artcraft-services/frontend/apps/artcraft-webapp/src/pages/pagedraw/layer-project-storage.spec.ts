@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createLayerProjectStorage } from './layer-project-storage';
+import { LayerProjectUnavailableError } from './layer-autosave';
+import { hashLayerDocument } from './layer-draft-store';
 import { validateLayerProject, type LayerProject } from '@storyteller/ui-pagedraw';
 vi.mock('@storyteller/ui-pagedraw', () => ({ validateLayerProject: (value: unknown) => value }));
 const calls = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), rename: vi.fn(), list: vi.fn(), get: vi.fn() }));
@@ -37,8 +39,8 @@ it('propagates failed saves so the UI stays dirty and can retry', async () => {
 });
 it('loads fresh authorized project bytes and the authoritative server title', async () => {
   calls.get.mockResolvedValue({ success: true, data: { maybe_title: 'Renamed', media_links: { cdn_url: 'https://storage.test/project?fresh=true' } } });
-  const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => document });vi.stubGlobal('fetch', fetch);
-  expect(await createLayerProjectStorage().load('m_saved')).toEqual({ name: 'Renamed', document: validateLayerProject(document) });
+  const fetch = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify(document) });vi.stubGlobal('fetch', fetch);
+  expect(await createLayerProjectStorage().load('m_saved')).toEqual({ name: 'Renamed', document: validateLayerProject(document), hash: await hashLayerDocument(document) });
   expect(fetch).toHaveBeenCalledWith('https://storage.test/project?fresh=true', { cache: 'no-store' });
 });
 it('lists only 2D projects with pagination and propagates list failures', async () => {
@@ -57,4 +59,18 @@ it('does not issue a redundant rename on every autosave when the name is unchang
   await storage.save(document, 'Unchanged', token, 'retry-request-id');
   expect(calls.rename).not.toHaveBeenCalled();
   expect(calls.update.mock.calls[0][0].uuid).toBe('retry-request-id');
+});
+
+it('identifies the server document by content and separates a missing project from a network failure', async () => {
+  const storage = createLayerProjectStorage();
+  calls.get.mockResolvedValue({ success: true, data: { media_links: { cdn_url: 'https://storage.test/project' } } });
+  // Whitespace and server re-encoding do not change the identity of the same JSON document.
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify(document, null, 2) }));
+  expect(await storage.serverHash('m_saved')).toBe(await hashLayerDocument(structuredClone(document)));
+  calls.get.mockResolvedValueOnce({ success: false, errorMessage: 'HTTP error! status: 404' });
+  await expect(storage.serverHash('m_gone')).rejects.toBeInstanceOf(LayerProjectUnavailableError);
+  calls.get.mockResolvedValueOnce({ success: false, errorMessage: 'Failed to fetch' });
+  const offline = storage.serverHash('m_saved');
+  await expect(offline).rejects.toThrow('Failed to fetch');
+  await expect(offline).rejects.not.toBeInstanceOf(LayerProjectUnavailableError);
 });

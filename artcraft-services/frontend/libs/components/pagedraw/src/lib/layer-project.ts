@@ -91,8 +91,29 @@ export function validateLayerProject(value: unknown): LayerProject {
   return doc;
 }
 
-async function embedImage(source: string | File): Promise<string> {
-  if (typeof source === 'string' && source.startsWith('data:')) return source;
+// Offline snapshots must not depend on re-downloading a remote image that was already embedded once.
+const EMBED_CACHE_LIMIT = 24;
+const embeddedUrls = new Map<string, Promise<string>>();
+const embeddedFiles = new WeakMap<File, Promise<string>>();
+
+function embedImage(source: string | File): Promise<string> {
+  if (typeof source === 'string' && source.startsWith('data:')) return Promise.resolve(source);
+  const cached = typeof source === 'string' ? embeddedUrls.get(source) : embeddedFiles.get(source);
+  if (cached) return cached;
+  const result = readAsDataUrl(source);
+  if (typeof source === 'string') {
+    embeddedUrls.set(source, result);
+    if (embeddedUrls.size > EMBED_CACHE_LIMIT) embeddedUrls.delete(embeddedUrls.keys().next().value!);
+  } else embeddedFiles.set(source, result);
+  // Failures are not cached, so a later retry reads the image again.
+  result.catch(() => {
+    if (typeof source === 'string') { if (embeddedUrls.get(source) === result) embeddedUrls.delete(source); }
+    else if (embeddedFiles.get(source) === result) embeddedFiles.delete(source);
+  });
+  return result;
+}
+
+async function readAsDataUrl(source: string | File): Promise<string> {
   let blob: Blob;
   if (typeof source === 'string') {
     const response = await fetch(source);

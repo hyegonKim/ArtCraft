@@ -1,5 +1,7 @@
 import { MediaFilesApi, ProjectsApi, Visibility } from '@storyteller/api';
 import { validateLayerProject, type LayerProject } from '@storyteller/ui-pagedraw';
+import { LayerProjectUnavailableError } from './layer-autosave';
+import { hashLayerDocument } from './layer-draft-store';
 
 export function createLayerProjectStorage() {
   const projects = new ProjectsApi();
@@ -32,15 +34,31 @@ export function createLayerProjectStorage() {
       return { rows: response.data ?? [], next: response.pagination?.maybe_next ?? undefined };
     },
     async load(token: string) {
-      const response = await files.GetMediaFileByToken({ mediaFileToken: token });
-      const file = response.success ? response.data : undefined;
-      if (!file?.media_links?.cdn_url) throw new Error('This 2D project is unavailable.');
-      const bytes = await fetch(file.media_links.cdn_url, { cache: 'no-store' });
-      if (!bytes.ok) throw new Error('Could not read the saved project.');
-      const document = validateLayerProject(await bytes.json());
+      const { file, text } = await read(token);
+      const document = validateLayerProject(JSON.parse(text));
       const name = file.maybe_title || 'Untitled image project';
       names.set(token, name);
-      return { document, name };
+      return { document, name, hash: await hashLayerDocument(document) };
+    },
+    /** Identity of the server document, used before replaying edits made during an outage. */
+    async serverHash(token: string) {
+      const { text } = await read(token);
+      let value: unknown;
+      try { value = JSON.parse(text); } catch { return `unreadable:${text.length}`; }
+      return hashLayerDocument(value as LayerProject);
     },
   };
+
+  /** Network failures throw a plain Error (retry later); a project that is gone throws LayerProjectUnavailableError. */
+  async function read(token: string) {
+    const response = await files.GetMediaFileByToken({ mediaFileToken: token });
+    if (!response.success && response.errorMessage && !/status: (404|410)\b/.test(response.errorMessage)) {
+      throw new Error(response.errorMessage);
+    }
+    const file = response.success ? response.data : undefined;
+    if (!file?.media_links?.cdn_url) throw new LayerProjectUnavailableError('This 2D project is unavailable.');
+    const bytes = await fetch(file.media_links.cdn_url, { cache: 'no-store' });
+    if (!bytes.ok) throw new Error('Could not read the saved project.');
+    return { file, text: await bytes.text() };
+  }
 }
