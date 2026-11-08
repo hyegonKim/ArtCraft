@@ -8,8 +8,11 @@ const mocks = vi.hoisted(() => ({ save: vi.fn(), list: vi.fn(), load: vi.fn(), s
   loggedIn: true, user: 'u_test', drafts: undefined as unknown as LayerDraftStore }));
 vi.mock('../../lib/session', () => ({ useSession: () => ({ loggedIn: mocks.loggedIn, user: mocks.loggedIn ? { user_token: mocks.user } : undefined }) }));
 vi.mock('./layer-project-storage', () => ({ createLayerProjectStorage: () => mocks }));
+// crypto.subtle finishes on the real event loop, outside fake timers, so tests use a microtask-only hash.
+// layer-draft-store.spec.ts covers the real SHA-256.
 vi.mock('./layer-draft-store', async importOriginal => ({
-  ...await importOriginal<typeof import('./layer-draft-store')>(), openLayerDraftStore: () => mocks.drafts }));
+  ...await importOriginal<typeof import('./layer-draft-store')>(), openLayerDraftStore: () => mocks.drafts,
+  hashLayerDocument: async (document: LayerProject) => `h:${JSON.stringify(document)}` }));
 vi.mock('@storyteller/ui-pagedraw', async () => {
   const { create } = await import('zustand');
   const state = { baseImageInfo: { isBlankCanvas: true, blankCanvasWidth: 1920, blankCanvasHeight: 1080 },
