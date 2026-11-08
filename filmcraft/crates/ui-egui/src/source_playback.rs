@@ -8,7 +8,7 @@ use filmcraft_render::SourceProvider;
 use filmcraft_time::Tick;
 use serde_json::json;
 
-use crate::{AUDIO_RETRY_S, AUDIO_STALL_S, FilmcraftApp, Playback, shuttle};
+use crate::{AUDIO_RETRY_S, AUDIO_STALL_S, AudioReadiness, FilmcraftApp, Playback, shuttle};
 
 #[derive(Default)]
 pub struct SourcePlayback {
@@ -112,6 +112,7 @@ impl FilmcraftApp {
         }
         self.source_playback.clock.playing = false;
         self.source_playback.clock.audio_clock = false;
+        self.source_playback.clock.audio_pending = false;
         self.source_playback.clock.meter.finish();
         self.frames.stop_prefetch();
         if let Some(audio) = self.audio.as_mut() {
@@ -228,6 +229,18 @@ impl FilmcraftApp {
             }
             _ => return,
         };
+        if audio.readiness() != AudioReadiness::Ready {
+            // Desktop opens the device on its own thread: play on the wall clock meanwhile, and
+            // start the sound where the playhead got to once it is open (#2281).
+            drop(fill);
+            audio.stop();
+            audio.prepare();
+            let pending = audio.readiness() == AudioReadiness::Opening;
+            self.source_playback.clock.audio_pending = pending;
+            self.source_playback.clock.audio_retry_at = if pending { 0.0 } else { now + AUDIO_RETRY_S };
+            return;
+        }
+        self.source_playback.clock.audio_pending = false;
         match audio.start(fill) {
             Ok(_) => {
                 self.source_playback.clock.audio_clock = true;
@@ -264,6 +277,22 @@ impl FilmcraftApp {
             self.source_playback.clock.anchor_time = now;
             self.source_playback.clock.audio_seen = (0, now);
             self.start_source_audio(now);
+        }
+        if self.source_playback.clock.audio_pending {
+            match self.audio.as_ref().map(|a| a.readiness()) {
+                Some(AudioReadiness::Opening) => {}
+                Some(AudioReadiness::Ready) => {
+                    // the output is open: the sound starts from the Source playhead, and its clock takes over
+                    self.source_playback.clock.anchor_tick = time;
+                    self.source_playback.clock.anchor_time = now;
+                    self.source_playback.clock.audio_seen = (0, now);
+                    self.start_source_audio(now);
+                }
+                _ => {
+                    self.source_playback.clock.audio_pending = false;
+                    self.source_playback.clock.audio_retry_at = now + AUDIO_RETRY_S;
+                }
+            }
         }
         if !self.source_playback.clock.audio_clock && self.source_playback.clock.audio_retry_at > 0.0 && now >= self.source_playback.clock.audio_retry_at {
             // The output failed mid-play: open it again where the wall clock got to, so a
