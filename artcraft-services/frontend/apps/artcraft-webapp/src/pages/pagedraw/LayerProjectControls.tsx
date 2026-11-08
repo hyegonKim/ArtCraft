@@ -49,6 +49,8 @@ export function LayerProjectControls() {
   const opened = useRef<string | undefined>(undefined);
   const operation = useRef(0);
   const recoveredOwner = useRef<string | undefined>(undefined);
+  /** The last signed-in account; a different one signing in must not inherit its document. */
+  const account = useRef<string | undefined>(undefined);
   useEffect(() => () => { operation.current += 1; }, []);
   const base = useSceneStore(s => s.baseImageInfo);
   const bitmap = useSceneStore(s => s.baseImageBitmap);
@@ -129,10 +131,14 @@ export function LayerProjectControls() {
     }
   }
 
-  /** Decodes a device copy into the editor; its edits stay unsynced until the server confirms them. */
-  async function applyDraft(draft: LayerDraft, release: () => void, version: number) {
+  /**
+   * Decodes a device copy into the editor; its edits stay unsynced until the server confirms them.
+   * `discard` drops the replaced document's device copy, only once the new one is in place.
+   */
+  async function applyDraft(draft: LayerDraft, release: () => void, version: number, discard: boolean) {
     try { await restoreLayerProject(draft.document, () => version === operation.current); }
     catch (error) { release(); throw error; }
+    if (discard) void autosave.discardLocal();
     opened.current = draft.token; setToken(draft.token); nameRef.current = draft.name; setName(draft.name);
     autosave.adopt(draft, release);
     setShowProjects(false); setRecoveredAt(draft.updatedAt);
@@ -155,23 +161,34 @@ export function LayerProjectControls() {
       if (local && version === operation.current) {
         try {
           const { draft, release } = await claimDraft(local.id);
-          await applyDraft(draft, release, version);
+          await applyDraft(draft, release, version, confirmed);
           return;
         } catch { /* fall back to the server copy; the device copy stays listed */ }
       }
       const project = await storage.load(projectToken);
       if (version !== operation.current) return;
       await restoreLayerProject(project.document, () => version === operation.current);
+      if (confirmed) void autosave.discardLocal();
       opened.current = projectToken; setToken(projectToken); nameRef.current = project.name; setName(project.name);
       autosave.reset(projectToken, { baseHash: project.hash }); setShowProjects(false); setRecoveredAt(undefined);
       setQuery({ project: projectToken }, { replace: true });
     }, 'Could not open project.');
   }
   useEffect(() => {
+    const previous = account.current;
+    if (owner) account.current = owner;
+    if (owner && previous && owner !== previous) {
+      // The open document and lists belong to the previous account: never show or save them for this one.
+      // The URL still names that account's project until the reset below applies, so do not open it.
+      clearDocument();
+      setPendingDiscard(null); setConfirmDelete(undefined); setShowProjects(false); setRows([]); setNext(undefined);
+      setRecoverable([]); void refreshRecoverable();
+      return;
+    }
     if (requested && requested !== opened.current && loggedIn) void open(requested);
     // A URL/account transition triggers loading; scene edits must not reload it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requested, loggedIn]);
+  }, [requested, loggedIn, owner]);
   useEffect(() => {
     if (!owner || recoveredOwner.current === owner) return;
     recoveredOwner.current = owner;
@@ -193,12 +210,17 @@ export function LayerProjectControls() {
     await operate(async version => {
       const { draft, release } = await claimDraft(id);
       if (version !== operation.current) { release(); return; }
-      await applyDraft(draft, release, version);
+      await applyDraft(draft, release, version, confirmed);
     }, 'Could not restore the edits kept on this device.');
   }
   async function deleteDraft(id: string) {
     setConfirmDelete(undefined);
-    try { await drafts.remove(id); } catch { setError('Could not delete the edits kept on this device.'); }
+    try {
+      // Another tab may have restored these edits since the list was read; never delete its copy.
+      const release = await drafts.claim(id);
+      if (!release) setError('These edits are open in another tab.');
+      else try { await drafts.remove(id); } finally { release(); }
+    } catch { setError('Could not delete the edits kept on this device.'); }
     await refreshRecoverable();
   }
 
@@ -218,6 +240,12 @@ export function LayerProjectControls() {
   function startNew(confirmed = false) {
     if (dirty && !confirmed) { setPendingDiscard({}); return; }
     if (autosave.state.saving) return;
+    if (confirmed) void autosave.discardLocal();
+    clearDocument();
+  }
+  /** Empties the editor into a new unsaved document, cancelling any open or restore in progress. */
+  function clearDocument() {
+    operation.current += 1; setBusy(false);
     autosave.setEnabled(false); autosave.reset();
     loading.current = true;
     useSceneStore.getState().setBaseImageInfo(null);
@@ -296,8 +324,8 @@ export function LayerProjectControls() {
         <div className="flex gap-2">
           <button autoFocus className={button} onClick={() => setPendingDiscard(null)}>Keep editing</button>
           <button className={button} onClick={() => {
+            // Each action drops the device copy only after the replacement document is in place.
             const target = pendingDiscard; setPendingDiscard(null);
-            void autosave.discardLocal();
             if (target.token) void open(target.token, true);
             else if (target.draftId) void restoreDraft(target.draftId, true);
             else startNew(true);

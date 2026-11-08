@@ -5,8 +5,8 @@ import { useSceneStore, type LayerProject } from '@storyteller/ui-pagedraw';
 import { LayerProjectControls } from './LayerProjectControls';
 import { createMemoryDraftStore, hashLayerDocument, type LayerDraft, type LayerDraftStore } from './layer-draft-store';
 const mocks = vi.hoisted(() => ({ save: vi.fn(), list: vi.fn(), load: vi.fn(), serverHash: vi.fn(), capture: vi.fn(), restore: vi.fn(),
-  loggedIn: true, drafts: undefined as unknown as LayerDraftStore }));
-vi.mock('../../lib/session', () => ({ useSession: () => ({ loggedIn: mocks.loggedIn, user: mocks.loggedIn ? { user_token: 'u_test' } : undefined }) }));
+  loggedIn: true, user: 'u_test', drafts: undefined as unknown as LayerDraftStore }));
+vi.mock('../../lib/session', () => ({ useSession: () => ({ loggedIn: mocks.loggedIn, user: mocks.loggedIn ? { user_token: mocks.user } : undefined }) }));
 vi.mock('./layer-project-storage', () => ({ createLayerProjectStorage: () => mocks }));
 vi.mock('./layer-draft-store', async importOriginal => ({
   ...await importOriginal<typeof import('./layer-draft-store')>(), openLayerDraftStore: () => mocks.drafts }));
@@ -17,7 +17,7 @@ vi.mock('@storyteller/ui-pagedraw', async () => {
   return { useSceneStore: create(() => state), captureLayerProject: mocks.capture, restoreLayerProject: mocks.restore };
 });
 const canvas = { isBlankCanvas: true, blankCanvasWidth: 1920, blankCanvasHeight: 1080, mediaToken: 'blank', url: '' };
-beforeEach(() => { vi.resetAllMocks(); mocks.loggedIn = true; mocks.drafts = createMemoryDraftStore(true); useSceneStore.setState({ baseImageInfo: canvas }); mocks.capture.mockResolvedValue({ format: 'artcraft-layer-project' }); });
+beforeEach(() => { vi.resetAllMocks(); mocks.loggedIn = true; mocks.user = 'u_test'; mocks.drafts = createMemoryDraftStore(true); useSceneStore.setState({ baseImageInfo: canvas }); mocks.capture.mockResolvedValue({ format: 'artcraft-layer-project' }); });
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
 const mount = (path = '/edit-image') => render(<MemoryRouter initialEntries={[path]}><LayerProjectControls /></MemoryRouter>);
 
@@ -161,4 +161,47 @@ it('never shows or writes device copies for a guest', async () => {
   await new Promise(resolve => setTimeout(resolve, 400));
   expect(screen.queryByLabelText('Edits kept on this device')).toBeNull();
   expect((await mocks.drafts.list('u_test')).map(row => row.id)).toEqual(['d_kept']);
+});
+
+const offlineStroke = () => act(() => useSceneStore.setState({ drawNodes: [{ id: 'offline-brush', type: 'line', points: [1, 2], stroke: '#000', strokeWidth: 3, draggable: false }] }));
+const keptOffline = 'Offline · edits kept on this device · syncs when back online';
+
+it('keeps the device copy when Discard is chosen but the other project cannot be opened', async () => {
+  mocks.list.mockResolvedValue({ rows: [{ token: 'm_other', maybe_title: 'Other project', updated_at: '2026-11-08T00:00:00Z' }] });
+  mocks.load.mockRejectedValue(new Error('Failed to fetch'));
+  mount();
+  act(() => { window.dispatchEvent(new Event('offline')); });
+  offlineStroke();
+  await waitFor(() => expect(screen.getByRole('status').textContent).toBe(keptOffline));
+  fireEvent.click(screen.getByRole('button', { name: 'Open project' }));
+  fireEvent.click(await screen.findByRole('button', { name: /^Other project/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+  await waitFor(() => expect(mocks.load).toHaveBeenCalledWith('m_other'));
+  await waitFor(() => expect(screen.getByRole('status').textContent).toBe(keptOffline));
+  expect(await mocks.drafts.list('u_test')).toHaveLength(1);
+});
+
+it('clears the previous account\'s document when another account signs in and never keeps it for that account', async () => {
+  const view = mount();
+  act(() => { window.dispatchEvent(new Event('offline')); });
+  fireEvent.change(screen.getByLabelText('2D project name'), { target: { value: 'Private to u_test' } });
+  await waitFor(async () => expect(await mocks.drafts.list('u_test')).toHaveLength(1));
+  mocks.user = 'u_other';
+  view.rerender(<MemoryRouter initialEntries={['/edit-image']}><LayerProjectControls /></MemoryRouter>);
+  await waitFor(() => expect(useSceneStore.getState().RESET).toHaveBeenCalled());
+  expect((screen.getByLabelText('2D project name') as HTMLInputElement).value).toBe('Untitled image project');
+  await new Promise(resolve => setTimeout(resolve, 400));
+  expect(await mocks.drafts.list('u_other')).toEqual([]);
+  expect((await mocks.drafts.list('u_test')).map(row => row.name)).toEqual(['Private to u_test']);
+});
+
+it('does not delete device edits that another tab opened after the list was shown', async () => {
+  await mocks.drafts.put(kept({ token: 'm_other', name: 'Other project' }));
+  mount();
+  fireEvent.click(await screen.findByRole('button', { name: 'Discard edits' }));
+  const release = await mocks.drafts.claim('d_kept'); // Another tab restores them now.
+  fireEvent.click(screen.getByRole('button', { name: 'Delete permanently' }));
+  expect((await screen.findByRole('alert')).textContent).toContain('These edits are open in another tab.');
+  expect(await mocks.drafts.list('u_test')).toHaveLength(1);
+  release?.();
 });

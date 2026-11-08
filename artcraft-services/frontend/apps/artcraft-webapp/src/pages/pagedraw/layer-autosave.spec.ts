@@ -239,7 +239,54 @@ it('keeps the last edit when the session ends and never writes it into another a
   expect(first.document).toEqual(document);
   saver.setOwner('u_owner'); name = 'After signing in again'; saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
   expect((await drafts.list('u_owner')).map(row => [row.id, row.name])).toEqual([[first.id, 'After signing in again']]);
-  saver.setOwner('u_other'); saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  saver.setOwner('u_other'); await vi.advanceTimersByTimeAsync(LAYER_AUTOSAVE_DELAY_MS);
+  // The previous account's document is neither kept for nor saved to the new account.
+  expect(saver.state.dirty).toBe(false);
+  expect(await drafts.list('u_other')).toEqual([]);
+  expect(save).not.toHaveBeenCalled();
   expect((await drafts.list('u_owner')).map(row => row.name)).toEqual(['After signing in again']);
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
   expect((await drafts.list('u_other'))[0].id).not.toBe(first.id);
+});
+
+it('keeps saving a conflicting replay as a separate copy when the first copy upload fails', async () => {
+  save.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValue('m_copy');
+  local({ serverHash: vi.fn().mockResolvedValue('h:someone-else') }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Offline edits (offline copy)', undefined]);
+  // The retry falls inside the server-check reuse window, yet must never overwrite the original.
+  await vi.advanceTimersByTimeAsync(LAYER_SAVE_RETRY_MS);
+  expect(save).toHaveBeenCalledTimes(2);
+  expect(save.mock.calls[1].slice(0, 3)).toEqual([document, 'Offline edits (offline copy)', undefined]);
+  expect(onSaved).toHaveBeenCalledWith('m_copy', 'Offline edits (offline copy)');
+  expect(saver.state.notice).toContain('was not overwritten');
+});
+
+it('stops reporting edits as kept once their device copy is discarded, even if a write was already queued', async () => {
+  local({ online: () => false });
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state.local).toBe(true);
+  await saver.discardLocal();
+  expect(saver.state).toMatchObject({ dirty: true, local: false });
+  expect(await drafts.list('u_owner')).toEqual([]);
+  await saver.persistNow();
+  expect(saver.state.local).toBe(true);
+  saver.markDirty(); const writing = saver.persistNow(); const discarding = saver.discardLocal();
+  await writing; await discarding;
+  expect(saver.state.local).toBe(false);
+  expect(await drafts.list('u_owner')).toEqual([]);
+});
+
+it('reports an edit that cannot be captured for the device copy instead of implying it is being kept', async () => {
+  local({ online: () => false });
+  capture.mockRejectedValueOnce(new Error('Could not read an image layer. Please retry.'));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: false,
+    localError: 'Could not keep a recovery copy on this device. Could not read an image layer. Please retry.' });
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: true, localError: '' });
+  // Without an open document (saving disabled) there is nothing to recover, so nothing to report.
+  saver.setEnabled(false); capture.mockRejectedValueOnce(new Error('Open an image or create a canvas before saving.'));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state.localError).toBe('');
 });

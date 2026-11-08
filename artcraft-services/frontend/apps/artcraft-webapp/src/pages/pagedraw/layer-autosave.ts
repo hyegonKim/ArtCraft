@@ -86,6 +86,8 @@ export class LayerAutosave {
   private ownHashes: string[] = [];
   private needsVerify = false;
   private verifiedAt = -Infinity;
+  /** The server copy changed or vanished while edits waited; retries go to a separate project, never the original. */
+  private conflict = false;
   private chain: Promise<void> = Promise.resolve();
 
   constructor(private readonly options: Options) {
@@ -116,9 +118,9 @@ export class LayerAutosave {
     // Keep what was typed before signing out or an expired session; signing back in continues the same record.
     if (this.owner && this.state.dirty && this.localRevision !== this.revision) void this.persistLocal(true);
     if (owner && this.lastOwner && owner !== this.lastOwner) {
-      // Never write one account's edits into another account's record.
-      this.bindDraft(crypto.randomUUID());
-      this.localRevision = 0;
+      // The open document belongs to the previous account: never keep it on this device or save it for
+      // this one. Its pending edit was just kept for the previous account above.
+      this.reset();
     }
     if (owner) this.lastOwner = owner;
     this.owner = owner;
@@ -174,6 +176,7 @@ export class LayerAutosave {
     this.token = token;
     this.revision = this.savedRevision = this.localRevision = 0;
     this.error = '';
+    this.localError = '';
     this.notice = '';
     this.flight = undefined;
     this.copyPending = false;
@@ -181,6 +184,7 @@ export class LayerAutosave {
     this.ownHashes = [];
     this.needsVerify = false;
     this.verifiedAt = -Infinity;
+    this.conflict = false;
     this.bindDraft(next.draftId ?? crypto.randomUUID(), next.release);
     this.emit();
   }
@@ -201,7 +205,16 @@ export class LayerAutosave {
     this.clearLocalTimer();
     const drafts = this.options.drafts;
     const id = this.draftId;
-    return drafts ? this.enqueue(() => drafts.remove(id)) : Promise.resolve();
+    const epoch = this.epoch;
+    // Until the document is replaced, its edits exist only in the editor and must be written again.
+    this.localRevision = 0;
+    this.emit();
+    if (!drafts) return Promise.resolve();
+    return this.enqueue(async () => {
+      await drafts.remove(id);
+      // A device write queued before the discard may have marked the edits as kept meanwhile.
+      if (epoch === this.epoch) { this.localRevision = 0; this.emit(); }
+    });
   }
 
   dismissNotice(): void { this.notice = ''; this.emit(); }
@@ -219,7 +232,7 @@ export class LayerAutosave {
     const epoch = this.epoch;
     const revision = this.revision;
     const name = this.options.getName().trim() || 'Untitled image project';
-    const original = this.copyPending ? undefined : this.token;
+    const original = this.copyPending || this.conflict ? undefined : this.token;
     const current = () => epoch === this.epoch && !this.disposed;
     let attempted: string | undefined;
     const task = Promise.resolve().then(async () => {
@@ -228,10 +241,13 @@ export class LayerAutosave {
       const hash = await this.options.hash?.(document);
       if (!current()) return false;
       let token = original;
-      let copyName: string | undefined;
+      let copyName = this.conflict ? offlineCopyName(name) : undefined;
       if (token && await this.serverChanged(token, hash)) {
+        if (!current()) return false;
         token = undefined;
         copyName = offlineCopyName(name);
+        // Remember the verdict: a failed copy upload must never fall back to overwriting the original.
+        this.conflict = true;
       }
       if (!current()) return false;
       if (token) attempted = hash;
@@ -241,6 +257,7 @@ export class LayerAutosave {
       this.token = saved;
       this.savedRevision = revision;
       this.copyPending = false;
+      this.conflict = false;
       this.error = '';
       this.baseHash = hash;
       this.ownHashes = [];
@@ -295,8 +312,10 @@ export class LayerAutosave {
       if (error instanceof LayerProjectUnavailableError) return true;
       throw error;
     }
-    this.verifiedAt = now;
-    return server !== this.baseHash && server !== hash && !this.ownHashes.includes(server);
+    const changed = server !== this.baseHash && server !== hash && !this.ownHashes.includes(server);
+    // Only a passing check may be reused while retries continue.
+    if (!changed) this.verifiedAt = now;
+    return changed;
   }
 
   private persistLocal(detached: boolean): Promise<void> {
@@ -316,7 +335,14 @@ export class LayerAutosave {
       if (!live && !detached) return;
       let document: LayerProject;
       // IndexedDB clones synchronously inside put(), so the fresh capture needs no extra copy.
-      try { document = await snapshot; } catch { return; } // Nothing to recover yet.
+      try { document = await snapshot; } catch (error) {
+        // While saving is disabled there is no open document to recover yet; otherwise say nothing was kept.
+        if (epoch === this.epoch && this.enabled) {
+          this.localError = `Could not keep a recovery copy on this device. ${error instanceof Error ? error.message : ''}`.trim();
+          this.emit();
+        }
+        return;
+      }
       if (revision <= this.savedRevision) return;
       try {
         await drafts.put({ id, owner, document, updatedAt: this.options.now?.() ?? Date.now(),
