@@ -180,6 +180,13 @@ fn handle_ui_set(app: &mut FilmcraftApp, ctx: &egui::Context, p: &Value) -> Outc
             Err(e) => return err(format!("`keyframeSelection`: {e}")),
         }
     }
+    // Effect Controls' keyframe lane zoom (#2202): `[start, end]` fractions of the clip it shows,
+    // or null for the whole clip
+    if let Some(v) = p.get("effectControlsZoom")
+        && let Err(e) = crate::panels::effect_controls::set_zoom(app, v)
+    {
+        return err(e);
+    }
     if let Some(v) = p.get("safeMargins").and_then(Value::as_bool) {
         app.ui.program.safe_margins = v;
     }

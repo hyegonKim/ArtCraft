@@ -426,6 +426,16 @@ pub struct Eyedropper {
     pub mask: Option<usize>,
 }
 
+/// Effect Controls' keyframe lane zoom (#2202): the stretch of a clip the lane shows, as (start,
+/// end) fractions of the clip's length, or `None` for the whole clip. It belongs to the clip it was
+/// set on (`clip`): any other clip shows whole.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct LaneZoom {
+    pub clip: u64,
+    pub range: Option<[f64; 2]>,
+}
+
 /// A keyframe selected in the Effect Controls keyframe lane: clip, effect index, parameter (of an
 /// effect mask when `mask` is set) and the keyframe's media time. The panel drops references that
 /// no longer match a keyframe (deleted, moved, another clip selected).
@@ -480,6 +490,10 @@ pub struct UiState {
     /// share of the panel). Dragging the divider sets it (#643).
     #[serde(default)]
     pub effect_controls_split: f32,
+    /// The stretch of the selected clip Effect Controls' keyframe lane shows (#2202). Set with
+    /// `ui.set {effectControlsZoom}`.
+    #[serde(default)]
+    pub effect_controls_zoom: LaneZoom,
     pub show_menu_bar: bool,
     /// The header bar (Home, Import, Edit, Export, workspaces). An app that embeds FilmCraft can hide it.
     #[serde(default = "shown")]
@@ -1024,6 +1038,7 @@ impl Default for UiState {
             lumetri_grid_folder: None,
             collapsed_fx: vec![],
             effect_controls_split: 0.0,
+            effect_controls_zoom: LaneZoom::default(),
             show_menu_bar: true,
             show_header: true,
             show_status_bar: true,
