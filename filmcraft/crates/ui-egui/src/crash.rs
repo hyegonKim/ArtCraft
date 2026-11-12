@@ -100,7 +100,7 @@ mod tests {
         super::install(Some(dir.clone()));
         let r = std::thread::Builder::new().name("filmcraft-test-worker".into()).spawn(|| panic!("boom in a worker")).unwrap().join();
         assert!(r.is_err());
-        let seen = super::SEEN.lock().unwrap().clone();
+        let seen = super::SEEN.lock().unwrap_or_else(std::sync::PoisonError::into_inner).clone();
         let ours = seen.iter().find(|s| s.contains("boom in a worker")).expect("recorded");
         assert!(ours.contains("filmcraft-test-worker") && ours.contains("crash.rs"), "{ours}");
         let log = std::fs::read_to_string(super::log_path().unwrap()).unwrap();
