@@ -1,10 +1,17 @@
 # Keeps https://github.com/hyegonKim/filmcraft in step with this repository's filmcraft/ folder.
 #
-# ArtCraft is the source: every push to main that touches filmcraft/ splits that folder's history
-# out with `git subtree split` and pushes it to the filmcraft repository's main branch. The split
-# is deterministic, so each run only adds the new commits. The push is a plain fast-forward:
-# if someone commits to hyegonKim/filmcraft main directly, this job fails instead of discarding
-# that work. Port such a change into filmcraft/ here and the next run catches up.
+# ArtCraft is the source: every push to main splits the filmcraft/ folder's history out with
+# `git subtree split` and pushes it to the filmcraft repository's main branch. The split is
+# deterministic, so each run only adds the new commits, and a run with no filmcraft/ change
+# pushes nothing. There is no `paths` filter on purpose: GitHub skips path filters for pushes of
+# more than 300 files, which would leave the mirror behind.
+#
+# The push is a plain fast-forward: if someone commits to hyegonKim/filmcraft main directly, this
+# job fails instead of discarding that work. To recover, bring that change into filmcraft/ here
+# (copying the content is enough), merge it to main, then force the mirror back onto the split:
+#   git subtree split --prefix=filmcraft -b filmcraft-mirror
+#   git push --force git@github.com:hyegonKim/filmcraft.git filmcraft-mirror:main
+# The direct commit's own history is then replaced, so only do this once its content is here.
 #
 # Needs the FILMCRAFT_DEPLOY_KEY secret: the private half of a write-enabled deploy key on
 # hyegonKim/filmcraft.
@@ -13,7 +20,6 @@ name: Mirror filmcraft/ to hyegonKim/filmcraft
 on:
   push:
     branches: [main]
-    paths: ["filmcraft/**"]
   workflow_dispatch:
 
 concurrency:
@@ -25,7 +31,8 @@ permissions:
 
 jobs:
   mirror:
-    if: github.repository == 'hyegonKim/ArtCraft'
+    # Only main is mirrored: a manual run started from another branch would publish unmerged work.
+    if: github.repository == 'hyegonKim/ArtCraft' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
