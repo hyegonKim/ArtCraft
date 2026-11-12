@@ -1,0 +1,51 @@
+# Keeps https://github.com/hyegonKim/filmcraft in step with this repository's filmcraft/ folder.
+#
+# ArtCraft is the source: every push to main that touches filmcraft/ splits that folder's history
+# out with `git subtree split` and pushes it to the filmcraft repository's main branch. The split
+# is deterministic, so each run only adds the new commits. The push is a plain fast-forward:
+# if someone commits to hyegonKim/filmcraft main directly, this job fails instead of discarding
+# that work. Port such a change into filmcraft/ here and the next run catches up.
+#
+# Needs the FILMCRAFT_DEPLOY_KEY secret: the private half of a write-enabled deploy key on
+# hyegonKim/filmcraft.
+name: Mirror filmcraft/ to hyegonKim/filmcraft
+
+on:
+  push:
+    branches: [main]
+    paths: ["filmcraft/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-filmcraft
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    if: github.repository == 'hyegonKim/ArtCraft'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Split the filmcraft/ history
+        run: git subtree split --prefix=filmcraft -b filmcraft-mirror
+
+      - name: Push to hyegonKim/filmcraft main
+        env:
+          DEPLOY_KEY: ${{ secrets.FILMCRAFT_DEPLOY_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/filmcraft_deploy
+          chmod 600 ~/.ssh/filmcraft_deploy
+          # GitHub's published SSH host key, pinned rather than trusted on first use.
+          echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND='ssh -i ~/.ssh/filmcraft_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes'
+          git push git@github.com:hyegonKim/filmcraft.git filmcraft-mirror:refs/heads/main
+          rm -f ~/.ssh/filmcraft_deploy
