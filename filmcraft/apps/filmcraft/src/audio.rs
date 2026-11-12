@@ -341,22 +341,27 @@ where
                 link.health.clear_errors();
                 let opened = open(&link, &request);
                 let mut st = link.state();
+                // An open overtaken by a newer request reports nothing: a settings change already
+                // set the format its device runs at, and a newer open reports its own.
                 let latest = st.issued == seq;
                 match opened {
                     Ok(o) => {
-                        (st.rate, st.channels, st.note) = (o.rate, o.channels, o.note);
                         if latest {
+                            (st.rate, st.channels, st.note) = (o.rate, o.channels, o.note);
                             st.phase = Phase::Open;
+                            // idle from now, not from the last playback: a stream that Play
+                            // prepared long after that would otherwise close before Play starts
+                            st.idle_since = Instant::now();
                         }
                         stream = Some(o.stream);
                     }
                     Err(e) => {
                         log::warn!("audio output unavailable: {}", e.message);
-                        // a device that now runs another format: the next `start` mixes at it
-                        if let Some((rate, channels)) = e.format {
-                            (st.rate, st.channels) = (rate, channels);
-                        }
                         if latest {
+                            // a device that now runs another format: the next `start` mixes at it
+                            if let Some((rate, channels)) = e.format {
+                                (st.rate, st.channels) = (rate, channels);
+                            }
                             st.phase = Phase::Closed;
                         }
                     }
@@ -1005,5 +1010,52 @@ mod tests {
         assert_eq!((opened.load(Ordering::SeqCst), live.load(Ordering::SeqCst)), (2, 1), "the old stream went first");
         assert_eq!(callback(&out, 1), [0.5; 2], "the same mixer");
         assert_eq!(out.played_frames(), Some(101));
+    }
+
+    /// Play prepares the output long after the last playback stopped: the stream stays open for
+    /// the idle time counted from when it opened, so Play still finds it open.
+    #[test]
+    fn a_stream_prepared_long_after_playback_stays_open_for_the_idle_time() {
+        let idle = Duration::from_secs(1);
+        let (mut out, (opened, _)) = fake(Duration::ZERO, 0, idle);
+        // the last playback ended a minute ago
+        out.link.state().idle_since = Instant::now().checked_sub(Duration::from_secs(60)).unwrap();
+        out.prepare();
+        wait_until("the stream is open", || out.readiness() == AudioReadiness::Ready);
+        let open_at = Instant::now();
+        // the device thread checks for idle streams every 250 ms
+        std::thread::sleep(Duration::from_millis(400));
+        let readiness = out.readiness();
+        out.start(constant(0.5)).unwrap();
+        // (a machine so loaded that the sleep overran the idle time proves nothing either way)
+        if open_at.elapsed() < idle {
+            assert_eq!(readiness, AudioReadiness::Ready, "the prepared stream closed before its idle time ran out");
+            assert_eq!(opened.load(Ordering::SeqCst), 1, "Play plays on the prepared stream");
+        }
+    }
+
+    /// A slow open that a settings change overtook does not put its device's format back: the next
+    /// start mixes at the format of the device the settings now name.
+    #[test]
+    fn an_overtaken_open_keeps_the_new_settings_format() {
+        let (gate, wait) = mpsc::channel::<()>();
+        let wait = Mutex::new(wait);
+        let counters: Counters = Default::default();
+        let device = counters.clone();
+        let mut out = CpalOut::with_opener(48_000, 2, None, Mutex::new(None), IDLE_CLOSE, move |_: &Arc<Link>, _: &OpenRequest| {
+            let _ = wait.lock().unwrap().recv();
+            opened_stream(&device)
+        });
+        out.prepare();
+        {
+            // what `configure` does for a device that runs at 96 kHz in 6 channels
+            let mut st = out.link.state();
+            (st.rate, st.channels) = (96_000, 6);
+            out.request_close(&mut st);
+        }
+        gate.send(()).unwrap();
+        wait_until("the overtaken open finishes", || counters.0.load(Ordering::SeqCst) == 1 && counters.1.load(Ordering::SeqCst) == 0);
+        assert_eq!((out.sample_rate(), out.channels()), (96_000, 6));
+        assert_eq!(out.readiness(), AudioReadiness::Closed);
     }
 }

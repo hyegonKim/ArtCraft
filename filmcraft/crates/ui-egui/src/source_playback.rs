@@ -323,14 +323,19 @@ impl FilmcraftApp {
             clock.anchor_tick = time;
             clock.anchor_time = now;
             clock.audio_clock = false;
-            // A dead stream is reopened on a timer; a stalled one keeps the wall clock (#136).
+            // A dead stream is reopened on a timer; a stalled one keeps the wall clock (#136),
+            // unless a restart (#840) is still opening the device: its sound comes back once open.
+            let reopening = reading.is_some() && self.audio.as_ref().is_some_and(|a| a.readiness() == AudioReadiness::Opening);
             if reading.is_none() {
                 clock.audio_retry_at = now + AUDIO_RETRY_S;
             }
+            clock.audio_pending = reopening;
             if let Some(audio) = self.audio.as_mut() {
                 audio.stop();
             }
-            self.ui.status = "Source audio output stopped responding: playing without sound (check Settings > Audio Hardware)".into();
+            if !reopening {
+                self.ui.status = "Source audio output stopped responding: playing without sound (check Settings > Audio Hardware)".into();
+            }
         }
         let elapsed = match reading {
             Some((frames, sr)) if clock.audio_clock && sr > 0 => frames as f64 / f64::from(sr),

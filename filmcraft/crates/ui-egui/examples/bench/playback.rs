@@ -629,6 +629,9 @@ pub fn to_json(r: &PlayReport, scenario: &str, res: &str, path: &str) -> Value {
 
 // ------------------------------------------------------------------------------------ main
 
+/// Most runs per measurement `--repeat` asks for: each one is kept until the summary.
+const MAX_REPEAT: usize = 1_000;
+
 struct Args {
     scenarios: Vec<String>,
     res: Vec<(String, f32)>,
@@ -674,7 +677,8 @@ fn parse_args() -> Args {
             "--seconds" => a.seconds = it.next().and_then(|v| v.parse().ok()).unwrap_or(8.0),
             "--refresh" => a.refresh = it.next().and_then(|v| v.parse().ok()).unwrap_or(60.0),
             "--workers" => a.workers = it.next().and_then(|v| v.parse().ok()).unwrap_or(a.workers),
-            "--repeat" => a.repeat = it.next().and_then(|v| v.parse().ok()).unwrap_or(1),
+            // capped: every run is kept for the summary
+            "--repeat" => a.repeat = it.next().and_then(|v| v.parse::<usize>().ok()).unwrap_or(1).clamp(1, MAX_REPEAT),
             "--json" => a.json = it.next(),
             "--preroll-study" => a.preroll_study = true,
             "--help" | "-h" => {

@@ -552,3 +552,57 @@ fn the_preroll_ends_in_the_logic_pass_once_its_frames_are_ready() {
     assert_eq!(app.playback.start.clock, Some(10.1));
     app.stop();
 }
+
+/// A restart (#840) that takes longer than `AUDIO_STALL_S` to reopen the device: the frozen clock
+/// hands over to the wall clock, and the sound comes back once the device is open instead of
+/// playback staying silent with no retry.
+#[test]
+fn a_slow_restart_brings_the_sound_back_once_the_device_is_open() {
+    use crate::AudioReadiness;
+    let (mut app, readiness, _, starts) = background_app();
+    *readiness.lock().unwrap() = AudioReadiness::Ready;
+    let ctx = egui::Context::default();
+    app.set_now_for_test(10.0);
+    app.play(1.0);
+    app.end_preroll(10.0);
+    assert!(app.playback.audio_clock && starts.load(Ordering::Relaxed) == 1);
+    // the stream died and the device thread is reopening it; the clock holds meanwhile
+    *readiness.lock().unwrap() = AudioReadiness::Opening;
+    let late = 10.0 + AUDIO_STALL_S + 0.1;
+    app.set_now_for_test(late);
+    app.advance_playback(&ctx);
+    assert!(!app.playback.audio_clock && app.playback.audio_pending, "waits for the reopened device on the wall clock");
+    assert!(!app.ui.status.contains("not responding"), "a reopening device is not reported as stalled");
+    *readiness.lock().unwrap() = AudioReadiness::Ready;
+    app.set_now_for_test(late + 0.5);
+    app.advance_playback(&ctx);
+    assert_eq!(starts.load(Ordering::Relaxed), 2, "the sound starts again on the reopened device");
+    assert!(app.playback.audio_clock && !app.playback.audio_pending);
+    app.stop();
+}
+
+/// A scrub stream whose device could not be opened is asked for again while the drag goes on (at
+/// most every half second), so the rest of the drag is not silent; one still opening is left alone.
+#[test]
+fn a_scrub_retries_a_device_that_could_not_be_opened() {
+    use crate::AudioReadiness;
+    let (mut app, readiness, _, starts) = background_app();
+    app.session.prefs.audio.scrub_audio = true;
+    let frame = app.session.sequence_rate().frame_duration();
+    let drag = |app: &mut FilmcraftApp, now: f64| {
+        let next = app.session.playhead() + frame;
+        app.session.set_playhead(next);
+        app.scrub_tick(now, true)
+    };
+    app.scrub_tick(0.0, true);
+    assert!(drag(&mut app, 1.0), "the first move opens the scrub stream");
+    assert_eq!(starts.load(Ordering::Relaxed), 1);
+    // the device thread could not open it (readiness stays Closed)
+    drag(&mut app, 1.1);
+    assert_eq!(starts.load(Ordering::Relaxed), 1, "not asked for again at once");
+    drag(&mut app, 1.6);
+    assert_eq!(starts.load(Ordering::Relaxed), 2, "asked for again while the drag goes on");
+    *readiness.lock().unwrap() = AudioReadiness::Opening;
+    drag(&mut app, 2.5);
+    assert_eq!(starts.load(Ordering::Relaxed), 2, "a device that is still opening is left to open");
+}

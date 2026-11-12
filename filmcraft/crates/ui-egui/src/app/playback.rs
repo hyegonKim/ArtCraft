@@ -297,11 +297,18 @@ impl FilmcraftApp {
                 self.playback.anchor_tick += Tick::from_seconds_f64(played * self.playback.speed);
                 self.playback.anchor_time = now;
                 self.playback.audio_clock = false;
+                let reopening = self.audio.as_ref().is_some_and(|a| a.readiness() == AudioReadiness::Opening);
                 if let Some(a) = self.audio.as_mut() {
                     a.stop();
                 }
-                log::warn!("audio output stalled (no samples consumed for {AUDIO_STALL_S} s); playing without sound");
-                self.ui.status = tl!("Audio output is not responding: playing without sound (check Settings > Audio Hardware)").into();
+                if reopening {
+                    // a restart (#840) is still opening the device: the sound comes back where
+                    // the wall clock got to once it is open, as after Play
+                    self.playback.audio_pending = true;
+                } else {
+                    log::warn!("audio output stalled (no samples consumed for {AUDIO_STALL_S} s); playing without sound");
+                    self.ui.status = tl!("Audio output is not responding: playing without sound (check Settings > Audio Hardware)").into();
+                }
             }
         }
         let elapsed = match reading {
