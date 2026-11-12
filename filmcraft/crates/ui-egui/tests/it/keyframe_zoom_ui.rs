@@ -116,17 +116,15 @@ impl Driver {
         self.frames(2);
         self.playhead()
     }
-    /// The lane's zoom as `ui.inspect` reports it: the clip it was set on and its range.
-    fn zoom_state(&mut self) -> Value {
-        self.ok("ui.inspect", json!({}))["ui"]["effect_controls_zoom"].clone()
+    /// The zoom saved for `clip`, as `ui.inspect` reports it; `None` while it shows whole.
+    fn zoom_of(&mut self, clip: &Clip) -> Option<(f64, f64)> {
+        let zooms = self.ok("ui.inspect", json!({}))["ui"]["effect_controls_zoom"].clone();
+        let z = zooms.as_array()?.iter().find(|z| z["clip"] == clip.id)?.clone();
+        Some((z["range"][0].as_f64().unwrap(), z["range"][1].as_f64().unwrap()))
     }
     /// The stretch of `clip` the lane shows, as (start, end) fractions of it.
     fn range(&mut self, clip: &Clip) -> (f64, f64) {
-        let z = self.zoom_state();
-        match z["range"].as_array() {
-            Some(r) if z["clip"] == clip.id => (r[0].as_f64().unwrap(), r[1].as_f64().unwrap()),
-            _ => (0.0, 1.0),
-        }
+        self.zoom_of(clip).unwrap_or((0.0, 1.0))
     }
     /// Add a Motion ▸ Scale keyframe at the fraction `f` of the clip; returns its media time.
     fn scale_key(&mut self, clip: &Clip, f: f64) -> i64 {
@@ -221,14 +219,14 @@ fn zoom_scroll_and_fit_with_the_buttons_and_the_zoom_bar() {
     // back to the whole clip: the button, a double-click on the bar, and \ (View ▸ Zoom to Sequence)
     // with the panel focused
     d.click("effectControls.zoomFit");
-    assert_eq!(d.zoom_state()["range"], Value::Null, "fit shows the whole clip");
+    assert_eq!(d.zoom_of(&clip), None, "fit shows the whole clip");
     assert_eq!(d.rect("effectControls.zoomBar")[2], track[2]);
     d.click("effectControls.zoomIn");
     // (egui counts clicks anywhere: right after the + click this would be a triple-click)
     d.frames(40);
     d.ok("ui.click", json!({"id": "effectControls.zoomBar", "count": 2}));
     d.frames(3);
-    assert_eq!(d.zoom_state()["range"], Value::Null, "a double-click on the bar shows the whole clip");
+    assert_eq!(d.zoom_of(&clip), None, "a double-click on the bar shows the whole clip");
     d.ok("ui.set", json!({"focused": "EffectControls"}));
     d.ok("ui.key", json!({"key": "="}));
     d.frames(2);
@@ -236,13 +234,13 @@ fn zoom_scroll_and_fit_with_the_buttons_and_the_zoom_bar() {
     assert!(e - s < 0.6, "= zooms the focused lane in: {:?}", (s, e));
     d.ok("ui.key", json!({"key": "\\"}));
     d.frames(2);
-    assert_eq!(d.zoom_state()["range"], Value::Null, "\\ shows the whole clip");
+    assert_eq!(d.zoom_of(&clip), None, "\\ shows the whole clip");
     // with the Timeline focused, = zooms the Timeline, not the lane
     d.ok("ui.set", json!({"focused": "Timeline"}));
     let pps = d.ok("ui.inspect", json!({}))["ui"]["timeline"]["target_pps"].as_f64().unwrap();
     d.ok("ui.key", json!({"key": "="}));
     d.frames(2);
-    assert_eq!(d.zoom_state()["range"], Value::Null);
+    assert_eq!(d.zoom_of(&clip), None);
     assert!(d.ok("ui.inspect", json!({}))["ui"]["timeline"]["target_pps"].as_f64().unwrap() > pps, "the Timeline zoomed");
 }
 
@@ -340,6 +338,15 @@ fn another_clip_shows_whole_and_ui_set_zooms_the_shown_clip() {
     d.exec("timeline.select", json!({"clips": [clip.id]}));
     d.frames(3);
     assert!(close(d.range(&clip), (0.2, 0.4), 1e-9), "back on the clip, its zoom is still there");
+    // each clip keeps its own zoom
+    d.exec("timeline.select", json!({"clips": [other.id]}));
+    d.frames(3);
+    d.ok("ui.set", json!({"effectControlsZoom": [0.6, 0.9]}));
+    d.exec("timeline.select", json!({"clips": [clip.id]}));
+    d.frames(3);
+    assert!(close(d.range(&clip), (0.2, 0.4), 1e-9), "zooming another clip keeps this one's");
+    assert!(d.rect("effectControls.zoomBar")[2] < track[2] * 0.5);
+    assert!(close(d.range(&other), (0.6, 0.9), 1e-9));
 
     d.ok("ui.set", json!({"effectControlsZoom": [0.5, 0.5000001]}));
     let (s, e) = d.range(&clip);
@@ -347,5 +354,18 @@ fn another_clip_shows_whole_and_ui_set_zooms_the_shown_clip() {
     assert!((e - s - five_frames).abs() < 1e-3 && ((s + e) / 2.0 - 0.5).abs() < 1e-6, "{:?}", (s, e));
     assert_eq!(d.call("ui.set", json!({"effectControlsZoom": [0.6, 0.2]}))["ok"], false, "a reversed range is refused");
     d.ok("ui.set", json!({"effectControlsZoom": null}));
-    assert_eq!(d.zoom_state()["range"], Value::Null);
+    assert_eq!(d.zoom_of(&clip), None);
+
+    // a refused zoom leaves the rest of the request undone
+    let tool = d.ok("ui.inspect", json!({}))["ui"]["tool"].clone();
+    assert_eq!(d.call("ui.set", json!({"tool": "razor", "effectControlsZoom": [0.6, 0.2]}))["ok"], false);
+    assert_eq!(d.ok("ui.inspect", json!({}))["ui"]["tool"], tool, "the tool did not change");
+
+    // in another project, a clip with the same id shows whole
+    d.ok("ui.set", json!({"effectControlsZoom": [0.2, 0.4]}));
+    d.exec("file.openDemoProject", json!({}));
+    d.frames(3);
+    d.exec("timeline.select", json!({"clips": [clip.id]}));
+    d.frames(3);
+    assert_eq!(d.rect("effectControls.zoomBar")[2], track[2], "the zoom stayed with the other project");
 }

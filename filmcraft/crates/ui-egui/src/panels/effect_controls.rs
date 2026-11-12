@@ -41,11 +41,20 @@ const MIN_ZOOM_FRAMES: i64 = 5;
 const ZOOM_STEP: f64 = 2.0;
 /// The keyframe lane's zoom buttons, in the footer under it.
 const ZOOM_BUTTON: f32 = 16.0;
+/// How many clips' keyframe-lane zooms are remembered (#2202).
+const MAX_LANE_ZOOMS: usize = 32;
 
 /// Timeline time at which the clip shows media time `m` (where a keyframe sits in the sequence).
 fn timeline_time_of(it: &TrackItem, m: Tick) -> Tick {
     let offset = if it.reverse { it.source_out() - m - Tick(1) } else { m - it.source_in };
     it.start + Tick((offset.0 as f64 / it.speed.abs().max(1e-6)).round() as i64)
+}
+
+/// The media time the clip shows at timeline time `tk`: the inverse of [`timeline_time_of`], a
+/// reversed clip counting back from its out point.
+fn media_time_at(it: &TrackItem, tk: Tick) -> Tick {
+    let offset = Tick(((tk - it.start).0 as f64 * it.speed.abs().max(1e-6)).round() as i64);
+    if it.reverse { it.source_out() - offset - Tick(1) } else { it.source_in + offset }
 }
 
 /// What the keyframe lane shows (#2202): the lane on screen, and the stretch of the clip across it
@@ -88,10 +97,11 @@ impl LaneView {
         self.rect.min.x + across as f32 * self.rect.width()
     }
 
-    /// The timeline time under `x`.
-    pub(crate) fn tick_at(&self, x: f32) -> Tick {
-        // `as` saturates (and a NaN is 0), so a hostile width can't overflow
-        self.clip_start + Tick((self.fraction_at(x) * self.clip_len) as i64)
+    /// The timeline time under `x`; `None` where that is not a number (a NaN coordinate or lane).
+    pub(crate) fn tick_at(&self, x: f32) -> Option<Tick> {
+        let f = self.fraction_at(x);
+        // `as` saturates, so a far-off but finite coordinate can't overflow
+        f.is_finite().then(|| self.clip_start + Tick((f * self.clip_len) as i64))
     }
 
     /// Ticks across the lane.
@@ -124,17 +134,33 @@ fn zoom_range(range: Option<[f64; 2]>) -> (f64, f64) {
     if s < e { (s, e) } else { (0.0, 1.0) }
 }
 
-/// The stretch of the clip `clip` the keyframe lane shows: what was set on that clip, else the
-/// whole clip (`None`), so selecting another clip shows it whole.
-fn lane_zoom(app: &FilmcraftApp, clip: u64) -> Option<[f64; 2]> {
-    let zoom = app.ui.effect_controls_zoom;
-    if zoom.clip == clip { zoom.range } else { None }
+/// The stretch of `it` the keyframe lane shows: what was last set on that clip in this project,
+/// else the whole clip (`None`). A clip trimmed (or a sequence rate changed) since still shows at
+/// least [`MIN_ZOOM_FRAMES`] frames.
+fn lane_zoom(app: &FilmcraftApp, it: &TrackItem, rate: FrameRate) -> Option<[f64; 2]> {
+    let document = app.session.document_epoch;
+    let z = app.ui.effect_controls_zoom.iter().find(|z| z.document == document && z.clip == it.id.0)?;
+    let (s, e) = keep_min_span(zoom_range(Some(z.range)), min_zoom_span(it, rate));
+    Some([s, e])
 }
 
-/// Show `range` of the clip `clip` in the keyframe lane; the whole clip is kept as `None`.
+/// `range` widened about its middle to at least `min_span` of the clip.
+fn keep_min_span((s, e): (f64, f64), min_span: f64) -> (f64, f64) {
+    if e - s >= min_span { (s, e) } else { zoom_about((s, e), 1.0, (s + e) / 2.0, min_span) }
+}
+
+/// Show `range` of the clip `clip` in the keyframe lane, remembered for that clip (the latest
+/// [`MAX_LANE_ZOOMS`] clips of this project); the whole clip is not kept.
 fn set_lane_zoom(app: &mut FilmcraftApp, clip: u64, (s, e): (f64, f64)) {
+    let document = app.session.document_epoch;
+    let zooms = &mut app.ui.effect_controls_zoom;
+    // another project's zooms are of clips that are gone
+    zooms.retain(|z| z.document == document && z.clip != clip);
     let whole = s <= 1e-9 && e >= 1.0 - 1e-9;
-    app.ui.effect_controls_zoom = LaneZoom { clip, range: (!whole && s < e).then_some([s.max(0.0), e.min(1.0)]) };
+    if !whole && s < e {
+        zooms.insert(0, LaneZoom { document, clip, range: [s.max(0.0), e.min(1.0)] });
+        zooms.truncate(MAX_LANE_ZOOMS);
+    }
 }
 
 /// The narrowest stretch of `it` the lane zooms in to: [`MIN_ZOOM_FRAMES`] frames, as a fraction
@@ -217,7 +243,7 @@ fn lane_zoom_controls(app: &mut FilmcraftApp, ui: &mut egui::Ui, lane: Rect, foo
     let t = app.tokens;
     let clip = it.id.0;
     let min_span = min_zoom_span(it, rate);
-    let view = LaneView::new(lane, it, lane_zoom(app, clip));
+    let view = LaneView::new(lane, it, lane_zoom(app, it, rate));
     let range = view.fractions();
     let mut set = None;
     let cy = footer.center().y;
@@ -285,10 +311,11 @@ pub(crate) fn zoom_command(app: &mut FilmcraftApp, id: &str) -> bool {
     }
     let Some((_, it, _)) = selected_clip(app) else { return false };
     let clip = it.id.0;
-    let range = LaneView::new(Rect::NOTHING, &it, lane_zoom(app, clip)).fractions();
+    let rate = app.session.sequence_rate();
+    let range = LaneView::new(Rect::NOTHING, &it, lane_zoom(app, &it, rate)).fractions();
     let now = (app.session.playhead() - it.start).0 as f64 / it.duration.0.max(1) as f64;
     let anchor = if (range.0..=range.1).contains(&now) { now } else { (range.0 + range.1) / 2.0 };
-    let min_span = min_zoom_span(&it, app.session.sequence_rate());
+    let min_span = min_zoom_span(&it, rate);
     let range = match id {
         "view.zoomIn" => zoom_about(range, ZOOM_STEP, anchor, min_span),
         "view.zoomOut" => zoom_about(range, 1.0 / ZOOM_STEP, anchor, min_span),
@@ -299,22 +326,25 @@ pub(crate) fn zoom_command(app: &mut FilmcraftApp, id: &str) -> bool {
     true
 }
 
-/// `ui.set {effectControlsZoom}`: `[start, end]` fractions of the clip Effect Controls shows, or
-/// `null` for the whole clip. A range narrower than the lane zooms in to widens about its middle.
-pub(crate) fn set_zoom(app: &mut FilmcraftApp, value: &Value) -> Result<(), String> {
+/// `ui.set {effectControlsZoom}`, checked without changing anything: `[start, end]` fractions of
+/// the clip Effect Controls shows, or `null` for the whole clip. A range narrower than the lane
+/// zooms in to widens about its middle. Returns the clip and the range to [`apply_zoom`].
+pub(crate) fn parse_zoom(app: &FilmcraftApp, value: &Value) -> Result<(u64, (f64, f64)), String> {
     let (_, it, _) = selected_clip(app).ok_or("no clip in Effect Controls")?;
     if value.is_null() {
-        set_lane_zoom(app, it.id.0, (0.0, 1.0));
-        return Ok(());
+        return Ok((it.id.0, (0.0, 1.0)));
     }
     let pair: [f64; 2] = serde_json::from_value(value.clone()).map_err(|e| format!("`effectControlsZoom`: {e}"))?;
     let [s, e] = pair;
     if !(s.is_finite() && e.is_finite() && 0.0 <= s && s < e && e <= 1.0) {
         return Err("`effectControlsZoom` must be [start, end] with 0 ≤ start < end ≤ 1".into());
     }
-    let range = zoom_about((s, e), 1.0, (s + e) / 2.0, min_zoom_span(&it, app.session.sequence_rate()));
-    set_lane_zoom(app, it.id.0, range);
-    Ok(())
+    Ok((it.id.0, keep_min_span((s, e), min_zoom_span(&it, app.session.sequence_rate()))))
+}
+
+/// Apply a zoom [`parse_zoom`] accepted.
+pub(crate) fn apply_zoom(app: &mut FilmcraftApp, (clip, range): (u64, (f64, f64))) {
+    set_lane_zoom(app, clip, range);
 }
 
 // The press frame can include movement before the button went down. Start from the press
@@ -491,7 +521,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     // the lane's time zoom (#2202), its controls in the footer under it; everything in the lane is
     // placed through `view`
     lane_zoom_controls(app, ui, lane, Rect::from_min_max(pos2(lane.min.x, lane.max.y), pos2(lane.max.x, rect.max.y)), &it, rate, ph);
-    let view = LaneView::new(lane, &it, lane_zoom(app, clip.0));
+    let view = LaneView::new(lane, &it, lane_zoom(app, &it, rate));
     let ruler = Rect::from_min_max(lane.min, pos2(lane.max.x, lane.min.y + RULER_H));
     let bar = Rect::from_min_max(pos2(lane.min.x, ruler.max.y + 4.0), pos2(lane.max.x, ruler.max.y + 4.0 + CLIP_BAR_H));
     let scrub = Rect::from_min_max(ruler.min, bar.max);
@@ -645,8 +675,9 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let sresp = ui.interact(scrub, egui::Id::unique(("ec-scrub", clip.0)), Sense::click_and_drag());
     if (sresp.dragged() || sresp.clicked())
         && let Some(pos) = sresp.interact_pointer_pos()
+        && let Some(tk) = view.tick_at(pos.x.clamp(lane.min.x, lane.max.x))
     {
-        let tk = rate.snap_nearest(view.tick_at(pos.x.clamp(lane.min.x, lane.max.x)));
+        let tk = rate.snap_nearest(tk);
         app.stop_for_scrub();
         app.session.set_playhead(tk);
     }
@@ -1602,13 +1633,13 @@ pub(crate) fn graph_rows(
     let (velr, _) = ui.allocate_exact_size(vec2(body.width(), 64.0), Sense::hover());
     row_line(ui, velr, lane, &t);
     let speed = it.speed.abs().max(1e-6);
-    // a timeline time's media time
-    let to_media = |tk: Tick| it.source_in + Tick(((tk - it.start).0 as f64 * speed) as i64);
-    // samples: one row of curve values per sample across the lane, wherever it is zoomed to (a
-    // point's NaN "auto" coordinate is skipped)
+    // samples: one row of curve values per sample across the lane, wherever it is zoomed to, at
+    // the media time the clip shows there (counting back on a reversed clip); a point's NaN "auto"
+    // coordinate is skipped
     let n = (lane.width() / 2.0).max(8.0) as usize;
     let x_of = |i: f32| lane.min.x + i / n as f32 * lane.width();
-    let vals: Vec<Vec<f64>> = (0..=n).map(|i| graph_components(&param.value_at(to_media(view.tick_at(x_of(i as f32)))))).collect();
+    let vals: Vec<Vec<f64>> =
+        (0..=n).map(|i| view.tick_at(x_of(i as f32)).map(|tk| graph_components(&param.value_at(media_time_at(it, tk)))).unwrap_or_default()).collect();
     let curves = graph_components(&param.value).len();
     let at_keys: Vec<Vec<f64>> = param.keyframes.iter().map(|k| graph_components(&k.value)).collect();
     let (mut lo, mut hi) = vals.iter().chain(&at_keys).flatten().filter(|v| v.is_finite()).fold((f64::MAX, f64::MIN), |(a, b), v| (a.min(*v), b.max(*v)));
@@ -1704,9 +1735,8 @@ fn draw_graph_keyframes(
     actions: &mut Vec<(String, Value)>,
 ) {
     let t = app.tokens;
-    let speed = it.speed.abs().max(1e-6);
     // where media time `m` is drawn, by its timeline time (as the graph's samples)
-    let x_of = |m: Tick| view.x_of(it.start + Tick(((m - it.source_in).0 as f64 / speed) as i64));
+    let x_of = |m: Tick| view.x_of(timeline_time_of(it, m));
     let y_of = |v: f64| area.max.y - ((v - lo) / (hi - lo)) as f32 * area.height();
     let v_of = |y: f32| lo + ((area.max.y - y) / area.height()) as f64 * (hi - lo);
     let dec = if let ParamKind::Float { decimals, .. } = pd.kind { decimals as usize } else { 1 };
@@ -1760,7 +1790,15 @@ fn draw_graph_keyframes(
                 let hp = pos2(hx, c.y);
                 p.line_segment([c, hp], Stroke::new(1.0, t.plot_handle_dim));
                 p.circle_filled(hp, 3.5, t.keyframe_handle);
-                let hr = ui.interact(Rect::from_center_size(hp, vec2(10.0, 10.0)), hid.with("h"), Sense::drag());
+                // zoomed in, a handle can reach past the lane's edge, where it is not drawn: it is
+                // grabbed only where it shows (and kept while it is being dragged)
+                let hit = Rect::from_center_size(hp, vec2(10.0, 10.0));
+                let shown = Rect::from_x_y_ranges(view.rect.expand2(vec2(8.0, 0.0)).x_range(), hit.y_range());
+                let hit = if ui.ctx().is_being_dragged(hid.with("h")) { hit } else { hit.intersect(shown) };
+                if !hit.is_positive() {
+                    continue;
+                }
+                let hr = ui.interact(hit, hid.with("h"), Sense::drag());
                 if hr.dragged_by(egui::PointerButton::Primary) {
                     let nx = graph_drag_offset(ui, &hr, vec2(hdx, 0.0)).x;
                     ui.data_mut(|d| d.insert_temp(hid, nx));
@@ -2021,6 +2059,38 @@ mod lane_tests {
                 let _ = (view.x_of(Tick::MIN), view.x_of(Tick::MAX), view.tick_at(f32::INFINITY), view.pixels_per_tick(), view.times());
             }
         }
+        // a coordinate that is not a number is no time at all, not the clip's start
+        it.duration = Tick(1_000_000);
+        let view = LaneView::new(Rect::from_min_size(pos2(10.0, 0.0), vec2(300.0, 50.0)), &it, Some([0.25, 0.5]));
+        assert_eq!(view.tick_at(f32::NAN), None);
+        assert_eq!(view.tick_at(10.0), Some(it.start + Tick(250_000)));
+        let nan_lane = LaneView::new(Rect::from_min_size(pos2(f32::NAN, 0.0), vec2(300.0, 50.0)), &it, Some([0.25, 0.5]));
+        assert_eq!(nan_lane.tick_at(10.0), None);
+        // a saved zoom narrower than the minimum (the clip was trimmed since) widens about its middle
+        let (s, e) = keep_min_span((0.5, 0.5001), 0.1);
+        assert!((e - s - 0.1).abs() < 1e-12 && ((s + e) / 2.0 - 0.50005).abs() < 1e-9, "{s} {e}");
+        assert_eq!(keep_min_span((0.2, 0.6), 0.1), (0.2, 0.6));
+    }
+
+    /// #2202: a reversed clip's graph is sampled and its keyframes placed counting back from its
+    /// out point, as its lane keyframes are.
+    #[test]
+    fn media_time_at_inverts_timeline_time_of() {
+        let mut session = filmcraft_engine::Session::default();
+        session.execute("file.openDemoProject", json!({})).unwrap();
+        let mut it = session.active_sequence().unwrap().video_tracks[0].items[0].clone();
+        for (reverse, speed) in [(false, 1.0), (true, 1.0), (true, 2.0), (false, 0.5)] {
+            it.reverse = reverse;
+            it.speed = speed;
+            for f in [0.0, 0.3, 0.9] {
+                let tk = it.start + Tick((it.duration.0 as f64 * f) as i64);
+                let back = timeline_time_of(&it, media_time_at(&it, tk));
+                assert!((back - tk).0.abs() <= 2, "reverse {reverse} speed {speed} at {f}: {tk:?} came back as {back:?}");
+            }
+        }
+        it.reverse = true;
+        it.speed = 1.0;
+        assert_eq!(media_time_at(&it, it.start), it.source_out() - Tick(1), "a reversed clip starts at its out point");
     }
 
     /// A five-second lane 300 px wide is labelled every two seconds, in sequence timecode.

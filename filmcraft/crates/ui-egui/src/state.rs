@@ -426,14 +426,15 @@ pub struct Eyedropper {
     pub mask: Option<usize>,
 }
 
-/// Effect Controls' keyframe lane zoom (#2202): the stretch of a clip the lane shows, as (start,
-/// end) fractions of the clip's length, or `None` for the whole clip. It belongs to the clip it was
-/// set on (`clip`): any other clip shows whole.
+/// Effect Controls' keyframe lane zoom (#2202) on one clip: the stretch of it the lane shows, as
+/// (start, end) fractions of the clip's length. `document` is the session's `document_epoch` when
+/// it was set, so a clip with the same id in a project opened since shows whole.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct LaneZoom {
+    pub document: u64,
     pub clip: u64,
-    pub range: Option<[f64; 2]>,
+    pub range: [f64; 2],
 }
 
 /// A keyframe selected in the Effect Controls keyframe lane: clip, effect index, parameter (of an
@@ -490,10 +491,10 @@ pub struct UiState {
     /// share of the panel). Dragging the divider sets it (#643).
     #[serde(default)]
     pub effect_controls_split: f32,
-    /// The stretch of the selected clip Effect Controls' keyframe lane shows (#2202). Set with
-    /// `ui.set {effectControlsZoom}`.
+    /// The stretches of clips Effect Controls' keyframe lane shows zoomed in (#2202), the most
+    /// recently zoomed first; a clip not listed shows whole. Set with `ui.set {effectControlsZoom}`.
     #[serde(default)]
-    pub effect_controls_zoom: LaneZoom,
+    pub effect_controls_zoom: Vec<LaneZoom>,
     pub show_menu_bar: bool,
     /// The header bar (Home, Import, Edit, Export, workspaces). An app that embeds FilmCraft can hide it.
     #[serde(default = "shown")]
@@ -1038,7 +1039,7 @@ impl Default for UiState {
             lumetri_grid_folder: None,
             collapsed_fx: vec![],
             effect_controls_split: 0.0,
-            effect_controls_zoom: LaneZoom::default(),
+            effect_controls_zoom: vec![],
             show_menu_bar: true,
             show_header: true,
             show_status_bar: true,
