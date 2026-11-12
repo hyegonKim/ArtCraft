@@ -8,10 +8,12 @@
 #
 # The push is a plain fast-forward: if someone commits to hyegonKim/filmcraft main directly, this
 # job fails instead of discarding that work. To recover, bring that change into filmcraft/ here
-# (copying the content is enough), merge it to main, then force the mirror back onto the split:
-#   git subtree split --prefix=filmcraft -b filmcraft-mirror
+# (copying the content is enough), merge it to main, then, from an up-to-date main, force the
+# mirror back onto the split:
+#   git pull && git subtree split --prefix=filmcraft -b filmcraft-mirror
 #   git push --force git@github.com:hyegonKim/filmcraft.git filmcraft-mirror:main
 # The direct commit's own history is then replaced, so only do this once its content is here.
+# Then run this workflow by hand: if main moved on meanwhile, it fast-forwards the mirror again.
 #
 # Needs the FILMCRAFT_DEPLOY_KEY secret: the private half of a write-enabled deploy key on
 # hyegonKim/filmcraft.
@@ -38,6 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # The latest main, not the commit that started this run: a queued run that GitHub's
+          # concurrency kept in place of a newer one still mirrors everything up to date.
+          ref: main
           fetch-depth: 0
           filter: blob:none
 
