@@ -1,4 +1,4 @@
-use super::convert::{Matrix, Planes444, rgba_to_yuv420_8, rgba_to_yuv422_10, rgbf_to_yuv420_8, rgbf_to_yuv422_10, to_yuv444_10};
+use super::convert::{Matrix, Planes444, rgba_to_yuv420_8, rgba_to_yuv422_10, rgbf_to_yuv420_8, rgbf_to_yuv420_10, rgbf_to_yuv422_10, to_yuv444_10};
 use super::format::{ColorSignal, DEFAULT_CRF, ExportSettings, Format, H264Pass};
 use super::registry::{AudioEncoder, EncodedPacket, EncoderFrame, PrepareAhead, VideoEncoder};
 use super::stats::{Stage, timed};
@@ -494,6 +494,145 @@ pub(crate) fn h264_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &
         filmcraft_h264enc::Encoder::new(cfg)
             .map(|enc| {
                 Box::new(H264Encoder { enc, w, h, rate, y: Vec::new(), u: Vec::new(), v: Vec::new(), signal: s.signal, ready: Default::default() })
+                    as Box<dyn VideoEncoder>
+            })
+            .map_err(|e| ExportError::Encode(e.to_string())),
+    )
+}
+
+/// H.265 Main / Main 10 (our encoder, `filmcraft-hevcenc`), after the hardware encoders a platform
+/// registers: sRGB/709 RGBA8 → 8-bit limited-range BT.709 4:2:0 (Main), or an HDR export's encoded
+/// R'G'B' → 10-bit limited-range 4:2:0 in the signal's matrix (Main 10, with the HDR10 static
+/// metadata as SEI and in `mdcv` / `clli`). Average-bitrate rate control at the requested target
+/// and ceiling, length-prefixed samples with the `hvcC` in the sample entry, no reordering.
+struct HevcEncoder {
+    enc: filmcraft_hevcenc::Encoder,
+    w: u32,
+    h: u32,
+    rate: FrameRate,
+    signal: ColorSignal,
+    ten_bit: bool,
+    planes: Yuv420Wide,
+    /// 4:2:0 planes the render threads converted ahead ([`VideoEncoder::prepare_ahead`]), by
+    /// picture index.
+    ready: Arc<Mutex<std::collections::HashMap<u64, Yuv420Wide>>>,
+}
+
+/// Y, Cb, Cr planes of 8- or 10-bit samples.
+type Yuv420Wide = (Vec<u16>, Vec<u16>, Vec<u16>);
+
+/// The H.265 encoder input of `f`: limited-range 4:2:0 in the export's colour signal, 10-bit from
+/// the HDR floats for Main 10, else 8-bit (shifted up two bits for a Main 10 stream given SDR).
+fn hevc_input(f: &EncoderFrame, signal: ColorSignal, ten_bit: bool, out: &mut Yuv420Wide) -> Result<()> {
+    let (w, h) = (f.width as usize, f.height as usize);
+    let (kr, kb) = signal.kr_kb();
+    if let (Some(rgb), true) = (f.hdr, ten_bit) {
+        return rgbf_to_yuv420_10(rgb, w, h, Matrix::new(kr, kb), &mut out.0, &mut out.1, &mut out.2);
+    }
+    let (mut y, mut u, mut v) = (Vec::new(), Vec::new(), Vec::new());
+    match f.hdr {
+        Some(rgb) => rgbf_to_yuv420_8(rgb, w, h, Matrix::new(kr, kb), &mut y, &mut u, &mut v),
+        None => rgba_to_yuv420_8(f.rgba, w, h, &mut y, &mut u, &mut v),
+    }
+    let shift = if ten_bit { 2 } else { 0 };
+    for (dst, src) in [(&mut out.0, y), (&mut out.1, u), (&mut out.2, v)] {
+        dst.clear();
+        dst.extend(src.iter().map(|&s| u16::from(s) << shift));
+    }
+    Ok(())
+}
+
+impl VideoEncoder for HevcEncoder {
+    fn sample_entry(&self) -> SampleEntry {
+        let cfg = filmcraft_isobmff::HevcConfig::parse(&self.enc.hvcc()).unwrap_or_default();
+        let mut e = SampleEntry::hevc(cfg, self.w as u16, self.h as u16);
+        self.signal.apply_to(&mut e, false);
+        e
+    }
+    fn timescale(&self) -> u32 {
+        self.rate.num as u32
+    }
+    fn encode(&mut self, f: &EncoderFrame) -> Result<Vec<EncodedPacket>> {
+        let ready = {
+            let mut ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
+            let mine = ready.remove(&f.index);
+            // anything older belongs to a batch that was rendered and then not encoded
+            ready.retain(|&i, _| i > f.index);
+            mine
+        };
+        let (w, h) = (f.width as usize, f.height as usize);
+        let chroma = w.div_ceil(2) * h.div_ceil(2);
+        match ready.filter(|(y, u, v)| y.len() == w * h && u.len() == chroma && v.len() == chroma) {
+            Some(planes) => self.planes = planes,
+            None => {
+                let (signal, ten_bit, planes) = (self.signal, self.ten_bit, &mut self.planes);
+                timed(Stage::Convert, || hevc_input(f, signal, ten_bit, planes))?;
+            }
+        }
+        let (y, u, v) = &self.planes;
+        let frame = filmcraft_hevcenc::Frame { y, u, v, y_stride: w, uv_stride: w.div_ceil(2) };
+        let p = self.enc.encode(&frame).map_err(|e| ExportError::Encode(e.to_string()))?;
+        Ok(vec![EncodedPacket { data: p.data, key: p.key, duration: self.rate.den as u32, composition_offset: 0 }])
+    }
+    fn flush(&mut self) -> Result<Vec<EncodedPacket>> {
+        // no reordering: every picture's packet came out of its own encode call
+        Ok(Vec::new())
+    }
+    fn prepare_ahead(&self) -> Option<PrepareAhead> {
+        let (ready, signal, ten_bit) = (self.ready.clone(), self.signal, self.ten_bit);
+        Some(Arc::new(move |f: &EncoderFrame| {
+            let mut planes = Yuv420Wide::default();
+            // a picture that fails to convert here is converted (and its error reported) by encode
+            if timed(Stage::Convert, || hevc_input(f, signal, ten_bit, &mut planes)).is_ok() {
+                ready.lock().unwrap_or_else(PoisonError::into_inner).insert(f.index, planes);
+            }
+        }))
+    }
+}
+
+/// Slices per H.265 picture: one per two 32x32 CTU rows (64 luma rows, the H.264 encoder's band
+/// height), coded in parallel. A fixed count keeps the stream the same on every machine; the
+/// encoder's default follows the core count.
+pub(crate) fn hevc_slices(height: u32) -> usize {
+    (height.div_ceil(64) as usize).max(1)
+}
+
+pub(crate) fn hevc_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &ExportSettings) -> Option<Result<Box<dyn VideoEncoder>>> {
+    if format != Format::Hevc {
+        return None;
+    }
+    let fps = |r: i64| u32::try_from(r).ok().filter(|v| *v > 0);
+    let (Some(num), Some(den)) = (fps(rate.num), fps(rate.den)) else {
+        return Some(Err(ExportError::Encode(format!("invalid frame rate {}/{}", rate.num, rate.den))));
+    };
+    if !w.is_multiple_of(2) || !h.is_multiple_of(2) {
+        return Some(Err(ExportError::Unsupported(format!("H.265 (4:2:0) needs an even frame size, not {w}x{h}"))));
+    }
+    let mut cfg = filmcraft_hevcenc::EncoderConfig::new(w, h, num, den);
+    let ten_bit = s.signal.is_hdr();
+    cfg.bit_depth = if ten_bit { 10 } else { 8 };
+    cfg.keyint = s.keyframe_distance.filter(|k| *k > 0).unwrap_or_else(|| (f64::from(num) / f64::from(den) * 2.0).round().max(1.0) as u32);
+    cfg.slices = hevc_slices(h);
+    let kbps = s.bitrate_kbps.max(100);
+    let max_kbps = match s.bitrate_mode {
+        BitrateMode::Cbr => kbps,
+        _ => s.max_bitrate_kbps.filter(|m| *m >= kbps).unwrap_or_else(|| (u64::from(kbps) * 3 / 2).min(u64::from(u32::MAX)) as u32),
+    };
+    // CRF and two-pass are refused by `ExportSettings::validate` for H.265
+    cfg.rate = filmcraft_hevcenc::RateControl::Average { kbps, max_kbps };
+    cfg.color = filmcraft_hevcenc::ColorDescription { primaries: s.signal.primaries, transfer: s.signal.transfer, matrix: s.signal.matrix };
+    if let Some((md, cll)) = s.signal.static_metadata() {
+        // the mdcv payload is 24 bytes; anything else is left out rather than written wrong
+        cfg.mastering_display = md.to_bytes().try_into().ok();
+        cfg.content_light = Some(cll);
+    }
+    if let Some((n, d)) = s.pixel_aspect {
+        cfg.sar = (n.clamp(1, 65535) as u16, d.clamp(1, 65535) as u16);
+    }
+    Some(
+        filmcraft_hevcenc::Encoder::new(cfg)
+            .map(|enc| {
+                Box::new(HevcEncoder { enc, w, h, rate, signal: s.signal, ten_bit, planes: Yuv420Wide::default(), ready: Default::default() })
                     as Box<dyn VideoEncoder>
             })
             .map_err(|e| ExportError::Encode(e.to_string())),
