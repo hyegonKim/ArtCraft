@@ -22,7 +22,15 @@ impl Padded {
     /// Copy a `w` x `h` plane (stride `w`) and replicate its edges by `pad` samples.
     pub fn new(src: &[u16], w: usize, h: usize, pad: usize) -> Padded {
         let stride = w + 2 * pad;
-        let mut data = vec![0u16; stride * (h + 2 * pad)];
+        let mut p = Padded { data: vec![0u16; stride * (h + 2 * pad)], stride, w, h, pad };
+        p.refill(src);
+        p
+    }
+
+    /// Copy a new picture of the same size (stride `w`) in, edges replicated again, reusing the
+    /// buffer: the next reference picture without a new allocation.
+    pub fn refill(&mut self, src: &[u16]) {
+        let Padded { ref mut data, stride, w, h, pad } = *self;
         for y in 0..h + 2 * pad {
             let sy = y.saturating_sub(pad).min(h.saturating_sub(1));
             let row = &src[sy * w..sy * w + w];
@@ -33,7 +41,6 @@ impl Padded {
             mid.copy_from_slice(row);
             right.fill(row[w - 1]);
         }
-        Padded { data, stride, w, h, pad }
     }
 
     /// The sample at picture coordinates (x, y), which must lie within the padding.

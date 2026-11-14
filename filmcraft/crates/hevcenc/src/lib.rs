@@ -142,6 +142,10 @@ pub struct Encoder {
     rc: RateController,
     /// The previous picture's reconstruction, padded (luma, Cb, Cr).
     refp: Option<[Padded; 3]>,
+    /// The picture being coded's reconstruction (luma, Cb, Cr at the coded size) and block state,
+    /// kept from picture to picture rather than allocated for each.
+    rec: [Vec<u16>; 3],
+    blk: Vec<Blk>,
     index: u64,
     poc: i32,
     slices: usize,
@@ -191,6 +195,8 @@ impl Encoder {
             seq,
             cfg,
             refp: None,
+            rec: [Vec::new(), Vec::new(), Vec::new()],
+            blk: Vec::new(),
             index: 0,
             poc: 0,
             slices,
@@ -227,39 +233,19 @@ impl Encoder {
         Some([crop(&r[0], w, h), crop(&r[1], w / 2, h / 2), crop(&r[2], w / 2, h / 2)])
     }
 
-    /// Code one picture.
-    pub fn encode(&mut self, f: &Frame) -> Result<Packet, Error> {
-        let (w, h) = (self.cfg.width as usize, self.cfg.height as usize);
-        let (cw, ch) = (w / 2, h / 2);
-        let fits = |p: &[u16], stride: usize, pw: usize, ph: usize| stride >= pw && p.len() >= stride.saturating_mul(ph - 1).saturating_add(pw);
-        if !fits(f.y, f.y_stride, w, h) || !fits(f.u, f.uv_stride, cw, ch) || !fits(f.v, f.uv_stride, cw, ch) {
-            return Err(Error::BadFrame);
-        }
+    /// Code the picture `src` (planes at the coded size) at `qp` into its access unit, leaving
+    /// its reconstruction in `self.rec`.
+    fn code_picture(&mut self, src: [&[u16]; 3], key: bool, qp: i32) -> Vec<u8> {
         let (cdw, cdh) = (self.seq.coded_w as usize, self.seq.coded_h as usize);
-        let max = (1u16 << self.cfg.bit_depth) - 1;
-        let src = [
-            pad_plane(f.y, f.y_stride, w, h, cdw, cdh, max),
-            pad_plane(f.u, f.uv_stride, cw, ch, cdw / 2, cdh / 2, max),
-            pad_plane(f.v, f.uv_stride, cw, ch, cdw / 2, cdh / 2, max),
-        ];
-        let keyint = u64::from(self.cfg.keyint.max(1));
-        let key = self.refp.is_none() || self.index.is_multiple_of(keyint);
-        if key {
-            self.poc = 0;
+        // every coded sample of the reconstruction is written by the slices, so the buffers are
+        // only sized (once), not cleared; the block state starts afresh with each picture
+        for (plane, len) in self.rec.iter_mut().zip([cdw * cdh, (cdw / 2) * (cdh / 2), (cdw / 2) * (cdh / 2)]) {
+            plane.resize(len, 0);
         }
-        let qp = self.rc.frame_qp(key);
-        let mut rec = [vec![0u16; cdw * cdh], vec![0u16; (cdw / 2) * (cdh / 2)], vec![0u16; (cdw / 2) * (cdh / 2)]];
         let w4 = cdw.div_ceil(4);
-        let mut blk = vec![Blk::default(); w4 * cdh.div_ceil(4)];
-        let shared = Shared {
-            src: [&src[0], &src[1], &src[2]],
-            refp: if key { None } else { self.refp.as_ref() },
-            coded_w: cdw,
-            coded_h: cdh,
-            bd: self.cfg.bit_depth,
-            qp,
-            intra: key,
-        };
+        self.blk.clear();
+        self.blk.resize(w4 * cdh.div_ceil(4), Blk::default());
+        let shared = Shared { src, refp: if key { None } else { self.refp.as_ref() }, coded_w: cdw, coded_h: cdh, bd: self.cfg.bit_depth, qp, intra: key };
         // slices: bands of whole CTU rows
         let wctb = self.seq.width_in_ctbs() as usize;
         let hctb = self.seq.height_in_ctbs() as usize;
@@ -273,8 +259,8 @@ impl Encoder {
         }
         let mut bands = Vec::with_capacity(bounds.len());
         {
-            let [ry, rcb, rcr] = &mut rec;
-            let (mut ly, mut lcb, mut lcr, mut lb) = (ry.as_mut_slice(), rcb.as_mut_slice(), rcr.as_mut_slice(), blk.as_mut_slice());
+            let [ry, rcb, rcr] = &mut self.rec;
+            let (mut ly, mut lcb, mut lcr, mut lb) = (ry.as_mut_slice(), rcb.as_mut_slice(), rcr.as_mut_slice(), self.blk.as_mut_slice());
             for &(r0, r1) in &bounds {
                 let (y0, y1) = (r0 * ctb, (r1 * ctb).min(cdh));
                 let rows = y1 - y0;
@@ -327,9 +313,57 @@ impl Encoder {
             data.extend_from_slice(&(unit.len() as u32).to_be_bytes());
             data.extend_from_slice(&unit);
         }
-        self.rc.update((data.len() * 8) as f64, key);
-        self.refp =
-            Some([Padded::new(&rec[0], cdw, cdh, PAD), Padded::new(&rec[1], cdw / 2, cdh / 2, PAD / 2), Padded::new(&rec[2], cdw / 2, cdh / 2, PAD / 2)]);
+        data
+    }
+
+    /// Code one picture.
+    pub fn encode(&mut self, f: &Frame) -> Result<Packet, Error> {
+        let (w, h) = (self.cfg.width as usize, self.cfg.height as usize);
+        let (cw, ch) = (w / 2, h / 2);
+        let fits = |p: &[u16], stride: usize, pw: usize, ph: usize| stride >= pw && p.len() >= stride.saturating_mul(ph - 1).saturating_add(pw);
+        if !fits(f.y, f.y_stride, w, h) || !fits(f.u, f.uv_stride, cw, ch) || !fits(f.v, f.uv_stride, cw, ch) {
+            return Err(Error::BadFrame);
+        }
+        let (cdw, cdh) = (self.seq.coded_w as usize, self.seq.coded_h as usize);
+        let max = (1u16 << self.cfg.bit_depth) - 1;
+        let src = [
+            coded_plane(f.y, f.y_stride, w, h, cdw, cdh, max),
+            coded_plane(f.u, f.uv_stride, cw, ch, cdw / 2, cdh / 2, max),
+            coded_plane(f.v, f.uv_stride, cw, ch, cdw / 2, cdh / 2, max),
+        ];
+        let keyint = u64::from(self.cfg.keyint.max(1));
+        let key = self.refp.is_none() || self.index.is_multiple_of(keyint);
+        if key {
+            self.poc = 0;
+        }
+        let src = [&*src[0], &*src[1], &*src[2]];
+        // a picture that would drain the decoder buffer (one the rate control could not foresee,
+        // such as the first of a far busier scene) is coded again at a coarser QP, at most twice
+        let mut qp = self.rc.frame_qp(key);
+        let mut retries = 0;
+        let data = loop {
+            let data = self.code_picture(src, key, qp);
+            match self.rc.retry_qp((data.len() * 8) as f64, qp) {
+                Some(coarser) if retries < 2 => {
+                    qp = coarser;
+                    retries += 1;
+                }
+                _ => break data,
+            }
+        };
+        self.rc.update((data.len() * 8) as f64, key, qp);
+        // the reconstruction becomes the next picture's reference, in the reference's own buffers
+        let rec = &self.rec;
+        match &mut self.refp {
+            Some(r) => r.iter_mut().zip(rec).for_each(|(p, plane)| p.refill(plane)),
+            None => {
+                self.refp = Some([
+                    Padded::new(&rec[0], cdw, cdh, PAD),
+                    Padded::new(&rec[1], cdw / 2, cdh / 2, PAD / 2),
+                    Padded::new(&rec[2], cdw / 2, cdh / 2, PAD / 2),
+                ])
+            }
+        }
         let packet = Packet { data, key, index: self.index };
         self.index += 1;
         self.poc += 1;
@@ -345,6 +379,15 @@ fn default_slices() -> usize {
     #[cfg(not(feature = "threads"))]
     {
         1
+    }
+}
+
+/// A `w` x `h` plane (stride `stride`) at the coded size `cw` x `ch`: the plane itself when it
+/// already is (tight rows, no sample above `max`), else a padded, clamped copy ([`pad_plane`]).
+fn coded_plane(p: &[u16], stride: usize, w: usize, h: usize, cw: usize, ch: usize, max: u16) -> std::borrow::Cow<'_, [u16]> {
+    match p.get(..w * h) {
+        Some(tight) if (w, h) == (cw, ch) && stride == w && tight.iter().all(|&s| s <= max) => std::borrow::Cow::Borrowed(tight),
+        _ => std::borrow::Cow::Owned(pad_plane(p, stride, w, h, cw, ch, max)),
     }
 }
 

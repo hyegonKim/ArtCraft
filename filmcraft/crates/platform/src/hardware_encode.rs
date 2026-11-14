@@ -198,6 +198,12 @@ pub fn videotoolbox_encoder_factory(
         _ => return None,
     };
     let config = match config_for(w, h, rate, s) {
+        // HDR needs a Main 10 encoder: where the probe found none, decline without opening (and
+        // failing) a session for every export
+        Ok(c) if c.hdr.is_some() && !hevc_hdr_available() => Err("HDR (this machine has no hardware HEVC Main 10 encoder)".to_string()),
+        other => other,
+    };
+    let config = match config {
         Ok(c) => c,
         Err(why) => {
             log::info!("hardware {name} encoding declined: {why}");

@@ -359,12 +359,51 @@ struct H264Encoder {
     u: Vec<u8>,
     v: Vec<u8>,
     signal: ColorSignal,
-    /// 4:2:0 planes the render threads converted ahead ([`VideoEncoder::prepare_ahead`]), by
-    /// picture index.
-    ready: Arc<Mutex<std::collections::HashMap<u64, Yuv420>>>,
+    ready: ReadyPlanes<u8>,
 }
 
 type Yuv420 = (Vec<u8>, Vec<u8>, Vec<u8>);
+
+/// Y, Cb, Cr planes of `T` samples.
+type Planes420<T> = (Vec<T>, Vec<T>, Vec<T>);
+
+/// 4:2:0 planes the render threads converted ahead of the encoder ([`VideoEncoder::prepare_ahead`]),
+/// by picture index: the H.264 and H.265 encoders' shared cache.
+struct ReadyPlanes<T>(Arc<Mutex<std::collections::HashMap<u64, Planes420<T>>>>);
+
+impl<T> Default for ReadyPlanes<T> {
+    fn default() -> Self {
+        ReadyPlanes(Arc::default())
+    }
+}
+
+impl<T: Send + 'static> ReadyPlanes<T> {
+    /// The planes converted ahead for `f`, when they have its size. Anything older is dropped: it
+    /// belongs to a batch that was rendered and then not encoded.
+    fn take(&self, f: &EncoderFrame) -> Option<Planes420<T>> {
+        let mine = {
+            let mut ready = self.0.lock().unwrap_or_else(PoisonError::into_inner);
+            let mine = ready.remove(&f.index);
+            ready.retain(|&i, _| i > f.index);
+            mine
+        };
+        let (w, h) = (f.width as usize, f.height as usize);
+        let chroma = w.div_ceil(2) * h.div_ceil(2);
+        mine.filter(|(y, u, v)| y.len() == w * h && u.len() == chroma && v.len() == chroma)
+    }
+
+    /// The prepare-ahead hook: `convert` fills a picture's planes on a render thread. A picture it
+    /// fails on (`false`) is left to `encode`, which converts it again and reports the error.
+    fn prepare(&self, convert: impl Fn(&EncoderFrame, &mut Planes420<T>) -> bool + Send + Sync + 'static) -> PrepareAhead {
+        let ready = self.0.clone();
+        Arc::new(move |f: &EncoderFrame| {
+            let mut planes = (Vec::new(), Vec::new(), Vec::new());
+            if timed(Stage::Convert, || convert(f, &mut planes)) {
+                ready.lock().unwrap_or_else(PoisonError::into_inner).insert(f.index, planes);
+            }
+        })
+    }
+}
 
 /// The encoder input of `f`: 8-bit limited-range 4:2:0 in the export's colour signal.
 fn h264_input(f: &EncoderFrame, signal: ColorSignal, y: &mut Vec<u8>, u: &mut Vec<u8>, v: &mut Vec<u8>) {
@@ -399,16 +438,7 @@ impl VideoEncoder for H264Encoder {
         self.rate.num as u32
     }
     fn encode(&mut self, f: &EncoderFrame) -> Result<Vec<EncodedPacket>> {
-        let ready = {
-            let mut ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
-            let mine = ready.remove(&f.index);
-            // anything older belongs to a batch that was rendered and then not encoded
-            ready.retain(|&i, _| i > f.index);
-            mine
-        };
-        let (w, h) = (f.width as usize, f.height as usize);
-        let chroma = w.div_ceil(2) * h.div_ceil(2);
-        match ready.filter(|(y, u, v)| y.len() == w * h && u.len() == chroma && v.len() == chroma) {
+        match self.ready.take(f) {
             Some((y, u, v)) => (self.y, self.u, self.v) = (y, u, v),
             None => {
                 let (enc, y, u, v, signal) = (&self.enc, &mut self.y, &mut self.u, &mut self.v, self.signal);
@@ -433,11 +463,10 @@ impl VideoEncoder for H264Encoder {
         self.enc.pass_stats()
     }
     fn prepare_ahead(&self) -> Option<PrepareAhead> {
-        let (ready, signal) = (self.ready.clone(), self.signal);
-        Some(Arc::new(move |f: &EncoderFrame| {
-            let (mut y, mut u, mut v) = (Vec::new(), Vec::new(), Vec::new());
-            timed(Stage::Convert, || h264_input(f, signal, &mut y, &mut u, &mut v));
-            ready.lock().unwrap_or_else(PoisonError::into_inner).insert(f.index, (y, u, v));
+        let signal = self.signal;
+        Some(self.ready.prepare(move |f, (y, u, v)| {
+            h264_input(f, signal, y, u, v);
+            true
         }))
     }
 }
@@ -504,7 +533,8 @@ pub(crate) fn h264_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &
 /// registers: sRGB/709 RGBA8 → 8-bit limited-range BT.709 4:2:0 (Main), or an HDR export's encoded
 /// R'G'B' → 10-bit limited-range 4:2:0 in the signal's matrix (Main 10, with the HDR10 static
 /// metadata as SEI and in `mdcv` / `clli`). Average-bitrate rate control at the requested target
-/// and ceiling, length-prefixed samples with the `hvcC` in the sample entry, no reordering.
+/// with a one-second decoder buffer filled at the ceiling, length-prefixed samples with the `hvcC`
+/// in the sample entry, no reordering.
 struct HevcEncoder {
     enc: filmcraft_hevcenc::Encoder,
     w: u32,
@@ -512,32 +542,29 @@ struct HevcEncoder {
     rate: FrameRate,
     signal: ColorSignal,
     ten_bit: bool,
-    planes: Yuv420Wide,
-    /// 4:2:0 planes the render threads converted ahead ([`VideoEncoder::prepare_ahead`]), by
-    /// picture index.
-    ready: Arc<Mutex<std::collections::HashMap<u64, Yuv420Wide>>>,
+    planes: Planes420<u16>,
+    /// The 8-bit conversion's planes, kept from picture to picture.
+    scratch: Yuv420,
+    ready: ReadyPlanes<u16>,
 }
 
-/// Y, Cb, Cr planes of 8- or 10-bit samples.
-type Yuv420Wide = (Vec<u16>, Vec<u16>, Vec<u16>);
-
 /// The H.265 encoder input of `f`: limited-range 4:2:0 in the export's colour signal, 10-bit from
-/// the HDR floats for Main 10, else 8-bit (shifted up two bits for a Main 10 stream given SDR).
-fn hevc_input(f: &EncoderFrame, signal: ColorSignal, ten_bit: bool, out: &mut Yuv420Wide) -> Result<()> {
+/// the HDR floats for Main 10, else 8-bit (converted in `scratch`, then widened into `out`). A
+/// Main 10 stream is tagged with the HDR signal, so a picture without its HDR floats is an error
+/// rather than 8-bit sRGB codes that would play with the wrong colours.
+fn hevc_input(f: &EncoderFrame, signal: ColorSignal, ten_bit: bool, scratch: &mut Yuv420, out: &mut Planes420<u16>) -> Result<()> {
     let (w, h) = (f.width as usize, f.height as usize);
     let (kr, kb) = signal.kr_kb();
-    if let (Some(rgb), true) = (f.hdr, ten_bit) {
-        return rgbf_to_yuv420_10(rgb, w, h, Matrix::new(kr, kb), &mut out.0, &mut out.1, &mut out.2);
+    let (y, u, v) = scratch;
+    match (f.hdr, ten_bit) {
+        (Some(rgb), true) => return rgbf_to_yuv420_10(rgb, w, h, Matrix::new(kr, kb), &mut out.0, &mut out.1, &mut out.2),
+        (None, true) => return Err(ExportError::Unsupported("H.265 Main 10 needs the HDR picture (EncoderFrame::hdr)".into())),
+        (Some(rgb), false) => rgbf_to_yuv420_8(rgb, w, h, Matrix::new(kr, kb), y, u, v),
+        (None, false) => rgba_to_yuv420_8(f.rgba, w, h, y, u, v),
     }
-    let (mut y, mut u, mut v) = (Vec::new(), Vec::new(), Vec::new());
-    match f.hdr {
-        Some(rgb) => rgbf_to_yuv420_8(rgb, w, h, Matrix::new(kr, kb), &mut y, &mut u, &mut v),
-        None => rgba_to_yuv420_8(f.rgba, w, h, &mut y, &mut u, &mut v),
-    }
-    let shift = if ten_bit { 2 } else { 0 };
-    for (dst, src) in [(&mut out.0, y), (&mut out.1, u), (&mut out.2, v)] {
+    for (dst, src) in [(&mut out.0, &*y), (&mut out.1, &*u), (&mut out.2, &*v)] {
         dst.clear();
-        dst.extend(src.iter().map(|&s| u16::from(s) << shift));
+        dst.extend(src.iter().map(|&s| u16::from(s)));
     }
     Ok(())
 }
@@ -553,22 +580,14 @@ impl VideoEncoder for HevcEncoder {
         self.rate.num as u32
     }
     fn encode(&mut self, f: &EncoderFrame) -> Result<Vec<EncodedPacket>> {
-        let ready = {
-            let mut ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
-            let mine = ready.remove(&f.index);
-            // anything older belongs to a batch that was rendered and then not encoded
-            ready.retain(|&i, _| i > f.index);
-            mine
-        };
-        let (w, h) = (f.width as usize, f.height as usize);
-        let chroma = w.div_ceil(2) * h.div_ceil(2);
-        match ready.filter(|(y, u, v)| y.len() == w * h && u.len() == chroma && v.len() == chroma) {
+        match self.ready.take(f) {
             Some(planes) => self.planes = planes,
             None => {
-                let (signal, ten_bit, planes) = (self.signal, self.ten_bit, &mut self.planes);
-                timed(Stage::Convert, || hevc_input(f, signal, ten_bit, planes))?;
+                let (signal, ten_bit, scratch, planes) = (self.signal, self.ten_bit, &mut self.scratch, &mut self.planes);
+                timed(Stage::Convert, || hevc_input(f, signal, ten_bit, scratch, planes))?;
             }
         }
+        let w = f.width as usize;
         let (y, u, v) = &self.planes;
         let frame = filmcraft_hevcenc::Frame { y, u, v, y_stride: w, uv_stride: w.div_ceil(2) };
         let p = self.enc.encode(&frame).map_err(|e| ExportError::Encode(e.to_string()))?;
@@ -579,22 +598,26 @@ impl VideoEncoder for HevcEncoder {
         Ok(Vec::new())
     }
     fn prepare_ahead(&self) -> Option<PrepareAhead> {
-        let (ready, signal, ten_bit) = (self.ready.clone(), self.signal, self.ten_bit);
-        Some(Arc::new(move |f: &EncoderFrame| {
-            let mut planes = Yuv420Wide::default();
-            // a picture that fails to convert here is converted (and its error reported) by encode
-            if timed(Stage::Convert, || hevc_input(f, signal, ten_bit, &mut planes)).is_ok() {
-                ready.lock().unwrap_or_else(PoisonError::into_inner).insert(f.index, planes);
-            }
+        let (signal, ten_bit) = (self.signal, self.ten_bit);
+        // 8-bit conversion planes for the render threads, reused: a pool rather than one per
+        // thread, because a thread waiting inside the conversion's own parallel loop can be handed
+        // another picture to prepare
+        let pool: Arc<Mutex<Vec<Yuv420>>> = Arc::default();
+        Some(self.ready.prepare(move |f, planes| {
+            let mut scratch = pool.lock().unwrap_or_else(PoisonError::into_inner).pop().unwrap_or_default();
+            let ok = hevc_input(f, signal, ten_bit, &mut scratch, planes).is_ok();
+            pool.lock().unwrap_or_else(PoisonError::into_inner).push(scratch);
+            ok
         }))
     }
 }
 
-/// Slices per H.265 picture: one per two 32x32 CTU rows (64 luma rows, the H.264 encoder's band
-/// height), coded in parallel. A fixed count keeps the stream the same on every machine; the
-/// encoder's default follows the core count.
+/// Slices per H.265 picture, coded in parallel: one per four 32x32 CTU rows (128 luma rows), at
+/// most 16. A fixed count keeps the stream the same on every machine (the encoder's default
+/// follows the core count). Every slice boundary resets the CABAC contexts and cuts off
+/// prediction, so the cap keeps 4K and 8K pictures from paying for dozens of them.
 pub(crate) fn hevc_slices(height: u32) -> usize {
-    (height.div_ceil(64) as usize).max(1)
+    (height.div_ceil(128) as usize).clamp(1, 16)
 }
 
 pub(crate) fn hevc_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &ExportSettings) -> Option<Result<Box<dyn VideoEncoder>>> {
@@ -614,6 +637,8 @@ pub(crate) fn hevc_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &
     cfg.keyint = s.keyframe_distance.filter(|k| *k > 0).unwrap_or_else(|| (f64::from(num) / f64::from(den) * 2.0).round().max(1.0) as u32);
     cfg.slices = hevc_slices(h);
     let kbps = s.bitrate_kbps.max(100);
+    // CBR is the average at `kbps` with the decoder buffer filled at `kbps` too, as the H.264
+    // encoder's CBR (a one-second VBV)
     let max_kbps = match s.bitrate_mode {
         BitrateMode::Cbr => kbps,
         _ => s.max_bitrate_kbps.filter(|m| *m >= kbps).unwrap_or_else(|| (u64::from(kbps) * 3 / 2).min(u64::from(u32::MAX)) as u32),
@@ -632,8 +657,17 @@ pub(crate) fn hevc_factory(format: Format, w: u32, h: u32, rate: FrameRate, s: &
     Some(
         filmcraft_hevcenc::Encoder::new(cfg)
             .map(|enc| {
-                Box::new(HevcEncoder { enc, w, h, rate, signal: s.signal, ten_bit, planes: Yuv420Wide::default(), ready: Default::default() })
-                    as Box<dyn VideoEncoder>
+                Box::new(HevcEncoder {
+                    enc,
+                    w,
+                    h,
+                    rate,
+                    signal: s.signal,
+                    ten_bit,
+                    planes: Default::default(),
+                    scratch: Default::default(),
+                    ready: Default::default(),
+                }) as Box<dyn VideoEncoder>
             })
             .map_err(|e| ExportError::Encode(e.to_string())),
     )
