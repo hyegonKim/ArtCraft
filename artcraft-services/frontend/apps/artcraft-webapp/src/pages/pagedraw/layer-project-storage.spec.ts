@@ -74,3 +74,25 @@ it('identifies the server document by content and separates a missing project fr
   await expect(offline).rejects.toThrow('Failed to fetch');
   await expect(offline).rejects.not.toBeInstanceOf(LayerProjectUnavailableError);
 });
+
+const text = (blob: Blob) => new Promise<string>(resolve => {
+  const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.readAsText(blob);
+});
+
+it('treats only a 404 or 410 as a deleted project and retries every other failure', async () => {
+  const storage = createLayerProjectStorage();
+  calls.get.mockResolvedValueOnce({ success: false });
+  const silent = storage.serverHash('m_saved');
+  await expect(silent).rejects.toThrow('Could not reach the saved project.');
+  await expect(silent).rejects.not.toBeInstanceOf(LayerProjectUnavailableError);
+  calls.get.mockResolvedValueOnce({ success: true, data: { media_links: {} } });
+  await expect(storage.serverHash('m_saved')).rejects.not.toBeInstanceOf(LayerProjectUnavailableError);
+  calls.get.mockResolvedValueOnce({ success: false, errorMessage: 'HTTP error! status: 410' });
+  await expect(storage.serverHash('m_gone')).rejects.toBeInstanceOf(LayerProjectUnavailableError);
+});
+
+it('uploads exactly the JSON it is given', async () => {
+  calls.create.mockResolvedValue({ success: true, data: 'm_new' });
+  await createLayerProjectStorage().save(document, 'Layer test', undefined, 'request-id', '{"exact":"bytes"}');
+  expect(await text(calls.create.mock.calls[0][0].blob)).toBe('{"exact":"bytes"}');
+});

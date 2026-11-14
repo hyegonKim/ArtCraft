@@ -38,3 +38,21 @@ it('hashes a document identically after a JSON round trip', async () => {
   expect(await hashLayerDocument(roundTrip)).toBe(await hashLayerDocument(document));
   expect(await hashLayerDocument({ ...document, version: 2 } as unknown as LayerProject)).not.toBe(await hashLayerDocument(document));
 });
+
+it('lists details without documents and updates details without touching the document', async () => {
+  const store = createMemoryDraftStore(true);
+  await store.put(draft('d1', 'u_a', 1));
+  const [row] = await store.list('u_a');
+  expect(row).not.toHaveProperty('document');
+  await store.update('d1', { token: 'm_saved', name: 'renamed', ownHashes: ['h:sent'] });
+  expect(await store.get('d1')).toMatchObject({ token: 'm_saved', name: 'renamed', ownHashes: ['h:sent'], owner: 'u_a', document });
+  await store.update('missing', { name: 'gone' });
+  expect(await store.get('missing')).toBeUndefined();
+});
+
+it('shares one store (and one database connection) per IndexedDB factory, and one page fallback', async () => {
+  const blocked = { open: () => { throw new DOMException('blocked', 'SecurityError'); } } as unknown as IDBFactory;
+  expect(openLayerDraftStore(blocked)).toBe(openLayerDraftStore(blocked));
+  expect(await openLayerDraftStore(blocked).durable()).toBe(false);
+  expect(openLayerDraftStore(undefined)).toBe(openLayerDraftStore(undefined));
+});

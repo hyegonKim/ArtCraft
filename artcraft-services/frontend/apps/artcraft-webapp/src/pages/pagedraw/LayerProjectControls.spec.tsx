@@ -12,7 +12,7 @@ vi.mock('./layer-project-storage', () => ({ createLayerProjectStorage: () => moc
 // layer-draft-store.spec.ts covers the real SHA-256.
 vi.mock('./layer-draft-store', async importOriginal => ({
   ...await importOriginal<typeof import('./layer-draft-store')>(), openLayerDraftStore: () => mocks.drafts,
-  hashLayerDocument: async (document: LayerProject) => `h:${JSON.stringify(document)}` }));
+  hashLayerDocument: async (document: LayerProject) => `h:${JSON.stringify(document)}`, hashLayerJson: async (json: string) => `h:${json}` }));
 vi.mock('@storyteller/ui-pagedraw', async () => {
   const { create } = await import('zustand');
   const state = { baseImageInfo: { isBlankCanvas: true, blankCanvasWidth: 1920, blankCanvasHeight: 1080 },
@@ -208,3 +208,30 @@ it('does not delete device edits that another tab opened after the list was show
   expect(await mocks.drafts.list('u_test')).toHaveLength(1);
   release?.();
 });
+
+it('does not claim offline edits are kept when this browser blocks device storage', async () => {
+  mocks.drafts = createMemoryDraftStore(false);
+  mount();
+  act(() => { window.dispatchEvent(new Event('offline')); });
+  const notKept = 'Offline · edits are not kept on this device · keep this page open';
+  await waitFor(() => expect(screen.getByRole('status').textContent).toBe(notKept));
+  offlineStroke();
+  await new Promise(resolve => setTimeout(resolve, 400));
+  expect(screen.getByRole('status').textContent).toBe(notKept);
+});
+
+it('reads only draft details, never documents, to show the banner when the tab regains focus', async () => {
+  await mocks.drafts.put(kept({ token: 'm_other', name: 'Other project' }));
+  const get = vi.spyOn(mocks.drafts, 'get');
+  const list = vi.spyOn(mocks.drafts, 'list');
+  mount();
+  await screen.findByLabelText('Edits kept on this device');
+  const before = list.mock.calls.length;
+  act(() => { document.dispatchEvent(new Event('visibilitychange')); });
+  await waitFor(() => expect(list.mock.calls.length).toBeGreaterThan(before));
+  expect(get).not.toHaveBeenCalled();
+  const [row] = await list.mock.results.at(-1)!.value;
+  expect(row).toMatchObject({ id: 'd_kept', name: 'Other project' });
+  expect(row).not.toHaveProperty('document');
+});
+

@@ -8,10 +8,11 @@ export function createLayerProjectStorage() {
   const files = new MediaFilesApi();
   const names = new Map<string, string>();
   return {
-    async save(document: LayerProject, name: string, token?: string, requestId: string = crypto.randomUUID()) {
+    /** `json`, when given, is `document` already serialized (the bytes autosave hashed). */
+    async save(document: LayerProject, name: string, token?: string, requestId: string = crypto.randomUUID(), json?: string) {
       validateLayerProject(document);
       const args = { projectType: 'editor_2d' as const,
-        blob: new Blob([JSON.stringify(document)], { type: 'application/json' }),
+        blob: new Blob([json ?? JSON.stringify(document)], { type: 'application/json' }),
         fileName: 'project.editor.json', uuid: requestId, maybe_title: name };
       if (!token) {
         const response = await projects.UploadNewProject({ ...args, maybe_visibility: Visibility.Private });
@@ -49,14 +50,18 @@ export function createLayerProjectStorage() {
     },
   };
 
-  /** Network failures throw a plain Error (retry later); a project that is gone throws LayerProjectUnavailableError. */
+  /**
+   * Only a 404 / 410 means the project is gone (LayerProjectUnavailableError, which makes a replay save
+   * a separate copy). Every other failure throws a plain Error so the caller retries later.
+   */
   async function read(token: string) {
     const response = await files.GetMediaFileByToken({ mediaFileToken: token });
-    if (!response.success && response.errorMessage && !/status: (404|410)\b/.test(response.errorMessage)) {
-      throw new Error(response.errorMessage);
+    if (!response.success) {
+      if (/status: (404|410)\b/.test(response.errorMessage ?? '')) throw new LayerProjectUnavailableError('This 2D project is unavailable.');
+      throw new Error(response.errorMessage || 'Could not reach the saved project.');
     }
-    const file = response.success ? response.data : undefined;
-    if (!file?.media_links?.cdn_url) throw new LayerProjectUnavailableError('This 2D project is unavailable.');
+    const file = response.data;
+    if (!file?.media_links?.cdn_url) throw new Error('The saved project is not ready to read yet.');
     const bytes = await fetch(file.media_links.cdn_url, { cache: 'no-store' });
     if (!bytes.ok) throw new Error('Could not read the saved project.');
     return { file, text: await bytes.text() };

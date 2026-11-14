@@ -5,15 +5,25 @@ import type { ProjectMediaFileInfo } from '@storyteller/api';
 import { useSession } from '../../lib/session';
 import { createLayerProjectStorage } from './layer-project-storage';
 import { LayerAutosave, type LayerSaveState } from './layer-autosave';
-import { hashLayerDocument, openLayerDraftStore, type LayerDraft } from './layer-draft-store';
+import { hashLayerJson, openLayerDraftStore, type LayerDraft, type LayerDraftSummary } from './layer-draft-store';
 
 const fields = ['drawNodes', 'inpaintLineNodes', 'baseImageInfo', 'brushColor', 'brushSize',
   'brushOpacity', 'eraserSize', 'fillColor', 'aspectRatioType', 'inpaintBrushSize', 'inpaintOperation'] as const;
 const button = 'rounded border border-white/20 bg-[#171717] px-2 py-1 text-xs disabled:opacity-40';
-const initialState: LayerSaveState = { dirty: false, saving: false, error: '', retrying: false, offline: false, local: false, localError: '', notice: '' };
-type Recoverable = Pick<LayerDraft, 'id' | 'name' | 'token' | 'updatedAt'>;
+const initialState: LayerSaveState = { dirty: false, saving: false, error: '', retrying: false, offline: false, local: false, localError: '',
+  notice: '', deviceCopies: false };
+type Recoverable = Pick<LayerDraftSummary, 'id' | 'name' | 'token' | 'updatedAt'>;
 type Pending = { token?: string; draftId?: string };
 const isOnline = () => typeof navigator === 'undefined' || navigator.onLine !== false;
+
+/** What survives closing the tab while offline; claims only what this device actually keeps. */
+function offlineStatus(state: LayerSaveState, dirty: boolean): string {
+  const notKept = 'Offline · edits are not kept on this device · keep this page open';
+  if (!state.deviceCopies) return notKept;
+  if (!dirty) return 'Offline · new edits are kept on this device';
+  if (state.local) return 'Offline · edits kept on this device · syncs when back online';
+  return state.localError ? notKept : 'Offline · keeping edits on this device…';
+}
 
 export function LayerProjectControls() {
   const storage = useMemo(createLayerProjectStorage, []);
@@ -32,7 +42,7 @@ export function LayerProjectControls() {
   const autosave = useMemo(() => new LayerAutosave({
     capture: captureLayerProject, getName: () => nameRef.current, save: storage.save,
     onSaved: (saved, renamed) => onSaved.current(saved, renamed), onState: setSaveState,
-    drafts, hash: hashLayerDocument, serverHash: storage.serverHash, online: isOnline,
+    drafts, hash: hashLayerJson, serverHash: storage.serverHash, online: isOnline,
   }), [storage, drafts]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -49,8 +59,6 @@ export function LayerProjectControls() {
   const opened = useRef<string | undefined>(undefined);
   const operation = useRef(0);
   const recoveredOwner = useRef<string | undefined>(undefined);
-  /** The last signed-in account; a different one signing in must not inherit its document. */
-  const account = useRef<string | undefined>(undefined);
   useEffect(() => () => { operation.current += 1; }, []);
   const base = useSceneStore(s => s.baseImageInfo);
   const bitmap = useSceneStore(s => s.baseImageBitmap);
@@ -64,7 +72,6 @@ export function LayerProjectControls() {
     setQuery({ project: saved }, { replace: true });
   };
   useEffect(() => { autosave.activate(); return () => autosave.dispose(); }, [autosave]);
-  useEffect(() => { autosave.setOwner(owner); }, [autosave, owner]);
   useEffect(() => {
     autosave.setEnabled(loggedIn && !!base && (!!bitmap || !!base.isBlankCanvas) && !busy && !pendingDiscard &&
       (!requested || requested === opened.current));
@@ -106,8 +113,8 @@ export function LayerProjectControls() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autosave]);
 
-  /** Device copies of this account that no tab is editing right now. */
-  async function availableDrafts(): Promise<LayerDraft[]> {
+  /** Device copies of this account that no tab is editing right now (details only, no documents). */
+  async function availableDrafts(): Promise<LayerDraftSummary[]> {
     const account = ownerRef.current;
     if (!account) return [];
     try {
@@ -175,12 +182,11 @@ export function LayerProjectControls() {
     }, 'Could not open project.');
   }
   useEffect(() => {
-    const previous = account.current;
-    if (owner) account.current = owner;
-    if (owner && previous && owner !== previous) {
+    // The autosave session is the one place that tells a different account from the same one returning.
+    if (autosave.setOwner(owner)) {
       // The open document and lists belong to the previous account: never show or save them for this one.
       // The URL still names that account's project until the reset below applies, so do not open it.
-      clearDocument();
+      clearDocument(true);
       setPendingDiscard(null); setConfirmDelete(undefined); setShowProjects(false); setRows([]); setNext(undefined);
       setRecoverable([]); void refreshRecoverable();
       return;
@@ -188,7 +194,7 @@ export function LayerProjectControls() {
     if (requested && requested !== opened.current && loggedIn) void open(requested);
     // A URL/account transition triggers loading; scene edits must not reload it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requested, loggedIn, owner]);
+  }, [requested, loggedIn, owner, autosave]);
   useEffect(() => {
     if (!owner || recoveredOwner.current === owner) return;
     recoveredOwner.current = owner;
@@ -243,10 +249,14 @@ export function LayerProjectControls() {
     if (confirmed) void autosave.discardLocal();
     clearDocument();
   }
-  /** Empties the editor into a new unsaved document, cancelling any open or restore in progress. */
-  function clearDocument() {
+  /**
+   * Empties the editor into a new unsaved document, cancelling any open or restore in progress.
+   * `sessionReset` says the autosave session was already reset (another account signed in).
+   */
+  function clearDocument(sessionReset = false) {
     operation.current += 1; setBusy(false);
-    autosave.setEnabled(false); autosave.reset();
+    autosave.setEnabled(false);
+    if (!sessionReset) autosave.reset();
     loading.current = true;
     useSceneStore.getState().setBaseImageInfo(null);
     useSceneStore.getState().RESET();
@@ -254,8 +264,7 @@ export function LayerProjectControls() {
     setError(''); setRecoveredAt(undefined); loading.current = false;
   }
   const status = busy ? 'Working…' : !loggedIn ? 'Sign in to save projects'
-    : saveState.offline ? (!dirty ? 'Offline · new edits are kept on this device'
-      : saveState.local ? 'Offline · edits kept on this device · syncs when back online' : 'Offline · keeping edits on this device…')
+    : saveState.offline ? offlineStatus(saveState, dirty)
     : saving ? 'Saving…'
     : saveState.retrying ? `Save failed · retrying in 5 seconds${saveState.local ? ' · edits kept on this device' : ''}`
     : dirty ? 'Unsaved changes · autosave pending'
