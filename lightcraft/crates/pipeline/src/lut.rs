@@ -81,6 +81,120 @@ impl Lut3d {
         let c11 = lerp(at(r, g + 1, b + 1), at(r + 1, g + 1, b + 1), frac[0]);
         lerp(lerp(c00, c10, frac[1]), lerp(c01, c11, frac[1]), frac[2])
     }
+
+    /// Build an identity 3D LUT of edge `size` (clamped to `2..=129`).
+    pub fn identity(size: usize) -> Self {
+        Self::from_fn(size, Some("Identity".into()), |c| c)
+    }
+
+    /// Sample `f` across a `size × size × size` grid (red fastest).
+    pub fn from_fn(size: usize, title: Option<String>, f: impl Fn([f32; 3]) -> [f32; 3]) -> Self {
+        let size = size.clamp(2, 129);
+        let denom = (size - 1) as f32;
+        let mut data = Vec::with_capacity(size * size * size);
+        for b in 0..size {
+            for g in 0..size {
+                for r in 0..size {
+                    let c = f([r as f32 / denom, g as f32 / denom, b as f32 / denom]);
+                    data.push(c.map(|v| if v.is_finite() { v.clamp(0.0, 1.0) } else { 0.0 }));
+                }
+            }
+        }
+        Lut3d { size, data, domain_min: [0.0; 3], domain_max: [1.0; 3], title }
+    }
+
+    /// Serialize this 3D LUT to the standard Adobe / Iridas `.cube` format (compatible with
+    /// Final Cut Pro, FilmCraft, Premiere Pro, DaVinci Resolve, and PhotoCraft).
+    pub fn to_cube(&self) -> String {
+        use std::fmt::Write;
+        let mut out = String::with_capacity(self.data.len() * 28 + 128);
+        if let Some(t) = &self.title
+            && !t.is_empty()
+        {
+            let _ = writeln!(out, "TITLE \"{}\"", t.replace('"', "'"));
+        }
+        let _ = writeln!(out, "LUT_3D_SIZE {}", self.size);
+        if self.domain_min != [0.0; 3] || self.domain_max != [1.0; 3] {
+            let _ = writeln!(out, "DOMAIN_MIN {:.6} {:.6} {:.6}", self.domain_min[0], self.domain_min[1], self.domain_min[2]);
+            let _ = writeln!(out, "DOMAIN_MAX {:.6} {:.6} {:.6}", self.domain_max[0], self.domain_max[1], self.domain_max[2]);
+        }
+        for c in &self.data {
+            let _ = writeln!(out, "{:.6} {:.6} {:.6}", c[0], c[1], c[2]);
+        }
+        out
+    }
+}
+
+/// Bake the global colour and tone adjustments of `settings` into a 3D [`Lut3d`] of edge `size`
+/// (`2..=65`) in `space` (typically [`crate::OutputSpace::Srgb`] or [`crate::OutputSpace::Rec2020`]).
+///
+/// Spatial-only operations (crop, vignette, grain, spot removal, red-eye, local masks, clarity,
+/// texture, dehaze, sharpening, noise reduction, lens optics) are neutralized so the exported
+/// `.cube` LUT captures a clean, position-independent 3D colour grade suitable for Final Cut Pro,
+/// FilmCraft, EffectCraft, and PhotoCraft.
+pub fn bake_develop_lut(
+    settings: &lightcraft_develop::DevelopSettings,
+    size: usize,
+    space: crate::OutputSpace,
+    title: Option<String>,
+) -> Result<Lut3d, String> {
+    if !(2..=65).contains(&size) {
+        return Err(format!("LUT_3D_SIZE {size} out of range (expected 2..=65)"));
+    }
+    let mut s = settings.effective().into_owned();
+    s.crop = Default::default();
+    s.orientation = Default::default();
+    s.vignette = Default::default();
+    s.grain = Default::default();
+    s.spots.clear();
+    s.red_eye.clear();
+    s.masks.clear();
+    s.effects.clarity = 0.0;
+    s.effects.texture = 0.0;
+    s.effects.dehaze = 0.0;
+    s.detail = Default::default();
+    s.optics = Default::default();
+    s.hdr.enabled = false;
+
+    let trc = space.trc();
+    let to_working = space.rgb_space().to_space(&lightcraft_color::REC2020);
+    let denom = (size - 1) as f32;
+    let w = size * size;
+    let h = size;
+    let mut pixels = Vec::with_capacity(w * h);
+    for b in 0..size {
+        for g in 0..size {
+            for r in 0..size {
+                let enc = [r as f32 / denom, g as f32 / denom, b as f32 / denom];
+                let lin = enc.map(|v| trc.decode(v));
+                pixels.push(to_working.apply_f32(lin));
+            }
+        }
+    }
+    let src = lightcraft_raster::Rgb32f { width: w, height: h, data: pixels };
+    let req = crate::RenderRequest {
+        max_w: w,
+        max_h: h,
+        quality: crate::Quality::Full,
+        apply_crop: false,
+        overlay: crate::Overlay::None,
+        space,
+        depth: crate::OutputDepth::U16,
+        proof: None,
+        window: None,
+        display: None,
+    };
+    let rendered = crate::render(&src, &crate::SourceInfo::default(), &s, &req);
+    let data = match rendered.deep.map(|d| d.samples) {
+        Some(crate::DeepSamples::U16(v)) if v.len() == w * h * 3 => v
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .map(|px| [px[0] as f32 / 65535.0, px[1] as f32 / 65535.0, px[2] as f32 / 65535.0])
+            .collect(),
+        _ => return Err("failed to render 16-bit LUT lattice".into()),
+    };
+    Ok(Lut3d { size, data, domain_min: [0.0; 3], domain_max: [1.0; 3], title })
 }
 
 fn registry() -> &'static RwLock<HashMap<String, Arc<Lut3d>>> {
@@ -139,5 +253,26 @@ mod tests {
         assert!((v[0] - 0.8).abs() < 1e-5 && (v[2] - 0.1).abs() < 1e-5, "{v:?}");
         assert!(Lut3d::parse_cube("LUT_1D_SIZE 4\n0 0 0").is_err());
         assert!(Lut3d::parse_cube("LUT_3D_SIZE 2\n0 0 0\n").is_err(), "too few entries");
+    }
+
+    #[test]
+    fn bake_develop_lut_and_cube_roundtrip() {
+        let neutral = lightcraft_develop::DevelopSettings::default();
+        let id_lut = bake_develop_lut(&neutral, 9, crate::OutputSpace::Srgb, Some("Neutral Grade".into())).unwrap();
+        let cube_text = id_lut.to_cube();
+        assert!(cube_text.contains("TITLE \"Neutral Grade\""));
+        assert!(cube_text.contains("LUT_3D_SIZE 9"));
+        let parsed = Lut3d::parse_cube(&cube_text).unwrap();
+        let mid = parsed.apply([0.5, 0.5, 0.5]);
+        for ch in mid {
+            assert!((ch - 0.5).abs() < 0.02, "expected neutral midgrey ~0.5, got {mid:?}");
+        }
+
+        let mut warm = lightcraft_develop::DevelopSettings::default();
+        warm.light.exposure = 0.7;
+        warm.color.saturation = 25.0;
+        let warm_lut = bake_develop_lut(&warm, 9, crate::OutputSpace::Srgb, Some("Brighter".into())).unwrap();
+        let lifted = warm_lut.apply([0.4, 0.3, 0.2]);
+        assert!(lifted[0] > 0.45 && lifted[1] > 0.33, "exposure +0.7 EV should lift midtones: {lifted:?}");
     }
 }

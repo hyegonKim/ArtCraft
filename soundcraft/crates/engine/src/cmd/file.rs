@@ -195,6 +195,44 @@ pub fn specs() -> Vec<CommandSpec> {
             e.session_mut().edit.selected_clips.clone_from(&placed);
             Ok(json!({"clips": placed.iter().map(|c| c.0).collect::<Vec<_>>()}))
         }),
+        cmd!(
+            "file.import_fcpxml",
+            "Final Cut Pro XML (.fcpxml)...",
+            ["File", "Import"],
+            None,
+            "{path} — imports FCPXML 1.9–1.13 audio clips grouped by Audio Roles (Dialogue, Effects, Music) onto role tracks with Stem Summing Buses, clip gain/volume automation, fades, and scene markers",
+            always,
+            |e, p| {
+                let id = "file.import_fcpxml";
+                let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
+                let bytes = crate::io::read_file(&path)?;
+                let xml = String::from_utf8(bytes).map_err(|err| bad(id, format!("{path} is not valid UTF-8 XML: {err}")))?;
+                let summary = soundcraft_model::fcpxml::import_fcpxml_audio(e.session_mut(), &xml)
+                    .map_err(|err| bad(id, err.to_string()))?;
+                Ok(json!({
+                    "tracks": summary.role_tracks.iter().map(|(r, t)| json!({"role": r, "track": t.0})).collect::<Vec<_>>(),
+                    "stems": summary.stem_buses.iter().map(|(cat, b, t)| json!({"role": cat.fcpxml_id(), "bus": b.0, "aux_track": t.0})).collect::<Vec<_>>(),
+                    "clips": summary.clip_count,
+                    "markers": summary.marker_count,
+                }))
+            }
+        ),
+        cmd!(
+            noundo "file.export_fcpxml",
+            "Final Cut Pro XML (.fcpxml)...",
+            ["File", "Export"],
+            None,
+            "{path, replace?: false} — exports audio tracks, clips, fades, volume automation, and scene markers as FCPXML 1.11 with Dialogue/Effects/Music Audio Roles",
+            always,
+            |e, p| {
+                let id = "file.export_fcpxml";
+                let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
+                refuse_replacing(e, id, std::path::Path::new(&path), p)?;
+                let xml = soundcraft_model::fcpxml::export_fcpxml_audio(e.session());
+                crate::io::write_file(&path, xml.as_bytes())?;
+                Ok(json!({"path": path, "bytes": xml.len()}))
+            }
+        ),
         cmd!(query "file.get_info", "Get Info...", ["File"], None, "{}", always, |e, _| Ok(crate::inspect::session(e, false))),
         cmd!(noundo "app.quit", "Quit", [], Some("Cmd+Q"), "{}", always, |_, _| Ok(json!({"quit": true}))),
     ]

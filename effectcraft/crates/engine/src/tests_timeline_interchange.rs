@@ -55,6 +55,14 @@ fn export_and_reimport_timeline_commands() {
     assert!(s.execute_checked("file.importTimeline", json!({"path": "/nope/a.prproj"})).is_err());
     let formats = s.execute("file.timelineFormats", json!({})).unwrap();
     assert_eq!(formats.as_array().unwrap().len(), 6);
+
+    // Apple Motion (.motn) export and re-import through file.exportTimeline / file.importTimeline
+    let motn_path = tmp("Main.motn");
+    let exp = s.execute_checked("file.exportTimeline", json!({"comp": main, "path": motn_path})).unwrap();
+    assert_eq!(exp["format"], "motion");
+    let imp = s.execute_checked("file.importTimeline", json!({"path": motn_path})).unwrap();
+    assert_eq!(imp["format"], "motion");
+    assert!(!imp["comps"].as_array().unwrap().is_empty());
 }
 
 #[test]

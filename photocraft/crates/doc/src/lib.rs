@@ -15,6 +15,7 @@ pub mod blend_if;
 pub mod comps;
 pub mod effects;
 pub mod mode;
+pub mod motion;
 pub mod pattern;
 pub mod slices;
 pub mod text;
@@ -36,12 +37,14 @@ pub use effects::{
     GradientStyle, Satin, Shadow, StrokeFx, StrokePosition,
 };
 pub use mode::{ColorTable, Duotone, DuotoneInk, StackMode};
+pub use motion::{MotionExportOptions, export_motion_ozml};
 pub use pattern::Pattern;
 pub use photocraft_color::{BlendMode, Color, ColorMode, PixelFormat, SampleType};
 pub use photocraft_geom::{Affine, Rect, Size};
 pub use photocraft_raster::Surface;
 use serde::{Deserialize, Serialize};
 pub use slices::{Slice, SliceKind, SliceOrigin, Slices};
+pub use text::TextAlign;
 pub use text_styles::TextStyles;
 pub use variables::{DataSet, DataValue, PixelAlign, PixelMethod, VarKind, VariableDef, Variables};
 pub use vector::{

@@ -1897,3 +1897,21 @@ fn sanitize_keeps_windows_device_names_off_the_disk() {
         assert_eq!(sanitize(name), name);
     }
 }
+
+#[test]
+fn motion_project_and_lut_intensity_export() {
+    let mut s = session(64, 36, 8);
+    s.execute("layer.newAdjustmentLayer.invert", json!({})).unwrap();
+    let motn = s.execute("file.export.motionProject", json!({"frameRate": 60.0, "durationFrames": 180})).unwrap();
+    let ozml = motn["ozml"].as_str().unwrap();
+    assert!(ozml.contains("<ozml version=\"5.10\""), "{ozml}");
+    assert!(ozml.contains("<width>64</width>") && ozml.contains("<height>36</height>"), "{ozml}");
+
+    let half_lut = s.execute("file.export.colorLookupTables", json!({"size": 5, "intensity": 0.5})).unwrap();
+    let cube = half_lut["cube"].as_str().unwrap();
+    let parsed = photocraft_cms::lutfile::parse_cube(cube).unwrap();
+    // Invert at 50% intensity maps black (0,0,0) to mid-gray (0.5,0.5,0.5)
+    let black = parsed.apply_trilinear([0.0, 0.0, 0.0]);
+    assert!((black[0] - 0.5).abs() < 1e-4, "{black:?}");
+}
+

@@ -117,3 +117,15 @@ fn formats_list_use_artboards() {
     }
     assert!(opts("vectorcraft").get("useArtboards").is_none());
 }
+
+#[test]
+fn export_motion_project_writes_ozml() {
+    let mut s = session(1920.0, 1080.0, 1);
+    s.execute("shape.rectangle", &json!({"x": 100, "y": 100, "width": 400, "height": 200})).unwrap();
+    let r = s.execute("document.exportMotion", &json!({"frameRate": 60.0, "durationFrames": 240})).unwrap();
+    assert_eq!(r["format"].as_str(), Some("motion"));
+    let ozml = r["ozml"].as_str().unwrap();
+    assert!(ozml.contains("<ozml version=\"5.10\""), "{ozml}");
+    assert!(ozml.contains("type=\"Shape\""), "{ozml}");
+}
+

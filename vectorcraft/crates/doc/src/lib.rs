@@ -35,6 +35,7 @@ pub mod live_paint;
 pub mod marks;
 mod mem;
 pub mod metadata;
+pub mod motion;
 pub mod node;
 pub mod objects_on_path;
 pub mod orient;

@@ -607,3 +607,77 @@ fn absent_or_incompatible_composition_bakes_have_actionable_fidelity_warnings() 
         assert!(output.warnings.iter().any(|warning| warning.contains("missing or incompatible")));
     }
 }
+
+#[test]
+fn caption_tracks_import_as_editable_text_layers_and_layer_markers_roundtrip() {
+    let (mut doc, main) = edit();
+    {
+        let seq = doc.sequence_mut(main).unwrap();
+        let mut ct = fp::CaptionTrack::new(fp::TrackId(900), "Subtitles".into(), fp::CaptionFormat::Subtitle);
+        ct.captions.push(fp::Caption {
+            id: fp::ClipId(901),
+            start: secs(1.0),
+            duration: secs(2.0),
+            text: "<i>안녕하세요 EffectCraft 자막 레이어</i>".into(),
+            speaker: Some("Narrator".into()),
+            cue_id: None,
+            settings: String::new(),
+        });
+        seq.caption_tracks.push(ct);
+    }
+
+    let mut p = Project::default();
+    let r = import_project(&mut p, &doc, &[main], &ImportOptions { name: "CaptionBridge".into(), ..Default::default() }, &mut probe);
+    assert!(!r.warnings.iter().any(|w| w.contains("caption tracks are not imported")), "{:?}", r.warnings);
+    let comp = p.comp(r.comps[0]).unwrap();
+    // Caption layer sits at the top of the composition stack above all video layers.
+    let cap_layer = &comp.layers[0];
+    assert_eq!(cap_layer.source, LayerSource::Text);
+    assert!(near(cap_layer.in_point, t(1.0)));
+    assert!(near(cap_layer.out_point, t(3.0)));
+    assert_eq!(cap_layer.comment, "Speaker: Narrator");
+    let st = cap_layer.props.prop("text/sourceText").unwrap();
+    assert_eq!(st.value.as_text().unwrap().text, "안녕하세요 EffectCraft 자막 레이어");
+
+    // Round-trip layer markers and layer labels through in-memory project handoff and Fcp7Xml/Otio.
+    let (mut ae_proj, cid) = ae_project();
+    {
+        let c = ae_proj.comp_mut(cid).unwrap();
+        let clip_a = c.layers.iter_mut().find(|l| l.name == "clip a").unwrap();
+        clip_a.label = effectcraft_color::Label::Orange;
+        clip_a.markers.push(effectcraft_project::Marker {
+            time: t(1.6),
+            duration: Tick::ZERO,
+            comment: "VFX cue".into(),
+            label: effectcraft_color::Label::Pink,
+            ..Default::default()
+        });
+    }
+    let opts_none = ExportOptions { prerender: PrerenderMode::None, ..Default::default() };
+    let (fp_proj, fp_seq, _) = export_project(&ae_proj, cid, &opts_none, &HashMap::new()).unwrap();
+    let mut mem_reimp = Project::default();
+    let mem_res = import_project(&mut mem_reimp, &fp_proj, &[fp_seq], &ImportOptions::default(), &mut probe);
+    let mem_mc = mem_reimp.comp(mem_res.comps[0]).unwrap();
+    let mem_la = layer(mem_mc, "clip a");
+    assert_eq!(mem_la.label, effectcraft_color::Label::Orange);
+    assert_eq!(mem_la.markers.len(), 1);
+    assert_eq!(mem_la.markers[0].comment, "VFX cue");
+    assert_eq!(mem_la.markers[0].label, effectcraft_color::Label::Pink);
+    assert!(near(mem_la.markers[0].time, t(1.6)));
+
+    for format in [TimelineFormat::Fcp7Xml, TimelineFormat::Otio] {
+        let out = export(&ae_proj, cid, &ExportOptions { format, prerender: PrerenderMode::None, ..Default::default() }, &HashMap::new()).unwrap();
+        let (reimp, res) = import_doc(&out.bytes, &format!("Main.{}", format.extension()), &mut probe);
+        let main_id = res.comps.iter().copied().find(|c| reimp.item(*c).unwrap().name == "Main").unwrap();
+        let mc = reimp.comp(main_id).unwrap();
+        let la = layer(mc, "clip a");
+        assert_eq!(la.markers.len(), 1, "{format:?}");
+        assert_eq!(la.markers[0].comment, "VFX cue");
+        assert!(near(la.markers[0].time, t(1.6)), "{format:?}: {:?}", la.markers[0].time.seconds());
+        if format == TimelineFormat::Otio {
+            assert_eq!(la.label, effectcraft_color::Label::Orange);
+        }
+    }
+}
+
+

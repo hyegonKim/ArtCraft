@@ -1175,6 +1175,47 @@ pub fn specs() -> Vec<CommandSpec> {
             s.cancel_interaction()?;
             ok()
         }),
+        cmd!(
+            "develop.deflicker",
+            "Deflicker Sequence",
+            ["Photo"],
+            None,
+            "{ids?: [photo], window?: 2..=32 (default 2, smoothing radius in frames), luminances?: [number]} — smooths frame-to-frame exposure flicker across the selected photo sequence → {count, offsets}",
+            has_selection,
+            |s, p| {
+                const C: &str = "develop.deflicker";
+                let ids = s.targets(p)?;
+                if ids.len() < 2 {
+                    return Err(bad(C, "select at least 2 photos to deflicker a sequence"));
+                }
+                let window = p.get("window").and_then(Value::as_u64).unwrap_or(2).clamp(1, 32) as usize;
+                let lumas: Vec<f64> = if let Some(given) = numbers(p.get("luminances")) {
+                    if given.len() != ids.len() {
+                        return Err(bad(C, "`luminances` length must match the number of target photos"));
+                    }
+                    given
+                } else {
+                    ids.iter()
+                        .map(|id| {
+                            let exp = s.develop_of(*id).map(|d| d.light.exposure).unwrap_or(0.0);
+                            0.18 * 2.0_f64.powf(exp)
+                        })
+                        .collect()
+                };
+                let offsets = lightcraft_develop::deflicker_exposure_offsets(&lumas, window);
+                let mut seq: Vec<DevelopSettings> = ids.iter().map(|id| (*s.develop_of(*id).unwrap_or_default()).clone()).collect();
+                lightcraft_develop::deflicker_sequence(&mut seq, &lumas, window);
+                let ops: Vec<Op> = ids
+                    .iter()
+                    .copied()
+                    .zip(seq)
+                    .filter_map(|(id, d)| s.develop_op(id, d, "Deflicker"))
+                    .collect();
+                let count = ops.len();
+                s.commit("Deflicker", Op::Batch { ops })?;
+                Ok(json!({"count": count, "offsets": offsets}))
+            }
+        ),
     ]
 }
 

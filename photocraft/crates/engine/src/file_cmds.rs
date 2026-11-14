@@ -1931,13 +1931,56 @@ fn color_lookup_tables(s: &mut Session, p: &Value) -> Result<Value> {
     let layers = lut_layers(&d.doc, explicit.as_deref())?;
     let count = layers.len();
     let title = p.get("title").and_then(Value::as_str).map(str::to_string).unwrap_or_else(|| stem(&d.doc.name));
-    let cube = bake_cube_layers(size as usize, &title, &layers);
+    let mut cube = bake_cube_layers(size as usize, &title, &layers);
+    if p.get("intensity").is_some() || p.get("chainPath").is_some() {
+        let mut lut = photocraft_cms::lutfile::parse_cube(&cube)
+            .map_err(|e| EngineError::Other(e.to_string()))?;
+        if let Some(chain_path) = p.get("chainPath").and_then(Value::as_str) {
+            let bytes = read_file(chain_path)?;
+            let next = photocraft_cms::lutfile::parse(chain_path, &bytes)
+                .map_err(|e| EngineError::BadParams { cmd: CMD.into(), msg: format!("chainPath: {e}") })?;
+            lut = lut.chain(&next, size as usize, &title);
+        }
+        if let Some(intensity) = p.get("intensity").and_then(Value::as_f64) {
+            lut = lut.with_intensity(intensity as f32);
+        }
+        cube = photocraft_cms::lutfile::write_cube(&lut);
+    }
     match p.get("path").and_then(Value::as_str) {
         Some(path) => {
             write_file(path, cube.as_bytes())?;
             Ok(json!({"path": path, "size": size, "layerCount": count}))
         }
         None => Ok(json!({"cube": cube, "size": size, "layerCount": count})),
+    }
+}
+
+fn motion_project(s: &mut Session, p: &Value) -> Result<Value> {
+    const CMD: &str = "file.export.motionProject";
+    let d = s.active().ok_or(EngineError::NoDocument)?;
+    let mut opts = photocraft_doc::motion::MotionExportOptions::default();
+    if let Some(fps) = p.get("frameRate").and_then(Value::as_f64) {
+        if !fps.is_finite() || !(1.0..=240.0).contains(&fps) {
+            return Err(EngineError::BadParams { cmd: CMD.into(), msg: "frameRate must be 1..=240".into() });
+        }
+        opts.fps = fps as f32;
+    }
+    if let Some(dur) = p.get("durationFrames").and_then(Value::as_u64) {
+        if dur == 0 {
+            return Err(EngineError::BadParams { cmd: CMD.into(), msg: "durationFrames must be >= 1".into() });
+        }
+        opts.duration_frames = dur as usize;
+    }
+    if let Some(pub_ctrl) = p.get("publishParameters").and_then(Value::as_bool) {
+        opts.publish_template_controls = pub_ctrl;
+    }
+    let ozml = photocraft_doc::motion::export_motion_ozml(&d.doc, &opts);
+    match p.get("path").and_then(Value::as_str) {
+        Some(path) => {
+            write_file(path, ozml.as_bytes())?;
+            Ok(json!({"path": path, "bytes": ozml.len(), "layerCount": d.doc.layers.len()}))
+        }
+        None => Ok(json!({"ozml": ozml, "bytes": ozml.len(), "layerCount": d.doc.layers.len()})),
     }
 }
 
@@ -2143,9 +2186,18 @@ pub fn specs() -> Vec<CommandSpec> {
             "Color Lookup Tables…",
             &["File", "Export"],
             None,
-            r##"{"path":str? (.cube; omit to return the text),"size":2..129=33,"title":str?,"scope":"all|selected"="all","layers":[id,…]?} (selected layer IDs use original document stacking; masks are spatial and omitted)"##,
+            r##"{"path":str? (.cube; omit to return the text),"size":2..129=33,"title":str?,"scope":"all|selected"="all","layers":[id,…]?,"intensity":0..1?,"chainPath":str?} (selected layer IDs use original document stacking; masks are spatial and omitted)"##,
             has_adjustments,
             color_lookup_tables
+        ),
+        spec!(
+            "file.export.motionProject",
+            "Apple Motion Project (.motn)…",
+            &["File", "Export"],
+            None,
+            r##"{"path":str? (.motn/.moti; omit to return ozml),"frameRate":1..240=30,"durationFrames":n=300,"publishParameters":bool=true} → {path?, ozml?, bytes, layerCount}"##,
+            has_doc,
+            motion_project
         ),
         spec!(
             "view.newGuideLayout",

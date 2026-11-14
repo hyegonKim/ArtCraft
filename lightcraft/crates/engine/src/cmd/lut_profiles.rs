@@ -162,5 +162,42 @@ pub fn specs() -> Vec<CommandSpec> {
             crate::profile_refs::refresh(s);
             Ok(json!({"deleted": id}))
         }),
+        cmd!(
+            "profile.exportLut",
+            "Export 3D LUT (.cube)…",
+            ["File"],
+            None,
+            "{path?: .cube file (omit to return `cube` text), size?: 2..=65 (default 33), space?: srgb|displayP3|adobeRgb|proPhotoRgb|rec2020, title?: str} — bakes the active photo's global color & tone edits into an Adobe/Resolve/Final Cut Pro 3D .cube LUT → {path?, cube, size}",
+            super::has_active,
+            |s, p| {
+                const C: &str = "profile.exportLut";
+                let id = s.active().ok_or_else(|| bad(C, "no active photo"))?;
+                let dev = s.develop_of(id).unwrap_or_default();
+                let size = match p.get("size") {
+                    None | Some(Value::Null) => 33usize,
+                    Some(v) => v.as_u64().ok_or_else(|| bad(C, "`size` must be an integer 2..=65"))? as usize,
+                };
+                let space = match str_param(p, "space").unwrap_or("srgb") {
+                    "srgb" | "sRGB" => lightcraft_pipeline::OutputSpace::Srgb,
+                    "displayP3" | "p3" => lightcraft_pipeline::OutputSpace::DisplayP3,
+                    "adobeRgb" => lightcraft_pipeline::OutputSpace::AdobeRgb,
+                    "proPhotoRgb" | "proPhoto" => lightcraft_pipeline::OutputSpace::ProPhoto,
+                    "rec2020" => lightcraft_pipeline::OutputSpace::Rec2020,
+                    other => return Err(bad(C, format!("unknown color space `{other}`"))),
+                };
+                let title = str_param(p, "title")
+                    .map(str::to_string)
+                    .or_else(|| s.catalog.photo(id).map(|ph| ph.file_name.clone()));
+                let lut = lightcraft_pipeline::lut::bake_develop_lut(&dev, size, space, title).map_err(|e| bad(C, e))?;
+                let cube = lut.to_cube();
+                if let Some(path) = str_param(p, "path") {
+                    std::fs::write(path, cube.as_bytes()).map_err(|e| bad(C, format!("{path}: {e}")))?;
+                    Ok(json!({"path": path, "cube": cube, "size": size}))
+                } else {
+                    Ok(json!({"cube": cube, "size": size}))
+                }
+            }
+        ),
     ]
 }
+
