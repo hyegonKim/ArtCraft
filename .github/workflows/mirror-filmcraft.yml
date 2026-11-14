@@ -15,8 +15,11 @@
 # The direct commit's own history is then replaced, so only do this once its content is here.
 # Then run this workflow by hand: if main moved on meanwhile, it fast-forwards the mirror again.
 #
-# Needs the FILMCRAFT_DEPLOY_KEY secret: the private half of a write-enabled deploy key on
-# hyegonKim/filmcraft.
+# Needs the FILMCRAFT_DEPLOY_KEY secret in the filmcraft-mirror environment: the private half of a
+# write-enabled deploy key on hyegonKim/filmcraft. Only main may deploy to that environment
+# (Settings → Environments → filmcraft-mirror → Deployment branches), so a workflow pushed on
+# another branch can't read the key. Keep it out of the repository secrets: every branch's
+# workflows can read those.
 name: Mirror filmcraft/ to hyegonKim/filmcraft
 
 on:
@@ -35,6 +38,8 @@ jobs:
   mirror:
     # Only main is mirrored: a manual run started from another branch would publish unmerged work.
     if: github.repository == 'hyegonKim/ArtCraft' && github.ref == 'refs/heads/main'
+    # Holds the deploy key; GitHub refuses this environment to any branch but main.
+    environment: filmcraft-mirror
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
