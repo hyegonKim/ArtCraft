@@ -71,3 +71,51 @@ it('does not commit a project whose host navigated away while images decoded', a
   await expect(restoreLayerProject(saved, () => false)).rejects.toThrow('cancelled');
   expect(useSceneStore.getState().drawNodes[0].id).toBe('keep');
 });
+
+it('captures again while offline from images it already embedded, without caching a failed read', async () => {
+  const fetchImage = vi.fn().mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    .mockResolvedValue({ ok: true, blob: async () => new Blob(['hello'], { type: 'image/png' }) });
+  vi.stubGlobal('fetch', fetchImage);
+  useSceneStore.setState({ baseImageInfo: { url: 'https://storage.test/offline-base?signature=1', mediaToken: 'base' },
+    baseImageBitmap: {} as HTMLImageElement, drawNodes: [] });
+  await expect(captureLayerProject()).rejects.toThrow('Failed to fetch');
+  expect((await captureLayerProject()).baseImage.url).toBe(png);
+  fetchImage.mockRejectedValue(new TypeError('Failed to fetch'));
+  useSceneStore.setState({ drawNodes: [stroke] });
+  const offline = await captureLayerProject();
+  expect(offline.baseImage.url).toBe(png);
+  expect(offline.drawNodes).toEqual([stroke]);
+  expect(fetchImage).toHaveBeenCalledTimes(2);
+});
+
+const remoteImage = (id: string, url: string) =>
+  ({ id, type: 'image', x: 0, y: 0, width: 10, height: 10, imageUrl: url }) as unknown as Node;
+const imageBytes = { ok: true, blob: async () => new Blob(['hello'], { type: 'image/png' }) };
+
+it('keeps every remote image of the open document for offline captures, however many there are', async () => {
+  const fetchImage = vi.fn().mockResolvedValue(imageBytes);
+  vi.stubGlobal('fetch', fetchImage);
+  useSceneStore.setState({ drawNodes: Array.from({ length: 30 }, (_, i) => remoteImage(`img${i}`, `https://storage.test/layer-${i}.png`)) });
+  await captureLayerProject();
+  expect(fetchImage).toHaveBeenCalledTimes(30);
+  fetchImage.mockRejectedValue(new TypeError('Failed to fetch'));
+  const offline = await captureLayerProject();
+  expect(offline.drawNodes.every(node => node.type === 'image' && node.imageUrl === png)).toBe(true);
+  expect(fetchImage).toHaveBeenCalledTimes(30);
+});
+
+it('keeps the base image for offline captures when another image of the document fails to load', async () => {
+  const fetchImage = vi.fn(async (url: string) => {
+    if (url.includes('new-layer')) throw new TypeError('Failed to fetch');
+    return imageBytes;
+  });
+  vi.stubGlobal('fetch', fetchImage);
+  useSceneStore.setState({ baseImageInfo: { url: 'https://storage.test/base?signature=2', mediaToken: 'base' },
+    baseImageBitmap: {} as HTMLImageElement, drawNodes: [] });
+  await captureLayerProject();
+  useSceneStore.setState({ drawNodes: [remoteImage('new', 'https://storage.test/new-layer.png')] });
+  await expect(captureLayerProject()).rejects.toThrow('Failed to fetch');
+  useSceneStore.setState({ drawNodes: [] });
+  fetchImage.mockRejectedValue(new TypeError('Failed to fetch'));
+  expect((await captureLayerProject()).baseImage.url).toBe(png);
+});

@@ -33,13 +33,25 @@ export async function captureLayerProject(): Promise<LayerProject> {
     eraserSize: state.eraserSize, fillColor: state.fillColor, aspectRatioType: state.aspectRatioType,
     inpaintBrushSize: state.inpaintBrushSize, inpaintOperation: state.inpaintOperation,
   };
-  const drawNodes = await Promise.all(nodes.map(async node => {
-    if (node.type !== 'image') return node as StoredNode;
-    if (!node.imageUrl) throw new Error('An image layer has not finished loading.');
-    return { ...node, imageUrl: await embedImage(node.imageUrl) } as StoredNode;
-  }));
-  baseImage.url = baseImage.isBlankCanvas ? '' : await embedImage(baseImage.url);
-  return { format: 'artcraft-layer-project', version: 1, baseImage, drawNodes, inpaintLineNodes: masks, settings };
+  // Every remote image this document uses, collected before any of them is read: a failed read must
+  // not drop the others from the cache.
+  const used = new Set<string>();
+  for (const source of [...nodes.map(node => node.type === 'image' ? node.imageUrl : undefined), baseImage.isBlankCanvas ? undefined : baseImage.url]) {
+    if (typeof source === 'string' && !source.startsWith('data:')) used.add(source);
+  }
+  try {
+    const drawNodes = await Promise.all(nodes.map(async node => {
+      if (node.type !== 'image') return node as StoredNode;
+      if (!node.imageUrl) throw new Error('An image layer has not finished loading.');
+      return { ...node, imageUrl: await embedImage(node.imageUrl) } as StoredNode;
+    }));
+    baseImage.url = baseImage.isBlankCanvas ? '' : await embedImage(baseImage.url);
+    return { format: 'artcraft-layer-project', version: 1, baseImage, drawNodes, inpaintLineNodes: masks, settings };
+  } finally {
+    // Keep exactly the remote images this document uses, however many: the next capture (offline too)
+    // needs all of them, and images of documents no longer open are dropped.
+    for (const url of embeddedUrls.keys()) if (!used.has(url)) embeddedUrls.delete(url);
+  }
 }
 
 /** Decode every asset before changing the current document. Failed opens preserve it. */
@@ -91,8 +103,27 @@ export function validateLayerProject(value: unknown): LayerProject {
   return doc;
 }
 
-async function embedImage(source: string | File): Promise<string> {
-  if (typeof source === 'string' && source.startsWith('data:')) return source;
+// Offline snapshots must not depend on re-downloading a remote image that was already embedded once.
+// captureLayerProject() keeps the URLs the open document uses and drops the others.
+const embeddedUrls = new Map<string, Promise<string>>();
+const embeddedFiles = new WeakMap<File, Promise<string>>();
+
+function embedImage(source: string | File): Promise<string> {
+  if (typeof source === 'string' && source.startsWith('data:')) return Promise.resolve(source);
+  const cached = typeof source === 'string' ? embeddedUrls.get(source) : embeddedFiles.get(source);
+  if (cached) return cached;
+  const result = readAsDataUrl(source);
+  if (typeof source === 'string') embeddedUrls.set(source, result);
+  else embeddedFiles.set(source, result);
+  // Failures are not cached, so a later retry reads the image again.
+  result.catch(() => {
+    if (typeof source === 'string') { if (embeddedUrls.get(source) === result) embeddedUrls.delete(source); }
+    else if (embeddedFiles.get(source) === result) embeddedFiles.delete(source);
+  });
+  return result;
+}
+
+async function readAsDataUrl(source: string | File): Promise<string> {
   let blob: Blob;
   if (typeof source === 'string') {
     const response = await fetch(source);

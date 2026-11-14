@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { LayerProject } from '@storyteller/ui-pagedraw';
-import { LayerAutosave, LAYER_AUTOSAVE_DELAY_MS, LAYER_SAVE_RETRY_MS } from './layer-autosave';
+import { LayerAutosave, LayerProjectUnavailableError, LAYER_AUTOSAVE_DELAY_MS, LAYER_LOCAL_DELAY_MS, LAYER_SAVE_RETRY_MS,
+  LOCAL_RECOVERY_UNAVAILABLE, offlineCopyName } from './layer-autosave';
+import { createMemoryDraftStore, type LayerDraft, type LayerDraftStore } from './layer-draft-store';
 
 const document = { version: 1, drawNodes: [{ id: 'original' }] } as unknown as LayerProject;
 let saver: LayerAutosave;
@@ -94,4 +96,264 @@ it('keeps a failed Save copy separate from the original through automatic retry'
   await vi.advanceTimersByTimeAsync(5000); expect(save.mock.calls[1].slice(0, 3)).toEqual(attempt.slice(0, 3));
   expect(save.mock.calls[1][3]).not.toBe(attempt[3]);
   saver.markDirty(); await saver.flush(); expect(save.mock.calls[2][2]).toBe('m_saved');
+});
+
+// ---- Device copies (IndexedDB in the browser) and the offline save queue ----
+const hash = async (json: string) => `h:${json}`;
+const hashOf = (value: LayerProject) => hash(JSON.stringify(value));
+let drafts: LayerDraftStore;
+function local(extra: Partial<ConstructorParameters<typeof LayerAutosave>[0]> = {}, owner = 'u_owner') {
+  saver.dispose();
+  drafts = (extra.drafts as LayerDraftStore | undefined) ?? createMemoryDraftStore(true);
+  saver = new LayerAutosave({ capture, save, getName: () => name, onSaved, onState: vi.fn(), drafts, hash, ...extra });
+  saver.activate(); saver.setOwner(owner); saver.setEnabled(true);
+  return saver;
+}
+const kept = (id = 'd_recovered', patch: Partial<LayerDraft> = {}): LayerDraft => ({ id, owner: 'u_owner', token: 'm_saved',
+  copyPending: false, name: 'Offline edits', document, baseHash: 'h:base', ownHashes: [], updatedAt: 1, ...patch });
+
+it('keeps an edit on this device before the server confirms it and deletes that copy only after acknowledgment', async () => {
+  local();
+  let finish!: (token: string) => void;
+  save.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  const [row] = await drafts.list('u_owner');
+  expect(row).toMatchObject({ owner: 'u_owner', name: 'Original', token: undefined });
+  expect(row).not.toHaveProperty('document');
+  expect((await drafts.get(row.id))!.document).toEqual(document);
+  expect(await drafts.list('u_other')).toEqual([]);
+  expect(saver.state).toMatchObject({ dirty: true, local: true });
+  await vi.advanceTimersByTimeAsync(LAYER_AUTOSAVE_DELAY_MS); expect(save).toHaveBeenCalledTimes(1);
+  expect(await drafts.list('u_owner')).toHaveLength(1);
+  finish('m_saved'); await vi.advanceTimersByTimeAsync(0);
+  expect(await drafts.list('u_owner')).toEqual([]);
+  expect(saver.state).toMatchObject({ dirty: false, local: false });
+});
+
+it('queues saves while offline and sends the latest edits as soon as the browser is back online', async () => {
+  local({ online: () => false });
+  saver.markDirty(); name = 'Edited offline'; saver.markDirty();
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(save).not.toHaveBeenCalled();
+  expect(saver.state).toMatchObject({ dirty: true, offline: true, local: true, retrying: false, error: '' });
+  expect((await drafts.list('u_owner'))[0].name).toBe('Edited offline');
+  saver.setOnline(true); await vi.advanceTimersByTimeAsync(0);
+  expect(save).toHaveBeenCalledTimes(1);
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Edited offline', undefined]);
+  expect(await drafts.list('u_owner')).toEqual([]);
+});
+
+it('records the new server identity on a kept copy at once, so a later replay updates instead of duplicating', async () => {
+  local();
+  let finish!: (token: string) => void;
+  save.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_AUTOSAVE_DELAY_MS);
+  name = 'Edited during the first create'; saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  finish('m_created'); await vi.advanceTimersByTimeAsync(0);
+  const [row] = await drafts.list('u_owner');
+  expect(row).toMatchObject({ token: 'm_created', baseHash: await hashOf(document), name: 'Edited during the first create' });
+});
+
+it('replays a recovered copy onto the same project when the server still has the version it was based on', async () => {
+  const serverHash = vi.fn().mockResolvedValue('h:base');
+  local({ serverHash }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(serverHash).toHaveBeenCalledWith('m_saved');
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Offline edits', 'm_saved']);
+  expect(onSaved).toHaveBeenCalledWith('m_saved', undefined);
+  expect(await drafts.list('u_owner')).toEqual([]);
+});
+
+it.each([
+  ['changed on another device', () => Promise.resolve('h:someone-else')],
+  ['deleted', () => Promise.reject(new LayerProjectUnavailableError('This 2D project is unavailable.'))],
+])('saves a recovered copy as a separate private project when the original was %s', async (_case, serverState) => {
+  save.mockResolvedValue('m_copy');
+  local({ serverHash: vi.fn(serverState) }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(save).toHaveBeenCalledTimes(1);
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Offline edits (offline copy)', undefined]);
+  expect(onSaved).toHaveBeenCalledWith('m_copy', 'Offline edits (offline copy)');
+  expect(saver.state.notice).toContain('was not overwritten');
+  expect(await drafts.list('u_owner')).toEqual([]);
+  saver.markDirty(); await saver.flush();
+  expect(save.mock.calls[1][2]).toBe('m_copy');
+});
+
+it('treats its own landed write with a lost response as safe, without creating a copy', async () => {
+  const newer = { ...document, drawNodes: [] } as unknown as LayerProject;
+  const serverHash = vi.fn().mockResolvedValue('h:base');
+  save.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+  local({ serverHash }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(saver.state).toMatchObject({ dirty: true, retrying: true });
+  expect((await drafts.get('d_recovered'))!.ownHashes).toEqual([await hashOf(document)]);
+  // The first request did reach the server; the device only saw the network failure.
+  serverHash.mockResolvedValue(await hashOf(document)); capture.mockResolvedValue(newer); saver.markDirty();
+  saver.setOnline(false); saver.setOnline(true); await vi.advanceTimersByTimeAsync(0);
+  expect(serverHash).toHaveBeenCalledTimes(2);
+  expect(save.mock.calls[1].slice(0, 3)).toEqual([newer, 'Offline edits', 'm_saved']);
+});
+
+it('keeps waiting instead of copying when the server cannot be reached for the pre-save check', async () => {
+  const serverHash = vi.fn().mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValue('h:base');
+  local({ serverHash }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(save).not.toHaveBeenCalled();
+  expect(saver.state).toMatchObject({ dirty: true, retrying: true, error: 'Failed to fetch', local: true });
+  await vi.advanceTimersByTimeAsync(LAYER_SAVE_RETRY_MS);
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Offline edits', 'm_saved']);
+});
+
+it('keeps a Save copy made offline as a pending separate project after reload', async () => {
+  local({ online: () => false }); saver.reset('m_original');
+  await saver.flush(true); await vi.advanceTimersByTimeAsync(0);
+  expect(save).not.toHaveBeenCalled();
+  expect((await drafts.list('u_owner'))[0]).toMatchObject({ token: 'm_original', copyPending: true });
+  saver.setOnline(true); await vi.advanceTimersByTimeAsync(0);
+  expect(save.mock.calls[0][2]).toBeUndefined();
+});
+
+it('writes a pending edit to the device when the editor unmounts before the local delay', async () => {
+  local(); saver.markDirty(); saver.dispose();
+  await vi.advanceTimersByTimeAsync(0);
+  const [row] = await drafts.list('u_owner');
+  expect((await drafts.get(row.id))!.document).toEqual(document);
+  expect(save).not.toHaveBeenCalled();
+});
+
+it('reports when the device cannot keep a copy, while server saves continue', async () => {
+  const full = createMemoryDraftStore(true);
+  full.put = () => Promise.reject(new DOMException('full', 'QuotaExceededError'));
+  local({ drafts: full }); saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: false, localError: expect.stringContaining('out of storage') });
+  await vi.advanceTimersByTimeAsync(LAYER_AUTOSAVE_DELAY_MS); expect(save).toHaveBeenCalledTimes(1);
+  local({ drafts: createMemoryDraftStore(false) }); saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: false, localError: LOCAL_RECOVERY_UNAVAILABLE });
+});
+
+it('never writes a device copy without a signed-in owner', async () => {
+  local({}, ''); saver.setOwner(undefined); saver.markDirty();
+  await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(await drafts.list('')).toEqual([]);
+});
+
+it('keeps the last edit when the session ends and never writes it into another account\'s record', async () => {
+  local(); saver.markDirty(); saver.setOwner(undefined); await vi.advanceTimersByTimeAsync(0);
+  const [first] = await drafts.list('u_owner');
+  expect((await drafts.get(first.id))!.document).toEqual(document);
+  expect(saver.setOwner('u_owner')).toBe(false); // the same account returning is not a switch
+  name = 'After signing in again'; saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect((await drafts.list('u_owner')).map(row => [row.id, row.name])).toEqual([[first.id, 'After signing in again']]);
+  expect(saver.setOwner('u_other')).toBe(true); await vi.advanceTimersByTimeAsync(LAYER_AUTOSAVE_DELAY_MS);
+  // The previous account's document is neither kept for nor saved to the new account.
+  expect(saver.state.dirty).toBe(false);
+  expect(await drafts.list('u_other')).toEqual([]);
+  expect(save).not.toHaveBeenCalled();
+  expect((await drafts.list('u_owner')).map(row => row.name)).toEqual(['After signing in again']);
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect((await drafts.list('u_other'))[0].id).not.toBe(first.id);
+});
+
+it('keeps saving a conflicting replay as a separate copy when the first copy upload fails', async () => {
+  save.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValue('m_copy');
+  local({ serverHash: vi.fn().mockResolvedValue('h:someone-else') }); await drafts.put(kept()); name = 'Offline edits';
+  saver.adopt(kept()); await vi.advanceTimersByTimeAsync(0);
+  expect(save.mock.calls[0].slice(0, 3)).toEqual([document, 'Offline edits (offline copy)', undefined]);
+  // The retry falls inside the server-check reuse window, yet must never overwrite the original.
+  await vi.advanceTimersByTimeAsync(LAYER_SAVE_RETRY_MS);
+  expect(save).toHaveBeenCalledTimes(2);
+  expect(save.mock.calls[1].slice(0, 3)).toEqual([document, 'Offline edits (offline copy)', undefined]);
+  expect(onSaved).toHaveBeenCalledWith('m_copy', 'Offline edits (offline copy)');
+  expect(saver.state.notice).toContain('was not overwritten');
+});
+
+it('stops reporting edits as kept once their device copy is discarded, even if a write was already queued', async () => {
+  local({ online: () => false });
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state.local).toBe(true);
+  await saver.discardLocal();
+  expect(saver.state).toMatchObject({ dirty: true, local: false });
+  expect(await drafts.list('u_owner')).toEqual([]);
+  await saver.persistNow();
+  expect(saver.state.local).toBe(true);
+  saver.markDirty(); const writing = saver.persistNow(); const discarding = saver.discardLocal();
+  await writing; await discarding;
+  expect(saver.state.local).toBe(false);
+  expect(await drafts.list('u_owner')).toEqual([]);
+});
+
+it('reports an edit that cannot be captured for the device copy instead of implying it is being kept', async () => {
+  local({ online: () => false });
+  capture.mockRejectedValueOnce(new Error('Could not read an image layer. Please retry.'));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: false,
+    localError: 'Could not keep a recovery copy on this device. Could not read an image layer. Please retry.' });
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state).toMatchObject({ local: true, localError: '' });
+  // Without an open document (saving disabled) there is nothing to recover, so nothing to report.
+  saver.setEnabled(false); capture.mockRejectedValueOnce(new Error('Open an image or create a canvas before saving.'));
+  saver.markDirty(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(saver.state.localError).toBe('');
+});
+
+it('releases the cross-tab lock only after the last device write lands', async () => {
+  local(); await vi.advanceTimersByTimeAsync(0);
+  const id = saver.currentDraftId;
+  expect(await drafts.held()).toEqual(new Set([id]));
+  const put = drafts.put;
+  let land!: () => void;
+  drafts.put = draft => new Promise(resolve => { land = () => resolve(put(draft)); });
+  saver.markDirty(); saver.dispose(); await vi.advanceTimersByTimeAsync(0);
+  // Another tab must not be able to restore the copy while its newest edit is still being written.
+  expect(await drafts.claim(id)).toBeUndefined();
+  land(); await vi.advanceTimersByTimeAsync(0);
+  expect(await drafts.held()).toEqual(new Set());
+  expect(await drafts.list('u_owner')).toHaveLength(1);
+});
+
+it('keeps the lock when the same document remounts before its last write lands', async () => {
+  local(); await vi.advanceTimersByTimeAsync(0);
+  const id = saver.currentDraftId;
+  saver.markDirty(); saver.dispose(); saver.activate(); await vi.advanceTimersByTimeAsync(0);
+  expect(await drafts.held()).toEqual(new Set([id]));
+  expect(await drafts.claim(id)).toBeUndefined();
+});
+
+it('writes a revision to the device once however many hide and close events ask, and again after a failed write', async () => {
+  local({ online: () => false });
+  const put = vi.spyOn(drafts, 'put');
+  saver.markDirty(); void saver.persistNow(); void saver.persistNow(); await vi.advanceTimersByTimeAsync(LAYER_LOCAL_DELAY_MS);
+  expect(put).toHaveBeenCalledTimes(1);
+  put.mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
+  saver.markDirty(); await saver.persistNow(); await saver.persistNow();
+  expect(put).toHaveBeenCalledTimes(3);
+  expect(saver.state).toMatchObject({ local: true, localError: '' });
+});
+
+it('hashes exactly the JSON it uploads, serializing the document once', async () => {
+  const hashed = vi.fn(hash);
+  local({ hash: hashed });
+  saver.markDirty(); await saver.flush();
+  const json = save.mock.calls[0][4];
+  expect(json).toBe(JSON.stringify(document));
+  expect(hashed).toHaveBeenCalledWith(json);
+});
+
+it('says whether this device can keep copies at all', async () => {
+  local(); await vi.advanceTimersByTimeAsync(0);
+  expect(saver.state.deviceCopies).toBe(true);
+  local({ drafts: createMemoryDraftStore(false) }); await vi.advanceTimersByTimeAsync(0);
+  expect(saver.state.deviceCopies).toBe(false);
+  local(); saver.setOwner(undefined);
+  expect(saver.state.deviceCopies).toBe(false);
+});
+
+it('names a conflict copy once and cuts a long name between characters', () => {
+  expect(offlineCopyName('Poster')).toBe('Poster (offline copy)');
+  expect(offlineCopyName('Poster (offline copy)')).toBe('Poster (offline copy)');
+  const long = offlineCopyName('🎨'.repeat(200));
+  expect(long.endsWith(' (offline copy)')).toBe(true);
+  expect(Array.from(long)).toHaveLength(120);
+  expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(long)).toBe(false);
 });
