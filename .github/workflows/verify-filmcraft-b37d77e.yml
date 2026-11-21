@@ -9,60 +9,80 @@ permissions:
   contents: read
 
 jobs:
-  workspace:
-    name: Workspace tests
-    uses: storytold/craft-common-actions/.github/workflows/gate.yml@0bef64f155fcea81edbd9542381777358bfbdcf4
-    with:
-      toolchain: '1.95.0'
-      craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
-      timeout-minutes: 120
-      gate-timeout-minutes: 115
-      dev-debug: '0'
-      tools: ''
-      targets: ''
-      packages: >-
-        pkg-config libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev libxcursor-dev
-        libxrandr-dev libxi-dev libfontconfig1-dev libfreetype-dev mesa-vulkan-drivers
-        libasound2-dev
-      env: |
-        FILMCRAFT_REQUIRE_ORACLES=1
-        RUST_TEST_THREADS=2
-      setup-command: |
-        set -euo pipefail
-        mkdir -p "$RUNNER_TEMP/filmcraft-oracle"
-        archive="$RUNNER_TEMP/filmcraft-oracle.tar.xz"
-        curl --fail --location --retry 3 --output "$archive" https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/autobuild-2026-11-21-12-37/ffmpeg-n8.1.3-39-g660b5aa7db-linux64-gpl-8.1.tar.xz
-        printf '%s  %s\n' 85d6d2c617fa4e2bee9ea105b5532c66ac866ada0a9a650a088e6fb096c7eeff "$archive" | sha256sum --check
-        tar -xJf "$archive" --strip-components=2 -C "$RUNNER_TEMP/filmcraft-oracle" --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
-        "$RUNNER_TEMP/filmcraft-oracle/ffmpeg" -version | sed -n '1p'
-        printf '%s\n' "$RUNNER_TEMP/filmcraft-oracle" >> "$GITHUB_PATH"
-      command: |
-        set -euo pipefail
-        git fetch --depth=1 origin b37d77e86ead6ead1db3a350cdfd632b4ee9c537
-        git checkout --detach b37d77e86ead6ead1db3a350cdfd632b4ee9c537
-        git rev-parse HEAD
-        cd filmcraft
-        status=0
-        cargo test --locked --workspace --lib --bins --tests --no-fail-fast || status=1
-        cargo test --locked --workspace --doc || status=1
-        git diff --exit-code -- Cargo.lock
-        exit "$status"
+  check:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Workspace tests
+            check: workspace
+            packages: >-
+              pkg-config libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev libxcursor-dev
+              libxrandr-dev libxi-dev libfontconfig1-dev libfreetype-dev mesa-vulkan-drivers
+              libasound2-dev
+            targets: ''
+          - name: WASM check
+            check: wasm
+            packages: ''
+            targets: wasm32-unknown-unknown
+    env:
+      CARGO_INCREMENTAL: '0'
+      CARGO_NET_RETRY: '5'
+    steps:
+      - name: Check out FilmCraft source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: b37d77e86ead6ead1db3a350cdfd632b4ee9c537
+          sparse-checkout: filmcraft
+          persist-credentials: false
 
-  wasm:
-    name: WASM check
-    uses: storytold/craft-common-actions/.github/workflows/gate.yml@0bef64f155fcea81edbd9542381777358bfbdcf4
-    with:
-      toolchain: '1.95.0'
-      targets: wasm32-unknown-unknown
-      craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
-      timeout-minutes: 60
-      dev-debug: '0'
-      tools: ''
-      command: |
-        set -euo pipefail
-        git fetch --depth=1 origin b37d77e86ead6ead1db3a350cdfd632b4ee9c537
-        git checkout --detach b37d77e86ead6ead1db3a350cdfd632b4ee9c537
-        git rev-parse HEAD
-        cd filmcraft
-        cargo xtask wasm
-        git diff --exit-code -- Cargo.lock
+      - name: Set up FilmCraft dependencies
+        uses: storytold/craft-common-actions/actions/gate-setup@ab35cb2622a77d004a8344095888bfcfbef10323
+        with:
+          toolchain: '1.95.0'
+          targets: ${{ matrix.targets }}
+          packages: ${{ matrix.packages }}
+          craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
+          dev-debug: '0'
+          tools: ''
+          # The shared cache assumes Cargo.toml is at the repository root.
+          rust-cache: 'false'
+
+      - name: Install pinned FFmpeg oracle
+        if: matrix.check == 'workspace'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/filmcraft-oracle"
+          archive="$RUNNER_TEMP/filmcraft-oracle.tar.xz"
+          curl --fail --location --retry 3 --output "$archive" https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/autobuild-2026-11-21-12-37/ffmpeg-n8.1.3-39-g660b5aa7db-linux64-gpl-8.1.tar.xz
+          printf '%s  %s\n' 85d6d2c617fa4e2bee9ea105b5532c66ac866ada0a9a650a088e6fb096c7eeff "$archive" | sha256sum --check
+          tar -xJf "$archive" --strip-components=2 -C "$RUNNER_TEMP/filmcraft-oracle" --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
+          "$RUNNER_TEMP/filmcraft-oracle/ffmpeg" -version | sed -n '1p'
+          printf '%s\n' "$RUNNER_TEMP/filmcraft-oracle" >> "$GITHUB_PATH"
+
+      - name: Run workspace tests
+        if: matrix.check == 'workspace'
+        working-directory: filmcraft
+        env:
+          FILMCRAFT_REQUIRE_ORACLES: '1'
+          RUST_TEST_THREADS: '2'
+        run: |
+          git rev-parse HEAD
+          cargo test --locked --workspace --lib --bins --tests --no-fail-fast
+
+      - name: Run workspace doctests
+        if: "!cancelled() && matrix.check == 'workspace'"
+        working-directory: filmcraft
+        run: cargo test --locked --workspace --doc
+
+      - name: Check WASM crates
+        if: matrix.check == 'wasm'
+        working-directory: filmcraft
+        run: |
+          git rev-parse HEAD
+          cargo xtask wasm
+          git diff --exit-code -- Cargo.lock
