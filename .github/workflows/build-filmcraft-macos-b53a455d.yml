@@ -1,0 +1,71 @@
+name: FilmCraft macOS release build
+run-name: Build FilmCraft b53a455d for Apple silicon
+
+on:
+  push:
+    branches: [codex/build-filmcraft-macos-b53a455d]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      FILMCRAFT_BUILD_SHA: b53a455d2582adb69589d252b9f1ae7a6752b107
+      FILMCRAFT_BUILD_NUMBER: '19'
+      FILMCRAFT_BUILD_DATE: '2026-11-22'
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
+      CARGO_INCREMENTAL: '0'
+      CARGO_NET_RETRY: '5'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: hyegonKim/filmcraft
+          ref: b53a455d2582adb69589d252b9f1ae7a6752b107
+          persist-credentials: false
+
+      - name: Fetch licensed fonts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: storytold/craft-fonts
+          ref: b076417b5880bd4154bd22f00695b1d28c6bea83
+          path: craft-fonts
+          persist-credentials: false
+
+      - name: Build and verify version
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(uname -m)" == arm64 ]]
+          [[ "$(git rev-parse HEAD)" == "$FILMCRAFT_BUILD_SHA" ]]
+          [[ "$(git rev-parse HEAD^{tree})" == 08408d1240300bfe8f8ec8bd58b2abb4380ec373 ]]
+          export CRAFT_FONTS_DIR="$PWD/craft-fonts"
+          export CRAFT_FONTS_REQUIRED=1
+          rustup toolchain install 1.95.0 --profile minimal
+          cargo +1.95.0 build --release --locked -j2 -p filmcraft -p filmcraft-cli --features whisper,macos-voices
+          git diff --exit-code -- Cargo.lock
+          target/release/filmcraft --version
+          target/release/filmcraft-cli --version
+          expected="FilmCraft 0.15.0 · release · Build $FILMCRAFT_BUILD_NUMBER ($FILMCRAFT_BUILD_DATE, $FILMCRAFT_BUILD_SHA)"
+          [[ "$(target/release/filmcraft --version)" == "$expected" ]]
+          out="$RUNNER_TEMP/filmcraft-macos-inputs"
+          mkdir -p "$out/release" "$out/fonts"
+          cp target/release/filmcraft target/release/filmcraft-cli "$out/release/"
+          for license in craft-fonts/fonts/*/OFL.txt; do
+            test -f "$license"
+            family="$(basename "$(dirname "$license")")"
+            mkdir -p "$out/fonts/$family"
+            cp "$license" "$out/fonts/$family/OFL.txt"
+          done
+          tar -czf "$RUNNER_TEMP/filmcraft-b53a455d-macos-arm64.tar.gz" -C "$out" release fonts
+          shasum -a 256 "$RUNNER_TEMP/filmcraft-b53a455d-macos-arm64.tar.gz" | awk '{print $1}'
+
+      - name: Upload build inputs for local signing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unsigned-filmcraft-b53a455d-macos-arm64
+          path: ${{ runner.temp }}/filmcraft-b53a455d-macos-arm64.tar.gz
+          if-no-files-found: error
+          retention-days: 1
