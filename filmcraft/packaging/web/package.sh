@@ -15,7 +15,10 @@ if [[ "${1:-}" != "--skip-build" ]]; then
   # CI (the shared release workflow installs only trunk): install the wasm-bindgen CLI at the
   # crate's exact version. Locally, `cargo xtask web` says which version to install.
   if [[ -n "${CI:-}" ]]; then
-    WASM_BINDGEN_VERSION="$(sed -n 's/^const WASM_BINDGEN: &str = "\(.*\)";$/\1/p' "$ROOT/xtask/src/main.rs")"
+    # `.*` after the `;` also takes the CR of a CRLF line.
+    WASM_BINDGEN_VERSION="$(sed -n 's/^const WASM_BINDGEN: &str = "\([^"]*\)";.*$/\1/p' "$ROOT/xtask/src/main.rs")"
+    # An empty version would let grep -F match any installed wasm-bindgen.
+    [[ -n "$WASM_BINDGEN_VERSION" ]] || { echo "error: could not read WASM_BINDGEN from xtask/src/main.rs" >&2; exit 1; }
     if ! { command -v wasm-bindgen >/dev/null && wasm-bindgen --version | grep -qF "$WASM_BINDGEN_VERSION"; }; then
       cargo install wasm-bindgen-cli --version "$WASM_BINDGEN_VERSION" --locked
     fi
