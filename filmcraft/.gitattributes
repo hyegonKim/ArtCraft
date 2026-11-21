@@ -1,2 +1,5 @@
 # POSIX packaging scripts require LF when checked out on macOS/Linux.
 *.sh text eol=lf
+# shellcheck and desktop-file-validate both report a CR before the line feed as an error.
+.shellcheckrc text eol=lf
+*.desktop text eol=lf
