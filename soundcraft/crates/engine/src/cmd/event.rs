@@ -98,6 +98,53 @@ pub fn specs() -> Vec<CommandSpec> {
         cmd!(noundo "markers.recall", "Recall Memory Location", [], Some("Period + n + Period"), "{number}", always, recall_marker),
         cmd!(noundo "markers.next", "Go to Next Marker", [], None, "{}", always, |e, _| step_marker(e, 1)),
         cmd!(noundo "markers.previous", "Go to Previous Marker", [], None, "{}", always, |e, _| step_marker(e, -1)),
+        cmd!(
+            "event.smpte_lock",
+            "SMPTE Lock Position...",
+            ["Event", "Time Operations"],
+            None,
+            "{bpm: number, clips?: [clip_id], lock?: bool} — optionally locks/unlocks the target clips (`lock`) and updates the session tempo to `bpm` while keeping `time_locked` clips fixed at their absolute SMPTE sample positions",
+            always,
+            |e, p| {
+                let id = "event.smpte_lock";
+                if let Some(lock) = p.get("lock").and_then(Value::as_bool) {
+                    let ids = clip_ids_param(e, p);
+                    let s = e.session_mut();
+                    for cid in ids {
+                        if let Some(c) = s.find_clip_mut(cid) {
+                            c.time_locked = lock;
+                        }
+                    }
+                }
+                let bpm = f64_or(p, "bpm", e.session().tempo.tempo_at_tick(0));
+                let affected = soundcraft_model::fcpxml::smpte_lock_clips(e.session_mut(), bpm)
+                    .map_err(|err| bad(id, err.to_string()))?;
+                Ok(json!({"bpm": bpm, "affected_clips": affected}))
+            }
+        ),
+        cmd!(
+            "event.beat_map_markers",
+            "Beat Map Scene Markers...",
+            ["Event", "Tempo Operations"],
+            None,
+            "{anchors: [{bar: 2, beat?: 1, tick?: 0, marker: marker_id}, ...]} — computes piecewise constant tempo changes so each musical Bar|Beat lands sample-accurately on its scene marker",
+            always,
+            |e, p| {
+                let id = "event.beat_map_markers";
+                let arr = p.get("anchors").and_then(Value::as_array).ok_or_else(|| bad(id, "`anchors` array required"))?;
+                let mut anchors = Vec::with_capacity(arr.len());
+                for item in arr {
+                    let bar = item.get("bar").and_then(Value::as_i64).ok_or_else(|| bad(id, "each anchor requires `bar`"))?;
+                    let beat = item.get("beat").and_then(Value::as_i64).unwrap_or(1);
+                    let tick = item.get("tick").or_else(|| item.get("sub_tick")).and_then(Value::as_i64).unwrap_or(0);
+                    let marker = item.get("marker").and_then(Value::as_u64).ok_or_else(|| bad(id, "each anchor requires `marker` id"))?;
+                    anchors.push((soundcraft_time::BarBeat { bar, beat, tick }, soundcraft_model::MarkerId(marker)));
+                }
+                let events = soundcraft_model::fcpxml::beat_map_markers_to_tempo(e.session_mut(), &anchors)
+                    .map_err(|err| bad(id, err.to_string()))?;
+                Ok(json!({"tempos": events.iter().map(|ev| json!({"tick": ev.tick, "bpm": ev.bpm})).collect::<Vec<_>>()}))
+            }
+        ),
     ]
 }
 
@@ -514,5 +561,16 @@ mod tests {
         assert_eq!(tempo.tempo_at_tick(mid), 90.0, "the interior change is replaced");
         assert_eq!(tempo.tempo_at_tick(t1), after, "the old tempo resumes at the end");
         assert_eq!(after, 140.0);
+    }
+
+    #[test]
+    fn smpte_lock_and_beat_map_commands_work() {
+        let mut e = demo_engine();
+        let m = e.execute("markers.add", &json!({"name": "Scene Hit", "at": 96_000})).unwrap();
+        let mid = m["id"].as_u64().unwrap();
+        let bm = e.execute("event.beat_map_markers", &json!({"anchors": [{"bar": 2, "beat": 1, "marker": mid}]})).unwrap();
+        assert_eq!(bm["tempos"].as_array().unwrap().len(), 1);
+        let lock_res = e.execute("event.smpte_lock", &json!({"bpm": 120.0, "lock": true})).unwrap();
+        assert_eq!(lock_res["bpm"].as_f64(), Some(120.0));
     }
 }

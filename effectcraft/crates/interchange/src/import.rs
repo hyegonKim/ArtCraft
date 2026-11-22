@@ -152,15 +152,36 @@ pub fn import(
         name: Some(opts.name.trim_end_matches(|c| c != '.').trim_end_matches('.').to_string()).filter(|s| !s.is_empty()),
     };
     let (imported, report) = filmcraft_interchange::import_with(bytes, format.fc(), &fc_opts)?;
-    let mut res = ImportResult { format: Some(format), ..Default::default() };
+    let mut res = import_project(project, &imported.project, &imported.sequences, opts, probe);
+    res.format = Some(format);
     for e in &report.entries {
-        if e.count > 1 { res.warnings.push(format!("{} (×{})", e.message, e.count)) } else { res.warnings.push(e.message.clone()) }
+        let msg = if e.count > 1 { format!("{} (×{})", e.message, e.count) } else { e.message.clone() };
+        if !res.warnings.contains(&msg) {
+            res.warnings.push(msg);
+        }
     }
-    let folder_name = if opts.name.is_empty() { "Imported Timeline".to_string() } else { opts.name.clone() };
+    Ok(res)
+}
+
+/// Import a FilmCraft [`fp::Project`] directly in memory into `project` without intermediate
+/// XML/OTIO serialization (direct cross-app sequence handoff / Dynamic Link).
+pub fn import_project(
+    project: &mut Project,
+    src: &fp::Project,
+    sequences: &[fp::ItemId],
+    opts: &ImportOptions,
+    probe: &mut dyn FnMut(&str) -> Option<Footage>,
+) -> ImportResult {
+    let mut res = ImportResult::default();
+    let folder_name = if opts.name.is_empty() {
+        if src.name.is_empty() { "Imported Timeline".to_string() } else { src.name.clone() }
+    } else {
+        opts.name.clone()
+    };
     res.folder = project.add_item(&folder_name, Label::None, None, ItemKind::Folder);
-    let mut im = Importer { src: &imported.project, project, res, items: HashMap::new(), solids: HashMap::new(), solids_folder: None, bins: HashMap::new() };
-    im.run(&imported.sequences, probe);
-    Ok(im.res)
+    let mut im = Importer { src, project, res, items: HashMap::new(), solids: HashMap::new(), solids_folder: None, bins: HashMap::new() };
+    im.run(sequences, probe);
+    im.res
 }
 
 struct Importer<'a> {
@@ -314,6 +335,17 @@ impl Importer<'_> {
     fn fill_comp(&mut self, cid: ItemId, seq: &fp::Sequence) {
         let mut comp = self.project.comp(cid).cloned().unwrap_or_else(|| Comp::new(1920, 1080, FrameRate::new(30, 1), Tick(1)));
         comp.markers = seq.markers.iter().map(marker_in).collect();
+        // Captions sit above the video tracks in Premiere / FilmCraft; import each caption cue as
+        // an editable Text layer at the top of the composition stack.
+        for ct in seq.caption_tracks.iter().rev() {
+            let mut caps: Vec<&fp::Caption> = ct.captions.iter().collect();
+            caps.sort_by_key(|c| std::cmp::Reverse(c.start));
+            for cap in caps {
+                if let Some(l) = self.caption_layer(&comp, ct, cap) {
+                    comp.layers.push(l);
+                }
+            }
+        }
         // Video: the top track's clips first (layer #1); later clips of a track above earlier ones
         // so incoming clips of dissolves cover outgoing ones.
         for track in seq.video_tracks.iter().rev() {
@@ -334,12 +366,73 @@ impl Importer<'_> {
                 }
             }
         }
-        if !seq.caption_tracks.is_empty() {
-            self.warn("caption tracks are not imported");
-        }
         if let Some(c) = self.project.comp_mut(cid) {
             *c = comp;
         }
+    }
+
+    fn caption_layer(&mut self, comp: &Comp, ct: &fp::CaptionTrack, cap: &fp::Caption) -> Option<Layer> {
+        let plain = fp::plain_text(&cap.text);
+        let trimmed = plain.trim();
+        if trimmed.is_empty() {
+            return None;
+        }
+        let first_line: String = trimmed.lines().next().unwrap_or(&ct.name).chars().take(32).collect();
+        let name = if first_line.is_empty() { ct.name.clone() } else { first_line };
+        let mut l = effectcraft_project::build::layer(self.project, comp, &name, LayerSource::Text, (comp.width, comp.height), None);
+        let start = tick_in(cap.start).max(Tick::ZERO);
+        let dur = tick_in(cap.duration).max(comp.frame_duration());
+        l.start_time = start;
+        l.in_point = start;
+        l.out_point = (start + dur).min(comp.duration).max(l.in_point + comp.frame_duration());
+        l.switches.video = ct.enabled;
+        l.switches.locked = ct.locked;
+        if let Some(spk) = &cap.speaker
+            && !spk.is_empty()
+        {
+            l.comment = format!("Speaker: {spk}");
+        }
+        let scale_h = (comp.height.max(1) as f64) / 1080.0;
+        let size = (ct.style.size as f64 * scale_h).clamp(8.0, 500.0);
+        let [cr, cg, cb, ca] = ct.style.color;
+        let [or, og, ob, oa] = ct.style.outline_color;
+        let stroke_w = (ct.style.outline as f64 * scale_h).max(0.0);
+        let justify = match ct.style.align {
+            fp::CaptionAlign::Left => effectcraft_keyframe::Justify::Left,
+            fp::CaptionAlign::Center => effectcraft_keyframe::Justify::Center,
+            fp::CaptionAlign::Right => effectcraft_keyframe::Justify::Right,
+        };
+        let mut doc = effectcraft_keyframe::TextDoc::plain(trimmed);
+        if !ct.style.font.is_empty() {
+            doc.font = ct.style.font.clone();
+        }
+        doc.size = size;
+        doc.fill = [cr as f32 / 255.0, cg as f32 / 255.0, cb as f32 / 255.0, ca as f32 / 255.0];
+        doc.stroke = [or as f32 / 255.0, og as f32 / 255.0, ob as f32 / 255.0, oa as f32 / 255.0];
+        doc.stroke_width = stroke_w;
+        doc.apply_stroke = stroke_w > 0.0;
+        doc.justify = justify;
+        doc.leading = Some(size * (ct.style.line_spacing as f64).max(0.5));
+        if let Some(st) = l.props.prop_mut("text/sourceText") {
+            st.value = Value::Text(Box::new(doc));
+        }
+        let cw = comp.width as f64;
+        let ch = comp.height as f64;
+        let margin = (ct.style.margin as f64).clamp(0.0, 0.45) * ch;
+        let x = match ct.style.align {
+            fp::CaptionAlign::Left => cw * 0.1,
+            fp::CaptionAlign::Center => cw * 0.5,
+            fp::CaptionAlign::Right => cw * 0.9,
+        };
+        let y = match ct.style.anchor {
+            fp::CaptionAnchor::Top => margin + size,
+            fp::CaptionAnchor::Middle => ch * 0.5,
+            fp::CaptionAnchor::Bottom => (ch - margin).max(size),
+        };
+        if let Some(pos) = l.transform_mut().and_then(|t| t.get_mut("position")) {
+            pos.value = Value::Vec3([x, y, 0.0]);
+        }
+        Some(l)
     }
 
     /// The layer source for a clip's item (creating solids on demand).
@@ -472,11 +565,29 @@ impl Importer<'_> {
                 l.switches.audio = false;
             }
         }
+        if ti.label != fp::Label::Iris {
+            l.label = label_in(ti.label);
+        }
         if ti.frame_hold.is_some() || ti.effects.iter().any(|e| e.effect == "time_remap" && e.params.values().any(|p| p.is_animated())) {
             self.time_remap(&mut l, ti);
         }
         // Keyframe times: clip time → layer time.
         let to_layer = |l: &Layer, k: filmcraft_time::Tick| l.layer_time(start + tick_in(k));
+        if !ti.markers.is_empty() {
+            l.markers = ti
+                .markers
+                .iter()
+                .map(|m| {
+                    let mut mk = marker_in(m);
+                    mk.time = if m.start < ti.source_in && ti.source_in > filmcraft_time::Tick::ZERO {
+                        to_layer(&l, m.start)
+                    } else {
+                        tick_in(m.start)
+                    };
+                    mk
+                })
+                .collect();
+        }
         if audio_track {
             self.audio_levels(&mut l, ti, track, &fades, to_layer);
         } else {
@@ -606,6 +717,27 @@ impl Importer<'_> {
     }
 }
 
+pub(crate) fn label_in(l: fp::Label) -> Label {
+    match l {
+        fp::Label::Violet => Label::Purple,
+        fp::Label::Iris => Label::Aqua,
+        fp::Label::Caribbean => Label::SeaFoam,
+        fp::Label::Lavender => Label::Lavender,
+        fp::Label::Cerulean => Label::Cyan,
+        fp::Label::Forest => Label::DarkGreen,
+        fp::Label::Rose => Label::Pink,
+        fp::Label::Mango => Label::Orange,
+        fp::Label::Purple => Label::Purple,
+        fp::Label::Blue => Label::Blue,
+        fp::Label::Teal => Label::Cyan,
+        fp::Label::Magenta => Label::Fuchsia,
+        fp::Label::Tan => Label::Sandstone,
+        fp::Label::Green => Label::Green,
+        fp::Label::Brown => Label::Brown,
+        fp::Label::Yellow => Label::Yellow,
+    }
+}
+
 fn marker_in(m: &fp::Marker) -> Marker {
     let comment = match (m.name.is_empty(), m.comment.is_empty()) {
         (false, false) => format!("{}: {}", m.name, m.comment),
@@ -616,6 +748,7 @@ fn marker_in(m: &fp::Marker) -> Marker {
         time: tick_in(m.start),
         duration: tick_in(m.duration),
         comment,
+        label: label_in(m.color),
         chapter: if m.kind == fp::MarkerKind::Chapter { m.name.clone() } else { String::new() },
         ..Default::default()
     }

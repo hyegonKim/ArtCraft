@@ -54,6 +54,12 @@ impl Machine {
                 PcodeOp::Copy { dst, src } | PcodeOp::ZeroExtend { dst, src } => {
                     self.write(dst, self.read(src))
                 }
+                PcodeOp::SignExtend { dst, src } => {
+                    let raw = self.read(src);
+                    let shift = 64 - (src.size as u32 * 8);
+                    let sext64 = ((raw << shift) as i64 >> shift) as u64;
+                    self.write(dst, sext64);
+                }
                 PcodeOp::IntAdd { dst, lhs, rhs } => {
                     self.write(dst, self.read(lhs).wrapping_add(self.read(rhs)))
                 }
@@ -222,4 +228,47 @@ fn compiled_native_main_ir_preserves_frame_and_returns_42() {
     assert_eq!(m.regs[31], 0x2000);
     assert_eq!(m.regs[29], 0x1234);
     assert_eq!(m.regs[30], 0x5678);
+}
+
+#[test]
+fn ghidra_12_3_ldursb_ldtrsb_sign_extension_obeys_wt_zero_upper() {
+    let mut m = Machine::default();
+    m.regs[1] = 0x2000;
+    m.bytes.insert(0x1ffc, 0x80); // -128 signed byte at [x1, #-4]
+    m.bytes.insert(0x1ffe, 0x80);
+    m.bytes.insert(0x1fff, 0xff); // -128 signed halfword (0xff80) at [x1, #-2]
+
+    // Ghidra 12.3_DEV (71506bafd3e4): ldursb w0, [x1, #-4] -> 32-bit sext, upper 32 bits zeroed!
+    m.regs[0] = u64::MAX;
+    let insn_w = decode(0x38df_c020);
+    assert_eq!(insn_w.mnemonic, "ldursb");
+    assert_eq!(insn_w.raw_args, vec!["w0", "[x1, #-4]"]);
+    m.execute(0x38df_c020);
+    assert_eq!(m.regs[0], 0xffff_ff80);
+
+    // Unprivileged ldtrsb (mode 2) remains explicitly unsupported; pre-index ldrsb w2, [x1, #-4]! works
+    assert!(matches!(
+        decode(0x38df_c822).pcode[0],
+        PcodeOp::Unsupported { .. }
+    ));
+    m.regs[2] = u64::MAX;
+    let insn_pre_w = decode(0x38df_cc22);
+    assert_eq!(insn_pre_w.mnemonic, "ldrsb");
+    m.execute(0x38df_cc22);
+    assert_eq!(m.regs[2], 0xffff_ff80);
+    assert_eq!(m.regs[1], 0x1ffc);
+    m.regs[1] = 0x2000;
+
+    // ldursb x3, [x1, #-4] -> 64-bit sext
+    let insn_x = decode(0x389f_c023);
+    assert_eq!(insn_x.mnemonic, "ldursb");
+    assert_eq!(insn_x.raw_args, vec!["x3", "[x1, #-4]"]);
+    m.execute(0x389f_c023);
+    assert_eq!(m.regs[3], 0xffff_ffff_ffff_ff80);
+
+    // ldursh w4, [x1, #-2] vs ldursh x5, [x1, #-2]
+    m.execute(0x78df_e024);
+    assert_eq!(m.regs[4], 0xffff_ff80);
+    m.execute(0x789f_e025);
+    assert_eq!(m.regs[5], 0xffff_ffff_ffff_ff80);
 }

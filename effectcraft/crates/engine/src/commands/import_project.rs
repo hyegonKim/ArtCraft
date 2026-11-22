@@ -15,12 +15,28 @@ const C: &str = "file.importProject";
 /// Whether `path` names a project EffectCraft imports as a project (not as footage).
 pub(crate) fn is_project_path(path: &str) -> bool {
     let lower = path.to_ascii_lowercase();
-    lower.ends_with(".ecproj") || lower.ends_with(".ecprojx")
+    lower.ends_with(".ecproj")
+        || lower.ends_with(".ecprojx")
+        || lower.ends_with(".motn")
+        || lower.ends_with(".moti")
+        || lower.ends_with(".motr")
+        || lower.ends_with(".moef")
 }
 
-/// Read a project file (JSON or its XML copy), as File ▸ Open does.
+/// Read a project file (JSON, its XML copy, or Apple Motion `<ozml>`), as File ▸ Open does.
 fn read_project(s: &Session, path: &str) -> Result<(Project, Option<String>)> {
     let bytes = s.services.read_file(path).map_err(|e| EngineError::Other(format!("cannot read {path}: {e}")))?;
+    if effectcraft_interchange::is_motion_ozml(&bytes) {
+        let mut proj = Project::default();
+        let fp = std::path::Path::new(path);
+        let opts = effectcraft_interchange::ImportOptions {
+            base_dir: fp.parent().map(|d| d.to_string_lossy().to_string()).filter(|d| !d.is_empty()),
+            name: fp.file_stem().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "Motion Project".into()),
+            edl_frame_rate: None,
+        };
+        effectcraft_interchange::import_motion_ozml(&mut proj, &bytes, &opts).map_err(|e| bad(C, format!("{path}: {e}")))?;
+        return Ok((proj, None));
+    }
     let text = String::from_utf8(bytes).map_err(|_| bad(C, format!("{path} is not a text project file")))?;
     let text = if crate::xml_project::is_xml(&text) { crate::xml_project::from_xml(&text).map_err(EngineError::Other)? } else { text };
     let project = Project::from_json(&text).map_err(|e| bad(C, format!("{path} is not a project EffectCraft can open: {e}")))?;

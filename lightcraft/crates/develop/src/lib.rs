@@ -167,6 +167,54 @@ impl DevelopSettings {
     }
 }
 
+/// Compute per-frame exposure offsets (in EV, clamped to `-5.0..=5.0`) to eliminate frame-to-frame
+/// brightness flicker across a time-lapse or stop-motion sequence.
+///
+/// `frame_lumas` contains the measured mean linear luminance of each frame before exposure
+/// adjustment, and `window_radius` is the half-width of the rolling smoothing window in frames
+/// (e.g. `5` averages `2 * 5 + 1 = 11` frames). Non-positive or non-finite luminances receive `0.0`.
+pub fn deflicker_exposure_offsets(frame_lumas: &[f64], window_radius: usize) -> Vec<f64> {
+    if frame_lumas.is_empty() {
+        return Vec::new();
+    }
+    let radius = window_radius.max(1);
+    let evs: Vec<Option<f64>> = frame_lumas
+        .iter()
+        .map(|&y| (y.is_finite() && y > 1e-9).then(|| y.log2()))
+        .collect();
+    let n = evs.len();
+    (0..n)
+        .map(|i| {
+            let Some(cur_ev) = evs[i] else {
+                return 0.0;
+            };
+            let lo = i.saturating_sub(radius);
+            let hi = (i + radius).min(n - 1);
+            let mut sum = 0.0;
+            let mut count = 0usize;
+            for ev in evs[lo..=hi].iter().flatten() {
+                sum += *ev;
+                count += 1;
+            }
+            if count == 0 {
+                0.0
+            } else {
+                (sum / count as f64 - cur_ev).clamp(-5.0, 5.0)
+            }
+        })
+        .collect()
+}
+
+/// Apply batch time-lapse deflicker exposure compensation across `frames` using the measured linear
+/// luminance of each frame (`frame_lumas`) and a rolling smoothing `window_radius`.
+pub fn deflicker_sequence(frames: &mut [DevelopSettings], frame_lumas: &[f64], window_radius: usize) {
+    let offsets = deflicker_exposure_offsets(frame_lumas, window_radius);
+    for (settings, delta_ev) in frames.iter_mut().zip(offsets) {
+        let next = (settings.light.exposure + delta_ev).clamp(-5.0, 5.0);
+        controls::set(settings, "light.exposure", next);
+    }
+}
+
 #[cfg(test)]
 mod tests_process;
 
@@ -362,5 +410,17 @@ mod tests {
         assert!(s.enhance.denoise_enabled());
         s.reset_section(Section::Detail);
         assert_eq!(s.enhance.denoise_on, None);
+    }
+
+    #[test]
+    fn timelapse_deflicker_smooths_exposure_spikes() {
+        // 5 frames where frame 2 has a +1 EV brightness spike (0.36 vs 0.18).
+        let lumas = [0.18, 0.18, 0.36, 0.18, 0.18];
+        let mut seq = vec![DevelopSettings::default(); 5];
+        deflicker_sequence(&mut seq, &lumas, 2);
+        // Frame 2 averages all 5 frames (mean +0.2 EV vs its +1.0 EV -> -0.8 EV offset).
+        assert!((seq[2].light.exposure - (-0.8)).abs() < 1e-6, "{}", seq[2].light.exposure);
+        // Frame 0 averages frames 0..=2 (mean +1/3 EV vs its 0 EV -> +1/3 EV offset).
+        assert!((seq[0].light.exposure - (1.0 / 3.0)).abs() < 1e-6, "{}", seq[0].light.exposure);
     }
 }

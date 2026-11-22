@@ -8,7 +8,9 @@
 mod automation;
 pub mod b64;
 mod clip;
+pub mod fcpxml;
 mod ids;
+pub mod mainstage;
 mod markers;
 mod mixer;
 mod session;
@@ -17,7 +19,15 @@ mod track;
 
 pub use automation::{AutoParam, AutomationLane, AutomationMode, AutomationPoint};
 pub use clip::{Clip, ClipContent, Fade, FadeShape};
+pub use fcpxml::{
+    AudioRoleCategory, FcpxmlAudioImportSummary, beat_map_markers_to_tempo, export_fcpxml_audio,
+    import_fcpxml_audio, is_fcpxml_document, smpte_lock_clips,
+};
 pub use ids::{BusId, ClipId, GroupId, MarkerId, SourceId, TrackId};
+pub use mainstage::{
+    ChannelStripConfig, Concert, LivePatchSwitcher, MacroControl, MacroMapping, MacroTarget, Patch,
+    PatchId, PatchSet, PatchSetId, RoutedMidiNote,
+};
 pub use markers::{Group, MarkerKind, MemoryLocation};
 pub use mixer::{
     Bus, ChannelFormat, INSERT_SLOTS, Insert, Mixer, OutputPath, Route, SEND_SLOTS, SendSlot, Speaker, SurroundPan, fader_db_to_pos, fader_pos_to_db,

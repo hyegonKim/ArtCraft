@@ -51,7 +51,9 @@ public class ArtCraftDecompile extends HeadlessScript {
                     throw new IllegalStateException("native C is empty or exceeds the 1 MiB output limit");
                 out.addProperty("c", c);
             } finally { decompiler.dispose(); }
-            Path nativeFile = Application.getOSFile("decompile").toPath().toRealPath();
+            String nativeBin = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).startsWith("win")
+                ? "decompile.exe" : "decompile";
+            Path nativeFile = Application.getOSFile(nativeBin).toPath().toRealPath();
             Path utilityJar = Path.of(ghidra.Ghidra.class.getProtectionDomain()
                 .getCodeSource().getLocation().toURI()).toRealPath();
             // .../Ghidra/Framework/Utility/lib/Utility.jar -> installation root.

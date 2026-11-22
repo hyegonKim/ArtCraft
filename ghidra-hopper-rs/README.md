@@ -1,4 +1,8 @@
-# ghidra-hopper-rs
+# ghidra-hopper-rs (v0.3.1)
+
+> **2026-11-22 업데이트 (REA 6.10.1 · Ghidra 12.3_DEV / 12.2 PUBLIC · JDK 25 동기화):**
+> - **상위 크레이트 (`ghidra-hopper-rs` v0.3.1):** REA `6.10.1` (`v63` 스킬, 263 MCP 도구) 네이티브 브리지 패리티(`inspect_native_load_image`, `resolve_native_call_targets`, `annotate_native_function`, `search_procedures` `objc_stub::` 별칭, `apply_address_names` UTF-16 <= 1024, `rea_caller_scan_page` 512 KiB 페이징) 및 9-Tool STDIO MCP 서버 적용
+> - **SDK 엔진 (`sdk-engine` v0.3.1):** Ghidra `12.3_DEV`(`3fb3eec6a0` / `71506bafd3e4`) ARM64 `LDURSB`/`LDURSH` 32비트 `Wt` 상위 비트 zero-extension 시맨틱 반영 및 **Windows `x86_64` + macOS `arm64` 외부 헤드리스 Ghidra 디컴파일 프로바이더(`ghidra-decompile`)** 지원
 
 **Rust-Native Reverse Engineering Engine** combining **Ghidra 12.3_DEV** (`SLEIGH` / `P-Code` SSA Decompiler, `ObjcMessageAnalyzer`, `DecompilerSwitchAnalysisCmd`, `JumpTable`, `ReferenceManager`, `BookmarkManager`) with **Hopper Disassembler's 5 Core Architectural Advantages** (O(1) `ByteType` Reactive State Machine, Zero-IPC `__objc_stubs` / `__objc_selrefs` `CALL_OBJC` Recovery, `SwitchHintTable` Indirect Branch Override, 4-Mode Unified View `[ASM | CFG | Pseudocode | Hex]`, and Built-in STDIO MCP Server).
 

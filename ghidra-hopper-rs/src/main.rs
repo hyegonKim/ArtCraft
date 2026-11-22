@@ -1,6 +1,4 @@
-use ghidra_hopper_rs::ghidra_port::{
-    GhidraJumpTable, GhidraProgram, HopperHybridObjcAnalyzerRs,
-};
+use ghidra_hopper_rs::ghidra_port::{GhidraJumpTable, GhidraProgram, HopperHybridObjcAnalyzerRs};
 use ghidra_hopper_rs::macho_objc::MachOImage;
 use ghidra_hopper_rs::mcp_server;
 use ghidra_hopper_rs::pe_x64::Pe64Image;
@@ -68,7 +66,7 @@ fn main() {
     let mode = args.get(1).map(String::as_str).unwrap_or("demo");
 
     if mode == "mcp" {
-        let summary = r#"{"engine":"ghidra-hopper-rs","status":"ready","ported_analyzers":["ObjcMessageAnalyzer","DecompilerSwitchAnalysisCmd","HopperHybridObjcAnalyzer"]}"#;
+        let summary = r#"{"engine":"ghidra-hopper-rs","version":"0.3.1","status":"ready","ghidra_version":"12.3_DEV (3fb3eec6a0) / 12.2 PUBLIC","rea_version":"6.10.1 (ad6e511b6)","ported_analyzers":["ObjcMessageAnalyzer","DecompilerSwitchAnalysisCmd","HopperHybridObjcAnalyzer","ReaGhidraBridge"]}"#;
         let _ = mcp_server::run_stdio_mcp_loop(summary);
         return;
     }
@@ -131,13 +129,20 @@ fn main() {
                     print_pe_summary(&pe, &ghidra_prog);
                     if !keywords.is_empty() {
                         let matches = Pe64Image::scan_matching_strings(&raw_file, &keywords, 80);
-                        println!("    - Keyword Matches  : {:?}: {} hits", keywords, matches.len());
+                        println!(
+                            "    - Keyword Matches  : {:?}: {} hits",
+                            keywords,
+                            matches.len()
+                        );
                         for m in matches {
                             println!("      * {}", m);
                         }
                     } else {
                         let shown = pe.notable_strings.len().min(20);
-                        println!("    - Notable Strings  : {:?}", &pe.notable_strings[..shown]);
+                        println!(
+                            "    - Notable Strings  : {:?}",
+                            &pe.notable_strings[..shown]
+                        );
                     }
                     println!("    - Elapsed          : {:.3?}", t0.elapsed());
                 }
@@ -150,11 +155,16 @@ fn main() {
 
     let start_time = Instant::now();
     println!("╔════════════════════════════════════════════════════════════════════════╗");
-    println!("║  Ghidra 12.3 + Hopper Hybrid Engine (Rust Port) - Zero-IPC Pipeline    ║");
+    println!("║  Ghidra 12.3_DEV + Hopper + REA 6.10.1 Hybrid Engine (Rust v0.3.1)     ║");
+    println!("║  Synced: Ghidra 3fb3eec6a0 | Ghidra 12.2 PUBLIC | REA 6.10.1 ad6e511b6 ║");
     println!("╚════════════════════════════════════════════════════════════════════════╝");
 
-    let default_hopper_bin = "/Applications/Hopper Disassembler.app/Contents/MacOS/Hopper Disassembler";
-    let target_path = args.get(2).map(String::as_str).unwrap_or(default_hopper_bin);
+    let default_hopper_bin =
+        "/Applications/Hopper Disassembler.app/Contents/MacOS/Hopper Disassembler";
+    let target_path = args
+        .get(2)
+        .map(String::as_str)
+        .unwrap_or(default_hopper_bin);
 
     if let Ok(raw_file) = fs::read(target_path) {
         let t0 = Instant::now();
@@ -198,7 +208,10 @@ fn main() {
                     println!("    - Load Latency     : {:.3?}", elapsed);
                 }
                 Err(pe_err) => {
-                    println!("    [!] Not Mach-O ({}) and not PE32+ ({})", macho_err, pe_err);
+                    println!(
+                        "    [!] Not Mach-O ({}) and not PE32+ ({})",
+                        macho_err, pe_err
+                    );
                 }
             },
         }
@@ -219,7 +232,9 @@ fn main() {
     );
 
     if let Some(first_bb) = proc.basic_blocks.first_mut() {
-        first_bb.tags.insert(Tag::new("entry-objc-bridge", "#FF6B6B"));
+        first_bb
+            .tags
+            .insert(Tag::new("entry-objc-bridge", "#FF6B6B"));
     }
 
     println!(
@@ -254,7 +269,10 @@ fn main() {
 
 /// Prints what `Pe64Image::parse` and `GhidraProgram::from_pe_image` produced.
 fn print_pe_summary(pe: &Pe64Image, prog: &GhidraProgram) {
-    println!("    - Architecture     : {} (machine=0x{:04x})", pe.arch_name, pe.machine);
+    println!(
+        "    - Architecture     : {} (machine=0x{:04x})",
+        pe.arch_name, pe.machine
+    );
     println!("    - ImageBase        : 0x{:x}", pe.image_base);
     println!(
         "    - Entry Point      : RVA 0x{:x} (VA 0x{:x})",
@@ -327,11 +345,8 @@ mod tests {
             prog.eol_comments.get(&0x10000000c).map(String::as_str),
             Some("[HopperGhidraBridge initWithUTF8String:@\"Hopper+Ghidra Rust Engine\"]")
         );
-        assert!(prog
-            .references
-            .iter()
-            .any(|r| r.from_addr == 0x10000000c
-                && r.ref_type == GhidraRefType::CallOverrideUnconditional));
+        assert!(prog.references.iter().any(|r| r.from_addr == 0x10000000c
+            && r.ref_type == GhidraRefType::CallOverrideUnconditional));
 
         // Verify DecompilerSwitchAnalysisCmd JumpTable port created COMPUTED_JUMP references
         let computed_jumps: Vec<_> = prog

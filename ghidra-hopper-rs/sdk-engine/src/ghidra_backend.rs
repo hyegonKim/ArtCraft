@@ -1,17 +1,24 @@
-//! Explicit external Ghidra provider. Existing Rust lifting and MCP are independent.
+//! Explicit external Ghidra provider (macOS arm64 & Windows x86_64).
+//! Existing Rust lifting and MCP are independent.
 //! Targets are imported as data; only the explicitly configured SDK launcher runs.
 use crate::macho_objc::MachOImage;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
+#[cfg(unix)]
 use std::ffi::CString;
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
+#[cfg(unix)]
 use std::os::fd::{AsRawFd, FromRawFd};
+#[cfg(unix)]
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
+#[cfg(unix)]
 use std::os::unix::process::CommandExt;
 use std::path::{Component, Path, PathBuf};
-use std::process::{Child, Command, Stdio};
+#[cfg(unix)]
+use std::process::Child;
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -92,11 +99,27 @@ impl Config {
             .ok_or_else(|| error("configuration", "explicit --java-home is required"))?;
         let project_root = match flags.get("--project-root") {
             Some(p) => PathBuf::from(p),
-            None => PathBuf::from(
-                std::env::var_os("HOME")
-                    .ok_or_else(|| error("configuration", "HOME missing; pass --project-root"))?,
-            )
-            .join("Library/ArtCraft_Rebuild/ghidra-provider"),
+            None => {
+                #[cfg(windows)]
+                {
+                    PathBuf::from(
+                        std::env::var_os("LOCALAPPDATA")
+                            .or_else(|| std::env::var_os("USERPROFILE"))
+                            .ok_or_else(|| {
+                                error("configuration", "LOCALAPPDATA missing; pass --project-root")
+                            })?,
+                    )
+                    .join("ArtCraft_Rebuild")
+                    .join("ghidra-provider")
+                }
+                #[cfg(not(windows))]
+                {
+                    PathBuf::from(std::env::var_os("HOME").ok_or_else(|| {
+                        error("configuration", "HOME missing; pass --project-root")
+                    })?)
+                    .join("Library/ArtCraft_Rebuild/ghidra-provider")
+                }
+            }
         };
         let seconds = flags
             .get("--timeout-seconds")
@@ -117,8 +140,7 @@ impl Config {
     }
 }
 
-// The OFF policy is thread-local and restored even on error. On other platforms
-// this initial provider is unavailable, rather than silently weakening its guard.
+// On macOS the OFF policy is thread-local and restored even on error.
 #[cfg(target_os = "macos")]
 unsafe extern "C" {
     fn getiopolicy_np(kind: i32, scope: i32) -> i32;
@@ -146,11 +168,18 @@ impl ResidentPolicy {
                 Ok(Self { previous })
             }
         }
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+        {
+            Ok(Self {})
+        }
+        #[cfg(not(any(
+            target_os = "macos",
+            all(target_os = "windows", target_arch = "x86_64")
+        )))]
         {
             Err(error(
                 "unsupported_host",
-                "external Ghidra currently requires macOS arm64",
+                "external Ghidra currently requires macOS arm64 or Windows x86_64",
             ))
         }
     }
@@ -188,6 +217,8 @@ fn resident(meta: &fs::Metadata) -> bool {
         true
     }
 }
+
+#[cfg(unix)]
 fn file_flags(m: &fs::Metadata) -> u32 {
     #[cfg(target_os = "macos")]
     {
@@ -200,7 +231,14 @@ fn file_flags(m: &fs::Metadata) -> u32 {
         0
     }
 }
-fn identity(m: &fs::Metadata) -> (u64, u64, u32, u64, i64, i64, i64, i64, u32) {
+
+#[cfg(unix)]
+type FileIdentity = (u64, u64, u32, u64, i64, i64, i64, i64, u32);
+#[cfg(windows)]
+type FileIdentity = (u64, u128, u128, bool);
+
+#[cfg(unix)]
+fn identity(m: &fs::Metadata) -> FileIdentity {
     (
         m.dev(),
         m.ino(),
@@ -213,19 +251,44 @@ fn identity(m: &fs::Metadata) -> (u64, u64, u32, u64, i64, i64, i64, i64, u32) {
         file_flags(m),
     )
 }
+
+#[cfg(windows)]
+fn identity(m: &fs::Metadata) -> FileIdentity {
+    let nanos = |res: std::io::Result<SystemTime>| -> u128 {
+        res.ok()
+            .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+            .map(|d| d.as_nanos())
+            .unwrap_or(0)
+    };
+    (
+        m.len(),
+        nanos(m.modified()),
+        nanos(m.created()),
+        m.permissions().readonly(),
+    )
+}
+
 fn path_guard(path: &Path, allow_missing: bool) -> Result<()> {
     if !path.is_absolute() {
         return Err(error("path", "absolute paths are required"));
     }
     let mut current = PathBuf::new();
     for part in path.components() {
-        if !matches!(part, Component::RootDir | Component::Normal(_)) {
-            return Err(error(
-                "path",
-                "dot and parent path components are not supported",
-            ));
+        match part {
+            Component::Prefix(_) => {
+                current.push(part);
+                continue;
+            }
+            Component::RootDir | Component::Normal(_) => {
+                current.push(part);
+            }
+            _ => {
+                return Err(error(
+                    "path",
+                    "dot and parent path components are not supported",
+                ));
+            }
         }
-        current.push(part);
         match fs::symlink_metadata(&current) {
             Ok(m) if m.file_type().is_symlink() || !resident(&m) => {
                 return Err(error(
@@ -240,8 +303,8 @@ fn path_guard(path: &Path, allow_missing: bool) -> Result<()> {
     }
     Ok(())
 }
-// Parent descriptors are pinned one component at a time: no path lookup may
-// silently follow an intermediate symlink, even when the kernel rejects ANY.
+
+#[cfg(unix)]
 fn open_anchored(path: &Path) -> Result<File> {
     let mut directory = io(File::open("/"))?;
     let names: Vec<_> = path
@@ -278,6 +341,21 @@ fn open_anchored(path: &Path) -> Result<File> {
     }
     Err(error("path", "file path is empty"))
 }
+
+#[cfg(windows)]
+fn open_anchored(path: &Path) -> Result<File> {
+    path_guard(path, false)?;
+    let next = io(File::open(path))?;
+    let metadata = io(next.metadata())?;
+    if !resident(&metadata) || !metadata.is_file() {
+        return Err(error(
+            "residency",
+            "descriptor is nonresident or has the wrong file type",
+        ));
+    }
+    Ok(next)
+}
+
 fn read(path: &Path, limit: usize) -> Result<Vec<u8>> {
     path_guard(path, false)?;
     let before = io(fs::symlink_metadata(path))?;
@@ -321,11 +399,25 @@ fn property(source: &str, key: &str) -> Option<String> {
 fn executable(path: &Path) -> Result<()> {
     path_guard(path, false)?;
     let m = io(fs::metadata(path))?;
+    #[cfg(unix)]
     if !m.is_file() || m.permissions().mode() & 0o111 == 0 {
         return Err(error(
             "configuration",
             format!("not an executable file: {}", path.display()),
         ));
+    }
+    #[cfg(windows)]
+    {
+        let valid_ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| matches!(e.to_ascii_lowercase().as_str(), "exe" | "bat" | "cmd"));
+        if !m.is_file() || !valid_ext {
+            return Err(error(
+                "configuration",
+                format!("not an executable file: {}", path.display()),
+            ));
+        }
     }
     Ok(())
 }
@@ -346,8 +438,21 @@ fn valid_project(path: &Path) -> Result<()> {
     }
     Ok(())
 }
+
+#[cfg(windows)]
+pub fn is_pe64_x86_64(bytes: &[u8]) -> bool {
+    if bytes.len() < 0x44 || &bytes[..2] != b"MZ" {
+        return false;
+    }
+    let pe_off = u32::from_le_bytes([bytes[0x3c], bytes[0x3d], bytes[0x3e], bytes[0x3f]]) as usize;
+    let Some(hdr) = bytes.get(pe_off..pe_off.saturating_add(6)) else {
+        return false;
+    };
+    hdr == b"PE\0\0\x64\x86"
+}
+
 type Fingerprints = BTreeMap<String, Value>;
-fn dependencies(config: &Config) -> Result<(Fingerprints, PathBuf)> {
+fn dependencies(config: &Config) -> Result<(Fingerprints, PathBuf, String)> {
     for path in [&config.ghidra_home, &config.java_home] {
         path_guard(path, false)?;
         if path
@@ -369,12 +474,18 @@ fn dependencies(config: &Config) -> Result<(Fingerprints, PathBuf)> {
         return Err(error("configuration","Ghidra class discovery excludes paths containing Caches; provide an installation outside Caches"));
     }
     let props = text(&config.ghidra_home.join("Ghidra/application.properties"))?;
-    if property(&props, "application.version").as_deref() != Some("12.2")
-        || property(&props, "application.java.min").as_deref() != Some("25")
-    {
+    let sdk_ver = property(&props, "application.version")
+        .filter(|v| matches!(v.as_str(), "12.2" | "12.3"))
+        .ok_or_else(|| {
+            error(
+                "configuration",
+                "this provider requires the validated Ghidra 12.2/12.3 and JDK 25 contract",
+            )
+        })?;
+    if property(&props, "application.java.min").as_deref() != Some("25") {
         return Err(error(
             "configuration",
-            "this provider requires the validated Ghidra 12.2/JDK 25 contract",
+            "this provider requires the validated Ghidra 12.2/12.3 and JDK 25 contract",
         ));
     }
     if property(
@@ -389,45 +500,113 @@ fn dependencies(config: &Config) -> Result<(Fingerprints, PathBuf)> {
         ));
     }
     let release = text(&config.java_home.join("release"))?;
-    if !property(&release, "JAVA_VERSION").is_some_and(|s| s == "25" || s.starts_with("25."))
-        || property(&release, "OS_ARCH").as_deref() != Some("aarch64")
-    {
+    if !property(&release, "JAVA_VERSION").is_some_and(|s| s == "25" || s.starts_with("25.")) {
+        return Err(error("configuration", "JDK 25 required"));
+    }
+    #[cfg(target_os = "macos")]
+    if property(&release, "OS_ARCH").as_deref() != Some("aarch64") {
         return Err(error("configuration", "JDK 25 aarch64 required"));
     }
-    let build = config
-        .ghidra_home
-        .join("Ghidra/Features/Decompiler/build/os/mac_arm_64/decompile");
-    let native = if build.try_exists().map_err(|e| error("configuration", e))? {
-        build
-    } else {
-        config
+    #[cfg(target_os = "windows")]
+    if !matches!(
+        property(&release, "OS_ARCH").as_deref(),
+        Some("x86_64" | "amd64")
+    ) {
+        return Err(error("configuration", "JDK 25 x86_64/amd64 required"));
+    }
+
+    #[cfg(target_os = "macos")]
+    let (native, headless_bin, launch_script, java_bin, javac_bin) = {
+        let build = config
             .ghidra_home
-            .join("Ghidra/Features/Decompiler/os/mac_arm_64/decompile")
+            .join("Ghidra/Features/Decompiler/build/os/mac_arm_64/decompile");
+        let native = if build.try_exists().map_err(|e| error("configuration", e))? {
+            build
+        } else {
+            config
+                .ghidra_home
+                .join("Ghidra/Features/Decompiler/os/mac_arm_64/decompile")
+        };
+        (
+            native,
+            config.ghidra_home.join("support/analyzeHeadless"),
+            config.ghidra_home.join("support/launch.sh"),
+            config.java_home.join("bin/java"),
+            config.java_home.join("bin/javac"),
+        )
     };
+
+    #[cfg(target_os = "windows")]
+    let (native, headless_bin, launch_script, java_bin, javac_bin) = {
+        let build = config
+            .ghidra_home
+            .join("Ghidra")
+            .join("Features")
+            .join("Decompiler")
+            .join("build")
+            .join("os")
+            .join("win_x86_64")
+            .join("decompile.exe");
+        let native = if build.try_exists().map_err(|e| error("configuration", e))? {
+            build
+        } else {
+            config
+                .ghidra_home
+                .join("Ghidra")
+                .join("Features")
+                .join("Decompiler")
+                .join("os")
+                .join("win_x86_64")
+                .join("decompile.exe")
+        };
+        (
+            native,
+            config
+                .ghidra_home
+                .join("support")
+                .join("analyzeHeadless.bat"),
+            config.ghidra_home.join("support").join("launch.bat"),
+            config.java_home.join("bin").join("java.exe"),
+            config.java_home.join("bin").join("javac.exe"),
+        )
+    };
+
     for path in [
-        config.ghidra_home.join("support/analyzeHeadless"),
-        config.java_home.join("bin/java"),
-        config.java_home.join("bin/javac"),
+        headless_bin.clone(),
+        java_bin.clone(),
+        javac_bin.clone(),
         native.clone(),
     ] {
         executable(&path)?;
     }
     let native_bytes = read(&native, 64 * 1024 * 1024)?;
+    #[cfg(target_os = "macos")]
     if native_bytes.len() < 32 || native_bytes[..8] != [0xcf, 0xfa, 0xed, 0xfe, 0x0c, 0, 0, 1] {
         return Err(error(
             "configuration",
             "native decompiler must be Mach-O arm64",
         ));
     }
+    #[cfg(target_os = "windows")]
+    if !is_pe64_x86_64(&native_bytes) {
+        return Err(error(
+            "configuration",
+            "native decompiler must be PE32+ x86_64",
+        ));
+    }
+
     let mut paths = vec![
-        config.ghidra_home.join("Ghidra/application.properties"),
-        config.ghidra_home.join("support/launch.properties"),
-        config.ghidra_home.join("support/analyzeHeadless"),
-        config.ghidra_home.join("support/launch.sh"),
-        config.ghidra_home.join("support/LaunchSupport.jar"),
+        config
+            .ghidra_home
+            .join("Ghidra")
+            .join("application.properties"),
+        config.ghidra_home.join("support").join("launch.properties"),
+        headless_bin,
+        launch_script,
+        config.ghidra_home.join("support").join("LaunchSupport.jar"),
         config.java_home.join("release"),
-        config.java_home.join("bin/java"),
-        config.java_home.join("bin/javac"),
+        java_bin,
+        javac_bin,
         native.clone(),
     ];
     let mut pending = vec![config.ghidra_home.join("Ghidra")];
@@ -470,20 +649,25 @@ fn dependencies(config: &Config) -> Result<(Fingerprints, PathBuf)> {
     if !map.contains_key(
         &config
             .ghidra_home
-            .join("Ghidra/Framework/Utility/lib/Utility.jar")
+            .join("Ghidra")
+            .join("Framework")
+            .join("Utility")
+            .join("lib")
+            .join("Utility.jar")
             .to_string_lossy()
             .into_owned(),
     ) {
         return Err(error("configuration", "SDK Utility.jar missing"));
     }
-    Ok((map, native))
+    Ok((map, native, sdk_ver))
 }
+
 fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
-    let mut file = io(OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .mode(0o600)
-        .open(path))?;
+    let mut opts = OpenOptions::new();
+    opts.write(true).create_new(true);
+    #[cfg(unix)]
+    opts.mode(0o600);
+    let mut file = io(opts.open(path))?;
     io(file.write_all(bytes))
 }
 static WORKSPACE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -503,25 +687,41 @@ fn workspace(root: &Path) -> Result<PathBuf> {
         .map_err(|e| error("clock", e))?
         .as_nanos();
     let path = root.join(unique_name("run", nonce));
-    io(fs::DirBuilder::new().mode(0o700).create(&path))?;
-    for name in [
-        "home", "settings", "cache", "tmp", "prefs", "scripts", "project",
-    ] {
-        io(fs::DirBuilder::new().mode(0o700).create(path.join(name)))?;
+    #[cfg(unix)]
+    {
+        io(fs::DirBuilder::new().mode(0o700).create(&path))?;
+        for name in [
+            "home", "settings", "cache", "tmp", "prefs", "scripts", "project",
+        ] {
+            io(fs::DirBuilder::new().mode(0o700).create(path.join(name)))?;
+        }
+    }
+    #[cfg(windows)]
+    {
+        io(fs::create_dir(&path))?;
+        for name in [
+            "home", "settings", "cache", "tmp", "prefs", "scripts", "project",
+        ] {
+            io(fs::create_dir(path.join(name)))?;
+        }
     }
     Ok(path)
 }
 
+#[cfg(unix)]
 unsafe extern "C" {
     fn kill(pid: i32, signal: i32) -> i32;
     fn fcntl(fd: i32, command: i32, ...) -> i32;
     fn openat(fd: i32, path: *const std::ffi::c_char, flags: i32, ...) -> i32;
 }
+
+#[cfg(unix)]
 struct OwnedChild {
     child: Child,
     group: i32,
     active: bool,
 }
+#[cfg(unix)]
 impl OwnedChild {
     fn stop(&mut self) {
         if !self.active {
@@ -544,11 +744,13 @@ impl OwnedChild {
         let _ = self.child.wait();
     }
 }
+#[cfg(unix)]
 impl Drop for OwnedChild {
     fn drop(&mut self) {
         self.stop();
     }
 }
+#[cfg(unix)]
 fn nonblocking<T: std::os::fd::AsRawFd>(pipe: &T) -> Result<()> {
     #[cfg(target_os = "macos")]
     let nonblock = 4;
@@ -561,6 +763,7 @@ fn nonblocking<T: std::os::fd::AsRawFd>(pipe: &T) -> Result<()> {
     }
     Ok(())
 }
+#[cfg(unix)]
 fn drain(pipe: &mut impl Read, bytes: &mut Vec<u8>, limit: usize) -> Result<bool> {
     let mut chunk = [0u8; 8192];
     loop {
@@ -582,6 +785,8 @@ fn drain(pipe: &mut impl Read, bytes: &mut Vec<u8>, limit: usize) -> Result<bool
         }
     }
 }
+
+#[cfg(unix)]
 fn run_process(
     command: &mut Command,
     timeout: Duration,
@@ -664,12 +869,159 @@ fn run_process(
     Ok((out, err))
 }
 
+#[cfg(windows)]
+fn kill_windows_tree(pid: u32) {
+    let _ = Command::new("taskkill.exe")
+        .args(["/T", "/F", "/PID", &pid.to_string()])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
+}
+
+#[cfg(windows)]
+fn run_process(
+    command: &mut Command,
+    timeout: Duration,
+    result_path: &Path,
+) -> Result<(Vec<u8>, Vec<u8>)> {
+    command
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let mut child = io(command.spawn())?;
+    let pid = child.id();
+    let mut stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| error("process", "stdout missing"))?;
+    let mut stderr = child
+        .stderr
+        .take()
+        .ok_or_else(|| error("process", "stderr missing"))?;
+
+    let out_handle = std::thread::spawn(move || -> std::io::Result<(Vec<u8>, bool)> {
+        let mut buf = Vec::new();
+        (&mut stdout)
+            .take(PIPE_LIMIT as u64 + 1)
+            .read_to_end(&mut buf)?;
+        let overflow = buf.len() > PIPE_LIMIT;
+        if overflow {
+            buf.truncate(PIPE_LIMIT);
+        }
+        Ok((buf, overflow))
+    });
+    let err_handle = std::thread::spawn(move || -> std::io::Result<(Vec<u8>, bool)> {
+        let mut buf = Vec::new();
+        (&mut stderr)
+            .take(PIPE_LIMIT as u64 + 1)
+            .read_to_end(&mut buf)?;
+        let overflow = buf.len() > PIPE_LIMIT;
+        if overflow {
+            buf.truncate(PIPE_LIMIT);
+        }
+        Ok((buf, overflow))
+    });
+
+    let start = Instant::now();
+    let mut status_opt = None;
+    let mut loop_err: Option<BackendError> = None;
+    loop {
+        if start.elapsed() >= timeout {
+            loop_err = Some(error(
+                "timeout",
+                format!(
+                    "owned headless process tree exceeded {} seconds",
+                    timeout.as_secs_f64()
+                ),
+            ));
+            break;
+        }
+        if let Ok(m) = fs::symlink_metadata(result_path) {
+            if !m.is_file() || m.len() > JSON_LIMIT as u64 {
+                loop_err = Some(error(
+                    "output_limit",
+                    "result file exceeds its byte limit or is not regular",
+                ));
+                break;
+            }
+        }
+        match child.try_wait() {
+            Ok(Some(st)) => {
+                status_opt = Some(st);
+                break;
+            }
+            Ok(None) => std::thread::sleep(Duration::from_millis(10)),
+            Err(e) => {
+                loop_err = Some(error("process", e));
+                break;
+            }
+        }
+    }
+
+    kill_windows_tree(pid);
+    let _ = child.kill();
+    let _ = child.wait();
+
+    let (out, out_over) = out_handle
+        .join()
+        .map_err(|_| error("process", "stdout reader panicked"))?
+        .map_err(|e| error("process", e))?;
+    let (err, err_over) = err_handle
+        .join()
+        .map_err(|_| error("process", "stderr reader panicked"))?
+        .map_err(|e| error("process", e))?;
+
+    let parent = result_path
+        .parent()
+        .ok_or_else(|| error("path", "result parent missing"))?;
+    create_file(&parent.join("stdout.log"), &out)?;
+    create_file(&parent.join("stderr.log"), &err)?;
+
+    if let Some(e) = loop_err {
+        return Err(e);
+    }
+    if out_over || err_over {
+        return Err(error(
+            "output_limit",
+            "headless stdout/stderr exceeds its byte limit",
+        ));
+    }
+    if let Some(st) = status_opt {
+        if !st.success() {
+            return Err(error(
+                "headless_failed",
+                format!(
+                    "headless exited {st}; stderr: {}",
+                    String::from_utf8_lossy(&err[..err.len().min(4096)])
+                ),
+            ));
+        }
+    }
+    Ok((out, err))
+}
+
+fn norm_path(p: &str) -> String {
+    #[cfg(windows)]
+    {
+        p.strip_prefix(r"\\?\")
+            .unwrap_or(p)
+            .replace('/', "\\")
+            .to_ascii_lowercase()
+    }
+    #[cfg(not(windows))]
+    {
+        p.to_string()
+    }
+}
+
 fn validate(
     result: &Value,
     request: &Value,
     config: &Config,
     native: &Path,
     native_sha: &Value,
+    sdk_ver: &str,
 ) -> Result<()> {
     if result.get("schema") != Some(&json!(1))
         || result.get("request_id") != request.get("request_id")
@@ -689,10 +1041,7 @@ fn validate(
         ("input_sha256", request["input_sha256"].clone()),
         ("input_bytes", request["input_bytes"].clone()),
         ("entry", request["entry"].clone()),
-        ("sdk_home", json!(config.ghidra_home)),
-        ("sdk_version", json!("12.2")),
-        ("java_home", json!(config.java_home)),
-        ("native_path", json!(native)),
+        ("sdk_version", json!(sdk_ver)),
         ("native_sha256", native_sha.clone()),
         ("exporter_sha256", json!(sha(EXPORTER.as_bytes()))),
         ("architecture", json!("AARCH64")),
@@ -701,6 +1050,19 @@ fn validate(
         ("analysis_timed_out", json!(false)),
     ] {
         if result.get(key) != Some(&expected) {
+            return Err(error(
+                "provenance",
+                format!("observed {key} does not match the request/prerequisites"),
+            ));
+        }
+    }
+    for (key, expected_path) in [
+        ("sdk_home", config.ghidra_home.as_path()),
+        ("java_home", config.java_home.as_path()),
+        ("native_path", native),
+    ] {
+        let observed = result.get(key).and_then(Value::as_str).unwrap_or("");
+        if norm_path(observed) != norm_path(&expected_path.to_string_lossy()) {
             return Err(error(
                 "provenance",
                 format!("observed {key} does not match the request/prerequisites"),
@@ -752,10 +1114,13 @@ pub fn decompile(config: &Config) -> Result<Value> {
     result
 }
 fn decompile_inner(config: &Config) -> Result<Value> {
-    if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
+    if !cfg!(any(
+        all(target_os = "macos", target_arch = "aarch64"),
+        all(target_os = "windows", target_arch = "x86_64")
+    )) {
         return Err(error(
             "unsupported_host",
-            "external provider currently supports macOS arm64 only",
+            "external provider currently supports macOS arm64 and Windows x86_64 only",
         ));
     }
     if config.timeout.is_zero() || config.timeout > Duration::from_secs(180) {
@@ -794,7 +1159,7 @@ fn decompile_inner(config: &Config) -> Result<Value> {
     let original_metadata = identity(&io(fs::symlink_metadata(&config.input))?);
     let engine_path = io(std::env::current_exe())?;
     let engine_sha = sha(&read(&engine_path, 256 * 1024 * 1024)?);
-    let (before, native) = dependencies(config)?;
+    let (before, native, sdk_ver) = dependencies(config)?;
     let work = workspace(&config.project_root)?;
     let result = (|| {
         let input_path = work.join("input.macho");
@@ -808,26 +1173,99 @@ fn decompile_inner(config: &Config) -> Result<Value> {
             &request_path,
             &serde_json::to_vec(&request).map_err(|e| error("protocol", e))?,
         )?;
-        let options=format!("-Duser.home={} -Dapplication.settingsdir={} -Dapplication.cachedir={} -Dapplication.tempdir={} -Djava.io.tmpdir={} -Djava.util.prefs.userRoot={} -XX:ActiveProcessorCount=2 -Xmx1G",work.join("home").display(),work.join("settings").display(),work.join("cache").display(),work.join("tmp").display(),work.join("tmp").display(),work.join("prefs").display());
-        let mut command = Command::new(config.ghidra_home.join("support/analyzeHeadless"));
+        let options = format!(
+            "-Duser.home={} -Dapplication.settingsdir={} -Dapplication.cachedir={} -Dapplication.tempdir={} -Djava.io.tmpdir={} -Djava.util.prefs.userRoot={} -XX:ActiveProcessorCount=2 -Xmx1G",
+            work.join("home").display(),
+            work.join("settings").display(),
+            work.join("cache").display(),
+            work.join("tmp").display(),
+            work.join("tmp").display(),
+            work.join("prefs").display()
+        );
+
+        #[cfg(unix)]
+        let mut command = {
+            let mut cmd = Command::new(config.ghidra_home.join("support/analyzeHeadless"));
+            cmd.env_clear()
+                .env("HOME", work.join("home"))
+                .env("JAVA_HOME", &config.java_home)
+                .env("JAVA_TOOL_OPTIONS", &options)
+                .env(
+                    "PATH",
+                    format!(
+                        "{}:/usr/bin:/bin:/usr/sbin:/sbin",
+                        config.java_home.join("bin").display()
+                    ),
+                )
+                .env("LANG", "en_US.UTF-8")
+                .env("LC_ALL", "en_US.UTF-8")
+                .env("TMPDIR", work.join("tmp"))
+                .env("XDG_CONFIG_HOME", work.join("settings"))
+                .env("XDG_CACHE_HOME", work.join("cache"))
+                .env("GHIDRA_HEADLESS_MAXMEM", "1G");
+            cmd
+        };
+
+        #[cfg(windows)]
+        let mut command = {
+            use std::os::windows::process::CommandExt;
+            let sys_root =
+                std::env::var("SystemRoot").unwrap_or_else(|_| r"C:\Windows".to_string());
+            let comspec = std::env::var("COMSPEC")
+                .unwrap_or_else(|_| format!(r"{sys_root}\System32\cmd.exe"));
+            let _ = fs::create_dir_all(
+                work.join("settings")
+                    .join("ghidra")
+                    .join(format!("ghidra_{sdk_ver}_PUBLIC")),
+            );
+            let bat = config
+                .ghidra_home
+                .join("support")
+                .join("analyzeHeadless.bat");
+            let cmd_line = format!(
+                "\"\"{}\" \"{}\" \"ArtCraftProvider\" -import \"{}\" -analysisTimeoutPerFile 60 -max-cpu 2 -scriptPath \"{}\" -postScript ArtCraftDecompile.java \"{}\" \"{}\"",
+                bat.display(),
+                work.join("project").display(),
+                input_path.display(),
+                work.join("scripts").display(),
+                request_path.display(),
+                output.display()
+            );
+            let mut cmd = Command::new(&comspec);
+            cmd.env_remove("JAVA_TOOL_OPTIONS")
+                .env_remove("_JAVA_OPTIONS")
+                .env("COMSPEC", &comspec)
+                .env("HOME", work.join("home"))
+                .env("USERPROFILE", work.join("home"))
+                .env("APPDATA", work.join("settings"))
+                .env("LOCALAPPDATA", work.join("cache"))
+                .env("TEMP", work.join("tmp"))
+                .env("TMP", work.join("tmp"))
+                .env("JAVA_HOME", &config.java_home)
+                .env(
+                    "JDK_JAVA_OPTIONS",
+                    format!("{options} -XX:-UsePerfData -Djava.awt.headless=true"),
+                )
+                .env("GHIDRA_HEADLESS_JAVA_OPTIONS", "")
+                .env(
+                    "PATH",
+                    format!(
+                        "{};{sys_root}\\System32;{sys_root}",
+                        config.java_home.join("bin").display()
+                    ),
+                )
+                .env("MAXMEM", "1G")
+                .env("GHIDRA_HEADLESS_MAXMEM", "1G")
+                .current_dir(&work)
+                .arg("/d")
+                .arg("/s")
+                .arg("/c")
+                .raw_arg(format!("{cmd_line}\""));
+            cmd
+        };
+
+        #[cfg(unix)]
         command
-            .env_clear()
-            .env("HOME", work.join("home"))
-            .env("JAVA_HOME", &config.java_home)
-            .env("JAVA_TOOL_OPTIONS", options)
-            .env(
-                "PATH",
-                format!(
-                    "{}:/usr/bin:/bin:/usr/sbin:/sbin",
-                    config.java_home.join("bin").display()
-                ),
-            )
-            .env("LANG", "en_US.UTF-8")
-            .env("LC_ALL", "en_US.UTF-8")
-            .env("TMPDIR", work.join("tmp"))
-            .env("XDG_CONFIG_HOME", work.join("settings"))
-            .env("XDG_CACHE_HOME", work.join("cache"))
-            .env("GHIDRA_HEADLESS_MAXMEM", "1G")
             .current_dir(&work)
             .arg(work.join("project"))
             .arg("ArtCraftProvider")
@@ -853,10 +1291,12 @@ fn decompile_inner(config: &Config) -> Result<Value> {
             config,
             &native,
             &before[&native.to_string_lossy().into_owned()]["sha256"],
+            &sdk_ver,
         )?;
-        let (after, after_native) = dependencies(config)?;
+        let (after, after_native, after_ver) = dependencies(config)?;
         if after != before
             || after_native != native
+            || after_ver != sdk_ver
             || read(&config.input, INPUT_LIMIT)? != input
             || identity(&io(fs::symlink_metadata(&config.input))?) != original_metadata
             || read(&input_path, INPUT_LIMIT)? != input
@@ -876,6 +1316,69 @@ fn decompile_inner(config: &Config) -> Result<Value> {
         e.workspace = Some(work);
         e
     })
+}
+
+#[cfg(all(test, target_os = "windows", target_arch = "x86_64"))]
+mod win_tests {
+    use super::*;
+
+    fn fake_pe64() -> Vec<u8> {
+        let mut b = vec![0u8; 128];
+        b[0..2].copy_from_slice(b"MZ");
+        b[0x3c..0x40].copy_from_slice(&0x40u32.to_le_bytes());
+        b[0x40..0x46].copy_from_slice(b"PE\0\0\x64\x86");
+        b
+    }
+
+    #[test]
+    fn pe64_header_validator_checks_mz_and_amd64_machine() {
+        assert!(is_pe64_x86_64(&fake_pe64()));
+        assert!(!is_pe64_x86_64(b"MZshort"));
+        let mut arm = fake_pe64();
+        arm[0x44..0x46].copy_from_slice(&0xaa64u16.to_le_bytes());
+        assert!(!is_pe64_x86_64(&arm));
+    }
+
+    #[test]
+    fn windows_parser_and_response_caps_are_guarded() {
+        assert_ne!(unique_name("win", 0), unique_name("win", 0));
+        assert!(bounded_result(json!({"c":"int x(void) { return 42; }"})).is_ok());
+        assert_eq!(
+            bounded_result(json!({"c":"\"".repeat(C_LIMIT),"fingerprints":{"host":"checked"}}))
+                .unwrap_err()
+                .code,
+            "output_limit"
+        );
+        for args in [
+            vec![],
+            vec!["a", "1"],
+            vec!["a", "xyz"],
+            vec![
+                "a",
+                "1",
+                "--ghidra-home",
+                r"E:\sdk",
+                "--java-home",
+                r"E:\jdk",
+                "--timeout-seconds",
+                "0",
+            ],
+            vec![
+                "a",
+                "1",
+                "--ghidra-home",
+                r"E:\sdk",
+                "--java-home",
+                r"E:\jdk",
+                "--timeout-seconds",
+                "181",
+            ],
+        ] {
+            assert!(
+                Config::parse(&args.into_iter().map(str::to_string).collect::<Vec<_>>()).is_err()
+            );
+        }
+    }
 }
 
 #[cfg(all(test, target_os = "macos", target_arch = "aarch64"))]
@@ -997,8 +1500,6 @@ mod tests {
             timeout: Duration::from_secs(5),
         }
     }
-    // This test doubles as an owned child responder. A normal test invocation
-    // has no provider-test.json, so it never consults user state or launches Java.
     #[test]
     fn fake_process_child() {
         let spec_path = Path::new("provider-test.json");

@@ -75,6 +75,60 @@ impl LutFile {
         self.domain_min == [0.0, 0.0, 0.0] && self.domain_max == [1.0, 1.0, 1.0]
     }
 
+    /// Evaluate the 3D LUT at `rgb` using trilinear interpolation across its input domain.
+    pub fn apply_trilinear(&self, rgb: [f32; 3]) -> [f32; 3] {
+        let n = self.size.max(2);
+        if self.data.len() < n * n * n * 3 {
+            return rgb;
+        }
+        let s = (n - 1) as f32;
+        let mut idx = [0usize; 3];
+        let mut frac = [0.0f32; 3];
+        for k in 0..3 {
+            let span = (self.domain_max[k] - self.domain_min[k]).max(1e-6);
+            let x = (((rgb[k] - self.domain_min[k]) / span).clamp(0.0, 1.0)) * s;
+            let i = (x.floor() as usize).min(n - 2);
+            idx[k] = i;
+            frac[k] = x - i as f32;
+        }
+        let at = |r: usize, g: usize, b: usize| {
+            let base = ((b * n + g) * n + r) * 3;
+            [self.data[base], self.data[base + 1], self.data[base + 2]]
+        };
+        let lerp = |a: [f32; 3], b: [f32; 3], t: f32| {
+            [
+                a[0] + (b[0] - a[0]) * t,
+                a[1] + (b[1] - a[1]) * t,
+                a[2] + (b[2] - a[2]) * t,
+            ]
+        };
+        let [r, g, b] = idx;
+        let c00 = lerp(at(r, g, b), at(r + 1, g, b), frac[0]);
+        let c10 = lerp(at(r, g + 1, b), at(r + 1, g + 1, b), frac[0]);
+        let c01 = lerp(at(r, g, b + 1), at(r + 1, g, b + 1), frac[0]);
+        let c11 = lerp(at(r, g + 1, b + 1), at(r + 1, g + 1, b + 1), frac[0]);
+        lerp(lerp(c00, c10, frac[1]), lerp(c01, c11, frac[1]), frac[2])
+    }
+
+    /// Compose `self` followed by `next` (`next(self(rgb))`) into a single 3D LUT of edge `size`,
+    /// allowing multi-layer color adjustments to be exported as one `.cube` file for Final Cut Pro / FilmCraft.
+    pub fn chain(&self, next: &LutFile, size: usize, title: &str) -> Self {
+        Self::from_fn(title, size.max(2), |c| next.apply_trilinear(self.apply_trilinear(c)))
+    }
+
+    /// Blend this LUT with the identity table by `amount` (`0.0` = identity, `1.0` = full LUT).
+    pub fn with_intensity(&self, amount: f32) -> Self {
+        let t = if amount.is_finite() { amount.clamp(0.0, 1.0) } else { 1.0 };
+        Self::from_fn(&self.title, self.size.max(2), |c| {
+            let out = self.apply_trilinear(c);
+            [
+                c[0] + (out[0] - c[0]) * t,
+                c[1] + (out[1] - c[1]) * t,
+                c[2] + (out[2] - c[2]) * t,
+            ]
+        })
+    }
+
     fn check(self) -> Result<Self, LutError> {
         let (entries, data_len) = checked_data_len(self.size)?;
         if self.data.len() != data_len {
@@ -587,5 +641,22 @@ DOMAIN_MAX 0.5 1 1
             assert!(l.data.iter().all(|v| (0.0..=1.0).contains(v)), "{id}");
         }
         assert!(builtin("nope").is_none());
+    }
+
+    #[test]
+    fn lut_chain_and_intensity_blend_roundtrip_cube() {
+        let warm = builtin("warm").unwrap();
+        let half = warm.with_intensity(0.5);
+        let mid_full = warm.apply_trilinear([0.5, 0.5, 0.5]);
+        let mid_half = half.apply_trilinear([0.5, 0.5, 0.5]);
+        assert!((mid_half[0] - (0.5 + (mid_full[0] - 0.5) * 0.5)).abs() < 1e-4);
+
+        let inv = LutFile::from_fn("Invert", 9, |[r, g, b]| [1.0 - r, 1.0 - g, 1.0 - b]);
+        let double_inv = inv.chain(&inv, 9, "DoubleInvert");
+        let cube = write_cube(&double_inv);
+        let parsed = parse_cube(&cube).unwrap();
+        assert_eq!(parsed.title, "DoubleInvert");
+        let sample = parsed.apply_trilinear([0.25, 0.5, 0.75]);
+        assert!((sample[0] - 0.25).abs() < 1e-4 && (sample[1] - 0.5).abs() < 1e-4 && (sample[2] - 0.75).abs() < 1e-4);
     }
 }
