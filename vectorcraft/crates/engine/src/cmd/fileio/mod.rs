@@ -232,6 +232,15 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             screens::export_settings
         ),
+        cmd!(
+            "document.exportMotion",
+            "Export Apple Motion Project…",
+            ["File", "Export"],
+            None,
+            "{path?, artboard?: 0 (0-based artboard index), frameRate?: 60.0 (1..=240), durationFrames?: 300, includeHidden?: true, includeTemplateLayers?: false, publishParameters?: true} export the artboard's vector hierarchy (layers, groups, live shapes, cubic Bézier paths, compound paths, rich text, images, symbols) as an Apple Motion 5 <ozml version=\"5.10\"> (.motn/.moti) project → {path, format: \"motion\", ozml, bytes} (no path → {dataBase64, format: \"motion\", ozml, bytes})",
+            has_doc,
+            export_motion
+        ),
     ]
     .into_iter()
     .chain(save::specs())
@@ -1444,6 +1453,41 @@ pub(crate) fn write_or_return(path: Option<&str>, bytes: &[u8], extra: Value) ->
         None => json!({ "dataBase64": vectorcraft_format::base64_encode(bytes), "bytes": bytes.len() }),
     };
     Ok(merge(out, extra))
+}
+
+fn export_motion(s: &mut Session, p: &Value) -> Result<Value> {
+    let doc = &s.doc()?.doc;
+    let mut opts = vectorcraft_doc::motion::MotionExportOptions::default();
+    if let Some(ab) = p.get("artboard").and_then(Value::as_u64) {
+        opts.artboard_index = ab as usize;
+    }
+    if let Some(fps) = p.get("frameRate").and_then(Value::as_f64) {
+        if !fps.is_finite() || !(1.0..=240.0).contains(&fps) {
+            return Err(EngineError::BadParams { cmd: "document.exportMotion".into(), msg: "frameRate must be 1..=240".into() });
+        }
+        opts.frame_rate = fps;
+    }
+    if let Some(dur) = p.get("durationFrames").and_then(Value::as_u64) {
+        if dur == 0 || dur > u64::from(u32::MAX) {
+            return Err(EngineError::BadParams { cmd: "document.exportMotion".into(), msg: "durationFrames must be >= 1".into() });
+        }
+        opts.duration_frames = dur as u32;
+    }
+    if let Some(h) = p.get("includeHidden").and_then(Value::as_bool) {
+        opts.include_hidden = h;
+    }
+    if let Some(t) = p.get("includeTemplateLayers").and_then(Value::as_bool) {
+        opts.include_template_layers = t;
+    }
+    if let Some(pub_params) = p.get("publishParameters").and_then(Value::as_bool) {
+        opts.publish_parameters = pub_params;
+    }
+    let ozml = vectorcraft_doc::motion::export_motion_ozml(doc, &opts);
+    write_or_return(
+        str_param(p, "path"),
+        ozml.as_bytes(),
+        json!({ "format": "motion", "ozml": ozml }),
+    )
 }
 
 #[cfg(test)]

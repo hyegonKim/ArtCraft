@@ -305,6 +305,40 @@ pub fn export_with_compositions(
     prerendered: &HashMap<(ItemId, LayerId), Prerendered>,
     compositions: &HashMap<ItemId, Prerendered>,
 ) -> Result<ExportOutput> {
+    let name = project.item(comp).map(|i| i.name.clone()).unwrap_or_else(|| "Composition".into());
+    let (fp_proj, seq, mut out) = export_project_with_compositions(project, comp, opts, prerendered, compositions)?;
+    let fc_opts = filmcraft_interchange::ExportOptions { relative_to: opts.relative_to.clone(), name: Some(name), ..Default::default() };
+    let (bytes, report) = filmcraft_interchange::export(&fp_proj, seq, opts.format.fc(), &fc_opts)?;
+    for e in report.entries {
+        let m = if e.count > 1 { format!("{} (×{})", e.message, e.count) } else { e.message };
+        if !out.warnings.contains(&m) {
+            out.warnings.push(m);
+        }
+    }
+    out.bytes = bytes;
+    Ok(out)
+}
+
+/// Export composition `comp` directly in memory to a FilmCraft [`fp::Project`] and sequence
+/// [`fp::ItemId`] without intermediate file serialization.
+pub fn export_project(
+    project: &Project,
+    comp: ItemId,
+    opts: &ExportOptions,
+    prerendered: &HashMap<(ItemId, LayerId), Prerendered>,
+) -> Result<(fp::Project, fp::ItemId, ExportOutput)> {
+    export_project_with_compositions(project, comp, opts, prerendered, &HashMap::new())
+}
+
+/// Export composition `comp` directly in memory to a FilmCraft [`fp::Project`] and sequence
+/// [`fp::ItemId`] with optional full-composition bakes.
+pub fn export_project_with_compositions(
+    project: &Project,
+    comp: ItemId,
+    opts: &ExportOptions,
+    prerendered: &HashMap<(ItemId, LayerId), Prerendered>,
+    compositions: &HashMap<ItemId, Prerendered>,
+) -> Result<(fp::Project, fp::ItemId, ExportOutput)> {
     project.comp(comp).ok_or(Error::NoComp(comp.0))?;
     let name = project.item(comp).map(|i| i.name.clone()).unwrap_or_else(|| "Composition".into());
     let mut ex = Exporter {
@@ -320,14 +354,7 @@ pub fn export_with_compositions(
         stack: vec![],
     };
     let seq = ex.sequence(comp).ok_or(Error::NoComp(comp.0))?;
-    let fc_opts = filmcraft_interchange::ExportOptions { relative_to: opts.relative_to.clone(), name: Some(name), ..Default::default() };
-    let (bytes, report) = filmcraft_interchange::export(&ex.fp, seq, opts.format.fc(), &fc_opts)?;
-    for e in report.entries {
-        let m = if e.count > 1 { format!("{} (×{})", e.message, e.count) } else { e.message };
-        ex.warn(m);
-    }
-    ex.out.bytes = bytes;
-    Ok(ex.out)
+    Ok((ex.fp, seq, ex.out))
 }
 
 struct Exporter<'a> {
@@ -577,6 +604,8 @@ impl Exporter<'_> {
             if let Some(mut ti) = clip {
                 ti.enabled = l.switches.video;
                 ti.link = Some(link);
+                ti.label = label_out(l.label);
+                ti.markers = self.layer_markers_out(l);
                 let mut t = fp::Track::new(fp::TrackId(self.fp.alloc_id()), fp::TrackKind::Video, format!("Video {}", video.len() + 1));
                 t.items.push(ti);
                 video.push(t);
@@ -600,6 +629,10 @@ impl Exporter<'_> {
             {
                 ti.enabled = l.switches.audio;
                 ti.link = has_video_clip.then_some(link);
+                if !has_video_clip {
+                    ti.label = label_out(l.label);
+                    ti.markers = self.layer_markers_out(l);
+                }
                 self.levels(&mut ti, l, &tm);
                 let mut t = fp::Track::new(fp::TrackId(self.fp.alloc_id()), fp::TrackKind::Audio, format!("Audio {}", audio.len() + 1));
                 t.items.push(ti);
@@ -615,15 +648,7 @@ impl Exporter<'_> {
         let markers: Vec<fp::Marker> = comp
             .markers
             .iter()
-            .map(|m| fp::Marker {
-                id: fp::MarkerId(self.fp.alloc_id()),
-                start: tick_out(m.time),
-                duration: tick_out(m.duration),
-                name: if m.chapter.is_empty() { m.comment.clone() } else { m.chapter.clone() },
-                comment: if m.chapter.is_empty() { String::new() } else { m.comment.clone() },
-                kind: if m.chapter.is_empty() { fp::MarkerKind::Comment } else { fp::MarkerKind::Chapter },
-                color: fp::Label::Green,
-            })
+            .map(|m| self.marker_out(m))
             .collect();
         if let Some(seq) = self.fp.sequence_mut(sid) {
             seq.video_tracks = video;
@@ -634,6 +659,22 @@ impl Exporter<'_> {
         }
         self.stack.pop();
         Some(sid)
+    }
+
+    fn marker_out(&mut self, m: &effectcraft_project::Marker) -> fp::Marker {
+        fp::Marker {
+            id: fp::MarkerId(self.fp.alloc_id()),
+            start: tick_out(m.time),
+            duration: tick_out(m.duration),
+            name: if m.chapter.is_empty() { m.comment.clone() } else { m.chapter.clone() },
+            comment: if m.chapter.is_empty() { String::new() } else { m.comment.clone() },
+            kind: if m.chapter.is_empty() { fp::MarkerKind::Comment } else { fp::MarkerKind::Chapter },
+            color: label_out(m.label),
+        }
+    }
+
+    fn layer_markers_out(&mut self, l: &Layer) -> Vec<fp::Marker> {
+        l.markers.iter().map(|m| self.marker_out(m)).collect()
     }
 
     fn track_item(&mut self, item: fp::ItemId, name: &str, kind: fp::TrackKind, tm: &Timing, rate: FrameRate) -> Option<fp::TrackItem> {
@@ -798,3 +839,24 @@ fn media_info(name: &str, kind: MediaKind, duration: Tick, video: Option<VideoSp
 fn media_clip(media: fp::MediaRef, info: MediaInfo) -> fp::MediaClip {
     fp::MediaClip { media, info, interpret: Default::default(), mark_in: None, mark_out: None, markers: vec![], offline: false, proxy: None, identity: None }
 }
+
+pub(crate) fn label_out(l: effectcraft_color::Label) -> fp::Label {
+    use effectcraft_color::Label;
+    match l {
+        Label::None | Label::Aqua => fp::Label::Iris,
+        Label::Red | Label::Pink => fp::Label::Rose,
+        Label::Yellow => fp::Label::Yellow,
+        Label::Lavender => fp::Label::Lavender,
+        Label::Peach | Label::Orange => fp::Label::Mango,
+        Label::SeaFoam => fp::Label::Caribbean,
+        Label::Blue => fp::Label::Blue,
+        Label::Green => fp::Label::Green,
+        Label::Purple => fp::Label::Purple,
+        Label::Brown => fp::Label::Brown,
+        Label::Fuchsia => fp::Label::Magenta,
+        Label::Cyan => fp::Label::Cerulean,
+        Label::Sandstone => fp::Label::Tan,
+        Label::DarkGreen => fp::Label::Forest,
+    }
+}
+
