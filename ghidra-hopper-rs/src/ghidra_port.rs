@@ -381,10 +381,8 @@ impl HopperHybridObjcAnalyzerRs {
         let ext_addr = prog.next_external_addr;
         prog.next_external_addr += prog.data_types.ptr_size as u64;
         prog.external_methods.insert(key, ext_addr);
-        prog.symbol_table.insert(
-            ext_addr,
-            format!("-[{} {}]", msg.receiver, msg.selector),
-        );
+        prog.symbol_table
+            .insert(ext_addr, format!("-[{} {}]", msg.receiver, msg.selector));
         ext_addr
     }
 
@@ -458,5 +456,359 @@ impl HopperHybridObjcAnalyzerRs {
         (0..count)
             .map(|i| seg.get_type_at_address(addr + i as u64))
             .collect()
+    }
+}
+
+// ============================================================================
+// REA 6.10.1 (`ReaGhidraBridge.java` + `hopper_bridge.py`) & Ghidra 12.3_DEV Parity
+// ============================================================================
+
+pub const HOPPER_SYMBOL_NAME_UTF16_UNITS: usize = 1024;
+pub const CALLER_SCAN_ALLOWANCE_BYTES: usize = 512 * 1024;
+pub const DEFAULT_BRIDGE_MAX_REQUEST_BYTES: usize = 16 * 1024 * 1024;
+pub const MINIMUM_BRIDGE_MAX_REQUEST_BYTES: usize = 7464;
+pub const MAXIMUM_BRIDGE_MAX_REQUEST_BYTES: usize = 536_870_887;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NativeInstructionContext {
+    pub address: u64,
+    pub instruction_start: Option<u64>,
+    pub byte_types: Vec<ByteType>,
+    pub symbol: Option<String>,
+    pub objc_selector: Option<String>,
+    pub eol_comment: Option<String>,
+    pub outgoing_refs: Vec<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoadImageSegmentInfo {
+    pub name: String,
+    pub start_address: u64,
+    pub length: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoadImageSummary {
+    pub program_name: String,
+    pub segments: Vec<LoadImageSegmentInfo>,
+    pub symbol_count: usize,
+    pub objc_stub_count: usize,
+    pub reference_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedCallTarget {
+    pub to_addr: u64,
+    pub ref_type: GhidraRefType,
+    pub symbol: Option<String>,
+    pub selector: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BatchRenameFailure {
+    pub address: u64,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BatchRenameReport {
+    pub applied: Vec<(u64, String)>,
+    pub rejected: Vec<BatchRenameFailure>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CallerScanPage {
+    pub target_address: u64,
+    pub callers: Vec<u64>,
+    pub next_cursor: Option<usize>,
+    pub budget_bytes: usize,
+}
+
+pub fn parse_bridge_max_request_bytes(raw: &str) -> Result<usize, String> {
+    if raw.is_empty() || raw.starts_with('0') || !raw.bytes().all(|b| b.is_ascii_digit()) {
+        return Err(format!(
+            "REA_BRIDGE_MAX_REQUEST_BYTES must be ASCII digits in {}..={}",
+            MINIMUM_BRIDGE_MAX_REQUEST_BYTES, MAXIMUM_BRIDGE_MAX_REQUEST_BYTES
+        ));
+    }
+    let val: usize = raw.parse().map_err(|_| {
+        format!(
+            "REA_BRIDGE_MAX_REQUEST_BYTES overflow ({}..={})",
+            MINIMUM_BRIDGE_MAX_REQUEST_BYTES, MAXIMUM_BRIDGE_MAX_REQUEST_BYTES
+        )
+    })?;
+    if !(MINIMUM_BRIDGE_MAX_REQUEST_BYTES..=MAXIMUM_BRIDGE_MAX_REQUEST_BYTES).contains(&val) {
+        return Err(format!(
+            "REA_BRIDGE_MAX_REQUEST_BYTES out of range ({}..={})",
+            MINIMUM_BRIDGE_MAX_REQUEST_BYTES, MAXIMUM_BRIDGE_MAX_REQUEST_BYTES
+        ));
+    }
+    Ok(val)
+}
+
+fn validate_symbol_name(name: &str) -> Result<(), String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() {
+        return Err("symbol name must not be empty".to_string());
+    }
+    if trimmed.chars().any(char::is_control) {
+        return Err("symbol name must not contain control characters".to_string());
+    }
+    let utf16_len = trimmed.encode_utf16().count();
+    if utf16_len > HOPPER_SYMBOL_NAME_UTF16_UNITS {
+        return Err(format!(
+            "symbol name UTF-16 length {} exceeds Hopper ceiling {}",
+            utf16_len, HOPPER_SYMBOL_NAME_UTF16_UNITS
+        ));
+    }
+    Ok(())
+}
+
+impl GhidraProgram {
+    pub fn segment_at(&self, addr: u64) -> Option<&Segment> {
+        self.segments.iter().find(|s| s.contains(addr))
+    }
+
+    pub fn segment_at_mut(&mut self, addr: u64) -> Option<&mut Segment> {
+        self.segments.iter_mut().find(|s| s.contains(addr))
+    }
+
+    /// REA 6.10.1 `inspect_native_load_image` equivalent.
+    pub fn inspect_native_load_image(&self) -> LoadImageSummary {
+        LoadImageSummary {
+            program_name: self.name.clone(),
+            segments: self
+                .segments
+                .iter()
+                .map(|s| LoadImageSegmentInfo {
+                    name: s.name.clone(),
+                    start_address: s.start_address,
+                    length: s.length(),
+                })
+                .collect(),
+            symbol_count: self.symbol_table.len(),
+            objc_stub_count: self.objc_stub_selectors.len(),
+            reference_count: self.references.len(),
+        }
+    }
+
+    /// REA 6.10.1 `inspect_native_instruction` equivalent.
+    pub fn inspect_native_instruction(&self, addr: u64) -> Option<NativeInstructionContext> {
+        let seg = self.segment_at(addr)?;
+        let base = seg.get_instruction_start(addr);
+        let byte_types = (0..4)
+            .filter(|i| seg.contains(base + *i))
+            .map(|i| seg.get_type_at_address(base + i))
+            .collect();
+        let outgoing_refs = self
+            .references
+            .iter()
+            .filter(|r| r.from_addr == base)
+            .map(|r| r.to_addr)
+            .collect();
+        Some(NativeInstructionContext {
+            address: addr,
+            instruction_start: Some(base),
+            byte_types,
+            symbol: self.symbol_table.get(&base).cloned(),
+            objc_selector: self.objc_stub_selectors.get(&base).cloned(),
+            eol_comment: self.eol_comments.get(&base).cloned(),
+            outgoing_refs,
+        })
+    }
+
+    /// REA 6.10.1 `resolve_native_call_targets` equivalent.
+    pub fn resolve_native_call_targets(&self, call_addr: u64) -> Vec<ResolvedCallTarget> {
+        self.references
+            .iter()
+            .filter(|r| {
+                r.from_addr == call_addr
+                    && matches!(
+                        r.ref_type,
+                        GhidraRefType::CallOverrideUnconditional
+                            | GhidraRefType::UnconditionalCall
+                            | GhidraRefType::ComputedJump
+                    )
+            })
+            .map(|r| ResolvedCallTarget {
+                to_addr: r.to_addr,
+                ref_type: r.ref_type,
+                symbol: self.symbol_table.get(&r.to_addr).cloned(),
+                selector: self.objc_stub_selectors.get(&r.to_addr).cloned(),
+            })
+            .collect()
+    }
+
+    /// REA 6.10.1 `annotate_native_function` equivalent.
+    pub fn annotate_native_function(
+        &mut self,
+        addr: u64,
+        name: Option<&str>,
+        comment: Option<&str>,
+    ) -> Result<(), String> {
+        if let Some(n) = name {
+            validate_symbol_name(n)?;
+            let clean = n.trim().to_string();
+            self.symbol_table.insert(addr, clean.clone());
+            if let Some(seg) = self.segment_at_mut(addr) {
+                seg.set_name_at_address(addr, clean);
+            }
+        }
+        if let Some(c) = comment {
+            let clean = c.trim().to_string();
+            self.eol_comments.insert(addr, clean.clone());
+            if let Some(seg) = self.segment_at_mut(addr) {
+                seg.inline_comments.insert(addr, clean.clone());
+            }
+            self.bookmarks.push(GhidraBookmark {
+                address: addr,
+                bookmark_type: "HopperTag".into(),
+                category: "REAAnnotation".into(),
+                comment: clean,
+            });
+        }
+        Ok(())
+    }
+
+    /// REA `search_procedures` with secondary `objc_stub::<sel>` alias matching.
+    pub fn search_procedures(&self, query: &str, limit: usize) -> Vec<(u64, String)> {
+        let q = query.trim().to_ascii_lowercase();
+        let mut results = Vec::new();
+        for (&addr, sym) in &self.symbol_table {
+            let stub_alias = self
+                .objc_stub_selectors
+                .get(&addr)
+                .map(|s| format!("objc_stub::{s}"));
+            let matched = q.is_empty()
+                || sym.to_ascii_lowercase().contains(&q)
+                || stub_alias
+                    .as_ref()
+                    .is_some_and(|a| a.to_ascii_lowercase().contains(&q));
+            if matched {
+                results.push((addr, sym.clone()));
+                if results.len() >= limit.max(1) {
+                    break;
+                }
+            }
+        }
+        results
+    }
+
+    /// REA `set_addresses_names` batch symbol rename with per-address validation.
+    pub fn apply_address_names(&mut self, items: &[(u64, String)]) -> BatchRenameReport {
+        let mut applied = Vec::new();
+        let mut rejected = Vec::new();
+        for (addr, name) in items {
+            match validate_symbol_name(name) {
+                Ok(()) => {
+                    let clean = name.trim().to_string();
+                    self.symbol_table.insert(*addr, clean.clone());
+                    if let Some(seg) = self.segment_at_mut(*addr) {
+                        seg.set_name_at_address(*addr, clean.clone());
+                    }
+                    applied.push((*addr, clean));
+                }
+                Err(reason) => rejected.push(BatchRenameFailure {
+                    address: *addr,
+                    reason,
+                }),
+            }
+        }
+        BatchRenameReport { applied, rejected }
+    }
+
+    /// REA `hopper_bridge.py` bounded `CALLER_SCAN_ALLOWANCE_BYTES` caller-scan page.
+    pub fn caller_scan_page(&self, target_addr: u64, cursor: usize) -> CallerScanPage {
+        let mut all_callers: Vec<u64> = self
+            .references
+            .iter()
+            .filter(|r| r.to_addr == target_addr)
+            .map(|r| r.from_addr)
+            .collect();
+        all_callers.sort_unstable();
+        all_callers.dedup();
+
+        let mut callers = Vec::new();
+        let mut used_bytes = 64usize;
+        let mut idx = cursor.min(all_callers.len());
+        while idx < all_callers.len() {
+            let entry_cost = 24usize;
+            if !callers.is_empty() && used_bytes + entry_cost > CALLER_SCAN_ALLOWANCE_BYTES {
+                break;
+            }
+            callers.push(all_callers[idx]);
+            used_bytes += entry_cost;
+            idx += 1;
+        }
+        let next_cursor = (idx < all_callers.len()).then_some(idx);
+        CallerScanPage {
+            target_address: target_addr,
+            callers,
+            next_cursor,
+            budget_bytes: CALLER_SCAN_ALLOWANCE_BYTES,
+        }
+    }
+}
+
+#[cfg(test)]
+mod rea_6_10_parity_tests {
+    use super::*;
+
+    #[test]
+    fn test_rea_6_10_bridge_ceiling_and_native_tools() {
+        assert_eq!(parse_bridge_max_request_bytes("7464"), Ok(7464));
+        assert_eq!(parse_bridge_max_request_bytes("16777216"), Ok(16777216));
+        assert!(parse_bridge_max_request_bytes("7463").is_err());
+        assert!(parse_bridge_max_request_bytes("07464").is_err());
+        assert!(parse_bridge_max_request_bytes("536870888").is_err());
+
+        let mut seg = Segment::new("__TEXT", 0x100000000, 0, vec![0u8; 64]);
+        seg.mark_as_procedure(0x100000000, 4);
+        let mut prog = GhidraProgram::new("Rea610Demo", seg);
+        prog.objc_stub_selectors
+            .insert(0x100000020, "initWithUTF8String:".into());
+        prog.symbol_table
+            .insert(0x100000020, "objc_msgSend$initWithUTF8String:".into());
+        prog.add_memory_reference(
+            0x10000000c,
+            0x100000020,
+            GhidraRefType::CallOverrideUnconditional,
+            GhidraSourceType::Analysis,
+            0,
+        );
+
+        let img = prog.inspect_native_load_image();
+        assert_eq!(img.segments.len(), 1);
+        assert_eq!(img.objc_stub_count, 1);
+
+        let targets = prog.resolve_native_call_targets(0x10000000c);
+        assert_eq!(targets.len(), 1);
+        assert_eq!(targets[0].selector.as_deref(), Some("initWithUTF8String:"));
+
+        let hits = prog.search_procedures("objc_stub::initWithUTF8String:", 10);
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 0x100000020);
+
+        prog.annotate_native_function(
+            0x100000000,
+            Some("bootstrap_entry"),
+            Some("REA 6.10.1 verified entry"),
+        )
+        .unwrap();
+        let ctx = prog.inspect_native_instruction(0x100000002).unwrap();
+        assert_eq!(ctx.instruction_start, Some(0x100000000));
+        assert_eq!(ctx.symbol.as_deref(), Some("bootstrap_entry"));
+
+        let overlong = "x".repeat(HOPPER_SYMBOL_NAME_UTF16_UNITS + 1);
+        let report = prog.apply_address_names(&[
+            (0x100000010, "valid_helper".into()),
+            (0x100000014, overlong),
+        ]);
+        assert_eq!(report.applied.len(), 1);
+        assert_eq!(report.rejected.len(), 1);
+
+        let page = prog.caller_scan_page(0x100000020, 0);
+        assert_eq!(page.callers, vec![0x10000000c]);
+        assert_eq!(page.next_cursor, None);
     }
 }

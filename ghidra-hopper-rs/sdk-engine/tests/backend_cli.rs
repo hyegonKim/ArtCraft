@@ -1,7 +1,10 @@
 use serde_json::Value;
 use std::process::Command;
 
-#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64"),
+    all(target_os = "windows", target_arch = "x86_64")
+))]
 #[test]
 fn optional_provider_is_explicit_and_errors_are_structured() {
     let output = Command::new(env!("CARGO_BIN_EXE_ghidra-hopper-rs"))
@@ -26,7 +29,10 @@ fn default_demo_remains_the_existing_rust_lifter() {
     assert!(!text.contains("external_ghidra"));
 }
 
-#[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+#[cfg(not(any(
+    all(target_os = "macos", target_arch = "aarch64"),
+    all(target_os = "windows", target_arch = "x86_64")
+)))]
 #[test]
 fn external_provider_is_an_explicit_typed_unsupported_host_on_other_platforms() {
     let output = Command::new(env!("CARGO_BIN_EXE_ghidra-hopper-rs"))

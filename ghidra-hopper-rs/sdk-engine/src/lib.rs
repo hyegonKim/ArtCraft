@@ -11,9 +11,12 @@ mod arm64_memory;
 pub mod arm64_simd;
 pub mod arm64_test_branch;
 pub mod cfg_tags;
-pub mod ghidra_port;
-#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64"),
+    all(target_os = "windows", target_arch = "x86_64")
+))]
 pub mod ghidra_backend;
+pub mod ghidra_port;
 pub mod jni_runtime;
 pub mod macho_objc;
 pub mod mcp_server;

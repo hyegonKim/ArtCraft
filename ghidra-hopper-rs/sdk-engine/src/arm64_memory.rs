@@ -236,14 +236,16 @@ pub fn decode(address: u64, word: u32) -> Option<DecodedInstruction> {
             ops,
         ));
     }
-    // Integer unscaled / pre-index / post-index immediate single transfers.
-    // Unprivileged encodings (mode 2), signed byte/halfword and SIMD remain unsupported.
+    // Integer unscaled (mode 0), post-index (mode 1), and pre-index (mode 3) immediate single
+    // transfers, including Ghidra 12.3_DEV (71506bafd3e4) LDURSB/LDURSH/LDRSB/LDRSH 32-bit Wt vs
+    // 64-bit Xt sign-extension semantics. Unprivileged (mode 2) and SIMD remain unsupported.
     if word & 0x3f200000 == 0x38000000 {
         let opc = (word >> 22) & 3;
         let mode = (word >> 10) & 3;
         let size = 1u8 << ((word >> 30) & 3);
-        let signed_word = opc == 2 && size == 4;
-        if (opc > 1 && !signed_word) || mode == 2 {
+        let signed_64 = opc == 2 && matches!(size, 1 | 2 | 4);
+        let signed_32 = opc == 3 && matches!(size, 1 | 2);
+        if mode == 2 || (opc > 1 && !signed_64 && !signed_32) {
             return None;
         }
         let rt = (word & 31) as u64;
@@ -260,19 +262,24 @@ pub fn decode(address: u64, word: u32) -> Option<DecodedInstruction> {
             lhs: base,
             rhs: Varnode::imm(if mode == 1 { 0 } else { displacement as u64 }, 8),
         }];
-        if opc == 1 || signed_word {
+        let dst_reg_size = if signed_64 || (opc <= 1 && size == 8) {
+            8
+        } else {
+            4
+        };
+        if opc >= 1 {
             ops.push(PcodeOp::Load {
                 dst: temp(1, size),
                 addr: a,
             });
-            ops.push(if signed_word {
+            ops.push(if signed_64 || signed_32 {
                 PcodeOp::SignExtend {
-                    dst: write_reg(rt, 8),
-                    src: temp(1, 4),
+                    dst: write_reg(rt, dst_reg_size),
+                    src: temp(1, size),
                 }
             } else {
                 PcodeOp::ZeroExtend {
-                    dst: write_reg(rt, if size == 8 { 8 } else { 4 }),
+                    dst: write_reg(rt, dst_reg_size),
                     src: temp(1, size),
                 }
             });
@@ -282,29 +289,30 @@ pub fn decode(address: u64, word: u32) -> Option<DecodedInstruction> {
                 src: read_reg(rt, size),
             });
         }
-        if mode != 0 {
+        if matches!(mode, 1 | 3) {
             ops.push(PcodeOp::IntAdd {
                 dst: base,
                 lhs: base,
                 rhs: Varnode::imm(displacement as u64, 8),
             });
         }
-        let mnemonic = match (mode == 0, opc, size) {
-            (true, 2, 4) => "ldursw",
-            (false, 2, 4) => "ldrsw",
-            (true, 0, 1) => "sturb",
-            (true, 0, 2) => "sturh",
-            (true, 0, _) => "stur",
-            (true, 1, 1) => "ldurb",
-            (true, 1, 2) => "ldurh",
-            (true, 1, _) => "ldur",
-            (false, 0, 1) => "strb",
-            (false, 0, 2) => "strh",
-            (false, 0, _) => "str",
-            (false, 1, 1) => "ldrb",
-            (false, 1, 2) => "ldrh",
-            _ => "ldr",
+        let stem = match (opc == 0, mode) {
+            (true, 0) => "stur",
+            (true, 2) => "sttr",
+            (true, _) => "str",
+            (false, 0) => "ldur",
+            (false, 2) => "ldtr",
+            (false, _) => "ldr",
         };
+        let suffix = match (signed_64 || signed_32, size) {
+            (true, 1) => "sb",
+            (true, 2) => "sh",
+            (true, _) => "sw",
+            (false, 1) => "b",
+            (false, 2) => "h",
+            (false, _) => "",
+        };
+        let mnemonic = format!("{stem}{suffix}");
         let memory = match mode {
             1 => format!("[{}], #{displacement}", base.display_arm64()),
             3 => format!("[{}, #{displacement}]!", base.display_arm64()),
@@ -313,11 +321,8 @@ pub fn decode(address: u64, word: u32) -> Option<DecodedInstruction> {
         return Some(instruction(
             address,
             word,
-            mnemonic,
-            vec![
-                name(rt, if size == 8 || signed_word { 8 } else { 4 }),
-                memory,
-            ],
+            &mnemonic,
+            vec![name(rt, dst_reg_size), memory],
             ops,
         ));
     }

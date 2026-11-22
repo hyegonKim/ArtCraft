@@ -70,7 +70,10 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mode = args.get(1).map(String::as_str).unwrap_or("demo");
     if mode == "ghidra-decompile" {
-        #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+        #[cfg(any(
+            all(target_os = "macos", target_arch = "aarch64"),
+            all(target_os = "windows", target_arch = "x86_64")
+        ))]
         {
             match ghidra_hopper_rs::ghidra_backend::Config::parse(&args[2..])
                 .and_then(|config| ghidra_hopper_rs::ghidra_backend::decompile(&config))
@@ -83,11 +86,14 @@ fn main() {
             }
             return;
         }
-        #[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+        #[cfg(not(any(
+            all(target_os = "macos", target_arch = "aarch64"),
+            all(target_os = "windows", target_arch = "x86_64")
+        )))]
         {
             println!(
                 "{}",
-                serde_json::json!({"schema":1,"status":"error","provider":"external_ghidra","code":"unsupported_host","message":"external Ghidra currently requires macOS arm64"})
+                serde_json::json!({"schema":1,"status":"error","provider":"external_ghidra","code":"unsupported_host","message":"external Ghidra currently requires macOS arm64 or Windows x86_64"})
             );
             std::process::exit(1);
         }
@@ -109,7 +115,7 @@ fn main() {
     }
 
     if mode == "mcp" {
-        let summary = r#"{"engine":"ghidra-hopper-rs","version":"0.3.0","status":"no_document_loaded","provider_health":"not_checked","engine_scope":"partial_arm64","full_ssa_decompiler":false,"document_mutation":false}"#;
+        let summary = r#"{"engine":"ghidra-hopper-rs","version":"0.3.1","status":"no_document_loaded","provider_health":"not_checked","engine_scope":"partial_arm64","full_ssa_decompiler":false,"document_mutation":false,"synced_rea":"6.10.1","synced_ghidra":"12.3_DEV"}"#;
         if let Err(err) = mcp_server::run_stdio_mcp_loop(summary) {
             eprintln!("MCP transport error: {err}");
             std::process::exit(1);
@@ -293,8 +299,8 @@ fn main() {
     let start_time = Instant::now();
     println!("SYNTHETIC DEMO ONLY: no real binary is analyzed below");
     println!("╔════════════════════════════════════════════════════════════════════════╗");
-    println!("║  Ghidra 12.3_DEV + Hopper 6.6.0 Hybrid Engine (ghidra-hopper-rs v0.3.0)║");
-    println!("║  Synced: Ghidra 4718f50d99 | Hopper 42.6316032 | REA 6.8.0 (15 Agents) ║");
+    println!("║  Ghidra 12.3_DEV + Hopper 6.6.0 Hybrid Engine (ghidra-hopper-rs v0.3.1)║");
+    println!("║  Synced: Ghidra 3fb3eec6a0 | Ghidra 12.2 PUBLIC | REA 6.10.1 ad6e511b6 ║");
     println!("╚════════════════════════════════════════════════════════════════════════╝");
 
     // 2. Execute the Rust-ported Ghidra `HopperHybridObjcAnalyzerRs` + `GhidraJumpTable`
