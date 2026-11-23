@@ -344,7 +344,6 @@ fn path_dialog(id: &str, home: &str, name: &str) -> Option<Dialog> {
     let ext = match id {
         "file.export_midi" => ".mid",
         "file.export_sibelius" => ".musicxml",
-        "file.export_fcpxml" => ".fcpxml",
         "file.print_score" => ".svg",
         "file.export_clip_groups" => ".scgrp",
         "file.export_session_text" => ".txt",
