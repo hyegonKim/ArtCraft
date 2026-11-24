@@ -210,6 +210,10 @@ pub fn tree() -> Vec<MenuNode> {
     // SoundCraft additions that are not in the observed catalog (so they do not count toward parity).
     insert_path(&mut roots, "AudioSuite > Other > Match Loudness");
     insert_path(&mut roots, "View > Waveforms > Spectral Frequency Display");
+    insert_path(&mut roots, "File > Import > Final Cut Pro XML (.fcpxml)...");
+    insert_path(&mut roots, "File > Export > Final Cut Pro XML (.fcpxml)...");
+    insert_path(&mut roots, "Event > Time Operations > SMPTE Lock Position...");
+    insert_path(&mut roots, "Event > Tempo Operations > Beat Map Scene Markers...");
     // Not in the observed catalog either; Pro Tools lists it right under Identify Sync Point.
     if let Some(clip) = roots.iter_mut().find(|n| n.label == "Clip") {
         let at = clip.children.iter().position(|n| n.label == "Identify Sync Point").map_or(clip.children.len(), |i| i + 1);
