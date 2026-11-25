@@ -6,7 +6,7 @@ Windows RTX 4070 Ti 재시험은 macOS VideoToolbox를 다시 돌리지 않았�
 
 - 소스: [PR #23](https://github.com/hyegonKim/ArtCraft/pull/23)의 `65f716ba`. main `7603d9c7`(PR #21 병합)에 `a6b921d2`가 되돌린 파일 53개를 복구한 것이고, 2026-11-24에 같은 트리로 main `08439e6b`에 병합됐다. H.265 관련 크레이트에서 main과 다른 곳은 `crates/hevc/src/filter.rs`의 clippy 정리(동작 같음)와 Pro Apps 내보내기 코드 삭제뿐이다.
 - Apple M1(8 CPU), RAM 16GiB, macOS 27.2.1, Rust/Cargo 1.99.1, 외부 FFmpeg/ffprobe 9.0.2.
-- 릴리스 프로필, `--locked`, `FILMCRAFT_REQUIRE_ORACLES=1`. 2026-11-23 23:27에 시작해 11-24 01:10(KST)에 끝났다. 대부분은 컴파일 시간이다.
+- 릴리스 프로필, `--locked`, `FILMCRAFT_REQUIRE_ORACLES=1`. 2026-11-23 23:27에 시작해 11-24 01:10(KST)에 끝났다. 그동안 Mac은 배터리로 잠들었다가 잠깐씩 깨어나기(DarkWake)를 되풀이했고(`pmset` 기록), 시험은 깨어 있는 동안에만 진행됐다. 걸린 시간 대부분은 잠든 시간이다. Cargo가 잰 시간은 잠든 시간을 빼고 컴파일이 네 단계 합쳐 약 3분 40초, 테스트가 약 50초다.
 
 ## 실제 출력 8개 시나리오
 
@@ -50,7 +50,7 @@ Windows RTX 4070 Ti 재시험은 macOS VideoToolbox를 다시 돌리지 않았�
 
 ## 재현
 
-`filmcraft` 디렉터리에서 실행한다. 출력 폴더는 저장소 밖의 절대 경로로 한다.
+`filmcraft` 디렉터리에서 실행한다. 출력 폴더는 저장소 밖의 절대 경로로, 실행할 때마다 새로 만든 빈 폴더를 쓴다. 테스트는 폴더를 비우지 않고 시나리오마다 같은 파일 이름에 덮어쓰며, CSV는 그 시나리오의 확인이 모두 끝난 뒤에 쓴다. 폴더를 다시 쓰거나 두 실행이 같은 폴더를 쓰면 이전 실행이나 다른 실행의 파일이 섞일 수 있다.
 
 ```sh
 export FILMCRAFT_REQUIRE_ORACLES=1
@@ -60,4 +60,6 @@ cargo test --locked --release -p filmcraft-hevcenc
 cargo test --locked --release -p filmcraft-hevc --test it
 ```
 
-통과만으로는 VideoToolbox가 쓰였는지 알 수 없다. 출력 폴더의 `auto-*.csv`에서 `hardware_frames`가 프레임 수와 같고 `hardware_sessions`가 1인지, 그리고 테스트 출력에 `SKIPPED`가 없는지 확인한다.
+통과만으로는 VideoToolbox가 쓰였는지 알 수 없다. 납품 테스트가 통과한 뒤, 그 실행에서 새로 만든 출력 폴더의 `auto-*.csv`에서 `hardware_frames`가 프레임 수와 같고 `hardware_sessions`가 1인지 확인한다. CSV의 `seconds` 값이 테스트 출력에 찍힌 시나리오별 초와 같으면 그 실행이 쓴 파일이다. 테스트 출력에 `SKIPPED`가 없는지도 확인한다.
+
+이번 출력 폴더는 이 실행을 위해 2026-11-23 23:27에 새로 만들었고, 이 실행이 만든 24개 파일만 있다. CSV의 `seconds` 값은 로그와 같다. 파일 생성 시각은 `software-4k-sdr`만 00:03이고 나머지는 00:10인데, 그 사이(00:03:26~00:10:27)는 Mac이 잠들어 있던 시간이다. 테스트의 시간 측정은 잠든 시간을 세지 않아 32.95초로 찍혔다.
