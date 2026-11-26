@@ -67,10 +67,22 @@ fn project(w: u32, h: u32, frames: i64, working: WorkingSpace) -> (Arc<Project>,
     (Arc::new(p), seq, sources)
 }
 
+/// The evidence (`.probe.txt`, `.csv`) is written only after every check passes: drop an earlier
+/// run's, so that a failed rerun in the same directory cannot leave it beside the new picture file.
+fn clear_evidence(dir: &std::path::Path, name: &str) {
+    for evidence in [format!("{name}.probe.txt"), format!("{name}.csv")] {
+        match std::fs::remove_file(dir.join(evidence)) {
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => panic!("{name}: {e}"),
+            _ => {}
+        }
+    }
+}
+
 fn deliver(name: &str, w: u32, h: u32, frames: i64, working: WorkingSpace, hardware: HardwareEncoding) {
     let dir = std::path::PathBuf::from(std::env::var_os("FILMCRAFT_DELIVERY_DIR").expect("set FILMCRAFT_DELIVERY_DIR"));
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join(format!("{name}.mp4"));
+    clear_evidence(&dir, name);
     let (p, seq, sources) = project(w, h, frames, working);
     let before = hw_encode_stats();
     let start = Instant::now();
