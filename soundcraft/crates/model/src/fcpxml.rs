@@ -28,8 +28,7 @@ use soundcraft_time::{
 };
 
 use crate::{
-    AutoParam, BusId, ChannelFormat, Clip, Fade, FadeShape, MarkerId, MarkerKind, Route, Session,
-    SessionError, Source, SourceId, TrackId, TrackKind,
+    AutoParam, BusId, ChannelFormat, Clip, Fade, FadeShape, MarkerId, MarkerKind, Route, Session, SessionError, Source, SourceId, TrackId, TrackKind,
 };
 
 /// Main Final Cut Pro / Logic Pro audio role category.
@@ -119,16 +118,12 @@ pub fn is_fcpxml_document(xml: &str) -> bool {
 
 /// Import FCPXML (`1.9`..=`1.13`) audio clips, Audio Roles (`dialogue`, `effects`, `music`),
 /// volume/pan automation, fades, and scene markers into `session`.
-pub fn import_fcpxml_audio(
-    session: &mut Session,
-    xml: &str,
-) -> Result<FcpxmlAudioImportSummary, SessionError> {
+pub fn import_fcpxml_audio(session: &mut Session, xml: &str) -> Result<FcpxmlAudioImportSummary, SessionError> {
     let root = parse_xml(xml).ok_or_else(|| SessionError::Format("invalid FCPXML XML".into()))?;
     let fcpxml = if root.tag == "fcpxml" {
         &root
     } else {
-        root.find_descendant("fcpxml")
-            .ok_or_else(|| SessionError::Format("missing <fcpxml> root element".into()))?
+        root.find_descendant("fcpxml").ok_or_else(|| SessionError::Format("missing <fcpxml> root element".into()))?
     };
 
     let sr = session.sample_rate;
@@ -151,33 +146,14 @@ pub fn import_fcpxml_audio(
             {
                 let name = child
                     .attr("name")
-                    .or_else(|| {
-                        child
-                            .child("media-rep")
-                            .and_then(|m| m.attr("src"))
-                            .and_then(|s| s.rsplit('/').next())
-                    })
+                    .or_else(|| child.child("media-rep").and_then(|m| m.attr("src")).and_then(|s| s.rsplit('/').next()))
                     .unwrap_or(id)
                     .to_string();
-                let src_url = child
-                    .attr("src")
-                    .or_else(|| child.child("media-rep").and_then(|m| m.attr("src")))
-                    .unwrap_or(&name);
+                let src_url = child.attr("src").or_else(|| child.child("media-rep").and_then(|m| m.attr("src"))).unwrap_or(&name);
                 let path = src_url.strip_prefix("file://").unwrap_or(src_url).to_string();
-                let channels = child
-                    .attr("audioChannels")
-                    .and_then(|s| s.trim().parse::<u16>().ok())
-                    .unwrap_or(2)
-                    .clamp(1, 16);
-                let asset_sr = child
-                    .attr("audioRate")
-                    .and_then(|s| s.trim().parse::<u32>().ok())
-                    .unwrap_or(sr.hz());
-                let dur_sec = child
-                    .attr("duration")
-                    .and_then(parse_fcpxml_seconds)
-                    .unwrap_or(10.0)
-                    .max(0.0);
+                let channels = child.attr("audioChannels").and_then(|s| s.trim().parse::<u16>().ok()).unwrap_or(2).clamp(1, 16);
+                let asset_sr = child.attr("audioRate").and_then(|s| s.trim().parse::<u32>().ok()).unwrap_or(sr.hz());
+                let dur_sec = child.attr("duration").and_then(parse_fcpxml_seconds).unwrap_or(10.0).max(0.0);
                 let frames = (dur_sec * f64::from(asset_sr)).round() as u64;
                 let source_id = SourceId(session.alloc());
                 session.sources.push(Source {
@@ -191,21 +167,12 @@ pub fn import_fcpxml_audio(
                     time_reference: 0,
                     unsaved: false,
                 });
-                assets.insert(
-                    id.to_string(),
-                    FcpxmlAsset {
-                        source_id,
-                        name,
-                        channels,
-                    },
-                );
+                assets.insert(id.to_string(), FcpxmlAsset { source_id, name, channels });
             }
         }
     }
 
-    let sequence = fcpxml
-        .find_descendant("sequence")
-        .ok_or_else(|| SessionError::Format("missing <sequence> in FCPXML".into()))?;
+    let sequence = fcpxml.find_descendant("sequence").ok_or_else(|| SessionError::Format("missing <sequence> in FCPXML".into()))?;
     if let Some(fmt_id) = sequence.attr("format")
         && let Some(&fps) = format_fps.get(fmt_id)
     {
@@ -215,9 +182,7 @@ pub fn import_fcpxml_audio(
         session.timecode_start = sr.samples(tc_start_sec);
     }
 
-    let spine = sequence
-        .child("spine")
-        .ok_or_else(|| SessionError::Format("missing <spine> in FCPXML <sequence>".into()))?;
+    let spine = sequence.child("spine").ok_or_else(|| SessionError::Format("missing <spine> in FCPXML <sequence>".into()))?;
 
     let mut summary = FcpxmlAudioImportSummary::default();
     let mut stem_bus_map: BTreeMap<AudioRoleCategory, (BusId, TrackId)> = BTreeMap::new();
@@ -226,19 +191,9 @@ pub fn import_fcpxml_audio(
     let mut spine_cursor_sec = 0.0_f64;
     for item in &spine.children {
         if item.tag == "gap" {
-            let dur = item
-                .attr("duration")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(0.0)
-                .max(0.0);
-            let gap_offset_timeline = item
-                .attr("offset")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(spine_cursor_sec);
-            let gap_start_media = item
-                .attr("start")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(0.0);
+            let dur = item.attr("duration").and_then(parse_fcpxml_seconds).unwrap_or(0.0).max(0.0);
+            let gap_offset_timeline = item.attr("offset").and_then(parse_fcpxml_seconds).unwrap_or(spine_cursor_sec);
+            let gap_start_media = item.attr("start").and_then(parse_fcpxml_seconds).unwrap_or(0.0);
             import_connected_items(
                 session,
                 item,
@@ -251,24 +206,9 @@ pub fn import_fcpxml_audio(
             );
             spine_cursor_sec = gap_offset_timeline + dur;
         } else if is_clip_tag(&item.tag) {
-            let timeline_offset = item
-                .attr("offset")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(spine_cursor_sec);
-            let dur = item
-                .attr("duration")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(0.0)
-                .max(0.0);
-            import_clip_element(
-                session,
-                item,
-                timeline_offset,
-                &assets,
-                &mut stem_bus_map,
-                &mut role_track_map,
-                &mut summary,
-            );
+            let timeline_offset = item.attr("offset").and_then(parse_fcpxml_seconds).unwrap_or(spine_cursor_sec);
+            let dur = item.attr("duration").and_then(parse_fcpxml_seconds).unwrap_or(0.0).max(0.0);
+            import_clip_element(session, item, timeline_offset, &assets, &mut stem_bus_map, &mut role_track_map, &mut summary);
             spine_cursor_sec = timeline_offset + dur;
         }
     }
@@ -301,28 +241,12 @@ fn import_connected_items(
     for child in &parent.children {
         if is_clip_tag(&child.tag) {
             // In FCPXML, a connected clip's `offset` is relative to the parent clip's media `start`!
-            let child_offset = child
-                .attr("offset")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(parent_media_start_sec);
-            let timeline_sec =
-                (parent_timeline_offset_sec + (child_offset - parent_media_start_sec)).max(0.0);
-            import_clip_element(
-                session,
-                child,
-                timeline_sec,
-                assets,
-                stem_bus_map,
-                role_track_map,
-                summary,
-            );
+            let child_offset = child.attr("offset").and_then(parse_fcpxml_seconds).unwrap_or(parent_media_start_sec);
+            let timeline_sec = (parent_timeline_offset_sec + (child_offset - parent_media_start_sec)).max(0.0);
+            import_clip_element(session, child, timeline_sec, assets, stem_bus_map, role_track_map, summary);
         } else if child.tag == "marker" || child.tag == "chapter-marker" {
-            let m_start = child
-                .attr("start")
-                .and_then(parse_fcpxml_seconds)
-                .unwrap_or(parent_media_start_sec);
-            let timeline_sec =
-                (parent_timeline_offset_sec + (m_start - parent_media_start_sec)).max(0.0);
+            let m_start = child.attr("start").and_then(parse_fcpxml_seconds).unwrap_or(parent_media_start_sec);
+            let timeline_sec = (parent_timeline_offset_sec + (m_start - parent_media_start_sec)).max(0.0);
             let sample_pos = session.sample_rate.samples(timeline_sec);
             let label = child.attr("value").unwrap_or("Scene Marker");
             let id = session.add_marker(label, MarkerKind::Marker, sample_pos, sample_pos);
@@ -346,25 +270,14 @@ fn import_clip_element(
     role_track_map: &mut BTreeMap<String, TrackId>,
     summary: &mut FcpxmlAudioImportSummary,
 ) {
-    let media_start_sec = node
-        .attr("start")
-        .and_then(parse_fcpxml_seconds)
-        .unwrap_or(0.0)
-        .max(0.0);
-    let dur_sec = node
-        .attr("duration")
-        .and_then(parse_fcpxml_seconds)
-        .unwrap_or(0.0)
-        .max(0.0);
+    let media_start_sec = node.attr("start").and_then(parse_fcpxml_seconds).unwrap_or(0.0).max(0.0);
+    let dur_sec = node.attr("duration").and_then(parse_fcpxml_seconds).unwrap_or(0.0).max(0.0);
 
     // Determine if this clip carries audio.
     let role_str = node
         .attr("audioRole")
         .or_else(|| node.attr("role"))
-        .or_else(|| {
-            node.child("audio-channel-source")
-                .and_then(|a| a.attr("role"))
-        })
+        .or_else(|| node.child("audio-channel-source").and_then(|a| a.attr("role")))
         .unwrap_or("dialogue.dialogue-1");
     let category = AudioRoleCategory::from_role_attr(role_str);
     let has_audio = node.tag != "video" || node.attr("audioRole").is_some();
@@ -375,11 +288,8 @@ fn import_clip_element(
         let len_samples = sr.samples(dur_sec).clamp(1, MAX_POSITION);
         let offset_samples = sr.samples(media_start_sec).clamp(0, MAX_POSITION);
 
-        let (source_id, default_name, channels) = node
-            .attr("ref")
-            .and_then(|r| assets.get(r))
-            .map(|a| (a.source_id, a.name.clone(), a.channels))
-            .unwrap_or_else(|| {
+        let (source_id, default_name, channels) =
+            node.attr("ref").and_then(|r| assets.get(r)).map(|a| (a.source_id, a.name.clone(), a.channels)).unwrap_or_else(|| {
                 let sid = SourceId(session.alloc());
                 let name = node.attr("name").unwrap_or("Clip").to_string();
                 session.sources.push(Source {
@@ -396,11 +306,7 @@ fn import_clip_element(
                 (sid, name, 2)
             });
 
-        let clip_name = node
-            .attr("name")
-            .filter(|s| !s.is_empty())
-            .unwrap_or(&default_name)
-            .to_string();
+        let clip_name = node.attr("name").filter(|s| !s.is_empty()).unwrap_or(&default_name).to_string();
         let format = ChannelFormat::for_channels(usize::from(channels));
 
         // Ensure a Stem Summing Bus + Aux Track exists for this main role category.
@@ -418,27 +324,18 @@ fn import_clip_element(
         });
 
         let normalized_role = normalize_role_key(role_str, &category);
-        let track_id = *role_track_map
-            .entry(normalized_role.clone())
-            .or_insert_with(|| {
-                let tid = session.add_track(TrackKind::Audio, format, Some(&normalized_role));
-                if let Some(t) = session.track_mut(tid) {
-                    t.color = category.color();
-                    t.mixer.output = Route::Bus(bus_id);
-                    t.comments = format!("fcpxml.role:{normalized_role}");
-                }
-                tid
-            });
+        let track_id = *role_track_map.entry(normalized_role.clone()).or_insert_with(|| {
+            let tid = session.add_track(TrackKind::Audio, format, Some(&normalized_role));
+            if let Some(t) = session.track_mut(tid) {
+                t.color = category.color();
+                t.mixer.output = Route::Bus(bus_id);
+                t.comments = format!("fcpxml.role:{normalized_role}");
+            }
+            tid
+        });
 
         let clip_id = session.new_clip_id();
-        let mut clip = Clip::audio(
-            clip_id,
-            clip_name,
-            source_id,
-            offset_samples,
-            start_samples,
-            len_samples,
-        );
+        let mut clip = Clip::audio(clip_id, clip_name, source_id, offset_samples, start_samples, len_samples);
         clip.color = Some(category.color());
 
         if node.attr("enabled") == Some("0") {
@@ -446,10 +343,8 @@ fn import_clip_element(
         }
 
         // Volume adjustment & keyframe animation (`<adjust-volume amount="-3dB">`)
-        if let Some(vol_node) = node.child("adjust-volume").or_else(|| {
-            node.child("audio-channel-source")
-                .and_then(|acs| acs.child("adjust-volume"))
-        }) {
+        if let Some(vol_node) = node.child("adjust-volume").or_else(|| node.child("audio-channel-source").and_then(|acs| acs.child("adjust-volume")))
+        {
             if let Some(amt) = vol_node.attr("amount").and_then(parse_fcpxml_db) {
                 clip.gain_db = amt;
             }
@@ -514,25 +409,12 @@ fn import_clip_element(
     }
 
     // Recurse into connected clips and markers attached to this clip.
-    import_connected_items(
-        session,
-        node,
-        timeline_offset_sec,
-        media_start_sec,
-        assets,
-        stem_bus_map,
-        role_track_map,
-        summary,
-    );
+    import_connected_items(session, node, timeline_offset_sec, media_start_sec, assets, stem_bus_map, role_track_map, summary);
 }
 
 fn normalize_role_key(raw: &str, category: &AudioRoleCategory) -> String {
     let trimmed = raw.trim();
-    if trimmed.contains('.') {
-        trimmed.to_string()
-    } else {
-        format!("{}.{}-1", category.fcpxml_id(), category.fcpxml_id())
-    }
+    if trimmed.contains('.') { trimmed.to_string() } else { format!("{}.{}-1", category.fcpxml_id(), category.fcpxml_id()) }
 }
 
 fn parse_fcpxml_fade_shape(t: &str) -> FadeShape {
@@ -565,10 +447,8 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
 
     let (fps_num, fps_den) = session.frame_rate.rational();
     // frameDuration is 1 / fps = fps_den / fps_num seconds.
-    let _ = writeln!(
-        xml,
-        "    <format id=\"r1\" name=\"FFVideoFormat1080p\" frameDuration=\"{fps_den}/{fps_num}s\" width=\"1920\" height=\"1080\"/>"
-    );
+    let _ =
+        writeln!(xml, "    <format id=\"r1\" name=\"FFVideoFormat1080p\" frameDuration=\"{fps_den}/{fps_num}s\" width=\"1920\" height=\"1080\"/>");
 
     let sr = session.sample_rate;
     for src in &session.sources {
@@ -588,16 +468,8 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
     let total_samples = session.content_end().max(i64::from(sr.hz()));
     let tc_start_samples = session.timecode_start.max(0);
     let _ = writeln!(xml, "  <library>");
-    let _ = writeln!(
-        xml,
-        "    <event name=\"{}\">",
-        escape_xml(&session.name)
-    );
-    let _ = writeln!(
-        xml,
-        "      <project name=\"{}\">",
-        escape_xml(&session.name)
-    );
+    let _ = writeln!(xml, "    <event name=\"{}\">", escape_xml(&session.name));
+    let _ = writeln!(xml, "      <project name=\"{}\">", escape_xml(&session.name));
     let _ = writeln!(
         xml,
         "        <sequence format=\"r1\" duration=\"{total_samples}/{}s\" tcStart=\"{tc_start_samples}/{}s\" tcFormat=\"{}\" audioLayout=\"stereo\" audioRate=\"48k\">",
@@ -606,11 +478,7 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
         if session.frame_rate.is_drop() { "DF" } else { "NDF" }
     );
     xml.push_str("          <spine>\n");
-    let _ = writeln!(
-        xml,
-        "            <gap name=\"Timeline\" offset=\"0s\" start=\"0s\" duration=\"{total_samples}/{}s\">",
-        sr.hz()
-    );
+    let _ = writeln!(xml, "            <gap name=\"Timeline\" offset=\"0s\" start=\"0s\" duration=\"{total_samples}/{}s\">", sr.hz());
 
     let mut lane_idx = 1_i32;
     for track in &session.tracks {
@@ -626,11 +494,7 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
             let offset_s = clip.start.max(0);
             let start_s = clip.source_offset().max(0);
             let dur_s = clip.length.max(1);
-            let enabled_attr = if clip.muted || track.mixer.mute {
-                " enabled=\"0\""
-            } else {
-                ""
-            };
+            let enabled_attr = if clip.muted || track.mixer.mute { " enabled=\"0\"" } else { "" };
             let _ = writeln!(
                 xml,
                 "              <asset-clip name=\"{}\" lane=\"-{lane_idx}\" offset=\"{offset_s}/{}s\" ref=\"a{}\" start=\"{start_s}/{}s\" duration=\"{dur_s}/{}s\" role=\"{}\"{enabled_attr}>",
@@ -644,14 +508,8 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
 
             let net_db = clip.gain_db + track.mixer.volume_db;
             let clip_end = clip.end();
-            let kfs_in_clip: Vec<_> = vol_lane
-                .map(|l| {
-                    l.points
-                        .iter()
-                        .filter(|p| p.at >= clip.start && p.at <= clip_end)
-                        .collect()
-                })
-                .unwrap_or_default();
+            let kfs_in_clip: Vec<_> =
+                vol_lane.map(|l| l.points.iter().filter(|p| p.at >= clip.start && p.at <= clip_end).collect()).unwrap_or_default();
 
             if net_db.abs() > 1e-4 || !kfs_in_clip.is_empty() {
                 let _ = writeln!(xml, "                <adjust-volume amount=\"{net_db:.2}dB\">");
@@ -661,12 +519,7 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
                     for kf in kfs_in_clip {
                         let rel = (kf.at - clip.start).max(0);
                         let media_pos = start_s.saturating_add(rel);
-                        let _ = writeln!(
-                            xml,
-                            "                      <keyframe time=\"{media_pos}/{}s\" value=\"{:.2}dB\"/>",
-                            sr.hz(),
-                            kf.value
-                        );
+                        let _ = writeln!(xml, "                      <keyframe time=\"{media_pos}/{}s\" value=\"{:.2}dB\"/>", sr.hz(), kf.value);
                     }
                     xml.push_str("                    </keyframeAnimation>\n");
                     xml.push_str("                  </param>\n");
@@ -701,11 +554,7 @@ pub fn export_fcpxml_audio(session: &Session) -> String {
     for marker in &session.markers {
         let start_s = marker.start.max(0);
         let dur_s = (marker.end - marker.start).max(1);
-        let note_attr = if marker.comments.is_empty() {
-            String::new()
-        } else {
-            format!(" note=\"{}\"", escape_xml(&marker.comments))
-        };
+        let note_attr = if marker.comments.is_empty() { String::new() } else { format!(" note=\"{}\"", escape_xml(&marker.comments)) };
         let _ = writeln!(
             xml,
             "              <marker start=\"{start_s}/{}s\" duration=\"{dur_s}/{}s\" value=\"{}\"{note_attr}/>",
@@ -785,10 +634,7 @@ pub fn smpte_lock_clips(session: &mut Session, new_bpm: f64) -> Result<usize, Se
         }
     }
 
-    session
-        .tempo
-        .set_tempo(0, new_bpm)
-        .map_err(|e| SessionError::Invalid(e.to_string()))?;
+    session.tempo.set_tempo(0, new_bpm).map_err(|e| SessionError::Invalid(e.to_string()))?;
 
     let mut affected = 0_usize;
     for track in &mut session.tracks {
@@ -818,10 +664,7 @@ pub fn smpte_lock_clips(session: &mut Session, new_bpm: f64) -> Result<usize, Se
 /// Given a list of `(BarBeat, MarkerId)` pairs, computes and applies piecewise constant
 /// [`TempoEvent`]s on `session.tempo` so that each musical [`BarBeat`] lands sample-accurately on
 /// the corresponding scene hit [`MemoryLocation`].
-pub fn beat_map_markers_to_tempo(
-    session: &mut Session,
-    anchors: &[(BarBeat, MarkerId)],
-) -> Result<Vec<TempoEvent>, SessionError> {
+pub fn beat_map_markers_to_tempo(session: &mut Session, anchors: &[(BarBeat, MarkerId)]) -> Result<Vec<TempoEvent>, SessionError> {
     if anchors.is_empty() {
         return Ok(session.tempo.tempos().to_vec());
     }
@@ -834,13 +677,9 @@ pub fn beat_map_markers_to_tempo(
     for &(bb, marker_id) in anchors {
         let tick = session.tempo.tick_at_bar_beat(bb);
         if tick <= 0 {
-            return Err(SessionError::Invalid(
-                "beat mapping target BarBeat must be after bar 1 beat 1".into(),
-            ));
+            return Err(SessionError::Invalid("beat mapping target BarBeat must be after bar 1 beat 1".into()));
         }
-        let marker = session
-            .marker(marker_id)
-            .ok_or_else(|| SessionError::Invalid(format!("unknown marker id {}", marker_id.0)))?;
+        let marker = session.marker(marker_id).ok_or_else(|| SessionError::Invalid(format!("unknown marker id {}", marker_id.0)))?;
         resolved.push((tick, marker.start));
     }
 
@@ -854,18 +693,12 @@ pub fn beat_map_markers_to_tempo(
         let dt_ticks = t1 - t0;
         let ds_samples = s1 - s0;
         if dt_ticks <= 0 || ds_samples <= 0 {
-            return Err(SessionError::Invalid(
-                "beat map markers must advance monotonically in both musical ticks and sample time"
-                    .into(),
-            ));
+            return Err(SessionError::Invalid("beat map markers must advance monotonically in both musical ticks and sample time".into()));
         }
         let delta_sec = sr.seconds(ds_samples);
         let quarters = dt_ticks as f64 / TICKS_PER_QUARTER as f64;
         let bpm = (quarters * 60.0 / delta_sec).clamp(5.0, 1000.0);
-        session
-            .tempo
-            .set_tempo(t0, bpm)
-            .map_err(|e| SessionError::Invalid(e.to_string()))?;
+        session.tempo.set_tempo(t0, bpm).map_err(|e| SessionError::Invalid(e.to_string()))?;
         events.push(TempoEvent { tick: t0, bpm });
     }
 
@@ -892,11 +725,7 @@ fn parse_fcpxml_seconds(s: &str) -> Option<f64> {
 
 fn parse_fcpxml_db(s: &str) -> Option<f32> {
     let s = s.trim();
-    let num = s
-        .strip_suffix("dB")
-        .or_else(|| s.strip_suffix("db"))
-        .unwrap_or(s)
-        .trim();
+    let num = s.strip_suffix("dB").or_else(|| s.strip_suffix("db")).unwrap_or(s).trim();
     if num == "-inf" || num == "-INF" {
         return Some(-144.0);
     }
@@ -951,10 +780,7 @@ struct XmlNode {
 
 impl XmlNode {
     fn attr(&self, key: &str) -> Option<&str> {
-        self.attrs
-            .iter()
-            .find(|(k, _)| k == key)
-            .map(|(_, v)| v.as_str())
+        self.attrs.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str())
     }
 
     fn child(&self, tag: &str) -> Option<&XmlNode> {
@@ -975,10 +801,7 @@ impl XmlNode {
 }
 
 fn parse_xml(input: &str) -> Option<XmlNode> {
-    let mut root = XmlNode {
-        tag: "__root__".to_string(),
-        ..Default::default()
-    };
+    let mut root = XmlNode { tag: "__root__".to_string(), ..Default::default() };
     let mut stack: Vec<XmlNode> = Vec::new();
     let bytes = input.as_bytes();
     let mut i = 0_usize;
@@ -1025,20 +848,12 @@ fn parse_xml(input: &str) -> Option<XmlNode> {
         }
 
         let self_closing = inside.ends_with('/');
-        let tag_body = if self_closing {
-            inside[..inside.len() - 1].trim()
-        } else {
-            inside
-        };
+        let tag_body = if self_closing { inside[..inside.len() - 1].trim() } else { inside };
         let (tag_name, attrs) = parse_tag_and_attrs(tag_body);
         if tag_name.is_empty() {
             continue;
         }
-        let node = XmlNode {
-            tag: tag_name,
-            attrs,
-            children: Vec::new(),
-        };
+        let node = XmlNode { tag: tag_name, attrs, children: Vec::new() };
         if self_closing {
             if let Some(parent) = stack.last_mut() {
                 parent.children.push(node);
@@ -1098,11 +913,7 @@ fn parse_tag_and_attrs(body: &str) -> (String, Vec<(String, String)>) {
 }
 
 fn unescape_xml(s: &str) -> String {
-    s.replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&amp;", "&")
+    s.replace("&quot;", "\"").replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 }
 
 #[cfg(test)]
@@ -1158,11 +969,7 @@ mod tests {
         assert_eq!(summary.stem_buses.len(), 3); // Dialogue, Effects, Music stems
         assert_eq!(session.frame_rate, FrameRate::Fps24);
 
-        let dx_track = session
-            .tracks
-            .iter()
-            .find(|t| t.name == "dialogue.dialogue-1")
-            .unwrap();
+        let dx_track = session.tracks.iter().find(|t| t.name == "dialogue.dialogue-1").unwrap();
         assert_eq!(dx_track.clips().len(), 1);
         let dx_clip = &dx_track.clips()[0];
         assert_eq!(dx_clip.start, 48_000); // 1.0s at 48 kHz
@@ -1193,34 +1000,15 @@ mod tests {
         let sfx_clip_id = session.new_clip_id();
         let mut sfx_clip = Clip::audio(sfx_clip_id, "Boom Hit", SourceId(1), 0, 144_000, 24_000);
         sfx_clip.time_locked = true;
-        session
-            .track_mut(sfx_track)
-            .unwrap()
-            .playlist_mut()
-            .unwrap()
-            .clips
-            .push(sfx_clip);
+        session.track_mut(sfx_track).unwrap().playlist_mut().unwrap().clips.push(sfx_clip);
 
         let midi_track = session.add_track(TrackKind::Midi, ChannelFormat::Mono, Some("Strings"));
         // At default 120 BPM 4/4, Bar 2 Beat 1 is at 2.0 seconds (96_000 samples).
         let midi_clip_id = session.new_clip_id();
         let mut seq = Sequence::default();
-        seq.notes.push(Note {
-            pitch: 60,
-            velocity: 100,
-            release_velocity: 0,
-            start: 0,
-            length: 960,
-            channel: 0,
-        });
+        seq.notes.push(Note { pitch: 60, velocity: 100, release_velocity: 0, start: 0, length: 960, channel: 0 });
         let midi_clip = Clip::midi(midi_clip_id, "Downbeat Chord", 96_000, 48_000, seq);
-        session
-            .track_mut(midi_track)
-            .unwrap()
-            .playlist_mut()
-            .unwrap()
-            .clips
-            .push(midi_clip);
+        session.track_mut(midi_track).unwrap().playlist_mut().unwrap().clips.push(midi_clip);
 
         // Change tempo from 120 BPM to 60 BPM with SMPTE Lock:
         // - The time-locked SFX hit stays at sample 144_000 (3.0s)
@@ -1232,31 +1020,10 @@ mod tests {
 
         // Now add a scene cut marker at 3.2 seconds (153_600 samples) and beat-map Bar 3 Beat 1 to it!
         let cut_marker = session.add_marker("Scene Cut", MarkerKind::Marker, 153_600, 153_600);
-        let events = beat_map_markers_to_tempo(
-            &mut session,
-            &[(
-                BarBeat {
-                    bar: 3,
-                    beat: 1,
-                    tick: 0,
-                },
-                cut_marker,
-            )],
-        )
-        .unwrap();
+        let events = beat_map_markers_to_tempo(&mut session, &[(BarBeat { bar: 3, beat: 1, tick: 0 }, cut_marker)]).unwrap();
         assert_eq!(events.len(), 1);
         // 2 bars of 4/4 = 8 beats in 3.2 seconds => 150.0 BPM!
         assert!((events[0].bpm - 150.0).abs() < 1e-6);
-        assert_eq!(
-            session.tempo.samples_at_bar_beat(
-                BarBeat {
-                    bar: 3,
-                    beat: 1,
-                    tick: 0
-                },
-                session.sample_rate
-            ),
-            153_600
-        );
+        assert_eq!(session.tempo.samples_at_bar_beat(BarBeat { bar: 3, beat: 1, tick: 0 }, session.sample_rate), 153_600);
     }
 }

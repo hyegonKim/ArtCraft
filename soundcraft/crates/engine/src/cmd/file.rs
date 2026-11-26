@@ -231,8 +231,7 @@ pub fn specs() -> Vec<CommandSpec> {
                 let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
                 let bytes = crate::io::read_file(&path)?;
                 let xml = String::from_utf8(bytes).map_err(|err| bad(id, format!("{path} is not valid UTF-8 XML: {err}")))?;
-                let summary = soundcraft_model::fcpxml::import_fcpxml_audio(e.session_mut(), &xml)
-                    .map_err(|err| bad(id, err.to_string()))?;
+                let summary = soundcraft_model::fcpxml::import_fcpxml_audio(e.session_mut(), &xml).map_err(|err| bad(id, err.to_string()))?;
                 Ok(json!({
                     "tracks": summary.role_tracks.iter().map(|(r, t)| json!({"role": r, "track": t.0})).collect::<Vec<_>>(),
                     "stems": summary.stem_buses.iter().map(|(cat, b, t)| json!({"role": cat.fcpxml_id(), "bus": b.0, "aux_track": t.0})).collect::<Vec<_>>(),

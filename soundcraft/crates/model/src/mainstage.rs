@@ -19,35 +19,11 @@ use soundcraft_time::Samples;
 use crate::{ChannelFormat, Insert, Mixer, SendSlot, TrackId};
 
 /// Unique identifier for a [`Patch`] in a [`Concert`].
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Default,
-    serde::Serialize,
-    serde::Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, serde::Serialize, serde::Deserialize)]
 pub struct PatchId(pub u64);
 
 /// Unique identifier for a [`PatchSet`] in a [`Concert`].
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Default,
-    serde::Serialize,
-    serde::Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, serde::Serialize, serde::Deserialize)]
 pub struct PatchSetId(pub u64);
 
 /// A single channel strip inside a [`Patch`], with MIDI keyboard split (`note_low..=note_high`),
@@ -107,8 +83,7 @@ impl ChannelStripConfig {
         {
             return false;
         }
-        (self.note_low..=self.note_high).contains(&pitch)
-            && (self.vel_low..=self.vel_high).contains(&velocity)
+        (self.note_low..=self.note_high).contains(&pitch) && (self.vel_low..=self.vel_high).contains(&velocity)
     }
 
     /// Transposes `pitch` by `self.transpose`, clamped to `0..=127`.
@@ -129,11 +104,7 @@ pub enum MacroTarget {
     /// Software instrument parameter by name.
     InstrumentParam { strip: TrackId, param: String },
     /// Audio insert plugin parameter (`0..INSERT_SLOTS`).
-    InsertParam {
-        strip: TrackId,
-        insert_slot: usize,
-        param: String,
-    },
+    InsertParam { strip: TrackId, insert_slot: usize, param: String },
 }
 
 /// One destination in a MainStage Screen Control's multi-parameter Fan-Out.
@@ -151,11 +122,7 @@ pub struct MacroMapping {
 impl MacroMapping {
     /// Map a normalized `0.0..=1.0` screen control value to the target parameter's domain.
     pub fn evaluate(&self, norm: f32) -> f32 {
-        let t = if norm.is_finite() {
-            norm.clamp(0.0, 1.0)
-        } else {
-            0.0
-        };
+        let t = if norm.is_finite() { norm.clamp(0.0, 1.0) } else { 0.0 };
         let t = if self.inverted { 1.0 - t } else { t };
         self.min_val + (self.max_val - self.min_val) * t
     }
@@ -176,13 +143,7 @@ pub struct MacroControl {
 
 impl MacroControl {
     pub fn new(id: u64, name: impl Into<String>, midi_cc: Option<u8>) -> Self {
-        Self {
-            id,
-            name: name.into(),
-            midi_cc,
-            value: 0.0,
-            mappings: Vec::new(),
-        }
+        Self { id, name: name.into(), midi_cc, value: 0.0, mappings: Vec::new() }
     }
 }
 
@@ -201,23 +162,12 @@ pub struct Patch {
 
 impl Patch {
     pub fn new(id: PatchId, name: impl Into<String>, tail_decay_samples: Samples) -> Self {
-        Self {
-            id,
-            name: name.into(),
-            program_change: None,
-            tail_decay_samples: tail_decay_samples.max(0),
-            strips: Vec::new(),
-            macros: Vec::new(),
-        }
+        Self { id, name: name.into(), program_change: None, tail_decay_samples: tail_decay_samples.max(0), strips: Vec::new(), macros: Vec::new() }
     }
 
     /// Apply a normalized (`0.0..=1.0`) macro control update across all mapped channel strips.
     pub fn set_macro_value(&mut self, macro_id: u64, norm_value: f32) -> usize {
-        let norm = if norm_value.is_finite() {
-            norm_value.clamp(0.0, 1.0)
-        } else {
-            0.0
-        };
+        let norm = if norm_value.is_finite() { norm_value.clamp(0.0, 1.0) } else { 0.0 };
         let Some(mc) = self.macros.iter_mut().find(|m| m.id == macro_id) else {
             return 0;
         };
@@ -236,12 +186,7 @@ impl Patch {
     /// Handle a hardware MIDI CC message (`cc` ∈ `0..=127`, `value_7bit` ∈ `0..=127`).
     pub fn handle_midi_cc(&mut self, cc: u8, value_7bit: u8) -> usize {
         let norm = f32::from(value_7bit.min(127)) / 127.0;
-        let matching_ids: Vec<u64> = self
-            .macros
-            .iter()
-            .filter(|m| m.midi_cc == Some(cc))
-            .map(|m| m.id)
-            .collect();
+        let matching_ids: Vec<u64> = self.macros.iter().filter(|m| m.midi_cc == Some(cc)).map(|m| m.id).collect();
         let mut total = 0_usize;
         for id in matching_ids {
             total += self.set_macro_value(id, norm);
@@ -282,13 +227,9 @@ impl Patch {
                     return true;
                 }
             }
-            MacroTarget::InsertParam {
-                strip,
-                insert_slot,
-                param,
-            } => {
+            MacroTarget::InsertParam { strip, insert_slot, param } => {
                 if let Some(s) = self.strips.iter_mut().find(|s| s.id == *strip)
-                    && let Some( Some(ins)) = s.mixer.inserts.get_mut(*insert_slot)
+                    && let Some(Some(ins)) = s.mixer.inserts.get_mut(*insert_slot)
                 {
                     ins.params.insert(param.clone(), val);
                     return true;
@@ -320,12 +261,7 @@ pub struct Concert {
 
 impl Concert {
     pub fn new(name: impl Into<String>) -> Self {
-        Self {
-            name: name.into(),
-            global_strips: Vec::new(),
-            global_macros: Vec::new(),
-            sets: Vec::new(),
-        }
+        Self { name: name.into(), global_strips: Vec::new(), global_macros: Vec::new(), sets: Vec::new() }
     }
 
     pub fn patch(&self, id: PatchId) -> Option<&Patch> {
@@ -333,17 +269,11 @@ impl Concert {
     }
 
     pub fn patch_mut(&mut self, id: PatchId) -> Option<&mut Patch> {
-        self.sets
-            .iter_mut()
-            .flat_map(|s| &mut s.patches)
-            .find(|p| p.id == id)
+        self.sets.iter_mut().flat_map(|s| &mut s.patches).find(|p| p.id == id)
     }
 
     pub fn patch_by_program(&self, program: u8) -> Option<&Patch> {
-        self.sets
-            .iter()
-            .flat_map(|s| &s.patches)
-            .find(|p| p.program_change == Some(program))
+        self.sets.iter().flat_map(|s| &s.patches).find(|p| p.program_change == Some(program))
     }
 }
 
@@ -377,11 +307,7 @@ pub struct LivePatchSwitcher {
 
 impl LivePatchSwitcher {
     pub fn new(initial_patch: PatchId) -> Self {
-        Self {
-            active_patch: initial_patch,
-            held_notes: BTreeMap::new(),
-            decaying_tails: BTreeMap::new(),
-        }
+        Self { active_patch: initial_patch, held_notes: BTreeMap::new(), decaying_tails: BTreeMap::new() }
     }
 
     pub fn active_patch(&self) -> PatchId {
@@ -401,15 +327,8 @@ impl LivePatchSwitcher {
         self.active_patch = next_patch;
         self.decaying_tails.remove(&next_patch);
 
-        let tail = concert
-            .patch(prev)
-            .map(|p| p.tail_decay_samples)
-            .unwrap_or(0)
-            .max(0);
-        let has_held = self
-            .held_notes
-            .values()
-            .any(|routes| routes.iter().any(|r| r.patch_id == prev));
+        let tail = concert.patch(prev).map(|p| p.tail_decay_samples).unwrap_or(0).max(0);
+        let has_held = self.held_notes.values().any(|routes| routes.iter().any(|r| r.patch_id == prev));
         if has_held || tail > 0 {
             self.decaying_tails.insert(prev, tail);
         }
@@ -417,13 +336,7 @@ impl LivePatchSwitcher {
 
     /// Route an incoming MIDI Note-On (`velocity > 0`).
     /// Only triggers strips belonging to the **currently active** [`Patch`].
-    pub fn note_on(
-        &mut self,
-        concert: &Concert,
-        channel: u8,
-        pitch: u8,
-        velocity: u8,
-    ) -> Vec<RoutedMidiNote> {
+    pub fn note_on(&mut self, concert: &Concert, channel: u8, pitch: u8, velocity: u8) -> Vec<RoutedMidiNote> {
         if velocity == 0 {
             return self.note_off(concert, channel, pitch);
         }
@@ -436,26 +349,12 @@ impl LivePatchSwitcher {
         for strip in &patch.strips {
             if strip.accepts_note(channel, pitch, velocity) {
                 let tp = strip.transposed_pitch(pitch);
-                routed.push(RoutedMidiNote {
-                    patch_id: patch.id,
-                    strip_id: strip.id,
-                    channel,
-                    pitch: tp,
-                    velocity,
-                    is_note_on: true,
-                });
-                held_entries.push(HeldNoteRoute {
-                    patch_id: patch.id,
-                    strip_id: strip.id,
-                    transposed_pitch: tp,
-                });
+                routed.push(RoutedMidiNote { patch_id: patch.id, strip_id: strip.id, channel, pitch: tp, velocity, is_note_on: true });
+                held_entries.push(HeldNoteRoute { patch_id: patch.id, strip_id: strip.id, transposed_pitch: tp });
             }
         }
         if !held_entries.is_empty() {
-            self.held_notes
-                .entry((channel, pitch))
-                .or_default()
-                .extend(held_entries);
+            self.held_notes.entry((channel, pitch)).or_default().extend(held_entries);
         }
         routed
     }
@@ -479,11 +378,7 @@ impl LivePatchSwitcher {
             // If this note belonged to a previous patch, refresh its tail decay timer from the
             // moment the note is released.
             if r.patch_id != self.active_patch {
-                let tail = concert
-                    .patch(r.patch_id)
-                    .map(|p| p.tail_decay_samples)
-                    .unwrap_or(0)
-                    .max(0);
+                let tail = concert.patch(r.patch_id).map(|p| p.tail_decay_samples).unwrap_or(0).max(0);
                 if tail > 0 {
                     self.decaying_tails.insert(r.patch_id, tail);
                 }
@@ -496,11 +391,7 @@ impl LivePatchSwitcher {
     /// all been released AND whose reverb/delay tail has finished decaying.
     pub fn advance_audio(&mut self, frames: Samples) {
         let dt = frames.max(0);
-        let patches_with_held_notes: BTreeSet<PatchId> = self
-            .held_notes
-            .values()
-            .flat_map(|v| v.iter().map(|r| r.patch_id))
-            .collect();
+        let patches_with_held_notes: BTreeSet<PatchId> = self.held_notes.values().flat_map(|v| v.iter().map(|r| r.patch_id)).collect();
 
         self.decaying_tails.retain(|patch_id, remaining| {
             if patches_with_held_notes.contains(patch_id) {
@@ -543,30 +434,20 @@ mod tests {
         // Patch 1: Warm Pad (with 1-second reverb tail = 48_000 samples)
         let mut p1 = Patch::new(PatchId(1), "Warm Pad", 48_000);
         p1.program_change = Some(0);
-        p1.strips.push(
-            ChannelStripConfig::new(TrackId(10), "Pad Synth", Some("alchemy_pad"))
-                .with_zone(36, 96, 1, 127),
-        );
+        p1.strips.push(ChannelStripConfig::new(TrackId(10), "Pad Synth", Some("alchemy_pad")).with_zone(36, 96, 1, 127));
 
         // Patch 2: Split Bass (C1..B2) + Lead Synth (C3..C6, transposed +12 semitones)
         let mut p2 = Patch::new(PatchId(2), "Bass + Lead Split", 24_000);
         p2.program_change = Some(1);
-        p2.strips.push(
-            ChannelStripConfig::new(TrackId(20), "Sub Bass", Some("retro_bass"))
-                .with_zone(24, 59, 1, 127),
-        );
-        let mut lead = ChannelStripConfig::new(TrackId(21), "Saw Lead", Some("es2_lead"))
-            .with_zone(60, 108, 1, 127);
+        p2.strips.push(ChannelStripConfig::new(TrackId(20), "Sub Bass", Some("retro_bass")).with_zone(24, 59, 1, 127));
+        let mut lead = ChannelStripConfig::new(TrackId(21), "Saw Lead", Some("es2_lead")).with_zone(60, 108, 1, 127);
         lead.transpose = 12;
         p2.strips.push(lead);
 
         // Add a Screen Control Macro on Patch 2 that simultaneously opens Lead cutoff and lowers Bass volume.
         let mut cutoff_macro = MacroControl::new(1, "Filter + Bass Balance", Some(74));
         cutoff_macro.mappings.push(MacroMapping {
-            target: MacroTarget::InstrumentParam {
-                strip: TrackId(21),
-                param: "cutoff".to_string(),
-            },
+            target: MacroTarget::InstrumentParam { strip: TrackId(21), param: "cutoff".to_string() },
             min_val: 200.0,
             max_val: 8200.0,
             inverted: false,
@@ -579,11 +460,7 @@ mod tests {
         });
         p2.macros.push(cutoff_macro);
 
-        concert.sets.push(PatchSet {
-            id: PatchSetId(1),
-            name: "Opening Set".to_string(),
-            patches: vec![p1, p2],
-        });
+        concert.sets.push(PatchSet { id: PatchSetId(1), name: "Opening Set".to_string(), patches: vec![p1, p2] });
 
         let mut switcher = LivePatchSwitcher::new(PatchId(1));
 
@@ -597,10 +474,7 @@ mod tests {
         switcher.select_patch(&concert, PatchId(2));
         assert_eq!(switcher.active_patch(), PatchId(2));
         // Both Patch 1 (held note + tail) and Patch 2 (active) must remain in the DSP graph:
-        assert_eq!(
-            switcher.active_dsp_patches(),
-            vec![PatchId(1), PatchId(2)]
-        );
+        assert_eq!(switcher.active_dsp_patches(), vec![PatchId(1), PatchId(2)]);
 
         // 3. Play C2 (pitch 36) and E4 (pitch 64) on Patch 2:
         //    - C2 routes to Sub Bass (strip 20)
@@ -616,10 +490,7 @@ mod tests {
 
         // 4. Advance audio by 2 seconds while C4 is still held on Patch 1 -> Patch 1 must NOT expire!
         switcher.advance_audio(96_000);
-        assert_eq!(
-            switcher.active_dsp_patches(),
-            vec![PatchId(1), PatchId(2)]
-        );
+        assert_eq!(switcher.active_dsp_patches(), vec![PatchId(1), PatchId(2)]);
 
         // 5. Release C4 (pitch 60) -> NoteOff routes to Patch 1 (Strip 10), and starts Patch 1's 48_000-sample reverb tail.
         let off1 = switcher.note_off(&concert, 0, 60);
@@ -629,10 +500,7 @@ mod tests {
 
         // Halfway through the 1-second tail (24_000 samples), Patch 1 is still active:
         switcher.advance_audio(24_000);
-        assert_eq!(
-            switcher.active_dsp_patches(),
-            vec![PatchId(1), PatchId(2)]
-        );
+        assert_eq!(switcher.active_dsp_patches(), vec![PatchId(1), PatchId(2)]);
 
         // After the remaining 24_000 samples of tail decay, Patch 1 cleanly deactivates!
         switcher.advance_audio(24_000);
@@ -641,14 +509,7 @@ mod tests {
         // 6. Test hardware MIDI CC 74 macro fan-out on Patch 2:
         let patch2 = concert.patch_mut(PatchId(2)).unwrap();
         assert_eq!(patch2.handle_midi_cc(74, 127), 2);
-        let cutoff = patch2.strips[1]
-            .instrument
-            .as_ref()
-            .unwrap()
-            .params
-            .get("cutoff")
-            .copied()
-            .unwrap();
+        let cutoff = patch2.strips[1].instrument.as_ref().unwrap().params.get("cutoff").copied().unwrap();
         assert!((cutoff - 8200.0).abs() < 1e-3);
         assert!((patch2.strips[0].mixer.volume_db - (-6.0)).abs() < 1e-3);
     }

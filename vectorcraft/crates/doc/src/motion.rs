@@ -12,10 +12,10 @@ use std::fmt::Write as _;
 use vectorcraft_color::{BlendMode, Color, Paint};
 use vectorcraft_geom::{Affine, AnchorKind, FillRule, PathData, Point, Rect};
 
+use crate::Document;
 use crate::appearance::{Appearance, LineCap, LineJoin};
 use crate::node::{ImageObject, Node, NodeKind};
 use crate::text::{Justify, TextObject};
-use crate::Document;
 
 /// Options controlling how a [`Document`] artboard is exported as an Apple Motion `<ozml>` project.
 #[derive(Clone, Debug, PartialEq)]
@@ -60,32 +60,16 @@ struct PublishedParam {
 /// Export a VectorCraft [`Document`] artboard to an Apple Motion 5 `<ozml version="5.10">` XML string.
 #[must_use]
 pub fn export_motion_ozml(doc: &Document, opts: &MotionExportOptions) -> String {
-    let fps = if opts.frame_rate.is_finite() && opts.frame_rate > 0.0 {
-        opts.frame_rate
-    } else {
-        60.0
-    };
+    let fps = if opts.frame_rate.is_finite() && opts.frame_rate > 0.0 { opts.frame_rate } else { 60.0 };
     let dur = opts.duration_frames.max(1);
-    let artboard = doc
-        .artboards
-        .get(opts.artboard_index)
-        .or_else(|| doc.artboards.first());
+    let artboard = doc.artboards.get(opts.artboard_index).or_else(|| doc.artboards.first());
 
-    let ab_rect = artboard.map_or_else(
-        || Rect::new(0.0, 0.0, 1920.0, 1080.0),
-        |ab| ab.rect,
-    );
+    let ab_rect = artboard.map_or_else(|| Rect::new(0.0, 0.0, 1920.0, 1080.0), |ab| ab.rect);
     let width = ab_rect.width().round().max(1.0) as u32;
     let height = ab_rect.height().round().max(1.0) as u32;
     let origin = Point::new(ab_rect.x0, ab_rect.y0);
-    let [bg_r, bg_g, bg_b] = artboard
-        .and_then(|ab| ab.color)
-        .map_or([0.0, 0.0, 0.0], |c| c.to_rgb());
-    let bg_a = if artboard.and_then(|ab| ab.color).is_some() {
-        1.0
-    } else {
-        0.0
-    };
+    let [bg_r, bg_g, bg_b] = artboard.and_then(|ab| ab.color).map_or([0.0, 0.0, 0.0], |c| c.to_rgb());
+    let bg_a = if artboard.and_then(|ab| ab.color).is_some() { 1.0 } else { 0.0 };
     let root_name = if !doc.title.is_empty() {
         doc.title.as_str()
     } else if let Some(ab) = artboard {
@@ -110,31 +94,14 @@ pub fn export_motion_ozml(doc: &Document, opts: &MotionExportOptions) -> String 
     let _ = writeln!(out, "      <frameRate>{fps:.4}</frameRate>");
     let _ = writeln!(out, "      <NTSC>0</NTSC>");
     let _ = writeln!(out, "      <channels>4</channels>");
-    let _ = writeln!(
-        out,
-        "      <backgroundColor red=\"{bg_r:.4}\" green=\"{bg_g:.4}\" blue=\"{bg_b:.4}\" alpha=\"{bg_a:.4}\" />"
-    );
+    let _ = writeln!(out, "      <backgroundColor red=\"{bg_r:.4}\" green=\"{bg_g:.4}\" blue=\"{bg_b:.4}\" alpha=\"{bg_a:.4}\" />");
     let _ = writeln!(out, "    </sceneSettings>");
 
     let mut published = Vec::new();
-    let _ = writeln!(
-        out,
-        "    <layer name=\"{}\" id=\"100\" type=\"Group\">",
-        xml_escape(root_name)
-    );
+    let _ = writeln!(out, "    <layer name=\"{}\" id=\"100\" type=\"Group\">", xml_escape(root_name));
     let mut next_id = 1000_u64;
     for layer in &doc.layers {
-        write_node(
-            &mut out,
-            layer,
-            doc,
-            origin,
-            ab_rect,
-            opts,
-            &mut next_id,
-            &mut published,
-            3,
-        );
+        write_node(&mut out, layer, doc, origin, ab_rect, opts, &mut next_id, &mut published, 3);
     }
     let _ = writeln!(out, "    </layer>");
 
@@ -200,11 +167,7 @@ fn write_node(
     let is_drop_zone = name.contains("[DropZone]") || name.contains("{{DropZone}}");
 
     let layer_type = match &node.kind {
-        NodeKind::Layer { .. }
-        | NodeKind::Group { .. }
-        | NodeKind::Blend { .. }
-        | NodeKind::Envelope { .. }
-        | NodeKind::Intertwine { .. } => "Group",
+        NodeKind::Layer { .. } | NodeKind::Group { .. } | NodeKind::Blend { .. } | NodeKind::Envelope { .. } | NodeKind::Intertwine { .. } => "Group",
         NodeKind::Path { .. } | NodeKind::Compound { .. } | NodeKind::Mesh(_) => "Shape",
         NodeKind::Text(_) => "Text",
         NodeKind::Image(_) | NodeKind::PlacedDocument(_) => {
@@ -217,11 +180,7 @@ fn write_node(
         NodeKind::SymbolInstance { .. } | NodeKind::Repeat(_) | NodeKind::RulerGuide { .. } => "Group",
     };
 
-    let _ = writeln!(
-        out,
-        "{pad}<layer name=\"{}\" id=\"{id}\" type=\"{layer_type}\">",
-        xml_escape(&name)
-    );
+    let _ = writeln!(out, "{pad}<layer name=\"{}\" id=\"{id}\" type=\"{layer_type}\">", xml_escape(&name));
     let _ = writeln!(out, "{pad}  <enabled>{enabled}</enabled>");
     let _ = writeln!(out, "{pad}  <locked>{locked}</locked>");
     let _ = writeln!(out, "{pad}  <blendMode>{blend}</blendMode>");
@@ -229,14 +188,8 @@ fn write_node(
 
     let (pos_x, pos_y, scale_x, scale_y, rot_deg) = node_transform(node, origin, ab_rect);
     let _ = writeln!(out, "{pad}  <transform>");
-    let _ = writeln!(
-        out,
-        "{pad}    <position x=\"{pos_x:.3}\" y=\"{pos_y:.3}\" z=\"0.0\" />"
-    );
-    let _ = writeln!(
-        out,
-        "{pad}    <scale x=\"{scale_x:.4}\" y=\"{scale_y:.4}\" z=\"100.0\" />"
-    );
+    let _ = writeln!(out, "{pad}    <position x=\"{pos_x:.3}\" y=\"{pos_y:.3}\" z=\"0.0\" />");
+    let _ = writeln!(out, "{pad}    <scale x=\"{scale_x:.4}\" y=\"{scale_y:.4}\" z=\"100.0\" />");
     let _ = writeln!(out, "{pad}    <rotation z=\"{rot_deg:.4}\" />");
     let _ = writeln!(out, "{pad}  </transform>");
 
@@ -246,49 +199,20 @@ fn write_node(
         | NodeKind::Blend { children, .. }
         | NodeKind::Intertwine { children } => {
             for child in children {
-                write_node(
-                    out,
-                    child,
-                    doc,
-                    origin,
-                    ab_rect,
-                    opts,
-                    next_id,
-                    published,
-                    indent + 1,
-                );
+                write_node(out, child, doc, origin, ab_rect, opts, next_id, published, indent + 1);
             }
         }
         NodeKind::Envelope { content, .. } => {
             for child in content {
-                write_node(
-                    out,
-                    child,
-                    doc,
-                    origin,
-                    ab_rect,
-                    opts,
-                    next_id,
-                    published,
-                    indent + 1,
-                );
+                write_node(out, child, doc, origin, ab_rect, opts, next_id, published, indent + 1);
             }
         }
-        NodeKind::Path {
-            path, rule, live, ..
-        } => {
+        NodeKind::Path { path, rule, live, .. } => {
             let resolved: Cow<'_, PathData> = match live.as_deref() {
                 Some(ls) => Cow::Owned(ls.to_path()),
                 None => Cow::Borrowed(path),
             };
-            write_shape_content(
-                out,
-                std::slice::from_ref(resolved.as_ref()),
-                *rule,
-                &node.appearance,
-                origin,
-                indent + 1,
-            );
+            write_shape_content(out, std::slice::from_ref(resolved.as_ref()), *rule, &node.appearance, origin, indent + 1);
             maybe_publish_fill(&name, id, &node.appearance, opts, published);
         }
         NodeKind::Compound { children, rule } => {
@@ -317,33 +241,13 @@ fn write_node(
             if let Some(sym) = doc.symbols.iter().find(|s| &s.name == symbol) {
                 let mut expanded = (*sym.art).clone();
                 let _ = xf;
-                write_node(
-                    out,
-                    &expanded,
-                    doc,
-                    origin,
-                    ab_rect,
-                    opts,
-                    next_id,
-                    published,
-                    indent + 1,
-                );
+                write_node(out, &expanded, doc, origin, ab_rect, opts, next_id, published, indent + 1);
                 let _ = &mut expanded;
             }
         }
         NodeKind::Repeat(rep) => {
             for child in &rep.source {
-                write_node(
-                    out,
-                    child,
-                    doc,
-                    origin,
-                    ab_rect,
-                    opts,
-                    next_id,
-                    published,
-                    indent + 1,
-                );
+                write_node(out, child, doc, origin, ab_rect, opts, next_id, published, indent + 1);
             }
         }
         NodeKind::Mesh(_) | NodeKind::PlacedDocument(_) | NodeKind::RulerGuide { .. } => {}
@@ -370,13 +274,7 @@ fn collect_compound_paths(children: &[std::sync::Arc<Node>], out: &mut Vec<PathD
     }
 }
 
-fn maybe_publish_fill(
-    name: &str,
-    id: u64,
-    appearance: &Appearance,
-    opts: &MotionExportOptions,
-    published: &mut Vec<PublishedParam>,
-) {
+fn maybe_publish_fill(name: &str, id: u64, appearance: &Appearance, opts: &MotionExportOptions, published: &mut Vec<PublishedParam>) {
     if !opts.publish_parameters {
         return;
     }
@@ -408,11 +306,7 @@ fn node_display_name(node: &Node) -> String {
         NodeKind::Text(t) => {
             let plain: String = t.runs.iter().map(|r| r.text.as_str()).collect();
             let first = plain.lines().next().unwrap_or("Text").trim();
-            if first.is_empty() {
-                format!("Text {}", node.id.0)
-            } else {
-                first.chars().take(32).collect()
-            }
+            if first.is_empty() { format!("Text {}", node.id.0) } else { first.chars().take(32).collect() }
         }
         NodeKind::Image(img) => img.key.clone(),
         NodeKind::SymbolInstance { symbol, .. } => symbol.clone(),
@@ -442,26 +336,13 @@ fn node_transform(node: &Node, origin: Point, ab_rect: Rect) -> (f64, f64, f64, 
         let rot_rad = m1.atan2(m0);
         let px = tx - origin.x;
         let py = ty - origin.y;
-        (
-            px,
-            py,
-            (sx * 100.0).clamp(0.01, 10000.0),
-            (sy * 100.0).clamp(0.01, 10000.0),
-            rot_rad.to_degrees(),
-        )
+        (px, py, (sx * 100.0).clamp(0.01, 10000.0), (sy * 100.0).clamp(0.01, 10000.0), rot_rad.to_degrees())
     } else {
         (cx, cy, 100.0, 100.0, node.bbox_angle)
     }
 }
 
-fn write_shape_content(
-    out: &mut String,
-    paths: &[PathData],
-    rule: FillRule,
-    appearance: &Appearance,
-    origin: Point,
-    indent: usize,
-) {
+fn write_shape_content(out: &mut String, paths: &[PathData], rule: FillRule, appearance: &Appearance, origin: Point, indent: usize) {
     let pad = "  ".repeat(indent);
     let rule_str = match rule {
         FillRule::NonZero => "NonZero",
@@ -475,15 +356,9 @@ fn write_shape_content(
     {
         let [r, g, b] = c.to_rgb();
         let alpha = fill.opacity.clamp(0.0, 1.0);
-        let _ = writeln!(
-            out,
-            "{pad}  <fill enabled=\"1\" r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"{alpha:.4}\" opacity=\"{alpha:.4}\" />"
-        );
+        let _ = writeln!(out, "{pad}  <fill enabled=\"1\" r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"{alpha:.4}\" opacity=\"{alpha:.4}\" />");
     } else {
-        let _ = writeln!(
-            out,
-            "{pad}  <fill enabled=\"0\" r=\"0.0\" g=\"0.0\" b=\"0.0\" a=\"0.0\" opacity=\"0.0\" />"
-        );
+        let _ = writeln!(out, "{pad}  <fill enabled=\"0\" r=\"0.0\" g=\"0.0\" b=\"0.0\" a=\"0.0\" opacity=\"0.0\" />");
     }
 
     if let Some(st) = appearance.stroke()
@@ -541,23 +416,13 @@ fn write_path_data(out: &mut String, path: &PathData, origin: Point, indent: usi
     }
 }
 
-fn write_text_content(
-    out: &mut String,
-    t: &TextObject,
-    appearance: &Appearance,
-    indent: usize,
-) {
+fn write_text_content(out: &mut String, t: &TextObject, appearance: &Appearance, indent: usize) {
     let pad = "  ".repeat(indent);
     let plain: String = t.runs.iter().map(|r| r.text.as_str()).collect();
     let first_style = t.runs.first().map(|r| &r.style);
-    let font = first_style
-        .map(|s| s.font_family.as_str())
-        .filter(|f| !f.is_empty())
-        .unwrap_or("Inter");
+    let font = first_style.map(|s| s.font_family.as_str()).filter(|f| !f.is_empty()).unwrap_or("Inter");
     let size = first_style.map_or(24.0, |s| s.size.max(1.0));
-    let leading = first_style
-        .and_then(|s| s.leading)
-        .unwrap_or(size * 1.2);
+    let leading = first_style.and_then(|s| s.leading).unwrap_or(size * 1.2);
     let tracking = first_style.map_or(0.0, |s| s.tracking);
     let color = first_style
         .and_then(|s| paint_representative_color(&s.fill))
@@ -575,10 +440,7 @@ fn write_text_content(
     let _ = writeln!(out, "{pad}  <font>{}</font>", xml_escape(font));
     let _ = writeln!(out, "{pad}  <size>{size:.3}</size>");
     let _ = writeln!(out, "{pad}  <alignment>{align}</alignment>");
-    let _ = writeln!(
-        out,
-        "{pad}  <color r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"1.0000\" />"
-    );
+    let _ = writeln!(out, "{pad}  <color r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"1.0000\" />");
     let _ = writeln!(out, "{pad}  <tracking>{tracking:.3}</tracking>");
     let _ = writeln!(out, "{pad}  <leading>{leading:.3}</leading>");
     let _ = writeln!(out, "{pad}</text>");
@@ -586,10 +448,7 @@ fn write_text_content(
 
 fn write_image_content(out: &mut String, img: &ImageObject, is_drop_zone: bool, indent: usize) {
     let pad = "  ".repeat(indent);
-    let source = img
-        .link
-        .as_ref()
-        .map_or(img.key.as_str(), |l| l.path.as_str());
+    let source = img.link.as_ref().map_or(img.key.as_str(), |l| l.path.as_str());
     let _ = writeln!(
         out,
         "{pad}<footage width=\"{}\" height=\"{}\" source=\"{}\" dropZone=\"{}\" />",
@@ -668,36 +527,16 @@ mod tests {
                 true,
             )],
         };
-        let mut shape_node = Node::path(
-            NodeId(10),
-            badge_path,
-            Appearance::basic(
-                Paint::solid(Color::rgb(0.1, 0.5, 0.9)),
-                Paint::solid(Color::WHITE),
-                4.0,
-            ),
-        );
+        let mut shape_node =
+            Node::path(NodeId(10), badge_path, Appearance::basic(Paint::solid(Color::rgb(0.1, 0.5, 0.9)), Paint::solid(Color::WHITE), 4.0));
         shape_node.name = Some("BadgeFrame".to_string());
 
-        let style = crate::text::CharStyle {
-            font_family: "Inter".to_string(),
-            size: 48.0,
-            fill: Paint::solid(Color::WHITE),
-            ..Default::default()
-        };
-        let text_obj = TextObject::point(
-            Point::new(140.0, 185.0),
-            "BREAKING NEWS",
-            style,
-        );
+        let style = crate::text::CharStyle { font_family: "Inter".to_string(), size: 48.0, fill: Paint::solid(Color::WHITE), ..Default::default() };
+        let text_obj = TextObject::point(Point::new(140.0, 185.0), "BREAKING NEWS", style);
         let mut text_node = Node::new(NodeId(11), NodeKind::Text(Box::new(text_obj)));
         text_node.name = Some("Headline".to_string());
 
-        let mut layer = Node::layer(
-            NodeId(1),
-            "Overlay Layer",
-            crate::node::LayerColor::Preset(0),
-        );
+        let mut layer = Node::layer(NodeId(1), "Overlay Layer", crate::node::LayerColor::Preset(0));
         if let NodeKind::Layer { children, .. } = &mut layer.kind {
             children.push(Arc::new(shape_node));
             children.push(Arc::new(text_node));

@@ -272,6 +272,10 @@ pub fn tree() -> Vec<MenuNode> {
     insert_path(&mut roots, "AudioSuite > Other > Shorten Silence");
     insert_path(&mut roots, "AudioSuite > Other > Stem Separation");
     insert_path(&mut roots, "View > Waveforms > Spectral Frequency Display");
+    insert_path(&mut roots, "File > Import > Final Cut Pro XML (.fcpxml)...");
+    insert_path(&mut roots, "File > Export > Final Cut Pro XML (.fcpxml)...");
+    insert_path(&mut roots, "Event > Time Operations > SMPTE Lock Position...");
+    insert_path(&mut roots, "Event > Tempo Operations > Beat Map Scene Markers...");
     // Not in the observed catalog either; Pro Tools lists it right under Identify Sync Point.
     if let Some(clip) = roots.iter_mut().find(|n| n.path == "Clip") {
         let at = clip.children.iter().position(|n| n.path == "Clip > Identify Sync Point").map_or(clip.children.len(), |i| i + 1);

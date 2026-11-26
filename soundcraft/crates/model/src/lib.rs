@@ -10,10 +10,9 @@ pub mod fcpxml;
 pub mod mainstage;
 
 pub use fcpxml::{
-    AudioRoleCategory, FcpxmlAudioImportSummary, beat_map_markers_to_tempo, export_fcpxml_audio,
-    import_fcpxml_audio, is_fcpxml_document, smpte_lock_clips,
+    AudioRoleCategory, FcpxmlAudioImportSummary, beat_map_markers_to_tempo, export_fcpxml_audio, import_fcpxml_audio, is_fcpxml_document,
+    smpte_lock_clips,
 };
 pub use mainstage::{
-    ChannelStripConfig, Concert, LivePatchSwitcher, MacroControl, MacroMapping, MacroTarget, Patch,
-    PatchId, PatchSet, PatchSetId, RoutedMidiNote,
+    ChannelStripConfig, Concert, LivePatchSwitcher, MacroControl, MacroMapping, MacroTarget, Patch, PatchId, PatchSet, PatchSetId, RoutedMidiNote,
 };

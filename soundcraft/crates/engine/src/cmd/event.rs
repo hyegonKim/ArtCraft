@@ -117,8 +117,7 @@ pub fn specs() -> Vec<CommandSpec> {
                     }
                 }
                 let bpm = f64_or(p, "bpm", e.session().tempo.tempo_at_tick(0));
-                let affected = soundcraft_model::fcpxml::smpte_lock_clips(e.session_mut(), bpm)
-                    .map_err(|err| bad(id, err.to_string()))?;
+                let affected = soundcraft_model::fcpxml::smpte_lock_clips(e.session_mut(), bpm).map_err(|err| bad(id, err.to_string()))?;
                 Ok(json!({"bpm": bpm, "affected_clips": affected}))
             }
         ),
@@ -140,8 +139,8 @@ pub fn specs() -> Vec<CommandSpec> {
                     let marker = item.get("marker").and_then(Value::as_u64).ok_or_else(|| bad(id, "each anchor requires `marker` id"))?;
                     anchors.push((soundcraft_time::BarBeat { bar, beat, tick }, soundcraft_model::MarkerId(marker)));
                 }
-                let events = soundcraft_model::fcpxml::beat_map_markers_to_tempo(e.session_mut(), &anchors)
-                    .map_err(|err| bad(id, err.to_string()))?;
+                let events =
+                    soundcraft_model::fcpxml::beat_map_markers_to_tempo(e.session_mut(), &anchors).map_err(|err| bad(id, err.to_string()))?;
                 Ok(json!({"tempos": events.iter().map(|ev| json!({"tick": ev.tick, "bpm": ev.bpm})).collect::<Vec<_>>()}))
             }
         ),

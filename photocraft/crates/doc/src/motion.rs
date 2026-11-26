@@ -32,27 +32,14 @@ pub struct MotionExportOptions {
 
 impl Default for MotionExportOptions {
     fn default() -> Self {
-        Self {
-            fps: 30.0,
-            duration_frames: 300,
-            asset_dir: "Media".into(),
-            publish_template_controls: true,
-        }
+        Self { fps: 30.0, duration_frames: 300, asset_dir: "Media".into(), publish_template_controls: true }
     }
 }
 
 /// Export `doc` to an Apple Motion `<ozml version="5.10">` XML string (`.motn` / `.moti`).
 pub fn export_motion_ozml(doc: &Document, opts: &MotionExportOptions) -> String {
-    let fps = doc
-        .timeline
-        .as_ref()
-        .map_or(opts.fps, |t| t.fps)
-        .clamp(1.0, 240.0);
-    let duration_frames = doc
-        .timeline
-        .as_ref()
-        .map_or(opts.duration_frames, |t| t.duration)
-        .max(1);
+    let fps = doc.timeline.as_ref().map_or(opts.fps, |t| t.fps).clamp(1.0, 240.0);
+    let duration_frames = doc.timeline.as_ref().map_or(opts.duration_frames, |t| t.duration).max(1);
     let w = doc.size.width.max(1);
     let h = doc.size.height.max(1);
 
@@ -90,33 +77,15 @@ fn write_published_parameters(out: &mut String, layers: &[Layer]) {
     for l in layers.iter().rev() {
         match &l.content {
             LayerContent::Text(_) => {
-                params.push((
-                    next_param_id,
-                    format!("{} Text", l.name),
-                    "text",
-                    l.id.0,
-                    "text/sourceText",
-                ));
+                params.push((next_param_id, format!("{} Text", l.name), "text", l.id.0, "text/sourceText"));
                 next_param_id += 1;
             }
             LayerContent::Shape(s) if s.fill.is_some() => {
-                params.push((
-                    next_param_id,
-                    format!("{} Color", l.name),
-                    "color",
-                    l.id.0,
-                    "shape/fillColor",
-                ));
+                params.push((next_param_id, format!("{} Color", l.name), "color", l.id.0, "shape/fillColor"));
                 next_param_id += 1;
             }
             LayerContent::Smart(_) => {
-                params.push((
-                    next_param_id,
-                    format!("{} Drop Zone", l.name),
-                    "media",
-                    l.id.0,
-                    "media/source",
-                ));
+                params.push((next_param_id, format!("{} Drop Zone", l.name), "media", l.id.0, "media/source"));
                 next_param_id += 1;
             }
             _ => {}
@@ -136,13 +105,7 @@ fn write_published_parameters(out: &mut String, layers: &[Layer]) {
     let _ = writeln!(out, "    </publishedParameters>");
 }
 
-fn write_layer(
-    out: &mut String,
-    layer: &Layer,
-    doc: &Document,
-    opts: &MotionExportOptions,
-    indent: usize,
-) {
+fn write_layer(out: &mut String, layer: &Layer, doc: &Document, opts: &MotionExportOptions, indent: usize) {
     let pad = "  ".repeat(indent);
     let active = u8::from(layer.visible);
     let locked = u8::from(layer.locks.any());
@@ -167,14 +130,8 @@ fn write_layer(
     );
     let _ = writeln!(out, "{pad}  <properties>");
     let _ = writeln!(out, "{pad}    <transform>");
-    let _ = writeln!(
-        out,
-        "{pad}      <position x=\"{motion_x:.3}\" y=\"{motion_y:.3}\" z=\"0.0\" canvasX=\"{pos_x:.3}\" canvasY=\"{pos_y:.3}\" />"
-    );
-    let _ = writeln!(
-        out,
-        "{pad}      <scale x=\"{scale_x:.3}\" y=\"{scale_y:.3}\" z=\"100.0\" />"
-    );
+    let _ = writeln!(out, "{pad}      <position x=\"{motion_x:.3}\" y=\"{motion_y:.3}\" z=\"0.0\" canvasX=\"{pos_x:.3}\" canvasY=\"{pos_y:.3}\" />");
+    let _ = writeln!(out, "{pad}      <scale x=\"{scale_x:.3}\" y=\"{scale_y:.3}\" z=\"100.0\" />");
     let _ = writeln!(out, "{pad}      <rotation z=\"{rot_deg:.3}\" />");
     let _ = writeln!(out, "{pad}      <anchorPoint x=\"0.0\" y=\"0.0\" />");
     let _ = writeln!(out, "{pad}    </transform>");
@@ -253,11 +210,7 @@ fn write_layer(
             );
         }
         LayerContent::Adjustment(adj) => {
-            let _ = writeln!(
-                out,
-                "{pad}  <adjustment kind=\"{}\" />",
-                xml_escape(adjustment_kind_name(adj))
-            );
+            let _ = writeln!(out, "{pad}  <adjustment kind=\"{}\" />", xml_escape(adjustment_kind_name(adj)));
         }
     }
 
@@ -279,13 +232,7 @@ fn layer_transform(layer: &Layer, doc: &Document) -> (f64, f64, f64, f64, f64) {
         let rot_rad = m1.atan2(m0);
         let pos_x = if tx == 0.0 && ty == 0.0 { cx } else { tx };
         let pos_y = if tx == 0.0 && ty == 0.0 { cy } else { ty };
-        (
-            pos_x,
-            pos_y,
-            (sx * 100.0).clamp(0.01, 10000.0),
-            (sy * 100.0).clamp(0.01, 10000.0),
-            rot_rad.to_degrees(),
-        )
+        (pos_x, pos_y, (sx * 100.0).clamp(0.01, 10000.0), (sy * 100.0).clamp(0.01, 10000.0), rot_rad.to_degrees())
     } else {
         (cx, cy, 100.0, 100.0, 0.0)
     }
@@ -295,41 +242,25 @@ fn write_text_content(out: &mut String, t: &TextLayer, dpi: f32, indent: usize) 
     let pad = "  ".repeat(indent);
     let runs = t.char_runs();
     let style = runs.first().map(|r| &r.style);
-    let fallback_font = if t.font_family.is_empty() {
-        "Inter"
-    } else {
-        t.font_family.as_str()
-    };
-    let font = style
-        .and_then(|s| s.postscript_name.as_deref().or(Some(s.font_family.as_str())))
-        .filter(|f| !f.is_empty())
-        .unwrap_or(fallback_font);
+    let fallback_font = if t.font_family.is_empty() { "Inter" } else { t.font_family.as_str() };
+    let font = style.and_then(|s| s.postscript_name.as_deref().or(Some(s.font_family.as_str()))).filter(|f| !f.is_empty()).unwrap_or(fallback_font);
     let pt_to_px = (dpi.max(1.0) / 72.0).max(0.1);
     let size_px = (t.size_pt.max(1.0) * pt_to_px).clamp(1.0, 4096.0);
     let [r, g, b] = t.color.to_rgb();
-    let align = t
-        .paragraphs
-        .first()
-        .map_or("left", |p| match p.style.align {
-            TextAlign::Left | TextAlign::JustifyLeft => "left",
-            TextAlign::Center | TextAlign::JustifyCenter => "center",
-            TextAlign::Right | TextAlign::JustifyRight | TextAlign::JustifyAll => "right",
-        });
+    let align = t.paragraphs.first().map_or("left", |p| match p.style.align {
+        TextAlign::Left | TextAlign::JustifyLeft => "left",
+        TextAlign::Center | TextAlign::JustifyCenter => "center",
+        TextAlign::Right | TextAlign::JustifyRight | TextAlign::JustifyAll => "right",
+    });
     let tracking = style.map_or(0.0, |s| s.tracking);
-    let leading = style
-        .and_then(|s| s.leading_pt)
-        .map_or(size_px * 1.2, |l| l * pt_to_px);
+    let leading = style.and_then(|s| s.leading_pt).map_or(size_px * 1.2, |l| l * pt_to_px);
 
     let _ = writeln!(out, "{pad}<text>");
     let _ = writeln!(out, "{pad}  <string>{}</string>", xml_escape(&t.text));
     let _ = writeln!(out, "{pad}  <font>{}</font>", xml_escape(font));
     let _ = writeln!(out, "{pad}  <size>{size_px:.3}</size>");
     let _ = writeln!(out, "{pad}  <alignment>{align}</alignment>");
-    let _ = writeln!(
-        out,
-        "{pad}  <color r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"{:.4}\" />",
-        t.color.alpha.clamp(0.0, 1.0)
-    );
+    let _ = writeln!(out, "{pad}  <color r=\"{r:.4}\" g=\"{g:.4}\" b=\"{b:.4}\" a=\"{:.4}\" />", t.color.alpha.clamp(0.0, 1.0));
     let _ = writeln!(out, "{pad}  <tracking>{tracking:.3}</tracking>");
     let _ = writeln!(out, "{pad}  <leading>{leading:.3}</leading>");
     let _ = writeln!(out, "{pad}</text>");
@@ -352,10 +283,7 @@ fn write_shape_content(out: &mut String, s: &ShapeLayer, indent: usize) {
             s.density.clamp(0.0, 1.0),
         );
     } else {
-        let _ = writeln!(
-            out,
-            "{pad}  <fill enabled=\"0\" r=\"0.0\" g=\"0.0\" b=\"0.0\" a=\"0.0\" opacity=\"0.0\" />"
-        );
+        let _ = writeln!(out, "{pad}  <fill enabled=\"0\" r=\"0.0\" g=\"0.0\" b=\"0.0\" a=\"0.0\" opacity=\"0.0\" />");
     }
     if let Some(st) = &s.stroke
         && st.width > 0.0
@@ -426,9 +354,7 @@ fn write_effect(out: &mut String, fx: &Effect, indent: usize) {
         Effect::OuterGlow(gl) => {
             let c = match &gl.paint {
                 crate::FxPaint::Color(c) => *c,
-                crate::FxPaint::Gradient(gr) => {
-                    gr.stops.first().map_or(Color::WHITE, |(_, col)| *col)
-                }
+                crate::FxPaint::Gradient(gr) => gr.stops.first().map_or(Color::WHITE, |(_, col)| *col),
                 crate::FxPaint::Pattern { .. } => Color::WHITE,
             };
             let [r, g, b] = c.to_rgb();
@@ -523,35 +449,19 @@ fn xml_escape(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        ColorMode, Effects, FxCommon, LabelColor, SampleType, Shadow, ShapeStroke, Size, Subpath,
-    };
+    use crate::{ColorMode, Effects, FxCommon, LabelColor, SampleType, Shadow, ShapeStroke, Size, Subpath};
 
     #[test]
     fn exports_layered_document_to_apple_motion_ozml() {
-        let mut doc = Document::new(
-            "LowerThirdCard",
-            Size::new(1920, 1080),
-            ColorMode::Rgb,
-            SampleType::U8,
-        );
+        let mut doc = Document::new("LowerThirdCard", Size::new(1920, 1080), ColorMode::Rgb, SampleType::U8);
 
-        let bar_path = Path::new(vec![Subpath::polygon(&[
-            (120.0, 820.0),
-            (720.0, 820.0),
-            (720.0, 940.0),
-            (120.0, 940.0),
-        ])]);
+        let bar_path = Path::new(vec![Subpath::polygon(&[(120.0, 820.0), (720.0, 820.0), (720.0, 940.0), (120.0, 940.0)])]);
         let mut shape_layer = Layer::new(
             "Accent Bar",
             LayerContent::Shape(ShapeLayer {
                 path: bar_path,
                 fill: Some(Fill::Solid(Color::rgb(0.95, 0.25, 0.15))),
-                stroke: Some(ShapeStroke {
-                    width: 4.0,
-                    paint: Fill::Solid(Color::WHITE),
-                    ..Default::default()
-                }),
+                stroke: Some(ShapeStroke { width: 4.0, paint: Fill::Solid(Color::WHITE), ..Default::default() }),
                 ..Default::default()
             }),
         );
