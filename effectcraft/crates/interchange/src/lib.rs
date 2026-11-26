@@ -33,11 +33,13 @@
 
 mod export;
 mod import;
+pub mod motion;
 #[cfg(test)]
 mod tests;
 
 pub use export::{ExportOptions, ExportOutput, PrecompMode, PrerenderMode, Prerendered, export, plan_prerender, prerender_reason};
 pub use import::{ImportOptions, ImportResult, import};
+pub use motion::{export_motion_ozml, import_motion_ozml, is_motion_ozml};
 
 pub use filmcraft_geom as fc_geom;
 /// FilmCraft's interchange crate (format readers/writers) and timeline model, re-exported so
