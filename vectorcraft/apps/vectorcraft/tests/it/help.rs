@@ -1,7 +1,9 @@
 //! `vectorcraft --help` prints the usage and exits before the app starts (#2110): run from a
 //! terminal, SSH or an agent's shell it used to open the window (or hang without a display).
 
+use std::io::Read;
 use std::process::{Command, Output, Stdio};
+use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
 /// Runs the desktop binary without a display and with a control port it cannot parse, so a

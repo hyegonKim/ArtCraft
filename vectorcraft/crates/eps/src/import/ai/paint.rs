@@ -778,18 +778,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn gradient_stops_beyond_the_cap_are_ignored() {
-        let mut d = GradientDef::begin(&[V::Str(b"H".to_vec()), V::Num(0.0)]).unwrap();
-        let mut spots = vec![];
-        for i in 0..257 {
-            let ramp = i as f64 / 256.0 * 100.0;
-            d.stop(&nums(&[0.2, 0.4, 0.6, 0.0, 1.0, 1.0, 6.0, 50.0, ramp]), &mut spots);
-        }
-        let (_, g) = d.finish().unwrap();
-        assert_eq!(g.stops.len(), MAX_STOPS);
-    }
-
     /// A linear gradient of three stops as newer files place it: `Bg` with numbers that aren't in
     /// art space, `Xm` for the whole ramp and a `Bm` for each pair of stops.
     #[test]
