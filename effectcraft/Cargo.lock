@@ -1595,13 +1595,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "effectcraft-av1enc"
-version = "0.24.1"
-dependencies = [
- "filmcraft-av1",
-]
-
-[[package]]
 name = "effectcraft-cli"
 version = "0.24.1"
 dependencies = [
@@ -1771,13 +1764,6 @@ dependencies = [
  "log",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "effectcraft-hevcenc"
-version = "0.24.1"
-dependencies = [
- "filmcraft-hevc",
 ]
 
 [[package]]
@@ -2138,10 +2124,6 @@ dependencies = [
  "toml",
  "web-time",
 ]
-
-[[package]]
-name = "effectcraft-vp9enc"
-version = "0.24.1"
 
 [[package]]
 name = "effectcraft-web"
