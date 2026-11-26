@@ -1,0 +1,2491 @@
+# Bahasa Indonesia (id) interface catalog for WordCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	(no suggestions)	(tanpa saran)
+	1.5 Line Spacing	Spasi Baris 1,5
+	A free, open-source word processor written from scratch in Rust.\nPart of the Crafting Apps from the ArtCraft team.	Editor kata gratis dan bersumber terbuka yang ditulis dari awal dalam bahasa Rust.\nBagian dari Crafting Apps dari tim ArtCraft.
+	About WordCraft	Tentang WordCraft
+	Accept	Terima
+	Accept All Changes	Terima Semua Perubahan
+	Accept This Change	Terima Perubahan Ini
+	Accessibility	Aksesibilitas
+	Add Space Before Paragraph	Tambah Spasi Sebelum Paragraf
+	Add Text	Tambah Teks
+	Add a Table	Tambah Tabel
+	Add a comment	Tambah komentar
+	Add to Style Gallery	Tambahkan ke Galeri Gaya
+	Address Block	Blok Alamat
+	Address:	Alamat:
+	Address\nBlock	Blok\nAlamat
+	Advanced Find	Pencarian Lanjutan
+	Advanced Find…	Pencarian Lanjutan…
+	After:	Setelah:
+	Agents	Agen
+	All Borders	Semua Batas
+	All Markup	Semua Tanda
+	All caps	Huruf kapital
+	Alt Text	Teks Alt
+	Apply Style	Terapkan Gaya
+	Arrange\nAll	Atur\nSemua
+	Artistic Effects	Efek Artistik
+	AutoCorrect Options	Opsi Koreksi Otomatis
+	AutoFit	Sesuaikan Otomatis
+	AutoFit Contents	Sesuaikan Otomatis ke Isi
+	AutoFit Window	Sesuaikan Otomatis ke Jendela
+	AutoSave	Simpan Otomatis
+	AutoSave saves every change to the file (needs a saved document)	Simpan Otomatis menyimpan setiap perubahan ke berkas (perlu dokumen yang sudah disimpan)
+	AutoText	Teks Otomatis
+	Automatic ({language})	Otomatis ({language})
+	Automatic Table 1 (3 levels)	Tabel Otomatis 1 (3 tingkat)
+	Automatic Table 2 (2 levels)	Tabel Otomatis 2 (2 tingkat)
+	Automatic follows your system's language. Menus and commands change; your documents don't.	Otomatis mengikuti bahasa sistem Anda. Menu dan perintah berubah; dokumen Anda tidak.
+	Banded Columns	Kolom Selang-seling
+	Banded Rows	Baris Selang-seling
+	Before:	Sebelum:
+	Bibliography	Daftar Pustaka
+	Blank	Kosong
+	Blank (Three Columns)	Kosong (Tiga Kolom)
+	Blank Page	Halaman Kosong
+	Blank document	Dokumen kosong
+	Block\nAuthors	Blokir\nPenulis
+	Bookmark	Penanda
+	Bookmark name:	Nama penanda:
+	Delete Bookmark	Hapus Penanda
+	Hidden bookmarks	Penanda tersembunyi
+	Sort by:	Urutkan menurut:
+	Border Painter	Kuas Batas
+	Border\nPainter	Kuas\nBatas
+	Bottom Border	Batas Bawah
+	Bottom Margin	Margin Bawah
+	Bottom of Page	Bawah Halaman
+	Box	Kotak
+	Breaks	Pemisah
+	Bullet Library	Pustaka Poin
+	Bullets	Poin
+	Calendar	Kalender
+	Capitalize Each Word	Awal Setiap Kata Huruf Besar
+	Captions	Keterangan
+	Cell Margins	Margin Sel
+	Cell\nMargins	Margin\nSel
+	Change List Level	Ubah Tingkat Daftar
+	Change Picture	Ganti Gambar
+	Change Shape	Ganti Bentuk
+	Changes	Perubahan
+	Character Position	Posisi Karakter
+	Character Scale	Skala Karakter
+	Character Shading	Warna Latar Karakter
+	Character Spacing	Spasi Karakter
+	Characters	Karakter
+	Characters (no spaces)	Karakter (tanpa spasi)
+	Characters (with spaces)	Karakter (dengan spasi)
+	Chart	Bagan
+	Check Accessibility	Periksa Aksesibilitas
+	Check Compatibility	Periksa Kompatibilitas
+	Check Spelling as You Type	Periksa Ejaan Saat Mengetik
+	Check for Errors	Periksa Kesalahan
+	Check\nAccessibility	Periksa\nAksesibilitas
+	Citation Style	Gaya Sitasi
+	Citations & Bibliography	Sitasi dan Daftar Pustaka
+	Clear All Formatting	Hapus Semua Format
+	Clear Character Formatting	Hapus Format Karakter
+	Clear Character Style	Hapus Gaya Karakter
+	Clear Formatting Level	Hapus Format Tingkat
+	Clear Paragraph Formatting	Hapus Format Paragraf
+	Close Header and Footer	Tutup Header dan Footer
+	Collapse Selection	Lipat Seleksi
+	Column	Kolom
+	Column Break	Pemisah Kolom
+	Combine	Gabungkan
+	Commands	Perintah
+	Comments	Komentar
+	Comments Pane	Panel Komentar
+	Community\nDiscord	Komunitas\nDiscord
+	Compact	Ringkas
+	Compare	Bandingkan
+	Compress Pictures	Kompres Gambar
+	Continuous	Terus Menerus
+	Convert Text to Table	Konversikan Teks ke Tabel
+	Convert Text to Table…	Konversikan Teks ke Tabel…
+	Convert to Text	Konversikan ke Teks
+	Copy Formatting	Salin Format
+	Corrections	Koreksi
+	Count words in text boxes and notes	Hitung kata di kotak teks dan catatan
+	Cover Page	Sampul
+	Create New Style	Buat Gaya Baru
+	Create a Style	Buat Gaya
+	Create an interactive outline of your document.\n\nIt's a great way to keep track of where you are or quickly move your content around.\n\nTo get started, go to the Home tab and apply Heading styles to the headings in your document.	Buat kerangka interaktif dokumen Anda.\n\nCara yang tepat untuk melacak posisi Anda atau memindahkan isi dengan cepat.\n\nUntuk memulai, buka tab Beranda dan terapkan gaya Judul pada judul di dokumen Anda.
+	Cross-reference	Referensi Silang
+	Current Position	Posisi Saat Ini
+	Current style: {style}	Gaya saat ini: {style}
+	Custom Margins…	Margin Kustom…
+	Custom Watermark	Tanda Air Kustom
+	Custom Watermark…	Tanda Air Kustom…
+	Customize Quick Access Toolbar	Sesuaikan Bilah Alat Akses Cepat
+	Dark Mode	Mode Gelap
+	Data	Data
+	Date & Time	Tanggal dan Waktu
+	Decrease Indent	Kurangi Indentasi
+	Define New Bullet	Tentukan Poin Baru
+	Define New Number Format	Tentukan Format Nomor Baru
+	Delete Cells	Hapus Sel
+	Delete Columns	Hapus Kolom
+	Delete Comment	Hapus Komentar
+	Delete Next Word	Hapus Kata Berikutnya
+	Delete Previous Word	Hapus Kata Sebelumnya
+	Delete Rows	Hapus Baris
+	Delete Table	Hapus Tabel
+	Design	Desain
+	Dictate	Diktir
+	Different First Page	Halaman Pertama Berbeda
+	Different Odd & Even Pages	Halaman Ganjil dan Genap Berbeda
+	Direct formatting	Format langsung
+	Discord community	Komunitas Discord
+	Display for Review	Tampilan untuk Tinjauan
+	Distribute Columns	Sebarkan Kolom
+	Distribute Rows	Sebarkan Baris
+	Distributed	Rata Lebar
+	Do Not Show in TOC	Jangan Tampilkan di Daftar Isi
+	Document End	Akhir Dokumen
+	Document Formatting	Format Dokumen
+	Document Property	Properti Dokumen
+	Document Start	Awal Dokumen
+	Document Text	Teks Dokumen
+	Document Title	Judul Dokumen
+	Documents you open will show up here.	Dokumen yang Anda buka akan muncul di sini.
+	Dot-dash	Garis-titik
+	Double	Ganda
+	Double Spacing	Spasi Ganda
+	Double Strikethrough	Coret Ganda
+	Double Underline	Garis Bawah Ganda
+	Drawing Tools	Alat Gambar
+	Drawing\nCanvas	Kanvas\nGambar
+	Drop Cap	Inisial
+	Drops all formatting and pastes plain text.	Membuang semua format dan menempelkan teks biasa.
+	Edit Comment	Edit Komentar
+	Edit Footer	Edit Footer
+	Edit Header	Edit Header
+	Edit Recipient List	Edit Daftar Penerima
+	Edit\nRecipient List	Edit Daftar\nPenerima
+	Edited	Diedit
+	Editing header/footer	Mengedit header/footer
+	Editing — edit the document directly	Pengeditan — perubahan langsung masuk ke dokumen
+	Editor	Editor
+	Encrypt with Password	Enkripsi dengan Kata Sandi
+	English (United States)	Bahasa Inggris (Amerika Serikat)
+	Engrave	Cekung
+	Enter page number:	Masukkan nomor halaman:
+	Envelopes	Amplop
+	Even Page	Halaman Genap
+	Every command is available to scripts and AI agents: run `wordcraft-cli mcp` for an MCP server, or start the app with `--control <port>` for the JSON control channel.	Setiap perintah tersedia untuk skrip dan agen AI: jalankan `wordcraft-cli mcp` untuk server MCP, atau jalankan aplikasi dengan `--control <port>` untuk kanal kendali JSON.
+	Export Page as PNG	Ekspor Halaman sebagai PNG
+	Export a copy to share (PDF, Word document)	Ekspor salinan untuk dibagikan (PDF, dokumen Word)
+	Extend Selection	Perluas Seleksi
+	Field	Medan
+	Find Previous	Cari Sebelumnya
+	Find Recipient	Cari Penerima
+	Find and Replace	Cari dan Ganti
+	Find what:	Cari:
+	Finish	Selesai
+	Finish & Merge	Selesaikan & Gabungkan
+	Finish &\nMerge	Selesaikan &\nGabungkan
+	First Column	Kolom Pertama
+	First line:	Baris pertama:
+	Fixed Column Width	Lebar Kolom Tetap
+	Font Color	Warna Font
+	Font Dialog	Dialog Font
+	Font color:	Warna font:
+	Footer	Footer
+	Footnote and Endnote	Catatan Kaki dan Catatan Akhir
+	Footnotes	Catatan Kaki
+	Format Page Numbers	Format Nomor Halaman
+	Format Page Numbers…	Format Nomor Halaman…
+	Format Painter	Kuas Format
+	Formatted Text	Teks Berformat
+	Formatting at Selection	Format di Seleksi
+	Formula	Rumus
+	Go To	Pergi ke
+	Go To (⌘⌥G)	Pergi ke (⌘⌥G)
+	Go To…	Pergi ke…
+	Go to	Pergi ke
+	Grab bag	Aneka
+	Greeting Line	Baris Sapaan
+	Greeting\nLine	Baris\nSapaan
+	Gridlines	Garis Kisi
+	Grow Font 1 Point	Perbesar Font 1 Poin
+	HTML Format	Format HTML
+	Hanging Indent	Indentasi Gantung
+	Header	Header
+	Header & Footer	Header dan Footer
+	Header Row	Baris Header
+	Header/Footer Position	Posisi Header/Footer
+	Heading 1	Judul 1
+	Heading 2	Judul 2
+	Heading 3	Judul 3
+	Headings	Judul
+	Highlight Merge Fields	Sorot Medan Gabungan
+	Highlight\nMerge Fields	Sorot\nMedan Gabungan
+	Highlighter	Penyorot
+	Horizontal Line	Garis Horisontal
+	Icons	Ikon
+	Illustrations	Ilustrasi
+	Immersive	Imersif
+	Immersive Reader	Pembaca Imersif
+	Immersive\nReader	Pembaca\nImersif
+	In the margin	Di margin
+	Increase Indent	Tambah Indentasi
+	Indent	Indentasi
+	Indentation	Indentasi
+	Indents	Indentasi
+	Index	Indeks
+	Ink to\nMath	Tinta ke\nPersamaan
+	Ink to\nShape	Tinta ke\nBentuk
+	Ink\nReplay	Putar Ulang\nTinta
+	Insert Above	Sisipkan di Atas
+	Insert Below	Sisipkan di Bawah
+	Insert Caption	Sisipkan Keterangan
+	Insert Caption…	Sisipkan Keterangan…
+	Insert Citation	Sisipkan Sitasi
+	Insert Endnote	Sisipkan Catatan Akhir
+	Insert Footnote	Sisipkan Catatan Kaki
+	Insert Hyperlink	Sisipkan Tautan
+	Insert Index	Sisipkan Indeks
+	Insert Left	Sisipkan di Kiri
+	Insert Merge Field	Sisipkan Medan Gabungan
+	Insert Merge\nField	Sisipkan Medan\nGabungan
+	Insert Right	Sisipkan di Kanan
+	Insert Shapes	Sisipkan Bentuk
+	Insert Table	Sisipkan Tabel
+	Insert Table of Authorities	Sisipkan Daftar Rujukan Hukum
+	Insert Table of Figures	Sisipkan Daftar Gambar
+	Insert Table…	Sisipkan Tabel…
+	Insert\nAbove	Sisipkan di\nAtas
+	Insert\nCaption	Sisipkan\nKeterangan
+	Insert\nCitation	Sisipkan\nSitasi
+	Insert\nFootnote	Sisipkan\nCatatan Kaki
+	Inside Borders	Batas Dalam
+	Inspect Styles at Selection	Periksa Gaya di Seleksi
+	Interface language:	Bahasa antarmuka:
+	Join the ArtCraft community on Discord	Bergabung dengan komunitas ArtCraft di Discord
+	Join us on Discord: discord.gg/artcraft	Bergabunglah dengan kami di Discord: discord.gg/artcraft
+	Keep Lines Together	Pertahankan Baris Bersama
+	Keep Text Only	Pertahankan Teks Saja
+	Keep lines together	Pertahankan baris bersama
+	Keep with Next	Pertahankan dengan Berikutnya
+	Keep with next	Pertahankan dengan berikutnya
+	Keeps the fonts and formatting of the copied text.	Mempertahankan font dan format teks yang disalin.
+	{language} (no dictionary)	{language} (tanpa kamus)
+	No spelling dictionary for {language} is installed, so it isn't checked. WordCraft looks for the Hunspell dictionary {name} in the WORDCRAFT_DICTIONARIES folder and in the usual system locations.	Tidak ada kamus ejaan untuk {language} yang terpasang, jadi teks tidak diperiksa. WordCraft mencari kamus Hunspell {name} di folder WORDCRAFT_DICTIONARIES dan di lokasi sistem yang biasa.
+	Last Column	Kolom Terakhir
+	Layout Summary	Ringkasan Tata Letak
+	Left Border	Batas Kiri
+	Left Margin	Margin Kiri
+	Line Break	Pemisah Baris
+	Line End	Akhir Baris
+	Line Numbers	Nomor Baris
+	Line Spacing	Spasi Baris
+	Line Spacing Options…	Opsi Spasi Baris…
+	Line Start	Awal Baris
+	Line and Page Breaks	Pemisah Baris dan Halaman
+	Line and Paragraph Spacing	Spasi Baris dan Paragraf
+	Line spacing:	Spasi baris:
+	Link to Previous	Tautkan ke Sebelumnya
+	Location: {path}	Lokasi: {path}
+	MIT OR Apache-2.0. Copyright (c) 2026 ArtCraft Team and the WordCraft contributors.	MIT atau Apache-2.0. Hak Cipta (c) 2026 ArtCraft Team dan para kontributor WordCraft.
+	Macros	Makro
+	Mailings	Surat Massal
+	Manage Sources	Kelola Sumber
+	Many pages	Banyak halaman
+	Margins	Margin
+	Mark Citation	Tandai Sitasi
+	Mark Entry	Tandai Entri
+	Mark\nCitation	Tandai\nSitasi
+	Mark\nEntry	Tandai\nEntri
+	Markdown (*.md)	Markdown (*.md)
+	Match Fields	Cocokkan Medan
+	Match case	Bedakan Huruf Besar/Kecil
+	Matrix	Matriks
+	Merge Cells	Gabungkan Sel
+	Merge Formatting	Gabungkan Format
+	Mirrored	Dicerminkan
+	Moderate	Sedang
+	Modify Style	Ubah Gaya
+	Modify…	Ubah…
+	More templates →	Templat lainnya →
+	Move or Resize	Pindahkan atau Ubah Ukuran
+	Multilevel List	Daftar Bertingkat
+	Multilevel List Library	Pustaka Daftar Bertingkat
+	Article I.	Artikel I.
+	Chapter 1	Bab 1
+	Section 1.01	Bagian 1.01
+	Multiple Pages	Beberapa Halaman
+	Narrow  {size} all	Sempit  semua {size}
+	Navigation Pane	Panel Navigasi
+	New Comment	Komentar Baru
+	New Paragraph	Paragraf Baru
+	New\nComment	Komentar\nBaru
+	New\nWindow	Jendela\nBaru
+	Next Change	Perubahan Berikutnya
+	Next Comment	Komentar Berikutnya
+	Next Footnote	Catatan Kaki Berikutnya
+	Next Record	Rekaman Berikutnya
+	Next Section	Bagian Berikutnya
+	No Border	Tanpa Batas
+	No Markup	Tanpa Tanda
+	No Paragraph Space	Tanpa Spasi Paragraf
+	No contributor data was built into this copy.	Salinan ini tidak menyertakan data kontributor.
+	No document is open. Create a document or open one first.	Tidak ada dokumen yang terbuka. Buat atau buka dokumen terlebih dahulu.
+	No model credits were built into this copy.	Salinan ini tidak menyertakan kredit model.
+	No templates match your search.	Tidak ada templat yang cocok dengan pencarian Anda.
+	Nonbreaking Hyphen	Tanda Hubung Tidak Terputus
+	Normal  {size} all	Normal  semua {size}
+	Normal Style	Gaya Normal
+	Not available right now	Tidak tersedia saat ini
+	Not saved	Belum disimpan
+	Not saved yet	Belum disimpan
+	Nudge	Geser Sedikit
+	Number of columns:	Jumlah kolom:
+	Number of rows:	Jumlah baris:
+	Numbering	Penomoran
+	Odd Page	Halaman Ganjil
+	Office 2003 Default	Bawaan Office 2003
+	One	Satu
+	One Page	Satu Halaman
+	Only for the selected text	Hanya untuk teks terpilih
+	OpenDocument Text (*.odt)	Teks OpenDocument (*.odt)
+	Optional Hyphen	Tanda Hubung Opsional
+	Outline Level	Tingkat Kerangka
+	Outside Borders	Batas Luar
+	PDF document (*.pdf)	Dokumen PDF (*.pdf)
+	Page Background	Latar Halaman
+	Page Borders	Batas Halaman
+	Page Break	Pemisah Halaman
+	Page Break Before	Pemisah Halaman Sebelum
+	Page Breaks	Pemisah Halaman
+	Page Color	Warna Halaman
+	Page Down	Page Down
+	Page Movement	Gerakan Halaman
+	Page Number	Nomor Halaman
+	Page Setup	Pengaturan Halaman
+	Page Up	Page Up
+	Page Width	Lebar Halaman
+	Page X of Y	Halaman X dari Y
+	Page break before	Pemisah halaman sebelum
+	Page image (*.png)	Gambar halaman (*.png)
+	Page width	Lebar halaman
+	Page {page}	Halaman {page}
+	Page\nBorders	Batas\nHalaman
+	Page\nColor	Warna\nHalaman
+	Page\nNumber	Nomor\nHalaman
+	Paragraph Details	Rincian Paragraf
+	Paragraph Down	Paragraf ke Bawah
+	Paragraph Settings	Pengaturan Paragraf
+	Paragraph Spacing	Spasi Paragraf
+	Paragraph Up	Paragraf ke Atas
+	Paragraphs	Paragraf
+	Paste (⌘V)	Tempel (⌘V)
+	Paste Formatting	Tempel Format
+	Paste Special…	Tempel Khusus…
+	Paste as:	Tempel sebagai:
+	Paste: Keep Text Only	Tempel: Pertahankan Teks Saja
+	Paste: Merge Formatting	Tempel: Gabungkan Format
+	Picture Border	Batas Gambar
+	Picture Format	Format Gambar
+	Picture Styles	Gaya Gambar
+	Pictures	Gambar
+	Plain text (*.txt)	Teks biasa (*.txt)
+	Preview Results	Pratinjau Hasil
+	Preview\nResults	Pratinjau\nHasil
+	Previous Change	Perubahan Sebelumnya
+	Previous Comment	Komentar Sebelumnya
+	Previous Record	Rekaman Sebelumnya
+	Previous Section	Bagian Sebelumnya
+	Print Layout	Tata Letak Cetak
+	Print\nLayout	Tata Letak\nCetak
+	Proofing	Pemeriksaan
+	Proofing Issues	Masalah Pemeriksaan
+	Protect	Lindungi
+	Protect Document	Lindungi Dokumen
+	Quick Access Toolbar	Bilah Alat Akses Cepat
+	Quick Parts	Bagian Cepat
+	Quick Tables	Tabel Cepat
+	Read Aloud	Bacakan
+	Read Mode	Mode Baca
+	Read\nAloud	Bacakan
+	Read\nMode	Mode\nBaca
+	Reads the clipboard's rich text and keeps its formatting.	Membaca teks kaya dari papan klip dan mempertahankan formatnya.
+	Reads the clipboard's web content and keeps its formatting.	Membaca konten web dari papan klip dan mempertahankan formatnya.
+	Picture	Gambar
+	Pastes the clipboard's picture.	Menempelkan gambar dari papan klip.
+	Reading Highlight	Sorotan Bacaan
+	Record Macro	Rekam Makro
+	Recover Unsaved Documents	Pulihkan Dokumen yang Belum Disimpan
+	Reduce Hanging Indent	Kurangi Indentasi Gantung
+	References	Referensi
+	Reject	Tolak
+	Reject All Changes	Tolak Semua Perubahan
+	Reject Change	Tolak Perubahan
+	Remove Footer	Hapus Footer
+	Remove Header	Hapus Header
+	Remove Hyperlink	Hapus Tautan
+	Remove Space After Paragraph	Hapus Spasi Setelah Paragraf
+	Remove Table of Contents	Hapus Daftar Isi
+	Remove Watermark	Hapus Tanda Air
+	Reopen	Buka Kembali
+	Repeat Header Rows	Ulangi Baris Header
+	Replace All	Ganti Semua
+	Replace Document Text	Ganti Teks Dokumen
+	Replace with:	Ganti dengan:
+	Replay	Putar Ulang
+	Reply	Balas
+	Report	Laporan
+	Research	Riset
+	Researcher	Peneliti
+	Reset Picture	Atur Ulang Gambar
+	Reset to Normal	Atur Ulang ke Normal
+	Resolve	Selesaikan
+	Resolved	Terselesaikan
+	Restart Each Page	Mulai Ulang Setiap Halaman
+	Restart Each Section	Mulai Ulang Setiap Bagian
+	Restart at 1	Mulai Ulang dari 1
+	Restrict Editing	Batasi Pengeditan
+	Restrict\nEditing	Batasi\nPengeditan
+	Results	Hasil
+	Reviewing	Peninjauan
+	Reviewing Pane	Panel Peninjauan
+	Reviewing — edits become suggestions	Peninjauan — perubahan menjadi saran
+	Rich Text Format (*.rtf)	Format Teks Kaya (*.rtf)
+	Rich Text Format (RTF)	Format Teks Kaya (RTF)
+	Right Border	Batas Kanan
+	Right Margin	Margin Kanan
+	Right-to-Left Text Direction	Arah Teks Kanan ke Kiri
+	Left-to-Right Text Direction	Arah Teks Kiri ke Kanan
+	Rows & Columns	Baris & Kolom
+	Rules	Aturan
+	Résumé	Riwayat Hidup
+	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	Simpan salinan dalam format lain. Pencetakan melalui PDF yang dapat Anda cetak dari penampil mana pun.
+	Search Commands	Cari Perintah
+	Search commands and help	Cari perintah dan bantuan
+	Search document	Cari di dokumen
+	Search for templates	Cari templat
+	Section Breaks	Pemisah Bagian
+	Section Properties	Properti Bagian
+	Sections	Bagian
+	Select Cell	Pilih Sel
+	Select Line	Pilih Baris
+	Select Paragraph	Pilih Paragraf
+	Select Range	Pilih Rentang
+	Select Recipients	Pilih Penerima
+	Select Row	Pilih Baris
+	Select Sentence	Pilih Kalimat
+	Select Table	Pilih Tabel
+	Select Text	Pilih Teks
+	Select Text with Similar Formatting	Pilih Teks dengan Format Serupa
+	Select Word	Pilih Kata
+	Select\nRecipients	Pilih\nPenerima
+	Selection Pane	Panel Seleksi
+	Sentence case.	Huruf besar di awal kalimat.
+	Set Caret	Tetapkan Kursor
+	Set Character Formatting	Tetapkan Format Karakter
+	Set Numbering Value	Tetapkan Nilai Penomoran
+	Set Paragraph Formatting	Tetapkan Format Paragraf
+	Shading	Warna Latar
+	Shape Fill	Isian Bentuk
+	Shape Format	Format Bentuk
+	Shape Outline	Kontur Bentuk
+	Shape Styles	Gaya Bentuk
+	Share	Bagikan
+	Shift+Tab	Shift+Tab
+	Show Comments	Tampilkan Komentar
+	Show Markup	Tampilkan Tanda
+	Show Notes	Tampilkan Catatan
+	Show all formatting marks	Tampilkan semua tanda format
+	Show the community button in the title bar	Tampilkan tombol komunitas di bilah judul
+	Show/Hide ¶	Tampilkan/Sembunyikan ¶
+	Show\nComments	Tampilkan\nKomentar
+	Shrink Font 1 Point	Perkecil Font 1 Poin
+	Side to Side	Sisi ke Sisi
+	Side\nto Side	Sisi\nke Sisi
+	Signature Line	Baris Tanda Tangan
+	Single	Tunggal
+	Single Spacing	Spasi Tunggal
+	Small caps	Huruf kapital kecil
+	SmartArt	SmartArt
+	Source code: github.com/storytold/wordcraft	Kode sumber: github.com/storytold/wordcraft
+	Space before/after:	Spasi sebelum/sesudah:
+	Spacing (pt):	Spasi (pt):
+	Kerning for fonts:	Kerning untuk font:
+	Points and above	Poin dan di atasnya
+	Speech	Ucapan
+	Spelling & Grammar	Ejaan dan Tata Bahasa
+	Spelling &\nGrammar	Ejaan dan\nTata Bahasa
+	Spelling Suggestions	Saran Ejaan
+	Split Cells	Pisahkan Sel
+	Split Table	Pisahkan Tabel
+	Spreadsheet Table	Tabel Lembar Kerja
+	Standard Colors	Warna Standar
+	Start Mail Merge	Mulai Gabung Surat
+	Start Mail\nMerge	Mulai Gabung\nSurat
+	Statistics	Statistik
+	Status Bar	Bilah Status
+	Studio cover	Sampul Studio
+	Studio handbook (sample)	Buku Panduan Studio (contoh)
+	Style Inspector	Inspektur Gaya
+	Style Set	Kumpulan Gaya
+	Style based on:	Gaya berdasarkan:
+	Styles Pane	Panel Gaya
+	Switch Modes	Ganti Mode
+	Switch\nModes	Ganti\nMode
+	Synonyms	Sinonim
+	Table Column Width	Lebar Kolom Tabel
+	Table Design	Desain Tabel
+	Table Layout	Tata Letak Tabel
+	Table Properties	Properti Tabel
+	Table Properties…	Properti Tabel…
+	Table Row Height	Tinggi Baris Tabel
+	Table Style Options	Opsi Gaya Tabel
+	Table Styles	Gaya Tabel
+	Table of Authorities	Daftar Rujukan Hukum
+	Table of Contents	Daftar Isi
+	Table of\nContents	Daftar\nIsi
+	Tables	Tabel
+	Tabular List	Daftar Tabular
+	Text Box	Kotak Teks
+	Text Direction	Arah Teks
+	Text Effects	Efek Teks
+	Text Effects and Typography	Efek Teks dan Tipografi
+	Text Highlight Color	Warna Sorotan Teks
+	Text Wrapping	Bungkus Teks
+	Text from File	Teks dari Berkas
+	Text to display:	Teks yang ditampilkan:
+	Text\nBox	Kotak\nTeks
+	Text\nDirection	Arah\nTeks
+	The clipboard is empty.	Papan klip kosong.
+	The new style takes the formatting of the current paragraph.	Gaya baru mengambil format paragraf saat ini.
+	Theme Colors	Warna Tema
+	Theme Fonts	Font Tema
+	Theme List	Daftar Tema
+	Themes	Tema
+	Thesaurus	Tesaurus
+	Thick	Tebal
+	Three	Tiga
+	Tight	Rapat
+	Top Border	Batas Atas
+	Top Margin	Margin Atas
+	Top of Page	Atas Halaman
+	Total Row	Baris Total
+	Track Changes	Lacak Perubahan
+	Track Changes: On	Lacak Perubahan: Aktif
+	Translate	Terjemahkan
+	Two	Dua
+	Type Text	Ketik Teks
+	Type a command, e.g. "insert table"	Ketik perintah, mis. "sisipkan tabel"
+	Underline Words Only	Garis Bawah Kata Saja
+	Undo {action}	Batalkan: {action}
+	Unformatted Text	Teks Tanpa Format
+	Up	Ke Atas
+	Update Field	Perbarui Medan
+	Update Index	Perbarui Indeks
+	Update Style to Match Selection	Perbarui Gaya agar Sesuai Seleksi
+	Update Table	Perbarui Tabel
+	Update Table of Figures	Perbarui Daftar Gambar
+	Update to Match	Perbarui agar Sesuai
+	Update to Match Selection	Perbarui agar Sesuai Seleksi
+	User Name	Nama Pengguna
+	User name:	Nama pengguna:
+	Version History	Riwayat Versi
+	Version {version} ({build})	Versi {version} ({build})
+	View Gridlines	Tampilkan Garis Kisi
+	View State	Status Tampilan
+	Views	Tampilan
+	Watermark	Tanda Air
+	No watermark	Tanpa tanda air
+	Picture watermark	Tanda air gambar
+	Text watermark	Tanda air teks
+	Select Picture…	Pilih Gambar…
+	Washout	Pudar
+	Semitransparent	Semitransparan
+	Transparency:	Transparansi:
+	Select a picture first.	Pilih gambar terlebih dahulu.
+	Web Layout	Tata Letak Web
+	Web\nLayout	Tata Letak\nWeb
+	Web page (*.html)	Halaman web (*.html)
+	Whole page	Seluruh halaman
+	Whole words	Seluruh kata
+	Wide	Lebar
+	Widow/Orphan Control	Kontrol Janda/Yatim
+	Widow/Orphan control	Kontrol janda/yatim
+	Wildcards (regex)	Karakter pengganti (regex)
+	Word Count	Jumlah Kata
+	Word Left	Kata ke Kiri
+	Word Right	Kata ke Kanan
+	Word document (*.docx)	Dokumen Word (*.docx)
+	WordArt	WordArt
+	WordCraft	WordCraft
+	Words	Kata
+	Words only	Kata saja
+	Wrap Text	Bungkus Teks
+	Wrap\nText	Bungkus\nTeks
+	Write & Insert Fields	Tulis & Sisipkan Medan
+	Write a reply	Tulis balasan
+	development build	versi pengembangan
+	{group} settings	Pengaturan {group}
+	{key}+Click to follow link	{key}+Klik untuk mengikuti tautan
+	{selected} of {words} words	{selected} dari {words} kata
+	{words} words	{words} kata
+	➕ New comment	➕ Komentar baru
+	📂  Browse…	📂  Jelajahi…
+	Equation	Persamaan
+	Track\nChanges	Lacak\nPerubahan
+	Track\nChanges ✓	Lacak\nPerubahan ✓
+	Scroll ribbon left	Gulir pita ke kiri
+	Scroll ribbon right	Gulir pita ke kanan
+	Apply Styles	Terapkan Gaya
+	Dark page (white text on black)	Halaman gelap (teks putih di atas hitam)
+	Show documents with their colours inverted, like View › Switch Modes. Saving, printing and PDFs are unchanged.	Tampilkan dokumen dengan warna terbalik, seperti Tampilan › Ganti Mode. Penyimpanan, pencetakan, dan PDF tidak berubah.
+	Only web (http, https) and email (mailto) links can be followed	Hanya tautan web (http, https) dan email (mailto) yang dapat diikuti
+	Character Border	Batas Karakter
+	Right-to-left	Kanan ke Kiri
+	Left-to-right	Kiri ke Kanan
+	Zotero	Zotero
+	Citations	Sitasi
+	Add/Edit\nCitation	Tambah/Edit\nSitasi
+	Add\nNote	Tambah\nCatatan
+	Add/Edit\nBibliography	Tambah/Edit\nDaftar Pustaka
+	Document\nPreferences	Preferensi\nDokumen
+	Unlink\nCitations	Lepaskan\nSitasi
+	Waiting for Zotero…	Menunggu Zotero…
+	Zotero: done	Zotero: selesai
+	Zotero: cancelled	Zotero: dibatalkan
+	Move Past Citation	Lewati Sitasi
+	Move Past\nCitation	Lewati\nSitasi
+	Next Sentence	Kalimat Berikutnya
+	Previous Sentence	Kalimat Sebelumnya
+	Next sentence	Kalimat berikutnya
+	Previous sentence	Kalimat sebelumnya
+	Play/Pause	Putar/Jeda
+	Read Aloud Status	Status Bacakan
+	Reading Speed	Kecepatan Baca
+	Skip Citations and Bibliography	Lewati Sitasi dan Daftar Pustaka
+	Skip citations & bibliography	Lewati sitasi & daftar pustaka
+	Stop Reading	Hentikan Pembacaan
+	Don't read Zotero, Mendeley or EndNote citations and bibliographies	Jangan baca sitasi dan daftar pustaka dari Zotero, Mendeley, atau EndNote
+	Sentence	Kalimat
+	Paused	Dijeda
+	Finished	Selesai
+	Stopped	Dihentikan
+	Normal speed	Kecepatan normal
+	AutoSave documents you have saved in WordCraft	Simpan otomatis dokumen yang telah Anda simpan di WordCraft
+	AutoSave failed: {error}. Save the document to turn AutoSave back on.	Simpan Otomatis gagal: {error}. Simpan dokumen untuk mengaktifkan kembali Simpan Otomatis.
+	Couldn't download {name}: {error}	Tidak dapat mengunduh {name}: {error}
+	Do you want to save changes to {name}?	Apakah Anda ingin menyimpan perubahan pada {name}?
+	That format doesn't keep everything, so the document is still open. Save it as a Word document (.docx) to go on.	Format tersebut tidak menyimpan semuanya, jadi dokumen tetap terbuka. Simpan sebagai dokumen Word (.docx) untuk melanjutkan.
+	Change Structure	Ubah Struktur
+	Change to Display	Ubah menjadi Tampilan
+	Change to Inline	Ubah menjadi Sebaris
+	Conversions	Konversi
+	Delete Back in Equation	Hapus Mundur di Persamaan
+	Delete in Equation	Hapus di Persamaan
+	Edit Equation	Edit Persamaan
+	Enter in Equation	Enter di Persamaan
+	Equation Gallery	Galeri Persamaan
+	Equation Info	Info Persamaan
+	Equation Number	Nomor Persamaan
+	Input Format	Format Masukan
+	Insert Structure	Sisipkan Struktur
+	Insert Symbol	Sisipkan Simbol
+	Leave Equation	Tinggalkan Persamaan
+	Move in Equation	Pindah di Persamaan
+	Normal Text	Teks Normal
+	Set Equation	Tetapkan Persamaan
+	Structure Actions	Tindakan Struktur
+	Structures	Struktur
+	Type in Equation	Ketik di Persamaan
+	Inline	Sebaris
+	Close Equation	Tutup Persamaan
+	Insert New Equation	Sisipkan Persamaan Baru
+	Built-In	Bawaan
+	Professional	Profesional
+	Fraction	Pecahan
+	Script	Indeks
+	Radical	Akar
+	Integral	Integral
+	Large\nOperator	Operator\nBesar
+	Bracket	Kurung
+	Function	Fungsi
+	Accent	Aksen
+	Limit and\nLog	Limit dan\nLog
+	Operator	Operator
+	Equation Options	Opsi Persamaan
+	All symbol sets	Semua kumpulan simbol
+	Send the document straight to the system print dialog, or save a copy in another format below.	Kirim dokumen langsung ke dialog cetak sistem, atau simpan salinannya dalam format lain di bawah.
+	Or save a copy in another format:	Atau simpan salinan dalam format lain:
+	Opening print dialog…	Membuka dialog cetak…
+	Print failed: {error}	Pencetakan gagal: {error}
+	Couldn't open {path}: {error}	Tidak dapat membuka {path}: {error}
+	Column Selection	Seleksi Kolom
+	New Table Style	Gaya Tabel Baru
+	Modify Table Style	Ubah Gaya Tabel
+	New Table Style…	Gaya Tabel Baru…
+	Modify Table Style…	Ubah Gaya Tabel…
+	Apply formatting to:	Terapkan format ke:
+	Whole Table	Seluruh Tabel
+	Fill color:	Warna isian:
+	{count} items highlighted	{count} item disorot
+	{n} pt	{n} pt
+	Not {name}	Bukan {name}
+	Level {n}	Tingkat {n}
+	Body Text	Teks Utama
+	{n} lines	{n} baris
+	At least {n}	Minimal {n}
+	Exactly {n}	Tepat {n}
+	Centered	Di Tengah
+	Character spacing	Spasi karakter
+	Don't add space between paragraphs of the same style	Jangan tambahkan spasi ant paragraf dengan gaya yang sama
+	Don't hyphenate	Jangan Pemenggalan Kata
+	Double strikethrough	Coret ganda
+	Drop cap	Inisial
+	First line	Baris pertama
+	Font color	Warna font
+	Highlight	Sorotan
+	Justified	Rata Kiri Kanan
+	Left indent	Indentasi kiri
+	Line spacing	Spasi baris
+	Outline level	Tingkat kerangka
+	Raised/lowered	Dinaikkan/diturunkan
+	Right indent	Indentasi kanan
+	Space after	Spasi sesudah
+	Space before	Spasi sebelum
+	Suppress line numbers	Sembunyikan Nomor Baris
+	Underline color	Warna garis bawah
+	Letters	Surat
+	E-mail Messages	Pesan Email
+	Directory	Direktori
+	Normal Word Document	Dokumen Word Normal
+	If…Then…Else…	Jika…Maka…Jika tidak…
+	If…Then…Else	Jika…Maka…Jika tidak
+	Merge Record #	Nomor Rekaman Gabungan
+	Skip Record If…	Lewati Rekaman Jika…
+	Skip Record If	Lewati Rekaman Jika
+	Equals:	Sama dengan:
+	Then insert:	Maka sisipkan:
+	Otherwise insert:	Jika tidak, sisipkan:
+	Courtesy Title	Sapaan Kehormatan
+	First Name	Nama Depan
+	Last Name	Nama Belakang
+	Address	Alamat
+	State	Provinsi/Negara Bagian
+	Postal Code	Kode Pos
+	(not matched)	(tidak cocok)
+	Leave a recipient out of the merge when a field has this value.	Lewati penerima dari penggabungan jika suatu medan memiliki nilai ini.
+	Insert one text or another, depending on a field's value.	Sisipkan salah satu teks bergantung pada nilai medan.
+	Select recipients first to match their fields.	Pilih penerima terlebih dahulu untuk mencocokkan medannya.
+	The recipient-list field that fills each part of an address block and greeting line.	Medan daftar penerima yang mengisi setiap bagian blok alamat dan baris sapaan.
+	No errors found: every merge field is in the recipient list.	Tidak ditemukan kesalahan: setiap medan gabungan ada di daftar penerima.
+	These merge fields aren't in the recipient list:	Medan gabungan ini tidak ada di daftar penerima:
+	Add at least one field.	Tambahkan setidaknya satu medan.
+	Add Field	Tambah Medan
+	Every field needs a name.	Setiap medan harus memiliki nama.
+	Field name	Nama medan
+	Field names must be different.	Nama medan harus berbeda.
+	Field:	Medan:
+	New Entry	Entri Baru
+	Recipient List	Daftar Penerima
+	Recipients: {count}	Penerima: {count}
+	Remove field	Hapus medan
+	Remove recipient	Hapus penerima
+	Select recipients first to choose from their fields.	Pilih penerima terlebih dahulu untuk memilih dari medannya.
+	Type a New List…	Ketik Daftar Baru…
+	Type at least one recipient.	Ketik setidaknya satu penerima.
+	Type the recipients, or load them from a file.	Ketik penerima, atau muat dari berkas.
+	Use an Existing List…	Gunakan Daftar yang Ada…
+	Interface theme:	Tema antarmuka:
+	Interface\nTheme	Tema\nAntarmuka
+	Interface Theme	Tema Antarmuka
+	Use system setting	Gunakan pengaturan sistem
+	A file dialog is already open.	Dialog berkas sudah terbuka.
+	Row	Baris
+	Cell	Sel
+	Preferred width:	Lebar pilihan:
+	Indent from left:	Indentasi dari kiri:
+	Specify height:	Tentukan tinggi:
+	Exactly	Tepat
+	At least	Minimal
+	Allow row to break across pages	Izinkan baris terpecah antar halaman
+	Repeat as header row on each page	Ulangi sebagai baris header di setiap halaman
+	Vertical alignment:	Perataan vertikal:
+	Alt text	Teks alt
+	Alt:	Alt:
+	H:	T:
+	Reset Crop	Atur Ulang Pangkasan
+	Insert a new equation (Alt+=)	Sisipkan persamaan baru (Alt+=)
+	Leave the equation (Esc)	Tinggalkan persamaan (Esc)
+	getartcraft.com/apps/wordcraft	getartcraft.com/apps/wordcraft
+	English (United Kingdom)	Bahasa Inggris (Britania Raya)
+	Polish	Bahasa Polandia
+	Do Not Check Spelling or Grammar	Jangan Periksa Ejaan atau Tata Bahasa
+	Possible spelling mistake	Kemungkinan kesalahan ejaan
+	Extra space	Spasi berlebih
+	Capitalize the first word of a sentence	Besarkan huruf pertama di awal kalimat
+	Remove the space before the punctuation	Hapus spasi sebelum tanda baca
+	Use "an" before a vowel sound	Gunakan "an" sebelum bunyi vokal
+	Use "a" before a consonant sound	Gunakan "a" sebelum bunyi konsonan
+	The spelling and grammar check is complete.	Pemeriksaan ejaan dan tata bahasa selesai.
+	Font…	Font…
+	Paragraph…	Paragraf…
+	Link…	Tautan…
+	Change Picture…	Ganti Gambar…
+	Size and Crop…	Ukuran dan Pangkasan…
+	Insert Rows Above	Sisipkan Baris di Atas
+	Insert Rows Below	Sisipkan Baris di Bawah
+	Insert Columns to the Left	Sisipkan Kolom di Kiri
+	Insert Columns to the Right	Sisipkan Kolom di Kanan
+	(picture or object)	(gambar atau objek)
+	A password is required to open this document.	Kata sandi diperlukan untuk membuka dokumen ini.
+	Add Object to Selection	Tambahkan Objek ke Seleksi
+	Add space between Asian and Latin text	Tambahkan spasi antara teks Asia dan Latin
+	Add space between Asian text and numbers	Tambahkan spasi antara teks Asia dan angka
+	Allow Latin text to wrap in the middle of a word	Izinkan teks Latin dibungkus di tengah kata
+	Allow hanging punctuation	Izinkan tanda baca menggantung
+	Alphabetical	Alfabetis
+	Anyone can open this document. Encrypt it with a password to keep it private.	Siapa pun dapat membuka dokumen ini. Enkripsikan dengan kata sandi agar tetap privat.
+	Anyone who opens the document will need this password.	Siapa pun yang membuka dokumen ini akan memerlukan kata sandi ini.
+	Apply Asian line-breaking rules (kinsoku)	Terapkan aturan pemenggalan baris Asia (kinsoku)
+	As Recommended	Sesuai Rekomendasi
+	Asian Typography	Tipografi Asia
+	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	Simpan Otomatis tidak tersedia di peramban: tidak dapat menulis ke berkas Anda. Simpan mengunduh salinan.
+	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	Simpan Otomatis hanya menyimpan berkas .docx, .odt, dan .rtf; {name} tidak dapat menyimpan semua format. Simpan sebagai .docx untuk mengaktifkan Simpan Otomatis.
+	Based on: {style}	Berdasarkan: {style}
+	Built-in style	Gaya bawaan
+	Built-in styles can't be deleted.	Gaya bawaan tidak dapat dihapus.
+	Change Password…	Ganti Kata Sandi…
+	Character style	Gaya karakter
+	Click an item to paste it.	Klik item untuk menempelkannya.
+	Clipboard Items	Item Papan Klip
+	Clipboard Pane	Panel Papan Klip
+	Color: {color}	Warna: {color}
+	Compress punctuation at the start of a line	Rapatkan tanda baca di awal baris
+	Confirm password:	Konfirmasi kata sandi:
+	Delete Clipboard Item	Hapus Item Papan Klip
+	Delete Table Style	Hapus Gaya Tabel
+	Encrypt with Password…	Enkripsi dengan Kata Sandi…
+	Font: {font}	Font: {font}
+	Glow Colors	Warna Cahaya
+	Hide from style lists	Sembunyikan dari daftar gaya
+	Indents and Spacing	Indentasi dan Spasi
+	Keep the password somewhere safe: without it nobody, WordCraft included, can open the document. Leave both boxes empty to remove the password.	Simpan kata sandi di tempat yang aman: tanpanya, siapa pun termasuk WordCraft tidak dapat membuka dokumen. Biarkan kedua kotak kosong untuk menghapus kata sandi.
+	Line breaking	Pemenggalan baris
+	Linked style (paragraph and character)	Gaya tertaut (paragraf dan karakter)
+	Manage Styles	Kelola Gaya
+	Manage Styles…	Kelola Gaya…
+	No Glow	Tanpa Cahaya
+	No Shadow	Tanpa Bayangan
+	No Soft Edges	Tanpa Tepi Lembut
+	Nothing collected yet. Items you copy or cut appear here.	Belum ada yang terkumpul. Item yang Anda salin atau potong akan muncul di sini.
+	Offset: Bottom	Offset: Bawah
+	Offset: Bottom Left	Offset: Kiri Bawah
+	Offset: Bottom Right	Offset: Kanan Bawah
+	Offset: Center	Offset: Tengah
+	Offset: Left	Offset: Kiri
+	Offset: Right	Offset: Kanan
+	Offset: Top	Offset: Atas
+	Offset: Top Left	Offset: Kiri Atas
+	Offset: Top Right	Offset: Kanan Atas
+	Paragraph style	Gaya paragraf
+	Password:	Kata sandi:
+	Paste All	Tempel Semua
+	Paste Clipboard Item	Tempel Item Papan Klip
+	Remove Password	Hapus Kata Sandi
+	Save the document to turn on AutoSave	Simpan dokumen untuk mengaktifkan Simpan Otomatis
+	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Simpan dokumen untuk mengaktifkan Simpan Otomatis (berkas yang hanya dibuka tidak ditulis ulang sampai Anda menyimpannya)
+	Shadow, glow and soft edges	Bayangan, cahaya, dan tepi lembut
+	Show in the Styles gallery	Tampilkan di galeri Gaya
+	Show or Hide Style	Tampilkan atau Sembunyikan Gaya
+	Soft Edges	Tepi Lembut
+	Sort order:	Urutan pengurutan:
+	Space after: {pt} pt	Spasi sesudah: {pt} pt
+	Space before: {pt} pt	Spasi sebelum: {pt} pt
+	Table style	Gaya tabel
+	That password isn't right. Check it (passwords are case-sensitive) and try again.	Kata sandi salah. Periksa kembali (kata sandi membedakan huruf besar/kecil) lalu coba lagi.
+	The document will be saved with a password. Save it to protect it.	Dokumen akan disimpan dengan kata sandi. Simpan untuk melindunginya.
+	The password is removed. Save the document to keep the change.	Kata sandi telah dihapus. Simpan dokumen untuk menyimpan perubahan.
+	The passwords don't match.	Kata sandi tidak cocok.
+	{name} is protected with a password.	{name} dilindungi dengan kata sandi.
+	{size} pt	{size} pt
+	(All)	(Semua)
+	(no style)	(tanpa gaya)
+	(none)	(tidak ada)
+	(normal text)	(teks normal)
+	1/4 Em Space	Spasi 1/4 Em
+	3-D	3D
+	A mail merge field	Medan gabung surat
+	A numbered sequence (figures, tables…)	Urutan bernomor (gambar, tabel…)
+	A table of contents	Daftar isi
+	AaBbYyZz	AaBbYyZz
+	Add tab stop at:	Tambahkan perhentian tab di:
+	Align Bottom Center	Ratakan Bawah Tengah
+	Align Bottom Left	Ratakan Kiri Bawah
+	Align Bottom Right	Ratakan Kanan Bawah
+	Align Center	Ratakan Tengah
+	Align Center Left	Ratakan Kiri Tengah
+	Align Center Right	Ratakan Kanan Tengah
+	Align Top Center	Ratakan Atas Tengah
+	Align Top Left	Ratakan Kiri Atas
+	Align Top Right	Ratakan Kanan Atas
+	Aligned at:	Diratakan di:
+	Apply to:	Terapkan ke:
+	Atelier	Atelier
+	Balloons	Balon
+	Between	Antara
+	Borders and Shading	Batas dan Warna Latar
+	Borders and Shading…	Batas dan Warna Latar…
+	By author	Menurut penulis
+	Categories:	Kategori:
+	Changed lines:	Baris berubah:
+	Character code:	Kode karakter:
+	Click a border between two cells to merge them. Esc stops.	Klik batas antara dua sel untuk menggabungkannya. Esc menghentikan.
+	Click level to modify:	Klik tingkat untuk diubah:
+	Col #:	Kolom No.:
+	Color only	Hanya warna
+	Copy of the text a bookmark marks	Salinan teks yang ditandai penanda
+	Craft	Karya
+	Darkroom	Kamar Gelap
+	Date and Time	Tanggal dan Waktu
+	Date formats:	Format tanggal:
+	Decimal	Desimal
+	Default tab stops:	Perhentian tab bawaan:
+	Define New Multilevel List	Tentukan Daftar Bertingkat Baru
+	Define New Multilevel List…	Tentukan Daftar Bertingkat Baru…
+	Deletions:	Penghapusan:
+	Document Information	Informasi Dokumen
+	Document1	Dokumen1
+	Dot dash	Garis-titik
+	Double Closing Quote	Tanda Kutip Penutup Ganda
+	Double Opening Quote	Tanda Kutip Pembuka Ganda
+	Drag a rectangle to draw a table, or a line across cells to split them. Esc stops.	Seret persegi panjang untuk menggambar tabel, atau garis melintasi sel untuk memisahkannya. Esc menghentikan.
+	Draw Ink	Gambar Tinta
+	Draw Table	Gambar Tabel
+	Enter formatting for number:	Masukkan format untuk nomor:
+	Equal column width	Lebar kolom sama
+	Erase Ink	Hapus Tinta
+	Field Codes	Kode Medan
+	Field code:	Kode medan:
+	Field codes:	Kode medan:
+	Field name:	Nama medan:
+	Field names:	Nama medan:
+	Field properties	Properti medan
+	Field…	Medan…
+	Follow number with:	Ikuti nomor dengan:
+	Formatted	Berformat
+	Formatting	Format
+	Gallery	Galeri
+	Hide Codes	Sembunyikan Kode
+	Hide Ink	Sembunyikan Tinta
+	Hide\nInk	Sembunyikan\nTinta
+	How many pages the whole document has	Jumlah halaman seluruh dokumen
+	How many pages this section has	Jumlah halaman bagian ini
+	How many words the document holds	Jumlah kata dalam dokumen
+	Include level number from:	Sertakan nomor tingkat dari:
+	Index and Tables	Indeks dan Tabel
+	Ink	Tinta
+	Insertions and Deletions	Sisipan dan Penghapusan
+	Insertions:	Sisipan:
+	Interface size:	Ukuran antarmuka:
+	Leader	Garis Pengisi
+	Left border	Batas kiri
+	Legal style numbering	Penomoran gaya hukum
+	Line between	Garis di antara
+	Link level to style:	Tautkan tingkat ke gaya:
+	Links and References	Tautan dan Referensi
+	List Definition	Definisi Daftar
+	Mail Merge	Gabung Surat
+	Auto ({percent}%)	Otomatis ({percent}%)
+	Makes the ribbon, menus and dialogs larger or smaller. Auto follows your system's display scaling; 100% is one screen pixel per point. Document zoom is separate.	Memperbesar atau memperkecil pita, menu, dan dialog. Otomatis mengikuti skala tampilan sistem Anda; 100% berarti satu piksel layar per poin. Zoom dokumen terpisah.
+	Mon	Sen
+	More Columns…	Kolom Lainnya…
+	More Symbols…	Simbol Lainnya…
+	Name of the file this document is saved as	Nama berkas tempat dokumen ini disimpan
+	No-Width Non Break	Spasi Tanpa Lebar Tidak Terputus
+	No-Width Optional Break	Spasi Tanpa Lebar Opsional
+	North	Utara
+	Nothing	Tidak Ada
+	Number alignment:	Perataan nomor:
+	Number format	Format nomor
+	Number of the page the field sits on	Nomor halaman tempat medan berada
+	Number of the section the field sits in	Nomor bagian tempat medan berada
+	Number style for this level:	Gaya nomor untuk tingkat ini:
+	Outside border	Batas luar
+	Page Border	Batas Halaman
+	Page on which a bookmarked passage falls	Halaman tempat bagian yang ditandai penanda berada
+	Paragraph Mark	Tanda Paragraf
+	Pens	Pena
+	Pick a field from the list	Pilih medan dari daftar
+	Preserve formatting during updates	Pertahankan format saat pembaruan
+	Recently used symbols:	Simbol yang baru digunakan:
+	Registered	Terdaftar
+	Restart list after:	Mulai ulang daftar setelah:
+	Right border	Batas kanan
+	Rotate Left 90°	Putar Kiri 90°
+	Rotate Right 90°	Putar Kanan 90°
+	Section Mark	Tanda Bagian
+	Sequence name:	Nama urutan:
+	Setting:	Pengaturan:
+	Shortcut key:	Tombol pintas:
+	Show all revisions inline	Tampilkan semua revisi sebaris
+	Show only comments and formatting in balloons	Tampilkan hanya komentar dan format di balon
+	Show revisions in balloons	Tampilkan revisi di balon
+	Single Closing Quote	Tanda Kutip Penutup Tunggal
+	Single Opening Quote	Tanda Kutip Pembuka Tunggal
+	Sketchbook	Buku Sketsa
+	South	Selatan
+	Space	Spasi
+	Special Characters	Karakter Khusus
+	Style: {style}	Gaya: {style}
+	Subset:	Subset:
+	Sum	Jumlah
+	Tab character	Karakter tab
+	Tab stop position:	Posisi perhentian tab:
+	Tab stops to be cleared:	Perhentian tab yang akan dihapus:
+	Tabs…	Tabulator…
+	Text indent at:	Indentasi teks di:
+	The date it is today	Tanggal hari ini
+	The document has no bookmarks yet.	Dokumen belum memiliki penanda.
+	The time right now	Waktu saat ini
+	This field has no options.	Medan ini tidak memiliki opsi.
+	This font has no characters to show.	Font ini tidak memiliki karakter untuk ditampilkan.
+	This point forward	Dari titik ini ke depan
+	This section	Bagian ini
+	Selected text	Teks terpilih
+	Title from the document properties	Judul dari properti dokumen
+	Total	Total
+	Track Changes Options	Opsi Lacak Perubahan
+	Track formatting	Lacak format
+	Trademark	Merek Dagang
+	Triple	Tiga
+	Tue	Sel
+	Type the field's name and its switches, for example PAGE \\* roman.	Ketik nama medan dan sakelarnya, misalnya PAGE \\* roman.
+	Wed	Rab
+	West	Barat
+	When this document was first created	Saat dokumen ini pertama dibuat
+	When this document was most recently printed	Saat dokumen ini terakhir dicetak
+	When this document was most recently saved	Saat dokumen ini terakhir disimpan
+	Who the document properties name as author	Penulis yang tercantum di properti dokumen
+	Whole document	Seluruh dokumen
+	Width and spacing	Lebar dan spasi
+	from Unicode (hex)	dari Unicode (heksadesimal)
+	pt	pt
+	{cols}×{rows} Table	Tabel {cols}×{rows}
+	{contributors} contributors · {commits} commits	{contributors} kontributor · {commits} komit
+	Copyright Sign	Tanda Hak Cipta
+	Edit Field Code	Edit Kode Medan
+	Edit Field…	Edit Medan…
+	Insert Date Field	Sisipkan Medan Tanggal
+	Insert Page Field	Sisipkan Medan Halaman
+	Insert Time Field	Sisipkan Medan Waktu
+	Lock Fields	Kunci Medan
+	Next Field	Medan Berikutnya
+	Previous Field	Medan Sebelumnya
+	Registered Sign	Tanda Terdaftar
+	Reset Character Formatting	Atur Ulang Format Karakter
+	Reset Paragraph Formatting	Atur Ulang Format Paragraf
+	Selected Fields	Medan Terpilih
+	Toggle Field Codes	Alihkan Kode Medan
+	Trademark Sign	Tanda Merek Dagang (™)
+	Unlink Fields	Lepaskan Tautan Medan
+	Unlock Fields	Buka Kunci Medan
+	All Commands	Semua Perintah
+	Choose a command	Pilih perintah
+	Choose a shortcut	Pilih pintasan
+	Customize	Sesuaikan
+	Customize Keyboard	Sesuaikan Papan Ketik
+	Demote	Turunkan
+	Draw\nTable	Gambar\nTabel
+	Go Back	Kembali
+	Keyboard shortcuts:	Pintasan papan ketik:
+	Keys for this command:	Tombol untuk perintah ini:
+	Move Paragraph Down	Pindahkan Paragraf ke Bawah
+	Move Paragraph Up	Pindahkan Paragraf ke Atas
+	New shortcut:	Pintasan baru:
+	Not used by any command	Tidak digunakan oleh perintah mana pun
+	Now used by {command}	Sekarang digunakan oleh {command}
+	Press a key combination	Tekan kombinasi tombol
+	Promote	Naikkan
+	Remove every custom shortcut and restore the built-in keys?	Hapus semua pintasan kustom dan kembalikan tombol bawaan?
+	Reset All…	Atur Ulang Semua…
+	Toggle Unicode Character	Alihkan Karakter Unicode
+	Type Character Code	Ketik Kode Karakter
+	<< Remove	<< Hapus
+	Add >>	Tambah >>
+	Add to Quick Access Toolbar	Tambahkan ke Bilah Alat Akses Cepat
+	Customize Quick Access Toolbar…	Sesuaikan Bilah Alat Akses Cepat…
+	Customize Ribbon	Sesuaikan Pita
+	Customize the Ribbon…	Sesuaikan Pita…
+	More Commands…	Perintah Lainnya…
+	New Tab	Tab Baru
+	Pick a custom group (New Group makes one)	Pilih grup kustom (Grup Baru membuatnya)
+	Put the default commands back on the Quick Access Toolbar?	Kembalikan perintah bawaan ke Bilah Alat Akses Cepat?
+	Remove every custom tab and group and show all tabs again?	Hapus semua tab dan grup kustom lalu tampilkan lagi semua tab?
+	Remove from Quick Access Toolbar	Hapus dari Bilah Alat Akses Cepat
+	Hide Quick Access Toolbar	Sembunyikan Bilah Alat Akses Cepat
+	Show Quick Access Toolbar	Tampilkan Bilah Alat Akses Cepat
+	Ribbon	Pita
+	Ribbon and Quick Access Toolbar:	Pita dan Bilah Alat Akses Cepat:
+	Ribbon tabs	Tab pita
+	Align Text	Ratakan Teks
+	Arrows	Panah
+	Base text:	Teks dasar:
+	Behind Text	Di Belakang Teks
+	Below text	Di bawah teks
+	Both Sides	Kedua Sisi
+	Canvas Member	Anggota Kanvas
+	Choose the sheet that holds the recipients.	Pilih lembar yang berisi penerima.
+	Click the empty text box the text should continue in (Esc cancels)	Klik kotak teks kosong tempat teks dilanjutkan (Esc membatalkan)
+	Communication	Komunikasi
+	Continuous numbering	Penomoran berkelanjutan
+	Convert Notes	Konversikan Catatan
+	Create Link	Buat Tautan
+	Custom mark:	Tanda kustom:
+	Distribute letters	Sebarkan huruf
+	Distribute spacing	Sebarkan spasi
+	Drawing Canvas	Kanvas Gambar
+	Enclose Characters	Lingkupi Karakter
+	Enclosure	Lingkupan
+	End of document	Akhir dokumen
+	End of section	Akhir bagian
+	Endnotes	Catatan Akhir
+	Endnotes to footnotes	Catatan akhir ke catatan kaki
+	Enlarge symbol	Perbesar simbol
+	First row of data contains column headers	Baris data pertama berisi header kolom
+	Footnotes to endnotes	Catatan kaki ke catatan akhir
+	Icon Color	Warna Ikon
+	In Front of Text	Di Depan Teks
+	In Line with Text	Sejajar dengan Teks
+	Largest Only	Hanya Terbesar
+	Left Only	Hanya Kiri
+	Middle	Tengah
+	Moved from	Dipindahkan dari
+	Moved to	Dipindahkan ke
+	Nature	Alam
+	New Drawing Canvas	Kanvas Gambar Baru
+	No icons match your search.	Tidak ada ikon yang cocok dengan pencarian Anda.
+	Not linked: click a text box	Tidak tertaut: klik kotak teks
+	Office	Kantor
+	Offset (pt):	Offset (pt):
+	People	Orang
+	Phonetic Guide	Panduan Fonetik
+	Recolor a one-color picture, such as an icon	Ubah warna gambar satu warna, seperti ikon
+	Right (vertical)	Kanan (vertikal)
+	Right Only	Hanya Kanan
+	Right-to-Left Section	Bagian Kanan ke Kiri
+	Right-to-Left Table	Tabel Kanan ke Kiri
+	Rotate all text 270°	Putar semua teks 270°
+	Rotate all text 90°	Putar semua teks 90°
+	Ruby text:	Teks ruby:
+	Scale Drawing	Skalakan Gambar
+	Search icons	Cari ikon
+	Section direction:	Arah bagian:
+	Shrink text	Perkecil teks
+	Size (pt):	Ukuran (pt):
+	Swap footnotes and endnotes	Tukar catatan kaki dan catatan akhir
+	Table direction:	Arah tabel:
+	Technology	Teknologi
+	Through	Menembus
+	Top and Bottom	Atas dan Bawah
+	Transport	Transportasi
+	Weather	Cuaca
+	Wrap Text Sides	Sisi Bungkus Teks
+	Characters per line:	Karakter per baris:
+	Document Grid	Kisi Dokumen
+	Lines and characters	Baris dan karakter
+	Lines only	Hanya baris
+	Lines per page:	Baris per halaman:
+	No grid	Tanpa kisi
+	Text snaps to characters	Teks menempel ke karakter
+	A, B, C, …	A, B, C, …
+	Above the item	Di atas item
+	Accessed on	Diakses pada
+	Accessibility Pane	Panel Aksesibilitas
+	Add New Source…	Tambah Sumber Baru…
+	Add Pen	Tambah Pena
+	Add line numbering	Tambahkan penomoran baris
+	Add the chapter number	Tambahkan nomor bab
+	Add to Document	Tambahkan ke Dokumen
+	Add\nPen	Tambah\nPena
+	Address labels	Label alamat
+	Alt Text Pane	Panel Teks Alt
+	Alt\nText	Teks\nAlt
+	Arabic	Arab
+	Atmosphere	Atmosfer
+	Automatically hyphenate document	Pemenggalan kata otomatis di dokumen
+	Below the item	Di bawah item
+	Book	Buku
+	Book title	Judul buku
+	Caption Numbering	Penomoran Keterangan
+	Caption text	Teks keterangan
+	Caption:	Keterangan:
+	Chapter in a book	Bab dalam buku
+	Chapters begin at:	Bab dimulai dari:
+	Chinese (Simplified)	Bahasa Tionghoa (Sederhana)
+	Chinese (Traditional)	Bahasa Tionghoa (Tradisional)
+	Collect entries from:	Kumpulkan entri dari:
+	Column:	Kolom:
+	Conference	Konferensi
+	Conference paper	Makalah konferensi
+	Container Title	Judul Wadah
+	Convert to Shapes	Konversikan ke Bentuk
+	Count by:	Hitung per:
+	Create Source	Buat Sumber
+	Cross-reference:	Referensi silang:
+	Custom Table of Contents…	Daftar Isi Kustom…
+	Czech	Ceko
+	DOI	DOI
+	Danish	Denmark
+	Day	Hari
+	Decorative objects only add visual interest: screen readers skip them.	Objek dekoratif hanya menambah daya tarik visual: pembaca layar melewatinya.
+	Delete Label	Hapus Label
+	Delete Selected Ink	Hapus Tinta Terpilih
+	Delivery address:	Alamat pengiriman:
+	Describe what this object shows, for people who can't see it.	Jelaskan apa yang ditampilkan objek ini, untuk orang yang tidak dapat melihatnya.
+	Describe what this table shows, for people who can't see it.	Jelaskan apa yang ditampilkan tabel ini, untuk orang yang tidak dapat melihatnya.
+	Detect language automatically	Deteksi bahasa secara otomatis
+	Do not check spelling or grammar	Jangan periksa ejaan atau tata bahasa
+	Edit Source	Edit Sumber
+	Edition	Edisi
+	Entry marked.	Entri ditandai.
+	Envelope size:	Ukuran amplop:
+	Errors ({n})	Kesalahan ({n})
+	Estonian	Estonia
+	Example: {sample}	Contoh: {sample}
+	Figure	Gambar
+	Film	Film
+	Finnish	Finlandia
+	Forward	Maju
+	French (France)	Bahasa Prancis (Prancis)
+	From text:	Dari teks:
+	Full page of the same label	Satu halaman penuh label yang sama
+	German (Germany)	Bahasa Jerman (Jerman)
+	Greek	Yunani
+	Heading styles (levels 1–{n})	Gaya judul (tingkat 1–{n})
+	Heading {n}	Judul {n}
+	Hebrew	Ibrani
+	Hyphenate at:	Pemenggalan kata di:
+	Hyphenate words in CAPS	Pemenggalan kata HURUF BESAR
+	Hyphenation Options…	Opsi Pemenggalan Kata…
+	Hyphenation zone:	Zona pemenggalan kata:
+	I, II, III, …	I, II, III, …
+	Include page numbers	Sertakan nomor halaman
+	Indented	Berindentasi
+	Ink Replay	Putar Ulang Tinta
+	Ink to Shape	Tinta ke Bentuk
+	Institution	Institusi
+	Ionosphere	Ionosfer
+	Issue	Terbitan
+	Croatian	Kroasia
+	Indonesian	Indonesia
+	Journal	Jurnal
+	Label:	Label:
+	Lasso Select	Pilih dengan Lasso
+	Last, First; Last, First	Belakang, Depan; Belakang, Depan
+	Leave the label out of the caption	Hilangkan label dari keterangan
+	Letter headings	Judul huruf
+	Levels:	Tingkat:
+	Limit consecutive hyphens to:	Batasi tanda hubung berurutan hingga:
+	Line Numbering Options…	Opsi Penomoran Baris…
+	Link entries to their headings	Tautkan entri ke judulnya
+	Made from the author and year when empty	Dibuat dari penulis dan tahun jika kosong
+	Magazine or newspaper article	Artikel majalah atau koran
+	Main entry:	Entri utama:
+	Manual Hyphenation	Pemenggalan Kata Manual
+	Manual hyphenation is complete.	Pemenggalan kata manual selesai.
+	Manual…	Manual…
+	Mark	Tandai
+	Mark All	Tandai Semua
+	Mark Entry…	Tandai Entri…
+	Mark Index Entry	Tandai Entri Indeks
+	Mark as decorative	Tandai sebagai dekoratif
+	Mark selected text as:	Tandai teks terpilih sebagai:
+	Mesosphere	Mesosfer
+	Month	Bulan
+	Move Selected Ink	Pindahkan Tinta Terpilih
+	New Label	Label Baru
+	New Label…	Label Baru…
+	No accessibility issues found.	Tidak ditemukan masalah aksesibilitas.
+	No limit	Tanpa batas
+	No sources yet.	Belum ada sumber.
+	Norwegian (Bokmål)	Bahasa Norwegia (Bokmål)
+	Numbering:	Penomoran:
+	Numbering…	Penomoran…
+	One label per recipient	Satu label per penerima
+	Other styles and their TOC level:	Gaya lain dan tingkat daftar isinya:
+	Outline levels	Tingkat kerangka
+	Page number style	Gaya nomor halaman
+	Page numbers at the right margin	Nomor halaman di margin kanan
+	Page title	Judul halaman
+	Pages of bookmark:	Halaman penanda:
+	Periodical	Terbitan berkala
+	Portuguese (Brazil)	Bahasa Portugis (Brasil)
+	Portuguese (Portugal)	Bahasa Portugis (Portugal)
+	Publisher	Penerbit
+	Recolor Selected Ink	Ubah Warna Tinta Terpilih
+	Remove Pen	Hapus Pena
+	Return address labels	Label alamat pengirim
+	Return address:	Alamat pengirim:
+	Rewind	Mundurkan
+	Row:	Baris:
+	Run-in	Sebaris teks
+	See	Lihat
+	Select a picture, shape, chart or table to describe it.	Pilih gambar, bentuk, bagan, atau tabel untuk dijelaskan.
+	Separator:	Pemisah:
+	Serbian (Cyrillic)	Bahasa Serbia (Sirilik)
+	Serbian (Latin)	Bahasa Serbia (Latin)
+	Set As Default	Jadikan Bawaan
+	Shipping labels	Label pengiriman
+	Show every bibliography field	Tampilkan semua medan daftar pustaka
+	Single label	Label tunggal
+	Site name	Nama situs
+	Source Manager	Pengelola Sumber
+	Source type:	Jenis sumber:
+	Sources in this document:	Sumber dalam dokumen ini:
+	Spanish (Mexico)	Bahasa Spanyol (Meksiko)
+	Spanish (Spain)	Bahasa Spanyol (Spanyol)
+	Stroke {n} of {total}	Goresan {n} dari {total}
+	Styles:	Gaya:
+	Subentry:	Subentri:
+	Swedish	Swedia
+	TC entry fields	Medan entri TC
+	Tab leader:	Garis pengisi tab:
+	Table of Contents Options	Opsi Daftar Isi
+	Table of Contents Styles	Gaya Daftar Isi
+	Tag	Tag
+	This page	Halaman ini
+	Tips ({n})	Tips ({n})
+	Title:	Judul:
+	Turkish	Turki
+	URL	URL
+	Ukrainian	Ukraina
+	View Alt Text…	Lihat Teks Alt…
+	Volume	Volume
+	Warnings ({n})	Peringatan ({n})
+	Website	Situs web
+	Year	Tahun
+	a, b, c, …	a, b, c, …
+	i, ii, iii, …	i, ii, iii, …
+	{language} is now the document's default language.	{language} kini menjadi bahasa bawaan dokumen.
+	{n} entries marked.	{n} entri ditandai.
+	0 or More Characters	0 atau Lebih Karakter
+	1. Formatting restrictions	1. Pembatasan format
+	2. Editing restrictions	2. Pembatasan pengeditan
+	3. Start enforcement	3. Mulai penerapan
+	<< Less	<< Lebih Sedikit
+	Above Chart	Di Atas Bagan
+	Accent Gradient	Gradien Aksen
+	Accent with Reflection	Aksen dengan Pantulan
+	Accent {n}	Aksen {n}
+	Add Chart Element	Tambah Elemen Bagan
+	Add Font…	Tambah Font…
+	Add Row	Tambah Baris
+	Add Series	Tambah Seri
+	Add Shape	Tambah Bentuk
+	Add\nShape	Tambah\nBentuk
+	Added Fonts	Font yang Ditambahkan
+	All Levels	Semua Tingkat
+	All files	Semua berkas
+	All pages	Semua halaman
+	All pages in the range	Semua halaman dalam rentang
+	Allow line breaks	Izinkan pemisahan baris
+	Animate the caret (it glides and fades)	Animasi kursor (meluncur dan memudar)
+	Animation effects:	Efek animasi:
+	Another file	Berkas lain
+	Any Character	Karakter Apa Pun
+	Any Digit	Digit Apa Pun
+	Any Letter	Huruf Apa Pun
+	Apply as you type	Terapkan saat mengetik
+	Arch Down	Lengkung ke Bawah
+	Arch Up	Lengkung ke Atas
+	Area	Area
+	As you type	Saat mengetik
+	Asian text font:	Font teks Asia:
+	Attach Template	Lampirkan Templat
+	Attach…	Lampirkan…
+	AutoCorrect	Koreksi Otomatis
+	AutoFormat As You Type	Format Otomatis Saat Mengetik
+	AutoSave writes your changes to the file a moment after you stop typing.	Simpan Otomatis menulis perubahan Anda ke berkas sesaat setelah Anda berhenti mengetik.
+	Automatic bulleted lists	Daftar poin otomatis
+	Automatic numbered lists	Daftar bernomor otomatis
+	Automatically Update Document Styles	Perbarui Gaya Dokumen Secara Otomatis
+	Automatically update document styles	Perbarui gaya dokumen secara otomatis
+	Basic Cycle	Siklus Dasar
+	Basic List	Daftar Dasar
+	Basic Matrix	Matriks Dasar
+	Basic Process	Proses Dasar
+	Basic Pyramid	Piramida Dasar
+	Basic Radial	Radial Dasar
+	Basic Venn	Venn Dasar
+	Beginning of Word	Awal Kata
+	Blue:	Biru:
+	Border lines	Garis batas
+	Browse in WordCraft…	Jelajahi di WordCraft…
+	Building Block Gallery Content Control	Kontrol Konten Galeri Blok Bangunan
+	Can't be deleted	Tidak dapat dihapus
+	Capitalize first letter of sentences	Besarkan huruf pertama kalimat
+	Capitalize first letter of table cells	Besarkan huruf pertama sel tabel
+	Capitalize names of days	Besarkan nama hari
+	Caret Character	Karakter Sisip
+	Case changes	Perubahan huruf besar/kecil
+	Categories	Kategori
+	Category {n}	Kategori {n}
+	Change Chart Type	Ubah Jenis Bagan
+	Change Colors	Ubah Warna
+	Change Layout	Ubah Tata Letak
+	Change\nChart Type	Ubah Jenis\nBagan
+	Change\nColors	Ubah\nWarna
+	Character in Range	Karakter dalam Rentang
+	Character level	Tingkat karakter
+	Chart Design	Desain Bagan
+	Chart Layouts	Tata Letak Bagan
+	Chart Title	Judul Bagan
+	Check Box Content Control	Kontrol Konten Kotak Centang
+	Check spelling as you type	Periksa ejaan saat mengetik
+	Checked styles are allowed:	Gaya yang dicentang diizinkan:
+	Checked symbol	Simbol centang
+	Chevron Down	Chevron Bawah
+	Chevron Up	Chevron Atas
+	Choose List Item	Pilih Item Daftar
+	Click to switch back to inserting	Klik untuk kembali ke penyisipan
+	Clipboard Contents	Isi Papan Klip
+	Close Outline View	Tutup Tampilan Kerangka
+	Close Outline\nView	Tutup Tampilan\nKerangka
+	Clustered Bar	Batang Berkelompok
+	Clustered Column	Kolom Berkelompok
+	Collate copies	Susun salinan
+	Color model:	Model warna:
+	Colorful	Berwarna
+	Combine Documents	Gabungkan Dokumen
+	Combo Box Content Control	Kontrol Konten Kotak Kombinasi
+	Comments beside each page and tracked changes in PDFs, prints and images; a comment list at the end of web pages, Markdown and text.	Komentar di samping setiap halaman dan perubahan terlacak pada PDF, cetakan, dan gambar; daftar komentar di akhir halaman web, Markdown, dan teks.
+	Compare Documents	Bandingkan Dokumen
+	Compared: {changes} changes	Dibandingkan: {changes} perubahan
+	Comparing with another file needs the desktop app.	Membandingkan dengan berkas lain memerlukan aplikasi desktop.
+	Comparison settings	Pengaturan perbandingan
+	Connect Shapes	Sambungkan Bentuk
+	Content Control Properties	Properti Kontrol Konten
+	Content Control at Selection	Kontrol Konten di Seleksi
+	Contents can't be edited	Isi tidak dapat diedit
+	Controls	Kontrol
+	Copy Styles	Salin Gaya
+	Create Graphic	Buat Grafik
+	Current page	Halaman saat ini
+	Curved Arrow Connector	Konektor Panah Melengkung
+	Curved Connector	Konektor Melengkung
+	Custom dictionary	Kamus kustom
+	Custom range	Rentang kustom
+	Cycle	Siklus
+	Dark with Shadow	Gelap dengan Bayangan
+	Data Labels	Label Data
+	Date Picker Content Control	Kontrol Konten Pemilih Tanggal
+	Date format	Format tanggal
+	Deflate	Cekung
+	Deleted	Dihapus
+	Demote to Body Text	Turunkan ke Teks Utama
+	Design Mode	Mode Desain
+	Detach Template	Lepaskan Templat
+	Developer	Pengembang
+	Display text	Teks tampilan
+	Document template:	Templat dokumen:
+	Documents	Dokumen
+	Don't capitalize after:	Jangan besarkan huruf setelah:
+	Doughnut	Donat
+	Drop-Down List Content Control	Kontrol Konten Daftar Drop-down
+	Edit Data	Edit Data
+	Edit Items	Edit Item
+	Edit\nData	Edit\nData
+	Editing in this document is restricted.	Pengeditan dalam dokumen ini dibatasi.
+	Elbow Arrow Connector	Konektor Panah Siku
+	Elbow Connector	Konektor Siku
+	End of Word	Akhir Kata
+	Even pages only	Hanya halaman genap
+	Every change is recorded as a tracked change.	Setiap perubahan dicatat sebagai perubahan terlacak.
+	Everyone	Semua orang
+	Exceptions (optional)	Pengecualian (opsional)
+	Exceptions…	Pengecualian…
+	Expand or Collapse Heading	Bentangkan atau Lipat Judul
+	Expression	Ekspresi
+	Extend Selection by Units	Perluas Seleksi per Unit
+	Fields	Medan
+	File name:	Nama berkas:
+	Filling in forms	Mengisi formulir
+	Find Next Editable Region	Cari Wilayah yang Dapat Diedit Berikutnya
+	Find What Expression	Ekspresi yang Dicari
+	Find What Text	Teks yang Dicari
+	Fix Position on Page	Tetapkan Posisi di Halaman
+	Footnotes and endnotes	Catatan kaki dan catatan akhir
+	Formatting exceptions	Pengecualian format
+	Formatting marks	Tanda format
+	Formatting, case changes, white space and tables are compared; the other settings are kept for later.	Format, perubahan huruf besar/kecil, spasi, dan tabel dibandingkan; pengaturan lainnya disimpan untuk nanti.
+	Fractions (1/2) as fraction characters (½)	Pecahan (1/2) sebagai karakter pecahan (½)
+	Green:	Hijau:
+	Headers and footers	Header dan footer
+	Hex:	Heksadesimal:
+	Hidden text	Teks tersembunyi
+	Hide White Space	Sembunyikan Ruang Kosong
+	Hierarchy	Hierarki
+	Home folder	Folder beranda
+	Hue:	Hue:
+	Hyphens (--) as dashes (—)	Tanda hubung (--) sebagai tanda pisah (—)
+	Ignore punctuation characters	Abaikan karakter tanda baca
+	Ignore web and file addresses	Abaikan alamat web dan berkas
+	Ignore white-space characters	Abaikan karakter spasi
+	Ignore words in capitals	Abaikan kata berhuruf besar
+	Ignore words with numbers	Abaikan kata yang mengandung angka
+	In equations, typing a name after a backslash replaces it with its symbol.	Dalam persamaan, mengetik nama setelah garis miring terbalik akan menggantinya dengan simbolnya.
+	Initials:	Inisial:
+	Insert Chart	Sisipkan Bagan
+	Insert SmartArt	Sisipkan SmartArt
+	Inside:	Dalam:
+	Interface language	Bahasa antarmuka
+	Internet addresses as links	Alamat internet sebagai tautan
+	Label changes with:	Beri label perubahan dengan:
+	Latin text font:	Font teks Latin:
+	Layouts	Tata Letak
+	Legend	Legenda
+	Light with Outline	Terang dengan Kontur
+	Limit formatting to a selection of styles	Batasi format ke pilihan gaya
+	List entries	Entri daftar
+	Lum:	Lum:
+	Manual Line Break	Pemisah Baris Manual
+	Manual Page Break	Pemisah Halaman Manual
+	Mark grammar errors as you type	Tandai kesalahan tata bahasa saat mengetik
+	Match prefix	Cocokkan awalan
+	Match suffix	Cocokkan akhiran
+	Math AutoCorrect	Koreksi Otomatis Matematika
+	Measurement units:	Satuan ukuran:
+	Mirror indents	Indentasi cermin
+	More >>	Lainnya >>
+	More Colors…	Warna Lainnya…
+	Move with Text	Pindah dengan Teks
+	Moves	Pemindahan
+	Moved from:	Dipindahkan dari:
+	Moved to:	Dipindahkan ke:
+	New comments and tracked changes are recorded under this name and these initials.	Komentar baru dan perubahan terlacak dicatat dengan nama dan inisial ini.
+	New document	Dokumen baru
+	New word	Kata baru
+	No Fill	Tanpa Isian
+	No Outline	Tanpa Kontur
+	No Reflection	Tanpa Pantulan
+	No Transform	Tanpa Transformasi
+	No changes (read only)	Tanpa perubahan (hanya baca)
+	No words yet. Add to Dictionary on a misspelled word puts it here.	Belum ada kata. "Tambahkan ke Kamus" pada kata yang salah eja akan menaruhnya di sini.
+	Not	Bukan
+	Num Occurrences	Jumlah Kemunculan
+	Odd pages only	Hanya halaman ganjil
+	On: the caret glides to its new place when you type or use the arrow keys, and its blink fades. Off: it jumps and blinks on and off.	Aktif: kursor meluncur ke tempat baru saat Anda mengetik atau memakai tombol panah, dan kedipannya memudar. Nonaktif: kursor melompat dan berkedip nyala-mati.
+	One line per item. Enter adds an item.	Satu baris per item. Enter menambah item.
+	Only allow this kind of editing:	Hanya izinkan jenis pengeditan ini:
+	Only comments can be added, except in regions marked editable.	Hanya komentar yang dapat ditambahkan, kecuali di wilayah yang ditandai dapat diedit.
+	Only form fields can be filled in.	Hanya medan formulir yang dapat diisi.
+	Only the allowed styles can be applied.	Hanya gaya yang diizinkan yang dapat diterapkan.
+	Open a file with WordCraft's own browser when the system file dialog doesn't appear.	Buka berkas dengan penjelajah milik WordCraft saat dialog berkas sistem tidak muncul.
+	Ordinals (1st) as superscript	Bilangan bertingkat (1st) sebagai superskrip
+	Organizer	Pengelola
+	Organizer…	Pengelola…
+	Original document	Dokumen asli
+	Outline State	Status Kerangka
+	Outline Tools	Alat Kerangka
+	Outlining	Kerangka
+	Outside:	Luar:
+	Overtype	Timpa
+	Overtype (typing replaces the characters after the caret)	Timpa (mengetik menggantikan karakter setelah kursor)
+	Show alignment guides when moving pictures and shapes	Tampilkan garis panduan perataan saat memindahkan gambar dan bentuk
+	Moved objects snap to the page's edges and centre, the margins and other objects. Hold Alt to move freely.	Objek yang dipindahkan menempel ke tepi dan tengah halaman, margin, serta objek lain. Tahan Alt untuk bergerak bebas.
+	Page display	Tampilan halaman
+	Pages like 1-3, 5	Halaman seperti 1-3, 5
+	Paragraph Character	Karakter Paragraf
+	Paragraph marks	Tanda paragraf
+	Personalize	Personalisasi
+	Picture Content Control	Kontrol Konten Gambar
+	Pie	Pai
+	Placeholder text	Teks pengganti
+	Plain Text Content Control	Kontrol Konten Teks Biasa
+	Previous 1 or More	Sebelumnya 1 atau Lebih
+	Print Markup	Cetak Tanda
+	Print the page color	Cetak warna halaman
+	Print to PDF	Cetak ke PDF
+	Printing	Pencetakan
+	Process	Proses
+	Promote to Heading 1	Naikkan ke Judul 1
+	Proofing language	Bahasa pemeriksaan
+	Put the caret in a content control first.	Letakkan kursor di kontrol konten terlebih dahulu.
+	Pyramid	Piramida
+	Recent documents to show:	Dokumen terbaru yang ditampilkan:
+	Recipient lists	Daftar penerima
+	Red:	Merah:
+	Reflection	Pantulan
+	Regular expressions	Ekspresi reguler
+	Relationship	Hubungan
+	Remove Added Font	Hapus Font yang Ditambahkan
+	Load System Installed Fonts…	Muat Font Sistem Terpasang…
+	All system fonts are already available.	Semua font sistem sudah tersedia.
+	Local font access is not supported by your browser.	Akses font lokal tidak didukung oleh peramban Anda.
+	Local font access was denied.	Akses font lokal ditolak.
+	Loaded {count} system fonts.	{count} font sistem dimuat.
+	Remove Content Control	Hapus Kontrol Konten
+	Remove row	Hapus baris
+	Remove series	Hapus seri
+	Remove the control once edited	Hapus kontrol setelah diedit
+	Repeating Section Content Control	Kontrol Konten Bagian Berulang
+	Replace as you type	Ganti saat mengetik
+	Replace text as you type	Ganti teks saat mengetik
+	Reset Graphic	Atur Ulang Grafik
+	Reset\nGraphic	Atur Ulang\nGrafik
+	Resize Table by Dragging	Ubah Ukuran Tabel dengan Menyeret
+	Select Column	Pilih Kolom
+	Select Table Cells by Clicking	Pilih Sel Tabel dengan Mengklik
+	Insert Row or Column by Clicking	Sisipkan Baris atau Kolom dengan Mengklik
+	Move Table by Dragging	Pindahkan Tabel dengan Menyeret
+	AutoFit Column by Double-Clicking	Sesuaikan Otomatis Kolom dengan Klik Ganda
+	Revised document	Dokumen revisi
+	Rich Text Content Control	Kontrol Konten Teks Kaya
+	Sat:	Sat:
+	Save documents	Menyimpan dokumen
+	Save these pages as PDF…	Simpan halaman ini sebagai PDF…
+	Scatter	Sebar
+	Search Options	Opsi Pencarian
+	Section Break	Pemisah Bagian
+	Section Character	Karakter Bagian
+	Select Heading and Content	Pilih Judul dan Isi
+	Select text, then tick who can still edit it.	Pilih teks, lalu centang siapa yang masih dapat mengeditnya.
+	Selected pages	Halaman terpilih
+	Series name	Nama seri
+	Series {n}	Seri {n}
+	Set Date	Tetapkan Tanggal
+	Show All Levels	Tampilkan Semua Tingkat
+	Show First Line Only	Tampilkan Hanya Baris Pertama
+	Show Level	Tampilkan Tingkat
+	Show Level 1	Tampilkan Tingkat 1
+	Show Level 2	Tampilkan Tingkat 2
+	Show Level 3	Tampilkan Tingkat 3
+	Show Level 4	Tampilkan Tingkat 4
+	Show Level 5	Tampilkan Tingkat 5
+	Show Level 6	Tampilkan Tingkat 6
+	Show Level 7	Tampilkan Tingkat 7
+	Show Level 8	Tampilkan Tingkat 8
+	Show Level 9	Tampilkan Tingkat 9
+	Show Text Formatting	Tampilkan Format Teks
+	Show changes at:	Tampilkan perubahan di:
+	Show changes in:	Tampilkan perubahan dalam:
+	Show the mini toolbar when text is selected	Tampilkan bilah alat mini saat teks dipilih
+	Showing the first {count} items.	Menampilkan {count} item pertama.
+	Shows a tree: each item below the item it belongs to.	Menampilkan pohon: setiap item berada di bawah item induknya.
+	Shows items around a central idea: the first item is the centre.	Menampilkan item di sekitar ide pusat: item pertama adalah pusatnya.
+	Shows items of equal weight as blocks in rows.	Menampilkan item setara sebagai blok dalam baris.
+	Shows overlapping ideas as overlapping circles.	Menampilkan ide yang tumpang tindih sebagai lingkaran yang tumpang tindih.
+	Shows parts of a whole as quadrants.	Menampilkan bagian dari keseluruhan sebagai kuadran.
+	Shows parts that build on each other, largest at the bottom.	Menampilkan bagian yang saling menumpuk, terbesar di bawah.
+	Shows steps in order, left to right, with arrows between them.	Menampilkan langkah berurutan dari kiri ke kanan, dengan panah di antaranya.
+	Shows steps that repeat, around a circle.	Menampilkan langkah yang berulang di sepanjang lingkaran.
+	Slant Down	Miring ke Bawah
+	Slant Up	Miring ke Atas
+	Smart quotes instead of straight quotes	Kutip pintar sebagai pengganti kutip lurus
+	SmartArt Design	Desain SmartArt
+	SmartArt Styles	Gaya SmartArt
+	Smooth scrolling and zooming, and menus and buttons that fade in. Off shows every change at once.	Gulir dan zoom halus, serta menu dan tombol yang muncul memudar. Nonaktif menampilkan setiap perubahan sekaligus.
+	Soft Glow	Cahaya Lembut
+	Solid Accent	Aksen Solid
+	Spelling and grammar are checked in English (United States).	Ejaan dan tata bahasa diperiksa dalam Bahasa Inggris (Amerika Serikat).
+	Stacked Bar	Batang Bertumpuk
+	Stacked Column	Kolom Bertumpuk
+	Start Enforcing Protection	Mulai Terapkan Perlindungan
+	Stop Protection	Hentikan Perlindungan
+	Straight Arrow Connector	Konektor Panah Lurus
+	Straight Connector	Konektor Lurus
+	Tab Character	Karakter Tab
+	Tab characters	Karakter tab
+	Templates and Add-ins	Templat dan Pengaya
+	Text Fill	Isian Teks
+	Text Outline	Kontur Teks
+	Text Pane	Panel Teks
+	Text boxes	Kotak teks
+	The document is read only, except for regions marked editable.	Dokumen ini hanya baca, kecuali wilayah yang ditandai dapat diedit.
+	The password is optional; without it anyone can stop the protection.	Kata sandi bersifat opsional; tanpanya siapa pun dapat menghentikan perlindungan.
+	The printer, two-sided printing and pages per sheet are chosen in that dialog.	Pencetak, pencetakan dua sisi, dan halaman per lembar dipilih dalam dialog tersebut.
+	The system file dialog isn't available, so WordCraft shows its own. To get the system dialog, install a file chooser portal (such as xdg-desktop-portal-gtk) or zenity.	Dialog berkas sistem tidak tersedia, jadi WordCraft menampilkan miliknya sendiri. Untuk mendapatkan dialog sistem, pasang portal pemilih berkas (seperti xdg-desktop-portal-gtk) atau zenity.
+	These marks show even when Show/Hide ¶ is off.	Tanda ini tetap tampil meskipun Tampilkan/Sembunyikan ¶ nonaktif.
+	This document	Dokumen ini
+	This folder can't be read: {error}	Folder ini tidak dapat dibaca: {error}
+	This password type isn't supported.	Jenis kata sandi ini tidak didukung.
+	Today	Hari ini
+	Toggle Check Box	Alihkan Kotak Centang
+	Tracked changes	Perubahan terlacak
+	Triangle Down	Segitiga ke Bawah
+	Triangle Up	Segitiga ke Atas
+	Type the categories down the side and a column of values per series.	Ketik kategori di sisi kiri dan satu kolom nilai per seri.
+	Type the password to stop the protection.	Ketik kata sandi untuk menghentikan perlindungan.
+	Typing replaces selected text	Mengetik menggantikan teks terpilih
+	Unchecked symbol	Simbol tidak dicentang
+	Up one level	Naik satu tingkat
+	Update Styles from Template	Perbarui Gaya dari Templat
+	Update fields before printing	Perbarui medan sebelum mencetak
+	Use the Insert key to switch overtype on and off	Gunakan tombol Insert untuk mengaktifkan/menonaktifkan mode timpa
+	Use wildcards	Gunakan karakter pengganti
+	Visual effects	Efek visual
+	Warm Gradient with Outline	Gradien Hangat dengan Kontur
+	White Space	Ruang Kosong
+	White space	Ruang kosong
+	With:	Dengan:
+	Word XML Document (*.xml)	Dokumen XML Word (*.xml)
+	Word 2003 XML Document (*.xml)	Dokumen XML Word 2003 (*.xml)
+	Word document	Dokumen Word
+	Word level	Tingkat kata
+	WordArt Styles	Gaya WordArt
+	Your system doesn't report an animation setting, so animation effects stay on.	Sistem Anda tidak melaporkan pengaturan animasi, jadi efek animasi tetap aktif.
+	Your system has animation effects turned off.	Efek animasi dinonaktifkan di sistem Anda.
+	Your system has animation effects turned on.	Efek animasi diaktifkan di sistem Anda.
+	{count} of {total} pages will print	{count} dari {total} halaman akan dicetak
+	{name} already exists. Choose Save again to replace it.	{name} sudah ada. Pilih Simpan lagi untuk menggantinya.
+	{name} wasn't found.	{name} tidak ditemukan.
+	“{text}” ({row}, {series}) isn't a number.	“{text}” ({row}, {series}) bukan angka.
+	Undo Actions	Batalkan Tindakan
+	Undo History	Riwayat Pembatalan
+	Undo 1 Action	Batalkan 1 Tindakan
+	Undo {n} Actions	Batalkan {n} Tindakan
+	Start-up	Saat Mulai
+	Show the Start screen when WordCraft starts	Tampilkan layar Mulai saat WordCraft dijalankan
+	On: WordCraft opens on File › Home, with a blank document, the templates and your recent documents. Off: it opens a blank document.	Aktif: WordCraft terbuka di Berkas › Beranda, dengan dokumen kosong, templat, dan dokumen terbaru Anda. Nonaktif: WordCraft membuka dokumen kosong.
+	Couldn't make WordCraft the default: {error}	Tidak dapat menjadikan WordCraft sebagai bawaan: {error}
+	In Default apps, choose WordCraft for the document types you want it to open.	Di Aplikasi bawaan, pilih WordCraft untuk jenis dokumen yang ingin dibukanya.
+	Make WordCraft the default for Word documents…	Jadikan WordCraft bawaan untuk dokumen Word…
+	Opens .docx, .doc, .rtf and .odt files and Word templates with WordCraft from now on.	Mulai sekarang membuka berkas .docx, .doc, .rtf, .odt, dan templat Word dengan WordCraft.
+	Opens Settings › Default apps, where you choose WordCraft for .docx and the other document types.	Membuka Pengaturan › Aplikasi bawaan, tempat Anda memilih WordCraft untuk .docx dan jenis dokumen lain.
+	To open Word documents with WordCraft by default: select one in Finder, choose File › Get Info, pick WordCraft under Open with, then click Change All.	Untuk membuka dokumen Word dengan WordCraft secara bawaan: pilih salah satu di Finder, pilih Berkas › Dapatkan Info, pilih WordCraft di bawah "Buka dengan", lalu klik "Ubah Semua".
+	WordCraft is now the default app for Word documents.	WordCraft kini menjadi aplikasi bawaan untuk dokumen Word.
+	Numerals:	Angka:
+	Numerals	Angka
+	Context	Kontekstual
+	Odd Banded Rows	Baris Selang-seling Ganjil
+	Even Banded Rows	Baris Selang-seling Genap
+	Odd Banded Columns	Kolom Selang-seling Ganjil
+	Even Banded Columns	Kolom Selang-seling Genap
+	Top Left Cell	Sel Kiri Atas
+	Top Right Cell	Sel Kanan Atas
+	Bottom Left Cell	Sel Kiri Bawah
+	Bottom Right Cell	Sel Kanan Bawah
+	Inside Horizontal Border	Batas Horisontal Dalam
+	Inside Vertical Border	Batas Vertikal Dalam
+	Filter Recipients	Saring Penerima
+	Sort Recipients	Urutkan Penerima
+	Filter and Sort	Saring dan Urutkan
+	And	Dan
+	Or	Atau
+	Compare to	Bandingkan dengan
+	Add Condition	Tambah Kondisi
+	Remove condition	Hapus kondisi
+	Sort by	Urutkan menurut
+	Then by	Lalu menurut
+	Ascending	Menaik
+	Equal to	Sama dengan
+	Not equal to	Tidak sama dengan
+	Less than	Kurang dari
+	Greater than	Lebih dari
+	Less than or equal	Kurang dari atau sama dengan
+	Greater than or equal	Lebih dari atau sama dengan
+	Is blank	Kosong
+	Is not blank	Tidak kosong
+	Does not contain	Tidak mengandung
+	{count} of {total} recipients will be merged.	{count} dari {total} penerima akan digabungkan.
+	Find in list:	Cari dalam daftar:
+	Any field	Medan apa pun
+	Matches: {count}	Cocok: {count}
+	Show only records that will be merged	Tampilkan hanya rekaman yang akan digabungkan
+	Book Title	Judul Buku
+	Emphasis	Penekanan
+	Endnote Reference	Referensi Catatan Akhir
+	Endnote Text	Teks Catatan Akhir
+	Footnote Reference	Referensi Catatan Kaki
+	Footnote Text	Teks Catatan Kaki
+	Hyperlink	Tautan
+	Intense Emphasis	Penekanan Kuat
+	Intense Quote	Kutipan Kuat
+	Intense Reference	Referensi Kuat
+	No Spacing	Tanpa Spasi
+	Quote	Kutipan
+	Strong	Tegas
+	Subtle Emphasis	Penekanan Halus
+	Subtle Reference	Referensi Halus
+	TOC Heading	Judul Daftar Isi
+	TOC {n}	Daftar Isi {n}
+	List Paragraph	Paragraf Daftar
+	Show KeyTips (Alt or F10)	Tampilkan Petunjuk Tombol (Alt atau F10)
+	Reading	Membaca
+	Reading Column Width	Lebar Kolom Baca
+	Reading Line Spacing	Spasi Baris Baca
+	Reading Text Size	Ukuran Teks Baca
+	Correct TWo INitial CApitals	Perbaiki DUA HURUF BESAR di Awal
+	Correct accidental usage of cAPS LOCK key	Perbaiki penggunaan tombol cAPS LOCK yang tidak disengaja
+	Region:	Wilayah:
+	Automatic ({region})	Otomatis ({region})
+	Text of the nearest paragraph with a given style (running headers)	Teks paragraf terdekat dengan gaya tertentu (header berjalan)
+	Style name:	Nama gaya:
+	Take the last match on the page	Ambil kecocokan terakhir di halaman
+	Show its list number	Tampilkan nomor daftarnya
+	Show its number relative to this field	Tampilkan nomornya relatif terhadap medan ini
+	Show its number with all higher levels	Tampilkan nomornya dengan semua tingkat yang lebih tinggi
+	Number only, without the label's words	Hanya nomor, tanpa kata label
+	Add whether it is above or below	Tambahkan apakah di atas atau di bawah
+	AaBbCcDd	AaBbCcDd
+	Annotation Reference	Referensi Anotasi
+	Annotation Subject	Subjek Anotasi
+	Annotation Text	Teks Anotasi
+	Body text in a short paragraph to show spacing.	Teks isi dalam paragraf pendek untuk menunjukkan spasi.
+	Default Paragraph Font	Font Paragraf Bawaan
+	Envelope Address	Alamat Amplop
+	Envelope Return	Alamat Pengirim Amplop
+	Index Heading	Judul Indeks
+	Index {n}	Indeks {n}
+	Line Number	Nomor Baris
+	Normal Indent	Indentasi Normal
+	Normal Table	Tabel Normal
+	Table Grid	Kisi Tabel
+	Table of Figures	Daftar Gambar
+preview	Title	Judul
+	TOA Heading	Judul Daftar Rujukan Hukum
+	Good evening	Selamat malam
+	Good morning	Selamat pagi
+	Good afternoon	Selamat siang
+	tOGGLE cASE	bALIK hURUF bESAR/kECIL
+	Change to Level 1	Ubah ke Tingkat 1
+	Change to Level 2	Ubah ke Tingkat 2
+	Change to Level 3	Ubah ke Tingkat 3
+	Change to Level 4	Ubah ke Tingkat 4
+	Change to Level 5	Ubah ke Tingkat 5
+	ASAP	SEGERA
+	CONFIDENTIAL	RAHASIA
+	DO NOT COPY	JANGAN DISALIN
+	DRAFT	DRAF
+	SAMPLE	CONTOH
+	URGENT	MENDESAK
+	Plain Table 1	Tabel Sederhana 1
+	Grid Table 1 Light	Tabel Kisi 1 Terang
+	Grid Table 4 – Blue	Tabel Kisi 4 – Biru
+	Grid Table 4 – Green	Tabel Kisi 4 – Hijau
+	Grid Table 4 – Orange	Tabel Kisi 4 – Oranye
+	Grid Table 4 – Purple	Tabel Kisi 4 – Ungu
+	List Table 3 – Blue	Tabel Daftar 3 – Biru
+	List Table 3 – Green	Tabel Daftar 3 – Hijau
+	List Table 3 – Orange	Tabel Daftar 3 – Oranye
+	List Table 3 – Purple	Tabel Daftar 3 – Ungu
+	Convert between built-up and linear form	Konversikan antara bentuk tersusun dan linear
+	Justification of a display equation	Perataan persamaan tampilan
+	Number the equation; the number sits at the right margin (or type # then the number)	Beri nomor persamaan; nomor berada di margin kanan (atau ketik # lalu nomornya)
+	Show the equation in the line of text	Tampilkan persamaan dalam baris teks
+	Show the equation on a line of its own	Tampilkan persamaan pada barisnya sendiri
+	Type equations in LaTeX	Ketik persamaan dalam LaTeX
+	Type equations in the linear format (UnicodeMath)	Ketik persamaan dalam format linear (UnicodeMath)
+	Type normal (non-math) text in the equation	Ketik teks normal (bukan matematika) dalam persamaan
+	Sides of a right triangle	Sisi-sisi segitiga siku-siku
+	Circle area from its radius	Luas lingkaran dari jari-jarinya
+	Roots of ax²+bx+c	Akar-akar ax²+bx+c
+	Binomial expansion of (x+a)ⁿ	Ekspansi binomial (x+a)ⁿ
+	Power series of (1+x)ⁿ	Deret pangkat (1+x)ⁿ
+	Euler's identity	Identitas Euler
+	Derivative as a limit	Turunan sebagai limit
+	Exponential series	Deret eksponensial
+	Integral of e^(−x²)	Integral e^(−x²)
+	Sine and cosine series of f(x)	Deret sinus dan kosinus f(x)
+	Sum or difference of sines	Jumlah atau selisih sinus
+	Sum of cosines	Jumlah kosinus
+	Normal probability density	Kepadatan probabilitas normal
+	Bayes' rule	Aturan Bayes
+	Accents	Aksen
+	Basic Math	Matematika Dasar
+	Boxed Formulas	Rumus Berkotak
+	Cases and Stacks	Kasus dan Tumpukan
+	Common Accent Objects	Objek Aksen Umum
+	Common Brackets	Kurung Umum
+	Common Fractions	Pecahan Umum
+	Common Functions	Fungsi Umum
+	Common Large Operators	Operator Besar Umum
+	Common Operator Structures	Struktur Operator Umum
+	Common Operators	Operator Umum
+	Common Radicals	Akar Umum
+	Common Subscripts and Superscripts	Subskrip dan Superskrip Umum
+	Contour Integrals	Integral Kontur
+	Differentials	Diferensial
+	Empty Matrices	Matriks Kosong
+	Geometry	Geometri
+	Greek Letters	Huruf Yunani
+	Hyperbolic Functions	Fungsi Hiperbolik
+	Identity Matrices	Matriks Identitas
+	Integrals	Integral
+	Inverse Functions	Fungsi Invers
+	Inverse Hyperbolic Functions	Fungsi Hiperbolik Invers
+	Letter-Like Symbols	Simbol Mirip Huruf
+	Matrices with Brackets	Matriks dengan Kurung
+	Negated Relations	Relasi Ternafikan
+	Operator Structures	Struktur Operator
+	Operators	Operator
+	Other Large Operators	Operator Besar Lainnya
+	Overbars and Underbars	Garis Atas dan Garis Bawah
+	Products and Coproducts	Produk dan Koproduk
+	Radicals	Akar
+	Single Brackets	Kurung Tunggal
+	Sparse Matrices	Matriks Jarang
+	Subscripts and Superscripts	Subskrip dan Superskrip
+	Summations	Penjumlahan
+	Trigonometric Functions	Fungsi Trigonometri
+	Unions and Intersections	Gabungan dan Irisan
+	1×2 Empty Matrix	Matriks Kosong 1×2
+	1×3 Empty Matrix	Matriks Kosong 1×3
+	2×1 Empty Matrix	Matriks Kosong 2×1
+	2×2 Empty Matrix	Matriks Kosong 2×2
+	2×3 Empty Matrix	Matriks Kosong 2×3
+	3×1 Empty Matrix	Matriks Kosong 3×1
+	3×2 Empty Matrix	Matriks Kosong 3×2
+	3×3 Empty Matrix	Matriks Kosong 3×3
+	2×2 Determinant	Determinan 2×2
+	2×2 Identity Matrix	Matriks Identitas 2×2
+	2×2 Identity Matrix (sparse)	Matriks Identitas 2×2 (jarang)
+	3×3 Identity Matrix	Matriks Identitas 3×3
+	3×3 Identity Matrix (sparse)	Matriks Identitas 3×3 (jarang)
+	2×2 Matrix in Brackets	Matriks 2×2 dalam Kurung Siku
+	2×2 Matrix in Double Bars	Matriks 2×2 dalam Garis Ganda
+	2×2 Matrix in Parentheses	Matriks 2×2 dalam Kurung
+	n×n Identity Matrix	Matriks Identitas n×n
+	n×n Matrix	Matriks n×n
+	A xor B	A xor B
+	Absolute value cases	Kasus nilai absolut
+	Acute	Akut
+	Angle Brackets	Kurung Sudut
+	Angle Brackets with Separator	Kurung Sudut dengan Pemisah
+	Angle Brackets with Two Separators	Kurung Sudut dengan Dua Pemisah
+	Baseline Dots	Titik Garis Dasar
+	Binomial Coefficient	Koefisien Binomial
+	Binomial Coefficient (angle)	Koefisien Binomial (sudut)
+	Binomial Coefficient with Angle Brackets	Koefisien Binomial dengan Kurung Sudut
+	Boxed Formula	Rumus Berkotak
+	Boxed Formula (example)	Rumus Berkotak (contoh)
+	Braces	Kurung Kurawal
+	Braces with Separator	Kurung Kurawal dengan Pemisah
+	Brackets	Kurung Siku
+	Brackets with Separators	Kurung Siku dengan Pemisah
+	Breve	Breve
+	Cases (Three Conditions)	Kasus (Tiga Kondisi)
+	Cases (Two Conditions)	Kasus (Dua Kondisi)
+	Ceiling	Batas Atas
+	Change in y over change in x	Perubahan y terhadap perubahan x
+	Check	Karon
+	Circled Dot	Titik dalam Lingkaran
+	Circled Plus	Plus dalam Lingkaran
+	Circled Times	Kali dalam Lingkaran
+	Colon Equal	Titik Dua Sama Dengan
+	Contour Integral	Integral Kontur
+	Contour Integral with Limits	Integral Kontur dengan Batas
+	Contour Integral with Stacked Limits	Integral Kontur dengan Batas Bertumpuk
+	Coproduct	Koproduk
+	Coproduct with Limits	Koproduk dengan Batas
+	Coproduct with Lower Limit	Koproduk dengan Batas Bawah
+	Coproduct with Subscript-Superscript Limits	Koproduk dengan Batas Subskrip-Superskrip
+	Cosecant Function	Fungsi Kosekan
+	Cosine 2x	Kosinus 2x
+	Cosine Function	Fungsi Kosinus
+	Cotangent Function	Fungsi Kotangen
+	Cube Root	Akar Kubik
+	Delta Equal To	Sama Dengan Delta
+	Delta over arrow	Delta di atas panah
+	Diagonal Dots	Titik Diagonal
+	Differential	Diferensial
+	Differential theta	Diferensial theta
+	Differential x	Diferensial x
+	Differential y	Diferensial y
+	Double Bar	Garis Ganda di Atas
+	Double Dot	Dua Titik di Atas
+	Double Integral	Integral Ganda
+	Double Integral with Limits	Integral Ganda dengan Batas
+	Double Integral with Stacked Limits	Integral Ganda dengan Batas Bertumpuk
+	Double Left Arrow with Text Above	Panah Kiri Ganda dengan Teks di Atas
+	Double Left Arrow with Text Below	Panah Kiri Ganda dengan Teks di Bawah
+	Double Left Right Arrow with Text Above	Panah Kiri Kanan Ganda dengan Teks di Atas
+	Double Left Right Arrow with Text Below	Panah Kiri Kanan Ganda dengan Teks di Bawah
+	Double Right Arrow with Text Above	Panah Kanan Ganda dengan Teks di Atas
+	Double Right Arrow with Text Below	Panah Kanan Ganda dengan Teks di Bawah
+	Double Square Brackets	Kurung Siku Ganda
+	Double Vertical Bars	Garis Vertikal Ganda
+	Double summation	Penjumlahan Ganda
+	Equal Equal	Sama Dengan Ganda
+	Equal by Definition	Sama Dengan Definisi
+	Exponential	Eksponensial
+	Floor	Batas Bawah
+	Grave	Grave
+	Grouping Character Above	Karakter Pengelompok di Atas
+	Grouping Character Below	Karakter Pengelompok di Bawah
+	Hat	Topi
+	Hyperbolic Cosecant Function	Fungsi Kosekan Hiperbolik
+	Hyperbolic Cosine Function	Fungsi Kosinus Hiperbolik
+	Hyperbolic Cotangent Function	Fungsi Kotangen Hiperbolik
+	Hyperbolic Secant Function	Fungsi Sekan Hiperbolik
+	Hyperbolic Sine Function	Fungsi Sinus Hiperbolik
+	Hyperbolic Tangent Function	Fungsi Tangen Hiperbolik
+	Hypotenuse	Sisi Miring
+	Integral with Limits	Integral dengan Batas
+	Integral with Stacked Limits	Integral dengan Batas Bertumpuk
+	Intersection	Irisan
+	Intersection with Limits	Irisan dengan Batas
+	Intersection with Lower Limit	Irisan dengan Batas Bawah
+	Intersection with Subscript-Superscript Limits	Irisan dengan Batas Subskrip-Superskrip
+	Inverse Cosecant Function	Fungsi Kosekan Invers
+	Inverse Cosine Function	Fungsi Kosinus Invers
+	Inverse Cotangent Function	Fungsi Kotangen Invers
+	Inverse Hyperbolic Cosecant Function	Fungsi Kosekan Hiperbolik Invers
+	Inverse Hyperbolic Cosine Function	Fungsi Kosinus Hiperbolik Invers
+	Inverse Hyperbolic Cotangent Function	Fungsi Kotangen Hiperbolik Invers
+	Inverse Hyperbolic Secant Function	Fungsi Sekan Hiperbolik Invers
+	Inverse Hyperbolic Sine Function	Fungsi Sinus Hiperbolik Invers
+	Inverse Hyperbolic Tangent Function	Fungsi Tangen Hiperbolik Invers
+	Inverse Secant Function	Fungsi Sekan Invers
+	Inverse Sine Function	Fungsi Sinus Invers
+	Inverse Tangent Function	Fungsi Tangen Invers
+	Left Arrow with Text Above	Panah Kiri dengan Teks di Atas
+	Left Arrow with Text Below	Panah Kiri dengan Teks di Bawah
+	Left Bracket Twice	Kurung Siku Kiri Ganda
+	Left Right Arrow Above	Panah Kiri Kanan di Atas
+	Left Right Arrow with Text Above	Panah Kiri Kanan dengan Teks di Atas
+	Left Right Arrow with Text Below	Panah Kiri Kanan dengan Teks di Bawah
+	Left Subscript-Superscript	Subskrip-Superskrip Kiri
+	Leftwards Arrow Above	Panah ke Kiri di Atas
+	Leftwards Harpoon Above	Harpun ke Kiri di Atas
+	Limit	Limit
+	Limit Example	Contoh Limit
+	Linear Fraction	Pecahan Linear
+	Logarithm	Logaritma
+	Logarithm with Base	Logaritma dengan Basis
+	Logical AND	DAN Logika
+	Logical AND with Limits	DAN Logika dengan Batas
+	Logical OR	ATAU Logika
+	Logical OR with Limits	ATAU Logika dengan Batas
+	Maximum Example	Contoh Maksimum
+	Measured By	Diukur Oleh
+	Midline Dots	Titik Tengah
+	Minus Equal	Minus Sama Dengan
+	Natural Logarithm	Logaritma Natural
+	One half	Satu Per Dua
+	Outward Brackets	Kurung Siku Mengarah Keluar
+	Overbar	Garis Atas
+	Overbrace	Klamra Atas
+	Parentheses	Kurung
+	Parentheses with Separator	Kurung dengan Pemisah
+	Partial Differential	Diferensial Parsial
+	Pi Over 2	Pi per 2
+	Plus Equal	Plus Sama Dengan
+	Product	Produk
+	Product of A	Produk A
+	Product with Limits	Produk dengan Batas
+	Product with Lower Limit	Produk dengan Batas Bawah
+	Product with Subscript-Superscript Limits	Produk dengan Batas Subskrip-Superskrip
+	Quadratic Root	Akar Persamaan Kuadrat
+	Radical with Degree	Radikal dengan Derajat
+	Right Arrow with Text Above	Panah Kanan dengan Teks di Atas
+	Right Arrow with Text Below	Panah Kanan dengan Teks di Bawah
+	Right Bracket Twice	Kurung Siku Kanan Ganda
+	Rightwards Arrow Above	Panah ke Kanan di Atas
+	Rightwards Harpoon Above	Harpun ke Kanan di Atas
+	Secant Function	Fungsi Sekan
+	Sine Function	Fungsi Sinus
+	Sine theta	Sinus theta
+	Single Left Angle	Kurung Sudut Kiri Tunggal
+	Single Left Bar	Garis Vertikal Kiri Tunggal
+	Single Left Brace	Kurung Kurawal Kiri Tunggal
+	Single Left Bracket	Kurung Siku Kiri Tunggal
+	Single Left Parenthesis	Kurung Kiri Tunggal
+	Single Right Brace	Kurung Kurawal Kanan Tunggal
+	Single Right Bracket	Kurung Siku Kanan Tunggal
+	Single Right Parenthesis	Kurung Kanan Tunggal
+	Skewed Fraction	Pecahan Miring
+	Small change	Perubahan Kecil
+	Square Root	Akar Kuadrat
+	Square Root with Degree	Akar Kuadrat dengan Derajat
+	Square Union	Gabungan Persegi
+	Stack Object	Objek Tumpukan
+	Stack Object (Three)	Objek Tumpukan (Tiga)
+	Stacked Fraction	Pecahan Bertumpuk
+	Stacked, no bar	Bertumpuk, tanpa garis
+	Subscript-Superscript	Subskrip-Superskrip
+	Summation	Penjumlahan
+	Summation from 0 to n	Penjumlahan dari 0 hingga n
+	Summation over binomials	Penjumlahan atas binomial
+	Summation with Limits	Penjumlahan dengan Batas
+	Summation with Lower Limit	Penjumlahan dengan Batas Bawah
+	Summation with Subscript Limit	Penjumlahan dengan Batas Subskrip
+	Summation with Subscript-Superscript Limits	Penjumlahan dengan Batas Subskrip-Superskrip
+	Surface Integral	Integral Permukaan
+	Surface Integral with Limits	Integral Permukaan dengan Batas
+	Surface Integral with Stacked Limits	Integral Permukaan dengan Batas Bertumpuk
+	Tangent Function	Fungsi Tangen
+	Tangent formula	Rumus tangen
+	Text over Colon Equal	Teks di Atas Titik Dua Sama Dengan
+	Text over Equal	Teks di Atas Tanda Sama Dengan
+	Tilde	Tilde
+	Triple Dot	Tiga Titik di Atas
+	Triple Integral	Integral Rangkap Tiga
+	Triple Integral with Limits	Integral Rangkap Tiga dengan Batas
+	Triple Integral with Stacked Limits	Integral Rangkap Tiga dengan Batas Bertumpuk
+	Underbar	Garis Bawah
+	Underbrace	Klamra Bawah
+	Union	Gabungan
+	Union of intersections	Gabungan Irisan
+	Union with Limits	Gabungan dengan Batas
+	Union with Lower Limit	Gabungan dengan Batas Bawah
+	Union with Plus	Gabungan dengan Plus
+	Union with Subscript-Superscript Limits	Gabungan dengan Batas Subskrip-Superskrip
+	Up Diagonal Dots	Titik Diagonal Naik
+	Vector A	Vektor A
+	Vector AB	Vektor AB
+	Vertical Bars	Garis Vertikal
+	Vertical Dots	Titik Vertikal
+	Volume Integral	Integral Volume
+	Volume Integral with Limits	Integral Volume dengan Batas
+	Volume Integral with Stacked Limits	Integral Volume dengan Batas Bertumpuk
+	Yields	Menghasilkan
+	x bar	x garis atas
+	All - Linear	Semua — Linear
+	All - Professional	Semua — Profesional
+	Current - Linear	Saat Ini — Linear
+	Current - Professional	Saat Ini — Profesional
+	Centered as Group	Dipusatkan sebagai Grup
+	✓ None	✓ Tidak Ada
+	Change to Level 6	Ubah ke Tingkat 6
+	Change to Level 7	Ubah ke Tingkat 7
+	Change to Level 8	Ubah ke Tingkat 8
+	Change to Level 9	Ubah ke Tingkat 9
+	Level 5	Tingkat 5
+	Level 6	Tingkat 6
+	Level 7	Tingkat 7
+	Level 8	Tingkat 8
+	Level 9	Tingkat 9
+	Title Bar	Bilah Judul
+	Copy to	Salin ke
+	Rename Document	Ganti Nama Dokumen
+	Document name	Nama dokumen
+	Account	Akun
+	Privacy Options	Opsi Privasi
+	Trust Center	Pusat Kepercayaan
+	Privacy for this document	Privasi dokumen ini
+	Remove my name from comments, changes and file properties when saving	Hapus nama saya dari komentar, perubahan, dan properti berkas saat menyimpan
+	Leave out the date and time of comments and tracked changes when saving	Hilangkan tanggal dan waktu komentar serta perubahan terlacak saat menyimpan
+	The document you are editing keeps the names and dates; only the saved file leaves them out.	Dokumen yang sedang Anda edit tetap menyimpan nama dan tanggal; hanya berkas tersimpan yang menghilangkannya.
+	Privacy Settings	Pengaturan Privasi
+	Waiting for the save to finish…	Menunggu penyimpanan selesai…
+	Saving {name} was cancelled, so it is still open and nothing was lost.	Penyimpanan {name} dibatalkan, jadi dokumen tetap terbuka dan tidak ada yang hilang.
+	Paper size:	Ukuran kertas:
+	Custom size	Ukuran kustom
+	More Paper Sizes…	Ukuran Kertas Lainnya…
+	The margins don't fit on a page this size; make the margins smaller first.	Margin tidak muat pada halaman seukuran ini; kecilkan margin terlebih dahulu.
+	Full Screen	Layar Penuh
+	Full\nScreen	Layar\nPenuh
+	Use the browser's full screen (F11)	Gunakan layar penuh peramban (F11)
+	{name}   {height} × {width} in	{name}   {height} × {width} in
+	{name}   {height} × {width} mm	{name}   {height} × {width} mm
+	{width} × {height} mm	{width} × {height} mm
+	{kind}, {columns} × {rows}, {size} ({paper})	{kind}, {columns} × {rows}, {size} ({paper})
+	Researcher needs an online service; WordCraft keeps your documents offline.	Peneliti memerlukan layanan daring; WordCraft menyimpan dokumen Anda secara luring.
+	These settings will be used for new documents.	Pengaturan ini akan digunakan untuk dokumen baru.
+	can't split at the first row	tidak dapat memisahkan pada baris pertama
+	select two or more cells to merge	pilih dua sel atau lebih untuk digabungkan
+	there is no ink to replay	tidak ada tinta untuk diputar ulang
+	there's no citation after the caret	tidak ada sitasi setelah kursor
+	this item is already at the top level	item ini sudah berada di tingkat teratas
+	Envelope #10	Amplop #10
+	Reading Mode	Mode Baca
+	Text size	Ukuran teks
+	Edit Document	Edit Dokumen
+	Go to what:	Pergi ke apa:
+	Type +2 or -1 to move from the page you are on.	Ketik +2 atau -1 untuk berpindah dari halaman Anda saat ini.
+	Suggested	Disarankan
+	Set Proofing Language…	Tetapkan Bahasa Pemeriksaan…
+	Language Preferences…	Preferensi Bahasa…
+	APA	APA
+	Chicago	Chicago
+	GB/T 7714	GB/T 7714
+	GOST (name sort)	GOST (urut nama)
+	GOST (title sort)	GOST (urut judul)
+	Harvard (Anglia)	Harvard (Anglia)
+	IEEE	IEEE
+	ISO 690 (author-date)	ISO 690 (penulis-tanggal)
+	ISO 690 (numerical)	ISO 690 (numerik)
+	MLA	MLA
+	SIST02	SIST02
+	Turabian	Turabian
+	Limit and	Limit dan
+	Log	Log
+	Select a printer	Pilih pencetak
+	Refresh printers	Segarkan pencetak
+	Two-sided printing	Pencetakan dua sisi
+	Printer default	Bawaan pencetak
+	One-sided	Satu sisi
+	Two-sided: long edge	Dua sisi: tepi panjang
+	Two-sided: short edge	Dua sisi: tepi pendek
+	Finding printers…	Mencari pencetak…
+	No printers found. Configure a system printer or export a PDF.	Pencetak tidak ditemukan. Konfigurasikan pencetak sistem atau ekspor PDF.
+	Printer discovery failed.	Pencarian pencetak gagal.
+	Submitting print job…	Mengirim tugas cetak…
+	Print job submitted.	Tugas cetak terkirim.
+	Print job submitted: {receipt}	Tugas cetak terkirim: {receipt}
+	Print failed: the printing worker stopped.	Pencetakan gagal: proses pencetakan berhenti.
+	Print settings	Pengaturan pencetakan
+	Submit print job	Kirim tugas cetak
+	For which item:	Untuk item mana:
+	Heading	Judul
+	Heading text	Teks judul
+	Insert reference to:	Sisipkan referensi ke:
+	Reference type:	Jenis referensi:
+	Dictionaries	Kamus
+	Dictionaries folder:	Folder kamus:
+	Not set: the system's usual places	Belum diatur: lokasi biasa sistem
+	Hunspell .aff and .dic files here (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) are used before the system's.	Berkas Hunspell .aff dan .dic di sini (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) dipakai sebelum milik sistem.
+	{language}: {file}	{language}: {file}
+	{language}: no dictionary found	{language}: kamus tidak ditemukan
+	Mirror margins	Margin cermin
+	Existing File or Web Page	Berkas atau Halaman Web yang Ada
+	Link to:	Tautkan ke:
+	Place in This Document	Tempat di Dokumen Ini
+	Column {n}	Kolom {n}
+	Header row	Baris header
+	No header row	Tanpa baris header
+	My list has	Daftar saya memiliki
+	Formula:	Rumus:
+	Paste function:	Tempel fungsi:
+	Narrow	Sempit
+	Merge cells before split	Gabungkan sel sebelum dipisah
+	Table size	Ukuran tabel
+	AutoFit behavior	Perilaku Sesuaikan Otomatis
+	Initial column width:	Lebar kolom awal:
+	AutoFit to contents	Sesuaikan Otomatis ke Isi
+	AutoFit to window	Sesuaikan Otomatis ke Jendela
+	Separate text at	Pisahkan teks di
+	Commas	Koma
+	Other:	Lainnya:
+	The number must be between 1 and {max}.	Angka harus antara 1 dan {max}.
+	The measurement must be between {min} and {max}.	Ukuran harus antara {min} dan {max}.
+	Recently Used Fonts	Font yang Baru Digunakan
+	All Fonts	Semua Font
+	Spike	Spike
+	Insert Spike	Sisipkan Spike
+	Added 1 font	1 font ditambahkan
+	Added {n} fonts	{n} font ditambahkan
+	{added}; {count} couldn't be read: {names}	{added}; {count} tidak dapat dibaca: {names}
+	{names} and {n} more	{names} dan {n} lainnya
+	{added}; {n} skipped (limit {max})	{added}; {n} dilewati (batas {max})
+	nothing is selected	tidak ada yang dipilih
+	select a picture or shape first	pilih gambar atau bentuk terlebih dahulu
+	select recipients first	pilih penerima terlebih dahulu
+	select two or more pictures or shapes first (Shift+click)	pilih dua gambar atau bentuk atau lebih terlebih dahulu (Shift+klik)
+	text boxes can't go inside a text box	kotak teks tidak dapat dimasukkan ke dalam kotak teks
+	the cursor isn't in a table	kursor tidak berada dalam tabel
+	{name} options	Opsi {name}
+	Dropped	Di dalam teks
+	In margin	Di margin
+	Drop Cap Options…	Opsi Inisial…
+	Lines to drop:	Tinggi baris:
+	Distance from text:	Jarak dari teks:
+	Distance from text	Jarak dari teks
+	the paragraph is empty	paragraf kosong
+	the paragraph starts with a space	paragraf diawali spasi
+	Lock aspect ratio	Kunci rasio aspek
+	Relative to original picture size	Relatif terhadap ukuran gambar asli
+	Original size	Ukuran asli
+	{width} × {height} pixels	{width} × {height} piksel
+	Type a size in any unit, such as 5 cm or 300 px. The other side follows, so the picture keeps its proportions.	Ketik ukuran dalam satuan apa pun, misalnya 5 cm atau 300 px. Sisi lainnya mengikuti, sehingga gambar tetap proporsional.
+template	Letter	Surat
+	B4 (JIS)   10.12" × 14.33"	B4 (JIS)   10.12" × 14.33"
+	B5 (JIS)   7.17" × 10.12"	B5 (JIS)   7.17" × 10.12"
+	Enter bookmark name:	Masukkan nama penanda:
+	Envelope #10   4.12" × 9.50"	Envelope #10   4.12" × 9.50"
+	Envelope DL   4.33" × 8.66"	Envelope DL   4.33" × 8.66"
+	Executive   7.25" × 10.50"	Executive   7.25" × 10.50"
+	Find “{text}” in the document	Cari “{text}” di dokumen
+	Legal   8.50" × 14.00"	Legal   8.50" × 14.00"
+	Letter   8.50" × 11.00"	Letter   8.50" × 11.00"
+	Statement   5.50" × 8.50"	Statement   5.50" × 8.50"
+	Style: APA	Gaya: APA
+	Tabloid   11.00" × 17.00"	Tabloid   11.00" × 17.00"
+	This document has no bookmarks.	Dokumen ini tidak memiliki penanda.
+	Type a page number, or +2 / -1.	Ketik nomor halaman, atau +2 / -1.
+	Wait for the print job to finish submitting before closing.	Tunggu hingga pengiriman tugas cetak selesai sebelum menutup.
+	Add gradient stop	Tambahkan perhentian gradien
+	Remove gradient stop	Hapus perhentian gradien
+	Rotate with shape	Putar bersama bentuk
+	Gradient fill	Isian gradien
+	Gradient stops	Perhentian gradien
+	No Gradient	Tanpa Gradien
+	Solid fill	Isian solid
+	No fill	Tanpa Isian
+	Preset gradients	Gradien preset
+	Light Variations	Variasi Terang
+	Dark Variations	Variasi Gelap
+	More Gradients…	Gradien Lainnya…
+	Select a shape, text box or drawing canvas to format its fill.	Pilih bentuk, kotak teks, atau kanvas gambar untuk memformat isiannya.
+	Linear Right	Linear ke Kanan
+	Linear Diagonal - Top Left to Bottom Right	Diagonal Linear - Kiri Atas ke Kanan Bawah
+	Linear Down	Linear ke Bawah
+	Linear Diagonal - Top Right to Bottom Left	Diagonal Linear - Kanan Atas ke Kiri Bawah
+	Linear Left	Linear ke Kiri
+	Linear Diagonal - Bottom Right to Top Left	Diagonal Linear - Kanan Bawah ke Kiri Atas
+	Linear Up	Linear ke Atas
+	Linear Diagonal - Bottom Left to Top Right	Diagonal Linear - Kiri Bawah ke Kanan Atas
+	From Top Left Corner	Dari Sudut Kiri Atas
+	From Top Right Corner	Dari Sudut Kanan Atas
+	From Bottom Left Corner	Dari Sudut Kiri Bawah
+	From Bottom Right Corner	Dari Sudut Kanan Bawah
+	From Center	Dari Tengah
+	Lit from Top	Disinari dari Atas
+	Deep	Dalam
+	Lit from Bottom	Disinari dari Bawah
+	Center Glow	Cahaya Tengah
+	Format Shape	Format Bentuk
+	Format Shape Pane	Panel Format Bentuk
+	Format Shape…	Format Bentuk…
+	Full Screen View	Tampilan Layar Penuh
+	Show the ribbon	Tampilkan pita
+	File locations	Lokasi berkas
+	Personal	Pribadi
+	Personal Templates	Templat Pribadi
+	User templates:	Templat pengguna:
+	Save as Word Template…	Simpan sebagai Templat Word…
+	File › New lists the .dotx and .dotm templates here under Personal; Save as Word Template starts here.	Berkas › Baru mencantumkan templat .dotx dan .dotm di sini, di bawah Pribadi; Simpan sebagai Templat Word dimulai dari sini.
+	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	Menyimpan templat .dotx di folder templat Anda. Templat muncul di Berkas › Baru di bawah Pribadi.
+	Templates you save in your templates folder show up here.	Templat yang Anda simpan di folder templat akan muncul di sini.
+	Not set	Belum diatur
+	No items to show.	Tidak ada item untuk ditampilkan.
+	Old menu keys: Alt, {keys}. Keep typing, or press Esc to cancel.	Tombol menu lama: Alt, {keys}. Lanjutkan mengetik, atau tekan Esc untuk membatalkan.
+	English (Australia)	Bahasa Inggris (Australia)
+	English (Canada)	Bahasa Inggris (Kanada)
+	English (India)	Bahasa Inggris (India)
+	English (Ireland)	Bahasa Inggris (Irlandia)
+	English (New Zealand)	Bahasa Inggris (Selandia Baru)
+	English (South Africa)	Bahasa Inggris (Afrika Selatan)
+	Add a language…	Tambah bahasa…
+	Add a language	Tambah bahasa
+	Your languages	Bahasa Anda
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Inggris, bahasa dokumen ini, dan setiap paket bahasa yang terpasang. Paket bahasa menambahkan kamus ejaan dan pemenggalan kata.
+	Set as default	Jadikan default
+	New blank documents are written in this language	Dokumen kosong baru ditulis dalam bahasa ini
+	{language} (default)	{language} (default)
+	Built in	Bawaan
+	Your own dictionary	Kamus Anda sendiri
+	System dictionary	Kamus sistem
+	Not available yet	Belum tersedia
+	Grammar built in	Tata bahasa bawaan
+	Install spelling ({size})	Pasang ejaan ({size})
+	Its dictionary couldn't be read: {reason}	Kamusnya tidak dapat dibaca: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Pengunduhan nonaktif. Mengeklik “Tambah bahasa…” atau “Pasang” mengaktifkannya: WordCraft lalu mengunduh paket bahasa dan font dari GitHub.
+	Search:	Cari:
+	Dutch, Nederlands or nl	Belanda, Nederlands atau nl
+	No languages to show yet.	Belum ada bahasa untuk ditampilkan.
+	No language matches your search.	Tidak ada bahasa yang cocok dengan pencarian Anda.
+	An installed Language pack is used after this folder.	Paket bahasa yang terpasang digunakan setelah folder ini.
+	Dictionary files	File kamus
+	Gets the list of Language packs, then this language's pack if there is one.	Mengambil daftar paket bahasa, lalu paket bahasa ini jika ada.
+	Afrikaans	Afrikaans
+	Belarusian	Belarus
+	Bulgarian	Bulgaria
+	Bosnian	Bosnia
+	Catalan	Katalan
+	Catalan (Valencian)	Katalan (Valencia)
+	Welsh	Wales
+	Esperanto	Esperanto
+	Persian	Persia
+	Irish	Irlandia
+	Galician	Galisia
+	Hungarian	Hungaria
+	Armenian	Armenia
+	Icelandic	Islandia
+	Georgian	Georgia
+	Lithuanian	Lituania
+	Latvian	Latvia
+	Macedonian	Makedonia
+	Norwegian (Nynorsk)	Norwegia (Nynorsk)
+	Romanian	Rumania
+	Slovak	Slovakia
+	Slovenian	Slovenia
+	Albanian	Albania
+	Swahili	Swahili
+	Tamil	Tamil
+	Thai	Thai
+	Vietnamese	Vietnam
+	Set as Default Language	Jadikan bahasa default
+	U.A.E.	Uni Emirat Arab
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austria
+	Australia	Australia
+	Bosnia and Herzegovina	Bosnia dan Herzegovina
+	Belgium	Belgia
+	Bolivia	Bolivia
+	Brazil	Brasil
+	Belarus	Belarus
+	Canada	Kanada
+	Switzerland	Swiss
+	Chile	Chili
+	China	Tiongkok
+	Colombia	Kolombia
+	Costa Rica	Kosta Rika
+	Cuba	Kuba
+	Cabo Verde	Tanjung Verde
+	Cyprus	Siprus
+	Germany	Jerman
+	Dominican Republic	Republik Dominika
+	Ecuador	Ekuador
+	Egypt	Mesir
+	Spain	Spanyol
+	Finland	Finlandia
+	France	Prancis
+	United Kingdom	Britania Raya
+	Equatorial Guinea	Guinea Khatulistiwa
+	Guatemala	Guatemala
+	Hong Kong SAR	Hong Kong SAR
+	Honduras	Honduras
+	Ireland	Irlandia
+	India	India
+	Iraq	Irak
+	Italy	Italia
+	Jamaica	Jamaika
+	Jordan	Yordania
+	Kuwait	Kuwait
+	Kazakhstan	Kazakhstan
+	Lebanon	Lebanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luksemburg
+	Morocco	Maroko
+	Monaco	Monako
+	Montenegro	Montenegro
+	Macao SAR	Makau SAR
+	Mexico	Meksiko
+	Malaysia	Malaysia
+	Mozambique	Mozambik
+	Nicaragua	Nikaragua
+	Netherlands	Belanda
+	New Zealand	Selandia Baru
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipina
+	Puerto Rico	Puerto Riko
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Rusia
+	Singapore	Singapura
+	El Salvador	El Salvador
+	Syria	Suriah
+	Taiwan	Taiwan
+	Ukraine	Ukraina
+	United States	Amerika Serikat
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Afrika Selatan

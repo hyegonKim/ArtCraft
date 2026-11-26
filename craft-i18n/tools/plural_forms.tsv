@@ -1,0 +1,57 @@
+# Each locale's gettext Plural-Forms, for the PO files tools/weblate_bridge.py writes for Weblate.
+# Columns, separated by a TAB:  locale <TAB> nplurals <TAB> plural expression (C syntax, in n)
+# The expression's index is the form's position in the catalog's `@plural` row: CLDR order, over the
+# categories whole numbers 0..=1000 reach (docs/catalog-format.md, Plurals). The test
+# `plural_forms_table_matches_the_runtime_crate` checks every row against craft-libs' runtime crate.
+ar	6	n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5
+az	2	n != 1
+bg	2	n != 1
+bn	2	n > 1
+bs	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+ca	2	n != 1
+ckb	2	n != 1
+cs	3	n==1 ? 0 : n>=2 && n<=4 ? 1 : 2
+da	2	n != 1
+de	2	n != 1
+dv	2	n != 1
+el	2	n != 1
+es	2	n != 1
+et	2	n != 1
+fa	2	n > 1
+fi	2	n != 1
+fr	2	n > 1
+gl	2	n != 1
+he	3	n==1 ? 0 : n==2 ? 1 : 2
+hi	2	n > 1
+hr	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+hu	2	n != 1
+id	1	0
+it	2	n != 1
+ja	1	0
+ka	2	n != 1
+kk	2	n != 1
+ko	1	0
+lo	1	0
+lt	3	n%10==1 && (n%100<11 || n%100>19) ? 0 : n%10>=2 && (n%100<11 || n%100>19) ? 1 : 2
+lv	3	n%10==0 || (n%100>=11 && n%100<=19) ? 0 : n%10==1 && n%100!=11 ? 1 : 2
+nb	2	n != 1
+nl	2	n != 1
+pl	3	n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+pt-br	2	n > 1
+ro	3	n==1 ? 0 : n==0 || (n%100>=1 && n%100<=19) ? 1 : 2
+ru	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+sk	3	n==1 ? 0 : n>=2 && n<=4 ? 1 : 2
+sl	4	n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3
+sq	2	n != 1
+sr	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+sr-latn	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+sv	2	n != 1
+ta	2	n != 1
+te	2	n != 1
+th	1	0
+tr	2	n != 1
+uk	3	n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2
+ur	2	n != 1
+vi	1	0
+zh-hans	1	0
+zh-hant	1	0

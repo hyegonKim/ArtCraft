@@ -1257,12 +1257,21 @@
 	Zoom Out	Зменшити
 	Zoom out	Зменшити
 	Zoom Tool	Інструмент «Масштаб»
+unit	{n} B	{n} Б
 @plural	{n} commit|{n} commits	{n} коміт|{n} коміти|{n} комітів
 	{n} files	Файлів: {n}
+unit	{n} GB	{n} ГБ
+unit	{n} GiB	{n} ГіБ
 	{n} h ago	{n} год тому
 @plural	{n} item|{n} items	{n} елемент|{n} елементи|{n} елементів
+unit	{n} KB	{n} КБ
+unit	{n} KiB	{n} КіБ
 @plural	{n} Layer|{n} Layers	{n} шар|{n} шари|{n} шарів
+unit	{n} MB	{n} МБ
+unit	{n} MiB	{n} МіБ
 	{n} min ago	{n} хв тому
 @plural	{n} step|{n} steps	{n} крок|{n} кроки|{n} кроків
+unit	{n} TB	{n} ТБ
+unit	{n} TiB	{n} ТіБ
 	−Bin	−Bin
 	● Recording	● Запис

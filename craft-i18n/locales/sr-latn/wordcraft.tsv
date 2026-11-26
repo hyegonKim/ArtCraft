@@ -1409,6 +1409,14 @@
 	Remove Table of Contents	Ukloni sadržaj
 	Remove the control once edited	Ukloni kontrolu posle uređivanja
 	Remove Watermark	Ukloni vodeni žig
+	No watermark	Bez vodenog žiga
+	Picture watermark	Vodeni žig sa slikom
+	Text watermark	Tekstualni vodeni žig
+	Select Picture…	Izaberi sliku…
+	Washout	Izbledelo
+	Semitransparent	Polutransparentno
+	Transparency:	Transparentnost:
+	Select a picture first.	Prvo izaberite sliku.
 	Rename Document	Preimenuj dokument
 	Reopen	Ponovo otvori
 	Repeat	Ponovi
@@ -2001,3 +2009,122 @@
 	{width} × {height} pixels	{width} × {height} piksela
 	{words} words	{words} reči
 	“{text}” ({row}, {series}) isn't a number.	„{text}” ({row}, {series}) nije broj.
+	Add a language…	Dodaj jezik…
+	Add a language	Dodaj jezik
+	Your languages	Vaši jezici
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engleski, jezici ovog dokumenta i svaki instalirani jezički paket. Jezički paketi dodaju rečnike za pravopis i deljenje reči.
+	Set as default	Postavi kao podrazumevano
+	New blank documents are written in this language	Novi prazni dokumenti pišu se na ovom jeziku
+	{language} (default)	{language} (podrazumevano)
+	Built in	Ugrađeno
+	Your own dictionary	Vaš sopstveni rečnik
+	System dictionary	Sistemski rečnik
+	Not available yet	Još nije dostupno
+	Grammar built in	Gramatika je ugrađena
+	Install spelling ({size})	Instaliraj pravopis ({size})
+	Its dictionary couldn't be read: {reason}	Njegov rečnik nije mogao da se pročita: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Preuzimanje je isključeno. Klik na „Dodaj jezik…“ ili „Instaliraj“ uključuje ga: tada WordCraft preuzima jezičke pakete i fontove sa GitHub-a.
+	Search:	Traži:
+	Dutch, Nederlands or nl	Holandski, Nederlands ili nl
+	No languages to show yet.	Još nema jezika za prikaz.
+	No language matches your search.	Nijedan jezik ne odgovara vašoj pretrazi.
+	An installed Language pack is used after this folder.	Instalirani jezički paket koristi se posle ovog foldera.
+	Dictionary files	Datoteke rečnika
+	Possible spelling mistake	Moguća pravopisna greška
+	Gets the list of Language packs, then this language's pack if there is one.	Preuzima spisak jezičkih paketa, zatim paket ovog jezika ako postoji.
+	Afrikaans	afrikans
+	Belarusian	beloruski
+	Bulgarian	bugarski
+	Bosnian	bosanski
+	Catalan	katalonski
+	Catalan (Valencian)	katalonski (valensijski)
+	Welsh	velški
+	Esperanto	esperanto
+	Persian	persijski
+	Irish	irski
+	Galician	galicijski
+	Hungarian	mađarski
+	Armenian	jermenski
+	Icelandic	islandski
+	Georgian	gruzijski
+	Lithuanian	litvanski
+	Latvian	letonski
+	Macedonian	makedonski
+	Norwegian (Nynorsk)	norveški (njunorsk)
+	Slovak	slovački
+	Slovenian	slovenački
+	Albanian	albanski
+	Swahili	svahili
+	Tamil	tamilski
+	Thai	tajski
+	Vietnamese	vijetnamski
+	Set as Default Language	Postavi kao podrazumevani jezik
+	U.A.E.	Ujedinjeni Arapski Emirati
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austrija
+	Australia	Australija
+	Bosnia and Herzegovina	Bosna i Hercegovina
+	Belgium	Belgija
+	Bolivia	Bolivija
+	Brazil	Brazil
+	Belarus	Belorusija
+	Canada	Kanada
+	Switzerland	Švajcarska
+	Chile	Čile
+	China	Kina
+	Colombia	Kolumbija
+	Costa Rica	Kostarika
+	Cuba	Kuba
+	Cabo Verde	Zelenortska Ostrva
+	Cyprus	Kipar
+	Germany	Nemačka
+	Dominican Republic	Dominikanska Republika
+	Ecuador	Ekvador
+	Egypt	Egipat
+	Spain	Španija
+	Finland	Finska
+	France	Francuska
+	United Kingdom	Ujedinjeno Kraljevstvo
+	Equatorial Guinea	Ekvatorijalna Gvineja
+	Guatemala	Gvatemala
+	Hong Kong SAR	Hongkong SAR
+	Honduras	Honduras
+	Ireland	Irska
+	India	Indija
+	Iraq	Irak
+	Italy	Italija
+	Jamaica	Jamajka
+	Jordan	Jordan
+	Kuwait	Kuvajt
+	Kazakhstan	Kazahstan
+	Lebanon	Liban
+	Liechtenstein	Lihtenštajn
+	Luxembourg	Luksemburg
+	Morocco	Maroko
+	Monaco	Monako
+	Montenegro	Crna Gora
+	Macao SAR	Makao SAR
+	Mexico	Meksiko
+	Malaysia	Malezija
+	Mozambique	Mozambik
+	Nicaragua	Nikaragva
+	Netherlands	Holandija
+	New Zealand	Novi Zeland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipini
+	Puerto Rico	Portoriko
+	Portugal	Portugalija
+	Paraguay	Paragvaj
+	Qatar	Katar
+	Russia	Rusija
+	Singapore	Singapur
+	El Salvador	Salvador
+	Syria	Sirija
+	Taiwan	Tajvan
+	Ukraine	Ukrajina
+	United States	Sjedinjene Američke Države
+	Uruguay	Urugvaj
+	Venezuela	Venecuela
+	South Africa	Južnoafrička Republika

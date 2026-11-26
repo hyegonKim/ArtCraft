@@ -7,7 +7,7 @@ input), and every command is reachable from:
 | Surface | How |
 |---|---|
 | Desktop app control channel | `soundcraft --control <port>` (`0` = pick a free port; printed as `SOUNDCRAFT_CONTROL_PORT=…`) |
-| CLI against a running app | `soundcraft-cli app --port <port> <method or command id> [JSON]` |
+| CLI against a running app | `soundcraft-cli app --port <port> <method or command id> [JSON]` (see [cli.md](cli.md)) |
 | Headless CLI | `soundcraft-cli run --demo --cmd 'mix.volume={"track":"Kick","db":-6}' --bounce out.wav` |
 | MCP (headless) | `soundcraft-cli mcp [--demo]` |
 | MCP (bridged to the app) | `soundcraft-cli mcp --connect <port>` |
@@ -33,7 +33,7 @@ Newline-delimited JSON over TCP on `127.0.0.1`. One request per line, one reply 
 {"id": 1, "ok": true, "result": {"tracks": [12, 13]}}
 ```
 
-Errors: `{"id": 1, "ok": false, "error": "bad parameters for `mix.volume`: no track named `Nope`"}`.
+Errors: `{"id": 1, "ok": false, "error": "bad parameters for `mix.volume`: no track named `Nope`"}`. A line that is not a JSON object with a string `method` gets one error reply, and the connection is closed.
 
 ## Methods
 

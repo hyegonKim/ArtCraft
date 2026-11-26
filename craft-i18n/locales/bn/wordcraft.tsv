@@ -1,0 +1,2649 @@
+# বাংলা (bn) interface catalog for WordCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	(All)	(সব)
+	(no style)	(শৈলী নেই)
+	(no suggestions)	(পরামর্শ নেই)
+	(normal text)	(স্বাভাবিক টেক্সট)
+	(not matched)	(মেলেনি)
+	(picture or object)	(ছবি বা অবজেক্ট)
+	0 or More Characters	০ বা ততোধিক অক্ষর
+	1. Formatting restrictions	১. ফরম্যাটিং সীমাবদ্ধতা
+	1.5 Line Spacing	১.৫ লাইন ব্যবধান
+	1/4 Em Space	১/৪ এম স্পেস
+#	1×2 Empty Matrix	
+#	1×3 Empty Matrix	
+	2. Editing restrictions	২. সম্পাদনা সীমাবদ্ধতা
+#	2×1 Empty Matrix	
+#	2×2 Determinant	
+#	2×2 Empty Matrix	
+#	2×2 Identity Matrix	
+#	2×2 Identity Matrix (sparse)	
+#	2×2 Matrix in Brackets	
+#	2×2 Matrix in Double Bars	
+#	2×2 Matrix in Parentheses	
+#	2×3 Empty Matrix	
+	3-D	৩-D
+	3. Start enforcement	৩. প্রয়োগ শুরু করুন
+#	3×1 Empty Matrix	
+#	3×2 Empty Matrix	
+#	3×3 Empty Matrix	
+#	3×3 Identity Matrix	
+#	3×3 Identity Matrix (sparse)	
+	<< Less	<< কম
+	<< Remove	<< সরান
+#	a drawing canvas can't be ungrouped	
+#	a drawing canvas can't go inside a text box	
+#	A file dialog is already open.	
+#	A free, open-source word processor written from scratch in Rust.\nPart of the Crafting Apps from the ArtCraft team.	
+#	a group holding Word ink can't be ungrouped yet	
+	A mail merge field	একটি মেইল মার্জ ক্ষেত্র
+#	A numbered sequence (figures, tables…)	
+#	A password is required to open this document.	
+	A table of contents	একটি সূচিপত্র
+#	A xor B	
+#	A, B, C, …	
+#	a, b, c, …	
+#	AaBbCcDd	
+#	AaBbYyZz	
+	About WordCraft	ওয়ার্ডক্রাফট সম্পর্কে
+	Above Chart	চার্টের উপরে
+	Above the item	আইটেমের উপরে
+	Above/below	উপরে/নিচে
+#	Absolute value cases	
+	Accent	অ্যাকসেন্ট
+#	Accent Gradient	
+#	Accent with Reflection	
+#	Accent {n}	
+	Accents	অ্যাকসেন্ট
+	Accept	গ্রহণ
+	Accept All Changes	সকল পরিবর্তন গ্রহণ
+#	Accept All Changes and Stop Tracking	
+	Accept and Move to Next	গ্রহণ করে পরবর্তীতে যান
+	Accept This Change	এই পরিবর্তন গ্রহণ
+	Accessed on	প্রবেশের তারিখ
+	Accessibility Pane	সহজপ্রবেশ্যতা প্যানেল
+	Account	অ্যাকাউন্ট
+#	Acute	
+	Add >>	যোগ >>
+	Add a Table	টেবিল যোগ
+#	Add at least one field.	
+	Add Chart Element	চার্ট উপাদান যোগ
+	Add Condition	শর্ত যোগ
+	Add Field	ক্ষেত্র যোগ
+	Add Font…	ফন্ট যোগ…
+#	Add gradient stop	
+	Add line numbering	লাইন নম্বর যোগ
+	Add New Source…	নতুন উৎস যোগ…
+	Add Object to Selection	নির্বাচনে অবজেক্ট যোগ
+	Add Pen	পেন যোগ
+	Add Row	সারি যোগ
+	Add Series	সিরিজ যোগ
+	Add Shape	আকার যোগ
+	Add Space Before Paragraph	অনুচ্ছেদের আগে স্পেস যোগ
+#	Add space between Asian and Latin text	
+#	Add space between Asian text and numbers	
+#	Add tab stop at:	
+	Add Text	টেক্সট যোগ
+	Add the chapter number	অধ্যায় নম্বর যোগ
+	Add to Document	নথিতে যোগ
+	Add to Quick Access Toolbar	দ্রুত অ্যাক্সেস টুলবারে যোগ
+	Add to Style Gallery	শৈলী গ্যালারিতে যোগ
+#	Add whether it is above or below	
+#	Add/Edit\nBibliography	
+#	Add/Edit\nCitation	
+#	Add\nNote	
+#	Add\nPen	
+#	Add\nShape	
+	Added 1 font	১টি ফন্ট যোগ হয়েছে
+	Added Fonts	যোগ করা ফন্ট
+#	Added {n} fonts	
+	Address	ঠিকানা
+	Address Block	ঠিকানা ব্লক
+	Address labels	ঠিকানা লেবেল
+	Address:	ঠিকানা:
+#	Address\nBlock	
+	Advanced Find	উন্নত অনুসন্ধান
+	Advanced Find…	উন্নত অনুসন্ধান…
+	Advanced Properties…	উন্নত বৈশিষ্ট্য…
+	After:	পরে:
+	Agents	এজেন্ট
+#	Agents connected to WordCraft can show you messages through the Assistant. Muted, they're told you'd rather not.	
+#	Ah, Latin. The language of deadlines.	
+#	Ah, the editing phase. My favourite. Very decisive.	
+	Align Bottom Center	নিচের মাঝে
+	Align Bottom Left	নিচের বামে
+	Align Bottom Right	নিচের ডানে
+	Align Center	মাঝে
+	Align Center Left	মাঝে বামে সারিবদ্ধ
+	Align Center Right	মাঝে ডানে সারিবদ্ধ
+	Align Top Center	উপরের মাঝে
+	Align Top Left	উপরের বামে
+	Align Top Right	উপরের ডানে
+	Aligned at:	সারিবদ্ধ:
+	All - Linear	সব - রৈখিক
+	All - Professional	সব - পেশাদার
+	All Borders	সকল বর্ডার
+	All caps	সব বড় হাতের
+	All Commands	সকল কমান্ড
+#	All documents based on the Normal template?	
+	All Fonts	সব ফন্ট
+	All Levels	সকল স্তর
+	All Markup	সকল মার্কআপ
+	All pages in the range	সীমার সকল পৃষ্ঠা
+	All symbol sets	সকল প্রতীক সেট
+	All system fonts are already available.	সকল সিস্টেম ফন্ট ইতিমধ্যে উপলব্ধ।
+	Allow hanging punctuation	ঝুলন্ত বিরামচিহ্ন অনুমোদন
+#	Allow Latin text to wrap in the middle of a word	
+	Allow line breaks	লাইন বিরতি অনুমোদন
+#	Allow row to break across pages	
+	Alphabetical	বর্ণানুক্রমিক
+	Alt Text	অল্ট টেক্সট
+	Alt text	অল্ট টেক্সট
+	Alt Text Pane	অল্ট টেক্সট প্যানেল
+	Alt:	অল্ট:
+#	Alt\nText	
+#	an agent	
+	And	এবং
+#	Angle Brackets	
+#	Angle Brackets with Separator	
+#	Angle Brackets with Two Separators	
+#	Animate the caret (it glides and fades)	
+#	Animation effects:	
+	Annotation Reference	টীকা রেফারেন্স
+#	Annotation Subject	
+#	Annotation Text	
+#	Annoying	
+#	Another file	
+#	Any Character	
+#	Any Digit	
+#	Any field	
+#	Any Letter	
+#	Anyone can open this document. Encrypt it with a password to keep it private.	
+#	Anyone who opens the document will need this password.	
+#	APA	
+#	Apply as you type	
+#	Apply Asian line-breaking rules (kinsoku)	
+	Apply formatting to:	ফরম্যাটিং প্রয়োগ:
+	Apply Style	শৈলী প্রয়োগ
+	Apply Styles	শৈলী প্রয়োগ
+#	Arabic	
+numerals	Arabic	আরবি
+#	Arch Down	
+#	Arch Up	
+#	Arrange\nAll	
+#	Article I.	
+#	Artistic Effects	
+#	As Recommended	
+#	As you type	
+#	ASAP	
+	Asian text font:	এশীয় টেক্সট ফন্ট:
+#	Asian Typography	
+#	Assistant	
+#	Assistant Suggestions	
+#	At least	
+#	At least {n}	
+#	Atelier	
+#	Atmosphere	
+#	Attach Template	
+#	Attach…	
+#	Auto orientation	
+#	AutoCorrect	
+#	AutoCorrect Options	
+#	AutoFit	
+#	AutoFit behavior	
+#	AutoFit Column by Double-Clicking	
+#	AutoFit Contents	
+#	AutoFit to contents	
+#	AutoFit to window	
+#	AutoFit Window	
+	AutoFormat As You Type	টাইপ করার সময় অটো ফরম্যাট
+#	Automatic ({language})	
+#	Automatic ({region})	
+	Automatic bulleted lists	স্বয়ংক্রিয় বুলেটযুক্ত তালিকা
+#	Automatic follows your system's language. Menus and commands change; your documents don't.	
+	Automatic numbered lists	স্বয়ংক্রিয় সংখ্যাযুক্ত তালিকা
+#	Automatic Table 1 (3 levels)	
+#	Automatic Table 2 (2 levels)	
+#	Automatically add words to list (First Letter)	
+#	Automatically add words to list (INitial CAps)	
+#	Automatically hyphenate document	
+#	Automatically Update Document Styles	
+#	Automatically update document styles	
+#	AutoSave	
+#	AutoSave documents you have saved in WordCraft	
+#	AutoSave failed: {error}. Save the document to turn AutoSave back on.	
+#	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	
+#	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	
+#	AutoSave saves every change to the file (needs a saved document)	
+#	AutoSave writes your changes to the file a moment after you stop typing.	
+	AutoText	অটোটেক্সট
+#	B4 (JIS)   10.12" × 14.33"	
+#	B5 (JIS)   7.17" × 10.12"	
+#	Balloons	
+#	Banded Columns	
+#	Banded Rows	
+#	Base text:	
+#	Based on: {style}	
+	Baseline Dots	বেসলাইন ডটস
+#	Basic Cycle	
+	Basic List	সাধারণ তালিকা
+#	Basic Math	
+#	Basic Matrix	
+#	Basic Process	
+#	Basic Pyramid	
+#	Basic Radial	
+#	Basic Venn	
+#	Bayes' rule	
+#	Before:	
+#	Beginning of Word	
+	Behind Text	টেক্সটের পেছনে
+	Below text	টেক্সটের নিচে
+#	Below the item	
+#	Between	
+#	Bibliography	
+#	Binomial Coefficient	
+#	Binomial Coefficient (angle)	
+#	Binomial Coefficient with Angle Brackets	
+#	Binomial expansion of (x+a)ⁿ	
+#	Blank	
+#	Blank (Three Columns)	
+#	Blank document	
+	Blank Page	খালি পৃষ্ঠা
+#	Block\nAuthors	
+#	Blue:	
+	Body Text	মূল টেক্সট
+#	Body text in a short paragraph to show spacing.	
+#	Bold choice. Ctrl+Z is right there if you need it.	
+#	Book	
+	Book Title	বইয়ের নাম
+#	Book title	
+#	Bookmark	
+#	Bookmark name:	
+	Bookmark text	বুকমার্ক টেক্সট
+#	Bookmarks	
+	Border lines	বর্ডার রেখা
+#	Border Painter	
+#	Border\nPainter	
+#	Borders and Shading	
+#	Borders and Shading…	
+#	Both Sides	
+#	Bottom Border	
+#	Bottom Left Cell	
+	Bottom Margin	নিচের মার্জিন
+	Bottom of Page	পৃষ্ঠার নিচে
+#	Bottom Right Cell	
+#	Box	
+#	Boxed Formula	
+#	Boxed Formula (example)	
+#	Boxed Formulas	
+#	Braces	
+#	Braces with Separator	
+#	Bracket	
+#	Brackets	
+#	Brackets with Separators	
+	Breaks	বিরতি
+#	Breve	
+#	Brighter +20%	
+#	Brightness, contrast and sharpness	
+#	Browse in WordCraft…	
+#	Building Block Gallery Content Control	
+#	Built-In	
+	Built-in style	বিল্ট-ইন শৈলী
+#	Built-in styles can't be deleted.	
+#	Bullet Library	
+	Bullets	বুলেট
+#	By author	
+#	Calendar	
+#	Can't be deleted	
+#	Can't find a command? Press Alt+Q and type what you want to do.	
+#	Can't find a command? Press {key} and type what you want to do.	
+#	can't split at the first row	
+#	Canvas Member	
+#	Capitalize Each Word	
+#	Capitalize first letter of sentences	
+#	Capitalize first letter of table cells	
+#	Capitalize names of days	
+#	Capitalize the first word of a sentence	
+#	Caption Numbering	
+	Caption text	ক্যাপশন টেক্সট
+#	Caption:	
+#	Captions	
+#	Careful, any further back and we'll undo the invention of paper.	
+#	Caret Character	
+#	Case changes	
+#	Cases (Three Conditions)	
+#	Cases (Two Conditions)	
+#	Cases and Stacks	
+#	Categories	
+#	Categories:	
+#	Category {n}	
+#	Ceiling	
+#	Cell	
+	Cell Margins	ঘর মার্জিন
+#	Cell\nMargins	
+#	Center Glow	
+#	Centered as Group	
+#	Change Chart Type	
+#	Change Colors	
+#	Change in y over change in x	
+#	Change Layout	
+	Change List Level	তালিকা স্তর বদল
+#	Change Password…	
+#	Change Picture	
+#	Change Picture…	
+#	Change Shape	
+#	Change Structure	
+#	Change to Display	
+	Change to Inline	ইনলাইনে পরিবর্তন
+#	Change to Level 1	
+#	Change to Level 2	
+#	Change to Level 3	
+#	Change to Level 4	
+#	Change to Level 5	
+#	Change to Level 6	
+#	Change to Level 7	
+#	Change to Level 8	
+#	Change to Level 9	
+#	Change\nChart Type	
+#	Change\nColors	
+#	Changed lines:	
+#	Changes	
+#	Chapter 1	
+#	Chapter in a book	
+#	Chapters begin at:	
+#	Character Border	
+#	Character code:	
+#	Character in Range	
+#	Character level	
+#	Character Position	
+#	Character Scale	
+#	Character Shading	
+#	Character Spacing	
+#	Character spacing	
+	Character style	অক্ষর শৈলী
+#	Characters (no spaces)	
+#	Characters (with spaces)	
+#	Characters per line:	
+#	Chart	
+#	Chart Design	
+#	Chart Layouts	
+#	Chart Title	
+#	charts and diagrams can't be moved or resized yet	
+#	Check	
+#	Check Accessibility	
+#	Check Box Content Control	
+#	Check Compatibility	
+#	Check for Errors	
+#	Check for\nUpdates…	
+#	Check Spelling as You Type	
+#	Check spelling as you type	
+#	Check\nAccessibility	
+#	Checked styles are allowed:	
+#	Checked symbol	
+#	Checking for updates…	
+#	Chevron Down	
+#	Chevron Up	
+#	Chicago	
+#	Chinese (Simplified)	
+#	Chinese (Traditional)	
+#	Choose a command	
+#	Choose a shortcut	
+	Choose List Item	তালিকা আইটেম বাছুন
+#	Choose the sheet that holds the recipients.	
+#	Circle area from its radius	
+#	Circled Dot	
+#	Circled Plus	
+#	Circled Times	
+	Citation Style	উদ্ধৃতি শৈলী
+#	Citations	
+#	Citations & Bibliography	
+	Clear All Formatting	সকল ফরম্যাটিং মুছুন
+#	Clear Character Formatting	
+	Clear Character Style	অক্ষর শৈলী মুছুন
+#	Clear Formatting Level	
+#	Clear Paragraph Formatting	
+#	Click a border between two cells to merge them. Esc stops.	
+#	Click an item to paste it.	
+#	Click level to modify:	
+#	Click the empty text box the text should continue in (Esc cancels)	
+#	Click to switch back to inserting	
+#	Clipboard Contents	
+#	Clipboard Items	
+#	Clipboard Pane	
+#	Close Document	
+#	Close Equation	
+	Close Header and Footer	হেডার-ফুটার বন্ধ
+	Close Outline View	আউটলাইন ভিউ বন্ধ
+#	Close Outline\nView	
+#	Clustered Bar	
+#	Clustered Column	
+#	cm	
+#	Col #:	
+#	Collapse Selection	
+#	Collate copies	
+#	Collect entries from:	
+#	Colon Equal	
+#	Color model:	
+#	Color only	
+#	Color: {color}	
+#	Colorful	
+#	Column	
+	Column Break	কলাম বিরতি
+#	Column Selection	
+#	Column {n}	
+#	Column:	
+#	Combine Documents	
+#	Combo Box Content Control	
+#	Commands	
+#	Commas	
+#	Comments beside each page and tracked changes in PDFs, prints and images; a comment list at the end of web pages, Markdown and text.	
+#	Comments Pane	
+#	Common Accent Objects	
+#	Common Brackets	
+#	Common Fractions	
+#	Common Functions	
+#	Common Large Operators	
+#	Common Operator Structures	
+#	Common Operators	
+#	Common Radicals	
+#	Common Subscripts and Superscripts	
+#	Communication	
+#	Community\nDiscord	
+#	Compact	
+	Compare Documents	নথি তুলনা
+#	Compare to	
+#	Compared: {changes} changes	
+#	Comparing with another file needs the desktop app.	
+#	Comparison settings	
+#	Compress Pictures	
+#	Compress punctuation at the start of a line	
+#	Conference	
+#	Conference paper	
+#	CONFIDENTIAL	
+#	Confirm password:	
+#	Connect Shapes	
+#	Container Title	
+#	Content Control at Selection	
+#	Content Control Properties	
+#	Contents can't be edited	
+#	Context	
+#numerals	Context	
+#	Continue from previous section	
+#	Continue without restoring	
+#	Continuous	
+#	Continuous numbering	
+#	Contour Integral	
+#	Contour Integral with Limits	
+#	Contour Integral with Stacked Limits	
+#	Contour Integrals	
+#	Controls	
+#	Conversions	
+#	Convert between built-up and linear form	
+#	Convert Notes	
+#	Convert Text to Table	
+#	Convert Text to Table…	
+#	Convert to Shapes	
+#	Convert to Text	
+#	Coproduct	
+#	Coproduct with Limits	
+#	Coproduct with Lower Limit	
+#	Coproduct with Subscript-Superscript Limits	
+#	Copy Formatting	
+#	Copy of the text a bookmark marks	
+#	Copy Styles	
+#	Copy to	
+#	Copyright Sign	
+#	Correct accidental usage of cAPS LOCK key	
+#	Correct TWo INitial CApitals	
+#	Corrections	
+#	Cosecant Function	
+#	Cosine 2x	
+#	Cosine Function	
+#	Cotangent Function	
+#	Couldn't download {name}: {error}	
+#	Couldn't make WordCraft the default: {error}	
+#	Couldn't open {path}: {error}	
+#	Couldn't save {name}, so it is still open and nothing was lost: {error}	
+#	Count by:	
+#	Count words in text boxes and notes	
+#	Courtesy Title	
+#	Cover Page	
+#	Craft	
+#	Create a Style	
+#	Create an interactive outline of your document.\n\nIt's a great way to keep track of where you are or quickly move your content around.\n\nTo get started, go to the Home tab and apply Heading styles to the headings in your document.	
+#	Create Graphic	
+#	Create Link	
+#	Create New Style	
+#	Create Source	
+#	Croatian	
+#	Crop on the page works on unturned pictures: set Rotation to 0° first, or use the crop boxes	
+#	Cross-reference	
+#	Cross-reference:	
+#	Ctrl+Enter starts a new page. Much tidier than pressing Enter until it happens.	
+#	Ctrl+H finds and replaces text, formatting and special characters.	
+#	Ctrl+K turns the selected text into a link.	
+#	Ctrl+Shift+G counts your words, characters and paragraphs.	
+#	Cube Root	
+#	Current - Linear	
+#	Current - Professional	
+#	Current Document	
+#	Current Position	
+#	Current record	
+#	Current style: {style}	
+#	Curved Arrow Connector	
+#	Curved Connector	
+#	Custom dictionary	
+	Custom Margins…	কাস্টম মার্জিন…
+#	Custom mark:	
+#	Custom range	
+#	Custom size	
+#	Custom Table of Contents…	
+#	Custom Watermark	
+#	Custom Watermark…	
+#	Customize	
+#	Customize Keyboard	
+#	Customize Quick Access Toolbar	
+#	Customize Quick Access Toolbar…	
+#	Customize Ribbon	
+#	Customize the Ribbon…	
+#	Cycle	
+#	Czech	
+#	Danish	
+#	Dark Mode	
+#	Dark page (white text on black)	
+#	Dark Variations	
+#	Dark with Shadow	
+#	Darker −20%	
+#	Darkroom	
+#	Data Labels	
+#	Date & Time	
+#	Date formats:	
+#	Date Picker Content Control	
+#	Day	
+#	Decimal	
+#	Decorative objects only add visual interest: screen readers skip them.	
+	Decrease Indent	ইনডেন্ট কমান
+#	Deep	
+#	Default formatting	
+#	Default Paragraph Font	
+#	Default tab stops:	
+#	Define New Bullet	
+#	Define New Multilevel List	
+#	Define New Multilevel List…	
+#	Define New Number Format	
+#	Deflate	
+#	Delete Around Caret in Equation	
+#	Delete Back in Equation	
+#	Delete Bookmark	
+	Delete Cells	ঘর মুছুন
+#	Delete Clipboard Item	
+	Delete Columns	কলাম মুছুন
+#	Delete Comment	
+#	Delete in Equation	
+#	Delete Label	
+#	Delete Next Word	
+#	Delete Previous Word	
+	Delete Rows	সারি মুছুন
+#	Delete Selected Ink	
+#	Delete Table	
+#	Delete Table Style	
+#	Deletions:	
+#	Delivery address:	
+#	Delta Equal To	
+#	Delta over arrow	
+#	Demote	
+#	Demote to Body Text	
+#	Derivative as a limit	
+#	Describe what this object shows, for people who can't see it.	
+#	Describe what this table shows, for people who can't see it.	
+#	Design	
+#	Design Mode	
+#	Detach Template	
+#	Detect language automatically	
+#	Developer	
+#	development build	
+#	Diagonal Dots	
+#	Dictate	
+#	Dictionaries	
+#	Dictionaries folder:	
+#	Different First Page	
+#	Different Odd & Even Pages	
+#	Differential	
+#	Differential theta	
+#	Differential x	
+#	Differential y	
+#	Differentials	
+#	Direct formatting	
+#	Directory	
+#	Discard the recovery copy of {name}?	
+#	Discard…	
+#	Discord community	
+#	Display for Review	
+#	Display text	
+#	Distance from text	
+#	Distance from text:	
+	Distribute Columns	কলাম সমান করুন
+#	Distribute letters	
+	Distribute Rows	সারি সমান করুন
+#	Distribute spacing	
+#	Distributed	
+#	Do Not Check Spelling or Grammar	
+#	Do not check spelling or grammar	
+#	DO NOT COPY	
+#	Do Not Show in TOC	
+#	Do you want to save changes to {name}?	
+#	Dock Left	
+#	Dock Right	
+#	Document End	
+#	Document Formatting	
+#	Document Grid	
+#	Document Information	
+#	Document name	
+#	Document Property	
+#	Document Start	
+#	Document template:	
+#	Document Text	
+#	Document1	
+#	Document\nPreferences	
+#	Documents you open will show up here.	
+#	Does not contain	
+#	DOI	
+#	Don't add space between paragraphs of the same style	
+#	Don't capitalize after:	
+#	Don't hyphenate	
+#	Don't read Zotero, Mendeley or EndNote citations and bibliographies	
+#	Don't show me this tip again	
+#	Dot dash	
+#	Dot-dash	
+#	Dot-dot-dash	
+#	Double	
+#	Double Bar	
+#	Double Closing Quote	
+#	Double Dot	
+#	Double Integral	
+#	Double Integral with Limits	
+#	Double Integral with Stacked Limits	
+#	Double Left Arrow with Text Above	
+#	Double Left Arrow with Text Below	
+#	Double Left Right Arrow with Text Above	
+#	Double Left Right Arrow with Text Below	
+#	Double Opening Quote	
+#	Double Right Arrow with Text Above	
+#	Double Right Arrow with Text Below	
+#	Double Spacing	
+#	Double Square Brackets	
+	Double Strikethrough	দ্বৈত স্ট্রাইকথ্রু
+#	Double strikethrough	
+#	Double summation	
+#	Double Underline	
+#	Double Vertical Bars	
+#	Doughnut	
+#	DRAFT	
+#	Drag a rectangle to draw a table, or a line across cells to split them. Esc stops.	
+#	Draw Ink	
+	Draw Table	টেবিল আঁকুন
+#	Draw\nTable	
+#	Drawing Canvas	
+#	Drawing Tools	
+#	Drawing\nCanvas	
+	Drop Cap	ড্রপ ক্যাপ
+#	Drop cap	
+#	Drop Cap Options…	
+#	drop caps can't go in a table	
+#	Drop-Down List Content Control	
+#	Dropped	
+#	Drops all formatting and pastes plain text.	
+#	E-mail Messages	
+#	Edit Comment	
+#	Edit Data	
+#	Edit Document	
+#	Edit Equation	
+#	Edit Field Code	
+#	Edit Field…	
+#	Edit Footer	
+#	Edit Header	
+#	Edit Individual Documents…	
+#	Edit Items	
+#	Edit Recipient List	
+#	Edit Source	
+#	Edit\nData	
+#	Edit\nRecipient List	
+#	Edited	
+#	Editing endnote	
+#	Editing footnote	
+#	Editing header/footer	
+#	Editing in this document is restricted.	
+#	Editing — edit the document directly	
+#	Edition	
+#	Editor	
+#	Elbow Arrow Connector	
+#	Elbow Connector	
+#	Emphasis	
+#	Empty Matrices	
+#	Enclose Characters	
+#	Enclosure	
+#	Encrypt with Password	
+#	Encrypt with Password…	
+#	End of document	
+#	End of section	
+#	End of Word	
+#	Endnote Reference	
+#	Endnote Text	
+#	Endnotes	
+#	Endnotes to footnotes	
+#	English (Australia)	
+#	English (Canada)	
+#	English (India)	
+#	English (Ireland)	
+#	English (New Zealand)	
+#	English (South Africa)	
+#	English (United Kingdom)	
+#	English (United States)	
+#	Engrave	
+#	Enlarge symbol	
+#	Enter a number.	
+#	Enter bookmark name:	
+#	Enter formatting for number:	
+#	Enter in Equation	
+#	Enter page number:	
+#	Entire caption	
+#	Entry marked.	
+#	Envelope #10	
+#	Envelope #10   4.12" × 9.50"	
+#	Envelope Address	
+#	Envelope DL   4.33" × 8.66"	
+#	Envelope Return	
+#	Envelope size:	
+#	Envelopes	
+#	Equal by Definition	
+#	Equal column width	
+#	Equal Equal	
+#	Equal to	
+#	Equals:	
+	Equation	সমীকরণ
+#	Equation Gallery	
+#	Equation Info	
+#	Equation Number	
+#	Equation Options	
+#	Erase Ink	
+#	Errors ({n})	
+#	Estonian	
+#	Euler's identity	
+#	Even Banded Columns	
+#	Even Banded Rows	
+	Even Page	জোড় পৃষ্ঠা
+#	Every change is recorded as a tracked change.	
+#	Every command is available to scripts and AI agents: run `wordcraft-cli mcp` for an MCP server, or start the app with `--control <port>` for the JSON control channel.	
+#	Every field needs a name.	
+#	Everyone	
+#	Exactly	
+#	Exactly {n}	
+#	Exceptions (optional)	
+#	Exceptions…	
+#	Executive   7.25" × 10.50"	
+#	Existing File or Web Page	
+#	Expand or Collapse Heading	
+#	Exponential	
+#	Exponential series	
+#	Export a copy to share (PDF, Word document)	
+#	Export Page as PNG	
+#	Extend Selection	
+#	Extend Selection by Units	
+#	Extra space	
+#	F4 repeats your last action. Formatting ten headings is suddenly one click and nine taps.	
+#	F7 checks the spelling and grammar of the whole document.	
+#	Faster: {command} is {key} on the keyboard.	
+#	Field code:	
+#	Field Codes	
+#	Field codes:	
+#	Field name	
+#	Field name:	
+#	Field names must be different.	
+#	Field names:	
+#	Field:	
+#	Field…	
+#	Figure	
+#	File locations	
+#	File name:	
+#	File › New lists the .dotx and .dotm templates here under Personal; Save as Word Template starts here.	
+#	Fill color:	
+#	Filling in forms	
+#	Film	
+#	Filter and Sort	
+#	Filter Recipients	
+#	Find in list:	
+#	Find Next Editable Region	
+#	Find Previous	
+#	Find Recipient	
+#	Find What Expression	
+#	Find What Text	
+#	Find what:	
+#	Find “{text}” in the document	
+#	Finding printers…	
+#	Finish & Merge	
+#	Finish &\nMerge	
+#	Finished	
+#	Finnish	
+	First Column	প্রথম কলাম
+#	First line	
+#	First line:	
+#	First Name	
+#	First Record	
+#	First row of data contains column headers	
+#	Fix Position on Page	
+#	Fixed Column Width	
+#	Float	
+#	Floor	
+#	Follow number with:	
+	Font Color	ফন্ট রঙ
+#	Font color	
+#	Font color:	
+#	Font Dialog	
+#	Font: {font}	
+#	Font…	
+	Footer	ফুটার
+#	Footnote and Endnote	
+#	Footnote Reference	
+	Footnote Text	পাদটীকা টেক্সট
+#	Footnotes	
+#	Footnotes and endnotes	
+#	Footnotes to endnotes	
+#	For which item:	
+#	Format Page Numbers	
+#	Format Page Numbers…	
+	Format Painter	ফরম্যাট পেইন্টার
+#	Format Shape	
+#	Format Shape Pane	
+#	Format Shape…	
+#	Formatted	
+#	Formatted Text	
+#	Formatting	
+#	Formatting at Selection	
+#	Formatting exceptions	
+#	Formatting marks	
+#	Formatting saved for new documents:	
+#	Formatting, case changes, white space and tables are compared; the other settings are kept for later.	
+#	Formula	
+#	Formula:	
+#	Forward	
+#	Fraction	
+#	Fractions (1/2) as fraction characters (½)	
+#	Frames and effects	
+#	French (France)	
+#	From Bottom Left Corner	
+#	From Bottom Right Corner	
+#	From Center	
+#	From text:	
+#	From Top Left Corner	
+#	From Top Right Corner	
+#	from Unicode (hex)	
+#	From {name}	
+#	From:	
+#	Full page of the same label	
+#	Full Saturation 100%	
+#	Full Screen View	
+#	Full\nScreen	
+#	Fun fact: a blank page is just a draft that hasn't been told yet.	
+#	Function	
+#	Gallery	
+#	GB/T 7714	
+#	German (Germany)	
+#	getartcraft.com/apps/wordcraft	
+#	Glow Colors	
+#	Go Back	
+#	Go To	
+#	Go to	
+#	Go To (⌘⌥G)	
+#	Go to Record	
+#	Go to what:	
+#	Go To…	
+#	Gone! Like it was never written. Mostly because it now wasn't.	
+#	Good afternoon	
+#	Good evening	
+#	Good morning	
+#	GOST (name sort)	
+#	GOST (title sort)	
+#	Grab bag	
+#	Gradient fill	
+#	Gradient stops	
+#	Grave	
+#	Gray 0%	
+#	Greater than	
+#	Greater than or equal	
+#	Greek	
+#	Greek Letters	
+#	Green:	
+#	Greeting Line	
+#	Greeting\nLine	
+#	Grid Table 1 Light	
+#	Grid Table 4 – Blue	
+#	Grid Table 4 – Green	
+#	Grid Table 4 – Orange	
+#	Grid Table 4 – Purple	
+	Gridlines	গ্রিডলাইন
+#	Grouping Character Above	
+#	Grouping Character Below	
+#	Grow Font 1 Point	
+#	H:	
+	Hanging Indent	ঝুলন্ত ইনডেন্ট
+#	Harvard (Anglia)	
+#	Hat	
+	Header	হেডার
+#	Header & Footer	
+#	Header Row	
+#	Header row	
+#	Header/Footer Position	
+#	Headers and footers	
+	Heading	শিরোনাম
+	Heading 1	শিরোনাম ১
+	Heading 2	শিরোনাম ২
+	Heading 3	শিরোনাম ৩
+#	Heading styles (levels 1–{n})	
+#	Heading text	
+#	Heading {n}	
+#	Hebrew	
+#	Hex:	
+#	Hi! I'm Nib, your writing assistant. I offer tips, shortcuts and the occasional unsolicited opinion. Shall I stick around?	
+#	Hidden bookmarks	
+#	Hide Codes	
+#	Hide from style lists	
+#	Hide Ink	
+#	Hide Quick Access Toolbar	
+#	Hide White Space	
+#	Hide\nInk	
+#	Hierarchy	
+#	Highlight	
+#	Highlight Merge Fields	
+#	Highlight\nMerge Fields	
+#	Highlighter	
+numerals	Hindi	হিন্দি
+#	Home folder	
+#	Horizontal Line	
+#	How many pages the whole document has	
+#	How many pages this section has	
+#	How many words the document holds	
+#	HTML Format	
+#	Hue:	
+#	Hunspell .aff and .dic files here (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) are used before the system's.	
+#	Hyperbolic Cosecant Function	
+#	Hyperbolic Cosine Function	
+#	Hyperbolic Cotangent Function	
+#	Hyperbolic Functions	
+#	Hyperbolic Secant Function	
+#	Hyperbolic Sine Function	
+#	Hyperbolic Tangent Function	
+#	Hyperlink	
+#	Hyphenate at:	
+#	Hyphenate words in CAPS	
+#	Hyphenation Options…	
+#	Hyphenation zone:	
+#	Hyphens (--) as dashes (—)	
+#	Hypotenuse	
+#	I promise it's saved. I checked. Twice.	
+#	I'd write something myself, but I'm all nib and no ink.	
+#	I, II, III, …	
+#	i, ii, iii, …	
+#	Icon Color	
+#	Icons	
+#	Identity Matrices	
+#	IEEE	
+#	If…Then…Else	
+#	If…Then…Else…	
+#	Ignore punctuation characters	
+#	Ignore web and file addresses	
+#	Ignore white-space characters	
+#	Ignore words in capitals	
+#	Ignore words with numbers	
+#	Illustrations	
+#	Immersive	
+#	Immersive Reader	
+#	Immersive\nReader	
+#	Imported 1 source	
+#	Imported {n} sources	
+#	In Default apps, choose WordCraft for the document types you want it to open.	
+#	In equations, typing a name after a backslash replaces it with its symbol.	
+#	In Front of Text	
+#	In Line with Text	
+#	In margin	
+#	In the margin	
+#	Include label and number	
+#	Include level number from:	
+#	Include page numbers	
+	Increase Indent	ইনডেন্ট বাড়ান
+#	Indent	
+#	Indent from left:	
+#	Indentation	
+#	Indented	
+#	Indents	
+#	Indents and Spacing	
+#	Index and Tables	
+#	Index Heading	
+#	Index {n}	
+#	Indonesian	
+#	Initial column width:	
+#	Initials:	
+#	Ink	
+#	Ink Replay	
+#	Ink to Shape	
+#	Ink to\nMath	
+#	Ink to\nShape	
+#	Ink\nReplay	
+	Inline	ইনলাইন
+#	Input Format	
+#	Insert a new equation (Alt+=)	
+#	Insert Above	
+#	Insert Below	
+#	Insert Caption	
+	Insert Caption…	ক্যাপশন যোগ…
+#	Insert Chart	
+#	Insert Citation	
+#	Insert Columns to the Left	
+#	Insert Columns to the Right	
+#	Insert Date Field	
+#	Insert Endnote	
+	Insert Footnote	পাদটীকা যোগ
+#	Insert Hyperlink	
+#	Insert Index	
+#	Insert Left	
+#	Insert Merge Field	
+#	Insert Merge\nField	
+#	Insert New Equation	
+#	Insert one text or another, depending on a field's value.	
+#	Insert Page Field	
+#	Insert reference to:	
+#	Insert Right	
+#	Insert Row or Column by Clicking	
+#	Insert Rows Above	
+#	Insert Rows Below	
+#	Insert Shapes	
+#	Insert SmartArt	
+#	Insert Spike	
+#	Insert Structure	
+#	Insert Symbol	
+	Insert Table	টেবিল যোগ
+#	Insert Table of Authorities	
+#	Insert Table of Figures	
+	Insert Table…	টেবিল যোগ…
+#	Insert Time Field	
+#	Insert\nAbove	
+#	Insert\nCaption	
+#	Insert\nCitation	
+#	Insert\nFootnote	
+#	Insertions and Deletions	
+#	Insertions:	
+#	Inside Borders	
+#	Inside Horizontal Border	
+#	Inside Vertical Border	
+#	Inside:	
+#	Inspect Styles at Selection	
+#	Institution	
+#	Integral	
+#	Integral of e^(−x²)	
+#	Integral with Limits	
+#	Integral with Stacked Limits	
+#	Integrals	
+#	Intense Emphasis	
+#	Intense Quote	
+#	Intense Reference	
+#	Interface language:	
+#	Interface size:	
+#	Interface theme:	
+#	Interface\nTheme	
+#	Internet addresses as links	
+#	Intersection with Limits	
+#	Intersection with Lower Limit	
+#	Intersection with Subscript-Superscript Limits	
+#	Inverse Cosecant Function	
+#	Inverse Cosine Function	
+#	Inverse Cotangent Function	
+#	Inverse Functions	
+#	Inverse Hyperbolic Cosecant Function	
+#	Inverse Hyperbolic Cosine Function	
+#	Inverse Hyperbolic Cotangent Function	
+#	Inverse Hyperbolic Functions	
+#	Inverse Hyperbolic Secant Function	
+#	Inverse Hyperbolic Sine Function	
+#	Inverse Hyperbolic Tangent Function	
+#	Inverse Secant Function	
+#	Inverse Sine Function	
+#	Inverse Tangent Function	
+#	Ionosphere	
+#	Is blank	
+#	Is not blank	
+#	ISO 690 (author-date)	
+#	ISO 690 (numerical)	
+#	Issue	
+#	It looks like you're writing a letter. Want an envelope for it, or a letter template to start from?	
+#	Join the ArtCraft community on Discord	
+#	Join us on Discord: discord.gg/artcraft	
+#	Journal	
+#	Journal article	
+#	Justification of a display equation	
+#	Justified	
+#	Keep Lines Together	
+#	Keep lines together	
+#	Keep me around	
+#	Keep Text Only	
+#	Keep the password somewhere safe: without it nobody, WordCraft included, can open the document. Leave both boxes empty to remove the password.	
+	Keep with Next	পরবর্তীতে সাথে রাখুন
+#	Keep with next	
+#	Keeps the fonts and formatting of the copied text.	
+#	Kerning for fonts:	
+#	Keyboard shortcuts:	
+#	Keys for this command:	
+#	Label changes with:	
+#	Label:	
+#	Language Preferences…	
+#	Large\nOperator	
+#	Largest Only	
+#	Lasso Select	
+	Last Column	শেষ কলাম
+#	Last Name	
+#	Last Record	
+#	Last, First; Last, First	
+#	Latin text font:	
+#	Layout Summary	
+#	Layouts	
+#	Leader	
+#	Leave a recipient out of the merge when a field has this value.	
+#	Leave Equation	
+#	Leave out the date and time of comments and tracked changes when saving	
+#	Leave the equation (Esc)	
+#	leave the equation first	
+#	Leave the label out of the caption	
+#	Left Arrow with Text Above	
+#	Left Arrow with Text Below	
+#	Left Border	
+#	Left border	
+#	Left Bracket Twice	
+#	Left indent	
+	Left Margin	বাম মার্জিন
+#	Left Only	
+#	Left Right Arrow Above	
+#	Left Right Arrow with Text Above	
+#	Left Right Arrow with Text Below	
+#	Left Subscript-Superscript	
+#	Left-to-right	
+#	Left-to-Right Text Direction	
+#	Leftwards Arrow Above	
+#	Leftwards Harpoon Above	
+#	Legal   8.50" × 14.00"	
+#	Legal style numbering	
+#	Legend	
+#	Less Contrast −20%	
+#	Less than	
+#	Less than or equal	
+template	Letter	চিঠি
+#	Letter   8.50" × 11.00"	
+#	Letter headings	
+#	Letter template	
+#	Letter-Like Symbols	
+#	Letters	
+#	Level 5	
+#	Level 6	
+#	Level 7	
+#	Level 8	
+#	Level 9	
+#	Level {n}	
+#	Levels:	
+#	Light Variations	
+#	Light with Outline	
+#	Limit	
+#	Limit and	
+#	Limit and\nLog	
+#	Limit consecutive hyphens to:	
+#	Limit Example	
+#	Limit formatting to a selection of styles	
+#	Line and Page Breaks	
+#	Line and Paragraph Spacing	
+#	Line between	
+	Line Break	লাইন বিরতি
+#	Line breaking	
+#	Line End	
+#	Line Number	
+#	Line Numbering Options…	
+	Line Numbers	লাইন নম্বর
+	Line Spacing	লাইন ব্যবধান
+#	Line Spacing Options…	
+#	Line spacing:	
+#	Line Start	
+#	Linear Diagonal - Bottom Left to Top Right	
+#	Linear Diagonal - Bottom Right to Top Left	
+#	Linear Diagonal - Top Left to Bottom Right	
+#	Linear Diagonal - Top Right to Bottom Left	
+#	Linear Down	
+#	Linear Fraction	
+#	Linear Left	
+#	Linear Right	
+#	Linear Up	
+#	Lines and characters	
+#	Lines only	
+#	Lines per page:	
+#	Lines to drop:	
+#	Link entries to their headings	
+#	Link level to style:	
+#	Link to Previous	
+#	Link to:	
+#	Linked style (paragraph and character)	
+#	Links and References	
+#	Link…	
+#	List Definition	
+#	List entries	
+#	List Paragraph	
+#	List Table 3 – Blue	
+#	List Table 3 – Green	
+#	List Table 3 – Orange	
+#	List Table 3 – Purple	
+#	Lit from Bottom	
+#	Lit from Top	
+#	Load System Installed Fonts…	
+#	Loaded {count} system fonts.	
+#	Local font access is not supported by your browser.	
+#	Local font access was denied.	
+#	Local recovery is unavailable or still loading.	
+#	Location: {path}	
+#	Lock aspect ratio	
+#	Lock Fields	
+#	Log	
+#	Logarithm	
+#	Logarithm with Base	
+#	Logical AND	
+#	Logical AND with Limits	
+#	Logical OR	
+#	Logical OR with Limits	
+#	Lorem ipsum: because the real words are still at the café.	
+#	Lum:	
+#	Macros	
+#	Made from the author and year when empty	
+#	Magazine or newspaper article	
+#	Mail Merge	
+#	Mailings	
+#	Main entry:	
+#	Make WordCraft the default for Word documents…	
+#	Makes the ribbon, menus and dialogs larger or smaller. Auto follows your system's display scaling; 100% is one screen pixel per point. Document zoom is separate.	
+#	Manage Sources	
+#	Manage Styles	
+#	Manage Styles…	
+#	Manual Hyphenation	
+#	Manual hyphenation is complete.	
+#	Manual Line Break	
+#	Manual Page Break	
+#	Manual…	
+#	Many pages	
+#	Mark	
+#	Mark All	
+#	Mark as decorative	
+#	Mark Citation	
+#	Mark Entry	
+#	Mark Entry…	
+#	Mark grammar errors as you type	
+#	Mark Index Entry	
+#	Mark selected text as:	
+#	Mark\nCitation	
+#	Mark\nEntry	
+#	Markdown (*.md)	
+#	Match case	
+#	Match Fields	
+#	Match prefix	
+#	Match suffix	
+#	Matches: {count}	
+#	Math AutoCorrect	
+#	Matrices with Brackets	
+#	Matrix	
+#	Maximum Example	
+#	Measured By	
+#	Measurement units:	
+#	Merge cells before split	
+#	Merge Formatting	
+#	Merge Record #	
+#	Mesosphere	
+#	Midline Dots	
+#	Minus Equal	
+#	Mirror indents	
+#	Mirror margins	
+#	Mirrored	
+#	MIT OR Apache-2.0. Copyright (c) 2026 ArtCraft Team and the WordCraft contributors.	
+#	MLA	
+#	mm	
+#	Moderate	
+#	Modify Style	
+#	Modify Table Style	
+#	Modify Table Style…	
+#	Modify…	
+#	Mon	
+#	Month	
+#	More >>	
+#	More Colors…	
+#	More Columns…	
+#	More Commands…	
+#	More Contrast +20%	
+#	More Gradients…	
+#	More Paper Sizes…	
+#	More Symbols…	
+#	More tabs	
+#	More templates →	
+#	More Underlines…	
+#	Move in Equation	
+#	Move or Resize	
+#	Move Pane: {title}	
+#	Move Paragraph Down	
+#	Move Paragraph Up	
+#	Move Past Citation	
+#	Move Past\nCitation	
+#	Move Selected Ink	
+#	Move Table by Dragging	
+#	Move with Text	
+#	Moved from	
+#	Moved from:	
+#	Moved objects snap to the page's edges and centre, the margins and other objects. Hold Alt to move freely.	
+#	Moved to	
+#	Moved to:	
+#	Moves	
+#	Multilevel List	
+#	Multilevel List Library	
+	Multiple Pages	একাধিক পৃষ্ঠা
+#	Mute agent messages	
+#	Muted 50%	
+#	My list has	
+#	Name of the file this document is saved as	
+#	Narrow	
+#	Narrow  {size} all	
+#	Natural Logarithm	
+#	Nature	
+#	Navigation Pane	
+#	Negated Relations	
+#	New Comment	
+#	New comments and tracked changes are recorded under this name and these initials.	
+#	New Documents Based on This Template	
+#	New documents based on this template	
+#	New documents will use this font.	
+#	New documents will use this page setup.	
+#	New documents will use this paragraph formatting.	
+#	New documents will use this style.	
+#	New documents will use WordCraft's built-in formatting.	
+#	New documents will use WordCraft's built-in formatting. Your saved defaults can't be recovered. Reset?	
+#	New Drawing Canvas	
+#	New Entry	
+#	New Label	
+#	New Label…	
+#	New Paragraph	
+#	New shortcut:	
+#	New Tab	
+#	New Table Style	
+#	New Table Style…	
+#	New word	
+#	New\nComment	
+#	New\nWindow	
+#	Next Comment	
+#	Next Field	
+#	Next Footnote	
+#	Next Record	
+	Next Section	পরবর্তী অনুচ্ছেদ
+#	Next Sentence	
+#	Next sentence	
+#	Nib floats over the window with tips and the occasional remark.	
+#	Nib, your assistant. Drag to move; right-click for options.	
+#	No accessibility issues found.	
+#	No Border	
+#	No changes (read only)	
+#	No contributor data was built into this copy.	
+#	No document is open. Create a document or open one first.	
+#	no equation at the caret	
+#	No errors found: every merge field is in the recipient list.	
+#	No Fill	
+#	No fill	
+#	No Glow	
+#	No Gradient	
+#	No grid	
+#	No header row	
+#	No icons match your search.	
+#	No items to show.	
+#	No Markup	
+#	No model credits were built into this copy.	
+#	No new sources in that file	
+#	No Outline	
+#	No Paragraph Space	
+#	No printers found. Configure a system printer or export a PDF.	
+#	No recovery copies.	
+#	No Reflection	
+#	No Scaling	
+#	No Shadow	
+#	No Soft Edges	
+#	No sources yet.	
+#	No Spacing	
+#	No spelling dictionary for {language} is installed, so it isn't checked. WordCraft looks for the Hunspell dictionary {name} in the WORDCRAFT_DICTIONARIES folder and in the usual system locations.	
+#	No templates match your search.	
+#	No Transform	
+#	No words yet. Add to Dictionary on a misspelled word puts it here.	
+#	No-Width Non Break	
+#	No-Width Optional Break	
+#	Nonbreaking Hyphen	
+#	Normal  {size} all	
+#	Normal Indent	
+#	Normal probability density	
+#	Normal speed	
+#	Normal Style	
+#	Normal Table	
+#	Normal Text	
+#	Normal Word Document	
+#	North	
+#	Norwegian (Bokmål)	
+#	Not	
+#	Not available right now	
+#	not editing an equation	
+#	Not equal to	
+#	Not linked: click a text box	
+#	Not now	
+#	Not saved	
+#	Not saved yet	
+#	Not set	
+#	Not set: the system's usual places	
+#	Not used by any command	
+#	Not {name}	
+#	Nothing	
+#	Nothing collected yet. Items you copy or cut appear here.	
+#	nothing is selected	
+#	Nothing of this type in the document.	
+#	Now used by {command}	
+#	Nudge	
+#	Num Occurrences	
+#	Number alignment:	
+#	Number format	
+#	Number of columns:	
+#	Number of rows:	
+#	Number of the page the field sits on	
+#	Number of the section the field sits in	
+#	Number only, without the label's words	
+#	Number style for this level:	
+#	Number the equation; the number sits at the right margin (or type # then the number)	
+#	Numbering	
+#	Numbering:	
+#	Numbering…	
+#	Numerals	
+#	Numerals:	
+#	n×n Identity Matrix	
+#	n×n Matrix	
+#	Odd Banded Columns	
+#	Odd Banded Rows	
+	Odd Page	বিজোড় পৃষ্ঠা
+#	Office	
+#	Office 2003 Default	
+#	Offset (pt):	
+#	Offset: Bottom	
+#	Offset: Bottom Left	
+#	Offset: Bottom Right	
+#	Offset: Center	
+#	Offset: Left	
+#	Offset: Right	
+#	Offset: Top	
+#	Offset: Top Left	
+#	Offset: Top Right	
+#	Old menu keys: Alt, {keys}. Keep typing, or press Esc to cancel.	
+#	On: the caret glides to its new place when you type or use the arrow keys, and its blink fades. Off: it jumps and blinks on and off.	
+#	On: WordCraft opens on File › Home, with a blank document, the templates and your recent documents. Off: it opens a blank document.	
+#	One	
+#	One half	
+#	One label per recipient	
+#	One line per item. Enter adds an item.	
+	One Page	এক পৃষ্ঠা
+#	One-sided	
+#	Only allow this kind of editing:	
+#	Only comments can be added, except in regions marked editable.	
+#	Only for the selected text	
+#	Only form fields can be filled in.	
+#	only in Outline view	
+#	Only in this document	
+#	Only label and number	
+#	Only the allowed styles can be applied.	
+#	Only web (http, https) and email (mailto) links can be followed	
+#spacing	Open	
+#	Open a document first	
+#	Open a file with WordCraft's own browser when the system file dialog doesn't appear.	
+#	OpenDocument Text (*.odt)	
+#	Opening print dialog…	
+#	Opens .docx, .doc, .rtf and .odt files and Word templates with WordCraft from now on.	
+#	Opens Settings › Default apps, where you choose WordCraft for .docx and the other document types.	
+#	Operator	
+#	Operator Structures	
+#	Operators	
+#	Optional Hyphen	
+#	Or	
+#	Or save a copy in another format:	
+#	Ordinals (1st) as superscript	
+#	Organizer	
+#	Organizer…	
+#	Original document	
+#	Original size	
+#	Other Large Operators	
+#	Other styles and their TOC level:	
+#	Other:	
+#	Otherwise insert:	
+#	Outline Level	
+#	Outline level	
+#	Outline levels	
+#	Outline State	
+#	Outline Tools	
+#	Outlining	
+#	Outside border	
+#	Outside Borders	
+#	Outside:	
+#	Outward Brackets	
+#	Overbar	
+#	Overbars and Underbars	
+#	Overbrace	
+#	Overtype	
+#	Overtype (typing replaces the characters after the caret)	
+#	Page Background	
+	Page Border	পৃষ্ঠা বর্ডার
+#	Page Borders	
+	Page Break	পৃষ্ঠা বিরতি
+#	Page Break Before	
+#	Page break before	
+#	Page Breaks	
+#	Page Color	
+#	Page color	
+#	Page display	
+#	Page Down	
+#	Page image (*.png)	
+#	Page Movement	
+#	Page Number	
+#	Page number	
+#	Page Number Format	
+#	Page number style	
+#	Page numbering	
+#	Page numbers at the right margin	
+#	Page on which a bookmarked passage falls	
+#	Page Setup	
+#	Page title	
+#	Page Up	
+	Page Width	পৃষ্ঠা প্রস্থ
+#	Page width	
+#	Page X of Y	
+#	Page {page}	
+#	Page\nBorders	
+#	Page\nColor	
+#	Page\nNumber	
+#	Pages like 1-3, 5	
+#	Pages of bookmark:	
+#	Pane Options	
+#	Paper size:	
+#	Paragraph Character	
+#	Paragraph Details	
+#	Paragraph Down	
+#	Paragraph Mark	
+#	Paragraph marks	
+#	Paragraph Settings	
+#	Paragraph Spacing	
+#	Paragraph style	
+#	Paragraph Up	
+#	Paragraphs	
+#	Paragraph…	
+#	Parentheses	
+#	Parentheses with Separator	
+#	Partial Differential	
+#	Password:	
+#	Paste (⌘V)	
+#	Paste All	
+#	Paste as:	
+#	Paste Clipboard Item	
+#	Paste Formatting	
+#	Paste function:	
+#	Paste Special…	
+#	Paste: Keep Text Only	
+#	Paste: Merge Formatting	
+#	Pastes the clipboard's picture.	
+#	Paused	
+#	PDF document (*.pdf)	
+#	Pens	
+#	People	
+#	Periodical	
+#	Personal	
+#	Personal Templates	
+#	Personalize	
+#	Phonetic Guide	
+#	pi	
+#	Pi Over 2	
+#	Pick a custom group (New Group makes one)	
+#	Pick a field from the list	
+#	Picture	
+#	Picture Border	
+#	Picture border	
+#	Picture Content Control	
+#	Picture Format	
+#	Picture Styles	
+#	Picture transparency	
+#	Pictures	
+#	Pie	
+#	Place in This Document	
+#	Placeholder text	
+#	Plain Table 1	
+#	Plain text (*.txt)	
+#	Plain Text Content Control	
+#	Play/Pause	
+#	Plus Equal	
+#	Points and above	
+#	Polish	
+#	Portuguese (Brazil)	
+#	Portuguese (Portugal)	
+#	Possible spelling mistake	
+#	Postal Code	
+#	Power series of (1+x)ⁿ	
+#	Preferred width:	
+#	Preserve formatting during updates	
+#	Preset gradients	
+#	Press a key combination	
+#	Preview Results	
+#	Preview\nResults	
+#	Previous 1 or More	
+#	Previous Comment	
+#	Previous Field	
+#	Previous Record	
+#	Previous Section	
+#	Previous Sentence	
+#	Previous sentence	
+#	Print Documents	
+#	Print Documents…	
+#	Print failed: the printing worker stopped.	
+#	Print failed: {error}	
+#	Print job submitted.	
+#	Print job submitted: spooled {count} sheet(s)	
+#	Print job submitted: {receipt}	
+	Print Layout	প্রিন্ট লেআউট
+#	Print Markup	
+#	Print settings	
+#	Print the page color	
+#	Print to PDF	
+#	Print\nLayout	
+#	Printer default	
+#	Printer discovery failed.	
+#	Privacy for this document	
+#	Privacy Options	
+#	Privacy Settings	
+#	Process	
+#	Product	
+#	Product of A	
+#	Product with Limits	
+#	Product with Lower Limit	
+#	Product with Subscript-Superscript Limits	
+#	Products and Coproducts	
+#	Professional	
+#	Promote	
+#	Promote to Heading 1	
+#	Proofing	
+#	Proofing Issues	
+#	Proofing language	
+#	Protect Document	
+#	pt	
+#	Publisher	
+#	Put the caret in a content control first.	
+#	Put the default commands back on the Quick Access Toolbar?	
+#	Quadratic Root	
+#	Quick Access Toolbar	
+#	Quick Parts	
+#	Quick Tables	
+#	Quote	
+#	Radical	
+#	Radical with Degree	
+#	Radicals	
+#	Raised/lowered	
+#	Read Aloud	
+#	Read Aloud Status	
+#	Read Mode	
+#	Read\nAloud	
+#	Read\nMode	
+#	Reading	
+#	Reading Column Width	
+#	Reading Highlight	
+#	Reading Line Spacing	
+#	Reading Mode	
+#	Reading Page Color	
+#	Reading Speed	
+#	Reading Text Size	
+#	Reads the clipboard's rich text and keeps its formatting.	
+#	Reads the clipboard's web content and keeps its formatting.	
+#	Recent documents to show:	
+#	Recently Used Fonts	
+#	Recently used symbols:	
+#	Recipient List	
+#	Recipient lists	
+#	Recipients: {count}	
+#	Recolor a one-color picture, such as an icon	
+#	Recolor Selected Ink	
+#	Record Macro	
+#	Recover documents	
+#	Recover Unsaved Documents	
+#	Recovery copy	
+#	Recovery is disabled while this document has a password.	
+#	Red:	
+#	Reduce Hanging Indent	
+#	Reference type:	
+#	References	
+#	Reflection	
+#	Refresh printers	
+#	Region:	
+#	Registered	
+#	Registered Sign	
+#	Regular expressions	
+#	Reject	
+#	Reject All Changes	
+#	Reject All Changes and Stop Tracking	
+#	Reject and Move to Next	
+#	Reject Change	
+#	Relationship	
+#	Relative to original picture size	
+#	Remove Added Font	
+#	Remove condition	
+#	Remove Content Control	
+#	Remove every custom shortcut and restore the built-in keys?	
+#	Remove every custom tab and group and show all tabs again?	
+#	Remove field	
+	Remove Footer	ফুটার সরান
+#	Remove from Quick Access Toolbar	
+#	Remove gradient stop	
+	Remove Header	হেডার সরান
+#	Remove Hyperlink	
+#	Remove my name from comments, changes and file properties when saving	
+#	Remove Password	
+#	Remove Pen	
+#	Remove recipient	
+#	Remove row	
+#	Remove series	
+#	Remove Space After Paragraph	
+#	Remove Table of Contents	
+#	Remove the control once edited	
+#	Remove the space before the punctuation	
+	Remove Watermark	জলছাপ সরান
+	No watermark	জলছাপ নেই
+	Picture watermark	ছবির জলছাপ
+	Text watermark	টেক্সট জলছাপ
+	Select Picture…	ছবি নির্বাচন করুন…
+	Washout	ফ্যাকাশে
+	Semitransparent	আংশিক স্বচ্ছ
+	Transparency:	স্বচ্ছতা:
+	Select a picture first.	আগে একটি ছবি নির্বাচন করুন।
+#	Rename Document	
+#	Reopen	
+#	Repeat as header row on each page	
+	Repeat Header Rows	হেডার সারি পুনরাবৃত্তি
+#	Repeating Section Content Control	
+#	Replace All	
+#	Replace as you type	
+#	Replace Document Text	
+#	Replace text as you type	
+#	Replace with:	
+#	Replay	
+#	Research	
+#	Researcher	
+#	Researcher needs an online service; WordCraft keeps your documents offline.	
+#	Reset All…	
+#	Reset Character Formatting	
+#	Reset Crop	
+#	Reset Default Formatting	
+#	Reset Graphic	
+#	Reset Paragraph Formatting	
+#	Reset Picture	
+#	Reset tips	
+#	Reset to Normal	
+#	Reset\nGraphic	
+#	Resize Pane	
+#	Resize Table by Dragging	
+#	Resolve	
+#	Resolved	
+#	Restart at 1	
+#	Restart Each Page	
+#	Restart Each Section	
+#	Restart list after:	
+#	Restore opens an unsaved copy. Your original file stays unchanged.	
+#	Restrict Editing	
+#	Restrict\nEditing	
+#	Results	
+#	Return address labels	
+#	Return address:	
+#	Reviewing	
+#	Reviewing Pane	
+#	Reviewing — edits become suggestions	
+#	Revised document	
+#	Rewind	
+#	Rewinding. Tell me when to stop.	
+#	Ribbon	
+#	Ribbon and Quick Access Toolbar:	
+#	Ribbon tabs	
+#	Rich Text Content Control	
+#	Rich Text Format (*.rtf)	
+#	Rich Text Format (RTF)	
+#	Right (vertical)	
+#	Right Arrow with Text Above	
+#	Right Arrow with Text Below	
+#	Right Border	
+#	Right border	
+#	Right Bracket Twice	
+#	Right indent	
+	Right Margin	ডান মার্জিন
+#	Right Only	
+#	Right-to-left	
+#	Right-to-Left Section	
+#	Right-to-Left Table	
+#	Right-to-Left Text Direction	
+#	Rightwards Arrow Above	
+#	Rightwards Harpoon Above	
+#	Romanian	
+#	Roots of ax²+bx+c	
+#	Rotate all text 270°	
+#	Rotate all text 90°	
+#	Rotate Left 90°	
+#	Rotate Right 90°	
+#	Rotate with shape	
+#	Rounded	
+#	Row	
+#	Row:	
+#	Rows & Columns	
+#	Ruby text:	
+#	Rules	
+#	Run-in	
+#	Résumé	
+#	SAMPLE	
+#	Sat:	
+#	Saturation and recolor	
+#	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	
+#	Save as Word Template…	
+#	Save documents	
+#	Save the document to turn on AutoSave	
+#	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	
+#	Save these pages as PDF…	
+#	Saved. Saved again. Still saved. It's very saved.	
+#	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	
+#	Saving {name} was cancelled, so it is still open and nothing was lost.	
+#	Sayings	
+#	Sayings:	
+#	Scale Drawing	
+#	Scale Font Sizes	
+#	Scale to paper size	
+#	Scatter	
+#	Script	
+#	Scroll ribbon left	
+#	Scroll ribbon right	
+#	Search Commands	
+#	Search commands and help	
+#	Search document	
+#	Search for templates	
+#	Search icons	
+#	Search Options	
+#	Secant Function	
+#	Section 1.01	
+	Section Break	বিভাগ বিরতি
+#	Section Breaks	
+#	Section Character	
+#	Section direction:	
+#	Section Mark	
+#	Section Properties	
+#	Sections	
+#	See	
+#	select a chart first	
+#	select a connector first	
+#	select a drawing canvas first	
+#	select a floating picture or shape first	
+#	select a group first	
+#	select a picture first	
+#	select a picture or shape first	
+#	Select a picture, shape, chart or table to describe it.	
+#	Select a place in this document:	
+#	Select a printer	
+#	select a shape first	
+#	Select a shape, text box or drawing canvas to format its fill.	
+#	select a SmartArt graphic first	
+#	select a text box first	
+#	select a text box linked to another first	
+#	Select Cell	
+#	Select Column	
+#	Select Heading and Content	
+#	Select Line	
+#	Select Paragraph	
+#	Select Range	
+#	Select Recipients	
+#	select recipients first	
+#	Select recipients first to choose from their fields.	
+#	Select recipients first to match their fields.	
+#	Select Row	
+#	Select Sentence	
+#	Select Table	
+#	Select Table Cells by Clicking	
+#	Select Text	
+#	Select Text with Similar Formatting	
+#	Select text, then tick who can still edit it.	
+#	select two or more cells to merge	
+#	select two or more pictures or shapes first (Shift+click)	
+#	Select Word	
+#	Select\nRecipients	
+#	Selected Fields	
+#	Selected text	
+#	Selection Pane	
+#	Send the document straight to the system print dialog, or save a copy in another format below.	
+#	Sentence	
+#	Sentence case.	
+#	Separate text at	
+#	Separate text with	
+#	Separator:	
+#	Sepia	
+#	Sequence name:	
+#	Serbian (Cyrillic)	
+#	Serbian (Latin)	
+#	Series name	
+#	Series {n}	
+#	Set As Default	
+#	Set As Default (Font)	
+#	Set As Default (Page Setup)	
+#	Set As Default (Paragraph)	
+#	Set Caret	
+#	Set Character Formatting	
+#	Set Date	
+#	Set Equation	
+#	Set Numbering Value	
+#	Set Paragraph Formatting	
+#	Set Proofing Language…	
+#	Setting:	
+	Shading	শেডিং
+#	Shadow, glow and soft edges	
+#	Shape Fill	
+#	Shape Format	
+#	Shape Outline	
+#	Shape Styles	
+#	Shift+Enter starts a new line without starting a new paragraph.	
+#	Shift+Tab	
+#	Shipping labels	
+#	Shortcut key:	
+#	Show alignment guides when moving pictures and shapes	
+#	Show all formatting marks	
+#	Show All Levels	
+#	Show all revisions inline	
+#	Show changes at:	
+#	Show changes in:	
+#	Show Comments	
+#	Show documents with their colours inverted, like View › Switch Modes. Saving, printing and PDFs are unchanged.	
+#	Show every bibliography field	
+#	Show First Line Only	
+#	Show in the Styles gallery	
+#	Show its list number	
+#	Show its number relative to this field	
+#	Show its number with all higher levels	
+#	Show KeyTips (Alt or F10)	
+#	Show Level	
+#	Show Level 1	
+#	Show Level 2	
+#	Show Level 3	
+#	Show Level 4	
+#	Show Level 5	
+#	Show Level 6	
+#	Show Level 7	
+#	Show Level 8	
+#	Show Level 9	
+#	Show Markup	
+#	Show Notes	
+#	Show only comments and formatting in balloons	
+#	Show only records that will be merged	
+#	Show or Hide Style	
+#	Show Quick Access Toolbar	
+#	Show revisions in balloons	
+#	Show Text Formatting	
+#	Show the Assistant	
+#	Show the community button in the title bar	
+#	Show the equation in the line of text	
+#	Show the equation on a line of its own	
+#	Show the mini toolbar when text is selected	
+#	Show the ribbon	
+#	Show the Start screen when WordCraft starts	
+#	Show the tips you asked not to see again.	
+#	Show/Hide ¶	
+#	Show/Hide ¶ (Ctrl+Shift+8) shows the spaces, tabs and breaks hiding in your text.	
+#	Show/Hide ¶ ({key}) shows the spaces, tabs and breaks hiding in your text.	
+#	Show\nComments	
+#	Showing the first {count} items.	
+#	Shows a tree: each item below the item it belongs to.	
+#	Shows items around a central idea: the first item is the centre.	
+#	Shows items of equal weight as blocks in rows.	
+#	Shows overlapping ideas as overlapping circles.	
+#	Shows parts of a whole as quadrants.	
+#	Shows parts that build on each other, largest at the bottom.	
+#	Shows steps in order, left to right, with arrows between them.	
+#	Shows steps that repeat, around a circle.	
+#	Shrink Font 1 Point	
+#	Shrink text	
+#	Side to Side	
+#	Side\nto Side	
+#	Sides of a right triangle	
+#	Signature Line	
+#	Simple Frame	
+#	Sine and cosine series of f(x)	
+#	Sine Function	
+#	Sine theta	
+#	Single	
+#	Single Brackets	
+#	Single Closing Quote	
+#	Single label	
+#	Single Left Angle	
+#	Single Left Bar	
+#	Single Left Brace	
+#	Single Left Bracket	
+#	Single Left Parenthesis	
+#	Single Opening Quote	
+#	Single Right Brace	
+#	Single Right Bracket	
+#	Single Right Parenthesis	
+#	Single Spacing	
+#	SIST02	
+#	Site name	
+#	Size (pt):	
+#	Size and Crop…	
+#	Sketchbook	
+#	Skewed Fraction	
+#	Skip citations & bibliography	
+#	Skip Citations and Bibliography	
+#	Skip Record If	
+#	Skip Record If…	
+#	Slant Down	
+#	Slant Up	
+#	Small caps	
+#	Small change	
+#	Smart quotes instead of straight quotes	
+#	SmartArt	
+#	SmartArt Design	
+#	SmartArt Styles	
+#	Smooth scrolling and zooming, and menus and buttons that fade in. Off shows every change at once.	
+#	Soft Edge	
+#	Soft Edges	
+#	Soft Glow	
+#	Solid Accent	
+#	Solid fill	
+#	Sometimes	
+#	Sort by:	
+#	Sort order:	
+#	Sort Recipients	
+#	Source code: github.com/storytold/wordcraft	
+#	Source Manager	
+#	Source type:	
+#	Sources in this document:	
+#	South	
+#	Space	
+#	Space after	
+#	Space after: {pt} pt	
+#	Space before	
+#	Space before/after:	
+#	Space before: {pt} pt	
+#	Spacing (pt):	
+#	Spanish (Latin America)	
+#	Spanish (Mexico)	
+#	Spanish (Spain)	
+#	Spanish (Uruguay)	
+#	Sparse Matrices	
+#	Special Characters	
+#	Specify height:	
+#	Speech	
+#	Spelling & Grammar	
+#	Spelling &\nGrammar	
+#	Spelling and grammar are checked in English (United States).	
+#	Spelling and grammar are checked in {language}.	
+#	Spelling Suggestions	
+#	Spike	
+#	Split Cells	
+	Split Table	টেবিল বিভক্ত
+#	Spreadsheet Table	
+#	Square Root	
+#	Square Root with Degree	
+#	Square Union	
+#	Stack Object	
+#	Stack Object (Three)	
+#	Stacked Bar	
+#	Stacked Column	
+#	Stacked Fraction	
+#	Stacked, no bar	
+#	Standard Colors	
+#	Start Enforcing Protection	
+#	Start Mail Merge	
+#	Start Mail\nMerge	
+#	Start-up	
+#	State	
+#	Statement   5.50" × 8.50"	
+#	Still there? I can hear you thinking.	
+#	Stop Protection	
+#	Stop Reading	
+#	Stopped	
+#	Straight Arrow Connector	
+#	Straight Connector	
+#	Stroke {n} of {total}	
+#	Strong	
+#	Structure Actions	
+#	Structures	
+#	Studio cover	
+#	Studio handbook (sample)	
+#	Style based on:	
+#	Style Inspector	
+#	Style name:	
+#	Style Set	
+#	Style: APA	
+#	Style: {style}	
+#	Styles Pane	
+#	Styles Pane Position	
+#	Styles:	
+#	Subentry:	
+#	Submit print job	
+#	Submitting print job…	
+#	Subscript-Superscript	
+#	Subscripts and Superscripts	
+#	Subset:	
+#	Subtle Emphasis	
+#	Subtle Reference	
+#	Suggested	
+#	Sum	
+#	Sum of cosines	
+#	Sum or difference of sines	
+#	Summation	
+#	Summation from 0 to n	
+#	Summation over binomials	
+#	Summation with Limits	
+#	Summation with Lower Limit	
+#	Summation with Subscript Limit	
+#	Summation with Subscript-Superscript Limits	
+#	Summations	
+#	Suppress line numbers	
+#	Surface Integral	
+#	Surface Integral with Limits	
+#	Surface Integral with Stacked Limits	
+#	Swap footnotes and endnotes	
+#	Swedish	
+#	Switch Modes	
+#	Switch Windows	
+#	Switch\nModes	
+#	Switch\nWindows	
+#	Synonyms	
+#numerals	System	
+#	Tab Character	
+#	Tab character	
+#	Tab characters	
+#	Tab leader:	
+#	Tab stop position:	
+#	Tab stops to be cleared:	
+#	Table Column Width	
+#	Table Design	
+#	Table direction:	
+#	Table Grid	
+#	Table Layout	
+#	Table of Authorities	
+	Table of Contents	সূচিপত্র
+#	Table of Contents Options	
+#	Table of Contents Styles	
+#	Table of Figures	
+#	Table of\nContents	
+#	Table Properties	
+	Table Properties…	টেবিল বৈশিষ্ট্য…
+#	Table Row Height	
+#	Table size	
+#	Table Style Options	
+#	Table Styles	
+#	Tabloid   11.00" × 17.00"	
+#	Tabs…	
+#	Tabular List	
+#	Tag	
+#	Take the last match on the page	
+#	Take your time. The page isn't going anywhere. Neither am I. Ever.	
+#	Tangent formula	
+#	Tangent Function	
+#	TC entry fields	
+#	Technology	
+#	Templates and Add-ins	
+#	Templates you save in your templates folder show up here.	
+#	Text Box	
+#	Text boxes	
+#	text boxes can't go inside a text box	
+	Text Direction	টেক্সট দিক
+#	Text Effects	
+#	Text Effects and Typography	
+#	Text Fill	
+#	Text from File	
+#	Text Highlight Color	
+#	Text indent at:	
+#	Text of the nearest paragraph with a given style (running headers)	
+#	Text Outline	
+#	Text over Colon Equal	
+#	Text over Equal	
+#	Text Pane	
+#	Text size	
+#	Text snaps to characters	
+#	Text to display:	
+#	Text Wrapping	
+#	Text\nBox	
+#	Text\nDirection	
+#	That format doesn't keep everything, so the document is still open. Save it as a Word document (.docx) to go on.	
+#	That password isn't right. Check it (passwords are case-sensitive) and try again.	
+#	The clipboard is empty.	
+#	the Clipboard pane is empty	
+#	the cursor isn't in a table	
+#	The date it is today	
+#	The document has no bookmarks yet.	
+#	the document is protected	
+#	The document is read only, except for regions marked editable.	
+#	The document will be saved with a password. Save it to protect it.	
+#	The document you are editing keeps the names and dates; only the saved file leaves them out.	
+#	The margins don't fit on a page this size; make the margins smaller first.	
+#	The measurement must be between {min} and {max}.	
+#	The new style takes the formatting of the current paragraph.	
+#	The Normal template couldn't be read, so this document uses WordCraft's built-in formatting.	
+#	The number must be a divisor of {max}.	
+#	The number must be between 1 and {max}.	
+#	the paragraph is empty	
+#	the paragraph starts with a space	
+#	The password is optional; without it anyone can stop the protection.	
+#	The password is removed. Save the document to keep the change.	
+#	The printer, two-sided printing and pages per sheet are chosen in that dialog.	
+#	The recipient-list field that fills each part of an address block and greeting line.	
+#	The spelling and grammar check is complete.	
+#	The spelling dictionary for {language} couldn't be read, so it isn't checked. File: {file}. Reason: {reason}	
+#	the Spike is empty	
+#	The system file dialog isn't available, so WordCraft shows its own. To get the system dialog, install a file chooser portal (such as xdg-desktop-portal-gtk) or zenity.	
+#	The text at the insertion point is marked Do not check spelling or grammar.	
+#	The time right now	
+#	Theme Colors	
+#	Theme Fonts	
+#	Theme List	
+#	Themes	
+#	Then by	
+#	Then insert:	
+#	there is no ink to replay	
+#	there is nothing to undo	
+#	there's no citation after the caret	
+#	Thesaurus	
+#	These marks show even when Show/Hide ¶ is off.	
+#	These merge fields aren't in the recipient list:	
+#	These settings will be used for new documents.	
+#	Thick	
+#	Thick Frame	
+#	Thin	
+#	This cannot be undone. Your original file stays unchanged.	
+#	this chart was made in another program: WordCraft shows it but can't edit it	
+#	This document	
+#	This document only?	
+#	This field has no options.	
+#	This folder can't be read: {error}	
+#	This font has no characters to show.	
+#	this item is already at the top level	
+#	This page	
+#	This password type isn't supported.	
+#	This point forward	
+#	This section	
+#	this session has no Normal template (headless or without preferences)	
+#	this session has no Normal template (headless or without preferences): use "scope": "document"	
+#	this SmartArt was made in another program: WordCraft shows it but can't edit it	
+#	this text box is already linked: break the link first	
+#	Three	
+#	Through	
+#	Tight	
+#	Tilde	
+#	Tip	
+#	Tips ({n})	
+preview	Title	শিরোনাম
+#	Title Bar	
+#	Title from the document properties	
+#	Title:	
+#	To open Word documents with WordCraft by default: select one in Finder, choose File › Get Info, pick WordCraft under Open with, then click Change All.	
+#	To:	
+#	TOA Heading	
+#	TOC Heading	
+#	TOC {n}	
+#	Today	
+#	tOGGLE cASE	
+#	Toggle Check Box	
+#	Toggle Field Codes	
+#	Toggle Unicode Character	
+#	Top and Bottom	
+#	Top Border	
+#	Top Left Cell	
+	Top Margin	উপরের মার্জিন
+#	Top of Page	
+#	Top of the Document	
+#	Top Right Cell	
+#	Total Row	
+	Track Changes	পরিবর্তন ট্র্যাক করুন
+#	Track Changes Options	
+#	Track Changes: On	
+#	Track formatting	
+#	Track\nChanges	
+#	Track\nChanges ✓	
+#	Tracked changes	
+#	Trademark	
+#	Trademark Sign	
+#	Transport	
+#	Triangle Down	
+#	Triangle Up	
+#	Trigonometric Functions	
+#	Triple	
+#	Triple Dot	
+#	Triple Integral	
+#	Triple Integral with Limits	
+#	Triple Integral with Stacked Limits	
+#	Trust Center	
+#	Tue	
+#	Turabian	
+#	Turkish	
+#	Two	
+#	Two-sided printing	
+#	Two-sided: long edge	
+#	Two-sided: short edge	
+#	Type +2 or -1 to move from the page you are on.	
+#	Type a command, e.g. "insert table"	
+#	Type a New List…	
+#	Type a page number, or +2 / -1.	
+#	Type a size in any unit, such as 5 cm or 300 px. The other side follows, so the picture keeps its proportions.	
+#	Type at least one recipient.	
+#	Type Character Code	
+#	Type equations in LaTeX	
+#	Type equations in the linear format (UnicodeMath)	
+#	Type in Equation	
+#	Type normal (non-math) text in the equation	
+#	Type Text	
+#	Type the categories down the side and a column of values per series.	
+#	Type the field's name and its switches, for example PAGE \\* roman.	
+#	Type the password to stop the protection.	
+#	Type the recipients, or load them from a file.	
+#	Typing replaces selected text	
+#	Ukrainian	
+#	Unchecked symbol	
+#	Underbar	
+#	Underbrace	
+#	Underline Color	
+#	Underline color	
+#	Underline Words Only	
+#	Undo 1 Action	
+#	Undo Actions	
+#	Undo History	
+#	Undo {n} Actions	
+#	Undo, undo, undo… we're time travelling now.	
+#	Unformatted Text	
+#	Union of intersections	
+#	Union with Limits	
+#	Union with Lower Limit	
+#	Union with Plus	
+#	Union with Subscript-Superscript Limits	
+#	Unions and Intersections	
+#	Unlink Fields	
+#	Unlink\nCitations	
+#	Unlock Fields	
+#	Up Diagonal Dots	
+#	Up one level	
+#	Update Field	
+#	Update fields before printing	
+#	Update Index	
+#	Update Style to Match Selection	
+#	Update Styles from Template	
+#	Update Table	
+#	Update Table of Figures	
+#	Update to Match	
+#	Update to Match Selection	
+#	URGENT	
+#	URL	
+#	Use "a" before a consonant sound	
+#	Use "an" before a vowel sound	
+#	Use an Existing List…	
+#	Use system setting	
+#	Use the browser's full screen (F11)	
+#	Use the current style set and theme for all new documents?	
+#	Use the Insert key to switch overtype on and off	
+#	Use this formatting as the default for:	
+#	Use wildcards	
+#	User Name	
+#	User name:	
+#	User templates:	
+#	Vector A	
+#	Vector AB	
+#	Version History	
+#	Version {version} ({build})	
+#	Vertical alignment:	
+#	Vertical Bars	
+#	Vertical Dots	
+#	View Alt Text…	
+#	View and edit the document's custom properties.	
+#	View Gridlines	
+#	View State	
+#	View › Focus hides everything but your words. I'll wait outside.	
+#	Views	
+#	Visual effects	
+#	Vivid 200%	
+#	Volume	
+#	Volume Integral	
+#	Volume Integral with Limits	
+#	Volume Integral with Stacked Limits	
+#	Wait for the print job to finish submitting before closing.	
+#	Waiting for the save to finish…	
+#	Waiting for Zotero…	
+#	Warm Gradient with Outline	
+#	Warnings ({n})	
+#	Washout	
+#	Weather	
+	Web Layout	ওয়েব লেআউট
+#	Web page (*.html)	
+#	Web\nLayout	
+#	Wed	
+#	West	
+#	When this document was first created	
+#	When this document was most recently printed	
+#	When this document was most recently saved	
+#	White Space	
+#	White space	
+#	Who the document properties name as author	
+#	Whole document	
+#	Whole page	
+#	Whole Table	
+#	Whole words	
+#	Wide	
+#	Widow/Orphan Control	
+#	Widow/Orphan control	
+#	Width and spacing	
+#	Wildcards (regex)	
+#	With:	
+#	Word 2003 XML Document (*.xml)	
+	Word Count	শব্দ সংখ্যা
+#	Word document	
+#	Word document (*.docx)	
+#	Word Left	
+#	Word level	
+#	Word Right	
+#	Word sources	
+#	Word XML Document (*.xml)	
+#	WordArt	
+#	WordArt Styles	
+#	WordCraft	
+#	WordCraft is now the default app for Word documents.	
+#	Words only	
+	Wrap Text	টেক্সট মোড়ানো
+#	Wrap Text Sides	
+#	Wrap\nText	
+#	Write & Insert Fields	
+#	Write a reply	
+#	Writer's block? I find staring at the cursor helps. It's been blinking at me for years.	
+#	x bar	
+#	Year	
+#	Yields	
+#	You haven't saved in a while, and AutoSave is off. Save now?	
+#	You started a list. Press Enter twice to end it, or Backspace at the start of an item to turn it back into text.	
+#	Your document is now the most saved document in history.	
+#	Your system doesn't report an animation setting, so animation effects stay on.	
+#	Your system has animation effects turned off.	
+#	Your system has animation effects turned on.	
+#	Zotero	
+#	Zotero: cancelled	
+#	Zotero: done	
+#	{added}; {count} couldn't be read: {names}	
+#	{added}; {n} skipped (limit {max})	
+#	{cols}×{rows} Table	
+#	{contributors} contributors · {commits} commits	
+#	{count} items highlighted	
+#	{count} of {total} pages will print	
+#	{count} of {total} recipients will be merged.	
+#	{group} settings	
+#	{key} checks the spelling and grammar of the whole document.	
+#	{key} counts your words, characters and paragraphs.	
+#	{key} finds and replaces text, formatting and special characters.	
+#	{key} repeats your last action. Formatting ten headings is suddenly one click and nine taps.	
+#	{key} starts a new line without starting a new paragraph.	
+#	{key} starts a new page. Much tidier than pressing Enter until it happens.	
+#	{key} turns the selected text into a link.	
+#	{key}+Click to follow link	
+#	{kind}, {columns} × {rows}, {size} ({paper})	
+#	{language} (dictionary unreadable)	
+#	{language} (no dictionary)	
+#	{language} is now the document's default language.	
+#	{language}: no dictionary found	
+#	{language}: WordCraft doesn't check spelling or grammar in this language yet.	
+#	{language}: {file}	
+#	{language}: {file} (unreadable: {reason})	
+#	{names} and {n} more	
+#	{name}   {height} × {width} in	
+#	{name}   {height} × {width} mm	
+#	{name} already exists. Choose Save again to replace it.	
+#	{name} is protected with a password.	
+#	{name} options	
+#	{name} wasn't found.	
+#	{n} entries marked.	
+#	{n} lines	
+#	{n} pt	
+#	{paper}   {width} × {height}	
+#	{selected} of {words} words	
+#	{size} pt	
+#	{width} × {height} mm	
+#	{width} × {height} pixels	
+#	{words} words	
+#	{words} words and counting. Literally. I'm counting.	
+#	{words} words! I'd throw confetti but I'd have to clean it up.	
+#	{words} words. That's {words} more than I've written today.	
+#	“{text}” ({row}, {series}) isn't a number.	
+#	✓ None	
+#	➕ New comment	
+#	📂  Browse…	
+	Add a language…	একটি ভাষা যোগ করুন…
+	Add a language	একটি ভাষা যোগ করুন
+	Your languages	আপনার ভাষাসমূহ
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	ইংরেজি, এই নথির ভাষাগুলো এবং ইনস্টল করা প্রতিটি ভাষা প্যাক। ভাষা প্যাক বানান অভিধান ও হাইফেনেশন যোগ করে।
+	Set as default	ডিফল্ট হিসেবে সেট করুন
+	New blank documents are written in this language	নতুন ফাঁকা নথি এই ভাষায় লেখা হয়
+	{language} (default)	{language} (ডিফল্ট)
+	Built in	অন্তর্নির্মিত
+	Your own dictionary	আপনার নিজের অভিধান
+	System dictionary	সিস্টেম অভিধান
+	Not available yet	এখনও পাওয়া যাচ্ছে না
+	Grammar built in	ব্যাকরণ অন্তর্নির্মিত
+	Install spelling ({size})	বানান ইনস্টল করুন ({size})
+	Its dictionary couldn't be read: {reason}	এর অভিধান পড়া যায়নি: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	ডাউনলোড বন্ধ আছে। একটি ভাষা যোগ করুন… বা ইনস্টল করুন ক্লিক করলে এটি চালু হয়: তখন WordCraft GitHub থেকে ভাষা প্যাক ও ফন্ট ডাউনলোড করে।
+	Search:	অনুসন্ধান:
+	Dutch, Nederlands or nl	ডাচ, Nederlands বা nl
+	No languages to show yet.	দেখানোর মতো কোনো ভাষা এখনও নেই।
+	No language matches your search.	আপনার অনুসন্ধানের সাথে কোনো ভাষা মেলে না।
+	An installed Language pack is used after this folder.	ইনস্টল করা ভাষা প্যাক এই ফোল্ডারের পরে ব্যবহৃত হয়।
+	Dictionary files	অভিধান ফাইল
+	Possible spelling mistake	সম্ভাব্য বানান ভুল
+	Gets the list of Language packs, then this language's pack if there is one.	ভাষা প্যাকের তালিকা আনে, তারপর এই ভাষার প্যাক আনে (থাকলে)।
+	Afrikaans	আফ্রিকান্স
+	Belarusian	বেলারুশীয়
+	Bulgarian	বুলগেরীয়
+	Bosnian	বসনীয়
+	Catalan	কাতালান
+	Catalan (Valencian)	কাতালান (ভ্যালেন্সীয়)
+	Welsh	ওয়েলশ
+	Esperanto	এস্পেরান্তো
+	Persian	ফার্সি
+	Irish	আইরিশ
+	Galician	গালিসীয়
+	Hungarian	হাঙ্গেরীয়
+	Armenian	আর্মেনীয়
+	Icelandic	আইসল্যান্ডীয়
+	Georgian	জর্জীয়
+	Lithuanian	লিথুয়ানীয়
+	Latvian	লাটভীয়
+	Macedonian	ম্যাসিডোনীয়
+	Norwegian (Nynorsk)	নরওয়েজীয় (নিনরস্ক)
+	Romanian	রোমানীয়
+	Slovak	স্লোভাক
+	Slovenian	স্লোভেনীয়
+	Albanian	আলবেনীয়
+	Swahili	সোয়াহিলি
+	Tamil	তামিল
+	Thai	থাই
+	Vietnamese	ভিয়েতনামী
+	Set as Default Language	ডিফল্ট ভাষা হিসেবে সেট করুন
+	U.A.E.	সংযুক্ত আরব আমিরাত
+	Angola	অ্যাঙ্গোলা
+	Argentina	আর্জেন্টিনা
+	Austria	অস্ট্রিয়া
+	Australia	অস্ট্রেলিয়া
+	Bosnia and Herzegovina	বসনিয়া ও হার্জেগোভিনা
+	Belgium	বেলজিয়াম
+	Bolivia	বলিভিয়া
+	Brazil	ব্রাজিল
+	Belarus	বেলারুশ
+	Canada	কানাডা
+	Switzerland	সুইজারল্যান্ড
+	Chile	চিলি
+	China	চীন
+	Colombia	কলম্বিয়া
+	Costa Rica	কোস্টা রিকা
+	Cuba	কিউবা
+	Cabo Verde	কেপ ভার্দে
+	Cyprus	সাইপ্রাস
+	Germany	জার্মানি
+	Dominican Republic	ডোমিনিকান প্রজাতন্ত্র
+	Ecuador	ইকুয়েডর
+	Egypt	মিশর
+	Spain	স্পেন
+	Finland	ফিনল্যান্ড
+	France	ফ্রান্স
+	United Kingdom	যুক্তরাজ্য
+	Equatorial Guinea	নিরক্ষীয় গিনি
+	Guatemala	গুয়াতেমালা
+	Hong Kong SAR	হংকং এসএআর
+	Honduras	হন্ডুরাস
+	Ireland	আয়ারল্যান্ড
+	India	ভারত
+	Iraq	ইরাক
+	Italy	ইতালি
+	Jamaica	জামাইকা
+	Jordan	জর্ডান
+	Kuwait	কুয়েত
+	Kazakhstan	কাজাখস্তান
+	Lebanon	লেবানন
+	Liechtenstein	লিখটেনস্টাইন
+	Luxembourg	লুক্সেমবার্গ
+	Morocco	মরক্কো
+	Monaco	মোনাকো
+	Montenegro	মন্টিনিগ্রো
+	Macao SAR	ম্যাকাও এসএআর
+	Mexico	মেক্সিকো
+	Malaysia	মালয়েশিয়া
+	Mozambique	মোজাম্বিক
+	Nicaragua	নিকারাগুয়া
+	Netherlands	নেদারল্যান্ডস
+	New Zealand	নিউজিল্যান্ড
+	Panama	পানামা
+	Peru	পেরু
+	Philippines	ফিলিপাইন
+	Puerto Rico	পুয়ের্তো রিকো
+	Portugal	পর্তুগাল
+	Paraguay	প্যারাগুয়ে
+	Qatar	কাতার
+	Russia	রাশিয়া
+	Singapore	সিঙ্গাপুর
+	El Salvador	এল সালভাদর
+	Syria	সিরিয়া
+	Taiwan	তাইওয়ান
+	Ukraine	ইউক্রেন
+	United States	মার্কিন যুক্তরাষ্ট্র
+	Uruguay	উরুগুয়ে
+	Venezuela	ভেনেজুয়েলা
+	South Africa	দক্ষিণ আফ্রিকা

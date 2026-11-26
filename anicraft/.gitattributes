@@ -1,0 +1,22 @@
+# Normalise line endings in the repository; check out with the platform's native endings.
+* text=auto
+*.rs text diff=rust
+*.toml text
+*.md text
+*.json text
+*.png binary
+# shell hooks must keep LF endings or /bin/sh rejects them
+scripts/git-hooks/* text eol=lf
+*.wav binary
+*.ogg binary
+*.mp3 binary
+# packaging scripts run on Linux and macOS runners; the DMG layout files are binary
+*.sh text eol=lf
+.shellcheckrc text eol=lf
+*.tiff binary
+*.DS_Store binary
+*.ico binary
+# XFL corpus media (ADR 0086)
+*.flv binary
+*.aif binary
+*.dat binary

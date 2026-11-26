@@ -1,0 +1,14 @@
+[package]
+name = "anicraft-audio"
+description = "AniCraft L0: sound decoding (via craft-audio), deterministic mixing and resampling, WAV writing, waveform peaks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+craft-audio.workspace = true
+
+[lints]
+workspace = true

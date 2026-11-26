@@ -1670,6 +1670,14 @@ template	Letter	Pismo
 	Remove the control once edited	Ukloni kontrolu nakon uređivanja
 	Remove the space before the punctuation	Ukloni razmak prije interpunkcije
 	Remove Watermark	Ukloni vodeni žig
+	No watermark	Bez vodenog žiga
+	Picture watermark	Vodeni žig sa slikom
+	Text watermark	Tekstualni vodeni žig
+	Select Picture…	Odaberi sliku…
+	Washout	Izblijedjelo
+	Semitransparent	Poluprozirno
+	Transparency:	Prozirnost:
+	Select a picture first.	Prvo odaberite sliku.
 	Rename Document	Preimenuj dokument
 	Reopen	Ponovno otvori
 	Repeat as header row on each page	Ponovi kao redak zaglavlja na svakoj stranici
@@ -2355,3 +2363,121 @@ preview	Title	Naslov
 	✓ None	✓ Nema
 	➕ New comment	➕ Novi komentar
 	📂  Browse…	📂  Pregledaj…
+	Add a language…	Dodaj jezik…
+	Add a language	Dodaj jezik
+	Your languages	Vaši jezici
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engleski, jezici ovog dokumenta i svaki instalirani jezični paket. Jezični paketi dodaju rječnike za pravopis i rastavljanje riječi.
+	Set as default	Postavi kao zadano
+	New blank documents are written in this language	Novi prazni dokumenti pišu se na ovom jeziku
+	{language} (default)	{language} (zadano)
+	Built in	Ugrađeno
+	Your own dictionary	Vaš vlastiti rječnik
+	System dictionary	Sustavski rječnik
+	Not available yet	Još nije dostupno
+	Grammar built in	Gramatika je ugrađena
+	Install spelling ({size})	Instaliraj pravopis ({size})
+	Its dictionary couldn't be read: {reason}	Njegov rječnik nije se mogao pročitati: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Preuzimanje je isključeno. Klik na „Dodaj jezik…“ ili „Instaliraj“ uključuje ga: tada WordCraft preuzima jezične pakete i fontove s GitHuba.
+	Search:	Traži:
+	Dutch, Nederlands or nl	Nizozemski, Nederlands ili nl
+	No languages to show yet.	Još nema jezika za prikaz.
+	No language matches your search.	Nijedan jezik ne odgovara vašem pretraživanju.
+	An installed Language pack is used after this folder.	Instalirani jezični paket koristi se nakon ove mape.
+	Dictionary files	Datoteke rječnika
+	Gets the list of Language packs, then this language's pack if there is one.	Dohvaća popis jezičnih paketa, zatim paket ovog jezika ako postoji.
+	Afrikaans	afrikaans
+	Belarusian	bjeloruski
+	Bulgarian	bugarski
+	Bosnian	bosanski
+	Catalan	katalonski
+	Catalan (Valencian)	katalonski (valencijski)
+	Welsh	velški
+	Esperanto	esperanto
+	Persian	perzijski
+	Irish	irski
+	Galician	galicijski
+	Hungarian	mađarski
+	Armenian	armenski
+	Icelandic	islandski
+	Georgian	gruzijski
+	Lithuanian	litavski
+	Latvian	latvijski
+	Macedonian	makedonski
+	Norwegian (Nynorsk)	norveški (nynorsk)
+	Slovak	slovački
+	Slovenian	slovenski
+	Albanian	albanski
+	Swahili	svahili
+	Tamil	tamilski
+	Thai	tajlandski
+	Vietnamese	vijetnamski
+	Set as Default Language	Postavi kao zadani jezik
+	U.A.E.	UAE
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austrija
+	Australia	Australija
+	Bosnia and Herzegovina	Bosna i Hercegovina
+	Belgium	Belgija
+	Bolivia	Bolivija
+	Brazil	Brazil
+	Belarus	Bjelarus
+	Canada	Kanada
+	Switzerland	Švicarska
+	Chile	Čile
+	China	Kina
+	Colombia	Kolumbija
+	Costa Rica	Kostarika
+	Cuba	Kuba
+	Cabo Verde	Zelenortski Otoci
+	Cyprus	Cipar
+	Germany	Njemačka
+	Dominican Republic	Dominikanska Republika
+	Ecuador	Ekvador
+	Egypt	Egipat
+	Spain	Španjolska
+	Finland	Finska
+	France	Francuska
+	United Kingdom	Ujedinjeno Kraljevstvo
+	Equatorial Guinea	Ekvatorska Gvineja
+	Guatemala	Gvatemala
+	Hong Kong SAR	Hong Kong SAR
+	Honduras	Honduras
+	Ireland	Irska
+	India	Indija
+	Iraq	Irak
+	Italy	Italija
+	Jamaica	Jamajka
+	Jordan	Jordan
+	Kuwait	Kuvajt
+	Kazakhstan	Kazahstan
+	Lebanon	Libanon
+	Liechtenstein	Lihtenštajn
+	Luxembourg	Luksemburg
+	Morocco	Maroko
+	Monaco	Monako
+	Montenegro	Crna Gora
+	Macao SAR	Makao SAR
+	Mexico	Meksiko
+	Malaysia	Malezija
+	Mozambique	Mozambik
+	Nicaragua	Nikaragva
+	Netherlands	Nizozemska
+	New Zealand	Novi Zeland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipini
+	Puerto Rico	Portoriko
+	Portugal	Portugal
+	Paraguay	Paragvaj
+	Qatar	Katar
+	Russia	Rusija
+	Singapore	Singapur
+	El Salvador	Salvador
+	Syria	Sirija
+	Taiwan	Tajvan
+	Ukraine	Ukrajina
+	United States	Sjedinjene Američke Države
+	Uruguay	Urugvaj
+	Venezuela	Venezuela
+	South Africa	Južnoafrička Republika

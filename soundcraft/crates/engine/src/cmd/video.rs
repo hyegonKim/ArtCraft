@@ -135,7 +135,7 @@ mod tests {
         std::fs::create_dir_all(&dir).unwrap();
         let out = dir.join("mix.wav");
         e.execute("file.bounce_mix", &json!({"path": out.to_string_lossy(), "start": 0, "end": 96_000, "dither": false})).unwrap();
-        let (_, buf) = soundcraft_audio_io::decode(&std::fs::read(&out).unwrap(), Some("wav")).unwrap();
+        let (_, buf) = craft_audio::decode(&std::fs::read(&out).unwrap(), Some("wav")).unwrap();
         assert!(buf.channels.iter().flatten().all(|x| *x == 0.0));
         let _ = std::fs::remove_dir_all(dir);
     }
@@ -165,7 +165,7 @@ mod tests {
         let sess = dir.join("s.scraft");
         e.execute("session.save_as", &json!({"path": sess.to_string_lossy()})).unwrap();
         let mut e2 = Engine::default();
-        let missing = crate::io::open_session(&mut e2, &sess.to_string_lossy()).unwrap();
+        let missing = crate::io::open_session(&mut e2, &sess).unwrap();
         assert!(missing.is_empty(), "{missing:?}");
         assert_eq!(e2.session().tracks[0].clips()[0], clip);
         assert_eq!(e2.session().videos, e.session().videos);
@@ -173,12 +173,12 @@ mod tests {
         std::fs::create_dir_all(dir.join("Video Files")).unwrap();
         std::fs::rename(&movie, dir.join("Video Files").join("picture.mp4")).unwrap();
         let mut e3 = Engine::default();
-        assert!(crate::io::open_session(&mut e3, &sess.to_string_lossy()).unwrap().is_empty());
+        assert!(crate::io::open_session(&mut e3, &sess).unwrap().is_empty());
         assert!(e3.session().videos[0].path.contains("Video Files"));
         // Movie gone: the session still opens and reports it.
         std::fs::remove_file(dir.join("Video Files").join("picture.mp4")).unwrap();
         let mut e4 = Engine::default();
-        let missing = crate::io::open_session(&mut e4, &sess.to_string_lossy()).unwrap();
+        let missing = crate::io::open_session(&mut e4, &sess).unwrap();
         assert!(missing.iter().any(|m| m.contains("picture.mp4")), "{missing:?}");
         assert!(e4.messages.iter().any(|m| m.contains("missing media")));
         assert_eq!(e4.session().tracks[0].clips().len(), 1);

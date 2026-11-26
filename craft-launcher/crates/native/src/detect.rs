@@ -128,7 +128,15 @@ pub fn detect_workspace_binary(app: &CraftApp) -> Option<Installed> {
     let version = windows::executable_version(&path);
     #[cfg(not(windows))]
     let version = None;
-    Some(Installed { version, source: InstallSource::Binary, location: path.display().to_string(), package: None })
+    Some(Installed {
+        version,
+        source: InstallSource::Binary,
+        location: path.display().to_string(),
+        package: None,
+        externally_managed: false,
+        origin: None,
+        installation: None,
+    })
 }
 
 fn from_manifest(app: &CraftApp, manifest: &Manifest) -> Option<Installed> {
@@ -146,6 +154,9 @@ fn from_manifest(app: &CraftApp, manifest: &Manifest) -> Option<Installed> {
         source: InstallSource::Launcher,
         location: rec.path.display().to_string(),
         package: None,
+        externally_managed: false,
+        origin: None,
+        installation: None,
     })
 }
 
@@ -167,7 +178,8 @@ pub(crate) fn appimage_version(name: &str, stems: &[&str]) -> Option<Option<Stri
     (parsed.kind == artcraft_launcher_core::PackageKind::AppImage && parsed.token.starts_with("linux-")).then_some(Some(parsed.version))
 }
 
-/// Who our Windows Installer packages name as their publisher.
+/// Who our Windows Installer packages name as their publisher. A community app's names its own
+/// ([`CraftApp::msi_publisher`]).
 #[cfg_attr(not(windows), allow(dead_code))]
 const PUBLISHER: &str = "Learning Machines LLC";
 
@@ -175,17 +187,39 @@ const PUBLISHER: &str = "Learning Machines LLC";
 /// installers have registered.
 #[cfg_attr(not(windows), allow(dead_code))]
 fn is_installer_entry(app: &CraftApp, display_name: &str, publisher: &str) -> bool {
-    publisher == PUBLISHER && app.names().any(|n| n == display_name)
+    publisher == app.msi_publisher.unwrap_or(PUBLISHER) && app.names().any(|n| n == display_name)
 }
 
 /// Where a Windows install of `app` may keep its exe, in the order to try: the entry's
-/// `InstallLocation`, then `<App>` under each Program Files root for each name the app has had,
+/// `InstallLocation`, then `<App>` under each install root (the `ArtCraft` suite folder first, then the
+/// root itself, for Program Files and the per-user Programs folder) for each name the app has had,
 /// and in each folder `<stem>.exe` for each stem, current first. Doesn't touch the disk.
 #[cfg_attr(not(windows), allow(dead_code))]
 fn exe_candidates(app: &CraftApp, location: Option<&Path>, program_files: &[PathBuf]) -> Vec<PathBuf> {
     let in_program_files = program_files.iter().flat_map(|root| app.names().map(move |n| root.join(n)));
     let dirs = location.map(Path::to_path_buf).into_iter().chain(in_program_files);
     dirs.flat_map(|d| app.stems().map(move |s| d.join(format!("{s}.exe")))).collect()
+}
+
+/// The folder under `ArtCraft` that the MSI installs to when it is not the display name: the launcher
+/// installs to `ArtCraft\Launcher`, the apps to `ArtCraft\<App>`.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn suite_folders(app: &CraftApp, roots: &[PathBuf]) -> Vec<PathBuf> {
+    if app.id != artcraft_launcher_core::catalog::LAUNCHER_ID {
+        return Vec::new();
+    }
+    roots.iter().map(|root| root.join("ArtCraft").join("Launcher")).collect()
+}
+
+/// The registry keys an MSI records its install folder in (value `InstallDir`). The launcher's package
+/// keeps its own key, under the publisher name.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn install_dir_keys(app: &CraftApp) -> Vec<String> {
+    let mut keys = vec![format!(r"SOFTWARE\{}", app.name)];
+    if app.id == artcraft_launcher_core::catalog::LAUNCHER_ID {
+        keys.push(format!(r"SOFTWARE\{PUBLISHER}\{}", app.name));
+    }
+    keys
 }
 
 /// Version from `<app> --version` output. Binaries print the machine id (`photocraft 0.7.0`),
@@ -216,6 +250,330 @@ fn strip_cli_prefix<'a>(line: &'a str, prefix: &str) -> Option<&'a str> {
     }
 }
 
+/// An industry counterpart (such as Adobe Creative Cloud 2027, Figma, AutoCAD, or Microsoft Office)
+/// detected on the local system for a Craft Suite app.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DetectedCounterpart {
+    /// Canonical counterpart product name (`"Adobe Photoshop 2027"`, `"Adobe Acrobat DC"`, ...).
+    pub name: String,
+    /// Detected product version (from PE `VERSIONINFO`, registry `DisplayVersion`, `Info.plist`,
+    /// or the matched CC 2027 install directory baseline).
+    pub version: Option<version::Version>,
+    /// Companion plug-in version detected alongside the host app (such as `("Camera Raw", 19.0)`).
+    pub companion_version: Option<(String, version::Version)>,
+    /// Path to the detected executable, plug-in binary, `.app` bundle, or install directory.
+    pub location: PathBuf,
+    /// True when the detected version or install slot meets the Adobe CC 2027 / Acrobat DC 26.2 baseline.
+    pub is_cc_2027: bool,
+}
+
+impl DetectedCounterpart {
+    /// Formatted display label including detected version and any companion plug-in version.
+    pub fn display_label(&self) -> String {
+        match (&self.version, &self.companion_version) {
+            (Some(v), Some((comp, cv))) => format!("{} {v} ({comp} {cv})", self.name),
+            (Some(v), None) => format!("{} {v}", self.name),
+            (None, Some((comp, cv))) => format!("{} ({comp} {cv})", self.name),
+            (None, None) => self.name.clone(),
+        }
+    }
+}
+
+/// Whether a Windows Uninstall registry record (`DisplayName`, `Publisher`) belongs to `spec`.
+pub fn matches_adobe_registry_entry(
+    spec: &artcraft_launcher_core::counterpart::AdobeProductSpec,
+    display_name: &str,
+    publisher: &str,
+) -> bool {
+    let pub_lower = publisher.trim().to_ascii_lowercase();
+    if !pub_lower.is_empty() && !pub_lower.contains("adobe") {
+        return false;
+    }
+    let name_lower = display_name.trim().to_ascii_lowercase();
+    // Do not confuse Adobe Acrobat Reader with full Adobe Acrobat DC when matching Acrobat DC.
+    if spec.id == artcraft_launcher_core::counterpart::AdobeProductId::AcrobatDc && name_lower.contains("reader") {
+        return false;
+    }
+    spec.registry_prefixes.iter().any(|prefix| name_lower.starts_with(&prefix.to_ascii_lowercase()))
+}
+
+fn join_windows_rel(root: &Path, rel: &str) -> PathBuf {
+    rel.split(['\\', '/']).filter(|s| !s.is_empty()).fold(root.to_path_buf(), |acc, part| acc.join(part))
+}
+
+fn file_product_version(path: &Path) -> Option<version::Version> {
+    #[cfg(windows)]
+    {
+        windows::executable_version(path)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = path;
+        None
+    }
+}
+
+/// Candidate Windows filesystem paths for `spec`, returning `(path, is_cc_2027_slot, is_dir_probe)`.
+///
+/// Both `<Root>\Adobe\<rel>` (standard Creative Cloud layout) and `<Root>\<rel>` (direct root or
+/// custom Adobe root) are checked in priority order: CC 2027 executable first, CC 2027 install
+/// directory second (for directory-level installs such as After Effects 2027 and InDesign 2027),
+/// then older Creative Cloud generations.
+pub fn adobe_windows_candidate_paths(
+    spec: &artcraft_launcher_core::counterpart::AdobeProductSpec,
+    program_roots: &[PathBuf],
+    common_roots: &[PathBuf],
+) -> Vec<(PathBuf, bool, bool)> {
+    let bases = if spec.uses_common_files { common_roots } else { program_roots };
+    let mut out = Vec::new();
+    let mut push_both = |rel: &str, is_2027: bool, is_dir: bool| {
+        for root in bases {
+            let under_adobe = join_windows_rel(&root.join("Adobe"), rel);
+            if !out.iter().any(|(p, _, _)| p == &under_adobe) {
+                out.push((under_adobe, is_2027, is_dir));
+            }
+            let direct = join_windows_rel(root, rel);
+            if !out.iter().any(|(p, _, _)| p == &direct) {
+                out.push((direct, is_2027, is_dir));
+            }
+        }
+    };
+    push_both(spec.windows_exe, true, false);
+    push_both(spec.windows_dir, true, true);
+    for legacy_exe in spec.legacy_windows_exes {
+        push_both(legacy_exe, false, false);
+    }
+    for legacy_dir in spec.legacy_windows_dirs {
+        push_both(legacy_dir, false, true);
+    }
+    out
+}
+
+/// Detect an Adobe product or shared plug-in under explicit Windows directory roots (testable on
+/// any platform without touching live system folders).
+pub fn detect_adobe_product_in_roots(
+    spec: &artcraft_launcher_core::counterpart::AdobeProductSpec,
+    program_roots: &[PathBuf],
+    common_roots: &[PathBuf],
+) -> Option<DetectedCounterpart> {
+    use artcraft_launcher_core::counterpart::{AdobeProductId, AdobeProductSpec};
+
+    let mut matched: Option<(PathBuf, bool, Option<version::Version>)> = None;
+    for (candidate, is_2027_slot, is_dir_probe) in adobe_windows_candidate_paths(spec, program_roots, common_roots) {
+        if !is_dir_probe && candidate.is_file() {
+            let embedded = file_product_version(&candidate);
+            matched = Some((candidate, is_2027_slot, embedded));
+            break;
+        }
+        if is_dir_probe && candidate.is_dir() {
+            // For Plug-Ins\CC\File Formats (shared folder), require the actual Camera Raw.8bi binary.
+            if spec.uses_common_files {
+                continue;
+            }
+            matched = Some((candidate, is_2027_slot, None));
+            break;
+        }
+    }
+
+    let (location, is_2027_slot, embedded_ver) = matched?;
+    let resolved_ver = embedded_ver.or_else(|| is_2027_slot.then(|| spec.parsed_release_version()).flatten());
+    let is_cc_2027 = match &resolved_ver {
+        Some(v) => spec.matches_cc_2027_version(v),
+        None => is_2027_slot && spec.cc_2027_lineup,
+    };
+    let name = if is_cc_2027 { spec.name.to_string() } else { spec.family.to_string() };
+
+    let companion_version = if spec.companion.is_some() && spec.id != AdobeProductId::CameraRaw {
+        let cr_spec = AdobeProductSpec::by_id(AdobeProductId::CameraRaw);
+        detect_adobe_product_in_roots(cr_spec, program_roots, common_roots)
+            .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)))
+    } else {
+        None
+    };
+
+    Some(DetectedCounterpart { name, version: resolved_ver, companion_version, location, is_cc_2027 })
+}
+
+/// Detect all industry counterparts for `app` (covering all 16 Craft Suite apps) inside explicit
+/// program, common-files, and per-user roots.
+pub fn detect_counterparts_in_roots(
+    app: &CraftApp,
+    program_roots: &[PathBuf],
+    common_roots: &[PathBuf],
+    user_roots: &[PathBuf],
+) -> Vec<DetectedCounterpart> {
+    let Some(spec) = app.counterpart() else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for adobe_spec in spec.adobe_specs() {
+        if let Some(found) = detect_adobe_product_in_roots(adobe_spec, program_roots, common_roots) {
+            out.push(found);
+        }
+    }
+    if !spec.non_adobe_windows_exes.is_empty() {
+        for rel in spec.non_adobe_windows_exes {
+            let found_path = program_roots
+                .iter()
+                .chain(user_roots.iter())
+                .map(|root| join_windows_rel(root, rel))
+                .find(|p| p.is_file());
+            if let Some(location) = found_path {
+                let ver = file_product_version(&location);
+                out.push(DetectedCounterpart {
+                    name: spec.display_name.to_string(),
+                    version: ver,
+                    companion_version: None,
+                    location,
+                    is_cc_2027: false,
+                });
+                break;
+            }
+        }
+    }
+    out
+}
+
+fn system_program_roots() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
+    let mut program_roots = Vec::new();
+    for var in ["ProgramW6432", "ProgramFiles", "ProgramFiles(x86)"] {
+        if let Some(p) = std::env::var_os(var).map(PathBuf::from)
+            && !program_roots.contains(&p)
+        {
+            program_roots.push(p);
+        }
+    }
+    let mut common_roots = Vec::new();
+    for var in ["CommonProgramW6432", "CommonProgramFiles", "CommonProgramFiles(x86)"] {
+        if let Some(p) = std::env::var_os(var).map(PathBuf::from)
+            && !common_roots.contains(&p)
+        {
+            common_roots.push(p);
+        }
+    }
+    let mut user_roots = Vec::new();
+    if let Some(local) = std::env::var_os("LOCALAPPDATA").map(PathBuf::from) {
+        user_roots.push(local.join("Programs"));
+        user_roots.push(local);
+    }
+    (program_roots, common_roots, user_roots)
+}
+
+#[cfg(target_os = "macos")]
+fn detect_mac_bundle_version(bundle: &Path) -> Option<version::Version> {
+    let plist = plist::Value::from_file(bundle.join("Contents/Info.plist")).ok()?;
+    let dict = plist.as_dictionary()?;
+    ["CFBundleShortVersionString", "CFBundleVersion"]
+        .into_iter()
+        .find_map(|k| dict.get(k).and_then(plist::Value::as_string))
+        .and_then(version::parse)
+}
+
+/// Detect installed counterparts for `app` on the running machine (filesystem + Windows Uninstall
+/// registry / macOS `/Applications` bundles).
+pub fn detect_counterparts(app: &CraftApp) -> Vec<DetectedCounterpart> {
+    let Some(spec) = app.counterpart() else {
+        return Vec::new();
+    };
+    let (program_roots, common_roots, user_roots) = system_program_roots();
+    let mut found = detect_counterparts_in_roots(app, &program_roots, &common_roots, &user_roots);
+
+    #[cfg(windows)]
+    for adobe_spec in spec.adobe_specs() {
+        if !found.iter().any(|f| f.name == adobe_spec.name || f.name == adobe_spec.family)
+            && let Some(mut reg) = windows::detect_adobe_registry(adobe_spec)
+        {
+            if adobe_spec.companion.is_some() && adobe_spec.id != artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw {
+                let cr_spec = artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(
+                    artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw,
+                );
+                reg.companion_version = detect_adobe_product_in_roots(cr_spec, &program_roots, &common_roots)
+                    .or_else(|| windows::detect_adobe_registry(cr_spec))
+                    .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)));
+            }
+            found.push(reg);
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let home = dirs::home_dir();
+        for adobe_spec in spec.adobe_specs() {
+            if found.iter().any(|f| f.name == adobe_spec.name || f.name == adobe_spec.family) {
+                continue;
+            }
+            for rel in adobe_spec.mac_bundles {
+                let candidates: Vec<PathBuf> = if rel.starts_with('/') {
+                    vec![PathBuf::from(rel)]
+                } else {
+                    let mut v = vec![Path::new("/Applications").join(rel)];
+                    if let Some(h) = &home {
+                        v.push(h.join("Applications").join(rel));
+                    }
+                    v
+                };
+                if let Some(bundle) = candidates.into_iter().find(|p| p.exists()) {
+                    let is_2027_bundle = rel.contains("2027") || adobe_spec.id == artcraft_launcher_core::counterpart::AdobeProductId::AcrobatDc;
+                    let ver = detect_mac_bundle_version(&bundle)
+                        .or_else(|| is_2027_bundle.then(|| adobe_spec.parsed_release_version()).flatten());
+                    let is_cc_2027 = ver.as_ref().is_some_and(|v| adobe_spec.matches_cc_2027_version(v))
+                        || (is_2027_bundle && adobe_spec.cc_2027_lineup);
+                    let name = if is_cc_2027 { adobe_spec.name.to_string() } else { adobe_spec.family.to_string() };
+                    found.push(DetectedCounterpart { name, version: ver, companion_version: None, location: bundle, is_cc_2027 });
+                    break;
+                }
+            }
+        }
+        for rel in spec.non_adobe_mac_bundles {
+            let mut candidates = vec![Path::new("/Applications").join(rel)];
+            if let Some(h) = &home {
+                candidates.push(h.join("Applications").join(rel));
+            }
+            if let Some(bundle) = candidates.into_iter().find(|p| p.exists()) {
+                let ver = detect_mac_bundle_version(&bundle);
+                found.push(DetectedCounterpart {
+                    name: spec.display_name.to_string(),
+                    version: ver,
+                    companion_version: None,
+                    location: bundle,
+                    is_cc_2027: false,
+                });
+                break;
+            }
+        }
+    }
+
+    found
+}
+
+/// Detect all installed products from the Adobe Creative Cloud 2027 & Acrobat DC 26.2 lineup on the
+/// running machine.
+pub fn detect_adobe_cc_2027() -> Vec<DetectedCounterpart> {
+    let (program_roots, common_roots, _) = system_program_roots();
+    let mut out = Vec::new();
+    for spec in artcraft_launcher_core::counterpart::adobe_cc_2027_specs() {
+        let detected = detect_adobe_product_in_roots(spec, &program_roots, &common_roots);
+        #[cfg(windows)]
+        let detected = detected.or_else(|| windows::detect_adobe_registry(spec));
+        if let Some(mut item) = detected {
+            #[cfg(windows)]
+            if spec.companion.is_some()
+                && item.companion_version.is_none()
+                && spec.id != artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw
+            {
+                let cr_spec = artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(
+                    artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw,
+                );
+                item.companion_version = detect_adobe_product_in_roots(cr_spec, &program_roots, &common_roots)
+                    .or_else(|| windows::detect_adobe_registry(cr_spec))
+                    .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)));
+            }
+            out.push(item);
+        }
+    }
+    out
+}
+
 #[cfg(target_os = "macos")]
 pub mod macos {
     use std::path::{Path, PathBuf};
@@ -224,14 +582,19 @@ pub mod macos {
 
     /// Where a `.app` might be: the system and the user's Applications folders.
     pub fn candidates(app: &CraftApp) -> Vec<PathBuf> {
-        let bundle = format!("{}.app", app.name);
-        let mut out = vec![Path::new("/Applications").join(&bundle)];
-        if let Some(home) = dirs::home_dir() {
-            out.push(home.join("Applications").join(&bundle));
+        let home = dirs::home_dir();
+        let mut out = Vec::new();
+        for name in app.mac_bundle_names() {
+            let bundle = format!("{name}.app");
+            out.push(Path::new("/Applications").join(&bundle));
+            if let Some(home) = &home {
+                out.push(home.join("Applications").join(&bundle));
+            }
         }
         out
     }
 
+    /// Finds an installed `.app` bundle for `app` in the standard Applications folders.
     pub fn detect(app: &CraftApp) -> Option<Installed> {
         candidates(app).iter().find_map(|p| read_bundle(app, p))
     }
@@ -240,15 +603,39 @@ pub mod macos {
     pub fn read_bundle(app: &CraftApp, path: &Path) -> Option<Installed> {
         let plist = plist::Value::from_file(path.join("Contents/Info.plist")).ok()?;
         let dict = plist.as_dictionary()?;
-        if dict.get("CFBundleIdentifier")?.as_string()? != app.bundle_id() {
+        // Its current bundle id or an older one (SolidCraft was ai.storyteller.solidcraft).
+        let id = dict.get("CFBundleIdentifier")?.as_string()?;
+        if !app.bundle_ids().any(|b| b == id) {
             return None;
         }
         // `<App>Version` carries the full version including a pre-release suffix;
         // CFBundleShortVersionString only has the numbers.
-        let full_key = format!("{}Version", app.name);
-        let text =
-            [full_key.as_str(), "CFBundleShortVersionString", "CFBundleVersion"].iter().find_map(|k| dict.get(k).and_then(plist::Value::as_string));
-        Some(Installed { version: text.and_then(version::parse), source: InstallSource::MacApp, location: path.display().to_string(), package: None })
+        let full_keys: Vec<String> = app.mac_bundle_names().map(|n| format!("{n}Version")).collect();
+        let text = full_keys
+            .iter()
+            .map(String::as_str)
+            .chain(["CFBundleShortVersionString", "CFBundleVersion"])
+            .find_map(|k| dict.get(k).and_then(plist::Value::as_string));
+        Some(Installed {
+            version: text.and_then(version::parse),
+            source: InstallSource::MacApp,
+            location: path.display().to_string(),
+            package: None,
+            externally_managed: false,
+            origin: None,
+            installation: None,
+        })
+    }
+}
+
+/// Newest version first; an entry with no version comes after every entry with one.
+#[cfg(any(windows, test))]
+fn newest_first(a: Option<&version::Version>, b: Option<&version::Version>) -> std::cmp::Ordering {
+    match (b, a) {
+        (Some(x), Some(y)) => version::compare(x, y),
+        (Some(_), None) => std::cmp::Ordering::Greater,
+        (None, Some(_)) => std::cmp::Ordering::Less,
+        (None, None) => std::cmp::Ordering::Equal,
     }
 }
 
@@ -256,10 +643,10 @@ pub mod macos {
 pub mod windows {
     use std::path::PathBuf;
 
-    use winreg::RegKey;
     use winreg::enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_32KEY, KEY_WOW64_64KEY};
+    use winreg::{HKEY, RegKey};
 
-    use super::{CraftApp, InstallSource, Installed, exe_candidates, is_installer_entry, version};
+    use super::{CraftApp, InstallSource, Installed, exe_candidates, install_dir_keys, is_installer_entry, suite_folders, version};
 
     const UNINSTALL: &str = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
 
@@ -287,14 +674,55 @@ pub mod windows {
         pub product_code: String,
         pub version: Option<artcraft_launcher_core::version::Version>,
         pub exe: Option<PathBuf>,
+        /// The context of the uninstall record that named it: the machine's records are per-machine,
+        /// the current account's own are per-user.
+        pub scope: crate::install::MsiScope,
+    }
+
+    /// Where the uninstall records of an MSI are kept: the machine's (both registry views) and the account's own.
+    const UNINSTALL_ROOTS: [(HKEY, u32); 3] = [(HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY), (HKEY_LOCAL_MACHINE, KEY_WOW64_32KEY), (HKEY_CURRENT_USER, 0)];
+
+    fn record_context(hive: HKEY) -> crate::install::MsiScope {
+        if hive == HKEY_CURRENT_USER { crate::install::MsiScope::PerUser } else { crate::install::MsiScope::PerMachine }
+    }
+
+    /// The context every uninstall record of `product_code` places it in, when Windows Installer cannot be
+    /// asked. All records are read, not the deduplicated list, so a copy registered both per-user and
+    /// per-machine gives no answer and the update stops.
+    pub fn record_scope(app: &CraftApp, product_code: &str) -> Option<crate::install::MsiScope> {
+        let scopes = UNINSTALL_ROOTS.into_iter().filter_map(|(hive, flags)| {
+            let root = RegKey::predef(hive).open_subkey_with_flags(UNINSTALL, KEY_READ | flags).ok()?;
+            let key = root.open_subkey_with_flags(product_code, KEY_READ | flags).ok()?;
+            let name: String = key.get_value("DisplayName").unwrap_or_default();
+            let publisher: String = key.get_value("Publisher").unwrap_or_default();
+            is_installer_entry(app, &name, &publisher).then(|| record_context(hive))
+        });
+        crate::msi_context::single_scope(scopes)
+    }
+
+    /// How an exe path is stored in `Installed::location`. One function builds it for `detect` and for
+    /// the comparison below, so the two can never disagree on spelling.
+    fn location_text(exe: &std::path::Path) -> String {
+        exe.display().to_string()
+    }
+
+    /// Whether `location` is the exe the record `product_code` resolves in its own scope. False for
+    /// a path that only the launch fallback (`exe_in_any_scope`) found, so an update never takes its
+    /// folder from another scope.
+    pub fn location_is_in_record_scope(app: &CraftApp, product_code: &str, location: &str) -> bool {
+        msi_installs(app).into_iter().find(|m| m.product_code == product_code).and_then(|m| m.exe).is_some_and(|exe| location_text(&exe) == location)
     }
 
     /// Every Windows Installer entry for `app`, newest first.
     pub fn msi_installs(app: &CraftApp) -> Vec<MsiInstall> {
         let mut out = Vec::new();
-        for (hive, flags) in [(HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY), (HKEY_LOCAL_MACHINE, KEY_WOW64_32KEY), (HKEY_CURRENT_USER, 0)] {
+        for (hive, flags) in UNINSTALL_ROOTS {
             let Ok(root) = RegKey::predef(hive).open_subkey_with_flags(UNINSTALL, KEY_READ | flags) else { continue };
             for code in root.enum_keys().flatten() {
+                // App-authored uninstall rows are not MSI product identities.
+                if !crate::msi_context::valid_product_code(&code) {
+                    continue;
+                }
                 let Ok(key) = root.open_subkey_with_flags(&code, KEY_READ | flags) else { continue };
                 let name: String = key.get_value("DisplayName").unwrap_or_default();
                 let publisher: String = key.get_value("Publisher").unwrap_or_default();
@@ -303,60 +731,179 @@ pub mod windows {
                 }
                 let version = key.get_value::<String, _>("DisplayVersion").ok().and_then(|v| version::parse(&v));
                 let location: String = key.get_value("InstallLocation").unwrap_or_default();
-                let exe = exe_path(app, (!location.is_empty()).then(|| PathBuf::from(location)).or_else(|| install_dir(app)));
-                out.push(MsiInstall { product_code: code, version, exe });
+                let exe =
+                    exe_path(app, (!location.is_empty()).then(|| PathBuf::from(location)).or_else(|| install_dir(app, hive, flags)), hive, flags);
+                out.push(MsiInstall { product_code: code, version, exe, scope: record_context(hive) });
             }
         }
-        out.sort_by(|a, b| match (&b.version, &a.version) {
-            (Some(x), Some(y)) => version::compare(x, y),
-            (Some(_), None) => std::cmp::Ordering::Less,
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (None, None) => std::cmp::Ordering::Equal,
-        });
+        out.sort_by(|a, b| super::newest_first(a.version.as_ref(), b.version.as_ref()));
         out
     }
 
-    /// The folder the app's MSI remembers for its next upgrade, which is where it went when the
-    /// launcher chose the folder.
-    fn install_dir(app: &CraftApp) -> Option<PathBuf> {
-        [KEY_WOW64_64KEY, KEY_WOW64_32KEY].into_iter().find_map(|flags| {
-            let key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey_with_flags(format!(r"SOFTWARE\{}", app.name), KEY_READ | flags).ok()?;
-            key.get_value::<String, _>("InstallDir").ok().filter(|d| !d.is_empty()).map(PathBuf::from)
+    /// The folder the app's MSI remembers for its next upgrade, read from the same registry view as the
+    /// uninstall record that named the install. A per-machine record (HKLM) therefore reads HKLM, and a
+    /// per-user record (HKCU, dual-scope packages) reads HKCU, so one scope never resolves to the other's folder.
+    fn install_dir(app: &CraftApp, hive: HKEY, flags: u32) -> Option<PathBuf> {
+        install_dir_keys(app).into_iter().find_map(|path| {
+            let key = RegKey::predef(hive).open_subkey_with_flags(path, KEY_READ | flags).ok()?;
+            let dir = key.get_value::<String, _>("InstallDir").ok()?;
+            (!dir.is_empty()).then(|| PathBuf::from(dir))
         })
     }
 
-    /// The app's exe: from `App Paths`, the install folder, or Program Files.
-    fn exe_path(app: &CraftApp, location: Option<PathBuf>) -> Option<PathBuf> {
+    /// The app's exe for one uninstall record, found only in that record's own scope: the recorded
+    /// folder first, then `App Paths` in the record's hive and registry view, then the usual folders
+    /// for that scope (`ArtCraft` suite folder first, then the bare root, for older installs). A
+    /// per-machine entry therefore never stands in for a per-user record, or the other way round.
+    fn exe_path(app: &CraftApp, location: Option<PathBuf>, hive: HKEY, flags: u32) -> Option<PathBuf> {
+        if let Some(dir) = location.as_deref()
+            && let Some(found) = exe_in_folder(app, dir)
+        {
+            return Some(found);
+        }
         for stem in app.stems() {
             let app_paths = format!(r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\{stem}.exe");
-            for flags in [KEY_WOW64_64KEY, KEY_WOW64_32KEY] {
-                if let Ok(key) = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey_with_flags(&app_paths, KEY_READ | flags)
-                    && let Ok(path) = key.get_value::<String, _>("")
-                {
-                    let p = PathBuf::from(path.trim_matches('"'));
-                    if p.exists() {
-                        return Some(p);
-                    }
+            if let Ok(key) = RegKey::predef(hive).open_subkey_with_flags(&app_paths, KEY_READ | flags)
+                && let Ok(path) = key.get_value::<String, _>("")
+            {
+                let p = PathBuf::from(path.trim_matches('"'));
+                if p.exists() {
+                    return Some(p);
                 }
             }
         }
-        let mut roots = Vec::new();
+        let roots: Vec<PathBuf> = if hive == HKEY_CURRENT_USER {
+            // Per-user installs (dual-scope packages) live in the user's own Programs folder.
+            std::env::var_os("LOCALAPPDATA").map(|local| PathBuf::from(local).join("Programs")).into_iter().collect()
+        } else {
+            let mut roots: Vec<PathBuf> = Vec::new();
+            for var in ["ProgramW6432", "ProgramFiles", "ProgramFiles(x86)"] {
+                if let Some(pf) = std::env::var_os(var).map(PathBuf::from)
+                    && !roots.contains(&pf)
+                {
+                    roots.push(pf);
+                }
+            }
+            roots
+        };
+        exe_in_roots(app, roots)
+    }
+
+    /// Where the exe may be under the given install roots, best first: the launcher's own folder, then
+    /// the `ArtCraft` suite folder of each root, then the bare roots (older installs). Not checked on
+    /// disk.
+    fn candidates_in_roots(app: &CraftApp, roots: &[PathBuf]) -> Vec<PathBuf> {
+        let mut out: Vec<PathBuf> = suite_folders(app, roots).iter().flat_map(|dir| exe_candidates(app, Some(dir), &[])).collect();
+        let mut dirs: Vec<PathBuf> = roots.iter().map(|root| root.join("ArtCraft")).collect();
+        dirs.extend(roots.iter().cloned());
+        out.extend(exe_candidates(app, None, &dirs));
+        out
+    }
+
+    /// The first exe under the given install roots.
+    pub(super) fn exe_in_roots(app: &CraftApp, roots: Vec<PathBuf>) -> Option<PathBuf> {
+        candidates_in_roots(app, &roots).into_iter().find(|p| p.exists())
+    }
+
+    /// Every exe under the given install roots, in the order `exe_in_roots` prefers them.
+    pub(super) fn exe_all_in_roots(app: &CraftApp, roots: Vec<PathBuf>) -> Vec<PathBuf> {
+        candidates_in_roots(app, &roots).into_iter().filter(|p| p.exists()).collect()
+    }
+
+    /// The app's exe directly in `folder`, under any name it has shipped as.
+    pub(super) fn exe_in_folder(app: &CraftApp, folder: &std::path::Path) -> Option<PathBuf> {
+        exe_candidates(app, Some(folder), &[]).into_iter().find(|p| p.exists())
+    }
+
+    /// Last resort for opening an app whose uninstall record names no folder and whose exe is not in
+    /// the record's own scope. The package records its folder (`InstallDir`) in the hive of the account
+    /// that installed it, which need not be the hive of its uninstall record: a per-user install can
+    /// leave a per-machine record. So the folder any hive or view recorded is tried first (this finds
+    /// a custom folder), then the usual folders of every scope. This only decides which exe "Open"
+    /// runs and where "Show in folder" goes. An update never takes its folder from here
+    /// (`location_is_in_record_scope`), and the record's scope is unchanged. Every candidate is
+    /// collected and the one whose own version is the record's is chosen, so a leftover older copy in
+    /// another scope is not opened under the newer record's version (`pick_candidate`).
+    fn exe_in_any_scope(app: &CraftApp, version: Option<&version::Version>) -> Option<PathBuf> {
+        let mut found: Vec<PathBuf> =
+            UNINSTALL_ROOTS.into_iter().filter_map(|(hive, flags)| exe_in_folder(app, &install_dir(app, hive, flags)?)).collect();
+        let mut roots: Vec<PathBuf> = std::env::var_os("LOCALAPPDATA").map(|local| PathBuf::from(local).join("Programs")).into_iter().collect();
         for var in ["ProgramW6432", "ProgramFiles", "ProgramFiles(x86)"] {
-            if let Some(pf) = std::env::var_os(var) {
-                roots.push(PathBuf::from(pf));
+            if let Some(pf) = std::env::var_os(var).map(PathBuf::from)
+                && !roots.contains(&pf)
+            {
+                roots.push(pf);
             }
         }
-        exe_candidates(app, location.as_deref(), &roots).into_iter().find(|p| p.exists())
+        found.extend(exe_all_in_roots(app, roots));
+        pick_candidate(found, version, executable_version)
+    }
+
+    /// The first candidate whose version is `wanted`; with no match (or no version to match, or exes
+    /// without version info) the first candidate, in the order they were found.
+    pub(super) fn pick_candidate(
+        candidates: Vec<PathBuf>,
+        wanted: Option<&version::Version>,
+        version_of: impl Fn(&std::path::Path) -> Option<version::Version>,
+    ) -> Option<PathBuf> {
+        let matching = wanted.and_then(|want| candidates.iter().find(|c| version_of(c).as_ref() == Some(want)));
+        matching.or_else(|| candidates.first()).cloned()
     }
 
     pub fn detect(app: &CraftApp) -> Option<Installed> {
         let m = msi_installs(app).into_iter().next()?;
+        let location = m.exe.or_else(|| exe_in_any_scope(app, m.version.as_ref())).map_or_else(|| app.name.to_string(), |p| location_text(&p));
         Some(Installed {
             version: m.version,
             source: InstallSource::Msi,
-            location: m.exe.map_or_else(|| app.name.to_string(), |p| p.display().to_string()),
+            location,
             package: Some(m.product_code),
+            externally_managed: false,
+            origin: None,
+            installation: None,
         })
+    }
+
+    /// Inspect Windows Uninstall registry keys for an installed Adobe product matching `spec`.
+    pub fn detect_adobe_registry(spec: &artcraft_launcher_core::counterpart::AdobeProductSpec) -> Option<super::DetectedCounterpart> {
+        let mut best: Option<(Option<version::Version>, PathBuf, String)> = None;
+        for (hive, flags) in UNINSTALL_ROOTS {
+            let Ok(uninstall) = RegKey::predef(hive).open_subkey_with_flags(UNINSTALL, KEY_READ | flags) else { continue };
+            for sub in uninstall.enum_keys().flatten() {
+                let Ok(entry) = uninstall.open_subkey_with_flags(&sub, KEY_READ | flags) else { continue };
+                let display_name: String = entry.get_value("DisplayName").unwrap_or_default();
+                let publisher: String = entry.get_value("Publisher").unwrap_or_default();
+                if !super::matches_adobe_registry_entry(spec, &display_name, &publisher) {
+                    continue;
+                }
+                let display_ver: Option<String> = entry.get_value("DisplayVersion").ok();
+                let parsed_ver = display_ver.as_deref().and_then(version::parse);
+                let install_loc: Option<String> = entry.get_value("InstallLocation").ok().filter(|s: &String| !s.trim().is_empty());
+                let display_icon: Option<String> = entry.get_value("DisplayIcon").ok().filter(|s: &String| !s.trim().is_empty());
+                let path = install_loc
+                    .map(PathBuf::from)
+                    .or_else(|| {
+                        display_icon.map(|icon| {
+                            let trimmed = icon.trim_matches('"').split(',').next().unwrap_or("").trim();
+                            PathBuf::from(trimmed)
+                        })
+                    })
+                    .unwrap_or_else(|| PathBuf::from(spec.windows_dir));
+                let replace = match &best {
+                    None => true,
+                    Some((cur_ver, _, _)) => super::newest_first(parsed_ver.as_ref(), cur_ver.as_ref()).is_lt(),
+                };
+                if replace {
+                    best = Some((parsed_ver, path, display_name));
+                }
+            }
+        }
+        let (found_ver, location, display_name) = best?;
+        let is_2027_named = display_name.contains("2027");
+        let ver = found_ver.or_else(|| is_2027_named.then(|| spec.parsed_release_version()).flatten());
+        let is_cc_2027 = ver.as_ref().is_some_and(|v| spec.matches_cc_2027_version(v)) || (is_2027_named && spec.cc_2027_lineup);
+        let name = if is_cc_2027 { spec.name.to_string() } else { spec.family.to_string() };
+        Some(super::DetectedCounterpart { name, version: ver, companion_version: None, location, is_cc_2027 })
     }
 }
 
@@ -373,7 +920,7 @@ pub mod linux {
     /// pacman, Flatpak). Read once per detection pass.
     pub fn packages() -> Vec<Package> {
         let ours = |name: &str| {
-            artcraft_launcher_core::SUITE.iter().any(|a| {
+            artcraft_launcher_core::hosted_catalog::apps().iter().any(|a| {
                 [InstallSource::Deb, InstallSource::Rpm, InstallSource::Pacman, InstallSource::Flatpak]
                     .iter()
                     .any(|m| crate::packages::candidate_names(a, *m).iter().any(|n| n == name))
@@ -381,32 +928,60 @@ pub mod linux {
         };
         let t = Duration::from_secs(10);
         let mut out = Vec::new();
-        let mut add = |manager, list: Vec<(String, String)>| {
-            out.extend(list.into_iter().filter(|(n, _)| ours(n)).map(|(name, version)| Package { manager, name, version }));
+        let mut add = |manager, user, list: Vec<(String, String)>| {
+            out.extend(list.into_iter().filter(|(n, _)| ours(n)).map(|(name, version)| Package {
+                manager,
+                name,
+                version,
+                user,
+                origin: None,
+                installation: None,
+            }));
         };
         if let Some(list) = capture("dpkg-query", &["-W", "-f", "${Package}|${db:Status-Status}|${Version}\n"], t) {
-            add(InstallSource::Deb, packages::parse_dpkg(&list));
+            add(InstallSource::Deb, false, packages::parse_dpkg(&list));
         }
         if let Some(list) = capture("rpm", &["-qa", "--qf", "%{NAME}|%{VERSION}\n"], t) {
-            add(InstallSource::Rpm, packages::parse_rpm(&list));
+            add(InstallSource::Rpm, false, packages::parse_rpm(&list));
         }
         // Only run `pacman` where its database exists: elsewhere `pacman` on PATH may be an unrelated program
         // (the Pac-Man game in /usr/games on Debian-family systems).
         if has_pacman_db()
             && let Some(list) = capture("pacman", &["-Q"], t)
         {
-            add(InstallSource::Pacman, packages::parse_pacman(&list));
+            add(InstallSource::Pacman, false, packages::parse_pacman(&list));
         }
         let arch = format!("--arch={}", std::env::consts::ARCH);
-        if let Some(list) = crate::process::capture_flatpak(&["list", "--app", &arch, "--columns=application,version"], t) {
-            let mut flatpaks = packages::parse_flatpak_list(&list);
-            // Bundles built from a release tarball often list no version: ask Flatpak directly.
-            for (id, version) in flatpaks.iter_mut().filter(|(id, v)| v.is_empty() && id.starts_with("ai.storyteller.")) {
-                if let Some(v) = crate::process::capture_flatpak(&["info", &arch, id], t).as_deref().and_then(packages::parse_flatpak_info) {
-                    *version = v;
+        // User installs are marked so `packages::find` reads the user copy the launcher updates, not a
+        // stale system one (#881). The unscoped list after it still covers every system installation,
+        // named ones included (`--system` is only the default one).
+        let mut user_ids = Vec::new();
+        for scope in [&["--user"][..], &[]] {
+            let list_args = [&["list", "--app"][..], scope, &[&arch, "--columns=application,version,origin,installation"]].concat();
+            if let Some(list) = crate::process::capture_flatpak(&list_args, t) {
+                let mut flatpaks = packages::parse_flatpak_list_with_origin(&list);
+                // The unscoped list repeats the user installs: the user pass already has them.
+                flatpaks.retain(|(id, _, _, _)| !user_ids.contains(id));
+                if !scope.is_empty() {
+                    user_ids.extend(flatpaks.iter().map(|(id, _, _, _)| id.clone()));
                 }
+                // Bundles built from a release tarball often list no version: ask Flatpak directly.
+                for (id, version, _, installation) in flatpaks.iter_mut().filter(|(id, v, _, _)| {
+                    v.is_empty() && artcraft_launcher_core::hosted_catalog::apps().iter().any(|a| a.bundle_ids().any(|b| b == *id))
+                }) {
+                    let scope_arg = packages::flatpak_scope(if scope.is_empty() { installation.as_deref() } else { Some("user") });
+                    let info_args = ["info", &scope_arg, &arch, id];
+                    if let Some(v) = crate::process::capture_flatpak(&info_args, t).as_deref().and_then(packages::parse_flatpak_info) {
+                        *version = v;
+                    }
+                }
+                let is_user = !scope.is_empty();
+                out.extend(flatpaks.into_iter().filter(|(n, _, _, _)| ours(n)).map(|(name, version, origin, installation)| {
+                    let user_install = is_user || installation.as_deref() == Some("user");
+                    let resolved_installation = installation.or_else(|| if user_install { Some("user".into()) } else { Some("system".into()) });
+                    Package { manager: InstallSource::Flatpak, name, version, user: user_install, origin, installation: resolved_installation }
+                }));
             }
-            add(InstallSource::Flatpak, flatpaks);
         }
         out
     }
@@ -426,11 +1001,7 @@ pub mod linux {
 
     /// Where a package put the app's binary: on `PATH`, else `/usr/bin/<id>`.
     fn binary_on_path(id: &str) -> String {
-        std::env::var_os("PATH")
-            .and_then(|path| std::env::split_paths(&path).map(|d| d.join(id)).find(|p| p.is_file()))
-            .unwrap_or_else(|| PathBuf::from("/usr/bin").join(id))
-            .display()
-            .to_string()
+        crate::process::which(id).unwrap_or_else(|| PathBuf::from("/usr/bin").join(id)).display().to_string()
     }
 
     /// `~/Applications`, where the launcher puts AppImages (the AppImageLauncher convention).
@@ -479,16 +1050,93 @@ pub mod linux {
         appimages_in(app, &appimage_dirs())
     }
 
+    /// How the app is installed, in this order: an AppImage the launcher put down, a package
+    /// (deb, rpm, pacman or Flatpak), a package the launcher knows no name for but which owns the
+    /// app's binary ([`owned_install`]), else a binary found on disk.
     pub fn detect(app: &CraftApp, snapshot: &Snapshot) -> Option<Installed> {
         if let Some((path, version)) = appimages(app).into_iter().next() {
-            return Some(Installed { version, source: InstallSource::AppImage, location: path.display().to_string(), package: None });
+            return Some(Installed {
+                version,
+                source: InstallSource::AppImage,
+                location: path.display().to_string(),
+                package: None,
+                externally_managed: false,
+                origin: None,
+                installation: None,
+            });
         }
         let order = [InstallSource::Deb, InstallSource::Rpm, InstallSource::Pacman, InstallSource::Flatpak];
         if let Some(p) = packages::find(app, &snapshot.packages, &order) {
-            let location = if p.manager == InstallSource::Flatpak { app.bundle_id() } else { binary_on_path(app.id) };
-            return Some(Installed { version: packages::version_of(p), source: p.manager, location, package: Some(p.name.clone()) });
+            // A Flatpak runs under the id it was found under, which may be an older one.
+            let location = if p.manager == InstallSource::Flatpak { p.name.clone() } else { binary_on_path(app.id) };
+            let externally_managed = p.manager == InstallSource::Flatpak
+                && p.origin.as_deref().is_none_or(|origin| {
+                    if packages::is_flatpark_origin(origin) {
+                        return true;
+                    }
+                    let scope = packages::flatpak_scope(p.installation.as_deref());
+                    crate::process::capture_flatpak(&["remotes", &scope, "--show-disabled", "--columns=name,url"], Duration::from_secs(10))
+                        .is_none_or(|remotes| packages::remote_manages_flatpak(origin, &remotes))
+                });
+            return Some(Installed {
+                version: packages::version_of(p),
+                source: p.manager,
+                location,
+                package: Some(p.name.clone()),
+                externally_managed,
+                origin: p.origin.clone(),
+                installation: p.installation.clone(),
+            });
+        }
+        // Before any binary is run to learn a version, the package database is asked whether a
+        // package owns it (see [`owned_install`]).
+        if let Some(installed) = owned_install(app) {
+            return Some(installed);
         }
         detect_system_install(app)
+    }
+
+    /// A package the launcher knows no name for may still own the app's binary: a release may
+    /// name its deb `art-craft` while the app's own names are `artcraft` and its bundle id. When
+    /// that happens the binary is never run to learn a version — `--version` starts apps that
+    /// don't support the flag (#1298) — so the package database is asked which package owns the
+    /// file, and the install is reported under that manager with the package's own version.
+    fn owned_install(app: &CraftApp) -> Option<Installed> {
+        let bin = find_binary(app.id)?;
+        let owned =
+            [owned_by_dpkg(&bin), owned_by_rpm(&bin), has_pacman_db().then(|| owned_by_pacman(&bin)).flatten()].into_iter().flatten().next()?;
+        Some(Installed {
+            version: packages::version_of(&owned),
+            source: owned.manager,
+            location: bin.display().to_string(),
+            package: Some(owned.name),
+            externally_managed: false,
+            origin: None,
+            installation: None,
+        })
+    }
+
+    /// The dpkg package owning `bin`: `dpkg-query -S` names it, and one `-W` reads its version.
+    fn owned_by_dpkg(bin: &Path) -> Option<Package> {
+        let bin = bin.to_str()?;
+        let t = Duration::from_secs(5);
+        let name = packages::parse_dpkg_search(&capture("dpkg-query", &["-S", bin], t)?, bin)?;
+        let version = capture("dpkg-query", &["-W", "-f", "${Version}\n", &name], t).filter(|v| !v.trim().is_empty())?;
+        Some(Package { manager: InstallSource::Deb, name, version, user: false, origin: None, installation: None })
+    }
+
+    /// The rpm package owning `bin`: `rpm -qf` names it and its version in one query.
+    fn owned_by_rpm(bin: &Path) -> Option<Package> {
+        let bin = bin.to_str()?;
+        let (name, version) = packages::parse_rpm_owner(&capture("rpm", &["-qf", bin, "--qf", "%{NAME}|%{VERSION}\n"], Duration::from_secs(5))?)?;
+        Some(Package { manager: InstallSource::Rpm, name, version, user: false, origin: None, installation: None })
+    }
+
+    /// The pacman package owning `bin`: `pacman -Qo` names it and its version in one line.
+    fn owned_by_pacman(bin: &Path) -> Option<Package> {
+        let bin = bin.to_str()?;
+        let (name, version) = packages::parse_pacman_owner(&capture("pacman", &["-Qo", bin], Duration::from_secs(5))?)?;
+        Some(Package { manager: InstallSource::Pacman, name, version, user: false, origin: None, installation: None })
     }
 
     /// When the package managers don't report the app (a query timed out or was locked, an
@@ -497,15 +1145,26 @@ pub mod linux {
     /// to whatever installed it, since it can't tell which package manager that was.
     fn detect_system_install(app: &CraftApp) -> Option<Installed> {
         let bin = find_binary(app.id)?;
-        Some(Installed { version: binary_version(&bin, app), source: InstallSource::Binary, location: bin.display().to_string(), package: None })
+        Some(Installed {
+            version: binary_version(&bin, app),
+            source: InstallSource::Binary,
+            location: bin.display().to_string(),
+            package: None,
+            externally_managed: false,
+            origin: None,
+            installation: None,
+        })
     }
 
+    /// The app's binary on `PATH`, else in `/usr/bin`, `/usr/local/bin` or `~/.local/bin`.
     fn find_binary(id: &str) -> Option<PathBuf> {
-        let on_path = std::env::var_os("PATH").and_then(|path| std::env::split_paths(&path).map(|d| d.join(id)).find(|p| p.is_file()));
+        let on_path = crate::process::which(id);
         let usual = ["/usr/bin", "/usr/local/bin"].into_iter().map(PathBuf::from).chain(dirs::home_dir().map(|h| h.join(".local/bin")));
         on_path.or_else(|| usual.map(|d| d.join(id)).find(|p| p.is_file()))
     }
 
+    /// The version `bin --version` prints, or `None` when it can't be started, doesn't finish
+    /// within 5 seconds (it is then killed), exits with an error, or prints no version.
     pub(crate) fn binary_version(bin: &Path, app: &CraftApp) -> Option<version::Version> {
         let out = crate::process::capture(bin.to_str()?, &["--version"], Duration::from_secs(5))?;
         parse_cli_version(out.trim(), app)
@@ -524,7 +1183,15 @@ pub mod freebsd {
         if !bin.exists() {
             return None;
         }
-        Some(Installed { version: binary_version(&bin, app), source: InstallSource::Binary, location: bin.display().to_string(), package: None })
+        Some(Installed {
+            version: binary_version(&bin, app),
+            source: InstallSource::Binary,
+            location: bin.display().to_string(),
+            package: None,
+            externally_managed: false,
+            origin: None,
+            installation: None,
+        })
     }
 
     /// `<app> --version` prints `<app> 0.5.0 (sha, date)`.
@@ -541,7 +1208,7 @@ mod linux_tests {
     #[test]
     fn ours_filter_matches_rpm_packages() {
         let ours = |name: &str| {
-            artcraft_launcher_core::SUITE.iter().any(|a| {
+            artcraft_launcher_core::hosted_catalog::apps().iter().any(|a| {
                 [InstallSource::Deb, InstallSource::Rpm, InstallSource::Pacman, InstallSource::Flatpak]
                     .iter()
                     .any(|m| crate::packages::candidate_names(a, *m).iter().any(|n| n == name))
@@ -549,6 +1216,9 @@ mod linux_tests {
         };
         assert!(ours("photocraft"));
         assert!(ours("ai.storyteller.photocraft"));
+        assert!(ours("io.tangencylabs.solidcraft"));
+        assert!(ours("ai.storyteller.solidcraft"));
+        assert!(ours("ai.storyteller.solvecraft"));
         assert!(!ours("unrelated-package"));
     }
 
@@ -607,6 +1277,21 @@ mod tests {
     use artcraft_launcher_core::SUITE;
 
     use super::*;
+
+    #[test]
+    fn msi_entries_sort_newest_first_and_unversioned_last() {
+        use std::cmp::Ordering::{Equal, Greater, Less};
+        let (old, new) = (version::parse("0.4.0"), version::parse("0.5.0"));
+        // Each arm by hand: the sort below never asks about None against Some in that order.
+        assert_eq!(newest_first(new.as_ref(), old.as_ref()), Less);
+        assert_eq!(newest_first(old.as_ref(), new.as_ref()), Greater);
+        assert_eq!(newest_first(new.as_ref(), None), Less);
+        assert_eq!(newest_first(None, new.as_ref()), Greater);
+        assert_eq!(newest_first(None, None), Equal);
+        let mut versions = vec![None, old.clone(), new.clone(), None];
+        versions.sort_by(|a, b| newest_first(a.as_ref(), b.as_ref()));
+        assert_eq!(versions, vec![new, old, None, None]);
+    }
 
     /// A file without VERSIONINFO, or one that isn't there, has no version.
     #[cfg(windows)]
@@ -824,6 +1509,14 @@ mod tests {
     }
 
     #[test]
+    fn solidcraft_matches_its_own_installer_publisher_only() {
+        let sc = CraftApp::by_id("solidcraft").unwrap();
+        assert!(is_installer_entry(sc, "SolidCraft", "SolidCraft contributors"));
+        assert!(!is_installer_entry(sc, "SolidCraft", LEARNING_MACHINES));
+        assert!(!is_installer_entry(CraftApp::by_id("cadcraft").unwrap(), "CADCraft", "SolidCraft contributors"));
+    }
+
+    #[test]
     fn pdfcraft_exe_is_sought_under_every_name_it_has_shipped_as() {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
         let location = PathBuf::from(r"D:\Apps\PrintCraft");
@@ -843,15 +1536,98 @@ mod tests {
         let roots = roots();
         let location = PathBuf::from(r"D:\Apps\Somewhere");
         for a in SUITE.iter().filter(|a| a.former_ids.is_empty() && a.former_names.is_empty()) {
-            assert!(is_installer_entry(a, a.name, LEARNING_MACHINES), "{}", a.name);
+            let publisher = a.msi_publisher.unwrap_or(LEARNING_MACHINES);
+            assert!(is_installer_entry(a, a.name, publisher), "{}", a.name);
             assert!(!is_installer_entry(a, a.name, "Some Other Publisher"), "{}", a.name);
-            assert!(!is_installer_entry(a, &a.name.to_lowercase(), LEARNING_MACHINES), "{}", a.name);
+            assert!(!is_installer_entry(a, &a.name.to_lowercase(), publisher), "{}", a.name);
             let exe = format!("{}.exe", a.id);
             let in_program_files: Vec<PathBuf> = roots.iter().map(|r| r.join(a.name).join(&exe)).collect();
             assert_eq!(exe_candidates(a, None, &roots), in_program_files);
             let with_location: Vec<PathBuf> = std::iter::once(location.join(&exe)).chain(in_program_files).collect();
             assert_eq!(exe_candidates(a, Some(&location), &roots), with_location);
         }
+    }
+
+    /// An app unpacked into the suite folder of a root is found from that root alone, so "Open" works
+    /// for a record whose folder is not the one its scope would name.
+    #[cfg(windows)]
+    #[test]
+    fn an_exe_in_the_suite_folder_of_any_root_is_found() {
+        let dir = tempfile::tempdir().unwrap();
+        let deck = CraftApp::by_id("deckcraft").unwrap();
+        let folder = dir.path().join("ArtCraft").join("DeckCraft");
+        std::fs::create_dir_all(&folder).unwrap();
+        std::fs::write(folder.join("deckcraft.exe"), "x").unwrap();
+        assert_eq!(windows::exe_in_roots(deck, vec![dir.path().to_path_buf()]), Some(folder.join("deckcraft.exe")));
+        assert_eq!(windows::exe_in_roots(deck, vec![dir.path().join("elsewhere")]), None);
+    }
+
+    /// A folder the package recorded is searched as it is, whatever it is called, so an app installed
+    /// to a folder of the user's choosing is found.
+    #[cfg(windows)]
+    #[test]
+    fn an_exe_in_a_custom_recorded_folder_is_found() {
+        let dir = tempfile::tempdir().unwrap();
+        let deck = CraftApp::by_id("deckcraft").unwrap();
+        let custom = dir.path().join("My Slides");
+        std::fs::create_dir_all(&custom).unwrap();
+        assert_eq!(windows::exe_in_folder(deck, &custom), None);
+        std::fs::write(custom.join("deckcraft.exe"), "x").unwrap();
+        assert_eq!(windows::exe_in_folder(deck, &custom), Some(custom.join("deckcraft.exe")));
+    }
+
+    /// With two copies in different scopes, the one that is the record's version is chosen, wherever it
+    /// was found; with no match, the first found.
+    #[cfg(windows)]
+    #[test]
+    fn the_copy_with_the_records_version_is_the_one_opened() {
+        let v = |s: &str| version::parse(s);
+        let old = PathBuf::from(r"D:\Old\deckcraft.exe");
+        let new = PathBuf::from(r"C:\Users\a\AppData\Local\Programs\ArtCraft\DeckCraft\deckcraft.exe");
+        let version_of = |p: &std::path::Path| if p == old { v("0.11.1") } else { v("0.12.0") };
+        let both = vec![old.clone(), new.clone()];
+        assert_eq!(windows::pick_candidate(both.clone(), v("0.12.0").as_ref(), version_of), Some(new.clone()));
+        assert_eq!(windows::pick_candidate(both.clone(), v("0.11.1").as_ref(), version_of), Some(old.clone()));
+        assert_eq!(windows::pick_candidate(both.clone(), v("0.99.0").as_ref(), version_of), Some(old.clone()));
+        assert_eq!(windows::pick_candidate(both, None, version_of), Some(old.clone()));
+        assert_eq!(windows::pick_candidate(Vec::new(), v("0.12.0").as_ref(), version_of), None);
+    }
+
+    /// Every exe under the given roots, in the order `exe_in_roots` prefers them, so a version match
+    /// can see a copy that an earlier root's older copy would otherwise hide.
+    #[cfg(windows)]
+    #[test]
+    fn every_root_is_searched_for_a_version_match() {
+        let dir = tempfile::tempdir().unwrap();
+        let deck = CraftApp::by_id("deckcraft").unwrap();
+        let (a, b) = (dir.path().join("a"), dir.path().join("b"));
+        let exes: Vec<PathBuf> = [&a, &b].iter().map(|r| r.join("ArtCraft").join("DeckCraft").join("deckcraft.exe")).collect();
+        for exe in &exes {
+            std::fs::create_dir_all(exe.parent().unwrap()).unwrap();
+            std::fs::write(exe, "x").unwrap();
+        }
+        assert_eq!(windows::exe_all_in_roots(deck, vec![a.clone(), b.clone()]), exes);
+        assert_eq!(windows::exe_in_roots(deck, vec![a, b]), exes.first().cloned());
+        assert!(windows::exe_all_in_roots(deck, vec![dir.path().join("none")]).is_empty());
+    }
+
+    #[test]
+    fn the_launcher_msi_installs_to_artcraft_launcher_and_the_apps_do_not() {
+        let roots = roots();
+        let want: Vec<PathBuf> = roots.iter().map(|root| root.join("ArtCraft").join("Launcher")).collect();
+        assert_eq!(suite_folders(&artcraft_launcher_core::catalog::LAUNCHER, &roots), want);
+        let photo = CraftApp::by_id("photocraft").unwrap();
+        assert!(suite_folders(photo, &roots).is_empty());
+    }
+
+    #[test]
+    fn the_launcher_records_its_folder_under_the_publisher_key() {
+        assert_eq!(
+            install_dir_keys(&artcraft_launcher_core::catalog::LAUNCHER),
+            [r"SOFTWARE\ArtCraft Launcher".to_string(), format!(r"SOFTWARE\{LEARNING_MACHINES}\ArtCraft Launcher")]
+        );
+        let photo = CraftApp::by_id("photocraft").unwrap();
+        assert_eq!(install_dir_keys(photo), [r"SOFTWARE\PhotoCraft".to_string()]);
     }
 
     #[test]
@@ -896,5 +1672,105 @@ mod tests {
             let found = detect(a, &Manifest::default(), &Snapshot::default());
             assert_ne!(found.as_ref(), Some(&build), "{}", a.id);
         }
+    }
+
+    #[test]
+    fn adobe_registry_matching_accepts_cc_2027_and_rejects_acrobat_reader() {
+        use artcraft_launcher_core::counterpart::{AdobeProductId, AdobeProductSpec};
+
+        let ps = AdobeProductSpec::by_id(AdobeProductId::Photoshop2027);
+        assert!(matches_adobe_registry_entry(ps, "Adobe Photoshop 2027", "Adobe Inc."));
+        assert!(!matches_adobe_registry_entry(ps, "Adobe Photoshop 2027", "Other Vendor"));
+
+        let acrobat = AdobeProductSpec::by_id(AdobeProductId::AcrobatDc);
+        assert!(matches_adobe_registry_entry(acrobat, "Adobe Acrobat DC", "Adobe Systems Incorporated"));
+        assert!(matches_adobe_registry_entry(acrobat, "Adobe Acrobat (64-bit)", "Adobe"));
+        assert!(!matches_adobe_registry_entry(acrobat, "Adobe Acrobat Reader DC", "Adobe"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn detects_all_adobe_cc_2027_executables_and_directories_with_exact_versions() {
+        let dir = tempfile::tempdir().unwrap();
+        let pf = dir.path().join("Program Files");
+        let cf = dir.path().join("Common Files");
+        let uf = dir.path().join("LocalAppData");
+
+        let write_pe = |full: PathBuf, ver: &str| {
+            std::fs::create_dir_all(full.parent().unwrap()).unwrap();
+            std::fs::write(&full, resource_only_program(ver)).unwrap();
+        };
+
+        // 1. Adobe Photoshop 2027 (28.0 / Adobe Photoshop 2027\Photoshop.exe, Camera Raw 19.0)
+        write_pe(pf.join(r"Adobe\Adobe Photoshop 2027\Photoshop.exe"), "28.0.0");
+        write_pe(cf.join(r"Adobe\Plug-Ins\CC\File Formats\Camera Raw.8bi"), "19.0.0");
+        // 2. Adobe Illustrator 2027 (31.0 / Adobe Illustrator 2027\Support Files\Contents\Windows\Illustrator.exe)
+        write_pe(pf.join(r"Adobe\Adobe Illustrator 2027\Support Files\Contents\Windows\Illustrator.exe"), "31.0.0");
+        // 3. Adobe Premiere Pro 2027 (27.0 / Adobe Premiere Pro 2027\Adobe Premiere Pro.exe)
+        write_pe(pf.join(r"Adobe\Adobe Premiere Pro 2027\Adobe Premiere Pro.exe"), "27.0.0");
+        // 4. Adobe Media Encoder 2027 (27.0 / Adobe Media Encoder 2027\Adobe Media Encoder.exe)
+        write_pe(pf.join(r"Adobe\Adobe Media Encoder 2027\Adobe Media Encoder.exe"), "27.0.0");
+        // 5. Adobe After Effects 2027 (27.0 / Adobe After Effects 2027 directory-level install)
+        std::fs::create_dir_all(pf.join(r"Adobe\Adobe After Effects 2027")).unwrap();
+        // 6. Adobe InDesign 2027 (22.0 / Adobe InDesign 2027 directory-level install)
+        std::fs::create_dir_all(pf.join(r"Adobe\Adobe InDesign 2027")).unwrap();
+        // 7. Adobe Acrobat DC (26.2 / Acrobat DC\Acrobat\Acrobat.exe)
+        write_pe(pf.join(r"Adobe\Acrobat DC\Acrobat\Acrobat.exe"), "26.2.0");
+        // Remaining Craft Suite counterparts (Lightroom Classic, Animate, Audition, Substance 3D, Office, AutoCAD, Figma)
+        write_pe(pf.join(r"Adobe\Adobe Lightroom Classic\Lightroom.exe"), "16.0.0");
+        write_pe(pf.join(r"Adobe\Adobe Animate 2027\Animate.exe"), "25.0.0");
+        write_pe(pf.join(r"Adobe\Adobe Audition 2027\Adobe Audition.exe"), "27.0.0");
+        write_pe(pf.join(r"Adobe\Adobe Substance 3D Painter\Adobe Substance 3D Painter.exe"), "11.0.0");
+        write_pe(pf.join(r"Adobe\Adobe Substance 3D Designer\Adobe Substance 3D Designer.exe"), "15.0.0");
+        write_pe(pf.join(r"Microsoft Office\root\Office16\WINWORD.EXE"), "16.0.1");
+        write_pe(pf.join(r"Microsoft Office\root\Office16\POWERPNT.EXE"), "16.0.1");
+        write_pe(pf.join(r"Microsoft Office\root\Office16\EXCEL.EXE"), "16.0.1");
+        write_pe(pf.join(r"Autodesk\AutoCAD 2027\acad.exe"), "25.1.0");
+        write_pe(uf.join(r"Figma\Figma.exe"), "124.0.0");
+
+        let proots = [pf];
+        let croots = [cf];
+        let uroots = [uf];
+
+        // Verify every single one of the 16 Craft Suite apps resolves its counterpart cleanly.
+        for id in artcraft_launcher_core::counterpart::CRAFT_SUITE_16_IDS {
+            let app = CraftApp::by_id(id).unwrap();
+            let found = detect_counterparts_in_roots(app, &proots, &croots, &uroots);
+            assert!(!found.is_empty(), "expected counterpart detected for {id}");
+        }
+
+        let ps_found = detect_counterparts_in_roots(CraftApp::by_id("photocraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(ps_found[0].name, "Adobe Photoshop 2027");
+        assert_eq!(ps_found[0].version, version::parse("28.0.0"));
+        assert_eq!(ps_found[0].companion_version, Some(("Camera Raw".into(), version::parse("19.0.0").unwrap())));
+        assert!(ps_found[0].is_cc_2027);
+        assert_eq!(ps_found[0].display_label(), "Adobe Photoshop 2027 28.0.0 (Camera Raw 19.0.0)");
+
+        let ai_found = detect_counterparts_in_roots(CraftApp::by_id("vectorcraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(ai_found[0].name, "Adobe Illustrator 2027");
+        assert_eq!(ai_found[0].version, version::parse("31.0.0"));
+        assert!(ai_found[0].is_cc_2027);
+
+        let pr_found = detect_counterparts_in_roots(CraftApp::by_id("filmcraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(pr_found.len(), 2);
+        assert_eq!(pr_found[0].name, "Adobe Premiere Pro 2027");
+        assert_eq!(pr_found[0].version, version::parse("27.0.0"));
+        assert_eq!(pr_found[1].name, "Adobe Media Encoder 2027");
+        assert_eq!(pr_found[1].version, version::parse("27.0.0"));
+
+        let ae_found = detect_counterparts_in_roots(CraftApp::by_id("effectcraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(ae_found[0].name, "Adobe After Effects 2027");
+        assert_eq!(ae_found[0].version, version::parse("27.0"));
+        assert!(ae_found[0].is_cc_2027);
+
+        let id_found = detect_counterparts_in_roots(CraftApp::by_id("designcraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(id_found[0].name, "Adobe InDesign 2027");
+        assert_eq!(id_found[0].version, version::parse("22.0"));
+        assert!(id_found[0].is_cc_2027);
+
+        let pdf_found = detect_counterparts_in_roots(CraftApp::by_id("pdfcraft").unwrap(), &proots, &croots, &uroots);
+        assert_eq!(pdf_found[0].name, "Adobe Acrobat DC");
+        assert_eq!(pdf_found[0].version, version::parse("26.2.0"));
+        assert!(pdf_found[0].is_cc_2027);
     }
 }

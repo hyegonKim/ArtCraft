@@ -1253,6 +1253,7 @@ theme	Appearance	Giao diện
 	Zoom Out	Thu nhỏ
 	Zoom out	Thu nhỏ
 	Zoom Tool	Công cụ thu phóng
+@plural	{n} byte|{n} bytes	{n} byte
 @plural	{n} commit|{n} commits	{n} commit
 	{n} files	{n} tệp
 	{n} h ago	{n} giờ trước

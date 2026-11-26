@@ -77,11 +77,14 @@ fn cube_files(paths: &[String]) -> (Vec<(String, String, Option<String>)>, Vec<V
                     ));
                 }
             }
-        } else {
+        } else if path.extension().is_some_and(|x| x.eq_ignore_ascii_case("cube")) {
             match std::fs::read_to_string(path) {
                 Ok(t) => out.push((stem(path), t, None)),
                 Err(e) => failed.push(json!([stem(path), e.to_string()])),
             }
+        } else if !path.extension().is_some_and(|x| x.eq_ignore_ascii_case("dcp")) {
+            // (a .dcp is a camera profile: `dcp_profiles::import_files` takes it)
+            failed.push(json!([stem(path), "not a .cube, .dcp or .zip file"]));
         }
     }
     (out, failed)
@@ -100,6 +103,10 @@ fn import(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let (files, mut failed) = cube_files(&paths);
     let mut imported = Vec::new();
+    // the ids taken and the next suffix per slug: a bundle of same-titled LUTs doesn't probe the
+    // whole list from 2 for each one
+    let mut taken: std::collections::HashSet<String> = s.lut_profiles.iter().map(|x| x.id.clone()).collect();
+    let mut next_suffix: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
     for (name, text, group) in files {
         let lut = match lightcraft_pipeline::lut::Lut3d::parse_cube(&text) {
             Ok(l) => l,
@@ -112,15 +119,18 @@ fn import(s: &mut Session, p: &Value) -> Result<Value> {
         let group = super::super::preset_import::group_from_dir(&group.unwrap_or_default()).unwrap_or_else(|| "Imported".into());
         let slug = crate::presets::slug(&format!("{group}-{display}"));
         let mut id = format!("lut:{slug}");
-        let mut n = 2;
-        while s.lut_profiles.iter().any(|x| x.id == id) {
+        let n = next_suffix.entry(slug.clone()).or_insert(2);
+        while taken.contains(&id) {
             id = format!("lut:{slug}-{n}");
-            n += 1;
+            *n += 1;
         }
+        taken.insert(id.clone());
         let file = match &dir {
             Some(d) => {
                 let f = d.join(format!("{}.cube", id.trim_start_matches("lut:")));
-                std::fs::write(&f, &text).map_err(|e| bad(C, format!("{}: {e}", f.display())))?;
+                // a new file renamed into place: an entry already under the name (a link planted
+                // in the Profiles folder) is replaced, never written through
+                lightcraft_catalog::safe_file::write_atomic(&f, text.as_bytes()).map_err(|e| bad(C, format!("{}: {e}", f.display())))?;
                 f.to_string_lossy().to_string()
             }
             // no library on disk: the registered LUT is all this session needs (a copy would only
@@ -131,6 +141,10 @@ fn import(s: &mut Session, p: &Value) -> Result<Value> {
         s.lut_profiles.push(LutProfile { id: id.clone(), name: display.clone(), group: group.clone(), file });
         imported.push(json!({"id": id, "name": display, "group": group}));
     }
+    // camera profiles (.dcp) among them
+    let (cameras, camera_failed) = super::dcp_profiles::import_files(s, &paths)?;
+    imported.extend(cameras);
+    failed.extend(camera_failed);
     s.save_prefs()?;
     // presets that name these profiles use them now
     crate::profile_refs::refresh(s);
@@ -144,12 +158,15 @@ pub fn specs() -> Vec<CommandSpec> {
             "Import Profiles",
             [],
             None,
-            "{paths: [.cube file, folder or .zip]} — 3D LUTs become creative profiles (Amount 0–200 %; rendered on the CPU) in the profile browser's groups (folder / zip name, else Imported) → {imported: [{id, name, group}], failed}",
+            "{paths: [.cube / .dcp file, folder or .zip]} — 3D LUTs become creative profiles (Amount 0–200 %; rendered on the CPU) in the profile browser's groups (folder / zip name, else Imported); DNG camera profiles (.dcp, the user's own) become camera profiles (dcp: ids, group Camera Profiles) that replace a raw file's colour model when it is decoded → {imported: [{id, name, group | cameraModel}], failed}",
             always,
             import
         ),
-        cmd!("profile.deleteImported", "Delete Imported Profile", [], None, "{id: lut:…}", always, |s, p| {
+        cmd!("profile.deleteImported", "Delete Imported Profile", [], None, "{id: lut:… | dcp:…}", always, |s, p| {
             let id = str_param(p, "id").ok_or_else(|| bad("profile.deleteImported", "missing id"))?.to_string();
+            if super::dcp_profiles::is_dcp_id(&id) {
+                return s.execute("profile.deleteCamera", p);
+            }
             let Some(i) = s.lut_profiles.iter().position(|x| x.id == id) else {
                 return Err(bad("profile.deleteImported", format!("no imported profile `{id}`")));
             };
@@ -162,42 +179,5 @@ pub fn specs() -> Vec<CommandSpec> {
             crate::profile_refs::refresh(s);
             Ok(json!({"deleted": id}))
         }),
-        cmd!(
-            "profile.exportLut",
-            "Export 3D LUT (.cube)…",
-            ["File"],
-            None,
-            "{path?: .cube file (omit to return `cube` text), size?: 2..=65 (default 33), space?: srgb|displayP3|adobeRgb|proPhotoRgb|rec2020, title?: str} — bakes the active photo's global color & tone edits into an Adobe/Resolve/Final Cut Pro 3D .cube LUT → {path?, cube, size}",
-            super::has_active,
-            |s, p| {
-                const C: &str = "profile.exportLut";
-                let id = s.active().ok_or_else(|| bad(C, "no active photo"))?;
-                let dev = s.develop_of(id).unwrap_or_default();
-                let size = match p.get("size") {
-                    None | Some(Value::Null) => 33usize,
-                    Some(v) => v.as_u64().ok_or_else(|| bad(C, "`size` must be an integer 2..=65"))? as usize,
-                };
-                let space = match str_param(p, "space").unwrap_or("srgb") {
-                    "srgb" | "sRGB" => lightcraft_pipeline::OutputSpace::Srgb,
-                    "displayP3" | "p3" => lightcraft_pipeline::OutputSpace::DisplayP3,
-                    "adobeRgb" => lightcraft_pipeline::OutputSpace::AdobeRgb,
-                    "proPhotoRgb" | "proPhoto" => lightcraft_pipeline::OutputSpace::ProPhoto,
-                    "rec2020" => lightcraft_pipeline::OutputSpace::Rec2020,
-                    other => return Err(bad(C, format!("unknown color space `{other}`"))),
-                };
-                let title = str_param(p, "title")
-                    .map(str::to_string)
-                    .or_else(|| s.catalog.photo(id).map(|ph| ph.file_name.clone()));
-                let lut = lightcraft_pipeline::lut::bake_develop_lut(&dev, size, space, title).map_err(|e| bad(C, e))?;
-                let cube = lut.to_cube();
-                if let Some(path) = str_param(p, "path") {
-                    std::fs::write(path, cube.as_bytes()).map_err(|e| bad(C, format!("{path}: {e}")))?;
-                    Ok(json!({"path": path, "cube": cube, "size": size}))
-                } else {
-                    Ok(json!({"cube": cube, "size": size}))
-                }
-            }
-        ),
     ]
 }
-

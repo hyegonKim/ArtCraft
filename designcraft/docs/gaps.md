@@ -1,6 +1,6 @@
 # Where DesignCraft falls short of InDesign
 
-> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-24 · **Change:** minor (placed graphic layer-option preservation and explicit rendering warnings; gap 16 shrunk: File › File Info; gap 16: Convert Variable to Text; gap 28 added: placed-PDF font repair remains after visible unembedded font detection, #909; gap 26 shrunk: autoflow fills the following pages before it adds pages at the end; gap 6 shrunk: Type › Reload Fonts reads fonts installed, edited or removed while running (#328); gap 3: Package links are relative, #340; gap 27 closed: the loaded text cursor threads into a frame inside a group (#1075); .indd and .indt open through indd-utils; gap 0 shrunk: text threads by hand; threading gaps added; Optical kerning from outlines (#181); gap 6: macOS lists fonts that font services and managers activate; shared print spooler; image clipping paths from IDML; Tabs panel listed as present (#343); book chapter update safety; gap 16: Based on Parent leftovers; bounded control click/drag input; swatches on placed greyscale and bitmap images) · **Target:** Adobe InDesign 2026 (21.6)
+> **Last reviewed:** 2026-11-15 · **Last updated:** 2026-11-15 · **Change:** minor (gap 0 closed: Primary Text Frame Smart Text Reflow preserves manual pages and reclaims unused auto-added pages (#165); gap 2 shrunk: `.indb` books, `.indl` asset libraries and `.idms` snippets read and write natively; gap 9 shrunk: `PDF/X-3:2003` (`x3` + validator), Adobe PDF Presets and `.joboptions` load/save ship; gap 15 shrunk: book page-numbering options (`continue` / `nextOdd` / `nextEven` + blank page insertion + list continuation), granular 10-category synchronization, book preflight and book Reflowable/Fixed-Layout EPUB export; gap 17 shrunk: true XHTML5 + CSS3 Fixed-Layout EPUB 3.0 scene-graph export with live positioned text, `@font-face` embedded fonts and inline SVG vectors; preflight live panel profiles (`.idpp`), category tree and Info/Fix drawer; gap 21 shrunk: Korean (`ko`) interface localization) · **Target:** Adobe InDesign 2027 (22.0)
 
 Every known shortfall against InDesign 2026, one entry each, ranked by how much it stops an
 InDesign professional from doing real work. This is the work list: agents pick from the top.
@@ -11,18 +11,6 @@ ROADMAP progress log and update the timestamps.
 
 Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · **H** hardware ·
 **L** localization · **P** performance · **S** stability · **E** ecosystem · **A** AI.
-
-## Alpha blocker (the core-workflow gate in [roadmap.md](roadmap.md#alpha-gate))
-
-### 0. Primary Text Frame autoflow adds pages users can't delete (F) · **ALPHA BLOCKER**
-- **Missing:** fixes to Smart Text Reflow on the Primary Text Frame, which users report adding
-  pages they can't delete (#165). Threading by hand works (ports, loaded text cursor, `text.thread` / `text.unthread` /
-  `text.removeFromThread`).
-- **Evidence:** #165.
-- **Impact:** a long story in a Primary Text Frame document can leave pages the designer can't
-  remove.
-- **Estimate:** 5–7 h.
-- **Doc:** [ui-parity.md](ui-parity.md)
 
 ## Blocking (beta can't be declared while these are open)
 
@@ -40,10 +28,13 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 - **Doc:** [ui-parity.md](ui-parity.md)
 
 ### 2. INDD opening isn't measured on real files (FF)
-- **Missing:** a real-file corpus test of opening `.indd` and `.indt`. They open through
+- **Missing:** a real-file corpus test of opening `.indd` and `.indt`, plus full proprietary binary
+  decoding for legacy `.indb`/`.indl` metadata streams beyond embedded document paths and IDMS/ZIP
+  bundles. `.indd` and `.indt` open through
   [storytold/indd-utils](https://github.com/storytold/indd-utils), which converts them to IDML in
-  memory for the IDML importer, but DesignCraft's own tests use synthetic bytes only. INDB and
-  INDL are still not read.
+  memory for the IDML importer, while `.indb` books (XML/ZIP + binary chapter-path scanning),
+  `.indl` asset libraries (IDMS ZIP bundle + binary asset scanning) and `.idms` snippets now read
+  and write natively.
 - **Evidence:** #21, #114 (PR #98 proposed another converter). indd-utils reports 96.9% of
   InDesign's IDML values reproduced on ~650 INDD/IDML pairs and 0 failures on ~4,300 files; what
   DesignCraft draws from those files is unmeasured, and it inherits the IDML importer's open bugs
@@ -116,13 +107,15 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 - **Estimate:** 10–20 h. **Doc:** [localization-parity.md](localization-parity.md)
 
 ### 9. PDF output presets and standards (FF)
-- **Missing:** PDF/X-3, Adobe PDF Presets and `.joboptions` load/save, output-intent choice
-  beyond the built-in profile, PDF/UA validation; soft effects other than the drop shadow reach
-  the PDF/X-1a flattener as RGB images; #159, #32.
-- **Have:** PDF/X-4 with output intent and a validator (`#200`), PDF/X-1a:2003 through
-  craft-prepress's flattener with its own checks, PDF/A-2b, tagged PDF, CMYK and spot, marks and
-  bleed, the options dialog with remembered settings (#196).
-- **Estimate:** 30–60 h. **Doc:** [file-format-parity.md](file-format-parity.md)
+- **Missing:** output-intent choice beyond the built-in/preset profile, PDF/UA validation; soft
+  effects other than the drop shadow reach the PDF/X-1a and PDF/X-3 flattener as RGB images; #159, #32.
+- **Have:** PDF/X-4 with output intent and a validator (`#200`), PDF/X-3:2003 (`x3` + validator,
+  PDF 1.4 with flattened transparency and ICC-tagged RGB allowed), PDF/X-1a:2003 through
+  craft-prepress's flattener with its own checks, PDF/A-2b, Adobe PDF Presets and `.joboptions`
+  Distiller PS preset load/save (`pdfPreset.importJoboptions`, `pdfPreset.exportJoboptions`, and UI
+  controls in Export PDF), tagged PDF, CMYK and spot, marks and bleed, the options dialog with
+  remembered settings (#196), and File ▸ Export Layouts and Versions (`file.exportBatch`).
+- **Estimate:** 15–30 h. **Doc:** [file-format-parity.md](file-format-parity.md)
 
 ### 28. Placed-PDF font repair for PDF/X-4 (FF)
 - **Missing:** embedding, substitution or outlining of unembedded fonts in placed PDFs; export
@@ -151,12 +144,12 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 
 ### 12. Tables in depth (F)
 - **Missing:** anchored objects in cells not drawn (#163); Table ▸ Table Options and Cell Options
-  submenus as InDesign lays them out, Diagonal Lines, Edit Header/Footer,
-  Go to Row; general reliability (#20).
+  submenus as InDesign lays them out, Diagonal Lines, Edit Header/Footer; general reliability
+  (#20).
 - **Estimate:** 25–40 h.
 
 ### 13. Hyphenation and spelling languages (T, L)
-- **Missing:** hyphenation patterns for every language but English, Spanish, Portuguese, Norwegian and Greek; spelling for
+- **Missing:** hyphenation patterns for every language but English, Spanish, Portuguese, Norwegian, Danish, Greek, German (2006 reform), French, Italian and Dutch; spelling for
   every language but English. InDesign ships dictionaries for ~40 languages.
 - **Estimate:** 30–60 h (permissively licensed patterns exist for most; spelling word lists need
   licence review). **Doc:** [typography-parity.md](typography-parity.md)
@@ -171,11 +164,15 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 
 ### 15. Long documents in depth (F)
 - **Missing:** book-wide TOC and index; Table of Contents Styles and deeper production workflows.
-- **Present:** basic style synchronization, continuous book numbering and merged PDF export.
-  Chapter updates prepare the full batch and write only closed native chapters; IDML is a
-  read-only source. Each file is atomic, but a later I/O failure can leave completed chapters;
-  the error lists them. Cross-file transactional saving remains unavailable.
-- **Estimate:** 30–50 h.
+- **Present:** `.indb` book files (`book.open`, `book.save`, `book.saveAs`), chapter reordering
+  (`book.move`), book page-numbering modes (`continue`, `nextOdd`, `nextEven` with optional blank
+  page insertion and list continuation), granular 10-category synchronization (`book.syncStyles` /
+  `book.options` across paragraph/character/object/table/cell styles, swatches, parent pages,
+  numbered lists, text variables and conditional text), book-wide preflight (`book.preflight`),
+  merged PDF export (`book.exportPdf` with full `.joboptions` / PDF/X options), and book-wide
+  Reflowable & Fixed-Layout EPUB 3.0 export (`book.exportEpub`). Chapter updates prepare the full
+  batch and write only closed native chapters; IDML is a read-only source.
+- **Estimate:** 15–30 h.
 
 ### 16. Menu items still missing (U)
 - **Missing:** 149 of 482 in-scope items of InDesign 21.6's menu dump have no match (measured 2026-10-10; some exist under other labels): Type ▸ Notes
@@ -189,16 +186,20 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
   Profile / Edit Original, File ▸ Open PDF / Document and Print Presets / User
   Settings, Type ▸ Size presets, Table ▸ Table Options / Cell Options submenus, Paste Before/After,
   Convert Columns, Object ▸ Interactive ▸ Convert to (form fields),
-  View ▸ Extras badges and Story Editor options. Pages panel ▸ Parent Options (Based on Parent is
-  the `layout.parents.options` command only); overriding a base parent's items on a parent spread
-  itself (overrides work on document pages only).
+  View ▸ Extras badges and Story Editor options (Show/Hide Depth Ruler is there). Overriding a
+  base parent's items on a parent spread itself (overrides work on document pages only); Save
+  as Parent; new parents for an alternate layout (its pages keep their source pages' parents).
 - **Estimate:** 40–70 h (most are thin wrappers over existing engine features).
 - **Doc:** [ui-parity.md](ui-parity.md)
 
 ### 17. HTML and fixed-layout EPUB (FF)
-- **Missing:** HTML export is one basic page (#314); fixed-layout EPUB writes page images, not
-  live text and CSS; no animation or timing for EPUB/HTML.
-- **Estimate:** 30–50 h.
+- **Have:** Fixed-Layout EPUB 3.0 (`file.exportFixedEpub` and `file.exportEpub {fixedLayout: true}`)
+  now emits genuine XHTML5 + CSS3 scene-graph pages (`rendition:layout` `pre-paginated`, viewport
+  dimensions, `@font-face` embedded fonts, positioned `<div>` frames, shaped selectable `<span>`
+  text runs, hyperlinks, inline `<svg>` vector paths/gradients, and `<img>` placed rasters).
+- **Missing:** HTML export is still one basic page (#314); no SMIL media overlays, animation or
+  timing for EPUB/HTML.
+- **Estimate:** 12–25 h.
 
 ### 18. Colour management depth (F)
 - **Missing:** Assign Profiles / Convert to Profile, per-image rendering intents in output,
@@ -228,10 +229,20 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 - **Estimate:** 30–60 h (PostScript interpreter is a large separate project: +80–150 h).
 
 ### 20. Performance on large documents (P)
-- **Missing:** incremental composition (recompose from the edited paragraph; 8 ms keystroke
-  budget), benchmarks against InDesign on long books and image-heavy catalogues.
+- **Missing:** the 8 ms keystroke budget in long stories: an edit that moves lines into other
+  frames composes the story to its end, the lines an edit keeps are copied, and stories with
+  footnotes, endnotes, tables, anchored objects, named lists, tracked deletions, balanced
+  columns, vertical justification other than Top, column rules, type on a path, spanning or
+  split paragraphs, paragraph borders or shading, or keep options that move lines compose
+  whole; benchmarks
+  against InDesign on long books and image-heavy catalogues.
 - **Have:** compose 300k characters ~38 ms warm, damage-region repaint (< 1 ms while typing),
-  parallel story composition.
+  parallel story composition, and an edit composes only the paragraphs it can change in a plain
+  story (240 paragraphs: 3 composed for a typed character). Automatic recovery writes on a
+  background thread and streams to disk, so an autosave of that catalogue no longer blocks the
+  interface thread for 30-100 s (`file.recovery.save {background}`, `file.recovery.progress`). A
+  snapshot still being written when its document is saved, reverted or closed is cancelled before
+  it is published, so a crash cannot offer back a copy older than the saved file.
 - **Estimate:** 40–80 h.
 
 ### 26. Autoflow flows into the primary text frame of the pages that follow (F)
@@ -243,8 +254,11 @@ Kind: **F** feature · **U** UI/UX · **T** typography · **FF** file format · 
 ## Lower
 
 ### 21. Localization breadth (L)
-- **Missing:** Hindi, Indonesian, Korean, Vietnamese interfaces; ~17% of strings in the 83–85%
-  languages; 39% of pt-BR; native-speaker review for all. **Estimate:** 120–180 h.
+- **Have:** Korean (`ko` — 한국어) interface localization across menus, tools, panels, dialogs,
+  preflight, `.joboptions` / PDF/X, Fixed-Layout EPUB, `.indb` books and `.indl` / `.idms` asset
+  libraries, plus Korean EPUB TOC localized title (`목차`).
+- **Missing:** Hindi, Indonesian, Vietnamese interfaces; ~17% of strings in the 83–85%
+  languages; native-speaker review for all. **Estimate:** 100–150 h.
   **Doc:** [localization-parity.md](localization-parity.md)
 
 ### 22. InDesign scripting compatibility (E)
@@ -275,6 +289,8 @@ Cue. These are excluded from every percentage.
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-11-15 | minor | Gap 0 closed (Smart Text Reflow #165); Gap 2 shrunk (`.indb`, `.indl`, `.idms`); Gap 9 shrunk (`PDF/X-3:2003` + `.joboptions`); Gap 15 shrunk (book numbering, 10-category sync, preflight & EPUB); Gap 17 shrunk (true XHTML5+CSS3 Fixed-Layout EPUB 3.0); Preflight `.idpp` profiles & live category/Fix UI; Gap 21 shrunk (Korean `ko` UI) |
+| 2026-11-04 | trivial | Gap 21 shrunk: pt-BR translates 2,936 of 2,939 strings, all but three Control panel captions (61% before) |
 | 2026-10-22 | minor | Gap 26 shrunk: autoflow threads a frame per column on the pages that follow the story's last frame, then adds pages at the end of the document |
 | 2026-10-19 | minor | Gap 28 added for remaining placed-PDF font embedding, substitution or outlining; visible unembedded font detection now ships in PDF/X-4 export and `validate-pdf`, with invisible text exempt and operation- or depth-limited checks reported incomplete (#909) |
 | 2026-10-16 | minor | Gap 27 closed: the loaded text cursor threads into a text frame inside a group (#1075) |

@@ -1,0 +1,3 @@
+# Words the eo pack must accept and reject (common words; written for this check).
+correct = ["domo", "libro", "lernejo", "akvo", "urbo"]
+incorrect = ["librro", "lernnejo", "urrbo"]

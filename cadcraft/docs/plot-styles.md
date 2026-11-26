@@ -87,8 +87,9 @@ prints as `Normal`. A colour-dependent table ignores the property.
 
 ## Table files
 
-Tables are saved in our own format: UTF-8 JSON with a format marker. Fields left at "use the
-object's" are omitted.
+CADCraft reads and writes AutoCAD PIA 2.0 binary `.ctb` and `.stb` files (`PIAFILEVERSION_2.0,{CTB|STB}VER1,compress` + `pmzlibcodec` Adler32/size header + zlib stream, as well as raw zlib streams and `uncompressed` PIA text) and CADCraft's UTF-8 JSON format. Saving to a `.ctb` or `.stb` path writes binary PIA 2.0 by default (`format: "binary" | "pia" | "json"` in `stylesmanager` and `plotstyle` selects binary PIA, uncompressed PIA text, or JSON).
+
+In JSON format, fields left at "use the object's" are omitted:
 
 ```json
 {
@@ -115,9 +116,7 @@ Reading fixes hostile values:
 - Screening is capped at 100 and lineweights at 211.
 - A colour-dependent table always gets 255 styles named `Color_n`.
 - A named table gets unique style names (at most 1024), with `Normal` first.
-- Files over 4 MB are refused.
-
-Binary `.ctb`/`.stb` files are not read. We haven't found a public specification of that format.
+- Files over 4 MB (and decompressed PIA payloads over 16 MB) are refused.
 
 ## In DXF files
 

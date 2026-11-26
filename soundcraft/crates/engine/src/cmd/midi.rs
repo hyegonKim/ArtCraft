@@ -23,6 +23,15 @@ pub fn specs() -> Vec<CommandSpec> {
         cmd!("midi.note_edit", "Edit Note", [], None, "{clip, index, pitch?, start_ticks?, length_ticks?, velocity?}", always, note_edit),
         cmd!("midi.note_delete", "Delete Notes", [], None, "{clip, indices: [n]}", always, note_delete),
         cmd!("midi.notes_move", "Move Notes", [], None, "{clip, indices: [n], ticks?: 0, semitones?: 0}", always, notes_move),
+        cmd!(
+            noundo "midi.audition",
+            "Audition MIDI Note",
+            [],
+            None,
+            "{track?, clip?, pitch, velocity?: 100, duration_ms?: 250} — sends a live MIDI note-on (or note-off when velocity is 0) to the target instrument",
+            always,
+            audition
+        ),
     ]
 }
 
@@ -124,6 +133,12 @@ fn notes_move(e: &mut Engine, p: &Value) -> Result<Value> {
     let dt = i64_or(p, "ticks", 0);
     let ds = i64_or(p, "semitones", 0);
     let seq = seq_mut(e, id, "midi.notes_move")?;
+    // Clamp the shared delta so the earliest selected note stops at tick 0 and the selection keeps its spacing.
+    let earliest = seq.notes.iter().enumerate().filter(|(i, _)| idx.contains(i)).map(|(_, n)| n.start).min();
+    let dt = match earliest {
+        Some(m) => dt.max(0i64.saturating_sub(m).min(0)),
+        None => dt,
+    };
     for (i, n) in seq.notes.iter_mut().enumerate() {
         if idx.contains(&i) {
             n.start = n.start.saturating_add(dt).max(0);
@@ -143,6 +158,26 @@ fn notes_move(e: &mut Engine, p: &Value) -> Result<Value> {
     }
     indices.sort_unstable();
     Ok(json!({"moved": idx.len(), "indices": indices}))
+}
+
+fn audition(e: &mut Engine, p: &Value) -> Result<Value> {
+    let pitch = p
+        .get("pitch")
+        .and_then(Value::as_i64)
+        .ok_or_else(|| bad("midi.audition", "`pitch` required"))?
+        .clamp(0, 127) as u8;
+    let velocity = i64_or(p, "velocity", 100).clamp(0, 127) as u8;
+    let duration_ms = i64_or(p, "duration_ms", 250).clamp(0, 10_000) as u32;
+    let track = if p.get("track").is_some() {
+        super::track_param(e, "midi.audition", p, "track")?
+    } else if p.get("clip").is_some() {
+        let cid = clip_id(p, "midi.audition")?;
+        e.session().find_clip(cid).map(|(t, _)| t)
+    } else {
+        None
+    };
+    e.transport_requests.push(crate::TransportRequest::MidiAudition { track, pitch, velocity, duration_ms });
+    Ok(json!({"track": track.map(|t| t.0), "pitch": pitch, "velocity": velocity, "duration_ms": duration_ms}))
 }
 
 #[cfg(test)]
@@ -166,6 +201,36 @@ mod tests {
         e.execute("midi.note_delete", &json!({"clip": clip, "indices": [0]})).unwrap();
         assert_eq!(e.execute("midi.notes", &json!({"clip": clip})).unwrap()["notes"].as_array().map(Vec::len), Some(1));
         assert!(e.execute("midi.note_edit", &json!({"clip": clip, "index": 99})).is_err());
+    }
+
+    #[test]
+    fn notes_move_left_past_zero_keeps_spacing() {
+        let mut e = Engine::default();
+        let t = e.session_mut().add_track(TrackKind::Instrument, ChannelFormat::Stereo, Some("Keys"));
+        let r = e.execute("midi.new_clip", &json!({"track": t.0})).unwrap();
+        let clip = r["clip"].as_u64().unwrap();
+        for s in [100, 200, 300] {
+            e.execute("midi.note_add", &json!({"clip": clip, "pitch": 60, "start_ticks": s})).unwrap();
+        }
+        e.execute("midi.notes_move", &json!({"clip": clip, "indices": [0, 1], "ticks": -150})).unwrap();
+        let n = e.execute("midi.notes", &json!({"clip": clip})).unwrap();
+        let starts: Vec<i64> = n["notes"].as_array().unwrap().iter().map(|x| x["start"].as_i64().unwrap()).collect();
+        assert_eq!(starts, [0, 100, 300]);
+    }
+
+    #[test]
+    fn notes_move_without_left_overflow_does_not_shift_selection() {
+        let mut e = Engine::default();
+        let t = e.session_mut().add_track(TrackKind::Instrument, ChannelFormat::Stereo, Some("Keys"));
+        let clip = e.execute("midi.new_clip", &json!({"track": t.0})).unwrap()["clip"].as_u64().unwrap();
+        for s in [0, 100] {
+            e.execute("midi.note_add", &json!({"clip": clip, "pitch": 60, "start_ticks": s})).unwrap();
+        }
+        seq_mut(&mut e, ClipId(clip), "test").unwrap().notes[0].start = -50;
+        e.execute("midi.notes_move", &json!({"clip": clip, "indices": [0, 1], "ticks": 0})).unwrap();
+        let n = e.execute("midi.notes", &json!({"clip": clip})).unwrap();
+        let starts: Vec<i64> = n["notes"].as_array().unwrap().iter().map(|x| x["start"].as_i64().unwrap()).collect();
+        assert_eq!(starts, [0, 100]);
     }
 
     #[test]

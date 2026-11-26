@@ -1,0 +1,298 @@
+# Ελληνικά (el) interface catalog for ArtCraft Launcher.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+	{a} and {b}	{a} και {b}
+	{count} updates are available	Υπάρχουν {count} διαθέσιμες ενημερώσεις
+	{done} downloaded	Λήφθηκαν {done}
+	{done} of {total}	{done} από {total}
+	{done} of {total} downloaded	Λήφθηκαν {done} από {total}
+	{installed} installed · latest {latest}	Εγκατεστημένη {installed} · τελευταία {latest}
+	{month} {day}, {year}	{day} {month} {year}
+	{name} {v} is available	Το {name} {v} είναι διαθέσιμο
+	{name} details	Λεπτομέρειες για το {name}
+	{name} icon	Εικονίδιο του {name}
+	{path} already exists. Installing {name} will overwrite it.	Το {path} υπάρχει ήδη. Η εγκατάσταση του {name} θα το αντικαταστήσει.
+	{version} installed → {latest} released	Εγκατεστημένη {version} → κυκλοφόρησε η {latest}
+	⊞  Grid	⊞  Πλέγμα
+	☰  Table	☰  Πίνακας
+	A new version is available. Download it to replace this version?	Υπάρχει νέα έκδοση. Να γίνει λήψη της για να αντικαταστήσει αυτήν την έκδοση;
+	A new version is available. Would you like to relaunch with the updated version?	Υπάρχει νέα έκδοση. Να γίνει επανεκκίνηση με την ενημερωμένη έκδοση;
+	All releases	Όλες οι εκδόσεις
+	App	Εφαρμογή
+	App details	Λεπτομέρειες εφαρμογής
+	Apps are placed inside this folder.	Οι εφαρμογές τοποθετούνται μέσα σε αυτόν τον φάκελο.
+	Apps on this computer	Εφαρμογές σε αυτόν τον υπολογιστή
+	Apps you can install	Εφαρμογές που μπορείτε να εγκαταστήσετε
+	Apps you hid	Εφαρμογές που αποκρύψατε
+	Arch package (.pkg.tar.zst)	Πακέτο Arch (.pkg.tar.zst)
+	ArtCraft Launcher {version} is available.	Το ArtCraft Launcher {version} είναι διαθέσιμο.
+	ArtCraft Launcher is still running	Το ArtCraft Launcher εξακολουθεί να εκτελείται
+	ArtCraft on {name}	Το ArtCraft στο {name}
+	ArtCraft on GitHub	Το ArtCraft στο GitHub
+	Ascending	Αύξουσα
+	Automatically download and install updates	Αυτόματη λήψη και εγκατάσταση ενημερώσεων
+	Available to install	Διαθέσιμες για εγκατάσταση
+	Cancel download	Ακύρωση λήψης
+	Cancel update	Ακύρωση ενημέρωσης
+	Checked {ago}	Ελέγχθηκε {ago}
+	Checked {ago} · using {sources}	Ελέγχθηκε {ago} · μέσω {sources}
+	Checking for updates…	Έλεγχος για ενημερώσεις…
+	Checking…	Έλεγχος…
+	Classic apps	Κλασικές εφαρμογές
+	Click to enlarge	Κάντε κλικ για μεγέθυνση
+	Click to reverse the order	Κάντε κλικ για αντιστροφή της σειράς
+	Click to sort by this column	Κάντε κλικ για ταξινόμηση με βάση αυτή τη στήλη
+	Coming soon	Σύντομα
+	Couldn't change the login item: {e}	Δεν ήταν δυνατή η αλλαγή της εκκίνησης κατά τη σύνδεση: {e}
+	Couldn't check for updates: {f}	Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις: {f}
+	Craft App Suite	Σουίτα εφαρμογών Craft
+	Custom folders use AppImage on Linux.	Στο Linux, οι προσαρμοσμένοι φάκελοι χρησιμοποιούν AppImage.
+	Debian package (.deb)	Πακέτο Debian (.deb)
+	Default install folder	Προεπιλεγμένος φάκελος εγκατάστασης
+	Descending	Φθίνουσα
+	Discard download	Απόρριψη λήψης
+	Disk image (.dmg)	Εικόνα δίσκου (.dmg)
+	Download again	Νέα λήψη
+	Download cancelled	Η λήψη ακυρώθηκε
+	Download for {os}	Λήψη για {os}
+	Download paused	Η λήψη τέθηκε σε παύση
+	Downloading	Λήψη
+	Downloading {done} of {total}	Λήψη {done} από {total}
+	Downloading…	Λήψη…
+	Downloads for {platform}	Λήψεις για {platform}
+	Downloads the new version, replaces this one and opens it again	Κατεβάζει τη νέα έκδοση, αντικαθιστά την τρέχουσα και την ανοίγει ξανά
+	Enlarge picture	Μεγέθυνση εικόνας
+	Every Craft app	Όλες οι εφαρμογές Craft
+	Features	Δυνατότητες
+	Flatpak bundle	Πακέτο Flatpak
+	Frequently used	Συχνά χρησιμοποιούμενες
+	Full changelog	Πλήρες αρχείο αλλαγών
+	GitHub limit hit; back in {min} min	Συμπληρώθηκε το όριο του GitHub· ξανά σε {min} λεπτά
+	GitHub's hourly limit was reached; full details return in {min} min	Συμπληρώθηκε το ωριαίο όριο του GitHub· οι πλήρεις λεπτομέρειες επιστρέφουν σε {min} λεπτά
+	GitHub repository	Αποθετήριο GitHub
+	Hidden Apps	Κρυφές εφαρμογές
+	Hide App	Απόκρυψη εφαρμογής
+	Include pre-releases (betas and release candidates)	Συμπερίληψη προεκδόσεων (beta και υποψήφιες εκδόσεις)
+	Install	Εγκατάσταση
+	Install cancelled	Η εγκατάσταση ακυρώθηκε
+	Install cancelled. The download is kept for the next try.	Η εγκατάσταση ακυρώθηκε. Το αρχείο λήψης διατηρείται για την επόμενη προσπάθεια.
+	Install folder	Φάκελος εγκατάστασης
+	Install new apps as	Εγκατάσταση νέων εφαρμογών ως
+	installed	εγκατεστημένη
+	Installed	Εγκατεστημένη
+	Installed · latest {latest}	Εγκατεστημένη · τελευταία {latest}
+	Installed · up to date	Εγκατεστημένη · ενημερωμένη
+	Installed apps with a newer version	Εγκατεστημένες εφαρμογές με νεότερη έκδοση
+	Installed version	Εγκατεστημένη έκδοση
+	Installer (.msi)	Πρόγραμμα εγκατάστασης (.msi)
+	Installing for {platform}	Εγκατάσταση για {platform}
+	Installing on Linux	Εγκατάσταση σε Linux
+	Installing on Windows	Εγκατάσταση σε Windows
+	Installing, then restarting…	Εγκατάσταση και επανεκκίνηση…
+	Installing…	Εγκατάσταση…
+	It's in the tray: open it or quit it from the tray icon, or turn this off in the settings.	Βρίσκεται στην περιοχή ειδοποιήσεων: ανοίξτε το ή κλείστε το από το εικονίδιό του εκεί, ή απενεργοποιήστε αυτή τη λειτουργία στις ρυθμίσεις.
+	Join the ArtCraft community on Discord	Γίνετε μέλος της κοινότητας του ArtCraft στο Discord
+	Join the Discord	Γίνετε μέλος στο Discord
+	Keep running in the tray when the window is closed	Συνέχιση εκτέλεσης στην περιοχή ειδοποιήσεων όταν κλείνει το παράθυρο
+	Last updated: {date}	Τελευταία ενημέρωση: {date}
+	Latest	Τελευταία
+	Latest release	Τελευταία κυκλοφορία
+	Latest version	Τελευταία έκδοση
+	Learn more	Μάθετε περισσότερα
+	link	σύνδεσμος
+	Loading ArtCraft Launcher…	Φόρτωση του ArtCraft Launcher…
+	Loading pictures…	Φόρτωση εικόνων…
+	Match system	Όπως το σύστημα
+	More actions for {name}	Περισσότερες ενέργειες για το {name}
+	Name (Z–A)	Όνομα (Z–A)
+	NEW	ΝΕΟ
+	New apps	Νέες εφαρμογές
+	New installs use this folder. Updates stay in their current location.	Οι νέες εγκαταστάσεις χρησιμοποιούν αυτόν τον φάκελο. Οι ενημερώσεις παραμένουν στην τρέχουσα θέση τους.
+	Newest release	Πιο πρόσφατη κυκλοφορία
+	Next app	Επόμενη εφαρμογή
+	Next picture (→)	Επόμενη εικόνα (→)
+	No apps match	Καμία εφαρμογή δεν ταιριάζει
+	No downloads for this system	Δεν υπάρχουν λήψεις για αυτό το σύστημα
+	No notes were published with this release.	Δεν δημοσιεύτηκαν σημειώσεις με αυτήν την έκδοση.
+	No release published yet	Δεν έχει δημοσιευτεί ακόμη έκδοση
+	Not available	Μη διαθέσιμη
+	Not available here	Δεν είναι διαθέσιμη εδώ
+	Not checked yet	Δεν έχει ελεγχθεί ακόμη
+	Not installed	Μη εγκατεστημένη
+	Notify me when an installed app has an update	Ειδοποίηση όταν μια εγκατεστημένη εφαρμογή έχει ενημέρωση
+	Offline	Εκτός σύνδεσης
+	On Linux, custom folders use AppImage format.	Στο Linux, οι προσαρμοσμένοι φάκελοι χρησιμοποιούν τη μορφή AppImage.
+	Only when I ask	Μόνο όταν το ζητώ
+	Open ArtCraft Launcher to update.	Ανοίξτε το ArtCraft Launcher για να γίνει η ενημέρωση.
+	Open on GitHub	Άνοιγμα στο GitHub
+	Open Source Tools for Creatives, Makers, and Builders	Εργαλεία ανοιχτού κώδικα για δημιουργούς, μάστορες και κατασκευαστές
+	Pause download	Παύση λήψης
+	Pictures couldn't be loaded. Reopen this page to try again.	Δεν ήταν δυνατή η φόρτωση των εικόνων. Ανοίξτε ξανά αυτή τη σελίδα για να δοκιμάσετε πάλι.
+	Platforms	Πλατφόρμες
+	Portable (.zip)	Φορητή έκδοση (.zip)
+	Previous app	Προηγούμενη εφαρμογή
+	Previous picture (←)	Προηγούμενη εικόνα (←)
+	Questions, ideas and news from the ArtCraft team	Ερωτήσεις, ιδέες και νέα από την ομάδα του ArtCraft
+	Quit ArtCraft Launcher	Έξοδος από το ArtCraft Launcher
+	Recently updated	Πρόσφατα ενημερωμένες
+	Reconnecting…	Επανασύνδεση…
+	Reinstall	Επανεγκατάσταση
+	Release notes	Σημειώσεις έκδοσης
+	Released	Κυκλοφόρησε
+	Released {date}	Κυκλοφόρησε {date}
+	Releases	Εκδόσεις
+	Removing…	Αφαίρεση…
+	Replace what's there?	Να αντικατασταθεί το υπάρχον;
+	Resume download	Συνέχιση λήψης
+	Retry install	Νέα προσπάθεια εγκατάστασης
+	Retry update to {version}	Νέα προσπάθεια ενημέρωσης σε {version}
+	RPM package (.rpm)	Πακέτο RPM (.rpm)
+	Running in the background	Εκτελείται στο παρασκήνιο
+	Search apps	Αναζήτηση εφαρμογών
+	Show {n} more changes	Εμφάνιση {n} ακόμη αλλαγών
+	Show apps as a table	Εμφάνιση εφαρμογών ως πίνακα
+	Show apps as cards	Εμφάνιση εφαρμογών ως κάρτες
+	Show ArtCraft Launcher	Εμφάνιση του ArtCraft Launcher
+	Show in Explorer	Εμφάνιση στο Explorer
+	Show in Files	Εμφάνιση στο Files
+	Show in Finder	Εμφάνιση στο Finder
+	Show the window on the current desktop	Εμφάνιση του παραθύρου στην τρέχουσα επιφάνεια εργασίας
+	Start ArtCraft Launcher when I log in	Εκκίνηση του ArtCraft Launcher κατά τη σύνδεσή μου
+	Stop waiting; the update can be started again later	Διακοπή αναμονής· η ενημέρωση μπορεί να ξεκινήσει ξανά αργότερα
+	Suite order	Σειρά σουίτας
+	System default	Προεπιλογή συστήματος
+	System package (recommended)	Πακέτο συστήματος (συνιστάται)
+	Tarball (.tar.gz)	Αρχείο tar (.tar.gz)
+	The app will be moved to the Trash. Your documents and settings stay.	Η εφαρμογή θα μετακινηθεί στον Κάδο. Τα έγγραφα και οι ρυθμίσεις σας διατηρούνται.
+	The app will be removed. Your documents and settings stay.	Η εφαρμογή θα αφαιρεθεί. Τα έγγραφα και οι ρυθμίσεις σας διατηρούνται.
+	The download is still here. It's checked again, then installed.	Το αρχείο λήψης υπάρχει ακόμη. Θα ελεγχθεί ξανά και μετά θα εγκατασταθεί.
+	The system manages install locations here.	Εδώ τις θέσεις εγκατάστασης τις διαχειρίζεται το σύστημα.
+	These notes weren't fetched (GitHub's request limit was reached). They're on the release page.	Οι σημειώσεις δεν ανακτήθηκαν (συμπληρώθηκε το όριο αιτημάτων του GitHub). Θα τις βρείτε στη σελίδα της έκδοσης.
+	Unhide App	Επανεμφάνιση εφαρμογής
+	Uninstall	Απεγκατάσταση
+	Uninstall {name}?	Απεγκατάσταση του {name};
+	Uninstall cancelled	Η απεγκατάσταση ακυρώθηκε
+	Uninstall…	Απεγκατάσταση…
+	Update 1 app	Ενημέρωση 1 εφαρμογής
+	Update all ({count})	Ενημέρωση όλων ({count})
+	Update and restart	Ενημέρωση και επανεκκίνηση
+	Update available	Υπάρχει ενημέρωση
+	Update cancelled	Η ενημέρωση ακυρώθηκε
+	Update paused	Η ενημέρωση τέθηκε σε παύση
+	Update to {v}	Ενημέρωση σε {v}
+	Updates always use the format an app was installed with.	Οι ενημερώσεις χρησιμοποιούν πάντα τη μορφή με την οποία εγκαταστάθηκε η εφαρμογή.
+	Updating…	Ενημέρωση…
+	Use default	Χρήση προεπιλογής
+	Verifying checksum…	Επαλήθευση αθροίσματος ελέγχου…
+	Verifying…	Επαλήθευση…
+	Version {latest}	Έκδοση {latest}
+	Version {version} installed	Εγκατεστημένη έκδοση {version}
+	Visit getartcraft.com	Επισκεφθείτε το getartcraft.com
+	Waiting for another app…	Αναμονή για άλλη εφαρμογή…
+	Waiting for other installs…	Αναμονή για άλλες εγκαταστάσεις…
+	Website	Ιστότοπος
+	What's new	Τι νέο υπάρχει
+	When on, opening the launcher from the menu bar brings its window to the desktop you're on. When off, macOS switches you to the desktop the window was on.	Όταν είναι ενεργό, το άνοιγμα του launcher από τη γραμμή μενού φέρνει το παράθυρό του στην επιφάνεια εργασίας όπου βρίσκεστε. Όταν είναι ανενεργό, το macOS σας μεταφέρει στην επιφάνεια εργασίας όπου βρισκόταν το παράθυρο.
+	Windows will remove it like any installed program. Your documents and settings stay.	Τα Windows θα την αφαιρέσουν όπως κάθε εγκατεστημένο πρόγραμμα. Τα έγγραφα και οι ρυθμίσεις σας διατηρούνται.
+	Your system's package manager will remove it, and may ask for your password. Your documents and settings stay.	Ο διαχειριστής πακέτων του συστήματος θα την αφαιρέσει και μπορεί να ζητήσει τον κωδικό πρόσβασής σας. Τα έγγραφα και οι ρυθμίσεις σας διατηρούνται.
+	🔍  Search apps	🔍  Αναζήτηση εφαρμογών
+@id	app.download	Λήψη για {os}
+@id	app.github	Αποθετήριο GitHub
+@id	app.install	Εγκατάσταση
+@id	app.notes	Σημειώσεις έκδοσης
+@id	app.open	Άνοιγμα
+@id	app.reinstall	Επανεγκατάσταση
+@id	app.releases	Όλες οι εκδόσεις
+@id	app.reveal	Εμφάνιση στο Finder
+@id	app.uninstall	Απεγκατάσταση…
+@id	app.update	Ενημέρωση σε {v}
+@id	app.website	Ιστότοπος
+@id	appearance.theme	Εμφάνιση
+@id	filter.all	Όλες
+@id	filter.installed	Εγκατεστημένες
+@id	filter.notinstalled	Μη εγκατεστημένες
+@id	filter.updates	Ενημερώσεις
+@id	help.website	Ιστότοπος
+@id	launcher.dismiss	Παράβλεψη
+@id	launcher.download	Λήψη
+@id	launcher.notes	Τι νέο υπάρχει
+@id	launcher.update	Ενημέρωση και επανεκκίνηση
+@id	linux.preferred_kind	Εγκατάσταση νέων εφαρμογών ως
+@id	settings.open	Ρυθμίσεις
+@id	settings.quit	Έξοδος από το ArtCraft Launcher
+@id	sort.installed	Εγκατεστημένη έκδοση
+@id	sort.latest	Τελευταία έκδοση
+@id	sort.name	Όνομα
+@id	sort.released	Πιο πρόσφατη κυκλοφορία
+@id	sort.status	Κατάσταση
+@id	sort.suite	Σειρά σουίτας
+@id	tray.close_to_tray	Συνέχιση εκτέλεσης στην περιοχή ειδοποιήσεων όταν κλείνει το παράθυρο
+@id	tray.login_item	Εκκίνηση του ArtCraft Launcher κατά τη σύνδεση
+@id	tray.show_on_current_desktop	Εμφάνιση του παραθύρου στην τρέχουσα επιφάνεια εργασίας
+@id	update.check	Έλεγχος για ενημερώσεις
+@id	update.check_auto	Αυτόματος έλεγχος για ενημερώσεις
+@id	update.notify	Ειδοποίηση όταν μια εγκατεστημένη εφαρμογή έχει ενημέρωση
+@id	update.prereleases	Συμπερίληψη προεκδόσεων (beta και υποψήφιες εκδόσεις)
+@id	view.grid	Πλέγμα
+@id	view.table	Πίνακας
+@msg	{name} installed: {version}	Εγκαταστάθηκε το {name}: {version}
+@msg	{name} installed: {version} (this release publishes no checksum, so only its size was checked)	Εγκαταστάθηκε το {name}: {version} (αυτή η έκδοση δεν δημοσιεύει άθροισμα ελέγχου, οπότε ελέγχθηκε μόνο το μέγεθός της)
+@msg	{name} is running. Quit it, then try again.	Το {name} εκτελείται. Κλείστε το και δοκιμάστε ξανά.
+@msg	{name} updated to {version}	Το {name} ενημερώθηκε σε {version}
+@msg	{name} updated to {version} (this release publishes no checksum, so only its size was checked)	Το {name} ενημερώθηκε σε {version} (αυτή η έκδοση δεν δημοσιεύει άθροισμα ελέγχου, οπότε ελέγχθηκε μόνο το μέγεθός της)
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with {cmd} or sudo pacman -Syu	Το {name} εγκαταστάθηκε από το αποθετήριο {repo} ή το AUR ({pkg}). Ενημερώστε το με {cmd} ή sudo pacman -Syu
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg}) or sudo pacman -Syu	Το {name} εγκαταστάθηκε από το αποθετήριο {repo} ή το AUR ({pkg}). Ενημερώστε το με το εργαλείο AUR που χρησιμοποιείτε (για παράδειγμα: yay -S {pkg}) ή sudo pacman -Syu
+@msg	{name} was installed from the AUR ({pkg}). Update it with {cmd}	Το {name} εγκαταστάθηκε από το AUR ({pkg}). Ενημερώστε το με {cmd}
+@msg	{name} was installed from the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg})	Το {name} εγκαταστάθηκε από το AUR ({pkg}). Ενημερώστε το με το εργαλείο AUR που χρησιμοποιείτε (για παράδειγμα: yay -S {pkg})
+@msg	{name} was removed	Το {name} αφαιρέθηκε
+@msg	{path} already exists and wasn't installed by ArtCraft Launcher	Το {path} υπάρχει ήδη και δεν εγκαταστάθηκε από το ArtCraft Launcher
+@msg	couldn't move {path} to Trash ({reason}). Remove it in Finder instead.	δεν ήταν δυνατή η μετακίνηση του {path} στον Κάδο ({reason}). Αφαιρέστε το από το Finder.
+@msg	couldn't use install folder {path}: {reason}	δεν ήταν δυνατή η χρήση του φακέλου εγκατάστασης {path}: {reason}
+@msg	custom install folders aren't supported on this system	οι προσαρμοσμένοι φάκελοι εγκατάστασης δεν υποστηρίζονται σε αυτό το σύστημα
+@msg	Download cancelled	Η λήψη ακυρώθηκε
+@msg	this release has no AppImage for a custom install folder	αυτή η έκδοση δεν έχει AppImage για προσαρμοσμένο φάκελο εγκατάστασης
+@plural	{n} app|{n} apps	{n} εφαρμογή|{n} εφαρμογές
+@plural	{n} day ago|{n} days ago	πριν από {n} ημέρα|πριν από {n} ημέρες
+@plural	{n} h ago|{n} h ago	πριν από {n} ώρα|πριν από {n} ώρες
+@plural	{n} min ago|{n} min ago	πριν από {n} λεπτό|πριν από {n} λεπτά
+@plural	ArtCraft Launcher · {n} update available|ArtCraft Launcher · {n} updates available	ArtCraft Launcher · {n} διαθέσιμη ενημέρωση|ArtCraft Launcher · {n} διαθέσιμες ενημερώσεις
+cadcraft	Computer-aided design and drafting	Σχεδίαση και σχέδιο με τη βοήθεια υπολογιστή
+deckcraft	Presentations and slide shows	Παρουσιάσεις και προβολές διαφανειών
+designcraft	Page layout and publishing	Σελιδοποίηση και εκδόσεις
+effectcraft	Motion graphics and visual effects	Γραφικά κίνησης και οπτικά εφέ
+figcraft	Interface design and prototyping	Σχεδίαση διεπαφών και πρωτότυπα
+filmcraft	Video editing, color and sound	Μοντάζ βίντεο, χρώμα και ήχος
+gridcraft	Spreadsheets and data	Υπολογιστικά φύλλα και δεδομένα
+lightcraft	Photo library and raw development	Βιβλιοθήκη φωτογραφιών και εμφάνιση raw
+pdfcraft	Reading, organizing and protecting PDFs	Ανάγνωση, οργάνωση και προστασία PDF
+photocraft	Image editing	Επεξεργασία εικόνας
+soundcraft	Recording, editing and mixing audio	Ηχογράφηση, επεξεργασία και μίξη ήχου
+vectorcraft	Vector illustration	Διανυσματική εικονογράφηση
+wordcraft	Writing and document design	Συγγραφή και σχεδίαση εγγράφων
+column	App	Εφαρμογή
+column	Installed	Εγκατεστημένη
+column	Latest	Τελευταία
+column	Released	Κυκλοφορία
+column	Version	Έκδοση
+filter	Installed	Εγκατεστημένες
+month	Jan	Ιαν
+month	Feb	Φεβ
+month	Mar	Μαρ
+month	Apr	Απρ
+month	May	Μαΐ
+month	Jun	Ιουν
+month	Jul	Ιουλ
+month	Aug	Αυγ
+month	Sep	Σεπ
+month	Oct	Οκτ
+month	Nov	Νοε
+month	Dec	Δεκ

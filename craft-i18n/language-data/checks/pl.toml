@@ -1,0 +1,3 @@
+# Words the pl pack must accept and reject (common words; written for this check).
+correct = ["dom", "książka", "szkoła", "woda", "miasto", "pracować", "książki"]
+incorrect = ["ksiąąka", "szkkoła", "pracowaćć"]

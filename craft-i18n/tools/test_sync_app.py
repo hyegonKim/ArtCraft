@@ -46,10 +46,14 @@ class Sync(unittest.TestCase):
     def locale(self, locale, name, common=(), app=None):
         d = self.root / "locales" / locale
         d.mkdir(parents=True)
+        # Always UTF-8: the header's "…" and names like Français are not Latin-1, and Windows'
+        # default encoding would write byte 0x85 / 0xe7 that Tree.get then can't read as UTF-8.
         (d / "common.tsv").write_text(
-            header(name, locale, "every Crafting App") + "\n" + tsv(("@id", "language.name", name), *common))
+            header(name, locale, "every Crafting App") + "\n" + tsv(("@id", "language.name", name), *common),
+            encoding="utf-8")
         if app is not None:
-            (d / "demo.tsv").write_text(header(name, locale, "Demo") + "\n" + tsv(*app))
+            (d / "demo.tsv").write_text(
+                header(name, locale, "Demo") + "\n" + tsv(*app), encoding="utf-8")
 
     def write_app(self, files):
         d = self.app / DIR
@@ -58,7 +62,7 @@ class Sync(unittest.TestCase):
             if text is None:
                 (d / name).unlink()
             else:
-                (d / name).write_text(text)
+                (d / name).write_text(text, encoding="utf-8")
 
     def commit(self):
         self.git("add", "-A")
@@ -78,7 +82,7 @@ class Sync(unittest.TestCase):
 
     def rows(self, locale, file="demo.tsv"):
         path = self.root / "locales" / locale / file
-        return sync_app.parse(path.read_text())[0] if path.exists() else None
+        return sync_app.parse(path.read_text(encoding="utf-8"))[0] if path.exists() else None
 
     def snapshot(self):
         return {p: p.read_bytes() for p in sorted(self.root.rglob("*.tsv"))}
@@ -131,7 +135,7 @@ class Sync(unittest.TestCase):
         self.commit()
         self.run_sync(base=base)
         self.assertEqual(self.rows("de"), {})
-        self.assertIn("Speichern", (self.root / "locales/de/common.tsv").read_text())
+        self.assertIn("Speichern", (self.root / "locales/de/common.tsv").read_text(encoding="utf-8"))
 
     def test_new_locale_is_lowercase_bcp47_with_its_language_name(self):
         self.write_app({"pt_BR.tsv": tsv(("", "Crop", "Cortar")), "zh-TW.tsv": tsv(("", "Crop", "裁切")),
@@ -146,7 +150,7 @@ class Sync(unittest.TestCase):
         self.commit()
         self.run_sync()
         self.assertEqual(self.rows("es-mx", "common.tsv"), {("@id", "language.name"): "Español (México)"})
-        text = (self.root / "locales/es-mx/demo.tsv").read_text()
+        text = (self.root / "locales/es-mx/demo.tsv").read_text(encoding="utf-8")
         self.assertTrue(text.startswith("# Español (México) (es-mx) interface catalog for Demo.\n"))
 
     def test_regional_row_identical_to_its_base_language_is_not_written(self):
@@ -192,7 +196,7 @@ class Sync(unittest.TestCase):
         self.assertEqual(self.run_sync("--check")[0], 0)
 
     def test_plural_rows_get_the_locales_form_count(self):
-        with (self.root / "locales/fr/common.tsv").open("a") as f:
+        with (self.root / "locales/fr/common.tsv").open("a", encoding="utf-8") as f:
             f.write("@plural\t{n} page|{n} pages\t{n} page|{n} pages\n")
         self.write_app({"fr.tsv": tsv(("", "Save", "Enregistrer"), ("", "Crop", "Rogner"),
                                       ("@plural", "{n} commit", "{n} commit"))})
@@ -220,7 +224,8 @@ class Sync(unittest.TestCase):
         self.assertIn("two placeholders in a row", out)
 
     def test_check_lists_mismatches(self):
-        (self.root / "locales/fr/demo.tsv").write_text(header("Français", "fr", "Demo") + "\n")
+        (self.root / "locales/fr/demo.tsv").write_text(
+            header("Français", "fr", "Demo") + "\n", encoding="utf-8")
         code, out = self.run_sync("--check")
         self.assertEqual(code, 1)
         self.assertIn("Crop", out)
@@ -237,7 +242,8 @@ class Sync(unittest.TestCase):
     def test_rows_the_app_did_not_touch_keep_craft_i18n_wording(self):
         # A branch older than the last sync: main's newer wording stays.
         (self.root / "locales/fr/demo.tsv").write_text(
-            header("Français", "fr", "Demo") + "\n" + tsv(("", "Crop", "Recadrer")))
+            header("Français", "fr", "Demo") + "\n" + tsv(("", "Crop", "Recadrer")),
+            encoding="utf-8")
         self.write_app({"es.tsv": tsv(("", "Save", "Guardar"), ("", "Crop", "Cortar"))})
         self.commit()
         code, out = self.run_sync()
@@ -266,7 +272,7 @@ class Sync(unittest.TestCase):
         self.assertIn("i18n/*.tsv", out)
 
     def test_header_matches_the_catalog_format_doc(self):
-        doc = (Path(__file__).parent.parent / "docs/catalog-format.md").read_text()
+        doc = (Path(__file__).parent.parent / "docs/catalog-format.md").read_text(encoding="utf-8")
         block = doc.split("## Header")[1].split("```\n")[1]
         self.assertEqual(block, sync_app.HEADER.format(
             name="<Language>", locale="<locale>", app="<every Crafting App | AppName>"))

@@ -899,6 +899,7 @@ theme	Appearance	Ulkoasu
 	Zoom In	Lähennä
 	Zoom Out	Loitonna
 	Zoom Tool	Zoomaustyökalu
+@plural	{n} byte|{n} bytes	{n} tavu|{n} tavua
 @plural	{n} commit|{n} commits	{n} commit|{n} commitia
 @plural	{n} item|{n} items	{n} kohde|{n} kohdetta
 @plural	{n} Layer|{n} Layers	{n} taso|{n} tasoa

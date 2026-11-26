@@ -1,5 +1,5 @@
-//! Stylize effects, batch 3: CC Block Load, CC Burn Film, CC Glass, CC HexTile, CC Mr. Smoothie
-//! and CC Plastic.
+//! Stylize effects, batch 3: Block Reveal, Film Burn, Glass Relief, Hexagonal Tiles, Palette Map
+//! and Plastic Shading.
 //!
 //! Written from the public descriptions of what these effects do (progressive block loading,
 //! burning film, bump-mapped glass / plastic surfaces lit by an effect light, hexagonal tiling,
@@ -27,7 +27,7 @@ fn pt(x: f64, y: f64) -> Value {
     Value::Vec2([x, y])
 }
 
-// ------------------------------------------------------------------ CC Block Load
+// ------------------------------------------------------------------ Block Reveal
 
 /// Mean colour of every `s`×`s` block (grid of `ceil(w/s)`×`ceil(h/s)`).
 fn block_means(img: &Image, s: usize) -> (usize, usize, Vec<Px>) {
@@ -135,7 +135,7 @@ fn block_load(ctx: &EffectCtx, mut b: Buf) -> Buf {
     b
 }
 
-// ------------------------------------------------------------------ CC Burn Film
+// ------------------------------------------------------------------ Film Burn
 
 fn burn_film(ctx: &EffectCtx, mut b: Buf) -> Buf {
     let burn = (ctx.params.f("burn") / 100.0).clamp(0.0, 1.0) as f32;
@@ -180,7 +180,7 @@ fn burn_film(ctx: &EffectCtx, mut b: Buf) -> Buf {
 
 const BUMP_PROPS: [&str; 6] = ["Red", "Green", "Blue", "Alpha", "Luminance", "Lightness"];
 
-/// The bump-map layer parameter: CC Glass's Bump Map, CC Plastic's Bump Layer.
+/// The bump-map layer parameter: Glass Relief's Bump Map, Plastic Shading's Bump Layer.
 pub fn bump_layer_id(ctx: &EffectCtx) -> &'static str {
     if ctx.params.get("bumpLayer").is_some() { "bumpLayer" } else { "bumpMap" }
 }
@@ -208,7 +208,7 @@ fn height_field(ctx: &EffectCtx, b: &Buf) -> Plane {
     pl
 }
 
-/// The effect light and surface of CC Glass / CC Plastic (shared with the GPU compositor).
+/// The effect light and surface of Glass Relief / Plastic Shading (shared with the GPU compositor).
 pub struct BumpLight {
     pub intensity: f32,
     pub color: [f32; 3],
@@ -342,7 +342,7 @@ fn plastic(ctx: &EffectCtx, mut b: Buf) -> Buf {
     b
 }
 
-// ------------------------------------------------------------------ CC HexTile
+// ------------------------------------------------------------------ Hexagonal Tiles
 
 /// Axial hex cell (pointy-top) containing (x, y) for circumradius `r`; returns the cell centre
 /// and integer cell coordinates.
@@ -351,7 +351,7 @@ fn hex_cell(x: f64, y: f64, r: f64) -> ((f64, f64), (i64, i64)) {
     let rr = (2.0 / 3.0 * y) / r;
     // Cube rounding.
     let (cx, cz) = (q, rr);
-    let cy = -cx - cz;
+    let cy = (-3f64.sqrt() / 3.0 * x - y / 3.0) / r;
     let (mut rx, ry, mut rz) = (cx.round(), cy.round(), cz.round());
     let (dx, dy, dz) = ((rx - cx).abs(), (ry - cy).abs(), (rz - cz).abs());
     if dx > dy && dx > dz {
@@ -364,39 +364,61 @@ fn hex_cell(x: f64, y: f64, r: f64) -> ((f64, f64), (i64, i64)) {
     ((px, py), (rx as i64, rz as i64))
 }
 
+/// Stable f64 hex-cell selection and source geometry for CPU and GPU renders.
+pub struct HexTile {
+    r: f64,
+    c: (f64, f64),
+    sn: f64,
+    cs: f64,
+    smear: f64,
+    mode: u32,
+}
+impl HexTile {
+    /// No image pixels are read; only buffer geometry and parameters are used.
+    pub fn new(ctx: &EffectCtx, b: &Buf) -> Self {
+        let r = (ctx.params.f("radius") * b.scale).max(0.5);
+        let c = b.to_px(ctx.params.v2("center"));
+        let rot = ctx.params.f("rotate").to_radians();
+        let (sn, cs) = rot.sin_cos();
+        let smear = (ctx.params.f("smearing") / 100.0).clamp(0.0, 1.0);
+        let mode = ctx.params.e("render");
+        Self { r, c, sn, cs, smear, mode }
+    }
+    /// Bilinear source position at a buffer pixel centre.
+    pub fn source_at(&self, x: u32, y: u32) -> (f64, f64) {
+        let Self { r, c: (cx, cy), sn, cs, smear, mode } = *self;
+        let (dx, dy) = (x as f64 + 0.5 - cx, y as f64 + 0.5 - cy);
+        // Into the rotated tiling frame.
+        let (u, v) = (dx * cs + dy * sn, -dx * sn + dy * cs);
+        let ((hx, hy), (qi, ri)) = hex_cell(u, v, r);
+        let (mut lu, lv) = (u - hx, v - hy);
+        let odd = (qi + ri).rem_euclid(2) == 1;
+        match mode {
+            1 if odd => lu = -lu,
+            2 if odd => lu = -lu,
+            _ => {}
+        }
+        let lv = if mode == 2 && odd { -lv } else { lv };
+        // Every tile shows the hexagon around the centre point.
+        let (ox, oy) = (lu * cs - lv * sn, lu * sn + lv * cs);
+        let (tx, ty) = (cx + ox, cy + oy);
+        let (sx, sy) = (tx + (x as f64 + 0.5 - tx) * smear, ty + (y as f64 + 0.5 - ty) * smear);
+        (sx, sy)
+    }
+}
 fn hextile(ctx: &EffectCtx, mut b: Buf) -> Buf {
-    let r = (ctx.params.f("radius") * b.scale).max(0.5);
-    let (cx, cy) = b.to_px(ctx.params.v2("center"));
-    let rot = ctx.params.f("rotate").to_radians();
-    let (sn, cs) = rot.sin_cos();
-    let smear = (ctx.params.f("smearing") / 100.0).clamp(0.0, 1.0);
-    let mode = ctx.params.e("render");
+    let geometry = HexTile::new(ctx, &b);
     let src = b.img.clone();
     b.img.rows_mut().for_each(|(y, row)| {
         for (x, px) in row.iter_mut().enumerate() {
-            let (dx, dy) = (x as f64 + 0.5 - cx, y as f64 + 0.5 - cy);
-            // Into the rotated tiling frame.
-            let (u, v) = (dx * cs + dy * sn, -dx * sn + dy * cs);
-            let ((hx, hy), (qi, ri)) = hex_cell(u, v, r);
-            let (mut lu, lv) = (u - hx, v - hy);
-            let odd = (qi + ri).rem_euclid(2) == 1;
-            match mode {
-                1 if odd => lu = -lu,
-                2 if odd => lu = -lu,
-                _ => {}
-            }
-            let lv = if mode == 2 && odd { -lv } else { lv };
-            // Every tile shows the hexagon around the centre point.
-            let (ox, oy) = (lu * cs - lv * sn, lu * sn + lv * cs);
-            let (tx, ty) = (cx + ox, cy + oy);
-            let (sx, sy) = (tx + (x as f64 + 0.5 - tx) * smear, ty + (y as f64 + 0.5 - ty) * smear);
+            let (sx, sy) = geometry.source_at(x as u32, y as u32);
             *px = src.sample_bilinear_clamped(sx, sy);
         }
     });
     b
 }
 
-// ------------------------------------------------------------------ CC Mr. Smoothie
+// ------------------------------------------------------------------ Palette Map
 
 const SMOOTHIE_PROPS: [&str; 8] = ["Red", "Green", "Blue", "Alpha", "Luminance", "Lightness", "Hue", "Saturation"];
 
@@ -496,7 +518,7 @@ pub fn specs() -> Vec<EffectSpec> {
     vec![
         spec(
             "ec.stylize.ccblockload",
-            "CC Block Load",
+            "Block Reveal",
             vec![
                 p("completion", "Completion", num(0.0), pct()),
                 p("scanlines", "Scanlines", Value::Bool(true), ParamUi::Checkbox),
@@ -508,7 +530,7 @@ pub fn specs() -> Vec<EffectSpec> {
         ),
         spec(
             "ec.stylize.ccburnfilm",
-            "CC Burn Film",
+            "Film Burn",
             vec![
                 p("burn", "Burn", num(0.0), pct()),
                 p("center", "Center", pt(0.5, 0.5), ParamUi::Point),
@@ -516,10 +538,10 @@ pub fn specs() -> Vec<EffectSpec> {
             ],
             burn_film,
         ),
-        spec("ec.stylize.ccglass", "CC Glass", glass_p, glass),
+        spec("ec.stylize.ccglass", "Glass Relief", glass_p, glass),
         spec(
             "ec.stylize.cchextile",
-            "CC HexTile",
+            "Hexagonal Tiles",
             vec![
                 p("render", "Render", Value::Enum(0), popup(&["Normal", "Mirrored", "Rotated"])),
                 p("radius", "Radius", num(50.0), slider(1.0, 4000.0, 2.0, 500.0, 1)),
@@ -531,7 +553,7 @@ pub fn specs() -> Vec<EffectSpec> {
         ),
         spec(
             "ec.stylize.ccmrsmoothie",
-            "CC Mr. Smoothie",
+            "Palette Map",
             vec![
                 p("flowLayer", "Flow Layer", Value::Layer(None), ParamUi::Layer),
                 p("property", "Property", Value::Enum(4), popup(&SMOOTHIE_PROPS)),
@@ -543,8 +565,262 @@ pub fn specs() -> Vec<EffectSpec> {
             ],
             smoothie,
         ),
-        spec("ec.stylize.ccplastic", "CC Plastic", plastic_p, plastic),
+        spec("ec.stylize.ccplastic", "Plastic Shading", plastic_p, plastic),
+        spec(
+            "ec.stylize.outlinepaint",
+            "Outline Paint",
+            vec![
+                p("smearRadius", "Smear Radius", num(6.0), slider(0.0, 100.0, 0.0, 40.0, 1)),
+                p("smearAngle", "Smear Angle", num(35.0), ParamUi::Angle),
+                p("paletteColors", "Palette Colors", num(5.0), slider(2.0, 8.0, 2.0, 8.0, 0)),
+                p("sampleFromImage", "Sample from Image", Value::Bool(true), ParamUi::Checkbox),
+                p("color1", "Color 1", col(0.11, 0.14, 0.24), ParamUi::Color),
+                p("color2", "Color 2", col(0.84, 0.33, 0.24), ParamUi::Color),
+                p("color3", "Color 3", col(0.24, 0.56, 0.58), ParamUi::Color),
+                p("color4", "Color 4", col(0.92, 0.72, 0.28), ParamUi::Color),
+                p("color5", "Color 5", col(0.96, 0.93, 0.86), ParamUi::Color),
+                p("color6", "Color 6", col(0.42, 0.26, 0.20), ParamUi::Color),
+                p("softness", "Posterize Softness", num(10.0), pct()),
+                p("outlineWidth", "Outline Width", num(2.0), slider(0.0, 25.0, 0.0, 10.0, 1)),
+                p("outlineThreshold", "Outline Threshold", num(22.0), pct()),
+                p("outlineColor", "Outline Color", col(0.08, 0.07, 0.09), ParamUi::Color),
+                p("blendWithOriginal", "Blend with Original", num(0.0), pct()),
+            ],
+            outline_paint,
+        ),
     ]
+}
+
+// ------------------------------------------------------------------ Outline Paint (AE 27.0)
+
+fn luma_straight(rgb: [f32; 3]) -> f32 {
+    0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+}
+
+fn sample_image_palette(straight: &[[f32; 4]], k: usize) -> Vec<[f32; 3]> {
+    let stride = (straight.len() / 4096).max(1);
+    let mut samples: Vec<[f32; 3]> = straight
+        .iter()
+        .step_by(stride)
+        .filter(|p| p[3] > 0.05)
+        .map(|p| [p[0].clamp(0.0, 1.0), p[1].clamp(0.0, 1.0), p[2].clamp(0.0, 1.0)])
+        .collect();
+    if samples.is_empty() {
+        return (0..k).map(|i| [i as f32 / (k.saturating_sub(1).max(1)) as f32; 3]).collect();
+    }
+    samples.sort_by(|a, b| luma_straight(*a).total_cmp(&luma_straight(*b)));
+    let mut centers: Vec<[f32; 3]> = (0..k)
+        .map(|i| {
+            let idx = ((i * 2 + 1) * samples.len()) / (k * 2);
+            samples[idx.min(samples.len() - 1)]
+        })
+        .collect();
+    for _ in 0..4 {
+        let mut sums = vec![[0.0f64; 3]; k];
+        let mut counts = vec![0usize; k];
+        for &s in &samples {
+            let mut best = 0usize;
+            let mut best_d = f32::INFINITY;
+            for (ci, c) in centers.iter().enumerate() {
+                let d = (s[0] - c[0]).powi(2) + (s[1] - c[1]).powi(2) + (s[2] - c[2]).powi(2);
+                if d < best_d {
+                    best_d = d;
+                    best = ci;
+                }
+            }
+            sums[best][0] += f64::from(s[0]);
+            sums[best][1] += f64::from(s[1]);
+            sums[best][2] += f64::from(s[2]);
+            counts[best] += 1;
+        }
+        for ci in 0..k {
+            if counts[ci] > 0 {
+                let inv = 1.0 / counts[ci] as f64;
+                centers[ci] = [(sums[ci][0] * inv) as f32, (sums[ci][1] * inv) as f32, (sums[ci][2] * inv) as f32];
+            }
+        }
+    }
+    centers
+}
+
+fn custom_palette(ctx: &EffectCtx, k: usize) -> Vec<[f32; 3]> {
+    let base = [
+        ctx.params.color("color1"),
+        ctx.params.color("color2"),
+        ctx.params.color("color3"),
+        ctx.params.color("color4"),
+        ctx.params.color("color5"),
+        ctx.params.color("color6"),
+    ];
+    let rgb = |c: [f32; 4]| [c[0], c[1], c[2]];
+    if k <= 6 {
+        base[..k].iter().copied().map(rgb).collect()
+    } else {
+        (0..k)
+            .map(|i| {
+                let t = i as f32 * 5.0 / (k - 1) as f32;
+                let i0 = (t.floor() as usize).min(5);
+                let i1 = (i0 + 1).min(5);
+                let f = t - i0 as f32;
+                let a = rgb(base[i0]);
+                let b = rgb(base[i1]);
+                [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]
+            })
+            .collect()
+    }
+}
+
+fn outline_paint(ctx: &EffectCtx, b: Buf) -> Buf {
+    let blend_orig = (ctx.params.f("blendWithOriginal") / 100.0).clamp(0.0, 1.0) as f32;
+    if blend_orig >= 1.0 - 1e-6 {
+        return b;
+    }
+    let (w, h) = (b.img.width as usize, b.img.height as usize);
+    if w == 0 || h == 0 {
+        return b;
+    }
+    let scale = b.scale.max(0.05) as f32;
+    let smear_r = (ctx.params.f("smearRadius") as f32 * scale).clamp(0.0, 80.0);
+    let angle_rad = (ctx.params.f("smearAngle") as f32).to_radians();
+    let (bias_dx, bias_dy) = (angle_rad.cos(), angle_rad.sin());
+    let k = (ctx.params.f("paletteColors").round() as usize).clamp(2, 8);
+    let sample_auto = ctx.params.b("sampleFromImage");
+    let softness = (ctx.params.f("softness") / 100.0).clamp(0.0, 1.0) as f32;
+    let out_w = (ctx.params.f("outlineWidth") as f32 * scale).clamp(0.0, 32.0);
+    let out_thresh = (ctx.params.f("outlineThreshold") / 100.0).clamp(0.01, 0.99) as f32;
+    let out_col = ctx.params.color("outlineColor");
+
+    let straight: Vec<[f32; 4]> = b.img.data.iter().copied().map(|px| {
+        let (c, a) = unpremul(px);
+        [c[0], c[1], c[2], a]
+    }).collect();
+    let luma: Vec<f32> = straight.iter().map(|p| luma_straight([p[0], p[1], p[2]]) * p[3]).collect();
+    let clamp_xy = |x: i32, y: i32| -> usize {
+        (y.clamp(0, h as i32 - 1) as usize) * w + (x.clamp(0, w as i32 - 1) as usize)
+    };
+
+    // Pass 1: edge-guided directional brush smear.
+    let smeared: Vec<[f32; 4]> = if smear_r < 0.25 {
+        straight.clone()
+    } else {
+        let steps = (smear_r.ceil() as i32).clamp(1, 24);
+        let step_len = smear_r / steps as f32;
+        let mut out_s = vec![[0.0f32; 4]; w * h];
+        out_s.par_chunks_mut(w).enumerate().for_each(|(y, row)| {
+            let yi = y as i32;
+            for (x, dst) in row.iter_mut().enumerate() {
+                let xi = x as i32;
+                let gx = -luma[clamp_xy(xi - 1, yi - 1)] - 2.0 * luma[clamp_xy(xi - 1, yi)] - luma[clamp_xy(xi - 1, yi + 1)]
+                    + luma[clamp_xy(xi + 1, yi - 1)] + 2.0 * luma[clamp_xy(xi + 1, yi)] + luma[clamp_xy(xi + 1, yi + 1)];
+                let gy = -luma[clamp_xy(xi - 1, yi - 1)] - 2.0 * luma[clamp_xy(xi, yi - 1)] - luma[clamp_xy(xi + 1, yi - 1)]
+                    + luma[clamp_xy(xi - 1, yi + 1)] + 2.0 * luma[clamp_xy(xi, yi + 1)] + luma[clamp_xy(xi + 1, yi + 1)];
+                let gmag = gx.hypot(gy);
+                // Tangent runs perpendicular to gradient; blend with user brush angle.
+                let (tx, ty) = if gmag > 0.04 {
+                    let (ux, uy) = (-gy / gmag, gx / gmag);
+                    let sign = if ux * bias_dx + uy * bias_dy < 0.0 { -1.0 } else { 1.0 };
+                    let edge_w = (gmag * 2.5).clamp(0.0, 0.85);
+                    let mx = ux * sign * edge_w + bias_dx * (1.0 - edge_w);
+                    let my = uy * sign * edge_w + bias_dy * (1.0 - edge_w);
+                    let mlen = mx.hypot(my).max(1e-5);
+                    (mx / mlen, my / mlen)
+                } else {
+                    (bias_dx, bias_dy)
+                };
+                let center = straight[y * w + x];
+                let center_l = luma[y * w + x];
+                let mut acc = [0.0f32; 4];
+                let mut wsum = 0.0f32;
+                for s in -steps..=steps {
+                    let dist = s as f32 * step_len;
+                    let sx = (xi as f32 + tx * dist).round() as i32;
+                    let sy = (yi as f32 + ty * dist).round() as i32;
+                    let idx = clamp_xy(sx, sy);
+                    let sp = straight[idx];
+                    let dl = (luma[idx] - center_l).abs();
+                    let spatial = (-0.5 * (dist / (smear_r * 0.65).max(0.5)).powi(2)).exp();
+                    let range = (-dl * dl * 18.0).exp();
+                    let wt = spatial * range * sp[3].max(0.02);
+                    for c in 0..3 {
+                        acc[c] += sp[c] * wt;
+                    }
+                    acc[3] += sp[3] * spatial;
+                    wsum += wt;
+                }
+                if wsum > 1e-6 {
+                    let norm_a = (steps * 2 + 1) as f32;
+                    *dst = [acc[0] / wsum, acc[1] / wsum, acc[2] / wsum, center[3].max(acc[3] / norm_a).min(1.0)];
+                } else {
+                    *dst = center;
+                }
+            }
+        });
+        out_s
+    };
+
+    // Pass 2: palette extraction / custom palette quantization + ink outline.
+    let palette = if sample_auto { sample_image_palette(&smeared, k) } else { custom_palette(ctx, k) };
+    let sme_luma: Vec<f32> = smeared.iter().map(|p| luma_straight([p[0], p[1], p[2]])).collect();
+    let edge_step = out_w.max(1.0).round() as i32;
+
+    let mut out = Image::new(w as u32, h as u32);
+    out.rows_mut().for_each(|(y, row)| {
+        let yi = y as i32;
+        for (x, dst) in row.iter_mut().enumerate() {
+            let sp = smeared[y * w + x];
+            let orig_px = b.img.data[y * w + x];
+            if sp[3] <= 1e-6 && out_w <= 0.0 {
+                *dst = orig_px;
+                continue;
+            }
+            let mut best0 = 0usize;
+            let mut best1 = 0usize;
+            let mut d0 = f32::INFINITY;
+            let mut d1 = f32::INFINITY;
+            for (ci, c) in palette.iter().enumerate() {
+                let d = (sp[0] - c[0]).powi(2) + (sp[1] - c[1]).powi(2) + (sp[2] - c[2]).powi(2);
+                if d < d0 {
+                    d1 = d0;
+                    best1 = best0;
+                    d0 = d;
+                    best0 = ci;
+                } else if d < d1 {
+                    d1 = d;
+                    best1 = ci;
+                }
+            }
+            let mut rgb = palette[best0];
+            if softness > 1e-4 && best1 != best0 && d1.is_finite() {
+                let ratio = (d0.sqrt() / (d0.sqrt() + d1.sqrt()).max(1e-6)).clamp(0.0, 0.5);
+                let t = smoothstep(0.5 * (1.0 - softness), 0.5, ratio) * 0.5;
+                let c1 = palette[best1];
+                rgb = [rgb[0] + (c1[0] - rgb[0]) * t, rgb[1] + (c1[1] - rgb[1]) * t, rgb[2] + (c1[2] - rgb[2]) * t];
+            }
+
+            if out_w > 0.05 {
+                let xi = x as i32;
+                let r = edge_step.max(1);
+                let gx = (sme_luma[clamp_xy(xi + r, yi)] - sme_luma[clamp_xy(xi - r, yi)])
+                    + 0.5 * (sme_luma[clamp_xy(xi + r, yi - r)] - sme_luma[clamp_xy(xi - r, yi - r)])
+                    + 0.5 * (sme_luma[clamp_xy(xi + r, yi + r)] - sme_luma[clamp_xy(xi - r, yi + r)]);
+                let gy = (sme_luma[clamp_xy(xi, yi + r)] - sme_luma[clamp_xy(xi, yi - r)])
+                    + 0.5 * (sme_luma[clamp_xy(xi - r, yi + r)] - sme_luma[clamp_xy(xi - r, yi - r)])
+                    + 0.5 * (sme_luma[clamp_xy(xi + r, yi + r)] - sme_luma[clamp_xy(xi + r, yi - r)]);
+                let edge = (gx.hypot(gy) * 0.5).clamp(0.0, 1.0);
+                let ink = smoothstep(out_thresh * 0.7, (out_thresh * 1.15).min(1.0), edge) * (out_w.min(1.0)) * out_col[3];
+                if ink > 1e-4 {
+                    rgb = [
+                        rgb[0] * (1.0 - ink) + out_col[0] * ink,
+                        rgb[1] * (1.0 - ink) + out_col[1] * ink,
+                        rgb[2] * (1.0 - ink) + out_col[2] * ink,
+                    ];
+                }
+            }
+            let painted = premul(rgb, sp[3]);
+            *dst = if blend_orig > 0.0 { lerp4(painted, orig_px, blend_orig) } else { painted };
+        }
+    });
+    Buf { img: out, offset: b.offset, scale: b.scale }
 }
 
 #[cfg(test)]
@@ -582,8 +858,15 @@ mod tests {
         a.data.iter().zip(&b.data).flat_map(|(p, q)| (0..4).map(move |c| (p[c] - q[c]).abs())).fold(0.0, f32::max)
     }
 
-    const ALL: [&str; 6] =
-        ["ec.stylize.ccblockload", "ec.stylize.ccburnfilm", "ec.stylize.ccglass", "ec.stylize.cchextile", "ec.stylize.ccmrsmoothie", "ec.stylize.ccplastic"];
+    const ALL: [&str; 7] = [
+        "ec.stylize.ccblockload",
+        "ec.stylize.ccburnfilm",
+        "ec.stylize.ccglass",
+        "ec.stylize.cchextile",
+        "ec.stylize.ccmrsmoothie",
+        "ec.stylize.ccplastic",
+        "ec.stylize.outlinepaint",
+    ];
 
     #[test]
     fn all_deterministic() {
@@ -661,5 +944,51 @@ mod tests {
         // Every output colour lies on the palette line between A and B (blue stays 0.3, green ≈ 0.5).
         assert!(o.img.data.iter().all(|p| (p[2] - 0.3).abs() < 1e-3 && (p[1] - 0.5).abs() < 0.03));
         assert!(max_diff(&o.img, &img) > 0.1);
+    }
+
+    #[test]
+    fn outline_paint_posterizes_smears_and_outlines() {
+        let img = ramp(40, 30);
+        // 100% blend with original is exact identity.
+        let id = run("ec.stylize.outlinepaint", &[("blendWithOriginal", num(100.0))], img.clone());
+        assert!(max_diff(&id.img, &img) < 1e-5);
+
+        // Custom 3-color crisp posterization maps every opaque pixel to one of the 3 swatches.
+        let c1 = col(0.9, 0.1, 0.1);
+        let c2 = col(0.1, 0.8, 0.2);
+        let c3 = col(0.1, 0.2, 0.9);
+        let o = run(
+            "ec.stylize.outlinepaint",
+            &[
+                ("sampleFromImage", Value::Bool(false)),
+                ("paletteColors", num(3.0)),
+                ("softness", num(0.0)),
+                ("outlineWidth", num(0.0)),
+                ("color1", c1.clone()),
+                ("color2", c2.clone()),
+                ("color3", c3.clone()),
+            ],
+            img.clone(),
+        );
+        let swatches = [[0.9f32, 0.1, 0.1], [0.1, 0.8, 0.2], [0.1, 0.2, 0.9]];
+        assert!(o.img.data.iter().all(|px| {
+            swatches.iter().any(|s| (px[0] - s[0]).abs() < 1e-3 && (px[1] - s[1]).abs() < 1e-3 && (px[2] - s[2]).abs() < 1e-3)
+        }));
+
+        // Sampled 4-color crisp posterization produces at most 4 distinct colors without outlines.
+        let sampled = run(
+            "ec.stylize.outlinepaint",
+            &[("sampleFromImage", Value::Bool(true)), ("paletteColors", num(4.0)), ("softness", num(0.0)), ("outlineWidth", num(0.0))],
+            img,
+        );
+        let mut distinct: Vec<[u32; 3]> = sampled
+            .img
+            .data
+            .iter()
+            .map(|p| [(p[0] * 1000.0).round() as u32, (p[1] * 1000.0).round() as u32, (p[2] * 1000.0).round() as u32])
+            .collect();
+        distinct.sort();
+        distinct.dedup();
+        assert!(distinct.len() <= 4 && distinct.len() >= 2, "distinct={}", distinct.len());
     }
 }

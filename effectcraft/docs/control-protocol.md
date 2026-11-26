@@ -9,6 +9,13 @@ effectcraft --control 9877        # or EFFECTCRAFT_CONTROL_PORT=9877
 The port must be a number from 1 to 65535, and `--control` overrides the variable. A bad port or an
 unknown option prints an error and the app exits with status 1 before it opens a window.
 
+An app started with a control port is meant to be driven by an agent, so a normal launch does not
+wait for a person: the window opens without taking keyboard focus, and the app skips crash recovery,
+the Home screen (unless `--home` is given) and the startup update check. Help ▸ Check for Updates
+still works. One exception: when the window cannot start at all, the app writes the error to
+standard error and the session log and then shows it in a message box, and it exits only after
+someone closes that box.
+
 - **Transport:** TCP on `127.0.0.1` only, one JSON object per line in each direction. Connections are
   persistent; requests on one connection are answered in order.
 - **Request:** `{"id": 1, "method": "engine.execute", "params": {...}}` (`id` is echoed back, `params`
@@ -41,17 +48,37 @@ printf '{"id":1,"method":"engine.execute","params":{"command":"comp.new","params
 | UI commands (via either) | | `timeline.column {column, visible?}` (av, keys, label, num, comment, switches, modes, parent, in, out, duration, stretch), `timeline.sourceName {value?}`, `timeline.search {query}`, `timeline.reveal.<kind>` / `timeline.revealAdd.<kind>` (the property shortcuts and Shift+shortcut: position, scale, rotation, opacity, anchor, effects, masks, feather, levels, animated, and the double-press sets maskPath, maskOpacity, timeRemap, expressions, material, paint, selected, missingEffects, waveform), `timeline.keyAt.<anchor\|position\|scale\|rotation\|opacity>` (Alt+Shift+A/P/S/R/T), `timeline.twirlSelected` ``(Ctrl/Cmd+`)``, `timeline.collapseAll`, `flowchart.options {layers?, effects?, solids?, direction?: lr\|tb, comp?}`, `flowchart.graph {comp?}` → `{nodes, edges}`, `window.workspace {name}` (all After Effects workspaces). |
 | `engine.commands` | `{filter?, enabledOnly?}` | `[{id, label, menu, shortcut, params, enabled, why}]` |
 | `ui.menu.list` | `{}` | The menu tree with enablement. |
-| `render.frame` | `{comp?, time?, max_side?, path?, base64?}` | Renders a comp frame through the session, independent of the viewer zoom or resolution. `comp` is an id or name (default: the active comp), `time` is in comp seconds (default: the CTI), `max_side` caps the longest side (0 = full size). Writes a PNG to `path` (default: a temp file) and returns `{comp, time, width, height, path}`. With `base64: true` it returns `{…, png: "<base64>"}` and writes no file. |
+| `render.frame` | `{comp?, time?, max_side?, path?, base64?, write?}` | Renders a comp frame through the session, independent of the viewer zoom or resolution. `comp` is an id or name (default: the active comp), `time` is in comp seconds (default: the CTI), `max_side` caps the longest side (0 = full size). Writes a PNG to `path` (default: a temp file) and returns `{comp, time, width, height, path}`. With `base64: true` it returns `{…, png: "<base64>"}` and writes no file unless `write: true` also requests a guarded write in the same app operation. |
 
 Useful query commands for `engine.execute` (they aren't journaled or undoable): `project.summary`,
 `comp.info {comp?}`, `layer.tree {layer, comp?, depth?, time?}` (every node has a `path`),
-`prop.get {layer, path, comp?, time?}`, `editor.state`, `command.list {filter?, enabledOnly?, schemas?}`,
+`prop.get {layer, path, comp?, time?}` (a popup (enum) property also lists its `options`, `[{value, label}]`, as `layer.tree` does), `editor.state`, `command.list {filter?, enabledOnly?, schemas?}`,
 `command.describe {command}` (params doc and JSON Schema), `app.capabilities` (version, counts,
 export formats, parity summary), `jobs.list` (Progress panel jobs, e.g. the background
 `footage.check` after File ▸ Open).
 
 Every engine command is reachable through `engine.execute`, and every interactive widget of every
 panel registers an element id; both are enforced by `crates/ui-egui/tests/it/ui_agent_audit.rs`.
+
+### Waiting for a render
+
+On native desktop builds, `engine.execute` with `renderQueue.render` and `wait: true`
+(the default) keeps the window responsive while its reply waits for the render worker.
+`script.run` invoked through the control channel also yields the window while
+`app.project.renderQueue.render()` waits. JavaScript resumes after completion or cancellation;
+the original request receives its result and accumulated output only after the continuation
+finishes or shows a modal dialog. Several renders in one script keep the same request pending.
+Headless scripts retain their synchronous behavior.
+
+While a script waits for rendering, the window shows progress and a **Stop Render** button
+(`scriptRender.stop`). Other editing and script callbacks pause so they cannot enter the
+suspended script's undo group. `ui.inspect`, `ui.elements`, command/menu listings, resize,
+focus, and the engine commands `renderQueue.list`, `renderQueue.stop`, `editor.state`,
+`app.capabilities`, `command.list`, `scriptui.list` and `scriptui.get` remain available.
+Other control requests return an error. Use another connection for inspection or Stop,
+since requests on one connection are answered in order. A window-close request is canceled
+during this wait; stop the render and then close normally to use the unsaved-changes prompt.
+The control transport's 60-second request timeout still applies to long renders.
 
 ## UI state
 
@@ -103,7 +130,7 @@ Points are logical window coordinates. A target is `{id}` (the element's centre;
 | `ui.click` | `{id \| x,y, button?: left\|right\|middle, count?, modifiers?}` |
 | `ui.move` | `{id \| x,y}` |
 | `ui.drag` | `{from: target, to: target, steps? (12), modifiers?}`: press, move, release |
-| `ui.scroll` | `{id \| x,y, dx, dy}` |
+| `ui.scroll` | `{id \| x,y, dx?, dy?, unit?: point\|line, source?: wheel\|trackpad, pinch?, modifiers?}`: `line` is a mouse wheel (zooms the viewers); `point` (default) is a pixel-precise scroll; `source: trackpad` pans the viewers (as on macOS); with no `source` the viewers take a scroll in points as a wheel until one moves on both axes (a trackpad: from then on it pans); `pinch` is a trackpad pinch's zoom factor |
 | `ui.key` | `{key}`, for example `Space`, `F9`, `Cmd+Z`, `Cmd+Shift+Z`, `PageDown`, `Escape` |
 | `ui.type` | `{text}`: text input into the focused field |
 
@@ -143,7 +170,9 @@ revolutions are `timeline.prop.<uid>.revolutions`, `effectControls.prop.<uid>.re
 `viewer.showSnapshot`, `viewer.fastPreviews` (their popup entries are `viewer.<menu>Item.<n>`),
 `viewer.ruler.top|left|origin`, `viewer.mask.<uid>.vertex.<i>`, `viewer.shapePath.<uid>.vertex.<i>`,
 `viewer.motionPath.<layer>.<key>[.in|.out]`, `viewer.puppetPin.<uid>[.rotate|.scale]`,
-`viewer.freeTransform.handle.<i>` and
+`viewer.freeTransform.handle.<i>`, `viewer.cryptoPick` (the Cryptomatte eyedropper's hover chip; its
+label is the chip's text), `viewer.cryptoPick.error` (the chip when it shows an error; label `whole`, or
+`cut` when the message is cut off), `viewer.cryptoPick.highlight` (the hovered ID's highlighted area) and
 `viewer.regionOfInterest`; the Graph Editor adds `timeline.graph.transformBox[.<i>]`,
 `timeline.graph.snap` and `timeline.graph.reference`. Use `ui.elements` to see what is on screen.
 
@@ -210,7 +239,9 @@ takes a name, or as `{"Viewer":42}` and `{"ScriptPanel":77}` for viewers and Scr
   `move {target, zone?, before?}`, `setStackOpen {open}`, `resizeStack {height}`,
   `resizeSplit {path, size}`; `rect` is `[x, y, width, height]`). It returns
   `{"docking": workspace}`. `ui.dock.reset` returns the current workspace to its saved or
-  built-in layout and returns the same.
+  built-in layout and returns the same. Raw `Open` and `OpenAt` actions are refused in both
+  `ui.dock {action}` and `window.panel.layout {action}`, as in `window.dockAction`; use the
+  panel open commands instead.
 - `window.dockPanel {panel, anchor?, zone?, before?}` docks as `window.panel.dock`: `zone` is
   `center`, `tab`, `left`, `right`, `top`, `bottom`, `above` or `below`; without an anchor a
   side zone docks along that edge of the whole workspace. `window.floatPanel {panel, rect?}`

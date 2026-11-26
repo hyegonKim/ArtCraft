@@ -67,6 +67,9 @@ fn events() -> Vec<Event> {
             source: InstallSource::Msi,
             location: format!("C:\\Program Files\\{}\\{}.exe", app.name, app.id),
             package: None,
+            externally_managed: false,
+            origin: None,
+            installation: None,
         });
         ev.push(Event::Detected { app: app.id.into(), installed });
     }
@@ -97,6 +100,7 @@ fn harness(view: ViewMode) -> Harness<'static, Option<LauncherUi>> {
     )
 }
 
+// One test: the UI language is process-wide.
 #[test]
 fn portuguese_ui_translates_labels_dates_and_messages() {
     let mut h = harness(ViewMode::Grid);
@@ -112,5 +116,12 @@ fn portuguese_ui_translates_labels_dates_and_messages() {
     let mut table = harness(ViewMode::Table);
     table.run_steps(8);
     table.get_by_label("Versão");
-    assert!(table.query_all_by_label_contains("de ago. de 2026").count() >= 1);
+    // Brazilian Portuguese writes the launcher's longest dates ("29/30 de ago. de 2026" depending
+    // on local timezone): the table's released column must show one whole, not cut with "...".
+    let date = table.get_all_by_label_contains("de ago. de 2026").next().expect("a release date in the table");
+    let text = date.value().expect("release date label");
+    let font = egui::TextStyle::Body.resolve(&table.ctx.global_style());
+    let whole = table.ctx.fonts_mut(|f| f.layout_no_wrap(text, font, egui::Color32::WHITE).size().x);
+    // A label cut with an ellipsis keeps its full text, so only its width tells.
+    assert!(date.rect().width() >= whole - 0.5, "{:?} of {whole}", date.rect());
 }

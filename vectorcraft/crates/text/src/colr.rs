@@ -12,7 +12,7 @@ use skrifa::outline::DrawSettings;
 use skrifa::raw::TableProvider;
 use skrifa::raw::types::BoundingBox;
 use skrifa::{GlyphId, MetadataProvider};
-use vectorcraft_doc::color::{BlendMode, Color, Gradient, GradientGeom, GradientKind, GradientPaint, GradientStop, Paint};
+use vectorcraft_doc::color::{BlendMode, Color, Gradient, GradientGeom, GradientKind, GradientPaint, GradientSpread, GradientStop, Paint};
 use vectorcraft_doc::{Appearance, FillLayer, ImageBlob, Node, NodeId, NodeKind};
 use vectorcraft_geom::PathData;
 use vello_cpu::peniko;
@@ -83,9 +83,66 @@ pub(crate) fn colour_glyph(
 
 /// Palette 0's colours with their alpha.
 fn palette(font: &skrifa::FontRef<'_>) -> Vec<(Color, f32)> {
+    palette_at(font, 0)
+}
+
+/// Palette `palette_index`'s colours with their alpha (falls back to palette 0 when out of range).
+fn palette_at(font: &skrifa::FontRef<'_>, palette_index: u16) -> Vec<(Color, f32)> {
     let palettes = ColorPalettes::new(font);
-    let Some(palette) = palettes.get(0) else { return vec![] };
+    let Some(palette) = palettes.get(palette_index).or_else(|| palettes.get(0)) else {
+        return vec![];
+    };
     palette.colors().iter().map(|c| (Color::rgb8(c.red, c.green, c.blue), f32::from(c.alpha) / 255.0)).collect()
+}
+
+/// Does the font face at `face_index` in `font_bytes` contain a COLR table?
+pub fn has_colr_table(font_bytes: &[u8], face_index: u32) -> bool {
+    skrifa::FontRef::from_index(font_bytes, face_index).ok().is_some_and(|f| has_colour_layers(&f))
+}
+
+/// Number of CPAL color palettes defined in the font face at `face_index` (`0` when none).
+pub fn colr_palette_count(font_bytes: &[u8], face_index: u32) -> u16 {
+    let Ok(font) = skrifa::FontRef::from_index(font_bytes, face_index) else { return 0 };
+    ColorPalettes::new(&font).len()
+}
+
+/// Read COLR v0/v1 glyph `gid` as a pure vector node tree using CPAL `palette_index`, returning
+/// `None` if the glyph uses paints that require extended vector conversion or is not a COLR glyph.
+pub fn colour_glyph_with_palette(
+    font_bytes: &[u8],
+    face_index: u32,
+    gid: u32,
+    palette_index: u16,
+    foreground: Color,
+) -> Option<Arc<Node>> {
+    let font = skrifa::FontRef::from_index(font_bytes, face_index).ok()?;
+    let glyph = ColorGlyphCollection::new(&font).get(GlyphId::new(gid))?;
+    let mut tree = Tree::with_options(&font, LocationRef::default(), palette_index, foreground, false);
+    glyph.paint(LocationRef::default(), &mut tree).ok()?;
+    if tree.unsupported.is_some() {
+        return None;
+    }
+    tree.finish()
+}
+
+/// Read COLR v0/v1 glyph `gid` as an extended multi-layer vector node tree using CPAL
+/// `palette_index`, mapping `SweepGradient` to conic vector gradients, `Extend::{Repeat, Reflect}`
+/// to `GradientSpread`, and two-circle focal `RadialGradient` to focal radial vector gradients.
+pub fn colour_glyph_vector(
+    font_bytes: &[u8],
+    face_index: u32,
+    gid: u32,
+    palette_index: u16,
+    foreground: Color,
+) -> Option<Arc<Node>> {
+    let font = skrifa::FontRef::from_index(font_bytes, face_index).ok()?;
+    let glyph = ColorGlyphCollection::new(&font).get(GlyphId::new(gid))?;
+    let mut tree = Tree::with_options(&font, LocationRef::default(), palette_index, foreground, true);
+    glyph.paint(LocationRef::default(), &mut tree).ok()?;
+    if tree.unsupported.is_some() {
+        return None;
+    }
+    tree.finish()
 }
 
 /// The colour and alpha of palette entry `index` (0xFFFF: `foreground`), times `alpha`; `None`
@@ -148,15 +205,28 @@ struct Tree<'a> {
     painted: Option<Rect>,
     /// It paints with the foreground colour (palette index 0xFFFF).
     foreground_used: bool,
+    /// Convert extended COLR v1 gradients (sweep, repeat/reflect spread, two-circle focal radial)
+    /// directly to VectorCraft vector gradients rather than raster fallback.
+    vector_extended: bool,
 }
 
 impl<'a> Tree<'a> {
     fn new(font: &'a skrifa::FontRef<'a>, location: LocationRef<'a>, foreground: Color) -> Self {
+        Self::with_options(font, location, 0, foreground, false)
+    }
+
+    fn with_options(
+        font: &'a skrifa::FontRef<'a>,
+        location: LocationRef<'a>,
+        palette_index: u16,
+        foreground: Color,
+        vector_extended: bool,
+    ) -> Self {
         let root = Open { clip: None, blend: Some(BlendMode::Normal), children: vec![], flooded: false };
         Tree {
             font,
             location,
-            palette: palette(font),
+            palette: palette_at(font, palette_index),
             foreground,
             transforms: vec![FLIP],
             groups: vec![root],
@@ -166,7 +236,19 @@ impl<'a> Tree<'a> {
             too_large: false,
             painted: None,
             foreground_used: false,
+            vector_extended,
         }
+    }
+
+    /// Glyph `gid`'s outline in the current transform; empty once the glyph is over budget, so
+    /// the layers that follow cost nothing (a compact layer list can name one big outline often).
+    fn layer_outline(&mut self, gid: GlyphId) -> BezPath {
+        if self.too_large {
+            return BezPath::new();
+        }
+        let mut path = outline(self.font, self.location, gid);
+        path.apply_affine(self.transform());
+        path
     }
 
     fn transform(&self) -> Affine {
@@ -268,10 +350,18 @@ impl<'a> Tree<'a> {
                 })
                 .collect()
         };
-        let gradient = |kind, stops: Vec<GradientStop>, geom| {
-            let mut paint = GradientPaint::new(Gradient { kind, stops, ..Gradient::default() });
+        let gradient = |kind, stops: Vec<GradientStop>, spread: GradientSpread, geom| {
+            let mut paint = GradientPaint::new(Gradient { kind, stops, spread, ..Gradient::default() });
             paint.geom = Some(geom);
             Paint::Gradient(Box::new(paint))
+        };
+        let extend_spread = |ext: Extend, extended: bool| -> Option<GradientSpread> {
+            match ext {
+                Extend::Pad => Some(GradientSpread::Pad),
+                Extend::Repeat if extended => Some(GradientSpread::Repeat),
+                Extend::Reflect if extended => Some(GradientSpread::Reflect),
+                _ => None,
+            }
         };
         match brush {
             Brush::Solid { palette_index, alpha } => {
@@ -279,44 +369,73 @@ impl<'a> Tree<'a> {
                 Some((Paint::solid(c), a))
             }
             Brush::LinearGradient { p0, p1, color_stops, extend } => {
-                if *extend != Extend::Pad {
+                let Some(spread) = extend_spread(*extend, self.vector_extended) else {
                     self.unsupported.get_or_insert("a repeating or reflecting gradient");
                     return None;
-                }
+                };
                 let (p0, p1) = (point(*p0), point(*p1));
                 let (stops, first, last) = normalized(stops(color_stops, self))?;
                 // Stops past 0 and 1 move the ends instead.
                 let mut geom = GradientGeom { start: p0.lerp(p1, f64::from(first)), end: p0.lerp(p1, f64::from(last)), aspect: 1.0, focal: None };
                 geom.transform(xf, GradientKind::Linear);
-                Some((gradient(GradientKind::Linear, stops, geom), 1.0))
+                Some((gradient(GradientKind::Linear, stops, spread, geom), 1.0))
             }
             Brush::RadialGradient { c0, r0, c1, r1, color_stops, extend } => {
-                if *extend != Extend::Pad {
+                let Some(spread) = extend_spread(*extend, self.vector_extended) else {
                     self.unsupported.get_or_insert("a repeating or reflecting gradient");
                     return None;
-                }
+                };
                 let (c0, c1, r0, r1) = (point(*c0), point(*c1), f64::from(*r0), f64::from(*r1));
                 let concentric = (c0 - c1).hypot() < 1e-6;
-                if (r0 > 1e-6 && !concentric) || r1 <= r0 || (c0 - c1).hypot() >= r1 {
+                if !self.vector_extended && ((r0 > 1e-6 && !concentric) || r1 <= r0 || (c0 - c1).hypot() >= r1) {
+                    self.unsupported.get_or_insert("a radial gradient from a circle");
+                    return None;
+                }
+                if r1 <= 1e-6 {
                     self.unsupported.get_or_insert("a radial gradient from a circle");
                     return None;
                 }
                 let mut stops = stops(color_stops, self);
-                if stops.iter().any(|s| !(0.0..=1.0).contains(&s.offset)) {
+                if !self.vector_extended && stops.iter().any(|s| !(0.0..=1.0).contains(&s.offset)) {
                     self.unsupported.get_or_insert("a radial gradient with stops past its circles");
                     return None;
                 }
-                // A start circle around the centre starts the stops further out.
+                let r_start = r0.min(r1 * 0.999);
                 for s in &mut stops {
-                    s.offset = ((r0 + f64::from(s.offset) * (r1 - r0)) / r1) as f32;
+                    let clamped = f64::from(s.offset).clamp(0.0, 1.0);
+                    s.offset = ((r_start + clamped * (r1 - r_start)) / r1).clamp(0.0, 1.0) as f32;
                 }
-                let mut geom = GradientGeom { start: c1, end: c1 + Vec2::new(r1, 0.0), aspect: 1.0, focal: (!concentric).then_some(c0) };
+                let focal = if concentric {
+                    None
+                } else {
+                    let d = (c0 - c1).hypot();
+                    let clamped_focal = if d < r1 * 0.99 { c0 } else { c1 + (c0 - c1) * ((r1 * 0.99) / d) };
+                    Some(clamped_focal)
+                };
+                let mut geom = GradientGeom { start: c1, end: c1 + Vec2::new(r1, 0.0), aspect: 1.0, focal };
                 geom.transform(xf, GradientKind::Radial);
-                Some((gradient(GradientKind::Radial, stops, geom), 1.0))
+                Some((gradient(GradientKind::Radial, stops, spread, geom), 1.0))
             }
-            Brush::SweepGradient { .. } => {
-                self.unsupported.get_or_insert("a sweep gradient");
-                None
+            Brush::SweepGradient { c0, start_angle, end_angle, color_stops, extend } => {
+                if !self.vector_extended {
+                    self.unsupported.get_or_insert("a sweep gradient");
+                    return None;
+                }
+                let spread = extend_spread(*extend, true).unwrap_or(GradientSpread::Pad);
+                let center = point(*c0);
+                let (mut stops, first, last) = normalized(stops(color_stops, self))?;
+                let eff_start = *start_angle + (*end_angle - *start_angle) * first;
+                let eff_end = *start_angle + (*end_angle - *start_angle) * last;
+                let arc_fraction = ((eff_end - eff_start).abs() / 360.0).clamp(0.001, 1.0);
+                for s in &mut stops {
+                    s.offset = (s.offset * arc_fraction).clamp(0.0, 1.0);
+                }
+                let angle_rad = f64::from(eff_start).to_radians();
+                let dir = Vec2::new(angle_rad.cos() * 100.0, angle_rad.sin() * 100.0);
+                let aspect = if *end_angle >= *start_angle { 1.0 } else { -1.0 };
+                let mut geom = GradientGeom { start: center, end: center + dir, aspect, focal: None };
+                geom.transform(xf, GradientKind::Conic);
+                Some((gradient(GradientKind::Conic, stops, spread, geom), 1.0))
             }
         }
     }
@@ -359,8 +478,7 @@ impl ColorPainter for Tree<'_> {
     }
 
     fn push_clip_glyph(&mut self, glyph_id: GlyphId) {
-        let mut clip = outline(self.font, self.location, glyph_id);
-        clip.apply_affine(self.transform());
+        let clip = self.layer_outline(glyph_id);
         self.charge(&clip);
         self.open(Open { clip: Some(clip), blend: None, children: vec![], flooded: false });
     }
@@ -392,8 +510,7 @@ impl ColorPainter for Tree<'_> {
 
     /// The glyph's outline filled, the brush moved by `brush_transform` (the glyph stays).
     fn fill_glyph(&mut self, glyph_id: GlyphId, brush_transform: Option<Transform>, brush: Brush<'_>) {
-        let mut path = outline(self.font, self.location, glyph_id);
-        path.apply_affine(self.transform());
+        let path = self.layer_outline(glyph_id);
         let brush_xf = self.transform() * brush_transform.as_ref().map_or(Affine::IDENTITY, affine);
         self.transforms.push(brush_xf);
         self.fill_path(&path, &brush);

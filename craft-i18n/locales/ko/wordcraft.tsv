@@ -1629,6 +1629,14 @@
 	Remove the control once edited	편집 후 컨트롤 제거
 	Remove the space before the punctuation	문장 부호 앞의 공백을 제거하세요
 	Remove Watermark	워터마크 제거
+	No watermark	워터마크 없음
+	Picture watermark	그림 워터마크
+	Text watermark	텍스트 워터마크
+	Select Picture…	그림 선택…
+	Washout	흐리게
+	Semitransparent	반투명
+	Transparency:	투명도:
+	Select a picture first.	먼저 그림을 선택하세요.
 	Rename Document	문서 이름 바꾸기
 	Reopen	다시 열기
 	Repeat as header row on each page	각 페이지에서 머리글 행으로 반복
@@ -2289,15 +2297,209 @@ preview	Title	제목
 	✓ None	✓ 없음
 	➕ New comment	➕ 새 메모
 	📂  Browse…	📂  찾아보기…
-	PDF & OCR Tools	PDF 및 OCR 도구
-	Make Accessible	접근성 개선
-	Current selection	현재 선택 영역
-	Find text	텍스트 찾기
-	Text to redact	가릴 텍스트
-	Tagged PDF	태그 있는 PDF
-	Create bookmarks from headings	제목에서 책갈피 만들기
-	Include Word bookmarks	Word 책갈피 포함
-	Retain background colors	배경색 유지
-	Underline links	링크 밑줄
-	Verify Signature	서명 확인
-	{n} dpi	{n} dpi
+	In the margin	여백에
+	No document is open. Create a document or open one first.	열려 있는 문서가 없습니다. 문서를 만들거나 먼저 여세요.
+	Only for the selected text	고른 글에만
+	Show alignment guides when moving pictures and shapes	그림과 도형을 옮길 때 맞춤 안내선 보이기
+	Moved objects snap to the page's edges and centre, the margins and other objects. Hold Alt to move freely.	옮기는 개체가 쪽의 가장자리와 가운데, 여백, 다른 개체에 맞춰 붙습니다. 자유롭게 옮기려면 Alt 를 누르고 있으세요.
+	{language} (no dictionary)	{language} (사전 없음)
+	No spelling dictionary for {language} is installed, so it isn't checked. WordCraft looks for the Hunspell dictionary {name} in the WORDCRAFT_DICTIONARIES folder and in the usual system locations.	{language} 맞춤법 사전이 설치되어 있지 않아 검사하지 않습니다. WordCraft 는 Hunspell 사전 {name} 을 WORDCRAFT_DICTIONARIES 폴더와 시스템의 보통 위치에서 찾습니다.
+	Word 2003 XML Document (*.xml)	Word 2003 XML 문서 (*.xml)
+	Print settings	인쇄 설정
+	Submit print job	인쇄 작업 보내기
+	Dictionaries	사전
+	Dictionaries folder:	사전 폴더:
+	Not set: the system's usual places	정하지 않음: 시스템의 보통 위치
+	Hunspell .aff and .dic files here (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) are used before the system's.	이 폴더의 Hunspell .aff, .dic 파일(pl_PL, pt_BR, it_IT, hr_HR, tr_TR)을 시스템의 것보다 먼저 씁니다.
+	{language}: {file}	{language}: {file}
+	{language}: no dictionary found	{language}: 사전을 찾지 못함
+	Mirror margins	좌우 대칭 여백
+	Existing File or Web Page	기존 파일 또는 웹 페이지
+	Link to:	연결 대상:
+	Place in This Document	이 문서 안의 위치
+	Auto ({percent}%)	자동 ({percent}%)
+	Makes the ribbon, menus and dialogs larger or smaller. Auto follows your system's display scaling; 100% is one screen pixel per point. Document zoom is separate.	도구 줄, 메뉴, 대화 상자를 더 크게 또는 작게 합니다. 자동은 시스템의 화면 배율을 따르며, 100% 는 1포인트에 화면 한 픽셀입니다. 문서 확대/축소는 따로 정합니다.
+	Croatian	크로아티아어
+	Text of the nearest paragraph with a given style (running headers)	정한 스타일을 쓴 가장 가까운 문단의 글 (쪽 머리글용)
+	Style name:	스타일 이름:
+	Hidden bookmarks	숨은 책갈피
+	Sort by:	정렬 기준:
+	Full\nScreen	전체\n화면
+	{name}   {height} × {width} in	{name}   {height} × {width} 인치
+	{name}   {height} × {width} mm	{name}   {height} × {width} mm
+	{width} × {height} mm	{width} × {height} mm
+	{kind}, {columns} × {rows}, {size} ({paper})	{kind}, {columns} × {rows}, {size} ({paper})
+	Researcher needs an online service; WordCraft keeps your documents offline.	조사 도우미는 온라인 서비스가 필요합니다. WordCraft 는 문서를 오프라인으로 보관합니다.
+	These settings will be used for new documents.	이 설정은 새 문서에 쓰입니다.
+	can't split at the first row	첫 줄에서는 나눌 수 없습니다
+	select two or more cells to merge	합칠 칸을 둘 이상 고르세요
+	there is no ink to replay	다시 재생할 잉크가 없습니다
+	there's no citation after the caret	커서 뒤에 인용이 없습니다
+	this item is already at the top level	이 항목은 이미 가장 위 단계입니다
+	Envelope #10	봉투 #10
+	Envelope DL	봉투 DL
+	Reading Mode	읽기 모드
+	Text size	글자 크기
+	Edit Document	문서 고치기
+	Go to what:	이동할 대상:
+	Type +2 or -1 to move from the page you are on.	지금 있는 쪽에서 움직일 만큼 +2 또는 -1 을 입력하세요.
+	Suggested	추천
+	Set Proofing Language…	맞춤법 언어 정하기…
+	Language Preferences…	언어 기본 설정…
+	Trust Center	보안 센터
+	Privacy for this document	이 문서의 개인 정보
+	Remove my name from comments, changes and file properties when saving	저장할 때 메모, 고침, 파일 속성에서 내 이름 지우기
+	Leave out the date and time of comments and tracked changes when saving	저장할 때 메모와 고침 기록의 날짜와 시간 빼기
+	The document you are editing keeps the names and dates; only the saved file leaves them out.	고치고 있는 문서에는 이름과 날짜가 그대로 남고, 저장한 파일에서만 빠집니다.
+	Waiting for the save to finish…	저장이 끝나기를 기다리는 중…
+	Saving {name} was cancelled, so it is still open and nothing was lost.	{name} 저장을 취소해서 문서는 그대로 열려 있고 잃은 것은 없습니다.
+	Paper size:	용지 크기:
+	Custom size	직접 정한 크기
+	More Paper Sizes…	다른 용지 크기…
+	The margins don't fit on a page this size; make the margins smaller first.	이 크기의 쪽에는 여백이 맞지 않습니다. 먼저 여백을 줄이세요.
+	Document name	문서 이름
+	Account	계정
+	Filter and Sort	거르기와 정렬
+	And	그리고
+	Or	또는
+	Compare to	비교할 값
+	Add Condition	조건 넣기
+	Remove condition	조건 지우기
+	Sort by	정렬 기준
+	Then by	다음 기준
+	Ascending	오름차순
+	Equal to	같음
+	Not equal to	같지 않음
+	Less than	보다 작음
+	Greater than	보다 큼
+	Less than or equal	작거나 같음
+	Greater than or equal	크거나 같음
+	Is blank	비어 있음
+	Is not blank	비어 있지 않음
+	Does not contain	포함하지 않음
+	{count} of {total} recipients will be merged.	받는 사람 {total} 명 중 {count} 명을 병합합니다.
+	Take the last match on the page	쪽에서 마지막으로 찾은 것 쓰기
+	Show its list number	목록 번호 보이기
+	Show its number relative to this field	이 필드 기준의 상대 번호 보이기
+	Show its number with all higher levels	모든 상위 단계를 붙인 번호 보이기
+	Number only, without the label's words	이름표 글 없이 번호만
+	Add whether it is above or below	위인지 아래인지 덧붙이기
+	Add a language…	언어 추가…
+	Add a language	언어 추가
+	Your languages	내 언어
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	영어, 이 문서의 언어, 설치된 모든 언어 팩. 언어 팩은 맞춤법 사전과 하이픈 넣기를 추가합니다.
+	Set as default	기본값으로 설정
+	New blank documents are written in this language	새 빈 문서는 이 언어로 작성됩니다
+	{language} (default)	{language}(기본값)
+	Built in	기본 제공
+	Your own dictionary	내 사전
+	System dictionary	시스템 사전
+	Not available yet	아직 사용할 수 없음
+	Grammar built in	문법 검사 기본 제공
+	Install spelling ({size})	맞춤법 설치({size})
+	Its dictionary couldn't be read: {reason}	사전을 읽을 수 없습니다: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	다운로드가 꺼져 있습니다. “언어 추가…” 또는 “설치”를 클릭하면 켜지며, 그러면 WordCraft가 GitHub에서 언어 팩과 글꼴을 다운로드합니다.
+	Search:	검색:
+	Dutch, Nederlands or nl	네덜란드어, Nederlands 또는 nl
+	No languages to show yet.	아직 표시할 언어가 없습니다.
+	No language matches your search.	검색과 일치하는 언어가 없습니다.
+	An installed Language pack is used after this folder.	설치된 언어 팩은 이 폴더 다음에 사용됩니다.
+	Dictionary files	사전 파일
+	Gets the list of Language packs, then this language's pack if there is one.	언어 팩 목록을 가져온 다음, 이 언어의 팩이 있으면 그것을 가져옵니다.
+	Afrikaans	아프리칸스어
+	Belarusian	벨라루스어
+	Bulgarian	불가리아어
+	Bosnian	보스니아어
+	Catalan	카탈루냐어
+	Catalan (Valencian)	카탈루냐어(발렌시아어)
+	Welsh	웨일스어
+	Esperanto	에스페란토
+	Persian	페르시아어
+	Irish	아일랜드어
+	Galician	갈리시아어
+	Hungarian	헝가리어
+	Armenian	아르메니아어
+	Icelandic	아이슬란드어
+	Georgian	조지아어
+	Lithuanian	리투아니아어
+	Latvian	라트비아어
+	Macedonian	마케도니아어
+	Norwegian (Nynorsk)	노르웨이어(뉘노르스크)
+	Slovak	슬로바키아어
+	Slovenian	슬로베니아어
+	Albanian	알바니아어
+	Swahili	스와힐리어
+	Tamil	타밀어
+	Thai	태국어
+	Vietnamese	베트남어
+	Set as Default Language	기본 언어로 설정
+	{language} ({region})	{language}({region})
+	U.A.E.	아랍에미리트
+	Angola	앙골라
+	Argentina	아르헨티나
+	Austria	오스트리아
+	Australia	오스트레일리아
+	Bosnia and Herzegovina	보스니아 헤르체고비나
+	Belgium	벨기에
+	Bolivia	볼리비아
+	Brazil	브라질
+	Belarus	벨라루스
+	Canada	캐나다
+	Switzerland	스위스
+	Chile	칠레
+	China	중국
+	Colombia	콜롬비아
+	Costa Rica	코스타리카
+	Cuba	쿠바
+	Cabo Verde	카보베르데
+	Cyprus	키프로스
+	Germany	독일
+	Dominican Republic	도미니카 공화국
+	Ecuador	에콰도르
+	Egypt	이집트
+	Spain	스페인
+	Finland	핀란드
+	France	프랑스
+	United Kingdom	영국
+	Equatorial Guinea	적도 기니
+	Guatemala	과테말라
+	Hong Kong SAR	홍콩 특별행정구
+	Honduras	온두라스
+	Ireland	아일랜드
+	India	인도
+	Iraq	이라크
+	Italy	이탈리아
+	Jamaica	자메이카
+	Jordan	요르단
+	Kuwait	쿠웨이트
+	Kazakhstan	카자흐스탄
+	Lebanon	레바논
+	Liechtenstein	리히텐슈타인
+	Luxembourg	룩셈부르크
+	Morocco	모로코
+	Monaco	모나코
+	Montenegro	몬테네그로
+	Macao SAR	마카오 특별행정구
+	Mexico	멕시코
+	Malaysia	말레이시아
+	Mozambique	모잠비크
+	Nicaragua	니카라과
+	Netherlands	네덜란드
+	New Zealand	뉴질랜드
+	Panama	파나마
+	Peru	페루
+	Philippines	필리핀
+	Puerto Rico	푸에르토리코
+	Portugal	포르투갈
+	Paraguay	파라과이
+	Qatar	카타르
+	Russia	러시아
+	Singapore	싱가포르
+	El Salvador	엘살바도르
+	Syria	시리아
+	Taiwan	대만
+	Ukraine	우크라이나
+	United States	미국
+	Uruguay	우루과이
+	Venezuela	베네수엘라
+	South Africa	남아프리카 공화국

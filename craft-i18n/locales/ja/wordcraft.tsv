@@ -1475,6 +1475,14 @@
 	Remove Table of Contents	目次の削除
 	Remove the control once edited	編集したらコントロールを削除する
 	Remove Watermark	透かしの削除
+	No watermark	透かしなし
+	Picture watermark	画像の透かし
+	Text watermark	テキストの透かし
+	Select Picture…	画像を選択…
+	Washout	薄色
+	Semitransparent	半透明
+	Transparency:	透明度:
+	Select a picture first.	先に画像を選択してください。
 	Rename	名前の変更
 	Rename Document	ドキュメント名の変更
 	Rename Style	スタイル名の変更
@@ -2091,3 +2099,123 @@
 	{width} × {height} pixels	{width} × {height} ピクセル
 	{words} words	{words} 語
 	“{text}” ({row}, {series}) isn't a number.	「{text}」（{row}、{series}）は数値ではありません。
+	Add a language…	言語を追加…
+	Add a language	言語を追加
+	Your languages	使用する言語
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	英語、この文書の言語、インストール済みのすべての言語パック。言語パックはスペルチェック用の辞書とハイフネーションを追加します。
+	Set as default	既定に設定
+	New blank documents are written in this language	新しい白紙の文書はこの言語で書かれます
+	{language} (default)	{language}（既定）
+	Built in	内蔵
+	Your own dictionary	独自の辞書
+	System dictionary	システム辞書
+	Not available yet	まだ利用できません
+	Grammar built in	文法チェック内蔵
+	Install spelling ({size})	スペルチェックをインストール（{size}）
+	Its dictionary couldn't be read: {reason}	辞書を読み込めませんでした: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	ダウンロードはオフです。「言語を追加…」または「インストール」をクリックするとオンになり、WordCraft は GitHub から言語パックとフォントをダウンロードします。
+	Search:	検索:
+	Dutch, Nederlands or nl	オランダ語、Nederlands または nl
+	No languages to show yet.	表示できる言語はまだありません。
+	No language matches your search.	検索に一致する言語はありません。
+	An installed Language pack is used after this folder.	インストール済みの言語パックは、このフォルダーの後に使われます。
+	Dictionary files	辞書ファイル
+	Possible spelling mistake	スペルミスの可能性
+	Gets the list of Language packs, then this language's pack if there is one.	言語パックの一覧を取得し、続いてこの言語のパックがあればそれを取得します。
+	Afrikaans	アフリカーンス語
+	Belarusian	ベラルーシ語
+	Bulgarian	ブルガリア語
+	Bosnian	ボスニア語
+	Catalan	カタルーニャ語
+	Catalan (Valencian)	カタルーニャ語（バレンシア語）
+	Welsh	ウェールズ語
+	Esperanto	エスペラント語
+	Persian	ペルシア語
+	Irish	アイルランド語
+	Galician	ガリシア語
+	Hungarian	ハンガリー語
+	Armenian	アルメニア語
+	Icelandic	アイスランド語
+	Georgian	ジョージア語
+	Lithuanian	リトアニア語
+	Latvian	ラトビア語
+	Macedonian	マケドニア語
+	Norwegian (Nynorsk)	ノルウェー語（ニーノシュク）
+	Slovak	スロバキア語
+	Slovenian	スロベニア語
+	Albanian	アルバニア語
+	Swahili	スワヒリ語
+	Tamil	タミル語
+	Thai	タイ語
+	Vietnamese	ベトナム語
+	Set as Default Language	既定の言語に設定
+	{language} ({region})	{language}（{region}）
+	U.A.E.	アラブ首長国連邦
+	Angola	アンゴラ
+	Argentina	アルゼンチン
+	Austria	オーストリア
+	Australia	オーストラリア
+	Bosnia and Herzegovina	ボスニア・ヘルツェゴビナ
+	Belgium	ベルギー
+	Bolivia	ボリビア
+	Brazil	ブラジル
+	Belarus	ベラルーシ
+	Canada	カナダ
+	Switzerland	スイス
+	Chile	チリ
+	China	中国
+	Colombia	コロンビア
+	Costa Rica	コスタリカ
+	Cuba	キューバ
+	Cabo Verde	カーボベルデ
+	Cyprus	キプロス
+	Germany	ドイツ
+	Dominican Republic	ドミニカ共和国
+	Ecuador	エクアドル
+	Egypt	エジプト
+	Spain	スペイン
+	Finland	フィンランド
+	France	フランス
+	United Kingdom	英国
+	Equatorial Guinea	赤道ギニア
+	Guatemala	グアテマラ
+	Hong Kong SAR	香港特別行政区
+	Honduras	ホンジュラス
+	Ireland	アイルランド
+	India	インド
+	Iraq	イラク
+	Italy	イタリア
+	Jamaica	ジャマイカ
+	Jordan	ヨルダン
+	Kuwait	クウェート
+	Kazakhstan	カザフスタン
+	Lebanon	レバノン
+	Liechtenstein	リヒテンシュタイン
+	Luxembourg	ルクセンブルク
+	Morocco	モロッコ
+	Monaco	モナコ
+	Montenegro	モンテネグロ
+	Macao SAR	マカオ特別行政区
+	Mexico	メキシコ
+	Malaysia	マレーシア
+	Mozambique	モザンビーク
+	Nicaragua	ニカラグア
+	Netherlands	オランダ
+	New Zealand	ニュージーランド
+	Panama	パナマ
+	Peru	ペルー
+	Philippines	フィリピン
+	Puerto Rico	プエルトリコ
+	Portugal	ポルトガル
+	Paraguay	パラグアイ
+	Qatar	カタール
+	Russia	ロシア
+	Singapore	シンガポール
+	El Salvador	エルサルバドル
+	Syria	シリア
+	Taiwan	台湾
+	Ukraine	ウクライナ
+	United States	米国
+	Uruguay	ウルグアイ
+	Venezuela	ベネズエラ
+	South Africa	南アフリカ

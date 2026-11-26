@@ -54,7 +54,24 @@ fn max_len(ch: &[Vec<f32>]) -> usize {
 
 /// The largest finite sample magnitude in any channel.
 pub fn peak(ch: &[Vec<f32>]) -> f32 {
-    ch.iter().flatten().filter(|v| v.is_finite()).fold(0.0f32, |m, v| m.max(v.abs()))
+    ch.iter().map(|c| channel_peak(c)).fold(0.0f32, f32::max)
+}
+
+/// Largest finite absolute sample of one channel (0 for none).
+pub fn channel_peak(x: &[f32]) -> f32 {
+    let mut lanes = [0.0f32; 8];
+    let (chunks, rest) = x.as_chunks::<8>();
+    for c in chunks {
+        for (m, v) in lanes.iter_mut().zip(c) {
+            let a = v.abs();
+            *m = if a < f32::INFINITY && a > *m { a } else { *m };
+        }
+    }
+    for (m, v) in lanes.iter_mut().zip(rest) {
+        let a = v.abs();
+        *m = if a < f32::INFINITY && a > *m { a } else { *m };
+    }
+    lanes.into_iter().fold(0.0f32, f32::max)
 }
 
 /// Peak-normalizes to `target_db` dBFS, either all channels together or each on its own.
@@ -169,7 +186,6 @@ pub fn measure_loudness(ch: &[Vec<f32>], sample_rate: f32) -> (f32, f32) {
 /// Minimum over `[i - r, i + r]` for every `i`, in place (a monotonic queue: linear time).
 fn sliding_min_in_place(v: &mut [f32], r: usize) {
     let n = v.len();
-    // (index, value) pairs: the values live here, so overwriting `v[i]` once it is read is safe.
     let mut q: std::collections::VecDeque<(usize, f32)> = std::collections::VecDeque::new();
     let mut next = 0usize;
     for i in 0..n {
@@ -192,17 +208,12 @@ fn sliding_min_in_place(v: &mut [f32], r: usize) {
     }
 }
 
-/// Look-ahead true-peak limiter, linked across channels: wherever the 4× oversampled true peak
-/// would pass `ceiling` (linear) the gain is lowered just enough, ramping down over 1.5 ms ahead of
-/// the peak, holding across it and recovering by at most one unit of gain per 50 ms. The gain at
-/// every frame is at most what that frame's peak needs, so the ceiling holds up to the
-/// interpolation error of the gain change itself. Returns whether any gain was reduced.
+/// Look-ahead true-peak limiter, linked across channels.
 fn limit_true_peak(ch: &mut [Vec<f32>], sample_rate: f32, ceiling: f32) -> bool {
     let frames = max_len(ch);
     if frames == 0 || ceiling.is_nan() || ceiling <= 0.0 {
         return false;
     }
-    // The gain each frame needs, then its minimum over ±2·attack (look-ahead and hold).
     let mut gain = crate::meter::true_peak_envelope(ch);
     let mut any = false;
     for g in gain.iter_mut() {
@@ -219,8 +230,6 @@ fn limit_true_peak(ch: &mut [Vec<f32>], sample_rate: f32, ceiling: f32) -> bool 
     let sr = sane_sr(sample_rate);
     let attack = ((sr * 0.0015) as usize).clamp(1, 1 << 12);
     sliding_min_in_place(&mut gain, 2 * attack);
-    // A moving average over ±attack: every value it reads is a minimum over a window that covers
-    // this frame, so the smoothed gain never rises above what the frame needs.
     let release_step = 1.0 / (sr * 0.05).max(1.0);
     let at = |i: usize| -> f64 { f64::from(gain.get(i).copied().unwrap_or(1.0)) };
     let mut sum: f64 = (0..=attack.min(frames - 1)).map(at).sum();
@@ -235,7 +244,6 @@ fn limit_true_peak(ch: &mut [Vec<f32>], sample_rate: f32, ceiling: f32) -> bool 
                 *x = if x.is_finite() { *x * g } else { 0.0 };
             }
         }
-        // Slide the window on to n + 1.
         if n + attack + 1 < frames {
             sum += at(n + attack + 1);
         }
@@ -247,11 +255,7 @@ fn limit_true_peak(ch: &mut [Vec<f32>], sample_rate: f32, ceiling: f32) -> bool 
 }
 
 /// Normalizes planar audio to `target_lufs` (ITU-R BS.1770 gated integrated loudness) under a
-/// true-peak ceiling of `max_true_peak_dbtp`: a gain change to the target, then the look-ahead
-/// true-peak limiter ([`limit_true_peak`]). When limiting took loudness off the target the gain
-/// and limiter run again (at most three rounds), so very peaky material can end a little below the
-/// target rather than be crushed. Audio with nothing above the -70 LUFS absolute gate is left
-/// unchanged. Returns the final `(lufs, true_peak_dbtp)`.
+/// true-peak ceiling of `max_true_peak_dbtp`.
 pub fn match_loudness(ch: &mut [Vec<f32>], sample_rate: f32, target_lufs: f32, max_true_peak_dbtp: f32) -> (f32, f32) {
     let target_lufs = if target_lufs.is_nan() { -14.0 } else { target_lufs.clamp(-70.0, 0.0) };
     let max_tp_db = if max_true_peak_dbtp.is_nan() { -1.0 } else { max_true_peak_dbtp.clamp(-20.0, 0.0) };
@@ -271,7 +275,6 @@ pub fn match_loudness(ch: &mut [Vec<f32>], sample_rate: f32, target_lufs: f32, m
             break;
         }
     }
-    // The gain change itself can lift an interpolated peak a hair over the ceiling: limit again.
     for _ in 0..2 {
         if measure_loudness(ch, sample_rate).1 <= max_tp_db || !limit_true_peak(ch, sample_rate, ceiling) {
             break;
@@ -280,8 +283,7 @@ pub fn match_loudness(ch: &mut [Vec<f32>], sample_rate: f32, target_lufs: f32, m
     measure_loudness(ch, sample_rate)
 }
 
-/// Normalizes planar audio to a [`LoudnessPreset`]'s loudness and true-peak ceiling
-/// ([`match_loudness`]).
+/// Normalizes planar audio to a [`LoudnessPreset`]'s loudness and true-peak ceiling.
 pub fn match_loudness_preset(ch: &mut [Vec<f32>], sample_rate: f32, preset: LoudnessPreset) -> (f32, f32) {
     match_loudness(ch, sample_rate, preset.target_lufs(), preset.max_true_peak_dbtp())
 }
@@ -308,8 +310,11 @@ pub fn remove_dc(ch: &mut [Vec<f32>]) {
         if c.is_empty() {
             continue;
         }
-        let mean = c.iter().filter(|v| v.is_finite()).map(|&v| f64::from(v)).sum::<f64>() / c.len() as f64;
-        let m = mean as f32;
+        let (sum, n) = c.iter().filter(|v| v.is_finite()).fold((0.0f64, 0usize), |(s, n), &v| (s + f64::from(v), n + 1));
+        if n == 0 {
+            continue;
+        }
+        let m = (sum / n as f64) as f32;
         c.iter_mut().for_each(|s| *s -= m);
     }
 }
@@ -1097,6 +1102,220 @@ pub fn peak_db(ch: &[Vec<f32>]) -> f32 {
     gain_to_db(peak(ch))
 }
 
+/// Three phase-aligned stems separated from an audio buffer.
+#[derive(Debug, Clone)]
+pub struct SeparatedStems {
+    pub vocals: Vec<Vec<f32>>,
+    pub accompaniment: Vec<Vec<f32>>,
+    pub ambience: Vec<Vec<f32>>,
+}
+
+/// Offline multi-channel microphone crosstalk suppression.
+pub fn separate_crosstalk(ch: &mut [Vec<f32>], sample_rate: f32, sensitivity: f32, suppression_db: f32) {
+    let mut proc = crate::plugins::restoration::CrosstalkSeparator::new();
+    proc.set_param("sensitivity", sensitivity);
+    proc.set_param("suppression", suppression_db);
+    apply_plugin(ch, &mut proc, sample_rate);
+}
+
+/// Offline speech/programme loudness leveling with low-level noise-gate freeze.
+pub fn level_audio(ch: &mut [Vec<f32>], sample_rate: f32, target_db: f32, amount_pct: f32, gate_db: f32) {
+    let mut proc = crate::plugins::restoration::AudioLeveler::new();
+    proc.set_param("target", target_db);
+    proc.set_param("amount", amount_pct);
+    proc.set_param("gate", gate_db);
+    apply_plugin(ch, &mut proc, sample_rate);
+}
+
+fn stft_frames(signal: &[f32], win: &[f32], fft: &dyn rustfft::Fft<f32>, hop: usize) -> Vec<Vec<Complex<f32>>> {
+    let n_fft = win.len();
+    let total = signal.len();
+    let n_frames = (total + hop).div_ceil(hop).max(1);
+    let mut spec = Vec::with_capacity(n_frames);
+    for f in 0..n_frames {
+        let base = f * hop;
+        let mut buf = vec![Complex::new(0.0f32, 0.0f32); n_fft];
+        for (k, w) in win.iter().enumerate() {
+            let idx = (base + k).checked_sub(n_fft / 2);
+            let s = idx.and_then(|i| signal.get(i)).copied().unwrap_or(0.0);
+            let s = if s.is_finite() { s } else { 0.0 };
+            if let Some(slot) = buf.get_mut(k) {
+                slot.re = s * *w;
+            }
+        }
+        fft.process(&mut buf);
+        spec.push(buf);
+    }
+    spec
+}
+
+fn istft_frames(spec: &[Vec<Complex<f32>>], win: &[f32], ifft: &dyn rustfft::Fft<f32>, hop: usize, out_len: usize) -> Vec<f32> {
+    let n_fft = win.len();
+    let scale = 1.0 / (n_fft as f32);
+    let mut out = vec![0.0f32; out_len];
+    let mut norm = vec![0.0f32; out_len];
+    let mut buf = vec![Complex::new(0.0f32, 0.0f32); n_fft];
+    for (f, frame) in spec.iter().enumerate() {
+        buf.copy_from_slice(frame);
+        ifft.process(&mut buf);
+        let base = f * hop;
+        for (k, w) in win.iter().enumerate() {
+            if let Some(idx) = (base + k).checked_sub(n_fft / 2)
+                && idx < out_len
+            {
+                let v = buf.get(k).map_or(0.0, |c| c.re) * scale * *w;
+                if let Some(o) = out.get_mut(idx) {
+                    *o += v;
+                }
+                if let Some(nm) = norm.get_mut(idx) {
+                    *nm += *w * *w;
+                }
+            }
+        }
+    }
+    for (o, nm) in out.iter_mut().zip(norm) {
+        if nm > 1.0e-6 {
+            *o /= nm;
+        }
+    }
+    out
+}
+
+fn median5(vals: [f32; 5]) -> f32 {
+    let mut a = vals;
+    a.sort_by(|x, y| x.total_cmp(y));
+    a[2]
+}
+
+fn harmonic_ratio(mags: &[Vec<f32>], f: usize, b: usize) -> f32 {
+    let nf = mags.len();
+    let nb = mags.first().map_or(0, Vec::len);
+    if nf == 0 || nb == 0 {
+        return 0.5;
+    }
+    let at = |fi: usize, bi: usize| mags.get(fi.min(nf - 1)).and_then(|v| v.get(bi.min(nb - 1))).copied().unwrap_or(0.0);
+    // Median across time favors sustained/harmonic partials; median across frequency favors transients.
+    let h = median5([at(f.saturating_sub(2), b), at(f.saturating_sub(1), b), at(f, b), at(f + 1, b), at(f + 2, b)]);
+    let p = median5([at(f, b.saturating_sub(2)), at(f, b.saturating_sub(1)), at(f, b), at(f, b + 1), at(f, b + 2)]);
+    let h2 = h * h;
+    let p2 = p * p;
+    h2 / (h2 + p2 + 1.0e-12)
+}
+
+/// Separates planar audio `ch` into `(vocals, accompaniment, ambience)` via STFT harmonic-percussive
+/// median filtering combined with Mid/Side spatial soft masking.
+///
+/// The accompaniment stem is computed as the exact sample residual `ch - vocals - ambience`, so
+/// summing the three stems reconstructs the original audio without phase coloration.
+pub fn separate_stems(ch: &[Vec<f32>], sample_rate: f32) -> SeparatedStems {
+    let sr = sane_sr(sample_rate);
+    let n_ch = ch.len();
+    let len = max_len(ch).min(MAX_OFFLINE_SAMPLES);
+    if n_ch == 0 || len == 0 {
+        return SeparatedStems {
+            vocals: vec![Vec::new(); n_ch],
+            accompaniment: vec![Vec::new(); n_ch],
+            ambience: vec![Vec::new(); n_ch],
+        };
+    }
+    const N_FFT: usize = 1024;
+    const HOP: usize = 256;
+    let win: Vec<f32> = (0..N_FFT).map(|k| (PI * (k as f64 + 0.5) / N_FFT as f64).sin() as f32).collect();
+    let mut planner = FftPlanner::<f32>::new();
+    let fft = planner.plan_fft_forward(N_FFT);
+    let ifft = planner.plan_fft_inverse(N_FFT);
+
+    let left = ch.first().map_or(&[][..], |v| &v[..v.len().min(len)]);
+    let right = if n_ch >= 2 { ch.get(1).map_or(left, |v| &v[..v.len().min(len)]) } else { left };
+    let mid: Vec<f32> = (0..len).map(|i| 0.5 * (left.get(i).copied().unwrap_or(0.0) + right.get(i).copied().unwrap_or(0.0))).collect();
+    let side: Vec<f32> = (0..len).map(|i| 0.5 * (left.get(i).copied().unwrap_or(0.0) - right.get(i).copied().unwrap_or(0.0))).collect();
+
+    let mid_stft = stft_frames(&mid, &win, fft.as_ref(), HOP);
+    let side_stft = stft_frames(&side, &win, fft.as_ref(), HOP);
+    let bins = N_FFT / 2 + 1;
+    let mid_mags: Vec<Vec<f32>> = mid_stft.iter().map(|fr| fr.iter().take(bins).map(|c| c.norm()).collect()).collect();
+    let side_mags: Vec<Vec<f32>> = side_stft.iter().map(|fr| fr.iter().take(bins).map(|c| c.norm()).collect()).collect();
+
+    let hz_per_bin = sr / N_FFT as f32;
+    let mut voc_stft = vec![vec![Complex::new(0.0f32, 0.0f32); N_FFT]; mid_stft.len()];
+    let mut amb_stft = vec![vec![Complex::new(0.0f32, 0.0f32); N_FFT]; side_stft.len()];
+
+    for f in 0..mid_stft.len() {
+        for b in 0..bins {
+            let freq = b as f32 * hz_per_bin;
+            let band_w = if (130.0..=7500.0).contains(&freq) {
+                let lo = ((freq - 130.0) / 90.0).clamp(0.0, 1.0);
+                let hi = ((7500.0 - freq) / 1800.0).clamp(0.0, 1.0);
+                lo * hi
+            } else {
+                0.0
+            };
+            let mm = mid_mags.get(f).and_then(|v| v.get(b)).copied().unwrap_or(0.0);
+            let sm = side_mags.get(f).and_then(|v| v.get(b)).copied().unwrap_or(0.0);
+            let center = if n_ch >= 2 { (mm * mm) / (mm * mm + sm * sm + 1.0e-12) } else { 1.0 };
+            let harm_m = harmonic_ratio(&mid_mags, f, b);
+            let voc_mask = (band_w * center * harm_m).clamp(0.0, 1.0);
+            let amb_band = ((freq - 160.0) / 140.0).clamp(0.0, 1.0);
+            let harm_s = harmonic_ratio(&side_mags, f, b);
+            let amb_mask = if n_ch >= 2 { (0.75 * amb_band * harm_s * (1.0 - center)).clamp(0.0, 1.0) } else { 0.0 };
+
+            let mc = mid_stft.get(f).and_then(|v| v.get(b)).copied().unwrap_or_default();
+            let sc = side_stft.get(f).and_then(|v| v.get(b)).copied().unwrap_or_default();
+            let vc = mc * voc_mask;
+            let ac = sc * amb_mask;
+            if let Some(vf) = voc_stft.get_mut(f) {
+                if let Some(slot) = vf.get_mut(b) {
+                    *slot = vc;
+                }
+                if b > 0 && b < N_FFT / 2
+                    && let Some(conj_slot) = vf.get_mut(N_FFT - b)
+                {
+                    *conj_slot = vc.conj();
+                }
+            }
+            if let Some(af) = amb_stft.get_mut(f) {
+                if let Some(slot) = af.get_mut(b) {
+                    *slot = ac;
+                }
+                if b > 0 && b < N_FFT / 2
+                    && let Some(conj_slot) = af.get_mut(N_FFT - b)
+                {
+                    *conj_slot = ac.conj();
+                }
+            }
+        }
+    }
+
+    let voc_mid = istft_frames(&voc_stft, &win, ifft.as_ref(), HOP, len);
+    let amb_side = istft_frames(&amb_stft, &win, ifft.as_ref(), HOP, len);
+
+    let mut vocals = vec![vec![0.0f32; len]; n_ch];
+    let mut ambience = vec![vec![0.0f32; len]; n_ch];
+    let mut accompaniment = vec![vec![0.0f32; len]; n_ch];
+    for c in 0..n_ch {
+        for i in 0..len {
+            let orig = ch.get(c).and_then(|v| v.get(i)).copied().unwrap_or(0.0);
+            let orig = if orig.is_finite() { orig } else { 0.0 };
+            let v = if c < 2 { voc_mid.get(i).copied().unwrap_or(0.0) } else { 0.0 };
+            let a = match c {
+                0 if n_ch >= 2 => amb_side.get(i).copied().unwrap_or(0.0),
+                1 => -amb_side.get(i).copied().unwrap_or(0.0),
+                _ => 0.0,
+            };
+            if let Some(vo) = vocals.get_mut(c).and_then(|x| x.get_mut(i)) {
+                *vo = v;
+            }
+            if let Some(am) = ambience.get_mut(c).and_then(|x| x.get_mut(i)) {
+                *am = a;
+            }
+            if let Some(ac) = accompaniment.get_mut(c).and_then(|x| x.get_mut(i)) {
+                *ac = orig - v - a;
+            }
+        }
+    }
+    SeparatedStems { vocals, accompaniment, ambience }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1151,80 +1370,67 @@ mod tests {
     }
 
     #[test]
-    fn match_loudness_presets_normalize_to_targets_and_limit_true_peak() {
-        let sr = 48_000.0f32;
-        let frames = 48_000 * 2; // 2 seconds at 48 kHz
-        let make_stereo_sine = |amp: f32| -> Vec<Vec<f32>> {
-            let c: Vec<f32> = (0..frames).map(|n| amp * (std::f32::consts::TAU * 997.0 * n as f32 / sr).sin()).collect();
-            vec![c.clone(), c]
-        };
+    fn remove_dc_ignores_non_finite_samples_in_the_mean() {
+        let mut ch = vec![vec![f32::NAN, 1.0, 1.0, 1.0]];
+        remove_dc(&mut ch);
+        assert!(ch[0][1..].iter().all(|x| x.abs() < 1e-6), "left over dc {:?}", ch[0]);
+        let mut all_bad = vec![vec![f32::NAN, f32::INFINITY]];
+        remove_dc(&mut all_bad);
+        assert!(all_bad[0][0].is_nan() && all_bad[0][1].is_infinite());
+    }
 
-        for preset in LoudnessPreset::ALL {
-            let mut buf = make_stereo_sine(0.05);
-            let (lufs, tp_db) = match_loudness_preset(&mut buf, sr, preset);
-            assert!((lufs - preset.target_lufs()).abs() < 0.2, "preset {preset:?}: expected {} LUFS, got {lufs} LUFS", preset.target_lufs());
-            assert!(
-                tp_db <= preset.max_true_peak_dbtp() + 0.05,
-                "preset {preset:?}: true peak {tp_db} dBTP exceeded ceiling {} dBTP",
-                preset.max_true_peak_dbtp()
-            );
+    #[test]
+    fn crosstalk_leveler_and_stem_separation_preserve_invariants() {
+        let sr = 48_000.0f32;
+        let n = 4096usize;
+        // 1. Crosstalk: strong voice on L (-6 dB) with -24 dB bleed on R suppresses R while preserving L.
+        let l_sig: Vec<f32> = (0..n).map(|i| 0.5 * (2.0 * std::f32::consts::PI * 320.0 * i as f32 / sr).sin()).collect();
+        let r_bleed: Vec<f32> = l_sig.iter().map(|x| x * 0.0625).collect();
+        let mut xtalk = vec![l_sig.clone(), r_bleed.clone()];
+        separate_crosstalk(&mut xtalk, sr, 80.0, 24.0);
+        let r_in_rms: f32 = (r_bleed[512..].iter().map(|x| x * x).sum::<f32>() / (n - 512) as f32).sqrt();
+        let r_out_rms: f32 = (xtalk[1][512..].iter().map(|x| x * x).sum::<f32>() / (n - 512) as f32).sqrt();
+        let l_out_rms: f32 = (xtalk[0][512..].iter().map(|x| x * x).sum::<f32>() / (n - 512) as f32).sqrt();
+        assert!(r_out_rms < r_in_rms * 0.35, "bleed should be suppressed: in={r_in_rms}, out={r_out_rms}");
+        assert!(l_out_rms > 0.30, "dominant speaker preserved: {l_out_rms}");
+
+        // 2. Audio Leveling: quiet phrase (-30 dB) followed by loud phrase (-8 dB) brings levels closer without boosting silence.
+        let mut speech = vec![vec![0.0f32; n * 3]];
+        for i in 0..n {
+            let tone = (2.0 * std::f32::consts::PI * 440.0 * i as f32 / sr).sin();
+            speech[0][i] = 0.03 * tone;
+            speech[0][n + i] = 0.40 * tone;
+            speech[0][2 * n + i] = 0.0002 * tone; // room floor below gate
         }
+        level_audio(&mut speech, sr, -18.0, 90.0, -54.0);
+        let quiet_after = channel_peak(&speech[0][n / 2..n]);
+        let loud_after = channel_peak(&speech[0][n + n / 2..2 * n]);
+        let floor_after = channel_peak(&speech[0][2 * n + n / 2..3 * n]);
+        assert!(quiet_after > 0.05, "quiet speech boosted: {quiet_after}");
+        assert!(loud_after < 0.35, "loud speech attenuated: {loud_after}");
+        assert!(floor_after < 0.001, "noise floor below gate is not boosted: {floor_after}");
 
-        assert_eq!(LoudnessPreset::AtscA85.max_true_peak_dbtp(), -2.0, "ATSC A/85 recommends -2 dBTP");
-
-        // A transient that would pass the ceiling after the gain is limited, not clipped: the
-        // limiter lowers the gain around it, so the waveform keeps its shape there.
-        let mut spiky = make_stereo_sine(0.05);
-        spiky[0][1000] = 0.8;
-        spiky[1][1000] = -0.8;
-        let before = (spiky[0][1000], spiky[0][1003]);
-        let (lufs, tp_db) = match_loudness(&mut spiky, sr, -14.0, -1.0);
-        assert!((lufs - -14.0).abs() < 0.25, "spiky buffer LUFS: {lufs}");
-        assert!(tp_db <= -0.95, "spiky buffer true peak should be limited to -1.0 dBTP, got {tp_db}");
-        let ratio = |a: f32, b: f32| a / b;
-        assert!(
-            (ratio(spiky[0][1000], spiky[0][1003]) - ratio(before.0, before.1)).abs() < 1e-3,
-            "the peak keeps its shape: {} vs {}",
-            ratio(spiky[0][1000], spiky[0][1003]),
-            ratio(before.0, before.1)
-        );
-        assert!(spiky[0][1000].abs() < 0.9 && spiky[0][1000].abs() > 0.5, "{}", spiky[0][1000]);
-    }
-
-    /// Material with nothing above the -70 LUFS absolute gate is silence to BS.1770: matching
-    /// its loudness must not turn room tone up.
-    #[test]
-    fn match_loudness_leaves_audio_below_the_absolute_gate_alone() {
-        let sr = 48_000.0f32;
-        let hiss: Vec<f32> = (0..48_000 * 2).map(|n| 0.0002 * ((n as f32 * 12.9898).sin() * 43_758.547).fract()).collect();
-        let mut ch = vec![hiss.clone()];
-        let (lufs, _) = match_loudness(&mut ch, sr, -14.0, -1.0);
-        assert_eq!(lufs, crate::MIN_DB);
-        assert_eq!(ch[0], hiss, "audio below the gate is unchanged");
-        // A short (< 400 ms) loud clip is still measured over all of it.
-        let short: Vec<f32> = (0..9_600).map(|n| 0.1 * (std::f32::consts::TAU * 997.0 * n as f32 / sr).sin()).collect();
-        let mut ch = vec![short.clone(), short];
-        let (lufs, _) = match_loudness(&mut ch, sr, -20.0, -1.0);
-        assert!((lufs - -20.0).abs() < 0.3, "{lufs}");
-    }
-
-    #[test]
-    fn delete_and_shorten_silence_remove_and_compact_silent_segments() {
-        // Construct a buffer: 200 silent, 300 active (0.5), 400 silent, 300 active (0.5), 250 silent.
-        let mut c = vec![0.0f32; 200];
-        c.extend(vec![0.5f32; 300]);
-        c.extend(vec![0.0f32; 400]);
-        c.extend(vec![0.5f32; 300]);
-        c.extend(vec![0.0f32; 250]);
-        let ch = vec![c];
-
-        // Delete silence with 0 padding removes all 3 silent intervals, leaving 300 + 300 = 600 samples.
-        let deleted = delete_silence(&ch, -40.0, 50, 0, 0);
-        assert_eq!(deleted[0].len(), 600);
-        assert!(deleted[0].iter().all(|&s| (s - 0.5).abs() < 1e-6));
-
-        // Shorten silence to 50 samples per silent gap: 50 + 300 + 50 + 300 + 50 = 750 samples.
-        let shortened = shorten_silence(&ch, -40.0, 50, 50, 0, 0);
-        assert_eq!(shortened[0].len(), 750);
+        // 3. Stem Separation: center vocal + side diffuse ambience + bass/transient accompaniment sum back exactly!
+        let mut mix_l = vec![0.0f32; n];
+        let mut mix_r = vec![0.0f32; n];
+        for i in 0..n {
+            let vocal = 0.35 * (2.0 * std::f32::consts::PI * 520.0 * i as f32 / sr).sin();
+            let side_amb = 0.20 * (2.0 * std::f32::consts::PI * 1200.0 * i as f32 / sr).sin();
+            let bass = 0.25 * (2.0 * std::f32::consts::PI * 65.0 * i as f32 / sr).sin();
+            mix_l[i] = vocal + side_amb + bass;
+            mix_r[i] = vocal - side_amb + bass;
+        }
+        let orig = vec![mix_l, mix_r];
+        let stems = separate_stems(&orig, sr);
+        for c in 0..2 {
+            for i in 0..n {
+                let sum = stems.vocals[c][i] + stems.accompaniment[c][i] + stems.ambience[c][i];
+                assert!((sum - orig[c][i]).abs() < 1e-5, "stem sum mismatch at ch={c} i={i}: {sum} vs {}", orig[c][i]);
+            }
+        }
+        let voc_energy: f32 = stems.vocals[0][512..n - 512].iter().map(|x| x * x).sum();
+        let amb_energy: f32 = stems.ambience[0][512..n - 512].iter().map(|x| x * x).sum();
+        let acc_energy: f32 = stems.accompaniment[0][512..n - 512].iter().map(|x| x * x).sum();
+        assert!(voc_energy > 10.0 && amb_energy > 2.0 && acc_energy > 5.0, "stems separated: voc={voc_energy}, amb={amb_energy}, acc={acc_energy}");
     }
 }

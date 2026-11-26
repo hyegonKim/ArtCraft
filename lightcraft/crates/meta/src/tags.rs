@@ -4,7 +4,7 @@
 //! binary blobs are summarised by size; of a maker note only the lens name is listed (the
 //! Panasonic one, as Panasonic writes no Exif LensModel).
 
-use lightcraft_tiff::{Ifd, Tiff, Value};
+use craft_tiff::{Ifd, Tiff, Value};
 
 /// One metadata row.
 #[derive(Clone, Debug, PartialEq)]
@@ -156,7 +156,12 @@ fn rational(n: f64, d: f64) -> String {
 }
 
 fn list<T: ToString>(v: &[T]) -> String {
-    let shown: Vec<String> = v.iter().take(16).map(|x| x.to_string()).collect();
+    list_with(v, T::to_string)
+}
+
+/// The first 16 values of `v` written by `f`, and how many there are when that's not all of them.
+fn list_with<T>(v: &[T], f: impl Fn(&T) -> String) -> String {
+    let shown: Vec<String> = v.iter().take(16).map(f).collect();
     if v.len() > 16 { format!("{} … ({} values)", shown.join(", "), v.len()) } else { shown.join(", ") }
 }
 
@@ -249,8 +254,8 @@ fn value_text(group: &str, tag: u16, v: &Value) -> String {
         }
         Value::Rational(a) if tag == 0x829d && group != "GPS" && a.len() == 1 => format!("f/{}", rational(a[0].0 as f64, a[0].1 as f64)),
         Value::Rational(a) if tag == 0x920a && group != "GPS" && a.len() == 1 => format!("{} mm", rational(a[0].0 as f64, a[0].1 as f64)),
-        Value::Rational(a) => a.iter().map(|(n, d)| rational(*n as f64, *d as f64)).collect::<Vec<_>>().join(", "),
-        Value::SRational(a) => a.iter().map(|(n, d)| rational(*n as f64, *d as f64)).collect::<Vec<_>>().join(", "),
+        Value::Rational(a) => list_with(a, |(n, d)| rational(*n as f64, *d as f64)),
+        Value::SRational(a) => list_with(a, |(n, d)| rational(*n as f64, *d as f64)),
         Value::Byte(b) | Value::Undefined(b) => {
             // version tags and short printable values read as text
             let printable = b.len() <= 64 && b.iter().all(|c| c.is_ascii_graphic() || *c == b' ' || *c == 0);
@@ -313,7 +318,7 @@ fn nikon_nef_compression(tiff: &Tiff, bytes: &[u8]) -> Option<&'static str> {
         return None;
     }
     let e = ifd0.exif.as_ref()?.get(0x927c)?;
-    let mn = lightcraft_tiff::makernote::parse_makernote(bytes, e.offset, e.count() as u64, tiff.order, &make)?;
+    let mn = craft_tiff::makernote::parse_makernote(bytes, e.offset, e.count() as u64, tiff.order, &make)?;
     nef_compression(mn.ifd.u32(0x0093)?)
 }
 
@@ -385,6 +390,18 @@ mod tests {
         assert_eq!(rational(1000001.0, 100000.0), "10");
         assert_eq!(rational(1.0, 3.0), "0.3333");
         assert_eq!(rational(5.0, 2.0), "2.5");
+    }
+
+    /// Rational lists were joined whole, unlike every other list (#2579): a tag of millions of
+    /// fractions became a string as long in the tag panel.
+    #[test]
+    fn rational_lists_show_sixteen_values_like_other_lists() {
+        let first16 = (1..=16).map(|i| i.to_string()).collect::<Vec<_>>().join(", ");
+        let many: Vec<(u32, u32)> = (1..=1000).map(|i| (i, 1)).collect();
+        assert_eq!(value_text("EXIF", 0x9999, &Value::Rational(many)), format!("{first16} … (1000 values)"));
+        let signed: Vec<(i32, i32)> = (1..=1000).map(|i| (-i, 1)).collect();
+        assert!(value_text("EXIF", 0x9999, &Value::SRational(signed)).ends_with("-16 … (1000 values)"));
+        assert_eq!(value_text("EXIF", 0x9999, &Value::Rational(vec![(1, 2), (3, 4)])), "0.5, 0.75");
     }
 
     #[test]
@@ -499,7 +516,7 @@ mod tests {
         let rw2 = crate::exif::tests::panasonic_rw2("LUMIX S 85/F1.8");
         assert_eq!(lens(&file_tag_rows(&rw2)), ["LUMIX S 85/F1.8"]);
         // a JPEG: the note is in its own Exif
-        let exif = crate::exif::tests::panasonic_exif(lightcraft_tiff::ByteOrder::Big, Some("LUMIX G 25/F1.7"), None);
+        let exif = crate::exif::tests::panasonic_exif(craft_tiff::ByteOrder::Big, Some("LUMIX G 25/F1.7"), None);
         let mut jpg = vec![0xff, 0xd8, 0xff, 0xe1];
         jpg.extend_from_slice(&((exif.len() + 8) as u16).to_be_bytes());
         jpg.extend(b"Exif\0\0");

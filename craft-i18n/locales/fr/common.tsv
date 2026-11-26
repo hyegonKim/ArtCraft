@@ -1282,12 +1282,22 @@ theme	Appearance	Apparence
 	Zoom Out	Zoom arrière
 	Zoom out	Zoom arrière
 	Zoom Tool	Outil Zoom
+unit	{n} B	{n} o
+@plural	{n} byte|{n} bytes	{n} octet|{n} octets
 @plural	{n} commit|{n} commits	{n} commit|{n} commits
 	{n} files	{n} fichiers
+unit	{n} GB	{n} Go
+unit	{n} GiB	{n} Gio
 	{n} h ago	il y a {n} h
 @plural	{n} item|{n} items	{n} élément|{n} éléments
+unit	{n} KB	{n} Ko
+unit	{n} KiB	{n} Kio
 @plural	{n} Layer|{n} Layers	{n} calque|{n} calques
+unit	{n} MB	{n} Mo
+unit	{n} MiB	{n} Mio
 	{n} min ago	il y a {n} min
 @plural	{n} step|{n} steps	{n} étape|{n} étapes
+unit	{n} TB	{n} To
+unit	{n} TiB	{n} Tio
 	−Bin	−Bin
 	● Recording	● Enregistrement

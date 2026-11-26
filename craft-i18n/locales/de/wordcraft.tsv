@@ -179,13 +179,12 @@
 	Automatically hyphenate document	Silbentrennung im Dokument automatisch durchführen
 	Automatically Update Document Styles	Formatvorlagen des Dokuments automatisch aktualisieren
 	Automatically update document styles	Formatvorlagen des Dokuments automatisch aktualisieren
-	AutoSave	AutoSpeichern
 	AutoSave documents you have saved in WordCraft	In WordCraft gespeicherte Dokumente automatisch speichern
-	AutoSave failed: {error}. Save the document to turn AutoSave back on.	AutoSpeichern fehlgeschlagen: {error}. Speichern Sie das Dokument, um AutoSpeichern wieder zu aktivieren.
-	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	AutoSpeichern ist im Browser nicht verfügbar: Es kann nicht in Ihre Dateien schreiben. „Speichern“ lädt eine Kopie herunter.
-	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	AutoSpeichern behält nur .docx-, .odt- und .rtf-Dateien; {name} kann nicht die gesamte Formatierung bewahren. Speichern Sie als .docx, um AutoSpeichern zu aktivieren.
-	AutoSave saves every change to the file (needs a saved document)	AutoSpeichern speichert jede Änderung in der Datei (erfordert ein gespeichertes Dokument)
-	AutoSave writes your changes to the file a moment after you stop typing.	AutoSpeichern schreibt Ihre Änderungen kurz nach dem Ende der Eingabe in die Datei.
+	AutoSave failed: {error}. Save the document to turn AutoSave back on.	Automatisches Speichern fehlgeschlagen: {error}. Speichern Sie das Dokument, um automatisches Speichern wieder zu aktivieren.
+	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	Automatisches Speichern ist im Browser nicht verfügbar: Es kann nicht in Ihre Dateien schreiben. „Speichern“ lädt eine Kopie herunter.
+	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	Automatisches Speichern unterstützt nur .docx-, .odt- und .rtf-Dateien; {name} kann nicht die gesamte Formatierung bewahren. Speichern Sie als .docx, um automatisches Speichern zu aktivieren.
+	AutoSave saves every change to the file (needs a saved document)	Automatisches Speichern sichert jede Änderung in der Datei (erfordert ein gespeichertes Dokument)
+	AutoSave writes your changes to the file a moment after you stop typing.	Automatisches Speichern schreibt Ihre Änderungen kurz nach dem Ende der Eingabe in die Datei.
 	AutoText	Textbausteine
 	Balloons	Sprechblasen
 	Banded Columns	Gestreifte Spalten
@@ -521,7 +520,7 @@
 	Document Start	Dokumentanfang
 	Document template:	Dokumentvorlage:
 	Document Text	Dokumenttext
-	Document1	Document1
+	Document1	Dokument1
 	Document\nPreferences	Dokument-\neinstellungen
 	Documents you open will show up here.	Geöffnete Dokumente werden hier angezeigt.
 	Does not contain	Enthält nicht
@@ -889,7 +888,7 @@
 	Interface theme:	Oberflächendesign:
 	Interface\nTheme	Oberflächen-\ndesign
 	Internet addresses as links	Internetadressen als Links
-	Intersection	Intersection
+	Intersection	Schnittmenge
 	Ionosphere	Ionosphäre
 	Is blank	Ist leer
 	Is not blank	Ist nicht leer
@@ -943,7 +942,8 @@
 	Less than or equal	Kleiner oder gleich
 	Letter	Brief
 	Letter headings	Buchstabenüberschriften
-	Letters	Buchstaben
+	Letter template	Briefvorlage
+	Letters	Briefe
 	Level {n}	Ebene {n}
 	Levels:	Ebenen:
 	Light Variations	Helle Varianten
@@ -1441,6 +1441,14 @@
 	Remove Table of Contents	Inhaltsverzeichnis entfernen
 	Remove the control once edited	Steuerelement nach der Bearbeitung entfernen
 	Remove Watermark	Wasserzeichen entfernen
+	No watermark	Kein Wasserzeichen
+	Picture watermark	Bildwasserzeichen
+	Text watermark	Textwasserzeichen
+	Select Picture…	Bild auswählen…
+	Washout	Ausgewaschen
+	Semitransparent	Halbtransparent
+	Transparency:	Transparenz:
+	Select a picture first.	Wählen Sie zuerst ein Bild aus.
 	Rename Document	Dokument umbenennen
 	Rename Style	Formatvorlage umbenennen
 	Reopen	Erneut öffnen
@@ -1515,8 +1523,8 @@
 	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	Eine Kopie in einem anderen Format speichern. Gedruckt wird über ein PDF, das sich aus jedem Betrachter drucken lässt.
 	Save as Word Template…	Als Word-Vorlage speichern…
 	Save documents	Dokumente speichern
-	Save the document to turn on AutoSave	Speichern Sie das Dokument, um AutoSpeichern zu aktivieren
-	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Speichern Sie das Dokument, um AutoSpeichern zu aktivieren (eine nur geöffnete Datei wird erst beim Speichern neu geschrieben)
+	Save the document to turn on AutoSave	Speichern Sie das Dokument, um automatisches Speichern zu aktivieren
+	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Speichern Sie das Dokument, um automatisches Speichern zu aktivieren (eine nur geöffnete Datei wird erst beim Speichern neu geschrieben)
 	Save these pages as PDF…	Diese Seiten als PDF speichern…
 	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	Speichert eine .dotx-Vorlage in Ihrem Vorlagenordner. Sie erscheint unter Datei › Neu bei Persönlich.
 	Saving {name} was cancelled, so it is still open and nothing was lost.	Das Speichern von {name} wurde abgebrochen. Das Dokument ist weiterhin geöffnet und nichts ist verloren gegangen.
@@ -1524,7 +1532,7 @@
 	Scale Drawing	Zeichnung skalieren
 	Scatter	Punkt (XY)
 	Script	Index
-	Scripts	Scripts
+	Scripts	Schriftvarianten
 	Scroll ribbon left	Menüband nach links scrollen
 	Scroll ribbon right	Menüband nach rechts scrollen
 	Search Commands	Befehle suchen
@@ -1853,6 +1861,8 @@
 	Thick	Stark
 	this chart was made in another program: WordCraft shows it but can't edit it	dieses Diagramm wurde in einem anderen Programm erstellt: WordCraft zeigt es an, kann es aber nicht bearbeiten
 	This document	Dieses Dokument
+	This document has no bookmarks.	Dieses Dokument hat keine Textmarken.
+	This document only?	Nur dieses Dokument?
 	This field has no options.	Dieses Feld hat keine Optionen.
 	This folder can't be read: {error}	Dieser Ordner kann nicht gelesen werden: {error}
 	This font has no characters to show.	Diese Schriftart hat keine Zeichen zum Anzeigen.
@@ -1928,6 +1938,7 @@
 	Undo {action}	{action} rückgängig
 	Undo {n} Actions	{n} Aktionen rückgängig
 	Unformatted Text	Unformatierter Text
+	Union	Vereinigung
 	Unlink Fields	Feldverknüpfungen aufheben
 	Unlink\nCitations	Verknüpfung der\nZitate lösen
 	Unlock Fields	Felder entsperren
@@ -2004,6 +2015,9 @@
 	Write & Insert Fields	Felder schreiben und einfügen
 	Write a reply	Antwort schreiben
 	Year	Jahr
+	You haven't saved in a while, and AutoSave is off. Save now?	Sie haben schon länger nicht gespeichert, und automatisches Speichern ist deaktiviert. Jetzt speichern?
+	You started a list. Press Enter twice to end it, or Backspace at the start of an item to turn it back into text.	Sie haben eine Liste begonnen. Drücken Sie zweimal die Eingabetaste, um sie zu beenden, oder die Rücktaste am Anfang eines Eintrags, um ihn wieder in Text zu verwandeln.
+	Your document is now the most saved document in history.	Ihr Dokument ist jetzt das meistgespeicherte Dokument der Geschichte.
 	Your system doesn't report an animation setting, so animation effects stay on.	Ihr System meldet keine Animationseinstellung, daher bleiben Animationseffekte aktiviert.
 	Your system has animation effects turned off.	Auf Ihrem System sind Animationseffekte deaktiviert.
 	Your system has animation effects turned on.	Auf Ihrem System sind Animationseffekte aktiviert.
@@ -2040,3 +2054,143 @@
 	{width} × {height} pixels	{width} × {height} Pixel
 	{words} words	Wörter: {words}
 	“{text}” ({row}, {series}) isn't a number.	„{text}“ ({row}, {series}) ist keine Zahl.
+	tOGGLE cASE	gROSS-/kLEINSCHREIBUNG UMKEHREN
+	Normal	Standard
+	Emphasis	Betonung
+	Intense Emphasis	Intensive Betonung
+	No Spacing	Kein Abstand
+	Strong	Kräftig
+	Subtle Emphasis	Dezente Betonung
+	Subtle Reference	Dezenter Verweis
+	TOC {n}	Inhaltsverzeichnis {n}
+	Insert reference to:	Verweis einfügen auf:
+	Nothing of this type in the document.	Keine Elemente dieses Typs im Dokument vorhanden.
+	Above/below	Oben/Unten
+	East	Ost
+	Bright Green	Hellgrün
+	Turquoise	Türkis
+	Dark Blue	Dunkelblau
+	Teal	Petrol
+	Dark Red	Dunkelrot
+	Dark Yellow	Dunkelgelb
+	Gray-50%	Grau-50%
+	Gray-25%	Grau-25%
+	Add a language…	Sprache hinzufügen…
+	Add a language	Sprache hinzufügen
+	Your languages	Ihre Sprachen
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Englisch, die Sprachen dieses Dokuments und jedes installierte Sprachpaket. Sprachpakete bringen Rechtschreibwörterbücher und Silbentrennung mit.
+	Set as default	Als Standard festlegen
+	New blank documents are written in this language	Neue leere Dokumente werden in dieser Sprache geschrieben
+	{language} (default)	{language} (Standard)
+	Built in	Integriert
+	Your own dictionary	Ihr eigenes Wörterbuch
+	System dictionary	Systemwörterbuch
+	Not available yet	Noch nicht verfügbar
+	Grammar built in	Grammatik integriert
+	Install spelling ({size})	Rechtschreibung installieren ({size})
+	Its dictionary couldn't be read: {reason}	Das Wörterbuch konnte nicht gelesen werden: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Das Herunterladen ist ausgeschaltet. Ein Klick auf „Sprache hinzufügen…“ oder „Installieren“ schaltet es ein: WordCraft lädt dann Sprachpakete und Schriftarten von GitHub herunter.
+	Search:	Suchen:
+	Dutch, Nederlands or nl	Niederländisch, Nederlands oder nl
+	No languages to show yet.	Noch keine Sprachen anzuzeigen.
+	No language matches your search.	Keine Sprache entspricht Ihrer Suche.
+	An installed Language pack is used after this folder.	Ein installiertes Sprachpaket wird nach diesem Ordner verwendet.
+	Dictionary files	Wörterbuchdateien
+	Possible spelling mistake	Möglicher Rechtschreibfehler
+	Gets the list of Language packs, then this language's pack if there is one.	Holt die Liste der Sprachpakete, dann das Paket dieser Sprache, falls es eines gibt.
+	Afrikaans	Afrikaans
+	Belarusian	Belarussisch
+	Bulgarian	Bulgarisch
+	Bosnian	Bosnisch
+	Catalan	Katalanisch
+	Catalan (Valencian)	Katalanisch (Valencianisch)
+	Welsh	Walisisch
+	Esperanto	Esperanto
+	Persian	Persisch
+	Irish	Irisch
+	Galician	Galicisch
+	Hungarian	Ungarisch
+	Armenian	Armenisch
+	Icelandic	Isländisch
+	Georgian	Georgisch
+	Lithuanian	Litauisch
+	Latvian	Lettisch
+	Macedonian	Mazedonisch
+	Norwegian (Nynorsk)	Norwegisch (Nynorsk)
+	Slovak	Slowakisch
+	Slovenian	Slowenisch
+	Albanian	Albanisch
+	Swahili	Swahili
+	Tamil	Tamil
+	Thai	Thai
+	Vietnamese	Vietnamesisch
+	Set as Default Language	Als Standardsprache festlegen
+	U.A.E.	Vereinigte Arabische Emirate
+	Angola	Angola
+	Argentina	Argentinien
+	Austria	Österreich
+	Australia	Australien
+	Bosnia and Herzegovina	Bosnien und Herzegowina
+	Belgium	Belgien
+	Bolivia	Bolivien
+	Brazil	Brasilien
+	Belarus	Belarus
+	Canada	Kanada
+	Switzerland	Schweiz
+	Chile	Chile
+	China	China
+	Colombia	Kolumbien
+	Costa Rica	Costa Rica
+	Cuba	Kuba
+	Cabo Verde	Kap Verde
+	Cyprus	Zypern
+	Germany	Deutschland
+	Dominican Republic	Dominikanische Republik
+	Ecuador	Ecuador
+	Egypt	Ägypten
+	Spain	Spanien
+	Finland	Finnland
+	France	Frankreich
+	United Kingdom	Vereinigtes Königreich
+	Equatorial Guinea	Äquatorialguinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Sonderverwaltungsregion Hongkong
+	Honduras	Honduras
+	Ireland	Irland
+	India	Indien
+	Iraq	Irak
+	Italy	Italien
+	Jamaica	Jamaika
+	Jordan	Jordanien
+	Kuwait	Kuwait
+	Kazakhstan	Kasachstan
+	Lebanon	Libanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburg
+	Morocco	Marokko
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Sonderverwaltungsregion Macau
+	Mexico	Mexiko
+	Malaysia	Malaysia
+	Mozambique	Mosambik
+	Nicaragua	Nicaragua
+	Netherlands	Niederlande
+	New Zealand	Neuseeland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Philippinen
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Katar
+	Russia	Russland
+	Singapore	Singapur
+	El Salvador	El Salvador
+	Syria	Syrien
+	Taiwan	Taiwan
+	Ukraine	Ukraine
+	United States	Vereinigte Staaten
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Südafrika

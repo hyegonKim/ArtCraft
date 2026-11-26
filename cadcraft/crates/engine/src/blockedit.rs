@@ -144,6 +144,11 @@ impl BlockEdit {
         }
         let host = &self.host.doc;
         let mut d = editor.clone();
+        // When saving a copy, the source keeps its last saved definition. The editor's own
+        // table entry can still be the one from before BSAVE; the copy gets the edited data.
+        if !name.eq_ignore_ascii_case(&self.name) {
+            restore_saved_definition(&mut d, host, &self.name);
+        }
         d.model = host.model.clone();
         d.layouts = host.layouts.clone();
         d.groups = host.groups.clone();
@@ -166,8 +171,57 @@ impl BlockEdit {
         b.base.x = self.base.x;
         b.base.y = self.base.y;
         b.entities = entities;
-        d.blocks.insert(key, Arc::new(b));
+        d.blocks.insert(key.clone(), Arc::new(b));
+        // Restore the host drawing's own *Model_Space graph (clearing the editor's scratch copy),
+        // then write the editor's *Model_Space dynamic block graph onto the target block.
+        cadcraft_doc::dynblock::author::copy_block_graph(host, "*Model_Space", &mut d, "*Model_Space", Vec2::ZERO);
+        cadcraft_doc::dynblock::author::copy_block_graph(editor, "*Model_Space", &mut d, &key, self.base);
+        cadcraft_doc::dynblock::author::finalize_dynamic_block(&mut d, &key);
+        refresh_dynamic_references(&mut d, &key);
         Ok(d)
+    }
+}
+
+/// Re-evaluate existing dynamic block references to `block_name` whose geometry lives in an
+/// anonymous `*U…` copy so geometry and action edits saved in `BEDIT` take effect immediately.
+fn refresh_dynamic_references(d: &mut Drawing, block_name: &str) {
+    let inserts: Vec<cadcraft_doc::Handle> = d
+        .model
+        .iter()
+        .chain(d.layouts.iter().flat_map(|l| l.entities.iter()))
+        .filter_map(|e| match &e.kind {
+            EntityKind::Insert(ins) if ins.block.starts_with('*') => Some(e.handle),
+            _ => None,
+        })
+        .collect();
+    for h in inserts {
+        let Some(r) = cadcraft_doc::dynblock::reference(d, h) else { continue };
+        if !r.definition.eq_ignore_ascii_case(block_name) {
+            continue;
+        }
+        let saved_props = cadcraft_doc::dynblock::custom_properties(d, h)
+            .map(|(_, ps)| ps.into_iter().filter(|p| p.editable).map(|p| (p.name, p.value)).collect::<Vec<_>>())
+            .unwrap_or_default();
+        let _ = d.modify_entity(h, |e| {
+            if let EntityKind::Insert(ins) = &mut e.kind {
+                ins.block = block_name.to_string();
+            }
+        });
+        for (prop_name, prop_val) in saved_props {
+            let _ = cadcraft_doc::dynblock::set_property(d, h, &prop_name, &prop_val);
+        }
+    }
+}
+
+/// Keep the source block's saved objects and metadata when the edited objects are saved as a copy.
+/// Without a saved source, drop the empty definition an editor description may have created.
+fn restore_saved_definition(d: &mut Drawing, host: &Drawing, name: &str) {
+    match host.block(name) {
+        Some(h) => {
+            let key = d.blocks.keys().find(|key| key.eq_ignore_ascii_case(name)).cloned().unwrap_or_else(|| h.name.clone());
+            d.blocks.insert(key, h.clone());
+        }
+        None => d.blocks.retain(|k, b| !(k.eq_ignore_ascii_case(name) && b.entities.is_empty())),
     }
 }
 
@@ -236,6 +290,7 @@ impl DocState {
         let base = block.base.xy();
         let mut d = (*self.doc).clone();
         d.model = if base == Vec2::ZERO { block.entities.clone() } else { moved(&block.entities, &Mat3::translate(-base)) };
+        cadcraft_doc::dynblock::author::copy_block_graph(&self.doc, &block.name, &mut d, "*Model_Space", -base);
         // The drawing's own groups, constraints and hidden objects stay with it.
         d.groups.clear();
         d.constraints.clear();
@@ -248,11 +303,12 @@ impl DocState {
     }
 
     /// Start editing in the Block Editor `be` (the drawing is already the editor's): a fresh
-    /// undo history, nothing selected, model space.
+    /// undo history, nothing selected, nothing for OOPS, model space.
     fn enter_block_editor(&mut self, be: BlockEdit) {
         self.undo.clear();
         self.redo.clear();
         self.undo_ctl = Default::default();
+        self.erased = Default::default();
         self.selection.clear();
         self.previous_selection.clear();
         self.space = cadcraft_doc::Space::Model;
@@ -272,6 +328,24 @@ impl DocState {
         let d = be.compose(&self.doc, &name)?;
         let original = d.block(&name).map(|b| b.entities.clone()).unwrap_or_default();
         let name = d.block(&name).map(|b| b.name.clone()).unwrap_or(name);
+        // When BSAVEAS saves the block under another name, the editor's drawing and each undo and
+        // redo step get the block as saved and the edited block as the drawing has it, so a later
+        // save and the description shown start from them after an undo too.
+        if !name.eq_ignore_ascii_case(&be.name)
+            && let Some(b) = d.block(&name).cloned()
+        {
+            let was = be.name.clone();
+            let reconcile = |doc: &mut Arc<Drawing>| {
+                let editor = Arc::make_mut(doc);
+                restore_saved_definition(editor, &d, &was);
+                editor.blocks.retain(|k, _| !k.eq_ignore_ascii_case(&name));
+                editor.blocks.insert(name.clone(), b.clone());
+            };
+            reconcile(&mut self.doc);
+            for step in self.undo.iter_mut().chain(self.redo.iter_mut()) {
+                reconcile(&mut step.doc);
+            }
+        }
         let editor = self.doc.clone();
         let Some(be) = &mut self.block_edit else { return Ok(()) };
         let before = be.host.doc.clone();
@@ -300,6 +374,7 @@ impl DocState {
         self.undo = host.undo;
         self.redo = host.redo;
         self.undo_ctl = host.undo_ctl;
+        self.erased = host.erased;
         // The drawing comes back with nothing selected; Previous is what was selected before.
         self.selection.clear();
         self.previous_selection = if host.selection.is_empty() { host.previous_selection } else { host.selection };

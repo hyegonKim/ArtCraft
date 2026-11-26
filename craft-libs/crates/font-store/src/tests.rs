@@ -192,7 +192,11 @@ fn lookups_match_exactly_and_refuse_near_matches() {
     assert_eq!(name("Test Var", "Light").unwrap(), "TestVar[wght].ttf");
     assert!(matches!(name("Test Var", "Thin"), Err(Unavailable::NoStyle { .. })));
     assert!(matches!(name("Test Var", "Bold Italic"), Err(Unavailable::NoStyle { .. })));
+}
 
+#[test]
+fn postscript_lookups_match_exactly() {
+    let index = index_of(&fixture().index).unwrap();
     assert_eq!(index.find_postscript("TestSans-Bold").unwrap().family.family, "Test Sans");
     assert_eq!(index.find_postscript("TestVar-SemiBold").unwrap().file.file_name(), "TestVar[wght].ttf");
     assert!(matches!(index.find_postscript("testsans-bold"), Err(Unavailable::NoPostScript(_))));
@@ -200,7 +204,30 @@ fn lookups_match_exactly_and_refuse_near_matches() {
     let Err(Unavailable::Ambiguous { families, .. }) = index.find_postscript("Shared-Regular") else { panic!("not ambiguous") };
     assert_eq!(families, ["Shared One", "Shared Two"]);
     assert!(index.family("Shared Two").unwrap().face_by_postscript("Shared-Regular").is_some());
+}
 
+#[test]
+fn many_files_sharing_a_postscript_name_index_in_linear_time() {
+    let mut v = fixture().index;
+    let bytes = font("Many", "Regular", 400);
+    for f in 0..40 {
+        let files: Vec<serde_json::Value> = (0..2500)
+            .map(|i| file_entry(&format!("ofl/many{f}/Many-{i}.ttf"), &bytes, "normal", 400, json!([]), &["Many-Regular", "Many-Regular"]))
+            .collect();
+        let family = json!({"family": format!("Many {f}"), "license": "OFL", "license_path": null, "files": files});
+        v["families"].as_array_mut().unwrap().push(family);
+    }
+    let index = index_of(&v).unwrap();
+    let Err(Unavailable::Ambiguous { families, .. }) = index.find_postscript("Many-Regular") else { panic!("not ambiguous") };
+    assert_eq!(families.len(), 40);
+    assert_eq!(families[0], "Many 0");
+    let first = index.family("Many 7").unwrap();
+    assert_eq!(first.face_by_postscript("Many-Regular").unwrap().file_name(), "Many-0.ttf");
+}
+
+#[test]
+fn styles_parse_and_urls_pin_the_commit() {
+    let index = index_of(&fixture().index).unwrap();
     assert_eq!(parse_style("Extra Bold Italic"), Some((800, true)));
     assert_eq!(parse_style("semi-bold"), Some((600, false)));
     assert_eq!(parse_style("Condensed Bold"), None);

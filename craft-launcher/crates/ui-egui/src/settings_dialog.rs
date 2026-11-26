@@ -136,7 +136,7 @@ impl LauncherUi {
         let installed = self.cjk_font;
         sheet::panel_with_heading(ui, tl!("Language"), |ui, heading| {
             let width = ui.available_width();
-            egui::ComboBox::from_id_salt("language")
+            craft_ui::ComboBox::from_id_salt("language")
                 .selected_text(Settings::language_label(&lang_code, installed))
                 .width(width)
                 .show_ui(ui, |ui| {
@@ -159,7 +159,7 @@ impl LauncherUi {
         if pref.needs_cjk_font() && !theme::cjk_font_available(pref) {
             // In English on purpose: the language asked for can't be drawn.
             let text = "No font for this language was found on this system, so the interface stays in English. \
-                        Installing one (for example Noto Sans CJK) and restarting fixes it.";
+                        Installing one (for example Noto Sans CJK or Noto Sans Georgian) and restarting fixes it.";
             ui.add(egui::Label::new(RichText::new(text).size(12.0).color(t.warn)).wrap());
             ui.add_space(14.0);
         }
@@ -169,10 +169,12 @@ impl LauncherUi {
     /// backend manages apps runs a pass over pending updates at once. The automatic-update checkbox
     /// is hidden on hosts that cannot manage apps.
     fn settings_updates(&mut self, ui: &mut Ui) {
+        let launcher_id = artcraft_launcher_core::catalog::LAUNCHER_ID;
+        self.request_versions(launcher_id);
         sheet::panel(ui, tl!("Updates"), |ui| {
             let mut every = self.settings.check_every;
             row(ui, tl!("Check for updates"), 150.0, &mut |ui, label| {
-                egui::ComboBox::from_id_salt("every")
+                craft_ui::ComboBox::from_id_salt("every")
                     .selected_text(every.label())
                     .width(150.0)
                     .show_ui(ui, |ui| {
@@ -190,8 +192,16 @@ impl LauncherUi {
             {
                 self.trigger_auto_updates();
             }
+            if self.caps.manage_apps {
+                ui.checkbox(&mut self.settings.batch_updates, tl!("Ask for permission once when updating all apps"));
+            }
             ui.checkbox(&mut self.settings.notify, tl!("Notify me when an installed app has an update"));
             ui.checkbox(&mut self.settings.prereleases, tl!("Include pre-releases (betas and release candidates)"));
+            row(ui, tl!("Launcher version"), 200.0, &mut |ui, label| {
+                self.version_combo(ui, launcher_id, &artcraft_launcher_core::catalog::LAUNCHER, 200.0, label);
+                self.version_lock(ui, launcher_id);
+            });
+            self.launcher_version_notes(ui);
         });
     }
 
@@ -203,7 +213,8 @@ impl LauncherUi {
         sheet::panel(ui, tl!("Default install folder"), |ui| {
             if self.custom_install_folders() {
                 let mut folder = self.settings.install_locations.root.clone().unwrap_or_default();
-                Self::folder_field(ui, &mut folder, None, host);
+                let default = self.suite_default_folder(host);
+                Self::folder_field(ui, &mut folder, default.as_deref(), host);
                 self.settings.install_locations.root = (!folder.is_empty()).then_some(folder);
                 note(ui, tl!("New installs use this folder. Updates stay in their current location."));
                 if self.platform.is_some_and(|p| p.os == Os::Linux) {
@@ -235,7 +246,7 @@ impl LauncherUi {
                 .or(Some(PackageKind::Msi));
             row(ui, tl!("Install new apps as"), 210.0, &mut |ui, label| {
                 let shown = choice.map_or_else(|| crate::i18n::t(PackageKind::Msi.label()), |kind| crate::i18n::t(kind.label()));
-                egui::ComboBox::from_id_salt("windows-kind")
+                craft_ui::ComboBox::from_id_salt("windows-kind")
                     .selected_text(shown)
                     .width(210.0)
                     .show_ui(ui, |ui| {
@@ -271,7 +282,7 @@ impl LauncherUi {
                     None => tl!("System package (recommended)"),
                 };
                 let shown = choice.map_or(default_label, |k| crate::i18n::t(k.label()));
-                egui::ComboBox::from_id_salt("kind")
+                craft_ui::ComboBox::from_id_salt("kind")
                     .selected_text(shown)
                     .width(210.0)
                     .show_ui(ui, |ui| {
@@ -354,6 +365,7 @@ impl LauncherUi {
             ui.horizontal(|ui| {
                 widgets::cells(ui, &mut theme_choice, &ThemeChoice::ALL.map(|c| (c, Cell { label: c.label(), tip: c.label(), count: None })));
             });
+            ui.checkbox(&mut self.settings.hide_community_apps, tl!("Hide community apps"));
         });
         self.settings.theme = theme_choice;
     }

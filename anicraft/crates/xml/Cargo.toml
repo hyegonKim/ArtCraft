@@ -1,0 +1,15 @@
+[package]
+name = "anicraft-xml"
+description = "AniCraft L0: a small, bounded XML element reader shared by the XFL and SVG importers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+craft-xml.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

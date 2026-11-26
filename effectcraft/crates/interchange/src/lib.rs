@@ -33,16 +33,11 @@
 
 mod export;
 mod import;
-pub mod motion;
 #[cfg(test)]
 mod tests;
 
-pub use export::{
-    ExportOptions, ExportOutput, PrecompMode, PrerenderMode, PrerenderPlan, Prerendered, export, export_project, export_project_with_compositions,
-    export_with_compositions, plan_composition_prerender, plan_prerender, plan_prerender_with_compositions, prerender_reason,
-};
-pub use import::{ImportOptions, ImportResult, import, import_project};
-pub use motion::{export_motion_ozml, import_motion_ozml, is_motion_ozml};
+pub use export::{ExportOptions, ExportOutput, PrecompMode, PrerenderMode, Prerendered, export, plan_prerender, prerender_reason};
+pub use import::{ImportOptions, ImportResult, import};
 
 pub use filmcraft_geom as fc_geom;
 /// FilmCraft's interchange crate (format readers/writers) and timeline model, re-exported so
@@ -165,6 +160,8 @@ pub enum Error {
     NoComp(u64),
     #[error("the timeline document nests more than {0} levels deep")]
     TooDeep(usize),
+    #[error("the timeline document declares XML entities, which timeline files don't use and which can expand without bound")]
+    XmlEntities,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

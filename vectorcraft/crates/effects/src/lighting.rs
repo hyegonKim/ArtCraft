@@ -20,7 +20,102 @@ pub(crate) fn validate(p: &Value) -> Result<(), String> {
     if let Some(list) = p.get("lights").filter(|v| !v.is_null()) {
         parse_lights(list)?;
     }
+    if let Some(v) = p.get("substancePreset")
+        && v.as_str().and_then(vectorcraft_three_d::SubstanceMaterialPreset::parse).is_none()
+    {
+        let key = "substancePreset";
+        let names = vectorcraft_three_d::SubstanceMaterialPreset::ALL.map(|m| m.id()).join(", ");
+        return Err(format!("`{key}` must be one of {}", names));
+    }
+    if let Some(v) = p.get("raytrace")
+        && !v.is_boolean()
+    {
+        let key = "raytrace";
+        return Err(format!("`{key}` must be true or false"));
+    }
+    for (key, min, max) in [
+        ("roughness", 0.0, 100.0),
+        ("metallic", 0.0, 100.0),
+        ("materialScale", 10.0, 500.0),
+        ("materialWear", 0.0, 100.0),
+        ("normalStrength", 0.0, 200.0),
+        ("materialSeed", 0.0, 10_000.0),
+        ("ambientOcclusion", 0.0, 100.0),
+    ] {
+        if let Some(v) = p.get(key) {
+            let Some(d) = v.as_f64().filter(|d| d.is_finite()) else {
+                return Err(format!("{key} must be a number from {min} to {max}"));
+            };
+            if !(min..=max).contains(&d) {
+                return Err(format!("{key} must be a number from {min} to {max}"));
+            }
+        }
+    }
     Ok(())
+}
+
+/// Extract [`vectorcraft_three_d::SubstanceMaterial`] from a 3D effect's JSON parameter map.
+pub fn substance_material(p: &Value) -> vectorcraft_three_d::SubstanceMaterial {
+    let num_or = |k: &str, d: f64| p.get(k).and_then(Value::as_f64).filter(|v| v.is_finite()).unwrap_or(d);
+    let preset = p
+        .get("substancePreset")
+        .and_then(Value::as_str)
+        .and_then(vectorcraft_three_d::SubstanceMaterialPreset::parse)
+        .unwrap_or_default();
+    let seed = p
+        .get("materialSeed")
+        .and_then(Value::as_f64)
+        .filter(|v| v.is_finite())
+        .map_or(0, |v| v.round().clamp(0.0, 10_000.0) as u32);
+    vectorcraft_three_d::SubstanceMaterial {
+        preset,
+        roughness: (num_or("roughness", 50.0) / 100.0).clamp(0.0, 1.0),
+        metallic: (num_or("metallic", 0.0) / 100.0).clamp(0.0, 1.0),
+        scale: (num_or("materialScale", 100.0) / 100.0).clamp(0.1, 5.0),
+        wear: (num_or("materialWear", 0.0) / 100.0).clamp(0.0, 1.0),
+        normal_strength: (num_or("normalStrength", 100.0) / 100.0).clamp(0.0, 2.0),
+        seed,
+    }
+    .sanitized()
+}
+
+pub(crate) fn pbr_material(p: &Value) -> vectorcraft_three_d::PbrMaterial {
+    let num_pct = |k: &str, d: f64| p.get(k).and_then(Value::as_f64).filter(|v| v.is_finite()).unwrap_or(d).clamp(0.0, 100.0) / 100.0;
+    vectorcraft_three_d::PbrMaterial::new(num_pct("metallic", 0.0), num_pct("roughness", 50.0))
+}
+
+pub(crate) fn apply_pbr_to_node(node: &mut vectorcraft_doc::Node, p: &Value) {
+    if crate::raytrace_fx::is_raytraced(p) || !substance_material(p).is_none() {
+        return;
+    }
+    let pbr = pbr_material(p);
+    if pbr.is_default() {
+        return;
+    }
+    let ambient = p.get("ambient").and_then(Value::as_f64).unwrap_or(25.0) / 100.0;
+    modulate_node_pbr(node, pbr, ambient);
+}
+
+fn modulate_node_pbr(node: &mut vectorcraft_doc::Node, pbr: vectorcraft_three_d::PbrMaterial, ambient: f64) {
+    let shade_col = |c: Color| -> Color {
+        let [r, g, b] = c.to_rgb().map(f64::from);
+        let lum = (r * 0.2126 + g * 0.7152 + b * 0.0722).clamp(0.02, 1.0);
+        let lit = pbr.shade_lit_rgb([r / lum.max(0.25), g / lum.max(0.25), b / lum.max(0.25)].map(|x| x.min(1.0)), [lum, lum, lum], ambient);
+        Color::rgb(lit[0] as f32, lit[1] as f32, lit[2] as f32)
+    };
+    let mut app = (*node.appearance).clone();
+    for item in &mut app.items {
+        let _ = match item {
+            AppearanceItem::Fill(f) => vectorcraft_doc::recolor::map_paint(&mut f.paint, &shade_col),
+            AppearanceItem::Stroke(s) => vectorcraft_doc::recolor::map_paint(&mut s.paint, &shade_col),
+        };
+    }
+    node.appearance = app.into();
+    if let Some(children) = node.children_mut() {
+        for child in children {
+            modulate_node_pbr(std::sync::Arc::make_mut(child), pbr, ambient);
+        }
+    }
 }
 
 pub(crate) fn lights(p: &Value) -> Option<vectorcraft_three_d::Lights> {
@@ -96,6 +191,18 @@ pub(crate) fn rgb_gradient_art(
     composed_art(id, path, paint, Ramp::Rgb(light), 0.75)
 }
 
+/// The narrow stroke of a facet's own `paint`, `width` wide, that closes the hairline seam between
+/// it and its neighbors where each is antialiased alone. Its joins are round: a facet seen almost
+/// edge-on is a sharp sliver, and a mitered seam would reach far past its tip as a thorn, where a
+/// round one reaches no more than half its width past the facet. Revolve's meets() counts on a
+/// stroked seam reaching no more than half its width; faces drawn as clipped groups (whose clip,
+/// in `composed_art`, already outlines the seam with round joins) are measured by their box.
+pub(crate) fn seam_stroke(paint: Paint, width: f64) -> vectorcraft_doc::StrokeLayer {
+    let mut edge = vectorcraft_doc::StrokeLayer::new(paint, width);
+    edge.join = vectorcraft_doc::LineJoin::Round;
+    edge
+}
+
 /// Smooth Inflate triangles keep the seam within their narrow projected footprint.
 pub(crate) fn facet_art(
     id: vectorcraft_doc::NodeId,
@@ -109,8 +216,7 @@ pub(crate) fn facet_art(
         let light = vectorcraft_three_d::LightGradient { diffuse: r, ambient: 0.0, color: [1.0; 3] };
         if let Some(color) = paint.color() {
             let paint = smooth_paint(light, color);
-            let mut edge = vectorcraft_doc::StrokeLayer::new(paint.clone(), seam);
-            edge.join = vectorcraft_doc::LineJoin::Round;
+            let edge = seam_stroke(paint.clone(), seam);
             return vectorcraft_doc::Node::path(
                 id,
                 path.clone(),
@@ -131,7 +237,7 @@ pub(crate) fn solid_surface(id: vectorcraft_doc::NodeId, facets: &[vectorcraft_t
     use kurbo::Shape;
     use std::sync::Arc;
     use vectorcraft_doc::color::BlendMode;
-    use vectorcraft_doc::{Appearance, Node, NodeKind, StrokeLayer};
+    use vectorcraft_doc::{Appearance, Node, NodeKind};
     use vectorcraft_geom::{BezPath, PathData, Rect, shapes};
 
     let mut boundary = BezPath::new();
@@ -163,8 +269,7 @@ pub(crate) fn solid_surface(id: vectorcraft_doc::NodeId, facets: &[vectorcraft_t
                 } else {
                     Paint::solid(shade(Color::WHITE, color.map(|c| c * face.illumination[channel])))
                 };
-                let mut edge = StrokeLayer::new(paint.clone(), (face.thickness() / 2.0).clamp(0.05, 0.75));
-                edge.join = vectorcraft_doc::LineJoin::Round;
+                let edge = seam_stroke(paint.clone(), (face.thickness() / 2.0).clamp(0.05, 0.75));
                 Arc::new(Node::path(
                     id,
                     face.path(),

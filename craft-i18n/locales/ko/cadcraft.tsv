@@ -91,6 +91,7 @@
 	Bind...	결합...
 	Blend	곡선 연결
 	Block Attribute Manager...	블록 속성 관리자...
+	Block Description...	블록 설명...
 	Block Editor	블록 편집기
 	Block Reference	블록 참조
 	Block...	블록...
@@ -109,6 +110,7 @@
 	ByLayer	도면층별
 	CADCraft	CADCraft
 	CADCraft Help	CADCraft 도움말
+	CADCraft is up to date.	CADCraft가 최신 버전입니다.
 	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	CADCraft는 이 환경설정, 객체 스냅 모드 및 제도 기능의 켜기/끄기 상태를 사용자 계정에 저장하고 시작할 때 복원합니다.
 	Calibrate	보정
 	Calibrate 3D Mouse	3D 마우스 보정
@@ -126,6 +128,7 @@
 	Change to Current Layer	현재 도면층으로 변경
 	Changed: {n}	변경됨: {n}개
 	Changes apply at once and are kept for next time.	변경 사항은 즉시 적용되며 다음 실행에도 유지됩니다.
+	Check for Updates…	업데이트 확인…
 	Circumference	둘레
 	Clear Command History	명령 기록 지우기
 	Clear History	기록 지우기
@@ -168,6 +171,7 @@
 	Copy Nested Objects	내포된 객체 복사
 	Copy Selection	선택 항목 복사
 	Copy with Base Point	기준점을 지정하여 복사
+	Could not check for updates.	업데이트를 확인하지 못했습니다.
 	Count	개수
 	Count List	개수 목록
 	Count Table	개수 표
@@ -180,6 +184,7 @@
 	Current selection	현재 선택 항목
 	Current: {color}	현재: {color}
 	Custom	Custom
+	Cut with Base Point	기준점을 지정하여 잘라내기
 	Cyan	청록색
 	Cylinder	원기둥
 	Data Extraction...	데이터 추출...
@@ -265,7 +270,7 @@ menu	Draw	그리기
 	Enter a vertex editing option	정점 편집 옵션 입력
 	Enter an option	옵션 입력
 	Enter angle of xline	구성선 각도 입력
-	Enter angle of xline (0) or	구성선 각도 입력(0) 또는
+	Enter angle of xline (0)	구성선 각도 입력(0)
 	Enter area of rectangle in current units	현재 단위로 직사각형 면적 입력
 	Enter attribute prompt	속성 프롬프트 입력
 	Enter attribute tag name	속성 태그 이름 입력
@@ -276,7 +281,7 @@ menu	Draw	그리기
 	Enter default attribute value	기본 속성 값 입력
 	Enter degree of spline	스플라인 차수 입력
 	Enter delta angle	각도 변화량 입력
-	Enter delta length or	길이 변화량 입력 또는
+	Enter delta length	길이 변화량 입력
 	Enter dimension text	치수 문자 입력
 	Enter dimension text (<> = measurement)	치수 문자 입력(<> = 측정값)
 	Enter dimension value or [name=expression]	치수 값 또는 [name=expression] 입력
@@ -309,6 +314,7 @@ menu	Draw	그리기
 	Evaluate	계산
 	Exclude from new selection set	새 선택 세트에서 제외
 	Explode	분해
+	Export Comparison	비교 내보내기
 	Export Table	표 내보내기
 	Export to PDF...	PDF로 내보내기...
 	Export...	내보내기...
@@ -322,6 +328,8 @@ menu	Draw	그리기
 	File Tab	파일 탭
 	Fillet	모깎기
 	Filters	필터
+	Find All	Find All
+	Find what:	Find what:
 	Find...	찾기...
 	First commit	첫 커밋
 	Fit Points	맞춤점
@@ -486,6 +494,7 @@ menu	Draw	그리기
 	Make it a block of this drawing; its layers become NAME$0$LAYER	이 도면의 블록으로 만들기; 도면층 이름은 NAME$0$LAYER로 변경됨
 	Make Object's Layer Current	객체의 도면층을 현재로 설정
 	Make...	만들기...
+	Match case	Match case
 	Match Layer	도면층 일치
 	Match Properties	특성 일치
 	Measure Distance	거리 측정
@@ -518,6 +527,7 @@ menu	Modify	수정
 	N	북
 	Name (A–Z)	이름(A–Z)
 	Named	명명된 스타일
+	Named Viewports...	명명된 뷰포트...
 	Named Views...	명명된 뷰...
 	Nearest	근처점
 	New (metric)	새로 만들기(미터법)
@@ -543,10 +553,11 @@ menu	Modify	수정
 	No saved layer states	저장된 도면층 상태 없음
 	No supported 3D mouse found	지원되는 3D 마우스를 찾을 수 없습니다
 	Node	노드
-	Normal	Normal
+	Normal	보통
 	Not available yet	아직 사용할 수 없음
 	Not Found	찾을 수 없음
 	Not loaded	로드되지 않음
+	Nothing found	Nothing found
 	Numbered list	번호 매기기 목록
 	Object	객체
 	Object Snap	객체 스냅
@@ -565,6 +576,7 @@ menu	Modify	수정
 	One of the Crafting Apps by the ArtCraft team and community.	ArtCraft 팀과 커뮤니티가 만드는 Crafting Apps 제품군의 하나입니다.
 	Only in this drawing: {n}	이 도면에만 있음: {n}개
 	Only in {name}: {n}	{name}에만 있음: {n}개
+	Oops	지운 객체 복원
 	Open (⌘O)	열기(⌘O)
 	Open a drawing first.	먼저 도면을 여세요.
 	Open and Save	열기 및 저장
@@ -695,12 +707,18 @@ menu	Modify	수정
 	Rename Text Style	문자 스타일 이름 바꾸기
 	Rename...	이름 바꾸기...
 	Repeat {command}	{command} 반복
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	블록 바꾸기...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	점이 필요합니다(x,y, @dx,dy 또는 @d<a).
 	Reset keeps the interface language.	초기화해도 인터페이스 언어는 유지됩니다.
 	Reset Palettes	팔레트 초기화
 	Reset Panel Layout	패널 배치 초기화
 	Reset to Defaults	기본값으로 초기화
 	Restore Layer State	도면층 상태 복원
+	Results	Results
 	Reverse	방향 반전
 	Reverse the order	순서 반전
 	Reverse zoom direction	줌 방향 반전
@@ -722,6 +740,7 @@ menu	Modify	수정
 	Search for layer	도면층 검색
 	Search for parameter	매개변수 검색
 	Search for pattern	패턴 검색
+	Searches the current space.	Searches the current space.
 	Second and next points:	두 번째 이후 점:
 	Select 2D polyline	2D 폴리선 선택
 	Select a 2D polyline.	2D 폴리선을 선택하세요.
@@ -746,8 +765,8 @@ menu	Modify	수정
 	Select an arc or circle	호 또는 원 선택
 	Select an arc.	호를 선택하세요.
 	Select an object	객체 선택
-	Select an object to change or	변경할 객체 선택 또는
-	Select an object to measure or	측정할 객체 선택 또는
+	Select an object to change	변경할 객체 선택
+	Select an object to measure	측정할 객체 선택
 	Select an object.	객체를 선택하세요.
 	Select an open curve.	열린 곡선을 선택하세요.
 	Select an open line, arc, polyline, ellipse arc or spline.	열린 선, 호, 폴리선, 타원 호 또는 스플라인을 선택하세요.
@@ -761,9 +780,8 @@ menu	Modify	수정
 	Select first line	첫 번째 선 선택
 	Select first line or arc	첫 번째 선 또는 호 선택
 	Select first object	첫 번째 객체 선택
-	Select first object or	첫 번째 객체 선택 또는
 	Select first point	첫 번째 점 선택
-	Select nested objects to copy or	복사할 내포된 객체 선택 또는
+	Select nested objects to copy	복사할 내포된 객체 선택
 	Select object	객체 선택
 	Select object to dimension	치수를 기입할 객체 선택
 	Select object to divide	등분할할 객체 선택
@@ -781,7 +799,7 @@ menu	Modify	수정
 	Select one polyline (Multiple is available through the JSON form).	폴리선 하나를 선택하세요(다중 선택은 JSON 형식으로 사용할 수 있습니다).
 	Select path curve	경로 곡선 선택
 	Select point or object	점 또는 객체 선택
-	Select polyline or	폴리선 선택 또는
+	Select polyline	폴리선 선택
 	Select second line	두 번째 선 선택
 	Select second line or shift-select to apply corner	두 번째 선 선택 또는 Shift를 누른 채 선택하여 각진 모서리 적용
 	Select second object	두 번째 객체 선택
@@ -847,9 +865,8 @@ menu	Modify	수정
 	Specify axis endpoint of ellipse	타원 축 끝점 지정
 	Specify base diameter	밑면 지름 지정
 	Specify base point	기준점 지정
-	Specify base point or	기준점 지정 또는
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	기준점 또는 변위 지정(마우스 가운데 버튼으로 드래그하여 실시간 초점 이동)
-	Specify base radius or	밑면 반지름 지정 또는
+	Specify base radius	밑면 반지름 지정
 	Specify center of donut	도넛 중심 지정
 	Specify center of ellipse	타원 중심 지정
 	Specify center of polygon	다각형 중심 지정
@@ -891,7 +908,7 @@ menu	Modify	수정
 	Specify first point on circle: _tan to	원 위의 첫 번째 점 지정: _tan 접점
 	Specify first source point	첫 번째 원본점 지정
 	Specify height	높이 지정
-	Specify helix height or	나선 높이 지정 또는
+	Specify helix height	나선 높이 지정
 	Specify included angle	사이각 지정
 	Specify insertion base point	삽입 기준점 지정
 	Specify insertion point	삽입점 지정
@@ -910,7 +927,6 @@ menu	Modify	수정
 	Specify new width for all segments	모든 구간의 새 폭 지정
 	Specify next point	다음 점 지정
 	Specify offset distance	간격띄우기 거리 지정
-	Specify offset distance or	간격띄우기 거리 지정 또는
 	Specify opposite corner	반대 구석 지정
 	Specify other corner point	다른 구석점 지정
 	Specify other endpoint of axis	축의 다른 끝점 지정
@@ -923,7 +939,6 @@ menu	Modify	수정
 	Specify radius of circle	원 반지름 지정
 	Specify rotation angle	회전 각도 지정
 	Specify rotation angle of text	문자 회전 각도 지정
-	Specify rotation angle or	회전 각도 지정 또는
 	Specify scale factor	축척 비율 지정
 	Specify second angle endpoint	두 번째 각도 끝점 지정
 	Specify second break point	두 번째 끊기점 지정
@@ -956,9 +971,9 @@ menu	Modify	수정
 	Specify third source point or <continue>	세 번째 원본점 지정 또는 <계속>
 	Specify through point	통과점 지정
 	Specify top diameter	윗면 지름 지정
-	Specify top radius or	윗면 반지름 지정 또는
+	Specify top radius	윗면 반지름 지정
 	Specify total angle	전체 각도 지정
-	Specify total length or	전체 길이 지정 또는
+	Specify total length	전체 길이 지정
 	Specify width for rectangles	직사각형 폭 지정
 	Sphere	구
 	Spline	스플라인
@@ -1005,6 +1020,7 @@ menu	Modify	수정
 	Text override	문자 재지정
 	Text style	문자 스타일
 	Text Style...	문자 스타일...
+	Text to find	Text to find
 	Thaw All Layers	모든 도면층 동결 해제
 	Thaw Layer	도면층 동결 해제
 	The aperture is how near the cursor must come to a point for an object snap to find it.	포착 범위는 객체 스냅이 점을 찾을 수 있도록 커서가 점에 얼마나 가까이 있어야 하는지를 정합니다.
@@ -1075,13 +1091,15 @@ menu	View	보기
 	VP Color	뷰포트 색상
 	VP Freeze	뷰포트 동결
 	W	서
-	WCS ⌄	WCS 선택
+	WCS	WCS
+	Whole words	Whole words
 	Width factor	폭 비율
 	Wipeout	가리기
 	Workspace Switching	작업공간 전환
 	Write Block	블록 쓰기
 	Xline	구성선
 	Yellow	노란색
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom	줌
 	Zoom All	전체 줌
 	Zoom Dynamic	동적 줌

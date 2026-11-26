@@ -71,6 +71,8 @@ pub struct MergeFinish {
     pub stack: bool,
     /// Preview only: tint deghosted areas red.
     pub show_overlay: bool,
+    /// Enable HDR display headroom (`d.hdr.enabled` + auto `1..4 EV` headroom range) on the merged DNG.
+    pub hdr_output: bool,
 }
 
 /// Reads a source photo's bytes (by catalog path).
@@ -176,11 +178,15 @@ impl MergeJob {
                 }
                 let groups = frames.len() / b;
                 let mut merged = Vec::new();
+                let mut group_ghosts: Vec<lightcraft_raster::Plane> = Vec::new();
                 let mut it = frames.into_iter();
                 for g in 0..groups {
                     let set: Vec<Frame> = it.by_ref().take(b).collect();
                     let p = sub(0.2 + 0.4 * g as f32 / groups as f32, 0.2 + 0.4 * (g + 1) as f32 / groups as f32);
                     let r = lightcraft_merge::merge_hdr(set, hdr, &p).map_err(err)?;
+                    if r.ghost.width > 0 && r.ghost.height > 0 {
+                        group_ghosts.push(r.ghost);
+                    }
                     let mut f = Frame {
                         image: r.radiance,
                         clip: f32::INFINITY,
@@ -201,6 +207,8 @@ impl MergeJob {
                 let r = lightcraft_merge::stitch(merged, &fit, &p).map_err(err)?;
                 let mut info = pano_info(&r, &self.sources, pano, &fit);
                 info["bracket"] = json!(b);
+                info["bracketGroups"] = json!(groups);
+                let pano_ghost = combine_group_ghosts(&group_ghosts);
                 (
                     r.image,
                     r.color,
@@ -210,13 +218,17 @@ impl MergeJob {
                     lightcraft_merge::DngSamples::Half,
                     r.crop,
                     info,
-                    None,
+                    pano_ghost,
                 )
             }
         };
         if !progress(0.9, "Writing DNG") {
             return Err("cancelled".into());
         }
+        let peak_ev = estimate_peak_ev(&image);
+        let rec_ev = recommended_headroom_ev(peak_ev);
+        info["peakEv"] = json!((peak_ev * 100.0).round() / 100.0);
+        info["recommendedHeadroomEv"] = json!(rec_ev);
         let mut metadata = metadata;
         if self.finish.stack {
             let names: Vec<&str> =
@@ -297,11 +309,108 @@ fn pixels(frames: &[Frame]) -> f64 {
 /// The smallest size [`fit_in_memory`] holds a panorama to (megapixels).
 pub(crate) const MIN_FITTED_MEGAPIXELS: f64 = 40.0;
 
-/// Bracket size from EXIF: the smallest period of the exposure sequence (≥ 2).
+/// Bracket size from EXIF or frame luminance: the smallest period of the exposure sequence (>= 2).
 pub fn detect_bracket(frames: &[Frame]) -> Option<usize> {
-    let ev: Vec<f64> = frames.iter().map(|f| f.exposure).collect::<Option<_>>()?;
+    let ev: Vec<f64> = if frames.iter().all(|f| f.exposure.is_some()) {
+        frames.iter().filter_map(|f| f.exposure).collect()
+    } else {
+        frames.iter().map(frame_log2_luma).collect::<Option<_>>()?
+    };
     let n = ev.len();
-    (2..=n / 2).find(|&b| n.is_multiple_of(b) && (0..n).all(|k| (ev[k] - ev[k % b]).abs() < 0.2) && (1..b).any(|k| (ev[k] - ev[0]).abs() > 0.5))
+    (2..=n / 2).find(|&b| {
+        if !n.is_multiple_of(b) {
+            return false;
+        }
+        let groups = n / b;
+        // Compare relative offsets inside each bracket so scene-brightness shifts across panorama positions don't reject valid brackets!
+        let ref_offsets: Vec<f64> = (0..b).map(|k| ev[k] - ev[0]).collect();
+        let spread = ref_offsets.iter().fold(0.0_f64, |m, &v| m.max(v.abs()));
+        spread > 0.45
+            && (1..groups).all(|g| {
+                let base = ev[g * b];
+                (0..b).all(|k| ((ev[g * b + k] - base) - ref_offsets[k]).abs() < 0.35)
+            })
+    })
+}
+
+fn frame_log2_luma(f: &Frame) -> Option<f64> {
+    let n = f.image.data.len();
+    if n == 0 {
+        return None;
+    }
+    let step = (n / 4096).max(1);
+    let mut vals: Vec<f32> = f
+        .image
+        .data
+        .iter()
+        .step_by(step)
+        .map(|p| (0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]).max(1e-6))
+        .collect();
+    if vals.is_empty() {
+        return None;
+    }
+    let mid = vals.len() / 2;
+    let (_, med, _) = vals.select_nth_unstable_by(mid, |a, b| a.total_cmp(b));
+    Some((*med as f64).log2())
+}
+
+fn combine_group_ghosts(ghosts: &[lightcraft_raster::Plane]) -> Option<lightcraft_raster::Plane> {
+    if ghosts.is_empty() {
+        return None;
+    }
+    let h = ghosts.first().map(|g| g.height.min(512).max(1)).unwrap_or(256);
+    let w_each = ghosts.first().map(|g| (g.width * h / g.height.max(1)).clamp(32, 512)).unwrap_or(256);
+    let total_w = (w_each * ghosts.len()).clamp(32, 2048);
+    let mut out = lightcraft_raster::Plane::new(total_w, h);
+    let mut any = false;
+    for (gi, g) in ghosts.iter().enumerate() {
+        if g.width == 0 || g.height == 0 {
+            continue;
+        }
+        let x0 = gi * total_w / ghosts.len();
+        let x1 = (gi + 1) * total_w / ghosts.len();
+        let span = (x1 - x0).max(1);
+        for y in 0..h {
+            let sy = (y * g.height / h).min(g.height - 1);
+            for x in x0..x1 {
+                let sx = ((x - x0) * g.width / span).min(g.width - 1);
+                let v = g.get(sx, sy);
+                if v > 0.01 {
+                    any = true;
+                }
+                out.set(x, y, v);
+            }
+        }
+    }
+    any.then_some(out)
+}
+
+fn estimate_peak_ev(img: &Rgb32f) -> f64 {
+    if img.data.is_empty() {
+        return 0.0;
+    }
+    let step = (img.data.len() / 16_384).max(1);
+    let mut peaks: Vec<f32> = img
+        .data
+        .iter()
+        .step_by(step)
+        .map(|p| p[0].max(p[1]).max(p[2]).max(1e-5))
+        .collect();
+    if peaks.is_empty() {
+        return 0.0;
+    }
+    let idx = ((peaks.len() - 1) * 995) / 1000;
+    let (_, p995, _) = peaks.select_nth_unstable_by(idx, |a, b| a.total_cmp(b));
+    (*p995 as f64).log2().max(0.0)
+}
+
+fn recommended_headroom_ev(peak_ev: f64) -> f64 {
+    for &r in &lightcraft_develop::Hdr::HEADROOM_RANGES {
+        if peak_ev <= r + 0.15 {
+            return r;
+        }
+    }
+    4.0
 }
 
 /// Render a merged DNG like the library will show it (default raw settings, optionally Auto
@@ -399,6 +508,7 @@ pub fn parse(id: &str, p: &Value) -> Result<(MergeKind, MergeFinish)> {
         auto_settings: p.get("autoSettings").and_then(Value::as_bool).unwrap_or(true),
         stack: p.get("stack").and_then(Value::as_bool).unwrap_or(false),
         show_overlay: p.get("showOverlay").and_then(Value::as_bool).unwrap_or(false),
+        hdr_output: p.get("hdrOutput").and_then(Value::as_bool).unwrap_or(false),
     };
     Ok((kind, finish))
 }
@@ -458,6 +568,15 @@ impl Session {
             let mut d = (*d).clone();
             d.crop.geometry.rect = lightcraft_geom::Rect::from_xywh(c[0], c[1], c[2], c[3]);
             self.set_develop(id, d, "Auto Crop")?;
+        }
+        if job.finish.hdr_output
+            && matches!(job.kind, MergeKind::Hdr { .. } | MergeKind::HdrPanorama { .. })
+            && let Some(d) = self.develop_of(id)
+        {
+            let mut d = (*d).clone();
+            d.hdr.enabled = true;
+            d.hdr.max_ev = out.info.get("recommendedHeadroomEv").and_then(Value::as_f64).unwrap_or(2.0).clamp(0.5, 4.0);
+            self.set_develop(id, d, "HDR Headroom")?;
         }
         let mut info = out.info;
         info["id"] = json!(id.0);

@@ -1,7 +1,7 @@
 //! Timeline documents → compositions (File ▸ Import ▸ Adobe Premiere Pro Project / Timeline
 //! Interchange…).
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use effectcraft_color::{BlendMode, Label};
 use effectcraft_keyframe::{Keyframe, Value};
@@ -143,6 +143,11 @@ pub fn import(
     if depth > MAX_DEPTH {
         return Err(Error::TooDeep(MAX_DEPTH));
     }
+    // FilmCraft's parser expands internal entities without a node limit (#2129); Final Cut Pro
+    // and FCPXML exports never declare any.
+    if matches!(format, TimelineFormat::Fcp7Xml | TimelineFormat::Fcpxml) && bytes.windows(8).any(|w| w == b"<!ENTITY") {
+        return Err(Error::XmlEntities);
+    }
     let fc_opts = filmcraft_interchange::ImportOptions {
         base_dir: opts.base_dir.clone(),
         edl_frame_rate: opts.edl_frame_rate.map(|f| {
@@ -151,43 +156,127 @@ pub fn import(
         }),
         name: Some(opts.name.trim_end_matches(|c| c != '.').trim_end_matches('.').to_string()).filter(|s| !s.is_empty()),
     };
-    let (imported, report) = filmcraft_interchange::import_with(bytes, format.fc(), &fc_opts)?;
-    let mut res = import_project(project, &imported.project, &imported.sequences, opts, probe);
-    res.format = Some(format);
+    let (mut imported, report) = filmcraft_interchange::import_with(bytes, format.fc(), &fc_opts)?;
+    // Each file is probed once, though an EDL's media are probed before the layers are made.
+    let mut probed: HashMap<String, Option<Footage>> = HashMap::new();
+    // An EDL's guessed paths that leave the list's folder are not probed (see `guessed_outside`).
+    let outside = if format == TimelineFormat::Edl { guessed_outside(&imported.project, opts.base_dir.as_deref()) } else { HashSet::new() };
+    let mut probe_once = |path: &str| if outside.contains(path) { None } else { probed.entry(path.to_string()).or_insert_with(|| probe(path)).clone() };
+    let left_on_timecode = if format == TimelineFormat::Edl { rebase_to_file_timecode(&mut imported.project, &mut probe_once) } else { Vec::new() };
+    let mut res = ImportResult { format: Some(format), ..Default::default() };
     for e in &report.entries {
-        let msg = if e.count > 1 { format!("{} (×{})", e.message, e.count) } else { e.message.clone() };
-        if !res.warnings.contains(&msg) {
-            res.warnings.push(msg);
+        // The reader's "rebase after probing" note is done above: name only the media it wasn't.
+        if format == TimelineFormat::Edl && e.message.starts_with(EDL_MEDIA_TIME_NOTE) {
+            if !left_on_timecode.is_empty() {
+                res.warnings
+                    .push(format!("EDL source timecodes stay media time for {}: the file is missing or has no start timecode", left_on_timecode.join(", ")));
+            }
+            continue;
         }
+        if e.count > 1 { res.warnings.push(format!("{} (×{})", e.message, e.count)) } else { res.warnings.push(e.message.clone()) }
     }
-    Ok(res)
+    let folder_name = if opts.name.is_empty() { "Imported Timeline".to_string() } else { opts.name.clone() };
+    res.folder = project.add_item(&folder_name, Label::None, None, ItemKind::Folder);
+    let warned = res.warnings.iter().cloned().collect();
+    let mut im = Importer {
+        src: &imported.project,
+        project,
+        res,
+        warned,
+        items: HashMap::new(),
+        solids: HashMap::new(),
+        solids_folder: None,
+        bins: HashMap::new(),
+        probe_offline: format == TimelineFormat::Edl,
+    };
+    im.run(&imported.sequences, &mut probe_once);
+    Ok(im.res)
 }
 
-/// Import a FilmCraft [`fp::Project`] directly in memory into `project` without intermediate
-/// XML/OTIO serialization (direct cross-app sequence handoff / Dynamic Link).
-pub fn import_project(
-    project: &mut Project,
-    src: &fp::Project,
-    sequences: &[fp::ItemId],
-    opts: &ImportOptions,
-    probe: &mut dyn FnMut(&str) -> Option<Footage>,
-) -> ImportResult {
-    let mut res = ImportResult::default();
-    let folder_name = if opts.name.is_empty() {
-        if src.name.is_empty() { "Imported Timeline".to_string() } else { src.name.clone() }
-    } else {
-        opts.name.clone()
+/// The start of the note FilmCraft's EDL reader adds when source timecodes look like real
+/// timecode (an hour or more) and it has kept them as media time.
+const EDL_MEDIA_TIME_NOTE: &str = "EDL source timecodes were imported as media time";
+
+/// An EDL's source times are its source timecodes, which FilmCraft's reader keeps as media time.
+/// The largest start timecode, in frames, a file may have: a day at 1000 fps.
+const MAX_FILE_TIMECODE: i64 = 24 * 3600 * 1000;
+
+/// The paths an EDL reader guessed (media it flags offline: a line without `SOURCE FILE` names
+/// only its clip) that are not inside the list's folder: a clip name of `../x.mov` or an absolute
+/// one would link a file elsewhere on the disk. They stay placeholders. A `SOURCE FILE` path is
+/// the list's own choice and is kept, also when another clip guesses the same path.
+fn guessed_outside(project: &fp::Project, base_dir: Option<&str>) -> HashSet<String> {
+    let inside = |path: &str| {
+        let p = std::path::Path::new(path);
+        let rest = match base_dir.filter(|b| !b.is_empty()) {
+            Some(b) => p.strip_prefix(b).ok(),
+            None => Some(p),
+        };
+        rest.is_some_and(|r| r.components().all(|c| matches!(c, std::path::Component::Normal(_))))
     };
-    res.folder = project.add_item(&folder_name, Label::None, None, ItemKind::Folder);
-    let mut im = Importer { src, project, res, items: HashMap::new(), solids: HashMap::new(), solids_folder: None, bins: HashMap::new() };
-    im.run(sequences, probe);
-    im.res
+    let (mut guessed, mut named) = (HashSet::new(), HashSet::new());
+    for it in project.items.values() {
+        if let fp::ItemKind::Media(m) = &it.kind
+            && let fp::MediaRef::File { path } = &m.media
+        {
+            if m.offline && !inside(path) {
+                guessed.insert(path.clone());
+            } else {
+                named.insert(path.clone());
+            }
+        }
+    }
+    guessed.retain(|p| !named.contains(p));
+    guessed
+}
+
+/// Put the clips of each file that has a start timecode on the file's own time, as FilmCraft does
+/// when it links the media of an imported EDL. Returns the names of the media that stay on
+/// timecode though their clips use an hour or more of it (the file is missing or has none).
+fn rebase_to_file_timecode(project: &mut fp::Project, probe: &mut dyn FnMut(&str) -> Option<Footage>) -> Vec<String> {
+    let mut on_timecode: HashSet<fp::ItemId> = HashSet::new();
+    for it in project.items.values() {
+        if let fp::ItemKind::Sequence(seq) = &it.kind {
+            // 01:00:00:00 as the list counts it: 01:00:00;00 drop-frame at 29.97 fps is 3599.996 s
+            let (rate, df) = (seq.settings.frame_rate, seq.settings.drop_frame);
+            let hour = rate.tick_of(filmcraft_time::fields_to_frames(1, 0, 0, 0, rate, df));
+            on_timecode.extend(seq.all_tracks().flat_map(|t| &t.items).filter(|ti| ti.source_in >= hour).map(|ti| ti.item));
+        }
+    }
+    let files: Vec<(fp::ItemId, String, String)> = project
+        .items
+        .values()
+        .filter_map(|it| match &it.kind {
+            fp::ItemKind::Media(m) => match &m.media {
+                fp::MediaRef::File { path } => Some((it.id, it.name.clone(), path.clone())),
+                _ => None,
+            },
+            _ => None,
+        })
+        .collect();
+    let mut left = Vec::new();
+    for (id, name, path) in files {
+        match probe(&path) {
+            // A corrupt timecode past a day of frames (at up to 1000 fps) would overflow the tick
+            // arithmetic; such a file stays on timecode.
+            Some(Footage { file_timecode: Some(tc), native_rate, frame_rate, .. }) if (0..=MAX_FILE_TIMECODE).contains(&tc) => {
+                filmcraft_interchange::rebase_source_timecode(project, id, tc, crate::rate_out(native_rate.unwrap_or(frame_rate)));
+            }
+            _ if on_timecode.contains(&id) => left.push(name),
+            _ => {}
+        }
+    }
+    left.sort();
+    left.dedup();
+    left
 }
 
 struct Importer<'a> {
     src: &'a fp::Project,
     project: &'a mut Project,
     res: ImportResult,
+    /// The warnings in `res`, to say each once without searching them all every time.
+    warned: HashSet<String>,
     /// Source item → created item (footage, comp).
     items: HashMap<fp::ItemId, ItemId>,
     /// Generator / adjustment solids by (source item, width, height).
@@ -195,12 +284,17 @@ struct Importer<'a> {
     solids_folder: Option<ItemId>,
     /// Folder of each source item (from the bins).
     bins: HashMap<fp::ItemId, ItemId>,
+    /// Probe media the reader flags offline too. An EDL line without `SOURCE FILE` names its clip and
+    /// FilmCraft guesses the path beside the list; other readers flag media offline for other reasons
+    /// (an OTIO missing reference also gets a guessed path), and a same-named file there is not
+    /// the intended clip.
+    probe_offline: bool,
 }
 
 impl Importer<'_> {
     fn warn(&mut self, m: impl Into<String>) {
         let m = m.into();
-        if !self.res.warnings.contains(&m) {
+        if self.warned.insert(m.clone()) {
             self.res.warnings.push(m);
         }
     }
@@ -267,7 +361,9 @@ impl Importer<'_> {
     }
 
     fn footage(&mut self, name: &str, path: &str, m: &fp::MediaClip, probe: &mut dyn FnMut(&str) -> Option<Footage>) -> Footage {
-        if !m.offline
+        // An EDL's offline media is probed: the clip is named and the file may sit beside the list.
+        // A path that is not there probes to nothing and stays a placeholder.
+        if (!m.offline || self.probe_offline)
             && let Some(mut f) = probe(path)
         {
             if let Some(r) = m.interpret.frame_rate
@@ -292,7 +388,7 @@ impl Importer<'_> {
             MediaKind::AudioOnly => FootageKind::Audio,
             MediaKind::Still => FootageKind::Still,
             MediaKind::ImageSequence => FootageKind::Sequence,
-            _ if v.is_none() && info.audio.is_some() => FootageKind::Audio,
+            _ if v.is_none() && info.has_audio() => FootageKind::Audio,
             _ => FootageKind::Video,
         };
         let _ = name;
@@ -305,7 +401,7 @@ impl Importer<'_> {
             frame_rate: rate_in(info.frame_rate()),
             duration: tick_in(info.duration),
             has_video: kind != FootageKind::Audio,
-            has_audio: info.audio.is_some() || kind == FootageKind::Audio,
+            has_audio: info.has_audio() || kind == FootageKind::Audio,
             alpha: if v.is_some_and(|v| v.has_alpha) { AlphaMode::Straight } else { AlphaMode::Ignore },
             codec: v.map(|v| v.codec.clone()).unwrap_or_default(),
             missing: true,
@@ -335,104 +431,17 @@ impl Importer<'_> {
     fn fill_comp(&mut self, cid: ItemId, seq: &fp::Sequence) {
         let mut comp = self.project.comp(cid).cloned().unwrap_or_else(|| Comp::new(1920, 1080, FrameRate::new(30, 1), Tick(1)));
         comp.markers = seq.markers.iter().map(marker_in).collect();
-        // Captions sit above the video tracks in Premiere / FilmCraft; import each caption cue as
-        // an editable Text layer at the top of the composition stack.
-        for ct in seq.caption_tracks.iter().rev() {
-            let mut caps: Vec<&fp::Caption> = ct.captions.iter().collect();
-            caps.sort_by_key(|c| std::cmp::Reverse(c.start));
-            for cap in caps {
-                if let Some(l) = self.caption_layer(&comp, ct, cap) {
-                    comp.layers.push(l);
-                }
-            }
-        }
         // Video: the top track's clips first (layer #1); later clips of a track above earlier ones
         // so incoming clips of dissolves cover outgoing ones.
-        for track in seq.video_tracks.iter().rev() {
-            let mut items: Vec<&fp::TrackItem> = track.items.iter().collect();
-            items.sort_by_key(|i| std::cmp::Reverse(i.start));
-            for ti in items {
-                if let Some(l) = self.clip_layer(&comp, seq, track, ti) {
-                    comp.layers.push(l);
-                }
-            }
+        for track in seq.video_tracks.iter().rev().chain(&seq.audio_tracks) {
+            self.track_layers(&mut comp, seq, track);
         }
-        for track in &seq.audio_tracks {
-            let mut items: Vec<&fp::TrackItem> = track.items.iter().collect();
-            items.sort_by_key(|i| std::cmp::Reverse(i.start));
-            for ti in items {
-                if let Some(l) = self.clip_layer(&comp, seq, track, ti) {
-                    comp.layers.push(l);
-                }
-            }
+        if !seq.caption_tracks.is_empty() {
+            self.warn("caption tracks are not imported");
         }
         if let Some(c) = self.project.comp_mut(cid) {
             *c = comp;
         }
-    }
-
-    fn caption_layer(&mut self, comp: &Comp, ct: &fp::CaptionTrack, cap: &fp::Caption) -> Option<Layer> {
-        let plain = fp::plain_text(&cap.text);
-        let trimmed = plain.trim();
-        if trimmed.is_empty() {
-            return None;
-        }
-        let first_line: String = trimmed.lines().next().unwrap_or(&ct.name).chars().take(32).collect();
-        let name = if first_line.is_empty() { ct.name.clone() } else { first_line };
-        let mut l = effectcraft_project::build::layer(self.project, comp, &name, LayerSource::Text, (comp.width, comp.height), None);
-        let start = tick_in(cap.start).max(Tick::ZERO);
-        let dur = tick_in(cap.duration).max(comp.frame_duration());
-        l.start_time = start;
-        l.in_point = start;
-        l.out_point = (start + dur).min(comp.duration).max(l.in_point + comp.frame_duration());
-        l.switches.video = ct.enabled;
-        l.switches.locked = ct.locked;
-        if let Some(spk) = &cap.speaker
-            && !spk.is_empty()
-        {
-            l.comment = format!("Speaker: {spk}");
-        }
-        let scale_h = (comp.height.max(1) as f64) / 1080.0;
-        let size = (ct.style.size as f64 * scale_h).clamp(8.0, 500.0);
-        let [cr, cg, cb, ca] = ct.style.color;
-        let [or, og, ob, oa] = ct.style.outline_color;
-        let stroke_w = (ct.style.outline as f64 * scale_h).max(0.0);
-        let justify = match ct.style.align {
-            fp::CaptionAlign::Left => effectcraft_keyframe::Justify::Left,
-            fp::CaptionAlign::Center => effectcraft_keyframe::Justify::Center,
-            fp::CaptionAlign::Right => effectcraft_keyframe::Justify::Right,
-        };
-        let mut doc = effectcraft_keyframe::TextDoc::plain(trimmed);
-        if !ct.style.font.is_empty() {
-            doc.font = ct.style.font.clone();
-        }
-        doc.size = size;
-        doc.fill = [cr as f32 / 255.0, cg as f32 / 255.0, cb as f32 / 255.0, ca as f32 / 255.0];
-        doc.stroke = [or as f32 / 255.0, og as f32 / 255.0, ob as f32 / 255.0, oa as f32 / 255.0];
-        doc.stroke_width = stroke_w;
-        doc.apply_stroke = stroke_w > 0.0;
-        doc.justify = justify;
-        doc.leading = Some(size * (ct.style.line_spacing as f64).max(0.5));
-        if let Some(st) = l.props.prop_mut("text/sourceText") {
-            st.value = Value::Text(Box::new(doc));
-        }
-        let cw = comp.width as f64;
-        let ch = comp.height as f64;
-        let margin = (ct.style.margin as f64).clamp(0.0, 0.45) * ch;
-        let x = match ct.style.align {
-            fp::CaptionAlign::Left => cw * 0.1,
-            fp::CaptionAlign::Center => cw * 0.5,
-            fp::CaptionAlign::Right => cw * 0.9,
-        };
-        let y = match ct.style.anchor {
-            fp::CaptionAnchor::Top => margin + size,
-            fp::CaptionAnchor::Middle => ch * 0.5,
-            fp::CaptionAnchor::Bottom => (ch - margin).max(size),
-        };
-        if let Some(pos) = l.transform_mut().and_then(|t| t.get_mut("position")) {
-            pos.value = Value::Vec3([x, y, 0.0]);
-        }
-        Some(l)
     }
 
     /// The layer source for a clip's item (creating solids on demand).
@@ -488,7 +497,45 @@ impl Importer<'_> {
         }
     }
 
-    fn clip_layer(&mut self, comp: &Comp, seq: &fp::Sequence, track: &fp::Track, ti: &fp::TrackItem) -> Option<Layer> {
+    /// A track's clips as layers of `comp`, the latest first.
+    fn track_layers(&mut self, comp: &mut Comp, seq: &fp::Sequence, track: &fp::Track) {
+        let mut items: Vec<&fp::TrackItem> = track.items.iter().collect();
+        items.sort_by_key(|i| std::cmp::Reverse(i.start));
+        // Each clip's transitions, found once per track: scanning every transition of the track
+        // for every clip made a long flat edit (many clips and many transitions) quadratic.
+        let mut transitions: HashMap<fp::ClipId, Vec<&fp::Transition>> = HashMap::new();
+        for tr in &track.transitions {
+            for clip in [tr.from, tr.to].into_iter().flatten() {
+                let list = transitions.entry(clip).or_default();
+                // A transition from and to the same clip still counts once.
+                if !list.last().is_some_and(|last| std::ptr::eq(*last, tr)) {
+                    list.push(tr);
+                }
+            }
+        }
+        let mut any = false;
+        for ti in items {
+            let own = transitions.get(&ti.id).map(Vec::as_slice).unwrap_or_default();
+            if let Some(l) = self.clip_layer(comp, seq, track, ti, own) {
+                comp.layers.push(l);
+                any = true;
+            }
+        }
+        // What the track's transitions become, said once a clip of the track was imported.
+        if any && track.kind != fp::TrackKind::Audio {
+            for tr in &track.transitions {
+                let id = tr.effect.effect.as_str();
+                if !matches!(id, "cross_dissolve" | "dip_to_black" | "dip_to_white" | "film_dissolve" | "additive_dissolve" | "non_additive_dissolve") {
+                    self.warn(format!("transition \"{}\" was imported as a cross dissolve", tr.effect.def().map(|d| d.name).unwrap_or(id)));
+                }
+            }
+        }
+        if any && track.transitions.iter().any(|tr| tr.effect.effect == "dip_to_white") {
+            self.warn("Dip to White was imported as a dip to the background");
+        }
+    }
+
+    fn clip_layer(&mut self, comp: &Comp, seq: &fp::Sequence, track: &fp::Track, ti: &fp::TrackItem, transitions: &[&fp::Transition]) -> Option<Layer> {
         let audio_track = track.kind == fp::TrackKind::Audio;
         let (source, size, has_audio) = self.source_of(ti, comp.width, comp.height)?;
         let is_adjustment = matches!(self.src.item(ti.item).map(|i| &i.kind), Some(fp::ItemKind::AdjustmentLayer { .. }));
@@ -502,11 +549,31 @@ impl Importer<'_> {
         // ---- timing
         let start = tick_in(ti.start);
         let dur = tick_in(ti.duration);
-        let speed = if ti.speed.abs() < 1e-9 { 1.0 } else { ti.speed.abs() };
+        // A zero, tiny (below 1e-9) or non-finite speed plays at 100 %. Otherwise the layer's
+        // stretch (100 / speed) is held to the range the app supports (±1 % to ±9900 %): a speed
+        // of 1e300 or 1e-300 from a damaged file made the layer and audio time divide by ~0
+        // (#3247). The speed follows the stretch so the start time below matches it.
+        let raw = ti.speed.abs();
+        let (speed, stretch) = if !raw.is_finite() || raw < 1e-9 {
+            // A speed of exactly 0 keeps its old silent 100 %; a tiny or non-finite one is named.
+            if !raw.is_finite() || raw > 0.0 {
+                self.warn(format!("clip \"{}\": a speed of {} is not supported (100 % used)", ti.name, ti.speed));
+            }
+            (1.0, 100.0)
+        } else {
+            let stretch = effectcraft_project::limits::stretch(100.0 / raw);
+            if stretch.to_bits() == (100.0 / raw).to_bits() {
+                (raw, stretch)
+            } else {
+                let speed = 100.0 / stretch;
+                self.warn(format!("clip \"{}\": a speed of {:e} % is outside what a layer supports ({} % used)", ti.name, raw * 100.0, speed * 100.0));
+                (speed, stretch)
+            }
+        };
         let reverse = ti.reverse || ti.speed < 0.0;
         let src_in = tick_in(ti.source_in);
         let span = Tick((dur.0 as f64 * speed).round() as i64);
-        l.stretch = if reverse { -100.0 / speed } else { 100.0 / speed };
+        l.stretch = if reverse { -stretch } else { stretch };
         l.start_time =
             if reverse { start + Tick(((src_in + span).0 as f64 / speed).round() as i64) } else { start - Tick((src_in.0 as f64 / speed).round() as i64) };
         l.in_point = start;
@@ -521,18 +588,9 @@ impl Importer<'_> {
         }
         // Transitions extend the layer over their handles.
         let mut fades: Vec<(Tick, Tick, f64, f64)> = vec![];
-        for tr in &track.transitions {
+        for tr in transitions {
             let (ts, te) = (tick_in(tr.start), tick_in(tr.end()));
-            let id = tr.effect.effect.as_str();
-            let dip = id.starts_with("dip_to");
-            if !audio_track
-                && !matches!(id, "cross_dissolve" | "dip_to_black" | "dip_to_white" | "film_dissolve" | "additive_dissolve" | "non_additive_dissolve")
-            {
-                self.warn(format!("transition \"{}\" was imported as a cross dissolve", tr.effect.def().map(|d| d.name).unwrap_or(id)));
-            }
-            if dip && id == "dip_to_white" {
-                self.warn("Dip to White was imported as a dip to the background");
-            }
+            let dip = tr.effect.effect.starts_with("dip_to");
             let mid = ts + Tick((te - ts).0 / 2);
             if tr.to == Some(ti.id) {
                 l.in_point = l.in_point.min(ts);
@@ -565,29 +623,11 @@ impl Importer<'_> {
                 l.switches.audio = false;
             }
         }
-        if ti.label != fp::Label::Iris {
-            l.label = label_in(ti.label);
-        }
         if ti.frame_hold.is_some() || ti.effects.iter().any(|e| e.effect == "time_remap" && e.params.values().any(|p| p.is_animated())) {
             self.time_remap(&mut l, ti);
         }
         // Keyframe times: clip time → layer time.
         let to_layer = |l: &Layer, k: filmcraft_time::Tick| l.layer_time(start + tick_in(k));
-        if !ti.markers.is_empty() {
-            l.markers = ti
-                .markers
-                .iter()
-                .map(|m| {
-                    let mut mk = marker_in(m);
-                    mk.time = if m.start < ti.source_in && ti.source_in > filmcraft_time::Tick::ZERO {
-                        to_layer(&l, m.start)
-                    } else {
-                        tick_in(m.start)
-                    };
-                    mk
-                })
-                .collect();
-        }
         if audio_track {
             self.audio_levels(&mut l, ti, track, &fades, to_layer);
         } else {
@@ -717,27 +757,6 @@ impl Importer<'_> {
     }
 }
 
-pub(crate) fn label_in(l: fp::Label) -> Label {
-    match l {
-        fp::Label::Violet => Label::Purple,
-        fp::Label::Iris => Label::Aqua,
-        fp::Label::Caribbean => Label::SeaFoam,
-        fp::Label::Lavender => Label::Lavender,
-        fp::Label::Cerulean => Label::Cyan,
-        fp::Label::Forest => Label::DarkGreen,
-        fp::Label::Rose => Label::Pink,
-        fp::Label::Mango => Label::Orange,
-        fp::Label::Purple => Label::Purple,
-        fp::Label::Blue => Label::Blue,
-        fp::Label::Teal => Label::Cyan,
-        fp::Label::Magenta => Label::Fuchsia,
-        fp::Label::Tan => Label::Sandstone,
-        fp::Label::Green => Label::Green,
-        fp::Label::Brown => Label::Brown,
-        fp::Label::Yellow => Label::Yellow,
-    }
-}
-
 fn marker_in(m: &fp::Marker) -> Marker {
     let comment = match (m.name.is_empty(), m.comment.is_empty()) {
         (false, false) => format!("{}: {}", m.name, m.comment),
@@ -748,7 +767,6 @@ fn marker_in(m: &fp::Marker) -> Marker {
         time: tick_in(m.start),
         duration: tick_in(m.duration),
         comment,
-        label: label_in(m.color),
         chapter: if m.kind == fp::MarkerKind::Chapter { m.name.clone() } else { String::new() },
         ..Default::default()
     }

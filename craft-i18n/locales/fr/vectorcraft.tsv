@@ -4327,3 +4327,303 @@ effect	Vertical	Vertical
 @msg	“{name}” is not a file	« {name} » n’est pas un fichier
 	▾ Default Actions	▾ Scripts par défaut
 	⚠ {chord} was already used by {names} — it has been removed there.	Attention : {chord} était déjà utilisé par {names} ; il en a été retiré.
+	[1P-High View]	[1P-Vue haute]
+	[1P-Low View]	[1P-Vue basse]
+	[1P-Normal View]	[1P-Vue normale]
+	[2P-High View]	[2P-Vue haute]
+	[2P-Low View]	[2P-Vue basse]
+	[2P-Normal View]	[2P-Vue normale]
+	[3P-Low View]	[3P-Vue basse]
+	[3P-Normal View]	[3P-Vue normale]
+	Artboard Options: edit with the Artboard tool	Options de plan de travail : modifier avec l'outil Plan de travail
+	Automation	Automation
+	Essentials	Essentials
+	Essentials Classic	Essentials Classic
+	Printing and Proofing	Printing and Proofing
+	Tracing	Tracing
+	Typography	Typography
+	VectorCraft	VectorCraft
+	Art Brush	Forme artistique
+	 on the canvas to create one (	 sur la zone de travail pour en créer un (
+	 selects several, or draws one inside an artboard)	 sélectionne plusieurs, ou en dessine un à l'intérieur d'un plan de travail)
+	3D Lighting Preset	Paramètre prédéfini d'éclairage 3D
+swatch	[None]	[Aucune]
+swatch	[Registration]	[Repérage]
+@msg	`dither` applies to gradient fills (paint.setFill)	`dither` s'applique aux fonds en dégradé (paint.setFill)
+@msg	`dither` applies to gradient fills (stroke: false)	`dither` s'applique aux fonds en dégradé (stroke: false)
+@msg	`dither` must be true or false	`dither` doit être true ou false
+@msg	`method` must be classic or perceptual	`method` doit être classic ou perceptual
+@msg	a calculation has no result, as in a division by zero	un calcul n'a pas de résultat, comme dans une division par zéro
+@msg	a clipping path can't be attached to a path	un masque d'écrêtage ne peut pas être attaché à un tracé
+@msg	a clipping path can't take objects	un masque d'écrêtage ne peut pas contenir d'objets
+@msg	a path inside a compound path, blend, envelope, repeat or Intertwine group can't take objects	un tracé à l'intérieur d'un tracé transparent, d'un dégradé de formes, d'une enveloppe, d'une répétition ou d'un groupe Entrelacement ne peut pas recevoir d'objets
+@msg	a PostScript error ({name} in `{op}`: {at}; {meaning})	une erreur PostScript ({name} dans `{op}` : {at} ; {meaning})
+@msg	a PostScript error ({name} in `{op}`: {at}; {meaning}), in {procs}	une erreur PostScript ({name} dans `{op}` : {at} ; {meaning}), dans {procs}
+@msg	a PostScript error ({name} in `{op}`; {meaning})	une erreur PostScript ({name} dans `{op}` ; {meaning})
+@msg	a PostScript error ({name} in `{op}`; {meaning}), in {procs}	une erreur PostScript ({name} dans `{op}` ; {meaning}), dans {procs}
+@msg	a PostScript error ({name}; {meaning})	une erreur PostScript ({name} ; {meaning})
+@msg	a value has the wrong type for the operator	une valeur n'a pas le bon type pour l'opérateur
+@msg	a value is outside the range the operator takes	une valeur est en dehors de la plage acceptée par l'opérateur
+	Add filters from the list above	Ajouter des filtres à partir de la liste ci-dessus
+	Add to Stack	Ajouter à la pile
+	Alt key toggles to Smooth Tool	La touche Alt bascule vers l'outil Lissage
+swatch	Amber	Ambre
+@msg	an image has no pixels and was left out	une image n'a pas de pixels et a été exclue
+	Applied Filters	Filtres appliqués
+swatch	Aqua	Aqua
+	Arc Segment Tool Options	Options de l'outil Segment d'arc
+	Artwork	Illustration
+	Attach	Attacher
+	Attach Objects on Path	Attacher des objets sur le tracé
+	Auto-Simplify	Simplification automatique
+@msg	automation path rejected: outside the read roots {roots}: {path}	chemin d'automatisation refusé : hors des dossiers racines de lecture {roots} : {path}
+@msg	automation path rejected: outside the write roots {roots}: {path}	chemin d'automatisation refusé : hors des dossiers racines d'écriture {roots} : {path}
+swatch	Azure	Azure
+	Background Level	Niveau d'arrière-plan
+	Bas Relief	Bas-relief
+	Bas Relief…	Bas-relief…
+	Base Along:	Base le long de :
+swatch	Black	Noir
+	Black and white stay as they are. Dark colors become shades of the stroke color and light colors become tints of it.	Le noir et le blanc restent tels quels. Les couleurs sombres deviennent des nuances de la couleur du contour et les couleurs claires deviennent des teintes de celle-ci.
+	Black becomes the stroke color and white stays white. Other colors become tints of the stroke color by their lightness.	Le noir devient la couleur du contour et le blanc reste blanc. Les autres couleurs deviennent des teintes de la couleur du contour selon leur luminosité.
+swatch	Blue	Bleu
+	Bottom-Justified Tab	Tabulation alignée en bas
+swatch	Bright Blue	Bleu vif
+swatch	Bright Green	Vert vif
+swatch	Bright Red	Rouge vif
+swatch	Bright Violet	Violet vif
+swatch	Bright Yellow	Jaune vif
+swatch	Brights	Couleurs vives
+	Bristle Brush	Forme Soies
+swatch	Brown	Brun
+	Brush Art	Art au pinceau
+	Brush Detail	Détail du pinceau
+@msg	brushes move only within their type	les formes ne se déplacent qu'au sein de leur type
+	Calligraphic Brush	Forme calligraphique
+	Categories	Catégories
+	Chalk & Charcoal	Craie et fusain
+	Chalk & Charcoal…	Craie et fusain…
+	Character Direction	Direction du caractère
+	Charcoal	Fusain
+	Charcoal…	Fusain…
+swatch	Chocolate	Chocolat
+	Choose a filter	Choisir un filtre
+	Chrome	Chrome
+	Chrome…	Chrome…
+	Clockwise	Sens horaire
+	Closed	Fermé
+swatch	Coffee	Café
+	Collapse Panel Group	Réduire le groupe de panneaux
+	Colored Pencil	Crayon de couleur
+	Colored Pencil…	Crayon de couleur…
+	Colorization Tips	Conseils de colorisation
+@msg	column docks a set as a dock column, with no anchor or icon	column ancre un ensemble en tant que colonne de la zone d'ancrage, sans ancre ni icône
+	Consider Open Filled Paths as Closed	Considérer les tracés ouverts remplis comme fermés
+	Conté Crayon	Crayon Conté
+	Conté Crayon…	Crayon Conté…
+	Convex	Convexe
+swatch	Copper	Cuivre
+	Cursor Swatch Preview	Aperçu de l'échantillon du curseur
+swatch	Cyan	Cyan
+swatch	Cyan Green	Vert cyan
+	Dark Rough	Sombre rugueux
+@msg	data the program reads is damaged or cut short, or the program asks for a position in a file that has none	les données lues par le programme sont endommagées ou tronquées, ou le programme demande une position dans un fichier qui n'en possède pas
+	Definition	Définition
+	Detail	Détail
+	Diffuse	Diffus
+	Dither	Tramage
+	Drag an item here, or right-click one, to put it in this group.	Faites glisser un élément ici, ou faites un clic droit sur l'un d'eux, pour le placer dans ce groupe.
+	Drop Artwork	Déposer l'illustration
+	Drop here to take it out of its group	Déposez ici pour le sortir de son groupe
+	Dry Brush	Pinceau sec
+	Dry Brush…	Pinceau sec…
+	Ease In	Accélération
+	Ease In Out	Accélération / Décélération
+	Ease Out	Décélération
+	Ease Out In	Décélération / Accélération
+	Effect Gallery	Galerie d'effets
+	Effect Gallery Dialog	Boîte de dialogue de la galerie d'effets
+	Effect Gallery…	Galerie d'effets…
+swatch	Emerald	Émeraude
+swatch	Espresso	Expresso
+	Expand Objects on Path	Décomposer les objets sur le tracé
+	Eyedropper: click the art to sample the key color	Pipette : cliquez sur l'illustration pour prélever la couleur clé
+	Fill Arc	Remplir l'arc
+	Filters	Filtres
+	Fine noise hides banding in the gradient fill	Un bruit fin masque l'effet de bande dans le fond en dégradé
+	Foreground Level	Niveau de premier plan
+	Fresco	Fresque
+	Fresco…	Fresque…
+	Gap Length:	Longueur de l'espace :
+	Geometric Guides	Guides géométriques
+	Graphic Pen	Plume graphique
+	Graphic Pen…	Plume graphique…
+swatch	Grays	Gris
+swatch	Green	Vert
+	Hide Live Paint Gaps	Masquer les espaces de peinture dynamique
+	Highlight:	Mise en évidence :
+@msg	icon must be true or false	icon doit être true ou false
+@msg	icon only docks a panel in the icon column, with no anchor	icon ancre seulement un panneau dans la colonne d'icônes, sans ancre
+@msg	ids must contain 1–10000 object ids	ids doit contenir entre 1 et 10000 identifiants d'objet
+	In Merge Mode, Clicking Stroke Splits the Path	En mode fusion, cliquer sur le contour sépare le tracé
+	Include All Subdirectories	Inclure tous les sous-répertoires
+swatch	Indigo	Indigo
+	Insert Kashidas	Insérer des kashidas
+@msg	invalid object id {value}: expected a non-negative integer	id d'objet invalide {value} : un entier non négatif est attendu
+	Length X-Axis:	Longueur de l'axe X :
+	Length Y-Axis:	Longueur de l'axe Y :
+@msg	library panel `{given}` isn't missing its library	le panneau de bibliothèque `{given}` n'a pas perdu sa bibliothèque
+	Light Rough	Clair rugueux
+	Light/Dark Balance	Équilibre clair/sombre
+swatch	Lime	Citron vert
+	Load Variable Library…	Charger la bibliothèque de variables…
+	Locate Library…	Localiser la bibliothèque…
+	Locate Selected Objects	Localiser les objets sélectionnés
+	Long	Long
+swatch	Magenta	Magenta
+@msg	missing integer `{key}`	entier `{key}` manquant
+	Move Anchor Point	Déplacer le point d'ancrage
+	Move Brush	Déplacer la forme
+	Move Library Group	Déplacer le groupe de bibliothèque
+	New Brush	Nouvelle forme
+	New Without Dialog	Nouveau sans boîte de dialogue
+@msg	no such object id {value}	aucun objet avec l'id {value}
+	Note Paper	Papier à lettres
+	Note Paper…	Papier à lettres…
+@msg	nothing in data set {name} was applied: no object is bound to a variable it has a value for	rien dans l'ensemble de données {name} n'a été appliqué : aucun objet n'est lié à une variable pour laquelle il possède une valeur
+@msg	objects inside a blend, envelope, repeat or Intertwine group can't be attached to a path	les objets à l'intérieur d'un groupe de dégradé de formes, d'enveloppe, de répétition ou d'entrelacement ne peuvent pas être attachés à un tracé
+	Objects on Path	Objets sur le tracé
+	Objects on Path Options	Options d'objets sur le tracé
+	Objects on Path Tool	Outil Objets sur le tracé
+swatch	Ocean	Océan
+@msg	only a dock group above or below others collapses, not one beside another	seul un groupe ancré au-dessus ou en dessous d'autres groupes peut être réduit, pas un groupe placé à côté d'un autre
+	Open this dialog with these settings next time	Ouvrir cette boîte de dialogue avec ces paramètres la prochaine fois
+	Open this setting's help page	Ouvrir la page d'aide de ce paramètre
+swatch	Orange	Orange
+swatch	Orange Red	Rouge orangé
+	Overlap	Chevauchement
+	Override Action "Export" Commands	Remplacer les commandes de l'action « Exporter »
+	Override Action "Open" Commands	Remplacer les commandes de l'action « Ouvrir »
+	Override Action "Save" Commands	Remplacer les commandes « Enregistrer » des actions
+	Packaged {n} file(s)	{n} fichier(s) assemblé(s)
+@msg	Packaged {n} file(s)	{n} fichier(s) assemblé(s)
+	Packaged {n} file(s) in {folder}	{n} fichier(s) assemblé(s) dans {folder}
+@msg	Packaged {n} file(s) in {folder}	{n} fichier(s) assemblé(s) dans {folder}
+	Packaged {n} file(s) in {folder} {note}	{n} fichier(s) assemblé(s) dans {folder} {note}
+@msg	Packaged {n} file(s) in {folder} {note}	{n} fichier(s) assemblé(s) dans {folder} {note}
+	Packaged {n} file(s) {note}	{n} fichier(s) assemblé(s) {note}
+@msg	Packaged {n} file(s) {note}	{n} fichier(s) assemblé(s) {note}
+@msg	Packaging {_1}	Assemblage de {_1}
+	Paint Daubs	Barbouillage
+	Paint Daubs…	Barbouillage…
+	Palette Knife	Couteau à palette
+	Palette Knife…	Couteau à palette…
+@msg	panel floats; collapse its group with window.panel.float {panel, collapsed}	le panneau flotte ; réduisez son groupe avec window.panel.float {panel, collapsed}
+@msg	panel is not in a dock group	le panneau n'est pas dans un groupe d'ancrage
+@msg	part of the program isn't valid PostScript text	une partie du programme n'est pas du texte PostScript valide
+	Pattern Brush	Forme de motif
+	Photocopy…	Photocopie…
+	Pick Color From:	Prélever la couleur dans :
+swatch	Pink	Rose
+	Plaster	Plâtre
+	Plaster…	Plâtre…
+	Plastic Wrap	Film plastique
+	Plastic Wrap…	Film plastique…
+	Play:	Lecture :
+	Plug-ins & Scratch Disks	Plug-ins et disques de travail
+swatch	Purple	Violet
+swatch	Radial White, Black	Radial blanc, noir
+	Ramp:	Rampe :
+swatch	Red	Rouge
+	Repeat Objects	Répéter les objets
+	Reticulation	Réticulation
+	Reticulation…	Réticulation…
+swatch	Rose	Rose
+	Rough Pastels	Pastels rugueux
+	Rough Pastels…	Pastels rugueux…
+	Ruby	Rubis
+	Ruby…	Rubis…
+swatch	Rust	Rouille
+swatch	Sand	Sable
+	Save and Close	Enregistrer et fermer
+	Scale Text Attributes	Mettre à l'échelle les attributs de texte
+@msg	Scale Text Attributes: selected type has no scale to bake	Mise à l'échelle des attributs de texte : le type sélectionné n'a pas d'échelle à figer
+	Scatter Brush	Forme diffuse
+@msg	select an Objects on Path group	sélectionnez un groupe Objets sur le tracé
+	Select art to make a scatter, art or pattern brush.	Sélectionnez une illustration pour créer une forme diffuse, artistique ou de motif.
+	Select artwork to apply effects	Sélectionnez une illustration pour appliquer des effets
+	Select by Color	Sélectionner par couleur
+	Select Fills	Sélectionner les fonds
+	Select Strokes	Sélectionner les contours
+	Selection:	Sélection :
+	Shadow Intensity	Intensité de l'ombre
+	Shift:	Décalage :
+	Show Live Paint Gaps	Afficher les espaces de la peinture dynamique
+	Simple	Simple
+	Slope:	Pente :
+	Smudge Stick	Bâtonnet de lissage
+	Smudge Stick…	Bâtonnet de lissage…
+	Snap to Perpendicular	Magnétisme perpendiculaire
+	Snap to Tangent	Magnétisme de la tangente
+	Snap to Unit	Magnétisme des unités
+	Snapping	Magnétisme
+	Soft Mix	Mélange doux
+	Sparkle	Étincelle
+	Sponge	Éponge
+	Sponge…	Éponge…
+	Stamp…	Tampon…
+	Stop on Errors	S'arrêter en cas d'erreur
+	Straight Line	Ligne droite
+	Stroke When Editable	Contour lors de l'édition
+	Stylistic	Stylistique
+swatch	Sunset	Coucher de soleil
+swatch	Tan	Brun clair
+swatch	Teal	Bleu canard
+	Texture Coverage	Couverture de la texture
+	The art keeps its own colors.	L'illustration conserve ses propres couleurs.
+@msg	the artboard is locked	le plan de travail est verrouillé
+@msg	the file's variables and data sets weren't read (variables: {variables}, data sets: {data_sets}): the Variables panel doesn't list them	les variables et les jeux de données du fichier n'ont pas été lus (variables : {variables}, jeux de données : {data_sets}) : le panneau Variables ne les liste pas
+	The key color becomes the stroke color. The other colors shift their hue by the same amount and keep their saturation and brightness.	La couleur clé devient la couleur du contour. Les autres couleurs décalent leur teinte de la même valeur tout en conservant leur saturation et leur luminosité.
+@msg	the operator looks for a mark on the stack and finds none	l'opérateur cherche une marque dans la pile et n'en trouve aucune
+@msg	the operator needs more values than the stack holds	l'opérateur a besoin de plus de valeurs que ce que la pile contient
+@msg	the path has no point to continue from	le tracé n'a aucun point à partir duquel continuer
+	The plug-in writes the whole document.	Le plug-in écrit l'intégralité du document.
+@msg	the program asks for a resource that isn't defined	le programme demande une ressource qui n'est pas définie
+@msg	the program ends a dictionary it didn't begin	le programme termine un dictionnaire qu'il n'a pas commencé
+@msg	the program goes past one of the reader's limits	le programme dépasse l'une des limites du lecteur
+@msg	the program opens a file, which the reader can't do	le programme ouvre un fichier que le lecteur ne peut pas ouvrir
+@msg	the program restores a saved state that was already restored	le programme restaure un état sauvegardé qui a déjà été restauré
+@msg	the program runs, deletes or renames a file, which the reader can't do	le programme exécute, supprime ou renomme un fichier, ce que le lecteur ne peut pas faire
+	The samples show this brush on a blue stroke.	Les échantillons montrent cette forme sur un contour bleu.
+@msg	the Simplify slider is not open	le curseur Simplifier n'est pas ouvert
+@msg	this is a PostScript file (an .ai saved in an older format or without PDF compatibility, or an EPS file), which can't be opened yet: save it as PDF, PDF-compatible .ai or SVG	il s'agit d'un fichier PostScript (un .ai enregistré dans un format ancien ou sans compatibilité PDF, ou un fichier EPS), qui ne peut pas encore être ouvert : enregistrez-le en PDF, en .ai compatible PDF ou en SVG
+@msg	thumbnail: no page {n} (the file has 1)	vignette : pas de page {n} (le fichier en contient 1)
+	Tips	Astuces
+	Top-Justified Tab	Tabulation alignée en haut
+	Torn Edges	Bords déchirés
+	Torn Edges…	Bords déchirés…
+	Underpainting	Sous-couche
+	Underpainting…	Sous-couche…
+@msg	unknown snap option `{key}` (use {options})	option de magnétisme inconnue `{key}` (utilisez {options})
+@msg	variables that aren't text were left out: {kinds}	les variables qui ne sont pas du texte ont été exclues : {kinds}
+swatch	Violet	Violet
+swatch	Walnut	Noyer
+	Water Paper	Papier mouillé
+	Water Paper…	Papier mouillé…
+	Watercolor	Aquarelle
+	Watercolor…	Aquarelle…
+swatch	White	Blanc
+swatch	White, Black	Blanc, noir
+	Wide Blurry	Large et flou
+	Wide Sharp	Large et net
+axis	X Axis	Axe X
+axis	Y Axis	Axe Y
+swatch	Yellow	Jaune
+swatch	Yellow Green	Vert jaune
+@msg	{_1} is an exporter (File › Export › Export As…)	{_1} est un module d'exportation (Fichier › Exporter › Exporter sous…)
+	{count} file(s) in {folder} {note}. Show the package folder?	{count} fichier(s) dans {folder} {note}. Afficher le dossier de l'assemblage ?
+	{count} file(s) in {folder}. Show the package folder?	{count} fichier(s) dans {folder}. Afficher le dossier de l'assemblage ?
+@msg	{key} must be [x, y] with finite coordinates	{key} doit être [x, y] avec des coordonnées finies
+@msg	{key} must be an array of non-negative integer object ids	{key} doit être un tableau d'identifiants d'objet entiers non négatifs
+@msg	{key} must be Unix seconds (an integer) or null	{key} doit être en secondes Unix (un entier) ou null
+@msg	{label} keeps 1 of the document's {n} artboards: the file reopens with one. Turn on Preserve Editing Capabilities to keep them all.	{label} conserve 1 des {n} plans de travail du document : le fichier se réouvre avec un seul. Activez « Conserver les capacités de modification » pour tous les conserver.

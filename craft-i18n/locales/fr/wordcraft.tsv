@@ -1712,6 +1712,14 @@ template	Letter	Lettre
 	Remove the control once edited	Supprimer le contrôle une fois le contenu modifié
 	Remove the space before the punctuation	Supprimer l’espace avant la ponctuation
 	Remove Watermark	Supprimer le filigrane
+	No watermark	Aucun filigrane
+	Picture watermark	Filigrane image
+	Text watermark	Filigrane texte
+	Select Picture…	Sélectionner une image…
+	Washout	Délavé
+	Semitransparent	Semi-transparent
+	Transparency:	Transparence :
+	Select a picture first.	Sélectionnez d'abord une image.
 	Rename Document	Renommer le document
 	Reopen	Rouvrir
 	Repeat as header row on each page	Répéter en tant que ligne d’en-tête sur chaque page
@@ -2412,3 +2420,210 @@ preview	Title	Titre
 	✓ None	✓ Aucun
 	➕ New comment	➕ Nouveau commentaire
 	📂  Browse…	📂  Parcourir…
+	Restore opens an unsaved copy. Your original file stays unchanged.	La restauration ouvre une copie non enregistrée. Votre fichier d’origine reste inchangé.
+	Recovery is disabled while this document has a password.	La récupération est désactivée tant que ce document est protégé par un mot de passe.
+	Local recovery is unavailable or still loading.	La récupération locale est indisponible ou en cours de chargement.
+	No recovery copies.	Aucune copie de récupération.
+	Recovery copy	Copie de récupération
+	Discard…	Supprimer…
+	Continue without restoring	Continuer sans restaurer
+	Advanced Properties…	Propriétés avancées…
+	View and edit the document's custom properties.	Afficher et modifier les propriétés personnalisées du document.
+	The spelling dictionary for {language} couldn't be read, so it isn't checked. File: {file}. Reason: {reason}	Le dictionnaire orthographique pour {language} n’a pas pu être lu ; il n’est donc pas vérifié. Fichier : {file}. Raison : {reason}
+	{language} (dictionary unreadable)	{language} (dictionnaire illisible)
+	Text Size	Taille du texte
+	Crop on the page works on unturned pictures: set Rotation to 0° first, or use the crop boxes	Le rognage sur la page fonctionne sur les images non pivotées : réglez d’abord la rotation sur 0°, ou utilisez les cadres de rognage
+	Folder path	Chemin du dossier
+	No items to show.	Aucun élément à afficher.
+	File type	Type de fichier
+	No new sources in that file	Aucune nouvelle source dans ce fichier
+	Imported 1 source	1 source importée
+	Imported {n} sources	{n} sources importées
+	{n} MB	{n} Mo
+	{n} KB	{n} Ko
+	Couldn't get the list of languages: {error}	Impossible d’obtenir la liste des langues : {error}
+	Couldn't install: {error}	Impossible d’installer : {error}
+	Only you can turn on downloading: click the button yourself. Agents can install once it is on.	Seul vous pouvez activer le téléchargement : cliquez vous-même sur le bouton. Les agents pourront installer une fois qu’il est activé.
+	Couldn't turn on downloading: {error}	Impossible d’activer le téléchargement : {error}
+	Couldn't remove: {error}	Impossible de supprimer : {error}
+	{language} proofing isn't installed.	Les outils de vérification pour {language} ne sont pas installés.
+	Installing… {percent}%	Installation… {percent} %
+	Install ({size})	Installer ({size})
+	Licence: {licence}. Source: {source}	Licence : {licence}. Source : {source}
+	Installing turns on downloading of fonts and Language packs from GitHub.	L’installation active le téléchargement des polices et des packs de langue depuis GitHub.
+	Language packs come from a test source: {source}	Les packs de langue proviennent d’une source de test : {source}
+	Language packs aren't available in the browser.	Les packs de langue ne sont pas disponibles dans le navigateur.
+	Language packs need the font store folder, and there is none on this computer.	Les packs de langue ont besoin du dossier de stockage des polices, et cet ordinateur n’en a pas.
+	Getting the list of languages…	Récupération de la liste des langues…
+	Get the list of languages again	Récupérer à nouveau la liste des langues
+	Installed	Installé
+	Install	Installer
+	The spelling and hyphenation data WordCraft uses, and their licences.	Les données d’orthographe et de césure utilisées par WordCraft, et leurs licences.
+	{language}: {file} (unreadable: {reason})	{language} : {file} (illisible : {reason})
+	Spanish (Latin America)	Espagnol (Amérique latine)
+	Spanish (Uruguay)	Espagnol (Uruguay)
+	Pages in the range	Pages de la plage
+	Scale to paper size	Adapter au format du papier
+	The document or selection changed. Check again to continue.	Le document ou la sélection a changé. Vérifiez à nouveau pour continuer.
+	Not in Dictionary	Absent du dictionnaire
+	Suggestions	Suggestions
+	Change…	Modifier…
+	Add to AutoCorrect	Ajouter à la correction automatique
+	AutoCorrect Options…	Options de correction automatique…
+	More options	Plus d’options
+	Change to:	Modifier en :
+	Update check is not supported in the web browser.	La recherche de mises à jour n’est pas prise en charge dans le navigateur web.
+	Couldn't save {name}, so it is still open and nothing was lost: {error}	Impossible d’enregistrer {name} ; il reste donc ouvert et rien n’a été perdu : {error}
+	Current Document	Document actuel
+	Macro name:	Nom de la macro :
+	There are no macros yet. Record one to add it here.	Il n’y a pas encore de macro. Enregistrez-en une pour l’ajouter ici.
+	Run	Exécuter
+	Stop Recording	Arrêter l’enregistrement
+	Record…	Enregistrer…
+	*Bold* and _italic_ as real formatting	*Gras* et _italique_ en véritable mise en forme
+	Add a period with double-space	Ajouter un point avec un double espace
+	Built-in Heading styles	Styles de titre intégrés
+	Set left- and first-indent with tabs and backspaces	Définir le retrait gauche et de première ligne avec des tabulations et des retours arrière
+	Automatically add words to list (First Letter)	Ajouter automatiquement des mots à la liste (Première lettre)
+	Automatically add words to list (INitial CAps)	Ajouter automatiquement des mots à la liste (Deux majuscules initiales)
+	Select a place in this document:	Sélectionnez un emplacement dans ce document :
+	Top of the Document	Haut du document
+	Bookmarks	Signets
+	Discard the recovery copy of {name}?	Supprimer la copie de récupération de {name} ?
+	This cannot be undone. Your original file stays unchanged.	Cette action est irréversible. Votre fichier d’origine reste inchangé.
+	Property names are 1–{max} characters.	Les noms de propriété comptent de 1 à {max} caractères.
+	Property values are at most {max} bytes.	Les valeurs de propriété font au plus {max} octets.
+	Only text properties can be changed.	Seules les propriétés de type texte peuvent être modifiées.
+	Select a property to change.	Sélectionnez une propriété à modifier.
+	This document has no custom properties.	Ce document n’a aucune propriété personnalisée.
+	Text properties only: Word's number, date and yes-no types aren't offered.	Propriétés de type texte uniquement : les types nombre, date et oui/non de Word ne sont pas proposés.
+	{field}, record {n}	{field}, enregistrement {n}
+	Pane Options	Options du volet
+	Dock Left	Ancrer à gauche
+	Dock Right	Ancrer à droite
+	Float	Flottant
+	Move Pane: {title}	Déplacer le volet : {title}
+	Resize Pane	Redimensionner le volet
+	Page color	Couleur de page
+	{name} options	Options de {name}
+	The number must be a divisor of {max}.	Le nombre doit être un diviseur de {max}.
+	Nothing of this type in the document.	Aucun élément de ce type dans le document.
+	Corporate Author	Auteur collectif
+	Add a language…	Ajouter une langue…
+	Add a language	Ajouter une langue
+	Your languages	Vos langues
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	L’anglais, les langues de ce document et chaque pack de langue installé. Les packs de langue ajoutent des dictionnaires orthographiques et la césure.
+	Set as default	Définir par défaut
+	New blank documents are written in this language	Les nouveaux documents vierges sont rédigés dans cette langue
+	{language} (default)	{language} (par défaut)
+	Built in	Intégré
+	Your own dictionary	Votre propre dictionnaire
+	System dictionary	Dictionnaire du système
+	Not available yet	Pas encore disponible
+	Grammar built in	Grammaire intégrée
+	Install spelling ({size})	Installer l’orthographe ({size})
+	Its dictionary couldn't be read: {reason}	Son dictionnaire n’a pas pu être lu : {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Le téléchargement est désactivé. Cliquer sur « Ajouter une langue… » ou « Installer » l’active : WordCraft télécharge alors des packs de langue et des polices depuis GitHub.
+	Search:	Rechercher :
+	Dutch, Nederlands or nl	Néerlandais, Nederlands ou nl
+	No languages to show yet.	Aucune langue à afficher pour l’instant.
+	No language matches your search.	Aucune langue ne correspond à votre recherche.
+	An installed Language pack is used after this folder.	Un pack de langue installé est utilisé après ce dossier.
+	Dictionary files	Fichiers de dictionnaire
+	Gets the list of Language packs, then this language's pack if there is one.	Récupère la liste des packs de langue, puis le pack de cette langue s’il y en a un.
+	Afrikaans	Afrikaans
+	Belarusian	Biélorusse
+	Bulgarian	Bulgare
+	Bosnian	Bosniaque
+	Catalan	Catalan
+	Catalan (Valencian)	Catalan (valencien)
+	Welsh	Gallois
+	Esperanto	Espéranto
+	Persian	Persan
+	Irish	Irlandais
+	Galician	Galicien
+	Hungarian	Hongrois
+	Armenian	Arménien
+	Icelandic	Islandais
+	Georgian	Géorgien
+	Lithuanian	Lituanien
+	Latvian	Letton
+	Macedonian	Macédonien
+	Norwegian (Nynorsk)	Norvégien (nynorsk)
+	Slovak	Slovaque
+	Slovenian	Slovène
+	Albanian	Albanais
+	Swahili	Swahili
+	Tamil	Tamoul
+	Thai	Thaï
+	Vietnamese	Vietnamien
+	Set as Default Language	Définir comme langue par défaut
+	U.A.E.	Émirats arabes unis
+	Angola	Angola
+	Argentina	Argentine
+	Austria	Autriche
+	Australia	Australie
+	Bosnia and Herzegovina	Bosnie-Herzégovine
+	Belgium	Belgique
+	Bolivia	Bolivie
+	Brazil	Brésil
+	Belarus	Biélorussie
+	Canada	Canada
+	Switzerland	Suisse
+	Chile	Chili
+	China	Chine
+	Colombia	Colombie
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Cap-Vert
+	Cyprus	Chypre
+	Germany	Allemagne
+	Dominican Republic	République dominicaine
+	Ecuador	Équateur
+	Egypt	Égypte
+	Spain	Espagne
+	Finland	Finlande
+	France	France
+	United Kingdom	Royaume-Uni
+	Equatorial Guinea	Guinée équatoriale
+	Guatemala	Guatemala
+	Hong Kong SAR	R.A.S. de Hong Kong
+	Honduras	Honduras
+	Ireland	Irlande
+	India	Inde
+	Iraq	Irak
+	Italy	Italie
+	Jamaica	Jamaïque
+	Jordan	Jordanie
+	Kuwait	Koweït
+	Kazakhstan	Kazakhstan
+	Lebanon	Liban
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxembourg
+	Morocco	Maroc
+	Monaco	Monaco
+	Montenegro	Monténégro
+	Macao SAR	R.A.S. de Macao
+	Mexico	Mexique
+	Malaysia	Malaisie
+	Mozambique	Mozambique
+	Nicaragua	Nicaragua
+	Netherlands	Pays-Bas
+	New Zealand	Nouvelle-Zélande
+	Panama	Panama
+	Peru	Pérou
+	Philippines	Philippines
+	Puerto Rico	Porto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Russie
+	Singapore	Singapour
+	El Salvador	Salvador
+	Syria	Syrie
+	Taiwan	Taïwan
+	Ukraine	Ukraine
+	United States	États-Unis
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Afrique du Sud

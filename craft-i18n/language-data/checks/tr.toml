@@ -1,0 +1,3 @@
+# Words the tr pack must accept and reject (common words; written for this check).
+correct = ["ev", "kitap", "okul", "su", "şehir", "çalışmak"]
+incorrect = ["kitapp", "okkul", "şehirr"]

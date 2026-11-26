@@ -13,6 +13,7 @@
 
 use std::path::Path;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use designcraft_compose::Cache;
 use designcraft_doc::{AssetId, Content, Document, Fingerprint, Item, ItemId, Selection, Story, StoryId, TextFileLink};
@@ -26,9 +27,9 @@ pub fn specs() -> Vec<CommandSpec> {
     vec![
         cmd!(query "links.list", "Links", [], None, "{} → [{asset, name, path, status: ok|modified|missing|embedded, refused?: why a missing link isn't followed (a path on another computer, a device), pixels, pdfCrop (placed PDFs: the box shown), uses: [{id, page, ppi}]}], then linked text files: [{story, name, path, status (also tooLarge: unchanged size, too big to check), edited (the story was changed in the layout), uses: [{id, page}]}]", has_doc, |s, _| {
             // Taken out for the call so the document needn't be cloned on every poll.
-            let mut checks = std::mem::take(&mut s.text_link_checks);
-            let links = s.doc().map(|d| list(&d.doc, &s.cache, d.path.as_deref().map(Path::new), &mut checks));
-            s.text_link_checks = checks;
+            let mut checks = std::mem::take(&mut s.link_checks);
+            let links = s.doc().map(|d| list(&d.doc, &s.cache, d.path.as_deref().map(Path::new), Some(&mut checks), None).unwrap_or_default());
+            s.link_checks = checks;
             Ok(Value::Array(links?))
         }),
         cmd!(
@@ -75,7 +76,7 @@ pub fn specs() -> Vec<CommandSpec> {
                 let aid = asset_param(p, "links.embed")?;
                 s.edit(|d, _| {
                     let a = d.assets.get_mut(&aid).ok_or_else(|| bad("links.embed", "no such graphic"))?;
-                    Arc::make_mut(a).link = None;
+                    Arc::make_mut(a).set_link(None, None);
                     Ok(Value::Null)
                 })
             }
@@ -137,7 +138,7 @@ pub fn refused(link: &str, document: Option<&Path>) -> Option<crate::io::Refused
     crate::io::document_path(link, document).err()
 }
 
-/// Whether an asset's linked file is gone ([`status`] "missing" without reading the file). An
+/// Whether an asset's linked file is gone ([`status_cached`] "missing" without reading the file). An
 /// asset can hold data while its file is missing: the document's preview of it. `document` is
 /// the document's file, which relative links are resolved against.
 pub fn link_missing(a: &designcraft_doc::Asset, document: Option<&Path>) -> bool {
@@ -153,36 +154,89 @@ pub fn link_missing(a: &designcraft_doc::Asset, document: Option<&Path>) -> bool
     }
 }
 
-/// Link status of an asset in the document at `document`. Only a regular file is compared, so a
-/// link to a device (`/dev/zero`) or a FIFO is missing rather than read.
-pub fn status(a: &designcraft_doc::Asset, document: Option<&Path>) -> &'static str {
-    let Some(link) = &a.link else { return "embedded" };
+/// Linked images checked this session: (asset, the identity of its bytes, the file its link
+/// resolves to) → (the file's size and time when it was read, whether it matched the bytes). The
+/// resolved file, not the link text, is the key: a relative link names another file once the
+/// document is saved elsewhere. The bytes' identity (their `Arc`'s address, as the render cache
+/// keys them) changes with every relink, update or undo, so a remembered answer can never
+/// describe other bytes.
+pub(crate) type ImageChecks = std::collections::HashMap<(AssetId, usize, std::path::PathBuf), (Fingerprint, bool)>;
+
+/// The size and time to keep with `bytes` just read from a linked file, `before` being the
+/// file's from before the read. Kept only when they can vouch for the bytes later: the size is
+/// the bytes' (the file didn't change while it was read) and the time is [`settled`] (another
+/// write in the same second, a file still being synced, would keep it). A linked text file's time
+/// is kept on the same terms.
+pub(crate) fn loaded_fingerprint(before: Option<Fingerprint>, bytes: &[u8]) -> Option<Fingerprint> {
+    before.filter(|f| f.size == bytes.len() as u64 && settled(f))
+}
+
+/// Is the linked file still the one the asset's bytes were loaded from, going by the size and
+/// time kept then ([`designcraft_doc::Asset::link_fingerprint`], [`loaded_fingerprint`])? Nothing
+/// is read when it is, also on the first check after a document is opened, which matters on a
+/// network share. A fingerprint of another size than the bytes isn't theirs and doesn't count; a
+/// new time or no fingerprint leave it to the byte comparison.
+#[cfg(not(target_arch = "wasm32"))]
+fn loaded_unchanged(a: &designcraft_doc::Asset, now: Fingerprint) -> bool {
+    a.link_fingerprint.is_some_and(|loaded| loaded.size == a.data.len() as u64 && loaded == now && settled(&now))
+}
+
+/// Link status of a placed graphic (`ok`, `modified`, `missing`, `embedded`), reading the file
+/// only when its size is the asset's and its time is neither the one the bytes were loaded at
+/// ([`loaded_unchanged`]) nor the one remembered from the last read (`checks`): the Links panel
+/// polls, and a document of press-size images would otherwise be read whole on every poll. A file
+/// changed in the last two seconds is never remembered (see [`settled`]).
+pub(crate) fn status_cached(a: &designcraft_doc::Asset, document: Option<&Path>, checks: &mut ImageChecks) -> &'static str {
+    image_status(a, document, checks).0
+}
+
+/// [`status_cached`], and the file's size and time when a read found the asset's bytes in it
+/// although the fingerprint kept with the asset says nothing or something else: what
+/// [`remember_link_files`] keeps, so the file isn't read again in another session.
+fn image_status(a: &designcraft_doc::Asset, document: Option<&Path>, checks: &mut ImageChecks) -> (&'static str, Option<Fingerprint>) {
+    let Some(link) = &a.link else { return ("embedded", None) };
     // Nothing was read from the file (a package's link that wasn't followed): missing, as in
     // Preflight.
     if a.data.is_empty() {
-        return "missing";
+        return ("missing", None);
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let Ok(path) = crate::io::document_path(link, document) else { return "missing" };
+        let Ok(path) = crate::io::document_path(link, document) else { return ("missing", None) };
         if !crate::io::is_file(&path) {
-            return "missing";
+            return ("missing", None);
         }
-        match crate::io::metadata(&path) {
-            Err(_) => "missing",
-            Ok(m) if m.len() as usize != a.data.len() => "modified",
-            // Same size: compare the bytes (cheap for the sizes involved, and exact).
-            Ok(_) => match crate::io::read_capped(&path, a.data.len() as u64) {
-                Ok(b) if b == *a.data => "ok",
-                Ok(_) => "modified",
-                Err(_) => "missing",
-            },
+        let now = match crate::io::metadata(&path) {
+            Err(_) => return ("missing", None),
+            Ok(m) => super::datamerge::fingerprint_from(&m),
+        };
+        if loaded_unchanged(a, now) {
+            return ("ok", None);
         }
+        if now.size != a.data.len() as u64 {
+            return ("modified", None);
+        }
+        let key = (a.id, Arc::as_ptr(&a.data) as usize, path.clone());
+        if let Some((at, same)) = checks.get(&key)
+            && *at == now
+        {
+            return if *same { ("ok", Some(now)) } else { ("modified", None) };
+        }
+        let same = match crate::io::read_capped(&path, a.data.len() as u64) {
+            Ok(b) => b == *a.data,
+            Err(_) => return ("missing", None),
+        };
+        // The time from before the read: a change during it is seen next time.
+        let settled = settled(&now);
+        if settled {
+            checks.insert(key, (now, same));
+        }
+        if same { ("ok", settled.then_some(now)) } else { ("modified", None) }
     }
     #[cfg(target_arch = "wasm32")]
     {
-        let _ = (link, document);
-        "ok"
+        let _ = (link, document, checks);
+        ("ok", None)
     }
 }
 
@@ -317,17 +371,130 @@ fn shown<'a>(d: &'a Document, cache: &Cache, aid: AssetId) -> Vec<Shown<'a>> {
     out
 }
 
-fn list(d: &Document, cache: &Cache, document: Option<&Path>, checks: &mut TextChecks) -> Vec<Value> {
-    let texts = d.stories.values().filter_map(|st| {
-        let l = st.file_link.as_ref()?;
+/// What a check of a document's links remembers between runs: the linked text files and images
+/// already compared with the document ([`TextChecks`], [`ImageChecks`]), so a poll reads nothing
+/// unchanged. The [`Session`] keeps one for `links.list`; a caller that lists a document's links
+/// itself ([`list_document_links`]) keeps its own.
+#[derive(Default)]
+pub struct LinkListChecks {
+    text: TextChecks,
+    images: ImageChecks,
+    /// Linked images the latest list read and found to hold the document's bytes, with the file's
+    /// size and time then ([`LinkListChecks::take_verified`]).
+    verified: Vec<(AssetId, Fingerprint)>,
+}
+
+impl LinkListChecks {
+    /// The linked images the latest list found unchanged by comparing bytes, because the size
+    /// and time kept with them said nothing or something else: [`remember_link_files`] keeps the
+    /// file's current ones with them.
+    pub fn take_verified(&mut self) -> Vec<(AssetId, Fingerprint)> {
+        std::mem::take(&mut self.verified)
+    }
+
+    /// Add what `other` remembers (the checks of another worker thread).
+    pub fn absorb(&mut self, other: LinkListChecks) {
+        self.text.extend(other.text);
+        self.images.extend(other.images);
+    }
+
+    /// How many files are remembered.
+    pub fn len(&self) -> usize {
+        self.text.len() + self.images.len()
+    }
+
+    /// Is nothing remembered yet?
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
+/// The rows of `links.list` without looking at a linked file: `checking` stands where a file
+/// would be read or asked for its size and time. A native UI shows these at once and fills in
+/// what [`list_document_links`] finds on a worker thread, where a share that doesn't answer
+/// can't stall it.
+pub fn preview_document_links(d: &Document, cache: &Cache, document: Option<&Path>) -> Vec<Value> {
+    list(d, cache, document, None, None).unwrap_or_default()
+}
+
+/// The rows of `links.list` for a document outside a [`Session`], so a native UI can check the
+/// linked files on a worker thread. `checks` is what the worker remembers between calls. Another
+/// thread sets `stop` to end the check before its next file (the one being asked may be on a
+/// share that doesn't answer, and hundreds more may follow it): nothing is returned then.
+pub fn list_document_links(
+    d: &Document,
+    cache: &Cache,
+    document: Option<&Path>,
+    checks: &mut LinkListChecks,
+    stop: &AtomicBool,
+) -> Option<Vec<Value>> {
+    list(d, cache, document, Some(checks), Some(stop))
+}
+
+/// Keep, with each linked image in `files`, the size and time its file had when a check read it
+/// and found the document's bytes in it ([`LinkListChecks::take_verified`]). Later checks, and
+/// the first one of another session, then don't read it: copying, restoring or checking out a
+/// project folder gives every file a new time. `doc` is the document the check ran on: nothing
+/// is kept when the active document isn't that one any more (other bytes may be linked by now),
+/// or during a gesture. Nothing placed changes, so a saved document stays saved; the times go
+/// into its file with the next save. → how many were kept
+pub fn remember_link_files(s: &mut Session, doc: &Arc<Document>, files: &[(AssetId, Fingerprint)]) -> usize {
+    let Ok(st) = s.doc_mut() else { return 0 };
+    if !Arc::ptr_eq(&st.doc, doc) || st.interaction.is_some() {
+        return 0;
+    }
+    let stale = |a: &designcraft_doc::Asset, f: &Fingerprint| a.link.is_some() && a.data.len() as u64 == f.size && a.link_fingerprint != Some(*f);
+    let fresh: Vec<(AssetId, Fingerprint)> = files.iter().filter(|(id, f)| st.doc.assets.get(id).is_some_and(|a| stale(a, f))).copied().collect();
+    if fresh.is_empty() {
+        return 0;
+    }
+    let saved = !st.is_dirty();
+    let d = Arc::make_mut(&mut st.doc);
+    for (id, f) in &fresh {
+        if let Some(a) = d.assets.get_mut(id) {
+            Arc::make_mut(a).link_fingerprint = Some(*f);
+        }
+    }
+    if saved {
+        st.saved_doc = Arc::clone(&st.doc);
+    }
+    fresh.len()
+}
+
+/// `links.list`: every used placed graphic, then every linked text file, each with its status.
+/// `files` is what was read this session (a poll reads nothing unchanged); without it no file is
+/// looked at and a status that needs one is `checking` ([`preview_document_links`]). `None` when
+/// `stop` was set before the last link was reached.
+fn list(d: &Document, cache: &Cache, document: Option<&Path>, files: Option<&mut LinkListChecks>, stop: Option<&AtomicBool>) -> Option<Vec<Value>> {
+    let stopped = || stop.is_some_and(|stop| stop.load(Ordering::Relaxed));
+    let (mut checks, mut images, mut verified) = match files {
+        Some(files) => {
+            files.verified.clear();
+            (Some(&mut files.text), Some(&mut files.images), Some(&mut files.verified))
+        }
+        None => (None, None, None),
+    };
+    let texts = d.stories.values().filter_map(|st| Some((st, st.file_link.as_ref()?))).map(|(st, l)| {
+        if stopped() {
+            return None;
+        }
         let uses: Vec<Value> = st.frames.iter().map(|id| json!({"id": id.0, "page": d.page_of_item(*id).map(|p| d.page_name(p))})).collect();
-        Some(json!({"story": st.id.0, "name": file_name(&l.path), "path": l.path, "status": text_status(l, checks, document), "refused": refused(&l.path, document).map(|r| r.to_string()), "edited": story_hash(st) != l.story_hash, "uses": uses}))
+        let why = refused(&l.path, document).map(|r| r.to_string());
+        let status = match checks.as_deref_mut() {
+            Some(checks) => text_status(l, checks, document),
+            None if why.is_some() => "missing",
+            None => "checking",
+        };
+        Some(json!({"story": st.id.0, "name": file_name(&l.path), "path": l.path, "status": status, "refused": why, "edited": story_hash(st) != l.story_hash, "uses": uses}))
     });
     let used = d.used_assets();
     d.assets
         .values()
         .filter(|a| used.contains(&a.id))
         .map(|a| {
+            if stopped() {
+                return None;
+            }
             let uses: Vec<Value> = shown(d, cache, a.id)
                 .into_iter()
                 .map(|u| {
@@ -350,7 +517,19 @@ fn list(d: &Document, cache: &Cache, document: Option<&Path>, checks: &mut TextC
                 .collect();
             let pdf_crop = (a.mime == "application/pdf").then(|| a.pdf_crop.name());
             let why = a.link.as_deref().and_then(|l| refused(l, document)).map(|r| r.to_string());
-            json!({"asset": a.id.0, "name": a.name, "path": a.link, "status": status(a, document), "refused": why, "pixels": a.pixels, "pdfCrop": pdf_crop, "uses": uses})
+            let status = match images.as_deref_mut() {
+                Some(images) => {
+                    let (status, file) = image_status(a, document, images);
+                    if let (Some(verified), Some(file)) = (verified.as_deref_mut(), file) {
+                        verified.push((a.id, file));
+                    }
+                    status
+                }
+                None if a.link.is_none() => "embedded",
+                None if a.data.is_empty() || why.is_some() => "missing",
+                None => "checking",
+            };
+            Some(json!({"asset": a.id.0, "name": a.name, "path": a.link, "status": status, "refused": why, "pixels": a.pixels, "pdfCrop": pdf_crop, "uses": uses}))
         })
         .chain(texts)
         .collect()
@@ -429,7 +608,10 @@ fn reload(path: impl AsRef<Path>) -> Result<(Vec<u8>, (u32, u32))> {
 /// Relink passes the file the user chose as both. Update passes the path the stored link resolved
 /// to and the stored link itself, so refreshing a link never rewrites what the document holds.
 fn relinked_asset(a: &designcraft_doc::Asset, read: &Path, link: &str) -> Result<Arc<designcraft_doc::Asset>> {
+    // The size and time from before the read: a change during it is seen by the next check.
+    let before = super::datamerge::fingerprint_of(read);
     let (bytes, px) = reload(read)?;
+    let loaded = loaded_fingerprint(before, &bytes);
     let page = if designcraft_render::is_pdf(&bytes) { a.page } else { 0 };
     let px = if page > 0 {
         designcraft_render::pdf_page_size(&bytes, page as usize)
@@ -444,12 +626,13 @@ fn relinked_asset(a: &designcraft_doc::Asset, read: &Path, link: &str) -> Result
     a.pixels = Some(px);
     a.page = page;
     a.name = Path::new(link).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| link.to_string());
-    a.link = Some(link.to_string());
+    a.set_link(Some(link.to_string()), loaded);
     // A placed PDF keeps its crop choice; its box is found on the new file.
     super::file::crop_pdf(&mut a);
     Ok(Arc::new(a))
 }
 
+/// `links.relink`: a placed graphic or linked text file takes its bytes from `path` from now on.
 fn relink(s: &mut Session, p: &Value) -> Result<Value> {
     let path = str_param(p, "path").ok_or_else(|| bad("links.relink", "missing path"))?.to_string();
     if let Some(sid) = story_param(p) {
@@ -464,13 +647,17 @@ fn relink(s: &mut Session, p: &Value) -> Result<Value> {
     let a = s.doc()?.doc.assets.get(&aid).ok_or_else(|| bad("links.relink", "no such graphic"))?;
     // Build the replacement before the edit: a file that cannot be read leaves the document as it was.
     let fresh = relinked_asset(a, Path::new(&path), &path)?;
-    s.edit(|d, _| {
+    let r = s.edit(|d, _| {
         let name = fresh.name.clone();
         d.assets.insert(aid, fresh);
         Ok(json!({"name": name}))
-    })
+    });
+    s.link_checks.images.clear();
+    r
 }
 
+/// `links.relinkFolder`: relink graphics to same-named files in a folder and/or with another
+/// extension (the missing ones by default).
 fn relink_folder(s: &mut Session, p: &Value) -> Result<Value> {
     let dir = str_param(p, "dir").map(std::path::PathBuf::from);
     if let Some(dir) = &dir {
@@ -486,12 +673,13 @@ fn relink_folder(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let missing_only = p.get("missingOnly").and_then(Value::as_bool).unwrap_or(dir.is_some() && ext.is_none());
     let only: Option<Vec<u64>> = p.get("assets").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_u64).collect());
+    let mut images = std::mem::take(&mut s.link_checks.images);
     let st = s.doc()?;
     let (d, document) = (&st.doc, st.path.as_deref().map(Path::new));
     let mut todo: Vec<(AssetId, std::path::PathBuf)> = Vec::new();
     let mut not_found = Vec::new();
     for a in d.assets.values() {
-        if only.as_ref().is_some_and(|o| !o.contains(&a.id.0)) || (missing_only && status(a, document) != "missing") {
+        if only.as_ref().is_some_and(|o| !o.contains(&a.id.0)) || (missing_only && status_cached(a, document, &mut images) != "missing") {
             continue;
         }
         let old = std::path::PathBuf::from(a.link.clone().unwrap_or_else(|| a.name.clone()));
@@ -538,17 +726,20 @@ fn relink_folder(s: &mut Session, p: &Value) -> Result<Value> {
             }
             Ok(())
         })?;
+        images.clear();
     }
+    s.link_checks.images = images;
     Ok(json!({"relinked": n, "notFound": not_found}))
 }
 
+/// `links.update`: re-read the modified links (one, or every one) from where they resolve.
 fn update(s: &mut Session, p: &Value) -> Result<Value> {
     let (d, document) = {
         let st = s.doc()?;
         (st.doc.clone(), st.path.clone())
     };
     let document = document.as_deref().map(Path::new);
-    let checks = &mut s.text_link_checks;
+    let LinkListChecks { text: checks, images, .. } = &mut s.link_checks;
     let (only_asset, only_story) = (p.get("asset").and_then(Value::as_u64), story_param(p));
     let all = only_asset.is_none() && only_story.is_none();
     // A link craft-docpath refuses is missing, so it is never read or refreshed.
@@ -563,7 +754,7 @@ fn update(s: &mut Session, p: &Value) -> Result<Value> {
         })
         .collect();
     let mut fresh = Vec::new();
-    for a in d.assets.values().filter(|a| all || only_asset == Some(a.id.0)).filter(|a| status(a, document) == "modified") {
+    for a in d.assets.values().filter(|a| all || only_asset == Some(a.id.0)).filter(|a| status_cached(a, document, images) == "modified") {
         // The bytes come from where the stored link resolves; the link itself stays as the
         // document stored it, so refreshing never rewrites a relative link to an absolute one.
         if let Some((link, at)) = a.link.as_deref().and_then(|l| resolved(l).map(|at| (l, at))) {
@@ -579,7 +770,7 @@ fn update(s: &mut Session, p: &Value) -> Result<Value> {
     if n == 0 {
         return Ok(json!({"updated": 0}));
     }
-    s.edit(|d, _| {
+    let r = s.edit(|d, _| {
         for (aid, a) in fresh {
             d.assets.insert(aid, a);
         }
@@ -588,387 +779,13 @@ fn update(s: &mut Session, p: &Value) -> Result<Value> {
             warnings.extend(reimport(d, *sid, path, bytes, *before)?);
         }
         Ok(json!({"updated": n, "warnings": warnings}))
-    })
+    });
+    s.link_checks.images.clear();
+    r
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn png(w: u32, h: u32) -> Vec<u8> {
-        designcraft_render::Rendered { width: w, height: h, pixels: vec![200u8; (w * h * 4) as usize] }.to_png()
-    }
-
-    /// A linked file's size is the document's choice, so a link is read under a cap (#1596).
-    #[cfg(not(target_arch = "wasm32"))]
-    #[test]
-    fn a_linked_file_over_the_cap_is_refused_instead_of_read() {
-        let dir = std::env::temp_dir().join(format!("dc-link-cap-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("big.png");
-        let bytes = png(40, 40);
-        std::fs::write(&path, &bytes).unwrap();
-
-        // Under the cap the file is read and measured as before.
-        let (read, px) = reload_capped(&path, bytes.len() as u64).expect("a file within the cap is read");
-        assert_eq!((read.len(), px), (bytes.len(), (40, 40)));
-
-        // Over it the file is refused by name, and the error says what the limit is.
-        let err = reload_capped(&path, (bytes.len() - 1) as u64).expect_err("a file over the cap is refused");
-        let msg = err.to_string();
-        assert!(msg.contains("big.png") && msg.contains("larger than"), "the error names the file and the limit: {msg}");
-
-        // The real cap is the one packaging uses, so an ordinary graphic still loads.
-        assert!(reload(&path).is_ok(), "a normal linked graphic is unaffected");
-        let _ = std::fs::remove_dir_all(&dir);
-    }
-
-    fn pdf(sizes: &[(u32, u32)]) -> Vec<u8> {
-        let mut s = Session::new();
-        s.execute("file.new", &json!({"pages": sizes.len(), "facingPages": false})).unwrap();
-        for (i, (width, height)) in sizes.iter().enumerate() {
-            s.execute("layout.pageSize", &json!({"pages": [i + 1], "width": width, "height": height})).unwrap();
-        }
-        let result = s.execute("file.exportPdf", &json!({})).unwrap();
-        super::super::file::base64_decode(result["base64"].as_str().unwrap())
-    }
-
-    #[test]
-    fn anchored_image_lists_its_page_and_resolution() {
-        let mut s = Session::new();
-        s.execute("file.new", &json!({"pages": 2, "facingPages": false})).unwrap();
-        let r = s
-            .execute("frame.create", &json!({"spread": 1, "rect": [72, 72, 400, 400], "content": "text", "text": "Before after and more words."}))
-            .unwrap();
-        let sid = s.doc().unwrap().doc.item(ItemId(r["id"].as_u64().unwrap())).unwrap().text_frame().unwrap().story;
-        let placed = s
-            .execute(
-                "file.place",
-                &json!({"base64": super::super::file::base64_encode(&png(10, 10)), "name": "dot.png", "x": 450, "y": 450, "width": 36}),
-            )
-            .unwrap();
-        let id = placed["id"].as_u64().unwrap();
-        let before = s.execute("links.list", &json!({})).unwrap();
-        assert_eq!(before[0]["uses"][0]["ppi"], 20.0);
-        s.execute("anchored.insert", &json!({"ids": [id], "story": sid.0, "pos": 7})).unwrap();
-        let list = s.execute("links.list", &json!({})).unwrap();
-        let uses = list[0]["uses"].as_array().unwrap();
-        assert_eq!(uses.len(), 1, "anchored image must have one use: {list}");
-        assert_eq!(uses[0]["page"], "2");
-        assert_eq!(uses[0]["ppi"], 20.0);
-    }
-
-    #[test]
-    fn eps_web_exports_convert_tiff_and_skip_bad_used_assets() {
-        use std::io::Read;
-        let bytes = super::super::file::eps_place_tests::tiff_eps();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        let placed = s.execute("file.place", &json!({"base64":super::super::file::base64_encode(&bytes),"name":"logo.eps"})).unwrap();
-        let aid = AssetId(placed["asset"].as_u64().unwrap());
-        let before = s.doc().unwrap().doc.clone();
-        let html = s.execute("file.exportHtml", &json!({})).unwrap();
-        let encoded = html["text"].as_str().unwrap().split("data:image/png;base64,").nth(1).unwrap().split('"').next().unwrap();
-        let png = super::super::file::base64_decode(encoded);
-        assert!(png.starts_with(b"\x89PNG"));
-        assert_eq!(designcraft_render::image_size(&png), Some((2, 2)));
-        assert_eq!(designcraft_render::decode_pixmap(&png).unwrap().data()[0], designcraft_render::decode_pixmap(&bytes).unwrap().data()[0]);
-        let result = s.execute("file.exportEpub", &json!({})).unwrap();
-        let mut z = zip::ZipArchive::new(std::io::Cursor::new(super::super::file::base64_decode(result["base64"].as_str().unwrap()))).unwrap();
-        let mut image = Vec::new();
-        z.by_name(&format!("OEBPS/images/logo-{}.png", aid.0)).unwrap().read_to_end(&mut image).unwrap();
-        assert_eq!(image, png);
-        let mut opf = String::new();
-        z.by_name("OEBPS/content.opf").unwrap().read_to_string(&mut opf).unwrap();
-        assert!(opf.contains("media-type=\"image/png\""));
-        assert!(!opf.contains("image/tiff"));
-        assert!(Arc::ptr_eq(&before, &s.doc().unwrap().doc));
-        s.edit(|d, _| {
-            Arc::make_mut(d.assets.get_mut(&aid).unwrap()).data = Arc::new(b"%!PS-Adobe-3.0 EPSF-3.0\n%%EOF\n".to_vec());
-            Ok(())
-        })
-        .unwrap();
-        let before = s.doc().unwrap().doc.clone();
-        for command in ["file.exportHtml", "file.exportEpub"] {
-            let result = s.execute(command, &json!({})).unwrap();
-            assert_eq!(result["warnings"].as_array().unwrap().len(), 1, "{command}");
-            if command == "file.exportHtml" {
-                assert!(!result["text"].as_str().unwrap().contains("<img "));
-            }
-        }
-        assert!(Arc::ptr_eq(&before, &s.doc().unwrap().doc));
-        s.execute("edit.clear", &json!({})).unwrap();
-        assert!(s.doc().unwrap().doc.assets.contains_key(&aid));
-        for command in ["file.exportHtml", "file.exportEpub"] {
-            let result = s.execute(command, &json!({})).unwrap();
-            assert!(result["warnings"].as_array().unwrap().is_empty(), "unused EPS: {command}");
-        }
-    }
-
-    #[test]
-    fn eps_status_tracks_source_bytes_across_save_update_relink_and_embed() {
-        let dir = std::env::temp_dir().join(format!("dc-eps-status-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("logo.eps");
-        let first = b"%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 20 10\n0 0 0 setrgbcolor\n%%EOF\n";
-        let changed = b"%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 20 10\n1 0 0 setrgbcolor\n%%EOF\n";
-        assert_eq!(first.len(), changed.len());
-        assert_eq!(designcraft_images::eps_proxy(first), designcraft_images::eps_proxy(changed), "same preview, different source");
-        std::fs::write(&path, first).unwrap();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        let aid = AssetId(s.execute("file.place", &json!({"path": path.to_string_lossy()})).unwrap()["asset"].as_u64().unwrap());
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        let before = s.doc().unwrap().doc.clone();
-        assert_eq!(s.execute("links.update", &json!({})).unwrap()["updated"], 0);
-        assert!(Arc::ptr_eq(&s.doc().unwrap().doc, &before), "unchanged EPS must not create an edit");
-        let saved = designcraft_format::save(&before).unwrap();
-        let reopened = designcraft_format::load(&saved).unwrap();
-        assert_eq!(reopened.assets[&aid].data.as_slice(), first);
-        let mut s = Session::new();
-        s.add_document(crate::DocState::new(reopened, None));
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        std::fs::write(&path, changed).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "modified");
-        assert_eq!(s.execute("links.update", &json!({})).unwrap()["updated"], 1);
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].data.as_slice(), changed);
-        std::fs::remove_file(&path).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "missing");
-        let replacement = dir.join("replacement.eps");
-        std::fs::write(&replacement, changed).unwrap();
-        s.execute("links.relink", &json!({"asset": aid.0, "path": replacement.to_string_lossy()})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        s.execute("edit.undo", &json!({})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "missing");
-        s.execute("edit.redo", &json!({})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        s.execute("links.embed", &json!({"asset": aid.0})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "embedded");
-        std::fs::remove_file(&replacement).unwrap();
-        let embedded = designcraft_format::load(&designcraft_format::save(&s.doc().unwrap().doc).unwrap()).unwrap();
-        // The asset is embedded, so no link is followed and the document is irrelevant.
-        assert_eq!(status(&embedded.assets[&aid], None), "embedded");
-        assert_eq!(embedded.assets[&aid].data.as_slice(), changed);
-        assert!(designcraft_render::decode_pixmap(&embedded.assets[&aid].data).is_some());
-        let _ = std::fs::remove_dir_all(dir);
-    }
-
-    #[test]
-    fn eps_legacy_preview_document_is_upgraded_by_update() {
-        let dir = std::env::temp_dir().join(format!("dc-eps-legacy-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("logo.eps");
-        let source = b"%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 20 10\n%%EOF\n";
-        std::fs::write(&path, source).unwrap();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        let aid = AssetId(s.execute("file.place", &json!({"path": path.to_string_lossy()})).unwrap()["asset"].as_u64().unwrap());
-        let proxy = designcraft_images::eps_proxy(source).unwrap().0;
-        s.edit(|d, _| {
-            let a = Arc::make_mut(d.assets.get_mut(&aid).unwrap());
-            a.data = Arc::new(proxy);
-            a.mime = "image/png".into();
-            Ok(())
-        })
-        .unwrap();
-        let old = designcraft_format::load(&designcraft_format::save(&s.doc().unwrap().doc).unwrap()).unwrap();
-        let mut s = Session::new();
-        s.add_document(crate::DocState::new(old, None));
-        assert_eq!(s.execute("links.update", &json!({})).unwrap()["updated"], 1);
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].data.as_slice(), source);
-        s.execute("edit.undo", &json!({})).unwrap();
-        assert!(designcraft_render::decode_pixmap(&s.doc().unwrap().doc.assets[&aid].data).is_some(), "old preview remains renderable");
-        s.execute("edit.redo", &json!({})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        let _ = std::fs::remove_dir_all(dir);
-    }
-
-    #[test]
-    fn eps_source_exports_preview_to_pdf_html_and_epub_without_editing_document() {
-        use hayro_syntax::object::Name;
-        use std::io::Read;
-
-        let source = b"%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 20 10\n%%EOF\n";
-        let proxy = designcraft_images::eps_proxy(source).unwrap().0;
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        let aid = AssetId(
-            s.execute("file.place", &json!({"base64": super::super::file::base64_encode(source), "name": "logo.eps"})).unwrap()["asset"]
-                .as_u64()
-                .unwrap(),
-        );
-        // A document retaining the original EPS rather than the legacy preview-only asset.
-        s.edit(|d, _| {
-            let a = Arc::make_mut(d.assets.get_mut(&aid).unwrap());
-            a.data = Arc::new(source.to_vec());
-            a.mime = "application/postscript".into();
-            Ok(())
-        })
-        .unwrap();
-        let before = s.doc().unwrap().doc.clone();
-        let result = s.execute("file.exportPdf", &json!({})).unwrap();
-        assert!(result["warnings"].as_array().unwrap().is_empty(), "{:?}", result["warnings"]);
-        let pdf = hayro_syntax::Pdf::new(super::super::file::base64_decode(result["base64"].as_str().unwrap())).unwrap();
-        assert_eq!(
-            pdf.objects()
-                .into_iter()
-                .filter_map(|o| o.into_stream())
-                .filter(|st| st.dict().get::<Name>("Subtype").is_some_and(|n| n.as_str() == "Image"))
-                .count(),
-            1
-        );
-        let result = s.execute("file.exportHtml", &json!({})).unwrap();
-        let encoded = result["text"].as_str().unwrap().split("data:image/png;base64,").nth(1).unwrap().split('"').next().unwrap();
-        assert_eq!(super::super::file::base64_decode(encoded), proxy);
-        let result = s.execute("file.exportEpub", &json!({})).unwrap();
-        let bytes = super::super::file::base64_decode(result["base64"].as_str().unwrap());
-        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).unwrap();
-        let mut image = Vec::new();
-        archive.by_name(&format!("OEBPS/images/logo-{}.png", aid.0)).unwrap().read_to_end(&mut image).unwrap();
-        assert_eq!(image, proxy);
-        let mut opf = String::new();
-        archive.by_name("OEBPS/content.opf").unwrap().read_to_string(&mut opf).unwrap();
-        assert!(opf.contains("media-type=\"image/png\""));
-        assert!(!opf.contains("application/postscript"));
-        assert!(Arc::ptr_eq(&s.doc().unwrap().doc, &before), "exports must leave the source document intact");
-        assert_eq!(before.assets[&aid].data.as_slice(), source);
-    }
-
-    #[test]
-    fn eps_relink_update_and_folder_relink_retain_source() {
-        let dir = std::env::temp_dir().join(format!("dc-links-eps-{}", std::process::id()));
-        std::fs::create_dir_all(dir.join("new")).unwrap();
-        let eps = |w: u32| format!("%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 {w} 10\n%%EOF\n");
-        let original = dir.join("original.eps");
-        let replacement = dir.join("replacement.eps");
-        std::fs::write(&original, eps(10)).unwrap();
-        std::fs::write(&replacement, eps(30)).unwrap();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        s.execute("file.place", &json!({"path": original.to_string_lossy()})).unwrap();
-        let aid = s.doc().unwrap().doc.assets.keys().next().copied().unwrap();
-        std::fs::write(&original, eps(20)).unwrap();
-        assert_eq!(s.execute("links.update", &json!({})).unwrap()["updated"], 1);
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].pixels, Some((40, 20)));
-        s.execute("links.relink", &json!({"asset": aid.0, "path": replacement.to_string_lossy()})).unwrap();
-        let a = &s.doc().unwrap().doc.assets[&aid];
-        assert_eq!(a.pixels, Some((60, 20)));
-        assert_eq!(a.mime, "application/postscript");
-        assert_eq!(a.data.as_slice(), eps(30).as_bytes());
-        let moved = dir.join("new").join("replacement.eps");
-        std::fs::rename(&replacement, &moved).unwrap();
-        assert_eq!(s.execute("links.relinkFolder", &json!({"dir": dir.join("new").to_string_lossy()})).unwrap()["relinked"], 1);
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].link.as_deref(), moved.to_str());
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "ok");
-        let _ = std::fs::remove_dir_all(dir);
-    }
-
-    #[test]
-    fn pdf_relink_and_update_preserve_selected_page_size() {
-        let dir = std::env::temp_dir().join(format!("dc-links-pdf-size-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let original = dir.join("original.pdf");
-        let replacement = dir.join("replacement.pdf");
-        std::fs::write(&original, pdf(&[(10, 10), (20, 30)])).unwrap();
-        std::fs::write(&replacement, pdf(&[(40, 40), (50, 60)])).unwrap();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        s.execute("file.place", &json!({"path": original.to_string_lossy(), "pdfPage": 2})).unwrap();
-        let aid = s.doc().unwrap().doc.assets.keys().next().copied().unwrap();
-        s.execute("links.relink", &json!({"asset": aid.0, "path": replacement.to_string_lossy()})).unwrap();
-        let a = &s.doc().unwrap().doc.assets[&aid];
-        assert_eq!(a.page, 1);
-        assert_eq!(a.pixels, Some((50, 60)));
-        assert!(designcraft_render::render_pdf_page(&a.data, a.page as usize, 64).is_some());
-        std::fs::write(&replacement, pdf(&[(70, 70), (80, 90)])).unwrap();
-        assert_eq!(s.execute("links.update", &json!({})).unwrap()["updated"], 1);
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].pixels, Some((80, 90)));
-        let raster = dir.join("replacement.png");
-        std::fs::write(&raster, png(4, 5)).unwrap();
-        s.execute("links.relink", &json!({"asset": aid.0, "path": raster.to_string_lossy()})).unwrap();
-        assert_eq!(s.doc().unwrap().doc.assets[&aid].page, 0);
-        let _ = std::fs::remove_dir_all(dir);
-    }
-
-    #[test]
-    fn pdf_reload_rejects_missing_page_without_edit() {
-        let full = pdf(&[(10, 10), (20, 30)]);
-        let short = pdf(&[(10, 10)]);
-        let dir = std::env::temp_dir().join(format!("dc-links-pdf-page-{}", std::process::id()));
-        std::fs::create_dir_all(dir.join("new")).unwrap();
-        let original = dir.join("book.pdf");
-        let replacement = dir.join("new/book.pdf");
-        std::fs::write(&replacement, short.clone()).unwrap();
-        for command in ["links.relink", "links.relinkFolder", "links.update"] {
-            std::fs::write(&original, &full).unwrap();
-            let mut s = Session::new();
-            s.execute("file.new", &json!({})).unwrap();
-            s.execute("file.place", &json!({"path": original.to_string_lossy(), "pdfPage": 2})).unwrap();
-            let aid = s.doc().unwrap().doc.assets.keys().next().copied().unwrap();
-            if command == "links.update" {
-                std::fs::write(&original, &short).unwrap();
-            }
-            let st = s.doc().unwrap();
-            let before = st.doc.clone();
-            let revision = st.revision;
-            let undo = st.history.undo.len();
-            let journal = s.journal.len();
-            let params = match command {
-                "links.relinkFolder" => json!({"dir": dir.join("new").to_string_lossy(), "missingOnly": false}),
-                "links.update" => json!({"asset": aid.0}),
-                _ => json!({"asset": aid.0, "path": replacement.to_string_lossy()}),
-            };
-            let err = s.execute(command, &params).unwrap_err();
-            assert!(err.to_string().contains("PDF page 2"), "{command}: {err}");
-            let st = s.doc().unwrap();
-            assert!(Arc::ptr_eq(&st.doc, &before), "{command}");
-            assert_eq!(st.revision, revision);
-            assert_eq!(st.history.undo.len(), undo);
-            assert_eq!(s.journal.len(), journal);
-            assert!(designcraft_render::render_pdf_page(&st.doc.assets[&aid].data, 1, 64).is_some());
-        }
-        let _ = std::fs::remove_dir_all(dir);
-    }
-
-    #[test]
-    fn link_status_relink_update_embed() {
-        let dir = std::env::temp_dir().join(format!("dc-links-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let a = dir.join("a.png");
-        let b = dir.join("b.png");
-        std::fs::write(&a, png(10, 10)).unwrap();
-        std::fs::write(&b, png(20, 10)).unwrap();
-        let mut s = Session::new();
-        s.execute("file.new", &json!({})).unwrap();
-        s.execute("file.place", &json!({"path": a.to_string_lossy(), "x": 72, "y": 72, "width": 72})).unwrap();
-        let l = s.execute("links.list", &json!({})).unwrap();
-        assert_eq!(l[0]["status"], "ok");
-        assert_eq!(l[0]["uses"][0]["ppi"], 10.0, "10 px over 1 inch");
-        let aid = l[0]["asset"].as_u64().unwrap();
-        // The file changes on disk.
-        std::fs::write(&a, png(30, 10)).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "modified");
-        s.execute("links.update", &json!({})).unwrap();
-        let l = s.execute("links.list", &json!({})).unwrap();
-        assert_eq!(l[0]["status"], "ok");
-        assert_eq!(l[0]["pixels"], json!([30, 10]));
-        // Missing, then relinked.
-        std::fs::remove_file(&a).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "missing");
-        s.execute("links.relink", &json!({"asset": aid, "path": b.to_string_lossy()})).unwrap();
-        let l = s.execute("links.list", &json!({})).unwrap();
-        assert_eq!((l[0]["status"].as_str(), l[0]["name"].as_str()), (Some("ok"), Some("b.png")));
-        // Go to selects the frame; embed forgets the file.
-        let r = s.execute("links.goTo", &json!({"asset": aid})).unwrap();
-        assert_eq!(r["ids"].as_array().unwrap().len(), 1);
-        s.execute("links.embed", &json!({"asset": aid})).unwrap();
-        assert_eq!(s.execute("links.list", &json!({})).unwrap()[0]["status"], "embedded");
-        let _ = std::fs::remove_dir_all(&dir);
-    }
-}
+mod tests;
 
 #[cfg(test)]
 mod relink_folder_tests {
@@ -1278,7 +1095,6 @@ mod text_link_tests {
 
     /// A small Word file: a Title paragraph, then Body paragraphs (`body` is WordprocessingML).
     fn docx(body: &str) -> Vec<u8> {
-        use std::io::Write;
         const W: &str = r#"xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main""#;
         let styles = format!(
             r#"<w:styles {W}><w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:rPr><w:sz w:val="56"/></w:rPr></w:style>
@@ -1288,13 +1104,7 @@ mod text_link_tests {
             r#"<w:document {W}><w:body><w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr><w:r><w:t>Head</w:t></w:r></w:p>
             <w:p><w:pPr><w:pStyle w:val="Body"/></w:pPr>{body}</w:p></w:body></w:document>"#
         );
-        let mut w = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
-        let o = zip::write::SimpleFileOptions::default();
-        for (n, c) in [("word/document.xml", doc), ("word/styles.xml", styles)] {
-            w.start_file(n, o).unwrap();
-            w.write_all(c.as_bytes()).unwrap();
-        }
-        w.finish().unwrap().into_inner()
+        crate::cmd::place_text::word_package(&doc, &styles)
     }
 
     fn text_rows(s: &mut Session) -> Vec<Value> {
@@ -1308,6 +1118,47 @@ mod text_link_tests {
 
     fn styles(st: &designcraft_doc::Story) -> Vec<String> {
         st.paras.iter().map(|p| p.style.clone()).collect()
+    }
+
+    fn assert_link_update_replaces_and_warns(s: &mut Session, path: &std::path::Path, sid: StoryId, a: u64, b: u64) {
+        // The file changes (with tracked changes): Modified; Update imports it as if accepted, with
+        // the saved style map, into the same frames, without new renamed styles.
+        std::fs::write(
+            path,
+            docx(r#"<w:r><w:t xml:space="preserve">Second </w:t></w:r><w:ins w:id="1" w:author="A"><w:r><w:t>revised </w:t></w:r></w:ins><w:del w:id="2" w:author="A"><w:r><w:delText>old </w:delText></w:r></w:del><w:r><w:t>draft.</w:t></w:r>"#),
+        )
+        .unwrap();
+        assert_eq!(text_rows(s)[0]["status"], "modified");
+        let r = s.execute("links.update", &json!({"story": sid.0})).unwrap();
+        assert_eq!(r["updated"], 1);
+        assert_eq!(r["warnings"], json!([]), "no edits in the layout to replace");
+        let updated = story(s, sid);
+        assert_eq!(updated.text, "Head\nSecond revised draft.");
+        assert_eq!(styles(&updated), ["Headline", "Body_wrd_1"]);
+        assert_eq!(updated.frames, [ItemId(a), ItemId(b)], "frames and thread kept");
+        assert!(s.doc().unwrap().doc.styles.para("Body_wrd_2").is_none());
+        assert!(s.doc().unwrap().doc.styles.para("Title").is_none(), "mapped styles aren't imported");
+        assert_eq!(text_rows(s)[0]["status"], "ok");
+
+        // An edit in the layout, then the file changes again: Update replaces the edit and warns.
+        s.execute("story.setText", &json!({"story": sid.0, "text": "Fixed in layout"})).unwrap();
+        assert_eq!(text_rows(s)[0]["edited"], true);
+        std::fs::write(path, docx("<w:r><w:t>Third draft.</w:t></w:r>")).unwrap();
+        let r = s.execute("links.update", &json!({})).unwrap();
+        assert_eq!(r["updated"], 1);
+        let w = r["warnings"][0].as_str().unwrap();
+        assert!(w.contains("chapter.docx") && w.contains("replaced"), "{w}");
+        assert_eq!(story(s, sid).text, "Head\nThird draft.");
+        assert_eq!(text_rows(s)[0]["edited"], false);
+        // Undo brings the edit back.
+        s.execute("edit.undo", &json!({})).unwrap();
+        assert_eq!(story(s, sid).text, "Fixed in layout");
+        s.execute("edit.redo", &json!({})).unwrap();
+
+        // Saved and opened again: the link and its options are kept.
+        let back = designcraft_format::load(&designcraft_format::save(&s.doc().unwrap().doc).unwrap()).unwrap();
+        assert_eq!(back.story(sid).unwrap().file_link, story(s, sid).file_link);
+        assert_eq!(super::text_status(back.story(sid).unwrap().file_link.as_ref().unwrap(), &mut Default::default(), None), "ok");
     }
 
     #[test]
@@ -1349,44 +1200,7 @@ mod text_link_tests {
         assert_eq!((rows[0]["status"].as_str(), rows[0]["edited"].as_bool()), (Some("ok"), Some(false)));
         assert_eq!(rows[0]["uses"].as_array().unwrap().len(), 2, "both threaded frames");
 
-        // The file changes (with tracked changes): Modified; Update imports it as if accepted, with
-        // the saved style map, into the same frames, without new renamed styles.
-        std::fs::write(
-            &path,
-            docx(r#"<w:r><w:t xml:space="preserve">Second </w:t></w:r><w:ins w:id="1" w:author="A"><w:r><w:t>revised </w:t></w:r></w:ins><w:del w:id="2" w:author="A"><w:r><w:delText>old </w:delText></w:r></w:del><w:r><w:t>draft.</w:t></w:r>"#),
-        )
-        .unwrap();
-        assert_eq!(text_rows(&mut s)[0]["status"], "modified");
-        let r = s.execute("links.update", &json!({"story": sid.0})).unwrap();
-        assert_eq!(r["updated"], 1);
-        assert_eq!(r["warnings"], json!([]), "no edits in the layout to replace");
-        let updated = story(&s, sid);
-        assert_eq!(updated.text, "Head\nSecond revised draft.");
-        assert_eq!(styles(&updated), ["Headline", "Body_wrd_1"]);
-        assert_eq!(updated.frames, [ItemId(a), ItemId(b)], "frames and thread kept");
-        assert!(s.doc().unwrap().doc.styles.para("Body_wrd_2").is_none());
-        assert!(s.doc().unwrap().doc.styles.para("Title").is_none(), "mapped styles aren't imported");
-        assert_eq!(text_rows(&mut s)[0]["status"], "ok");
-
-        // An edit in the layout, then the file changes again: Update replaces the edit and warns.
-        s.execute("story.setText", &json!({"story": sid.0, "text": "Fixed in layout"})).unwrap();
-        assert_eq!(text_rows(&mut s)[0]["edited"], true);
-        std::fs::write(&path, docx("<w:r><w:t>Third draft.</w:t></w:r>")).unwrap();
-        let r = s.execute("links.update", &json!({})).unwrap();
-        assert_eq!(r["updated"], 1);
-        let w = r["warnings"][0].as_str().unwrap();
-        assert!(w.contains("chapter.docx") && w.contains("replaced"), "{w}");
-        assert_eq!(story(&s, sid).text, "Head\nThird draft.");
-        assert_eq!(text_rows(&mut s)[0]["edited"], false);
-        // Undo brings the edit back.
-        s.execute("edit.undo", &json!({})).unwrap();
-        assert_eq!(story(&s, sid).text, "Fixed in layout");
-        s.execute("edit.redo", &json!({})).unwrap();
-
-        // Saved and opened again: the link and its options are kept.
-        let back = designcraft_format::load(&designcraft_format::save(&s.doc().unwrap().doc).unwrap()).unwrap();
-        assert_eq!(back.story(sid).unwrap().file_link, story(&s, sid).file_link);
-        assert_eq!(super::text_status(back.story(sid).unwrap().file_link.as_ref().unwrap(), &mut Default::default(), None), "ok");
+        assert_link_update_replaces_and_warns(&mut s, &path, sid, a, b);
 
         // The file moves: Missing; Relink to it imports it into the story.
         let moved = dir.join("moved").join("chapter.docx");
@@ -1466,6 +1280,16 @@ mod text_link_tests {
         assert_eq!(status(&mut s), "ok", "a future time is remembered");
         readable(true);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn placed_plain_text_drops_story_markers() {
+        let mut s = Session::new();
+        s.execute("file.new", &json!({})).unwrap();
+        let b64 = crate::cmd::base64_encode("a\u{E009}b\u{E000}c\u{E002}d".as_bytes());
+        let r = s.execute("file.place", &json!({"base64": b64, "name": "n.txt", "rect": [72, 72, 300, 200]})).unwrap();
+        let st = s.doc().unwrap().doc.story(StoryId(r["story"].as_u64().unwrap())).unwrap();
+        assert_eq!(st.text, "abcd");
     }
 
     #[test]

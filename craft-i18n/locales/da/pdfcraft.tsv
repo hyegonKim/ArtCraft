@@ -1,0 +1,2490 @@
+# Dansk (da) interface catalog for PdfCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	  · not fixable here	  · kan ikke rettes her
+	 (page {p})	 (side {p})
+	 (searching… {s} of {p} pages)	 (søger… {s} af {p} sider)
+	 ({n} at {dpi} dpi, the largest size they can be drawn at)	 ({n} ved {dpi} dpi, den største størrelse de kan tegnes i)
+	 ({s} not exported: {first})	 ({s} ikke eksporteret: {first})
+	 on page {label}	 på side {label}
+	 on page {p}	 på side {p}
+	 · password-protected	 · adgangskodebeskyttet
+	(none)	(ingen)
+	+Bin	+Bin
+	+LOC	+LOC
+	, Expires: 	, Udløber: 
+	1 difference found	1 forskel fundet
+	1 file	1 fil
+	1 file done	1 fil fuldført
+	1 file needs attention	1 fil kræver opmærksomhed
+	1 instance	1 forekomst
+	1 issue	1 problem
+	1 mark	1 mærke
+	1 page	1 side
+	1 page selected	1 side valgt
+	1 page selected.	1 side valgt.
+	180 degrees	180 grader
+	4 x 6 in label (101.6 x 152.4 mm)	Etiket 4 x 6 tommer (101,6 x 152,4 mm)
+	9 digit, A letter, O letter or digit, X any character	9 ciffer, A bogstav, O bogstav eller ciffer, X vilkårligt tegn
+	; 1 page already had text	; 1 side havde allerede tekst
+	; failed: {list}	; mislykkedes: {list}
+	; {n} pages already had text	; {n} sider havde allerede tekst
+	? of {n}	? af {n}
+	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{bin_added} / −{bin_deleted} binary assets, {first} – {last}	@{login}: {prs} PR'er, {commits} commits, +{added} / −{deleted} linjer (Δ {delta}), +{bin_added} / −{bin_deleted} binære filer, {first} – {last}
+	`{command}` {when}	`{command}` {when}
+	a bookmark cannot be moved inside itself	et bogmærke kan ikke flyttes ind i sig selv
+	A button	En knap
+	A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0.	Et PDF-program med clean-room-udvikling og åben kildekode, skrevet i Rust. MIT OR Apache-2.0.
+	A diagonal CONFIDENTIAL watermark on every page.	Et diagonalt FORTROLIG-vandmærke på hver side.
+	a document must keep at least one page	et dokument skal bevare mindst én side
+	A document needs at least one page: copy instead	Et dokument skal have mindst én side: kopiér i stedet
+	A font isn't embedded	En skrifttype er ikke indlejret
+	A form field has additional actions	Et formularfelt har yderligere handlinger
+	A link	Et link
+	A script	Et script
+	A selected field has no widget on any page, so the fields can't be edited together.	Et valgt felt har ingen widget på nogen side, så felterne kan ikke redigeres samlet.
+	A stream refers to an external file	En stream henviser til en ekstern fil
+	A stream uses LZW compression	En stream bruger LZW-komprimering
+	A summary describes the table's purpose and layout. Add a Summary attribute to each table.	Et resumé beskriver tabellens formål og opsætning. Tilføj attributten Summary til hver tabel.
+	A {} action isn't allowed	En {}-handling er ikke tilladt
+	A {} annotation has additional actions	En {}-annotation har yderligere handlinger
+	A {} annotation has no appearance stream	En {}-annotation har ingen appearance stream
+	A {} annotation isn't set to print, or is hidden	En {}-annotation er ikke sat til udskrivning, eller den er skjult
+	About PdfCraft	Om PdfCraft
+	Accepted	Accepteret
+	Accessibility	Tilgængelighed
+	Accessibility Checker	Tilgængelighedskontrol
+	Accessibility Checker Options	Indstillinger for tilgængelighedskontrol
+	Accessibility permission flag	Flag for tilgængelighedstilladelse
+	Accessibility permission flag is set	Flaget for tilgængelighedstilladelse er angivet
+	Accessibility Report	Tilgængelighedsrapport
+	Acrobat 3.0 and later (40-bit RC4)	Acrobat 3.0 og senere (40-bit RC4)
+	Acrobat 5.0 and later (128-bit RC4)	Acrobat 5.0 og senere (128-bit RC4)
+	Acrobat 7.0 and later (128-bit AES)	Acrobat 7.0 og senere (128-bit AES)
+	Acrobat X and later (256-bit AES)	Acrobat X og senere (256-bit AES)
+	Action name:	Handlingsnavn:
+	Action Wizard	Handlingsguide
+	Action Wizard…	Handlingsguide…
+	Actions list	Handlingsliste
+	Active	Aktiv
+	Actual size	Faktisk størrelse
+	Actual text	Faktisk tekst
+	Add	Tilføj
+	Add a button	Tilføj en knap
+	Add a callout	Tilføj en tekstballon
+	Add a checkbox	Tilføj et afkrydsningsfelt
+	Add a comment	Tilføj en kommentar
+	Add a date field	Tilføj et datofelt
+	Add a digital signature field	Tilføj et felt til digital signatur
+	Add a drop-down list	Tilføj en rulleliste
+	Add a list box	Tilføj et listefelt
+	Add a radio button	Tilføj en alternativknap
+	Add a reply	Tilføj et svar
+	Add a stamp	Tilføj et stempel
+	Add a sticky note	Tilføj en note
+	Add a sticky note here	Tilføj en noteseddel her
+	Add a text box	Tilføj en tekstboks
+	Add a text field	Tilføj et tekstfelt
+	Add alternate text	Tilføj alternativ tekst
+	Add alternate text…	Tilføj alternativ tekst…
+	Add an Action	Tilføj en handling
+	Add an image field	Tilføj et billedfelt
+	Add arrow	Tilføj pil
+	Add at least two files	Tilføj mindst to filer
+	Add background	Tilføj baggrund
+	Add background…	Tilføj baggrund…
+	Add Bates numbering…	Tilføj Bates-nummerering…
+	Add bookmark	Tilføj bogmærke
+	Add callout	Tilføj tekstballon
+	Add checkmark	Tilføj flueben
+	Add cloud	Tilføj sky
+	Add comment	Tilføj kommentar
+	Add comments	Tilføj kommentarer
+	Add connected lines	Tilføj forbundne linjer
+	Add content	Tilføj indhold
+	Add cross	Tilføj kryds
+	Add dot	Tilføj prik
+	Add drawing	Tilføj tegning
+	Add field	Tilføj felt
+	Add file attachment	Tilføj filvedhæftning
+	Add files to combine	Tilføj filer, der skal kombineres
+	Add files…	Tilføj filer…
+	Add folder	Tilføj mappe
+	Add folder and subfolders	Tilføj mappe og undermapper
+	Add folder and subfolders…	Tilføj mappe og undermapper…
+	Add folder…	Tilføj mappe…
+	Add footer	Tilføj sidefod
+	Add form components	Tilføj formularkomponenter
+	Add header	Tilføj sidehoved
+	Add header & footer	Tilføj sidehoved og sidefod
+	Add header & footer…	Tilføj sidehoved og sidefod…
+	Add highlight	Tilføj fremhævning
+	Add image	Tilføj billede
+	Add image…	Tilføj billede…
+	Add inserted text	Tilføj indsat tekst
+	Add line	Tilføj linje
+	Add link	Tilføj link
+	Add open documents	Tilføj åbne dokumenter
+	Add or edit links	Tilføj eller redigér links
+	Add oval	Tilføj oval
+	Add Page Numbers	Tilføj sidenumre
+	Add polygon	Tilføj polygon
+	Add printer marks	Tilføj trykmærker
+	Add rectangle	Tilføj rektangel
+	Add redaction mark	Tilføj redaktionsmærke
+	Add search index	Tilføj søgeindeks
+	Add signature	Tilføj signatur
+	Add squiggly underline	Tilføj bølget understregning
+	Add stamp	Tilføj stempel
+	Add Step	Tilføj trin
+	Add sticky note	Tilføj klistermærke
+	Add strikethrough	Tilføj gennemstregning
+	Add text	Tilføj tekst
+	Add text box	Tilføj tekstboks
+	Add the choices people pick from.	Tilføj de valgmuligheder, som brugerne vælger imellem.
+	Add the files to combine	Tilføj de filer, der skal kombineres
+	Add the PDFs to combine	Tilføj de PDF-filer, der skal kombineres
+	Add the steps this action runs, in order.	Tilføj de trin, denne handling kører, i rækkefølge.
+	Add to Trusted Certificates	Føj til betroede certifikater
+	Add to trusted certificates	Føj til betroede certifikater
+	Add underline	Tilføj understregning
+	Add watermark	Tilføj vandmærke
+	Add watermark…	Tilføj vandmærke…
+	Add {what}	Tilføj {what}
+	Added 1 comment	Tilføjede 1 kommentar
+	Added more than once	Tilføjet mere end én gang
+	Added the first {n} files in {folder}	Tilføjede de første {n} filer i {folder}
+	Added the first {n} PDFs in {folder}	Tilføjede de første {n} PDF-filer i {folder}
+	Added {n} comments	Tilføjede {n} kommentarer
+	Adding images arrives on the web with file pickers for images	Tilføjelse af billeder kommer på webversionen med filvælgere til billeder
+	Adds invisible text over each word; the page image is not changed	Tilføjer usynlig tekst over hvert ord; sidebilledet ændres ikke
+	Advanced optimization	Avanceret optimering
+	Advanced options	Avancerede indstillinger
+	Advanced Options {chevron}	Avancerede indstillinger {chevron}
+	Advanced search…	Avanceret søgning…
+	AI assistant	AI-assistent
+	Algorithm	Algoritme
+	Align	Juster
+	Align fields	Juster felter
+	Align left	Venstrejuster
+	Align right	Højrejuster
+	All	Alle
+	All annotations are tagged	Alle annoteringer er taggede
+	All document contents	Alt dokumentindhold
+	All document contents except metadata	Alt dokumentindhold undtagen metadata
+	All form fields are tagged	Alle formularfelter er taggede
+	All form fields have description	Alle formularfelter har en beskrivelse
+	All multimedia objects are tagged	Alle multimedieobjekter er taggede
+	All open documents	Alle åbne dokumenter
+	All page content is tagged	Alt sideindhold er tagget
+	All pages	Alle sider
+	All pages in document	Alle sider i dokumentet
+	All pages in range	Alle sider i intervallet
+	All tools	Alle værktøjer
+	Allow	Tillad
+	Allow Rich Text Formatting	Tillad rig tekstformatering
+	Allow user to enter custom text	Tillad brugeren at indtaste egen tekst
+	Allowed	Tilladt
+	already a PDF	er allerede en PDF
+	Also recognize pages that already have text	Genkend også sider, der allerede har tekst
+	Alternate Text	Alternativ tekst
+	Alternate text	Alternativ tekst
+	alternate text hides an annotation inside it	alternativ tekst skjuler en annotation, der ligger inde i den
+	Alternate text inside an element that already has alternate text is never read. Remove the inner alternate text.	Alternativ tekst inde i et element, der allerede har alternativ tekst, bliver aldrig læst. Fjern den indre alternative tekst.
+	Alternate text must be associated with some content	Alternativ tekst skal være tilknyttet indhold
+	Alternate text on an element that contains a link or field hides that annotation from assistive technology. Move the alternate text.	Alternativ tekst på et element, der indeholder et link eller et felt, skjuler den annotering for hjælpeteknologi. Flyt den alternative tekst.
+	alternate text on an element with no page content	alternativ tekst på et element uden sideindhold
+	Alternate text on an element without page content is never reached. Remove it or attach the element to content.	Alternativ tekst på et element uden sideindhold nås aldrig. Fjern den, eller fastgør elementet til indhold.
+	Alternate text should not hide annotation	Alternativ tekst må ikke skjule annoteringer
+	Alternate text that will never be read	Alternativ tekst, der aldrig bliver læst
+	Always	Altid
+	An action is already running	En handling kører allerede
+	An action with this name already exists.	En handling med dette navn findes allerede.
+	An embedded file has no AFRelationship	En indlejret fil har ingen AFRelationship
+	An image asks to be interpolated	Et billede beder om at blive interpoleret
+	An image has alternates or OPI information	Et billede har alternativer eller OPI-oplysninger
+	An open-source PDF workbench — local, private, and scriptable.	Et open source-PDF-værksted — lokalt, privat og kan scriptes.
+	and {n} more	og {n} flere
+	Animation effects	Animationseffekter
+	Animation that flashes can cause seizures. Check scripts and media for flicker.	Animation, der blinker, kan udløse anfald. Kontrollér scripts og medier for flimmer.
+	Annotations, form fill-in, and digital signatures	Annoteringer, formularudfyldning og digitale signaturer
+	Another file dialog is still open. Finish with it first.	En anden fildialog er stadig åben. Bliv færdig med den først.
+	Any	Alle
+	Any except extracting pages	Alt undtagen udtrækning af sider
+	Anyone opening the document will need this password. It's applied when you save.	Alle, der åbner dokumentet, skal bruge denne adgangskode. Den anvendes, når du gemmer.
+	Appear behind page	Vises bag siden
+	Appear on top of page	Vises oven på siden
+	Appearance mode	Udseendetilstand
+	Appearance settings…	Indstillinger for udseende…
+	Application	Program
+	Applied 1 redaction mark. Save to remove the content from the file.	Anvendte 1 sløringsmærke. Gem for at fjerne indholdet fra filen.
+	Applied {n} redaction marks. Save to remove the content from the file.	Anvendte {n} sløringsmærker. Gem for at fjerne indholdet fra filen.
+	Applies to 1 page	Gælder 1 side
+	Applies to {n} pages	Gælder {n} sider
+	Apply PDF standards	Anvend PDF-standarder
+	Apply redactions	Anvend sløring
+	Apply redactions…	Anvend sløring…
+	Apply scale	Anvend målestok
+	Appropriate nesting	Hensigtsmæssig indlejring
+	April	april
+calendar date	April	april
+	Arbitrary Mask	Vilkårlig maske
+	Archive documents	Arkivér dokumenter
+	Area	Areal
+	Ask about this document	Spørg om dette dokument
+	Asks GitHub for the latest release. Nothing is downloaded or installed automatically.	Spørger GitHub om den nyeste udgivelse. Intet hentes eller installeres automatisk.
+	Associated with content	Tilknyttet indhold
+	At least one signature has problems.	Mindst én signatur har problemer.
+	At least one signature is invalid.	Mindst én signatur er ugyldig.
+	At most	Højst
+	Attach a file	Vedhæft en fil
+	Attach file	Vedhæft fil
+	Attachment	Vedhæftning
+	Attachments	Vedhæftede filer
+	Attachments Panel and Page	Bilagspanel og side
+	Audit space usage	Analysér pladsforbrug
+	Audit space usage…	Analysér pladsforbrug…
+	August	august
+calendar date	August	august
+	Author	Forfatter
+	Auto	Automatisk
+	Auto ({percent}%)	Automatisk ({percent}%)
+	Auto follows the system's text size. Pages always render at the display's full resolution.	Automatisk følger systemets tekststørrelse. Sider gengives altid i skærmens fulde opløsning.
+	Auto portrait/landscape	Automatisk portræt/landskab
+	Auto-rotate pages	Rotér sider automatisk
+	Auto-size text to fit redaction region	Tilpas automatisk tekststørrelsen til sløringsområdet
+	Automatically tag PDF	Tag PDF automatisk
+	Available	Tilgængelig
+	average	gennemsnittet
+	Back	Tilbage
+	Back side only	Kun bagsiden
+	Back to all tools	Tilbage til alle værktøjer
+	Back to the document	Tilbage til dokumentet
+	Background	Baggrund
+	background	baggrund
+	Basic constraints	Grundlæggende begrænsninger
+certificate	Basic constraints	Grundlæggende begrænsninger
+	Bates numbering	Bates-nummerering
+	Before each selected page (select pages in Organize)	Før hver valgt side (vælg sider i Organiser)
+	Before the number	Før tallet
+	Beveled	Facetteret
+	Bicubic downsampling to	Bicubisk nedsampling til
+	Binary assets added	Tilføjede binære filer
+	Binary assets removed	Fjernede binære filer
+	Binding	Binding
+	Binding:	Indbinding:
+	Black and white	Sort-hvid
+	Black on white	Sort på hvid
+	Blank page	Tom side
+	Booklet	Hæfte
+	Booklet subset:	Del af hæfte:
+	Bookmark options	Bogmærkeindstillinger
+	Bookmarks	Bogmærker
+	Bookmarks are present in large documents	Bogmærker findes i store dokumenter
+	Bookmarks Panel and Page	Bogmærkepanel og side
+	Border Color:	Kantfarve:
+	Borders and Colors	Kanter og farver
+	Both	Begge
+	Bottom	Nederst
+	Box	Boks
+	Bring your own model (off by default)	Brug din egen model (slået fra som standard)
+	Browser's print dialog	Browserens udskrivningsdialog
+	Browse…	Gennemse…
+	Butt	Flad
+	Button	Knap
+	Button is checked by default	Knappen er markeret som standard
+	Button Properties	Egenskaber for knap
+	Button Style:	Stil for knap:
+	Buttons with the same name and value are selected in unison	Knapper med samme navn og værdi markeres samtidig
+	Bytes	Bytes
+	Calculate	Beregn
+	Calibrate from two points	Kalibrér ud fra to punkter
+	Callout	Tekstballon
+	Can't be read: {e}	Kan ikke læses: {e}
+	Cancel	Annuller
+	Cancelled	Annulleret
+	Cancelling…	Annullerer…
+	Case-sensitive	Forskel på store og små bogstaver
+	Category:	Kategori:
+	Center	Centreret
+	Center Footer Text	Midterste sidefodtekst
+	Center Header Text	Midterste sidehovedtekst
+	Center horizontally	Centrer vandret
+	Center vertically	Centrer lodret
+	Center window on screen	Centrer vinduet på skærmen
+	Centre	Centrer
+	Certificate authority	Certificeringsautoritet
+	Certificate Signing	Certifikatsignering
+	Certificate Viewer	Certifikatfremviser
+	Certificates	Certifikater
+	Certified by {by}	Certificeret af {by}
+	Certify	Certificér
+	Certify (invisible signature)	Certificér (usynlig signatur)
+	Certify (visible signature)	Certificér (synlig signatur)
+	Change Author	Ændr forfatter
+	Change comment properties	Skift kommentaregenskaber
+	Change document properties	Ændr dokumentegenskaber
+	Change field properties	Skift feltegenskaber
+	Change initial view	Skift startvisning
+	Change initials	Ændr initialer
+	Change Keywords	Ændr nøgleord
+	Change link properties	Skift linkegenskaber
+	Change reading options	Skift læseindstillinger
+	Change reading options…	Skift læseindstillinger…
+	Change settings…	Skift indstillinger…
+	Change signature	Ændr underskrift
+	Change Subject	Ændr emne
+	Change tag properties	Ændr tagegenskaber
+	Change the colour of line art as well as text	Ændr farven på stregtegning såvel som tekst
+	Change Title	Ændr titel
+	Change {key}	Skift {key}
+	Change {what}	Ændr {what}
+	Changes allowed	Ændringer tilladt
+	Changing the document	Ændring af dokumentet
+	Character encoding	Tegnkodning
+	Character limit 0 means no limit. A comb of characters needs a limit.	Tegngrænsen 0 betyder ingen grænse. En tegnkam kræver en grænse.
+	Character limit:	Tegngrænse:
+	Character spacing	Tegnavstand
+	Characters	Tegn
+	characters	tegn
+	Characters without spaces	Tegn uden mellemrum
+	Check	Flueben
+	Check Again	Kontrollér igen
+	Check again	Kontrollér igen
+	Check box is checked by default	Afkrydsningsfeltet er afkrydset som standard
+	Check Box Properties	Egenskaber for afkrydsningsfelt
+	Check Box Style:	Stil for afkrydsningsfelt:
+	Check for accessibility	Kontrollér tilgængelighed
+	Check for accessibility…	Kontrollér tilgængelighed…
+	Check for updates	Søg efter opdateringer
+	Check for updates…	Søg efter opdateringer…
+	Check spelling	Kontrollér stavning
+	Check that the tags read in the order a sighted reader would. Use the Reading Order tool or the Tags panel to correct it.	Kontrollér, at tagsene læses i samme rækkefølge, som en seende læser ville læse dem. Brug værktøjet Læserækkefølge eller Tags-panelet til at rette det.
+	Check the pages	Kontrollér siderne
+	Check the pages of {name}: {why}	Kontroller siderne i {name}: {why}
+	CheckBox	Afkrydsningsfelt
+	Checkbox	Afkrydsningsfelt
+	Checked	Afkrydset
+	Checking for a newer version…	Søger efter en nyere version…
+	Checking Options ({on} of 32 in all categories)	Kontrolindstillinger ({on} af 32 i alle kategorier)
+	Checkmark	Flueben
+	Choose a digital ID.	Vælg et digitalt id.
+	Choose a file…	Vælg en fil…
+	Choose a folder for the exported files	Vælg en mappe til de eksporterede filer
+	Choose a folder for the extracted pages	Vælg en mappe til de udtrukne sider
+	Choose a folder for the results	Vælg en mappe til resultaterne
+	Choose a folder for the searchable files	Vælg en mappe til de søgbare filer
+	Choose a folder for the split files	Vælg en mappe til de opdelte filer
+	Choose a folder on this computer to pin	Vælg en mappe på denne computer at fastgøre
+	Choose a folder…	Vælg en mappe…
+	Choose a layout:	Vælg et layout:
+	Choose a PNG or JPEG image (up to 4 MiB). Transparency is preserved.	Vælg et PNG- eller JPEG-billede (op til 4 MiB). Gennemsigtighed bevares.
+	Choose a stamp, then click on the page to place it.	Vælg et stempel, og klik derefter på siden for at placere det.
+	Choose an image	Vælg et billede
+	Choose images	Vælg billeder
+	Choose image…	Vælg billede…
+	Choose photo…	Vælg foto…
+	Choose the digital ID that you want to use for signing:	Vælg det digitale id, du vil bruge til at signere:
+	Clean Up	Oprydning
+	Clean-up	Oprydning
+	Clear	Ryd
+	Clear all	Ryd alle
+	Clear form	Ryd formular
+	Clear redaction marks	Ryd sløringsmærker
+	Clear selection / close find	Ryd markering / luk Find
+	Click on the page to add a {tool}, or drag to set its size	Klik på siden for at tilføje {tool}, eller træk for at angive størrelsen
+	Click on the page to add text; each click starts a new box, and ✓ finishes. Drag items to move them, drag a corner to resize, double-click text to edit it.	Klik på siden for at tilføje tekst; hvert klik starter en ny boks, og ✓ afslutter. Træk elementer for at flytte dem, træk i et hjørne for at ændre størrelsen, og dobbeltklik på tekst for at redigere den.
+	Click text or an image to edit it	Klik på tekst eller et billede for at redigere det
+	Click the first point to begin.	Klik på det første punkt for at begynde.
+	Click to sort, drag to move the column. Drag its edge to resize it.	Klik for at sortere, og træk for at flytte kolonnen. Træk i dens kant for at ændre dens størrelse.
+	Click vertices. Enter or double-click finishes a perimeter or area. Click the first point to close an area.	Klik på hjørner. Enter eller dobbeltklik afslutter en omkreds eller et areal. Klik på det første punkt for at lukke et areal.
+	Clipboard	Udklipsholder
+	Clockwise 90 degrees	90 grader med uret
+	Close (Esc)	Luk (Esc)
+	Close all	Luk alle
+	Close file	Luk fil
+	Close panel	Luk panel
+	Close Tab	Luk faneblad
+	Closed arrow	Lukket pil
+	Cloud	Sky
+	Collapse	Sammenfold
+	Collapse all	Fold alle sammen
+	Collapse all bookmarks	Fold alle bogmærker sammen
+	Collapse all pages	Fold alle sider sammen
+	Collapse tag	Fold tag sammen
+	Color contrast	Farvekontrast
+	Color Images	Farvebilleder
+	Color Spaces	Farverum
+	Colour	Farve
+	Colours are remapped while rendering; the document itself never changes.	Farverne ændres kun under gengivelsen; selve dokumentet ændres aldrig.
+	Column select	Kolonnemarkering
+	Comb of	Spred over
+	Comb of characters	Tegnkam
+	Combine	Kombinér
+	Combine files	Kombinér filer
+	Combine files…	Kombinér filer…
+	Combine the rest	Kombinér resten
+	Combined {n} files	Kombinerede {n} filer
+	Combo	Kombinationsboks
+	Coming in milestone	Kommer i milepæl
+	Coming in milestone {m}. Items marked Ready work today.	Kommer i milepæl {m}. Elementer markeret Klar virker i dag.
+	Comment	Kommentar
+	Comment and form data	Kommentar- og formulardata
+	Comment and review	Kommentering og gennemsyn
+	Comment list	Kommentarliste
+	Commenting	Kommentering
+	Commenting, filling in form fields, and signing existing signature fields	Kommentering, udfyldning af formularfelter og signering af eksisterende signaturfelter
+	Comments	Kommentarer
+	comments	kommentarer
+	Comments & Forms	Kommentarer og formularer
+	Comments and markups	Kommentarer og markeringer
+	Comments only	Kun kommentarer
+	Comments panel	Kommentarpanel
+	Comments, links and fields must be in the tag tree to be announced. Tag the annotations.	Kommentarer, links og felter skal være i tagtræet for at blive oplæst. Tag annoteringerne.
+	Commit selected value immediately	Anvend valgt værdi med det samme
+	Common Properties	Fælles egenskaber
+	Company	Virksomhed
+	Compare	Sammenlign
+	Compare Files	Sammenlign filer
+	Compare files	Sammenlign filer
+	Compare files…	Sammenlign filer…
+	Compare this file with an older version: Compare files… in All tools.	Sammenlign denne fil med en ældre version: Sammenlign filer… under Alle værktøjer.
+	Compatibility	Kompatibilitet
+	Completed	Fuldført
+	Compress a PDF	Komprimér en PDF
+	Compress document structure (object streams)	Komprimér dokumentstruktur (objektstrømme)
+	Configure a Digital ID for Signing	Konfigurér et digitalt id til signering
+	Configure New Digital ID	Konfigurér nyt digitalt id
+	Confirm Password	Bekræft adgangskode
+	Conformance level:	Overensstemmelsesniveau:
+	Connected lines	Forbundne linjer
+	Console	Konsol
+	Content copying	Kopiering af indhold
+	Content copying for accessibility	Kopiering af indhold til tilgængelighed
+	Content Streams	Indholdsstrømme
+	Continue	Fortsæt
+	Continuous scrolling	Kontinuerlig rulning
+	Convert colors	Konvertér farver
+	Copied to clipboard	Kopieret til udklipsholder
+	Copied {what}	Kopierede {what}
+	Copies, two-sided printing and colour are chosen in the browser's print dialog.	Kopier, tosidt udskrivning og farve vælges i browserens udskrivningsdialog.
+	Copy Image	Kopiér billede
+	Copy Image in Original Format	Kopiér billede i oprindeligt format
+	Copy or cut pages first	Kopiér eller klip sider først
+	Copy pages	Kopiér sider
+	Copy selected text	Kopiér markeret tekst
+	Copy text	Kopiér tekst
+	Copy to clipboard	Kopiér til udklipsholder
+	Correct recognized text	Ret genkendt tekst
+	Could not save: {e}	Kunne ikke gemme: {e}
+	Couldn't add {name}: {e}	Kunne ikke tilføje {name}: {e}
+	Couldn't check for updates: {e}	Kunne ikke søge efter opdateringer: {e}
+	Couldn't combine files: {e}	Kunne ikke kombinere filer: {e}
+	Couldn't copy the image: {e}	Kunne ikke kopiere billedet: {e}
+	Couldn't create a PDF: {e}	Kunne ikke oprette en PDF: {e}
+	Couldn't download {name}: {e}	Kunne ikke downloade {name}: {e}
+	Couldn't extract pages: {e}	Kunne ikke udtrække sider: {e}
+	Couldn't fit the visible content: {e}	Kunne ikke tilpasse det synlige indhold: {e}
+	Couldn't follow linked PDF: {reason}	Kunne ikke følge den linkede PDF: {reason}
+	Couldn't import the signature image: {e}	Kunne ikke importere underskriftsbilledet: {e}
+	Couldn't open revision {n}: {e}	Kunne ikke åbne revision {n}: {e}
+	Couldn't open the printer's preferences: {e}	Kunne ikke åbne printerens indstillinger: {e}
+	Couldn't open the result: {e}	Kunne ikke åbne resultatet: {e}
+	Couldn't open the signed version: {e}	Kunne ikke åbne den signerede version: {e}
+	Couldn't open {name}: {e}	Kunne ikke åbne {name}: {e}
+	Couldn't optimize the file	Kunne ikke optimere filen
+	Couldn't optimize the file: {e}	Kunne ikke optimere filen: {e}
+	Couldn't print from the browser ({e}); downloaded {name} to print instead	Kunne ikke udskrive fra browseren ({e}); hentede {name} til udskrivning i stedet
+	Couldn't read {name}: {e}	Kunne ikke læse {name}: {e}
+	Couldn't recover {name}: {e}	Kunne ikke gendanne {name}: {e}
+	Couldn't reload {name}: {e}	Kunne ikke genindlæse {name}: {e}
+	Couldn't save the image: {e}	Kunne ikke gemme billedet: {e}
+	Couldn't save {name}: {e}	Kunne ikke gemme {name}: {e}
+	Couldn't save: {e}	Kunne ikke gemme: {e}
+	Couldn't show the file picker. Please try again.	Kunne ikke vise filvælgeren. Prøv igen.
+	Couldn't split: {e}	Kunne ikke opdele: {e}
+	Couldn't summarize comments: {e}	Kunne ikke opsummere kommentarer: {e}
+	Couldn't take the snapshot: {e}	Kunne ikke tage et snapshot: {e}
+	Couldn't unlock {name}: {e}	Kunne ikke låse {name} op: {e}
+	Couldn't use the photo: {e}	Kunne ikke bruge fotoet: {e}
+	Couldn't use {name}: {e}	Kunne ikke bruge {name}: {e}
+	Couldn't write {name}: {e}	Kunne ikke skrive {name}: {e}
+	Couldn't write {path}: {e}	Kunne ikke skrive {path}: {e}
+	Counterclockwise 90 degrees	90 grader mod uret
+	Counting words… {n} pages read	Tæller ord… {n} sider læst
+	Country/Region	Land/område
+	Create a new Digital ID (self-signed, saved to a password-protected file)	Opret et nyt digitalt id (selvsigneret, gemmes i en adgangskodebeskyttet fil)
+	Create a PDF	Opret en PDF
+	Create accessibility report	Opret tilgængelighedsrapport
+	Create Custom Stamp	Opret brugerdefineret stempel
+	Create custom stamp…	Opret brugerdefineret stempel…
+	Create folder	Opret mappe
+	Create from	Opret fra
+	Create Link	Opret link
+	Create link	Opret link
+	Create links	Opret links
+	Create links from URLs	Opret links fra URL'er
+	Create Link…	Opret link…
+	Create PDF Comment Summary	Opret PDF-kommentaroversigt
+	Create PDF comment summary…	Opret PDF-kommentaroversigt…
+	Create PDF from clipboard	Opret PDF fra udklipsholder
+	Create PDF from file…	Opret PDF fra fil…
+	Create PDF from images	Opret PDF fra billeder
+	Create PDF from images…	Opret PDF fra billeder…
+	Create PDF from multiple files…	Opret PDF fra flere filer…
+	Create separate PDFs…	Opret separate PDF-filer…
+	Create {what}	Opret {what}
+	Created 1 link	Oprettede 1 link
+	Created a comment summary	Oprettede en kommentaroversigt
+	Created a PDF from the first {n} files	Oprettede en PDF fra de første {n} filer
+	Created a PDF from {n} files	Oprettede en PDF fra {n} filer
+	Created a PDF from {n} files; left out: {names}	Oprettede en PDF fra {n} filer; udeladt: {names}
+	Created {n} links	Oprettede {n} links
+	Creates 1 file from {n} pages.	Opretter 1 fil ud af {n} sider.
+	Creates {f} files from {n} pages.	Opretter {f} filer ud af {n} sider.
+	Creator	Skaber
+	Credit Cards	Kreditkort
+	CRL Signing	CRL-signering
+	Crop (% trimmed from each side)	Beskær (% beskåret fra hver side)
+	Crop Image	Beskær billede
+	Crop page	Beskær side
+	Crop pages	Beskær sider
+	Cross	Kryds
+key	Ctrl	Ctrl
+	Currency symbol:	Valutasymbol:
+	Current page	Aktuel side
+	Current page ({n})	Aktuel side ({n})
+	Current page only	Kun den aktuelle side
+	Current page — type a page number or label (such as iv) and press Enter	Aktuel side — skriv et sidetal eller en etiket (f.eks. iv), og tryk på Enter
+	Custom font	Egen skrifttype
+	Custom scale:	Brugerdefineret skalering:
+	Custom stamps arrive on the web with file pickers for images	Brugerdefinerede stempler kommer på webversionen med filvælgere til billeder
+	Custom text:	Brugerdefineret tekst:
+	Custom:	Brugerdefineret:
+	Cut and stack	Klip og stak
+	Cut and stack needs Two-sided: Off. Print single-sided sheets.	Klip og stak kræver Tosidet: Fra. Udskriv ensidede ark.
+	Cut Image	Klip billede
+	Cut marks	Skæremærker
+	Cut pages	Klip sider
+	Cut {what}	Klippede {what}
+	Cuts each page to its printed area, turns it upright and fits it to the sheet without stretching. One label per sheet.	Klipper hver side til sit trykte område, vender den op og tilpasser den arket uden strækning. Én etiket pr. ark.
+	Dark gray	Mørkegrå
+	Dark gray theme	Mørkegråt tema
+	Dark theme	Mørkt tema
+	Data Encipherment	Datakryptering
+	Date	Dato
+	Date field	Datofelt
+	Date format	Datoformat
+	Date: 	Date: 
+	December	december
+calendar date	December	december
+	Decimal places:	Decimaler:
+	Decimals	Decimaler
+	Decipher Only	Kun dekryptering
+	Declared conformance: {shown}	Erklæret overensstemmelse: {shown}
+	Decorative figure	Dekorativ figur
+	Default page display	Standardvisning af sider
+	Default Value:	Standardværdi:
+	Default workspace mode	Standardtilstand for arbejdsområde
+	Default zoom	Standardzoom
+	Default:	Standard:
+key	Delete	Delete
+	Delete bookmark	Slet bogmærke
+	Delete comment	Slet kommentar
+	Delete content	Slet indhold
+	Delete document JavaScript	Slet dokument-JavaScript
+	Delete field	Slet felt
+	Delete image	Slet billede
+	Delete link	Slet link
+	Delete page	Slet side
+	Delete page {label}	Slet side {label}
+	Delete pages	Slet sider
+	Delete pages (Delete)	Slet sider (Delete)
+	Delete pages after extracting	Slet sider efter udtrækning
+	Delete selected fields	Slet valgte felter
+	Delete selected pages (Organize)	Slet markerede sider (Organisér)
+	Delete stamp	Slet stempel
+@plural	Delete {n} field|Delete {n} fields	Slet {n} felt|Slet {n} felter
+	Delete {o}	Slet {o}
+	Deleted	Slettet
+	Describe the figure	Beskriv figuren
+	Detailed Report	Detaljeret rapport
+	Details	Detaljer
+	Detect form fields	Registrér formularfelter
+	Detected 1 form field	Fandt 1 formularfelt
+	Detected {n} form fields	Fandt {n} formularfelter
+	Device colour is used, but there is no PDF/A output intent	Der bruges enhedsfarve, men der er ingen PDF/A-outputintent
+	DeviceCMYK is used, but the PDF/A output intent isn't a CMYK profile	DeviceCMYK bruges, men PDF/A-outputintenten er ikke en CMYK-profil
+	DeviceCMYK is used: it needs a CMYK output intent (not added automatically)	DeviceCMYK bruges: det kræver en CMYK-outputintent (tilføjes ikke automatisk)
+	DeviceRGB is used, but the PDF/A output intent isn't an RGB profile	DeviceRGB bruges, men PDF/A-outputintenten er ikke en RGB-profil
+	Diagnostic details	Diagnostiske detaljer
+	Digital ID	Digitalt id
+	Digital ID password	Adgangskode til digitalt id
+	Digital Signature	Digital signatur
+	Digital signature	Digital signatur
+	Digital Signature Properties	Egenskaber for digital signatur
+	Digitally sign	Signér digitalt
+	Digitally signed by	Digitalt signeret af
+	Disabled	Deaktiveret
+	Discard	Forkast
+	Discard all comments, forms and multimedia	Fjern alle kommentarer, formularer og multimedieindhold
+	Discard all links, actions and JavaScript	Fjern alle links, handlinger og JavaScript
+	Discard all object data (file attachments)	Fjern alle objektdata (vedhæftede filer)
+	Discard alternate images	Fjern alternative billeder
+	Discard bookmarks	Fjern bogmærker
+	Discard document information and metadata	Fjern dokumentoplysninger og metadata
+	Discard document tags	Fjern dokumenttags
+	Discard embedded page thumbnails	Fjern integrerede sideminiaturer
+	Discard embedded print settings	Fjern integrerede udskriftsindstillinger
+	Discard hidden layer content	Fjern skjult lagindhold
+	Discard hidden text	Fjern skjult tekst
+	Discard Objects	Fjern objekter
+	Discard private data of other applications	Fjern private data fra andre programmer
+	Discard this text (Esc)	Forkast denne tekst (Esc)
+	Discard User Data	Fjern brugerdata
+	Dismiss	Luk
+	Display name	Visningsnavn
+	Display theme	Visningstema
+	Distinguished name	Entydigt navn
+	Distribute fields	Fordel felter
+	DN: 	DN: 
+	Document actions	Dokumenthandlinger
+	Document and markups	Dokument og markeringer
+	Document and stamps	Dokument og stempler
+	Document assembly	Sammenlægning af dokument
+	Document has appropriate color contrast	Dokumentet har passende farvekontrast
+	Document is not image-only PDF	Dokumentet er ikke en PDF med kun billeder
+	Document is tagged PDF	Dokumentet er tagget PDF
+	Document JavaScripts	Dokument-JavaScripts
+	Document JavaScripts…	Dokument-JavaScripts…
+	Document language	Dokumentsprog
+	Document Overhead	Dokumentoverhead
+	Document Properties	Dokumentegenskaber
+	Document properties ({key})	Dokumentegenskaber ({key})
+	Document properties (⌘D)	Dokumentegenskaber (⌘D)
+	Document properties…	Dokumentegenskaber…
+	Document sanitized. Save to finish: saving rewrites the whole file.	Dokumentet er saneret. Gem for at afslutte: at gemme omskriver hele filen.
+	document security store	dokumentets sikkerhedslager
+	document structure	dokumentstruktur
+	Document structure provides a logical reading order	Dokumentstrukturen giver en logisk læserækkefølge
+	Document Title	Dokumenttitel
+	Document title is showing in title bar	Dokumenttitel vises i titellinjen
+	Documents and view	Dokumenter og visning
+	Documents of more than 20 pages need bookmarks for navigation. Add bookmarks for the main sections.	Dokumenter med flere end 20 sider har brug for bogmærker til at navigere. Tilføj bogmærker for hovedafsnittene.
+	Don't save	Gem ikke
+	Done	Færdig
+	Done adding text	Færdig med at tilføje tekst
+	Download	Hent
+	Downloaded {name}	Downloadede {name}
+@plural	Downloaded {n} PDF|Downloaded {n} PDFs	Hentede {n} PDF|Hentede {n} PDF'er
+	Downloading attachments on the web arrives with M3.10 ({n} bytes ready)	Download af bilag på webversionen kommer med M3.10 ({n} bytes klar)
+	Downsample to	Nedsample til
+	DPI sets the printed page size without resampling the image.	DPI bestemmer den udskrevne sidestørrelse uden resampling af billedet.
+	Drag a rectangle around the area to copy	Træk et rektangel omkring det område, der skal kopieres
+	Drag a rectangle on a page to crop it; double-click a page for Set Page Boxes	Træk et rektangel på en side for at beskære den; dobbeltklik på en side for at angive sidebokse
+	Drag a rectangle to create a link; double-click a link to edit it	Træk et rektangel for at oprette et link; dobbeltklik på et link for at redigere det
+	Drag the corners onto the document's edges, then choose Enhance page.	Træk hjørnerne hen på dokumentets kanter, og vælg derefter Forbedr side.
+	Drag the selection to move it. Esc clears the selection.	Træk markeringen for at flytte den. Esc rydder markeringen.
+	Drag to draw the area where the signature should appear.	Træk for at tegne det område, hvor signaturen skal vises.
+	Drag to reorder	Træk for at ændre rækkefølgen
+	Draw a cloud	Tegn en sky
+	Draw a line	Tegn en linje
+	Draw a polygon	Tegn en polygon
+	Draw a rectangle	Tegn et rektangel
+	Draw an arrow	Tegn en pil
+	Draw an oval	Tegn en oval
+	Draw connected lines	Tegn forbundne linjer
+	Draw freehand	Tegn frihånd
+	Draw your {what} below.	Tegn dit {what} herunder.
+	Drawing	Tegning
+	Drawing scale	Tegningsmålestok
+	Drawing scale changes. Use Actual size for full-scale plans.	Tegningsmålestokken ændres. Brug Faktisk størrelse til tegninger i fuld skala.
+	Drop PDFs or folders here, or choose them.	Slip PDF-filer eller mapper her, eller vælg dem.
+	Drop PDFs, images, text files or folders here, or choose them.	Slip PDF'er, billeder, tekstfiler eller mapper her, eller vælg dem.
+	Drop-down list	Rulleliste
+	Dropdown Properties	Egenskaber for rulleliste
+	Duplicate "{name}" onto:	Duplikér "{name}" til:
+	Duplicate Field	Duplikér felt
+	Duplicate field	Duplikér felt
+	Duplicate page	Duplikér side
+	Duplicate pages	Duplikér sider
+	Duplicate…	Duplikér…
+	Dynamic	Dynamisk
+	Dynamic XFA form laid out from its template: {pages}, {fields}.	Dynamisk XFA-formular lagt ud fra sin skabelon: {pages}, {fields}.
+	E-Sign	E-signatur
+	e.g. en-US	fx en-US
+	e.g. My stamps	f.eks. Mine stempler
+	Each field needs a tooltip that says what to enter. Add one in Field Properties > General > Tooltip.	Hvert felt har brug for et værktøjstip, der fortæller, hvad der skal indtastes. Tilføj et i Feltegenskaber > Generelt > Værktøjstip.
+	Each file holds as many of the {n} pages as fit.	Hver fil indeholder så mange af de {n} sider, som der er plads til.
+	Each image is measured where pages draw it; an image is replaced only if the result is smaller.	Hvert billede måles der, hvor siderne gengiver det; et billede erstattes kun, hvis resultatet er mindre.
+	Each image once, named after the document and page. JPEG images are saved unchanged; others as PNG.	Hvert billede én gang, navngivet efter dokumentet og siden. JPEG-billeder gemmes uændrede; andre som PNG.
+	Earlier in tab order	Tidligere i tabulatorrækkefølgen
+	Edit	Rediger
+comment menu	Edit	Rediger
+	Edit a PDF	Rediger en PDF
+	Edit Action	Rediger handling
+	Edit comment	Rediger kommentar
+	Edit content	Rediger indhold
+	Edit document JavaScript	Rediger dokument-JavaScript
+	Edit fields	Rediger felter
+	Edit image	Rediger billede
+	Edit script of {name}	Rediger scriptet for {name}
+	Edit text	Rediger tekst
+	Edit text & images	Rediger tekst og billeder
+	Edit text…	Rediger tekst…
+	Editing	Redigering
+	Edit…	Rediger…
+	Email Address	E-mailadresse
+	Email Addresses	E-mailadresser
+	Embedded Files	Integrerede filer
+	Embedded files must be PDF/A files themselves (use PDF/A-3 for others)	Indlejrede filer skal selv være PDF/A-filer (brug PDF/A-3 til andre)
+	Enable Acrobat JavaScript	Aktivér Acrobat JavaScript
+	Enable copying of text, images, and other content	Tillad kopiering af tekst, billeder og andet indhold
+	Enable text access for screen reader devices for the visually impaired	Tillad tekstadgang for skærmlæserenheder til synshandicappede
+	Enabled	Aktiveret
+	Encipher Only	Kun kryptering
+	Encrypt	Kryptér
+	Encrypt with certificate	Kryptér med certifikat
+	Encryption	Kryptering
+key	End	End
+	End entity	Slutentitet
+	Endpoint	Endepunkt
+	Endpoints	Endepunkter
+	English	Engelsk
+	Enhance camera image	Forbedr kamerabillede
+	Enhance page	Forbedr side
+	Enhance scanned file	Forbedr skannet fil
+	Enter a name.	Angiv et navn.
+	Enter a page number	Angiv et sidenummer
+	Enter a URL	Angiv en URL
+	Enter permissions password…	Angiv rettighedsadgangskode…
+	Enter the field names	Angiv feltnavnene
+	Enter the password that opens it	Angiv den adgangskode, der åbner den
+	Enter the permissions password to allow combining	Angiv rettighedsadgangskoden for at tillade kombinering
+	Entire page	Hele siden
+	Erase	Visk ud
+	Erase drawings	Slet tegninger
+key	Esc	Esc
+	Even and Odd Pages	Lige og ulige sider
+	Even pages	Lige sider
+	Even Pages Only	Kun lige sider
+	Even pages only	Kun lige sider
+	Every PDF in the folder	Alle PDF-filer i mappen
+	Every PDF in the folder and the folders inside it	Alle PDF-filer i mappen og i de mapper, der ligger i den
+	Every PDF, image and text file in the folder	Alle PDF'er, billeder og tekstfiler i mappen
+	Every PDF, image and text file in the folder and the folders inside it	Alle PDF'er, billeder og tekstfiler i mappen og mapperne i den
+	Everything on a page must be tagged or marked as an artifact (decoration, headers, footers). Tag the untagged content.	Alt på en side skal være tagget eller markeret som artefakt (dekoration, sidehoveder, sidefødder). Tag det indhold, der ikke er tagget.
+	Example: {sample}	Eksempel: {sample}
+	Exclude image/OCR text	Udeluk billed-/OCR-tekst
+	Exclude images smaller than	Udeluk billeder mindre end
+	Exclude tagged code blocks	Udeluk taggede kodeblokke
+	Exclude tagged tables	Udeluk taggede tabeller
+	Exclusions use PDF tags. Untagged tables and code remain included. Image exclusion also removes invisible text.	Udelukkelser bruger PDF-tags. Utagede tabeller og kode regnes stadig med. Billedudelukkelse fjerner også usynlig tekst.
+	Execute a menu item	Udfør et menupunkt
+	Expand all	Udfold alle
+	Expand all bookmarks	Udvid alle bogmærker
+	Expand all pages	Fold alle sider ud
+	Expand tag	Udfold tag
+	Expand top-level bookmarks	Udvid bogmærkerne på øverste niveau
+	Explain	Forklar
+	Export a PDF	Eksportér en PDF
+	Export all comments to data file…	Eksportér alle kommentarer til datafil…
+	Export All Images	Eksportér alle billeder
+	Export all images	Eksportér alle billeder
+	Export all images…	Eksportér alle billeder…
+	Export all to data file…	Eksportér alle til datafil…
+	Export certificate	Eksportér certifikat
+	Export certificate…	Eksportér certifikat…
+	Export comments	Eksportér kommentarer
+	Export data	Eksportér data
+	Export form data	Eksportér formulardata
+	Export form data…	Eksportér formulardata…
+	Export measurements	Eksportér målinger
+	Export measurements as CSV	Eksportér målinger som CSV
+	Export stopped: {e}	Eksport standset: {e}
+	Export to	Eksportér til
+	Export to HTML…	Eksportér til HTML…
+	Export to Image	Eksportér til billede
+	Export to image…	Eksportér til billede…
+	Export to PowerPoint…	Eksportér til PowerPoint…
+	Export to RTF…	Eksportér til RTF…
+	Export to Text	Eksportér til tekst
+	Export to text…	Eksportér til tekst…
+	Export to Word…	Eksportér til Word…
+	Export Value: {on}	Eksportværdi: {on}
+	Exported 1 image	Eksporterede 1 billede
+	Exported the text of 1 page	Eksporterede teksten fra 1 side
+	Exported the text of {n} pages	Eksporterede teksten fra {n} sider
+	Exported to {path}	Eksporteret til {path}
+	Exported {n} images	Eksporterede {n} billeder
+	Exporting… {d} of {t}	Eksporterer… {d} af {t}
+	Extended Graphics States	Udvidede grafiktilstande
+	Extract	Udtræk
+	Extract pages	Udtræk sider
+	Extract pages as separate files	Udtræk sider som separate filer
+	Extract pages to a new document	Udtræk sider til et nyt dokument
+	Extract pages…	Udtræk sider…
+	Extracted 1 page	Udtrak 1 side
+	Extracted {n} pages	Udtrak {n} sider
+	Failed	Mislykkedes
+scroll speed	Fast	Hurtig
+	February	februar
+calendar date	February	februar
+	Field	Felt
+	Field "{}" on page {p} has no description (tooltip)	Feltet "{}" på side {p} har ingen beskrivelse (tooltip)
+	Field descriptions	Feltbeskrivelser
+	Field is used for file selection	Feltet bruges til filvalg
+	Field list	Feltliste
+	Field names (comma-separated)	Feltnavne (kommasepareret)
+	Field names with + - * / and parentheses; put \\ before spaces in names.	Feltnavne med + - * / og parenteser; sæt \\ foran mellemrum i navnene.
+	Field properties	Feltegenskaber
+	Field properties…	Feltegenskaber…
+	Field value is in range:	Feltværdien er inden for intervallet:
+	Field value is not validated	Feltværdien valideres ikke
+	Field: {field} on page {p}	Felt: {field} på side {p}
+	Fields	Felter
+	Fields to reset (comma-separated; empty: all)	Felter der nulstilles (kommasepareret; tom: alle)
+	Figure {i} of {n}{page}	Figur {i} af {n}{page}
+	Figures alternate text	Alternativ tekst for figurer
+	Figures require alternate text	Figurer kræver alternativ tekst
+	File (.p12, .pfx)	Fil (.p12, .pfx)
+	File attachments	Filvedhæftninger
+	File Name	Filnavn
+	File name	Filnavn
+	File size	Filstørrelse
+@id	file.word_count	Tæl ord…
+	Filename	Filnavn
+	Files are combined from top to bottom. Leave Pages empty to take every page.	Filerne kombineres fra top til bund. Lad Sider stå tomt for at medtage alle sider.
+	Files are combined in the order shown. Drag them to change it.	Filerne kombineres i den viste rækkefølge. Træk i dem for at ændre den.
+	Files are combined in this order. Leave Pages empty to take every page.	Filerne kombineres i denne rækkefølge. Lad Sider stå tomt for at tage alle sider med.
+	Files for {name}	Filer til {name}
+	Files you open in PdfCraft appear here. Drop a PDF anywhere to open it.	Filer, du åbner i PdfCraft, vises her. Slip en PDF hvor som helst for at åbne den.
+	Fill	Udfyld
+	Fill & Sign	Udfyld og signér
+	Fill & Sign dates	Datoer i Udfyld og signér
+	Fill & Sign signature	Udfyld og signér-signatur
+	Fill & Sign: add text	Udfyld og signér: tilføj tekst
+	Fill & Sign: change initials	Udfyld og signér: ændr initialer
+	Fill & Sign: change signature	Udfyld og signér: skift signatur
+	Fill & Sign: checkmark	Udfyld og signér: flueben
+	Fill & Sign: cross	Udfyld og signér: kryds
+	Fill & Sign: date	Udfyld og signér: dato
+	Fill & Sign: dot	Udfyld og signér: prik
+	Fill & Sign: initials	Udfyld og signér: initialer
+	Fill & Sign: line	Udfyld og signér: linje
+	Fill & Sign: remove saved initials	Udfyld og signér: fjern de gemte initialer
+	Fill & Sign: remove saved signature	Udfyld og signér: fjern den gemte underskrift
+	Fill & Sign: sign	Udfyld og signér: signatur
+	Fill Color:	Fyldfarve:
+	Fill colour	Udfyldningsfarve
+	Fill colour:	Udfyldningsfarve:
+	Fill colour: none	Udfyldningsfarve: ingen
+	Fill in {name}	Udfyld {name}
+	Filling in form fields and signing existing signature fields	Udfyldning af formularfelter og signering af eksisterende signaturfelter
+	Filling of form fields	Udfyldning af formularfelter
+	Filter comments	Filtrér kommentarer
+	Find a tag	Find et tag
+	Find options	Søgeindstillinger
+	Find text	Find tekst
+	Find text and redact	Find tekst og slør
+	Find text and redact…	Find tekst og slør…
+	Find tools and commands	Find værktøjer og kommandoer
+	Find tools and commands…	Find værktøjer og kommandoer…
+	Find untagged content	Find utagget indhold
+	Finding document fonts…	Søger efter skrifttyper i dokumentet…
+	Find…	Find…
+	Finish or discard the text being edited before selecting several objects.	Afslut eller forkast den tekst, der redigeres, før du vælger flere objekter.
+	First / last page	Første / sidste side
+	Fit Height	Tilpas til højde
+	Fit one full page	Tilpas én hel side
+	Fit Page	Tilpas til side
+	Fit to height	Tilpas til højde
+	Fit to page	Tilpas til siden
+	Fit to width	Tilpas til bredde
+	Fit to width scrolling	Tilpas til bredden (rulning)
+	Fit Visible	Tilpas til det synlige
+	Fit visible	Tilpas til synligt
+	Fit Width	Tilpas til bredde
+	Fix	Ret
+	Fix hairlines	Ret hårstreger
+	Fix reading order	Ret læserækkefølge
+	Fixed what could be fixed; 1 problem remains	Rettede det, der kunne rettes; 1 problem er tilbage
+	Fixed what could be fixed; {n} problems remain	Rettede det, der kunne rettes; {n} problemer er tilbage
+	Flatten comments	Fladgør kommentarer
+	Flatten Fill & Sign	Fladgør Udfyld og signér
+	Flatten Fill & Sign when saving	Fladgør Udfyld og signér, når du gemmer
+	Flatten form fields	Fladgør formularfelter
+	Flip Horizontal	Vend vandret
+	Flip horizontal	Vend vandret
+	Flip image	Vend billede
+	Flip on long edge	Vend langs den lange kant
+	Flip on short edge	Vend langs den korte kant
+	Flip Vertical	Vend lodret
+	Flip vertical	Vend lodret
+	Float panel	Fritsvævende panel
+	Folders	Mapper
+	Font (unnamed) on page {p} doesn't map its characters to Unicode	Skrifttype (uden navn) på side {p} knytter ikke sine tegn til Unicode
+	Font colour:	Skriftfarve:
+	Font size	Skriftstørrelse
+	Font size 0 uses automatic sizing.	Skriftstørrelsen 0 giver automatisk størrelse.
+	Font Size:	Skriftstørrelse:
+	Font size:	Skriftstørrelse:
+	Font {} on page {p} doesn't map its characters to Unicode	Skrifttypen {} på side {p} knytter ikke sine tegn til Unicode
+	Font: Helvetica	Skrifttype: Helvetica
+	Fonts must map their characters to Unicode so text can be read and copied. Fix the fonts or recreate the PDF.	Skrifttyper skal knytte deres tegn til Unicode, så teksten kan læses og kopieres. Ret skrifttyperne, eller genopret PDF'en.
+	for images above	for billeder over
+	For page sizes and margins.	Til sidestørrelser og margener.
+	Form data and PDF forms	Formulardata og PDF-formularer
+	Form field on page {p} isn't tagged	Formularfelt på side {p} er ikke tagget
+	Form fields	Formularfelter
+	Form fields are flattened: their values stay visible. Saving rewrites the whole file.	Formularfelter fladgøres: deres værdier forbliver synlige. Når du gemmer, omskrives hele filen.
+	Form fields must be in the tag tree (Form tags) to be announced. Tag the form fields.	Formularfelter skal være i tagtræet (Form-tags) for at blive oplæst. Tag formularfelterne.
+	Form fields only	Kun formularfelter
+	Form fields panel	Formularfeltpanel
+	form fill	formularudfyldning
+	Form fill-in and digital signatures	Formularudfyldning og digitale signaturer
+	Format text	Formatér tekst
+	Forms	Formularer
+	Formulas and similar non-text elements need alternate text. Add alternate text to them.	Formler og lignende ikke-tekstelementer har brug for alternativ tekst. Tilføj alternativ tekst til dem.
+	Found {n} untagged content problems.	Fandt {n} problemer med utagget indhold.
+calendar weekday	Fr	fr
+	From	Fra
+	From a PDF page or an image	Fra en PDF-side eller et billede
+	From colour	Fra farve
+	From {file}	Fra {file}
+	From:	Fra:
+	Front side only	Kun forsiden
+	Full Screen	Fuldskærm
+	Full screen mode	Fuldskærmstilstand
+	Geospatial location	Geografisk placering
+	Get help, share feedback and follow development on Discord.	Få hjælp, del feedback og følg udviklingen på Discord.
+	Go to a page view	Gå til en sidevisning
+	Go to page {p}	Gå til side {p}
+	Go to page…	Gå til side…
+	Go to the page	Gå til siden
+	Go to this result	Gå til dette resultat
+	Grab bag	Diverse
+	Grayscale Images	Gråtonebilleder
+	Green on black	Grøn på sort
+	Greyscale	Gråtoner
+	Grid view	Gittervisning
+	H / Space (hold)	H / Mellemrum (hold)
+	Hand (H)	Hånd (H)
+	Has JavaScript actions (run in M6)	Har JavaScript-handlinger (kører i M6)
+	Header and footer	Sidehoved og sidefod
+	Header cells (TH) tell listeners what each column or row holds. Mark the header cells.	Overskriftceller (TH) fortæller lytterne, hvad hver kolonne eller række indeholder. Markér overskriftcellerne.
+	header or footer	sidehoved eller sidefod
+	Headers	Tabeloverskrifter
+	Heading levels shouldn't skip (an H1 followed by an H3). Retag the headings.	Overskriftsniveauer bør ikke springes over (et H1 efterfulgt af et H3). Tag overskrifterne igen.
+	Headings	Overskrifter
+	Help…	Hjælp…
+	Hidden layers	Skjulte lag
+	Hidden text	Skjult tekst
+	Hide a field	Skjul et felt
+	Hide all comments	Skjul alle kommentarer
+	Hide field highlights	Skjul fremhævning af felter
+	Hide hover previews for highlights without comment text	Skjul svæveforhåndsvisninger for markeringer uden kommentartekst
+	Hide layer	Skjul lag
+	Hide menu bar	Skjul menulinje
+	Hide password	Skjul adgangskode
+	Hide toolbars	Skjul værktøjslinjer
+	Hide window controls	Skjul vindueskontroller
+	Hides annotation	Skjuler annotering
+	Highlight	Fremhæv
+	Highlight fields	Fremhæv felter
+	Highlight Style:	Fremhævningsformat:
+	Highlight text	Fremhæv tekst
+	Home	Hjem
+key	Home	Home
+	Home / End	Home / End
+	Horizontal reversed	Vandret, omvendt
+	Horizontal scale	Vandret skalering
+	Horizontally	Vandret
+	HTML web page	HTML-webside
+	H{n} follows an H{d}; headings should not skip levels	H{n} følger efter en H{d}; overskrifter må ikke springe niveauer over
+	Icon	Ikon
+	Identity	Identitet
+	Image (PNG)	Billede (PNG)
+	Image field	Billedfelt
+	Image-only PDF	PDF med kun billeder
+	Images and text	Billeder og tekst
+	Images and text (converted to PDF)	Billeder og tekst (konverteret til PDF)
+	Import	Importér
+	Import comments…	Importér kommentarer…
+	Import data	Importér data
+	Import form data…	Importér formulardata…
+	Import list…	Importér liste…
+	Import {name}	Importér {name}
+	Importing data arrives on the web with file pickers for data files	Import af data kommer på webversionen med filvælgere til datafiler
+	In multiple files	I flere filer
+	In this file	I denne fil
+	Includes unsaved changes	Indeholder ikke-gemte ændringer
+	Incorrect password. Try again.	Forkert adgangskode. Prøv igen.
+	Indent	Forøg indrykning
+	Index	Indeks
+	Information	Information
+	Initial View	Startvisning
+	Initials	Initialer
+	initials	initialer
+	Ink sensitivity	Blækfølsomhed
+	Insert a blank page after the selection	Indsæt en tom side efter markeringen
+	Insert a file at the end	Indsæt en fil til sidst
+	Insert a file before page {label}	Indsæt en fil før side {label}
+	Insert blank page	Indsæt tom side
+	Insert Date	Indsæt dato
+	Insert Page Number	Indsæt sidetal
+	Insert pages	Indsæt sider
+	Insert pages from a file…	Indsæt sider fra en fil…
+	Insert pages from file…	Indsæt sider fra fil…
+	Insert pages from {name}	Indsæt sider fra {name}
+	Insert pages from {name} — 1 field renamed	Indsæt sider fra {name} — 1 felt omdøbt
+	Insert pages from {name} — fields renamed	Indsæt sider fra {name} — felter omdøbt
+	Insert text	Indsæt tekst
+	Inserted	Indsat
+	Inserted text	Indsat tekst
+	Inserting, deleting, and rotating pages	Indsættelse, sletning og rotation af sider
+	Inset	Indsænket
+	Inspector	Inspektør
+	Installed fonts…	Installerede skrifttyper…
+	Intended usage	Påtænkt brug
+certificate	Intended usage	Tilsigtet brug
+	Interface language	Grænsefladesprog
+	Interface size	Grænsefladestørrelse
+	Intersection	Skæringspunkt
+	Intersections	Skæringspunkter
+	Invisible Rectangle	Usynligt rektangel
+	Irregular tables confuse cell navigation. Give every row the same number of cells (counting spans).	Uregelmæssige tabeller forvirrer navigationen mellem celler. Giv hver række det samme antal celler (spænd medregnet).
+	is available	er tilgængelig
+	is not available yet	er endnu ikke tilgængelig
+	Issued by	Udstedt af
+certificate	Issued by	Udstedt af
+	Issued by: 	Udstedt af: 
+	Issued to	Udstedt til
+certificate	Issued to	Udstedt til
+	Issuer	Udsteder
+certificate	Issuer	Udsteder
+	Item List	Punktliste
+	Item:	Punkt:
+	Items marked Ready work today.	Elementer markeret som Klar fungerer allerede i dag.
+	its alternate text is inside another element's and will never be read	dens alternative tekst ligger inde i et andet elements og vil aldrig blive læst
+	Its security settings don't allow copying pages	Dens sikkerhedsindstillinger tillader ikke kopiering af sider
+	January	januar
+calendar date	January	januar
+	JavaScript	JavaScript
+	JavaScript Console	JavaScript-konsol
+	JavaScript console…	JavaScript-konsol…
+	JavaScript is turned off (Preferences ▸ JavaScript).	JavaScript er slået fra (Indstillinger > JavaScript).
+	JavaScript, e.g. getField("total").value	JavaScript, fx getField("total").value
+	Join the ArtCraft community	Deltag i ArtCraft-fællesskabet
+	Join the ArtCraft Discord	Deltag i ArtCrafts Discord
+	July	juli
+calendar date	July	juli
+	June	juni
+calendar date	June	juni
+	just now	lige nu
+	Justify	Juster
+	Keep source fonts	Bevar de oprindelige skrifttyper
+	Keep tool selected	Behold værktøjet valgt
+	Keep tool selected: on	Behold værktøjet valgt: til
+	Key Agreement	Nøgleaftale
+	Key Algorithm	Nøglealgoritme
+	Key Encipherment	Nøglekryptering
+	Key usage	Nøgleanvendelse
+certificate	Key usage	Nøgleanvendelse
+	Keyboard shortcuts	Tastaturgenveje
+	Keychain  ·  	Nøglering  ·  
+	Keywords	Nøgleord
+	Label	Etiket
+	Labels	Etiketter
+	Labels: {preview}. Later pages keep their labels.	Etiketter: {preview}. Senere sider bevarer deres etiketter.
+	Landscape	Landskab
+	Landscape and Portrait Pages	Sider i liggende og stående format
+	Landscape Pages	Sider i liggende format
+	Landscape pages	Sider i liggende format
+	Larger pages	Større sider
+	Later	Senere
+	Later in tab order	Senere i tabulatorrækkefølgen
+	Layers Panel and Page	Lagpanel og side
+	Layout and Magnification	Layout og zoom
+	Lbl and LBody	Lbl og LBody
+	Lbl and LBody must be children of LI	Lbl og LBody skal være underordnet LI
+	Leave out files that can't be read?	Udelad filer, der ikke kan læses?
+	Left Edge	Venstre kant
+	Left Footer Text	Venstre sidefodtekst
+	Left Header Text	Venstre sidehovedtekst
+	Left out: {names}	Udeladt: {names}
+	LI must be a child of L	LI skal være underordnet L
+	Light blue	Lyseblå
+	Light gray	Lysegrå
+	Light theme	Lyst tema
+	Limit of	Grænse på
+	Line ending	Linjeafslutning
+	Line spacing	Linjeafstand
+	Line Style:	Linjestil:
+	Line thickness	Linjetykkelse
+	Line Thickness:	Linjetykkelse:
+	Lines added	Tilføjede linjer
+	Lines deleted	Slettede linjer
+	Link Action	Linkhandling
+	Link Appearance	Linkets udseende
+	Link Properties	Linkegenskaber
+	Link Type:	Linktype:
+	links	links
+	Links, actions and JavaScripts	Links, handlinger og JavaScripts
+	List	Liste
+	List box	Listefelt
+	List Box Properties	Egenskaber for listefelt
+	List items	Listeelementer
+	List items belong in a list. Fix the list's tags.	Listeelementer hører hjemme i en liste. Ret listens tags.
+	List labels and bodies belong in a list item. Fix the list's tags.	Listeetiketter og listetekster hører hjemme i et listeelement. Ret listens tags.
+	List view	Listevisning
+	Lists	Lister
+	Load document font	Indlæs dokumentskrifttype
+	Load font…	Indlæs skrifttype…
+	Loading…	Indlæser…
+	Local cross-PDF links require the desktop app	Lokale links mellem PDF-filer kræver skrivebordsappen
+	Location: 	Location: 
+	Lock comment	Lås kommentar
+	Locked	Låst
+	Logical Reading Order	Logisk læserækkefølge
+	Looking for PDFs…	Søger efter PDF-filer…
+	Looking for printers…	Søger efter printere…
+	Low resolution	Lav opløsning
+	Low Resolution (150 dpi)	Lav opløsning (150 dpi)
+	Magnification	Zoom
+	Make accessible	Gør tilgængelig
+	Make Current Properties Default	Gør nuværende egenskaber til standard
+	Make Properties Default	Gør egenskaber til standard
+	Make properties default	Gør egenskaber til standard
+	Make scans searchable, then make them smaller.	Gør scanningerne søgbare, og gør dem derefter mindre.
+	Manage embedded index	Administrér integreret indeks
+	March	marts
+calendar date	March	marts
+	Margins	Margener
+	Margins (in)	Margener (tommer)
+	Mark all	Markér alle
+	Mark as artifact	Markér som artefakt
+	Mark as comments	Markér som kommentarer
+	Mark as Confidential	Markér som fortrolig
+	Mark content as artifact	Markér indhold som artefakt
+	Mark differences	Markér forskelle
+	Mark figure as decorative	Markér figur som dekorativ
+	Mark for redaction	Markér til bortredaktion
+	Mark Page Range	Markér sideinterval
+	Mark pages for redaction	Markér sider til bortredaktion
+	Mark with checkmark	Markér med afkrydsning
+	Marked	Markeret
+	Markup	Markering
+	Marquee zoom	Zoom med markering
+	Mask:	Maske:
+	Match field sizes	Gør feltstørrelser ens
+	Match page at 100%	Match side ved 100%
+	maximum	maksimumet
+	May	maj
+calendar date	May	maj
+	Measure area	Mål areal
+	Measure distance	Mål afstand
+	Measure objects	Mål objekter
+	Measure perimeter	Mål omkreds
+	Measurement information	Måleoplysninger
+	Measurement snapping	Fastgørelse ved måling
+	Measuring tool	Måleværktøj
+	Medium	Middel
+	Menu	Menu
+	Merge data files into spreadsheet…	Flet datafiler til et regneark…
+	Merge image fragments	Saml billedfragmenter
+	Merged 1 file into {path}	Flettede 1 fil ind i {path}
+	Merged {n} files into {path}	Flettede {n} filer ind i {path}
+	Merging data files needs the desktop app	Fletning af datafiler kræver skrivebordsappen
+	Metadata	Metadata
+	metadata	metadata
+	Microsoft Word (.docx)	Microsoft Word (.docx)
+	Midpoint	Midtpunkt
+	Midpoints	Midtpunkter
+	minimum	minimumet
+	Mixed	Blandet
+calendar weekday	Mo	ma
+	Modify page	Ændr side
+	More options	Flere indstillinger
+	More options:	Flere indstillinger:
+	More ways to add files	Flere måder at tilføje filer på
+	Mouse Down	Mus ned
+	Mouse Enter	Mus ind
+	Mouse Exit	Mus ud
+	Mouse Up	Mus op
+	Mouse wheel scroll speed	Rullehastighed for musehjulet
+	Move bookmark	Flyt bogmærke
+	Move comment	Flyt kommentar
+	Move down	Flyt ned
+	Move earlier	Flyt tidligere
+	Move image	Flyt billede
+	Move later	Flyt senere
+	Move object	Flyt objekt
+	Move objects	Flyt objekter
+	Move page	Flyt side
+	Move pages	Flyt sider
+	Move tag earlier	Flyt tag tidligere
+	Move tag later	Flyt tag senere
+	Move to group	Flyt til gruppe
+	Move up	Flyt op
+	Multi-line	Flere linjer
+	Multiple	Flere
+	Multiple files	Flere filer
+	Multiple selection	Valg af flere
+	Multiple words or phrases	Flere ord eller fraser
+	Name on new comments	Navn på nye kommentarer
+	Named Destinations	Navngivne destinationer
+	Navigation links	Navigationslinks
+	Navigation links are not repetitive	Navigationslinks gentages ikke
+	Navigation tab	Navigationsfane
+	needs an AI provider (off by default)	kræver en AI-udbyder (slået fra som standard)
+	Needs manual check	Kræver manuel kontrol
+	Negative number style:	Stil for negative tal:
+	Nested alternate text	Indlejret alternativ tekst
+	Never	Aldrig
+	New Action	Ny handling
+	New Action…	Ny handling…
+	New blank PDF	Ny tom PDF
+	New bookmark	Nyt bogmærke
+	New bookmark ({key})	Nyt bogmærke ({key})
+	New bookmark (⌘B)	Nyt bogmærke (⌘B)
+	New bookmarks from structure	Nye bogmærker fra struktur
+	New file only	Kun ny fil
+	New file:	Ny fil:
+	New file: {name}	Ny fil: {name}
+	New {tool} comments will look like this one	Nye {tool}-kommentarer kommer til at se sådan her ud
+	Next ({key})	Næste ({key})
+	Next (⌘G)	Næste (⌘G)
+	Next / previous match	Næste / forrige match
+	Next figure	Næste figur
+	Next month	Næste måned
+	Next sheet	Næste ark
+	Next tab	Næste faneblad
+	Next view	Næste visning
+	No	Nej
+	No actions	Ingen handlinger
+	no alternate text	ingen alternativ tekst
+	No changes allowed	Ingen ændringer tilladt
+	No changes to save	Ingen ændringer at gemme
+	No check has run yet.	Der er ikke udført nogen kontrol endnu.
+	No color	Ingen farve
+	No colour	Ingen farve
+	No comments match.	Ingen kommentarer matcher.
+	No comments yet.	Ingen kommentarer endnu.
+	No contributor data was built into this copy.	Der er ikke indbygget bidragsyderdata i denne kopi.
+	No differences in the text.	Ingen forskelle i teksten.
+	No digital IDs yet.	Ingen digitale id'er endnu.
+	No document language is set	Der er ikke angivet noget dokumentsprog
+	No documents are open	Ingen dokumenter er åbne
+	No file chosen	Ingen fil valgt
+	No fill	Ingen udfyldning
+	No fonts are referenced by the pages.	Siderne henviser ikke til nogen skrifttyper.
+	No form fields were detected	Der blev ikke fundet nogen formularfelter
+	no header cells (TH)	ingen overskriftsceller (TH)
+	No inaccessible scripts	Ingen utilgængelige scripts
+	No issues found	Ingen problemer fundet
+	No limit	Ingen grænse
+	No links to remove	Ingen links at fjerne
+	No matches	Ingen forekomster
+	No matches.	Ingen resultater.
+	No matching tools	Ingen matchende værktøjer
+	No model credits were built into this copy.	Der er ikke indbygget kreditering af modeller i denne kopi.
+	No openly licensed document fonts found. Load a font file.	Fandt ingen åbent licenserede skrifttyper i dokumentet. Indlæs en skrifttypefil.
+	no output folder was chosen	ingen outputmappe blev valgt
+	No page has text: the document appears to be images of pages	Ingen side har tekst: dokumentet ser ud til at være billeder af sider
+	No pages match those choices	Ingen sider passer til disse valg
+	No pages selected	Ingen sider valgt
+	No PDFs found in {folder}	Ingen PDF-filer fundet i {folder}
+	No PDFs in this folder yet	Endnu ingen PDF-filer i denne mappe
+	No PDFs, images or text files found in {folder}	Der blev ikke fundet PDF'er, billeder eller tekstfiler i {folder}
+	No photo chosen	Intet foto valgt
+	No preview	Ingen forhåndsvisning
+	No printers were found. Check that the printer is installed and the print spooler is running, then open Print again.	Der blev ikke fundet nogen printere. Tjek at printeren er installeret, og at udskriftskøen kører, og åbn Udskriv igen.
+	No problems found: the document conforms to {level}.	Fandt ingen problemer: dokumentet overholder {level}.
+	No recent files	Ingen seneste filer
+	No security	Ingen sikkerhed
+	No sheets	Ingen ark
+	No signature was found in the frame. Move the frame over the signature or raise the ink sensitivity.	Der blev ikke fundet nogen underskrift i rammen. Flyt rammen hen over underskriften, eller øg blækfølsomheden.
+	No status has been set.	Der er ikke angivet nogen status.
+	no such document	dokumentet findes ikke
+	no summary	intet resumé
+	No unlinked web addresses were found in the text	Der blev ikke fundet webadresser uden link i teksten
+	No untagged content was found.	Der blev ikke fundet utagget indhold.
+	no unused output name	intet ledigt outputnavn
+	Non-Repudiation	Uafviselighed
+	none	ingen
+	None (prefix only)	Ingen (kun præfiks)
+	None found	Ingen fundet
+	None of those files can be made into a PDF; use PDFs, images or .txt files	Ingen af disse filer kan laves til en PDF; brug PDF-filer, billeder eller .txt-filer
+	None — everything is allowed	Ingen — alt er tilladt
+scroll speed	Normal	Normal
+	Not allowed	Ikke tilladt
+	not in a Table, THead, TBody or TFoot	står ikke i en Table, THead, TBody eller TFoot
+	not in a TR	står ikke i en TR
+	not in an L (list)	står ikke i en L (liste)
+	not in an LI (list item)	står ikke i en LI (listeelement)
+	Not now	Ikke nu
+	Not present	Ikke til stede
+	Note	Note
+	nothing in the file matches this document	intet i filen svarer til dette dokument
+	Nothing to redo	Intet at gentage
+	nothing to redo	intet at gentage
+	Nothing to undo	Intet at fortryde
+	nothing to undo	intet at fortryde
+	November	november
+calendar date	November	november
+	Number	Tal
+	Number every page in the footer.	Nummerér alle sider i sidefoden.
+	Number of pages	Antal sider
+	Number pages	Nummerér sider
+	Number pages…	Nummerér sider…
+	October	oktober
+calendar date	October	oktober
+	Odd pages	Ulige sider
+	Odd Pages Only	Kun ulige sider
+	Odd pages only	Kun ulige sider
+	of	af
+	of the following fields:	af følgende felter:
+	of {name}	fra {name}
+	of {pages}	af {pages}
+animation effects	Off	Fra
+	Offset from centre	Forskydning fra midten
+	Old file:	Ældre fil:
+	Old file: {name}	Gammel fil: {name}
+	On	Til
+animation effects	On	Til
+	On Blur	Ved fokustab
+	On Focus	Ved fokus
+	on page {label}	på side {label}
+	On the web, open or drop an image to convert it	På webversionen kan du åbne eller slippe et billede for at konvertere det
+	One word or phrase per line	Ét ord eller én frase pr. linje
+	One {f} file per page, named after the document.	Én {f}-fil pr. side, navngivet efter dokumentet.
+	Only allow this if you trust the source document.	Tillad kun dette, hvis du stoler på kildedokumentet.
+	Only change the colour of black text or line art	Ændr kun farven på sort tekst eller stregtegning
+	Only checked properties will change. Mixed means the selected fields have different values.	Kun afkrydsede egenskaber ændres. Blandet betyder, at de valgte felter har forskellige værdier.
+	Only continue if you trust this document. An address can carry information from the document, such as what you typed into its form.	Fortsæt kun, hvis du stoler på dette dokument. En adresse kan bringe oplysninger fra dokumentet med, f.eks. det, du har tastet i dets formular.
+	Only the document's owner can change its security (open it with the permissions password)	Kun dokumentets ejer kan ændre dets sikkerhed (åbn det med rettighedsadgangskoden)
+	Only the page content changes: links, comments, form fields and bookmarks on the original pages stay.	Kun sideindholdet ændres: links, kommentarer, formularfelter og bogmærker på de oprindelige sider bevares.
+	Opacity	Uigennemsigtighed
+	Open a document first	Åbn først et dokument
+	Open a PDF ({key})	Åbn en PDF ({key})
+	Open a PDF (⌘O)	Åbn en PDF (⌘O)
+	Open a PDF to measure it.	Åbn en PDF for at måle på den.
+	Open a web link	Åbn et weblink
+	Open a web page	Åbn en webside
+	Open accessibility report	Åbn tilgængelighedsrapport
+	Open arrow	Åben pil
+	Open email app	Åbn e-mail-app
+	Open file	Åbn fil
+	Open folder	Åbn mappe
+	Open in a new tab	Åbn i en ny fane
+	Open in Full Screen mode	Åbn i fuldskærmstilstand
+	Open in Full Screen mode?	Åbn i fuldskærm?
+	Open link	Åbn link
+	Open Recent	Åbn seneste
+	Open the file as it was saved then	Åbn filen, som den blev gemt dengang
+	Open the older version first	Åbn den ældre version først
+	Open this local PDF?	Åbn denne lokale PDF?
+	Open this web page?	Åbn denne webside?
+	Open to page	Åbn på side
+	open to see what it will include	åbn for at se, hvad den kommer til at indeholde
+	Opened with	Åbnet med
+	Opened, but its security settings don't allow combining. Enter the permissions password.	Åbnet, men dens sikkerhedsindstillinger tillader ikke kombinering. Angiv rettighedsadgangskoden.
+	Opening the browser's print dialog…	Åbner browserens udskrivningsdialog…
+	Opens the printer driver's preferences. They are saved for every print from this computer; the copies, two-sided, grayscale and paper chosen here still apply.	Åbner printerdriverens indstillinger. De gemmes for alle udskrivninger fra denne computer; kopier, tosidt, gråtone og papir valgt her gælder stadig.
+	Optimization cancelled	Optimering annulleret
+	Optimization is already running	Optimering kører allerede
+	Optimize	Optimér
+	Optimize PDF…	Optimér PDF…
+	Optimize Scanned Documents	Optimér scannede dokumenter
+	Optimize scanned documents	Optimér skannede dokumenter
+	Optimize scanned documents…	Optimér skannede dokumenter…
+	Optimizing… cleaning up	Optimerer… rydder op
+	Optimizing… image {d} of {t}	Optimerer… billede {d} af {t}
+	Optimizing… merging identical objects	Optimerer… fletter identiske objekter
+	Optimizing… merging image fragments	Optimerer… samler billedfragmenter
+	Optimizing… removing user data	Optimerer… fjerner brugerdata
+	Optimizing… writing the copy	Optimerer… skriver kopien
+	Optional	Valgfri
+	Optional: needs an AI provider you configure	Valgfrit: kræver en AI-udbyder, du selv konfigurerer
+	Organization Name	Organisationsnavn
+	Organizational Unit	Organisationsenhed
+	Organize	Organisér
+	Organize pages	Organisér sider
+	Original: replace pages	Original: erstat sider
+	other changes	andre ændringer
+	Other colour…	Anden farve…
+	Other elements alternate text	Alternativ tekst for andre elementer
+	Other elements that require alternate text	Andre elementer, der kræver alternativ tekst
+	Outdent	Formindsk indrykning
+	Outline colour:	Konturfarve:
+	Output appears here.	Output vises her.
+	Output intent: {list}	Output intent: {list}
+	Output preview	Forhåndsvisning af output
+	Owner password (no restrictions apply)	Ejeadgangskode (ingen begrænsninger gælder)
+	Page background	Sidebaggrund
+	Page Content	Sideindhold
+	page content	sideindhold
+	Page display	Sidevisning
+	Page display: {layout}	Sidevisning: {layout}
+	Page does not require timed responses	Siden kræver ikke tidsbegrænsede svar
+	Page grid	Sidegitter
+	Page labels	Sideetiketter
+	Page layout	Sidelayout
+	Page navigation	Sidenavigation
+	Page number	Sidetal
+	Page Only	Kun side
+	Page options	Sideindstillinger
+	Page order:	Siderækkefølge:
+	Page properties	Sideegenskaber
+	Page Range	Sideinterval
+	Page Range Options	Indstillinger for sideinterval
+	Page size	Sidestørrelse
+	Page Sizing & Handling	Sidestørrelse og håndtering
+	Page thumbnails	Sideminiaturer
+	Page transitions	Sideovergange
+	Page will not cause screen flicker	Siden forårsager ikke skærmflimmer
+	Page {label}	Side {label}
+	Page {n}	Side {n}
+	page {n} is out of range (1–{count})	side {n} er uden for intervallet (1–{count})
+	Page {n} of {total}	Side {n} af {total}
+	Page {p} doesn't tab in structure order	Side {p} følger ikke strukturen i sin tabulatorrækkefølge
+	Page {p} of {n}	Side {p} af {n}
+	Page {p}: {n} untagged content item	Side {p}: {n} ikke-tagget indholdselement
+	Page {p}: {n} untagged content items	Side {p}: {n} ikke-taggede indholdselementer
+	Page {} has additional actions	Side {} har yderligere handlinger
+	pages	sider
+	pages added or removed	sider tilføjet eller fjernet
+	Pages counted	Sider talt
+	Pages from	Sider fra
+	Pages of {name} to combine, e.g. 1-3, 6	Sider fra {name}, der skal kombineres, fx 1-3, 6
+	Pages Panel and Page	Sidepanel og side
+	Pages per file	Sider pr. fil
+	Pages per sheet:	Sider pr. ark:
+	Pages selected	Sider valgt
+	Pages that are only pictures of text can't be read aloud or searched. Recognize text (OCR) to add a text layer.	Sider, der kun er billeder af tekst, kan ikke læses højt eller gennemsøges. Genkend tekst (OCR) for at tilføje et tekstlag.
+	Pages to Print	Sider der skal udskrives
+	Pages with links, comments or fields should tab in structure order. The fix sets each page's tab order to Use Document Structure.	Sider med links, kommentarer eller felter bør tabbe i strukturrækkefølge. Rettelsen sætter hver sides tabulatorrækkefølge til Brug dokumentstruktur.
+	Pages:	Sider:
+	Pages: {k} of {n}	Sider: {k} af {n}
+	Panel layout could not be restored: {error}	Panellayoutet kunne ikke gendannes: {error}
+	Panel move was not applied: {error}	Flytning af panelet blev ikke anvendt: {error}
+	Paper:	Papir:
+	Part of	En del af
+	Passed	Bestået
+	Password protection will be applied when you save	Adgangskodebeskyttelse anvendes, når du gemmer
+	Password required	Adgangskode påkrævet
+	Password security	Adgangskodesikkerhed
+	Password-protected	Adgangskodebeskyttet
+	Paste after	Indsæt efter
+	Paste pages	Indsæt sider
+	Path	Sti
+	Patterns	Mønstre
+	Patterns (graphics objects)	Mønstre (grafikobjekter)
+	PDF Optimizer	PDF-optimering
+	PDF or image	PDF eller billede
+	PDF page: {size}	PDF-side: {size}
+	PDF producer	PDF-producent
+	PDF scale: {scale}%	PDF-skala: {scale}%
+	PDF version	PDF-version
+	PDF, images and text	PDF, billeder og tekst
+	PDF/A…	PDF/A…
+	PdfCraft can't check this signature yet: {}.	PdfCraft kan endnu ikke kontrollere denne signatur: {}.
+	PdfCraft didn't shut down normally. These documents had changes that were autosaved:	PdfCraft blev ikke lukket normalt. Disse dokumenter havde ændringer, der blev gemt automatisk:
+	PdfCraft is drawing without a graphics processor, so it may be slow. Updating the graphics driver may help.	PdfCraft tegner uden en grafikprocessor, så det kan gå langsomt. Opdatering af grafikdriveren kan hjælpe.
+	PdfCraft on GitHub	PdfCraft på GitHub
+	PdfCraft web page	PdfCraft-webside
+	PdfCraft works offline. No telemetry, no account, and no cloud processing unless you add a provider.	PdfCraft fungerer offline. Ingen telemetri, ingen konto og ingen databehandling i skyen, medmindre du tilføjer en udbyder.
+	PdfCraft {c} is up to date.	PdfCraft {c} er opdateret.
+	PdfCraft {v} is available.	PdfCraft {v} er tilgængelig.
+	People may need more time to respond. Check that nothing has a time limit.	Folk kan have brug for mere tid til at svare. Kontrollér, at intet har en tidsgrænse.
+	Percentage	Procent
+	Perimeter	Omkreds
+	Permissions password	Rettighedsadgangskode
+	Permitted actions after certifying	Tilladte handlinger efter certificering
+	Phone Number	Telefonnummer
+	Phone Numbers	Telefonnumre
+	Photo	Foto
+	Pick a tool in the quick bar, or type above.	Vælg et værktøj i hurtiglinjen, eller skriv ovenfor.
+	Pictures need alternate text that describes them, or must be marked decorative. Add alternate text to each figure.	Billeder har brug for alternativ tekst, der beskriver dem, eller skal markeres som dekorative. Tilføj alternativ tekst til hver figur.
+	Pictures on those pages are recognized too; words already in the page's text are not added again	Billeder på disse sider genkendes også; ord, der allerede findes i sidens tekst, tilføjes ikke igen
+	Pin a folder to Home	Fastgør en mappe til Hjem
+	Pin a folder to list its newest PDFs here, such as where your scanner or a synced cloud drive saves them.	Fastgør en mappe for at få vist dens nyeste PDF-filer her, f.eks. der, hvor din scanner eller et synkroniseret clouddrev gemmer dem.
+	Pin a folder…	Fastgør en mappe…
+	Pin folder to Home…	Fastgør mappe til Hjem…
+	Pinned folders need the desktop app	Fastgjorte mapper kræver skrivebordsappen
+	Pinned {folder} to Home	Fastgjorde {folder} til Hjem
+	Place saved {what}	Placér gemt {what}
+	Plain text in reading order; pages are separated by form feeds.	Klartekst i læserækkefølge; siderne adskilles af form feed-tegn.
+	Planned	Planlagt
+	Planned for milestone	Planlagt til milepæl
+	Planned for milestone {m} — open to see what it will include	Planlagt til milepæl {m} — åbn for at se, hvad den kommer til at indeholde
+	Planned · {m}	Planlagt · {m}
+	Points from the page's bottom-left corner.	Punkter fra sidens nederste venstre hjørne.
+	Polyline	Polylinje
+	Portable mode is off: {folder} can't be written ({error}). Settings are kept in your user folder instead.	Portabel tilstand er slået fra: der kan ikke skrives til {folder} ({error}). Indstillingerne gemmes i din brugermappe i stedet.
+	Portrait	Portræt
+	Portrait Pages	Sider i stående format
+	Portrait pages	Sider i stående format
+	Post	Send
+	Poster	Plakat
+	PostScript / EPS	PostScript / EPS
+	PostScript XObjects aren't allowed	PostScript-XObjects er ikke tilladt
+	Preferences…	Præferencer…
+	Prefix	Præfiks
+	Preflight	Preflight
+	Prepare a form	Klargør en formular
+	Prepare for accessibility	Klargør til tilgængelighed
+	Prepare for Distribution	Forbered til distribution
+	Prepare for distribution	Klargør til distribution
+	Prepare for distribution…	Klargør til distribution…
+	Preparing sheet {done} of {total} for printing…	Forbereder ark {done} af {total} til udskrivning…
+	Preparing {n} sheets for printing…	Forbereder {n} ark til udskrivning…
+	Presentation (.pptx)	Præsentation (.pptx)
+	Preview unavailable: {e}	Forhåndsvisning ikke tilgængelig: {e}
+	Preview: page {p} of {n}	Forhåndsvisning: side {p} af {n}
+	Previous ({key})	Forrige ({key})
+	Previous (⇧⌘G)	Forrige (⇧⌘G)
+	Previous / next page	Forrige / næste side
+	Previous figure	Forrige figur
+	Previous month	Forrige måned
+	Previous sheet	Forrige ark
+	Previous tab	Forrige faneblad
+	Previous view	Forrige visning
+	Primary language	Primært sprog
+	Print ({key})	Udskriv ({key})
+	Print (⌘P)	Udskriv (⌘P)
+	Print as image	Udskriv som billede
+	Print in grayscale	Udskriv i gråtoner
+	Print page border	Udskriv sidekant
+	Print production	Printproduktion
+	Print single-sided. Keep the sheets in order, cut at the marks, then stack the piles left to right, top to bottom.	Udskriv enkeltsidet. Behold arkene i rækkefølge, klip ved mærkerne, og stabl derefter bunker fra venstre mod højre og oppefra og ned.
+	Print, NextPage, PrevPage, FirstPage or LastPage	Print, NextPage, PrevPage, FirstPage eller LastPage
+	Printer paper and scaling may differ. Check driver settings.	Printerens papir og skalering kan afvige. Kontrollér driverindstillingerne.
+	Printer properties	Printeregenskaber
+	Printing	Udskrivning
+	Printing allowed	Udskrivning tilladt
+	Privacy	Privatliv
+	Private data of other applications	Private data fra andre programmer
+	Producer	Producent
+	product (x)	produktet (x)
+	Properties…	Egenskaber…
+	Protect	Beskyt
+	Protect a PDF	Beskyt en PDF
+	Protect Using Password	Beskyt med adgangskode
+	Protect using password…	Beskyt med adgangskode…
+	Protect with password	Beskyt med adgangskode
+	Protected: the combined file won't keep its security settings	Beskyttet: den kombinerede fil bevarer ikke sine sikkerhedsindstillinger
+	Public key	Offentlig nøgle
+certificate	Public key	Offentlig nøgle
+	PushButton	Trykknap
+	Radio	Alternativknap
+	Radio button	Alternativknap
+	Radio Button Properties	Egenskaber for alternativknap
+	Re-type Password	Angiv adgangskoden igen
+	Read	Læs
+	Read mode	Læsetilstand
+	Read Only	Skrivebeskyttet
+	Reading colours	Læsefarver
+	Reason	Årsag
+	Reason: 	Reason: 
+	Recent colours	Seneste farver
+	Recognize Text	Genkend tekst
+	Recognize text	Genkend tekst
+	Recognize text in multiple files…	Genkend tekst i flere filer…
+	Recognize Text…	Genkend tekst…
+	Recognize text…	Genkend tekst…
+	Recognized 1 word	Genkendte 1 ord
+	Recognized {n} words	Genkendte {n} ord
+	Recognized {w} words in 1 file	Genkendte {w} ord i 1 fil
+	Recognized {w} words in {n} files	Genkendte {w} ord i {n} filer
+	Recognizing text… file {d} of {t}	Genkender tekst… fil {d} af {t}
+	Recognizing text… page {d} of {t}	Genkender tekst… side {d} af {t}
+	Recommended tools	Anbefalede værktøjer
+	Recover	Gendan
+	Recover unsaved documents?	Gendan ikke-gemte dokumenter?
+	Redact	Slør
+	Redact a PDF	Slør en PDF
+	Redact all	Slør alt
+	Redact Image	Slør billede
+	Redact pages	Slør sider
+	Redact pages…	Slør sider…
+	Redact text and images	Slør tekst og billeder
+	Redacted area fill colour:	Udfyldningsfarve for sløringsområdet:
+	Redaction code:	Sløringskode:
+	Redaction mark appearance	Udseende af sløringsmærke
+	Redaction properties…	Egenskaber for sløring…
+	Redaction Tool Properties	Egenskaber for sløringsværktøjet
+	Redid {label}	Gentog {label}
+	Redo	Gentag
+	Redo {action}	Gentag {action}
+	Reduce file size	Reducér filstørrelse
+	Reduce file size…	Reducér filstørrelse…
+	Refresh	Opdater
+	Regularity	Regelmæssighed
+	Rejected	Afvist
+	Reliable character encoding is provided	Der er angivet en pålidelig tegnkodning
+	Reload	Genindlæs
+	Reload documents when their files change on disk	Genindlæs dokumenter, når deres filer ændres på disken
+	Remove "{name}" from this list? The file itself is not deleted.	Fjern "{name}" fra denne liste? Selve filen slettes ikke.
+	Remove all links	Fjern alle links
+	Remove background	Fjern baggrund
+	Remove checkmark	Fjern afkrydsning
+	Remove Crop	Fjern beskæring
+	Remove from Recent	Fjern fra Seneste
+	Remove header & footer	Fjern sidehoved og sidefod
+	Remove hidden information	Fjern skjulte oplysninger
+	Remove hidden information and flatten comments and form fields, so recipients see only the pages.	Fjern skjulte oplysninger og fladgør kommentarer og formularfelter, så modtagerne kun ser siderne.
+	Remove hidden information, metadata, scripts and embedded content, and rewrite the files.	Fjern skjulte oplysninger, metadata, scripts og indlejret indhold, og omskriv filerne.
+	Remove hidden information…	Fjern skjulte oplysninger…
+	Remove invalid links and bookmarks	Fjern ugyldige links og bogmærker
+	Remove page	Fjern side
+	Remove redaction marks	Fjern redaktionsmærker
+	Remove saved {what}	Fjern gemt {what}
+	Remove security	Fjern sikkerhed
+	Remove this leaf tag from reading order and mark its direct content as an artifact	Fjern dette bladtag fra læserækkefølgen og markér dets direkte indhold som en artefakt
+	Remove unreferenced named destinations	Fjern navngivne destinationer uden referencer
+	Remove unused objects and merge identical ones	Fjern ubrugte objekter og flet identiske
+	Remove watermark	Fjern vandmærke
+	Remove {name}	Fjern {name}
+	Remove {name} from Recent	Fjern {name} fra Seneste
+	Remove {n} files	Fjern {n} filer
+	Remove {n} pages	Fjern {n} sider
+	Removed 1 hidden item. Save to remove them from the file.	Fjernede 1 skjult element. Gem for at fjerne det fra filen.
+	Removed 1 link	Fjernede 1 link
+	Removed {n} hidden items. Save to remove them from the file.	Fjernede {n} skjulte elementer. Gem for at fjerne dem fra filen.
+	Removed {n} links	Fjernede {n} links
+	Rename bookmark	Omdøb bogmærke
+	Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)	Rendering: hayro (bootstrap) · UI: egui · Ikoner: Lucide (ISC) · Skrifttyper: Inter, JetBrains Mono, Dancing Script (OFL)
+	Rendering…	Gengiver…
+	Reopen Closed Tab	Genåbn lukket faneblad
+	Reopen the files that were open when PdfCraft last closed	Genåbn de filer, der var åbne, da PdfCraft sidst blev lukket
+	Repair log	Reparationslog
+	Repairs	Reparationer
+	Repeat overlay text	Gentag overlejringsteksten
+	Repeated navigation links should be skippable. Check links that appear on every page.	Gentagne navigationslinks bør kunne springes over. Kontrollér links, der vises på hver side.
+	Replace document colours	Erstat dokumentfarver
+	Replace image	Udskift billede
+	Replace Image…	Udskift billede…
+	Replace page	Erstat side
+	Replace Pages	Erstat sider
+	Replace pages	Erstat sider
+	Replace pages…	Erstat sider…
+	Replace text	Erstat tekst
+	Replaced	Erstattet
+	Replacement text	Erstatningstekst
+	Replacement: pages of {name}	Erstatning: sider fra {name}
+	Replaces the existing one on those pages.	Erstatter den eksisterende på disse sider.
+	Replacing images arrives on the web with image file pickers	Erstatning af billeder kommer på webversionen med filvælgere til billedfiler
+	Replacing images on page {p} arrives on the web with image pickers ({i})	Erstatning af billeder på side {p} kommer på webversionen med billedvælgere ({i})
+	Reply	Svar
+	Report	Rapport
+	Report created	Rapport oprettet
+	Report Options	Rapportindstillinger
+	Report…	Rapport…
+	Required	Påkrævet
+	Requires user to enter a password for:	Kræver, at brugeren angiver en adgangskode til:
+	Reset a form	Nulstil en formular
+	Reset columns	Nulstil kolonner
+	Reset page size	Nulstil sidestørrelse
+	Reset panel layout	Nulstil panellayout
+	Reset to printer defaults	Nulstil til printerens standardindstillinger
+	Resize comment	Ændr størrelse på kommentar
+	Resize window to initial page	Tilpas vinduet til startsiden
+	Resolution	Opløsning
+	Restrictions	Begrænsninger
+	Restrictions lifted	Begrænsninger ophævet
+	Retain existing	Behold eksisterende
+	Rev. {rev}: Certified by an unknown signer	Rev. {rev}: Certificeret af en ukendt underskriver
+	Rev. {rev}: Certified by {name}	Rev. {rev}: Certificeret af {name}
+	Rev. {rev}: Signed by an unknown signer	Rev. {rev}: Underskrevet af en ukendt underskriver
+	Rev. {rev}: Signed by {name}	Rev. {rev}: Underskrevet af {name}
+	Reveal in File Explorer	Vis i Stifinder
+	Reveal in Finder	Vis i Finder
+	Reverse closed arrow	Omvendt lukket pil
+	Reverse open arrow	Omvendt åben pil
+	Reverse pages	Sider i omvendt rækkefølge
+	Revert changes	Gendan ændringer
+	Revert to the previously saved version of “{name}”? Changes since then can't be undone afterwards.	Gendan den tidligere gemte version af „{name}”? Ændringer siden da kan bagefter ikke fortrydes.
+	Reverted to the last saved version	Gendannede til den senest gemte version
+	Review	Gennemgang
+	Review History	Gennemgangshistorik
+	Revisions	Revisioner
+	Rich Text Format (.rtf)	Rich Text Format (.rtf)
+	Right Edge	Højre kant
+	Right Footer Text	Højre sidefodtekst
+	Right Header Text	Højre sidehovedtekst
+	Rotate Clockwise	Rotér med uret
+	Rotate clockwise	Rotér med uret
+	Rotate Counterclockwise	Rotér mod uret
+	Rotate counterclockwise	Rotér mod uret
+	Rotate image	Roter billede
+	Rotate page	Rotér side
+	Rotate page {label} clockwise	Rotér side {label} med uret
+	Rotate page {label} counterclockwise	Rotér side {label} mod uret
+	Rotate Pages	Roter sider
+	Rotate pages	Rotér sider
+	Rotate pages clockwise	Rotér sider med uret
+	Rotate pages counterclockwise	Rotér sider mod uret
+	Rotate pages…	Rotér sider…
+	Rotate view	Rotér visning
+	Rotate view clockwise	Rotér visningen med uret
+	Rotate view clockwise ({key})	Rotér visningen med uret ({key})
+	Rotate view clockwise (⇧⌘+)	Rotér visningen med uret (⇧⌘+)
+	Rotate view counterclockwise	Rotér visningen mod uret
+	Rotate:	Roter:
+	Rows	Rækker
+	rows have between {min} and {max} columns	rækker har mellem {min} og {max} kolonner
+	Rule Name	Regelnavn
+	Run	Kør
+	Run a JavaScript	Kør et JavaScript
+	Run form script	Kør formularscript
+	Run JavaScript	Kør JavaScript
+	Running action… file {d} of {t}	Kører handling… fil {d} af {t}
+calendar weekday	Sa	lø
+	Same as interface ({language})	Samme som brugergrænsefladen ({language})
+	Sanitize	Sanér
+	Sanitize document	Sanér dokument
+	Sanitize Documents	Sanér dokumenter
+	Sanitize document…	Sanér dokument…
+	Sanitizing removes hidden information from the document: metadata, file attachments, comments, form fields (flattened), hidden text and layers, bookmarks, links, actions and scripts, and private application data.	Sanering fjerner skjulte oplysninger fra dokumentet: metadata, filvedhæftninger, kommentarer, formularfelter (fladgjorte), skjult tekst og lag, bogmærker, links, handlinger og scripts samt private programdata.
+	Save & Close	Gem og luk
+	Save (M4)	Gem (M4)
+	Save ({key})	Gem ({key})
+	Save anyway	Gem alligevel
+	Save as PDF	Gem som PDF
+	Save as PDF/A	Gem som PDF/A
+	Save as PDF/A-1b	Gem som PDF/A-1b
+	Save as PDF/A-2b	Gem som PDF/A-2b
+	Save as PDF/A-3b	Gem som PDF/A-3b
+	Save as PDF/UA	Gem som PDF/UA
+	Save as PDF/X	Gem som PDF/X
+	Save as {level}	Gem som {level}
+	Save as…	Gem som…
+	Save attachment…	Gem bilag…
+	Save changes to “{name}” before closing?	Vil du gemme ændringer i “{name}”, inden du lukker?
+	Save changes?	Gem ændringer?
+	Save file	Gem fil
+	Save image	Gem billede
+	Save Image As…	Gem billede som…
+	Save or revert changes before selecting another tag.	Gem eller gendan ændringer, før du vælger et andet tag.
+	Save over the changed file?	Gem oven i den ændrede fil?
+	Save pages	Gem sider
+	Save tag properties	Gem tagegenskaber
+	Save the accessibility report	Gem tilgængelighedsrapporten
+	Save the document afterwards: saving rewrites the whole file so no trace of the removed content stays in it.	Gem dokumentet bagefter: at gemme omskriver hele filen, så der ikke er spor tilbage af det fjernede indhold i den.
+	Save the document afterwards; saving rewrites the whole file so nothing removed stays in it.	Gem dokumentet bagefter; at gemme omskriver hele filen, så intet af det fjernede bliver i den.
+	Save the spreadsheet	Gem regnearket
+	Save these pages as one PDF	Gem disse sider som én PDF
+	Saved measurements	Gemte målinger
+	Saved measurements.	Gemte målinger.
+	Saved the print-ready PDF to {path}	Gemte den trykklare PDF i {path}
+	Saved {name}	Gemte {name}
+	Saved {place}: {before} → {after} (not smaller){detail}	Gemt {place}: {before} → {after} (ikke mindre){detail}
+	Saved {place}: {before} → {after} ({pct}% smaller){detail}	Gemt {place}: {before} → {after} ({pct} % mindre){detail}
+	Saved, but reopening failed: {e}	Gemt, men genåbningen mislykkedes: {e}
+	Scale relative to target page	Skalér i forhold til målsiden
+	Scan	Scan
+	Scan & OCR	Scan og OCR
+	Screen flicker	Skærmflimmer
+	Screen readers choose their voice from the document's language. Set it in Document Properties > Advanced > Language.	Skærmlæsere vælger deres stemme ud fra dokumentets sprog. Angiv det i Dokumentegenskaber > Avanceret > Sprog.
+	Script Name:	Scriptnavn:
+	Script:	Script:
+	Scripted content must be usable with a keyboard and assistive technology. Check the document's scripts.	Indhold, der styres af scripts, skal kunne betjenes med tastatur og hjælpemidler. Kontrollér dokumentets scripts.
+	Scripts	Scripts
+	Scripts run in a sandbox without file or network access. A script that asks to open a web page needs your permission first. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	Scripts kører i en sandkasse uden adgang til filer eller netværk. Et script, der vil åbne en webside, kræver først din tilladelse. Med JavaScript slået fra fungerer Acrobats standardfunktioner for format, validering og beregning stadig.
+	Scripts run in a sandbox without file or network access. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	Scripts kører i en sandbox uden fil- eller netværksadgang. Med JavaScript slået fra fungerer Acrobats standardfunktioner til formatering, validering og beregning stadig.
+	Scroll long text	Tillad rulning af lang tekst
+	Scroll speed (mouse wheel and arrow keys)	Rullehastighed (musehjul og piletaster)
+	Scroll tabs left	Rul faner til venstre
+	Scroll tabs right	Rul faner til højre
+	Search comments	Søg i kommentarer
+	Search results	Søgeresultater
+	Search tools and commands…	Søg i værktøjer og kommandoer…
+	Searchable Image (Exact)	Søgbart billede (præcist)
+	Searching… {s} of {p} pages	Søger… {s} af {p} sider
+	Searching… {s}/{p}	Søger… {s}/{p}
+	Security method	Sikkerhedsmetode
+	Security properties	Sikkerhedsegenskaber
+	Security properties…	Sikkerhedsegenskaber…
+	Security settings	Sikkerhedsindstillinger
+	Security settings must allow assistive technology to read the content ("Enable text access for screen reader devices"). Change the document's security to allow it.	Sikkerhedsindstillingerne skal give hjælpeteknologi adgang til at læse indholdet ("Aktivér tekstadgang for skærmlæserenheder"). Ændr dokumentets sikkerhed for at tillade det.
+	Security will be removed when you save	Sikkerheden fjernes, når du gemmer
+	Select (V)	Markér (V)
+	Select a file first	Vælg først en fil
+	Select a file for the stamp	Vælg en fil til stemplet
+	Select a password-protected file first	Vælg først en adgangskodebeskyttet fil
+	Select a word	Markér et ord
+	Select Action:	Vælg handling:
+	Select All	Vælg alle
+	Select all	Vælg alle
+	Select all pages (Organize)	Markér alle sider (Organisér)
+	Select at most 1000 objects at a time.	Vælg højst 1000 objekter ad gangen.
+	Select data files to merge	Vælg datafiler, der skal flettes
+	Select files to compare	Vælg filer, der skal sammenlignes
+	Select format category:	Vælg formatkategori:
+	Select Icon	Vælg ikon
+	Select page {label}	Vælg side {label}
+	Select pages	Vælg sider
+	Select the items to remove from this document.	Vælg de elementer, der skal fjernes fra dette dokument.
+	Select Trigger:	Vælg udløser:
+	Selected image files: {count}	Valgte billedfiler: {count}
+	Selected pages	Valgte sider
+	Self-signed	Selvsigneret
+certificate	Self-signed	Selvsigneret
+	Sending sheet {s} of {n} to {printer}…	Ark {s} af {n} sendes til {printer}…
+	Sending to {printer}…	Sender til {printer}…
+	Sensitivity	Følsomhed
+	Sent to {printer}	Sendt til {printer}
+	Sent to {printer}: {msg}	Sendt til {printer}: {msg}
+	Separate PDFs	Separate PDF-filer
+	Separator style:	Separatorstil:
+	September	september
+calendar date	September	september
+	Serial number	Serienummer
+certificate	Serial number	Serienummer
+	Set Alternate Text	Angiv alternativ tekst
+	Set alternate text	Angiv alternativ tekst
+	Set bookmark destination	Angiv bogmærkets destination
+	Set document title	Angiv dokumenttitel
+	Set Fields to Same Size	Angiv samme størrelse for felter
+	Set layer visibility	Angiv synlighed for lag
+	Set measurement scale	Angiv målestok
+	Set Page Boxes	Angiv sidebokse
+	Set page boxes	Angiv sidebokse
+	Set page boxes…	Angiv sidebokse…
+	Set page transitions	Angiv sideovergange
+	Set properties	Angiv egenskaber
+	Set status	Angiv status
+	Set status Accepted	Angiv status Godkendt
+	Set status Cancelled	Angiv status Annulleret
+	Set status Completed	Angiv status Fuldført
+	Set status None	Angiv status Ingen
+	Set status Rejected	Angiv status Afvist
+	Set status Unmarked	Angiv status Umærket
+	Set tab order	Angiv tabulatorrækkefølge
+	Set the image of {name}	Angiv billedet for {name}
+	Set to current page ({n})	Sæt til den aktuelle side ({n})
+	Set to zero	Sæt til nul
+	SHA-1 digest	SHA-1-fingeraftryk
+certificate	SHA-1 digest	SHA-1-fingeraftryk
+	SHA-256 digest	SHA-256-fingeraftryk
+certificate	SHA-256 digest	SHA-256-fingeraftryk
+	Shadings	Farveforløb
+	Shared Field Properties	Fælles feltegenskaber
+	Sheet {s} of {n}	Ark {s} af {n}
+key	Shift	Skift
+	Shift constrains to 45 degrees. Backspace removes a vertex. Escape cancels.	Skift begrænser til 45 grader. Backspace fjerner et hjørne. Esc annullerer.
+	Shift- or Ctrl/Command-click to select several fields.	Skift- eller Ctrl/Command-klik for at vælge flere felter.
+	Shift-click to select several objects. Drag empty space to select an area.	Skift-klik for at vælge flere objekter. Træk i et tomt område for at markere et område.
+	ships in milestone {m}	kommer i milepæl {m}
+	Show a basic title bar for the window buttons instead of the tab strip. GNOME doesn't draw title bars for apps, so this one doesn't follow its theme.	Vis en enkel titellinje med vinduesknapper i stedet for fanebladslinjen. GNOME tegner ikke titellinjer til apps, så den følger ikke GNOMEs tema.
+	Show a field	Vis et felt
+	Show all	Vis alle
+	Show all comments	Vis alle kommentarer
+	Show certificate…	Vis certifikat…
+	Show cover page in two-page view	Vis forsiden i tosidevisning
+	Show layer	Vis lag
+	Show less	Vis mindre
+	Show password	Vis adgangskode
+	Show Report	Vis rapport
+	Show the accessibility report	Vis tilgængelighedsrapporten
+	Show this dialog when the Checker starts	Vis denne dialog, når kontrollen startes
+	Show {n} more	Vis {n} flere
+	Shown while the pointer is over a mark.	Vises, mens markøren er over et mærke.
+	Shrink oversized pages	Formindsk for store sider
+	Side by side	Side om side
+	Side panels	Sidepaneler
+	Sign	Signér
+	Sign a sheet of white paper and take a photo of it in bright, even light (use the flash). Choose the photo or drop it here: PdfCraft finds the signature and removes the paper.	Sæt din underskrift på et blankt stykke hvidt papir, og tag et billede af det i klart, jævnt lys (brug blitzen). Vælg billedet, eller slip det her: PdfCraft finder underskriften og fjerner papiret.
+	Sign Here	Signér her
+	Sign this field…	Signér dette felt…
+	Sign with a Digital ID	Signér med et digitalt id
+	Sign yourself	Underskriv selv
+	Signature	Signatur
+	signature	signatur
+	Signature Details	Signaturdetaljer
+	Signature is invalid	Signaturen er ugyldig
+	Signature is INVALID:	Signaturen er UGYLDIG:
+	Signature is valid	Signaturen er gyldig
+	Signature is valid:	Signaturen er gyldig:
+	Signature panel	Signaturpanel
+	Signature validity is unknown	Signaturens gyldighed er ukendt
+	Signature validity is UNKNOWN:	Signaturens gyldighed er UKENDT:
+	Signatures	Signaturer
+	Signatures panel	Signaturpanel
+	Signed and all signatures are valid.	Signeret, og alle signaturer er gyldige.
+	Signed and saved to {path}	Signeret og gemt i {path}
+	Signer	Underskriver
+	Signer's name	Underskriverens navn
+	Signing time	Signeringstidspunkt
+	Signing time is from the clock on the signer's computer.	Signeringstidspunktet stammer fra uret på underskriverens computer.
+	Simplified field notation:	Forenklet feltnotation:
+	Single file	Enkelt fil
+	Single Page	Enkelt side
+	Single page	Enkelt side
+	Single Page Continuous	Enkelt side (fortløbende)
+	Single word or phrase	Enkelt ord eller frase
+	Skip Rule	Spring regel over
+	Skipped	Sprunget over
+	Slash	Skråstreg
+scroll speed	Slow	Langsom
+	Smaller pages	Mindre sider
+	Snap to drawing	Fastgør til tegning
+	Snapping	Fastgørelse
+	Social Security Number	Socialsikringsnummer
+	Social Security Numbers	CPR-numre
+	Solid	Massiv
+	Some bookmarks are not shown here: the panel lists a limited number, nested a limited depth.	Nogle bogmærker vises ikke her: panelet viser et begrænset antal og en begrænset dybde af indlejring.
+	Some content could not be classified safely and was kept in the count.	Noget indhold kunne ikke klassificeres sikkert og er forblevet med i optællingen.
+	Some page content couldn't be read; snapping uses the rest.	En del af sideindholdet kunne ikke læses; fastgørelsen bruger resten.
+	Some pages contain no countable text. Scanned images need OCR first.	Nogle sider indeholder ingen tællelig tekst. Scannede billeder kræver OCR først.
+	Sort by	Sortér efter
+	Sort comments by:	Sortér kommentarer efter:
+	Sort items	Sortér punkter
+	sorted ascending	sorteret stigende
+	sorted descending	sorteret faldende
+	Source	Kilde
+key	Space	Mellemrum
+	Space Audit	Pladsanalyse
+	Special	Speciel
+	Split	Opdel
+	Split document	Opdel dokument
+	Split document…	Opdel dokument…
+	Split into files…	Opdel i filer…
+	Spreadsheet (.xlsx)	Regneark (.xlsx)
+	Square	Kvadrat
+	Squiggly	Bølget
+	Squiggly underline	Bølget understregning
+	Squiggly underline text	Understreg tekst med bølgestreg
+	Stamp	Stempel
+	Stamp palette	Stempelpalette
+	Stamps	Stempler
+	Standard	Standard
+	Standard Business	Standardvirksomhed
+	Standards	Standarder
+	Start	Start
+action wizard	Start	Start
+	Start Checking	Start kontrol
+	Start page number	Startsidetal
+	Steps	Trin
+	Sticky note	Note
+	Still rendering — this page is unusually complex…	Gengiver stadig — denne side er usædvanligt kompleks…
+	Strength: {s}	Styrke: {s}
+	Strikethrough	Gennemstregning
+	Strikethrough text	Gennemstreg tekst
+	Strong	Stærk
+	Structure Info	Strukturinfo
+	Style	Stil
+calendar weekday	Su	sø
+	Subject	Emne
+certificate	Subject	Emne
+	Submit a form	Send en formular
+	Success	Succes
+	sum (+)	summen (+)
+	Summarize	Opsummér
+	Summarize comments	Opsummér kommentarer
+	Summarize Options	Indstillinger for oversigt
+	Summary	Resumé
+	Switch light / dark theme	Skift mellem lyst / mørkt tema
+	Switch to List view to change the pages it takes.	Skift til listevisning for at ændre, hvilke sider der medtages.
+	Switch to two-page view first to show the cover page	Skift først til tosidet visning for at vise forsiden
+	System	System
+	Tab order	Tabulatorrækkefølge
+	Tab order by columns	Tabulatorrækkefølge efter kolonner
+	Tab order by rows	Tabulatorrækkefølge efter rækker
+	Tab order is consistent with structure order	Tabulatorrækkefølgen er i overensstemmelse med strukturrækkefølgen
+	Tab order: by columns	Tabulatorrækkefølge: efter kolonner
+	Tab order: by document structure	Tabulatorrækkefølge: efter dokumentstruktur
+	Tab order: by rows	Tabulatorrækkefølge: efter rækker
+	Tab order: move a field with its arrows.	Tabulatorrækkefølge: flyt et felt med dets pile.
+	Table cells belong in a row. Fix the table's tags.	Tabelceller hører hjemme i en række. Ret tabellens tags.
+	Table rows belong directly in a table or its head, body or foot. Fix the table's tags.	Tabelrækker skal ligge direkte i en tabel eller i dennes hoved, krop eller fod. Ret tabellens tags.
+	Tables	Tabeller
+	Tables must contain the same number of columns in each row and rows in each column	Tabeller skal indeholde det samme antal kolonner i hver række og rækker i hver kolonne
+	Tables must have a summary	Tabeller skal have et resumé
+	Tables should have headers	Tabeller bør have overskrifter
+	Tag form fields	Tag formularfelter
+	Tag type	Tagtype
+	Tagged annotations	Taggede annoteringer
+	Tagged content	Tagget indhold
+	Tagged form fields	Taggede formularfelter
+	Tagged multimedia	Taggede multimedier
+	Tagged PDF	Tagget PDF
+	Tags	Tags
+	Tags give the document a logical structure that assistive technology follows. Tag the document (Automatically tag PDF).	Tags giver dokumentet en logisk struktur, som hjælpeteknologi følger. Tag dokumentet (Tag PDF automatisk).
+	Tags panel	Tagpanel
+	Take a snapshot	Tag et snapshot
+	Text (plain)	Tekst (ren tekst)
+	Text alignment:	Tekstjustering:
+	Text box	Tekstboks
+	Text Color:	Tekstfarve:
+	Text field	Tekstfelt
+	Text Field Properties	Egenskaber for tekstfelt
+	Text in images isn't found; recognise text (OCR) first.	Tekst i billeder findes ikke; genkend teksten (OCR) først.
+	Text is compared word by word; the differences are shown on the new file.	Teksten sammenlignes ord for ord; forskellene vises på den nye fil.
+	Text language is specified	Tekstens sprog er angivet
+	Text must contrast enough with its background for people with low vision. Check the colours by eye or with a contrast tool.	Tekst skal have tilstrækkelig kontrast til baggrunden for personer med nedsat syn. Kontrollér farverne med øjet eller med et kontrastværktøj.
+	Text recognition is already running	Tekstgenkendelse kører allerede
+	Text recognition isn't installed: its model files are missing. Reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them.	Tekstgenkendelse er ikke installeret: dens modelfiler mangler. Geninstallér PdfCraft, eller angiv PDFCRAFT_MODELS som den mappe, der indeholder dem.
+	Text recognition isn't installed: its models are missing (run `cargo xtask models`, or set PDFCRAFT_MODELS).	Tekstgenkendelse er ikke installeret: dens modeller mangler (kør `cargo xtask models`, eller sæt PDFCRAFT_MODELS).
+	Text to find	Tekst der søges efter
+	Text to insert	Tekst der skal indsættes
+	Text used as a clipping path cannot be moved with this selection.	Tekst, der bruges som udklipningssti, kan ikke flyttes med denne markering.
+	Text, marks and signatures become part of the page. Other comments stay editable.	Tekst, markeringer og underskrifter bliver en del af siden. Andre kommentarer forbliver redigerbare.
+calendar weekday	Th	to
+	TH and TD	TH og TD
+	TH and TD must be children of TR	TH og TD skal være underordnet TR
+	Thai and Arabic use regular fallback fonts when available.	Thai og arabisk bruger almindelige reserveskrifttyper, når de er tilgængelige.
+	That didn't work: an internal error stopped it ({m}).	Det lykkedes ikke: en intern fejl stoppede det ({m}).
+	That didn't work: an internal error stopped it ({m}). Your documents are unchanged.	Det virkede ikke: en intern fejl standsede den ({m}). Dine dokumenter er uændrede.
+	The certificate of {} does not allow this many CA certificates below it (path length), so it is not used to vouch for {}.	Certifikatet for {} tillader ikke så mange CA-certifikater under sig (stilængde), så det bruges ikke til at attestere {}.
+	The certificate of {} is not a CA certificate that may issue certificates, so it is not used to vouch for {}.	Certifikatet for {} er ikke et CA-certifikat, der må udstede certifikater, så det bruges ikke til at attestere {}.
+	The certificate of {} was not valid at the time of signing, so it is not used to vouch for {}.	Certifikatet for {} var ikke gyldigt på underskrivelsestidspunktet, så det bruges ikke til at attestere {}.
+	The checker found 1 problem which may prevent the document from being fully accessible.	Kontrolprogrammet fandt 1 problem, som kan forhindre, at dokumentet er fuldt tilgængeligt.
+	The checker found no problems in this document.	Kontrolprogrammet fandt ingen problemer i dette dokument.
+	The checker found problems which may prevent the document from being fully accessible.	Kontrolprogrammet fandt problemer, som kan forhindre dokumentet i at være fuldt tilgængeligt.
+	The checker found {n} problems which may prevent the document from being fully accessible.	Kontrolprogrammet fandt {n} problemer, som kan forhindre, at dokumentet er fuldt tilgængeligt.
+	The clipboard has no image or text	Udklipsholderen indeholder hverken billede eller tekst
+	The document changed while you were choosing a file, so nothing was changed.	Dokumentet blev ændret, mens du valgte en fil, så der blev ikke ændret noget.
+	The document changed while you were editing field properties.	Dokumentet blev ændret, mens du redigerede feltegenskaber.
+	The document has additional actions (/AA)	Dokumentet har yderligere handlinger (/AA)
+	The document has been altered or corrupted since the signature was applied.	Dokumentet er blevet ændret eller beskadiget, siden signaturen blev påført.
+	The document has been altered or corrupted since the timestamp was applied.	Dokumentet er blevet ændret eller beskadiget, siden tidsstemplet blev påført.
+	The document has been altered since this signature was applied in ways it does not permit ({}).	Dokumentet er blevet ændret, siden denne signatur blev påført, på måder som den ikke tillader ({}).
+	The document has been altered since this timestamp was applied in ways it does not permit ({}).	Dokumentet er blevet ændret, siden dette tidsstempel blev påført, på måder som det ikke tillader ({}).
+	The document has been modified since this signature was applied, but the changes are permitted ({}).	Dokumentet er blevet ændret, siden denne signatur blev påført, men ændringerne er tilladte ({}).
+	The document has been modified since this timestamp was applied, but the changes are permitted ({}).	Dokumentet er blevet ændret, siden dette tidsstempel blev påført, men ændringerne er tilladte ({}).
+	The document has document-level JavaScript	Dokumentet har JavaScript på dokumentniveau
+	the document has no form fields	dokumentet har ingen formularfelter
+	the document has no page tree	dokumentet har intet sidetræ
+	the document has no tags	dokumentet har ingen mærker
+	The document has no tags (structure tree)	Dokumentet har ingen tags (strukturtræ)
+	The document has no title	Dokumentet har ingen titel
+	The document has no XMP metadata	Dokumentet har ingen XMP-metadata
+	The document is encrypted	Dokumentet er krypteret
+	The document is no longer open.	Dokumentet er ikke længere åbent.
+	the document is protected by a password	dokumentet er beskyttet med en adgangskode
+	The document isn't marked as tagged (MarkInfo Marked)	Dokumentet er ikke markeret som tagget (MarkInfo Marked)
+	The document isn't tagged, so none of its content is	Dokumentet er ikke tagget, så intet af dets indhold er det
+	The document now conforms to {level}; save it to keep the changes	Dokumentet overholder nu {level}; gem det for at bevare ændringerne
+	The document opens without a password; this password is needed to change the restrictions. It's applied when you save.	Dokumentet åbnes uden adgangskode; denne adgangskode kræves for at ændre begrænsningerne. Den anvendes, når du gemmer.
+	The document was closed before it could be saved.	Dokumentet blev lukket, før det kunne gemmes.
+	The document's embedded revocation information shows that the signer's certificate has not been revoked.	Dokumentets indlejrede tilbagekaldelsesoplysninger viser, at underskriverens certifikat ikke er blevet tilbagekaldt.
+	The document's security settings don't allow copying text and images	Dokumentets sikkerhedsindstillinger tillader ikke kopiering af tekst og billeder
+	The document's security settings don't allow filling in form fields	Dokumentets sikkerhedsindstillinger tillader ikke udfyldning af formularfelter
+	The document's security settings don't allow this change	Dokumentets sikkerhedsindstillinger tillader ikke denne ændring
+	The ECDSA signature is not in canonical DER (trailing bytes, padding or a missing sign byte); it was read anyway.	ECDSA-signaturen er ikke i kanonisk DER (afsluttende bytes, udfyldning eller en manglende fortegnsbyte); den blev læst alligevel.
+	The ECDSA signature is the raw r and s values instead of a DER sequence; it was read anyway.	ECDSA-signaturen er de rå værdier for r og s i stedet for en DER-sekvens; den blev læst alligevel.
+	The embedded timestamp token is valid and its authority is trusted; trusted time is {}.	Den indlejrede tidsstempeltoken er gyldig, og dens myndighed er betroet; den betroede tid er {}.
+	The existing action will be preserved.	Den eksisterende handling bevares.
+	The field properties could not be changed.	Feltegenskaberne kunne ikke ændres.
+	The field properties dialog is no longer open.	Dialogboksen til feltegenskaber er ikke længere åben.
+	The field {name} no longer exists.	Feltet {name} findes ikke længere.
+	the first heading is an H{n}; headings should not skip levels	den første overskrift er en H{n}; overskrifter må ikke springe niveauer over
+	The font {} isn't embedded	Skrifttypen {} er ikke indlejret
+	The fonts PdfCraft writes with can't draw “{c}” ({code}), so it shows as ? in every PDF viewer. The text is saved.	De skrifttyper, PdfCraft skriver med, kan ikke tegne »{c}« ({code}), så den vises som ? i alle PDF-fremvisere. Teksten gemmes.
+	The form asks to be submitted to {u}; PdfCraft doesn't send form data. Save the document to keep your entries.	Formularen beder om at blive sendt til {u}; PdfCraft sender ikke formulardata. Gem dokumentet for at bevare det, du har indtastet.
+	The form asks viewers to make appearances (NeedAppearances)	Formularen beder visningsprogrammer om at oprette udseender (NeedAppearances)
+	The image has been copied ({w} × {h} pixels)	Billedet er kopieret ({w} × {h} pixels)
+	The image has been copied as a {ext} file	Billedet er kopieret som en {ext}-fil
+	the image is empty	billedet er tomt
+	The key is in the macOS Keychain, which may ask to allow PdfCraft to use it.	Nøglen er i macOS' Nøglering, som kan bede om tilladelse til, at PdfCraft må bruge den.
+	The key is in the Windows certificate store, which may ask to allow PdfCraft to use it.	Nøglen er i Windows' certifikatlager, som kan bede om tilladelse til, at PdfCraft må bruge den.
+	The Keychain's digital IDs couldn't be listed: {e}	De digitale id'er i Nøgleringen kunne ikke oplistes: {e}
+	The labels are in English: the signature's font can't draw them in this language.	Labelsne er på engelsk: signaturens skrifttype kan ikke tegne dem på dette sprog.
+	The linked PDF opened, but its named destination was not applied.	Den linkede PDF blev åbnet, men dens navngivne destination blev ikke anvendt.
+	The linked PDF opened, but its page destination was out of range.	Den linkede PDF blev åbnet, men dens sidedestination var uden for intervallet.
+	The metadata doesn't identify the file as {}	Metadataene identificerer ikke filen som {}
+	the name is not a plain file name	navnet er ikke et almindeligt filnavn
+	The newest {n} of {total} PDFs	De nyeste {n} af {total} PDF-filer
+	The operation failed.	Handlingen mislykkedes.
+	The page has changed; select the image again	Siden er ændret; vælg billedet igen
+	The pages were extracted but not deleted, because the document changed while you were choosing a folder.	Siderne blev udtrukket, men ikke slettet, fordi dokumentet blev ændret, mens du valgte en mappe.
+	the password is incorrect	adgangskoden er forkert
+	The password is incorrect.	Adgangskoden er forkert.
+	The password is only used to read the file; it isn't saved.	Adgangskoden bruges kun til at læse filen; den gemmes ikke.
+	The password must have at least 6 characters.	Adgangskoden skal have mindst 6 tegn.
+	The password must have at least 8 characters.	Adgangskoden skal have mindst 8 tegn.
+	The passwords do not match.	Adgangskoderne stemmer ikke overens.
+	The passwords don't match.	Adgangskoderne er ikke ens.
+	The PDF text fonts can't draw “{c}” ({code}). Choose supported text.	PDF-tekstskrifterne kan ikke tegne »{c}« ({code}). Vælg understøttet tekst.
+	The printer driver's own settings for this print: paper tray, paper type, finishing and more.	Printerdriverens egne indstillinger for denne udskrivning: papirbakke, papirtype, efterbehandling m.m.
+	The replacement file doesn't have that many pages.	Erstatningsfilen har ikke så mange sider.
+	The RSA signature value does not have the length of the key's modulus (leading zero bytes dropped or added); it was read anyway.	RSA-signaturværdien har ikke samme længde som nøglens modulus (foranstående nul-bytes er fjernet eller tilføjet); den blev læst alligevel.
+	The RSA signature's DigestInfo has no NULL parameter (older signers write it so); it was read anyway.	RSA-signaturens DigestInfo har ingen NULL-parameter (ældre underskrivere skriver den sådan); den blev læst alligevel.
+	The same password is tried on each file.	Den samme adgangskode prøves på hver fil.
+	The security settings don't allow screen readers to read the text	Sikkerhedsindstillingerne tillader ikke, at skærmlæsere læser teksten
+	The selected area has been copied ({w} × {h} pixels)	Det markerede område er blevet kopieret ({w} × {h} pixels)
+	The selected fields could not be found. Select them again.	De valgte felter kunne ikke findes. Vælg dem igen.
+	The signature algorithm and the SignerInfo's digest algorithm name different hashes; the signature was made with the SignerInfo's.	Signaturalgoritmen og SignerInfos digest-algoritme angiver forskellige hashfunktioner; signaturen er lavet med SignerInfos.
+	The signature carries an unverified timestamp ({}): the timestamp authority is not in your list of trusted certificates, so the signing time claimed by the signer is used instead.	Signaturen har et uverificeret tidsstempel ({}): tidsstempelmyndigheden er ikke i din liste over betroede certifikater, så underskriverens angivne signeringstidspunkt bruges i stedet.
+	The signature contents are not hexadecimal.	Signaturindholdet er ikke hexadecimalt.
+	The signature could not be checked ({}).	Signaturen kunne ikke kontrolleres ({}).
+	The signature could not be read ({}).	Signaturen kunne ikke læses ({}).
+	The signature could not be verified ({}).	Signaturen kunne ikke verificeres ({}).
+	The signature has no valid byte range.	Signaturen har intet gyldigt byteinterval.
+	The signature includes an embedded timestamp.	Signaturen indeholder et indlejret tidsstempel.
+	The signature is BER-encoded (indefinite lengths) rather than DER; it was read leniently.	Signaturen er BER-kodet (ubestemte længder) i stedet for DER; den blev læst lempeligt.
+	The signature uses the legacy adbe.x509.rsa_sha1 format.	Signaturen bruger det forældede format adbe.x509.rsa_sha1.
+	The signature value does not match the signer's certificate: the signature is corrupt.	Signaturværdien stemmer ikke overens med underskriverens certifikat: signaturen er beskadiget.
+	The signature will be invisible.	Signaturen bliver usynlig.
+	The signature's byte range does not exclude exactly its contents.	Signaturens byteinterval udelukker ikke præcis sit indhold.
+	The signature's byte range does not match the file.	Signaturens byteinterval stemmer ikke overens med filen.
+	The signature's timestamp token could not be verified ({}).	Signaturens tidsstempeltoken kunne ikke verificeres ({}).
+	The signature's timestamp token does not cover the signature value.	Signaturens tidsstempeltoken dækker ikke signaturværdien.
+	The signed content is a constructed (segmented) OCTET STRING, as BER allows; it was read anyway.	Det underskrevne indhold er en konstrueret (segmenteret) OCTET STRING, som BER tillader; den blev læst alligevel.
+	the signed version could not be read	den underskrevne version kunne ikke læses
+	The signer's certificate does not allow digital signatures (its key usage has neither digital signature nor non-repudiation).	Underskriverens certifikat tillader ikke digitale signaturer (dens nøgleanvendelse har hverken digital signatur eller uafviselighed).
+	The signer's certificate has been revoked ({}).	Underskriverens certifikat er blevet tilbagekaldt ({}).
+	The signer's certificate has critical extensions PdfCraft does not recognize ({}).	Underskriverens certifikat har kritiske udvidelser, som PdfCraft ikke genkender ({}).
+	The signer's certificate is not in the signature.	Underskriverens certifikat er ikke i signaturen.
+	The signer's certificate is not issued for signing documents (its extended key usage has no document-signing purpose).	Underskriverens certifikat er ikke udstedt til at signere dokumenter (dens udvidede nøgleanvendelse har intet formål om dokumentsignering).
+	The signer's certificate was not valid at the time of signing.	Underskriverens certifikat var ikke gyldigt på underskrivelsestidspunktet.
+	The signer's identity is unknown because it has not been included in your list of trusted certificates and none of its parent certificates are trusted certificates.	Underskriverens identitet er ukendt, fordi den ikke er medtaget i din liste over betroede certifikater, og ingen af dens overordnede certifikater er betroede certifikater.
+	The signer's identity is valid.	Underskriverens identitet er gyldig.
+	The standard fonts can't draw “{c}” ({code}). Only Western European characters can be added as text for now.	Standardskrifttyperne kan ikke tegne »{c}« ({code}). Foreløbig kan kun vesteuropæiske tegn tilføjes som tekst.
+	The text is the same	Teksten er den samme
+	the text recognition models are not installed (reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them)	tekstgenkendelsesmodellerne er ikke installeret (geninstallér PdfCraft, eller sæt PDFCRAFT_MODELS til den mappe, der indeholder dem)
+	The timestamp authority's certificate was not valid at the time of timestamping.	Tidsstempelmyndighedens certifikat var ikke gyldigt på tidspunktet for tidsstemplingen.
+	The timestamp contents are not hexadecimal.	Tidsstempelindholdet er ikke hexadecimalt.
+	The timestamp has no valid byte range.	Tidsstemplet har intet gyldigt byteinterval.
+	The timestamp token could not be read ({}).	Tidsstempeltokenet kunne ikke læses ({}).
+	The timestamp token is valid and its authority is trusted.	Tidsstempeltokenet er gyldig, og dens myndighed er betroet.
+	The timestamp token is valid, but the timestamp authority is not in your list of trusted certificates.	Tidsstempeltokenet er gyldig, men tidsstempelmyndigheden er ikke i din liste over betroede certifikater.
+	The timestamp's byte range does not exclude exactly its contents.	Tidsstemplets byteinterval udelukker ikke præcis dets indhold.
+	The timestamp's byte range does not match the file.	Tidsstemplets byteinterval stemmer ikke overens med filen.
+	The title in the metadata and the document information differ	Titlen i metadataene afviger fra dokumentoplysningerne
+	the title must not be empty	titlen må ikke være tom
+	The value is shown as typed.	Værdien vises, som den er indtastet.
+	The window should show a meaningful title rather than the file name. Set a title and Initial View > Show: Document Title.	Vinduet bør vise en meningsfuld titel i stedet for filnavnet. Angiv en titel og Første visning > Vis: Dokumenttitel.
+	The window shows the file name, not the title (Initial View > Show)	Vinduet viser filnavnet, ikke titlen (Initial View > Show)
+	The Windows store's digital IDs couldn't be listed: {e}	Windows' digitale id'er kunne ikke oplistes: {e}
+	Theme	Tema
+	there are no pages to print	der er ingen sider at udskrive
+	There are no redaction marks (mark text, areas or pages first)	Der er ingen redaktionsmærker (markér først tekst, områder eller sider)
+	There are no redaction marks to apply	Der er ingen redaktionsmærker at anvende
+	there are no redaction marks to apply	der er ingen redaktionsmærker at anvende
+	There is no folder to save the digital ID in.	Der er ingen mappe at gemme det digitale id i.
+	These files can't be read, so they won't be in the combined PDF:	Disse filer kan ikke læses, så de kommer ikke med i den kombinerede PDF:
+	These objects could not be moved. Select them again and try a smaller move.	Disse objekter kunne ikke flyttes. Vælg dem igen, og prøv en mindre flytning.
+	Thick	Tyk
+	Thickness	Tykkelse
+	Thin	Tynd
+	This area has too many overlapping paths; intersection snapping is limited.	Dette areal har for mange overlappende stier; fastgørelse til skæringspunkter er begrænset.
+	This certificate is in your list of trusted certificates.	Dette certifikat findes i din liste over betroede certifikater.
+	This certificate is not trusted. Signatures made with it show an unknown identity.	Dette certifikat er ikke betroet. Signaturer lavet med det viser en ukendt identitet.
+	This certificate is trusted through a certificate above it in the chain.	Dette certifikat er betroet gennem et certifikat højere oppe i kæden.
+	This comment's appearance can't be changed yet.	Denne kommentars udseende kan ikke ændres endnu.
+	This compatibility level supports only plain ASCII passwords.	Dette kompatibilitetsniveau understøtter kun adgangskoder i ren ASCII.
+	This dialog shows the details of a certificate and its chain.	Denne dialog viser detaljerne for et certifikat og dets kæde.
+	This document asks to open in Full Screen mode: the page fills the screen and nothing else shows. Press Esc at any time to leave it.	Dette dokument beder om at åbne i fuldskærm: siden fylder skærmen, og alt andet skjules. Tryk Esc når som helst for at forlade det.
+	This document can't be checked: it couldn't be read for editing	Dette dokument kan ikke kontrolleres: det kunne ikke læses til redigering
+	This document contains {n} interactive form fields.	Dette dokument indeholder {n} interaktive formularfelter.
+	This document has no attachments.	Dette dokument har ingen vedhæftninger.
+	This document has no bookmarks.	Dette dokument har ingen bogmærker.
+	This document has no comments to flatten	Dette dokument har ingen kommentarer, der kan fladgøres
+	This document has no document-level scripts.	Dette dokument har ingen scripts på dokumentniveau.
+	This document has no editable structure tags.	Dette dokument har ingen redigerbare strukturtags.
+	This document has no form fields to flatten	Dette dokument har ingen formularfelter, der kan fladgøres
+	This document has no form fields you can fill in	Dette dokument har ingen formularfelter, du kan udfylde
+	This document has no form fields.	Dette dokument har ingen formularfelter.
+	This document has no layers.	Dette dokument har ingen lag.
+	This document has no pages.	Dette dokument har ingen sider.
+	This document has no restrictions to lift	Dette dokument har ingen begrænsninger at ophæve
+	This document has no signatures.	Dette dokument har ingen signaturer.
+	This document has no tagged figures.	Dette dokument har ingen taggede figurer.
+	This document has no {kind} to change	Dette dokument har ingen {kind} at ændre
+	This document has not been modified since this signature was applied.	Dette dokument er ikke blevet ændret, siden denne signatur blev påført.
+	This document has not been modified since this timestamp was applied.	Dette dokument er ikke blevet ændret, siden dette tidsstempel blev påført.
+	This document hasn't been checked yet.	Dette dokument er ikke blevet kontrolleret endnu.
+	This document is secured. Some changes are restricted by its security settings.	Dette dokument er beskyttet. Nogle ændringer er begrænset af dets sikkerhedsindstillinger.
+	this document is signed: rewriting it would invalidate its signatures (save it incrementally instead)	dette dokument er signeret: at omskrive det ville gøre dets signaturer ugyldige (gem det inkrementelt i stedet)
+	This document is trying to open a local file:	Dette dokument forsøger at åbne en lokal fil:
+	This document isn't password-protected	Dette dokument er ikke beskyttet med adgangskode
+	This drawing exceeds the snapping limit; only the first paths are used.	Denne tegning overstiger fastgørelsesgrænsen; kun de første stier bruges.
+	This field is locked. Unlock it to change its properties.	Dette felt er låst. Lås det op for at ændre dets egenskaber.
+	This field's font can't draw “{c}” ({code}), so PdfCraft shows ? in its place. The value is saved, and other PDF viewers redraw the field from it.	Feltets skrifttype kan ikke tegne »{c}« ({code}), så PdfCraft viser ? i stedet. Værdien gemmes, og andre PDF-fremvisere tegner feltet igen ud fra den.
+	This file changed on disk. Reload it to see the new version; your unsaved changes will be lost.	Denne fil er ændret på disken. Genindlæs den for at se den nye version; dine ikke-gemte ændringer går tabt.
+	This file changed on disk. Reload shows the new version and drops your unsaved changes; Save replaces it with this version.	Denne fil er ændret på disken. Genindlæs viser den nye version og dropper dine ikke-gemte ændringer; Gem erstatter den med denne version.
+	This file is already as small as it can be made ({size}). No copy was saved.	Denne fil er allerede så lille, som den kan blive ({size}). Der blev ikke gemt nogen kopi.
+	this file isn't XFDF, FDF, XML or text form data	denne fil er ikke XFDF-, FDF-, XML- eller tekstformulardata
+	This file was damaged and has been repaired. Saving keeps the repaired version.	Denne fil var beskadiget og er blevet repareret. Når du gemmer, bevares den reparerede version.
+	This folder isn't available right now. It may have moved, or its drive or cloud sync is offline.	Mappen er ikke tilgængelig i øjeblikket. Den er muligvis blevet flyttet, eller dens drev eller cloudsynkronisering er offline.
+	This form also contains XFA data, which PdfCraft doesn't read yet. You can fill its fields, but Acrobat may show the XFA values instead.	Denne formular indeholder også XFA-data, som PdfCraft endnu ikke læser. Du kan udfylde dens felter, men Acrobat viser måske XFA-værdierne i stedet.
+	This form's scripts are turned off because one ran too long. Reopen the document to run them again.	Denne formulars scripts er slået fra, fordi ét af dem kørte for længe. Genåbn dokumentet for at køre dem igen.
+	This is a dynamic XFA form, which PdfCraft can't display yet. What you see is the file's placeholder page.	Dette er en dynamisk XFA-formular, som PdfCraft endnu ikke kan vise. Det, du ser, er filens pladsholderside.
+	This measurement needs at least {n} points.	Denne måling kræver mindst {n} punkter.
+	This page contains objects that cannot be selected together.	Denne side indeholder objekter, der ikke kan vælges samtidig.
+	This page couldn't be displayed.\n{e}	Denne side kunne ikke vises.\n{e}
+	This PDF uses the unsupported {s} action.	Denne PDF bruger handlingen {s}, som ikke understøttes.
+	This printer offers no settings of its own.	Denne printer har ingen egne indstillinger.
+	This printer's driver doesn't take two-sided settings from other programs, so its own setting applies. Change it in Properties…	Denne printers driver accepterer ikke tosidte indstillinger fra andre programmer, så dens egen indstilling gælder. Ændr den under Egenskaber…
+	This signature uses RIPEMD-160, a legacy 160-bit hash algorithm that is no longer recommended for signatures. It still validates, but it should not be relied on.	Denne signatur bruger RIPEMD-160, en forældet 160-bit-hashalgoritme, der ikke længere anbefales til signaturer. Den validerer stadig, men man bør ikke stole på den.
+	This signature uses SHA-1, a weak hash algorithm: collisions in it have been demonstrated. It still validates because many documents signed years ago use it, but it should not be relied on.	Denne signatur bruger SHA-1, en svag hashalgoritme: Der er påvist kollisioner i den. Den validerer stadig, fordi mange dokumenter, der blev underskrevet for mange år siden, bruger den, men man bør ikke stole på den.
+	This web address mixes letters from different alphabets, a common way to imitate another site's name.	Denne webadresse blander bogstaver fra forskellige alfabeter, en almindelig måde at efterligne et andet websteds navn på.
+	This web address uses letters from another alphabet, which can look like familiar ones.	Denne webadresse bruger bogstaver fra et andet alfabet, som kan ligne velkendte bogstaver.
+	Thumbnails	Miniaturer
+	Tile scale:	Fliseskalering:
+	Time	Klokkeslæt
+	Timed responses	Tidsbegrænsede svar
+	Timestamp	Tidsstempel
+	Title	Titel
+	to	til
+	To change locked fields, also set Locked to No.	For at ændre låste felter skal du også sætte Låst til Nej.
+	to {n}	til {n}
+	To:	Til:
+	Today: {date}	I dag: {date}
+	Toggle fit page / fit width	Skift mellem tilpas til side / tilpas til bredde
+	Tools panel side	Værktøjspanelets side
+	Tooltip:	Værktøjstip:
+	Top-level bookmarks ({n})	Bogmærker på øverste niveau ({n})
+	Total	I alt
+	TR must be a child of Table, THead, TBody, or TFoot	TR skal være underordnet Table, THead, TBody eller TFoot
+	Translate	Oversæt
+	Trim the picture with its handles; Enter or Done applies	Trim billedet med dets håndtag; Enter eller Udført anvender
+	Trust	Tillid
+	Try the form as people filling it in will see it	Prøv formularen, som den viser sig for dem, der udfylder den
+calendar weekday	Tu	ti
+	Turn upside down (180°)	Vend på hovedet (180°)
+	Two-page view	Tosidevisning
+	Two-sided:	Dobbeltsidet:
+	Two-Up (Cover Page)	To op (forside)
+	Two-Up (Facing)	To op (modstående)
+	Two-Up Continuous (Cover Page)	To op, fortløbende (forside)
+	Two-Up Continuous (Facing)	To op, fortløbende (modstående)
+	Type	Type
+signature pad	Type	Skriv
+	Type a password.	Angiv en adgangskode.
+	Type Password	Angiv adgangskode
+	Type text	Skriv tekst
+	Type the web address.	Indtast webadressen.
+	Type your {what}.	Skriv dit {what}.
+	Typewriter	Skrivemaskine
+	Unchecked	Ikke afkrydset
+	Underline	Understregning
+	Underline text	Understreg tekst
+	Undid {label}	Fortrudte {label}
+	Undo {action}	Fortryd {action}
+	Unit	Enhed
+	Unknown author	Ukendt forfatter
+	Unlock comment	Lås kommentar op
+	Unlock {name}	Lås {name} op
+	Unlock {n} files	Lås {n} filer op
+	Unlocked {n} of {m} files	Låste {n} af {m} filer op
+	Unlocked: the combined file won't be password-protected	Låst op: den kombinerede fil bliver ikke adgangskodebeskyttet
+	Unlock…	Lås op…
+	Unpin	Frigør
+	Unpin {folder}	Frigør {folder}
+	Unplaced	Ikke placeret
+	Unsigned signature field	Ikke-underskrevet signaturfelt
+	Unsigned signature field: {name}	Ikke-underskrevet signaturfelt: {name}
+	Unsupported measurements	Ikke-understøttede målinger
+	Up	Op
+	Update	Opdater
+	Update background	Opdater baggrund
+	Update background…	Opdatér baggrund…
+	Update header & footer	Opdater sidehoved og sidefod
+	Update header & footer…	Opdatér sidehoved og sidefod…
+	Update watermark	Opdater vandmærke
+	Update watermark…	Opdatér vandmærke…
+	URL to submit to	URL der sendes til
+	Use 72 DPI (one point per pixel)	Brug 72 DPI (ét punkt pr. pixel)
+	Use a certificate	Brug et certifikat
+	Use a Digital ID from a file	Brug et digitalt id fra en fil
+	Use custom DPI	Brug egen DPI
+	Use each image's embedded DPI; use 72 DPI when it is absent.	Brug hvert billedes indlejrede DPI; brug 72 DPI, hvis det mangler.
+	Use Flate to encode streams that are not encoded	Brug Flate til at indkode strømme, der ikke er kodet
+	Use guided actions	Brug guidede handlinger
+	Use image resolution	Brug billedopløsning
+	Use it when a printer skips text, shading or transparency. The print is no longer searchable text; with Print in grayscale, the pictures are grey.	Brug det, når en printer springer tekst, skravering eller gennemsigtighed over. Udskriften er ikke længere søgbar tekst; med Udskriv i gråtoner er billederne grå.
+	Use JavaScript	Brug JavaScript
+	Use now	Brug nu
+	Use overlay text	Brug overlejringstekst
+	Use print production	Brug printproduktion
+	Use system setting	Brug systemindstilling
+	Use system title bar	Brug systemets titellinje
+	Use {what}	Brug {what}
+	Used when a PDF doesn't ask for a layout or zoom. Continuous scrolling never snaps between pages.	Bruges, når en PDF ikke angiver layout eller zoom. Ved fortløbende rulning rettes der aldrig ind efter de enkelte sider.
+	Used when opening PDFs. An explicit launch or control mode takes precedence for the session.	Bruges ved åbning af PDF-filer. En eksplicit start- eller kontroltilstand har forrang for sessionen.
+	User Interface Options	Indstillinger for brugergrænseflade
+	User password	Brugeradgangskode
+	Valid	Gyldig
+	Valid for 5 years, for digital signatures. Self-signed IDs are usually not trusted by others.	Gyldig i 5 år, til digitale signaturer. Selvsignerede id'er bliver normalt ikke betragtet som troværdige af andre.
+	Valid from	Gyldig fra
+certificate	Valid from	Gyldig fra
+	Valid to	Gyldig til
+certificate	Valid to	Gyldig til
+	Validate	Validér
+	Validate all	Valider alle
+	Validate all signatures	Validér alle signaturer
+	Validity ends	Gyldighed udløber
+certificate	Validity ends	Gyldighed udløber
+	Validity starts	Gyldighed starter
+certificate	Validity starts	Gyldighed starter
+	Value is not calculated	Værdien beregnes ikke
+	Value is the	Værdien er
+	Value:	Værdi:
+	Verify	Kontrollér
+	Verify to see what the document needs.	Verificér for at se, hvad dokumentet kræver.
+certificate	Version	Version
+	Version {v}	Version {v}
+	Vertical reversed	Lodret, omvendt
+	Vertical text cannot be moved with this selection.	Lodret tekst kan ikke flyttes med denne markering.
+	Vertically	Lodret
+	Video, sound and rich media must be tagged to be announced. Tag the multimedia annotations.	Video, lyd og rich media skal være tagget for at blive oplæst. Tag multimedieannoteringerne.
+	View less	Vis mindre
+	View more	Vis mere
+	View revision {n}	Vis revision {n}
+	View signed version	Vis signeret version
+	Viewing	Visning
+	Viewport	Visningsområde
+	Viewport rectangle in page points (x, y, width, height)	Rektangel for visningsområde i sidepunkter (x, y, bredde, højde)
+	Visible Rectangle	Synligt rektangel
+	Visual	Visuel
+	Warning	Advarsel
+	Watermark	Vandmærke
+	watermark	vandmærke
+calendar weekday	We	on
+	Weak	Svag
+	Welcome to PdfCraft	Velkommen til PdfCraft
+	What takes up the space in this file, by kind of content.	Hvad der fylder i denne fil, efter indholdstype.
+	What word or phrase would you like to search for?	Hvilket ord eller hvilket udtryk vil du søge efter?
+	White on black	Hvid på sort
+	Whole words only	Kun hele ord
+	Window Options	Vinduesindstillinger
+	Windows store  ·  	Windows-certifikatlager  ·  
+	Word count	Ordantal
+	Word counting stopped unexpectedly.	Ordoptællingen stoppedde uventet.
+	Word count…	Tæl ord…
+	Words	Ord
+	Write this email?	Skriv denne e-mail?
+	Wrong password	Forkert adgangskode
+	Wrote 1 file to {dir}	Skrev 1 fil til {dir}
+	Wrote {n} files to {dir}	Skrev {n} filer til {dir}
+	X Object Forms	X-objektformularer
+	XFA form: its fields and its XFA data are kept in step, so other viewers show what you fill in.	XFA-formular: dens felter og dens XFA-data holdes i trit, så andre fremvisere viser det, du udfylder.
+	Yellow on black	Gul på sort
+	Yes	Ja
+	yesterday	i går
+	You are about to apply 1 redaction mark. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	Du er ved at anvende 1 sløringsmærke. Tekst, billeder og tegninger under mærkerne samt kommentarer og formularfelter, der overlapper dem, fjernes permanent.
+	You are about to apply {n} redaction marks. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	Du er ved at anvende {n} sløringsmærker. Tekst, billeder og tegninger under mærkerne samt kommentarer og formularfelter, der overlapper dem, fjernes permanent.
+	You are viewing revision {rev} of “{from}”. It is a snapshot: changes here won't affect the original.	Du ser revision {rev} af »{from}«. Det er et øjebliksbillede: ændringer her påvirker ikke originalen.
+	You are viewing the signed version of “{from}” (revision {rev}). It is a snapshot: changes here won't affect the original.	Du ser den signerede version af »{from}« (revision {rev}). Det er et øjebliksbillede: ændringer her påvirker ikke originalen.
+	You can pin up to {n} folders. Unpin one first.	Du kan fastgøre op til {n} mapper. Frigør først en af dem.
+	You have version {c}. All releases are listed at {page}.	Du har version {c}. Alle udgivelser er angivet på {page}.
+	You have version {c}. Download the new version from its release page.	Du har version {c}. Hent den nye version fra dens udgivelsesside.
+	Your name	Dit navn
+	yyyy or yy year · m or mm month · mmm or mmmm month name · d or dd day · ddd or dddd weekday. H, h, M, s and t are time letters and can't be used on their own: put {escape} before a letter to show it as is.	yyyy eller yy år · m eller mm måned · mmm eller mmmm månedens navn · d eller dd dag · ddd eller dddd ugedag. H, h, M, s og t er tidsbogstaver og kan ikke bruges alene: sæt {escape} foran et bogstav for at vise det, som det er.
+	ZIP	ZIP
+	Zip Code	Postnummer
+	Zip Code + 4	Postnummer + 4
+	Zoom in	Zoom ind
+	Zoom in ({key})	Zoom ind ({key})
+	Zoom in (⌘+)	Zoom ind (⌘+)
+	Zoom in / out (also pinch or {key}-scroll)	Zoom ind / ud (også ved at knibe eller rulle med {key})
+	Zoom in / out (also pinch or ⌘-scroll)	Zoom ind / ud (også knibning eller ⌘-rulning)
+	Zoom out	Zoom ud
+	Zoom out ({key})	Zoom ud ({key})
+	Zoom out (⌘−)	Zoom ud (⌘−)
+	Zoom to page level	Zoom til sideniveau
+	Zoom — type a percentage and press Enter	Zoom — indtast en procent og tryk Enter
+	{0}: {1}	{0}: {1}
+	{chars} can't be written into the PDF yet: Fill & Sign text is Western European only. Pick a numeric format such as dd.mm.yyyy.	{chars} kan endnu ikke skrives i PDF'en: Tekst i Udfyld og signér er kun vesteuropæisk. Vælg et numerisk format som dd.mm.yyyy.
+	{c} of {n}{more}	{c} af {n}{more}
+	{dpi} pixels/inch	{dpi} pixels/tomme
+	{field}: {e}	{field}: {e}
+	{file} is too large for a stamp (at most {n} MB)	{file} er for stor til et stempel (højst {n} MB)
+	{folder} is already pinned to Home	{folder} er allerede fastgjort til Hjem
+	{kind} field	{kind}-felt
+	{kind} Properties	Egenskaber for {kind}
+	{kind} · page {p}	{kind} · side {p}
+	{kind} — click to show it on the page	{kind} — klik for at vise den på siden
+	{k} of {n}	{k} af {n}
+	{label} (1 issue)	{label} (1 problem)
+	{label} ({n} issues)	{label} ({n} problemer)
+	{label} failed: {e}	{label} mislykkedes: {e}
+	{month} {day}, {y}	{day}. {month} {y}
+	{month} {y}	{month} {y}
+	{msg} to {dir}	{msg} til {dir}
+	{name} (default)	{name} (standard)
+	{name} can't be combined: {why}	{name} kan ikke kombineres: {why}
+	{name} has no action	{name} har ingen handling
+	{name} is read-only	{name} er skrivebeskyttet
+	{name} is too large for a word list (at most 1 MB).	{name} er for stor til en ordliste (højst 1 MB).
+	{name} submits the form to {url}; PdfCraft doesn't send form data. Save the document to keep your entries.	{name} sender formularen til {url}; PdfCraft sender ikke formulardata. Gem dokumentet for at bevare det, du har indtastet.
+	{name} — unsaved changes	{name} — ikke-gemte ændringer
+	{name}: choosing images arrives on the web with file pickers for images	{name}: valg af billeder kommer på webversionen med filvælgere til billeder
+	{name}: the {other} action isn't supported yet	{name}: handlingen {other} understøttes endnu ikke
+@plural	{n} byte|{n} bytes	{n} byte|{n} bytes
+@plural	{n} comment|{n} comments	{n} kommentar|{n} kommentarer
+	{n} contributors · {c} commits	{n} bidragsydere · {c} commits
+	{n} days ago	for {n} dage siden
+	{n} differences found	{n} forskelle fundet
+@plural	{n} field name collides with earlier files and will be renamed: {list}|{n} field names collide with earlier files and will be renamed: {list}	{n} feltnavn kolliderer med tidligere filer og omdøbes: {list}|{n} feltnavne kolliderer med tidligere filer og omdøbes: {list}
+	{n} fields selected	{n} felter valgt
+@plural	{n} field|{n} fields	{n} felt|{n} felter
+	{n} files	{n} filer
+	{n} files done	{n} filer fuldført
+	{n} files need attention	{n} filer kræver opmærksomhed
+@plural	{n} file|{n} files	{n} fil|{n} filer
+	{n} h ago	for {n} t. siden
+@plural	{n} image optimized|{n} images optimized	{n} billede optimeret|{n} billeder optimeret
+	{n} instances	{n} forekomster
+	{n} issues	{n} problemer
+@plural	{n} item discarded|{n} items discarded	{n} element forkastet|{n} elementer forkastet
+	{n} marks	{n} mærker
+	{n} match(es) marked for redaction.	{n} forekomst(er) markeret til sløring.
+	{n} measurements use an unsupported format and are left out.	{n} målinger bruger et format, der ikke understøttes, og udelades.
+	{n} min ago	for {n} min. siden
+@plural	{n} object selected|{n} objects selected	{n} objekt valgt|{n} objekter valgt
+	{n} pages	{n} sider
+	{n} pages and no bookmarks	{n} sider og ingen bogmærker
+	{n} pages selected	{n} sider valgt
+	{n} pages selected.	{n} sider valgt.
+@plural	{n} page|{n} pages	{n} side|{n} sider
+@plural	{n} pixel|{n} pixels	{n} pixel|{n} pixels
+@plural	{n} result|{n} results	{n} resultat|{n} resultater
+	{n} selected	{n} valgt
+	{n} tags	{n} tags
+	{n} word(s) or phrase(s)	{n} ord eller frase(r)
+	{n} {kind}	{n} {kind}
+	{page} is not a page number or label	{page} er ikke et sidenummer eller en sidebetegnelse
+	{rule} - {status}	{rule} - {status}
+	{s} action	{s}-handling
+	{ty} element on page {p}: {what}	{ty}-element på side {p}: {what}
+	{ty} element: {what}	{ty}-element: {what}
+	{verb} as "{name}"	{verb} som "{name}"
+	{verb} Background	{verb} baggrund
+	{verb} Header and Footer	{verb} sidehoved og sidefod
+	{verb} Watermark	{verb} vandmærke
+	{who} in this document tried to open an address PdfCraft won't open: {e}.	{who} i dette dokument forsøgte at åbne en adresse, som PdfCraft ikke åbner: {e}.
+	{who} in this document tried to open an address PdfCraft won't open: {e}. Only web (http, https) and email (mailto) links open from documents.	{who} i dette dokument forsøgte at åbne en adresse, som PdfCraft ikke åbner: {e}. Kun weblinks (http, https) og e-maillinks (mailto) kan åbnes fra dokumenter.
+	{who} in this document wants to open this address in your browser:	{who} i dette dokument vil åbne denne adresse i din browser:
+	{who} in this document wants to open your email app with this address:	{who} i dette dokument vil åbne din e-mail-app med denne adresse:
+	{who}, certificate issued by an unknown issuer.	{who}, certifikat udstedt af en ukendt udsteder.
+	{who}, certificate issued by {issuer}.	{who}, certifikat udstedt af {issuer}.
+	{words} on {pages}	{words} på {pages}
+	{} annotation on page {p} isn't tagged	{}-annotation på side {p} er ikke tagget
+	{} annotations aren't allowed	{}-annotationer er ikke tilladt
+	ΔLOC	ΔLOC
+	— (protection is applied when you save)	— (beskyttelsen anvendes, når du gemmer)
+	“{name}” changed on disk after it was opened or last saved. Saving now replaces that newer version with this one.	»{name}« er ændret på disken, efter den blev åbnet eller sidst gemt. At gemme nu erstatter den nyere version med denne.
+	“{name}” has security restrictions. Enter its permissions password to lift them.	„{name}” har sikkerhedsbegrænsninger. Angiv dens rettighedsadgangskode for at ophæve dem.
+	“{name}” is protected. Enter a password to open it.	“{name}” er beskyttet. Indtast en adgangskode for at åbne den.
+	… and {n} more	… og {n} flere
+	−Bin	−Bin
+	−LOC	−LOC
+	This document's script is asking	Dette dokuments script spørger
+	Document: {name}	Dokument: {name}
+	This request comes from the document, not PdfCraft. Only enter a password if you trust this document.	Denne anmodning kommer fra dokumentet, ikke fra PdfCraft. Indtast kun en adgangskode, hvis du har tillid til dette dokument.

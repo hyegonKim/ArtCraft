@@ -1,0 +1,3 @@
+# Words the de-ch pack must accept and reject (common words; written for this check).
+correct = ["Haus", "Buch", "Schule", "Wasser", "Strasse"]
+incorrect = ["Buchh", "Schuule", "Wassser"]

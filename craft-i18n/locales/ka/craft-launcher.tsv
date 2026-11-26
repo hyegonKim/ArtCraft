@@ -1,0 +1,358 @@
+# ქართული (ka) interface catalog for ArtCraft Launcher.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	A new version is available. Download it to replace this version?	ხელმისაწვდომია ახალი ვერსია. ჩამოვტვირთოთ და ჩავანაცვლოთ ეს ვერსია?
+	A new version is available. Would you like to relaunch with the updated version?	ხელმისაწვდომია ახალი ვერსია. გსურთ განახლებული ვერსიით ხელახლა გაშვება?
+	Advanced	დამატებითი
+	All	ყველა
+	All releases	ყველა გამოშვება
+	App	აპლიკაცია
+column	App	აპლიკაცია
+	App details	აპლიკაციის დეტალები
+@id	app.download	ჩამოტვირთვა {os}-ისთვის
+@id	app.github	GitHub-ის რეპოზიტორია
+@id	app.install	ინსტალაცია
+@id	app.notes	გამოშვების შენიშვნები
+@id	app.open	გახსნა
+@id	app.reinstall	ხელახლა ინსტალაცია
+@id	app.releases	ყველა გამოშვება
+@id	app.reveal	Finder-ში ჩვენება
+@id	app.uninstall	დეინსტალაცია…
+@id	app.update	განახლება: {v}
+@id	app.website	ვებსაიტი
+	Appearance	იერსახე
+@id	appearance.theme	იერსახე
+	Apps are placed inside this folder.	აპლიკაციები ამ საქაღალდეში განთავსდება.
+	Apps on this computer	ამ კომპიუტერზე არსებული აპლიკაციები
+	Apps you can install	აპლიკაციები, რომელთა ინსტალაციაც შეგიძლიათ
+	Apps you hid	თქვენ მიერ დამალული აპლიკაციები
+month	Apr	აპრ
+	Arch package (.pkg.tar.zst)	Arch-ის პაკეტი (.pkg.tar.zst)
+	ArtCraft	ArtCraft
+	ArtCraft Launcher	ArtCraft Launcher
+	ArtCraft Launcher is still running	ArtCraft Launcher კვლავ მუშაობს
+	ArtCraft Launcher {version}	ArtCraft Launcher {version}
+	ArtCraft Launcher {version} is available.	ხელმისაწვდომია ArtCraft Launcher {version}.
+@plural	ArtCraft Launcher · {n} update available|ArtCraft Launcher · {n} updates available	ArtCraft Launcher · ხელმისაწვდომია {n} განახლება|ArtCraft Launcher · ხელმისაწვდომია {n} განახლება
+	ArtCraft on GitHub	ArtCraft GitHub-ზე
+	ArtCraft on {name}	ArtCraft {name}-ზე
+	Ascending	ზრდადობით
+month	Aug	აგვ
+	Auto	ავტომატური
+	Automatically	ავტომატურად
+	Automatically download and install updates	განახლებების ავტომატური ჩამოტვირთვა და ინსტალაცია
+	Available	ხელმისაწვდომია
+	Available to install	ხელმისაწვდომია
+	Browse…	არჩევა…
+	Cancel	გაუქმება
+	Cancel download	ჩამოტვირთვის გაუქმება
+	Cancel update	განახლების გაუქმება
+	Check for Updates	განახლებების შემოწმება
+	Check for updates	განახლებების შემოწმება
+	Checked {ago}	ბოლო შემოწმება: {ago}
+	Checked {ago} · using {sources}	შემოწმდა {ago} · წყარო: {sources}
+	Checking for updates…	განახლებების შემოწმება…
+	Checking…	მოწმდება…
+	Classic	კლასიკური
+	Classic apps	კლასიკური აპლიკაციები
+	Click to enlarge	დაწკაპეთ გასადიდებლად
+	Click to reverse the order	დაწკაპეთ რიგის შესაბრუნებლად
+	Click to sort by this column	დაწკაპეთ ამ სვეტით სორტირებისთვის
+	Close	დახურვა
+	Close (Esc)	დახურვა (Esc)
+	Coming soon	მალე
+	Community	საზოგადოება
+cadcraft	Computer-aided design and drafting	დაპროექტება და ნახაზები
+	Couldn't change the login item: {e}	სისტემაში შესვლისას გაშვების შეცვლა ვერ მოხერხდა: {e}
+	Couldn't check for updates: {f}	განახლებების შემოწმება ვერ მოხერხდა: {f}
+@msg	couldn't move {path} to Trash ({reason}). Remove it in Finder instead.	{path} ნაგავში ვერ გადავიდა ({reason}). წაშალეთ ის Finder-ში.
+	Couldn't open {name}: {e}	{name} ვერ გაიხსნა: {e}
+@msg	Couldn't open {name}: {e}	{name} ვერ გაიხსნა: {e}
+@msg	couldn't use install folder {path}: {reason}	ინსტალაციის საქაღალდის ({path}) გამოყენება ვერ მოხერხდა: {reason}
+	Craft App Suite	Craft App Suite
+	Custom folders use AppImage on Linux.	Linux-ზე არჩეულ საქაღალდეში ინსტალაცია AppImage-ით ხდება.
+@msg	custom install folders aren't supported on this system	ამ სისტემაზე ინსტალაციის საქაღალდის არჩევა არ არის მხარდაჭერილი
+	Dark	ბნელი
+	Debian package (.deb)	Debian-ის პაკეტი (.deb)
+month	Dec	დეკ
+	Default install folder	ნაგულისხმევი ინსტალაციის საქაღალდე
+	Descending	კლებადობით
+	Discard download	ჩამოტვირთულის მოშორება
+	Discord	Discord
+	Disk image (.dmg)	დისკის იმიჯი (.dmg)
+	Dismiss	უგულებელყოფა
+	Done	მზადაა
+	Download	ჩამოტვირთვა
+	Download again	ხელახლა ჩამოტვირთვა
+	Download cancelled	ჩამოტვირთვა გაუქმდა
+@msg	Download cancelled	ჩამოტვირთვა გაუქმდა
+	Download for {os}	ჩამოტვირთვა {os}-ისთვის
+	Download paused	ჩამოტვირთვა შეჩერებულია
+	Downloading	ჩამოტვირთვა
+	Downloading {done} of {total}	ჩამოიტვირთება: {done} / {total}
+	Downloading…	ჩამოიტვირთება…
+	Downloads for {platform}	ჩამოტვირთვები პლატფორმისთვის: {platform}
+	Downloads the new version, replaces this one and opens it again	ჩამოტვირთავს ახალ ვერსიას, ჩაანაცვლებს ამას და ხელახლა გახსნის
+	Enlarge picture	სურათის გადიდება
+	Every Craft app	ყველა Craft აპლიკაცია
+	Features	შესაძლებლობები
+month	Feb	თებ
+@id	filter.all	ყველა
+@id	filter.installed	დაინსტალირებული
+@id	filter.notinstalled	არ არის დაინსტალირებული
+@id	filter.updates	განახლებები
+	Flatpak bundle	Flatpak პაკეტი
+	Frequently used	ხშირად გამოყენებული
+	Full changelog	ცვლილებების სრული სია
+	GitHub	GitHub
+	GitHub limit hit; back in {min} min	GitHub-ის ლიმიტი ამოიწურა; {min} წუთში დაბრუნდება
+	GitHub repository	GitHub-ის რეპოზიტორია
+	GitHub's hourly limit was reached; full details return in {min} min	GitHub-ის საათობრივი ლიმიტი ამოიწურა; სრული ინფორმაცია {min} წუთში დაბრუნდება
+	Grid	ბადე
+@id	help.discord	Discord
+@id	help.github	GitHub
+@id	help.website	ვებსაიტი
+	Hidden Apps	დამალული აპლიკაციები
+	Hide App	აპლიკაციის დამალვა
+photocraft	Image editing	გამოსახულებების რედაქტირება
+	Include pre-releases (betas and release candidates)	წინასწარი ვერსიების ჩართვა (ბეტა-ვერსიები და გამოშვების კანდიდატები)
+	Inspired by	შთაგონების წყარო
+	Install	ინსტალაცია
+	Install cancelled	ინსტალაცია გაუქმდა
+	Install cancelled. The download is kept for the next try.	ინსტალაცია გაუქმდა. ჩამოტვირთული ფაილი შემდეგი ცდისთვის შენახულია.
+	Install folder	ინსტალაციის საქაღალდე
+	Install new apps as	ახალი აპლიკაციების ინსტალაციის ფორმატი
+	Installed	დაინსტალირებულია
+column	Installed	დაინსტალირებული
+filter	Installed	დაინსტალირებული
+	installed	დაინსტალირებულია
+	Installed apps with a newer version	დაინსტალირებული აპლიკაციები, რომელთაც უფრო ახალი ვერსია აქვთ
+	Installed version	დაინსტალირებული ვერსია
+	Installed · latest {latest}	დაინსტალირებულია · უახლესი: {latest}
+	Installed · up to date	დაინსტალირებულია · უახლესი ვერსია
+	Installer (.msi)	ინსტალერი (.msi)
+	Installing for {platform}	ინსტალაცია პლატფორმისთვის: {platform}
+	Installing on Linux	ინსტალაცია Linux-ზე
+	Installing on Windows	ინსტალაცია Windows-ზე
+	Installing, then restarting…	ინსტალაცია, შემდეგ გადატვირთვა…
+	Installing…	ინსტალაცია…
+figcraft	Interface design and prototyping	ინტერფეისის დიზაინი და პროტოტიპირება
+	It's in the tray: open it or quit it from the tray icon, or turn this off in the settings.	ის შეტყობინებების არეშია: გახსენით ან დახურეთ მისი ხატულით, ან გამორთეთ ეს ფუნქცია პარამეტრებში.
+month	Jan	იან
+	Join the ArtCraft community on Discord	შემოუერთდით ArtCraft-ის საზოგადოებას Discord-ზე
+	Join the ArtCraft Discord	შემოუერთდით ArtCraft-ის Discord-ს
+	Join the Discord	შემოუერთდით Discord-ს
+month	Jul	ივლ
+month	Jun	ივნ
+	just now	ახლახან
+	Keep running in the tray when the window is closed	ფანჯრის დახურვის შემდეგ მუშაობის გაგრძელება შეტყობინებების არეში
+	Language	ენა
+	Last updated: {date}	ბოლო განახლება: {date}
+	Later	მოგვიანებით
+	Latest	უახლესი
+column	Latest	უახლესი
+	Latest release	უახლესი გამოშვება
+	Latest version	უახლესი ვერსია
+	Launcher	Launcher
+@id	launcher.dismiss	უგულებელყოფა
+@id	launcher.download	ჩამოტვირთვა
+@id	launcher.notes	რა არის ახალი
+@id	launcher.update	განახლება და გადატვირთვა
+	Learn more	დაწვრილებით
+	Light	ღია
+	Like {name}	{name}-ის მსგავსი
+	link	ბმული
+@id	linux.preferred_kind	ახალი აპლიკაციების ინსტალაციის ფორმატი
+	Loading ArtCraft Launcher…	ArtCraft Launcher იტვირთება…
+	Loading pictures…	სურათები იტვირთება…
+month	Mar	მარ
+	Match system	სისტემის მიხედვით
+	Maximize	გაშლა
+month	May	მაი
+	Minimize	ჩაკეცვა
+	More actions for {name}	{name}: სხვა მოქმედებები
+effectcraft	Motion graphics and visual effects	მოძრავი გრაფიკა და ეფექტები
+	Name	სახელი
+	Name (A–Z)	სახელი (A–Z)
+	Name (Z–A)	სახელი (Z–A)
+	NEW	ახალი
+	New	ახალი
+	New apps	ახალი აპლიკაციები
+	New installs use this folder. Updates stay in their current location.	ახალი ინსტალაციები ამ საქაღალდეს იყენებს. განახლებები ამჟამინდელ ადგილას რჩება.
+	Newest release	უახლესი გამოშვება
+	Next app	შემდეგი აპლიკაცია
+	Next picture (→)	შემდეგი სურათი (→)
+	No apps match	შესაბამისი აპლიკაცია ვერ მოიძებნა
+	No downloads for this system	ამ სისტემისთვის ჩამოსატვირთი არაფერია
+	No notes were published with this release.	ამ გამოშვებას შენიშვნები არ ახლავს.
+	No release published yet	გამოშვება ჯერ არ გამოქვეყნებულა
+	Not available	მიუწვდომელია
+	Not available here	აქ მიუწვდომელია
+	Not checked yet	ჯერ არ შემოწმებულა
+	Not installed	არ არის დაინსტალირებული
+	Notify me when an installed app has an update	შეტყობინება, როცა დაინსტალირებულ აპლიკაციას განახლება აქვს
+month	Nov	ნოე
+month	Oct	ოქტ
+	Offline	ოფლაინ
+	OK	OK
+	On Linux, custom folders use AppImage format.	Linux-ზე არჩეულ საქაღალდეში ინსტალაცია AppImage ფორმატით ხდება.
+	Only when I ask	მხოლოდ მოთხოვნისას
+	Open	გახსნა
+	Open ArtCraft Launcher to update.	განახლებისთვის გახსენით ArtCraft Launcher.
+	Open link	ბმულის გახსნა
+	Open on GitHub	GitHub-ზე გახსნა
+	Open Source Tools for Creatives, Makers, and Builders	ღია კოდის ხელსაწყოები შემოქმედთათვის, ოსტატებისა და მშენებლებისთვის
+designcraft	Page layout and publishing	გვერდების მაკეტირება და გამოცემა
+	Pause download	ჩამოტვირთვის შეჩერება
+lightcraft	Photo library and raw development	ფოტოთეკა და RAW-ის დამუშავება
+	Pictures couldn't be loaded. Reopen this page to try again.	სურათები ვერ ჩაიტვირთა. ხელახლა საცდელად თავიდან გახსენით ეს გვერდი.
+	Platforms	პლატფორმები
+	Portable (.zip)	პორტატული (.zip)
+deckcraft	Presentations and slide shows	პრეზენტაციები და სლაიდშოუები
+	Previous app	წინა აპლიკაცია
+	Previous picture (←)	წინა სურათი (←)
+	Questions, ideas and news from the ArtCraft team	კითხვები, იდეები და სიახლეები ArtCraft-ის გუნდისგან
+	Quit ArtCraft Launcher	ArtCraft Launcher-იდან გასვლა
+pdfcraft	Reading, organizing and protecting PDFs	PDF-ების კითხვა, ორგანიზება და დაცვა
+	Recently updated	ბოლოს განახლებული
+	Reconnecting…	კავშირის აღდგენა…
+soundcraft	Recording, editing and mixing audio	აუდიოს ჩაწერა, რედაქტირება და მიქსირება
+	Reinstall	ხელახლა ინსტალაცია
+	Release notes	გამოშვების შენიშვნები
+	Released	გამოვიდა
+column	Released	გამოშვება
+	Released {date}	გამოშვების თარიღი: {date}
+	Releases	გამოშვებები
+	Removing…	იშლება…
+	Replace	ჩანაცვლება
+	Replace what's there?	ჩანაცვლდეს არსებული?
+	Restore	აღდგენა
+	Resume	გაგრძელება
+	Resume download	ჩამოტვირთვის გაგრძელება
+	Retry install	ინსტალაციის ხელახლა ცდა
+	Retry update to {version}	განახლების ხელახლა ცდა: {version}
+	RPM package (.rpm)	RPM პაკეტი (.rpm)
+	Running in the background	ფონურ რეჟიმში მუშაობა
+	Search apps	აპლიკაციების ძიება
+month	Sep	სექ
+	Settings	პარამეტრები
+@id	settings.open	პარამეტრები
+@id	settings.quit	ArtCraft Launcher-იდან გასვლა
+	Show apps as a table	აპლიკაციების ჩვენება ცხრილად
+	Show apps as cards	აპლიკაციების ჩვენება ბარათებად
+	Show ArtCraft Launcher	ArtCraft Launcher-ის ჩვენება
+	Show in Explorer	Explorer-ში ჩვენება
+	Show in Files	Files-ში ჩვენება
+	Show in Finder	Finder-ში ჩვენება
+	Show the window on the current desktop	ფანჯრის ჩვენება მიმდინარე სამუშაო მაგიდაზე
+	Show {n} more changes	კიდევ {n} ცვლილების ჩვენება
+	Sort	სორტირება
+@id	sort.inspired	შთაგონების წყარო
+@id	sort.installed	დაინსტალირებული ვერსია
+@id	sort.latest	უახლესი ვერსია
+@id	sort.name	სახელი
+@id	sort.released	უახლესი გამოშვება
+@id	sort.status	სტატუსი
+@id	sort.suite	ნაკრების რიგით
+gridcraft	Spreadsheets and data	ელცხრილები და მონაცემები
+	Start ArtCraft Launcher when I log in	ArtCraft Launcher-ის გაშვება სისტემაში შესვლისას
+	Status	სტატუსი
+	Stop waiting; the update can be started again later	ლოდინის შეწყვეტა; განახლების დაწყება მოგვიანებითაც შეიძლება
+	Suite order	ნაკრების რიგით
+	System default	სისტემის ნაგულისხმევი
+	System package (recommended)	სისტემის პაკეტი (რეკომენდებული)
+	Table	ცხრილი
+	Tarball (.tar.gz)	tar-არქივი (.tar.gz)
+	The app will be moved to the Trash. Your documents and settings stay.	აპლიკაცია ნაგავში გადავა. თქვენი დოკუმენტები და პარამეტრები შენარჩუნდება.
+	The app will be removed. Your documents and settings stay.	აპლიკაცია წაიშლება. თქვენი დოკუმენტები და პარამეტრები შენარჩუნდება.
+	The download is still here. It's checked again, then installed.	ჩამოტვირთული ფაილი ისევ აქ არის. ჯერ ხელახლა შემოწმდება, შემდეგ დაინსტალირდება.
+	The system manages install locations here.	აქ ინსტალაციის ადგილს სისტემა მართავს.
+	These notes weren't fetched (GitHub's request limit was reached). They're on the release page.	ეს შენიშვნები ვერ ჩაიტვირთა (GitHub-ის მოთხოვნების ლიმიტი ამოიწურა). ისინი გამოშვების გვერდზეა.
+@msg	this release has no AppImage for a custom install folder	ამ გამოშვებას არჩეული ინსტალაციის საქაღალდისთვის AppImage არ აქვს
+@id	tray.close_to_tray	ფანჯრის დახურვის შემდეგ მუშაობის გაგრძელება შეტყობინებების არეში
+@id	tray.login_item	ArtCraft Launcher-ის გაშვება სისტემაში შესვლისას
+@id	tray.show_on_current_desktop	ფანჯრის ჩვენება მიმდინარე სამუშაო მაგიდაზე
+	Unhide App	აპლიკაციის გამოჩენა
+	Uninstall	დეინსტალაცია
+	Uninstall cancelled	დეინსტალაცია გაუქმდა
+	Uninstall {name}?	{name}-ის დეინსტალაცია?
+	Uninstall…	დეინსტალაცია…
+	Update	განახლება
+	Update 1 app	1 აპლიკაციის განახლება
+	Update all ({count})	ყველას განახლება ({count})
+	Update and restart	განახლება და გადატვირთვა
+	Update available	ხელმისაწვდომია განახლება
+	Update cancelled	განახლება გაუქმდა
+	Update paused	განახლება შეჩერებულია
+	Update to {v}	განახლება ვერსიამდე {v}
+@id	update.check	განახლებების შემოწმება
+@id	update.check_auto	განახლებების ავტომატური შემოწმება
+@id	update.notify	შეტყობინება, როცა დაინსტალირებულ აპლიკაციას განახლება აქვს
+@id	update.prereleases	წინასწარი ვერსიების ჩართვა (ბეტა-ვერსიები და გამოშვების კანდიდატები)
+	Updates	განახლებები
+	Updates always use the format an app was installed with.	განახლება ყოველთვის იმ ფორმატს იყენებს, რომლითაც აპლიკაცია დაინსტალირდა.
+	Updating…	ახლდება…
+	Use default	ნაგულისხმევის გამოყენება
+vectorcraft	Vector illustration	ვექტორული ილუსტრაცია
+	Verifying checksum…	საკონტროლო ჯამის შემოწმება…
+	Verifying…	გადამოწმება…
+	Version	ვერსია
+column	Version	ვერსია
+	Version {latest}	ვერსია {latest}
+	Version {version}	ვერსია {version}
+	Version {version} installed	დაინსტალირებულია ვერსია {version}
+filmcraft	Video editing, color and sound	ვიდეოს მონტაჟი, ფერი და ხმა
+@id	view.grid	ბადე
+@id	view.table	ცხრილი
+	Visit getartcraft.com	getartcraft.com-ის გახსნა
+	Waiting for another app…	სხვა აპლიკაციის მოლოდინი…
+	Waiting for other installs…	სხვა ინსტალაციების მოლოდინი…
+	Website	ვებსაიტი
+	Website (coming soon)	ვებსაიტი (მალე)
+	What's new	რა არის ახალი
+	When on, opening the launcher from the menu bar brings its window to the desktop you're on. When off, macOS switches you to the desktop the window was on.	ჩართვისას მენიუს ზოლიდან გახსნილი ArtCraft Launcher-ის ფანჯარა იმ სამუშაო მაგიდაზე გამოჩნდება, რომელზეც ახლა ხართ. გამორთვისას macOS გადაგიყვანთ იმ სამუშაო მაგიდაზე, სადაც ფანჯარა იყო.
+	Windows will remove it like any installed program. Your documents and settings stay.	Windows მას ისე წაშლის, როგორც ნებისმიერ დაინსტალირებულ პროგრამას. თქვენი დოკუმენტები და პარამეტრები შენარჩუნდება.
+wordcraft	Writing and document design	წერა და დოკუმენტების დიზაინი
+	yesterday	გუშინ
+	Your system's package manager will remove it, and may ask for your password. Your documents and settings stay.	მას თქვენი სისტემის პაკეტების მენეჯერი წაშლის და შეიძლება პაროლი მოგთხოვოთ. თქვენი დოკუმენტები და პარამეტრები შენარჩუნდება.
+	{a} and {b}	{a} და {b}
+	{count} updates are available	ხელმისაწვდომია {count} განახლება
+	{done} downloaded	ჩამოტვირთულია {done}
+	{done} of {total}	{done} / {total}
+	{done} of {total} downloaded	ჩამოტვირთულია {done} / {total}
+	{installed} installed · latest {latest}	დაინსტალირებულია {installed} · უახლესი: {latest}
+	{month} {day}, {year}	{day} {month}, {year}
+	{name} details	{name}-ის დეტალები
+	{name} icon	{name}-ის ხატულა
+@msg	{name} installed: {version}	{name} დაინსტალირდა: {version}
+@msg	{name} installed: {version} (this release publishes no checksum, so only its size was checked)	{name} დაინსტალირდა: {version} (ეს გამოშვება საკონტროლო ჯამს არ აქვეყნებს, ამიტომ მხოლოდ ზომა შემოწმდა)
+@msg	{name} is running. Quit it, then try again.	{name} გაშვებულია. დახურეთ და კვლავ სცადეთ.
+@msg	{name} updated to {version}	{name} განახლდა ვერსიამდე {version}
+@msg	{name} updated to {version} (this release publishes no checksum, so only its size was checked)	{name} განახლდა ვერსიამდე {version} (ეს გამოშვება საკონტროლო ჯამს არ აქვეყნებს, ამიტომ მხოლოდ ზომა შემოწმდა)
+@msg	{name} was installed from the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg})	{name} დაინსტალირდა AUR-იდან ({pkg}). განაახლეთ AUR-ის დამხმარე პროგრამით (მაგალითად: yay -S {pkg})
+@msg	{name} was installed from the AUR ({pkg}). Update it with {cmd}	{name} დაინსტალირდა AUR-იდან ({pkg}). განაახლეთ ბრძანებით {cmd}
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg}) or sudo pacman -Syu	{name} დაინსტალირდა {repo} რეპოზიტორიიდან ან AUR-იდან ({pkg}). განაახლეთ AUR-ის დამხმარე პროგრამით (მაგალითად: yay -S {pkg}) ან sudo pacman -Syu
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with {cmd} or sudo pacman -Syu	{name} დაინსტალირდა {repo} რეპოზიტორიიდან ან AUR-იდან ({pkg}). განაახლეთ ბრძანებით {cmd} ან sudo pacman -Syu
+@msg	{name} was removed	{name} წაიშალა
+	{name} {version}	{name} {version}
+	{name} {v} is available	ხელმისაწვდომია {name} {v}
+@plural	{n} app|{n} apps	{n} აპლიკაცია|{n} აპლიკაცია
+@plural	{n} day ago|{n} days ago	{n} დღის წინ|{n} დღის წინ
+@plural	{n} h ago|{n} h ago	{n} საათის წინ|{n} საათის წინ
+@plural	{n} min ago|{n} min ago	{n} წუთის წინ|{n} წუთის წინ
+@msg	{path} already exists and wasn't installed by ArtCraft Launcher	{path} უკვე არსებობს და ის ArtCraft Launcher-ს არ დაუინსტალირებია
+	{path} already exists. Installing {name} will overwrite it.	{path} უკვე არსებობს. {name}-ის ინსტალაცია მას გადააწერს.
+	{version} installed → {latest} released	დაინსტალირებულია {version} → გამოვიდა {latest}
+	⊞  Grid	⊞  ბადე
+	☰  Table	☰  ცხრილი
+	🔍  Search apps	🔍  აპლიკაციების ძიება

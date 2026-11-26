@@ -14,13 +14,14 @@ app picks it up. An app can still override a shared string, or add its own, in i
 |---|---|
 | `locales/<locale>/common.tsv` | Shared strings: those two or more apps use. |
 | `locales/<locale>/<app>.tsv` | One app's strings, and its overrides of shared ones. |
+| `language-data/<locale>/` | Spelling word lists and hyphenation patterns (Language data); see [`language-data/README.md`](language-data/README.md). |
 | `docs/catalog-format.md` | The catalog format, the rules CI checks, and the header every catalog starts with. |
 | `docs/integration.md` | How an app embeds the catalogs as a fully optional build input. |
-| `docs/adr/` | Why TSV keyed by English, and why the lookup code lives in craft-libs. |
+| `docs/adr/` | Decisions: TSV keyed by English, lookup code in craft-libs, the shared catalog, Language data and its licences. |
 | `GLOSSARY.md` | The words this project uses: source text, context, catalog, override… |
 | `ROADMAP.md` | Milestones and which apps have moved here. |
-| `ATTRIBUTION.md` | Translators, and where migrated catalogs came from. |
-| `AGENTS.md` | Instructions for coding agents, pointing at the shared craftrules standards. |
+| `ATTRIBUTION.md` | Translators, where migrated catalogs came from, and the source and licence of every Language data file. |
+| `AGENTS.md` | Instructions for coding agents. |
 | `crates/craft-i18n-tests` | The catalog checker CI runs. |
 
 ## How the apps use it
@@ -117,4 +118,7 @@ cargo test --workspace                          # check every catalog
 cargo test coverage_report -- --nocapture       # rows per catalog against the largest locale
 ```
 
-Code and translations are MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`).
+Code and translations are MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`). Language data
+under `language-data/` is upstream work and keeps its own licence, recorded next to each file
+(`LICENSE-<source>.txt`), in the manifest and in `ATTRIBUTION.md`
+([ADR 0004](docs/adr/0004-third-party-language-data.md)).

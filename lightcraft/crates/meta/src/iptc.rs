@@ -8,8 +8,8 @@ use crate::{DateTime, Metadata};
 fn decode(b: &[u8], utf8: bool) -> String {
     match std::str::from_utf8(b) {
         Ok(s) => s.trim_end_matches('\0').trim().to_string(),
-        Err(_) if utf8 => String::from_utf8_lossy(b).trim().to_string(),
-        Err(_) => b.iter().map(|&c| c as char).collect::<String>().trim().to_string(),
+        Err(_) if utf8 => String::from_utf8_lossy(b).trim_end_matches('\0').trim().to_string(),
+        Err(_) => b.iter().map(|&c| c as char).collect::<String>().trim_end_matches('\0').trim().to_string(),
     }
 }
 
@@ -20,6 +20,7 @@ pub fn parse_iptc(b: &[u8]) -> Metadata {
     let mut utf8 = false;
     let mut date: Option<String> = None;
     let mut time: Option<String> = None;
+    let mut seen_keywords = std::collections::HashSet::new();
     let mut i = 0usize;
     while i + 5 <= b.len() {
         if b[i] != 0x1c {
@@ -43,7 +44,7 @@ pub fn parse_iptc(b: &[u8]) -> Metadata {
             (2, 5) => m.title = Some(decode(data, utf8)).filter(|s| !s.is_empty()),
             (2, 25) => {
                 let k = decode(data, utf8);
-                if !k.is_empty() && !m.keywords.contains(&k) {
+                if !k.is_empty() && seen_keywords.insert(k.clone()) {
                     m.keywords.push(k);
                 }
             }
@@ -79,6 +80,18 @@ pub(crate) mod tests {
         out.extend_from_slice(data);
     }
 
+    #[test]
+    fn distinct_keywords_are_kept_once_each_without_rescanning() {
+        let mut b = Vec::new();
+        for i in 0..50_000u32 {
+            ds(&mut b, 2, 25, format!("k{i}").as_bytes());
+            ds(&mut b, 2, 25, b"same");
+        }
+        let m = parse_iptc(&b);
+        assert_eq!(m.keywords.len(), 50_001);
+        assert_eq!(m.keywords.iter().filter(|k| *k == "same").count(), 1);
+    }
+
     pub(crate) fn sample_iim() -> Vec<u8> {
         let mut v = Vec::new();
         ds(&mut v, 1, 90, b"\x1b%G");
@@ -104,6 +117,20 @@ pub(crate) mod tests {
         assert_eq!(m.copyright.as_deref(), Some("CC0"));
         assert_eq!(m.caption.as_deref(), Some("A caption"));
         assert_eq!(m.capture_time.unwrap().to_iso(), "2021-03-04T10:11:12+01:00");
+    }
+
+    #[test]
+    fn non_utf8_text_drops_trailing_nul() {
+        let mut v = Vec::new();
+        ds(&mut v, 2, 5, &[0x43, 0xe9, 0x00]);
+        ds(&mut v, 2, 25, &[0x6b, 0xe9, 0x00]);
+        let m = parse_iptc(&v);
+        assert_eq!(m.title.as_deref(), Some("Cé"));
+        assert_eq!(m.keywords, vec!["ké".to_string()]);
+        let mut u = Vec::new();
+        ds(&mut u, 1, 90, b"\x1b%G");
+        ds(&mut u, 2, 5, &[0x43, 0xff, 0x00]);
+        assert_eq!(parse_iptc(&u).title.as_deref(), Some("C\u{fffd}"));
     }
 
     #[test]

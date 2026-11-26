@@ -1281,6 +1281,7 @@
 	Zoom Out	Riduci
 	Zoom out	Riduci
 	Zoom Tool	Strumento Zoom
+@plural	{n} byte|{n} bytes	{n} byte|{n} byte
 @plural	{n} commit|{n} commits	{n} commit|{n} commit
 	{n} files	{n} file
 	{n} h ago	{n} h fa

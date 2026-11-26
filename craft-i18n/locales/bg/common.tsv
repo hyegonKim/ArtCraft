@@ -388,7 +388,7 @@ theme	Appearance	Външен вид
 	File Handling	Работа с файлове
 	File Info…	Информация за файла…
 	File Name	Име на файла
-@id	file.close	file.close
+@id	file.close	Затваряне
 	Files	Файлове
 	Fill	Запълване
 	Fill:	Запълване:

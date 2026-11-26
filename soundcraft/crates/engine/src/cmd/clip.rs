@@ -72,7 +72,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Loop...",
             ["Clip"],
             Some("Cmd+Alt+L"),
-            "{clips?, count?: n, length?: samples, fill?: bool}: count is the clip plus its loops; length is the whole looped clip, with the last loop cut short to fit; fill loops up to the next clip on the track, or else to the session end",
+            "{clips?, count?: n, length?: samples, fill?: bool, crossfade_ms?: 0..5000, crossfade_shape?: 'equal power'|'linear'|'s-curve'|'exponential'|'logarithmic'}: count is the clip plus its loops (up to 1000); length is the whole looped clip, with the last loop cut short to fit; fill loops up to the next clip on the track, or else to the session end; crossfade_ms overlaps adjacent loop boundaries with fades",
             has_selection,
             loop_clips
         ),
@@ -228,6 +228,7 @@ fn elastic(e: &mut Engine, p: &Value) -> Result<Value> {
         nc.content = soundcraft_model::ClipContent::Audio { source: src, offset: 0 };
         nc.length = out_len;
         nc.stretch = 1.0;
+        nc.clamp_fades();
         super::more_util::replace_clip(s, t, *id, nc);
         rendered += 1;
     }
@@ -246,7 +247,7 @@ fn remove_warp(e: &mut Engine, p: &Value) -> Result<Value> {
             if let Some((src, off, len)) = orig {
                 c.content = soundcraft_model::ClipContent::Audio { source: src, offset: off };
                 c.length = len.max(1);
-                c.fade_out.len = c.fade_out.len.min(c.length);
+                c.clamp_fades();
                 n += 1;
             }
         }
@@ -298,11 +299,88 @@ fn layer(e: &mut Engine, p: &Value, front: bool) -> Result<Value> {
 /// The most loops `clip.loop` makes of one clip.
 const MAX_LOOPS: i64 = 1000;
 
+fn parse_loop_crossfade(e: &Engine, p: &Value) -> Result<(Samples, soundcraft_model::FadeShape)> {
+    let ms = f64_or(p, "crossfade_ms", 0.0);
+    if !ms.is_finite() || !(0.0..=5000.0).contains(&ms) {
+        return Err(bad("clip.loop", "`crossfade_ms` must be between 0 and 5000"));
+    }
+    let shape = match str_param(p, "crossfade_shape") {
+        None => soundcraft_model::FadeShape::EqualPower,
+        Some("equal_power") => soundcraft_model::FadeShape::EqualPower,
+        Some("s_curve") => soundcraft_model::FadeShape::SCurve,
+        Some(name) => soundcraft_model::FadeShape::from_id(name)
+            .ok_or_else(|| bad("clip.loop", "crossfade_shape must be linear|equal power|s-curve|exponential|logarithmic"))?,
+    };
+    let samples = if ms > 0.0 { e.session().sample_rate.samples(ms / 1000.0).max(1) } else { 0 };
+    Ok((samples, shape))
+}
+
+fn loop_plan(c: &soundcraft_model::Clip, end: Option<Samples>, count: i64, stride: Samples) -> Result<(i64, Samples)> {
+    let len = c.length;
+    match end {
+        Some(end) => {
+            let span = end.saturating_sub(c.end()).max(0);
+            if span == 0 {
+                return Ok((0, len));
+            }
+            let (whole, rest) = (span / stride, span % stride);
+            let reps = whole.saturating_add(i64::from(rest > 0));
+            if reps > MAX_LOOPS {
+                return Err(bad("clip.loop", format!("“{}” would need {reps} loops to fill that; a clip loops at most {MAX_LOOPS} times", c.name)));
+            }
+            let last_start = c.start.saturating_add(stride.saturating_mul(reps));
+            let last = end.saturating_sub(last_start).clamp(1, len);
+            Ok((reps, last))
+        }
+        None => Ok(((count - 1).clamp(0, MAX_LOOPS), len)),
+    }
+}
+
+fn place_crossfaded_loops(
+    s: &mut soundcraft_model::Session,
+    tid: soundcraft_model::TrackId,
+    orig_id: ClipId,
+    template: &soundcraft_model::Clip,
+    (reps, last, xfade): (i64, Samples, Samples),
+    shape: soundcraft_model::FadeShape,
+) -> usize {
+    let stride = (template.length - xfade).max(1);
+    let final_end = template.start.saturating_add(stride.saturating_mul(reps)).saturating_add(last);
+    crate::edit::clear_range(s, tid, soundcraft_time::Range::new(template.end(), final_end), false);
+    if let Some(src) = s.find_clip_mut(orig_id) {
+        src.fade_out = soundcraft_model::Fade { len: xfade.min(src.length), shape, curvature: 0.0 };
+        src.clamp_fades();
+    }
+    let mut built = Vec::new();
+    for k in 1..=reps {
+        let mut nc = template.clone();
+        nc.id = s.new_clip_id();
+        nc.start = 0;
+        if k == reps && last < template.length {
+            nc.trim_end_to(last);
+        }
+        nc.start = template.start.saturating_add(stride.saturating_mul(k));
+        nc.fade_in = soundcraft_model::Fade { len: xfade.min(nc.length), shape, curvature: 0.0 };
+        if k < reps {
+            nc.fade_out = soundcraft_model::Fade { len: xfade.min(nc.length), shape, curvature: 0.0 };
+        }
+        nc.clamp_fades();
+        built.push(nc);
+    }
+    let added = built.len();
+    if let Some(pl) = s.track_mut(tid).and_then(|t| t.playlist_mut()) {
+        pl.clips.extend(built);
+        pl.sort();
+    }
+    added
+}
+
 fn loop_clips(e: &mut Engine, p: &Value) -> Result<Value> {
     let ids = clip_ids_param(e, p);
-    let count = i64_or(p, "count", 4).clamp(1, 512);
+    let count = i64_or(p, "count", 4).clamp(1, MAX_LOOPS);
     let total = position_param(e, "clip.loop", p, "length")?;
     let fill = p.get("fill").and_then(Value::as_bool).unwrap_or(false);
+    let (xfade_req, xfade_shape) = parse_loop_crossfade(e, p)?;
     let s = e.session_mut();
     let session_end = s.content_end();
     let mut made = 0;
@@ -311,30 +389,15 @@ fn loop_clips(e: &mut Engine, p: &Value) -> Result<Value> {
         if c.length <= 0 {
             continue;
         }
-        let len = c.length;
-        // Where the looped clip ends: the next clip or the session end, or `length` after the start.
+        let xfade = xfade_req.min((c.length - 1).max(0) / 2);
+        let stride = (c.length - xfade).max(1);
         let end = if fill {
             let next = s.track(tid).and_then(|t| t.clips().iter().filter(|x| x.id != c.id && x.start >= c.end()).map(|x| x.start).min());
             Some(next.unwrap_or(session_end))
         } else {
             total.map(|l| c.start.saturating_add(l))
         };
-        // Whole iterations, then one cut short to reach `end` exactly.
-        let (reps, last) = match end {
-            Some(end) => {
-                let span = end.saturating_sub(c.end()).max(0);
-                let (whole, rest) = (span / len, span % len);
-                let reps = whole.saturating_add(i64::from(rest > 0));
-                if reps > MAX_LOOPS {
-                    return Err(bad(
-                        "clip.loop",
-                        format!("“{}” would need {reps} loops to fill that; a clip loops at most {MAX_LOOPS} times", c.name),
-                    ));
-                }
-                (reps, if rest > 0 { rest } else { len })
-            }
-            None => ((count - 1).clamp(0, MAX_LOOPS), len),
-        };
+        let (reps, last) = loop_plan(&c, end, count, stride)?;
         if reps > 0 && c.loop_id.is_none() {
             let lid = s.alloc();
             if let Some(src) = s.find_clip_mut(id) {
@@ -342,23 +405,23 @@ fn loop_clips(e: &mut Engine, p: &Value) -> Result<Value> {
             }
             c.loop_id = Some(lid);
         }
-        let mut copies = Vec::new();
+        if xfade > 0 && reps > 0 {
+            made += place_crossfaded_loops(s, tid, id, &c, (reps, last, xfade), xfade_shape);
+            continue;
+        }
         for k in 1..=reps {
             let mut nc = c.clone();
             nc.start = 0;
             if k == reps && last < c.length {
-                // `start` is 0 here, so the end is the length; the trim also shortens the fades to fit and removes a sync point past the cut.
                 nc.trim_end_to(last);
             }
-            copies.push((c.start + c.length * k, nc));
-        }
-        for (at, nc) in copies {
+            let at = c.start + c.length * k;
             let length = nc.length;
             let _ = crate::edit::paste(s, tid, at, &[nc], length, false);
             made += 1;
         }
     }
-    Ok(json!({"loops": made}))
+    Ok(json!({"loops": made, "crossfade_samples": xfade_req}))
 }
 
 fn rename(e: &mut Engine, p: &Value) -> Result<Value> {
@@ -424,7 +487,7 @@ fn quantize_to_grid(e: &mut Engine, p: &Value) -> Result<Value> {
     let ids = clip_ids_param(e, p);
     let s = e.session();
     let moves: Vec<(soundcraft_model::ClipId, i64)> =
-        ids.iter().filter_map(|id| s.find_clip(*id).map(|(_, c)| (*id, crate::edit::grid_delta(s, c, 0, false)))).collect();
+        ids.iter().filter_map(|id| s.find_clip(*id).map(|(_, c)| (*id, crate::edit::grid_delta(s, c, 0, false, &ids)))).collect();
     let s = e.session_mut();
     for (id, d) in &moves {
         crate::edit::move_clips(s, &[*id], *d, &[]);
@@ -463,8 +526,8 @@ mod tests {
         let mut s = Session::default();
         let t = s.add_track(TrackKind::Audio, ChannelFormat::Mono, Some("Elastic"));
         let samples = (0..source_len).map(|i| if i >= tone_at { (i as f32 * 0.2).sin() * 0.4 } else { 0.0 }).collect();
-        let buf = soundcraft_audio_io::AudioBuffer { sample_rate: 48_000, channels: vec![samples] };
-        let src = crate::io::add_source(&mut s, "Tone", buf, None, soundcraft_audio_io::FileFormat::Wav);
+        let buf = craft_audio::AudioBuffer { sample_rate: 48_000, channels: vec![samples] };
+        let src = crate::io::add_source(&mut s, "Tone", buf, None, soundcraft_model::FileFormat::Wav);
         let cid = s.new_clip_id();
         crate::edit::place_clip(&mut s, t, Clip::audio(cid, "Clip", src, 0, 0, clip_len));
         let mut e = crate::Engine::new(s);
@@ -494,6 +557,27 @@ mod tests {
             e.execute("clip.elastic_properties", &json!({"clips": [cid.0], "ratio": ratio})).unwrap();
             assert_eq!(e.session().find_clip(cid).unwrap().1.length, len, "ratio {ratio}");
         }
+    }
+
+    #[test]
+    fn warping_and_unwarping_keep_fades_within_the_clip() {
+        let (mut e, _, cid) = elastic_clip(20_000, 10_000, 20_000);
+        if let Some(c) = e.session_mut().find_clip_mut(cid) {
+            c.fade_in.len = 20_000;
+            c.fade_out.len = 20_000;
+        }
+        e.execute("clip.elastic_properties", &json!({"clips": [cid.0], "ratio": 0.5})).unwrap();
+        let c = e.session().find_clip(cid).unwrap().1.clone();
+        assert!(c.fade_in.len <= c.length && c.fade_out.len <= c.length, "{} {} {}", c.length, c.fade_in.len, c.fade_out.len);
+
+        let (mut e, _, cid) = elastic_clip(20_000, 10_000, 20_000);
+        e.execute("clip.elastic_properties", &json!({"clips": [cid.0], "ratio": 2.0})).unwrap();
+        if let Some(c) = e.session_mut().find_clip_mut(cid) {
+            c.fade_in.len = 40_000;
+        }
+        e.execute("clip.remove_warp", &json!({"clips": [cid.0]})).unwrap();
+        let c = e.session().find_clip(cid).unwrap().1.clone();
+        assert!(c.fade_in.len <= c.length, "{} {}", c.length, c.fade_in.len);
     }
 
     #[test]
@@ -530,8 +614,8 @@ mod tests {
         use soundcraft_model::{ChannelFormat, Clip, Session, TrackKind};
         let mut s = Session::default();
         let t = s.add_track(TrackKind::Audio, ChannelFormat::Mono, Some("Dialog"));
-        let buf = soundcraft_audio_io::AudioBuffer { sample_rate: 48_000, channels: vec![vec![0.1; 10_000]] };
-        let src = crate::io::add_source(&mut s, "Line", buf, None, soundcraft_audio_io::FileFormat::Wav);
+        let buf = craft_audio::AudioBuffer { sample_rate: 48_000, channels: vec![vec![0.1; 10_000]] };
+        let src = crate::io::add_source(&mut s, "Line", buf, None, soundcraft_model::FileFormat::Wav);
         let ids = [0, 1, 2].map(|k| {
             let cid = s.new_clip_id();
             crate::edit::place_clip(&mut s, t, Clip::audio(cid, "Line", src, 0, k * 12_000, 10_000));

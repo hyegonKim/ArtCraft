@@ -57,6 +57,7 @@
 	All Scales	Todas las escalas
 	All Used Layers	Todas las capas usadas
 	An array that would create more objects than this is refused.	Se rechaza una matriz que crearía más objetos que este límite.
+	Analyze Shapes	Analizar formas
 	Animation Effects	Efectos de animación
 	Annotation scale	Escala de anotación
 	Annotation Visibility	Visibilidad de anotaciones
@@ -68,6 +69,7 @@
 	Arc Length	Longitud de arco
 	Arrange Panel	Organizar panel
 	Array	Matriz
+	Arrow size	Tamaño de flecha
 	Attach	Adjuntar
 	Attach DWG...	Adjuntar DWG...
 	Attribute	Atributo
@@ -81,6 +83,7 @@
 	Automatic save file location	Ubicación de los archivos de guardado automático
 	Axis, End	Eje, extremo
 	B	N
+	Backup copy	Copia de seguridad
 	Base	Base
 	Baseline	Línea base
 	Batch Publish	Publicar en lote
@@ -89,6 +92,7 @@
 	Bind...	Unir...
 	Blend	Fusión de curvas
 	Block Attribute Manager...	Administrador de atributos de bloque...
+	Block Description...	Descripción de bloque...
 	Block Editor	Editor de bloques
 	Block Reference	Referencia de bloque
 	Block...	Bloque...
@@ -106,6 +110,7 @@
 	ByLayer	PorCapa
 	CADCraft	CADCraft
 	CADCraft Help	Ayuda de CADCraft
+	CADCraft is up to date.	CADCraft está actualizado.
 	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	CADCraft guarda estas preferencias, los modos de referencia a objetos y los ajustes de dibujo para tu cuenta de usuario y los restaura al iniciarse.
 	Calibrate	Calibrar
 	Calibrate 3D Mouse	Calibrar ratón 3D
@@ -122,6 +127,7 @@
 	Change to Current Layer	Cambiar a la capa actual
 	Changed: {n}	Modificados: {n}
 	Changes apply at once and are kept for next time.	Los cambios se aplican al instante y se conservan para la próxima vez.
+	Check for Updates…	Buscar actualizaciones…
 	Circumference	Circunferencia
 	Clear	Limpiar
 	Clear Command History	Borrar el historial de comandos
@@ -163,9 +169,11 @@
 	Copy Nested Objects	Copiar objetos anidados
 	Copy Selection	Copiar selección
 	Copy with Base Point	Copiar con punto base
+	Could not check for updates.	No se pudo buscar actualizaciones.
 	Count	Contar
 	Count List	Lista de recuento
 	Count Table	Tabla de recuento
+	Create backup copy with each save	Crear una copia de seguridad en cada guardado
 	Create Block	Crear bloque
 	Creates a user parameter	Crea un parámetro de usuario
 	Crosshair size	Tamaño del cursor en cruz
@@ -175,6 +183,7 @@
 	Current selection	Selección actual
 	Current: {color}	Actual: {color}
 	Custom	Custom
+	Cut with Base Point	Cortar con punto base
 	Cylinder	Cilindro
 	Data Extraction...	Extracción de datos...
 	Data Link...	Vínculo de datos...
@@ -199,6 +208,7 @@
 	Delta X	Incremento X
 	Delta Y	Incremento Y
 	Detach	Desenlazar
+	Dim scale overall	Escala global de cota
 	Dim style	Estilo de cota
 	Dimension	Acotación
 	Dimension Break	Partir cota
@@ -259,7 +269,7 @@
 	Enter a vertex editing option	Introduce una opción de edición de vértices
 	Enter an option	Introduce una opción
 	Enter angle of xline	Introduce el ángulo de la línea auxiliar
-	Enter angle of xline (0) or	Introduce el ángulo de la línea auxiliar (0) o
+	Enter angle of xline (0)	Introduce el ángulo de la línea auxiliar (0)
 	Enter area of rectangle in current units	Introduce el área del rectángulo en las unidades actuales
 	Enter attribute prompt	Introduce la solicitud del atributo
 	Enter attribute tag name	Introduce la etiqueta del atributo
@@ -270,7 +280,7 @@
 	Enter default attribute value	Introduce el valor predeterminado del atributo
 	Enter degree of spline	Introduce el grado de la spline
 	Enter delta angle	Introduce el incremento angular
-	Enter delta length or	Introduce el incremento de longitud o
+	Enter delta length	Introduce el incremento de longitud
 	Enter dimension text	Introduce el texto de cota
 	Enter dimension text (<> = measurement)	Introduce el texto de cota (<> = medida)
 	Enter dimension value or [name=expression]	Introduce el valor de cota o [nombre=expresión]
@@ -303,6 +313,7 @@
 	Evaluate	Evaluar
 	Exclude from new selection set	Excluir del nuevo conjunto de selección
 	Explode	Descomponer
+	Export Comparison	Exportar comparación
 	Export Table	Exportar tabla
 	Export to PDF...	Exportar a PDF...
 	Export...	Exportar...
@@ -316,6 +327,8 @@
 	Fillet	Empalme
 	Filter	Filtrar
 	Filters	Filtros
+	Find All	Find All
+	Find what:	Find what:
 	Find...	Buscar...
 	Fit Points	Puntos de ajuste
 	Fix	Fijar
@@ -458,6 +471,7 @@
 	Make it a block of this drawing; its layers become NAME$0$LAYER	Convertirla en un bloque de este dibujo; sus capas pasan a ser NAME$0$LAYER
 	Make Object's Layer Current	Usar como actual la capa del objeto
 	Make...	Crear...
+	Match case	Match case
 	Match Layer	Igualar capa
 	Match Properties	Igualar propiedades
 	Measure Distance	Medir distancia
@@ -489,6 +503,7 @@
 	My properties: not available yet	Mis propiedades: aún no disponible
 	N	N
 	Named	Por nombre
+	Named Viewports...	Ventanas gráficas con nombre...
 	Named Views...	Vistas con nombre...
 	Nearest	Cercano
 	New (metric)	Nuevo (métrico)
@@ -517,6 +532,7 @@
 	Not available yet	Aún no disponible
 	Not Found	No encontrada
 	Not loaded	No cargada
+	Nothing found	Nothing found
 	Numbered list	Lista numerada
 	Object Snap	Referencia a objetos
 	Object Snap (F3)	Referencia a objetos (F3)
@@ -534,6 +550,7 @@
 	One of the Crafting Apps by the ArtCraft team and community.	Una de las Crafting Apps del equipo y la comunidad de ArtCraft.
 	Only in this drawing: {n}	Solo en este dibujo: {n}
 	Only in {name}: {n}	Solo en {name}: {n}
+	Oops	Restaurar objetos borrados
 	Open (⌘O)	Abrir (⌘O)
 	Open a drawing first.	Abre primero un dibujo.
 	Open and Save	Abrir y guardar
@@ -605,6 +622,7 @@
 	Position X	Posición X
 	Position Y	Posición Y
 	Position Z	Posición Z
+	Precision	Precisión
 	Previous Layer	Capa anterior
 	Primitives	Primitivas
 	Print...	Imprimir...
@@ -662,12 +680,18 @@
 	Rename Text Style	Renombrar estilo de texto
 	Rename...	Renombrar...
 	Repeat {command}	Repetir {command}
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Reemplazar bloque...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	Se requiere un punto (x,y, @dx,dy o @d<a).
 	Reset keeps the interface language.	Restablecer conserva el idioma de la interfaz.
 	Reset Palettes	Restablecer paletas
 	Reset Panel Layout	Restablecer disposición de paneles
 	Reset to Defaults	Restablecer valores predeterminados
 	Restore Layer State	Restaurar estado de capas
+	Results	Results
 	Reverse zoom direction	Invertir dirección del zoom
 	Revision Cloud	Nube de revisión
 	Revolve	Revolución
@@ -686,6 +710,7 @@
 	Search for layer	Buscar capa
 	Search for parameter	Buscar parámetro
 	Search for pattern	Buscar patrón
+	Searches the current space.	Searches the current space.
 	Second and next points:	Segundo punto y siguientes:
 	Select 2D polyline	Selecciona una polilínea 2D
 	Select a 2D polyline.	Selecciona una polilínea 2D.
@@ -710,8 +735,8 @@
 	Select an arc or circle	Selecciona un arco o círculo
 	Select an arc.	Selecciona un arco.
 	Select an object	Selecciona un objeto
-	Select an object to change or	Selecciona un objeto que modificar o
-	Select an object to measure or	Selecciona un objeto que medir o
+	Select an object to change	Selecciona un objeto que modificar
+	Select an object to measure	Selecciona un objeto que medir
 	Select an object.	Selecciona un objeto.
 	Select an open curve.	Selecciona una curva abierta.
 	Select an open line, arc, polyline, ellipse arc or spline.	Selecciona una línea, arco, polilínea, arco elíptico o spline abierta.
@@ -725,9 +750,8 @@
 	Select first line	Selecciona la primera línea
 	Select first line or arc	Selecciona la primera línea o arco
 	Select first object	Selecciona el primer objeto
-	Select first object or	Selecciona el primer objeto o
 	Select first point	Selecciona el primer punto
-	Select nested objects to copy or	Selecciona objetos anidados para copiar o
+	Select nested objects to copy	Selecciona objetos anidados para copiar
 	Select object	Selecciona un objeto
 	Select object to dimension	Selecciona un objeto para acotar
 	Select object to divide	Selecciona un objeto para dividir
@@ -744,7 +768,7 @@
 	Select one polyline (Multiple is available through the JSON form).	Selecciona una polilínea (la opción Multiple está disponible en la forma JSON).
 	Select path curve	Selecciona la curva del camino
 	Select point or object	Selecciona un punto u objeto
-	Select polyline or	Selecciona una polilínea o
+	Select polyline	Selecciona una polilínea
 	Select second line	Selecciona la segunda línea
 	Select second line or shift-select to apply corner	Selecciona la segunda línea o usa Mayús para aplicar una esquina
 	Select second object	Selecciona el segundo objeto
@@ -809,9 +833,8 @@
 	Specify axis endpoint of ellipse	Indica el extremo del eje de la elipse
 	Specify base diameter	Indica el diámetro de la base
 	Specify base point	Indica el punto base
-	Specify base point or	Indica el punto base o
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Indica el punto base o el desplazamiento (arrastra con el botón central para encuadrar)
-	Specify base radius or	Indica el radio de la base o
+	Specify base radius	Indica el radio de la base
 	Specify center of donut	Indica el centro de la arandela
 	Specify center of ellipse	Indica el centro de la elipse
 	Specify center of polygon	Indica el centro del polígono
@@ -853,7 +876,7 @@
 	Specify first point on circle: _tan to	Indica el primer punto del círculo: _tan a
 	Specify first source point	Indica el primer punto de origen
 	Specify height	Indica la altura
-	Specify helix height or	Indica la altura de la hélice o
+	Specify helix height	Indica la altura de la hélice
 	Specify included angle	Indica el ángulo incluido
 	Specify insertion base point	Indica el punto base de inserción
 	Specify insertion point	Indica el punto de inserción
@@ -872,7 +895,6 @@
 	Specify new width for all segments	Indica la nueva anchura de todos los segmentos
 	Specify next point	Indica el siguiente punto
 	Specify offset distance	Indica la distancia de desfase
-	Specify offset distance or	Indica la distancia de desfase o
 	Specify opposite corner	Indica la esquina opuesta
 	Specify other corner point	Indica el punto de la otra esquina
 	Specify other endpoint of axis	Indica el otro extremo del eje
@@ -885,7 +907,6 @@
 	Specify radius of circle	Indica el radio del círculo
 	Specify rotation angle	Indica el ángulo de giro
 	Specify rotation angle of text	Indica el ángulo de giro del texto
-	Specify rotation angle or	Indica el ángulo de giro o
 	Specify scale factor	Indica el factor de escala
 	Specify second angle endpoint	Indica el segundo extremo del ángulo
 	Specify second break point	Indica el segundo punto de ruptura
@@ -918,9 +939,9 @@
 	Specify third source point or <continue>	Indica el tercer punto de origen o <continuar>
 	Specify through point	Indica el punto a atravesar
 	Specify top diameter	Indica el diámetro superior
-	Specify top radius or	Indica el radio superior o
+	Specify top radius	Indica el radio superior
 	Specify total angle	Indica el ángulo total
-	Specify total length or	Indica la longitud total o
+	Specify total length	Indica la longitud total
 	Specify width for rectangles	Indica la anchura de los rectángulos
 	Sphere	Esfera
 	Spline	Spline
@@ -964,6 +985,7 @@
 	Text override	Sustitución de texto
 	Text style	Estilo de texto
 	Text Style...	Estilo de texto...
+	Text to find	Text to find
 	Thaw All Layers	Reutilizar todas las capas
 	Thaw Layer	Reutilizar capa
 	The aperture is how near the cursor must come to a point for an object snap to find it.	La apertura indica cuánto debe acercarse el cursor a un punto para que la referencia a objetos lo encuentre.
@@ -1031,7 +1053,8 @@
 	VP Color	Color en ventana gráfica
 	VP Freeze	Inutilizar en ventana gráfica
 	W	O
-	WCS ⌄	SCU ⌄
+	WCS	SCU
+	Whole words	Whole words
 	Width factor	Factor de anchura
 	Wipeout	Cobertura
 	Working Set	Conjunto de trabajo
@@ -1039,6 +1062,7 @@
 	Write Block	Escribir bloque
 	Xline	Línea auxiliar
 	Xref and Block In-place Editing	Edición in situ de xrefs y bloques
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom All	Zoom a todo
 	Zoom Dynamic	Zoom dinámico
 	Zoom Extents	Zoom a extensión

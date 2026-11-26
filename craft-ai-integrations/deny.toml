@@ -1,0 +1,56 @@
+# cargo-deny: advisories, licences, sources. Run by CI (.github/workflows/ci.yml).
+
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+ignore = [
+    { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained and arrives through the gemm, pulp and metal crates that candle-core uses. It is a compile-time macro with no known flaw. Remove when candle drops it." },
+    { id = "RUSTSEC-2026-0370", reason = "Flagged as unmaintained, not as vulnerable. It arrives only through keyring's Linux secret-service backend (zbus), which this workspace does not control, and no safe upgrade exists yet. Remove when keyring moves to a maintained zbus." },
+    { id = "RUSTSEC-2026-0371", reason = "Flagged as unmaintained, not as vulnerable. It arrives only through keyring's Linux secret-service backend (zbus), which this workspace does not control, and no safe upgrade exists yet. Remove when keyring moves to a maintained zbus." },
+    { id = "RUSTSEC-2026-0372", reason = "Flagged as unmaintained, not as vulnerable. It arrives only through keyring's Linux secret-service backend (zbus), which this workspace does not control, and no safe upgrade exists yet. Remove when keyring moves to a maintained zbus." },
+]
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unlicense",
+    "0BSD",
+    "BSL-1.0",
+    "CC0-1.0",
+    "CDLA-Permissive-2.0",
+    "MPL-2.0",
+    "bzip2-1.0.6",
+    # Fonts bundled by egui's epaint.
+    "OFL-1.1",
+    "Ubuntu-font-1.0",
+]
+# jpeg-encoder is a dev-dependency of craft-ai-engine-candle that makes the JPEGs its tests read. It
+# carries the Independent JPEG Group licence (permissive, attribution) for its quantisation tables.
+exceptions = [
+    { allow = ["IJG"], crate = "jpeg-encoder" },
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+# The workspace pins the reviewed egui-family and winit forks in Cargo.toml.
+allow-git = [
+    "https://github.com/storytold/egui.git",
+    "https://github.com/storytold/winit.git",
+]

@@ -54,13 +54,13 @@ def main(argv=None, root=ROOT):
     for file in ["common", *args.apps]:
         path = tree.path(args.locale, file)
         if path.exists():
-            print(f"{path.relative_to(root)}: exists, left as it is")
+            print(f"{path.relative_to(root).as_posix()}: exists, left as it is")
             continue
         text = starter(tree, args.locale, args.name, file)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
         todo = sum(1 for line in text.split("\n") if line.startswith("#") and line.endswith("\t"))
-        print(f"{path.relative_to(root)}: {todo} strings to translate")
+        print(f"{path.relative_to(root).as_posix()}: {todo} strings to translate")
 
 
 if __name__ == "__main__":

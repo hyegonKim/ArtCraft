@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MaterialCraft MSI (WiX Toolset v5: `dotnet tool install -g wix`). Built by package.ps1:
+
+    wix build materialcraft.wxs -arch x64 -d Version=1.2.3 -d BinDir=... -d IconPath=... -o out.msi
+
+  Per-machine install into Program Files, a Start Menu shortcut, `.mcraft` owned by MaterialCraft,
+  and MaterialCraft offered under "Open with" for the mesh formats it opens (without taking over
+  the user's default app for them).
+
+  UpgradeCode is MaterialCraft's for good: generated once (2026-10-14), never change it, or new
+  versions install beside old ones instead of replacing them.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="MaterialCraft"
+      Manufacturer="Learning Machines LLC"
+      Version="$(var.Version)"
+      UpgradeCode="89DE105E-B6C8-4261-ADBE-25BCFA3A0C91"
+      Scope="perMachine"
+      Compressed="yes"
+      Language="1033">
+    <SummaryInformation Description="MaterialCraft procedural material designer" Manufacturer="Learning Machines LLC" />
+    <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other
+         (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of MaterialCraft is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- MSI caches this icon using its Id as the filename. Advertised shortcuts to an
+         .exe need an .exe icon identifier (ICE50), even when the source is an ICO. -->
+    <Icon Id="MaterialCraftIcon.exe" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="MaterialCraftIcon.exe" />
+    <Property Id="ARPURLINFOABOUT" Value="https://getartcraft.com/apps/materialcraft" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://getartcraft.com/apps/materialcraft" />
+    <Property Id="ARPHELPLINK" Value="https://discord.gg/artcraft" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="MaterialCraft" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+
+    <Feature Id="Main" Title="MaterialCraft" Level="1">
+      <ComponentGroupRef Id="MaterialCraftFiles" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="MaterialCraftFiles" Directory="INSTALLFOLDER">
+      <Component Id="MaterialCraftApp">
+        <File Id="MaterialCraftExe" Source="$(var.BinDir)\materialcraft.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="MaterialCraft"
+              Description="MaterialCraft procedural material designer" WorkingDirectory="INSTALLFOLDER" Advertise="yes"
+              Icon="MaterialCraftIcon.exe" IconIndex="0" />
+        </File>
+
+        <!-- .mcraft: MaterialCraft's own package format; MaterialCraft is its default app. -->
+        <ProgId Id="MaterialCraft.Package" Description="MaterialCraft Package" Icon="MaterialCraftExe" IconIndex="0">
+          <Extension Id="mcraft" ContentType="application/x-materialcraft">
+            <Verb Id="open" Command="Open" TargetFile="MaterialCraftExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+        <!-- "Open with" app list and the Run dialog (Win+R "materialcraft"). -->
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\materialcraft.exe" Name="FriendlyAppName" Value="MaterialCraft" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\materialcraft.exe\shell\open\command" Value="&quot;[#MaterialCraftExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\materialcraft.exe\SupportedTypes" Name=".mcraft" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\materialcraft.exe" Value="[#MaterialCraftExe]" Type="string" />
+      </Component>
+
+      <Component Id="MaterialCraftCli">
+        <File Id="MaterialCraftCliExe" Source="$(var.BinDir)\materialcraft-cli.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
-use hayro_syntax::content::UntypedIter;
-use hayro_syntax::object::{Array, Dict, Name, Object, ObjectIdentifier, Stream};
-use hayro_syntax::page::Resources;
+use craft_pdf::syntax::content::UntypedIter;
+use craft_pdf::syntax::object::{Array, Dict, Name, Object, ObjectIdentifier, Stream};
+use craft_pdf::syntax::page::Resources;
 
 use super::MAX_DEPTH;
 
@@ -13,8 +13,8 @@ const MAX_OPERATIONS: usize = 100_000;
 const LIMIT_WARNING: &str = "font scan operation limit reached: PDF/X-4 font embedding checks are incomplete";
 const DEPTH_WARNING: &str = "font scan nesting depth limit reached: PDF/X-4 font embedding checks are incomplete";
 
-pub(super) fn unembedded_fonts(pdf: &[u8]) -> Vec<String> {
-    let Ok(file) = hayro_syntax::Pdf::new(pdf.to_vec()) else { return Vec::new() };
+pub(crate) fn unembedded_fonts(pdf: &[u8]) -> Vec<String> {
+    let Ok(file) = craft_pdf::syntax::Pdf::new(pdf.to_vec()) else { return Vec::new() };
     let mut found: BTreeMap<String, Vec<usize>> = BTreeMap::new();
     let mut scan = FontScan::default();
     for (i, page) in file.pages().iter().enumerate() {

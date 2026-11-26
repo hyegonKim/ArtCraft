@@ -2764,6 +2764,13 @@ preview	Title	Názov
 	Warnings ({n})	Upozornenia ({n})
 	Washout	Vyblednutie
 	Watermark	Vodotlač
+	No watermark	Bez vodotlače
+	Picture watermark	Obrázková vodotlač
+	Text watermark	Textová vodotlač
+	Select Picture…	Vybrať obrázok…
+	Semitransparent	Polopriehľadné
+	Transparency:	Priehľadnosť:
+	Select a picture first.	Najprv vyberte obrázok.
 	Wave	Vlna
 	Weather	Počasie
 	Web Layout	Webové rozloženie
@@ -2861,3 +2868,122 @@ preview	Title	Názov
 	✓ None	✓ Žiadne
 	➕ New comment	➕ Nový komentár
 	📂  Browse…	📂  Prehľadávať…
+	Add a language…	Pridať jazyk…
+	Add a language	Pridať jazyk
+	Your languages	Vaše jazyky
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Angličtina, jazyky tohto dokumentu a každý nainštalovaný jazykový balík. Jazykové balíky pridávajú slovníky pravopisu a delenie slov.
+	Set as default	Nastaviť ako predvolený
+	New blank documents are written in this language	Nové prázdne dokumenty sa píšu v tomto jazyku
+	{language} (default)	{language} (predvolený)
+	Built in	Zabudovaný
+	Your own dictionary	Váš vlastný slovník
+	System dictionary	Systémový slovník
+	Not available yet	Zatiaľ nie je k dispozícii
+	Grammar built in	Gramatika je zabudovaná
+	Install spelling ({size})	Nainštalovať pravopis ({size})
+	Its dictionary couldn't be read: {reason}	Jeho slovník sa nepodarilo prečítať: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Sťahovanie je vypnuté. Kliknutím na „Pridať jazyk…“ alebo „Nainštalovať“ sa zapne: WordCraft potom sťahuje jazykové balíky a písma z GitHubu.
+	Search:	Hľadať:
+	Dutch, Nederlands or nl	Holandčina, Nederlands alebo nl
+	No languages to show yet.	Zatiaľ nie sú k dispozícii žiadne jazyky.
+	No language matches your search.	Vášmu hľadaniu nezodpovedá žiadny jazyk.
+	An installed Language pack is used after this folder.	Nainštalovaný jazykový balík sa použije po tomto priečinku.
+	Dictionary files	Súbory slovníkov
+	Gets the list of Language packs, then this language's pack if there is one.	Načíta zoznam jazykových balíkov a potom balík tohto jazyka, ak existuje.
+	Afrikaans	afrikánčina
+	Belarusian	bieloruština
+	Bulgarian	bulharčina
+	Bosnian	bosniančina
+	Catalan	katalánčina
+	Catalan (Valencian)	katalánčina (valencijská)
+	Welsh	waleština
+	Esperanto	esperanto
+	Persian	perzština
+	Irish	írčina
+	Galician	haličština
+	Hungarian	maďarčina
+	Armenian	arménčina
+	Icelandic	islandčina
+	Georgian	gruzínčina
+	Lithuanian	litovčina
+	Latvian	lotyština
+	Macedonian	macedónčina
+	Norwegian (Nynorsk)	nórčina (nynorsk)
+	Romanian	rumunčina
+	Slovak	slovenčina
+	Slovenian	slovinčina
+	Albanian	albánčina
+	Swahili	svahilčina
+	Tamil	tamilčina
+	Thai	thajčina
+	Vietnamese	vietnamčina
+	Set as Default Language	Nastaviť ako predvolený jazyk
+	U.A.E.	Spojené arabské emiráty
+	Angola	Angola
+	Argentina	Argentína
+	Austria	Rakúsko
+	Australia	Austrália
+	Bosnia and Herzegovina	Bosna a Hercegovina
+	Belgium	Belgicko
+	Bolivia	Bolívia
+	Brazil	Brazília
+	Belarus	Bielorusko
+	Canada	Kanada
+	Switzerland	Švajčiarsko
+	Chile	Čile
+	China	Čína
+	Colombia	Kolumbia
+	Costa Rica	Kostarika
+	Cuba	Kuba
+	Cabo Verde	Kapverdy
+	Cyprus	Cyprus
+	Germany	Nemecko
+	Dominican Republic	Dominikánska republika
+	Ecuador	Ekvádor
+	Egypt	Egypt
+	Spain	Španielsko
+	Finland	Fínsko
+	France	Francúzsko
+	United Kingdom	Spojené kráľovstvo
+	Equatorial Guinea	Rovníková Guinea
+	Guatemala	Guatemala
+	Hong Kong SAR	OAO Hongkong
+	Honduras	Honduras
+	Ireland	Írsko
+	India	India
+	Iraq	Irak
+	Italy	Taliansko
+	Jamaica	Jamajka
+	Jordan	Jordánsko
+	Kuwait	Kuvajt
+	Kazakhstan	Kazachstan
+	Lebanon	Libanon
+	Liechtenstein	Lichtenštajnsko
+	Luxembourg	Luxembursko
+	Morocco	Maroko
+	Monaco	Monako
+	Montenegro	Čierna Hora
+	Macao SAR	OAO Macao
+	Mexico	Mexiko
+	Malaysia	Malajzia
+	Mozambique	Mozambik
+	Nicaragua	Nikaragua
+	Netherlands	Holandsko
+	New Zealand	Nový Zéland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipíny
+	Puerto Rico	Portoriko
+	Portugal	Portugalsko
+	Paraguay	Paraguaj
+	Qatar	Katar
+	Russia	Rusko
+	Singapore	Singapur
+	El Salvador	Salvádor
+	Syria	Sýria
+	Taiwan	Taiwan
+	Ukraine	Ukrajina
+	United States	Spojené štáty
+	Uruguay	Uruguaj
+	Venezuela	Venezuela
+	South Africa	Južná Afrika

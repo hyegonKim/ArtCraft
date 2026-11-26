@@ -104,3 +104,111 @@ fn stylesmanager_creates_edits_saves_and_loads_tables() {
     // Undo takes a table edit back.
     s.execute("undo", &json!({})).unwrap();
 }
+
+/// Issue #1928: saving a plot style table to a file goes through the atomic writer: a symlink
+/// planted at the old fixed temporary name is left alone, and the file keeps its permissions.
+#[cfg(unix)]
+#[test]
+fn plot_style_save_is_atomic_and_keeps_permissions() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = std::env::temp_dir().join(format!("cadcraft-pstyle-atomic-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("office.stb.json");
+    std::fs::write(&path, "old").unwrap();
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+    let victim = dir.join("victim");
+    std::fs::write(&victim, "keep").unwrap();
+    std::os::unix::fs::symlink(&victim, dir.join("office.stb.json.cadcraft-tmp")).unwrap();
+
+    let mut s = Session::new();
+    s.execute("stylesmanager", &json!({"action": "new", "name": "office.stb"})).unwrap();
+    let p = path.to_string_lossy().to_string();
+    s.execute("stylesmanager", &json!({"action": "save", "name": "office.stb", "path": p})).unwrap();
+
+    assert_ne!(std::fs::read_to_string(&path).unwrap(), "old");
+    assert_eq!(std::fs::read_to_string(&victim).unwrap(), "keep");
+    assert_eq!(std::fs::metadata(&path).unwrap().permissions().mode() & 0o777, 0o600);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn stylesmanager_and_dash_plotstyle_binary_ctb_and_stb_round_trip() {
+    let dir = std::env::temp_dir().join(format!("cadcraft-pia-pstyle-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let ctb_path = dir.join("shop.ctb");
+    let stb_path = dir.join("shop.stb");
+    let ctb_str = ctb_path.to_string_lossy().to_string();
+    let stb_str = stb_path.to_string_lossy().to_string();
+
+    let mut s = Session::new();
+    s.execute("stylesmanager", &json!({"action": "new", "name": "shop.ctb", "kind": "colorDependent"})).unwrap();
+    s.execute(
+        "stylesmanager",
+        &json!({
+            "action": "set",
+            "name": "shop.ctb",
+            "description": "Shop binary CTB",
+            "style": {
+                "name": "Color_1",
+                "color": "#112233",
+                "screening": 75,
+                "lineweight": 0.25,
+                "linetype": "DASHED",
+                "end": "butt",
+                "join": "miter",
+                "fill": "crosshatch"
+            }
+        }),
+    )
+    .unwrap();
+
+    // Saving to a `.ctb` path writes genuine AutoCAD binary PIA 2.0 + pmzlibcodec!
+    let saved = s.execute("stylesmanager", &json!({"action": "save", "name": "shop.ctb", "path": ctb_str})).unwrap();
+    assert_eq!(saved["format"], "binary");
+    let raw_ctb = std::fs::read(&ctb_path).unwrap();
+    assert!(raw_ctb.starts_with(b"PIAFILEVERSION_2.0,CTBVER1,compress\r\npmzlibcodec"));
+
+    // Load binary `.ctb` into a fresh session via STYLESMANAGER and verify style attributes.
+    let mut s2 = Session::new();
+    let loaded = s2.execute("stylesmanager", &json!({"action": "load", "path": ctb_str})).unwrap();
+    assert_eq!(loaded["name"], "shop.ctb");
+    let got_ctb = s2.execute("stylesmanager", &json!({"action": "get", "name": "shop.ctb"})).unwrap();
+    assert_eq!(got_ctb["description"], "Shop binary CTB");
+    let c1 = &got_ctb["styles"][0];
+    assert_eq!(
+        (c1["color"].as_str(), c1["screening"].as_u64(), c1["lineweight"].as_u64(), c1["linetype"].as_str(), c1["end"].as_str(), c1["join"].as_str(), c1["fill"].as_str()),
+        (Some("#112233"), Some(75), Some(25), Some("DASHED"), Some("butt"), Some("miter"), Some("crosshatch"))
+    );
+
+    // Export & import named `.stb` via `-plotstyle` / `plotstyle`.
+    s.execute("stylesmanager", &json!({"action": "new", "name": "shop.stb", "kind": "named"})).unwrap();
+    s.execute(
+        "stylesmanager",
+        &json!({
+            "action": "set",
+            "name": "shop.stb",
+            "style": {"name": "Fine", "color": "#000000", "grayscale": true, "lineweight": 0.13}
+        }),
+    )
+    .unwrap();
+    s.execute("-plotstyle", &json!({"action": "export", "name": "shop.stb", "path": stb_str})).unwrap();
+    let raw_stb = std::fs::read(&stb_path).unwrap();
+    assert!(raw_stb.starts_with(b"PIAFILEVERSION_2.0,STBVER1,compress\r\npmzlibcodec"));
+
+    s2.execute("-plotstyle", &json!({"action": "import", "path": stb_str, "name": "imported.stb"})).unwrap();
+    let got_stb = s2.execute("stylesmanager", &json!({"action": "get", "name": "imported.stb"})).unwrap();
+    let fine = got_stb["styles"].as_array().unwrap().iter().find(|v| v["name"] == "Fine").unwrap();
+    assert_eq!((fine["color"].as_str(), fine["grayscale"].as_bool(), fine["lineweight"].as_u64()), (Some("#000000"), Some(true), Some(13)));
+
+    // Uncompressed PIA text export & import without disk files.
+    let pia_res = s.execute("stylesmanager", &json!({"action": "save", "name": "shop.stb", "format": "pia"})).unwrap();
+    let pia_txt = pia_res["text"].as_str().unwrap();
+    assert!(pia_txt.starts_with("PIAFILEVERSION_2.0,STBVER1,uncompress"));
+    s2.execute("stylesmanager", &json!({"action": "load", "text": pia_txt, "name": "from_pia.stb"})).unwrap();
+    assert!(s2.execute("stylesmanager", &json!({"action": "get", "name": "from_pia.stb"})).is_ok());
+
+    let _ = std::fs::remove_dir_all(&dir);
+}

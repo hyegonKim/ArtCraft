@@ -1,0 +1,151 @@
+[workspace]
+resolver = "3"
+members = ["crates/core", "crates/texel", "crates/geom", "crates/compose", "crates/bake", "crates/formats", "crates/paint", "crates/engine", "crates/render", "crates/automation", "crates/ui-egui", "apps/texturecraft", "apps/texturecraft-cli", "apps/texturecraft-web", "xtask"]
+exclude = ["vendor"]
+default-members = ["crates/core", "crates/texel", "crates/geom", "crates/compose", "crates/bake", "crates/formats", "crates/paint", "crates/engine", "crates/render", "crates/automation", "crates/ui-egui", "apps/texturecraft", "apps/texturecraft-cli", "xtask"]
+
+[workspace.package]
+version = "0.6.1"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+rust-version = "1.95"
+repository = "https://github.com/storytold/texturecraft"
+
+[workspace.dependencies]
+# internal
+texturecraft-core = { path = "crates/core" }
+texturecraft-texel = { path = "crates/texel" }
+texturecraft-geom = { path = "crates/geom" }
+texturecraft-bake = { path = "crates/bake" }
+texturecraft-paint = { path = "crates/paint" }
+texturecraft-formats = { path = "crates/formats" }
+texturecraft-compose = { path = "crates/compose" }
+texturecraft-engine = { path = "crates/engine" }
+texturecraft-render = { path = "crates/render" }
+texturecraft-automation = { path = "crates/automation" }
+texturecraft-ui-egui = { path = "crates/ui-egui" }
+
+# external
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+glam = { version = "0.30", features = ["serde", "bytemuck"] }
+bytemuck = { version = "1", features = ["derive"] }
+rayon = "1"
+# Free RAM, to size how much a project save holds in flight.
+sysinfo = { version = "0.40", default-features = false, features = ["system"] }
+# Text alphas: shaping and glyph outlines, the versions egui's text layout already builds.
+harfrust = "0.12"
+skrifa = { version = "0.44", default-features = false, features = ["std"] }
+# The UI's built-in fonts (Ubuntu Light, Hack): text alphas fall back to them without system fonts.
+epaint_default_fonts = "0.37"
+log = "0.4"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "tga", "tiff", "exr", "hdr", "bmp", "webp"] }
+half = "2"
+exr = { version = "1.73", default-features = false }
+eframe = { version = "0.37", default-features = false }
+egui = "0.37"
+wgpu = "30"
+rfd = "0.17"
+zip = { version = "9", default-features = false, features = ["deflate"] }
+gltf = { version = "1.4", default-features = false, features = ["import", "utils", "names", "KHR_materials_emissive_strength"] }
+tobj = { version = "4", default-features = false }
+flate2 = "1"
+lz4_flex = { version = "0.11", default-features = false, features = ["safe-decode", "safe-encode"] }
+quick-xml = "0.41"
+mikktspace = { version = "0.3", default-features = false, features = ["glam"] }
+proptest = "1"
+rmcp = { version = "3.5", default-features = false, features = ["server", "macros", "transport-io"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "io-std", "sync", "net", "io-util", "time"] }
+schemars = "1"
+base64 = "0.22"
+cap-std = "4"
+getrandom = "0.3"
+# Opening the control token file without following symlinks, and the effective uid (Unix).
+rustix = { version = "1", default-features = false, features = ["std", "fs", "process"] }
+# Shared Craft egui components (widget palette, icon buttons, panel docking): storytold/craft-libs,
+# MIT OR Apache-2.0, pinned to one rev.
+# Shared catalog lookup, pinned with the other Craft libraries.
+craft-i18n = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b" }
+craft-ui = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b", features = ["serde"] }
+# Who draws the window frame, and the app-drawn strip as the title bar (crates/ui-egui/src/titlebar.rs).
+craft-window = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b", features = ["egui"] }
+# Release checks, the update prompt and the update helper (crates/ui-egui/src/updates_ui.rs).
+craft-update = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b", features = ["egui"] }
+# File dialogs that never block the frame (crates/ui-egui/src/file_dialogs.rs).
+craft-dialogs = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b" }
+# Shortcut chords, lookup and dispatch (crates/ui-egui/src/keymap.rs).
+craft-keymap = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b", features = ["egui"] }
+# Quitting the macOS way instead of closing the window (crates/ui-egui/src/windows.rs).
+craft-quit = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b", features = ["egui"] }
+# The macOS app menu whose Quit asks about unsaved changes (apps/texturecraft/src/main.rs).
+craft-menu = { git = "https://github.com/storytold/craft-libs", rev = "6e03f65bf45181db77ba6229716e6624db9eb25b" }
+
+# egui 0.37 and winit: the suite's forks (storytold/egui, storytold/winit), as craft-libs pins them.
+[patch.crates-io]
+ecolor = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+emath = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+epaint = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+epaint_default_fonts = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui-winit = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui-wgpu = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui_glow = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+eframe = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui_kittest = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+winit = { git = "https://github.com/storytold/winit.git", rev = "a517b3846ee8457d84ee4975110bfda6797c44dc" }
+# egui-phosphor has no release for egui 0.37 (vendor/egui-phosphor/VENDORED.md).
+egui-phosphor = { path = "vendor/egui-phosphor" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+# Index loops read better than zipped iterators in per-texel code.
+needless_range_loop = "allow"
+field_reassign_with_default = "allow"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Fast optimized verification: each test executable otherwise repeats cross-crate LTO.
+# `false` keeps thin LTO within each crate; release packaging keeps the profile above.
+[profile.verify]
+inherits = "release"
+lto = false
+codegen-units = 16
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+strip = "debuginfo"
+
+[profile.wasm-release.package."*"]
+opt-level = "s"
+
+[profile.wasm-release.package.texturecraft-texel]
+opt-level = 3
+[profile.wasm-release.package.texturecraft-compose]
+opt-level = 3
+[profile.wasm-release.package.texturecraft-paint]
+opt-level = 3
+[profile.wasm-release.package.texturecraft-geom]
+opt-level = 3
+[profile.wasm-release.package.texturecraft-bake]
+opt-level = 3
+# Path tracing and the vector math under it run per pixel.
+[profile.wasm-release.package.texturecraft-render]
+opt-level = 3
+[profile.wasm-release.package.glam]
+opt-level = 3

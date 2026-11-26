@@ -15,3 +15,9 @@ the code there costs no new dependency. The data stays optional: a build without
 - **Code per app** (status quo): rejected, it is what drifted.
 - **Code in this repository as a git dependency**: rejected, it adds a second git dependency and
   makes the data repository mandatory for every build.
+
+## Amendment: Language data (2026-11-01)
+
+[ADR 0005](0005-language-data-lives-here.md) adds Language data (spelling dictionaries,
+hyphenation patterns, the suite word list) to the data held here. The split is unchanged: data
+here, code in craft-libs, and a build without `CRAFT_I18N_DIR` still builds offline.

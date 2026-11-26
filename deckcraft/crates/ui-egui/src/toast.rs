@@ -46,6 +46,10 @@ pub fn show(app: &mut SlideApp, ctx: &egui::Context) {
         app.toast = None;
         return;
     }
+    if app.ui_fonts.pending_for(ctx, &toast.text) {
+        ctx.request_repaint();
+        return;
+    }
     let t = Tokens::get(ctx);
     let text = toast.text.clone();
     let mut close = false;

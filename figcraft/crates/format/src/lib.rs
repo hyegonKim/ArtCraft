@@ -18,18 +18,24 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 pub mod fig;
+pub mod jpeg;
 pub mod library;
+pub mod penpot;
 pub mod rest;
 pub mod sketch;
 pub mod thumbnail;
+pub mod xd;
 
+pub use density::{pixel_density, placed_size};
 pub use library::{is_valid_library_id, read_library, read_library_within};
+
+mod density;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{Read, Seek, Write};
 use std::sync::Arc;
 
-use figcraft_doc::{Document, ImageData};
+use figcraft_doc::{Document, ImageData, VideoData};
 use serde::de::{Deserializer, IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{Value, json};
@@ -51,6 +57,9 @@ const MAX_DOCUMENT: u64 = 4 * 1024 * 1024 * 1024;
 const MAX_DOCUMENT: u64 = 1024 * 1024 * 1024;
 /// Most versions a file keeps: saving more is refused, extra entries in a file are skipped.
 pub const MAX_VERSIONS: usize = 100;
+/// The export warning for colour calculations that resolve to nothing (an operand missing, or more
+/// than 32 variables to read), shared by the Penpot and `.fig` exports.
+pub(crate) const CALCULATIONS_LEFT_OUT: &str = "colour calculations that don't resolve were left out";
 /// Longest version name and description kept (chars).
 pub const MAX_VERSION_NAME: usize = 200;
 pub const MAX_VERSION_DESCRIPTION: usize = 2000;
@@ -59,6 +68,16 @@ const MAX_VERSION_INDEX: u64 = 16 * 1024 * 1024;
 const MAX_VERSION_BYTES: u64 = 1024 * 1024 * 1024;
 /// Most images, and image bytes together, read from one file (members past it are left out).
 const IMAGE_BUDGET: ImageBudget = ImageBudget { images: 20_000, bytes: 4 * 1024 * 1024 * 1024 };
+/// Most bytes one open of a `.figcraft` file unpacks, every area together: its document, images,
+/// published library, version history and branches ([`Unpacked`], #1079). Each area keeps its own
+/// cap; their sum was about 10 GB. Read in that order, the document (a 900 000-layer one unpacks
+/// to 1.5 GB) and the images up to their own 4 GiB cap fit, so a file whose images pass that cap
+/// (#1313: an 84 MiB document with 7.3 GiB of images) keeps as many as before; the history and
+/// branches share what is left. 32-bit targets (wasm32) have 4 GB of address space in all.
+#[cfg(not(target_pointer_width = "32"))]
+const MAX_UNPACKED: u64 = 6 * 1024 * 1024 * 1024;
+#[cfg(target_pointer_width = "32")]
+const MAX_UNPACKED: u64 = 2 * 1024 * 1024 * 1024;
 const BRANCH_INDEX: &str = "branches/index.json";
 /// Most branches a file keeps: making more is refused, extra entries in a file are skipped.
 pub const MAX_BRANCHES: usize = 100;
@@ -103,8 +122,8 @@ enum Snapshot {
     /// Saved in this session (or already read).
     Doc(Arc<Document>),
     /// As read from a file: its `document.json`-style JSON, parsed on first use, and the images
-    /// it uses.
-    Stored { json: Arc<Vec<u8>>, images: BTreeMap<String, ImageData> },
+    /// and videos it uses.
+    Stored { json: Arc<Vec<u8>>, images: BTreeMap<String, ImageData>, videos: BTreeMap<String, VideoData> },
 }
 
 impl Version {
@@ -125,10 +144,11 @@ impl Version {
     pub fn document(&self) -> Result<Arc<Document>, FormatError> {
         match &self.snapshot {
             Snapshot::Doc(d) => Ok(d.clone()),
-            Snapshot::Stored { json, images } => {
+            Snapshot::Stored { json, images, videos } => {
                 let text = std::str::from_utf8(json).map_err(|e| FormatError::Corrupt(e.to_string()))?;
                 let (mut doc, _) = from_json(text)?;
                 doc.images = images.clone();
+                doc.videos = videos.clone();
                 Ok(Arc::new(doc))
             }
         }
@@ -139,6 +159,14 @@ impl Version {
         match &self.snapshot {
             Snapshot::Doc(d) => &d.images,
             Snapshot::Stored { images, .. } => images,
+        }
+    }
+
+    /// The videos the snapshot uses, by hash.
+    pub fn videos(&self) -> &BTreeMap<String, VideoData> {
+        match &self.snapshot {
+            Snapshot::Doc(d) => &d.videos,
+            Snapshot::Stored { videos, .. } => videos,
         }
     }
 }
@@ -225,6 +253,71 @@ pub(crate) fn image_data(data: Vec<u8>) -> ImageData {
     ImageData { bytes: Arc::new(data), width: w, height: h }
 }
 
+/// Generate a deterministic poster PNG for a video asset when no thumbnail frame was supplied.
+pub fn generate_video_poster_png(width: u32, height: u32) -> Result<Vec<u8>, FormatError> {
+    let aspect = (f64::from(width.max(1)) / f64::from(height.max(1))).clamp(0.25, 4.0);
+    let pw = 240u32;
+    let ph = ((f64::from(pw) / aspect).round() as u32).clamp(60, 320);
+    let cx = pw as f32 * 0.5;
+    let cy = ph as f32 * 0.5;
+    let rad = (pw.min(ph) as f32 * 0.22).max(12.0);
+    let img = image::RgbaImage::from_fn(pw, ph, |x, y| {
+        let mut r = 30u8.saturating_add(((x * 24) / pw.max(1)) as u8);
+        let mut g = 35u8.saturating_add(((y * 28) / ph.max(1)) as u8);
+        let mut b = 52u8.saturating_add((((x + y) * 20) / (pw + ph).max(1)) as u8);
+        let dx = x as f32 - cx;
+        let dy = y as f32 - cy;
+        if dx * dx + dy * dy <= rad * rad {
+            r = 18;
+            g = 20;
+            b = 28;
+        }
+        let tri_l = cx - rad * 0.28;
+        let tri_r = cx + rad * 0.42;
+        if (x as f32) >= tri_l && (x as f32) <= tri_r {
+            let span = (tri_r - x as f32) * 0.62;
+            if dy.abs() <= span {
+                r = 246;
+                g = 248;
+                b = 252;
+            }
+        }
+        image::Rgba([r, g, b, 255])
+    });
+    let mut out = Vec::new();
+    img.write_to(&mut std::io::Cursor::new(&mut out), image::ImageFormat::Png).map_err(io_err)?;
+    Ok(out)
+}
+
+/// Register encoded video bytes with `doc`, storing an optional poster image (or generating a
+/// deterministic poster PNG) in `doc.images`. Returns `(video_hash, poster_hash, width, height, duration_secs)`.
+pub fn add_video(
+    doc: &mut Document,
+    bytes: Vec<u8>,
+    poster_bytes: Option<Vec<u8>>,
+) -> Result<(String, String, u32, u32, f64), FormatError> {
+    let (mime, w, h, dur) = VideoData::probe(&bytes)
+        .ok_or_else(|| FormatError::Corrupt("unsupported video format (expected MP4, MOV, WebM or Ogg)".into()))?;
+    let poster_raw = match poster_bytes {
+        Some(pb) => pb,
+        None => generate_video_poster_png(w, h)?,
+    };
+    let (poster_hash, _, _) = add_image(doc, poster_raw)?;
+    let hash = image_hash(&bytes);
+    doc.videos.insert(
+        hash.clone(),
+        VideoData {
+            bytes: Arc::new(bytes),
+            mime: mime.to_string(),
+            width: w,
+            height: h,
+            duration_secs: dur,
+            poster: Some(poster_hash.clone()),
+        },
+    );
+    Ok((hash, poster_hash, w, h, dur))
+}
+
 /// `document.json`: the format header, the image index and the document's own fields, written
 /// straight from the document (no intermediate JSON tree).
 #[derive(Serialize)]
@@ -233,14 +326,20 @@ struct DocumentJson<'a> {
     version: u32,
     #[serde(rename = "imageIndex", serialize_with = "image_index")]
     images: &'a BTreeMap<String, ImageData>,
+    #[serde(rename = "videoIndex", skip_serializing_if = "videos_empty", serialize_with = "video_index")]
+    videos: &'a BTreeMap<String, VideoData>,
     #[serde(flatten)]
     doc: &'a Document,
 }
 
 impl<'a> DocumentJson<'a> {
     fn new(doc: &'a Document) -> Self {
-        Self { format: FORMAT, version: VERSION, images: &doc.images, doc }
+        Self { format: FORMAT, version: VERSION, images: &doc.images, videos: &doc.videos, doc }
     }
+}
+
+fn videos_empty(videos: &&BTreeMap<String, VideoData>) -> bool {
+    videos.is_empty()
 }
 
 /// The `imageIndex`: `[{hash, width, height}]` for every image the document holds.
@@ -254,14 +353,216 @@ fn image_index<S: Serializer>(images: &&BTreeMap<String, ImageData>, s: S) -> Re
     s.collect_seq(images.iter().map(|(hash, i)| Entry { hash, width: i.width, height: i.height }))
 }
 
+/// The `videoIndex`: `[{hash, mime, width, height, durationSecs, poster?}]` for every video in `doc`.
+fn video_index<S: Serializer>(videos: &&BTreeMap<String, VideoData>, s: S) -> Result<S::Ok, S::Error> {
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Entry<'a> {
+        hash: &'a str,
+        mime: &'a str,
+        width: u32,
+        height: u32,
+        duration_secs: f64,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        poster: Option<&'a str>,
+    }
+    s.collect_seq(videos.iter().map(|(hash, v)| Entry {
+        hash,
+        mime: &v.mime,
+        width: v.width,
+        height: v.height,
+        duration_secs: v.duration_secs,
+        poster: v.poster.as_deref(),
+    }))
+}
+
+/// A serializer adapter that writes `0` in place of every NaN or infinite float. JSON has no such
+/// numbers (`serde_json` writes `null`, which the reader rejects), so one bad value must not stop
+/// Save, autosave or recovery copies of the whole document. Everything else passes through.
+struct Finite<S>(S);
+
+/// Serializes a value through a [`Finite`] adapter around the serializer it is written with.
+struct FiniteValue<'a, T: ?Sized>(&'a T);
+
+impl<T: ?Sized + Serialize> Serialize for FiniteValue<'_, T> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        self.0.serialize(Finite(s))
+    }
+}
+
+macro_rules! finite_pass {
+    ($($name:ident($ty:ty)),* $(,)?) => {
+        $(fn $name(self, v: $ty) -> Result<S::Ok, S::Error> { self.0.$name(v) })*
+    };
+}
+
+impl<S: Serializer> Serializer for Finite<S> {
+    type Ok = S::Ok;
+    type Error = S::Error;
+    type SerializeSeq = Finite<S::SerializeSeq>;
+    type SerializeTuple = Finite<S::SerializeTuple>;
+    type SerializeTupleStruct = Finite<S::SerializeTupleStruct>;
+    type SerializeTupleVariant = Finite<S::SerializeTupleVariant>;
+    type SerializeMap = Finite<S::SerializeMap>;
+    type SerializeStruct = Finite<S::SerializeStruct>;
+    type SerializeStructVariant = Finite<S::SerializeStructVariant>;
+
+    finite_pass!(
+        serialize_bool(bool),
+        serialize_i8(i8),
+        serialize_i16(i16),
+        serialize_i32(i32),
+        serialize_i64(i64),
+        serialize_u8(u8),
+        serialize_u16(u16),
+        serialize_u32(u32),
+        serialize_u64(u64),
+        serialize_i128(i128),
+        serialize_u128(u128),
+        serialize_char(char),
+        serialize_str(&str),
+        serialize_bytes(&[u8])
+    );
+
+    fn serialize_f32(self, v: f32) -> Result<S::Ok, S::Error> {
+        self.0.serialize_f32(if v.is_finite() { v } else { 0.0 })
+    }
+    fn serialize_f64(self, v: f64) -> Result<S::Ok, S::Error> {
+        self.0.serialize_f64(if v.is_finite() { v } else { 0.0 })
+    }
+    fn serialize_none(self) -> Result<S::Ok, S::Error> {
+        self.0.serialize_none()
+    }
+    fn serialize_some<T: ?Sized + Serialize>(self, v: &T) -> Result<S::Ok, S::Error> {
+        self.0.serialize_some(&FiniteValue(v))
+    }
+    fn serialize_unit(self) -> Result<S::Ok, S::Error> {
+        self.0.serialize_unit()
+    }
+    fn serialize_unit_struct(self, name: &'static str) -> Result<S::Ok, S::Error> {
+        self.0.serialize_unit_struct(name)
+    }
+    fn serialize_unit_variant(self, name: &'static str, idx: u32, variant: &'static str) -> Result<S::Ok, S::Error> {
+        self.0.serialize_unit_variant(name, idx, variant)
+    }
+    fn serialize_newtype_struct<T: ?Sized + Serialize>(self, name: &'static str, v: &T) -> Result<S::Ok, S::Error> {
+        self.0.serialize_newtype_struct(name, &FiniteValue(v))
+    }
+    fn serialize_newtype_variant<T: ?Sized + Serialize>(self, name: &'static str, idx: u32, variant: &'static str, v: &T) -> Result<S::Ok, S::Error> {
+        self.0.serialize_newtype_variant(name, idx, variant, &FiniteValue(v))
+    }
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, S::Error> {
+        self.0.serialize_seq(len).map(Finite)
+    }
+    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, S::Error> {
+        self.0.serialize_tuple(len).map(Finite)
+    }
+    fn serialize_tuple_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeTupleStruct, S::Error> {
+        self.0.serialize_tuple_struct(name, len).map(Finite)
+    }
+    fn serialize_tuple_variant(
+        self,
+        name: &'static str,
+        idx: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleVariant, S::Error> {
+        self.0.serialize_tuple_variant(name, idx, variant, len).map(Finite)
+    }
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, S::Error> {
+        self.0.serialize_map(len).map(Finite)
+    }
+    fn serialize_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeStruct, S::Error> {
+        self.0.serialize_struct(name, len).map(Finite)
+    }
+    fn serialize_struct_variant(
+        self,
+        name: &'static str,
+        idx: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStructVariant, S::Error> {
+        self.0.serialize_struct_variant(name, idx, variant, len).map(Finite)
+    }
+    fn is_human_readable(&self) -> bool {
+        self.0.is_human_readable()
+    }
+}
+
+macro_rules! finite_elements {
+    ($($trait:ident::$method:ident),* $(,)?) => {
+        $(impl<S: serde::ser::$trait> serde::ser::$trait for Finite<S> {
+            type Ok = S::Ok;
+            type Error = S::Error;
+            fn $method<T: ?Sized + Serialize>(&mut self, v: &T) -> Result<(), S::Error> {
+                self.0.$method(&FiniteValue(v))
+            }
+            fn end(self) -> Result<S::Ok, S::Error> {
+                self.0.end()
+            }
+        })*
+    };
+}
+
+finite_elements!(
+    SerializeSeq::serialize_element,
+    SerializeTuple::serialize_element,
+    SerializeTupleStruct::serialize_field,
+    SerializeTupleVariant::serialize_field
+);
+
+impl<S: serde::ser::SerializeMap> serde::ser::SerializeMap for Finite<S> {
+    type Ok = S::Ok;
+    type Error = S::Error;
+    fn serialize_key<T: ?Sized + Serialize>(&mut self, k: &T) -> Result<(), S::Error> {
+        self.0.serialize_key(&FiniteValue(k))
+    }
+    fn serialize_value<T: ?Sized + Serialize>(&mut self, v: &T) -> Result<(), S::Error> {
+        self.0.serialize_value(&FiniteValue(v))
+    }
+    fn end(self) -> Result<S::Ok, S::Error> {
+        self.0.end()
+    }
+}
+
+impl<S: serde::ser::SerializeStruct> serde::ser::SerializeStruct for Finite<S> {
+    type Ok = S::Ok;
+    type Error = S::Error;
+    fn serialize_field<T: ?Sized + Serialize>(&mut self, key: &'static str, v: &T) -> Result<(), S::Error> {
+        self.0.serialize_field(key, &FiniteValue(v))
+    }
+    fn skip_field(&mut self, key: &'static str) -> Result<(), S::Error> {
+        self.0.skip_field(key)
+    }
+    fn end(self) -> Result<S::Ok, S::Error> {
+        self.0.end()
+    }
+}
+
+impl<S: serde::ser::SerializeStructVariant> serde::ser::SerializeStructVariant for Finite<S> {
+    type Ok = S::Ok;
+    type Error = S::Error;
+    fn serialize_field<T: ?Sized + Serialize>(&mut self, key: &'static str, v: &T) -> Result<(), S::Error> {
+        self.0.serialize_field(key, &FiniteValue(v))
+    }
+    fn skip_field(&mut self, key: &'static str) -> Result<(), S::Error> {
+        self.0.skip_field(key)
+    }
+    fn end(self) -> Result<S::Ok, S::Error> {
+        self.0.end()
+    }
+}
+
 /// Serialize the document (without images) to the JSON value stored in `document.json`.
+/// NaN and infinite numbers are written as `0`.
 pub fn to_json(doc: &Document) -> Result<Value, FormatError> {
-    serde_json::to_value(DocumentJson::new(doc)).map_err(io_err)
+    DocumentJson::new(doc).serialize(Finite(serde_json::value::Serializer)).map_err(io_err)
 }
 
 /// Write the document (without images) as `document.json` content to `w`.
+/// NaN and infinite numbers are written as `0`.
 pub fn write_json(doc: &Document, w: impl Write) -> Result<(), FormatError> {
-    serde_json::to_writer(w, &DocumentJson::new(doc)).map_err(io_err)
+    DocumentJson::new(doc).serialize(Finite(&mut serde_json::Serializer::new(w))).map_err(io_err)
 }
 
 /// Parse `document.json` content.
@@ -272,12 +573,22 @@ pub fn from_json(text: &str) -> Result<(Document, Vec<String>), FormatError> {
 /// The image hashes a `document.json` lists in its `imageIndex` (`None` without one).
 type ImageIndex = Option<BTreeSet<String>>;
 
+#[derive(Clone, Default)]
+struct VideoMeta {
+    mime: String,
+    width: u32,
+    height: u32,
+    duration_secs: f64,
+    poster: Option<String>,
+}
+
 /// The header of a `document.json` (its format version and image index), read in a pass that
 /// skips over everything else without building it.
 #[derive(Default)]
 struct Header {
     version: Option<u64>,
     images: ImageIndex,
+    videos: BTreeMap<String, VideoMeta>,
 }
 
 impl<'de> Deserialize<'de> for Header {
@@ -299,6 +610,23 @@ impl<'de> Deserialize<'de> for Header {
                                 .as_array()
                                 .map(|a| a.iter().filter_map(|i| i.get("hash").and_then(Value::as_str).map(str::to_string)).collect());
                         }
+                        "videoIndex" => {
+                            if let Some(arr) = map.next_value::<Value>()?.as_array() {
+                                for item in arr {
+                                    let Some(hash) = item.get("hash").and_then(Value::as_str) else { continue };
+                                    h.videos.insert(
+                                        hash.to_string(),
+                                        VideoMeta {
+                                            mime: item.get("mime").and_then(Value::as_str).unwrap_or("video/mp4").to_string(),
+                                            width: item.get("width").and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok()).unwrap_or(0),
+                                            height: item.get("height").and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok()).unwrap_or(0),
+                                            duration_secs: item.get("durationSecs").and_then(Value::as_f64).filter(|n| n.is_finite()).unwrap_or(0.0),
+                                            poster: item.get("poster").and_then(Value::as_str).map(str::to_string),
+                                        },
+                                    );
+                                }
+                            }
+                        }
                         _ => {
                             map.next_value::<IgnoredAny>()?;
                         }
@@ -311,10 +639,12 @@ impl<'de> Deserialize<'de> for Header {
     }
 }
 
-/// Parse `document.json` content; also returns its [`ImageIndex`]. The header is checked first
-/// (a newer file is refused before its document is read), then the document is deserialized
-/// straight from the text.
+/// Parse `document.json` content; also returns its [`ImageIndex`] and video index.
 fn parse_json(text: &str) -> Result<(Document, Vec<String>, ImageIndex), FormatError> {
+    parse_json_full(text).map(|(doc, issues, imgs, _)| (doc, issues, imgs))
+}
+
+fn parse_json_full(text: &str) -> Result<(Document, Vec<String>, ImageIndex, BTreeMap<String, VideoMeta>), FormatError> {
     let corrupt = |e: serde_json::Error| FormatError::Corrupt(e.to_string());
     let header: Header = serde_json::from_str(text).map_err(corrupt)?;
     if let Some(ver) = header.version
@@ -327,7 +657,7 @@ fn parse_json(text: &str) -> Result<(Document, Vec<String>, ImageIndex), FormatE
     if !issues.is_empty() {
         doc.repair();
     }
-    Ok((doc, issues, header.images))
+    Ok((doc, issues, header.images, header.videos))
 }
 
 pub(crate) fn io_err(e: impl std::fmt::Display) -> FormatError {
@@ -404,6 +734,13 @@ pub fn save_bytes_with_history(
                 put(&mut z, &format!("images/{hash}"), stored, &img.bytes)?;
             }
         }
+        let mut written_videos = BTreeSet::new();
+        let branch_videos = branches.iter().flat_map(|b| [&b.base.videos, &b.head.videos].into_iter().chain(b.versions.iter().map(Version::videos)));
+        for (hash, vid) in std::iter::once(&doc.videos).chain(versions.iter().map(Version::videos)).chain(branch_videos).flatten() {
+            if written_videos.insert(hash) {
+                put(&mut z, &format!("videos/{hash}"), stored, &vid.bytes)?;
+            }
+        }
         if let Some(t) = thumbnail_png {
             put(&mut z, "thumbnail.png", stored, t)?;
         }
@@ -419,8 +756,16 @@ pub fn save_bytes_with_history(
                 put_json(&mut z, &format!("branches/{}/head.json", b.id), &b.head)?;
                 put_versions(&mut z, &format!("branches/{}/versions", b.id), &b.versions)?;
                 let images = |d: &Document| d.images.keys().cloned().collect::<Vec<String>>();
-                index.push(json!({"id": b.id, "name": b.name, "time": b.time, "client": b.client, "state": b.state,
-                    "baseImages": images(&b.base), "headImages": images(&b.head)}));
+                let videos = |d: &Document| d.videos.keys().cloned().collect::<Vec<String>>();
+                let mut entry = json!({"id": b.id, "name": b.name, "time": b.time, "client": b.client, "state": b.state,
+                    "baseImages": images(&b.base), "headImages": images(&b.head)});
+                if !b.base.videos.is_empty() {
+                    entry["baseVideos"] = json!(videos(&b.base));
+                }
+                if !b.head.videos.is_empty() {
+                    entry["headVideos"] = json!(videos(&b.head));
+                }
+                index.push(entry);
             }
             put(&mut z, BRANCH_INDEX, json_options(), &serde_json::to_vec(&json!({"branches": index})).map_err(io_err)?)?;
         }
@@ -451,6 +796,10 @@ fn put_versions<W: Write + Seek>(z: &mut zip::ZipWriter<W>, dir: &str, versions:
         }
         let images: Vec<&String> = v.images().keys().collect();
         let mut entry = json!({"id": v.id, "name": v.name, "description": v.description, "time": v.time, "images": images});
+        if !v.videos().is_empty() {
+            let videos: Vec<&String> = v.videos().keys().collect();
+            entry["videos"] = json!(videos);
+        }
         if v.auto {
             entry["auto"] = json!(true);
         }
@@ -480,6 +829,49 @@ pub(crate) fn read_member<R: Read + Seek>(z: &mut zip::ZipArchive<R>, name: &str
     Ok(data)
 }
 
+/// What one file open may still unpack, every area together ([`MAX_UNPACKED`]).
+pub(crate) struct Unpacked {
+    left: u64,
+    total: u64,
+}
+
+impl Unpacked {
+    pub(crate) fn new(total: u64) -> Self {
+        Self { left: total, total }
+    }
+
+    /// Why a member is left out once the total is spent.
+    fn passed(&self) -> String {
+        match self.total / (1024 * 1024) {
+            0 => format!("too large: the file's contents together pass {} bytes", self.total),
+            mb => format!("too large: the file's contents together pass {mb} MB"),
+        }
+    }
+
+    /// Whether member `name` (by its recorded size) needs more than is left.
+    fn exceeded<R: Read + Seek>(&self, z: &mut zip::ZipArchive<R>, name: &str) -> bool {
+        z.by_name(name).is_ok_and(|f| f.size() > self.left)
+    }
+
+    /// [`read_member`] within `limit` (the area's own cap) and what is left of the total, which the
+    /// member then uses up.
+    pub(crate) fn read<R: Read + Seek>(&mut self, z: &mut zip::ZipArchive<R>, name: &str, limit: u64) -> Result<Vec<u8>, FormatError> {
+        if self.exceeded(z, name) && z.by_name(name).is_ok_and(|f| f.size() <= limit) {
+            return Err(FormatError::Corrupt(format!("{name}: {}", self.passed())));
+        }
+        let cap = limit.min(self.left);
+        let size = z.by_name(name).map_or(0, |f| f.size());
+        let data = read_member(z, name, cap);
+        // A read that failed part way (a bad checksum at the end, say) did its unpacking all the
+        // same: it is charged in full, so an index naming that member again can't repeat it. One
+        // refused for its recorded size before any unpacking costs nothing.
+        if size <= cap {
+            self.left = self.left.saturating_sub(data.as_ref().map_or(size, |d| d.len() as u64));
+        }
+        data
+    }
+}
+
 /// Largest `document.json` read from an archive of `len` bytes in which it takes `packed`.
 pub(crate) fn document_limit(packed: u64, len: u64) -> u64 {
     packed.min(len).saturating_mul(DOCUMENT_RATIO).clamp(MAX_MEMBER, MAX_DOCUMENT)
@@ -499,6 +891,11 @@ pub fn load_bytes_with_versions(bytes: &[u8]) -> Result<Loaded, FormatError> {
 
 /// [`load_bytes_with_versions`] reading at most `budget` of images.
 pub(crate) fn load_within(bytes: &[u8], budget: ImageBudget) -> Result<Loaded, FormatError> {
+    load_limited(bytes, budget, MAX_UNPACKED)
+}
+
+/// [`load_within`] unpacking at most `total` bytes from the archive, every area together.
+pub(crate) fn load_limited(bytes: &[u8], budget: ImageBudget, total: u64) -> Result<Loaded, FormatError> {
     let trimmed = bytes.iter().position(|b| !b.is_ascii_whitespace()).and_then(|i| bytes.get(i));
     if trimmed == Some(&b'{') {
         let text = std::str::from_utf8(bytes).map_err(|e| FormatError::Corrupt(e.to_string()))?;
@@ -508,18 +905,20 @@ pub(crate) fn load_within(bytes: &[u8], budget: ImageBudget) -> Result<Loaded, F
     let mut z = zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(|e| FormatError::Corrupt(e.to_string()))?;
     let packed = z.by_name("document.json").map(|f| f.compressed_size()).unwrap_or(0);
     let limit = document_limit(packed, bytes.len() as u64);
-    let text = String::from_utf8(read_member(&mut z, "document.json", limit)?).map_err(|e| FormatError::Corrupt(e.to_string()))?;
-    let (mut doc, mut issues, own_images) = parse_json(&text)?;
-    let ImagesRead { images, unread, past_budget } = read_images(&mut z, own_images.as_ref(), budget);
+    let mut unpacked = Unpacked::new(total);
+    let text = String::from_utf8(unpacked.read(&mut z, "document.json", limit)?).map_err(|e| FormatError::Corrupt(e.to_string()))?;
+    let (mut doc, mut issues, own_images, own_videos) = parse_json_full(&text)?;
+    let ImagesRead { images, unread, past_budget } = read_images(&mut z, own_images.as_ref(), budget, &mut unpacked);
     report_lost_images(&mut issues, &unread, &past_budget, own_images.as_ref(), &images);
     let images_past_budget = past_budget.len();
-    match library::read(&mut z, &images, u64::MAX) {
+    let videos = read_videos(&mut z, &own_videos, budget, &mut unpacked);
+    match library::read(&mut z, &images, &mut unpacked) {
         Ok(lib) => doc.published = lib.map(Arc::new),
         Err(e) => issues.push(format!("the published library was skipped: {e}")),
     }
     let mut budget = MAX_VERSION_BYTES;
-    let versions = read_versions(&mut z, "versions", &images, &mut issues, &mut budget);
-    let branches = read_branches(&mut z, &images, &mut issues);
+    let versions = read_versions(&mut z, "versions", &images, &videos, &mut issues, &mut budget, &mut unpacked);
+    let branches = read_branches(&mut z, &images, &videos, &mut issues, &mut unpacked);
     // Images only the version history or branches use stay with them.
     let branch_images =
         branches.iter().flat_map(|b| b.base.images.keys().chain(b.head.images.keys()).chain(b.versions.iter().flat_map(|v| v.images().keys())));
@@ -530,20 +929,63 @@ pub(crate) fn load_within(bytes: &[u8], budget: ImageBudget) -> Result<Loaded, F
         .filter(|h| own_images.as_ref().is_some_and(|o| !o.contains(*h)))
         .collect();
     doc.images = images.into_iter().filter(|(h, _)| !history_only.contains(h)).collect();
+    doc.videos = videos.into_iter().filter(|(h, _)| own_videos.is_empty() || own_videos.contains_key(h)).collect();
     Ok(Loaded { doc, issues, versions, branches, images_past_budget })
+}
+
+fn read_videos<R: Read + Seek>(
+    z: &mut zip::ZipArchive<R>,
+    meta: &BTreeMap<String, VideoMeta>,
+    budget: ImageBudget,
+    unpacked: &mut Unpacked,
+) -> BTreeMap<String, VideoData> {
+    let mut hashes: Vec<String> = z
+        .file_names()
+        .filter_map(|n| n.strip_prefix("videos/"))
+        .filter(|h| VideoData::is_valid_key(h))
+        .map(str::to_string)
+        .collect();
+    hashes.sort_by_key(|h| !meta.contains_key(h));
+    let mut out = BTreeMap::new();
+    let mut left = budget.bytes;
+    for (i, hash) in hashes.into_iter().enumerate() {
+        if i >= budget.images {
+            break;
+        }
+        let name = format!("videos/{hash}");
+        if z.by_name(&name).is_ok_and(|f| f.size() > left) || unpacked.exceeded(z, &name) {
+            continue;
+        }
+        if let Ok(data) = unpacked.read(z, &name, left.min(MAX_MEMBER)) {
+            left = left.saturating_sub(data.len() as u64);
+            let m = meta.get(&hash).cloned().unwrap_or_default();
+            let probed = VideoData::probe(&data);
+            let mime = if m.mime.is_empty() { probed.map_or("video/mp4", |p| p.0).to_string() } else { m.mime };
+            let width = if m.width > 0 { m.width } else { probed.map_or(640, |p| p.1) };
+            let height = if m.height > 0 { m.height } else { probed.map_or(360, |p| p.2) };
+            let duration_secs = if m.duration_secs > 0.0 { m.duration_secs } else { probed.map_or(5.0, |p| p.3) };
+            out.insert(hash, VideoData { bytes: Arc::new(data), mime, width, height, duration_secs, poster: m.poster });
+        }
+    }
+    out
 }
 
 /// The archive's `images/` members by hash, within `budget`, and the ones that couldn't be read
 /// with why. The document's own images (`own`) are read first, so a file past the budget loses
 /// the images only its history uses before its own.
-fn read_images<R: Read + Seek>(z: &mut zip::ZipArchive<R>, own: Option<&BTreeSet<String>>, budget: ImageBudget) -> ImagesRead {
+fn read_images<R: Read + Seek>(
+    z: &mut zip::ZipArchive<R>,
+    own: Option<&BTreeSet<String>>,
+    budget: ImageBudget,
+    unpacked: &mut Unpacked,
+) -> ImagesRead {
     let mut hashes: Vec<String> = z.file_names().filter_map(|n| n.strip_prefix("images/")).filter(|h| !h.is_empty()).map(str::to_string).collect();
     hashes.sort_by_key(|h| !own.is_some_and(|o| o.contains(h)));
     let mut images = BTreeMap::new();
     let mut unread = Vec::new();
-    // Member names that aren't plain hashes (`../x`, `a/b`) are never read, so never written back.
+    // Member names that can't be real image keys (`../x`, `a/b`) are never read, so never written back.
     hashes.retain(|h| {
-        let ok = library::is_valid_hash(h);
+        let ok = ImageData::is_valid_key(h);
         if !ok {
             unread.push((h.clone(), FormatError::Corrupt("its name isn't a valid image hash".to_string())));
         }
@@ -564,7 +1006,14 @@ fn read_images<R: Read + Seek>(z: &mut zip::ZipArchive<R>, own: Option<&BTreeSet
             unread.push((hash, FormatError::Corrupt(format!("the file's images together pass {mb} MB"))));
             continue;
         }
-        match read_member(z, &name, left.min(MAX_MEMBER)) {
+        // Past the file's total, an image is left out as one past the images' own budget: it stays
+        // in the file, which can't then be saved over without losing it (#1313).
+        if unpacked.exceeded(z, &name) {
+            past_budget.insert(hash.clone());
+            unread.push((hash, FormatError::Corrupt(unpacked.passed())));
+            continue;
+        }
+        match unpacked.read(z, &name, left.min(MAX_MEMBER)) {
             Ok(data) => {
                 left = left.saturating_sub(data.len() as u64);
                 images.insert(hash, image_data(data));
@@ -626,14 +1075,17 @@ fn read_versions<R: Read + Seek>(
     z: &mut zip::ZipArchive<R>,
     dir: &str,
     images: &BTreeMap<String, ImageData>,
+    videos: &BTreeMap<String, VideoData>,
     issues: &mut Vec<String>,
     budget: &mut u64,
+    unpacked: &mut Unpacked,
 ) -> Vec<Version> {
     let index_name = format!("{dir}/index.json");
     if z.index_for_name(&index_name).is_none() {
         return Vec::new();
     }
-    let index = match read_member(z, &index_name, MAX_VERSION_INDEX)
+    let index = match unpacked
+        .read(z, &index_name, MAX_VERSION_INDEX)
         .and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| FormatError::Corrupt(e.to_string())))
     {
         Ok(v) => v,
@@ -654,7 +1106,7 @@ fn read_versions<R: Read + Seek>(
             issues.push("a version with an invalid id was skipped".into());
             continue;
         }
-        let json = match read_member(z, &format!("{dir}/{id}.json"), (*budget).min(MAX_MEMBER)) {
+        let json = match unpacked.read(z, &format!("{dir}/{id}.json"), (*budget).min(MAX_MEMBER)) {
             Ok(j) => j,
             Err(err) => {
                 issues.push(format!("version `{id}` was skipped: {err}"));
@@ -671,13 +1123,21 @@ fn read_versions<R: Read + Seek>(
             .filter_map(Value::as_str)
             .filter_map(|h| images.get(h).map(|i| (h.to_string(), i.clone())))
             .collect();
+        let videos = e
+            .get("videos")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .filter_map(|h| videos.get(h).map(|v| (h.to_string(), v.clone())))
+            .collect();
         out.push(Version {
             id: id.to_string(),
             name: text("name", MAX_VERSION_NAME),
             description: text("description", MAX_VERSION_DESCRIPTION),
             time: e.get("time").and_then(Value::as_u64).unwrap_or(0),
             auto: e.get("auto").and_then(Value::as_bool).unwrap_or(false),
-            snapshot: Snapshot::Stored { json: Arc::new(json), images },
+            snapshot: Snapshot::Stored { json: Arc::new(json), images, videos },
         });
     }
     out
@@ -685,11 +1145,18 @@ fn read_versions<R: Read + Seek>(
 
 /// The branches of an archive (none when it has no index), parsed. Damaged entries are skipped and
 /// reported in `issues`; nothing here fails the load.
-fn read_branches<R: Read + Seek>(z: &mut zip::ZipArchive<R>, images: &BTreeMap<String, ImageData>, issues: &mut Vec<String>) -> Vec<Branch> {
+fn read_branches<R: Read + Seek>(
+    z: &mut zip::ZipArchive<R>,
+    images: &BTreeMap<String, ImageData>,
+    videos: &BTreeMap<String, VideoData>,
+    issues: &mut Vec<String>,
+    unpacked: &mut Unpacked,
+) -> Vec<Branch> {
     if z.index_for_name(BRANCH_INDEX).is_none() {
         return Vec::new();
     }
-    let index = match read_member(z, BRANCH_INDEX, MAX_VERSION_INDEX)
+    let index = match unpacked
+        .read(z, BRANCH_INDEX, MAX_VERSION_INDEX)
         .and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| FormatError::Corrupt(e.to_string())))
     {
         Ok(v) => v,
@@ -711,15 +1178,17 @@ fn read_branches<R: Read + Seek>(z: &mut zip::ZipArchive<R>, images: &BTreeMap<S
             issues.push("a branch with an invalid id was skipped".into());
             continue;
         }
-        let mut snapshot = |part: &str, list: &str| -> Result<Arc<Document>, FormatError> {
-            let json = read_member(z, &format!("branches/{id}/{part}.json"), budget.min(MAX_MEMBER))?;
+        let mut snapshot = |part: &str, list: &str, vlist: &str| -> Result<Arc<Document>, FormatError> {
+            let json = unpacked.read(z, &format!("branches/{id}/{part}.json"), budget.min(MAX_MEMBER))?;
             budget = budget.saturating_sub(json.len() as u64);
             let (mut doc, _) = from_json(std::str::from_utf8(&json).map_err(|e| FormatError::Corrupt(e.to_string()))?)?;
             let hashes = e.get(list).and_then(Value::as_array).into_iter().flatten().filter_map(Value::as_str);
             doc.images = hashes.filter_map(|h| images.get(h).map(|i| (h.to_string(), i.clone()))).collect();
+            let vhashes = e.get(vlist).and_then(Value::as_array).into_iter().flatten().filter_map(Value::as_str);
+            doc.videos = vhashes.filter_map(|h| videos.get(h).map(|v| (h.to_string(), v.clone()))).collect();
             Ok(Arc::new(doc))
         };
-        let (base, head) = match (snapshot("base", "baseImages"), snapshot("head", "headImages")) {
+        let (base, head) = match (snapshot("base", "baseImages", "baseVideos"), snapshot("head", "headImages", "headVideos")) {
             (Ok(b), Ok(h)) => (b, h),
             (Err(err), _) | (_, Err(err)) => {
                 issues.push(format!("branch `{id}` was skipped: {err}"));
@@ -732,7 +1201,7 @@ fn read_branches<R: Read + Seek>(z: &mut zip::ZipArchive<R>, images: &BTreeMap<S
             time: e.get("time").and_then(Value::as_u64).unwrap_or(0),
             client: e.get("client").and_then(Value::as_u64).and_then(|c| u32::try_from(c).ok()).unwrap_or(0),
             state: e.get("state").and_then(|s| BranchState::deserialize(s).ok()).unwrap_or(BranchState::Active),
-            versions: read_versions(z, &format!("branches/{id}/versions"), images, issues, &mut budget),
+            versions: read_versions(z, &format!("branches/{id}/versions"), images, videos, issues, &mut budget, unpacked),
             base,
             head,
         });
@@ -769,6 +1238,11 @@ pub fn write_file_atomic(path: &std::path::Path, bytes: &[u8]) -> std::io::Resul
         let tmp = std::path::PathBuf::from(name);
         match std::fs::OpenOptions::new().write(true).create_new(true).open(&tmp) {
             Ok(mut file) => {
+                // The replacement keeps the destination's permissions from the start, so a private
+                // file's content is never readable under default ones (the open handle still writes).
+                if let Ok(old) = std::fs::metadata(path) {
+                    let _ = file.set_permissions(old.permissions());
+                }
                 if let Err(e) = file.write_all(bytes) {
                     let _ = std::fs::remove_file(&tmp);
                     return Err(e);
@@ -798,15 +1272,21 @@ pub fn load_file(path: &std::path::Path) -> Result<(Document, Vec<String>), Form
 #[cfg(test)]
 mod branch_tests;
 #[cfg(test)]
+mod guides_tests;
+#[cfg(test)]
 mod image_budget_tests;
 #[cfg(test)]
 mod image_tests;
+#[cfg(test)]
+mod jpeg_tests;
 #[cfg(test)]
 mod large_tests;
 #[cfg(test)]
 mod staging_tests;
 #[cfg(test)]
 mod thumbnail_tests;
+#[cfg(test)]
+mod unpacked_total_tests;
 #[cfg(test)]
 mod version_tests;
 
@@ -838,6 +1318,37 @@ mod tests {
         // Bare JSON opens too.
         let json = serde_json::to_vec(&to_json(&d).unwrap()).unwrap();
         assert!(load_bytes(&json).is_ok());
+    }
+
+    #[test]
+    fn non_finite_numbers_are_saved_as_zero() {
+        let mut d = Document::new("NaN");
+        let p = d.first_page().unwrap();
+        let r = d.create(p, NodeKind::Rectangle, "R", 1.0, 2.0, 3.0, 4.0).unwrap();
+        assert!(save_bytes(&d, None).is_ok());
+        d.get_mut(r).unwrap().width = f64::NAN;
+        d.get_mut(r).unwrap().opacity = f32::INFINITY;
+        // Saving never fails; non-finite numbers are written as 0 and the file reopens.
+        let bytes = save_bytes(&d, None).unwrap();
+        let (back, _) = load_bytes(&bytes).unwrap();
+        assert_eq!(back.node_count(), d.node_count());
+        let n = back.get(r).unwrap();
+        assert_eq!(n.width, 0.0);
+        assert_eq!(n.opacity, 0.0);
+        assert_eq!(n.height, 4.0);
+        let mut out = Vec::new();
+        write_json(&d, &mut out).unwrap();
+        let (back, _) = from_json(std::str::from_utf8(&out).unwrap()).unwrap();
+        let n = back.get(r).unwrap();
+        assert_eq!(n.width, 0.0);
+        assert_eq!(n.opacity, 0.0);
+        assert_eq!(n.height, 4.0);
+        let v = to_json(&d).unwrap();
+        let (back, _) = from_json(&v.to_string()).unwrap();
+        let n = back.get(r).unwrap();
+        assert_eq!(n.width, 0.0);
+        assert_eq!(n.opacity, 0.0);
+        assert_eq!(n.height, 4.0);
     }
 
     #[test]

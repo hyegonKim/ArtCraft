@@ -1,0 +1,2868 @@
+# ta (ta) interface catalog for PdfCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	  · not fixable here	  · இங்கே சரிசெய்ய இயலாது
+	 (page {p})	 (பக்கம் {p})
+	 (searching… {s} of {p} pages)	 (தேடுகிறது… {p} பக்கங்களில் {s})
+	 ({n} at {dpi} dpi, the largest size they can be drawn at)	 ({n} — {dpi} dpi இல், வரையக்கூடிய மிகப் பெரிய அளவு)
+	 ({s} not exported: {first})	 ({s} ஏற்றுமதியாகவில்லை: {first})
+	 on page {label}	 பக்கம் {label} இல்
+	 on page {p}	 பக்கம் {p} இல்
+	 · password-protected	 · கடவுச்சொல் பாதுகாக்கப்பட்டது
+	% of all commits	அனைத்துக் கமிட்களில் %
+	(none)	(எதுவுமில்லை)
+	+Bin	+Bin
+	+LOC	+LOC
+	, Expires: 	, காலாவதி: 
+	1 difference found	1 வேறுபாடு கண்டறியப்பட்டது
+	1 file	1 கோப்பு
+	1 file done	1 கோப்பு முடிந்தது
+	1 file needs attention	1 கோப்புக்குக் கவனம் தேவை
+	1 instance	1 நிகழ்வு
+	1 issue	1 சிக்கல்
+	1 mark	1 குறி
+	1 page	1 பக்கம்
+	1 page selected	1 பக்கம் தேர்ந்தெடுக்கப்பட்டது
+	1 page selected.	1 பக்கம் தேர்ந்தெடுக்கப்பட்டது.
+	180 degrees	180 டிகிரி
+	4 x 6 in label (101.6 x 152.4 mm)	4 x 6 அங்குல லேபிள் (101.6 x 152.4 மிமீ)
+	9 digit, A letter, O letter or digit, X any character	9 இலக்கம், A எழுத்து, O எழுத்து அல்லது இலக்கம், X எந்த எழுத்தும்
+	; 1 page already had text	; 1 பக்கத்தில் ஏற்கனவே உரை இருந்தது
+	; failed: {list}	; தோல்வி: {list}
+	; {n} pages already had text	; {n} பக்கங்களில் ஏற்கனவே உரை இருந்தது
+	? of {n}	{n} இல் ?
+	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{bin_added} / −{bin_deleted} binary assets, {first} – {last}	@{login}: {prs} PRகள், {commits} கமிட்கள், +{added} / −{deleted} வரிகள் (Δ {delta}), +{bin_added} / −{bin_deleted} இருமச் சொத்துகள், {first} – {last}
+	`{command}` {when}	`{command}` {when}
+	a bookmark cannot be moved inside itself	ஒரு புத்தகக்குறியைத் தனக்குள்ளேயே நகர்த்த இயலாது
+	A button	ஒரு பொத்தான்
+	A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0.	Rust-இல் எழுதப்பட்ட, தூய அறை முறையிலான திறந்த மூல PDF பயன்பாடு. MIT OR Apache-2.0.
+	a column is too narrow: make the area wider, give the column more of it, or use fewer columns or less column spacing	ஒரு நெடுவரிசை மிகக் குறுகியது: பகுதியை அகலமாக்கவும், நெடுவரிசைக்கு அதிகமாக ஒதுக்கவும், அல்லது குறைவான நெடுவரிசைகள் அல்லது குறைந்த நெடுவரிசை இடைவெளியைப் பயன்படுத்தவும்
+	A diagonal CONFIDENTIAL watermark on every page.	ஒவ்வொரு பக்கத்திலும் குறுக்காக "ரகசியம்" எனும் நீர்க்குறி.
+	a document must keep at least one page	ஓர் ஆவணத்தில் குறைந்தது ஒரு பக்கம் இருக்க வேண்டும்
+	A document needs at least one page: copy instead	ஒரு ஆவணத்துக்குக் குறைந்தது ஒரு பக்கம் தேவை: அதற்குப் பதிலாக நகலெடுக்கவும்
+	a field named {name} already exists	{name} என்ற பெயரில் ஒரு புலம் ஏற்கனவே உள்ளது
+	A font isn't embedded	ஓர் எழுத்துரு உட்பொதிக்கப்படவில்லை
+	A form field has additional actions	ஒரு படிவப் புலத்தில் கூடுதல் செயல்கள் உள்ளன
+	A link	ஓர் இணைப்பு
+	A picture covers page {pages} (a scan?), so the background won't show there.	பக்கம் {pages} ஐ ஒரு படம் மூடுகிறது (ஸ்கேனா?), எனவே அங்கே பின்னணி தெரியாது.
+	A script	ஒரு ஸ்கிரிப்ட்
+	A selected field has no widget on any page, so the fields can't be edited together.	தேர்ந்தெடுத்த ஒரு புலத்துக்கு எந்தப் பக்கத்திலும் விட்ஜெட் இல்லை, எனவே புலங்களை ஒன்றாகத் திருத்த இயலாது.
+	A stream refers to an external file	ஒரு ஸ்ட்ரீம் வெளிக் கோப்பைக் குறிப்பிடுகிறது
+	A stream uses LZW compression	ஒரு ஸ்ட்ரீம் LZW அழுத்தத்தைப் பயன்படுத்துகிறது
+	A summary describes the table's purpose and layout. Add a Summary attribute to each table.	சுருக்கம் அட்டவணையின் நோக்கத்தையும் அமைப்பையும் விவரிக்கிறது. ஒவ்வொரு அட்டவணைக்கும் Summary பண்புக்கூறைச் சேர்க்கவும்.
+	a table has 1 to {max} columns	ஓர் அட்டவணையில் 1 முதல் {max} வரை நெடுவரிசைகள் இருக்கலாம்
+	a table has 1 to {max} rows	ஓர் அட்டவணையில் 1 முதல் {max} வரை வரிசைகள் இருக்கலாம்
+	A {} action isn't allowed	{} செயல் அனுமதிக்கப்படுவதில்லை
+	A {} annotation has additional actions	ஒரு {} குறிப்பில் கூடுதல் செயல்கள் உள்ளன
+	A {} annotation has no appearance stream	ஒரு {} குறிப்புக்குத் தோற்ற ஸ்ட்ரீம் இல்லை
+	A {} annotation isn't set to print, or is hidden	ஒரு {} குறிப்பு அச்சிடுவதற்கு அமைக்கப்படவில்லை, அல்லது மறைக்கப்பட்டுள்ளது
+	About	பற்றி
+	About PdfCraft	PdfCraft பற்றி
+	Accepted	ஏற்கப்பட்டது
+	Accessibility	அணுகல்தன்மை
+	Accessibility Checker	அணுகல்தன்மை சரிபார்ப்பி
+	Accessibility Checker Options	அணுகல்தன்மை சரிபார்ப்பி விருப்பங்கள்
+	Accessibility permission flag	அணுகல்தன்மை அனுமதிக் கொடி
+	Accessibility permission flag is set	அணுகல்தன்மை அனுமதிக் கொடி அமைக்கப்பட்டுள்ளது
+	Accessibility Report	அணுகல்தன்மை அறிக்கை
+	Acrobat 3.0 and later (40-bit RC4)	Acrobat 3.0 மற்றும் பிந்தையவை (40-பிட் RC4)
+	Acrobat 5.0 and later (128-bit RC4)	Acrobat 5.0 மற்றும் பிந்தையவை (128-பிட் RC4)
+	Acrobat 7.0 and later (128-bit AES)	Acrobat 7.0 மற்றும் பிந்தையவை (128-பிட் AES)
+	Acrobat X and later (256-bit AES)	Acrobat X மற்றும் பிந்தையவை (256-பிட் AES)
+	Action name:	செயலின் பெயர்:
+	Action Wizard	செயல் வழிகாட்டி
+	Action Wizard…	செயல் வழிகாட்டி…
+	Actions	செயல்கள்
+	Actions list	செயல் பட்டியல்
+	Active	செயலில்
+	Actual Size	உண்மையான அளவு
+	Actual size	உண்மையான அளவு
+	Actual text	உண்மையான உரை
+	Add	சேர்
+	Add a button	பொத்தானைச் சேர்
+	Add a callout	விளக்கக்குறிப்பைச் சேர்
+	Add a checkbox	தேர்வுப்பெட்டியைச் சேர்
+	Add a comment	கருத்தைச் சேர்
+	Add a date field	தேதிப் புலத்தைச் சேர்
+	Add a digital signature field	எண்ணிம கையொப்பப் புலத்தைச் சேர்
+	Add a drop-down list	கீழிறங்கு பட்டியலைச் சேர்
+	Add a list box	பட்டியல் பெட்டியைச் சேர்
+	Add a radio button	ரேடியோ பொத்தானைச் சேர்
+	Add a reply	பதிலைச் சேர்
+	Add a stamp	முத்திரையைச் சேர்
+	Add a sticky note	ஒட்டுக் குறிப்பைச் சேர்
+	Add a sticky note here	இங்கே ஒட்டுக் குறிப்பைச் சேர்
+	Add a text box	உரைப்பெட்டியைச் சேர்
+	Add a text field	உரைப் புலத்தைச் சேர்
+	Add alternate text	மாற்று உரையைச் சேர்
+	Add alternate text…	மாற்று உரையைச் சேர்…
+	Add an Action	செயலைச் சேர்
+	Add an image field	படப் புலத்தைச் சேர்
+	Add arrow	அம்புக்குறியைச் சேர்
+	Add at least two files	குறைந்தது இரண்டு கோப்புகளைச் சேர்க்கவும்
+	Add background	பின்னணியைச் சேர்
+	Add background…	பின்னணியைச் சேர்…
+	Add Bates numbering…	பேட்ஸ் எண்ணிடலைச் சேர்…
+	Add bookmark	புத்தகக்குறியைச் சேர்
+	Add callout	விளக்கக்குறிப்பைச் சேர்
+	Add checkmark	சரிக்குறியைச் சேர்
+	Add cloud	மேகத்தைச் சேர்
+	Add comment	கருத்தைச் சேர்
+	Add comments	கருத்துகளைச் சேர்
+	Add connected lines	இணைக்கப்பட்ட கோடுகளைச் சேர்
+	Add content	உள்ளடக்கத்தைச் சேர்
+	Add cross	குறுக்குக்குறியைச் சேர்
+	Add dot	புள்ளியைச் சேர்
+	Add drawing	வரைதலைச் சேர்
+	Add field	புலத்தைச் சேர்
+	Add fields	புலங்களைச் சேர்
+	Add file attachment	கோப்பு இணைப்பைச் சேர்
+	Add files to combine	இணைக்க வேண்டிய கோப்புகளைச் சேர்
+	Add files…	கோப்புகளைச் சேர்…
+	Add folder	கோப்புறையைச் சேர்
+	Add folder and subfolders	கோப்புறையையும் துணைக் கோப்புறைகளையும் சேர்
+	Add folder and subfolders…	கோப்புறையையும் துணைக் கோப்புறைகளையும் சேர்…
+	Add folder…	கோப்புறையைச் சேர்…
+	Add footer	அடிக்குறிப்பைச் சேர்
+	Add form components	படிவக் கூறுகளைச் சேர்
+	Add header	தலைப்பைச் சேர்
+	Add header & footer	தலைப்பு & அடிக்குறிப்பைச் சேர்
+	Add header & footer…	தலைப்பு & அடிக்குறிப்பைச் சேர்…
+	Add highlight	தனிப்படுத்தலைச் சேர்
+	Add image	படத்தைச் சேர்
+	Add image…	படத்தைச் சேர்…
+	Add inserted text	செருகிய உரையைச் சேர்
+	Add line	கோட்டைச் சேர்
+	Add link	இணைப்பைச் சேர்
+	Add open documents	திறந்த ஆவணங்களைச் சேர்
+	Add or edit links	இணைப்புகளைச் சேர் அல்லது திருத்து
+	Add oval	நீள்வட்டத்தைச் சேர்
+	Add Page Numbers	பக்க எண்களைச் சேர்
+	Add polygon	பலகோணத்தைச் சேர்
+	Add printer marks	அச்சுக் குறிகளைச் சேர்
+	Add rectangle	செவ்வகத்தைச் சேர்
+	Add redaction mark	மறைப்புக் குறியைச் சேர்
+	Add search index	தேடல் அட்டவணையைச் சேர்
+	Add signature	கையொப்பத்தைச் சேர்
+	Add squiggly underline	அலைக் கீழ்க்கோட்டைச் சேர்
+	Add stamp	முத்திரையைச் சேர்
+	Add Step	படியைச் சேர்
+	Add sticky note	ஒட்டுக் குறிப்பைச் சேர்
+	Add strikethrough	வெட்டுக்கோட்டைச் சேர்
+	Add text	உரையைச் சேர்
+	Add text box	உரைப்பெட்டியைச் சேர்
+	Add text field table	உரைப் புல அட்டவணையைச் சேர்
+	Add the choices people pick from.	மக்கள் தேர்ந்தெடுக்கும் தேர்வுகளைச் சேர்க்கவும்.
+	Add the files to combine	இணைக்க வேண்டிய கோப்புகளைச் சேர்க்கவும்
+	Add the PDFs to combine	இணைக்க வேண்டிய PDFகளைச் சேர்க்கவும்
+	Add the steps this action runs, in order.	இந்தச் செயல் இயக்கும் படிகளை வரிசையாகச் சேர்க்கவும்.
+	Add to Trusted Certificates	நம்பகச் சான்றிதழ்களில் சேர்
+	Add to trusted certificates	நம்பகச் சான்றிதழ்களில் சேர்
+	Add underline	கீழ்க்கோட்டைச் சேர்
+	Add watermark	நீர்க்குறியைச் சேர்
+	Add watermark…	நீர்க்குறியைச் சேர்…
+	Add {what}	{what} ஐச் சேர்
+	Added 1 comment	1 கருத்து சேர்க்கப்பட்டது
+	Added more than once	ஒன்றுக்கு மேற்பட்ட முறை சேர்க்கப்பட்டது
+	Added text	சேர்க்கப்பட்ட உரை
+	Added the first {n} files in {folder}	{folder} இல் முதல் {n} கோப்புகள் சேர்க்கப்பட்டன
+	Added the first {n} PDFs in {folder}	{folder} இல் முதல் {n} PDFகள் சேர்க்கப்பட்டன
+	Added {n} comments	{n} கருத்துகள் சேர்க்கப்பட்டன
+	Adding images arrives on the web with file pickers for images	படங்களைச் சேர்க்கும் வசதி, படக் கோப்புத் தேர்விகளுடன் இணையத்தில் வரவுள்ளது
+	Adds invisible text over each word; the page image is not changed	ஒவ்வொரு சொல்லின் மேலும் கண்ணுக்குத் தெரியாத உரையைச் சேர்க்கும்; பக்கப் படம் மாறாது
+	Advanced	மேம்பட்ட
+	Advanced optimization	மேம்பட்ட உகப்பாக்கம்
+	Advanced options	மேம்பட்ட விருப்பங்கள்
+	Advanced Options {chevron}	மேம்பட்ட விருப்பங்கள் {chevron}
+	Advanced search…	மேம்பட்ட தேடல்…
+	AI assistant	AI உதவியாளர்
+	Algorithm	வழிமுறை
+	Align	சீரமை
+	Align fields	புலங்களைச் சீரமை
+	Align left	இடதுபுறம் சீரமை
+	Align right	வலதுபுறம் சீரமை
+	Alignment	சீரமைப்பு
+	Alignment:	சீரமைப்பு:
+	All	அனைத்தும்
+	All annotations are tagged	அனைத்துக் குறிப்புகளும் குறியிடப்பட்டுள்ளன
+	All document contents	அனைத்து ஆவண உள்ளடக்கமும்
+	All document contents except metadata	மேனிலைத் தரவு தவிர அனைத்து ஆவண உள்ளடக்கமும்
+	All form fields are tagged	அனைத்துப் படிவப் புலங்களும் குறியிடப்பட்டுள்ளன
+	All form fields have description	அனைத்துப் படிவப் புலங்களுக்கும் விளக்கம் உள்ளது
+	All multimedia objects are tagged	அனைத்துப் பல்லூடகப் பொருட்களும் குறியிடப்பட்டுள்ளன
+	All open documents	திறந்துள்ள அனைத்து ஆவணங்களும்
+	All page content is tagged	அனைத்துப் பக்க உள்ளடக்கமும் குறியிடப்பட்டுள்ளது
+	All pages	அனைத்துப் பக்கங்களும்
+	All pages in document	ஆவணத்தில் உள்ள அனைத்துப் பக்கங்களும்
+	All pages in range	வரம்பில் உள்ள அனைத்துப் பக்கங்களும்
+	All tools	அனைத்துக் கருவிகள்
+	Allow	அனுமதி
+	Allow Rich Text Formatting	செறிவான உரை வடிவமைப்பை அனுமதி
+	Allow user to enter custom text	பயனர் தனிப்பயன் உரையை உள்ளிட அனுமதி
+	Allowed	அனுமதிக்கப்படுகிறது
+	already a PDF	ஏற்கனவே PDF ஆக உள்ளது
+	Also recognize pages that already have text	ஏற்கனவே உரை உள்ள பக்கங்களையும் அடையாளம் காண்
+	Alternate Text	மாற்று உரை
+	Alternate text	மாற்று உரை
+	alternate text hides an annotation inside it	மாற்று உரை, அதனுள் உள்ள குறிப்பை மறைக்கிறது
+	Alternate text inside an element that already has alternate text is never read. Remove the inner alternate text.	ஏற்கனவே மாற்று உரை உள்ள உறுப்புக்குள் இருக்கும் மாற்று உரை ஒருபோதும் வாசிக்கப்படாது. உள்ளே உள்ள மாற்று உரையை நீக்கவும்.
+	Alternate text must be associated with some content	மாற்று உரை ஏதேனும் உள்ளடக்கத்துடன் தொடர்புடையதாக இருக்க வேண்டும்
+	Alternate text on an element that contains a link or field hides that annotation from assistive technology. Move the alternate text.	இணைப்பு அல்லது புலம் உள்ள உறுப்பிலுள்ள மாற்று உரை, அந்தக் குறிப்பை உதவித் தொழில்நுட்பத்திடமிருந்து மறைக்கிறது. மாற்று உரையை நகர்த்தவும்.
+	alternate text on an element with no page content	பக்க உள்ளடக்கம் இல்லாத உறுப்பில் மாற்று உரை
+	Alternate text on an element without page content is never reached. Remove it or attach the element to content.	பக்க உள்ளடக்கம் இல்லாத உறுப்பிலுள்ள மாற்று உரையை அடையவே இயலாது. அதை நீக்கவும் அல்லது உறுப்பை உள்ளடக்கத்துடன் இணைக்கவும்.
+	Alternate text should not hide annotation	மாற்று உரை குறிப்பை மறைக்கக் கூடாது
+	Alternate text that will never be read	ஒருபோதும் வாசிக்கப்படாத மாற்று உரை
+	Always	எப்போதும்
+	Always use my default zoom and page layout	எப்போதும் என் இயல்புநிலைப் பெரிதாக்கத்தையும் பக்கத் தளவமைப்பையும் பயன்படுத்து
+	An action is already running	ஒரு செயல் ஏற்கனவே இயங்குகிறது
+	An action with this name already exists.	இந்தப் பெயரில் ஏற்கனவே ஒரு செயல் உள்ளது.
+	An embedded file has no AFRelationship	ஒரு உட்பொதிந்த கோப்பில் AFRelationship இல்லை
+	An image asks to be interpolated	ஒரு படம் இடைச்செருகல் செய்யக் கோருகிறது
+	An image has alternates or OPI information	ஒரு படத்தில் மாற்றுகள் அல்லது OPI தகவல் உள்ளது
+	An open-source PDF workbench — local, private, and scriptable.	திறந்த மூல PDF பணிமேடை — உள்ளூர், தனிப்பட்ட, ஸ்கிரிப்ட் செய்யக்கூடியது.
+	and {n} more	மேலும் {n}
+	Angle	கோணம்
+	Animation effects	அசைவூட்ட விளைவுகள்
+	Animation that flashes can cause seizures. Check scripts and media for flicker.	ஒளிரும் அசைவூட்டம் வலிப்பை ஏற்படுத்தலாம். ஸ்கிரிப்ட்களையும் ஊடகங்களையும் மினுமினுப்புக்காகச் சரிபார்க்கவும்.
+	Annotations, form fill-in, and digital signatures	குறிப்புகள், படிவ நிரப்பல், எண்ணிம கையொப்பங்கள்
+	Another file dialog is still open. Finish with it first.	மற்றொரு கோப்பு உரையாடல் இன்னும் திறந்துள்ளது. முதலில் அதை முடிக்கவும்.
+	Any	ஏதேனும்
+	Any except extracting pages	பக்கங்களைப் பிரித்தெடுப்பதைத் தவிர எதுவும்
+	Anyone opening the document will need this password. It's applied when you save.	ஆவணத்தைத் திறக்கும் எவருக்கும் இந்தக் கடவுச்சொல் தேவைப்படும். சேமிக்கும்போது இது பயன்படுத்தப்படும்.
+	Appear behind page	பக்கத்துக்குப் பின்னால் தோன்றும்
+	Appear on top of page	பக்கத்துக்கு மேலே தோன்றும்
+	Appearance	தோற்றம்
+theme	Appearance	தோற்றம்
+	Appearance mode	தோற்றப் பயன்முறை
+	Appearance settings…	தோற்ற அமைப்புகள்…
+	Application	பயன்பாடு
+	Applied 1 redaction mark. Save to remove the content from the file.	1 மறைப்புக் குறி பயன்படுத்தப்பட்டது. கோப்பிலிருந்து உள்ளடக்கத்தை நீக்கச் சேமிக்கவும்.
+	Applied {n} redaction marks. Save to remove the content from the file.	{n} மறைப்புக் குறிகள் பயன்படுத்தப்பட்டன. கோப்பிலிருந்து உள்ளடக்கத்தை நீக்கச் சேமிக்கவும்.
+	Applies to 1 page	1 பக்கத்துக்குப் பொருந்தும்
+	Applies to {n} pages	{n} பக்கங்களுக்குப் பொருந்தும்
+	Apply	பயன்படுத்து
+	Apply PDF standards	PDF தரநிலைகளைப் பயன்படுத்து
+	Apply redactions	மறைப்புகளைப் பயன்படுத்து
+	Apply redactions…	மறைப்புகளைப் பயன்படுத்து…
+	Apply scale	அளவுகோலைப் பயன்படுத்து
+	Applying a scale switches units to m / mm.	அளவுகோலைப் பயன்படுத்தினால் அலகுகள் m / mm ஆக மாறும்.
+	Appropriate nesting	சரியான உள்ளமைவு
+	April	ஏப்ரல்
+calendar date	April	ஏப்ரல்
+	Arbitrary Mask	தன்னிச்சை முகமூடி
+	Archive documents	ஆவணங்களைக் காப்பகப்படுத்து
+	Area	பரப்பளவு
+	Arrange image	படத்தை ஒழுங்குபடுத்து
+	Arrow	அம்புக்குறி
+	ArtCraft website	ArtCraft இணையதளம்
+	Ask about this document	இந்த ஆவணத்தைப் பற்றிக் கேள்
+	Asks GitHub for the latest release. Nothing is downloaded or installed automatically.	GitHub-இடம் சமீபத்திய வெளியீட்டைக் கேட்கிறது. எதுவும் தானாகப் பதிவிறக்கப்படாது, நிறுவப்படாது.
+	Associated with content	உள்ளடக்கத்துடன் தொடர்புடையது
+	At least one signature has problems.	குறைந்தது ஒரு கையொப்பத்தில் சிக்கல்கள் உள்ளன.
+	At least one signature is invalid.	குறைந்தது ஒரு கையொப்பம் செல்லாதது.
+	At most	அதிகபட்சம்
+	Attach a file	கோப்பை இணை
+	Attach a file…	கோப்பை இணை…
+	Attach file	கோப்பை இணை
+	Attach {name}	{name} ஐ இணை
+	Attaching files is not available on the web yet	இணைப்புகளை இணைக்கும் வசதி இன்னும் இணையத்தில் கிடைக்கவில்லை
+	Attachment	இணைப்பு
+	Attachments	இணைப்புகள்
+	Attachments Panel and Page	இணைப்புப் பலகமும் பக்கமும்
+	Audit space usage	இட பயன்பாட்டைத் தணிக்கை செய்
+	Audit space usage…	இட பயன்பாட்டைத் தணிக்கை செய்…
+	August	ஆகஸ்ட்
+calendar date	August	ஆகஸ்ட்
+	Author	ஆசிரியர்
+	Auto	தானியங்கி
+	Auto ({percent}%)	தானியங்கி ({percent}%)
+	Auto follows the system's text size. Pages always render at the display's full resolution.	தானியங்கி என்பது கணினியின் எழுத்து அளவைப் பின்பற்றும். பக்கங்கள் எப்போதும் திரையின் முழுத் தெளிவுத்திறனில் காட்டப்படும்.
+	Auto portrait/landscape	தானியங்கி நிலைபரப்பு/படுக்கைப்பரப்பு
+	Auto-rotate pages	பக்கங்களைத் தானாகச் சுழற்று
+	Auto-size text to fit redaction region	மறைப்புப் பகுதிக்குப் பொருந்த உரை அளவைத் தானாக மாற்று
+	Automatically	தானாக
+	Automatically tag PDF	PDF-ஐத் தானாகக் குறியிடு
+	Available	கிடைக்கிறது
+	average	சராசரி
+	Back	பின்செல்
+	Back side only	பின் பக்கம் மட்டும்
+	Back to all tools	அனைத்துக் கருவிகளுக்கும் திரும்பு
+	Back to Prepare a form	படிவத்தைத் தயார்செய்வதற்குத் திரும்பு
+	Back to the document	ஆவணத்துக்குத் திரும்பு
+	Background	பின்னணி
+	background	பின்னணி
+	Basic constraints	அடிப்படைக் கட்டுப்பாடுகள்
+certificate	Basic constraints	அடிப்படைக் கட்டுப்பாடுகள்
+	Bates numbering	பேட்ஸ் எண்ணிடல்
+	Before each selected page (select pages in Organize)	தேர்ந்தெடுத்த ஒவ்வொரு பக்கத்துக்கும் முன் (ஒழுங்கமை என்பதில் பக்கங்களைத் தேர்ந்தெடுக்கவும்)
+	Before the number	எண்ணுக்கு முன்
+	Beveled	விளிம்புச் சாய்வு
+	Bicubic downsampling to	இதற்கு பைகியூபிக் குறைத்தல்
+	Binary assets added	சேர்க்கப்பட்ட இருமச் சொத்துகள்
+	Binary assets removed	நீக்கப்பட்ட இருமச் சொத்துகள்
+	Binding	பிணைப்பு
+	Binding:	பிணைப்பு:
+	Black	கருப்பு
+	Black and white	கருப்பு வெள்ளை
+	Black on white	வெள்ளையில் கருப்பு
+	Blank page	வெற்றுப் பக்கம்
+	Blue	நீலம்
+	Bold	தடித்த
+	Booklet	சிறுபுத்தகம்
+	Booklet subset:	சிறுபுத்தகத் துணைக்குழு:
+	Bookmark options	புத்தகக்குறி விருப்பங்கள்
+	Bookmarks	புத்தகக்குறிகள்
+	Bookmarks are present in large documents	பெரிய ஆவணங்களில் புத்தகக்குறிகள் உள்ளன
+	Bookmarks Panel and Page	புத்தகக்குறிப் பலகமும் பக்கமும்
+	Border Color:	எல்லை நிறம்:
+	Borders and Colors	எல்லைகளும் நிறங்களும்
+	Both	இரண்டும்
+	Both sides	இரு பக்கங்களும்
+	Bottom	கீழ்
+	Bottom:	கீழ்:
+	Box	பெட்டி
+	Bring forward	ஒரு படி முன்னே கொண்டு வா
+	Bring to front	முன்னால் கொண்டு வா
+	Bring your own model (off by default)	உங்கள் சொந்த மாதிரியைக் கொண்டு வாருங்கள் (இயல்பாக நிறுத்தப்பட்டுள்ளது)
+	Browser's print dialog	உலாவியின் அச்சு உரையாடல்
+	Browse…	உலாவு…
+	Bulleted list	புள்ளிப் பட்டியல்
+	Butt	முனை
+	Button	பொத்தான்
+	Button is checked by default	பொத்தான் இயல்பாகத் தேர்ந்தெடுக்கப்பட்டுள்ளது
+	Button Properties	பொத்தான் பண்புகள்
+	Button Style:	பொத்தான் பாணி:
+	Buttons with the same name and value are selected in unison	ஒரே பெயரும் மதிப்பும் கொண்ட பொத்தான்கள் ஒன்றாகத் தேர்ந்தெடுக்கப்படும்
+	Bytes	பைட்டுகள்
+	Calculate	கணக்கிடு
+	Calculation order	கணக்கீட்டு வரிசை
+	Calibrate from two points	இரு புள்ளிகளிலிருந்து அளவுத்திருத்தம் செய்
+	Callout	விளக்கக்குறிப்பு
+	Can't be read: {e}	படிக்க இயலாது: {e}
+	Cancel	ரத்துசெய்
+	Cancelled	ரத்துசெய்யப்பட்டது
+	Cancelling…	ரத்துசெய்கிறது…
+	Case-sensitive	எழுத்து வடிவ உணர்வு
+	Category:	வகை:
+	CCITT Group 4	CCITT Group 4
+	Center	மையம்
+	Center Footer Text	மைய அடிக்குறிப்பு உரை
+	Center Header Text	மைய தலைப்பு உரை
+	Center horizontally	கிடைமட்டமாக மையப்படுத்து
+	Center vertically	செங்குத்தாக மையப்படுத்து
+	Center window on screen	சாளரத்தைத் திரையில் மையப்படுத்து
+	Centre	மையம்
+	Certificate authority	சான்றிதழ் அதிகாரம்
+	Certificate Signing	சான்றிதழ் கையொப்பமிடல்
+	Certificate Viewer	சான்றிதழ் பார்வையாளர்
+	Certificates	சான்றிதழ்கள்
+	Certified by {by}	{by} சான்றளித்தது
+	Certify	சான்றளி
+	Certify (invisible signature)	சான்றளி (தெரியாத கையொப்பம்)
+	Certify (visible signature)	சான்றளி (தெரியும் கையொப்பம்)
+	Change Author	ஆசிரியரை மாற்று
+	Change comment properties	கருத்துப் பண்புகளை மாற்று
+	Change document properties	ஆவணப் பண்புகளை மாற்று
+	Change field properties	புலப் பண்புகளை மாற்று
+	Change initial view	தொடக்கக் காட்சியை மாற்று
+	Change initials	முதலெழுத்துகளை மாற்று
+	Change Keywords	திறவுச்சொற்களை மாற்று
+	Change link properties	இணைப்புப் பண்புகளை மாற்று
+	Change reading options	வாசிப்பு விருப்பங்களை மாற்று
+	Change reading options…	வாசிப்பு விருப்பங்களை மாற்று…
+	Change settings…	அமைப்புகளை மாற்று…
+	Change signature	கையொப்பத்தை மாற்று
+	Change Subject	பொருளை மாற்று
+	Change tag properties	குறிச்சொல் பண்புகளை மாற்று
+	Change the colour of line art as well as text	உரையுடன் கோட்டுக் கலையின் நிறத்தையும் மாற்று
+	Change Title	தலைப்பை மாற்று
+	Change {key}	{key} ஐ மாற்று
+	Change {what}	{what} ஐ மாற்று
+	Changes allowed	மாற்றங்கள் அனுமதிக்கப்படுகின்றன
+	Changing the document	ஆவணத்தை மாற்றுதல்
+	Character encoding	எழுத்துக் குறியாக்கம்
+	Character limit 0 means no limit. A comb of characters needs a limit.	எழுத்து வரம்பு 0 என்றால் வரம்பு இல்லை. எழுத்துச் சீப்புக்கு வரம்பு தேவை.
+	Character limit:	எழுத்து வரம்பு:
+	Character spacing	எழுத்து இடைவெளி
+	Characters	எழுத்துகள்
+	characters	எழுத்துகள்
+	Characters without spaces	இடைவெளி இல்லாத எழுத்துகள்
+	Check	சரிக்குறி
+	Check Again	மீண்டும் சரிபார்
+	Check again	மீண்டும் சரிபார்
+	Check box is checked by default	தேர்வுப்பெட்டி இயல்பாகத் தேர்ந்தெடுக்கப்பட்டுள்ளது
+	Check Box Properties	தேர்வுப்பெட்டிப் பண்புகள்
+	Check Box Style:	தேர்வுப்பெட்டி பாணி:
+	Check for accessibility	அணுகல்தன்மையைச் சரிபார்
+	Check for accessibility…	அணுகல்தன்மையைச் சரிபார்…
+	Check for updates…	புதுப்பிப்புகளைச் சரிபார்…
+	Check spelling	எழுத்துப்பிழை சரிபார்
+	Check that the tags read in the order a sighted reader would. Use the Reading Order tool or the Tags panel to correct it.	பார்வையுள்ள வாசகர் படிக்கும் வரிசையிலேயே குறிச்சொற்கள் படிக்கப்படுகின்றனவா எனச் சரிபார்க்கவும். அதைச் சரிசெய்ய வாசிப்பு வரிசைக் கருவி அல்லது குறிச்சொற்கள் பலகத்தைப் பயன்படுத்தவும்.
+	Check the pages	பக்கங்களைச் சரிபார்
+	Check the pages of {name}: {why}	{name} இன் பக்கங்களைச் சரிபார்க்கவும்: {why}
+	CheckBox	தேர்வுப்பெட்டி
+	Checkbox	தேர்வுப்பெட்டி
+	Checked	தேர்ந்தெடுக்கப்பட்டது
+	Checking Options ({on} of 32 in all categories)	சரிபார்ப்பு விருப்பங்கள் (அனைத்து வகைகளிலும் உள்ள 32 இல் {on})
+	Checking pages…	பக்கங்களைச் சரிபார்க்கிறது…
+	Checkmark	சரிக்குறி
+	Choose a digital ID.	ஓர் எண்ணிம ஐடியைத் தேர்ந்தெடுக்கவும்.
+	Choose a file…	ஒரு கோப்பைத் தேர்ந்தெடு…
+	Choose a folder for the exported files	ஏற்றுமதி செய்யப்படும் கோப்புகளுக்கான கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder for the extracted pages	பிரித்தெடுத்த பக்கங்களுக்கான கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder for the results	முடிவுகளுக்கான கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder for the searchable files	தேடக்கூடிய கோப்புகளுக்கான கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder for the split files	பிரித்த கோப்புகளுக்கான கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder on this computer to pin	பொருத்துவதற்கு இந்தக் கணினியில் ஒரு கோப்புறையைத் தேர்ந்தெடுக்கவும்
+	Choose a folder…	ஒரு கோப்புறையைத் தேர்ந்தெடு…
+	Choose a layout:	ஒரு தளவமைப்பைத் தேர்ந்தெடுக்கவும்:
+	Choose a PNG or JPEG image (up to 4 MiB). Transparency is preserved.	ஒரு PNG அல்லது JPEG படத்தைத் தேர்ந்தெடுக்கவும் (4 MiB வரை). ஒளிபுகாமை பாதுகாக்கப்படும்.
+	Choose a stamp, then click on the page to place it.	ஒரு முத்திரையைத் தேர்ந்தெடுத்து, அதை வைக்கப் பக்கத்தில் சொடுக்கவும்.
+	Choose an image	ஒரு படத்தைத் தேர்ந்தெடு
+	Choose images	படங்களைத் தேர்ந்தெடு
+	Choose image…	படத்தைத் தேர்ந்தெடு…
+	Choose photo…	புகைப்படத்தைத் தேர்ந்தெடு…
+	Choose the digital ID that you want to use for signing:	கையொப்பமிடப் பயன்படுத்த விரும்பும் எண்ணிம ஐடியைத் தேர்ந்தெடுக்கவும்:
+	Choose…	தேர்ந்தெடு…
+	Circle	வட்டம்
+	Clean Up	சுத்தம் செய்
+	Clean-up	சுத்தம் செய்தல்
+	Clear	அழி
+	Clear All	அனைத்தையும் அழி
+	Clear all	அனைத்தையும் அழி
+	Clear form	படிவத்தை அழி
+	Clear Recent Files	சமீபத்திய கோப்புகளை அழி
+	Clear redaction marks	மறைப்புக் குறிகளை அழி
+	Clear search	தேடலை அழி
+	Clear selection / close find	தேர்வை நீக்கு / தேடலை மூடு
+	Click on the page to add a {tool}, or drag to set its size	{tool} ஐச் சேர்க்கப் பக்கத்தில் சொடுக்கவும், அல்லது அளவை அமைக்க இழுக்கவும்
+	Click on the page to add text; each click starts a new box, and ✓ finishes. Drag items to move them, drag a corner to resize, double-click text to edit it.	உரையைச் சேர்க்கப் பக்கத்தில் சொடுக்கவும்; ஒவ்வொரு சொடுக்கும் புதிய பெட்டியைத் தொடங்கும், ✓ முடிக்கும். உருப்படிகளை நகர்த்த இழுக்கவும், அளவை மாற்ற மூலையை இழுக்கவும், உரையைத் திருத்த இருமுறை சொடுக்கவும்.
+	Click text or an image to edit it	உரை அல்லது படத்தைத் திருத்த சொடுக்கவும்
+	Click the first point to begin.	தொடங்க முதல் புள்ளியைச் சொடுக்கவும்.
+	Click to sort, drag to move the column. Drag its edge to resize it.	வரிசைப்படுத்த சொடுக்கவும், நெடுவரிசையை நகர்த்த இழுக்கவும். அளவை மாற்ற அதன் விளிம்பை இழுக்கவும்.
+	Click vertices. Enter or double-click finishes a perimeter or area. Click the first point to close an area.	முனைகளைச் சொடுக்கவும். சுற்றளவு அல்லது பரப்பளவை முடிக்க Enter அல்லது இருமுறை சொடுக்கவும். பரப்பளவை மூட முதல் புள்ளியைச் சொடுக்கவும்.
+	Clipboard	கிளிப்போர்டு
+	Clockwise 90 degrees	வலஞ்சுழியாக 90 டிகிரி
+	Close	மூடு
+	Close (Esc)	மூடு (Esc)
+	Close all	அனைத்தையும் மூடு
+	Close file	கோப்பை மூடு
+	Close panel	பலகத்தை மூடு
+	Close Tab	தாவலை மூடு
+	Closed arrow	மூடிய அம்பு
+	Cloud	மேகம்
+	Collapse	சுருக்கு
+	Collapse all	அனைத்தையும் சுருக்கு
+	Collapse all bookmarks	அனைத்துப் புத்தகக்குறிகளையும் சுருக்கு
+	Collapse all pages	அனைத்துப் பக்கங்களையும் சுருக்கு
+	Collapse all tools	அனைத்துக் கருவிகளையும் சுருக்கு
+	Collapse tag	குறிச்சொல்லைச் சுருக்கு
+	Collate	ஒழுங்குபடுத்து
+	Color	நிறம்
+	Color contrast	நிற முரண்பாடு
+	Color Images	வண்ணப் படங்கள்
+	Color Spaces	வண்ண வெளிகள்
+	Color:	நிறம்:
+	Colour	நிறம்
+	Colours are remapped while rendering; the document itself never changes.	வரையும்போது நிறங்கள் மறுவரைவு செய்யப்படுகின்றன; ஆவணம் ஒருபோதும் மாறாது.
+	Column select	நெடுவரிசைத் தேர்வு
+	Column spacing	நெடுவரிசை இடைவெளி
+	Column widths	நெடுவரிசை அகலங்கள்
+	Column {n}	நெடுவரிசை {n}
+	Columns	நெடுவரிசைகள்
+	Comb of	சீப்பு அமைப்பு:
+	Comb of characters	எழுத்துச் சீப்பு
+	Combine	இணை
+	Combine files	கோப்புகளை இணை
+	Combine files…	கோப்புகளை இணை…
+	Combine the rest	மற்றவற்றை இணை
+	Combined {n} files	{n} கோப்புகள் இணைக்கப்பட்டன
+	Combo	காம்போ
+	Coming in milestone	வரவிருக்கும் மைல்கல்
+	Coming in milestone {m}. Items marked Ready work today.	மைல்கல் {m} இல் வரவுள்ளது. 'தயார்' எனக் குறிக்கப்பட்டவை இன்றே செயல்படும்.
+	Command	கட்டளை
+	Comment	கருத்து
+	Comment and form data	கருத்து மற்றும் படிவத் தரவு
+	Comment and review	கருத்து மற்றும் மதிப்பாய்வு
+	Comment list	கருத்துப் பட்டியல்
+	Commenting	கருத்திடுதல்
+	Commenting, filling in form fields, and signing existing signature fields	கருத்திடுதல், படிவப் புலங்களை நிரப்புதல், ஏற்கனவே உள்ள கையொப்பப் புலங்களில் கையொப்பமிடுதல்
+	Comments	கருத்துகள்
+	comments	கருத்துகள்
+	Comments & Forms	கருத்துகள் & படிவங்கள்
+	Comments and markups	கருத்துகள் மற்றும் குறிப்பீடுகள்
+	Comments only	கருத்துகள் மட்டும்
+	Comments panel	கருத்துகள் பலகம்
+	Comments, links and fields must be in the tag tree to be announced. Tag the annotations.	கருத்துகள், இணைப்புகள், புலங்கள் ஆகியவை அறிவிக்கப்பட குறிச்சொல் மரத்தில் இருக்க வேண்டும். குறிப்புகளைக் குறியிடவும்.
+	Commit selected value immediately	தேர்ந்தெடுத்த மதிப்பை உடனே உறுதிசெய்
+	Commits	கமிட்கள்
+	Common Properties	பொதுப் பண்புகள்
+	Common scales	பொதுவான அளவுகோல்கள்
+	Company	நிறுவனம்
+	Compare	ஒப்பிடு
+	Compare Files	கோப்புகளை ஒப்பிடு
+	Compare files	கோப்புகளை ஒப்பிடு
+	Compare files…	கோப்புகளை ஒப்பிடு…
+	Compare this file with an older version: Compare files… in All tools.	இந்தக் கோப்பைப் பழைய பதிப்புடன் ஒப்பிட: அனைத்துக் கருவிகளில் "கோப்புகளை ஒப்பிடு…".
+	Compatibility	இணக்கத்தன்மை
+	Completed	முடிந்தது
+	Compress a PDF	PDF-ஐச் சுருக்கு
+	Compress document structure (object streams)	ஆவண அமைப்பைச் சுருக்கு (பொருள் ஸ்ட்ரீம்கள்)
+	Compression	அழுத்தம்
+	Configure a Digital ID for Signing	கையொப்பமிடுவதற்கான எண்ணிம ஐடியை உள்ளமை
+	Configure New Digital ID	புதிய எண்ணிம ஐடியை உள்ளமை
+	Confirm Password	கடவுச்சொல்லை உறுதிசெய்
+	Conformance level:	இணக்க நிலை:
+	Connected lines	இணைக்கப்பட்ட கோடுகள்
+	Console	கன்சோல்
+	Content copying	உள்ளடக்க நகலெடுப்பு
+	Content copying for accessibility	அணுகல்தன்மைக்கான உள்ளடக்க நகலெடுப்பு
+	Content Streams	உள்ளடக்க ஸ்ட்ரீம்கள்
+	Continue	தொடர்
+	Continuous scrolling	தொடர்ச்சியான ஸ்க்ரோலிங்
+	Contributors	பங்களிப்பாளர்கள்
+	Convert	மாற்று
+	Convert colors	நிறங்களை மாற்று
+	Copied to clipboard	கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது
+	Copied {what}	{what} நகலெடுக்கப்பட்டது
+	Copies, two-sided printing and colour are chosen in the browser's print dialog.	நகல்கள், இருபக்க அச்சு மற்றும் நிறம் உலாவியின் அச்சு உரையாடலில் தேர்ந்தெடுக்கப்படுகின்றன.
+	Copies:	நகல்கள்:
+	Copy	நகலெடு
+	Copy Image	படத்தை நகலெடு
+	Copy Image in Original Format	படத்தை அசல் வடிவத்தில் நகலெடு
+	Copy or cut pages first	முதலில் பக்கங்களை நகலெடுக்கவும் அல்லது வெட்டவும்
+	Copy pages	பக்கங்களை நகலெடு
+	Copy selected text	தேர்ந்தெடுத்த உரையை நகலெடு
+	Copy text	உரையை நகலெடு
+	Copy to clipboard	கிளிப்போர்டுக்கு நகலெடு
+	Correct recognized text	அடையாளம் காணப்பட்ட உரையைத் திருத்து
+	Could not save: {e}	சேமிக்க முடியவில்லை: {e}
+	Couldn't add {name}: {e}	{name} ஐச் சேர்க்க இயலவில்லை: {e}
+	Couldn't combine files: {e}	கோப்புகளை இணைக்க இயலவில்லை: {e}
+	Couldn't copy the image: {e}	படத்தை நகலெடுக்க இயலவில்லை: {e}
+	Couldn't create a PDF: {e}	PDF-ஐ உருவாக்க இயலவில்லை: {e}
+	Couldn't download {name}: {e}	{name} ஐப் பதிவிறக்க இயலவில்லை: {e}
+	Couldn't extract pages: {e}	பக்கங்களைப் பிரித்தெடுக்க இயலவில்லை: {e}
+	Couldn't fit the visible content: {e}	தெரியும் உள்ளடக்கத்துக்குப் பொருத்த இயலவில்லை: {e}
+	Couldn't follow linked PDF: {reason}	இணைக்கப்பட்ட PDF-ஐப் பின்தொடர இயலவில்லை: {reason}
+	Couldn't import the signature image: {e}	கையொப்பப் படத்தை இறக்குமதி செய்ய இயலவில்லை: {e}
+	Couldn't open revision {n}: {e}	திருத்தம் {n} ஐத் திறக்க இயலவில்லை: {e}
+	Couldn't open the printer's preferences: {e}	அச்சுப்பொறியின் விருப்பத்தேர்வுகளைத் திறக்க இயலவில்லை: {e}
+	Couldn't open the result: {e}	முடிவைத் திறக்க இயலவில்லை: {e}
+	Couldn't open the signed version: {e}	கையொப்பமிட்ட பதிப்பைத் திறக்க இயலவில்லை: {e}
+	Couldn't open {name}: {e}	{name} ஐத் திறக்க இயலவில்லை: {e}
+	Couldn't optimize the file	கோப்பை உகந்ததாக்க இயலவில்லை
+	Couldn't optimize the file: {e}	கோப்பை உகந்ததாக்க இயலவில்லை: {e}
+	Couldn't print from the browser ({e}); downloaded {name} to print instead	உலாவியிலிருந்து அச்சிட இயலவில்லை ({e}); அதற்குப் பதிலாக அச்சிட {name} பதிவிறக்கப்பட்டது
+	Couldn't read {name}: {e}	{name} ஐப் படிக்க இயலவில்லை: {e}
+	Couldn't recover {name}: {e}	{name} ஐ மீட்டெடுக்க இயலவில்லை: {e}
+	Couldn't reload {name}: {e}	{name} ஐ மீண்டும் ஏற்ற இயலவில்லை: {e}
+	Couldn't save the image: {e}	படத்தைச் சேமிக்க இயலவில்லை: {e}
+	Couldn't save {name}: {e}	{name} ஐச் சேமிக்க இயலவில்லை: {e}
+	Couldn't save: {e}	சேமிக்க இயலவில்லை: {e}
+	Couldn't show the file picker. Please try again.	கோப்புத் தேர்வியைக் காட்ட இயலவில்லை. மீண்டும் முயலவும்.
+	Couldn't split: {e}	பிரிக்க இயலவில்லை: {e}
+	Couldn't summarize comments: {e}	கருத்துகளைச் சுருக்க இயலவில்லை: {e}
+	Couldn't take the snapshot: {e}	ஸ்னாப்ஷாட் எடுக்க இயலவில்லை: {e}
+	Couldn't unlock {name}: {e}	{name} இன் பூட்டைத் திறக்க இயலவில்லை: {e}
+	Couldn't use the photo: {e}	புகைப்படத்தைப் பயன்படுத்த இயலவில்லை: {e}
+	Couldn't use {name}: {e}	{name} ஐப் பயன்படுத்த இயலவில்லை: {e}
+	Couldn't write {name}: {e}	{name} ஐ எழுத இயலவில்லை: {e}
+	Couldn't write {path}: {e}	{path} ஐ எழுத இயலவில்லை: {e}
+	Counterclockwise 90 degrees	இடஞ்சுழியாக 90 டிகிரி
+	Counting words… {n} pages read	சொற்களை எண்ணுகிறது… {n} பக்கங்கள் படிக்கப்பட்டன
+	Country/Region	நாடு/பகுதி
+	Create	உருவாக்கு
+	Create & Edit	உருவாக்கு & திருத்து
+	Create a new Digital ID (self-signed, saved to a password-protected file)	புதிய எண்ணிம ஐடியை உருவாக்கு (சுய-கையொப்பம், கடவுச்சொல் பாதுகாக்கப்பட்ட கோப்பில் சேமிக்கப்படும்)
+	Create a PDF	PDF உருவாக்கு
+	Create accessibility report	அணுகல்தன்மை அறிக்கையை உருவாக்கு
+	Create Custom Stamp	தனிப்பயன் முத்திரையை உருவாக்கு
+	Create custom stamp…	தனிப்பயன் முத்திரையை உருவாக்கு…
+	Create folder	கோப்புறையை உருவாக்கு
+	Create from	இதிலிருந்து உருவாக்கு
+	Create Link	இணைப்பை உருவாக்கு
+	Create link	இணைப்பை உருவாக்கு
+	Create links	இணைப்புகளை உருவாக்கு
+	Create links from URLs	URLகளிலிருந்து இணைப்புகளை உருவாக்கு
+	Create Link…	இணைப்பை உருவாக்கு…
+	Create PDF Comment Summary	PDF கருத்துச் சுருக்கத்தை உருவாக்கு
+	Create PDF comment summary…	PDF கருத்துச் சுருக்கத்தை உருவாக்கு…
+	Create PDF from clipboard	கிளிப்போர்டிலிருந்து PDF உருவாக்கு
+	Create PDF from file…	கோப்பிலிருந்து PDF உருவாக்கு…
+	Create PDF from images	படங்களிலிருந்து PDF உருவாக்கு
+	Create PDF from images…	படங்களிலிருந்து PDF உருவாக்கு…
+	Create PDF from multiple files…	பல கோப்புகளிலிருந்து PDF உருவாக்கு…
+	Create separate PDFs…	தனித்தனி PDFகளை உருவாக்கு…
+	Create {what}	{what} உருவாக்கு
+	Created 1 link	1 இணைப்பு உருவாக்கப்பட்டது
+	Created a comment summary	கருத்துச் சுருக்கம் உருவாக்கப்பட்டது
+	Created a PDF from the first {n} files	முதல் {n} கோப்புகளிலிருந்து ஒரு PDF உருவாக்கப்பட்டது
+	Created a PDF from {n} files	{n} கோப்புகளிலிருந்து ஒரு PDF உருவாக்கப்பட்டது
+	Created a PDF from {n} files; left out: {names}	{n} கோப்புகளிலிருந்து ஒரு PDF உருவாக்கப்பட்டது; விடுபட்டவை: {names}
+	Created {n} links	{n} இணைப்புகள் உருவாக்கப்பட்டன
+	Creates 1 file from {n} pages.	{n} பக்கங்களிலிருந்து 1 கோப்பை உருவாக்கும்.
+	Creates {f} files from {n} pages.	{n} பக்கங்களிலிருந்து {f} கோப்புகளை உருவாக்கும்.
+	Creator	உருவாக்கியவர்
+	Credit Cards	கடன் அட்டைகள்
+	CRL Signing	CRL கையொப்பமிடல்
+	Crop	வெட்டு
+	Crop (% trimmed from each side)	வெட்டு (ஒவ்வொரு பக்கத்திலிருந்தும் நீக்கப்படும் %)
+	Crop Image	படத்தை வெட்டு
+	Crop image	படத்தை வெட்டு
+	Crop page	பக்கத்தை வெட்டு
+	Crop pages	பக்கங்களை வெட்டு
+	Cross	குறுக்குக்குறி
+key	Ctrl	Ctrl
+	Currency symbol:	நாணயக் குறியீடு:
+	Current page	தற்போதைய பக்கம்
+	Current page ({n})	தற்போதைய பக்கம் ({n})
+	Current page only	தற்போதைய பக்கம் மட்டும்
+	Current page — type a page number or label (such as iv) and press Enter	தற்போதைய பக்கம் — பக்க எண் அல்லது குறிப்பை (எ.கா. iv) உள்ளிட்டு Enter அழுத்தவும்
+	Custom	தனிப்பயன்
+	Custom font	தனிப்பயன் எழுத்துரு
+	Custom scale:	தனிப்பயன் அளவு:
+	Custom stamps arrive on the web with file pickers for images	தனிப்பயன் முத்திரைகள், படக் கோப்புத் தேர்விகளுடன் இணையத்தில் வரவுள்ளன
+	Custom text:	தனிப்பயன் உரை:
+	Custom:	தனிப்பயன்:
+	Customize & Automate	தனிப்பயனாக்கு & தானியக்கு
+	Cut	வெட்டு
+	Cut and stack	வெட்டி அடுக்கு
+	Cut and stack needs Two-sided: Off. Print single-sided sheets.	வெட்டி அடுக்குதலுக்கு இருபக்கம்: அணைப்பு தேவை. ஒருபக்கத் தாள்களை அச்சிடவும்.
+	Cut Image	படத்தை வெட்டு
+	Cut marks	வெட்டுக் குறிகள்
+	Cut pages	பக்கங்களை வெட்டு
+	Cut {what}	{what} வெட்டப்பட்டது
+	Cuts each page to its printed area, turns it upright and fits it to the sheet without stretching. One label per sheet.	ஒவ்வொரு பக்கத்தையும் அதன் அச்சிடப்பட்ட பகுதிக்கு வெட்டி, நேராகத் திருப்பி, இழுக்காமல் தாளுக்குப் பொருத்தும். ஒரு தாளுக்கு ஒரு லேபிள்.
+	Dark	இருண்ட
+	Dark gray	அடர் சாம்பல்
+	Dark gray theme	அடர் சாம்பல் தீம்
+	Dark theme	இருண்ட தீம்
+	Dashed	கோடிட்ட
+	Data Encipherment	தரவுக் குறியாக்கம்
+	Date	தேதி
+	Date field	தேதிப் புலம்
+	Date format	தேதி வடிவம்
+	Date: 	தேதி: 
+	Dates	தேதிகள்
+	December	டிசம்பர்
+calendar date	December	டிசம்பர்
+	Decimal places:	தசம இடங்கள்:
+	Decimals	தசமங்கள்
+	Decipher Only	மறைகுறி நீக்கம் மட்டும்
+	Declared conformance: {shown}	அறிவிக்கப்பட்ட இணக்கம்: {shown}
+	Decorative figure	அலங்காரப் படம்
+	Default	இயல்புநிலை
+	Default page display	இயல்புநிலை பக்கக் காட்சி
+	Default Value:	இயல்புநிலை மதிப்பு:
+	Default workspace mode	இயல்புநிலைப் பணிவெளிப் பயன்முறை
+	Default zoom	இயல்புநிலைப் பெரிதாக்கம்
+	Default:	இயல்புநிலை:
+	Delete	நீக்கு
+key	Delete	Delete
+	Delete attachment	இணைப்பை நீக்கு
+	Delete attachment {key}	இணைப்பு {key} ஐ நீக்கு
+	Delete bookmark	புத்தகக்குறியை நீக்கு
+	Delete comment	கருத்தை நீக்கு
+	Delete content	உள்ளடக்கத்தை நீக்கு
+	Delete document JavaScript	ஆவண JavaScript-ஐ நீக்கு
+	Delete field	புலத்தை நீக்கு
+	Delete image	படத்தை நீக்கு
+	Delete link	இணைப்பை நீக்கு
+	Delete page	பக்கத்தை நீக்கு
+	Delete page {label}	பக்கம் {label} ஐ நீக்கு
+	Delete pages	பக்கங்களை நீக்கு
+	Delete pages (Delete)	பக்கங்களை நீக்கு (Delete)
+	Delete pages after extracting	பிரித்தெடுத்த பிறகு பக்கங்களை நீக்கு
+	Delete selected fields	தேர்ந்தெடுத்த புலங்களை நீக்கு
+	Delete selected pages (Organize)	தேர்ந்தெடுத்த பக்கங்களை நீக்கு (ஒழுங்கமை)
+	Delete stamp	முத்திரையை நீக்கு
+	Delete the selected pages	தேர்ந்தெடுத்த பக்கங்களை நீக்கு
+@plural	Delete {n} field|Delete {n} fields	{n} புலத்தை நீக்கு|{n} புலங்களை நீக்கு
+	Delete {o}	{o} ஐ நீக்கு
+	Deleted	நீக்கப்பட்டது
+	Describe the figure	படத்தை விவரிக்கவும்
+	Description	விளக்கம்
+	Description:	விளக்கம்:
+	Detailed Report	விரிவான அறிக்கை
+	Details	விவரங்கள்
+	Detect form fields	படிவப் புலங்களைக் கண்டறி
+	Detected 1 form field	1 படிவப் புலம் கண்டறியப்பட்டது
+	Detected {n} form fields	{n} படிவப் புலங்கள் கண்டறியப்பட்டன
+	Device colour is used, but there is no PDF/A output intent	சாதன நிறம் பயன்படுத்தப்படுகிறது, ஆனால் PDF/A வெளியீட்டு நோக்கம் இல்லை
+	DeviceCMYK is used, but the PDF/A output intent isn't a CMYK profile	DeviceCMYK பயன்படுத்தப்படுகிறது, ஆனால் PDF/A வெளியீட்டு நோக்கம் CMYK சுயவிவரம் அல்ல
+	DeviceCMYK is used: it needs a CMYK output intent (not added automatically)	DeviceCMYK பயன்படுத்தப்படுகிறது: இதற்கு CMYK வெளியீட்டு நோக்கம் தேவை (தானாகச் சேர்க்கப்படுவதில்லை)
+	DeviceRGB is used, but the PDF/A output intent isn't an RGB profile	DeviceRGB பயன்படுத்தப்படுகிறது, ஆனால் PDF/A வெளியீட்டு நோக்கம் RGB சுயவிவரம் அல்ல
+	Diagnostic details	நோயறிதல் விவரங்கள்
+	Diamond	வைரம்
+	Digital ID	எண்ணிம ஐடி
+	Digital ID password	எண்ணிம ஐடி கடவுச்சொல்
+	Digital Signature	எண்ணிம கையொப்பம்
+	Digital signature	எண்ணிம கையொப்பம்
+	Digital Signature Properties	எண்ணிம கையொப்பப் பண்புகள்
+	Digitally sign	எண்ணிம முறையில் கையொப்பமிடு
+	Digitally signed by	எண்ணிம முறையில் கையொப்பமிட்டவர்
+	Direction:	திசை:
+	Disabled	முடக்கப்பட்டது
+	Discard	நிராகரி
+	Discard all comments, forms and multimedia	அனைத்துக் கருத்துகள், படிவங்கள், பல்லூடகத்தை நீக்கு
+	Discard all links, actions and JavaScript	அனைத்து இணைப்புகள், செயல்கள், JavaScript ஆகியவற்றை நீக்கு
+	Discard all object data (file attachments)	அனைத்துப் பொருள் தரவையும் (கோப்பு இணைப்புகள்) நீக்கு
+	Discard alternate images	மாற்றுப் படங்களை நீக்கு
+	Discard bookmarks	புத்தகக்குறிகளை நீக்கு
+	Discard document information and metadata	ஆவணத் தகவல் மற்றும் மேனிலைத் தரவை நீக்கு
+	Discard document tags	ஆவணக் குறிச்சொற்களை நீக்கு
+	Discard embedded page thumbnails	உட்பொதிந்த பக்கச் சிறுபடங்களை நீக்கு
+	Discard embedded print settings	உட்பொதிந்த அச்சு அமைப்புகளை நீக்கு
+	Discard hidden layer content	மறைந்த அடுக்கு உள்ளடக்கத்தை நீக்கு
+	Discard hidden text	மறைந்த உரையை நீக்கு
+	Discard Objects	பொருட்களை நீக்கு
+	Discard private data of other applications	பிற பயன்பாடுகளின் தனிப்பட்ட தரவை நீக்கு
+	Discard this text (Esc)	இந்த உரையை நிராகரி (Esc)
+	Discard User Data	பயனர் தரவை நீக்கு
+	Dismiss	மூடு
+	Display name	காட்சிப் பெயர்
+	Display theme	காட்சி தீம்
+	Distance	தொலைவு
+	Distinguished name	தனிச்சிறப்புப் பெயர்
+	Distribute	சமமாகப் பகிர்
+	Distribute evenly	சமமாகப் பகிர்
+	Distribute fields	புலங்களைச் சமமாகப் பகிர்
+	DN: 	DN: 
+	Document	ஆவணம்
+	Document actions	ஆவணச் செயல்கள்
+	Document and markups	ஆவணமும் குறிப்பீடுகளும்
+	Document and stamps	ஆவணமும் முத்திரைகளும்
+	Document assembly	ஆவணத் தொகுப்பு
+	Document has appropriate color contrast	ஆவணத்தில் பொருத்தமான நிற முரண்பாடு உள்ளது
+	Document is not image-only PDF	ஆவணம் படம் மட்டுமே உள்ள PDF அல்ல
+	Document is tagged PDF	ஆவணம் குறியிடப்பட்ட PDF
+	Document JavaScripts	ஆவண JavaScriptகள்
+	Document JavaScripts…	ஆவண JavaScriptகள்…
+	Document language	ஆவண மொழி
+	Document Overhead	ஆவணக் கூடுதல் சுமை
+	Document Properties	ஆவணப் பண்புகள்
+	Document properties ({key})	ஆவணப் பண்புகள் ({key})
+	Document properties (⌘D)	ஆவணப் பண்புகள் (⌘D)
+	Document properties…	ஆவணப் பண்புகள்…
+	Document sanitized. Save to finish: saving rewrites the whole file.	ஆவணம் தூய்மையாக்கப்பட்டது. முடிக்கச் சேமிக்கவும்: சேமிப்பது முழுக் கோப்பையும் மீண்டும் எழுதும்.
+	document security store	ஆவணப் பாதுகாப்புச் சேமிப்பகம்
+	document structure	ஆவண அமைப்பு
+	Document structure provides a logical reading order	ஆவண அமைப்பு தருக்க வாசிப்பு வரிசையை அளிக்கிறது
+	Document Title	ஆவணத் தலைப்பு
+	Document title is showing in title bar	ஆவணத் தலைப்பு தலைப்புப் பட்டையில் காட்டப்படுகிறது
+	Documents and view	ஆவணங்களும் காட்சியும்
+	Documents of more than 20 pages need bookmarks for navigation. Add bookmarks for the main sections.	20 பக்கங்களுக்கு மேற்பட்ட ஆவணங்களுக்கு வழிசெலுத்த புத்தகக்குறிகள் தேவை. முக்கியப் பிரிவுகளுக்குப் புத்தகக்குறிகளைச் சேர்க்கவும்.
+	Don't save	சேமிக்க வேண்டாம்
+	Don't show again	மீண்டும் காட்ட வேண்டாம்
+	Done	முடிந்தது
+	Done adding text	உரையைச் சேர்த்து முடிந்தது
+	Dot	புள்ளி
+	Double-click	இருமுறை சொடுக்கு
+	Download	பதிவிறக்கு
+	Downloaded {name}	{name} பதிவிறக்கப்பட்டது
+@plural	Downloaded {n} PDF|Downloaded {n} PDFs	{n} PDF பதிவிறக்கப்பட்டது|{n} PDFகள் பதிவிறக்கப்பட்டன
+	Downloading attachments on the web arrives with M3.10 ({n} bytes ready)	இணையத்தில் இணைப்புகளைப் பதிவிறக்கும் வசதி M3.10 இல் வரவுள்ளது ({n} பைட்டுகள் தயார்)
+	Downsample to	இதற்குக் குறைத்து மாதிரியெடு
+	DPI sets the printed page size without resampling the image.	படத்தை மறுமாதிரியெடுக்காமல் DPI அச்சிடப்படும் பக்க அளவை அமைக்கிறது.
+	Drag a field to move it, or select it and press {up} or {down}.	புலத்தை நகர்த்த இழுக்கவும், அல்லது அதைத் தேர்ந்தெடுத்து {up} அல்லது {down} அழுத்தவும்.
+	Drag a rectangle around the area to copy	நகலெடுக்க வேண்டிய பகுதியைச் சுற்றி ஒரு செவ்வகத்தை இழுக்கவும்
+	Drag a rectangle on a page to crop it; double-click a page for Set Page Boxes	வெட்ட, பக்கத்தில் ஒரு செவ்வகத்தை இழுக்கவும்; பக்கப் பெட்டிகளை அமைக்க பக்கத்தின்மேல் இருமுறை சொடுக்கவும்
+	Drag a rectangle to create a link; double-click a link to edit it	இணைப்பை உருவாக்க ஒரு செவ்வகத்தை இழுக்கவும்; இணைப்பைத் திருத்த அதன்மேல் இருமுறை சொடுக்கவும்
+	Drag the corners onto the document's edges, then choose Enhance page.	மூலைகளை ஆவணத்தின் விளிம்புகளுக்கு இழுத்து, பின்னர் "பக்கத்தை மேம்படுத்து" என்பதைத் தேர்ந்தெடுக்கவும்.
+	Drag the selection to move it. Esc clears the selection.	தேர்வை நகர்த்த இழுக்கவும். Esc தேர்வை நீக்கும்.
+	Drag to draw the area where the signature should appear.	கையொப்பம் தோன்ற வேண்டிய பகுதியை வரைய இழுக்கவும்.
+	Drag to reorder	மறுவரிசைப்படுத்த இழுக்கவும்
+	Draw	வரை
+	Draw a cloud	மேகம் வரை
+	Draw a line	கோடு வரை
+	Draw a polygon	பலகோணம் வரை
+	Draw a rectangle	செவ்வகம் வரை
+	Draw an arrow	அம்புக்குறி வரை
+	Draw an oval	நீள்வட்டம் வரை
+	Draw connected lines	இணைக்கப்பட்ட கோடுகளை வரை
+	Draw freehand	கையால் வரை
+	Draw your {what} below.	உங்கள் {what} ஐக் கீழே வரையுங்கள்.
+	Drawing	வரைதல்
+	Drawing scale	வரைபட அளவுகோல்
+	Drawing scale changes. Use Actual size for full-scale plans.	வரைபட அளவுகோல் மாறுகிறது. முழு அளவுத் திட்டங்களுக்கு உண்மையான அளவைப் பயன்படுத்தவும்.
+	Drop PDFs or folders here, or choose them.	PDFகள் அல்லது கோப்புறைகளை இங்கே இழுத்துவிடவும், அல்லது அவற்றைத் தேர்ந்தெடுக்கவும்.
+	Drop PDFs, images, text files or folders here, or choose them.	PDFகள், படங்கள், உரைக் கோப்புகள் அல்லது கோப்புறைகளை இங்கே இழுத்துவிடவும், அல்லது அவற்றைத் தேர்ந்தெடுக்கவும்.
+	Drop-down list	கீழிறங்கு பட்டியல்
+	Dropdown Properties	கீழிறங்கு பட்டியல் பண்புகள்
+	Duplicate	நகலெடுத்துப் பெருக்கு
+	Duplicate "{name}" onto:	"{name}" ஐ இங்கே நகலெடு:
+	Duplicate Field	புலத்தை நகலெடுத்துப் பெருக்கு
+	Duplicate field	புலத்தை நகலெடுத்துப் பெருக்கு
+	Duplicate page	பக்கத்தை நகலெடுத்துப் பெருக்கு
+	Duplicate pages	பக்கங்களை நகலெடுத்துப் பெருக்கு
+	Duplicate…	நகலெடுத்துப் பெருக்கு…
+	Dynamic	இயங்குநிலை
+	Dynamic XFA form laid out from its template: {pages}, {fields}.	இயங்குநிலை XFA படிவம் அதன் வார்ப்புருவிலிருந்து அமைக்கப்பட்டது: {pages}, {fields}.
+	E-Sign	மின்-கையொப்பம்
+	e.g. en-US	எ.கா. en-US
+	e.g. My stamps	எ.கா. என் முத்திரைகள்
+	Each field needs a tooltip that says what to enter. Add one in Field Properties > General > Tooltip.	ஒவ்வொரு புலத்துக்கும் என்ன உள்ளிட வேண்டும் எனக் கூறும் கருவிக்குறிப்பு தேவை. புலப் பண்புகள் > பொது > கருவிக்குறிப்பு என்பதில் ஒன்றைச் சேர்க்கவும்.
+	Each file holds as many of the {n} pages as fit.	ஒவ்வொரு கோப்பும் {n} பக்கங்களில் பொருந்தும் அளவு பக்கங்களைக் கொண்டிருக்கும்.
+	Each image is measured where pages draw it; an image is replaced only if the result is smaller.	பக்கங்கள் வரையும் அளவில் ஒவ்வொரு படமும் அளக்கப்படுகிறது; முடிவு சிறியதாக இருந்தால் மட்டுமே படம் மாற்றப்படும்.
+	Each image once, named after the document and page. JPEG images are saved unchanged; others as PNG.	ஒவ்வொரு படமும் ஒருமுறை, ஆவணம் மற்றும் பக்கத்தின் பெயரில். JPEG படங்கள் மாற்றமின்றிச் சேமிக்கப்படும்; மற்றவை PNG ஆக.
+	Earlier in calculation order	கணக்கீட்டு வரிசையில் முன்னதாக
+	Earlier in tab order	தாவல் வரிசையில் முன்னதாக
+	Edit	திருத்து
+comment menu	Edit	திருத்து
+	Edit a PDF	PDF-ஐத் திருத்து
+	Edit Action	செயலைத் திருத்து
+	Edit comment	கருத்தைத் திருத்து
+	Edit content	உள்ளடக்கத்தைத் திருத்து
+	Edit document JavaScript	ஆவண JavaScript-ஐத் திருத்து
+	Edit fields	புலங்களைத் திருத்து
+	Edit image	படத்தைத் திருத்து
+	Edit script of {name}	{name} இன் ஸ்கிரிப்டைத் திருத்து
+	Edit text	உரையைத் திருத்து
+	Edit text & images	உரை & படங்களைத் திருத்து
+	Edit text…	உரையைத் திருத்து…
+	Edit this PDF	இந்த PDF-ஐத் திருத்து
+	Edit {field}'s formula	{field} புலத்தின் சூத்திரத்தைத் திருத்து
+	Editing	திருத்துவதற்கு
+	Edit…	திருத்து…
+	Email Address	மின்னஞ்சல் முகவரி
+	Email Addresses	மின்னஞ்சல் முகவரிகள்
+	Embedded Files	உட்பொதிந்த கோப்புகள்
+	Embedded files must be PDF/A files themselves (use PDF/A-3 for others)	உட்பொதிந்த கோப்புகள் தாமே PDF/A கோப்புகளாக இருக்க வேண்டும் (மற்றவற்றுக்கு PDF/A-3 ஐப் பயன்படுத்தவும்)
+	Enable Acrobat JavaScript	Acrobat JavaScript-ஐ இயக்கு
+	Enable copying of text, images, and other content	உரை, படங்கள் மற்றும் பிற உள்ளடக்கத்தை நகலெடுக்க அனுமதி
+	Enable text access for screen reader devices for the visually impaired	பார்வையற்றோருக்கான திரை வாசிப்பான் சாதனங்கள் உரையை அணுக அனுமதி
+	Enabled	இயக்கப்பட்டது
+	Encipher Only	குறியாக்கம் மட்டும்
+	Encrypt	குறியாக்கு
+	Encrypt with certificate	சான்றிதழால் குறியாக்கு
+	Encryption	குறியாக்கம்
+key	End	End
+	End entity	இறுதிப் பொருள்
+	Endpoint	முனைப்புள்ளி
+	Endpoints	முனைப்புள்ளிகள்
+	English	ஆங்கிலம்
+	Enhance camera image	கேமரா படத்தை மேம்படுத்து
+	Enhance page	பக்கத்தை மேம்படுத்து
+	Enhance scanned file	ஸ்கேன் கோப்பை மேம்படுத்து
+	Enter a name.	ஒரு பெயரை உள்ளிடவும்.
+	Enter a page number	ஒரு பக்க எண்ணை உள்ளிடவும்
+	Enter a scale such as 1:50.	1:50 போன்ற அளவுகோலை உள்ளிடவும்.
+	Enter a URL	ஒரு URL ஐ உள்ளிடவும்
+	Enter permissions password…	அனுமதிக் கடவுச்சொல்லை உள்ளிடு…
+	Enter the field names	புலப் பெயர்களை உள்ளிடவும்
+	Enter the password that opens it	அதைத் திறக்கும் கடவுச்சொல்லை உள்ளிடவும்
+	Enter the permissions password to allow combining	இணைப்பதற்கு அனுமதிக்க அனுமதிக் கடவுச்சொல்லை உள்ளிடவும்
+	Entire page	முழுப் பக்கம்
+	Erase	அழி
+	Erase drawings	வரைவுகளை அழி
+	Eraser	அழிப்பான்
+	Error	பிழை
+key	Esc	Esc
+	Even and Odd Pages	இரட்டை மற்றும் ஒற்றைப்படைப் பக்கங்கள்
+	Even pages	இரட்டைப்படைப் பக்கங்கள்
+	Even Pages Only	இரட்டைப்படைப் பக்கங்கள் மட்டும்
+	Even pages only	இரட்டைப்படைப் பக்கங்கள் மட்டும்
+	Every field calculates after the fields it reads.	ஒவ்வொரு புலமும் தான் படிக்கும் புலங்களுக்குப் பிறகே கணக்கிடும்.
+	Every field outside a loop calculates after the fields it reads.	சுழற்சிக்கு வெளியே உள்ள ஒவ்வொரு புலமும் தான் படிக்கும் புலங்களுக்குப் பிறகே கணக்கிடும்.
+	Every PDF in the folder	கோப்புறையிலுள்ள ஒவ்வொரு PDF
+	Every PDF in the folder and the folders inside it	கோப்புறையிலும் அதனுள் உள்ள கோப்புறைகளிலும் உள்ள ஒவ்வொரு PDF
+	Every PDF, image and text file in the folder	கோப்புறையிலுள்ள ஒவ்வொரு PDF, படம் மற்றும் உரைக் கோப்பு
+	Every PDF, image and text file in the folder and the folders inside it	கோப்புறையிலும் அதனுள் உள்ள கோப்புறைகளிலும் உள்ள ஒவ்வொரு PDF, படம் மற்றும் உரைக் கோப்பு
+	Everything on a page must be tagged or marked as an artifact (decoration, headers, footers). Tag the untagged content.	பக்கத்தில் உள்ள அனைத்தும் குறியிடப்பட வேண்டும் அல்லது கலைப்பொருளாகக் (அலங்காரம், தலைப்புகள், அடிக்குறிப்புகள்) குறிக்கப்பட வேண்டும். குறியிடப்படாத உள்ளடக்கத்தைக் குறியிடவும்.
+	Example: {sample}	எடுத்துக்காட்டு: {sample}
+	Exclude image/OCR text	படம்/OCR உரையை விலக்கு
+	Exclude images smaller than	இதை விடச் சிறிய படங்களை விலக்கு
+	Exclude tagged code blocks	குறியிடப்பட்ட நிரல் தொகுதிகளை விலக்கு
+	Exclude tagged tables	குறியிடப்பட்ட அட்டவணைகளை விலக்கு
+	Exclusions use PDF tags. Untagged tables and code remain included. Image exclusion also removes invisible text.	விலக்குகள் PDF குறிச்சொற்களைப் பயன்படுத்துகின்றன. குறியிடப்படாத அட்டவணைகளும் நிரலும் சேர்க்கப்பட்டே இருக்கும். படத்தை விலக்குவது கண்ணுக்குத் தெரியாத உரையையும் நீக்கும்.
+	Execute a menu item	பட்டி உருப்படியை இயக்கு
+	Expand	விரிவாக்கு
+	Expand all	அனைத்தையும் விரிவாக்கு
+	Expand all bookmarks	அனைத்துப் புத்தகக்குறிகளையும் விரிவாக்கு
+	Expand all pages	அனைத்துப் பக்கங்களையும் விரிவாக்கு
+	Expand all tools	அனைத்துக் கருவிகளையும் விரிவாக்கு
+	Expand tag	குறிச்சொல்லை விரிவாக்கு
+	Expand top-level bookmarks	மேல்நிலைப் புத்தகக்குறிகளை விரிவாக்கு
+	Explain	விளக்கு
+	Export	ஏற்றுமதி செய்
+	Export a PDF	PDF-ஐ ஏற்றுமதி செய்
+	Export all comments to data file…	அனைத்துக் கருத்துகளையும் தரவுக் கோப்பாக ஏற்றுமதி செய்…
+	Export All Images	அனைத்துப் படங்களையும் ஏற்றுமதி செய்
+	Export all images	அனைத்துப் படங்களையும் ஏற்றுமதி செய்
+	Export all images…	அனைத்துப் படங்களையும் ஏற்றுமதி செய்…
+	Export all to data file…	அனைத்தையும் தரவுக் கோப்பாக ஏற்றுமதி செய்…
+	Export certificate	சான்றிதழை ஏற்றுமதி செய்
+	Export certificate…	சான்றிதழை ஏற்றுமதி செய்…
+	Export comments	கருத்துகளை ஏற்றுமதி செய்
+	Export data	தரவை ஏற்றுமதி செய்
+	Export form data	படிவத் தரவை ஏற்றுமதி செய்
+	Export form data…	படிவத் தரவை ஏற்றுமதி செய்…
+	Export measurements	அளவீடுகளை ஏற்றுமதி செய்
+	Export measurements as CSV	அளவீடுகளை CSV ஆக ஏற்றுமதி செய்
+	Export stopped: {e}	ஏற்றுமதி நிறுத்தப்பட்டது: {e}
+	Export this PDF	இந்த PDF-ஐ ஏற்றுமதி செய்
+	Export to	இதற்கு ஏற்றுமதி செய்
+	Export to HTML…	HTML-ஆக ஏற்றுமதி செய்…
+	Export to Image	படமாக ஏற்றுமதி செய்
+	Export to image…	படமாக ஏற்றுமதி செய்…
+	Export to PowerPoint…	PowerPoint-ஆக ஏற்றுமதி செய்…
+	Export to RTF…	RTF-ஆக ஏற்றுமதி செய்…
+	Export to Text	உரையாக ஏற்றுமதி செய்
+	Export to text…	உரையாக ஏற்றுமதி செய்…
+	Export to Word…	Word-ஆக ஏற்றுமதி செய்…
+	Export value	ஏற்றுமதி மதிப்பு
+	Export Value: {on}	ஏற்றுமதி மதிப்பு: {on}
+	Exported 1 image	1 படம் ஏற்றுமதி செய்யப்பட்டது
+	Exported the text of 1 page	1 பக்கத்தின் உரை ஏற்றுமதி செய்யப்பட்டது
+	Exported the text of {n} pages	{n} பக்கங்களின் உரை ஏற்றுமதி செய்யப்பட்டது
+	Exported to {path}	{path} க்கு ஏற்றுமதி செய்யப்பட்டது
+	Exported {n} images	{n} படங்கள் ஏற்றுமதி செய்யப்பட்டன
+	Exporting… {d} of {t}	ஏற்றுமதி செய்கிறது… {t} இல் {d}
+	Export…	ஏற்றுமதி செய்…
+	Extended Graphics States	விரிவாக்கப்பட்ட வரைகலை நிலைகள்
+	Extract	பிரித்தெடு
+	Extract pages	பக்கங்களைப் பிரித்தெடு
+	Extract pages as separate files	பக்கங்களைத் தனித்தனிக் கோப்புகளாகப் பிரித்தெடு
+	Extract pages to a new document	பக்கங்களைப் புதிய ஆவணத்துக்குப் பிரித்தெடு
+	Extract pages…	பக்கங்களைப் பிரித்தெடு…
+	Extract the selected pages…	தேர்ந்தெடுத்த பக்கங்களைப் பிரித்தெடு…
+	Extracted 1 page	1 பக்கம் பிரித்தெடுக்கப்பட்டது
+	Extracted {n} pages	{n} பக்கங்கள் பிரித்தெடுக்கப்பட்டன
+	Failed	தோல்வி
+scroll speed	Fast	வேகமாக
+	February	பிப்ரவரி
+calendar date	February	பிப்ரவரி
+	Field	புலம்
+	Field "{}" on page {p} has no description (tooltip)	பக்கம் {p} இல் உள்ள "{}" புலத்துக்கு விளக்கம் (கருவிக்குறிப்பு) இல்லை
+	Field descriptions	புல விளக்கங்கள்
+	Field is used for file selection	இந்தப் புலம் கோப்புத் தேர்வுக்குப் பயன்படுகிறது
+	Field list	புலப் பட்டியல்
+	Field names	புலப் பெயர்கள்
+	Field names (comma-separated)	புலப் பெயர்கள் (கமாவால் பிரித்து)
+	field names can't contain a period: {name}	புலப் பெயர்களில் புள்ளி இருக்கக் கூடாது: {name}
+	Field names with + - * / and parentheses; put \\ before spaces in names.	+ - * / மற்றும் அடைப்புக்குறிகளுடன் புலப் பெயர்கள்; பெயர்களில் உள்ள இடைவெளிகளுக்கு முன் \\ இடவும்.
+	Field properties	புலப் பண்புகள்
+	Field properties…	புலப் பண்புகள்…
+	Field value is in range:	புல மதிப்பு இந்த வரம்பில் உள்ளது:
+	Field value is not validated	புல மதிப்பு சரிபார்க்கப்படாது
+	Field: {field} on page {p}	புலம்: பக்கம் {p} இல் {field}
+	Fields	புலங்கள்
+	Fields to reset (comma-separated; empty: all)	மீட்டமைக்க வேண்டிய புலங்கள் (கமாவால் பிரித்து; காலி: அனைத்தும்)
+	Figure {i} of {n}{page}	{n} இல் படம் {i}{page}
+	Figures alternate text	படங்களின் மாற்று உரை
+	Figures require alternate text	படங்களுக்கு மாற்று உரை தேவை
+	File	கோப்பு
+	File (.p12, .pfx)	கோப்பு (.p12, .pfx)
+	File attachments	கோப்பு இணைப்புகள்
+	File Name	கோப்புப் பெயர்
+	File name	கோப்புப் பெயர்
+	File size	கோப்பு அளவு
+@id	file.word_count	சொல் எண்ணிக்கை…
+	Filename	கோப்புப் பெயர்
+	Files are combined from top to bottom. Leave Pages empty to take every page.	கோப்புகள் மேலிருந்து கீழாக இணைக்கப்படும். ஒவ்வொரு பக்கத்தையும் எடுக்க பக்கங்கள் புலத்தைக் காலியாக விடவும்.
+	Files are combined in the order shown. Drag them to change it.	கோப்புகள் காட்டப்பட்ட வரிசையில் இணைக்கப்படும். அதை மாற்ற அவற்றை இழுக்கவும்.
+	Files are combined in this order. Leave Pages empty to take every page.	கோப்புகள் இந்த வரிசையில் இணைக்கப்படும். ஒவ்வொரு பக்கத்தையும் எடுக்க பக்கங்கள் புலத்தைக் காலியாக விடவும்.
+	Files for {name}	{name} க்கான கோப்புகள்
+	Files you open in PdfCraft appear here. Drop a PDF anywhere to open it.	PdfCraft-இல் நீங்கள் திறக்கும் கோப்புகள் இங்கே தோன்றும். PDF-ஐ எங்கேயும் இழுத்துவிட்டால் திறக்கும்.
+	Fill	நிரப்பு
+	Fill & Sign	Fill & Sign
+	Fill & Sign dates	Fill & Sign தேதிகள்
+	Fill & Sign signature	Fill & Sign கையொப்பம்
+	Fill & Sign: add text	Fill & Sign: உரையைச் சேர்
+	Fill & Sign: change initials	Fill & Sign: முதலெழுத்துகளை மாற்று
+	Fill & Sign: change signature	Fill & Sign: கையொப்பத்தை மாற்று
+	Fill & Sign: checkmark	Fill & Sign: சரிக்குறி
+	Fill & Sign: cross	Fill & Sign: குறுக்குக்குறி
+	Fill & Sign: date	Fill & Sign: தேதி
+	Fill & Sign: dot	Fill & Sign: புள்ளி
+	Fill & Sign: initials	Fill & Sign: முதலெழுத்துகள்
+	Fill & Sign: line	Fill & Sign: கோடு
+	Fill & Sign: remove saved initials	Fill & Sign: சேமித்த முதலெழுத்துகளை நீக்கு
+	Fill & Sign: remove saved signature	Fill & Sign: சேமித்த கையொப்பத்தை நீக்கு
+	Fill & Sign: sign	Fill & Sign: கையொப்பமிடு
+	Fill Color:	நிரப்பு நிறம்:
+	Fill colour	நிரப்பு நிறம்
+	Fill colour:	நிரப்பு நிறம்:
+	Fill colour: none	நிரப்பு நிறம்: எதுவுமில்லை
+	Fill in {name}	{name} ஐ நிரப்பு
+	Filling in form fields and signing existing signature fields	படிவப் புலங்களை நிரப்புதல் மற்றும் ஏற்கனவே உள்ள கையொப்பப் புலங்களில் கையொப்பமிடுதல்
+	Filling of form fields	படிவப் புலங்களை நிரப்புதல்
+	Filter comments	கருத்துகளை வடிகட்டு
+	Find a tag	ஒரு குறிச்சொல்லைத் தேடு
+	Find options	தேடல் விருப்பங்கள்
+	Find text	உரையைத் தேடு
+	Find text and redact	உரையைக் கண்டறிந்து மறை
+	Find text and redact…	உரையைக் கண்டறிந்து மறை…
+	Find text or tools	உரை அல்லது கருவிகளைத் தேடு
+	Find tools and commands	கருவிகளையும் கட்டளைகளையும் தேடு
+	Find tools and commands…	கருவிகளையும் கட்டளைகளையும் தேடு…
+	Find untagged content	குறியிடப்படாத உள்ளடக்கத்தைக் கண்டறி
+	Finding document fonts…	ஆவண எழுத்துருக்களைத் தேடுகிறது…
+	Find…	தேடு…
+	Finish or discard the text being edited before selecting several objects.	பல பொருட்களைத் தேர்ந்தெடுக்கும் முன், திருத்தப்படும் உரையை முடிக்கவும் அல்லது நிராகரிக்கவும்.
+	First	முதல்
+	First / last page	முதல் / கடைசிப் பக்கம்
+	First commit	முதல் கமிட்
+	First row number	முதல் வரிசை எண்
+	Fit	பொருத்து
+	Fit Height	உயரத்துக்குப் பொருத்து
+	Fit one full page	ஒரு முழுப் பக்கத்தைப் பொருத்து
+	Fit Page	பக்கத்துக்குப் பொருத்து
+	Fit to height	உயரத்துக்குப் பொருத்து
+	Fit to page	பக்கத்துக்குப் பொருத்து
+	Fit to width	அகலத்துக்குப் பொருத்து
+	Fit to width scrolling	அகலத்துக்குப் பொருந்தும் ஸ்க்ரோலிங்
+	Fit Visible	தெரிவதற்குப் பொருத்து
+	Fit visible	தெரிவதற்குப் பொருத்து
+	Fit Width	அகலத்துக்குப் பொருத்து
+	Fix	சரிசெய்
+	Fix hairlines	மெல்லிய கோடுகளைச் சரிசெய்
+	Fix order	வரிசையைச் சரிசெய்
+	Fix reading order	வாசிப்பு வரிசையைச் சரிசெய்
+	Fixed what could be fixed; 1 problem remains	சரிசெய்யக்கூடியவை சரிசெய்யப்பட்டன; 1 சிக்கல் மீதமுள்ளது
+	Fixed what could be fixed; {n} problems remain	சரிசெய்யக்கூடியவை சரிசெய்யப்பட்டன; {n} சிக்கல்கள் மீதமுள்ளன
+	Flatten	தட்டையாக்கு
+	Flatten comments	கருத்துகளைத் தட்டையாக்கு
+	Flatten Fill & Sign	Fill & Sign-ஐ தட்டையாக்கு
+	Flatten Fill & Sign when saving	சேமிக்கும்போது Fill & Sign-ஐ தட்டையாக்கு
+	Flatten form fields	படிவப் புலங்களைத் தட்டையாக்கு
+	Flip Horizontal	கிடைமட்டமாகப் புரட்டு
+	Flip horizontal	கிடைமட்டமாகப் புரட்டு
+	Flip image	படத்தைப் புரட்டு
+	Flip on long edge	நீண்ட விளிம்பில் புரட்டு
+	Flip on short edge	குறுகிய விளிம்பில் புரட்டு
+	Flip Vertical	செங்குத்தாகப் புரட்டு
+	Flip vertical	செங்குத்தாகப் புரட்டு
+	Float panel	பலகத்தை மிதக்கவிடு
+	Folder	கோப்புறை
+	Folders	கோப்புறைகள்
+	Font	எழுத்துரு
+	Font (unnamed) on page {p} doesn't map its characters to Unicode	பக்கம் {p} இல் உள்ள (பெயரில்லாத) எழுத்துரு தன் எழுத்துகளை Unicode-உடன் இணைக்கவில்லை
+	Font colour:	எழுத்துரு நிறம்:
+	Font size	எழுத்துரு அளவு
+	Font size 0 uses automatic sizing.	எழுத்துரு அளவு 0 தானியங்கி அளவைப் பயன்படுத்தும்.
+	Font Size:	எழுத்துரு அளவு:
+	Font size:	எழுத்துரு அளவு:
+	Font {} on page {p} doesn't map its characters to Unicode	பக்கம் {p} இல் உள்ள {} எழுத்துரு தன் எழுத்துகளை Unicode-உடன் இணைக்கவில்லை
+	Font:	எழுத்துரு:
+	Font: Helvetica	எழுத்துரு: Helvetica
+	Fonts	எழுத்துருக்கள்
+	Fonts must map their characters to Unicode so text can be read and copied. Fix the fonts or recreate the PDF.	உரையைப் படிக்கவும் நகலெடுக்கவும் இயல, எழுத்துருக்கள் தம் எழுத்துகளை Unicode-உடன் இணைக்க வேண்டும். எழுத்துருக்களைச் சரிசெய்யவும் அல்லது PDF-ஐ மீண்டும் உருவாக்கவும்.
+	for images above	இதற்கு மேற்பட்ட படங்களுக்கு
+	For page sizes and margins.	பக்க அளவுகள் மற்றும் ஓரங்களுக்கு.
+	Form data and PDF forms	படிவத் தரவும் PDF படிவங்களும்
+	Form field on page {p} isn't tagged	பக்கம் {p} இல் உள்ள படிவப் புலம் குறியிடப்படவில்லை
+	Form fields	படிவப் புலங்கள்
+	Form fields are flattened: their values stay visible. Saving rewrites the whole file.	படிவப் புலங்கள் தட்டையாக்கப்படுகின்றன: அவற்றின் மதிப்புகள் தெரிந்தபடியே இருக்கும். சேமிப்பது முழுக் கோப்பையும் மீண்டும் எழுதும்.
+	Form fields must be in the tag tree (Form tags) to be announced. Tag the form fields.	படிவப் புலங்கள் அறிவிக்கப்பட குறிச்சொல் மரத்தில் (Form குறிச்சொற்கள்) இருக்க வேண்டும். படிவப் புலங்களைக் குறியிடவும்.
+	Form fields only	படிவப் புலங்கள் மட்டும்
+	Form fields panel	படிவப் புலங்கள் பலகம்
+	form fill	படிவ நிரப்பல்
+	Form fill-in and digital signatures	படிவ நிரப்பல் மற்றும் எண்ணிம கையொப்பங்கள்
+	Format	வடிவம்
+	Format text	உரையை வடிவமை
+	Format:	வடிவம்:
+	Forms	படிவங்கள்
+	Forms & Signatures	படிவங்கள் & கையொப்பங்கள்
+	Formulas and similar non-text elements need alternate text. Add alternate text to them.	சூத்திரங்கள் மற்றும் அது போன்ற உரையற்ற உறுப்புகளுக்கு மாற்று உரை தேவை. அவற்றுக்கு மாற்று உரையைச் சேர்க்கவும்.
+	Found {n} untagged content problems.	குறியிடப்படாத உள்ளடக்கச் சிக்கல்கள் {n} கண்டறியப்பட்டன.
+calendar weekday	Fr	வெ
+	From	இருந்து
+	From a PDF page or an image	PDF பக்கம் அல்லது படத்திலிருந்து
+	From colour	நிறத்திலிருந்து
+	From {file}	{file} இலிருந்து
+	From:	இருந்து:
+	Front side only	முன் பக்கம் மட்டும்
+	Full Screen	முழுத்திரை
+	Full screen mode	முழுத்திரை பயன்முறை
+	General	பொது
+	Geospatial location	புவியியல் இருப்பிடம்
+	Get help, share feedback and follow development on Discord.	Discord-இல் உதவி பெறுங்கள், கருத்துகளைப் பகிருங்கள், மேம்பாட்டைப் பின்தொடருங்கள்.
+	Go to a page view	ஒரு பக்கக் காட்சிக்குச் செல்
+	Go to page {p}	பக்கம் {p} க்குச் செல்
+	Go to page…	பக்கத்துக்குச் செல்…
+	Go to the page	பக்கத்துக்குச் செல்
+	Go to this result	இந்த முடிவுக்குச் செல்
+	Grab bag	பலவகைத் தொகுப்பு
+	Graphic	வரைகலை
+	Gray	சாம்பல்
+	Grayscale Images	சாம்பல் நிறப் படங்கள்
+	Green	பச்சை
+	Green on black	கருப்பில் பச்சை
+	Greyscale	சாம்பல் நிறம்
+	Grid view	கட்டக் காட்சி
+	H / Space (hold)	H / Space (அழுத்திப் பிடி)
+	Hand (H)	கை (H)
+	Hand Tool	கைக் கருவி
+	Has JavaScript actions (run in M6)	JavaScript செயல்கள் உள்ளன (M6 இல் இயங்கும்)
+	Header and footer	தலைப்பு மற்றும் அடிக்குறிப்பு
+	Header cells (TH) tell listeners what each column or row holds. Mark the header cells.	தலைப்புக் கலங்கள் (TH) ஒவ்வொரு நெடுவரிசை அல்லது வரிசையிலும் என்ன உள்ளது என்பதைக் கேட்பவர்களுக்குச் சொல்கின்றன. தலைப்புக் கலங்களைக் குறிக்கவும்.
+	header or footer	தலைப்பு அல்லது அடிக்குறிப்பு
+	Headers	தலைப்புகள்
+	Heading levels shouldn't skip (an H1 followed by an H3). Retag the headings.	தலைப்பு நிலைகள் தாவக் கூடாது (H1-ஐத் தொடர்ந்து H3). தலைப்புகளை மீண்டும் குறியிடவும்.
+	Headings	தலைப்புகள்
+	Height	உயரம்
+	Height:	உயரம்:
+	Help	உதவி
+	Help…	உதவி…
+	Hidden layers	மறைந்த அடுக்குகள்
+	Hidden text	மறைந்த உரை
+	Hide a field	புலத்தை மறை
+	Hide all comments	அனைத்துக் கருத்துகளையும் மறை
+	Hide field highlights	புலத் தனிப்படுத்தல்களை மறை
+	Hide gaps to join page edges. Margins inside the PDF remain unchanged.	பக்க விளிம்புகளை இணைக்க இடைவெளிகளை மறைக்கவும். PDF-க்குள் உள்ள ஓரங்கள் மாறாது.
+	Hide hover previews for highlights without comment text	கருத்து உரை இல்லாத சிறப்பம்சங்களுக்கு மிதவை முன்னோட்டங்களை மறை
+	Hide layer	அடுக்கை மறை
+	Hide menu bar	பட்டிப் பட்டையை மறை
+	Hide password	கடவுச்சொல்லை மறை
+	Hide toolbars	கருவிப்பட்டைகளை மறை
+	Hide window controls	சாளரக் கட்டுப்பாடுகளை மறை
+	Hides annotation	குறிப்பை மறைக்கிறது
+	High	உயர்வு
+	High Resolution	உயர் தெளிவுத்திறன்
+	High resolution	உயர் தெளிவுத்திறன்
+	Highlight	தனிப்படுத்து
+	Highlight fields	புலங்களைத் தனிப்படுத்து
+	Highlight Style:	தனிப்படுத்தல் பாணி:
+	Highlight text	உரையைத் தனிப்படுத்து
+	Home	முகப்பு
+key	Home	Home
+	Home / End	Home / End
+	Horizontal	கிடைமட்டம்
+	Horizontal reversed	கிடைமட்டம் தலைகீழ்
+	Horizontal scale	கிடைமட்ட அளவு
+	Horizontally	கிடைமட்டமாக
+	HTML web page	HTML வலைப்பக்கம்
+	H{n} follows an H{d}; headings should not skip levels	H{n}, H{d} ஐத் தொடர்கிறது; தலைப்பு நிலைகள் தாவக் கூடாது
+	Icon	சின்னம்
+	Identity	அடையாளம்
+	Image	படம்
+	Image (PNG)	படம் (PNG)
+	Image field	படப் புலம்
+	Image pasted	படம் ஒட்டப்பட்டது
+	Image-only PDF	படம் மட்டுமே உள்ள PDF
+	Images	படங்கள்
+	Images and text	படங்களும் உரையும்
+	Images and text (converted to PDF)	படங்களும் உரையும் (PDF ஆக மாற்றப்பட்டது)
+	Import	இறக்குமதி செய்
+	Import comments…	கருத்துகளை இறக்குமதி செய்…
+	Import data	தரவை இறக்குமதி செய்
+	Import form data…	படிவத் தரவை இறக்குமதி செய்…
+	Import list…	பட்டியலை இறக்குமதி செய்…
+	Import {name}	{name} ஐ இறக்குமதி செய்
+	Importing data arrives on the web with file pickers for data files	தரவை இறக்குமதி செய்யும் வசதி, தரவுக் கோப்புத் தேர்விகளுடன் இணையத்தில் வரவுள்ளது
+	In multiple files	பல கோப்புகளில்
+	In streams that use LZW encoding, use Flate instead	LZW குறியாக்கம் பயன்படுத்தும் ஸ்ட்ரீம்களில் அதற்குப் பதிலாக Flate-ஐப் பயன்படுத்து
+	In this file	இந்தக் கோப்பில்
+	Includes unsaved changes	சேமிக்கப்படாத மாற்றங்கள் உள்ளன
+	Incorrect password. Try again.	கடவுச்சொல் தவறானது. மீண்டும் முயலவும்.
+	Indent	உள்தள்ளு
+	Index	அட்டவணை
+	Information	தகவல்
+	Initial View	தொடக்கக் காட்சி
+	Initials	முதலெழுத்துகள்
+	initials	முதலெழுத்துகள்
+	Ink sensitivity	மை உணர்திறன்
+	Insert	செருகு
+	Insert a blank page after the selection	தேர்வுக்குப் பிறகு ஒரு வெற்றுப் பக்கத்தைச் செருகு
+	Insert a file at the end	இறுதியில் ஒரு கோப்பைச் செருகு
+	Insert a file before page {label}	பக்கம் {label} க்கு முன் ஒரு கோப்பைச் செருகு
+	Insert blank page	வெற்றுப் பக்கத்தைச் செருகு
+	Insert Date	தேதியைச் செருகு
+	Insert Page Number	பக்க எண்ணைச் செருகு
+	Insert pages	பக்கங்களைச் செருகு
+	Insert pages from a file after the selection…	தேர்வுக்குப் பிறகு கோப்பிலிருந்து பக்கங்களைச் செருகு…
+	Insert pages from a file…	கோப்பிலிருந்து பக்கங்களைச் செருகு…
+	Insert pages from file…	கோப்பிலிருந்து பக்கங்களைச் செருகு…
+	Insert pages from {name}	{name} இலிருந்து பக்கங்களைச் செருகு
+	Insert pages from {name} — 1 field renamed	{name} இலிருந்து பக்கங்களைச் செருகு — 1 புலம் மறுபெயரிடப்பட்டது
+	Insert pages from {name} — fields renamed	{name} இலிருந்து பக்கங்களைச் செருகு — புலங்கள் மறுபெயரிடப்பட்டன
+	Insert text	உரையைச் செருகு
+	Inserted	செருகப்பட்டது
+	Inserted text	செருகப்பட்ட உரை
+	Inserting, deleting, and rotating pages	பக்கங்களைச் செருகுதல், நீக்குதல், சுழற்றுதல்
+	Inset	உட்பதிவு
+	Inspector	ஆய்வி
+	Installed fonts…	நிறுவப்பட்ட எழுத்துருக்கள்…
+	Intended usage	நோக்கப் பயன்பாடு
+certificate	Intended usage	நோக்கப் பயன்பாடு
+	Interface language	இடைமுக மொழி
+	Interface size	இடைமுக அளவு
+	Intersection	வெட்டுப்புள்ளி
+	Intersections	வெட்டுப்புள்ளிகள்
+	Invert	தலைகீழாக்கு
+	Invisible Rectangle	தெரியாத செவ்வகம்
+	Irregular tables confuse cell navigation. Give every row the same number of cells (counting spans).	சீரற்ற அட்டவணைகள் கல வழிசெலுத்தலைக் குழப்பும். ஒவ்வொரு வரிசைக்கும் ஒரே எண்ணிக்கையிலான கலங்களைக் கொடுக்கவும் (இணைப்புகளையும் சேர்த்து).
+	is available	கிடைக்கிறது
+	is not available yet	இன்னும் கிடைக்கவில்லை
+	Issued by	வழங்கியவர்
+certificate	Issued by	வழங்கியவர்
+	Issued by: 	வழங்கியவர்: 
+	Issued to	வழங்கப்பட்டவர்
+certificate	Issued to	வழங்கப்பட்டவர்
+	Issuer	வழங்குநர்
+certificate	Issuer	வழங்குநர்
+	Italic	சாய்வு
+	Item List	உருப்படிப் பட்டியல்
+	Item:	உருப்படி:
+	Items marked Ready work today.	'தயார்' எனக் குறிக்கப்பட்டவை இன்றே செயல்படும்.
+	its alternate text is inside another element's and will never be read	அதன் மாற்று உரை மற்றொரு உறுப்பின் உள்ளே உள்ளது; அது ஒருபோதும் வாசிக்கப்படாது
+	Its script also reads fields whose names it builds as it runs, so those reads can't be checked.	இதன் ஸ்கிரிப்ட் இயங்கும்போது பெயர்களை உருவாக்கிப் புலங்களையும் படிக்கிறது; எனவே அந்தப் படிப்புகளைச் சரிபார்க்க இயலாது.
+	Its security settings don't allow copying pages	இதன் பாதுகாப்பு அமைப்புகள் பக்கங்களை நகலெடுக்க அனுமதிக்கவில்லை
+	January	ஜனவரி
+calendar date	January	ஜனவரி
+	JavaScript	JavaScript
+	JavaScript Console	JavaScript கன்சோல்
+	JavaScript console…	JavaScript கன்சோல்…
+	JavaScript is turned off (Preferences ▸ JavaScript).	JavaScript அணைக்கப்பட்டுள்ளது (விருப்பத்தேர்வுகள் > JavaScript).
+	JavaScript, e.g. getField("total").value	JavaScript, எ.கா. getField("total").value
+	JBIG2 (lossless)	JBIG2 (இழப்பில்லாதது)
+	Join our Discord	எங்கள் Discord-இல் சேருங்கள்
+	Join the ArtCraft community	ArtCraft சமூகத்தில் சேருங்கள்
+	Join the ArtCraft Discord	ArtCraft Discord-இல் சேருங்கள்
+	July	ஜூலை
+calendar date	July	ஜூலை
+	June	ஜூன்
+calendar date	June	ஜூன்
+	just now	இப்போதுதான்
+	Justify	இருபுறமும் சீரமை
+	Keep source fonts	மூல எழுத்துருக்களை வைத்திரு
+	Keep tool selected	கருவியைத் தேர்வில் வை
+	Keep tool selected: on	கருவியைத் தேர்வில் வை: இயக்கத்தில்
+	Key Agreement	விசை உடன்படிக்கை
+	Key Algorithm	விசை வழிமுறை
+	Key Encipherment	விசைக் குறியாக்கம்
+	Key usage	விசைப் பயன்பாடு
+certificate	Key usage	விசைப் பயன்பாடு
+	Keyboard shortcuts	விசைப்பலகை குறுக்குவழிகள்
+	Keychain  ·  	Keychain  ·  
+	Keywords	திறவுச்சொற்கள்
+	Label	லேபிள்
+	Labels	லேபிள்கள்
+	Labels: {preview}. Later pages keep their labels.	லேபிள்கள்: {preview}. பிந்தைய பக்கங்கள் தம் லேபிள்களை வைத்திருக்கும்.
+	Landscape	படுக்கைப்பரப்பு
+	Landscape and Portrait Pages	படுக்கைப்பரப்பு மற்றும் நிலைபரப்புப் பக்கங்கள்
+	Landscape Pages	படுக்கைப்பரப்புப் பக்கங்கள்
+	Landscape pages	படுக்கைப்பரப்புப் பக்கங்கள்
+	Language	மொழி
+	Larger pages	பெரிய பக்கங்கள்
+	Larger thumbnails	பெரிய சிறுபடங்கள்
+	Last	கடைசி
+	Last commit	கடைசி கமிட்
+	Later	பிறகு
+	Later in calculation order	கணக்கீட்டு வரிசையில் பின்னதாக
+	Later in tab order	தாவல் வரிசையில் பின்னதாக
+	Layer options	அடுக்கு விருப்பங்கள்
+	Layers	அடுக்குகள்
+	Layers Panel and Page	அடுக்குப் பலகமும் பக்கமும்
+	Layout and Magnification	தளவமைப்பும் பெரிதாக்கமும்
+	Lbl and LBody	Lbl மற்றும் LBody
+	Lbl and LBody must be children of LI	Lbl மற்றும் LBody ஆகியவை LI-இன் உட்கூறுகளாக இருக்க வேண்டும்
+	Leave out files that can't be read?	படிக்க இயலாத கோப்புகளை விலக்கவா?
+	Left	இடது
+	Left Edge	இடது விளிம்பு
+	Left Footer Text	இடது அடிக்குறிப்பு உரை
+	Left Header Text	இடது தலைப்பு உரை
+	Left out: {names}	விடுபட்டவை: {names}
+	Left:	இடது:
+	Less	குறைவு
+	LI must be a child of L	LI என்பது L-இன் உட்கூறாக இருக்க வேண்டும்
+	Light	ஒளி
+	Light blue	வெளிர் நீலம்
+	Light gray	இளஞ்சாம்பல்
+	Light theme	ஒளி தீம்
+	Limit of	வரம்பு
+	Line	கோடு
+	Line delta	வரி வேறுபாடு
+	Line ending	கோட்டு முனை
+	Line spacing	வரி இடைவெளி
+	Line Style:	கோட்டுப் பாணி:
+	Line thickness	கோட்டுத் தடிமன்
+	Line Thickness:	கோட்டுத் தடிமன்:
+	Lines +/−	வரிகள் +/−
+	Lines added	சேர்க்கப்பட்ட வரிகள்
+	Lines deleted	நீக்கப்பட்ட வரிகள்
+	Link	இணைப்பு
+	Link Action	இணைப்புச் செயல்
+	Link Appearance	இணைப்புத் தோற்றம்
+	Link Properties	இணைப்புப் பண்புகள்
+	Link Type:	இணைப்பு வகை:
+	Link URL	இணைப்பு URL
+	links	இணைப்புகள்
+	Links on page	பக்கத்தில் உள்ள இணைப்புகள்
+	Links, actions and JavaScripts	இணைப்புகள், செயல்கள் மற்றும் JavaScriptகள்
+	List	பட்டியல்
+	List box	பட்டியல் பெட்டி
+	List Box Properties	பட்டியல் பெட்டிப் பண்புகள்
+	List items	பட்டியல் உருப்படிகள்
+	List items belong in a list. Fix the list's tags.	பட்டியல் உருப்படிகள் ஒரு பட்டியலுக்குள் இருக்க வேண்டும். பட்டியலின் குறிச்சொற்களைச் சரிசெய்யவும்.
+	List labels and bodies belong in a list item. Fix the list's tags.	பட்டியல் லேபிள்களும் உடல்களும் ஒரு பட்டியல் உருப்படிக்குள் இருக்க வேண்டும். பட்டியலின் குறிச்சொற்களைச் சரிசெய்யவும்.
+	List view	பட்டியல் காட்சி
+	Lists	பட்டியல்கள்
+	Load document font	ஆவண எழுத்துருவை ஏற்று
+	Load font…	எழுத்துருவை ஏற்று…
+	Loading…	ஏற்றுகிறது…
+	Local cross-PDF links require the desktop app	உள்ளூர் PDF-க்கிடையிலான இணைப்புகளுக்கு டெஸ்க்டாப் பயன்பாடு தேவை
+	Location	இடம்
+	Location: 	இடம்: 
+	Lock comment	கருத்தைப் பூட்டு
+	Locked	பூட்டப்பட்டது
+	Logical Reading Order	தருக்க வாசிப்பு வரிசை
+	Looking for PDFs…	PDFகளைத் தேடுகிறது…
+	Looking for printers…	அச்சுப்பொறிகளைத் தேடுகிறது…
+	Loop	சுழற்சி
+	Low	குறைவு
+	Low resolution	குறைந்த தெளிவுத்திறன்
+	Low Resolution (150 dpi)	குறைந்த தெளிவுத்திறன் (150 dpi)
+	Lowering this forgets the oldest files. At 0 there is no list.	இதைக் குறைத்தால் பழைய கோப்புகள் மறக்கப்படும். 0 எனில் பட்டியல் இருக்காது.
+	Magnification	பெரிதாக்கம்
+	Make accessible	அணுகத்தக்கதாக்கு
+	Make Current Properties Default	தற்போதைய பண்புகளை இயல்புநிலையாக்கு
+	Make Properties Default	பண்புகளை இயல்புநிலையாக்கு
+	Make properties default	பண்புகளை இயல்புநிலையாக்கு
+	Make scans searchable, then make them smaller.	ஸ்கேன்களைத் தேடக்கூடியதாக்கி, பின்னர் சிறியதாக்கு.
+	Manage embedded index	உட்பொதிந்த அட்டவணையை நிர்வகி
+	March	மார்ச்
+calendar date	March	மார்ச்
+	Margins	ஓரங்கள்
+	Margins (in)	ஓரங்கள் (அங்.)
+	Mark all	அனைத்தையும் குறி
+	Mark as artifact	கலைப்பொருளாகக் குறி
+	Mark as comments	கருத்துகளாகக் குறி
+	Mark as Confidential	ரகசியம் எனக் குறி
+	Mark content as artifact	உள்ளடக்கத்தைக் கலைப்பொருளாகக் குறி
+	Mark differences	வேறுபாடுகளைக் குறி
+	Mark figure as decorative	படத்தை அலங்காரம் எனக் குறி
+	Mark for redaction	மறைப்புக்காகக் குறி
+	Mark Page Range	பக்க வரம்பைக் குறி
+	Mark pages for redaction	பக்கங்களை மறைப்புக்காகக் குறி
+	Mark with checkmark	சரிக்குறியால் குறி
+	Marked	குறிக்கப்பட்டது
+	Markup	குறிப்பீடு
+	Marquee Zoom	பகுதி பெரிதாக்கம்
+	Marquee zoom	பகுதி பெரிதாக்கம்
+	Mask:	முகமூடி:
+	Match field sizes	புல அளவுகளைப் பொருத்து
+	Match page at 100%	பக்கத்தை 100% இல் பொருத்து
+	Maximize	பெரிதாக்கு
+	Maximum	அதிகபட்சம்
+	maximum	அதிகபட்சம்
+	May	மே
+calendar date	May	மே
+	Measure	அளவிடு
+	Measure area	பரப்பளவை அளவிடு
+	Measure distance	தொலைவை அளவிடு
+	Measure objects	பொருட்களை அளவிடு
+	Measure perimeter	சுற்றளவை அளவிடு
+	Measurement information	அளவீட்டுத் தகவல்
+	Measurement snapping	அளவீட்டு ஒட்டுதல்
+	Measuring tool	அளவிடும் கருவி
+	Medium	நடுத்தரம்
+	Menu	பட்டி
+	Merge data files into spreadsheet…	தரவுக் கோப்புகளை விரிதாளாக இணை…
+	Merge image fragments	படத் துண்டுகளை ஒன்றிணை
+	Merged 1 file into {path}	1 கோப்பு {path} இல் இணைக்கப்பட்டது
+	Merged PRs	இணைக்கப்பட்ட PRகள்
+	Merged {n} files into {path}	{n} கோப்புகள் {path} இல் இணைக்கப்பட்டன
+	Merging data files needs the desktop app	தரவுக் கோப்புகளை இணைக்க டெஸ்க்டாப் பயன்பாடு தேவை
+	Metadata	மேனிலைத் தரவு
+	metadata	மேனிலைத் தரவு
+	Microsoft Word (.docx)	Microsoft Word (.docx)
+	Midpoint	நடுப்புள்ளி
+	Midpoints	நடுப்புள்ளிகள்
+	Minimize	சிறிதாக்கு
+	Minimum	குறைந்தபட்சம்
+	minimum	குறைந்தபட்சம்
+	Missing field	காணாமல் போன புலம்
+	Missing from the calculation order saved in the PDF: other PDF viewers may not calculate it.	PDF-இல் சேமிக்கப்பட்ட கணக்கீட்டு வரிசையில் இது இல்லை: பிற PDF பார்வையாளர்கள் இதைக் கணக்கிடாமல் போகலாம்.
+	Mixed	கலப்பு
+calendar weekday	Mo	தி
+	Mobile	கைபேசி
+	Model	மாதிரி
+	Models	மாதிரிகள்
+	Modified	மாற்றப்பட்டது
+	Modify page	பக்கத்தை மாற்று
+	Monochrome Images	ஒற்றை நிறப் படங்கள்
+	More	மேலும்
+	More options	மேலும் விருப்பங்கள்
+	More options:	மேலும் விருப்பங்கள்:
+	More ways to add files	கோப்புகளைச் சேர்க்கும் மேலும் வழிகள்
+	Mouse Down	சுட்டி அழுத்துதல்
+	Mouse Enter	சுட்டி உள்ளே நுழைதல்
+	Mouse Exit	சுட்டி வெளியேறுதல்
+	Mouse Up	சுட்டி மேலே விடுதல்
+	Mouse wheel scroll speed	சுட்டி உருளை ஸ்க்ரோல் வேகம்
+	Move	நகர்த்து
+	Move bookmark	புத்தகக்குறியை நகர்த்து
+	Move comment	கருத்தை நகர்த்து
+	Move down	கீழே நகர்த்து
+	Move earlier	முன்னே நகர்த்து
+	Move image	படத்தை நகர்த்து
+	Move later	பின்னே நகர்த்து
+	Move object	பொருளை நகர்த்து
+	Move objects	பொருட்களை நகர்த்து
+	Move only what must move, so every field calculates after the fields it reads.	நகர்த்த வேண்டியதை மட்டும் நகர்த்தும்; இதனால் ஒவ்வொரு புலமும் தான் படிக்கும் புலங்களுக்குப் பிறகே கணக்கிடும்.
+	Move page	பக்கத்தை நகர்த்து
+	Move pages	பக்கங்களை நகர்த்து
+	Move tag earlier	குறிச்சொல்லை முன்னே நகர்த்து
+	Move tag later	குறிச்சொல்லைப் பின்னே நகர்த்து
+	Move to group	குழுவுக்கு நகர்த்து
+	Move up	மேலே நகர்த்து
+	Moves only what must move	நகர்த்த வேண்டியதை மட்டும் நகர்த்தும்
+	Multi-line	பல வரி
+	Multiple	பல
+	Multiple files	பல கோப்புகள்
+	Multiple selection	பல தேர்வு
+	Multiple words or phrases	பல சொற்கள் அல்லது சொற்றொடர்கள்
+	N or {row} is the row number, {col} the column number, {seq} the cell number. With none of them, the row number goes last.	N அல்லது {row} வரிசை எண், {col} நெடுவரிசை எண், {seq} கல எண். இவற்றில் எதுவும் இல்லையெனில், வரிசை எண் கடைசியில் வரும்.
+	Name	பெயர்
+	Name (A–Z)	பெயர் (A–Z)
+	Name on new comments	புதிய கருத்துகளில் பெயர்
+	Name:	பெயர்:
+	Named Destinations	பெயரிட்ட இலக்குகள்
+	Navigation links	வழிசெலுத்தல் இணைப்புகள்
+	Navigation links are not repetitive	வழிசெலுத்தல் இணைப்புகள் திரும்பத் திரும்ப வரவில்லை
+	Navigation tab	வழிசெலுத்தல் தாவல்
+	needs an AI provider (off by default)	AI வழங்குநர் தேவை (இயல்பாக அணைக்கப்பட்டுள்ளது)
+	Needs manual check	கைமுறைச் சரிபார்ப்பு தேவை
+	Negative number style:	எதிர்மறை எண் பாணி:
+	Nested alternate text	உள்ளமைந்த மாற்று உரை
+	Never	ஒருபோதும் இல்லை
+	New Action	புதிய செயல்
+	New Action…	புதிய செயல்…
+	New blank PDF	புதிய வெற்று PDF
+	New bookmark	புதிய புத்தகக்குறி
+	New bookmark ({key})	புதிய புத்தகக்குறி ({key})
+	New bookmark (⌘B)	புதிய புத்தகக்குறி (⌘B)
+	New bookmarks from structure	அமைப்பிலிருந்து புதிய புத்தகக்குறிகள்
+	New file only	புதிய கோப்பு மட்டும்
+	New file:	புதிய கோப்பு:
+	New file: {name}	புதிய கோப்பு: {name}
+	New {tool} comments will look like this one	புதிய {tool} கருத்துகள் இதைப் போலவே தோன்றும்
+	Next	அடுத்தது
+	Next ({key})	அடுத்தது ({key})
+	Next (⌘G)	அடுத்தது (⌘G)
+	Next / previous match	அடுத்த / முந்தைய பொருத்தம்
+	Next figure	அடுத்த படம்
+	Next month	அடுத்த மாதம்
+	Next page	அடுத்த பக்கம்
+	Next sheet	அடுத்த தாள்
+	Next tab	அடுத்த தாவல்
+	Next view	அடுத்த காட்சி
+	No	இல்லை
+	No actions	செயல்கள் இல்லை
+	no alternate text	மாற்று உரை இல்லை
+	No changes allowed	மாற்றங்கள் அனுமதிக்கப்படாது
+	No changes to save	சேமிக்க மாற்றங்கள் இல்லை
+	No check has run yet.	இன்னும் எந்தச் சரிபார்ப்பும் நடைபெறவில்லை.
+	No color	நிறம் இல்லை
+	No colour	நிறம் இல்லை
+	No comments match.	பொருந்தும் கருத்துகள் இல்லை.
+	No comments yet.	இன்னும் கருத்துகள் இல்லை.
+	No contributor data was built into this copy.	இந்த நகலில் பங்களிப்பாளர் தரவு உருவாக்கப்படவில்லை.
+	No differences in the text.	உரையில் வேறுபாடுகள் இல்லை.
+	No digital IDs yet.	இன்னும் எண்ணிம ஐடிகள் இல்லை.
+	No document language is set	ஆவண மொழி அமைக்கப்படவில்லை
+	No documents are open	எந்த ஆவணமும் திறக்கப்படவில்லை
+	No field in this form calculates its value yet. Give a field a calculation on the Calculate tab of its properties, and it shows here.	இந்தப் படிவத்தில் எந்தப் புலமும் இன்னும் தன் மதிப்பைக் கணக்கிடவில்லை. புலப் பண்புகளின் கணக்கிடு தாவலில் ஒரு புலத்துக்குக் கணக்கீட்டை அளித்தால், அது இங்கே தோன்றும்.
+	No field reads it	எந்தப் புலமும் இதைப் படிக்கவில்லை
+	No file chosen	கோப்பு தேர்ந்தெடுக்கப்படவில்லை
+	No fill	நிரப்பு இல்லை
+	No fonts are referenced by the pages.	பக்கங்கள் எந்த எழுத்துருவையும் குறிப்பிடவில்லை.
+	No form fields were detected	படிவப் புலங்கள் எதுவும் கண்டறியப்படவில்லை
+	no header cells (TH)	தலைப்புக் கலங்கள் (TH) இல்லை
+	No image on clipboard to paste	ஒட்ட கிளிப்போர்டில் படம் இல்லை
+	No inaccessible scripts	அணுக இயலாத ஸ்கிரிப்ட்கள் இல்லை
+	No issues found	சிக்கல்கள் இல்லை
+	No limit	வரம்பு இல்லை
+	No links to remove	நீக்க இணைப்புகள் இல்லை
+	No matches	பொருத்தங்கள் இல்லை
+	No matches.	பொருத்தங்கள் இல்லை.
+	No matching tools	பொருந்தும் கருவிகள் இல்லை
+	No model credits were built into this copy.	இந்த நகலில் மாதிரிப் பங்களிப்புகள் உருவாக்கப்படவில்லை.
+	No openly licensed document fonts found. Load a font file.	திறந்த உரிமம் கொண்ட ஆவண எழுத்துருக்கள் எதுவும் கிடைக்கவில்லை. ஒரு எழுத்துருக் கோப்பை ஏற்றவும்.
+	No order can fix a loop. Change one of the formulas.	எந்த வரிசையாலும் சுழற்சியைச் சரிசெய்ய முடியாது. ஒரு சூத்திரத்தை மாற்றவும்.
+	no output folder was chosen	வெளியீட்டுக் கோப்புறை தேர்ந்தெடுக்கப்படவில்லை
+	No page has text: the document appears to be images of pages	எந்தப் பக்கத்திலும் உரை இல்லை: ஆவணம் பக்கங்களின் படங்களாகத் தெரிகிறது
+	No pages match those choices	அந்தத் தேர்வுகளுக்குப் பொருந்தும் பக்கங்கள் இல்லை
+	No pages selected	பக்கங்கள் தேர்ந்தெடுக்கப்படவில்லை
+	No PDFs found in {folder}	{folder} இல் PDFகள் எதுவும் கிடைக்கவில்லை
+	No PDFs in this folder yet	இந்தக் கோப்புறையில் இன்னும் PDF எதுவும் இல்லை
+	No PDFs, images or text files found in {folder}	{folder} இல் PDFகள், படங்கள் அல்லது உரைக் கோப்புகள் எதுவும் கிடைக்கவில்லை
+	No photo chosen	புகைப்படம் தேர்ந்தெடுக்கப்படவில்லை
+	No preview	முன்னோட்டம் இல்லை
+	No printers were found. Check that the printer is installed and the print spooler is running, then open Print again.	அச்சுப்பொறிகள் எதுவும் கிடைக்கவில்லை. அச்சுப்பொறி நிறுவப்பட்டுள்ளதா, அச்சு ஸ்பூலர் இயங்குகிறதா எனச் சரிபார்த்து, மீண்டும் அச்சிடு என்பதைத் திறக்கவும்.
+	No problems found: the document conforms to {level}.	சிக்கல்கள் எதுவும் இல்லை: ஆவணம் {level} உடன் இணங்குகிறது.
+	No recent files	சமீபத்திய கோப்புகள் இல்லை
+	No results	முடிவுகள் இல்லை
+	No security	பாதுகாப்பு இல்லை
+	No sheets	தாள்கள் இல்லை
+	No signature was found in the frame. Move the frame over the signature or raise the ink sensitivity.	சட்டகத்தில் கையொப்பம் எதுவும் காணப்படவில்லை. சட்டகத்தைக் கையொப்பத்தின் மேல் நகர்த்தவும் அல்லது மை உணர்திறனை உயர்த்தவும்.
+	No status has been set.	நிலை எதுவும் அமைக்கப்படவில்லை.
+	no such document	அப்படி ஓர் ஆவணம் இல்லை
+	no summary	சுருக்கம் இல்லை
+	No tools match your search.	உங்கள் தேடலுக்குப் பொருந்தும் கருவிகள் இல்லை.
+	No unlinked web addresses were found in the text	உரையில் இணைக்கப்படாத வலை முகவரிகள் எதுவும் கிடைக்கவில்லை
+	No untagged content was found.	குறியிடப்படாத உள்ளடக்கம் எதுவும் கிடைக்கவில்லை.
+	no unused output name	பயன்படுத்தப்படாத வெளியீட்டுப் பெயர் இல்லை
+	Non-Repudiation	மறுக்கமுடியாமை
+	None	எதுவுமில்லை
+	none	எதுவுமில்லை
+	None (prefix only)	எதுவுமில்லை (முன்னொட்டு மட்டும்)
+	None found	எதுவும் கிடைக்கவில்லை
+	None of those files can be made into a PDF; use PDFs, images or .txt files	அந்தக் கோப்புகளில் எதையும் PDF ஆக்க இயலாது; PDFகள், படங்கள் அல்லது .txt கோப்புகளைப் பயன்படுத்தவும்
+	None — everything is allowed	எதுவுமில்லை — அனைத்தும் அனுமதிக்கப்படுகின்றன
+scroll speed	Normal	இயல்பு
+	Not allowed	அனுமதிக்கப்படவில்லை
+	not in a Table, THead, TBody or TFoot	Table, THead, TBody அல்லது TFoot-இல் இல்லை
+	not in a TR	TR-இல் இல்லை
+	not in an L (list)	L (பட்டியல்)-இல் இல்லை
+	not in an LI (list item)	LI (பட்டியல் உருப்படி)-இல் இல்லை
+	Not in order	வரிசையில் இல்லை
+	Not now	இப்போது வேண்டாம்
+	Not present	இல்லை
+	Note	குறிப்பு
+	nothing in the file matches this document	கோப்பில் உள்ள எதுவும் இந்த ஆவணத்துடன் பொருந்தவில்லை
+	Nothing to redo	மீண்டும் செய்ய எதுவுமில்லை
+	nothing to redo	மீண்டும் செய்ய எதுவுமில்லை
+	Nothing to undo	செயல்தவிர்க்க எதுவுமில்லை
+	nothing to undo	செயல்தவிர்க்க எதுவுமில்லை
+	November	நவம்பர்
+calendar date	November	நவம்பர்
+	Number	எண்
+	Number every page in the footer.	அடிக்குறிப்பில் ஒவ்வொரு பக்கத்துக்கும் எண்ணிடு.
+	Number of pages	பக்கங்களின் எண்ணிக்கை
+	Number pages	பக்கங்களுக்கு எண்ணிடு
+	Number pages…	பக்கங்களுக்கு எண்ணிடு…
+	Numbered list	எண்ணிட்ட பட்டியல்
+	October	அக்டோபர்
+calendar date	October	அக்டோபர்
+	Odd pages	ஒற்றைப்படைப் பக்கங்கள்
+	Odd Pages Only	ஒற்றைப்படைப் பக்கங்கள் மட்டும்
+	Odd pages only	ஒற்றைப்படைப் பக்கங்கள் மட்டும்
+	of	/
+	of the following fields:	பின்வரும் புலங்களில்:
+	of {name}	/ {name}
+	of {pages}	/ {pages}
+	Off	அணை
+animation effects	Off	அணைப்பு
+	Offset from centre	மையத்திலிருந்து விலகல்
+	OK	சரி
+	Old file:	பழைய கோப்பு:
+	Old file: {name}	பழைய கோப்பு: {name}
+	On	இயக்கம்
+animation effects	On	இயக்கத்தில்
+	On Blur	கவனம் இழக்கும்போது
+	On Focus	கவனம் பெறும்போது
+	on page {label}	பக்கம் {label} இல்
+	On the web, open or drop an image to convert it	இணையத்தில், ஒரு படத்தை மாற்ற அதைத் திறக்கவும் அல்லது இழுத்துவிடவும்
+	One word or phrase per line	ஒரு வரிக்கு ஒரு சொல் அல்லது சொற்றொடர்
+	One {f} file per page, named after the document.	ஒரு பக்கத்துக்கு ஒரு {f} கோப்பு, ஆவணத்தின் பெயரில்.
+	Only allow this if you trust the source document.	மூல ஆவணத்தை நம்பினால் மட்டுமே இதை அனுமதிக்கவும்.
+	Only change the colour of black text or line art	கருப்பு உரை அல்லது கோட்டுக் கலையின் நிறத்தை மட்டும் மாற்று
+	Only checked properties will change. Mixed means the selected fields have different values.	குறிக்கப்பட்ட பண்புகள் மட்டுமே மாறும். "கலப்பு" என்பது தேர்ந்தெடுத்த புலங்களுக்கு வெவ்வேறு மதிப்புகள் இருப்பதைக் குறிக்கும்.
+	Only continue if you trust this document. An address can carry information from the document, such as what you typed into its form.	இந்த ஆவணத்தை நம்பினால் மட்டுமே தொடரவும். ஒரு முகவரி, படிவத்தில் நீங்கள் தட்டச்சிட்டவை போன்ற ஆவணத் தகவலைச் சுமக்கக்கூடும்.
+	Only the document's owner can change its security (open it with the permissions password)	ஆவணத்தின் உரிமையாளர் மட்டுமே அதன் பாதுகாப்பை மாற்ற முடியும் (அனுமதிக் கடவுச்சொல்லுடன் திறக்கவும்)
+	Only the page content changes: links, comments, form fields and bookmarks on the original pages stay.	பக்க உள்ளடக்கம் மட்டுமே மாறும்: அசல் பக்கங்களில் உள்ள இணைப்புகள், கருத்துகள், படிவப் புலங்கள், புத்தகக்குறிகள் அப்படியே இருக்கும்.
+	Opacity	ஒளிபுகாமை
+	Opacity:	ஒளிபுகாமை:
+	Open	திற
+	Open a document first	முதலில் ஒரு ஆவணத்தைத் திறக்கவும்
+	Open a PDF ({key})	PDF-ஐத் திற ({key})
+	Open a PDF (⌘O)	PDF-ஐத் திற (⌘O)
+	Open a PDF to measure it.	அளவிட ஒரு PDF-ஐத் திறக்கவும்.
+	Open a web link	இணைய இணைப்பைத் திற
+	Open a web page	ஒரு வலைப்பக்கத்தைத் திற
+	Open accessibility report	அணுகல்தன்மை அறிக்கையைத் திற
+	Open arrow	திறந்த அம்பு
+	Open email app	மின்னஞ்சல் பயன்பாட்டைத் திற
+	Open file	கோப்பைத் திற
+	Open folder	கோப்புறையைத் திற
+	Open in a new tab	புதிய தாவலில் திற
+	Open in Full Screen mode	முழுத்திரை பயன்முறையில் திற
+	Open in Full Screen mode?	முழுத்திரை பயன்முறையில் திறக்கவா?
+	Open link	இணைப்பைத் திற
+	Open Recent	சமீபத்தியவற்றைத் திற
+	Open the file as it was saved then	அப்போது சேமிக்கப்பட்டபடி கோப்பைத் திற
+	Open the older version first	முதலில் பழைய பதிப்பைத் திறக்கவும்
+	Open this local PDF?	இந்த உள்ளூர் PDF-ஐத் திறக்கவா?
+	Open this web page?	இந்த வலைப்பக்கத்தைத் திறக்கவா?
+	Open to page	பக்கத்தில் திற
+	open to see what it will include	இதில் என்ன இருக்கும் என்பதைக் காணத் திறக்கவும்
+	Opened with	இதனுடன் திறக்கப்பட்டது
+	Opened, but its security settings don't allow combining. Enter the permissions password.	திறக்கப்பட்டது, ஆனால் அதன் பாதுகாப்பு அமைப்புகள் இணைக்க அனுமதிக்கவில்லை. அனுமதிக் கடவுச்சொல்லை உள்ளிடவும்.
+	Opening the browser's print dialog…	உலாவியின் அச்சு உரையாடலைத் திறக்கிறது…
+	Opens the printer driver's preferences. They are saved for every print from this computer; the copies, two-sided, grayscale and paper chosen here still apply.	அச்சுப்பொறி இயக்கியின் விருப்பத்தேர்வுகளைத் திறக்கும். இந்தக் கணினியிலிருந்து செய்யும் ஒவ்வொரு அச்சுக்கும் அவை சேமிக்கப்படும்; இங்கே தேர்ந்தெடுத்த நகல்கள், இருபக்கம், சாம்பல் நிறம், தாள் ஆகியவை தொடர்ந்து பொருந்தும்.
+	Open…	திற…
+	Optimization cancelled	உகப்பாக்கம் ரத்துசெய்யப்பட்டது
+	Optimization is already running	உகப்பாக்கம் ஏற்கனவே இயங்குகிறது
+	Optimize	உகந்ததாக்கு
+	Optimize PDF…	PDF-ஐ உகந்ததாக்கு…
+	Optimize Scanned Documents	ஸ்கேன் ஆவணங்களை உகந்ததாக்கு
+	Optimize scanned documents	ஸ்கேன் ஆவணங்களை உகந்ததாக்கு
+	Optimize scanned documents…	ஸ்கேன் ஆவணங்களை உகந்ததாக்கு…
+	Optimizing… cleaning up	உகந்ததாக்குகிறது… சுத்தம் செய்கிறது
+	Optimizing… image {d} of {t}	உகந்ததாக்குகிறது… {t} இல் படம் {d}
+	Optimizing… merging identical objects	உகந்ததாக்குகிறது… ஒரே மாதிரியான பொருட்களை ஒன்றிணைக்கிறது
+	Optimizing… merging image fragments	உகந்ததாக்குகிறது… படத் துண்டுகளை ஒன்றிணைக்கிறது
+	Optimizing… removing user data	உகந்ததாக்குகிறது… பயனர் தரவை நீக்குகிறது
+	Optimizing… writing the copy	உகந்ததாக்குகிறது… நகலை எழுதுகிறது
+	Optional	விருப்பத்தேர்வு
+	Optional: needs an AI provider you configure	விருப்பத்தேர்வு: நீங்கள் உள்ளமைக்கும் AI வழங்குநர் தேவை
+	Options	விருப்பங்கள்
+	Options for this reply	இந்தப் பதிலுக்கான விருப்பங்கள்
+	Options…	விருப்பங்கள்…
+	Orange	ஆரஞ்சு
+	Order · top calculates first	வரிசை · மேலே உள்ளது முதலில் கணக்கிடும்
+	Organization Name	நிறுவனப் பெயர்
+	Organizational Unit	நிறுவன அலகு
+	Organize	ஒழுங்கமை
+	Organize pages	பக்கங்களை ஒழுங்கமை
+	Orientation:	திசையமைவு:
+	Original	அசல்
+	Original: replace pages	அசல்: மாற்ற வேண்டிய பக்கங்கள்
+	other changes	பிற மாற்றங்கள்
+	Other colour…	பிற நிறம்…
+	Other elements alternate text	பிற உறுப்புகளின் மாற்று உரை
+	Other elements that require alternate text	மாற்று உரை தேவைப்படும் பிற உறுப்புகள்
+	Other options	பிற விருப்பங்கள்
+	Outdent	வெளித்தள்ளு
+	Outline	வெளிக்கோடு
+	Outline colour:	வெளிக்கோட்டு நிறம்:
+	Output	வெளியீடு
+	Output appears here.	வெளியீடு இங்கே தோன்றும்.
+	Output intent: {list}	வெளியீட்டு நோக்கம்: {list}
+	Output preview	வெளியீட்டு முன்னோட்டம்
+	Oval	நீள்வட்டம்
+	Overlap:	மேற்பொருந்தல்:
+	Owner password (no restrictions apply)	உரிமையாளர் கடவுச்சொல் (கட்டுப்பாடுகள் பொருந்தாது)
+	Page	பக்கம்
+	Page background	பக்கப் பின்னணி
+	Page Content	பக்க உள்ளடக்கம்
+	page content	பக்க உள்ளடக்கம்
+	Page display	பக்கக் காட்சி
+	Page display: {layout}	பக்கக் காட்சி: {layout}
+	Page does not require timed responses	பக்கத்துக்கு நேரக்கட்டுப்பாட்டுப் பதில்கள் தேவையில்லை
+	Page grid	பக்க கட்டம்
+	Page labels	பக்க குறிப்புகள்
+	Page layout	பக்கத் தளவமைப்பு
+	Page navigation	பக்க வழிசெலுத்தல்
+	Page number	பக்க எண்
+	Page Only	பக்கம் மட்டும்
+	Page options	பக்க விருப்பங்கள்
+	Page order:	பக்க வரிசை:
+	Page properties	பக்கப் பண்புகள்
+	Page Range	பக்க வரம்பு
+	Page Range Options	பக்க வரம்பு விருப்பங்கள்
+	Page size	பக்க அளவு
+	Page Sizing & Handling	பக்க அளவும் கையாளுதலும்
+	Page thumbnails	பக்கச் சிறுபடங்கள்
+	Page tools	பக்கக் கருவிகள்
+	Page transitions	பக்க மாற்ற விளைவுகள்
+	Page will not cause screen flicker	பக்கம் திரை மினுமினுப்பை ஏற்படுத்தாது
+	Page {label}	பக்கம் {label}
+	Page {n}	பக்கம் {n}
+	page {n} is out of range (1–{count})	பக்கம் {n} வரம்புக்கு வெளியே உள்ளது (1–{count})
+	Page {n} of {total}	{total} இல் பக்கம் {n}
+	Page {pages} changed after the background was added, so its own white backdrop stays off. It looks the same on white paper.	பின்னணி சேர்க்கப்பட்ட பிறகு பக்கம் {pages} மாறியுள்ளது, எனவே அதன் சொந்த வெள்ளைப் பின்புலம் அணைந்தே இருக்கும். வெள்ளைத் தாளில் அது ஒரே மாதிரி தெரியும்.
+	Page {pages} paints its own white backdrop, which would hide the background. Replace it	பக்கம் {pages} தனக்கென வெள்ளைப் பின்புலத்தை வரைகிறது; அது பின்னணியை மறைக்கும். அதை மாற்று
+	Page {p} doesn't tab in structure order	பக்கம் {p} அமைப்பு வரிசையில் தாவுவதில்லை
+	Page {p} of {n}	{n} இல் பக்கம் {p}
+	Page {p}: {n} untagged content item	பக்கம் {p}: குறியிடப்படாத {n} உள்ளடக்க உருப்படி
+	Page {p}: {n} untagged content items	பக்கம் {p}: குறியிடப்படாத {n} உள்ளடக்க உருப்படிகள்
+	Page {} has additional actions	பக்கம் {} இல் கூடுதல் செயல்கள் உள்ளன
+	Pages	பக்கங்கள்
+	pages	பக்கங்கள்
+	pages added or removed	சேர்க்கப்பட்ட அல்லது நீக்கப்பட்ட பக்கங்கள்
+	Pages counted	எண்ணப்பட்ட பக்கங்கள்
+	Pages from	பக்கங்கள் இருந்து
+	Pages of {name} to combine, e.g. 1-3, 6	இணைக்க வேண்டிய {name} இன் பக்கங்கள், எ.கா. 1-3, 6
+	Pages Panel and Page	பக்கப் பலகமும் பக்கமும்
+	Pages per file	ஒரு கோப்புக்குப் பக்கங்கள்
+	Pages per sheet:	ஒரு தாளுக்குப் பக்கங்கள்:
+	Pages selected	தேர்ந்தெடுத்த பக்கங்கள்
+	Pages that are only pictures of text can't be read aloud or searched. Recognize text (OCR) to add a text layer.	உரையின் படங்களாக மட்டுமே உள்ள பக்கங்களை உரக்கப் படிக்கவோ தேடவோ இயலாது. உரை அடுக்கைச் சேர்க்க உரையை அடையாளம் காணவும் (OCR).
+	Pages to Print	அச்சிட வேண்டிய பக்கங்கள்
+	Pages with links, comments or fields should tab in structure order. The fix sets each page's tab order to Use Document Structure.	இணைப்புகள், கருத்துகள் அல்லது புலங்கள் உள்ள பக்கங்கள் அமைப்பு வரிசையில் தாவ வேண்டும். சரிசெய்தல் ஒவ்வொரு பக்கத்தின் தாவல் வரிசையையும் "ஆவண அமைப்பைப் பயன்படுத்து" என அமைக்கும்.
+	Pages {pages} changed after the background was added, so their own white backdrops stay off. They look the same on white paper.	பின்னணி சேர்க்கப்பட்ட பிறகு பக்கங்கள் {pages} மாறியுள்ளன, எனவே அவற்றின் சொந்த வெள்ளைப் பின்புலங்கள் அணைந்தே இருக்கும். வெள்ளைத் தாளில் அவை ஒரே மாதிரி தெரியும்.
+	Pages {pages} paint their own white backdrop, which would hide the background. Replace it	பக்கங்கள் {pages} தமக்கென வெள்ளைப் பின்புலத்தை வரைகின்றன; அது பின்னணியை மறைக்கும். அவற்றை மாற்று
+	Pages:	பக்கங்கள்:
+	Pages: {k} of {n}	பக்கங்கள்: {n} இல் {k}
+	Panel layout could not be restored: {error}	பலகத் தளவமைப்பை மீட்டெடுக்க இயலவில்லை: {error}
+	Panel move was not applied: {error}	பலக நகர்வு பயன்படுத்தப்படவில்லை: {error}
+	Panels	பலகங்கள்
+	Paper:	தாள்:
+	Paragraph spacing	பத்தி இடைவெளி
+	Part of	இதன் பகுதி
+	Passed	தேர்ச்சி
+	Password	கடவுச்சொல்
+	Password protection will be applied when you save	சேமிக்கும்போது கடவுச்சொல் பாதுகாப்பு பயன்படுத்தப்படும்
+	Password required	கடவுச்சொல் தேவை
+	Password security	கடவுச்சொல் பாதுகாப்பு
+	Password-protected	கடவுச்சொல் பாதுகாக்கப்பட்டது
+	Paste	ஒட்டு
+	Paste after	பின்னால் ஒட்டு
+	Paste pages	பக்கங்களை ஒட்டு
+	Path	பாதை
+	Paths	பாதைகள்
+	Pattern	வடிவம்
+	Patterns	வடிவங்கள்
+	Patterns (graphics objects)	வடிவங்கள் (வரைகலைப் பொருட்கள்)
+	PDF Optimizer	PDF உகப்பாக்கி
+	PDF or image	PDF அல்லது படம்
+	PDF page: {size}	PDF பக்கம்: {size}
+	PDF producer	PDF உருவாக்கி
+	PDF scale: {scale}%	PDF அளவுகோல்: {scale}%
+	PDF version	PDF பதிப்பு
+	PDF, images and text	PDF, படங்கள் மற்றும் உரை
+	PDF/A…	PDF/A…
+	PdfCraft can't check this signature yet: {}.	இந்தக் கையொப்பத்தை PdfCraft இன்னும் சரிபார்க்க இயலாது: {}.
+	PdfCraft didn't shut down normally. These documents had changes that were autosaved:	PdfCraft இயல்பாக மூடப்படவில்லை. இந்த ஆவணங்களில் தானாகச் சேமிக்கப்பட்ட மாற்றங்கள் இருந்தன:
+	PdfCraft is drawing without a graphics processor, so it may be slow. Updating the graphics driver may help.	PdfCraft வரைகலை செயலி இல்லாமல் வரைகிறது, எனவே மெதுவாக இருக்கலாம். வரைகலை இயக்கியைப் புதுப்பித்தால் உதவலாம்.
+	PdfCraft on GitHub	GitHub-இல் PdfCraft
+	PdfCraft web page	PdfCraft இணையப் பக்கம்
+	PdfCraft works offline. No telemetry, no account, and no cloud processing unless you add a provider.	PdfCraft இணையம் இல்லாமல் செயல்படும். டெலிமெட்ரி இல்லை, கணக்கு தேவையில்லை, நீங்கள் வழங்குநரைச் சேர்த்தால் மட்டுமே கிளவுட் செயலாக்கம் நடைபெறும்.
+	PdfCraft {v} is available.	PdfCraft {v} கிடைக்கிறது.
+	People may need more time to respond. Check that nothing has a time limit.	மக்களுக்குப் பதிலளிக்கக் கூடுதல் நேரம் தேவைப்படலாம். எதற்கும் நேர வரம்பு இல்லை என்பதைச் சரிபார்க்கவும்.
+	Percentage	சதவீதம்
+	Perimeter	சுற்றளவு
+	Permissions password	அனுமதிக் கடவுச்சொல்
+	Permitted actions after certifying	சான்றளித்த பிறகு அனுமதிக்கப்படும் செயல்கள்
+	Phone Number	தொலைபேசி எண்
+	Phone Numbers	தொலைபேசி எண்கள்
+	Photo	புகைப்படம்
+	Pick a tool in the quick bar, or type above.	விரைவுப் பட்டையில் ஒரு கருவியைத் தேர்ந்தெடுக்கவும், அல்லது மேலே தட்டச்சிடவும்.
+	Pictures cover pages {pages} (scans?), so the background won't show there.	பக்கங்கள் {pages} ஐப் படங்கள் மூடுகின்றன (ஸ்கேன்களா?), எனவே அங்கே பின்னணி தெரியாது.
+	Pictures need alternate text that describes them, or must be marked decorative. Add alternate text to each figure.	படங்களுக்கு அவற்றை விவரிக்கும் மாற்று உரை தேவை, அல்லது அவை அலங்காரம் எனக் குறிக்கப்பட வேண்டும். ஒவ்வொரு படத்துக்கும் மாற்று உரையைச் சேர்க்கவும்.
+	Pictures on those pages are recognized too; words already in the page's text are not added again	அந்தப் பக்கங்களில் உள்ள படங்களும் அடையாளம் காணப்படும்; பக்க உரையில் ஏற்கனவே உள்ள சொற்கள் மீண்டும் சேர்க்கப்படாது
+	Pin	பொருத்து
+	Pin a folder to Home	ஒரு கோப்புறையை முகப்பில் பொருத்து
+	Pin a folder to list its newest PDFs here, such as where your scanner or a synced cloud drive saves them.	உங்கள் ஸ்கேனர் அல்லது ஒத்திசைக்கப்பட்ட கிளவுட் டிரைவ் சேமிக்கும் இடம் போன்ற ஒரு கோப்புறையைப் பொருத்தினால், அதன் புதிய PDFகள் இங்கே பட்டியலிடப்படும்.
+	Pin a folder…	ஒரு கோப்புறையைப் பொருத்து…
+	Pin a tool…	ஒரு கருவியைப் பொருத்து…
+	Pin folder to Home…	கோப்புறையை முகப்பில் பொருத்து…
+	Pin to Home	முகப்பில் பொருத்து
+	Pin tools to Home	கருவிகளை முகப்பில் பொருத்து
+	Pin your favorite tools here for quick access.	விரைவான அணுகலுக்கு உங்களுக்குப் பிடித்த கருவிகளை இங்கே பொருத்தவும்.
+	Pink	இளஞ்சிவப்பு
+	Pinned	பொருத்தப்பட்டது
+	Pinned folders need the desktop app	பொருத்தப்பட்ட கோப்புறைகளுக்கு டெஸ்க்டாப் பயன்பாடு தேவை
+	Pinned Tools	பொருத்தப்பட்ட கருவிகள்
+	Pinned {folder} to Home	{folder} முகப்பில் பொருத்தப்பட்டது
+	Pinned {tool} to Home	{tool} முகப்பில் பொருத்தப்பட்டது
+	Place saved {what}	சேமித்த {what} ஐ வை
+	Plain text in reading order; pages are separated by form feeds.	வாசிப்பு வரிசையில் எளிய உரை; பக்கங்கள் பக்கப் பிரிப்பு எழுத்துகளால் பிரிக்கப்படும்.
+	Planned	திட்டமிடப்பட்டது
+	Planned for milestone	திட்டமிடப்பட்ட மைல்கல்
+	Planned for milestone {m} — open to see what it will include	மைல்கல் {m} க்குத் திட்டமிடப்பட்டது — இதில் என்ன இருக்கும் என்பதைக் காணத் திறக்கவும்
+	Planned · {m}	திட்டமிடப்பட்டது · {m}
+	Points from the page's bottom-left corner.	பக்கத்தின் கீழ்-இடது மூலையிலிருந்து புள்ளிகளில்.
+	Polygon	பலகோணம்
+	Polyline	பல்கோடு
+	Portable mode is off: {folder} can't be written ({error}). Settings are kept in your user folder instead.	கையடக்கப் பயன்முறை அணைக்கப்பட்டுள்ளது: {folder} இல் எழுத இயலவில்லை ({error}). அதற்குப் பதிலாக அமைப்புகள் உங்கள் பயனர் கோப்புறையில் வைக்கப்படுகின்றன.
+	Portrait	நிலைபரப்பு
+	Portrait Pages	நிலைபரப்புப் பக்கங்கள்
+	Portrait pages	நிலைபரப்புப் பக்கங்கள்
+	Position	இடம்
+	Post	இடு
+	Poster	சுவரொட்டி
+	PostScript / EPS	PostScript / EPS
+	PostScript XObjects aren't allowed	PostScript XObjects அனுமதிக்கப்படுவதில்லை
+	Preferences	விருப்பத்தேர்வுகள்
+	Preferences…	விருப்பத்தேர்வுகள்…
+	Prefix	முன்னொட்டு
+	Preflight	முன்சோதனை
+	Prepare a form	படிவத்தைத் தயார்செய்
+	Prepare for accessibility	அணுகல்தன்மைக்குத் தயார்செய்
+	Prepare for Distribution	விநியோகத்துக்குத் தயார்செய்
+	Prepare for distribution	விநியோகத்துக்குத் தயார்செய்
+	Prepare for distribution…	விநியோகத்துக்குத் தயார்செய்…
+	Preparing sheet {done} of {total} for printing…	அச்சிடுவதற்கு {total} இல் தாள் {done} ஐத் தயார்செய்கிறது…
+	Preparing {n} sheets for printing…	அச்சிடுவதற்கு {n} தாள்களைத் தயார்செய்கிறது…
+	Presentation (.pptx)	விளக்கக்காட்சி (.pptx)
+	Preview	முன்னோட்டம்
+	Preview unavailable: {e}	முன்னோட்டம் கிடைக்கவில்லை: {e}
+	Preview: page {p} of {n}	முன்னோட்டம்: {n} இல் பக்கம் {p}
+	Previous	முந்தையது
+	Previous ({key})	முந்தையது ({key})
+	Previous (⇧⌘G)	முந்தையது (⇧⌘G)
+	Previous / next page	முந்தைய / அடுத்த பக்கம்
+	Previous figure	முந்தைய படம்
+	Previous month	முந்தைய மாதம்
+	Previous page	முந்தைய பக்கம்
+	Previous sheet	முந்தைய தாள்
+	Previous tab	முந்தைய தாவல்
+	Previous view	முந்தைய காட்சி
+	Primary language	முதன்மை மொழி
+	Print	அச்சிடு
+	Print ({key})	அச்சிடு ({key})
+	Print (⌘P)	அச்சிடு (⌘P)
+	Print as image	படமாக அச்சிடு
+	Print in grayscale	சாம்பல் நிறத்தில் அச்சிடு
+	Print page border	பக்க எல்லையை அச்சிடு
+	Print production	அச்சு உற்பத்தி
+	Print single-sided. Keep the sheets in order, cut at the marks, then stack the piles left to right, top to bottom.	ஒரு பக்க அச்சில் அச்சிடவும். தாள்களை வரிசையில் வைத்து, குறிகளில் வெட்டி, பின்னர் அடுக்குகளை இடமிருந்து வலமாக, மேலிருந்து கீழாக அடுக்கவும்.
+	Print, NextPage, PrevPage, FirstPage or LastPage	Print, NextPage, PrevPage, FirstPage அல்லது LastPage
+	Printer default	அச்சுப்பொறி இயல்புநிலை
+	Printer paper and scaling may differ. Check driver settings.	அச்சுப்பொறியின் தாளும் அளவிடலும் வேறுபடலாம். இயக்கி அமைப்புகளைச் சரிபார்க்கவும்.
+	Printer properties	அச்சுப்பொறிப் பண்புகள்
+	Printer:	அச்சுப்பொறி:
+	Printing	அச்சிடுதல்
+	Printing allowed	அச்சிடுதல் அனுமதிக்கப்படுகிறது
+	Print…	அச்சிடு…
+	Privacy	தனியுரிமை
+	Private data of other applications	பிற பயன்பாடுகளின் தனிப்பட்ட தரவு
+	Producer	உருவாக்கி
+	product (x)	பெருக்குத்தொகை (x)
+	Properties…	பண்புகள்…
+	Protect	பாதுகா
+	Protect & Standardize	பாதுகா & தரப்படுத்து
+	Protect a PDF	PDF-ஐப் பாதுகா
+	Protect Using Password	கடவுச்சொல்லால் பாதுகா
+	Protect using password…	கடவுச்சொல் மூலம் பாதுகா…
+	Protect with password	கடவுச்சொல்லால் பாதுகா
+	Protected: the combined file won't keep its security settings	பாதுகாக்கப்பட்டது: இணைக்கப்பட்ட கோப்பு தன் பாதுகாப்பு அமைப்புகளை வைத்திருக்காது
+	PRs	PRகள்
+	Public key	பொது விசை
+certificate	Public key	பொது விசை
+	Purple	ஊதா
+	PushButton	அழுத்துப் பொத்தான்
+	Quality	தரம்
+	Radio	ரேடியோ
+	Radio button	ரேடியோ பொத்தான்
+	Radio Button Properties	ரேடியோ பொத்தான் பண்புகள்
+	Re-type Password	கடவுச்சொல்லை மீண்டும் உள்ளிடு
+	Read	வாசி
+	Read mode	வாசிப்பு பயன்முறை
+	Read Only	படிக்க மட்டும்
+	Reading colours	வாசிப்பு நிறங்கள்
+	Reading the printer's settings…	அச்சுப்பொறியின் அமைப்புகளைப் படிக்கிறது…
+	Reads {names}, which read it back. No order can fix a loop: change one of the formulas.	{names} ஐப் படிக்கிறது; அவையும் இதையே படிக்கின்றன. எந்த வரிசையாலும் சுழற்சியைச் சரிசெய்ய முடியாது: ஒரு சூத்திரத்தை மாற்றவும்.
+	Reads {name}, which calculates later, so it shows an old value.	பின்னால் கணக்கிடப்படும் {name} ஐப் படிப்பதால், பழைய மதிப்பைக் காட்டுகிறது.
+	Reads {name}, which the form doesn't have, so it gets no value there.	படிவத்தில் இல்லாத {name} ஐப் படிப்பதால், அங்கு இதற்கு மதிப்பு கிடைக்காது.
+	Ready	தயார்
+	Real name	உண்மைப் பெயர்
+	Reason	காரணம்
+	Reason: 	காரணம்: 
+	Recent	சமீபத்தியவை
+	Recent colours	சமீபத்திய நிறங்கள்
+	Recent files to keep	வைத்திருக்க வேண்டிய சமீபத்திய கோப்புகள்
+	Recognize Text	உரையை அடையாளம் காண்
+	Recognize text	உரையை அடையாளம் காண்
+	Recognize text in multiple files…	பல கோப்புகளில் உரையை அடையாளம் காண்…
+	Recognize Text…	உரையை அடையாளம் காண்…
+	Recognize text…	உரையை அடையாளம் காண்…
+	Recognized 1 word	1 சொல் அடையாளம் காணப்பட்டது
+	Recognized {n} words	{n} சொற்கள் அடையாளம் காணப்பட்டன
+	Recognized {w} words in 1 file	1 கோப்பில் {w} சொற்கள் அடையாளம் காணப்பட்டன
+	Recognized {w} words in {n} files	{n} கோப்புகளில் {w} சொற்கள் அடையாளம் காணப்பட்டன
+	Recognizing text… file {d} of {t}	உரையை அடையாளம் காண்கிறது… {t} இல் கோப்பு {d}
+	Recognizing text… page {d} of {t}	உரையை அடையாளம் காண்கிறது… {t} இல் பக்கம் {d}
+	Recommended tools	பரிந்துரைக்கப்பட்ட கருவிகள்
+	Recover	மீட்டெடு
+	Recover unsaved documents?	சேமிக்கப்படாத ஆவணங்களை மீட்கவா?
+	Rectangle	செவ்வகம்
+	Red	சிவப்பு
+	Redact	மறை
+	Redact a PDF	PDF-இல் மறைப்பு செய்
+	Redact all	அனைத்தையும் மறை
+	Redact Image	படத்தை மறை
+	Redact pages	பக்கங்களை மறை
+	Redact pages…	பக்கங்களை மறை…
+	Redact text and images	உரை மற்றும் படங்களை மறை
+	Redacted area fill colour:	மறைக்கப்பட்ட பகுதியின் நிரப்பு நிறம்:
+	Redaction code:	மறைப்புக் குறியீடு:
+	Redaction mark appearance	மறைப்புக் குறியின் தோற்றம்
+	Redaction properties…	மறைப்புப் பண்புகள்…
+	Redaction Tool Properties	மறைப்புக் கருவி பண்புகள்
+	Redid {label}	{label} மீண்டும் செய்யப்பட்டது
+	Redo	மீண்டும் செய்
+	Redo {action}	{action} ஐ மீண்டும் செய்
+	Reduce file size	கோப்பு அளவைக் குறை
+	Reduce file size…	கோப்பு அளவைக் குறை…
+	Refresh	புதுப்பி
+	Regularity	சீரான தன்மை
+	Rejected	நிராகரிக்கப்பட்டது
+	Reliable character encoding is provided	நம்பகமான எழுத்துக் குறியாக்கம் வழங்கப்பட்டுள்ளது
+	Reload	மீண்டும் ஏற்று
+	Reload documents when their files change on disk	கோப்புகள் வட்டில் மாறும்போது ஆவணங்களை மீண்டும் ஏற்று
+	Remove	நீக்கு
+	Remove "{name}" from this list? The file itself is not deleted.	இந்தப் பட்டியலிலிருந்து "{name}" ஐ நீக்கவா? கோப்பு நீக்கப்படாது.
+	Remove all links	அனைத்து இணைப்புகளையும் நீக்கு
+	Remove background	பின்னணியை நீக்கு
+	Remove checkmark	சரிக்குறியை நீக்கு
+	Remove Crop	வெட்டலை நீக்கு
+	Remove crop	வெட்டலை நீக்கு
+	Remove from Recent	சமீபத்தியவற்றிலிருந்து நீக்கு
+	Remove header & footer	தலைப்பு & அடிக்குறிப்பை நீக்கு
+	Remove hidden information	மறைந்துள்ள தகவலை நீக்கு
+	Remove hidden information and flatten comments and form fields, so recipients see only the pages.	மறைந்துள்ள தகவலை நீக்கி, கருத்துகளையும் படிவப் புலங்களையும் தட்டையாக்கு; இதனால் பெறுநர்கள் பக்கங்களை மட்டுமே காண்பர்.
+	Remove hidden information, metadata, scripts and embedded content, and rewrite the files.	மறைந்துள்ள தகவல், மேனிலைத் தரவு, ஸ்கிரிப்ட்கள், உட்பொதிந்த உள்ளடக்கம் ஆகியவற்றை நீக்கி, கோப்புகளை மீண்டும் எழுது.
+	Remove hidden information…	மறைந்துள்ள தகவலை நீக்கு…
+	Remove invalid links and bookmarks	தவறான இணைப்புகளையும் புத்தகக்குறிகளையும் நீக்கு
+	Remove page	பக்கத்தை நீக்கு
+	Remove redaction marks	மறைப்புக் குறிகளை நீக்கு
+	Remove saved {what}	சேமித்த {what} ஐ நீக்கு
+	Remove security	பாதுகாப்பை நீக்கு
+	Remove this leaf tag from reading order and mark its direct content as an artifact	இந்த இலைக் குறிச்சொல்லை வாசிப்பு வரிசையிலிருந்து நீக்கி, அதன் நேரடி உள்ளடக்கத்தைக் கலைப்பொருளாகக் குறி
+	Remove unreferenced named destinations	குறிப்பிடப்படாத பெயரிட்ட இலக்குகளை நீக்கு
+	Remove unused objects and merge identical ones	பயன்படுத்தப்படாத பொருட்களை நீக்கி, ஒரே மாதிரியானவற்றை ஒன்றிணை
+	Remove watermark	நீர்க்குறியை நீக்கு
+	Remove {name}	{name} ஐ நீக்கு
+	Remove {name} from Recent	{name} கோப்பைச் சமீபத்தியவற்றிலிருந்து நீக்கு
+	Remove {n} files	{n} கோப்புகளை நீக்கு
+	Remove {n} pages	{n} பக்கங்களை நீக்கு
+	Remove {standard} identification	{standard} அடையாளத்தை நீக்கு
+	Removed 1 hidden item. Save to remove them from the file.	1 மறைந்த உருப்படி நீக்கப்பட்டது. கோப்பிலிருந்து நீக்க சேமிக்கவும்.
+	Removed 1 link	1 இணைப்பு நீக்கப்பட்டது
+	Removed {n} hidden items. Save to remove them from the file.	{n} மறைந்த உருப்படிகள் நீக்கப்பட்டன. கோப்பிலிருந்து நீக்க சேமிக்கவும்.
+	Removed {n} links	{n} இணைப்புகள் நீக்கப்பட்டன
+	Removing the background puts the page's own backdrop back.	பின்னணியை நீக்கினால் பக்கத்தின் சொந்தப் பின்புலம் மீண்டும் வரும்.
+	Rename	மறுபெயரிடு
+	Rename bookmark	புத்தகக்குறியை மறுபெயரிடு
+	Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)	வரைவு: hayro (bootstrap) · இடைமுகம்: egui · சின்னங்கள்: Lucide (ISC) · எழுத்துருக்கள்: Inter, JetBrains Mono, Dancing Script (OFL)
+	Rendering…	வரைகிறது…
+	Reopen Closed Tab	மூடிய தாவலை மீண்டும் திற
+	Reopen the files that were open when PdfCraft last closed	PdfCraft கடைசியாக மூடப்பட்டபோது திறந்திருந்த கோப்புகளை மீண்டும் திற
+	Repair log	பழுதுபார்ப்புப் பதிவு
+	Repairs	பழுதுபார்ப்புகள்
+	Repeat overlay text	மேலடுக்கு உரையை மீண்டும் மீண்டும் இடு
+	Repeated navigation links should be skippable. Check links that appear on every page.	திரும்ப வரும் வழிசெலுத்தல் இணைப்புகளைத் தவிர்க்க முடிய வேண்டும். ஒவ்வொரு பக்கத்திலும் தோன்றும் இணைப்புகளைச் சரிபார்க்கவும்.
+	Replace	மாற்று
+	Replace document colours	ஆவண நிறங்களை மாற்று
+	Replace image	படத்தை மாற்று
+	Replace Image…	படத்தை மாற்று…
+	Replace page	பக்கத்தை மாற்று
+	Replace Pages	பக்கங்களை மாற்று
+	Replace pages	பக்கங்களை மாற்று
+	Replace pages…	பக்கங்களை மாற்று…
+	Replace text	உரையை மாற்று
+	Replaced	மாற்றப்பட்டது
+	Replacement text	மாற்று உரை
+	Replacement: pages of {name}	மாற்றுவது: {name} இன் பக்கங்கள்
+	Replaces the existing one on those pages.	அந்தப் பக்கங்களில் ஏற்கனவே உள்ளதை மாற்றும்.
+	Replacing images arrives on the web with image file pickers	படங்களை மாற்றும் வசதி, படக் கோப்புத் தேர்விகளுடன் இணையத்தில் வரவுள்ளது
+	Replacing images on page {p} arrives on the web with image pickers ({i})	பக்கம் {p} இல் படங்களை மாற்றும் வசதி, படத் தேர்விகளுடன் இணையத்தில் வரவுள்ளது ({i})
+	Reply	பதிலளி
+	Report	அறிக்கை
+	Report created	அறிக்கை உருவாக்கப்பட்டது
+	Report Options	அறிக்கை விருப்பங்கள்
+	Report…	அறிக்கை…
+	Required	தேவை
+	Requires user to enter a password for:	இதற்குப் பயனர் கடவுச்சொல்லை உள்ளிட வேண்டும்:
+	Reset a form	படிவத்தை மீட்டமை
+	Reset columns	நெடுவரிசைகளை மீட்டமை
+	Reset page size	பக்க அளவை மீட்டமை
+	Reset panel layout	பலகத் தளவமைப்பை மீட்டமை
+	Reset to Initial Visibility	தொடக்கக் காட்சிநிலைக்கு மீட்டமை
+	Reset to printer defaults	அச்சுப்பொறி இயல்புநிலைகளுக்கு மீட்டமை
+	Reshape comment	கருத்தின் வடிவத்தை மாற்று
+	Resize comment	கருத்தின் அளவை மாற்று
+	Resize panel window	பலகச் சாளரத்தின் அளவை மாற்று
+	Resize panels	பலகங்களின் அளவை மாற்று
+	Resize window to initial page	சாளரத்தைத் தொடக்கப் பக்கத்துக்கு ஏற்ப மறுஅளவாக்கு
+	Resolution	தெளிவுத்திறன்
+	Resolution:	தெளிவுத்திறன்:
+	Restore	மீட்டமை
+	Restore the last view (page, zoom and page display) when a document is opened again	ஆவணம் மீண்டும் திறக்கப்படும்போது கடைசிக் காட்சியை (பக்கம், பெரிதாக்கம், பக்கக் காட்சி) மீட்டெடு
+	Restrictions	கட்டுப்பாடுகள்
+	Restrictions lifted	கட்டுப்பாடுகள் நீக்கப்பட்டன
+	Retain existing	உள்ளதை அப்படியே வை
+	Rev. {rev}: Certified by an unknown signer	திருத். {rev}: அறியப்படாத கையொப்பமிடுபவர் சான்றளித்தார்
+	Rev. {rev}: Certified by {name}	திருத். {rev}: {name} சான்றளித்தார்
+	Rev. {rev}: Signed by an unknown signer	திருத். {rev}: அறியப்படாத கையொப்பமிடுபவர் கையொப்பமிட்டார்
+	Rev. {rev}: Signed by {name}	திருத். {rev}: {name} கையொப்பமிட்டார்
+	Reveal in File Explorer	File Explorer-இல் காட்டு
+	Reveal in Finder	Finder-இல் காட்டு
+	Reverse closed arrow	தலைகீழ் மூடிய அம்பு
+	Reverse open arrow	தலைகீழ் திறந்த அம்பு
+	Reverse pages	பக்கங்களைத் தலைகீழாக்கு
+	Reverse the order	வரிசையைத் தலைகீழாக்கு
+	Revert	மீட்டமை
+	Revert changes	மாற்றங்களை மீட்டமை
+	Revert to the previously saved version of “{name}”? Changes since then can't be undone afterwards.	“{name}” இன் முன்பு சேமித்த பதிப்புக்குத் திரும்பவா? அதன் பிறகு செய்த மாற்றங்களை மீட்க இயலாது.
+	Reverted to the last saved version	கடைசியாகச் சேமித்த பதிப்புக்கு மீட்டமைக்கப்பட்டது
+	Review	மதிப்பாய்வு
+	Review & Compare	மதிப்பாய்வு & ஒப்பிடு
+	Review History	மதிப்பாய்வு வரலாறு
+	Revisions	திருத்தங்கள்
+	Rich Text Format (.rtf)	Rich Text Format (.rtf)
+	Right	வலது
+	Right Edge	வலது விளிம்பு
+	Right Footer Text	வலது அடிக்குறிப்பு உரை
+	Right Header Text	வலது தலைப்பு உரை
+	Rotate	சுழற்று
+	Rotate Clockwise	வலஞ்சுழியாகச் சுழற்று
+	Rotate clockwise	வலஞ்சுழியாகச் சுழற்று
+	Rotate Counterclockwise	இடஞ்சுழியாகச் சுழற்று
+	Rotate counterclockwise	இடஞ்சுழியாகச் சுழற்று
+	Rotate image	படத்தைச் சுழற்று
+	Rotate page	பக்கத்தைச் சுழற்று
+	Rotate page {label} clockwise	பக்கம் {label} ஐ வலஞ்சுழியாகச் சுழற்று
+	Rotate page {label} counterclockwise	பக்கம் {label} ஐ இடஞ்சுழியாகச் சுழற்று
+	Rotate Pages	பக்கங்களைச் சுழற்று
+	Rotate pages	பக்கங்களைச் சுழற்று
+	Rotate pages clockwise	பக்கங்களை வலஞ்சுழியாகச் சுழற்று
+	Rotate pages counterclockwise	பக்கங்களை இடஞ்சுழியாகச் சுழற்று
+	Rotate pages…	பக்கங்களைச் சுழற்று…
+	Rotate the selected pages clockwise	தேர்ந்தெடுத்த பக்கங்களை வலஞ்சுழியாகச் சுழற்று
+	Rotate the selected pages counterclockwise	தேர்ந்தெடுத்த பக்கங்களை இடஞ்சுழியாகச் சுழற்று
+	Rotate view	காட்சியைச் சுழற்று
+	Rotate view clockwise	காட்சியை வலஞ்சுழியாகச் சுழற்று
+	Rotate view clockwise ({key})	காட்சியை வலஞ்சுழியாகச் சுழற்று ({key})
+	Rotate view clockwise (⇧⌘+)	காட்சியை வலஞ்சுழியாகச் சுழற்று (⇧⌘+)
+	Rotate view counterclockwise	காட்சியை இடஞ்சுழியாகச் சுழற்று
+	Rotate:	சுழற்று:
+	Rotation	சுழற்சி
+	Rotation:	சுழற்சி:
+	Row spacing	வரிசை இடைவெளி
+	Rows	வரிசைகள்
+	rows have between {min} and {max} columns	வரிசைகளில் {min} முதல் {max} வரை நெடுவரிசைகள் உள்ளன
+	Rule Name	விதியின் பெயர்
+	Run	இயக்கு
+	Run a JavaScript	JavaScript-ஐ இயக்கு
+	Run form script	படிவ ஸ்கிரிப்டை இயக்கு
+	Run JavaScript	JavaScript-ஐ இயக்கு
+	Running action… file {d} of {t}	செயலை இயக்குகிறது… {t} இல் கோப்பு {d}
+calendar weekday	Sa	ச
+	Same as interface ({language})	இடைமுகத்தைப் போலவே ({language})
+	Sanitize	தூய்மையாக்கு
+	Sanitize document	ஆவணத்தைத் தூய்மையாக்கு
+	Sanitize Documents	ஆவணங்களைத் தூய்மையாக்கு
+	Sanitize document…	ஆவணத்தைத் தூய்மையாக்கு…
+	Sanitizing removes hidden information from the document: metadata, file attachments, comments, form fields (flattened), hidden text and layers, bookmarks, links, actions and scripts, and private application data.	தூய்மையாக்குதல் ஆவணத்திலிருந்து மறைந்துள்ள தகவலை நீக்குகிறது: மேனிலைத் தரவு, கோப்பு இணைப்புகள், கருத்துகள், படிவப் புலங்கள் (தட்டையாக்கி), மறைந்த உரை மற்றும் அடுக்குகள், புத்தகக்குறிகள், இணைப்புகள், செயல்கள் மற்றும் ஸ்கிரிப்ட்கள், பயன்பாட்டின் தனிப்பட்ட தரவு.
+	Save	சேமி
+	Save & Close	சேமித்து மூடு
+	Save (M4)	சேமி (M4)
+	Save ({key})	சேமி ({key})
+	Save anyway	எப்படியும் சேமி
+	Save as PDF	PDF ஆகச் சேமி
+	Save as PDF/A	PDF/A ஆகச் சேமி
+	Save as PDF/A-1b	PDF/A-1b ஆகச் சேமி
+	Save as PDF/A-2b	PDF/A-2b ஆகச் சேமி
+	Save as PDF/A-3b	PDF/A-3b ஆகச் சேமி
+	Save as PDF/UA	PDF/UA ஆகச் சேமி
+	Save as PDF/X	PDF/X ஆகச் சேமி
+	Save as {level}	{level} ஆகச் சேமி
+	Save as…	இவ்வாறு சேமி…
+	Save attachment…	இணைப்பைச் சேமி…
+	Save changes to “{name}” before closing?	மூடுவதற்கு முன் “{name}” இல் மாற்றங்களைச் சேமிக்கவா?
+	Save changes?	மாற்றங்களைச் சேமிக்கவா?
+	Save file	கோப்பைச் சேமி
+	Save image	படத்தைச் சேமி
+	Save Image As…	படத்தை இவ்வாறு சேமி…
+	Save or revert changes before selecting another tag.	மற்றொரு குறிச்சொல்லைத் தேர்ந்தெடுக்கும் முன் மாற்றங்களைச் சேமிக்கவும் அல்லது மீட்டமைக்கவும்.
+	Save over the changed file?	மாற்றப்பட்ட கோப்பின் மேல் சேமிக்கவா?
+	Save pages	பக்கங்களைச் சேமி
+	Save tag properties	குறிச்சொல் பண்புகளைச் சேமி
+	Save the accessibility report	அணுகல்தன்மை அறிக்கையைச் சேமி
+	Save the document afterwards: saving rewrites the whole file so no trace of the removed content stays in it.	பின்னர் ஆவணத்தைச் சேமிக்கவும்: சேமிப்பது முழுக் கோப்பையும் மீண்டும் எழுதுவதால், நீக்கப்பட்ட உள்ளடக்கத்தின் தடயம் எதுவும் அதில் இருக்காது.
+	Save the document afterwards; saving rewrites the whole file so nothing removed stays in it.	பின்னர் ஆவணத்தைச் சேமிக்கவும்; சேமிப்பது முழுக் கோப்பையும் மீண்டும் எழுதுவதால் நீக்கப்பட்டவை எதுவும் அதில் இருக்காது.
+	Save the spreadsheet	விரிதாளைச் சேமி
+	Save these pages as one PDF	இந்தப் பக்கங்களை ஒரே PDF ஆகச் சேமி
+	Saved measurements	சேமித்த அளவீடுகள்
+	Saved measurements.	அளவீடுகள் சேமிக்கப்பட்டன.
+	Saved the print-ready PDF to {path}	அச்சுக்குத் தயாரான PDF {path} இல் சேமிக்கப்பட்டது
+	Saved {name}	{name} சேமிக்கப்பட்டது
+	Saved {place}: {before} → {after} (not smaller){detail}	{place} இல் சேமிக்கப்பட்டது: {before} → {after} (சிறியதாகவில்லை){detail}
+	Saved {place}: {before} → {after} ({pct}% smaller){detail}	{place} இல் சேமிக்கப்பட்டது: {before} → {after} ({pct}% சிறியது){detail}
+	Saved, but reopening failed: {e}	சேமிக்கப்பட்டது, ஆனால் மீண்டும் திறப்பது தோல்வியடைந்தது: {e}
+	Scale	அளவுகோல்
+	Scale relative to target page	இலக்குப் பக்கத்துடன் ஒப்பிட்ட அளவு
+	Scan	ஸ்கேன்
+	Scan & OCR	ஸ்கேன் & OCR
+	Screen flicker	திரை மினுமினுப்பு
+	Screen readers choose their voice from the document's language. Set it in Document Properties > Advanced > Language.	திரை வாசிப்பான்கள் ஆவணத்தின் மொழியைக் கொண்டு குரலைத் தேர்வு செய்கின்றன. அதை ஆவணப் பண்புகள் > மேம்பட்ட > மொழி என்பதில் அமைக்கவும்.
+	Script	ஸ்கிரிப்ட்
+	Script Name:	ஸ்கிரிப்ட் பெயர்:
+	Script:	ஸ்கிரிப்ட்:
+	Scripted content must be usable with a keyboard and assistive technology. Check the document's scripts.	ஸ்கிரிப்ட் உள்ளடக்கம் விசைப்பலகை மற்றும் உதவித் தொழில்நுட்பத்தால் பயன்படுத்தத்தக்கதாக இருக்க வேண்டும். ஆவணத்தின் ஸ்கிரிப்ட்களைச் சரிபார்க்கவும்.
+	Scripts	ஸ்கிரிப்ட்கள்
+	Scripts run in a sandbox without file or network access. A script that asks to open a web page needs your permission first. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	ஸ்கிரிப்ட்கள் கோப்பு அல்லது பிணைய அணுகல் இல்லாத சாண்ட்பாக்ஸில் இயங்கும். வலைப்பக்கத்தைத் திறக்கக் கோரும் ஸ்கிரிப்டுக்கு முதலில் உங்கள் அனுமதி தேவை. JavaScript நிறுத்தப்பட்டிருந்தாலும், Acrobat-இன் நிலையான வடிவமைப்பு, சரிபார்ப்பு, கணக்கீட்டுச் செயல்பாடுகள் செயல்படும்.
+	Scripts run in a sandbox without file or network access. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	ஸ்கிரிப்ட்கள் கோப்பு அல்லது பிணைய அணுகல் இல்லாத சாண்ட்பாக்ஸில் இயங்கும். JavaScript நிறுத்தப்பட்டிருந்தாலும், Acrobat-இன் நிலையான வடிவமைப்பு, சரிபார்ப்பு, கணக்கீட்டுச் செயல்பாடுகள் செயல்படும்.
+	Scroll long text	நீண்ட உரையை ஸ்க்ரோல் செய்
+	Scroll speed (mouse wheel and arrow keys)	ஸ்க்ரோல் வேகம் (சுட்டி உருளை மற்றும் அம்புக்குறி விசைகள்)
+	Scroll tabs left	தாவல்களை இடப்புறம் ஸ்க்ரோல் செய்
+	Scroll tabs right	தாவல்களை வலப்புறம் ஸ்க்ரோல் செய்
+	Search	தேடல்
+	Search comments	கருத்துகளைத் தேடு
+	Search results	தேடல் முடிவுகள்
+	Search tools and commands	கருவிகளையும் கட்டளைகளையும் தேடு
+	Search tools and commands…	கருவிகளையும் கட்டளைகளையும் தேடு…
+	Search tools…	கருவிகளைத் தேடு…
+	Searchable Image (Exact)	தேடக்கூடிய படம் (துல்லியம்)
+	Searching… {s} of {p} pages	தேடுகிறது… {p} பக்கங்களில் {s}
+	Searching… {s}/{p}	தேடுகிறது… {s}/{p}
+	Search…	தேடு…
+	Security	பாதுகாப்பு
+	Security method	பாதுகாப்பு முறை
+	Security properties	பாதுகாப்புப் பண்புகள்
+	Security properties…	பாதுகாப்புப் பண்புகள்…
+	Security settings	பாதுகாப்பு அமைப்புகள்
+	Security settings must allow assistive technology to read the content ("Enable text access for screen reader devices"). Change the document's security to allow it.	உள்ளடக்கத்தைப் படிக்க உதவித் தொழில்நுட்பத்தைப் பாதுகாப்பு அமைப்புகள் அனுமதிக்க வேண்டும் ("திரை வாசிப்பான் சாதனங்களுக்கு உரை அணுகலை இயக்கு"). அதை அனுமதிக்க ஆவணத்தின் பாதுகாப்பை மாற்றவும்.
+	Security will be removed when you save	சேமிக்கும்போது பாதுகாப்பு நீக்கப்படும்
+	Select (V)	தேர்ந்தெடு (V)
+	Select a file first	முதலில் ஒரு கோப்பைத் தேர்ந்தெடுக்கவும்
+	Select a file for the stamp	முத்திரைக்கு ஒரு கோப்பைத் தேர்ந்தெடுக்கவும்
+	Select a password-protected file first	முதலில் கடவுச்சொல் பாதுகாக்கப்பட்ட கோப்பைத் தேர்ந்தெடுக்கவும்
+	Select a word	ஒரு சொல்லைத் தேர்ந்தெடு
+	Select Action:	செயலைத் தேர்ந்தெடுக்கவும்:
+	Select All	அனைத்தையும் தேர்ந்தெடு
+	Select all	அனைத்தையும் தேர்ந்தெடு
+	Select all pages (Organize)	அனைத்துப் பக்கங்களையும் தேர்ந்தெடு (ஒழுங்கமை)
+	Select at most 1000 objects at a time.	ஒரே நேரத்தில் அதிகபட்சம் 1000 பொருட்களைத் தேர்ந்தெடுக்கலாம்.
+	Select data files to merge	இணைக்க வேண்டிய தரவுக் கோப்புகளைத் தேர்ந்தெடுக்கவும்
+	Select files to compare	ஒப்பிட வேண்டிய கோப்புகளைத் தேர்ந்தெடு
+	Select format category:	வடிவமைப்பு வகையைத் தேர்ந்தெடுக்கவும்:
+	Select Icon	சின்னத்தைத் தேர்ந்தெடு
+	Select page {label}	பக்கம் {label} ஐத் தேர்ந்தெடு
+	Select pages	பக்கங்களைத் தேர்ந்தெடு
+	Select the items to remove from this document.	இந்த ஆவணத்திலிருந்து நீக்க வேண்டியவற்றைத் தேர்ந்தெடுக்கவும்.
+	Select Tool	தேர்வுக் கருவி
+	Select tools to display on your Home page for quick access.	விரைவான அணுகலுக்கு உங்கள் முகப்புப் பக்கத்தில் காட்ட வேண்டிய கருவிகளைத் தேர்ந்தெடுக்கவும்.
+	Select Trigger:	தூண்டுதலைத் தேர்ந்தெடுக்கவும்:
+	Selected image files: {count}	தேர்ந்தெடுத்த படக் கோப்புகள்: {count}
+	Selected pages	தேர்ந்தெடுத்த பக்கங்கள்
+	Selection	தேர்வு
+	Self-signed	சுய-கையொப்பம்
+certificate	Self-signed	சுய-கையொப்பம்
+	Send backward	ஒரு படி பின்னே அனுப்பு
+	Send to back	பின்னால் அனுப்பு
+	Sending sheet {s} of {n} to {printer}…	{n} இல் தாள் {s} ஐ {printer} க்கு அனுப்புகிறது…
+	Sending to {printer}…	{printer} க்கு அனுப்புகிறது…
+	Sensitivity	உணர்திறன்
+	Sent to {printer}	{printer} க்கு அனுப்பப்பட்டது
+	Sent to {printer}: {msg}	{printer} க்கு அனுப்பப்பட்டது: {msg}
+	Separate PDFs	தனித்தனி PDFகள்
+	Separator style:	பிரிப்பு பாணி:
+	September	செப்டம்பர்
+calendar date	September	செப்டம்பர்
+	Serial number	வரிசை எண்
+certificate	Serial number	வரிசை எண்
+	Set Alternate Text	மாற்று உரையை அமை
+	Set alternate text	மாற்று உரையை அமை
+	Set bookmark destination	புத்தகக்குறி இலக்கை அமை
+	Set calculation order	கணக்கீட்டு வரிசையை அமை
+	Set document title	ஆவணத் தலைப்பை அமை
+	Set Fields to Same Size	புலங்களை ஒரே அளவாக்கு
+	Set layer visibility	அடுக்குக் காட்சிநிலையை அமை
+	Set measurement scale	அளவீட்டு அளவுகோலை அமை
+	Set Page Boxes	பக்கப் பெட்டிகளை அமை
+	Set page boxes	பக்கப் பெட்டிகளை அமை
+	Set page boxes…	பக்கப் பெட்டிகளை அமை…
+	Set page transitions	பக்க மாற்ற விளைவுகளை அமை
+	Set properties	பண்புகளை அமை
+	Set status	நிலையை அமை
+	Set status Accepted	நிலையை "ஏற்கப்பட்டது" என அமை
+	Set status Cancelled	நிலையை "ரத்துசெய்யப்பட்டது" என அமை
+	Set status Completed	நிலையை "முடிந்தது" என அமை
+	Set status None	நிலையை "எதுவுமில்லை" என அமை
+	Set status Rejected	நிலையை "நிராகரிக்கப்பட்டது" என அமை
+	Set status Unmarked	நிலையை "குறிக்கப்படவில்லை" என அமை
+	Set tab order	தாவல் வரிசையை அமை
+	Set the image of {name}	{name} இன் படத்தை அமை
+	Set to current page ({n})	தற்போதைய பக்கத்துக்கு அமை ({n})
+	Set to zero	பூஜ்யமாக அமை
+	Settings	அமைப்புகள்
+	SHA-1 digest	SHA-1 சுருக்கம்
+certificate	SHA-1 digest	SHA-1 சுருக்கம்
+	SHA-256 digest	SHA-256 சுருக்கம்
+certificate	SHA-256 digest	SHA-256 சுருக்கம்
+	Shadings	நிழலிடல்கள்
+	Shared Field Properties	பகிரப்பட்ட புலப் பண்புகள்
+	Sheet {s} of {n}	{n} இல் தாள் {s}
+key	Shift	Shift
+	Shift constrains to 45 degrees. Backspace removes a vertex. Escape cancels.	Shift 45 டிகிரிக்குக் கட்டுப்படுத்தும். Backspace ஒரு முனையை நீக்கும். Escape ரத்துசெய்யும்.
+	Shift- or Ctrl/Command-click to select several fields.	பல புலங்களைத் தேர்ந்தெடுக்க Shift- அல்லது Ctrl/Command-சொடுக்கு.
+	Shift-click to select several objects. Drag empty space to select an area.	பல பொருட்களைத் தேர்ந்தெடுக்க Shift-சொடுக்கு. ஒரு பகுதியைத் தேர்ந்தெடுக்க வெற்றிடத்தை இழுக்கவும்.
+	ships in milestone {m}	மைல்கல் {m} இல் வெளியாகும்
+	Show	காட்டு
+	Show a basic title bar for the window buttons instead of the tab strip. GNOME doesn't draw title bars for apps, so this one doesn't follow its theme.	தாவல் பட்டைக்குப் பதிலாகச் சாளரப் பொத்தான்களுக்கு அடிப்படைத் தலைப்புப் பட்டையைக் காட்டு. GNOME பயன்பாடுகளுக்குத் தலைப்புப் பட்டைகளை வரைவதில்லை, எனவே இது அதன் தீமைப் பின்பற்றாது.
+	Show a field	புலத்தைக் காட்டு
+	Show a notice when a document is secured	ஆவணம் பாதுகாக்கப்பட்டிருக்கும்போது அறிவிப்பைக் காட்டு
+	Show all	அனைத்தையும் காட்டு
+	Show all comments	அனைத்துக் கருத்துகளையும் காட்டு
+	Show certificate…	சான்றிதழைக் காட்டு…
+	Show cover page in two-page view	இரு-பக்கக் காட்சியில் அட்டைப் பக்கத்தைக் காட்டு
+	Show gaps between pages	பக்கங்களுக்கு இடையே இடைவெளி காட்டு
+	Show layer	அடுக்கைக் காட்டு
+	Show less	குறைவாகக் காட்டு
+	Show on the page which fields each field reads	ஒவ்வொரு புலமும் எந்தப் புலங்களைப் படிக்கிறது என்பதைப் பக்கத்தில் காட்டு
+	Show Page Edge Shadows	பக்க விளிம்பு நிழல்களைக் காட்டு
+	Show password	கடவுச்சொல்லைக் காட்டு
+	Show Report	அறிக்கையைக் காட்டு
+	Show the accessibility report	அணுகல்தன்மை அறிக்கையைக் காட்டு
+	Show this dialog when the Checker starts	சரிபார்ப்பி தொடங்கும்போது இந்த உரையாடலைக் காட்டு
+	Show {n} more	மேலும் {n} காட்டு
+	Show:	காட்டு:
+	Shown while the pointer is over a mark.	சுட்டி குறியின் மேல் இருக்கும்போது காட்டப்படும்.
+	Shrink oversized pages	பெரிய பக்கங்களைச் சுருக்கு
+	Shrink the page content to make room for the header and footer	தலைப்பு மற்றும் அடிக்குறிப்புக்கு இடம் அளிக்கப் பக்க உள்ளடக்கத்தைச் சுருக்கு
+	Side by side	அருகருகே
+	Side panels	பக்கப் பலகங்கள்
+	Sign	கையொப்பமிடு
+	Sign a sheet of white paper and take a photo of it in bright, even light (use the flash). Choose the photo or drop it here: PdfCraft finds the signature and removes the paper.	ஒரு வெள்ளைத் தாளில் கையொப்பமிட்டு, பிரகாசமான, சீரான ஒளியில் (ஃபிளாஷைப் பயன்படுத்தவும்) அதைப் புகைப்படம் எடுக்கவும். புகைப்படத்தைத் தேர்ந்தெடுக்கவும் அல்லது இங்கே இழுத்துவிடவும்: PdfCraft கையொப்பத்தைக் கண்டறிந்து தாளை நீக்கும்.
+	Sign Here	இங்கே கையொப்பமிடுங்கள்
+	Sign this field…	இந்தப் புலத்தில் கையொப்பமிடு…
+	Sign with a Digital ID	எண்ணிம ஐடியுடன் கையொப்பமிடு
+	Sign yourself	நீங்களே கையொப்பமிடுங்கள்
+	Signature	கையொப்பம்
+	signature	கையொப்பம்
+	Signature Details	கையொப்ப விவரங்கள்
+	Signature is invalid	கையொப்பம் செல்லாதது
+	Signature is INVALID:	கையொப்பம் செல்லாதது:
+	Signature is valid	கையொப்பம் செல்லுபடியாகும்
+	Signature is valid:	கையொப்பம் செல்லுபடியாகும்:
+	Signature panel	கையொப்பப் பலகம்
+	Signature validity is unknown	கையொப்பத்தின் செல்லுபடி அறியப்படவில்லை
+	Signature validity is UNKNOWN:	கையொப்பத்தின் செல்லுபடி அறியப்படவில்லை:
+	Signatures	கையொப்பங்கள்
+	Signatures panel	கையொப்பங்கள் பலகம்
+	Signed and all signatures are valid.	கையொப்பமிடப்பட்டது, அனைத்துக் கையொப்பங்களும் செல்லுபடியாகும்.
+	Signed and saved to {path}	கையொப்பமிடப்பட்டு {path} இல் சேமிக்கப்பட்டது
+	Signer	கையொப்பமிட்டவர்
+	Signer's name	கையொப்பமிடுபவரின் பெயர்
+	Signing time	கையொப்பமிட்ட நேரம்
+	Signing time is from the clock on the signer's computer.	கையொப்பமிடும் நேரம் கையொப்பமிடுபவரின் கணினிக் கடிகாரத்திலிருந்து பெறப்பட்டது.
+	Simplified field notation:	எளிமைப்படுத்தப்பட்ட புலக் குறியீடு:
+	Single file	ஒற்றைக் கோப்பு
+	Single Page	ஒற்றைப் பக்கம்
+	Single page	ஒற்றைப் பக்கம்
+	Single Page Continuous	ஒற்றைப் பக்கம் தொடர்ச்சியாக
+	Single word or phrase	ஒற்றைச் சொல் அல்லது சொற்றொடர்
+	Size	அளவு
+	Skip Rule	விதியைத் தவிர்
+	Skipped	தவிர்க்கப்பட்டது
+	Slash	சாய்கோடு
+scroll speed	Slow	மெதுவாக
+	Smaller pages	சிறிய பக்கங்கள்
+	Smaller thumbnails	சிறிய சிறுபடங்கள்
+	Snap to drawing	வரைபடத்தில் ஒட்டு
+	Snapping	ஒட்டுதல்
+	Social Security Number	சமூகப் பாதுகாப்பு எண்
+	Social Security Numbers	சமூகப் பாதுகாப்பு எண்கள்
+	Solid	திட
+	Some bookmarks are not shown here: the panel lists a limited number, nested a limited depth.	சில புத்தகக்குறிகள் இங்கே காட்டப்படவில்லை: பலகம் வரையறுக்கப்பட்ட எண்ணிக்கையையும், வரையறுக்கப்பட்ட ஆழத்தில் உள்ளமைந்தவற்றையும் மட்டுமே பட்டியலிடும்.
+	Some content could not be classified safely and was kept in the count.	சில உள்ளடக்கத்தைப் பாதுகாப்பாக வகைப்படுத்த இயலவில்லை, எனவே அது எண்ணிக்கையில் வைக்கப்பட்டது.
+	Some names are built as it runs	சில பெயர்கள் இயங்கும்போது உருவாக்கப்படுகின்றன
+	Some page content couldn't be read; snapping uses the rest.	சில பக்க உள்ளடக்கத்தைப் படிக்க இயலவில்லை; ஒட்டுதல் மீதமுள்ளதைப் பயன்படுத்துகிறது.
+	Some pages contain no countable text. Scanned images need OCR first.	சில பக்கங்களில் எண்ணக்கூடிய உரை இல்லை. ஸ்கேன் படங்களுக்கு முதலில் OCR தேவை.
+	Sort	வரிசைப்படுத்து
+	Sort by	இதன்படி வரிசைப்படுத்து
+	Sort comments by:	கருத்துகளை இதன்படி வரிசைப்படுத்து:
+	Sort items	உருப்படிகளை வரிசைப்படுத்து
+	sorted ascending	ஏறுவரிசையில் வரிசைப்படுத்தப்பட்டது
+	sorted descending	இறங்குவரிசையில் வரிசைப்படுத்தப்பட்டது
+	Source	மூலம்
+key	Space	Space
+	Space Audit	இடத் தணிக்கை
+	Special	சிறப்பு
+	Split	பிரி
+	Split document	ஆவணத்தைப் பிரி
+	Split document…	ஆவணத்தைப் பிரி…
+	Split into files…	கோப்புகளாகப் பிரி…
+	Spreadsheet (.xlsx)	விரிதாள் (.xlsx)
+	Square	சதுரம்
+	Squiggly	அலை
+	Squiggly underline	அலைக் கீழ்க்கோடு
+	Squiggly underline text	உரைக்கு அலைக்கோடிடு
+	Stamp	முத்திரை
+	Stamp palette	முத்திரைத் தட்டு
+	Stamps	முத்திரைகள்
+	Standard	நிலையான
+	Standard Business	நிலையான வணிகம்
+	Standards	தரநிலைகள்
+	Star	நட்சத்திரம்
+	Start	தொடக்கம்
+action wizard	Start	தொடங்கு
+	Start Checking	சரிபார்க்கத் தொடங்கு
+	Start page number	தொடக்கப் பக்க எண்
+	Status	நிலை
+	Steps	படிகள்
+	Sticky note	ஒட்டுக் குறிப்பு
+	Still rendering — this page is unusually complex…	இன்னும் வரைகிறது — இந்தப் பக்கம் வழக்கத்துக்கு மாறாகச் சிக்கலானது…
+	Strength: {s}	வலிமை: {s}
+	Strikethrough	வெட்டுக்கோடு
+	Strikethrough text	உரையை வெட்டிக்கோடிடு
+	Strong	வலுவானது
+	Structure Info	அமைப்புத் தகவல்
+	Style	பாணி
+calendar weekday	Su	ஞா
+	Subject	பொருள்
+certificate	Subject	பொருள்
+	Submit a form	படிவத்தைச் சமர்ப்பி
+	Subscript	கீழெழுத்து
+	Subset	துணைக்குழு
+	Success	வெற்றி
+	sum (+)	கூட்டுத்தொகை (+)
+	Summarize	சுருக்கு
+	Summarize comments	கருத்துகளைச் சுருக்கு
+	Summarize Options	சுருக்க விருப்பங்கள்
+	Summary	சுருக்கம்
+	Superscript	மேலெழுத்து
+	Switch light / dark theme	ஒளி / இருண்ட தீமை மாற்று
+	Switch to List view to change the pages it takes.	அது எடுக்கும் பக்கங்களை மாற்ற பட்டியல் காட்சிக்கு மாறவும்.
+	Switch to two-page view first to show the cover page	அட்டைப் பக்கத்தைக் காட்ட முதலில் இரு-பக்கக் காட்சிக்கு மாறவும்
+	System	கணினி
+	Tab order	தாவல் வரிசை
+	Tab order by columns	நெடுவரிசைகள் வாரியாக தாவல் வரிசை
+	Tab order by rows	வரிசைகள் வாரியாக தாவல் வரிசை
+	Tab order is consistent with structure order	தாவல் வரிசை அமைப்பு வரிசையுடன் ஒத்துள்ளது
+	Tab order: by columns	தாவல் வரிசை: நெடுவரிசைகள் வாரியாக
+	Tab order: by document structure	தாவல் வரிசை: ஆவண அமைப்பு வாரியாக
+	Tab order: by rows	தாவல் வரிசை: வரிசைகள் வாரியாக
+	Tab order: move a field with its arrows.	தாவல் வரிசை: புலத்தை அதன் அம்புகளால் நகர்த்தவும்.
+	Table	அட்டவணை
+	Table cells belong in a row. Fix the table's tags.	அட்டவணைக் கலங்கள் ஒரு வரிசையில் இருக்க வேண்டும். அட்டவணையின் குறிச்சொற்களைச் சரிசெய்யவும்.
+	Table rows belong directly in a table or its head, body or foot. Fix the table's tags.	அட்டவணை வரிசைகள் நேரடியாக அட்டவணையில் அல்லது அதன் தலை, உடல் அல்லது அடிப்பகுதியில் இருக்க வேண்டும். அட்டவணையின் குறிச்சொற்களைச் சரிசெய்யவும்.
+	Tables	அட்டவணைகள்
+	Tables must contain the same number of columns in each row and rows in each column	அட்டவணைகளின் ஒவ்வொரு வரிசையிலும் ஒரே எண்ணிக்கையிலான நெடுவரிசைகளும், ஒவ்வொரு நெடுவரிசையிலும் ஒரே எண்ணிக்கையிலான வரிசைகளும் இருக்க வேண்டும்
+	Tables must have a summary	அட்டவணைகளுக்குச் சுருக்கம் இருக்க வேண்டும்
+	Tables should have headers	அட்டவணைகளுக்குத் தலைப்புகள் இருக்க வேண்டும்
+	Tag form fields	படிவப் புலங்களைக் குறியிடு
+	Tag type	குறிச்சொல் வகை
+	Tagged annotations	குறியிடப்பட்ட குறிப்புகள்
+	Tagged content	குறியிடப்பட்ட உள்ளடக்கம்
+	Tagged form fields	குறியிடப்பட்ட படிவப் புலங்கள்
+	Tagged multimedia	குறியிடப்பட்ட பல்லூடகம்
+	Tagged PDF	குறியிடப்பட்ட PDF
+	Tags	குறிச்சொற்கள்
+	Tags give the document a logical structure that assistive technology follows. Tag the document (Automatically tag PDF).	குறிச்சொற்கள் ஆவணத்துக்கு உதவித் தொழில்நுட்பம் பின்பற்றும் தருக்க அமைப்பை வழங்குகின்றன. ஆவணத்தைக் குறியிடவும் (PDF-ஐத் தானாகக் குறியிடு).
+	Tags panel	குறிச்சொற்கள் பலகம்
+	Take a snapshot	ஸ்னாப்ஷாட் எடு
+	Text	உரை
+	Text (plain)	உரை (எளிய)
+	Text alignment:	உரைச் சீரமைப்பு:
+	Text box	உரைப்பெட்டி
+	Text Color:	உரை நிறம்:
+	Text editing line	உரை திருத்தும் வரி
+	Text field	உரைப் புலம்
+	Text Field Properties	உரைப் புலப் பண்புகள்
+	Text Field Table	உரைப் புல அட்டவணை
+	Text field table	உரைப் புல அட்டவணை
+	Text in images isn't found; recognise text (OCR) first.	படங்களில் உள்ள உரை கண்டறியப்படாது; முதலில் உரையை அடையாளம் காணவும் (OCR).
+	Text is compared word by word; the differences are shown on the new file.	உரை சொல் வாரியாக ஒப்பிடப்படுகிறது; வேறுபாடுகள் புதிய கோப்பில் காட்டப்படும்.
+	Text language is specified	உரை மொழி குறிப்பிடப்பட்டுள்ளது
+	Text must contrast enough with its background for people with low vision. Check the colours by eye or with a contrast tool.	குறைந்த பார்வை உள்ளவர்களுக்காக உரை அதன் பின்னணியுடன் போதுமான அளவு முரண்பட வேண்டும். நிறங்களைக் கண்ணால் அல்லது முரண்பாட்டுக் கருவி மூலம் சரிபார்க்கவும்.
+	Text recognition is already running	உரை அடையாளம் காணல் ஏற்கனவே இயங்குகிறது
+	Text recognition isn't installed: its model files are missing. Reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them.	உரை அடையாளம் காணல் நிறுவப்படவில்லை: அதன் மாதிரிக் கோப்புகள் இல்லை. PdfCraft-ஐ மீண்டும் நிறுவவும், அல்லது PDFCRAFT_MODELS-ஐ அவை உள்ள கோப்புறைக்கு அமைக்கவும்.
+	Text recognition isn't installed: its models are missing (run `cargo xtask models`, or set PDFCRAFT_MODELS).	உரை அடையாளம் காணல் நிறுவப்படவில்லை: அதன் மாதிரிகள் இல்லை (`cargo xtask models` ஐ இயக்கவும், அல்லது PDFCRAFT_MODELS ஐ அமைக்கவும்).
+	Text to find	தேட வேண்டிய உரை
+	Text to insert	செருக வேண்டிய உரை
+	Text to place	வைக்க வேண்டிய உரை
+	Text used as a clipping path cannot be moved with this selection.	வெட்டுப் பாதையாகப் பயன்படுத்தப்படும் உரையை இந்தத் தேர்வுடன் நகர்த்த இயலாது.
+	Text, marks and signatures become part of the page. Other comments stay editable.	உரை, குறிகள் மற்றும் கையொப்பங்கள் பக்கத்தின் பகுதியாகிவிடும். பிற கருத்துகள் திருத்தக்கூடியதாகவே இருக்கும்.
+calendar weekday	Th	வி
+	TH and TD	TH மற்றும் TD
+	TH and TD must be children of TR	TH மற்றும் TD ஆகியவை TR-இன் உட்கூறுகளாக இருக்க வேண்டும்
+	Thai and Arabic use regular fallback fonts when available.	கிடைக்கும்போது தாய் மற்றும் அரபு மொழிகளுக்கு வழக்கமான மாற்று எழுத்துருக்கள் பயன்படுத்தப்படும்.
+	That didn't work: an internal error stopped it ({m}).	அது செயல்படவில்லை: ஒரு உள் பிழை அதை நிறுத்தியது ({m}).
+	That didn't work: an internal error stopped it ({m}). Your documents are unchanged.	அது செயல்படவில்லை: ஒரு உள் பிழை அதை நிறுத்தியது ({m}). உங்கள் ஆவணங்கள் மாறவில்லை.
+	the area, the spacing and the column widths must be numbers, the spacing 0 or more and each width more than 0	பகுதி, இடைவெளி, நெடுவரிசை அகலங்கள் ஆகியவை எண்களாக இருக்க வேண்டும்; இடைவெளி 0 அல்லது அதற்கு மேல், ஒவ்வொரு அகலமும் 0 க்கு மேல் இருக்க வேண்டும்
+@plural	The calculation order has {n} entry that calculates nothing. Fix order removes it.|The calculation order has {n} entries that calculate nothing. Fix order removes them.	கணக்கீட்டு வரிசையில் எதையும் கணக்கிடாத {n} உள்ளீடு உள்ளது. "வரிசையைச் சரிசெய்" அதை நீக்கும்.|கணக்கீட்டு வரிசையில் எதையும் கணக்கிடாத {n} உள்ளீடுகள் உள்ளன. "வரிசையைச் சரிசெய்" அவற்றை நீக்கும்.
+	The certificate of {} does not allow this many CA certificates below it (path length), so it is not used to vouch for {}.	{} இன் சான்றிதழ் தனக்குக் கீழ் இத்தனை CA சான்றிதழ்களை அனுமதிக்கவில்லை (பாதை நீளம்), எனவே {} க்குச் சான்றளிக்க அது பயன்படுத்தப்படவில்லை.
+	The certificate of {} has critical extensions PdfCraft does not recognize, so it is not used to vouch for {}.	{} இன் சான்றிதழில் PdfCraft அடையாளம் காணாத முக்கிய நீட்சிகள் உள்ளன, எனவே {} க்குச் சான்றளிக்க அது பயன்படுத்தப்படவில்லை.
+	The certificate of {} is not a CA certificate that may issue certificates, so it is not used to vouch for {}.	{} இன் சான்றிதழ் சான்றிதழ்களை வழங்கக்கூடிய CA சான்றிதழ் அல்ல, எனவே {} க்குச் சான்றளிக்க அது பயன்படுத்தப்படவில்லை.
+	The certificate of {} was not valid at the time of signing, so it is not used to vouch for {}.	{} இன் சான்றிதழ் கையொப்பமிடும் நேரத்தில் செல்லுபடியாகவில்லை, எனவே {} க்குச் சான்றளிக்க அது பயன்படுத்தப்படவில்லை.
+	The checker found 1 problem which may prevent the document from being fully accessible.	ஆவணம் முழுமையாக அணுகத்தக்கதாக இருப்பதைத் தடுக்கக்கூடிய 1 சிக்கலைச் சரிபார்ப்பி கண்டறிந்தது.
+	The checker found no problems in this document.	சரிபார்ப்பி இந்த ஆவணத்தில் சிக்கல்கள் எதையும் காணவில்லை.
+	The checker found problems which may prevent the document from being fully accessible.	ஆவணம் முழுமையாக அணுகத்தக்கதாக இருப்பதைத் தடுக்கக்கூடிய சிக்கல்களைச் சரிபார்ப்பி கண்டறிந்தது.
+	The checker found {n} problems which may prevent the document from being fully accessible.	ஆவணம் முழுமையாக அணுகத்தக்கதாக இருப்பதைத் தடுக்கக்கூடிய {n} சிக்கல்களைச் சரிபார்ப்பி கண்டறிந்தது.
+	The clipboard has no image or text	கிளிப்போர்டில் படமோ உரையோ இல்லை
+	The document changed while you were choosing a file, so nothing was changed.	நீங்கள் கோப்பைத் தேர்ந்தெடுக்கும்போது ஆவணம் மாறியதால் எதுவும் மாற்றப்படவில்லை.
+	The document changed while you were editing field properties.	புலப் பண்புகளைத் திருத்தும்போது ஆவணம் மாறியது.
+	The document has additional actions (/AA)	ஆவணத்தில் கூடுதல் செயல்கள் உள்ளன (/AA)
+	The document has been altered or corrupted since the signature was applied.	கையொப்பம் இடப்பட்ட பிறகு ஆவணம் மாற்றப்பட்டுள்ளது அல்லது சிதைந்துள்ளது.
+	The document has been altered or corrupted since the timestamp was applied.	நேர முத்திரை இடப்பட்ட பிறகு ஆவணம் மாற்றப்பட்டுள்ளது அல்லது சிதைந்துள்ளது.
+	The document has been altered since this signature was applied in ways it does not permit ({}).	இந்தக் கையொப்பம் இடப்பட்ட பிறகு ஆவணம் அது அனுமதிக்காத வழிகளில் மாற்றப்பட்டுள்ளது ({}).
+	The document has been altered since this timestamp was applied in ways it does not permit ({}).	இந்த நேர முத்திரை இடப்பட்ட பிறகு ஆவணம் அது அனுமதிக்காத வழிகளில் மாற்றப்பட்டுள்ளது ({}).
+	The document has been modified since this signature was applied, but the changes are permitted ({}).	இந்தக் கையொப்பம் இடப்பட்ட பிறகு ஆவணம் மாற்றப்பட்டுள்ளது, ஆனால் மாற்றங்கள் அனுமதிக்கப்பட்டவை ({}).
+	The document has been modified since this timestamp was applied, but the changes are permitted ({}).	இந்த நேர முத்திரை இடப்பட்ட பிறகு ஆவணம் மாற்றப்பட்டுள்ளது, ஆனால் மாற்றங்கள் அனுமதிக்கப்பட்டவை ({}).
+	The document has document-level JavaScript	ஆவணத்தில் ஆவண-நிலை JavaScript உள்ளது
+	the document has no form fields	ஆவணத்தில் படிவப் புலங்கள் இல்லை
+	the document has no page tree	ஆவணத்தில் பக்க மரம் இல்லை
+	the document has no tags	ஆவணத்தில் குறிச்சொற்கள் இல்லை
+	The document has no tags (structure tree)	ஆவணத்தில் குறிச்சொற்கள் (அமைப்பு மரம்) இல்லை
+	The document has no title	ஆவணத்துக்குத் தலைப்பு இல்லை
+	The document has no XMP metadata	ஆவணத்தில் XMP மேனிலைத் தரவு இல்லை
+	The document is encrypted	ஆவணம் குறியாக்கம் செய்யப்பட்டுள்ளது
+	The document is no longer open.	ஆவணம் இனி திறந்திருக்கவில்லை.
+	the document is protected by a password	ஆவணம் கடவுச்சொல்லால் பாதுகாக்கப்பட்டுள்ளது
+	The document isn't marked as tagged (MarkInfo Marked)	ஆவணம் குறியிடப்பட்டதாகக் குறிக்கப்படவில்லை (MarkInfo Marked)
+	The document isn't tagged, so none of its content is	ஆவணம் குறியிடப்படவில்லை, எனவே அதன் உள்ளடக்கம் எதுவும் குறியிடப்படவில்லை
+	The document now conforms to {level}; save it to keep the changes	ஆவணம் இப்போது {level} உடன் இணங்குகிறது; மாற்றங்களை வைத்திருக்க அதைச் சேமிக்கவும்
+	The document opens without a password; this password is needed to change the restrictions. It's applied when you save.	ஆவணம் கடவுச்சொல் இல்லாமல் திறக்கும்; கட்டுப்பாடுகளை மாற்ற இந்தக் கடவுச்சொல் தேவை. சேமிக்கும்போது இது பயன்படுத்தப்படும்.
+	The document was closed before it could be saved.	ஆவணம் சேமிக்கப்படுவதற்கு முன்பே மூடப்பட்டது.
+	The document's embedded revocation information shows that the signer's certificate has not been revoked.	ஆவணத்தின் உட்பொதிந்த ரத்துத் தகவல், கையொப்பமிடுபவரின் சான்றிதழ் ரத்து செய்யப்படவில்லை எனக் காட்டுகிறது.
+	The document's security settings don't allow copying text and images	ஆவணத்தின் பாதுகாப்பு அமைப்புகள் உரை மற்றும் படங்களை நகலெடுக்க அனுமதிக்கவில்லை
+	The document's security settings don't allow filling in form fields	ஆவணத்தின் பாதுகாப்பு அமைப்புகள் படிவப் புலங்களை நிரப்ப அனுமதிக்கவில்லை
+	The document's security settings don't allow printing	ஆவணத்தின் பாதுகாப்பு அமைப்புகள் அச்சிட அனுமதிக்கவில்லை
+	The document's security settings don't allow this change	ஆவணத்தின் பாதுகாப்பு அமைப்புகள் இந்த மாற்றத்தை அனுமதிக்கவில்லை
+	The ECDSA signature is not in canonical DER (trailing bytes, padding or a missing sign byte); it was read anyway.	ECDSA கையொப்பம் நியம DER-இல் இல்லை (பின்தொடரும் பைட்டுகள், நிரப்பல் அல்லது குறி பைட் இல்லை); எப்படியும் படிக்கப்பட்டது.
+	The ECDSA signature is the raw r and s values instead of a DER sequence; it was read anyway.	ECDSA கையொப்பம் DER வரிசைக்குப் பதிலாக மூல r மற்றும் s மதிப்புகளாக உள்ளது; எப்படியும் படிக்கப்பட்டது.
+	The embedded timestamp token is valid and its authority is trusted; trusted time is {}.	உட்பொதிந்த நேர முத்திரைக் குறியீடு செல்லுபடியாகும், அதன் அதிகாரம் நம்பப்படுகிறது; நம்பகமான நேரம் {}.
+	The existing action will be preserved.	ஏற்கனவே உள்ள செயல் பாதுகாக்கப்படும்.
+	The field properties could not be changed.	புலப் பண்புகளை மாற்ற இயலவில்லை.
+	The field properties dialog is no longer open.	புலப் பண்புகள் உரையாடல் இனி திறந்திருக்கவில்லை.
+	The field {name} no longer exists.	{name} புலம் இனி இல்லை.
+	the first heading is an H{n}; headings should not skip levels	முதல் தலைப்பு H{n}; தலைப்பு நிலைகள் தாவக் கூடாது
+	the first row number can be at most {max}	முதல் வரிசை எண் அதிகபட்சம் {max} ஆக இருக்கலாம்
+	The font {} isn't embedded	{} எழுத்துரு உட்பொதிக்கப்படவில்லை
+	The fonts PdfCraft writes with can't draw “{c}” ({code}), so it shows as ? in every PDF viewer. The text is saved.	PdfCraft எழுதப் பயன்படுத்தும் எழுத்துருக்களால் “{c}” ({code}) ஐ வரைய இயலாது, எனவே அது எல்லா PDF பார்வையாளர்களிலும் ? ஆகத் தெரியும். உரை சேமிக்கப்படுகிறது.
+	The form asks to be submitted to {u}; PdfCraft doesn't send form data. Save the document to keep your entries.	படிவம் {u} க்குச் சமர்ப்பிக்கப்பட வேண்டும் எனக் கோருகிறது; PdfCraft படிவத் தரவை அனுப்புவதில்லை. உங்கள் உள்ளீடுகளை வைத்திருக்க ஆவணத்தைச் சேமிக்கவும்.
+	The form asks viewers to make appearances (NeedAppearances)	படிவம் பார்வையாளர்களைத் தோற்றங்களை உருவாக்கக் கேட்கிறது (NeedAppearances)
+	The image has been copied ({w} × {h} pixels)	படம் நகலெடுக்கப்பட்டது ({w} × {h} பிக்சல்)
+	The image has been copied as a {ext} file	படம் {ext} கோப்பாக நகலெடுக்கப்பட்டது
+	the image is empty	படம் காலியாக உள்ளது
+	The key is in the macOS Keychain, which may ask to allow PdfCraft to use it.	விசை macOS Keychain-இல் உள்ளது; PdfCraft அதைப் பயன்படுத்த அனுமதி கேட்கலாம்.
+	The key is in the Windows certificate store, which may ask to allow PdfCraft to use it.	விசை Windows சான்றிதழ் சேமிப்பகத்தில் உள்ளது; PdfCraft அதைப் பயன்படுத்த அனுமதி கேட்கலாம்.
+	The Keychain's digital IDs couldn't be listed: {e}	Keychain-இல் உள்ள எண்ணிம ஐடிகளைப் பட்டியலிட இயலவில்லை: {e}
+	The labels are in English: the signature's font can't draw them in this language.	லேபிள்கள் ஆங்கிலத்தில் உள்ளன: கையொப்பத்தின் எழுத்துருவால் அவற்றை இந்த மொழியில் வரைய இயலாது.
+	The linked PDF opened, but its named destination was not applied.	இணைக்கப்பட்ட PDF திறந்தது, ஆனால் அதன் பெயரிட்ட இலக்கு பயன்படுத்தப்படவில்லை.
+	The linked PDF opened, but its page destination was out of range.	இணைக்கப்பட்ட PDF திறந்தது, ஆனால் அதன் பக்க இலக்கு வரம்புக்கு வெளியே இருந்தது.
+	The metadata doesn't identify the file as {}	மேனிலைத் தரவு கோப்பை {} என அடையாளம் காட்டவில்லை
+	the name is not a plain file name	பெயர் எளிய கோப்புப் பெயர் அல்ல
+	The newest {n} of {total} PDFs	மொத்தம் {total} PDFகளில் புதிய {n}
+	The operation failed.	செயல்பாடு தோல்வியடைந்தது.
+	The order saved in the PDF needs tidying	PDF-இல் சேமிக்கப்பட்ட வரிசையைச் சீர்செய்ய வேண்டும்
+	The page has changed; select the image again	பக்கம் மாறியுள்ளது; படத்தை மீண்டும் தேர்ந்தெடுக்கவும்
+	The pages were extracted but not deleted, because the document changed while you were choosing a folder.	நீங்கள் கோப்புறையைத் தேர்ந்தெடுக்கும்போது ஆவணம் மாறியதால், பக்கங்கள் பிரித்தெடுக்கப்பட்டன ஆனால் நீக்கப்படவில்லை.
+	the password is incorrect	கடவுச்சொல் தவறானது
+	The password is incorrect.	கடவுச்சொல் தவறானது.
+	The password is only used to read the file; it isn't saved.	கடவுச்சொல் கோப்பைப் படிக்க மட்டுமே பயன்படுகிறது; அது சேமிக்கப்படாது.
+	The password must have at least 6 characters.	கடவுச்சொல்லில் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்.
+	The password must have at least 8 characters.	கடவுச்சொல்லில் குறைந்தது 8 எழுத்துகள் இருக்க வேண்டும்.
+	The passwords do not match.	கடவுச்சொற்கள் பொருந்தவில்லை.
+	The passwords don't match.	கடவுச்சொற்கள் பொருந்தவில்லை.
+	The PDF text fonts can't draw “{c}” ({code}). Choose supported text.	PDF உரை எழுத்துருக்களால் “{c}” ({code}) ஐ வரைய இயலாது. ஆதரிக்கப்படும் உரையைத் தேர்ந்தெடுக்கவும்.
+	The printer driver's own settings for this print: paper tray, paper type, finishing and more.	இந்த அச்சுக்கான அச்சுப்பொறி இயக்கியின் சொந்த அமைப்புகள்: தாள் தட்டு, தாள் வகை, முடிப்பு மற்றும் பல.
+	The replacement file doesn't have that many pages.	மாற்றுக் கோப்பில் அத்தனை பக்கங்கள் இல்லை.
+	the rows are too short: make the area taller, or use fewer rows or less row spacing	வரிசைகள் மிகக் குறுகியவை: பகுதியை உயரமாக்கவும், அல்லது குறைவான வரிசைகள் அல்லது குறைந்த வரிசை இடைவெளியைப் பயன்படுத்தவும்
+	The RSA signature value does not have the length of the key's modulus (leading zero bytes dropped or added); it was read anyway.	RSA கையொப்ப மதிப்பு விசையின் மாடுலஸ் நீளத்தில் இல்லை (முன்னணிப் பூஜ்ய பைட்டுகள் விடப்பட்டன அல்லது சேர்க்கப்பட்டன); எப்படியும் படிக்கப்பட்டது.
+	The RSA signature's DigestInfo has no NULL parameter (older signers write it so); it was read anyway.	RSA கையொப்பத்தின் DigestInfo-வில் NULL அளபுரு இல்லை (பழைய கையொப்பமிடுவோர் இப்படி எழுதுவர்); எப்படியும் படிக்கப்பட்டது.
+	The same password is tried on each file.	ஒவ்வொரு கோப்பிலும் அதே கடவுச்சொல் முயற்சிக்கப்படும்.
+	The security settings don't allow screen readers to read the text	திரை வாசிப்பான்கள் உரையைப் படிக்க பாதுகாப்பு அமைப்புகள் அனுமதிக்கவில்லை
+	The selected area has been copied ({w} × {h} pixels)	தேர்ந்தெடுத்த பகுதி நகலெடுக்கப்பட்டது ({w} × {h} பிக்சல்)
+	The selected fields could not be found. Select them again.	தேர்ந்தெடுத்த புலங்கள் கிடைக்கவில்லை. அவற்றை மீண்டும் தேர்ந்தெடுக்கவும்.
+	The signature algorithm and the SignerInfo's digest algorithm name different hashes; the signature was made with the SignerInfo's.	கையொப்ப வழிமுறையும் SignerInfo-வின் சுருக்க வழிமுறையும் வெவ்வேறு ஹாஷ்களைக் குறிக்கின்றன; கையொப்பம் SignerInfo-வின் ஹாஷுடன் உருவாக்கப்பட்டது.
+	The signature carries an unverified timestamp ({}): the timestamp authority is not in your list of trusted certificates, so the signing time claimed by the signer is used instead.	கையொப்பம் சரிபார்க்கப்படாத நேர முத்திரையைக் கொண்டுள்ளது ({}): நேர முத்திரை அதிகாரம் உங்கள் நம்பகச் சான்றிதழ் பட்டியலில் இல்லை, எனவே கையொப்பமிடுபவர் கூறிய கையொப்ப நேரம் பயன்படுத்தப்படுகிறது.
+	The signature contents are not hexadecimal.	கையொப்ப உள்ளடக்கம் பதினறுமத்தில் இல்லை.
+	The signature could not be checked ({}).	கையொப்பத்தைச் சரிபார்க்க இயலவில்லை ({}).
+	The signature could not be read ({}).	கையொப்பத்தைப் படிக்க இயலவில்லை ({}).
+	The signature could not be verified ({}).	கையொப்பத்தை நிறுவ இயலவில்லை ({}).
+	The signature has no valid byte range.	கையொப்பத்துக்குச் செல்லுபடியாகும் பைட் வரம்பு இல்லை.
+	The signature includes an embedded timestamp.	கையொப்பத்தில் உட்பொதிந்த நேர முத்திரை உள்ளது.
+	The signature is BER-encoded (indefinite lengths) rather than DER; it was read leniently.	கையொப்பம் DER அல்லாமல் BER-குறியாக்கம் (வரம்பற்ற நீளங்கள்) செய்யப்பட்டுள்ளது; அது தளர்வாகப் படிக்கப்பட்டது.
+	The signature uses the legacy adbe.x509.rsa_sha1 format.	கையொப்பம் பழைய adbe.x509.rsa_sha1 வடிவத்தைப் பயன்படுத்துகிறது.
+	The signature value does not match the signer's certificate: the signature is corrupt.	கையொப்ப மதிப்பு கையொப்பமிடுபவரின் சான்றிதழுடன் பொருந்தவில்லை: கையொப்பம் சிதைந்துள்ளது.
+	The signature will be invisible.	கையொப்பம் தெரியாததாக இருக்கும்.
+	The signature's byte range does not exclude exactly its contents.	கையொப்பத்தின் பைட் வரம்பு அதன் உள்ளடக்கத்தை மட்டும் சரியாக விலக்கவில்லை.
+	The signature's byte range does not match the file.	கையொப்பத்தின் பைட் வரம்பு கோப்புடன் பொருந்தவில்லை.
+	The signature's signed attributes have no content type, which CMS requires; it was read anyway.	கையொப்பத்தின் கையொப்பமிட்ட பண்புக்கூறுகளில் CMS தேவைப்படும் உள்ளடக்க வகை இல்லை; எப்படியும் படிக்கப்பட்டது.
+	The signature's signed attributes have no message digest, so the signature does not cover the document.	கையொப்பத்தின் கையொப்பமிட்ட பண்புக்கூறுகளில் செய்தி சுருக்கம் இல்லை, எனவே கையொப்பம் ஆவணத்தை உள்ளடக்கவில்லை.
+	The signature's signed attributes name a content type other than data, so it is not a signature of the document.	கையொப்பத்தின் கையொப்பமிட்ட பண்புக்கூறுகள் தரவு அல்லாத உள்ளடக்க வகையைக் குறிப்பிடுகின்றன, எனவே இது ஆவணத்தின் கையொப்பம் அல்ல.
+	The signature's timestamp token could not be verified ({}).	கையொப்பத்தின் நேர முத்திரைக் குறியீட்டை நிறுவ இயலவில்லை ({}).
+	The signature's timestamp token does not cover the signature value.	கையொப்பத்தின் நேர முத்திரைக் குறியீடு கையொப்ப மதிப்பை உள்ளடக்கவில்லை.
+	The signed content is a constructed (segmented) OCTET STRING, as BER allows; it was read anyway.	கையொப்பமிட்ட உள்ளடக்கம் BER அனுமதிப்பது போல் கட்டமைக்கப்பட்ட (துண்டாக்கப்பட்ட) OCTET STRING; எப்படியும் படிக்கப்பட்டது.
+	the signed version could not be read	கையொப்பமிட்ட பதிப்பைப் படிக்க இயலவில்லை
+	The signer's certificate does not allow digital signatures (its key usage has neither digital signature nor non-repudiation).	கையொப்பமிடுபவரின் சான்றிதழ் எண்ணிம கையொப்பங்களை அனுமதிக்கவில்லை (அதன் விசைப் பயன்பாட்டில் எண்ணிம கையொப்பமோ மறுக்கமுடியாமையோ இல்லை).
+	The signer's certificate has been revoked ({}).	கையொப்பமிடுபவரின் சான்றிதழ் ரத்து செய்யப்பட்டுள்ளது ({}).
+	The signer's certificate has critical extensions PdfCraft does not recognize ({}).	கையொப்பமிடுபவரின் சான்றிதழில் PdfCraft அடையாளம் காணாத முக்கிய நீட்சிகள் உள்ளன ({}).
+	The signer's certificate is not in the signature.	கையொப்பமிடுபவரின் சான்றிதழ் கையொப்பத்தில் இல்லை.
+	The signer's certificate is not issued for signing documents (its extended key usage has no document-signing purpose).	கையொப்பமிடுபவரின் சான்றிதழ் ஆவணங்களில் கையொப்பமிட வழங்கப்படவில்லை (அதன் நீட்டிக்கப்பட்ட விசைப் பயன்பாட்டில் ஆவணக் கையொப்ப நோக்கம் இல்லை).
+	The signer's certificate was not valid at the time of signing.	கையொப்பமிடும் நேரத்தில் கையொப்பமிடுபவரின் சான்றிதழ் செல்லுபடியாகவில்லை.
+	The signer's identity is unknown because it has not been included in your list of trusted certificates and none of its parent certificates are trusted certificates.	கையொப்பமிடுபவரின் அடையாளம் அறியப்படவில்லை; ஏனெனில் அது உங்கள் நம்பகச் சான்றிதழ் பட்டியலில் சேர்க்கப்படவில்லை, அதன் தாய்ச் சான்றிதழ்கள் எதுவும் நம்பகச் சான்றிதழ்கள் அல்ல.
+	The signer's identity is valid.	கையொப்பமிடுபவரின் அடையாளம் செல்லுபடியாகும்.
+	The standard fonts can't draw “{c}” ({code}). Only Western European characters can be added as text for now.	நிலையான எழுத்துருக்களால் “{c}” ({code}) ஐ வரைய இயலாது. தற்போது மேற்கு ஐரோப்பிய எழுத்துகளை மட்டுமே உரையாகச் சேர்க்க முடியும்.
+	The text is the same	உரை ஒன்றாகவே உள்ளது
+	the text recognition models are not installed (reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them)	உரை அடையாளம் காணல் மாதிரிகள் நிறுவப்படவில்லை (PdfCraft-ஐ மீண்டும் நிறுவவும், அல்லது PDFCRAFT_MODELS-ஐ அவை உள்ள கோப்புறைக்கு அமைக்கவும்)
+	The timestamp authority's certificate is not issued for time stamping.	நேர முத்திரை அதிகாரத்தின் சான்றிதழ் நேர முத்திரையிடுவதற்கு வழங்கப்படவில்லை.
+	The timestamp authority's certificate was not valid at the time of timestamping.	நேர முத்திரையிடும் நேரத்தில் நேர முத்திரை அதிகாரத்தின் சான்றிதழ் செல்லுபடியாகவில்லை.
+	The timestamp contents are not hexadecimal.	நேர முத்திரை உள்ளடக்கம் பதினறுமத்தில் இல்லை.
+	The timestamp has no valid byte range.	நேர முத்திரைக்குச் செல்லுபடியாகும் பைட் வரம்பு இல்லை.
+	The timestamp token could not be read ({}).	நேர முத்திரைக் குறியீட்டைப் படிக்க இயலவில்லை ({}).
+	The timestamp token is valid and its authority is trusted.	நேர முத்திரைக் குறியீடு செல்லுபடியாகும், அதன் அதிகாரம் நம்பப்படுகிறது.
+	The timestamp token is valid, but the timestamp authority is not in your list of trusted certificates.	நேர முத்திரைக் குறியீடு செல்லுபடியாகும், ஆனால் நேர முத்திரை அதிகாரம் உங்கள் நம்பகச் சான்றிதழ் பட்டியலில் இல்லை.
+	The timestamp's byte range does not exclude exactly its contents.	நேர முத்திரையின் பைட் வரம்பு அதன் உள்ளடக்கத்தை மட்டும் சரியாக விலக்கவில்லை.
+	The timestamp's byte range does not match the file.	நேர முத்திரையின் பைட் வரம்பு கோப்புடன் பொருந்தவில்லை.
+	The title in the metadata and the document information differ	மேனிலைத் தரவிலும் ஆவணத் தகவலிலும் உள்ள தலைப்பு வேறுபடுகிறது
+	the title must not be empty	தலைப்பு காலியாக இருக்கக் கூடாது
+	The value is shown as typed.	மதிப்பு தட்டச்சிட்டபடியே காட்டப்படும்.
+	The window should show a meaningful title rather than the file name. Set a title and Initial View > Show: Document Title.	சாளரம் கோப்புப் பெயருக்குப் பதிலாகப் பொருள்பொதிந்த தலைப்பைக் காட்ட வேண்டும். ஒரு தலைப்பை அமைத்து, தொடக்கக் காட்சி > காட்டு: ஆவணத் தலைப்பு என்பதைத் தேர்ந்தெடுக்கவும்.
+	The window shows the file name, not the title (Initial View > Show)	சாளரம் தலைப்பை அல்லாமல் கோப்புப் பெயரைக் காட்டுகிறது (தொடக்கக் காட்சி > காட்டு)
+	The Windows store's digital IDs couldn't be listed: {e}	Windows சேமிப்பகத்தின் எண்ணிம ஐடிகளைப் பட்டியலிட இயலவில்லை: {e}
+	Theme	தீம்
+	there are no pages to print	அச்சிட பக்கங்கள் இல்லை
+	There are no redaction marks (mark text, areas or pages first)	மறைப்புக் குறிகள் இல்லை (முதலில் உரை, பகுதிகள் அல்லது பக்கங்களைக் குறிக்கவும்)
+	There are no redaction marks to apply	பயன்படுத்த மறைப்புக் குறிகள் இல்லை
+	there are no redaction marks to apply	பயன்படுத்த மறைப்புக் குறிகள் இல்லை
+	There is no folder to save the digital ID in.	எண்ணிம ஐடியைச் சேமிக்க கோப்புறை இல்லை.
+	These files can't be read, so they won't be in the combined PDF:	இந்தக் கோப்புகளைப் படிக்க இயலாது, எனவே அவை இணைக்கப்பட்ட PDF-இல் இடம்பெறாது:
+	These objects could not be moved. Select them again and try a smaller move.	இந்தப் பொருட்களை நகர்த்த இயலவில்லை. அவற்றை மீண்டும் தேர்ந்தெடுத்து சிறிய நகர்வை முயலவும்.
+	Thick	தடித்த
+	Thickness	தடிமன்
+	Thin	மெல்லிய
+	This area has too many overlapping paths; intersection snapping is limited.	இந்தப் பகுதியில் அதிகமான மேற்பொருந்தும் பாதைகள் உள்ளன; வெட்டுப்புள்ளி ஒட்டுதல் வரையறுக்கப்பட்டுள்ளது.
+	This certificate is in your list of trusted certificates.	இந்தச் சான்றிதழ் நீங்கள் நம்பும் சான்றிதழ்களின் பட்டியலில் உள்ளது.
+	This certificate is not trusted. Signatures made with it show an unknown identity.	இந்தச் சான்றிதழ் நம்பப்படவில்லை. இதனால் இடப்பட்ட கையொப்பங்கள் அறியப்படாத அடையாளத்தைக் காட்டும்.
+	This certificate is trusted through a certificate above it in the chain.	இந்தச் சான்றிதழ், சங்கிலியில் அதற்கு மேலுள்ள சான்றிதழ் வழியாக நம்பப்படுகிறது.
+	This comment's appearance can't be changed yet.	இந்தக் கருத்தின் தோற்றத்தை இன்னும் மாற்ற இயலாது.
+	This compatibility level supports only plain ASCII passwords.	இந்த இணக்கத்தன்மை நிலை எளிய ASCII கடவுச்சொற்களை மட்டுமே ஆதரிக்கிறது.
+	This dialog shows the details of a certificate and its chain.	இந்த உரையாடல் ஒரு சான்றிதழ் மற்றும் அதன் சங்கிலியின் விவரங்களைக் காட்டுகிறது.
+	This document asks to open in Full Screen mode: the page fills the screen and nothing else shows. Press Esc at any time to leave it.	இந்த ஆவணம் முழுத்திரை பயன்முறையில் திறக்கக் கோருகிறது: பக்கம் திரையை நிரப்பும், வேறு எதுவும் தெரியாது. எப்போது வேண்டுமானாலும் வெளியேற Esc அழுத்தவும்.
+	This document can't be checked: it couldn't be read for editing	இந்த ஆவணத்தைச் சரிபார்க்க இயலாது: திருத்துவதற்காக அதைப் படிக்க இயலவில்லை
+	This document contains {n} interactive form fields.	இந்த ஆவணத்தில் {n} ஊடாடும் படிவப் புலங்கள் உள்ளன.
+	This document has no attachments.	இந்த ஆவணத்தில் இணைப்புகள் இல்லை.
+	This document has no bookmarks.	இந்த ஆவணத்தில் புத்தகக்குறிகள் இல்லை.
+	This document has no comments to flatten	இந்த ஆவணத்தில் தட்டையாக்க கருத்துகள் இல்லை
+	This document has no document-level scripts.	இந்த ஆவணத்தில் ஆவண-நிலை ஸ்கிரிப்ட்கள் இல்லை.
+	This document has no editable structure tags.	இந்த ஆவணத்தில் திருத்தக்கூடிய அமைப்புக் குறிச்சொற்கள் இல்லை.
+	This document has no form fields to flatten	இந்த ஆவணத்தில் தட்டையாக்க படிவப் புலங்கள் இல்லை
+	This document has no form fields you can fill in	இந்த ஆவணத்தில் நீங்கள் நிரப்பக்கூடிய படிவப் புலங்கள் இல்லை
+	This document has no form fields.	இந்த ஆவணத்தில் படிவப் புலங்கள் இல்லை.
+	This document has no layers.	இந்த ஆவணத்தில் அடுக்குகள் இல்லை.
+	This document has no pages.	இந்த ஆவணத்தில் பக்கங்கள் இல்லை.
+	This document has no restrictions to lift	இந்த ஆவணத்தில் நீக்க கட்டுப்பாடுகள் இல்லை
+	This document has no signatures.	இந்த ஆவணத்தில் கையொப்பங்கள் இல்லை.
+	This document has no tagged figures.	இந்த ஆவணத்தில் குறியிடப்பட்ட படங்கள் இல்லை.
+	This document has no {kind} to change	இந்த ஆவணத்தில் மாற்ற {kind} இல்லை
+	This document has not been modified since this signature was applied.	இந்தக் கையொப்பம் இடப்பட்ட பிறகு இந்த ஆவணம் மாற்றப்படவில்லை.
+	This document has not been modified since this timestamp was applied.	இந்த நேர முத்திரை இடப்பட்ட பிறகு இந்த ஆவணம் மாற்றப்படவில்லை.
+	This document hasn't been checked yet.	இந்த ஆவணம் இன்னும் சரிபார்க்கப்படவில்லை.
+	This document is secured. Some changes are restricted by its security settings.	இந்த ஆவணம் பாதுகாக்கப்பட்டுள்ளது. சில மாற்றங்கள் அதன் பாதுகாப்பு அமைப்புகளால் கட்டுப்படுத்தப்படுகின்றன.
+	this document is signed: rewriting it would invalidate its signatures (save it incrementally instead)	இந்த ஆவணம் கையொப்பமிடப்பட்டுள்ளது: அதை மீண்டும் எழுதினால் அதன் கையொப்பங்கள் செல்லாததாகிவிடும் (அதற்குப் பதிலாகப் படிப்படியாகச் சேமிக்கவும்)
+	This document is trying to open a local file:	இந்த ஆவணம் ஓர் உள்ளூர் கோப்பைத் திறக்க முயல்கிறது:
+	This document isn't password-protected	இந்த ஆவணம் கடவுச்சொல்லால் பாதுகாக்கப்படவில்லை
+	This drawing exceeds the snapping limit; only the first paths are used.	இந்த வரைபடம் ஒட்டுதல் வரம்பை மீறுகிறது; முதல் சில பாதைகள் மட்டுமே பயன்படுத்தப்படுகின்றன.
+	This field is locked. Unlock it to change its properties.	இந்தப் புலம் பூட்டப்பட்டுள்ளது. அதன் பண்புகளை மாற்ற பூட்டைத் திறக்கவும்.
+	This field's font can't draw “{c}” ({code}), so PdfCraft shows ? in its place. The value is saved, and other PDF viewers redraw the field from it.	இந்தப் புலத்தின் எழுத்துருவால் “{c}” ({code}) ஐ வரைய இயலாது, எனவே PdfCraft அதன் இடத்தில் ? ஐக் காட்டுகிறது. மதிப்பு சேமிக்கப்படுகிறது; பிற PDF பார்வையாளர்கள் அதிலிருந்து புலத்தை மீண்டும் வரைவர்.
+	This file changed on disk. Reload it to see the new version; your unsaved changes will be lost.	இந்தக் கோப்பு வட்டில் மாறியுள்ளது. புதிய பதிப்பைக் காண அதை மீண்டும் ஏற்றவும்; சேமிக்காத உங்கள் மாற்றங்கள் இழக்கப்படும்.
+	This file changed on disk. Reload shows the new version and drops your unsaved changes; Save replaces it with this version.	இந்தக் கோப்பு வட்டில் மாறியுள்ளது. மீண்டும் ஏற்றுதல் புதிய பதிப்பைக் காட்டி, சேமிக்காத உங்கள் மாற்றங்களை நீக்கும்; சேமித்தல் அதை இந்தப் பதிப்பால் மாற்றும்.
+	This file is already as small as it can be made ({size}). No copy was saved.	இந்தக் கோப்பு ஏற்கனவே முடிந்த அளவு சிறியதாக உள்ளது ({size}). நகல் எதுவும் சேமிக்கப்படவில்லை.
+	this file isn't XFDF, FDF, XML or text form data	இந்தக் கோப்பு XFDF, FDF, XML அல்லது உரைப் படிவத் தரவு அல்ல
+	This file was damaged and has been repaired. Saving keeps the repaired version.	இந்தக் கோப்பு சேதமடைந்திருந்தது; அது சரிசெய்யப்பட்டுள்ளது. சேமித்தால் சரிசெய்யப்பட்ட பதிப்பு வைக்கப்படும்.
+	This folder isn't available right now. It may have moved, or its drive or cloud sync is offline.	இந்தக் கோப்புறை இப்போது கிடைக்கவில்லை. அது நகர்த்தப்பட்டிருக்கலாம் அல்லது அதன் டிரைவ் அல்லது கிளவுட் ஒத்திசைவு இணைப்பில் இல்லாமல் இருக்கலாம்.
+	This form also contains XFA data, which PdfCraft doesn't read yet. You can fill its fields, but Acrobat may show the XFA values instead.	இந்தப் படிவத்தில் XFA தரவும் உள்ளது; அதை PdfCraft இன்னும் படிக்காது. அதன் புலங்களை நிரப்பலாம், ஆனால் Acrobat அதற்குப் பதிலாக XFA மதிப்புகளைக் காட்டலாம்.
+	This form's scripts are turned off because one ran too long. Reopen the document to run them again.	ஒரு ஸ்கிரிப்ட் மிக நீண்ட நேரம் இயங்கியதால் இந்தப் படிவத்தின் ஸ்கிரிப்ட்கள் அணைக்கப்பட்டன. அவற்றை மீண்டும் இயக்க ஆவணத்தை மீண்டும் திறக்கவும்.
+	This is a dynamic XFA form, which PdfCraft can't display yet. What you see is the file's placeholder page.	இது ஓர் இயங்குநிலை XFA படிவம்; இதை PdfCraft இன்னும் காட்ட இயலாது. நீங்கள் காண்பது கோப்பின் இடஒதுக்கீட்டுப் பக்கம்.
+	This measurement needs at least {n} points.	இந்த அளவீட்டுக்குக் குறைந்தது {n} புள்ளிகள் தேவை.
+	This page contains objects that cannot be selected together.	இந்தப் பக்கத்தில் ஒன்றாகத் தேர்ந்தெடுக்க முடியாத பொருட்கள் உள்ளன.
+	This page couldn't be displayed.\n{e}	இந்தப் பக்கத்தைக் காட்ட இயலவில்லை.\n{e}
+	This PDF uses the unsupported {s} action.	இந்த PDF ஆதரிக்கப்படாத {s} செயலைப் பயன்படுத்துகிறது.
+	This printer offers no settings of its own.	இந்த அச்சுப்பொறி சொந்த அமைப்புகள் எதையும் வழங்கவில்லை.
+	This printer's driver doesn't take two-sided settings from other programs, so its own setting applies. Change it in Properties…	இந்த அச்சுப்பொறியின் இயக்கி பிற நிரல்களிலிருந்து இருபக்க அமைப்புகளை ஏற்காது, எனவே அதன் சொந்த அமைப்பு பொருந்தும். அதைப் பண்புகளில் மாற்றவும்…
+	This signature uses an RSA key shorter than 2048 bits, which is no longer considered strong enough for signatures. It still validates, but it should not be relied on.	இந்தக் கையொப்பம் 2048 பிட்டுகளை விடக் குறுகிய RSA விசையைப் பயன்படுத்துகிறது; இது கையொப்பங்களுக்கு இனி போதுமான வலிமை உடையதாகக் கருதப்படுவதில்லை. அது இன்னும் செல்லுபடியாகிறது, ஆனால் அதை நம்பக் கூடாது.
+	This signature uses RIPEMD-160, a legacy 160-bit hash algorithm that is no longer recommended for signatures. It still validates, but it should not be relied on.	இந்தக் கையொப்பம் RIPEMD-160 ஐப் பயன்படுத்துகிறது; இது கையொப்பங்களுக்கு இனி பரிந்துரைக்கப்படாத பழைய 160-பிட் ஹாஷ் வழிமுறை. அது இன்னும் செல்லுபடியாகிறது, ஆனால் அதை நம்பக் கூடாது.
+	This signature uses SHA-1, a weak hash algorithm: collisions in it have been demonstrated. It still validates because many documents signed years ago use it, but it should not be relied on.	இந்தக் கையொப்பம் பலவீனமான ஹாஷ் வழிமுறையான SHA-1 ஐப் பயன்படுத்துகிறது: அதில் மோதல்கள் நிரூபிக்கப்பட்டுள்ளன. பல ஆண்டுகளுக்கு முன் கையொப்பமிட்ட பல ஆவணங்கள் அதைப் பயன்படுத்துவதால் அது இன்னும் செல்லுபடியாகிறது, ஆனால் அதை நம்பக் கூடாது.
+	This web address mixes letters from different alphabets, a common way to imitate another site's name.	இந்த வலை முகவரி வெவ்வேறு எழுத்துமுறைகளின் எழுத்துகளைக் கலக்கிறது; இது மற்றொரு தளத்தின் பெயரைப் போலி செய்யும் பொதுவான வழி.
+	This web address uses letters from another alphabet, which can look like familiar ones.	இந்த வலை முகவரி வேறொரு எழுத்துமுறையின் எழுத்துகளைப் பயன்படுத்துகிறது; அவை பழக்கமான எழுத்துகளைப் போலத் தோன்றலாம்.
+	Thumbnail size	சிறுபட அளவு
+	Thumbnails	சிறுபடங்கள்
+	Tile scale:	ஓடு அளவு:
+	Time	நேரம்
+	Timed responses	நேரக்கட்டுப்பாட்டுப் பதில்கள்
+	Timestamp	நேர முத்திரை
+	Title	தலைப்பு
+	to	முதல்
+	To change locked fields, also set Locked to No.	பூட்டப்பட்ட புலங்களை மாற்ற, பூட்டப்பட்டது என்பதையும் இல்லை என அமைக்கவும்.
+	to {n}	முதல் {n} வரை
+	To:	வரை:
+	Today	இன்று
+	Today: {date}	இன்று: {date}
+	Toggle fit page / fit width	பக்கத்துக்குப் பொருத்து / அகலத்துக்குப் பொருத்து மாற்று
+	Too early	மிக முன்னதாக
+	Tool	கருவி
+	Tools	கருவிகள்
+	Tools panel side	கருவிகள் பலகத்தின் பக்கம்
+	Tooltip	கருவிக்குறிப்பு
+	Tooltip:	கருவிக்குறிப்பு:
+	Top	மேல்
+	Top-level bookmarks ({n})	மேல்நிலைப் புத்தகக்குறிகள் ({n})
+	Total	மொத்தம்
+	TR must be a child of Table, THead, TBody, or TFoot	TR என்பது Table, THead, TBody அல்லது TFoot-இன் உட்கூறாக இருக்க வேண்டும்
+	Transform image	படத்தை உருமாற்று
+	Translate	மொழிபெயர்
+	Trim the picture with its handles; Enter or Done applies	படத்தை அதன் கைப்பிடிகளால் வெட்டவும்; Enter அல்லது முடிந்தது என்பது பயன்படுத்தும்
+	Trust	நம்பிக்கை
+	Try the form as people filling it in will see it	படிவத்தை நிரப்புவோர் காண்பது போலவே சோதித்துப் பார்
+calendar weekday	Tu	செ
+	Turn upside down (180°)	தலைகீழாகத் திருப்பு (180°)
+	two cells would both be named {name}	இரு கலங்களுக்கு {name} என்று ஒரே பெயர் வரும்
+	Two-page view	இரு-பக்கக் காட்சி
+	Two-sided:	இருபக்கம்:
+	Two-Up (Cover Page)	இரு-பக்கம் (அட்டைப் பக்கம்)
+	Two-Up (Facing)	இரு-பக்கம் (எதிரெதிர்)
+	Two-Up Continuous (Cover Page)	இரு-பக்கம் தொடர்ச்சியாக (அட்டைப் பக்கம்)
+	Two-Up Continuous (Facing)	இரு-பக்கம் தொடர்ச்சியாக (எதிரெதிர்)
+	Type	வகை
+signature pad	Type	தட்டச்சிடு
+	Type a password.	கடவுச்சொல்லை உள்ளிடவும்.
+	Type Password	கடவுச்சொல்லை உள்ளிடு
+	Type text	உரையைத் தட்டச்சிடு
+	Type the web address.	வலை முகவரியை உள்ளிடவும்.
+	Type your {what}.	உங்கள் {what} ஐத் தட்டச்சிடுங்கள்.
+	Typewriter	தட்டச்சுப்பொறி
+	Unchecked	தேர்ந்தெடுக்கப்படாதது
+	Unchecked reads	சரிபார்க்கப்படாத படிப்புகள்
+	Underline	கீழ்க்கோடு
+	Underline text	உரைக்குக் கீழ்க்கோடிடு
+	Undid {label}	{label} செயல்தவிர்க்கப்பட்டது
+	Undo	செயல்தவிர்
+	Undo {action}	{action} ஐ செயல்தவிர்
+	Unit	அலகு
+	Units	அலகுகள்
+	Unknown	அறியப்படாதது
+	Unknown author	அறியப்படாத ஆசிரியர்
+	Unlock	பூட்டைத் திற
+	Unlock comment	கருத்தின் பூட்டைத் திற
+	Unlock {name}	{name} பூட்டைத் திற
+	Unlock {n} files	{n} கோப்புகளின் பூட்டைத் திற
+	Unlocked {n} of {m} files	{m} கோப்புகளில் {n} இன் பூட்டு திறக்கப்பட்டது
+	Unlocked: the combined file won't be password-protected	பூட்டு திறக்கப்பட்டது: இணைக்கப்பட்ட கோப்பு கடவுச்சொல்லால் பாதுகாக்கப்படாது
+	Unlock…	பூட்டைத் திற…
+	Unpin	பொருத்துதலை நீக்கு
+	Unpin from Home	முகப்பிலிருந்து பொருத்துதலை நீக்கு
+	Unpin tool	கருவிப் பொருத்துதலை நீக்கு
+	Unpin {folder}	{folder} பொருத்துதலை நீக்கு
+	Unpinned {tool} from Home	{tool} முகப்பிலிருந்து பொருத்துதல் நீக்கப்பட்டது
+	Unplaced	வைக்கப்படாதவை
+	Unsigned signature field	கையொப்பமிடப்படாத கையொப்பப் புலம்
+	Unsigned signature field: {name}	கையொப்பமிடப்படாத கையொப்பப் புலம்: {name}
+	Unsupported measurements	ஆதரிக்கப்படாத அளவீடுகள்
+	Up	மேலே
+	Update	புதுப்பி
+	Update background	பின்னணியைப் புதுப்பி
+	Update background…	பின்னணியைப் புதுப்பி…
+	Update header & footer	தலைப்பு & அடிக்குறிப்பைப் புதுப்பி
+	Update header & footer…	தலைப்பு & அடிக்குறிப்பைப் புதுப்பி…
+	Update watermark	நீர்க்குறியைப் புதுப்பி
+	Update watermark…	நீர்க்குறியைப் புதுப்பி…
+	URL to submit to	சமர்ப்பிக்க வேண்டிய URL
+	Use 72 DPI (one point per pixel)	72 DPI ஐப் பயன்படுத்து (ஒரு பிக்சலுக்கு ஒரு புள்ளி)
+	Use a certificate	சான்றிதழைப் பயன்படுத்து
+	Use a Digital ID from a file	கோப்பிலிருந்து எண்ணிம ஐடியைப் பயன்படுத்து
+	Use custom DPI	தனிப்பயன் DPI ஐப் பயன்படுத்து
+	Use each image's embedded DPI; use 72 DPI when it is absent.	ஒவ்வொரு படத்தின் உட்பொதிந்த DPI-ஐப் பயன்படுத்து; அது இல்லையெனில் 72 DPI.
+	Use Flate to encode streams that are not encoded	குறியாக்கப்படாத ஸ்ட்ரீம்களைக் குறியாக்க Flate-ஐப் பயன்படுத்து
+	Use guided actions	வழிகாட்டும் செயல்களைப் பயன்படுத்து
+	Use image resolution	படத் தெளிவுத்திறனைப் பயன்படுத்து
+	Use it when a printer skips text, shading or transparency. The print is no longer searchable text; with Print in grayscale, the pictures are grey.	அச்சுப்பொறி உரை, நிழல் அல்லது ஒளிஊடுருவலைத் தவிர்க்கும்போது இதைப் பயன்படுத்தவும். அச்சு இனி தேடக்கூடிய உரையாக இருக்காது; சாம்பல் நிறத்தில் அச்சிடுதலுடன், படங்கள் சாம்பல் நிறமாக இருக்கும்.
+	Use JavaScript	JavaScript-ஐப் பயன்படுத்து
+	Use now	இப்போது பயன்படுத்து
+	Use overlay text	மேலடுக்கு உரையைப் பயன்படுத்து
+	Use print production	அச்சு உற்பத்தியைப் பயன்படுத்து
+	Use system setting	கணினி அமைப்பைப் பயன்படுத்து
+	Use system title bar	கணினித் தலைப்புப் பட்டையைப் பயன்படுத்து
+	Use {what}	{what} ஐப் பயன்படுத்து
+	Used when a PDF doesn't ask for a layout or zoom. Continuous scrolling never snaps between pages.	PDF தளவமைப்பையோ பெரிதாக்கத்தையோ கோராதபோது பயன்படுத்தப்படும். தொடர்ச்சியான ஸ்க்ரோலிங் பக்கங்களுக்கு இடையே ஒருபோதும் தாவாது.
+	Used when opening PDFs. An explicit launch or control mode takes precedence for the session.	PDFகளைத் திறக்கும்போது பயன்படுத்தப்படும். வெளிப்படையான தொடக்க அல்லது கட்டுப்பாட்டுப் பயன்முறை அந்த அமர்வுக்கு முன்னுரிமை பெறும்.
+	User Interface Options	பயனர் இடைமுக விருப்பங்கள்
+	User password	பயனர் கடவுச்சொல்
+	Username	பயனர்பெயர்
+	Valid	செல்லுபடி
+	Valid for 5 years, for digital signatures. Self-signed IDs are usually not trusted by others.	எண்ணிம கையொப்பங்களுக்காக 5 ஆண்டுகள் செல்லுபடியாகும். சுய-கையொப்பமிட்ட ஐடிகளை மற்றவர்கள் பொதுவாக நம்புவதில்லை.
+	Valid from	செல்லுபடி தொடக்கம்
+certificate	Valid from	செல்லுபடி தொடக்கம்
+	Valid to	செல்லுபடி முடிவு
+certificate	Valid to	செல்லுபடி முடிவு
+	Validate	சரிபார்
+	Validate all	அனைத்தையும் சரிபார்
+	Validate all signatures	அனைத்துக் கையொப்பங்களையும் சரிபார்
+	Validity ends	செல்லுபடி முடியும் நாள்
+certificate	Validity ends	செல்லுபடி முடியும் நாள்
+	Validity starts	செல்லுபடி தொடங்கும் நாள்
+certificate	Validity starts	செல்லுபடி தொடங்கும் நாள்
+	Value is not calculated	மதிப்பு கணக்கிடப்படுவதில்லை
+	Value is the	மதிப்பு என்பது
+	Value:	மதிப்பு:
+	Verify	சரிபார்
+	Verify to see what the document needs.	ஆவணத்துக்கு என்ன தேவை என்பதைக் காண சரிபார்க்கவும்.
+	Version	பதிப்பு
+certificate	Version	பதிப்பு
+	Version {v}	பதிப்பு {v}
+	Vertical	செங்குத்து
+	Vertical reversed	செங்குத்து தலைகீழ்
+	Vertical text cannot be moved with this selection.	செங்குத்து உரையை இந்தத் தேர்வுடன் நகர்த்த இயலாது.
+	Vertically	செங்குத்தாக
+	Video, sound and rich media must be tagged to be announced. Tag the multimedia annotations.	காணொளி, ஒலி, செறிவூட்டிய ஊடகம் ஆகியவை அறிவிக்கப்பட குறியிடப்பட வேண்டும். பல்லூடகக் குறிப்புகளைக் குறியிடவும்.
+	View	காண்க
+	View less	குறைவாகப் பார்
+	View more	மேலும் பார்
+	View revision {n}	திருத்தம் {n} ஐப் பார்
+	View signed version	கையொப்பமிட்ட பதிப்பைப் பார்
+	Viewing	பார்ப்பதற்கு
+	Viewport	காட்சிச்சட்டம்
+	Viewport rectangle in page points (x, y, width, height)	பக்கப் புள்ளிகளில் காட்சிச்சட்ட செவ்வகம் (x, y, அகலம், உயரம்)
+	Visible Rectangle	தெரியும் செவ்வகம்
+	Visual	காட்சி
+	Warning	எச்சரிக்கை
+	Warnings	எச்சரிக்கைகள்
+	Watermark	நீர்க்குறி
+	watermark	நீர்க்குறி
+calendar weekday	We	பு
+	Weak	பலவீனமானது
+	Welcome to PdfCraft	PdfCraft-க்கு வரவேற்கிறோம்
+	What takes up the space in this file, by kind of content.	இந்தக் கோப்பில் இடத்தை எது எடுத்துக்கொள்கிறது என்பது, உள்ளடக்க வகை வாரியாக.
+	What word or phrase would you like to search for?	எந்தச் சொல் அல்லது சொற்றொடரைத் தேட விரும்புகிறீர்கள்?
+	White on black	கருப்பில் வெள்ளை
+	Whole words only	முழுச் சொற்கள் மட்டும்
+	Width	அகலம்
+	Width:	அகலம்:
+	Window Options	சாளர விருப்பங்கள்
+	Windows store  ·  	Windows சேமிப்பகம்  ·  
+	Word count	சொல் எண்ணிக்கை
+	Word counting stopped unexpectedly.	சொல் எண்ணிக்கை எதிர்பாராமல் நின்றது.
+	Word count…	சொல் எண்ணிக்கை…
+	Words	சொற்கள்
+	Words or phrases to redact	மறைக்க வேண்டிய சொற்கள் அல்லது சொற்றொடர்கள்
+	Write this email?	இந்த மின்னஞ்சலை எழுதவா?
+	Wrong password	தவறான கடவுச்சொல்
+	Wrote 1 file to {dir}	{dir} இல் 1 கோப்பு எழுதப்பட்டது
+	Wrote {n} files to {dir}	{dir} இல் {n} கோப்புகள் எழுதப்பட்டன
+	X Object Forms	X பொருள் படிவங்கள்
+	XFA form: its fields and its XFA data are kept in step, so other viewers show what you fill in.	XFA படிவம்: அதன் புலங்களும் XFA தரவும் ஒத்திசைவாக வைக்கப்படுகின்றன, எனவே பிற பார்வையாளர்கள் நீங்கள் நிரப்பியதைக் காட்டுவர்.
+	Yellow	மஞ்சள்
+	Yellow on black	கருப்பில் மஞ்சள்
+	Yes	ஆம்
+	yesterday	நேற்று
+	You are about to apply 1 redaction mark. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	1 மறைப்புக் குறியைப் பயன்படுத்தப் போகிறீர்கள். குறிகளுக்குக் கீழுள்ள உரை, படங்கள், வரைபடங்கள் மற்றும் அவற்றுடன் மேற்பொருந்தும் கருத்துகள், படிவப் புலங்கள் நிரந்தரமாக நீக்கப்படும்.
+	You are about to apply {n} redaction marks. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	{n} மறைப்புக் குறிகளைப் பயன்படுத்தப் போகிறீர்கள். குறிகளுக்குக் கீழுள்ள உரை, படங்கள், வரைபடங்கள் மற்றும் அவற்றுடன் மேற்பொருந்தும் கருத்துகள், படிவப் புலங்கள் நிரந்தரமாக நீக்கப்படும்.
+	You are viewing revision {rev} of “{from}”. It is a snapshot: changes here won't affect the original.	நீங்கள் “{from}” இன் திருத்தம் {rev} ஐப் பார்க்கிறீர்கள். இது ஒரு ஸ்னாப்ஷாட்: இங்கே செய்யும் மாற்றங்கள் அசலைப் பாதிக்காது.
+	You are viewing the signed version of “{from}” (revision {rev}). It is a snapshot: changes here won't affect the original.	நீங்கள் “{from}” இன் கையொப்பமிட்ட பதிப்பைப் (திருத்தம் {rev}) பார்க்கிறீர்கள். இது ஒரு ஸ்னாப்ஷாட்: இங்கே செய்யும் மாற்றங்கள் அசலைப் பாதிக்காது.
+	You can pin up to {n} folders. Unpin one first.	அதிகபட்சம் {n} கோப்புறைகளைப் பொருத்தலாம். முதலில் ஒன்றின் பொருத்துதலை நீக்கவும்.
+	You have version {c}. Download the new version from its release page.	உங்களிடம் பதிப்பு {c} உள்ளது. புதிய பதிப்பை அதன் வெளியீட்டுப் பக்கத்திலிருந்து பதிவிறக்கவும்.
+	Your changes will be lost if you don't save them.	சேமிக்காவிட்டால் உங்கள் மாற்றங்கள் இழக்கப்படும்.
+	Your name	உங்கள் பெயர்
+	yyyy or yy year · m or mm month · mmm or mmmm month name · d or dd day · ddd or dddd weekday. H, h, M, s and t are time letters and can't be used on their own: put {escape} before a letter to show it as is.	yyyy அல்லது yy ஆண்டு · m அல்லது mm மாதம் · mmm அல்லது mmmm மாதப் பெயர் · d அல்லது dd நாள் · ddd அல்லது dddd வார நாள். H, h, M, s மற்றும் t நேர எழுத்துகள்; அவற்றைத் தனியாகப் பயன்படுத்த இயலாது: ஓர் எழுத்தை அப்படியே காட்ட அதற்கு முன் {escape} இடவும்.
+	ZIP	ZIP
+	Zip Code	அஞ்சல் குறியீடு
+	Zip Code + 4	அஞ்சல் குறியீடு + 4
+	Zoom	பெரிதாக்கு/சிறிதாக்கு
+	Zoom in	பெரிதாக்கு
+	Zoom in ({key})	பெரிதாக்கு ({key})
+	Zoom in (⌘+)	பெரிதாக்கு (⌘+)
+	Zoom in / out (also pinch or {key}-scroll)	பெரிதாக்கு / சிறிதாக்கு (பிஞ்ச் அல்லது {key}-ஸ்க்ரோல் மூலமும்)
+	Zoom in / out (also pinch or ⌘-scroll)	பெரிதாக்கு / சிறிதாக்கு (பிஞ்ச் அல்லது ⌘-ஸ்க்ரோல் மூலமும்)
+	Zoom out	சிறிதாக்கு
+	Zoom out ({key})	சிறிதாக்கு ({key})
+	Zoom out (⌘−)	சிறிதாக்கு (⌘−)
+	Zoom to page level	பக்க அளவுக்குப் பெரிதாக்கு
+	Zoom — type a percentage and press Enter	பெரிதாக்கம் — சதவீதத்தை உள்ளிட்டு Enter அழுத்தவும்
+	{0}: {1}	{0}: {1}
+	{chars} can't be written into the PDF yet: Fill & Sign text is Western European only. Pick a numeric format such as dd.mm.yyyy.	{chars} ஐ இன்னும் PDF-இல் எழுத இயலாது: Fill & Sign உரை மேற்கு ஐரோப்பிய எழுத்துகளுக்கு மட்டுமே. dd.mm.yyyy போன்ற எண் வடிவத்தைத் தேர்ந்தெடுக்கவும்.
+	{c} of {n}{more}	{n} இல் {c}{more}
+	{dpi} pixels/inch	{dpi} பிக்சல்/அங்குலம்
+@plural	{fields} builds some field names as it runs, so those reads aren't checked.|{fields} build some field names as they run, so those reads aren't checked.	{fields} இயங்கும்போது சில புலப் பெயர்களை உருவாக்குகிறது, எனவே அந்தப் படிப்புகள் சரிபார்க்கப்படவில்லை.|{fields} இயங்கும்போது சில புலப் பெயர்களை உருவாக்குகின்றன, எனவே அந்தப் படிப்புகள் சரிபார்க்கப்படவில்லை.
+@plural	{fields} is missing from the order saved in the PDF, so other PDF viewers may not calculate it.|{fields} are missing from the order saved in the PDF, so other PDF viewers may not calculate them.	{fields} PDF-இல் சேமிக்கப்பட்ட வரிசையில் இல்லை, எனவே பிற PDF பார்வையாளர்கள் அதைக் கணக்கிடாமல் போகலாம்.|{fields} PDF-இல் சேமிக்கப்பட்ட வரிசையில் இல்லை, எனவே பிற PDF பார்வையாளர்கள் அவற்றைக் கணக்கிடாமல் போகலாம்.
+@plural	{fields} is missing|{fields} are missing	{fields} காணவில்லை|{fields} காணவில்லை
+	{fields} read each other	{fields} ஒன்றையொன்று படிக்கின்றன
+@plural	{fields} reads it|{fields} read it	{fields} அதைப் படிக்கிறது|{fields} அதைப் படிக்கின்றன
+@plural	{field} calculates before {fields}, which it reads.|{field} calculates before {fields}, which it reads.	{field} தான் படிக்கும் {fields} க்கு முன்பே கணக்கிடுகிறது.|{field} தான் படிக்கும் {fields} க்கு முன்பே கணக்கிடுகிறது.
+	{field} reads fields named as it runs	{field} இயங்கும்போது பெயரிடப்படும் புலங்களைப் படிக்கிறது
+	{field} reads its own value	{field} தன் சொந்த மதிப்பையே படிக்கிறது
+	{field} reads no other field	{field} வேறு எந்தப் புலத்தையும் படிக்கவில்லை
+	{field} reads {fields}	{field} {fields} ஐப் படிக்கிறது
+@plural	{field} reads {fields}, which the form doesn't have.|{field} reads {fields}, which the form doesn't have.	{field} படிவத்தில் இல்லாத {fields} ஐப் படிக்கிறது.|{field} படிவத்தில் இல்லாத {fields} ஐப் படிக்கிறது.
+	{field}: {e}	{field}: {e}
+	{file} is too large for a stamp (at most {n} MB)	{file} முத்திரைக்கு மிகப் பெரியது (அதிகபட்சம் {n} MB)
+	{folder} is already pinned to Home	{folder} ஏற்கனவே முகப்பில் பொருத்தப்பட்டுள்ளது
+	{kind} field	{kind} புலம்
+	{kind} Properties	{kind} பண்புகள்
+	{kind} · page {p}	{kind} · பக்கம் {p}
+	{kind} — click to show it on the page	{kind} — பக்கத்தில் காட்ட சொடுக்கவும்
+	{k} of {n}	{n} இல் {k}
+	{label} (1 issue)	{label} (1 சிக்கல்)
+	{label} ({n} issues)	{label} ({n} சிக்கல்கள்)
+	{label} failed: {e}	{label} தோல்வியடைந்தது: {e}
+	{month} {day}, {y}	{day} {month}, {y}
+	{month} {y}	{month} {y}
+	{msg} to {dir}	{msg} — {dir} இல்
+	{names} and {last}	{names} மற்றும் {last}
+	{name} (default)	{name} (இயல்புநிலை)
+	{name} can't be combined: {why}	{name} ஐ இணைக்க இயலாது: {why}
+	{name} has no action	{name} க்குச் செயல் எதுவும் இல்லை
+	{name} is read-only	{name} படிக்க மட்டும்
+	{name} is too large for a word list (at most 1 MB).	{name} சொற்பட்டியலுக்கு மிகப் பெரியது (அதிகபட்சம் 1 MB).
+	{name} submits the form to {url}; PdfCraft doesn't send form data. Save the document to keep your entries.	{name} படிவத்தை {url} க்குச் சமர்ப்பிக்கிறது; PdfCraft படிவத் தரவை அனுப்புவதில்லை. உங்கள் உள்ளீடுகளை வைத்திருக்க ஆவணத்தைச் சேமிக்கவும்.
+	{name} — unsaved changes	{name} — சேமிக்கப்படாத மாற்றங்கள்
+	{name}: choosing images arrives on the web with file pickers for images	{name}: படங்களைத் தேர்ந்தெடுக்கும் வசதி, படக் கோப்புத் தேர்விகளுடன் இணையத்தில் வரவுள்ளது
+	{name}: the {other} action isn't supported yet	{name}: {other} செயல் இன்னும் ஆதரிக்கப்படவில்லை
+@plural	{n} byte|{n} bytes	{n} பைட்|{n} பைட்டுகள்
+@plural	{n} calculation now uses the new name.|{n} calculations now use the new name.	{n} கணக்கீடு இப்போது புதிய பெயரைப் பயன்படுத்துகிறது.|{n} கணக்கீடுகள் இப்போது புதிய பெயரைப் பயன்படுத்துகின்றன.
+@plural	{n} comment|{n} comments	{n} கருத்து|{n} கருத்துகள்
+	{n} contributors · {c} commits	{n} பங்களிப்பாளர்கள் · {c} கமிட்கள்
+	{n} days ago	{n} நாட்களுக்கு முன்
+	{n} differences found	{n} வேறுபாடுகள் கண்டறியப்பட்டன
+@plural	{n} field name collides with earlier files and will be renamed: {list}|{n} field names collide with earlier files and will be renamed: {list}	{n} புலப் பெயர் முந்தைய கோப்புகளுடன் மோதுகிறது, மறுபெயரிடப்படும்: {list}|{n} புலப் பெயர்கள் முந்தைய கோப்புகளுடன் மோதுகின்றன, மறுபெயரிடப்படும்: {list}
+@plural	{n} field shows an old value|{n} fields show old values	{n} புலம் பழைய மதிப்பைக் காட்டுகிறது|{n} புலங்கள் பழைய மதிப்புகளைக் காட்டுகின்றன
+	{n} fields selected	{n} புலங்கள் தேர்ந்தெடுக்கப்பட்டன
+@plural	{n} field|{n} fields	{n} புலம்|{n} புலங்கள்
+	{n} files	{n} கோப்புகள்
+	{n} files done	{n} கோப்புகள் முடிந்தன
+	{n} files need attention	{n} கோப்புகளுக்குக் கவனம் தேவை
+@plural	{n} file|{n} files	{n} கோப்பு|{n} கோப்புகள்
+@plural	{n} formula reads a field the form doesn't have|{n} formulas read fields the form doesn't have	{n} சூத்திரம் படிவத்தில் இல்லாத புலத்தைப் படிக்கிறது|{n} சூத்திரங்கள் படிவத்தில் இல்லாத புலங்களைப் படிக்கின்றன
+	{n} h ago	{n} ம முன்
+@plural	{n} image optimized|{n} images optimized	{n} படம் உகந்ததாக்கப்பட்டது|{n} படங்கள் உகந்ததாக்கப்பட்டன
+	{n} instances	{n} நிகழ்வுகள்
+	{n} issues	{n} சிக்கல்கள்
+@plural	{n} item discarded|{n} items discarded	{n} உருப்படி நீக்கப்பட்டது|{n} உருப்படிகள் நீக்கப்பட்டன
+	{n} marks	{n} குறிகள்
+	{n} match(es) marked for redaction.	{n} பொருத்தம்(கள்) மறைப்புக்காகக் குறிக்கப்பட்டன.
+	{n} measurements use an unsupported format and are left out.	{n} அளவீடுகள் ஆதரிக்கப்படாத வடிவத்தைப் பயன்படுத்துகின்றன; அவை விடப்பட்டுள்ளன.
+	{n} min ago	{n} நிமி முன்
+@plural	{n} more field calculates too early.|{n} more fields calculate too early.	மேலும் {n} புலம் மிக முன்னதாகக் கணக்கிடுகிறது.|மேலும் {n} புலங்கள் மிக முன்னதாகக் கணக்கிடுகின்றன.
+@plural	{n} more formula reads a missing field.|{n} more formulas read missing fields.	மேலும் {n} சூத்திரம் காணாமல் போன புலத்தைப் படிக்கிறது.|மேலும் {n} சூத்திரங்கள் காணாமல் போன புலங்களைப் படிக்கின்றன.
+@plural	{n} object selected|{n} objects selected	{n} பொருள் தேர்ந்தெடுக்கப்பட்டது|{n} பொருட்கள் தேர்ந்தெடுக்கப்பட்டன
+	{n} pages	{n} பக்கங்கள்
+	{n} pages and no bookmarks	{n} பக்கங்கள், புத்தகக்குறிகள் இல்லை
+	{n} pages selected	{n} பக்கங்கள் தேர்ந்தெடுக்கப்பட்டன
+	{n} pages selected.	{n} பக்கங்கள் தேர்ந்தெடுக்கப்பட்டன.
+@plural	{n} page|{n} pages	{n} பக்கம்|{n} பக்கங்கள்
+@plural	{n} pixel|{n} pixels	{n} பிக்சல்|{n} பிக்சல்கள்
+@plural	{n} reply|{n} replies	{n} பதில்|{n} பதில்கள்
+@plural	{n} result|{n} results	{n} முடிவு|{n} முடிவுகள்
+	{n} selected	{n} தேர்ந்தெடுக்கப்பட்டன
+	{n} tags	{n} குறிச்சொற்கள்
+	{n} word(s) or phrase(s)	{n} சொல்(கள்) அல்லது சொற்றொடர்(கள்)
+	{n} {kind}	{n} {kind}
+	{page} is not a page number or label	{page} என்பது பக்க எண் அல்லது லேபிள் அல்ல
+	{rule} - {status}	{rule} - {status}
+	{s} action	{s} செயல்
+	{ty} element on page {p}: {what}	பக்கம் {p} இல் {ty} உறுப்பு: {what}
+	{ty} element: {what}	{ty} உறுப்பு: {what}
+	{verb} as "{name}"	"{name}" ஆக {verb}
+	{verb} Background	பின்னணியை {verb}
+	{verb} Header and Footer	தலைப்பு & அடிக்குறிப்பை {verb}
+	{verb} Watermark	நீர்க்குறியை {verb}
+	{who} in this document tried to open an address PdfCraft won't open: {e}.	இந்த ஆவணத்தில் உள்ள {who}, PdfCraft திறக்காத ஒரு முகவரியைத் திறக்க முயன்றது: {e}.
+	{who} in this document tried to open an address PdfCraft won't open: {e}. Only web (http, https) and email (mailto) links open from documents.	இந்த ஆவணத்தில் உள்ள {who}, PdfCraft திறக்காத ஒரு முகவரியைத் திறக்க முயன்றது: {e}. ஆவணங்களிலிருந்து வலை (http, https) மற்றும் மின்னஞ்சல் (mailto) இணைப்புகள் மட்டுமே திறக்கும்.
+	{who} in this document wants to open this address in your browser:	இந்த ஆவணத்தில் உள்ள {who} இந்த முகவரியை உங்கள் உலாவியில் திறக்க விரும்புகிறது:
+	{who} in this document wants to open your email app with this address:	இந்த ஆவணத்தில் உள்ள {who} இந்த முகவரியுடன் உங்கள் மின்னஞ்சல் பயன்பாட்டைத் திறக்க விரும்புகிறது:
+	{who}, certificate issued by an unknown issuer.	{who}, சான்றிதழை வழங்கியவர் அறியப்படாத வழங்குநர்.
+	{who}, certificate issued by {issuer}.	{who}, சான்றிதழை வழங்கியவர் {issuer}.
+	{words} on {pages}	{pages} இல் {words}
+	{} annotation on page {p} isn't tagged	பக்கம் {p} இல் உள்ள {} குறிப்பு குறியிடப்படவில்லை
+	{} annotations aren't allowed	{} குறிப்புகள் அனுமதிக்கப்படுவதில்லை
+	ΔLOC	ΔLOC
+	— (protection is applied when you save)	— (சேமிக்கும்போது பாதுகாப்பு பயன்படுத்தப்படும்)
+	“{name}” changed on disk after it was opened or last saved. Saving now replaces that newer version with this one.	“{name}” திறக்கப்பட்ட பிறகு அல்லது கடைசியாகச் சேமிக்கப்பட்ட பிறகு வட்டில் மாறியுள்ளது. இப்போது சேமித்தால் அந்தப் புதிய பதிப்பு இதனால் மாற்றப்படும்.
+	“{name}” has security restrictions. Enter its permissions password to lift them.	“{name}” இல் பாதுகாப்புக் கட்டுப்பாடுகள் உள்ளன. அவற்றை நீக்க அதன் அனுமதிக் கடவுச்சொல்லை உள்ளிடவும்.
+	“{name}” is protected. Enter a password to open it.	“{name}” பாதுகாக்கப்பட்டுள்ளது. திறக்க கடவுச்சொல்லை உள்ளிடவும்.
+	… and {n} more	… மேலும் {n}
+	−Bin	−Bin
+	−LOC	−LOC
+	This document's script is asking	இந்த ஆவணத்தின் ஸ்கிரிப்ட் கேட்கிறது
+	Document: {name}	ஆவணம்: {name}
+	This request comes from the document, not PdfCraft. Only enter a password if you trust this document.	இந்தக் கோரிக்கை PdfCraft-இலிருந்து அல்ல, ஆவணத்திலிருந்து வருகிறது. இந்த ஆவணத்தை நம்பினால் மட்டுமே கடவுச்சொல்லை உள்ளிடவும்.

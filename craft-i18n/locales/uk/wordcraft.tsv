@@ -1463,6 +1463,14 @@
 	Remove Table of Contents	Видалити зміст
 	Remove the control once edited	Видалити елемент після редагування
 	Remove Watermark	Видалити водяний знак
+	No watermark	Без водяного знака
+	Picture watermark	Водяний знак із зображення
+	Text watermark	Текстовий водяний знак
+	Select Picture…	Вибрати зображення…
+	Washout	Вицвіле
+	Semitransparent	Напівпрозоре
+	Transparency:	Прозорість:
+	Select a picture first.	Спочатку виберіть зображення.
 	Rename Document	Перейменувати документ
 	Reopen	Відкрити знову
 	Repeat as header row on each page	Повторювати як рядок заголовка на кожній сторінці
@@ -2066,3 +2074,122 @@
 	{width} × {height} pixels	{width} × {height} пікс.
 	{words} words	Слів: {words}
 	“{text}” ({row}, {series}) isn't a number.	«{text}» ({row}, {series}) — не число.
+	Add a language…	Додати мову…
+	Add a language	Додати мову
+	Your languages	Ваші мови
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Англійська, мови цього документа та кожен установлений мовний пакет. Мовні пакети додають орфографічні словники та переноси.
+	Set as default	Зробити типовою
+	New blank documents are written in this language	Нові порожні документи пишуться цією мовою
+	{language} (default)	{language} (типово)
+	Built in	Вбудований
+	Your own dictionary	Ваш власний словник
+	System dictionary	Системний словник
+	Not available yet	Поки недоступний
+	Grammar built in	Граматика вбудована
+	Install spelling ({size})	Установити орфографію ({size})
+	Its dictionary couldn't be read: {reason}	Не вдалося прочитати його словник: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Завантаження вимкнено. Клацання «Додати мову…» або «Установити» вмикає його: тоді WordCraft завантажує мовні пакети та шрифти з GitHub.
+	Search:	Пошук:
+	Dutch, Nederlands or nl	Нідерландська, Nederlands або nl
+	No languages to show yet.	Поки немає мов для показу.
+	No language matches your search.	Жодна мова не відповідає пошуку.
+	An installed Language pack is used after this folder.	Установлений мовний пакет використовується після цієї папки.
+	Dictionary files	Файли словників
+	Possible spelling mistake	Можлива орфографічна помилка
+	Gets the list of Language packs, then this language's pack if there is one.	Отримує список мовних пакетів, а потім пакет цієї мови, якщо він є.
+	Afrikaans	Африкаанс
+	Belarusian	Білоруська
+	Bulgarian	Болгарська
+	Bosnian	Боснійська
+	Catalan	Каталонська
+	Catalan (Valencian)	Каталонська (валенсійська)
+	Welsh	Валлійська
+	Esperanto	Есперанто
+	Persian	Перська
+	Irish	Ірландська
+	Galician	Галісійська
+	Hungarian	Угорська
+	Armenian	Вірменська
+	Icelandic	Ісландська
+	Georgian	Грузинська
+	Lithuanian	Литовська
+	Latvian	Латвійська
+	Macedonian	Македонська
+	Norwegian (Nynorsk)	Норвезька (нюнорськ)
+	Slovak	Словацька
+	Slovenian	Словенська
+	Albanian	Албанська
+	Swahili	Суахілі
+	Tamil	Тамільська
+	Thai	Тайська
+	Vietnamese	В’єтнамська
+	Set as Default Language	Зробити типовою мовою
+	U.A.E.	ОАЕ
+	Angola	Ангола
+	Argentina	Аргентина
+	Austria	Австрія
+	Australia	Австралія
+	Bosnia and Herzegovina	Боснія і Герцеговина
+	Belgium	Бельгія
+	Bolivia	Болівія
+	Brazil	Бразилія
+	Belarus	Білорусь
+	Canada	Канада
+	Switzerland	Швейцарія
+	Chile	Чилі
+	China	Китай
+	Colombia	Колумбія
+	Costa Rica	Коста-Рика
+	Cuba	Куба
+	Cabo Verde	Кабо-Верде
+	Cyprus	Кіпр
+	Germany	Німеччина
+	Dominican Republic	Домініканська Республіка
+	Ecuador	Еквадор
+	Egypt	Єгипет
+	Spain	Іспанія
+	Finland	Фінляндія
+	France	Франція
+	United Kingdom	Велика Британія
+	Equatorial Guinea	Екваторіальна Гвінея
+	Guatemala	Гватемала
+	Hong Kong SAR	САР Гонконг
+	Honduras	Гондурас
+	Ireland	Ірландія
+	India	Індія
+	Iraq	Ірак
+	Italy	Італія
+	Jamaica	Ямайка
+	Jordan	Йорданія
+	Kuwait	Кувейт
+	Kazakhstan	Казахстан
+	Lebanon	Ліван
+	Liechtenstein	Ліхтенштейн
+	Luxembourg	Люксембург
+	Morocco	Марокко
+	Monaco	Монако
+	Montenegro	Чорногорія
+	Macao SAR	САР Макао
+	Mexico	Мексика
+	Malaysia	Малайзія
+	Mozambique	Мозамбік
+	Nicaragua	Нікарагуа
+	Netherlands	Нідерланди
+	New Zealand	Нова Зеландія
+	Panama	Панама
+	Peru	Перу
+	Philippines	Філіппіни
+	Puerto Rico	Пуерто-Рико
+	Portugal	Португалія
+	Paraguay	Парагвай
+	Qatar	Катар
+	Russia	Росія
+	Singapore	Сінгапур
+	El Salvador	Сальвадор
+	Syria	Сирія
+	Taiwan	Тайвань
+	Ukraine	Україна
+	United States	Сполучені Штати
+	Uruguay	Уругвай
+	Venezuela	Венесуела
+	South Africa	Південна Африка

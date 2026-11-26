@@ -1,0 +1,3 @@
+# Words the sk pack must accept and reject (common words; written for this check).
+correct = ["dom", "kniha", "škola", "voda", "mesto", "pracovať"]
+incorrect = ["knihha", "škoola", "mestto"]

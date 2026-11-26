@@ -8,7 +8,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::render_queue::*;
+use crate::render_queue::{
+    AlphaMode, Channels, CurrentOrOff, FieldRender, OutputFormat, OutputModule, ProResProfile, ProxyUse, RenderQuality, RenderSettings, SwitchOverride,
+};
 use effectcraft_time::FrameRate;
 
 /// A default slot (the Defaults section of the Templates dialogs).
@@ -167,22 +169,6 @@ pub fn builtin_output_modules() -> Vec<OutputModule> {
         h.bitrate_kbps = mbps * 1000;
         v.push(h);
     }
-    let mut match_high = om("H.264 Match Source - High Bitrate", OutputFormat::H264);
-    match_high.bitrate_kbps = 20_000;
-    v.push(match_high);
-    let mut yt_1080 = om("YouTube 1080p Full HD", OutputFormat::H264);
-    yt_1080.bitrate_kbps = 16_000;
-    yt_1080.resize = Resize { enabled: true, width: 1920, height: 1080, lock_aspect: true, quality: ResizeQuality::High };
-    v.push(yt_1080);
-    let mut yt_4k = om("YouTube 4K Ultra HD", OutputFormat::H264);
-    yt_4k.bitrate_kbps = 45_000;
-    yt_4k.resize = Resize { enabled: true, width: 3840, height: 2160, lock_aspect: true, quality: ResizeQuality::High };
-    v.push(yt_4k);
-    let mut prores_4444 = om("Apple ProRes 4444 with Alpha", OutputFormat::ProRes);
-    prores_4444.prores_profile = ProResProfile::P4444;
-    prores_4444.channels = Channels::Rgba;
-    prores_4444.alpha_mode = AlphaMode::Straight;
-    v.push(prores_4444);
     let mut alpha = om("Alpha Only", OutputFormat::ProRes);
     alpha.channels = Channels::Alpha;
     v.push(alpha);
@@ -200,9 +186,6 @@ pub fn builtin_output_modules() -> Vec<OutputModule> {
     exr.channels = Channels::Rgba;
     v.push(exr);
     v.push(om("Animated GIF", OutputFormat::Gif));
-    let mut lottie = om("Lottie Web Animation (.json)", OutputFormat::Lottie);
-    lottie.channels = Channels::Rgba;
-    v.push(lottie);
     v.push(om("WebM (VP9 + Opus)", OutputFormat::WebM));
     let mut wa = om("WebM with Alpha", OutputFormat::WebM);
     wa.channels = Channels::Rgba;
@@ -307,6 +290,7 @@ impl RenderTemplates {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_queue::{ColorDepth, Crop};
 
     #[test]
     fn builtins_defaults_and_round_trip() {
@@ -340,31 +324,18 @@ mod tests {
         assert_eq!(t.output_module("High Quality").unwrap().format, OutputFormat::ProRes);
     }
 
+    /// An Output Module template keeps its OpenEXR compression and bit depth through a save and
+    /// load (#2911); the built-in EXR template stays ZIP, 32-bit float.
     #[test]
-    fn media_encoder_style_presets_are_present() {
-        let t = RenderTemplates::default();
-        let h264_high = t.output_module("H.264 Match Source - High Bitrate").unwrap();
-        assert_eq!(h264_high.format, OutputFormat::H264);
-        assert_eq!(h264_high.bitrate_kbps, 20_000);
-
-        let yt_1080 = t.output_module("YouTube 1080p Full HD").unwrap();
-        assert_eq!(yt_1080.format, OutputFormat::H264);
-        assert!(yt_1080.resize.enabled && yt_1080.resize.width == 1920 && yt_1080.resize.height == 1080);
-
-        let yt_4k = t.output_module("YouTube 4K Ultra HD").unwrap();
-        assert_eq!(yt_4k.format, OutputFormat::H264);
-        assert!(yt_4k.resize.enabled && yt_4k.resize.width == 3840 && yt_4k.resize.height == 2160);
-
-        let prores = t.output_module("Apple ProRes 4444 with Alpha").unwrap();
-        assert_eq!(prores.format, OutputFormat::ProRes);
-        assert_eq!(prores.prores_profile, ProResProfile::P4444);
-        assert_eq!(prores.channels, Channels::Rgba);
-
-        let lottie = t.output_module("Lottie Web Animation (.json)").unwrap();
-        assert_eq!(lottie.format, OutputFormat::Lottie);
-        assert_eq!(lottie.channels, Channels::Rgba);
-
-        let gif = t.output_module("Animated GIF").unwrap();
-        assert_eq!(gif.format, OutputFormat::Gif);
+    fn exr_options_survive_a_template_round_trip() {
+        use crate::render_queue::{ExrBitDepth, ExrCompression};
+        let mut t = RenderTemplates::default();
+        let builtin = t.output_module("OpenEXR Sequence with Alpha").unwrap();
+        assert_eq!((builtin.exr_compression, builtin.exr_bit_depth), (ExrCompression::Zip, ExrBitDepth::Float));
+        let m = OutputModule { exr_compression: ExrCompression::Piz, exr_bit_depth: ExrBitDepth::Half, ..OutputModule::for_format(OutputFormat::ExrSequence) };
+        t.save_output_module("EXR Half PIZ", m);
+        let back: RenderTemplates = serde_json::from_str(&serde_json::to_string(&t).unwrap()).unwrap();
+        let m = back.output_module("exr half piz").unwrap();
+        assert_eq!((m.format, m.exr_compression, m.exr_bit_depth), (OutputFormat::ExrSequence, ExrCompression::Piz, ExrBitDepth::Half));
     }
 }

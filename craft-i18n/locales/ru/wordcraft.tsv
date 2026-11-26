@@ -292,6 +292,7 @@
 	Capitalize first letter of sentences	Делать первые буквы предложений прописными
 	Capitalize first letter of table cells	Делать первые буквы ячеек таблиц прописными
 	Capitalize names of days	Названия дней с прописной буквы
+	Capitalize the first word of a sentence	Начните предложение с прописной буквы
 	Caption Numbering	Нумерация названий
 	Caption text	Текст названия
 	Caption:	Название:
@@ -861,6 +862,8 @@
 	Good afternoon	Добрый день
 	Good evening	Добрый вечер
 	Good morning	Доброе утро
+	GOST (name sort)	ГОСТ (сортировка по автору)
+	GOST (title sort)	ГОСТ (сортировка по названию)
 	Grab bag	Разное
 	Gradient fill	Градиентная заливка
 	Gradient stops	Точки градиента
@@ -1668,6 +1671,14 @@
 	Remove Table of Contents	Удалить оглавление
 	Remove the control once edited	Удалить элемент управления после редактирования
 	Remove Watermark	Удалить подложку
+	No watermark	Без подложки
+	Picture watermark	Подложка-рисунок
+	Text watermark	Текстовая подложка
+	Select Picture…	Выбрать рисунок…
+	Washout	Выцветший
+	Semitransparent	Полупрозрачный
+	Transparency:	Прозрачность:
+	Select a picture first.	Сначала выберите рисунок.
 	Rename Document	Переименовать документ
 	Reopen	Открыть снова
 	Repeat as header row on each page	Повторять как заголовок на каждой странице
@@ -2359,3 +2370,121 @@ preview	Title	Пример
 	{words} words	Слов: {words}
 	“{text}” ({row}, {series}) isn't a number.	«{text}» ({row}, {series}) — не число.
 	✓ None	✓ Нет
+	Add a language…	Добавить язык…
+	Add a language	Добавить язык
+	Your languages	Ваши языки
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Английский, языки этого документа и каждый установленный языковой пакет. Языковые пакеты добавляют орфографические словари и переносы.
+	Set as default	Сделать языком по умолчанию
+	New blank documents are written in this language	Новые пустые документы пишутся на этом языке
+	{language} (default)	{language} (по умолчанию)
+	Built in	Встроенный
+	Your own dictionary	Ваш собственный словарь
+	System dictionary	Системный словарь
+	Not available yet	Пока недоступен
+	Grammar built in	Грамматика встроена
+	Install spelling ({size})	Установить орфографию ({size})
+	Its dictionary couldn't be read: {reason}	Не удалось прочитать его словарь: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Загрузка отключена. Щелчок по «Добавить язык…» или «Установить» включает её: тогда WordCraft скачивает языковые пакеты и шрифты с GitHub.
+	Search:	Поиск:
+	Dutch, Nederlands or nl	Нидерландский, Nederlands или nl
+	No languages to show yet.	Пока нет языков для показа.
+	No language matches your search.	Ни один язык не соответствует запросу.
+	An installed Language pack is used after this folder.	Установленный языковой пакет используется после этой папки.
+	Dictionary files	Файлы словарей
+	Gets the list of Language packs, then this language's pack if there is one.	Получает список языковых пакетов, затем пакет этого языка, если он есть.
+	Afrikaans	Африкаанс
+	Belarusian	Белорусский
+	Bulgarian	Болгарский
+	Bosnian	Боснийский
+	Catalan	Каталанский
+	Catalan (Valencian)	Каталанский (валенсийский)
+	Welsh	Валлийский
+	Esperanto	Эсперанто
+	Persian	Персидский
+	Irish	Ирландский
+	Galician	Галисийский
+	Hungarian	Венгерский
+	Armenian	Армянский
+	Icelandic	Исландский
+	Georgian	Грузинский
+	Lithuanian	Литовский
+	Latvian	Латышский
+	Macedonian	Македонский
+	Norwegian (Nynorsk)	Норвежский (нюнорск)
+	Slovak	Словацкий
+	Slovenian	Словенский
+	Albanian	Албанский
+	Swahili	Суахили
+	Tamil	Тамильский
+	Thai	Тайский
+	Vietnamese	Вьетнамский
+	Set as Default Language	Сделать языком по умолчанию
+	U.A.E.	ОАЭ
+	Angola	Ангола
+	Argentina	Аргентина
+	Austria	Австрия
+	Australia	Австралия
+	Bosnia and Herzegovina	Босния и Герцеговина
+	Belgium	Бельгия
+	Bolivia	Боливия
+	Brazil	Бразилия
+	Belarus	Беларусь
+	Canada	Канада
+	Switzerland	Швейцария
+	Chile	Чили
+	China	Китай
+	Colombia	Колумбия
+	Costa Rica	Коста-Рика
+	Cuba	Куба
+	Cabo Verde	Кабо-Верде
+	Cyprus	Кипр
+	Germany	Германия
+	Dominican Republic	Доминиканская Республика
+	Ecuador	Эквадор
+	Egypt	Египет
+	Spain	Испания
+	Finland	Финляндия
+	France	Франция
+	United Kingdom	Великобритания
+	Equatorial Guinea	Экваториальная Гвинея
+	Guatemala	Гватемала
+	Hong Kong SAR	САР Гонконг
+	Honduras	Гондурас
+	Ireland	Ирландия
+	India	Индия
+	Iraq	Ирак
+	Italy	Италия
+	Jamaica	Ямайка
+	Jordan	Иордания
+	Kuwait	Кувейт
+	Kazakhstan	Казахстан
+	Lebanon	Ливан
+	Liechtenstein	Лихтенштейн
+	Luxembourg	Люксембург
+	Morocco	Марокко
+	Monaco	Монако
+	Montenegro	Черногория
+	Macao SAR	САР Макао
+	Mexico	Мексика
+	Malaysia	Малайзия
+	Mozambique	Мозамбик
+	Nicaragua	Никарагуа
+	Netherlands	Нидерланды
+	New Zealand	Новая Зеландия
+	Panama	Панама
+	Peru	Перу
+	Philippines	Филиппины
+	Puerto Rico	Пуэрто-Рико
+	Portugal	Португалия
+	Paraguay	Парагвай
+	Qatar	Катар
+	Russia	Россия
+	Singapore	Сингапур
+	El Salvador	Сальвадор
+	Syria	Сирия
+	Taiwan	Тайвань
+	Ukraine	Украина
+	United States	Соединённые Штаты
+	Uruguay	Уругвай
+	Venezuela	Венесуэла
+	South Africa	Южная Африка

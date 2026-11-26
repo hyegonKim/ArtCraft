@@ -24,6 +24,23 @@ as `{path}: {e}` in `common.tsv` would match other apps' messages, so `@msg` row
 app's catalog even when two or more apps share them. `Couldn't open {name}: {e}`, promoted in 3b,
 stays shared: existing rows never change, and it is specific enough not to over-match.
 
+## Amendment: corrections change a shared row in place (2026-10-31)
+
+A shared row that is wrong in every app that uses it is corrected where it stands: a wrong meaning
+(sl `Later` as `Prekliči`, "Cancel"), a misspelling, broken grammar, English left untranslated or
+the wrong script. An override would leave every other app showing the error. A correction is
+allowed in any PR, including an app's own. The PR lists each corrected row with its error, and the
+reviewer confirms each one. The new text must be right for every app that uses the row; where one
+app means something else by the source text, that app gets an override instead.
+
+Everything else stays as above. A preference (a synonym, formal or informal address, a term both
+readings accept) is an override, never a change to the shared row. A locale-wide change of
+terminology is not a correction. Shared rows are never deleted.
+
+A correction also reaches the regional locales that fall back to the row. Any override or regional
+row identical to the corrected text is redundant, and the checker rejects it, so the same PR removes
+it. Apps see the correction when they move their pin.
+
 ## Considered options
 
 - **Re-seed `common.tsv` from every migrated app at each migration**: rejected, winners can flip,

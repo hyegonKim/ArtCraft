@@ -78,9 +78,9 @@ fn rebase_midi_start(clip: &mut Clip, old_start: Samples, t: TimeCtx<'_>) {
     }
 }
 
-/// Split every clip on a track's active playlist that spans `at`. The piece before `at` keeps the
-/// clip's name. The piece after it is a new clip, and takes the next name of the clip's Auto Rename
-/// scheme when it has one.
+/// Split every clip on a track's active playlist that spans `at`, except time- or edit-locked ones.
+/// The piece before `at` keeps the clip's name. The piece after it is a new clip, and takes the next
+/// name of the clip's Auto Rename scheme when it has one.
 pub fn separate_at(s: &mut Session, track: TrackId, at: Samples) -> usize {
     separate_at_if(s, track, at, |_| true)
 }
@@ -88,11 +88,21 @@ pub fn separate_at(s: &mut Session, track: TrackId, at: Samples) -> usize {
 /// [`separate_at`], giving the piece after `at` the next Auto Rename name only when `auto_name`
 /// returns true for it. Any other piece keeps the clip's name, and its scheme does not count up.
 pub fn separate_at_if(s: &mut Session, track: TrackId, at: Samples, auto_name: impl Fn(&Clip) -> bool) -> usize {
+    split_at(s, track, at, auto_name, true)
+}
+
+/// [`separate_at`], splitting time- and edit-locked clips too. For the Event time operations, which
+/// move the whole timeline, locked clips included.
+pub fn separate_all_at(s: &mut Session, track: TrackId, at: Samples) -> usize {
+    split_at(s, track, at, |_| true, false)
+}
+
+fn split_at(s: &mut Session, track: TrackId, at: Samples, auto_name: impl Fn(&Clip) -> bool, skip_locked: bool) -> usize {
     let tc_tempo = s.tempo.clone();
     let sr = s.sample_rate;
     let t = TimeCtx { tempo: &tc_tempo, sr };
     let mut ids = Vec::new();
-    let n_split = s.track(track).map_or(0, |tr| tr.clips().iter().filter(|c| at > c.start && at < c.end()).count());
+    let n_split = s.track(track).map_or(0, |tr| tr.clips().iter().filter(|c| at > c.start && at < c.end() && !(skip_locked && locked(c))).count());
     for _ in 0..n_split {
         ids.push(s.new_clip_id());
     }
@@ -106,6 +116,7 @@ pub fn separate_at_if(s: &mut Session, track: TrackId, at: Samples, auto_name: i
     for c in pl.clips.drain(..) {
         if at > c.start
             && at < c.end()
+            && !(skip_locked && locked(&c))
             && let Some(id) = ids.pop()
             && let Some((l, mut r)) = split_clip(&c, at, id, t)
         {
@@ -123,6 +134,45 @@ pub fn separate_at_if(s: &mut Session, track: TrackId, at: Samples, auto_name: i
     pl.sort();
     s.auto_names = schemes;
     count
+}
+
+/// Split every clip on a track's active playlist at each of `points`, in one pass over the
+/// playlist: [`separate_at_if`] once per point with `|_| false` (no piece takes an Auto Rename
+/// name here), without rebuilding the playlist per point. Returns the number of splits.
+/// `points` are sorted and deduplicated first, so the source offsets of stretched audio can differ
+/// from per-point calls given in another order (each trim rounds its own adjustment).
+pub fn separate_at_points(s: &mut Session, track: TrackId, points: &[Samples]) -> usize {
+    let mut pts = points.to_vec();
+    pts.sort_unstable();
+    pts.dedup();
+    let tc_tempo = s.tempo.clone();
+    let t = TimeCtx { tempo: &tc_tempo, sr: s.sample_rate };
+    // The points strictly inside a clip.
+    let within = |c: &Clip| {
+        let (lo, hi) = (pts.partition_point(|p| *p <= c.start), pts.partition_point(|p| *p < c.end()));
+        lo..hi.max(lo)
+    };
+    let n_split: usize = s.track(track).map_or(0, |tr| tr.clips().iter().map(|c| within(c).len()).sum());
+    let mut ids: Vec<ClipId> = (0..n_split).map(|_| s.new_clip_id()).collect();
+    let Some(pl) = s.track_mut(track).and_then(|t| t.playlist_mut()) else { return 0 };
+    let mut out = Vec::with_capacity(pl.clips.len() + n_split);
+    for c in pl.clips.drain(..) {
+        let mut rest = c;
+        for p in &pts[within(&rest)] {
+            let Some(id) = ids.pop() else { break };
+            match split_clip(&rest, *p, id, t) {
+                Some((l, r)) => {
+                    out.push(l);
+                    rest = r;
+                }
+                None => break,
+            }
+        }
+        out.push(rest);
+    }
+    pl.clips = out;
+    pl.sort();
+    n_split
 }
 
 /// Gives `c` the next name of its Auto Rename scheme, when it has one, and counts the scheme up.
@@ -175,6 +225,26 @@ pub fn clear_range(s: &mut Session, track: TrackId, range: Range, shuffle: bool)
         follow_automation(s, track, range.end, moved);
     }
     removed
+}
+
+/// Remove the clips `ids` from every track. In Shuffle the later clips on each track close the holes the movable
+/// ones leave, as a Shuffle move lifts them (see [`lift_plan`]), so a crossfade partner keeps its material. Returns
+/// how many clips went.
+pub fn remove_clips(s: &mut Session, ids: &[ClipId], shuffle: bool) -> usize {
+    let ids: HashSet<ClipId> = ids.iter().copied().collect();
+    let mut n = 0;
+    for track in s.tracks.iter().map(|t| t.id).collect::<Vec<_>>() {
+        if shuffle {
+            n += lift_all(s, track, &ids).len();
+        }
+        // Locked clips don't lift; they go without closing up, as everything does outside Shuffle.
+        if let Some(pl) = s.track_mut(track).and_then(|t| t.playlist_mut()) {
+            let before = pl.clips.len();
+            pl.clips.retain(|c| !ids.contains(&c.id));
+            n += before - pl.clips.len();
+        }
+    }
+    n
 }
 
 /// Copy the material inside `range` (clips trimmed to the range), relative to `range.start`.
@@ -238,13 +308,16 @@ pub fn paste(s: &mut Session, track: TrackId, at: Samples, clips: &[Clip], lengt
         make_room(s, track, at, length)?;
     }
     let mut ids = Vec::new();
+    let mut placed = Vec::new();
     for c in clips {
         let mut nc = c.clone();
         nc.id = s.new_clip_id();
         nc.start += at;
         ids.push(nc.id);
-        place_clip(s, track, nc);
+        placed.push((track, nc));
     }
+    // Clear every destination first, so pasted clips that overlap (crossfades) keep each other.
+    put_clips(s, placed);
     Ok(ids)
 }
 
@@ -404,6 +477,10 @@ pub fn trim_to(s: &mut Session, track: TrackId, range: Range) -> usize {
     let Some(pl) = s.track_mut(track).and_then(|t| t.playlist_mut()) else { return 0 };
     let mut n = 0;
     for c in &mut pl.clips {
+        // Locked clips keep their extent, like they don't move for nudge.
+        if locked(c) {
+            continue;
+        }
         if let Some(i) = c.range().intersect(&range)
             && i != c.range()
         {
@@ -425,6 +502,9 @@ pub fn trim_start_to(s: &mut Session, track: TrackId, at: Samples) -> usize {
     let Some(pl) = s.track_mut(track).and_then(|t| t.playlist_mut()) else { return 0 };
     let mut n = 0;
     for c in &mut pl.clips {
+        if locked(c) {
+            continue;
+        }
         if c.range().contains(at) && at > c.start {
             let old = c.start;
             c.trim_start_to(at);
@@ -435,10 +515,14 @@ pub fn trim_start_to(s: &mut Session, track: TrackId, at: Samples) -> usize {
     n
 }
 
+/// Trim the end of clips after `at` to `at` (Trim End to Insertion).
 pub fn trim_end_to(s: &mut Session, track: TrackId, at: Samples) -> usize {
     let Some(pl) = s.track_mut(track).and_then(|t| t.playlist_mut()) else { return 0 };
     let mut n = 0;
     for c in &mut pl.clips {
+        if locked(c) {
+            continue;
+        }
         if at > c.start && at < c.end() {
             c.trim_end_to(at);
             n += 1;
@@ -505,9 +589,15 @@ fn join_gain_env(l: &mut Clip, r: &Clip) {
 }
 
 /// Move clips by `delta`, overwriting what they land on; `dest` sends whole tracks of them
-/// elsewhere (see [`destinations`]).
+/// elsewhere (see [`destinations`]). Same-track moves clamped to zero leave all material intact.
 pub fn move_clips(s: &mut Session, ids: &[ClipId], delta: Samples, dest: &[(TrackId, TrackId)]) -> usize {
     let ids: HashSet<ClipId> = ids.iter().copied().collect();
+    // Limit the shift before removing any clips, so a stationary edit cannot overwrite overlaps.
+    let limit = s.tracks.iter().flat_map(|t| t.clips()).filter(|c| ids.contains(&c.id) && !locked(c)).map(|c| c.start.saturating_neg()).max();
+    let delta = delta.max(limit.unwrap_or(0));
+    if delta == 0 && dest.iter().all(|(from, to)| from == to) {
+        return 0;
+    }
     let mut moving: Vec<(TrackId, Clip)> = Vec::new();
     for t in &mut s.tracks {
         let tid = t.id;
@@ -524,7 +614,7 @@ pub fn move_clips(s: &mut Session, ids: &[ClipId], delta: Samples, dest: &[(Trac
     }
     let n = moving.len();
     let placed = moving.into_iter().map(|(tid, mut c)| {
-        c.start = c.start.saturating_add(delta).max(0);
+        c.start = c.start.saturating_add(delta);
         (lands(dest, tid), c)
     });
     put_clips(s, placed.collect());
@@ -547,20 +637,7 @@ fn put_clips(s: &mut Session, placed: Vec<(TrackId, Clip)>) {
 
 /// Whether the Edit window shows track `t`: not hidden, and not inside a closed folder at any level.
 pub fn shown(s: &Session, t: &Track) -> bool {
-    !t.hidden && !folder_collapsed(s, t)
-}
-
-/// Hidden because a folder at any level above this track is closed.
-fn folder_collapsed(s: &Session, track: &Track) -> bool {
-    let mut current = track.folder;
-    for _ in 0..64 {
-        let Some(folder) = current.and_then(|folder| s.track(folder)) else { return false };
-        if !folder.folder_open {
-            return true;
-        }
-        current = folder.folder;
-    }
-    false
+    s.track_shown(t)
 }
 
 /// Where the tracks of clips `ids` go when track `from` goes to `to`: each keeps its distance
@@ -765,12 +842,11 @@ pub fn shuffle_clips(s: &mut Session, ids: &[ClipId], delta: Samples, dest: &[(T
 /// How far a Grabber drag by `raw` moves `clip` in Grid mode: Absolute puts its sync point (its
 /// start when it has none inside the clip) on the nearest grid line; Relative moves it by whole
 /// grid steps, keeping its offset from the grid.
-pub fn grid_delta(s: &Session, clip: &Clip, raw: Samples, relative: bool) -> Samples {
-    let (g, sr, map, rate) = (&s.edit.grid, s.sample_rate, &s.tempo, s.frame_rate);
+pub fn grid_delta(s: &Session, clip: &Clip, raw: Samples, relative: bool, moving: &[ClipId]) -> Samples {
     let sync = if (0..clip.length).contains(&clip.sync_point) { clip.sync_point } else { 0 };
     let anchor = clip.start.saturating_add(sync);
-    let from = if relative { g.line_at_or_before(anchor, sr, map, rate) } else { anchor };
-    g.snap(from.saturating_add(raw), sr, map, rate).saturating_sub(from)
+    let from = if relative { s.grid_line_at_or_before_excluding(anchor, moving) } else { anchor };
+    s.snap_to_grid_excluding(from.saturating_add(raw), moving).saturating_sub(from)
 }
 
 /// Trim a clip's edges to `start` and/or `end` like the Trim tool, never past its file. In
@@ -794,8 +870,11 @@ pub fn trim_clip(s: &mut Session, id: ClipId, start: Option<Samples>, end: Optio
         lo = lo.max(0);
     }
     let file = |c: &Clip| {
-        let start = c.start.saturating_sub(c.source_offset());
-        material_len(s, c).map(|n| (start.min(c.start), start.saturating_add(n).max(c.end())))
+        // The mixer plays from `offset + rel / stretch`, so file samples span `stretch` times as many timeline samples.
+        let stretch = if c.stretch.is_finite() && c.stretch > 0.0 { c.stretch } else { 1.0 };
+        let scale = |n: Samples| if (stretch - 1.0).abs() >= 1e-9 { (n as f64 * stretch).round() as Samples } else { n };
+        let start = c.start.saturating_sub(scale(c.source_offset()));
+        material_len(s, c).map(|n| (start.min(c.start), start.saturating_add(scale(n)).max(c.end())))
     };
     let t = TimeCtx::of(s);
     let mut c = old.clone();
@@ -917,350 +996,4 @@ pub fn delete_fades(s: &mut Session, track: TrackId, range: Range) -> usize {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use soundcraft_model::{ChannelFormat, Source, SourceId, TrackKind};
-
-    fn session_with_clip() -> (Session, TrackId) {
-        let mut s = Session::default();
-        let t = s.add_track(TrackKind::Audio, ChannelFormat::Mono, None);
-        s.sources.push(Source {
-            id: SourceId(500),
-            name: "src".into(),
-            path: "src.wav".into(),
-            channels: 1,
-            frames: 10_000,
-            sample_rate: 48_000,
-            format: soundcraft_audio_io::FileFormat::Wav,
-            time_reference: 0,
-            unsaved: false,
-        });
-        let id = s.new_clip_id();
-        if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-            pl.clips.push(Clip::audio(id, "a", SourceId(500), 1000, 1000, 4000));
-        }
-        (s, t)
-    }
-
-    fn clips(s: &Session, t: TrackId) -> Vec<(Samples, Samples, Samples)> {
-        s.track(t).unwrap().clips().iter().map(|c| (c.start, c.length, c.source_offset())).collect()
-    }
-
-    #[test]
-    fn copy_range_resets_fades_at_cut_edges() {
-        let (mut s, t) = session_with_clip();
-        if let Some(c) = s.track_mut(t).and_then(|t| t.playlist_mut()).and_then(|p| p.clips.first_mut()) {
-            c.fade_in = Fade { len: 100, shape: FadeShape::Linear, curvature: 0.0 };
-            c.fade_out = Fade { len: 100, shape: FadeShape::Linear, curvature: 0.0 };
-        }
-        let fades = |r: Range| -> Vec<(Samples, Samples)> { copy_range(&s, t, r).iter().map(|c| (c.fade_in.len, c.fade_out.len)).collect() };
-        assert_eq!(fades(Range::new(2000, 3000)), vec![(0, 0)]);
-        assert_eq!(fades(Range::new(0, 3000)), vec![(100, 0)]);
-        assert_eq!(fades(Range::new(2000, 6000)), vec![(0, 100)]);
-        assert_eq!(fades(Range::new(0, 6000)), vec![(100, 100)]);
-    }
-
-    #[test]
-    fn separate_splits_and_heal_rejoins() {
-        let (mut s, t) = session_with_clip();
-        assert_eq!(separate_at(&mut s, t, 3000), 1);
-        assert_eq!(clips(&s, t), vec![(1000, 2000, 1000), (3000, 2000, 3000)]);
-        assert_eq!(separate_at(&mut s, t, 1000), 0);
-        assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 1);
-        assert_eq!(clips(&s, t), vec![(1000, 4000, 1000)]);
-    }
-
-    #[test]
-    fn heal_rejoins_cut_separation() {
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), false);
-        assert_eq!(heal(&mut s, t, Range::new(1500, 3500)), 1);
-        assert_eq!(clips(&s, t), vec![(1000, 4000, 1000)]);
-        // A selection that does not span the whole gap leaves it alone.
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), false);
-        assert_eq!(heal(&mut s, t, Range::new(2500, 3500)), 0);
-        // Shuffled pieces no longer line up with their source and stay apart.
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), true);
-        assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 0);
-        // Moved apart: the timeline gap no longer matches the source gap.
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), false);
-        if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-            pl.clips[1].start = 3500;
-        }
-        assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 0);
-        // Overlapping neighbours whose offsets line up are not a separation.
-        let (mut s, t) = session_with_clip();
-        assert_eq!(separate_at(&mut s, t, 3000), 1);
-        if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-            pl.clips[1].start = 2500;
-        }
-        assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 0);
-        assert_eq!(clips(&s, t).len(), 2);
-    }
-
-    #[test]
-    fn heal_skips_clips_with_different_playback() {
-        for tweak in [(|c: &mut Clip| c.muted = true) as fn(&mut Clip), |c: &mut Clip| c.stretch = 1.5] {
-            let (mut s, t) = session_with_clip();
-            separate_at(&mut s, t, 3000);
-            if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-                tweak(&mut pl.clips[1]);
-            }
-            assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 0);
-            assert_eq!(s.track(t).unwrap().clips().len(), 2);
-        }
-    }
-
-    #[test]
-    fn heal_keeps_each_side_gain_envelope() {
-        let cases: [(Vec<(Samples, f32)>, Vec<(Samples, f32)>); 4] = [
-            (vec![(500, -3.0), (2500, -12.0)], vec![]),
-            (vec![], vec![(0, -6.0), (1000, 0.0)]),
-            (vec![(0, 0.0), (1999, -20.0)], vec![(-100, 4.0), (300, -9.0)]),
-            (vec![(500, -3.0), (2500, -12.0)], vec![(0, -9.75), (500, -12.0)]),
-        ];
-        for (left_env, right_env) in cases {
-            let (mut s, t) = session_with_clip();
-            separate_at(&mut s, t, 3000);
-            let pl = s.track_mut(t).and_then(|t| t.playlist_mut()).unwrap();
-            pl.clips[0].gain_env = left_env;
-            pl.clips[1].gain_env = right_env;
-            let (l, r) = (pl.clips[0].clone(), pl.clips[1].clone());
-            assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 1);
-            let healed = &s.track(t).unwrap().clips()[0];
-            for rel in 0..4000 {
-                let want = if rel < 2000 { l.gain_at(rel) } else { r.gain_at(rel - 2000) };
-                assert!((healed.gain_at(rel) - want).abs() < 1e-4, "sample {rel}: {} != {want}", healed.gain_at(rel));
-            }
-        }
-    }
-
-    #[test]
-    fn heal_keeps_gain_envelopes_across_a_gap() {
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), false);
-        let pl = s.track_mut(t).and_then(|t| t.playlist_mut()).unwrap();
-        pl.clips[0].gain_env = vec![(0, 0.0), (999, -6.0)];
-        pl.clips[1].gain_env = vec![(0, -12.0), (1999, -3.0)];
-        let (l, r) = (pl.clips[0].clone(), pl.clips[1].clone());
-        assert_eq!(heal(&mut s, t, Range::new(1500, 3500)), 1);
-        let healed = &s.track(t).unwrap().clips()[0];
-        assert_eq!(healed.length, 4000);
-        for rel in (0..1000).chain(2000..4000) {
-            let want = if rel < 1000 { l.gain_at(rel) } else { r.gain_at(rel - 2000) };
-            assert!((healed.gain_at(rel) - want).abs() < 1e-4, "sample {rel}: {} != {want}", healed.gain_at(rel));
-        }
-    }
-
-    #[test]
-    fn split_then_heal_rejoins_stretched_clip() {
-        let (mut s, t) = session_with_clip();
-        if let Some(c) = s.track_mut(t).and_then(|t| t.playlist_mut()).and_then(|p| p.clips.first_mut()) {
-            c.stretch = 2.0;
-        }
-        assert_eq!(separate_at(&mut s, t, 3000), 1);
-        assert_eq!(clips(&s, t), vec![(1000, 2000, 1000), (3000, 2000, 2000)]);
-        assert_eq!(heal(&mut s, t, Range::new(0, 10_000)), 1);
-        assert_eq!(clips(&s, t), vec![(1000, 4000, 1000)]);
-    }
-
-    #[test]
-    fn clear_slip_and_shuffle() {
-        let (mut s, t) = session_with_clip();
-        let removed = clear_range(&mut s, t, Range::new(2000, 3000), false);
-        assert_eq!(removed.len(), 1);
-        assert_eq!(removed[0].start, 0);
-        assert_eq!(clips(&s, t), vec![(1000, 1000, 1000), (3000, 2000, 3000)]);
-        let (mut s, t) = session_with_clip();
-        clear_range(&mut s, t, Range::new(2000, 3000), true);
-        assert_eq!(clips(&s, t), vec![(1000, 1000, 1000), (2000, 2000, 3000)]);
-    }
-
-    #[test]
-    fn copy_paste_overwrites() {
-        let (mut s, t) = session_with_clip();
-        let copied = copy_range(&s, t, Range::new(1500, 2500));
-        assert_eq!(copied.len(), 1);
-        assert_eq!((copied[0].start, copied[0].length, copied[0].source_offset()), (0, 1000, 1500));
-        paste(&mut s, t, 4000, &copied, 1000, false).unwrap();
-        assert_eq!(clips(&s, t), vec![(1000, 3000, 1000), (4000, 1000, 1500)]);
-    }
-
-    #[test]
-    fn paste_shuffle_ripples() {
-        let (mut s, t) = session_with_clip();
-        let copied = copy_range(&s, t, Range::new(1000, 2000));
-        paste(&mut s, t, 1000, &copied, 1000, true).unwrap();
-        assert_eq!(clips(&s, t), vec![(1000, 1000, 1000), (2000, 4000, 1000)]);
-    }
-
-    #[test]
-    fn insert_silence_and_trim() {
-        let (mut s, t) = session_with_clip();
-        insert_silence(&mut s, t, Range::new(2000, 2500));
-        assert_eq!(clips(&s, t), vec![(1000, 1000, 1000), (2500, 3000, 2000)]);
-        let (mut s, t) = session_with_clip();
-        trim_to(&mut s, t, Range::new(1500, 2000));
-        assert_eq!(clips(&s, t), vec![(1500, 500, 1500)]);
-    }
-
-    #[test]
-    fn fades_and_crossfades() {
-        let (mut s, t) = session_with_clip();
-        assert_eq!(create_fades(&mut s, t, Range::new(500, 1500), FadeShape::Linear), 1);
-        assert_eq!(s.track(t).unwrap().clips()[0].fade_in.len, 500);
-        let (mut s, t) = session_with_clip();
-        separate_at(&mut s, t, 3000);
-        assert_eq!(create_fades(&mut s, t, Range::new(2900, 3100), FadeShape::EqualPower), 1);
-        let c = s.track(t).unwrap().clips();
-        assert_eq!(c[0].end(), 3100);
-        assert_eq!(c[1].start, 2900);
-        assert_eq!(c[0].fade_out.len, 200);
-        assert_eq!(c[1].fade_in.len, 200);
-        delete_fades(&mut s, t, Range::new(2900, 3100));
-        let c = s.track(t).unwrap().clips();
-        assert_eq!((c[0].end(), c[1].start), (3000, 3000));
-    }
-
-    fn three_clips() -> (Session, TrackId, [ClipId; 3]) {
-        let (mut s, t) = session_with_clip();
-        let ids = [s.new_clip_id(), s.new_clip_id(), s.new_clip_id()];
-        if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-            pl.clips = vec![
-                Clip::audio(ids[0], "a", SourceId(500), 0, 0, 1000),
-                Clip::audio(ids[1], "b", SourceId(500), 1000, 1000, 2000),
-                Clip::audio(ids[2], "c", SourceId(500), 3000, 5000, 1000),
-            ];
-        }
-        (s, t, ids)
-    }
-
-    #[test]
-    fn shuffle_moves_reorder_clips_and_keep_the_silence() {
-        let (mut s, t, [_, b, _]) = three_clips();
-        assert_eq!(shuffle_clips(&mut s, &[b], -900, &[]), Ok(1));
-        assert_eq!(clips(&s, t), vec![(0, 2000, 1000), (2000, 1000, 0), (5000, 1000, 3000)]);
-        let (mut s, t, [a, ..]) = three_clips();
-        assert_eq!(shuffle_slot(&s, t, 900, &[a]), 0);
-        assert_eq!(shuffle_slot(&s, t, 1100, &[a]), 2000);
-        shuffle_clips(&mut s, &[a], 2500, &[]).unwrap();
-        assert_eq!(clips(&s, t), vec![(0, 2000, 1000), (2000, 1000, 0), (5000, 1000, 3000)]);
-    }
-
-    #[test]
-    fn shuffling_onto_an_empty_track_starts_it_at_zero() {
-        let (mut s, t, [_, _, c]) = three_clips();
-        let other = s.add_track(TrackKind::Audio, ChannelFormat::Mono, None);
-        shuffle_clips(&mut s, &[c], 40_000, &[(t, other)]).unwrap();
-        assert_eq!(clips(&s, other), vec![(0, 1000, 3000)]);
-        assert_eq!(clips(&s, t), vec![(0, 1000, 0), (1000, 2000, 1000)]);
-    }
-
-    #[test]
-    fn shuffle_trims_move_later_clips_and_slip_trims_stop_at_neighbours() {
-        let (mut s, t, [a, b, c]) = three_clips();
-        trim_clip(&mut s, b, None, Some(2500), true);
-        trim_clip(&mut s, b, Some(1500), None, true);
-        assert_eq!(clips(&s, t), vec![(0, 1000, 0), (1000, 1000, 1500), (4000, 1000, 3000)]);
-        let (mut s, t, _) = three_clips();
-        trim_clip(&mut s, a, None, Some(2500), false);
-        trim_clip(&mut s, c, Some(2000), None, false);
-        assert_eq!(clips(&s, t), vec![(0, 1000, 0), (1000, 2000, 1000), (3000, 3000, 1000)]);
-        trim_clip(&mut s, c, None, Some(99_999), false);
-        assert_eq!(clips(&s, t)[2], (3000, 9000, 1000));
-    }
-
-    #[test]
-    fn shuffle_leaves_locked_clips_and_what_follows_them_in_place() {
-        let (mut s, t, [a, b, c]) = three_clips();
-        s.find_clip_mut(c).unwrap().time_locked = true;
-        clear_range(&mut s, t, Range::new(1000, 3000), true);
-        assert_eq!(clips(&s, t), vec![(0, 1000, 0), (5000, 1000, 3000)]);
-        let (mut s, t, [a2, ..]) = three_clips();
-        s.find_clip_mut(c).unwrap().edit_locked = true;
-        assert_eq!(shuffle_room(&s, t, 0), 2000);
-        assert_eq!(make_room(&mut s, t, 0, 2500), Err(NO_ROOM));
-        assert_eq!(make_room(&mut s, t, 0, 2000), Ok(()));
-        assert_eq!(clips(&s, t), vec![(2000, 1000, 0), (3000, 2000, 1000), (5000, 1000, 3000)]);
-        assert_eq!(shuffle_clips(&mut s, &[a2], 2500, &[]), Ok(1));
-        assert_eq!(clips(&s, t)[2], (5000, 1000, 3000));
-        let (mut s, t, _) = three_clips();
-        s.find_clip_mut(c).unwrap().time_locked = true;
-        trim_clip(&mut s, b, None, Some(9000), true);
-        assert_eq!(clips(&s, t), vec![(0, 1000, 0), (1000, 4000, 1000), (5000, 1000, 3000)]);
-        assert_eq!(shuffle_slot(&s, t, 4000, &[a]), 4000);
-    }
-
-    #[test]
-    fn multi_track_moves_keep_the_tracks_apart() {
-        let (mut s, t1, [a, ..]) = three_clips();
-        let t2 = s.add_track(TrackKind::Audio, ChannelFormat::Mono, None);
-        let t3 = s.add_track(TrackKind::Audio, ChannelFormat::Mono, None);
-        let m = s.add_track(TrackKind::Midi, ChannelFormat::Mono, None);
-        let d = s.new_clip_id();
-        s.track_mut(t2).and_then(|t| t.playlist_mut()).unwrap().clips.push(Clip::audio(d, "d", SourceId(500), 0, 0, 500));
-        let dest = destinations(&s, &[a, d], t1, t2);
-        assert_eq!(dest, Some(vec![(t1, t2), (t2, t3)]));
-        assert_eq!(destinations(&s, &[a, d], t1, m), None);
-        assert_eq!(destinations(&s, &[a], t1, m), None);
-        assert_eq!(move_clips(&mut s, &[a, d], 0, &dest.unwrap()), 2);
-        assert_eq!(clips(&s, t2), vec![(0, 1000, 0)]);
-        assert_eq!(clips(&s, t3), vec![(0, 500, 0)]);
-    }
-
-    #[test]
-    fn grid_moves_snap_the_clip_start_or_keep_its_offset() {
-        let (s, t) = session_with_clip();
-        let step = s.edit.grid.step_samples(0, s.sample_rate, &s.tempo, s.frame_rate);
-        let c = s.track(t).unwrap().clips()[0].clone();
-        assert_eq!(c.start + grid_delta(&s, &c, step + 200, false), step);
-        assert_eq!(c.start + grid_delta(&s, &c, step + 200, true), step + 1000);
-        assert_eq!(grid_delta(&s, &c, step / 3, true), 0);
-    }
-
-    #[test]
-    fn moves_overwrite_and_respect_locks() {
-        let (mut s, t) = session_with_clip();
-        let id = s.track(t).unwrap().clips()[0].id;
-        assert_eq!(move_clips(&mut s, &[id], 500, &[]), 1);
-        assert_eq!(clips(&s, t), vec![(1500, 4000, 1000)]);
-        s.find_clip_mut(id).unwrap().time_locked = true;
-        assert_eq!(move_clips(&mut s, &[id], 500, &[]), 0);
-    }
-
-    #[test]
-    fn delete_fades_keeps_playlist_sorted_when_a_clip_overlaps_several() {
-        let (mut s, t) = session_with_clip();
-        let pl = s.track_mut(t).and_then(|t| t.playlist_mut()).expect("track has a playlist");
-        pl.clips.clear();
-        pl.clips.push(Clip::audio(ClipId(901), "a", SourceId(500), 0, 0, 1000));
-        pl.clips.push(Clip::audio(ClipId(902), "b", SourceId(500), 100, 100, 100));
-        pl.clips.push(Clip::audio(ClipId(903), "c", SourceId(500), 150, 150, 750));
-        delete_fades(&mut s, t, Range::new(0, 10_000));
-        let got = clips(&s, t);
-        assert!(got.windows(2).all(|w| w[0].0 <= w[1].0), "playlist not sorted: {got:?}");
-        assert!(got.iter().all(|c| c.1 > 0), "empty clip: {got:?}");
-    }
-
-    #[test]
-    fn delete_fades_leaves_unrelated_overlaps_alone() {
-        let (mut s, t) = session_with_clip();
-        let ids: Vec<ClipId> = (0..4).map(|_| s.new_clip_id()).collect();
-        if let Some(pl) = s.track_mut(t).and_then(|t| t.playlist_mut()) {
-            pl.clips.clear();
-            for (id, start, len) in [(ids[0], 0, 1100), (ids[1], 1000, 1000), (ids[2], 5000, 1100), (ids[3], 6000, 1000)] {
-                let mut c = Clip::audio(id, "c", SourceId(500), start, start, len);
-                c.fade_in = Fade { len: 100, shape: FadeShape::Linear, curvature: 0.0 };
-                c.fade_out = Fade { len: 100, shape: FadeShape::Linear, curvature: 0.0 };
-                pl.clips.push(c);
-            }
-        }
-        assert_eq!(delete_fades(&mut s, t, Range::new(900, 1200)), 2);
-        assert_eq!(clips(&s, t), vec![(0, 1050, 0), (1050, 950, 1050), (5000, 1100, 5000), (6000, 1000, 6000)]);
-        let c = s.track(t).unwrap().clips();
-        assert_eq!((c[1].fade_in.len, c[2].fade_out.len, c[3].fade_in.len), (0, 100, 100));
-    }
-}
+mod tests;

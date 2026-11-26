@@ -47,19 +47,47 @@ fn invert_sample(bytes: &mut [u8], s: SampleType) {
 /// are filled with `fill[c]` (a native-endian encoded sample). Channels whose
 /// `invert[c]` is set are inverted (PSD stores CMYK as `max - ink`).
 pub fn interleave(planes: &[Option<&[u8]>], fill: &[Vec<u8>], n: usize, s: SampleType, invert: &[bool]) -> Vec<u8> {
+    // Large results come from (and callers may return them to) the scratch pool.
+    let mut out = photocraft_raster::scratch::take(n * planes.len() * s.bytes(), 0u8);
+    interleave_into(planes, fill, n, s, invert, &mut out);
+    out
+}
+
+/// Fallible interleave for file imports. Validate sizes and missing-plane fills before
+/// workers write disjoint slices of one reserved output buffer.
+pub fn try_interleave(planes: &[Option<&[u8]>], fill: &[Vec<u8>], n: usize, s: SampleType, invert: &[bool]) -> craft_psd::Result<Vec<u8>> {
+    use craft_psd::PsdError;
+    let plane_bytes = n.checked_mul(s.bytes()).ok_or(PsdError::LimitExceeded("interleave size overflow"))?;
+    let len = plane_bytes.checked_mul(planes.len()).ok_or(PsdError::LimitExceeded("interleave size overflow"))?;
+    if len as u64 > craft_psd::compression::MAX_DECODED_BYTES {
+        return Err(PsdError::LimitExceeded("interleave exceeds MAX_DECODED_BYTES"));
+    }
+    if n > 0 && planes.is_empty() {
+        return Err(PsdError::Invalid("interleave needs at least one channel".into()));
+    }
+    for (c, plane) in planes.iter().enumerate() {
+        if plane.is_none_or(|p| p.len() < plane_bytes) && fill.get(c).is_none_or(|f| f.len() != s.bytes()) {
+            return Err(PsdError::Invalid("interleave fill has the wrong sample size".into()));
+        }
+    }
+    let mut out = photocraft_raster::scratch::try_take_exact(len, 0u8).ok_or(PsdError::OutOfMemory("not enough memory to interleave PSD pixels"))?;
+    interleave_into(planes, fill, n, s, invert, &mut out);
+    Ok(out)
+}
+
+fn interleave_into(planes: &[Option<&[u8]>], fill: &[Vec<u8>], n: usize, s: SampleType, invert: &[bool], out: &mut [u8]) {
+    if out.is_empty() {
+        return;
+    }
     let bps = s.bytes();
     let ch = planes.len();
     let row = ch * bps;
-    let mut out = vec![0u8; n * row];
-    if out.is_empty() {
-        return out;
-    }
     let bs = bands(n);
     let step = bs.first().map_or(n, ExactSizeIterator::len) * row;
     par_map(bs.into_iter().zip(out.chunks_mut(step)).collect(), |(band, part)| {
         for (c, plane) in planes.iter().enumerate() {
             let src = plane.and_then(|p| p.get(band.start * bps..)).unwrap_or_default();
-            let inv = src.len() >= bps && invert[c];
+            let inv = src.len() >= bps && invert.get(c).copied().unwrap_or(false);
             let fill = fill.get(c).map(Vec::as_slice).unwrap_or_default();
             match s {
                 SampleType::U8 => write_channel(part, ch, c, src, fill, |[v]| [if inv { 255 - v } else { v }]),
@@ -74,7 +102,6 @@ pub fn interleave(planes: &[Option<&[u8]>], fill: &[Vec<u8>], n: usize, s: Sampl
             }
         }
     });
-    out
 }
 
 fn write_channel<const N: usize>(out: &mut [u8], ch: usize, c: usize, src: &[u8], fill: &[u8], decode: impl Fn([u8; N]) -> [u8; N]) {
@@ -93,11 +120,30 @@ pub fn deinterleave(bytes: &[u8], ch: usize, s: SampleType, invert: &[bool]) -> 
     let bps = s.bytes();
     let n = bytes.len() / (ch * bps).max(1);
     if s == SampleType::U8 {
-        // Fast path: one plane per thread, no per-sample copies.
-        return par_map((0..ch).collect(), |c| {
-            let it = bytes.iter().skip(c).step_by(ch).take(n);
-            if invert[c] { it.map(|v| 255 - v).collect() } else { it.copied().collect() }
+        // Fast path: one band of pixels per core, written straight into every plane.
+        let mut planes = vec![vec![0u8; n]; ch];
+        let bs = bands(n);
+        let mut slots: Vec<Vec<&mut [u8]>> = bs.iter().map(|_| Vec::with_capacity(ch)).collect();
+        for plane in &mut planes {
+            let mut rest = plane.as_mut_slice();
+            for (slot, band) in slots.iter_mut().zip(&bs) {
+                let Some((part, tail)) = rest.split_at_mut_checked(band.len()) else { break };
+                slot.push(part);
+                rest = tail;
+            }
+        }
+        par_map(bs.into_iter().zip(slots).collect(), |(band, mut outs)| {
+            let src = bytes.get(band.start * ch..band.end * ch).unwrap_or(&[]);
+            for (c, out) in outs.iter_mut().enumerate() {
+                let px = src.chunks_exact(ch).filter_map(|p| p.get(c).copied());
+                if invert.get(c).copied().unwrap_or(false) {
+                    out.iter_mut().zip(px).for_each(|(o, v)| *o = 255 - v);
+                } else {
+                    out.iter_mut().zip(px).for_each(|(o, v)| *o = v);
+                }
+            }
         });
+        return planes;
     }
     // One band of rows per core, appended in band order into pre-grown planes.
     let row = ch * bps;
@@ -200,10 +246,27 @@ pub fn unmatte(m: f32, a: f32, white: f32) -> f32 {
     if a <= 0.0 { white } else { (m - white * (1.0 - a)) / a }
 }
 
+thread_local! {
+    static MULTITHREADED: std::cell::Cell<bool> = const { std::cell::Cell::new(true) };
+}
+
+/// Runs `f` with [`par_map`] and [`bands`] multithreading enabled or forced sequential on this thread.
+pub(crate) fn with_multithreaded<R>(enabled: bool, f: impl FnOnce() -> R) -> R {
+    struct Reset(bool);
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            MULTITHREADED.set(self.0);
+        }
+    }
+    let prev = MULTITHREADED.replace(enabled);
+    let _reset = Reset(prev);
+    f()
+}
+
 /// `items.map(f)` on scoped threads (one per item; callers pass a handful of channels or
-/// bands), in order; sequential on wasm or for a single item.
+/// bands), in order; sequential on wasm, when multithreading is disabled, or for a single item.
 pub fn par_map<T: Send, R: Send>(items: Vec<T>, f: impl Fn(T) -> R + Sync) -> Vec<R> {
-    if cfg!(target_arch = "wasm32") || items.len() < 2 {
+    if cfg!(target_arch = "wasm32") || !MULTITHREADED.get() || items.len() < 2 {
         return items.into_iter().map(f).collect();
     }
     std::thread::scope(|sc| {
@@ -219,7 +282,11 @@ pub fn par_map<T: Send, R: Send>(items: Vec<T>, f: impl Fn(T) -> R + Sync) -> Ve
 
 /// `0..n` split into about one band per core.
 pub fn bands(n: usize) -> Vec<std::ops::Range<usize>> {
-    let k = if cfg!(target_arch = "wasm32") { 1 } else { std::thread::available_parallelism().map_or(1, |v| v.get()).clamp(1, 32) };
+    let k = if cfg!(target_arch = "wasm32") || !MULTITHREADED.get() {
+        1
+    } else {
+        std::thread::available_parallelism().map_or(1, |v| v.get()).clamp(1, 32)
+    };
     let step = n.div_ceil(k).max(1);
     (0..n).step_by(step).map(|a| a..(a + step).min(n)).collect()
 }
@@ -303,6 +370,20 @@ mod tests {
                 let want_back = seq_deinterleave(&got, 4, s, &invert);
                 assert_eq!(planes_back, want_back, "deinterleave n={n}");
             }
+        }
+    }
+
+    #[test]
+    fn fallible_interleave_checks_sizes_and_missing_plane_fills() {
+        assert!(try_interleave(&[None], &[vec![0]], usize::MAX, SampleType::F32, &[]).is_err());
+        assert!(try_interleave(&[None], &[], 1, SampleType::U8, &[]).is_err());
+        assert!(try_interleave(&[], &[], 1, SampleType::U8, &[]).is_err());
+        assert!(try_interleave(&[None], &[vec![0]], usize::MAX / 2, SampleType::U8, &[]).is_err());
+        for s in [SampleType::U8, SampleType::U16, SampleType::F32] {
+            let plane = vec![1; 1001 * s.bytes()];
+            let planes = [Some(plane.as_slice()), None];
+            let fill = vec![zero_sample(s), max_sample(s)];
+            assert_eq!(try_interleave(&planes, &fill, 1001, s, &[true, false]).unwrap(), interleave(&planes, &fill, 1001, s, &[true, false]));
         }
     }
 

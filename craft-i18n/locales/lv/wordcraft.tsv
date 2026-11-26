@@ -1,0 +1,2688 @@
+# Latviešu (lv) interface catalog for WordCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	(All)	(Visi)
+	(no style)	(bez stila)
+	(no suggestions)	(nav ieteikumu)
+	(normal text)	(parasts teksts)
+	(not matched)	(nav atbilstības)
+	(picture or object)	(attēls vai objekts)
+	*Bold* and _italic_ as real formatting	*Treknraksts* un _slīpraksts_ kā īsts formatējums
+	0 or More Characters	0 vai vairāk rakstzīmju
+	1. Formatting restrictions	1. Formatēšanas ierobežojumi
+	1.5 Line Spacing	1,5 rindstarpa
+	1/4 Em Space	1/4 Em atstarpe
+	1×2 Empty Matrix	1×2 tukša matrica
+	1×3 Empty Matrix	1×3 tukša matrica
+	2. Editing restrictions	2. Rediģēšanas ierobežojumi
+	2×1 Empty Matrix	2×1 tukša matrica
+	2×2 Determinant	2×2 determinants
+	2×2 Empty Matrix	2×2 tukša matrica
+	2×2 Identity Matrix	2×2 vienības matrica
+	2×2 Identity Matrix (sparse)	2×2 vienības matrica (reta)
+	2×2 Matrix in Brackets	2×2 matrica kvadrātiekavās
+	2×2 Matrix in Double Bars	2×2 matrica dubultās līnijās
+	2×2 Matrix in Parentheses	2×2 matrica apaļajās iekavās
+	2×3 Empty Matrix	2×3 tukša matrica
+	3-D	3D
+	3. Start enforcement	3. Sākt piemērošanu
+	3×1 Empty Matrix	3×1 tukša matrica
+	3×2 Empty Matrix	3×2 tukša matrica
+	3×3 Empty Matrix	3×3 tukša matrica
+	3×3 Identity Matrix	3×3 vienības matrica
+	3×3 Identity Matrix (sparse)	3×3 vienības matrica (reta)
+	<< Less	<< Mazāk
+	<< Remove	<< Noņemt
+	a drawing canvas can't be ungrouped	zīmēšanas audeklu nevar atgrupēt
+	a drawing canvas can't go inside a text box	zīmēšanas audekls nevar atrasties teksta lodziņā
+	A file dialog is already open.	Failu dialoglodziņš jau ir atvērts.
+	A free, open-source word processor written from scratch in Rust.\nPart of the Crafting Apps from the ArtCraft team.	Bezmaksas atvērtā koda teksta procesors, kas no nulles rakstīts Rust valodā.\nDaļa no ArtCraft komandas Crafting Apps.
+	a group holding Word ink can't be ungrouped yet	grupu ar Word tinti vēl nevar atgrupēt
+	A mail merge field	Pasta sapludināšanas lauks
+	A numbered sequence (figures, tables…)	Numurēta secība (attēli, tabulas…)
+	A password is required to open this document.	Lai atvērtu šo dokumentu, nepieciešama parole.
+	A table of contents	Satura rādītājs
+	A xor B	A xor B
+	A, B, C, …	A, B, C, …
+	a, b, c, …	a, b, c, …
+	AaBbCcDd	AaBbCcDd
+	AaBbYyZz	AaBbYyZz
+	About WordCraft	Par WordCraft
+	Above Chart	Virs diagrammas
+	Above the item	Virs vienuma
+	Above/below	Virs/zem
+	Absolute value cases	Absolūtās vērtības gadījumi
+	Accent	Akcents
+	Accent Gradient	Akcenta gradients
+	Accent with Reflection	Akcents ar atspulgu
+	Accent {n}	{n}. akcents
+	Accents	Akcenti
+	Accept	Pieņemt
+	Accept All Changes	Pieņemt visas izmaiņas
+	Accept All Changes and Stop Tracking	Pieņemt visas izmaiņas un pārtraukt izsekošanu
+	Accept and Move to Next	Pieņemt un pāriet uz nākamo
+	Accept This Change	Pieņemt šīs izmaiņas
+	Accessed on	Skatīts
+	Accessibility Pane	Pieejamības rūts
+	Account	Konts
+	Acute	Akūts
+	Add >>	Pievienot >>
+	Add a language	Pievienot valodu
+	Add a language…	Pievienot valodu…
+	Add a period with double-space	Pievienot punktu ar dubultatstarpi
+	Add a Table	Pievienot tabulu
+	Add at least one field.	Pievienojiet vismaz vienu lauku.
+	Add Chart Element	Pievienot diagrammas elementu
+	Add Condition	Pievienot nosacījumu
+	Add Field	Pievienot lauku
+	Add Font…	Pievienot fontu…
+	Add gradient stop	Pievienot gradienta punktu
+	Add line numbering	Pievienot rindu numerāciju
+	Add New Source…	Pievienot jaunu avotu…
+	Add Object to Selection	Pievienot objektu atlasei
+	Add Pen	Pievienot pildspalvu
+	Add Row	Pievienot rindu
+	Add Series	Pievienot sēriju
+	Add Shape	Pievienot figūru
+	Add Space Before Paragraph	Pievienot atstarpi pirms rindkopas
+	Add space between Asian and Latin text	Pievienot atstarpi starp Āzijas un latīņu tekstu
+	Add space between Asian text and numbers	Pievienot atstarpi starp Āzijas tekstu un skaitļiem
+	Add tab stop at:	Pievienot tabulācijas pieturu pie:
+	Add Text	Pievienot tekstu
+	Add the chapter number	Pievienot nodaļas numuru
+	Add to AutoCorrect	Pievienot automātiskajai labošanai
+	Add to Document	Pievienot dokumentam
+	Add to Quick Access Toolbar	Pievienot ātrās piekļuves rīkjoslai
+	Add to Style Gallery	Pievienot stilu galerijai
+	Add whether it is above or below	Pievienot, vai tas ir virs vai zem
+	Add/Edit\nBibliography	Pievienot/rediģēt\nbibliogrāfiju
+	Add/Edit\nCitation	Pievienot/rediģēt\natsauci
+	Add\nNote	Pievienot\npiezīmi
+	Add\nPen	Pievienot\npildspalvu
+	Add\nShape	Pievienot\nfigūru
+	Added 1 font	Pievienots 1 fonts
+	Added Fonts	Pievienotie fonti
+	Added {n} fonts	Pievienoti {n} fonti
+	Address	Adrese
+	Address Block	Adreses bloks
+	Address labels	Adrešu etiķetes
+	Address:	Adrese:
+	Address\nBlock	Adreses\nbloks
+	Advanced Find	Papildu meklēšana
+	Advanced Find…	Papildu meklēšana…
+	Advanced Properties…	Papildu rekvizīti…
+	Afrikaans	Afrikandu
+	After:	Pēc:
+	Agents	Aģenti
+	Agents connected to WordCraft can show you messages through the Assistant. Muted, they're told you'd rather not.	Ar WordCraft savienoti aģenti var rādīt jums ziņojumus ar palīga starpniecību. Ja tie ir izslēgti, viņiem tiek pateikts, ka jūs to nevēlaties.
+	Ah, Latin. The language of deadlines.	Ā, latīņu valoda. Termiņu valoda.
+	Ah, the editing phase. My favourite. Very decisive.	Ā, rediģēšanas posms. Mans mīļākais. Ļoti izlēmīgs.
+	Albanian	Albāņu
+	Align Bottom Center	Līdzināt apakšā centrā
+	Align Bottom Left	Līdzināt apakšā pa kreisi
+	Align Bottom Right	Līdzināt apakšā pa labi
+	Align Center	Līdzināt centrā
+	Align Center Left	Līdzināt centrā pa kreisi
+	Align Center Right	Līdzināt centrā pa labi
+	Align Top Center	Līdzināt augšā centrā
+	Align Top Left	Līdzināt augšā pa kreisi
+	Align Top Right	Līdzināt augšā pa labi
+	Aligned at:	Līdzināts pie:
+	All - Linear	Viss — lineāri
+	All - Professional	Viss — profesionāli
+	All Borders	Visas apmales
+	All caps	Lielie burti
+	All Commands	Visas komandas
+	All documents based on the Normal template?	Visus dokumentus, kas balstīti uz veidni Normal?
+	All Fonts	Visi fonti
+	All Levels	Visi līmeņi
+	All Markup	Visi iezīmējumi
+	All pages in the range	Visas lapas diapazonā
+	All symbol sets	Visas simbolu kopas
+	All system fonts are already available.	Visi sistēmas fonti jau ir pieejami.
+	Allow hanging punctuation	Atļaut pieturzīmju izvirzīšanu
+	Allow Latin text to wrap in the middle of a word	Atļaut latīņu teksta pārnešanu vārda vidū
+	Allow line breaks	Atļaut rindu pārtraukumus
+	Allow row to break across pages	Atļaut rindas dalīšanu pāri lapām
+	Alphabetical	Alfabētiski
+	Alt Text	Alternatīvais teksts
+	Alt text	Alternatīvais teksts
+	Alt Text Pane	Alternatīvā teksta rūts
+	Alt:	Alt:
+	Alt\nText	Alternatīvais\nteksts
+	an agent	aģents
+	An installed Language pack is used after this folder.	Pēc šīs mapes tiek izmantota instalēta valodas pakotne.
+	And	Un
+	Angle Brackets	Stūra iekavas
+	Angle Brackets with Separator	Stūra iekavas ar atdalītāju
+	Angle Brackets with Two Separators	Stūra iekavas ar diviem atdalītājiem
+	Angola	Angola
+	Animate the caret (it glides and fades)	Animēt kursoru (tas slīd un izgaist)
+	Animation effects:	Animācijas efekti:
+	Annotation Reference	Anotācijas atsauce
+	Annotation Subject	Anotācijas tēma
+	Annotation Text	Anotācijas teksts
+	Annoying	Kaitinošs
+	Another file	Cits fails
+	Any Character	Jebkura rakstzīme
+	Any Digit	Jebkurš cipars
+	Any field	Jebkurš lauks
+	Any Letter	Jebkurš burts
+	Anyone can open this document. Encrypt it with a password to keep it private.	Šo dokumentu var atvērt ikviens. Šifrējiet to ar paroli, lai saglabātu privātu.
+	Anyone who opens the document will need this password.	Ikvienam, kas atver dokumentu, būs vajadzīga šī parole.
+	APA	APA
+	Apply as you type	Lietot rakstīšanas laikā
+	Apply Asian line-breaking rules (kinsoku)	Lietot Āzijas rindu pārneses kārtulas (kinsoku)
+	Apply formatting to:	Lietot formatējumu:
+	Apply Style	Lietot stilu
+	Apply Styles	Lietot stilus
+	Arabic	Arābu
+numerals	Arabic	Arābu
+	Arch Down	Arka uz leju
+	Arch Up	Arka uz augšu
+	Argentina	Argentīna
+	Armenian	Armēņu
+	Arrange\nAll	Sakārtot\nvisu
+	Article I.	I pants.
+	Artistic Effects	Mākslinieciskie efekti
+	As Recommended	Kā ieteikts
+	As you type	Rakstīšanas laikā
+	ASAP	Pēc iespējas ātrāk
+	Asian text font:	Āzijas teksta fonts:
+	Asian Typography	Āzijas tipogrāfija
+	Assistant	Palīgs
+	Assistant Suggestions	Palīga ieteikumi
+	At least	Vismaz
+	At least {n}	Vismaz {n}
+	Atelier	Atelier
+	Atmosphere	Atmosfēra
+	Attach Template	Pievienot veidni
+	Attach…	Pievienot…
+	Australia	Austrālija
+	Austria	Austrija
+	Auto orientation	Automātiska orientācija
+	AutoCorrect	Automātiskā labošana
+	AutoCorrect Options	Automātiskās labošanas opcijas
+	AutoCorrect Options…	Automātiskās labošanas opcijas…
+	AutoFit	Automātiski ietilpināt
+	AutoFit behavior	Automātiskās ietilpināšanas darbība
+	AutoFit Column by Double-Clicking	Automātiski ietilpināt kolonnu ar dubultklikšķi
+	AutoFit Contents	Ietilpināt pēc satura
+	AutoFit to contents	Automātiski ietilpināt pēc satura
+	AutoFit to window	Automātiski ietilpināt logā
+	AutoFit Window	Ietilpināt logā
+	AutoFormat As You Type	Automātiskā formatēšana rakstīšanas laikā
+	Automatic ({language})	Automātiski ({language})
+	Automatic ({region})	Automātiski ({region})
+	Automatic bulleted lists	Automātiski saraksti ar aizzīmēm
+	Automatic follows your system's language. Menus and commands change; your documents don't.	Automātiskais režīms seko sistēmas valodai. Mainās izvēlnes un komandas, bet ne jūsu dokumenti.
+	Automatic numbered lists	Automātiski numurēti saraksti
+	Automatic Table 1 (3 levels)	Automātiskā tabula 1 (3 līmeņi)
+	Automatic Table 2 (2 levels)	Automātiskā tabula 2 (2 līmeņi)
+	Automatically add words to list (First Letter)	Automātiski pievienot vārdus sarakstam (pirmais burts)
+	Automatically add words to list (INitial CAps)	Automātiski pievienot vārdus sarakstam (DIvi LIeli burti)
+	Automatically hyphenate document	Automātiski pārnest vārdus dokumentā
+	Automatically Update Document Styles	Automātiski atjaunināt dokumenta stilus
+	Automatically update document styles	Automātiski atjaunināt dokumenta stilus
+	AutoSave documents you have saved in WordCraft	Automātiski saglabāt dokumentus, kas saglabāti programmā WordCraft
+	AutoSave failed: {error}. Save the document to turn AutoSave back on.	Automātiskā saglabāšana neizdevās: {error}. Saglabājiet dokumentu, lai to atkal ieslēgtu.
+	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	Automātiskā saglabāšana pārlūkā nav pieejama: tā nevar rakstīt jūsu failos. Saglabāt lejupielādē kopiju.
+	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	Automātiskā saglabāšana saglabā tikai .docx, .odt un .rtf failus; {name} nevar saglabāt visu formatējumu. Saglabājiet kā .docx, lai ieslēgtu automātisko saglabāšanu.
+	AutoSave saves every change to the file (needs a saved document)	Automātiskā saglabāšana saglabā katru izmaiņu failā (nepieciešams saglabāts dokuments)
+	AutoSave writes your changes to the file a moment after you stop typing.	Automātiskā saglabāšana ieraksta izmaiņas failā brīdi pēc tam, kad pārtraucat rakstīt.
+	AutoText	Automātiskais teksts
+	B4 (JIS)   10.12" × 14.33"	B4 (JIS)   10.12" × 14.33"
+	B5 (JIS)   7.17" × 10.12"	B5 (JIS)   7.17" × 10.12"
+	Balloons	Baloni
+	Banded Columns	Joslotas kolonnas
+	Banded Rows	Joslotas rindas
+	Base text:	Pamatteksts:
+	Based on: {style}	Balstīts uz: {style}
+	Baseline Dots	Bāzes līnijas punkti
+	Basic Cycle	Pamata cikls
+	Basic List	Pamata saraksts
+	Basic Math	Pamata matemātika
+	Basic Matrix	Pamata matrica
+	Basic Process	Pamata process
+	Basic Pyramid	Pamata piramīda
+	Basic Radial	Pamata radiāls
+	Basic Venn	Pamata Venna diagramma
+	Bayes' rule	Beijesa likums
+	Before:	Pirms:
+	Beginning of Word	Vārda sākums
+	Behind Text	Aiz teksta
+	Belarus	Baltkrievija
+	Belarusian	Baltkrievu
+	Belgium	Beļģija
+	Below text	Zem teksta
+	Below the item	Zem vienuma
+	Between	Starp
+	Bibliography	Bibliogrāfija
+	Binomial Coefficient	Binomiālais koeficients
+	Binomial Coefficient (angle)	Binomiālais koeficients (stūra)
+	Binomial Coefficient with Angle Brackets	Binomiālais koeficients stūra iekavās
+	Binomial expansion of (x+a)ⁿ	(x+a)ⁿ binomiālā izvirzījums
+	Blank	Tukšs
+	Blank (Three Columns)	Tukšs (trīs kolonnas)
+	Blank document	Tukšs dokuments
+	Blank Page	Tukša lapa
+	Block\nAuthors	Bloķēt\nautorus
+	Blue:	Zils:
+	Body Text	Pamatteksts
+	Body text in a short paragraph to show spacing.	Pamatteksts īsā rindkopā, lai parādītu atstatumus.
+	Bold choice. Ctrl+Z is right there if you need it.	Drosmīga izvēle. Ctrl+Z ir tepat, ja vajag.
+	Bolivia	Bolīvija
+	Book	Grāmata
+	Book Title	Grāmatas nosaukums
+	Book title	Grāmatas nosaukums
+	Bookmark	Grāmatzīme
+	Bookmark name:	Grāmatzīmes nosaukums:
+	Bookmark text	Grāmatzīmes teksts
+	Bookmarks	Grāmatzīmes
+	Border lines	Apmales līnijas
+	Border Painter	Apmaļu ota
+	Border\nPainter	Apmaļu\nota
+	Borders and Shading	Apmales un ēnojums
+	Borders and Shading…	Apmales un ēnojums…
+	Bosnia and Herzegovina	Bosnija un Hercegovina
+	Bosnian	Bosniešu
+	Both Sides	Abas puses
+	Bottom Border	Apakšējā apmale
+	Bottom Left Cell	Apakšējā kreisā šūna
+	Bottom Margin	Apakšējā piemale
+	Bottom of Page	Lapas apakša
+	Bottom Right Cell	Apakšējā labā šūna
+	Box	Lodziņš
+	Boxed Formula	Formula lodziņā
+	Boxed Formula (example)	Formula lodziņā (piemērs)
+	Boxed Formulas	Formulas lodziņos
+	Braces	Figūriekavas
+	Braces with Separator	Figūriekavas ar atdalītāju
+	Bracket	Iekava
+	Brackets	Iekavas
+	Brackets with Separators	Iekavas ar atdalītājiem
+	Brazil	Brazīlija
+	Breaks	Pārtraukumi
+	Breve	Īsuma zīme
+	Bright Green	Spilgti zaļš
+	Brighter +20%	Gaišāks +20%
+	Brightness, contrast and sharpness	Spilgtums, kontrasts un asums
+	Browse in WordCraft…	Pārlūkot programmā WordCraft…
+	Building Block Gallery Content Control	Būvbloku galerijas satura vadīkla
+	Built in	Iebūvēts
+	Built-In	Iebūvēts
+	Built-in Heading styles	Iebūvētie virsrakstu stili
+	Built-in style	Iebūvēts stils
+	Built-in styles can't be deleted.	Iebūvētos stilus nevar dzēst.
+	Bulgarian	Bulgāru
+	Bullet Library	Aizzīmju bibliotēka
+	Bullets	Aizzīmes
+	By author	Pēc autora
+	Cabo Verde	Kaboverde
+	Calendar	Kalendārs
+	Can't be deleted	Nevar dzēst
+	Can't find a command? Press Alt+Q and type what you want to do.	Nevarat atrast komandu? Nospiediet Alt+Q un ierakstiet, ko vēlaties darīt.
+	Can't find a command? Press {key} and type what you want to do.	Nevarat atrast komandu? Nospiediet {key} un ierakstiet, ko vēlaties darīt.
+	can't split at the first row	nevar sadalīt pie pirmās rindas
+	Canada	Kanāda
+	Canvas Member	Audekla dalībnieks
+	Capitalize Each Word	Katru vārdu ar lielo burtu
+	Capitalize first letter of sentences	Teikumu pirmais burts lielais
+	Capitalize first letter of table cells	Tabulas šūnu pirmais burts lielais
+	Capitalize names of days	Dienu nosaukumi ar lielo burtu
+	Capitalize the first word of a sentence	Teikuma pirmais vārds ar lielo burtu
+	Caption Numbering	Parakstu numerācija
+	Caption text	Paraksta teksts
+	Caption:	Paraksts:
+	Captions	Paraksti
+	Careful, any further back and we'll undo the invention of paper.	Uzmanīgi, vēl tālāk atpakaļ un atsauksim papīra izgudrošanu.
+	Caret Character	Jumtiņa rakstzīme
+	Case changes	Reģistra izmaiņas
+	Cases (Three Conditions)	Gadījumi (trīs nosacījumi)
+	Cases (Two Conditions)	Gadījumi (divi nosacījumi)
+	Cases and Stacks	Gadījumi un kaudzes
+	Catalan	Katalāņu
+	Catalan (Valencian)	Katalāņu (valensiešu)
+	Categories	Kategorijas
+	Categories:	Kategorijas:
+	Category {n}	{n}. kategorija
+	Ceiling	Griesti
+	Cell	Šūna
+	Cell Margins	Šūnu piemales
+	Cell\nMargins	Šūnu\npiemales
+	Center Glow	Mirdzums centrā
+	Centered as Group	Centrēts kā grupa
+	Change Chart Type	Mainīt diagrammas veidu
+	Change Colors	Mainīt krāsas
+	Change in y over change in x	y izmaiņas pret x izmaiņām
+	Change Layout	Mainīt izkārtojumu
+	Change List Level	Mainīt saraksta līmeni
+	Change Password…	Mainīt paroli…
+	Change Picture	Mainīt attēlu
+	Change Picture…	Mainīt attēlu…
+	Change Shape	Mainīt figūru
+	Change Structure	Mainīt struktūru
+	Change to Display	Mainīt uz atsevišķu rindu
+	Change to Inline	Mainīt uz rindā iekļautu
+	Change to Level 1	Mainīt uz 1. līmeni
+	Change to Level 2	Mainīt uz 2. līmeni
+	Change to Level 3	Mainīt uz 3. līmeni
+	Change to Level 4	Mainīt uz 4. līmeni
+	Change to Level 5	Mainīt uz 5. līmeni
+	Change to Level 6	Mainīt uz 6. līmeni
+	Change to Level 7	Mainīt uz 7. līmeni
+	Change to Level 8	Mainīt uz 8. līmeni
+	Change to Level 9	Mainīt uz 9. līmeni
+	Change to:	Mainīt uz:
+	Change\nChart Type	Mainīt\ndiagrammas veidu
+	Change\nColors	Mainīt\nkrāsas
+	Changed lines:	Mainītās rindas:
+	Changes	Izmaiņas
+	Change…	Mainīt…
+	Chapter 1	1. nodaļa
+	Chapter in a book	Nodaļa grāmatā
+	Chapters begin at:	Nodaļas sākas:
+	Character Border	Rakstzīmju apmale
+	Character code:	Rakstzīmes kods:
+	Character in Range	Rakstzīme diapazonā
+	Character level	Rakstzīmju līmenis
+	Character Position	Rakstzīmju novietojums
+	Character Scale	Rakstzīmju mērogs
+	Character Shading	Rakstzīmju ēnojums
+	Character Spacing	Rakstzīmju atstatums
+	Character spacing	Rakstzīmju atstatums
+	Character style	Rakstzīmju stils
+	Characters (no spaces)	Rakstzīmes (bez atstarpēm)
+	Characters (with spaces)	Rakstzīmes (ar atstarpēm)
+	Characters per line:	Rakstzīmes rindā:
+	Chart	Diagramma
+	Chart Design	Diagrammas dizains
+	Chart Layouts	Diagrammu izkārtojumi
+	Chart Title	Diagrammas virsraksts
+	charts and diagrams can't be moved or resized yet	diagrammas vēl nevar pārvietot vai mainīt to izmēru
+	Check	Pārbaudīt
+	Check Accessibility	Pārbaudīt pieejamību
+	Check Box Content Control	Izvēles rūtiņas satura vadīkla
+	Check Compatibility	Pārbaudīt saderību
+	Check for Errors	Pārbaudīt kļūdas
+	Check for\nUpdates…	Pārbaudīt\natjauninājumus…
+	Check Spelling as You Type	Pārbaudīt pareizrakstību rakstīšanas laikā
+	Check spelling as you type	Pārbaudīt pareizrakstību rakstīšanas laikā
+	Check\nAccessibility	Pārbaudīt\npieejamību
+	Checked styles are allowed:	Atļautie atzīmētie stili:
+	Checked symbol	Atzīmēts simbols
+	Checking for updates…	Pārbauda atjauninājumus…
+	Chevron Down	Ševrons uz leju
+	Chevron Up	Ševrons uz augšu
+	Chicago	Chicago
+	Chile	Čīle
+	China	Ķīna
+	Chinese (Simplified)	Ķīniešu (vienkāršotā)
+	Chinese (Traditional)	Ķīniešu (tradicionālā)
+	Choose a command	Izvēlieties komandu
+	Choose a shortcut	Izvēlieties saīsni
+	Choose List Item	Izvēlieties saraksta vienumu
+	Choose the sheet that holds the recipients.	Izvēlieties lapu, kurā ir adresāti.
+	Circle area from its radius	Riņķa laukums no rādiusa
+	Circled Dot	Punkts aplī
+	Circled Plus	Plus aplī
+	Circled Times	Reizināšana aplī
+	Citation Style	Atsauces stils
+	Citations	Atsauces
+	Citations & Bibliography	Atsauces un bibliogrāfija
+	Clear All Formatting	Notīrīt visu formatējumu
+	Clear Character Formatting	Notīrīt rakstzīmju formatējumu
+	Clear Character Style	Notīrīt rakstzīmju stilu
+	Clear Formatting Level	Notīrīt formatējuma līmeni
+	Clear Paragraph Formatting	Notīrīt rindkopas formatējumu
+	Click a border between two cells to merge them. Esc stops.	Noklikšķiniet uz apmales starp divām šūnām, lai tās sapludinātu. Esc aptur.
+	Click an item to paste it.	Noklikšķiniet uz vienuma, lai to ielīmētu.
+	Click level to modify:	Noklikšķiniet uz maināmā līmeņa:
+	Click the empty text box the text should continue in (Esc cancels)	Noklikšķiniet uz tukšā teksta lodziņa, kurā jāturpinās tekstam (Esc atceļ)
+	Click to switch back to inserting	Noklikšķiniet, lai atgrieztos pie ievietošanas
+	Clipboard Contents	Starpliktuves saturs
+	Clipboard Items	Starpliktuves vienumi
+	Clipboard Pane	Starpliktuves rūts
+	Close Document	Aizvērt dokumentu
+	Close Equation	Aizvērt vienādojumu
+	Close Header and Footer	Aizvērt galveni un kājeni
+	Close Outline View	Aizvērt struktūrskatu
+	Close Outline\nView	Aizvērt\nstruktūrskatu
+	Clustered Bar	Grupētas joslas
+	Clustered Column	Grupētas kolonnas
+	cm	cm
+	Col #:	Kol. nr.:
+	Collapse Selection	Sakļaut atlasi
+	Collate copies	Salikt eksemplārus
+	Collect entries from:	Vākt ierakstus no:
+	Colombia	Kolumbija
+	Colon Equal	Kols vienāds
+	Color model:	Krāsu modelis:
+	Color only	Tikai krāsa
+	Color: {color}	Krāsa: {color}
+	Colorful	Krāsains
+	Column	Kolonna
+	Column Break	Kolonnas pārtraukums
+	Column Selection	Kolonnas atlase
+	Column {n}	{n}. kolonna
+	Column:	Kolonna:
+	Combine Documents	Apvienot dokumentus
+	Combo Box Content Control	Kombinētā lodziņa satura vadīkla
+	Commands	Komandas
+	Commas	Komati
+	Comments beside each page and tracked changes in PDFs, prints and images; a comment list at the end of web pages, Markdown and text.	Komentāri blakus katrai lapai un izsekotās izmaiņas PDF failos, izdrukās un attēlos; komentāru saraksts tīmekļa lapu, Markdown un teksta beigās.
+	Comments Pane	Komentāru rūts
+	Common Accent Objects	Biežie akcentu objekti
+	Common Brackets	Biežās iekavas
+	Common Fractions	Biežās daļas
+	Common Functions	Biežās funkcijas
+	Common Large Operators	Biežie lielie operatori
+	Common Operator Structures	Biežās operatoru struktūras
+	Common Operators	Biežie operatori
+	Common Radicals	Biežās saknes
+	Common Subscripts and Superscripts	Biežie apakšraksti un augšraksti
+	Communication	Saziņa
+	Community\nDiscord	Kopienas\nDiscord
+	Compact	Kompakts
+	Compare Documents	Salīdzināt dokumentus
+	Compare to	Salīdzināt ar
+	Compared: {changes} changes	Salīdzināts: izmaiņas {changes}
+	Comparing with another file needs the desktop app.	Salīdzināšanai ar citu failu nepieciešama datora lietotne.
+	Comparison settings	Salīdzināšanas iestatījumi
+	Compress Pictures	Saspiest attēlus
+	Compress punctuation at the start of a line	Saspiest pieturzīmes rindas sākumā
+	Conference	Konference
+	Conference paper	Konferences raksts
+	CONFIDENTIAL	KONFIDENCIĀLI
+	Confirm password:	Apstipriniet paroli:
+	Connect Shapes	Savienot figūras
+	Container Title	Konteinera nosaukums
+	Content Control at Selection	Satura vadīkla pie atlases
+	Content Control Properties	Satura vadīklas rekvizīti
+	Contents can't be edited	Saturu nevar rediģēt
+	Context	Konteksts
+numerals	Context	Kontekstuāli
+	Continue from previous section	Turpināt no iepriekšējās sadaļas
+	Continue without restoring	Turpināt bez atjaunošanas
+	Continuous	Nepārtraukti
+	Continuous numbering	Nepārtraukta numerācija
+	Contour Integral	Kontūrintegrālis
+	Contour Integral with Limits	Kontūrintegrālis ar robežām
+	Contour Integral with Stacked Limits	Kontūrintegrālis ar robežām virs un zem
+	Contour Integrals	Kontūrintegrāļi
+	Controls	Vadīklas
+	Conversions	Pārvēršanas
+	Convert between built-up and linear form	Pārvērst starp izvērsto un lineāro formu
+	Convert Notes	Pārvērst piezīmes
+	Convert Text to Table	Pārvērst tekstu par tabulu
+	Convert Text to Table…	Pārvērst tekstu par tabulu…
+	Convert to Shapes	Pārvērst par figūrām
+	Convert to Text	Pārvērst par tekstu
+	Coproduct	Koprodukts
+	Coproduct with Limits	Koprodukts ar robežām
+	Coproduct with Lower Limit	Koprodukts ar apakšējo robežu
+	Coproduct with Subscript-Superscript Limits	Koprodukts ar apakšraksta un augšraksta robežām
+	Copy Formatting	Kopēt formatējumu
+	Copy of the text a bookmark marks	Grāmatzīmes iezīmētā teksta kopija
+	Copy Styles	Kopēt stilus
+	Copy to	Kopēt uz
+	Copyright Sign	Autortiesību zīme
+	Corporate Author	Korporatīvais autors
+	Correct accidental usage of cAPS LOCK key	Labot nejaušu cAPS LOCK taustiņa lietojumu
+	Correct TWo INitial CApitals	Labot DIvus LIelus sākuma burtus
+	Corrections	Korekcijas
+	Cosecant Function	Kosekanta funkcija
+	Cosine 2x	Kosinuss 2x
+	Cosine Function	Kosinusa funkcija
+	Costa Rica	Kostarika
+	Cotangent Function	Kotangensa funkcija
+	Could not check for updates:\n{error}	Neizdevās pārbaudīt atjauninājumus:\n{error}
+	Couldn't download {name}: {error}	Neizdevās lejupielādēt {name}: {error}
+	Couldn't make WordCraft the default: {error}	Neizdevās iestatīt WordCraft kā noklusējumu: {error}
+	Couldn't open {path}: {error}	Neizdevās atvērt {path}: {error}
+	Couldn't save {name}, so it is still open and nothing was lost: {error}	Neizdevās saglabāt {name}, tāpēc tas joprojām ir atvērts un nekas nav zaudēts: {error}
+	Count by:	Skaitīt pa:
+	Count words in text boxes and notes	Skaitīt vārdus teksta lodziņos un piezīmēs
+	Courtesy Title	Uzruna
+	Cover Page	Vāka lapa
+	Craft	Amatniecība
+	Create a Style	Izveidot stilu
+	Create an interactive outline of your document.\n\nIt's a great way to keep track of where you are or quickly move your content around.\n\nTo get started, go to the Home tab and apply Heading styles to the headings in your document.	Izveidojiet interaktīvu dokumenta struktūru.\n\nTas ir lielisks veids, kā sekot savai atrašanās vietai vai ātri pārvietot saturu.\n\nLai sāktu, atveriet cilni Sākums un lietojiet dokumenta virsrakstiem virsrakstu stilus.
+	Create Graphic	Izveidot grafiku
+	Create Link	Izveidot saiti
+	Create New Style	Izveidot jaunu stilu
+	Create Source	Izveidot avotu
+	Croatian	Horvātu
+	Crop on the page works on unturned pictures: set Rotation to 0° first, or use the crop boxes	Apgriešana lapā darbojas ar nepagrieztiem attēliem: vispirms iestatiet pagriezumu uz 0° vai izmantojiet apgriešanas lodziņus
+	Cross-reference	Savstarpējā atsauce
+	Cross-reference:	Savstarpējā atsauce:
+	Ctrl+Enter starts a new page. Much tidier than pressing Enter until it happens.	Ctrl+Enter sāk jaunu lapu. Daudz kārtīgāk nekā spiest Enter, līdz tas notiek.
+	Ctrl+H finds and replaces text, formatting and special characters.	Ctrl+H atrod un aizstāj tekstu, formatējumu un īpašās rakstzīmes.
+	Ctrl+K turns the selected text into a link.	Ctrl+K pārvērš atlasīto tekstu par saiti.
+	Ctrl+Shift+G counts your words, characters and paragraphs.	Ctrl+Shift+G saskaita vārdus, rakstzīmes un rindkopas.
+	Cuba	Kuba
+	Cube Root	Kubsakne
+	Current - Linear	Pašreizējais — lineāri
+	Current - Professional	Pašreizējais — profesionāli
+	Current Document	Pašreizējais dokuments
+	Current Position	Pašreizējais novietojums
+	Current record	Pašreizējais ieraksts
+	Current style: {style}	Pašreizējais stils: {style}
+	Curved Arrow Connector	Izliekts bultas savienotājs
+	Curved Connector	Izliekts savienotājs
+	Custom dictionary	Pielāgota vārdnīca
+	Custom Margins…	Pielāgotas piemales…
+	Custom mark:	Pielāgota atzīme:
+	Custom range	Pielāgots diapazons
+	Custom size	Pielāgots izmērs
+	Custom Table of Contents…	Pielāgots satura rādītājs…
+	Custom Watermark	Pielāgota ūdenszīme
+	Custom Watermark…	Pielāgota ūdenszīme…
+	Customize	Pielāgot
+	Customize Keyboard	Pielāgot tastatūru
+	Customize Quick Access Toolbar	Pielāgot ātrās piekļuves rīkjoslu
+	Customize Quick Access Toolbar…	Pielāgot ātrās piekļuves rīkjoslu…
+	Customize Ribbon	Pielāgot lenti
+	Customize the Ribbon…	Pielāgot lenti…
+	Cycle	Cikls
+	Cyprus	Kipra
+	Czech	Čehu
+	Danish	Dāņu
+	Dark Blue	Tumši zils
+	Dark Mode	Tumšais režīms
+	Dark page (white text on black)	Tumša lapa (balts teksts uz melna)
+	Dark Red	Tumši sarkans
+	Dark Variations	Tumšās variācijas
+	Dark with Shadow	Tumšs ar ēnu
+	Dark Yellow	Tumši dzeltens
+	Darker −20%	Tumšāks −20%
+	Darkroom	Tumšā istaba
+	Data Labels	Datu etiķetes
+	Date & Time	Datums un laiks
+	Date formats:	Datumu formāti:
+	Date Picker Content Control	Datuma atlasītāja satura vadīkla
+	Day	Diena
+	Decimal	Decimāls
+	Decorative objects only add visual interest: screen readers skip them.	Dekoratīvie objekti tikai papildina izskatu: ekrāna lasītāji tos izlaiž.
+	Decrease Indent	Samazināt atkāpi
+	Deep	Dziļš
+	Default formatting	Noklusējuma formatējums
+	Default Paragraph Font	Noklusējuma rindkopas fonts
+	Default tab stops:	Noklusējuma tabulācijas pieturas:
+	Define New Bullet	Definēt jaunu aizzīmi
+	Define New Multilevel List	Definēt jaunu vairāklīmeņu sarakstu
+	Define New Multilevel List…	Definēt jaunu vairāklīmeņu sarakstu…
+	Define New Number Format	Definēt jaunu numura formātu
+	Deflate	Saspiest
+	Delete Around Caret in Equation	Dzēst ap kursoru vienādojumā
+	Delete Back in Equation	Dzēst atpakaļ vienādojumā
+	Delete Bookmark	Dzēst grāmatzīmi
+	Delete Cells	Dzēst šūnas
+	Delete Clipboard Item	Dzēst starpliktuves vienumu
+	Delete Columns	Dzēst kolonnas
+	Delete Comment	Dzēst komentāru
+	Delete in Equation	Dzēst vienādojumā
+	Delete Label	Dzēst etiķeti
+	Delete Next Word	Dzēst nākamo vārdu
+	Delete Previous Word	Dzēst iepriekšējo vārdu
+	Delete Rows	Dzēst rindas
+	Delete Selected Ink	Dzēst atlasīto tinti
+	Delete Table	Dzēst tabulu
+	Delete Table Style	Dzēst tabulas stilu
+	Deletions:	Dzēsumi:
+	Delivery address:	Piegādes adrese:
+	Delta Equal To	Delta vienāds ar
+	Delta over arrow	Delta virs bultiņas
+	Demote	Pazemināt
+	Demote to Body Text	Pazemināt līdz pamattekstam
+	Derivative as a limit	Atvasinājums kā robeža
+	Describe what this object shows, for people who can't see it.	Aprakstiet, ko šis objekts rāda, cilvēkiem, kuri to neredz.
+	Describe what this table shows, for people who can't see it.	Aprakstiet, ko šī tabula rāda, cilvēkiem, kuri to neredz.
+	Design	Dizains
+	Design Mode	Dizaina režīms
+	Detach Template	Atvienot veidni
+	Detect language automatically	Automātiski noteikt valodu
+	Developer	Izstrādātājs
+	development build	izstrādes versija
+	Diagonal Dots	Diagonāli punkti
+	Dictate	Diktēt
+	Dictionaries	Vārdnīcas
+	Dictionaries folder:	Vārdnīcu mape:
+	Dictionary files	Vārdnīcu faili
+	Different First Page	Atšķirīga pirmā lapa
+	Different Odd & Even Pages	Atšķirīgas pāra un nepāra lapas
+	Differential	Diferenciālis
+	Differential theta	Diferenciālis theta
+	Differential x	Diferenciālis x
+	Differential y	Diferenciālis y
+	Differentials	Diferenciāļi
+	Direct formatting	Tiešais formatējums
+	Directory	Katalogs
+	Discard the recovery copy of {name}?	Vai atmest {name} atkopšanas kopiju?
+	Discard…	Atmest…
+	Discord community	Discord kopiena
+	Display for Review	Rādījums pārskatīšanai
+	Display text	Parādāmais teksts
+	Distance from text	Attālums no teksta
+	Distance from text:	Attālums no teksta:
+	Distribute Columns	Sadalīt kolonnas
+	Distribute letters	Sadalīt burtus
+	Distribute Rows	Sadalīt rindas
+	Distribute spacing	Sadalīt atstarpes
+	Distributed	Sadalīts
+	Do Not Check Spelling or Grammar	Nepārbaudīt pareizrakstību vai gramatiku
+	Do not check spelling or grammar	Nepārbaudīt pareizrakstību vai gramatiku
+	DO NOT COPY	NEKOPĒT
+	Do Not Show in TOC	Nerādīt satura rādītājā
+	Do you want to save changes to {name}?	Vai saglabāt izmaiņas failā {name}?
+	Dock Left	Piestiprināt pa kreisi
+	Dock Right	Piestiprināt pa labi
+	Document End	Dokumenta beigas
+	Document Formatting	Dokumenta formatējums
+	Document Grid	Dokumenta režģis
+	Document Information	Dokumenta informācija
+	Document name	Dokumenta nosaukums
+	Document Property	Dokumenta rekvizīts
+	Document Start	Dokumenta sākums
+	Document template:	Dokumenta veidne:
+	Document Text	Dokumenta teksts
+	Document1	Dokuments1
+	Document\nPreferences	Dokumenta\niestatījumi
+	Documents you open will show up here.	Šeit parādīsies atvērtie dokumenti.
+	Does not contain	Nesatur
+	DOI	DOI
+	Dominican Republic	Dominikāna
+	Don't add space between paragraphs of the same style	Nepievienot atstarpi starp viena stila rindkopām
+	Don't capitalize after:	Nesākt ar lielo burtu pēc:
+	Don't hyphenate	Nepārnest
+	Don't read Zotero, Mendeley or EndNote citations and bibliographies	Nelasīt Zotero, Mendeley vai EndNote atsauces un bibliogrāfijas
+	Don't show me this tip again	Vairs nerādīt šo padomu
+	Dot dash	Punkts svītra
+	Dot-dash	Punkts-svītra
+	Dot-dot-dash	Punkts-punkts-svītra
+	Double	Dubults
+	Double Bar	Dubultā josla
+	Double Closing Quote	Dubultā aizverošā pēdiņa
+	Double Dot	Dubultpunkts
+	Double Integral	Divkāršais integrālis
+	Double Integral with Limits	Divkāršais integrālis ar robežām
+	Double Integral with Stacked Limits	Divkāršais integrālis ar robežām virs un zem
+	Double Left Arrow with Text Above	Dubultā bultiņa pa kreisi ar tekstu virs
+	Double Left Arrow with Text Below	Dubultā bultiņa pa kreisi ar tekstu zem
+	Double Left Right Arrow with Text Above	Dubultā bultiņa pa kreisi un labi ar tekstu virs
+	Double Left Right Arrow with Text Below	Dubultā bultiņa pa kreisi un labi ar tekstu zem
+	Double Opening Quote	Dubultā atverošā pēdiņa
+	Double Right Arrow with Text Above	Dubultā bultiņa pa labi ar tekstu virs
+	Double Right Arrow with Text Below	Dubultā bultiņa pa labi ar tekstu zem
+	Double Spacing	Dubultā rindstarpa
+	Double Square Brackets	Dubultas kvadrātiekavas
+	Double Strikethrough	Dubults pārsvītrojums
+	Double strikethrough	Dubults pārsvītrojums
+	Double summation	Divkāršā summa
+	Double Underline	Dubults pasvītrojums
+	Double Vertical Bars	Dubultas vertikālas līnijas
+	Doughnut	Virtulis
+	Download fetches the dictionary from LibreOffice's dictionary collection into the dictionaries folder. Each keeps its own licence (GPL, LGPL or MPL) and stays a separate file that WordCraft only reads.	Lejupielāde iegūst vārdnīcu no LibreOffice vārdnīcu kolekcijas vārdnīcu mapē. Katrai ir sava licence (GPL, LGPL vai MPL), un tā paliek atsevišķs fails, ko WordCraft tikai lasa.
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Lejupielāde ir izslēgta. Noklikšķinot uz Pievienot valodu… vai Instalēt, tā tiek ieslēgta: WordCraft tad lejupielādē valodu pakotnes un fontus no GitHub.
+	Downloading the {language} dictionary…	Lejupielādē vārdnīcu: {language}…
+	Downloading…	Lejupielādē…
+	DRAFT	MELNRAKSTS
+	Drag a rectangle to draw a table, or a line across cells to split them. Esc stops.	Velciet taisnstūri, lai uzzīmētu tabulu, vai līniju pāri šūnām, lai tās sadalītu. Esc aptur.
+	Draw Ink	Zīmēt ar tinti
+	Draw Table	Zīmēt tabulu
+	Draw\nTable	Zīmēt\ntabulu
+	Drawing Canvas	Zīmēšanas audekls
+	Drawing Tools	Zīmēšanas rīki
+	Drawing\nCanvas	Zīmēšanas\naudekls
+	Drop Cap	Iniciālis
+	Drop cap	Iniciālis
+	Drop Cap Options…	Iniciāļa opcijas…
+	drop caps can't go in a table	iniciāļi nevar atrasties tabulā
+	Drop-Down List Content Control	Nolaižamā saraksta satura vadīkla
+	Dropped	Iegremdēts
+	Drops all formatting and pastes plain text.	Noņem visu formatējumu un ielīmē vienkāršu tekstu.
+	Dutch, Nederlands or nl	Nīderlandiešu, Nederlands vai nl
+	E-mail Messages	E-pasta ziņojumi
+	East	Austrumi
+	Ecuador	Ekvadora
+	Edit Comment	Rediģēt komentāru
+	Edit Data	Rediģēt datus
+	Edit Document	Rediģēt dokumentu
+	Edit Equation	Rediģēt vienādojumu
+	Edit Field Code	Rediģēt lauka kodu
+	Edit Field…	Rediģēt lauku…
+	Edit Footer	Rediģēt kājeni
+	Edit Header	Rediģēt galveni
+	Edit Individual Documents…	Rediģēt atsevišķus dokumentus…
+	Edit Items	Rediģēt vienumus
+	Edit Recipient List	Rediģēt adresātu sarakstu
+	Edit Source	Rediģēt avotu
+	Edit\nData	Rediģēt\ndatus
+	Edit\nRecipient List	Rediģēt\nadresātu sarakstu
+	Edited	Rediģēts
+	Editing endnote	Rediģē beigu vēri
+	Editing footnote	Rediģē vēri
+	Editing header/footer	Rediģē galveni/kājeni
+	Editing in this document is restricted.	Rediģēšana šajā dokumentā ir ierobežota.
+	Editing is blocked in Viewing mode.	Skatīšanas režīmā rediģēšana ir bloķēta.
+	Editing — edit the document directly	Rediģēšana — rediģējiet dokumentu tieši
+	Edition	Izdevums
+	Editor	Redaktors
+	Egypt	Ēģipte
+	El Salvador	Salvadora
+	Elbow Arrow Connector	Lauzts bultas savienotājs
+	Elbow Connector	Lauzts savienotājs
+	Emphasis	Uzsvars
+	Empty Matrices	Tukšas matricas
+	Enclose Characters	Rakstzīmes aplī
+	Enclosure	Aptvere
+	Encrypt with Password	Šifrēt ar paroli
+	Encrypt with Password…	Šifrēt ar paroli…
+	End of document	Dokumenta beigas
+	End of section	Sadaļas beigas
+	End of Word	Vārda beigas
+	Endnote Reference	Beigu vēres atsauce
+	Endnote Text	Beigu vēres teksts
+	Endnotes	Beigu vēres
+	Endnotes to footnotes	Beigu vēres par vērēm
+	English (Australia)	Angļu (Austrālija)
+	English (Canada)	Angļu (Kanāda)
+	English (India)	Angļu (Indija)
+	English (Ireland)	Angļu (Īrija)
+	English (New Zealand)	Angļu (Jaunzēlande)
+	English (South Africa)	Angļu (Dienvidāfrika)
+	English (United Kingdom)	Angļu (Apvienotā Karaliste)
+	English (United States)	Angļu (Amerikas Savienotās Valstis)
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Angļu, šī dokumenta valodas un katra instalētā valodas pakotne. Valodu pakotnes pievieno pareizrakstības vārdnīcas un vārdu pārnešanu.
+	Engrave	Iegravēts
+	Enlarge symbol	Palielināt simbolu
+	Enter a number.	Ievadiet skaitli.
+	Enter bookmark name:	Ievadiet grāmatzīmes nosaukumu:
+	Enter formatting for number:	Ievadiet numura formatējumu:
+	Enter in Equation	Enter vienādojumā
+	Enter page number:	Ievadiet lapas numuru:
+	Entire caption	Viss paraksts
+	Entry marked.	Ieraksts atzīmēts.
+	Envelope #10	Aploksne #10
+	Envelope #10   4.12" × 9.50"	Aploksne #10   4.12" × 9.50"
+	Envelope Address	Aploksnes adrese
+	Envelope DL   4.33" × 8.66"	Aploksne DL   4.33" × 8.66"
+	Envelope Return	Aploksnes atpakaļadrese
+	Envelope size:	Aploksnes izmērs:
+	Envelopes	Aploksnes
+	Equal by Definition	Vienāds pēc definīcijas
+	Equal column width	Vienāds kolonnu platums
+	Equal Equal	Vienāds vienāds
+	Equal to	Vienāds ar
+	Equals:	Vienāds:
+	Equation	Vienādojums
+	Equation Gallery	Vienādojumu galerija
+	Equation Info	Vienādojuma informācija
+	Equation Number	Vienādojuma numurs
+	Equation Options	Vienādojuma opcijas
+	Equatorial Guinea	Ekvatoriālā Gvineja
+	Erase Ink	Dzēst tinti
+	Errors ({n})	Kļūdas ({n})
+	Esperanto	Esperanto
+	Estonian	Igauņu
+	Euler's identity	Eilera identitāte
+	Even Banded Columns	Pāra joslotas kolonnas
+	Even Banded Rows	Pāra joslotas rindas
+	Even Page	Pāra lapa
+	Every change is recorded as a tracked change.	Katra izmaiņa tiek reģistrēta kā izsekota izmaiņa.
+	Every command is available to scripts and AI agents: run `wordcraft-cli mcp` for an MCP server, or start the app with `--control <port>` for the JSON control channel.	Katra komanda ir pieejama skriptiem un AI aģentiem: palaidiet `wordcraft-cli mcp`, lai iegūtu MCP serveri, vai sāciet lietotni ar `--control <port>` JSON vadības kanālam.
+	Every field needs a name.	Katram laukam vajadzīgs nosaukums.
+	Everyone	Visi
+	Exactly	Tieši
+	Exactly {n}	Tieši {n}
+	Exceptions (optional)	Izņēmumi (neobligāti)
+	Exceptions…	Izņēmumi…
+	Executive   7.25" × 10.50"	Executive   7.25" × 10.50"
+	Existing File or Web Page	Esošs fails vai tīmekļa lapa
+	Expand or Collapse Heading	Izvērst vai sakļaut virsrakstu
+	Exponential	Eksponenciāls
+	Exponential series	Eksponenciālā rinda
+	Export a copy to share (PDF, Word document)	Eksportēt kopiju kopīgošanai (PDF, Word dokuments)
+	Export Page as PNG	Eksportēt lapu kā PNG
+	Extend Selection	Paplašināt atlasi
+	Extend Selection by Units	Paplašināt atlasi pa vienībām
+	Extra space	Papildu atstarpe
+	F4 repeats your last action. Formatting ten headings is suddenly one click and nine taps.	F4 atkārto pēdējo darbību. Desmit virsrakstu formatēšana pēkšņi ir viens klikšķis un deviņi pieskārieni.
+	F7 checks the spelling and grammar of the whole document.	F7 pārbauda visa dokumenta pareizrakstību un gramatiku.
+	Faster: {command} is {key} on the keyboard.	Ātrāk: {command} uz tastatūras ir {key}.
+	Field code:	Lauka kods:
+	Field Codes	Lauku kodi
+	Field codes:	Lauku kodi:
+	Field name	Lauka nosaukums
+	Field name:	Lauka nosaukums:
+	Field names must be different.	Lauku nosaukumiem jābūt atšķirīgiem.
+	Field names:	Lauku nosaukumi:
+	Field:	Lauks:
+	Field…	Lauks…
+	Figure	Attēls
+	File locations	Failu atrašanās vietas
+	File name:	Faila nosaukums:
+	File type	Faila veids
+	File › New lists the .dotx and .dotm templates here under Personal; Save as Word Template starts here.	Fails > Jauns šeit parāda .dotx un .dotm veidnes sadaļā Personīgās; Saglabāt kā Word veidni sākas šeit.
+	Fill color:	Aizpildījuma krāsa:
+	Filling in forms	Veidlapu aizpildīšana
+	Film	Filma
+	Filter and Sort	Filtrēt un kārtot
+	Filter Recipients	Filtrēt adresātus
+	Find in list:	Atrast sarakstā:
+	Find Next Editable Region	Atrast nākamo rediģējamo apgabalu
+	Find Previous	Atrast iepriekšējo
+	Find Recipient	Atrast adresātu
+	Find What Expression	Meklējamā izteiksme
+	Find What Text	Meklējamais teksts
+	Find what:	Atrast:
+	Find “{text}” in the document	Atrast „{text}” dokumentā
+	Finding printers…	Meklē printerus…
+	Finish & Merge	Pabeigt un sapludināt
+	Finish &\nMerge	Pabeigt un\nsapludināt
+	Finished	Pabeigts
+	Finland	Somija
+	Finnish	Somu
+	First Column	Pirmā kolonna
+	First line	Pirmā rinda
+	First line:	Pirmā rinda:
+	First Name	Vārds
+	First Record	Pirmais ieraksts
+	First row of data contains column headers	Datu pirmajā rindā ir kolonnu virsraksti
+	Fix Position on Page	Fiksēt novietojumu lapā
+	Fixed Column Width	Fiksēts kolonnas platums
+	Float	Peldošs
+	Floor	Grīda
+	Folder path	Mapes ceļš
+	Follow number with:	Aiz numura likt:
+	Font Color	Fonta krāsa
+	Font color	Fonta krāsa
+	Font color:	Fonta krāsa:
+	Font Dialog	Fonta dialoglodziņš
+	Font: {font}	Fonts: {font}
+	Font…	Fonts…
+	Footer	Kājene
+	Footnote and Endnote	Vēre un beigu vēre
+	Footnote Reference	Vēres atsauce
+	Footnote Text	Vēres teksts
+	Footnotes	Vēres
+	Footnotes and endnotes	Vēres un beigu vēres
+	Footnotes to endnotes	Vēres par beigu vērēm
+	For which item:	Kuram vienumam:
+	Format Page Numbers	Formatēt lapu numurus
+	Format Page Numbers…	Formatēt lapu numurus…
+	Format Painter	Formāta ota
+	Format Shape	Formatēt figūru
+	Format Shape Pane	Figūras formatēšanas rūts
+	Format Shape…	Formatēt figūru…
+	Formatted	Formatēts
+	Formatted Text	Formatēts teksts
+	Formatting	Formatējums
+	Formatting at Selection	Formatējums pie atlases
+	Formatting exceptions	Formatējuma izņēmumi
+	Formatting marks	Formatējuma zīmes
+	Formatting saved for new documents:	Jauniem dokumentiem saglabātais formatējums:
+	Formatting, case changes, white space and tables are compared; the other settings are kept for later.	Tiek salīdzināts formatējums, reģistra izmaiņas, atstarpes un tabulas; pārējie iestatījumi tiek saglabāti vēlākam laikam.
+	Formula	Formula
+	Formula:	Formula:
+	Forward	Uz priekšu
+	Fraction	Daļa
+	Fractions (1/2) as fraction characters (½)	Daļskaitļi (1/2) kā daļskaitļu rakstzīmes (½)
+	Frames and effects	Rāmji un efekti
+	France	Francija
+	French (France)	Franču (Francija)
+	From Bottom Left Corner	No apakšējā kreisā stūra
+	From Bottom Right Corner	No apakšējā labā stūra
+	From Center	No centra
+	From text:	No teksta:
+	From Top Left Corner	No augšējā kreisā stūra
+	From Top Right Corner	No augšējā labā stūra
+	from Unicode (hex)	no Unicode (heksadecimāls)
+	From {name}	No {name}
+	From:	No:
+	Full page of the same label	Visa lapa ar vienu etiķeti
+	Full Saturation 100%	Pilns piesātinājums 100%
+	Full Screen View	Pilnekrāna skats
+	Full\nScreen	Pilnekrāna\nskats
+	Fun fact: a blank page is just a draft that hasn't been told yet.	Interesants fakts: tukša lapa ir vienkārši melnraksts, kam vēl nav pateikts.
+	Function	Funkcija
+	Galician	Galisiešu
+	Gallery	Galerija
+	GB/T 7714	GB/T 7714
+	Georgian	Gruzīnu
+	German (Germany)	Vācu (Vācija)
+	Germany	Vācija
+	getartcraft.com/apps/wordcraft	getartcraft.com/apps/wordcraft
+	Gets the list of Language packs, then this language's pack if there is one.	Iegūst valodu pakotņu sarakstu un pēc tam šīs valodas pakotni, ja tāda ir.
+	Glow Colors	Mirdzuma krāsas
+	Go Back	Atgriezties
+	Go To	Pāriet uz
+	Go to	Pāriet uz
+	Go To (⌘⌥G)	Pāriet uz (⌘⌥G)
+	Go to Record	Pāriet uz ierakstu
+	Go to what:	Pāriet uz:
+	Go To…	Pāriet uz…
+	Gone! Like it was never written. Mostly because it now wasn't.	Pazudis! It kā nekad nebūtu rakstīts. Galvenokārt tāpēc, ka tagad nav.
+	Good afternoon	Labdien
+	Good evening	Labvakar
+	Good morning	Labrīt
+	GOST (name sort)	GOST (kārtot pēc vārda)
+	GOST (title sort)	GOST (kārtot pēc nosaukuma)
+	Grab bag	Dažādi
+	Gradient fill	Gradienta aizpildījums
+	Gradient stops	Gradienta punkti
+	Grammar built in	Iebūvēta gramatika
+	Grave	Gravis
+	Gray 0%	Pelēks 0%
+	Gray-25%	Pelēks 25%
+	Gray-50%	Pelēks 50%
+	Greater than	Lielāks par
+	Greater than or equal	Lielāks vai vienāds
+	Greek	Grieķu
+	Greek Letters	Grieķu burti
+	Green:	Zaļš:
+	Greeting Line	Sveiciena rinda
+	Greeting\nLine	Sveiciena\nrinda
+	Grid Table 1 Light	Režģa tabula 1 gaiša
+	Grid Table 4 – Blue	Režģa tabula 4 – zila
+	Grid Table 4 – Green	Režģa tabula 4 – zaļa
+	Grid Table 4 – Orange	Režģa tabula 4 – oranža
+	Grid Table 4 – Purple	Režģa tabula 4 – purpura
+	Gridlines	Režģa līnijas
+	Grouping Character Above	Grupēšanas rakstzīme virs
+	Grouping Character Below	Grupēšanas rakstzīme zem
+	Grow Font 1 Point	Palielināt fontu par 1 punktu
+	Guatemala	Gvatemala
+	H:	A:
+	Hanging Indent	Izkārta atkāpe
+	Harvard (Anglia)	Harvard (Anglia)
+	Hat	Jumtiņš
+	Header	Galvene
+	Header & Footer	Galvene un kājene
+	Header Row	Galvenes rinda
+	Header row	Galvenes rinda
+	Header/Footer Position	Galvenes/kājenes novietojums
+	Headers and footers	Galvenes un kājenes
+	Heading	Virsraksts
+	Heading 1	1. virsraksts
+	Heading 2	2. virsraksts
+	Heading 3	3. virsraksts
+	Heading styles (levels 1–{n})	Virsrakstu stili (1.–{n}. līmenis)
+	Heading text	Virsraksta teksts
+	Heading {n}	{n}. virsraksts
+	Hebrew	Ivrits
+	Hex:	Hex:
+	Hi! I'm Nib, your writing assistant. I offer tips, shortcuts and the occasional unsolicited opinion. Shall I stick around?	Sveiki! Es esmu Nib, jūsu rakstīšanas palīgs. Piedāvāju padomus, saīsnes un reizēm arī nelūgtu viedokli. Vai palikt?
+	Hidden bookmarks	Paslēptās grāmatzīmes
+	Hide Codes	Paslēpt kodus
+	Hide from style lists	Paslēpt no stilu sarakstiem
+	Hide Ink	Paslēpt tinti
+	Hide Quick Access Toolbar	Paslēpt ātrās piekļuves rīkjoslu
+	Hide White Space	Paslēpt tukšo vietu
+	Hide\nInk	Paslēpt\ntinti
+	Hierarchy	Hierarhija
+	Highlight	Izcēlums
+	Highlight Merge Fields	Izcelt sapludināšanas laukus
+	Highlight\nMerge Fields	Izcelt\nsapludināšanas laukus
+	Highlighter	Marķieris
+numerals	Hindi	Hindi
+	Home folder	Sākuma mape
+	Honduras	Hondurasa
+	Hong Kong SAR	Honkongas ĪPR
+	Horizontal Line	Horizontāla līnija
+	How many pages the whole document has	Cik lapu ir visā dokumentā
+	How many pages this section has	Cik lapu ir šajā sadaļā
+	How many words the document holds	Cik vārdu ir dokumentā
+	HTML Format	HTML formāts
+	Hue:	Nokrāsa:
+	Hungarian	Ungāru
+	Hunspell .aff and .dic files here (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) are used before the system's.	Šeit esošie Hunspell .aff un .dic faili (pl_PL, pt_BR, it_IT, hr_HR, tr_TR) tiek izmantoti pirms sistēmas failiem.
+	Hyperbolic Cosecant Function	Hiperboliskā kosekanta funkcija
+	Hyperbolic Cosine Function	Hiperboliskā kosinusa funkcija
+	Hyperbolic Cotangent Function	Hiperboliskā kotangensa funkcija
+	Hyperbolic Functions	Hiperboliskās funkcijas
+	Hyperbolic Secant Function	Hiperboliskā sekanta funkcija
+	Hyperbolic Sine Function	Hiperboliskā sinusa funkcija
+	Hyperbolic Tangent Function	Hiperboliskā tangensa funkcija
+	Hyperlink	Hipersaite
+	Hyphenate at:	Pārnest pie:
+	Hyphenate words in CAPS	Pārnest vārdus ar LIELAJIEM BURTIEM
+	Hyphenation Options…	Vārdu pārnešanas opcijas…
+	Hyphenation zone:	Pārneses zona:
+	Hyphens (--) as dashes (—)	Defises (--) kā domuzīmes (—)
+	Hypotenuse	Hipotenūza
+	I promise it's saved. I checked. Twice.	Solu, ka saglabāts. Pārbaudīju. Divreiz.
+	I'd write something myself, but I'm all nib and no ink.	Es pats kaut ko uzrakstītu, bet esmu tikai spalva bez tintes.
+	I, II, III, …	I, II, III, …
+	i, ii, iii, …	i, ii, iii, …
+	Icelandic	Islandiešu
+	Icon Color	Ikonas krāsa
+	Icons	Ikonas
+	Identity Matrices	Vienības matricas
+	IEEE	IEEE
+	If…Then…Else	Ja…Tad…Citādi
+	If…Then…Else…	Ja…Tad…Citādi…
+	Ignore punctuation characters	Ignorēt pieturzīmes
+	Ignore web and file addresses	Ignorēt tīmekļa un failu adreses
+	Ignore white-space characters	Ignorēt atstarpju rakstzīmes
+	Ignore words in capitals	Ignorēt vārdus ar lielajiem burtiem
+	Ignore words with numbers	Ignorēt vārdus ar cipariem
+	Illustrations	Ilustrācijas
+	Immersive	Iegremdējošs
+	Immersive Reader	Iegremdējošais lasītājs
+	Immersive\nReader	Iegremdējošais\nlasītājs
+	Imported 1 source	Importēts 1 avots
+	Imported {n} sources	Importēti {n} avoti
+	In Default apps, choose WordCraft for the document types you want it to open.	Noklusējuma lietotnēs izvēlieties WordCraft tiem dokumentu veidiem, kuros vēlaties to atvērt.
+	In equations, typing a name after a backslash replaces it with its symbol.	Vienādojumos nosaukums pēc atpakaļvērstās slīpsvītras tiek aizstāts ar tā simbolu.
+	In Front of Text	Teksta priekšā
+	In Line with Text	Rindā ar tekstu
+	In margin	Piemalē
+	In the margin	Piemalē
+	Include label and number	Iekļaut etiķeti un numuru
+	Include level number from:	Iekļaut līmeņa numuru no:
+	Include page numbers	Iekļaut lapu numurus
+	Increase Indent	Palielināt atkāpi
+	Indent	Atkāpe
+	Indent from left:	Atkāpe no kreisās:
+	Indentation	Atkāpes
+	Indented	Ar atkāpi
+	Indents	Atkāpes
+	Indents and Spacing	Atkāpes un atstatumi
+	Index and Tables	Rādītājs un tabulas
+	Index Heading	Rādītāja virsraksts
+	Index {n}	{n}. rādītājs
+	India	Indija
+	Indonesian	Indonēziešu
+	Initial column width:	Sākotnējais kolonnas platums:
+	Initials:	Iniciāļi:
+	Ink	Tinte
+	Ink Replay	Tintes atskaņošana
+	Ink to Shape	Tinte par figūru
+	Ink to\nMath	Tinte par\nmatemātiku
+	Ink to\nShape	Tinte par\nfigūru
+	Ink\nReplay	Tintes\natskaņošana
+	Inline	Rindā
+	Input Format	Ievades formāts
+	Insert a new equation (Alt+=)	Ievietot jaunu vienādojumu (Alt+=)
+	Insert Above	Ievietot virs
+	Insert Below	Ievietot zem
+	Insert Caption	Ievietot parakstu
+	Insert Caption…	Ievietot parakstu…
+	Insert Chart	Ievietot diagrammu
+	Insert Citation	Ievietot atsauci
+	Insert Columns to the Left	Ievietot kolonnas pa kreisi
+	Insert Columns to the Right	Ievietot kolonnas pa labi
+	Insert Date Field	Ievietot datuma lauku
+	Insert Endnote	Ievietot beigu vēri
+	Insert Footnote	Ievietot vēri
+	Insert Hyperlink	Ievietot hipersaiti
+	Insert Index	Ievietot rādītāju
+	Insert Left	Ievietot pa kreisi
+	Insert Merge Field	Ievietot sapludināšanas lauku
+	Insert Merge\nField	Ievietot\nsapludināšanas lauku
+	Insert New Equation	Ievietot jaunu vienādojumu
+	Insert one text or another, depending on a field's value.	Ievietot vienu vai otru tekstu atkarībā no lauka vērtības.
+	Insert Page Field	Ievietot lapas lauku
+	Insert reference to:	Ievietot atsauci uz:
+	Insert Right	Ievietot pa labi
+	Insert Row or Column by Clicking	Ievietot rindu vai kolonnu ar klikšķi
+	Insert Rows Above	Ievietot rindas virs
+	Insert Rows Below	Ievietot rindas zem
+	Insert Shapes	Ievietot figūras
+	Insert SmartArt	Ievietot SmartArt
+	Insert Spike	Ievietot krājumu
+	Insert Structure	Ievietot struktūru
+	Insert Symbol	Ievietot simbolu
+	Insert Table	Ievietot tabulu
+	Insert Table of Authorities	Ievietot autoritāšu tabulu
+	Insert Table of Figures	Ievietot attēlu sarakstu
+	Insert Table…	Ievietot tabulu…
+	Insert Time Field	Ievietot laika lauku
+	Insert\nAbove	Ievietot\nvirs
+	Insert\nCaption	Ievietot\nparakstu
+	Insert\nCitation	Ievietot\natsauci
+	Insert\nFootnote	Ievietot\nvēri
+	Insertions and Deletions	Ievietojumi un dzēsumi
+	Insertions:	Ievietojumi:
+	Inside Borders	Iekšējās apmales
+	Inside Horizontal Border	Iekšējā horizontālā apmale
+	Inside Vertical Border	Iekšējā vertikālā apmale
+	Inside:	Iekšpusē:
+	Inspect Styles at Selection	Pārbaudīt stilus pie atlases
+	Install spelling ({size})	Instalēt pareizrakstību ({size})
+	Institution	Iestāde
+	Integral	Integrālis
+	Integral of e^(−x²)	e^(−x²) integrālis
+	Integral with Limits	Integrālis ar robežām
+	Integral with Stacked Limits	Integrālis ar robežām virs un zem
+	Integrals	Integrāļi
+	Intense Emphasis	Spēcīgs uzsvars
+	Intense Quote	Spēcīgs citāts
+	Intense Reference	Spēcīga atsauce
+	Interface language:	Saskarnes valoda:
+	Interface size:	Saskarnes izmērs:
+	Interface theme:	Saskarnes motīvs:
+	Interface\nTheme	Saskarnes\nmotīvs
+	Internet addresses as links	Interneta adreses kā saites
+	Intersection with Limits	Šķēlums ar robežām
+	Intersection with Lower Limit	Šķēlums ar apakšējo robežu
+	Intersection with Subscript-Superscript Limits	Šķēlums ar apakšraksta un augšraksta robežām
+	Inverse Cosecant Function	Apgrieztā kosekanta funkcija
+	Inverse Cosine Function	Apgrieztā kosinusa funkcija
+	Inverse Cotangent Function	Apgrieztā kotangensa funkcija
+	Inverse Functions	Apgrieztās funkcijas
+	Inverse Hyperbolic Cosecant Function	Apgrieztā hiperboliskā kosekanta funkcija
+	Inverse Hyperbolic Cosine Function	Apgrieztā hiperboliskā kosinusa funkcija
+	Inverse Hyperbolic Cotangent Function	Apgrieztā hiperboliskā kotangensa funkcija
+	Inverse Hyperbolic Functions	Apgrieztās hiperboliskās funkcijas
+	Inverse Hyperbolic Secant Function	Apgrieztā hiperboliskā sekanta funkcija
+	Inverse Hyperbolic Sine Function	Apgrieztā hiperboliskā sinusa funkcija
+	Inverse Hyperbolic Tangent Function	Apgrieztā hiperboliskā tangensa funkcija
+	Inverse Secant Function	Apgrieztā sekanta funkcija
+	Inverse Sine Function	Apgrieztā sinusa funkcija
+	Inverse Tangent Function	Apgrieztā tangensa funkcija
+	Ionosphere	Jonosfēra
+	Iraq	Irāka
+	Ireland	Īrija
+	Irish	Īru
+	Is blank	Ir tukšs
+	Is not blank	Nav tukšs
+	ISO 690 (author-date)	ISO 690 (autors-datums)
+	ISO 690 (numerical)	ISO 690 (skaitlisks)
+	Issue	Numurs
+	It looks like you're writing a letter. Want an envelope for it, or a letter template to start from?	Izskatās, ka rakstāt vēstuli. Vai vēlaties tai aploksni vai vēstules veidni, no kuras sākt?
+	Italy	Itālija
+	Its dictionary couldn't be read: {reason}	Tās vārdnīcu neizdevās nolasīt: {reason}
+	Jamaica	Jamaika
+	Join the ArtCraft community on Discord	Pievienojieties ArtCraft kopienai Discord
+	Join us on Discord: discord.gg/artcraft	Pievienojieties mums Discord: discord.gg/artcraft
+	Jordan	Jordānija
+	Journal	Žurnāls
+	Journal article	Žurnāla raksts
+	Justification of a display equation	Atsevišķa vienādojuma izlīdzinājums
+	Justified	Izlīdzināts abās malās
+	Kazakhstan	Kazahstāna
+	Keep Lines Together	Paturēt rindas kopā
+	Keep lines together	Paturēt rindas kopā
+	Keep me around	Paturēt mani
+	Keep Text Only	Saglabāt tikai tekstu
+	Keep the password somewhere safe: without it nobody, WordCraft included, can open the document. Leave both boxes empty to remove the password.	Glabājiet paroli drošā vietā: bez tās neviens, arī WordCraft, nevar atvērt dokumentu. Atstājiet abus lodziņus tukšus, lai noņemtu paroli.
+	Keep with Next	Paturēt ar nākamo
+	Keep with next	Paturēt ar nākamo
+	Keeps the fonts and formatting of the copied text.	Saglabā kopētā teksta fontus un formatējumu.
+	Kerning for fonts:	Kerninga fontiem:
+	Keyboard shortcuts:	Īsinājumtaustiņi:
+	Keys for this command:	Šīs komandas taustiņi:
+	Kuwait	Kuveita
+	Label changes with:	Etiķete mainās ar:
+	Label:	Etiķete:
+	Language Preferences…	Valodas iestatījumi…
+	Large\nOperator	Liels\noperators
+	Largest Only	Tikai lielākais
+	Lasso Select	Laso atlase
+	Last Column	Pēdējā kolonna
+	Last Name	Uzvārds
+	Last Record	Pēdējais ieraksts
+	Last, First; Last, First	Uzvārds, vārds; uzvārds, vārds
+	Latin text font:	Latīņu teksta fonts:
+	Latvian	Latviešu
+	Layout Summary	Izkārtojuma kopsavilkums
+	Layouts	Izkārtojumi
+	Leader	Aizpildes rakstzīme
+	Leave a recipient out of the merge when a field has this value.	Izlaist adresātu no sapludināšanas, ja laukam ir šī vērtība.
+	Leave Equation	Iziet no vienādojuma
+	Leave out the date and time of comments and tracked changes when saving	Saglabājot neiekļaut komentāru un izsekoto izmaiņu datumu un laiku
+	Leave the equation (Esc)	Iziet no vienādojuma (Esc)
+	leave the equation first	vispirms izejiet no vienādojuma
+	Leave the label out of the caption	Izlaist etiķeti no paraksta
+	Lebanon	Libāna
+	Left Arrow with Text Above	Bultiņa pa kreisi ar tekstu virs
+	Left Arrow with Text Below	Bultiņa pa kreisi ar tekstu zem
+	Left Border	Kreisā apmale
+	Left border	Kreisā apmale
+	Left Bracket Twice	Divreiz kreisā iekava
+	Left indent	Kreisā atkāpe
+	Left Margin	Kreisā piemale
+	Left Only	Tikai pa kreisi
+	Left Right Arrow Above	Bultiņa pa kreisi un labi virs
+	Left Right Arrow with Text Above	Bultiņa pa kreisi un labi ar tekstu virs
+	Left Right Arrow with Text Below	Bultiņa pa kreisi un labi ar tekstu zem
+	Left Subscript-Superscript	Kreisais apakšraksts un augšraksts
+	Left-to-right	No kreisās uz labo
+	Left-to-Right Text Direction	Teksta virziens no kreisās uz labo
+	Leftwards Arrow Above	Bultiņa pa kreisi virs
+	Leftwards Harpoon Above	Harpūna pa kreisi virs
+	Legal   8.50" × 14.00"	Legal   8.50" × 14.00"
+	Legal style numbering	Juridiskā stila numerācija
+	Legend	Leģenda
+	Less Contrast −20%	Mazāks kontrasts −20%
+	Less than	Mazāks par
+	Less than or equal	Mazāks vai vienāds
+template	Letter	Vēstule
+	Letter   8.50" × 11.00"	Letter   8.50" × 11.00"
+	Letter headings	Vēstuļu virsraksti
+	Letter template	Vēstules veidne
+	Letter-Like Symbols	Burtiem līdzīgi simboli
+	Letters	Vēstules
+	Level 5	5. līmenis
+	Level 6	6. līmenis
+	Level 7	7. līmenis
+	Level 8	8. līmenis
+	Level 9	9. līmenis
+	Level {n}	{n}. līmenis
+	Levels:	Līmeņi:
+	Liechtenstein	Lihtenšteina
+	Light Variations	Gaišās variācijas
+	Light with Outline	Gaišs ar kontūru
+	Limit	Robeža
+	Limit and	Robeža un
+	Limit and\nLog	Robeža un\nlogaritms
+	Limit consecutive hyphens to:	Ierobežot secīgas defises līdz:
+	Limit Example	Robežas piemērs
+	Limit formatting to a selection of styles	Ierobežot formatējumu līdz izvēlētiem stiliem
+	Line and Page Breaks	Rindu un lapu pārtraukumi
+	Line and Paragraph Spacing	Rindstarpa un rindkopu atstatums
+	Line between	Līnija starp
+	Line Break	Rindas pārtraukums
+	Line breaking	Rindu pārnese
+	Line End	Rindas beigas
+	Line Number	Rindas numurs
+	Line Numbering Options…	Rindu numerācijas opcijas…
+	Line Numbers	Rindu numuri
+	Line Spacing	Rindstarpa
+	Line Spacing Options…	Rindstarpas opcijas…
+	Line spacing:	Rindstarpa:
+	Line Start	Rindas sākums
+	Linear Diagonal - Bottom Left to Top Right	Lineāra diagonāle — no apakšas pa kreisi uz augšu pa labi
+	Linear Diagonal - Bottom Right to Top Left	Lineāra diagonāle — no apakšas pa labi uz augšu pa kreisi
+	Linear Diagonal - Top Left to Bottom Right	Lineāra diagonāle — no augšas pa kreisi uz apakšu pa labi
+	Linear Diagonal - Top Right to Bottom Left	Lineāra diagonāle — no augšas pa labi uz apakšu pa kreisi
+	Linear Down	Lineāri uz leju
+	Linear Fraction	Lineāra daļa
+	Linear Left	Lineāri pa kreisi
+	Linear Right	Lineāri pa labi
+	Linear Up	Lineāri uz augšu
+	Lines and characters	Rindas un rakstzīmes
+	Lines only	Tikai līnijas
+	Lines per page:	Rindas lapā:
+	Lines to drop:	Rindas nolaišanai:
+	Link entries to their headings	Saistīt ierakstus ar to virsrakstiem
+	Link level to style:	Saistīt līmeni ar stilu:
+	Link to Previous	Saistīt ar iepriekšējo
+	Link to:	Saistīt ar:
+	Linked style (paragraph and character)	Saistīts stils (rindkopas un rakstzīmju)
+	Links and References	Saites un atsauces
+	Link…	Saite…
+	List Definition	Saraksta definīcija
+	List entries	Saraksta ieraksti
+	List Paragraph	Saraksta rindkopa
+	List Table 3 – Blue	Saraksta tabula 3 – zila
+	List Table 3 – Green	Saraksta tabula 3 – zaļa
+	List Table 3 – Orange	Saraksta tabula 3 – oranža
+	List Table 3 – Purple	Saraksta tabula 3 – purpura
+	Lit from Bottom	Apgaismots no apakšas
+	Lit from Top	Apgaismots no augšas
+	Lithuanian	Lietuviešu
+	Load System Installed Fonts…	Ielādēt sistēmā instalētos fontus…
+	Loaded {count} system fonts.	Ielādēti {count} sistēmas fonti.
+	Local font access is not supported by your browser.	Jūsu pārlūks neatbalsta piekļuvi lokāliem fontiem.
+	Local font access was denied.	Piekļuve lokāliem fontiem tika liegta.
+	Local recovery is unavailable or still loading.	Lokālā atkopšana nav pieejama vai vēl tiek ielādēta.
+	Location: {path}	Atrašanās vieta: {path}
+	Lock aspect ratio	Bloķēt malu attiecību
+	Lock Fields	Bloķēt laukus
+	Log	Log
+	Logarithm	Logaritms
+	Logarithm with Base	Logaritms ar bāzi
+	Logical AND	Loģiskais UN
+	Logical AND with Limits	Loģiskais UN ar robežām
+	Logical OR	Loģiskais VAI
+	Logical OR with Limits	Loģiskais VAI ar robežām
+	Lorem ipsum: because the real words are still at the café.	Lorem ipsum: jo īstie vārdi vēl ir kafejnīcā.
+	Lum:	Spož.:
+	Luxembourg	Luksemburga
+	Macao SAR	Makao ĪPR
+	Macedonian	Maķedoniešu
+	Macro name:	Makro nosaukums:
+	Macros	Makro
+	Made from the author and year when empty	Ja tukšs, tiek veidots no autora un gada
+	Magazine or newspaper article	Žurnāla vai laikraksta raksts
+	Mail Merge	Pasta sapludināšana
+	Mailings	Sūtījumi
+	Main entry:	Galvenais ieraksts:
+	Make WordCraft the default for Word documents…	Iestatīt WordCraft kā noklusējumu Word dokumentiem…
+	Makes the ribbon, menus and dialogs larger or smaller. Auto follows your system's display scaling; 100% is one screen pixel per point. Document zoom is separate.	Palielina vai samazina lenti, izvēlnes un dialoglodziņus. Automātiskais režīms seko sistēmas displeja mērogam; 100% ir viens ekrāna pikselis punktā. Dokumenta tālummaiņa ir atsevišķa.
+	Malaysia	Malaizija
+	Manage Sources	Pārvaldīt avotus
+	Manage Styles	Pārvaldīt stilus
+	Manage Styles…	Pārvaldīt stilus…
+	Manual Hyphenation	Manuāla vārdu pārnešana
+	Manual hyphenation is complete.	Manuālā vārdu pārnešana ir pabeigta.
+	Manual Line Break	Manuāls rindas pārtraukums
+	Manual Page Break	Manuāls lapas pārtraukums
+	Manual…	Manuāli…
+	Many pages	Daudz lapu
+	Mark	Atzīmēt
+	Mark All	Atzīmēt visu
+	Mark as decorative	Atzīmēt kā dekoratīvu
+	Mark Citation	Atzīmēt atsauci
+	Mark Entry	Atzīmēt ierakstu
+	Mark Entry…	Atzīmēt ierakstu…
+	Mark grammar errors as you type	Atzīmēt gramatikas kļūdas rakstīšanas laikā
+	Mark Index Entry	Atzīmēt rādītāja ierakstu
+	Mark selected text as:	Atzīmēt atlasīto tekstu kā:
+	Mark\nCitation	Atzīmēt\natsauci
+	Mark\nEntry	Atzīmēt\nierakstu
+	Markdown (*.md)	Markdown (*.md)
+	Match case	Atšķirt lielos un mazos burtus
+	Match Fields	Saskaņot laukus
+	Match prefix	Atbilstošs prefikss
+	Match suffix	Atbilstošs sufikss
+	Matches: {count}	Atbilstības: {count}
+	Math AutoCorrect	Matemātiskā automātiskā labošana
+	Matrices with Brackets	Matricas ar iekavām
+	Matrix	Matrica
+	Maximum Example	Maksimuma piemērs
+	Measured By	Mērīts pēc
+	Measurement units:	Mērvienības:
+	Merge cells before split	Sapludināt šūnas pirms sadalīšanas
+	Merge Formatting	Sapludināt formatējumu
+	Merge Record #	Sapludināšanas ieraksta nr.
+	Mesosphere	Mezosfēra
+	Mexico	Meksika
+	Midline Dots	Punkti līnijas vidū
+	Minus Equal	Mīnus vienāds
+	Mirror indents	Spoguļot atkāpes
+	Mirror margins	Spoguļot piemales
+	Mirrored	Spoguļots
+	MIT OR Apache-2.0. Copyright (c) 2026 ArtCraft Team and the WordCraft contributors.	MIT OR Apache-2.0. Autortiesības (c) 2026 ArtCraft Team un WordCraft līdzdalībnieki.
+	MLA	MLA
+	mm	mm
+	Moderate	Mērens
+	Modify Style	Mainīt stilu
+	Modify Table Style	Mainīt tabulas stilu
+	Modify Table Style…	Mainīt tabulas stilu…
+	Modify…	Mainīt…
+	Mon	Pr
+	Monaco	Monako
+	Montenegro	Melnkalne
+	Month	Mēnesis
+	More >>	Vairāk >>
+	More Colors…	Citas krāsas…
+	More Columns…	Citas kolonnas…
+	More Commands…	Citas komandas…
+	More Contrast +20%	Lielāks kontrasts +20%
+	More Gradients…	Citi gradienti…
+	More options	Citas opcijas
+	More Paper Sizes…	Citi papīra izmēri…
+	More Symbols…	Citi simboli…
+	More tabs	Citas cilnes
+	More templates →	Citas veidnes →
+	More Underlines…	Citi pasvītrojumi…
+	Morocco	Maroka
+	Move in Equation	Pārvietoties vienādojumā
+	Move or Resize	Pārvietot vai mainīt izmēru
+	Move Pane: {title}	Pārvietot rūti: {title}
+	Move Paragraph Down	Pārvietot rindkopu uz leju
+	Move Paragraph Up	Pārvietot rindkopu uz augšu
+	Move Past Citation	Pārvietoties aiz atsauces
+	Move Past\nCitation	Pārvietoties\naiz atsauces
+	Move Selected Ink	Pārvietot atlasīto tinti
+	Move Table by Dragging	Pārvietot tabulu velkot
+	Move with Text	Pārvietot ar tekstu
+	Moved from	Pārvietots no
+	Moved from:	Pārvietots no:
+	Moved objects snap to the page's edges and centre, the margins and other objects. Hold Alt to move freely.	Pārvietotie objekti piesaistās lapas malām un centram, piemalēm un citiem objektiem. Turiet Alt, lai pārvietotu brīvi.
+	Moved to	Pārvietots uz
+	Moved to:	Pārvietots uz:
+	Moves	Pārvietojumi
+	Mozambique	Mozambika
+	Multilevel List	Vairāklīmeņu saraksts
+	Multilevel List Library	Vairāklīmeņu sarakstu bibliotēka
+	Multiple Pages	Vairākas lapas
+	Mute agent messages	Izslēgt aģentu ziņojumus
+	Muted 50%	Klusināts 50%
+	My list has	Manā sarakstā ir
+	Name of the file this document is saved as	Faila nosaukums, ar kuru šis dokuments saglabāts
+	Narrow	Šaurs
+	Narrow  {size} all	Šauras  {size} visas
+	Natural Logarithm	Naturālais logaritms
+	Nature	Daba
+	Navigation Pane	Navigācijas rūts
+	Negated Relations	Noliegtās attiecības
+	Netherlands	Nīderlande
+	New blank documents are written in this language	Jauni tukši dokumenti tiek rakstīti šajā valodā
+	New Comment	Jauns komentārs
+	New comments and tracked changes are recorded under this name and these initials.	Jauni komentāri un izsekotās izmaiņas tiek reģistrēti ar šo vārdu un šiem iniciāļiem.
+	New Documents Based on This Template	Jauni dokumenti, kas balstīti uz šo veidni
+	New documents based on this template	Jauni dokumenti, kas balstīti uz šo veidni
+	New documents will use this font.	Jauni dokumenti izmantos šo fontu.
+	New documents will use this page setup.	Jauni dokumenti izmantos šo lapas iestatījumu.
+	New documents will use this paragraph formatting.	Jauni dokumenti izmantos šo rindkopas formatējumu.
+	New documents will use this style.	Jauni dokumenti izmantos šo stilu.
+	New documents will use WordCraft's built-in formatting.	Jauni dokumenti izmantos WordCraft iebūvēto formatējumu.
+	New documents will use WordCraft's built-in formatting. Your saved defaults can't be recovered. Reset?	Jauni dokumenti izmantos WordCraft iebūvēto formatējumu. Jūsu saglabātos noklusējumus nevar atgūt. Vai atiestatīt?
+	New Drawing Canvas	Jauns zīmēšanas audekls
+	New Entry	Jauns ieraksts
+	New Label	Jauna etiķete
+	New Label…	Jauna etiķete…
+	New Paragraph	Jauna rindkopa
+	New shortcut:	Jauna saīsne:
+	New Tab	Jauna cilne
+	New Table Style	Jauns tabulas stils
+	New Table Style…	Jauns tabulas stils…
+	New word	Jauns vārds
+	New Zealand	Jaunzēlande
+	New\nComment	Jauns\nkomentārs
+	New\nWindow	Jauns\nlogs
+	Next Comment	Nākamais komentārs
+	Next Field	Nākamais lauks
+	Next Footnote	Nākamā vēre
+	Next Record	Nākamais ieraksts
+	Next Section	Nākamā sadaļa
+	Next Sentence	Nākamais teikums
+	Next sentence	Nākamais teikums
+	Nib floats over the window with tips and the occasional remark.	Nib peld virs loga ar padomiem un reizēm kādu piezīmi.
+	Nib, your assistant. Drag to move; right-click for options.	Nib, jūsu palīgs. Velciet, lai pārvietotu; labais klikšķis — opcijas.
+	Nicaragua	Nikaragva
+	No accessibility issues found.	Pieejamības problēmas nav atrastas.
+	No Border	Bez apmales
+	No changes (read only)	Bez izmaiņām (tikai lasīšana)
+	No contributor data was built into this copy.	Šajā kopijā nav iekļauti līdzdalībnieku dati.
+	No document is open. Create a document or open one first.	Nav atvērta dokumenta. Vispirms izveidojiet vai atveriet dokumentu.
+	no equation at the caret	pie kursora nav vienādojuma
+	No errors found: every merge field is in the recipient list.	Kļūdas nav atrastas: katrs sapludināšanas lauks ir adresātu sarakstā.
+	No Fill	Bez aizpildījuma
+	No fill	Bez aizpildījuma
+	No Glow	Bez mirdzuma
+	No Gradient	Bez gradienta
+	No grid	Bez režģa
+	No header row	Bez galvenes rindas
+	No icons match your search.	Meklējumam neatbilst neviena ikona.
+	No items to show.	Nav rādāmu vienumu.
+	No language matches your search.	Meklējumam neatbilst neviena valoda.
+	No languages to show yet.	Vēl nav rādāmu valodu.
+	No Markup	Bez iezīmējumiem
+	No model credits were built into this copy.	Šajā kopijā nav iekļauta informācija par modeļu autoriem.
+	No new sources in that file	Šajā failā nav jaunu avotu
+	No Outline	Bez kontūras
+	No Paragraph Space	Bez rindkopu atstatuma
+	No printers found. Configure a system printer or export a PDF.	Printeri nav atrasti. Konfigurējiet sistēmas printeri vai eksportējiet PDF.
+	No recovery copies.	Nav atkopšanas kopiju.
+	No Reflection	Bez atspulga
+	No Scaling	Bez mērogošanas
+	No Shadow	Bez ēnas
+	No Soft Edges	Bez mīkstām malām
+	No sources yet.	Vēl nav avotu.
+	No Spacing	Bez atstarpes
+	No spelling dictionary for {language} is installed, so it isn't checked. WordCraft looks for the Hunspell dictionary {name} in the WORDCRAFT_DICTIONARIES folder and in the usual system locations.	Valodai {language} nav instalēta pareizrakstības vārdnīca, tāpēc tā netiek pārbaudīta. WordCraft meklē Hunspell vārdnīcu {name} mapē WORDCRAFT_DICTIONARIES un parastajās sistēmas vietās.
+	No templates match your search.	Meklējumam neatbilst neviena veidne.
+	No Transform	Bez transformācijas
+	No words yet. Add to Dictionary on a misspelled word puts it here.	Vēl nav vārdu. Pievienot vārdnīcai uz kļūdaina vārda ievieto to šeit.
+	No-Width Non Break	Nulles platuma nedalošs
+	No-Width Optional Break	Nulles platuma neobligāts pārtraukums
+	Nonbreaking Hyphen	Nedalāma defise
+	Normal  {size} all	Parastas  {size} visas
+	Normal Indent	Parasta atkāpe
+	Normal probability density	Normālā varbūtības blīvuma funkcija
+	Normal speed	Parasts ātrums
+	Normal Style	Parastais stils
+	Normal Table	Parasta tabula
+	Normal Text	Parasts teksts
+	Normal Word Document	Parasts Word dokuments
+	North	Ziemeļi
+	Norwegian (Bokmål)	Norvēģu (bukmols)
+	Norwegian (Nynorsk)	Norvēģu (nīnoršks)
+	Not	Ne
+	Not available right now	Pašlaik nav pieejams
+	Not available yet	Vēl nav pieejams
+	not editing an equation	vienādojums netiek rediģēts
+	Not equal to	Nav vienāds ar
+	Not in Dictionary	Nav vārdnīcā
+	Not linked: click a text box	Nav saistīts: noklikšķiniet uz teksta lodziņa
+	Not now	Ne tagad
+	Not saved	Nav saglabāts
+	Not saved yet	Vēl nav saglabāts
+	Not set	Nav iestatīts
+	Not set: the system's usual places	Nav iestatīts: parastās sistēmas vietas
+	Not used by any command	Neizmanto neviena komanda
+	Not {name}	Nav {name}
+	Nothing	Nekas
+	Nothing collected yet. Items you copy or cut appear here.	Vēl nekas nav savākts. Šeit parādās kopētie vai izgrieztie vienumi.
+	nothing is selected	nekas nav atlasīts
+	Nothing of this type in the document.	Dokumentā nav šāda veida vienumu.
+	Now used by {command}	Tagad izmanto {command}
+	Nudge	Pabīdīt
+	Num Occurrences	Gadījumu skaits
+	Number alignment:	Numura līdzinājums:
+	Number format	Numura formāts
+	Number of columns:	Kolonnu skaits:
+	Number of rows:	Rindu skaits:
+	Number of the page the field sits on	Lapas numurs, kurā atrodas lauks
+	Number of the section the field sits in	Sadaļas numurs, kurā atrodas lauks
+	Number only, without the label's words	Tikai numurs, bez etiķetes vārdiem
+	Number style for this level:	Numura stils šim līmenim:
+	Number the equation; the number sits at the right margin (or type # then the number)	Numurēt vienādojumu; numurs atrodas pie labās piemales (vai ierakstiet # un numuru)
+	Numbering	Numerācija
+	Numbering:	Numerācija:
+	Numbering…	Numerācija…
+	Numerals	Cipari
+	Numerals:	Cipari:
+	n×n Identity Matrix	n×n vienības matrica
+	n×n Matrix	n×n matrica
+	Odd Banded Columns	Nepāra joslotas kolonnas
+	Odd Banded Rows	Nepāra joslotas rindas
+	Odd Page	Nepāra lapa
+	Office	Birojs
+	Office 2003 Default	Office 2003 noklusējums
+	Offset (pt):	Nobīde (pt):
+	Offset: Bottom	Nobīde: apakšā
+	Offset: Bottom Left	Nobīde: apakšā pa kreisi
+	Offset: Bottom Right	Nobīde: apakšā pa labi
+	Offset: Center	Nobīde: centrā
+	Offset: Left	Nobīde: pa kreisi
+	Offset: Right	Nobīde: pa labi
+	Offset: Top	Nobīde: augšā
+	Offset: Top Left	Nobīde: augšā pa kreisi
+	Offset: Top Right	Nobīde: augšā pa labi
+	Old menu keys: Alt, {keys}. Keep typing, or press Esc to cancel.	Vecie izvēlnes taustiņi: Alt, {keys}. Turpiniet rakstīt vai nospiediet Esc, lai atceltu.
+	On: the caret glides to its new place when you type or use the arrow keys, and its blink fades. Off: it jumps and blinks on and off.	Ieslēgts: kursors slīd uz jauno vietu, rakstot vai izmantojot bulttaustiņus, un tā mirgošana izgaist. Izslēgts: tas lec un mirgo.
+	On: WordCraft opens on File › Home, with a blank document, the templates and your recent documents. Off: it opens a blank document.	Ieslēgts: WordCraft atveras sadaļā Fails > Sākums ar tukšu dokumentu, veidnēm un nesenajiem dokumentiem. Izslēgts: atveras tukšs dokuments.
+	One	Viens
+	One half	Viena puse
+	One label per recipient	Viena etiķete katram adresātam
+	One line per item. Enter adds an item.	Viena rinda katram vienumam. Enter pievieno vienumu.
+	One Page	Viena lapa
+	One-sided	Vienpusēji
+	Only allow this kind of editing:	Atļaut tikai šāda veida rediģēšanu:
+	Only comments can be added, except in regions marked editable.	Var pievienot tikai komentārus, izņemot apgabalos, kas atzīmēti kā rediģējami.
+	Only for the selected text	Tikai atlasītajam tekstam
+	Only form fields can be filled in.	Var aizpildīt tikai veidlapu laukus.
+	only in Outline view	tikai struktūrskatā
+	Only in this document	Tikai šajā dokumentā
+	Only label and number	Tikai etiķete un numurs
+	Only text properties can be changed.	Var mainīt tikai teksta rekvizītus.
+	Only the allowed styles can be applied.	Var lietot tikai atļautos stilus.
+	Only web (http, https) and email (mailto) links can be followed	Var sekot tikai tīmekļa (http, https) un e-pasta (mailto) saitēm
+spacing	Open	Atvērts
+	Open a document first	Vispirms atveriet dokumentu
+	Open a file with WordCraft's own browser when the system file dialog doesn't appear.	Atvērt failu ar WordCraft pārlūku, ja sistēmas failu dialoglodziņš neparādās.
+	OpenDocument Text (*.odt)	OpenDocument teksts (*.odt)
+	Opening print dialog…	Atver drukas dialoglodziņu…
+	Opens .docx, .doc, .rtf and .odt files and Word templates with WordCraft from now on.	Turpmāk atver .docx, .doc, .rtf un .odt failus un Word veidnes ar WordCraft.
+	Opens Settings › Default apps, where you choose WordCraft for .docx and the other document types.	Atver Iestatījumi > Noklusējuma lietotnes, kur izvēlaties WordCraft .docx un citiem dokumentu veidiem.
+	Operator	Operators
+	Operator Structures	Operatoru struktūras
+	Operators	Operatori
+	Optional Hyphen	Neobligāta defise
+	Or	Vai
+	Or save a copy in another format:	Vai saglabājiet kopiju citā formātā:
+	Ordinals (1st) as superscript	Kārtas skaitļi (1st) kā augšraksts
+	Organizer	Organizators
+	Organizer…	Organizators…
+	Original document	Oriģinālais dokuments
+	Original size	Oriģinālais izmērs
+	Other Large Operators	Citi lielie operatori
+	Other styles and their TOC level:	Citi stili un to satura rādītāja līmenis:
+	Other:	Cits:
+	Otherwise insert:	Citādi ievietot:
+	Outline Level	Struktūras līmenis
+	Outline level	Struktūras līmenis
+	Outline levels	Struktūras līmeņi
+	Outline State	Struktūras stāvoklis
+	Outline Tools	Struktūras rīki
+	Outlining	Struktūra
+	Outside border	Ārējā apmale
+	Outside Borders	Ārējās apmales
+	Outside:	Ārpusē:
+	Outward Brackets	Uz āru vērstas iekavas
+	Overbar	Virssvītra
+	Overbars and Underbars	Virssvītras un apakšsvītras
+	Overbrace	Figūriekava virs
+	Overtype	Pārrakstīšana
+	Overtype (typing replaces the characters after the caret)	Pārrakstīšana (rakstot tiek aizstātas rakstzīmes aiz kursora)
+	Page Background	Lapas fons
+	Page Border	Lapas apmale
+	Page Borders	Lapas apmales
+	Page Break	Lapas pārtraukums
+	Page Break Before	Lapas pārtraukums pirms
+	Page break before	Lapas pārtraukums pirms
+	Page Breaks	Lapu pārtraukumi
+	Page Color	Lapas krāsa
+	Page color	Lapas krāsa
+	Page display	Lapu attēlošana
+	Page Down	Page Down
+	Page image (*.png)	Lapas attēls (*.png)
+	Page Movement	Lapas pārvietojums
+	Page Number	Lapas numurs
+	Page number	Lapas numurs
+	Page Number Format	Lapas numura formāts
+	Page number style	Lapas numura stils
+	Page numbering	Lapu numerācija
+	Page numbers at the right margin	Lapu numuri pie labās piemales
+	Page on which a bookmarked passage falls	Lapa, kurā atrodas ar grāmatzīmi atzīmētais fragments
+	Page Setup	Lapas iestatīšana
+	Page title	Lapas nosaukums
+	Page Up	Page Up
+	Page Width	Lapas platums
+	Page width	Lapas platums
+	Page X of Y	X. lapa no Y
+	Page {page}	{page}. lapa
+	Page\nBorders	Lapas\napmales
+	Page\nColor	Lapas\nkrāsa
+	Page\nNumber	Lapas\nnumurs
+	Pages in the range	Lapas diapazonā
+	Pages like 1-3, 5	Lapas, piemēram, 1-3, 5
+	Pages of bookmark:	Grāmatzīmes lapas:
+	Panama	Panama
+	Pane Options	Rūts opcijas
+	Paper size:	Papīra izmērs:
+	Paragraph Character	Rindkopas rakstzīme
+	Paragraph Details	Rindkopas detaļas
+	Paragraph Down	Rindkopa uz leju
+	Paragraph Mark	Rindkopas zīme
+	Paragraph marks	Rindkopu zīmes
+	Paragraph Settings	Rindkopas iestatījumi
+	Paragraph Spacing	Rindkopu atstatums
+	Paragraph style	Rindkopas stils
+	Paragraph Up	Rindkopa uz augšu
+	Paragraphs	Rindkopas
+	Paragraph…	Rindkopa…
+	Paraguay	Paragvaja
+	Parentheses	Apaļās iekavas
+	Parentheses with Separator	Apaļās iekavas ar atdalītāju
+	Partial Differential	Parciālais diferenciālis
+	Password:	Parole:
+	Paste (⌘V)	Ielīmēt (⌘V)
+	Paste All	Ielīmēt visu
+	Paste as:	Ielīmēt kā:
+	Paste Clipboard Item	Ielīmēt starpliktuves vienumu
+	Paste Formatting	Ielīmēt formatējumu
+	Paste function:	Ielīmēt funkciju:
+	Paste Special…	Īpašā ielīmēšana…
+	Paste: Keep Text Only	Ielīmēt: saglabāt tikai tekstu
+	Paste: Merge Formatting	Ielīmēt: sapludināt formatējumu
+	Pastes the clipboard's picture.	Ielīmē starpliktuves attēlu.
+	Paused	Pauzēts
+	PDF document (*.pdf)	PDF dokuments (*.pdf)
+	Pens	Pildspalvas
+	People	Cilvēki
+	Periodical	Periodisks izdevums
+	Persian	Persiešu
+	Personal	Personīgās
+	Personal Templates	Personīgās veidnes
+	Personalize	Personalizēt
+	Peru	Peru
+	Philippines	Filipīnas
+	Phonetic Guide	Fonētiskais ceļvedis
+	pi	pi
+	Pi Over 2	Pi dalīts ar 2
+	Pick a custom group (New Group makes one)	Izvēlieties pielāgotu grupu (Jauna grupa to izveido)
+	Pick a field from the list	Izvēlieties lauku no saraksta
+	Picture	Attēls
+	Picture Border	Attēla apmale
+	Picture border	Attēla apmale
+	Picture Content Control	Attēla satura vadīkla
+	Picture Format	Attēla formāts
+	Picture Styles	Attēlu stili
+	Picture transparency	Attēla caurspīdīgums
+	Pictures	Attēli
+	Pie	Sektoru diagramma
+	Place in This Document	Vieta šajā dokumentā
+	Placeholder text	Vietturis
+	Plain Table 1	Vienkārša tabula 1
+	Plain text (*.txt)	Vienkāršs teksts (*.txt)
+	Plain Text Content Control	Vienkārša teksta satura vadīkla
+	Play/Pause	Atskaņot/pauzēt
+	Plus Equal	Plus vienāds
+	Points and above	Punkti un vairāk
+	Polish	Poļu
+	Portugal	Portugāle
+	Portuguese (Brazil)	Portugāļu (Brazīlija)
+	Portuguese (Portugal)	Portugāļu (Portugāle)
+	Possible spelling mistake	Iespējama pareizrakstības kļūda
+	Postal Code	Pasta indekss
+	Power series of (1+x)ⁿ	(1+x)ⁿ pakāpju rinda
+	Preferred width:	Vēlamais platums:
+	Preserve formatting during updates	Saglabāt formatējumu atjauninot
+	Preset gradients	Iepriekš iestatīti gradienti
+	Press a key combination	Nospiediet taustiņu kombināciju
+	Preview Results	Priekšskatīt rezultātus
+	Preview\nResults	Priekšskatīt\nrezultātus
+	Previous 1 or More	Iepriekšējais 1 vai vairāki
+	Previous Comment	Iepriekšējais komentārs
+	Previous Field	Iepriekšējais lauks
+	Previous Record	Iepriekšējais ieraksts
+	Previous Section	Iepriekšējā sadaļa
+	Previous Sentence	Iepriekšējais teikums
+	Previous sentence	Iepriekšējais teikums
+	Print Documents	Drukāt dokumentus
+	Print Documents…	Drukāt dokumentus…
+	Print failed: the printing worker stopped.	Drukāšana neizdevās: drukas process apstājās.
+	Print failed: {error}	Drukāšana neizdevās: {error}
+	Print job submitted.	Drukas darbs iesniegts.
+	Print job submitted: spooled {count} sheet(s)	Drukas darbs iesniegts: spolētas {count} loksnes
+	Print job submitted: {receipt}	Drukas darbs iesniegts: {receipt}
+	Print Layout	Drukas izkārtojums
+	Print Markup	Drukāt iezīmējumus
+	Print settings	Drukas iestatījumi
+	Print the page color	Drukāt lapas krāsu
+	Print to PDF	Drukāt uz PDF
+	Print\nLayout	Drukas\nizkārtojums
+	Printer default	Printera noklusējums
+	Printer discovery failed.	Printeru meklēšana neizdevās.
+	Privacy for this document	Šī dokumenta privātums
+	Privacy Options	Privātuma opcijas
+	Privacy Settings	Privātuma iestatījumi
+	Process	Process
+	Product	Reizinājums
+	Product of A	A reizinājums
+	Product with Limits	Reizinājums ar robežām
+	Product with Lower Limit	Reizinājums ar apakšējo robežu
+	Product with Subscript-Superscript Limits	Reizinājums ar apakšraksta un augšraksta robežām
+	Products and Coproducts	Reizinājumi un koprodukti
+	Professional	Profesionāls
+	Promote	Paaugstināt
+	Promote to Heading 1	Paaugstināt līdz 1. virsrakstam
+	Proofing	Korektūra
+	Proofing Issues	Korektūras problēmas
+	Proofing language	Korektūras valoda
+	Property names are 1–{max} characters.	Rekvizītu nosaukumi ir 1–{max} rakstzīmes.
+	Property values are at most {max} bytes.	Rekvizītu vērtības ir ne vairāk kā {max} baiti.
+	Protect Document	Aizsargāt dokumentu
+	pt	pt
+	Publisher	Izdevējs
+	Puerto Rico	Puertoriko
+	Put the caret in a content control first.	Vispirms novietojiet kursoru satura vadīklā.
+	Put the default commands back on the Quick Access Toolbar?	Vai atjaunot noklusējuma komandas ātrās piekļuves rīkjoslā?
+	Qatar	Katara
+	Quadratic Root	Kvadrātsakne
+	Quick Access Toolbar	Ātrās piekļuves rīkjosla
+	Quick Parts	Ātrās daļas
+	Quick Tables	Ātrās tabulas
+	Quote	Citāts
+	Radical	Sakne
+	Radical with Degree	Sakne ar pakāpi
+	Radicals	Saknes
+	Raised/lowered	Pacelts/nolaists
+	Read Aloud	Lasīt skaļi
+	Read Aloud Status	Skaļās lasīšanas statuss
+	Read Mode	Lasīšanas režīms
+	Read\nAloud	Lasīt\nskaļi
+	Read\nMode	Lasīšanas\nrežīms
+	Reading	Lasīšana
+	Reading Column Width	Lasīšanas kolonnas platums
+	Reading Highlight	Lasīšanas izcēlums
+	Reading Line Spacing	Lasīšanas rindstarpa
+	Reading Mode	Lasīšanas režīms
+	Reading Page Color	Lasīšanas lapas krāsa
+	Reading Speed	Lasīšanas ātrums
+	Reading Text Size	Lasīšanas teksta lielums
+	Reads the clipboard's rich text and keeps its formatting.	Nolasa starpliktuves bagātināto tekstu un saglabā tā formatējumu.
+	Reads the clipboard's web content and keeps its formatting.	Nolasa starpliktuves tīmekļa saturu un saglabā tā formatējumu.
+	Recent documents to show:	Rādāmie nesenie dokumenti:
+	Recently Used Fonts	Nesen izmantotie fonti
+	Recently used symbols:	Nesen izmantotie simboli:
+	Recipient List	Adresātu saraksts
+	Recipient lists	Adresātu saraksti
+	Recipients: {count}	Adresāti: {count}
+	Recolor a one-color picture, such as an icon	Pārkrāsot vienkrāsainu attēlu, piemēram, ikonu
+	Recolor Selected Ink	Pārkrāsot atlasīto tinti
+	Record Macro	Ierakstīt makro
+	Record…	Ierakstīt…
+	Recover documents	Atgūt dokumentus
+	Recover Unsaved Documents	Atgūt nesaglabātos dokumentus
+	Recovery copy	Atkopšanas kopija
+	Recovery is disabled while this document has a password.	Atkopšana ir atspējota, kamēr šim dokumentam ir parole.
+	Red:	Sarkans:
+	Reduce Hanging Indent	Samazināt izkārto atkāpi
+	Reference type:	Atsauces veids:
+	References	Atsauces
+	Reflection	Atspulgs
+	Refresh printers	Atsvaidzināt printerus
+	Region:	Reģions:
+	Registered	Reģistrēts
+	Registered Sign	Reģistrētas preču zīmes simbols
+	Regular expressions	Regulārās izteiksmes
+	Reject	Noraidīt
+	Reject All Changes	Noraidīt visas izmaiņas
+	Reject All Changes and Stop Tracking	Noraidīt visas izmaiņas un pārtraukt izsekošanu
+	Reject and Move to Next	Noraidīt un pāriet uz nākamo
+	Reject Change	Noraidīt izmaiņas
+	Relationship	Saistība
+	Relative to original picture size	Attiecībā pret attēla sākotnējo izmēru
+	Remove Added Font	Noņemt pievienoto fontu
+	Remove condition	Noņemt nosacījumu
+	Remove Content Control	Noņemt satura vadīklu
+	Remove every custom shortcut and restore the built-in keys?	Vai noņemt visas pielāgotās saīsnes un atjaunot iebūvētos taustiņus?
+	Remove every custom tab and group and show all tabs again?	Vai noņemt visas pielāgotās cilnes un grupas un atkal rādīt visas cilnes?
+	Remove field	Noņemt lauku
+	Remove Footer	Noņemt kājeni
+	Remove from Quick Access Toolbar	Noņemt no ātrās piekļuves rīkjoslas
+	Remove gradient stop	Noņemt gradienta punktu
+	Remove Header	Noņemt galveni
+	Remove Hyperlink	Noņemt hipersaiti
+	Remove my name from comments, changes and file properties when saving	Saglabājot noņemt manu vārdu no komentāriem, izmaiņām un faila rekvizītiem
+	Remove Password	Noņemt paroli
+	Remove Pen	Noņemt pildspalvu
+	Remove recipient	Noņemt adresātu
+	Remove row	Noņemt rindu
+	Remove series	Noņemt sēriju
+	Remove Space After Paragraph	Noņemt atstarpi pēc rindkopas
+	Remove Table of Contents	Noņemt satura rādītāju
+	Remove the control once edited	Noņemt vadīklu pēc rediģēšanas
+	Remove the space before the punctuation	Noņemt atstarpi pirms pieturzīmes
+	Remove Watermark	Noņemt ūdenszīmi
+	Rename Document	Pārdēvēt dokumentu
+	Reopen	Atvērt atkārtoti
+	Repeat as header row on each page	Atkārtot kā galvenes rindu katrā lapā
+	Repeat Header Rows	Atkārtot galvenes rindas
+	Repeating Section Content Control	Atkārtotas sadaļas satura vadīkla
+	Replace All	Aizstāt visu
+	Replace as you type	Aizstāt rakstīšanas laikā
+	Replace Document Text	Aizstāt dokumenta tekstu
+	Replace text as you type	Aizstāt tekstu rakstīšanas laikā
+	Replace with:	Aizstāt ar:
+	Replay	Atskaņot vēlreiz
+	Research	Izpēte
+	Researcher	Pētnieks
+	Researcher needs an online service; WordCraft keeps your documents offline.	Pētniekam nepieciešams tiešsaistes pakalpojums; WordCraft saglabā jūsu dokumentus bezsaistē.
+	Reset All…	Atiestatīt visu…
+	Reset Character Formatting	Atiestatīt rakstzīmju formatējumu
+	Reset Crop	Atiestatīt apgriezumu
+	Reset Default Formatting	Atiestatīt noklusējuma formatējumu
+	Reset Graphic	Atiestatīt grafiku
+	Reset Paragraph Formatting	Atiestatīt rindkopas formatējumu
+	Reset Picture	Atiestatīt attēlu
+	Reset tips	Atiestatīt padomus
+	Reset to Normal	Atiestatīt uz parasto
+	Reset\nGraphic	Atiestatīt\ngrafiku
+	Resize Pane	Mainīt rūts izmēru
+	Resize Table by Dragging	Mainīt tabulas izmēru velkot
+	Resolve	Atrisināt
+	Resolved	Atrisināts
+	Restart at 1	Sākt no jauna ar 1
+	Restart Each Page	Sākt no jauna katrā lapā
+	Restart Each Section	Sākt no jauna katrā sadaļā
+	Restart list after:	Sākt sarakstu no jauna pēc:
+	Restore opens an unsaved copy. Your original file stays unchanged.	Atjaunot atver nesaglabātu kopiju. Oriģinālais fails paliek nemainīts.
+	Restrict Editing	Ierobežot rediģēšanu
+	Restrict\nEditing	Ierobežot\nrediģēšanu
+	Results	Rezultāti
+	Return address labels	Atpakaļadreses etiķetes
+	Return address:	Atpakaļadrese:
+	Reviewing	Pārskatīšana
+	Reviewing Pane	Pārskatīšanas rūts
+	Reviewing — edits become suggestions	Pārskatīšana — labojumi kļūst par ieteikumiem
+	Revised document	Labotais dokuments
+	Rewind	Attīt atpakaļ
+	Rewinding. Tell me when to stop.	Attin atpakaļ. Pasakiet, kad apstāties.
+	Ribbon	Lente
+	Ribbon and Quick Access Toolbar:	Lente un ātrās piekļuves rīkjosla:
+	Ribbon tabs	Lentes cilnes
+	Rich Text Content Control	Bagātinātā teksta satura vadīkla
+	Rich Text Format (*.rtf)	Bagātināta teksta formāts (*.rtf)
+	Rich Text Format (RTF)	Bagātināta teksta formāts (RTF)
+	Right (vertical)	Pa labi (vertikāli)
+	Right Arrow with Text Above	Bultiņa pa labi ar tekstu virs
+	Right Arrow with Text Below	Bultiņa pa labi ar tekstu zem
+	Right Border	Labā apmale
+	Right border	Labā apmale
+	Right Bracket Twice	Divreiz labā iekava
+	Right indent	Labā atkāpe
+	Right Margin	Labā piemale
+	Right Only	Tikai pa labi
+	Right-to-left	No labās uz kreiso
+	Right-to-Left Section	Sadaļa no labās uz kreiso
+	Right-to-Left Table	Tabula no labās uz kreiso
+	Right-to-Left Text Direction	Teksta virziens no labās uz kreiso
+	Rightwards Arrow Above	Bultiņa pa labi virs
+	Rightwards Harpoon Above	Harpūna pa labi virs
+	Romanian	Rumāņu
+	Roots of ax²+bx+c	ax²+bx+c saknes
+	Rotate all text 270°	Pagriezt visu tekstu par 270°
+	Rotate all text 90°	Pagriezt visu tekstu par 90°
+	Rotate Left 90°	Pagriezt pa kreisi par 90°
+	Rotate Right 90°	Pagriezt pa labi par 90°
+	Rotate with shape	Pagriezt kopā ar figūru
+	Rounded	Noapaļots
+	Row	Rinda
+	Row:	Rinda:
+	Rows & Columns	Rindas un kolonnas
+	Ruby text:	Ruby teksts:
+	Rules	Kārtulas
+	Run	Izpildīt
+	Run-in	Iestarpināts
+	Russia	Krievija
+	Résumé	CV
+	SAMPLE	PARAUGS
+	Sat:	Piesāt.:
+	Saturation and recolor	Piesātinājums un pārkrāsošana
+	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	Saglabājiet kopiju citā formātā. Drukāšana notiek caur PDF, ko varat izdrukāt no jebkura skatītāja.
+	Save as Word Template…	Saglabāt kā Word veidni…
+	Save documents	Saglabāt dokumentus
+	Save the document to turn on AutoSave	Saglabājiet dokumentu, lai ieslēgtu automātisko saglabāšanu
+	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Saglabājiet dokumentu, lai ieslēgtu automātisko saglabāšanu (tikai atvērts fails netiek pārrakstīts, kamēr to nesaglabājat)
+	Save these pages as PDF…	Saglabāt šīs lapas kā PDF…
+	Saved. Saved again. Still saved. It's very saved.	Saglabāts. Atkal saglabāts. Joprojām saglabāts. Ļoti saglabāts.
+	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	Saglabā .dotx veidni jūsu veidņu mapē. Tā parādās sadaļā Fails > Jauns zem Personīgās.
+	Saving {name} was cancelled, so it is still open and nothing was lost.	{name} saglabāšana tika atcelta, tāpēc tas joprojām ir atvērts un nekas nav zaudēts.
+	Sayings	Teicieni
+	Sayings:	Teicieni:
+	Scale Drawing	Mērogot zīmējumu
+	Scale Font Sizes	Mērogot fontu lielumus
+	Scale to paper size	Mērogot atbilstoši papīra izmēram
+	Scatter	Izkliedes diagramma
+	Script	Skripts
+	Scroll ribbon left	Ritināt lenti pa kreisi
+	Scroll ribbon right	Ritināt lenti pa labi
+	Search Commands	Meklēt komandas
+	Search commands and help	Meklēt komandas un palīdzību
+	Search document	Meklēt dokumentā
+	Search for templates	Meklēt veidnes
+	Search icons	Meklēt ikonas
+	Search Options	Meklēšanas opcijas
+	Search:	Meklēt:
+	Secant Function	Sekanta funkcija
+	Section 1.01	1.01. sadaļa
+	Section Break	Sadaļas pārtraukums
+	Section Breaks	Sadaļu pārtraukumi
+	Section Character	Sadaļas rakstzīme
+	Section direction:	Sadaļas virziens:
+	Section Mark	Sadaļas zīme
+	Section Properties	Sadaļas rekvizīti
+	Sections	Sadaļas
+	See	Skatīt
+	select a chart first	vispirms atlasiet diagrammu
+	select a connector first	vispirms atlasiet savienotāju
+	select a drawing canvas first	vispirms atlasiet zīmēšanas audeklu
+	select a floating picture or shape first	vispirms atlasiet peldošu attēlu vai figūru
+	select a group first	vispirms atlasiet grupu
+	select a picture first	vispirms atlasiet attēlu
+	select a picture or shape first	vispirms atlasiet attēlu vai figūru
+	Select a picture, shape, chart or table to describe it.	Atlasiet attēlu, figūru, diagrammu vai tabulu, lai to aprakstītu.
+	Select a place in this document:	Atlasiet vietu šajā dokumentā:
+	Select a printer	Atlasiet printeri
+	Select a property to change.	Atlasiet maināmo rekvizītu.
+	select a shape first	vispirms atlasiet figūru
+	Select a shape, text box or drawing canvas to format its fill.	Atlasiet figūru, teksta lodziņu vai zīmēšanas audeklu, lai formatētu tā aizpildījumu.
+	select a SmartArt graphic first	vispirms atlasiet SmartArt grafiku
+	select a text box first	vispirms atlasiet teksta lodziņu
+	select a text box linked to another first	vispirms atlasiet teksta lodziņu, kas saistīts ar citu
+	Select Cell	Atlasīt šūnu
+	Select Column	Atlasīt kolonnu
+	Select Heading and Content	Atlasīt virsrakstu un saturu
+	Select Line	Atlasīt rindu
+	Select Paragraph	Atlasīt rindkopu
+	Select Range	Atlasīt diapazonu
+	Select Recipients	Atlasīt adresātus
+	select recipients first	vispirms atlasiet adresātus
+	Select recipients first to choose from their fields.	Vispirms atlasiet adresātus, lai izvēlētos no viņu laukiem.
+	Select recipients first to match their fields.	Vispirms atlasiet adresātus, lai saskaņotu viņu laukus.
+	Select Row	Atlasīt rindu
+	Select Sentence	Atlasīt teikumu
+	Select Table	Atlasīt tabulu
+	Select Table Cells by Clicking	Atlasīt tabulas šūnas ar klikšķi
+	Select Text	Atlasīt tekstu
+	Select Text with Similar Formatting	Atlasīt tekstu ar līdzīgu formatējumu
+	Select text, then tick who can still edit it.	Atlasiet tekstu un atzīmējiet, kas joprojām var to rediģēt.
+	select two or more cells to merge	atlasiet divas vai vairākas sapludināmās šūnas
+	select two or more pictures or shapes first (Shift+click)	vispirms atlasiet divus vai vairākus attēlus vai figūras (Shift+klikšķis)
+	Select Word	Atlasīt vārdu
+	Select\nRecipients	Atlasīt\nadresātus
+	Selected Fields	Atlasītie lauki
+	Selected text	Atlasītais teksts
+	Selection Pane	Atlases rūts
+	Send the document straight to the system print dialog, or save a copy in another format below.	Nosūtiet dokumentu tieši uz sistēmas drukas dialoglodziņu vai zemāk saglabājiet kopiju citā formātā.
+	Sentence	Teikums
+	Sentence case.	Kā teikumā.
+	Separate text at	Atdalīt tekstu pie
+	Separate text with	Atdalīt tekstu ar
+	Separator:	Atdalītājs:
+	Sepia	Sēpija
+	Sequence name:	Secības nosaukums:
+	Serbian (Cyrillic)	Serbu (kirilica)
+	Serbian (Latin)	Serbu (latīņu)
+	Series name	Sērijas nosaukums
+	Series {n}	{n}. sērija
+	Set As Default	Iestatīt kā noklusējumu
+	Set as default	Iestatīt kā noklusējumu
+	Set As Default (Font)	Iestatīt kā noklusējumu (fonts)
+	Set As Default (Page Setup)	Iestatīt kā noklusējumu (lapas iestatīšana)
+	Set As Default (Paragraph)	Iestatīt kā noklusējumu (rindkopa)
+	Set as Default Language	Iestatīt kā noklusējuma valodu
+	Set Caret	Iestatīt kursoru
+	Set Character Formatting	Iestatīt rakstzīmju formatējumu
+	Set Date	Iestatīt datumu
+	Set Equation	Iestatīt vienādojumu
+	Set left- and first-indent with tabs and backspaces	Iestatīt kreiso un pirmās rindas atkāpi ar tabulatoru un atpakaļatkāpi
+	Set Numbering Value	Iestatīt numerācijas vērtību
+	Set Paragraph Formatting	Iestatīt rindkopas formatējumu
+	Set Proofing Language…	Iestatīt korektūras valodu…
+	Setting:	Iestatījums:
+	Shading	Ēnojums
+	Shadow, glow and soft edges	Ēna, mirdzums un mīkstas malas
+	Shape Fill	Figūras aizpildījums
+	Shape Format	Figūras formāts
+	Shape Outline	Figūras kontūra
+	Shape Styles	Figūru stili
+	Shift+Enter starts a new line without starting a new paragraph.	Shift+Enter sāk jaunu rindu, nesākot jaunu rindkopu.
+	Shift+Tab	Shift+Tab
+	Shipping labels	Sūtījumu etiķetes
+	Shortcut key:	Saīsnes taustiņš:
+	Show alignment guides when moving pictures and shapes	Rādīt līdzināšanas palīglīnijas, pārvietojot attēlus un figūras
+	Show all formatting marks	Rādīt visas formatējuma zīmes
+	Show All Levels	Rādīt visus līmeņus
+	Show all revisions inline	Rādīt visus labojumus rindā
+	Show changes at:	Rādīt izmaiņas pie:
+	Show changes in:	Rādīt izmaiņas:
+	Show Comments	Rādīt komentārus
+	Show documents with their colours inverted, like View › Switch Modes. Saving, printing and PDFs are unchanged.	Rādīt dokumentus ar invertētām krāsām, kā Skats > Pārslēgt režīmus. Saglabāšana, drukāšana un PDF faili netiek mainīti.
+	Show every bibliography field	Rādīt visus bibliogrāfijas laukus
+	Show First Line Only	Rādīt tikai pirmo rindu
+	Show in the Styles gallery	Rādīt stilu galerijā
+	Show its list number	Rādīt tā saraksta numuru
+	Show its number relative to this field	Rādīt tā numuru attiecībā pret šo lauku
+	Show its number with all higher levels	Rādīt tā numuru ar visiem augstākajiem līmeņiem
+	Show KeyTips (Alt or F10)	Rādīt taustiņu padomus (Alt vai F10)
+	Show Level	Rādīt līmeni
+	Show Level 1	Rādīt 1. līmeni
+	Show Level 2	Rādīt 2. līmeni
+	Show Level 3	Rādīt 3. līmeni
+	Show Level 4	Rādīt 4. līmeni
+	Show Level 5	Rādīt 5. līmeni
+	Show Level 6	Rādīt 6. līmeni
+	Show Level 7	Rādīt 7. līmeni
+	Show Level 8	Rādīt 8. līmeni
+	Show Level 9	Rādīt 9. līmeni
+	Show Markup	Rādīt iezīmējumus
+	Show Notes	Rādīt piezīmes
+	Show only comments and formatting in balloons	Balonos rādīt tikai komentārus un formatējumu
+	Show only records that will be merged	Rādīt tikai sapludināmos ierakstus
+	Show or Hide Style	Rādīt vai paslēpt stilu
+	Show Quick Access Toolbar	Rādīt ātrās piekļuves rīkjoslu
+	Show revisions in balloons	Rādīt labojumus balonos
+	Show Text Formatting	Rādīt teksta formatējumu
+	Show the Assistant	Rādīt palīgu
+	Show the community button in the title bar	Rādīt kopienas pogu virsraksta joslā
+	Show the equation in the line of text	Rādīt vienādojumu teksta rindā
+	Show the equation on a line of its own	Rādīt vienādojumu atsevišķā rindā
+	Show the mini toolbar when text is selected	Rādīt mini rīkjoslu, kad teksts ir atlasīts
+	Show the ribbon	Rādīt lenti
+	Show the Start screen when WordCraft starts	Rādīt sākuma ekrānu, kad WordCraft tiek palaists
+	Show the tips you asked not to see again.	Rādīt padomus, kurus lūdzāt vairs nerādīt.
+	Show/Hide ¶	Rādīt/paslēpt ¶
+	Show/Hide ¶ (Ctrl+Shift+8) shows the spaces, tabs and breaks hiding in your text.	Rādīt/paslēpt ¶ (Ctrl+Shift+8) parāda tekstā paslēptās atstarpes, tabulatorus un pārtraukumus.
+	Show/Hide ¶ ({key}) shows the spaces, tabs and breaks hiding in your text.	Rādīt/paslēpt ¶ ({key}) parāda tekstā paslēptās atstarpes, tabulatorus un pārtraukumus.
+	Show\nComments	Rādīt\nkomentārus
+	Showing the first {count} items.	Rādīti pirmie {count} vienumi.
+	Shows a tree: each item below the item it belongs to.	Rāda koku: katrs vienums zem tā, kam tas pieder.
+	Shows items around a central idea: the first item is the centre.	Rāda vienumus ap centrālo ideju: pirmais vienums ir centrs.
+	Shows items of equal weight as blocks in rows.	Rāda vienāda svara vienumus kā blokus rindās.
+	Shows overlapping ideas as overlapping circles.	Rāda pārklājošās idejas kā pārklājošus apļus.
+	Shows parts of a whole as quadrants.	Rāda veseluma daļas kā kvadrantus.
+	Shows parts that build on each other, largest at the bottom.	Rāda daļas, kas balstās cita uz citas, lielākā apakšā.
+	Shows steps in order, left to right, with arrows between them.	Rāda soļus secībā no kreisās uz labo ar bultiņām starp tiem.
+	Shows steps that repeat, around a circle.	Rāda soļus, kas atkārtojas, pa apli.
+	Shrink Font 1 Point	Samazināt fontu par 1 punktu
+	Shrink text	Samazināt tekstu
+	Side to Side	Blakus
+	Side\nto Side	Blakus\nviens otram
+	Sides of a right triangle	Taisnleņķa trijstūra malas
+	Signature Line	Paraksta rinda
+	Simple Frame	Vienkāršs rāmis
+	Sine and cosine series of f(x)	f(x) sinusa un kosinusa rinda
+	Sine Function	Sinusa funkcija
+	Sine theta	Sinuss theta
+	Singapore	Singapūra
+	Single	Viens
+	Single Brackets	Vienkāršas kvadrātiekavas
+	Single Closing Quote	Vienkāršā aizverošā pēdiņa
+	Single label	Viena etiķete
+	Single Left Angle	Vienkāršs kreisais leņķis
+	Single Left Bar	Vienkārša kreisā josla
+	Single Left Brace	Vienkārša kreisā figūriekava
+	Single Left Bracket	Vienkārša kreisā kvadrātiekava
+	Single Left Parenthesis	Vienkārša kreisā apaļā iekava
+	Single Opening Quote	Vienkāršā atverošā pēdiņa
+	Single Right Brace	Vienkārša labā figūriekava
+	Single Right Bracket	Vienkārša labā kvadrātiekava
+	Single Right Parenthesis	Vienkārša labā apaļā iekava
+	Single Spacing	Vienkārša rindstarpa
+	SIST02	SIST02
+	Site name	Vietnes nosaukums
+	Size (pt):	Izmērs (pt):
+	Size and Crop…	Izmērs un apgriešana…
+	Sketchbook	Skiču burtnīca
+	Skewed Fraction	Slīpa daļa
+	Skip citations & bibliography	Izlaist atsauces un bibliogrāfiju
+	Skip Citations and Bibliography	Izlaist atsauces un bibliogrāfiju
+	Skip Record If	Izlaist ierakstu, ja
+	Skip Record If…	Izlaist ierakstu, ja…
+	Slant Down	Slīpi uz leju
+	Slant Up	Slīpi uz augšu
+	Slovak	Slovāku
+	Slovenian	Slovēņu
+	Small caps	Kapiteļi
+	Small change	Neliela izmaiņa
+	Smart quotes instead of straight quotes	Viedās pēdiņas taisno pēdiņu vietā
+	SmartArt	SmartArt
+	SmartArt Design	SmartArt dizains
+	SmartArt Styles	SmartArt stili
+	Smooth scrolling and zooming, and menus and buttons that fade in. Off shows every change at once.	Plūdena ritināšana un tālummaiņa, kā arī izvēlnes un pogas, kas parādās pakāpeniski. Izslēgts rāda katru izmaiņu uzreiz.
+	Soft Edge	Mīksta mala
+	Soft Edges	Mīkstas malas
+	Soft Glow	Maigs mirdzums
+	Solid Accent	Vienlaidu akcents
+	Solid fill	Vienlaidu aizpildījums
+	Sometimes	Dažreiz
+	Sort by:	Kārtot pēc:
+	Sort order:	Kārtošanas secība:
+	Sort Recipients	Kārtot adresātus
+	Source code: github.com/storytold/wordcraft	Pirmkods: github.com/storytold/wordcraft
+	Source Manager	Avotu pārvaldnieks
+	Source type:	Avota veids:
+	Sources in this document:	Avoti šajā dokumentā:
+	South	Dienvidi
+	South Africa	Dienvidāfrika
+	Space	Atstarpe
+	Space after	Atstarpe pēc
+	Space after: {pt} pt	Atstarpe pēc: {pt} pt
+	Space before	Atstarpe pirms
+	Space before/after:	Atstarpe pirms/pēc:
+	Space before: {pt} pt	Atstarpe pirms: {pt} pt
+	Spacing (pt):	Atstatums (pt):
+	Spain	Spānija
+	Spanish (Latin America)	Spāņu (Latīņamerika)
+	Spanish (Mexico)	Spāņu (Meksika)
+	Spanish (Spain)	Spāņu (Spānija)
+	Spanish (Uruguay)	Spāņu (Urugvaja)
+	Sparse Matrices	Retas matricas
+	Special Characters	Īpašās rakstzīmes
+	Specify height:	Norādīt augstumu:
+	Speech	Runa
+	Spelling & Grammar	Pareizrakstība un gramatika
+	Spelling &\nGrammar	Pareizrakstība\nun gramatika
+	Spelling and grammar are checked in English (United States).	Pareizrakstība un gramatika tiek pārbaudīta angļu valodā (Amerikas Savienotās Valstis).
+	Spelling and grammar are checked in {language}.	Pareizrakstība un gramatika tiek pārbaudīta valodā: {language}.
+	Spelling Suggestions	Pareizrakstības ieteikumi
+	Spike	Krājums
+	Split Cells	Sadalīt šūnas
+	Split Table	Sadalīt tabulu
+	Spreadsheet Table	Izklājlapas tabula
+	Square Root	Kvadrātsakne
+	Square Root with Degree	Kvadrātsakne ar pakāpi
+	Square Union	Kvadrātveida apvienojums
+	Stack Object	Kaudzes objekts
+	Stack Object (Three)	Kaudzes objekts (trīs)
+	Stacked Bar	Sakrautas joslas
+	Stacked Column	Sakrautas kolonnas
+	Stacked Fraction	Sakrauta daļa
+	Stacked, no bar	Sakrauts, bez līnijas
+	Standard Colors	Standarta krāsas
+	Start Enforcing Protection	Sākt aizsardzības piemērošanu
+	Start Mail Merge	Sākt pasta sapludināšanu
+	Start Mail\nMerge	Sākt pasta\nsapludināšanu
+	Start-up	Palaišana
+	State	Štats
+	Statement   5.50" × 8.50"	Statement   5.50" × 8.50"
+	Still there? I can hear you thinking.	Vēl tur? Es dzirdu, kā jūs domājat.
+	Stop Protection	Apturēt aizsardzību
+	Stop Reading	Pārtraukt lasīšanu
+	Stop Recording	Apturēt ierakstīšanu
+	Stopped	Apturēts
+	Straight Arrow Connector	Taisns bultas savienotājs
+	Straight Connector	Taisns savienotājs
+	Stroke {n} of {total}	{n}. vilciens no {total}
+	Strong	Izcelts
+	Structure Actions	Struktūras darbības
+	Structures	Struktūras
+	Studio cover	Studijas vāks
+	Studio handbook (sample)	Studijas rokasgrāmata (paraugs)
+	Style based on:	Stils balstīts uz:
+	Style Inspector	Stilu inspektors
+	Style name:	Stila nosaukums:
+	Style Set	Stilu kopa
+	Style: APA	Stils: APA
+	Style: {style}	Stils: {style}
+	Styles Pane	Stilu rūts
+	Styles Pane Position	Stilu rūts novietojums
+	Styles:	Stili:
+	Subentry:	Apakšieraksts:
+	Submit print job	Iesniegt drukas darbu
+	Submitting print job…	Iesniedz drukas darbu…
+	Subscript-Superscript	Apakšraksts un augšraksts
+	Subscripts and Superscripts	Apakšraksti un augšraksti
+	Subset:	Apakškopa:
+	Subtle Emphasis	Smalks uzsvars
+	Subtle Reference	Smalka atsauce
+	Suggested	Ieteicams
+	Suggestions	Ieteikumi
+	Sum	Summa
+	Sum of cosines	Kosinusu summa
+	Sum or difference of sines	Sinusu summa vai starpība
+	Summation	Summēšana
+	Summation from 0 to n	Summa no 0 līdz n
+	Summation over binomials	Summa pa binomiāļiem
+	Summation with Limits	Summa ar robežām
+	Summation with Lower Limit	Summa ar apakšējo robežu
+	Summation with Subscript Limit	Summa ar apakšraksta robežu
+	Summation with Subscript-Superscript Limits	Summa ar apakšraksta un augšraksta robežām
+	Summations	Summas
+	Suppress line numbers	Izlaist rindu numurus
+	Surface Integral	Virsmas integrālis
+	Surface Integral with Limits	Virsmas integrālis ar robežām
+	Surface Integral with Stacked Limits	Virsmas integrālis ar robežām virs un zem
+	Swahili	Svahili
+	Swap footnotes and endnotes	Apmainīt vēres un beigu vēres
+	Swedish	Zviedru
+	Switch Modes	Pārslēgt režīmus
+	Switch Windows	Pārslēgt logus
+	Switch\nModes	Pārslēgt\nrežīmus
+	Switch\nWindows	Pārslēgt\nlogus
+	Switzerland	Šveice
+	Synonyms	Sinonīmi
+	Syria	Sīrija
+numerals	System	Sistēma
+	System dictionary	Sistēmas vārdnīca
+	Tab Character	Tabulatora rakstzīme
+	Tab character	Tabulatora rakstzīme
+	Tab characters	Tabulatora rakstzīmes
+	Tab leader:	Tabulācijas aizpildījums:
+	Tab stop position:	Tabulācijas pieturas novietojums:
+	Tab stops to be cleared:	Notīrāmās tabulācijas pieturas:
+	Table Column Width	Tabulas kolonnas platums
+	Table Design	Tabulas dizains
+	Table direction:	Tabulas virziens:
+	Table Grid	Tabulas režģis
+	Table Layout	Tabulas izkārtojums
+	Table of Authorities	Autoritāšu tabula
+	Table of Contents	Satura rādītājs
+	Table of Contents Options	Satura rādītāja opcijas
+	Table of Contents Styles	Satura rādītāja stili
+	Table of Figures	Attēlu saraksts
+	Table of\nContents	Satura\nrādītājs
+	Table Properties	Tabulas rekvizīti
+	Table Properties…	Tabulas rekvizīti…
+	Table Row Height	Tabulas rindas augstums
+	Table size	Tabulas izmērs
+	Table Style Options	Tabulas stila opcijas
+	Table Styles	Tabulas stili
+	Tabloid   11.00" × 17.00"	Tabloid   11.00" × 17.00"
+	Tabs…	Tabulācija…
+	Tabular List	Tabulārs saraksts
+	Tag	Tags
+	Taiwan	Taivāna
+	Take the last match on the page	Ņemt pēdējo atbilstību lapā
+	Take your time. The page isn't going anywhere. Neither am I. Ever.	Nesteidzieties. Lapa nekur nepazudīs. Es arī ne. Nekad.
+	Tamil	Tamilu
+	Tangent formula	Tangensa formula
+	Tangent Function	Tangensa funkcija
+	TC entry fields	TC ierakstu lauki
+	Teal	Zilganzaļš
+	Technology	Tehnoloģijas
+	Templates and Add-ins	Veidnes un papildinājumi
+	Templates you save in your templates folder show up here.	Šeit parādās veidnes, ko saglabājat savā veidņu mapē.
+	Text Box	Teksta lodziņš
+	Text boxes	Teksta lodziņi
+	text boxes can't go inside a text box	teksta lodziņi nevar atrasties teksta lodziņā
+	Text Direction	Teksta virziens
+	Text Effects	Teksta efekti
+	Text Effects and Typography	Teksta efekti un tipogrāfija
+	Text Fill	Teksta aizpildījums
+	Text from File	Teksts no faila
+	Text Highlight Color	Teksta izcēluma krāsa
+	Text indent at:	Teksta atkāpe pie:
+	Text of the nearest paragraph with a given style (running headers)	Tuvākās rindkopas teksts ar noteiktu stilu (mainīgās galvenes)
+	Text Outline	Teksta kontūra
+	Text over Colon Equal	Teksts virs kols vienāds
+	Text over Equal	Teksts virs vienāds
+	Text Pane	Teksta rūts
+	Text properties only: Word's number, date and yes-no types aren't offered.	Tikai teksta rekvizīti: Word skaitļu, datumu un jā/nē veidi netiek piedāvāti.
+	Text Size	Teksta lielums
+	Text size	Teksta lielums
+	Text snaps to characters	Teksts piesaistās rakstzīmēm
+	Text to display:	Parādāmais teksts:
+	Text Wrapping	Teksta aplaušana
+	Text\nBox	Teksta\nlodziņš
+	Text\nDirection	Teksta\nvirziens
+	Thai	Taju
+	That format doesn't keep everything, so the document is still open. Save it as a Word document (.docx) to go on.	Šis formāts nesaglabā visu, tāpēc dokuments joprojām ir atvērts. Lai turpinātu, saglabājiet to kā Word dokumentu (.docx).
+	That password isn't right. Check it (passwords are case-sensitive) and try again.	Parole nav pareiza. Pārbaudiet to (parolēs ir atšķirība starp lielajiem un mazajiem burtiem) un mēģiniet vēlreiz.
+	The clipboard is empty.	Starpliktuve ir tukša.
+	the Clipboard pane is empty	starpliktuves rūts ir tukša
+	the cursor isn't in a table	kursors nav tabulā
+	The date it is today	Šodienas datums
+	The document has no bookmarks yet.	Dokumentā vēl nav grāmatzīmju.
+	the document is protected	dokuments ir aizsargāts
+	The document is read only, except for regions marked editable.	Dokuments ir tikai lasāms, izņemot apgabalus, kas atzīmēti kā rediģējami.
+	The document or selection changed. Check again to continue.	Dokuments vai atlase mainījās. Pārbaudiet vēlreiz, lai turpinātu.
+	The document will be saved with a password. Save it to protect it.	Dokuments tiks saglabāts ar paroli. Saglabājiet to, lai aizsargātu.
+	The document you are editing keeps the names and dates; only the saved file leaves them out.	Rediģējamais dokuments saglabā vārdus un datumus; tos izlaiž tikai saglabātais fails.
+	The margins don't fit on a page this size; make the margins smaller first.	Piemales neietilpst šāda izmēra lapā; vispirms samaziniet piemales.
+	The measurement must be between {min} and {max}.	Mēram jābūt no {min} līdz {max}.
+	The new style takes the formatting of the current paragraph.	Jaunais stils pārņem pašreizējās rindkopas formatējumu.
+	The Normal template couldn't be read, so this document uses WordCraft's built-in formatting.	Veidni Normal neizdevās nolasīt, tāpēc šis dokuments izmanto WordCraft iebūvēto formatējumu.
+	The number must be a divisor of {max}.	Skaitlim jābūt {max} dalītājam.
+	The number must be between 1 and {max}.	Skaitlim jābūt no 1 līdz {max}.
+	the paragraph is empty	rindkopa ir tukša
+	the paragraph starts with a space	rindkopa sākas ar atstarpi
+	The password is optional; without it anyone can stop the protection.	Parole nav obligāta; bez tās ikviens var apturēt aizsardzību.
+	The password is removed. Save the document to keep the change.	Parole ir noņemta. Saglabājiet dokumentu, lai paturētu izmaiņas.
+	The printer, two-sided printing and pages per sheet are chosen in that dialog.	Printeri, abpusējo druku un lapas loksnē izvēlas šajā dialoglodziņā.
+	The recipient-list field that fills each part of an address block and greeting line.	Adresātu saraksta lauks, kas aizpilda katru adreses bloka un sveiciena rindas daļu.
+	The spelling and grammar check is complete.	Pareizrakstības un gramatikas pārbaude ir pabeigta.
+	The spelling dictionary for {language} couldn't be read, so it isn't checked. File: {file}. Reason: {reason}	Valodas {language} pareizrakstības vārdnīcu neizdevās nolasīt, tāpēc tā netiek pārbaudīta. Fails: {file}. Iemesls: {reason}
+	the Spike is empty	krājums ir tukšs
+	The system file dialog isn't available, so WordCraft shows its own. To get the system dialog, install a file chooser portal (such as xdg-desktop-portal-gtk) or zenity.	Sistēmas failu dialoglodziņš nav pieejams, tāpēc WordCraft rāda savu. Lai iegūtu sistēmas dialoglodziņu, instalējiet failu atlasītāja portālu (piemēram, xdg-desktop-portal-gtk) vai zenity.
+	The text at the insertion point is marked Do not check spelling or grammar.	Teksts ievietošanas vietā ir atzīmēts ar Nepārbaudīt pareizrakstību vai gramatiku.
+	The time right now	Pašreizējais laiks
+	The {language} dictionary couldn't be downloaded: {error}	Valodas {language} vārdnīcu neizdevās lejupielādēt: {error}
+	The {language} dictionary is installed.	Valodas {language} vārdnīca ir instalēta.
+	Theme Colors	Motīva krāsas
+	Theme Fonts	Motīva fonti
+	Theme List	Motīvu saraksts
+	Themes	Motīvi
+	Then by	Pēc tam pēc
+	Then insert:	Tad ievietot:
+	There are no macros yet. Record one to add it here.	Vēl nav makro. Ierakstiet kādu, lai to šeit pievienotu.
+	there is no ink to replay	nav tintes, ko atskaņot
+	there is nothing to undo	nav ko atsaukt
+	there's no citation after the caret	aiz kursora nav atsauces
+	Thesaurus	Tēzaurs
+	These marks show even when Show/Hide ¶ is off.	Šīs zīmes ir redzamas arī tad, ja Rādīt/paslēpt ¶ ir izslēgts.
+	These merge fields aren't in the recipient list:	Šie sapludināšanas lauki nav adresātu sarakstā:
+	These settings will be used for new documents.	Šie iestatījumi tiks izmantoti jauniem dokumentiem.
+	Thick	Biezs
+	Thick Frame	Biezs rāmis
+	Thin	Tievs
+	This cannot be undone. Your original file stays unchanged.	To nevar atsaukt. Oriģinālais fails paliek nemainīts.
+	this chart was made in another program: WordCraft shows it but can't edit it	šī diagramma izveidota citā programmā: WordCraft to rāda, bet nevar rediģēt
+	This document	Šis dokuments
+	This document has no custom properties.	Šim dokumentam nav pielāgotu rekvizītu.
+	This document only?	Tikai šo dokumentu?
+	This field has no options.	Šim laukam nav opciju.
+	This folder can't be read: {error}	Šo mapi nevar nolasīt: {error}
+	This font has no characters to show.	Šajā fontā nav rādāmu rakstzīmju.
+	this item is already at the top level	šis vienums jau ir augšējā līmenī
+	This page	Šī lapa
+	This password type isn't supported.	Šis paroles veids netiek atbalstīts.
+	This point forward	No šīs vietas uz priekšu
+	This section	Šī sadaļa
+	this session has no Normal template (headless or without preferences)	šai sesijai nav veidnes Normal (bez saskarnes vai bez iestatījumiem)
+	this session has no Normal template (headless or without preferences): use "scope": "document"	šai sesijai nav veidnes Normal (bez saskarnes vai bez iestatījumiem): izmantojiet "scope": "document"
+	this SmartArt was made in another program: WordCraft shows it but can't edit it	šis SmartArt izveidots citā programmā: WordCraft to rāda, bet nevar rediģēt
+	this text box is already linked: break the link first	šis teksta lodziņš jau ir saistīts: vispirms pārtrauciet saiti
+	Three	Trīs
+	Through	Cauri
+	Tight	Cieši
+	Tilde	Tilde
+	Tip	Padoms
+	Tips ({n})	Padomi ({n})
+preview	Title	Virsraksts
+	Title Bar	Virsraksta josla
+	Title from the document properties	Nosaukums no dokumenta rekvizītiem
+	Title:	Nosaukums:
+	To open Word documents with WordCraft by default: select one in Finder, choose File › Get Info, pick WordCraft under Open with, then click Change All.	Lai pēc noklusējuma atvērtu Word dokumentus ar WordCraft: atlasiet vienu programmā Finder, izvēlieties File > Get Info, sadaļā Open with izvēlieties WordCraft un pēc tam noklikšķiniet uz Change All.
+	To:	Līdz:
+	TOA Heading	Autoritāšu virsraksts
+	TOC Heading	Satura rādītāja virsraksts
+	TOC {n}	Satura rādītājs {n}
+	Today	Šodien
+	tOGGLE cASE	mAINĪT rEĢISTRU
+	Toggle Check Box	Pārslēgt izvēles rūtiņu
+	Toggle Field Codes	Pārslēgt lauku kodus
+	Toggle Unicode Character	Pārslēgt Unicode rakstzīmi
+	Top and Bottom	Augšā un apakšā
+	Top Border	Augšējā apmale
+	Top Left Cell	Augšējā kreisā šūna
+	Top Margin	Augšējā piemale
+	Top of Page	Lapas augša
+	Top of the Document	Dokumenta sākums
+	Top Right Cell	Augšējā labā šūna
+	Total Row	Kopsummas rinda
+	Track Changes	Izsekot izmaiņas
+	Track Changes Options	Izmaiņu izsekošanas opcijas
+	Track Changes: On	Izmaiņu izsekošana: ieslēgta
+	Track formatting	Izsekot formatējumu
+	Track\nChanges	Izsekot\nizmaiņas
+	Track\nChanges ✓	Izsekot\nizmaiņas ✓
+	Tracked changes	Izsekotās izmaiņas
+	Trademark	Preču zīme
+	Trademark Sign	Preču zīmes simbols
+	Transport	Transports
+	Triangle Down	Trijstūris uz leju
+	Triangle Up	Trijstūris uz augšu
+	Trigonometric Functions	Trigonometriskās funkcijas
+	Triple	Trīskāršs
+	Triple Dot	Trīskāršs punkts
+	Triple Integral	Trīskāršais integrālis
+	Triple Integral with Limits	Trīskāršais integrālis ar robežām
+	Triple Integral with Stacked Limits	Trīskāršais integrālis ar robežām virs un zem
+	Trust Center	Uzticamības centrs
+	Tue	Ot
+	Turabian	Turabian
+	Turkish	Turku
+	Turquoise	Tirkīzs
+	Two	Divi
+	Two-sided printing	Abpusējā druka
+	Two-sided: long edge	Abpusēji: garā mala
+	Two-sided: short edge	Abpusēji: īsā mala
+	Type +2 or -1 to move from the page you are on.	Ierakstiet +2 vai -1, lai pārvietotos no pašreizējās lapas.
+	Type a command, e.g. "insert table"	Ierakstiet komandu, piem., "ievietot tabulu"
+	Type a New List…	Ievadīt jaunu sarakstu…
+	Type a page number, or +2 / -1.	Ierakstiet lapas numuru vai +2 / -1.
+	Type a size in any unit, such as 5 cm or 300 px. The other side follows, so the picture keeps its proportions.	Ierakstiet izmēru jebkurā vienībā, piemēram, 5 cm vai 300 px. Otra mala seko, lai attēls saglabātu proporcijas.
+	Type at least one recipient.	Ierakstiet vismaz vienu adresātu.
+	Type Character Code	Ievadīt rakstzīmes kodu
+	Type equations in LaTeX	Rakstīt vienādojumus LaTeX
+	Type equations in the linear format (UnicodeMath)	Rakstīt vienādojumus lineārajā formātā (UnicodeMath)
+	Type in Equation	Rakstīt vienādojumā
+	Type normal (non-math) text in the equation	Rakstīt vienādojumā parastu (nematemātisku) tekstu
+	Type Text	Rakstīt tekstu
+	Type the categories down the side and a column of values per series.	Ierakstiet kategorijas sānos un vienu vērtību kolonnu katrai sērijai.
+	Type the field's name and its switches, for example PAGE \\* roman.	Ierakstiet lauka nosaukumu un tā slēdžus, piemēram, PAGE \\* roman.
+	Type the password to stop the protection.	Ievadiet paroli, lai apturētu aizsardzību.
+	Type the recipients, or load them from a file.	Ierakstiet adresātus vai ielādējiet tos no faila.
+	Typing replaces selected text	Rakstīšana aizstāj atlasīto tekstu
+	U.A.E.	AAE
+	Ukraine	Ukraina
+	Ukrainian	Ukraiņu
+	Unchecked symbol	Neatzīmēts simbols
+	Underbar	Apakšsvītra
+	Underbrace	Figūriekava zem
+	Underline Color	Pasvītrojuma krāsa
+	Underline color	Pasvītrojuma krāsa
+	Underline Words Only	Pasvītrot tikai vārdus
+	Undo 1 Action	Atsaukt 1 darbību
+	Undo Actions	Atsaukt darbības
+	Undo History	Atsaukšanas vēsture
+	Undo {n} Actions	Atsaukt {n} darbības
+	Undo, undo, undo… we're time travelling now.	Atsaukt, atsaukt, atsaukt… tagad ceļojam laikā.
+	Unformatted Text	Neformatēts teksts
+	Union of intersections	Šķēlumu apvienojums
+	Union with Limits	Apvienojums ar robežām
+	Union with Lower Limit	Apvienojums ar apakšējo robežu
+	Union with Plus	Apvienojums ar plusu
+	Union with Subscript-Superscript Limits	Apvienojums ar apakšraksta un augšraksta robežām
+	Unions and Intersections	Apvienojumi un šķēlumi
+	United Kingdom	Apvienotā Karaliste
+	United States	Amerikas Savienotās Valstis
+	Unlink Fields	Atsaistīt laukus
+	Unlink\nCitations	Atsaistīt\natsauces
+	Unlock Fields	Atbloķēt laukus
+	Up Diagonal Dots	Diagonāli punkti uz augšu
+	Up one level	Vienu līmeni augstāk
+	Update check is not supported in the web browser.	Atjauninājumu pārbaude tīmekļa pārlūkā netiek atbalstīta.
+	Update Field	Atjaunināt lauku
+	Update fields before printing	Atjaunināt laukus pirms drukāšanas
+	Update Index	Atjaunināt rādītāju
+	Update Style to Match Selection	Atjaunināt stilu atbilstoši atlasei
+	Update Styles from Template	Atjaunināt stilus no veidnes
+	Update Table	Atjaunināt tabulu
+	Update Table of Figures	Atjaunināt attēlu sarakstu
+	Update to Match	Atjaunināt atbilstoši
+	Update to Match Selection	Atjaunināt atbilstoši atlasei
+	URGENT	STEIDZAMI
+	URL	URL
+	Uruguay	Urugvaja
+	Use "a" before a consonant sound	Pirms līdzskaņa izrunas izmantojiet "a"
+	Use "an" before a vowel sound	Pirms patskaņa izrunas izmantojiet "an"
+	Use an Existing List…	Izmantot esošu sarakstu…
+	Use system setting	Izmantot sistēmas iestatījumu
+	Use the browser's full screen (F11)	Izmantot pārlūka pilnekrānu (F11)
+	Use the current style set and theme for all new documents?	Vai izmantot pašreizējo stilu kopu un motīvu visiem jaunajiem dokumentiem?
+	Use the Insert key to switch overtype on and off	Izmantot taustiņu Insert, lai ieslēgtu un izslēgtu pārrakstīšanu
+	Use this formatting as the default for:	Izmantot šo formatējumu kā noklusējumu:
+	Use wildcards	Izmantot aizstājējzīmes
+	User Name	Lietotājvārds
+	User name:	Lietotājvārds:
+	User templates:	Lietotāja veidnes:
+	Vector A	Vektors A
+	Vector AB	Vektors AB
+	Venezuela	Venecuēla
+	Version History	Versiju vēsture
+	Version {version} ({build})	Versija {version} ({build})
+	Vertical alignment:	Vertikālais līdzinājums:
+	Vertical Bars	Vertikālas līnijas
+	Vertical Dots	Vertikāli punkti
+	Vietnamese	Vjetnamiešu
+	View Alt Text…	Skatīt alternatīvo tekstu…
+	View and edit the document's custom properties.	Skatīt un rediģēt dokumenta pielāgotos rekvizītus.
+	View Gridlines	Skatīt režģa līnijas
+	View State	Skata stāvoklis
+	View › Focus hides everything but your words. I'll wait outside.	Skats > Fokuss paslēpj visu, izņemot jūsu vārdus. Es pagaidīšu ārā.
+	Viewing	Skatīšana
+	Viewing — view the file but make no changes	Skatīšana — skatīt failu, neko nemainot
+	Views	Skati
+	Visual effects	Vizuālie efekti
+	Vivid 200%	Spilgts 200%
+	Volume	Sējums
+	Volume Integral	Tilpuma integrālis
+	Volume Integral with Limits	Tilpuma integrālis ar robežām
+	Volume Integral with Stacked Limits	Tilpuma integrālis ar robežām virs un zem
+	Wait for the print job to finish submitting before closing.	Pirms aizvēršanas pagaidiet, līdz drukas darba iesniegšana beidzas.
+	Waiting for the save to finish…	Gaida saglabāšanas beigas…
+	Waiting for Zotero…	Gaida Zotero…
+	Warm Gradient with Outline	Silts gradients ar kontūru
+	Warnings ({n})	Brīdinājumi ({n})
+	Washout	Izbalināts
+	Weather	Laikapstākļi
+	Web Layout	Tīmekļa izkārtojums
+	Web page (*.html)	Tīmekļa lapa (*.html)
+	Web\nLayout	Tīmekļa\nizkārtojums
+	Wed	Tr
+	Welsh	Velsiešu
+	West	Rietumi
+	When this document was first created	Kad šis dokuments pirmoreiz izveidots
+	When this document was most recently printed	Kad šis dokuments pēdējoreiz drukāts
+	When this document was most recently saved	Kad šis dokuments pēdējoreiz saglabāts
+	White Space	Tukšā vieta
+	White space	Tukšā vieta
+	Who the document properties name as author	Kuru dokumenta rekvizīti norāda kā autoru
+	Whole document	Viss dokuments
+	Whole page	Visa lapa
+	Whole Table	Visa tabula
+	Whole words	Veseli vārdi
+	Wide	Plats
+	Widow/Orphan Control	Atsevišķu rindu kontrole
+	Widow/Orphan control	Atsevišķu rindu kontrole
+	Width and spacing	Platums un atstatums
+	Wildcards (regex)	Aizstājējzīmes (regex)
+	With:	Ar:
+	Word 2003 XML Document (*.xml)	Word 2003 XML dokuments (*.xml)
+	Word Count	Vārdu skaits
+	Word document	Word dokuments
+	Word document (*.docx)	Word dokuments (*.docx)
+	Word Left	Vārds pa kreisi
+	Word level	Vārdu līmenis
+	Word Right	Vārds pa labi
+	Word sources	Word avoti
+	Word XML Document (*.xml)	Word XML dokuments (*.xml)
+	WordArt	WordArt
+	WordArt Styles	WordArt stili
+	WordCraft	WordCraft
+	WordCraft is now the default app for Word documents.	WordCraft tagad ir noklusējuma lietotne Word dokumentiem.
+	WordCraft {version} is currently the newest version available.	WordCraft {version} pašlaik ir jaunākā pieejamā versija.
+	Words only	Tikai vārdi
+	Wrap Text	Aplauzt tekstu
+	Wrap Text Sides	Aplaušanas puses
+	Wrap\nText	Aplauzt\ntekstu
+	Write & Insert Fields	Rakstīšana un lauku ievietošana
+	Write a reply	Rakstīt atbildi
+	Writer's block? I find staring at the cursor helps. It's been blinking at me for years.	Rakstītāja bloks? Man palīdz skatīšanās uz kursoru. Tas man mirkšķina jau gadiem.
+	x bar	x ar svītru
+	Year	Gads
+	Yields	Rezultāts
+	You haven't saved in a while, and AutoSave is off. Save now?	Sen neesat saglabājis, un automātiskā saglabāšana ir izslēgta. Vai saglabāt tagad?
+	You started a list. Press Enter twice to end it, or Backspace at the start of an item to turn it back into text.	Sākāt sarakstu. Divreiz nospiediet Enter, lai to beigtu, vai Backspace vienuma sākumā, lai to pārvērstu atpakaļ par tekstu.
+	Your document is now the most saved document in history.	Jūsu dokuments tagad ir vēsturē visvairāk saglabātais dokuments.
+	Your languages	Jūsu valodas
+	Your own dictionary	Jūsu vārdnīca
+	Your system doesn't report an animation setting, so animation effects stay on.	Jūsu sistēma nenorāda animācijas iestatījumu, tāpēc animācijas efekti paliek ieslēgti.
+	Your system has animation effects turned off.	Jūsu sistēmā animācijas efekti ir izslēgti.
+	Your system has animation effects turned on.	Jūsu sistēmā animācijas efekti ir ieslēgti.
+	Zotero	Zotero
+	Zotero: cancelled	Zotero: atcelts
+	Zotero: done	Zotero: gatavs
+	{added}; {count} couldn't be read: {names}	{added}; {count} neizdevās nolasīt: {names}
+	{added}; {n} skipped (limit {max})	{added}; {n} izlaisti (ierobežojums {max})
+	{cols}×{rows} Table	{cols}×{rows} tabula
+	{contributors} contributors · {commits} commits	Līdzdalībnieki: {contributors} · iesūtījumi: {commits}
+	{count} items highlighted	Izcelti vienumi: {count}
+	{count} of {total} pages will print	Tiks drukātas {count} no {total} lapām
+	{count} of {total} recipients will be merged.	Tiks sapludināti {count} no {total} adresātiem.
+	{field}, record {n}	{field}, ieraksts {n}
+	{group} settings	{group}: iestatījumi
+	{key} checks the spelling and grammar of the whole document.	{key} pārbauda visa dokumenta pareizrakstību un gramatiku.
+	{key} counts your words, characters and paragraphs.	{key} saskaita vārdus, rakstzīmes un rindkopas.
+	{key} finds and replaces text, formatting and special characters.	{key} atrod un aizstāj tekstu, formatējumu un īpašās rakstzīmes.
+	{key} repeats your last action. Formatting ten headings is suddenly one click and nine taps.	{key} atkārto pēdējo darbību. Desmit virsrakstu formatēšana pēkšņi ir viens klikšķis un deviņi pieskārieni.
+	{key} starts a new line without starting a new paragraph.	{key} sāk jaunu rindu, nesākot jaunu rindkopu.
+	{key} starts a new page. Much tidier than pressing Enter until it happens.	{key} sāk jaunu lapu. Daudz kārtīgāk nekā spiest Enter, līdz tas notiek.
+	{key} turns the selected text into a link.	{key} pārvērš atlasīto tekstu par saiti.
+	{key}+Click to follow link	{key}+klikšķis, lai sekotu saitei
+	{kind}, {columns} × {rows}, {size} ({paper})	{kind}, {columns} × {rows}, {size} ({paper})
+	{language} (default)	{language} (noklusējums)
+	{language} (dictionary unreadable)	{language} (vārdnīca nav nolasāma)
+	{language} (no dictionary)	{language} (nav vārdnīcas)
+	{language} ({region})	{language} ({region})
+	{language} is now the document's default language.	{language} tagad ir dokumenta noklusējuma valoda.
+	{language}: no dictionary found	{language}: vārdnīca nav atrasta
+	{language}: WordCraft doesn't check spelling or grammar in this language yet.	{language}: WordCraft šajā valodā vēl nepārbauda pareizrakstību vai gramatiku.
+	{language}: {file}	{language}: {file}
+	{language}: {file} (unreadable: {reason})	{language}: {file} (nav nolasāms: {reason})
+	{names} and {n} more	{names} un vēl {n}
+	{name}   {height} × {width} in	{name}   {height} × {width} collas
+	{name}   {height} × {width} mm	{name}   {height} × {width} mm
+	{name} already exists. Choose Save again to replace it.	{name} jau pastāv. Vēlreiz izvēlieties Saglabāt, lai to aizstātu.
+	{name} is protected with a password.	{name} ir aizsargāts ar paroli.
+	{name} options	{name}: opcijas
+	{name} wasn't found.	{name} netika atrasts.
+	{n} entries marked.	Atzīmēti ieraksti: {n}.
+	{n} lines	{n} rindas
+	{n} pt	{n} pt
+	{paper}   {width} × {height}	{paper}   {width} × {height}
+	{selected} of {words} words	{selected} no {words} vārdiem
+	{size} pt	{size} pt
+	{width} × {height} mm	{width} × {height} mm
+	{width} × {height} pixels	{width} × {height} pikseļi
+	{words} words	Vārdi: {words}
+	{words} words and counting. Literally. I'm counting.	Vārdi: {words} un turpinās. Burtiski. Es skaitu.
+	{words} words! I'd throw confetti but I'd have to clean it up.	Vārdi: {words}! Mestu konfeti, bet tad būtu jāsakopj.
+	{words} words. That's {words} more than I've written today.	Vārdi: {words}. Tas ir par {words} vairāk nekā es šodien esmu uzrakstījis.
+	“{text}” ({row}, {series}) isn't a number.	„{text}” ({row}, {series}) nav skaitlis.
+	✓ None	✓ Nav
+	➕ New comment	➕ Jauns komentārs
+	📂  Browse…	📂  Pārlūkot…

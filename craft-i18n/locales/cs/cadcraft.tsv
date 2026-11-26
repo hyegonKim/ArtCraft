@@ -51,6 +51,7 @@
 	All Scales	Všechna měřítka
 	All Used Layers	Všechny použité hladiny
 	An array that would create more objects than this is refused.	Pole překračující tento počet objektů bude odmítnuto.
+	Analyze Shapes	Analyzovat tvary
 	Animation Effects	Efekty animace
 	Animation effects	Efekty animace
 	Annotation scale	Měřítko popisů
@@ -82,6 +83,7 @@
 	Bind...	Svázat...
 	Blend	Spojit křivky
 	Block Attribute Manager...	Správce atributů bloků...
+	Block Description...	Popis bloku...
 	Block Editor	Editor bloků
 	Block Reference	Reference bloku
 	Block...	Blok...
@@ -100,6 +102,7 @@
 	ByLayer	Dle hladiny
 	CADCraft	CADCraft
 	CADCraft Help	Nápověda CADCraft
+	CADCraft is up to date.	CADCraft je aktuální.
 	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	CADCraft ukládá tyto předvolby, režimy uchopení objektu a přepínače kreslení pro váš uživatelský účet a obnovuje je při spuštění.
 	Cartesian (x, y)	Kartézské (x, y)
 	Center Line	Osa
@@ -115,6 +118,7 @@
 	Change to Current Layer	Převést do aktuální hladiny
 	Changed: {n}	Změněno: {n}
 	Changes apply at once and are kept for next time.	Změny se projeví okamžitě a uloží se pro příště.
+	Check for Updates…	Zkontrolovat aktualizace…
 	Circle	Kružnice
 	Circumference	Obvod
 	Clear Command History	Vymazat historii příkazů
@@ -155,6 +159,7 @@
 	Copy Nested Objects	Kopírovat vnořené objekty
 	Copy Selection	Kopírovat výběr
 	Copy with Base Point	Kopírovat se základním bodem
+	Could not check for updates.	Aktualizace se nepodařilo zkontrolovat.
 	Count	Počet
 	Count List	Seznam počtů
 	Count Table	Tabulka počtů
@@ -167,6 +172,7 @@
 	Current selection	Aktuální výběr
 	Current: {color}	Aktuální: {color}
 	Custom	Custom
+	Cut with Base Point	Vyjmout se základním bodem
 	Cylinder	Válec
 	Dark	Tmavé
 	Data Extraction...	Extrahovat data...
@@ -250,7 +256,7 @@ menu	Draw	Kreslení
 	Enter a vertex editing option	Zadejte možnost úpravy vrcholů
 	Enter an option	Zadejte možnost
 	Enter angle of xline	Zadejte úhel přímky
-	Enter angle of xline (0) or	Zadejte úhel přímky (0) nebo
+	Enter angle of xline (0)	Zadejte úhel přímky (0)
 	Enter area of rectangle in current units	Zadejte plochu obdélníku v aktuálních jednotkách
 	Enter attribute prompt	Zadejte výzvu atributu
 	Enter attribute tag name	Zadejte označení atributu
@@ -261,7 +267,7 @@ menu	Draw	Kreslení
 	Enter default attribute value	Zadejte výchozí hodnotu atributu
 	Enter degree of spline	Zadejte stupeň spline
 	Enter delta angle	Zadejte změnu úhlu
-	Enter delta length or	Zadejte změnu délky nebo
+	Enter delta length	Zadejte změnu délky
 	Enter dimension text	Zadejte text kóty
 	Enter dimension text (<> = measurement)	Zadejte text kóty (<> = naměřená hodnota)
 	Enter dimension value or [name=expression]	Zadejte hodnotu kóty nebo [name=expression]
@@ -295,6 +301,7 @@ menu	Draw	Kreslení
 	Evaluate	Vyhodnotit
 	Exclude from new selection set	Vyloučit z nové výběrové množiny
 	Explode	Rozložit
+	Export Comparison	Exportovat porovnání
 	Export Table	Exportovat tabulku
 	Export to PDF...	Exportovat do PDF...
 	Export...	Exportovat...
@@ -307,6 +314,8 @@ menu	Draw	Kreslení
 	File Tab	Karta souboru
 	Fillet	Zaoblit
 	Filters	Filtry
+	Find All	Find All
+	Find what:	Find what:
 	Find...	Najít...
 	Fit Points	Prokládací body
 	Fix	Pevná vazba
@@ -461,6 +470,7 @@ menu	Draw	Kreslení
 	Make it a block of this drawing; its layers become NAME$0$LAYER	Převést na blok tohoto výkresu; názvy hladin budou NAME$0$LAYER
 	Make Object's Layer Current	Nastavit hladinu objektu jako aktuální
 	Make...	Vytvořit...
+	Match case	Match case
 	Match Layer	Převzít hladinu
 	Match Properties	Převzít vlastnosti
 	Measure	Rozdělit podle délky
@@ -493,6 +503,7 @@ menu	Modify	Modifikace
 	Name	Název
 	Name (A–Z)	Název (A–Z)
 	Named	Pojmenované
+	Named Viewports...	Pojmenované výřezy...
 	Named Views...	Pojmenované pohledy...
 	Nearest	Nejbližší
 	New (metric)	Nový (metrický)
@@ -517,11 +528,11 @@ menu	Modify	Modifikace
 	No saved layer states	Žádné uložené stavy hladin
 	No selection	Žádný výběr
 	Node	Bod
-	Normal	Normal
 	Not a number or distance: {text}	Není číslo ani vzdálenost: {text}
 	Not available yet	Zatím není k dispozici
 	Not Found	Nenalezeno
 	Not loaded	Nenačteno
+	Nothing found	Nothing found
 	Numbered list	Číslovaný seznam
 	Object Snap	Uchopení objektu
 	Object Snap (F3)	Uchopení objektu (F3)
@@ -539,6 +550,7 @@ menu	Modify	Modifikace
 	One of the Crafting Apps by the ArtCraft team and community.	Jedna z aplikací Crafting Apps od týmu ArtCraft a komunity.
 	Only in this drawing: {n}	Pouze v tomto výkresu: {n}
 	Only in {name}: {n}	Pouze v {name}: {n}
+	Oops	Obnovit vymazané objekty
 	Open (⌘O)	Otevřít (⌘O)
 	Open a drawing first.	Nejprve otevřete výkres.
 	Open and Save	Otevírání a ukládání
@@ -669,12 +681,18 @@ menu	Modify	Modifikace
 	Rename Text Style	Přejmenovat styl textu
 	Rename...	Přejmenovat...
 	Repeat {command}	Opakovat {command}
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Nahradit blok...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	Je vyžadován bod (x,y, @dx,dy nebo @d<a).
 	Reset keeps the interface language.	Obnovení výchozího nastavení zachová jazyk rozhraní.
 	Reset Palettes	Obnovit palety
 	Reset Panel Layout	Obnovit rozložení panelů
 	Reset to Defaults	Obnovit výchozí nastavení
 	Restore Layer State	Obnovit stav hladin
+	Results	Results
 	Reverse	Obrátit
 	Revision Cloud	Revizní obláček
 	Revolve	Rotovat profil
@@ -693,6 +711,7 @@ menu	Modify	Modifikace
 	Search for layer	Hledat hladinu
 	Search for parameter	Hledat parametr
 	Search for pattern	Hledat vzor
+	Searches the current space.	Searches the current space.
 	Second and next points:	Druhý a další body:
 	Select	Vybrat
 	Select 2D polyline	Vyberte 2D křivku
@@ -718,8 +737,8 @@ menu	Modify	Modifikace
 	Select an arc or circle	Vyberte oblouk nebo kružnici
 	Select an arc.	Vyberte oblouk.
 	Select an object	Vyberte objekt
-	Select an object to change or	Vyberte objekt ke změně nebo
-	Select an object to measure or	Vyberte objekt k měření nebo
+	Select an object to change	Vyberte objekt ke změně
+	Select an object to measure	Vyberte objekt k měření
 	Select an object.	Vyberte objekt.
 	Select an open curve.	Vyberte otevřenou křivku.
 	Select an open line, arc, polyline, ellipse arc or spline.	Vyberte otevřenou úsečku, oblouk, křivku, eliptický oblouk nebo spline.
@@ -733,9 +752,8 @@ menu	Modify	Modifikace
 	Select first line	Vyberte první úsečku
 	Select first line or arc	Vyberte první úsečku nebo oblouk
 	Select first object	Vyberte první objekt
-	Select first object or	Vyberte první objekt nebo
 	Select first point	Vyberte první bod
-	Select nested objects to copy or	Vyberte vnořené objekty ke kopírování nebo
+	Select nested objects to copy	Vyberte vnořené objekty ke kopírování
 	Select object	Vyberte objekt
 	Select object to dimension	Vyberte objekt ke kótování
 	Select object to divide	Vyberte objekt k dělení
@@ -752,7 +770,7 @@ menu	Modify	Modifikace
 	Select one polyline (Multiple is available through the JSON form).	Vyberte jednu křivku (možnost Multiple je dostupná ve formě JSON).
 	Select path curve	Vyberte křivku trajektorie
 	Select point or object	Vyberte bod nebo objekt
-	Select polyline or	Vyberte křivku nebo
+	Select polyline	Vyberte křivku
 	Select second line	Vyberte druhou úsečku
 	Select second line or shift-select to apply corner	Vyberte druhou úsečku; s klávesou Shift vytvoříte roh
 	Select second object	Vyberte druhý objekt
@@ -816,9 +834,8 @@ menu	Modify	Modifikace
 	Specify axis endpoint of ellipse	Určete koncový bod osy elipsy
 	Specify base diameter	Určete průměr základny
 	Specify base point	Určete základní bod
-	Specify base point or	Určete základní bod nebo
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Určete základní bod nebo posunutí (tažením prostředním tlačítkem myši posunete pohled v reálném čase)
-	Specify base radius or	Určete poloměr základny nebo
+	Specify base radius	Určete poloměr základny
 	Specify center of donut	Určete střed prstence
 	Specify center of ellipse	Určete střed elipsy
 	Specify center of polygon	Určete střed mnohoúhelníku
@@ -860,7 +877,7 @@ menu	Modify	Modifikace
 	Specify first point on circle: _tan to	Určete první bod na kružnici: _tan k
 	Specify first source point	Určete první zdrojový bod
 	Specify height	Určete výšku
-	Specify helix height or	Určete výšku šroubovice nebo
+	Specify helix height	Určete výšku šroubovice
 	Specify included angle	Určete středový úhel
 	Specify insertion base point	Určete základní bod vložení
 	Specify insertion point	Určete bod vložení
@@ -879,7 +896,6 @@ menu	Modify	Modifikace
 	Specify new width for all segments	Určete novou šířku všech segmentů
 	Specify next point	Určete další bod
 	Specify offset distance	Určete vzdálenost ekvidistanty
-	Specify offset distance or	Určete vzdálenost ekvidistanty nebo
 	Specify opposite corner	Určete protilehlý roh
 	Specify other corner point	Určete bod druhého rohu
 	Specify other endpoint of axis	Určete druhý koncový bod osy
@@ -892,7 +908,6 @@ menu	Modify	Modifikace
 	Specify radius of circle	Určete poloměr kružnice
 	Specify rotation angle	Určete úhel otočení
 	Specify rotation angle of text	Určete úhel otočení textu
-	Specify rotation angle or	Určete úhel otočení nebo
 	Specify scale factor	Určete faktor měřítka
 	Specify second angle endpoint	Určete druhý koncový bod úhlu
 	Specify second break point	Určete druhý bod přerušení
@@ -925,9 +940,9 @@ menu	Modify	Modifikace
 	Specify third source point or <continue>	Určete třetí zdrojový bod nebo <pokračovat>
 	Specify through point	Určete bod, kterým má procházet
 	Specify top diameter	Určete horní průměr
-	Specify top radius or	Určete horní poloměr nebo
+	Specify top radius	Určete horní poloměr
 	Specify total angle	Určete celkový úhel
-	Specify total length or	Určete celkovou délku nebo
+	Specify total length	Určete celkovou délku
 	Specify width for rectangles	Určete šířku obdélníků
 	Sphere	Koule
 	Spline	Spline
@@ -971,6 +986,7 @@ menu	Modify	Modifikace
 	Text override	Přepsání textu
 	Text style	Styl textu
 	Text Style...	Styl textu...
+	Text to find	Text to find
 	Thaw All Layers	Rozmrazit všechny hladiny
 	Thaw Layer	Rozmrazit hladinu
 	The aperture is how near the cursor must come to a point for an object snap to find it.	Dosah určuje, jak blízko se kurzor musí přiblížit k bodu, aby jej uchopení objektu nalezlo.
@@ -1038,7 +1054,8 @@ menu	View	Zobrazení
 	VP Color	Barva ve výřezu
 	VP Freeze	Zmrazení ve výřezu
 	W	Z
-	WCS ⌄	GSS ⌄
+	WCS	GSS
+	Whole words	Whole words
 	Width factor	Faktor šířky
 	Wipeout	Zakrytí
 	Working Set	Pracovní sada
@@ -1046,6 +1063,7 @@ menu	View	Zobrazení
 	Write Block	Zapsat blok
 	Xline	Konstrukční přímka
 	Xref and Block In-place Editing	Úpravy xref a bloků na místě
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom	Změna přiblížení
 	Zoom All	Přiblížit vše
 	Zoom Dynamic	Dynamické přiblížení

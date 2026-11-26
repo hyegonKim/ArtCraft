@@ -35,8 +35,7 @@ const SPECTRAL_MAX_COLUMNS: usize = 256;
 
 /// Draw a clip's Spectral Frequency Display across `body`: per channel band, columns of
 /// Hann-windowed FFT levels centred on each column's time, low frequencies at the bottom and
-/// Nyquist at the top, on a magma-like colour ramp from -84 dBFS to 0 dBFS. The columns are
-/// computed when the clip is drawn, with one FFT plan for the whole clip.
+/// Nyquist at the top, on a magma-like colour ramp from -84 dBFS to 0 dBFS.
 pub fn draw_spectral(canvas: Canvas<'_>, clip: &Clip, audio: &SourceAudio, channels: usize, body: Rect) {
     let Canvas { painter, s, tl } = canvas;
     let n_ch = channels.min(audio.peaks.len()).max(1);

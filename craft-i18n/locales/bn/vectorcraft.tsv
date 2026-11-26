@@ -1,0 +1,4573 @@
+# বাংলা (bn) interface catalog for VectorCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+#	  — missing	
+#	  — substituted by {style}	
+#	  — {n} characters from another font	
+#	 a pin to warp  |  	
+#	 a point to edit it  |  	
+#	 a stroke to add a width point  |  	
+#	 across a selected object to set the gradient direction	
+#	 across paths to push them along  |  	
+#	 an anchor or path segment to select it  |  	
+#	 an object to copy its attributes  |  	
+#	 an object, then another to blend them  |  	
+#	 cancels  |  Double-click the tool for options	
+#	 for exact size	
+#	 for exact values	
+#	 from center  |  	
+#	 keeps its proportions)	
+#	 near a selected pin to rotate  |  	
+#	 on the canvas to create one	
+#	 on the canvas to create one (	
+#	 out from a highlighted edge to place its dimension  |  	
+#	 over paths to roughen their outlines  |  	
+#	 over paths, and hold still to keep going  |  	
+#	 right or left to zoom in or out  |  	
+#	 selects several, or draws one inside an artboard)	
+#	 the art to add a pin  |  	
+#	 the object to duplicate	
+#	 the object to select  |  	
+#	 to add	
+#	 to add a corner point  |  	
+#	 to add a smooth point  |  	
+#	 to add smooth points  |  	
+#	 to apply the selection's to it  |  	
+#	 to blend from it  |  	
+#	 to change one side  |  	
+#	 to close  |  	
+#	 to constrain proportions  |  	
+#	 to copy  |  	
+#	 to create area type  |  	
+#	 to create point type  |  	
+#	 to draw  |  	
+#	 to exit editing	
+#	 to finish	
+#	 to keep zooming	
+#	 to move  |  	
+#	 to move in perspective  |  	
+#	 to pan the view	
+#	 to remove pins	
+#	 to remove points	
+#	 to sample a color	
+#	 to scale in perspective	
+#	 to search every command	
+#	 to select an artboard  |  	
+#	 to select more pins  |  	
+#	 to select more points  |  	
+#	 to select multiple objects  |  	
+#	 to set spacing and orientation	
+#	 to set the reference point  |  	
+#	 to size the brush (	
+#	 to toggle corner  |  	
+#	 to transform  |  	
+#	 to zoom in  |  	
+#	 to zoom into an area	
+#	 to zoom out  |  	
+#	 while dragging to move perpendicular to the plane  |  	
+#@msg	"{0}" is not a colour: write it as #rrggbb	
+#	(closest)	
+#	+ Add Scale	
+#	0.2 (quality) to 100 (speed)	
+#	1 bit	
+#	1 Color Job	
+#	1 Color Job…	
+#	1 Layer	
+#	1 {unit} on the artboard stands for {real} {unit} in the scene.	
+#	16 bits/pixel	
+#	16 Colors	
+#	2 Color Job	
+#	2 Color Job…	
+#	2-Up	
+#	256 Colors	
+#	2K Cinema	
+#	2up	
+#	3 Color Job	
+#	3 Color Job…	
+#	3 Colors	
+#	3 x 3 Average	
+#	30° Angles	
+#	3D and Materials	
+#	3D Lighting Preset	
+#	3D Ribbon	
+#	4 bit	
+#	4-Up	
+#	45° Angles	
+#	4K Cinema	
+#	4K UHD	
+#	4up	
+#	5 x 5 Average	
+#	6 Colors	
+#	60° Angles	
+#	8 Colors	
+#	8K UHD	
+#	90° & 45° & 30° Angles	
+#	90° & 45° Angles	
+#	90° Angles	
+#	:	
+#	< 1 sec	
+#	<Opacity Mask>	
+#	@{login}: {prs}, {commits}, +{added} / −{deleted} lines (Δ {delta}), +{binary_added} / −{binary_deleted} binary assets, {first} – {last}	
+#	[1P-High View]	
+#	[1P-Low View]	
+#	[1P-Normal View]	
+#	[2P-High View]	
+#	[2P-Low View]	
+#	[2P-Normal View]	
+#	[3P-Low View]	
+#	[3P-Normal View]	
+#	[Custom]	
+#	[Default]	
+#	[Default] is protected: New… starts an editable copy.	
+#	[High Quality Print]	
+#	[High Resolution]	
+#	[Low Resolution]	
+#	[Medium Resolution]	
+#swatch	[None]	
+#	[Normal Character Style]	
+#	[Normal Paragraph Style]	
+#	[PDF/X-1a:2001]	
+#	[PDF/X-3:2002]	
+#	[PDF/X-4:2010]	
+#	[Press Quality]	
+#swatch	[Registration]	
+#	[Smallest File Size]	
+#	[Unnamed]	
+#	[VectorCraft Default]	
+#@msg	`aspect` must be a number (%)	
+#@msg	`at` must be [x, y]	
+#@msg	`color` must be a colour	
+#@msg	`command` must be a command whose menu item opens a dialog (see ui.menuDialog)	
+#@msg	`corners` must be an array of anchor indices, not {v}	
+#@msg	`dither` applies to gradient fills (paint.setFill)	
+#@msg	`dither` applies to gradient fills (stroke: false)	
+#@msg	`dither` must be true or false	
+#@msg	`freeform.lines` must be an array	
+#@msg	`freeform.points` must be an array	
+#@msg	`gradient` must be an object	
+#@msg	`id` is the step reference {r}, which only `run` and `command_batch` resolve	
+#@msg	`ids` must be an array of object ids, not {v}	
+#@msg	`library` is a library id or name (see {list})	
+#@msg	`method` must be classic or perceptual	
+#@msg	`mode` applies to freeform gradients	
+#@msg	`mode` must be grayscale, rgb, hsb, cmyk or websafe	
+#@msg	`sampleSize` must be 1, 3 or 5	
+#@msg	`stops` must be an array	
+#@msg	`svg` must be an object of SVG options (see document.formats)	
+#@msg	`to` must be "corner" or "smooth"	
+#@msg	`{_1}` is no save command	
+#@msg	`{area}` is no recovery area name	
+#@msg	`{color}` is not a colour (#rrggbb or a preset name)	
+#@msg	`{file}` isn't a VectorCraft document, a PDF or a PDF-compatible .ai file	
+#@msg	`{given}` isn't a library panel (see window.swatchLibrary)	
+#@msg	`{id}` has no envelope dialog	
+#@msg	`{keep}` is not a side of this axis	
+#@msg	`{key}` must be `auto` or a language code such as `en` or `zh-hant`	
+#@msg	`{key}` must be a #rrggbb color	
+#@msg	`{key}` must be a #rrggbb colour	
+#@msg	`{key}` must be a number	
+#@msg	`{key}` must be a number, not {v}	
+#@msg	`{key}` must be a string	
+#@msg	`{key}` must be a whole number	
+#@msg	`{key}` must be a whole number between {min} and {max} (got {x})	
+#@msg	`{key}` must be an array of these names: {_1}	
+#@msg	`{key}` must be between {min} and {max} (got {x})	
+#@msg	`{key}` must be one of {_1}	
+#@msg	`{key}` must be true or false	
+#@msg	`{k}` must be [x, y]	
+#@msg	`{name}` has no options	
+#@msg	`{name}` is a built-in workspace; choose another name	
+#@msg	`{name}` is a process colour: tints apply to global and spot colours	
+#@msg	`{name}` is no recovery entry name	
+#@msg	`{name}` isn't a colour swatch	
+#@msg	`{path}` must be a bool or an object of bools	
+#@msg	`{s}` is not a colour (#rrggbb or a preset name)	
+#@msg	`{text}`: step {i}'s result has no such value (write $$ for a literal $)	
+#@msg	`{text}`: there is no step {i} before this one (steps count from 0; write $$ for a literal $)	
+#@msg	`{tool}` isn't a freehand tool	
+#@msg	`{tool}` isn't a Liquify tool	
+#@msg	`{to}` is not an available name	
+#@msg	`{what}` closes nothing	
+#@msg	`{what}` closes something it didn't open	
+#@msg	a bitmap is empty	
+#@msg	a bitmap is too large to read	
+#@msg	a bristle brush name can have at most {max} characters: `{name}` has {count}	
+#@msg	A browser with WebGPU or WebGL2 is required.	
+#@msg	a calculation has no result, as in a division by zero	
+#@msg	a clipping path can't be attached to a path	
+#@msg	a clipping path can't take objects	
+#@msg	a colour index is 0 to {_1}, not {n}	
+#@msg	a colour is an index, #rrggbb or a preset name, not {v}	
+#@msg	a document needs at least one artboard	
+#@msg	a document needs at least one layer	
+#	A file dialog is open: choose there first	
+#	A File per Object	
+#	A File…	
+#@msg	a freeform gradient keeps at least one point	
+#@msg	a gradient needs at least two stops	
+#@msg	a graphic style named `{to}` already exists	
+#@msg	a key object sits on that point	
+#	A later row takes this shortcut	
+#@msg	a layer couldn't be read	
+#	A legacy .ai file holds one artboard: each artboard you check is saved as a separate file.	
+#@msg	a linked image can't become a gradient mesh: embed it first	
+#	A lower value follows the stroke closely; a higher one gives fewer points and smoother curves.	
+#@msg	a mask has more than one art block	
+#	A new preset starting from the selected one	
+#@msg	a page is missing	
+#@msg	a page out of range	
+#@msg	a page tree kid isn't a reference	
+#@msg	a page tree node has no kids	
+#@msg	a page's placement is not finite	
+#@msg	a path has too many points	
+#@msg	a path inside a compound path, blend, envelope, repeat or Intertwine group can't take objects	
+#@msg	a PostScript error ({name} in `{op}`)	
+#@msg	a PostScript error ({name} in `{op}`), in {procs}	
+#@msg	a PostScript error ({name} in `{op}`: {at})	
+#@msg	a PostScript error ({name} in `{op}`: {at}), in {procs}	
+#@msg	a PostScript error ({name} in `{op}`: {at}; {meaning})	
+#@msg	a PostScript error ({name} in `{op}`: {at}; {meaning}), in {procs}	
+#@msg	a PostScript error ({name} in `{op}`; {meaning})	
+#@msg	a PostScript error ({name} in `{op}`; {meaning}), in {procs}	
+#@msg	a PostScript error ({name})	
+#@msg	a PostScript error ({name}; {meaning})	
+#@msg	a preset named `{_1}` exists	
+#	A saved copy of the selected preset	
+#@msg	a slice size must be a positive number of points	
+#@msg	a spine keeps at least two points	
+#@msg	a stream runs past the end	
+#@msg	a stream's length is wrong	
+#@msg	a stream's length isn't a number	
+#@msg	a swatch or color group named `{n}` exists	
+#@msg	a value has the wrong type for the operator	
+#@msg	a value is outside the range the operator takes	
+#	A3	
+#	A4	
+#	A5	
+#	A6	
+	About VectorCraft	ভেক্টরক্রাফট সম্পর্কে
+#	above	
+#	Above Text	
+#	Absolute Position	
+#	Abutting	
+#	Accent Color	
+#	Accented Edges…	
+#@msg	action is required	
+#	Action {n}	
+#	Activate Document	
+#	Active Perspective Plane	
+#@msg	add a format to export	
+	Add Anchor (Pen)	অ্যাঙ্কর যোগ (পেন)
+	Add Anchor Point	অ্যাঙ্কর পয়েন্ট যোগ
+	Add Anchor Point Tool	অ্যাঙ্কর পয়েন্ট টুল যোগ
+	Add Anchor Points	অ্যাঙ্কর পয়েন্ট যোগ
+#	Add Content	
+#	Add Effect	
+#	Add Event	
+#	Add filters from the list above	
+#	Add Font Files	
+#	Add Fonts	
+#	Add Freeform Line	
+#	Add Freeform Point	
+#	Add Guides	
+#	Add JavaScript File	
+#	Add Light	
+	Add Mesh Line	মেশ লাইন যোগ
+#	Add New	
+#	Add New Effect	
+	Add New Fill	নতুন ফিল যোগ
+	Add New Stroke	নতুন স্ট্রোক যোগ
+#	Add Selected Artwork (Alt: as one asset)	
+#	Add Selected Artwork as Multiple Assets	
+#	Add Selected Artwork as One Asset	
+#	Add space to fit	
+#	Add Spine Point	
+#	Add Swatches	
+#	Add to Graphic Styles	
+#	Add to Library	
+#	Add to Profiles	
+#	Add to Profiles…	
+#	Add to Selection	
+#	Add to Stack	
+#	Add to the Current Shortcuts	
+#	Add Used Colors	
+#	Additional Fonts Folder	
+#	Additional Plug-ins Folder	
+#	Adjust Adjoining Width Points	
+#	Adjust Color Balance…	
+#	Adjust Colors	
+#	Adjust Options:	
+#	Advanced Options	
+#	After First:	
+#@plural	agrees with {n} default shortcut|agrees with {n} default shortcuts	
+#@msg	aiVersion 7 writes legacy .ai files; a .ait template is always PDF-compatible	
+#	Align Objects:	
+#	Align On:	
+	Align Stroke to Center	মাঝে স্ট্রোক অ্যালাইন
+	Align Stroke to Inside	ভেতরে স্ট্রোক অ্যালাইন
+	Align Stroke to Outside	বাইরে স্ট্রোক অ্যালাইন
+#	Align Stroke:	
+#	Align to Artboard	
+#	Align to Glyph Bounds	
+#	Align to Key Object	
+#	Align to Page	
+	Align to Path	পাথে অ্যালাইন
+#	Align To:	
+#	Align:	
+#	Alignment Guides	
+#	All Affected Objects	
+#	All Artwork Above	
+#	All colours are within the CMYK gamut	
+#	All in One Folder	
+#	All on Active Artboard	
+#	All on Same Layers	
+#file-filter	All placeable files	
+#	All printer's marks	
+#	All Rasterized Regions	
+#file-filter	All readable files	
+#	All Scripts	
+#	All shortcuts reset to defaults.	
+#	All Text Objects	
+#	All the art	
+#	All Tools	
+#@msg	already editing a pattern	
+#	Alt key toggles to Smooth Tool	
+#	Alt+Click	
+#	Alt+Drag	
+#	Alt:	
+#	Alter Paths for Appearance	
+#	Amber	
+#swatch	Amber	
+#	Ambient Light	
+#@msg	an image has no pixels and was left out	
+#@msg	an image of {w} × {h} pixels is too large to draw	
+#@msg	an image VectorCraft can't read was left out	
+#@msg	an image whose data is cut short was left out	
+#@msg	an object can't be read	
+#@msg	an object in perspective would leave the edited grid	
+#@msg	An object takes one 3D effect. Edit the existing effect's options, or remove it first.	
+#	Analogous	
+#	Analogous 2	
+#@msg	anchor must name a registered panel	
+	Anchor Point	অ্যাঙ্কর পয়েন্ট
+	Anchor Point Tool	অ্যাঙ্কর পয়েন্ট টুল
+	Anchor Points	অ্যাঙ্কর পয়েন্ট
+#	Anchor Points, Handle, and Bounding Box Display	
+#	Anchor/Path Labels	
+#	Anchors	
+#	Anchors:	
+#	Angled Strokes	
+#	Angled Strokes…	
+#	Angles	
+#@msg	Angles require two straight segments	
+#	Animated Zoom	
+#	Anti-alias Rasters	
+#	Anti-aliased Artwork	
+#	Anti-aliasing:	
+#@msg	antiAlias `{id}`: none, art or type	
+#	Any except extracting pages	
+#	Any Kind	
+#	Appearance Attribute	
+#	Appearance Item	
+#	Appearance of Black	
+#	Appearance Panel	
+#	Appearance panel	
+#	Applied Filters	
+#	Applies the next time VectorCraft starts.	
+#	Applies when the linked file is relinked or updated.	
+#	Apply Brush	
+#	Apply Effect	
+#	Apply Graphic Style	
+#	Apply Last Color	
+#	Apply Last Effect	
+#	Apply Last Gradient	
+#	Apply Paragraph Style	
+#	Apply SVG Filter…	
+#	Apply to All	
+#	Apply to All ({count} more missing)	
+#	Apply {name}	
+#	Approximate path	
+#swatch	Aqua	
+#	Arabic	
+#	Arc Lower…	
+#	Arc Segment Tool Options	
+#	Arc Tool	
+#	Arc Upper…	
+#	Arch…	
+#	Arc…	
+#	Area / Path Type	
+#	Area Graph Tool	
+#	Area Text Objects	
+#	Area Type	
+#@msg	area type in frames too short for a line of the font it shows in got taller frames ({_1}): their type wouldn't show otherwise	
+#	Area Type Options	
+#	Area Type Options…	
+#	Area Type Tool	
+#	Around Object	
+#	Arrange by Column	
+#	Arrange by Row	
+#	Arrange Intertwine Area	
+#	Arrange: Bring to Front	
+#	Arrow (open)	
+#	Arrowheads:	
+#	Art	
+#	Art & Illustration	
+#	Art and Bright Colors	
+	Art Brush	আর্ট ব্রাশ
+	Art Brush Options	আর্ট ব্রাশ বিকল্প
+#	Art Optimized	
+#	Art using a deleted global swatch keeps its colour.	
+#	Artboard Options	
+#	Artboard Options: edit with the Artboard tool	
+#	Artboard Options…	
+#	Artboard or Item Name	
+#	Artboard Tool	
+#@msg	artboard {0} does not exist	
+#	Artboard {number}	
+#	Artboard {n} of {total}	
+#	Artboard:	
+#	Artboards: {n}	
+#	Artwork	
+#	Artwork Colors	
+#	As Multiple Assets	
+#	As Single Asset	
+#	Ascender	
+#	Ascent	
+#	Ask When Modified	
+#	Asset Export	
+#	Asset Export Settings	
+#	Assets	
+#	Assign:	
+#@msg	at this scale the drawing is {w} × {h} pt, more than the canvas holds: choose a smaller scale or fit it to the artboard	
+#	Attach	
+#	Attach Objects on Path	
+#	Attach to Active Plane	
+#	Attributes	
+#	Author Title:	
+#	Auto Grouping	
+#	Auto Leading:	
+#	Auto Size	
+#	Auto Size New Area Type	
+#	Auto Spell Check	
+#	Auto-Collapse Iconic Panels	
+#	Auto-Rotate (turn the paper to each artboard)	
+#	Auto-Simplify	
+#	Automatic flatness	
+#	Automatically Save Recovery Data	
+#	Automation	
+#@msg	automation filesystem access is not granted: read authority is absent: {path}	
+#@msg	automation filesystem access is not granted: write authority is absent: {path}	
+#@msg	automation path rejected: a link that leads nowhere: {path}	
+#@msg	automation path rejected: cannot resolve {path}: {e}	
+#@msg	automation path rejected: outside the read root {root}: {path}	
+#@msg	automation path rejected: outside the read roots {roots}: {path}	
+#@msg	automation path rejected: outside the write root {root}: {path}	
+#@msg	automation path rejected: outside the write roots {roots}: {path}	
+#@msg	automation path rejected: parent traversal below a folder that doesn't exist: {path}	
+#@msg	automation path rejected: path is empty	
+#@msg	automation path rejected: reserved device names are not allowed: {path}	
+#	Average…	
+#	Away from the Line	
+#	Axis	
+#@msg	axis must be "vertical", "horizontal" or an angle in degrees, not `{v}`	
+#	Axis side	
+#	Axis:	
+#swatch	Azure	
+#	B4	
+#	B5	
+#	Back	
+#	Background Color:	
+#	Background Contents:	
+#	Background Level	
+#@msg	background {other}: transparent, white, black or a colour such as "#ff8800"	
+#	Background:	
+#@msg	bad color {v}	
+#@msg	bad colour `{hex}` (#rrggbb)	
+#@msg	bad page tree	
+#@msg	bad shortcut	
+#@msg	bad stream length	
+#@msg	bad trailer	
+#@msg	balance must be between 0 and 100	
+#	Bar Graph Tool	
+#	Barbed	
+#	Bas Relief	
+#	Bas Relief…	
+#	Base Along:	
+#	Baseline (Standard)	
+#	Baseline Optimized	
+#@msg	batch step {_1} (`{id}`) failed: {e}	
+#@msg	Batch: {count} processed	
+#@msg	Batch: {count} processed, {failed} failed	
+#	Before Last:	
+#@msg	before must name a panel	
+#	Begin Recording	
+#	Begin Undo Group	
+#@msg	below and above must name a panel floating in another group	
+#	Best	
+#	Between Line and Object	
+#	Bevel	
+#3d	Bevel	
+#	Bevel both sides	
+#	Bevel Inside	
+#	Bevel Join	
+#	Bevel Shape	
+#	Bind Variable	
+#swatch	Black	
+#	Black and White	
+#	Black and White Logo	
+#	Black and white stay as they are. Dark colors become shades of the stroke color and light colors become tints of it.	
+#	Black becomes the stroke color and white stays white. Other colors become tints of the stroke color by their lightness.	
+#	Black Outline	
+#	BLANK DOCUMENT PRESETS	
+#	Bleed	
+#	Bleed:	
+#	Bleeds	
+#	Blend	
+#@msg	Blend colors: select at least three objects with filled colours	
+#	Blend Front to Back	
+#	Blend Horizontally	
+#	Blend Info	
+#	Blend Options	
+#	Blend Options…	
+#	Blend Tool	
+#	Blend Vertically	
+#	Blends and Transparency	
+#	Bloat	
+#	Bloat Tool	
+#	Blob Brush	
+#	Blob Brush Tool	
+#swatch	Blue	
+#	Blur Mode	
+#@msg	BMP files are RGB or grayscale: colorModel rgb or gray	
+#axis	Both	
+#	Bottom in Front	
+#	Bottom Left:	
+#	Bottom Right:	
+#	Bottom to Top	
+#	Bottom-Justified Tab	
+#	Bottom-to-Bottom Leading	
+#	Bounding Box	
+#	Bounds	
+#	Bounds (Fill Proportionally)	
+#	Bounds (Fit Proportionally)	
+#	Bracket	
+#	Bracket never closed	
+#	Branding	
+#	Break Link to Graphic Style	
+#	Break Link to Symbol	
+#	Brick by Column	
+#	Brick by Row	
+#	Brick Offset:	
+#swatch	Bright Blue	
+#swatch	Bright Green	
+#swatch	Bright Red	
+#swatch	Bright Violet	
+#swatch	Bright Yellow	
+#@msg	brightness must be dark|mediumDark|mediumLight|light	
+#	Brightness/Contrast…	
+#	Brightness:	
+#	Brights	
+#swatch	Brights	
+#	Bring All to Front	
+#	Bristle	
+#	Bristle Brush	
+#	Bristle Brush Options	
+#	Bristle Brush Strokes	
+#	Bristle Density:	
+#	Bristle Length:	
+#	Bristle Thickness:	
+#swatch	Brown	
+#	Browser	
+#	Brush Affects:	
+#	Brush Art	
+#	Brush Definition	
+#	Brush Detail	
+#	Brush Libraries	
+#	Brush Libraries (on the roadmap)	
+#	Brush Options…	
+#	Brush Scale Options	
+#@msg	brushes move only within their type	
+#	Built-in Libraries	
+#	Built-in presets are read-only: New… starts an editable copy.	
+#	Built-in presets don't change: New makes a copy you can edit.	
+#	Built-in presets don't change: New… starts an editable copy.	
+#	Bulge…	
+#	Burasagari	
+#	Business Card 3.5 × 2 in	
+#	Business Card 85 × 55 mm	
+#	Butt Cap	
+#	By Artboard or Item	
+#	By Format	
+#	By Item, Then Format	
+#	By Layer	
+#	By Object	
+#	By Size or Row	
+#	Byte Order:	
+#	Calligraphic	
+#	Calligraphic Brush	
+#	Calligraphic Brush Options	
+#@msg	can't encode the document: {0}	
+#	Can't export “{name}”.	
+#	Can't open “{name}”.	
+#@msg	can't parse shortcut `{c}`	
+#@msg	can't parse shortcut `{s}` for `{k}`	
+#	Can't print these settings: see the Summary	
+#@msg	can't save version {0}: VectorCraft writes versions {MIN_VERSION} to {VERSION}	
+#	Can't save “{name}”.	
+#@msg	can't write .{ext} images	
+#	Cancel Export	
+#	Cancel Key Object	
+#	Cancel Pattern Editing	
+#@msg	cancelled; nothing was changed	
+#@msg	cannot distort a zero-size bounding box	
+#@msg	cannot read PDF: {0}	
+#@msg	cannot split an open path at its end point	
+#	Canvas Color	
+#	Cap	
+#3d	Cap	
+#	Cap Height	
+#	Cap:	
+#	Capture Data Set	
+#	Categories	
+#	Center Artwork	
+#	Center on Artboard	
+#	Center-Justified Tab	
+#	Chalk & Charcoal	
+#	Chalk & Charcoal…	
+#	Change Screen Mode (F)	
+#	Change to Artboard Rulers	
+#	Change to Global Rulers	
+#	Change to Left-to-Right Layout	
+#	Change to Right-to-Left Layout	
+#	Changed since the last Refresh.	
+#	Changes allowed:	
+#	Changes made since it was last saved will be lost.	
+#	Changes the reference app's preferences	
+#	Changing these settings changes how raster effects look when exported, flattened or expanded.	
+#	Channel 1	
+#	Channel 2	
+#	Channel 3	
+#	Channel 4	
+#	Character / Paragraph	
+#	Character Alignment	
+#	Character Direction	
+#	Character options	
+#	Character Rotation	
+#	Character Set:	
+#	Character Style	
+#	Character Style Options	
+#	Character:	
+#	Charcoal	
+#	Charcoal…	
+#@msg	check a layer to export	
+#	Check an artboard to save.	
+#@msg	check an asset to export	
+#	Check Links	
+#	Check Script	
+#	Check Script…	
+#	Checked	
+#	Chevron	
+#swatch	Chocolate	
+#@msg	choice must be "merge" or "add", not `{choice}`	
+#@msg	Choose a circle or a perfect arc	
+#@msg	choose a destination folder	
+#@msg	choose a direction to divide in	
+#	Choose a filter	
+#	Choose a folder	
+#@msg	choose a folder to export to	
+#@msg	choose a location for the package	
+#@msg	Choose a precision from 0 to 6	
+#@msg	choose a source folder	
+#	Choose the file to relink each linked file to. Files with the size and contents saved with the link come first.	
+#@msg	choose the font files to add	
+#@msg	Choose two different points	
+#@msg	Choose two non-parallel straight segments	
+#@msg	Choose two nonzero angle arms	
+#	Chop Design	
+#	Chrome	
+#	Chrome…	
+#	Circle (open)	
+#	Classic Defaults	
+#	Clean Up…	
+#	Clear All Tabs	
+#	Clear Amount	
+#	Clear Appearance	
+#	Clear Events	
+#	Clear Overrides	
+#	Click	
+#	Click an anchor point	
+#	Click or drag	
+#	Click the art with the Gradient tool to add or select points.	
+#	Click the first point	
+#	Click the ramp or a type button to apply a gradient.	
+#	Click to add a tab stop, drag to move it, drag it off the ruler to delete it	
+#	Click to apply to the selected type	
+#	Click to choose a swatch, Shift-click to mix a colour	
+#	Click to edit the mask; Alt-click to view only the mask; Shift-click to disable or enable it	
+#	Click to place each file at 100%, or drag to size it; arrow keys switch files, Esc skips one.	
+#	Click to select, double-click to edit	
+#	Click to toggle visibility	
+#	Click to zoom in, Alt-click to zoom out, drag to pan, double-click to fit	
+#	Click, then press the key this code stands for (Esc cancels)	
+#	Click, then press the new shortcut (Esc cancels)	
+#	Client-side (.html)	
+#	Clip	
+#	Clip Complex Regions	
+#	Clip Group	
+#	Clip to Art	
+#	Clip to Artboard	
+#	Clip to Bounding Box	
+#	Clipboard as PDF	
+#	Clipboard as PNG	
+#	Clipboard as SVG	
+#	Clipboard as Text	
+#	Clipboard Formats	
+#	Clipboard Handling	
+#@msg	clipboard is empty	
+#	Clipping Masks	
+#	Clockwise	
+#	Close Gaps With Paths	
+#	Close Library	
+#	Close Path	
+#	Close paths when ends are within:	
+#	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	
+#	Closed	
+#	Closing bracket with no opening one	
+#@msg	closing needs three anchors	
+#	Clumped	
+#	CMYK	
+#	CMYK colours print with their own values; off, they go through the colour settings too.	
+#	CMYK Equivalents	
+#	CMYK profile in effect	
+#swatch	Coffee	
+#	Collapse Panel Group	
+#	Collapse Panels to Icons	
+#	Collapse to Icons	
+#	Collect for Export	
+#	Collect in New Layer	
+#	Collect Links in a Separate Folder	
+#	Color (,)	
+#	Color Adjustments	
+#	Color bars	
+#	Color blindness – Deuteranopia-type	
+#	Color blindness – Protanopia-type	
+#	Color blindness – Tritanopia-type	
+#	Color conversion:	
+#	Color Group	
+#	Color Group:	
+#	Color Group: {name}	
+#	Color Guide	
+#	Color Guide Options	
+#	Color Guide Options…	
+#	Color Halftone	
+#	Color Halftone…	
+#	Color images	
+#	Color Library	
+#	Color Library…	
+#	Color Mixer (Shift-click the chip)	
+#	Color Mode:	
+#	Color Model:	
+#	Color Models	
+#	Color Panel Options	
+#	Color Picker…	
+#	Color Reduction:	
+#	Color Scheme	
+#	Color Table (4 colors)	
+#	Color Table ({n} color)	
+#@plural	Color Table ({n} color)|Color Table ({n} colors)	
+#	Color Table ({n} colors)	
+#	Color Theme	
+#	Color Themes	
+#	Color Type:	
+#	Color wheel	
+#	Colored Pencil	
+#	Colored Pencil…	
+#	Coloring Controls	
+#	Colorization	
+#	Colorization Tips	
+#@msg	colorTable.{what}: `{h}` is not a colour such as "#ff8800"	
+#@msg	colorTable.{what}: at most {MAX_TABLE} colours	
+#@msg	column docks a set as a dock column, with no anchor or icon	
+#	Column Graph Tool	
+#@msg	column must be true or a number from 1	
+#	Column Type:	
+#	Column Width:	
+#	Column…	
+#	Combine Slices	
+#@msg	Combine Slices: the slices have no bounds	
+#	Coming soon — tracked in the parity plan	
+#@msg	command `{0}` is not available right now: {1}	
+#	Command Click to Select Objects Behind	
+#	Command Dialog	
+#	Comment not closed	
+#	Commenting, filling in form fields and signing	
+#	Compatibility:	
+#	Compatible Gradient and Gradient Mesh Printing	
+#	Compiled or not text	
+#	Compiled script: ask its author for the .jsx file	
+#	Complement	
+#	Complementary	
+#	Complementary 2	
+#	Complete	
+#	Complexity:	
+#	Composite colours are converted to it; separations separate with it when it is a CMYK profile.	
+#	Compound	
+#	Compound 2	
+#	Compound Path	
+#@msg	compound paths can only contain paths	
+#	Compress (RLE)	
+#	Compress text and line art	
+#@msg	compressed (RLE) bitmaps can't be read yet	
+#	Compression › Color › Above Ppi	
+#	Compression:	
+#	Concave	
+#	Concentric Dividers:	
+#	Condition identifier:	
+#	Conflict {n} of {count}	
+#	Connect	
+#	Connect Selected End Points	
+#	Consider Open Filled Paths as Closed	
+#	Consolidate All Windows	
+#	Constrain	
+#	Constrain Angle	
+#	Constrain Width and Height Proportions	
+#	Construction Guides	
+#	Contextual Alternates	
+#	Contextual Task Bar	
+#	Continue in Background	
+#	Contrasty	
+#	Control	
+#@msg	control must be fillStroke, coloring, drawMode or screenMode	
+#	Conté Crayon	
+#	Conté Crayon…	
+#	Convert All Spot Colors to Process	
+#	Convert All Strokes to Outlines	
+#	Convert All Text to Outlines	
+#	Convert Anchor Point	
+#	Convert Anchor Points	
+#	Convert Color	
+#	Convert Document Color Mode	
+#	Convert Process to Global	
+#	Convert Selected Anchor Points to Corner	
+#	Convert Selected Anchor Points to Smooth	
+#	Convert text to outlines	
+#	Convert To Area Type	
+#	Convert to Artboards	
+#@msg	Convert to Artboards: selection has no area	
+#	Convert to CMYK	
+#	Convert to destination	
+#	Convert to destination (preserve numbers)	
+#	Convert to Global	
+#	Convert to Grayscale	
+#	Convert To Outlines	
+#	Convert To Point Type	
+#	Convert to RGB	
+#@msg	Convert to Shape: no rectangles or ellipses selected	
+#	Convert to Straight Lines	
+#	Convert:	
+#	Convex	
+#	Cool	
+#	Copied the CSS of {rules} object(s)	
+#@msg	Copied the CSS of {rules} object(s)	
+#@msg	Copied the script report	
+#swatch	Copper	
+#	Copy (make a transformed copy)	
+#	Copy All Objects	
+#	Copy All Styles	
+#	Copy Appearance	
+#	Copy Artboard	
+#	Copy Color Value (Hex)	
+#	Copy Fonts Used in the Document	
+#	Copy Guide	
+#	Copy in Perspective	
+#	Copy into the document's folder	
+#	Copy Links	
+#	Copy only fonts you own or are licensed to install.	
+#	Copy Report	
+#	Copy Selected Style	
+#	Copy to User Defined	
+#	Copy Width Point	
+#	Copyright and Contact Info	
+#	Copyright Info URL:	
+#	Copyright Notice:	
+#	Copyright Status:	
+#	Copyright Symbol	
+#	Coral	
+#	Corner Point Angle Threshold:	
+#	Corner Radius	
+#	Corner Radius:	
+#	Corner:	
+#@msg	Corners edits the corners of a path	
+#	Corners…	
+#@msg	could not decode image: {0}	
+#	Couldn't copy to the system clipboard: {e}	
+#@msg	Couldn't copy to the system clipboard: {e}	
+#	Couldn't paste from the clipboard: {e}	
+#@msg	Couldn't paste from the clipboard: {e}	
+#@msg	Couldn't place {name}: the document it was dropped on was closed	
+#@msg	Couldn't place {name}: {e}	
+#@msg	Couldn't read {name}: {e}	
+#	Couldn't save recovery data: {e}	
+#@msg	Couldn't save recovery data: {e}	
+#	Couldn't {} {name}: {e}	
+#	Cove	
+#	Craquelure	
+#	Craquelure…	
+#	Create Compound Path From Ellipses	
+#	Create Dimension	
+#	Create Document	
+#	Create from Guides	
+#@msg	Create from Guides: the document has no artboard	
+#@msg	Create from Guides: the guides make more than {MAX_PIECES} slices	
+#	Create from Selection	
+#@msg	Create from Selection: the selection has no area	
+#	Create From:	
+#	Create Gradient Mesh…	
+#	Create Graph	
+#	Create New Fields by	
+#	Create New Layer	
+#	Create New Library	
+#	Create New Library…	
+#	Create New Sublayer	
+#	Create New Swatch…	
+#	Create New {kind} Style	
+#	Create Object Mosaic…	
+#	Create Outlines	
+#@msg	Create Outlines: select text objects	
+#	Create Path	
+#	Create PDF layers from layers and sublayers	
+#	Create PDF layers from top-level layers	
+#	Create PDF-Compatible File	
+#	Create Report	
+#	Create Slice	
+#	Create Slice from Selection	
+#	Create Slices from Guides	
+#	Create Sub-folders	
+#	Create Text	
+#	Create Trim Marks	
+#	Create:	
+#	Created	
+#	Created:	
+#	CRLF (Windows)	
+#	Crop Image	
+#	Crop Marks	
+#	Crop To	
+#	Crosshatch…	
+#	Crystallize Tool	
+#	CSS Properties	
+#	Currency & Symbols	
+#	Current Brush	
+#	Current Colors	
+#	Current Colors (0)	
+#	Current Colors ({total})	
+#	Current Symbol	
+#	Cursor Swatch Preview	
+#	Curvature Tool	
+#	Custom Scale	
+#	Cut Artboard	
+#	Cut Path	
+#	Cut Path at Selected Anchor Points	
+#	Cutout	
+#	Cutout…	
+#swatch	Cyan	
+#swatch	Cyan Green	
+#@msg	damaged	
+#	Dark Intensity	
+#	Dark Rough	
+#	Dark Strokes…	
+#	dash	
+#	Dash Pattern	
+#	Dashed Line	
+#	Data Recovery	
+#@msg	Data Recovery has nowhere to keep copies: set Preferences → File Handling → Data Recovery → Folder (recoveryFolder)	
+#	Data Set	
+#@msg	data the program reads is damaged or cut short, or the program asks for a position in a file that has none	
+#	Data…	
+#	Date (YYYY-MM-DD)	
+#	Date (YYYYMMDD)	
+#	De-Interlace…	
+#	Decimal-Justified Tab	
+#	Decimal:	
+#@msg	decimals must be {_1}–{_2} (got {_3})	
+#	Decorative	
+#	Decrease Font Size by Five Steps	
+#	Default Actions	
+#	Default Figure	
+#	Default Fill and Stroke	
+#	Default Fill and Stroke (D)	
+#	Default Graphic Style	
+#	Default Language	
+#	Default Printer	
+#	Default Swatches	
+#	Define a variable first	
+#	Define Grid…	
+#	Define Perspective Grid	
+#	Define Perspective Grid…	
+#	Definition	
+#	Delete All	
+#	Delete All Slices	
+#	Delete Anchor Point	
+#	Delete Anchor Point Tool	
+#	Delete Anchor Points	
+#	Delete Artboard	
+#	Delete Artboards	
+#	Delete Character Style	
+#	Delete Data Set	
+#	Delete Data Sets	
+#	Delete Design	
+#	Delete Empty Artboards	
+#	Delete Export Preset	
+#	Delete Freeform Point	
+#	Delete Graphic Style	
+#	Delete Graphic Style (Alt-click: without asking)	
+#	Delete Graphic Styles	
+#	Delete Guide	
+#	Delete Guides	
+#	Delete Library	
+#	Delete Library Group	
+#	Delete Library Item	
+#	Delete Light	
+#	Delete Mesh Point	
+#	Delete Paragraph Style	
+#	Delete Pattern	
+#	Delete PDF Preset	
+#	Delete Perspective Grid Preset	
+#	Delete Point	
+#	Delete Preset	
+#	Delete Print Preset	
+#	Delete Profile	
+#	Delete Save for Web Preset	
+#	Delete Selected Item	
+#	Delete Selection	
+#	Delete Slice	
+#	Delete Slices	
+#	Delete Spine Point	
+#	Delete Stop	
+#	Delete Swatch	
+#	Delete Symbol	
+#	Delete Tab	
+#	Delete the graphic style “{name}”?	
+#	Delete the library “{name}”?	
+#	Delete Theme	
+#	Delete theme	
+#	Delete these {count} swatches and groups?	
+#	Delete these {n} graphic styles?	
+#	Delete this saved preset	
+#	Delete this {n} graphic style?	
+#@plural	Delete this {n} graphic style?|Delete these {n} graphic styles?	
+#	Delete Transparency Flattener Preset	
+#	Delete Variable	
+#	Delete Variables	
+#	Delete View	
+#	Delete Width Point	
+#	Delete {kind} Style	
+#	Delete “{name}”?	
+#	Depth:	
+#	Descender	
+#	Design…	
+#	Desired	
+#	Destination Folder:	
+#	Detail	
+#	Detail:	
+#	Devices	
+#	Dialog	
+#	Diamond (open)	
+#	Differences from [Default]:	
+#	Differences from VectorCraft Default:	
+#	Differences from {preset}:	
+#	Diffuse	
+#	Diffuse Glow…	
+#	Dim Copies to:	
+#	Dim Images to:	
+#	Dimension	
+#@msg	Dimension point is outside the canvas	
+#@msg	Dimension size is outside its supported range	
+#	Dimension Tool	
+#	Dimension Tool Options	
+#	Direct Selection	
+#@msg	direct-select anchor points to cut at (not the end points of open paths)	
+#	Direction Handles	
+#	Directives	
+#	Disable Auto Add/Delete	
+#	Disable Opacity Mask	
+#	Discard Empty Type	
+#	Discard Recovered Documents	
+#	Discard White Overprint in Output	
+#@msg	Discarded {_1} recovered document(s)	
+#	Discarded {} recovered document(s)	
+#	Discretionary Hyphen	
+#	Display All Blacks Accurately	
+#	Display All Blacks as Rich Black	
+#	Display Bitmaps as Anti-aliased Images in Pixel Preview	
+#	Display Options	
+#	Display Print Size at 100% Zoom	
+#	Distance:	
+#	Distort & Transform	
+#	Distort Appearance	
+#	Distort Linear Gradients	
+#	Distort Pattern Fills	
+#	Distribute Objects:	
+#	Distribute Spacing	
+#	Distribute Spacing:	
+#	Dither	
+#	Dither:	
+#	Divide Horizontally Into	
+#@msg	divide into 1 to {MAX_PIECES} slices	
+#	Divide Objects Below	
+#@msg	Divide Objects Below: select a path	
+#@msg	Divide Objects Below: select exactly one path	
+#	Divide Slices	
+#	Divide Slices…	
+#	Divide Vertically Into	
+#	Do Not Move	
+#	Do Not Scale	
+#	Do you want to save the changes you made to “{name}”?	
+#@msg	docking action contains an unknown panel or an excessive split path	
+#	Document Color Mode	
+#	Document Info	
+#	Document Ink Options	
+#	Document JSON	
+#	Document Library	
+#	Document model	
+#	Document Name	
+#	Document open password	
+#	Document profile	
+#	Document Raster Effects Settings	
+#	Document Raster Effects Settings Dialog	
+#	Document Raster Effects Settings…	
+#	Document Setup	
+#	Document Setup…	
+#	Document Swatches	
+#	Document Title:	
+#	Documents you create appear here.	
+#	Don't include profiles	
+#	Don't Relink	
+#	Don't Show Center	
+#	Done Editing Pattern	
+#	Dot Gain 15%	
+#	Dot on Bar	
+#	Double Arrow	
+#	Double Bar	
+#	Double Click To Isolate	
+#	Double Column	
+#	Double Left Quotation Marks	
+#	Double Quotes:	
+#	Double Right Quotation Marks	
+#	Double Slash	
+#	Double-click to edit the characters' paint	
+#	Double-click to insert	
+#	Double-click to rename	
+#	Double-click to target the contents	
+#	Down (right reading)	
+#	Download:	
+#@msg	Downloaded {_1} file(s)	
+#	Downloaded {what}	
+#@msg	Downloaded {what}	
+#	Downloaded {} file(s)	
+#	Drag	
+#	Drag a handle	
+#	Drag an item here, or right-click one, to put it in this group.	
+#	Drag art here, or select it and click +. Hold Alt for one asset of several objects.	
+#	Drag art or swatches here, or use + to add the selection's colors and text styles.	
+#	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	
+#	Drag onto art to apply this appearance	
+#	Drag out from a circle or arc for its radius, inwards for its diameter.	
+#	Drag out from a corner, or click two straight lines, then click to place.	
+#	Drag out from a segment, or click two points, then click to place.	
+#	Drag rings to rotate. Shift snaps to 15°.	
+#	Drag the art to move it on the paper	
+#	Drag the light, or its rings. Shift snaps to 15°.	
+#	Drag to float as a toolbar	
+#	Drag to float the panel group	
+#	Drag to float the toolbar	
+#	Drag to move	
+#	Drag to move out of the set	
+#	Drag to the window's left edge to dock	
+#	Drag values or labels. Double-click a value to type.	
+#	Draw Behind	
+#	Draw in Perspective	
+#	Draw Inside	
+#	Draw Mode Controls	
+#	Draw Normal	
+#	Draw:	
+#	Drawer menu	
+#	Drawing : real size — 1:10 labels 1 unit on the page as 10.	
+#	Drawing Mode	
+#	Drop	
+#	Drop Artwork	
+#	Drop here to take it out of its group	
+#	Dry Brush	
+#	Dry Brush…	
+#	Duotone Gradients	
+#	Duplicate and Offset 10 pt	
+#	Duplicate Artboard	
+#	Duplicate Artboards	
+#	Duplicate Brush	
+#	Duplicate Character Style	
+#	Duplicate Effect	
+#	Duplicate Graphic Style	
+#	Duplicate Item	
+#	Duplicate Paragraph Style	
+#	Duplicate Rows	
+#	Duplicate Selected Item	
+#	Duplicate Selection	
+#	Duplicate Slice	
+#	Duplicate Swatch	
+#	Duplicate Symbol	
+#	Duplicate {kind} Style	
+#	DWG (use DXF)	
+#	DXF Import Options	
+#	DXF Info	
+#	DXF Options	
+#	DXF Options Dialog	
+#	e.g. 1-3, 5	
+#	Each Design Represents:	
+#	Each entry of the file is matched to a VectorCraft tool, command or panel. Check the matches and answer what is left.	
+#	Each page prints as one image, at the document's raster effects resolution.	
+#	Earth Tones	
+#	Ease In	
+#	Ease In Out	
+#	Ease Out	
+#	Ease Out In	
+#	East Asian Type	
+#	Edge Fidelity	
+#	Edit Artboards	
+#	Edit Clipping Path	
+#	Edit Color Group	
+#	Edit Colors	
+#	Edit Custom Dictionary…	
+#	Edit Data Set	
+#	Edit Data Set…	
+#	Edit Envelope	
+#	Edit Freeform Point	
+#	Edit Gradient	
+#	Edit Opacity Mask	
+#	Edit or Apply Color Group	
+#	Edit or Apply Color Group…	
+#	Edit or Apply Colors	
+#@msg	Edit Original opens image and document files only; “{name}” is not one	
+#	Edit Path	
+#	Edit Pattern	
+#	Edit PDF Preset	
+#	Edit Perspective Grid	
+#	Edit Print Preset	
+#	Edit selected paths within:	
+#	Edit Selection	
+#	Edit Selection…	
+#	Edit Symbol	
+#	Edit Text	
+#	Edit the applied effect, or add another one?	
+#	Edit the selected point's colour in the Color panel	
+#	Edit the stop	
+#	Edit Theme	
+#	Edit theme	
+#	Edit Views	
+#	Edit Views…	
+#	Editable	
+#	Effect Gallery	
+#	Effect Gallery Dialog	
+#	Effect Gallery…	
+#	Effect Options	
+#@msg	effect {k} is `{_1}`, not `{id}`	
+#	Effective PPI	
+#	Effect…	
+#	Ellipse Properties:	
+#	Ellipse…	
+#	Em Box Bottom/Left	
+#	Em Box Center	
+#	Em Box Top/Right	
+#	Embed Fonts (for other applications)	
+#	Embed Fonts (Glyphs Used)	
+#	Embed ICC Profile	
+#	Embed ICC Profiles	
+#	Embed Image	
+#	Embed Image(s)	
+#	Embed page thumbnails	
+#	Embedded	
+#	Embedded Image	
+#	Embedded {n} image(s)	
+#@msg	Embedded {n} image(s)	
+#	Embedded {n} image(s); {missing} missing: relink them first	
+#@msg	Embedded {n} image(s); {missing} missing: relink them first	
+#swatch	Emerald	
+#@msg	empty brush stroke	
+#@msg	empty cutter	
+#@msg	empty path	
+#	Emulsion:	
+#	Enable Background Export	
+#	Enable Background Save	
+#	Enable Contextual Task Bar	
+#	Enable copying of text, images and other content	
+#	Enable Guides for 9-Slice Scaling	
+#	Enable in-menu font previews	
+#	Enable Missing Glyph Protection	
+#	Enable Opacity Mask	
+#	Enable plaintext metadata	
+#	Enable Rubber Band for	
+#	Enable text access for screen readers	
+#	Enable Touch Gestures	
+#	Enable Touch Workspace	
+#	Encoding	
+#	Encoding and writing the file…	
+#	Encoding:	
+#	Encryption: {name} (set by Compatibility)	
+#	End arrowhead	
+#	End Tile	
+#	End Undo Group	
+#	End:	
+#	English	
+#	English: UK	
+#	English: USA	
+#	Enhanced	
+#	Enter Isolation Mode	
+#	Envelope	
+#	Envelope #10	
+#	Envelope Distort	
+#	Envelope Info	
+#	Envelope Mesh	
+#	Envelope Options	
+#	Envelope Options…	
+#	EPS Options	
+#	EPS Options Dialog	
+#	Esc	
+#swatch	Espresso	
+#	Essentials	
+#	Essentials Classic	
+#	Even	
+#	Event:	
+#	Every (minutes)	
+#@msg	every numbered name for it is taken in the Fonts folder	
+#@msg	every numbered name for {name} is taken in the document's folder	
+#	Every option is at its default.	
+#	Every option matches {base}.	
+#@msg	every search thread stopped on an internal error (please report this bug)	
+#	Every-line Composer	
+#	Exact dash lengths	
+#	Example: {name}	
+#	Exceptions (comma separated)	
+#	Exclude	
+#	Exit Isolation Mode	
+#	Expand 1 Selected	
+#	Expand Appearance	
+#@msg	Expand Appearance: the selection has a basic appearance	
+#	Expand applies to compound shapes (Alt-click a shape mode) — on the roadmap	
+#	Expand Blend	
+#	Expand Brush Strokes	
+#	Expand Compound Shape	
+#	Expand Envelope	
+#	Expand Gradient Mesh	
+#	Expand Gradient To	
+#	Expand Image Trace	
+#	Expand Layers Panel Rows	
+#	Expand Live Paint	
+#	Expand Object	
+#	Expand Objects on Path	
+#	Expand Options	
+#	Expand Panels	
+#	Expand Repeat	
+#	Expand Shape	
+#	Expand Shaper Group	
+#	Expand:	
+#@msg	Expand: no brush strokes selected	
+#@msg	Expand: no gradient fills	
+#@msg	Expand: nothing to expand	
+#	Expanded Patterns	
+#	Expand…	
+#	Export All…	
+#	Export and Clipboard Transparency Flattener Settings	
+#	Export Artboard	
+#	Export As PNG…	
+#	Export As SVG…	
+#	Export Asset	
+#	Export Assets	
+#@msg	Export cancelled	
+#	Export CSS	
+#	Export CSS…	
+#	Export Data Sets…	
+#	Export Document	
+#	Export DXF	
+#	Export EPS	
+#	Export for Screens	
+#	Export for Screens Settings	
+#	Export for Screens…	
+#	Export Keyboard Shortcuts…	
+#	Export Layer	
+#	Export Library	
+#	Export Library…	
+#	Export Option	
+#	Export PDF Presets	
+#	Export Perspective Grid Presets	
+#	Export Preset:	
+#	Export Presets	
+#	Export Print Presets	
+#	Export Selected Art Only	
+#	Export Selected CSS…	
+#	Export Selection	
+#	Export Selection…	
+#	Export Settings	
+#	Export the selected assets (else all of them)	
+#	Export to:	
+#	Export Transparency Flattener Presets	
+#	Export Type:	
+#	Export {count} Selected	
+#	Export:	
+#	Exported {count} file(s) to {folder}	
+#@msg	Exported {count} file(s) to {folder}	
+#@msg	Exported {path}	
+#	Exported {what}	
+#@msg	Exported {what}	
+#@msg	Exported {what} with {_1} note(s): {first}	
+#	Exported {what} with {} note(s): {first}	
+#@msg	Exporting {_1}	
+#	Exporting {}	
+#	Extrude & Bevel…	
+#	Eyedropper Applies:	
+#	Eyedropper Options	
+#	Eyedropper Picks Up:	
+#	Eyedropper: click the art to sample the key color	
+#	Eyedropper: click the art to sample the stop's colour	
+#	Farsi	
+#	Feather…	
+#	Feet	
+#	Feet & Inches	
+#	Fewer <tspan> Elements	
+#	Fidelity:	
+#	Figure Space	
+#	Figure:	
+#	File Dimensions	
+#	File Format:	
+#	File Formats	
+#	File Info	
+#	File Info Dialog	
+#	File Name:	
+#	File or URL:	
+#@msg	file version {0} is newer than this VectorCraft supports ({VERSION})	
+#	File › Place… brings in an image, linked or embedded.	
+#	Files of a PDF standard can't be password-protected.	
+#	Files of this standard tag their colours with ICC profiles.	
+#	Fill & Stroke	
+#	Fill (X), double-click for the Color Picker	
+#	Fill and Stroke	
+#	Fill and Stroke Controls	
+#	Fill Arc	
+#	Fill Color	
+#	Fill Grid	
+#	Fill new strokes	
+#	Fill New Type Objects With Placeholder Text	
+#	Fill Rule	
+#	Fill with Placeholder Text	
+#	Fill: click for swatches, Shift-click for the color mixer	
+#	Filling in form fields and signing	
+#	Fills	
+#	Film & Video	
+#	Film Grain…	
+#	Filter Layers Panel Rows	
+#	Filters	
+#	Find and Replace…	
+#	Find Font	
+#	Find Font Files	
+#	Find Fonts	
+#	Find Fonts in Folder…	
+#	Find Font…	
+#	Find in Folder…	
+#	Find Linked Files	
+#	Find Linked Files in Folder…	
+#	Find Objects	
+#	Fine noise hides banding in the gradient fill	
+#	First Artboard	
+#	First Baseline	
+#@msg	First measured segment no longer exists	
+#	First Page	
+#	First-line Left Indent	
+#	Fisheye…	
+#	Fish…	
+#	Fit All	
+#	Fit All in Window	
+#	Fit Artboard in Window	
+#	Fit dashes to corners and ends	
+#	Fit Headline	
+#	Fit in Window	
+#	Fit on Screen	
+#	Fit to Artwork Bounds	
+#	Fit to Page	
+#	Fit to Selected Art	
+#	Flag…	
+#	Flare	
+#	Flare Tool	
+#	Flare Tool Options	
+#	Flat Angle	
+#	Flat Blunt	
+#	Flat Curve	
+#	Flat Fan	
+#	Flat Image	
+#	Flat Logo	
+#	Flat Point	
+#	Flatness:	
+#	Flatten Artwork	
+#	Flatten Transparency	
+#@msg	Flatten Transparency: select objects to flatten	
+#@msg	Flatten Transparency: {e}	
+#	Flatten Transparency…	
+#	Flattener preset:	
+#	Flattener presets	
+#file-filter	Flattener presets	
+#	Flattener Preview	
+#	Flip Across	
+#	Flip Along	
+#	Flip Along Horizontal Axis	
+#	Flip Along Vertical Axis	
+#	Flip Row Order	
+#	Flip:	
+#	Float in Window	
+#	Float Panel	
+#	Float Tool Group	
+#	Focal Fill	
+#	Focal Stroke	
+#	Folder Name:	
+#	Folders:	
+#	Font Family	
+#	Font Family & Style	
+#	Font Family, Style & Size	
+#	Font Family:	
+#	Font List	
+#	Font Preview Size	
+#	Font Style:	
+#	Fonts in Document	
+#	Fonts in Document: {count}	
+#	fonts not copied: {fonts}	
+#	Fonts whose licence doesn't allow embedding are not copied.	
+#	For Fractions:	
+#	Force	
+#	Forced Line Break	
+#	Foreground Level	
+#	Forget Import Matches	
+#	Fork	
+#	Format Options	
+#	Format Settings	
+#	Formats:	
+#	Fractional Widths	
+#	Free Distort	
+#	Free Distort…	
+#	Free Transform Tool	
+#	Freeform	
+#	Freeform Gradient	
+#@msg	freeform line {i} must be an array of point indices	
+#@msg	freeform point {i} needs `at` [x, y] and a valid `color`	
+#	Frequencies and angles are the output device's to apply.	
+#	Fresco	
+#	Fresco…	
+#	from the format's public description	
+#	from your earlier imports	
+#	Front	
+#	Full Document	
+#	Full Justify	
+#	Full Screen Mode with Menu Bar	
+#	Full Tone	
+#	Full Width	
+#	Fuzziness:	
+#	Gamut Check	
+#	gap	
+#	Gap Detection	
+#	Gap Length:	
+#	Gap Options	
+#	Gap Options…	
+#	Gap Preview Color:	
+#	General › Placement › X	
+#	General › Thumbnails	
+#	Generate CSS	
+#	Generate CSS: the whole document's CSS while nothing is selected	
+#	Geometric Guides	
+#	Get Preferences	
+#	Get Text Range	
+#	GIF, 128 colours	
+#@msg	give a fraction `t` from 0 to 1	
+#@msg	give both `start` and `end` [x, y] (or neither)	
+#@msg	give corners of the path: anchors between two straight sides	
+#@msg	give corners of the path: anchors where its sides meet at an angle	
+#@msg	give horizontal or vertical	
+#@msg	give only one of onto, below and above	
+#@msg	give the path `id`	
+#@msg	give the path `id` and the width point `index`	
+#	Glass…	
+#	Global Brush Dimensions	
+#	Global Process Color	
+#	Global Process Color, CMYK	
+#	Glow Amount	
+#	Glowing Edges	
+#	Glowing Edges…	
+#	Glyph Scaling:	
+#	glyph {id}	
+#	Go to Artboard	
+#	Go to Conflict	
+#	Go To Link	
+#	GPL palettes keep solid colours only, as RGB.	
+#	GPU Performance	
+#	Grab bag	
+#	Gradient (.)	
+#	Gradient across stroke	
+#	Gradient along stroke	
+#	Gradient and Mesh Resolution:	
+#	Gradient Fill: click to apply, drag onto art	
+#	Gradient Finishes	
+#	Gradient Mesh	
+#	Gradient swatches	
+#	Gradient Vector	
+#	Gradient within stroke	
+#@msg	gradient “{name}” isn't defined in the file: a plain colour stands in for it	
+#	Grain…	
+#	Graph	
+#	Graph Column	
+#	Graph Data	
+#	Graph Design	
+#	Graph Marker	
+#	Graph Type	
+#	Graphic Pen	
+#	Graphic Pen…	
+#	Graphic Style	
+#	Graphic Style Libraries	
+#	Graphic Style Libraries Menu	
+#	Graphic Style Library	
+#	Graphic Style Options	
+#	Graphic Style Options…	
+#	Graphic Styles	
+#	Graphic Styles (4)	
+#	Graphic Styles Options	
+#	Graphics Processor	
+#	Graphics: {adapter}	
+#	Gravity	
+#	Grays	
+#swatch	Grays	
+#	Grays and Neutrals	
+#	Grayscale images	
+#	Greek & Cyrillic	
+#swatch	Green	
+#	Greeting Card	
+#	Grey	
+#	Grid by Column	
+#	Grid by Row	
+#	Grid Color & Opacity	
+#	Grid Colors:	
+#	Grid Repeat	
+#	Gridline every:	
+#	Grids In Back	
+#@msg	group must be true or false	
+#	Group Selection	
+#	Group Selection Tool	
+#	Growth:	
+#	Guide	
+#	Guides & Grid	
+#@msg	guides are locked	
+#	Gutter	
+#	Gutter:	
+#	H Spacing:	
+#	H:	
+#	Hair Space	
+#	Half Arrow (left)	
+#	Half Arrow (right)	
+#	Half Circle	
+#	Halftone Pattern…	
+#	Halo	
+#	Hand-Drawn	
+#@msg	handle must be in or out	
+#	Handles	
+#	Harmony Rules	
+#	Harmony Rules:	
+#	Harmony Sets	
+#	HDTV 1080p	
+#	HDTV 720p	
+#	Heavy Ink	
+#	Help › Search Commands…	
+#	Hex by Column	
+#	Hex by Row	
+#	Hexagon (open)	
+#	Hidden Layer	
+#	Hidden Objects:	
+#	Hide Artboards	
+#	Hide Bar	
+#	Hide Bounding Box	
+#	Hide Code	
+#	Hide Corner Widget	
+#	Hide Corner Widget for angles greater than	
+#	Hide Edges	
+#	Hide Gradient Annotator	
+#	Hide Guides	
+#	Hide Hidden Characters	
+#	Hide Live Paint Gaps	
+#	Hide Note	
+#	Hide Options	
+#	Hide Print Tiling	
+#	Hide Rulers	
+#	Hide Slices	
+#	Hide Template	
+#	Hide Text Threads	
+#	Hide Thumbnail	
+#	Hide Thumbnails	
+#	Hide Transparency Grid	
+#	Hide VectorCraft	
+#	High (300 ppi)	
+#	High Contrast	
+#	High Contrast 2	
+#	High Contrast 3	
+#	High Fidelity Photo	
+#	High Performance (discrete)	
+#	High Quality Print	
+#	Highlight Alternate Glyphs	
+#	Highlight anchors on mouse over	
+#	Highlight Rows	
+#	Highlight Substituted Fonts	
+#	Highlight Substituted Glyphs	
+#	Highlight Variable	
+#	Highlight:	
+#	History Options…	
+#	History States	
+#	Hold	
+#3d	Hollow	
+#	Horizon Height:	
+#axis	Horizontal	
+#effect	Horizontal	
+#	Horizontal %	
+#	Horizontal & Vertical Align Center	
+#	Horizontal Align Center	
+#	Horizontal Align Left	
+#	Horizontal Align Right	
+#	Horizontal Distribute Center	
+#	Horizontal Distribute Left	
+#	Horizontal Distribute Right	
+#	Horizontal Distribute Space	
+#	Horizontal Dividers:	
+#	Horizontal Grid:	
+#	Horizontal Guide	
+#	Horizontal Plane	
+#	Horizontal Scale %	
+#	Horizontal:	
+#	How colours outside the press's gamut are separated.	
+#	HTML and Images	
+#	Hyphen Limit:	
+#	Hyphenate	
+#	Hyphenate Capitalized Words	
+#	Hyphenation Zone:	
+#	Hyphenation…	
+#	hyphens	
+#	ICC Profile	
+#	ICF Bottom/Left	
+#	ICF Top/Right	
+#@msg	icon must be true or false	
+#@msg	icon only docks a panel in the icon column, with no anchor	
+#	Identify Objects By	
+#@msg	ids must contain 1–10000 object ids	
+#	If a drawing tablet's pen doesn't draw, choose an X11 (XWayland) option.	
+#	Ignore Artboards (all the art as one page)	
+#	Ignore Color	
+#	Ignore White	
+#@msg	image '{key}' has no pixels and was left out	
+#@msg	image data `{_1}` is missing	
+#	Image Info	
+#@msg	image is empty	
+#	Image Map:	
+#	Image Trace	
+#	Image Trace (Make and Expand)	
+#	Image Trace Presets	
+#	Image Trace View	
+#@msg	Image Trace: the traced image is missing	
+#	Image Tracing	
+#@msg	image would be too large; lower the resolution	
+#	Image:	
+#	Images Only	
+#	Images:	
+#	Images: link to the file instead of only embedding it.	
+#	Import Data Sets…	
+#	Import Data…	
+#	Import Keyboard Shortcuts…	
+#	Import Library	
+#	Import Library…	
+#	Import Matches	
+#	Import PDF	
+#	Import PDF Presets	
+#	Import Perspective Grid Presets	
+#	Import Print Presets	
+#	Import Shortcut Set	
+#	Import Shortcut Set…	
+#	Import Transparency Flattener Presets	
+#@msg	Imported library {name}	
+#@msg	Imported {what}: {_1}	
+#	Imported {what}: {}	
+#	Imported. Press OK to keep the imported set.	
+#	In Merge Mode, Clicking Stroke Splits the Path	
+#	In Tangent Handles	
+#	In the File	
+#	In the selected objects	
+#	In VectorCraft	
+#	Include all profiles	
+#	Include All Subdirectories	
+#	Include Blacks with CMY:	
+#	Include Bleed	
+#	Include Cmy Blacks	
+#	Include CMYK PostScript in RGB Files	
+#	Include destination profile	
+#	Include Document Thumbnails	
+#	Include Hidden Layers	
+#	Include Linked Files	
+#	Include Metadata	
+#	Include non-printing layers	
+#	Include SVG Code	
+#	Include Swatches for Tints	
+#	Include tagged source profiles	
+#	Includes	
+#	Includes itself	
+#	Increase Font Size by Five Steps	
+#@msg	index must be a number or first, previous, next or last	
+#@msg	index must be a number or first, previous, next or last, not `{other}`	
+#@msg	index must be ≥ 0	
+#swatch	Indigo	
+#	Inflate…	
+#	Ink	
+#	Ink Outlines	
+#	Ink Outlines…	
+#	Inner Corner Tile	
+#	Input Black	
+#	Input White	
+#	Insert Break Character	
+#	Insert Character	
+#	Insert Inline Symbol	
+#	Insert Kashidas	
+#	Insert Special Character	
+#	Insert Whitespace Character	
+#	Inserting, deleting and rotating pages	
+#	Inspect Object	
+#@msg	Installed plug-in {_1}	
+#	Installed plug-in {}	
+#@msg	installing from a path is not available on the web; pass the module as `dataBase64`	
+#	Intensity:	
+#	Intent:	
+#	Internal CSS	
+#@msg	internal error in `{cmd}`: {msg} (the document was left as it was before; please report this bug)	
+#@msg	Internal error: {msg} (please report this bug)	
+#@msg	internal error: {msg} (please report this bug)	
+#	Internet Standard RGB (sRGB)	
+#	Intertwine	
+#@msg	Invalid dimension distance	
+#@msg	Invalid dimension font name	
+#@msg	Invalid drawing scale	
+#@msg	invalid image data for `{0}`	
+#@msg	invalid native panel set	
+#@msg	invalid object id {value}: expected a non-negative integer	
+#@msg	Invalid panel layout; restored the default dock	
+#@msg	invalid parameters for `{cmd}`: {msg}	
+#@msg	invalid PDF setting: {0}	
+#@msg	Invalid real scale	
+#@msg	invalid restored panel group	
+#@msg	invalid stroke widths	
+#	Inverse	
+#	Invert Colors	
+#	Invert Pie	
+#	Inverted Round	
+#@msg	is not an image VectorCraft reads	
+#	Isolate Blending	
+#	Isolate Group	
+#	Isolate Selected Group	
+#	Isolate Selected Object	
+#	Isometric Bottom	
+#	Isometric Left	
+#	Isometric Right	
+#	Isometric Top	
+#@msg	it decompresses to more than {_1} MB	
+#@msg	it ends inside a layer	
+#@msg	it has art outside its layers	
+#@msg	it has more than one artboard	
+#@msg	it has more than {MAX_NODES} objects	
+#@msg	it has no layers	
+#@msg	it has no page	
+#@msg	it has too many text objects	
+#@msg	it has too many values in a row	
+#@msg	it has too much text	
+#@msg	it has {_1}, which VectorCraft doesn't read from it yet	
+#@msg	it uses `{at}`, which VectorCraft's PostScript reader doesn't know	
+#@msg	it uses `{at}`, which VectorCraft's PostScript reader doesn't know, in {procs}	
+#@msg	its editing data doesn't say where its art is	
+#@msg	its editing data doesn't say where its artboard is	
+#@msg	its editing data has no layers	
+#@msg	its editing data is damaged	
+#@msg	its editing data is for a different page	
+#@msg	its editing data is for a {w} × {h} pt page, not the file's {pw} × {ph} pt page	
+#@msg	its editing data is for a {w} × {h} pt page, the file's {pw} × {ph} pt page at {scale}	
+#	Its graphics, colors and text styles are deleted from this machine.	
+#@msg	its layers use {_1}, which aren't read yet	
+#@msg	its objects are nested too deeply	
+#@msg	its page has text, and its layers have no text objects to put it in	
+#@msg	its preview was placed instead, at screen resolution	
+#@msg	its section ending with `%{end}` doesn't end	
+#@msg	its type is to come in as outlines, which only its page has	
+#@msg	its Windows metafile preview was opened instead, which may simplify the art	
+#@msg	its zlib compression is damaged	
+#@msg	its Zstandard compression is damaged	
+#mark-style	Japanese	
+#	JavaScript Files	
+#	JavaScript:	
+#@msg	join needs open paths	
+#	Join Our Discord	
+#	Join the ArtCraft community on Discord (discord.gg/artcraft)	
+#	Join the lines of each paragraph	
+#	Join Tool	
+#	Joins	
+#	Joins:	
+#	Justification…	
+#	Justify all lines	
+#	Justify with last line aligned center	
+#	Justify with last line aligned left	
+#	Justify with last line aligned right	
+#	Keep a link to an image file instead of only embedding it	
+#	Keep both sides the same width	
+#	Keep Formatting	
+#	Keep graphics, colors and text styles here to use them in any document. Libraries are stored on this machine — no account required.	
+#	Keep Original	
+#	Keep Plain Text	
+#	Keep selected	
+#	Keep the pasted color as a new swatch with a numbered name.	
+#	Keep this row's colors (exclude)	
+#	Keep visible surfaces only when expanding	
+#	Keeps the document editable: VectorCraft reopens the PDF with nothing lost. For files you'll edit again.	
+#	Kerning (0 = Auto)	
+#	Key Color:	
+#	Keyboard Increment	
+#	Keyboard Shortcut Conflicts	
+#	Keyboard Shortcut Set	
+#	Keys	
+#	Keywords:	
+#	Kinsoku Set	
+#	Kite	
+#	Knife	
+#	Knockout Group	
+#	Lab Spot Colors	
+#	Lab Spot Colors:	
+#	Lab Values	
+#	Landscape (flipped)	
+#@msg	lang must be one of {_1}	
+#	Language Level 2	
+#	Language Level 3	
+#	Large Gaps	
+#	Large List View	
+#	Large Tabs	
+#	Large Thumbnail View	
+#	Large Thumbnails	
+#@msg	larger than 256 MB	
+#	Largest:	
+#	Last Artboard	
+#	Last Effect: {name}	
+#	Last Effect: {}	
+#	Last Effect…	
+#	Last Page	
+#	Latin	
+#	Latin Extended	
+#	Latin-1 Supplement	
+#	Layer Names	
+#	Layer Options	
+#	Layer Options…	
+#@msg	layers can't be wrap objects	
+#	Layers Panel Options	
+#	Layout Order:	
+#	Leader:	
+#	Leaf	
+#	Left Complement	
+#	Left Grid:	
+#	Left in Front	
+#	Left Indent	
+#	Left Plane	
+#	Left-Justified Tab	
+#	Left-to-Right Paragraph Direction	
+#	Legacy (version 7)	
+#	Legacy .ai Options	
+#	Legacy Macintosh RGB (Gamma 1.8)	
+#	Legacy vector clipboard	
+#	Legacy vector clipboard (no transparency)	
+#	Legends in Wedges	
+#	Length X-Axis:	
+#	Length Y-Axis:	
+#	Letter Spacing:	
+#	Letterhead A4	
+#	Letterhead Letter	
+#	letters	
+#	LF (macOS, Linux)	
+#@msg	library panel `{given}` isn't missing its library	
+#@msg	library panel `{given}` isn't open	
+#	Library Panel Options	
+#	Library:	
+#	Ligatures are off while the text is tracked.	
+#3d	Light	
+#lighting	Light	
+#	Light behind the object	
+#	Light Rough	
+#	Light/Dark Balance	
+#	Lighten Grout	
+#	Lights	
+#swatch	Lime	
+#	Limit Color Guide to Library	
+#	Limit colors to swatch library	
+#	Limit colors to swatch library: {name}	
+#	Limit to Library:	
+#	Limit:	
+#	Limited	
+#	Line Art	
+#	Line Art and Text Resolution:	
+#	Line Breaks	
+#	Line Color	
+#	Line Cut	
+#	Line Cut Tool	
+#	Line Endings:	
+#	Line Graph Tool	
+#	Line Segment	
+#	Line Segment Tool	
+#	Line Segment Tool Options	
+#	Line {line}	
+#	line {line}	
+#	Line {line}: {name}: {status}	
+#	Line-end Punctuation Half Width	
+#	lines {lines}	
+#	Lines: clicks add points joined by a line	
+#	Link harmony colors	
+#	Link Info	
+#	Link JavaScript Files…	
+#	Link Opacity Mask	
+#	Link start and end arrowhead scales	
+#	Link the mask	
+#	Linked	
+#	Linked File	
+#	Linked File Not Found	
+#	Linked Files	
+#@msg	linked pictures show the low-resolution preview saved in the file until their files are found: relink them in the Links panel	
+#	Linux Display Server	
+#	Liquify	
+#	List Data Sets	
+#	List Folder	
+#	List Graphic Styles	
+#	List Keyboard Shortcuts	
+#	List Patterns	
+#	List Plug-ins	
+#	List Preferences	
+#	List Slices	
+#	List Variables	
+#	List Workspaces	
+#	Live Paint	
+#	Live Paint Bucket	
+#	Live Paint Bucket (Stroke)	
+#	Live Paint Info	
+#@msg	Live Paint Merge: select a Live Paint group and the paths to add	
+#	Live Paint Selection Tool	
+#@msg	Live Paint: select paths or compound paths	
+#@msg	Live Paint: these paths are too degenerate to paint	
+#	Live Shape	
+#	Live Shape Properties	
+#	Load Color Profile…	
+#	Load EPS into Clipboard	
+#	Load Image into Clipboard	
+#	Load Metafile into Clipboard	
+#	Load PDF into Clipboard	
+#	Load Place Cursor	
+#	Load Profile…	
+#	Load SVG into Clipboard	
+#	Load Text into Clipboard	
+#	Load Texture…	
+#	Load Variable Library…	
+#	Loaded Texture	
+#@msg	Loading VectorCraft…	
+#	Loads native code	
+#	Local Libraries	
+#	Locate Library…	
+#	Locate Object	
+#	Locate Selected Objects	
+#	Lock (⌘2)	
+#	Lock Grid	
+#	Lock Others	
+#	Lock Station Point	
+#	Lock Variables	
+#	Logo 1000×1000	
+#	Long	
+#	Longest:	
+#	Lossless (lossy WebP isn't available yet)	
+#	Lossy:	
+#	Low Fidelity Photo	
+#	Low Resolution	
+#	Low resolution (150 ppi)	
+#	LZW Compression	
+#	Mac	
+#swatch	Magenta	
+#	Magic Wand	
+#	Magic Wand Options	
+#	Magic Wand Settings	
+#	Maintain Envelope Shape	
+#	Make	
+#	Make a theme on Create and save it.	
+#	Make all bleed settings the same	
+#	Make and Expand	
+#	Make Blend	
+#	Make Clipping Mask	
+#	Make Compound Path	
+#	Make Compound Shape	
+#	Make Dynamic	
+#	Make Envelope	
+#	Make Graph Dynamic	
+#	Make Guides	
+#@msg	Make Guides: select paths	
+#	Make Image Dynamic	
+#	Make Intertwine	
+#	Make Live Paint	
+#	Make Mask	
+#	Make Opacity Mask	
+#	Make Pattern	
+#	Make Pixel Perfect	
+#	Make Sides Equal	
+#	Make Slice	
+#	Make Text Dynamic	
+#	Make Text Wrap	
+#	Make the bleed values differ	
+#	Make Visibility Dynamic	
+#	Make Visible	
+#	Make with Mesh…	
+#	Make with Top Object	
+#	Make with Warp…	
+#	Make/Release Clipping Mask	
+#	Manage Workspaces	
+#	Manage Workspaces…	
+#	Manually	
+#	Mark as trapped	
+#	Mark Older Files as [Converted] When Opened	
+#	Marker…	
+#	Marks	
+#	Marks and Bleed	
+#	Marks and Bleeds	
+#@msg	mask art ends outside a mask dictionary	
+#	Match User Interface Brightness	
+#	Materials…	
+#	Matte:	
+#	Max. Radius	
+#	Maximize Editability	
+#	Maximum Editability	
+#	Measure Tool	
+#@msg	Measured anchor no longer exists	
+#@msg	Measured segment no longer exists	
+#	Measurement Labels	
+#	Media	
+#	Medium (150 ppi)	
+#	Medium Dark	
+#	Medium Gaps	
+#	Medium Light	
+#	Medium Resolution	
+#	Medium Strokes	
+#	Medium Thumbnail View	
+#	Medium Thumbnails	
+#	Menu Commands	
+#	Menu commands	
+#	Menu Dialog	
+#	Merge colors into one row	
+#	Merge Graphic Styles	
+#	Merge Graphic Styles…	
+#	Merge Live Paint	
+#	Merge only with selection	
+#	Merge Selected	
+#	Merge Swatches	
+#	Mesh Point Color	
+#	Mesh Tool	
+#	Metadata:	
+#	Metallic Gradients	
+#	Meters	
+#	Minify	
+#	Minimal	
+#	Minimum must not exceed Desired, nor Desired Maximum.	
+#	Minus Back	
+#	Minus Front	
+#	Mirror & Cut	
+#	Mirror & Cut Tool	
+#	Mirror Repeat	
+#@msg	missing `folder`	
+#@msg	missing `id` (see plugin.list)	
+#@msg	missing `name`	
+#@msg	missing `tool`	
+#	Missing Fonts	
+#	Missing Fonts Dialog	
+#@msg	missing index	
+#@msg	missing integer `{key}`	
+#@msg	missing number `{key}`	
+#@msg	missing panel layout	
+#	Missing: {path}	
+#	Miter	
+#	Miter Join	
+#	Miter Limit	
+#	Miter Limit:	
+#	Mixed Appearances	
+#	Mixed line endings	
+#	Mixed Objects	
+#	Modified since it was read: {path}	
+#	Modified:	
+#	Mojikumi	
+#	Mojikumi Set	
+#	Monochromatic	
+#	Monochrome images	
+#	Monospaced	
+#	More Align options	
+#	More Options	
+#	More Paragraph options	
+#	More Pathfinder options	
+#	More Settings	
+#	Mosaic Tiles…	
+#	Move All Objects	
+#	Move Anchor Point	
+#	Move Anchors	
+#	Move Appearance	
+#	Move Artboard	
+#	Move Artboard Up/Down	
+#	Move Artwork with Artboard	
+#	Move Brush	
+#	Move Direction Handle	
+#	Move Effect	
+#	Move Envelope Mesh Point	
+#	Move Envelope Point	
+#	Move Graphic Style	
+#	Move Guide	
+#	Move Guide to Layer	
+#	Move in Perspective	
+#	Move Library Group	
+#	Move Library Item to Group	
+#	Move Locked and Hidden Artwork with Artboard	
+#	Move Mesh Point	
+#	Move Plane	
+#	Move Plane and Copy Objects	
+#	Move Plane and Objects	
+#	Move Plane to Match Object	
+#@msg	move requires a destination panel	
+#@msg	move requires an existing destination panel	
+#	Move Rows	
+#	Move Slice	
+#	Move Slices	
+#	Move Spine Point	
+#	Move Swatch	
+#	Move to Group	
+#	Move Type on a Path	
+#	Move…	
+#	Movie Clip	
+#@msg	Multichannel PSD files can't be read: save it in RGB, CMYK or Grayscale mode	
+#	Multiple objects	
+#@msg	multiple windows land with M11.5	
+#	Muted	
+#	My Themes	
+#	N pt per	
+#	N slices …, evenly spaced	
+#	Name 40%	
+#@msg	name is empty	
+#@msg	name the file	
+#	Name* @ 66.67 % (RGB/Preview)	
+#	Name* @ 66.67% (RGB/Preview)	
+#	Names the script builds as it runs: {count}	
+#	Navigate	
+#	Needs a choice	
+#	Needs a key	
+#	Needs Attention Only	
+#	Needs dialogs	
+#	Needs features only the reference app has	
+#	Needs files	
+#	Needs menu commands	
+#	Needs nothing beyond plain JavaScript	
+#	Needs the desktop app	
+#	Needs the document model	
+#	Needs the script language's own objects or directives	
+#	Negative	
+#	Neon Glow…	
+#	Nesting too deep to follow	
+#	Neutral Gradients	
+#	New Art Appearance	
+#	New Art Brush from Selection	
+#	New Art Has Basic Appearance	
+#	New Artboard	
+#	New Artboard Options…	
+#	New Bristle Brush	
+#	New Brush	
+#	New Brush…	
+#	New Calligraphic Brush	
+#	New Character Style	
+#	New Color Group	
+#	New Color Group…	
+#	New Data Set	
+#	New Data Set…	
+#	New Design	
+#	New Document Presets	
+#	New file	
+#	New from Template…	
+#	New Graphic Style	
+#	New Graphic Style (Alt-click to name it)	
+#	New Graphic Style…	
+#	New Group…	
+#	New Layer Options…	
+#	New Library Group	
+#	New Name	
+#	New Opacity Masks Are Clipping	
+#	New Opacity Masks Are Inverted	
+#	New Paragraph Style	
+#	New Pattern Brush from Selection	
+#	New PDF Preset	
+#	New Print Preset	
+#	New Scatter Brush from Selection	
+#	New Sublayer…	
+#	New Swatch	
+#	New Symbol	
+#	New Symbol…	
+#	New theme from the current color	
+#	New Variable	
+#	New Variable…	
+#	New View	
+#	New View…	
+#	New Without Dialog	
+#	New {kind} Style…	
+#	Next Artboard	
+#	Next Data Set	
+#	Next Library	
+#	Next Object Above	
+#	Next Object Below	
+#	No actions. Press ● to record.	
+#@msg	no active document	
+#@msg	no active perspective plane	
+#@msg	no anchor points selected	
+#@msg	no app to open files here	
+#@msg	no artboard	
+#@msg	no artboard {i} (0-based; the document has {_1})	
+#@msg	no artboard {i} (0-based; the document has {count})	
+#@msg	no artboards named	
+#@msg	no artwork	
+#	No assets	
+#	No assets yet. Collect art with Object › Collect for Export, or drag it into the Asset Export panel.	
+#@msg	no blend options	
+#@msg	no bounds	
+#	No Break	
+#@msg	no brush named `{name}`	
+#@msg	no brush selected	
+#	No brushes	
+#@msg	no catalog	
+#@msg	no changes since the last save	
+#@msg	no clock to keep a heartbeat by	
+#	No colors to recolor (preserved colors are left out).	
+#@msg	no colour group `{g}`	
+#	No contributor data was built into this copy.	
+#	No conversion	
+#@msg	no cross-reference table	
+#	No CSS	
+#@msg	no CSS to copy: select objects with CSS of their own	
+#@msg	no current layer	
+#@msg	no data	
+#	no data set to edit	
+#	no data set to rename	
+#@msg	no dialog open	
+#	no document	
+#@msg	no document	
+#@msg	no document open	
+#	No document open.	
+#	No downsampling	
+#@msg	no effect applied yet	
+#@msg	no effect at index {k}	
+#@msg	no end record	
+#	No equivalent	
+#@msg	no file manager here	
+#@msg	no file reader	
+#@msg	no file system here	
+#@msg	no file writer	
+#@msg	no files to place	
+#	No filter plug-ins installed	
+#	No fonts are available.	
+#@msg	No fonts are missing in this document	
+#@msg	no format to export to	
+#@msg	no free recovery area	
+#@msg	no gradient stop or freeform point is selected	
+#	No gradient swatches	
+#@msg	no graphic style `{name}`	
+#@msg	no graphic style `{n}`	
+#	No graphic styles	
+#	No Group	
+#@msg	no history to clear	
+#	No images	
+#@msg	no interaction in progress	
+#	No items in this library match “{query}”.	
+#@msg	no key object	
+#	No Legend	
+#@msg	no library `{id}`	
+#@msg	no library `{key}` (see {list})	
+#@msg	No linked files to look for	
+#@msg	no Live Paint edge near that point	
+#@msg	no Live Paint face at that point	
+#	No matching fonts	
+#	No model credits were built into this copy.	
+#@msg	no native format	
+#	No options	
+#@msg	no pages	
+#@msg	no pattern `{name}`	
+#@msg	no perspective grid preset named `{name}`	
+#@msg	no plug-in {0} is installed	
+#@msg	no plug-in {id} is installed	
+#@msg	no PNG encoder	
+#@msg	no point {i} (the gradient has {_1})	
+#@msg	no preset editor	
+#@msg	no previous transform	
+#@msg	no print preset named `{base}`	
+#@msg	no print preset named `{name}`	
+#@msg	no print service	
+#	No printer settings to open here	
+#@msg	no revert command	
+#@msg	no saved PDF preset named `{name}` (built-in presets are read-only: start a new one from them)	
+#@msg	no saved presets	
+#@msg	no saved print preset named `{name}` ({DEFAULT_PRESET} is protected: start a new one from it)	
+#@msg	no saved profiles	
+#@msg	no saved selection recalled	
+#@msg	no saved selections	
+#@msg	No saved selections (Select → Save Selection…)	
+#	No saved themes	
+#@msg	no saved themes	
+#	No saved views (View → New View…)	
+#@msg	No saved views (View → New View…)	
+#@msg	no segment {segment} on line {line}	
+#@msg	no selected slice in the image: select slices, or save all of them	
+#@msg	no selection bounds	
+#@msg	no slice selected	
+#	No Slices	
+#@msg	no such action	
+#@msg	no such anchor	
+#@msg	no such artboard	
+#@msg	no such document	
+#@msg	no such layer or object	
+#@msg	no such object id {value}	
+#@msg	no such object {0}	
+#@msg	no such perspective grid preset	
+#@msg	no such recent file	
+#@msg	no such recent font	
+#@msg	no such saved selection	
+#@msg	no such segment	
+#@msg	no such spine point	
+#@msg	no such spine segment	
+#@msg	no such subpath	
+#@msg	no such user library	
+#@msg	no such view	
+#@msg	no such width point	
+#@msg	no swatch `{name}`	
+#@msg	no swatch library `{l}` (see swatch.library.list)	
+#@msg	no symbol instances selected	
+#@msg	no symbol named `{n}`	
+#	No symbols in this document	
+#@msg	no target object has an opacity mask: select one or give `id`	
+#	No text selected	
+#@msg	no threaded text selected	
+#	No Thumbnails	
+#@msg	no user library folder here	
+#@msg	no user workspace `{from}`	
+#	no variable to rename	
+#@msg	node {_1} is not text	
+#@msg	Non-finite dimension	
+#	Nonbreaking Hyphen	
+#	None (/)	
+#	None (Color Preview)	
+#	None (keep transparency)	
+#	None.	
+#	Normal Screen Mode	
+#@msg	not a blend	
+#@msg	not a DXF drawing	
+#@msg	not a file	
+#@msg	not a font file	
+#@msg	not a graphic style library (format `{_1}`)	
+#@msg	not a PSD file	
+#	Not a script for the reference app	
+#@msg	not a shortcut set: the text doesn't start with a slash name and an opening brace	
+#@msg	not a stored central record	
+#@msg	not a valid plug-in module: {0}	
+#@msg	not a VectorCraft file: {0}	
+#@msg	not a VectorCraft shortcut set (missing `overrides`)	
+#@msg	not an EMF or WMF file	
+#	Not followed: outside the script's folder	
+#	Not found	
+#@msg	not found	
+#@msg	not in pattern editing mode	
+#	not known yet	
+#	Not read	
+#	Not read: a limit was reached	
+#	Not valid UTF-8: unreadable bytes were replaced	
+#	Note Paper	
+#	Note Paper…	
+#	Note:	
+#@msg	nothing encoded	
+#@msg	nothing in data set {name} was applied: no object is bound to a variable it has a value for	
+#	Nothing is selected. Select the art to export, then open this tab again.	
+#	Nothing matches the Show filter.	
+#@msg	nothing selected	
+#@msg	nothing to align	
+#@msg	nothing to distort	
+#@msg	nothing to export: the document has no visible art (or turn on Use Artboards)	
+#@msg	nothing to preview	
+#	Nothing to print	
+#@msg	nothing to print	
+#@msg	nothing to redo	
+#@msg	nothing to save: the document has no visible art	
+#@msg	nothing to undo	
+#@msg	nothing to warp	
+#@msg	nothing to wrap	
+#	Nudge	
+#	Nudge in Perspective	
+#	Number (####)	
+#	Number of Artboards:	
+#	Number of Colors:	
+#	Number of Decimals:	
+#	Number of Recent Files to Display	
+#	Number of Recent Fonts	
+#	Number:	
+#	Numbers Without Units Are Points	
+#@msg	object has no weighted stroke	
+#	Object Highlighting	
+#@msg	object ids are non-negative integers, not {v}	
+#	Object IDs:	
+#	Object Name	
+#	Object Properties	
+#	Object Selection by Path Only	
+#	Object types: {names}	
+#@msg	object {0} cannot have children	
+#@msg	object {id} is not a path	
+#@msg	object {id} is not a selected top-level object	
+#	Objects	
+#@msg	objects can't be nested more than 32 deep	
+#@msg	objects inside a blend, envelope, repeat or Intertwine group can't be attached to a path	
+#	Objects on Path	
+#	Objects on Path Options	
+#	Objects on Path Tool	
+#	Objects using them keep their look but are no longer linked.	
+#@msg	objects with several fills or strokes, effects or brushes came in as their drawn look ({_1}): their appearance isn't editable yet	
+#swatch	Ocean	
+#	Ocean Ripple	
+#	Ocean Ripple…	
+#	of	
+#	of characters used	
+#	of {count}	
+#	Off-Axis Back	
+#	Off-Axis Bottom	
+#	Off-Axis Front	
+#	Off-Axis Left	
+#	Off-Axis Right	
+#	Off-Axis Top	
+#	Off: an editable copy of its art, embedded in this document.	
+#	Offset Path	
+#@msg	Offset Path: select paths	
+#@msg	Offset Path: the offset leaves nothing of the selected paths (an inset larger than the shapes)	
+#	Offset Path…	
+#	Offset X	
+#	Ogee	
+#	On Both Sides	
+#	On Copy	
+#	On Left Side	
+#	On Paste	
+#	On Right Side	
+#	On Screen	
+#	On: one locked object showing the document, updated when it changes.	
+#	One File of the Selection	
+#	One file per artboard: <name>-<artboard>.{ext}	
+#	One page per artboard.	
+#	One Point	
+#	One Point Perspective	
+#	One Point Perspective Preset 1	
+#	One Point Perspective Preset 2	
+#	One Point Perspective Preset 3	
+#	One Point Perspective Preset 4	
+#	One Point Perspective Preset 5	
+#@msg	only a dock group above or below others collapses, not one beside another	
+#@msg	only http, https and mailto URLs open in the browser, not “{url}”	
+#@msg	onto must name a floating panel	
+#@msg	onto must name a panel floating in another group	
+#	Opacity & Mask Define Knockout Shape	
+#	Opacity Mask	
+#	Opacity Mask Info	
+#	Opacity Mask Options	
+#	Opacity: 50% Multiply	
+#	Opacity: Default	
+#	Opacity: {value}	
+#	Opaque	
+#	Open a document to edit its patterns.	
+#	Open a document to navigate it.	
+#	Open a document to preview its flattening.	
+#	Open a document to preview its pages	
+#	Open a document to see its artboards.	
+#	Open a document to see its graphic styles.	
+#	Open a document to see its history.	
+#	Open a document to see its swatches.	
+#@msg	open a document with data sets	
+#	Open Document	
+#	Open Documents As Tabs	
+#	Open Graphic Style Library	
+#	Open Location after Export	
+#	Open password:	
+#	Open Paths	
+#	Open Recent File 1	
+#	Open Recent File 10	
+#	Open Recent File 11	
+#	Open Recent File 12	
+#	Open Recent File 13	
+#	Open Recent File 14	
+#	Open Recent File 15	
+#	Open Recent File 16	
+#	Open Recent File 17	
+#	Open Recent File 18	
+#	Open Recent File 19	
+#	Open Recent File 2	
+#	Open Recent File 20	
+#	Open Recent File 21	
+#	Open Recent File 22	
+#	Open Recent File 23	
+#	Open Recent File 24	
+#	Open Recent File 25	
+#	Open Recent File 26	
+#	Open Recent File 27	
+#	Open Recent File 28	
+#	Open Recent File 29	
+#	Open Recent File 3	
+#	Open Recent File 30	
+#	Open Recent File 4	
+#	Open Recent File 5	
+#	Open Recent File 6	
+#	Open Recent File 7	
+#	Open Recent File 8	
+#	Open Recent File 9	
+#	Open Recent Files	
+#	Open Swatch Library	
+#	Open the URL in the web browser	
+#	Open this dialog with these settings next time	
+#	Open this setting's help page	
+#@msg	Opened with {_1} note(s): {_2}	
+#	Opened with {} note(s): {}	
+#@msg	Opened {url}	
+#	Opening it left out what VectorCraft can't read yet ({what}), so replacing it loses that for good. Save under another name to keep it.	
+#	Opens files in other apps	
+#	Opens network connections	
+#	Optical Margin Alignment	
+#	Optimize for fast web view	
+#	Options for Selection…	
+#	Options:	
+#	or more spaces with a tab	
+#swatch	Orange	
+#swatch	Orange Red	
+#	Order:	
+#	Original: click to restore	
+#	Other Layers	
+#	Other Libraries	
+#	Other Library…	
+#	Other Script…	
+#	Out of Gamut Warning	
+#	Out of Web Color Warning	
+#	Out Tangent Handles	
+#	Outer Corner Tile	
+#imageTrace	Outline	
+#	Outline Object	
+#	Outline Others	
+#	Outline Stroke	
+#@msg	Outline Stroke: no stroked paths selected	
+#	Outline Text	
+#	Outlined Strokes	
+#	Outlined Text	
+#	Outlines	
+#	Outlines and Rules	
+#	Outlines with Source Image	
+#	Output All Blacks Accurately	
+#	Output All Blacks as Rich Black	
+#	Output Black	
+#	Output condition:	
+#	Output Intent	
+#	Output intent profile:	
+#	Output White	
+#	Output › Mode	
+#	Outside the document	
+#	Overlap	
+#	Overlapping	
+#	Overlay Edge	
+#	Overprint	
+#	Overprint and Transparency Flattener	
+#	Overprint and Transparency Flattener Options	
+#	Overprint Black…	
+#	Overprint Fill	
+#	Overprint Preview	
+#	Overprint Preview (separations)	
+#	Overprint Stroke	
+#	Overprint:	
+#	Overprints:	
+#	Override Action "Export" Commands	
+#	Override Action "Open" Commands	
+#	Override Action "Save" Commands	
+#	Override Character Color	
+#	Overrides	
+#	Package	
+#	Package collects a saved document with its linked files and fonts.	
+#	Package created	
+#	Packaged {n} file(s)	
+#@msg	Packaged {n} file(s)	
+#	Packaged {n} file(s) in {folder}	
+#@msg	Packaged {n} file(s) in {folder}	
+#	Packaged {n} file(s) in {folder} {note}	
+#@msg	Packaged {n} file(s) in {folder} {note}	
+#	Packaged {n} file(s) in {folder}{note}	
+#	Packaged {n} file(s) {note}	
+#@msg	Packaged {n} file(s) {note}	
+#	Packaged {n} file(s){note}	
+#@msg	Packaged {n} file(s){note}	
+#@msg	Packaging {_1}	
+#	Page Cover 1640×624	
+#	Page information	
+#	Page Isolated Blending	
+#	Page Knockout Group	
+#@msg	page size {w} × {h}	
+#@msg	page {0} does not exist (the PDF has {1})	
+#	Paint Daubs	
+#	Paint Daubs…	
+#	Paint Opacity:	
+#	Paint Stops At:	
+#	Paintbrush	
+#	Paintbrush Tool	
+#	Palette Knife	
+#	Palette Knife…	
+#	Palette:	
+#@msg	panel floats; collapse its group with window.panel.float {panel, collapsed}	
+#@msg	panel group is empty	
+#@msg	panel is not in a dock group	
+#@msg	panel must name a registered panel	
+#	Panels Except Tools and Control	
+#	Paragraph Style	
+#	Paragraph Style Options	
+#	Paragraph Symbol	
+#	Part of ArtCraft. MIT OR Apache-2.0. Fonts: Source Sans 3, Inter, JetBrains Mono (OFL). Icons: Lucide (ISC) + VectorCraft.	
+#	Part of ArtCraft. MIT OR Apache-2.0. Fonts: Source Sans 3, Inter, JetBrains Mono, Noto Sans SC (OFL). Icons: Lucide (ISC) + VectorCraft.	
+#@msg	part of the program isn't valid PostScript text	
+#	Paste Design	
+#	Paste in Back	
+#	Paste in Front	
+#	Paste in Place	
+#	Paste Offset	
+#	Paste on All Artboards	
+#	Paste Remembers Layers	
+#@msg	paste unavailable	
+#	Paste without Formatting	
+#	Pasted	
+#	Pastels	
+#	Patchwork…	
+#	Path Eraser	
+#	Path Eraser Tool	
+#@msg	path is already closed	
+#	Path Length	
+#	Pathfinder	
+#	Pathfinder Options…	
+#@id	pathfinder.add	
+#	Pathfinders:	
+#@msg	paths contain invalid coordinates	
+#@msg	paths: give at least one file	
+#	Paths: {paths}    Anchors: {anchors}    Colors: {colors}	
+#	Pattern Brush	
+#	Pattern Brush Options	
+#	Pattern Editing	
+#@msg	pattern missing	
+#	Pattern Options	
+#	Pattern options are available in pattern editing mode.	
+#	Pattern Swatches	
+#@msg	patterns nested too deeply are filled with mid-grey	
+#	PDF	
+#	PDF 1.3 files have no transparency: the preset flattens it.	
+#	PDF 1.7	
+#	PDF File	
+#	PDF Info	
+#	PDF Preset	
+#	PDF Preset:	
+#	PDF Presets	
+#file-filter	PDF presets	
+#	PDF Presets…	
+#	PDF Print	
+#	PDF Settings	
+#@msg	PDF settings are not an object	
+#@msg	PDF writer error: {0}	
+#	PDF-compatible	
+#file-filter	PDF-compatible .ai	
+#	PDF/A files carry their own output intent.	
+#	PDF/X-1a files are CMYK: every colour is converted to the destination (blank: the output intent's CMYK profile), untagged.	
+#	PDF/X-1a:2001	
+#	PDF/X-3:2002	
+#	PDF/X-4:2010	
+#	Pentagram	
+#	per slice	
+#@msg	percent must be above 0 and at most 6400, not {p}	
+#	Percent:	
+#	Perceptual	
+#	Perceptual Scales	
+#	Performance & Storage	
+#	Permissions	
+#	Permissions password:	
+#	Persistent	
+#@msg	Persistent libraries not found: {files}	
+#	Perspective Distort	
+#	Perspective Grid	
+#	Perspective Grid Options	
+#	Perspective Grid Preset	
+#	Perspective Grid Presets	
+#	Perspective grid presets	
+#	Perspective Grid Presets…	
+#	Perspective Grid Settings	
+#	Perspective Grid Tool	
+#	Perspective Plane Options…	
+#	Perspective Selection Tool	
+#	Phone 360×800	
+#	Phone 375×667	
+#	Phone 375×812	
+#	Phone 390×844	
+#	Phone 393×852	
+#	Phone 412×915	
+#	Phone 430×932	
+#	Photo Low Fidelity	
+#	Photocopy…	
+#@msg	pick a colour, gradient or pattern to save as a swatch	
+#	Pick Color From:	
+#	Pie End Angle:	
+#	Pie Graph Tool	
+#	Pie Start Angle:	
+#	Pin Bar Position	
+#swatch	Pink	
+#	Pixel Preview	
+#	Place	
+#	Place DXF	
+#	Place from Library	
+#	Place onto a new locked, dimmed template layer below the current layer	
+#	Place PDF	
+#	Place Symbol Instance	
+#	Place the pages with the placement again	
+#	Placed Document	
+#	Placed File Info	
+#	Placement Options	
+#	Placement Options…	
+#	Placement:	
+#	Place…	
+#@msg	plane must be left, right or ground	
+#	Plaster	
+#	Plaster…	
+#	Plastic Wrap	
+#	Plastic Wrap…	
+#	Plates	
+#	Platform:	
+#	Play Current Selection	
+#	Play:	
+#@msg	plug-in ABI: {0}	
+#@msg	plug-in exceeded its {0}	
+#@msg	plug-in failed: {0}	
+#	Plug-in Info	
+#@msg	plug-in manifest: {0}	
+#@msg	plug-in output: {0}	
+#@msg	plug-in parameters: {0}	
+#@msg	plug-in trapped: {0}	
+#	Plug-ins & Scratch Disks	
+#	Plug-in…	
+#	Plus	
+#	Point Sample	
+#	Point Text Objects	
+#effect	Points	
+#	Points:	
+#	Points: clicks add free points	
+#	Polar Grid	
+#	Polar Grid Tool	
+#	Polygon Properties:	
+#	Portrait (flipped)	
+#	Position Panel Above Text	
+#	Positive	
+#	Poster 18 × 24 in	
+#	Poster 24 × 36 in	
+#	Poster Edges…	
+#	PostScript:	
+#	Power Saving (integrated)	
+#	PPI	
+#	Precise Cursors	
+#	Precision:	
+#	Prefix:	
+#	Presentation Attributes	
+#	Presentation Mode	
+#	Preserve Alpha Transparency	
+#	Preserve Appearance	
+#	Preserve Appearance and Overprints	
+#	Preserve CMYK Numbers	
+#	Preserve Editing Capabilities	
+#	Preserve editing capabilities	
+#	Preserve Lightness	
+#	Preserve Overprints and Spot Colors	
+#	Preserve Paths	
+#	Preserve Shape Using:	
+#	Preserve Spot Colors	
+#	Preserve Text Appearance	
+#	Preserve Text Editability	
+#	Preserve Tints	
+#	Preserve:	
+#	PRESET DETAILS	
+#	Preset Name	
+#	Preset name:	
+#	Preset {number}	
+#	Preset {}	
+#	Presets you save with the Save Preset button appear here.	
+#	Press 	
+#	Press a key…	
+#	Press Quality	
+#	Preview (1 inch on the page)	
+#	Preview All Layers	
+#	Preview in Browser	
+#	Preview in Browser needs the desktop app (the web downloads files instead)	
+#@msg	Preview in Browser needs the desktop app (the web downloads files instead)	
+#	Preview Mode	
+#	Preview the document as it is now	
+#	Previous Artboard	
+#	Previous Data Set	
+#	Previous Library	
+#	Primary	
+#	Print & Proof	
+#	Print as Bitmap	
+#	Print Layers:	
+#	Print Preset	
+#	Print Preset:	
+#	Print Presets	
+#	Print presets	
+#file-filter	Print presets	
+#	Print Presets…	
+#	Print Preview	
+#@msg	print settings are not an object	
+#	Print Setup	
+#	Print Tiling	
+#	Print Tiling Pages	
+#	Print Tiling Tool	
+#	Printer mark type:	
+#	Printer profile:	
+#	Printer Setup…	
+#	Printers	
+#	Printing & Proofing	
+#	Printing / Exporting	
+#	Printing allowed:	
+#	Printing and Proofing	
+#@msg	printing isn't available here	
+#	Problems	
+#	Process Color	
+#	Profile Cover 1500×500	
+#	Profile inclusion:	
+#	Profile:	
+#	Projecting Cap	
+#	Proof Colors	
+#	Proportional Metrics	
+#	Proportional Oldstyle	
+#	Pucker	
+#	Pucker & Bloat…	
+#	Pucker Tool	
+#	Punctuation Space	
+#	Puppet Warp	
+#	Puppet Warp Pins	
+#	Puppet Warp Tool	
+#swatch	Purple	
+#	Put back in the dock	
+#	Put back in the toolbar	
+#	Quality {quality}	
+#	Quality:	
+#	Quarter Space	
+#	Quickly start a new file	
+#	Quit VectorCraft	
+#	Radar Graph Tool	
+#gradient-kind	Radial	
+#	Radial Dividers:	
+#	Radial Glows	
+#	Radial Repeat	
+#swatch	Radial White, Black	
+#	Radius 1	
+#	Radius 2	
+#	Radius1	
+#	Radius2	
+#	Rainbow	
+#	Ramp:	
+#	Randomize Colors	
+#	Randomly change color order	
+#	Randomly change saturation and brightness	
+#@msg	range `{s}` is empty	
+#@msg	range `{s}`: `{part}` names no number	
+#@msg	range `{s}`: `{part}` runs backwards	
+#@msg	range `{s}`: `{t}` is not a number from 1 to {count}	
+#	Raster Effects	
+#	Raster File Format:	
+#	Raster Sample Size:	
+#	Raster/Vector Balance:	
+#	Rasterize Unsupported Art	
+#	Rasterized Complex Regions	
+#	Rasterize…	
+#	Rasters	
+#	Rating:	
+#	Read Shortcut Set File	
+#	Reads or sets environment variables	
+#	Real World:	
+#	Real-time Drawing and Editing	
+#	Rearrange All	
+#	Rearrange All Artboards	
+#	Rearrange All Artboards…	
+#	Rearrange Artboards	
+#	Recall Selection	
+#	RECENT	
+#	RECENT (1)	
+#	Recent File	
+#	Recent Font	
+#	Recent Font 1	
+#	Recent Font 10	
+#	Recent Font 11	
+#	Recent Font 12	
+#	Recent Font 13	
+#	Recent Font 14	
+#	Recent Font 15	
+#	Recent Font 2	
+#	Recent Font 3	
+#	Recent Font 4	
+#	Recent Font 5	
+#	Recent Font 6	
+#	Recent Font 7	
+#	Recent Font 8	
+#	Recent Font 9	
+#	Recent Fonts	
+#	Recent URLs	
+#	Recolor	
+#	Recolor Artwork	
+#	Recolor Artwork…	
+#	Recolor this row	
+#	Recolor with Preset	
+#	Recover Documents	
+#@msg	recovery copy `{file}`: {e}	
+#	Recovery Data	
+#	Rectangle Cut	
+#	Rectangle Cut Tool	
+#	Rectangle Properties:	
+#	Rectangle: Sunshine	
+#	Rectangle…	
+#	Rectangular Grid	
+#	Rectangular Grid Tool	
+#swatch	Red	
+#	Redefine Character Style	
+#	Redefine Graphic Style	
+#	Redefine Graphic Style “{name}”	
+#	Redefine Paragraph Style	
+#	Redefine Symbol	
+#	Redefine {kind} Style	
+#	Redefine {name}	
+#	Redo {name}	
+#	Redo {}	
+#	Reduce Colors	
+#	Reduce to Basic Appearance	
+#	Reduction:	
+#	Reference Point	
+#	Reflect	
+#	Reflect Horizontal	
+#	Reflect Tool	
+#	Reflect X	
+#	Reflect Y	
+#	Reflect…	
+#	Refresh Font List	
+#	Registered Trademark Symbol	
+#	Registration marks	
+#	Registration:	
+#	Registry name:	
+#effect	Regular	
+#	Regular expression not closed	
+#	Release	
+#	Release Blend	
+#	Release Clipping Mask	
+#	Release Compound Path	
+#	Release Compound Shape	
+#	Release Envelope	
+#	Release Guides	
+#@msg	Release Guides: no guides	
+#	Release Image Trace	
+#	Release Intertwine	
+#	Release Live Paint	
+#	Release Opacity Mask	
+#	Release Repeat	
+#	Release Selection	
+#	Release Shaper Group	
+#	Release Slice	
+#	Release Text Wrap	
+#	Release Threaded Text	
+#	Release to Layers (Build)	
+#	Release to Layers (Sequence)	
+#	Release with Perspective	
+#@msg	Release: no layer to put the rectangle in	
+#	Relink	
+#	Relink Linked Files to the Document	
+#	Relink to Folder…	
+#@msg	Relinked {_1} image(s)	
+#	Relinked {n} image(s)	
+#@msg	Relinked {n} image(s)	
+#@msg	Relinked {n} image(s); not in that folder: {_1}	
+#	Relinked {n} image(s); not in that folder: {}	
+#@msg	Relinked {n} image(s); {name} couldn't be relinked: {reason}	
+#	Relinked {} image(s)	
+#	Relink…	
+#	Reload Plug-ins	
+#@msg	Reload the page to go on (changes not saved yet may be lost).	
+#	Remember Import Matches	
+#	Remember My Choices	
+#	Remove Anchor Points	
+#	Remove Asset	
+#	Remove blank lines between paragraphs	
+#	Remove Brush Stroke	
+#	Remove Color Profile…	
+#	Remove Effect	
+#	Remove Guide	
+#	Remove Item	
+#	Remove JavaScript File	
+#	Remove Plug-in	
+#	Remove Selected Assets	
+#	Remove Selected Entry	
+#	Remove the shortcut	
+#	Remove Threading	
+#	Remove “{keyword}”	
+#	Rename Asset	
+#	Rename Character Style	
+#	Rename Data Set	
+#	Rename Data Set…	
+#	Rename Design	
+#	Rename Graphic Style	
+#	Rename Library	
+#	Rename Library Group	
+#	Rename Library…	
+#	Rename Paragraph Style	
+#	Rename Variable	
+#	Rename View	
+#	Rename Workspace	
+#diagnostics	render	
+#	Render Threads (-1 = Automatic)	
+#	Rendering intent:	
+#	Reorder	
+#	Reorder Appearance	
+#	Reorder Appearance Item	
+#	Reorder Artboards	
+#	Repeat Objects	
+#	Repeat Options	
+#	Repeat Pathfinder	
+#	Repeat Tab	
+#	Repeat {name}	
+#	Repeating	
+#	Replace Font	
+#	Replace it with another file, or ignore it: its images keep showing the preview saved with the document.	
+#	Replace Spine	
+#@msg	Replace Spine: select a blend and a path	
+#	Replace Symbol	
+#	Replace With Font	
+#	Replace “{name}”, the file this document was opened from?	
+#	Replaces the saved preset of that name.	
+#	Replace…	
+#	Report copied	
+#	Require a password to open the document	
+#	Reset all	
+#	Reset all 3D settings to their defaults.	
+#	Reset all Revolve settings to their defaults.	
+#	Reset Automation	
+#	Reset Bar Position	
+#	Reset Bounding Box	
+#	Reset Envelope Mesh	
+#	Reset Envelope Shape	
+#	Reset Essentials	
+#	Reset Essentials Classic	
+#	Reset Horizontal Scale	
+#	Reset Keyboard Shortcuts	
+#	Reset Layout	
+#	Reset OpenType Features	
+#	Reset Painting	
+#	Reset Panel	
+#	Reset Printing and Proofing	
+#	Reset Profiles	
+#	Reset Rotate View	
+#	Reset Ruler Origin	
+#	Reset the rows to the artwork's colors	
+#	Reset to Default	
+#	Reset to default	
+#	Reset to Defaults	
+#	Reset to White, Black	
+#	Reset Tracing	
+#	Reset Tracking and Kerning	
+#	Reset Typography	
+#	Reset Web	
+#	Reset with Mesh	
+#	Reset with Mesh…	
+#	Reset with Warp	
+#	Reset with Warp…	
+#@msg	Reset {_1}	
+#	Reset {name}	
+#	Reset {}	
+#	Reshape	
+#	Reshape Segment	
+#	Reshape Spine	
+#	Reshape Spine Segment	
+#	Reshape Tool	
+#	Reshape Type Area	
+#	Resize	
+#	Resize Artboard	
+#	Resize Slice	
+#	Resize Type Area	
+#@msg	resolutions must be between 1 and 2400 ppi	
+#	Responsive	
+#	Restore every preference to its default (applied on OK)	
+#	Restore Recovered Documents	
+#	Restored documents open unsaved: save them to keep them.	
+#@msg	Restored {_1} recovered document(s): save them to keep them	
+#	Restored {} recovered document(s): save them to keep them	
+#	Restrict printing, editing and other tasks	
+#	Restricted Colors	
+#@msg	result would exceed the canvas (coordinates out of range)	
+#	Reticulation	
+#	Reticulation…	
+#	Reverse Front to Back	
+#	Reverse Gradient	
+#	Reverse Order	
+#	Reverse Path Direction	
+#	Reverse Path Direction Off	
+#	Reverse Path Direction On	
+#	Reverse Spine	
+#	Reverse Triangle	
+#	Revert to the saved version of “{name}”?	
+#	Revolve angle	
+#	Revolve…	
+#	Ridges per segment:	
+#	Right Complement	
+#	Right Grid:	
+#	Right in Front	
+#	Right Indent	
+#	Right Plane	
+#	Right to Left	
+#	Right-click an item to move it into this group.	
+#	Right-Justified Tab	
+#	Right-to-Left Paragraph Direction	
+#	Rings	
+#	Ripple Magnitude	
+#	Ripple Size	
+#	Rise…	
+#	Roman	
+#	Roman Baseline	
+#	Roman Hanging Punctuation	
+#swatch	Rose	
+#	Rotate 90° CW	
+#	Rotate Tool	
+#	Rotate View	
+#	Rotate View to Selection	
+#	Rotate View Tool	
+#	Rotate…	
+#	Rotation relative to:	
+#	Rotation X	
+#	Rotation Y	
+#	Rotation Z	
+#	Rough Pastels	
+#	Rough Pastels…	
+#	Roughen…	
+#	Round	
+#	Round Angle	
+#	Round Blunt	
+#	Round Cap	
+#	Round Corners…	
+#	Round Curve	
+#	Round Fan	
+#	Round Join	
+#	Round Point	
+#	Rounded	
+#3d	Rounded	
+#	Rounded Rectangle Tool	
+#	Rounded Rectangle…	
+#	Row Size:	
+#	Rows:	
+#	Ruby	
+#	Ruby…	
+#	Rule:	
+#	Ruler Origin	
+#	Run Length	
+#	Run Plug-in	
+#	Runs code the checker can't read	
+#swatch	Rust	
+#	Same	
+#	Same As Source	
+#	Same file	
+#	Same item as a later row	
+#	Same size	
+#	Sample Color	
+#	Sample Color from Screen	
+#swatch	Sand	
+#	Sans Serif / Gothic	
+#	Saturate	
+#	Saturate…	
+#	Save and Close	
+#	Save as PDF…	
+#	Save as preset:	
+#	Save changes to {name}	
+#	Save color group to Swatch panel	
+#	Save Colors as Swatches	
+#	Save Document	
+#	Save Document Info…	
+#	Save each artboard to a separate file	
+#	Save Export Preset	
+#	Save for Office Documents	
+#	Save for Office Documents…	
+#	Save for Web	
+#	Save for Web (Legacy)…	
+#	Save for Web Presets	
+#	Save for Web Preview	
+#	Save for Web Settings	
+#@msg	Save for Web: the image is empty	
+#	Save Graphic Style Library	
+#	Save Graphic Style Library…	
+#	Save Grid as Preset	
+#	Save Grid as Preset…	
+#	Save PDF	
+#	Save PDF Dialog	
+#	Save PDF Preset	
+#	Save Perspective Grid Preset	
+#	Save Preset	
+#	Save Print Preset	
+#	Save Recovery Data	
+#	Save Save for Web Preset	
+#	Save selected colors as swatches	
+#	Save Swatch Library	
+#	Save Swatch Library…	
+#	Save the current layout under this name	
+#	Save the document first?	
+#	Save the selected preset to a file	
+#	Save the settings as a preset	
+#	Save Theme	
+#	Save theme to My Themes	
+#	Save these settings as a preset	
+#	Save these settings as a print preset	
+#	Save to Swatches	
+#	Save To:	
+#	Save Transparency Flattener Preset	
+#	Save Transparency Flattener Preset…	
+#@msg	Save writes {_1}, not {_2}: use document.export for other formats	
+#@msg	Save writes {_1}, not {_2}: use file.saveAsTemplate to write it	
+#	SAVED	
+#@msg	saved panel layout is invalid; reset the workspace first	
+#	Saved recovery data for {title}	
+#@msg	Saved recovery data for {title}	
+#	Saved Selection 1	
+#	Saved Selection 10	
+#	Saved Selection 11	
+#	Saved Selection 12	
+#	Saved Selection 13	
+#	Saved Selection 14	
+#	Saved Selection 15	
+#	Saved Selection 16	
+#	Saved Selection 17	
+#	Saved Selection 18	
+#	Saved Selection 19	
+#	Saved Selection 2	
+#	Saved Selection 20	
+#	Saved Selection 21	
+#	Saved Selection 22	
+#	Saved Selection 23	
+#	Saved Selection 24	
+#	Saved Selection 25	
+#	Saved Selection 3	
+#	Saved Selection 4	
+#	Saved Selection 5	
+#	Saved Selection 6	
+#	Saved Selection 7	
+#	Saved Selection 8	
+#	Saved Selection 9	
+#	Saved Selections	
+#@msg	Saved to User Defined: {_1}	
+#	Saved to User Defined: {}	
+#	Saved View 1	
+#	Saved View 10	
+#	Saved View 2	
+#	Saved View 3	
+#	Saved View 4	
+#	Saved View 5	
+#	Saved View 6	
+#	Saved View 7	
+#	Saved View 8	
+#	Saved View 9	
+#	Saved Views	
+#	Saved {n} files beside {path}	
+#@msg	Saved {n} files beside {path}	
+#	Saved {path}	
+#@msg	Saved {path}	
+#@msg	Saved {path} with {_1} note(s): {first}	
+#	Saved {path} with {} note(s): {first}	
+#	Saves the current bars, toolbar and panel layout.	
+#	Saving	
+#@msg	Saving	
+#	Saving Poster.vectorcraft	
+#@msg	Saving recovery data for {_1}	
+#	Saving recovery data for {}	
+#@msg	Saving {_1}	
+#	Saving {}	
+#	Scale Artwork with Artboard	
+#	Scale Corners	
+#	Scale Cursor Proportional to UI	
+#	Scale Design	
+#	Scale in Perspective	
+#	Scale Lineweights	
+#@msg	scale must be a number from {_1} to {_2}, not {_3}	
+#@msg	scale must be a number from {_1} to {_2}, not {s}	
+#@msg	Scale must be drawing:real, for example 1:10	
+#	Scale Proportionately	
+#@msg	Scale ratio must be between 1:1000000 and 1000000:1	
+#	Scale Strokes & Effects	
+#	Scale Text Attributes	
+#@msg	Scale Text Attributes: selected type has no scale to bake	
+#	Scale Tints	
+#	Scale to Fit Artboard	
+#	Scale Tool	
+#	Scale X	
+#	Scale X:	
+#	Scale Y	
+#	Scale Y:	
+#	Scale…	
+#	Scaling:	
+#	Scallop	
+#	Scallop Tool	
+#	Scans:	
+#	Scatter	
+#	Scatter Brush	
+#	Scatter Brush Options	
+#	Scatter Graph Tool	
+#	Scatter:	
+#	Scissors	
+#	Scissors Tool	
+#	Screen (72 ppi)	
+#	Screen Mode Controls	
+#	Screens	
+#	Scribble…	
+#	Script / Brush	
+#	Scrub Numeric Fields by Dragging	
+#	Search All	
+#	Search commands and tools	
+#	Search commands and tools…	
+#	Search Commands…	
+#	Search Fonts Folder	
+#@msg	searching a folder isn't available on the web	
+#	Searching…	
+#@msg	Second measured segment no longer exists	
+#	Secondary	
+#	Section Symbol	
+#@msg	select (or target) objects whose appearance isn't basic	
+#@msg	select a blend	
+#@msg	select a blend or give `id`	
+#@msg	select a clip group	
+#@msg	select a gradient mesh	
+#@msg	select a linked image: an embedded one has no file	
+#@msg	select a Live Paint group	
+#@msg	select a repeat	
+#@msg	select a stroke with a variable width	
+#@msg	select a symbol instance	
+#	Select a text object	
+#	Select a text object to edit its character attributes.	
+#	Select a text object to edit its paragraph attributes.	
+#	Select a text object to set its tab stops.	
+#	Select All Art on Layer	
+#	Select All Assets	
+#	Select All Bound Objects	
+#	Select All Instances	
+#	Select All Pins	
+#	Select All Unused	
+#@msg	select an envelope	
+#@msg	select an image	
+#	Select an image to see its Link Info.	
+#	Select an image to trace	
+#@msg	select an Image Trace object	
+#@msg	select an Intertwine group	
+#@msg	select an object in perspective	
+#@msg	select an Objects on Path group	
+#	Select Anchors	
+#	Select Appearance Item	
+#	Select Art	
+#	Select art and choose Object › Pattern › Make.	
+#	Select art and click New Symbol to make one.	
+#	Select art and use New Brush to make one.	
+#	Select art to make a scatter, art or pattern brush.	
+#@msg	select artwork (or a colour group) to recolor	
+#	Select artwork to apply effects	
+#@msg	select at least two objects	
+#	Select Bound Object	
+#	Select by Color	
+#	Select Data Set	
+#	Select Fills	
+#	Select Freeform Point	
+#	Select Gradient Stop	
+#	Select Guides	
+#	Select objects to see their CSS, or Generate CSS for the whole document.	
+#@msg	select objects, not layers	
+#@msg	select one path, or give its `id`	
+#@msg	select paths or anchor points	
+#@msg	select paths to join	
+#	Select Same Tint %	
+#	Select Segments	
+#	Select Shaper Face	
+#	Select Slices	
+#@msg	select some type first	
+#	Select Strokes	
+#	Select styled art and click New Graphic Style.	
+#	Select text	
+#	Select Text by Font	
+#	Select text or click into text with the Type tool to insert glyphs	
+#@msg	Select text or click into text with the Type tool to insert glyphs	
+#	Select text to set its OpenType features.	
+#	Select the art (and, on top of it, the mask object)	
+#@msg	select the art to export first	
+#@msg	select the art to repeat	
+#@msg	select the artwork to warp	
+#@msg	select the objects to transform in perspective	
+#	Select Tool	
+#@msg	select two or more graphic styles to merge	
+#@msg	select two or more objects to distribute	
+#	Select two or more objects, or a group	
+#@msg	select type in perspective	
+#	Select Unused	
+#	Selected Artwork	
+#	Selected Slices	
+#	Selected Styles Only	
+#	Selected Styles Only (0)	
+#	Selected Swatches	
+#	Selected Swatches Only	
+#	Selected Swatches Only (0)	
+#	Selection & Anchor Display	
+#@msg	selection has no bounds	
+#	Selection Only	
+#	Selection:	
+#	Send to Current Layer	
+#	Sends messages to other apps	
+#@msg	Sent to {_1}	
+#	Sentence case	
+#	Separate colors into rows	
+#	Separate several keywords with commas.	
+#	Separations	
+#	Separations list the document's inks here: one page per ink that prints.	
+#	Separations Preview	
+#	Serialize Document	
+#	Serif / Mincho	
+#	Server-side (.map)	
+#	Set 1	
+#	Set Anchors	
+#	Set base color	
+#	Set base color to the current color	
+#	Set Bounds	
+#	Set Current Layer	
+#	Set History Limit…	
+#	Set Keyboard Shortcut	
+#	Set Mesh Point Color	
+#	Set Preference	
+#	Set Slice Rectangle	
+#	Set Tab Stops	
+#	Set Text	
+#	Set the selected color to the current color	
+#	Set Zoom	
+#	Setup…	
+#	Shades	
+#	Shades of Gray	
+#	Shading	
+#@msg	shadings of an unknown type were left out	
+#@msg	shadings of more than 4096 patches or triangles were left out	
+#@msg	shadings whose functions are of an unknown type are filled with their middle colour	
+#	Shadow Intensity	
+#	Shadows and Glows	
+#	Shape Builder	
+#	Shape Builder Delete	
+#	Shape Builder Regions	
+#	Shape Builder Tool	
+#@msg	Shape Builder: no region under the pointer	
+#@msg	Shape Builder: select paths or compound paths	
+#	Shape Modes:	
+#	Shape Properties:	
+#	Shaper	
+#	Shaper Tool	
+#	Shear	
+#	Shear Tool	
+#	Shear:	
+#	Shear…	
+#	Shell Lower…	
+#	Shell Upper…	
+#	Shift to Color…	
+#	Shift+Click	
+#	Shift+Drag	
+#	Shift:	
+#	Shifts the tints of global and spot colors; other colors stay.	
+#	Short	
+#@msg	shortcut for `{k}` must be a string	
+#	Show Active Plane Widget	
+#	Show All Hidden Attributes	
+#@msg	Show All Hidden Attributes: nothing is hidden	
+#	Show All Layers	
+#	Show all open documents	
+#	Show All Plates	
+#	Show all plates	
+#	Show All Swatches	
+#	Show and print from the Lab definition; PDF files carry it as the ink's alternate color.	
+#	Show and separate through the working CMYK space, as in older documents.	
+#	Show Artboards	
+#	Show axis	
+#	Show Bounding Box	
+#	Show Brush Size	
+#	Show Center	
+#	Show Code	
+#	Show Color Groups	
+#	Show Color Swatches	
+#	Show Corner Widget	
+#	Show East Asian Options	
+#	Show Edges	
+#	Show Embedded	
+#	Show Find Field	
+#	Show Font Names in English	
+#	Show Gradient Annotator	
+#	Show Gradient Swatches	
+#	Show Grid (⌘')	
+#	Show handles when multiple anchors are selected	
+#	Show Hidden Characters	
+#	Show Images in Outline Mode	
+#	Show Indic Options	
+#	Show Layers Only	
+#	Show Library	
+#	Show Link Info	
+#	Show List View	
+#	Show Live Paint Gaps	
+#	Show Missing	
+#	Show Modified	
+#	Show Note	
+#	Show Options	
+#	Show Original Path	
+#	Show Package	
+#	Show Panel	
+#	Show Pattern Swatches	
+#	Show Perspective Grid	
+#	Show Pixel Grid (Above 600% Zoom)	
+#	Show Print Tiling	
+#	Show Properties Panel	
+#	Show Rulers (⌘R)	
+#	Show Slice Numbers	
+#	Show Slices	
+#	Show Swatch Bounds	
+#	Show Swatch Kinds	
+#	Show Template	
+#	Show Text Threads	
+#	Show The Home Screen When No Documents Are Open	
+#	Show Thumbnail	
+#	Show Thumbnail View	
+#	Show Thumbnails	
+#	Show Tile Edge	
+#	Show Tints/Shades	
+#	Show Tool Group Labels	
+#	Show Transparency Grid	
+#	Show Video Rulers	
+#	Show Vivid/Muted	
+#	Show Warm/Cool	
+#	Show {kind} Brushes	
+#	Show/hide plate (Alt-click: only this plate)	
+#	Shown with the optimised preview.	
+#	Shrink Text to Fit	
+#	Side 1:	
+#	Side 2:	
+#	Side Length:	
+#	Side Tile	
+#	Silhouettes	
+#	Simple	
+#	Simplified Chinese	
+#	Simplify:	
+#	Simplify…	
+#	Simulate	
+#	Simulate Colored Paper	
+#	Simulate Paper	
+#	Simulate prints overprints as Overprint Preview shows them; separations always keep them. A preset flattens transparency before printing (PostScript files always flatten it).	
+#	Single Corner Radius	
+#	Single Left Quotation Mark	
+#	Single Quotes:	
+#	Single Right Quotation Mark	
+#	Single Word Justification:	
+#	Single-line Composer	
+#	Sixth Space	
+#	Size Tile to Art	
+#	Size/Leading	
+#	Size: {size}  Tracking: {tracking}	
+#	Sketched Art	
+#	Skew:	
+#	Skin Tone Ramps	
+#	Skip Blank Artboards	
+#	Sky Gradients	
+#	Slash	
+#	Slice Selection Tool	
+#	Slice Type:	
+#	slices across, evenly spaced	
+#	slices down, evenly spaced	
+#	Slices:	
+#	Sliding	
+#	Slope:	
+#	Small Caps (on the roadmap)	
+#	Small Caps:	
+#	Small Gaps	
+#	Small List View	
+#	Small Thumbnail View	
+#	Small Thumbnails	
+#	Smaller ↔ Larger	
+#	Smallest File Size	
+#	Smart Guides (View → Smart Guides)	
+#	Smart Guides (⌘U)	
+#	Smart Punctuation…	
+#	Smooth	
+#	Smooth Color	
+#	Smooth Tool	
+#	Smudge Stick	
+#	Smudge Stick…	
+#	Snap Curves To Lines	
+#	Snap Options	
+#	Snap to Glyph	
+#	Snap to Perpendicular	
+#	Snap to Pixel	
+#	Snap to Point	
+#	Snap to Tangent	
+#	Snap to Unit	
+#	Snapping	
+#	Snapping Tolerance	
+#	Social	
+#	Social Landscape Post 1200×630	
+#	Social Portrait Post 1080×1350	
+#	Social Square Post 1080×1080	
+#	Social Story 1080×1920	
+#	Social Tall Post 1000×1500	
+#effect	Soft	
+#	Soft Mix	
+#	Solid	
+#3d	Solid	
+#	Some lists were cut short at their limit.	
+#	Sort by Hue	
+#	Sort by Kind	
+#	Sort by Luminance	
+#	Sort by Name	
+#	Sort by Popularity	
+#	Sort by Status	
+#	Sort Swatches	
+#	Source Folder:	
+#	Source Image	
+#	Source Sans 3	
+#3d	Space	
+#	Space After Paragraph	
+#	Space Before Paragraph	
+#	Spacing Guides	
+#@msg	span must be "object" or "selection", got {v}	
+#@msg	span: "selection" places a `gradient`, not a swatch	
+#@msg	span: "selection" places a gradient: give `gradient`	
+#@msg	span: "selection" places a linear or radial gradient, not a freeform one	
+#@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	
+#	Sparkle	
+#	Spatter…	
+#	Specified Distance	
+#	Specified Steps	
+#	Specify:	
+#	Spectrum	
+#	Spectrum Gradients	
+#	Spin	
+#	Spiral	
+#	Spiral Tool	
+#	Split Complementary	
+#	Split Freeform Line	
+#	Split Into Grid	
+#@msg	Split Into Grid: select paths large enough for the grid	
+#	Split Into Grid…	
+#	Split Path	
+#	Sponge	
+#	Sponge…	
+#	spot	
+#	Spot Colors	
+#	Spot Colors (0)	
+#	Spot Colors…	
+#	Sprayed Strokes	
+#	Sprayed Strokes…	
+#	Spread:	
+#	Sprinkles	
+#	Square (open)	
+#	Square 8 × 8 in	
+#	Squeeze…	
+#	Stacked Bar Graph Tool	
+#	Stacked Column Graph Tool	
+#	Stained Glass…	
+#	Stair Step	
+#	Stamp…	
+#	Standard Legend	
+#	Standard Vertical Roman Alignment	
+#	Standard:	
+#	Star Tool	
+#	Start arrowhead	
+#	Start from VectorCraft Defaults	
+#	Start Global Edit	
+#	Start Tile	
+#	Start:	
+#	Step	
+#	Step Backward	
+#	Step Forward	
+#	Step Type	
+#	Step up or down	
+#	Steps:	
+#	Stiffness:	
+#	Stop Editing Opacity Mask	
+#	Stop editing the opacity mask	
+#	Stop on Errors	
+#	Stop Playing/Recording	
+#@msg	stop {i} needs `offset`	
+#@msg	stop {i} needs a valid `color`	
+#@msg	stop {i}: `{k}` must be a number	
+#	Straight Line	
+#	Stray Points	
+#	Stretch Between Guides	
+#	Stretch to fit	
+#	Stretch to Fit Stroke Length	
+#	String not closed	
+#	Stroke (X), double-click for the Color Picker	
+#	Stroke Direction	
+#	Stroke options	
+#	Stroke Pressure	
+#	Stroke Weight	
+#	Stroke When Editable	
+#	Stroke Width	
+#	Stroke: click for swatches, Shift-click for the color mixer	
+#	Strokes	
+#	Style Attributes	
+#	Style Attributes (Entity References)	
+#	Style Name:	
+#	Styling:	
+#	Stylistic	
+#	Subsample	
+#	Subscript (on the roadmap)	
+#	Subscript:	
+#	Subset fonts below:	
+#	Suffix	
+#	Sumi-e…	
+#swatch	Sunset	
+#	Sunshine	
+#	Superscript (on the roadmap)	
+#	Superscript:	
+#	SVG 1.1	
+#file-filter	SVG Compressed	
+#	SVG Filters	
+#	SVG Interactivity	
+#	SVG Options	
+#@msg	SVG parse error: {0}	
+#	SVG Profile:	
+#	Swallowtail	
+#	Swap Fill and Stroke	
+#	Swap Fill and Stroke (Shift+X)	
+#	Swap start and end arrowheads	
+#	Swap the selected object for the file, keeping its place and transform	
+#	Swash	
+#	Swatch Conflict	
+#	Swatch Conflicts	
+#	Swatch exchange files keep solid colors only.	
+#	Swatch Libraries	
+#file-filter	Swatch libraries	
+#	Swatch Libraries Menu	
+#	Swatch Library	
+#	Swatch Name:	
+#	Swatch Options	
+#	Swatch Options…	
+#	Swatch Tiles	
+#	Switch workspace	
+#	Switch x/y	
+#	Symbol Instance	
+#	Symbol Libraries	
+#	Symbol Libraries (on the roadmap)	
+#	Symbol Options	
+#	Symbol Options…	
+#	Symbol Screener	
+#	Symbol Screener Tool	
+#	Symbol Scruncher	
+#	Symbol Scruncher Tool	
+#	Symbol Set Density:	
+#	Symbol Shifter	
+#	Symbol Shifter Tool	
+#	Symbol Sizer	
+#	Symbol Sizer Tool	
+#	Symbol Spinner	
+#	Symbol Spinner Tool	
+#	Symbol Sprayer	
+#	Symbol Sprayer Tool	
+#	Symbol Stainer	
+#	Symbol Stainer Tool	
+#	Symbol Styler	
+#	Symbol Styler Tool	
+#	Symbolism Tool	
+#	Symbolism Tools Options	
+#	Syntax newer than ES3	
+#	System Layout	
+#	System Title Bar	
+#@msg	t, dx and dy must be finite	
+#	Tab Stops	
+#	Tablet 1024×1366	
+#	Tablet 1024×768	
+#	Tablet 768×1024	
+#	Tablet 800×1280	
+#	Tablet 820×1180	
+#	Tablet 834×1194	
+#	Tabular Lining	
+#	Tabular Oldstyle	
+#	Tag	
+#	Tag (open)	
+#swatch	Tan	
+#@msg	Targa files are RGB: colorModel rgb	
+#	Target Contents	
+#	Tate-chu-yoko	
+#swatch	Teal	
+#	Technical Drawing	
+#	Temperature/Tint…	
+#	Template	
+#	Template literal not closed	
+#file-filter	Templates	
+#	Templates Folder	
+#	Templates…	
+#	Tetrad	
+#	Tetrad 2	
+#	Tetrad 3	
+#	Text Displayed in Cell	
+#	Text Displayed in Cell:	
+#	Text Export Options	
+#	Text Fill Color	
+#	Text Import Options	
+#	Text Orientation	
+#	Text Stroke Color	
+#	Text Wrap	
+#	Text Wrap Options	
+#	Text Wrap Options…	
+#@msg	Text Wrap: select a wrap object	
+#	Texture Coverage	
+#	Texture Image	
+#	Texturizer	
+#	Texturizer…	
+#	Thai	
+#@msg	that document is no longer open	
+#@msg	The 3D surface is too complex; simplify the shape	
+#@msg	the action has no steps	
+#	The active document changed while the screen color sampler was open	
+#@msg	the art could not be sampled	
+#@msg	the art has no bounds	
+#@msg	the art is too light for any dots	
+#	The art keeps its own colors.	
+#@msg	the art on them differs from the page's in {_1}% of it	
+#@msg	the art on them differs from the page's in {_1}% of it: they come from its editing data all the same	
+#@msg	the artboard is locked	
+#@msg	the artboard to fit must be a positive size up to {_1} pt	
+#@msg	the background worker stopped	
+#@msg	the blend has no spine	
+#	The bounds of the visible art.	
+#	The cell shows the type object's text as HTML.	
+#@msg	the Color Picker is not open	
+#@msg	the compressed file unpacks to more than VectorCraft reads ({_1} MB of document, {_2} MB per image)	
+#@msg	the compressed file unpacks to more than {_1} MB	
+#	The dialog was closed before its file dialog answered	
+#@msg	the document has never been saved	
+#@msg	the document has no artboard	
+#@msg	the document has no artboards	
+#	The document has no colour swatches.	
+#@msg	the document has no patterns	
+#@msg	the document has no slices	
+#@msg	the document has no symbols	
+#@msg	the document is too large to save compressed ({0}): save it with Use Compression off	
+#	The document was closed while its file dialog was open	
+#@msg	the drawing has no layout `{_1}` (it has {_2})	
+#@msg	the drawing is no longer loaded	
+#@msg	the drawing is too large to open	
+#	The edge of the paper the printer can't reach: the art goes inside it, and the preview shows it dashed.	
+#@msg	the EMF header is damaged	
+#@msg	the export region is empty	
+#@msg	the export region is not finite	
+#@msg	the export returned unreadable data	
+#@msg	the export wrote no file	
+#@msg	the file holds only a placeholder page, not its art (it was saved without PDF compatibility): save it again with PDF compatibility on, or as PDF or SVG	
+#	The file is too large to read in full, so only its first part is listed.	
+#@msg	the file stopped being read (please report this bug)	
+#@msg	the file was read up to an error ({why}): what follows it was left out	
+#	The file writes keys and modifiers as codes. Check the proposed meanings and answer the codes that are not known yet.	
+#@msg	the file's layers weren't read ({_1}): it comes in as its page, in one layer	
+#@msg	the file's layers weren't read from its editing data ({_1}): they come from its PDF part	
+#@msg	the file's preview header points outside the file	
+#@msg	the file's variables and data sets weren't read (variables: {variables}, data sets: {data_sets}): the Variables panel doesn't list them	
+#@msg	the files come to more than 1 GB: add fewer at a time	
+#@msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	
+#@msg	The graphics were lost and couldn't be restarted.	
+#@msg	The graphics were lost and have been restarted	
+#@msg	the guide is on a hidden or locked layer	
+#@msg	the image can't be read as a texture	
+#@msg	the image has no usable size or position	
+#@msg	The image is {_1} × {_2} pixels, more than {LARGE_TRACE_SIDE} on a side: it is traced, but more slowly. A lower-fidelity preset or a smaller copy of the image traces faster.	
+#@msg	the image is {width} × {height} pixels, more than Image Trace takes ({max} megapixels)	
+#@msg	The image was traced at {_1} × {_2} pixels, scaled down from {_3} × {_4} ({_5} megapixels at most).	
+#@msg	the image's pixels can't be read	
+#@msg	the image's pixels don't match its size	
+#	The key color becomes the stroke color. The other colors shift their hue by the same amount and keep their saturation and brightness.	
+#@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	
+#@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	
+#@msg	the layer has no objects to clip by	
+#@msg	the layer or group is locked	
+#@msg	the layer to flatten into is hidden	
+#	The name in the save panel was “{typed}”; VectorCraft added the file type's extension. Replacing the file overwrites its contents.	
+#@msg	the object already has an opacity mask	
+#@msg	the object has no geometry	
+#@msg	the object has no opacity mask	
+#@msg	the object has no stroke	
+#@msg	the object is beyond the plane's horizon	
+#@msg	the object isn't in perspective	
+#@msg	the object isn't on a perspective plane	
+#@msg	the object would cross the horizon of the perspective plane	
+#@msg	the objects would leave the grid	
+#@msg	the operator looks for a mark on the stack and finds none	
+#@msg	the operator needs more values than the stack holds	
+#@msg	the package came back damaged	
+#	The page as it prints	
+#@msg	the path has no point to continue from	
+#@msg	the PDF has no pages	
+#@msg	the PDF is no longer loaded	
+#@msg	the PDF is password-protected: give its password	
+#@msg	the PDF password is wrong	
+#	The plug-in writes the whole document.	
+#@msg	the pointer is beyond the plane's horizon	
+#	the preset	
+#@msg	the preview image is empty	
+#@msg	the print job has no data	
+#	The Print Tiling tool placed the pages.	
+#@msg	the program asks for a resource that isn't defined	
+#@msg	the program ends a dictionary it didn't begin	
+#@msg	the program goes past one of the reader's limits	
+#@msg	the program opens a file, which the reader can't do	
+#@msg	the program restores a saved state that was already restored	
+#@msg	the program runs, deletes or renames a file, which the reader can't do	
+#@msg	the PSD file has an unknown colour mode ({m})	
+#@msg	the PSD file is cut short	
+#@msg	the PSD file's header is damaged	
+#@msg	the PSD file's image data can't be read: {e}	
+#@msg	the PSD file's image data uses an unknown compression ({m})	
+#@msg	the PSD image is too large to read ({_1} × {_2} pixels)	
+#	The samples show this brush on a blue stroke.	
+#@msg	the Save PDF dialog didn't open	
+#@msg	the scale is not a usable number	
+#@msg	the screen color sampler is already open	
+#@msg	the search couldn't start: try again in a moment	
+#	The search stopped at its limit: search a smaller folder.	
+#	The selected objects have no CSS of their own (see below).	
+#@msg	the selected stroke's profile is already listed as {_1}	
+#@msg	the selection has no URL (or they differ)	
+#@msg	the selection isn't in perspective	
+#@msg	The shape is too complex for a 3D effect	
+#@msg	the Simplify slider is not open	
+#@msg	the spine has no segments	
+#@msg	the stroke has no weight	
+#@msg	the SVG's elements are nested more than {0} deep	
+#	The system's settings of this printer	
+#@msg	the target layer is locked or hidden	
+#@msg	the thumbnail image is malformed	
+#@msg	the top object must be a path, compound path or text object to use as a clipping mask	
+#@msg	the WMF header is damaged	
+#@msg	the {tool} tool has no options	
+#@msg	there are no objects to release	
+#@msg	there are no printer settings to open here	
+#	These fonts aren't available. Their text shows in another font.	
+#	Thin Space	
+#	Third Space	
+#	Third Vanishing Point:	
+#	This document already has a swatch named “{name}” with another color.	
+#@msg	this file was saved without PDF compatibility, and its editing data can't be read ({why})	
+#@msg	this file's PostScript couldn't be read ({why}): {what}	
+#@msg	this format holds one artboard: export several as PDF or with document.exportForScreens	
+#@msg	this is a DWG drawing, which can't be read: save it from the CAD app as an ASCII DXF and open that	
+#@msg	this is a PostScript file (an .ai saved in an older format or without PDF compatibility, or an EPS file), not a PDF: File › Open and File › Place read it as EPS	
+#@msg	this is a PostScript file (an .ai saved in an older format or without PDF compatibility, or an EPS file), which can't be opened yet: save it as PDF, PDF-compatible .ai or SVG	
+#@msg	this is not a PostScript file	
+#@msg	this isn't a flat-colour logo ({_1}% of its solid areas match a few flat colours), so Flat Logo mode would turn its gradients into patches: use Color mode instead	
+#@msg	this kind of brush has no options dialog yet	
+#	This library is empty	
+#	This library is empty.	
+#	This panel is on the roadmap (see the parity plan).	
+#@msg	this PostScript file can't be read ({why}): save it as PDF or SVG in the app that made it	
+#@msg	This shortcut file is in a form VectorCraft can't read.	
+#	This system has no screen color sampler	
+#@msg	this system has no screen color sampler	
+#@msg	this trace would make more than {max} anchor points, more than the document can show smoothly: raise Noise, lower Paths or Colors, or pick a lower-fidelity preset	
+#	Thread Text	
+#	Threaded Text	
+#	Threads	
+#	Three Point	
+#	Three Point Perspective	
+#	Three Point Perspective Preset 1	
+#	Three Point Perspective Preset 2	
+#	Three Point Perspective Preset 3	
+#	Three Point Perspective Preset 4	
+#	Three Point Perspective Preset 5	
+#	Thumbnail View	
+#@msg	thumbnail: no page {n} (the file has 1)	
+#	Thumbnails:	
+#	TIFF (8-bit Color)	
+#	TIFF (Black & White)	
+#	Tile Edge Color	
+#	Tile Edge Color…	
+#	Tile Full Pages	
+#	Tile Imageable Areas	
+#	Tile Range:	
+#	Tile Type:	
+#	tile {number}	
+#	Tiles are numbered across, then down; leave the range empty for every tile.	
+#	Time (hhmmss)	
+#	Tints	
+#	Tints and Shades	
+#	Tiny Lens	
+#	Tip extends past the end point	
+#	Tip on the end point	
+#	Tips	
+#	Title Case	
+#	to	
+#	Toggle Fill/Stroke Focus	
+#	Toggle Selection	
+#	Toggle single/double column	
+#	Too large to check	
+#@msg	too many library panels were opened in this session	
+#@msg	tool (a tool id) is required	
+#	Tool Option	
+#	Tool Options…	
+#@msg	tool shortcuts must be a single key (optionally with Shift)	
+#	Toolbar: Add Tool	
+#	Toolbar: Advanced / Basic	
+#	Toolbar: Remove Tool	
+#	Toolbar: Reset	
+#	Toolbar: Show Controls	
+#	Toolbar: Single/Double Column	
+#	Tools take a single key (optionally with Shift)	
+#	Top in Front	
+#	Top Left:	
+#	Top Right:	
+#	Top to Bottom	
+#	Top-Justified Tab	
+#	Top-to-Top Leading	
+#	Torn Edges	
+#	Torn Edges…	
+#	Total Width:	
+#	Touch Type	
+#	Touch Type Tool	
+#	Trace	
+#	Trace the image with the Default preset	
+#	Tracing	
+#	Tracing Presets	
+#	Tracing Result	
+#	Tracing Result with Outlines	
+#	Trackpad Gesture to Rotate View	
+#	Trademark Symbol	
+#	Transform Again	
+#	Transform Both	
+#	Transform Each	
+#	Transform Each…	
+#	Transform in Perspective	
+#	Transform Object Only	
+#	Transform Objects	
+#	Transform options	
+#	Transform Panel	
+#	Transform Pattern Only	
+#	Transform Pattern Tiles	
+#	Transform Patterns	
+#	Transform Tools	
+#	Transforms	
+#	Transform…	
+#	Transparency Flattener Presets	
+#	Transparency Flattener Presets…	
+#	Transparency Grid	
+#	Transparency Info	
+#	Transparency is flattened with the preset. Type is written as outlines; gradients as bands of colour.	
+#	Transparency is flattened with the preset. Type is written as outlines; gradients stay smooth.	
+#	Transparency Options	
+#	Transparent (Default)	
+#	Transparent Background	
+#	Transparent Images:	
+#	Transparent Objects	
+#	Transpose	
+#	Transverse (the page a quarter turn on the paper)	
+#	Triad	
+#	Triad 2	
+#	Triad 3	
+#	Triangle (open)	
+#	Triangle to Bar	
+#	Trim	
+#	Trim covered geometry on Expand Appearance. Live preview keeps the full surface. Transparent paints and surfaces exceeding visibility limits retain all faces.	
+#	Trim mark weight:	
+#	Trim marks	
+#	Trim View	
+#	True Colors	
+#	True colour needs version 2004 or later: the nearest of 256 colours is written.	
+#@msg	truncated	
+#	Turn off Data Recovery for complex documents	
+#	Tweak…	
+#	Twirl Rate:	
+#	Twirl Tool	
+#	Twist…	
+#	Two Point	
+#	Two Point Perspective	
+#	Two Point Perspective Preset 1	
+#	Two Point Perspective Preset 2	
+#	Two Point Perspective Preset 3	
+#	Two Point Perspective Preset 4	
+#	Two Point Perspective Preset 5	
+#	Type becomes outlines, and strokes a CAD line can't draw become filled shapes.	
+#	Type Object Selection by Path Only	
+#	Type on a Path	
+#	Type on a Path Options	
+#	Type on a Path Options…	
+#	Type on a Path Tool	
+#	Type Optimized	
+#	Type Orientation	
+#	Type stays text, and every stroke is a line with its lineweight and dashes.	
+#	Typography	
+#diagnostics	ui	
+#	UI Brightness	
+#	UI Scaling	
+#	Unbind Variable	
+#	Underpainting	
+#	Underpainting…	
+#	Undo {name}	
+#	Undo {}	
+#	Unembed	
+#@msg	Unembedded to {_1}	
+#	Unembedded to {}	
+#	Unembed…	
+#	Ungroup Color Group	
+#	Unicode	
+#	Unicode (UTF-16)	
+#	Unicode (UTF-8)	
+#	Uniformly Scaled	
+#	Unique	
+#	Unite	
+#	Unite and Simplify	
+#	Units:	
+#	Units: {units}	
+#@msg	unknown command `{0}`	
+#@msg	unknown control `{name}`: fillStroke, coloring, drawMode or screenMode	
+#@msg	Unknown dimension mode	
+#@msg	Unknown dimension option {k}	
+#@msg	Unknown dimension style	
+#	Unknown directive	
+#@msg	unknown effect `{id}`	
+#@msg	unknown format	
+#@msg	unknown format `{f}` (Save writes {_1})	
+#@msg	unknown freeform mode `{m}` (points, lines)	
+#@msg	unknown gradient kind `{k}` (linear, radial, freeform)	
+#@msg	unknown highlight `{h}`	
+#@msg	unknown option `{path}.{k}`	
+#@msg	unknown overprints `{o}` (preserve, simulate or discard)	
+#@msg	unknown panel `{raw}`	
+#@msg	unknown parameter `{key}`; did you mean `{near}`?	
+#@msg	unknown parameter `{key}`; the command takes no parameters	
+#@msg	unknown parameter `{key}`; the command takes: {keys}	
+#@msg	unknown preference `{key}`	
+#@msg	unknown preset (one of {_1})	
+#@msg	unknown preset `{name}` (high, medium, low or a saved one: see flattener.presets.list)	
+#@msg	unknown preset `{name}` (see flattener.presets.list)	
+#@msg	unknown preset `{name}` (see webExport.presets.list)	
+#@msg	unknown side `{other}` (left|right|top|bottom)	
+#@msg	unknown snap option `{key}` (use {options})	
+#@msg	unknown tool `{tool}`	
+#@msg	unknown tool `{t}`	
+#@msg	unknown tool or command `{key}`	
+#@msg	Unknown unit	
+#@msg	unknown workspace (one of {_1})	
+#	Unlink harmony colors	
+#	Unlink Opacity Mask	
+#	Unlink the mask	
+#	Unlock All	
+#	Unlock All Layers	
+#	Unlock Grid	
+#	Unlock Guides	
+#	Unlock Variables	
+#	Unnamed Objects	
+#	Unprintable margin:	
+#	Unsharp Mask…	
+#	Unshift	
+#	Unsorted	
+#@msg	unsupported native docking operation	
+#@msg	unsupported: {0}	
+#	Up (right reading)	
+#	Update Changed Links	
+#	Update Data Set	
+#	Update Dimensions	
+#	Update Link	
+#	Update Links	
+#	Update Modified Links	
+#	Update Selection	
+#@msg	Updated {_1} image(s)	
+#@msg	Updated {_1} linked file(s) changed on disk	
+#	Updated {} image(s)	
+#	URL:	
+#	Use 	
+#	Use Artboards	
+#	Use Black Point Compensation	
+#	Use Compression	
+#	Use document bleed settings	
+#	Use Document Raster Effects Resolution	
+#	Use Even-Odd Fill Rule	
+#	Use Japanese Crop Marks	
+#	Use Library Item	
+#	Use Low Resolution Proxy for Linked EPS	
+#	Use Non-Zero Winding Fill Rule	
+#	Use Outside Rectangle As Frame	
+#	Use Precise Cursors	
+#	Use Pressure Pen	
+#	Use Preview Bounds	
+#	Use Registration Point for Symbol	
+#	Use Square for Previews	
+#	Use Text for Previews	
+#	Use the document's swatch: pasted colors take its color.	
+#	Use the Selected Text's Font	
+#	Use Typographer's Quotes	
+#	User Defined	
+#	User Defined Libraries	
+#	User Graphic Style Library 1	
+#	User Graphic Style Library 10	
+#	User Graphic Style Library 2	
+#	User Graphic Style Library 3	
+#	User Graphic Style Library 4	
+#	User Graphic Style Library 5	
+#	User Graphic Style Library 6	
+#	User Graphic Style Library 7	
+#	User Graphic Style Library 8	
+#	User Graphic Style Library 9	
+#	User Interface	
+#	User Library	
+#	User Preset	
+#	User Swatch Library 1	
+#	User Swatch Library 10	
+#	User Swatch Library 2	
+#	User Swatch Library 3	
+#	User Swatch Library 4	
+#	User Swatch Library 5	
+#	User Swatch Library 6	
+#	User Swatch Library 7	
+#	User Swatch Library 8	
+#	User Swatch Library 9	
+#	Uses every data set of the open document.	
+#	UTF-16 (Unicode)	
+#	V Spacing:	
+#	V:	
+#	Value Axis	
+#	Variable	
+#	Variable Font	
+#	Variable Options	
+#	Variable Options…	
+#	Variable Width Profile	
+#@msg	variables are locked	
+#@msg	variables that aren't text were left out: {kinds}	
+#	Variation	
+#	Variation:	
+#	Vector Effects	
+#	Vector Halftone	
+#	Vector Halftone…	
+#	Vector illustration — fast, open, scriptable.	
+#	VectorCraft	
+#	VectorCraft copies the fonts to {folder}.	
+#	VectorCraft Default	
+#	VectorCraft Defaults	
+#	VectorCraft didn't quit normally last time. These documents had unsaved changes:	
+#	VectorCraft documents: one locked object, updated when the file changes.	
+#@msg	VectorCraft doesn't search other apps' or the system's folders: {path}	
+#@msg	VectorCraft doesn't search the Shared or Public folder in Users: {path}	
+#@msg	VectorCraft failed to start: {e}	
+#	VectorCraft Generic CMYK (SWOP-like)	
+#	VectorCraft Help…	
+#	VectorCraft on getartcraft.com	
+#	VectorCraft on GitHub	
+#	VectorCraft read this script without running it.	
+#	VectorCraft Swatches (.vcswatches)	
+#file-filter	VectorCraft Template	
+#@msg	VectorCraft's Fonts folder isn't set here: the desktop app and vectorcraft-cli set it	
+#	Vectors	
+#@msg	version {0} files can't be compressed: only version {COMPRESSED_SINCE} and later open compressed files	
+#	Version {version} — open-source vector illustration in pure Rust.	
+#	Version:	
+#axis	Vertical	
+#effect	Vertical	
+#	Vertical %	
+#	Vertical Align	
+#	Vertical Align Bottom	
+#	Vertical Align Center	
+#	Vertical Align Top	
+#	Vertical Area Type	
+#	Vertical Area Type Tool	
+#	Vertical Distribute Bottom	
+#	Vertical Distribute Center	
+#	Vertical Distribute Space	
+#	Vertical Distribute Top	
+#	Vertical Dividers:	
+#	Vertical Guide	
+#	Vertical Scale %	
+#	Vertical Type	
+#	Vertical Type on a Path	
+#	Vertical Type on a Path Tool	
+#	Vertical:	
+#	Vertically Scaled	
+#	Video 1920×1080	
+#	Video 3840×2160	
+#	Video Banner 2560×1440	
+#	Video Thumbnail 1280×720	
+#	View Artboard Only	
+#	View Opacity Mask	
+#	View PDF after saving	
+#	View {n}	
+#	View:	
+#	Viewing Angle:	
+#	Viewing Distance:	
+#swatch	Violet	
+#	Visible & Printable Layers	
+#	Visible Layers	
+#	Vivid	
+#	Volume	
+#swatch	Walnut	
+#	Warm	
+#	Warp Options	
+#	Warp Tool	
+#	Watch 184×224	
+#	Watch 198×242	
+#	Water Paper	
+#	Water Paper…	
+#	Watercolor	
+#	Watercolor…	
+#	Web 1024×768	
+#	Web 1280×720	
+#	Web 1280×800	
+#	Web 1366×768	
+#	Web 1440×900	
+#	Web 1600×900	
+#	Web 1920×1080	
+#	Web Safe 216	
+#	Web Safe RGB	
+#	Web Shift	
+#	Web Snap:	
+#	WebP	
+#	Weight:	
+#	Welcome to VectorCraft	
+#	When pasting text	
+#swatch	White	
+#swatch	White, Black	
+#	Wide Blurry	
+#	Wide Sharp	
+#	Widget Position:	
+#@msg	width and height are at least 1 pixel	
+#	Width Point	
+#	Width Point Edit	
+#	Width Point Edit…	
+#	Width Profile	
+#	Width Profiles	
+#	Width Tool	
+#	Word Spacing:	
+#	Words Longer Than:	
+#	Working CMYK (don't tag)	
+#	Working RGB	
+#@msg	workspace name can't be empty	
+#	Workspace {i}	
+#	Wrinkle	
+#	Wrinkle Tool	
+#	Write Layers	
+#	Writes, moves or deletes files	
+#@msg	x and y must be finite	
+#@msg	x and y must be provided together	
+#@msg	x and y must both be numbers	
+#axis	X Axis	
+#	x Height	
+#	X11 (XWayland)	
+#	X11 (XWayland) When a Pen Is Attached	
+#	X:	
+#	XML ID	
+#	XML literal not closed	
+#axis	Y Axis	
+#	Y:	
+#	Yards	
+#swatch	Yellow	
+#swatch	Yellow Green	
+#	Your browser downloads the files (several as one .zip).	
+#@msg	Your unsaved changes are kept in this browser: reload the page to get them back.	
+#	Zig Zag…	
+#@msg	zipped 32-bit PSD image data with prediction can't be read	
+#@msg	zone must be a string	
+#@msg	zone must be tab, center, left, right, top or bottom	
+#	Zoom to Selection	
+#	Zoom with Mouse Wheel	
+#@msg	{_1} failed: {e}	
+#@msg	{_1} files	
+#@msg	{_1} files are written by file.saveAsTemplate	
+#@msg	{_1} files can be opened but not written (see document.formats)	
+#@msg	{_1} font families available	
+#@msg	{_1} has no {_2} style	
+#@msg	{_1} is a live effect (Effect › Plug-ins)	
+#@msg	{_1} is already used by {_2}	
+#@msg	{_1} is an exporter (File › Export › Export As…)	
+#@msg	{_1} linked file(s) can't be read here: their previews show	
+#@msg	{_1} linked image(s) changed on disk: Update Links shows the new versions	
+#@msg	{_1}: not saved, so not closed	
+#@msg	{bpp}-bit bitmaps can't be read	
+#@msg	{command} didn't create an object	
+#	{count} file(s) in {folder} {note}. Show the package folder?	
+#	{count} file(s) in {folder}. Show the package folder?	
+#	{count} file(s) in {folder}{note}. Show the package folder?	
+#	{count} folder(s) or file(s) couldn't be read	
+#	{count} folder(s) skipped, such as other apps' and the system's folders and hidden ones	
+#	{count} linked file(s) not found	
+#	{count} linked image(s) changed on disk. Show the new versions?	
+#	{count} linked image(s) changed since this document was saved. Show the new versions?	
+#	{count} more rules: Export writes every one.	
+#	{count} of {total} artboards	
+#	{count} unnamed objects left out: name them, or turn on Unnamed Objects in the panel menu.	
+#@msg	{C}: no effect at index {from}	
+#@msg	{depth}-bit PSD files in this colour mode can't be read	
+#	{effect} is already applied	
+#	{file}, line {line}	
+#	{folders} folder(s) and {files} file(s) searched	
+#	{format} Options	
+#@msg	{id} opens another app: only the person at the keyboard can run it	
+#@msg	{key} must be [x, y] with finite coordinates	
+#@msg	{key} must be a finite coordinate	
+#@msg	{key} must be an array of non-negative integer object ids	
+#@msg	{key} must be Unix seconds (an integer) or null	
+#	{kind} Gradient	
+#	{kind} Style Options…	
+#	{kind}, {model}	
+#@msg	{label} currently requires a path or compound path. Convert type, images and groups to paths first.	
+#@msg	{label} keeps 1 of the document's {n} artboards: the file reopens with one. Turn on Preserve Editing Capabilities to keep them all.	
+#@msg	{label} produced an empty result	
+#@msg	{label} requires a shape with at least two anchors	
+#@msg	{label}: lost track of a shape's style	
+#@msg	{label}: select paths	
+#@msg	{label}: select paths, compound paths, groups or text	
+#@msg	{label}…	
+#	{name} (spot)	
+#@msg	{name}: CRC mismatch	
+#@msg	{name}: no local header	
+#@msg	{name}: no such recovery entry	
+#@plural	{n} area highlighted|{n} areas highlighted	
+#@plural	{n} color|{n} colors	
+#@plural	{n} fill|{n} fills	
+#@msg	{n} font file(s) are now in {folder}	
+#@msg	{n} font file(s) are now in {folder}; {failed} couldn't be added: {reason}	
+#@msg	{n} font(s) aren't available here: their text shows in another font	
+#@plural	{n} glyph|{n} glyphs	
+#@plural	{n} more export waiting|{n} more exports waiting	
+#@plural	{n} object highlighted|{n} objects highlighted	
+#	{n} objects selected	
+#@plural	{n} Object|{n} Objects	
+#@plural	{n} part of the file wasn't read|{n} parts of the file weren't read	
+#@plural	{n} PR|{n} PRs	
+#@plural	{n} shortcut is assigned more than once|{n} shortcuts are assigned more than once	
+#@plural	{n} star|{n} stars	
+#@plural	{n} stroke|{n} strokes	
+#	{pages} in all, {count} per copy	
+#	{page} of {count}	
+#@msg	{path} can't be found: relink it first	
+#@msg	{path} is not a folder	
+#@msg	{path}: no file system here (pass dataBase64 to open; omit the path to get dataBase64)	
+#@msg	{path}: not a file	
+#@msg	{path}: {e}	
+#	{people} contributors · {commits} commits	
+#	{percent}% opacity	
+#	{ready} of {total} ready	
+#	{secs} sec	
+#	{shortcut} with the tool sizes the brush	
+#@msg	{status} ({e})	
+#	{title} (selection)	
+#@msg	{tool} isn't in a toolbar group of several tools	
+#	{tool} Options	
+#	{tool} Tool Options	
+#	{warning}: click to correct to the closest color ({hex})	
+#	“{file}” is protected by a password.	
+#	“{name}” already exists. Replace it?	
+#@msg	“{name}” is not a file	
+#	▾ Default Actions	
+#	⚠ {chord} was already used by {names} — it has been removed there.	

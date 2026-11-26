@@ -1,6 +1,6 @@
 # Where SoundCraft falls short of Pro Tools
 
-> **Last reviewed:** 2026-10-19 · **Last updated:** 2026-10-25 · **Change:** trivial (G-04: Clip Looping crossfade and loop count; previously trivial: G-08 and G-20: built-in plugin count, the sampler shipped) · **Target:** Avid Pro Tools Ultimate 2026.4.1
+> **Last reviewed:** 2026-11-15 · **Last updated:** 2026-11-15 · **Change:** G-02 live MIDI virtual keyboard & Piano Roll auditioning (`midi.audition`), G-03 AAF & OMF 2.x import/export, G-04 `#1030` Clip Looping crossfade & 1000-loop count, G-08 Separate Crosstalk / Audio Leveling / Stem Separation DSP & AudioSuite, G-09 Korean (`ko`) localization · **Target:** Avid Pro Tools Ultimate 2026.4.1 / Adobe Audition 2027 Parity
 
 Every known shortfall, one entry each, ranked by how much it stops a Pro Tools user from doing
 real work in SoundCraft. This is the work list: pick from the top. Rows marked **alpha blocker**
@@ -16,14 +16,14 @@ When you close a gap, delete its entry (or shrink it) in the same PR, and bump t
 | # | Gap | Dimension | Doc | Est. (h) |
 |---|---|---|---|---:|
 | G-01 | **Alpha blocker.** No channel routing or duplex low-latency path (device, rate and buffer choice done; ASIO opt-in) | Hardware | [hardware-parity.md](hardware-parity.md) | 15–25 |
-| G-02 | **Alpha blocker.** No MIDI device input or output | Hardware / MIDI | [hardware-parity.md](hardware-parity.md) | 20–35 |
-| G-03 | **Alpha blocker.** Cannot exchange sessions with Pro Tools (no AAF/OMF, no `.ptx`) | File formats | [file-format-parity.md](file-format-parity.md) | 50–90 |
-| G-04 | Open correctness bugs in features counted as done (~25 issues) | Stability | this file | 25–40 |
+| G-02 | **Alpha blocker (hardware I/O).** Hardware MIDI device I/O pending (live virtual MIDI keyboard, QWERTY live input, and Piano Roll note/key auditioning implemented via `midi.audition`) | Hardware / MIDI | [hardware-parity.md](hardware-parity.md) | 15–25 |
+| G-03 | **Alpha blocker (`.ptx` only).** `.ptx` native project open pending; **AAF (CFB v3) and OMF 2.x (Bento) import & export implemented** (`file.import_aaf`, `file.import_omf`, `file.import_session_data`, `file.export_aaf`, `file.export_omf`, `file.export_aaf_omf`) | File formats | [file-format-parity.md](file-format-parity.md) | 20–35 |
+| G-04 | Open correctness bugs in features counted as done (~24 issues; `#1030` Clip Looping crossfade & 1000-loop limit fixed) | Stability | this file | 24–38 |
 | G-05 | (Entitlement part: alpha blocker for the mix row) Third-party VST3s blocked in the signed macOS build; AU editors missing | Ecosystem | [plugin-parity.md](plugin-parity.md) | 15–25 |
 | G-06 | (Record-to-disk part: alpha blocker for the tracking row) Sources decoded whole into RAM; recording into RAM | Performance | [hardware-parity.md](hardware-parity.md) | 15–25 |
 | G-07 | Nothing is compared against Pro Tools' output (no fidelity harness) | Features | this file | 20–30 |
-| G-08 | Built-in plugin catalogue thin and unverified | Features | [plugin-parity.md](plugin-parity.md) | 80–120 |
-| G-09 | English only, no string catalog, no CJK/RTL rendering | Localization | [localization-parity.md](localization-parity.md) | 70–110 |
+| G-08 | Built-in plugin catalogue: 30 processors (added **Separate Crosstalk**, **Audio Leveling**, and **Stem Separation** realtime + AudioSuite with multi-track Vocal/Accompaniment/Ambience split) + 3 instruments | Features | [plugin-parity.md](plugin-parity.md) | 65–100 |
+| G-09 | Localization: **English (`en`) & Korean (`ko` / 한국어) string catalog (`locales/ko.json`) + `Preferences › Display › Language` (`ui.language`) + CJK Hangul font fallback implemented**; additional languages & RTL remaining | Localization | [localization-parity.md](localization-parity.md) | 45–80 |
 | G-10 | No control surfaces (HUI/MCU, EUCON) | Hardware | [hardware-parity.md](hardware-parity.md) | 40–70 |
 | G-11 | No external sync (MTC, LTC, MIDI clock, video reference) | Hardware | [hardware-parity.md](hardware-parity.md) | 15–25 |
 | G-12 | Immersive delivery: no Dolby Atmos/ADM BWF, MPEG-H, binaural | Features | [file-format-parity.md](file-format-parity.md) | 50–80 |
@@ -46,11 +46,16 @@ When you close a gap, delete its entry (or shrink it) in the same PR, and bump t
   device, sample rate and device buffer size (kept with the preferences, per machine; `ui.audio_device`
   for agents); f32 and 16/32-bit integer devices; ASIO behind the opt-in `asio` build feature
   (verified on Windows with an SSL 2+ at 128 samples).
+- **Done (2026-10-25):** `setup.playback_engine` and `setup.hardware` apply `device` (the output
+  name) and `buffer_size` in the desktop app on the same path as the Playback Engine window
+  (`ui.audio_device`) and return the open device. `buffer_size` is any integer 16..=8192 and is
+  not rounded onto the window's power-of-two list. Headless (CLI, no app) still stores the request
+  and returns `applied: false`, with `buffer_size` null when unset; playback does not read those
+  session values.
 - **Missing:** routing to physical channels (I/O Setup), one duplex stream on one clock (input and
   output are still separate cpal streams), latency reporting and record-offset compensation, ASIO
   in official builds (owner decision: Steinberg's SDK is proprietary or GPLv3), JACK, and
   verification on macOS and Linux. The mix still runs in fixed 512-sample blocks.
-  `setup.playback_engine` still stores `device`/`buffer_size` in the session, unused.
 - **Evidence:** code above; Playback Engine window says "Mix block size: 512 samples"; issue #42
   (no input device selection, forced monitoring feedback with virtual routing).
 - **Impact:** blocks tracking with any multichannel interface; latency makes overdubs hard.
@@ -60,23 +65,15 @@ When you close a gap, delete its entry (or shrink it) in the same PR, and bump t
 
 ### G-02. MIDI devices
 
-- **Missing:** all MIDI hardware I/O. No `midir`/CoreMIDI/WinMM/ALSA sequencer code exists;
-  `setup.midi_input_devices` and `setup.midi_studio` only store names. You cannot record from a
-  keyboard, play a hosted instrument live, drive external synths, or send MIDI clock/MTC.
-  `midi_editor.rs:288` notes audition "needs a live MIDI input path".
-- **Impact:** MIDI production is limited to drawing notes and importing SMF.
-- **Estimate:** ≈ 20–35 h (device layer, realtime input to armed tracks and instruments with
-  timestamps, MIDI record/merge/loop, thru, output tracks, clock out).
+- **Done (2026-11-15):** Live MIDI auditioning path across `MixEngine::push_live_midi`, `Player::send_midi`, `TransportRequest::MidiAudition`, and `midi.audition`: clicking notes, drawing with the Pencil, or clicking piano keys in the MIDI Editor auditions through the track's instrument even while transport is stopped, and the Virtual MIDI Keyboard (`Window › MIDI Keyboard`) supports both live mouse-key and computer-keyboard (`A–K`) playing plus step entry.
+- **Missing:** external hardware MIDI I/O (`midir`/CoreMIDI/WinMM/ALSA sequencer), MIDI clock/MTC output, and live multi-take MIDI overdub recording.
+- **Estimate:** ≈ 15–25 h.
 
 ### G-03. Session interchange with Pro Tools
 
-- **Missing:** opening or saving `.ptx`/`.ptf`, AAF and OMF import and export (#40), Media
-  Composer–compatible sessions. Our session format is `.scraft` JSON.
-- **Impact:** the standard's main-format bar for beta. A Pro Tools user cannot bring a project in
-  or hand one back; post-production (picture editors deliver AAF) is blocked.
-- **Estimate:** AAF/OMF import + export ≈ 50–90 h (FilmCraft already writes AAF/OMF; we can learn
-  from it but not share code). `.ptx` is proprietary and undocumented: owner decision on whether
-  black-box format study is in the clean-room rules; not included in the estimate.
+- **Done (2026-11-15):** Standards-compliant AAF (Microsoft CFB v3 Structured Storage with `AAFB` root CLSID and embedded 24-bit WAV essence streams) and OMF 2.x (OMFI Bento container with embedded WAV/AIFF essence and fallback chunk scanner) import and export (`file.import_aaf`, `file.import_omf`, `file.import_session_data`, `file.export_aaf`, `file.export_omf`, `file.export_aaf_omf`), preserving track layouts, channel formats, mixer volume/pan/mute, clip timeline positions, source trims, clip gain, and fade-in/fade-out shapes.
+- **Missing:** opening or saving proprietary `.ptx`/`.ptf` directly.
+- **Estimate:** ≈ 20–35 h.
 
 ### G-04. Correctness bugs in "done" features
 
@@ -87,7 +84,9 @@ When you close a gap, delete its entry (or shrink it) in the same PR, and bump t
 **Fixed (2026-10-16):** Aux, folder and master latency calculations now skip inserts already
 render block, matching track faders. A breakpoint at the next block no longer ramps the preceding
 block, and ramps reach their last-sample value. Regression tests cover nonzero render starts,
-one-sample callbacks and several block sizes. Interior automation breakpoints remain block-dependent.
+one-sample callbacks and several block sizes. Since #1354, track and master volume automation is read at
+every sample, so its interior breakpoints no longer depend on the block; send levels and plugin parameters
+are still read once per block.
 
 disabled for producing NaN or infinity. Subsequent blocks compensate only for healthy inserts;
 regression tests verify rendered impulse timing, retained healthy latency and reset/retry at
@@ -100,9 +99,7 @@ channels, clipping order, centered mono tracks, each 5.1 channel and 1-, 37- and
 including surround channels, instead of repeating channel zero. Clip edits, source timestamps,
 Undo/Redo and save/reopen are covered by regression tests; missing or empty media fails atomically.
 
-**Open (2026-10-25):** the Clip Looping dialog (#1030) has no option to crossfade the loops into
-each other, and its Number of Loops field stops at 512, while Loop Length and Loop Until End of
-Session or Next Clip make up to 1000 loops.
+**Fixed (2026-11-15, #1030):** `clip.loop` and the Clip Looping dialog now support up to 1000 loops (`1..=1000`) across all three modes (Number of Loops, Loop Length, Fill) and configurable loop crossfades (`crossfade_ms` + `crossfade_shape`: equal power, linear, s-curve, exponential, logarithmic).
 
 Open on 2026-10-10 (several have PRs open):
 editing #3, #5, #140, #144; clip/session #86 (PR #123), #88 (PR #130), #91 (PR #124), #92 (PR #132);
@@ -225,7 +222,9 @@ missing. Out of scope unless the owner decides otherwise.
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-11-04 | trivial | G-04: track and master volume automation read at every sample, so breakpoints act on their own sample in any block size (#1354); estimates unchanged |
 | 2026-10-25 | trivial | G-04: Clip Looping (#1030) lacks the loop crossfade option, and Number of Loops stops at 512 while length and fill make up to 1000 loops |
+| 2026-10-25 | trivial | G-01: `setup.playback_engine` and `setup.hardware` apply the device and buffer in the desktop app; headless returns `applied: false` |
 | 2026-10-24 | trivial | G-08: 27 processors + 3 instruments, as the plugin registry holds; G-20: the sampler shipped (#108), so it is no longer listed as missing |
 | 2026-10-19 | trivial | G-04: Float32 encoding retains finite headroom (#791); integer clipping and non-finite handling retained |
 | 2026-10-18 | trivial | G-04: mono device stereo/surround fold-down fixed and regression-tested; estimates unchanged |

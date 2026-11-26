@@ -1,0 +1,2723 @@
+# עברית (he) interface catalog for PdfCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	  · not fixable here	  · לא ניתן לתקן כאן
+	 (page {p})	 (עמוד {p})
+	 (searching… {s} of {p} pages)	 (בחיפוש… {s} מתוך {p} עמודים)
+	 ({n} at {dpi} dpi, the largest size they can be drawn at)	 ({n} ברזולוציה {dpi} dpi, הגודל המרבי שבו ניתן לצייר אותם)
+	 ({s} not exported: {first})	 ({s} לא יוצאו: {first})
+	 on page {label}	 בעמוד {label}
+	 on page {p}	 בעמוד {p}
+	 · password-protected	 · מוגן בסיסמה
+	+Bin	+קבצים בינאריים
+	+LOC	+שורות קוד
+	, Expires: 	, תוקף עד: 
+	1 difference found	נמצא הבדל אחד
+	1 file	קובץ אחד
+	1 file done	קובץ אחד הושלם
+	1 file needs attention	קובץ אחד דורש טיפול
+	1 instance	מופע אחד
+	1 issue	בעיה אחת
+	1 line	שורה אחת
+	1 mark	סימון אחד
+	1 page	עמוד אחד
+	1 page selected	נבחר עמוד אחד
+	1 page selected.	נבחר עמוד אחד.
+	180 degrees	180 מעלות
+	4 x 6 in label (101.6 x 152.4 mm)	תווית בגודל 4 × 6 אינץ׳ (101.6 × 152.4 מ״מ)
+	9 digit, A letter, O letter or digit, X any character	9 ספרה, A אות, O אות או ספרה, X כל תו
+	; 1 page already had text	; בעמוד אחד כבר היה טקסט
+	; failed: {list}	; נכשל: {list}
+	; {n} pages already had text	; ב־{n} עמודים כבר היה טקסט
+	? of {n}	? מתוך {n}
+	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{bin_added} / −{bin_deleted} binary assets, {first} – {last}	@{login}: ‏{prs} בקשות מיזוג, {commits} קומיטים, +{added} / −{deleted} שורות (Δ {delta}), +{bin_added} / −{bin_deleted} נכסים בינאריים, {first} – {last}
+	`{command}` {when}	`{command}` {when}
+	a bookmark cannot be moved inside itself	אי אפשר להעביר סימנייה לתוך עצמה
+	A button	כפתור
+	A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0.	יישום PDF בקוד פתוח, שנכתב בשפת Rust מאפס בהתאם למפרט. MIT OR Apache-2.0.
+	a column is too narrow: make the area wider, give the column more of it, or use fewer columns or less column spacing	עמודה צרה מדי: הרחב את האזור, תן לעמודה רוחב גדול יותר או השתמש בפחות עמודות או במרווח עמודות קטן יותר
+	A diagonal CONFIDENTIAL watermark on every page.	הוספת סימן מים אלכסוני „סודי” לכל עמוד.
+	a document must keep at least one page	על מסמך להכיל לפחות עמוד אחד
+	A document needs at least one page: copy instead	מסמך חייב לכלול עמוד אחד לפחות: אפשר להעתיק במקום זאת
+	a field named {name} already exists	כבר קיים שדה בשם {name}
+	A font isn't embedded	גופן אינו מוטמע
+	A form field has additional actions	לשדה טופס יש פעולות נוספות
+	A link	קישור
+	A picture covers page {pages} (a scan?), so the background won't show there.	תמונה מכסה את עמוד {pages} (סריקה?), ולכן הרקע לא יוצג בו.
+	A script	סקריפט
+	A selected field has no widget on any page, so the fields can't be edited together.	לאחד השדות שנבחרו אין רכיב תצוגה באף עמוד, ולכן אי אפשר לערוך את השדות יחד.
+	A stream refers to an external file	זרם מפנה לקובץ חיצוני
+	A stream uses LZW compression	זרם משתמש בדחיסת LZW
+	A summary describes the table's purpose and layout. Add a Summary attribute to each table.	הסיכום מתאר את מטרת הטבלה ואת המבנה שלה. יש להוסיף מאפיין Summary לכל טבלה.
+	a table has 1 to {max} columns	בטבלה חייבות להיות בין עמודה אחת ל־{max} עמודות
+	a table has 1 to {max} rows	בטבלה יש בין שורה אחת ל־{max} שורות
+	A {} action isn't allowed	פעולה מסוג {} אינה מותרת
+	A {} annotation has additional actions	להערה מסוג {} יש פעולות נוספות
+	A {} annotation has no appearance stream	להערה מסוג {} אין זרם מראה
+	A {} annotation isn't set to print, or is hidden	הערה מסוג {} אינה מוגדרת להדפסה או שהיא מוסתרת
+	About PdfCraft	אודות PdfCraft
+	Accepted	התקבל
+	Accessibility Checker	בודק נגישות
+	Accessibility Checker Options	אפשרויות בודק הנגישות
+	Accessibility permission flag	דגל הרשאת נגישות
+	Accessibility permission flag is set	דגל הרשאת הנגישות מוגדר
+	Accessibility Report	דוח נגישות
+	Acrobat 3.0 and later (40-bit RC4)	Acrobat 3.0 ואילך (RC4 ‏40 סיביות)
+	Acrobat 5.0 and later (128-bit RC4)	Acrobat 5.0 ואילך (RC4 ‏128 סיביות)
+	Acrobat 7.0 and later (128-bit AES)	Acrobat 7.0 ואילך (AES ‏128 סיביות)
+	Acrobat X and later (256-bit AES)	Acrobat X ואילך (AES ‏256 סיביות)
+	Action name:	שם הפעולה:
+	Action Wizard	אשף פעולות
+	Action Wizard…	אשף הפעולות…
+	Actions	פעולות
+	Actions list	רשימת פעולות
+	Active	פעיל
+	Actual Size	גודל מקורי
+	Actual size	גודל מקורי
+	Actual text	טקסט בפועל
+	Add a button	הוספת כפתור
+	Add a callout	הוספת תיבת הסבר
+	Add a checkbox	הוספת תיבת סימון
+	Add a date field	הוספת שדה תאריך
+	Add a digital signature field	הוספת שדה חתימה דיגיטלית
+	Add a drop-down list	הוספת רשימה נפתחת
+	Add a list box	הוספת תיבת רשימה
+	Add a radio button	הוספת כפתור בחירה
+	Add a reply	הוספת תגובה
+	Add a stamp	הוספת חותמת
+	Add a sticky note	הוספת פתקית
+	Add a sticky note here	הוספת פתקית כאן
+	Add a text box	הוספת תיבת טקסט
+	Add a text field	הוספת שדה טקסט
+	Add alternate text	הוספת טקסט חלופי
+	Add alternate text…	הוספת טקסט חלופי…
+	Add an Action	הוספת פעולה
+	Add an image field	הוספת שדה תמונה
+	Add arrow	הוספת חץ
+	Add at least two files	יש להוסיף לפחות שני קבצים
+	Add background	הוספת רקע
+	Add background…	הוספת רקע…
+	Add Bates numbering…	הוספת מספור Bates…
+	Add bookmark	הוספת סימנייה
+	Add callout	הוספת תיבת הסבר
+	Add checkmark	הוספת סימן וי
+	Add cloud	הוספת ענן
+	Add comment	הוספת הערה
+	Add comments	הוספת הערות
+	Add connected lines	הוספת קווים מחוברים
+	Add content	הוספת תוכן
+	Add cross	הוספת צלב
+	Add dot	הוספת נקודה
+	Add drawing	הוספת ציור
+	Add field	הוספת שדה
+	Add fields	הוספת שדות
+	Add file attachment	הוספת קובץ מצורף
+	Add files to combine	הוספת קבצים לשילוב
+	Add files…	הוספת קבצים…
+	Add folder	הוספת תיקייה
+	Add folder and subfolders	הוספת תיקייה ותיקיות משנה
+	Add folder and subfolders…	הוספת תיקייה ותיקיות משנה…
+	Add folder…	הוספת תיקייה…
+	Add footer	הוספת כותרת תחתונה
+	Add form components	הוספת רכיבי טופס
+	Add header	הוספת כותרת עליונה
+	Add header & footer	הוספת כותרת עליונה ותחתונה
+	Add header & footer…	הוספת כותרת עליונה ותחתונה…
+	Add highlight	הוספת הדגשה
+	Add image	הוספת תמונה
+	Add image…	הוספת תמונה…
+	Add inserted text	הוספת טקסט מוכנס
+	Add line	הוספת קו
+	Add link	הוספת קישור
+	Add open documents	הוספת מסמכים פתוחים
+	Add or edit links	הוספה או עריכת קישורים
+	Add oval	הוספת אליפסה
+	Add Page Numbers	הוספת מספרי עמודים
+	Add polygon	הוספת מצולע
+	Add printer marks	הוספת סימני דפוס
+	Add rectangle	הוספת מלבן
+	Add redaction mark	הוספת סימון השחרה
+	Add search index	הוספת אינדקס חיפוש
+	Add signature	הוספת חתימה
+	Add squiggly underline	הוספת קו תחתון גלי
+	Add stamp	הוספת חותמת
+	Add Step	הוספת שלב
+	Add sticky note	הוספת פתקית
+	Add strikethrough	הוספת קו חוצה
+	Add text	הוספת טקסט
+	Add text box	הוספת תיבת טקסט
+	Add text field table	הוספת טבלת שדות טקסט
+	Add the choices people pick from.	יש להוסיף את האפשרויות שמהן המשתמשים יבחרו.
+	Add the files to combine	הוספת הקבצים לשילוב
+	Add the PDFs to combine	הוספת קובצי ה־PDF לשילוב
+	Add the steps this action runs, in order.	יש להוסיף את שלבי הפעולה לפי סדר הביצוע.
+	Add to Trusted Certificates	הוספה לאישורים מהימנים
+	Add to trusted certificates	הוספה לאישורים מהימנים
+	Add tools to hotbar	הוסף כלים לסרגל הכלים המהיר
+	Add underline	הוספת קו תחתון
+	Add watermark	הוספת סימן מים
+	Add watermark…	הוספת סימן מים…
+	Add {what}	הוספת {what}
+	Added 1 comment	נוספה הערה אחת
+	Added more than once	נוסף יותר מפעם אחת
+	Added text	טקסט שנוסף
+	Added the first {n} files in {folder}	נוספו {n} הקבצים הראשונים בתיקייה {folder}
+	Added the first {n} PDFs in {folder}	נוספו {n} קובצי ה־PDF הראשונים בתיקייה {folder}
+	Added {n} comments	נוספו {n} הערות
+	Adding images arrives on the web with file pickers for images	הוספת תמונות תגיע לגרסת האינטרנט עם בוחרי קבצים לתמונות
+	Adds invisible text over each word; the page image is not changed	מוסיף טקסט בלתי נראה מעל כל מילה; תמונת העמוד אינה משתנה
+	Advanced optimization	מיטוב מתקדם
+	Advanced options	אפשרויות מתקדמות
+	Advanced Options {chevron}	אפשרויות מתקדמות {chevron}
+	Advanced search…	חיפוש מתקדם…
+	AI assistant	עוזר בינה מלאכותית
+	Algorithm	אלגוריתם
+	Align fields	יישור שדות
+	Align left	יישור לשמאל
+	Align right	יישור לימין
+	All annotations are tagged	כל ההערות מתויגות
+	All document contents	כל תוכן המסמך
+	All document contents except metadata	כל תוכן המסמך למעט מטא־נתונים
+	All form fields are tagged	כל שדות הטופס מתויגים
+	All form fields have description	לכל שדות הטופס יש תיאור
+	All multimedia objects are tagged	כל אובייקטי המולטימדיה מתויגים
+	All open documents	כל המסמכים הפתוחים
+	All page content is tagged	כל תוכן העמוד מתויג
+	All pages in document	כל עמודי המסמך
+	All pages in range	כל העמודים בטווח
+	All tools	כל הכלים
+	Allow	אפשר
+	Allow Rich Text Formatting	אפשר עיצוב טקסט עשיר
+	Allow user to enter custom text	אפשר למשתמש להזין טקסט מותאם אישית
+	Allowed	מורשה
+	already a PDF	כבר קובץ PDF
+	Also recognize pages that already have text	זיהוי גם בעמודים שכבר מכילים טקסט
+	Alternate Text	טקסט חלופי
+	Alternate text	טקסט חלופי
+	alternate text hides an annotation inside it	הטקסט החלופי מסתיר הערה שנמצאת בתוכו
+	Alternate text inside an element that already has alternate text is never read. Remove the inner alternate text.	טקסט חלופי בתוך רכיב שכבר יש לו טקסט חלופי לא ייקרא. יש להסיר את הטקסט החלופי הפנימי.
+	Alternate text must be associated with some content	יש לשייך טקסט חלופי לתוכן כלשהו
+	Alternate text on an element that contains a link or field hides that annotation from assistive technology. Move the alternate text.	טקסט חלופי ברכיב שמכיל קישור או שדה מסתיר את ההערה מטכנולוגיה מסייעת. יש להעביר את הטקסט החלופי.
+	alternate text on an element with no page content	טקסט חלופי ברכיב שאין לו תוכן בעמוד
+	Alternate text on an element without page content is never reached. Remove it or attach the element to content.	לא ניתן להגיע לטקסט חלופי ברכיב שאין לו תוכן בעמוד. יש להסיר אותו או לשייך את הרכיב לתוכן.
+	Alternate text should not hide annotation	טקסט חלופי לא אמור להסתיר הערה
+	Alternate text that will never be read	טקסט חלופי שלא ייקרא לעולם
+	Always	תמיד
+	Always use my default zoom and page layout	תמיד להשתמש בהגדלה ובפריסת העמוד המוגדרות כברירת מחדל
+	An action is already running	פעולה כבר פועלת
+	An action with this name already exists.	כבר קיימת פעולה בשם זה.
+	An embedded file has no AFRelationship	לקובץ מוטמע אין ערך AFRelationship
+	An image asks to be interpolated	תמונה מבקשת לבצע אינטרפולציה
+	An image has alternates or OPI information	לתמונה יש חלופות או מידע OPI
+	An open-source PDF workbench — local, private, and scriptable.	סביבת עבודה בקוד פתוח לקובצי PDF — מקומית, פרטית וניתנת לתכנות.
+	and {n} more	ועוד {n}
+	Angle	זווית
+	Animation effects	אפקטים של אנימציה
+	Animation that flashes can cause seizures. Check scripts and media for flicker.	אנימציה מהבהבת עלולה לגרום להתקפים. יש לבדוק סקריפטים ומדיה לאיתור הבהוב.
+	Annotations, form fill-in, and digital signatures	הערות, מילוי טפסים וחתימות דיגיטליות
+	Another file dialog is still open. Finish with it first.	חלון בחירת קובץ אחר עדיין פתוח. יש לסיים בו תחילה.
+	Any	כל
+	Any except extracting pages	הכול למעט חילוץ עמודים
+	Anyone opening the document will need this password. It's applied when you save.	כל מי שיפתח את המסמך יזדקק לסיסמה זו. היא תופעל בעת השמירה.
+	Appear behind page	הצגה מאחורי העמוד
+	Appear on top of page	הצגה מעל העמוד
+	Appearance	מראה
+theme	Appearance	מראה
+	Appearance mode	מצב מראה
+	Appearance settings…	הגדרות מראה…
+	Application	יישום
+	Applied 1 redaction mark. Save to remove the content from the file.	בוצעה השחרה אחת. יש לשמור כדי להסיר את התוכן מהקובץ.
+	Applied {n} redaction marks. Save to remove the content from the file.	בוצעו {n} השחרות. יש לשמור כדי להסיר את התוכן מהקובץ.
+	Applies to 1 page	חל על עמוד אחד
+	Applies to {n} pages	חל על {n} עמודים
+	Apply PDF standards	החלת תקני PDF
+	Apply redactions	החלת ההשחרות
+	Apply redactions…	החלת השחרות…
+	Apply scale	החלת קנה מידה
+	Applying a scale switches units to m / mm.	החלת קנה המידה משנה את היחידות ל־m / mm.
+	Appropriate nesting	קינון מתאים
+	April	אפריל
+calendar date	April	אפריל
+	Arbitrary Mask	מסכה מותאמת
+	Archive documents	ארכוב מסמכים
+	Arrange image	ארגן את התמונה
+	ArtCraft website	אתר ArtCraft
+	Ask about this document	שאלות על המסמך
+	Asks GitHub for the latest release. Nothing is downloaded or installed automatically.	בודק ב־GitHub מהי הגרסה האחרונה. שום דבר אינו מורד או מותקן אוטומטית.
+	Associated with content	משויך לתוכן
+	At least one signature has problems.	יש בעיות בלפחות אחת מהחתימות.
+	At least one signature is invalid.	לפחות חתימה אחת אינה תקפה.
+	At most	לכל היותר
+	Attach a file	צירוף קובץ
+	Attach a file…	צירוף קובץ…
+	Attach file	צירוף קובץ
+	Attach {name}	צירוף {name}
+	Attaching files is not available on the web yet	צירוף קבצים עדיין אינו זמין בגרסת האינטרנט
+	Attachment	קובץ מצורף
+	Attachments	קבצים מצורפים
+	Attachments Panel and Page	חלונית קבצים מצורפים ועמוד
+	Audit space usage	בדיקת השימוש במקום
+	Audit space usage…	בדיקת שימוש במקום…
+	August	אוגוסט
+calendar date	August	אוגוסט
+	Auto follows the system's text size. Pages always render at the display's full resolution.	המצב האוטומטי משתמש בגודל הטקסט של המערכת. העמודים מוצגים תמיד ברזולוציה המלאה של המסך.
+	Auto portrait/landscape	כיוון לאורך/לרוחב אוטומטי
+	Auto-rotate pages	סיבוב עמודים אוטומטי
+	Auto-size text to fit redaction region	התאמה אוטומטית של גודל הטקסט לאזור ההשחרה
+	Automatically	באופן אוטומטי
+	Automatically tag PDF	תיוג אוטומטי של PDF
+	Available	זמין
+	average	ממוצע
+	Back	חזרה
+	Back side only	הצד האחורי בלבד
+	Back to all tools	חזרה לכל הכלים
+	Back to Prepare a form	חזרה להכנת טופס
+	Back to the document	חזרה למסמך
+	Background	רקע
+	background	רקע
+	Basic constraints	אילוצים בסיסיים
+certificate	Basic constraints	אילוצים בסיסיים
+	Bates numbering	מספור Bates
+	Before each selected page (select pages in Organize)	לפני כל עמוד שנבחר (יש לבחור עמודים בתצוגת ארגון)
+	Before the number	לפני המספר
+	Beveled	משופע
+	Bicubic downsampling to	דגימה מופחתת בשיטה דו־קובית לרזולוציה
+	Binding	כריכה
+	Binding:	צד הכריכה:
+	Black	שחור
+	Black and white	שחור ולבן
+	Black on white	שחור על לבן
+	Blank page	עמוד ריק
+	Blue	כחול
+	bold	מודגש
+	Booklet	חוברת
+	Booklet subset:	חלקי החוברת:
+	Bookmark options	אפשרויות סימניות
+	Bookmarks	סימניות
+	Bookmarks are present in large documents	במסמכים גדולים קיימות סימניות
+	Bookmarks Panel and Page	חלונית סימניות ועמוד
+	Border Color:	צבע הגבול:
+	Borders and Colors	גבולות וצבעים
+	Both	שניהם
+	Both sides	שני הצדדים
+	Bottom:	תחתית:
+	Box	תיבה
+	Bring forward	העבר שכבה אחת קדימה
+	Bring to front	העבר לחזית
+	Bring your own model (off by default)	שימוש במודל משלך (כבוי כברירת מחדל)
+	Browser's print dialog	חלון ההדפסה של הדפדפן
+	Bulleted list	רשימת תבליטים
+	Butt	קצה שטוח
+	Button	כפתור
+	Button is checked by default	הכפתור מסומן כברירת מחדל
+	Button Properties	מאפייני כפתור
+	Button Style:	סגנון הכפתור:
+	Buttons with the same name and value are selected in unison	כפתורים בעלי אותו שם וערך נבחרים יחד
+	Bytes	בתים
+	Calculate	חישוב
+	Calculation order	סדר החישוב
+	Calibrate from two points	כיול באמצעות שתי נקודות
+	Callout	בועת הסבר
+	Can't be read: {e}	לא ניתן לקרוא: {e}
+	Cancelled	בוטל
+	Cancelling…	מבטל…
+	Case-sensitive	התאמה לאותיות רישיות וקטנות
+	Category:	קטגוריה:
+	CCITT Group 4	CCITT קבוצה 4
+	Center Footer Text	טקסט הכותרת התחתונה במרכז
+	Center Header Text	טקסט הכותרת העליונה במרכז
+	Center horizontally	מרכוז אופקי
+	Center vertically	מרכוז אנכי
+	Center window on screen	מרכוז החלון במסך
+	Centre	מרכוז
+	Certificate authority	רשות אישורים
+	Certificate Signing	חתימת אישור
+	Certificate Viewer	מציג האישורים
+	Certificates	אישורים
+	Certified by {by}	אושר על ידי {by}
+	Certify	אישור
+	Certify (invisible signature)	אישור באמצעות חתימה בלתי נראית
+	Certify (visible signature)	אישור באמצעות חתימה גלויה
+	Change Author	שינוי מחבר
+	Change comment properties	שינוי מאפייני הערה
+	Change document properties	שינוי מאפייני המסמך
+	Change field properties	שינוי מאפייני שדה
+	Change initial view	שינוי התצוגה הראשונית
+	Change initials	שינוי ראשי תיבות
+	Change Keywords	שינוי מילות מפתח
+	Change link properties	שינוי מאפייני קישור
+	Change reading options	שינוי אפשרויות הקריאה
+	Change reading options…	שינוי אפשרויות קריאה…
+	Change settings…	שינוי הגדרות…
+	Change signature	שינוי חתימה
+	Change Subject	שינוי נושא
+	Change tag properties	שינוי מאפייני תגית
+	Change the colour of line art as well as text	שינוי הצבע של גרפיקה קווית בנוסף לטקסט
+	Change Title	שינוי כותרת
+	Change {key}	שינוי {key}
+	Change {what}	שינוי {what}
+	Changes allowed	שינויים מותרים
+	Changing the document	שינוי המסמך
+	Character encoding	קידוד תווים
+	Character limit 0 means no limit. A comb of characters needs a limit.	מגבלת תווים 0 פירושה שאין מגבלה. רשת תווים מחייבת הגבלת תווים.
+	Character limit:	מגבלת תווים:
+	Character spacing	מרווח בין תווים
+	characters	תווים
+	Characters without spaces	תווים ללא רווחים
+	Check	סימן וי
+	Check Again	בדיקה חוזרת
+	Check again	בדיקה חוזרת
+	Check box is checked by default	תיבת הסימון מסומנת כברירת מחדל
+	Check Box Properties	מאפייני תיבת סימון
+	Check Box Style:	סגנון תיבת הסימון:
+	Check for accessibility	בדיקת נגישות
+	Check for accessibility…	בדיקת נגישות…
+	Check for updates	בדוק עדכונים
+	Check for updates…	בדיקת עדכונים…
+	Check spelling	בדיקת איות
+	Check that the tags read in the order a sighted reader would. Use the Reading Order tool or the Tags panel to correct it.	יש לוודא שהתגיות נקראות בסדר שבו קורא רואה היה קורא. אפשר לתקן זאת באמצעות כלי סדר הקריאה או חלונית התגיות.
+	Check the pages	בדיקת העמודים
+	Check the pages of {name}: {why}	יש לבדוק את עמודי {name}: {why}
+	CheckBox	תיבת סימון
+	Checkbox	תיבת סימון
+	Checked	מסומן
+	Checking for a newer version…	בודק אם קיימת גרסה חדשה יותר…
+	Checking Options ({on} of 32 in all categories)	אפשרויות בדיקה ({on} מתוך 32 בכל הקטגוריות)
+	Checking pages…	בדיקת עמודים…
+	Checkmark	סימן וי
+	Choose a digital ID.	יש לבחור מזהה דיגיטלי.
+	Choose a file…	בחירת קובץ…
+	Choose a folder for the exported files	יש לבחור תיקייה לקבצים המיוצאים
+	Choose a folder for the extracted pages	בחירת תיקייה לעמודים שחולצו
+	Choose a folder for the results	יש לבחור תיקייה לתוצאות
+	Choose a folder for the searchable files	יש לבחור תיקייה לקבצים שניתנים לחיפוש
+	Choose a folder for the split files	בחירת תיקייה לקבצים שפוצלו
+	Choose a folder on this computer to pin	בחר תיקייה במחשב זה להצמדה
+	Choose a folder…	בחירת תיקייה…
+	Choose a layout:	בחירת פריסה:
+	Choose a PNG or JPEG image (up to 4 MiB). Transparency is preserved.	בחר תמונת PNG או JPEG (עד 4 MiB). השקיפות נשמרת.
+	Choose a stamp, then click on the page to place it.	יש לבחור חותמת ואז ללחוץ בעמוד כדי למקם אותה.
+	Choose an image	בחירת תמונה
+	Choose images	בחירת תמונות
+	Choose image…	בחירת תמונה…
+	Choose photo…	בחירת תמונה…
+	Choose the digital ID that you want to use for signing:	יש לבחור את המזהה הדיגיטלי שישמש לחתימה:
+	Choose…	בחירה…
+	Clean Up	ניקוי
+	Clean-up	ניקוי
+	Clear all	ניקוי הכול
+	Clear form	ניקוי הטופס
+	Clear Recent Files	ניקוי רשימת הקבצים האחרונים
+	Clear redaction marks	ניקוי סימוני השחרה
+	Clear search	נקה חיפוש
+	Clear selection / close find	ביטול הבחירה / סגירת החיפוש
+	Click on the page to add a {tool}, or drag to set its size	לחץ בעמוד כדי להוסיף {tool}, או גרור כדי לקבוע את גודלו
+	Click on the page to add text; each click starts a new box, and ✓ finishes. Drag items to move them, drag a corner to resize, double-click text to edit it.	לחץ בעמוד כדי להוסיף טקסט; כל לחיצה יוצרת תיבה חדשה, וסימן ✓ מסיים. גרור פריטים כדי להזיז אותם, גרור פינה כדי לשנות גודל, ולחץ פעמיים על טקסט כדי לערוך אותו.
+	Click text or an image to edit it	לחץ על טקסט או תמונה כדי לערוך אותם
+	Click the first point to begin.	לחץ על הנקודה הראשונה כדי להתחיל.
+	Click to sort, drag to move the column. Drag its edge to resize it.	לחץ כדי למיין וגרור כדי להזיז את העמודה. גרור את הקצה כדי לשנות את גודלה.
+	Click vertices. Enter or double-click finishes a perimeter or area. Click the first point to close an area.	לחץ על קודקודים. לחיצה על Enter או לחיצה כפולה מסיימת מדידת היקף או שטח. לחץ על הנקודה הראשונה כדי לסגור שטח.
+	Clipboard	לוח הגזירים
+	Clockwise 90 degrees	90 מעלות עם כיוון השעון
+	Close (Esc)	סגירה (Esc)
+	Close all	סגירת הכול
+	Close file	סגירת קובץ
+	Close menu	סגור תפריט
+	Close panel	סגירת חלונית
+	Close Tab	סגירת לשונית
+	Closed arrow	חץ סגור
+	Cloud	ענן
+	Collapse	צמצום
+	Collapse all	צמצום הכול
+	Collapse all bookmarks	צמצום כל הסימניות
+	Collapse all pages	צמצום כל העמודים
+	Collapse all tools	צמצום כל הכלים
+	Collapse tag	צמצום תגית
+	Collate	איסוף לפי סדר
+	Color contrast	ניגודיות צבעים
+	Color Images	תמונות צבעוניות
+	Color Spaces	מרחבי צבע
+	Colour	צבע
+	Colours are remapped while rendering; the document itself never changes.	הצבעים ממופים מחדש בזמן הרינדור; המסמך עצמו אינו משתנה.
+	Column select	בחירת עמודה
+	Column spacing	מרווח בין עמודות
+	Column widths	רוחב העמודות
+	Column {n}	עמודה {n}
+	Comb of	תאי תווים
+	Comb of characters	רשת תווים
+	Combine files	שילוב קבצים
+	Combine files…	שילוב קבצים…
+	Combine the rest	שילוב השאר
+	Combined {n} files	שולבו {n} קבצים
+	Combo	תיבה משולבת
+	Coming in milestone	ייכלל באבן הדרך
+	Coming in milestone {m}. Items marked Ready work today.	יגיע באבן הדרך {m}. פריטים המסומנים „מוכן” כבר פועלים.
+	Command	פקודה
+	Comment and form data	נתוני הערות וטפסים
+	Comment and review	הערות וסקירה
+	Comment list	רשימת הערות
+	Commenting	הוספת הערות
+	Commenting, filling in form fields, and signing existing signature fields	הוספת הערות, מילוי שדות טופס וחתימה בשדות חתימה קיימים
+	comments	הערות
+	Comments & Forms	הערות וטפסים
+	Comments and markups	הערות וסימונים
+	Comments only	הערות בלבד
+	Comments panel	חלונית הערות
+	Comments, links and fields must be in the tag tree to be announced. Tag the annotations.	הערות, קישורים ושדות צריכים להופיע בעץ התגיות כדי שיוקראו. יש לתייג את ההערות.
+	Commit selected value immediately	אישור הערך שנבחר מיד
+	Common Properties	מאפיינים כלליים
+	Common scales	קני מידה נפוצים
+	Compare Files	השוואת קבצים
+	Compare files	השוואת קבצים
+	Compare files…	השוואת קבצים…
+	Compare this file with an older version: Compare files… in All tools.	כדי להשוות קובץ זה לגרסה ישנה, יש לבחור „השוואת קבצים…” ב„כל הכלים”.
+	Compatibility	תאימות
+	Completed	הושלם
+	Compress a PDF	דחיסת PDF
+	Compress document structure (object streams)	דחיסת מבנה המסמך (זרמי אובייקטים)
+	Compression	דחיסה
+	Configure a Digital ID for Signing	הגדרת מזהה דיגיטלי לחתימה
+	Configure New Digital ID	הגדרת מזהה דיגיטלי חדש
+	Confirm Password	אימות סיסמה
+	Conformance level:	רמת תאימות:
+	Connected lines	קווים מחוברים
+	Console	מסוף
+	Content copying	העתקת תוכן
+	Content copying for accessibility	העתקת תוכן לצורכי נגישות
+	Content Streams	זרמי תוכן
+	Continue	המשך
+	Continuous scrolling	גלילה רציפה
+	Convert colors	המרת צבעים
+	Copied to clipboard	הועתק ללוח הגזירים
+	Copied {what}	הועתקו {what}
+	Copies, two-sided printing and colour are chosen in the browser's print dialog.	מספר העותקים, הדפסה דו־צדדית וצבע נבחרים בחלון ההדפסה של הדפדפן.
+	Copies:	עותקים:
+	Copy Image	העתקת תמונה
+	Copy Image in Original Format	העתקת תמונה בפורמט המקורי
+	Copy or cut pages first	יש להעתיק או לגזור תחילה עמודים
+	Copy pages	העתקת עמודים
+	Copy selected text	העתקת הטקסט שנבחר
+	Copy text	העתקת טקסט
+	Copy to clipboard	העתקה ללוח הגזירים
+	Correct recognized text	תיקון הטקסט שזוהה
+	Could not save: {e}	השמירה נכשלה: {e}
+	Couldn't add {name}: {e}	לא ניתן להוסיף את {name}: {e}
+	Couldn't check for updates: {e}	לא ניתן לבדוק עדכונים: {e}
+	Couldn't combine files: {e}	שילוב הקבצים נכשל: {e}
+	Couldn't copy the image: {e}	לא ניתן היה להעתיק את התמונה: {e}
+	Couldn't create a PDF: {e}	יצירת PDF נכשלה: {e}
+	Couldn't download {name}: {e}	הורדת {name} נכשלה: {e}
+	Couldn't extract pages: {e}	חילוץ העמודים נכשל: {e}
+	Couldn't fit the visible content: {e}	לא ניתן להתאים את התוכן הגלוי: {e}
+	Couldn't follow linked PDF: {reason}	לא ניתן לעבור אל קובץ ה־PDF המקושר: {reason}
+	Couldn't import the signature image: {e}	ייבוא תמונת החתימה נכשל: {e}
+	Couldn't open revision {n}: {e}	לא ניתן היה לפתוח את המהדורה {n}: {e}
+	Couldn't open the printer's preferences: {e}	לא ניתן לפתוח את העדפות המדפסת: {e}
+	Couldn't open the result: {e}	לא ניתן לפתוח את התוצאה: {e}
+	Couldn't open the signed version: {e}	לא ניתן היה לפתוח את הגרסה החתומה: {e}
+	Couldn't open {name}: {e}	לא ניתן לפתוח את {name}: {e}
+	Couldn't optimize the file	לא ניתן למטב את הקובץ
+	Couldn't optimize the file: {e}	מיטוב הקובץ נכשל: {e}
+	Couldn't print from the browser ({e}); downloaded {name} to print instead	לא ניתן היה להדפיס מהדפדפן ({e}); הורד את {name} כדי להדפיס במקום זאת
+	Couldn't read {name}: {e}	לא ניתן לקרוא את {name}: {e}
+	Couldn't recover {name}: {e}	שחזור {name} נכשל: {e}
+	Couldn't reload {name}: {e}	לא ניתן לטעון מחדש את {name}: {e}
+	Couldn't save the image: {e}	לא ניתן לשמור את התמונה: {e}
+	Couldn't save {name}: {e}	שמירת {name} נכשלה: {e}
+	Couldn't save: {e}	השמירה נכשלה: {e}
+	Couldn't show the file picker. Please try again.	לא ניתן להציג את בורר הקבצים. יש לנסות שוב.
+	Couldn't split: {e}	הפיצול נכשל: {e}
+	Couldn't summarize comments: {e}	יצירת סיכום ההערות נכשלה: {e}
+	Couldn't take the snapshot: {e}	צילום תמונת המצב נכשל: {e}
+	Couldn't unlock {name}: {e}	ביטול הנעילה של {name} נכשל: {e}
+	Couldn't use the photo: {e}	לא ניתן להשתמש בתמונה: {e}
+	Couldn't use {name}: {e}	לא ניתן להשתמש ב־{name}: {e}
+	Couldn't write {name}: {e}	כתיבה של {name} נכשלה: {e}
+	Couldn't write {path}: {e}	כתיבה אל {path} נכשלה: {e}
+	Counterclockwise 90 degrees	90 מעלות נגד כיוון השעון
+	Counting words… {n} pages read	סופר מילים… נקראו {n} עמודים
+	Country/Region	מדינה/אזור
+	Create & Edit	יצירה ועריכה
+	Create a new Digital ID (self-signed, saved to a password-protected file)	יצירת מזהה דיגיטלי חדש (חתימה עצמית, יישמר בקובץ המוגן בסיסמה)
+	Create a PDF	יצירת PDF
+	Create accessibility report	יצירת דוח נגישות
+	Create Custom Stamp	יצירת חותמת מותאמת אישית
+	Create custom stamp…	יצירת חותמת מותאמת אישית…
+	Create folder	יצירת תיקייה
+	Create from	יצירה מתוך
+	Create Link	יצירת קישור
+	Create link	יצירת קישור
+	Create links	יצירת קישורים
+	Create links from URLs	יצירת קישורים מכתובות URL
+	Create Link…	יצירת קישור…
+	Create PDF Comment Summary	יצירת סיכום הערות PDF
+	Create PDF comment summary…	יצירת סיכום הערות PDF…
+	Create PDF from clipboard	יצירת PDF מלוח הגזירים
+	Create PDF from file…	יצירת PDF מקובץ…
+	Create PDF from images	יצירת PDF מתמונות
+	Create PDF from images…	יצירת PDF מתמונות…
+	Create PDF from multiple files…	יצירת PDF ממספר קבצים…
+	Create separate PDFs…	יצירת קובצי PDF נפרדים…
+	Create {what}	יצירת {what}
+	Created 1 link	נוצר קישור אחד
+	Created a comment summary	נוצר סיכום הערות
+	Created a PDF from the first {n} files	נוצר PDF מ־{n} הקבצים הראשונים
+	Created a PDF from {n} files	נוצר PDF מ־{n} קבצים
+	Created a PDF from {n} files; left out: {names}	נוצר PDF מ־{n} קבצים; הושמטו: {names}
+	Created {n} links	נוצרו {n} קישורים
+	Creates 1 file from {n} pages.	יוצר קובץ אחד מ־{n} עמודים.
+	Creates {f} files from {n} pages.	יוצר {f} קבצים מ־{n} עמודים.
+	Creator	יוצר
+	Credit Cards	כרטיסי אשראי
+	CRL Signing	חתימת CRL
+	Crop (% trimmed from each side)	חיתוך (% שיוסרו מכל צד)
+	Crop Image	חיתוך תמונה
+	Crop image	חתוך תמונה
+	Crop page	חיתוך עמוד
+	Crop pages	חיתוך עמודים
+	Cross	צלב
+key	Ctrl	Ctrl
+	Currency symbol:	סמל מטבע:
+	Current page ({n})	העמוד הנוכחי ({n})
+	Current page only	העמוד הנוכחי בלבד
+	Current page — type a page number or label (such as iv) and press Enter	העמוד הנוכחי — יש להקליד מספר עמוד או תווית (כגון iv) וללחוץ על Enter
+	Custom font	גופן מותאם אישית
+	Custom scale	קנה מידה מותאם אישית
+	Custom scale:	קנה מידה מותאם אישית:
+	Custom stamps arrive on the web with file pickers for images	חותמות מותאמות אישית יגיעו לגרסת האינטרנט עם בוחרי קבצי תמונה
+	Custom text:	טקסט מותאם אישית:
+	Custom:	מותאם אישית:
+	Customize & Automate	התאמה אישית ואוטומציה
+	Cut and stack	חיתוך וערימה
+	Cut and stack needs Two-sided: Off. Print single-sided sheets.	חיתוך וערימה דורשים שהדפסה דו־צדדית תהיה כבויה. יש להדפיס גיליונות חד־צדדיים.
+	Cut Image	חיתוך תמונה
+	Cut marks	סימני חיתוך
+	Cut pages	גזירת עמודים
+	Cut {what}	נגזרו {what}
+	Cuts each page to its printed area, turns it upright and fits it to the sheet without stretching. One label per sheet.	חותך כל עמוד לאזור המודפס, מסובב אותו למצב אנכי ומתאים אותו לגיליון בלי למתוח. תווית אחת לכל גיליון.
+	Dark gray	אפור כהה
+	Dark gray theme	ערכת נושא אפורה כהה
+	Dark theme	ערכת נושא כהה
+	Data Encipherment	הצפנת נתונים
+	Date	תאריך
+	Date field	שדה תאריך
+	Date: 	תאריך: 
+	Dates	תאריכים
+	December	דצמבר
+calendar date	December	דצמבר
+	Decimal places:	ספרות אחרי הנקודה:
+	Decimals	ספרות עשרוניות
+	Decipher Only	פענוח בלבד
+	Declared conformance: {shown}	תאימות מוצהרת: {shown}
+	Decorative figure	איור דקורטיבי
+	Default page display	תצוגת ברירת המחדל של העמוד
+	Default Value:	ערך ברירת מחדל:
+	Default workspace mode	מצב ברירת המחדל של סביבת העבודה
+	Default zoom	הגדלה כברירת מחדל
+	Default:	ברירת מחדל:
+key	Delete	Delete
+	Delete attachment	מחיקת קובץ מצורף
+	Delete attachment {key}	מחיקת קובץ מצורף {key}
+	Delete bookmark	מחיקת סימנייה
+	Delete comment	מחיקת הערה
+	Delete content	מחיקת תוכן
+	Delete document JavaScript	מחיקת JavaScript מהמסמך
+	Delete field	מחיקת שדה
+	Delete image	מחיקת תמונה
+	Delete link	מחיקת קישור
+	Delete page	מחיקת עמוד
+	Delete page {label}	מחיקת עמוד {label}
+	Delete pages	מחיקת עמודים
+	Delete pages (Delete)	מחיקת עמודים (Delete)
+	Delete pages after extracting	מחיקת העמודים לאחר החילוץ
+	Delete selected fields	מחיקת השדות שנבחרו
+	Delete selected pages (Organize)	מחיקת העמודים שנבחרו (ארגון)
+	Delete stamp	מחיקת חותמת
+	Delete the selected pages	מחיקת העמודים שנבחרו
+@plural	Delete {n} field|Delete {n} fields	מחיקת שדה {n}|מחיקת {n} שדות|מחיקת {n} שדות
+	Delete {o}	מחיקת {o}
+	Describe the figure	תיאור האיור
+	Description	תיאור
+	Detailed Report	דוח מפורט
+	Details	פרטים
+	Detect form fields	זיהוי שדות טופס
+	Detected 1 form field	זוהה שדה טופס אחד
+	Detected {n} form fields	זוהו {n} שדות טופס
+	Device colour is used, but there is no PDF/A output intent	נעשה שימוש בצבע התקן, אך לא הוגדר פרופיל פלט עבור PDF/A
+	DeviceCMYK is used, but the PDF/A output intent isn't a CMYK profile	נעשה שימוש ב־DeviceCMYK, אך פרופיל הפלט של PDF/A אינו פרופיל CMYK
+	DeviceCMYK is used: it needs a CMYK output intent (not added automatically)	נעשה שימוש ב־DeviceCMYK: נדרש פרופיל פלט CMYK (אינו מתווסף אוטומטית)
+	DeviceRGB is used, but the PDF/A output intent isn't an RGB profile	נעשה שימוש ב־DeviceRGB, אך פרופיל הפלט של PDF/A אינו פרופיל RGB
+	Diagnostic details	פרטי אבחון
+	Digital ID	מזהה דיגיטלי
+	Digital ID password	סיסמת המזהה הדיגיטלי
+	Digital Signature	חתימה דיגיטלית
+	Digital signature	חתימה דיגיטלית
+	Digital Signature Properties	מאפייני חתימה דיגיטלית
+	Digitally sign	חתימה דיגיטלית
+	Digitally signed by	נחתם דיגיטלית על ידי
+	Disabled	מושבת
+	Discard	התעלמות
+	Discard all comments, forms and multimedia	הסרת כל ההערות, הטפסים ותוכן המולטימדיה
+	Discard all links, actions and JavaScript	הסרת כל הקישורים, הפעולות וקוד JavaScript
+	Discard all object data (file attachments)	הסרת נתוני כל האובייקטים (קבצים מצורפים)
+	Discard alternate images	הסרת תמונות חלופיות
+	Discard bookmarks	הסרת סימניות
+	Discard document information and metadata	הסרת פרטי המסמך והמטא־נתונים
+	Discard document tags	הסרת תגיות המסמך
+	Discard embedded page thumbnails	הסרת תמונות ממוזערות מוטמעות של עמודים
+	Discard embedded print settings	הסרת הגדרות הדפסה מוטמעות
+	Discard hidden layer content	הסרת תוכן של שכבות מוסתרות
+	Discard hidden text	הסרת טקסט מוסתר
+	Discard Objects	הסרת אובייקטים
+	Discard private data of other applications	הסרת נתונים פרטיים של יישומים אחרים
+	Discard this text (Esc)	ביטול הטקסט הזה (Esc)
+	Discard User Data	הסרת נתוני משתמש
+	Dismiss	סגירה
+	Display theme	ערכת נושא לתצוגה
+	Distance	מרחק
+	Distinguished name	שם ייחודי
+	Distribute	פיזור אחיד
+	Distribute evenly	פיזור שווה
+	Distribute fields	פיזור שדות באופן שווה
+	DN: 	שם מזהה: 
+	Dock navigation rail on Left	עגן את סרגל הניווט משמאל
+	Dock navigation rail on Right	עגן את סרגל הניווט מימין
+	Document actions	פעולות מסמך
+	Document and markups	מסמך וסימונים
+	Document and stamps	מסמך וחותמות
+	Document assembly	הרכבת המסמך
+	Document has appropriate color contrast	ניגודיות הצבעים במסמך מספקת
+	Document is not image-only PDF	המסמך אינו PDF שמכיל תמונות בלבד
+	Document is tagged PDF	ה־PDF מתויג
+	Document JavaScripts	סקריפטים של JavaScript במסמך
+	Document JavaScripts…	סקריפטים של JavaScript במסמך…
+	Document language	שפת המסמך
+	Document Overhead	תקורת המסמך
+	Document Properties	מאפייני המסמך
+	Document properties ({key})	מאפייני המסמך ({key})
+	Document properties (⌘D)	מאפייני המסמך (⌘D)
+	Document properties…	מאפייני המסמך…
+	Document sanitized. Save to finish: saving rewrites the whole file.	המסמך נוקה. יש לשמור כדי לסיים: השמירה כותבת את כל הקובץ מחדש.
+	document security store	מאגר אבטחת המסמך
+	document structure	מבנה המסמך
+	Document structure provides a logical reading order	מבנה המסמך מספק סדר קריאה לוגי
+	Document title is showing in title bar	כותרת המסמך מוצגת בשורת הכותרת
+	Documents and view	מסמכים ותצוגה
+	Documents of more than 20 pages need bookmarks for navigation. Add bookmarks for the main sections.	מסמכים שכוללים יותר מ־20 עמודים זקוקים לסימניות לניווט. יש להוסיף סימניות לחלקים העיקריים.
+	Don't save	לא לשמור
+	Don't show again	לא להציג שוב
+	Done	סיום
+	Done adding text	הוספת הטקסט הסתיימה
+	Double-click	לחיצה כפולה
+	Download	הורדה
+	Downloaded {name}	הורד {name}
+@plural	Downloaded {n} PDF|Downloaded {n} PDFs	הורד {n} קובץ PDF|הורדו {n} קובצי PDF|הורדו {n} קובצי PDF
+	Downloading attachments on the web arrives with M3.10 ({n} bytes ready)	הורדת קבצים מצורפים בגרסת האינטרנט תגיע באבן הדרך M3.10 ({n} בתים מוכנים)
+	Downsample to	הפחתת רזולוציה עד
+	DPI sets the printed page size without resampling the image.	ערך ה־DPI קובע את גודל העמוד המודפס בלי לדגום מחדש את התמונה.
+	Drag a field to move it, or select it and press {up} or {down}.	גרור שדה כדי להזיז אותו, או בחר אותו ולחץ על {up} או {down}.
+	Drag a rectangle around the area to copy	גרור מלבן מסביב לאזור להעתקה
+	Drag a rectangle on a page to crop it; double-click a page for Set Page Boxes	גרור מלבן בעמוד כדי לחתוך אותו; לחץ פעמיים על העמוד כדי להגדיר תיבות עמוד
+	Drag a rectangle to create a link; double-click a link to edit it	גרור מלבן כדי ליצור קישור; לחץ פעמיים על קישור כדי לערוך אותו
+	Drag hotbar	גרור את סרגל הכלים המהיר
+	Drag the corners onto the document's edges, then choose Enhance page.	גרור את הפינות לקצוות המסמך ואז בחר „שיפור עמוד”.
+	Drag the selection to move it. Esc clears the selection.	גרור את הבחירה כדי להזיז אותה. Esc מנקה את הבחירה.
+	Drag to draw the area where the signature should appear.	גרור כדי לסמן את האזור שבו החתימה תופיע.
+	Drag to reorder	גרירה לשינוי הסדר
+	Draw a cloud	ציור ענן
+	Draw a line	ציור קו
+	Draw a polygon	ציור מצולע
+	Draw a rectangle	ציור מלבן
+	Draw an arrow	ציור חץ
+	Draw an oval	ציור אליפסה
+	Draw connected lines	ציור קווים מחוברים
+	Draw freehand	ציור ביד חופשית
+	Draw your {what} below.	צייר את {what} למטה.
+	Drawing	ציור
+	Drawing scale	קנה מידה של השרטוט
+	Drawing scale changes. Use Actual size for full-scale plans.	קנה המידה של השרטוט משתנה. יש לבחור „גודל מקורי” עבור תוכניות בקנה מידה מלא.
+	Drop PDFs or folders here, or choose them.	גרור לכאן קובצי PDF או תיקיות, או בחר אותם.
+	Drop PDFs, images, text files or folders here, or choose them.	אפשר לגרור לכאן קובצי PDF, תמונות, קובצי טקסט או תיקיות, או לבחור אותם.
+	Drop-down list	רשימה נפתחת
+	Dropdown Properties	מאפייני רשימה נפתחת
+	Duplicate	שכפול
+	Duplicate "{name}" onto:	שכפול „{name}” אל:
+	Duplicate Field	שכפול שדה
+	Duplicate field	שכפול שדה
+	Duplicate page	שכפול עמוד
+	Duplicate pages	שכפול עמודים
+	Duplicate…	שכפול…
+	Dynamic	דינמי
+	Dynamic XFA form laid out from its template: {pages}, {fields}.	טופס XFA דינמי שנפרס לפי התבנית שלו: {pages}, {fields}.
+	E-Sign	חתימה אלקטרונית
+	e.g. en-US	לדוגמה en-US
+	e.g. My stamps	לדוגמה: החותמות שלי
+	Each field needs a tooltip that says what to enter. Add one in Field Properties > General > Tooltip.	לכל שדה דרוש תיאור שמציין מה יש להזין. יש להוסיף אותו במאפייני השדה > כללי > תיאור כלי.
+	Each file holds as many of the {n} pages as fit.	כל קובץ מכיל כמה שיותר מתוך {n} העמודים.
+	Each image is measured where pages draw it; an image is replaced only if the result is smaller.	כל תמונה נמדדת לפי גודלה בעמוד; התמונה תוחלף רק אם התוצאה תהיה קטנה יותר.
+	Each image once, named after the document and page. JPEG images are saved unchanged; others as PNG.	כל תמונה מיוצאת פעם אחת, בשם המסמך והעמוד. תמונות JPEG נשמרות ללא שינוי; אחרות נשמרות כ־PNG.
+	Earlier in calculation order	מוקדם יותר בסדר החישוב
+	Earlier in tab order	מוקדם יותר בסדר המעבר
+	Edit	עריכה
+comment menu	Edit	עריכה
+	Edit a PDF	עריכת PDF
+	Edit Action	עריכת פעולה
+	Edit comment	עריכת הערה
+	Edit content	עריכת תוכן
+	Edit document JavaScript	עריכת JavaScript במסמך
+	Edit fields	עריכת שדות
+	Edit image	עריכת תמונה
+	Edit script of {name}	עריכת הסקריפט של {name}
+	Edit text	עריכת טקסט
+	Edit text & images	עריכת טקסט ותמונות
+	Edit text…	עריכת טקסט…
+	Edit this PDF	ערוך את קובץ ה־PDF הזה
+	Edit {field}'s formula	עריכת הנוסחה של {field}
+	Email Address	כתובת דוא״ל
+	Email Addresses	כתובות דוא״ל
+	Embedded Files	קבצים מוטמעים
+	Embedded files must be PDF/A files themselves (use PDF/A-3 for others)	קבצים מוטמעים חייבים להיות בעצמם קובצי PDF/A (לשאר יש להשתמש ב־PDF/A-3)
+	Enable Acrobat JavaScript	הפעלת JavaScript של Acrobat
+	Enable copying of text, images, and other content	אפשר העתקת טקסט, תמונות ותוכן אחר
+	Enable text access for screen reader devices for the visually impaired	אפשר גישה לטקסט עבור קוראי מסך לאנשים עם לקות ראייה
+	Enabled	מופעל
+	Encipher Only	הצפנה בלבד
+	Encrypt	הצפנה
+	Encrypt with certificate	הצפנה באמצעות אישור
+	Encryption	הצפנה
+key	End	End
+	End entity	ישות קצה
+	Endpoint	נקודת קצה
+	Endpoints	נקודות קצה
+	English	אנגלית
+	Enhance camera image	שיפור תמונת מצלמה
+	Enhance page	שיפור עמוד
+	Enhance scanned file	שיפור קובץ סרוק
+	Enter a name.	יש להזין שם.
+	Enter a page number	יש להזין מספר עמוד
+	Enter a scale such as 1:50.	יש להזין קנה מידה, לדוגמה 1:50.
+	Enter a URL	יש להזין כתובת URL
+	Enter permissions password…	הזנת סיסמת הרשאות…
+	Enter the field names	יש להזין את שמות השדות
+	Enter the password that opens it	יש להזין את הסיסמה שפותחת אותו
+	Enter the permissions password to allow combining	יש להזין את סיסמת ההרשאות כדי לאפשר שילוב
+	Entire page	כל העמוד
+	Erase	מחיקה
+	Erase drawings	מחיקת ציורים
+	Error	שגיאה
+key	Esc	Esc
+	Even and Odd Pages	עמודים זוגיים ואי־זוגיים
+	Even pages	עמודים זוגיים
+	Even Pages Only	עמודים זוגיים בלבד
+	Every field calculates after the fields it reads.	כל שדה מחושב לאחר השדות שהוא קורא.
+	Every field outside a loop calculates after the fields it reads.	כל שדה שאינו בלולאה מחושב לאחר השדות שהוא קורא.
+	Every line set in the style chosen for a level becomes a bookmark of that level, under a new first bookmark.	כל שורה שעוצבה בסגנון שנבחר לרמה תהפוך לסימנייה באותה רמה, מתחת לסימנייה ראשית חדשה.
+	Every PDF in the folder	כל קובצי ה־PDF שבתיקייה
+	Every PDF in the folder and the folders inside it	כל קובצי ה־PDF שבתיקייה ובתיקיות המשנה שלה
+	Every PDF, image and text file in the folder	כל קובצי ה־PDF, התמונות וקובצי הטקסט שבתיקייה
+	Every PDF, image and text file in the folder and the folders inside it	כל קובצי ה־PDF, התמונות וקובצי הטקסט שבתיקייה ובתיקיות המשנה שלה
+	Everything on a page must be tagged or marked as an artifact (decoration, headers, footers). Tag the untagged content.	יש לתייג את כל תוכן העמוד או לסמן אותו כפריט עיצובי (קישוט, כותרות עליונות ותחתונות). יש לתייג תוכן שאינו מתויג.
+	Exclude image/OCR text	החרגת טקסט מתמונות ומ־OCR
+	Exclude images smaller than	התעלמות מתמונות שקטנות מ־
+	Exclude tagged code blocks	החרגת קטעי קוד מתויגים
+	Exclude tagged tables	החרגת טבלאות מתויגות
+	Exclusions use PDF tags. Untagged tables and code remain included. Image exclusion also removes invisible text.	ההחרגות משתמשות בתגיות PDF. טבלאות וקוד שאינם מתויגים נכללים עדיין. החרגת תמונות מסירה גם טקסט בלתי נראה.
+	Execute a menu item	הפעלת פריט בתפריט
+	Expand all	הרחבת הכול
+	Expand all bookmarks	הרחבת כל הסימניות
+	Expand all pages	הרחבת כל העמודים
+	Expand all tools	הרחבת כל הכלים
+	Expand tag	הרחבת תגית
+	Expand top-level bookmarks	הרחבת סימניות ברמה העליונה
+	Explain	הסבר
+	Export a PDF	ייצוא PDF
+	Export all comments to data file…	ייצוא כל ההערות לקובץ נתונים…
+	Export All Images	ייצוא כל התמונות
+	Export all images	ייצוא כל התמונות
+	Export all images…	ייצוא כל התמונות…
+	Export all to data file…	ייצוא הכול לקובץ נתונים…
+	Export certificate	ייצוא אישור
+	Export certificate…	ייצוא האישור…
+	Export comments	ייצוא הערות
+	Export data	ייצוא נתונים
+	Export form data	ייצוא נתוני טופס
+	Export form data…	ייצוא נתוני טופס…
+	Export measurements	ייצוא מדידות
+	Export measurements as CSV	ייצוא מדידות כ־CSV
+	Export stopped: {e}	הייצוא נעצר: {e}
+	Export this PDF	ייצא את קובץ ה־PDF הזה
+	Export to	ייצוא אל
+	Export to HTML…	ייצוא ל־HTML…
+	Export to Image	ייצוא לתמונה
+	Export to image…	ייצוא לתמונה…
+	Export to PowerPoint…	ייצוא ל־PowerPoint…
+	Export to RTF…	ייצוא ל־RTF…
+	Export to Text	ייצוא לטקסט
+	Export to text…	ייצוא לטקסט…
+	Export to Word…	ייצוא ל־Word…
+	Export value	ייצא ערך
+	Export Value: {on}	ערך הייצוא: {on}
+	Exported 1 image	יוצאה תמונה אחת
+	Exported the text of 1 page	יוצא הטקסט של עמוד אחד
+	Exported the text of {n} pages	יוצא הטקסט של {n} עמודים
+	Exported to {path}	יוצא אל {path}
+	Exported {n} images	יוצאו {n} תמונות
+	Exporting… {d} of {t}	מייצא… {d} מתוך {t}
+	Export…	ייצוא…
+	Extend the docked toolbar along the entire side. Choose a side above to enable.	הרחב את סרגל הכלים המעוגן לאורך כל הצד. בחר צד למעלה כדי להפעיל זאת.
+	Extended Graphics States	מצבי גרפיקה מורחבים
+	Extract	חילוץ
+	Extract pages	חילוץ עמודים
+	Extract pages as separate files	חילוץ העמודים לקבצים נפרדים
+	Extract pages to a new document	חילוץ עמודים למסמך חדש
+	Extract pages…	חילוץ עמודים…
+	Extract the selected pages…	חילוץ העמודים שנבחרו…
+	Extracted 1 page	חולץ עמוד אחד
+	Extracted {n} pages	חולצו {n} עמודים
+	Failed	נכשל
+scroll speed	Fast	מהירה
+	February	פברואר
+calendar date	February	פברואר
+	Field "{}" on page {p} has no description (tooltip)	לשדה "{}" בעמוד {p} אין תיאור (תיאור כלי)
+	Field descriptions	תיאורי שדות
+	Field is used for file selection	השדה משמש לבחירת קובץ
+	Field list	רשימת שדות
+	Field names	שמות שדות
+	Field names (comma-separated)	שמות שדות (מופרדים בפסיקים)
+	field names can't contain a period: {name}	שמות שדות אינם יכולים להכיל נקודה: {name}
+	Field names with + - * / and parentheses; put \\ before spaces in names.	שמות שדות עם הסימנים + - * / וסוגריים; יש להוסיף \\ לפני רווחים בשמות.
+	Field properties	מאפייני השדה
+	Field properties…	מאפייני שדה…
+	Field value is in range:	ערך השדה נמצא בטווח:
+	Field value is not validated	ערך השדה אינו עובר אימות
+	Field: {field} on page {p}	שדה: {field} בעמוד {p}
+	Fields to reset (comma-separated; empty: all)	שדות לאיפוס (מופרדים בפסיקים; ריק: כולם)
+	Figure {i} of {n}{page}	איור {i} מתוך {n}{page}
+	Figures alternate text	טקסט חלופי לאיורים
+	Figures require alternate text	איורים זקוקים לטקסט חלופי
+	File (.p12, .pfx)	קובץ (.p12, .pfx)
+	File attachments	קבצים מצורפים
+	File Name	שם הקובץ
+	File name	שם הקובץ
+	File size	גודל קובץ
+@id	file.word_count	ספירת מילים…
+	Filename	שם קובץ
+	Files are combined from top to bottom. Leave Pages empty to take every page.	הקבצים משולבים מלמעלה למטה. יש להשאיר את שדה העמודים ריק כדי לכלול את כל העמודים.
+	Files are combined in the order shown. Drag them to change it.	הקבצים משולבים בסדר שמוצג. יש לגרור אותם כדי לשנות את הסדר.
+	Files are combined in this order. Leave Pages empty to take every page.	הקבצים משולבים בסדר זה. יש להשאיר את שדה העמודים ריק כדי לכלול את כל העמודים.
+	Files for {name}	קבצים עבור {name}
+	Files you open in PdfCraft appear here. Drop a PDF anywhere to open it.	קבצים שנפתחים ב־PdfCraft יופיעו כאן. אפשר לגרור קובץ PDF לכל מקום בחלון כדי לפתוח אותו.
+	Fill & Sign	מילוי וחתימה
+	Fill & Sign dates	תאריכי מילוי וחתימה
+	Fill & Sign signature	חתימת „מילוי וחתימה”
+	Fill & Sign: add text	מילוי וחתימה: הוספת טקסט
+	Fill & Sign: change initials	מילוי וחתימה: שינוי ראשי תיבות
+	Fill & Sign: change signature	מילוי וחתימה: שינוי חתימה
+	Fill & Sign: checkmark	מילוי וחתימה: סימון וי
+	Fill & Sign: cross	מילוי וחתימה: סימון צלב
+	Fill & Sign: date	מילוי וחתימה: תאריך
+	Fill & Sign: dot	מילוי וחתימה: נקודה
+	Fill & Sign: initials	מילוי וחתימה: ראשי תיבות
+	Fill & Sign: line	מילוי וחתימה: קו
+	Fill & Sign: remove saved initials	מילוי וחתימה: הסרת ראשי תיבות שמורות
+	Fill & Sign: remove saved signature	מילוי וחתימה: הסרת חתימה שמורה
+	Fill & Sign: sign	מילוי וחתימה: חתימה
+	Fill Color:	צבע המילוי:
+	Fill colour	צבע מילוי
+	Fill colour:	צבע המילוי:
+	Fill colour: none	צבע מילוי: ללא
+	Fill in {name}	מילוי {name}
+	Filling in form fields and signing existing signature fields	מילוי שדות טופס וחתימה בשדות חתימה קיימים
+	Filling of form fields	מילוי שדות טופס
+	Filter comments	סינון הערות
+	Find a tag	חיפוש תגית
+	Find options	אפשרויות חיפוש
+	Find text	חיפוש טקסט
+	Find text and redact	חיפוש והשחרת טקסט
+	Find text and redact…	חיפוש והשחרת טקסט…
+	Find text or tools	חפש טקסט או כלים
+	Find tools and commands	חיפוש כלים ופקודות
+	Find tools and commands…	חיפוש כלים ופקודות…
+	Find untagged content	חיפוש תוכן שאינו מתויג
+	Finding document fonts…	מחפש גופנים במסמך…
+	Find…	חיפוש…
+	Finish or discard the text being edited before selecting several objects.	יש לסיים את עריכת הטקסט או לבטל אותה לפני בחירת מספר אובייקטים.
+	First / last page	העמוד הראשון / האחרון
+	First row number	מספר השורה הראשונה
+	Fit Height	התאמה לגובה
+	Fit one full page	התאמה לעמוד שלם
+	Fit Page	התאמה לעמוד
+	Fit to height	התאמה לגובה
+	Fit to page	התאמה לעמוד
+	Fit to width	התאמה לרוחב
+	Fit to width scrolling	גלילה בהתאמה לרוחב
+	Fit Visible	התאמה לאזור הנראה
+	Fit visible	התאמה לאזור הנראה
+	Fit Width	התאמה לרוחב
+	Fix	תיקון
+	Fix hairlines	תיקון קווים דקים
+	Fix order	תיקון הסדר
+	Fix reading order	תיקון סדר הקריאה
+	Fixed what could be fixed; 1 problem remains	תוקנו הבעיות שניתן היה לתקן; נותרה בעיה אחת
+	Fixed what could be fixed; {n} problems remain	תוקנו הבעיות שניתן היה לתקן; נותרו {n} בעיות
+	Flatten	השטחה
+	Flatten comments	השטחת הערות
+	Flatten Fill & Sign	השטחת „מילוי וחתימה”
+	Flatten Fill & Sign when saving	השטחת תוכן „מילוי וחתימה” בעת השמירה
+	Flatten form fields	השטחת שדות טופס
+	Flip horizontal	היפוך אופקי
+	Flip image	היפוך תמונה
+	Flip on long edge	היפוך לפי הקצה הארוך
+	Flip on short edge	היפוך לפי הקצה הקצר
+	Flip vertical	היפוך אנכי
+	Float (drag anywhere)	צף (אפשר לגרור לכל מקום)
+	Float panel	הפיכת החלונית לצפה
+	Folder	תיקייה
+	Folders	תיקיות
+	Font (unnamed) on page {p} doesn't map its characters to Unicode	הגופן (ללא שם) בעמוד {p} אינו ממפה את התווים שלו ל־Unicode
+	Font colour:	צבע הגופן:
+	Font size	גודל גופן
+	Font size 0 uses automatic sizing.	גודל גופן 0 משתמש בהתאמה אוטומטית.
+	Font Size:	גודל גופן:
+	Font size:	גודל גופן:
+	Font {} on page {p} doesn't map its characters to Unicode	הגופן {} בעמוד {p} אינו ממפה את התווים שלו ל־Unicode
+	Font: Helvetica	גופן: Helvetica
+	Fonts must map their characters to Unicode so text can be read and copied. Fix the fonts or recreate the PDF.	הגופנים צריכים למפות את התווים ל־Unicode כדי שאפשר יהיה לקרוא ולהעתיק את הטקסט. יש לתקן את הגופנים או ליצור את ה־PDF מחדש.
+	for images above	לתמונות שרזולוצייתן גבוהה מ־
+	For page sizes and margins.	עבור גדלי עמודים ושוליים.
+	Form data and PDF forms	נתוני טופס וטפסי PDF
+	Form field on page {p} isn't tagged	שדה הטופס בעמוד {p} אינו מתויג
+	Form fields	שדות טופס
+	Form fields are flattened: their values stay visible. Saving rewrites the whole file.	שדות הטופס משוטחים והערכים שלהם נשארים גלויים. השמירה כותבת את הקובץ כולו מחדש.
+	Form fields must be in the tag tree (Form tags) to be announced. Tag the form fields.	שדות הטופס צריכים להופיע בעץ התגיות (תגיות טופס) כדי שיוקראו. יש לתייג את שדות הטופס.
+	Form fields only	שדות טופס בלבד
+	Form fields panel	חלונית שדות הטופס
+	form fill	מילוי טופס
+	Form fill-in and digital signatures	מילוי טפסים וחתימות דיגיטליות
+	Format	תבנית
+	Format text	עיצוב טקסט
+	Format:	תבנית:
+	Forms	טפסים
+	Forms & Signatures	טפסים וחתימות
+	Formulas and similar non-text elements need alternate text. Add alternate text to them.	נוסחאות ורכיבים דומים שאינם טקסט זקוקים לטקסט חלופי. יש להוסיף להם טקסט חלופי.
+	Found {n} untagged content problems.	נמצאו {n} בעיות של תוכן שאינו מתויג.
+calendar weekday	Fr	ו׳
+	Freehand-Highlight	הדגשה ביד חופשית
+	From	מ־
+	From a PDF page or an image	מתוך עמוד PDF או תמונה
+	From colour	מצבע
+	From {file}	מתוך {file}
+	From:	מאת:
+	Front side only	הצד הקדמי בלבד
+	Full screen mode	מצב מסך מלא
+	Full-side strip	רצועה לאורך כל הצד
+	General & Interface	כללי וממשק
+	Geospatial location	מיקום גאוגרפי
+	Get help, share feedback and follow development on Discord.	קבלת עזרה, שליחת משוב ומעקב אחר הפיתוח ב־Discord.
+	Go to a page view	מעבר לתצוגת עמוד
+	Go to page {p}	מעבר לעמוד {p}
+	Go to page…	מעבר לעמוד…
+	Go to the page	מעבר לעמוד
+	Go to this result	מעבר לתוצאה זו
+	Grab bag	שונות
+	Gray	אפור
+	Grayscale Images	תמונות בגווני אפור
+	Green	ירוק
+	Green on black	ירוק על שחור
+	Greyscale	גווני אפור
+	Grid view	תצוגת רשת
+	H / Space (hold)	H / רווח (החזקה)
+	Hand	יד
+	Hand (H)	יד (H)
+	Hand Tool	כלי היד
+	Has JavaScript actions (run in M6)	מכיל פעולות JavaScript (יופעלו באבן הדרך M6)
+	Header and footer	כותרת עליונה ותחתונה
+	Header cells (TH) tell listeners what each column or row holds. Mark the header cells.	תאי כותרת (TH) מסבירים מה מכילה כל עמודה או שורה. יש לסמן את תאי הכותרת.
+	header or footer	כותרת עליונה או תחתונה
+	Headers	כותרות
+	Heading levels shouldn't skip (an H1 followed by an H3). Retag the headings.	אין לדלג על רמות כותרת (למשל H1 ולאחריו H3). יש לתייג מחדש את הכותרות.
+	Hebrew	עברית
+	Height	גובה
+	Help…	עזרה…
+	Hidden layers	שכבות מוסתרות
+	Hide a field	הסתרת שדה
+	Hide all comments	הסתרת כל ההערות
+	Hide field highlights	הסתרת הדגשת השדות
+	Hide gaps to join page edges. Margins inside the PDF remain unchanged.	הסתרת הרווחים כדי להצמיד את קצוות העמודים. השוליים בתוך קובץ ה־PDF לא ישתנו.
+	Hide hover previews for highlights without comment text	הסתרת תצוגה מקדימה בריחוף מעל סימונים שאין להם טקסט הערה
+	Hide layer	הסתרת שכבה
+	Hide menu bar	הסתרת שורת התפריטים
+	Hide password	הסתרת סיסמה
+	Hide toolbars	הסתרת סרגלי הכלים
+	Hide window controls	הסתרת פקדי החלון
+	Hides annotation	מסתיר הערה
+	High	גבוהה
+	High Resolution	רזולוציה גבוהה
+	High resolution	רזולוציה גבוהה
+	Highlight	הדגשה
+	Highlight fields	הדגשת שדות
+	Highlight Style:	סגנון הדגשה:
+	Highlight text	הדגשת טקסט
+	Home	דף הבית
+key	Home	Home
+	Home / End	Home / End
+	Horizontal reversed	אופקי הפוך
+	Horizontal scale	קנה מידה אופקי
+	Horizontally	אופקית
+	Hotbar settings	הגדרות סרגל הכלים המהיר
+	Hotbar settings / add tools	הגדרות סרגל הכלים המהיר / הוספת כלים
+	Hotbar tools	כלי סרגל הכלים המהיר
+	HTML web page	דף אינטרנט HTML
+	H{n} follows an H{d}; headings should not skip levels	אחרי H{d} מופיעה H{n}; אין לדלג על רמות כותרת
+	Icon	סמל
+	Identity	זהות
+	Image	תמונה
+	Image (PNG)	תמונה (PNG)
+	Image field	שדה תמונה
+	Image pasted	התמונה הודבקה
+	Image-only PDF	PDF שמכיל תמונות בלבד
+	Images	תמונות
+	Images and text	תמונות וטקסט
+	Images and text (converted to PDF)	תמונות וטקסט (יומרו ל־PDF)
+	Import	ייבוא
+	Import comments…	ייבוא הערות…
+	Import data	ייבוא נתונים
+	Import form data…	ייבוא נתוני טופס…
+	Import list…	ייבוא רשימה…
+	Import {name}	ייבוא {name}
+	Importing data arrives on the web with file pickers for data files	ייבוא נתונים יגיע לגרסת האינטרנט יחד עם בוחרי קובצי נתונים
+	In multiple files	בכמה קבצים
+	In streams that use LZW encoding, use Flate instead	שימוש ב־Flate במקום LZW בזרמים המקודדים ב־LZW
+	In this file	בקובץ זה
+	Includes unsaved changes	כולל שינויים שלא נשמרו
+	Incorrect password. Try again.	הסיסמה שגויה. נסה שוב.
+	Indent	הגדלת כניסה
+	Information	מידע
+	Initial View	תצוגה ראשונית
+	Initials	ראשי תיבות
+	initials	ראשי תיבות
+	Ink sensitivity	רגישות הדיו
+	Insert a blank page after the selection	הוספת עמוד ריק לאחר הבחירה
+	Insert a file at the end	הוספת קובץ בסוף
+	Insert a file before page {label}	הוספת קובץ לפני עמוד {label}
+	Insert blank page	הוספת עמוד ריק
+	Insert Date	הוספת תאריך
+	Insert Page Number	הוספת מספר עמוד
+	Insert pages	הוספת עמודים
+	Insert pages from a file after the selection…	הוספת עמודים מקובץ אחרי הבחירה…
+	Insert pages from a file…	הוספת עמודים מקובץ…
+	Insert pages from file…	הוספת עמודים מקובץ…
+	Insert pages from {name}	הוספת עמודים מתוך {name}
+	Insert pages from {name} — 1 field renamed	הוספת עמודים מתוך {name} — שם של שדה אחד שונה
+	Insert pages from {name} — fields renamed	הוספת עמודים מתוך {name} — שמות שדות שונו
+	Insert text	הוספת טקסט
+	Inserted	נוסף
+	Inserted text	טקסט שהוכנס
+	Inserting, deleting, and rotating pages	הוספה, מחיקה וסיבוב של עמודים
+	Inset	שקוע פנימה
+	Inspector	מפקח
+	Installed fonts…	גופנים מותקנים…
+	Intended usage	שימוש מיועד
+certificate	Intended usage	שימוש מיועד
+	Interface size	גודל הממשק
+	Intersection	נקודת חיתוך
+	Intersections	נקודות חיתוך
+	Invert	היפוך צבעים
+	Invisible Rectangle	מלבן בלתי נראה
+	Irregular tables confuse cell navigation. Give every row the same number of cells (counting spans).	טבלאות לא אחידות מקשות על ניווט בין התאים. יש להגדיר לכל שורה אותו מספר תאים, כולל תאים ממוזגים.
+	is available	זמין
+	is not available yet	עדיין לא זמין
+	Issued by	הונפק על ידי
+certificate	Issued by	הונפק על ידי
+	Issued by: 	הונפק על ידי: 
+	Issued to	הונפק עבור
+certificate	Issued to	הונפק עבור
+	Issuer	מנפיק
+certificate	Issuer	מנפיק
+	italic	נטוי
+	Item List	רשימת פריטים
+	Item:	פריט:
+	Items marked Ready work today.	הפריטים המסומנים „מוכן” כבר פועלים.
+	its alternate text is inside another element's and will never be read	הטקסט החלופי שלו נמצא בתוך הטקסט החלופי של רכיב אחר ולעולם לא ייקרא
+	Its script also reads fields whose names it builds as it runs, so those reads can't be checked.	הסקריפט שלו קורא גם שדות ששמותיהם נוצרים במהלך ההרצה, ולכן אי אפשר לבדוק את הקריאות האלה.
+	Its security settings don't allow copying pages	הגדרות האבטחה שלו אינן מאפשרות להעתיק עמודים
+	January	ינואר
+calendar date	January	ינואר
+	JavaScript	JavaScript
+	JavaScript Console	מסוף JavaScript
+	JavaScript console…	מסוף JavaScript…
+	JavaScript is turned off (Preferences ▸ JavaScript).	JavaScript כבוי (העדפות > JavaScript).
+	JavaScript, e.g. getField("total").value	JavaScript, לדוגמה getField("total").value
+	JBIG2 (lossless)	JBIG2 (ללא אובדן)
+	Join our Discord	הצטרפות ל־Discord שלנו
+	Join the ArtCraft community	הצטרפות לקהילת ArtCraft
+	Join the ArtCraft Discord	הצטרפות ל־Discord של ArtCraft
+	July	יולי
+calendar date	July	יולי
+	June	יוני
+calendar date	June	יוני
+	just now	הרגע
+	Keep source fonts	שמירת גופני המקור
+	Keep tool selected	השארת הכלי נבחר
+	Keep tool selected: on	השארת הכלי נבחרת: מופעל
+	Key Agreement	הסכמת מפתחות
+	Key Algorithm	אלגוריתם מפתח
+	Key Encipherment	הצפנת מפתח
+	Key usage	שימוש במפתח
+certificate	Key usage	שימוש במפתח
+	Keyboard shortcuts	קיצורי מקלדת
+	Keychain  ·  	צרור מפתחות  ·  
+	Label	תווית
+	Labels: {preview}. Later pages keep their labels.	תוויות: {preview}. העמודים הבאים ישמרו על התוויות שלהם.
+	Landscape and Portrait Pages	עמודים לרוחב ולאורך
+	Landscape Pages	עמודים לרוחב
+	Landscape pages	עמודים לרוחב
+	Larger pages	עמודים גדולים יותר
+	Larger thumbnails	תמונות ממוזערות גדולות יותר
+	Later	מאוחר יותר
+	Later in calculation order	מאוחר יותר בסדר החישוב
+	Later in tab order	מאוחר יותר בסדר המעבר
+	Layer options	אפשרויות שכבה
+	Layers	שכבות
+	Layers Panel and Page	חלונית שכבות ועמוד
+	Layout and Magnification	פריסה והגדלה
+	Lbl and LBody	Lbl ו־LBody
+	Lbl and LBody must be children of LI	Lbl ו־LBody חייבים להיות רכיבים בני LI
+	Leave out files that can't be read?	להשמיט קבצים שלא ניתן לקרוא?
+	Left Edge	הקצה השמאלי
+	Left Footer Text	טקסט הכותרת התחתונה השמאלית
+	Left Header Text	טקסט הכותרת העליונה השמאלית
+	Left out: {names}	הושמטו: {names}
+	Less	פחות
+	Level {n}	רמה {n}
+	LI must be a child of L	LI חייב להיות רכיב בן של L
+	Light blue	תכלת
+	Light gray	אפור בהיר
+	Light theme	ערכת נושא בהירה
+	Limit of	מגבלה של
+	Line ending	קצה קו
+	Line Style:	סגנון הקו:
+	Line thickness	עובי הקו
+	Line Thickness:	עובי הקו:
+	Link Action	פעולת הקישור
+	Link Appearance	מראה הקישור
+	Link Properties	מאפייני קישור
+	Link Type:	סוג הקישור:
+	Link URL	כתובת URL של קישור
+	links	קישורים
+	Links on page	קישורים בעמוד
+	Links, actions and JavaScripts	קישורים, פעולות וסקריפטים של JavaScript
+	List box	תיבת רשימה
+	List Box Properties	מאפייני תיבת רשימה
+	List items	פריטי רשימה
+	List items belong in a list. Fix the list's tags.	פריטי רשימה צריכים להשתייך לרשימה. יש לתקן את תגיות הרשימה.
+	List labels and bodies belong in a list item. Fix the list's tags.	תוויות ותוכן של רשימה צריכים להשתייך לפריט רשימה. יש לתקן את תגיות הרשימה.
+	List view	תצוגת רשימה
+	Lists	רשימות
+	Load document font	טעינת גופן למסמך
+	Load font…	טעינת גופן…
+	Loading…	טוען…
+	Local cross-PDF links require the desktop app	קישורים מקומיים בין קובצי PDF דורשים את יישום שולחן העבודה
+	Location: 	מיקום: 
+	Lock comment	נעילת הערה
+	Locked	נעול
+	Logical Reading Order	סדר קריאה לוגי
+	Looking for PDFs…	מחפש קובצי PDF…
+	Looking for printers…	מחפש מדפסות…
+	Loop	לולאה
+	Low	נמוכה
+	Low resolution	רזולוציה נמוכה
+	Low Resolution (150 dpi)	רזולוציה נמוכה (150 dpi)
+	Lowering this forgets the oldest files. At 0 there is no list.	הפחתת הערך מסירה את הקבצים הישנים ביותר. בערך 0 לא נשמרת רשימה.
+	Magnification	הגדלה
+	Make accessible	התאמה לנגישות
+	Make Current Properties Default	הגדרת המאפיינים הנוכחיים כברירת מחדל
+	Make Properties Default	הגדרת המאפיינים כברירת מחדל
+	Make properties default	הגדרת המאפיינים כברירת מחדל
+	Make scans searchable, then make them smaller.	הפיכת סריקות לניתנות לחיפוש ואז הקטנתן.
+	Manage embedded index	ניהול אינדקס מוטמע
+	March	מרץ
+calendar date	March	מרץ
+	Margins (in)	שוליים (באינץ׳)
+	Mark all	סימון הכול
+	Mark as artifact	סימון כפריט שאינו תוכן
+	Mark as comments	סימון כהערות
+	Mark as Confidential	סימון כסודי
+	Mark content as artifact	סימון התוכן כפריט שאינו תוכן
+	Mark differences	סימון הבדלים
+	Mark figure as decorative	סימון איור כדקורטיבי
+	Mark for redaction	סימון להשחרה
+	Mark Page Range	סימון טווח עמודים
+	Mark pages for redaction	סימון עמודים להשחרה
+	Mark with checkmark	סימון ב־וי
+	Marked	מסומן
+	Markup	סימון
+	Marquee Zoom	הגדלת אזור מסומן
+	Marquee zoom	הגדלה לפי אזור
+	Mask:	מסכה:
+	Match field sizes	התאמת גדלי שדות
+	Match page at 100%	התאמה לעמוד ב־100%
+	Maximize	הגדלה
+	maximum	מקסימום
+	May	מאי
+calendar date	May	מאי
+	Measure	מדידה
+	Measure area	מדידת שטח
+	Measure distance	מדידת מרחק
+	Measure objects	מדידת אובייקטים
+	Measure perimeter	מדידת היקף
+	Measurement information	מידע על המדידה
+	Measurement snapping	הצמדה במדידה
+	Measuring tool	כלי מדידה
+	Medium	בינונית
+	Menu	תפריט
+	Merge data files into spreadsheet…	מיזוג קובצי נתונים לגיליון אלקטרוני…
+	Merge image fragments	מיזוג חלקי תמונה
+	Merged 1 file into {path}	מוזג קובץ אחד אל {path}
+	Merged PRs	בקשות מיזוג שמוזגו
+	Merged {n} files into {path}	מוזגו {n} קבצים אל {path}
+	Merging data files needs the desktop app	מיזוג קובצי נתונים דורש את יישום שולחן העבודה
+	Metadata	מטא־נתונים
+	metadata	מטא־נתונים
+	Microsoft Word (.docx)	Microsoft Word‏ (.docx)
+	Midpoint	נקודת אמצע
+	Midpoints	נקודות אמצע
+	Minimize	מזעור
+	minimum	מינימום
+	Missing field	שדה חסר
+	Missing from the calculation order saved in the PDF: other PDF viewers may not calculate it.	חסר מסדר החישוב שנשמר ב־PDF; מציגי PDF אחרים עלולים שלא לחשב אותו.
+	Mixed	מעורב
+calendar weekday	Mo	ב׳
+	Mobile	נייד
+	Modified	שונה
+	Modify page	שינוי עמוד
+	Monochrome Images	תמונות מונוכרומטיות
+	More	עוד
+	More options	אפשרויות נוספות
+	More options:	אפשרויות נוספות:
+	More ways to add files	דרכים נוספות להוספת קבצים
+	Mouse Down	לחיצה על לחצן העכבר
+	Mouse Enter	כניסת העכבר לאזור
+	Mouse Exit	יציאת העכבר מהאזור
+	Mouse Up	שחרור לחצן העכבר
+	Mouse wheel scroll speed	מהירות הגלילה בגלגלת העכבר
+	Move	העברה
+	Move bookmark	העברת סימנייה
+	Move comment	העברת הערה
+	Move down	העברה למטה
+	Move earlier	העברה למעלה
+	Move image	הזזת תמונה
+	Move later	העברה למטה
+	Move object	הזזת אובייקט
+	Move objects	הזזת אובייקטים
+	Move only what must move, so every field calculates after the fields it reads.	הזז רק את מה שנחוץ, כדי שכל שדה יחושב לאחר השדות שהוא קורא.
+	Move page	העברת עמוד
+	Move pages	העברת עמודים
+	Move tag earlier	העברת תגית למיקום מוקדם יותר
+	Move tag later	העברת תגית למיקום מאוחר יותר
+	Move to group	העברה לקבוצה
+	Move up	העברה למעלה
+	Moves only what must move	מזיז רק את מה שחייבים
+	Multi-line	רב־שורות
+	Multiple	מרובה
+	Multiple files	קבצים מרובים
+	Multiple selection	בחירה מרובה
+	Multiple words or phrases	כמה מילים או ביטויים
+	N or {row} is the row number, {col} the column number, {seq} the cell number. With none of them, the row number goes last.	N או {row} הם מספר השורה, {col} הוא מספר העמודה ו־{seq} הוא מספר התא. אם לא מציינים אף אחד מהם, מספר השורה יופיע בסוף.
+	Name on new comments	השם שיופיע בהערות חדשות
+	Named Destinations	יעדים בעלי שם
+	Navigation links	קישורי ניווט
+	Navigation links are not repetitive	קישורי הניווט אינם חוזרים על עצמם
+	Navigation rail side	צד סרגל הניווט
+	Navigation tab	לשונית ניווט
+	needs an AI provider (off by default)	דורש ספק בינה מלאכותית (כבוי כברירת מחדל)
+	Needs manual check	נדרשת בדיקה ידנית
+	Negative number style:	סגנון מספר שלילי:
+	Nested alternate text	טקסט חלופי מקונן
+	Never	לעולם לא
+	New Action	פעולה חדשה
+	New Action…	פעולה חדשה…
+	New blank PDF	קובץ PDF ריק חדש
+	New bookmark	סימנייה חדשה
+	New bookmark ({key})	סימנייה חדשה ({key})
+	New bookmark (⌘B)	סימנייה חדשה (⌘B)
+	New bookmarks from structure	יצירת סימניות חדשות מהמבנה
+	New bookmarks from text styles	סימניות חדשות מסגנונות טקסט
+	New bookmarks from text styles…	סימניות חדשות מסגנונות טקסט…
+	New file only	הקובץ החדש בלבד
+	New file:	קובץ חדש:
+	New file: {name}	הקובץ החדש: {name}
+	New {tool} comments will look like this one	הערות חדשות מסוג {tool} ייראו כמו זו
+	Next ({key})	הבא ({key})
+	Next (⌘G)	הבא (⌘G)
+	Next / previous match	התוצאה הבאה / הקודמת
+	Next figure	האיור הבא
+	Next month	החודש הבא
+	Next page	העמוד הבא
+	Next sheet	הגיליון הבא
+	Next tab	הלשונית הבאה
+	Next view	התצוגה הבאה
+	No actions	אין פעולות
+	no alternate text	אין טקסט חלופי
+	No changes allowed	אין לאפשר שינויים
+	No changes to save	אין שינויים לשמירה
+	No check has run yet.	עדיין לא בוצעה בדיקה.
+	No color	ללא צבע
+	No colour	ללא צבע
+	No comments match.	לא נמצאו הערות תואמות.
+	No comments yet.	אין עדיין הערות.
+	No contributor data was built into this copy.	לא נכללו נתוני תורמים בעותק זה.
+	No differences in the text.	אין הבדלים בטקסט.
+	No digital IDs yet.	עדיין אין מזהים דיגיטליים.
+	No document language is set	לא הוגדרה שפת המסמך
+	No documents are open	אין מסמכים פתוחים
+	No field in this form calculates its value yet. Give a field a calculation on the Calculate tab of its properties, and it shows here.	אף שדה בטופס זה עדיין אינו מחשב את ערכו. יש להגדיר חישוב לשדה בלשונית „חישוב” של מאפייניו, ואז הוא יוצג כאן.
+	No field reads it	אף שדה אינו קורא אותו
+	No file chosen	לא נבחר קובץ
+	No fill	ללא מילוי
+	No fonts are referenced by the pages.	העמודים אינם מפנים לגופנים כלשהם.
+	No form fields were detected	לא זוהו שדות טופס
+	no header cells (TH)	אין תאי כותרת (TH)
+	No image on clipboard to paste	אין תמונה בלוח הגזירים להדבקה
+	No inaccessible scripts	אין סקריפטים שאינם נגישים
+	No issues found	לא נמצאו בעיות
+	No links to remove	אין קישורים להסרה
+	No matches	לא נמצאו התאמות
+	No matches.	לא נמצאו התאמות.
+	No matching tools	לא נמצאו כלים תואמים
+	No model credits were built into this copy.	לא נכללו פרטי קרדיט למודלים בעותק זה.
+	No openly licensed document fonts found. Load a font file.	לא נמצאו גופנים ברישיון פתוח למסמכים. יש לטעון קובץ גופן.
+	No order can fix a loop. Change one of the formulas.	אי אפשר לתקן לולאה באמצעות סדר. יש לשנות אחת מהנוסחאות.
+	no output folder was chosen	לא נבחרה תיקיית פלט
+	No page has text: the document appears to be images of pages	אין טקסט באף עמוד: נראה שהמסמך מורכב מתמונות של עמודים
+	No pages match those choices	אין עמודים שתואמים לבחירות האלה
+	No pages selected	לא נבחרו עמודים
+	No PDFs found in {folder}	לא נמצאו קובצי PDF בתיקייה {folder}
+	No PDFs in this folder yet	אין עדיין קובצי PDF בתיקייה זו
+	No PDFs, images or text files found in {folder}	לא נמצאו קובצי PDF, תמונות או קובצי טקסט בתיקייה {folder}
+	No photo chosen	לא נבחרה תמונה
+	No preview	אין תצוגה מקדימה
+	No printers were found. Check that the printer is installed and the print spooler is running, then open Print again.	לא נמצאו מדפסות. יש לבדוק שהמדפסת מותקנת וששירות ההדפסה פועל, ואז לפתוח שוב את חלון ההדפסה.
+	No problems found: the document conforms to {level}.	לא נמצאו בעיות: המסמך תואם לתקן {level}.
+	No recent files	אין קבצים אחרונים
+	No results	אין תוצאות
+	No security	ללא אבטחה
+	No sheets	אין גיליונות
+	No signature was found in the frame. Move the frame over the signature or raise the ink sensitivity.	לא נמצאה חתימה במסגרת. יש להזיז את המסגרת מעל החתימה או להעלות את רגישות הדיו.
+	No status has been set.	לא הוגדר מצב.
+	no such document	אין מסמך כזה
+	no summary	אין סיכום
+	No tools match your search.	לא נמצאו כלים התואמים לחיפוש שלך.
+	No unlinked web addresses were found in the text	לא נמצאו בטקסט כתובות אינטרנט שאינן מקושרות
+	No untagged content was found.	לא נמצא תוכן שאינו מתויג.
+	no unused output name	אין שם פלט פנוי
+	Non-Repudiation	אי־התכחשות
+	none	ללא
+	None (prefix only)	ללא (קידומת בלבד)
+	None found	לא נמצאו פריטים
+	None of those files can be made into a PDF; use PDFs, images or .txt files	אי אפשר ליצור PDF מאף אחד מהקבצים האלה; יש להשתמש בקובצי PDF, תמונות או קובצי ‎.txt
+	None — everything is allowed	ללא — הכול מותר
+scroll speed	Normal	רגילה
+	Not allowed	לא מורשה
+	not in a Table, THead, TBody or TFoot	אינו נמצא ברכיב Table,‏ THead,‏ TBody או TFoot
+	not in a TR	אינו נמצא בתוך TR
+	not in an L (list)	אינו נמצא בתוך L (רשימה)
+	not in an LI (list item)	אינו נמצא בתוך LI (פריט רשימה)
+	Not in order	לא לפי הסדר
+	Not now	לא עכשיו
+	Not present	לא קיים
+	Note	הערה
+	nothing in the file matches this document	שום דבר בקובץ אינו תואם למסמך זה
+	Nothing to redo	אין פעולה לביצוע חוזר
+	nothing to redo	אין פעולה לביצוע חוזר
+	Nothing to undo	אין פעולה לביטול
+	nothing to undo	אין פעולה לביטול
+	November	נובמבר
+calendar date	November	נובמבר
+	Number every page in the footer.	מספור כל עמוד בכותרת התחתונה.
+	Number of pages	מספר עמודים
+	Number pages	מספור עמודים
+	Number pages…	מספור עמודים…
+	Numbered list	רשימה ממוספרת
+	October	אוקטובר
+calendar date	October	אוקטובר
+	Odd pages	עמודים אי־זוגיים
+	Odd Pages Only	עמודים אי־זוגיים בלבד
+	Odd pages only	עמודים אי־זוגיים בלבד
+	of	מתוך
+	of the following fields:	מהשדות הבאים:
+	of {name}	מתוך {name}
+	of {pages}	מתוך {pages}
+animation effects	Off	כבוי
+	Offset from centre	היסט מהמרכז
+	Old file:	קובץ ישן:
+	Old file: {name}	הקובץ הישן: {name}
+animation effects	On	מופעל
+	On Blur	בעת אובדן מיקוד
+	On Focus	בעת קבלת מיקוד
+	on page {label}	בעמוד {label}
+	On the web, open or drop an image to convert it	בגרסת האינטרנט יש לפתוח או לגרור תמונה כדי להמיר אותה
+	One word or phrase per line	מילה או ביטוי אחד בכל שורה
+	One {f} file per page, named after the document.	קובץ {f} אחד לכל עמוד, בשם המסמך.
+	Only allow this if you trust the source document.	יש לאפשר זאת רק אם מסמך המקור מהימן.
+	Only change the colour of black text or line art	שינוי הצבע של טקסט שחור או של גרפיקה קווית בלבד
+	Only checked properties will change. Mixed means the selected fields have different values.	רק המאפיינים שסומנו ישתנו. „מעורב” פירושו שלשדות שנבחרו יש ערכים שונים.
+	Only continue if you trust this document. An address can carry information from the document, such as what you typed into its form.	יש להמשיך רק אם המסמך מהימן. כתובת עשויה להעביר מידע מהמסמך, למשל תוכן שהקלדת בטופס שלו.
+	Only the document's owner can change its security (open it with the permissions password)	רק בעל המסמך יכול לשנות את האבטחה שלו (יש לפתוח באמצעות סיסמת ההרשאות)
+	Only the page content changes: links, comments, form fields and bookmarks on the original pages stay.	רק תוכן העמודים משתנה: הקישורים, ההערות, שדות הטופס והסימניות בעמודים המקוריים נשארים.
+	Opacity	אטימות
+	Opacity:	אטימות:
+	Open a document first	תחילה יש לפתוח מסמך
+	Open a PDF ({key})	פתיחת PDF ({key})
+	Open a PDF (⌘O)	פתיחת PDF (⌘O)
+	Open a PDF to measure it.	יש לפתוח קובץ PDF כדי למדוד אותו.
+	Open a web link	פתיחת קישור אינטרנט
+	Open a web page	פתיחת דף אינטרנט
+	Open accessibility report	פתיחת דוח נגישות
+	Open arrow	חץ פתוח
+	Open email app	פתיחת יישום דוא״ל
+	Open file	פתיחת קובץ
+	Open folder	פתיחת תיקייה
+	Open in a new tab	פתיחה בלשונית חדשה
+	Open in Full Screen mode	פתיחה במצב מסך מלא
+	Open in Full Screen mode?	לפתוח במצב מסך מלא?
+	Open link	פתיחת קישור
+	Open Recent	פתיחה אחרונה
+	Open the file as it was saved then	פתיחת הקובץ כפי שנשמר באותו זמן
+	Open the older version first	תחילה יש לפתוח את הגרסה הישנה
+	Open this local PDF?	לפתוח את קובץ ה־PDF המקומי הזה?
+	Open this web page?	לפתוח את דף האינטרנט הזה?
+	Open to page	פתיחה בעמוד
+	open to see what it will include	פתח כדי לראות מה ייכלל
+	Opened with	נפתח באמצעות
+	Opened, but its security settings don't allow combining. Enter the permissions password.	הקובץ נפתח, אך הגדרות האבטחה שלו אינן מאפשרות שילוב. יש להזין את סיסמת ההרשאות.
+	Opening the browser's print dialog…	פותח את חלון ההדפסה של הדפדפן…
+	Opens the printer driver's preferences. They are saved for every print from this computer; the copies, two-sided, grayscale and paper chosen here still apply.	פותח את העדפות מנהל ההתקן של המדפסת. הן נשמרות לכל הדפסה מהמחשב הזה; מספר העותקים, הדפסה דו־צדדית, גווני אפור והנייר שנבחרו כאן עדיין חלים.
+	Open…	פתיחה…
+	Optimization cancelled	המיטוב בוטל
+	Optimization is already running	המיטוב כבר פועל
+	Optimize	מיטוב
+	Optimize PDF…	מיטוב PDF…
+	Optimize Scanned Documents	מיטוב מסמכים סרוקים
+	Optimize scanned documents	מיטוב מסמכים סרוקים
+	Optimize scanned documents…	מיטוב מסמכים סרוקים…
+	Optimizing… cleaning up	מבצע מיטוב… מנקה
+	Optimizing… image {d} of {t}	מבצע מיטוב… תמונה {d} מתוך {t}
+	Optimizing… merging identical objects	מבצע מיטוב… ממזג אובייקטים זהים
+	Optimizing… merging image fragments	מיטוב… מיזוג חלקי תמונה
+	Optimizing… removing user data	מבצע מיטוב… מסיר נתוני משתמש
+	Optimizing… writing the copy	מבצע מיטוב… כותב את העותק
+	Optional	אופציונלי
+	Optional: needs an AI provider you configure	רשות: נדרש ספק בינה מלאכותית שתגדיר
+	Options for this reply	אפשרויות לתשובה זו
+	Orange	כתום
+	Order · top calculates first	סדר · העליון מחושב ראשון
+	Organization Name	שם הארגון
+	Organizational Unit	יחידה ארגונית
+	Organize	ארגון
+	Organize pages	ארגון עמודים
+	Orientation:	כיוון:
+	Original	מקורי
+	Original: replace pages	מקור: החלפת עמודים
+	other changes	שינויים אחרים
+	Other colour…	צבע אחר…
+	Other elements alternate text	טקסט חלופי לרכיבים אחרים
+	Other elements that require alternate text	רכיבים אחרים שזקוקים לטקסט חלופי
+	Other options	אפשרויות נוספות
+	Outdent	הקטנת כניסה
+	Outline	קו מתאר
+	Outline colour:	צבע קו המתאר:
+	Output	פלט
+	Output appears here.	הפלט יופיע כאן.
+	Output intent: {list}	כוונת פלט: {list}
+	Output preview	תצוגה מקדימה של הפלט
+	Overlap:	חפיפה:
+	Owner password (no restrictions apply)	סיסמת בעלים (ללא הגבלות)
+	Page background	רקע העמוד
+	Page Content	תוכן העמוד
+	page content	תוכן העמוד
+	Page display	תצוגת העמוד
+	Page display: {layout}	תצוגת העמוד: {layout}
+	Page does not require timed responses	העמוד אינו דורש תגובות מוגבלות בזמן
+	Page grid	רשת העמודים
+	Page labels	תוויות עמודים
+	Page layout	פריסת עמוד
+	Page navigation	ניווט בין עמודים
+	Page number	מספר עמוד
+	Page Only	עמוד בלבד
+	Page options	אפשרויות עמוד
+	Page order:	סדר העמודים:
+	Page Properties	מאפייני עמוד
+	Page properties	מאפייני עמוד
+	Page properties…	מאפייני עמוד…
+	Page Range	טווח עמודים
+	Page Range Options	אפשרויות טווח עמודים
+	Page size	גודל העמוד
+	Page Sizing & Handling	גודל העמוד וטיפול בו
+	Page thumbnails	תמונות ממוזערות של עמודים
+	Page tools	כלי עמוד
+	Page transitions	מעברי עמודים
+	Page will not cause screen flicker	העמוד לא יגרום להבהוב מסך
+	Page {label}	עמוד {label}
+	Page {n}	עמוד {n}
+	page {n} is out of range (1–{count})	עמוד {n} מחוץ לטווח (1–{count})
+	Page {n} of {total}	עמוד {n} מתוך {total}
+	Page {pages} changed after the background was added, so its own white backdrop stays off. It looks the same on white paper.	עמוד {pages} השתנה לאחר הוספת הרקע, ולכן הרקע הלבן המקורי שלו נשאר כבוי. על נייר לבן הוא נראה אותו הדבר.
+	Page {pages} paints its own white backdrop, which would hide the background. Replace it	לעמוד {pages} יש רקע לבן משלו, שיסתיר את הרקע. להחליף אותו
+	Page {p} doesn't tab in structure order	סדר המעבר באמצעות Tab בעמוד {p} אינו תואם לסדר המבנה
+	Page {p} of {n}	עמוד {p} מתוך {n}
+	Page {p}: {n} untagged content item	עמוד {p}: פריט תוכן אחד שאינו מתויג ({n})
+	Page {p}: {n} untagged content items	עמוד {p}: {n} פריטי תוכן שאינם מתויגים
+	Page {} has additional actions	לעמוד {} יש פעולות נוספות
+	pages	עמודים
+	pages added or removed	עמודים שנוספו או הוסרו
+	Pages counted	עמודים שנספרו
+	Pages from	עמודים מ־
+	Pages of {name} to combine, e.g. 1-3, 6	עמודים לשילוב מתוך {name}, לדוגמה: 1-3, 6
+	Pages Panel and Page	חלונית עמודים ועמוד
+	Pages per file	עמודים בכל קובץ
+	Pages per sheet:	עמודים בכל גיליון:
+	Pages selected	עמודים שנבחרו
+	Pages that are only pictures of text can't be read aloud or searched. Recognize text (OCR) to add a text layer.	אי אפשר להקריא או לחפש בעמודים שמכילים תמונות של טקסט בלבד. יש לזהות את הטקסט (OCR) כדי להוסיף שכבת טקסט.
+	Pages to Print	עמודים להדפסה
+	Pages with links, comments or fields should tab in structure order. The fix sets each page's tab order to Use Document Structure.	בעמודים עם קישורים, הערות או שדות, המעבר באמצעות Tab צריך להתבצע לפי סדר המבנה. התיקון מגדיר לכל עמוד את סדר המעבר ל„שימוש במבנה המסמך”.
+	Pages {pages} changed after the background was added, so their own white backdrops stay off. They look the same on white paper.	העמודים {pages} השתנו לאחר הוספת הרקע, ולכן הרקעים הלבנים המקוריים שלהם נשארים כבויים. על נייר לבן הם נראים אותו הדבר.
+	Pages {pages} paint their own white backdrop, which would hide the background. Replace it	לעמודים {pages} יש רקעים לבנים משלהם, שיסתירו את הרקע. להחליף אותם
+	Pages:	עמודים:
+	Pages: {k} of {n}	עמודים: {k} מתוך {n}
+	Panel layout could not be restored: {error}	לא ניתן לשחזר את פריסת החלוניות: {error}
+	Panel move was not applied: {error}	העברת החלונית לא בוצעה: {error}
+	Panels	חלוניות
+	Paper:	נייר:
+	Paragraph spacing	מרווח בין פסקאות
+	Part of	חלק מ־
+	Passed	עבר
+	Password protection will be applied when you save	ההגנה באמצעות סיסמה תופעל בעת השמירה
+	Password required	נדרשת סיסמה
+	Password security	הגנה באמצעות סיסמה
+	Password-protected	מוגן בסיסמה
+	Paste after	הדבקה לאחר
+	Paste pages	הדבקת עמודים
+	Path	נתיב
+	Paths	נתיבים
+	Pattern	תבנית
+	Patterns	תבניות
+	Patterns (graphics objects)	דפוסים (אובייקטים גרפיים)
+	PDF Optimizer	מיטוב PDF
+	PDF or image	PDF או תמונה
+	PDF page: {size}	עמוד PDF: {size}
+	PDF producer	יוצר ה־PDF
+	PDF scale: {scale}%	קנה מידה של PDF: ‏{scale}%
+	PDF version	גרסת PDF
+	PDF, images and text	PDF, תמונות וטקסט
+	PDF/A…	PDF/A…
+	PdfCraft can't check this signature yet: {}.	PdfCraft עדיין אינו יכול לבדוק חתימה זו: {}.
+	PdfCraft didn't shut down normally. These documents had changes that were autosaved:	PdfCraft לא נסגר כראוי. השינויים במסמכים הבאים נשמרו אוטומטית:
+	PdfCraft is drawing without a graphics processor, so it may be slow. Updating the graphics driver may help.	PdfCraft מצייר ללא מעבד גרפי ולכן ייתכן שיהיה איטי. עדכון מנהל ההתקן הגרפי עשוי לעזור.
+	PdfCraft on GitHub	PdfCraft ב־GitHub
+	PdfCraft web page	אתר PdfCraft
+	PdfCraft works offline. No telemetry, no account, and no cloud processing unless you add a provider.	PdfCraft פועל גם ללא חיבור לרשת. אין איסוף נתוני שימוש, אין צורך בחשבון ואין עיבוד בענן, אלא אם מוסיפים ספק שירות.
+	PdfCraft {c} is up to date.	PdfCraft {c} מעודכן.
+	PdfCraft {v} is available.	גרסת PdfCraft {v} זמינה.
+	People may need more time to respond. Check that nothing has a time limit.	ייתכן שמשתמשים זקוקים לזמן נוסף כדי להגיב. יש לוודא שאין מגבלת זמן.
+	Percentage	אחוז
+	Perimeter	היקף
+	Permissions password	סיסמת הרשאות
+	Permitted actions after certifying	פעולות מותרות לאחר האישור
+	Phone Number	מספר טלפון
+	Phone Numbers	מספרי טלפון
+	Photo	תמונה
+	Pick a tool in the quick bar, or type above.	בחר כלי בסרגל המהיר או הקלד למעלה.
+	Pictures cover pages {pages} (scans?), so the background won't show there.	תמונות מכסות את העמודים {pages} (סריקות?), ולכן הרקע לא יוצג בהם.
+	Pictures need alternate text that describes them, or must be marked decorative. Add alternate text to each figure.	יש להוסיף לכל תמונה טקסט חלופי שמתאר אותה או לסמן אותה כדקורטיבית. יש להוסיף טקסט חלופי לכל איור.
+	Pictures on those pages are recognized too; words already in the page's text are not added again	גם תמונות בעמודים אלה יזוהו; מילים שכבר מופיעות בטקסט של העמוד לא יתווספו שוב
+	Pin	הצמד
+	Pin a folder to Home	הצמדת תיקייה לדף הבית
+	Pin a folder to list its newest PDFs here, such as where your scanner or a synced cloud drive saves them.	אפשר להצמיד תיקייה כדי שקובצי ה־PDF החדשים שבה יופיעו כאן, למשל תיקייה שבה הסורק או כונן ענן מסונכרן שומרים קבצים.
+	Pin a folder…	הצמדת תיקייה…
+	Pin a tool…	הצמד כלי…
+	Pin folder to Home…	הצמדת תיקייה לדף הבית…
+	Pin to Home	הצמד למסך הבית
+	Pin tools to Home	הצמד כלים למסך הבית
+	Pin your favorite tools here for quick access.	הצמד כאן את הכלים המועדפים עליך לגישה מהירה.
+	Pink	ורוד
+	Pinned	מוצמד
+	Pinned folders need the desktop app	הצמדת תיקיות זמינה באפליקציית שולחן העבודה
+	Pinned Tools	כלים מוצמדים
+	Pinned {folder} to Home	{folder} הוצמדה לדף הבית
+	Pinned {tool} to Home	הכלי {tool} הוצמד למסך הבית
+	Place saved {what}	הצבת {what} שנשמר
+	Plain text in reading order; pages are separated by form feeds.	טקסט פשוט לפי סדר הקריאה; העמודים מופרדים בתווי מעבר עמוד.
+	Planned	מתוכנן
+	Planned for milestone	מתוכנן לאבן הדרך
+	Planned for milestone {m} — open to see what it will include	מתוכנן לאבן הדרך {m} — יש לפתוח כדי לראות מה ייכלל בה
+	Planned · {m}	מתוכנן · {m}
+	Points from the page's bottom-left corner.	בנקודות, מהפינה השמאלית התחתונה של העמוד.
+	Polygon	מצולע
+	Polyline	קו שבור
+	Portable mode is off: {folder} can't be written ({error}). Settings are kept in your user folder instead.	מצב נייד כבוי: לא ניתן לכתוב אל {folder} ({error}). ההגדרות יישמרו במקום זאת בתיקיית המשתמש שלך.
+	Portrait Pages	עמודים לאורך
+	Portrait pages	עמודים לאורך
+	Post	פרסום
+	Poster	פוסטר
+	PostScript / EPS	PostScript / EPS
+	PostScript XObjects aren't allowed	אסור להשתמש באובייקטי XObject מסוג PostScript
+	Preferences	העדפות
+	Preferences…	העדפות…
+	Prefix	קידומת
+	Preflight	בדיקה מקדימה
+	Prepare a form	הכנת טופס
+	Prepare for accessibility	הכנה לנגישות
+	Prepare for Distribution	הכנה להפצה
+	Prepare for distribution	הכנה להפצה
+	Prepare for distribution…	הכנה להפצה…
+	Preparing sheet {done} of {total} for printing…	מכין גיליון {done} מתוך {total} להדפסה…
+	Preparing {n} sheets for printing…	מכין {n} גיליונות להדפסה…
+	Presentation (.pptx)	מצגת (.pptx)
+	Preview unavailable: {e}	התצוגה המקדימה אינה זמינה: {e}
+	Preview: page {p} of {n}	תצוגה מקדימה: עמוד {p} מתוך {n}
+	Previous ({key})	הקודם ({key})
+	Previous (⇧⌘G)	הקודם (⇧⌘G)
+	Previous / next page	העמוד הקודם / הבא
+	Previous figure	האיור הקודם
+	Previous month	החודש הקודם
+	Previous page	העמוד הקודם
+	Previous sheet	הגיליון הקודם
+	Previous tab	הלשונית הקודמת
+	Previous view	התצוגה הקודמת
+	Primary language	שפה ראשית
+	Print ({key})	הדפסה ({key})
+	Print (⌘P)	הדפסה (⌘P)
+	Print as image	הדפסה כתמונה
+	Print in grayscale	הדפסה בגווני אפור
+	Print page border	הדפסת גבול העמוד
+	Print production	הפקה לדפוס
+	Print single-sided. Keep the sheets in order, cut at the marks, then stack the piles left to right, top to bottom.	יש להדפיס חד־צדדית. יש לשמור על סדר הגיליונות, לחתוך בסימונים ואז לערום את הערימות משמאל לימין ומלמעלה למטה.
+	Print, NextPage, PrevPage, FirstPage or LastPage	Print, NextPage, PrevPage, FirstPage או LastPage
+	Printer default	ברירת המחדל של המדפסת
+	Printer paper and scaling may differ. Check driver settings.	הנייר והקנה מידה של המדפסת עשויים להיות שונים. יש לבדוק את הגדרות מנהל ההתקן.
+	Printer properties	מאפייני המדפסת
+	Printer:	מדפסת:
+	Printing allowed	הדפסה מותרת
+	Print…	הדפסה…
+	Privacy	פרטיות
+	Private data of other applications	נתונים פרטיים של יישומים אחרים
+	Producer	מפיק
+	product (x)	מכפלה (x)
+	Properties…	מאפיינים…
+	Protect & Standardize	הגנה ותקנון
+	Protect a PDF	הגנה על PDF
+	Protect Using Password	הגנה באמצעות סיסמה
+	Protect using password…	הגנה באמצעות סיסמה…
+	Protect with password	הגנה באמצעות סיסמה
+	Protected: the combined file won't keep its security settings	מוגן: הקובץ המשולב לא ישמור את הגדרות האבטחה
+	PRs	בקשות מיזוג
+	Public key	מפתח ציבורי
+certificate	Public key	מפתח ציבורי
+	Purple	סגול
+	PushButton	כפתור
+	Quality	איכות
+	Radio	כפתור בחירה
+	Radio button	כפתור בחירה
+	Radio Button Properties	מאפייני כפתור בחירה
+	Re-type Password	הקלדת הסיסמה שוב
+	Read	קריאה
+	Read mode	מצב קריאה
+	Read Only	קריאה בלבד
+	Reading colours	צבעי קריאה
+	Reading the printer's settings…	קורא את הגדרות המדפסת…
+	Reads {names}, which read it back. No order can fix a loop: change one of the formulas.	קורא את {names}, שקוראים אותו בחזרה. אי אפשר לתקן לולאה באמצעות סדר; יש לשנות אחת מהנוסחאות.
+	Reads {name}, which calculates later, so it shows an old value.	קורא את {name}, שמחושב מאוחר יותר, ולכן מציג ערך ישן.
+	Reads {name}, which the form doesn't have, so it gets no value there.	הסקריפט קורא את {name}, שאינו קיים בטופס, ולכן הקריאה לא מחזירה ערך.
+	Ready	מוכן
+	Reason	סיבה
+	Reason: 	סיבה: 
+	Recent colours	צבעים אחרונים
+	Recent files to keep	מספר הקבצים האחרונים לשמירה
+	Recognize Text	זיהוי טקסט
+	Recognize text	זיהוי טקסט
+	Recognize text in multiple files…	זיהוי טקסט בכמה קבצים…
+	Recognize Text…	זיהוי טקסט…
+	Recognize text…	זיהוי טקסט…
+	Recognized 1 word	זוהתה מילה אחת
+	Recognized {n} words	זוהו {n} מילים
+	Recognized {w} words in 1 file	זוהו {w} מילים בקובץ אחד
+	Recognized {w} words in {n} files	זוהו {w} מילים ב־{n} קבצים
+	Recognizing text… file {d} of {t}	מזהה טקסט… קובץ {d} מתוך {t}
+	Recognizing text… page {d} of {t}	מזהה טקסט… עמוד {d} מתוך {t}
+	Recommended tools	כלים מומלצים
+	Recover unsaved documents?	לשחזר מסמכים שלא נשמרו?
+	Red	אדום
+	Redact	השחרה
+	Redact a PDF	השחרת תוכן ב־PDF
+	Redact all	השחרת הכול
+	Redact Image	השחרת תמונה
+	Redact pages	השחרת עמודים
+	Redact pages…	השחרת עמודים…
+	Redact text and images	השחרת טקסט ותמונות
+	Redacted area fill colour:	צבע המילוי של האזור המושחר:
+	Redaction code:	קוד השחרה:
+	Redaction mark appearance	מראה סימון ההשחרה
+	Redaction properties…	מאפייני השחרה…
+	Redaction Tool Properties	מאפייני כלי ההשחרה
+	Redid {label}	בוצעה שוב הפעולה {label}
+	Redo	ביצוע חוזר
+	Redo {action}	ביצוע חוזר של {action}
+	Reduce file size	הקטנת גודל הקובץ
+	Reduce file size…	הקטנת גודל הקובץ…
+	Regularity	אחידות
+	Rejected	נדחה
+	Reliable character encoding is provided	קידוד תווים אמין מוגדר
+	Reload	טעינה מחדש
+	Reload documents when their files change on disk	טעינה מחדש של מסמכים כאשר הקבצים שלהם משתנים בדיסק
+	Remove "{name}" from this list? The file itself is not deleted.	להסיר את „{name}” מהרשימה? הקובץ עצמו לא יימחק.
+	Remove all links	הסרת כל הקישורים
+	Remove background	הסרת רקע
+	Remove checkmark	הסרת סימן וי
+	Remove Crop	הסרת החיתוך
+	Remove crop	הסר חיתוך
+	Remove from hotbar	הסר מסרגל הכלים המהיר
+	Remove from Recent	הסרה מהקבצים האחרונים
+	Remove header & footer	הסרת כותרת עליונה ותחתונה
+	Remove hidden information	הסרת מידע מוסתר
+	Remove hidden information and flatten comments and form fields, so recipients see only the pages.	הסרת מידע מוסתר והשטחת הערות ושדות טופס, כך שהנמענים יראו את העמודים בלבד.
+	Remove hidden information, metadata, scripts and embedded content, and rewrite the files.	הסרת מידע מוסתר, מטא־נתונים, סקריפטים ותוכן מוטמע, וכתיבה מחדש של הקבצים.
+	Remove hidden information…	הסרת מידע מוסתר…
+	Remove invalid links and bookmarks	הסרת קישורים וסימניות לא תקינים
+	Remove page	הסרת עמוד
+	Remove redaction marks	הסרת סימוני השחרה
+	Remove saved {what}	הסרת {what} שנשמר
+	Remove security	הסרת ההגנה
+	Remove this leaf tag from reading order and mark its direct content as an artifact	הסרת תגית העלה הזו מסדר הקריאה וסימון התוכן הישיר שלה כפריט שאינו תוכן
+	Remove unreferenced named destinations	הסרת יעדים בעלי שם שאין אליהם הפניה
+	Remove unused objects and merge identical ones	הסרת אובייקטים שאינם בשימוש ומיזוג אובייקטים זהים
+	Remove watermark	הסרת סימן מים
+	Remove {name}	הסרת {name}
+	Remove {name} from Recent	הסרת {name} מהקבצים האחרונים
+	Remove {n} files	הסרת {n} קבצים
+	Remove {n} pages	הסרת {n} עמודים
+	Remove {standard} identification	הסרת זיהוי {standard}
+	Removed 1 hidden item. Save to remove them from the file.	הוסר פריט מוסתר אחד. יש לשמור כדי להסירו מהקובץ.
+	Removed 1 link	הוסר קישור אחד
+	Removed {n} hidden items. Save to remove them from the file.	הוסרו {n} פריטים מוסתרים. יש לשמור כדי להסירם מהקובץ.
+	Removed {n} links	הוסרו {n} קישורים
+	Removing the background puts the page's own backdrop back.	הסרת הרקע מחזירה את הרקע המקורי של העמוד.
+	Rename bookmark	שינוי שם סימנייה
+	Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)	רינדור: hayro (bootstrap) · ממשק: egui · סמלים: Lucide (ISC) · גופנים: Inter, JetBrains Mono, Dancing Script (OFL)
+	Rendering…	מרנדר…
+	Reopen Closed Tab	פתיחה מחדש של לשונית שנסגרה
+	Reopen the files that were open when PdfCraft last closed	פתיחת הקבצים מחדש שהיו פתוחים כש־PdfCraft נסגר בפעם האחרונה
+	Repair log	יומן תיקונים
+	Repairs	תיקונים
+	Repeat overlay text	חזרה על טקסט השכבה
+	Repeated navigation links should be skippable. Check links that appear on every page.	צריך לאפשר לדלג על קישורי ניווט חוזרים. יש לבדוק קישורים שמופיעים בכל עמוד.
+	Replace document colours	החלפת צבעי המסמך
+	Replace image	החלפת תמונה
+	Replace Image…	החלפת תמונה…
+	Replace page	החלפת עמוד
+	Replace Pages	החלפת עמודים
+	Replace pages	החלפת עמודים
+	Replace pages…	החלפת עמודים…
+	Replace text	החלפת טקסט
+	Replaced	הוחלף
+	Replacement text	טקסט חלופי
+	Replacement: pages of {name}	החלפה: עמודים מתוך {name}
+	Replaces the existing one on those pages.	מחליף את הפריט הקיים בעמודים האלה.
+	Replacing images arrives on the web with image file pickers	החלפת תמונות תגיע לגרסת האינטרנט עם בוחרי קבצי תמונה
+	Replacing images on page {p} arrives on the web with image pickers ({i})	החלפת תמונות בעמוד {p} תגיע לגרסת האינטרנט עם בוחרי תמונות ({i})
+	Reply	השבה
+	Report created	הדוח נוצר
+	Report Options	אפשרויות הדוח
+	Report…	דוח…
+	Required	נדרש
+	Requires user to enter a password for:	נדרשת סיסמה מהמשתמש עבור:
+	Reset a form	איפוס טופס
+	Reset columns	איפוס עמודות
+	Reset page size	איפוס גודל העמוד
+	Reset panel layout	איפוס פריסת החלוניות
+	Reset side panels	אפס לוחות צד
+	Reset to Initial Visibility	איפוס לנראות ההתחלתית
+	Reset to printer defaults	איפוס לברירות המחדל של המדפסת
+	Reshape comment	שינוי צורת הערה
+	Resize comment	שינוי גודל הערה
+	Resize panel window	שינוי גודל חלון החלונית
+	Resize panels	שינוי גודל החלוניות
+	Resize window to initial page	שינוי גודל החלון בהתאם לעמוד הראשוני
+	Resolution	רזולוציה
+	Resolution:	רזולוציה:
+	Restore	שחזור
+	Restore the last view (page, zoom and page display) when a document is opened again	שחזור התצוגה האחרונה (עמוד, הגדלה ותצוגת עמוד) כאשר מסמך נפתח שוב
+	Restrictions	הגבלות
+	Restrictions lifted	ההגבלות הוסרו
+	Retain existing	שמירה על הקיים
+	Rev. {rev}: Certified by an unknown signer	מהדורה {rev}: אושרה על ידי חותם לא ידוע
+	Rev. {rev}: Certified by {name}	מהדורה {rev}: אושרה על ידי {name}
+	Rev. {rev}: Signed by an unknown signer	מהדורה {rev}: נחתמה על ידי חותם לא ידוע
+	Rev. {rev}: Signed by {name}	מהדורה {rev}: נחתמה על ידי {name}
+	Reveal in File Explorer	הצגה בסייר הקבצים
+	Reveal in Finder	הצגה ב־Finder
+	Reverse closed arrow	חץ סגור הפוך
+	Reverse open arrow	חץ פתוח הפוך
+	Reverse pages	הדפסה בסדר עמודים הפוך
+	Revert	חזרה לגרסה השמורה
+	Revert changes	ביטול השינויים
+	Revert to the previously saved version of “{name}”? Changes since then can't be undone afterwards.	לחזור לגרסה השמורה הקודמת של „{name}”? לא ניתן יהיה לבטל לאחר מכן את השינויים שנעשו מאז.
+	Reverted to the last saved version	המסמך הוחזר לגרסה האחרונה שנשמרה
+	Review & Compare	סקירה והשוואה
+	Review History	היסטוריית סקירה
+	Revisions	מהדורות
+	Rich Text Format (.rtf)	Rich Text Format ‏(.rtf)
+	Right Edge	הקצה הימני
+	Right Footer Text	טקסט הכותרת התחתונה הימנית
+	Right Header Text	טקסט הכותרת העליונה הימנית
+	Rotate Clockwise	סיבוב עם כיוון השעון
+	Rotate clockwise	סיבוב עם כיוון השעון
+	Rotate Counterclockwise	סיבוב נגד כיוון השעון
+	Rotate counterclockwise	סיבוב נגד כיוון השעון
+	Rotate image	סיבוב תמונה
+	Rotate page	סיבוב עמוד
+	Rotate page {label} clockwise	סיבוב עמוד {label} עם כיוון השעון
+	Rotate page {label} counterclockwise	סיבוב עמוד {label} נגד כיוון השעון
+	Rotate Pages	סיבוב עמודים
+	Rotate pages	סיבוב עמודים
+	Rotate pages clockwise	סיבוב עמודים עם כיוון השעון
+	Rotate pages counterclockwise	סיבוב עמודים נגד כיוון השעון
+	Rotate pages…	סיבוב עמודים…
+	Rotate the selected pages clockwise	סיבוב העמודים שנבחרו עם כיוון השעון
+	Rotate the selected pages counterclockwise	סיבוב העמודים שנבחרו נגד כיוון השעון
+	Rotate view	סיבוב התצוגה
+	Rotate view clockwise	סיבוב התצוגה עם כיוון השעון
+	Rotate view clockwise ({key})	סיבוב התצוגה עם כיוון השעון ({key})
+	Rotate view clockwise (⇧⌘+)	סיבוב התצוגה עם כיוון השעון (⇧⌘+)
+	Rotate view counterclockwise	סיבוב התצוגה נגד כיוון השעון
+	Rotate:	סיבוב:
+	Row spacing	מרווח בין שורות
+	Rows	שורות
+	rows have between {min} and {max} columns	בשורות יש בין {min} ל־{max} עמודות
+	Rule Name	שם הכלל
+	Run	הפעלה
+	Run a JavaScript	הרצת JavaScript
+	Run form script	הרצת סקריפט טופס
+	Run JavaScript	הרצת JavaScript
+	Running action… file {d} of {t}	מריץ פעולה… קובץ {d} מתוך {t}
+calendar weekday	Sa	ש׳
+	Same as interface ({language})	כמו שפת הממשק ({language})
+	Sanitize	ניקוי
+	Sanitize document	ניקוי המסמך
+	Sanitize Documents	ניקוי מסמכים
+	Sanitize document…	ניקוי המסמך…
+	Sanitizing removes hidden information from the document: metadata, file attachments, comments, form fields (flattened), hidden text and layers, bookmarks, links, actions and scripts, and private application data.	ניקוי המסמך מסיר מידע מוסתר: מטא־נתונים, קבצים מצורפים, הערות, שדות טופס (שמשוטחים), טקסט ושכבות מוסתרים, סימניות, קישורים, פעולות וסקריפטים ונתוני יישומים פרטיים.
+	Save & Close	שמירה וסגירה
+	Save (M4)	שמירה (M4)
+	Save ({key})	שמירה ({key})
+	Save anyway	לשמור בכל זאת
+	Save as PDF	שמירה כ־PDF
+	Save as PDF/A	שמירה כ־PDF/A
+	Save as PDF/A-1b	שמירה כ־PDF/A-1b
+	Save as PDF/A-2b	שמירה כ־PDF/A-2b
+	Save as PDF/A-3b	שמירה כ־PDF/A-3b
+	Save as PDF/UA	שמירה כ־PDF/UA
+	Save as PDF/X	שמירה כ־PDF/X
+	Save as {level}	שמירה כ־{level}
+	Save as…	שמירה בשם…
+	Save attachment…	שמירת קובץ מצורף…
+	Save changes to “{name}” before closing?	לשמור את השינויים בקובץ „{name}” לפני הסגירה?
+	Save changes?	לשמור את השינויים?
+	Save file	שמירת קובץ
+	Save image	שמירת תמונה
+	Save Image As…	שמירת תמונה בשם…
+	Save or revert changes before selecting another tag.	יש לשמור או לבטל את השינויים לפני בחירת תגית אחרת.
+	Save over the changed file?	לשמור במקום הקובץ שהשתנה?
+	Save pages	שמירת עמודים
+	Save tag properties	שמירת מאפייני התגית
+	Save the accessibility report	שמירת דוח הנגישות
+	Save the document afterwards: saving rewrites the whole file so no trace of the removed content stays in it.	לאחר מכן יש לשמור את המסמך: השמירה כותבת את הקובץ כולו מחדש כדי שלא יישאר זכר לתוכן שהוסר.
+	Save the document afterwards; saving rewrites the whole file so nothing removed stays in it.	יש לשמור את המסמך לאחר מכן; השמירה כותבת את כל הקובץ מחדש כדי ששום תוכן שהוסר לא יישאר בו.
+	Save the spreadsheet	שמירת הגיליון האלקטרוני
+	Save these pages as one PDF	שמירת עמודים אלה כקובץ PDF אחד
+	Saved measurements	מדידות שמורות
+	Saved measurements.	המדידות נשמרו.
+	Saved the print-ready PDF to {path}	קובץ ה־PDF המוכן להדפסה נשמר ב־{path}
+	Saved {name}	נשמר {name}
+	Saved {place}: {before} → {after} (not smaller){detail}	נשמר {place}: {before} → {after} (לא קטן יותר){detail}
+	Saved {place}: {before} → {after} ({pct}% smaller){detail}	נשמר {place}: {before} → {after} ({pct}% קטן יותר){detail}
+	Saved, but reopening failed: {e}	הקובץ נשמר, אך פתיחתו מחדש נכשלה: {e}
+	Scale relative to target page	שינוי קנה מידה ביחס לעמוד היעד
+	Scan	סריקה
+	Scan & OCR	סריקה וזיהוי תווים (OCR)
+	Screen flicker	הבהוב מסך
+	Screen readers choose their voice from the document's language. Set it in Document Properties > Advanced > Language.	קוראי מסך בוחרים את הקול לפי שפת המסמך. יש להגדיר אותה במאפייני המסמך > מתקדם > שפה.
+	Script	סקריפט
+	Script Name:	שם הסקריפט:
+	Script:	סקריפט:
+	Scripted content must be usable with a keyboard and assistive technology. Check the document's scripts.	יש לאפשר שימוש בתוכן מתוסרט באמצעות מקלדת וטכנולוגיה מסייעת. יש לבדוק את הסקריפטים במסמך.
+	Scripts	סקריפטים
+	Scripts run in a sandbox without file or network access. A script that asks to open a web page needs your permission first. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	סקריפטים פועלים בסביבה מבודדת ללא גישה לקבצים או לרשת. סקריפט שמבקש לפתוח דף אינטרנט דורש את אישורך תחילה. גם כש־JavaScript כבוי, פונקציות העיצוב, האימות והחישוב התקניות של Acrobat ממשיכות לפעול.
+	Scripts run in a sandbox without file or network access. With JavaScript off, Acrobat's standard format, validate and calculate functions still work.	סקריפטים פועלים בסביבה מבודדת ללא גישה לקבצים או לרשת. גם כש־JavaScript כבוי, פונקציות העיצוב, האימות והחישוב התקניות של Acrobat ממשיכות לפעול.
+	Scroll long text	גלילה בטקסט ארוך
+	Scroll speed (mouse wheel and arrow keys)	מהירות גלילה (גלגלת העכבר ומקשי החצים)
+	Scroll tabs left	גלילת הלשוניות שמאלה
+	Scroll tabs right	גלילת הלשוניות ימינה
+	Search all tools…	חפש בכל הכלים…
+	Search comments	חיפוש בהערות
+	Search results	תוצאות חיפוש
+	Search settings…	חפש בהגדרות…
+	Search tools and commands	חיפוש כלים ופקודות
+	Search tools and commands…	חיפוש כלים ופקודות…
+	Search tools…	חיפוש כלים…
+	Searchable Image (Exact)	תמונה ניתנת לחיפוש (מדויקת)
+	Searching… {s} of {p} pages	מחפש… {s} מתוך {p} עמודים
+	Searching… {s}/{p}	מחפש… {s}/{p}
+	Search…	חיפוש…
+	Security	אבטחה
+	Security method	שיטת אבטחה
+	Security properties	מאפייני אבטחה
+	Security properties…	מאפייני אבטחה…
+	Security settings	הגדרות אבטחה
+	Security settings must allow assistive technology to read the content ("Enable text access for screen reader devices"). Change the document's security to allow it.	הגדרות האבטחה צריכות לאפשר לטכנולוגיה מסייעת לקרוא את התוכן („אפשר גישה לטקסט עבור קוראי מסך”). יש לשנות את אבטחת המסמך כדי לאפשר זאת.
+	Security will be removed when you save	האבטחה תוסר בעת השמירה
+	Select	בחר
+	Select (V)	בחירה (V)
+	Select a file first	יש לבחור קובץ תחילה
+	Select a file for the stamp	בחירת קובץ לחותמת
+	Select a password-protected file first	יש לבחור תחילה קובץ המוגן בסיסמה
+	Select a word	בחירת מילה
+	Select Action:	בחירת פעולה:
+	Select all	בחירת הכול
+	Select all pages (Organize)	בחירת כל העמודים (ארגון)
+	Select at most 1000 objects at a time.	ניתן לבחור עד 1000 אובייקטים בכל פעם.
+	Select data files to merge	בחירת קובצי נתונים למיזוג
+	Select files to compare	בחירת קבצים להשוואה
+	Select format category:	בחירת קטגוריית עיצוב:
+	Select Icon	בחירת סמל
+	Select page {label}	בחירת עמוד {label}
+	Select pages	בחירת עמודים
+	Select the items to remove from this document.	יש לבחור את הפריטים להסרה מהמסמך.
+	Select Tool	כלי הבחירה
+	Select tools to display on your Home page for quick access.	בחר את הכלים שיוצגו בדף הבית שלך לגישה מהירה.
+	Select Trigger:	בחירת אירוע מפעיל:
+	Selected image files: {count}	קובצי התמונות שנבחרו: {count}
+	Selected pages	העמודים שנבחרו
+	Self-signed	חתימה עצמית
+certificate	Self-signed	חתימה עצמית
+	Send backward	העבר שכבה אחת לאחור
+	Send to back	העבר לשכבה האחורית
+	Sending sheet {s} of {n} to {printer}…	שולח גיליון {s} מתוך {n} למדפסת {printer}…
+	Sending to {printer}…	שולח אל המדפסת {printer}…
+	Sensitivity	רגישות
+	Sent to {printer}	נשלח אל המדפסת {printer}
+	Sent to {printer}: {msg}	נשלח אל המדפסת {printer}: {msg}
+	Separate PDFs	קובצי PDF נפרדים
+	Separator style:	סגנון מפריד:
+	September	ספטמבר
+calendar date	September	ספטמבר
+	Serial number	מספר סידורי
+certificate	Serial number	מספר סידורי
+	Set Alternate Text	הגדרת טקסט חלופי
+	Set alternate text	הגדרת טקסט חלופי
+	Set bookmark destination	הגדרת יעד לסימנייה
+	Set calculation order	הגדרת סדר החישוב
+	Set document title	הגדרת כותרת המסמך
+	Set Fields to Same Size	הגדרת גודל אחיד לשדות
+	Set layer visibility	הגדרת נראות השכבה
+	Set measurement scale	הגדרת קנה מידה למדידה
+	Set Page Boxes	הגדרת תיבות עמוד
+	Set page boxes	הגדרת תיבות עמוד
+	Set page boxes…	הגדרת תיבות עמוד…
+	Set page transitions	הגדרת מעברי עמודים
+	Set properties	הגדרת מאפיינים
+	Set status	הגדרת מצב
+	Set status Accepted	הגדרת מצב: התקבל
+	Set status Cancelled	הגדרת מצב: בוטל
+	Set status Completed	הגדרת מצב: הושלם
+	Set status None	הגדרת מצב: ללא
+	Set status Rejected	הגדרת מצב: נדחה
+	Set status Unmarked	הגדרת מצב: לא מסומן
+	Set tab order	הגדרת סדר מעבר עם Tab
+	Set the image of {name}	הגדרת התמונה של {name}
+	Set to current page ({n})	הגדרה לעמוד הנוכחי ({n})
+	Set to zero	איפוס
+	Settings	הגדרות
+	SHA-1 digest	תקציר SHA-1
+certificate	SHA-1 digest	תקציר SHA-1
+	SHA-256 digest	תקציר SHA-256
+certificate	SHA-256 digest	תקציר SHA-256
+	Shadings	הצללות
+	Shared Field Properties	מאפייני שדה משותפים
+	Sheet {s} of {n}	גיליון {s} מתוך {n}
+key	Shift	Shift
+	Shift constrains to 45 degrees. Backspace removes a vertex. Escape cancels.	Shift מגביל לזוויות של 45 מעלות. Backspace מסיר קודקוד. Escape מבטל.
+	Shift- or Ctrl/Command-click to select several fields.	יש ללחוץ תוך החזקת Shift או Ctrl/Command כדי לבחור כמה שדות.
+	Shift-click to select several objects. Drag empty space to select an area.	יש ללחוץ תוך החזקת Shift כדי לבחור כמה אובייקטים. גרור באזור ריק כדי לבחור אזור.
+	ships in milestone {m}	ייכלל באבן הדרך {m}
+	Show a basic title bar for the window buttons instead of the tab strip. GNOME doesn't draw title bars for apps, so this one doesn't follow its theme.	הצגת שורת כותרת בסיסית עבור כפתורי החלון במקום שורת הלשוניות. GNOME אינו מצייר שורות כותרת ליישומים ולכן שורה זו אינה תואמת לערכת הנושא שלו.
+	Show a field	הצגת שדה
+	Show a notice when a document is secured	הצגת הודעה כאשר מסמך מאובטח
+	Show all	הצגת הכול
+	Show all comments	הצגת כל ההערות
+	Show certificate…	הצגת האישור…
+	Show cover page in two-page view	הצגת עמוד השער בתצוגת שני עמודים
+	Show gaps between pages	הצגת רווחים בין עמודים
+	Show layer	הצגת שכבה
+	Show less	הצגת פחות
+	Show on the page which fields each field reads	הצגת השדות שכל שדה קורא בעמוד
+	Show or hide the side panel	הצג או הסתר את לוח הצד
+	Show or hide the Tools panel	הצג או הסתר את לוח הכלים
+	Show Page Edge Shadows	הצג צללים בשולי העמודים
+	Show password	הצגת סיסמה
+	Show Report	הצגת הדוח
+	Show the accessibility report	הצגת דוח הנגישות
+	Show this dialog when the Checker starts	הצגת חלון זה כשהבודק מופעל
+	Show {n} more	הצגת {n} נוספים
+	Show:	הצגה:
+	Shown while the pointer is over a mark.	מוצג כאשר המצביע נמצא מעל סימון.
+	Shrink oversized pages	הקטנת עמודים גדולים מדי
+	Shrink the page content to make room for the header and footer	הקטנת תוכן העמוד כדי לפנות מקום לכותרת העליונה והתחתונה
+	Side by side	זה לצד זה
+	Side panels	חלוניות צד
+	Sign	חתימה
+	Sign a sheet of white paper and take a photo of it in bright, even light (use the flash). Choose the photo or drop it here: PdfCraft finds the signature and removes the paper.	חתום על דף נייר לבן וצלם אותו בתאורה בהירה ואחידה (השתמש במבזק). בחר את התמונה או גרור אותה לכאן: PdfCraft יאתר את החתימה ויסיר את הנייר.
+	Sign Here	חתימה כאן
+	Sign this field…	חתימה על שדה זה…
+	Sign with a Digital ID	חתימה באמצעות מזהה דיגיטלי
+	Sign yourself	חתימה עצמית
+	Signature	חתימה
+	signature	חתימה
+	Signature Details	פרטי החתימה
+	Signature is invalid	החתימה אינה תקפה
+	Signature is INVALID:	החתימה אינה תקפה:
+	Signature is valid	החתימה תקפה
+	Signature is valid:	החתימה תקפה:
+	Signature panel	חלונית חתימות
+	Signature validity is unknown	תוקף החתימה אינו ידוע
+	Signature validity is UNKNOWN:	תוקף החתימה אינו ידוע:
+	Signatures	חתימות
+	Signatures panel	חלונית חתימות
+	Signed and all signatures are valid.	המסמך חתום וכל החתימות תקפות.
+	Signed and saved to {path}	נחתם ונשמר ב־{path}
+	Signer	חותם
+	Signer's name	שם החותם
+	Signing time	זמן החתימה
+	Signing time is from the clock on the signer's computer.	זמן החתימה מבוסס על השעון במחשב של החותם.
+	Simplified field notation:	סימון שדה פשוט:
+	Single file	קובץ יחיד
+	Single Page	עמוד יחיד
+	Single page	עמוד יחיד
+	Single Page Continuous	עמוד יחיד, גלילה רציפה
+	Single word or phrase	מילה או ביטוי יחיד
+	Skip Rule	דילוג על כלל
+	Skipped	דולג
+	Slash	קו נטוי
+scroll speed	Slow	איטית
+	Smaller pages	עמודים קטנים יותר
+	Smaller thumbnails	תמונות ממוזערות קטנות יותר
+	Snap to drawing	הצמדה לשרטוט
+	Snapping	הצמדה
+	Social Security Number	מספר ביטוח לאומי
+	Social Security Numbers	מספרי ביטוח לאומי
+	Solid	רציף
+	Some bookmarks are not shown here: the panel lists a limited number, nested a limited depth.	חלק מהסימניות אינן מוצגות כאן: החלונית מציגה מספר מוגבל של סימניות ורמות קינון.
+	Some content could not be classified safely and was kept in the count.	לא ניתן היה לסווג חלק מהתוכן באופן בטוח ולכן הוא נכלל בספירה.
+	Some names are built as it runs	חלק מהשמות נוצרים במהלך ההרצה
+	Some page content couldn't be read; snapping uses the rest.	לא ניתן לקרוא חלק מתוכן העמוד; ההצמדה משתמשת בשאר התוכן.
+	Some pages contain no countable text. Scanned images need OCR first.	בחלק מהעמודים אין טקסט שניתן לספור. יש להפעיל OCR על תמונות סרוקות תחילה.
+	Sort comments by:	מיון הערות לפי:
+	Sort items	מיון פריטים
+	sorted ascending	ממויין בסדר עולה
+	sorted descending	ממויין בסדר יורד
+	Source	מקור
+key	Space	רווח
+	Space Audit	בדיקת שימוש במקום
+	Split document	פיצול מסמך
+	Split document…	פיצול מסמך…
+	Split into files…	פיצול לקבצים…
+	Spreadsheet (.xlsx)	גיליון אלקטרוני (.xlsx)
+	Squiggly	קו גלי
+	Squiggly underline	קו תחתון גלי
+	Squiggly underline text	הוספת קו תחתון גלי לטקסט
+	Stamp	חותמת
+	Stamp palette	לוח חותמות
+	Stamps	חותמות
+	Standard	רגיל
+	Standard Business	עסקי סטנדרטי
+	Standard fonts; text outside Windows-1252 isn't supported yet.	גופנים סטנדרטיים; טקסט מחוץ ל-Windows-1252 עדיין אינו נתמך.
+	Standards	תקנים
+	Start	התחלה
+action wizard	Start	התחלה
+	Start Checking	התחלת הבדיקה
+	Start page number	מספר העמוד ההתחלתי
+	Status	מצב
+	Steps	שלבים
+	Stick to a side:	הצמד לצד:
+	Sticky note	פתקית
+	Still rendering — this page is unusually complex…	העיבוד עדיין נמשך — העמוד הזה מורכב במיוחד…
+	Strength: {s}	חוזק: {s}
+	Strikethrough text	הוספת קו חוצה לטקסט
+	Strong	חזקה
+	Structure Info	מידע על המבנה
+calendar weekday	Su	א׳
+certificate	Subject	נושא
+	Submit a form	שליחת טופס
+	Subset	תת־קבוצה
+	Success	הצלחה
+	sum (+)	סכום (+)
+	Summarize	סיכום
+	Summarize comments	סיכום הערות
+	Summarize Options	אפשרויות סיכום
+	Summary	סיכום
+	Switch light / dark theme	מעבר לערכת נושא בהירה / כהה
+	Switch to List view to change the pages it takes.	יש לעבור לתצוגת רשימה כדי לשנות אילו עמודים ייכללו.
+	Switch to two-page view first to show the cover page	יש לעבור תחילה לתצוגת שני עמודים כדי להציג את עמוד השער
+	Tab Order	סדר המעבר באמצעות Tab
+	Tab order	סדר מעבר עם Tab
+	Tab order by columns	סדר מעבר לפי עמודות
+	Tab order by rows	סדר מעבר לפי שורות
+	Tab order is consistent with structure order	סדר המעבר עם Tab תואם לסדר המבני
+	Tab order: by columns	סדר מעבר באמצעות Tab: לפי עמודות
+	Tab order: by document structure	סדר מעבר באמצעות Tab: לפי מבנה המסמך
+	Tab order: by rows	סדר מעבר באמצעות Tab: לפי שורות
+	Tab order: move a field with its arrows.	סדר מעבר באמצעות Tab: יש להזיז שדה באמצעות החצים שלו.
+	Table cells belong in a row. Fix the table's tags.	תאי טבלה צריכים להשתייך לשורה. יש לתקן את תגיות הטבלה.
+	Table rows belong directly in a table or its head, body or foot. Fix the table's tags.	שורות טבלה צריכות להשתייך ישירות לטבלה או לראש, לגוף או לתחתית שלה. יש לתקן את תגיות הטבלה.
+	Tables must contain the same number of columns in each row and rows in each column	בכל שורת טבלה צריך להיות אותו מספר עמודות ובכל עמודה אותו מספר שורות
+	Tables must have a summary	לטבלאות חייב להיות סיכום
+	Tables should have headers	לטבלאות צריכות להיות כותרות
+	Tag form fields	תיוג שדות טופס
+	Tag type	סוג תגית
+	Tagged annotations	הערות מתויגות
+	Tagged content	תוכן מתויג
+	Tagged form fields	שדות טופס מתויגים
+	Tagged multimedia	מולטימדיה מתויגת
+	Tagged PDF	PDF מתויג
+	Tags	תגיות
+	Tags give the document a logical structure that assistive technology follows. Tag the document (Automatically tag PDF).	תגיות מעניקות למסמך מבנה הגיוני שטכנולוגיה מסייעת יכולה לעקוב אחריו. יש לתייג את המסמך („תיוג PDF אוטומטי”).
+	Tags panel	חלונית התגיות
+	Take a snapshot	צילום תמונת מצב
+	Text (plain)	טקסט פשוט
+	Text alignment:	יישור הטקסט:
+	Text box	תיבת טקסט
+	Text Color:	צבע הטקסט:
+	Text editing line	שורת עריכת טקסט
+	Text field	שדה טקסט
+	Text Field Properties	מאפייני שדה טקסט
+	Text Field Table	טבלת שדות טקסט
+	Text field table	טבלת שדות טקסט
+	Text in images isn't found; recognise text (OCR) first.	טקסט בתוך תמונות לא נמצא; יש לזהות אותו תחילה באמצעות OCR.
+	Text is compared word by word; the differences are shown on the new file.	הטקסט מושווה מילה אחר מילה; ההבדלים מוצגים בקובץ החדש.
+	Text language is specified	שפת הטקסט מוגדרת
+	Text must contrast enough with its background for people with low vision. Check the colours by eye or with a contrast tool.	הטקסט צריך להיות מובחן דיו מהרקע עבור אנשים עם ראייה ירודה. יש לבדוק את הצבעים בעין או בכלי לבדיקת ניגודיות.
+	Text recognition is already running	זיהוי הטקסט כבר פועל
+	Text recognition isn't installed: its model files are missing. Reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them.	זיהוי הטקסט אינו מותקן: קובצי המודל חסרים. יש להתקין מחדש את PdfCraft או להגדיר את PDFCRAFT_MODELS לתיקייה שמכילה אותם.
+	Text recognition isn't installed: its models are missing (run `cargo xtask models`, or set PDFCRAFT_MODELS).	זיהוי הטקסט אינו מותקן: המודלים חסרים (יש להריץ `cargo xtask models` או להגדיר את PDFCRAFT_MODELS).
+	Text to find	טקסט לחיפוש
+	Text to insert	טקסט להוספה
+	Text to place	טקסט להוספה
+	Text used as a clipping path cannot be moved with this selection.	אי אפשר להזיז טקסט המשמש כנתיב חיתוך באמצעות בחירה זו.
+	Text, marks and signatures become part of the page. Other comments stay editable.	טקסט, סימונים וחתימות הופכים לחלק מהעמוד. הערות אחרות נשארות ניתנות לעריכה.
+calendar weekday	Th	ה׳
+	TH and TD	TH ו־TD
+	TH and TD must be children of TR	TH ו־TD חייבים להיות רכיבים בני TR
+	Thai and Arabic use regular fallback fonts when available.	לתאילנדית ולערבית נעשה שימוש בגופני fallback רגילים, אם הם זמינים.
+	That didn't work: an internal error stopped it ({m}).	הפעולה נכשלה עקב שגיאה פנימית ({m}).
+	That didn't work: an internal error stopped it ({m}). Your documents are unchanged.	הפעולה נכשלה עקב שגיאה פנימית ({m}). המסמכים שלך לא השתנו.
+	the area, the spacing and the column widths must be numbers, the spacing 0 or more and each width more than 0	האזור, המרווחים ורוחבי העמודות חייבים להיות מספרים; המרווחים חייבים להיות 0 ומעלה וכל רוחב חייב להיות גדול מ־0
+@plural	The calculation order has {n} entry that calculates nothing. Fix order removes it.|The calculation order has {n} entries that calculate nothing. Fix order removes them.	בסדר החישוב יש רשומה אחת ({n}) שאינה מחשבת דבר; תיקון הסדר יסיר אותה|בסדר החישוב יש {n} רשומות שאינן מחשבות דבר; תיקון הסדר יסיר אותן|בסדר החישוב יש {n} רשומות שאינן מחשבות דבר; תיקון הסדר יסיר אותן
+	The certificate of {} does not allow this many CA certificates below it (path length), so it is not used to vouch for {}.	התעודה של {} אינה מתירה מספר כזה של תעודות CA מתחתיה (אורך נתיב), ולכן אינה משמשת לאימות {}.
+	The certificate of {} has critical extensions PdfCraft does not recognize, so it is not used to vouch for {}.	לתעודה של {} יש הרחבות קריטיות ש־PdfCraft אינו מזהה ולכן היא אינה משמשת לאימות {}.
+	The certificate of {} is not a CA certificate that may issue certificates, so it is not used to vouch for {}.	התעודה של {} אינה תעודת CA המורשית להנפיק תעודות, ולכן אינה משמשת לאימות {}.
+	The certificate of {} was not valid at the time of signing, so it is not used to vouch for {}.	התעודה של {} לא הייתה תקפה בזמן החתימה ולכן אינה משמשת לאימות {}.
+	The checker found 1 problem which may prevent the document from being fully accessible.	הבודק מצא בעיה אחת שעלולה למנוע מהמסמך להיות נגיש במלואו.
+	The checker found no problems in this document.	הבודק לא מצא בעיות במסמך זה.
+	The checker found problems which may prevent the document from being fully accessible.	הבודק מצא בעיות שעלולות למנוע נגישות מלאה של המסמך.
+	The checker found {n} problems which may prevent the document from being fully accessible.	הבודק מצא {n} בעיות שעלולות למנוע מהמסמך להיות נגיש במלואו.
+	The clipboard has no image or text	אין בלוח הגזירים תמונה או טקסט
+	The document changed while you were choosing a file, so nothing was changed.	המסמך השתנה במהלך בחירת הקובץ ולכן לא בוצעו שינויים.
+	The document changed while you were editing field properties.	המסמך השתנה בזמן עריכת מאפייני השדה.
+	The document has additional actions (/AA)	למסמך יש פעולות נוספות (/AA)
+	The document has been altered or corrupted since the signature was applied.	המסמך שונה או נפגם מאז הוספת החתימה.
+	The document has been altered or corrupted since the timestamp was applied.	המסמך שונה או נפגם מאז הוספת חותמת הזמן.
+	The document has been altered since this signature was applied in ways it does not permit ({}).	המסמך שונה מאז הוספת החתימה בדרכים שאינן מותרות לו ({}).
+	The document has been altered since this timestamp was applied in ways it does not permit ({}).	המסמך שונה מאז הוספת חותמת הזמן בדרכים שאינן מותרות לו ({}).
+	The document has been modified since this signature was applied, but the changes are permitted ({}).	המסמך שונה מאז הוספת החתימה, אך השינויים מותרים ({}).
+	The document has been modified since this timestamp was applied, but the changes are permitted ({}).	המסמך שונה מאז הוספת חותמת הזמן, אך השינויים מותרים ({}).
+	The document has document-level JavaScript	למסמך יש JavaScript ברמת המסמך
+	the document has no form fields	אין במסמך שדות טופס
+	the document has no page tree	למסמך אין עץ עמודים
+	the document has no tags	למסמך אין תגיות
+	The document has no tags (structure tree)	למסמך אין תגיות (עץ מבנה)
+	The document has no title	למסמך אין כותרת
+	The document has no XMP metadata	למסמך אין מטא־נתוני XMP
+	The document is encrypted	המסמך מוצפן
+	The document is no longer open.	המסמך אינו פתוח עוד.
+	the document is protected by a password	המסמך מוגן בסיסמה
+	The document isn't marked as tagged (MarkInfo Marked)	המסמך אינו מסומן כמתויג (MarkInfo Marked)
+	The document isn't tagged, so none of its content is	המסמך אינו מתויג ולכן גם התוכן שלו אינו מתויג
+	The document now conforms to {level}; save it to keep the changes	המסמך תואם כעת לרמה {level}; יש לשמור כדי שהשינויים יישמרו
+	The document opens without a password; this password is needed to change the restrictions. It's applied when you save.	המסמך נפתח ללא סיסמה; סיסמה זו נדרשת לשינוי ההגבלות. היא תופעל בעת השמירה.
+	The document was closed before it could be saved.	המסמך נסגר לפני שניתן היה לשמור אותו.
+	The document's embedded revocation information shows that the signer's certificate has not been revoked.	מידע הביטול המוטמע במסמך מציין שתעודת החותם לא בוטלה.
+	The document's security settings don't allow copying text and images	הגדרות האבטחה של המסמך אינן מאפשרות העתקת טקסט ותמונות
+	The document's security settings don't allow filling in form fields	הגדרות האבטחה של המסמך אינן מאפשרות למלא שדות טופס
+	The document's security settings don't allow printing	הגדרות האבטחה של המסמך אינן מאפשרות הדפסה
+	The document's security settings don't allow this change	הגדרות האבטחה של המסמך אינן מאפשרות שינוי זה
+	The ECDSA signature is not in canonical DER (trailing bytes, padding or a missing sign byte); it was read anyway.	חתימת ECDSA אינה בתבנית DER קנונית (בתי סיום, ריפוד או בית סימן חסר); היא נקראה בכל זאת.
+	The ECDSA signature is the raw r and s values instead of a DER sequence; it was read anyway.	חתימת ECDSA מכילה ערכי r ו־s גולמיים במקום רצף DER; היא נקראה בכל זאת.
+	The embedded timestamp token is valid and its authority is trusted; trusted time is {}.	אסימון חותמת הזמן המוטמע תקף והגורם שהנפיק אותו מהימן; הזמן המהימן הוא {}.
+	The existing action will be preserved.	הפעולה הקיימת תישמר.
+	The field properties could not be changed.	לא ניתן היה לשנות את מאפייני השדה.
+	The field properties dialog is no longer open.	חלון מאפייני השדה אינו פתוח עוד.
+	The field {name} no longer exists.	השדה {name} אינו קיים עוד.
+	the first heading is an H{n}; headings should not skip levels	הכותרת הראשונה היא H{n}; אין לדלג על רמות כותרת
+	the first row number can be at most {max}	מספר השורה הראשונה יכול להיות לכל היותר {max}
+	The font {} isn't embedded	הגופן {} אינו מוטמע
+	The fonts PdfCraft writes with can't draw “{c}” ({code}), so it shows as ? in every PDF viewer. The text is saved.	הגופנים שבהם PdfCraft כותב אינם יכולים להציג את „{c}” ({code}), ולכן הוא מוצג כ־? בכל מציגי ה־PDF. הטקסט נשמר.
+	The form asks to be submitted to {u}; PdfCraft doesn't send form data. Save the document to keep your entries.	הטופס מבקש לשלוח נתונים אל {u}; ‏PdfCraft אינו שולח נתוני טפסים. יש לשמור את המסמך כדי לשמור את הנתונים שהוזנו.
+	The form asks viewers to make appearances (NeedAppearances)	הטופס מבקש מתוכנות הצפייה ליצור מראי שדות (NeedAppearances)
+	The image has been copied ({w} × {h} pixels)	התמונה הועתקה ({w} × {h} פיקסלים)
+	The image has been copied as a {ext} file	התמונה הועתקה כקובץ {ext}
+	the image is empty	התמונה ריקה
+	The key is in the macOS Keychain, which may ask to allow PdfCraft to use it.	המפתח נמצא בצרור המפתחות של macOS, וייתכן שתתבקש לאשר ל־PdfCraft להשתמש בו.
+	The key is in the Windows certificate store, which may ask to allow PdfCraft to use it.	המפתח נמצא במאגר האישורים של Windows, וייתכן שתתבקש לאשר ל־PdfCraft להשתמש בו.
+	The Keychain's digital IDs couldn't be listed: {e}	לא ניתן היה להציג את המזהים הדיגיטליים שבצרור המפתחות: {e}
+	The labels are in English: the signature's font can't draw them in this language.	התוויות באנגלית: גופן החתימה אינו יכול להציג אותן בשפה זו.
+	The linked PDF opened, but its named destination was not applied.	קובץ ה־PDF המקושר נפתח, אך היעד בעל השם שלו לא הוחל.
+	The linked PDF opened, but its page destination was out of range.	קובץ ה־PDF המקושר נפתח, אך עמוד היעד שלו מחוץ לטווח.
+	The metadata doesn't identify the file as {}	המטא־נתונים אינם מזהים את הקובץ כ־{}
+	the name is not a plain file name	השם אינו שם קובץ פשוט
+	The newest {n} of {total} PDFs	{n} קובצי ה־PDF החדשים ביותר מתוך {total}
+	The operation failed.	הפעולה נכשלה.
+	The order saved in the PDF needs tidying	יש לסדר מחדש את הסדר שנשמר ב־PDF
+	The page has changed; select the image again	העמוד השתנה; יש לבחור את התמונה שוב
+	The pages were extracted but not deleted, because the document changed while you were choosing a folder.	העמודים חולצו אך לא נמחקו, משום שהמסמך השתנה בזמן בחירת התיקייה.
+	the password is incorrect	הסיסמה שגויה
+	The password is incorrect.	הסיסמה שגויה.
+	The password is only used to read the file; it isn't saved.	הסיסמה משמשת לקריאת הקובץ בלבד ואינה נשמרת.
+	The password must have at least 6 characters.	הסיסמה חייבת להכיל לפחות 6 תווים.
+	The password must have at least 8 characters.	הסיסמה חייבת להכיל שמונה תווים לפחות.
+	The passwords do not match.	הסיסמאות אינן תואמות.
+	The PDF text fonts can't draw “{c}” ({code}). Choose supported text.	גופני הטקסט של PDF אינם יכולים להציג את „{c}” ({code}). יש לבחור טקסט נתמך.
+	The printer driver's own settings for this print: paper tray, paper type, finishing and more.	הגדרות מנהל ההתקן של המדפסת להדפסה זו: מגש הנייר, סוג הנייר, גימור ועוד.
+	The replacement file doesn't have that many pages.	בקובץ החלופי אין מספר גדול כל כך של עמודים.
+	the rows are too short: make the area taller, or use fewer rows or less row spacing	השורות נמוכות מדי: הגדל את גובה האזור, או השתמש בפחות שורות או במרווח שורות קטן יותר
+	The RSA signature value does not have the length of the key's modulus (leading zero bytes dropped or added); it was read anyway.	אורך ערך חתימת RSA אינו תואם לאורך מודול המפתח (בתי אפס בתחילה הוסרו או נוספו); הוא נקרא בכל זאת.
+	The RSA signature's DigestInfo has no NULL parameter (older signers write it so); it was read anyway.	ל־DigestInfo של חתימת RSA אין פרמטר NULL (חותמים ישנים כותבים אותו כך); הוא נקרא בכל זאת.
+	The same password is tried on each file.	אותה סיסמה תיבדק בכל קובץ.
+	The security settings don't allow screen readers to read the text	הגדרות האבטחה אינן מאפשרות לקוראי מסך לקרוא את הטקסט
+	The selected area has been copied ({w} × {h} pixels)	האזור שנבחר הועתק ({w} × {h} פיקסלים)
+	The selected fields could not be found. Select them again.	לא ניתן למצוא את השדות שנבחרו. יש לבחור אותם שוב.
+	The signature algorithm and the SignerInfo's digest algorithm name different hashes; the signature was made with the SignerInfo's.	אלגוריתם החתימה ואלגוריתם התקציר ב־SignerInfo מציינים פונקציות תקציר שונות; החתימה נוצרה באמצעות זו שב־SignerInfo.
+	The signature carries an unverified timestamp ({}): the timestamp authority is not in your list of trusted certificates, so the signing time claimed by the signer is used instead.	החתימה כוללת חותמת זמן שלא אומתה ({}): הגורם שהנפיק אותה אינו ברשימת התעודות המהימנות, ולכן נעשה שימוש בזמן החתימה שעליו הצהיר החותם.
+	The signature contents are not hexadecimal.	תוכן החתימה אינו הקסדצימלי.
+	The signature could not be checked ({}).	לא ניתן היה לבדוק את החתימה ({}).
+	The signature could not be read ({}).	לא ניתן היה לקרוא את החתימה ({}).
+	The signature could not be verified ({}).	לא ניתן היה לאמת את החתימה ({}).
+	The signature font can't draw “{c}” ({code}). Type it in Latin, Cyrillic or Greek letters, or use Draw or Image.	גופן החתימה לא יכול לצייר את "{c}" ({code}). הקלידו את השם באותיות לטיניות, קיריליות או יווניות, או השתמשו ב"ציור" או ב"תמונה".
+	The signature has no valid byte range.	לחתימה אין טווח בתים תקף.
+	The signature includes an embedded timestamp.	החתימה כוללת חותמת זמן מוטמעת.
+	The signature is BER-encoded (indefinite lengths) rather than DER; it was read leniently.	החתימה מקודדת ב־BER (אורכים לא מוגדרים) במקום ב־DER; היא נקראה באופן סובלני.
+	The signature uses the legacy adbe.x509.rsa_sha1 format.	החתימה משתמשת בפורמט הישן adbe.x509.rsa_sha1.
+	The signature value does not match the signer's certificate: the signature is corrupt.	ערך החתימה אינו תואם לתעודת החותם: החתימה פגומה.
+	The signature will be invisible.	החתימה תהיה בלתי נראית.
+	The signature's byte range does not exclude exactly its contents.	טווח הבתים של החתימה אינו מוציא בדיוק את תוכן החתימה.
+	The signature's byte range does not match the file.	טווח הבתים של החתימה אינו תואם לקובץ.
+	The signature's signed attributes have no content type, which CMS requires; it was read anyway.	לתכונות החתימה החתומות אין סוג תוכן, שנדרש על ידי CMS; היא נקראה בכל זאת.
+	The signature's signed attributes have no message digest, so the signature does not cover the document.	לתכונות החתימה החתומות אין תקציר הודעה, ולכן החתימה אינה מכסה את המסמך.
+	The signature's signed attributes name a content type other than data, so it is not a signature of the document.	תכונות החתימה החתומות מציינות סוג תוכן שאינו נתונים, ולכן זו אינה חתימה על המסמך.
+	The signature's timestamp token could not be verified ({}).	לא ניתן היה לאמת את אסימון חותמת הזמן של החתימה ({}).
+	The signature's timestamp token does not cover the signature value.	אסימון חותמת הזמן של החתימה אינו מכסה את ערך החתימה.
+	The signed content is a constructed (segmented) OCTET STRING, as BER allows; it was read anyway.	התוכן החתום הוא OCTET STRING מורכב (מקטעים), כפי ש־BER מתיר; הוא נקרא בכל זאת.
+	the signed version could not be read	לא ניתן היה לקרוא את הגרסה החתומה
+	The signer's certificate does not allow digital signatures (its key usage has neither digital signature nor non-repudiation).	תעודת החותם אינה מתירה חתימות דיגיטליות (שימוש המפתח שלה אינו כולל חתימה דיגיטלית או אי־התכחשות).
+	The signer's certificate has been revoked ({}).	תעודת החותם בוטלה ({}).
+	The signer's certificate has critical extensions PdfCraft does not recognize ({}).	לתעודת החותם יש הרחבות קריטיות ש־PdfCraft אינו מזהה ({}).
+	The signer's certificate is not in the signature.	תעודת החותם אינה כלולה בחתימה.
+	The signer's certificate is not issued for signing documents (its extended key usage has no document-signing purpose).	תעודת החותם לא הונפקה לחתימה על מסמכים (שימוש המפתח המורחב אינו כולל מטרה של חתימת מסמכים).
+	The signer's certificate was not valid at the time of signing.	תעודת החותם לא הייתה תקפה בזמן החתימה.
+	The signer's identity is unknown because it has not been included in your list of trusted certificates and none of its parent certificates are trusted certificates.	זהות החותם אינה ידועה משום שלא נכללה ברשימת התעודות המהימנות שלך ואף אחת מתעודות האב שלה אינה מהימנה.
+	The signer's identity is valid.	זהות החותם תקפה.
+	The standard fonts can't draw “{c}” ({code}). Only Western European characters can be added as text for now.	הגופנים התקניים אינם יכולים להציג את „{c}” ({code}). בשלב זה ניתן להוסיף כטקסט רק תווים ממערב אירופה.
+	The text is the same	הטקסט זהה
+	the text recognition models are not installed (reinstall PdfCraft, or set PDFCRAFT_MODELS to the folder that holds them)	מודלי זיהוי הטקסט אינם מותקנים (יש להתקין מחדש את PdfCraft או להגדיר את PDFCRAFT_MODELS לתיקיית המודלים)
+	The timestamp authority's certificate is not issued for time stamping.	תעודת הגורם שהנפיק את חותמת הזמן לא הונפקה לשימוש בחותמות זמן.
+	The timestamp authority's certificate was not valid at the time of timestamping.	תעודת הגורם שהנפיק את חותמת הזמן לא הייתה תקפה בזמן החתימה בזמן.
+	The timestamp contents are not hexadecimal.	תוכן חותמת הזמן אינו הקסדצימלי.
+	The timestamp has no valid byte range.	לחותמת הזמן אין טווח בתים תקף.
+	The timestamp token could not be read ({}).	לא ניתן היה לקרוא את אסימון חותמת הזמן ({}).
+	The timestamp token is valid and its authority is trusted.	אסימון חותמת הזמן תקף והגורם שהנפיק אותו מהימן.
+	The timestamp token is valid, but the timestamp authority is not in your list of trusted certificates.	אסימון חותמת הזמן תקף, אך הגורם שהנפיק אותו אינו ברשימת התעודות המהימנות שלך.
+	The timestamp's byte range does not exclude exactly its contents.	טווח הבתים של חותמת הזמן אינו מוציא בדיוק את התוכן שלה.
+	The timestamp's byte range does not match the file.	טווח הבתים של חותמת הזמן אינו תואם לקובץ.
+	The title in the metadata and the document information differ	הכותרת במטא־נתונים שונה מהכותרת בפרטי המסמך
+	the title must not be empty	הכותרת אינה יכולה להיות ריקה
+	The value is shown as typed.	הערך מוצג כפי שהוקלד.
+	The window should show a meaningful title rather than the file name. Set a title and Initial View > Show: Document Title.	בחלון צריכה להופיע כותרת משמעותית במקום שם הקובץ. יש להגדיר כותרת ואת „תצוגה ראשונית” > „הצגה: כותרת המסמך”.
+	The window shows the file name, not the title (Initial View > Show)	החלון מציג את שם הקובץ במקום את הכותרת (תצוגה ראשונית > הצגה)
+	The Windows store's digital IDs couldn't be listed: {e}	לא ניתן היה להציג את המזהים הדיגיטליים במאגר Windows: {e}
+	Theme	ערכת נושא
+	there are no pages to print	אין עמודים להדפסה
+	There are no redaction marks (mark text, areas or pages first)	אין סימוני השחרה (תחילה יש לסמן טקסט, אזורים או עמודים)
+	There are no redaction marks to apply	אין סימוני השחרה להחלה
+	there are no redaction marks to apply	אין סימוני השחרה להחלה
+	There is no folder to save the digital ID in.	אין תיקייה לשמירת המזהה הדיגיטלי.
+	These files can't be read, so they won't be in the combined PDF:	לא ניתן לקרוא את הקבצים האלה ולכן הם לא ייכללו ב־PDF המשולב:
+	These objects could not be moved. Select them again and try a smaller move.	לא ניתן להזיז אובייקטים אלה. יש לבחור אותם שוב ולנסות הזזה קטנה יותר.
+	Thick	עבה
+	Thin	דק
+	This area has too many overlapping paths; intersection snapping is limited.	באזור זה יש יותר מדי נתיבים חופפים; ההצמדה לנקודות חיתוך מוגבלת.
+	This certificate is in your list of trusted certificates.	האישור נמצא ברשימת האישורים המהימנים שלך.
+	This certificate is not trusted. Signatures made with it show an unknown identity.	האישור אינו מהימן. חתימות שנוצרו באמצעותו יציגו זהות לא ידועה.
+	This certificate is trusted through a certificate above it in the chain.	האישור מהימן בזכות אישור שמופיע מעליו בשרשרת.
+	This comment's appearance can't be changed yet.	עדיין אי אפשר לשנות את המראה של הערה זו.
+	This compatibility level supports only plain ASCII passwords.	רמת תאימות זו תומכת בסיסמאות ASCII פשוטות בלבד.
+	This dialog shows the details of a certificate and its chain.	חלון זה מציג את פרטי האישור ואת שרשרת האישורים שלו.
+	This document asks to open in Full Screen mode: the page fills the screen and nothing else shows. Press Esc at any time to leave it.	מסמך זה מבקש להיפתח במצב מסך מלא: העמוד ימלא את המסך ושום דבר אחר לא יוצג. יש ללחוץ על Esc בכל עת כדי לצאת.
+	This document can't be checked: it couldn't be read for editing	לא ניתן לבדוק את המסמך: לא ניתן היה לקרוא אותו לעריכה
+	This document contains {n} interactive form fields.	מסמך זה מכיל {n} שדות טופס אינטראקטיביים.
+	This document has no attachments.	אין במסמך זה קבצים מצורפים.
+	This document has no bookmarks.	אין במסמך זה סימניות.
+	This document has no comments to flatten	אין במסמך זה הערות להשטחה
+	This document has no document-level scripts.	במסמך זה אין סקריפטים ברמת המסמך.
+	This document has no editable structure tags.	אין במסמך זה תגיות מבנה הניתנות לעריכה.
+	This document has no form fields to flatten	אין במסמך זה שדות טופס להשטחה
+	This document has no form fields you can fill in	אין במסמך זה שדות טופס שניתן למלא
+	This document has no form fields.	אין במסמך זה שדות טופס.
+	This document has no layers.	אין במסמך זה שכבות.
+	This document has no pages.	אין במסמך זה עמודים.
+	This document has no restrictions to lift	אין במסמך זה הגבלות להסרה
+	This document has no signatures.	אין חתימות במסמך זה.
+	This document has no tagged figures.	אין במסמך זה איורים מתויגים.
+	This document has no text to make bookmarks from.	במסמך זה אין טקסט שממנו ניתן ליצור סימניות.
+	This document has no {kind} to change	אין במסמך זה {kind} לשינוי
+	This document has not been modified since this signature was applied.	מסמך זה לא שונה מאז הוספת החתימה.
+	This document has not been modified since this timestamp was applied.	המסמך לא שונה מאז הוספת חותמת זמן זו.
+	This document hasn't been checked yet.	המסמך עדיין לא נבדק.
+	This document is secured. Some changes are restricted by its security settings.	המסמך מאובטח. הגדרות האבטחה שלו מגבילות שינויים מסוימים.
+	this document is signed: rewriting it would invalidate its signatures (save it incrementally instead)	המסמך חתום: כתיבה מחדש תבטל את החתימות שלו (יש לשמור באופן מצטבר במקום זאת)
+	This document is trying to open a local file:	מסמך זה מנסה לפתוח קובץ מקומי:
+	This document isn't password-protected	מסמך זה אינו מוגן בסיסמה
+	This drawing exceeds the snapping limit; only the first paths are used.	השרטוט חורג ממגבלת ההצמדה; נעשה שימוש בנתיבים הראשונים בלבד.
+	This field is locked. Unlock it to change its properties.	השדה נעול. יש לבטל את הנעילה כדי לשנות את מאפייניו.
+	This field's font can't draw “{c}” ({code}), so PdfCraft shows ? in its place. The value is saved, and other PDF viewers redraw the field from it.	הגופן של שדה זה אינו יכול להציג את „{c}” ({code}), ולכן PdfCraft מציג במקומו ?. הערך נשמר ותוכנות PDF אחרות מציירות מחדש את השדה ממנו.
+	This file changed on disk. Reload it to see the new version; your unsaved changes will be lost.	קובץ זה השתנה בדיסק. יש לטעון אותו מחדש כדי לראות את הגרסה החדשה; שינויים שלא נשמרו יאבדו.
+	This file changed on disk. Reload shows the new version and drops your unsaved changes; Save replaces it with this version.	הקובץ השתנה בדיסק. טעינה מחדש תציג את הגרסה החדשה ותבטל שינויים שלא נשמרו; שמירה תחליף אותה בגרסה זו.
+	This file is already as small as it can be made ({size}). No copy was saved.	הקובץ כבר קטן ככל האפשר ({size}). לא נשמר עותק.
+	this file isn't XFDF, FDF, XML or text form data	קובץ זה אינו נתוני טופס בפורמט XFDF, FDF, XML או טקסט
+	This file was damaged and has been repaired. Saving keeps the repaired version.	הקובץ ניזוק ותוקן. שמירתו תשמור את הגרסה המתוקנת.
+	This folder isn't available right now. It may have moved, or its drive or cloud sync is offline.	התיקייה אינה זמינה כרגע. ייתכן שהועברה, שהכונן שלה אינו מחובר או שסנכרון הענן אינו פעיל.
+	This form also contains XFA data, which PdfCraft doesn't read yet. You can fill its fields, but Acrobat may show the XFA values instead.	טופס זה מכיל גם נתוני XFA ש־PdfCraft עדיין אינו קורא. אפשר למלא את השדות, אך Acrobat עשוי להציג במקום זאת את ערכי ה־XFA.
+	This form's scripts are turned off because one ran too long. Reopen the document to run them again.	הסקריפטים של טופס זה כובו כי אחד מהם פעל זמן רב מדי. יש לפתוח מחדש את המסמך כדי להריץ אותם שוב.
+	This is a dynamic XFA form, which PdfCraft can't display yet. What you see is the file's placeholder page.	זהו טופס XFA דינמי ש־PdfCraft עדיין אינו יכול להציג. מה שמוצג הוא עמוד מציין המיקום של הקובץ.
+	This measurement needs at least {n} points.	המדידה דורשת לפחות {n} נקודות.
+	This page contains objects that cannot be selected together.	עמוד זה מכיל אובייקטים שאי אפשר לבחור יחד.
+	This page couldn't be displayed.\n{e}	לא ניתן להציג את העמוד.\n{e}
+	This PDF uses the unsupported {s} action.	קובץ PDF זה משתמש בפעולה {s}, שאינה נתמכת.
+	This printer offers no settings of its own.	למדפסת זו אין הגדרות משלה.
+	This printer's driver doesn't take two-sided settings from other programs, so its own setting applies. Change it in Properties…	מנהל ההתקן של מדפסת זו אינו מקבל הגדרות דו־צדדיות מתוכנות אחרות, ולכן חלה ההגדרה שלו. ניתן לשנות אותה במאפיינים…
+	This signature uses an RSA key shorter than 2048 bits, which is no longer considered strong enough for signatures. It still validates, but it should not be relied on.	חתימה זו משתמשת במפתח RSA קצר מ־2048 סיביות, שאינו נחשב עוד חזק דיו לחתימות. היא עדיין עוברת אימות, אך אין להסתמך עליה.
+	This signature uses RIPEMD-160, a legacy 160-bit hash algorithm that is no longer recommended for signatures. It still validates, but it should not be relied on.	חתימה זו משתמשת ב־RIPEMD-160, אלגוריתם תקציר ישן באורך 160 סיביות שכבר אינו מומלץ לחתימות. היא עדיין עוברת אימות, אך אין להסתמך עליה.
+	This signature uses SHA-1, a weak hash algorithm: collisions in it have been demonstrated. It still validates because many documents signed years ago use it, but it should not be relied on.	חתימה זו משתמשת ב־SHA-1, אלגוריתם תקציר חלש שכבר הודגמו בו התנגשויות. היא עדיין עוברת אימות משום שמסמכים רבים שנחתמו לפני שנים משתמשים בו, אך אין להסתמך עליו.
+	This web address mixes letters from different alphabets, a common way to imitate another site's name.	כתובת האינטרנט הזו משלבת אותיות מאלפביתים שונים, שיטה נפוצה לחיקוי שם של אתר אחר.
+	This web address uses letters from another alphabet, which can look like familiar ones.	כתובת האינטרנט הזו משתמשת באותיות מאלפבית אחר, שעשויות להיראות מוכרות.
+	Thumbnail size	גודל תמונה ממוזערת
+	Thumbnails	תמונות ממוזערות
+	Tile scale:	קנה מידה לריצוף:
+	Time	שעה
+	Timed responses	תגובות מוגבלות בזמן
+	Timestamp	חותמת זמן
+	to	עד
+	To change locked fields, also set Locked to No.	כדי לשנות שדות נעולים, יש להגדיר גם „נעול” ל„לא”.
+	to {n}	עד {n}
+	To:	עד:
+	Today	היום
+	Today: {date}	היום: {date}
+	Toggle fit page / fit width	מעבר בין התאמה לעמוד להתאמה לרוחב
+	Too early	מוקדם מדי
+	Tool	כלי
+	Toolbar size	גודל סרגל הכלים
+	Tools panel side	הצד שבו מופיעה חלונית הכלים
+	Tooltip	תיאור כלי
+	Tooltip:	תיאור כלי:
+	Top-level bookmarks ({n})	סימניות ברמה העליונה ({n})
+	Total	סה״כ
+	TR must be a child of Table, THead, TBody, or TFoot	TR חייב להיות רכיב בן של Table, ‏THead, ‏TBody או TFoot
+	Transform image	התמרת תמונה
+	Trim the picture with its handles; Enter or Done applies	חתוך את התמונה באמצעות הידיות שלה; Enter או „סיום” מחיל את החיתוך
+	Trust	אמון
+	Try the form as people filling it in will see it	בדיקת הטופס כפי שיוצג למי שימלא אותו
+calendar weekday	Tu	ג׳
+	Turn upside down (180°)	הפיכה על הראש (180°)
+	two cells would both be named {name}	לשני תאים יהיה אותו שם: {name}
+	Two-page view	תצוגת שני עמודים
+	Two-sided:	הדפסה דו־צדדית:
+	Two-Up (Cover Page)	שני עמודים (עמוד שער)
+	Two-Up (Facing)	שני עמודים (זה לצד זה)
+	Two-Up Continuous (Cover Page)	שני עמודים בגלילה רציפה (עמוד שער)
+	Two-Up Continuous (Facing)	שני עמודים בגלילה רציפה (זה לצד זה)
+signature pad	Type	הקלדה
+	Type a password.	יש להקליד סיסמה.
+	Type Password	הקלדת סיסמה
+	Type text	הקלדת טקסט
+	Type the web address.	יש להקליד את כתובת האינטרנט.
+	Type your {what}.	הקלד את {what}.
+	Typewriter	מכונת כתיבה
+	Unchecked	לא מסומן
+	Unchecked reads	קריאות שלא נבדקו
+	Underline text	הוספת קו תחתון לטקסט
+	Undid {label}	בוטלה הפעולה {label}
+	Undo {action}	ביטול הפעולה {action}
+	Unit	יחידה
+	Units	יחידות
+	Unknown	לא ידוע
+	Unknown author	מחבר לא ידוע
+	Unlock	ביטול נעילה
+	Unlock comment	ביטול נעילת הערה
+	Unlock {name}	ביטול הנעילה של {name}
+	Unlock {n} files	ביטול הנעילה של {n} קבצים
+	Unlocked {n} of {m} files	בוטלה הנעילה של {n} מתוך {m} קבצים
+	Unlocked: the combined file won't be password-protected	הנעילה בוטלה: הקובץ המשולב לא יהיה מוגן בסיסמה
+	Unlock…	ביטול נעילה…
+	Unpin	ביטול הצמדה
+	Unpin from Home	בטל הצמדה ממסך הבית
+	Unpin tool	בטל הצמדת כלי
+	Unpin {folder}	ביטול ההצמדה של {folder}
+	Unpinned {tool} from Home	הכלי {tool} הוסר ממסך הבית
+	Unplaced	לא ממוקם
+	Unsigned signature field	שדה חתימה לא חתום
+	Unsigned signature field: {name}	שדה חתימה לא חתום: {name}
+	Unspecified	לא צוין
+	Unsupported measurements	מדידות שאינן נתמכות
+	Update	עדכון
+	Update background	עדכון רקע
+	Update background…	עדכון רקע…
+	Update header & footer	עדכון כותרת עליונה ותחתונה
+	Update header & footer…	עדכון כותרת עליונה ותחתונה…
+	Update watermark	עדכון סימן מים
+	Update watermark…	עדכון סימן מים…
+	URL to submit to	כתובת URL לשליחה
+	Use 72 DPI (one point per pixel)	שימוש ב־72 DPI (נקודה אחת לכל פיקסל)
+	Use a certificate	שימוש באישור
+	Use a Digital ID from a file	שימוש במזהה דיגיטלי מקובץ
+	Use Column Order	השתמש בסדר העמודות
+	Use custom DPI	שימוש ב־DPI מותאם אישית
+	Use Document Structure	השתמש במבנה המסמך
+	Use each image's embedded DPI; use 72 DPI when it is absent.	שימוש בערך ה־DPI המוטמע בכל תמונה; אם הוא חסר, ייעשה שימוש ב־72 DPI.
+	Use Flate to encode streams that are not encoded	שימוש ב־Flate לקידוד זרמים שאינם מקודדים
+	Use guided actions	שימוש בפעולות מודרכות
+	Use image resolution	שימוש ברזולוציית התמונה
+	Use it when a printer skips text, shading or transparency. The print is no longer searchable text; with Print in grayscale, the pictures are grey.	השתמש בכך כאשר המדפסת משמיטה טקסט, הצללות או שקיפות. הטקסט בתדפיס כבר לא ניתן לחיפוש; בהדפסה בגווני אפור גם התמונות יהיו בגווני אפור.
+	Use JavaScript	שימוש ב־JavaScript
+	Use now	שימוש כעת
+	Use overlay text	שימוש בטקסט שכבה
+	Use print production	שימוש בכלי הפקה לדפוס
+	Use Row Order	השתמש בסדר השורות
+	Use system setting	שימוש בהגדרת המערכת
+	Use system title bar	שימוש בשורת הכותרת של המערכת
+	Use {what}	שימוש ב־{what}
+	Used when a PDF doesn't ask for a layout or zoom. Continuous scrolling never snaps between pages.	משמש כאשר קובץ PDF אינו מגדיר פריסה או הגדלה. בגלילה רציפה התצוגה אינה נצמדת למעברי עמודים.
+	Used when opening PDFs. An explicit launch or control mode takes precedence for the session.	משמש בעת פתיחת קובצי PDF. מצב הפעלה או בקרה שהוגדר במפורש גובר עליו במהלך ההפעלה.
+	User Interface Options	אפשרויות ממשק המשתמש
+	User password	סיסמת משתמש
+	Valid	תקף
+	Valid for 5 years, for digital signatures. Self-signed IDs are usually not trusted by others.	תקף לחמש שנים עבור חתימות דיגיטליות. בדרך כלל אין אמון של אחרים במזהים שנחתמו בחתימה עצמית.
+	Valid from	תקף מתאריך
+certificate	Valid from	תקף מתאריך
+	Valid to	תקף עד
+certificate	Valid to	תקף עד
+	Validate	אימות
+	Validate all	אימות הכול
+	Validate all signatures	אימות כל החתימות
+	Validity ends	סיום התוקף
+certificate	Validity ends	סיום התוקף
+	Validity starts	תחילת התוקף
+certificate	Validity starts	תחילת התוקף
+	Value is not calculated	הערך אינו מחושב
+	Value is the	הערך הוא
+	Value:	ערך:
+	Verify	אימות
+	Verify to see what the document needs.	יש לבדוק כדי לראות מה המסמך צריך.
+certificate	Version	גרסה
+	Version {v}	גרסה {v}
+	Vertical layout	פריסה אנכית
+	Vertical reversed	אנכי הפוך
+	Vertical text cannot be moved with this selection.	אי אפשר להזיז טקסט אנכי באמצעות בחירה זו.
+	Vertically	אנכית
+	Video, sound and rich media must be tagged to be announced. Tag the multimedia annotations.	יש לתייג וידאו, קול ומדיה עשירה כדי שיהיו נגישים להקראה. יש לתייג את הערות המולטימדיה.
+	View less	הצגת פחות
+	View more	הצגת יותר
+	View revision {n}	הצגת מהדורה {n}
+	View signed version	הצגת הגרסה החתומה
+	Viewing	צפייה
+	Viewport	אזור תצוגה
+	Viewport rectangle in page points (x, y, width, height)	מלבן אזור התצוגה בנקודות עמוד (x, y, רוחב, גובה)
+	Visible Rectangle	מלבן גלוי
+	Visual	חזותי
+	Warning	אזהרה
+	Warnings	אזהרות
+	watermark	סימן מים
+calendar weekday	We	ד׳
+	Weak	חלשה
+	Welcome to PdfCraft	ברוכים הבאים ל־PdfCraft
+	What takes up the space in this file, by kind of content.	החלוקה של נפח הקובץ לפי סוג התוכן.
+	What word or phrase would you like to search for?	איזו מילה או איזו סדרת מילים לחפש?
+	White on black	לבן על שחור
+	Whole words only	מילים שלמות בלבד
+	Width	רוחב
+	Window Options	אפשרויות חלון
+	Windows store  ·  	מאגר Windows  ·  
+	Word count	ספירת מילים
+	Word counting stopped unexpectedly.	ספירת המילים נעצרה באופן בלתי צפוי.
+	Word count…	ספירת מילים…
+	Words or phrases to redact	מילים או ביטויים להשחרה
+	Write this email?	לכתוב את הודעת הדוא״ל הזו?
+	Wrong password	סיסמה שגויה
+	Wrote 1 file to {dir}	נכתב קובץ אחד אל {dir}
+	Wrote {n} files to {dir}	נכתבו {n} קבצים אל {dir}
+	X Object Forms	טופסי XObject
+	XFA form: its fields and its XFA data are kept in step, so other viewers show what you fill in.	טופס XFA: השדות ונתוני ה־XFA נשמרים מסונכרנים, כך שתוכנות צפייה אחרות מציגות את מה שמילאת.
+	Yellow	צהוב
+	Yellow on black	צהוב על שחור
+	yesterday	אתמול
+	You are about to apply 1 redaction mark. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	עומדת להתבצע השחרה אחת. הטקסט, התמונות והציורים שמתחת לסימונים, וכן הערות ושדות טופס שחופפים להם, יוסרו לצמיתות.
+	You are about to apply {n} redaction marks. Text, images and drawings under the marks, and comments and form fields that overlap them, are removed permanently.	עומדות להתבצע {n} השחרות. הטקסט, התמונות והציורים שמתחת לסימונים, וכן הערות ושדות טופס שחופפים להם, יוסרו לצמיתות.
+	You are viewing revision {rev} of “{from}”. It is a snapshot: changes here won't affect the original.	אתה מציג את מהדורה {rev} של „{from}”. זהו צילום מצב; שינויים כאן לא ישפיעו על המקור.
+	You are viewing the signed version of “{from}” (revision {rev}). It is a snapshot: changes here won't affect the original.	אתה מציג את הגרסה החתומה של „{from}” (מהדורה {rev}). זהו צילום מצב; שינויים כאן לא ישפיעו על המקור.
+	You can pin up to {n} folders. Unpin one first.	אפשר להצמיד עד {n} תיקיות. יש לבטל תחילה הצמדה של תיקייה אחרת.
+	You have version {c}. All releases are listed at {page}.	ברשותך גרסה {c}. כל הגרסאות מופיעות בכתובת {page}.
+	You have version {c}. Download the new version from its release page.	מותקנת אצלך גרסה {c}. הורד את הגרסה החדשה מדף ההפצה שלה.
+	Your changes will be lost if you don't save them.	השינויים יאבדו אם לא תשמור אותם.
+	Your name	השם שלך
+	yyyy or yy year · m or mm month · mmm or mmmm month name · d or dd day · ddd or dddd weekday. H, h, M, s and t are time letters and can't be used on their own: put {escape} before a letter to show it as is.	yyyy או yy לשנה · m או mm לחודש · mmm או mmmm לשם החודש · d או dd ליום · ddd או dddd ליום השבוע. H, h, M, s ו־t הם תווי שעה, ואי אפשר להשתמש בהם לבדם: יש להוסיף {escape} לפני אות כדי להציג אותה כלשונה.
+	ZIP	ZIP
+	Zip Code	מיקוד
+	Zip Code + 4	מיקוד + 4
+	Zoom	שינוי הגדלה
+	Zoom in	הגדלה
+	Zoom in ({key})	הגדלה ({key})
+	Zoom in (⌘+)	הגדלה (⌘+)
+	Zoom in / out (also pinch or {key}-scroll)	הגדלה / הקטנה (גם בצביטה או בגלילה עם {key})
+	Zoom in / out (also pinch or ⌘-scroll)	הגדלה / הקטנה (גם בצביטה או בגלילה עם ⌘)
+	Zoom out	הקטנה
+	Zoom out ({key})	הקטנה ({key})
+	Zoom out (⌘−)	הקטנה (⌘−)
+	Zoom to page level	התאמה לעמוד
+	Zoom — type a percentage and press Enter	הגדלה — יש להקליד אחוז וללחוץ על Enter
+	{0}: {1}	{0}: {1}
+	{chars} can't be written into the PDF yet: Fill & Sign text is Western European only. Pick a numeric format such as dd.mm.yyyy.	עדיין אי אפשר לכתוב את {chars} לקובץ PDF: טקסט „מילוי וחתימה” תומך רק בתווים ממערב אירופה. יש לבחור תבנית מספרית כמו dd.mm.yyyy.
+	{c} of {n}{more}	{c} מתוך {n}{more}
+	{dpi} pixels/inch	{dpi} פיקסלים לאינץ׳
+@plural	{fields} builds some field names as it runs, so those reads aren't checked.|{fields} build some field names as they run, so those reads aren't checked.	{fields} יוצר חלק משמות השדות במהלך ההרצה, ולכן הקריאות האלה אינן נבדקות.|{fields} יוצרים חלק משמות השדות במהלך ההרצה, ולכן הקריאות האלה אינן נבדקות.|{fields} יוצרים חלק משמות השדות במהלך ההרצה, ולכן הקריאות האלה אינן נבדקות.
+@plural	{fields} is missing from the order saved in the PDF, so other PDF viewers may not calculate it.|{fields} are missing from the order saved in the PDF, so other PDF viewers may not calculate them.	{fields} חסר בסדר שנשמר ב־PDF ולכן מציגי PDF אחרים עלולים שלא לחשב אותו|{fields} חסרים בסדר שנשמר ב־PDF ולכן מציגי PDF אחרים עלולים שלא לחשב אותם|{fields} חסרים בסדר שנשמר ב־PDF ולכן מציגי PDF אחרים עלולים שלא לחשב אותם
+@plural	{fields} is missing|{fields} are missing	{fields} חסר|{fields} חסרים|{fields} חסרים
+	{fields} read each other	{fields} קוראים זה את זה
+@plural	{fields} reads it|{fields} read it	{fields} קורא אותו|{fields} קוראים אותו|{fields} קוראים אותו
+@plural	{field} calculates before {fields}, which it reads.|{field} calculates before {fields}, which it reads.	{field} מחושב לפני השדה {fields} שהוא קורא|{field} מחושב לפני השדות {fields} שהוא קורא|{field} מחושב לפני השדות {fields} שהוא קורא
+	{field} reads fields named as it runs	{field} קורא לשדות ששמותיהם נוצרים במהלך ההרצה
+	{field} reads its own value	{field} קורא את הערך של עצמו
+	{field} reads no other field	{field} אינו קורא שדות אחרים
+	{field} reads {fields}	{field} קורא את {fields}
+@plural	{field} reads {fields}, which the form doesn't have.|{field} reads {fields}, which the form doesn't have.	{field} קורא לשדות {fields}, שאינם קיימים בטופס.|{field} קורא לשדות {fields}, שאינם קיימים בטופס.|{field} קורא לשדות {fields}, שאינם קיימים בטופס.
+	{field}: {e}	{field}: {e}
+	{file} is too large for a stamp (at most {n} MB)	{file} גדול מדי לחותמת (עד {n} MB)
+	{folder} is already pinned to Home	{folder} כבר מוצמדת לדף הבית
+	{font}, {size} pt	{font}, {size} pt
+	{kind} field	שדה מסוג {kind}
+	{kind} Properties	מאפייני {kind}
+	{kind} · page {p}	{kind} · עמוד {p}
+	{kind} — click to show it on the page	{kind} — לחץ כדי להציג אותו בעמוד
+	{k} of {n}	{k} מתוך {n}
+	{label} (1 issue)	{label} (בעיה אחת)
+	{label} ({n} issues)	{label} ({n} בעיות)
+	{label} failed: {e}	{label} נכשל: {e}
+	{month} {day}, {y}	{day} ב{month} {y}
+	{month} {y}	{month} {y}
+	{msg} to {dir}	{msg} אל {dir}
+	{names} and {last}	{names} ו־{last}
+	{name} (default)	{name} (ברירת מחדל)
+	{name} can't be combined: {why}	לא ניתן לשלב את {name}: {why}
+	{name} has no action	לא הוגדרה פעולה עבור {name}
+	{name} is read-only	{name} נמצא במצב קריאה בלבד
+	{name} is too large for a word list (at most 1 MB).	{name} גדול מדי לרשימת מילים (הגודל המרבי הוא 1 MB).
+	{name} submits the form to {url}; PdfCraft doesn't send form data. Save the document to keep your entries.	{name} שולח את הטופס אל {url}; ‏PdfCraft אינו שולח נתוני טפסים. יש לשמור את המסמך כדי לשמור את הנתונים שהוזנו.
+	{name} — unsaved changes	{name} — שינויים שלא נשמרו
+	{name}: choosing images arrives on the web with file pickers for images	{name}: בחירת תמונות תגיע לגרסת האינטרנט עם בוחרי קבצים לתמונות
+	{name}: the {other} action isn't supported yet	{name}: הפעולה {other} עדיין אינה נתמכת
+@plural	{n} byte|{n} bytes	{n} בית|{n} בתים|{n} בתים
+@plural	{n} calculation now uses the new name.|{n} calculations now use the new name.	חישוב אחד ({n}) משתמש כעת בשם החדש|{n} חישובים משתמשים כעת בשם החדש|{n} חישובים משתמשים כעת בשם החדש
+@plural	{n} comment|{n} comments	{n} הערה|{n} הערות|{n} הערות
+	{n} contributors · {c} commits	{n} תורמים · {c} קומיטים
+	{n} days ago	לפני {n} ימים
+	{n} differences found	נמצאו {n} הבדלים
+@plural	{n} field name collides with earlier files and will be renamed: {list}|{n} field names collide with earlier files and will be renamed: {list}	שם של {n} שדה מתנגש עם קבצים קודמים וישתנה: {list}|שמות של {n} שדות מתנגשים עם קבצים קודמים וישתנו: {list}|שמות של {n} שדות מתנגשים עם קבצים קודמים וישתנו: {list}
+@plural	{n} field shows an old value|{n} fields show old values	שדה אחד ({n}) מציג ערך ישן|{n} שדות מציגים ערכים ישנים|{n} שדות מציגים ערכים ישנים
+	{n} fields selected	נבחרו {n} שדות
+@plural	{n} field|{n} fields	{n} שדה|{n} שדות|{n} שדות
+	{n} files	{n} קבצים
+	{n} files done	{n} קבצים הושלמו
+	{n} files need attention	{n} קבצים דורשים טיפול
+@plural	{n} file|{n} files	{n} קובץ|{n} קבצים|{n} קבצים
+@plural	{n} formula reads a field the form doesn't have|{n} formulas read fields the form doesn't have	נוסחה {n} קוראת לשדה שאינו קיים בטופס|נוסחאות {n} קוראות לשדות שאינם קיימים בטופס|נוסחאות {n} קוראות לשדות שאינם קיימים בטופס
+	{n} h ago	לפני {n} שעות
+@plural	{n} image optimized|{n} images optimized	בוצע מיטוב לתמונה {n}|בוצע מיטוב ל־{n} תמונות|בוצע מיטוב ל־{n} תמונות
+	{n} instances	{n} מופעים
+	{n} issues	{n} בעיות
+@plural	{n} item discarded|{n} items discarded	הוסר פריט אחד ({n})|הוסרו {n} פריטים|הוסרו {n} פריטים
+	{n} lines	{n} שורות
+	{n} marks	{n} סימונים
+	{n} match(es) marked for redaction.	סומנו {n} התאמות להשחרה.
+	{n} measurements use an unsupported format and are left out.	{n} מדידות משתמשות בפורמט שאינו נתמך ולכן לא נכללו.
+	{n} min ago	לפני {n} דקות
+@plural	{n} more field calculates too early.|{n} more fields calculate too early.	שדה נוסף אחד ({n}) מחושב מוקדם מדי|{n} שדות נוספים מחושבים מוקדם מדי|{n} שדות נוספים מחושבים מוקדם מדי
+@plural	{n} more formula reads a missing field.|{n} more formulas read missing fields.	נוסחה נוספת ({n}) קוראת לשדה חסר|עוד {n} נוסחאות קוראות לשדות חסרים|עוד {n} נוסחאות קוראות לשדות חסרים
+@plural	{n} object selected|{n} objects selected	נבחר אובייקט אחד ({n})|נבחרו {n} אובייקטים|נבחרו {n} אובייקטים
+	{n} pages	{n} עמודים
+	{n} pages and no bookmarks	{n} עמודים וללא סימניות
+	{n} pages selected	נבחרו {n} עמודים
+	{n} pages selected.	נבחרו {n} עמודים.
+@plural	{n} page|{n} pages	{n} עמוד|{n} עמודים|{n} עמודים
+@plural	{n} pixel|{n} pixels	{n} פיקסל|{n} פיקסלים|{n} פיקסלים
+@plural	{n} reply|{n} replies	{n} תגובה|{n} תגובות|{n} תגובות
+@plural	{n} result|{n} results	{n} תוצאה|{n} תוצאות|{n} תוצאות
+	{n} selected	{n} נבחרו
+	{n} tags	{n} תגיות
+	{n} word(s) or phrase(s)	{n} מילים או ביטויים
+	{n} {kind}	{n} {kind}
+	{page} is not a page number or label	{page} אינו מספר עמוד או תווית
+	{rule} - {status}	{rule} - {status}
+	{s} action	פעולת {s}
+	{s} actions run in the JavaScript engine (M6)	פעולות {s} פועלות במנוע JavaScript (M6)
+	{ty} element on page {p}: {what}	רכיב {ty} בעמוד {p}: ‏{what}
+	{ty} element: {what}	רכיב {ty}: ‏{what}
+	{verb} as "{name}"	{verb} בשם „{name}”
+	{verb} Background	{verb} רקע
+	{verb} Header and Footer	{verb} כותרת עליונה ותחתונה
+	{verb} Watermark	{verb} סימן מים
+	{who} in this document tried to open an address PdfCraft won't open: {e}.	{who} במסמך זה ניסה לפתוח כתובת ש־PdfCraft לא יפתח: {e}.
+	{who} in this document tried to open an address PdfCraft won't open: {e}. Only web (http, https) and email (mailto) links open from documents.	{who} במסמך זה ניסה לפתוח כתובת ש־PdfCraft לא יפתח: {e}. ממסמכים נפתחים רק קישורי אינטרנט (http, https) ודוא״ל (mailto).
+	{who} in this document wants to open this address in your browser:	{who} במסמך זה מבקש לפתוח את הכתובת הזו בדפדפן שלך:
+	{who} in this document wants to open your email app with this address:	{who} במסמך זה מבקש לפתוח את יישום הדוא״ל שלך עם הכתובת הזו:
+	{who}, certificate issued by an unknown issuer.	{who}, האישור הונפק על ידי גורם לא ידוע.
+	{who}, certificate issued by {issuer}.	{who}, האישור הונפק על ידי {issuer}.
+	{words} on {pages}	{words} ב־{pages}
+	{} annotation on page {p} isn't tagged	הערת {} בעמוד {p} אינה מתויגת
+	{} annotations aren't allowed	הערות מסוג {} אינן מותרות
+	ΔLOC	Δשורות קוד
+	— (protection is applied when you save)	— (ההגנה מופעלת בעת השמירה)
+	“{name}” changed on disk after it was opened or last saved. Saving now replaces that newer version with this one.	„{name}” השתנה בדיסק מאז שנפתח או נשמר בפעם האחרונה. שמירה כעת תחליף את הגרסה החדשה יותר בגרסה זו.
+	“{name}” has security restrictions. Enter its permissions password to lift them.	על „{name}” חלות הגבלות אבטחה. יש להזין את סיסמת ההרשאות כדי להסיר אותן.
+	“{name}” is protected. Enter a password to open it.	הקובץ „{name}” מוגן. יש להזין סיסמה כדי לפתוח אותו.
+	… and {n} more	… ועוד {n}
+	−Bin	−סל
+	−LOC	−שורות קוד
+	This document's script is asking	הסקריפט של מסמך זה שואל
+	Document: {name}	מסמך: {name}
+	This request comes from the document, not PdfCraft. Only enter a password if you trust this document.	בקשה זו מגיעה מהמסמך, לא מ-PdfCraft. הזינו סיסמה רק אם אתם סומכים על מסמך זה.

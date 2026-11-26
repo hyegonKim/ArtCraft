@@ -72,6 +72,24 @@ pub fn ui_shortcut(app: &mut SlideApp, key: egui::Key, m: Mods) -> bool {
         }
         (F, true, false, false) => "app.find",
         (H, true, false, false) => "app.replace",
+        (Num1 | Num2 | Num3 | Num4 | Num5 | Num6 | Num7 | Num8 | Num9, false, false, true) => {
+            if app.session.mac_keys || app.backstage.is_some() || app.session.active().is_some_and(|d| d.selection.text.is_some()) {
+                return false;
+            }
+            let idx = match key {
+                Num1 => 0,
+                Num2 => 1,
+                Num3 => 2,
+                Num4 => 3,
+                Num5 => 4,
+                Num6 => 5,
+                Num7 => 6,
+                Num8 => 7,
+                Num9 => 8,
+                _ => return false,
+            };
+            return crate::qat::run_index(app, idx);
+        }
         _ => return false,
     };
     let _ = app.run(id, json!({}));
@@ -106,7 +124,8 @@ pub fn palette(app: &mut SlideApp, ctx: &egui::Context) {
         .anchor(egui::Align2::CENTER_TOP, egui::vec2(0.0, 90.0))
         .fixed_size(egui::vec2(520.0, 380.0))
         .show(ctx, |ui| {
-            let r = ui.add(egui::TextEdit::singleline(&mut query).hint_text("Search commands…").desired_width(f32::INFINITY).font(theme::font(15.0)));
+            let hint = crate::i18n::tr_ui(ui.ctx(), app.ui.locale, "Search commands…");
+            let r = ui.add(egui::TextEdit::singleline(&mut query).hint_text(hint).desired_width(f32::INFINITY).font(theme::font(15.0)));
             r.request_focus();
             let q = query.to_lowercase();
             let items = palette_items(&app.session, &q);
@@ -170,8 +189,10 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
                 ("Save", "file.save"),
                 ("Save As…", "app.saveAsDialog"),
                 ("Export…", "app.exportDialog"),
+                ("Export Animated Video / GIF…", "app.exportVideoDialog"),
                 ("Print…", "app.print"),
                 ("-", ""),
+                ("Preferences…", "app.preferences"),
                 ("Properties", "file.properties"),
             ],
         ),
@@ -219,6 +240,7 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
                 ("Zoom Out", "view.zoomOut"),
                 ("Fit to Window", "view.fit"),
                 ("-", ""),
+                ("Language", "app.language"),
                 ("New Window", "view.newWindow"),
             ],
         ),
@@ -230,7 +252,7 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
                 ("-", ""),
                 ("Section", "section.add"),
                 ("Text Box", "insert.textBox"),
-                ("WordArt", "insert.wordArt"),
+                ("Decorative Text", "insert.wordArt"),
                 ("Date and Time", "insert.dateTime"),
                 ("Slide Number", "insert.slideNumber"),
                 ("-", ""),
@@ -293,6 +315,21 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
     ]
 }
 
+/// Localized menu tree for `locale` (`en` or `ko`).
+pub fn menu_tree_for(locale: crate::i18n::Locale) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
+    menu_tree()
+        .into_iter()
+        .map(|(menu, items)| {
+            let m = crate::i18n::tr(locale, menu);
+            let sub = items
+                .into_iter()
+                .map(|(label, cmd)| if label == "-" { (label, cmd) } else { (crate::i18n::tr(locale, label), cmd) })
+                .collect();
+            (m, sub)
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::palette_items;
@@ -316,5 +353,39 @@ mod tests {
             assert_eq!(same.len(), 1, "{label}");
             assert_eq!(same[0].0, *id, "{label}");
         }
+    }
+
+    #[test]
+    fn korean_i18n_catalog_and_video_export_dialog_commands_work() {
+        use serde_json::json;
+
+        use crate::i18n::{Locale, tr};
+        use crate::{Services, SlideApp};
+
+        assert_eq!(tr(Locale::Ko, "Export Animated Video"), "애니메이션 비디오 내보내기");
+        assert_eq!(tr(Locale::Ko, "Export Animated Video / GIF"), "애니메이션 비디오 내보내기");
+        assert_eq!(tr(Locale::Ko, "Export Animated Video / GIF…"), "애니메이션 비디오 내보내기…");
+        assert_eq!(tr(Locale::Ko, "File"), "파일");
+        assert_eq!(tr(Locale::Ko, "Home"), "홈");
+        assert_eq!(tr(Locale::Ko, "Transitions"), "전환");
+        assert_eq!(tr(Locale::Ko, "Animations"), "애니메이션");
+        assert_eq!(tr(Locale::En, "Export Animated Video"), "Export Animated Video");
+
+        let ko_menus = super::menu_tree_for(Locale::Ko);
+        assert_eq!(ko_menus[0].0, "파일");
+        assert!(ko_menus[0].1.iter().any(|(lbl, id)| *lbl == "애니메이션 비디오 내보내기…" && *id == "app.exportVideoDialog"));
+
+        let mut app = SlideApp::new(deckcraft_engine::Session::with_new(), Services::default());
+        assert_eq!(app.ui.locale, Locale::En);
+        let r = app.run("app.language", json!({"locale": "ko"})).unwrap();
+        assert_eq!(r["locale"], "ko");
+        assert_eq!(app.ui.locale, Locale::Ko);
+
+        app.run("app.exportVideoDialog", json!({})).unwrap();
+        assert_eq!(app.dialog.as_ref().map(|d| d.id.as_str()), Some("exportVideo"));
+
+        let r2 = app.run("app.language", json!({})).unwrap();
+        assert_eq!(r2["locale"], "en");
+        assert_eq!(app.ui.locale, Locale::En);
     }
 }

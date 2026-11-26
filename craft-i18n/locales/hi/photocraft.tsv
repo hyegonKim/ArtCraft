@@ -1,0 +1,668 @@
+# हिन्दी (hi) interface catalog for PhotoCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	100%	100%
+	105%	105%
+	110%	110%
+	115%	115%
+	120%	120%
+	16 bit	16 बिट
+	16 Bits/Channel	16 बिट्स/चैनल
+	180°	180°
+	200%	200%
+	32 bit (float)	32 बिट (फ़्लोट)
+	32 Bits/Channel	32 बिट्स/चैनल
+	3D	3डी
+	8 bit	8 बिट
+	8 Bits/Channel	8 बिट्स/चैनल
+	90° Clockwise	90° दक्षिणावर्त
+	90° Counter Clockwise	90° वामावर्त
+	A frame supports affine transforms; select its image for perspective transforms	फ़्रेम एफ़ाइन रूपांतरणों का समर्थन करता है; परिप्रेक्ष्य रूपांतरणों के लिए उसकी छवि चुनें
+	A frame supports affine transforms; select its image to warp it	फ़्रेम एफ़ाइन रूपांतरणों का समर्थन करता है; वार्प करने के लिए उसकी छवि चुनें
+	A picked document is no longer a grayscale document of the same size.	चुना गया एक डॉक्यूमेंट अब उसी आकार का ग्रेस्केल डॉक्यूमेंट नहीं है।
+	A picked document is no longer open.	चुना गया एक डॉक्यूमेंट अब खुला नहीं है।
+	Accelerated	त्वरित
+	Actions	एक्शन्स
+	Actual Pixels	वास्तविक पिक्सेल
+	Add Anchor Point Tool	ऐड एंकर पॉइंट टूल
+	Adjustments	समायोजन
+	Align bottom edges	निचले किनारे संरेखित करें
+	Align top edges	ऊपरी किनारे संरेखित करें
+	Align vertical centers	ऊर्ध्वाधर केंद्र संरेखित करें
+	Aligned	संरेखित
+	All	सभी
+	All Layers	सभी लेयर्स
+	Amount	मात्रा
+cameraRaw	Amount	मात्रा
+	Angle:	एंगल:
+	Apply	लागू करें
+	Apply At Canvas Bounds	Apply At Canvas Bounds
+	Aqua	एक्वा
+cameraRaw	Aqua	एक्वा
+	Arbitrary…	इच्छानुसार…
+	Area	क्षेत्र
+	Arrange	व्यवस्थित करें
+	Art History Brush	आर्ट हिस्ट्री ब्रश
+	Art History Brush Tool	आर्ट हिस्ट्री ब्रश टूल
+	Artboard Tool	आर्टबोर्ड टूल
+	Artboard…	आर्टबोर्ड…
+	Aspect Ratio	पहलू अनुपात
+	Auto	स्वचालित
+	Auto-nest Layers	लेयर्स को स्वचालित रूप से नेस्ट करें
+	Auto-size Canvas	कैनवास का आकार स्वचालित रूप से बदलें
+	Background (default):	पृष्ठभूमि (डिफ़ॉल्ट):
+	Background Eraser Tool	बैकग्राउंड इरेज़र टूल
+	Balance	संतुलन
+cameraRaw	Balance	संतुलन
+	Before (Y)	पहले (Y)
+cameraRaw	Before (Y)	पहले (Y)
+	Black & White…	ब्लैक एंड व्हाइट…
+	Black Point Compensation	Black Point Compensation
+	Blacks	ब्लैक्स
+cameraRaw	Blacks	ब्लैक्स
+	Blending	मिश्रण
+cameraRaw	Blending	मिश्रण
+	Blending Options…	ब्लेंडिंग विकल्प…
+	Blue	नीला
+cameraRaw	Blue	नीला
+	Blur Tool	ब्लर टूल
+	Border…	सीमा…
+	Both	दोनों
+	Brightness/Contrast…	चमक/कंट्रास्ट…
+	Brush Settings	ब्रश सेटिंग्स
+	Brush Tool	ब्रश टूल
+	Brushes	ब्रश
+	Burn Tool	बर्न टूल
+	Cancel	रद्द करें
+cameraRaw	Cancel	रद्द करें
+	Canceled opening {name}	{name} खोलना रद्द किया गया
+cameraRaw	Canceled opening {name}	{name} खोलना रद्द किया गया
+	Canceled {label}	{label} रद्द किया गया
+cameraRaw	Canceled {label}	{label} रद्द किया गया
+	Canvas Size…	कैनवास साइज़…
+	Category	श्रेणी
+	Center	केंद्र
+	Centimeters	सेंटीमीटर
+	Channel Options…	चैनल विकल्प…
+	Channels	चैनल्स
+	Clarity	स्पष्टता
+cameraRaw	Clarity	स्पष्टता
+	Clean Brush	ब्रश साफ़ करें
+	Clean the brush after each stroke	हर स्ट्रोक के बाद ब्रश साफ़ करें
+	Clear	साफ़ करें
+	Clear aspect ratio values	पक्षानुपात मान साफ़ करें
+	Clear Guides	गाइड्स हटाएं
+	Clear Selection	चयन साफ़ करें
+	Clear Slices	स्लाइस हटाएं
+	Clone Stamp Tool	क्लोन स्टैम्प टूल
+	Close	बंद करें
+	Close All	सभी बंद करें
+	Close Others	अन्य सभी बंद करें
+	CMYK Color	CMYK रंग
+	Color	रंग
+cameraRaw	Color	रंग
+	Color Aware	रंग-आधारित
+	Color Balance…	कलर बैलेंस…
+	Color Detail	रंग विवरण
+cameraRaw	Color Detail	रंग विवरण
+	Color Grading	कलर ग्रेडिंग
+cameraRaw	Color Grading	कलर ग्रेडिंग
+	Color Mixer	कलर मिक्सर
+cameraRaw	Color Mixer	कलर मिक्सर
+	Color Priority	रंग प्राथमिकता
+cameraRaw	Color Priority	रंग प्राथमिकता
+	Color Range…	रंग सीमा…
+	Color Replacement Tool	कलर रिप्लेसमेंट टूल
+	Color Sampler Tool	कलर सैंपलर टूल
+	Color Table	रंग तालिका
+	Color:	कलर:
+	Consolidate All to Here	सभी को यहाँ समेकित करें
+	Consolidate All to Tabs	सभी को टैब में समेकित करें
+	Content-aware fill	सामग्री-आधारित भरण
+	Content-Aware Move Tool	कंटेंट-अवेयर मूव टूल
+	Contextual Task Bar	प्रासंगिक कार्य पट्टी
+	Continue	जारी रखें
+	Contract…	संकुचित करें…
+	Contrast	कंट्रास्ट
+cameraRaw	Contrast	कंट्रास्ट
+	Convert Point Tool	कन्वर्ट पॉइंट टूल
+	Convert to Frame…	फ़्रेम में बदलें…
+	Convert to Shape…	Convert to Shape…
+	Convert to Smart Object	स्मार्ट ऑब्जेक्ट में बदलें
+	Copy	कॉपी करें
+	Copy Merged	मर्ज की गई कॉपी
+	Count Tool	काउंट टूल
+	Create a new custom frame	नया कस्टम फ़्रेम बनाएँ
+	Create a new elliptical frame	नया अंडाकार फ़्रेम बनाएँ
+	Create a new polygonal frame	नया बहुभुजीय फ़्रेम बनाएँ
+	Create a new rectangular frame	नया आयताकार फ़्रेम बनाएँ
+	Create a new triangular frame	नया त्रिकोणीय फ़्रेम बनाएँ
+	Create a single history state	एक ही इतिहास स्थिति बनाएँ
+	Crop	क्रॉप करें
+	Crop Tool	क्रॉप टूल
+	Current Brush Load	वर्तमान ब्रश लोड
+	Curvature Pen Tool	कर्वचर पेन टूल
+	Curve	कर्व
+cameraRaw	Curve	कर्व
+	Curves…	कर्व्स…
+	Custom Shape Tool	कस्टम शेप टूल
+	Cut	काटें
+	Dab	थपका
+	Darks	डार्क्स
+cameraRaw	Darks	डार्क्स
+	Decontaminate	Decontaminate
+	Decontaminate Colors	रंग शुद्ध करें
+	Decrease Brush Hardness	Decrease Brush Hardness
+	Decrease Brush Size	Decrease Brush Size
+	Dehaze	डीहेज़
+cameraRaw	Dehaze	डीहेज़
+	Delete	हटाएँ
+	Delete Anchor Point Tool	डिलीट एंकर पॉइंट टूल
+	Delete Channel	चैनल हटाएँ
+	Delete Hidden Layers	छिपी हुई लेयर्स हटाएँ
+	Delete Layer	लेयर हटाएँ
+	Delete layer ‘{name}’?	लेयर ‘{name}’ हटाएँ?
+	Delete layer?	लेयर हटाएँ?
+	Delete Workspace…	कार्यस्थान हटाएँ…
+	Delete {count} layers? {names}	{count} लेयर हटाएँ? {names}
+	Demosaic	डिमोज़ेक
+	Deselect	अचयनित करें
+	Deselect Layers	लेयर्स अचयनित करें
+	Detail	डिटेल
+cameraRaw	Detail	डिटेल
+	Determines if pixel data outside the crop box is retained or deleted	निर्धारित करता है कि क्रॉप फ़्रेम के बाहर के पिक्सेल रखे जाएँ या हटाए जाएँ
+	Developing {name}	{name} विकसित किया जा रहा है
+cameraRaw	Developing {name}	{name} विकसित किया जा रहा है
+	Direct Selection Tool	डायरेक्ट चयन टूल
+	Disable	अक्षम करें
+	Displays pop-up help for the fill methods	भरण विधियों के लिए पॉप-अप सहायता दिखाता है
+	Distort	विरूपित करें
+	Distribute Heights	ऊंचाइयाँ वितरित करें
+	Distribute horizontally	क्षैतिज रूप से वितरित करें
+	Distribute vertically	ऊर्ध्वाधर रूप से वितरित करें
+	Distribute Widths	चौड़ाइयाँ वितरित करें
+	Dodge Tool	डॉज टूल
+	Don't Save	सहेजें नहीं
+	Don't show again	दोबारा न दिखाएँ
+	Done	संपन्न
+	Duplicate Channel	चैनल को डुप्लीकेट करें
+	Duplicate Layer…	लेयर को डुप्लीकेट करें…
+	Duplicate…	डुप्लीकेट…
+	Edge Detection	किनारा पहचान
+	Edit	एडिट
+	Edit Brush…	ब्रश संपादित करें…
+	Edits	संपादन
+	Effects	इफ़ेक्ट्स
+cameraRaw	Effects	इफ़ेक्ट्स
+	Ellipse Tool	एलिप्स टूल
+	Elliptical Marquee Tool	एलिप्टिकल मार्की टूल
+	Embed All Linked	सभी लिंक किए गए को एम्बेड करें
+	Embed Linked	लिंक किए गए को एम्बेड करें
+	Enable	सक्षम करें
+	Eraser Tool	इरेज़र टूल
+	Exit	बाहर निकलें
+	Expand layer group on click	क्लिक पर लेयर समूह विस्तृत करें
+	Expand…	विस्तार करें…
+	Export	एक्सपोर्ट करें
+	Export As…	इस रूप में एक्सपोर्ट करें…
+	Exposure	एक्सपोज़र
+cameraRaw	Exposure	एक्सपोज़र
+	Exposure…	एक्सपोज़र…
+	Eyedropper Tool	आईड्रॉपर टूल
+	Feather	फ़ेदर
+cameraRaw	Feather	फ़ेदर
+	Feather…	फ़ेदर…
+	File	फ़ाइल
+	File Info…	फ़ाइल जानकारी…
+	Fill options	भरण विकल्प
+	Fill the expanded area with your background color or transparent pixels	विस्तारित क्षेत्र को पृष्ठभूमि रंग या पारदर्शी पिक्सेल से भरें
+	Fill…	भरें…
+	Filter	फ़िल्टर
+	Find Layers	लेयर्स खोजें
+	First Brush	First Brush
+	Fit Content to Frame	सामग्री को फ़्रेम में फ़िट करें
+	Fit Frame to Content	फ़्रेम को सामग्री के अनुसार फ़िट करें
+	Fit in View	दृश्य में फ़िट करें
+	Fit Layer on Screen	स्क्रीन पर लेयर फ़िट करें
+	Fit on Screen	स्क्रीन पर फ़िट करें
+	Flatten Image	इमेज फ़्लैट करें
+	Flip Horizontal	क्षैतिज पलटें
+	Flip Vertical	लंबवत पलटें
+	Floating point	फ़्लोटिंग पॉइंट
+	Flow	प्रवाह
+	Flow:	फ्लो:
+	Frame	फ़्रेम
+	Frame coordinates must be finite and within 600000 pixels	फ़्रेम के निर्देशांक परिमित और 600000 पिक्सेल की सीमा में होने चाहिए
+	Frame Tool	फ़्रेम टूल
+	Free Transform	मुक्त रूपांतरण
+	Freeform Pen Tool	फ्रीफॉर्म पेन टूल
+	From Transparency	पारदर्शिता से
+	Full-resolution preview unavailable	पूर्ण-रिज़ॉल्यूशन पूर्वावलोकन अनुपलब्ध है
+cameraRaw	Full-resolution preview unavailable	पूर्ण-रिज़ॉल्यूशन पूर्वावलोकन अनुपलब्ध है
+	Gamma	गामा
+	General…	सामान्य…
+	Global	ग्लोबल
+cameraRaw	Global	ग्लोबल
+	Global Refinements	वैश्विक परिशोधन
+	Gradient Tool	ग्रेडिएंट टूल
+	Gradients	ग्रेडिएंट्स
+	Grain	ग्रेन
+cameraRaw	Grain	ग्रेन
+	Grayscale	ग्रेस्केल
+	Green	हरा
+cameraRaw	Green	हरा
+	Group from Layers…	लेयर्स से समूह…
+	Group…	समूह…
+	Grow	बढ़ाएँ
+	Guides	गाइड्स
+	H	H
+	Hand Tool	हैंड टूल
+	Hardness:	हार्डनेस:
+	Healing Brush Tool	हीलिंग ब्रश टूल
+	Height:	ऊंचाई:
+	Help	सहायता
+	Hide All	सभी छिपाएँ
+	Hide bar	पट्टी छिपाएँ
+	Hide Selection	चयन छिपाएँ
+	High Quality Preview	उच्च गुणवत्ता पूर्वावलोकन
+	Highlight Clipping Warning (O)	हाइलाइट क्लिपिंग चेतावनी (O)
+cameraRaw	Highlight Clipping Warning (O)	हाइलाइट क्लिपिंग चेतावनी (O)
+	Highlight Priority	हाइलाइट प्राथमिकता
+cameraRaw	Highlight Priority	हाइलाइट प्राथमिकता
+	Highlights	हाइलाइट्स
+cameraRaw	Highlights	हाइलाइट्स
+	History	हिस्ट्री
+	History Brush Tool	हिस्ट्री ब्रश टूल
+	Horizontal Type Mask Tool	हॉरिजोंटल टाइप मास्क टूल
+	Horizontal Type Tool	हॉरिजोंटल टाइप टूल
+	How expanded crop area gets filled	विस्तारित क्रॉप क्षेत्र कैसे भरा जाता है
+	Hue	ह्यू
+cameraRaw	Hue	ह्यू
+	Hue/Saturation…	ह्यू/सैचुरेशन…
+	Image	इमेज
+	Image Compression	इमेज संपीड़न
+	Image Rotation	इमेज रोटेशन
+	Image Size…	इमेज साइज़…
+	Import	इम्पोर्ट करें
+	Import Image…	छवि आयात करें…
+	Impressionist	प्रभाववादी
+	Inches	इंच
+	Increase Brush Hardness	Increase Brush Hardness
+	Increase Brush Size	Increase Brush Size
+	Info	जानकारी
+	Inside	अंदर
+	Integer	पूर्णांक
+	Interface…	इंटरफ़ेस…
+	Interpolation	इंटरपोलेशन
+	Invalid delete command	हटाने का कमांड अमान्य है
+	Invalid frame transform	अमान्य फ़्रेम रूपांतरण
+	Invalid nested file drop	अमान्य नेस्टेड फ़ाइल ड्रॉप
+	Invalid numeric entry. An integer between {min}% and {max}% is required. Previous value was inserted.	अमान्य संख्यात्मक प्रविष्टि। {min}% और {max}% के बीच एक पूर्णांक आवश्यक है। पिछला मान डाला गया।
+	Inverse	उल्टा करें
+	Invert	इन्वर्ट
+	Keep Relative Position During Layer Reordering	लेयर्स का क्रम बदलते समय सापेक्ष स्थिति बनाए रखें
+	Lab Color	Lab रंग
+	Language	भाषा
+	Lasso Tool	लैस्सो टूल
+	Last Brush	Last Brush
+	Layer	लेयर
+	Layer deleted, but confirmation preference could not be saved: {error}	लेयर हटा दी गई, लेकिन पुष्टि की प्राथमिकता सहेजी नहीं जा सकी: {error}
+	Layer from Background	बैकग्राउंड से लेयर
+	Layer Mask	लेयर मास्क
+	Layer Style	लेयर स्टाइल
+	Layers	लेयर्स
+	Layer…	लेयर…
+	Levels…	स्तर…
+	Light	लाइट
+cameraRaw	Light	लाइट
+	Lights	लाइट्स
+cameraRaw	Lights	लाइट्स
+	Line Tool	लाइन टूल
+	Load	लोड
+	Load Brush	ब्रश लोड करें
+	Load Selection…	चयन लोड करें…
+	Load settings from a Camera Raw .xmp file	Camera Raw .xmp फ़ाइल से सेटिंग्स लोड करें
+cameraRaw	Load settings from a Camera Raw .xmp file	Camera Raw .xmp फ़ाइल से सेटिंग्स लोड करें
+	Load Settings…	सेटिंग्स लोड करें…
+cameraRaw	Load Settings…	सेटिंग्स लोड करें…
+	Load the brush after each stroke	हर स्ट्रोक के बाद ब्रश लोड करें
+	Loaded RAW Develop settings from {file}	{file} से RAW डेवलप सेटिंग्स लोड की गईं
+cameraRaw	Loaded RAW Develop settings from {file}	{file} से RAW डेवलप सेटिंग्स लोड की गईं
+	Loaded RAW Develop settings from {file} ({n} not supported)	{file} से RAW डेवलप सेटिंग्स लोड की गईं ({n} समर्थित नहीं)
+	Lock Guides	गाइड्स लॉक करें
+	Lock Slices	स्लाइस लॉक करें
+	Lock Workspace	कार्यस्थान लॉक करें
+	Loose Curl	ढीला घुमाव
+	Loose Long	ढीला लंबा
+	Loose Medium	ढीला मध्यम
+	Luminance	लुमिनेंस
+cameraRaw	Luminance	लुमिनेंस
+	Luminance Detail	लुमिनेंस डिटेल
+cameraRaw	Luminance Detail	लुमिनेंस डिटेल
+	LZW	LZW
+	Magenta	मैजेंटा
+cameraRaw	Magenta	मैजेंटा
+	Magic Eraser Tool	मैजिक इरेज़र टूल
+	Magic Wand Tool	मैजिक वैंड टूल
+	Magnetic Lasso Tool	मैग्नेटिक लैस्सो टूल
+	Masking	मास्किंग
+cameraRaw	Masking	मास्किंग
+	Merge Channels…	चैनल्स मर्ज करें…
+	Merge Down	नीचे मर्ज करें
+	Merge Spot Channel	स्पॉट चैनल मर्ज करें
+	Merge Visible	दृश्यमान मर्ज करें
+	Message	संदेश
+	Midpoint	मिडपॉइंट
+cameraRaw	Midpoint	मिडपॉइंट
+	Midtones	मिडटोन्स
+cameraRaw	Midtones	मिडटोन्स
+	Millimeters	मिलीमीटर
+	Missing delete command	हटाने का कमांड नहीं मिला
+	Mix	मिश्रण
+	Mixer Brush	मिक्सर ब्रश
+	Mixer Brush Tool	मिक्सर ब्रश टूल
+	Mode	मोड
+	Modify	संशोधित करें
+	More options	अधिक विकल्प
+	Move bar	पट्टी खिसकाएँ
+	Move to New Window	नई विंडो में ले जाएँ
+	Move Tool	मूव टूल
+	Move Toolbar to the Left	टूलबार को बाएँ ले जाएँ
+	Move Toolbar to the Right	टूलबार को दाएँ ले जाएँ
+	Name:	नेम:
+	Navigator	नेविगेटर
+	Netscape Gray	Netscape धूसर
+	New	नया
+	New Channel…	नया चैनल…
+	New Document	New Document
+	New Document With Mask	New Document With Mask
+	New Document…	New Document…
+	New Frame	नया फ़्रेम
+	New Guide…	नई गाइड…
+	New Layer	New Layer
+	New Layer With Mask	New Layer With Mask
+	New Spot Channel…	नया स्पॉट चैनल…
+	New Workspace…	नया कार्यस्थान…
+	New…	नया…
+	Next Brush	Next Brush
+	No	नहीं
+	Noise Reduction	नॉइज़ रिडक्शन
+cameraRaw	Noise Reduction	नॉइज़ रिडक्शन
+	Not enough grayscale documents for this mode.	इस मोड के लिए पर्याप्त ग्रेस्केल डॉक्यूमेंट नहीं हैं।
+	Note Tool	नोट टूल
+	Object Aware	ऑब्जेक्ट-आधारित
+	Object Aware needs a segmentation model, which isn't available yet	ऑब्जेक्ट-आधारित के लिए सेगमेंटेशन मॉडल चाहिए, जो अभी उपलब्ध नहीं है
+	Object Selection Tool	ऑब्जेक्ट चयन टूल
+	OK	ठीक है
+cameraRaw	OK	ठीक है
+	Opacity:	ओपेसिटी:
+	Open	खोलें
+cameraRaw	Open	खोलें
+	Open Document…	खोलें…
+	Open Recent	हाल ही में खोले गए
+	Opened {name}	{name} खोला गया
+cameraRaw	Opened {name}	{name} खोला गया
+	Open…	खोलें…
+	Options	विकल्प
+	Orange	नारंगी
+cameraRaw	Orange	नारंगी
+	Output	Output
+	Outside	बाहर
+	Paint Bucket Tool	पेंट बकेट टूल
+	Paint Overlay	पेंट ओवरले
+cameraRaw	Paint Overlay	पेंट ओवरले
+	Paste	पेस्ट करें
+	Paste in Place	स्थान पर पेस्ट करें
+	Paste Into	अंदर पेस्ट करें
+	Paste Outside	बाहर पेस्ट करें
+	Paste Special	विशेष रूप में पेस्ट करें
+	Patch Tool	पैच टूल
+	Path Selection Tool	पाथ चयन टूल
+	Paths	पाथ्स
+	Pattern Stamp	पैटर्न स्टैम्प
+	Pattern Stamp Tool	पैटर्न स्टैम्प टूल
+	Patterns	पैटर्न्स
+	Pause For	इतने समय रुकें
+	Pause For:	इतने समय रुकें:
+	Pen Tool	पेन टूल
+	Pencil Tool	पेंसिल टूल
+	Percent	प्रतिशत
+	Performance…	परफॉरमेंस…
+	Perspective	परिप्रेक्ष्य
+	Perspective Crop Tool	परस्पेक्टिव क्रॉप टूल
+	Photo Filter…	फ़ोटो फ़िल्टर…
+	Pick a different document for each channel.	हर चैनल के लिए अलग डॉक्यूमेंट चुनें।
+	Pin bar position	पट्टी की स्थिति पिन करें
+	Pixels	पिक्सेल
+	Playback Options	प्लेबैक विकल्प
+	Playback Options…	प्लेबैक विकल्प…
+	Points	पॉइंट्स
+	Polygon Tool	पॉलीगोन टूल
+	Polygonal Lasso Tool	पॉलीगोनल लैस्सो टूल
+	Posterize…	पोस्टराइज़ करें…
+	Preferences	प्राथमिकताएं
+	Presets:	प्रीसेट्स:
+	Previous Brush	Previous Brush
+	Print One Copy	एक प्रति प्रिंट करें
+	Print…	प्रिंट करें…
+	Profile	प्रोफ़ाइल
+	Proof Colors	प्रूफ़ रंग
+	Proof Setup	प्रूफ़ सेटअप
+	Properties	गुण
+	Purple	बैंगनी
+cameraRaw	Purple	बैंगनी
+	Quick Export as PNG	PNG के रूप में त्वरित एक्सपोर्ट
+	Quick Selection Tool	क्विक चयन टूल
+	Radius	त्रिज्या
+cameraRaw	Radius	त्रिज्या
+	RAW Defaults	RAW डिफ़ॉल्ट
+	RAW Defaults…	RAW डिफ़ॉल्ट…
+	RAW Develop	RAW डेवलप
+cameraRaw	RAW Develop ({name})	RAW डेवलप ({name})
+	RAW Develop Filter	RAW डेवलप फ़िल्टर
+	RAW Develop Filter ({layer})	RAW डेवलप फ़िल्टर ({layer})
+cameraRaw	RAW Develop Filter ({layer})	RAW डेवलप फ़िल्टर ({layer})
+	RAW Develop Filter…	RAW डेवलप फ़िल्टर…
+	RAW Develop isn't open	RAW डेवलप खुला नहीं है
+cameraRaw	RAW Develop isn't open	RAW डेवलप खुला नहीं है
+	Real-Time Refinement	रियल-टाइम परिशोधन
+	Rectangle Tool	रेक्टेंगल टूल
+	Rectangular Marquee Tool	रेक्टेंगुलर मार्की टूल
+	Red	लाल
+cameraRaw	Red	लाल
+	Red Eye Tool	रेड आई टूल
+	Redo	फिर से करें
+	Refine Edge Brush Tool	किनारा परिशोधन ब्रश टूल
+	Refine Edge…	Refine Edge…
+	Refine Hair	बाल परिशोधित करें
+	Refine Hair needs hair detection, which isn't available yet	बाल परिशोधित करने के लिए बालों की पहचान चाहिए, जो अभी उपलब्ध नहीं है
+	Refine Mode	परिशोधन मोड
+	Refine Strokes	Refine Strokes
+	Remember Settings	सेटिंग्स याद रखें
+	Rename Layer…	लेयर का नाम बदलें…
+	Replace Image…	छवि बदलें…
+	Reselect	पुनः चयन करें
+	Reset	रीसेट करें
+	Reset bar position	पट्टी की स्थिति रीसेट करें
+	Reset Essentials	एसेंशियल्स रीसेट करें
+	Reset the crop box, image rotation, and aspect ratio settings	क्रॉप फ़्रेम, छवि घुमाव और पक्षानुपात रीसेट करें
+	Resolution:	रिज़ॉल्यूशन:
+	Reveal All	सभी दिखाएँ
+	Reveal in Explorer	Explorer में दिखाएँ
+	Reveal in Finder	Finder में दिखाएँ
+	Reveal Selection	चयन दिखाएँ
+	Revert	मूल स्थिति में लाएं
+	RGB Color	RGB रंग
+	Rotate	घुमाएँ
+	Rotate View Tool	रोटेट व्यू टूल
+	Roughness	रफनेस
+cameraRaw	Roughness	रफनेस
+	Rounded Rectangle Tool	राउंडेड रेक्टेंगल टूल
+	Roundness	राउंडनेस
+cameraRaw	Roundness	राउंडनेस
+	Roundness:	राउंडनेस:
+	Ruler Tool	रूलर टूल
+	Rulers	रूलर्स
+	Sample All Layers	सभी लेयर्स का नमूना लें
+	Sample content from part of the image and use it to fill a small area	छोटा क्षेत्र भरने के लिए छवि के हिस्से से सामग्री लें
+	Saturation	सैचुरेशन
+cameraRaw	Saturation	सैचुरेशन
+	Save	सहेजें
+	Save a Copy…	एक प्रति सहेजें…
+	Save As…	इस रूप में सहेजें…
+	Save Image Pyramid	इमेज पिरामिड सहेजें
+	Save Selection…	चयन सहेजें…
+	Save Settings…	सेटिंग्स सहेजें…
+cameraRaw	Save Settings…	सेटिंग्स सहेजें…
+	Save these settings as a Camera Raw .xmp file	इन सेटिंग्स को Camera Raw .xmp फ़ाइल के रूप में सहेजें
+cameraRaw	Save these settings as a Camera Raw .xmp file	इन सेटिंग्स को Camera Raw .xmp फ़ाइल के रूप में सहेजें
+	Save Transparency	पारदर्शिता सहेजें
+	Saved RAW Develop settings to {file}	RAW डेवलप सेटिंग्स {file} में सहेजी गईं
+	Scale	आकार बदलें
+	Scope	दायरा
+	Scroll All Windows	सभी विंडो स्क्रॉल करें
+	seconds	सेकंड
+	Select	चयन
+	Select a preset aspect ratio or crop size	पहले से सेट पक्षानुपात या क्रॉप आकार चुनें
+	Select and Mask was closed: another layer was selected	चयन और मास्क बंद कर दिया गया: दूसरी लेयर चुनी गई
+	Select and Mask was closed: its document is no longer the active one	चयन और मास्क बंद कर दिया गया: उसका दस्तावेज़ अब सक्रिय नहीं है
+	Select and Mask…	चयन और मास्क…
+	Selected	चयनित
+	Selection	Selection
+	Set the aspect ratio for the crop box	क्रॉप फ़्रेम का पक्षानुपात सेट करें
+	Set the overlay options for the Crop Tool	क्रॉप ओवरले के विकल्प सेट करें
+	Shadow Clipping Warning (U)	शैडो क्लिपिंग चेतावनी (U)
+cameraRaw	Shadow Clipping Warning (U)	शैडो क्लिपिंग चेतावनी (U)
+	Shadows	शेडोज़
+cameraRaw	Shadows	शेडोज़
+	Sharpen Tool	शार्पन टूल
+	Sharpening	शार्पनिंग
+cameraRaw	Sharpening	शार्पनिंग
+	Shift Edge	Shift Edge
+	Show hover bounds from Layers	लेयर्स से होवर सीमाएँ दिखाएँ
+	Show Lab Color Readouts	Lab रंग रीडआउट दिखाएँ
+cameraRaw	Show Lab Color Readouts	Lab रंग रीडआउट दिखाएँ
+	Show layer bounds on hover	होवर पर लेयर की सीमाएँ दिखाएँ
+	Show Red at 3 o'clock	3 बजे की स्थिति पर लाल दिखाएँ
+cameraRaw	Show Red at 3 o'clock	3 बजे की स्थिति पर लाल दिखाएँ
+	Show Selected Region	चयनित क्षेत्र दिखाएँ
+cameraRaw	Show Selected Region	चयनित क्षेत्र दिखाएँ
+	Show Skin Tone Indicator	स्किन टोन संकेतक दिखाएँ
+cameraRaw	Show Skin Tone Indicator	स्किन टोन संकेतक दिखाएँ
+	Show Vectorscope	वेक्टरस्कोप दिखाएँ
+cameraRaw	Show Vectorscope	वेक्टरस्कोप दिखाएँ
+	Shrinkwrap Canvas on Save	सहेजते समय कैनवास को सामग्री के अनुसार छोटा करें
+	Sides:	भुजाएँ:
+	Similar	समान
+	Single Column Marquee Tool	सिंगल कॉलम मार्की टूल
+	Single Row Marquee Tool	सिंगल रो मार्की टूल
+	Size	आकार
+cameraRaw	Size	आकार
+	Size:	साइज़:
+	Skew	तिरछा करें
+	Slice Select Tool	स्लाइस चयन टूल
+	Slice Tool	स्लाइस टूल
+	Smart Objects	स्मार्ट ऑब्जेक्ट्स
+	Smart Radius	Smart Radius
+	Smooth	Smooth
+	Smooth…	चिकना करें…
+	Smudge Tool	स्मज टूल
+	Snap	स्नैप
+	Snap To	पर स्नैप करें
+	Spacing:	स्पेसिंग:
+	Specify Channels:	चैनल्स निर्दिष्ट करें:
+	Split Channels	चैनल्स विभाजित करें
+	Sponge Tool	स्पंज टूल
+	Spot Healing Brush Tool	स्पॉट हीलिंग ब्रश टूल
+	Status Bar	स्टेटस बार
+	Step by Step	चरण दर चरण
+	Stop	रोकें
+	Stroke	स्ट्रोक
+	Stroke…	स्ट्रोक…
+	Style	शैली
+	Stylized dabs from a history state	इतिहास स्थिति से शैलीबद्ध थपके
+	Swatches	स्वॉचेस
+	Target	लक्ष्य
+	Temperature	तापमान
+cameraRaw	Temperature	तापमान
+	Texture	टेक्सचर
+cameraRaw	Texture	टेक्सचर
+	The document is closed	दस्तावेज़ बंद है
+	The document or selected layers changed. Please request deletion again.	दस्तावेज़ या चुनी हुई लेयर बदल गई हैं। कृपया हटाने का अनुरोध फिर से करें।
+	The frame is locked	फ़्रेम लॉक है
+	The frame is unavailable	फ़्रेम उपलब्ध नहीं है
+	The GPU compositor is still being prepared	The GPU compositor is still being prepared
+	The path was discarded	पथ हटा दिया गया
+	The path was kept as the Work Path	पथ को कार्य पथ के रूप में रखा गया
+	Threshold…	थ्रेशहोल्ड…
+	Tight Curl	सघन घुमाव
+	Tight Long	सघन लंबा
+	Tight Medium	सघन मध्यम
+	Tight Short	सघन छोटा
+	Tile Horizontally	क्षैतिज टाइल
+	Tile Vertically	लंबवत टाइल
+	Timeline	टाइमलाइन
+	Tint	टिंट
+cameraRaw	Tint	टिंट
+	Toggle reference point	संदर्भ बिंदु दिखाएँ/छिपाएँ
+	Tolerance	Tolerance
+	Tone Histogram	टोन हिस्टोग्राम
+cameraRaw	Tone Histogram	टोन हिस्टोग्राम
+	Tools	टूल्स
+	Tools…	टूल्स…
+	Transform	रूपांतरण करें
+	Transform Selection	चयन रूपांतरित करें
+	Triangle Tool	ट्रायंगल टूल
+	Trim…	ट्रिम करें…
+	Type	टाइप
+	Undo	पूर्ववत करें
+	Units	इकाइयाँ
+	Vertical Type Mask Tool	वर्टिकल टाइप मास्क टूल
+	Vertical Type Tool	वर्टिकल टाइप टूल
+	Vibrance	वाइब्रेंस
+cameraRaw	Vibrance	वाइब्रेंस
+	Vibrance…	वाइब्रेंस…
+	View	व्यू
+	View Mode	दृश्य मोड
+	Vignetting	विगनेटिंग
+cameraRaw	Vignetting	विगनेटिंग
+	W	W
+	Warp	मोड़ें
+	Wet	गीला
+	White Balance: As Shot	व्हाइट बैलेंस: शॉट के अनुसार
+cameraRaw	White Balance: As Shot	व्हाइट बैलेंस: शॉट के अनुसार
+	Whites	व्हाइट्स
+cameraRaw	Whites	व्हाइट्स
+	Width:	चौड़ाई:
+	Window	विंडो
+	Workspace	कार्यस्थान
+	Workspace…	कार्यस्थान…
+	X	X
+	Y	Y
+	Yellow	पीला
+cameraRaw	Yellow	पीला
+	Yes	हाँ
+	ZIP	ZIP
+	Zoom In	ज़ूम इन
+	Zoom Out	ज़ूम आउट
+	Zoom Tool	ज़ूम टूल
+	{message} ({note})	{message} ({note})
+@plural	{n} action file loaded|{n} action files loaded	{n} एक्शन फ़ाइल लोड हुई|{n} एक्शन फ़ाइलें लोड हुईं
+@plural	{n} action|{n} actions	{n} एक्शन|{n} एक्शन
+@plural	{n} document|{n} documents	{n} दस्तावेज़|{n} दस्तावेज़
+@plural	{n} file could not be loaded: {errors}|{n} files could not be loaded: {errors}	{n} फ़ाइल लोड नहीं हो सकी: {errors}|{n} फ़ाइलें लोड नहीं हो सकीं: {errors}
+@plural	{n} item|{n} items	{n} आइटम|{n} आइटम्स
+@plural	{n} layer|{n} layers	{n} लेयर|{n} लेयर्स
+@plural	{n} pixel|{n} pixels	{n} पिक्सेल|{n} पिक्सेल्स
+@plural	{n} step has no PhotoCraft equivalent yet|{n} steps have no PhotoCraft equivalent yet	{n} चरण का अभी PhotoCraft में कोई समकक्ष नहीं है|{n} चरणों का अभी PhotoCraft में कोई समकक्ष नहीं है
+	{set} from {file} replaced the one from {earlier}	{file} के सेट {set} ने {earlier} वाले सेट की जगह ले ली

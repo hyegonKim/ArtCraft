@@ -23,6 +23,7 @@ struct Locale {
 
 /// Every problem under `root/locales`, each prefixed by its path relative to `root`. No
 /// `locales/` directory means no locales, and no problems.
+#[must_use]
 pub fn check_tree(root: &Path) -> Vec<String> {
     let mut problems = Vec::new();
     let mut catalogs: BTreeMap<String, Locale> = BTreeMap::new();
@@ -216,6 +217,7 @@ fn redundant_regional_rows(catalogs: &BTreeMap<String, Locale>) -> Vec<String> {
 
 /// One line per catalog, `<locale>/<file>: <rows>/<max>`, where `<max>` is the most rows any
 /// locale's catalog of that name has. A report only: unreadable files count as empty.
+#[must_use]
 pub fn coverage(root: &Path) -> Vec<String> {
     let mut counts = Vec::new();
     for locale in entries(&root.join("locales")).unwrap_or_default() {

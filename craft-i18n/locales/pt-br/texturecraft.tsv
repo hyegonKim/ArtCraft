@@ -1,0 +1,897 @@
+# Português (Brasil) (pt-br) interface catalog for TextureCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	"{layer}" can't be filled: select a paint layer or a layer's mask	"{layer}" não pode ser preenchida: selecione uma camada de pintura ou uma máscara de camada
+	"{layer}" has no paint yet: the filter changes what you paint on it.	"{layer}" ainda não tem pintura: o filtro altera o que você pintar nela.
+	0 turns autosave off. Copies go to {folder}	0 desativa o salvamento automático. As cópias vão para {folder}
+	1 effect	1 efeito
+	2D view only	Apenas vista 2D
+	32 bits (float)	32 bits (float)
+	3D mesh	Malha 3D
+	3D meshes	Malhas 3D
+	3D texture painting: layers, masks, smart materials, mesh map baking and export.	Pintura de texturas 3D: camadas, máscaras, materiais inteligentes, bake de mapas de malha e exportação.
+	3D view only	Apenas vista 3D
+	3D/2D views	Vistas 3D/2D
+	A click fills what is under it; a dragged rectangle fills what it selects as it grows	Um clique preenche o que está embaixo; um retângulo arrastado preenche o que seleciona enquanto cresce
+	A folder blends its children (pass-through). Set per-channel opacity in the layer rows.	Uma pasta mescla seus filhos (passagem). Defina a opacidade por canal nas linhas das camadas.
+	a missing layer	uma camada ausente
+	About TextureCraft	Sobre o TextureCraft
+	About TextureCraft...	Sobre o TextureCraft...
+	Accent color	Cor de destaque
+	ACES filmic	ACES fílmico
+	Add an anchor point to a layer below to use its stack as a mask.	Adicione um ponto de ancoragem a uma camada abaixo para usar sua pilha como máscara.
+	Add anchor point	Adicionar ponto de ancoragem
+	Add as decal (view center)	Adicionar como decalque (centro da vista)
+	Add black mask	Adicionar máscara preta
+	Add channel	Adicionar canal
+	Add color	Adicionar cor
+	Add compare mask	Adicionar máscara de comparação
+	Add effect	Adicionar efeito
+	Add fill	Adicionar preenchimento
+	Add fill layer	Adicionar camada de preenchimento
+	Add filter	Adicionar filtro
+	Add folder	Adicionar pasta
+	Add generator	Adicionar gerador
+	Add High-Poly Meshes	Adicionar malhas de alta resolução
+	Add levels	Adicionar níveis
+	Add mask	Adicionar máscara
+	Add mask with color selection	Adicionar máscara com seleção de cor
+	Add output	Adicionar saída
+	Add paint	Adicionar pintura
+	Add paint layer	Adicionar camada de pintura
+	Add smart material from the shelf	Adicionar material inteligente da prateleira
+	Add to the layer content	Adicionar ao conteúdo da camada
+	Add to the mask	Adicionar à máscara
+	Add white mask	Adicionar máscara branca
+	Add...	Adicionar...
+	Advanced settings	Configurações avançadas
+	Aligned: the offset set by the first stroke is kept. V + click sets a new source.	Alinhado: o deslocamento definido pelo primeiro traço é mantido. V + clique define uma nova origem.
+	Alignment and culling	Alinhamento e descarte
+	All	Todos
+	All layers	Todas as camadas
+	Alpha	Alpha
+	Alphas	Alphas
+	Also bound to {item} ({menu})	Também atribuído a {item} ({menu})
+	Alt + LMB drag	Alt + arrastar com botão esquerdo
+	Amber	Âmbar
+	Ambient	Ambiente
+	Ambient Occlusion	Oclusão de ambiente
+	Ambient occlusion	Oclusão de ambiente
+	Anchor point	Ponto de ancoragem
+	Anchor: {name}	Âncora: {name}
+	Anchor: {name} ({channel})	Âncora: {name} ({channel})
+	Angle (degrees)	Ângulo (graus)
+	Angle fade from	Atenuação de ângulo a partir de
+	Angle fade to	Atenuação de ângulo até
+	Angle jitter	Variação de ângulo
+	Angle span	Amplitude do ângulo
+	aniso	aniso
+	aniso angle	âng aniso
+	Anisotropy angle	Ângulo de anisotropia
+	Anisotropy level	Nível de anisotropia
+	Antialiasing	Antisserrilhamento
+	ao	ao
+	AO intensity	Intensidade de AO
+	Aperture	Abertura
+	Apply Diffusion	Aplicar difusão
+	ArtCraft website...	Site da ArtCraft...
+	Assets	Recursos
+	Attenuation	Atenuação
+	Auto	Auto
+	Auto Tonemapping	Mapeamento tonal automático
+	Automatic (from the mesh UVs)	Automático (das UVs da malha)
+	Autosave every	Salvar automaticamente a cada
+	Autosaves, smart materials, presets, templates and UI layouts go to the data folder. A new folder applies on restart; files already saved stay where they are.	Salvamentos automáticos, materiais inteligentes, predefinições, modelos e layouts da interface vão para a pasta de dados. Uma nova pasta vale após reiniciar; os arquivos já salvos ficam onde estão.
+	Average Normals	Normais médias
+	Axis	Eixo
+	Axis position	Posição do eixo
+	Back to painting	Voltar à pintura
+	Backface culling	Descarte de faces traseiras
+	Bake an ID map (F8) to pick colors from the mesh.	Faça o bake de um mapa de ID (F8) para coletar cores da malha.
+	Bake Mesh Maps	Bake de mapas de malha
+	Bake mesh maps	Fazer bake dos mapas de malha
+	Bake mesh maps (F8) for curvature, AO and thickness based generators.	Faça o bake dos mapas de malha (F8) para geradores baseados em curvatura, AO e espessura.
+	Bake Selected Textures ({n})	Fazer bake das texturas selecionadas ({n})
+	Baked Lighting	Iluminação pré-calculada
+	Baked maps imported: {count}	Mapas com bake importados: {count}
+	Baking	Bake
+	Baking Visualization	Visualização do bake
+	Baking {map} ({n}/{total})	Fazendo o bake de {map} ({n}/{total})
+	Baking {map} ({n}/{total}), texture set {set} of {sets}	Fazendo o bake de {map} ({n}/{total}), conjunto de texturas {set} de {sets}
+	Base color	Cor base
+	Base color is the diffuse color, Specular the F0 color and Glossiness 1 - roughness (add these channels in the texture set settings).	Cor base é a cor difusa, Especular é a cor F0 e Brilho é 1 - rugosidade (adicione esses canais nas configurações do conjunto de texturas).
+	Base color, Metallic, Roughness and Specular level.	Cor base, Metálico, Rugosidade e Nível especular.
+	Based on each texture set's size	Com base no tamanho de cada conjunto de texturas
+	Basic settings	Configurações básicas
+	BBox	Caixa delimitadora
+	Bent Normals	Normais curvadas
+	Bevel	Chanfro
+	Blending	Mesclagem
+	Blending mode of the displayed channel	Modo de mesclagem do canal exibido
+	Blur and sharpen	Desfoque e nitidez
+	Blur Directional	Desfoque direcional
+	Bounces	Rebatimentos
+	Bricks	Tijolos
+	Brush	Pincel
+	Brush name	Nome do pincel
+	Brush size	Tamanho do pincel
+	Brush size down / up	Diminuir / aumentar o pincel
+	Brushed lines	Linhas escovadas
+	BSphere	Esfera delimitadora
+	Built-in (read-only): duplicate it to edit	Embutido (somente leitura): duplique-o para editar
+	Built-in templates are read-only: duplicate one to edit it	Os modelos embutidos são somente leitura: duplique um para editá-lo
+	Built-in: {mesh}	Embutida: {mesh}
+	By Mesh Name	Por nome da malha
+	Cage	Gaiola
+	Cage Scene	Cena da gaiola
+	Cage Type	Tipo de gaiola
+	Cage: {name}	Cage: {name}
+	Camera	Câmera
+	Camera settings	Configurações da câmera
+	Cancel the stroke	Cancelar o traço
+	Cavities	Cavidades
+	Cell size (texels at 2K)	Tamanho da célula (texels em 2K)
+	Cells	Células
+	Channel source: uniform value, procedural, image or anchor	Origem do canal: valor uniforme, procedural, imagem ou âncora
+	Check All	Marcar todos
+	Check for Updates...	Verificar atualizações...
+	Checker	Xadrez
+	Clamp	Limitar
+	Clear mask	Limpar máscara
+	Clear recent projects	Limpar projetos recentes
+	Click a mesh part to show or hide the selected layer on it.	Clique em uma parte da malha para mostrar ou ocultar nela a camada selecionada.
+	Click the mesh to pick its material into the brush	Clique na malha para capturar o material dela no pincel
+	Click the mesh to place the decal	Clique na malha para posicionar o decalque
+	Click, then press the new shortcut (Esc cancels)	Clique e pressione o novo atalho (Esc cancela)
+	Click: turn this channel on or off. Alt+click: this channel only	Clique: liga ou desliga este canal. Alt+clique: só este canal
+	Closed path	Caminho fechado
+	Cloud	Nuvem
+	Clouds	Nuvens
+	coat	verniz
+	Coat normal	Normal do verniz
+	coat nrm	vern nrm
+	coat rough	vern rug
+	Coat roughness	Rugosidade do verniz
+	Coat weight	Peso do verniz
+	color	cor
+	Color burn	Superexposição de cor
+	Color dodge	Subexposição de cor
+	Color Generator	Gerador de cores
+	Color of the light that travels under the surface (each channel goes as far as its value)	Cor da luz que viaja sob a superfície (cada canal vai tão longe quanto seu valor)
+	Color picker	Conta-gotas
+	Color selection	Seleção de cor
+	Color Source	Origem da cor
+	Color space	Espaço de cor
+	Color to replace	Cor a substituir
+	Colors near the first shift towards the second, keeping their shading.	As cores próximas da primeira passam para a segunda, mantendo o sombreamento.
+	Colors read as gray. Add a levels or blur effect above to shape the result.	As cores são lidas como cinza. Adicione um efeito de níveis ou desfoque acima para ajustar o resultado.
+	Combine with the layer's height	Combinar com a altura da camada
+	Common Parameters	Parâmetros comuns
+	Common Settings	Configurações comuns
+	Compare mask	Máscara de comparação
+	Compositing	Composição
+	Constant	Constante
+	Constants	Constantes
+	Contained center: fill polygons whose center is in the rectangle	Centro contido: preencher os polígonos cujo centro está no retângulo
+	Content effects	Efeitos do conteúdo
+	Continue with the sample project	Continuar com o projeto de exemplo
+	Contrast/Luminosity	Contraste/Luminosidade
+	Converted maps	Mapas convertidos
+	Cooked at {size} px	Calculado em {size} px
+	Copper	Cobre
+	Copy effect	Copiar efeito
+	Copy from	Copiar de
+	Copy layer(s)	Copiar camada(s)
+	Copy RGB values	Copiar os valores RGB
+	Copy the selected layer alone (its empty parts copy nothing)	Copiar apenas a camada selecionada (suas partes vazias não copiam nada)
+	Copy to all texture sets	Copiar para todos os conjuntos de texturas
+	Copy what the texture set shows	Copiar o que o conjunto de texturas exibe
+	Coral	Coral
+	Cores kept for the UI	Núcleos reservados para a interface
+	Cosine	Cosseno
+	Couldn't encode the render	Não foi possível codificar a renderização
+	Couldn't export textures: {error}	Não foi possível exportar as texturas: {error}
+	Couldn't export the mesh: {error}	Não foi possível exportar a malha: {error}
+	Couldn't export the template: {error}	Não foi possível exportar o modelo: {error}
+	Couldn't import {name}: {error}	Não foi possível importar {name}: {error}
+	Couldn't open {name}: {error}	Não foi possível abrir {name}: {error}
+	Couldn't read the render back from the GPU	Não foi possível ler a renderização de volta da GPU
+	Couldn't save the render: {error}	Não foi possível salvar a renderização: {error}
+	Couldn't save {name}: {error}	Não foi possível salvar {name}: {error}
+	Count	Quantidade
+	Count per stamp	Quantidade por carimbo
+	Crate	Caixote
+	Create smart material	Criar material inteligente
+	Ctrl+right-drag in a view sets the size and hardness, Ctrl+left-drag the flow and angle.	Ctrl+arrastar com botão direito em uma vista ajusta o tamanho e a dureza; Ctrl+arrastar com botão esquerdo, o fluxo e o ângulo.
+	Cube	Cubo
+	Current layer	Camada atual
+	Custom File	Arquivo personalizado
+	Cut effect	Recortar efeito
+	Cut layer(s)	Recortar camada(s)
+	Cyan / red	Ciano / vermelho
+	Cylinder	Cilindro
+	Cylindrical projection	Projeção cilíndrica
+	Dark to light: the content's luminance picks a color along these stops.	Do escuro ao claro: a luminância do conteúdo escolhe uma cor ao longo destas paradas.
+	Darken (Min)	Escurecer (Mín)
+	Data folder	Pasta de dados
+	Decal	Decalque
+	Decal projection	Projeção de decalque
+	Default camera	Câmera padrão
+	Delete the selected template	Excluir o modelo selecionado
+	Delete this camera	Excluir esta câmera
+	Deleted template "{name}"	Modelo "{name}" excluído
+	Denoise	Remover ruído
+	Depth of field	Profundidade de campo
+	Depth of field (viewport and Rendering mode)	Profundidade de campo (viewport e modo Renderização)
+	Depth of the sharp plane along the view (0: the orbit center)	Profundidade do plano nítido ao longo da vista (0: o centro de órbita)
+	Detail sizes	Tamanhos de detalhe
+	Details saved to {file}	Detalhes salvos em {file}
+	Dilation + default background color	Dilatação + cor de fundo padrão
+	Dilation + transparent	Dilatação + transparente
+	Dilation infinite	Dilatação infinita
+	Dilation Width	Largura da dilatação
+	DirectX normal map	Mapa normal DirectX
+	Dirt	Sujeira
+	Disable	Desativado
+	Dismiss	Fechar
+	Displacement (height channel)	Deslocamento (canal de altura)
+	Display material	Exibir material
+	Display next channel	Exibir próximo canal
+	Display next mesh map	Exibir próximo mapa de malha
+	Display previous channel	Exibir canal anterior
+	Display previous mesh map	Exibir mapa de malha anterior
+	Display Settings	Configurações de exibição
+	Distance-Based	Baseada em distância
+	Distribution	Distribuição
+	Divide	Divisão
+	Document resolution	Resolução do documento
+	Documentation...	Documentação...
+	Don't save	Não salvar
+	Done on CPU: {n} / {max} samples, {s} s	Concluído na CPU: {n} / {max} amostras, {s} s
+	Done on GPU: {n} / {max} samples, {s} s	Concluído na GPU: {n} / {max} amostras, {s} s
+	Double-click or press Enter to edit	Clique duas vezes ou pressione Enter para editar
+	Double-click to rename	Clique duas vezes para renomear
+	Download as	Baixar como
+	Downloaded {name}	{name} baixado
+	Drag onto an output channel	Arraste para um canal de saída
+	Drag the frame to move the decal, a corner to scale it, the round handle to turn it	Arraste o quadro para mover o decalque, um canto para redimensioná-lo e a alça redonda para girá-lo
+	Drags the layer stack's values along the stroke into the selected layer.	Arrasta os valores da pilha de camadas ao longo do traço para a camada selecionada.
+	Draws {name} of texture set "{set}". Edits to the source show in every instance.	Desenha {name} do conjunto de texturas "{set}". As edições na origem aparecem em todas as instâncias.
+	Drop an image from the Assets panel here to use it as this mesh map	Solte aqui uma imagem do painel Recursos para usá-la como este mapa de malha
+	Dry streaks	Estrias secas
+	Duplicate effect	Duplicar efeito
+	Duplicate layer(s)	Duplicar camada(s)
+	Duplicate the selected template	Duplicar o modelo selecionado
+	Edge Contrast	Contraste das arestas
+	Edge Detect	Detecção de bordas
+	Edge Distance	Distância das arestas
+	Edge Protection	Proteção das arestas
+	Edges	Bordas
+	Edges and cavities	Bordas e cavidades
+	Edit keyboard shortcuts...	Editar atalhos de teclado...
+	Edit quick mask	Editar máscara rápida
+	Editing quick mask: paint where painting is allowed (U to finish)	Editando a máscara rápida: pinte onde a pintura é permitida (U para concluir)
+	Editing the quick mask: fills paint where painting is allowed. Press U to finish.	Editando a máscara rápida: os preenchimentos pintam onde a pintura é permitida. Pressione U para concluir.
+	Editing the quick mask: strokes paint where painting is allowed. Press U to finish.	Editando a máscara rápida: os traços pintam onde a pintura é permitida. Pressione U para concluir.
+	emiss	emiss
+	Emissive	Emissivo
+	Enable or disable the effect	Ativar ou desativar o efeito
+	Enable quick mask	Ativar máscara rápida
+	Enable Seams	Ativar costuras
+	Enter a finite number	Insira um número finito
+	Environment blur	Desfoque do ambiente
+	Environment exposure (EV)	Exposição do ambiente (EV)
+	Environment map	Mapa de ambiente
+	Environment opacity	Opacidade do ambiente
+	Environment rotation	Rotação do ambiente
+	Environment settings	Configurações do ambiente
+	Environment: {name}	Ambiente: {name}
+	Environments	Ambientes
+	Expand or collapse the folder	Expandir ou recolher a pasta
+	Export mesh	Exportar malha
+	Export Mesh...	Exportar malha...
+	Export template	Exportar modelo
+	Export templates	Modelos de exportação
+	Export textures	Exportar texturas
+	Export Textures...	Exportar texturas...
+	Export the selected template (.json)	Exportar o modelo selecionado (.json)
+	Exported mesh to {path}	Malha exportada para {path}
+	Exported template "{name}" to {path}	Modelo "{name}" exportado para {path}
+	Exported {n} textures to {folder}	{n} texturas exportadas para {folder}
+	F0 from specular level	F0 a partir do nível especular
+	Fabric weave	Trama de tecido
+	Face Normals Based	Baseado nas Normais das Faces
+	Field of view (deg)	Campo de visão (graus)
+	File ID	ID do arquivo
+	File name without extension; variables insert names	Nome do arquivo sem extensão; variáveis inserem nomes
+	File type	Tipo de arquivo
+	Fill layer	Camada de preenchimento
+	Fill mode	Modo de preenchimento
+	Fill only polygons the camera sees (3D view)	Preencher apenas os polígonos que a câmera vê (vista 3D)
+	Fill the closed path (lasso)	Preencher o caminho fechado (laço)
+	Fill the path (close it first)	Preencher o caminho (feche-o primeiro)
+	Filter the remaining noise while keeping edges and texture detail	Filtrar o ruído restante preservando bordas e detalhes de textura
+	Filters	Filtros
+	Fine noise	Ruído fino
+	Fingerprints	Impressões digitais
+	Fit the input range to the histogram	Ajustar o intervalo de entrada ao histograma
+	Flatten layer	Achatar camada
+	Flips the image's green channel, for normal maps made with Y pointing down	Inverte o canal verde da imagem, para mapas normais feitos com Y apontando para baixo
+	Flow	Fluxo
+	Flow and opacity	Fluxo e opacidade
+	Flow jitter	Variação de fluxo
+	Focus distance	Distância de foco
+	Focus: show only the active texture set	Foco: mostrar só o conjunto de texturas ativo
+	Fold or unfold these effects	Recolher ou expandir estes efeitos
+	Folders	Pastas
+	Follow Newest Map	Seguir o mapa mais recente
+	Follow path	Seguir caminho
+	For the whole project: how normal map images set as mesh maps are read (set them again after a change), and the default for export	Para todo o projeto: como as imagens de mapa normal usadas como mapas de malha são lidas (atribua-as de novo após uma mudança), e o padrão para exportação
+	Free and open source (MIT OR Apache-2.0), written in Rust.	Livre e de código aberto (MIT OR Apache-2.0), escrito em Rust.
+	From template	Do modelo
+	From template / project	Do modelo / projeto
+	Full Scene	Cena inteira
+	General export parameters	Parâmetros gerais de exportação
+	General properties	Propriedades gerais
+	Generate from Mesh	Gerar a partir da malha
+	Generate from Normal Map	Gerar a partir do mapa de normais
+	Generator	Gerador
+	Geometry and UVs only	Apenas geometria e UVs
+	Geometry mask	Máscara de geometria
+	GGX specular with height-correlated Smith visibility, Lambert diffuse, split-sum image-based lighting with spherical-harmonics irradiance and horizon fading.	Especular GGX com visibilidade Smith correlacionada à altura, difuso Lambert, iluminação baseada em imagem com soma dividida, irradiância por harmônicos esféricos e atenuação no horizonte.
+	gloss	brilho
+	Glossiness	Brilho
+	Glossiness from roughness	Brilho a partir da rugosidade
+	glTF binary with textures	glTF binário com texturas
+	Go to camera 1	Ir para a câmera 1
+	Go to camera 2	Ir para a câmera 2
+	Go to camera 3	Ir para a câmera 3
+	Go to camera 4	Ir para a câmera 4
+	Go to camera 5	Ir para a câmera 5
+	Go to camera 6	Ir para a câmera 6
+	Go to camera 7	Ir para a câmera 7
+	Go to camera 8	Ir para a câmera 8
+	Go to camera 9	Ir para a câmera 9
+	GPU error: {error}	Erro de GPU: {error}
+	Gradient Map	Mapa de gradiente
+	Gravity	Gravidade
+	Gray + A	Cinza + A
+	Gray 50%	Cinza 50%
+	Grayscale	Escala de cinza
+	Ground Plane	Plano do solo
+	Ground Plane Offset	Deslocamento do solo
+	Group layer(s)	Agrupar camada(s)
+	Grunge	Grunge
+	Half	Metade
+	Hammered	Martelado
+	Hard light	Luz direta
+	Hardness	Dureza
+	HDR environments	Ambientes HDR
+	height	altura
+	Height offset	Deslocamento de altura
+	Height to normal strength	Intensidade de altura para normal
+	Hide all	Ocultar tudo
+	Hide UI	Ocultar interface
+	Hide while painting	Ocultar ao pintar
+	High Definition Mesh (HP)	Malha de alta resolução (HP)
+	High Pass	Passa-alta
+	High Poly Mesh Suffix	Sufixo da malha high poly
+	High Poly Scene	Cena de alta resolução
+	High poly: {name}	High poly: {name}
+	High-Poly Parameters	Parâmetros de alta resolução
+	Histogram Range	Intervalo do histograma
+	Histogram Scan	Varredura do histograma
+	Histogram Shift	Deslocamento do histograma
+	Hit-test	Teste de seleção
+	Hold S: left-drag rotates, right-drag scales, middle-drag moves the stencil.	Segure S: arrastar com botão esquerdo gira, com botão direito redimensiona e com botão do meio move o estêncil.
+	Hold V and click the mesh to set the clone source	Segure V e clique na malha para definir a origem da clonagem
+	Hold V and click the mesh to set the source, then paint elsewhere to copy it.	Segure V e clique na malha para definir a origem, depois pinte em outro lugar para copiá-la.
+	How a rectangle selects polygons	Como um retângulo seleciona polígonos
+	How far light travels under the surface, as a fraction of the mesh size (where the Scattering weight channel is painted)	Até onde a luz viaja sob a superfície, como fração do tamanho da malha (onde o canal Peso de dispersão está pintado)
+	How strongly transmissive surfaces bend light (where the Transmission channel is painted): water 1.33, glass 1.5, diamond 2.42	Quanto as superfícies transmissivas desviam a luz (onde o canal Transmissão está pintado): água 1.33, vidro 1.5, diamante 2.42
+	HSL Perceptive	HSL perceptivo
+	Hue shift (degrees)	Deslocamento de matiz (graus)
+	ID	ID
+	Ignore Backface	Ignorar faces traseiras
+	Ignore Backface Suffix	Sufixo para ignorar faces traseiras
+	Image: {name}	Imagem: {name}
+	Import a template (.json)	Importar um modelo (.json)
+	Import an image (File > Import resources) to project it onto the mesh.	Importe uma imagem (Arquivo > Importar recursos) para projetá-la na malha.
+	Import baked maps	Importar mapas com bake
+	Import HDR...	Importar HDR...
+	Import images to use them in fills and masks	Importe imagens para usá-las em preenchimentos e máscaras
+	Import material...	Importar material...
+	Import MaterialX material...	Importar material MaterialX...
+	Import resources...	Importar recursos...
+	Import...	Importar...
+	Imported template "{name}"	Modelo "{name}" importado
+	Imported {name}	{name} importado
+	Include in Bake	Incluir no bake
+	Index of refraction	Índice de refração
+	Input high	Entrada alta
+	Input low	Entrada baixa
+	Input maps	Mapas de entrada
+	Insert a variable	Inserir uma variável
+	Instance	Instância
+	Instantiate across texture sets	Instanciar entre conjuntos de texturas
+	Intensity (texels at 2K)	Intensidade (texels em 2K)
+	Interface scale	Escala da interface
+	Intersection: fill polygons the rectangle touches	Interseção: preencher os polígonos que o retângulo toca
+	Inverse divide	Divisão inversa
+	Inverse Subtract	Subtração inversa
+	Invert mask	Inverter máscara
+	Invert mask background	Inverter fundo da máscara
+	Invert mask value	Inverter valor da máscara
+	Invert quick mask	Inverter máscara rápida
+	Invert show/hide	Inverter mostrar/ocultar
+	Jitters	Variações
+	Join the ArtCraft community on Discord	Participe da comunidade ArtCraft no Discord
+	Join the community (Discord)...	Participar da comunidade (Discord)...
+	Key light (shadow-casting light, direct only)	Luz principal (projeta sombras, apenas direta)
+	Keyboard	Teclado
+	Keyboard shortcuts	Atalhos de teclado
+	Layer mask	Máscara de camada
+	Layer memory: {mb} MB	Memória das camadas: {mb} MB
+	Lazy mouse	Lazy mouse
+	Lazy mouse distance	Distância do lazy mouse
+	Leather grain	Grão de couro
+	Lens size: how quickly things blur away from the focus distance	Tamanho da lente: quão rápido os objetos desfocam fora da distância de foco
+	Lifetime (steps)	Duração (passos)
+	Light / direction	Luz / direção
+	Light azimuth (degrees)	Azimute da luz (graus)
+	Light elevation (degrees)	Elevação da luz (graus)
+	Light intensity	Intensidade da luz
+	Lighten (Max)	Clarear (Máx)
+	Lightness	Claridade
+	Linear burn	Superexposição linear
+	Linear dodge (Add)	Subexposição linear (Adição)
+	Linear light	Luz linear
+	List of exports	Lista de exportações
+	LMB	Botão esquerdo
+	Load Cage	Carregar gaiola
+	Load UI Layout	Carregar layout da interface
+	Loaded UI layout {path}	Layout da interface carregado de {path}
+	Lock Output Size	Bloquear tamanho de saída
+	Log	Log
+	Low Poly Mesh Suffix	Sufixo da malha low poly
+	Made by the ArtCraft team and community.	Feito pela equipe e pela comunidade ArtCraft.
+	Magenta / green	Magenta / verde
+	Main shader	Shader principal
+	Manipulator size	Tamanho do manipulador
+	Manual	Manual
+	Marble veins	Veios de mármore
+	Mask Editor: Edge wear	Editor de máscara: Desgaste de bordas
+	Mask effects	Efeitos da máscara
+	Mask value (gray)	Valor da máscara (cinza)
+	Mask with height	Mascarar com altura
+	Match	Correspondência
+	Material	Material
+	Material ball	Esfera de material
+	Material Color	Cor do material
+	Material finish	Acabamento de material
+	MaterialCraft material	Material do MaterialCraft
+	Materials	Materiais
+	MaterialX materials	Materiais MaterialX
+	MatFinish Grind	MatFinish Esmerilhado
+	MatFinish Hammered	MatFinish Martelado
+	MatFinish Raw	MatFinish Bruto
+	MatFinish Sanded	MatFinish Lixado
+	Max Frontal Distance	Distância frontal máxima
+	Max Occluder Distance	Distância máxima do oclusor
+	Max project size on open	Tamanho máximo ao abrir
+	Max RAM while saving	RAM máx. ao salvar
+	Max Rear Distance	Distância traseira máxima
+	Maximum decompressed project data. Increase this limit to open larger projects.	Limite de dados descompactados do projeto. Aumente este limite para abrir projetos maiores.
+	Medium dark	Médio escuro
+	Medium light	Médio claro
+	Mesh fill	Preenchimento de malha
+	Mesh ID	ID da malha
+	Mesh Map Bakers	Bakers de mapas de malha
+	Mesh Map Settings	Configurações de mapas de malha
+	Mesh map: {map}	Mapa de malha: {map}
+	Mesh maps	Mapas de malha
+	Mesh maps baked	Bake dos mapas de malha concluído
+	Mesh Normals Based	Baseado nas Normais da Malha
+	Meshes	Malhas
+	metal	metal
+	Metallic	Metálico
+	Midtones	Tons médios
+	min	min
+	Min Occluder Distance	Distância mínima do oclusor
+	Minimum size (%)	Tamanho mínimo (%)
+	Mirror symmetry	Simetria espelhada
+	missing	ausente
+	Missing (bake to create)	Ausente (faça o bake para criar)
+	missing source	origem ausente
+	Mixed AO	AO combinada
+	MMB drag / Alt + MMB	Arrastar com botão do meio / Alt + botão do meio
+	More in Assets > Alphas: click one, or drag it here	Mais em Recursos > Alphas: clique em um ou arraste-o para cá
+	Move down	Mover para baixo
+	Move up	Mover para cima
+	Moves the surface by the height channel on a finer copy of the mesh, at the height to normal strength (viewport only: painting follows the base surface)	Desloca a superfície pelo canal de altura em uma cópia mais fina da malha, com a intensidade de altura para normal (apenas na viewport: a pintura segue a superfície base)
+	Multiply	Multiplicação
+	My brushes	Meus pincéis
+	My smart materials	Meus materiais inteligentes
+	Name each file after its texture set, like Body_normal.png	Nomeie cada arquivo com o nome do seu conjunto de texturas, como Body_normal.png
+	New project	Novo projeto
+	New project...	Novo projeto...
+	New template	Novo modelo
+	No font on this system can show this language	Nenhuma fonte deste sistema consegue exibir este idioma
+	no GPU	sem GPU
+	No GPU renderer available	Nenhum renderizador de GPU disponível
+	No High-Poly Meshes	Nenhuma malha de alta resolução
+	No outputs yet: add one above, then drag input maps onto its channels.	Nenhuma saída ainda: adicione uma acima e arraste mapas de entrada para os canais dela.
+	No padding (passthrough)	Sem margem (passagem direta)
+	No Parameters	Sem parâmetros
+	No recent projects yet	Nenhum projeto recente ainda
+	Noise amount	Quantidade de ruído
+	Noise scale	Escala do ruído
+	none	nenhum
+	Normal DirectX	Normal DirectX
+	Normal from height	Normal a partir da altura
+	Normal Invert	Inverter normal
+	Normal map combine	Combinação de mapa normal
+	Normal map detail	Detalhe de mapa normal
+	Normal map format	Formato do mapa normal
+	Normal map inverse detail	Detalhe inverso de mapa normal
+	Normal OpenGL	Normal OpenGL
+	Normal: painting uses the flat normal	Normal: a pintura usa a normal plana
+	Normalization	Normalização
+	Normalization Scale	Escala de normalização
+	Normalization Type	Tipo de normalização
+	Not enough GPU memory to show texture set "{name}" fully: lower the viewport Texture resolution in Settings. Painting and export are not affected.	Memória de GPU insuficiente para mostrar o conjunto de texturas "{name}" por completo: reduza nas Configurações a resolução das texturas da viewport. A pintura e a exportação não são afetadas.
+	Not enough GPU memory to show {count} texture sets fully ({names}): lower the viewport Texture resolution in Settings. Painting and export are not affected.	Memória de GPU insuficiente para mostrar por completo {count} conjuntos de texturas ({names}): reduza nas Configurações a resolução das texturas da viewport. A pintura e a exportação não são afetadas.
+	Not exported: no source in this texture set	Não exportado: sem origem neste conjunto de texturas
+	Not imported: {files}	Não importados: {files}
+	Not saved: {error}	Não salvo: {error}
+	nrm	nrm
+	Off	Desligado
+	off	desligado
+	Offset right	Deslocamento à direita
+	Offset up	Deslocamento para cima
+	Offset {axis}	Deslocamento {axis}
+	Offsets the textures by the height channel, at the height to normal strength	Desloca as texturas pelo canal de altura, com a intensidade de altura para normal
+	On	Ligado
+	Only Same Mesh Name	Somente o mesmo nome de malha
+	op	opac
+	Open in MaterialCraft	Abrir no MaterialCraft
+	Open sample project...	Abrir projeto de exemplo...
+	Open...	Abrir...
+	Opened in MaterialCraft: use File > Send to TextureCraft there to bring your changes back	Aberto no MaterialCraft: use lá Arquivo > Enviar para o TextureCraft para trazer suas alterações
+	Opened {name}	{name} aberto
+	Optional channels add a clear coat (Coat weight, Coat roughness, Coat normal), sheen (Sheen weight, color, roughness), anisotropy (Anisotropy level, angle), subsurface scattering (Scattering weight) and transmission (Transmission).	Canais opcionais adicionam verniz (Peso do verniz, Rugosidade do verniz, Normal do verniz), lustro (Peso do lustro, cor, rugosidade), anisotropia (Nível de anisotropia, ângulo), dispersão subsuperficial (Peso de dispersão) e transmissão (Transmissão).
+	Orbit	Orbitar
+	Orthographic	Ortográfica
+	Output directory	Pasta de saída
+	Output high	Saída alta
+	Output low	Saída baixa
+	Output Size	Tamanho de saída
+	Output template	Modelo de saída
+	Output templates	Modelos de saída
+	Overlay opacity	Opacidade da sobreposição
+	Padding	Margem
+	Paint	Pintura
+	Paint Cage	Pintar gaiola
+	Paint chips	Lascas de tinta
+	Paint layer	Camada de pintura
+	Paint on the mesh to edit the layer content.	Pinte na malha para editar o conteúdo da camada.
+	Paint on the mesh to edit this mask. Use the Material tab's mask value for gray.	Pinte na malha para editar esta máscara. Use o valor de máscara da aba Material para cinza.
+	Paint Skew Correction	Pintar correção de inclinação
+	Paint with the current tool	Pintar com a ferramenta atual
+	Painted layer pixels {pixels} MB, composited channels {composites} MB, compositing cache {cache} MB	Pixels das camadas pintadas {pixels} MB, canais compostos {composites} MB, cache de composição {cache} MB
+	Painting is paused while a bake is shown. Cancel the bake or wait for it to finish.	A pintura fica em pausa enquanto um bake é exibido. Cancele o bake ou espere ele terminar.
+	Pan	Deslocar
+	Parallax occlusion (height channel)	Oclusão de paralaxe (canal de altura)
+	Parameters change in the desktop app, with MaterialCraft installed	Os parâmetros mudam no app para desktop, com o MaterialCraft instalado
+	Partial mask values follow the layer's height: high parts show first	Valores parciais de máscara seguem a altura da camada: as partes altas aparecem primeiro
+	Particle brush (slides down the surface)	Pincel de partículas (desliza pela superfície)
+	Particle brush: particles slide down the surface	Pincel de partículas: as partículas deslizam pela superfície
+	Particles	Partículas
+	Passthrough	Passagem
+	Paste as instance	Colar como instância
+	Paste effect	Colar efeito
+	Paste layer(s)	Colar camada(s)
+	Path trace on the processor instead of the graphics card (slower)	Fazer path tracing no processador em vez da placa de vídeo (mais lento)
+	Path: click adds a point, click the curve inserts one, drag moves it, Enter applies, Esc cancels	Caminho: clicar adiciona um ponto, clicar na curva insere um, arrastar o move, Enter aplica, Esc cancela
+	Paths stay editable: pick one to move its points or change its brush and material, and the sublayer repaints at once. Add paths with the Path tool.	Os caminhos continuam editáveis: escolha um para mover seus pontos ou mudar seu pincel e material, e a subcamada é repintada na hora. Adicione caminhos com a ferramenta Caminho.
+	Pattern scale	Escala do padrão
+	PBR - Metallic Roughness (TextureCraft)	PBR - Metálico Rugosidade (TextureCraft)
+	Per Material	Por material
+	Perlin noise	Ruído Perlin
+	Pick color	Coletar cor
+	Pick focus in the viewport	Escolher o foco na viewport
+	Pin light	Luz pontual
+	Place as decal	Colocar como decalque
+	Place on the surface	Posicionar na superfície
+	Place path points on the mesh	Posicione os pontos do caminho na malha
+	Planar projection	Projeção planar
+	Plane	Plano
+	PNG image	Imagem PNG
+	Polygon fill	Preenchimento de polígonos
+	Pores	Poros
+	Position gradient	Gradiente de posição
+	Position jitter	Variação de posição
+	Press a key...	Pressione uma tecla...
+	Procedurals	Procedurais
+	Project	Projeto
+	Project Configuration...	Configuração do projeto...
+	Project Mesh (LP)	Malha de projeção (LP)
+	Project opened	Projeto aberto
+	Project template	Modelo de projeto
+	Projection	Projeção
+	Projects and meshes	Projetos e malhas
+	Quarter	Um quarto
+	Quick mask	Máscara rápida
+	Quit	Sair
+	Radial settings	Configurações radiais
+	Radial symmetry	Simetria radial
+	Radius (texels at 2K)	Raio (texels em 2K)
+	Raw curvature	Curvatura bruta
+	Re-cook	Recalcular
+	Reads the curvature map as baked: changing the mode or a size turns detail sizes on.	Lê o mapa de curvatura como foi assado: mudar o modo ou um tamanho ativa os tamanhos de detalhe.
+	Rebind any menu item, tool or command	Reatribuir qualquer item de menu, ferramenta ou comando
+	Recent projects	Projetos recentes
+	Records the stack up to this layer. Fill effects in masks (and fill layers) above can read it as a source.	Registra a pilha até esta camada. Efeitos de preenchimento em máscaras (e camadas de preenchimento) acima podem lê-la como origem.
+	Rectangle fill	Preenchimento retangular
+	Reimport mesh	Reimportar malha
+	Relative to Bounding Box	Relativo à caixa delimitadora
+	Relative to Low Mesh	Relativo à malha de baixa resolução
+	Relative to Min/Max	Relativo ao mínimo/máximo
+	Relative to Ray Distances	Relativo às distâncias dos raios
+	Remove Cage	Remover gaiola
+	Remove channel	Remover canal
+	Remove effect	Remover efeito
+	Remove last	Remover último
+	Remove layer	Remover camada
+	Remove layer(s)	Remover camada(s)
+	Remove mask	Remover máscara
+	Remove point	Remover ponto
+	Remove resolution override	Remover resolução personalizada
+	Remove resource	Remover recurso
+	Remove Skew Correction	Remover a correção de inclinação
+	Remove skew correction	Remover a correção de inclinação
+	Remove the shortcut	Remover o atalho
+	Remove this output	Remover esta saída
+	Remove unused resources...	Remover recursos não usados...
+	Rename the selected template	Renomear o modelo selecionado
+	Render on the CPU	Renderizar na CPU
+	RENDERING	RENDERIZAÇÃO
+	Rendering	Renderização
+	Rendering (path traced)	Renderização (path tracing)
+	Rendering on CPU: {n} / {max} samples, {s} s	Renderizando na CPU: {n} / {max} amostras, {s} s
+	Rendering on GPU: {n} / {max} samples, {s} s	Renderizando na GPU: {n} / {max} amostras, {s} s
+	Rendering, path traced	Renderização com path tracing
+	Replace Color	Substituir cor
+	Replacement color	Cor de substituição
+	Report a bug...	Relatar um bug...
+	Rescan the library folder	Reexaminar a pasta da biblioteca
+	Reset all	Redefinir tudo
+	Reset Painted Cage	Redefinir Gaiola Pintada
+	Reset to defaults	Redefinir para o padrão
+	Reset to {shortcut}	Redefinir para {shortcut}
+	Reset UI	Redefinir interface
+	Resizing	Redimensionando
+	Restore Defaults	Restaurar padrões
+	Restore every default shortcut	Restaurar todos os atalhos padrão
+	Return to Painting Mode	Voltar ao modo de pintura
+	Return to this step	Voltar a esta etapa
+	Right-click a layer > Create smart material	Clique com o botão direito em uma camada > Criar material inteligente
+	Rotation (degrees)	Rotação (graus)
+	rough	rugos
+	Roughness	Rugosidade
+	Roughness from glossiness	Rugosidade a partir do brilho
+	Round	Redondo
+	Rounded cube	Cubo arredondado
+	Samples	Amostras
+	Sampling Radius	Raio de amostragem
+	Save a copy...	Salvar uma cópia...
+	Save as...	Salvar como...
+	Save current brush	Salvar o pincel atual
+	Save current layout...	Salvar layout atual...
+	Save current project as template	Salvar o projeto atual como modelo
+	Save render...	Salvar renderização...
+	Save the changes to {name} before closing?	Salvar as alterações em {name} antes de fechar?
+	Save the changes to {name} first?	Salvar primeiro as alterações em {name}?
+	Save UI Layout	Salvar layout da interface
+	Save view as camera	Salvar vista como câmera
+	Saved UI layout {path}	Layout da interface salvo em {path}
+	Saved {path}	{path} salvo
+	Saving UI layouts to files is available in the desktop app	Salvar layouts da interface em arquivos está disponível no aplicativo para desktop
+	Saving uses the other cores and at most this share of the free RAM. At least one core always works.	Salvar usa os outros núcleos e no máximo esta parte da RAM livre. Pelo menos um núcleo sempre trabalha.
+	Scale / tiling	Escala / repetição
+	Scaling Divisor	Divisor de escala
+	scatter	disp
+	Scatter color	Cor de dispersão
+	Scatter radius	Raio de dispersão
+	Scattering weight	Peso de dispersão
+	Scratches	Arranhões
+	Screenshot of the viewport	Captura de tela da viewport
+	Seams Intensity	Intensidade das costuras
+	Search all assets	Pesquisar em todos os recursos
+	Search commands or keys	Pesquisar comandos ou teclas
+	Secondary Rays	Raios secundários
+	Seed	Semente
+	Select a layer	Selecione uma camada
+	Select a paint layer or a layer's mask to fill	Selecione uma camada de pintura ou uma máscara de camada para preencher
+	Select an output template	Selecione um modelo de saída
+	Select source	Selecionar origem
+	Select the layer content	Selecionar o conteúdo da camada
+	Select the mask (Alt+click: show it in the viewport)	Selecionar a máscara (Alt+clique: exibi-la na viewport)
+	Select...	Selecionar...
+	Selection mode	Modo de seleção
+	Self Intersection	Autointerseção
+	Self Occlusion	Autooclusão
+	Settings...	Configurações...
+	Shader instance	Instância do shader
+	Shader Settings	Configurações do shader
+	sheen	lustro
+	Sheen color	Cor do lustro
+	sheen color	cor lust
+	Sheen color × weight	Cor do lustro × peso
+	sheen rough	rug lust
+	Sheen roughness	Rugosidade do lustro
+	Sheen weight	Peso do lustro
+	Shift + wheel	Shift + roda do mouse
+	Shortcuts list...	Lista de atalhos...
+	Show all	Mostrar tudo
+	Show at startup	Mostrar ao iniciar
+	Show axis	Mostrar eixo
+	Show axis position manipulator	Mostrar manipulador da posição do eixo
+	Show cursor	Mostrar cursor
+	Show entire mesh	Exibir malha inteira
+	Show for Selected Texture Set Only	Mostrar apenas para o conjunto de texturas selecionado
+	Show intersection	Mostrar interseção
+	Show log...	Exibir log...
+	Show on all parts	Mostrar em todas as partes
+	Show or hide texture sets	Mostrar ou ocultar conjuntos de texturas
+	Show or hide the layer	Exibir ou ocultar a camada
+	Show or hide the texture set	Exibir ou ocultar o conjunto de texturas
+	Show plane	Mostrar plano
+	Show UV wireframe in the 2D view	Exibir wireframe das UVs na vista 2D
+	Show wireframe in the 3D view	Exibir wireframe na vista 3D
+	Signed addition (AddSub)	Adição com sinal (AddSub)
+	Size in screen space	Tamanho no espaço da tela
+	Size jitter	Variação de tamanho
+	Size of the textures the viewport shows: lower uses less GPU memory with large texture sets. Painting and export keep full resolution.	Tamanho das texturas exibidas na viewport: valores menores usam menos memória de GPU com conjuntos de texturas grandes. A pintura e a exportação mantêm a resolução completa.
+	Skew Correction	Correção de inclinação
+	Skew Correction Method	Método de Correção de Distorção
+	Slope Blur	Desfoque de inclinação
+	Slope scale	Escala da inclinação
+	Smart masks	Máscaras inteligentes
+	Smart material saved to {path}	Material inteligente salvo em {path}
+	Smart materials	Materiais inteligentes
+	Smooth	Suave
+	Smudge	Borrar
+	Soft light	Luz suave
+	Source  U {u}  V {v}	Origem  U {u}  V {v}
+	spec	espec
+	Specular	Especular
+	specular	especular
+	Specular level	Nível especular
+	Sphere	Esfera
+	Spherical projection	Projeção esférica
+	Spray	Spray
+	Spread Angle	Ângulo de dispersão
+	Stamp depth	Profundidade do carimbo
+	Start window	Janela inicial
+	Starting render...	Iniciando renderização...
+	Stencil	Estêncil
+	Steps	Passos
+	Streaks	Estrias
+	Stripes	Listras
+	Stroke opacity	Opacidade do traço
+	Submesh	Submalha
+	Subsampling 2x2	Subamostragem 2x2
+	Subsampling 4x4	Subamostragem 4x4
+	Subsampling 8x8	Subamostragem 8x8
+	Subsurface scattering	Dispersão subsuperficial
+	Subtract	Subtração
+	Symmetry	Simetria
+	Symmetry color display	Cor de exibição da simetria
+	Symmetry settings	Configurações de simetria
+	System title bar (applies on restart)	Barra de título do sistema (aplicada ao reiniciar)
+	Tangent | Wrap	Tangente | Envolver
+	Template name	Nome do modelo
+	Temporal anti-aliasing (refines the 3D view while it is still)	Antisserrilhamento temporal (refina a vista 3D enquanto está parada)
+	Texture resolution	Resolução das texturas
+	Texture set channels	Canais do conjunto de texturas
+	Texture set resolution	Resolução do conjunto de texturas
+	Texture Set Settings	Configurações do conjunto de texturas
+	Texture Sets	Conjuntos de texturas
+	Texture sets	Conjuntos de texturas
+	TextureCraft had to close:	O TextureCraft precisou ser fechado:
+	TextureCraft PBR - Metallic Roughness	TextureCraft PBR - Metálico Rugosidade
+	TextureCraft PBR - Specular Glossiness	TextureCraft PBR - Especular Brilho
+	TextureCraft project	Projeto TextureCraft
+	TextureCraft project or mesh	Projeto TextureCraft ou malha
+	Textures	Texturas
+	Textures embedded; for game engines and most viewers	Texturas incorporadas; para engines de jogos e a maioria dos visualizadores
+	Textures packaged; for USD tools and AR Quick Look	Texturas empacotadas; para ferramentas USD e AR Quick Look
+	The bake worker stopped	O processo de bake parou
+	The eraser removes paint from the enabled channels.	A borracha remove a pintura dos canais ativados.
+	The file dialog couldn't be shown: {error}	Não foi possível mostrar a caixa de diálogo de arquivos: {error}
+	The first stroke sets the offset from the source.	O primeiro traço define o deslocamento em relação à origem.
+	The GPU couldn't render this scene: {error}	A GPU não conseguiu renderizar esta cena: {error}
+	The image's alpha cuts the decal's shape; faces turned away and surfaces beyond its depth stay clear.	O alpha da imagem recorta a forma do decalque; faces voltadas para trás e superfícies além da sua profundidade ficam intactas.
+	The next click in the 3D view moves the decal there	O próximo clique na vista 3D move o decalque para lá
+	The project changed while the dialog was open, so nothing was done	O projeto mudou enquanto a caixa de diálogo estava aberta, então nada foi feito
+	The resize worker stopped	O processo de redimensionamento parou
+	Thin areas	Áreas finas
+	Tile	Repetir
+	Tiles	Ladrilhos
+	Tint	Tonalizar
+	Title bar	Barra de título
+	Toggle mask	Alternar máscara
+	Tone mapping	Mapeamento de tons
+	Torus	Toro
+	transm	transm
+	Transmission	Transmissão
+	Tri-planar projection	Projeção triplanar
+	Triangle fill	Preenchimento de triângulos
+	Triangle fills single triangles, Polygon whole quads and n-gons, Mesh the connected geometry, UV island the UV islands	Triângulo preenche triângulos isolados, Polígono quads e n-gons inteiros, Malha a geometria conectada, Ilha UV as ilhas UV
+	Twill weave	Tecido sarja
+	UDIM plane	Plano UDIM
+	UDIM tiles painted by this texture set, each at the set's size	Tiles UDIM pintados por este conjunto de texturas, cada um no tamanho do conjunto
+	UI layout	Layout da interface
+	UI layout: {error}	Layout da interface: {error}
+	UI layouts	Layouts da interface
+	UI {ms} ms	Interface {ms} ms
+	Uniform value	Valor uniforme
+	USD binary, textures alongside	USD binário, texturas ao lado
+	USD text, textures alongside	USD em texto, texturas ao lado
+	USDZ with textures	USDZ com texturas
+	Use an equirectangular .hdr or .exr image as the environment	Usar uma imagem equirretangular .hdr ou .exr como ambiente
+	Use as brush alpha	Usar como alpha do pincel
+	Use Low Poly Mesh as High Poly Mesh	Usar a malha low poly como malha high poly
+	Use the control channel or `texturecraft-cli render` for screenshots	Use o canal de controle ou `texturecraft-cli render` para capturas de tela
+	Use the operating system's window frame and buttons instead of TextureCraft's own title bar	Usar a moldura e os botões de janela do sistema operacional em vez da barra de título própria do TextureCraft
+	Use this brush (keeps its size)	Usar este pincel (mantém o tamanho)
+	UV checker	Xadrez UV
+	UV island fill	Preenchimento de ilhas UV
+	UV projection	Projeção UV
+	UV Seams	Costuras UV
+	UV tile {tile} resolution	Resolução do tile UV {tile}
+	UV tiles	Tiles UV
+	UV tiles (UDIM)	Tiles UV (UDIM)
+	UV transformations	Transformações UV
+	Value Bounds Max	Limite máximo
+	Value Bounds Min	Limite mínimo
+	Version: {version} ({gpu})	Versão: {version} ({gpu})
+	Vertex Color	Cor do vértice
+	View through this camera	Ver por esta câmera
+	Viewer settings	Configurações do visualizador
+	Viewport	Viewport
+	Viewport and brush (fixed)	Viewport e pincel (fixos)
+	Views	Vistas
+	Visible polygons only	Apenas polígonos visíveis
+	Vivid light	Luz brilhante
+	Voronoi	Voronoi
+	Warp	Deformar
+	Warp Directional	Deformar direcional
+	Wavefront OBJ with MTL, textures alongside	Wavefront OBJ com MTL, texturas ao lado
+	WebGPU isn't available in this browser, so TextureCraft runs on WebGL2: Rendering mode path traces on the CPU (slower) and large texture sets show at reduced resolution. A current Chrome, Edge or Safari has WebGPU.	O WebGPU não está disponível neste navegador, então o TextureCraft usa WebGL2: o modo de renderização faz path tracing na CPU (mais lento) e conjuntos de texturas grandes aparecem em resolução reduzida. As versões atuais do Chrome, Edge e Safari têm WebGPU.
+	What the 3D view shows while the bake runs: the newest finished map, one finished map, or the material. Maps not baked yet show a neutral value.	O que a vista 3D mostra durante o bake: o último mapa concluído, um mapa concluído à escolha ou o material. Mapas ainda não gerados mostram um valor neutro.
+	Wheel / Alt + RMB drag	Roda do mouse / Alt + arrastar com botão direito
+	Width (texels at 2K)	Largura (texels em 2K)
+	Wood grain	Veio de madeira
+	Works in texture space, like the blur: it does not cross UV seams.	Funciona no espaço de textura, como o desfoque: não atravessa costuras de UV.
+	World Space Normal	Normal no espaço do mundo
+	Yellow / blue	Amarelo / azul
+	{action} (undone)	{action} (desfeito)
+	{count} effects	{count} efeitos
+	{file}: add above the selected layer (or drag it into the layer stack or onto the viewport)	{file}: adicionar acima da camada selecionada (ou arraste-o para a pilha de camadas ou para a viewport)
+	{name} copy	Cópia de {name}
+	{n} bits	{n} bits
+	{n} control points. Click the mesh (or the 2D view) to add points and drag them to adjust; click the first point to close the path. Enter paints it with the brush (a closed, filled path fills its inside), Esc cancels.	{n} pontos de controle. Clique na malha (ou na vista 2D) para adicionar pontos e arraste-os para ajustar; clique no primeiro ponto para fechar o caminho. Enter pinta o caminho com o pincel (um caminho fechado e preenchido preenche o interior), Esc cancela.
+	{n} items share a shortcut; the first one listed wins.	{n} itens compartilham um atalho; o primeiro listado prevalece.
+	{pattern} (scale {scale}, seed {seed})	{pattern} (escala {scale}, semente {seed})

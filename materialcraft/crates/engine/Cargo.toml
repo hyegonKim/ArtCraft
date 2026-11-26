@@ -1,0 +1,20 @@
+[package]
+name = "materialcraft-engine"
+description = "MaterialCraft session, command registry, inspection and sample materials"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-core = { workspace = true }
+materialcraft-image = { workspace = true }
+materialcraft-nodes = { workspace = true }
+materialcraft-eval = { workspace = true }
+materialcraft-formats = { workspace = true }
+materialcraft-geom = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

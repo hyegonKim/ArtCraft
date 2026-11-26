@@ -1282,6 +1282,7 @@ theme	Appearance	Aparência
 	Zoom Out	Reduzir
 	Zoom out	Diminuir zoom
 	Zoom Tool	Ferramenta Zoom
+@plural	{n} byte|{n} bytes	{n} byte|{n} bytes
 @plural	{n} commit|{n} commits	{n} commit|{n} commits
 	{n} files	{n} arquivos
 	{n} h ago	há {n} h

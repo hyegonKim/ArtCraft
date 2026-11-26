@@ -1,0 +1,62 @@
+# The Weblate export (ADR 0006). `main`'s catalogs go out as PO files on the `weblate` branch, which
+# Weblate translates. The way back (tools/weblate_bridge.py import, then the `weblate/sync` pull
+# request a maintainer merges) is not here: it runs outside Actions, under AutoCraft's GitHub App, so
+# this repository holds no write token.
+#
+# The base is `main` as of the last export, re-rendered from the commit named in that export's
+# message (tools/weblate_base.sh), never the export's own output, which also holds Weblate changes
+# not yet merged.
+name: Weblate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: weblate
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  EXPORT_NAME: craft-i18n export
+  BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  export:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check out the weblate branch and build the base
+        run: |
+          mkdir "$RUNNER_TEMP/base"
+          if git ls-remote --exit-code --heads origin weblate >/dev/null; then
+            git fetch -q origin weblate
+            git worktree add -q --detach "$RUNNER_TEMP/po" origin/weblate
+            tools/weblate_base.sh origin/weblate "$RUNNER_TEMP/base"
+          else
+            git worktree add -q --orphan -b weblate "$RUNNER_TEMP/po"
+          fi
+      - name: Export
+        run: python3 tools/weblate_bridge.py export "$RUNNER_TEMP/po" --base "$RUNNER_TEMP/base"
+      - name: Push to weblate
+        working-directory: ${{ runner.temp }}/po
+        run: |
+          git add -A
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          # The full SHA names the next base (tools/weblate_base.sh).
+          git -c user.name="$EXPORT_NAME" -c user.email="$BOT_EMAIL" \
+            commit -q -m "Export from main@$GITHUB_SHA"
+          # Fails if Weblate pushed meanwhile; the next push to main exports again.
+          git push -q origin HEAD:refs/heads/weblate
+

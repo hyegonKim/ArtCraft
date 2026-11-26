@@ -1,0 +1,287 @@
+# বাংলা (bn) interface catalog for ArtCraft Launcher.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	A new version is available. Would you like to relaunch with the updated version?	নতুন সংস্করণ উপলব্ধ। আপনি কি আপডেট করা সংস্করণে পুনরায় চালু করতে চান?
+	All releases	সকল রিলিজ
+	App	অ্যাপ
+column	App	অ্যাপ
+	App details	অ্যাপ বিবরণ
+@id	app.download	ডাউনলোড
+@id	app.github	গিটহাব
+@id	app.install	ইনস্টল
+@id	app.notes	নোট
+@id	app.open	খুলুন
+@id	app.reinstall	পুনরায় ইনস্টল
+@id	app.releases	রিলিজ
+@id	app.reveal	দেখান
+@id	app.uninstall	আনইনস্টল
+@id	app.update	আপডেট
+@id	app.website	ওয়েবসাইট
+@id	appearance.theme	থিম
+	Apps are placed inside this folder.	এই ফোল্ডারে অ্যাপ রাখা হয়।
+	Apps on this computer	এই কম্পিউটারের অ্যাপ
+	Apps you can install	ইনস্টলযোগ্য অ্যাপ
+	Apps you hid	লুকানো অ্যাপ
+month	Apr	এপ্রিল
+	Arch package (.pkg.tar.zst)	আর্চ প্যাকেজ (.pkg.tar.zst)
+	ArtCraft Launcher	আর্টক্রাফট লঞ্চার
+	ArtCraft Launcher {version}	আর্টক্রাফট লঞ্চার {version}
+	ArtCraft Launcher {version} is available.	আর্টক্রাফট লঞ্চার {version} উপলব্ধ।
+@plural	ArtCraft Launcher · {n} update available|ArtCraft Launcher · {n} updates available	আর্টক্রাফট লঞ্চার · {n}টি আপডেট উপলব্ধ|আর্টক্রাফট লঞ্চার · {n}টি আপডেট উপলব্ধ
+	ArtCraft on GitHub	গিটহাবে আর্টক্রাফট
+	ArtCraft on {name}	{name}-এ আর্টক্রাফট
+month	Aug	আগস্ট
+	Automatically download and install updates	স্বয়ংক্রিয়ভাবে আপডেট ডাউনলোড ও ইনস্টল করুন
+	Available to install	ইনস্টলযোগ্য
+	Cancel download	ডাউনলোড বাতিল
+	Cancel update	আপডেট বাতিল
+	Checked {ago}	চেক করা হয়েছে {ago}
+	Checked {ago} · using {sources}	চেক করা হয়েছে {ago} · {sources} ব্যবহার করে
+	Checking for updates…	আপডেট খোঁজা হচ্ছে…
+	Checking…	চেক করা হচ্ছে…
+	Classic apps	ক্লাসিক অ্যাপ
+	Click to enlarge	বড় করতে ক্লিক করুন
+	Click to reverse the order	ক্রম উল্টাতে ক্লিক করুন
+	Click to sort by this column	এই কলাম অনুসারে সাজাতে ক্লিক করুন
+	Coming soon	শীঘ্রই আসছে
+cadcraft	Computer-aided design and drafting	কম্পিউটার-সহায়তাকৃত নকশা ও ড্রাফটিং
+	Couldn't change the login item: {e}	লগইন আইটেম পরিবর্তন করা যায়নি: {e}
+	Couldn't check for updates: {f}	আপডেট চেক করা যায়নি: {f}
+@msg	couldn't move {path} to Trash ({reason}). Remove it in Finder instead.	{path} ট্র্যাশে সরানো যায়নি ({reason})। পরিবর্তে ফাইন্ডারে সরান।
+@msg	couldn't use install folder {path}: {reason}	ইনস্টল ফোল্ডার {path} ব্যবহার করা যায়নি: {reason}
+	Craft App Suite	ক্রাফট অ্যাপ স্যুট
+	Custom folders use AppImage on Linux.	লিনাক্সে কাস্টম ফোল্ডার AppImage ব্যবহার করে।
+@msg	custom install folders aren't supported on this system	এই সিস্টেমে কাস্টম ইনস্টল ফোল্ডার সমর্থিত নয়
+	Debian package (.deb)	ডেবিয়ান প্যাকেজ (.deb)
+month	Dec	ডিসে
+	Default install folder	ডিফল্ট ইনস্টল ফোল্ডার
+	Discard download	ডাউনলোড বাতিল
+	Disk image (.dmg)	ডিস্ক ইমেজ (.dmg)
+	Download again	আবার ডাউনলোড করুন
+	Download cancelled	ডাউনলোড বাতিল হয়েছে
+@msg	Download cancelled	ডাউনলোড বাতিল হয়েছে
+	Download for {os}	{os}-এর জন্য ডাউনলোড
+	Download paused	ডাউনলোড স্থগিত
+	Downloading	ডাউনলোড হচ্ছে
+	Downloading {done} of {total}	{total}-এর মধ্যে {done} ডাউনলোড হচ্ছে
+	Downloading…	ডাউনলোড হচ্ছে…
+	Downloads for {platform}	{platform}-এর জন্য ডাউনলোড
+	Downloads the new version, replaces this one and opens it again	নতুন সংস্করণ ডাউনলোড করে, এটি প্রতিস্থাপন করে আবার খোলে
+	Enlarge picture	ছবি বড় করুন
+	Every Craft app	প্রতিটি ক্রাফট অ্যাপ
+	Features	বৈশিষ্ট্যসমূহ
+month	Feb	ফেব্রু
+@id	filter.all	সব
+@id	filter.installed	ইনস্টল করা
+@id	filter.notinstalled	ইনস্টল নেই
+@id	filter.updates	আপডেট
+	Flatpak bundle	ফ্ল্যাটপ্যাক বান্ডেল
+	Full changelog	সম্পূর্ণ পরিবর্তন তালিকা
+	GitHub limit hit; back in {min} min	গিটহাব সীমা শেষ; {min} মিনিটে ফিরবে
+	GitHub repository	গিটহাব রিপোজিটরি
+	GitHub's hourly limit was reached; full details return in {min} min	গিটহাবের প্রতি ঘণ্টার সীমা শেষ; {min} মিনিটে সম্পূর্ণ বিবরণ পাওয়া যাবে
+@id	help.discord	ডিসকর্ড
+@id	help.github	গিটহাব
+@id	help.website	ওয়েবসাইট
+	Hidden Apps	লুকানো অ্যাপ
+	Hide App	অ্যাপ লুকান
+photocraft	Image editing	ছবি সম্পাদনা
+	Include pre-releases (betas and release candidates)	প্রাক-রিলিজ অন্তর্ভুক্ত করুন (বিটা এবং রিলিজ ক্যান্ডিডেট)
+	Inspired by	অনুপ্রেরণায়
+	Install	ইনস্টল
+	Install cancelled	ইনস্টল বাতিল হয়েছে
+	Install cancelled. The download is kept for the next try.	ইনস্টলেশন বাতিল হয়েছে। পরবর্তী চেষ্টার জন্য ডাউনলোড রাখা হয়েছে।
+	Install folder	ইনস্টল ফোল্ডার
+	Install new apps as	নতুন অ্যাপ ইনস্টল করুন এভাবে
+	Installed	ইনস্টল করা
+column	Installed	ইনস্টল করা
+filter	Installed	ইনস্টল করা
+	installed	ইনস্টল করা
+	Installed apps with a newer version	নতুন সংস্করণ উপলব্ধ ইনস্টল করা অ্যাপ
+	Installed version	ইনস্টল করা সংস্করণ
+	Installed · latest {latest}	ইনস্টল করা · সর্বশেষ {latest}
+	Installed · up to date	ইনস্টল করা · আপ টু ডেট
+	Installer (.msi)	ইনস্টলার (.msi)
+	Installing for {platform}	{platform}-এর জন্য ইনস্টল হচ্ছে
+	Installing on Linux	লিনাক্সে ইনস্টল হচ্ছে
+	Installing on Windows	উইন্ডোজে ইনস্টল হচ্ছে
+	Installing, then restarting…	ইনস্টল হচ্ছে, তারপর রিস্টার্ট হবে…
+	Installing…	ইনস্টল হচ্ছে…
+figcraft	Interface design and prototyping	ইন্টারফেস ডিজাইন ও প্রোটোটাইপিং
+month	Jan	জানু
+	Join the ArtCraft community on Discord	ডিসকর্ডে আর্টক্রাফট কমিউনিটিতে যোগ দিন
+	Join the Discord	ডিসকর্ডে যোগ দিন
+month	Jul	জুলাই
+month	Jun	জুন
+	Keep running in the tray when the window is closed	উইন্ডো বন্ধ থাকলেও ট্রেতে চালু রাখুন
+	Latest	সর্বশেষ
+column	Latest	সর্বশেষ
+	Latest release	সর্বশেষ রিলিজ
+	Latest version	সর্বশেষ সংস্করণ
+	Launcher	লঞ্চার
+@id	launcher.dismiss	খারিজ
+@id	launcher.download	ডাউনলোড
+@id	launcher.notes	নোট
+@id	launcher.update	আপডেট
+	Learn more	আরও জানুন
+	Like {name}	{name}-এর মতো
+	link	লিঙ্ক
+@id	linux.preferred_kind	পছন্দের প্যাকেজ
+	Loading ArtCraft Launcher…	আর্টক্রাফট লঞ্চার লোড হচ্ছে…
+	Loading pictures…	ছবি লোড হচ্ছে…
+month	Mar	মার্চ
+	Match system	সিস্টেমের সাথে মিলিয়ে
+month	May	মে
+effectcraft	Motion graphics and visual effects	মোশন গ্রাফিক্স ও ভিজ্যুয়াল ইফেক্টস
+	NEW	নতুন
+	New apps	নতুন অ্যাপ
+	New installs use this folder. Updates stay in their current location.	নতুন ইনস্টলেশন এই ফোল্ডার ব্যবহার করবে। আপডেট বর্তমান অবস্থানেই থাকবে।
+	Newest release	নতুন রিলিজ
+	Next picture (→)	পরের ছবি (→)
+	No apps match	কোনো অ্যাপ মেলেনি
+	No downloads for this system	এই সিস্টেমের জন্য কোনো ডাউনলোড নেই
+	No notes were published with this release.	এই রিলিজের সাথে কোনো নোট প্রকাশ করা হয়নি।
+	No release published yet	এখনও কোনো রিলিজ প্রকাশ করা হয়নি
+	Not available here	এখানে উপলব্ধ নয়
+	Not checked yet	এখনও চেক করা হয়নি
+	Not installed	ইনস্টল নেই
+	Notify me when an installed app has an update	ইনস্টল করা অ্যাপের আপডেট আসলে জানান
+month	Nov	নভে
+month	Oct	অক্টো
+	Only when I ask	শুধু যখন বলব
+	Open ArtCraft Launcher to update.	আপডেট করতে আর্টক্রাফট লঞ্চার খুলুন।
+	Open on GitHub	গিটহাবে খুলুন
+	Open Source Tools for Creatives, Makers, and Builders	সৃজনশীল ও নির্মাতাদের জন্য ওপেন সোর্স টুলস
+designcraft	Page layout and publishing	পৃষ্ঠা লেআউট ও প্রকাশনা
+	Pause download	ডাউনলোড স্থগিত
+lightcraft	Photo library and raw development	ফটো লাইব্রেরি ও র ডেভেলপমেন্ট
+	Pictures couldn't be loaded. Reopen this page to try again.	ছবি লোড করা যায়নি। পুনরায় চেষ্টা করতে পৃষ্ঠাটি আবার খুলুন।
+	Platforms	প্ল্যাটফর্ম
+	Portable (.zip)	পোর্টেবল (.zip)
+deckcraft	Presentations and slide shows	উপস্থাপনা ও স্লাইড শো
+	Previous picture (←)	আগের ছবি (←)
+	Questions, ideas and news from the ArtCraft team	আর্টক্রাফট টিমের প্রশ্ন, ধারণা ও খবর
+	Quit ArtCraft Launcher	আর্টক্রাফট লঞ্চার বন্ধ করুন
+pdfcraft	Reading, organizing and protecting PDFs	পিডিএফ পড়া, সাজানো ও সুরক্ষিত করা
+	Reconnecting…	পুনরায় সংযোগ করা হচ্ছে…
+soundcraft	Recording, editing and mixing audio	অডিও রেকর্ডিং, সম্পাদনা ও মিক্সিং
+	Reinstall	পুনরায় ইনস্টল
+	Release notes	রিলিজ নোট
+	Released	প্রকাশিত
+column	Released	প্রকাশিত
+	Released {date}	প্রকাশিত {date}
+	Releases	রিলিজ
+	Removing…	অপসারণ হচ্ছে…
+	Replace what's there?	বিদ্যমান ফাইল প্রতিস্থাপন করবেন?
+	Resume download	ডাউনলোড পুনরায় শুরু
+	Retry install	আবার ইনস্টল চেষ্টা
+	Retry update to {version}	{version}-এ আবার আপডেট চেষ্টা
+	RPM package (.rpm)	RPM প্যাকেজ (.rpm)
+	Running in the background	ব্যাকগ্রাউন্ডে চলছে
+	Search apps	অ্যাপ খুঁজুন
+month	Sep	সেপ্টে
+@id	settings.open	সেটিংস
+@id	settings.quit	প্রস্থান
+	Show apps as a table	অ্যাপসমূহ টেবিল হিসেবে দেখান
+	Show apps as cards	অ্যাপসমূহ কার্ড হিসেবে দেখান
+	Show ArtCraft Launcher	আর্টক্রাফট লঞ্চার দেখান
+	Show in Explorer	এক্সপ্লোরারে দেখান
+	Show in Files	ফাইলসে দেখান
+	Show in Finder	ফাইন্ডারে দেখান
+	Show the window on the current desktop	বর্তমান ডেস্কটপে উইন্ডো দেখান
+@id	sort.inspired	প্রস্তাবিত
+@id	sort.installed	ইনস্টল করা
+@id	sort.latest	সর্বশেষ
+@id	sort.name	নাম
+@id	sort.released	রিলিজ তারিখ
+@id	sort.status	অবস্থা
+@id	sort.suite	স্যুট
+gridcraft	Spreadsheets and data	স্প্রেডশিট ও ডেটা
+	Start ArtCraft Launcher when I log in	লগইনে আর্টক্রাফট লঞ্চার চালু করুন
+	Stop waiting; the update can be started again later	অপেক্ষা থামান; আপডেট পরে আবার শুরু করা যাবে
+	Suite order	স্যুট ক্রম
+	System default	সিস্টেম ডিফল্ট
+	System package (recommended)	সিস্টেম প্যাকেজ (প্রস্তাবিত)
+	Tarball (.tar.gz)	টারবল (.tar.gz)
+	The app will be moved to the Trash. Your documents and settings stay.	অ্যাপটি ট্র্যাশে সরানো হবে। আপনার নথি ও সেটিংস অক্ষুণ্ন থাকবে।
+	The app will be removed. Your documents and settings stay.	অ্যাপটি মুছে ফেলা হবে। আপনার নথি ও সেটিংস অক্ষুণ্ন থাকবে।
+	The download is still here. It's checked again, then installed.	ডাউনলোড এখনও রয়েছে। এটি আবার পরীক্ষা করা হবে, তারপর ইনস্টল হবে।
+	The system manages install locations here.	সিস্টেম এখানে ইনস্টল অবস্থান পরিচালনা করে।
+	These notes weren't fetched (GitHub's request limit was reached). They're on the release page.	এই নোটগুলো আনা যায়নি (গিটহাব সীমা শেষ)। এগুলো রিলিজ পৃষ্ঠায় রয়েছে।
+@msg	this release has no AppImage for a custom install folder	এই রিলিজে কাস্টম ইনস্টল ফোল্ডারের জন্য কোনো AppImage নেই
+@id	tray.close_to_tray	ট্রেতে বন্ধ
+@id	tray.login_item	লগইনে চালু
+@id	tray.show_on_current_desktop	বর্তমান ডেস্কটপে দেখান
+	Unhide App	অ্যাপ দৃশ্যমান করুন
+	Uninstall	আনইনস্টল
+	Uninstall cancelled	আনইনস্টলেশন বাতিল হয়েছে
+	Uninstall {name}?	{name} আনইনস্টল করবেন?
+	Uninstall…	আনইনস্টল…
+	Update 1 app	১টি অ্যাপ আপডেট
+	Update all ({count})	সব আপডেট ({count})
+	Update and restart	আপডেট ও রিস্টার্ট
+	Update available	আপডেট উপলব্ধ
+	Update cancelled	আপডেট বাতিল হয়েছে
+	Update paused	আপডেট স্থগিত
+	Update to {v}	{v}-এ আপডেট
+@id	update.check	চেক করুন
+@id	update.check_auto	স্বয়ংক্রিয় চেক
+@id	update.notify	বিজ্ঞপ্তি
+@id	update.prereleases	প্রাক-রিলিজ
+	Updates always use the format an app was installed with.	অ্যাপ যে ফরম্যাটে ইনস্টল ছিল আপডেট সবসময় সেই ফরম্যাট ব্যবহার করে।
+	Updating…	আপডেট হচ্ছে…
+	Use default	ডিফল্ট ব্যবহার
+vectorcraft	Vector illustration	ভেক্টর চিত্রাঙ্কন
+	Verifying checksum…	চেকসাম যাচাই হচ্ছে…
+	Verifying…	যাচাই হচ্ছে…
+	Version {latest}	সংস্করণ {latest}
+	Version {version} installed	সংস্করণ {version} ইনস্টল করা
+filmcraft	Video editing, color and sound	ভিডিও সম্পাদনা, রঙ ও শব্দ
+@id	view.grid	গ্রিড
+@id	view.table	টেবিল
+	Visit getartcraft.com	getartcraft.com দেখুন
+	Waiting for another app…	অন্য অ্যাপের জন্য অপেক্ষা…
+	Waiting for other installs…	অন্যান্য ইনস্টলের জন্য অপেক্ষা…
+	Website (coming soon)	ওয়েবসাইট (শীঘ্রই আসছে)
+	What's new	নতুন কী
+	When on, opening the launcher from the menu bar brings its window to the desktop you're on. When off, macOS switches you to the desktop the window was on.	চালু থাকলে, মেনু বার থেকে লঞ্চার খুললে তা বর্তমান ডেস্কটপে উইন্ডো আনবে। বন্ধ থাকলে macOS উইন্ডো যেখানে ছিল সেই ডেস্কটপে নিয়ে যাবে।
+	Windows will remove it like any installed program. Your documents and settings stay.	অন্যান্য প্রোগ্রামের মতো উইন্ডোজ এটি সরিয়ে ফেলবে। আপনার নথি ও সেটিংস অক্ষুণ্ন থাকবে।
+wordcraft	Writing and document design	লেখালেখি ও নথি নকশা
+	Your system's package manager will remove it, and may ask for your password. Your documents and settings stay.	আপনার সিস্টেমের প্যাকেজ ম্যানেজার এটি সরিয়ে ফেলবে, এবং পাসওয়ার্ড চাইতে পারে। আপনার নথি ও সেটিংস অক্ষুণ্ন থাকবে।
+	{a} and {b}	{a} এবং {b}
+	{count} updates are available	{count}টি আপডেট উপলব্ধ
+	{done} downloaded	{done} ডাউনলোড হয়েছে
+	{done} of {total}	{total}-এর মধ্যে {done}
+	{done} of {total} downloaded	{total}-এর মধ্যে {done} ডাউনলোড হয়েছে
+	{installed} installed · latest {latest}	{installed} ইনস্টল করা · সর্বশেষ {latest}
+	{month} {day}, {year}	{day} {month}, {year}
+	{name} details	{name} বিবরণ
+	{name} icon	{name} আইকন
+@msg	{name} installed: {version}	{name} ইনস্টল হয়েছে: {version}
+@msg	{name} installed: {version} (this release publishes no checksum, so only its size was checked)	{name} ইনস্টল হয়েছে: {version} (এই রিলিজ কোনো চেকসাম দেয়নি, কেবল সাইজ যাচাই করা হয়েছে)
+@msg	{name} is running. Quit it, then try again.	{name} চলছে। এটি বন্ধ করে আবার চেষ্টা করুন।
+@msg	{name} updated to {version}	{name} {version}-এ আপডেট হয়েছে
+@msg	{name} updated to {version} (this release publishes no checksum, so only its size was checked)	{name} {version}-এ আপডেট হয়েছে (এই রিলিজ কোনো চেকসাম দেয়নি, কেবল সাইজ যাচাই করা হয়েছে)
+@msg	{name} was removed	{name} মুছে ফেলা হয়েছে
+	{name} {version}	{name} {version}
+	{name} {v} is available	{name} {v} উপলব্ধ
+@plural	{n} app|{n} apps	{n}টি অ্যাপ|{n}টি অ্যাপ
+@plural	{n} day ago|{n} days ago	{n} দিন আগে|{n} দিন আগে
+@plural	{n} h ago|{n} h ago	{n} ঘণ্টা আগে|{n} ঘণ্টা আগে
+@plural	{n} min ago|{n} min ago	{n} মিনিট আগে|{n} মিনিট আগে
+@msg	{path} already exists and wasn't installed by ArtCraft Launcher	{path} আগে থেকেই রয়েছে এবং আর্টক্রাফট লঞ্চার দ্বারা ইনস্টল হয়নি
+	{path} already exists. Installing {name} will overwrite it.	{path} আগে থেকেই রয়েছে। {name} ইনস্টল করলে এটি প্রতিস্থাপিত হবে।
+	{version} installed → {latest} released	{version} ইনস্টল করা → {latest} প্রকাশিত
+	⊞  Grid	⊞  গ্রিড
+	☰  Table	☰  টেবিল
+	🔍  Search apps	🔍  অ্যাপ খুঁজুন

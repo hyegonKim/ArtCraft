@@ -21,7 +21,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Write as _;
 
-use soundcraft_audio_io::FileFormat;
+use crate::FileFormat;
 use soundcraft_time::{
     BarBeat, FrameRate, MAX_POSITION, SampleRate, Samples, TICKS_PER_QUARTER, TempoEvent,
     to_samples,

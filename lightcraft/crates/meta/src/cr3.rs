@@ -229,7 +229,7 @@ const CANON_UUID: [u8; 16] = [0x85, 0xc0, 0xb6, 0x87, 0x82, 0x0f, 0x11, 0xe0, 0x
 /// The `uuid` of the top-level box holding the XMP packet.
 pub const XMP_UUID: [u8; 16] = [0xbe, 0x7a, 0xcf, 0xcb, 0x97, 0xa9, 0x42, 0xe8, 0x9c, 0x71, 0x99, 0x94, 0x91, 0xe3, 0xaf, 0xac];
 const MAX_DEPTH: usize = 12;
-const MAX_BOXES: usize = 4096;
+pub(crate) const MAX_BOXES: usize = 4096;
 /// A `VisualSampleEntry` (78 bytes after the box header) plus 4 bytes Canon adds before the child boxes.
 const CRAW_CHILDREN_AT: usize = 82;
 
@@ -256,16 +256,16 @@ pub fn parse_cr3(bytes: &[u8]) -> Option<Cr3<'_>> {
     Some(out)
 }
 
-struct BoxRef {
-    kind: [u8; 4],
+pub(crate) struct BoxRef {
+    pub(crate) kind: [u8; 4],
     /// Start of the payload (after the header and, for `uuid`, the 16-byte uuid).
-    body: usize,
-    end: usize,
-    uuid: Option<[u8; 16]>,
+    pub(crate) body: usize,
+    pub(crate) end: usize,
+    pub(crate) uuid: Option<[u8; 16]>,
 }
 
 /// The boxes directly inside `[from, to)`; stops at the first malformed header.
-fn boxes(bytes: &[u8], from: usize, to: usize, budget: &mut usize) -> Vec<BoxRef> {
+pub(crate) fn boxes(bytes: &[u8], from: usize, to: usize, budget: &mut usize) -> Vec<BoxRef> {
     let mut out = Vec::new();
     let mut at = from;
     let to = to.min(bytes.len());
@@ -407,13 +407,16 @@ fn sample_entry(bytes: &[u8], e: &BoxRef, budget: &mut usize) -> Cr3TrackKind {
     Cr3TrackKind::Raw { width, height, cmp1, iad1 }
 }
 
-fn be16(b: &[u8], at: usize) -> Option<u16> {
+/// A big-endian `u16` at `at`, or `None` when the buffer is shorter than that.
+pub(crate) fn be16(b: &[u8], at: usize) -> Option<u16> {
     b.get(at..at.checked_add(2)?).map(|s| u16::from_be_bytes([s[0], s[1]]))
 }
-fn be32(b: &[u8], at: usize) -> Option<u32> {
+/// A big-endian `u32` at `at`, or `None` when the buffer is shorter than that.
+pub(crate) fn be32(b: &[u8], at: usize) -> Option<u32> {
     b.get(at..at.checked_add(4)?).map(|s| u32::from_be_bytes([s[0], s[1], s[2], s[3]]))
 }
-fn be64(b: &[u8], at: usize) -> Option<u64> {
+/// A big-endian `u64` at `at`, or `None` when the buffer is shorter than that.
+pub(crate) fn be64(b: &[u8], at: usize) -> Option<u64> {
     let s = b.get(at..at.checked_add(8)?)?;
     let mut a = [0u8; 8];
     a.copy_from_slice(s);
@@ -433,13 +436,13 @@ fn le32(b: &[u8], at: usize) -> Option<u32> {
 /// Merge `CMT1` (IFD0), `CMT2` (Exif) and `CMT4` (GPS) into one TIFF stream, so the Exif readers see a CR3
 /// like any TIFF-based raw. The maker note (`CMT3`) is left out: its offsets are relative to its own block.
 pub fn merged_exif(c: &Cr3<'_>) -> Option<Vec<u8>> {
-    use lightcraft_tiff::{IfdBuilder, Tiff, TiffWriter, tags as t};
+    use craft_tiff::{IfdBuilder, Tiff, TiffWriter, tags as t};
     let ifd0 = Tiff::parse(c.cmt[0]?).ok()?;
     let order = ifd0.order;
     let first = |i: usize| c.cmt[i].and_then(|b| Tiff::parse(b).ok()).and_then(|t| t.ifds.into_iter().next());
     // pointers and offsets that would dangle once the IFDs move
     const SKIP: [u16; 9] = [t::EXIF_IFD, t::GPS_IFD, t::INTEROP_IFD, t::SUB_IFDS, t::MAKER_NOTE, 273, 279, 513, 514];
-    let build = |ifd: &lightcraft_tiff::Ifd| {
+    let build = |ifd: &craft_tiff::Ifd| {
         let mut b = IfdBuilder::new();
         for e in ifd.entries.iter().filter(|e| !SKIP.contains(&e.tag)) {
             b.set(e.tag, e.value.clone());
@@ -494,14 +497,14 @@ mod tests {
         let stbl = [full(b"stsd", &stsd), full(b"stsz", &stsz), full(b"co64", &co64)].concat();
         bx(b"trak", &bx(b"mdia", &bx(b"minf", &bx(b"stbl", &stbl))))
     }
-    fn tiff_with(tag: u16, v: lightcraft_tiff::Value) -> Vec<u8> {
-        let b = lightcraft_tiff::IfdBuilder::new().with(tag, v);
-        lightcraft_tiff::TiffWriter::new(lightcraft_tiff::ByteOrder::Little, false).write(&[b]).unwrap()
+    fn tiff_with(tag: u16, v: craft_tiff::Value) -> Vec<u8> {
+        let b = craft_tiff::IfdBuilder::new().with(tag, v);
+        craft_tiff::TiffWriter::new(craft_tiff::ByteOrder::Little, false).write(&[b]).unwrap()
     }
 
     /// A small synthetic CR3: Canon uuid with CMT1/CMT2/CMT4, a JPEG track, a raw track, XMP.
     pub(crate) fn sample() -> Vec<u8> {
-        use lightcraft_tiff::{Value, tags as t};
+        use craft_tiff::{Value, tags as t};
         let cmt1 = tiff_with(t::MODEL, Value::Ascii("Canon EOS Test".into()));
         let cmt2 = tiff_with(t::ISO_SPEED, Value::Short(vec![400]));
         let cmt4 = tiff_with(1, Value::Ascii("N".into()));
@@ -686,7 +689,7 @@ mod tests {
 
     #[test]
     fn timed_metadata_exposes_the_dynamic_maker_note() {
-        use lightcraft_tiff::{Value, tags as t};
+        use craft_tiff::{Value, tags as t};
         let exif = tiff_with(t::ISO_SPEED, Value::Short(vec![800]));
         let maker = tiff_with(0x4001, Value::Short(vec![48, 100, 200]));
         let item = |tag: u32, data: &[u8]| {

@@ -1,0 +1,33 @@
+//! AniCraft XFL import (between `doc` and `engine`): opens Animate documents, as an XFL folder
+//! or a `.fla` archive, into the AniCraft document model.
+//!
+//! Clean room: written from the publicly documented structure of XFL (an XML package:
+//! `DOMDocument.xml`, `LIBRARY/*.xml`) and the published ZIP format. No Animate code, and no
+//! third-party converter code. The test corpus is self-authored.
+#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
+
+pub mod edges;
+pub mod export;
+pub mod import;
+pub mod text;
+pub mod video;
+/// The shared XML reader (`anicraft-xml`), under its old path.
+pub use anicraft_xml as xml;
+/// XFL/FLA ZIP package reader, shared with other consumers through `craft-xfl`.
+pub mod zip {
+    pub use craft_xfl::{Archive, MAX_DEPTH, MAX_ENTRIES, MAX_ENTRY, MAX_RATIO, MAX_TOTAL, ZipError, crc32};
+
+    #[cfg(test)]
+    pub(crate) use crate::pack;
+}
+
+pub use export::{ExportReport, export_fla, export_package, export_path};
+pub use import::{MAX_FLA_BYTES, MAX_NAMED, Report, XflError, import_fla, import_fla_with_fonts, import_path, import_with, import_with_fonts};
+
+#[cfg(test)]
+#[path = "../tests/support/fla.rs"]
+pub(crate) mod pack;
+#[cfg(test)]
+mod tests;
+#[cfg(test)]
+mod text_tests;

@@ -2,6 +2,7 @@
 //! with wgpu and writes PNGs when `EC_SNAPSHOT_DIR` is set (`cargo test -p effectcraft-ui-egui
 //! --test it ui_3d:: -- --ignored`); the other test only runs the UI logic.
 
+use crate::gpu_test::RenderSerial;
 use effectcraft_engine::Session;
 use effectcraft_engine::render::three_d::View3D;
 use effectcraft_ui_egui::EffectcraftApp;
@@ -109,6 +110,7 @@ fn camera_and_light_dialogs_create_layers() {
 #[test]
 #[ignore = "renders with wgpu; run with --ignored (set EC_SNAPSHOT_DIR to keep PNGs)"]
 fn snapshot() {
+    let _device = crate::gpu_test::lock();
     let dir = std::env::var("EC_SNAPSHOT_DIR").ok();
     let mut h = Harness::builder().with_size(egui::vec2(1600.0, 1000.0)).with_pixels_per_point(1.0).wgpu().build_eframe(|_| app());
     let shots: [(&str, Option<&str>); 4] =
@@ -118,7 +120,7 @@ fn snapshot() {
             h.state_mut().session.execute(c, json!({})).unwrap();
         }
         settle(&mut h);
-        let img = h.render().expect("render");
+        let img = h.render_serialized().expect("render");
         if let Some(d) = &dir {
             img.save(format!("{d}/ui3d_{name}.png")).unwrap();
         }
@@ -126,14 +128,14 @@ fn snapshot() {
     let ctx = h.ctx.clone();
     effectcraft_ui_egui::menus::invoke(h.state_mut(), &ctx, "layer.newCamera", json!({})).unwrap();
     h.run_steps(3);
-    let img = h.render().expect("render");
+    let img = h.render_serialized().expect("render");
     if let Some(d) = &dir {
         img.save(format!("{d}/ui3d_camera_dialog.png")).unwrap();
     }
     h.state_mut().dialog = None;
     effectcraft_ui_egui::menus::invoke(h.state_mut(), &ctx, "layer.newLight", json!({})).unwrap();
     h.run_steps(3);
-    let img = h.render().expect("render");
+    let img = h.render_serialized().expect("render");
     if let Some(d) = &dir {
         img.save(format!("{d}/ui3d_light_dialog.png")).unwrap();
     }
@@ -143,7 +145,7 @@ fn snapshot() {
     h.state_mut().session.execute("layer.select", json!({"layers": ["Card Blue"]})).unwrap();
     effectcraft_ui_egui::menus::invoke(h.state_mut(), &ctx, "timeline.reveal.rotation", json!({})).unwrap();
     settle(&mut h);
-    let img = h.render().expect("render");
+    let img = h.render_serialized().expect("render");
     if let Some(d) = &dir {
         img.save(format!("{d}/ui3d_reveal_rotation.png")).unwrap();
     }
@@ -348,4 +350,52 @@ fn a_gizmo_arrow_wins_over_the_box_handle_under_it() {
     assert_eq!(transform(&mut h, solid, "scale"), vec![100.0, 100.0, 100.0], "not scaled");
     assert!((p1[0] - p0[0] - 30.0).abs() < 1e-6, "moved 30 px along x: {p0:?} -> {p1:?}");
     assert_eq!(&p1[1..], &p0[1..]);
+}
+
+#[test]
+fn gizmo_projects_on_3d_primitive_layers_and_rotation_rings_turn_single_axis_with_undo() {
+    let mut s = Session::default();
+    s.execute("comp.new", json!({"name": "C", "width": 640, "height": 360, "duration": 2})).unwrap();
+    let cube = s.execute("layer.newPrimitive", json!({"kind": "cube"})).unwrap()["layer"].as_u64().unwrap();
+    s.execute("layer.select", json!({"layers": [cube]})).unwrap();
+    let mut h = Harness::builder().with_size(egui::vec2(1600.0, 1000.0)).build_eframe(|_| EffectcraftApp::new(s));
+    settle(&mut h);
+
+    // 3D primitive layers have no 2D content_bounds quad, yet still register anchor + full 3D gizmo.
+    let _origin = centre(&h, &format!("viewer.gizmo.{cube}.origin"));
+    let tx = centre(&h, &format!("viewer.gizmo.{cube}.x"));
+
+    // Translate Cube along X via the gizmo arrow.
+    let p0 = transform(&mut h, cube, "position");
+    drag(&mut h, tx, tx + egui::vec2(36.0, 0.0));
+    let p1 = transform(&mut h, cube, "position");
+    assert!(p1[0] > p0[0] + 15.0, "3D primitive translated along X: {p0:?} -> {p1:?}");
+    assert_eq!(&p1[1..], &p0[1..]);
+
+    // Rotate Cube around X via the red rotation arc handle (re-query position after X translation).
+    let scalar = |h: &mut Harness<'_, EffectcraftApp>, prop: &str| -> f64 {
+        h.state_mut().session.execute("prop.get", json!({"layer": cube, "path": format!("transform/{prop}")})).unwrap()["value"].as_f64().unwrap()
+    };
+    settle(&mut h);
+    let rx = centre(&h, &format!("viewer.gizmo.{cube}.rotate.x"));
+    let rot_x0 = scalar(&mut h, "rotationX");
+    drag(&mut h, rx, rx + egui::vec2(0.0, 40.0));
+    let rot_x1 = scalar(&mut h, "rotationX");
+    assert!((rot_x1 - rot_x0).abs() > 10.0, "rotationX changed: {rot_x0} -> {rot_x1}");
+    assert_eq!(scalar(&mut h, "rotationY"), 0.0);
+    assert_eq!(scalar(&mut h, "rotation"), 0.0);
+
+    // Rotate Cube around Z via the blue rotation arc handle.
+    settle(&mut h);
+    let rz = centre(&h, &format!("viewer.gizmo.{cube}.rotate.z"));
+    let rot_z0 = scalar(&mut h, "rotation");
+    drag(&mut h, rz, rz + egui::vec2(-30.0, 30.0));
+    let rot_z1 = scalar(&mut h, "rotation");
+    assert!((rot_z1 - rot_z0).abs() > 10.0, "rotation (Z) changed: {rot_z0} -> {rot_z1}");
+
+    // Single undo step per gizmo drag.
+    h.state_mut().session.execute("edit.undo", json!({})).unwrap();
+    assert!((scalar(&mut h, "rotation") - rot_z0).abs() < 1e-6);
+    h.state_mut().session.execute("edit.undo", json!({})).unwrap();
+    assert!((scalar(&mut h, "rotationX") - rot_x0).abs() < 1e-6);
 }

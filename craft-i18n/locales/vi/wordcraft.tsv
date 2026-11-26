@@ -1740,6 +1740,14 @@ template	Letter	Thư
 	Remove the control once edited	Gỡ điều khiển nội dung sau khi sửa
 	Remove the space before the punctuation	Bỏ khoảng trắng trước dấu câu
 	Remove Watermark	Xóa hình mờ
+	No watermark	Không có hình mờ
+	Picture watermark	Hình mờ ảnh
+	Text watermark	Hình mờ văn bản
+	Select Picture…	Chọn ảnh…
+	Washout	Nhạt màu
+	Semitransparent	Bán trong suốt
+	Transparency:	Độ trong suốt:
+	Select a picture first.	Hãy chọn ảnh trước.
 	Rename Document	Đổi tên tài liệu
 	Reopen	Mở lại
 	Repeat as header row on each page	Lặp lại làm hàng tiêu đề trên mỗi trang
@@ -2451,3 +2459,121 @@ template	Letter	Thư
 	✓ None	✓ Không có
 	➕ New comment	➕ Nhận xét mới
 	📂  Browse…	📂  Duyệt…
+	Add a language…	Thêm ngôn ngữ…
+	Add a language	Thêm ngôn ngữ
+	Your languages	Ngôn ngữ của bạn
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Tiếng Anh, các ngôn ngữ của tài liệu này và mọi gói ngôn ngữ đã cài đặt. Gói ngôn ngữ bổ sung từ điển chính tả và ngắt từ.
+	Set as default	Đặt làm mặc định
+	New blank documents are written in this language	Tài liệu trống mới được viết bằng ngôn ngữ này
+	{language} (default)	{language} (mặc định)
+	Built in	Tích hợp sẵn
+	Your own dictionary	Từ điển riêng của bạn
+	System dictionary	Từ điển hệ thống
+	Not available yet	Chưa khả dụng
+	Grammar built in	Ngữ pháp tích hợp sẵn
+	Install spelling ({size})	Cài đặt chính tả ({size})
+	Its dictionary couldn't be read: {reason}	Không đọc được từ điển của ngôn ngữ này: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Tính năng tải xuống đang tắt. Nhấp vào “Thêm ngôn ngữ…” hoặc “Cài đặt” sẽ bật lại: khi đó WordCraft tải các gói ngôn ngữ và phông chữ từ GitHub.
+	Search:	Tìm kiếm:
+	Dutch, Nederlands or nl	Tiếng Hà Lan, Nederlands hoặc nl
+	No languages to show yet.	Chưa có ngôn ngữ nào để hiển thị.
+	No language matches your search.	Không có ngôn ngữ nào khớp với tìm kiếm của bạn.
+	An installed Language pack is used after this folder.	Gói ngôn ngữ đã cài đặt được dùng sau thư mục này.
+	Dictionary files	Tệp từ điển
+	Gets the list of Language packs, then this language's pack if there is one.	Lấy danh sách các gói ngôn ngữ, rồi gói của ngôn ngữ này nếu có.
+	Afrikaans	Tiếng Afrikaans
+	Belarusian	Tiếng Belarus
+	Bulgarian	Tiếng Bulgaria
+	Bosnian	Tiếng Bosnia
+	Catalan	Tiếng Catalan
+	Catalan (Valencian)	Tiếng Catalan (Valencia)
+	Welsh	Tiếng Wales
+	Esperanto	Tiếng Quốc tế ngữ
+	Persian	Tiếng Ba Tư
+	Irish	Tiếng Ireland
+	Galician	Tiếng Galicia
+	Hungarian	Tiếng Hungary
+	Armenian	Tiếng Armenia
+	Icelandic	Tiếng Iceland
+	Georgian	Tiếng Gruzia
+	Lithuanian	Tiếng Litva
+	Latvian	Tiếng Latvia
+	Macedonian	Tiếng Macedonia
+	Norwegian (Nynorsk)	Tiếng Na Uy (Nynorsk)
+	Slovak	Tiếng Slovak
+	Slovenian	Tiếng Slovenia
+	Albanian	Tiếng Albania
+	Swahili	Tiếng Swahili
+	Tamil	Tiếng Tamil
+	Thai	Tiếng Thái
+	Vietnamese	Tiếng Việt
+	Set as Default Language	Đặt làm ngôn ngữ mặc định
+	U.A.E.	Các Tiểu vương quốc Ả Rập Thống nhất
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Áo
+	Australia	Úc
+	Bosnia and Herzegovina	Bosnia và Herzegovina
+	Belgium	Bỉ
+	Bolivia	Bolivia
+	Brazil	Brazil
+	Belarus	Belarus
+	Canada	Canada
+	Switzerland	Thụy Sĩ
+	Chile	Chile
+	China	Trung Quốc
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Cabo Verde
+	Cyprus	Síp
+	Germany	Đức
+	Dominican Republic	Cộng hòa Dominica
+	Ecuador	Ecuador
+	Egypt	Ai Cập
+	Spain	Tây Ban Nha
+	Finland	Phần Lan
+	France	Pháp
+	United Kingdom	Vương quốc Anh
+	Equatorial Guinea	Guinea Xích đạo
+	Guatemala	Guatemala
+	Hong Kong SAR	Đặc khu Hồng Kông
+	Honduras	Honduras
+	Ireland	Ireland
+	India	Ấn Độ
+	Iraq	Iraq
+	Italy	Ý
+	Jamaica	Jamaica
+	Jordan	Jordan
+	Kuwait	Kuwait
+	Kazakhstan	Kazakhstan
+	Lebanon	Liban
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxembourg
+	Morocco	Maroc
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Đặc khu Macao
+	Mexico	Mexico
+	Malaysia	Malaysia
+	Mozambique	Mozambique
+	Nicaragua	Nicaragua
+	Netherlands	Hà Lan
+	New Zealand	New Zealand
+	Panama	Panama
+	Peru	Peru
+	Philippines	Philippines
+	Puerto Rico	Puerto Rico
+	Portugal	Bồ Đào Nha
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Nga
+	Singapore	Singapore
+	El Salvador	El Salvador
+	Syria	Syria
+	Taiwan	Đài Loan
+	Ukraine	Ukraine
+	United States	Hoa Kỳ
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Nam Phi

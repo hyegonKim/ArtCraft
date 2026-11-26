@@ -17,6 +17,7 @@
 	(normal text)	(normal text)
 	(not matched)	(ingen matchning)
 	(picture or object)	(bild eller objekt)
+	*Bold* and _italic_ as real formatting	*Fet* och _kursiv_ som riktig formatering
 	0 or More Characters	0 eller fler tecken
 	1. Formatting restrictions	1. Formateringsbegränsningar
 	1.5 Line Spacing	Radavstånd 1,5
@@ -59,27 +60,31 @@
 	About WordCraft	Om WordCraft
 	Above Chart	Ovanför diagrammet
 	Above the item	Ovanför objektet
+	Above/below	Ovanför/nedanför
 	Absolute value cases	Fall med absolutbelopp
 	Accent	Accent
-	Accent Gradient	Accenttoning
+	Accent Gradient	Accentgradient
 	Accent with Reflection	Accent med spegling
 	Accent {n}	Accent {n}
 	Accents	Accenter
 	Accept	Acceptera
 	Accept All Changes	Acceptera alla ändringar
+	Accept All Changes and Stop Tracking	Acceptera alla ändringar och sluta spåra
+	Accept and Move to Next	Acceptera och gå till nästa
 	Accept This Change	Acceptera den här ändringen
 	Accessed on	Hämtad den
 	Accessibility Pane	Tillgänglighetspanel
 	Account	Konto
 	Acute	Akut accent
 	Add >>	Lägg till >>
+	Add a period with double-space	Lägg till punkt vid dubbelt blanksteg
 	Add a Table	Lägg till en tabell
 	Add at least one field.	Lägg till minst ett fält.
 	Add Chart Element	Lägg till diagramelement
 	Add Condition	Lägg till villkor
 	Add Field	Lägg till fält
 	Add Font…	Lägg till typsnitt…
-	Add gradient stop	Lägg till toningsstopp
+	Add gradient stop	Lägg till gradientstopp
 	Add line numbering	Lägg till radnumrering
 	Add New Source…	Lägg till ny källa…
 	Add Object to Selection	Lägg till objekt i markeringen
@@ -93,6 +98,7 @@
 	Add tab stop at:	Lägg till tabbstopp vid:
 	Add Text	Lägg till text
 	Add the chapter number	Lägg till kapitelnumret
+	Add to AutoCorrect	Lägg till i autokorrigering
 	Add to Document	Lägg till i dokumentet
 	Add to Quick Access Toolbar	Lägg till i snabbverktygsfältet
 	Add to Style Gallery	Lägg till i stilgalleriet
@@ -102,9 +108,9 @@
 	Add\nNote	Lägg till\nanteckning
 	Add\nPen	Lägg till\npenna
 	Add\nShape	Lägg till\nfigur
-	Added 1 font	1 teckensnitt har lagts till
+	Added 1 font	Lade till 1 typsnitt
 	Added Fonts	Tillagda typsnitt
-	Added {n} fonts	{n} teckensnitt har lagts till
+	Added {n} fonts	Lade till {n} typsnitt
 	Address	Adress
 	Address Block	Adressblock
 	Address labels	Adressetiketter
@@ -112,6 +118,7 @@
 	Address\nBlock	Adress-\nblock
 	Advanced Find	Avancerad sökning
 	Advanced Find…	Avancerad sökning…
+	Advanced Properties…	Avancerade egenskaper…
 	After:	Efter:
 	Agents	Agenter
 	Align Bottom Center	Justera nere i mitten
@@ -184,8 +191,10 @@
 	Atmosphere	Atmosfär
 	Attach Template	Koppla mall
 	Attach…	Koppla…
+	Auto orientation	Automatisk orientering
 	AutoCorrect	Autokorrigering
 	AutoCorrect Options	Alternativ för autokorrigering
+	AutoCorrect Options…	Alternativ för autokorrigering…
 	AutoFit	Autoanpassa
 	AutoFit behavior	Autopassning
 	AutoFit Column by Double-Clicking	Autoanpassa kolumnen genom att dubbelklicka
@@ -201,6 +210,8 @@
 	Automatic numbered lists	Automatiska numrerade listor
 	Automatic Table 1 (3 levels)	Automatisk innehållsförteckning 1 (3 nivåer)
 	Automatic Table 2 (2 levels)	Automatisk innehållsförteckning 2 (2 nivåer)
+	Automatically add words to list (First Letter)	Lägg automatiskt till ord i listan (Första bokstaven)
+	Automatically add words to list (INitial CAps)	Lägg automatiskt till ord i listan (INledande VErsaler)
 	Automatically hyphenate document	Avstava dokumentet automatiskt
 	Automatically Update Document Styles	Uppdatera dokumentstilar automatiskt
 	Automatically update document styles	Uppdatera dokumentstilar automatiskt
@@ -253,6 +264,9 @@
 	Book title	Boktitel
 	Bookmark	Bokmärke
 	Bookmark name:	Bokmärkesnamn:
+	Bookmark text	Bokmärkestext
+	Bookmarks	Bokmärken
+	Border	Kantlinje
 	Border lines	Kantlinjer
 	Border Painter	Kantlinjepensel
 	Border\nPainter	Kantlinje-\npensel
@@ -275,9 +289,13 @@
 	Brackets with Separators	Hakparenteser med avgränsare
 	Breaks	Brytningar
 	Breve	Breve
+	Bright Green	Klargrön
+	Brighter +20%	Ljusare +20 %
+	Brightness, contrast and sharpness	Ljusstyrka, kontrast och skärpa
 	Browse in WordCraft…	Bläddra i WordCraft…
 	Building Block Gallery Content Control	Innehållskontroll för byggblocksgalleri
 	Built-In	Inbyggd
+	Built-in Heading styles	Inbyggda rubrikstilar
 	Built-in style	Inbyggd stil
 	Built-in styles can't be deleted.	Inbyggda stilar kan inte tas bort.
 	Bullet Library	Punktbibliotek
@@ -332,10 +350,12 @@
 	Change to Level 7	Ändra till nivå 7
 	Change to Level 8	Ändra till nivå 8
 	Change to Level 9	Ändra till nivå 9
+	Change to:	Ändra till:
 	Change\nChart Type	Ändra\ndiagramtyp
 	Change\nColors	Ändra\nfärger
 	Changed lines:	Ändrade rader:
 	Changes	Ändringar
+	Change…	Ändra…
 	Chapter 1	Kapitel 1
 	Chapter in a book	Kapitel i en bok
 	Chapters begin at:	Kapitel börjar vid:
@@ -362,11 +382,14 @@
 	Check Box Content Control	Innehållskontroll för kryssruta
 	Check Compatibility	Kontrollera kompatibilitet
 	Check for Errors	Sök efter fel
+	Check for Updates	Sök efter uppdateringar
+	Check for\nUpdates…	Sök efter\nuppdateringar…
 	Check Spelling as You Type	Kontrollera stavningen medan du skriver
 	Check spelling as you type	Kontrollera stavningen medan du skriver
 	Check\nAccessibility	Kontrollera\ntillgänglighet
 	Checked styles are allowed:	Ikryssade stilar är tillåtna:
 	Checked symbol	Symbol för ikryssad
+	Checking for updates…	Söker efter uppdateringar…
 	Chevron Down	Vinkel nedåt
 	Chevron Up	Vinkel uppåt
 	Chicago	Chicago
@@ -396,6 +419,7 @@
 	Clipboard Contents	Innehållet i Urklipp
 	Clipboard Items	Objekt i Urklipp
 	Clipboard Pane	Urklippspanel
+	Close Document	Stäng dokumentet
 	Close Equation	Stäng ekvation
 	Close Header and Footer	Stäng sidhuvud och sidfot
 	Close Outline View	Stäng dispositionsvyn
@@ -453,6 +477,7 @@
 	Contents can't be edited	Innehållet kan inte redigeras
 	Context	Efter sammanhang
 	Continue from previous section	Fortsätt från föregående avsnitt
+	Continue without restoring	Fortsätt utan att återställa
 	Continuous	Löpande
 	Continuous numbering	Löpande numrering
 	Contour Integral	Kurvintegral
@@ -477,6 +502,7 @@
 	Copy to	Kopiera till
 	Copyright	Copyright
 	Copyright Sign	Copyrighttecken
+	Corporate Author	Organisation som författare
 	Correct accidental usage of cAPS LOCK key	Rätta oavsiktlig användning av cAPS LOCK
 	Correct TWo INitial CApitals	Rätta TVå INledande VErsaler
 	Corrections	Korrigeringar
@@ -484,9 +510,11 @@
 	Cosine 2x	Cosinus 2x
 	Cosine Function	Cosinusfunktion
 	Cotangent Function	Cotangensfunktion
+	Could not check for updates:\n{error}	Det gick inte att söka efter uppdateringar:\n{error}
 	Couldn't download {name}: {error}	Det gick inte att ladda ner {name}: {error}
 	Couldn't make WordCraft the default: {error}	Det gick inte att göra WordCraft till standardprogram: {error}
 	Couldn't open {path}: {error}	Det gick inte att öppna {path}: {error}
+	Couldn't save {name}, so it is still open and nothing was lost: {error}	Det gick inte att spara {name}, så dokumentet är fortfarande öppet och inget har gått förlorat: {error}
 	Count by:	Intervall:
 	Count words in text boxes and notes	Räkna ord i textrutor, fotnoter och slutnoter
 	Courtesy Title	Tilltalstitel
@@ -499,11 +527,39 @@
 	Create New Style	Skapa ny stil
 	Create Source	Skapa källa
 	Croatian	Kroatiska
+	Crop on the page works on unturned pictures: set Rotation to 0° first, or use the crop boxes	Beskärning på sidan fungerar bara på bilder som inte är roterade: ställ först in Rotation på 0° eller använd beskärningsrutorna
 	Cross-reference	Korsreferens
 	Cross-reference:	Korsreferens:
+	Dark Blue	Mörkblå
+	Dark Red	Mörkröd
+	Dark Yellow	Mörkgul
+	East	Öster
+	Gray-25%	Grå 25 %
+	Gray-50%	Grå 50 %
+	Macro name:	Makronamn:
+	More options	Fler alternativ
+	Not in Dictionary	Finns inte i ordlistan
+spacing	Open	Öppen
+	Page number	Sidnummer
+	Picture border	Bildkantlinje
+	Record…	Spela in…
+	Run	Kör
+	Soft Edge	Mjuk kant
+	Stop Recording	Stoppa inspelning
+	Suggestions	Förslag
+	Teal	Blågrön
+	The document or selection changed. Check again to continue.	Dokumentet eller markeringen har ändrats. Kontrollera igen för att fortsätta.
+	There are no macros yet. Record one to add it here.	Det finns inga makron än. Spela in ett för att lägga till det här.
+	Turquoise	Turkos
+	{field}, record {n}	{field}, post {n}
+	{key} starts a new page. Much tidier than pressing Enter until it happens.	{key} börjar en ny sida. Mycket snyggare än att trycka på Enter tills det händer.
+	{key} finds and replaces text, formatting and special characters.	{key} söker och ersätter text, formatering och specialtecken.
+	{key} turns the selected text into a link.	{key} gör den markerade texten till en länk.
+	{key} counts your words, characters and paragraphs.	{key} räknar dina ord, tecken och stycken.
 	Cube Root	Kubikrot
 	Current - Linear	Aktuell – linjär
 	Current - Professional	Aktuell – professionell
+	Current Document	Aktuellt dokument
 	Current Position	Aktuell position
 	Current record	Aktuell post
 	Current style: {style}	Aktuell stil: {style}
@@ -530,6 +586,7 @@
 	Dark page (white text on black)	Mörk sida (vit text på svart)
 	Dark Variations	Mörka varianter
 	Dark with Shadow	Mörk med skugga
+	Darker −20%	Mörkare −20 %
 	Darkroom	Mörkrum
 	Data Labels	Dataetiketter
 	Date & Time	Datum och tid
@@ -592,6 +649,8 @@
 	Direct formatting	Direkt formatering
 	Direction	Riktning
 	Directory	Katalog
+	Discard the recovery copy of {name}?	Vill du slänga återställningskopian av {name}?
+	Discard…	Släng…
 	Discord community	Discord-community
 	Display for Review	Visning för granskning
 	Display text	Visningstext
@@ -607,6 +666,8 @@
 	DO NOT COPY	KOPIERA INTE
 	Do Not Show in TOC	Visa inte i innehållsförteckningen
 	Do you want to save changes to {name}?	Vill du spara ändringarna i {name}?
+	Dock Left	Docka till vänster
+	Dock Right	Docka till höger
 	Document End	Dokumentets slut
 	Document Formatting	Dokumentformatering
 	Document Grid	Dokumentrutnät
@@ -718,6 +779,7 @@
 	Enter formatting for number:	Ange formatering för numret:
 	Enter in Equation	Enter i ekvation
 	Enter page number:	Ange sidnummer:
+	Entire caption	Hela bildtexten
 	Entry marked.	Posten är märkt.
 	Envelope #10	Kuvert #10
 	Envelope #10   4.12" × 9.50"	Kuvert #10   4,12" × 9,50"
@@ -773,6 +835,7 @@
 	Figure	Figur
 	File locations	Filplatser
 	File name:	Filnamn:
+	File type	Filtyp
 	File › New lists the .dotx and .dotm templates here under Personal; Save as Word Template starts here.	Arkiv › Ny visar .dotx- och .dotm-mallarna härifrån under Personliga; Spara som Word-mall börjar här.
 	Fill color:	Fyllningsfärg:
 	Filling in forms	Ifyllning av formulär
@@ -800,7 +863,9 @@
 	First row of data contains column headers	Första dataraden innehåller kolumnrubriker
 	Fix Position on Page	Fast position på sidan
 	Fixed Column Width	Fast kolumnbredd
+	Float	Gör flytande
 	Floor	Golvfunktion
+	Folder path	Mappsökväg
 	Follow number with:	Efter numret:
 	Font Color	Teckenfärg
 	Font color	Teckenfärg
@@ -834,6 +899,7 @@
 	Forward	Spola framåt
 	Fraction	Bråk
 	Fractions (1/2) as fraction characters (½)	Bråk (1/2) som bråktecken (½)
+	Frames and effects	Ramar och effekter
 	French (France)	Franska (Frankrike)
 	From Bottom Left Corner	Från nedre vänstra hörnet
 	From Bottom Right Corner	Från nedre högra hörnet
@@ -844,6 +910,7 @@
 	from Unicode (hex)	från Unicode (hex)
 	From:	Från:
 	Full page of the same label	Hel sida med samma etikett
+	Full Saturation 100%	Full mättnad 100 %
 	Full Screen View	Helskärmsvisning
 	Full\nScreen	Hel-\nskärm
 	Function	Funktion
@@ -865,10 +932,10 @@
 	GOST (name sort)	GOST (sortering på namn)
 	GOST (title sort)	GOST (sortering på titel)
 	Grab bag	Blandat
-	Gradient	Toning
-	Gradient fill	Toningsfyllning
-	Gradient stops	Toningsstopp
+	Gradient fill	Gradientfyllning
+	Gradient stops	Gradientstopp
 	Grave	Grav accent
+	Gray 0%	Grå 0 %
 	Greater than	Större än
 	Greater than or equal	Större än eller lika med
 	Greek	Grekiska
@@ -955,6 +1022,8 @@
 	Immersive	Fördjupning
 	Immersive Reader	Fördjupad läsning
 	Immersive\nReader	Fördjupad\nläsning
+	Imported 1 source	Importerade 1 källa
+	Imported {n} sources	Importerade {n} källor
 	In Default apps, choose WordCraft for the document types you want it to open.	I Standardappar väljer du WordCraft för de dokumenttyper som den ska öppna.
 	In equations, typing a name after a backslash replaces it with its symbol.	I ekvationer ersätts ett namn som du skriver efter ett omvänt snedstreck med sin symbol.
 	In Front of Text	Framför texten
@@ -1071,6 +1140,7 @@
 	Join the ArtCraft community on Discord	Gå med i ArtCrafts community på Discord
 	Join us on Discord: discord.gg/artcraft	Gå med i ArtCrafts community på Discord: discord.gg/artcraft
 	Journal	Tidskrift
+	Journal article	Tidskriftsartikel
 	Justification of a display equation	Justering av en fristående ekvation
 	Justified	Marginaljusterad
 	Keep Lines Together	Håll ihop raderna
@@ -1080,7 +1150,7 @@
 	Keep with Next	Håll ihop med nästa
 	Keep with next	Håll ihop med nästa
 	Keeps the fonts and formatting of the copied text.	Behåller typsnitt och formatering från den kopierade texten.
-	Kerning for fonts:	Kerning för teckensnitt:
+	Kerning for fonts:	Kerning för typsnitt:
 	Keyboard shortcuts:	Kortkommandon:
 	Keys for this command:	Tangenter för det här kommandot:
 	Label changes with:	Märk ändringar med:
@@ -1122,6 +1192,7 @@
 	Legal   8.50" × 14.00"	Legal   8,50" × 14,00"
 	Legal style numbering	Numrering i juridisk stil
 	Legend	Förklaring
+	Less Contrast −20%	Mindre kontrast −20 %
 	Less than	Mindre än
 	Less than or equal	Mindre än eller lika med
 template	Letter	Brev
@@ -1191,6 +1262,7 @@ template	Letter	Brev
 	Loaded {count} system fonts.	{count} systemtypsnitt har lästs in.
 	Local font access is not supported by your browser.	Webbläsaren har inte stöd för åtkomst till lokala typsnitt.
 	Local font access was denied.	Åtkomst till lokala typsnitt nekades.
+	Local recovery is unavailable or still loading.	Lokal återställning är inte tillgänglig eller läses fortfarande in.
 	Location: {path}	Plats: {path}
 	Lock aspect ratio	Lås proportioner
 	Lock Fields	Lås fält
@@ -1265,7 +1337,8 @@ template	Letter	Brev
 	More Colors…	Fler färger…
 	More Columns…	Fler kolumner…
 	More Commands…	Fler kommandon…
-	More Gradients…	Fler toningar…
+	More Contrast +20%	Mer kontrast +20 %
+	More Gradients…	Fler gradienter…
 	More Paper Sizes…	Fler pappersstorlekar…
 	More Symbols…	Fler symboler…
 	More tabs	Fler flikar
@@ -1273,6 +1346,7 @@ template	Letter	Brev
 	More Underlines…	Fler understrykningar…
 	Move in Equation	Flytta i ekvation
 	Move or Resize	Flytta eller ändra storlek
+	Move Pane: {title}	Flytta panelen: {title}
 	Move Paragraph Down	Flytta stycket nedåt
 	Move Paragraph Up	Flytta stycket uppåt
 	Move Past Citation	Hoppa förbi källhänvisning
@@ -1289,6 +1363,8 @@ template	Letter	Brev
 	Multilevel List	Lista med flera nivåer
 	Multilevel List Library	Bibliotek med listor med flera nivåer
 	Multiple Pages	Flera sidor
+	Mute agent messages	Stäng av agentmeddelanden
+	Muted 50%	Dämpad 50 %
 	My list has	Min lista har
 	Name of the file this document is saved as	Namnet på filen som dokumentet är sparat som
 	Narrow	Smal
@@ -1328,17 +1404,21 @@ template	Letter	Brev
 	No Fill	Ingen fyllning
 	No fill	Ingen fyllning
 	No Glow	Ingen glöd
-	No Gradient	Ingen toning
+	No Gradient	Ingen gradient
 	No grid	Inget rutnät
 	No header row	Ingen rubrikrad
 	No icons match your search.	Inga ikoner matchar sökningen.
 	No items to show.	Inga objekt att visa.
 	No Markup	Ingen märkning
+	No matching commands	Inga matchande kommandon
 	No model credits were built into this copy.	Den här kopian innehåller inga uppgifter om medverkande AI-modeller.
+	No new sources in that file	Inga nya källor i den filen
 	No Outline	Ingen kontur
 	No Paragraph Space	Inget styckeavstånd
 	No printers found. Configure a system printer or export a PDF.	Inga skrivare hittades. Lägg till en skrivare i systemet eller exportera en PDF.
+	No recovery copies.	Inga återställningskopior.
 	No Reflection	Ingen spegling
+	No Scaling	Ingen skalning
 	No Shadow	Ingen skugga
 	No Soft Edges	Inga mjuka kanter
 	No sources yet.	Inga källor än.
@@ -1374,8 +1454,9 @@ template	Letter	Brev
 	Nothing	Ingenting
 	Nothing collected yet. Items you copy or cut appear here.	Inget insamlat än. Det du kopierar eller klipper ut visas här.
 	nothing is selected	inget är markerat
+	Nothing of this type in the document.	Det finns inget av den här typen i dokumentet.
 	Now used by {command}	Används nu av {command}
-	Nudge	Knuffa
+	Nudge	Flytta stegvis
 	Num Occurrences	Antal förekomster
 	Number alignment:	Justering av nummer:
 	Number format	Nummerformat
@@ -1422,6 +1503,9 @@ template	Letter	Brev
 	Only for the selected text	Endast för den markerade texten
 	Only form fields can be filled in.	Bara formulärfält kan fyllas i.
 	only in Outline view	bara i dispositionsvyn
+	Only in this document	Bara i det här dokumentet
+	Only label and number	Endast etikett och nummer
+	Only text properties can be changed.	Endast textegenskaper kan ändras.
 	Only the allowed styles can be applied.	Bara de tillåtna stilarna kan användas.
 	Only web (http, https) and email (mailto) links can be followed	Bara webblänkar (http, https) och e-postlänkar (mailto) kan följas
 	Open a document first	Öppna först ett dokument
@@ -1468,6 +1552,7 @@ template	Letter	Brev
 	Page break before	Sidbrytning före
 	Page Breaks	Sidbrytningar
 	Page Color	Sidfärg
+	Page color	Sidfärg
 	Page display	Sidvisning
 	Page Down	Sida nedåt
 	Page image (*.png)	Sidbild (*.png)
@@ -1488,8 +1573,10 @@ template	Letter	Brev
 	Page\nBorders	Sid-\nkantlinjer
 	Page\nColor	Sid-\nfärg
 	Page\nNumber	Sid-\nnummer
+	Pages in the range	Sidor i omfånget
 	Pages like 1-3, 5	Sidor som 1-3, 5
 	Pages of bookmark:	Bokmärkets sidor:
+	Pane Options	Panelalternativ
 	Paper size:	Pappersstorlek:
 	Paragraph Character	Stycketecken
 	Paragraph Details	Styckedetaljer
@@ -1524,7 +1611,7 @@ template	Letter	Brev
 	Personal	Personliga
 	Personal Templates	Personliga mallar
 	Personalize	Personligt
-	Phonetic Guide	Fonetisk guide
+	Phonetic Guide	Uttalsguide
 	pi	pi
 	Pi Over 2	Pi genom 2
 	Pick a custom group (New Group makes one)	Välj en egen grupp (Ny grupp skapar en)
@@ -1534,6 +1621,7 @@ template	Letter	Brev
 	Picture Content Control	Innehållskontroll för bild
 	Picture Format	Formatera bild
 	Picture Styles	Bildstilar
+	Picture transparency	Bildens genomskinlighet
 	Pictures	Bilder
 	Pie	Cirkeldiagram
 	Place in This Document	Plats i det här dokumentet
@@ -1552,7 +1640,7 @@ template	Letter	Brev
 	Power series of (1+x)ⁿ	Potensserie för (1+x)ⁿ
 	Preferred width:	Önskad bredd:
 	Preserve formatting during updates	Behåll formateringen vid uppdatering
-	Preset gradients	Förinställda toningar
+	Preset gradients	Förinställda gradienter
 	Press a key combination	Tryck på en tangentkombination
 	Preview Results	Förhandsgranska resultat
 	Preview\nResults	Förhandsgranska\nresultat
@@ -1594,6 +1682,8 @@ template	Letter	Brev
 	Proofing	Korrektur
 	Proofing Issues	Korrekturanmärkningar
 	Proofing language	Korrekturspråk
+	Property names are 1–{max} characters.	Egenskapsnamn får vara 1–{max} tecken.
+	Property values are at most {max} bytes.	Egenskapsvärden får vara högst {max} byte.
 	Protect Document	Skydda dokument
 	pt	pt
 	Publisher	Förlag
@@ -1618,6 +1708,7 @@ template	Letter	Brev
 	Reading Highlight	Framhäv träffar
 	Reading Line Spacing	Radavstånd vid läsning
 	Reading Mode	Läsläge
+	Reading Page Color	Sidfärg vid läsning
 	Reading Speed	Läshastighet
 	Reading Text Size	Textstorlek vid läsning
 	Reads the clipboard's rich text and keeps its formatting.	Läser formaterad text från Urklipp och behåller formateringen.
@@ -1631,7 +1722,10 @@ template	Letter	Brev
 	Recolor a one-color picture, such as an icon	Färga om en enfärgad bild, till exempel en ikon
 	Recolor Selected Ink	Färga om markerat bläck
 	Record Macro	Spela in makro
+	Recover documents	Återställ dokument
 	Recover Unsaved Documents	Återställ osparade dokument
+	Recovery copy	Återställningskopia
+	Recovery is disabled while this document has a password.	Återställning är inaktiverad medan dokumentet har ett lösenord.
 	Red:	Röd:
 	Reduce Hanging Indent	Minska hängande indrag
 	Reference type:	Referenstyp:
@@ -1644,6 +1738,8 @@ template	Letter	Brev
 	Regular expressions	Reguljära uttryck
 	Reject	Avvisa
 	Reject All Changes	Avvisa alla ändringar
+	Reject All Changes and Stop Tracking	Avvisa alla ändringar och sluta spåra
+	Reject and Move to Next	Avvisa och gå till nästa
 	Reject Change	Avvisa ändring
 	Relationship	Relation
 	Relative to original picture size	I förhållande till bildens ursprungliga storlek
@@ -1655,7 +1751,7 @@ template	Letter	Brev
 	Remove field	Ta bort fält
 	Remove Footer	Ta bort sidfot
 	Remove from Quick Access Toolbar	Ta bort från snabbverktygsfältet
-	Remove gradient stop	Ta bort toningsstopp
+	Remove gradient stop	Ta bort gradientstopp
 	Remove Header	Ta bort sidhuvud
 	Remove Hyperlink	Ta bort hyperlänk
 	Remove my name from comments, changes and file properties when saving	Ta bort mitt namn från kommentarer, ändringar och filegenskaper när dokumentet sparas
@@ -1669,6 +1765,13 @@ template	Letter	Brev
 	Remove the control once edited	Ta bort kontrollen när den har redigerats
 	Remove the space before the punctuation	Ta bort blanksteget före skiljetecknet
 	Remove Watermark	Ta bort vattenstämpel
+	No watermark	Ingen vattenstämpel
+	Picture watermark	Bildvattenstämpel
+	Text watermark	Textvattenstämpel
+	Select Picture…	Välj bild…
+	Semitransparent	Halvgenomskinlig
+	Transparency:	Genomskinlighet:
+	Select a picture first.	Välj en bild först.
 	Rename Document	Byt namn på dokument
 	Reopen	Öppna igen
 	Repeat as header row on each page	Upprepa som rubrikrad på varje sida
@@ -1691,6 +1794,7 @@ template	Letter	Brev
 	Reset Picture	Återställ bild
 	Reset to Normal	Återställ till Normal
 	Reset\nGraphic	Återställ\ngrafik
+	Resize Pane	Ändra panelens storlek
 	Resize Table by Dragging	Ändra tabellens storlek genom att dra
 	Resolve	Lös
 	Resolved	Löst
@@ -1698,6 +1802,7 @@ template	Letter	Brev
 	Restart Each Page	Börja om på varje sida
 	Restart Each Section	Börja om i varje avsnitt
 	Restart list after:	Börja om listan efter:
+	Restore opens an unsaved copy. Your original file stays unchanged.	Återställ öppnar en osparad kopia. Originalfilen förblir oförändrad.
 	Restrict Editing	Begränsa redigering
 	Restrict\nEditing	Begränsa\nredigering
 	Results	Resultat
@@ -1736,6 +1841,7 @@ template	Letter	Brev
 	Rotate Left 90°	Rotera 90° åt vänster
 	Rotate Right 90°	Rotera 90° åt höger
 	Rotate with shape	Rotera med form
+	Rounded	Rundad
 	Row	Rad
 	Row:	Rad:
 	Rows & Columns	Rader och kolumner
@@ -1745,6 +1851,7 @@ template	Letter	Brev
 	Résumé	CV
 	SAMPLE	EXEMPEL
 	Sat:	Mättn.:
+	Saturation and recolor	Mättnad och omfärgning
 	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	Spara en kopia i ett annat format. Utskrift går via en PDF som du kan skriva ut från valfritt visningsprogram.
 	Save as Word Template…	Spara som Word-mall…
 	Save documents	Spara dokument
@@ -1754,6 +1861,8 @@ template	Letter	Brev
 	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	Sparar en .dotx-mall i din mallmapp. Den visas i Arkiv › Ny under Personliga.
 	Saving {name} was cancelled, so it is still open and nothing was lost.	Sparandet av {name} avbröts, så dokumentet är fortfarande öppet och inget gick förlorat.
 	Scale Drawing	Skala ritningen
+	Scale Font Sizes	Skala teckenstorlekarna
+	Scale to paper size	Anpassa till pappersstorlek
 	Scatter	Punktdiagram
 	Script	Index
 	Scripts	Index och exponenter
@@ -1783,7 +1892,9 @@ template	Letter	Brev
 	select a picture first	markera en bild först
 	select a picture or shape first	markera först en bild eller form
 	Select a picture, shape, chart or table to describe it.	Markera en bild, figur, ett diagram eller en tabell som du vill beskriva.
+	Select a place in this document:	Markera en plats i det här dokumentet:
 	Select a printer	Välj en skrivare
+	Select a property to change.	Välj en egenskap att ändra.
 	select a shape first	markera en figur först
 	Select a shape, text box or drawing canvas to format its fill.	Markera en form, en textruta eller en ritarea för att formatera fyllningen.
 	select a SmartArt graphic first	markera en SmartArt-grafik först
@@ -1817,7 +1928,9 @@ template	Letter	Brev
 	Sentence	Mening
 	Sentence case.	Som i en mening.
 	Separate text at	Avgränsa text vid
+	Separate text with	Avgränsa text med
 	Separator:	Avgränsare:
+	Sepia	Sepia
 	Sequence name:	Serienamn:
 	Serbian (Cyrillic)	Serbiska (kyrilliska)
 	Serbian (Latin)	Serbiska (latinska)
@@ -1828,6 +1941,7 @@ template	Letter	Brev
 	Set Character Formatting	Ange teckenformatering
 	Set Date	Ange datum
 	Set Equation	Ange ekvation
+	Set left- and first-indent with tabs and backspaces	Ange vänster- och förstaradsindrag med Tabb och Backsteg
 	Set Numbering Value	Ange numreringsvärde
 	Set Paragraph Formatting	Ange styckeformatering
 	Set Proofing Language…	Ange korrekturspråk…
@@ -1898,6 +2012,7 @@ template	Letter	Brev
 	Side\nto Side	Sida vid\nsida
 	Sides of a right triangle	Sidor i en rätvinklig triangel
 	Signature Line	Signaturrad
+	Simple Frame	Enkel ram
 	Sine and cosine series of f(x)	Sinus- och cosinusserie för f(x)
 	Sine Function	Sinusfunktion
 	Sine theta	Sinus theta
@@ -1936,6 +2051,7 @@ template	Letter	Brev
 	Smooth scrolling and zooming, and menus and buttons that fade in. Off shows every change at once.	Mjuk rullning och zoomning, och menyer och knappar som tonas in. Av visar varje ändring direkt.
 	Soft Edges	Mjuka kanter
 	Soft Glow	Mjuk glöd
+	Soften	Mjuka upp
 	Solid Accent	Fylld accent
 	Solid fill	Heldragen fyllning
 	Sort by:	Sortera efter:
@@ -1953,8 +2069,10 @@ template	Letter	Brev
 	Space before/after:	Avstånd före/efter:
 	Space before: {pt} pt	Avstånd före: {pt} pt
 	Spacing (pt):	Avstånd (pt):
+	Spanish (Latin America)	Spanska (Latinamerika)
 	Spanish (Mexico)	Spanska (Mexiko)
 	Spanish (Spain)	Spanska (Spanien)
+	Spanish (Uruguay)	Spanska (Uruguay)
 	Sparse Matrices	Glesa matriser
 	Special Characters	Specialtecken
 	Specify height:	Ange höjd:
@@ -2001,6 +2119,7 @@ template	Letter	Brev
 	Style: APA	Stil: APA
 	Style: {style}	Stil: {style}
 	Styles Pane	Stilpanel
+	Styles Pane Position	Stilpanelens placering
 	Styles:	Stilar:
 	Subentry:	Underpost:
 	Submit print job	Skicka utskrift
@@ -2029,7 +2148,9 @@ template	Letter	Brev
 	Swap footnotes and endnotes	Byt plats på fotnoter och slutnoter
 	Swedish	Svenska
 	Switch Modes	Byt läge
+	Switch Windows	Växla fönster
 	Switch\nModes	Byt\nläge
+	Switch\nWindows	Växla\nfönster
 	Synonyms	Synonymer
 	Tab Character	Tabbtecken
 	Tab character	Tabbtecken
@@ -2080,6 +2201,8 @@ template	Letter	Brev
 	Text over Colon Equal	Text över kolon lika med
 	Text over Equal	Text över likhetstecken
 	Text Pane	Textpanel
+	Text properties only: Word's number, date and yes-no types aren't offered.	Endast textegenskaper: Words egenskapstyper för tal, datum och ja/nej stöds inte.
+	Text Size	Textstorlek
 	Text size	Textstorlek
 	Text snaps to characters	Texten fästs mot tecken
 	Text to display:	Text som visas:
@@ -2100,6 +2223,8 @@ template	Letter	Brev
 	The margins don't fit on a page this size; make the margins smaller first.	Marginalerna får inte plats på en sida i den här storleken; minska marginalerna först.
 	The measurement must be between {min} and {max}.	Måttet måste vara mellan {min} och {max}.
 	The new style takes the formatting of the current paragraph.	Den nya stilen får formateringen från det aktuella stycket.
+	The Normal template couldn't be read, so this document uses WordCraft's built-in formatting.	Mallen Normal kunde inte läsas, så det här dokumentet använder WordCrafts inbyggda formatering.
+	The number must be a divisor of {max}.	Talet måste gå jämnt upp i {max}.
 	The number must be between 1 and {max}.	Talet måste vara mellan 1 och {max}.
 	the paragraph is empty	stycket är tomt
 	the paragraph starts with a space	stycket börjar med ett blanksteg
@@ -2108,6 +2233,7 @@ template	Letter	Brev
 	The printer, two-sided printing and pages per sheet are chosen in that dialog.	Skrivare, dubbelsidig utskrift och sidor per ark väljs i den dialogrutan.
 	The recipient-list field that fills each part of an address block and greeting line.	Fältet i mottagarlistan som fyller i varje del av adressblocket och hälsningsfrasen.
 	The spelling and grammar check is complete.	Stavnings- och grammatikkontrollen är klar.
+	The spelling dictionary for {language} couldn't be read, so it isn't checked. File: {file}. Reason: {reason}	Stavningsordlistan för {language} kunde inte läsas, så stavningen kontrolleras inte. Fil: {file}. Orsak: {reason}
 	the Spike is empty	samlaren är tom
 	The system file dialog isn't available, so WordCraft shows its own. To get the system dialog, install a file chooser portal (such as xdg-desktop-portal-gtk) or zenity.	Systemets fildialogruta är inte tillgänglig, så WordCraft visar sin egen. Installera en filväljarportal (till exempel xdg-desktop-portal-gtk) eller zenity för att få systemets dialogruta.
 	The text at the insertion point is marked Do not check spelling or grammar.	Texten vid insättningspunkten är markerad: Kontrollera inte stavning eller grammatik.
@@ -2126,8 +2252,13 @@ template	Letter	Brev
 	These merge fields aren't in the recipient list:	De här kopplingsfälten finns inte i mottagarlistan:
 	These settings will be used for new documents.	De här inställningarna används för nya dokument.
 	Thick	Tjock
+	Thick Frame	Tjock ram
+	Thin	Tunn
+	This cannot be undone. Your original file stays unchanged.	Det här går inte att ångra. Originalfilen förblir oförändrad.
 	this chart was made in another program: WordCraft shows it but can't edit it	detta diagram skapades i ett annat program: WordCraft visar det men kan inte redigera det
 	This document	Det här dokumentet
+	This document has no custom properties.	Det här dokumentet har inga anpassade egenskaper.
+	This document only?	Bara det här dokumentet?
 	This field has no options.	Det här fältet har inga alternativ.
 	This folder can't be read: {error}	Den här mappen kan inte läsas: {error}
 	This font has no characters to show.	Det här typsnittet har inga tecken att visa.
@@ -2162,6 +2293,7 @@ preview	Title	Titel
 	Top Left Cell	Övre vänstra cellen
 	Top Margin	Övre marginal
 	Top of Page	Överst på sidan
+	Top of the Document	Dokumentets början
 	Top Right Cell	Övre högra cellen
 	Total Row	Summarad
 	Track Changes	Spåra ändringar
@@ -2232,6 +2364,7 @@ preview	Title	Titel
 	Unlock Fields	Lås upp fält
 	Up Diagonal Dots	Uppåtgående diagonala punkter
 	Up one level	Upp en nivå
+	Update check is not supported in the web browser.	Sökning efter uppdateringar stöds inte i webbläsaren.
 	Update Field	Uppdatera fält
 	Update fields before printing	Uppdatera fält före utskrift
 	Update Index	Uppdatera register
@@ -2261,10 +2394,12 @@ preview	Title	Titel
 	Vertical Bars	Lodstreck
 	Vertical Dots	Lodräta punkter
 	View Alt Text…	Visa alternativtext…
+	View and edit the document's custom properties.	Visa och redigera dokumentets anpassade egenskaper.
 	View Gridlines	Visa stödlinjer
 	View State	Visningstillstånd
 	Views	Vyer
 	Visual effects	Visuella effekter
+	Vivid 200%	Livfull 200 %
 	Volume	Volym
 	Volume Integral	Volymintegral
 	Volume Integral with Limits	Volymintegral med gränser
@@ -2272,8 +2407,9 @@ preview	Title	Titel
 	Wait for the print job to finish submitting before closing.	Vänta tills utskriften har skickats innan du stänger.
 	Waiting for the save to finish…	Väntar på att sparandet ska slutföras…
 	Waiting for Zotero…	Väntar på Zotero…
-	Warm Gradient with Outline	Varm toning med kontur
+	Warm Gradient with Outline	Varm gradient med kontur
 	Warnings ({n})	Varningar ({n})
+	Washout	Blekt
 	Weather	Väder
 	Web Layout	Webblayout
 	Web page (*.html)	Webbsida (*.html)
@@ -2303,11 +2439,13 @@ preview	Title	Titel
 	Word Left	Ord åt vänster
 	Word level	Ordnivå
 	Word Right	Ord åt höger
+	Word sources	Word-källor
 	Word XML Document (*.xml)	Word XML-dokument (*.xml)
 	WordArt	WordArt
 	WordArt Styles	WordArt-stilar
 	WordCraft	WordCraft
 	WordCraft is now the default app for Word documents.	WordCraft är nu standardprogram för Word-dokument.
+	WordCraft {version} is currently the newest version available.	WordCraft {version} är den senaste tillgängliga versionen.
 	Words only	Bara ord
 	Wrap Text	Textombrytning
 	Wrap Text Sides	Sidor för textombrytning
@@ -2333,11 +2471,13 @@ preview	Title	Titel
 	{group} settings	Inställningar för {group}
 	{key}+Click to follow link	{key}+klicka för att följa länken
 	{kind}, {columns} × {rows}, {size} ({paper})	{kind}, {columns} × {rows}, {size} ({paper})
+	{language} (dictionary unreadable)	{language} (ordlistan är oläsbar)
 	{language} (no dictionary)	{language} (ingen ordlista)
 	{language} is now the document's default language.	{language} är nu dokumentets standardspråk.
 	{language}: no dictionary found	{language}: ingen ordlista hittades
 	{language}: WordCraft doesn't check spelling or grammar in this language yet.	{language}: WordCraft kontrollerar inte stavning eller grammatik på det här språket än.
 	{language}: {file}	{language}: {file}
+	{language}: {file} (unreadable: {reason})	{language}: {file} (oläsbar: {reason})
 	{names} and {n} more	{names} och {n} till
 	{name}   {height} × {width} in	{name}   {height} × {width} tum
 	{name}   {height} × {width} mm	{name}   {height} × {width} mm
@@ -2348,6 +2488,7 @@ preview	Title	Titel
 	{n} entries marked.	Märkta poster: {n}.
 	{n} lines	{n} rader
 	{n} pt	{n} pt
+	{paper}   {width} × {height}	{paper}   {width} × {height}
 	{selected} of {words} words	{selected} av {words} ord
 	{size} pt	{size} pt
 	{width} × {height} mm	{width} × {height} mm
@@ -2357,3 +2498,121 @@ preview	Title	Titel
 	✓ None	✓ Ingen
 	➕ New comment	➕ Ny kommentar
 	📂  Browse…	📂  Bläddra…
+	Add a language…	Lägg till ett språk…
+	Add a language	Lägg till ett språk
+	Your languages	Dina språk
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engelska, språken i det här dokumentet och varje installerat språkpaket. Språkpaket lägger till stavningsordlistor och avstavning.
+	Set as default	Ange som standard
+	New blank documents are written in this language	Nya tomma dokument skrivs på det här språket
+	{language} (default)	{language} (standard)
+	Built in	Inbyggd
+	Your own dictionary	Din egen ordlista
+	System dictionary	Systemordlista
+	Not available yet	Inte tillgängligt ännu
+	Grammar built in	Grammatik inbyggd
+	Install spelling ({size})	Installera stavning ({size})
+	Its dictionary couldn't be read: {reason}	Ordlistan kunde inte läsas: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Hämtning är avstängd. Ett klick på ”Lägg till ett språk…” eller ”Installera” slår på den: WordCraft hämtar då språkpaket och teckensnitt från GitHub.
+	Search:	Sök:
+	Dutch, Nederlands or nl	Nederländska, Nederlands eller nl
+	No languages to show yet.	Inga språk att visa ännu.
+	No language matches your search.	Inget språk matchar din sökning.
+	An installed Language pack is used after this folder.	Ett installerat språkpaket används efter den här mappen.
+	Dictionary files	Ordlistefiler
+	Gets the list of Language packs, then this language's pack if there is one.	Hämtar listan över språkpaket och sedan paketet för det här språket, om det finns ett.
+	Afrikaans	afrikaans
+	Belarusian	belarusiska
+	Bulgarian	bulgariska
+	Bosnian	bosniska
+	Catalan	katalanska
+	Catalan (Valencian)	katalanska (valencianska)
+	Welsh	walesiska
+	Esperanto	esperanto
+	Persian	persiska
+	Irish	iriska
+	Galician	galiciska
+	Hungarian	ungerska
+	Armenian	armeniska
+	Icelandic	isländska
+	Georgian	georgiska
+	Lithuanian	litauiska
+	Latvian	lettiska
+	Macedonian	makedonska
+	Norwegian (Nynorsk)	norska (nynorska)
+	Slovak	slovakiska
+	Slovenian	slovenska
+	Albanian	albanska
+	Swahili	swahili
+	Tamil	tamil
+	Thai	thailändska
+	Vietnamese	vietnamesiska
+	Set as Default Language	Ange som standardspråk
+	U.A.E.	Förenade arabemiraten
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Österrike
+	Australia	Australien
+	Bosnia and Herzegovina	Bosnien och Hercegovina
+	Belgium	Belgien
+	Bolivia	Bolivia
+	Brazil	Brasilien
+	Belarus	Belarus
+	Canada	Kanada
+	Switzerland	Schweiz
+	Chile	Chile
+	China	Kina
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Kuba
+	Cabo Verde	Kap Verde
+	Cyprus	Cypern
+	Germany	Tyskland
+	Dominican Republic	Dominikanska republiken
+	Ecuador	Ecuador
+	Egypt	Egypten
+	Spain	Spanien
+	Finland	Finland
+	France	Frankrike
+	United Kingdom	Storbritannien
+	Equatorial Guinea	Ekvatorialguinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Hongkong SAR
+	Honduras	Honduras
+	Ireland	Irland
+	India	Indien
+	Iraq	Irak
+	Italy	Italien
+	Jamaica	Jamaica
+	Jordan	Jordanien
+	Kuwait	Kuwait
+	Kazakhstan	Kazakstan
+	Lebanon	Libanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburg
+	Morocco	Marocko
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Macao SAR
+	Mexico	Mexiko
+	Malaysia	Malaysia
+	Mozambique	Moçambique
+	Nicaragua	Nicaragua
+	Netherlands	Nederländerna
+	New Zealand	Nya Zeeland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filippinerna
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Ryssland
+	Singapore	Singapore
+	El Salvador	El Salvador
+	Syria	Syrien
+	Taiwan	Taiwan
+	Ukraine	Ukraina
+	United States	USA
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Sydafrika

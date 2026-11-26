@@ -51,6 +51,7 @@
 	Available	متاح
 	Background	خلفية
 	Baseline	خط الأساس
+	Basic Latin	اللاتينية الأساسية
 	Binary assets added	الأصول الثنائية المضافة
 	Binary assets removed	الأصول الثنائية المُزالة
 	Black	أسود
@@ -170,6 +171,7 @@
 	Fields	الحقول
 	File	ملف
 	File Name	اسم الملف
+@id	file.close	إغلاق
 	Fill	تعبئة
 	Filter	تصفية
 	Find and Replace	بحث واستبدال
@@ -250,6 +252,7 @@
 	Layout	تخطيط
 	Left	يسار
 	Left:	اليسار:
+	Legal	Legal
 	Length	الطول
 	Light	فاتح
 	Light gray	رمادي فاتح
@@ -441,6 +444,7 @@
 	Table	جدول
 	Table style	نمط الجدول
 	Tables	الجداول
+	Tabloid	Tabloid
 	Text	نص
 	The passwords don't match.	كلمتا المرور غير متطابقتين.
 	Theme	السمة
@@ -497,6 +501,7 @@
 	Zoom in	تكبير
 	Zoom Out	تصغير
 	Zoom out	تصغير
+@plural	{n} byte|{n} bytes	{n} بايت|{n} بايت|{n} بايتان|{n} بايتات|{n} بايتاً|{n} بايت
 @plural	{n} commit|{n} commits	{n} إيداع|{n} إيداع|{n} إيداعان|{n} إيداعات|{n} إيداعاً|{n} إيداع
 	{n} files	{n} ملفات
 	{n} h ago	قبل {n} ساعة

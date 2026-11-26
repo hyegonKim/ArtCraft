@@ -18,12 +18,17 @@ use std::sync::Arc;
 use effectcraft_effects::Buf;
 use effectcraft_geom::{Mat4, Vec3, vec3};
 use effectcraft_model::{self as model, Primitive};
-use effectcraft_project::{ItemKind, Layer, LayerSource, LightKind, PrimitiveKind};
+use effectcraft_project::{
+    ItemKind, Layer, LayerSource, LightKind, PrimitiveKind, Property, SubstanceMaterial,
+    SubstancePreset,
+};
+use effectcraft_time::Tick;
 
 use super::shade::srgb_to_linear;
 use crate::three_d::camera::{CameraState, NEAR};
 use crate::three_d::compose::camera_for;
 use crate::three_d::light::{LightState, Material as ClassicMaterial};
+use crate::three_d::mat_override::{self, ResolvedOverride};
 use crate::{EvalCtx, Renderer};
 
 /// One vertex in world space.
@@ -172,6 +177,24 @@ pub struct EnvInfo {
     pub intensity: f32,
     /// Radians about the vertical axis.
     pub rotation: f32,
+    /// Unit direction from the scene towards the environment's dominant (radiance-weighted)
+    /// bright region — the direction its shadow is cast from, like a parallel light's
+    /// `to_light`. `[0; 3]` when the image is directionless (uniform, or opposing bright
+    /// regions that cancel) or the light casts no shadow (nothing reads it then): no shadow.
+    pub sun: [f32; 3],
+    /// The image's directional (key) fraction — `|Σ dir·radiance| / Σ radiance` over the
+    /// sphere, 0 for a uniform image and near 1 for a single bright spot. An Environment
+    /// light's shadow occludes only this much of its light: the key lobe is blocked where
+    /// the map says so, the remaining fill keeps shining, so the shadow stays partial the
+    /// way After Effects renders an area-light shadow (a broad environment like the default
+    /// studio shadows softly, a lone bright spot on black almost fully).
+    pub key: f32,
+    /// Shadow map index into [`Scene::shadows`]: 0 marked (assigned by `raster::shadow_maps`),
+    /// -1 casts no shadow. Gated by the light's Cast Shadows.
+    pub shadow: i32,
+    pub shadow_darkness: f32,
+    /// The light's Shadow Diffusion (the penumbra width the shadow map's PCF widens to).
+    pub shadow_diffusion: f32,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -277,6 +300,12 @@ impl Builder {
     fn material(&mut self, m: Material) -> u32 {
         self.s.materials.push(m);
         (self.s.materials.len() - 1) as u32
+    }
+
+    /// Upload a repeat-wrapped 3D Material Override texture in linear light.
+    fn override_texture(&mut self, res: &ResolvedOverride) -> i32 {
+        let data = mat_override::linear_texels(res, self.s.linear_io);
+        self.texture_from(res.width, res.height, [0, 0], data.into_iter())
     }
 
     /// Append a primitive with per-vertex matrices (model/layer space → world).
@@ -419,6 +448,108 @@ fn prim_kind(k: PrimitiveKind) -> model::prim::PrimitiveKind {
     }
 }
 
+fn substance_preset_kind(p: SubstancePreset) -> model::substance::SubstancePreset {
+    use model::substance::SubstancePreset as M;
+    match p {
+        SubstancePreset::BrushedSteel => M::BrushedSteel,
+        SubstancePreset::PolishedGold => M::PolishedGold,
+        SubstancePreset::CarbonHexWeave => M::CarbonHexWeave,
+        SubstancePreset::TerrazzoMarble => M::TerrazzoMarble,
+        SubstancePreset::CeramicTiles => M::CeramicTiles,
+        SubstancePreset::WeatheredCopper => M::WeatheredCopper,
+    }
+}
+
+#[derive(Clone, Copy)]
+struct UploadedSubstance {
+    tex_base: i32,
+    tex_mr: i32,
+    tex_normal: i32,
+    tex_occlusion: i32,
+    normal_scale: f32,
+    occlusion_strength: f32,
+    tile_scale: f64,
+}
+
+fn active_substance(layer: &Layer) -> Option<&SubstanceMaterial> {
+    layer.substance_material.as_ref().filter(|s| s.enabled)
+}
+
+fn upload_substance(b: &mut Builder, sub: &SubstanceMaterial) -> UploadedSubstance {
+    let params = model::substance::SubstanceParams {
+        resolution: sub.resolution.clamp(16, 1024),
+        seed: sub.seed,
+        wear: (sub.wear as f32).clamp(0.0, 1.0),
+        normal_scale: (sub.normal_scale as f32).clamp(0.0, 4.0),
+    };
+    let maps = model::substance::generate(substance_preset_kind(sub.preset), &params);
+    UploadedSubstance {
+        tex_base: b.model_texture(&Arc::new(maps.base_color), true),
+        tex_mr: b.model_texture(&Arc::new(maps.metallic_roughness), false),
+        tex_normal: b.model_texture(&Arc::new(maps.normal), false),
+        tex_occlusion: b.model_texture(&Arc::new(maps.occlusion), false),
+        normal_scale: maps.normal_scale,
+        occlusion_strength: maps.occlusion_strength,
+        tile_scale: sub.tile_scale,
+    }
+}
+
+/// Remaps or box-projects UVs for a Substance PBR material and computes per-vertex tangents so
+/// tangent-space normal maps shade both UV-mapped meshes and extruded 3D text/shapes.
+fn prepare_substance_primitive(p: &Primitive, tile_scale: f64) -> Primitive {
+    let mut out = p.clone();
+    if out.positions.is_empty() {
+        return out;
+    }
+    if out.normals.len() != out.positions.len() {
+        out.compute_normals();
+    }
+    let scale = (1.0 / tile_scale.abs().clamp(0.01, 1000.0)) as f32;
+    let has_uvs = out.uvs.len() == out.positions.len()
+        && out
+            .uvs
+            .windows(2)
+            .any(|w| (w[0][0] - w[1][0]).abs() > 1e-6 || (w[0][1] - w[1][1]).abs() > 1e-6);
+    if has_uvs {
+        for uv in &mut out.uvs {
+            uv[0] *= scale;
+            uv[1] *= scale;
+        }
+    } else {
+        let mut lmin = [f32::INFINITY; 3];
+        let mut lmax = [f32::NEG_INFINITY; 3];
+        for q in &out.positions {
+            for c in 0..3 {
+                lmin[c] = lmin[c].min(q[c]);
+                lmax[c] = lmax[c].max(q[c]);
+            }
+        }
+        let span = (lmax[0] - lmin[0])
+            .max(lmax[1] - lmin[1])
+            .max(lmax[2] - lmin[2])
+            .max(1e-3);
+        out.uvs = out
+            .positions
+            .iter()
+            .enumerate()
+            .map(|(k, q)| {
+                let n = out.normals.get(k).copied().unwrap_or([0.0, 0.0, -1.0]);
+                let (ax, ay, az) = (n[0].abs(), n[1].abs(), n[2].abs());
+                let (u, v) = if az >= ax && az >= ay {
+                    ((q[0] - lmin[0]) / span, (q[1] - lmin[1]) / span)
+                } else if ax >= ay {
+                    ((q[2] - lmin[2]) / span, (q[1] - lmin[1]) / span)
+                } else {
+                    ((q[0] - lmin[0]) / span, (q[2] - lmin[2]) / span)
+                };
+                [u * scale, v * scale]
+            })
+            .collect();
+    }
+    out.compute_tangents();
+    out
+}
+
 /// The primitive model of a primitive layer at the context time.
 pub fn primitive_model(ctx: &EvalCtx, layer: &Layer, kind: PrimitiveKind, mat: model::Material) -> model::Model {
     let g = layer.props.sub("geometryOptions");
@@ -439,6 +570,26 @@ pub fn model_to_layer(unit_scale: f64) -> Mat4 {
     Mat4::scale(vec3(unit_scale, -unit_scale, -unit_scale))
 }
 
+/// Layer time the selected clip started at: the last key that changed the selection, so a clip
+/// keyed on later plays from its first frame. Before any change, the layer clock; likewise under
+/// an expression or an Essential Property override, as the keys don't say when those switch.
+fn clip_start(ctx: &EvalCtx, layer: &Layer, prop: &Property, lt: Tick) -> Tick {
+    if prop.has_expression() || ctx.property_overrides.iter().any(|o| o.layer == layer.id && o.prop == prop.uid) {
+        return Tick::ZERO;
+    }
+    let mut keys = prop.keys.iter().filter(|k| !k.muted && k.time <= lt);
+    let Some(first) = keys.next() else { return Tick::ZERO };
+    let (mut clip, mut start) = (first.value.as_enum(), Tick::ZERO);
+    for k in keys {
+        let v = k.value.as_enum();
+        if v != clip {
+            (clip, start) = (v, k.time);
+        }
+    }
+    start
+}
+
+/// Adds a model layer to the Advanced 3D scene with its material options, opacity and world transform.
 fn model_layer(r: &Renderer, ctx: &EvalCtx, layer: &Layer, b: &mut Builder) {
     let lin = b.s.linear_io;
     let (opts, prim_mat) = model_options(ctx, layer, lin);
@@ -449,12 +600,14 @@ fn model_layer(r: &Renderer, ctx: &EvalCtx, layer: &Layer, b: &mut Builder) {
         LayerSource::Model { item } => {
             let Some(it) = r.project.item(*item) else { return };
             let ItemKind::Footage(f) = &it.kind else { return };
-            let Some(m) = r.footage.model(*item, f) else { return };
+            let Some(m) = r.read(|| r.footage.model(*item, f)) else { return };
             let unit = geo.map_or(1.0, |g| ctx.f(layer, g, "unitScale", 1.0));
             let clip = geo.map_or(0, |g| ctx.e(layer, g, "animation")) as usize;
             let clip = clip.checked_sub(1).filter(|c| *c < m.animations.len());
             let speed = geo.map_or(100.0, |g| ctx.f(layer, g, "animationSpeed", 100.0)) / 100.0;
-            let mut t = layer.layer_time(ctx.time).seconds() * speed;
+            let lt = layer.layer_time(ctx.time);
+            let start = geo.and_then(|g| g.get("animation")).map_or(Tick::ZERO, |p| clip_start(ctx, layer, p, lt));
+            let mut t = (lt - start).seconds() * speed;
             if let Some(c) = clip {
                 let d = m.animations[c].duration();
                 let looping = geo.is_none_or(|g| ctx.b(layer, g, "loopAnimation"));
@@ -467,6 +620,59 @@ fn model_layer(r: &Renderer, ctx: &EvalCtx, layer: &Layer, b: &mut Builder) {
         _ => return,
     };
     let world = b.outer * ctx.world_matrix(layer) * model_to_layer(unit);
+    if let Some(sub) = active_substance(layer) {
+        let up = upload_substance(b, sub);
+        let sub_mat = b.material(Material {
+            base: [1.0; 4],
+            metallic: 1.0,
+            roughness: 1.0,
+            normal_scale: up.normal_scale,
+            occlusion_strength: up.occlusion_strength,
+            alpha_mode: 0,
+            opacity,
+            tex_base: up.tex_base,
+            tex_mr: up.tex_mr,
+            tex_normal: up.tex_normal,
+            tex_occlusion: up.tex_occlusion,
+            double_sided: false,
+            ..opts
+        });
+        for inst in mdl.instances(clip, t) {
+            let inst_world = world * inst.world;
+            for p in &inst.mesh.primitives {
+                let prepared = prepare_substance_primitive(p, up.tile_scale);
+                b.emit(&prepared, sub_mat, &|k| {
+                    if k == usize::MAX { inst_world } else { world * model::vertex_matrix(&inst, &prepared, k) }
+                });
+            }
+        }
+        return;
+    }
+    if let Some((ov, res)) = mat_override::resolve(r, ctx, layer) {
+        let ov_tex = b.override_texture(&res);
+        let ov_mat = b.material(Material {
+            base: [1.0; 4],
+            metallic: res.metallic,
+            roughness: res.roughness,
+            alpha_mode: if res.opaque { 0 } else { 2 },
+            opacity,
+            tex_base: ov_tex,
+            double_sided: true,
+            ..opts
+        });
+        let mut sub_idx = 0u32;
+        for inst in mdl.instances(clip, t) {
+            let inst_world = world * inst.world;
+            for p in &inst.mesh.primitives {
+                let remapped = mat_override::remap_primitive(p, &inst_world, &ov, &res, sub_idx);
+                sub_idx = sub_idx.wrapping_add(1);
+                b.emit(&remapped, ov_mat, &|k| {
+                    if k == usize::MAX { inst_world } else { world * model::vertex_matrix(&inst, &remapped, k) }
+                });
+            }
+        }
+        return;
+    }
     // Materials of the model (one default when it has none).
     let mut mats: Vec<u32> = vec![];
     let defaults = [model::Material::plain([0.8, 0.8, 0.8, 1.0], 0.0, 0.5)];
@@ -572,7 +778,7 @@ pub fn extruded_meshes(ctx: &EvalCtx, layer: &Layer, p: &model::extrude::Extrude
                         groups.push((vec![g.local.clone()], c, g.m, usize::from(!stroke_on_top), g.xf.surface_colors(c)));
                     }
                     if g.stroke_width > 0.0 && g.stroke[3] * op > 0.0 {
-                        let st = effectcraft_path::StrokeStyle { width: g.stroke_width, join: effectcraft_path::Join::Round, ..Default::default() };
+                        let st = effectcraft_path::StrokeStyle { width: g.stroke_width, join: g.join, ..Default::default() };
                         if let Some(region) = crate::shapes::stroke_region(std::slice::from_ref(&g.local), &st) {
                             let c = [g.stroke[0], g.stroke[1], g.stroke[2], g.stroke[3] * op];
                             groups.push((vec![region], c, g.m, usize::from(stroke_on_top), g.xf.surface_colors(c)));
@@ -611,22 +817,65 @@ pub fn extruded_meshes(ctx: &EvalCtx, layer: &Layer, p: &model::extrude::Extrude
     out
 }
 
+/// Adds an extruded layer to the Advanced 3D scene with its card material, opacity and world transform.
 fn extruded_layer(r: &Renderer, ctx: &EvalCtx, layer: &Layer, p: &model::extrude::ExtrudeParams, b: &mut Builder) {
     let base = card_material(ctx, layer);
     let opacity = (ctx.opacity(layer) as f32 * r.opacity_mul()).clamp(0.0, 1.0);
     let world = b.outer * ctx.world_matrix(layer);
     let lin = b.s.linear_io;
-    for (mesh, c, local) in extruded_meshes(ctx, layer, p) {
-        let l = |v: f32| if lin { v } else { srgb_to_linear(v) };
-        let m = b.material(Material {
-            base: [l(c[0]), l(c[1]), l(c[2]), c[3]],
-            alpha_mode: if c[3] < 0.999 { 2 } else { 0 },
-            opacity,
-            double_sided: false,
-            ..base
-        });
+    let sub_up = active_substance(layer).map(|sub| upload_substance(b, sub));
+    let ov_pair = if sub_up.is_none() {
+        mat_override::resolve(r, ctx, layer).map(|(ov, res)| {
+            let tex = b.override_texture(&res);
+            (ov, res, tex)
+        })
+    } else {
+        None
+    };
+    for (sub_idx, (mesh, c, local)) in extruded_meshes(&r.with_reads(ctx), layer, p).into_iter().enumerate() {
         let xf = world * local;
-        b.emit(&mesh, m, &|_| xf);
+        if let Some(up) = sub_up {
+            let prepared = prepare_substance_primitive(&mesh, up.tile_scale);
+            let m = b.material(Material {
+                base: [1.0, 1.0, 1.0, c[3]],
+                metallic: 1.0,
+                roughness: 1.0,
+                normal_scale: up.normal_scale,
+                occlusion_strength: up.occlusion_strength,
+                tex_base: up.tex_base,
+                tex_mr: up.tex_mr,
+                tex_normal: up.tex_normal,
+                tex_occlusion: up.tex_occlusion,
+                alpha_mode: if c[3] < 0.999 { 2 } else { 0 },
+                opacity,
+                double_sided: false,
+                ..base
+            });
+            b.emit(&prepared, m, &|_| xf);
+        } else if let Some((ref ov, ref res, ov_tex)) = ov_pair {
+            let remapped = mat_override::remap_primitive(&mesh, &xf, ov, res, sub_idx as u32);
+            let m = b.material(Material {
+                base: [1.0, 1.0, 1.0, c[3]],
+                metallic: res.metallic,
+                roughness: res.roughness,
+                tex_base: ov_tex,
+                alpha_mode: if !res.opaque || c[3] < 0.999 { 2 } else { 0 },
+                opacity,
+                double_sided: false,
+                ..base
+            });
+            b.emit(&remapped, m, &|_| xf);
+        } else {
+            let l = |v: f32| if lin { v } else { srgb_to_linear(v) };
+            let m = b.material(Material {
+                base: [l(c[0]), l(c[1]), l(c[2]), c[3]],
+                alpha_mode: if c[3] < 0.999 { 2 } else { 0 },
+                opacity,
+                double_sided: false,
+                ..base
+            });
+            b.emit(&mesh, m, &|_| xf);
+        }
     }
 }
 
@@ -654,25 +903,50 @@ fn card(b: &mut Builder, buf: &Buf, world: Mat4, mut mat: Material) {
     b.emit(&p, m, &|_| world);
 }
 
+/// Adds a flat card layer to the Advanced 3D scene with its material, opacity and world transform.
 fn card_layer(r: &Renderer, ctx: &EvalCtx, layer: &Layer, b: &mut Builder) {
     let mut mat = card_material(ctx, layer);
     mat.opacity = (ctx.opacity(layer) as f32 * r.opacity_mul()).clamp(0.0, 1.0);
     let world = b.outer * ctx.world_matrix(layer);
+    let ov_pair = mat_override::resolve(r, ctx, layer);
+    if let Some((_, ref res)) = ov_pair {
+        mat.metallic = res.metallic;
+        mat.roughness = res.roughness;
+    }
+    let blend_lin = r.pipe.linear || r.pipe.linear_blend;
     if crate::text::per_char_3d(ctx, layer) {
-        for (buf, m) in crate::text::per_char_planes(ctx, layer, r.opts.scale) {
-            let buf = r.to_blend(Arc::new(buf), None);
-            card(b, &buf, world * m, mat);
+        for (idx, (buf, m)) in crate::text::per_char_planes(&r.with_reads(ctx), layer, r.opts.scale).into_iter().enumerate() {
+            let mut buf = r.to_blend(Arc::new(buf), None, &Arc::default());
+            let cw = world * m;
+            if let Some((ref ov, ref res)) = ov_pair {
+                buf = mat_override::modulate_card_buf(&buf, &cw, ov, res, blend_lin, idx as u32);
+            }
+            card(b, &buf, cw, mat);
         }
         return;
     }
-    if let Some(buf) = r.blend_layer_buf(ctx, layer) {
+    if let Some(mut buf) = r.blend_layer_buf(ctx, layer) {
+        if let Some((ref ov, ref res)) = ov_pair {
+            buf = mat_override::modulate_card_buf(&buf, &world, ov, res, blend_lin, 0);
+        }
         card(b, &buf, world, mat);
     }
 }
 
-/// Evaluated lights: (scene lights, ambient sum, environment light (layer, intensity × colour,
-/// rotation)).
-fn lights(ctx: &EvalCtx, lin: bool) -> (Vec<Light>, [f32; 3], Option<(Option<u64>, [f32; 3], f32)>) {
+/// The evaluated Environment light: its image source, intensity × colour, rotation, and
+/// shadow settings (After Effects' Light Settings shows Cast Shadows for Environment lights).
+#[derive(Clone, Copy)]
+pub(crate) struct EnvLight {
+    src: Option<u64>,
+    color: [f32; 3],
+    rot: f32,
+    casts_shadows: bool,
+    shadow_darkness: f64,
+    shadow_diffusion: f64,
+}
+
+/// Evaluated lights: (scene lights, ambient sum, environment light).
+fn lights(ctx: &EvalCtx, lin: bool) -> (Vec<Light>, [f32; 3], Option<EnvLight>) {
     let mut out = vec![];
     let mut ambient = [0.0f32; 3];
     let mut env = None;
@@ -693,7 +967,14 @@ fn lights(ctx: &EvalCtx, lin: bool) -> (Vec<Light>, [f32; 3], Option<(Option<u64
                 if env.is_none() {
                     let src = g.get("source").and_then(|p| ctx.value(layer, p).as_layer());
                     let rot = ctx.f(layer, g, "rotation", 0.0).to_radians() as f32;
-                    env = Some((src, color, rot));
+                    env = Some(EnvLight {
+                        src,
+                        color,
+                        rot,
+                        casts_shadows: ctx.b(layer, g, "castsShadows"),
+                        shadow_darkness: ctx.f(layer, g, "shadowDarkness", 100.0).clamp(0.0, 100.0) / 100.0,
+                        shadow_diffusion: ctx.f(layer, g, "shadowDiffusion", 0.0).max(0.0),
+                    });
                 }
             }
             _ => {
@@ -783,8 +1064,54 @@ pub fn irradiance_map(sw: u32, sh: u32, src: &[[f32; 4]], w: u32, h: u32) -> Vec
     out
 }
 
+/// The environment image's dominant direction and key strength: the mean texel direction
+/// weighted by the radiance the light actually emits — solid-angle weighted, rotation applied,
+/// each texel's channels scaled by `tint` (the light's colour, `[1; 3]` for a white one) — or
+/// `([0; 3], 0.0)` when that radiance is directionless (a uniform environment cancels to zero,
+/// and opposing bright regions that cancel leave no mean either — though a chromatic one need
+/// not stay directionless once tinted: a red light over equally bright red and blue opposite
+/// regions removes the blue pull and points at the red one). The mean of a single bright spot
+/// on black points straight at it; a gradient points somewhere between its ends. The returned
+/// key fraction is the mean vector's length over the radiance weight — how directional the
+/// image is, 0 (uniform) to ~1 (a lone spot) — and is the most of its light an Environment
+/// light's shadow can remove.
+pub(crate) fn dominant_direction(w: u32, h: u32, d: &[[f32; 4]], tint: [f32; 3], rot: f32) -> ([f32; 3], f32) {
+    use super::shade::equirect_dir;
+    let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
+    let mut weight = 0.0f32;
+    for (i, p) in d.iter().enumerate() {
+        let (tx, ty) = ((i % w as usize) as u32, (i / w as usize) as u32);
+        let (u, v) = ((tx as f32 + 0.5) / w as f32, (ty as f32 + 0.5) / h as f32);
+        // Tinted radiance × solid angle (∝ sin θ): the shadow must follow the light the
+        // environment emits, not the raw texels.
+        let lum = (p[0] * tint[0] + p[1] * tint[1] + p[2] * tint[2]) * (v * std::f32::consts::PI).sin();
+        let dir = equirect_dir(u, v, rot);
+        x += dir[0] * lum;
+        y += dir[1] * lum;
+        z += dir[2] * lum;
+        weight += lum.abs();
+    }
+    // Under 1 % directional, the image is uniform to the eye: no dominant region to shadow
+    // from. A non-finite sum (a NaN or infinite texel) is garbage, not a direction: none then.
+    let len = (x * x + y * y + z * z).sqrt();
+    if !weight.is_finite() || !len.is_finite() || weight <= 1e-9 || len < weight * 0.01 {
+        return ([0.0; 3], 0.0);
+    }
+    ([x / len, y / len, z / len], (len / weight).clamp(0.0, 1.0))
+}
+
 /// Prefilter an environment image into the scene's textures.
-pub(crate) fn add_environment(b: &mut Builder, w: u32, h: u32, data: Vec<[f32; 4]>, intensity: [f32; 3], rotation: f32) {
+pub(crate) fn add_environment(b: &mut Builder, env: &EnvLight, w: u32, h: u32, data: Vec<[f32; 4]>) {
+    // Intensity × colour folded into the radiance (one scalar on the GPU): tint the texels.
+    // A white (or off) light leaves them as they are.
+    let k = (env.color[0] + env.color[1] + env.color[2]) / 3.0;
+    let tint = if k > 0.0 && (env.color[0] != env.color[1] || env.color[1] != env.color[2]) { env.color.map(|c| c / k) } else { [1.0, 1.0, 1.0] };
+    // The shadow direction and key strength from the full-resolution image, before the mip
+    // chain averages it — only a shadow-casting light reads them, so only one pays for the
+    // pass — and weighted by the tint, so the shadow follows the radiance the light emits:
+    // opposing chromatic regions that cancel untinted need not cancel once the colour removes
+    // one of them (a red light over equally bright red and blue sides shadows from the red).
+    let (sun, key) = if env.casts_shadows { dominant_direction(w, h, &data, tint, env.rot) } else { ([0.0; 3], 0.0) };
     // Radiance level 0 at most 1024 wide.
     let (mut w, mut h, mut d) = (w, h, data);
     while w > 1024 {
@@ -807,10 +1134,7 @@ pub(crate) fn add_environment(b: &mut Builder, w: u32, h: u32, data: Vec<[f32; 4
     let (sw, sh, sd) = small.unwrap_or((w, h, d));
     let irr = irradiance_map(sw, sh, &sd, 32, 16);
     let ii = b.texture_from(32, 16, [0, 1], irr.into_iter()) as u32;
-    // Intensity × colour folded into the radiance (one scalar on the GPU): tint the texels.
-    let k = (intensity[0] + intensity[1] + intensity[2]) / 3.0;
-    if k > 0.0 && (intensity[0] != intensity[1] || intensity[1] != intensity[2]) {
-        let tint = intensity.map(|c| c / k);
+    if tint != [1.0, 1.0, 1.0] {
         for t in first..=ii {
             let ti = b.s.textures[t as usize];
             for p in &mut b.s.texels[ti.offset as usize..(ti.offset + ti.width * ti.height) as usize] {
@@ -820,16 +1144,45 @@ pub(crate) fn add_environment(b: &mut Builder, w: u32, h: u32, data: Vec<[f32; 4
             }
         }
     }
-    b.s.env = Some(EnvInfo { radiance: first, mips: levels, irradiance: ii, intensity: k, rotation });
+    b.s.env = Some(EnvInfo {
+        radiance: first,
+        mips: levels,
+        irradiance: ii,
+        intensity: k,
+        rotation: env.rot,
+        sun,
+        key,
+        // Marked; `raster::shadow_maps` assigns the map (a directionless image casts none).
+        shadow: if env.casts_shadows { 0 } else { -1 },
+        shadow_darkness: env.shadow_darkness as f32,
+        shadow_diffusion: env.shadow_diffusion as f32,
+    });
 }
 
-/// The environment layer's pixels as linear straight RGBA.
-fn env_pixels(r: &Renderer, ctx: &EvalCtx, src: Option<u64>, lin: bool) -> Option<(u32, u32, Vec<[f32; 4]>)> {
+/// The Environment light's image: `Absent` when the light has no Source and the comp has no
+/// Environment Layer (the default studio environment applies — After Effects "uses a default
+/// environment map" for an Environment light too), `Image` when the source renders, `Failed`
+/// when a selected or found source produced no pixels (a deleted layer, missing footage, a
+/// failed decode). A failed source must not silently become the default environment — that
+/// would relight and reshadow the scene behind the user's back — so, like any layer whose
+/// source fails renders nothing, it contributes nothing (#2436).
+enum EnvPixels {
+    Absent,
+    Image((u32, u32, Vec<[f32; 4]>)),
+    Failed,
+}
+
+fn env_pixels(r: &Renderer, ctx: &EvalCtx, src: Option<u64>, lin: bool) -> EnvPixels {
     let layer = match src {
-        Some(id) => ctx.comp.layer(effectcraft_project::LayerId(id))?,
-        None => ctx.comp.layers.iter().find(|l| l.environment && l.is_active_at(ctx.time))?,
+        Some(id) => ctx.comp.layer(effectcraft_project::LayerId(id)),
+        None => ctx.comp.layers.iter().find(|l| l.environment && l.is_active_at(ctx.time)),
     };
-    let buf = r.blend_layer_buf(ctx, layer)?;
+    let Some(layer) = layer else {
+        // A set Source that resolves to no layer (deleted) failed; an unset one with no
+        // Environment Layer is simply unconfigured.
+        return if src.is_some() { EnvPixels::Failed } else { EnvPixels::Absent };
+    };
+    let Some(buf) = r.blend_layer_buf(ctx, layer) else { return EnvPixels::Failed };
     let img = &buf.img;
     let data = img
         .data
@@ -843,7 +1196,43 @@ fn env_pixels(r: &Renderer, ctx: &EvalCtx, src: Option<u64>, lin: bool) -> Optio
             if lin { [s[0], s[1], s[2], 1.0] } else { [srgb_to_linear(s[0]), srgb_to_linear(s[1]), srgb_to_linear(s[2]), 1.0] }
         })
         .collect();
-    Some((img.width, img.height, data))
+    EnvPixels::Image((img.width, img.height, data))
+}
+
+/// The default environment when the light has no Source and no Environment Layer: a dim studio
+/// gradient, bright above and toward the initial camera, dark below and behind — After
+/// Effects "uses a default environment map" for an Environment light too, and its default
+/// casts shadows out of the box. The solid-angle-weighted mean is 0.3, a soft studio ambience
+/// (a mean of 1 would act like a 100 % white Ambient light and wash the whole scene out, which
+/// is not what After Effects' default looks like); the light's colour × intensity still scales
+/// the overall level, and its Rotation turns the key around the scene (#2436).
+pub(crate) fn default_environment() -> (u32, u32, Vec<[f32; 4]>) {
+    use super::shade::{dot, equirect_dir};
+    // The key region's centre: three quarters up, two thirds toward the viewer (the default
+    // camera looks +z from -z).
+    let key = [0.0f32, -0.75, -0.66];
+    let (w, h) = (8u32, 4u32);
+    let mut data = Vec::with_capacity((w * h) as usize);
+    let (mut mean, mut weight) = (0.0f32, 0.0f32);
+    for y in 0..h {
+        let v = (y as f32 + 0.5) / h as f32;
+        let sa = (v * std::f32::consts::PI).sin();
+        for x in 0..w {
+            let u = (x as f32 + 0.5) / w as f32;
+            let l = 0.15 + 1.2 * dot(equirect_dir(u, v, 0.0), key).max(0.0);
+            data.push([l, l, l, 1.0]);
+            mean += l * sa;
+            weight += sa;
+        }
+    }
+    // A dim studio: scale the gradient to a weighted mean of exactly 0.3.
+    let k = if mean.is_finite() && mean > 1e-6 { 0.3 * weight / mean } else { 1.0 };
+    for p in &mut data {
+        for c in 0..3 {
+            p[c] *= k;
+        }
+    }
+    (w, h, data)
 }
 
 /// Supersampling factor: 2×2 unless draft or very large.
@@ -857,8 +1246,8 @@ fn emit_layer<'a>(r: &Renderer<'a>, ctx: &EvalCtx<'a>, layer: &Layer, b: &mut Bu
     if layer.environment || layer.switches.adjustment || ctx.opacity(layer) <= 0.0 || !layer.has_video() {
         return;
     }
-    if let Some(item) = r.collapsed(ctx, layer) {
-        collapsed_layer(r, ctx, layer, item, b);
+    if let Some(collapsed) = r.collapsed(ctx, layer) {
+        collapsed_layer(r, ctx, layer, &collapsed, b);
     } else if layer.source.is_model() {
         model_layer(r, ctx, layer, b);
     } else if matches!(layer.source, LayerSource::Text | LayerSource::Shape)
@@ -874,9 +1263,9 @@ fn emit_layer<'a>(r: &Renderer<'a>, ctx: &EvalCtx<'a>, layer: &Layer, b: &mut Bu
 /// (meshes, extrusions, cards) placed by the precomp layer's world transform, so they
 /// intersect, occlude and shadow the parent's layers. Nested 2D layers lie on the precomp
 /// layer's plane; nested lights and cameras are ignored (the parent's light the scene).
-fn collapsed_layer<'a>(r: &Renderer<'a>, ctx: &EvalCtx<'a>, layer: &Layer, item: effectcraft_project::ItemId, b: &mut Builder) {
+fn collapsed_layer<'a>(r: &Renderer<'a>, ctx: &EvalCtx<'a>, layer: &Layer, collapsed: &crate::Collapsed, b: &mut Builder) {
     let op = ctx.opacity(layer) as f32 * r.opacity_mul();
-    let Some((sub, nctx)) = r.collapse_into(ctx, layer, item, op) else { return };
+    let Some((sub, nctx)) = r.collapse_into(ctx, layer, collapsed, op) else { return };
     let saved = b.outer;
     b.outer = saved * ctx.world_matrix(layer);
     let t = nctx.time;
@@ -935,10 +1324,23 @@ pub(crate) fn build_at(r: &Renderer, ctx: &EvalCtx, sub: Option<&EvalCtx>, run: 
         let (ls, amb, env) = lights(ctx, lin);
         b.s.lights = ls;
         b.s.ambient = amb;
-        if let Some((src, k, rot)) = env
-            && let Some((w, h, d)) = env_pixels(r, ctx, src, lin)
-        {
-            add_environment(&mut b, w, h, d, k, rot);
+        if let Some(env) = env {
+            match env_pixels(r, ctx, env.src, lin) {
+                EnvPixels::Image((w, h, d)) => add_environment(&mut b, &env, w, h, d),
+                // No Source and no Environment Layer: the default environment, a soft studio
+                // gradient of the light's colour × intensity — After Effects "uses a default
+                // environment map" for an Environment light — so the light always lights the
+                // scene per its parameters, and its dominant region casts shadows (#2436).
+                EnvPixels::Absent => {
+                    let (w, h, d) = default_environment();
+                    add_environment(&mut b, &env, w, h, d)
+                }
+                // A selected or found source that produced no pixels (deleted layer, missing
+                // footage, failed decode): no environment at all — the light contributes
+                // nothing, exactly like a layer whose source failed renders nothing, never a
+                // silent swap to the default studio's lighting and shadows (#2436).
+                EnvPixels::Failed => {}
+            }
         }
         if r.opts.shadows() {
             super::raster::shadow_maps(&mut b.s, r.opts.draft);
@@ -946,6 +1348,9 @@ pub(crate) fn build_at(r: &Renderer, ctx: &EvalCtx, sub: Option<&EvalCtx>, run: 
             // Settings ▸ 3D ▸ Realtime Shadows in Draft off: draft renders skip shadows.
             for l in &mut b.s.lights {
                 l.shadow = -1;
+            }
+            if let Some(e) = &mut b.s.env {
+                e.shadow = -1;
             }
         }
     }

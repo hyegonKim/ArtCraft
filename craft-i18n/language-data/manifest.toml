@@ -1,0 +1,3844 @@
+# Language packs: one [[file]] per upstream file of every locale that is not embedded.
+# Format and rules: docs/language-data-format.md. Generated from the 2026-10-31 licence audit;
+# sha256 and size are of the file downloaded from the pinned url.
+
+# af
+[[file]]
+locale = "af"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/af_ZA/af_ZA.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "fdfcdd04d700fc4ac94be63930167fa942ee5ffb471b52a6f4e0c68362dd63d2"
+size = 4969
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+name = "Afrikaans"
+
+[[file]]
+locale = "af"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/af_ZA/af_ZA.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8d806f90146059ea18b49c2352d188bd27dcc571a06815794facaa176aa5a5de"
+size = 1214886
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "af"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "a5de62ec8e5fd38251de838d8ebbdc44b21c76d30e9b486005fbfa641a93abe6"
+size = 81894
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "af"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/af_ZA/README_af_ZA.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e00c86cb0a1c0499380770750f545b5d0308d6cb35d25014cef6891c2fe5f255"
+size = 31492
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+
+# ar
+[[file]]
+locale = "ar"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ar/ar.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "cec30b8621001e49618feb05aec1984c5fcfbf7d2ec309901d5cbf66585217a3"
+size = 86949
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "العربية"
+
+[[file]]
+locale = "ar"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ar/ar.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2a3e5367f61c1583734db9d66734f5603e6be5c2d227cf5c5cd7e4ca586e34fe"
+size = 7217161
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "ar"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ar/COPYING.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "73480d918cd78d655508e80aa88c022cbd53634524a0f714b5f2519f2cf19124"
+size = 532
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# be
+[[file]]
+locale = "be"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/be_BY/be-official.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0a7f8246a352e7eea61f88d44a200a277a8a5dd5b06f1d7725f16138d1b751c1"
+size = 184150
+licence = "LGPL-3.0-only OR CC-BY-SA-4.0"
+class = "Download-only"
+name = "Беларуская"
+
+[[file]]
+locale = "be"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/be_BY/be-official.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "86237db80ddf5dc68d4319abed4de709a2096835042b332cf323207c13e869cd"
+size = 10607006
+licence = "LGPL-3.0-only OR CC-BY-SA-4.0"
+class = "Download-only"
+
+[[file]]
+locale = "be"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-be.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "ce0c69d86e03c40bdd0ab9f4535cee2503fe2894590380e45a99974f029cea6f"
+size = 36788
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "be"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/be_BY/README_be_BY.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8e11338bf07f3fc3eea1add0a091c3da4e1e0504a63f909790dabeef27de1ec3"
+size = 654
+licence = "LGPL-3.0-only OR CC-BY-SA-4.0"
+class = "Download-only"
+
+
+# bg
+[[file]]
+locale = "bg"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bg_BG/bg_BG.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "cb6bfc56d6b1e70c812061086d7ec5ad6aaf6d35acd927a035f1cee0188ea477"
+size = 58189
+licence = "GPL-2.0-or-later OR LGPL-2.0-or-later OR MPL-1.1"
+class = "Download-only"
+name = "Български"
+note = "No licence in the .aff/.dic. LibreOffice ships only bg_BG/COPYING (GPL-2.0). bgOffice (bgoffice.sourceforge.net, 2010 news) says the packages are 'GPLv2 or later, LGPLv2 or later and MPLv1.1', but the same page says the source code and words 'remain under GPL'. Download-only until bgOffice confirms MPL in writing."
+
+[[file]]
+locale = "bg"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bg_BG/bg_BG.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "416f956a6e8f607565113eafc8bd35a4a5720df28c100b20e023845868b963cb"
+size = 1566331
+licence = "GPL-2.0-or-later OR LGPL-2.0-or-later OR MPL-1.1"
+class = "Download-only"
+note = "No licence in the .aff/.dic. LibreOffice ships only bg_BG/COPYING (GPL-2.0). bgOffice (bgoffice.sourceforge.net, 2010 news) says the packages are 'GPLv2 or later, LGPLv2 or later and MPLv1.1', but the same page says the source code and words 'remain under GPL'. Download-only until bgOffice confirms MPL in writing."
+
+[[file]]
+locale = "bg"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-bg.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "d37886f8cecea60bf829e4dd9dc1107aea8e8ee3eb92425423534bafac5f59b0"
+size = 106100
+licence = "LicenseRef-hyph-bg"
+class = "Embeddable"
+
+[[file]]
+locale = "bg"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bg_BG/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "100035c1d3964e5528165e539619e2c5c01a421771daa43329809e06d779d692"
+size = 17979
+licence = "GPL-2.0-or-later OR LGPL-2.0-or-later OR MPL-1.1"
+class = "Download-only"
+note = "No licence in the .aff/.dic. LibreOffice ships only bg_BG/COPYING (GPL-2.0). bgOffice (bgoffice.sourceforge.net, 2010 news) says the packages are 'GPLv2 or later, LGPLv2 or later and MPLv1.1', but the same page says the source code and words 'remain under GPL'. Download-only until bgOffice confirms MPL in writing."
+
+[[file]]
+locale = "bg"
+kind = "licence"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-bg.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "d37886f8cecea60bf829e4dd9dc1107aea8e8ee3eb92425423534bafac5f59b0"
+size = 106100
+licence = "LicenseRef-hyph-bg"
+class = "Embeddable"
+
+
+# bs
+[[file]]
+locale = "bs"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bs_BA/bs_BA.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c25f10c556319c5725ae186e1cef767541214e272422b11fadc519e4c2487ff6"
+size = 17468
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "Bosanski"
+
+[[file]]
+locale = "bs"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bs_BA/bs_BA.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "eb6778f2f311dbc71997fe790a28d26ea9d1183ef5579e6ec05f7f7141246cd6"
+size = 339863
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "bs"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sh-latn.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "5aea49c845df3c21b95e417abfc28349909a4c9565523702055a122153486a4a"
+size = 23036
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "bs"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/bs_BA/README.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "fb9cdee428f4a9d25e0457b0e5be5f59b4182c62d6a431388c8c8636dc50cc4c"
+size = 458
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# ca
+[[file]]
+locale = "ca"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/dictionaries/ca.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "abcca353b16af2d91be51d68899f47e5076a47489d08f696717fbac44074ddb8"
+size = 52471
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+name = "Català"
+
+[[file]]
+locale = "ca"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/dictionaries/ca.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4838bb46776f5d82a3823aa7abb17cd00b9dc0c301d1b6d002e1ab6558fa07ca"
+size = 3086130
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "ca"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ca.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "153b51e2a9f8afdd87a8848f73f4462a902c58d597aa55c66506af65c5596e7a"
+size = 8076
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "ca"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/README_ca.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "ebdec61a0083bf2435879e236d6de44bab2959ad03bcce2a0d8ad4190097810c"
+size = 549
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "ca"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/LICENSES-en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e1931218994ce97e1d92fe57173838cd8a2c4de78fc4687f7e58bd2b3218272d"
+size = 85
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+
+# ca-valencia
+[[file]]
+locale = "ca-valencia"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/dictionaries/ca-valencia.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2e0b44b5dffd1b9b2f1af432f7db43f847f32e0103a91ba961e8652128dc9fad"
+size = 52680
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+name = "Català (valencià)"
+
+[[file]]
+locale = "ca-valencia"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/dictionaries/ca-valencia.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8f65e295eac2ae5ef8ed6b4d584b1acde0d1d353cadde67aefe8dadd1632b47b"
+size = 3091032
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "ca-valencia"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ca.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "153b51e2a9f8afdd87a8848f73f4462a902c58d597aa55c66506af65c5596e7a"
+size = 8076
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "ca-valencia"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/README_ca.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "ebdec61a0083bf2435879e236d6de44bab2959ad03bcce2a0d8ad4190097810c"
+size = 549
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "ca-valencia"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ca/LICENSES-en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e1931218994ce97e1d92fe57173838cd8a2c4de78fc4687f7e58bd2b3218272d"
+size = 85
+licence = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+class = "Download-only"
+
+
+# cs
+[[file]]
+locale = "cs"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/cs_CZ/cs_CZ.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7ecb20620ecd46ebd9c36f3f33e69dd4eda385cba5b2bb4e6bc396d910e297f7"
+size = 111575
+licence = "GPL-2.0-only"
+class = "Download-only"
+name = "Čeština"
+
+[[file]]
+locale = "cs"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/cs_CZ/cs_CZ.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d8e8c88c006fdae72dac8c85df11b0c99a773e05a4ab0fcbe92244876668ca74"
+size = 3656362
+licence = "GPL-2.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "cs"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-cs.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "37b16173109c9c1a34d04c87eeb4ea8206d55e636c380dbcd72e912b4ca5033a"
+size = 22983
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "cs"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/cs_CZ/README_en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0fe6d017aa91ffb58146d19160f8207900cc0c49d5fffef0b1a7d3a364cb29bd"
+size = 13105
+licence = "GPL-2.0-only"
+class = "Download-only"
+
+
+# cy
+[[file]]
+locale = "cy"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/techiaith/hunspell-cy/c2fc0d27706637877b6ef9e8b7ff169383f09b1e/cy_GB.aff"
+commit = "c2fc0d27706637877b6ef9e8b7ff169383f09b1e"
+sha256 = "76c1d25bb302153a3b69f66248446c429d9e38f333acfc45ec8872a78fc9555c"
+size = 7492
+licence = "LGPL-3.0-or-later"
+class = "Download-only"
+name = "Cymraeg"
+
+[[file]]
+locale = "cy"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/techiaith/hunspell-cy/c2fc0d27706637877b6ef9e8b7ff169383f09b1e/cy_GB.dic"
+commit = "c2fc0d27706637877b6ef9e8b7ff169383f09b1e"
+sha256 = "c71bf9a3bb0e8ebc9a7b7a766efbc8f7c51d6138def66ea2f5b5d0a7adb870ef"
+size = 890545
+licence = "LGPL-3.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "cy"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-cy.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "22c4d441e790c035bd208c4cccbe9a8254ab81c3da0ca0a8b062f8ed34f3e14c"
+size = 45634
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "cy"
+kind = "licence"
+url = "https://raw.githubusercontent.com/techiaith/hunspell-cy/c2fc0d27706637877b6ef9e8b7ff169383f09b1e/LICENCE"
+commit = "c2fc0d27706637877b6ef9e8b7ff169383f09b1e"
+sha256 = "9918f281ed48daa8eb43d00e2dbbf4502043d900035862260b5c568a0c9bed76"
+size = 1446
+licence = "LGPL-3.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "cy"
+kind = "licence"
+url = "https://raw.githubusercontent.com/techiaith/hunspell-cy/c2fc0d27706637877b6ef9e8b7ff169383f09b1e/COPYING.LESSER"
+commit = "c2fc0d27706637877b6ef9e8b7ff169383f09b1e"
+sha256 = "e4cbb53080116f800a61786b0bb1e5d7e0fd99b632cc96d53b744f7d324e3df8"
+size = 7631
+licence = "LGPL-3.0-or-later"
+class = "Download-only"
+
+
+# da
+[[file]]
+locale = "da"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/da_DK/da_DK.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "ee4fe193d19b72aa64bc0d2b9bcdf44ee44f11d9b4e7dcf6da36fd0e91528561"
+size = 82864
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "Dansk"
+
+[[file]]
+locale = "da"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/da_DK/da_DK.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "298aabeca362ee2c71836c5c7748d22080a460bd7193e6fbd2471f27a70d0fd3"
+size = 3894244
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "da"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-da.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "23e0a50f0c20d632be06f973e700323463961eac737bb14f6c3787675a4f5575"
+size = 8454
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "da"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/da_DK/README_da_DK.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9508f4ec9e14a3d2a3360dd694881440d0d73fe1fe076e547639e5fe33c7b42d"
+size = 787
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# de
+[[file]]
+locale = "de"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_DE_frami.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "646bf3333ac69c23e9d794533ee5241d6f755c359e8fe10a648f87613743d594"
+size = 19067
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+name = "Deutsch (Deutschland)"
+
+[[file]]
+locale = "de"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_DE_frami.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4ca3c958b0e5545910999bc246f668840bf8ede3df8e5e6790d05edd5a586c38"
+size = 4356903
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-de-1996.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "374ad1ce3263f8a2791ec070ef9b516c532dae64456f3fb656e617e8ae53a9d3"
+size = 274609
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "de"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_extension_owner.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7662cbc363fdee12bc03a5295148587bb76923c121792a401115e654fea37b5c"
+size = 1444
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_de_DE_frami.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c141f4f79c428b7348b5012836f4ad3db4d124f288f15effc22696dc876512ae"
+size = 752
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv2"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e7431ac20e815b6797369e802f9e4bb1b0082485060d8b096235f035d741bd89"
+size = 17992
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv3"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+size = 35147
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+
+# de-at
+[[file]]
+locale = "de-at"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_AT_frami.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8b428f6215e36e145626e3d150cd0ffe273e1ad9a9ec0a1bbd31ee468ee39edc"
+size = 19068
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+name = "Deutsch (Österreich)"
+
+[[file]]
+locale = "de-at"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_AT_frami.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d821e0a5a029b66df696c982a4cd55eb792139c33716ccbde364941db2448cbb"
+size = 4359309
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-at"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-de-1996.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "374ad1ce3263f8a2791ec070ef9b516c532dae64456f3fb656e617e8ae53a9d3"
+size = 274609
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "de-at"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_extension_owner.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7662cbc363fdee12bc03a5295148587bb76923c121792a401115e654fea37b5c"
+size = 1444
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-at"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_de_DE_frami.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c141f4f79c428b7348b5012836f4ad3db4d124f288f15effc22696dc876512ae"
+size = 752
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-at"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv2"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e7431ac20e815b6797369e802f9e4bb1b0082485060d8b096235f035d741bd89"
+size = 17992
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-at"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv3"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+size = 35147
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+
+# de-ch
+[[file]]
+locale = "de-ch"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_CH_frami.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d86884be4c3f07e5e08057884856feabf2872b4e2f90a587a11376082bc4126b"
+size = 19068
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+name = "Deutsch (Schweiz)"
+
+[[file]]
+locale = "de-ch"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/de_CH_frami.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "80a4df38cdc3e16d2f042f8eba4a99668ab9c075662e4262c62f8bba46c7bd16"
+size = 4358308
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-ch"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-de-1996.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "374ad1ce3263f8a2791ec070ef9b516c532dae64456f3fb656e617e8ae53a9d3"
+size = 274609
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "de-ch"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_extension_owner.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7662cbc363fdee12bc03a5295148587bb76923c121792a401115e654fea37b5c"
+size = 1444
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-ch"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/README_de_DE_frami.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c141f4f79c428b7348b5012836f4ad3db4d124f288f15effc22696dc876512ae"
+size = 752
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-ch"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv2"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e7431ac20e815b6797369e802f9e4bb1b0082485060d8b096235f035d741bd89"
+size = 17992
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "de-ch"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/de/COPYING_GPLv3"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+size = 35147
+licence = "GPL-2.0-only OR GPL-3.0-only"
+class = "Download-only"
+
+
+# el
+[[file]]
+locale = "el"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/el_GR/el_GR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "868dfe13ad7d34251915a745e44d38542831463d56e60732ba3a5bc1dcca582a"
+size = 15647
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "Ελληνικά"
+
+[[file]]
+locale = "el"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/el_GR/el_GR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e5b9b9c2cf05bbc59e03fe302b462dae85968f822f4fc219a8ed2879d6943720"
+size = 10125390
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "el"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-el-monoton.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "a3aa9ecba9c00dd958a2b1d1d3b3aa851701f6d0027ef9cc9d7365e432c5acb0"
+size = 8490
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "el"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/el_GR/README_el_GR.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8b942846bba64ac1b28c38aee294f1667d0063e2162d59030d0da09332e8c342"
+size = 2245
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# eo
+[[file]]
+locale = "eo"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/eo/eo.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "28d48b2d17c9fd20ae9924f14dc2832c8277c9d03715f939957e2c93bcd767b1"
+size = 19129
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+name = "Esperanto"
+
+[[file]]
+locale = "eo"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/eo/eo.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d3d8f84c7b5d6fcb348ce8c11b07c70e007c4b0075350d6bd796196419d42ac4"
+size = 377989
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "eo"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-eo.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6892e3758fd35a1cb509556bb06fcb008eda3e975a867ee87eb828f204460d18"
+size = 17045
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "eo"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/eo/license-en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+size = 35147
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+
+# es
+[[file]]
+locale = "es"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_ES.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e73a9bf8e1383f4986a5dc9e2fbed49371c0c61f511c626d15586bd433c1cad9"
+size = 169202
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (España)"
+
+[[file]]
+locale = "es"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_ES.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "6975dddec3d5d2c676069537bc67b4b5f786c65c5d4cf6703a82acf779ac9ec1"
+size = 715989
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-ar
+[[file]]
+locale = "es-ar"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_AR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e9a96514295f8664db270d024c345700ccb9410a384eb71aec0fe5f0931d8c70"
+size = 171527
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Argentina)"
+
+[[file]]
+locale = "es-ar"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_AR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4fe3e193425bb3841ee218d36a9fc95d85b8daa8909363bdbba55a2f9f4e3d1d"
+size = 707817
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ar"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ar"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ar"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-bo
+[[file]]
+locale = "es-bo"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_BO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Bolivia)"
+
+[[file]]
+locale = "es-bo"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_BO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c882b993a0ae83c94ab94c4b84a8f8300979e0e44fc4dceb2f15eaba521a30e7"
+size = 702886
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-bo"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-bo"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-bo"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-cl
+[[file]]
+locale = "es-cl"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CL.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Chile)"
+
+[[file]]
+locale = "es-cl"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CL.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e249a50ed9c9b939801bd2ba12099c9decb59217782c59fc65e7f72831b0b401"
+size = 705568
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cl"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-co
+[[file]]
+locale = "es-co"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "243d5dc50b68261dd10118799724beb95a6c19d4f9d6848ebfc977430bf2f8e2"
+size = 160081
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Colombia)"
+
+[[file]]
+locale = "es-co"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "10f5e38e1c6898194cd860c237b1569725f721eb5eb0705e3a7158c69652c226"
+size = 751422
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-co"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-co"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-co"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-cr
+[[file]]
+locale = "es-cr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Costa Rica)"
+
+[[file]]
+locale = "es-cr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "073b27663394a297eb1c896419b5b5518bd5b345acfe244d00968433ad9709bd"
+size = 700936
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-cu
+[[file]]
+locale = "es-cu"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CU.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Cuba)"
+
+[[file]]
+locale = "es-cu"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_CU.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3fc1bb0eeffdb99ec8851166453b8d32745da51e9d1036c689f2512dd22c887c"
+size = 702808
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cu"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cu"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-cu"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-do
+[[file]]
+locale = "es-do"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_DO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (República Dominicana)"
+
+[[file]]
+locale = "es-do"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_DO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "194293e1785b2a0ce9b8166cdc4164afebc1ef57db92305786b32350fcb13832"
+size = 699651
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-do"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-do"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-do"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-ec
+[[file]]
+locale = "es-ec"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_EC.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Ecuador)"
+
+[[file]]
+locale = "es-ec"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_EC.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "caeea1b6bb09c80ca1ff36c81a02ca868fe709f330ac4303806cbf1cd7a6bc0b"
+size = 701539
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ec"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ec"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ec"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-gq
+[[file]]
+locale = "es-gq"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_GQ.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "674c5a4b4d39fd3b4452f045a4e6e0649db4a2ce23f5903df8c311e21f1a757c"
+size = 171524
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Guinea Ecuatorial)"
+
+[[file]]
+locale = "es-gq"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_GQ.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "967175eb16b2cccd8f1ed327098c279848840fff6fe0f729fcf614ec77c54380"
+size = 835304
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gq"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gq"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gq"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-gt
+[[file]]
+locale = "es-gt"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_GT.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2cdfcb8d86b70090b3f23f2fe2b6d9d6cfa5f76c803fa8229c674af2b87e6adc"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Guatemala)"
+
+[[file]]
+locale = "es-gt"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_GT.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f424e3546db88d36b38bbc735fd01126296a4f7500ca1368d7017fac561107e7"
+size = 700565
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gt"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-gt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-hn
+[[file]]
+locale = "es-hn"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_HN.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Honduras)"
+
+[[file]]
+locale = "es-hn"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_HN.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a1fa7c74a68cb4e7746bae221dd53a27467c320a1cdc2d712cf55926896ee28d"
+size = 702581
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-hn"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-hn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-hn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-mx
+[[file]]
+locale = "es-mx"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_MX.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d966cb748e4a688ed75ec84b50c0835ac438e5325ee4fce703a093794f9cba7e"
+size = 160081
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (México)"
+
+[[file]]
+locale = "es-mx"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_MX.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "44ce35af220962c68f97962776639bef271f7d90a85ba924b539a36e33315f82"
+size = 723507
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-mx"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-mx"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-mx"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-ni
+[[file]]
+locale = "es-ni"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_NI.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Nicaragua)"
+
+[[file]]
+locale = "es-ni"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_NI.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4d7ecc54d369aab904733e64729fffa42413412e14e6a27a32f7fbd56e9161b9"
+size = 701487
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ni"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ni"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ni"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-pa
+[[file]]
+locale = "es-pa"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PA.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Panamá)"
+
+[[file]]
+locale = "es-pa"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PA.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bd87e7e25b776d8fe96c4197360909b41d45289ec91c7c47eb000948c04a3ae2"
+size = 700221
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pa"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pa"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pa"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-pe
+[[file]]
+locale = "es-pe"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PE.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d966cb748e4a688ed75ec84b50c0835ac438e5325ee4fce703a093794f9cba7e"
+size = 160081
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Perú)"
+
+[[file]]
+locale = "es-pe"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PE.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1d810a0a319fee329000538cf4df76621bb71228172558b87490f8b9c19b9d75"
+size = 715404
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pe"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pe"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pe"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-ph
+[[file]]
+locale = "es-ph"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PH.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "674c5a4b4d39fd3b4452f045a4e6e0649db4a2ce23f5903df8c311e21f1a757c"
+size = 171524
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Filipinas)"
+
+[[file]]
+locale = "es-ph"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PH.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "ce05ef779b88e398b9949cb873ee3cf0827685884116d48250d157f50faeb9b3"
+size = 797554
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ph"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ph"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ph"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-pr
+[[file]]
+locale = "es-pr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Puerto Rico)"
+
+[[file]]
+locale = "es-pr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "11e0815f41a25aac5d6871a13767b1c14a1c6ad5a7c40b359fc4c22f8297ff7f"
+size = 699760
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-pr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-py
+[[file]]
+locale = "es-py"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PY.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Paraguay)"
+
+[[file]]
+locale = "es-py"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_PY.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f9a18929f9e5234bc4aba83df1744351156932cb47b77b2ed3358c3170bb41ff"
+size = 700375
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-py"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-py"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-py"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-sv
+[[file]]
+locale = "es-sv"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_SV.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dc8213bb8fb08e51dd5869b348d873de23f89e3315656396ca3031fe1d7ffcea"
+size = 162395
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (El Salvador)"
+
+[[file]]
+locale = "es-sv"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_SV.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3a015f4469046d37806bf374c4d88149cdf570f467a60732f50d736f23d9cac5"
+size = 700941
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-sv"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-sv"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-sv"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-us
+[[file]]
+locale = "es-us"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_US.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "674c5a4b4d39fd3b4452f045a4e6e0649db4a2ce23f5903df8c311e21f1a757c"
+size = 171524
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Estados Unidos)"
+
+[[file]]
+locale = "es-us"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_US.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d46932a5c0ec3881fdf265333df4de45a73de51741baedcb5bb54d37b03979c8"
+size = 696235
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-us"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-us"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-us"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-uy
+[[file]]
+locale = "es-uy"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_UY.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d7ace3a7ef1fdf6dc89701d37f109730c0bc19aeaeda0ecf59fc67a1c5c28232"
+size = 162371
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Uruguay)"
+
+[[file]]
+locale = "es-uy"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_UY.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9f05b75265a78bcd394993b7fee5f9f0e4031c41ce8915828c6fce8ee6579e13"
+size = 702491
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-uy"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-uy"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-uy"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# es-ve
+[[file]]
+locale = "es-ve"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_VE.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d966cb748e4a688ed75ec84b50c0835ac438e5325ee4fce703a093794f9cba7e"
+size = 160081
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Español (Venezuela)"
+
+[[file]]
+locale = "es-ve"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/es_VE.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "57eb3aa695c24e1f8f469ac86367b952194c08ee25bc2b761ba4681686ccc723"
+size = 704472
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ve"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-es.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6a2e5f39a991a23d1cd8a23dbd0f6fe96a9f07561a6695f4f3320f47030e236c"
+size = 42602
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ve"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/LICENSE.md"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b70fd5cb8d3b34cc6ae322c969557a2270b99017594addb2531ef5ffd9e1b17"
+size = 991
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "es-ve"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/es/README_hunspell_es.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0b5c39a863ecb61f5c5631ec1cd977667ef9bda6da6f90e80e9fc0edcbfadd97"
+size = 2615
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# et
+[[file]]
+locale = "et"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/et_EE/et_EE.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2fa53b7853762ec8c63ffa14b2d96d23433e3f2c2d3d218ad7c2461673099f95"
+size = 236336
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+name = "Eesti"
+
+[[file]]
+locale = "et"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/et_EE/et_EE.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "cd1378434aefeaa8a31f49369dbf71caf4e6340badb5c2cf7a55820933ed4f13"
+size = 4383841
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "et"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-et.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "617abc528446e33c1690a3d13ae7629292d2f00557b1b4ec96cb2a1d790ac090"
+size = 25785
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "et"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/et_EE/README_et_EE.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4cff6a48ea9168d545316ab96bac24eff4745bf198cbdd9f57eb10a9d8f93f0d"
+size = 55978
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+
+# eu
+[[file]]
+locale = "eu"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/eu/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "ba68948c642828c80e5b5fc7ea19876bd38ce6f874f4453c662395adca8fef2a"
+size = 2729393
+licence = "LGPL-3.0-only"
+class = "Excluded"
+name = "Euskara"
+note = "The xuxen.eus zip ships only an LGPL-3.0 text with no copyright line; xuxen.eus/lege-oharra says Elhuyar content is CC BY-NC-ND; wooorm's readme says GPL-2.0. A non-commercial, no-derivatives statement makes it Excluded until Elhuyar confirms."
+
+[[file]]
+locale = "eu"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/eu/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "2f046ed070c11f9dc6f502577462bdc11a0966be50e0d9750823922a22d9e948"
+size = 2303418
+licence = "LGPL-3.0-only"
+class = "Excluded"
+note = "The xuxen.eus zip ships only an LGPL-3.0 text with no copyright line; xuxen.eus/lege-oharra says Elhuyar content is CC BY-NC-ND; wooorm's readme says GPL-2.0. A non-commercial, no-derivatives statement makes it Excluded until Elhuyar confirms."
+
+[[file]]
+locale = "eu"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/eu/readme.md"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "f2fb6de196e25ae7ce894d8d989263dae3718e9736c7ebd165cea5c4f7b7d762"
+size = 2885
+licence = "LGPL-3.0-only"
+class = "Excluded"
+note = "The xuxen.eus zip ships only an LGPL-3.0 text with no copyright line; xuxen.eus/lege-oharra says Elhuyar content is CC BY-NC-ND; wooorm's readme says GPL-2.0. A non-commercial, no-derivatives statement makes it Excluded until Elhuyar confirms."
+
+
+# fa
+[[file]]
+locale = "fa"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fa_IR/fa-IR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "cf7cd88fa8658b9c1bae8196b34ee2ff52456f6ce7a44482c1f5063feb6d8768"
+size = 5439
+licence = "Apache-2.0"
+class = "Embeddable"
+name = "فارسی"
+
+[[file]]
+locale = "fa"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fa_IR/fa-IR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "314f31e059994f26e8016c834b14dfd10f74834b3f623a6040265b8f2a9dddab"
+size = 2575990
+licence = "Apache-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "fa"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fa_IR/LICENSE"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7429736f069a84049bcfbee436e5cea3a3fd9b98348d880d9e43ebcf39721989"
+size = 582
+licence = "Apache-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "fa"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fa_IR/README_fa_IR.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "aa1450d6eab0d140719048e7277204bae086947fe5d8cd834d115c0dd0cf7a81"
+size = 887
+licence = "Apache-2.0"
+class = "Embeddable"
+
+
+# fr
+[[file]]
+locale = "fr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fr_FR/dictionaries/fr.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c176610cd5dc4846806a65ddd029f422d87978bf58f224aa44222662a16a2de5"
+size = 199870
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Français"
+
+[[file]]
+locale = "fr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fr_FR/dictionaries/fr.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b78a868e31dd6e373b6c3217969afb898a9acde828a5e7ef97308da42218c88c"
+size = 1236490
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "fr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-fr.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "526cad6fe8f52fcd3caa3fcaf667cb1740cfc14bca198680e00dc343a84594de"
+size = 30353
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "fr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/fr_FR/dictionaries/README_dict_fr.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4a25abf740ad6ba5e8d0cfc0d2ffadc3c13c303f8fe389f323b061a389350f83"
+size = 2758
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# ga
+[[file]]
+locale = "ga"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ga/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "1c48edbeb0e4225e612bb92d21f819fec58c9121b236db5ac0bba458982623b7"
+size = 20537
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+name = "Gaeilge"
+
+[[file]]
+locale = "ga"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ga/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "3ca59ca30da8875020f83697d9f817d44b4efa02d78fe9fb52a2c5a86527349d"
+size = 1582329
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "ga"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ga.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "7856cb341fd978b910c3807aa6918b39791e2f507d803253daccb5c71bbc02c6"
+size = 46868
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "ga"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ga/license"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "37b50f1f97cae81339300b3d69f412f4ebb952b9f5ff09c66a3bccbd0ad57e36"
+size = 19096
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+
+# gl
+[[file]]
+locale = "gl"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/gl/gl_ES.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "76c848fc7704be8ea035926fb524b6379d572212f10eb8cb8e847e98442b2f3a"
+size = 1163541
+licence = "GPL-3.0-only"
+class = "Download-only"
+name = "Galego"
+
+[[file]]
+locale = "gl"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/gl/gl_ES.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9c0b9128a73473fde3199e807a78252c39a3885db1d0db161a2b0fcd286c7a4b"
+size = 8325262
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "gl"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-gl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "a7dbf7fd11c646921a40be561fb1ba362cd79ce93d0099dec9f86676abb5273a"
+size = 22648
+licence = "Unlicense"
+class = "Embeddable"
+
+[[file]]
+locale = "gl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/gl/README"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1cf732806d5e30c414c72034cc9ab07a56e4525fb76a31adefc7a3aa22bd05f8"
+size = 992
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+
+# he
+[[file]]
+locale = "he"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/he_IL/he_IL.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "6caf86b3a545be5614f135d33a48baa244a59aca43f051dda6173d5d9cbc7700"
+size = 78883
+licence = "AGPL-3.0-or-later"
+class = "Download-only"
+name = "עברית"
+
+[[file]]
+locale = "he"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/he_IL/he_IL.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "5f5331f90ed775bd527f6fb7ad1ead9a1b7d8ce46ad640c2387d9d1dc91d3058"
+size = 7796259
+licence = "AGPL-3.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "he"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/he_IL/README_he_IL.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3212469adc6113e77939c20de2c29b9cec6c917d0cae80f2554cac092198e682"
+size = 937
+licence = "AGPL-3.0-or-later"
+class = "Download-only"
+
+
+# hi
+[[file]]
+locale = "hi"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hi_IN/hi_IN.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3ab96772dc3d1cdbec4141798efb8b7a091b92c9acbeb5dfd3c4998a5c508302"
+size = 12671
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+name = "हिन्दी"
+
+[[file]]
+locale = "hi"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hi_IN/hi_IN.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1e01f962a02638ef73e3f8de3c44bfd854f7059d31c9fa96cff0b73a2840f9d9"
+size = 5004835
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "hi"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-hi.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "a55a2766d7e1c2d36991f4fccfef639016721b41593029043c2d13bc340ef632"
+size = 3088
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "hi"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hi_IN/README_hi_IN.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2b373a1e07efe18e89c04c7f69bd540681a5926edcb478a4331d0df387861487"
+size = 2754
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "hi"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hi_IN/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "204d8eff92f95aac4df6c8122bc1505f468f3a901e5a4cc08940e0ede1938994"
+size = 18009
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+
+# hr
+[[file]]
+locale = "hr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hr_HR/hr_HR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b33461b41ec30851f901af70dc44a2be6d3ad90196ff2d5b01e60695d8182465"
+size = 95802
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+name = "Hrvatski"
+note = "LibreOffice hr_HR/README_hr_HR.txt (v2.1.1, these files): 'GPL 2.0/LGPL 2.1/MPL 1.1 tri-license'. The current upstream (krunose/hr-hunspell) README says 'LGPL/SISSL license, 2003'. Download-only until the conflict is resolved."
+
+[[file]]
+locale = "hr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hr_HR/hr_HR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9c517653968a69389ee240b658b12c9db3ea00ce5415086ab76ade5a725e469d"
+size = 731819
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+note = "LibreOffice hr_HR/README_hr_HR.txt (v2.1.1, these files): 'GPL 2.0/LGPL 2.1/MPL 1.1 tri-license'. The current upstream (krunose/hr-hunspell) README says 'LGPL/SISSL license, 2003'. Download-only until the conflict is resolved."
+
+[[file]]
+locale = "hr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-hr.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "69d684289c626c2576678112699c960d5821b52e7addbd473c0e8d0ef0c1694e"
+size = 10761
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "hr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hr_HR/README_hr_HR.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b850923a46efe6acb7d7fa5c314e9d413bcf0b039c67168266351936aa2d976f"
+size = 464
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+note = "LibreOffice hr_HR/README_hr_HR.txt (v2.1.1, these files): 'GPL 2.0/LGPL 2.1/MPL 1.1 tri-license'. The current upstream (krunose/hr-hunspell) README says 'LGPL/SISSL license, 2003'. Download-only until the conflict is resolved."
+
+
+# hu
+[[file]]
+locale = "hu"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hu_HU/hu_HU.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f3a2748dd535cfde2142ab17d0f7f8e4787b03fb25a60829c69ac8d493db4802"
+size = 2316267
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Magyar"
+
+[[file]]
+locale = "hu"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hu_HU/hu_HU.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "97293d670ad4a3b8e7eebef7e25c6e8e939b914c64b6b4672b2bf416b768f990"
+size = 1786144
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "hu"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-hu.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "c6f02d2b6f49d5068035f7bbc91aaeefd0b691ff806c17539a033a716c374692"
+size = 529279
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "hu"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/hu_HU/README_hu_HU.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "52b17fc3d53b6935eab747a71894507d702f7f0fde379c819c16cc803005fc84"
+size = 1190
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# hy
+[[file]]
+locale = "hy"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/hy/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "aa8b49f32350a0136d112f62ee697c87cdc452256d12a70ef1fea2e7a13b32fb"
+size = 25543
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "Հայերեն"
+
+[[file]]
+locale = "hy"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/hy/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "53530792b4937e4b8cd387e28ff45884e42742c8218d8ba4510804efcfb81084"
+size = 2210856
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "hy"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-hy.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "a132d1fdfafbc601da8540c3bc8419335dde455369b80c3a0a8ce06116eec449"
+size = 12797
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "hy"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/hy/license"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "4471b1cc5e45985780f3c044dcfc3725b7845f3108309aa2a7be2df5c0510d32"
+size = 353
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# id
+[[file]]
+locale = "id"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/id/id_ID.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c625d5b237a489c452cf1f9c666600103e8093667dff89e7030a24217995dc79"
+size = 15274
+licence = "LGPL-3.0-only"
+class = "Download-only"
+name = "Bahasa Indonesia"
+
+[[file]]
+locale = "id"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/id/id_ID.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "775ff17a52801f3d2ee80120952fb44cc9bac6c3cf61740de775e439851a5803"
+size = 453700
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "id"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-id.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "95bb9f56044f5f4bcceb838224a13d560df0188f0d91543c8d3b4c9a2abfc032"
+size = 3389
+licence = "GPL-2.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "id"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/id/LICENSE-dict"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "97628afebc60f026f5c2b25d7491c46a5c4ee61f693e7cfa07fbd2c03605979b"
+size = 7652
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "id"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/id/README-dict.adoc"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "7c18fabf4169a4b7f0f7effac5309c26294d8cb354d9ed5cbc8ea2868abcf942"
+size = 4065
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+
+# is
+[[file]]
+locale = "is"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/is/is.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0168050c64a369c55b5aeb61f9dfe484d2aa7512d78bb3fa36779ea24b467c50"
+size = 309734
+licence = "CC-BY-SA-3.0"
+class = "Download-only"
+name = "Íslenska"
+
+[[file]]
+locale = "is"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/is/is.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8447594fd7eb1d6d43725c4ca49b00d3f00c4c4f3ac2f2b6dfe3f56eb211d280"
+size = 2454138
+licence = "CC-BY-SA-3.0"
+class = "Download-only"
+
+[[file]]
+locale = "is"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-is.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "2707969ebe34a9ddfd861aaef40619e75ac78453718a56401aed91c5cbdcfcec"
+size = 27097
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "is"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/is/license.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a852be66ff244eb15563a39631e7d4663811ee8e5d66682e653a989e57cd13fe"
+size = 34802
+licence = "CC-BY-SA-3.0"
+class = "Download-only"
+
+
+# it
+[[file]]
+locale = "it"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/it_IT/it_IT.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "951afaa19272f13555b8823e8bcf9ccf78f8fe1a07835bdfb912ab3e4d537c2b"
+size = 70054
+licence = "GPL-3.0-only"
+class = "Download-only"
+name = "Italiano"
+
+[[file]]
+locale = "it"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/it_IT/it_IT.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bae1e3501dcd2a923669592493b3fde6c02aae7c7aab83bf5e5b49077e73dd64"
+size = 1295083
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "it"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-it.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6ce56ed6ed2ca7c0688838e366e6595e0429f984f4fc6e96ec045cebb1e76a47"
+size = 5011
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "it"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/it_IT/README_it_IT.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "34c3e93595cf3cf5f3afc9bc0d98eea12593750383f1e82ed1d3ca29f9681283"
+size = 38902
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+
+# ka
+[[file]]
+locale = "ka"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ka/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "f5c39986659f13d703d0bae0ac8856d58768ce2b8d1f5ab6fb1ca3487c5ede5a"
+size = 63577
+licence = "MIT AND CC-BY-4.0"
+class = "Embeddable"
+name = "ქართული"
+
+[[file]]
+locale = "ka"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ka/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "5963f268e996f1e27e17163873b4d32f41fae2a1e5bef0117126caefe62f5857"
+size = 3884579
+licence = "MIT AND CC-BY-4.0"
+class = "Embeddable"
+
+[[file]]
+locale = "ka"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ka.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "909f290e3a018e6b28692606ed2c1cf26d64f2d8bb1ec43e6133aba6d4704759"
+size = 26820
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "ka"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/ka/license"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "583322a252b4aef50d55c3300e42391697c406be5a732530428b2af3f0fa79ed"
+size = 1036
+licence = "MIT AND CC-BY-4.0"
+class = "Embeddable"
+
+
+# ko
+[[file]]
+locale = "ko"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ko_KR/ko_KR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "43a984d8f1e2309490b69cfde31832d217a0b31164c67661e293efc096083688"
+size = 11094418
+licence = "GPL-3.0-only"
+class = "Download-only"
+name = "한국어"
+
+[[file]]
+locale = "ko"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ko_KR/ko_KR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "14117a72811ed6a083ed374ceb728b0846a689da6f4dbfe0a84d3b3bce124e80"
+size = 2864524
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "ko"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ko_KR/README_ko_KR.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e0b13b74b287a71bc668a756fe0d1bcfe5adafb860acab0d81e71593333e1724"
+size = 327
+licence = "GPL-3.0-only"
+class = "Download-only"
+
+
+# lt
+[[file]]
+locale = "lt"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lt_LT/lt.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "79c6f8304490d1c8b27ec93e509b2f635d9bb21d45a2d41c15162b18c8ff897c"
+size = 99714
+licence = "BSD-3-Clause"
+class = "Embeddable"
+name = "Lietuvių"
+
+[[file]]
+locale = "lt"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lt_LT/lt.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a751750b040623cf408cf1a3b6f6336141b55ac9519e54068dbeaa52eb395ccd"
+size = 1181184
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+[[file]]
+locale = "lt"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-lt.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "6162b566620367abb827ba1457567e7a79680596919886a7138e48b346e983d1"
+size = 11601
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "lt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lt_LT/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c5c73b4e3743ed2b959c70e886c4acee20d8654002ccdabac0a51af977ee2a17"
+size = 1520
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+[[file]]
+locale = "lt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lt_LT/README"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "80b2b37785bab50153753eac04bf2ee368a7baa25bf2bfee6bbd5b556f72e78f"
+size = 619
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+
+# lv
+[[file]]
+locale = "lv"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lv_LV/lv_LV.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a11f646c6905d6c96f3218ada4a6cf84129c9e6169720ac1a17f1707940a2890"
+size = 130475
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+name = "Latviešu"
+
+[[file]]
+locale = "lv"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lv_LV/lv_LV.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bf7d054e28bc5e44df19410f3ed9d5fd8d6a4d8c051676650388c4e8d65c3148"
+size = 1844831
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "lv"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-lv.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "209e0a5b09aaf68517724a2cecc7b7bbd278355ffdd918051ce23110687e3d3c"
+size = 85396
+licence = "LGPL-2.1-only"
+class = "Download-only"
+
+[[file]]
+locale = "lv"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lv_LV/README_lv_LV.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "47c1e55d0651aec81734a187b5174638227e0e38b0edf8f96a8a4a3d9b46eed4"
+size = 4913
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "lv"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/lv_LV/license.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bb117c0fbd7f57f64170b690285d7df07c2371b578e3b3cd3aa2e1155ef461a0"
+size = 24390
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+
+
+# mk
+[[file]]
+locale = "mk"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/mk/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "4774871b7cafa2d59bd2f539be7a2293f4aa2b2e2a331f1d11f8bcb849b4105e"
+size = 181552
+licence = "GPL-3.0-or-later"
+class = "Download-only"
+name = "Македонски"
+
+[[file]]
+locale = "mk"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/mk/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "5008053d3b4e4be163c32b23a9d0551ae7aefceaa7d0760c07f2ebc10af7afb5"
+size = 2279845
+licence = "GPL-3.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "mk"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-mk.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "3cd8cf3ad015adec006523ba0c087069ee262f06625275ad4a332d3051f655fd"
+size = 6582
+licence = "GPL-1.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "mk"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/mk/license"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "1b8e0dea2caf07ba90b923725e06f9a50f2de9ead6667421f67c16a296abf967"
+size = 36073
+licence = "GPL-3.0-or-later"
+class = "Download-only"
+
+
+# mn
+[[file]]
+locale = "mn"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/bataak/dict-mn/b781747306b33bb34820507d4c930f5c787953d7/mn_MN/mn_MN.aff"
+commit = "b781747306b33bb34820507d4c930f5c787953d7"
+sha256 = "45369493d575435e4126e6285e20584fc890d1116066a1e5baa1dd8a637efa12"
+size = 523291
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Монгол"
+
+[[file]]
+locale = "mn"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/bataak/dict-mn/b781747306b33bb34820507d4c930f5c787953d7/mn_MN/mn_MN.dic"
+commit = "b781747306b33bb34820507d4c930f5c787953d7"
+sha256 = "c0d4e22fac97882d4aa1c5bef9414cd0ec078c998c0bd1c1a130cb32740680e0"
+size = 18437363
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "mn"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-mn-cyrl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "22903e12e25e5348d7c2285f8d3173215540296e1b47f38515936618993988fa"
+size = 16059
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "mn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/bataak/dict-mn/b781747306b33bb34820507d4c930f5c787953d7/mn_MN/README_mn_MN.txt"
+commit = "b781747306b33bb34820507d4c930f5c787953d7"
+sha256 = "2844c178dd897e315d41de529d2a2522711de64281a60a49724f1915ad6caa5b"
+size = 2332
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "mn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/bataak/dict-mn/b781747306b33bb34820507d4c930f5c787953d7/LICENSE"
+commit = "b781747306b33bb34820507d4c930f5c787953d7"
+sha256 = "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+size = 16726
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# nb
+[[file]]
+locale = "nb"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/nb_NO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b9e828538222b3580d8adb4660d5bae9bc1fbe42e7c21fd3e01970efed96b4f8"
+size = 17382
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+name = "Norsk bokmål"
+
+[[file]]
+locale = "nb"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/nb_NO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "aadaf9ea6b437b4edada54a2084e1c8dc00029addc6dfb4e15637f8e798dacc1"
+size = 9336265
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+[[file]]
+locale = "nb"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-no.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "05a2ac5fbf88bdc78c580e5cb8a158e6aa760d13756604f9523aa99feec3ec65"
+size = 196495
+licence = "FSFAP"
+class = "Embeddable"
+
+[[file]]
+locale = "nb"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/README"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0fb3b682bbe5fd3fe23a22d26cc7c417115016bb5f40ec4cf5a62aabe6e5c9c9"
+size = 4286
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+[[file]]
+locale = "nb"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e7431ac20e815b6797369e802f9e4bb1b0082485060d8b096235f035d741bd89"
+size = 17992
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+
+# nl
+[[file]]
+locale = "nl"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/nl_NL/nl_NL.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f0233d4f721f4661cf5f4d05ed2739549322bf3b6b66764b55a38257e1e16e6f"
+size = 46557
+licence = "BSD-3-Clause"
+class = "Embeddable"
+name = "Nederlands"
+
+[[file]]
+locale = "nl"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/nl_NL/nl_NL.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bc28af45307700a9927ad5719184da44dfd7eed4f707b8c1477f6d8a21b586a6"
+size = 2488246
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+[[file]]
+locale = "nl"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-nl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "d21499bfbee53e4d50e867ef92a41fd28b65725d7c91c980e4f8f02889bf6b2a"
+size = 87511
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "nl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/nl_NL/LICENSE.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2189c248cbc054445aeac6cd65b87eebd0a115efeb55ed498b0f2a73441805dd"
+size = 25820
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+
+# nn
+[[file]]
+locale = "nn"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/nn_NO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "454f0bf09e6581ca8e153c245a6136bec15e954f752d930ad32fedeb012ce5de"
+size = 13616
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+name = "Norsk nynorsk"
+
+[[file]]
+locale = "nn"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/nn_NO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9173f6b9e943cea8e3a2097b7c1cd67e09a0839cb85dfaad9114d7fc2c313c81"
+size = 6467674
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+[[file]]
+locale = "nn"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-no.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "05a2ac5fbf88bdc78c580e5cb8a158e6aa760d13756604f9523aa99feec3ec65"
+size = 196495
+licence = "FSFAP"
+class = "Embeddable"
+
+[[file]]
+locale = "nn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/README"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0fb3b682bbe5fd3fe23a22d26cc7c417115016bb5f40ec4cf5a62aabe6e5c9c9"
+size = 4286
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+[[file]]
+locale = "nn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/no/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e7431ac20e815b6797369e802f9e4bb1b0082485060d8b096235f035d741bd89"
+size = 17992
+licence = "GPL-2.0-only AND CC-BY-4.0"
+class = "Download-only"
+
+
+# pl
+[[file]]
+locale = "pl"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pl_PL/pl_PL.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "82973651651aa930335c865b339b98db376ca3dbf3a661b70b9eeb71fdf41dca"
+size = 257542
+licence = "Apache-2.0"
+class = "Embeddable"
+name = "Polski"
+
+[[file]]
+locale = "pl"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pl_PL/pl_PL.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c0848440599eb88e5aca500418d5f389e562ec2c157b63dbe39d354658ffba49"
+size = 5252096
+licence = "Apache-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "pl"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-pl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "83ddbbd21bc06a44bc4f4a4c49c38782e809cff5f026b764c044daa29e818843"
+size = 34118
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "pl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pl_PL/README_pl_PL.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e691ed1e79934293b0cd6996a14af1520ff893c02f920c09ed0c90aa5f0a8abc"
+size = 593
+licence = "Apache-2.0"
+class = "Embeddable"
+
+
+# pt-br
+[[file]]
+locale = "pt-br"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_BR/pt_BR.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "21d8ad2a769a60e17e2b5ea4ef11d4d593a58b9e2a82d642ef82d6a4c5523865"
+size = 979792
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Português (Brasil)"
+
+[[file]]
+locale = "pt-br"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_BR/pt_BR.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a38bfb26b68ece2834e79fe83e48d5792652970ace12db89d1b9674bf9933183"
+size = 4477695
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "pt-br"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-pt.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "c110a39e501db372d1d755e1c64464321a2efa7d8e9617f66001000389b941f2"
+size = 5487
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+[[file]]
+locale = "pt-br"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_BR/README_en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bb064f3db7ba5f5536da7d079773f692c5f928822e8aebc3d78259ff6cceb9e5"
+size = 1461
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# pt-pt
+[[file]]
+locale = "pt-pt"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_PT/pt_PT.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "975a209fcc892cb382fa5f34a28c391a39668661ce373ae071287809c5fcae24"
+size = 95089
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+name = "Português (Portugal)"
+note = "Three statements: pt_PT/README_pt_PT.txt 'covered by the (GPL/LGPL/MPL), by this order: GPL 2, LGPL 2.1, MPL 1.1'; pt_PT/LICENSES.txt 'covered by the GPL and BSD licence'; natura.di.uminho.pt 'GPL, LGPL, e MPL (ou pela menos uma delas)'. Download-only until resolved."
+
+[[file]]
+locale = "pt-pt"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_PT/pt_PT.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e29ba2d7aa8a2ad43e9cb46ac6473064b661545c87002aea90e18899d98d3cc9"
+size = 1485977
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+note = "Three statements: pt_PT/README_pt_PT.txt 'covered by the (GPL/LGPL/MPL), by this order: GPL 2, LGPL 2.1, MPL 1.1'; pt_PT/LICENSES.txt 'covered by the GPL and BSD licence'; natura.di.uminho.pt 'GPL, LGPL, e MPL (ou pela menos uma delas)'. Download-only until resolved."
+
+[[file]]
+locale = "pt-pt"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-pt.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "c110a39e501db372d1d755e1c64464321a2efa7d8e9617f66001000389b941f2"
+size = 5487
+licence = "BSD-3-Clause"
+class = "Embeddable"
+
+[[file]]
+locale = "pt-pt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_PT/README_pt_PT.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "36de7d88a406a4947bf646a64145f00827566808988632e3df969aa95776060c"
+size = 1106
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+note = "Three statements: pt_PT/README_pt_PT.txt 'covered by the (GPL/LGPL/MPL), by this order: GPL 2, LGPL 2.1, MPL 1.1'; pt_PT/LICENSES.txt 'covered by the GPL and BSD licence'; natura.di.uminho.pt 'GPL, LGPL, e MPL (ou pela menos uma delas)'. Download-only until resolved."
+
+[[file]]
+locale = "pt-pt"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/pt_PT/LICENSES.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d2c1cfe2e2dd81c651aec3fda5d1b4b4e7679b9e04f8cdc37586e521837384d1"
+size = 1830
+licence = "GPL-2.0-only OR LGPL-2.1-only OR MPL-1.1"
+class = "Download-only"
+note = "Three statements: pt_PT/README_pt_PT.txt 'covered by the (GPL/LGPL/MPL), by this order: GPL 2, LGPL 2.1, MPL 1.1'; pt_PT/LICENSES.txt 'covered by the GPL and BSD licence'; natura.di.uminho.pt 'GPL, LGPL, e MPL (ou pela menos uma delas)'. Download-only until resolved."
+
+
+# ro
+[[file]]
+locale = "ro"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ro/ro_RO.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "0c83a02f0ac5202c068e60e1aef5ce99e13d7f6c92ae8e68ca8b9e06829edfd1"
+size = 55195
+licence = "MPL-1.1"
+class = "Embeddable"
+name = "Română"
+
+[[file]]
+locale = "ro"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ro/ro_RO.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "c26a9356f598a0ae89e7be650f6bdd9ba70acce66b41d7ab14c0c68639b6ed33"
+size = 2202394
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "ro"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ro/README_EN.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "854c3b7e6575da37d066d5a09945af336a8ecc62c5e3c1049e97504dc67cbd81"
+size = 1633
+licence = "MPL-1.1"
+class = "Embeddable"
+
+[[file]]
+locale = "ro"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ro/COPYING.MPL"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "53692a2ed6c6a2c6ec9b32dd0b820dfae91e0a1fcdf625ca9ed0bdf8705fcc4f"
+size = 25755
+licence = "MPL-1.1"
+class = "Embeddable"
+
+
+# ru
+[[file]]
+locale = "ru"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ru_RU/ru_RU.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "38ce7d4af78e211e9bafe4bf7e3d6a2c420591136cb738ec6648f8fdf6524cd7"
+size = 71236
+licence = "LicenseRef-BSD-Lebedev"
+class = "Embeddable"
+name = "Русский"
+
+[[file]]
+locale = "ru"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ru_RU/ru_RU.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f6047416a0204adbecf3a451b874ec8a97ee37e2cbc714466ef04d8dbcc0d6fc"
+size = 3473191
+licence = "LicenseRef-BSD-Lebedev"
+class = "Embeddable"
+
+[[file]]
+locale = "ru"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "ce988fcc66e5e29d7474df5ab5b489d3f52a50ebccf570997f992d84221b922a"
+size = 68421
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "ru"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ru_RU/README_ru_RU.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "262af2f6ad70a61e5ee1332ff44fa8ee50edca819cf33207d8ad6ba6a0c9be52"
+size = 1886
+licence = "LicenseRef-BSD-Lebedev"
+class = "Embeddable"
+
+
+# sk
+[[file]]
+locale = "sk"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/sk-spell/hunspell-sk/ee4ffc39c1955411293dc0cf6263daa344fd18a4/sk_SK.aff"
+commit = "ee4ffc39c1955411293dc0cf6263daa344fd18a4"
+sha256 = "7170b067475451eeb7d3667efb7329dc0384235fe8484aafeb251c3cb08a5931"
+size = 226516
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Slovenčina"
+
+[[file]]
+locale = "sk"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/sk-spell/hunspell-sk/ee4ffc39c1955411293dc0cf6263daa344fd18a4/sk_SK.dic"
+commit = "ee4ffc39c1955411293dc0cf6263daa344fd18a4"
+sha256 = "016ef83c107661d259e7c60989328952fabc0920a550388bd621fbfdc87d2bf8"
+size = 3367805
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "sk"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sk.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "55b51962da5ad3f48ff62007006ecb7768bf2665e407c920e968d08b10b40369"
+size = 20883
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "sk"
+kind = "licence"
+url = "https://raw.githubusercontent.com/sk-spell/hunspell-sk/ee4ffc39c1955411293dc0cf6263daa344fd18a4/LICENSE"
+commit = "ee4ffc39c1955411293dc0cf6263daa344fd18a4"
+sha256 = "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+size = 16725
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "sk"
+kind = "licence"
+url = "https://raw.githubusercontent.com/sk-spell/hunspell-sk/ee4ffc39c1955411293dc0cf6263daa344fd18a4/doc/Copyright"
+commit = "ee4ffc39c1955411293dc0cf6263daa344fd18a4"
+sha256 = "04903300e57a64a9967f85cdc65038470165b56bd34843e161f89d1fb9bcc0cd"
+size = 822
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# sl
+[[file]]
+locale = "sl"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sl_SI/sl_SI.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3cb3e84824959928c8004e07b37b9d2bcb84176095f514e134f006dbb14a0beb"
+size = 14730
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+name = "Slovenščina"
+
+[[file]]
+locale = "sl"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sl_SI/sl_SI.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e157aabf1a20d21f639d04cf79f019ff1a3eb623c6780a726ffa4293787fa0ab"
+size = 2967766
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "sl"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "27da982d03b881fe84f1c4fb42ba0948f33e01a3a44eaa5ebd07e01d20c72691"
+size = 9070
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "sl"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sl_SI/README_sl_SI.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "80e3fb8a78bf7c3cf1c76679ff1f11d4cb100440c9362553636b02edca005eb8"
+size = 2076
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+
+# sq
+[[file]]
+locale = "sq"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sq_AL/sq_AL.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d20b6a23431d28fe6d4e6327eedf846dbed1c3ffbb9574fdcfed4ec308422010"
+size = 7764
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+name = "Shqip"
+
+[[file]]
+locale = "sq"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sq_AL/sq_AL.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "8fba63fcf7320910803739cc2f0475224a7e8f38f696963d0968e6122a7c0343"
+size = 2726785
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "sq"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sq.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "632e3c5c02d0f2260b4195e7b6e9f6e348c2deb57c61d2a0dc832209a332ee9f"
+size = 3939
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "sq"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sq_AL/README.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b56a3cbe5b5fd6a95a159f6d7da35c28541473808ddeec24fde863aec59cb91f"
+size = 303
+licence = "GPL-2.0-or-later"
+class = "Download-only"
+
+
+# sr
+[[file]]
+locale = "sr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/sr.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "068bd94a48136ceb577a5a794097024af6ab7fbd82a6f75cad0531cc3bb92e0a"
+size = 901060
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Српски"
+
+[[file]]
+locale = "sr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/sr.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "48f4590eb63c2337a53c5a3b89b9071a80ee0d13d786c639a66744ce53803c20"
+size = 5878745
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "sr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sh-cyrl.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "9b0f8f489868d3f98d4dec8a5d71f465ad5a70afde6857c6c2d79ec0344618fc"
+size = 32824
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "sr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/README.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2a38abe899cefc84dcf40f7f242d36560542bceab062d4bed2da18f1db19c8b1"
+size = 798
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# sr-latn
+[[file]]
+locale = "sr-latn"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/sr-Latn.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "38b99cae0005ff20b015d829580a0f3533ffabc1f889a54144a74e90069548e6"
+size = 684540
+licence = "MPL-2.0"
+class = "Embeddable"
+name = "Srpski (latinica)"
+
+[[file]]
+locale = "sr-latn"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/sr-Latn.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "f51950195e5bd0aaf155d3488517d4dbc4c8fbc772ecbafbf9131e69a257b1ff"
+size = 3817505
+licence = "MPL-2.0"
+class = "Embeddable"
+
+[[file]]
+locale = "sr-latn"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sh-latn.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "5aea49c845df3c21b95e417abfc28349909a4c9565523702055a122153486a4a"
+size = 23036
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "sr-latn"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sr/README.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2a38abe899cefc84dcf40f7f242d36560542bceab062d4bed2da18f1db19c8b1"
+size = 798
+licence = "MPL-2.0"
+class = "Embeddable"
+
+
+# sv
+[[file]]
+locale = "sv"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/dictionaries/sv_SE.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "97fc1a3cd998f62ba48366ac13398b919a17e991cb69115fa60bb861093406b9"
+size = 18582
+licence = "LGPL-3.0-only"
+class = "Download-only"
+name = "Svenska"
+
+[[file]]
+locale = "sv"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/dictionaries/sv_SE.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "bd44b19cd8c061fb1d2504dc676adc3a68d41a866c99d10c8163fc396049fcad"
+size = 3938932
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "sv"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sv.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "102253382bd91cdb7535de5c20744254c9ac9aaa4ca12ed420eb835e5004c0b3"
+size = 31706
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "sv"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/LICENSE_en_US.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1314b6004bff32053ca25aca5fc419e905d75a6d49f9f9825baf4f02298af6d9"
+size = 378
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+
+# sv-fi
+[[file]]
+locale = "sv-fi"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/dictionaries/sv_FI.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "cf50fb4860a4b839011e08c580459bb45fe018ca5a4e1c3b80ac69d9e47d31a8"
+size = 18583
+licence = "LGPL-3.0-only"
+class = "Download-only"
+name = "Svenska (Finland)"
+
+[[file]]
+locale = "sv-fi"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/dictionaries/sv_FI.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "3a2ee52ff2d9cbac633cf2400b3a0afef1804d0c75894b273ee18a8fd397b9d3"
+size = 2339367
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "sv-fi"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sv.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "102253382bd91cdb7535de5c20744254c9ac9aaa4ca12ed420eb835e5004c0b3"
+size = 31706
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "sv-fi"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sv_SE/LICENSE_en_US.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1314b6004bff32053ca25aca5fc419e905d75a6d49f9f9825baf4f02298af6d9"
+size = 378
+licence = "LGPL-3.0-only"
+class = "Download-only"
+
+
+# sw
+[[file]]
+locale = "sw"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sw_TZ/sw_TZ.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "1626aaf2b428ebcc6112abe742e95d4ebcc6576af65fad3ba2d32ddb403f3049"
+size = 974
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+name = "Kiswahili"
+
+[[file]]
+locale = "sw"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sw_TZ/sw_TZ.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e17d7c89fc5479198692d73aef8c23edd20d441347311a79befd67f79be62c28"
+size = 630844
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "sw"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/sw_TZ/README_sw_TZ.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "dd221d7bf8ad2ea58b701b1c1f6bb2216fe6235a3d452914cc03294e31473e28"
+size = 2408
+licence = "LGPL-2.1-or-later"
+class = "Download-only"
+
+
+# ta
+[[file]]
+locale = "ta"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ta_IN/ta_IN.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "e05c53e643a141efc1e9c00c5f6532a6fd8ac547b998e1347aa8aea5817f2e15"
+size = 12114
+licence = "MPL-1.1"
+class = "Download-only"
+name = "தமிழ்"
+note = "ta_IN/COPYING is the bare MPL 1.1 text, added four months after the files, naming no rights holder (LibreOffice gerrit change 184956); the older NRCFOSS Tamil dictionary was GPLv2+. Download-only until the provenance is confirmed."
+
+[[file]]
+locale = "ta"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ta_IN/ta_IN.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "4c079bde24d3232d4195e78bd33bbe5fcb887ceb6363065574cec048d04bc756"
+size = 2422307
+licence = "MPL-1.1"
+class = "Download-only"
+note = "ta_IN/COPYING is the bare MPL 1.1 text, added four months after the files, naming no rights holder (LibreOffice gerrit change 184956); the older NRCFOSS Tamil dictionary was GPLv2+. Download-only until the provenance is confirmed."
+
+[[file]]
+locale = "ta"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ta.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "7154ee4519ae5fcebbb2c1d05fd7f19820b53db8b84dbaea34e6a6f6a8fd4642"
+size = 3201
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "ta"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/ta_IN/COPYING"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "9fec7edfc79e99b210d43413ac1f309654c8c4c622ee8f51a24a3eb693f92a4e"
+size = 25754
+licence = "MPL-1.1"
+class = "Download-only"
+note = "ta_IN/COPYING is the bare MPL 1.1 text, added four months after the files, naming no rights holder (LibreOffice gerrit change 184956); the older NRCFOSS Tamil dictionary was GPLv2+. Download-only until the provenance is confirmed."
+
+
+# th
+[[file]]
+locale = "th"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/th_TH/th_TH.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "a99ba46a0899a9155cd0d4f7f823ef9f5686281220ae2eb355c8b576d166e243"
+size = 1555
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+name = "ไทย"
+
+[[file]]
+locale = "th"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/th_TH/th_TH.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "42e9f145eb6744a3a24c498e143229a7ce7fb2cb67c8e8e94b42fde808dbf28f"
+size = 1239954
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+[[file]]
+locale = "th"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-th.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "2d59071f549c68419362e9489044f67cc94bd395c004479afce9dc37338fc0c5"
+size = 86109
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "th"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/th_TH/README_th_TH.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "87049058b4b6e4f22cf01720bcbb416dfe14bc7ca5f6ae7927821a231d559e10"
+size = 321
+licence = "LGPL-2.0-or-later"
+class = "Download-only"
+
+
+# tr
+[[file]]
+locale = "tr"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/tr/index.aff"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "6a390c79b054ad427cf9a6bf6de43463953cc1918e7f727e9dd4ebd4f9702f42"
+size = 240814
+licence = "MIT"
+class = "Embeddable"
+name = "Türkçe"
+
+[[file]]
+locale = "tr"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/tr/index.dic"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "dc1d8f7724f4aefd117274678de431e4ea1765f2e02e6983b6ca48cbf5a7fc7c"
+size = 9117192
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "tr"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-tr.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "9243b6fc1426b07dae71c6136bd7d4a907e01a36ab6326f349ee6c310e6bb2b5"
+size = 5744
+licence = "LPPL-1.3c"
+class = "Embeddable"
+
+[[file]]
+locale = "tr"
+kind = "licence"
+url = "https://raw.githubusercontent.com/wooorm/dictionaries/8cfea406b505e4d7df52d5a19bce525df98c54ab/dictionaries/tr/license"
+commit = "8cfea406b505e4d7df52d5a19bce525df98c54ab"
+sha256 = "c18fd6425a62f50a0f1d4ec1dd45611e2051a66c56c44349a5f9045325549c0c"
+size = 1086
+licence = "MIT"
+class = "Embeddable"
+
+
+# ug
+[[file]]
+locale = "ug"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/neouyghur/hunspell-ug/9748df3abb8a563dc16721cb69bef0c609404415/ug.aff"
+commit = "9748df3abb8a563dc16721cb69bef0c609404415"
+sha256 = "8578f136c34c171349d74eac65f9b064c98908b79ae5cd6180600072df514088"
+size = 1568222
+licence = "GPL-2.0-only"
+class = "Excluded"
+name = "ئۇيغۇرچە"
+note = "The only Hunspell dictionary is broken (ug.dic is byte-identical to ug.aff) and its source word list has no licence. Excluded."
+
+[[file]]
+locale = "ug"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/neouyghur/hunspell-ug/9748df3abb8a563dc16721cb69bef0c609404415/ug.dic"
+commit = "9748df3abb8a563dc16721cb69bef0c609404415"
+sha256 = "8578f136c34c171349d74eac65f9b064c98908b79ae5cd6180600072df514088"
+size = 1568222
+licence = "GPL-2.0-only"
+class = "Excluded"
+note = "The only Hunspell dictionary is broken (ug.dic is byte-identical to ug.aff) and its source word list has no licence. Excluded."
+
+[[file]]
+locale = "ug"
+kind = "licence"
+url = "https://raw.githubusercontent.com/neouyghur/hunspell-ug/9748df3abb8a563dc16721cb69bef0c609404415/LICENSE"
+commit = "9748df3abb8a563dc16721cb69bef0c609404415"
+sha256 = "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+size = 18092
+licence = "GPL-2.0-only"
+class = "Excluded"
+note = "The only Hunspell dictionary is broken (ug.dic is byte-identical to ug.aff) and its source word list has no licence. Excluded."
+
+
+# uk
+[[file]]
+locale = "uk"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/uk_UA/uk_UA.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2219dd15e9802adebc45722c60943b1472640260491af38dd3e43b07e75585e6"
+size = 211759
+licence = "MPL-1.1 AND CC-BY-NC-SA-4.0"
+class = "Excluded"
+name = "Українська"
+note = "LibreOffice uk_UA/README_uk_UA.txt and dict_uk distr/hunspell/README.md: 'licensed under MPL (Mozilla Public License) 1.1'. The dict_uk source data the dictionary is generated from is CC BY-NC-SA 4.0 (non-commercial), and wooorm lists GPL-3.0. Excluded until Andriy Rysin confirms the MPL grant covers it."
+
+[[file]]
+locale = "uk"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/uk_UA/uk_UA.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "2e5a9e67be63bdb089b3459addb5d71113319d13768e277bcae20f3cc1ad5a93"
+size = 8919324
+licence = "MPL-1.1 AND CC-BY-NC-SA-4.0"
+class = "Excluded"
+note = "LibreOffice uk_UA/README_uk_UA.txt and dict_uk distr/hunspell/README.md: 'licensed under MPL (Mozilla Public License) 1.1'. The dict_uk source data the dictionary is generated from is CC BY-NC-SA 4.0 (non-commercial), and wooorm lists GPL-3.0. Excluded until Andriy Rysin confirms the MPL grant covers it."
+
+[[file]]
+locale = "uk"
+kind = "hyphenation"
+url = "https://raw.githubusercontent.com/hyphenation/tex-hyphen/5684c0f51c0b81133db2efbe60a408b4155a3ff5/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-uk.tex"
+commit = "5684c0f51c0b81133db2efbe60a408b4155a3ff5"
+sha256 = "9f57d9593f4b8a93e033f7f9649aaf3abb49d17117cbd987692b626e13374c55"
+size = 43854
+licence = "MIT"
+class = "Embeddable"
+
+[[file]]
+locale = "uk"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/uk_UA/README_uk_UA.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "664436fee625b4a3e712483947d1711a2f467670f4c389bcf10abca2a564e1dc"
+size = 362
+licence = "MPL-1.1 AND CC-BY-NC-SA-4.0"
+class = "Excluded"
+note = "LibreOffice uk_UA/README_uk_UA.txt and dict_uk distr/hunspell/README.md: 'licensed under MPL (Mozilla Public License) 1.1'. The dict_uk source data the dictionary is generated from is CC BY-NC-SA 4.0 (non-commercial), and wooorm lists GPL-3.0. Excluded until Andriy Rysin confirms the MPL grant covers it."
+
+
+# vi
+[[file]]
+locale = "vi"
+kind = "spelling-aff"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/vi/vi_VN.aff"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "b58b31ba3cfbf1c5a3730f2cceb8652604180770020f291d2cf6c6fecc9721f4"
+size = 788
+licence = "GPL-2.0-only"
+class = "Download-only"
+name = "Tiếng Việt"
+
+[[file]]
+locale = "vi"
+kind = "spelling-dic"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/vi/vi_VN.dic"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "21d59c8385d2ac8d708bc5dfe83b62753d7769a8b2c9c38d319ce5c57bfba0c7"
+size = 39852
+licence = "GPL-2.0-only"
+class = "Download-only"
+
+[[file]]
+locale = "vi"
+kind = "licence"
+url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/4f1df64b2e8e14751aa7c2205d170ca016071315/vi/LICENSES-en.txt"
+commit = "4f1df64b2e8e14751aa7c2205d170ca016071315"
+sha256 = "d32e4c8faf974bdeb87da10a5951556b33744cf9b50a7f06125074e11f30d7f6"
+size = 474
+licence = "GPL-2.0-only"
+class = "Download-only"

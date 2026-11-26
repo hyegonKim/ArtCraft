@@ -1,0 +1,15 @@
+[package]
+name = "materialcraft-render"
+description = "MaterialCraft 3D view: a PBR preview renderer with image-based lighting and parallax"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-core = { workspace = true }
+materialcraft-geom = { workspace = true }
+materialcraft-image = { workspace = true }
+rayon = { workspace = true }

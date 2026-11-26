@@ -5,7 +5,7 @@
 //! whose `ACAD_ENHANCEDBLOCK` entry is an evaluation graph (`ACAD_EVALUATION_GRAPH`), and the
 //! graph lists the block's *parameters* (a distance, a point, visibility states, a lookup…) and
 //! *actions* (what changing a parameter does to the block's objects: stretch, move, look up…).
-//! [`dynamic_block`] reads them into the model below without changing the kept data, so a drawing
+//! [`dynamic_block`](crate::dynblock::dynamic_block) reads them into the model below without changing the kept data, so a drawing
 //! saved again still carries them exactly as read.
 //!
 //! Every count and index here comes from the file: they are capped by the data actually present
@@ -20,6 +20,7 @@ use crate::foreign::ForeignObject;
 use crate::{Drawing, Handle, RawTag};
 
 mod apply;
+pub mod author;
 mod grips;
 mod reference;
 pub use apply::{drag_grip, set_property};
@@ -116,6 +117,16 @@ pub enum ParameterKind {
     Other { dxf_type: String },
 }
 
+impl Parameter {
+    /// Display/property label (`kind.label()`, falling back to `element` for 2-point parameters).
+    pub fn display_label(&self) -> &str {
+        self.kind
+            .label()
+            .filter(|s| !s.trim().is_empty())
+            .unwrap_or(self.element.as_str())
+    }
+}
+
 impl ParameterKind {
     /// The property name a reference shows ("Distance1", "Visibility1"), when it has one.
     pub fn label(&self) -> Option<&str> {
@@ -194,7 +205,9 @@ pub struct Action {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum ActionKind {
-    /// Moves the vertices inside `frame` of the objects listed (all of an object not listed).
+    /// Moves the points of its objects inside `frame`: a line's or polyline's points inside it
+    /// (the whole of one outside it), any other object whole. `vertices` are the point indices the
+    /// file lists for each object, used only when the frame can't be tested (see `apply`).
     Stretch {
         frame: Vec<Vec2>,
         #[serde(serialize_with = "hex_vertices")]
@@ -321,8 +334,9 @@ impl<'a> Cursor<'a> {
     }
 }
 
-/// The objects `xdict`'s `ACAD_ENHANCEDBLOCK` evaluation graph lists, when the dictionary has one.
-fn graph_members<'a>(objects: &HashMap<Handle, &'a ForeignObject>, xdict: Handle) -> Option<Vec<&'a ForeignObject>> {
+/// `xdict`'s `ACAD_ENHANCEDBLOCK` evaluation graph object, when the dictionary has one. Only the
+/// dictionary's own tags are read, so asking whether a block is dynamic never walks the graph.
+fn evaluation_graph<'a>(objects: &HashMap<Handle, &'a ForeignObject>, xdict: Handle) -> Option<&'a ForeignObject> {
     let dict = objects.get(&xdict)?;
     let mut graph = None;
     let mut tags = dict.tags.iter();
@@ -332,7 +346,12 @@ fn graph_members<'a>(objects: &HashMap<Handle, &'a ForeignObject>, xdict: Handle
             break;
         }
     }
-    let graph = objects.get(&graph?).filter(|o| o.kind.eq_ignore_ascii_case("ACAD_EVALUATION_GRAPH"))?;
+    objects.get(&graph?).copied().filter(|o| o.kind.eq_ignore_ascii_case("ACAD_EVALUATION_GRAPH"))
+}
+
+/// The objects `xdict`'s `ACAD_ENHANCEDBLOCK` evaluation graph lists, when the dictionary has one.
+fn graph_members<'a>(objects: &HashMap<Handle, &'a ForeignObject>, xdict: Handle) -> Option<Vec<&'a ForeignObject>> {
+    let graph = evaluation_graph(objects, xdict)?;
     let members = section(&sections(&graph.tags), "AcDbEvalGraph").iter().filter(|t| t.code == 360).filter_map(|t| Handle::parse_hex(&t.value));
     // Deduplicate member handles before resolving them: a graph can list the same member many
     // times, and parsing each occurrence into its own owned parameter multiplies a single large
@@ -341,13 +360,42 @@ fn graph_members<'a>(objects: &HashMap<Handle, &'a ForeignObject>, xdict: Handle
     Some(members.take(MAX_NODES).filter(|h| seen.insert(*h)).filter_map(|h| objects.get(&h).copied()).collect())
 }
 
+/// The kept foreign objects of a drawing by handle. Building it walks every object, so a caller
+/// that asks about many blocks (listing them) builds it once and passes it to
+/// [`dynamic_block_in`] and [`is_dynamic_block_in`] instead of rebuilding it per block, which
+/// multiplies the block count by the object count (CWE-407).
+pub struct ObjectIndex<'a>(HashMap<Handle, &'a ForeignObject>);
+
+impl<'a> ObjectIndex<'a> {
+    pub fn new(d: &'a Drawing) -> Self {
+        ObjectIndex(d.foreign.objects.iter().map(|o| (o.handle, o)).collect())
+    }
+}
+
+/// The extension dictionary of block `name`'s record, if it has one.
+fn block_xdict(d: &Drawing, name: &str) -> Option<Handle> {
+    d.foreign.records.get(&("BLOCK_RECORD".to_string(), name.trim().to_ascii_uppercase()))?.xdict
+}
+
 /// The dynamic block data of block `name` (any case; `*Model_Space` for a drawing that is a
 /// block's own drawing), or `None` when it has none.
 pub fn dynamic_block(d: &Drawing, name: &str) -> Option<DynamicBlock> {
-    let xdict = d.foreign.records.get(&("BLOCK_RECORD".to_string(), name.trim().to_ascii_uppercase()))?.xdict?;
-    let objects: HashMap<Handle, &ForeignObject> = d.foreign.objects.iter().map(|o| (o.handle, o)).collect();
+    // A block without an extension dictionary is never dynamic: answer before indexing objects.
+    block_xdict(d, name)?;
+    dynamic_block_in(d, &ObjectIndex::new(d), name)
+}
+
+/// Whether block `name` is a dynamic block (has an evaluation graph), without reading its
+/// parameters and actions; `objects` is the drawing's [`ObjectIndex`].
+pub fn is_dynamic_block_in(d: &Drawing, objects: &ObjectIndex<'_>, name: &str) -> bool {
+    block_xdict(d, name).and_then(|x| evaluation_graph(&objects.0, x)).is_some()
+}
+
+/// [`dynamic_block`] with the drawing's [`ObjectIndex`] already built.
+pub fn dynamic_block_in(d: &Drawing, objects: &ObjectIndex<'_>, name: &str) -> Option<DynamicBlock> {
+    let xdict = block_xdict(d, name)?;
     let mut out = DynamicBlock::default();
-    for o in graph_members(&objects, xdict)? {
+    for o in graph_members(&objects.0, xdict)? {
         let secs = sections(&o.tags);
         let node = Cursor::new(section(&secs, "AcDbEvalExpr")).int(90);
         let element = Cursor::new(section(&secs, "AcDbBlockElement")).string(300);
@@ -470,9 +518,9 @@ fn action(handle: Handle, node: i32, name: String, kind: &str, secs: &[(&str, &[
             let (multiplier, angle_offset) = (c.real(140), c.real(141));
             (two_connections(tags), ActionKind::Move { multiplier, angle_offset })
         }
-        "BLOCKSCALEACTION" => (Vec::new(), ActionKind::Scale),
-        "BLOCKROTATEACTION" => (Vec::new(), ActionKind::Rotate),
-        "BLOCKFLIPACTION" => (Vec::new(), ActionKind::Flip),
+        "BLOCKSCALEACTION" => (single_connection(section(secs, "AcDbBlockScaleAction"), 94, 303), ActionKind::Scale),
+        "BLOCKROTATEACTION" => (single_connection(section(secs, "AcDbBlockRotationAction"), 94, 303), ActionKind::Rotate),
+        "BLOCKFLIPACTION" => (single_connection(section(secs, "AcDbBlockFlipAction"), 92, 301), ActionKind::Flip),
         "BLOCKARRAYACTION" => (Vec::new(), ActionKind::Array),
         "BLOCKPOLARSTRETCHACTION" => (Vec::new(), ActionKind::PolarStretch),
         other => (Vec::new(), ActionKind::Other { dxf_type: other.to_string() }),
@@ -486,6 +534,15 @@ fn two_connections(tags: &[RawTag]) -> Vec<(i32, String)> {
     let first = |code: i32| Cursor::new(tags).next(code).unwrap_or_default().to_string();
     let int = |code: i32| first(code).trim().parse().unwrap_or(0);
     vec![(int(92), first(301)), (int(93), first(302))]
+}
+
+/// A single primary parameter connection (`node_code`, `name_code`), empty when absent.
+fn single_connection(tags: &[RawTag], node_code: i32, name_code: i32) -> Vec<(i32, String)> {
+    let Some(node) = Cursor::new(tags).next(node_code).and_then(|s| s.trim().parse::<i32>().ok()).filter(|n| *n > 0) else {
+        return Vec::new();
+    };
+    let name = Cursor::new(tags).next(name_code).unwrap_or_default().to_string();
+    vec![(node, name)]
 }
 
 /// A stretch action: its two connections, the frame (72 count, 1011/1021 points), the objects

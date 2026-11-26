@@ -1,0 +1,3 @@
+# Words the he pack must accept and reject (common words; written for this check).
+correct = ["ספר", "בית", "מים", "עיר", "ילד"]
+incorrect = ["ספרררר", "ביתתתת", "מיםםםם"]

@@ -1,0 +1,23 @@
+[package]
+name = "anicraft-doc"
+description = "AniCraft L1: document model (stage, timeline, layers, keyframes, symbols) and timeline evaluation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+anicraft-geom.workspace = true
+serde = { workspace = true, features = ["rc"] }
+# Bitmaps are decoded and encoded via craft-image-codecs.
+craft-image-codecs.workspace = true
+anicraft-audio.workspace = true
+# The timeline action IR keyframes and button instances carry (ADR 0024).
+anicraft-actions.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

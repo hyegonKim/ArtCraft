@@ -11,11 +11,22 @@
 //! [`DEFAULT_STB`] offers `Normal`, `Black`, `Screened 50%` and `Thick`, and
 //! [`MONOCHROME_STB`] prints `Normal` black.
 //!
-//! Tables are saved as files in our own JSON format (see `docs/plot-styles.md`):
-//! [`PlotStyleTable::to_file_text`] and [`PlotStyleTable::from_file_text`].
+//! Tables are saved and loaded as AutoCAD PIA 2.0 binary/zlib `.ctb` & `.stb` files
+//! (`PIAFILEVERSION_2.0,{CTB|STB}VER1,compress\r\npmzlibcodec`), uncompressed PIA text files,
+//! or CADCraft's JSON format (see `docs/plot-styles.md`): [`PlotStyleTable::from_file_bytes`],
+//! [`PlotStyleTable::to_binary_bytes`], [`write_binary_ctb`], [`write_binary_stb`],
+//! [`PlotStyleTable::to_pia_text`], [`PlotStyleTable::to_file_text`] and
+//! [`PlotStyleTable::from_file_text`].
+
+pub mod pia;
 
 use cadcraft_color::Rgb;
 use serde::{Deserialize, Serialize};
+
+pub use pia::{
+    PiaHeader, PiaNode, PiaPlotStyle, PiaTable, PiaVariant, parse_pia_bytes, parse_pia_nodes, parse_pia_table, write_binary_ctb, write_binary_stb,
+    write_pia_compressed, write_pia_uncompressed,
+};
 
 /// Built-in colour-dependent table that prints objects with their own properties.
 pub const DEFAULT_CTB: &str = "default.ctb";
@@ -356,10 +367,19 @@ impl PlotStyleTable {
         serde_json::to_string_pretty(&v).unwrap_or_default()
     }
 
-    /// Read a table file written by [`PlotStyleTable::to_file_text`] (sanitized).
+    /// Read a table file written by [`PlotStyleTable::to_file_text`] or uncompressed AutoCAD PIA
+    /// text (`PIAFILEVERSION_2.0,{CTB|STB}VER1,uncompress`), sanitized.
     pub fn from_file_text(text: &str) -> std::result::Result<PlotStyleTable, String> {
+        Self::from_file_text_named(text, None)
+    }
+
+    /// Like [`PlotStyleTable::from_file_text`], assigning `file_name` when a PIA file carries none.
+    pub fn from_file_text_named(text: &str, file_name: Option<&str>) -> std::result::Result<PlotStyleTable, String> {
         if text.len() > MAX_TABLE_FILE {
             return Err("the plot style table file is too large".into());
+        }
+        if pia::looks_like_pia(text.as_bytes()) {
+            return pia::parse_pia_bytes(text.as_bytes(), file_name);
         }
         let v: serde_json::Value = serde_json::from_str(text).map_err(|e| format!("not a CADCraft plot style table: {e}"))?;
         match v.get(FILE_MARKER).and_then(serde_json::Value::as_u64) {
@@ -367,8 +387,36 @@ impl PlotStyleTable {
             Some(n) => return Err(format!("plot style table format version {n} is newer than this CADCraft reads")),
             None => return Err(format!("not a CADCraft plot style table (no `{FILE_MARKER}`)")),
         }
-        let t: PlotStyleTable = serde_json::from_value(v).map_err(|e| format!("bad plot style table: {e}"))?;
+        let mut t: PlotStyleTable = serde_json::from_value(v).map_err(|e| format!("bad plot style table: {e}"))?;
+        if t.name.trim().is_empty()
+            && let Some(fname) = file_name.and_then(|f| std::path::Path::new(f).file_name()).map(|n| n.to_string_lossy().into_owned())
+        {
+            t.name = fname;
+        }
         Ok(t.sanitized())
+    }
+
+    /// Read a binary AutoCAD `.ctb`/`.stb` (`PIAFILEVERSION_2.0,...,compress` + `pmzlibcodec`),
+    /// uncompressed PIA text `.ctb`/`.stb`, or CADCraft JSON plot style table from raw bytes.
+    pub fn from_file_bytes(bytes: &[u8], file_name: Option<&str>) -> std::result::Result<PlotStyleTable, String> {
+        if bytes.len() > MAX_TABLE_FILE {
+            return Err("the plot style table file is too large".into());
+        }
+        if pia::looks_like_pia(bytes) {
+            return pia::parse_pia_bytes(bytes, file_name);
+        }
+        let text = std::str::from_utf8(bytes).map_err(|e| format!("not a valid plot style table: {e}"))?;
+        Self::from_file_text_named(text, file_name)
+    }
+
+    /// Serialize the table as uncompressed AutoCAD PIA 2.0 text (`CTBVER1` or `STBVER1`).
+    pub fn to_pia_text(&self) -> String {
+        pia::write_pia_uncompressed(self)
+    }
+
+    /// Serialize the table as binary AutoCAD PIA 2.0 (`pmzlibcodec` zlib stream).
+    pub fn to_binary_bytes(&self) -> Vec<u8> {
+        pia::write_pia_compressed(self)
     }
 }
 

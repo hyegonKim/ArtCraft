@@ -42,10 +42,11 @@ fn fit(kind: VariableType, v: VariableValue) -> Option<VariableValue> {
     }
 }
 
-/// Set `variable` to `value`, or to `expr` evaluated in the modes of `node` (the layer whose
-/// interaction runs), in every mode, and re-apply bindings. False when nothing could be set.
+/// Set stored variable id `variable` to `value`, or to `expr` evaluated in the modes of `node`
+/// (the layer whose interaction runs), in every mode, and re-apply bindings. False when nothing
+/// could be set.
 pub fn set_variable(doc: &mut Document, node: NodeId, variable: &str, value: &Value, expr: Option<&Expr>) -> bool {
-    let Some(var) = doc.variables.get(variable) else { return false };
+    let Some(var) = doc.variables.get_by_id(variable) else { return false };
     let (id, kind) = (var.id.clone(), var.kind);
     let v = match expr {
         Some(e) => e.eval(&doc.variables, &doc.modes_for(node)).and_then(|v| fit(kind, v)),
@@ -66,7 +67,16 @@ pub fn set_variable(doc: &mut Document, node: NodeId, variable: &str, value: &Va
 /// win), then re-apply bindings. False for an unknown collection or mode.
 pub fn set_mode(doc: &mut Document, frame: NodeId, collection: &str, mode: &str) -> bool {
     let Some(c) = doc.variables.collection(collection) else { return false };
-    let Some(mode) = c.find_mode(mode).map(|m| m.id.clone()) else {
+    let Some(m) = c.find_mode(mode) else { return false };
+    let (collection, mode) = (c.id.clone(), m.id.clone());
+    set_mode_by_id(doc, frame, &collection, &mode)
+}
+
+/// Switch a stored collection id to a stored mode id (a prototype action's), without matching
+/// another collection's or mode's name (#1613). Otherwise behaves like [`set_mode`].
+pub fn set_mode_by_id(doc: &mut Document, frame: NodeId, collection: &str, mode: &str) -> bool {
+    let Some(c) = doc.variables.collection_by_id(collection) else { return false };
+    let Some(mode) = c.mode_by_id(mode).map(|m| m.id.clone()) else {
         return false;
     };
     let cid = c.id.clone();
@@ -75,6 +85,14 @@ pub fn set_mode(doc: &mut Document, frame: NodeId, collection: &str, mode: &str)
         .node(page)
         .map(|p| p.children.iter().copied().filter(|t| doc.node(*t).is_some_and(|n| n.var_modes.contains_key(&cid))).collect())
         .unwrap_or_default();
+    for id in std::iter::once(frame).chain(doc.ancestors(frame)) {
+        if id == page {
+            break;
+        }
+        if doc.node(id).is_some_and(|n| n.var_modes.contains_key(&cid)) && !targets.contains(&id) {
+            targets.push(id);
+        }
+    }
     targets.push(page);
     for id in targets {
         if let Some(n) = doc.node_mut(id) {
@@ -84,6 +102,50 @@ pub fn set_mode(doc: &mut Document, frame: NodeId, collection: &str, mode: &str)
     apply_bindings(doc);
     crate::style_vars::refresh(doc, None, None);
     true
+}
+
+/// Switch `collection` to `mode` (stored ids) live in the prototype player for `frame`: updates
+/// the page, top-level frames, and any explicit override for `collection` inside `frame`'s subtree
+/// so bound colours, numbers, strings and booleans re-evaluate immediately.
+pub fn switch_screen_mode(doc: &mut Document, frame: NodeId, collection: &str, mode: &str) -> bool {
+    let Some(c) = doc.variables.collection_by_id(collection) else { return false };
+    let Some(mid) = c.mode_by_id(mode).map(|m| m.id.clone()) else { return false };
+    let cid = c.id.clone();
+    if !set_mode_by_id(doc, frame, &cid, &mid) {
+        return false;
+    }
+    let sub: Vec<NodeId> = doc.subtree(frame).into_iter().filter(|id| doc.node(*id).is_some_and(|n| n.var_modes.contains_key(&cid))).collect();
+    if !sub.is_empty() {
+        for id in sub {
+            if let Some(n) = doc.node_mut(id) {
+                n.var_modes.insert(cid.clone(), mid.clone());
+            }
+        }
+        apply_bindings(doc);
+        crate::style_vars::refresh(doc, None, None);
+    }
+    true
+}
+
+/// Restore every node's `var_modes` in `doc` from `original` and re-evaluate all variable and
+/// shared-style bindings. Returns true when at least one mode override changed.
+pub fn reset_modes(doc: &mut Document, original: &Document) -> bool {
+    let ids: Vec<NodeId> = doc.nodes().map(|n| n.id).collect();
+    let mut changed = false;
+    for id in ids {
+        let orig_modes = original.node(id).map(|n| n.var_modes.clone()).unwrap_or_default();
+        if let Some(n) = doc.node_mut(id)
+            && n.var_modes != orig_modes
+        {
+            n.var_modes = orig_modes;
+            changed = true;
+        }
+    }
+    if changed {
+        apply_bindings(doc);
+        crate::style_vars::refresh(doc, None, None);
+    }
+    changed
 }
 
 /// The actions of the branch of a conditional action that runs, with variables resolved in the

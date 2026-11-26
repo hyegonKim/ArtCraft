@@ -1,0 +1,20 @@
+[package]
+name = "craft-ext-core"
+description = "Package contract for Craft extensions: manifests, ids, trust tiers, themes and the catalogue index. Pure and wasm-safe."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+
+[features]
+# Third-party extensions. Off by default and never enabled by a release build until every gate in
+# docs/THREAT-MODEL.md has passed. A test fails if this appears in `default`.
+third-party = []

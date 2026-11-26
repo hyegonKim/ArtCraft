@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-pub const SUITE_APPS: [SuiteApp; 13] = [
+pub const SUITE_APPS: [SuiteApp; 18] = [
   SuiteApp { id: "photocraft", name: "PhotoCraft", domain: "Photo editing" },
   SuiteApp { id: "vectorcraft", name: "VectorCraft", domain: "Vector illustration" },
   SuiteApp { id: "filmcraft", name: "FilmCraft", domain: "Video editing" },
@@ -11,11 +11,16 @@ pub const SUITE_APPS: [SuiteApp; 13] = [
   SuiteApp { id: "effectcraft", name: "EffectCraft", domain: "Motion graphics and effects" },
   SuiteApp { id: "designcraft", name: "DesignCraft", domain: "Page layout" },
   SuiteApp { id: "soundcraft", name: "SoundCraft", domain: "Audio editing" },
+  SuiteApp { id: "pdfcraft", name: "PdfCraft", domain: "PDF editing and preflight" },
+  SuiteApp { id: "anicraft", name: "AniCraft", domain: "2D vector animation" },
+  SuiteApp { id: "texturecraft", name: "TextureCraft", domain: "3D PBR texture painting" },
+  SuiteApp { id: "materialcraft", name: "MaterialCraft", domain: "Procedural PBR materials" },
   SuiteApp { id: "figcraft", name: "FigCraft", domain: "Interface design" },
   SuiteApp { id: "wordcraft", name: "WordCraft", domain: "Word processing" },
   SuiteApp { id: "cadcraft", name: "CadCraft", domain: "CAD drafting" },
   SuiteApp { id: "deckcraft", name: "DeckCraft", domain: "Presentations" },
   SuiteApp { id: "gridcraft", name: "GridCraft", domain: "Spreadsheets" },
+  SuiteApp { id: "craft-anything", name: "Craft Anything", domain: "Reverse engineering studio" },
   SuiteApp { id: "artcraft-launcher", name: "Craft Launcher", domain: "App management" },
 ];
 
@@ -74,7 +79,7 @@ mod tests {
       assert!(names.insert(app.id));
       assert!(app.id.bytes().all(|c| c.is_ascii_lowercase() || c == b'-'));
     }
-    assert_eq!(SUITE_APPS.len(), 13);
+    assert_eq!(SUITE_APPS.len(), 18);
   }
 
   #[test]

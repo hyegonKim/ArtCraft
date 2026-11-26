@@ -1,0 +1,323 @@
+# Korean (ko) built-in interface catalog for AniCraft.
+# Clean room: written from the plain meaning of the English text in ordinary Korean UI vocabulary.
+
+@id	language.name	한국어
+	File	파일
+	Edit	편집
+	View	보기
+	Insert	삽입
+	Modify	수정
+	Text	텍스트
+	Commands	명령
+	Control	제어
+	Window	창
+	Help	도움말
+	Import	가져오기
+	Export	내보내기
+	Timeline	타임라인
+	Arrange	정렬
+	Transform	변형
+	Shape	도형
+	Document	문서
+	New	새 문서
+	New from Sample	예제로 새로 만들기
+	Open…	열기…
+	Save	저장
+	Save As…	다른 이름으로 저장…
+	Import to Stage…	스테이지로 가져오기…
+	Import to Library…	라이브러리로 가져오기…
+	Export Frame as PNG…	프레임을 PNG로 내보내기…
+	Export Frame as SVG…	프레임을 SVG로 내보내기…
+	Export Video…	비디오 내보내기…
+	Export Sprite Sheet…	스프라이트 시트 내보내기…
+	Export PNG Sequence…	PNG 시퀀스 내보내기…
+	Export Animated GIF…	애니메이션 GIF 내보내기…
+	Export Animated PNG…	애니메이션 PNG 내보내기…
+	Export Animated WebP…	애니메이션 WebP 내보내기…
+	Export Lottie Animation…	Lottie 애니메이션 내보내기…
+	Export HTML Canvas…	HTML 캔버스 내보내기…
+	Export XFL Package…	XFL 패키지 내보내기…
+	Export Audio…	오디오 내보내기…
+	Export XFL package to folder	폴더로 XFL 패키지 내보내기
+	Export PNG sequence to folder	폴더로 PNG 시퀀스 내보내기
+	Export frame as PNG	프레임을 PNG로 내보내기
+	Export frame as SVG	프레임을 SVG로 내보내기
+	Export animated GIF	애니메이션 GIF 내보내기
+	Export animated PNG (full colour, transparent)	애니메이션 PNG 내보내기 (풀 컬러, 투명)
+	Export animated WebP (lossless, transparent)	애니메이션 WebP 내보내기 (무손실, 투명)
+	Export sprite sheet (PNG + JSON frame map)	스프라이트 시트 내보내기 (PNG + JSON 프레임 맵)
+	Export video (.webm or .mp4, made with your ffmpeg)	비디오 내보내기 (.webm 또는 .mp4, ffmpeg 사용)
+	Export Lottie animation (JSON, for web and apps)	Lottie 애니메이션 내보내기 (JSON, 웹/앱용)
+	Export HTML canvas (one web page)	HTML 캔버스 내보내기 (단일 웹 페이지)
+	Export audio (the movie's soundtrack as a WAV)	오디오 내보내기 (WAV 사운드트랙)
+	Open document	문서 열기
+	Save document as	다른 이름으로 문서 저장
+	Documents	문서
+	AniCraft document	AniCraft 문서
+	Undo	실행 취소
+	Redo	다시 실행
+	Cut	잘라내기
+	Copy	복사
+	Paste	붙여넣기
+	Paste in Place	제자리에 붙여넣기
+	Duplicate	복제
+	Delete	삭제
+	Select All	모두 선택
+	Deselect All	선택 해제
+	Group	그룹화
+	Ungroup	그룹 해제
+	Break Apart	분리
+	Convert to Symbol…	심볼로 변환…
+	Auto Lip-Sync	자동 립싱크
+	Lip-sync	립싱크
+	Match mouth poses on this layer to scene speech audio	이 레이어의 입 모양 포즈를 장면 음성 오디오에 맞춥니다
+	Insert Frame	프레임 삽입
+	Remove Frames	프레임 제거
+	Insert Keyframe	키프레임 삽입
+	Insert Blank Keyframe	빈 키프레임 삽입
+	Clear Keyframe	키프레임 지우기
+	Create Classic Tween	클래식 트윈 만들기
+	Create Shape Tween	모양 트윈 만들기
+	Create Motion Tween	모션 트윈 만들기
+	Remove Tween	트윈 제거
+	Add Shape Hint	모양 힌트 추가
+	Remove All Hints	모든 힌트 제거
+	Reverse Frames	프레임 반전
+	Copy Frames	프레임 복사
+	Cut Frames	프레임 잘라내기
+	Paste Frames	프레임 붙여넣기
+	New Layer	새 레이어
+	New Folder	새 폴더
+	Delete Layer	레이어 삭제
+	Rename Layer…	레이어 이름 바꾸기…
+	Rename layer	레이어 이름 바꾸기
+	Add Motion Guide	모션 가이드 추가
+	Add Camera	카메라 추가
+	Remove Camera	카메라 제거
+	New Scene	새 장면
+	Duplicate Scene	장면 복제
+	Delete Scene	장면 삭제
+	Rename Scene…	장면 이름 바꾸기…
+	Rename scene	장면 이름 바꾸기
+	Next Scene	다음 장면
+	Previous Scene	이전 장면
+	Play / Stop	재생 / 정지
+	Play	재생
+	Stop	정지
+	Test Movie	무비 테스트
+	Onion Skin	어니언 스킨
+	Onion Skin Outlines	어니언 스킨 윤곽선
+	Edit Multiple Frames	여러 프레임 편집
+	Preview Through Camera	카메라 뷰로 미리보기
+	Fit Stage in Window	창에 스테이지 맞추기
+	Zoom In	확대
+	Zoom Out	축소
+	Actual Size	실제 크기
+	Rulers	눈금자
+	Grid	격자
+	Guides	안내선
+	Snap to Objects	객체에 스냅
+	Snap to Grid	격자에 스냅
+	Snap to Guides	안내선에 스냅
+	Properties	속성
+	Library	라이브러리
+	Scenes	장면
+	Swatches	스와치
+	Colour	색상
+	Align	정렬
+	Actions	액션
+	Motion Editor	모션 편집기
+	Document Explorer	문서 탐색기
+	Find & Replace	찾기 및 바꾸기
+	Brush Library	브러시 라이브러리
+	Publish Settings	퍼블리시 설정
+	Templates	템플릿
+	Preferences	환경설정
+	Keyboard Shortcuts	키보드 단축키
+	Command Palette	명령 팔레트
+	User Guide	사용자 가이드
+	Project Files & Docs	프로젝트 파일 및 문서
+	Licenses & Notices	라이선스 및 고지
+	About AniCraft	AniCraft 정보
+	Selection	선택
+	Subselection	직접 선택
+	Free Transform	자유 변형
+	Gradient Transform	그라디언트 변형
+	Lasso	올가미
+	Pen	펜
+	Line	선
+	Rectangle	사각형
+	Oval	타원
+	PolyStar	다각형/별
+	Pencil	연필
+	Brush	브러시
+	Paint Brush	페인트 브러시
+	Bone	뼈대
+	Bind	바인드
+	Asset Warp	에셋 워프
+	Paint Bucket	페인트 통
+	Ink Bottle	잉크병
+	Eyedropper	스포이드
+	Eraser	지우개
+	Width	선 두께
+	Camera	카메라
+	Hand	손
+	Zoom	돋보기
+	Stage	스테이지
+	Height	높이
+	Frame rate	프레임 속도
+	Background	배경
+	Position	위치
+	Size	크기
+	Rotation	회전
+	Skew	기울이기
+	Opacity	불투명도
+	Fill	채우기
+	Fill colour	채우기 색상
+	Stroke	선
+	Stroke colour	선 색상
+	Cap	선 끝
+	Join	모서리
+	Miter	마이터
+	Style	스타일
+	Profile	프로필
+	Graphic	그래픽
+	Movie Clip	무비클립
+	Button	버튼
+	Instance	인스턴스
+	Instance name	인스턴스 이름
+	Class	클래스
+	Linkage class	링키지 클래스
+	Looping	반복 방식
+	Loop	반복
+	Play once	한 번 재생
+	Single frame	단일 프레임
+	First frame	첫 프레임
+	of {frames}	/ {frames}
+	Blending	블렌딩
+	Colour Effect	색상 효과
+	Filters	필터
+	Add Filter	필터 추가
+	Edit Text	텍스트 편집
+	Font	글꼴
+	Bold	굵게
+	Italic	기울임꼴
+	Normal	표준
+	Layer	레이어
+	Darken	어둡게
+	Multiply	곱하기
+	Lighten	밝게
+	Screen	스크린
+	Overlay	오버레이
+	Hard Light	하드 라이트
+	Add	더하기
+	Subtract	빼기
+	Difference	차이
+	Invert	반전
+	Alpha	알파
+	Erase	지우기
+	Blur	블러
+	Drop Shadow	드롭 섀도우
+	Glow	글로우
+	Bevel	베벨
+	Gradient Glow	그라디언트 글로우
+	Gradient Bevel	그라디언트 베벨
+	Adjust Colour	색상 조정
+	Inner	내부
+	Outer	외부
+	Full	전체
+	None	없음
+	Brightness	밝기
+	Tint	틴트
+	Advanced	고급
+	Sound	사운드
+	Sound Settings	사운드 설정
+	Place Sound	사운드 배치
+	Remove Sound	사운드 제거
+	Delete Sound	사운드 삭제
+	Rename Sound	사운드 이름 바꾸기
+	Mute/Unmute Layer	레이어 음소거 전환
+	Layer Volume	레이어 볼륨
+	Sync	동기화
+	Event	이벤트
+	Start	시작
+	Stream	스트림
+	Effect	효과
+	Left Channel	왼쪽 채널
+	Right Channel	오른쪽 채널
+	Fade Left to Right	왼쪽에서 오른쪽으로 페이드
+	Fade Right to Left	오른쪽에서 왼쪽으로 페이드
+	Fade In	페이드 인
+	Fade Out	페이드 아웃
+	Custom	사용자 지정
+	WAV	WAV
+	Ogg Vorbis	Ogg Vorbis
+	MP3	MP3
+	Linear	선형
+	Smooth (bezier)	부드럽게 (베지어)
+	Quad	이차 (Quad)
+	Cubic	삼차 (Cubic)
+	Quart	사차 (Quart)
+	Quint	오차 (Quint)
+	Sine	사인 (Sine)
+	Back	백 (Back)
+	Circ	원형 (Circ)
+	Bounce	바운스 (Bounce)
+	Elastic	탄성 (Elastic)
+	In	인
+	Out	아웃
+	In Out	인-아웃
+	Appearance	모양
+	Language	언어
+	Interface language	인터페이스 언어
+	System language ({name})	시스템 언어 ({name})
+	Menus, panels and dialogs. Your documents, layer names and the command line stay as they are.	메뉴, 패널, 대화상자에 적용됩니다. 문서, 레이어 이름 및 명령줄은 그대로 유지됩니다.
+	Theme	테마
+	Follow system	시스템 설정 따르기
+	Graphite	그래파이트 (어둡게)
+	Light	밝게
+	High contrast	고대비
+	Interface font	인터페이스 글꼴
+	Data font	데이터 글꼴
+	Preview	미리보기
+	Interface scale	인터페이스 배율
+	Rendering	렌더링
+	Renderer	렌더러
+	Window graphics	창 그래픽
+	Extra start gap	시작 여백 추가
+	Files	파일
+	Width	너비
+	Movie clip	무비클립
+	Colour effect	색상 효과
+	Scaling	크기 조절
+	Saved {path}	{path} 저장됨
+	Nothing found	일치하는 항목 없음
+	Cancel	취소
+	Close	닫기
+	OK	확인
+	Apply	적용
+	Reset	초기화
+	Create	만들기
+	macOS	macOS
+	Windows	Windows
+	Linux / BSD	Linux / BSD
+	web browser	웹 브라우저
+	other	기타
+	Exported {path}	{path} 내보내기 완료
+	Undid {action}	{action} 실행 취소됨
+	Redid {action}	{action} 다시 실행됨
+	Deleted layer — {undo} to undo	레이어 삭제됨 — {undo} 키로 실행 취소
+	Deleted scene — {undo} to undo	장면 삭제됨 — {undo} 키로 실행 취소
+	{name} (scene {number} of {count})	{name} ({count}개 장면 중 {number}번째)
+	Cleared keyframe — {undo} to undo	키프레임 지워짐 — {undo} 키로 실행 취소
+	Removed frame — {undo} to undo	프레임 제거됨 — {undo} 키로 실행 취소
+@plural	Exported {path} ({n} frame, {kb} KB).|Exported {path} ({n} frames, {kb} KB).	{path} 내보내기 완료 ({n}프레임, {kb} KB).
+@plural	Exported {path} ({n} frame, {layers} layers).|Exported {path} ({n} frames, {layers} layers).	{path} 내보내기 완료 ({n}프레임, 레이어 {layers}개).
+@plural	Auto lip-synced {n} mouth keyframe — {undo} to undo|Auto lip-synced {n} mouth keyframes — {undo} to undo	입 모양 키프레임 {n}개 자동 립싱크 완료 — {undo} 키로 실행 취소
+@plural	Deleted {n} element — {undo} to undo|Deleted {n} elements — {undo} to undo	요소 {n}개 삭제됨 — {undo} 키로 실행 취소
+@plural	Copied {n} frame|Copied {n} frames	프레임 {n}개 복사됨
+@plural	Cut {n} frame — {undo} to undo|Cut {n} frames — {undo} to undo	프레임 {n}개 잘라냄 — {undo} 키로 실행 취소
+@plural	Pasted {n} frame — {undo} to undo|Pasted {n} frames — {undo} to undo	프레임 {n}개 붙여넣음 — {undo} 키로 실행 취소
+@plural	Cleared {n} keyframe — {undo} to undo|Cleared {n} keyframes — {undo} to undo	키프레임 {n}개 지워짐 — {undo} 키로 실행 취소
+@plural	Removed {n} frame — {undo} to undo|Removed {n} frames — {undo} to undo	프레임 {n}개 제거됨 — {undo} 키로 실행 취소
+@plural	Plays its {n}-frame timeline on a loop from when it appears.|Plays its {n}-frame timeline on a loop from when it appears.	등장 시점부터 {n}프레임 타임라인을 반복 재생합니다.

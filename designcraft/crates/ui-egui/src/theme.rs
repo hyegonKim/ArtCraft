@@ -83,6 +83,10 @@ pub struct Tokens {
     /// Measurement labels on the canvas (smart dimensions, gaps).
     pub measure_bg: Color32,
     pub measure_text: Color32,
+    /// The readout beside the cursor while drawing, moving or measuring ("W: 3.13 cm"): InDesign's
+    /// light grey box, with dark text in every brightness but High Contrast.
+    pub readout_bg: Color32,
+    pub readout_text: Color32,
     /// Live-corner widget and corner diamonds.
     pub live_corner: Color32,
     /// The Windows caption Close button when hovered, and its glyph.
@@ -130,6 +134,8 @@ impl Tokens {
             smart_guide: hex(0x00c853),
             measure_bg: Color32::from_rgba_unmultiplied(70, 70, 70, 230),
             measure_text: Color32::WHITE,
+            readout_bg: hex(0xa8a8a8),
+            readout_text: hex(0x1e1e1e),
             live_corner: hex(0xffe500),
             caption_close: hex(0xc42b1c),
             caption_close_text: Color32::WHITE,
@@ -255,6 +261,9 @@ impl Tokens {
                 ruler_text: hex(0xffffff),
                 section_divider: hex(0xffffff),
                 tab_strip: hex(0x000000),
+                // White on InDesign's grey is too faint here: black, as the rest of the chrome.
+                readout_bg: hex(0x000000),
+                readout_text: Color32::WHITE,
                 ..dark
             },
         }
@@ -327,7 +336,6 @@ const SYSTEM_UI_FONTS: &[(&str, char, &[&str])] = &[
     ("Hant", '中', &["PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC"]),
     ("Kore", '한', &["Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR", "Source Han Sans K", "NanumGothic", "UnDotum"]),
     // Scripts the built-in faces lack, after the CJK ones (text in the Story Editor, font names).
-    ("Arab", 'خ', &["Geeza Pro", "Noto Sans Arabic", "Noto Naskh Arabic", "DejaVu Sans", "Arial", "Tahoma"]),
     ("Taml", 'த', &["Tamil Sangam MN", "Tamil MN", "Nirmala UI", "Latha", "Noto Sans Tamil", "Noto Sans Tamil UI", "Lohit Tamil"]),
     ("Deva", 'क', &["Kohinoor Devanagari", "Devanagari Sangam MN", "Nirmala UI", "Mangal", "Noto Sans Devanagari", "Lohit Devanagari"]),
     ("Beng", 'ক', &["Kohinoor Bangla", "Bangla Sangam MN", "Nirmala UI", "Vrinda", "Noto Sans Bengali", "Lohit Bengali"]),
@@ -450,17 +458,12 @@ pub(crate) fn add_system_fallbacks(fonts: &mut FontDefinitions, system: &[System
         .chain(system.iter().filter(|f| !CJK.contains(&f.script)))
         .map(name)
         .collect();
-    let arabic_first: Vec<String> = system.iter().filter(|f| f.script == "Arab").map(name).collect();
     for (family, stack) in fonts.families.iter_mut() {
-        // An installed Arabic face, like an embedded one, owns spaces as well as letters
-        // in Arabic runs. Other families keep their current UI/CJK precedence.
+        // The Arabic families keep their own order (see `font_definitions`).
         let arabic = matches!(family, FontFamily::Name(n) if n.starts_with("arabic"));
         let at = if arabic { stack.len() } else { stack.iter().position(|n| n.starts_with("craft-")).unwrap_or(stack.len()) };
         stack.splice(at..at, preferred.iter().cloned());
-        if arabic {
-            stack.splice(0..0, arabic_first.iter().cloned());
-        }
-        stack.extend(rest.iter().filter(|n| !arabic || !arabic_first.contains(n)).cloned());
+        stack.extend(rest.iter().cloned());
     }
 }
 
@@ -533,13 +536,6 @@ pub(crate) fn font_definitions(craft: &'static [designcraft_fonts::CraftFont], l
             .chain(last_resort.iter().cloned());
         let mut seen = std::collections::HashSet::new();
         fonts.families.insert(FontFamily::Name(family.into()), stack.filter(|n| seen.insert(n.clone())).collect());
-    }
-    // The already embedded JetBrains Mono covers keyboard symbols (notably Return)
-    // absent from the proportional UI face. Use it only after each family's own faces.
-    for stack in fonts.families.values_mut() {
-        if !stack.iter().any(|name| name == "mono") {
-            stack.push("mono".into());
-        }
     }
     fonts
 }
@@ -656,51 +652,6 @@ mod japanese_font_tests {
         let defs = super::font_definitions(designcraft_fonts::CRAFT_FONTS, "ja");
         let stack = &defs.families[&egui::FontFamily::Proportional];
         assert_eq!(stack.iter().find(|n| n.starts_with("craft-")).map(String::as_str), Some("craft-BIZ UDPGothic-Regular"));
-    }
-
-    #[test]
-    fn bundled_ui_fallbacks_cover_option_and_return_without_craft_fonts() {
-        let ctx = egui::Context::default();
-        ctx.set_fonts(super::font_definitions(&[], ""));
-        let mut output = ctx.run_ui(egui::RawInput::default(), |_| {});
-        output.textures_delta.clear();
-        ctx.fonts_mut(|fonts| {
-            for family in families() {
-                let font = egui::FontId::new(13.0, family);
-                for ch in "⌥⏎".chars() {
-                    assert!(fonts.has_glyph(&font, ch), "missing {ch} in {:?}", font.family);
-                }
-            }
-        });
-    }
-
-    #[test]
-    fn installed_arabic_face_is_discovered_without_craft_fonts() {
-        let dir = std::env::temp_dir().join(format!("dc-ui-arabic-fonts-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let chars = ['خ', 'ص', 'ا', 'ئ'];
-        std::fs::write(dir.join("arabic.ttf"), designcraft_fonts::testing::font_with("Noto Sans Arabic", &chars).unwrap()).unwrap();
-        let db = designcraft_fonts::FontDb::with_font_dirs(vec![dir.clone()]);
-        let system = super::installed_ui_fonts(&db, &[]);
-        let _ = std::fs::remove_dir_all(&dir);
-        assert_eq!(system.iter().map(|f| (f.script, f.family.as_str())).collect::<Vec<_>>(), [("Arab", "Noto Sans Arabic")]);
-        let mut defs = super::font_definitions(&[], "ar");
-        super::add_system_fallbacks(&mut defs, &system, "ar");
-        for family in ["arabic", "arabic-semibold"] {
-            assert_eq!(defs.families[&egui::FontFamily::Name(family.into())].first().map(String::as_str), Some("system-Noto Sans Arabic"));
-        }
-        let ctx = egui::Context::default();
-        ctx.set_fonts(defs);
-        let mut output = ctx.run_ui(egui::RawInput::default(), |_| {});
-        output.textures_delta.clear();
-        ctx.fonts_mut(|fonts| {
-            for family in families() {
-                let font = egui::FontId::new(13.0, family);
-                for ch in chars {
-                    assert!(fonts.has_glyph(&font, ch), "missing {ch} in {:?}", font.family);
-                }
-            }
-        });
     }
 
     /// Without craft-fonts, an installed Japanese face gives the interface its glyphs (here a
@@ -909,5 +860,38 @@ mod russian_font_tests {
                 assert_ne!(face.glyph_for(*character), 0, "missing {character} in {name}");
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod readout_tests {
+    use super::{Brightness, Tokens};
+
+    fn luminance(c: egui::Color32) -> f32 {
+        let lin = |v: u8| {
+            let v = v as f32 / 255.0;
+            if v <= 0.04045 { v / 12.92 } else { ((v + 0.055) / 1.055).powf(2.4) }
+        };
+        0.2126 * lin(c.r()) + 0.7152 * lin(c.g()) + 0.0722 * lin(c.b())
+    }
+
+    fn contrast(a: egui::Color32, b: egui::Color32) -> f32 {
+        let (x, y) = (luminance(a), luminance(b));
+        (x.max(y) + 0.05) / (x.min(y) + 0.05)
+    }
+
+    /// The readout beside the cursor ("W: 3.13 cm" while drawing a frame) is InDesign's light
+    /// grey box in every brightness, with text that stays readable on it; High Contrast keeps
+    /// it black.
+    #[test]
+    fn the_cursor_readout_is_indesigns_light_grey_with_readable_text() {
+        for b in [Brightness::Dark, Brightness::MediumDark, Brightness::MediumLight, Brightness::Light] {
+            let t = Tokens::for_brightness(b);
+            assert_eq!(t.readout_bg, egui::Color32::from_rgb(0xa8, 0xa8, 0xa8), "{b:?}");
+            assert!(contrast(t.readout_text, t.readout_bg) >= 4.5, "{b:?}");
+        }
+        let hc = Tokens::for_brightness(Brightness::HighContrast);
+        assert_eq!(hc.readout_bg, egui::Color32::BLACK);
+        assert!(contrast(hc.readout_text, hc.readout_bg) >= 4.5);
     }
 }

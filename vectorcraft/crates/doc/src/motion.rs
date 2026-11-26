@@ -179,7 +179,7 @@ fn write_node(
     {
         return;
     }
-    if let NodeKind::Path { guide: true, .. } = &node.kind {
+    if matches!(&node.kind, NodeKind::Path { guide: true, .. } | NodeKind::RulerGuide { .. }) {
         return;
     }
 
@@ -214,7 +214,7 @@ fn write_node(
                 "Footage"
             }
         }
-        NodeKind::SymbolInstance { .. } | NodeKind::Repeat(_) => "Group",
+        NodeKind::SymbolInstance { .. } | NodeKind::Repeat(_) | NodeKind::RulerGuide { .. } => "Group",
     };
 
     let _ = writeln!(
@@ -346,7 +346,7 @@ fn write_node(
                 );
             }
         }
-        NodeKind::Mesh(_) | NodeKind::PlacedDocument(_) => {}
+        NodeKind::Mesh(_) | NodeKind::PlacedDocument(_) | NodeKind::RulerGuide { .. } => {}
     }
 
     let _ = writeln!(out, "{pad}</layer>");
@@ -422,6 +422,7 @@ fn node_display_name(node: &Node) -> String {
         NodeKind::Repeat(_) => "Repeat".to_string(),
         NodeKind::PlacedDocument(_) => "Placed Document".to_string(),
         NodeKind::Intertwine { .. } => "Intertwine".to_string(),
+        NodeKind::RulerGuide { .. } => "Guide".to_string(),
     }
 }
 

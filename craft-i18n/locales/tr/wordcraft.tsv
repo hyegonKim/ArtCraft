@@ -1660,6 +1660,14 @@
 	Remove Table of Contents	İçindekiler Tablosunu Kaldır
 	Remove the control once edited	Düzenlendikten sonra denetimi kaldır
 	Remove Watermark	Filigranı Kaldır
+	No watermark	Filigran yok
+	Picture watermark	Resim filigranı
+	Text watermark	Metin filigranı
+	Select Picture…	Resim Seç…
+	Washout	Soluk
+	Semitransparent	Yarı saydam
+	Transparency:	Saydamlık:
+	Select a picture first.	Önce bir resim seçin.
 	Rename Document	Belgeyi yeniden adlandır
 	Rename…	Yeniden Adlandır…
 	Reopen	Yeniden Aç
@@ -2343,3 +2351,121 @@ preview	Title	Örnek
 	{words} words	{words} sözcük
 	“{text}” ({row}, {series}) isn't a number.	“{text}” ({row}, {series}) bir sayı değil.
 	✓ None	✓ Yok
+	Add a language…	Dil ekle…
+	Add a language	Dil ekle
+	Your languages	Dilleriniz
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	İngilizce, bu belgenin dilleri ve yüklü her dil paketi. Dil paketleri yazım sözlükleri ve heceleme ekler.
+	Set as default	Varsayılan yap
+	New blank documents are written in this language	Yeni boş belgeler bu dilde yazılır
+	{language} (default)	{language} (varsayılan)
+	Built in	Yerleşik
+	Your own dictionary	Kendi sözlüğünüz
+	System dictionary	Sistem sözlüğü
+	Not available yet	Henüz kullanılamıyor
+	Grammar built in	Dil bilgisi yerleşik
+	Install spelling ({size})	Yazımı yükle ({size})
+	Its dictionary couldn't be read: {reason}	Sözlüğü okunamadı: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	İndirme kapalı. “Dil ekle…” veya “Yükle” düğmesine tıklamak onu açar: WordCraft bundan sonra dil paketlerini ve yazı tiplerini GitHub’dan indirir.
+	Search:	Ara:
+	Dutch, Nederlands or nl	Felemenkçe, Nederlands veya nl
+	No languages to show yet.	Henüz gösterilecek dil yok.
+	No language matches your search.	Aramanızla eşleşen dil yok.
+	An installed Language pack is used after this folder.	Yüklü bir dil paketi bu klasörden sonra kullanılır.
+	Dictionary files	Sözlük dosyaları
+	Gets the list of Language packs, then this language's pack if there is one.	Dil paketlerinin listesini, ardından varsa bu dilin paketini alır.
+	Afrikaans	Afrikanca
+	Belarusian	Belarusça
+	Bulgarian	Bulgarca
+	Bosnian	Boşnakça
+	Catalan	Katalanca
+	Catalan (Valencian)	Katalanca (Valensiyaca)
+	Welsh	Galce
+	Esperanto	Esperanto
+	Persian	Farsça
+	Irish	İrlandaca
+	Galician	Galiçyaca
+	Hungarian	Macarca
+	Armenian	Ermenice
+	Icelandic	İzlandaca
+	Georgian	Gürcüce
+	Lithuanian	Litvanca
+	Latvian	Letonca
+	Macedonian	Makedonca
+	Norwegian (Nynorsk)	Norveççe (Nynorsk)
+	Slovak	Slovakça
+	Slovenian	Slovence
+	Albanian	Arnavutça
+	Swahili	Svahili
+	Tamil	Tamilce
+	Thai	Tayca
+	Vietnamese	Vietnamca
+	Set as Default Language	Varsayılan dil yap
+	U.A.E.	Birleşik Arap Emirlikleri
+	Angola	Angola
+	Argentina	Arjantin
+	Austria	Avusturya
+	Australia	Avustralya
+	Bosnia and Herzegovina	Bosna-Hersek
+	Belgium	Belçika
+	Bolivia	Bolivya
+	Brazil	Brezilya
+	Belarus	Belarus
+	Canada	Kanada
+	Switzerland	İsviçre
+	Chile	Şili
+	China	Çin
+	Colombia	Kolombiya
+	Costa Rica	Kosta Rika
+	Cuba	Küba
+	Cabo Verde	Yeşil Burun Adaları
+	Cyprus	Kıbrıs
+	Germany	Almanya
+	Dominican Republic	Dominik Cumhuriyeti
+	Ecuador	Ekvador
+	Egypt	Mısır
+	Spain	İspanya
+	Finland	Finlandiya
+	France	Fransa
+	United Kingdom	Birleşik Krallık
+	Equatorial Guinea	Ekvator Ginesi
+	Guatemala	Guatemala
+	Hong Kong SAR	Hong Kong ÖİB
+	Honduras	Honduras
+	Ireland	İrlanda
+	India	Hindistan
+	Iraq	Irak
+	Italy	İtalya
+	Jamaica	Jamaika
+	Jordan	Ürdün
+	Kuwait	Kuveyt
+	Kazakhstan	Kazakistan
+	Lebanon	Lübnan
+	Liechtenstein	Lihtenştayn
+	Luxembourg	Lüksemburg
+	Morocco	Fas
+	Monaco	Monako
+	Montenegro	Karadağ
+	Macao SAR	Makao ÖİB
+	Mexico	Meksika
+	Malaysia	Malezya
+	Mozambique	Mozambik
+	Nicaragua	Nikaragua
+	Netherlands	Hollanda
+	New Zealand	Yeni Zelanda
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipinler
+	Puerto Rico	Porto Riko
+	Portugal	Portekiz
+	Paraguay	Paraguay
+	Qatar	Katar
+	Russia	Rusya
+	Singapore	Singapur
+	El Salvador	El Salvador
+	Syria	Suriye
+	Taiwan	Tayvan
+	Ukraine	Ukrayna
+	United States	Amerika Birleşik Devletleri
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Güney Afrika

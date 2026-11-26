@@ -1688,6 +1688,14 @@
 	Remove the control once edited	A vezérlő eltávolítása szerkesztés után
 	Remove the space before the punctuation	Töröld az írásjel előtti szóközt
 	Remove Watermark	Vízjel eltávolítása
+	No watermark	Nincs vízjel
+	Picture watermark	Képvízjel
+	Text watermark	Szövegvízjel
+	Select Picture…	Kép kiválasztása…
+	Washout	Kifakult
+	Semitransparent	Félig átlátszó
+	Transparency:	Átlátszóság:
+	Select a picture first.	Előbb válasszon ki egy képet.
 	Rename Document	Dokumentum átnevezése
 	Reopen	Újbóli megnyitás
 	Repeat as header row on each page	Ismétlés fejlécsorként minden oldalon
@@ -2375,3 +2383,121 @@
 	✓ None	✓ Nincs
 	➕ New comment	➕ Új megjegyzés
 	📂  Browse…	📂  Tallózás…
+	Add a language…	Nyelv hozzáadása…
+	Add a language	Nyelv hozzáadása
+	Your languages	Nyelveid
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Az angol, a dokumentum nyelvei és minden telepített nyelvi csomag. A nyelvi csomagok helyesírási szótárakat és elválasztást adnak hozzá.
+	Set as default	Beállítás alapértelmezettként
+	New blank documents are written in this language	Az új üres dokumentumok ezen a nyelven készülnek
+	{language} (default)	{language} (alapértelmezett)
+	Built in	Beépített
+	Your own dictionary	Saját szótár
+	System dictionary	Rendszerszótár
+	Not available yet	Még nem érhető el
+	Grammar built in	Beépített nyelvtan
+	Install spelling ({size})	Helyesírás telepítése ({size})
+	Its dictionary couldn't be read: {reason}	A szótárát nem sikerült beolvasni: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	A letöltés ki van kapcsolva. A(z) „Nyelv hozzáadása…” vagy a(z) „Telepítés” gombra kattintva bekapcsolódik: ekkor a WordCraft nyelvi csomagokat és betűtípusokat tölt le a GitHubról.
+	Search:	Keresés:
+	Dutch, Nederlands or nl	Holland, Nederlands vagy nl
+	No languages to show yet.	Még nincs megjeleníthető nyelv.
+	No language matches your search.	Egy nyelv sem felel meg a keresésnek.
+	An installed Language pack is used after this folder.	A telepített nyelvi csomagot ez a mappa után használja.
+	Dictionary files	Szótárfájlok
+	Gets the list of Language packs, then this language's pack if there is one.	Lekéri a nyelvi csomagok listáját, majd az adott nyelv csomagját, ha van.
+	Afrikaans	afrikaans
+	Belarusian	belarusz
+	Bulgarian	bolgár
+	Bosnian	bosnyák
+	Catalan	katalán
+	Catalan (Valencian)	katalán (valenciai)
+	Welsh	walesi
+	Esperanto	eszperantó
+	Persian	perzsa
+	Irish	ír
+	Galician	galíciai
+	Hungarian	magyar
+	Armenian	örmény
+	Icelandic	izlandi
+	Georgian	grúz
+	Lithuanian	litván
+	Latvian	lett
+	Macedonian	macedón
+	Norwegian (Nynorsk)	norvég (nynorsk)
+	Slovak	szlovák
+	Slovenian	szlovén
+	Albanian	albán
+	Swahili	szuahéli
+	Tamil	tamil
+	Thai	thai
+	Vietnamese	vietnami
+	Set as Default Language	Beállítás alapértelmezett nyelvként
+	U.A.E.	Egyesült Arab Emírségek
+	Angola	Angola
+	Argentina	Argentína
+	Austria	Ausztria
+	Australia	Ausztrália
+	Bosnia and Herzegovina	Bosznia-Hercegovina
+	Belgium	Belgium
+	Bolivia	Bolívia
+	Brazil	Brazília
+	Belarus	Fehéroroszország
+	Canada	Kanada
+	Switzerland	Svájc
+	Chile	Chile
+	China	Kína
+	Colombia	Kolumbia
+	Costa Rica	Costa Rica
+	Cuba	Kuba
+	Cabo Verde	Zöld-foki Köztársaság
+	Cyprus	Ciprus
+	Germany	Németország
+	Dominican Republic	Dominikai Köztársaság
+	Ecuador	Ecuador
+	Egypt	Egyiptom
+	Spain	Spanyolország
+	Finland	Finnország
+	France	Franciaország
+	United Kingdom	Egyesült Királyság
+	Equatorial Guinea	Egyenlítői-Guinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Hongkong KKT
+	Honduras	Honduras
+	Ireland	Írország
+	India	India
+	Iraq	Irak
+	Italy	Olaszország
+	Jamaica	Jamaica
+	Jordan	Jordánia
+	Kuwait	Kuvait
+	Kazakhstan	Kazahsztán
+	Lebanon	Libanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburg
+	Morocco	Marokkó
+	Monaco	Monaco
+	Montenegro	Montenegró
+	Macao SAR	Makaó KKT
+	Mexico	Mexikó
+	Malaysia	Malajzia
+	Mozambique	Mozambik
+	Nicaragua	Nicaragua
+	Netherlands	Hollandia
+	New Zealand	Új-Zéland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Fülöp-szigetek
+	Puerto Rico	Puerto Rico
+	Portugal	Portugália
+	Paraguay	Paraguay
+	Qatar	Katar
+	Russia	Oroszország
+	Singapore	Szingapúr
+	El Salvador	Salvador
+	Syria	Szíria
+	Taiwan	Tajvan
+	Ukraine	Ukrajna
+	United States	Amerikai Egyesült Államok
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Dél-afrikai Köztársaság

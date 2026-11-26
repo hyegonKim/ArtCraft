@@ -19,8 +19,12 @@
 
 pub mod area;
 pub mod cjk;
+mod color_glyphs;
 pub mod craft_fonts;
-pub mod engine_data;
+mod embolden;
+// The EngineData syntax of type layers is PSD format code: it lives in craft-psd.
+pub use craft_psd::engine_data;
+pub mod font_class;
 pub mod fonts;
 pub mod glyphs;
 pub mod layout;
@@ -39,6 +43,7 @@ use photocraft_color::PixelFormat;
 use photocraft_doc::TextLayer;
 
 pub use craft_fonts::{CRAFT_FONTS, CraftFont};
+pub use font_class::{FamilyTraits, FontClass, FontFormat};
 pub use fonts::{FaceInfo, FontDb, ResolvedFont};
 pub use layout::{
     ClusterInfo, LineInfo, PlacedGlyph, TextLayout, byte_index, char_index, hit_char, line_edge, line_index, line_step, text_point_inside, word_boundary,
@@ -71,6 +76,25 @@ impl TextEngine {
     /// Lays out a text layer (text space: pixels, before `layer.transform`).
     pub fn layout(&mut self, layer: &TextLayer, dpi: f32) -> TextLayout {
         self.layouter.layout(&mut self.fonts, layer, dpi)
+    }
+
+    /// Computes the Dynamic Text Fit scale factor (`0.15..=16.0`) for a box text layer.
+    pub fn dynamic_fit_scale(&mut self, layer: &TextLayer, dpi: f32) -> f32 {
+        self.layouter.dynamic_fit_scale(&mut self.fonts, layer, dpi)
+    }
+
+    /// Releases Dynamic Fit (`다이나믹 맞춤 풀기`) on `layer`: bakes the dynamically fitted point size
+    /// and leading into `size_pt` and `runs`, clears `dynamic_fit = false`, and invalidates `psd_raw`.
+    pub fn release_dynamic_fit(&mut self, layer: &mut TextLayer, dpi: f32) -> bool {
+        if !layer.dynamic_fit {
+            return false;
+        }
+        let scale = self.dynamic_fit_scale(layer, dpi);
+        let baked = layout::scale_text_layer(layer, scale);
+        *layer = baked;
+        layer.psd_raw = None;
+        layer.cache = None;
+        true
     }
 
     /// Kerning (1/1000 em) between the character starting at byte `at` and the next one, as
@@ -138,6 +162,22 @@ impl TextEngine {
         let (_, r) = self.render(layer, dpi, format);
         layer.cache = Some(r.surface);
         r.rect
+    }
+
+    /// Registers font bytes (for example a font embedded in an imported PDF) for later layout.
+    /// Returns the family names the font provides, best first.
+    pub fn register_font_data(&mut self, bytes: Vec<u8>) -> Vec<String> {
+        self.fonts.register_font_data(bytes)
+    }
+
+    /// [`Self::register_font_data`] under `family`, which cannot shadow an installed family.
+    pub fn register_font_data_as(&mut self, bytes: Vec<u8>, family: &str) -> Vec<String> {
+        self.fonts.register_font_data_as(bytes, family)
+    }
+
+    /// Whether `family` is available to this engine.
+    pub fn has_family(&mut self, family: &str) -> bool {
+        self.fonts.has_family(family)
     }
 }
 
@@ -307,6 +347,8 @@ mod warm {
     }
 }
 
+#[cfg(test)]
+mod color_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

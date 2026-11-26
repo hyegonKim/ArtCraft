@@ -1,0 +1,27 @@
+[package]
+name = "materialcraft-web"
+description = "MaterialCraft in the browser (eframe web runner, WebGPU with WebGL2 fallback)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "materialcraft-web"
+path = "src/main.rs"
+
+[dependencies]
+materialcraft-engine = { workspace = true }
+materialcraft-ui-egui = { workspace = true }
+log = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# `wgpu` pulls egui-wgpu's defaults: WebGPU plus the WebGL2 fallback.
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "accesskit", "persistence"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlCanvasElement", "Location", "KeyboardEvent", "EventTarget", "AddEventListenerOptions"] }

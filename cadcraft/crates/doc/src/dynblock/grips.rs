@@ -204,6 +204,40 @@ pub fn grips(d: &Drawing, insert: Handle) -> Vec<DynGrip> {
                     });
                 }
             }
+            ParameterKind::Polar { base, end } | ParameterKind::Xy { base, end } | ParameterKind::Rotation { base, end } => {
+                let (_, e) = match r.values.get(&p.node) {
+                    Some(Value::Points { base, end }) => (*base, *end),
+                    _ => (*base, *end),
+                };
+                let lbl = p.display_label();
+                let gid = if grip(1) != 0 { grip(1) } else { grip(0) };
+                if !lbl.is_empty() && shown(p.node, gid) {
+                    out.push(DynGrip {
+                        node: p.node,
+                        part: GripPart::End,
+                        shape: GripShape::Point,
+                        at: world(e),
+                        dir: Vec2::ZERO,
+                        property: lbl.to_string(),
+                        choices: Vec::new(),
+                    });
+                }
+            }
+            ParameterKind::Flip { base, end } => {
+                let lbl = p.display_label();
+                if !lbl.is_empty() && shown(p.node, grip(0)) {
+                    let mid = (*base + *end) * 0.5;
+                    out.push(DynGrip {
+                        node: p.node,
+                        part: GripPart::At,
+                        shape: GripShape::List,
+                        at: world(mid),
+                        dir: Vec2::ZERO,
+                        property: lbl.to_string(),
+                        choices: vec!["Not flipped".into(), "Flipped".into()],
+                    });
+                }
+            }
             _ => {}
         }
         if out.len() >= MAX_GRIPS {

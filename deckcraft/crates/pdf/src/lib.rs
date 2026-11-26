@@ -13,6 +13,8 @@
 
 use std::collections::HashMap;
 
+mod vector;
+
 use craft_pdf::write::{self, Metadata, Writer, backend as krilla};
 
 use deckcraft_fonts::FontDb;
@@ -77,6 +79,9 @@ pub struct PdfOptions {
     pub frame_slides: bool,
     /// Render each slide's speaker notes alongside or beneath its handout thumbnail when exporting handouts.
     pub include_speaker_notes: bool,
+    /// Render slide shapes, lines, gradients, tables, and text as true PDF vector graphics
+    /// instead of full-slide raster bitmaps (`true` by default).
+    pub vector: bool,
     /// Document title (defaults to the presentation title).
     pub title: Option<String>,
     /// Handout/notes page size in points (default US Letter portrait; see [`paper_size`]).
@@ -93,6 +98,7 @@ impl Default for PdfOptions {
             text_layer: true,
             frame_slides: true,
             include_speaker_notes: false,
+            vector: true,
             title: None,
             paper: (612.0, 792.0),
         }
@@ -181,7 +187,7 @@ fn export_inner(pres: &Presentation, opts: &PdfOptions) -> Result<Vec<u8>> {
     let pdf = writer.document_mut();
 
     let (sw, sh) = (pres.slide_size.width.max(1.0), pres.slide_size.height.max(1.0));
-    let mut ex = Exporter { pres, opts, fonts: HashMap::new() };
+    let mut ex = Exporter { pres, opts, fonts: HashMap::new(), backdrops: Backdrops::default() };
     // Page plan: per page, the slides on it with their boxes (page points).
     let pages = plan_pages(pres, opts, &slides, sw, sh);
     // Bookmarks and slide → page lookup for internal links.
@@ -211,12 +217,10 @@ fn export_inner(pres: &Presentation, opts: &PdfOptions) -> Result<Vec<u8>> {
                     ex.page_texts(&mut s, pres.notes_master.as_deref(), pw, ph, v.first().map(|x| x.0 + 1).unwrap_or(1))?;
                 }
                 PageLayout::Handouts { per_page } => {
-                    // The same slots `plan_pages` put the slides in, in the same order.
                     let slots = handout_slots(per_page, opts.paper, sw / sh, opts.include_speaker_notes);
                     for ((i, _), (_, area)) in v.iter().zip(&slots) {
                         let notes = pres.slides.get(*i).filter(|_| opts.include_speaker_notes).map(|sl| sl.notes_text()).unwrap_or_default();
                         if !notes.trim().is_empty() {
-                            // The speaker notes take the slot's notes area (the ruled lines' place on three per page).
                             ex.paragraphs(&mut s, &notes, *area, if per_page == 3 { 10.0 } else { 9.0 })?;
                         } else if per_page == 3 {
                             ex.note_lines(&mut s, *area);
@@ -310,18 +314,14 @@ pub fn master_text_pieces(pres: &Presentation, m: &deckcraft_model::Master, pape
     let (kx, ky) = (paper.0 / pres.notes_size.width.max(1.0), paper.1 / pres.notes_size.height.max(1.0));
     let mut out = vec![];
     for pt in deckcraft_render::place_master_texts(pres, m, n) {
+        let mut para_chars: HashMap<usize, Vec<char>> = HashMap::new();
         for run in &pt.layout.runs {
             let Some(g) = run.glyphs.first() else { continue };
-            let text: String = pt
-                .body
-                .paragraphs
-                .get(run.para)
-                .map(|p| p.runs.iter().map(|r| r.text.as_str()).collect::<String>())
-                .unwrap_or_default()
-                .chars()
-                .skip(run.chars.0)
-                .take(run.chars.1.saturating_sub(run.chars.0))
-                .collect();
+            let chars = para_chars.entry(run.para).or_insert_with(|| {
+                pt.body.paragraphs.get(run.para).map(|p| p.runs.iter().flat_map(|r| r.content().chars()).collect()).unwrap_or_default()
+            });
+            let (a, b) = (run.chars.0.min(chars.len()), run.chars.1.min(chars.len()));
+            let text: String = chars.get(a..b.max(a)).unwrap_or_default().iter().collect();
             if text.trim().is_empty() {
                 continue;
             }
@@ -371,10 +371,7 @@ pub fn handout_boxes(per_page: u8, paper: (f64, f64), aspect: f64) -> Vec<Rect> 
     handout_slots(per_page, paper, aspect, false).into_iter().map(|(b, _)| b).collect()
 }
 
-/// Each slot of a handout page: the slide's box and the area for its notes. Three per page put
-/// the ruled notes column beside each slide; with `speaker_notes` the other layouts keep a band at
-/// the bottom of each slot's cell and fit the slide above it (without, their notes area is empty).
-/// A slot's slide and notes area stay inside its cell, so they never reach into another slot.
+/// Slide box and notes area `(slide, notes)` for each slot on a handout page.
 pub fn handout_slots(per_page: u8, paper: (f64, f64), aspect: f64, speaker_notes: bool) -> Vec<(Rect, Rect)> {
     let (pw, ph) = paper;
     let (mx, top, bottom) = (54.0, 54.0, 54.0);
@@ -391,14 +388,15 @@ pub fn handout_slots(per_page: u8, paper: (f64, f64), aspect: f64, speaker_notes
     let ah = ph - top - bottom - 18.0;
     let cw = (aw - gap * (cols as f64 - 1.0)) / cols as f64;
     let ch = (ah - gap * (rows as f64 - 1.0)) / rows as f64;
-    // The notes band under each slide: about a third of the cell, at least two lines of 9 pt text.
-    let band = if speaker_notes && !notes { (ch * 0.3).max(30.0).min(ch * 0.5) } else { 0.0 };
-    let sh = ch - band;
+    let aspect = aspect.max(0.01);
+    let band = if speaker_notes && !notes { (ch * 0.3).clamp(30.0, ch * 0.5) } else { 0.0 };
+    let sh = (ch - band).max(1.0);
     let (w, h) = if cw / sh > aspect { (sh * aspect, sh) } else { (cw, cw / aspect) };
     let mut out = Vec::new();
     for r in 0..rows {
         for c in 0..cols {
-            let (cell_x, cell_y) = (mx + c as f64 * (cw + gap), top + r as f64 * (ch + gap));
+            let cell_x = mx + c as f64 * (cw + gap);
+            let cell_y = top + r as f64 * (ch + gap);
             let cx = if notes { mx } else { cell_x + (cw - w) / 2.0 };
             let cy = cell_y + (sh - h) / 2.0;
             let slide = Rect::new(cx, cy, cx + w, cy + h);
@@ -419,6 +417,7 @@ struct Exporter<'a> {
     pres: &'a Presentation,
     opts: &'a PdfOptions,
     fonts: HashMap<u32, Font>,
+    backdrops: Backdrops,
 }
 
 fn tf(a: Affine) -> Transform {
@@ -434,8 +433,19 @@ fn grey(v: u8, opacity: f32) -> Fill {
     }
 }
 
-/// Premultiplied RGBA (the renderer's pixels) to the straight RGBA the writer stores.
+/// Premultiplied RGBA (the renderer's pixels) to the straight RGBA the writer stores. Runs of
+/// pixels that are all fully transparent or fully opaque, most of a slide, are skipped in blocks.
 fn straight(rgba: &mut [u8]) {
+    let (blocks, rest) = rgba.as_chunks_mut::<64>();
+    for block in blocks {
+        if block.as_chunks::<4>().0.iter().fold(false, |m, px| m | (px[3].wrapping_sub(1) < 254)) {
+            straight_px(block);
+        }
+    }
+    straight_px(rest);
+}
+
+fn straight_px(rgba: &mut [u8]) {
     for px in rgba.as_chunks_mut::<4>().0 {
         let a = px[3] as u32;
         if a != 0 && a != 255 {
@@ -446,21 +456,76 @@ fn straight(rgba: &mut [u8]) {
     }
 }
 
-/// A backdrop raster as one PDF image, composited onto white (slides are normally opaque). Equal
-/// backdrops become equal images, which the writer stores once.
-fn backdrop(mut img: deckcraft_render::Image) -> Image {
-    for px in img.pixels.as_chunks_mut::<4>().0 {
-        let a = px[3] as u32;
-        for c in &mut px[..3] {
-            *c = (*c as u32 + (255 - a)).min(255) as u8;
+/// A backdrop raster composited onto white (slides are normally opaque, and opaque blocks are skipped).
+fn opaque(rgba: &mut [u8]) {
+    let (blocks, rest) = rgba.as_chunks_mut::<64>();
+    for block in blocks {
+        if !block.as_chunks::<4>().0.iter().fold(true, |m, px| m & (px[3] == 255)) {
+            opaque_px(block);
         }
+    }
+    opaque_px(rest);
+}
+
+fn opaque_px(rgba: &mut [u8]) {
+    for px in rgba.as_chunks_mut::<4>().0 {
+        let k = 255 - px[3];
+        px[0] = px[0].saturating_add(k);
+        px[1] = px[1].saturating_add(k);
+        px[2] = px[2].saturating_add(k);
         px[3] = 255;
     }
-    Image::from_rgba8(img.pixels, img.width, img.height)
+}
+
+/// Gives every fully transparent content pixel the backdrop's colour. The renderer leaves them
+/// RGB 0,0,0; a viewer that smooths the image blends colour and mask separately, so the black
+/// shows as a grey hairline around white pictures and shapes (#1455).
+fn fill_clear(front: &mut [u8], back: &[u8]) {
+    for (f, b) in front.as_chunks_mut::<4>().0.iter_mut().zip(back.as_chunks::<4>().0) {
+        if f[3] == 0 {
+            f[..3].copy_from_slice(&b[..3]);
+        }
+    }
+}
+
+/// Most bytes of opaque backdrop rasters kept to recognise a backdrop seen before.
+const BACKDROP_CACHE_BYTES: usize = 32 << 20;
+
+/// Backdrops already handed to the writer, most recent first, with their pixels. Slides that
+/// share a layout render the same backdrop; reusing its image skips hashing and compressing the
+/// raster again, and the writer stores it once either way (#845).
+#[derive(Default)]
+struct Backdrops(Vec<(Vec<u8>, u32, u32, Image)>);
+
+impl Backdrops {
+    fn image(&mut self, mut img: deckcraft_render::Image) -> Image {
+        opaque(&mut img.pixels);
+        let (w, h) = (img.width, img.height);
+        if let Some(i) = self.0.iter().position(|(px, pw, ph, _)| (*pw, *ph) == (w, h) && *px == img.pixels) {
+            let hit = self.0.remove(i);
+            let image = hit.3.clone();
+            self.0.insert(0, hit);
+            return image;
+        }
+        if img.pixels.len() > BACKDROP_CACHE_BYTES {
+            return Image::from_rgba8(img.pixels, w, h);
+        }
+        let image = Image::from_rgba8(img.pixels.clone(), w, h);
+        self.0.insert(0, (img.pixels, w, h, image.clone()));
+        let mut total = 0;
+        self.0.retain(|(px, ..)| {
+            total += px.len();
+            total <= BACKDROP_CACHE_BYTES
+        });
+        image
+    }
 }
 
 /// Most pixels one slide raster may have; it is RGBA, and the backdrop and the content are two rasters.
 const MAX_RASTER_PIXELS: f64 = 64_000_000.0;
+
+/// Most ruled note lines one handout area gets (a letter page holds about 30).
+const MAX_NOTE_LINES: usize = 500;
 
 /// Render scale for a slide of `slide` units drawn `box_width` points wide at `dpi`, with the total pixel count capped.
 fn raster_scale(box_width: f64, slide: (f64, f64), dpi: f64) -> f64 {
@@ -481,16 +546,21 @@ impl Exporter<'_> {
 
     /// Slide `i` drawn into `b` (page points).
     fn slide(&mut self, s: &mut Surface, i: usize, b: Rect) -> Result<()> {
+        if self.opts.vector {
+            return self.slide_vector(s, i, b);
+        }
         let pres = self.pres;
         let (sw, sh) = (pres.slide_size.width.max(1.0), pres.slide_size.height.max(1.0));
         let k = b.width() / sw;
         // Raster at the requested dpi relative to the box size on paper.
         let scale = raster_scale(b.width(), (sw, sh), self.opts.dpi);
-        let ropts = RenderOpts { scale, threads: 4, ..Default::default() };
+        // One clock reading for the raster and the text layer, so a date field cannot differ between them.
+        let ropts = RenderOpts { scale, threads: 4, now: deckcraft_text::datetime::DateTime::now_local(), ..Default::default() };
         // Two rasters per slide: the backdrop (background, master and layout graphics) is the same
         // on every slide that shares its layout, so the writer stores it once, and the slide's own
         // shapes draw over it (#845).
-        let back = deckcraft_render::render_slide_part(pres, i, deckcraft_render::SlidePart::Backdrop, &ropts);
+        let mut back = deckcraft_render::render_slide_part(pres, i, deckcraft_render::SlidePart::Backdrop, &ropts);
+        opaque(&mut back.pixels);
         let front = deckcraft_render::render_slide_part(pres, i, deckcraft_render::SlidePart::Content, &ropts);
         let (w, h) = (back.width, back.height);
         if w > 0
@@ -498,11 +568,15 @@ impl Exporter<'_> {
             && let Some(size) = Size::from_wh(b.width() as f32, b.height() as f32)
         {
             s.push_transform(&Transform::from_translate(b.x0 as f32, b.y0 as f32));
-            s.draw_image(backdrop(back), size);
             // Taken, not copied: a print-resolution slide is ~16 MB.
             let mut rgba = front.pixels;
-            if rgba.as_chunks::<4>().0.iter().any(|px| px[3] != 0) {
+            let content = rgba.as_chunks::<4>().0.iter().any(|px| px[3] != 0);
+            if content {
+                fill_clear(&mut rgba, &back.pixels);
                 straight(&mut rgba);
+            }
+            s.draw_image(self.backdrops.image(back), size);
+            if content {
                 s.draw_image(Image::from_rgba8(rgba, w, h), size);
             }
             s.pop();
@@ -522,7 +596,7 @@ impl Exporter<'_> {
         }
         if self.opts.text_layer {
             let view = Affine::translate((b.x0, b.y0)) * Affine::scale(k);
-            for pt in deckcraft_render::place_slide(pres, i).texts {
+            for pt in deckcraft_render::place_slide_with(pres, i, &ropts).texts {
                 self.text_layer(s, &pt, view, false)?;
             }
             let _ = sh;
@@ -532,20 +606,17 @@ impl Exporter<'_> {
 
     /// Invisible glyphs exactly over the rasterised text.
     fn text_layer(&mut self, s: &mut Surface, pt: &PlacedText, view: Affine, visible: bool) -> Result<()> {
+        // Each paragraph's characters, gathered once: a long paragraph wraps into many runs.
+        let mut para_chars: HashMap<usize, Vec<char>> = HashMap::new();
         for run in &pt.layout.runs {
             if run.glyphs.is_empty() || run.size <= 0.0 {
                 continue;
             }
-            let text: String = pt
-                .body
-                .paragraphs
-                .get(run.para)
-                .map(|p| p.runs.iter().map(|r| r.text.as_str()).collect::<String>())
-                .unwrap_or_default()
-                .chars()
-                .skip(run.chars.0)
-                .take(run.chars.1.saturating_sub(run.chars.0))
-                .collect();
+            let chars = para_chars.entry(run.para).or_insert_with(|| {
+                pt.body.paragraphs.get(run.para).map(|p| p.runs.iter().flat_map(|r| r.content().chars()).collect()).unwrap_or_default()
+            });
+            let (a, b) = (run.chars.0.min(chars.len()), run.chars.1.min(chars.len()));
+            let text: String = chars.get(a..b.max(a)).unwrap_or_default().iter().collect();
             if text.trim().is_empty() {
                 continue;
             }
@@ -625,19 +696,28 @@ impl Exporter<'_> {
         let lh = size * 1.3;
         let mut y = area.y0 + size;
         s.set_fill(Some(grey(0x20, 1.0)));
+        let space = width(" ");
         'outer: for para in text.split('\n') {
+            // The line's width is kept as words are added, not measured again for each word.
             let mut line = String::new();
+            let mut line_w = 0.0;
             for word in para.split(' ') {
-                let cand = if line.is_empty() { word.to_string() } else { format!("{line} {word}") };
-                if width(&cand) > area.width() && !line.is_empty() {
+                let word_w = width(word);
+                let cand_w = if line.is_empty() { word_w } else { line_w + space + word_w };
+                if cand_w > area.width() && !line.is_empty() {
                     if y > area.y1 {
                         break 'outer;
                     }
                     s.draw_text(Point::from_xy(area.x0 as f32, y as f32), font.clone(), size as f32, &line, false, TextDirection::Auto);
                     y += lh;
                     line = word.to_string();
+                    line_w = word_w;
                 } else {
-                    line = cand;
+                    if !line.is_empty() {
+                        line.push(' ');
+                    }
+                    line.push_str(word);
+                    line_w = cand_w;
                 }
             }
             if y > area.y1 {
@@ -654,20 +734,26 @@ impl Exporter<'_> {
 
     /// Ruled lines for handwritten notes (3-per-page handouts).
     fn note_lines(&self, s: &mut Surface, r: Rect) {
-        let mut y = r.y0 + 18.0;
+        // Counted, not stepped: at huge coordinates adding 22 leaves y unchanged, and a huge page
+        // would want millions of rules.
+        let first = r.y0 + 18.0;
+        let count = ((r.y1 - first) / 22.0).floor() + 1.0;
+        if count.is_nan() || count < 1.0 {
+            return;
+        }
         s.set_stroke(Some(krilla::paint::Stroke {
             paint: krilla::color::rgb::Color::new(0xB0, 0xB0, 0xB0).into(),
             width: 0.5,
             ..Default::default()
         }));
-        while y <= r.y1 {
+        for i in 0..(count.min(MAX_NOTE_LINES as f64) as usize) {
+            let y = first + 22.0 * i as f64;
             let mut p = kurbo::BezPath::new();
             p.move_to((r.x0, y));
             p.line_to((r.x1, y));
             if let Some(path) = to_path(&p) {
                 s.draw_path(&path);
             }
-            y += 22.0;
         }
         s.set_stroke(None);
     }

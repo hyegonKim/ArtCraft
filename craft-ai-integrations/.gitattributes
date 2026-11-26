@@ -1,0 +1,6 @@
+# Keep line endings stable whatever the contributor's git settings.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.zip binary
+crates/ai-engine-burn/src/model/** linguist-generated=true

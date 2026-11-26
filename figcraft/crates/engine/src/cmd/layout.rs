@@ -1,162 +1,26 @@
 //! Auto layout commands beyond `layout.add` / `layout.remove` (in `structure`) and the layout
 //! keys of `node.set` (gap, padding, alignment, sizing, min/max, absolute, grid cells): grid tracks.
 
-use figcraft_doc::{AutoLayout, GridTrack, LayoutMode, NodeId, NodeKind, Sizing};
-use serde_json::{Value, json};
+use figcraft_doc::{GridTrack, LayoutMode, Sizing};
+use serde_json::Value;
 
 use super::props::sizing;
 use super::{CommandSpec, ok};
-use crate::params::*;
+use crate::params::{get, num, req_num, req_targets, string};
 use crate::{Result, Session, bad, spec};
 
 pub fn specs() -> Vec<CommandSpec> {
-    vec![
-        spec!(
-            "layout.setTrack",
-            "Set grid track size",
-            "{ids?, axis: columns|rows, index (0-based), sizing: fixed|hug|fill, value? (fixed: px, default the track's current size; fill: fr, default 1)}",
-            true,
-            set_track
-        ),
-        spec!(
-            "layout.repeatGrid",
-            "Repeat grid",
-            "{ids?, columns?: 1..=50, rows?: 1..=50, columnGap?: px, rowGap?: px, sync?: bool (default true)} — makes each frame a grid auto layout and fills its `columns * rows` cells with copies of its first child (at most 20000 layers added in all); with fewer cells, only copies an earlier repeat added are removed, last first (other layers stay); sync copies the first child's look and size onto those copies → {ids, cells, kept (layers past the cells that weren't repeat copies)}",
-            true,
-            repeat_grid
-        ),
-    ]
+    vec![spec!(
+        "layout.setTrack",
+        "Set grid track size",
+        "{ids?, axis: columns|rows, index (0-based), sizing: fixed|hug|fill, value? (fixed: px, default the track's current size; fill: fr, default 1)}",
+        true,
+        set_track
+    )]
 }
 
 /// Same cap the layout pass applies to grid track counts.
 const MAX_TRACKS: usize = 1000;
-/// Maximum columns or rows for `layout.repeatGrid`.
-const MAX_REPEAT_AXIS: u32 = 50;
-/// Most layers one `layout.repeatGrid` may add (each copy counts its whole subtree).
-const MAX_REPEAT_LAYERS: usize = 20_000;
-/// `plugin_data` key on the copies `layout.repeatGrid` adds, holding the frame's id: repeating
-/// again removes or restyles those copies only, never the frame's other layers.
-const REPEAT_COPY: &str = "figcraft.repeatGrid";
-
-fn repeat_grid(s: &mut Session, p: &Value) -> Result<Value> {
-    const CMD: &str = "layout.repeatGrid";
-    let ids = req_targets(CMD, s, p)?;
-    let cols_arg = match get(p, "columns") {
-        None | Some(Value::Null) => None,
-        Some(v) => {
-            let c = v
-                .as_f64()
-                .filter(|x| x.is_finite() && (1.0..=f64::from(MAX_REPEAT_AXIS)).contains(x))
-                .ok_or_else(|| bad(CMD, "`columns` must be a number in 1..=50"))?;
-            Some(c.round() as u32)
-        }
-    };
-    let rows_arg = match get(p, "rows") {
-        None | Some(Value::Null) => None,
-        Some(v) => {
-            let r = v
-                .as_f64()
-                .filter(|x| x.is_finite() && (1.0..=f64::from(MAX_REPEAT_AXIS)).contains(x))
-                .ok_or_else(|| bad(CMD, "`rows` must be a number in 1..=50"))?;
-            Some(r.round() as u32)
-        }
-    };
-    let col_gap = match get(p, "columnGap").or_else(|| get(p, "gap")) {
-        None | Some(Value::Null) => None,
-        Some(v) => Some(v.as_f64().filter(|x| x.is_finite() && *x >= 0.0).ok_or_else(|| bad(CMD, "`columnGap` must be >= 0"))?.min(1e6)),
-    };
-    let row_gap = match get(p, "rowGap").or_else(|| get(p, "crossGap")) {
-        None | Some(Value::Null) => None,
-        Some(v) => Some(v.as_f64().filter(|x| x.is_finite() && *x >= 0.0).ok_or_else(|| bad(CMD, "`rowGap` must be >= 0"))?.min(1e6)),
-    };
-    let sync = match get(p, "sync") {
-        None | Some(Value::Null) => true,
-        Some(v) => v.as_bool().ok_or_else(|| bad(CMD, "`sync` must be a boolean"))?,
-    };
-    let doc = s.doc_mut()?;
-    let mut total_cells = 0usize;
-    let mut added_layers = 0usize;
-    let mut kept = 0usize;
-    for &id in &ids {
-        let n = doc.get(id)?;
-        if !n.kind.is_frame_like() {
-            return Err(bad(CMD, format!("node {id} is not a frame")));
-        }
-        if crate::components::owning_instance(doc, id).is_some() {
-            return Err(bad(CMD, "cannot repeat grid inside a component instance"));
-        }
-        let template = *n.children.first().ok_or_else(|| bad(CMD, format!("frame {id} needs at least one child item to repeat")))?;
-        let base_name = doc.get(template)?.name.clone();
-        let base_stem = match base_name.rsplit_once(' ') {
-            Some((prefix, digits)) if !prefix.is_empty() && digits.chars().all(|c| c.is_ascii_digit()) => prefix.to_string(),
-            _ => base_name,
-        };
-        let (cols, rows) = {
-            let n = doc.get_mut(id)?;
-            let l = n.layout.get_or_insert_with(|| AutoLayout { mode: LayoutMode::Grid, ..AutoLayout::default() });
-            l.mode = LayoutMode::Grid;
-            let cols = cols_arg.unwrap_or_else(|| l.grid_columns.max(1)).clamp(1, MAX_REPEAT_AXIS);
-            let rows = rows_arg.unwrap_or_else(|| l.grid_rows.max(1)).clamp(1, MAX_REPEAT_AXIS);
-            l.grid_columns = cols;
-            l.grid_rows = rows;
-            if let Some(cg) = col_gap {
-                l.gap = cg;
-            }
-            if let Some(rg) = row_gap {
-                l.cross_gap = rg;
-            }
-            (cols, rows)
-        };
-        let target_count = (cols as usize).saturating_mul(rows as usize);
-        total_cells += target_count;
-        let mark = id.to_string();
-        let is_copy = |doc: &figcraft_doc::Document, kid: NodeId| {
-            kid != template && doc.node(kid).is_some_and(|k| k.plugin_data.get(REPEAT_COPY) == Some(&mark))
-        };
-        let current_kids = doc.get(id)?.children.clone();
-        if current_kids.len() < target_count {
-            let missing = target_count - current_kids.len();
-            added_layers = added_layers.saturating_add(doc.subtree(template).len().max(1).saturating_mul(missing));
-            if added_layers > MAX_REPEAT_LAYERS {
-                return Err(bad(CMD, format!("repeating would add more than {MAX_REPEAT_LAYERS} layers")));
-            }
-            for idx in current_kids.len()..target_count {
-                let copy = crate::components::copy_in_file(doc, template, id, None)?;
-                let cn = doc.get_mut(copy)?;
-                if !matches!(cn.kind, NodeKind::Instance { .. }) {
-                    cn.name = format!("{base_stem} {}", idx + 1);
-                }
-                cn.child_layout.grid_column = None;
-                cn.child_layout.grid_row = None;
-                cn.plugin_data.insert(REPEAT_COPY.into(), mark.clone());
-            }
-        } else {
-            // Fewer cells: remove repeat copies from the end; any other layer stays.
-            let mut excess = current_kids.len() - target_count;
-            for &kid in current_kids.iter().rev() {
-                if excess == 0 {
-                    break;
-                }
-                if is_copy(&*doc, kid) {
-                    doc.remove(kid)?;
-                    excess -= 1;
-                }
-            }
-            kept += excess;
-        }
-        if sync && let Some(tmpl_node) = doc.node(template).cloned() {
-            let copies: Vec<NodeId> = doc.get(id)?.children.iter().copied().filter(|k| is_copy(&*doc, *k)).collect();
-            for kid in copies {
-                if let Some(m) = doc.node_mut(kid) {
-                    for g in ["fills", "strokes", "effects", "opacity", "corners", "size", "resizing", "textStyle"] {
-                        crate::components::copy_group(&tmpl_node, m, g);
-                    }
-                }
-            }
-        }
-    }
-    Ok(json!({"ok": true, "ids": ids, "cells": total_cells, "kept": kept}))
-}
 
 fn set_track(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "layout.setTrack";
@@ -178,8 +42,8 @@ fn set_track(s: &mut Session, p: &Value) -> Result<Value> {
             return Err(bad(CMD, format!("node {id} is not a grid auto layout frame")));
         };
         let count = tracks_now.len().max(if columns { l.grid_columns } else { l.grid_rows } as usize).min(MAX_TRACKS);
-        if !(0.0..count as f64).contains(&index) {
-            return Err(bad(CMD, format!("`index` must be 0..{count}")));
+        if index.fract() != 0.0 || !(0.0..count as f64).contains(&index) {
+            return Err(bad(CMD, format!("`index` must be an integer in 0..{count}")));
         }
         let i = index as usize;
         let track = match kind {
@@ -318,6 +182,19 @@ mod tests {
     }
 
     #[test]
+    fn junk_axis_padding_is_refused_and_keeps_padding() {
+        let mut s = Session::new();
+        let (f, _, _) = al_frame(&mut s);
+        ex(&mut s, "node.set", json!({"id": f, "props": {"padding": 16}}));
+        for key in ["paddingHorizontal", "paddingVertical"] {
+            for junk in [json!("abc"), json!({"a": 1}), json!([1, 2])] {
+                assert!(s.execute("node.set", &json!({"id": f, "props": {key: junk}})).is_err(), "{key}");
+                assert_eq!(node(&s, f).layout.as_ref().unwrap().padding, [16.0; 4], "{key}");
+            }
+        }
+    }
+
+    #[test]
     fn baseline_alignment_lines_up_text() {
         let mut s = Session::new();
         let f = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 400, "height": 100, "props": {"layout": "horizontal"}})));
@@ -336,6 +213,30 @@ mod tests {
         // Vertical layouts treat baseline as left.
         ex(&mut s, "node.set", json!({"id": f, "props": {"layout": "vertical"}}));
         assert_eq!(x(&s, small).0, x(&s, big).0);
+    }
+
+    /// "for baseline alignment, the bottoms of the icon and the word home are aligned on the red
+    /// line" (Use the horizontal and vertical flows in auto layout, the figure's caption; #1825): a
+    /// layer without text sits on the text's baseline with its bottom edge, not at the top.
+    #[test]
+    fn baseline_alignment_puts_an_icons_bottom_on_the_text_baseline() {
+        let mut s = Session::new();
+        let f = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 400, "height": 100, "props": {"layout": "horizontal", "gap": 8}})));
+        let icon = id(&ex(&mut s, "shape.rectangle", json!({"x": 0, "y": 0, "width": 16, "height": 16, "parent": f})));
+        let home = id(&ex(&mut s, "text.create", json!({"text": "Home", "x": 0, "y": 0, "parent": f, "props": {"fontSize": 48}})));
+        ex(&mut s, "node.set", json!({"id": f, "props": {"crossAlign": "baseline"}}));
+        let base = figcraft_text::layout_node(&node(&s, home)).and_then(|(l, dy)| l.lines.first().map(|line| line.baseline + dy));
+        // Only meaningful when the text was measured (fonts available) and its baseline is below
+        // the icon's height.
+        if let Some(b) = base
+            && b > 16.0
+        {
+            let bottom = x(&s, icon).1 + 16.0;
+            assert!((bottom - (x(&s, home).1 + b)).abs() < 1e-6, "icon bottom {bottom}, text baseline {}", x(&s, home).1 + b);
+        }
+        // Top alignment puts it back at the top.
+        ex(&mut s, "node.set", json!({"id": f, "props": {"crossAlign": "min"}}));
+        assert_eq!(x(&s, icon).1, x(&s, home).1);
     }
 
     #[test]
@@ -369,6 +270,13 @@ mod tests {
         assert_eq!(info["gridCell"]["column"], json!(2));
         assert_eq!(info["gridCell"]["row"], json!(1));
         assert_eq!(info["gridCell"]["anchored"], json!(true));
+        // Inspected together with the frame, each child still gets its own cell.
+        let all = crate::inspect::node_json(s.doc().unwrap(), f, 1);
+        let cells: Vec<(Value, Value)> =
+            all["children"].as_array().unwrap().iter().map(|c| (c["gridCell"]["column"].clone(), c["gridCell"]["row"].clone())).collect();
+        assert_eq!(cells[3], (json!(2), json!(1)));
+        assert_eq!(cells[0].0, json!(0));
+        assert!(cells.iter().all(|(c, r)| c.is_number() && r.is_number()), "{cells:?}");
         ex(&mut s, "node.set", json!({"id": kids[3], "props": {"gridColumn": "auto", "gridRow": null}}));
         assert_eq!(node(&s, kids[3]).child_layout.grid_column, None);
         // Fewer columns drop the extra tracks.
@@ -379,6 +287,7 @@ mod tests {
             json!({"ids": [f], "axis": "diagonal", "index": 0, "sizing": "fixed"}),
             json!({"ids": [f], "axis": "columns", "index": 9, "sizing": "fixed"}),
             json!({"ids": [f], "axis": "columns", "index": -1, "sizing": "hug"}),
+            json!({"ids": [f], "axis": "columns", "index": 1.5, "sizing": "fixed", "value": 50}),
             json!({"ids": [f], "axis": "columns", "index": 0, "sizing": "stretchy"}),
             json!({"ids": [kids[1]], "axis": "columns", "index": 0, "sizing": "hug"}),
         ] {
@@ -445,72 +354,5 @@ mod tests {
                 .map(super::super::props::track_of)
                 .collect();
         assert_eq!(t, vec![Some(GridTrack::fill(2.0)), None, Some(GridTrack::fixed(120.0)), None, Some(GridTrack::hug())]);
-    }
-
-    #[test]
-    fn repeat_grid_populates_syncs_and_trims_cells() {
-        let mut s = Session::new();
-        let f = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 340, "height": 220, "name": "Catalog"})));
-        let item = id(&ex(
-            &mut s,
-            "shape.rectangle",
-            json!({"x": 0, "y": 0, "width": 80, "height": 60, "parent": f, "name": "Card", "props": {"fills": ["#FF5500"], "cornerRadius": 8}}),
-        ));
-        let res = ex(&mut s, "layout.repeatGrid", json!({"ids": [f], "columns": 3, "rows": 2, "columnGap": 12, "rowGap": 16}));
-        assert_eq!(res["cells"], json!(6));
-        let fn_node = node(&s, f);
-        let layout = fn_node.layout.as_ref().unwrap();
-        assert_eq!(layout.mode, LayoutMode::Grid);
-        assert_eq!((layout.grid_columns, layout.grid_rows), (3, 2));
-        assert_eq!((layout.gap, layout.cross_gap), (12.0, 16.0));
-        assert_eq!(fn_node.children.len(), 6);
-        assert_eq!(node(&s, fn_node.children[1]).name, "Card 2");
-        assert_eq!(node(&s, fn_node.children[5]).name, "Card 6");
-        assert_eq!(node(&s, fn_node.children[5]).corners.radii, [8.0; 4]);
-
-        // Modify template corner radius and sync across repeated cells.
-        ex(&mut s, "node.set", json!({"id": item, "props": {"cornerRadius": 16}}));
-        ex(&mut s, "layout.repeatGrid", json!({"ids": [f], "columns": 2, "rows": 2}));
-        let fn_node = node(&s, f);
-        assert_eq!(fn_node.children.len(), 4);
-        for &cid in &fn_node.children {
-            assert_eq!(node(&s, cid).corners.radii, [16.0; 4]);
-        }
-
-        // Undo restores the 6-cell repeat grid.
-        s.undo().unwrap();
-        assert_eq!(node(&s, f).children.len(), 6);
-    }
-
-    #[test]
-    fn repeat_grid_trims_and_restyles_only_its_own_copies() {
-        let mut s = Session::new();
-        let f = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 340, "height": 220})));
-        let item = id(&ex(&mut s, "shape.rectangle", json!({"x": 0, "y": 0, "width": 80, "height": 60, "parent": f, "name": "Card"})));
-        ex(&mut s, "layout.repeatGrid", json!({"ids": [f], "columns": 2, "rows": 1}));
-        // A layer the user adds afterwards is not a repeat copy.
-        let title = id(&ex(&mut s, "shape.ellipse", json!({"x": 0, "y": 0, "width": 10, "height": 10, "parent": f, "name": "Badge"})));
-        ex(&mut s, "node.set", json!({"id": item, "props": {"cornerRadius": 4}}));
-        let res = ex(&mut s, "layout.repeatGrid", json!({"ids": [f], "columns": 1, "rows": 1}));
-        // One cell: the copy goes, the user's layer stays (reported as kept) and keeps its look.
-        assert_eq!(res["kept"], json!(1));
-        let kids = node(&s, f).children;
-        assert_eq!(kids, vec![item, title]);
-        assert_eq!(node(&s, title).corners.radii, [0.0; 4]);
-    }
-
-    #[test]
-    fn repeat_grid_caps_the_layers_it_adds() {
-        let mut s = Session::new();
-        let f = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 100, "height": 100})));
-        let card = id(&ex(&mut s, "frame.create", json!({"x": 0, "y": 0, "width": 50, "height": 50, "parent": f})));
-        for i in 0..10 {
-            ex(&mut s, "shape.rectangle", json!({"x": i, "y": 0, "width": 1, "height": 1, "parent": card}));
-        }
-        // 2500 cells × 11 layers each is past the cap: an error, and nothing changes.
-        let err = s.execute("layout.repeatGrid", &json!({"ids": [f], "columns": 50, "rows": 50})).unwrap_err();
-        assert!(err.to_string().contains("20000"), "{err}");
-        assert_eq!(node(&s, f).children.len(), 1);
-        assert!(node(&s, f).layout.is_none());
     }
 }

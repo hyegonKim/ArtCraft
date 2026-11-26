@@ -7,23 +7,26 @@ use super::detect::system_lang;
 
 /// The writing system a language is drawn in, and so the system font it needs. Languages that
 /// share one can share a face; Simplified and Traditional Chinese do not (they want different
-/// faces), so each script is its own. The bundled faces have no CJK glyphs, so a language with a
-/// script borrows a system font for it (`crate::theme::cjk_font`).
+/// faces), so each script is its own. The bundled faces have no CJK or Georgian glyphs, so a
+/// language with a script borrows a system font for it (`crate::theme::cjk_font`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Script {
     Chinese,
+    TraditionalChinese,
     Japanese,
+    Korean,
+    Georgian,
 }
 
 impl Script {
     /// Every script a language can be written in.
-    pub const ALL: [Script; 2] = [Script::Chinese, Script::Japanese];
+    pub const ALL: [Script; 5] = [Script::Chinese, Script::TraditionalChinese, Script::Japanese, Script::Korean, Script::Georgian];
 }
 
 /// One supported UI language.
 pub struct LangInfo {
-    /// Canonical BCP 47 code (`en`, `ru`, `zh-CN`, `de`, `fr`, `pt-BR`, `es`, `cs`, `pl`, `hu`, `ja`).
-    /// Also the `interfaceLanguage` value.
+    /// Canonical BCP 47 code (`en`, `ru`, `zh-CN`, `zh-TW`, `de`, `fr`, `pt-BR`, `es`, `cs`, `pl`, `hu`, `ja`,
+    /// `ka`, `ko`). Also the `interfaceLanguage` value.
     pub code: &'static str,
     /// The language's name in itself, shown in the Preferences dropdown.
     pub name: &'static str,
@@ -94,7 +97,7 @@ pub(super) fn plural_polish(n: u64) -> usize {
 }
 
 /// The registry. English first: it is the fallback and the source language.
-pub static LANGUAGES: [LangInfo; 11] = [
+pub static LANGUAGES: [LangInfo; 14] = [
     LangInfo {
         code: "en",
         name: "English",
@@ -123,6 +126,17 @@ pub static LANGUAGES: [LangInfo; 11] = [
         english_name: "Simplified Chinese",
         script: Some(Script::Chinese),
         source: include_str!("zh-CN.tsv"),
+        plural: plural_none,
+        plural_forms: 1,
+        complete_menus: true,
+        catalog: OnceLock::new(),
+    },
+    LangInfo {
+        code: "zh-TW",
+        name: "繁體中文",
+        english_name: "Traditional Chinese (Taiwan)",
+        script: Some(Script::TraditionalChinese),
+        source: include_str!("zh-TW.tsv"),
         plural: plural_none,
         plural_forms: 1,
         complete_menus: true,
@@ -216,6 +230,28 @@ pub static LANGUAGES: [LangInfo; 11] = [
         complete_menus: true,
         catalog: OnceLock::new(),
     },
+    LangInfo {
+        code: "ka",
+        name: "ქართული",
+        english_name: "Georgian",
+        script: Some(Script::Georgian),
+        source: include_str!("ka.tsv"),
+        plural: plural_one_other,
+        plural_forms: 2,
+        complete_menus: true,
+        catalog: OnceLock::new(),
+    },
+    LangInfo {
+        code: "ko",
+        name: "한국어",
+        english_name: "Korean",
+        script: Some(Script::Korean),
+        source: include_str!("ko.tsv"),
+        plural: plural_none,
+        plural_forms: 1,
+        complete_menus: true,
+        catalog: OnceLock::new(),
+    },
 ];
 
 impl LangInfo {
@@ -246,14 +282,17 @@ impl Lang {
     pub const EN: Lang = Lang(&LANGUAGES[0]);
     pub const RU: Lang = Lang(&LANGUAGES[1]);
     pub const ZH_CN: Lang = Lang(&LANGUAGES[2]);
-    pub const DE: Lang = Lang(&LANGUAGES[3]);
-    pub const FR: Lang = Lang(&LANGUAGES[4]);
-    pub const PT_BR: Lang = Lang(&LANGUAGES[5]);
-    pub const ES: Lang = Lang(&LANGUAGES[6]);
-    pub const CS: Lang = Lang(&LANGUAGES[7]);
-    pub const PL: Lang = Lang(&LANGUAGES[8]);
-    pub const HU: Lang = Lang(&LANGUAGES[9]);
-    pub const JA: Lang = Lang(&LANGUAGES[10]);
+    pub const ZH_TW: Lang = Lang(&LANGUAGES[3]);
+    pub const DE: Lang = Lang(&LANGUAGES[4]);
+    pub const FR: Lang = Lang(&LANGUAGES[5]);
+    pub const PT_BR: Lang = Lang(&LANGUAGES[6]);
+    pub const ES: Lang = Lang(&LANGUAGES[7]);
+    pub const CS: Lang = Lang(&LANGUAGES[8]);
+    pub const PL: Lang = Lang(&LANGUAGES[9]);
+    pub const HU: Lang = Lang(&LANGUAGES[10]);
+    pub const JA: Lang = Lang(&LANGUAGES[11]);
+    pub const KA: Lang = Lang(&LANGUAGES[12]);
+    pub const KO: Lang = Lang(&LANGUAGES[13]);
 
     pub fn code(self) -> &'static str {
         self.0.code
@@ -353,14 +392,19 @@ pub fn lang_from_tag(tag: &str) -> Option<Lang> {
     }
 }
 
-/// Chinese by script: Simplified for `zh-Hans`, and for a bare `zh` or the regions that write
-/// Simplified (mainland China, Singapore) when no script is given. An explicit script wins over
-/// the region (`zh-Hant-CN` is Traditional); Traditional Chinese isn't offered.
+/// Chinese by script: Traditional for an explicit `Hant`, and for Taiwan, Hong Kong and Macao when
+/// no script is given; Simplified for an explicit `Hans`, a bare `zh`, and the regions that write
+/// Simplified (mainland China, Singapore). An explicit script wins over the region
+/// (`zh-Hant-CN` is Traditional).
 fn chinese(tag: &str) -> Option<Lang> {
     let parts: Vec<&str> = tag.split('-').collect();
     if parts.contains(&"hant") {
-        None
-    } else if parts.contains(&"hans") || parts.len() == 1 || parts.iter().any(|p| matches!(*p, "cn" | "sg")) {
+        Some(Lang::ZH_TW)
+    } else if parts.contains(&"hans") {
+        Some(Lang::ZH_CN)
+    } else if parts.iter().any(|p| matches!(*p, "tw" | "hk" | "mo")) {
+        Some(Lang::ZH_TW)
+    } else if parts.len() == 1 || parts.iter().any(|p| matches!(*p, "cn" | "sg")) {
         Some(Lang::ZH_CN)
     } else {
         None

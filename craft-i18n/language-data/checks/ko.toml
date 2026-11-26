@@ -1,0 +1,3 @@
+# Words the ko pack must accept and reject (common words; written for this check).
+correct = ["학교", "사람", "물", "도시", "책"]
+incorrect = ["학교교교", "사람람람", "도시시시"]

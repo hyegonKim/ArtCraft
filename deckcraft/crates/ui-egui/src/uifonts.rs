@@ -131,6 +131,18 @@ impl UiFonts {
         ctx.request_repaint();
         true
     }
+
+    /// True when `text` contains a character covered by a borrowed face that `ctx` has not yet
+    /// activated (`set_fonts` takes effect at the next pass boundary).
+    pub fn pending_for(&self, ctx: &egui::Context, text: &str) -> bool {
+        if self.faces.is_empty() || !text.chars().any(wanted) {
+            return false;
+        }
+        let font = egui::FontId::proportional(13.0);
+        ctx.fonts_mut(|f| {
+            text.chars().any(|c| wanted(c) && !f.has_glyph(&font, c) && self.faces.iter().any(|face| face.covers(c)))
+        })
+    }
 }
 
 /// The text of a presentation that the interface can show (not the slides' pictures of it).

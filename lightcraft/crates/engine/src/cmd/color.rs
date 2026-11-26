@@ -12,11 +12,131 @@ use lightcraft_color::transfer::srgb_to_linear;
 use lightcraft_color::{REC2020, SRGB};
 use lightcraft_develop::{DevelopSettings, MAX_POINT_COLORS, MIXER_BANDS, PointColor, ToneCurve, Treatment, controls};
 use lightcraft_geom::Point;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use super::{CommandSpec, bad, cmd, f64_req, has_active};
+use super::{CommandSpec, always, bad, cmd, f64_req, has_active, str_param};
 use crate::media::SourceLevel;
 use crate::{Result, Session};
+
+/// A saved Point Color swatch (built-in or user-saved in `prefs.json`).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PointColorSwatch {
+    pub id: String,
+    pub name: String,
+    pub sample: PointColor,
+    #[serde(default)]
+    pub builtin: bool,
+}
+
+/// Built-in Camera Raw 19.0-style Point Color Swatches (skin tones, foliage, sky, sunset, coral).
+pub fn builtin_swatches() -> Vec<PointColorSwatch> {
+    vec![
+        PointColorSwatch {
+            id: "builtin.skin-warm".into(),
+            name: "Portrait Skin Warm".into(),
+            sample: PointColor {
+                hue: 48.0,
+                chroma: 0.085,
+                lum: 0.68,
+                hue_shift: 4.0,
+                sat_shift: -6.0,
+                lum_shift: 5.0,
+                variance: -25.0,
+                range: 55.0,
+                hue_range: 35.0,
+                sat_range: 40.0,
+                lum_range: 45.0,
+            },
+            builtin: true,
+        },
+        PointColorSwatch {
+            id: "builtin.skin-cool".into(),
+            name: "Portrait Skin Neutral".into(),
+            sample: PointColor {
+                hue: 38.0,
+                chroma: 0.075,
+                lum: 0.66,
+                hue_shift: 8.0,
+                sat_shift: -10.0,
+                lum_shift: 4.0,
+                variance: -30.0,
+                range: 55.0,
+                hue_range: 40.0,
+                sat_range: 40.0,
+                lum_range: 45.0,
+            },
+            builtin: true,
+        },
+        PointColorSwatch {
+            id: "builtin.foliage".into(),
+            name: "Natural Foliage".into(),
+            sample: PointColor {
+                hue: 136.0,
+                chroma: 0.125,
+                lum: 0.54,
+                hue_shift: 12.0,
+                sat_shift: -14.0,
+                lum_shift: -6.0,
+                range: 60.0,
+                ..Default::default()
+            },
+            builtin: true,
+        },
+        PointColorSwatch {
+            id: "builtin.sky-blue".into(),
+            name: "Deep Sky Blue".into(),
+            sample: PointColor {
+                hue: 248.0,
+                chroma: 0.115,
+                lum: 0.62,
+                hue_shift: -6.0,
+                sat_shift: 16.0,
+                lum_shift: -12.0,
+                range: 60.0,
+                ..Default::default()
+            },
+            builtin: true,
+        },
+        PointColorSwatch {
+            id: "builtin.sunset-gold".into(),
+            name: "Golden Sunset".into(),
+            sample: PointColor {
+                hue: 68.0,
+                chroma: 0.145,
+                lum: 0.72,
+                hue_shift: -8.0,
+                sat_shift: 18.0,
+                lum_shift: 4.0,
+                range: 55.0,
+                ..Default::default()
+            },
+            builtin: true,
+        },
+        PointColorSwatch {
+            id: "builtin.coral-red".into(),
+            name: "Coral Red".into(),
+            sample: PointColor {
+                hue: 24.0,
+                chroma: 0.165,
+                lum: 0.56,
+                hue_shift: 6.0,
+                sat_shift: 10.0,
+                lum_shift: 2.0,
+                range: 50.0,
+                ..Default::default()
+            },
+            builtin: true,
+        },
+    ]
+}
+
+pub fn all_swatches(s: &Session) -> Vec<PointColorSwatch> {
+    let mut out = builtin_swatches();
+    out.extend(s.point_color_swatches.iter().cloned());
+    out
+}
 
 /// Long edge of the proxy rendered for sampling.
 const PROBE_EDGE: usize = 384;
@@ -205,5 +325,95 @@ pub fn specs() -> Vec<CommandSpec> {
             s.set_develop(id, d, "Delete Point Color")?;
             Ok(Value::Null)
         }),
+        cmd!(
+            query "pointColor.swatches",
+            "Point Color Swatches",
+            [],
+            None,
+            "{} — built-in and user-saved Point Color swatches",
+            always,
+            |s, _| Ok(json!({"swatches": all_swatches(s)}))
+        ),
+        cmd!(
+            "pointColor.applySwatch",
+            "Apply Point Color Swatch",
+            [],
+            None,
+            "{id: swatch id, index?: usize (updates existing sample if given, else appends)}",
+            has_active,
+            |s, p| {
+                const C: &str = "pointColor.applySwatch";
+                let sw_id = str_param(p, "id").or_else(|| str_param(p, "swatchId")).ok_or_else(|| bad(C, "missing `id`"))?;
+                let sw = all_swatches(s).into_iter().find(|w| w.id == sw_id).ok_or_else(|| bad(C, format!("unknown swatch `{sw_id}`")))?;
+                let photo_id = s.active().ok_or_else(|| bad(C, "no active photo"))?;
+                let mut d = (*s.develop_of(photo_id).unwrap_or_default()).clone();
+                let out_idx = if let Some(idx) = p.get("index").and_then(Value::as_u64).map(|n| n as usize) {
+                    if idx >= d.point_colors.len() {
+                        return Err(bad(C, "no such sample"));
+                    }
+                    if let Some(slot) = d.point_colors.get_mut(idx) {
+                        *slot = sw.sample.clone();
+                    }
+                    idx
+                } else {
+                    if d.point_colors.len() >= MAX_POINT_COLORS {
+                        return Err(bad(C, format!("at most {MAX_POINT_COLORS} point colours")));
+                    }
+                    d.point_colors.push(sw.sample.clone());
+                    d.point_colors.len() - 1
+                };
+                s.set_develop(photo_id, d, &format!("Point Color Swatch ({})", sw.name))?;
+                Ok(json!({"index": out_idx, "swatch": sw.id}))
+            }
+        ),
+        cmd!(
+            "pointColor.saveSwatch",
+            "Save Point Color Swatch",
+            [],
+            None,
+            "{name: str, index: usize} — save the Point Color sample at `index` as a reusable user swatch",
+            has_active,
+            |s, p| {
+                const C: &str = "pointColor.saveSwatch";
+                let name = str_param(p, "name").map(str::trim).filter(|n| !n.is_empty()).ok_or_else(|| bad(C, "missing `name`"))?.to_string();
+                let idx = index(p, C)?;
+                let photo_id = s.active().ok_or_else(|| bad(C, "no active photo"))?;
+                let d = s.develop_of(photo_id).unwrap_or_default();
+                let sample = d.point_colors.get(idx).cloned().ok_or_else(|| bad(C, "no such sample"))?;
+                let slug = crate::presets::slug(&name);
+                let mut sw_id = format!("user.{slug}");
+                let mut n = 2u32;
+                while s.point_color_swatches.iter().any(|w| w.id == sw_id) {
+                    sw_id = format!("user.{slug}-{n}");
+                    n += 1;
+                }
+                let swatch = PointColorSwatch { id: sw_id.clone(), name, sample, builtin: false };
+                s.point_color_swatches.push(swatch.clone());
+                s.save_prefs()?;
+                Ok(json!({"swatch": swatch}))
+            }
+        ),
+        cmd!(
+            "pointColor.deleteSwatch",
+            "Delete Point Color Swatch",
+            [],
+            None,
+            "{id: str} — delete a user-saved Point Color swatch",
+            always,
+            |s, p| {
+                const C: &str = "pointColor.deleteSwatch";
+                let sw_id = str_param(p, "id").or_else(|| str_param(p, "swatchId")).ok_or_else(|| bad(C, "missing `id`"))?;
+                if builtin_swatches().iter().any(|w| w.id == sw_id) {
+                    return Err(bad(C, "built-in swatches cannot be deleted"));
+                }
+                let before = s.point_color_swatches.len();
+                s.point_color_swatches.retain(|w| w.id != sw_id);
+                if s.point_color_swatches.len() == before {
+                    return Err(bad(C, format!("no user swatch `{sw_id}`")));
+                }
+                s.save_prefs()?;
+                Ok(Value::Null)
+            }
+        ),
     ]
 }

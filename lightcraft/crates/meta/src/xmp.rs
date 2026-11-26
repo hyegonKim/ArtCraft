@@ -43,24 +43,7 @@ const NAMESPACES: &[(&str, &str)] = &[
 /// The camera-raw-settings namespace URI (prefix `crs`), read for interchange only.
 pub const CRS_NS: &str = "http://ns.adobe.com/camera-raw-settings/1.0/";
 
-/// XMP read failure.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum XmpError {
-    Xml(String),
-    /// Nesting / size limits exceeded.
-    TooComplex,
-}
-
-impl std::fmt::Display for XmpError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            XmpError::Xml(e) => write!(f, "XMP is not well-formed XML: {e}"),
-            XmpError::TooComplex => write!(f, "XMP packet too deeply nested or too large"),
-        }
-    }
-}
-
-impl std::error::Error for XmpError {}
+pub use craft_metadata::XmpError;
 
 /// Result of [`parse_xmp`].
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -75,6 +58,17 @@ pub struct XmpData {
     /// Every top-level property with its full structure (arrays of structs such as local
     /// corrections, which [`XmpData::properties`] flattens).
     pub values: BTreeMap<String, XmpValue>,
+}
+
+impl XmpData {
+    /// The pixel size the packet's regions were drawn on (`mwg-rs:AppliedToDimensions`), unless one of them says how
+    /// the photo was turned (`mwg-rs:Rotation`: Lightroom's boxes, which the reader already turns upright). It tells
+    /// boxes drawn on the photo as stored from boxes drawn on it upright: see [`crate::upright_regions`].
+    pub fn regions_drawn_on(&self) -> Option<(f64, f64)> {
+        let regions = self.values.get("mwg-rs:Regions")?;
+        let turned = regions.field("mwg-rs:RegionList").is_some_and(|l| l.items().iter().any(|r| r.field("mwg-rs:Rotation").is_some()));
+        if turned { None } else { applied_to(regions) }
+    }
 }
 
 /// A structured XMP value.
@@ -159,9 +153,16 @@ pub(crate) const MAX_OPAQUE_NAME_BYTES: usize = 8 * 1024 * 1024;
 /// retains its prefix once per property: node limits alone cannot bound that duplication.
 const MAX_KEY_BYTES: usize = 1 << 20;
 
-/// Names canonicalised by namespace URI (see [`NAMESPACES`]); conflicting foreign prefixes are opaque.
-pub(crate) fn canonical_name(qname: &str, scopes: &[Vec<(String, String)>], opaque_budget: &mut usize) -> Result<String, XmpError> {
-    canonical(qname, scopes, opaque_budget)
+/// Most namespace declarations in scope at once. Prefix lookup scans them, so declarations times the names of a
+/// start tag is the work; real packets declare a few dozen.
+const MAX_NS_DECLS: usize = 512;
+
+/// Refuses a scope stack holding more than [`MAX_NS_DECLS`] declarations (one count per start tag over a stack at most [`MAX_DEPTH`] deep).
+pub(crate) fn check_scopes(scopes: &[Vec<(String, String)>]) -> Result<(), XmpError> {
+    if scopes.iter().map(Vec::len).sum::<usize>() > MAX_NS_DECLS {
+        return Err(XmpError::TooComplex);
+    }
+    Ok(())
 }
 
 fn canonical(qname: &str, scopes: &[Vec<(String, String)>], opaque_budget: &mut usize) -> Result<String, XmpError> {
@@ -208,8 +209,10 @@ fn entity(name: &str) -> Option<char> {
         _ => {
             let n = name.strip_prefix('#')?;
             let v = match n.strip_prefix(['x', 'X']) {
-                Some(h) => u32::from_str_radix(h, 16).ok()?,
-                None => n.parse().ok()?,
+                Some(h) if h.bytes().all(|b| b.is_ascii_hexdigit()) => u32::from_str_radix(h, 16).ok()?,
+                Some(_) => return None,
+                None if n.bytes().all(|b| b.is_ascii_digit()) => n.parse().ok()?,
+                None => return None,
             };
             char::from_u32(v).filter(|&c| is_xml_char(c))?
         }
@@ -227,14 +230,21 @@ fn xml_safe(s: &str) -> String {
     s.chars().filter(|&c| is_xml_char(c)).collect()
 }
 
-/// Unescape attribute values (predefined + numeric references; unknown references kept verbatim).
+/// Index of the `;` that ends a reference starting at `rest` (its `&`). The scan stops at the first
+/// byte that cannot appear in a name or a numeric reference, so zero-padded references such as
+/// `&#000000097;` are found and each run of name bytes is read once, not once per `&`.
+fn entity_end(rest: &str) -> Option<usize> {
+    let n = rest.bytes().skip(1).take_while(|b| b.is_ascii_alphanumeric() || *b == b'#').count();
+    (rest.as_bytes().get(n + 1) == Some(&b';')).then_some(n + 1)
+}
+
 pub(crate) fn unescape_attr(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut rest = s;
     while let Some(i) = rest.find('&') {
         out.push_str(&rest[..i]);
         rest = &rest[i..];
-        match rest.find(';').and_then(|j| entity(&rest[1..j]).map(|c| (c, j))) {
+        match entity_end(rest).and_then(|j| entity(&rest[1..j]).map(|c| (c, j))) {
             Some((c, j)) => {
                 out.push(c);
                 rest = &rest[j + 1..];
@@ -278,6 +288,7 @@ fn parse_tree(s: &str) -> Result<Node, XmpError> {
                     }
                 }
                 scopes.push(scope);
+                check_scopes(&scopes)?;
                 let name = canonical(&String::from_utf8_lossy(e.name().as_ref()), &scopes, &mut opaque_budget)?;
                 let attrs =
                     raw_attrs.into_iter().map(|(k, v)| Ok((canonical(&k, &scopes, &mut opaque_budget)?, v))).collect::<Result<_, XmpError>>()?;
@@ -292,7 +303,7 @@ fn parse_tree(s: &str) -> Result<Node, XmpError> {
                 }
             }
             Event::End(_) if stack.len() > 1 => {
-                let n = stack.pop().expect("len > 1");
+                let Some(n) = stack.pop() else { return Err(XmpError::Xml("end tag without an open element".into())) };
                 scopes.pop();
                 if let Some(parent) = stack.last_mut() {
                     parent.children.push(n);
@@ -327,10 +338,11 @@ fn parse_tree(s: &str) -> Result<Node, XmpError> {
     }
     // close unterminated elements leniently
     while stack.len() > 1 {
-        let n = stack.pop().expect("len > 1");
-        stack.last_mut().expect("root").children.push(n);
+        let Some(n) = stack.pop() else { return Err(XmpError::Xml("unterminated element without a node".into())) };
+        let Some(parent) = stack.last_mut() else { return Err(XmpError::Xml("unterminated element without a parent".into())) };
+        parent.children.push(n);
     }
-    Ok(stack.pop().expect("root"))
+    stack.pop().ok_or_else(|| XmpError::Xml("xmp packet without a root element".into()))
 }
 
 fn is_rdf_meta_attr(k: &str) -> bool {
@@ -339,8 +351,13 @@ fn is_rdf_meta_attr(k: &str) -> bool {
 
 fn collect_description(d: &Node, prefix: &str, props: &mut BTreeMap<String, Vec<String>>, budget: &mut usize) {
     for (k, v) in &d.attrs {
-        if !is_rdf_meta_attr(k) && take_key_bytes(&format!("{prefix}{k}"), budget) {
-            props.entry(format!("{prefix}{k}")).or_default().push(v.clone());
+        // the budget is checked before the path is built, not after
+        if is_rdf_meta_attr(k) || *budget < prefix.len().saturating_add(k.len()) {
+            continue;
+        }
+        let key = format!("{prefix}{k}");
+        if take_key_bytes(&key, budget) {
+            props.entry(key).or_default().push(v.clone());
         }
     }
     for c in &d.children {
@@ -360,6 +377,11 @@ fn take_key_bytes(key: &str, budget: &mut usize) -> bool {
 }
 
 fn collect_property(p: &Node, prefix: &str, props: &mut BTreeMap<String, Vec<String>>, budget: &mut usize) {
+    // a path that can't fit the budget isn't built (a long ancestor path shared by many children
+    // would otherwise be copied for each of them after the budget is spent)
+    if *budget < prefix.len().saturating_add(p.name.len()) {
+        return;
+    }
     let key = format!("{prefix}{}", p.name);
     if let Some(arr) = p.children.iter().find(|c| matches!(c.name.as_str(), "rdf:Seq" | "rdf:Bag" | "rdf:Alt")) {
         let mut items: Vec<(bool, String)> = arr
@@ -379,6 +401,12 @@ fn collect_property(p: &Node, prefix: &str, props: &mut BTreeMap<String, Vec<Str
         return;
     }
     let struct_prefix = format!("{key}/");
+    // a struct's path is charged like a key before its fields copy it: that work too is bounded
+    // by the budget, kept fields or not
+    let is_struct = p.attr("rdf:parseType") == Some("Resource") || p.children.iter().any(|c| c.name == "rdf:Description");
+    if is_struct && !take_key_bytes(&key, budget) {
+        return;
+    }
     if p.attr("rdf:parseType") == Some("Resource") {
         for c in &p.children {
             collect_property(c, &struct_prefix, props, budget);
@@ -439,15 +467,20 @@ fn parse_gps_coord(s: &str) -> Option<f64> {
 /// Malformed or out-of-range entries are skipped rather than rejecting the whole list: one bad region
 /// (from Lightroom, digiKam, Picasa, or a hand-edited file) shouldn't hide the rest.
 fn parse_regions(regions: &XmpValue) -> Vec<Region> {
-    // `AppliedToDimensions` documents the pixel size regions were authored against. It's only consulted
+    // `AppliedToDimensions` documents the pixel size regions were authored against. Here it's only consulted
     // for the rare region whose own Area is in pixel units instead of MWG's normalized default below.
-    let px_dims = regions.field("mwg-rs:AppliedToDimensions").and_then(|d| {
+    let px_dims = applied_to(regions);
+    let Some(list) = regions.field("mwg-rs:RegionList") else { return Vec::new() };
+    list.items().iter().filter_map(|item| parse_one_region(item, px_dims)).collect()
+}
+
+/// `mwg-rs:AppliedToDimensions` of a `mwg-rs:Regions` struct: (width, height) in pixels, both positive.
+fn applied_to(regions: &XmpValue) -> Option<(f64, f64)> {
+    regions.field("mwg-rs:AppliedToDimensions").and_then(|d| {
         let w = d.field("stDim:w").and_then(XmpValue::text).and_then(parse_number)?;
         let h = d.field("stDim:h").and_then(XmpValue::text).and_then(parse_number)?;
         (w > 0.0 && h > 0.0).then_some((w, h))
-    });
-    let Some(list) = regions.field("mwg-rs:RegionList") else { return Vec::new() };
-    list.items().iter().filter_map(|item| parse_one_region(item, px_dims)).collect()
+    })
 }
 
 fn parse_one_region(item: &XmpValue, px_dims: Option<(f64, f64)>) -> Option<Region> {
@@ -547,8 +580,8 @@ pub fn parse_xmp(s: &str) -> Result<XmpData, XmpError> {
         metering_mode: num("exif:MeteringMode").map(|v| v as u16),
         white_balance: num("exif:WhiteBalance").map(|v| v as u16),
         orientation: num("tiff:Orientation").map(|v| v as u16).filter(|v| (1..=8).contains(v)).map(Orientation::from_exif),
-        width: num("tiff:ImageWidth").or_else(|| num("exif:PixelXDimension")).map(|v| v as u32),
-        height: num("tiff:ImageLength").or_else(|| num("exif:PixelYDimension")).map(|v| v as u32),
+        width: num("tiff:ImageWidth").filter(|v| *v >= 0.0).or_else(|| num("exif:PixelXDimension").filter(|v| *v >= 0.0)).map(|v| v as u32),
+        height: num("tiff:ImageLength").filter(|v| *v >= 0.0).or_else(|| num("exif:PixelYDimension").filter(|v| *v >= 0.0)).map(|v| v as u32),
         title: first("dc:title"),
         caption: first("dc:description"),
         alt_text: first("Iptc4xmpCore:AltTextAccessibility"),
@@ -614,12 +647,12 @@ fn frac(v: f64) -> String {
             return format!("1/{}", inv.round() as u64);
         }
     }
-    let (n, d) = lightcraft_tiff::writer::rational(v);
+    let (n, d) = craft_tiff::writer::rational(v);
     format!("{n}/{d}")
 }
 
 fn sfrac(v: f64) -> String {
-    let (n, d) = lightcraft_tiff::writer::srational(v);
+    let (n, d) = craft_tiff::writer::srational(v);
     format!("{n}/{d}")
 }
 
@@ -738,490 +771,4 @@ pub fn write_xmp_lc(meta: &Metadata, lc: &[(&str, &str)]) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn full() -> Metadata {
-        Metadata {
-            // write_xmp doesn't emit regions yet (read-only interchange; see docs/xmp-interop.md), so the
-            // roundtrip fixture must leave this empty or `roundtrip_all_fields` can't round-trip it.
-            regions: Vec::new(),
-            focus: None,
-            make: Some("Maker & Sons".into()),
-            model: Some("X <1>".into()),
-            serial_number: Some("SN1".into()),
-            software: Some("LightCraft".into()),
-            lens_make: Some("L".into()),
-            lens_model: Some("24-70mm".into()),
-            lens_serial_number: Some("LS".into()),
-            lens_spec: Some([24.0, 70.0, 2.8, 2.8]),
-            capture_time: DateTime::parse_iso("2022-05-06T07:08:09.123-04:00"),
-            exposure_time: Some(1.0 / 125.0),
-            f_number: Some(5.6),
-            iso: Some(800),
-            focal_length: Some(35.0),
-            focal_length_35mm: Some(52.0),
-            flash: Some(Flash { fired: true, raw: 0x59 }),
-            exposure_bias: Some(-1.0 / 3.0),
-            exposure_program: Some(2),
-            metering_mode: Some(3),
-            white_balance: Some(1),
-            orientation: Some(Orientation::Rotate270),
-            gps: Some(Gps { latitude: 48.858222, longitude: -2.2945, altitude: Some(-3.5) }),
-            width: Some(8000),
-            height: Some(6000),
-            artist: Some("Ann \"Photo\" Lee".into()),
-            copyright: Some("© 2022".into()),
-            copyright_marked: Some(true),
-            usage_terms: Some("Editorial use only; no <resale>".into()),
-            copyright_url: Some("https://example.com/licence?a=1&b=2".into()),
-            title: Some("Tïtle".into()),
-            caption: Some("Line one\nline two".into()),
-            alt_text: Some("A tree by the sea".into()),
-            extended_description: Some("Long <description>".into()),
-            sublocation: Some("Champ de Mars".into()),
-            city: Some("Paris".into()),
-            state: Some("Île-de-France".into()),
-            country: Some("France".into()),
-            keywords: vec!["tree".into(), "sky & sea".into()],
-            hierarchical_keywords: vec!["Places|France|Paris".into()],
-            rating: Some(-1),
-            label: Some("Green".into()),
-        }
-    }
-
-    #[test]
-    fn roundtrip_all_fields() {
-        let m = full();
-        let json = r#"{"version":1,"exposure":0.5,"note":"<&>"}"#;
-        let x = write_xmp(&m, Some(json));
-        let d = parse_xmp(&x).unwrap();
-        assert_eq!(d.lc_settings.as_deref(), Some(json));
-        let mut got = d.metadata.clone();
-        // floats go through rationals
-        assert!((got.exposure_bias.unwrap() + 1.0 / 3.0).abs() < 1e-5);
-        got.exposure_bias = m.exposure_bias;
-        let g = got.gps.unwrap();
-        assert!((g.latitude - 48.858222).abs() < 1e-6 && (g.longitude + 2.2945).abs() < 1e-6, "{g:?}");
-        got.gps = m.gps;
-        assert_eq!(got, m);
-    }
-
-    #[test]
-    fn empty_metadata_roundtrip() {
-        let x = write_xmp(&Metadata::default(), None);
-        let d = parse_xmp(&x).unwrap();
-        assert_eq!(d.metadata, Metadata::default());
-        assert_eq!(d.lc_settings, None);
-    }
-
-    #[test]
-    fn foreign_namespace_cannot_impersonate_known_metadata() {
-        for body in [
-            r#"xmp:Rating="2" lc:settings="foreign settings"/>"#,
-            r#"><xmp:Rating>2</xmp:Rating><lc:settings>foreign settings</lc:settings></rdf:Description>"#,
-        ] {
-            let packet = format!(
-                r#"<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description
-                xmlns:xmp="https://example.org/vendor/" xmlns:lc="https://example.org/vendor/" {body}</rdf:RDF>"#
-            );
-            let d = parse_xmp(&packet).unwrap();
-            assert_eq!(d.metadata.rating, None, "foreign rating: {packet}");
-            assert_eq!(d.lc_settings, None, "foreign settings: {packet}");
-            assert!(!d.properties.contains_key("xmp:Rating"));
-            assert!(!d.values.contains_key("lc:settings"));
-            assert!(d.properties.values().any(|v| v == &["foreign settings"]));
-            assert!(d.properties.keys().all(|key| !key.contains('/')), "opaque names must not create struct paths");
-        }
-    }
-
-    #[test]
-    fn foreign_namespace_names_are_distinct_and_scoped() {
-        let packet = r#"<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description xmlns:xmp="http://ns.adobe.com/xap/1.0/">
-                <xmp:Rating xmlns:xmp="https://example.org/one/">1</xmp:Rating>
-                <xmp:Rating xmlns:xmp="https://example.org/two/">2</xmp:Rating>
-                <xmp:Rating>4</xmp:Rating>
-            </rdf:Description></rdf:RDF>"#;
-        let d = parse_xmp(packet).unwrap();
-        assert_eq!(d.metadata.rating, Some(4), "a local rebinding must not escape its scope");
-        assert_eq!(d.properties.len(), 3, "different foreign URIs must not collide");
-        assert_eq!(d.values.len(), 3);
-        assert_eq!(d.properties["xmp:Rating"], vec!["4"]);
-        assert!(d.properties.values().any(|v| v == &["1"]));
-        assert!(d.properties.values().any(|v| v == &["2"]));
-    }
-
-    #[test]
-    fn attribute_form_foreign_prefixes_and_structs() {
-        let x = r#"<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about="" xmlns:a="http://ns.adobe.com/xap/1.0/" xmlns:d="http://purl.org/dc/elements/1.1/"
-               xmlns:e="http://ns.adobe.com/exif/1.0/" a:Rating="4" a:Label="Blue" e:FNumber="40/10" e:GPSLatitude="10,30N" e:GPSLongitude="20,15,36W">
-              <d:title><rdf:Alt><rdf:li xml:lang="de">Titel</rdf:li><rdf:li xml:lang="x-default">Title &amp; more &#233;</rdf:li></rdf:Alt></d:title>
-              <e:Flash><rdf:Description e:Fired="False" e:Mode="2"/></e:Flash>
-              <d:subject><rdf:Bag><rdf:li>k1</rdf:li><rdf:li>k2</rdf:li></rdf:Bag></d:subject>
-            </rdf:Description></rdf:RDF></x:xmpmeta>"#;
-        let d = parse_xmp(x).unwrap();
-        let m = d.metadata;
-        assert_eq!(m.rating, Some(4));
-        assert_eq!(m.label.as_deref(), Some("Blue"));
-        assert_eq!(m.f_number, Some(4.0));
-        assert_eq!(m.title.as_deref(), Some("Title & more é"));
-        assert_eq!(m.keywords, vec!["k1".to_string(), "k2".to_string()]);
-        assert_eq!(m.flash, Some(Flash { fired: false, raw: 0x10 }));
-        let g = m.gps.unwrap();
-        assert!((g.latitude - 10.5).abs() < 1e-9);
-        assert!((g.longitude + 20.26).abs() < 1e-9);
-        assert_eq!(d.properties["dc:title"], vec!["Title & more é".to_string(), "Titel".to_string()]);
-    }
-
-    /// Copyright status, usage terms and info URL (XMP Rights Management schema): written as
-    /// `xmpRights:Marked` (Boolean), `xmpRights:UsageTerms` (Lang Alt) and `xmpRights:WebStatement` (URI).
-    #[test]
-    fn rights_management_fields() {
-        let m = Metadata { copyright_marked: Some(false), usage_terms: Some("CC0".into()), ..Default::default() };
-        let x = write_xmp(&m, None);
-        assert!(x.contains("<xmpRights:Marked>False</xmpRights:Marked>"), "{x}");
-        assert!(x.contains("<xmpRights:UsageTerms>\n    <rdf:Alt>\n     <rdf:li xml:lang=\"x-default\">CC0</rdf:li>"), "{x}");
-        assert!(!x.contains("WebStatement"), "unset fields are left out");
-        assert_eq!(parse_xmp(&x).unwrap().metadata, m);
-        // attribute form, other prefixes; anything but True / False is "unknown"
-        let read = |marked: &str| {
-            let x = format!(
-                r#"<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-                <rdf:Description rdf:about="" xmlns:r="http://ns.adobe.com/xap/1.0/rights/" r:Marked="{marked}" r:WebStatement="https://example.org/c"/>
-                </rdf:RDF></x:xmpmeta>"#
-            );
-            parse_xmp(&x).unwrap().metadata
-        };
-        assert_eq!(read("True").copyright_marked, Some(true));
-        assert_eq!(read("false").copyright_marked, Some(false));
-        assert_eq!(read("").copyright_marked, None);
-        assert_eq!(read("maybe").copyright_marked, None);
-        assert_eq!(read("True").copyright_url.as_deref(), Some("https://example.org/c"));
-    }
-
-    /// A zero or negative `exif:ISOSpeedRatings` is "no ISO" (as in the EXIF reader), not `Some(0)`, and
-    /// must not hide a valid `exifEX:PhotographicSensitivity`.
-    #[test]
-    fn non_positive_iso_is_ignored() {
-        let read = |attrs: &str| {
-            let x = format!(
-                r#"<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-                <rdf:Description rdf:about="" xmlns:exif="http://ns.adobe.com/exif/1.0/" xmlns:exifEX="http://cipa.jp/exif/1.0/" {attrs}/>
-                </rdf:RDF></x:xmpmeta>"#
-            );
-            parse_xmp(&x).unwrap().metadata.iso
-        };
-        assert_eq!(read(r#"exif:ISOSpeedRatings="0" exifEX:PhotographicSensitivity="400""#), Some(400));
-        assert_eq!(read(r#"exif:ISOSpeedRatings="-100""#), None);
-        assert_eq!(read(r#"exif:ISOSpeedRatings="0""#), None);
-        assert_eq!(read(r#"exif:ISOSpeedRatings="200""#), Some(200));
-    }
-
-    #[test]
-    fn malformed_inputs() {
-        assert!(parse_xmp("<a><b></a>").is_ok() || parse_xmp("<a><b></a>").is_err());
-        assert_eq!(parse_xmp("").unwrap().metadata, Metadata::default());
-        assert_eq!(parse_xmp("not xml at all").unwrap().metadata, Metadata::default());
-        let deep = "<a>".repeat(1000);
-        assert_eq!(parse_xmp(&deep), Err(XmpError::TooComplex));
-        let x = write_xmp(&full(), Some("{}"));
-        for n in (0..x.len()).step_by(7) {
-            if x.is_char_boundary(n) {
-                let _ = parse_xmp(&x[..n]);
-            }
-        }
-    }
-
-    #[test]
-    fn lc_extras_and_crs_prefix() {
-        let x = write_xmp_lc(&Metadata::default(), &[("settings", "{\"a\":1}"), ("flag", "pick"), ("bad name", "x")]);
-        assert!(!x.contains("xmlns:crs"), "we never write crs:");
-        let d = parse_xmp(&x).unwrap();
-        assert_eq!(d.lc_settings.as_deref(), Some("{\"a\":1}"));
-        assert_eq!(d.properties["lc:flag"], vec!["pick".to_string()]);
-        assert!(!x.contains("bad name"));
-        let foreign = r#"<rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-            xmlns:cr="http://ns.adobe.com/camera-raw-settings/1.0/" cr:Exposure2012="+0.5"/>"#;
-        assert_eq!(parse_xmp(foreign).unwrap().properties["crs:Exposure2012"], vec!["+0.5".to_string()]);
-    }
-
-    #[test]
-    fn gps_coords() {
-        assert_eq!(parse_gps_coord("45,30N"), Some(45.5));
-        assert_eq!(parse_gps_coord("45,30,36S"), Some(-45.51));
-        assert_eq!(parse_gps_coord("45X"), None);
-        assert_eq!(parse_gps_coord(""), None);
-        assert_eq!(parse_gps_coord("é"), None);
-        assert_eq!(fmt_gps_coord(-45.51, 'N', 'S'), "45,30.600000S");
-        assert_eq!(fmt_gps_coord(10.9999999999, 'N', 'S'), "11,0.000000N");
-        assert_eq!(fmt_gps_coord(-0.9999999999, 'E', 'W'), "1,0.000000W");
-    }
-
-    /// Like the EXIF and GPX readers, XMP drops a position outside latitude ±90° / longitude ±180°.
-    #[test]
-    fn xmp_gps_out_of_range_rejected() {
-        let gps = |lat: &str, lon: &str| {
-            let x = format!(
-                r#"<rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-                xmlns:e="http://ns.adobe.com/exif/1.0/" e:GPSLatitude="{lat}" e:GPSLongitude="{lon}"/>"#
-            );
-            parse_xmp(&x).unwrap().metadata.gps
-        };
-        assert_eq!(gps("95,0N", "200,30E"), None);
-        assert_eq!(gps("95,0N", "10,0E"), None);
-        assert_eq!(gps("10,0S", "200,30W"), None);
-        assert_eq!(gps("90,0,1N", "0,0E"), None);
-        assert_eq!(gps("90,0N", "180,0E"), Some(Gps { latitude: 90.0, longitude: 180.0, altitude: None }));
-        assert_eq!(gps("90,0S", "180,0W"), Some(Gps { latitude: -90.0, longitude: -180.0, altitude: None }));
-    }
-
-    /// MWG Region Guidelines v2.0, element form (`rdf:parseType="Resource"`, self-closing `Area`) — how
-    /// Lightroom typically writes it. One named face, one untyped/unnamed region (still usable), one
-    /// region with a description. `AppliedToDimensions` is present but irrelevant: normalized areas
-    /// (the default, and the only unit real files use) don't need it.
-    #[test]
-    fn mwg_regions_element_form() {
-        let x = r#"<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-                xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/"
-                xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#"
-                xmlns:stDim="http://ns.adobe.com/xap/1.0/sType/Dimensions#">
-              <mwg-rs:Regions rdf:parseType="Resource">
-                <mwg-rs:AppliedToDimensions rdf:parseType="Resource" stDim:w="4000" stDim:h="3000" stDim:unit="pixel"/>
-                <mwg-rs:RegionList>
-                  <rdf:Bag>
-                    <rdf:li rdf:parseType="Resource">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.5" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3" stArea:unit="normalized"/>
-                      <mwg-rs:Name>Jane Doe</mwg-rs:Name>
-                      <mwg-rs:Type>Face</mwg-rs:Type>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.1" stArea:y="0.1" stArea:w="0.05" stArea:h="0.05" stArea:unit="normalized"/>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.8" stArea:y="0.2" stArea:w="0.1" stArea:h="0.1" stArea:unit="normalized"/>
-                      <mwg-rs:Type>Pet</mwg-rs:Type>
-                      <mwg-rs:Name>Rex</mwg-rs:Name>
-                      <mwg-rs:Description>Good boy</mwg-rs:Description>
-                    </rdf:li>
-                  </rdf:Bag>
-                </mwg-rs:RegionList>
-              </mwg-rs:Regions>
-            </rdf:Description></rdf:RDF></x:xmpmeta>"#;
-        let regions = parse_xmp(x).unwrap().metadata.regions;
-        assert_eq!(regions.len(), 3, "{regions:?}");
-
-        assert_eq!(regions[0].kind, RegionKind::Face);
-        assert_eq!(regions[0].name.as_deref(), Some("Jane Doe"));
-        assert_eq!(regions[0].description, None);
-        let r = regions[0].rect;
-        assert!((r.x0 - 0.4).abs() < 1e-9 && (r.x1 - 0.6).abs() < 1e-9, "{r:?}");
-        assert!((r.y0 - 0.25).abs() < 1e-9 && (r.y1 - 0.55).abs() < 1e-9, "{r:?}");
-
-        // No mwg-rs:Type or mwg-rs:Name at all: still a usable region, kind falls back to `Other("")`.
-        assert_eq!(regions[1].kind, RegionKind::Other(String::new()));
-        assert_eq!(regions[1].name, None);
-
-        assert_eq!(regions[2].kind, RegionKind::Pet);
-        assert_eq!(regions[2].name.as_deref(), Some("Rex"));
-        assert_eq!(regions[2].description.as_deref(), Some("Good boy"));
-    }
-
-    /// Lightroom Classic writes a rotated photo's (Exif orientation 3 / 6 / 8) box in the sensor's frame
-    /// and records the orientation as `mwg-rs:Rotation` (±π / −π/2 / +π/2); the reader returns the
-    /// upright frame.
-    #[test]
-    fn mwg_regions_quarter_turn_rotation_is_mapped_to_the_upright_frame() {
-        let x = r#"<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-                xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/"
-                xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#">
-              <mwg-rs:Regions rdf:parseType="Resource">
-                <mwg-rs:RegionList>
-                  <rdf:Bag>
-                    <rdf:li rdf:parseType="Resource" mwg-rs:Rotation="-1.57080" mwg-rs:Type="Face">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.3" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3"/>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource" mwg-rs:Rotation="1.57080" mwg-rs:Type="Face">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.3" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3"/>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource" mwg-rs:Rotation="0.00000" mwg-rs:Type="Face">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.3" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3"/>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource" mwg-rs:Rotation="3.14159" mwg-rs:Type="Face">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.3" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3"/>
-                    </rdf:li>
-                    <rdf:li rdf:parseType="Resource" mwg-rs:Rotation="-3.14159" mwg-rs:Type="Face">
-                      <mwg-rs:Area rdf:parseType="Resource" stArea:x="0.3" stArea:y="0.4" stArea:w="0.2" stArea:h="0.3"/>
-                    </rdf:li>
-                  </rdf:Bag>
-                </mwg-rs:RegionList>
-              </mwg-rs:Regions>
-            </rdf:Description></rdf:RDF></x:xmpmeta>"#;
-        let regions = parse_xmp(x).unwrap().metadata.regions;
-        assert_eq!(regions.len(), 5, "{regions:?}");
-        let near = |r: Rect, b: [f64; 4]| [r.x0 - b[0], r.y0 - b[1], r.x1 - b[2], r.y1 - b[3]].iter().all(|d| d.abs() < 1e-9);
-        assert!(near(regions[0].rect, [0.45, 0.2, 0.75, 0.4]), "−π/2 (orientation 6): {:?}", regions[0].rect);
-        assert!(near(regions[1].rect, [0.25, 0.6, 0.55, 0.8]), "+π/2 (orientation 8): {:?}", regions[1].rect);
-        assert!(near(regions[2].rect, [0.2, 0.25, 0.4, 0.55]), "0 is untouched: {:?}", regions[2].rect);
-        assert!(near(regions[3].rect, [0.6, 0.45, 0.8, 0.75]), "π (orientation 3): {:?}", regions[3].rect);
-        assert!(near(regions[4].rect, [0.6, 0.45, 0.8, 0.75]), "−π (orientation 3): {:?}", regions[4].rect);
-    }
-
-    /// A second, differently-shaped encoding: each region is its own `rdf:Description` (rather than an
-    /// `rdf:li rdf:parseType="Resource"`), `mwg-rs:Type` as an attribute instead of an element, and an
-    /// unrecognised `mwg-rs:Type` value kept verbatim.
-    #[test]
-    fn mwg_regions_attribute_form_and_unknown_type() {
-        let x = r#"<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-                xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/"
-                xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#">
-              <mwg-rs:Regions rdf:parseType="Resource">
-                <mwg-rs:RegionList>
-                  <rdf:Bag>
-                    <rdf:li>
-                      <rdf:Description mwg-rs:Type="BarCode">
-                        <mwg-rs:Area stArea:x="0.3" stArea:y="0.3" stArea:w="0.1" stArea:h="0.1"/>
-                      </rdf:Description>
-                    </rdf:li>
-                    <rdf:li>
-                      <rdf:Description mwg-rs:Type="Sticker">
-                        <mwg-rs:Area stArea:x="0.6" stArea:y="0.6" stArea:w="0.1" stArea:h="0.1"/>
-                      </rdf:Description>
-                    </rdf:li>
-                  </rdf:Bag>
-                </mwg-rs:RegionList>
-              </mwg-rs:Regions>
-            </rdf:Description></rdf:RDF>"#;
-        let regions = parse_xmp(x).unwrap().metadata.regions;
-        assert_eq!(regions.len(), 2, "{regions:?}");
-        assert_eq!(regions[0].kind, RegionKind::BarCode);
-        assert_eq!(regions[1].kind, RegionKind::Other("Sticker".to_string()));
-    }
-
-    /// Hostile/malformed regions are dropped individually, never panic, and never poison the rest of
-    /// the list: missing Area, non-finite or absurd numbers, zero/negative size, and a pixel-unit area
-    /// with no `AppliedToDimensions` to convert it (so it can't be stored as a nonsense fraction).
-    #[test]
-    fn mwg_regions_hostile_inputs_are_dropped_not_panicking() {
-        let x = r#"<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-                xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/"
-                xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#">
-              <mwg-rs:Regions rdf:parseType="Resource">
-                <mwg-rs:RegionList>
-                  <rdf:Bag>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Name>No Area</mwg-rs:Name></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="NaN" stArea:y="0.1" stArea:w="0.1" stArea:h="0.1"/></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="1e300" stArea:y="0.1" stArea:w="0.1" stArea:h="0.1"/></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="0.5" stArea:y="0.5" stArea:w="0" stArea:h="0.1"/></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="0.5" stArea:y="0.5" stArea:w="-0.1" stArea:h="0.1"/></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="100" stArea:y="100" stArea:w="50" stArea:h="50" stArea:unit="pixel"/></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="0.5" stArea:y="0.5" stArea:w="0.2" stArea:h="0.2"/><mwg-rs:Type>Face</mwg-rs:Type></rdf:li>
-                  </rdf:Bag>
-                </mwg-rs:RegionList>
-              </mwg-rs:Regions>
-            </rdf:Description></rdf:RDF>"#;
-        let regions = parse_xmp(x).unwrap().metadata.regions;
-        assert_eq!(regions.len(), 1, "only the last, well-formed region should survive: {regions:?}");
-        assert_eq!(regions[0].kind, RegionKind::Face);
-    }
-
-    /// Regions are clipped to the photo frame, and ones that miss the photo entirely are dropped: a
-    /// hostile sidecar can't park a box at x=1e5 (or a 1e5-wide one) that the loupe or the People view
-    /// would then draw or crop far outside the image.
-    #[test]
-    fn mwg_regions_are_clipped_to_the_frame_and_off_photo_ones_dropped() {
-        let x = r#"<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-                xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/"
-                xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#">
-              <mwg-rs:Regions rdf:parseType="Resource">
-                <mwg-rs:RegionList>
-                  <rdf:Bag>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="1e5" stArea:y="0.5" stArea:w="0.1" stArea:h="0.1"/><mwg-rs:Name>Far right</mwg-rs:Name></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="-3" stArea:y="-3" stArea:w="0.5" stArea:h="0.5"/><mwg-rs:Name>Far left</mwg-rs:Name></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="1.2" stArea:y="0.5" stArea:w="0.2" stArea:h="0.2"/><mwg-rs:Name>Touching edge</mwg-rs:Name></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="0.5" stArea:y="0.5" stArea:w="1e5" stArea:h="1e5"/><mwg-rs:Name>Huge</mwg-rs:Name></rdf:li>
-                    <rdf:li rdf:parseType="Resource"><mwg-rs:Area rdf:parseType="Resource" stArea:x="0.95" stArea:y="0.05" stArea:w="0.2" stArea:h="0.2"/><mwg-rs:Name>Corner</mwg-rs:Name></rdf:li>
-                  </rdf:Bag>
-                </mwg-rs:RegionList>
-              </mwg-rs:Regions>
-            </rdf:Description></rdf:RDF>"#;
-        let regions = parse_xmp(x).unwrap().metadata.regions;
-        let names: Vec<_> = regions.iter().map(|r| r.name.as_deref().unwrap_or("")).collect();
-        assert_eq!(names, ["Huge", "Corner"], "{regions:?}");
-        for r in &regions {
-            let q = r.rect;
-            assert!(q.x0 >= 0.0 && q.y0 >= 0.0 && q.x1 <= 1.0 && q.y1 <= 1.0 && !q.is_empty(), "{q:?}");
-        }
-        assert_eq!(regions[0].rect, Rect::UNIT);
-        let c = regions[1].rect;
-        assert!((c.x0 - 0.85).abs() < 1e-9 && c.x1 == 1.0 && c.y0 == 0.0 && (c.y1 - 0.15).abs() < 1e-9, "{c:?}");
-    }
-
-    /// `extract()`'s precedence (EXIF/IPTC never carry regions; XMP is read and filled in like keywords).
-    #[test]
-    fn regions_merge_like_keywords() {
-        let with_region = Region { rect: Rect::from_center(Point::new(0.5, 0.5), 0.2, 0.2), kind: RegionKind::Face, name: None, description: None };
-        let mut a = Metadata::default();
-        let b = Metadata { regions: vec![with_region.clone()], ..Default::default() };
-        a.fill_missing(&b);
-        assert_eq!(a.regions, vec![with_region.clone()]);
-
-        let mut a = Metadata::default();
-        a.overlay_user_fields(&b);
-        assert_eq!(a.regions, vec![with_region]);
-    }
-
-    #[test]
-    fn writer_drops_characters_xml_1_0_forbids() {
-        let bad = "a\u{1}b\u{0}c\u{FFFE}d\u{FFFF}e\u{1F}\tf\ng\rh";
-        let m = Metadata { make: Some(bad.into()), caption: Some(bad.into()), keywords: vec![bad.into()], ..Default::default() };
-        let x = write_xmp_lc(&m, &[("settings", bad)]);
-        let illegal: Vec<char> =
-            x.chars().filter(|&c| (c < '\u{20}' && !matches!(c, '\t' | '\n' | '\r')) || c == '\u{FFFE}' || c == '\u{FFFF}').collect();
-        assert!(illegal.is_empty(), "illegal XML chars in output: {illegal:?}");
-        assert!(x.contains(">abcde\tf\ng\rh<"), "allowed characters must survive: {x}");
-    }
-
-    #[test]
-    fn numeric_references_to_forbidden_characters_are_not_decoded() {
-        assert_eq!(entity("#1"), None);
-        assert_eq!(entity("#0"), None);
-        assert_eq!(entity("#xFFFE"), None);
-        assert_eq!(entity("#x41"), Some('A'));
-        assert_eq!(entity("#9"), Some('\t'));
-    }
-
-    /// Flattened keys repeat their whole ancestor path, so a long nested name with a wide child
-    /// fan-out would otherwise retain its prefix once per leaf: the cumulative key budget stops it
-    /// (a 65 KB document with 3000 leaves must not retain ~2.4 MB of key text).
-    #[test]
-    fn flattened_keys_stay_within_the_cumulative_budget() {
-        let level = "n".repeat(200);
-        let mut doc = String::from(
-            "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:lc=\"https://lightcraft.example/lc/\"><rdf:RDF><rdf:Description><lc:root rdf:parseType=\"Resource\">",
-        );
-        for _ in 0..4 {
-            doc.push_str(&format!("<lc:{level} rdf:parseType=\"Resource\">"));
-        }
-        // each leaf has a name of its own, so each one adds a key
-        for i in 0..3000 {
-            doc.push_str(&format!("<lc:leaf{i} lc:att=\"v\"/>"));
-        }
-        doc.push_str("</lc:root>");
-        for _ in 0..4 {
-            doc.push_str(&format!("</lc:{level}>"));
-        }
-        doc.push_str("</rdf:Description></rdf:RDF></x:xmpmeta>");
-        let d = parse_xmp(&doc).unwrap();
-        let total: usize = d.properties.keys().map(String::len).sum();
-        assert!(total <= MAX_KEY_BYTES, "flattened-key text {total} is over the {MAX_KEY_BYTES} budget");
-        assert!(d.properties.len() < 3000, "keys stop being added once the budget is spent");
-        assert!(!d.properties.is_empty(), "properties parsed before the budget are kept");
-    }
-}
+mod tests;

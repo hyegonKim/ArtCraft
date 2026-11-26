@@ -5,7 +5,7 @@
 //! (size patched at the end), Info, Tracks and one Cluster per render batch. Video frames are
 //! SimpleBlocks; with alpha (Channels: RGB + Alpha) each frame is a BlockGroup whose
 //! BlockAdditional (BlockAddID 1) carries a second VP9 frame coding the alpha channel as luma,
-//! with `AlphaMode` 1 on the track, as WebM defines. VP9 comes from `effectcraft-vp9enc` (key
+//! with `AlphaMode` 1 on the track, as WebM defines. VP9 comes from `craft_video::vp9` (key
 //! frames every two seconds, inter frames between them: SimpleBlocks carry the key flag, inter
 //! BlockGroups a ReferenceBlock; the alpha stream's key frames line up with the colour stream's),
 //! Opus from `effectcraft-opusenc` (CELT, 48 kHz stereo, 20 ms packets,
@@ -142,7 +142,7 @@ pub(crate) async fn webm(job: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut Sta
     let colour_channels = if job.output.channels == Channels::Alpha { Channels::Alpha } else { Channels::Rgb };
     let quality = job.output.quality.clamp(1, 100);
     let fps = rate.as_f64().max(1.0);
-    let cfg = effectcraft_vp9enc::EncoderConfig {
+    let cfg = craft_video::vp9::EncoderConfig {
         width: w,
         height: h,
         quality,
@@ -152,8 +152,8 @@ pub(crate) async fn webm(job: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut Sta
         frame_rate: fps,
         loop_filter: true,
     };
-    let mut color_enc = effectcraft_vp9enc::Vp9Encoder::new(cfg.clone());
-    let mut alpha_enc = alpha.then(|| effectcraft_vp9enc::Vp9Encoder::new(cfg.clone()));
+    let mut color_enc = craft_video::vp9::Vp9Encoder::new(cfg.clone());
+    let mut alpha_enc = alpha.then(|| craft_video::vp9::Vp9Encoder::new(cfg.clone()));
     let with_audio = wants_audio(job);
     let opus_channels = if job.output.audio_channels == 1 { 1usize } else { 2 };
     let mut opus = with_audio.then(|| opus_encoder(job));
@@ -244,12 +244,14 @@ pub(crate) async fn webm(job: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut Sta
             let pad = (fs - pcm_left.len() % fs) % fs + fs;
             pcm_left.extend(std::iter::repeat_n(0.0, pad));
         }
-        while pcm_left.len() >= fs {
-            let pkt = enc.encode_float(&pcm_left[..fs]);
-            pcm_left.drain(..fs);
+        // Packets are read in place and the encoded samples dropped once: draining each packet
+        // from the front would shift the rest of the batch's audio every 20 ms.
+        for packet in pcm_left.chunks_exact(fs) {
+            let pkt = enc.encode_float(packet);
             frames.push(Frame { ms: packets as i64 * 20, track: 2, key: true, prev_ms: None, data: pkt, alpha: None });
             packets += 1;
         }
+        pcm_left.drain(..pcm_left.len() / fs * fs);
     };
 
     let batch = batch_size();
@@ -264,12 +266,12 @@ pub(crate) async fn webm(job: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut Sta
         for (j, px) in pixels.iter().enumerate() {
             let (color, a) = rayon::join(
                 || {
-                    let (y, u, vv) = effectcraft_vp9enc::rgba_to_yuv420(px, w, h, false);
+                    let (y, u, vv) = craft_video::vp9::rgba_to_yuv420(px, w, h, false);
                     color_enc.encode_frame(&y, &u, &vv, false)
                 },
                 || {
                     alpha_enc.as_mut().map(|ea| {
-                        let (y, u, vv) = effectcraft_vp9enc::alpha_to_yuv420(px, w, h);
+                        let (y, u, vv) = craft_video::vp9::alpha_to_yuv420(px, w, h);
                         ea.encode_frame(&y, &u, &vv, false).data
                     })
                 },
@@ -325,7 +327,7 @@ fn ieee_extended(v: f64) -> [u8; 10] {
 /// 16/24-bit integer or 32-bit float; plain AIFF has no float, so 32-bit float is AIFF-C `fl32`).
 pub(crate) fn audio_file(job: &Cx, comp: &Comp, aiff: bool, st: &mut State) -> Result<Report> {
     let sr = job.output.audio_sample_rate.clamp(8_000, 192_000);
-    let channels = if job.output.audio_channels == 1 { 1u16 } else { 2 };
+    let channels = u16::from(job.output.audio_channels.clamp(1, 32));
     let fmt = job.output.audio_format;
     let bytes_per_sample: u16 = match fmt {
         AudioFormat::S16 => 2,
@@ -347,7 +349,7 @@ pub(crate) fn audio_file(job: &Cx, comp: &Comp, aiff: bool, st: &mut State) -> R
         let sample = start + done as i64;
         let t = Tick::from_units(sample, i64::from(sr));
         let t = if t.to_units_floor(i64::from(sr)) < sample { Tick(t.0.saturating_add(1)) } else { t };
-        pcm.extend(pcm_bytes(&mix(job, t, k, sr), fmt, aiff));
+        pcm.extend(pcm_bytes(&crate::encode::mix_channels(job, t, k, sr, channels as u8), fmt, aiff));
         done += k;
         let now = (done as u64 * total_frames / n.max(1) as u64).min(total_frames);
         if now > reported && st.total > 0 {

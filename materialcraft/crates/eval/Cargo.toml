@@ -1,0 +1,16 @@
+[package]
+name = "materialcraft-eval"
+description = "MaterialCraft graph cooking: dependency order, sizes, a content-addressed output cache, sub-graphs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-core = { workspace = true }
+materialcraft-image = { workspace = true }
+materialcraft-nodes = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }

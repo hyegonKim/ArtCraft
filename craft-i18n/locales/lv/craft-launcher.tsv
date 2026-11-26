@@ -1,0 +1,304 @@
+# Latviešu (lv) interface catalog for ArtCraft Launcher.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	A new version is available. Download it to replace this version?	Ir pieejama jauna versija. Vai lejupielādēt to, lai aizstātu šo versiju?
+	A new version is available. Would you like to relaunch with the updated version?	Ir pieejama jauna versija. Vai vēlaties restartēt ar atjaunināto versiju?
+	All releases	Visi laidieni
+	App	Lietotne
+column	App	Lietotne
+	App details	Lietotnes informācija
+@id	app.download	Lejupielādēt: {os}
+@id	app.github	GitHub repozitorijs
+@id	app.install	Instalēt
+@id	app.notes	Laidiena piezīmes
+@id	app.open	Atvērt
+@id	app.reinstall	Instalēt atkārtoti
+@id	app.releases	Visi laidieni
+@id	app.reveal	Rādīt Finder
+@id	app.uninstall	Atinstalēt…
+@id	app.update	Atjaunināt uz {v}
+@id	app.website	Tīmekļa vietne
+@id	appearance.theme	Izskats
+	Apps are placed inside this folder.	Lietotnes tiek ievietotas šajā mapē.
+	Apps on this computer	Lietotnes šajā datorā
+	Apps you can install	Lietotnes, ko varat instalēt
+	Apps you hid	Jūsu paslēptās lietotnes
+month	Apr	apr.
+	Arch package (.pkg.tar.zst)	Arch pakotne (.pkg.tar.zst)
+	ArtCraft Launcher	ArtCraft Launcher
+	ArtCraft Launcher is still running	ArtCraft Launcher joprojām darbojas
+	ArtCraft Launcher {version}	ArtCraft Launcher {version}
+	ArtCraft Launcher {version} is available.	Ir pieejams ArtCraft Launcher {version}.
+@plural	ArtCraft Launcher · {n} update available|ArtCraft Launcher · {n} updates available	ArtCraft Launcher · pieejami {n} atjauninājumi|ArtCraft Launcher · pieejams {n} atjauninājums|ArtCraft Launcher · pieejami {n} atjauninājumi
+	ArtCraft on GitHub	ArtCraft GitHub vietnē
+	ArtCraft on {name}	ArtCraft: {name}
+month	Aug	aug.
+	Automatically download and install updates	Automātiski lejupielādēt un instalēt atjauninājumus
+	Available to install	Pieejamas instalēšanai
+	Cancel download	Atcelt lejupielādi
+	Cancel update	Atcelt atjaunināšanu
+	Checked {ago}	Pārbaudīts {ago}
+	Checked {ago} · using {sources}	Pārbaudīts {ago} · avoti: {sources}
+	Checking for updates…	Pārbauda atjauninājumus…
+	Checking…	Pārbauda…
+	Classic apps	Klasiskās lietotnes
+	Click to enlarge	Noklikšķiniet, lai palielinātu
+	Click to reverse the order	Noklikšķiniet, lai apgrieztu secību
+	Click to sort by this column	Noklikšķiniet, lai kārtotu pēc šīs kolonnas
+	Coming soon	Drīzumā
+cadcraft	Computer-aided design and drafting	Datorizēta projektēšana un rasēšana
+	Couldn't change the login item: {e}	Neizdevās mainīt pieteikšanās vienumu: {e}
+	Couldn't check for updates: {f}	Neizdevās pārbaudīt atjauninājumus: {f}
+@msg	couldn't move {path} to Trash ({reason}). Remove it in Finder instead.	neizdevās pārvietot {path} uz miskasti ({reason}). Tā vietā noņemiet to programmā Finder.
+@msg	couldn't use install folder {path}: {reason}	neizdevās izmantot instalēšanas mapi {path}: {reason}
+	Craft App Suite	Craft lietotņu komplekts
+	Custom folders use AppImage on Linux.	Pielāgotajās mapēs Linux sistēmā tiek izmantots AppImage.
+@msg	custom install folders aren't supported on this system	šajā sistēmā pielāgotas instalēšanas mapes netiek atbalstītas
+	Debian package (.deb)	Debian pakotne (.deb)
+month	Dec	dec.
+	Default install folder	Noklusējuma instalēšanas mape
+	Discard download	Atmest lejupielādi
+	Disk image (.dmg)	Diska attēls (.dmg)
+	Download again	Lejupielādēt vēlreiz
+	Download cancelled	Lejupielāde atcelta
+@msg	Download cancelled	Lejupielāde atcelta
+	Download for {os}	Lejupielādēt: {os}
+	Download paused	Lejupielāde pauzēta
+	Downloading	Lejupielādē
+	Downloading {done} of {total}	Lejupielādē {done} no {total}
+	Downloading…	Lejupielādē…
+	Downloads for {platform}	Lejupielādes: {platform}
+	Downloads the new version, replaces this one and opens it again	Lejupielādē jauno versiju, aizstāj šo un atver to no jauna
+	Enlarge picture	Palielināt attēlu
+	Every Craft app	Visas Craft lietotnes
+	Features	Funkcijas
+month	Feb	febr.
+@id	filter.all	Visas
+@id	filter.installed	Instalētās
+@id	filter.notinstalled	Neinstalētās
+@id	filter.updates	Atjauninājumi
+	Flatpak bundle	Flatpak pakotne
+	Frequently used	Bieži lietotās
+	Full changelog	Pilns izmaiņu žurnāls
+	GitHub limit hit; back in {min} min	Sasniegts GitHub ierobežojums; atkal pieejams pēc {min} min
+	GitHub repository	GitHub repozitorijs
+	GitHub's hourly limit was reached; full details return in {min} min	Sasniegts GitHub stundas ierobežojums; pilna informācija būs pieejama pēc {min} min
+@id	help.discord	Discord
+@id	help.github	GitHub
+@id	help.website	Tīmekļa vietne
+	Hidden Apps	Paslēptās lietotnes
+	Hide App	Paslēpt lietotni
+photocraft	Image editing	Attēlu rediģēšana
+	Include pre-releases (betas and release candidates)	Iekļaut pirmsizlaides versijas (beta un laidienu kandidātus)
+	Inspired by	Iedvesmojusi
+	Install	Instalēt
+	Install cancelled	Instalēšana atcelta
+	Install cancelled. The download is kept for the next try.	Instalēšana atcelta. Lejupielāde tiek saglabāta nākamajam mēģinājumam.
+	Install folder	Instalēšanas mape
+	Install new apps as	Instalēt jaunas lietotnes kā
+	Installed	Instalēta
+column	Installed	Instalēta
+filter	Installed	Instalētās
+	installed	instalēta
+	Installed apps with a newer version	Instalētās lietotnes, kurām ir jaunāka versija
+	Installed version	Instalētā versija
+	Installed · latest {latest}	Instalēta · jaunākā {latest}
+	Installed · up to date	Instalēta · jaunākā versija
+	Installer (.msi)	Instalētājs (.msi)
+	Installing for {platform}	Instalēšana: {platform}
+	Installing on Linux	Instalēšana Linux sistēmā
+	Installing on Windows	Instalēšana Windows sistēmā
+	Installing, then restarting…	Instalē un pēc tam restartē…
+	Installing…	Instalē…
+figcraft	Interface design and prototyping	Saskarņu dizains un prototipēšana
+	It's in the tray: open it or quit it from the tray icon, or turn this off in the settings.	Tā ir sistēmas teknē: atveriet vai aizveriet to ar teknes ikonu vai izslēdziet šo iestatījumos.
+month	Jan	janv.
+	Join the ArtCraft community on Discord	Pievienojieties ArtCraft kopienai Discord
+	Join the Discord	Pievienoties Discord
+month	Jul	jūl.
+month	Jun	jūn.
+	Keep running in the tray when the window is closed	Pēc loga aizvēršanas turpināt darbu sistēmas teknē
+	Last updated: {date}	Pēdējoreiz atjaunināta: {date}
+	Latest	Jaunākā
+column	Latest	Jaunākā
+	Latest release	Jaunākais laidiens
+	Latest version	Jaunākā versija
+	Launcher	Palaidējs
+@id	launcher.dismiss	Noraidīt
+@id	launcher.download	Lejupielādēt
+@id	launcher.notes	Jaunumi
+@id	launcher.update	Atjaunināt un restartēt
+	Learn more	Uzzināt vairāk
+	Like {name}	Līdzīga kā {name}
+	link	saite
+@id	linux.preferred_kind	Instalēt jaunas lietotnes kā
+	Loading ArtCraft Launcher…	Ielādē ArtCraft Launcher…
+	Loading pictures…	Ielādē attēlus…
+month	Mar	marts
+	Match system	Kā sistēmā
+month	May	maijs
+	More actions for {name}	Citas darbības: {name}
+effectcraft	Motion graphics and visual effects	Kustīgā grafika un vizuālie efekti
+	Name (Z–A)	Nosaukums (Z–A)
+	NEW	JAUNA
+	New apps	Jaunas lietotnes
+	New installs use this folder. Updates stay in their current location.	Jaunās instalācijas izmanto šo mapi. Atjauninājumi paliek pašreizējā vietā.
+	Newest release	Jaunākais laidiens
+	Next app	Nākamā lietotne
+	Next picture (→)	Nākamais attēls (→)
+	No apps match	Nav atbilstošu lietotņu
+	No downloads for this system	Šai sistēmai nav lejupielāžu
+	No notes were published with this release.	Šim laidienam nav publicētu piezīmju.
+	No release published yet	Vēl nav publicēta neviena laidiena
+	Not available here	Šeit nav pieejama
+	Not checked yet	Vēl nav pārbaudīts
+	Not installed	Nav instalēta
+	Notify me when an installed app has an update	Paziņot, kad instalētai lietotnei ir pieejams atjauninājums
+month	Nov	nov.
+month	Oct	okt.
+	On Linux, custom folders use AppImage format.	Linux sistēmā pielāgotajās mapēs tiek izmantots AppImage formāts.
+	Only when I ask	Tikai pēc mana pieprasījuma
+	Open ArtCraft Launcher to update.	Lai atjauninātu, atveriet ArtCraft Launcher.
+	Open on GitHub	Atvērt GitHub
+	Open Source Tools for Creatives, Makers, and Builders	Atvērtā koda rīki radošiem cilvēkiem, meistariem un būvētājiem
+designcraft	Page layout and publishing	Lapu makets un izdošana
+	Pause download	Pauzēt lejupielādi
+lightcraft	Photo library and raw development	Fotoattēlu bibliotēka un RAW failu apstrāde
+	Pictures couldn't be loaded. Reopen this page to try again.	Neizdevās ielādēt attēlus. Lai mēģinātu vēlreiz, atveriet šo lapu no jauna.
+	Platforms	Platformas
+	Portable (.zip)	Pārnēsājama (.zip)
+deckcraft	Presentations and slide shows	Prezentācijas un slaidrādes
+	Previous app	Iepriekšējā lietotne
+	Previous picture (←)	Iepriekšējais attēls (←)
+	Questions, ideas and news from the ArtCraft team	Jautājumi, idejas un jaunumi no ArtCraft komandas
+	Quit ArtCraft Launcher	Aizvērt ArtCraft Launcher
+pdfcraft	Reading, organizing and protecting PDFs	PDF failu lasīšana, kārtošana un aizsardzība
+	Recently updated	Nesen atjauninātās
+	Reconnecting…	Atjauno savienojumu…
+soundcraft	Recording, editing and mixing audio	Audio ierakstīšana, rediģēšana un miksēšana
+	Reinstall	Instalēt atkārtoti
+	Release notes	Laidiena piezīmes
+	Released	Izlaista
+column	Released	Izlaista
+	Released {date}	Izlaista: {date}
+	Releases	Laidieni
+	Removing…	Noņem…
+	Replace what's there?	Vai aizstāt esošo?
+	Resume download	Atsākt lejupielādi
+	Retry install	Mēģināt instalēt vēlreiz
+	Retry update to {version}	Vēlreiz mēģināt atjaunināt uz {version}
+	RPM package (.rpm)	RPM pakotne (.rpm)
+	Running in the background	Darbojas fonā
+	Search apps	Meklēt lietotnes
+month	Sep	sept.
+@id	settings.open	Iestatījumi
+@id	settings.quit	Aizvērt ArtCraft Launcher
+	Show apps as a table	Rādīt lietotnes tabulā
+	Show apps as cards	Rādīt lietotnes kā kartītes
+	Show ArtCraft Launcher	Rādīt ArtCraft Launcher
+	Show in Explorer	Rādīt pārlūkā Explorer
+	Show in Files	Rādīt programmā Files
+	Show in Finder	Rādīt Finder
+	Show the window on the current desktop	Rādīt logu pašreizējā darbvirsmā
+	Show {n} more changes	Rādīt vēl {n} izmaiņas
+@id	sort.inspired	Iedvesmojusi
+@id	sort.installed	Instalētā versija
+@id	sort.latest	Jaunākā versija
+@id	sort.name	Nosaukums
+@id	sort.released	Jaunākais laidiens
+@id	sort.status	Statuss
+@id	sort.suite	Komplekta secība
+gridcraft	Spreadsheets and data	Izklājlapas un dati
+	Start ArtCraft Launcher when I log in	Palaist ArtCraft Launcher pēc pieteikšanās
+	Stop waiting; the update can be started again later	Pārtraukt gaidīšanu; atjaunināšanu var sākt vēlāk
+	Suite order	Komplekta secība
+	System default	Sistēmas noklusējums
+	System package (recommended)	Sistēmas pakotne (ieteicams)
+	Tarball (.tar.gz)	Tar arhīvs (.tar.gz)
+	The app will be moved to the Trash. Your documents and settings stay.	Lietotne tiks pārvietota uz miskasti. Jūsu dokumenti un iestatījumi paliks.
+	The app will be removed. Your documents and settings stay.	Lietotne tiks noņemta. Jūsu dokumenti un iestatījumi paliks.
+	The download is still here. It's checked again, then installed.	Lejupielāde joprojām ir šeit. Tā tiks vēlreiz pārbaudīta un pēc tam instalēta.
+	The system manages install locations here.	Šeit instalēšanas vietas pārvalda sistēma.
+	These notes weren't fetched (GitHub's request limit was reached). They're on the release page.	Šīs piezīmes netika ielādētas (sasniegts GitHub pieprasījumu ierobežojums). Tās ir atrodamas laidiena lapā.
+@msg	this release has no AppImage for a custom install folder	šim laidienam nav AppImage pielāgotai instalēšanas mapei
+@id	tray.close_to_tray	Pēc loga aizvēršanas turpināt darbu sistēmas teknē
+@id	tray.login_item	Palaist ArtCraft Launcher pēc pieteikšanās
+@id	tray.show_on_current_desktop	Rādīt logu pašreizējā darbvirsmā
+	Unhide App	Rādīt lietotni
+	Uninstall	Atinstalēt
+	Uninstall cancelled	Atinstalēšana atcelta
+	Uninstall {name}?	Vai atinstalēt {name}?
+	Uninstall…	Atinstalēt…
+	Update 1 app	Atjaunināt 1 lietotni
+	Update all ({count})	Atjaunināt visas ({count})
+	Update and restart	Atjaunināt un restartēt
+	Update available	Pieejams atjauninājums
+	Update cancelled	Atjaunināšana atcelta
+	Update paused	Atjaunināšana pauzēta
+	Update to {v}	Atjaunināt uz {v}
+@id	update.check	Pārbaudīt atjauninājumus
+@id	update.check_auto	Automātiski pārbaudīt atjauninājumus
+@id	update.notify	Paziņot, kad instalētai lietotnei ir pieejams atjauninājums
+@id	update.prereleases	Iekļaut pirmsizlaides versijas (beta un laidienu kandidātus)
+	Updates always use the format an app was installed with.	Atjauninājumi vienmēr izmanto formātu, kādā lietotne tika instalēta.
+	Updating…	Atjaunina…
+	Use default	Izmantot noklusējumu
+vectorcraft	Vector illustration	Vektorilustrācija
+	Verifying checksum…	Pārbauda kontrolsummu…
+	Verifying…	Pārbauda…
+column	Version	Versija
+	Version {latest}	Versija {latest}
+	Version {version} installed	Instalēta versija {version}
+filmcraft	Video editing, color and sound	Video rediģēšana, krāsas un skaņa
+@id	view.grid	Režģis
+@id	view.table	Tabula
+	Visit getartcraft.com	Apmeklēt getartcraft.com
+	Waiting for another app…	Gaida citu lietotni…
+	Waiting for other installs…	Gaida citas instalēšanas…
+	Website (coming soon)	Tīmekļa vietne (drīzumā)
+	What's new	Jaunumi
+	When on, opening the launcher from the menu bar brings its window to the desktop you're on. When off, macOS switches you to the desktop the window was on.	Ja ieslēgts, atverot palaidēju no izvēļņu joslas, tā logs tiek parādīts jūsu pašreizējā darbvirsmā. Ja izslēgts, macOS pārslēdz uz darbvirsmu, kurā logs atradās.
+	Windows will remove it like any installed program. Your documents and settings stay.	Windows to noņems tāpat kā jebkuru instalētu programmu. Jūsu dokumenti un iestatījumi paliks.
+wordcraft	Writing and document design	Rakstīšana un dokumentu noformēšana
+	Your system's package manager will remove it, and may ask for your password. Your documents and settings stay.	Sistēmas pakotņu pārvaldnieks to noņems un var prasīt jūsu paroli. Jūsu dokumenti un iestatījumi paliks.
+	{a} and {b}	{a} un {b}
+	{count} updates are available	Pieejami atjauninājumi: {count}
+	{done} downloaded	Lejupielādēts: {done}
+	{done} of {total}	{done} no {total}
+	{done} of {total} downloaded	Lejupielādēts {done} no {total}
+	{installed} installed · latest {latest}	Instalēta {installed} · jaunākā {latest}
+	{month} {day}, {year}	{year}. gada {day}. {month}
+	{name} details	{name}: informācija
+	{name} icon	{name}: ikona
+@msg	{name} installed: {version}	{name} instalēta: {version}
+@msg	{name} installed: {version} (this release publishes no checksum, so only its size was checked)	{name} instalēta: {version} (šim laidienam nav publicētas kontrolsummas, tāpēc tika pārbaudīts tikai lielums)
+@msg	{name} is running. Quit it, then try again.	{name} darbojas. Aizveriet to un mēģiniet vēlreiz.
+@msg	{name} updated to {version}	{name} atjaunināta uz {version}
+@msg	{name} updated to {version} (this release publishes no checksum, so only its size was checked)	{name} atjaunināta uz {version} (šim laidienam nav publicētas kontrolsummas, tāpēc tika pārbaudīts tikai lielums)
+@msg	{name} was installed from the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg})	{name} tika instalēta no AUR ({pkg}). Atjauniniet to ar savu AUR palīgrīku (piemēram: yay -S {pkg})
+@msg	{name} was installed from the AUR ({pkg}). Update it with {cmd}	{name} tika instalēta no AUR ({pkg}). Atjauniniet to ar {cmd}
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with your AUR helper (for example: yay -S {pkg}) or sudo pacman -Syu	{name} tika instalēta no {repo} repozitorija vai AUR ({pkg}). Atjauniniet to ar savu AUR palīgrīku (piemēram: yay -S {pkg}) vai sudo pacman -Syu
+@msg	{name} was installed from the {repo} repository or the AUR ({pkg}). Update it with {cmd} or sudo pacman -Syu	{name} tika instalēta no {repo} repozitorija vai AUR ({pkg}). Atjauniniet to ar {cmd} vai sudo pacman -Syu
+@msg	{name} was removed	{name} tika noņemta
+	{name} {version}	{name} {version}
+	{name} {v} is available	Ir pieejama {name} {v}
+@plural	{n} app|{n} apps	{n} lietotnes|{n} lietotne|{n} lietotnes
+@plural	{n} day ago|{n} days ago	pirms {n} dienām|pirms {n} dienas|pirms {n} dienām
+@plural	{n} h ago|{n} h ago	pirms {n} st.|pirms {n} st.|pirms {n} st.
+@plural	{n} min ago|{n} min ago	pirms {n} min|pirms {n} min|pirms {n} min
+@msg	{path} already exists and wasn't installed by ArtCraft Launcher	{path} jau pastāv, un to nav instalējis ArtCraft Launcher
+	{path} already exists. Installing {name} will overwrite it.	{path} jau pastāv. Instalējot {name}, tas tiks pārrakstīts.
+	{version} installed → {latest} released	Instalēta {version} → izlaista {latest}
+	⊞  Grid	⊞  Režģis
+	☰  Table	☰  Tabula
+	🔍  Search apps	🔍  Meklēt lietotnes

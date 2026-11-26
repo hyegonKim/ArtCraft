@@ -86,13 +86,36 @@ commit that has their translations.
 - **After cutover** (the app has no `i18n/*.tsv`): add rows straight to
   `locales/<locale>/<app>.tsv`. The app's stale and missing report, run with `CRAFT_I18N_DIR`
   set, lists the source texts with no translation (its missing bucket).
+  When the app only fixes its English (a typo, punctuation, casing), `tools/rekey.py <app> <old>
+  <new>` moves every locale's translation to the new text in one go; a changed meaning needs new
+  translations instead.
 
 The cutover itself: a final sync against the app's `main`, that craft-i18n PR merges, the app's
 wiring PR merges (deleting `i18n/*.tsv` and pinning a craft-i18n SHA that holds the sync), then the
 sync runs again against the merge's first parent for rows that landed in between.
+
+## Language data
+
+The same variable also feeds `craft-proof` (craft-libs): its own `build.rs` embeds the files
+it names from `$CRAFT_I18N_DIR/language-data/` (spelling word lists and hyphenation patterns; layout in
+[`language-data/README.md`](../language-data/README.md)), with the same rules: unset or missing
+data is a warning and an empty embedding (English spelling falls back to the system's Hunspell
+dictionaries, hyphenation that needs data is off), and `CRAFT_I18N_REQUIRED=1` makes it an error. An app that uses `craft-proof` needs nothing
+more than the `CRAFT_I18N_DIR` it already sets for the catalogs, at a pin that has `language-data/`.
 
 ## Release builds
 
 Whether craft-common-actions' release workflow checks out craft-i18n and sets
 `CRAFT_I18N_DIR` and `CRAFT_I18N_REQUIRED=1`, as it does for craft-fonts, is a pending maintainer
 decision.
+
+## Initial import from TextureCraft Rust tables
+
+TextureCraft's pre-cutover catalogs are Rust tables rather than `i18n/*.tsv`.
+Use `python tools/export_texturecraft.py ../texturecraft --ref <pre-cutover SHA>`
+for its initial export. The tool uses rustc to decode the original strings, reuses
+identical shared rows and verifies that every original translation still resolves.
+`--check` verifies without rewriting catalogs. Record the full source SHA in
+`ATTRIBUTION.md`. This is an initial import, not an incremental merge: do not run
+write mode over independently edited catalogs. After cutover, edit the TSV files
+here directly. Coordination: storytold/texturecraft#419.

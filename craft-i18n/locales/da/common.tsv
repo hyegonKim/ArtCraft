@@ -298,7 +298,7 @@ theme	Appearance	Udseende
 	File	Filer
 	File Handling	Filhåndtering
 	File Info…	Filoplysninger…
-@id	file.close	file.close
+@id	file.close	Luk
 	Files	Filer
 	Fill	Udfyldning
 	Fill:	Fyld:

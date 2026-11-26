@@ -1,0 +1,3 @@
+# Words the bg pack must accept and reject (common words; written for this check).
+correct = ["къща", "книга", "училище", "вода", "град", "хубав"]
+incorrect = ["кништа", "училищще", "градд"]

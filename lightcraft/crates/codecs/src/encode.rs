@@ -39,12 +39,16 @@ impl<'a> EncodeImage<'a> {
         if self.width == 0 || self.height == 0 {
             return Err(Error::Encode("zero dimension".into()));
         }
-        let need = self.width as u64 * self.height as u64 * self.channels as u64;
+        // u128: 2^32 x 2^32 x 4 does not fit u64, and every later `width * height * channels` is bounded by this
+        let need = self.width as u128 * self.height as u128 * self.channels as u128;
+        if need > usize::MAX as u128 {
+            return Err(Error::Encode("image too large".into()));
+        }
         let have = match self.samples {
             Samples::U8(s) => s.len(),
             Samples::U16(s) => s.len(),
             Samples::F32(s) => s.len(),
-        } as u64;
+        } as u128;
         if have < need {
             return Err(Error::Encode(format!("sample buffer too short: {have} < {need}")));
         }
@@ -225,9 +229,9 @@ pub enum TiffCompression {
 }
 
 /// Encode TIFF: 8/16-bit integer or 32-bit float, gray/RGB with optional (unassociated) alpha.
-/// ICC and XMP are embedded; EXIF is not (write it through the TIFF writer in `lightcraft-tiff`).
+/// ICC and XMP are embedded; EXIF is not (write it through the TIFF writer in `craft-tiff`).
 pub fn encode_tiff(img: &EncodeImage, compression: TiffCompression, meta: &EncodeMeta) -> Result<Vec<u8>> {
-    use tiff::encoder::{Compression, DeflateLevel, TiffEncoder, colortype};
+    use tiff::encoder::{Compression, DeflateLevel, TiffEncoder};
     use tiff::tags::Predictor;
     img.validate()?;
     let e = |e: tiff::TiffError| Error::Encode(e.to_string());
@@ -235,7 +239,7 @@ pub fn encode_tiff(img: &EncodeImage, compression: TiffCompression, meta: &Encod
     let comp = match compression {
         TiffCompression::None => Compression::Uncompressed,
         TiffCompression::Lzw => Compression::Lzw,
-        TiffCompression::Deflate => Compression::Deflate(DeflateLevel::Fast),
+        TiffCompression::Deflate => Compression::Deflate(DeflateLevel::Balanced),
         TiffCompression::PackBits => Compression::Packbits,
     };
     let float = matches!(img.samples, Samples::F32(_));
@@ -243,52 +247,90 @@ pub fn encode_tiff(img: &EncodeImage, compression: TiffCompression, meta: &Encod
         if !float && matches!(compression, TiffCompression::Lzw | TiffCompression::Deflate) { Predictor::Horizontal } else { Predictor::None };
     let mut enc = TiffEncoder::new(&mut cur).map_err(e)?.with_compression(comp).with_predictor(predictor);
     let (w, h) = (img.width, img.height);
-    let n = w as usize * h as usize;
-    // Gray + alpha is stored as RGBA (the encoder has no GrayA colour type).
-    let ch = img.channels as usize;
-
-    macro_rules! write {
-        ($ct:ty, $data:expr, $alpha:expr) => {{
-            let mut im = enc.new_image::<$ct>(w, h).map_err(e)?;
-            if let Some(ppi) = meta.ppi.filter(|p| *p > 0) {
-                im.resolution(tiff::tags::ResolutionUnit::Inch, tiff::encoder::Rational { n: ppi as u32, d: 1 });
-            }
-            if let Some(icc) = meta.icc {
-                im.encoder().write_tag(tiff::tags::Tag::IccProfile, icc).map_err(e)?;
-            }
-            if let Some(xmp) = meta.xmp {
-                im.encoder().write_tag(tiff::tags::Tag::from_u16_exhaustive(700), xmp.as_bytes()).map_err(e)?;
-            }
-            if $alpha {
-                im.encoder().write_tag(tiff::tags::Tag::ExtraSamples, &[2u16][..]).map_err(e)?;
-            }
-            im.write_data($data).map_err(e)?;
-        }};
-    }
-    fn expand_ga<T: Copy>(s: &[T], n: usize) -> Vec<T> {
-        s.as_chunks::<2>().0.iter().take(n).flat_map(|c| [c[0], c[0], c[0], c[1]]).collect()
-    }
+    let pixels = w as usize * h as usize;
     match img.samples {
-        Samples::U8(s) => match ch {
-            1 => write!(colortype::Gray8, &s[..n], false),
-            2 => write!(colortype::RGBA8, &expand_ga(s, n), true),
-            3 => write!(colortype::RGB8, &s[..n * 3], false),
-            _ => write!(colortype::RGBA8, &s[..n * 4], true),
-        },
-        Samples::U16(s) => match ch {
-            1 => write!(colortype::Gray16, &s[..n], false),
-            2 => write!(colortype::RGBA16, &expand_ga(s, n), true),
-            3 => write!(colortype::RGB16, &s[..n * 3], false),
-            _ => write!(colortype::RGBA16, &s[..n * 4], true),
-        },
-        Samples::F32(s) => match ch {
-            1 => write!(colortype::Gray32Float, &s[..n], false),
-            2 => write!(colortype::RGBA32Float, &expand_ga(s, n), true),
-            3 => write!(colortype::RGB32Float, &s[..n * 3], false),
-            _ => write!(colortype::RGBA32Float, &s[..n * 4], true),
-        },
+        Samples::U8(samples) => write_tiff_u8(&mut enc, samples, pixels, img.channels as usize, img, meta)?,
+        Samples::U16(samples) => write_tiff_u16(&mut enc, samples, pixels, img.channels as usize, img, meta)?,
+        Samples::F32(samples) => write_tiff_f32(&mut enc, samples, pixels, img.channels as usize, img, meta)?,
     }
     Ok(cur.into_inner())
+}
+
+macro_rules! write_tiff_image {
+    ($encoder:expr, $image:expr, $meta:expr, $color:ty, $data:expr, $alpha:expr) => {{
+        let mut image = $encoder.new_image::<$color>($image.width, $image.height).map_err(|e| Error::Encode(e.to_string()))?;
+        if let Some(ppi) = $meta.ppi.filter(|ppi| *ppi > 0) {
+            image.resolution(tiff::tags::ResolutionUnit::Inch, tiff::encoder::Rational { n: ppi as u32, d: 1 });
+        }
+        if let Some(icc) = $meta.icc {
+            image.encoder().write_tag(tiff::tags::Tag::IccProfile, icc).map_err(|e| Error::Encode(e.to_string()))?;
+        }
+        if let Some(xmp) = $meta.xmp {
+            image.encoder().write_tag(tiff::tags::Tag::from_u16_exhaustive(700), xmp.as_bytes()).map_err(|e| Error::Encode(e.to_string()))?;
+        }
+        if $alpha {
+            image.encoder().write_tag(tiff::tags::Tag::ExtraSamples, &[2u16][..]).map_err(|e| Error::Encode(e.to_string()))?;
+        }
+        image.write_data($data).map_err(|e| Error::Encode(e.to_string()))?;
+    }};
+}
+
+fn expanded_gray_alpha<T: Copy>(samples: &[T], pixels: usize) -> Vec<T> {
+    samples.as_chunks::<2>().0.iter().take(pixels).flat_map(|channel| [channel[0], channel[0], channel[0], channel[1]]).collect()
+}
+
+fn write_tiff_u8<W: std::io::Write + std::io::Seek>(
+    encoder: &mut tiff::encoder::TiffEncoder<W>,
+    samples: &[u8],
+    pixels: usize,
+    channels: usize,
+    image: &EncodeImage,
+    meta: &EncodeMeta,
+) -> Result<()> {
+    use tiff::encoder::colortype;
+    match channels {
+        1 => write_tiff_image!(encoder, image, meta, colortype::Gray8, &samples[..pixels], false),
+        2 => write_tiff_image!(encoder, image, meta, colortype::RGBA8, &expanded_gray_alpha(samples, pixels), true),
+        3 => write_tiff_image!(encoder, image, meta, colortype::RGB8, &samples[..pixels * 3], false),
+        _ => write_tiff_image!(encoder, image, meta, colortype::RGBA8, &samples[..pixels * 4], true),
+    }
+    Ok(())
+}
+
+fn write_tiff_u16<W: std::io::Write + std::io::Seek>(
+    encoder: &mut tiff::encoder::TiffEncoder<W>,
+    samples: &[u16],
+    pixels: usize,
+    channels: usize,
+    image: &EncodeImage,
+    meta: &EncodeMeta,
+) -> Result<()> {
+    use tiff::encoder::colortype;
+    match channels {
+        1 => write_tiff_image!(encoder, image, meta, colortype::Gray16, &samples[..pixels], false),
+        2 => write_tiff_image!(encoder, image, meta, colortype::RGBA16, &expanded_gray_alpha(samples, pixels), true),
+        3 => write_tiff_image!(encoder, image, meta, colortype::RGB16, &samples[..pixels * 3], false),
+        _ => write_tiff_image!(encoder, image, meta, colortype::RGBA16, &samples[..pixels * 4], true),
+    }
+    Ok(())
+}
+
+fn write_tiff_f32<W: std::io::Write + std::io::Seek>(
+    encoder: &mut tiff::encoder::TiffEncoder<W>,
+    samples: &[f32],
+    pixels: usize,
+    channels: usize,
+    image: &EncodeImage,
+    meta: &EncodeMeta,
+) -> Result<()> {
+    use tiff::encoder::colortype;
+    match channels {
+        1 => write_tiff_image!(encoder, image, meta, colortype::Gray32Float, &samples[..pixels], false),
+        2 => write_tiff_image!(encoder, image, meta, colortype::RGBA32Float, &expanded_gray_alpha(samples, pixels), true),
+        3 => write_tiff_image!(encoder, image, meta, colortype::RGB32Float, &samples[..pixels * 3], false),
+        _ => write_tiff_image!(encoder, image, meta, colortype::RGBA32Float, &samples[..pixels * 4], true),
+    }
+    Ok(())
 }
 
 /// Encode a flat PSD (8/16-bit gray or RGB, no layers; alpha dropped): the hand-off an image
@@ -632,6 +674,13 @@ fn avif_10bit(enc: &ravif::Encoder, img: &EncodeImage, s: &[u16]) -> Result<Vec<
 #[cfg(test)]
 mod hlg_tests {
     use super::*;
+
+    #[test]
+    fn dimensions_whose_sample_count_wraps_are_refused() {
+        // 2^31 x 2^31 x 4 is 2^64 samples: zero when wrapped, which an empty buffer would satisfy
+        let img = EncodeImage::new(1 << 31, 1 << 31, 4, Samples::U8(&[]));
+        assert!(img.validate().is_err());
+    }
 
     #[test]
     fn hlg_reference_white_and_peak() {

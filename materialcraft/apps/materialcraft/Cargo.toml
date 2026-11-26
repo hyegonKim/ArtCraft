@@ -1,0 +1,37 @@
+[package]
+name = "materialcraft"
+description = "MaterialCraft: an open-source node-based procedural material designer (desktop app)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+default-run = "materialcraft"
+build = "build.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-engine = { workspace = true }
+materialcraft-automation = { workspace = true }
+materialcraft-ui-egui = { workspace = true }
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "accesskit", "wayland", "x11", "persistence"] }
+egui = { workspace = true }
+image = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+# A start that never opens a window says why in an error dialog (src/start_failure.rs).
+rfd = { workspace = true }
+
+# The window frame's choice applies before the window exists.
+craft-window = { workspace = true, features = ["egui"] }
+
+# The Windows update helper is a copy of this program started with `--finish-update`.
+[target.'cfg(windows)'.dependencies]
+craft-update = { workspace = true }
+
+# The macOS app menu whose Quit asks before unsaved work is lost.
+[target.'cfg(target_os = "macos")'.dependencies]
+craft-menu = { workspace = true }
+
+[build-dependencies]
+winresource = "0.1"

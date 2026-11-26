@@ -52,6 +52,22 @@ pub fn effective(s: &DevelopSettings) -> Cow<'_, DevelopSettings> {
     let add = |v: &mut f64, d: f64| *v = (*v + d * k).clamp(-100.0, 100.0);
     match id {
         // ---- Basic
+        "lc.adaptive" => {
+            add(&mut e.light.contrast, 8.0);
+            add(&mut e.light.highlights, -18.0);
+            add(&mut e.light.shadows, 18.0);
+            add(&mut e.light.whites, 8.0);
+            add(&mut e.light.blacks, -6.0);
+            add(&mut e.color.vibrance, 12.0);
+        }
+        "lc.adaptive.mono" => {
+            e.treatment = Treatment::Bw;
+            add(&mut e.light.contrast, 14.0);
+            add(&mut e.light.highlights, -16.0);
+            add(&mut e.light.shadows, 16.0);
+            add(&mut e.light.whites, 10.0);
+            add(&mut e.light.blacks, -8.0);
+        }
         "lc.neutral" => {
             add(&mut e.light.contrast, -18.0);
             add(&mut e.color.saturation, -10.0);
@@ -217,8 +233,136 @@ pub fn effective(s: &DevelopSettings) -> Cow<'_, DevelopSettings> {
     Cow::Owned(e)
 }
 
+/// Image-aware profile evaluation (Camera Raw 19.0 / Lightroom 2027 Adaptive Color & Adaptive B&W).
+/// For `"lc.adaptive"` and `"lc.adaptive.mono"`, analyses the white-balanced scene's dynamic range,
+/// key luminance and colour distribution on a fixed strided grid so thumbnails, previews and full
+/// exports derive identical scene-adapted tone and colour response, scaled by `profile.amount`.
+/// Every non-adaptive profile delegates directly to [`effective`].
+pub fn effective_for_image<'a>(
+    s: &'a DevelopSettings,
+    src: &lightcraft_raster::Rgb32f,
+    info: &crate::SourceInfo,
+) -> Cow<'a, DevelopSettings> {
+    let id = s.profile.id.as_str();
+    if id != "lc.adaptive" && id != "lc.adaptive.mono" {
+        return effective(s);
+    }
+    let k = (s.profile.amount / 100.0).clamp(0.0, 2.0);
+    if k == 0.0 || src.width == 0 || src.height == 0 {
+        return Cow::Borrowed(s);
+    }
+
+    // Sample up to ~64×64 strided pixels across the source to estimate scene log2 luminance
+    // percentiles and OkLCh colour statistics deterministically across resolutions.
+    let step_x = (src.width / 64).max(1);
+    let step_y = (src.height / 64).max(1);
+    let mut lums = Vec::with_capacity(4225);
+    let mut chroma_sum = 0.0f64;
+    let mut warm_skin_weight = 0.0f64;
+    let mut sky_weight = 0.0f64;
+    let mut count = 0usize;
+
+    for y in (0..src.height).step_by(step_y) {
+        let row = y * src.width;
+        for x in (0..src.width).step_by(step_x) {
+            let c = src.data[row + x];
+            if !c[0].is_finite() || !c[1].is_finite() || !c[2].is_finite() {
+                continue;
+            }
+            let lum = lightcraft_color::luminance_2020(c).max(1e-5);
+            lums.push(lum.log2());
+            let lab = lightcraft_color::perceptual::oklab_from_2020([c[0].max(0.0), c[1].max(0.0), c[2].max(0.0)]);
+            let [_l, ch, hue] = lightcraft_color::perceptual::lab_to_lch(lab);
+            let ch = ch as f64;
+            let hue = hue as f64;
+            chroma_sum += ch;
+            if (15.0..=68.0).contains(&hue) && ch > 0.02 && ch < 0.18 {
+                warm_skin_weight += 1.0;
+            } else if (195.0..=255.0).contains(&hue) && ch > 0.03 {
+                sky_weight += 1.0;
+            }
+            count += 1;
+        }
+    }
+
+    if count < 4 {
+        return effective(s);
+    }
+    lums.sort_by(|a, b| a.total_cmp(b));
+    let pct = |q: f64| -> f64 {
+        let idx = ((lums.len() - 1) as f64 * q.clamp(0.0, 1.0)).round() as usize;
+        lums[idx.min(lums.len() - 1)] as f64
+    };
+    let p02 = pct(0.02);
+    let p50 = pct(0.50);
+    let p98 = pct(0.98);
+    let dr_stops = (p98 - p02).clamp(1.0, 14.0);
+    // Scene middle grey in linear Rec.2020 sits near 0.18 (~ -2.47 EV)
+    let key_err = (p50 - (-2.47)).clamp(-3.5, 3.5);
+    let mean_chroma = chroma_sum / count as f64;
+    let skin_frac = warm_skin_weight / count as f64;
+    let sky_frac = sky_weight / count as f64;
+
+    // Scene-adaptive deltas:
+    // - Under/over-exposed median gently nudges exposure within [-0.55, +0.75] EV
+    let exp_delta = (-0.24 * key_err).clamp(-0.55, 0.75);
+    // - High-DR scenes compress highlights & open shadows; low-DR flat scenes boost contrast & endpoints
+    let hi_delta = if s.hdr.enabled {
+        // Keep luminous HDR headroom when HDR mode is active
+        (-8.0 - (dr_stops - 6.0).max(0.0) * 2.5).clamp(-22.0, -4.0)
+    } else {
+        (-10.0 - (dr_stops - 5.5).max(0.0) * 5.2).clamp(-42.0, -4.0)
+    };
+    let sh_delta = (8.0 + (dr_stops - 5.0).max(0.0) * 4.8 + (-key_err).max(0.0) * 6.0).clamp(6.0, 42.0);
+    let contrast_delta = (18.0 - (dr_stops - 4.5) * 2.6).clamp(-4.0, 22.0);
+    let whites_delta = ((-0.10 - p98) * 18.0).clamp(-8.0, 20.0);
+    let blacks_delta = (-4.0 - (6.5 - dr_stops).max(0.0) * 2.2).clamp(-16.0, 2.0);
+
+    let mut e = s.clone();
+    let add = |v: &mut f64, d: f64| *v = (*v + d * k).clamp(-100.0, 100.0);
+    e.light.exposure = (e.light.exposure + exp_delta * k).clamp(-5.0, 5.0);
+    add(&mut e.light.contrast, contrast_delta);
+    add(&mut e.light.highlights, hi_delta);
+    add(&mut e.light.shadows, sh_delta);
+    add(&mut e.light.whites, whites_delta);
+    add(&mut e.light.blacks, blacks_delta);
+
+    if id == "lc.adaptive.mono" {
+        e.treatment = Treatment::Bw;
+        add(&mut e.light.contrast, 6.0);
+        add(&mut e.effects.clarity, 6.0);
+        if skin_frac > 0.12 {
+            add(&mut e.bw_mix.orange, 12.0);
+            add(&mut e.bw_mix.red, 6.0);
+        }
+        if sky_frac > 0.08 {
+            add(&mut e.bw_mix.blue, -18.0);
+            add(&mut e.bw_mix.aqua, -10.0);
+        }
+    } else {
+        // Adaptive Color: boost vibrance more on muted scenes, protect skin tones on portraits
+        let vib_delta = (18.0 - mean_chroma * 95.0).clamp(4.0, 20.0);
+        add(&mut e.color.vibrance, vib_delta);
+        if skin_frac > 0.18 {
+            add(&mut e.mixer.orange.sat, -4.0);
+            add(&mut e.mixer.orange.lum, 5.0);
+            add(&mut e.effects.texture, -3.0);
+        } else {
+            add(&mut e.effects.clarity, 4.0);
+        }
+        if sky_frac > 0.10 {
+            add(&mut e.mixer.blue.sat, 8.0);
+            add(&mut e.mixer.blue.lum, -5.0);
+        }
+    }
+    let _ = info;
+    Cow::Owned(e)
+}
+
 /// Ids of the looks [`effective`] implements (besides the identity `lc.color`).
 pub const LOOK_IDS: &[&str] = &[
+    "lc.adaptive",
+    "lc.adaptive.mono",
     "lc.neutral",
     "lc.vivid",
     "lc.landscape",

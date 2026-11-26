@@ -2348,6 +2348,14 @@ preview	Title	Titel
 	Warm Gradient with Outline	Warm verloop met omtrek
 	Warnings ({n})	Waarschuwingen ({n})
 	Watermark	Watermerk
+	No watermark	Geen watermerk
+	Picture watermark	Afbeeldingswatermerk
+	Text watermark	Tekstwatermerk
+	Select Picture…	Afbeelding selecteren…
+	Washout	Vervaagd
+	Semitransparent	Halfdoorzichtig
+	Transparency:	Transparantie:
+	Select a picture first.	Selecteer eerst een afbeelding.
 	Weather	Weer
 	Web Layout	Web-lay-out
 	Web page (*.html)	Webpagina (*.html)
@@ -2433,3 +2441,121 @@ preview	Title	Titel
 	✓ None	✓ Geen
 	➕ New comment	➕ Nieuwe opmerking
 	📂  Browse…	📂  Bladeren…
+	Add a language…	Een taal toevoegen…
+	Add a language	Een taal toevoegen
+	Your languages	Je talen
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engels, de talen van dit document en elk geïnstalleerd taalpakket. Taalpakketten voegen spellingwoordenboeken en woordafbreking toe.
+	Set as default	Instellen als standaard
+	New blank documents are written in this language	Nieuwe lege documenten worden in deze taal geschreven
+	{language} (default)	{language} (standaard)
+	Built in	Ingebouwd
+	Your own dictionary	Je eigen woordenboek
+	System dictionary	Systeemwoordenboek
+	Not available yet	Nog niet beschikbaar
+	Grammar built in	Grammatica ingebouwd
+	Install spelling ({size})	Spelling installeren ({size})
+	Its dictionary couldn't be read: {reason}	Het woordenboek kon niet worden gelezen: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Downloaden staat uit. Klikken op ‘Een taal toevoegen…’ of ‘Installeren’ zet het aan: WordCraft downloadt dan taalpakketten en lettertypen van GitHub.
+	Search:	Zoeken:
+	Dutch, Nederlands or nl	Nederlands, Nederlands of nl
+	No languages to show yet.	Er zijn nog geen talen om te tonen.
+	No language matches your search.	Geen taal komt overeen met je zoekopdracht.
+	An installed Language pack is used after this folder.	Een geïnstalleerd taalpakket wordt na deze map gebruikt.
+	Dictionary files	Woordenboekbestanden
+	Gets the list of Language packs, then this language's pack if there is one.	Haalt de lijst met taalpakketten op en daarna het pakket van deze taal, als er een is.
+	Afrikaans	Afrikaans
+	Belarusian	Wit-Russisch
+	Bulgarian	Bulgaars
+	Bosnian	Bosnisch
+	Catalan	Catalaans
+	Catalan (Valencian)	Catalaans (Valenciaans)
+	Welsh	Welsh
+	Esperanto	Esperanto
+	Persian	Perzisch
+	Irish	Iers
+	Galician	Galicisch
+	Hungarian	Hongaars
+	Armenian	Armeens
+	Icelandic	IJslands
+	Georgian	Georgisch
+	Lithuanian	Litouws
+	Latvian	Lets
+	Macedonian	Macedonisch
+	Norwegian (Nynorsk)	Noors (Nynorsk)
+	Slovak	Slowaaks
+	Slovenian	Sloveens
+	Albanian	Albanees
+	Swahili	Swahili
+	Tamil	Tamil
+	Thai	Thai
+	Vietnamese	Vietnamees
+	Set as Default Language	Instellen als standaardtaal
+	U.A.E.	Verenigde Arabische Emiraten
+	Angola	Angola
+	Argentina	Argentinië
+	Austria	Oostenrijk
+	Australia	Australië
+	Bosnia and Herzegovina	Bosnië en Herzegovina
+	Belgium	België
+	Bolivia	Bolivia
+	Brazil	Brazilië
+	Belarus	Belarus
+	Canada	Canada
+	Switzerland	Zwitserland
+	Chile	Chili
+	China	China
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Kaapverdië
+	Cyprus	Cyprus
+	Germany	Duitsland
+	Dominican Republic	Dominicaanse Republiek
+	Ecuador	Ecuador
+	Egypt	Egypte
+	Spain	Spanje
+	Finland	Finland
+	France	Frankrijk
+	United Kingdom	Verenigd Koninkrijk
+	Equatorial Guinea	Equatoriaal-Guinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Hongkong SAR
+	Honduras	Honduras
+	Ireland	Ierland
+	India	India
+	Iraq	Irak
+	Italy	Italië
+	Jamaica	Jamaica
+	Jordan	Jordanië
+	Kuwait	Koeweit
+	Kazakhstan	Kazachstan
+	Lebanon	Libanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburg
+	Morocco	Marokko
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Macau SAR
+	Mexico	Mexico
+	Malaysia	Maleisië
+	Mozambique	Mozambique
+	Nicaragua	Nicaragua
+	Netherlands	Nederland
+	New Zealand	Nieuw-Zeeland
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipijnen
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Rusland
+	Singapore	Singapore
+	El Salvador	El Salvador
+	Syria	Syrië
+	Taiwan	Taiwan
+	Ukraine	Oekraïne
+	United States	Verenigde Staten
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Zuid-Afrika

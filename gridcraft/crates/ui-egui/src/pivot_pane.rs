@@ -162,19 +162,25 @@ pub fn show(app: &mut SheetApp, ui: &mut Ui) {
             }
         });
         ui.separator();
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             if ui.button(lang.tr("Refresh")).clicked() {
-                app.run_or_alert("pivot.refresh", json!({"pivot": name}));
+                app.run_or_alert("pivot.refresh", json!({"pivot": &name}));
+            }
+            if ui.button(lang.tr("Insert Slicer")).clicked() {
+                app.run_or_alert("insert.slicer", json!({"pivot": &name}));
+            }
+            if ui.button(lang.tr("Insert Timeline")).clicked() {
+                app.run_or_alert("insert.timeline", json!({"pivot": &name}));
             }
             if ui.button(lang.tr("Calculated Field…")).clicked() {
-                app.run_or_alert("pivot.calculatedField", json!({"pivot": name}));
+                app.run_or_alert("pivot.calculatedField", json!({"pivot": &name}));
             }
-            egui::ComboBox::from_id_salt("pv_layout")
+            craft_ui::ComboBox::from_id_salt("pv_layout")
                 .selected_text(lang.tr("Report Layout"))
                 .show_ui(ui, |ui| {
                     for (l, v) in [("Compact", "compact"), ("Outline", "outline"), ("Tabular", "tabular")] {
                         if ui.button(lang.tr(l)).clicked() {
-                            app.run_or_alert("pivot.layout", json!({"pivot": name, "layout": v}));
+                            app.run_or_alert("pivot.layout", json!({"pivot": &name, "layout": v}));
                         }
                     }
                 })

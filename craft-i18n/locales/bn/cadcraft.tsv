@@ -1,0 +1,1090 @@
+# বাংলা (bn) interface catalog for CADCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	  Cancel  	  বাতিল  
+	  OK  	  ঠিক আছে  
+	 or [	 বা [
+	* Wildcard Match	* ওয়াইল্ডকার্ড মিল
+	*VARIES*	*পরিবর্তনশীল*
+	+  |  Top  |  2D Wireframe	+  |  শীর্ষ  |  ২D ওয়্যারফ্রেম
+	+Bin	+বিন
+	+LOC	+LOC
+	1 Viewport	১ ভিউপোর্ট
+	2 Points	২ বিন্দু
+	2 Viewports	২ ভিউপোর্ট
+	2D Solid	২D সলিড
+	3 Points	৩ বিন্দু
+	3 Viewports	৩ ভিউপোর্ট
+	3D Face	৩D ফেস
+	3D Mouse	৩D মাউস
+	3D mouse busy, possibly 3DxWare or missing device permissions	৩D মাউস ব্যস্ত, অনুমতি বা 3DxWare পরীক্ষা করুন
+	3D mouse connected	৩D মাউস সংযুক্ত
+	3D mouse disconnected	৩D মাউস বিচ্ছিন্ন
+	3D mouse input could not be started	৩D মাউস ইনপুট শুরু করা যায়নি
+	3D mouse input is unavailable on this platform	এই প্ল্যাটফর্মে ৩D মাউস ইনপুট অনুপলব্ধ
+	3D Mouse Navigation	৩D মাউস নেভিগেশন
+	3D Mouse...	৩D মাউস...
+	3D Operations	৩D ক্রিয়াকলাপ
+	3D Polyline	৩D পলিলাইন
+	4 Viewports	৪ ভিউপোর্ট
+	< Less than	< এর চেয়ে কম
+	<> Not Equal	<> সমান নয়
+	= Equals	= সমান
+	> Greater than	> এর চেয়ে বড়
+	A built-in table: editing it keeps an edited copy in the drawing.	একটি বিল্ট-ইন টেবিল: সম্পাদনা করলে অঙ্কনে কপি থাকে।
+	A drawing opened from a file keeps that file's format.	ফাইল থেকে খোলা অঙ্কন সেই ফাইলের ফরম্যাট বজায় রাখে।
+	A variable name starts with a letter and has only letters, digits and _	চলকের নাম বর্ণ দিয়ে শুরু হয় এবং বর্ণ, অঙ্ক ও _ থাকে
+	About CADCraft	ক্যাডক্রাফট সম্পর্কে
+	Add Current Scale	বর্তমান স্কেল যোগ
+	Add Leader	লিডার যোগ
+	Add to Working Set	ওয়ার্কিং সেটে যোগ
+	Add Vertex	শীর্ষবিন্দু যোগ
+	Add/Delete Scales...	স্কেল যোগ/মুছুন...
+	Add: Pick points	যোগ: বিন্দু নির্বাচন
+	Add: Select objects	যোগ: বস্তু নির্বাচন
+	Additional angles	অতিরিক্ত কোণ
+	Align Multileaders	মাল্টিলিডার সারিবদ্ধ
+	Aligned	সারিবদ্ধ
+	All Annotation Objects	সকল টীকা বস্তু
+	All Scales	সকল স্কেল
+	All Used Layers	ব্যবহৃত সকল স্তর
+	An array that would create more objects than this is refused.	এর বেশি বস্তু তৈরি করে এমন অ্যারে প্রত্যাখ্যান করা হয়।
+	Animation Effects	অ্যানিমেশন প্রভাব
+	Annotation scale	টীকা স্কেল
+	Annotation Visibility	টীকা দৃশ্যমানতা
+	Annotative Object Scale	অ্যানোটেটিভ অবজেক্ট স্কেল
+	Annotative Update	অ্যানোটেটিভ আপডেট
+	Apparent Intersection	দৃশ্যমান ছেদ
+	Append to current selection set	বর্তমান নির্বাচনে যোগ
+	Apply true color	আসল রঙ প্রয়োগ
+	Arc Length	চাপ দৈর্ঘ্য
+	Arrange Panel	প্যানেল সাজান
+	Array	অ্যারে
+	Associative	সম্পর্কযুক্ত
+	Attach	সংযুক্ত
+	Attach DWG...	DWG সংযুক্ত...
+	Attribute	অ্যাট্রিবিউট
+	Attribute Definition	অ্যাট্রিবিউট সংজ্ঞা
+	Attribute Display	অ্যাট্রিবিউট প্রদর্শন
+	Audit	অডিট
+	Auto (system language)	অটো (সিস্টেম ভাষা)
+	Auto Constrain	অটো কনস্ট্রেইন্ট
+	AutoConstrain	অটোকনস্ট্রেইন্ট
+	Automatic save every	স্বয়ংক্রিয় সংরক্ষণ প্রতি
+	Automatic save file location	স্বয়ংক্রিয় সংরক্ষণ অবস্থান
+	Axis, End	অক্ষ, প্রান্ত
+	B	B
+	Base	বেস
+	Batch Publish	ব্যাচ প্রকাশ
+	Batch Publish...	ব্যাচ প্রকাশ...
+	Bind	বাইন্ড
+	Bind...	বাইন্ড...
+	Blend	ব্লেন্ড
+	Block Attribute Manager...	ব্লক অ্যাট্রিবিউট ম্যানেজার...
+	Block Editor	ব্লক সম্পাদক
+	Block Reference	ব্লক রেফারেন্স
+	Block to create or edit	তৈরি বা সম্পাদনার ব্লক
+	Block...	ব্লক...
+	Boolean	বুলিয়ান
+	Bottom left	নিচের বামে
+	Bottom right	নিচের ডানে
+	Boundaries	সীমানা
+	Boundaries picked: {n}	নির্বাচিত সীমানা: {n}
+	Boundary	সীমানা
+	Boundary...	সীমানা...
+	Box	বাক্স
+	Break	বিরতি
+	Break At Point	বিন্দুতে ভাঙুন
+	Bring Above Objects	বস্তুর উপরে আনুন
+	Bring Annotations to Front	টীকা সামনে আনুন
+	Bulleted list	বুলেটযুক্ত তালিকা
+	ByBlock	ব্লক অনুসারে
+	ByColor	রঙ অনুসারে
+	ByLayer	স্তর অনুসারে
+	CADCraft	ক্যাডক্রাফট
+	CADCraft Help	ক্যাডক্রাফট সহায়তা
+	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	ক্যাডক্রাফট এই পছন্দসমূহ ও স্ন্যাপ মোড সংরক্ষণ করে এবং পুনরায় চালু হলে ফিরিয়ে আনে।
+	Calibrate	ক্যালিব্রেট
+	Calibrate 3D Mouse	৩D মাউস ক্যালিব্রেট
+	Cartesian (x, y)	কার্তেসীয় (x, y)
+	Center Line	কেন্দ্ররেখা
+	Center Mark	কেন্দ্র চিহ্ন
+	Center Z	কেন্দ্র Z
+	Center, Diameter	কেন্দ্র, ব্যাস
+	Center, Radius	কেন্দ্র, ব্যাসার্ধ
+	Center, Start, Angle	কেন্দ্র, শুরু, কোণ
+	Center, Start, End	কেন্দ্র, শুরু, শেষ
+	Center, Start, Length	কেন্দ্র, শুরু, দৈর্ঘ্য
+	Change Space	স্পেস বদল
+	Change to Current Layer	বর্তমান স্তরে বদল
+	Changed: {n}	পরিবর্তিত: {n}
+	Changes apply at once and are kept for next time.	পরিবর্তন সাথে সাথে প্রয়োগ হয় এবং সংরক্ষিত থাকে।
+	Circumference	পরিধি
+	Clear Command History	কমান্ড ইতিহাস মুছুন
+	Click the ruler to add a tab stop, right-click to remove one	ট্যাব যোগ করতে রুলারে ক্লিক করুন, সরাতে ডান ক্লিক করুন
+	Click to set new origin	নতুন মূলবিন্দু সেট করতে ক্লিক করুন
+	Clip	ক্লিপ
+	Clip Viewport	ভিউポート ক্লিপ
+	Close All Other Drawings	অন্যান্য সব অঙ্কন বন্ধ
+	Close Array Editing	অ্যারে সম্পাদনা বন্ধ
+	Close Block Editor	ব্লক সম্পাদক বন্ধ
+	Close Comparison	তুলনা বন্ধ
+	Closed	বন্ধ
+	Coincident	সমাপতিত
+	Collapse Palettes	প্যালেট সংকোচন
+	Collapse Tool Sets	টুল সেট সংকোচন
+	Collect	সংগ্রহ
+	Collect Multileaders	মাল্টিলিডার সংগ্রহ
+	Collinear	সমরেখ
+	Color 1	রঙ ১
+	Color 2	রঙ ২
+	Color 8	রঙ ৮
+	Color 9	রঙ ৯
+	Color Index	কালার ইনডেক্স
+	Color-dependent	রঙ-নির্ভর
+	Color...	রঙ...
+	Command Aliases	কমান্ড ওরফে
+	Command History	কমান্ড ইতিহাস
+	Command Line	কমান্ড লাইন
+	Command line history	কমান্ড লাইন ইতিহাস
+	Command Line History Lines	কমান্ড লাইন ইতিহাস লাইন
+	Command Reference	কমান্ড নির্দেশিকা
+	Compare Drawings...	অঙ্কন তুলনা...
+	Computer-aided design and drafting: an open-source, clean-room CAD application written in pure Rust.	কম্পিউটার-সহায়তাকৃত নকশা ও ড্রাফটিং: বিশুদ্ধ রাস্টে তৈরি ওপেন-সোর্স CAD অ্যাপ্লিকেশন।
+	Concentric	এককেন্দ্রিক
+	Constraint Bars	কনস্ট্রেইন্ট বার
+	Constraint Settings	কনস্ট্রেইন্ট সেটিংস
+	Construction Line	নির্মাণ রেখা
+	contains authoring elements. Open in Block Editor?	অথরিং উপাদান রয়েছে। ব্লক সম্পাদকে খুলবেন?
+	Contents	বিষয়বস্তু
+	Control Vertices	নিয়ন্ত্রণ শীর্ষবিন্দু
+	Convert to Arc	চাপে রূপান্তর
+	Convert to Line	রেখায় রূপান্তর
+	Copy as JSON	JSON হিসেবে কপি
+	Copy Full File Path	ফাইলের সম্পূর্ণ পাথ কপি
+	Copy History	ইতিহাস কপি
+	Copy Layout	লেআউট কপি
+	Copy Nested Objects	নেস্টেড বস্তু কপি
+	Copy Selection	নির্বাচন কপি
+	Copy with Base Point	বেস পয়েন্টসহ কপি
+	Count	গণনা
+	Count List	গণনা তালিকা
+	Count Table	গণনা টেবিল
+	Create Block	ব্লক তৈরি
+	Create separate hatches	পৃথক হ্যাচ তৈরি
+	Creates a user parameter	ব্যবহারকারী প্যারামিটার তৈরি করে
+	Crosshair size	ক্রসহ্যায়ার আকার
+	Crossing selection color:	ক্রসিং নির্বাচন রঙ:
+	Ctrl+Enter to finish	শেষ করতে Ctrl+Enter চাপুন
+	Current layer	বর্তমান স্তর
+	Current Scale Only	শুধু বর্তমান স্কেল
+	Current selection	বর্তমান নির্বাচন
+	Current: {color}	বর্তমান: {color}
+	Curved	বাঁকানো
+	Cylinder	সিলিন্ডার
+	Data Extraction...	ডেটা নিষ্কাশন...
+	Data Link...	ডেটা লিঙ্ক...
+	Default Save Format	ডিফল্ট সংরক্ষণ বিন্যাস
+	Default Save Version	ডিফল্ট সংরক্ষণ সংস্করণ
+	Default save version	ডিফল্ট সংরক্ষণ সংস্করণ
+	Default to boundary extents	ডিফল্ট সীমানা ব্যাপ্তি
+	Define Attributes	অ্যাট্রিবিউট নির্ধারণ
+	Define Attributes...	অ্যাট্রিবিউট নির্ধারণ...
+	Defined width	নির্ধারিত প্রস্থ
+	Degree	ডিগ্রি
+	Degrees of Freedom	স্বাধীনতার মাত্রা
+	Degrees of freedom: {n}	স্বাধীনতার মাত্রা: {n}
+	Delete Column	কলাম মুছুন
+	Delete Constraints	কনস্ট্রেইন্ট মুছুন
+	Delete Current Scale	বর্তমান স্কেল মুছুন
+	Delete Dimension Style	মাত্রা শৈলী মুছুন
+	Delete Duplicate Objects	অনুরূপ বস্তু মুছুন
+	Delete Layer State	স্তর অবস্থা মুছুন
+	Delete Layout	লেআউট মুছুন
+	Delete Row	সারি মুছুন
+	Delete Text Style	টেক্সট শৈলী মুছুন
+	Delta X	ডেল্টা X
+	Delta Y	ডেল্টা Y
+	Detach	বিচ্ছিন্ন
+	Dim style	মাত্রা শৈলী
+	Dimension	মাত্রা
+menu	Dimension	মাত্রা
+	Dimension Break	মাত্রা বিরতি
+	Dimension Edit	মাত্রা সম্পাদনা
+	Dimension Objects Only	শুধু মাত্রা বস্তু
+	Dimension Space	মাত্রা স্থান
+	Dimension style	মাত্রা শৈলী
+	Dimension Style Override	মাত্রা শৈলী ওভাররাইড
+	Dimension Style...	মাত্রা শৈলী...
+	Dimension Text Edit	মাত্রা টেক্সট সম্পাদনা
+	Dimensional Constraint	মাত্রিক কনস্ট্রেইন্ট
+	Dimensional Constraint Parameters	মাত্রিক কনস্ট্রেইন্ট প্যারামিটার
+	Dimensional Constraints	মাত্রিক কনস্ট্রেইন্ট
+	Disassociate Dimensions	মাত্রা বিচ্ছিন্ন
+	Display plot styles	প্লট শৈলী প্রদর্শন
+	Do not plot (click: plot)	প্লট করবেন না (ক্লিক: প্লট)
+	Donut	ডোনাট
+	Double-click to edit the description	বিবরণ সম্পাদনা করতে ডাবল ক্লিক করুন
+	Drafting	ড্রাফটিং
+	Drafting Settings	ড্রাফটিং সেটিংস
+	Drafting Settings...	ড্রাফটিং সেটিংস...
+	Drag Dynamic Grip	ডাইনামিক গ্রিপ টানুন
+menu	Draw	অঙ্কন
+	Draw Order	অঙ্কন ক্রম
+	Drawing (DWG)	অঙ্কন (DWG)
+	Drawing (DXF)	অঙ্কন (DXF)
+	Drawing as bytes	বাইট হিসেবে অঙ্কন
+	Drawing Limits	অঙ্কন সীমা
+	Drawing Recovery Manager...	অঙ্কন পুনরুদ্ধার ম্যানেজার...
+	Drawing Template (DWT)	অঙ্কন টেমপ্লেট (DWT)
+	Drawing Utilities	অঙ্কন ইউটিলিটি
+	Drawings (DWG, DXF)	অঙ্কন (DWG, DXF)
+	Drawings with no file yet are saved in the default version. 0 minutes turns automatic save off.	ফাইলহীন অঙ্কন ডিফল্ট সংস্করণে সংরক্ষিত হয়। ০ মিনিট দিলে স্বয়ংক্রিয় সংরক্ষণ বন্ধ হয়।
+	DWG	DWG
+	DWG Reference...	DWG রেফারেন্স...
+	DXF	DXF
+	Dynamic Block Data	ডাইনামিক ব্লক ডেটা
+	Dynamic Block Grips	ডাইনামিক ব্লক গ্রিপ
+	Dynamic Block Reference	ডাইনামিক ব্লক রেফারেন্স
+	Dynamic Dimensions	ডাইনামিক মাত্রা
+	Dynamic Input	ডাইনামিক ইনপুট
+	Dynamic Input (F12)	ডাইনামিক ইনপুট (F12)
+	E	E
+	Edit Array	অ্যারে সম্পাদনা
+	Edit Attributes...	অ্যাট্রিবিউট সম্পাদনা...
+	Edit Block Definition	ব্লক সংজ্ঞা সম্পাদনা
+	Edit Multileader	মাল্টিলিডার সম্পাদনা
+	Edit Reference In-Place	রেফারেন্স স্থানে সম্পাদনা
+	Edit Table Cell	টেবিল ঘর সম্পাদনা
+	Edit Text...	টেক্সট সম্পাদনা...
+	Elliptical Arc	উপবৃত্তাকার চাপ
+	Enable 3D mouse navigation	৩D মাউস নেভিগেশন সক্ষম করুন
+	Enable Dynamic Input (F12)	ডাইনামিক ইনপুট সক্ষম করুন (F12)
+	End angle	শেষ কোণ
+	End Object Isolation	অবজেক্ট বিচ্ছিন্নতা সমাপ্ত
+	End Width	শেষ প্রস্থ
+	End X	শেষ X
+	End Y	শেষ Y
+	Enter a fit data option	ফিট ডেটা বিকল্প দিন
+	Enter a pattern name	প্যাটার্ন নাম দিন
+	Enter a vertex editing option	শীর্ষবিন্দু সম্পাদনা বিকল্প দিন
+	Enter an option	বিকল্প লিখুন
+	Enter angle of xline	xline এর কোণ দিন
+	Enter area of rectangle in current units	বর্তমান এককে আয়তক্ষেত্রের ক্ষেত্রফল দিন
+	Enter attribute prompt	অ্যাট্রিবিউট প্রম্পট লিখুন
+	Enter attribute tag name	অ্যাট্রিবিউট ট্যাগ নাম দিন
+	Enter attribute value	অ্যাট্রিবিউট মান লিখুন
+	Enter block name	ব্লকের নাম লিখুন
+	Enter constraint type	কনস্ট্রেইন্ট ধরন দিন
+	Enter continuity	ধারাবাহিকতা দিন
+	Enter default attribute value	ডিফল্ট অ্যাট্রিবিউট মান লিখুন
+	Enter degree of spline	স্প্লাইনের ডিগ্রি দিন
+	Enter delta angle	ডেল্টা কোণ দিন
+	Enter dimension text	মাত্রা টেক্সট লিখুন
+	Enter dimension text (<> = measurement)	মাত্রা টেক্সট লিখুন (<> = পরিমাপ)
+	Enter dimension value or [name=expression]	মাত্রা মান বা [name=expression] লিখুন
+	Enter dimension variable name to override	ওভাররাইড করতে মাত্রা চলকের নাম দিন
+	Enter justification type	জাস্টিফিকেশন ধরন দিন
+	Enter leader text	লিডার টেক্সট লিখুন
+	Enter mline scale	mline স্কেল দিন
+	Enter mode	মোড দিন
+	Enter name of block to insert	সন্নিবেশের ব্লকের নাম লিখুন
+	Enter new text	নতুন টেক্সট লিখুন
+	Enter next point	পরবর্তী বিন্দু দিন
+	Enter number of columns	কলাম সংখ্যা লিখুন
+	Enter number of data rows	ডেটা সারি সংখ্যা লিখুন
+	Enter number of items	আইটেম সংখ্যা লিখুন
+	Enter number of items along path	পাথ বরাবর আইটেম সংখ্যা লিখুন
+	Enter number of sides	বাহুর সংখ্যা লিখুন
+	Enter number of turns	পাকের সংখ্যা লিখুন
+	Enter percentage length	শতকরা দৈর্ঘ্য দিন
+	Enter rectangle length	আয়তক্ষেত্রের দৈর্ঘ্য দিন
+	Enter rectangle width	আয়তক্ষেত্রের প্রস্থ দিন
+	Enter scale factor	স্কেল ফ্যাক্টর লিখুন
+	Enter text	টেক্সট লিখুন
+	Enter text (use \\P for new paragraphs)	টেক্সট লিখুন (নতুন অনুচ্ছেদের জন্য \\P ব্যবহার করুন)
+	Enter the number of segments	অংশের সংখ্যা লিখুন
+	Enter Top, Zero or Bottom.	Top, Zero বা Bottom লিখুন।
+	Enter twist direction of helix	হেলিক্সের প্যাঁচের দিক দিন
+	Entire drawing	সম্পূর্ণ অঙ্কন
+	Equal	সমান
+	error	ত্রুটি
+	Evaluate	মূল্যায়ন
+	Evaluate LISP	LISP মূল্যায়ন
+	Exclude from new selection set	নতুন নির্বাচন হতে বাদ দিন
+	Exclude:	বাদ দিন:
+	Explode	বিস্ফোরণ
+	Export Table	টেবিল রপ্তানি
+	Export to PDF...	PDF-এ রপ্তানি...
+	Export...	রপ্তানি...
+	Extend	প্রসারিত
+	Extension	সম্প্রসারণ
+	Extents	ব্যাপ্তি
+	External Reference	বাহ্যিক রেফারেন্স
+	External References	বাহ্যিক রেফারেন্স
+	Extrude	এক্সট্রুড
+	File Tab	ফাইল ট্যাব
+	Fillet	ফিলেট
+	Filters	ফিল্টার
+	Find...	খুঁজুন...
+	Fit Points	ফিট পয়েন্টস
+	Fix	স্থির
+	Flatten Objects	বস্তু সমতল করুন
+	Freehand	মুক্তহস্ত
+	Freeze	ফ্রিজ
+	Freeze in new viewports	নতুন ভিউপোর্টে ফ্রিজ
+	Freeze Layer	স্তর ফ্রিজ
+	Freeze/Thaw	ফ্রিজ/আনফ্রিজ
+	Freeze/Thaw in all viewports	সকল ভিউপোর্টে ফ্রিজ/আনফ্রিজ
+	Freeze/Thaw in the current viewport	বর্তমান ভিউপোর্টে ফ্রিজ/আনফ্রিজ
+	From Template...	টেমপ্লেট হতে...
+	Geometric Center	জ্যামিতিক কেন্দ্র
+	Geometric Constraint	জ্যামিতিক কনস্ট্রেইন্ট
+	Geometric Constraints	জ্যামিতিক কনস্ট্রেইন্ট
+	Get from the Drawing	অঙ্কন হতে নিন
+	Get Variable	চলক পান
+	Get View	ভিউ পান
+	Global width	সার্বিক প্রস্থ
+	Grab bag	বিবিধ
+	Gradient...	গ্রেডিয়েন্ট...
+	Grid (F7)	গ্রিড (F7)
+	Grid Display	গ্রিড প্রদর্শন
+	Grid On (F7)	গ্রিড চালু (F7)
+	Grid snap	গ্রিড স্ন্যাপ
+	Grid spacing	গ্রিড ব্যবধান
+	Grip Edit	গ্রিপ সম্পাদনা
+	Grip Mirror	গ্রিপ মিরর
+	Grip Option	গ্রিপ বিকল্প
+	Grip Rotate	গ্রিপ ঘোরান
+	Grip Scale	গ্রিপ স্কেল
+	Grip size	গ্রিপের আকার
+	Grip Stretch	গ্রিপ প্রসারিত
+	Grips	গ্রিপ
+	Group Edit	গ্রুপ সম্পাদনা
+	Group Options	গ্রুপ বিকল্প
+	Group Selection	গ্রুপ নির্বাচন
+	Hatch	হ্যাচ
+	Hatch and Gradient	হ্যাচ ও গ্রেডিয়েন্ট
+	Hatch Edit	হ্যাচ সম্পাদনা
+	Hatch origin	হ্যাচ মূলবিন্দু
+	Hatch Pattern	হ্যাচ প্যাটার্ন
+	Hatch Patterns	হ্যাচ প্যাটার্ন
+	Hatch Pick	হ্যাচ পিক
+	Hatch...	হ্যাচ...
+	Hatches	হ্যাচ
+	Height: {height}	উচ্চতা: {height}
+	Helix	হেলিক্স
+	Hemispherical	অর্ধগোলকাকার
+	Hide All Constraint Bars	সকল কনস্ট্রেইন্ট বার লুকান
+	Hide All Dynamic Dimensions	সকল ডাইনামিক মাত্রা লুকান
+	Hide CADCraft	ক্যাডক্রাফট লুকান
+	Hide Layer List	স্তর তালিকা লুকান
+	Hide Objects	বস্তু লুকান
+	Hide Palette	প্যালেট লুকান
+	Hide Palettes	প্যালেট লুকান
+	Hold Shift to add to the selection	নির্বাচনে যোগ করতে Shift চেপে রাখুন
+	HorizontalDistance	অনুভূমিক দূরত্ব
+	How to apply:	প্রয়োগের নিয়ম:
+	ID Point	ID বিন্দু
+	Import...	আমদানি...
+	In	ভেতরে
+	In-window Menu Bar	ইন-উইন্ডো মেনু বার
+	Include in new selection set	নতুন নির্বাচনে অন্তর্ভুক্ত করুন
+	Increment angle	কোণ বৃদ্ধি
+	Index Color	ইনডেক্স রঙ
+	Index color: {index}	ইনডেক্স রঙ: {index}
+	Indicate selection area	নির্বাচন এলাকা নির্দেশ করুন
+	Infer Constraints	অনুমিত কনস্ট্রেইন্ট
+	Inquiry	অনুসন্ধান
+	Insert Block	ব্লক সন্নিবেশ
+	Insert Column	কলাম সন্নিবেশ
+	Insert Row	সারি সন্নিবেশ
+	Insert tab	ট্যাব সন্নিবেশ
+	Insert Table Formula	টেবিল সূত্র সন্নিবেশ
+	Insert this block	এই ব্লক সন্নিবেশ করুন
+	Insertion	সন্নিবেশ
+	Insertion X	সন্নিবেশ X
+	Insertion Y	সন্নিবেশ Y
+	Insertion Z	সন্নিবেশ Z
+	Inspect Constraints	কনস্ট্রেইন্ট পরিদর্শন
+	Inspect Drawing	অঙ্কন পরিদর্শন
+	Inspection	পরিদর্শন
+	Interface theme	ইন্টারফেস থিম
+	Inverted	বিপরীত
+	Island detection	আইল্যান্ড সনাক্তকরণ
+	Isolate Layer	স্তর বিচ্ছিন্ন করুন
+	Isolate Objects	বস্তু বিচ্ছিন্ন করুন
+	Isometric Drafting	আইসোমেট্রিক ড্রাফটিং
+	Isometric Plane	আইসোমেট্রিক সমতল
+	Isometric snap	আইসোমেট্রিক স্ন্যাপ
+	Jogged	জগড
+	Jogged Linear	জগড রৈখিক
+	Keep an editable copy of this table in the drawing	এই টেবিলের সম্পাদনাযোগ্য কপি অঙ্কনে রাখুন
+	Keep the system cursor visible over the drawing area	অঙ্কন এলাকার উপর সিস্টেম কার্সার দৃশ্যমান রাখুন
+	Largest array	বৃহত্তম অ্যারে
+	Layer contains objects (double-click to make current)	স্তরে বস্তু রয়েছে (বর্তমান করতে ডাবল ক্লিক করুন)
+	Layer Delete	স্তর মুছুন
+	Layer is empty (double-click to make current)	স্তর খালি (বর্তমান করতে ডাবল ক্লিক করুন)
+	Layer Match	স্তর মিল
+	Layer Merge	স্তর একত্রীকরণ
+	Layer Off	স্তর বন্ধ
+	Layer Properties	স্তর বৈশিষ্ট্য
+	Layer Properties Manager	স্তর বৈশিষ্ট্য ম্যানেজার
+	Layer Properties Manager — current viewport	স্তর বৈশিষ্ট্য ম্যানেজার — বর্তমান ভিউপোর্ট
+	Layer State	স্তর অবস্থা
+	Layer States Manager...	স্তর অবস্থা ম্যানেজার...
+	Layer Tools	স্তর সরঞ্জাম
+	Layers displayed: {shown} of {total}.   Current layer: {layer}	প্রদর্শিত স্তর: {total}-এর মধ্যে {shown}। বর্তমান স্তর: {layer}
+	Layers Palette	স্তর প্যালেট
+	Layout list	লেআউট তালিকা
+	Layout paper	লেআউট কাগজ
+	Layout {name}: {table}	লেআউট {name}: {table}
+	Leader	লিডার
+	Leaders Only	শুধু লিডার
+	Left device button: zoom extents. Right device button: calibrate.	বাম বোতাম: জুম ব্যাপ্তি। ডান বোতাম: ক্যালিব্রেট।
+	Length X	দৈর্ঘ্য X
+	Length Y	দৈর্ঘ্য Y
+	Lengthen	দীর্ঘায়িত
+	Lines of Command History	কমান্ড ইতিহাসের লাইন
+	Linetype	লাইনটাইপ
+	Linetype Scale	লাইনটাইপ স্কেল
+	Linetype scale	লাইনটাইপ স্কেল
+	Linetype...	লাইনটাইপ...
+	Lineweight	লাইনওয়েট
+	Lineweight...	লাইনওয়েট...
+	List Blocks	ব্লকের তালিকা
+	List Dimension Styles	মাত্রা শৈলীর তালিকা
+	List Groups	গ্রুপ তালিকা
+	List Layer States	স্তর অবস্থার তালিকা
+	List Layouts	লেআউট তালিকা
+	List System Variables	সিস্টেম চলকের তালিকা
+	List Text Styles	টেক্সট শৈলীর তালিকা
+	Load all	সব লোড করুন
+	Load Application...	অ্যাপ্লিকেশন লোড...
+	Load...	লোড...
+	Loaded	লোড হয়েছে
+	Loaded linetypes	লোড করা লাইনটাইপ
+	Lock Layer	স্তর লক
+	Lock viewport	ভিউপোর্ট লক
+	Lock/Unlock	লক/আনলক
+	Loft	লফট
+	Ltscale	Ltscale
+	Major line every	প্রধান লাইন প্রতি
+	Make Current	বর্তমান করুন
+	Make it a block of this drawing, keeping its layer names	স্তরের নাম রেখে এই অঙ্কনের ব্লক করুন
+	Make it a block of this drawing; its layers become NAME$0$LAYER	এই অঙ্কনের ব্লক করুন; স্তরগুলো NAME$0$LAYER হবে
+	Make Object's Layer Current	বস্তুর স্তর বর্তমান করুন
+	Make...	তৈরি...
+	Match Layer	স্তর মিলান
+	Match Properties	বৈশিষ্ট্য মিলান
+	Measure Distance	দূরত্ব মাপুন
+	Measure Geometry	জ্যামিতি মাপুন
+	Mid Between 2 Points	২ বিন্দুর মধ্যবিন্দু
+	min	মিনিট
+	MIT OR Apache-2.0. Not affiliated with Autodesk, Inc.	MIT বা Apache-2.0। Autodesk, Inc.-এর সাথে সংশ্লিষ্ট নয়।
+	MODEL	MODEL
+	Model background	মডেল পটভূমি
+	Model Space (in viewport)	মডেল স্পেস (ভিউফোর্টে)
+	Modeling	মডেলিং
+menu	Modify	সংশোধন
+	More toolbar commands	আরও টুলবার কমান্ড
+	Move sideways to pan; push/pull or twist to zoom.	প্যান করতে পাশে সরান; জুম করতে পুশ/পুল করুন।
+	MText	MText
+	Multileader	মাল্টিলিডার
+	Multileader style	মাল্টিলিডার শৈলী
+	Multileader Style...	মাল্টিলিডার শৈলী...
+	Multiline	মাল্টিলাইন
+	Multiline Style...	মাল্টিলাইন শৈলী...
+	Multiline Text	মাল্টিলাইন টেক্সট
+	Multiline text	মাল্টিলাইন টেক্সট
+	Multiline Text...	মাল্টিলাইন টেক্সট...
+	Multiline...	মাল্টিলাইন...
+	Multiple	একাধিক
+	Multiple Point	একাধিক বিন্দু
+	My	আমার
+	My properties: not available yet	আমার বৈশিষ্ট্য: এখনও উপলব্ধ নয়
+	N	N
+	Named	নামযুক্ত
+	Named Views...	নামযুক্ত ভিউ...
+	Nearest	নিকটবর্তী
+	New (metric)	নতুন (মেট্রিক)
+	New block	নতুন ব্লক
+	New CTB	নতুন CTB
+	New Drawing	নতুন অঙ্কন
+	New Drawing (⌘N)	নতুন অঙ্কন (⌘N)
+	New Drawing...	নতুন অঙ্কন...
+	New from Template...	টেমপ্লেট হতে নতুন...
+	New Layout	নতুন লেআউট
+	New layout	নতুন লেআউট
+	New state name	নতুন অবস্থার নাম
+	New STB	নতুন STB
+	New style	নতুন শৈলী
+	New Viewports...	নতুন ভিউপোর্ট...
+	New VP Freeze	নতুন VP ফ্রিজ
+	No blocks defined in this drawing.	এই অঙ্কনে কোনো ব্লক সংজ্ঞায়িত নেই।
+	No contributor data was built into this copy.	এই কপিতে কোনো অবদানকারীর ডেটা নেই।
+	No external references are attached.	কোনো বাহ্যিক রেফারেন্স সংযুক্ত নেই।
+	No model credits were built into this copy.	এই কপিতে কোনো মডেল ক্রেডিট নেই।
+	No plot style tables.	কোনো প্লট শৈলী টেবিল নেই।
+	No saved layer states	কোনো সংরক্ষিত স্তর অবস্থা নেই
+	No supported 3D mouse found	সমর্থিত ৩D মাউস পাওয়া যায়নি
+	Node	নোড
+	Not a number or distance: {text}	সংখ্যা বা দূরত্ব নয়: {text}
+	Not available yet	এখনও উপলব্ধ নয়
+	Not Found	পাওয়া যায়নি
+	Not loaded	লোড হয়নি
+	Numbered list	সংখ্যাতালিকা
+	Object grouping	অবজেক্ট গ্রুপিং
+	Object selection limit for display of grips	গ্রিপ প্রদর্শনের জন্য অবজেক্ট নির্বাচন সীমা
+	Object Snap	অবজেক্ট স্ন্যাপ
+	Object Snap (F3)	অবজেক্ট স্ন্যাপ (F3)
+	Object snap aperture	অবজেক্ট স্ন্যাপ অ্যাপারচার
+	Object snap marker size	অবজেক্ট স্ন্যাপ মার্কারের আকার
+	Object Snap On (F3)	অবজেক্ট স্ন্যাপ চালু (F3)
+	Object Snap Tracking	অবজেক্ট স্ন্যাপ ট্র্যাকিং
+	Object Snap Tracking (F11)	অবজেক্ট স্ন্যাপ ট্র্যাকিং (F11)
+	Object Snap Tracking Settings	অবজেক্ট স্ন্যাপ ট্র্যাকিং সেটিংস
+	Object type:	অবজেক্টের ধরন:
+	objects	অবজেক্ট
+	Objects on locked layers	লক করা স্তরের অবজেক্ট
+	Oblique	তির্যক
+	On/Off	চালু/বন্ধ
+	One of the Crafting Apps by the ArtCraft team and community.	আর্টক্রাফট টিম ও কমিউনিটির একটি ক্রাফটিং অ্যাপ।
+	Only in this drawing: {n}	শুধু এই অঙ্কনে: {n}
+	Only in {name}: {n}	শুধু {name}-এ: {n}
+	Open (⌘O)	খুলুন (⌘O)
+	Open a drawing first.	প্রথমে একটি অঙ্কন খুলুন।
+	Open and Save	খোলা ও সংরক্ষণ
+	Open in Block Editor	ব্লক সম্পাদকে খুলুন
+	Open Sample Drawing	নমুনা অঙ্কন খুলুন
+	Open sample drawing	নমুনা অঙ্কন খুলুন
+	Open Xref	Xref খুলুন
+	Open...	খুলুন...
+	Operator:	অপারেটর:
+	Options...	বিকল্প...
+	Orbit	কক্ষপথ
+	Ordinate	অর্ডিনেট
+	Origin: {x}, {y}	মূলবিন্দু: {x}, {y}
+	Ortho (F8)	অর্থো (F8)
+	Ortho Mode	অর্থো মোড
+	Ortho Mode (F8)	অর্থো মোড (F8)
+	Osnap Settings...	ওস্ন্যাপ সেটিংস...
+	Out	বাইরে
+	Outer	বাইরের
+	Over-constrained	অতিরিক্ত সীমাবদ্ধ
+	Overline	ওভারলাইন
+	Override	ওভাররাইড
+	Page Setup Manager	পেজ সেটআপ ম্যানেজার
+	Page Setup Manager...	পেজ সেটআপ ম্যানেজার...
+	Pan	প্যান
+	Pan Down	নিচে প্যান
+	Pan Left	বামে প্যান
+	Pan Right	ডানে প্যান
+	Pan sensitivity	প্যান সংবেদনশীলতা
+	Pan Up	উপরে প্যান
+	PAPER	PAPER
+	Paper Space	পেপার স্পেস
+	Parallel	সমান্তরাল
+	Parameters Manager	প্যারামিটার ম্যানেজার
+	Parametric	প্যারামেট্রিক
+	Paste as Block	ব্লক হিসেবে পেস্ট
+	Paste to Command Line	কমান্ড লাইনে পেস্ট
+	Paste to Original Coordinates	মূল স্থানাঙ্কে পেস্ট
+	Path Array	পাথ অ্যারে
+	Perpendicular	লম্ব
+	Pickbox size	পিকবক্স আকার
+	Plot	প্লট
+	Plot (click: do not plot)	প্লট (ক্লিক: প্লট করবেন না)
+	Plot Preview	প্লট প্রিভিউ
+	Plot style	প্লট শৈলী
+	Plot style attached to	প্লট শৈলী সংযুক্ত
+	Plot Style Manager	প্লট শৈলী ম্যানেজার
+	Plot Style Manager...	প্লট শৈলী ম্যানেজার...
+	Plot style table	প্লট শৈলী টেবিল
+	Plot Style...	প্লট শৈলী...
+	Plot Styles...	প্লট শৈলী...
+	Plot table type	প্লট টেবিল ধরন
+	Plot Window	প্লট উইন্ডো
+	Plotter Manager	প্লটার ম্যানেজার
+	Plotter Manager...	প্লটার ম্যানেজার...
+	Plus/minus	প্লাস/মাইনাস
+	Point Filters	পয়েন্ট ফিল্টার
+	Point Style...	পয়েন্ট শৈলী...
+	Polar (distance < angle)	পোলার (দূরত্ব < কোণ)
+	Polar angle measurement	পোলার কোণ পরিমাপ
+	Polar Array	পোলার অ্যারে
+	Polar distance	পোলার দূরত্ব
+	Polar Tracking	পোলার ট্র্যাকিং
+	Polar Tracking (F10)	পোলার ট্র্যাকিং (F10)
+	Polar Tracking On (F10)	পোলার ট্র্যাকিং চালু (F10)
+	Polar: {distance} < {angle}°	পোলার: {distance} < {angle}°
+	PolarSnap	পোলারস্ন্যাপ
+	Polygonal	বহুভুজাকার
+	Polygonal Viewport	বহুভুজাকার ভিউপোর্ট
+	Polyline Edit	পলিলাইন সম্পাদনা
+	Position X	অবস্থান X
+	Position Y	অবস্থান Y
+	Position Z	অবস্থান Z
+	Previous Layer	আগের স্তর
+	Primitives	আদিম রূপ
+	Print...	প্রিন্ট...
+	Profiles	প্রোফাইল
+	Properties Inspector	বৈশিষ্ট্য পরিদর্শক
+	Properties:	বৈশিষ্ট্য:
+	Proxy	প্রক্সি
+	Purge	পার্জ
+	Quadrant	চতুর্ভাগ
+	Query Entities	সত্তা অনুসন্ধান
+	Query Texts	টেক্সট অনুসন্ধান
+	Quick	দ্রুত
+	Quick Dimension	দ্রুত মাত্রা
+	Quick Properties	দ্রুত বৈশিষ্ট্য
+	Quick Select	দ্রুত নির্বাচন
+	Quick Select Properties	দ্রুত নির্বাচন বৈশিষ্ট্য
+	Quick Select...	দ্রুত নির্বাচন...
+	QuickCalc	কুইকক্যাল্ক
+	QuickCalc Pick	কুইকক্যাল্ক পিক
+	Quit CADCraft	ক্যাডক্রাফট বন্ধ করুন
+	Raster Image	র‌্যাস্টার ছবি
+	Ray	রশ্মি
+	Read-only	শুধু পাঠযোগ্য
+	Realtime	রিয়েলটাইম
+	Reassociate Dimensions	মাত্রা পুনরায় সংযুক্ত
+	Recalculate Table Formulas	টেবিল সূত্র পুনর্গণনা
+	Recent Commands	সাম্প্রতিক কমান্ড
+	Recent Input	সাম্প্রতিক ইনপুট
+	Recover...	পুনরুদ্ধার...
+	Rectangular Array	আয়তাকার অ্যারে
+	Rectangular snap	আয়তাকার স্ন্যাপ
+	Redo (⇧⌘Z)	রিডু (⇧⌘Z)
+	Redraw	পুনরায় আঁকা
+	Reference Manager	রেফারেন্স ম্যানেজার
+	Reference Name	রেফারেন্সের নাম
+	References: {n}	রেফারেন্স: {n}
+	Regen	রিজেন
+	Regen All	সব রিজেন
+	Region	অঞ্চল
+	Region/Mass Properties	অঞ্চল/ভর বৈশিষ্ট্য
+	Reinitialize	পুনরায় শুরু
+	Relative to last segment	শেষ অংশের সাপেক্ষে
+	Release the 3D mouse to calibrate its resting position	বিশ্রাম অবস্থান ক্যালিব্রেট করতে ৩D মাউস ছেড়ে দিন
+	Reload All	সব পুনরায় লোড
+	Remove Leader	লিডার সরান
+	Remove the viewport override	ভিউফোর্ট ওভাররাইড সরান
+	Remove Vertex	শীর্ষবিন্দু সরান
+	Rename Dimension Style	মাত্রা শৈলীর নাম বদল
+	Rename Layer	স্তরের নাম বদল
+	Rename Layer State	স্তর অবস্থার নাম বদল
+	Rename Layout	লেআউটের নাম বদল
+	Rename Text Style	টেক্সট শৈলীর নাম বদল
+	Rename...	নাম বদল...
+	Repeat {command}	পুনরাবৃত্তি {command}
+	Requires a point (x,y, @dx,dy or @d<a).	একটি বিন্দু প্রয়োজন (x,y, @dx,dy বা @d<a)।
+	Reset keeps the interface language.	রিসেট করলে ইন্টারফেস ভাষা অক্ষুণ্ন থাকে।
+	Reset Palettes	প্যালেট রিসেট
+	Reset Panel Layout	প্যানেল লেআউট রিসেট
+	Reset to Defaults	ডিফল্ট রিসেট
+	Restore Layer State	স্তর অবস্থা পুনরুদ্ধার
+	Reverse zoom direction	জুমের দিক উল্টান
+	Revision Cloud	রিভিশন ক্লাউড
+	Revolve	আবর্তন
+	Run Script...	স্ক্রিপ্ট চালান...
+	S	S
+	Save (⌘S)	সংরক্ষণ (⌘S)
+	Save As...	নতুন নামে সংরক্ষণ...
+	Save Block	ব্লক সংরক্ষণ
+	Save Block As	নতুন নামে ব্লক সংরক্ষণ
+	Save Layer State	স্তর অবস্থা সংরক্ষণ
+	Save new drawings as	নতুন অঙ্কন সংরক্ষণ ফরম্যাট
+	Save Reference Edits	রেফারেন্স সম্পাদনা সংরক্ষণ
+	Save State	অবস্থা সংরক্ষণ
+	Saved Path	সংরক্ষিত পাথ
+	Scale List...	স্কেল তালিকা...
+	Screen magnifiers, screen readers and recorders follow the system cursor.	স্ক্রিন ম্যাগনিফায়ার ও রিডার সিস্টেম কার্সার অনুসরণ করে।
+	Screening	স্ক্রিনিং
+	Search for layer	স্তর খুঁজুন
+	Search for parameter	প্যারামিটার খুঁজুন
+	Search for pattern	প্যাটার্ন খুঁজুন
+	Second and next points:	দ্বিতীয় ও পরবর্তী বিন্দুসমূহ:
+	Select 2D polyline	২D পলিলাইন নির্বাচন
+	Select a 2D polyline.	একটি ২D পলিলাইন নির্বাচন করুন।
+	Select a block reference.	একটি ব্লক রেফারেন্স নির্বাচন করুন।
+	Select a circle or arc.	বৃত্ত বা চাপ নির্বাচন করুন।
+	Select a closed polyline	বদ্ধ পলিলাইন নির্বাচন
+	Select a closed polyline, circle, ellipse or closed spline.	বদ্ধ পলিলাইন, বৃত্ত, উপবৃত্ত বা স্প্লাইন নির্বাচন করুন।
+	Select a closed polyline.	একটি বদ্ধ পলিলাইন নির্বাচন করুন।
+	Select a curve as the path.	পাথ হিসেবে বক্ররেখা নির্বাচন করুন।
+	Select a dimension constraint type	মাত্রা কনস্ট্রেইন্টের ধরন নির্বাচন করুন
+	Select a line object	লাইন অবজেক্ট নির্বাচন করুন
+	Select a line object.	একটি লাইন অবজেক্ট নির্বাচন করুন।
+	Select a line or an arc.	একটি লাইন বা চাপ নির্বাচন করুন।
+	Select a line or polyline segment	লাইন বা পলিলাইন অংশ নির্বাচন করুন
+	Select a line, arc or open polyline.	লাইন, চাপ বা খোলা পলিলাইন নির্বাচন করুন।
+	Select a line, arc, circle, polyline, ellipse or spline as the path.	পাথ হিসেবে লাইন, চাপ, বৃত্ত, পলিলাইন বা স্প্লাইন নির্বাচন করুন।
+	Select a line, circle, arc or polyline segment.	লাইন, বৃত্ত, চাপ বা পলিলাইন অংশ নির্বাচন করুন।
+	Select a line.	একটি লাইন নির্বাচন করুন।
+	Select a polyline.	একটি পলিলাইন নির্বাচন করুন।
+	Select a text, mtext, attribute definition or dimension.	একটি টেক্সট, mtext, অ্যাট্রিবিউট বা মাত্রা নির্বাচন করুন।
+	Select an annotation object	একটি টীকা বস্তু নির্বাচন করুন
+	Select an arc or circle	চাপ বা বৃত্ত নির্বাচন করুন
+	Select an arc.	একটি চাপ নির্বাচন করুন।
+	Select an object	একটি বস্তু নির্বাচন করুন
+	Select an object.	একটি বস্তু নির্বাচন করুন।
+	Select an open curve.	খোলা বক্ররেখা নির্বাচন করুন।
+	Select an open line, arc, polyline, ellipse arc or spline.	খোলা লাইন, চাপ, পলিলাইন, উপবৃত্ত চাপ বা স্প্লাইন নির্বাচন করুন।
+	Select arc or circle	চাপ বা বৃত্ত নির্বাচন করুন
+	Select arc or polyline arc segment	চাপ বা পলিলাইন চাপ অংশ নির্বাচন করুন
+	Select arc style	চাপ শৈলী নির্বাচন করুন
+	Select arc, circle, line	চাপ, বৃত্ত, লাইন নির্বাচন করুন
+	Select at least two objects to join.	যুক্ত করতে কমপক্ষে দুটি বস্তু নির্বাচন করুন।
+	Select circle or arc to add center mark	কেন্দ্র চিহ্ন যোগ করতে বৃত্ত বা চাপ নির্বাচন করুন
+	Select closed objects (regions, closed polylines, circles).	বদ্ধ বস্তু নির্বাচন করুন (অঞ্চল, বদ্ধ পলিলাইন, বৃত্ত)।
+	Select first line	প্রথম লাইন নির্বাচন করুন
+	Select first line or arc	প্রথম লাইন বা চাপ নির্বাচন করুন
+	Select first object	প্রথম বস্তু নির্বাচন করুন
+	Select first point	প্রথম বিন্দু নির্বাচন করুন
+	Select object	বস্তু নির্বাচন করুন
+	Select object to dimension	মাত্রার বস্তু নির্বাচন করুন
+	Select object to divide	বিভাজনের বস্তু নির্বাচন করুন
+	Select object to extend or shift-select to trim	প্রসারিত করতে বস্তু নির্বাচন করুন (ছাঁটাইয়ে Shift-ক্লিক)
+	Select object to measure	পরিমাপের বস্তু নির্বাচন করুন
+	Select object to offset	অফসেটের বস্তু নির্বাচন করুন
+	Select object to trim or shift-select to extend	ছাঁটাই করতে বস্তু নির্বাচন করুন (প্রসারিত করতে Shift-ক্লিক)
+	Select objects	বস্তুসমূহ নির্বাচন করুন
+	Select objects (crossing window first corner)	বস্তু নির্বাচন করুন (ক্রসিং উইন্ডোর প্রথম কোণা)
+	Select objects first, then choose a command	প্রথমে বস্তু নির্বাচন করুন, তারপর কমান্ড বেছে নিন
+	Select objects to array.	অ্যারে করতে বস্তু নির্বাচন করুন।
+	Select objects to stretch by crossing-window or crossing-polygon...	টেনে লম্বা করতে ক্রসিং-উইন্ডো বা ক্রসিং-বহুভুজ দিয়ে বস্তু নির্বাচন করুন...
+	Select objects:	বস্তু নির্বাচন করুন:
+	Select one polyline (Multiple is available through the JSON form).	একটি পলিলাইন নির্বাচন করুন।
+	Select path curve	পাথ বক্ররেখা নির্বাচন করুন
+	Select point or object	বিন্দু বা বস্তু নির্বাচন করুন
+	Select second line	দ্বিতীয় লাইন নির্বাচন করুন
+	Select second line or shift-select to apply corner	দ্বিতীয় লাইন নির্বাচন করুন (কোণ করতে Shift-ক্লিক)
+	Select second object	দ্বিতীয় বস্তু নির্বাচন করুন
+	Select second object or shift-select to apply corner	দ্বিতীয় বস্তু নির্বাচন করুন (কোণ করতে Shift-ক্লিক)
+	Select second point	দ্বিতীয় বিন্দু নির্বাচন করুন
+	Select Similar	সদৃশ নির্বাচন
+	Select spline	স্প্লাইন নির্বাচন করুন
+	Select symmetry line	প্রতিসাম্য রেখা নির্বাচন করুন
+	Select two points	দুটি বিন্দু নির্বাচন করুন
+	Selection Area Effect	নির্বাচন এলাকা প্রভাব
+	Selection area opacity:	নির্বাচন এলাকা অস্বচ্ছতা:
+	Selection Cycling	নির্বাচন চক্রায়ন
+	Selection effect color	নির্বাচন প্রভাব রঙ
+	Selection modes	নির্বাচন মোড
+	Selection preview	নির্বাচন প্রিভিউ
+	Selection Preview Filter	নির্বাচন প্রিভিউ ফিল্টার
+	Send Hatches to Back	হ্যাচ পেছনে পাঠান
+	Send Under Objects	বস্তুর নিচে পাঠান
+	Set Current	বর্তমান সেট করুন
+	Set Current Dimension Style	বর্তমান মাত্রা শৈলী সেট করুন
+	Set Current Text Style	বর্তমান টেক্সট শৈলী সেট করুন
+	Set Current Viewport	বর্তমান ভিউপোর্ট সেট করুন
+	Set Dynamic Property	ডাইনামিক বৈশিষ্ট্য সেট করুন
+	Set Layer Properties	স্তর বৈশিষ্ট্য সেট করুন
+	Set Properties	বৈশিষ্ট্য সেট করুন
+	Set Table Cell	টেবিল ঘর সেট করুন
+	Set Table Cell Style	টেবিল ঘর শৈলী সেট করুন
+	Set Variable	চলক সেট করুন
+	Set View	ভিউ সেট করুন
+	Settings...	সেটিংস...
+	Sheet Books to PDF...	শিট বুক PDF-এ...
+	Show All Constraint Bars	সকল কনস্ট্রেইন্ট বার দেখান
+	Show All Dynamic Dimensions	সকল ডাইনামিক মাত্রা দেখান
+	Show and hide the tools of this category	এই বিভাগের সরঞ্জাম দেখান ও লুকান
+	Show Annotative Objects	অ্যানোটেটিভ বস্তু দেখান
+	Show command prompting near the crosshairs	ক্রসহ্যায়ারের কাছে কমান্ড প্রম্পট দেখান
+	Show grips	গ্রিপ দেখান
+	Show in Tool Sets	টুল সেটে দেখান
+	Show Layer List	স্তর তালিকা দেখান
+	Show Quick Properties for selected objects	নির্বাচিত বস্তুর দ্রুত বৈশিষ্ট্য দেখান
+	Show System Cursor	সিস্টেম কার্সার দেখান
+	Show/Hide Lineweight	লাইনওয়েট দেখান/লুকান
+	Show/Hide Transparency	স্বচ্ছতা দেখান/লুকান
+	Single Line Text	একক লাইন টেক্সট
+	Single Point	একক বিন্দু
+	Single...	একক...
+	Smooth	মসৃণ
+	Snap	স্ন্যাপ
+	Snap and Grid	স্ন্যাপ ও গ্রিড
+	Snap Mode	স্ন্যাপ মোড
+	Snap Mode (F9)	স্ন্যাপ মোড (F9)
+	Snap On (F9)	স্ন্যাপ চালু (F9)
+	Snap Overrides	স্ন্যাপ ওভাররাইড
+	Snap type	স্ন্যাপ ধরন
+	Snap X spacing	স্ন্যাপ X ব্যবধান
+	Snap, grid, polar tracking and Dynamic Input:	স্ন্যাপ, গ্রিড, পোলার ট্র্যাকিং ও ডাইনামিক ইনপুট:
+	Solid	সলিড
+	Solid Editing	সলিড সম্পাদনা
+	Specified origin	নির্দিষ্ট মূলবিন্দু
+	Specify a point	একটি বিন্দু নির্ধারণ করুন
+	Specify a scale for the hatch pattern	হ্যাচ প্যাটার্নের স্কেল নির্ধারণ করুন
+	Specify a second extension line origin	দ্বিতীয় এক্সটেনশন রেখার মূল নির্ধারণ করুন
+	Specify an angle for the hatch pattern	হ্যাচ প্যাটার্নের কোণ নির্ধারণ করুন
+	Specify angle end point	কোণের শেষ বিন্দু নির্ধারণ করুন
+	Specify angle of dimension line	মাত্রা রেখার কোণ নির্ধারণ করুন
+	Specify angle of dimension text	মাত্রা টেক্সটের কোণ নির্ধারণ করুন
+	Specify angle start point	কোণের শুরু বিন্দু নির্ধারণ করুন
+	Specify angle vertex	কোণের শীর্ষবিন্দু নির্ধারণ করুন
+	Specify angle vertex point	কোণের শীর্ষবিন্দু নির্ধারণ করুন
+	Specify arc length dimension location	চাপ দৈর্ঘ্য মাত্রা অবস্থান নির্ধারণ করুন
+	Specify axis endpoint of ellipse	উপবৃত্তের অক্ষের শেষবিন্দু নির্ধারণ করুন
+	Specify base diameter	বেস ব্যাস নির্ধারণ করুন
+	Specify base point	বেস পয়েন্ট নির্ধারণ করুন
+	Specify base point or displacement (drag with the middle mouse button for realtime pan)	বেস পয়েন্ট নির্ধারণ করুন (প্যান করতে মাঝের বোতাম টানুন)
+	Specify center of donut	ডোনাটের কেন্দ্র নির্ধারণ করুন
+	Specify center of ellipse	উপবৃত্তের কেন্দ্র নির্ধারণ করুন
+	Specify center of polygon	বহুভুজের কেন্দ্র নির্ধারণ করুন
+	Specify center point for circle	বৃত্তের কেন্দ্রবিন্দু নির্ধারণ করুন
+	Specify center point of arc	চাপের কেন্দ্রবিন্দু নির্ধারণ করুন
+	Specify center point of array	অ্যারের কেন্দ্রবিন্দু নির্ধারণ করুন
+	Specify center point of base	বেসের কেন্দ্রবিন্দু নির্ধারণ করুন
+	Specify corner of viewport	ভিউফোর্টের কোণা নির্ধারণ করুন
+	Specify corner of window, enter a scale factor (nX or nXP)	উইন্ডোর কোণা দিন, স্কেল ফ্যাক্টর (nX বা nXP) লিখুন
+	Specify diameter of circle	বৃত্তের ব্যাস নির্ধারণ করুন
+	Specify dimension arc line location	মাত্রা চাপ রেখার অবস্থান নির্ধারণ করুন
+	Specify dimension line location	মাত্রা রেখার অবস্থান নির্ধারণ করুন
+	Specify distance between turns	পাকের ব্যবধান নির্ধারণ করুন
+	Specify distance to other axis	অন্য অক্ষের দূরত্ব নির্ধারণ করুন
+	Specify end angle	শেষ কোণ নির্ধারণ করুন
+	Specify end point of arc	চাপের শেষ বিন্দু নির্ধারণ করুন
+	Specify end point of arc (hold Ctrl to switch direction)	চাপের শেষ বিন্দু নির্ধারণ করুন (দিক বদলাতে Ctrl চেপে রাখুন)
+	Specify ending width	শেষ প্রস্থ নির্ধারণ করুন
+	Specify ending width for next segment	পরের অংশের শেষ প্রস্থ নির্ধারণ করুন
+	Specify endpoint of arc	চাপের শেষবিন্দু নির্ধারণ করুন
+	Specify endpoint of axis	অক্ষের শেষবিন্দু নির্ধারণ করুন
+	Specify endpoint of line	রেখার শেষবিন্দু নির্ধারণ করুন
+	Specify feature location	ফিচারের অবস্থান নির্ধারণ করুন
+	Specify fillet radius	ফিলেট ব্যাসার্ধ নির্ধারণ করুন
+	Specify fillet radius for rectangles	আয়তক্ষেত্রের ফিলেট ব্যাসার্ধ নির্ধারণ করুন
+	Specify first angle endpoint	প্রথম কোণ শেষবিন্দু নির্ধারণ করুন
+	Specify first chamfer distance	প্রথম চ্যাম্ফার দূরত্ব নির্ধারণ করুন
+	Specify first chamfer distance for rectangles	আয়তক্ষেত্রের প্রথম চ্যাম্ফার দূরত্ব দিন
+	Specify first constraint point	প্রথম কনস্ট্রেইন্ট বিন্দু নির্ধারণ করুন
+	Specify first corner	প্রথম কোণা নির্ধারণ করুন
+	Specify first corner point	প্রথম কোণা বিন্দু নির্ধারণ করুন
+	Specify first destination point	প্রথম গন্তব্য বিন্দু নির্ধারণ করুন
+	Specify first end point of circle's diameter	বৃত্তের ব্যাসের প্রথম শেষবিন্দু দিন
+	Specify first endpoint of edge	প্রান্তের প্রথম শেষবিন্দু নির্ধারণ করুন
+	Specify first extension line origin	প্রথম এক্সটেনশন রেখার মূল দিন
+	Specify first point	প্রথম বিন্দু নির্ধারণ করুন
+	Specify first point of mirror line	মিরর রেখার প্রথম বিন্দু নির্ধারণ করুন
+	Specify first point on circle	বৃত্তের প্রথম বিন্দু নির্ধারণ করুন
+	Specify first point on circle: _tan to	বৃত্তের প্রথম বিন্দু নির্ধারণ করুন: _tan to
+	Specify first source point	প্রথম উৎস বিন্দু নির্ধারণ করুন
+	Specify height	উচ্চতা নির্ধারণ করুন
+	Specify included angle	অন্তর্ভুক্ত কোণ নির্ধারণ করুন
+	Specify insertion base point	সন্নিবেশ বেস পয়েন্ট নির্ধারণ করুন
+	Specify insertion point	সন্নিবেশ বিন্দু নির্ধারণ করুন
+	Specify inside diameter of donut	ডোনাটের ভেতরের ব্যাস নির্ধারণ করুন
+	Specify leader arrowhead location	লিডার তীরের অবস্থান নির্ধারণ করুন
+	Specify leader endpoint	লিডারের শেষবিন্দু নির্ধারণ করুন
+	Specify leader landing location	লিডার ল্যান্ডিং অবস্থান নির্ধারণ করুন
+	Specify length for rectangles	আয়তক্ষেত্রের দৈর্ঘ্য নির্ধারণ করুন
+	Specify length of chord	জ্যা-এর দৈর্ঘ্য নির্ধারণ করুন
+	Specify length of segment	অংশের দৈর্ঘ্য নির্ধারণ করুন
+	Specify line width for rectangles	আয়তক্ষেত্রের লাইন প্রস্থ নির্ধারণ করুন
+	Specify location for new vertex	নতুন শীর্ষবিন্দুর অবস্থান নির্ধারণ করুন
+	Specify minimum length of arc	চাপের সর্বনিম্ন দৈর্ঘ্য নির্ধারণ করুন
+	Specify new end point	নতুন শেষ বিন্দু নির্ধারণ করুন
+	Specify new location for marked vertex	চিহ্নিত শীর্ষবিন্দুর নতুন অবস্থান দিন
+	Specify new width for all segments	সব অংশের নতুন প্রস্থ নির্ধারণ করুন
+	Specify next point	পরবর্তী বিন্দু নির্ধারণ করুন
+	Specify offset distance	অফসেট দূরত্ব নির্ধারণ করুন
+	Specify opposite corner	বিপরীত কোণা নির্ধারণ করুন
+	Specify other corner point	অন্য কোণা বিন্দু নির্ধারণ করুন
+	Specify other endpoint of axis	অক্ষের অন্য শেষবিন্দু নির্ধারণ করুন
+	Specify outside diameter of donut	ডোনাটের বাইরের ব্যাস নির্ধারণ করুন
+	Specify point	বিন্দু নির্ধারণ করুন
+	Specify point on object for first tangent of circle	বৃত্তের প্রথম স্পর্শকের জন্য বস্তুর বিন্দু দিন
+	Specify point on object for second tangent of circle	বৃত্তের দ্বিতীয় স্পর্শকের জন্য বস্তুর বিন্দু দিন
+	Specify point on side to offset	অফসেটের পাশের বিন্দু নির্ধারণ করুন
+	Specify radius of arc	চাপের ব্যাসার্ধ নির্ধারণ করুন
+	Specify radius of circle	বৃত্তের ব্যাসার্ধ নির্ধারণ করুন
+	Specify rotation angle	ঘূর্ণন কোণ নির্ধারণ করুন
+	Specify rotation angle of text	টেক্সটের ঘূর্ণন কোণ নির্ধারণ করুন
+	Specify scale factor	স্কেল ফ্যাক্টর নির্ধারণ করুন
+	Specify second angle endpoint	দ্বিতীয় কোণ শেষবিন্দু নির্ধারণ করুন
+	Specify second break point	দ্বিতীয় বিরতি বিন্দু নির্ধারণ করুন
+	Specify second chamfer distance for rectangles	আয়তক্ষেত্রের দ্বিতীয় চ্যাম্ফার দূরত্ব দিন
+	Specify second constraint point	দ্বিতীয় কনস্ট্রেইন্ট বিন্দু নির্ধারণ করুন
+	Specify second destination point	দ্বিতীয় গন্তব্য বিন্দু নির্ধারণ করুন
+	Specify second end point of circle's diameter	বৃত্তের ব্যাসের দ্বিতীয় শেষবিন্দু দিন
+	Specify second endpoint of edge	প্রান্তের দ্বিতীয় শেষবিন্দু নির্ধারণ করুন
+	Specify second extension line origin	দ্বিতীয় এক্সটেনশন রেখার মূল দিন
+	Specify second point	দ্বিতীয় বিন্দু নির্ধারণ করুন
+	Specify second point of arc	চাপের দ্বিতীয় বিন্দু নির্ধারণ করুন
+	Specify second point of mirror line	মিরর রেখার দ্বিতীয় বিন্দু নির্ধারণ করুন
+	Specify second point on circle	বৃত্তের দ্বিতীয় বিন্দু নির্ধারণ করুন
+	Specify second point on circle: _tan to	বৃত্তের দ্বিতীয় বিন্দু নির্ধারণ করুন: _tan to
+	Specify second point or <use first point as displacement>	দ্বিতীয় বিন্দু নির্ধারণ করুন বা <প্রথম বিন্দু স্থানান্তর হিসেবে ব্যবহার>
+	Specify second source point	দ্বিতীয় উৎস বিন্দু নির্ধারণ করুন
+	Specify side to offset	অফসেটের পাশ নির্ধারণ করুন
+	Specify start angle	শুরু কোণ নির্ধারণ করুন
+	Specify start point	শুরু বিন্দু নির্ধারণ করুন
+	Specify start point of arc	চাপের শুরু বিন্দু নির্ধারণ করুন
+	Specify start point of polyline	পলিলাইনের শুরু বিন্দু নির্ধারণ করুন
+	Specify start point of text	টেক্সটের শুরু বিন্দু নির্ধারণ করুন
+	Specify starting width	শুরু প্রস্থ নির্ধারণ করুন
+	Specify starting width for next segment	পরের অংশের শুরু প্রস্থ নির্ধারণ করুন
+	Specify tangent direction for the start point of arc	চাপের শুরু বিন্দুর স্পর্শক দিক নির্ধারণ করুন
+	Specify the elevation for rectangles	আয়তক্ষেত্রের এলিভেশন নির্ধারণ করুন
+	Specify thickness for rectangles	আয়তক্ষেত্রের বেধ নির্ধারণ করুন
+	Specify third point on circle	বৃত্তের তৃতীয় বিন্দু নির্ধারণ করুন
+	Specify third point on circle: _tan to	বৃত্তের তৃতীয় বিন্দু নির্ধারণ করুন: _tan to
+	Specify third source point or <continue>	তৃতীয় উৎস বিন্দু দিন বা <চালিয়ে যান>
+	Specify through point	থ্রু পয়েন্ট নির্ধারণ করুন
+	Specify top diameter	শীর্ষ ব্যাস নির্ধারণ করুন
+	Specify total angle	মোট কোণ নির্ধারণ করুন
+	Specify width for rectangles	আয়তক্ষেত্রের প্রস্থ নির্ধারণ করুন
+	Sphere	গোলক
+	Spherical	গোলকাকার
+	Spline	স্প্লাইন
+	Spline Edit	স্প্লাইন সম্পাদনা
+	Stack (type 1/2 then select)	স্ট্যাক (১/২ টাইপ করে নির্বাচন করুন)
+	Start	শুরু
+	Start angle	শুরু কোণ
+	Start Width	শুরু প্রস্থ
+	Start X	শুরু X
+	Start Y	শুরু Y
+	Start, Center, Angle	শুরু, কেন্দ্র, কোণ
+	Start, Center, End	শুরু, কেন্দ্র, শেষ
+	Start, Center, Length	শুরু, কেন্দ্র, দৈর্ঘ্য
+	Start, End, Angle	শুরু, শেষ, কোণ
+	Start, End, Direction	শুরু, শেষ, দিক
+	Start, End, Radius	শুরু, শেষ, ব্যাসার্ধ
+	Stretch Vertex	শীর্ষবিন্দু প্রসারিত
+	Style: Standard	শৈলী: মানসম্মত
+	SVG drawings (SVG, SVGZ)	SVG অঙ্কন (SVG, SVGZ)
+	Sweep	সুইপ
+	Switch between model space in a viewport and paper space	ভিউপোর্টে মডেল স্পেস ও পেপার স্পেসের মধ্যে পাল্টান
+	Switch Drawing	অঙ্কন বদল
+	Switch Layout	লেআউট বদল
+	Symmetric	প্রতিসম
+	Synchronize Attributes	অ্যাট্রিবিউট সমন্বয়
+	Synchronize Multiple-scale Positions	মাল্টি-স্কেল অবস্থান সমন্বয়
+	Table Breaks	টেবিল বিরতি
+	Table Cell Style	টেবিল ঘর শৈলী
+	Table Style...	টেবিল শৈলী...
+	Table...	টেবিল...
+	Tan, Tan, Radius	স্পর্শক, স্পর্শক, ব্যাসার্ধ
+	Tan, Tan, Tan	স্পর্শক, স্পর্শক, স্পর্শক
+	Tangent	স্পর্শক
+	Temporary track point	অস্থায়ী ট্র্যাক বিন্দু
+	Text Editor	টেক্সট সম্পাদক
+	Text Height	টেক্সট উচ্চতা
+	Text height	টেক্সট উচ্চতা
+	Text Objects Only	শুধু টেক্সট বস্তু
+	Text override	টেক্সট ওভাররাইড
+	Text style	টেক্সট শৈলী
+	Text Style...	টেক্সট শৈলী...
+	Thaw All Layers	সকল স্তর আনফ্রিজ
+	Thaw Layer	স্তর আনফ্রিজ
+	The aperture is how near the cursor must come to a point for an object snap to find it.	স্ন্যাপ করতে কার্সার বিন্দুর কত কাছে আসতে হবে অ্যাপারচার তা নির্দেশ করে।
+	There is nothing here yet.	এখানে এখনও কিছু নেই।
+	This drawing	এই অঙ্কন
+	Time-sensitive right-click: a quick click is Enter, holding opens the menu	সময়-সংবেদনশীল ডান ক্লিক: দ্রুত ক্লিক এন্টার, চেপে ধরলে মেনু খোলে
+	To get started, create or open a drawing.	শুরু করতে একটি অঙ্কন তৈরি করুন বা খুলুন।
+	Toggle PICKADD (off: each pick replaces the selection)	PICKADD টগল (বন্ধ: প্রতি ক্লিকে নির্বাচন প্রতিস্থাপিত হয়)
+	Toggle PICKADD (on: picks add to the selection)	PICKADD টগল (চালু: ক্লিকে নির্বাচনে যোগ হয়)
+	Tolerance...	সহনশীলতা...
+	Tool Bar	টুল বার
+	Tool Sets	টুল সেট
+	TOP	শীর্ষ
+	Top left	উপরের বামে
+	Top right	উপরের ডানে
+	Torus	টোরাস
+	Trace	ট্রেস
+	Track orthogonally only	শুধু অর্থোগোনালি ট্র্যাক করুন
+	Track using all polar angle settings	সকল পোলার কোণ সেটিংসে ট্র্যাক করুন
+	Trim	ছাঁটাই
+	True Color	আসল রঙ
+	Turn All Layers On	সকল স্তর চালু করুন
+	Turn Off Layer	স্তর বন্ধ করুন
+	Turn On Layer	স্তর চালু করুন
+	Turn Quick Properties off (QPMODE)	দ্রুত বৈশিষ্ট্য বন্ধ করুন (QPMODE)
+	Turned off, a right-click while a command runs always opens the shortcut menu.	বন্ধ থাকলে কমান্ড চলার সময় ডান ক্লিক করলে শর্টকাট মেনু খোলে।
+	Type a command	কমান্ড লিখুন
+	Type text; Enter starts a new paragraph	টেক্সট লিখুন; Enter দিলে নতুন অনুচ্ছেদ শুরু হয়
+	UCS Icon	UCS আইকন
+	Undo (⌘Z)	আনডু (⌘Z)
+	Unisolate Layer	স্তর অবিচ্ছিন্ন করুন
+	Units Conversion	একক রূপান্তর
+	Units...	একক...
+	Unload	আনলোড
+	Unloaded	আনলোড করা হয়েছে
+	Unlock Layer	স্তর আনলক
+	Unlock viewport	ভিউপোর্ট আনলক
+	Unmerge Cells	ঘর আনমার্জ
+	Unreferenced	রেফারেন্সবিহীন
+	Unresolved	অমীমাংসিত
+	Unsaved Layer State	অসংরক্ষিত স্তর অবস্থা
+	Update Data Links	ডেটা লিঙ্ক আপডেট
+	Use current origin	বর্তমান মূলবিন্দু ব্যবহার
+	Use for this layout	এই লেআউটের জন্য ব্যবহার
+	Use object linetype	বস্তুর লাইনটাইপ ব্যবহার
+	Use object lineweight	বস্তুর লাইনওয়েট ব্যবহার
+	Use System Setting	সিস্টেম সেটিং ব্যবহার
+	User Parameters	ব্যবহারকারী প্যারামিটার
+	User Preferences	ব্যবহারকারী পছন্দ
+	Version 2000	সংস্করণ ২০০০
+	Version 2004	সংস্করণ ২০০৪
+	Version 2007	সংস্করণ ২০০৭
+	Version 2010	সংস্করণ ২০১০
+	Version 2013	সংস্করণ ২০১৩
+	Version 2018	সংস্করণ ২০১৮
+	VerticalDistance	উল্লম্ব দূরত্ব
+menu	View	প্রদর্শন
+	ViewCube	ভিউকিউব
+	Viewport	ভিউপোর্ট
+	Viewport is locked	ভিউপোর্ট লক করা
+	Viewport Layer Freeze	ভিউপোর্ট স্তর ফ্রিজ
+	Viewport Properties	ভিউপোর্ট বৈশিষ্ট্য
+	Viewport scale	ভিউপোর্ট স্কেল
+	Viewport {id}	ভিউপোর্ট {id}
+	Viewports	ভিউপোর্ট
+	Visual Effect Settings	ভিজ্যুয়াল প্রভাব সেটিংস
+	Visual Effect Settings...	ভিজ্যুয়াল প্রভাব সেটিংস...
+	Volume	আয়তন
+	VP Color	VP রঙ
+	VP Freeze	VP ফ্রিজ
+	W	W
+	When a command is active	যখন কমান্ড সক্রিয় থাকে
+	When no command is active	যখন কোনো কমান্ড সক্রিয় থাকে না
+	Width factor	প্রস্থ ফ্যাক্টর
+	Window selection color:	উইন্ডো নির্বাচন রঙ:
+	Wipeout	ওয়াইপআউট
+	Working Set	ওয়ার্কিং সেট
+	Workspace Switching	ওয়ার্কস্পেস বদল
+	Write Block	ব্লক লিখুন
+	Xline	Xline
+	Xref and Block In-place Editing	Xref ও ব্লক ইন-প্লেস সম্পাদনা
+	Xrefs	Xref
+	Zoom All	সব জুম
+	Zoom Dynamic	ডাইনামিক জুম
+	Zoom Extents	ব্যাপ্তি জুম
+	Zoom Object	বস্তু জুম
+	Zoom Previous	আগের জুম
+	Zoom Realtime	রিয়েলটাইম জুম
+	Zoom sensitivity	জুম সংবেদনশীলতা
+	Zoom Window	উইন্ডো জুম
+	{contributors} · {commits}	{contributors} · {commits}
+	{kind} (constraint {id})	{kind} (কনস্ট্রেইন্ট {id})
+	{kind} constraint {name} = {expression}  (double-click to edit)	{kind} কনস্ট্রেইন্ট {name} = {expression}  (সম্পাদনায় ডাবল ক্লিক)
+	{name}: {distance} < {angle}°	{name}: {distance} < {angle}°
+@plural	{n} contributor|{n} contributors	{n} অবদানকারী|{n} অবদানকারী
+	ƒx  New User Parameter	ƒx  নতুন ব্যবহারকারী প্যারামিটার
+	ΔLOC	ΔLOC
+	−LOC	−LOC
+	⌘↩ to finish	শেষ করতে ⌘↩

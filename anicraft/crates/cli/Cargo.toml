@@ -1,0 +1,30 @@
+[package]
+name = "anicraft-cli"
+description = "AniCraft L4: headless CLI and JSON-lines control channel for agents and pipelines"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "anicraft-cli"
+path = "src/main.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+anicraft-doc.workspace = true
+anicraft-engine.workspace = true
+anicraft-render.workspace = true
+anicraft-geom.workspace = true
+anicraft-guide.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+# Exporter plug-in fixtures written in WebAssembly text (Apache-2.0 WITH LLVM-exception).
+wat = "1.228"
+
+[lints]
+workspace = true

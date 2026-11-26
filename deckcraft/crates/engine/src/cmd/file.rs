@@ -7,7 +7,7 @@ use deckcraft_media::MediaInfo;
 use deckcraft_model::{MediaId, MediaItem, Presentation, Shape, ShapeKind, defaults};
 use serde_json::{Value, json};
 
-use super::{CommandSpec, always, bad, base64_decode, base64_encode, bool_or, cmd, f64_or, has_doc, ok, str_param, usize_param};
+use super::{CommandSpec, always, bad, base64_decode, base64_encode, bool_or, cmd, f64_or, has_doc, ok, opt_usize_param, str_param, usize_param};
 use crate::{DocState, EngineError, Result, Session};
 
 pub fn specs() -> Vec<CommandSpec> {
@@ -36,8 +36,11 @@ pub fn specs() -> Vec<CommandSpec> {
         cmd!(noundo "file.save", "Save", ["File"], Some("Cmd+S"), "{path?, format?: deckcraft|pptx}", has_doc, save),
         cmd!(noundo "file.saveAs", "Save As…", ["File"], Some("Cmd+Shift+S"), "{path, format?}", has_doc, save_as),
         cmd!(noundo "file.saveTemplate", "Save as Template…", ["File"], None, "{path}", has_doc, save_as),
-        cmd!(query "file.saveBytes", "Save to Data", [], None, "{format?: deckcraft|pptx} → {data: base64}", has_doc, save_bytes_cmd),
-        cmd!(noundo "file.export", "Export…", ["File"], None, "{path, format?: png|jpeg|pptx|deckcraft|outline|rtf|pdf|gif (else by path), slide?: index, all?: bool, scale?: px per pt, layout?: slides|notes|handouts (pdf), perPage?: 1|2|3|4|6|9, paper?: letter|a4|legal|a3 (pdf), orientation?: portrait|landscape (pdf), dpi?, slides?: [index]|range (\"1-3,5\"), includeHidden?, textLayer?, frame?, includeSpeakerNotes?: bool (pdf handouts: each slide's speaker notes in its slot; false), transparentBackground?: bool (png: leave the slide background out), width?: px 16-3840|small|medium|large|extraLarge (gif), secondsPerSlide?: 0.1-600 (gif; 5), loop?: bool (gif; true: forever)} → {path, bytes} or {files} (png, jpeg); gif adds frames, width, height, secondsPerSlide", has_doc, export),
+        cmd!(query "file.saveBytes", "Save to Data", [], None, "{format?: deckcraft|pptx|odp|pdf|gif|mp4|webm} → {data: base64}", has_doc, save_bytes_cmd),
+        cmd!(noundo "file.export", "Export…", ["File"], None, "{path, format?: png|jpeg|pptx|odp|deckcraft|outline|rtf|pdf|gif|mp4|webm (else by path), slide?: index, all?: bool, scale?: px per pt, layout?: slides|notes|handouts (pdf), perPage?: 1|2|3|4|6|9, paper?: letter|a4|legal|a3 (pdf), orientation?: portrait|landscape (pdf), dpi?, slides?: [index]|range (\"1-3,5\"), includeHidden?, textLayer?, frame?, includeSpeakerNotes?: bool (pdf), vector?: bool (pdf), transparentBackground?: bool (png: leave the slide background out), width?: px 16-3840|small|medium|large|extraLarge, height?: px 16-3840, fps?: 1-60, holdSeconds?: 0.1-600, secondsPerSlide?: 0.1-600 (gif; 5), loop?: bool (gif; true: forever), animate?: bool (gif), includeBuilds?: bool, includeTransitions?: bool} → {path, bytes} or {files} (png, jpeg); gif/mp4/webm add frames, width, height", has_doc, export),
+        cmd!(noundo "file.exportVideo", "Export Animated Video…", ["File"], None, "{path, format?: mp4|webm|gif, width?: px 16-3840|small|medium|large|extraLarge, height?: px 16-3840, fps?: 1-60, holdSeconds?: 0.1-600, secondsPerSlide?: 0.1-600, loop?: bool, includeHidden?: bool, includeBuilds?: bool, includeTransitions?: bool, slides?: [index]|range} → {path, format, bytes, frames, totalTicks, durationMs, width, height, fps}", has_doc, export_video),
+        cmd!(noundo "file.exportGif", "Export Animated GIF…", ["File"], None, "{path, format?: gif|mp4|webm, width?: px 16-3840|small|medium|large|extraLarge, height?: px 16-3840, fps?: 1-60, holdSeconds?: 0.1-600, secondsPerSlide?: 0.1-600, loop?: bool, includeHidden?: bool, includeBuilds?: bool, includeTransitions?: bool, slides?: [index]|range} → {path, format, bytes, frames, totalTicks, durationMs, width, height, fps}", has_doc, export_gif),
+        cmd!(noundo "export.animated", "Export Animated Presentation…", [], None, "{path, format?: mp4|webm|gif, width?: px 16-3840|small|medium|large|extraLarge, height?: px 16-3840, fps?: 1-60, holdSeconds?: 0.1-600, secondsPerSlide?: 0.1-600, loop?: bool, includeHidden?: bool, includeBuilds?: bool, includeTransitions?: bool, slides?: [index]|range} → {path, format, bytes, frames, totalTicks, durationMs, width, height, fps}", has_doc, export_video),
         cmd!(
             query "file.info",
             "Info",
@@ -163,6 +166,11 @@ fn open_other(name: &str, bytes: &[u8]) -> Result<(Presentation, Vec<String>)> {
         probe_clips(&mut p);
         return Ok((p, lost_slides));
     }
+    if deckcraft_format::odp::sniff_odp(bytes) {
+        let mut p = deckcraft_format::odp::load_odp(bytes).map_err(|e| EngineError::Other(e.to_string()))?;
+        probe_clips(&mut p);
+        return Ok((p, vec![]));
+    }
     if deckcraft_pptx::is_encrypted(bytes) {
         return Err(EngineError::Other(format!("{name} is password-protected. DeckCraft can't open password-protected presentations yet.")));
     }
@@ -253,8 +261,15 @@ pub struct LoadedFile {
 #[cfg(not(target_arch = "wasm32"))]
 pub fn read_presentation_file(path: &str) -> Result<LoadedFile> {
     let bytes = crate::io::read_file(path).map_err(EngineError::Other)?;
-    let (doc, damaged) = open_checked(path, &bytes)?;
-    let native = deckcraft_format::sniff(&bytes) || deckcraft_pptx::sniff(&bytes);
+    loaded_file(path, &bytes)
+}
+
+/// Parse `bytes` as the presentation file `path`, as [`read_presentation_file`] does after
+/// reading it. The web host bridge uses it for a file its page sent, which then saves back to
+/// that name like a file opened on the desktop.
+pub fn loaded_file(path: &str, bytes: &[u8]) -> Result<LoadedFile> {
+    let (doc, damaged) = open_checked(path, bytes)?;
+    let native = deckcraft_format::sniff(bytes) || deckcraft_pptx::sniff(bytes) || deckcraft_format::odp::sniff_odp(bytes);
     Ok(LoadedFile { path: path.to_string(), doc, native, damaged })
 }
 
@@ -337,14 +352,18 @@ fn report_damage(s: &mut Session, damaged: &Damage) -> Result<()> {
     Ok(())
 }
 
-/// Encode the presentation in `format` (`deckcraft`, `pptx`, `potx`, `ppsx`, `outline`, `pdf`, `gif`).
+/// Encode the presentation in `format` (`deckcraft`, `pptx`, `potx`, `ppsx`, `odp`, `outline`, `pdf`, `gif`, `mp4`, `webm`).
 pub fn save_bytes(doc: &Presentation, format: &str) -> Result<Vec<u8>> {
     match format {
         f @ ("pptx" | "potx" | "ppsx") => deckcraft_pptx::export_as(doc, f).map_err(|e| EngineError::Other(e.to_string())),
+        "odp" => deckcraft_format::odp::save_odp(doc).map_err(|e| EngineError::Other(e.to_string())),
         "outline" | "txt" => Ok(deckcraft_format::slides_to_outline(doc).into_bytes()),
         "rtf" => Ok(deckcraft_format::rtf::slides_to_rtf(doc).into_bytes()),
         "pdf" => deckcraft_pdf::export(doc, &Default::default()).map_err(|e| EngineError::Other(e.to_string())),
         "gif" => gif_bytes(doc, &Value::Null),
+        "mp4" => Ok(crate::video_export::encode_animated(doc, &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Mp4))?.bytes),
+        "webm" => Ok(crate::video_export::encode_animated(doc, &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Webm))?.bytes),
+        "png" | "jpeg" | "jpg" => Err(EngineError::Other("saving a presentation as a single image isn't supported; use file.export".into())),
         _ => deckcraft_format::save(doc).map_err(|e| EngineError::Other(e.to_string())),
     }
 }
@@ -353,13 +372,19 @@ pub fn save_bytes(doc: &Presentation, format: &str) -> Result<Vec<u8>> {
 pub use deckcraft_pdf::{PAPERS, paper_size};
 
 /// PDF options from command params: `{layout: slides|notes|handouts, perPage, dpi, slides,
-/// includeHidden, textLayer, frame, includeSpeakerNotes, paper: letter|a4|legal|a3, orientation: portrait|landscape}` for a
-/// presentation of `count` slides. `slides` is a list of 0-based indices or a range as typed in PowerPoint's Print page (`"1-3, 5"`, 1-based).
+/// includeHidden, textLayer, frame, paper: letter|a4|legal|a3, orientation: portrait|landscape}` for a presentation of `count` slides. `slides` is a list of
+/// 0-based indices or a range as typed in PowerPoint's Print page (`"1-3, 5"`, 1-based).
 pub fn pdf_options(p: &Value, count: usize) -> Result<deckcraft_pdf::PdfOptions> {
     let mut o = deckcraft_pdf::PdfOptions { layout: deckcraft_pdf::PageLayout::Slides, ..Default::default() };
     o.layout = match str_param(p, "layout").unwrap_or("slides") {
         "notes" => deckcraft_pdf::PageLayout::Notes,
-        "handouts" => deckcraft_pdf::PageLayout::Handouts { per_page: usize_param(p, "perPage").unwrap_or(6).clamp(1, 9) as u8 },
+        "handouts" => {
+            let per_page = opt_usize_param(p, "perPage", "file.export")?.unwrap_or(6);
+            if ![1, 2, 3, 4, 6, 9].contains(&per_page) {
+                return Err(bad("file.export", format!("perPage {per_page} isn't one of 1, 2, 3, 4, 6, 9")));
+            }
+            deckcraft_pdf::PageLayout::Handouts { per_page: per_page as u8 }
+        }
         _ => deckcraft_pdf::PageLayout::Slides,
     };
     o.dpi = f64_or(p, "dpi", o.dpi).clamp(36.0, 600.0);
@@ -372,6 +397,7 @@ pub fn pdf_options(p: &Value, count: usize) -> Result<deckcraft_pdf::PdfOptions>
     o.text_layer = bool_or(p, "textLayer", true);
     o.frame_slides = bool_or(p, "frame", true);
     o.include_speaker_notes = bool_or(p, "includeSpeakerNotes", false);
+    o.vector = bool_or(p, "vector", true);
     let landscape = match str_param(p, "orientation").unwrap_or("portrait") {
         "portrait" => false,
         "landscape" => true,
@@ -391,18 +417,23 @@ pub fn pdf_options(p: &Value, count: usize) -> Result<deckcraft_pdf::PdfOptions>
 pub fn parse_slide_range(text: &str, count: usize) -> Result<Vec<usize>> {
     let invalid = || bad("file.export", format!("“{text}” isn't a valid slide range: use numbers and ranges such as 1-3, 5"));
     let mut out: Vec<usize> = vec![];
+    let mut seen: std::collections::HashSet<usize> = std::collections::HashSet::new();
     for part in text.split([',', ';']).map(str::trim).filter(|p| !p.is_empty()) {
         let (a, b) = match part.split_once('-') {
             Some((a, b)) => (a.trim(), b.trim()),
             None => (part, part),
         };
+        let digits = |s: &str| !s.is_empty() && s.bytes().all(|c| c.is_ascii_digit());
+        if !digits(a) || !digits(b) {
+            return Err(invalid());
+        }
         let (a, b) = (a.parse::<usize>().map_err(|_| invalid())?, b.parse::<usize>().map_err(|_| invalid())?);
         let (lo, hi) = (a.min(b), a.max(b));
         if lo == 0 || hi > count {
             return Err(bad("file.export", format!("the presentation has {count} slides; “{part}” is outside them")));
         }
         for i in lo - 1..hi {
-            if !out.contains(&i) {
+            if seen.insert(i) {
                 out.push(i);
             }
         }
@@ -419,10 +450,12 @@ pub fn pdf_bytes(doc: &Presentation, p: &Value) -> Result<Vec<u8>> {
 }
 
 /// The output extensions [`format_for_path`] maps to a writer of that format.
-pub const WRITABLE_EXTENSIONS: &[&str] = &["deckcraft", "pptx", "potx", "ppsx", "pdf", "png", "jpg", "jpeg", "gif", "txt", "md", "rtf"];
+pub const WRITABLE_EXTENSIONS: &[&str] = &[
+    "deckcraft", "pptx", "potx", "ppsx", "odp", "pdf", "png", "jpg", "jpeg", "gif", "mp4", "webm", "txt", "md", "rtf",
+];
 
 /// The format a file named `path` is written in, or `None` when its extension names no format
-/// DeckCraft writes (`.odp`, `.svg`, no extension …): [`format_for_path`] would save
+/// DeckCraft writes (`.svg`, no extension …): [`format_for_path`] would save
 /// those as native `.deckcraft` bytes under the wrong name.
 pub fn writable_format_for_path(path: &str) -> Option<&'static str> {
     let ext = std::path::Path::new(path).extension()?.to_str()?.to_ascii_lowercase();
@@ -442,6 +475,8 @@ pub fn format_for_path(path: &str) -> &'static str {
         "potx"
     } else if l.ends_with(".ppsx") {
         "ppsx"
+    } else if l.ends_with(".odp") {
+        "odp"
     } else if l.ends_with(".png") {
         "png"
     } else if l.ends_with(".jpg") || l.ends_with(".jpeg") {
@@ -450,6 +485,10 @@ pub fn format_for_path(path: &str) -> &'static str {
         "pdf"
     } else if l.ends_with(".gif") {
         "gif"
+    } else if l.ends_with(".mp4") {
+        "mp4"
+    } else if l.ends_with(".webm") {
+        "webm"
     } else if l.ends_with(".txt") || l.ends_with(".md") {
         "outline"
     } else if l.ends_with(".rtf") {
@@ -459,7 +498,10 @@ pub fn format_for_path(path: &str) -> &'static str {
     }
 }
 
-fn mark_saved(s: &mut Session, path: Option<String>) -> Result<()> {
+/// The active presentation is saved as it is now: no unsaved changes, and `path` (when given)
+/// becomes its file. `file.save` calls it after writing; the web host bridge calls it once the
+/// page has the bytes.
+pub fn mark_saved(s: &mut Session, path: Option<String>) -> Result<()> {
     let st = s.doc_mut()?;
     st.saved_doc = st.doc.clone();
     if path.is_some() {
@@ -537,7 +579,7 @@ fn picture_bytes(img: &deckcraft_render::Image, format: &str, scale: f64) -> Vec
 
 fn render(s: &mut Session, p: &Value) -> Result<Value> {
     let st = s.doc()?;
-    let i = usize_param(p, "slide").unwrap_or(st.selection.slide);
+    let i = opt_usize_param(p, "slide", "file.render")?.unwrap_or(st.selection.slide);
     if i >= st.doc.slides.len() {
         return Err(bad("file.render", format!("no slide {i}")));
     }
@@ -548,7 +590,7 @@ fn render(s: &mut Session, p: &Value) -> Result<Value> {
 /// The colour the slide is drawn with at one point: what the Eyedropper takes.
 fn color_at(s: &mut Session, p: &Value) -> Result<Value> {
     let st = s.doc()?;
-    let i = usize_param(p, "slide").unwrap_or(st.selection.slide);
+    let i = opt_usize_param(p, "slide", "slide.colorAt")?.unwrap_or(st.selection.slide);
     if i >= st.doc.slides.len() {
         return Err(bad("slide.colorAt", format!("no slide {i}")));
     }
@@ -579,7 +621,7 @@ fn export(s: &mut Session, p: &Value) -> Result<Value> {
     }
     match format.as_str() {
         "png" | "jpeg" | "jpg" => {
-            let slides: Vec<usize> = match usize_param(p, "slide") {
+            let slides: Vec<usize> = match opt_usize_param(p, "slide", "file.export")? {
                 Some(i) => vec![i],
                 None if bool_or(p, "all", false) => (0..st.doc.slides.len()).collect(),
                 None => vec![st.selection.slide],
@@ -618,6 +660,9 @@ fn export(s: &mut Session, p: &Value) -> Result<Value> {
             Ok(json!({"path": path, "bytes": bytes.len()}))
         }
         "gif" => {
+            if crate::video_export::wants_animated_gif(p) {
+                return export_animated_with(s, p, crate::video_export::AnimatedFormat::Gif, "file.export");
+            }
             // `slides` may be a range, as for PDF ("1-3,5").
             let mut gp = p.clone();
             if let Some(text) = p.get("slides").and_then(Value::as_str) {
@@ -634,13 +679,49 @@ fn export(s: &mut Session, p: &Value) -> Result<Value> {
                 "secondsPerSlide": f64::from(out.delay_cs) / 100.0,
             }))
         }
-        "pptx" | "potx" | "ppsx" | "deckcraft" | "outline" | "txt" | "rtf" => {
+        "mp4" => export_animated_with(s, p, crate::video_export::AnimatedFormat::Mp4, "file.export"),
+        "webm" => export_animated_with(s, p, crate::video_export::AnimatedFormat::Webm, "file.export"),
+        "pptx" | "potx" | "ppsx" | "odp" | "deckcraft" | "outline" | "txt" | "rtf" => {
             let bytes = save_bytes(&st.doc, &format)?;
             write_file(&path, &bytes)?;
             Ok(json!({"path": path, "bytes": bytes.len()}))
         }
         other => Err(bad("file.export", format!("unknown format `{other}`"))),
     }
+}
+
+fn export_video(s: &mut Session, p: &Value) -> Result<Value> {
+    let path = str_param(p, "path").ok_or_else(|| bad("file.exportVideo", "missing `path`"))?;
+    let default_fmt = crate::video_export::AnimatedFormat::from_path(path).unwrap_or(crate::video_export::AnimatedFormat::Mp4);
+    export_animated_with(s, p, default_fmt, "file.exportVideo")
+}
+
+fn export_gif(s: &mut Session, p: &Value) -> Result<Value> {
+    export_animated_with(s, p, crate::video_export::AnimatedFormat::Gif, "file.exportGif")
+}
+
+fn export_animated_with(
+    s: &mut Session,
+    p: &Value,
+    default_format: crate::video_export::AnimatedFormat,
+    cmd: &str,
+) -> Result<Value> {
+    let path = str_param(p, "path").ok_or_else(|| bad(cmd, "missing `path`"))?.to_string();
+    let st = s.doc()?;
+    let opts = crate::video_export::AnimatedExportOptions::from_params(p, default_format, cmd, st.doc.slides.len())?;
+    let out = crate::video_export::encode_animated_for(&st.doc, &opts, cmd)?;
+    write_file(&path, &out.bytes)?;
+    Ok(json!({
+        "path": path,
+        "format": out.format.as_str(),
+        "bytes": out.bytes.len(),
+        "frames": out.frames,
+        "totalTicks": out.total_ticks,
+        "durationMs": out.duration_ms,
+        "width": out.width,
+        "height": out.height,
+        "fps": out.fps,
+    }))
 }
 
 /// File › Info: what the Info page shows about the active presentation.
@@ -764,7 +845,24 @@ mod color_at_tests;
 mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-    use super::write_file;
+    use super::{parse_slide_range, write_file};
+
+    #[test]
+    fn broad_and_repeated_slide_ranges_expand_once() {
+        // 200 copies of a 100,000-slide range: each index once, in order, without a scan per index.
+        let text = vec!["1-100000"; 200].join(",");
+        let v = parse_slide_range(&text, 100_000).unwrap();
+        assert_eq!(v.len(), 100_000);
+        assert!(v.windows(2).all(|w| w[0] < w[1]));
+        assert_eq!(parse_slide_range("3, 1-3, 2", 3).unwrap(), vec![2, 0, 1]);
+    }
+
+    #[test]
+    fn slide_range_rejects_plus_sign() {
+        assert!(parse_slide_range("+2", 3).is_err());
+        assert!(parse_slide_range("+1-+3", 3).is_err());
+        assert_eq!(parse_slide_range("1-3", 3).unwrap(), vec![0, 1, 2]);
+    }
 
     fn scratch(name: &str) -> std::path::PathBuf {
         let dir = std::env::temp_dir().join(format!("deckcraft-write-file-{}-{name}", std::process::id()));

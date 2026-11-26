@@ -232,7 +232,7 @@
 	Automatic ({language})	Automat ({language})
 	Automatic ({region})	Automat ({region})
 	Automatic bulleted lists	Liste cu marcatori automate
-	Automatic follows your system's language. Menus and commands change; your documents don't.	Automat urmează limba sistemului. Se schimbă meniurile și comenzile, nu documentele dvs..
+	Automatic follows your system's language. Menus and commands change; your documents don't.	Automat urmează limba sistemului. Se schimbă meniurile și comenzile, nu documentele dvs.
 	Automatic numbered lists	Liste numerotate automate
 	Automatic Table 1 (3 levels)	Tabel automat 1 (3 niveluri)
 	Automatic Table 2 (2 levels)	Tabel automat 2 (2 niveluri)
@@ -242,7 +242,7 @@
 	AutoSave	Salvare automată
 	AutoSave documents you have saved in WordCraft	Salvează automat documentele pe care le-ați salvat în WordCraft
 	AutoSave failed: {error}. Save the document to turn AutoSave back on.	Salvarea automată a eșuat: {error}. Salvați documentul pentru a reactiva salvarea automată.
-	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	Salvarea automată nu e disponibilă în browser: nu poate scrie în fișierele dvs.. Salvarea descarcă o copie.
+	AutoSave isn't available in the browser: it can't write to your files. Save downloads a copy.	Salvarea automată nu e disponibilă în browser: nu poate scrie în fișierele dvs. Salvarea descarcă o copie.
 	AutoSave only keeps .docx, .odt and .rtf files; {name} can't keep all formatting. Save as .docx to turn on AutoSave.	Salvarea automată păstrează doar fișiere .docx, .odt și .rtf; {name} nu poate păstra toată formatarea. Salvați ca .docx pentru a activa salvarea automată.
 	AutoSave saves every change to the file (needs a saved document)	Salvarea automată scrie fiecare modificare în fișier (necesită un document salvat)
 	AutoSave writes your changes to the file a moment after you stop typing.	Salvarea automată scrie modificările în fișier la scurt timp după ce nu mai scrieți.
@@ -429,10 +429,10 @@
 	Chicago	Chicago
 	Chinese (Simplified)	Chineză (simplificată)
 	Chinese (Traditional)	Chineză (tradițională)
-	Choose a command	Alegețiți o comandă
-	Choose a shortcut	Alegețiți o scurtătură
-	Choose List Item	Alegețire element din listă
-	Choose the sheet that holds the recipients.	Alegețiți foaia care conține destinatarii.
+	Choose a command	Alegeți o comandă
+	Choose a shortcut	Alegeți o scurtătură
+	Choose List Item	Alegere element din listă
+	Choose the sheet that holds the recipients.	Alegeți foaia care conține destinatarii.
 	Circle	Cerc
 	Circle area from its radius	Aria cercului din rază
 	Circled Dot	Punct încercuit
@@ -1008,6 +1008,7 @@
 	Full Screen	Ecran complet
 	Full Screen View	Vizualizare ecran complet
 	Full\nScreen	Ecran\nîntreg
+	Fun fact: a blank page is just a draft that hasn't been told yet.	Știați că? O pagină goală e doar o ciornă care încă nu și-a spus povestea.
 	Function	Funcție
 	Functions	Funcții
 	Gallery	Galerie
@@ -1816,8 +1817,8 @@ template	Letter	Scrisoare
 	pi	pi
 	Pi Over 2	Pi supra 2
 	Picas	Pica
-	Pick a custom group (New Group makes one)	Alegețiți un grup personalizat (Grup nou creează unul)
-	Pick a field from the list	Alegețiți un câmp din listă
+	Pick a custom group (New Group makes one)	Alegeți un grup personalizat (Grup nou creează unul)
+	Pick a field from the list	Alegeți un câmp din listă
 	Picture	Imagine
 	Picture Border	Bordură imagine
 	Picture Content Control	Control de conținut imagine
@@ -2091,7 +2092,7 @@ template	Letter	Scrisoare
 	Save as Word Template…	Salvare ca șablon Word…
 	Save documents	Salvare documente
 	Save the document to turn on AutoSave	Salvați documentul pentru a activa salvarea automată
-	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Salvați documentul pentru a activa salvarea automată (un fișier pe care l-ați doar deschis nu este rescris până nu îl salvați)
+	Save the document to turn on AutoSave (a file you have only opened isn't rewritten until you save it)	Salvați documentul pentru a activa salvarea automată (un fișier pe care doar l-ați deschis nu este rescris până nu îl salvați)
 	Save these pages as PDF…	Salvați aceste pagini ca PDF…
 	Saved	Salvat
 	Saves a .dotx template in your templates folder. It shows up in File › New under Personal.	Salvează un șablon .dotx în folderul de șabloane. Apare în Fișier › Nou, la Personale.
@@ -2704,6 +2705,14 @@ preview	Title	Titlu
 	Warm Gradient with Outline	Gradient cald cu contur
 	Warnings ({n})	Avertismente ({n})
 	Watermark	Filigran
+	No watermark	Fără filigran
+	Picture watermark	Filigran imagine
+	Text watermark	Filigran text
+	Select Picture…	Selectare imagine…
+	Washout	Decolorat
+	Semitransparent	Semitransparent
+	Transparency:	Transparență:
+	Select a picture first.	Selectați mai întâi o imagine.
 	Wave	Val
 	Weather	Vreme
 	Web Layout	Aspect web
@@ -2782,7 +2791,7 @@ preview	Title	Titlu
 	{names} and {n} more	{names} și încă {n}
 	{name}   {height} × {width} in	{name}   {height} × {width} in
 	{name}   {height} × {width} mm	{name}   {height} × {width} mm
-	{name} already exists. Choose Save again to replace it.	{name} există deja. Alegețiți din nou Salvare pentru a-l înlocui.
+	{name} already exists. Choose Save again to replace it.	{name} există deja. Alegeți din nou Salvare pentru a-l înlocui.
 	{name} is protected with a password.	{name} este protejat cu parolă.
 	{name} options	Opțiuni {name}
 	{name} wasn't found.	{name} nu a fost găsit.
@@ -2798,3 +2807,126 @@ preview	Title	Titlu
 	✓ None	✓ Niciunul
 	➕ New comment	➕ Comentariu nou
 	📂  Browse…	📂  Răsfoire…
+
+# Manual Viewing interaction mode (WordCraft companion change).
+	Viewing	Vizualizare
+	Viewing — view the file but make no changes	Vizualizare — vezi documentul cu editarea blocată
+	Editing is blocked in Viewing mode.	Editarea este blocată în modul Vizualizare.
+	Add a language…	Adaugă o limbă…
+	Add a language	Adaugă o limbă
+	Your languages	Limbile dvs.
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engleza, limbile acestui document și fiecare pachet de limbă instalat. Pachetele de limbă adaugă dicționare ortografice și silabisire.
+	Set as default	Setează ca implicită
+	New blank documents are written in this language	Documentele goale noi se scriu în această limbă
+	{language} (default)	{language} (implicită)
+	Built in	Încorporat
+	Your own dictionary	Dicționarul dvs. propriu
+	System dictionary	Dicționarul sistemului
+	Not available yet	Încă indisponibil
+	Grammar built in	Gramatică încorporată
+	Install spelling ({size})	Instalează ortografia ({size})
+	Its dictionary couldn't be read: {reason}	Dicționarul ei nu a putut fi citit: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Descărcarea este dezactivată. Un clic pe „Adaugă o limbă…” sau „Instalează” o activează: WordCraft descarcă apoi pachete de limbă și fonturi de pe GitHub.
+	Search:	Căutare:
+	Dutch, Nederlands or nl	Olandeză, Nederlands sau nl
+	No languages to show yet.	Încă nu există limbi de afișat.
+	No language matches your search.	Nicio limbă nu corespunde căutării dvs.
+	An installed Language pack is used after this folder.	Un pachet de limbă instalat este folosit după acest folder.
+	Dictionary files	Fișiere de dicționar
+	Gets the list of Language packs, then this language's pack if there is one.	Preia lista pachetelor de limbă, apoi pachetul acestei limbi, dacă există.
+	Afrikaans	afrikaans
+	Belarusian	belarusă
+	Bulgarian	bulgară
+	Bosnian	bosniacă
+	Catalan	catalană
+	Catalan (Valencian)	catalană (valenciană)
+	Welsh	galeză
+	Esperanto	esperanto
+	Persian	persană
+	Irish	irlandeză
+	Galician	galiciană
+	Hungarian	maghiară
+	Armenian	armeană
+	Icelandic	islandeză
+	Georgian	georgiană
+	Lithuanian	lituaniană
+	Latvian	letonă
+	Macedonian	macedoneană
+	Norwegian (Nynorsk)	norvegiană (nynorsk)
+	Slovak	slovacă
+	Slovenian	slovenă
+	Albanian	albaneză
+	Swahili	swahili
+	Tamil	tamilă
+	Thai	thailandeză
+	Vietnamese	vietnameză
+	Set as Default Language	Setează ca limbă implicită
+	U.A.E.	Emiratele Arabe Unite
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austria
+	Australia	Australia
+	Bosnia and Herzegovina	Bosnia și Herțegovina
+	Belgium	Belgia
+	Bolivia	Bolivia
+	Brazil	Brazilia
+	Belarus	Belarus
+	Canada	Canada
+	Switzerland	Elveția
+	Chile	Chile
+	China	China
+	Colombia	Columbia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Capul Verde
+	Cyprus	Cipru
+	Germany	Germania
+	Dominican Republic	Republica Dominicană
+	Ecuador	Ecuador
+	Egypt	Egipt
+	Spain	Spania
+	Finland	Finlanda
+	France	Franța
+	United Kingdom	Regatul Unit
+	Equatorial Guinea	Guineea Ecuatorială
+	Guatemala	Guatemala
+	Hong Kong SAR	R.A.S. Hong Kong
+	Honduras	Honduras
+	Ireland	Irlanda
+	India	India
+	Iraq	Irak
+	Italy	Italia
+	Jamaica	Jamaica
+	Jordan	Iordania
+	Kuwait	Kuweit
+	Kazakhstan	Kazahstan
+	Lebanon	Liban
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburg
+	Morocco	Maroc
+	Monaco	Monaco
+	Montenegro	Muntenegru
+	Macao SAR	R.A.S. Macao
+	Mexico	Mexic
+	Malaysia	Malaezia
+	Mozambique	Mozambic
+	Nicaragua	Nicaragua
+	Netherlands	Țările de Jos
+	New Zealand	Noua Zeelandă
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipine
+	Puerto Rico	Puerto Rico
+	Portugal	Portugalia
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Rusia
+	Singapore	Singapore
+	El Salvador	El Salvador
+	Syria	Siria
+	Taiwan	Taiwan
+	Ukraine	Ucraina
+	United States	Statele Unite
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Africa de Sud

@@ -55,11 +55,16 @@ pub fn validate_curve(points: &[[f32; 2]]) -> Result<(), String> {
 
 use crate::photo_util::{hash01, linear_to_srgb, par_rows, srgb_to_linear};
 
-mod local_tone;
+pub mod local_tone;
 mod per_pixel;
+pub mod spatial;
 mod whites_blacks;
 
-pub use per_pixel::{CURVE_LUT, Grade, Grain, PerPixel, Vignette, VignetteStyle, WB_STEPS, WhitesBlacks, per_pixel, white_black_points};
+pub use local_tone::{LocalTone, ToneKind, TonePass};
+pub use per_pixel::{
+    CURVE_LUT, Grade, Grain, PerPixel, Vignette, VignetteStyle, WB_STEPS, WhitesBlacks, WhitesBlacksModel, per_pixel, white_black_points, whites_blacks_model,
+};
+pub use spatial::{Clarity, Dehaze, Texture};
 
 /// How the pixels encode light: the sRGB curve (gamma 0) or a pure power law (ProPhoto's 1.8,
 /// Adobe RGB's 2.2). The tone controls work on light, so the document's own curve decodes it.
@@ -176,6 +181,21 @@ pub struct CameraRaw {
     pub calibration_hue: [f32; 3],
     /// Red, Green and Blue Primary › Saturation: −100 (grey) … 100 (purer).
     pub calibration_sat: [f32; 3],
+    // Camera Raw 19.0 (19.0.0.2794) extensions:
+    /// Distraction Removal › Eyeglass Reflections (`안경 반사 제거`, `0.0..=100.0`).
+    pub eyeglass_reflections: f32,
+    /// Distraction Removal › Window Reflections (`창문 반사 제거`, `0.0..=100.0`).
+    pub window_reflections: f32,
+    /// Adaptive Color / Adaptive Profile (`적응형 프로필`).
+    pub adaptive_profile: bool,
+    /// Adaptive Profile strength (`0.0..=200.0`, default `100.0`).
+    pub adaptive_amount: f32,
+    /// Detail › Non-Raw Denoise (`비-Raw 노이즈 감소`, `0.0..=100.0`).
+    pub non_raw_denoise: f32,
+    /// HDR output & extended histogram/curve headroom toggle.
+    pub hdr_mode: bool,
+    /// HDR headroom range in stops (`1..=4` EV).
+    pub hdr_range_ev: u8,
 }
 
 impl Default for CameraRaw {
@@ -235,6 +255,13 @@ impl Default for CameraRaw {
             shadow_tint: 0.0,
             calibration_hue: [0.0; 3],
             calibration_sat: [0.0; 3],
+            eyeglass_reflections: 0.0,
+            window_reflections: 0.0,
+            adaptive_profile: false,
+            adaptive_amount: 100.0,
+            non_raw_denoise: 0.0,
+            hdr_mode: false,
+            hdr_range_ev: 2,
         }
     }
 }
@@ -388,11 +415,13 @@ fn box_mean(v: &[f32], w: usize, h: usize, r: usize) -> Vec<f32> {
 
 /// Approximate Gaussian (three box passes).
 fn gauss(v: &[f32], w: usize, h: usize, sigma: f32) -> Vec<f32> {
-    if sigma < 0.3 {
-        return v.to_vec();
-    }
+    box_means(v, w, h, &spatial::gauss_radii(sigma))
+}
+
+/// Box means of radii `radii` in turn.
+fn box_means(v: &[f32], w: usize, h: usize, radii: &[usize]) -> Vec<f32> {
     let mut out = v.to_vec();
-    for r in crate::fxutil::gauss_box_radii(sigma) {
+    for &r in radii {
         out = box_mean(&out, w, h, r);
     }
     out
@@ -402,7 +431,7 @@ fn gauss(v: &[f32], w: usize, h: usize, sigma: f32) -> Vec<f32> {
 /// coefficients are computed on a `s×` subsampled copy and upsampled bilinearly, which is
 /// visually equivalent for the large radii used by tone controls at a fraction of the cost.
 fn guided_fast(i: &[f32], p: &[f32], w: usize, h: usize, r: usize, eps: f32) -> Vec<f32> {
-    let s = (r / 8).clamp(1, 8);
+    let (s, rs) = spatial::fast_guided_steps(r);
     if s == 1 {
         return guided(i, p, w, h, r, eps);
     }
@@ -420,7 +449,6 @@ fn guided_fast(i: &[f32], p: &[f32], w: usize, h: usize, r: usize, eps: f32) -> 
         o.iter().zip(&c).map(|(a, b)| a / b.max(1.0)).collect()
     };
     let (si, sp) = (down(i), down(p));
-    let rs = (r / s).max(1);
     let mi = box_mean(&si, sw, sh, rs);
     let mp = box_mean(&sp, sw, sh, rs);
     let ip: Vec<f32> = si.iter().zip(&sp).map(|(a, b)| a * b).collect();
@@ -655,6 +683,7 @@ impl CameraRaw {
             && self.noise_color == 0.0
             && self.grain_amount == 0.0
             && self.vignette_amount == 0.0
+            && !self.acr19_active()
     }
 }
 
@@ -680,7 +709,17 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
         return;
     }
     let ps = p.pixel_scale.clamp(0.01, 1.0);
-    let long = w.max(h) as f32;
+    // 0a. Camera Raw 19.0 Distraction Removal: Eyeglass Reflections & Window Reflections.
+    if p.eyeglass_reflections > 0.0 {
+        acr19_remove_eyeglass_reflections(px, w, h, p.eyeglass_reflections);
+    }
+    if p.window_reflections > 0.0 {
+        acr19_remove_window_reflections(px, w, h, p.window_reflections);
+    }
+    // 0b. Camera Raw 19.0 Adaptive Profile: image-aware local dynamic range & perceptual color tone-map.
+    if p.adaptive_profile && p.adaptive_amount > 0.0 {
+        acr19_apply_adaptive_profile(px, w, h, p.adaptive_amount, p.hdr_mode, p.hdr_range_ev);
+    }
     // 1. White balance + exposure in linear light.
     if let Some(g) = per_pixel::gains(p) {
         par_rows(px, w, 1, |_, row| {
@@ -708,8 +747,8 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
         });
     }
     // 2. Dehaze.
-    if p.dehaze != 0.0 {
-        dehaze(px, w, h, p.dehaze / 100.0);
+    if let Some(d) = Dehaze::new(p, w, h) {
+        dehaze(px, w, h, &d);
     }
     // 3. Tone. Highlights and Shadows: a local Laplacian filter (see `local_tone`).
     if p.highlights != 0.0 || p.shadows != 0.0 {
@@ -718,20 +757,22 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
     if !p.local_tone_neutral() && [p.contrast, p.texture, p.clarity].iter().any(|v| *v != 0.0) {
         let l: Vec<f32> = px.iter().map(|q| luma([q[0], q[1], q[2]]).max(0.0)).collect();
         let lc: Vec<f32> = l.iter().map(|v| v.min(1.0)).collect();
-        let clar = (p.clarity != 0.0).then(|| guided_fast(&lc, &lc, w, h, ((long * 0.02) as usize).max(3), 0.005));
-        let tex = (p.texture != 0.0).then(|| gauss(&lc, w, h, (long * 0.002).max(1.5 * ps)));
+        let clarity = Clarity::new(p, w, h);
+        let texture = Texture::new(p, w, h);
+        let clar = clarity.as_ref().map(|c| guided_fast(&lc, &lc, w, h, c.radius, spatial::CLARITY_EPS));
+        let tex = texture.as_ref().map(|t| box_means(&lc, w, h, &t.radii));
         let k_con = p.contrast / 100.0 * 0.6;
         par_rows(px, w, 1, |y, row| {
             for (x, q) in row.iter_mut().enumerate() {
                 let i = y * w + x;
                 let l0 = l[i];
                 let mut lv = lc[i];
-                if let Some(c) = &clar {
+                if let (Some(c), Some(k)) = (&clar, &clarity) {
                     let mw = 1.0 - (2.0 * lv.clamp(0.0, 1.0) - 1.0).powi(2);
-                    lv += p.clarity / 100.0 * 0.8 * (lc[i] - c[i]) * mw;
+                    lv += k.amount * (lc[i] - c[i]) * mw;
                 }
-                if let Some(t) = &tex {
-                    lv += p.texture / 100.0 * 0.9 * (lc[i] - t[i]).clamp(-0.1, 0.1);
+                if let (Some(t), Some(k)) = (&tex, &texture) {
+                    lv += k.amount * (lc[i] - t[i]).clamp(-spatial::TEXTURE_LIMIT, spatial::TEXTURE_LIMIT);
                 }
                 *q = tone(*q, l0, lc[i], lv, k_con);
             }
@@ -825,6 +866,9 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
     if p.noise_luminance > 0.0 || p.noise_color > 0.0 || p.sharpen_amount > 0.0 {
         detail(px, w, h, p, ps);
     }
+    if p.non_raw_denoise > 0.0 {
+        acr19_non_raw_denoise(px, w, h, p.non_raw_denoise, ps);
+    }
     // 9. Effects.
     if p.vignette_amount != 0.0 {
         vignette(px, w, h, p);
@@ -845,9 +889,14 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
         });
     }
     if !float {
+        let ceiling = if p.hdr_mode {
+            linear_to_srgb(2.0f32.powi(i32::from(p.hdr_range_ev.clamp(1, 4))))
+        } else {
+            1.0
+        };
         for q in px.iter_mut() {
             for c in 0..3 {
-                q[c] = q[c].clamp(0.0, 1.0);
+                q[c] = q[c].clamp(0.0, ceiling);
             }
         }
     }
@@ -885,11 +934,17 @@ fn balance(mut q: [f32; 4], g: [f32; 3]) -> [f32; 4] {
     q
 }
 
+/// The index of the `q` quantile (0 … 1) among `len` sorted values, as every percentile in the
+/// develop picks it.
+pub fn quantile_rank(len: usize, q: f32) -> usize {
+    (len.saturating_sub(1) as f32 * q).round() as usize
+}
+
 /// The image's black and white points as sRGB-encoded grey levels: the 3rd percentile of the
 /// luminance and the 99.5th of the brightest channel, on a copy at most 256 pixels across (so a
 /// preview proxy and the full image agree). `map` is applied to each pixel first.
 fn luminance_points(px: &[[f32; 4]], w: usize, h: usize, enc: Encoding, map: impl Fn([f32; 4]) -> [f32; 4] + Sync) -> (f32, f32) {
-    let f = w.max(h).div_ceil(256).max(1);
+    let f = w.max(h).div_ceil(whites_blacks::POINTS_SIDE).max(1);
     let (sw, sh) = (w.div_ceil(f), h.div_ceil(f));
     // Each band of `f` rows sums into its own row of cells, in the same order as one pass would.
     let bands = crate::photo_util::par_map(sh, |sy| {
@@ -912,10 +967,10 @@ fn luminance_points(px: &[[f32; 4]], w: usize, h: usize, enc: Encoding, map: imp
     }
     let pct = |mut v: Vec<f32>, q: f32| {
         v.sort_by(f32::total_cmp);
-        v[((v.len() - 1) as f32 * q).round() as usize]
+        v[quantile_rank(v.len(), q)]
     };
-    let bp = pct(cells.iter().map(|c| luma(*c)).collect(), 0.03);
-    let wp = pct(cells.iter().map(|c| c[0].max(c[1]).max(c[2])).collect(), 0.995);
+    let bp = pct(cells.iter().map(|c| luma(*c)).collect(), whites_blacks::POINT_QUANTILES[0]);
+    let wp = pct(cells.iter().map(|c| c[0].max(c[1]).max(c[2])).collect(), whites_blacks::POINT_QUANTILES[1]);
     (linear_to_srgb(bp), linear_to_srgb(wp))
 }
 
@@ -929,25 +984,32 @@ fn value_noise(x: f32, y: f32, seed: u64) -> f32 {
     top + (bot - top) * sy
 }
 
-fn dehaze(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32) {
-    // Transmission on a ≤ 768 px proxy, upsampled.
-    let k = w.max(h).div_ceil(768).max(1);
-    let (sw, sh) = (w.div_ceil(k), h.div_ceil(k));
-    let mut small = vec![[0.0f32; 3]; sw * sh];
-    let mut cnt = vec![0f32; sw * sh];
-    for y in 0..h {
-        for x in 0..w {
-            let i = (y / k) * sw + x / k;
-            for c in 0..3 {
-                small[i][c] += px[y * w + x][c].clamp(0.0, 1.0);
+/// Dehaze's copy of `px` (`w × h`): each pixel mapped by `map`, clipped to 0 … 1 and averaged over
+/// `d.factor × d.factor` blocks, each block summed in raster order.
+fn haze_cells(px: &[[f32; 4]], w: usize, h: usize, d: &Dehaze, map: impl Fn([f32; 4]) -> [f32; 4] + Sync) -> Vec<[f32; 3]> {
+    let (k, [sw, sh]) = (d.factor, d.size);
+    let bands = crate::photo_util::par_map(sh, |sy| {
+        let mut small = vec![[0.0f32; 3]; sw];
+        let mut cnt = vec![0f32; sw];
+        for y in sy * k..((sy + 1) * k).min(h) {
+            for x in 0..w {
+                let q = map(px[y * w + x]);
+                let i = x / k;
+                for c in 0..3 {
+                    small[i][c] += q[c].clamp(0.0, 1.0);
+                }
+                cnt[i] += 1.0;
             }
-            cnt[i] += 1.0;
         }
-    }
-    for (s, c) in small.iter_mut().zip(&cnt) {
-        *s = s.map(|v| v / c.max(1.0));
-    }
-    let r = (sw.max(sh) / 60).max(2);
+        small.iter().zip(&cnt).map(|(s, c)| s.map(|v| v / c.max(1.0))).collect::<Vec<_>>()
+    });
+    bands.into_iter().flatten().collect()
+}
+
+fn dehaze(px: &mut [[f32; 4]], w: usize, h: usize, d: &Dehaze) {
+    // Transmission on a ≤ DEHAZE_SIDE px proxy, upsampled.
+    let (k, [sw, sh], r, amount) = (d.factor, d.size, d.radius, d.amount);
+    let small = haze_cells(px, w, h, d, |q| q);
     // The minimum (or, with `f32::max`, maximum) over each (2r + 1)² window.
     let rank_filter = |v: &[f32], start: f32, pick: fn(f32, f32) -> f32| -> Vec<f32> {
         let mut a = vec![0.0f32; sw * sh];
@@ -968,33 +1030,37 @@ fn dehaze(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32) {
     };
     let min_filter = |v: &[f32]| rank_filter(v, f32::MAX, f32::min);
     let dark = min_filter(&small.iter().map(|c| c[0].min(c[1]).min(c[2])).collect::<Vec<_>>());
-    // Atmospheric light: mean colour of the brightest 0.1 % of the dark channel.
+    // Atmospheric light: mean colour of the brightest 0.1 % of the dark channel (ties in the
+    // order of the cells).
     let mut idx: Vec<usize> = (0..sw * sh).collect();
     idx.sort_by(|&a, &b| dark[b].total_cmp(&dark[a]));
-    let top = (sw * sh / 1000).max(1);
+    let top = d.top;
     let mut air = [0.0f32; 3];
     for &i in &idx[..top] {
         for c in 0..3 {
             air[c] += small[i][c] / top as f32;
         }
     }
-    let air = air.map(|v| v.max(0.2));
+    let air = air.map(|v| v.max(spatial::DEHAZE_AIR_FLOOR));
     let norm_dark = min_filter(&small.iter().map(|c| (c[0] / air[0]).min(c[1] / air[1]).min(c[2] / air[2])).collect::<Vec<_>>());
     // Opened (a maximum filter of the same radius after the minimum): the minimum grows every
     // dark object by `r`, so sky beside a dark building took its dark channel, counted as
     // haze-free and kept a bright halo (#9273). Opening shrinks dark regions back to their
     // outline and is still a lower bound of the dark channel over the window. It raises the dark
-    // channel on average, so the 0.95 weight is scaled to keep the slider's overall strength.
+    // channel on average, so the ω weight is scaled to keep the slider's overall strength.
     let opened = rank_filter(&norm_dark, f32::MIN, f32::max);
-    let mean = |v: &[f32]| v.iter().sum::<f32>() / v.len().max(1) as f32;
-    let weight = 0.95 * mean(&norm_dark) / mean(&opened).max(1e-6);
+    // Summed in f64: an f32 running sum over the copy's few hundred thousand cells drifts by about
+    // 1e-5, which the low transmission beside haze multiplies up to a visible fraction of a level.
+    let mean = |v: &[f32]| (v.iter().map(|x| f64::from(*x)).sum::<f64>() / v.len().max(1) as f64) as f32;
+    let weight = spatial::DEHAZE_OMEGA * mean(&norm_dark) / mean(&opened).max(1e-6);
     let t_raw: Vec<f32> = opened.iter().map(|d| 1.0 - weight * d).collect();
     let guide: Vec<f32> = small.iter().map(|c| luma(*c)).collect();
-    let t = guided(&guide, &t_raw, sw, sh, r * 2, 1e-3);
+    let t = guided(&guide, &t_raw, sw, sh, d.guide_radius, spatial::DEHAZE_EPS);
     let ks = k as f32;
     par_rows(px, w, 1, |y, row| {
         for (x, q) in row.iter_mut().enumerate() {
-            let tv = crate::photo_util::bilinear(&t, sw, sh, 1, 0, (x as f32 + 0.5) / ks - 0.5, (y as f32 + 0.5) / ks - 0.5).clamp(0.1, 1.0);
+            let tv =
+                crate::photo_util::bilinear(&t, sw, sh, 1, 0, (x as f32 + 0.5) / ks - 0.5, (y as f32 + 0.5) / ks - 0.5).clamp(spatial::DEHAZE_T_FLOOR, 1.0);
             for c in 0..3 {
                 let i = q[c];
                 let j = (i - air[c]) / tv + air[c];
@@ -1005,23 +1071,25 @@ fn dehaze(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32) {
 }
 
 fn detail(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, ps: f32) {
+    // The controls' documented 0..=100 range: raw values drive the filter radii below.
+    let [nl, nld, nc, ncd] = [p.noise_luminance, p.noise_luminance_detail, p.noise_color, p.noise_color_detail].map(|v| v.clamp(0.0, 100.0));
     // Work in Y + chroma (BT.709 luma, B−Y, R−Y).
     let mut y: Vec<f32> = px.iter().map(|q| luma([q[0], q[1], q[2]])).collect();
     let mut cb: Vec<f32> = px.iter().zip(&y).map(|(q, l)| q[2] - l).collect();
     let mut cr: Vec<f32> = px.iter().zip(&y).map(|(q, l)| q[0] - l).collect();
-    if p.noise_luminance > 0.0 {
-        let n = p.noise_luminance / 100.0;
+    if nl > 0.0 {
+        let n = nl / 100.0;
         let r = ((1.0 + 3.0 * n) * ps).round().max(1.0) as usize;
         let smooth = guided(&y, &y, w, h, r, (n * 0.06).powi(2) + 1e-6);
-        let keep = p.noise_luminance_detail / 100.0 * 0.5;
+        let keep = nld / 100.0 * 0.5;
         for i in 0..w * h {
             y[i] = smooth[i] + (y[i] - smooth[i]) * keep;
         }
     }
-    if p.noise_color > 0.0 {
-        let sigma = (p.noise_color / 100.0 * 6.0 * ps).max(0.3);
+    if nc > 0.0 {
+        let sigma = (nc / 100.0 * 6.0 * ps).max(0.3);
         let (bcb, bcr) = (gauss(&cb, w, h, sigma), gauss(&cr, w, h, sigma));
-        let keep = p.noise_color_detail / 100.0 * 0.3;
+        let keep = ncd / 100.0 * 0.3;
         for i in 0..w * h {
             cb[i] = bcb[i] + (cb[i] - bcb[i]) * keep;
             cr[i] = bcr[i] + (cr[i] - bcr[i]) * keep;
@@ -1104,6 +1172,186 @@ fn vignette(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw) {
     });
 }
 
+/// Camera Raw 19.0 Distraction Removal › Eyeglass Reflections (`안경 반사 제거`):
+/// Detects compact specular / cool-green anti-reflective coating glare patches surrounded by
+/// warmer skin/iris chromaticity and reconstructs underlying skin/eye colour & shading.
+fn acr19_remove_eyeglass_reflections(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32) {
+    let n = w * h;
+    if n == 0 || px.len() < n {
+        return;
+    }
+    let amt = amount.clamp(0.0, 100.0) / 100.0;
+    let r_nb = (w.min(h) / 5).clamp(5, 36);
+    let mut glare = vec![0.0f32; n];
+    for i in 0..n {
+        let q = px[i];
+        let lum = luma([q[0], q[1], q[2]]);
+        let mx = q[0].max(q[1]).max(q[2]);
+        let mn = q[0].min(q[1]).min(q[2]);
+        let sat = if mx > 1e-4 { (mx - mn) / mx } else { 0.0 };
+        // Specular eyeglass reflections are either desaturated bright highlights OR AR-coated green/cyan glints.
+        let spec = smoothstep(0.62, 0.92, lum) * (1.0 - sat * 0.75).clamp(0.0, 1.0);
+        let ar_tint = smoothstep(0.45, 0.85, lum) * ((q[1].max(q[2]) - q[0] * 0.95).max(0.0) * 2.2).clamp(0.0, 1.0);
+        glare[i] = spec.max(ar_tint);
+    }
+    let soft_glare = box_mean(&glare, w, h, 1);
+    let mut w_acc = vec![0.0f32; n];
+    let mut c_acc = [vec![0.0f32; n], vec![0.0f32; n], vec![0.0f32; n]];
+    for i in 0..n {
+        let keep = (1.0 - soft_glare[i] * 0.995).clamp(0.002, 1.0);
+        w_acc[i] = keep;
+        for c in 0..3 {
+            c_acc[c][i] = px[i][c] * keep;
+        }
+    }
+    let w_blur = box_mean(&w_acc, w, h, r_nb);
+    let r_blur = box_mean(&c_acc[0], w, h, r_nb);
+    let g_blur = box_mean(&c_acc[1], w, h, r_nb);
+    let b_blur = box_mean(&c_acc[2], w, h, r_nb);
+
+    par_rows(px, w, 1, |y, row| {
+        for (x, q) in row.iter_mut().enumerate() {
+            let idx = y * w + x;
+            let m = (soft_glare[idx] * 1.25 * amt).clamp(0.0, 1.0);
+            if m <= 1e-4 {
+                continue;
+            }
+            let den = w_blur[idx].max(1e-4);
+            let bg = [r_blur[idx] / den, g_blur[idx] / den, b_blur[idx] / den];
+            // Check whether neighborhood resembles warm portrait/eye context or indoor tone; blend smoothly.
+            for c in 0..3 {
+                let residual = (q[c] - bg[c]).clamp(-0.06, 0.06) * (1.0 - m);
+                q[c] = (q[c] * (1.0 - m) + (bg[c] + residual) * m).clamp(0.0, 1.0);
+            }
+        }
+    });
+}
+
+/// Camera Raw 19.0 Distraction Removal › Window Reflections (`창문 반사 제거`):
+/// Separates smooth additive glass-pane veil reflections (`I = T + R`) and restores transmitted contrast.
+fn acr19_remove_window_reflections(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32) {
+    crate::ambient_remove::remove_ambient_effects_rgba(
+        px,
+        w,
+        h,
+        &crate::ambient_remove::AmbientRemoveParams {
+            mode: crate::ambient_remove::AmbientMode::Reflections,
+            remove_related_elements: true,
+            enhance: true,
+            strength: amount.clamp(0.0, 100.0),
+        },
+    );
+}
+
+/// Camera Raw 19.0 `Adaptive Profile` (`적응형 프로필`):
+/// Content-adaptive dynamic range compression/expansion & perceptual color tone-mapping stage.
+fn acr19_apply_adaptive_profile(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32, hdr_mode: bool, hdr_ev: u8) {
+    let n = w * h;
+    if n == 0 || px.len() < n {
+        return;
+    }
+    let mix = (amount.clamp(0.0, 200.0) / 100.0).min(2.0);
+    let mut lum: Vec<f32> = px.iter().take(n).map(|q| luma([q[0], q[1], q[2]]).clamp(0.0, 1.0)).collect();
+    let base_lum = box_mean(&lum, w, h, (w.min(h) / 16).clamp(1, 24));
+    lum.sort_by(f32::total_cmp);
+    let p10 = lum[quantile_rank(n, 0.10)];
+    let p50 = lum[quantile_rank(n, 0.50)].max(0.02);
+    let p95 = lum[quantile_rank(n, 0.95)];
+    let exp_ev = (0.45 * (0.44 / p50).log2()).clamp(-1.2, 1.2) * mix.min(1.2);
+    let shadow_lift = ((0.22 - p10).max(0.0) * 0.65) * mix;
+    let hl_comp = ((p95 - 0.84).max(0.0) * 0.75) * mix;
+    let hdr_boost = if hdr_mode { 1.0 + 0.18 * f32::from(hdr_ev.clamp(1, 4)) * (mix * 0.5).min(1.0) } else { 1.0 };
+
+    par_rows(px, w, 1, |y, row| {
+        for (x, q) in row.iter_mut().enumerate() {
+            let idx = y * w + x;
+            let bl = base_lum[idx].clamp(0.01, 1.0);
+            let local_gain = 2.0f32.powf(exp_ev + shadow_lift * (1.0 - bl).powi(2) - hl_comp * bl.powi(2));
+            let l0 = luma([q[0], q[1], q[2]]).max(1e-5);
+            let mut c = [0.0f32; 3];
+            for k in 0..3 {
+                let lin = srgb_to_linear(q[k].max(0.0)) * local_gain;
+                let hi = if hdr_mode && bl > 0.72 { lin * (1.0 + (bl - 0.72) * (hdr_boost - 1.0) * 2.5) } else { lin };
+                c[k] = linear_to_srgb(hi.max(0.0));
+            }
+            // Adaptive perceptual vibrance boost on midtones.
+            let nl = luma(c);
+            let sat_boost = 1.0 + 0.12 * mix * (1.0 - (2.0 * bl - 1.0).powi(2));
+            for k in 0..3 {
+                let v = nl + (c[k] - nl) * sat_boost;
+                q[k] = if hdr_mode { v.max(0.0) } else { v.clamp(0.0, 1.0) };
+            }
+            let _ = l0;
+        }
+    });
+}
+
+/// Camera Raw 19.0 Detail › `Non-Raw Denoise` (`비-Raw 노이즈 감소`):
+/// Edge-guided bilateral/guided luma + chroma de-blocking and sensor-noise suppression for JPEG/PNG/TIFF.
+fn acr19_non_raw_denoise(px: &mut [[f32; 4]], w: usize, h: usize, amount: f32, ps: f32) {
+    let n = w * h;
+    if n == 0 || px.len() < n {
+        return;
+    }
+    let amt = (amount.clamp(0.0, 100.0) / 100.0).clamp(0.0, 1.0);
+    let radius = (((2.0 + 4.0 * amt) * ps).round() as usize).max(1);
+    let mut y_ch = vec![0.0f32; n];
+    let mut cb_ch = vec![0.0f32; n];
+    let mut cr_ch = vec![0.0f32; n];
+    for i in 0..n {
+        let l = luma([px[i][0], px[i][1], px[i][2]]);
+        y_ch[i] = l;
+        cb_ch[i] = px[i][2] - l;
+        cr_ch[i] = px[i][0] - l;
+    }
+    let eps = (0.0008 + 0.018 * amt * amt).clamp(1e-4, 0.05);
+    let y_clean = guided(&y_ch, &y_ch, w, h, radius, eps);
+    let cb_clean = guided(&y_ch, &cb_ch, w, h, (radius * 2).max(2), eps * 2.5);
+    let cr_clean = guided(&y_ch, &cr_ch, w, h, (radius * 2).max(2), eps * 2.5);
+
+    par_rows(px, w, 1, |y, row| {
+        for (x, q) in row.iter_mut().enumerate() {
+            let idx = y * w + x;
+            let l = y_ch[idx] * (1.0 - amt * 0.85) + y_clean[idx] * (amt * 0.85);
+            let cb = cb_ch[idx] * (1.0 - amt) + cb_clean[idx] * amt;
+            let cr = cr_ch[idx] * (1.0 - amt) + cr_clean[idx] * amt;
+            let rr = cr + l;
+            let bb = cb + l;
+            let gg = (l - 0.2126 * rr - 0.0722 * bb) / 0.7152;
+            q[0] = rr.max(0.0);
+            q[1] = gg.max(0.0);
+            q[2] = bb.max(0.0);
+        }
+    });
+}
+
+/// Computes Camera Raw 19.0's SDR + HDR headroom histogram:
+/// - `sdr`: 256 luminance bins across `[0.0..=1.0]` SDR range
+/// - `hdr_stops`: 4 stops × 64 bins covering `+0..+1 EV`, `+1..+2 EV`, `+2..+3 EV`, `+3..+4 EV` above SDR white!
+pub fn hdr_histogram(px: &[[f32; 4]], hdr_range_ev: u8) -> ([u32; 256], [[u32; 64]; 4]) {
+    let mut sdr = [0u32; 256];
+    let mut hdr = [[0u32; 64]; 4];
+    let max_stops = hdr_range_ev.clamp(1, 4) as usize;
+    for q in px {
+        let lin_r = srgb_to_linear(q[0].max(0.0));
+        let lin_g = srgb_to_linear(q[1].max(0.0));
+        let lin_b = srgb_to_linear(q[2].max(0.0));
+        let lin_y = 0.2126 * lin_r + 0.7152 * lin_g + 0.0722 * lin_b;
+        if lin_y <= 1.0 {
+            let s = linear_to_srgb(lin_y.max(0.0)).clamp(0.0, 1.0);
+            let bin = ((s * 255.0).round() as usize).min(255);
+            sdr[bin] = sdr[bin].saturating_add(1);
+        } else {
+            let ev = lin_y.log2().max(0.0);
+            let stop_idx = (ev.floor() as usize).min(max_stops.saturating_sub(1));
+            let frac = if ev >= max_stops as f32 { 0.999 } else { (ev - stop_idx as f32).clamp(0.0, 0.999) };
+            let bin = ((frac * 64.0) as usize).min(63);
+            hdr[stop_idx][bin] = hdr[stop_idx][bin].saturating_add(1);
+        }
+    }
+    (sdr, hdr)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1124,7 +1372,8 @@ mod tests {
                 [c[0], c[1], c[2], 1.0]
             })
             .collect();
-        dehaze(&mut px, w, h, 1.0);
+        let d = Dehaze::new(&CameraRaw { dehaze: 100.0, ..Default::default() }, w, h).unwrap();
+        dehaze(&mut px, w, h, &d);
         let sky = |xs: std::ops::Range<usize>| {
             let v: Vec<f32> =
                 (150..390).flat_map(|y| xs.clone().map(move |x| (x, y))).map(|(x, y)| luma([px[y * w + x][0], px[y * w + x][1], px[y * w + x][2]])).collect();
@@ -1281,6 +1530,12 @@ mod tests {
         let mut nr = noisy.clone();
         develop(&mut nr, w, h, &CameraRaw { noise_luminance: 80.0, ..Default::default() }, false);
         assert!(var(&nr) < var(&noisy) * 0.5);
+        // Out-of-range noise settings are held to their 0..=100 range, not turned into huge radii.
+        let mut wild = noisy.clone();
+        let hostile =
+            CameraRaw { noise_luminance: 1.0e30, noise_color: 1.0e30, noise_luminance_detail: 1.0e30, noise_color_detail: 1.0e30, ..Default::default() };
+        develop(&mut wild, w, h, &hostile, false);
+        assert!(wild.iter().all(|q| q[0].is_finite()));
         let mut sh = noisy.clone();
         develop(&mut sh, w, h, &CameraRaw { sharpen_amount: 100.0, ..Default::default() }, false);
         assert!(var(&sh) > var(&noisy));
@@ -1402,5 +1657,62 @@ mod tests {
         let mut a = vec![[2.0f32, 1.5, 0.5, 1.0]; 16];
         develop(&mut a, 4, 4, &CameraRaw { exposure: 0.5, ..Default::default() }, true);
         assert!(a[0][0] > 2.0);
+    }
+
+    /// A Gaussian narrower than 0.3 px has no box radii, so it returns its input unchanged, and
+    /// Texture on a proxy that small changes nothing.
+    #[test]
+    fn a_gaussian_below_0_3_px_leaves_the_image_alone() {
+        assert!(spatial::gauss_radii(0.29).is_empty());
+        assert!(!spatial::gauss_radii(0.3).is_empty());
+        let (w, h) = (64usize, 48usize);
+        let v: Vec<f32> = (0..w * h).map(|i| ((i * 37) % 101) as f32 / 100.0).collect();
+        assert_eq!(gauss(&v, w, h, 0.29), v);
+        assert_eq!(box_means(&v, w, h, &[]), v);
+        assert_ne!(gauss(&v, w, h, 1.0), v);
+        let src: Vec<[f32; 4]> = v.iter().map(|&x| [x, 1.0 - x, 0.5 * x, 1.0]).collect();
+        let base = CameraRaw { contrast: 10.0, pixel_scale: 0.1, ..Default::default() };
+        let (mut plain, mut textured) = (src.clone(), src);
+        develop(&mut plain, w, h, &base, false);
+        develop(&mut textured, w, h, &CameraRaw { texture: 80.0, ..base }, false);
+        assert_eq!(plain, textured);
+    }
+
+    #[test]
+    fn acr19_reflections_adaptive_non_raw_denoise_and_hdr_headroom_work() {
+        let (w, h) = (32, 32);
+        // 1. Eyeglass glare hotspot over warm skin tone
+        let mut glass = vec![[0.72f32, 0.52, 0.42, 1.0]; w * h];
+        for y in 13..19 {
+            for x in 13..19 {
+                glass[y * w + x] = [0.96, 0.98, 0.97, 1.0];
+            }
+        }
+        develop(&mut glass, w, h, &CameraRaw { eyeglass_reflections: 90.0, ..Default::default() }, false);
+        assert!(glass[16 * w + 16][0] < 0.88, "eyeglass glare attenuated: {:?}", glass[16 * w + 16]);
+
+        // 2. Non-Raw Denoise reduces checkerboard JPEG noise while keeping mean luminance
+        let mut noisy: Vec<[f32; 4]> = (0..w * h)
+            .map(|i| {
+                let d = if (i + i / w) % 2 == 0 { 0.08 } else { -0.08 };
+                [0.5 + d, 0.5 - d * 0.5, 0.5 + d * 0.5, 1.0]
+            })
+            .collect();
+        develop(&mut noisy, w, h, &CameraRaw { non_raw_denoise: 85.0, ..Default::default() }, false);
+        assert!((noisy[10 * w + 10][0] - noisy[10 * w + 11][0]).abs() < 0.06, "non-raw denoise smoothed checkerboard noise");
+
+        // 3. Adaptive Profile + HDR 1..4 EV headroom preserves >1.0 highlights and populates HDR stop bins
+        let mut hdr_px = vec![[0.95f32, 0.92, 0.88, 1.0]; 16];
+        develop(
+            &mut hdr_px,
+            4,
+            4,
+            &CameraRaw { exposure: 2.0, adaptive_profile: true, adaptive_amount: 100.0, hdr_mode: true, hdr_range_ev: 3, ..Default::default() },
+            false,
+        );
+        assert!(hdr_px[0][0] > 1.05, "HDR mode preserves headroom above 1.0: {:?}", hdr_px[0]);
+        let (_sdr, hdr_bins) = hdr_histogram(&hdr_px, 3);
+        let total_hdr: u32 = hdr_bins.iter().flatten().sum();
+        assert_eq!(total_hdr, 16, "all 16 over-bright pixels binned into HDR 1..3 EV stops");
     }
 }

@@ -1,0 +1,47 @@
+[package]
+name = "materialcraft-ui-egui"
+description = "MaterialCraft's egui shell: docks, graph editor, library, 2D and 3D views, properties"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-engine = { workspace = true }
+materialcraft-render = { workspace = true }
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "persistence"] }
+egui = { workspace = true }
+craft-ui = { workspace = true }
+craft-keymap = { workspace = true, features = ["egui"] }
+egui-phosphor = { version = "0.14", features = ["regular"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+base64 = "0.22"
+image = { workspace = true }
+zip = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+sys-locale = "0.3"
+craft-update = { workspace = true }
+craft-dialogs = { workspace = true }
+craft-quit = { workspace = true, features = ["egui"] }
+craft-window = { workspace = true, features = ["egui"] }
+# Floating panels open as OS windows.
+craft-ui = { workspace = true, features = ["native-windows"] }
+
+# Browser file I/O (web_files.rs): async pickers and Blob downloads.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+rfd = { workspace = true }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Window", "Document", "HtmlElement", "HtmlAnchorElement", "Blob", "BlobPropertyBag", "Url", "CssStyleDeclaration", "Navigator"] }
+
+# winit needs a window system on Linux, so the crate's own tests build with X11.
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+eframe = { workspace = true, features = ["x11"] }
+# Offscreen renders of the real UI (tests/snapshot.rs).
+egui_kittest = { workspace = true, features = ["wgpu", "snapshot", "eframe"] }

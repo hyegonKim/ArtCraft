@@ -1,0 +1,303 @@
+# Korean UI catalog for TextureCraft (clean-room translation)
+	File	파일
+	Edit	편집
+	Mode	모드
+	Window	창
+	Viewport	뷰포트
+	Help	도움말
+	New project...	새 프로젝트...
+	Open...	열기...
+	Open sample project...	샘플 프로젝트 열기...
+	Recent projects	최근 프로젝트
+	Clear recent projects	최근 프로젝트 지우기
+	Close	닫기
+	Save	저장
+	Save as...	다른 이름으로 저장...
+	Save a copy...	사본 저장...
+	Remove unused resources...	사용하지 않는 리소스 제거...
+	Import resources...	리소스 가져오기...
+	Import MaterialX material...	MaterialX 머티리얼 가져오기...
+	Import material...	머티리얼 가져오기...
+	Export Textures...	텍스처 내보내기...
+	Export Mesh...	메시 내보내기...
+	Quit	종료
+	Undo	실행 취소
+	Redo	다시 실행
+	Project Configuration...	프로젝트 구성...
+	Reimport mesh	메시 다시 가져오기
+	Settings...	설정...
+	Bake Mesh Maps	메시 맵 베이킹
+	Painting	페인팅
+	Baking	베이킹
+	Rendering	렌더링
+	Rendering (path traced)	렌더링 (패스 트레이싱)
+	Back to painting	페인팅으로 돌아가기
+	Views	보기
+	Assets	에셋
+	Common Settings	공통 설정
+	Display Settings	디스플레이 설정
+	History	히스토리
+	Layers	레이어
+	Log	로그
+	Mesh Map Bakers	메시 맵 베이커
+	Mesh Map Settings	메시 맵 설정
+	Properties	속성
+	Shader Settings	셰이더 설정
+	Texture Sets	텍스처 세트
+	Texture Set Settings	텍스처 세트 설정
+	Save UI Layout	UI 레이아웃 저장
+	Save current layout...	현재 레이아웃 저장...
+	Load UI Layout	UI 레이아웃 불러오기
+	Hide UI	UI 숨기기
+	Reset UI	UI 초기화
+	Display material	머티리얼 표시
+	Display next channel	다음 채널 표시
+	Display previous channel	이전 채널 표시
+	Display next mesh map	다음 메시 맵 표시
+	Display previous mesh map	이전 메시 맵 표시
+	UV checker	UV 체커
+	Show entire mesh	전체 메시 보기
+	3D/2D views	3D/2D 분할 보기
+	3D view only	3D 보기만
+	2D view only	2D 보기만
+	Enable quick mask	빠른 마스크 활성화
+	Edit quick mask	빠른 마스크 편집
+	Invert quick mask	빠른 마스크 반전
+	Documentation...	문서...
+	Shortcuts list...	단축키 목록...
+	Join the community (Discord)...	커뮤니티 참여 (Discord)...
+	ArtCraft website...	ArtCraft 웹사이트...
+	Report a bug...	버그 신고...
+	Show log...	로그 보기...
+	Check for Updates...	업데이트 확인...
+	About TextureCraft...	TextureCraft 정보...
+	About TextureCraft	TextureCraft 정보
+	Materials	머티리얼
+	Smart materials	스마트 머티리얼
+	Smart masks	스마트 마스크
+	Filters	필터
+	Brushes	브러시
+	Alphas	알파
+	Procedurals	프로시저럴
+	Environments	환경
+	Textures	텍스처
+	Brush	브러시
+	Eraser	지우개
+	Projection	프로젝션
+	Clone	복제 도장
+	Smudge	스머지
+	Polygon fill	폴리곤 채우기
+	Gradient	그라디언트
+	Path	패스
+	Material picker	머티리얼 스포이드
+	Geometry mask	지오메트리 마스크
+	Base color	베이스 컬러
+	Base Color	베이스 컬러
+	Metallic	메탈릭
+	Roughness	거칠기
+	Normal	노멀
+	Height	높이
+	Ambient occlusion	앰비언트 오클루전
+	Ambient Occlusion	앰비언트 오클루전
+	Emissive	이미시브
+	Opacity	불투명도
+	Specular	스페큘러
+	Glossiness	광택도
+	Specular level	스페큘러 레벨
+	Anisotropy level	이방성 강도
+	Anisotropy angle	이방성 각도
+	Coat weight	클리어코트 강도
+	Coat roughness	클리어코트 거칠기
+	Coat normal	클리어코트 노멀
+	Sheen weight	광택 천 강도
+	Sheen color	광택 천 색상
+	Sheen roughness	광택 천 거칠기
+	Transmission	투과
+	Scatter weight	서브서피스 산란 강도
+	Scatter color	서브서피스 산란 색상
+	World Space Normal	월드 공간 노멀
+	ID	ID
+	Curvature	곡률
+	Position	위치
+	Thickness	두께
+	Bent Normals	벤트 노멀
+	Generator	생성기
+	Mask Editor: Edge wear	마스크 편집기: 모서리 마모
+	Dirt	먼지 및 오염
+	Thin areas	얇은 영역
+	Position gradient	위치 그라디언트
+	Light / direction	조명 / 방향
+	World-space normal	월드 공간 노멀
+	Cavity	캐비티 (오목 틈새)
+	Level	레벨
+	Softness	부드러움
+	Noise amount	노이즈 강도
+	Noise scale	노이즈 크기
+	Offset	오프셋
+	Invert	반전
+	Edges	모서리
+	Cavities	오목부
+	Both	모두
+	Raw	원본
+	Detail sizes	디테일 크기
+	Bake mesh maps (F8) for curvature, AO and thickness based generators.	곡률, AO 및 두께 기반 생성기를 사용하려면 메시 맵을 베이킹(F8)하세요.
+	Reads the curvature map as baked: changing the mode or a size turns detail sizes on.	베이킹된 곡률 맵을 그대로 읽습니다. 모드나 크기를 변경하면 디테일 크기가 활성화됩니다.
+	Passthrough	통과
+	Multiply	곱하기
+	Screen	스크린
+	Overlay	오버레이
+	Linear dodge (Add)	리니어 닷지 (더하기)
+	Subtract	빼기
+	Darken	어둡게
+	Lighten	밝게
+	Color dodge	컬러 닷지
+	Color burn	컬러 번
+	Hard light	하드 라이트
+	Soft light	소프트 라이트
+	Difference	차이
+	Exclusion	제외
+	Divide	나누기
+	Inverse subtract	역 빼기
+	Signed add	부호 더하기
+	Tint	틴트
+	Saturation	채도
+	Color	색상
+	Value	명도
+	Normal map detail	노멀 맵 디테일
+	Normal map combine	노멀 맵 결합
+	Replace	교체
+	Paint	페인트
+	Fill	채우기
+	Levels	레벨
+	Color selection	색상 선택
+	Compare mask	비교 마스크
+	Anchor point	앵커 포인트
+	Layer mask	레이어 마스크
+	Add paint layer	페인트 레이어 추가
+	Add fill layer	채우기 레이어 추가
+	Add folder	폴더 추가
+	Add mask	마스크 추가
+	Add black mask	검정 마스크 추가
+	Add white mask	흰색 마스크 추가
+	Add mask with color selection	색상 선택 마스크 추가
+	Add effect	효과 추가
+	Add generator	생성기 추가
+	Add filter	필터 추가
+	Add paint	페인트 추가
+	Add fill	채우기 추가
+	Add levels	레벨 추가
+	Add compare mask	비교 마스크 추가
+	Add anchor point	앵커 포인트 추가
+	Clear mask	마스크 지우기
+	Remove mask	마스크 제거
+	Invert mask	마스크 반전
+	Toggle mask	마스크 전환
+	Duplicate	복제
+	Delete	삭제
+	Rename	이름 바꾸기
+	Create smart material	스마트 머티리얼 생성
+	Add smart material from the shelf	선반에서 스마트 머티리얼 추가
+	Content effects	콘텐츠 효과
+	Blending	블렌딩
+	Channel	채널
+	Channels	채널
+	Edges Worn	마모된 모서리
+	Edges Chipped	깨진 모서리
+	Dirt in Cavities	틈새 먼지
+	Dust from Top	상단 먼지
+	Ground Dirt	지면 흙먼지
+	Rust Leaks	녹물 자국
+	Scratches	스크래치
+	Grunge Blotches	그런지 얼룩
+	Paint Chips	페인트 벗겨짐
+	Fingerprints	지문
+	Edges Soft	부드러운 모서리
+	Edges Sharp	날카로운 모서리
+	Exposed Areas	노출된 영역
+	Thin Areas	얇은 영역
+	Dust in Cavities	틈새 가루 먼지
+	Moss from Top	상단 이끼
+	Water Stains	물얼룩
+	Sun Faded	햇빛 바램
+	Snow from Top	상단 적설
+	Moss from Ground	지면 이끼
+	Rust in Cavities	틈새 부식
+	Edge Scratches	모서리 스크래치
+	Dirt Streaks	오염 줄무늬
+	Occluded Areas	차폐된 영역
+	World Normal Top	월드 노멀 상단
+	Crevice Grime	미세 틈새 때
+	Oxide Bloom	산화 피막 번짐
+	Noise	노이즈
+	Grunge	그런지
+	Clouds	구름
+	Cells	셀
+	Streaks	줄무늬
+	Chips	칩 조각
+	Smudges	번짐
+	Wood grain	나뭇결
+	Weave	직물 짜임
+	Brushed	브러시드 헤어라인
+	Checker	체커
+	Bricks	벽돌
+	Dots	도트
+	Fibers	섬유
+	Veins	석재 맥
+	Leather	가죽 주름
+	Splatter	스플래터
+	Apply	적용
+	Cancel	취소
+	OK	확인
+	Reset	초기화
+	Search	검색
+	Language	언어
+	Theme	테마
+	Dark	어둡게
+	Light	밝게
+	Resolution	해상도
+	Format	형식
+	Output directory	출력 디렉터리
+	Template	템플릿
+	Export	내보내기
+	Bake	베이킹
+	High-poly meshes	하이폴리 메시
+	Add High-Poly Meshes	하이폴리 메시 추가
+	Cage	케이지
+	Antialiasing	안티앨리어싱
+	Rays	광선 수
+	Max frontal distance	최대 전면 거리
+	Max rear distance	최대 후면 거리
+	Average Normals	평균 노멀
+	Contrast	대비
+	Brightness	밝기
+	Scale	크기
+	Seed	시드
+	Angle	각도
+	Radius	반경
+	Amount	양
+	Intensity	강도
+	Sharpness	선명도
+	Brush size	브러시 크기
+	Flow	흐름
+	Spacing	간격
+	Hardness	경도
+	Symmetry	대칭
+	Stencil	스텐실
+	Triplanar	트라이플래너
+	Planar	평면
+	Spherical	구형
+	Cylindrical	원통형
+	UV	UV
+	Camera	카메라
+	Exposure	노출
+	Environment	환경
+	Shadows	그림자
+	Saved {path}	{path} 저장됨
+	Cooked at {size} px	{size} px 해상도로 계산됨
+	Bake Selected Textures ({n})	선택한 텍스처 베이킹 ({n})
+	Baking {map} ({n}/{total})	{map} 베이킹 중 ({n}/{total})
+	Baked maps imported: {count}	베이킹된 맵 가져옴: {count}
+	Built-in: {mesh}	내장: {mesh}
+	Anchor: {name}	앵커: {name}
+	Anchor: {name} ({channel})	앵커: {name} ({channel})
+	3D texture painting: layers, masks, smart materials, mesh map baking and export.	3D 텍스처 페인팅: 레이어, 마스크, 스마트 머티리얼, 메시 맵 베이킹 및 내보내기.

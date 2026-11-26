@@ -1,0 +1,3 @@
+# Words the mk pack must accept and reject (common words; written for this check).
+correct = ["куќа", "книга", "училиште", "вода", "град"]
+incorrect = ["книгга", "училлиште", "градд"]

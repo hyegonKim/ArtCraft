@@ -1,12 +1,13 @@
 //! AudioSuite-style offline processing of selected clips.
-use super::{CommandSpec, bad, clip_ids_param, has_selection, range_param, str_param, tracks_param};
+use super::{CommandSpec, bad, bool_or, clip_ids_param, has_selection, range_param, str_param, tracks_param};
 use soundcraft_time::Range;
 
 use crate::{Engine, Result, cmd};
+use craft_audio::AudioBuffer;
 use serde_json::{Value, json};
-use soundcraft_audio_io::{AudioBuffer, FileFormat};
 use soundcraft_dsp::offline::{SpeedRampChange, SpeedRampSelection};
-use soundcraft_model::{Clip, ClipContent, TrackKind};
+use soundcraft_model::FileFormat;
+use soundcraft_model::{ChannelFormat, Clip, ClipContent, TrackId, TrackKind};
 
 pub fn specs() -> Vec<CommandSpec> {
     vec![cmd!(
@@ -14,7 +15,7 @@ pub fn specs() -> Vec<CommandSpec> {
         "AudioSuite Process",
         [],
         None,
-        "{process: <plugin id> | normalize | reverse | invert | gain | duplicate | time_stretch | pitch_shift | varispeed | speed_ramp | match_loudness | delete_silence | shorten_silence | signal_generator, params?: {..}, clips?, tracks?, start?, end?} — signal_generator fills start..end (default: the selection) with a new clip on each audio track in `tracks` (default: the selected tracks); speed_ramp takes change (0 slow down, 1 speed up), selection (0 fit to, 1 extend) and fades (1 on, 0 off); normalize takes target_db (peak), or with lufs_mode 1 (or a bare target_lufs) target_lufs and true_peak_db; match_loudness takes target_lufs (-14) and true_peak_db (-1), or preset: youtube_spotify|podcast|ebu_r128|atsc_a85 (a look-ahead true-peak limiter holds the ceiling; audio below the -70 LUFS gate is left alone); delete_silence and shorten_silence take threshold_db, min_length_ms, pad_before_ms, pad_after_ms (and shorten_ms) and shorten the clip",
+        "{process: <built-in plugin id (engine.plugins)> | normalize | reverse | invert | gain | duplicate | time_stretch | pitch_shift | varispeed | speed_ramp | signal_generator, params?: {..}, clips?, tracks?, start?, end?} — signal_generator fills start..end (default: the selection) with a new clip on each audio track in `tracks` (default: the selected tracks); speed_ramp takes change (0 slow down, 1 speed up), selection (0 fit to, 1 extend) and fades (1 on, 0 off)",
         has_selection,
         process
     )]
@@ -58,7 +59,13 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
                 | "lufs_normalize"
                 | "delete_silence"
                 | "shorten_silence"
+                | "stem_separation"
+                | "audio_leveling"
+                | "crosstalk_remover"
         );
+    if !known && soundcraft_mix::is_third_party(&name) {
+        return Err(bad("audiosuite.process", format!("`{name}` is a hosted plugin; AudioSuite runs built-in plugins only (engine.plugins)")));
+    }
     if !known {
         return Err(bad("audiosuite.process", format!("unknown process `{name}`")));
     }
@@ -81,6 +88,7 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
     let fades = get("fades", 1.0) >= 0.5;
     let most = frame_limit(&name, ratio, semitones, sr.as_f64(), to, selection);
     let mut done = 0;
+    let mut stem_tracks: Vec<u64> = Vec::new();
     for id in ids {
         let Some((track, clip)) = e.session().find_clip(id).map(|(t, c)| (t, c.clone())) else { continue };
         if !clip.is_audio() {
@@ -102,10 +110,15 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
             audio = soundcraft_mix::render_clips(&tmp, track, clip.range());
         }
         let srf = sr.as_f64() as f32;
+        if matches!(name.as_str(), "stem_separator" | "stem_separation")
+            && (bool_or(p, "split_to_tracks", false) || get("split_to_tracks", 0.0) >= 0.5)
+        {
+            stem_tracks.extend(split_stems_to_tracks(e, track, &clip, &audio, sr.hz(), srf));
+            done += 1;
+            continue;
+        }
         let out: Vec<Vec<f32>> = match name.as_str() {
             "normalize" => {
-                // `lufs_mode` decides when it is given (the AudioSuite window always sends it); a caller
-                // that only passes `target_lufs` asks for loudness too.
                 let lufs =
                     params.iter().find(|(k, _)| k == "lufs_mode").map_or_else(|| params.iter().any(|(k, _)| k == "target_lufs"), |(_, v)| *v >= 0.5);
                 if lufs {
@@ -165,6 +178,15 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
             "pitch_shift" => soundcraft_dsp::offline::pitch_shift(&audio, semitones, srf),
             "varispeed" => soundcraft_dsp::offline::resample(&audio, sr.hz(), to),
             "speed_ramp" => soundcraft_dsp::offline::speed_ramp(&audio, change, selection, fades),
+            "stem_separator" | "stem_separation" => mix_separated_stems(&audio, srf, &params),
+            "audio_leveling" => {
+                apply("audio_leveler", &params, &mut audio, srf)?;
+                audio
+            }
+            "crosstalk_remover" => {
+                apply("separate_crosstalk", &params, &mut audio, srf)?;
+                audio
+            }
             plugin => {
                 apply(plugin, &params, &mut audio, srf)?;
                 audio
@@ -182,6 +204,7 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
         nc.name = new_name;
         nc.content = ClipContent::Audio { source: src, offset: 0 };
         nc.length = i64::try_from(frames).unwrap_or(nc.length);
+        nc.clamp_fades();
         // The render already has the clip's stretch applied; keeping it would stretch the new file again.
         nc.stretch = 1.0;
         // Invert and Duplicate are phase/copy operations. The clip's gain stays a clip gain,
@@ -196,7 +219,11 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
         crate::edit::place_clip(s, track, nc);
         done += 1;
     }
-    Ok(json!({"processed": done, "process": name}))
+    if stem_tracks.is_empty() {
+        Ok(json!({"processed": done, "process": name}))
+    } else {
+        Ok(json!({"processed": done, "process": name, "stem_tracks": stem_tracks}))
+    }
 }
 
 /// Fill `r` on each selected audio track with a new clip from the generator `name`, over
@@ -252,10 +279,70 @@ fn short(n: &str) -> String {
     s.chars().take(8).collect()
 }
 
+fn stem_gain_or_mute(db: f32) -> f32 {
+    if db <= -47.9 { 0.0 } else { soundcraft_dsp::db_to_gain(db.clamp(-48.0, 12.0)) }
+}
+
+fn mix_separated_stems(audio: &[Vec<f32>], srf: f32, params: &[(String, f32)]) -> Vec<Vec<f32>> {
+    let stems = soundcraft_dsp::offline::separate_stems(audio, srf);
+    let get = |k: &str, d: f32| params.iter().find(|(n, _)| n == k).map_or(d, |(_, v)| *v);
+    let mode = get("mode", 0.0).round() as i32;
+    let gv = stem_gain_or_mute(get("vocals", 0.0));
+    let ga = stem_gain_or_mute(get("accompaniment", 0.0));
+    let gm = stem_gain_or_mute(get("ambience", 0.0));
+    let (wv, wa, wm) = match mode {
+        1 => (gv, 0.0, 0.0),
+        2 => (0.0, ga, 0.0),
+        3 => (0.0, 0.0, gm),
+        _ => (gv, ga, gm),
+    };
+    let n_ch = stems.vocals.len();
+    let len = stems.vocals.first().map_or(0, Vec::len);
+    let mut out = vec![vec![0.0f32; len]; n_ch];
+    for c in 0..n_ch {
+        for i in 0..len {
+            let v = stems.vocals.get(c).and_then(|x| x.get(i)).copied().unwrap_or(0.0);
+            let a = stems.accompaniment.get(c).and_then(|x| x.get(i)).copied().unwrap_or(0.0);
+            let m = stems.ambience.get(c).and_then(|x| x.get(i)).copied().unwrap_or(0.0);
+            if let Some(slot) = out.get_mut(c).and_then(|x| x.get_mut(i)) {
+                *slot = v * wv + a * wa + m * wm;
+            }
+        }
+    }
+    out
+}
+
+fn split_stems_to_tracks(e: &mut Engine, src_track: TrackId, clip: &Clip, audio: &[Vec<f32>], sr_hz: u32, srf: f32) -> Vec<u64> {
+    let stems = soundcraft_dsp::offline::separate_stems(audio, srf);
+    let s = e.session_mut();
+    let (base_name, fmt) = s
+        .track(src_track)
+        .map_or_else(|| (clip.name.clone(), ChannelFormat::Stereo), |t| (t.name.clone(), t.format));
+    let mut created = Vec::with_capacity(3);
+    for (suffix, ch_buf) in [("Vocals", stems.vocals), ("Accompaniment", stems.accompaniment), ("Ambience", stems.ambience)] {
+        let frames = ch_buf.first().map_or(0, Vec::len);
+        if frames == 0 {
+            continue;
+        }
+        let tname = format!("{base_name} - {suffix}");
+        let cname = format!("{} - {suffix}", clip.name);
+        let tid = s.add_track(TrackKind::Audio, fmt, Some(&tname));
+        let src = crate::io::add_source(s, &cname, AudioBuffer { sample_rate: sr_hz, channels: ch_buf }, None, FileFormat::Wav);
+        let cid = s.new_clip_id();
+        let mut nc = Clip::audio(cid, &cname, src, 0, clip.start, i64::try_from(frames).unwrap_or(clip.length));
+        nc.fade_in = clip.fade_in;
+        nc.fade_out = clip.fade_out;
+        nc.clamp_fades();
+        crate::edit::place_clip(s, tid, nc);
+        created.push(tid.0);
+    }
+    created
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soundcraft_audio_io::AudioBuffer;
+    use craft_audio::AudioBuffer;
     use soundcraft_model::{ChannelFormat, Session, TrackKind};
 
     fn gained_clip() -> (crate::Engine, soundcraft_model::ClipId) {
@@ -270,6 +357,17 @@ mod tests {
         crate::edit::place_clip(&mut s, t, c);
         s.edit.selected_clips = vec![id];
         (crate::Engine::new(s), id)
+    }
+
+    #[test]
+    fn hosted_plugin_ids_are_refused_with_the_reason() {
+        let (mut e, id) = gained_clip();
+        for plugin in ["clap:com.example.reverb", "vst3:00112233445566778899AABBCCDDEEFF", "au:aufx:dely:appl"] {
+            let err = e.execute("audiosuite.process", &json!({"process": plugin, "clips": [id.0]})).unwrap_err().to_string();
+            assert!(err.contains("built-in"), "{plugin}: {err}");
+        }
+        let spec = specs().into_iter().find(|s| s.id == "audiosuite.process").unwrap();
+        assert!(spec.params.contains("<built-in plugin id"), "the help says which ids it takes: {}", spec.params);
     }
 
     #[test]
@@ -289,6 +387,21 @@ mod tests {
         assert_eq!(c.gain_env, vec![(0, 0.0), (32, -12.0)]);
         let sample = e.session().pool.get(c.source().unwrap()).unwrap().buffer.channels[0][0];
         assert!((sample - 0.5).abs() < 1e-3, "duplicate keeps the file level and the clip gain, got {sample}");
+    }
+
+    #[test]
+    fn shortening_process_clamps_fades_to_the_new_length() {
+        let (mut e, id) = gained_clip();
+        {
+            let c = e.session_mut().find_clip_mut(id).unwrap();
+            c.fade_in.len = 60;
+            c.fade_out.len = 40;
+        }
+        e.execute("audiosuite.process", &json!({"process": "time_stretch", "params": {"ratio": 0.25}, "clips": [id.0]})).unwrap();
+        let c = e.session().tracks[0].clips()[0].clone();
+        assert!(c.length < 64, "{}", c.length);
+        assert!(c.fade_in.len <= c.length, "fade in {} > length {}", c.fade_in.len, c.length);
+        assert_eq!(c.fade_out.len, 40.min(c.length));
     }
 
     #[test]
@@ -424,8 +537,6 @@ mod tests {
         assert!(tp <= -0.95, "expected <= -1.0 dBTP, got {tp}");
     }
 
-    /// Normalize with `lufs_mode` off peak-normalizes even when a loudness target is still in the
-    /// params (the AudioSuite window keeps them after the loudness checkbox is turned off).
     #[test]
     fn normalize_with_lufs_mode_off_is_a_peak_normalize() {
         let render = |params: Value| {

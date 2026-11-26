@@ -1,4 +1,4 @@
-//! Apple Motion (`.motn` / `.moti` `<ozml version="5.10">`) native project exporter.
+﻿//! Apple Motion (`.motn` / `.moti` `<ozml version="5.10">`) native project exporter.
 //!
 //! Mirrors Pixelmator Pro's "Export to Motion Project (`.motn`)" workflow so layered designs,
 //! lower-thirds, thumbnails, vector shapes, text layers, layer styles (Drop Shadow, Outer Glow),
@@ -10,9 +10,10 @@ use std::fmt::Write;
 
 use photocraft_color::{BlendMode, Color};
 
+use crate::text::TextAlign;
 use crate::{
-    Document, Effect, Fill, Layer, LayerContent, LineCap, LineJoin, Path, ShapeLayer, TextAlign,
-    TextLayer, VideoSource,
+    Document, Effect, Fill, Layer, LayerContent, LineCap, LineJoin, Path, ShapeLayer, TextLayer,
+    VideoSource,
 };
 
 /// Options controlling how a [`Document`] is exported to an Apple Motion `.motn` XML project.
@@ -470,7 +471,7 @@ fn adjustment_kind_name(adj: &crate::Adjustment) -> &'static str {
         Threshold { .. } => "Threshold",
         GradientMap { .. } => "GradientMap",
         SelectiveColor { .. } => "SelectiveColor",
-        Unsupported { .. } => "Adjustment",
+        _ => "Adjustment",
     }
 }
 

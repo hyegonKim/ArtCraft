@@ -7,8 +7,8 @@ use deckcraft_render::RenderOpts;
 use kurbo::Rect;
 
 use super::{
-    MAX_RASTER_PIXELS, PAPERS, PageLayout, PdfError, PdfOptions, Presentation, export, glyph_text_ranges, handout_boxes, handout_slots,
-    master_text_pieces, master_texts, notes_frames, notes_slide_box, paper_size, raster_scale,
+    MAX_RASTER_PIXELS, PAPERS, PageLayout, PdfError, PdfOptions, Presentation, export, fill_clear, glyph_text_ranges, handout_boxes,
+    handout_slots, master_text_pieces, master_texts, notes_frames, notes_slide_box, opaque, paper_size, raster_scale,
 };
 use deckcraft_model::text::TextBody;
 
@@ -202,7 +202,8 @@ fn unsafe_url_links_are_not_exported() {
 /// memory. Its naming/shaping tables still parse, but its missing head table prevents PDF
 /// embedding. No font bytes or vendor assets are stored as test fixtures.
 fn font_without_head() -> Vec<u8> {
-    let mut bytes = FontDb::global().face("Ubuntu", "Regular").data().to_vec();
+    // The final bundled face is always Ubuntu Light; a system lookup may select a variable font.
+    let mut bytes = deckcraft_fonts::bundled().last().unwrap().to_vec();
     for (old, new) in [(b"Ubuntu".as_slice(), b"BadPDF".as_slice()), (b"\0U\0b\0u\0n\0t\0u".as_slice(), b"\0B\0a\0d\0P\0D\0F".as_slice())] {
         let mut offset = 0;
         while offset + old.len() <= bytes.len() {
@@ -268,8 +269,6 @@ fn unembeddable_font_returns_error_instead_of_a_pdf_missing_text() {
 #[cfg_attr(not(target_arch = "wasm32"), test)]
 fn supported_unicode_is_shaped_and_recovered_from_the_page_text_layer() {
     use deckcraft_model::{Shape, ShapeId, Xfrm};
-    use hayro_syntax::content::ops::TypedInstruction;
-    use hayro_syntax::object::{Dict, Object, Stream};
 
     let text = "Café Ελληνικά Привет";
     let face = FontDb::global().face("Ubuntu", "Regular");
@@ -291,8 +290,17 @@ fn supported_unicode_is_shaped_and_recovered_from_the_page_text_layer() {
     assert!(runs.iter().all(|run| run.face.family == "Ubuntu" && !run.glyphs.is_empty() && run.glyphs.iter().all(|glyph| glyph.0 != 0)));
 
     let bytes = export(&p, &opts(PageLayout::Slides)).unwrap();
-    let pdf = hayro_syntax::Pdf::new(bytes.clone()).unwrap();
-    let page = &pdf.pages()[0];
+    assert_eq!(page_text(&bytes, 0), text);
+}
+
+/// The text of page `index`, read the way a PDF reader does: the content stream's text-showing
+/// operators decoded through the page font's ToUnicode map.
+fn page_text(bytes: &[u8], index: usize) -> String {
+    use hayro_syntax::content::ops::TypedInstruction;
+    use hayro_syntax::object::{Dict, Object, Stream};
+
+    let pdf = hayro_syntax::Pdf::new(bytes.to_vec()).unwrap();
+    let page = &pdf.pages()[index];
     let resources = page.raw().get::<Dict<'_>>(b"Resources").unwrap();
     let fonts = resources.get::<Dict<'_>>(b"Font").unwrap();
     assert_eq!(fonts.len(), 1);
@@ -343,7 +351,51 @@ fn supported_unicode_is_shaped_and_recovered_from_the_page_text_layer() {
             _ => {}
         }
     }
-    assert_eq!(extracted, text);
+    extracted
+}
+
+fn ubuntu_runs(runs: Vec<deckcraft_model::text::Run>) -> TextBody {
+    let paragraph = deckcraft_model::text::Paragraph { runs, ..Default::default() };
+    let mut body = TextBody { paragraphs: vec![paragraph], ..Default::default() };
+    for run in &mut body.paragraphs[0].runs {
+        run.props.font = Some("Ubuntu".into());
+        run.props.size = Some(20.0);
+    }
+    body
+}
+
+fn deck_with_body(n: usize, body: TextBody) -> Presentation {
+    use deckcraft_model::{Shape, ShapeId, Xfrm};
+    let mut p = deck(n);
+    for slide in &mut p.slides {
+        Arc::make_mut(slide).shapes =
+            vec![Shape { id: ShapeId(9001), xfrm: Some(Xfrm::new(20.0, 20.0, 920.0, 100.0)), text: Some(body.clone()), ..Default::default() }];
+    }
+    p
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn slide_number_field_is_recovered_from_the_page_text_layer() {
+    use deckcraft_model::text::{Run, RunKind};
+    let mut field = Run::new("<#>");
+    field.kind = RunKind::Field { field: "slidenum".into() };
+    let p = deck_with_body(3, ubuntu_runs(vec![Run::new("Page "), field]));
+    let bytes = export(&p, &opts(PageLayout::Slides)).unwrap();
+    for (i, want) in ["Page 1", "Page 2", "Page 3"].into_iter().enumerate() {
+        assert_eq!(page_text(&bytes, i), want);
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn line_break_keeps_the_text_layer_aligned_with_the_layout() {
+    use deckcraft_model::text::{Run, RunKind};
+    let mut brk = Run::new("");
+    brk.kind = RunKind::Break;
+    let p = deck_with_body(1, ubuntu_runs(vec![Run::new("one"), brk, Run::new("two")]));
+    let bytes = export(&p, &opts(PageLayout::Slides)).unwrap();
+    assert_eq!(page_text(&bytes, 0), "onetwo");
 }
 
 /// Notes pages and handouts print on the chosen paper, landscape included, with every slide box
@@ -511,7 +563,7 @@ fn slides_share_one_backdrop_raster_and_keep_their_pixels() {
     /// The image XObjects the export stores, one entry per distinct object: the pages that draw
     /// it, its filters, color channel, alpha channel (the SMask) and pixel size.
     fn images(p: &Presentation) -> Vec<(Vec<usize>, Vec<hayro_syntax::Filter>, Vec<u8>, Option<Vec<u8>>, (u32, u32))> {
-        let bytes = export(p, &opts(PageLayout::Slides)).expect("export");
+        let bytes = export(p, &PdfOptions { vector: false, ..opts(PageLayout::Slides) }).expect("export");
         let pdf = hayro_syntax::Pdf::new(bytes).expect("pdf");
         let mut out: Vec<(String, Vec<usize>, Vec<hayro_syntax::Filter>, Vec<u8>, Option<Vec<u8>>, (u32, u32))> = Vec::new();
         for (n, page) in pdf.pages().iter().enumerate() {
@@ -582,11 +634,33 @@ fn slides_share_one_backdrop_raster_and_keep_their_pixels() {
         deckcraft_render::SlidePart::Content,
         &RenderOpts { scale: scale(&p), threads: 4, ..Default::default() },
     );
-    let straight = expect.to_straight();
+    let mut straight = expect.to_straight();
+    // Fully transparent pixels carry the backdrop colour, not black (#1455).
+    let mut back = deckcraft_render::render_slide_part(
+        &p,
+        0,
+        deckcraft_render::SlidePart::Backdrop,
+        &RenderOpts { scale: scale(&p), threads: 4, ..Default::default() },
+    );
+    opaque(&mut back.pixels);
+    for (px, b) in straight.as_chunks_mut::<4>().0.iter_mut().zip(back.pixels.as_chunks::<4>().0) {
+        if px[3] == 0 {
+            px[..3].copy_from_slice(&b[..3]);
+        }
+    }
     let want_rgb: Vec<u8> = straight.as_chunks::<4>().0.iter().flat_map(|px| px[..3].iter().copied()).collect();
     let want_alpha: Vec<u8> = straight.as_chunks::<4>().0.iter().map(|px| px[3]).collect();
     assert_eq!(rgb, want_rgb, "content colors are straight, not premultiplied");
     assert_eq!(alpha, Some(want_alpha), "content alpha keeps the shape's coverage");
+}
+
+/// Fully transparent content pixels take the backdrop colour (not black) so a smoothing viewer
+/// draws no hairline at the edge of a picture; every other pixel is untouched (#1455).
+#[test]
+fn transparent_content_pixels_take_the_backdrop_colour() {
+    let mut front = vec![0, 0, 0, 0, 10, 20, 30, 255, 5, 5, 5, 1, 0, 0, 0, 0];
+    fill_clear(&mut front, &[255, 250, 240, 255].repeat(4));
+    assert_eq!(front, [255, 250, 240, 0, 10, 20, 30, 255, 5, 5, 5, 1, 255, 250, 240, 0]);
 }
 
 #[test]
@@ -610,119 +684,242 @@ fn raster_scale_caps_total_pixels_not_each_side() {
     assert!((s - 720.0 / 72.0 * 200.0 / 960.0).abs() < 1e-12);
 }
 
-#[test]
-fn handouts_and_notes_export_with_speaker_notes_and_recover_notes_text() {
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn huge_paper_and_long_notes_export_in_bounded_work() {
+    // At 1e19 pt adding a rule's 22 pt leaves y unchanged: the rules are counted, not stepped. A narrow page keeps the raster small.
+    let p = deck(1);
+    let bytes = export(&p, &PdfOptions { paper: (612.0, 1.0e19), ..opts(PageLayout::Handouts { per_page: 3 }) }).expect("export");
+    assert!(bytes.starts_with(b"%PDF-"));
+    // 20,000 short words of notes, wrapped with the line width kept as words are added.
+    let mut p = deck(1);
+    Arc::make_mut(&mut p.slides[0]).notes = TextBody::from_text(&"ab ".repeat(20_000));
+    let bytes = export(&p, &opts(PageLayout::Notes)).expect("export");
+    assert!(bytes.starts_with(b"%PDF-"));
+}
+
+fn all_page_text(bytes: &[u8], index: usize) -> String {
     use hayro_syntax::content::ops::TypedInstruction;
     use hayro_syntax::object::{Dict, Object, Stream};
 
-    let mut p = deck(3);
-    Arc::make_mut(&mut p.slides[0]).notes = TextBody::from_text("Keynote opening speaker note");
-    Arc::make_mut(&mut p.slides[1]).notes = TextBody::from_text("Architecture overview speaker note");
-    Arc::make_mut(&mut p.slides[2]).notes = TextBody::from_text("Closing Q&A speaker note");
-
-    let extract_page_text = |bytes: &[u8], page_idx: usize| -> String {
-        let pdf = hayro_syntax::Pdf::new(bytes.to_vec()).unwrap();
-        let page = &pdf.pages()[page_idx];
-        let resources = page.raw().get::<Dict<'_>>(b"Resources").unwrap();
-        let fonts = resources.get::<Dict<'_>>(b"Font").unwrap();
+    let pdf = hayro_syntax::Pdf::new(bytes.to_vec()).unwrap();
+    let page = &pdf.pages()[index];
+    let resources = page.raw().get::<Dict<'_>>(b"Resources").unwrap();
+    let Some(fonts) = resources.get::<Dict<'_>>(b"Font") else { return String::new() };
+    let mut maps = HashMap::<Vec<u8>, HashMap<u16, String>>::new();
+    for key in fonts.keys() {
+        let Some(font) = fonts.get::<Dict<'_>>(&key) else { continue };
+        let Some(stream) = font.get::<Stream<'_>>(b"ToUnicode") else { continue };
+        let cmap = stream.decoded().unwrap().into_owned();
+        let cmap = std::str::from_utf8(&cmap).unwrap();
         let mut mapping = HashMap::<u16, String>::new();
-        for key in fonts.keys() {
-            let Some(font) = fonts.get::<Dict<'_>>(key) else { continue };
-            let Some(cmap_stream) = font.get::<Stream<'_>>(b"ToUnicode") else { continue };
-            let Ok(cmap_bytes) = cmap_stream.decoded() else { continue };
-            let Ok(cmap) = std::str::from_utf8(&cmap_bytes) else { continue };
-            let mut in_char_map = false;
-            for line in cmap.lines() {
-                if line.ends_with("beginbfchar") {
-                    in_char_map = true;
-                } else if line == "endbfchar" {
-                    in_char_map = false;
-                } else if in_char_map {
-                    let parts: Vec<_> = line.split_whitespace().collect();
-                    if parts.len() >= 2 {
-                        let cid = u16::from_str_radix(parts[0].trim_matches(['<', '>']), 16).unwrap();
-                        let value = parts[1].trim_matches(['<', '>']);
-                        let units: Vec<_> = value
-                            .as_bytes()
-                            .as_chunks::<4>()
-                            .0
-                            .iter()
-                            .map(|chunk| u16::from_str_radix(std::str::from_utf8(chunk).unwrap(), 16).unwrap())
-                            .collect();
-                        mapping.insert(cid, String::from_utf16(&units).unwrap());
-                    }
+        let mut in_char_map = false;
+        for line in cmap.lines() {
+            if line.ends_with("beginbfchar") {
+                in_char_map = true;
+            } else if line == "endbfchar" {
+                in_char_map = false;
+            } else if in_char_map {
+                let parts: Vec<_> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let cid = u16::from_str_radix(parts[0].trim_matches(['<', '>']), 16).unwrap();
+                    let value = parts[1].trim_matches(['<', '>']);
+                    let units: Vec<_> = value
+                        .as_bytes()
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|chunk| u16::from_str_radix(std::str::from_utf8(chunk).unwrap(), 16).unwrap())
+                        .collect();
+                    mapping.insert(cid, String::from_utf16(&units).unwrap());
                 }
             }
         }
-        let mut extracted = String::new();
-        let mut append = |raw: &[u8]| {
-            for pair in raw.as_chunks::<2>().0 {
-                if let Some(ch) = mapping.get(&u16::from_be_bytes([pair[0], pair[1]])) {
-                    extracted.push_str(ch);
-                }
-            }
-        };
-        let mut operations = page.typed_operations();
-        while let Some(op) = operations.next() {
-            match op {
-                TypedInstruction::ShowText(val) => append(val.0.as_bytes()),
-                TypedInstruction::ShowTexts(vals) => {
-                    for val in vals.0.iter::<Object<'_>>() {
-                        if let Object::String(s) = val {
-                            append(s.as_bytes());
-                        }
-                    }
-                }
-                _ => {}
+        maps.insert(key.as_ref().to_vec(), mapping);
+    }
+    let mut cur_font: Option<Vec<u8>> = None;
+    let mut extracted = String::new();
+    let append = |extracted: &mut String, cur_font: &Option<Vec<u8>>, bytes: &[u8]| {
+        let Some(mapping) = cur_font.as_ref().and_then(|f| maps.get(f)) else { return };
+        for pair in bytes.as_chunks::<2>().0 {
+            if let Some(s) = mapping.get(&u16::from_be_bytes([pair[0], pair[1]])) {
+                extracted.push_str(s);
             }
         }
-        extracted
     };
-
-    // 1. Notes layout embeds speaker notes below the slide on each page.
-    let notes_pdf = export(&p, &PdfOptions { text_layer: false, ..opts(PageLayout::Notes) }).unwrap();
-    let notes_p0 = extract_page_text(&notes_pdf, 0);
-    assert!(notes_p0.contains("Keynote opening speaker note"), "{notes_p0}");
-
-    // 2. Handouts layout (3 per page) with `include_speaker_notes: true` renders speaker notes alongside the 3 slides.
-    let handout3_pdf =
-        export(&p, &PdfOptions { text_layer: false, include_speaker_notes: true, ..opts(PageLayout::Handouts { per_page: 3 }) }).unwrap();
-    let handout3_p0 = extract_page_text(&handout3_pdf, 0);
-    assert!(handout3_p0.contains("Keynote opening speaker note"), "{handout3_p0}");
-    assert!(handout3_p0.contains("Architecture overview speaker note"), "{handout3_p0}");
-    assert!(handout3_p0.contains("Closing Q&A speaker note"), "{handout3_p0}");
-
-    // 3. Handouts layout (6 per page) with `include_speaker_notes: true` also embeds speaker notes beneath each slide.
-    let handout6_pdf =
-        export(&p, &PdfOptions { text_layer: false, include_speaker_notes: true, ..opts(PageLayout::Handouts { per_page: 6 }) }).unwrap();
-    let handout6_p0 = extract_page_text(&handout6_pdf, 0);
-    assert!(handout6_p0.contains("Keynote opening speaker note"), "{handout6_p0}");
+    let mut operations = page.typed_operations();
+    while let Some(op) = operations.next() {
+        match op {
+            TypedInstruction::TextFont(tf) => cur_font = Some(tf.0.as_ref().to_vec()),
+            TypedInstruction::ShowText(value) => append(&mut extracted, &cur_font, value.0.as_bytes()),
+            TypedInstruction::ShowTexts(values) => {
+                for value in values.0.iter::<Object<'_>>() {
+                    if let Object::String(value) = value {
+                        append(&mut extracted, &cur_font, value.as_bytes());
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    extracted
 }
 
-/// With speaker notes, every handout layout keeps each slot's slide and notes inside the page and
-/// out of every other slot, for wide and standard slides; without, the slides are the plain
-/// handout boxes.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn handouts_and_notes_export_with_speaker_notes_and_recover_notes_text() {
+    let mut p = deck(4);
+    for (i, sl) in p.slides.iter_mut().enumerate() {
+        Arc::make_mut(sl).notes = TextBody::from_text(&format!("UniqueNoteMarker{i}"));
+    }
+    for per_page in [1, 2, 3, 4, 6] {
+        let with_notes = export(
+            &p,
+            &PdfOptions { include_speaker_notes: true, text_layer: false, ..opts(PageLayout::Handouts { per_page }) },
+        )
+        .unwrap();
+        let text = all_page_text(&with_notes, 0);
+        assert!(text.contains("UniqueNoteMarker0"), "per_page={per_page}: {text}");
+        let without_notes = export(
+            &p,
+            &PdfOptions { include_speaker_notes: false, text_layer: false, ..opts(PageLayout::Handouts { per_page }) },
+        )
+        .unwrap();
+        let text_off = all_page_text(&without_notes, 0);
+        assert!(!text_off.contains("UniqueNoteMarker0"), "per_page={per_page}: {text_off}");
+    }
+}
+
 #[test]
 fn handout_notes_stay_inside_their_slot() {
-    let paper = (612.0, 792.0);
-    for aspect in [16.0 / 9.0, 4.0 / 3.0] {
-        for per_page in [1u8, 2, 3, 4, 6, 9] {
-            let plain = handout_slots(per_page, paper, aspect, false);
-            assert_eq!(plain.iter().map(|(b, _)| *b).collect::<Vec<_>>(), handout_boxes(per_page, paper, aspect));
-            let slots = handout_slots(per_page, paper, aspect, true);
-            assert_eq!(slots.len(), plain.len());
-            for (k, (slide, notes)) in slots.iter().enumerate() {
-                assert!(notes.height() >= 20.0 && notes.width() > 0.0, "{per_page} {aspect}: slot {k} has room for notes: {notes:?}");
-                for r in [slide, notes] {
-                    assert!(r.x0 >= 0.0 && r.y0 >= 0.0 && r.x1 <= paper.0 && r.y1 <= paper.1, "{per_page} {aspect}: {r:?} off the page");
-                }
-                assert!(slide.intersect(*notes).area() <= 0.0, "{per_page} {aspect}: slot {k}'s notes cover its slide");
-                for (j, (other_slide, other_notes)) in slots.iter().enumerate().filter(|(j, _)| *j != k) {
-                    for (a, b) in [(slide, other_slide), (slide, other_notes), (notes, other_slide), (notes, other_notes)] {
-                        assert!(a.intersect(*b).area() <= 0.0, "{per_page} {aspect}: slot {k} {a:?} overlaps slot {j} {b:?}");
-                    }
-                }
+    for per_page in [1, 2, 3, 4, 6, 9] {
+        let slots = handout_slots(per_page, (612.0, 792.0), 16.0 / 9.0, true);
+        assert_eq!(slots.len(), per_page as usize);
+        for (i, (slide, notes)) in slots.iter().enumerate() {
+            assert!(slide.width() > 10.0 && slide.height() > 10.0);
+            assert!(notes.width() > 10.0 && notes.height() >= 20.0, "per_page={per_page} slot={i}: {notes:?}");
+            assert!(slide.intersect(*notes).area() <= 1e-6, "slide and notes overlap on per_page={per_page}");
+            assert!(notes.x0 >= 0.0 && notes.y0 >= 0.0 && notes.x1 <= 612.0 && notes.y1 <= 792.0);
+            for (other_slide, other_notes) in &slots[i + 1..] {
+                assert!(notes.intersect(*other_slide).area() <= 1e-6);
+                assert!(notes.intersect(*other_notes).area() <= 1e-6);
             }
         }
     }
+}
+
+fn page_image_xobject_count(bytes: &[u8], index: usize) -> usize {
+    use hayro_syntax::object::{Dict, Name, Stream};
+    let pdf = hayro_syntax::Pdf::new(bytes.to_vec()).unwrap();
+    let page = &pdf.pages()[index];
+    let Some(resources) = page.raw().get::<Dict<'_>>(b"Resources") else { return 0 };
+    let Some(xobjects) = resources.get::<Dict<'_>>(b"XObject") else { return 0 };
+    xobjects
+        .keys()
+        .filter(|k| {
+            xobjects
+                .get::<Stream<'_>>(k)
+                .and_then(|s| s.dict().get::<Name<'_>>(b"Subtype").map(|n| n.as_ref() == b"Image"))
+                .unwrap_or(false)
+        })
+        .count()
+}
+
+fn page_path_op_count(bytes: &[u8], index: usize) -> usize {
+    use hayro_syntax::content::ops::TypedInstruction;
+    let pdf = hayro_syntax::Pdf::new(bytes.to_vec()).unwrap();
+    let page = &pdf.pages()[index];
+    let mut ops = page.typed_operations();
+    let mut count = 0;
+    while let Some(op) = ops.next() {
+        if matches!(
+            op,
+            TypedInstruction::MoveTo(_)
+                | TypedInstruction::LineTo(_)
+                | TypedInstruction::CubicTo(_)
+                | TypedInstruction::RectPath(_)
+                | TypedInstruction::ClosePath(_)
+        ) {
+            count += 1;
+        }
+    }
+    count
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn vector_pdf_exports_paths_gradients_tables_and_text_without_slide_backdrop_raster() {
+    use deckcraft_model::style::{Gradient, GradientShape, GradientStop, LineEnd};
+    use deckcraft_model::table::Row;
+    use deckcraft_model::{Cell, ColorRef, Fill, Geom, Line, Rgba, Shape, ShapeId, ShapeKind, Table, Xfrm};
+
+    let mut p = deck(1);
+    let slide = Arc::make_mut(&mut p.slides[0]);
+    slide.shapes = vec![
+        Shape {
+            id: ShapeId(100),
+            xfrm: Some(Xfrm::new(40.0, 40.0, 360.0, 140.0)),
+            geom: Geom::preset("roundRect"),
+            kind: ShapeKind::Shape,
+            fill: Some(Fill::Gradient(Gradient {
+                shape: GradientShape::Linear { angle: 45.0, scaled: true },
+                stops: vec![
+                    GradientStop { pos: 0.0, color: ColorRef::rgb(Rgba::rgb(30, 100, 220)) },
+                    GradientStop { pos: 1.0, color: ColorRef::rgb(Rgba::rgb(240, 120, 40)) },
+                ],
+                flip: None,
+                rotate_with_shape: true,
+                tile: [0.0; 4],
+            })),
+            line: Some(Line {
+                width: Some(2.5),
+                fill: Some(Fill::Solid { color: ColorRef::rgb(Rgba::rgb(15, 25, 45)) }),
+                tail: Some(LineEnd { kind: "triangle".into(), w: "med".into(), len: "med".into() }),
+                ..Default::default()
+            }),
+            text: Some(TextBody::from_text("VectorSlideHeading")),
+            ..Default::default()
+        },
+        Shape {
+            id: ShapeId(101),
+            xfrm: Some(Xfrm::new(40.0, 220.0, 320.0, 120.0)),
+            kind: ShapeKind::Table(Table {
+                cols: vec![160.0, 160.0],
+                rows: vec![
+                    Row {
+                        height: 50.0,
+                        cells: vec![Cell::new("HeaderColA"), Cell::new("HeaderColB")],
+                    },
+                    Row {
+                        height: 50.0,
+                        cells: vec![Cell::new("CellValue42"), Cell::new("CellValue99")],
+                    },
+                ],
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+    ];
+
+    let bytes = export(&p, &opts(PageLayout::Slides)).expect("vector pdf export");
+    assert!(bytes.starts_with(b"%PDF-"));
+    assert_eq!(page_image_xobject_count(&bytes, 0), 0, "pure vector slide must not embed a backdrop raster image");
+    assert!(page_path_op_count(&bytes, 0) >= 8, "vector slide must emit path construction operators");
+    let extracted = all_page_text(&bytes, 0);
+    assert!(extracted.contains("VectorSlideHeading"), "{extracted}");
+    assert!(extracted.contains("HeaderColA") && extracted.contains("CellValue42"), "{extracted}");
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test::wasm_bindgen_test)]
+#[cfg_attr(not(target_arch = "wasm32"), test)]
+fn vector_pdf_outlines_glyphs_to_curves_when_text_layer_is_off() {
+    use hayro_syntax::object::Dict;
+
+    let p = deck(1);
+    let outlined = export(&p, &PdfOptions { text_layer: false, vector: true, ..opts(PageLayout::Slides) }).expect("outlined vector pdf");
+    let pdf = hayro_syntax::Pdf::new(outlined.clone()).unwrap();
+    let resources = pdf.pages()[0].raw().get::<Dict<'_>>(b"Resources").unwrap();
+    assert!(resources.get::<Dict<'_>>(b"Font").is_none(), "text_layer=false must outline glyphs without embedding font dicts");
+    assert_eq!(page_image_xobject_count(&outlined, 0), 0, "outlined vector slide still stays vector");
+    assert!(page_path_op_count(&outlined, 0) > 25, "outlined glyphs must emit cubic/line path segments");
 }

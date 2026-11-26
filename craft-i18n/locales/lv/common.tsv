@@ -1,0 +1,1304 @@
+# Latviešu (lv) interface catalog for every Crafting App.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+@id	language.name	Latviešu
+	% of all commits	% no visiem iesūtījumiem
+	(Custom)	(Pielāgots)
+	(none)	(nav)
+	1 file	1 fails
+	16 bit	16 biti
+	24 bit	24 biti
+	24 bits/pixel	24 biti/pikselī
+	32 bit	32 biti
+	32 bits/pixel	32 biti/pikselī
+	8 bit	8 biti
+	About	Par
+	Absolute	Absolūts
+	Absolute Colorimetric	Absolūtā kolorimetrija
+	Accented Edges	Izceltas malas
+	Accessibility	Pieejamība
+	Accurate	Precīzs
+	Actions	Darbības
+	Activate Panel	Aktivizēt paneli
+	Active	Aktīvs
+	Actual Size	Faktiskais izmērs
+	Adaptive	Adaptīvs
+	Add	Pievienot
+	Add a comment	Pievienot komentāru
+	Add Guide	Pievienot palīglīniju
+	Add to Dictionary	Pievienot vārdnīcai
+	Add to favorites	Pievienot izlasei
+	Add to Swatches	Pievienot krāsu paraugiem
+	Adjust	Pielāgot
+	Adjustments	Korekcijas
+	Advanced	Papildu
+	Align	Līdzināt
+	Align center	Līdzināt centrā
+	Align Left	Līdzināt pa kreisi
+	Align left	Līdzināt pa kreisi
+	Align Right	Līdzināt pa labi
+	Align right	Līdzināt pa labi
+	Align Text	Līdzināt tekstu
+	Align to Selection	Līdzināt pret atlasi
+	Alignment	Līdzinājums
+	Alignment:	Līdzinājums:
+	All	Visi
+	All Caps	Lielie burti
+	All Categories	Visas kategorijas
+	All files	Visi faili
+	All Layers	Visi slāņi
+	All pages	Visas lapas
+	All Slices	Visas šķēles
+	Alpha	Alfa
+	Alt	Alt
+	Always	Vienmēr
+	Amount	Daudzums
+	Amount:	Daudzums:
+	Angle	Leņķis
+	Angle:	Leņķis:
+	Angular	Leņķisks
+	Animation	Animācija
+	Animation effects	Animācijas efekti
+	Anti-Alias	Malu izlīdzināšana
+	Anti-alias	Malu izlīdzināšana
+	Any	Jebkurš
+	Appearance	Izskats
+theme	Appearance	Izskats
+	Appearance Settings…	Izskata iestatījumi…
+	Application	Lietojumprogramma
+	Apply	Lietot
+	Apply Character Style	Lietot rakstzīmju stilu
+	Apply Data Set	Lietot datu kopu
+	Apply to:	Lietot:
+	Arc	Loks
+	Area	Apgabals
+	Arrange	Sakārtot
+	Arrow	Bultiņa
+	Arrows	Bultiņas
+	Artboard	Zīmēšanas laukums
+	Artboards	Zīmēšanas laukumi
+	ArtCraft	ArtCraft
+	ArtCraft Website	ArtCraft tīmekļa vietne
+	ArtCraft website	ArtCraft tīmekļa vietne
+	Artistic	Māksliniecisks
+	Ascending	Augošā secībā
+	Aspect Ratio	Malu attiecība
+	Assign	Piešķirt
+	Assign Profile…	Piešķirt profilu…
+	Audio	Audio
+	Author	Autors
+	Author:	Autors:
+	Auto	Automātiski
+	Auto ({percent}%)	Automātiski ({percent}%)
+	Auto Color	Automātiskā krāsa
+	Automate	Automatizēt
+	Automatic	Automātisks
+	Automatically	Automātiski
+	AutoSave	Automātiskā saglabāšana
+	Available	Pieejams
+	Average	Vidējais
+	Background	Fons
+	Background Color	Fona krāsa
+	Background Contents	Fona saturs
+	Backspace	Backspace
+	Balance	Līdzsvars
+	Bar	Josla
+	Baseline	Bāzes līnija
+	Baseline Shift	Bāzes līnijas nobīde
+	Basic	Pamata
+	Basic Latin	Latīņu pamatburti
+	Batch	Pakete
+	Batch…	Pakete…
+	Bend:	Izliekums:
+	Bicubic	Bikubisks
+	Binary assets added	Pievienotie binārie resursi
+	Binary assets removed	Noņemtie binārie resursi
+	Bitmap	Bitkarte
+	Black	Melns
+	Black & White	Melnbalts
+	Black and white	Melnbalts
+	Black Intensity	Melnā intensitāte
+	Blacks	Melnie toņi
+	Blend Mode	Sajaukšanas režīms
+	Blending Mode	Sajaukšanas režīms
+	Block	Bloks
+	Blocks	Bloki
+	Blue	Zils
+	Blur	Aizmiglojums
+	Blur Angle	Aizmiglojuma leņķis
+	Bold	Treknraksts
+	Border	Apmale
+	Border Thickness	Apmales biezums
+	Borders	Apmales
+	Both	Abi
+	Both sides	Abas puses
+	Bottom	Apakša
+	Bottom Left	Apakšā pa kreisi
+	Bottom Right	Apakšā pa labi
+	Bottom:	Apakšā:
+	Break Link	Pārtraukt saiti
+	Brick	Ķieģelis
+	Brightness	Spilgtums
+	Bring Forward	Pārvietot uz priekšu
+	Bring to Front	Pārvietot uz priekšplānu
+	Brown	Brūns
+	Browse	Pārlūkot
+	Browse…	Pārlūkot…
+	Brush Size	Otas izmērs
+	Brush Strokes	Otas vilcieni
+	Brushes	Otas
+	Bulge	Izliekums
+	Bullet	Aizzīme
+	Burlap	Maisaudums
+	Calculate	Aprēķināt
+	Cancel	Atcelt
+	Canvas	Audekls
+	Caption	Paraksts
+	Cascade	Kaskāde
+	Case Sensitive	Reģistrjutīgs
+	Category	Kategorija
+	Category:	Kategorija:
+	Cell Size	Šūnas izmērs
+	Center	Centrs
+	Center X	Centrs X
+	Center Y	Centrs Y
+	Centered	Centrēts
+	Centimeters	Centimetri
+	Chamfer	Nošķēlums
+	Change	Mainīt
+	Change All	Mainīt visus
+	Change Case	Mainīt reģistru
+	Change Panel Layout	Mainīt paneļu izkārtojumu
+	Channel	Kanāls
+	Channel Mixer	Kanālu mikseris
+	Channels	Kanāli
+	Character	Rakstzīme
+	Character Styles	Rakstzīmju stili
+	Characters	Rakstzīmes
+	Check for Updates	Pārbaudīt atjauninājumus
+	Check for updates	Pārbaudīt atjauninājumus
+	Check Spelling…	Pārbaudīt pareizrakstību…
+	Checkerboard	Šaha galdiņš
+	Choose…	Izvēlēties…
+	Circle	Aplis
+	City	Pilsēta
+	Clarity	Skaidrība
+	Classic	Klasisks
+	Clear	Notīrīt
+	Clear All	Notīrīt visu
+	Clear Guides	Notīrīt palīglīnijas
+	Clear History	Notīrīt vēsturi
+	Clear Recent Files	Notīrīt nesenos failus
+	Clipboard	Starpliktuve
+	Clipping Mask	Izgriešanas maska
+	Clone	Klonēt
+	Close	Aizvērt
+	Close (Esc)	Aizvērt (Esc)
+	Close All	Aizvērt visu
+	Close Panel	Aizvērt paneli
+	Cmd	Cmd
+	CMYK Color	CMYK krāsa
+	CMYK:	CMYK:
+	Coarse Dots	Rupji punkti
+	Collapse	Sakļaut
+	Collate	Salikt pa eksemplāriem
+	Color	Krāsa
+	Color Balance	Krāsu līdzsvars
+	Color Burn	Krāsu apdedzināšana
+	Color Dodge	Krāsu izgaismošana
+	Color Management	Krāsu pārvaldība
+	Color Mode	Krāsu režīms
+	Color Picker	Krāsu atlasītājs
+	Color Settings	Krāsu iestatījumi
+	Color Settings…	Krāsu iestatījumi…
+	Color Space	Krāsu telpa
+	Color Swatches	Krāsu paraugi
+	Color Table	Krāsu tabula
+	Color:	Krāsa:
+	Colorize	Iekrāsot
+	Colors	Krāsas
+	Colors:	Krāsas:
+	Color…	Krāsa…
+	Colour	Krāsa
+	Column width	Kolonnas platums
+	Columns	Kolonnas
+	Columns:	Kolonnas:
+	Combine	Apvienot
+	Command	Komanda
+	Commands:	Komandas:
+	Comment	Komentārs
+	Comments	Komentāri
+	Commits	Iesūtījumi
+	Community	Kopiena
+	Company	Uzņēmums
+	Compare	Salīdzināt
+	Comparison	Salīdzinājums
+	Compatibility	Saderība
+	Composite	Salikts
+	Compression	Saspiešana
+	Cone	Konuss
+	Contains	Satur
+	Continue	Turpināt
+	Contrast	Kontrasts
+	Contributors	Līdzdalībnieki
+	Convert	Pārvērst
+	Convert to Shape	Pārvērst par figūru
+	Convert to sRGB	Pārvērst par sRGB
+	Copies	Eksemplāri
+	Copies:	Eksemplāri:
+	Copy	Kopēt
+	Copyright	Autortiesības
+	Copyrighted	Aizsargāts ar autortiesībām
+	Corner	Stūris
+	Corners	Stūri
+	Correction	Korekcija
+	Couldn't open {name}: {e}	Neizdevās atvērt {name}: {e}
+@msg	Couldn't open {name}: {e}	Neizdevās atvērt {name}: {e}
+	Country	Valsts
+	Crack Brightness	Plaisu spilgtums
+	Crack Depth	Plaisu dziļums
+	Crack Spacing	Plaisu atstatums
+	Create	Izveidot
+	Create Clipping Mask	Izveidot izgriešanas masku
+	Crop	Apgriezt
+	Cross	Krusts
+	Crosshatch	Krusteniskā švīkošana
+	Crystallize	Kristalizēt
+	Crystallize…	Kristalizēt…
+	Ctrl	Ctrl
+	Current	Pašreizējais
+	Current page	Pašreizējā lapa
+	Current Time	Pašreizējais laiks
+	Curvature	Izliekums
+	Curve	Līkne
+	Curves	Līknes
+	Curves…	Līknes…
+	Custom	Pielāgots
+	Customize…	Pielāgot…
+	Cut	Izgriezt
+	Cyan	Ciāns
+	Dark	Tumšs
+	Dark Gray	Tumši pelēks
+	Dark gray	Tumši pelēks
+	Dark Strokes	Tumši vilcieni
+	Dark Theme	Tumšais motīvs
+	Darken	Aptumšot
+	Darkness	Tumšums
+	Dashed	Svītrots
+	Data	Dati
+	Data Sets	Datu kopas
+	Date	Datums
+	Date and Time	Datums un laiks
+	Date Created	Izveides datums
+	Date format	Datuma formāts
+	Dates	Datumi
+	De-Interlace	Noņemt rindpārlēci
+	Decrease Font Size	Samazināt fonta lielumu
+	Default	Noklusējums
+	Delete	Dzēst
+	Delete Brush	Dzēst otu
+	Delete Group	Dzēst grupu
+	Delete Layer	Dzēst slāni
+	Delete Mask	Dzēst masku
+	Delete Style	Dzēst stilu
+	Delete Workspace	Dzēst darbvietu
+	Deleted	Dzēsts
+	Delete…	Dzēst…
+	Depth	Dziļums
+	Desaturate	Atņemt piesātinājumu
+	Descending	Dilstošā secībā
+	Description	Apraksts
+	Description:	Apraksts:
+	Deselect	Noņemt atlasi
+	Deselect All	Noņemt visu atlasi
+	Destination	Galamērķis
+	Destination:	Galamērķis:
+	Details	Detaļas
+	Diagonal	Diagonāle
+	Diameter	Diametrs
+	Diameter:	Diametrs:
+	Diamond	Rombs
+	Difference	Starpība
+	Diffuse Glow	Izkliedēts spīdums
+	Diffusion	Izkliede
+	Digits	Cipari
+	Dimensions	Izmēri
+	Direct Selection Tool	Tiešās atlases rīks
+	Direction	Virziens
+	Direction Balance	Virziena līdzsvars
+	Direction:	Virziens:
+	Discard	Atmest
+	Discord	Discord
+	Discretionary Ligatures	Izvēles ligatūras
+	Dismiss	Noraidīt
+	Display	Displejs
+	Display name	Parādāmais vārds
+	Distance	Attālums
+	Distort	Kropļot
+	Distortion	Kropļojums
+	Distribute	Sadalīt
+	Divide	Dalīt
+	Dock Panel	Piestiprināt paneli
+	Document	Dokuments
+	Document Title	Dokumenta nosaukums
+	Documents	Dokumenti
+	Don't Save	Nesaglabāt
+	Done	Gatavs
+	Dot	Punkts
+	Dots	Punkti
+	Dotted	Punktēts
+	Double-click	Dubultklikšķis
+	Down	Uz leju
+	Download	Lejupielādēt
+	Draft	Melnraksts
+	Draw	Zīmēt
+	Drop Shadow	Krītoša ēna
+	Drop Shadow…	Krītoša ēna…
+	Duplicate	Dublēt
+	Duplicate Layer	Dublēt slāni
+	Duplicate…	Dublēt…
+	Duplication	Dublēšana
+	Duration	Ilgums
+	Dutch	Nīderlandiešu
+	Dynamic	Dinamisks
+	Dynamics	Dinamika
+	Edge	Mala
+	Edge Brightness	Malu spilgtums
+	Edge Intensity	Malu intensitāte
+	Edge Only	Tikai mala
+	Edge Simplicity	Malu vienkāršība
+	Edge Thickness	Malu biezums
+	Edge Width	Malu platums
+	Edit	Rediģēt
+	Edit Contents	Rediģēt saturu
+	Edit Original	Rediģēt oriģinālu
+	Edit Toolbar	Rediģēt rīkjoslu
+	Editing	Rediģēšana
+	Edit…	Rediģēt…
+	Effect	Efekts
+	Effects	Efekti
+	Elevation	Pacēlums
+	Eliminate	Novērst
+	Ellipse	Elipse
+	Ellipse Tool	Elipses rīks
+	Ellipsis	Daudzpunkte
+	Em Dash	Garā domuzīme
+	Em Space	Em atstarpe
+	Embed	Iegult
+	Emboss	Reljefa efekts
+	En Dash	Īsā domuzīme
+	En Space	En atstarpe
+	Enable	Iespējot
+	Endpoint	Galapunkts
+	Enlarged	Palielināts
+	Enter	Enter
+	Entire Font	Viss fonts
+	Envelope DL	Aploksne DL
+	Erase	Dzēst
+	Eraser	Dzēšgumija
+	Eraser Tool	Dzēšgumijas rīks
+	Error	Kļūda
+	Even Fields	Pāra lauki
+	Even pages only	Tikai pāra lapas
+	Exact	Precīzi
+	Example: {sample}	Piemērs: {sample}
+	Exclusion	Izslēgšana
+	Exit	Iziet
+	Expand	Izvērst
+	Export	Eksportēt
+	Export As	Eksportēt kā
+	Export As…	Eksportēt kā…
+	Export Options	Eksporta opcijas
+	Export PDF	Eksportēt PDF
+	Export to	Eksportēt uz
+	Exported to {path}	Eksportēts uz {path}
+	Exported {path}	Eksportēts: {path}
+	Export…	Eksportēt…
+	Exposure	Ekspozīcija
+	Expression	Izteiksme
+	Extract	Izvilkt
+	Eyedropper	Pipete
+	Eyedropper Tool	Pipetes rīks
+	Faded Film	Izbalējusi filma
+	Fast	Ātrs
+	Favorites	Izlase
+	Feather	Izpludināt malas
+	Field	Lauks
+	Field properties	Lauka rekvizīti
+	Fields	Lauki
+	Fields:	Lauki:
+	File	Fails
+	File Format	Faila formāts
+	File Handling	Failu apstrāde
+	File Info…	Faila informācija…
+	File Name	Faila nosaukums
+	File Size	Faila lielums
+@id	file.close	Aizvērt
+	Files	Faili
+	Fill	Aizpildījums
+	Fill:	Aizpildījums:
+	Filter	Filtrs
+	Find	Atrast
+	Find and Replace	Atrast un aizstāt
+	Find Next	Atrast nākamo
+	Find:	Atrast:
+	Find…	Atrast…
+	Fine Dots	Smalki punkti
+	Finish	Pabeigt
+	First	Pirmais
+	First commit	Pirmais iesūtījums
+	Fit	Ietilpināt
+	Fit in View	Ietilpināt skatā
+	Fixed	Fiksēts
+	Flash	Zibspuldze
+	Flatten	Saplacināt
+	Flip	Apvērst
+	Flip Horizontal	Apvērst horizontāli
+	Flip Vertical	Apvērst vertikāli
+	Focus	Fokuss
+	Folder	Mape
+	Font	Fonts
+	Font Size	Fonta lielums
+	Font size	Fonta lielums
+	Font Size:	Fonta lielums:
+	Font:	Fonts:
+	Fonts	Fonti
+	Format	Formāts
+	Format:	Formāts:
+	Fractions	Daļskaitļi
+	Frame	Rāmis
+	Free	Brīvs
+	Free Transform	Brīvā transformācija
+	French	Franču
+	Frequency	Frekvence
+	From	No
+	Frosted	Apsarmojis
+	Full	Pilns
+	Full Screen	Pilnekrāns
+	Full Screen Mode	Pilnekrāna režīms
+	Functions	Funkcijas
+	Gamma	Gamma
+	Gamma Correction	Gammas korekcija
+	Gamut Warning	Krāsu diapazona brīdinājums
+	Gaussian Blur	Gausa aizmiglojums
+	Gaussian Blur…	Gausa aizmiglojums…
+	General	Vispārīgi
+	General…	Vispārīgi…
+	Generate	Ģenerēt
+	Geometry	Ģeometrija
+	German	Vācu
+	GitHub	GitHub
+	Glass	Stikls
+	Global	Globāls
+	Glow	Spīdums
+	Glow Brightness	Spīduma spilgtums
+	Glow Size	Spīduma izmērs
+	Glyphs	Glifi
+	Good	Labs
+	Gradient	Gradients
+	Gradient Tool	Gradienta rīks
+	Gradients	Gradienti
+	Grain	Graudi
+	Grain Type	Graudu veids
+	Graininess	Graudainība
+	Grainy Dots	Graudaini punkti
+	Graphic	Grafika
+	Graphics	Grafika
+	Gray	Pelēks
+	Gray Gamma 2.2	Pelēkā gamma 2.2
+	Grayscale	Pelēktoņi
+	Green	Zaļš
+	Grid	Režģis
+	Grid Size:	Režģa izmērs:
+	Grid view	Režģa skats
+	Gridline every	Režģa līnija ik pēc
+	Group	Grupēt
+	Group with	Grupēt ar
+	Groups	Grupas
+	Grout Width	Šuvju platums
+	Guides	Palīglīnijas
+	Halftone Pattern	Rastra raksts
+	Hand	Roka
+	Hand Tool	Rokas rīks
+	Hard	Ciets
+	Hard Light	Asā gaisma
+	Hard Mix	Asā sajaukšana
+	Headings	Virsraksti
+	Heart	Sirds
+	Height	Augstums
+	Height:	Augstums:
+	Help	Palīdzība
+	Hexagon	Sešstūris
+	Hidden	Paslēpts
+	Hidden text	Paslēpts teksts
+	Hide	Paslēpt
+	Hide All	Paslēpt visu
+	Hide Grid	Paslēpt režģi
+	Hide Others	Paslēpt citus
+	High	Augsts
+	High Pass	Augstfrekvenču filtrs
+	High Resolution	Augsta izšķirtspēja
+	High resolution	Augsta izšķirtspēja
+	Highlight Area	Izceltais apgabals
+	Highlights	Gaišie toņi
+	Hindi	Hindi
+	Histogram	Histogramma
+	History	Vēsture
+	Hollow	Dobs
+	Home	Sākums
+	Horizontal	Horizontāli
+	Horizontal scale	Horizontālais mērogs
+	Horizontally	Horizontāli
+	Hue	Nokrāsa
+	Hue Shift	Nokrāsas nobīde
+	Hue/Saturation…	Nokrāsa/piesātinājums…
+	Hyphenation	Vārdu pārnešana
+	Icon	Ikona
+	Ignore	Ignorēt
+	Ignore All	Ignorēt visu
+	Image	Attēls
+	Image Size	Attēla izmērs
+	Images	Attēli
+	Import	Importēt
+	Import…	Importēt…
+	Inches	Collas
+	Increase Font Size	Palielināt fonta lielumu
+	Index	Indekss
+	Inflate	Uzpūst
+	Info	Informācija
+	Inner Glow…	Iekšējais spīdums…
+	Input:	Ievade:
+	Insert	Ievietot
+	Inside	Iekšpusē
+	Inspect Document	Pārbaudīt dokumentu
+	Install Plug-in	Instalēt spraudni
+	Install Plug-in…	Instalēt spraudni…
+	Intensity	Intensitāte
+	Interface	Saskarne
+	Interface Language	Saskarnes valoda
+	Interface language	Saskarnes valoda
+	Interface Theme	Saskarnes motīvs
+	Interlaced	Ar rindpārlēci
+	Interpolation	Interpolācija
+	Intersect	Šķelt
+	Intersection	Šķēlums
+	Invert	Invertēt
+	Invert Mask	Invertēt masku
+	Isolate	Izolēt
+	Italian	Itāliešu
+	Italic	Slīpraksts
+	Japanese	Japāņu
+	Join	Savienot
+	Join our Discord	Pievienojieties mūsu Discord
+	Join the ArtCraft Discord	Pievienojieties ArtCraft Discord
+	Join the ArtCraft Discord…	Pievienojieties ArtCraft Discord…
+	Join us on Discord	Pievienojieties mums Discord
+	just now	tikko
+	Justification	Izlīdzināšana
+	Justify	Izlīdzināt abās malās
+	Keep:	Saglabāt:
+	Kerning	Burtu pāru atstatums
+	Keyboard Shortcuts	Īsinājumtaustiņi
+	Keyboard Shortcuts…	Īsinājumtaustiņi…
+	Keywords	Atslēgvārdi
+	Kind	Veids
+	Korean	Korejiešu
+	Lab	Lab
+	Label	Etiķete
+	Labels	Etiķetes
+	Landscape	Ainava
+	Language	Valoda
+	Language Options	Valodas opcijas
+	Language:	Valoda:
+	Large	Liels
+	Lasso	Laso
+	Lasso Tool	Laso rīks
+	Last	Pēdējais
+	Last commit	Pēdējais iesūtījums
+	Later	Vēlāk
+	Layer	Slānis
+	Layers	Slāņi
+	Layout	Izkārtojums
+	Layout:	Izkārtojums:
+	Leading	Rindstarpa
+	Left	Pa kreisi
+	Left Diagonal	Kreisā diagonāle
+	Left to Right	No kreisās uz labo
+	Left:	Pa kreisi:
+	Legal	Legal
+	Length	Garums
+	Length:	Garums:
+	Lens Flare	Objektīva atspīdums
+	Less	Mazāk
+	Letter	Letter
+	Level	Līmenis
+	Level 1	1. līmenis
+	Level 2	2. līmenis
+	Level 3	3. līmenis
+	Level 4	4. līmenis
+	Levels	Līmeņi
+	Levels…	Līmeņi…
+	Libraries	Bibliotēkas
+	Library	Bibliotēka
+	Light	Gaišs
+	Light Blue	Gaiši zils
+	Light Direction	Gaismas virziens
+	Light Gray	Gaiši pelēks
+	Light gray	Gaiši pelēks
+	Light Intensity	Gaismas intensitāte
+	Light Theme	Gaišais motīvs
+	Light Type	Gaismas veids
+	Lighten	Izgaismot
+	Lighter Color	Gaišāka krāsa
+	Lighting	Apgaismojums
+	Lighting Effects	Apgaismojuma efekti
+	Lightness	Gaišums
+	Line	Līnija
+	Line delta	Rindu starpība
+	Line spacing	Rindstarpa
+	Linear	Lineārs
+	Linear Burn	Lineārā apdedzināšana
+	Linear Gradient	Lineārs gradients
+	Linear Light	Lineārā gaisma
+	Lines	Līnijas
+	Lines +/−	Rindas +/−
+	Lines added	Pievienotās rindas
+	Lines deleted	Dzēstās rindas
+	Link	Saite
+	Links	Saites
+	List	Saraksts
+	List View	Saraksta skats
+	List view	Saraksta skats
+	Location	Atrašanās vieta
+	Location:	Atrašanās vieta:
+	Lock	Bloķēt
+	Lock Guides	Bloķēt palīglīnijas
+	Lock Slices	Bloķēt šķēles
+	Locked	Bloķēts
+	Long Lines	Garas līnijas
+	Long Strokes	Gari vilcieni
+	Low	Zems
+	lowercase	mazie burti
+	Luminance	Luminance
+	Luminosity	Spožums
+	Magenta	Fuksīns
+	Magic Wand Tool	Burvju nūjiņas rīks
+	Magnification	Palielinājums
+	Margins	Piemales
+	Mask	Maska
+	Masks	Maskas
+	Matte	Matēts
+	Maximize	Maksimizēt
+	Maximum	Maksimums
+	Measure	Mērīt
+	Median	Mediāna
+	Medium	Vidējs
+	Medium Dots	Vidēji punkti
+	Medium Gray	Vidēji pelēks
+	Medium Lines	Vidējas līnijas
+	Merge	Sapludināt
+	Merge Cells	Sapludināt šūnas
+	Merge Layers	Sapludināt slāņus
+	Merged PRs	Sapludinātie PR
+	Mesh	Tīkls
+	Message:	Ziņojums:
+	Metadata	Metadati
+	Method	Metode
+	Method:	Metode:
+	Mezzotint	Mecotinta
+	Mezzotint…	Mecotinta…
+	Middle	Vidus
+	Midpoint	Viduspunkts
+	Midtones	Vidējie toņi
+	Millimeters	Milimetri
+	Minimize	Minimizēt
+	Minimum	Minimums
+	Mirror	Spogulis
+	Missing	Trūkst
+	Mobile	Mobilais
+	Mode	Režīms
+	Mode:	Režīms:
+	Model	Modelis
+	Models	Modeļi
+	Modern	Moderns
+	Modified	Modificēts
+	Modify	Modificēt
+	Monitor RGB	Monitora RGB
+	Mono	Mono
+	Monochrome	Vienkrāsains
+	More	Vairāk
+	Mosaic	Mozaīka
+	Mosaic Tiles	Mozaīkas plāksnītes
+	Motion	Kustība
+	Move	Pārvietot
+	Move Down	Pārvietot uz leju
+	Move Panel	Pārvietot paneli
+	Move Up	Pārvietot uz augšu
+	Multiply	Reizināt
+	Name	Nosaukums
+	Name (A–Z)	Nosaukums (A–Z)
+	Name:	Nosaukums:
+	Navigation	Navigācija
+	Navigator	Navigators
+	Neon Glow	Neona spīdums
+	Never	Nekad
+	New	Jauns
+	New Document	Jauns dokuments
+	New document	Jauns dokuments
+	New from Template	Jauns no veidnes
+	New Group	Jauna grupa
+	New Guide	Jauna palīglīnija
+	New Layer	Jauns slānis
+	New Layer…	Jauns slānis…
+	New Style…	Jauns stils…
+	New Swatch…	Jauns krāsu paraugs…
+	New Window	Jauns logs
+	New Workspace	Jauna darbvieta
+	New Workspace…	Jauna darbvieta…
+	New…	Jauns…
+	Next	Nākamais
+	Next Appearance Mode	Nākamais izskata režīms
+	Next Change	Nākamās izmaiņas
+	Next Page	Nākamā lapa
+	Next page	Nākamā lapa
+	No	Nē
+	No Color	Bez krāsas
+	No Dither	Bez dizerēšanas
+	No Document	Nav dokumenta
+	No document	Nav dokumenta
+	No document open	Nav atvērta dokumenta
+	No limit	Bez ierobežojuma
+	No matches.	Nav atbilstību.
+	No matching commands	Nav atbilstošu komandu
+	No recent files	Nav nesenu failu
+	No results	Nav rezultātu
+	No Selection	Nav atlases
+	No selection	Nav atlases
+	Noise	Troksnis
+	Nonbreaking Space	Nedalāma atstarpe
+	None	Nav
+	Normal	Parasts
+	Not available	Nav pieejams
+	NTSC Colors	NTSC krāsas
+	Number	Skaitlis
+	Object	Objekts
+	Octagon	Astoņstūris
+	Odd Fields	Nepāra lauki
+	Odd pages only	Tikai nepāra lapas
+	Off	Izslēgts
+	Offline	Bezsaistē
+	Offset	Nobīde
+	Offset:	Nobīde:
+	OK	Labi
+	Omit	Izlaist
+	On	Ieslēgts
+	Only Web Colors	Tikai tīmekļa krāsas
+	Opacity	Necaurredzamība
+	Opacity:	Necaurredzamība:
+	Open	Atvērt
+	Open link	Atvērt saiti
+	Open Recent	Atvērt nesenos
+	OpenType	OpenType
+	Open…	Atvērt…
+	Optimized	Optimizēts
+	Options	Opcijas
+	Options…	Opcijas…
+	Orange	Oranžs
+	Ordinals	Kārtas skaitļi
+	Orientation	Orientācija
+	Orientation:	Orientācija:
+	Original	Oriģināls
+	Other	Cits
+	Outer Glow…	Ārējais spīdums…
+	Outline	Kontūra
+	Output	Izvade
+	Output:	Izvade:
+	Outside	Ārpusē
+	Oval	Ovāls
+	Overlap:	Pārklāšanās:
+	Overlay	Pārklājums
+	Package…	Sagatavot pakotni…
+	Page	Lapa
+	Page {page} of {pages}	{page}. lapa no {pages}
+	Pages	Lapas
+	Painting	Gleznošana
+	Panel	Panelis
+	Panel menu	Paneļa izvēlne
+	Panel Options…	Paneļa opcijas…
+	Panels	Paneļi
+	Paper	Papīrs
+	Paragraph	Rindkopa
+	Paragraph Styles	Rindkopu stili
+	Password	Parole
+	Paste	Ielīmēt
+	Paste Special	Īpašā ielīmēšana
+	Patchwork	Ielāpu raksts
+	Path	Ceļš
+	Path:	Ceļš:
+	Paths	Ceļi
+	Pattern	Raksts
+	Pattern Type	Raksta veids
+	Pause	Pauzēt
+	Pen	Spalva
+	Pen Tool	Spalvas rīks
+	Pencil	Zīmulis
+	Pencil Tool	Zīmuļa rīks
+	Pentagon	Piecstūris
+	Percent	Procenti
+	Percentage	Procentuālā vērtība
+	Performance	Veiktspēja
+	Perimeter	Perimetrs
+	Perspective	Perspektīva
+	Photo	Fotoattēls
+	Photocopy	Fotokopija
+	Picas	Pikas
+	Pin Light	Punktveida gaisma
+	Pink	Rozā
+	Pixel	Pikselis
+	Pixelate	Pikselizēt
+	Pixels	Pikseļi
+	Play	Atskaņot
+	Plug-ins	Spraudņi
+	Point	Punkts
+	Pointillize	Puantilisms
+	Pointillize…	Puantilisms…
+	Points	Punkti
+	Polygon	Daudzstūris
+	Polygon Tool	Daudzstūra rīks
+	Polyline	Lauzta līnija
+	Portrait	Portrets
+	Portuguese	Portugāļu
+	Position	Novietojums
+	Position:	Novietojums:
+	Postcard	Pastkarte
+	Poster	Plakāts
+	Poster Edges	Plakāta malas
+	Posterization	Posterizācija
+	Posterize	Posterizēt
+	Preferences	Iestatījumi
+	Preferences…	Iestatījumi…
+	Prefix	Prefikss
+	Preserve	Saglabāt
+	Preserve Luminosity	Saglabāt spožumu
+	Preset	Priekšiestatījums
+	Preset Manager	Priekšiestatījumu pārvaldnieks
+	Preset:	Priekšiestatījums:
+	Presets	Priekšiestatījumi
+	Presets:	Priekšiestatījumi:
+	Press keys…	Nospiediet taustiņus…
+	Pressure	Spiediens
+	Preview	Priekšskatījums
+	Previous	Iepriekšējais
+	Previous Change	Iepriekšējās izmaiņas
+	Previous Page	Iepriekšējā lapa
+	Previous page	Iepriekšējā lapa
+	Print	Drukāt
+	Printer	Printeris
+	Printer:	Printeris:
+	Printing	Drukāšana
+	Print…	Drukāt…
+	Profile	Profils
+	Progressive	Progresīvs
+	Proof Setup	Provēšanas iestatījumi
+	Properties	Rekvizīti
+	Protect	Aizsargāt
+	PRs	PR
+	Public Domain	Publiskais domēns
+	Punctuation	Pieturzīmes
+	Purple	Purpurs
+	Pyramid	Piramīda
+	Quality	Kvalitāte
+	Quick Actions	Ātrās darbības
+	Radial	Radiāls
+	Radial Blur	Radiālais aizmiglojums
+	Radial Blur…	Radiālais aizmiglojums…
+	Radial Gradient	Radiāls gradients
+	Radius	Rādiuss
+	Radius:	Rādiuss:
+	Random	Nejaušs
+	Range	Diapazons
+	Range:	Diapazons:
+	Rasterize	Rasterizēt
+	Ratio	Attiecība
+	Rays	Stari
+	Ready	Gatavs
+	Real name	Īstais vārds
+	Recent	Nesenie
+	Recent Colors	Nesenās krāsas
+	Recent Files	Nesenie faili
+	Recover	Atgūt
+	Rectangle	Taisnstūris
+	Rectangle Tool	Taisnstūra rīks
+	Rectangular	Taisnstūrveida
+	Red	Sarkans
+	Redo	Atcelt atsaukšanu
+	Reduce Noise	Samazināt troksni
+	Refine	Precizēt
+	Reflected	Atspoguļots
+	Refresh	Atsvaidzināt
+	Regular	Parasts
+	Relative	Relatīvs
+	Relative Colorimetric	Relatīvā kolorimetrija
+	Relaxed	Brīvs
+	Relief	Reljefs
+	Reload	Pārlādēt
+	Remove	Noņemt
+	Remove Background	Noņemt fonu
+	Remove from favorites	Noņemt no izlases
+	Rename	Pārdēvēt
+	Rename Group…	Pārdēvēt grupu…
+	Rename Style	Pārdēvēt stilu
+	Rename…	Pārdēvēt…
+	Repeat	Atkārtot
+	Replace	Aizstāt
+	Replace:	Aizstāt:
+	Reply	Atbildēt
+	Report	Pārskats
+	Report an Issue…	Ziņot par problēmu…
+	Reselect	Atlasīt atkārtoti
+	Reset	Atiestatīt
+	Reset Preferences	Atiestatīt iestatījumus
+	Reset…	Atiestatīt…
+	Resize panel window	Mainīt paneļa loga izmēru
+	Resize panels	Mainīt paneļu izmēru
+	Resolution	Izšķirtspēja
+	Resolution:	Izšķirtspēja:
+	Restore	Atjaunot
+	Result	Rezultāts
+	Resume	Atsākt
+	Reveal in Finder	Rādīt Finder
+	Reverse	Apgriezt
+	Reverse the order	Apgriezt secību
+	Revert	Atgriezt
+	Review	Pārskatīšana
+	RGB	RGB
+	RGB Color	RGB krāsa
+	RGB:	RGB:
+	Right	Pa labi
+	Right Diagonal	Labā diagonāle
+	Right:	Pa labi:
+	Rotate	Pagriezt
+	Rotate:	Pagriezt:
+	Rotation	Pagriezums
+	Rotation:	Pagriezums:
+	Rounded Rectangle	Noapaļots taisnstūris
+	Roundness	Noapaļojums
+	Roundness:	Noapaļojums:
+	Rows	Rindas
+	Ruler	Lineāls
+	Rulers	Lineāli
+	Rulers & Grids	Lineāli un režģi
+	Russian	Krievu
+	Sample Size	Parauga izmērs
+	Sandstone	Smilšakmens
+	Saturation	Piesātinājums
+	Save	Saglabāt
+	Save a Copy	Saglabāt kopiju
+	Save a Copy…	Saglabāt kopiju…
+	Save As	Saglabāt kā
+	Save as PDF	Saglabāt kā PDF
+	Save as Template	Saglabāt kā veidni
+	Save as Template…	Saglabāt kā veidni…
+	Save As…	Saglabāt kā…
+	Save Preset…	Saglabāt priekšiestatījumu…
+	Save Selection	Saglabāt atlasi
+	Save Selection…	Saglabāt atlasi…
+	Saved	Saglabāts
+	Save…	Saglabāt…
+	Scale	Mērogs
+	Scale:	Mērogs:
+	Scaling	Mērogošana
+	Scratch Disks	Darba diski
+	Scratch Disks…	Darba diski…
+	Screen	Ekrāns
+	Screen Mode	Ekrāna režīms
+	Scripts	Skripti
+	Search	Meklēt
+	Security	Drošība
+	Segments	Segmenti
+	Select	Atlasīt
+	Select All	Atlasīt visu
+	Select Objects	Atlasīt objektus
+	Select:	Atlasīt:
+	Selected pages	Atlasītās lapas
+	Selection	Atlase
+	Selection Tool	Atlases rīks
+	Selective	Selektīvs
+	Send Backward	Pārvietot atpakaļ
+	Send to Back	Pārvietot uz aizmuguri
+	Sensitivity	Jutīgums
+	Sent to {printer}	Nosūtīts: {printer}
+	Services	Pakalpojumi
+	Set	Iestatīt
+	Set as Default	Iestatīt kā noklusējumu
+	Set:	Komplekts:
+	Settings	Iestatījumi
+	Settings:	Iestatījumi:
+	Settings…	Iestatījumi…
+	Shadow	Ēna
+	Shadows	Ēnas
+	Shape	Figūra
+	Shape Effects	Figūras efekti
+	Shape:	Figūra:
+	Shapes	Figūras
+	Share	Kopīgot
+	Sharpen	Asināt
+	Sharpness	Asums
+	Shift	Shift
+	Short Lines	Īsas līnijas
+	Short Strokes	Īsi vilcieni
+	Shortcut	Saīsne
+	Shortcuts	Saīsnes
+	Show	Rādīt
+	Show All	Rādīt visu
+	Show Grid	Rādīt režģi
+	Show Guides	Rādīt palīglīnijas
+	Show in Folder	Rādīt mapē
+	Show Mask	Rādīt masku
+	Show Mesh	Rādīt tīklu
+	Show Rulers	Rādīt lineālus
+	Show rulers	Rādīt lineālus
+	Show Tool Tips	Rādīt rīku padomus
+	Show:	Rādīt:
+	Sides:	Malas:
+	Simplify	Vienkāršot
+	Size	Izmērs
+	Size:	Izmērs:
+	Sketch	Skice
+	Skew	Šķiebt
+	Slice	Šķēle
+	Slice Options	Šķēles opcijas
+	Slice Options…	Šķēles opcijas…
+	Slice Tool	Šķēles rīks
+	Slices	Šķēles
+	Small	Mazs
+	Small Caps	Kapiteļi
+	Smart Blur	Viedais aizmiglojums
+	Smart Blur…	Viedais aizmiglojums…
+	Smart Guides	Viedās palīglīnijas
+	Smart quotes	Viedās pēdiņas
+	Smoothness	Gludums
+	Snap to Grid	Piesaistīt režģim
+	Soft	Mīksts
+	Soft Light	Maigā gaisma
+	Soften	Mīkstināt
+	Softness	Mīkstums
+	Solarize	Solarizēt
+	Sort	Kārtot
+	Sort by	Kārtot pēc
+	Source	Avots
+	Source code on GitHub	Pirmkods GitHub
+	Spaces	Atstarpes
+	Spacing	Atstatums
+	Spacing:	Atstatums:
+	Spanish	Spāņu
+	Spatter	Šļakatas
+	Special	Īpašs
+	Speckle	Raibumi
+	Speed	Ātrums
+	Spelling	Pareizrakstība
+	Spherize	Sferizēt
+	Split	Sadalīt
+	Spot Color	Tīrtoņa krāsa
+	Spray Radius	Izsmidzināšanas rādiuss
+	Square	Kvadrāts
+	Square Size	Kvadrāta izmērs
+	sRGB IEC61966-2.1	sRGB IEC61966-2.1
+	Stacked	Sakrauts
+	Stained Glass	Vitrāža
+	Stamp	Zīmogs
+	Standard	Standarta
+	Standard Ligatures	Standarta ligatūras
+	Star	Zvaigzne
+	Start at:	Sākt no:
+	Statistics	Statistika
+	Status	Statuss
+	Status Bar	Statusa josla
+	Stippled	Punktēts
+	Stop	Apturēt
+	Strength	Stiprums
+	Stretch	Izstiept
+	Strikethrough	Pārsvītrojums
+	Stroke	Apvilkums
+	Stroke Color	Apvilkuma krāsa
+	Stroke Length	Vilciena garums
+	Stroke Options	Apvilkuma opcijas
+	Stroke:	Apvilkums:
+	Studio	Studija
+	Style	Stils
+	Style:	Stils:
+	Styles	Stili
+	Stylize	Stilizēt
+	Subdivisions	Apakšiedaļas
+	Subject	Tēma
+	Subscript	Apakšraksts
+	Subset	Apakškopa
+	Subtitle	Apakšvirsraksts
+	Subtract	Atņemt
+	Sumi-e	Sumi-e
+	Summary	Kopsavilkums
+	Superscript	Augšraksts
+	Swatches	Krāsu paraugi
+	Symbol	Simbols
+	Symbols	Simboli
+	Sync with system	Sinhronizēt ar sistēmu
+	System	Sistēma
+	Tab	Tab
+	Table	Tabula
+	Table style	Tabulas stils
+	Tables	Tabulas
+	Tabloid	Tabloīds
+	Tabs	Cilnes
+	Taper	Sašaurinājums
+	Target	Mērķis
+	Target:	Mērķis:
+	Temperature	Temperatūra
+	Templates	Veidnes
+	Text	Teksts
+	Text color	Teksta krāsa
+	Text:	Teksts:
+	Texture	Tekstūra
+	The passwords don't match.	Paroles nesakrīt.
+	Theme	Motīvs
+	Thickness	Biezums
+	This document has no bookmarks.	Šajā dokumentā nav grāmatzīmju.
+	Threshold	Slieksnis
+	Thumbnails	Sīktēli
+	Tile	Plāksnīte
+	Tile Size	Plāksnītes izmērs
+	Tilt	Slīpums
+	Time	Laiks
+	Timecode	Laikkods
+	Timeline	Laika josla
+	Tint	Tonējums
+	Tint Color	Tonējuma krāsa
+	Title	Nosaukums
+	To	Līdz
+	Tolerance	Pielaide
+	Tolerance:	Pielaide:
+	Tool	Rīks
+	Toolbars	Rīkjoslas
+	Tools	Rīki
+	Top	Augša
+	Top Left	Augšā pa kreisi
+	Top Right	Augšā pa labi
+	Top:	Augšā:
+	Total	Kopā
+	Total:	Kopā:
+	Tracking	Burtu atstarpe
+	Transform	Transformēt
+	Translate	Tulkot
+	Transparency	Caurspīdīgums
+	Transparent	Caurspīdīgs
+	Trap…	Krāsu pārklāšanās…
+	Triangle	Trijstūris
+	Turbulent	Turbulents
+	Twirl	Virpulis
+	Twist	Savērpums
+	Type	Veids
+	Type Tool	Teksta rīks
+	Type:	Veids:
+	Typewriter	Rakstāmmašīna
+	Type…	Teksts…
+	Typing	Rakstīšana
+	Underline	Pasvītrojums
+	Undo	Atsaukt
+	Undo {action}	Atsaukt: {action}
+	Ungroup	Atgrupēt
+	Uniform	Vienmērīgs
+	Union	Apvienojums
+	Units	Mērvienības
+	Unknown	Nezināms
+	Unlock	Atbloķēt
+	Unsaved changes	Nesaglabātas izmaiņas
+	Unsharp Mask	Asināšanas maska
+	Untitled	Bez nosaukuma
+	Up	Uz augšu
+	Update	Atjaunināt
+	Updates	Atjauninājumi
+	UPPERCASE	LIELIE BURTI
+	Use Default	Izmantot noklusējumu
+	User	Lietotājs
+	Username	Lietotājvārds
+	Value	Vērtība
+	Value:	Vērtība:
+	Variables	Mainīgie
+	Version	Versija
+	Version {version}	Versija {version}
+	Vertical	Vertikāli
+	Vertical Alignment	Vertikālais līdzinājums
+	Vertical Type Tool	Vertikālā teksta rīks
+	Vertically	Vertikāli
+	Very High	Ļoti augsts
+	Vibrance	Dzīvīgums
+	Video	Video
+	View	Skats
+	Violet	Violets
+	Visibility	Redzamība
+	Vivid Light	Spilgtā gaisma
+	Voice	Balss
+	W:	P:
+	Warning	Brīdinājums
+	Warnings	Brīdinājumi
+	Warp	Deformēt
+	Watermark	Ūdenszīme
+	Wave	Vilnis
+	Wave…	Vilnis…
+	Web	Tīmeklis
+	Website	Tīmekļa vietne
+	Weight	Svars
+	Wet	Mitrs
+	White	Balts
+	White Intensity	Baltā intensitāte
+	White Is High	Baltais ir augsts
+	Whites	Baltie toņi
+	Width	Platums
+	Width and Height	Platums un augstums
+	Width:	Platums:
+	Window	Logs
+	Windows	Logi
+	Words	Vārdi
+	Working CMYK	Darba CMYK
+	Workspace	Darbvieta
+	Workspaces	Darbvietas
+	X	X
+	Y	Y
+	Yellow	Dzeltens
+	Yes	Jā
+	yesterday	vakar
+	Your changes will be lost if you don't save them.	Ja nesaglabāsiet izmaiņas, tās tiks zaudētas.
+	Zoom	Tālummaiņa
+	Zoom In	Tuvināt
+	Zoom in	Tuvināt
+	Zoom Out	Tālināt
+	Zoom out	Tālināt
+	Zoom Tool	Tālummaiņas rīks
+unit	{n} B	{n} B
+@plural	{n} byte|{n} bytes	{n} baiti|{n} baits|{n} baiti
+@plural	{n} commit|{n} commits	{n} iesūtījumi|{n} iesūtījums|{n} iesūtījumi
+	{n} files	{n} faili
+unit	{n} GB	{n} GB
+unit	{n} GiB	{n} GiB
+	{n} h ago	pirms {n} st.
+@plural	{n} item|{n} items	{n} vienumi|{n} vienums|{n} vienumi
+unit	{n} KB	{n} KB
+unit	{n} KiB	{n} KiB
+@plural	{n} Layer|{n} Layers	{n} slāņi|{n} slānis|{n} slāņi
+unit	{n} MB	{n} MB
+unit	{n} MiB	{n} MiB
+	{n} min ago	pirms {n} min
+@plural	{n} step|{n} steps	{n} soļi|{n} solis|{n} soļi
+unit	{n} TB	{n} TB
+unit	{n} TiB	{n} TiB
+	−Bin	−Bin
+	● Recording	● Ieraksta

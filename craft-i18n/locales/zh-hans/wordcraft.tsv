@@ -1448,6 +1448,14 @@
 	Remove Table of Contents	删除目录
 	Remove the control once edited	编辑后删除控件
 	Remove Watermark	删除水印
+	No watermark	无水印
+	Picture watermark	图片水印
+	Text watermark	文字水印
+	Select Picture…	选择图片…
+	Washout	褪色
+	Semitransparent	半透明
+	Transparency:	透明度：
+	Select a picture first.	请先选择图片。
 	Rename Document	重命名文档
 	Reopen	重新打开
 	Repeat as header row on each page	在各页重复作为标题行
@@ -2058,3 +2066,123 @@
 	{width} × {height} pixels	{width} × {height} 像素
 	{words} words	{words} 个字
 	“{text}” ({row}, {series}) isn't a number.	“{text}”（{row}，{series}）不是数字。
+	Add a language…	添加语言…
+	Add a language	添加语言
+	Your languages	你的语言
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	英语、此文档的语言，以及每个已安装的语言包。语言包会添加拼写词典和断字规则。
+	Set as default	设为默认
+	New blank documents are written in this language	新的空白文档将使用此语言书写
+	{language} (default)	{language}（默认）
+	Built in	内置
+	Your own dictionary	你自己的词典
+	System dictionary	系统词典
+	Not available yet	暂不可用
+	Grammar built in	已内置语法检查
+	Install spelling ({size})	安装拼写检查（{size}）
+	Its dictionary couldn't be read: {reason}	无法读取其词典：{reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	下载已关闭。点击“添加语言…”或“安装”会将其打开，之后 WordCraft 会从 GitHub 下载语言包和字体。
+	Search:	搜索：
+	Dutch, Nederlands or nl	荷兰语、Nederlands 或 nl
+	No languages to show yet.	暂无可显示的语言。
+	No language matches your search.	没有与搜索匹配的语言。
+	An installed Language pack is used after this folder.	已安装的语言包在此文件夹之后使用。
+	Dictionary files	词典文件
+	Possible spelling mistake	可能的拼写错误
+	Gets the list of Language packs, then this language's pack if there is one.	获取语言包列表，然后获取此语言的语言包（如果有）。
+	Afrikaans	南非荷兰语
+	Belarusian	白俄罗斯语
+	Bulgarian	保加利亚语
+	Bosnian	波斯尼亚语
+	Catalan	加泰罗尼亚语
+	Catalan (Valencian)	加泰罗尼亚语（巴伦西亚语）
+	Welsh	威尔士语
+	Esperanto	世界语
+	Persian	波斯语
+	Irish	爱尔兰语
+	Galician	加利西亚语
+	Hungarian	匈牙利语
+	Armenian	亚美尼亚语
+	Icelandic	冰岛语
+	Georgian	格鲁吉亚语
+	Lithuanian	立陶宛语
+	Latvian	拉脱维亚语
+	Macedonian	马其顿语
+	Norwegian (Nynorsk)	挪威语（新挪威语）
+	Slovak	斯洛伐克语
+	Slovenian	斯洛文尼亚语
+	Albanian	阿尔巴尼亚语
+	Swahili	斯瓦希里语
+	Tamil	泰米尔语
+	Thai	泰语
+	Vietnamese	越南语
+	Set as Default Language	设为默认语言
+	{language} ({region})	{language}（{region}）
+	U.A.E.	阿联酋
+	Angola	安哥拉
+	Argentina	阿根廷
+	Austria	奥地利
+	Australia	澳大利亚
+	Bosnia and Herzegovina	波斯尼亚和黑塞哥维那
+	Belgium	比利时
+	Bolivia	玻利维亚
+	Brazil	巴西
+	Belarus	白俄罗斯
+	Canada	加拿大
+	Switzerland	瑞士
+	Chile	智利
+	China	中国
+	Colombia	哥伦比亚
+	Costa Rica	哥斯达黎加
+	Cuba	古巴
+	Cabo Verde	佛得角
+	Cyprus	塞浦路斯
+	Germany	德国
+	Dominican Republic	多米尼加共和国
+	Ecuador	厄瓜多尔
+	Egypt	埃及
+	Spain	西班牙
+	Finland	芬兰
+	France	法国
+	United Kingdom	英国
+	Equatorial Guinea	赤道几内亚
+	Guatemala	危地马拉
+	Hong Kong SAR	中国香港特别行政区
+	Honduras	洪都拉斯
+	Ireland	爱尔兰
+	India	印度
+	Iraq	伊拉克
+	Italy	意大利
+	Jamaica	牙买加
+	Jordan	约旦
+	Kuwait	科威特
+	Kazakhstan	哈萨克斯坦
+	Lebanon	黎巴嫩
+	Liechtenstein	列支敦士登
+	Luxembourg	卢森堡
+	Morocco	摩洛哥
+	Monaco	摩纳哥
+	Montenegro	黑山
+	Macao SAR	中国澳门特别行政区
+	Mexico	墨西哥
+	Malaysia	马来西亚
+	Mozambique	莫桑比克
+	Nicaragua	尼加拉瓜
+	Netherlands	荷兰
+	New Zealand	新西兰
+	Panama	巴拿马
+	Peru	秘鲁
+	Philippines	菲律宾
+	Puerto Rico	波多黎各
+	Portugal	葡萄牙
+	Paraguay	巴拉圭
+	Qatar	卡塔尔
+	Russia	俄罗斯
+	Singapore	新加坡
+	El Salvador	萨尔瓦多
+	Syria	叙利亚
+	Taiwan	台湾
+	Ukraine	乌克兰
+	United States	美国
+	Uruguay	乌拉圭
+	Venezuela	委内瑞拉
+	South Africa	南非

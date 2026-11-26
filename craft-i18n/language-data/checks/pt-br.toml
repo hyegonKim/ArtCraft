@@ -1,0 +1,3 @@
+# Words the pt-br pack must accept and reject (common words; written for this check).
+correct = ["casa", "livro", "escola", "água", "cidade", "trabalhar", "ação"]
+incorrect = ["livrro", "escolla", "cidadde"]

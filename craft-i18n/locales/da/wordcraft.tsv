@@ -2362,6 +2362,14 @@ preview	Title	Titel
 	Warm Gradient with Outline	Varm gradient med kontur
 	Warnings ({n})	Advarsler ({n})
 	Watermark	Vandmærke
+	No watermark	Intet vandmærke
+	Picture watermark	Billedvandmærke
+	Text watermark	Tekstvandmærke
+	Select Picture…	Vælg billede…
+	Washout	Udvasket
+	Semitransparent	Delvist gennemsigtig
+	Transparency:	Gennemsigtighed:
+	Select a picture first.	Vælg først et billede.
 	Wave	Bølge
 	Weather	Vejr
 	Web Layout	Weblayout
@@ -2444,3 +2452,121 @@ preview	Title	Titel
 	✓ None	✓ Ingen
 	➕ New comment	➕ Ny kommentar
 	📂  Browse…	📂  Gennemse…
+	Add a language…	Tilføj et sprog…
+	Add a language	Tilføj et sprog
+	Your languages	Dine sprog
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Engelsk, dette dokuments sprog og alle installerede sprogpakker. Sprogpakker tilføjer stavekontrolordbøger og orddeling.
+	Set as default	Brug som standard
+	New blank documents are written in this language	Nye tomme dokumenter skrives på dette sprog
+	{language} (default)	{language} (standard)
+	Built in	Indbygget
+	Your own dictionary	Din egen ordbog
+	System dictionary	Systemordbog
+	Not available yet	Ikke tilgængelig endnu
+	Grammar built in	Grammatik er indbygget
+	Install spelling ({size})	Installer stavning ({size})
+	Its dictionary couldn't be read: {reason}	Dens ordbog kunne ikke læses: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Download er slået fra. Et klik på „Tilføj et sprog…“ eller „Installer“ slår det til: WordCraft henter så sprogpakker og skrifttyper fra GitHub.
+	Search:	Søg:
+	Dutch, Nederlands or nl	Hollandsk, Nederlands eller nl
+	No languages to show yet.	Ingen sprog at vise endnu.
+	No language matches your search.	Intet sprog passer til din søgning.
+	An installed Language pack is used after this folder.	En installeret sprogpakke bruges efter denne mappe.
+	Dictionary files	Ordbogsfiler
+	Gets the list of Language packs, then this language's pack if there is one.	Henter listen over sprogpakker og derefter dette sprogs pakke, hvis der er en.
+	Afrikaans	afrikaans
+	Belarusian	hviderussisk
+	Bulgarian	bulgarsk
+	Bosnian	bosnisk
+	Catalan	catalansk
+	Catalan (Valencian)	catalansk (valenciansk)
+	Welsh	walisisk
+	Esperanto	esperanto
+	Persian	persisk
+	Irish	irsk
+	Galician	galicisk
+	Hungarian	ungarsk
+	Armenian	armensk
+	Icelandic	islandsk
+	Georgian	georgisk
+	Lithuanian	litauisk
+	Latvian	lettisk
+	Macedonian	makedonsk
+	Norwegian (Nynorsk)	norsk (nynorsk)
+	Slovak	slovakisk
+	Slovenian	slovensk
+	Albanian	albansk
+	Swahili	swahili
+	Tamil	tamil
+	Thai	thai
+	Vietnamese	vietnamesisk
+	Set as Default Language	Brug som standardsprog
+	U.A.E.	Forenede Arabiske Emirater
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Østrig
+	Australia	Australien
+	Bosnia and Herzegovina	Bosnien-Hercegovina
+	Belgium	Belgien
+	Bolivia	Bolivia
+	Brazil	Brasilien
+	Belarus	Belarus
+	Canada	Canada
+	Switzerland	Schweiz
+	Chile	Chile
+	China	Kina
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Kap Verde
+	Cyprus	Cypern
+	Germany	Tyskland
+	Dominican Republic	Den Dominikanske Republik
+	Ecuador	Ecuador
+	Egypt	Egypten
+	Spain	Spanien
+	Finland	Finland
+	France	Frankrig
+	United Kingdom	Storbritannien
+	Equatorial Guinea	Ækvatorialguinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Hongkong SAR
+	Honduras	Honduras
+	Ireland	Irland
+	India	Indien
+	Iraq	Irak
+	Italy	Italien
+	Jamaica	Jamaica
+	Jordan	Jordan
+	Kuwait	Kuwait
+	Kazakhstan	Kasakhstan
+	Lebanon	Libanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxembourg
+	Morocco	Marokko
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Macao SAR
+	Mexico	Mexico
+	Malaysia	Malaysia
+	Mozambique	Mozambique
+	Nicaragua	Nicaragua
+	Netherlands	Holland
+	New Zealand	New Zealand
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filippinerne
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Qatar
+	Russia	Rusland
+	Singapore	Singapore
+	El Salvador	El Salvador
+	Syria	Syrien
+	Taiwan	Taiwan
+	Ukraine	Ukraine
+	United States	USA
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Sydafrika

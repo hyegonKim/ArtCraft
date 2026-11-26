@@ -1,0 +1,13 @@
+[package]
+name = "materialcraft-image"
+description = "MaterialCraft image buffers: grayscale and color float planes, sampling, resampling, conversions"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+rayon = { workspace = true }
+thiserror = { workspace = true }

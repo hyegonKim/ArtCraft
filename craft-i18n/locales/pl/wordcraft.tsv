@@ -59,6 +59,7 @@
 	About WordCraft	O programie WordCraft
 	Above Chart	Nad wykresem
 	Above the item	Nad elementem
+	Above/below	Powyżej/poniżej
 	Absolute value cases	Przypadki wartości bezwzględnej
 	Accent	Akcent
 	Accent Gradient	Gradient akcentu
@@ -67,6 +68,8 @@
 	Accents	Akcenty
 	Accept	Zaakceptuj
 	Accept All Changes	Zaakceptuj wszystkie zmiany
+	Accept All Changes and Stop Tracking	Zaakceptuj wszystkie zmiany i zatrzymaj śledzenie
+	Accept and Move to Next	Zaakceptuj i przejdź do następnej
 	Accept This Change	Zaakceptuj tę zmianę
 	Accessed on	Data dostępu
 	Accessibility Pane	Okienko ułatwień dostępu
@@ -112,6 +115,7 @@
 	Address\nBlock	Blok\nadresu
 	Advanced Find	Wyszukiwanie zaawansowane
 	Advanced Find…	Wyszukiwanie zaawansowane…
+	Advanced Properties…	Właściwości zaawansowane…
 	After:	Po:
 	Agents	Agenci
 	Align Bottom Center	Wyrównaj do dołu i do środka
@@ -169,6 +173,7 @@
 	Apply Style	Zastosuj styl
 	Apply Styles	Zastosuj style
 	Arabic	Arabski
+numerals	Arabic	Arabskie
 	Arch Down	Łuk w dół
 	Arch Up	Łuk w górę
 	Area	Warstwowy
@@ -187,6 +192,7 @@
 	Atmosphere	Atmosfera
 	Attach Template	Dołącz szablon
 	Attach…	Dołącz…
+	Auto orientation	Orientacja automatyczna
 	AutoCorrect	Autokorekta
 	AutoCorrect Options	Opcje autokorekty
 	AutoFit	Autodopasowanie
@@ -205,6 +211,8 @@
 	Automatic numbered lists	Automatyczne listy numerowane
 	Automatic Table 1 (3 levels)	Tabela automatyczna 1 (3 poziomy)
 	Automatic Table 2 (2 levels)	Tabela automatyczna 2 (2 poziomy)
+	Automatically add words to list (First Letter)	Automatycznie dodawaj wyrazy do listy (Pierwsza litera)
+	Automatically add words to list (INitial CAps)	Automatycznie dodawaj wyrazy do listy (DWie POczątkowe WIelkie)
 	Automatically hyphenate document	Automatycznie dziel wyrazy w dokumencie
 	Automatically Update Document Styles	Automatycznie aktualizuj style dokumentu
 	Automatically update document styles	Automatycznie aktualizuj style dokumentu
@@ -258,6 +266,8 @@
 	Book title	Tytuł książki
 	Bookmark	Zakładka
 	Bookmark name:	Nazwa zakładki:
+	Bookmark text	Tekst zakładki
+	Bookmarks	Zakładki
 	Border lines	Linie obramowania
 	Border Painter	Pędzel krawędzi
 	Border\nPainter	Pędzel\nkrawędzi
@@ -281,6 +291,9 @@
 	Break Link	Przerwij łącze
 	Breaks	Podziały
 	Breve	Brewis
+	Bright Green	Jasnozielony
+	Brighter +20%	Jaśniej +20%
+	Brightness, contrast and sharpness	Jasność, kontrast i ostrość
 	Browse in WordCraft…	Przeglądaj w programie WordCraft…
 	Building Block Gallery Content Control	Formant zawartości galerii bloków konstrukcyjnych
 	Built-In	Wbudowane
@@ -368,6 +381,7 @@
 	Check Box Content Control	Formant zawartości pola wyboru
 	Check Compatibility	Sprawdź zgodność
 	Check for Errors	Wyszukaj błędy
+	Check for\nUpdates…	Sprawdź dostępność\naktualizacji…
 	Check Spelling as You Type	Sprawdzaj pisownię podczas pisania
 	Check spelling as you type	Sprawdzaj pisownię podczas pisania
 	Check\nAccessibility	Sprawdź ułatwienia\ndostępu
@@ -403,6 +417,7 @@
 	Clipboard Contents	Zawartość schowka
 	Clipboard Items	Elementy schowka
 	Clipboard Pane	Okienko schowka
+	Close Document	Zamknij dokument
 	Close Equation	Zamknij równanie
 	Close Header and Footer	Zamknij nagłówek i stopkę
 	Close Outline View	Zamknij widok konspektu
@@ -459,7 +474,9 @@
 	Content Control Properties	Właściwości formantu zawartości
 	Contents can't be edited	Nie można edytować zawartości
 	Context	Kontekstowe
+numerals	Context	Kontekstowe
 	Continue from previous section	Kontynuuj od poprzedniej sekcji
+	Continue without restoring	Kontynuuj bez przywracania
 	Continuous	Ciągły
 	Continuous numbering	Numeracja ciągła
 	Contour Integral	Całka okrężna
@@ -483,6 +500,7 @@
 	Copy Styles	Kopiuj style
 	Copy to	Kopiuj do
 	Copyright Sign	Znak praw autorskich
+	Corporate Author	Autor zbiorowy
 	Correct accidental usage of cAPS LOCK key	Poprawiaj przypadkowe użycie klawisza cAPS LOCK
 	Correct TWo INitial CApitals	Poprawiaj DWie POczątkowe WIelkie litery
 	Corrections	Korekty
@@ -493,6 +511,7 @@
 	Couldn't download {name}: {error}	Nie udało się pobrać pliku {name}: {error}
 	Couldn't make WordCraft the default: {error}	Nie udało się ustawić WordCraft jako domyślnego: {error}
 	Couldn't open {path}: {error}	Nie udało się otworzyć {path}: {error}
+	Couldn't save {name}, so it is still open and nothing was lost: {error}	Nie udało się zapisać pliku {name}, więc pozostaje on otwarty i nic nie zostało utracone: {error}
 	Count by:	Co ile:
 	Count words in text boxes and notes	Licz słowa w polach tekstowych i przypisach
 	Courtesy Title	Zwrot grzecznościowy
@@ -505,11 +524,40 @@
 	Create New Style	Utwórz nowy styl
 	Create Source	Utwórz źródło
 	Croatian	Chorwacki
+	Crop on the page works on unturned pictures: set Rotation to 0° first, or use the crop boxes	Przycinanie na stronie działa tylko na nieobróconych obrazach: najpierw ustaw obrót na 0° lub użyj pól przycinania
 	Cross-reference	Odsyłacz
 	Cross-reference:	Odsyłacz:
+	Dark Blue	Ciemnoniebieski
+	Dark Red	Ciemnoczerwony
+	Dark Yellow	Ciemnożółty
+	Dock Left	Zadokuj po lewej
+	Dock Right	Zadokuj po prawej
+	Float	Odłącz
+	Gray-25%	Szary 25%
+	Gray-50%	Szary 50%
+	Macro name:	Nazwa makra:
+	Move Pane: {title}	Przenieś okienko: {title}
+	Pane Options	Opcje okienka
+	Record…	Zarejestruj…
+	Reject All Changes and Stop Tracking	Odrzuć wszystkie zmiany i zatrzymaj śledzenie
+	Reject and Move to Next	Odrzuć i przejdź do następnej
+	Resize Pane	Zmień rozmiar okienka
+	Run	Uruchom
+	Scale Font Sizes	Skaluj rozmiary czcionek
+	Separate text with	Oddziel tekst za pomocą
+	Styles Pane Position	Położenie okienka stylów
+	Teal	Morski
+	There are no macros yet. Record one to add it here.	Nie ma jeszcze makr. Zarejestruj makro, aby dodać je tutaj.
+	Turquoise	Turkusowy
+	View and edit the document's custom properties.	Wyświetl i edytuj niestandardowe właściwości dokumentu.
+	{key} starts a new page. Much tidier than pressing Enter until it happens.	{key} zaczyna nową stronę. Dużo schludniej niż wciskanie Enter, aż w końcu się uda.
+	{key} finds and replaces text, formatting and special characters.	{key} znajduje i zamienia tekst, formatowanie i znaki specjalne.
+	{key} turns the selected text into a link.	{key} zamienia zaznaczony tekst w link.
+	{key} counts your words, characters and paragraphs.	{key} liczy słowa, znaki i akapity.
 	Cube Root	Pierwiastek sześcienny
 	Current - Linear	Bieżące — liniowe
 	Current - Professional	Bieżące — profesjonalne
+	Current Document	Bieżący dokument
 	Current Position	Bieżące położenie
 	Current record	Bieżący rekord
 	Current style: {style}	Bieżący styl: {style}
@@ -536,6 +584,7 @@
 	Dark page (white text on black)	Ciemna strona (biały tekst na czarnym tle)
 	Dark Variations	Ciemne warianty
 	Dark with Shadow	Ciemny z cieniem
+	Darker −20%	Ciemniej −20%
 	Darkroom	Ciemnia
 	Data Labels	Etykiety danych
 	Date & Time	Data i godzina
@@ -596,6 +645,8 @@
 	Differentials	Różniczki
 	Direct formatting	Formatowanie bezpośrednie
 	Directory	Katalog
+	Discard the recovery copy of {name}?	Odrzucić kopię odzyskiwania pliku {name}?
+	Discard…	Odrzuć…
 	Discord community	Społeczność na Discordzie
 	Display for Review	Wyświetlanie do recenzji
 	Display text	Tekst do wyświetlenia
@@ -725,6 +776,7 @@
 	Enter formatting for number:	Wprowadź formatowanie numeru:
 	Enter in Equation	Enter w równaniu
 	Enter page number:	Wpisz numer strony:
+	Entire caption	Cały podpis
 	Entry marked.	Pozycja oznaczona.
 	Envelope #10	Koperta nr 10
 	Envelope #10   4.12" × 9.50"	Envelope #10   4.12" × 9.50"
@@ -844,6 +896,7 @@
 	Forward	Do przodu
 	Fraction	Ułamek
 	Fractions (1/2) as fraction characters (½)	Ułamki (1/2) jako znaki ułamków (½)
+	Frames and effects	Ramki i efekty
 	French (France)	Francuski (Francja)
 	From Bottom Left Corner	Z narożnika: lewy dolny
 	From Bottom Right Corner	Z narożnika: prawy dolny
@@ -854,6 +907,7 @@
 	from Unicode (hex)	z Unicode (szesnastkowo)
 	From:	Od:
 	Full page of the same label	Cała strona tej samej etykiety
+	Full Saturation 100%	Pełne nasycenie 100%
 	Full Screen View	Widok pełnoekranowy
 	Full\nScreen	Pełny\nekran
 	Function	Funkcja
@@ -878,6 +932,7 @@
 	Gradient fill	Wypełnienie gradientowe
 	Gradient stops	Punkty gradientu
 	Grave	Akcent ciężki
+	Gray 0%	Szarość 0%
 	Grayscale	Odcienie szarości
 	Greater than	Większe niż
 	Greater than or equal	Większe lub równe
@@ -927,6 +982,7 @@
 	Highlight Merge Fields	Wyróżnij pola scalania
 	Highlight\nMerge Fields	Wyróżnij\npola scalania
 	Highlighter	Zakreślacz
+numerals	Hindi	Arabsko-indyjskie
 	Hollow	Pusty
 	Home folder	Folder domowy
 	Horizontal Line	Linia pozioma
@@ -968,6 +1024,8 @@
 	Immersive	Czytanie immersyjne
 	Immersive Reader	Czytnik immersyjny
 	Immersive\nReader	Czytnik\nimmersyjny
+	Imported 1 source	Zaimportowano 1 źródło
+	Imported {n} sources	Zaimportowano źródła: {n}
 	In Default apps, choose WordCraft for the document types you want it to open.	W Aplikacjach domyślnych wybierz WordCraft dla typów dokumentów, które ma otwierać.
 	In equations, typing a name after a backslash replaces it with its symbol.	W równaniach nazwa wpisana po ukośniku odwrotnym jest zastępowana symbolem.
 	In Front of Text	Przed tekstem
@@ -1086,6 +1144,7 @@
 	Join the ArtCraft community on Discord	Dołącz do społeczności ArtCraft na Discordzie
 	Join us on Discord: discord.gg/artcraft	Dołącz do nas na Discordzie: discord.gg/artcraft
 	Journal	Czasopismo naukowe
+	Journal article	Artykuł w czasopiśmie
 	Justification	Wyrównanie
 	Justification of a display equation	Wyrównanie równania wyświetlanego w osobnym wierszu
 	Justified	Wyjustowany
@@ -1139,6 +1198,7 @@
 	Legal   8.50" × 14.00"	Legal   8.50" × 14.00"
 	Legal style numbering	Numeracja w stylu prawniczym
 	Legend	Legenda
+	Less Contrast −20%	Mniejszy kontrast −20%
 	Less than	Mniejsze niż
 	Less than or equal	Mniejsze lub równe
 	Letter	List
@@ -1210,6 +1270,7 @@
 	Loaded {count} system fonts.	Wczytano {count} czcionek systemowych.
 	Local font access is not supported by your browser.	Twoja przeglądarka nie obsługuje dostępu do czcionek lokalnych.
 	Local font access was denied.	Odmówiono dostępu do czcionek lokalnych.
+	Local recovery is unavailable or still loading.	Lokalne odzyskiwanie jest niedostępne lub jeszcze się wczytuje.
 	Location: {path}	Lokalizacja: {path}
 	Lock aspect ratio	Zablokuj proporcje
 	Lock Fields	Zablokuj pola
@@ -1286,6 +1347,7 @@
 	More Colors…	Więcej kolorów…
 	More Columns…	Więcej kolumn…
 	More Commands…	Więcej poleceń…
+	More Contrast +20%	Większy kontrast +20%
 	More Gradients…	Więcej gradientów…
 	More Paper Sizes…	Więcej rozmiarów papieru…
 	More Symbols…	Więcej symboli…
@@ -1312,6 +1374,8 @@
 	Multilevel List	Lista wielopoziomowa
 	Multilevel List Library	Biblioteka list wielopoziomowych
 	Multiple Pages	Wiele stron
+	Mute agent messages	Wycisz wiadomości agentów
+	Muted 50%	Stonowane 50%
 	My list has	Moja lista ma
 	Name of the file this document is saved as	Nazwa pliku, pod którą zapisano ten dokument
 	Narrow	Wąska
@@ -1359,10 +1423,13 @@
 	No items to show.	Brak elementów do wyświetlenia.
 	No Markup	Bez znaczników
 	No model credits were built into this copy.	Ta kopia programu nie zawiera informacji o modelach.
+	No new sources in that file	Ten plik nie zawiera nowych źródeł
 	No Outline	Brak konturu
 	No Paragraph Space	Bez odstępów między akapitami
 	No printers found. Configure a system printer or export a PDF.	Nie znaleziono drukarek. Skonfiguruj drukarkę systemową lub wyeksportuj PDF.
+	No recovery copies.	Brak kopii odzyskiwania.
 	No Reflection	Bez odbicia
+	No Scaling	Bez skalowania
 	No Shadow	Bez cienia
 	No Soft Edges	Bez zmiękczonych krawędzi
 	No sources yet.	Nie ma jeszcze źródeł.
@@ -1398,6 +1465,7 @@
 	Nothing	Nic
 	Nothing collected yet. Items you copy or cut appear here.	Na razie nic tu nie ma. Pojawią się tu elementy, które skopiujesz lub wytniesz.
 	nothing is selected	nic nie jest zaznaczone
+	Nothing of this type in the document.	W dokumencie nie ma elementów tego typu.
 	Now used by {command}	Obecnie używany przez: {command}
 	Nudge	Przesuń nieznacznie
 	Num Occurrences	Liczba wystąpień
@@ -1447,6 +1515,8 @@
 	Only for the selected text	Tylko dla zaznaczonego tekstu
 	Only form fields can be filled in.	Można wypełniać tylko pola formularza.
 	only in Outline view	tylko w widoku Konspekt
+	Only in this document	Tylko w tym dokumencie
+	Only label and number	Tylko etykieta i numer
 	Only the allowed styles can be applied.	Można stosować tylko dozwolone style.
 	Only web (http, https) and email (mailto) links can be followed	Otwierać można tylko linki internetowe (http, https) i e-mailowe (mailto)
 	Open a document first	Najpierw otwórz dokument
@@ -1494,11 +1564,13 @@
 	Page break before	Podział strony przed
 	Page Breaks	Podziały stron
 	Page Color	Kolor strony
+	Page color	Kolor strony
 	Page display	Wyświetlanie strony
 	Page Down	Page Down
 	Page image (*.png)	Obraz strony (*.png)
 	Page Movement	Przewijanie stron
 	Page Number	Numer strony
+	Page number	Numer strony
 	Page Number Format	Format numerów stron
 	Page number style	Styl numeru strony
 	Page numbering	Numeracja stron
@@ -1559,9 +1631,11 @@
 	Pick a field from the list	Wybierz pole z listy
 	Picture	Obraz
 	Picture Border	Obramowanie obrazu
+	Picture border	Obramowanie obrazu
 	Picture Content Control	Formant zawartości obrazu
 	Picture Format	Formatowanie obrazu
 	Picture Styles	Style obrazu
+	Picture transparency	Przezroczystość obrazu
 	Pictures	Obrazy
 	Pie	Kołowy
 	Place in This Document	Miejsce w tym dokumencie
@@ -1648,6 +1722,7 @@
 	Reading Highlight	Wyróżnienie wyników
 	Reading Line Spacing	Interlinia do czytania
 	Reading Mode	Tryb czytania
+	Reading Page Color	Kolor strony do czytania
 	Reading Speed	Szybkość czytania
 	Reading Text Size	Rozmiar tekstu do czytania
 	Reads the clipboard's rich text and keeps its formatting.	Odczytuje sformatowany tekst ze schowka i zachowuje jego formatowanie.
@@ -1662,7 +1737,10 @@
 	Recolor a one-color picture, such as an icon	Zmień kolor jednobarwnego obrazu, na przykład ikony
 	Recolor Selected Ink	Zmień kolor zaznaczonego pisma odręcznego
 	Record Macro	Zarejestruj makro
+	Recover documents	Odzyskiwanie dokumentów
 	Recover Unsaved Documents	Odzyskaj niezapisane dokumenty
+	Recovery copy	Kopia odzyskiwania
+	Recovery is disabled while this document has a password.	Odzyskiwanie jest wyłączone, dopóki dokument jest chroniony hasłem.
 	Red:	Czerwony:
 	Reduce Hanging Indent	Zmniejsz wysunięcie
 	Reference type:	Typ odwołania:
@@ -1700,6 +1778,13 @@
 	Remove the control once edited	Usuń formant po edycji
 	Remove the space before the punctuation	Usuń spację przed znakiem interpunkcyjnym
 	Remove Watermark	Usuń znak wodny
+	No watermark	Brak znaku wodnego
+	Picture watermark	Znak wodny z obrazu
+	Text watermark	Tekstowy znak wodny
+	Select Picture…	Wybierz obraz…
+	Semitransparent	Półprzezroczyste
+	Transparency:	Przezroczystość:
+	Select a picture first.	Najpierw wybierz obraz.
 	Rename Document	Zmień nazwę dokumentu
 	Reopen	Otwórz ponownie
 	Repeat	Powtórz
@@ -1730,6 +1815,7 @@
 	Restart Each Page	Od nowa na każdej stronie
 	Restart Each Section	Od nowa w każdej sekcji
 	Restart list after:	Zacznij listę od nowa po:
+	Restore opens an unsaved copy. Your original file stays unchanged.	Przywrócenie otwiera niezapisaną kopię. Oryginalny plik pozostaje bez zmian.
 	Restrict Editing	Ogranicz edytowanie
 	Restrict\nEditing	Ogranicz\nedytowanie
 	Results	Wyniki
@@ -1769,6 +1855,7 @@
 	Rotate Left 90°	Obróć w lewo o 90°
 	Rotate Right 90°	Obróć w prawo o 90°
 	Rotate with shape	Obracaj z kształtem
+	Rounded	Zaokrąglony
 	Row	Wiersz
 	Row:	Wiersz:
 	Rows & Columns	Wiersze i kolumny
@@ -1778,6 +1865,7 @@
 	Résumé	Życiorys
 	SAMPLE	WZÓR
 	Sat:	Nasycenie:
+	Saturation and recolor	Nasycenie i zmiana koloru
 	Save a copy in another format. Printing goes through a PDF you can print from any viewer.	Zapisz kopię w innym formacie. Drukowanie odbywa się przez plik PDF, który można wydrukować w dowolnej przeglądarce.
 	Save as Word Template…	Zapisz jako szablon programu Word…
 	Save documents	Zapisywanie dokumentów
@@ -1789,6 +1877,7 @@
 	Saving {name} was cancelled, so it is still open and nothing was lost.	Zapisywanie pliku {name} zostało anulowane. Dokument jest nadal otwarty i nic nie zostało utracone.
 	Scale	Skala
 	Scale Drawing	Skaluj rysunek
+	Scale to paper size	Skaluj do rozmiaru papieru
 	Scatter	Punktowy
 	Script	Indeks
 	Scripts	Indeksy
@@ -1818,6 +1907,7 @@
 	select a picture first	najpierw zaznacz obraz
 	select a picture or shape first	najpierw zaznacz obraz lub kształt
 	Select a picture, shape, chart or table to describe it.	Zaznacz obraz, kształt, wykres lub tabelę, aby je opisać.
+	Select a place in this document:	Wybierz miejsce w tym dokumencie:
 	Select a printer	Wybierz drukarkę
 	select a shape first	najpierw zaznacz kształt
 	Select a shape, text box or drawing canvas to format its fill.	Zaznacz kształt, pole tekstowe lub kanwę rysunku, aby sformatować wypełnienie.
@@ -1853,6 +1943,7 @@
 	Sentence case.	Jak w zdaniu.
 	Separate text at	Oddziel tekst przy
 	Separator:	Separator:
+	Sepia	Sepia
 	Sequence name:	Nazwa sekwencji:
 	Serbian (Cyrillic)	Serbski (cyrylica)
 	Serbian (Latin)	Serbski (łacinka)
@@ -1932,6 +2023,7 @@
 	Side\nto Side	Obok\nsiebie
 	Sides of a right triangle	Boki trójkąta prostokątnego
 	Signature Line	Wiersz podpisu
+	Simple Frame	Prosta ramka
 	Sine and cosine series of f(x)	Szereg sinusów i cosinusów funkcji f(x)
 	Sine Function	Funkcja sinus
 	Sine theta	Sinus theta
@@ -1968,6 +2060,7 @@
 	SmartArt Design	Projekt grafiki SmartArt
 	SmartArt Styles	Style grafiki SmartArt
 	Smooth scrolling and zooming, and menus and buttons that fade in. Off shows every change at once.	Płynne przewijanie i powiększanie oraz łagodnie pojawiające się menu i przyciski. Po wyłączeniu każda zmiana jest widoczna od razu.
+	Soft Edge	Zmiękczona krawędź
 	Soft Edges	Zmiękczone krawędzie
 	Soft Glow	Łagodna poświata
 	Solid Accent	Jednolity akcent
@@ -1987,8 +2080,10 @@
 	Space before/after:	Odstęp przed/po:
 	Space before: {pt} pt	Odstęp przed: {pt} pt
 	Spacing (pt):	Odstępy (pt):
+	Spanish (Latin America)	Hiszpański (Ameryka Łacińska)
 	Spanish (Mexico)	Hiszpański (Meksyk)
 	Spanish (Spain)	Hiszpański (Hiszpania)
+	Spanish (Uruguay)	Hiszpański (Urugwaj)
 	Sparse Matrices	Macierze rzadkie
 	Special Characters	Znaki specjalne
 	Specify height:	Określ wysokość:
@@ -2066,6 +2161,7 @@
 	Switch Modes	Przełącz tryb
 	Switch\nModes	Przełącz\ntryb
 	Synonyms	Synonimy
+numerals	System	Systemowe
 	Tab	Tab
 	Tab Character	Znak tabulacji
 	Tab character	Znak tabulacji
@@ -2136,6 +2232,8 @@
 	The margins don't fit on a page this size; make the margins smaller first.	Marginesy nie mieszczą się na stronie tego rozmiaru; najpierw zmniejsz marginesy.
 	The measurement must be between {min} and {max}.	Miara musi być z zakresu od {min} do {max}.
 	The new style takes the formatting of the current paragraph.	Nowy styl przejmie formatowanie bieżącego akapitu.
+	The Normal template couldn't be read, so this document uses WordCraft's built-in formatting.	Nie udało się odczytać szablonu Normalny, więc ten dokument używa wbudowanego formatowania WordCraft.
+	The number must be a divisor of {max}.	Liczba musi być dzielnikiem liczby {max}.
 	The number must be between 1 and {max}.	Liczba musi być z zakresu od 1 do {max}.
 	the paragraph is empty	akapit jest pusty
 	the paragraph starts with a space	akapit zaczyna się od spacji
@@ -2144,6 +2242,7 @@
 	The printer, two-sided printing and pages per sheet are chosen in that dialog.	Drukarkę, druk dwustronny i liczbę stron na arkuszu wybiera się w tym oknie.
 	The recipient-list field that fills each part of an address block and greeting line.	Pole listy adresatów, które wypełnia poszczególne części bloku adresu i wiersza powitania.
 	The spelling and grammar check is complete.	Sprawdzanie pisowni i gramatyki zostało zakończone.
+	The spelling dictionary for {language} couldn't be read, so it isn't checked. File: {file}. Reason: {reason}	Nie udało się odczytać słownika pisowni dla języka {language}, więc pisownia nie jest sprawdzana. Plik: {file}. Przyczyna: {reason}
 	the Spike is empty	zbieracz jest pusty
 	The system file dialog isn't available, so WordCraft shows its own. To get the system dialog, install a file chooser portal (such as xdg-desktop-portal-gtk) or zenity.	Systemowe okno wyboru pliku jest niedostępne, więc WordCraft pokazuje własne. Aby korzystać z okna systemowego, zainstaluj portal wyboru plików (np. xdg-desktop-portal-gtk) lub zenity.
 	The text at the insertion point is marked Do not check spelling or grammar.	Tekst w punkcie wstawiania jest oznaczony: Nie sprawdzaj pisowni ani gramatyki.
@@ -2162,6 +2261,9 @@
 	These merge fields aren't in the recipient list:	Tych pól scalania nie ma na liście adresatów:
 	These settings will be used for new documents.	Te ustawienia będą używane w nowych dokumentach.
 	Thick	Grube
+	Thick Frame	Gruba ramka
+	Thin	Cienkie
+	This cannot be undone. Your original file stays unchanged.	Tej operacji nie można cofnąć. Oryginalny plik pozostaje bez zmian.
 	this chart was made in another program: WordCraft shows it but can't edit it	ten wykres został utworzony w innym programie: WordCraft go wyświetla, ale nie może go edytować
 	This document	Ten dokument
 	This document has no bookmarks.	This document has no bookmarks.
@@ -2199,6 +2301,7 @@ preview	Title	Tytuł
 	Top Left Cell	Lewa górna komórka
 	Top Margin	Margines górny
 	Top of Page	Góra strony
+	Top of the Document	Początek dokumentu
 	Top Right Cell	Prawa górna komórka
 	Top:	Górny:
 	Total Row	Wiersz sumy
@@ -2302,6 +2405,7 @@ preview	Title	Tytuł
 	View State	Stan widoku
 	Views	Widoki
 	Visual effects	Efekty wizualne
+	Vivid 200%	Intensywne 200%
 	Volume	Tom
 	Volume Integral	Całka objętościowa
 	Volume Integral with Limits	Całka objętościowa z granicami
@@ -2312,6 +2416,7 @@ preview	Title	Tytuł
 	Waiting for Zotero…	Oczekiwanie na Zotero…
 	Warm Gradient with Outline	Ciepły gradient z konturem
 	Warnings ({n})	Ostrzeżenia ({n})
+	Washout	Wyblakłe
 	Wave	Falowane
 	Weather	Pogoda
 	Web Layout	Układ strony WWW
@@ -2342,6 +2447,7 @@ preview	Title	Tytuł
 	Word Left	Słowo w lewo
 	Word level	Poziom wyrazów
 	Word Right	Słowo w prawo
+	Word sources	Źródła Word
 	Word XML Document (*.xml)	Dokument XML programu Word (*.xml)
 	WordArt	WordArt
 	WordArt Styles	Style WordArt
@@ -2372,11 +2478,13 @@ preview	Title	Tytuł
 	{group} settings	Ustawienia: {group}
 	{key}+Click to follow link	{key}+kliknięcie otwiera link
 	{kind}, {columns} × {rows}, {size} ({paper})	{kind}, {columns} × {rows}, {size} ({paper})
+	{language} (dictionary unreadable)	{language} (nie można odczytać słownika)
 	{language} (no dictionary)	{language} (brak słownika)
 	{language} is now the document's default language.	{language} to teraz domyślny język dokumentu.
 	{language}: no dictionary found	{language}: nie znaleziono słownika
 	{language}: WordCraft doesn't check spelling or grammar in this language yet.	{language}: WordCraft nie sprawdza jeszcze pisowni ani gramatyki w tym języku.
 	{language}: {file}	{language}: {file}
+	{language}: {file} (unreadable: {reason})	{language}: {file} (nie można odczytać: {reason})
 	{names} and {n} more	{names} i {n} więcej
 	{name}   {height} × {width} in	{name}   {height} × {width} cala
 	{name}   {height} × {width} mm	{name}   {height} × {width} mm
@@ -2387,6 +2495,7 @@ preview	Title	Tytuł
 	{n} entries marked.	Oznaczone pozycje: {n}.
 	{n} lines	{n} × wiersz
 	{n} pt	{n} pt
+	{paper}   {width} × {height}	{paper}   {width} × {height}
 	{selected} of {words} words	Słowa: {selected} z {words}
 	{size} pt	{size} pt
 	{width} × {height} mm	{width} × {height} mm
@@ -2396,3 +2505,121 @@ preview	Title	Tytuł
 	✓ None	✓ Brak
 	➕ New comment	➕ Nowy komentarz
 	📂  Browse…	📂  Przeglądaj…
+	Add a language…	Dodaj język…
+	Add a language	Dodaj język
+	Your languages	Twoje języki
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Angielski, języki tego dokumentu i każdy zainstalowany pakiet językowy. Pakiety językowe dodają słowniki pisowni i dzielenie wyrazów.
+	Set as default	Ustaw jako domyślny
+	New blank documents are written in this language	Nowe puste dokumenty są pisane w tym języku
+	{language} (default)	{language} (domyślny)
+	Built in	Wbudowany
+	Your own dictionary	Własny słownik
+	System dictionary	Słownik systemowy
+	Not available yet	Jeszcze niedostępny
+	Grammar built in	Gramatyka wbudowana
+	Install spelling ({size})	Zainstaluj pisownię ({size})
+	Its dictionary couldn't be read: {reason}	Nie udało się odczytać jego słownika: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Pobieranie jest wyłączone. Kliknięcie „Dodaj język…” lub „Zainstaluj” włącza je: WordCraft pobiera wtedy pakiety językowe i czcionki z GitHuba.
+	Search:	Szukaj:
+	Dutch, Nederlands or nl	Niderlandzki, Nederlands lub nl
+	No languages to show yet.	Nie ma jeszcze języków do wyświetlenia.
+	No language matches your search.	Żaden język nie pasuje do wyszukiwania.
+	An installed Language pack is used after this folder.	Zainstalowany pakiet językowy jest używany po tym folderze.
+	Dictionary files	Pliki słowników
+	Gets the list of Language packs, then this language's pack if there is one.	Pobiera listę pakietów językowych, a potem pakiet tego języka, jeśli istnieje.
+	Afrikaans	afrikaans
+	Belarusian	białoruski
+	Bulgarian	bułgarski
+	Bosnian	bośniacki
+	Catalan	kataloński
+	Catalan (Valencian)	kataloński (walencki)
+	Welsh	walijski
+	Esperanto	esperanto
+	Persian	perski
+	Irish	irlandzki
+	Galician	galicyjski
+	Hungarian	węgierski
+	Armenian	ormiański
+	Icelandic	islandzki
+	Georgian	gruziński
+	Lithuanian	litewski
+	Latvian	łotewski
+	Macedonian	macedoński
+	Norwegian (Nynorsk)	norweski (nynorsk)
+	Slovak	słowacki
+	Slovenian	słoweński
+	Albanian	albański
+	Swahili	suahili
+	Tamil	tamilski
+	Thai	tajski
+	Vietnamese	wietnamski
+	Set as Default Language	Ustaw jako język domyślny
+	U.A.E.	Zjednoczone Emiraty Arabskie
+	Angola	Angola
+	Argentina	Argentyna
+	Austria	Austria
+	Australia	Australia
+	Bosnia and Herzegovina	Bośnia i Hercegowina
+	Belgium	Belgia
+	Bolivia	Boliwia
+	Brazil	Brazylia
+	Belarus	Białoruś
+	Canada	Kanada
+	Switzerland	Szwajcaria
+	Chile	Chile
+	China	Chiny
+	Colombia	Kolumbia
+	Costa Rica	Kostaryka
+	Cuba	Kuba
+	Cabo Verde	Republika Zielonego Przylądka
+	Cyprus	Cypr
+	Germany	Niemcy
+	Dominican Republic	Dominikana
+	Ecuador	Ekwador
+	Egypt	Egipt
+	Spain	Hiszpania
+	Finland	Finlandia
+	France	Francja
+	United Kingdom	Wielka Brytania
+	Equatorial Guinea	Gwinea Równikowa
+	Guatemala	Gwatemala
+	Hong Kong SAR	SRA Hongkong
+	Honduras	Honduras
+	Ireland	Irlandia
+	India	Indie
+	Iraq	Irak
+	Italy	Włochy
+	Jamaica	Jamajka
+	Jordan	Jordania
+	Kuwait	Kuwejt
+	Kazakhstan	Kazachstan
+	Lebanon	Liban
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luksemburg
+	Morocco	Maroko
+	Monaco	Monako
+	Montenegro	Czarnogóra
+	Macao SAR	SRA Makau
+	Mexico	Meksyk
+	Malaysia	Malezja
+	Mozambique	Mozambik
+	Nicaragua	Nikaragua
+	Netherlands	Holandia
+	New Zealand	Nowa Zelandia
+	Panama	Panama
+	Peru	Peru
+	Philippines	Filipiny
+	Puerto Rico	Portoryko
+	Portugal	Portugalia
+	Paraguay	Paragwaj
+	Qatar	Katar
+	Russia	Rosja
+	Singapore	Singapur
+	El Salvador	Salwador
+	Syria	Syria
+	Taiwan	Tajwan
+	Ukraine	Ukraina
+	United States	Stany Zjednoczone
+	Uruguay	Urugwaj
+	Venezuela	Wenezuela
+	South Africa	Republika Południowej Afryki

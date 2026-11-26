@@ -1,0 +1,25 @@
+[package]
+name = "anicraft-render"
+description = "AniCraft L2: deterministic CPU oracle renderer (analytic coverage rasterizer, paints, compositor, PNG)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+anicraft-geom.workspace = true
+anicraft-doc.workspace = true
+rayon.workspace = true
+craft-image-codecs.workspace = true
+thiserror.workspace = true
+# Lottie export writes JSON.
+serde_json.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+# Runs the exported HTML player's JavaScript in tests, to compare it with the Rust player
+# (pure Rust, Unlicense OR MIT; tests only, never in the app).
+boa_engine = { version = "0.21", default-features = false }

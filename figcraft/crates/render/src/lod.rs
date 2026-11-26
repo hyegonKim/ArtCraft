@@ -12,7 +12,8 @@
 //!
 //! Only views at [`MAX_SCALE`] or below are approximated: 1:1 and closer previews are exact, and
 //! so are exports, thumbnails and every other render. Whatever LOD can't approximate faithfully
-//! (image paints, masks) takes the exact path at any scale.
+//! (image paints, masks) takes the exact path at any scale, except that previews draw a large image
+//! shown smaller than its pixels from a smaller copy ([`crate::images::shown`]).
 
 use figcraft_color::{BlendMode, Paint, PaintKind};
 use figcraft_doc::{Document, ListStyle, Node, NodeKind, StrokeAlign, TextAutoResize, TextData};
@@ -77,7 +78,10 @@ pub(crate) fn splattable_within<'a>(doc: &'a Document, n: &Node, depth: usize, m
     {
         return (ok, Some(levels));
     }
-    let image = |p: &Paint| p.visible && matches!(p.kind, PaintKind::Image(_) | PaintKind::Pattern(_));
+    if matches!(&n.kind, NodeKind::Vector { network } if network.regions.iter().any(|r| r.fills.is_some() || r.paint_space.is_some())) {
+        return (false, Some(0));
+    }
+    let image = |p: &Paint| p.visible && matches!(p.kind, PaintKind::Image(_) | PaintKind::Pattern(_) | PaintKind::Video(_));
     let own = match &n.kind {
         NodeKind::Text(t) => text_paints(n, t).any(image),
         _ => n.fills.iter().any(image),
@@ -117,7 +121,7 @@ fn paint_color(p: &Paint) -> Option<[f32; 4]> {
             let n = stops.len().max(1) as f32;
             stops.iter().fold([0.0; 4], |acc, s| [acc[0] + s.color.r / n, acc[1] + s.color.g / n, acc[2] + s.color.b / n, acc[3] + s.color.a / n])
         }
-        PaintKind::Image(_) | PaintKind::Pattern(_) => return None,
+        PaintKind::Image(_) | PaintKind::Pattern(_) | PaintKind::Video(_) => return None,
     };
     let c = c.map(|v| if v.is_finite() { v.clamp(0.0, 1.0) } else { 0.0 });
     (c[3] * op > 0.0).then_some([c[0], c[1], c[2], c[3] * op])

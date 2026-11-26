@@ -1,0 +1,3012 @@
+# বাংলা (bn) interface catalog for FilmCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+#	   Angle	
+#	   Blur	
+#	   Corner Radius	
+#	   Distance	
+#	   Opacity	
+#	   Size	
+#	   Template: {name}	
+#	  (none)	
+#	 (removed from {list})	
+#	 (unavailable)	
+#	 ({ch} output channels)	
+#	 and 	
+#	 frames	
+#	 seconds	
+#	 · {time} left	
+#	(Default)	
+#	(empty)	
+#	(gap)	
+	(no audio)	(অডিও নেই)
+	(no clip selected)	(ক্লিপ নির্বাচিত নেই)
+	(no clips)	(কোনো ক্লিপ নেই)
+	(no sequence)	(কোনো সিকোয়েন্স নেই)
+#	(no sequences)	
+#	(RGB) Gamma	
+#	(RGB) Input Black Level	
+#	(RGB) Input White Level	
+#	(RGB) Output Black Level	
+#	(RGB) Output White Level	
+#	+ Cmd	
+#	+ Opt	
+#	0 fastest, 8 smallest	
+#	10 Bit Black Point	
+#	10 Bit White Point	
+#	105mm Prime	
+#	29.97 fps Drop-Frame	
+#	29.97 fps Non Drop-Frame	
+#	32 bit float	
+#	35mm Prime	
+#	3D Roll	
+#	3D Rotate	
+#	3D Spin	
+#	3D Spinback	
+#	4-Color Gradient	
+#	5.1 Media	
+#	5.1 Mixdown Type	
+#	5.1 panner (drag the puck; double-click: front centre)	
+#	50-300mm Zoom	
+#	59.94 fps Drop-Frame	
+#	59.94 fps Non Drop-Frame	
+#	A boxed label with a round pointer; move the label and the pointer follows.	
+#	A clean-room, pure-Rust non-linear video editor. Part of the ArtCraft family.	
+#	A cut sequence with transitions, effects and music	
+#	A file dialog is already open	
+#	A news-style line that crawls in from the right and leaves at the left.	
+#	A rounded tag that fits its text, with a status dot.	
+#	A title on a rounded card with a soft shadow.	
+	AAC Audio	AAC অডিও
+#	AAC Audio 48 kHz 320 kbps	
+#	AAF Export Settings	
+#	AAF…	
+#	About FilmCraft	
+#	Accent Color	
+#	Accessible color contrast	
+#	Action and Title Safe Areas	
+#	Action Safe Area	
+#	Action-Safe Margin	
+#	Action:	
+#	Active Monitor	
+#	Adaptive ({bpp} bits per pixel)	
+#	Add a timecode row	
+#	Add another shortcut	
+	Add Audio Submix Track	অডিও সাবমিক্স ট্র্যাক যোগ
+	Add audio submix tracks	অডিও সাবমিক্স ট্র্যাক যোগ
+	Add audio tracks	অডিও ট্র্যাক যোগ
+#	Add Caption at Playhead	
+#	Add caption at playhead	
+#	Add captions	
+#	Add Chapter Marker…	
+#	Add Edit	
+	Add Edit to All Tracks	সব ট্র্যাকে সম্পাদনা যোগ
+#	Add Flash Cue Marker…	
+	Add Frame Hold	ফ্রেম হোল্ড যোগ
+#	Add Guide…	
+	Add keyframe	কীফ্রেম যোগ
+#	Add Lumetri Color to clip	
+#	Add Marker	
+#	Add Marker (M)	
+#	Add media to your project. Drop files anywhere in the window, or choose a source below.	
+#	Add New Caption Track…	
+#	Add Property…	
+#	Add Range Marker	
+#	Add Range Marker to In and Out	
+#	Add to Favorites	
+	Add Tracks	ট্র্যাক যোগ
+#	Add tracks automatically when editing source clips onto the Timeline	
+	Add Tracks…	ট্র্যাক যোগ…
+	Add video tracks	ভিডিও ট্র্যাক যোগ
+#	Add/Remove Keyframe	
+#	Added to the export queue	
+#	Additional Scale	
+#	Additive Dissolve	
+#	Additive Dissolve (Legacy)	
+#	Adjust Gain by:	
+#	Adjustment Layer…	
+#	After {name}	
+#	Aggressive	
+#	AIFF	
+#	AIFF 48 kHz 16-bit	
+#	AIFF, stereo 48 kHz 16-bit PCM	
+#	Align and Transform	
+#	Align Bottom	
+#	Align Center Horizontally	
+#	Align Center Vertically	
+#	Align Timecode	
+#	Align to Grid	
+#	Align to Video Frame	
+#	Align to Video Frame as Group	
+#	Align Top	
+#	All Cameras	
+#	All Empty Tracks	
+#	All Events	
+#	All lines	
+#	All markers are hidden by the colour filter.	
+#	All media is online.	
+#	All Panels	
+#	Allow current tool to change trim type of previously selected edit point	
+#	Allow Duplicate Media During Project Import	
+#	Allow duplicate media during project import	
+#	Allow Selection tool to choose Roll and Ripple trims without modifier key	
+#	Alpha Adjust	
+#	Alpha Blurriness	
+#	Alpha Channel	
+#	Alpha Glow	
+#	Always Deinterlace	
+#	Always import embedded CEA-708 closed captions with wide aspect.	
+#	Always override audio tags	
+#	Ambience	
+#	Ambience Intensity	
+#	Ambience Light Color	
+#	Amount of Noise	
+#	Amount to Decolor	
+#	Amount to Tint	
+#	Amplifier	
+#	Amplify	
+#	Amplitude	
+#	Amplitude and Compression	
+#	An earlier start failed with the default graphics. Updating the graphics driver usually fixes this.	
+#	Analog	
+#	Analog Delay	
+#	Analyze	
+#	Analyze all imported media to search for visuals or audio	
+#	Anamorphic	
+#	Anamorphic 2:1 (2.0)	
+#	Anchor	
+#	Anchor Point	
+#	Anchor point	
+#	Anchor to In Point	
+#	Anchor to Out Point	
+#	Animated GIF	
+#	Animated GIF 640×360	
+#	Anti-aliasing Quality	
+#	Anti-flicker Filter	
+#	Antialiasing for Best Quality	
+#	Appearance Mode	
+#	Appearance…	
+#	Apple ProRes	
+#	Apple ProRes 422	
+#	Apple ProRes 422 HQ	
+#	Apple ProRes 422 LT	
+#	Apple ProRes 422 Proxy	
+#	Apple ProRes 4444	
+#	Apple ProRes 4444 with Alpha	
+#	Apple ProRes 4444 XQ	
+#	Application shortcuts work whatever panel has focus	
+#	Apply a cut at each detected cut point	
+	Apply Audio Transition	অডিও ট্রানজিশন প্রয়োগ
+#	Apply Default Audio Transition	
+#	Apply Default Transitions	
+#	Apply Default Transitions to Selection	
+#	Apply Default Transitions to Selection (Shift+D)	
+#	Apply Default Video Transition	
+#	Apply Guide Template	
+#	Apply Match	
+	Apply to Selected Clips	নির্বাচিত ক্লিপে প্রয়োগ
+	Apply Video Transition	ভিডিও ট্রানজিশন প্রয়োগ
+#	APV	
+#	APV 422-10	
+#	APV 422-12	
+#	Are you sure you want to discard your changes to '{file}'?	
+#	ASC CDL	
+#	Aspect	
+#	Assembly	
+#	Assign an audio type to the selection:	
+#	Assign {key} to {command}	
+#	Asymmetry	
+#	At playback end, return to beginning when restarting playback	
+#	At Startup	
+#	At Unnumbered Markers	
+#	Att	
+#	Attach Proxies…	
+#	Attack	
+#	Attempt to force hardware to document sample rate	
+#	Audio analysis:	
+	Audio Attributes	অডিও বৈশিষ্ট্য
+#	Audio Bitrate	
+#	Audio Channels…	
+#	Audio Clip Mixer	
+#	Audio Codec	
+#	Audio Duration	
+#	Audio Effects	
+#	Audio effects	
+#	Audio File Format:	
+#	Audio Format	
+#	Audio Gain	
+#	Audio Gain…	
+#	Audio Hardware	
+#	Audio Hardware…	
+#	Audio In	
+#	Audio In Point	
+#	Audio Info	
+#	Audio Meters	
+#	Audio on track {t}	
+#	Audio Only	
+#	Audio only	
+#	Audio Options	
+#	Audio Out	
+#	Audio Out Point	
+#	Audio output failed: playing without sound (check Settings ▸ Audio Hardware)	
+#	Audio output is not responding: playing without sound (check Settings ▸ Audio Hardware)	
+#	Audio Previews:	
+#	Audio Samples	
+#	Audio Time Units	
+#	Audio Track Mixer	
+#	Audio Track Mixer menu	
+#	Audio Tracks	
+#	Audio Transition Default Duration	
+#	Audio Transitions	
+#	Audio Usage	
+#	Audio Waveform	
+#	Audio Waveforms	
+#	Audio {n}:	
+#	Audio:	
+#	Audio…	
+#	Auto (system)	
+#	Auto Align	
+#	Auto Bezier	
+#	Auto Gate	
+#	Auto Makeup	
+#	Auto Reframe	
+#	Auto Save	
+#	Auto Save also saves the current project(s)	
+#	Auto Save Now	
+#	Auto Save…	
+#	Auto Tone Map Media (HDR and log into SDR)	
+#	Auto tone map media (HDR and log into SDR)	
+#	Auto-Adjust Multi-Camera Playback Quality	
+#	Auto-Match	
+#	Auto-Match Loudness	
+#	Auto-saves go to: {dir}	
+#	Auto-tag audio types in the timeline	
+#	Auto-transcribe all imported clips	
+#	Auto-transcribe only clips in sequences	
+#	Automatch Time	
+#	Automate To Sequence	
+#	Automate to Sequence	
+#	Automate to Sequence…	
+#	Automatic Click Remover	
+#	Automatically delete cache files older than	
+#	Automatically delete oldest cache files when cache exceeds	
+#	Automatically Hide Dependent Clips	
+#	Automatically refresh growing files	
+#	Automatically resume playback for growing files in Source Monitor	
+#	Automatically Save Every	
+#	Automatically save projects	
+#	Automatically transcribe clips	
+#	Automation Keyframe Optimization	
+#	AV1	
+#	Average Data Rate	
+#	Avid DNxHR	
+#	Avid DNxHR HQ	
+#	Avid DNxHR LB	
+#	Avid DNxHR SQ	
+#	Avid Log Exchange	
+#	Avid Log Exchange…	
+#	Avid-style OP-Atom: DNxHR HQ picture file plus one 24-bit 48 kHz PCM file per channel (_A1, _A2…)	
+#	Background Corner Radius	
+#	Background fill	
+#	Background Opacity	
+#	Background Size	
+#	Balanced Voice	
+#	Band 1	
+#	Band 2	
+#	Band 3	
+#	Band 4	
+#	Band 5	
+#	Band Pass	
+#	Band Slide	
+#	Band Stop	
+#	Band {n}	
+#	Bandpass	
+#	Bar Color	
+#	Barn Doors	
+#	Bars and Tone	
+#	Bars and Tone…	
+#	Basic 3D	
+#	Basic Correction	
+#	Bass	
+#	Before First Track	
+#	Begin Text Editing for a Graphic Layer	
+#	Begins With	
+#	Behind	
+#	Bessel	
+#	Bevel Alpha	
+#	Bevel join	
+#	Bezier	
+#	Bin	
+#	Bin From Selection	
+#	Bin: {name}	
+#	Binauralizer - Ambisonics	
+#	Bins	
+#	Bitrate Encoding	
+#	Bits per Sample:	
+#	Black and white with crushed blacks and strong contrast	
+#	Black Input Level	
+#	Black Video…	
+#	Bleach Bypass	
+#	Bleach-bypass style: desaturated with hard contrast	
+#	Blend	
+#	Blend With Original	
+#	Block Dissolve	
+#	Block Height	
+#	Block Motion	
+#	Block Size	
+#	Block Width	
+#	Blue Blurriness	
+#	Blue Curve	
+#	Blue Offset	
+#	Blue Power	
+#	Blue Slope	
+#	Blue-Blue	
+#	Blue-Const	
+#	Blue-Green	
+#	Blue-Red	
+#	Blur & Sharpen	
+#	Blur Amount	
+#	Blur Dimensions	
+#	Blur Dissolve	
+#	Blur In	
+#	Blur Layer	
+#	Blur Length	
+#	Blur Out	
+#	Blurriness	
+#	BMP	
+#	BMP Sequence	
+#	Bokeh Blur	
+#	Boost	
+#	Boost Vibrance	
+#	Border Color	
+#	Border Width	
+#	Bottom Center	
+#	Bounce	
+#	Box	
+#	Box Color	
+#	Box Opacity	
+#	Branching	
+#	Breakout to Mono	
+#	Breakout to mono	
+#	Bright	
+#	Bright Air	
+#	Bright Studio	
+#	Brightens inside a feathered circular mask	
+#	Brightness & Contrast	
+#	British Stack	
+#	Broadcast	
+#	Browse files…	
+#	Brush Hardness	
+#	Brush Opacity	
+#	Brush Position	
+#	Brush Spacing (secs)	
+#	Bubbles	
+#	Bulge Smoother	
+#	Bump Height	
+#	Burn Alpha	
+#	Burn Captions Into Video	
+#	Burn Chroma	
+#	Burn Color	
+#	Butt cap	
+#	Butterworth	
+#	Button Editor	
+#	Bypass	
+#	Cache analysis results for re-use	
+#	Callout – Pointer	
+#	Callout – Tag	
+#	Callouts	
+#	Camera 1	
+#	Camera Angle	
+#	Camera Angle Metadata	
+#	Camera Blur	
+#	Camera Names	
+#	Camera Shake	
+#	Camera {n} — {name}	
+#	Cameras shown in the Multi-Camera view (uncheck to hide).	
+#	Cancel Dynamic Trim	
+#	Cancel Queued Export	
+#	Cancelled	
+#	Cannot open {dir}: {e}	
+#	Capitalisation	
+#	Caption track options	
+#	Caption Tracks	
+#	Captions	
+#	Captions and Graphics	
+#	Captions…	
+#	Capture	
+#	Capture Format:	
+#	Captured and Generated:	
+#	Captured View:	
+#	Caribbean	
+#	Cathedral	
+#	CBR	
+#	CEA-608	
+#	CEA-708	
+#	Cell Pattern	
+#	Center Align Text	
+#	Center align text	
+#	Center Channel Pan	
+#	Center Gradient	
+#	Center Horizontally	
+#	Center Input	
+#	Center Left	
+#	Center of Sphere	
+#	Center Out	
+#	Center Point (Latitude)	
+#	Center Point (Longitude)	
+#	Center Right	
+#	Center Split	
+#	Center Vertically	
+#	Centred credits that roll up from below the frame and leave at the top.	
+#	Cents	
+#	Cerulean	
+#	Ch. {n}	
+#	Change Mask	
+#	Change to Color	
+#	Changes are copied in the background a moment after each edit. If FilmCraft quits unexpectedly, they are offered the next time it starts.	
+#	Channel Blur	
+#	Channel Format:	
+#	Channel Mix	
+#	Channel Volume	
+#	Channel {n}	
+#	Chaos	
+#	Chebyshev	
+#	Checker Wipe	
+#	Chinese	
+#	Choke	
+#	Chorus	
+#	Chorus/Flanger	
+#	Chroma	
+#	Chroma Leak	
+#	Chromatic Aberration (Blue)	
+#	Chromatic Aberration (Green)	
+#	Chromatic Aberration (Red)	
+#	Cinematic	
+#	Cineon Converter	
+#	Clamp Signal	
+#	Clean Combo	
+#	Clean Up Noisy Dialogue	
+#	Clear (Delete)	
+#	Clear All Events	
+#	Clear Audio Type	
+#	Clear Edit Point Selection	
+#	Clear Finished	
+#	Clear Finished Exports	
+#	Clear In	
+#	Clear In and Out	
+#	Clear Markers	
+#	Clear Muddiness	
+#	Clear Out	
+#	Clear Poster Frame	
+#	Clear Recent Directories	
+#	Clear Selected Marker	
+#	Clear Transition	
+#	Cleared {n} shortcut(s) of {command}	
+#	Click a command's Shortcut cell and press keys to assign it; + adds another shortcut.	
+#	Click a key on the keyboard to see its shortcuts	
+#	Click in the Program monitor to place mask points (drag for curves); click the first point or press Enter to close	
+#	Click to select all clips to the left in all tracks. Shift-click for a single track.	
+#	Click to select all clips to the right in all tracks. Shift-click for a single track.	
+#	Click to select, or click in empty space and drag to marquee select. Use Shift, Alt, and Ctrl for other options.	
+#	Click to select, or click in empty space and drag to marquee select. Use Shift, Opt, and Cmd for other options.	
+#	Click to split a clip. Shift-click to split all tracks.	
+#	Click to zoom in; Alt-click to zoom out.	
+#	Click to zoom in; Opt-click to zoom out.	
+#	Client	
+#	Clip	
+#	Clip Channel Format:	
+#	Clip Fx Editor	
+#	Clip ID (fingerprint)	
+#	Clip Keyframes	
+#	Clip Level	
+#	Clip Marker	
+#	Clip Name	
+#	Clip Name:	
+#	Clip Names	
+#	Clip Names and Markers	
+#	Clip Overlap:	
+#	Clip Size	
+#	Clip Speed / Duration	
+#	Clip Volume	
+#	Clip {n}	
+#	Clip: {name}	
+#	Clipping	
+#	Clips	
+#	Clock Wipe	
+#	Clock Wipe (Legacy)	
+#	Clockwise	
+#	Close All Other Projects	
+#	Close All Projects	
+#	Close Bin	
+#	Close Gap	
+#	Close Other Timeline Panels	
+#	Close Project	
+#	Close Sequence	
+#	Closed Captions	
+#	Codec:	
+#	Codec: {codec}	
+#	Cold Mono	
+#	Collect Files and Copy to New Location	
+#	Color & Alpha	
+#	Color 1	
+#	Color 2	
+#	Color 3	
+#	Color 4	
+#	Color Channel	
+#	Color Correction	
+#	Color Distortion	
+#	Color Emboss	
+#	Color Key	
+#	Color Management · {n} item	
+#	Color Management · {n} items	
+#	Color Management…	
+#	Color Match	
+#	Color Matte Color	
+#	Color Matte…	
+#	Color Pass	
+#	Color Replace	
+#	Color Theme	
+#	Color To Leave	
+#	Color Tolerance	
+#	Color Wheels & Match	
+#	Color/Black	
+#	Color/Gray	
+#	Colour Space	
+#	Column order	
+#	Comments:	
+#	Comparison View	
+#	Complexity	
+#	Composite In Back	
+#	Composite In Front	
+#	Composite in Linear Color	
+#	Composite on Original	
+#	Composite on the GPU when available	
+#	Composite Using	
+#	Composite Video	
+#	Compound Blur	
+#	Compression Before Clipping	
+#	Compression Level	
+#	Compressor	
+#	Configure…	
+#	Conflict: {key} is assigned to {commands} ({ctx})	
+#	Consolidate and Transcode	
+#	Consolidate Duplicates	
+#	Constant Gain	
+#	Constant Power	
+#	Containers	
+#	Contains:	
+#	Continuous	
+#	Continuous Bezier	
+#	Conversion Type	
+#	Convert to Master Clip	
+#	Convolution Reverb	
+#	Cool Blue	
+#	Cool, desaturated and punchy	
+#	Copy and Create Proxies	
+#	Copy Paste Includes Sequence Markers	
+#	Core Width	
+#	Corner Pin	
+#	Corner Radius	
+#	Couldn't open your web browser	
+#	Count	
+#	Countdown Sound Cues	
+#	Counter-clockwise	
+#	Crash Recovery	
+#	Crawl Left	
+#	Crawl Right	
+#	Create 4-point polygon mask	
+#	Create a bin of subclips from each detected cut point	
+#	Create a caption track or import a caption file.	
+#	Create a clip marker at each detected cut point	
+#	Create captions	
+#	Create Captions from Transcript…	
+#	Create ellipse mask	
+#	Create Folder For Imported Projects	
+#	Create folder for imported projects	
+#	Create Multi-Camera Source Sequence	
+#	Create Multi-Camera Source Sequence…	
+#	Create new caption track	
+#	Create new graphic	
+#	Create Proxies	
+#	Create Proxies…	
+#	Create Search Bin	
+#	Create Sidecar File	
+#	Creating {n} proxy file(s)…	
+#	Creative	
+#	Creator	
+#	Credits	
+#	CRF (constant quality)	
+#	Crop Less <-> Smooth More	
+#	Cross Displacement	
+#	Cross Dissolve	
+#	Cross Dissolve (Legacy)	
+#	Cross Processed	
+#	Cross Zoom	
+#	Cross Zoom (Legacy)	
+#	Crossfade	
+#	Crossovers	
+#	Crystals	
+#	Cube Spin	
+#	Curl Radius	
+#	Current duration {seconds} s	
+#	Currently: {loc} — {files} file(s), {size}	
+#	Cursor	
+#	Custom ({n} points)	
+#	Custom ({ratio})	
+#	Custom Color	
+#	Custom Setup	
+#	Cut to Camera 1	
+#	Cut to Camera 2	
+#	Cut to Camera 3	
+#	Cut to Camera 4	
+#	Cut to Camera 5	
+#	Cut to Camera 6	
+#	Cut to Camera 7	
+#	Cut to Camera 8	
+#	Cut to Camera 9	
+#	Cutoff	
+#	Cyan-teal shadows and warm highlights with a little more contrast	
+#	Cycle (in Revolutions)	
+#	Cycle Evolution	
+#	D1/DV NTSC (0.9091)	
+#	D1/DV PAL (1.0940)	
+#	Damping	
+#	Damping HF	
+#	Damping LF	
+#	Darkens outside a feathered oval mask	
+#	Darker Color	
+#	Darkest	
+#	Date Modified	
+#	Day for night: darker, cooler and less saturated	
+#	days	
+#	Decay	
+#	Decay Time (RT60)	
+#	Decoded frames held for the monitors and thumbnails: {used} of {budget}.	
+#	Decoders	
+#	Decrease Audio Tracks Height	
+#	Decrease Clip Volume	
+#	Decrease Clip Volume Many	
+#	Decrease Font Size by Five Units	
+#	Decrease Font Size by One Unit	
+#	Decrease Leading by Five Units	
+#	Decrease Leading by One Unit	
+#	Decrease Video Tracks Height	
+#	DeEss	
+#	DeEsser	
+#	Default Audio Tracks	
+#	Default clip size:	
+#	Default closed caption font	
+#	Default Emoji font	
+#	Default Input	
+#	Default language	
+#	Default location	
+#	Default Media Scaling	
+#	Default Output	
+#	Default paragraph direction	
+#	Default subtitle and text font	
+#	DeHum	
+#	DeHummer	
+#	Delay	
+#	Delay 1	
+#	Delay 2	
+#	Delay 3	
+#	Delay 4	
+#	Delay and Echo	
+#	Delete Arrangement	
+#	Delete Audio Tracks	
+#	Delete Caption Track	
+#	Delete Caption Tracks	
+#	Delete Captions	
+#	Delete Empty Caption Tracks	
+#	Delete files older than	
+#	Delete Graphic Layer	
+#	Delete Guide Template	
+#	Delete Media Cache Files	
+#	Delete oldest files when the cache exceeds	
+#	Delete Preset	
+#	Delete Render Files	
+#	Delete Render Files In to Out	
+#	Delete Search Bin	
+#	Delete selected captions	
+#	Delete this preset	
+#	Delete Tracks	
+#	Delete Tracks…	
+#	Delete Transcript	
+#	Delete Video Tracks	
+#	Deleted preset “{active}”	
+#	Deleted {n} file(s), {size}.	
+#	Demo Footage	
+#	Demo footage	
+#	Demo Project	
+#	Demo project	
+#	DeNoise	
+#	Denoise	
+#	DeReverb	
+#	Deselect All Project Items	
+#	Destination Path	
+#	Destinations	
+#	Detach Proxies	
+#	Detail Amplitude	
+#	Detail Level	
+#	Detailed Analysis	
+#	Details: {path}	
+#	Device Class	
+#	Dialogue	
+#	Dimmed	
+#	Dip to Black	
+#	Dip to Black (Legacy)	
+#	Dip to Color	
+#	Dip to White	
+#	Dip to White (Legacy)	
+#	Directional	
+#	Directional Blur	
+#	Directional Blur (Legacy)	
+#	DirectX 12 only	
+#	Disable video output when in the background	
+#	Disabled clips	
+#	Discard take	
+#	Discard Unsaved Changes	
+#	Disk space: original {original} · resulting {result} ({n} files)	
+#	Disk space: —	
+#	Disperse	
+#	Displacement	
+#	Display Color Management	
+#	Display Color Settings	
+#	Display Format:	
+#	Display Mode	
+#	Display out of sync indicators for unlinked clips	
+#	Dissolve	
+#	Dissolve Blocks	
+#	Distance to Image	
+#	Distortion Complexity	
+#	Distortion Rate	
+#	Distortion Type	
+#	Distribute Horizontally	
+#	Distribute Space Horizontally	
+#	Distribute Space Vertically	
+#	Distribute Vertically	
+#	Do not delete cache files automatically	
+#	Docking Action	
+#	Does Not Contain	
+#	Don't label speakers	
+#	Dot Color	
+#	Double-click a sequence in the Project panel to open it here.	
+#	Download Speech Model	
+#	DPX	
+#	DPX Sequence	
+#	Draft decoding at reduced playback resolution (H.264: faster, some frames less filtered)	
+#	Drag a clip to slide it between its neighbours.	
+#	Drag a clip to slip its source in/out without moving it.	
+#	Drag an edge to change the clip's speed so it fills the new duration.	
+#	Drag an edit point to ripple trim; later clips move to keep the gap closed.	
+#	Drag an edit point to roll it: the out of one clip and the in of the next move together.	
+#	Drag inward to round the corners	
+#	Drag the edge of a music clip to remix it to the new duration at musically matching beats.	
+#	Drag to scroll the timeline.	
+#	Drag: move · Alt-click: smooth/corner · Cmd-click: delete	
+#	Drag: move · Alt-click: smooth/corner · Ctrl-click: delete	
+#	Drive	
+#	Drop media here to create sequence.	
+#	Dry	
+#	Dry Out	
+#	Dry Up a Roomy Voice	
+#	Duck against:	
+#	Duck Deep Under Dialogue	
+#	Duck Under Dialogue	
+#	Duck Under Voice and Effects	
+#	Ducking	
+#	Duration:	
+#	DVCPRO HD (1.5)	
+#	Dynamic Audio Waveforms	
+#	Dynamic Link	
+#	Dynamic Trim Stop	
+#	Dynamics Processing	
+#	Early Reflections	
+#	Earthquake	
+#	Ease In	
+#	Ease In and Out	
+#	Ease Out	
+#	Easing	
+#	Echo	
+#	Echo Glow	
+#	Echo Operator	
+#	Echo Time (seconds)	
+#	Echoes	
+#	Edge Color	
+#	Edge Feather	
+#	Edge Glow	
+#	Edge Sharpness	
+#	Edge Softness	
+#	Edge Thin	
+#	Edge Threshold	
+#	Edge Type	
+#	Edit Cameras	
+#	Edit Cameras…	
+#	Edit Caption Text	
+#	Edit Columns	
+#	Edit Columns…	
+#	Edit Narration	
+#	Edit Offline File	
+#	Edit Offline…	
+#	Edit Project Notes	
+#	Edit Subclip	
+#	Edit Subclip…	
+#	Edit Workspaces	
+#	Edit Workspaces…	
+#	Editable properties:	
+#	Editing Mode:	
+#	EDL…	
+#	Effect Controls	
+#	Effect presets	
+#	Elliptical	
+#	Empty tracks	
+#	Enable clip and XMP metadata linking	
+#	Enable developer mode	
+#	Enable hardware accelerated decoding (requires restart)	
+#	Enable HSL Secondary	
+#	Enable language auto-detection	
+#	Enable Mercury Transmit	
+#	Enable ProRes hardware accelerated encoding, if available	
+#	Enable proxies	
+#	Enable Remix	
+#	Enable track for recording	
+#	Encapsulate	
+#	Encoder	
+#	Encoding {n}%	
+#	End Color	
+#	End Credits	
+#	End Credits – Roll	
+#	End of Ramp	
+#	End Off Screen	
+#	End Point	
+#	End:	
+#	Ends With	
+#	Enhance Speech	
+#	Entire Source	
+#	Enumerate Cameras	
+#	EQ	
+#	Errors Only	
+#	Essential Graphics	
+#	Essential Sound	
+#	EssentialSound	
+#	Estimated file size: {size}	
+#	Events	
+#	Evolution	
+#	Evolution Options	
+#	Exact name matches only	
+#	Exciter Amount	
+#	Exciter Mode	
+#	Exclude Unused Clips	
+#	Existing XMP files written by other applications are left unchanged.	
+#	Exit Trim Mode	
+#	Expand All Tracks	
+#	Expander	
+#	Exponential Fade	
+#	Export As Motion Graphics Template	
+#	Export As Motion Graphics Template…	
+#	Export Audio	
+#	Export formats	
+#	Export Frame	
+#	Export Frame (Shift+E)	
+#	Export Frame: use Export mode (M6)	
+#	Export Markers as CSV…	
+#	Export presets	
+#	Export Preset…	
+#	Export the labels to a preset file…	
+#	Export: no file chosen (agents: export.presets.export {path, names})	
+#	Export: no file chosen (agents: shortcuts.export {path})	
+#	Exported graphics template to {path}	
+#	Exporting	
+#	Exporting {path}	
+#	Extend Next Edit To Playhead	
+#	Extend Previous Edit To Playhead	
+#	Extend Selected Edit to Playhead	
+#	Extend Selection Down	
+#	Extend Selection Left	
+#	Extend Selection Right	
+#	Extend Selection Up	
+#	Extended Dynamic Range Monitoring	
+#	Extract (')	
+#	Extract Audio	
+#	Extract selected text	
+#	Eyedropper (pick a color from the Program monitor)	
+#	Eyedropper: no picture to sample	
+#	Face Detection (protect skin tones)	
+#	Fade	
+#	Fade In	
+#	Fade Out	
+#	Faded Matte	
+#	Faded Print	
+#	Fades	
+#	Failed: {e}	
+#	Falloff	
+#	Far Away	
+#	Faster Motion	
+#	Faux Bold	
+#	Faux Italic	
+#	Favorites only	
+#	FCPXML…	
+#	Feedback	
+#	Feedback 1	
+#	Feedback 2	
+#	Feedback 3	
+#	Feedback 4	
+#	Feet + Frames 16mm	
+#	Feet + Frames 35mm	
+#	Female	
+#	Fewer · More	
+#	FFT Filter	
+#	Field Options	
+#	Field Options…	
+#	Field Order	
+#	File Extension	
+#	File Name & Location	
+#	File Name:	
+#	File Path	
+#	File Types Displayed	
+#	File…	
+#	Fill Background	
+#	Fill Color	
+#	Fill frame	
+#	Fill Left with Right	
+#	Fill Point	
+#	Fill Right with Left	
+#	Fill Selector	
+#	Fill the slots above first	
+#	Fill Type	
+#	Film Dissolve	
+#	Film Dissolve (Legacy)	
+#	Film Emulation	
+#	Film Roll	
+#	FilmCraft always composites in linear light	
+#	FilmCraft Graphics Template	
+#	FilmCraft Help…	
+#	FilmCraft hit an error	
+#	FilmCraft keeps the rest of the RAM free for other applications.	
+#	FilmCraft on getartcraft.com	
+#	FilmCraft on GitHub	
+#	FilmCraft Project	
+#	FilmCraft quit unexpectedly while “{name}” had unsaved changes.	
+#	FilmCraft was closed while “{name}” had unsaved changes.	
+#	Filter and EQ	
+#	Filter Frequency	
+#	Filter Resonance	
+#	Final Cut Pro XML…	
+#	Final Delay	
+#	Find Edges	
+#	Find in:	
+#	first marker	
+#	Fit to frame	
+#	FLAC	
+#	FLAC (lossless)	
+#	FLAC 48 kHz 24-bit	
+#	FLAC stores whole-number samples only	
+#	FLAC, stereo 48 kHz 24-bit, lossless	
+#	Flanger	
+#	Flare	
+#	Flare Brightness	
+#	Flare Center	
+#	Flare Color	
+#	Flash Cue Marker	
+#	Flicker	
+#	Flicker Removal	
+#	Flickers	
+#	Flip Motion	
+#	Flip Over	
+#	Float	
+#	Focus Blur	
+#	Focus Point	
+#	Focus Shape	
+#	Focus Size	
+#	Fold Motion	
+#	Foldback	
+#	Font family	
+#	Font Style	
+#	Fonts used in the project:	
+#	For color management parameters, go to the Settings tab in the Lumetri Color panel.	
+#	Forest	
+#	Format and size	
+#	Four Scopes (RGB, 8 bit)	
+#	Four Scopes (YUV, float, no clamp)	
+#	Fractal Influence	
+#	Fractal Type	
+#	Frame Blending	
+#	Frame cache for monitors and thumbnails	
+#	Frame Color	
+#	Frame Count	
+#	Frame Hold Options	
+#	Frame Hold Options…	
+#	Frame Layout	
+#	Frame Rate	
+#	Frame Rate:	
+#	Frame Sampling	
+#	Frame Size	
+#	Frame Size / Rate	
+#	Frame Size:	
+#	Frame Width	
+#	Frames	
+#	frames	
+#	Frames per Still:	
+#	Framing	
+#	Free draw bezier	
+#	Freeform	
+#	Freeform View	
+#	Freeform View Options	
+#	Freeform View Options…	
+#	From Bin	
+#	From East	
+#	From file…	
+#	From North	
+#	From Source Monitor	
+#	From Source Monitor, Match Frame	
+#	From South	
+#	From the Left	
+#	From the Right	
+#	From West	
+#	Front + LFE	
+#	Front + Rear	
+#	Front + Rear + LFE	
+#	Front Only	
+#	Full screen	
+#	Fuzz	
+#	Gain	
+#	Gamut Warning Color	
+#	Gang to Program	
+#	Gap	
+#	Gap Color	
+#	Gaps	
+#	Gaussian Blur (Legacy)	
+#	Gaussian Blur from 0 to 60 over the last second	
+#	Gaussian Blur from 60 to 0 over the first second	
+#	GB	
+#	Generate Audio Waveform	
+#	Generate Ducking Keyframes	
+#	Generate Keyframes	
+#	Generate Timecode	
+#	Generate waveforms and conform audio using multithreading	
+#	Generate waveforms automatically during import	
+#	Generating waveform…	
+#	Get Media File Properties for	
+#	Get Project Notes	
+#	Ghosts	
+#	Glint	
+#	Glitch	
+#	Glow Color	
+#	Glow Only	
+#	Glow Radius	
+#	Glow Saturation	
+#	Glow Width	
+#	Go Back	
+#	Go Forward	
+#	Go to Gap	
+#	Go to In	
+#	Go to In (Shift+I)	
+#	Go to In Point	
+#	Go to Next Caption Segment	
+#	Go to Next Edit Point	
+#	Go to Next Edit Point on Any Track	
+#	Go to next keyframe	
+#	Go to Next Marker	
+#	Go to Out	
+#	Go to Out (Shift+O)	
+#	Go to Out Point	
+#	Go to Previous Caption Segment	
+#	Go to Previous Edit Point	
+#	Go to Previous Edit Point on Any Track	
+#	Go to previous keyframe	
+#	Go to Previous Marker	
+#	Go to Selected Clip End	
+#	Go to Selected Clip Start	
+#	Go to Sequence End	
+#	Go to Sequence Start	
+#	Go to Split	
+#	Golden Dusk	
+#	Golden Hour	
+#	GPU acceleration is unavailable; preview renders on the CPU	
+#	GPU Rendering	
+#	Grab bag	
+#	Gradient Angle	
+#	Gradient End	
+#	Gradient Layer	
+#	Gradient Placement	
+#	Gradient Scatter	
+#	Gradient Shape	
+#	Gradient Start	
+#	Gradient Wipe	
+#	Gradient Wipe (Legacy)	
+#	Grain Size	
+#	Graphic Equalizer (10 Bands)	
+#	Graphic Equalizer (20 Bands)	
+#	Graphic Equalizer (30 Bands)	
+#	Graphics and Titles	
+#	Graphics problem: switched to software compositing	
+#	Graphics text search arrives with M10.1–M10.2	
+#	Graphics…	
+#	Green Blurriness	
+#	Green Curve	
+#	Green Offset	
+#	Green Power	
+#	Green Slope	
+#	Green-Blue	
+#	Green-Const	
+#	Green-Green	
+#	Green-Red	
+#	Grid spacing:	
+#	Grow	
+#	Growing Files	
+#	Grunge	
+#	Grunge & Distort	
+#	Guide Templates	
+#	GuitarSuite	
+#	H.264	
+#	H.264 1920×1080 for video sharing sites, VBR 1 pass, 16 Mbps	
+#	H.264 1920×1080, VBR 1 pass, 20 Mbps target, AAC 320 kbps	
+#	H.264 1920×1080, VBR 2 pass, 18 Mbps	
+#	H.264 3840×2160 for video sharing sites, VBR 1 pass, 45 Mbps	
+#	H.264 3840×2160, VBR 1 pass, 60 Mbps target, AAC 320 kbps	
+#	H.264 3840×2160, VBR 2 pass, 50 Mbps	
+#	H.264 9:16 portrait for short-form social video, scaled to fill, 12 Mbps	
+#	H.264 at the sequence's frame size and rate; 0.05 bits per pixel	
+#	H.264 at the sequence's frame size and rate; 0.1 bits per pixel	
+#	H.264 at the sequence's frame size and rate; bitrate adapts to the frame size (0.2 bits per pixel)	
+#	H.265 (HEVC)	
+#	Half Saturation	
+#	Handle Frames:	
+#	Hard Clip	
+#	Hard Limiter	
+#	Hard Mono	
+#	Hard Sun	
+#	Hardware (AV1 has no software encoder)	
+#	Hardware (H.265 has no software encoder)	
+#	Hardware decoding	
+#	Hardware decoding: Auto uses the system's video decoder (VideoToolbox on macOS, Media Foundation on Windows, VA-API for H.264 and HEVC on Linux) for the streams it supports, and FilmCraft's own decoder for everything else or if the hardware fails. Media that is already open keeps its decoder until it is reopened.	
+#	Hardware decoding: Auto uses the system's video decoder (VideoToolbox on macOS, Media Foundation on Windows, VA-API or NVDEC for H.264 and HEVC on Linux) for the streams it supports, and FilmCraft's own decoder for everything else or if the hardware fails. Media that is already open keeps its decoder until it is reopened.	
+#	HD Anamorphic 1080 (1.333)	
+#	HDR	
+#	HDR Graphics White (Nits)	
+#	HDR Range	
+#	HDR Specular	
+#	HDR White	
+#	Head	
+#	Head and Tail	
+#	Head Size	
+#	Heading	
+#	Hide All Caption Tracks	
+#	Hide Back Face	
+#	Hide FilmCraft	
+#	High contrast with held highlights and deep shadows	
+#	High Cutoff	
+#	High Frequency Cut	
+#	High Frequency Damping	
+#	High Quality 1080p HD	
+#	High Quality 2160p 4K	
+#	High Quality Playback	
+#	High Shelf	
+#	High Shelf Gain	
+#	High Tone	
+#	Highlight	
+#	Highlight Blue Balance	
+#	Highlight Brightness	
+#	Highlight Color	
+#	Highlight Green Balance	
+#	Highlight Red Balance	
+#	Highlight Rolloff	
+#	Highlight Threshold	
+#	Highlight Tint	
+#	Highlights Lightness	
+#	Highpass	
+#	Hindi digits	
+#	HLS Vectorscope + Histogram	
+#	Hold	
+#	Hold Filters	
+#	Hold On	
+#	horizontal	
+#	Horizontal 16:9	
+#	Horizontal Alignment	
+#	Horizontal and Vertical	
+#	Horizontal Blocks	
+#	Horizontal Decentering	
+#	Horizontal Displacement	
+#	Horizontal Flip	
+#	Horizontal Margin	
+#	Hover Scrub	
+#	HSL Secondary	
+#	Hue Center	
+#	Hue Range	
+#	Hue Saturation Curves	
+#	Hue Tolerance	
+#	Hue vs Hue	
+#	Hue vs Luma	
+#	Hue vs Sat	
+#	I/O Buffer Size	
+#	Icon View	
+#	Ignore Alpha	
+#	Ignore Audio	
+#	Ignore Hours	
+#	Ignore Options	
+#	Ignore Video	
+#	Image Control	
+#	Image Overlay	
+#	Image Sequence	
+#	Immersive Video	
+#	Import a preset file…	
+#	Import as Image Sequence	
+#	Import captions file…	
+#	Import From	
+#	Import from Media Browser	
+#	Import Image Sequence…	
+#	Import numbered stills as image sequences	
+#	Import Presets…	
+#	Import: no file chosen (agents: export.presets.import {path})	
+#	Import: no file chosen (agents: shortcuts.import {path})	
+#	Imported “{name}”	
+#	Impulse	
+#	In	
+#	in	
+#	In a Room	
+#	In Point	
+#	In Points	
+#	In the Media Cache	
+#	In the project	
+#	In/Out Duration	
+#	In: {name}	
+#	Include Alpha Channel	
+#	Include captions on import	
+#	Include Handles:	
+#	Include Preview Files	
+#	Include Proxies	
+#	Incoming	
+#	Increase Audio Tracks Height	
+#	Increase Clip Volume	
+#	Increase Clip Volume Many	
+#	Increase Font Size by Five Units	
+#	Increase Font Size by One Unit	
+#	Increase Leading by Five Units	
+#	Increase Leading by One Unit	
+#	Increase Video Tracks Height	
+#	Indeterminate Media Timebase	
+#	Ingest	
+#	Ingest Settings	
+#	Ingest Settings…	
+#	Initial Delay	
+#	Inner	
+#	Inner Radius	
+#	Input Boost	
+#	Input LUT	
+#	Insert (,)	
+#	Insert and overwrite sequences as nests or individual clips	
+#	Insert Edit	
+#	Insert Frame Hold Segment	
+#	Inset	
+#	Inside Color	
+#	Install Motion Graphics Template (.fcgt)	
+#	Install Motion Graphics Template…	
+#	Install…	
+#	Inter	
+#	Interior Room Tone	
+#	Internal Black Point	
+#	Internal White Point	
+#	Interpret Footage	
+#	Interpret Footage…	
+#	Intro Duration	
+#	Inverse Falloff	
+#	Invert Alpha	
+#	Invert Blur	
+#	Invert Fill	
+#	Invert Gradient	
+#	Invert Left	
+#	Invert Right	
+#	Inverted	
+#	Iris	
+#	Iris Box	
+#	Iris Cross	
+#	Iris Diamond	
+#	Iris Radius	
+#	Iris Rotation	
+#	Iris Round	
+#	Iris Shape	
+#	JetBrains Mono	
+#	Join the ArtCraft Discord (discord.gg/artcraft)	
+#	Join Through Edits	
+#	JPEG	
+#	JPEG Sequence	
+#	Kaleidoscope	
+#	Keep a recovery copy of unsaved changes	
+#	Key	
+#	Key Color	
+#	Key Frame Distance	
+#	Key:	
+#	Keyboard: US	
+#	Keyboard: US (macOS)	
+#	Keying	
+#	Label Color Presets	
+#	Label Colors	
+#	Label Defaults	
+#	Label speakers	
+#	Labels…	
+#	Large blocks resolving to the picture over the first second	
+#	Large centred title, accent rule and subtitle.	
+#	Large Hall	
+#	Large Trim Offset	
+#	Large Volume Adjustment	
+#	Larger	
+#	Last auto-save {a}	
+#	Last auto-save {a} · last recovery copy {j}	
+#	Last recovery copy {j}	
+#	Latch	
+#	Lavender	
+#	Layer Name	
+#	Learning	
+#	Leave Color	
+#	Left - Left	
+#	Left - Right	
+#	Left Align Text	
+#	Left align text	
+#	Left channel to device output	
+#	Left to right	
+#	Legacy	
+#	Legal Range Squeeze	
+#	Lens Blur	
+#	Lens Distortion	
+#	Lens Type	
+#	Lift	
+#	Lift (;)	
+#	Lift selected text	
+#	Lift Shadows	
+#	Lifted blacks, softer contrast, muted colour	
+#	Ligatures	
+#	Light 1	
+#	Light 2	
+#	Light 3	
+#	Light 4	
+#	Light 5	
+#	Light Angle	
+#	Light Color	
+#	Light Leak	
+#	Light Leaks	
+#	Light Sweep	
+#	Lightning	
+#	Lights & Blurs	
+#	Lights & Glows	
+#	Limiter	
+#	Limiter Release	
+#	Limiter Threshold	
+#	Line Thickness	
+#	Linear Dodge (Add)	
+#	Linear keyframe thinning	
+#	Linear Ramp	
+#	Linear to Log	
+#	Linear Wipe	
+#	Linear Wipe (Legacy)	
+#	Link Channels	
+#	Link Media	
+#	Link Media…	
+#	Link to Media	
+#	Linked Selection	
+#	Linked {n} clip(s)	
+#	Liquid Distortion	
+#	Loaded “{name}”	
+#	Local Drives	
+#	Local Projects	
+#	Locate…	
+#	Log Note	
+#	Log Note:	
+#	Log to Linear	
+#	Log to Log	
+#	Logo Cutout	
+#	Long Shadow	
+#	Look	
+#	Look LUT	
+#	Look-Ahead Time	
+#	Loop	
+#	Loop marked range	
+#	Looping GIF, 640×360 at 15 fps	
+#	Loudness	
+#	Loudness Maximizer	
+#	Loudness Meter	
+#	Loudness Normalization	
+#	Louver	
+#	Low Frequency Cut	
+#	Low Pass	
+#	Low Shelf	
+#	Low Shelf Gain	
+#	Low Tone	
+#	Lower First	
+#	Lower Left	
+#	Lower Right	
+#	Lower Third – Rule	
+#	Lower Third – Slab	
+#	Lower Thirds	
+#	lowest (V1…)	
+#	Lowpass	
+#	Luma	
+#	Luma and Chroma	
+#	Luma Curve	
+#	Luma Fade	
+#	Luma Key	
+#	Luma Max	
+#	Luma Min	
+#	Luma Min / Max	
+#	Luma Source	
+#	Luma vs Sat	
+#	Lumetri	
+#	Lumetri Color	
+#	Lumetri Presets	
+#	Lumetri Scopes	
+#	Luminance Threshold	
+#	LUT	
+#	Magnify	
+#	Magnify (Legacy)	
+#	Main	
+#	Main (8-bit)	
+#	Main (8-bit; Main 10 for HDR sequences)	
+#	Main 10 (10-bit, HDR)	
+#	Maintain pitch while shuttling	
+#	Major Radius	
+#	Make Offline	
+#	Make Offline…	
+#	Make Subclip	
+#	Make Subclip…	
+#	Make Subsequence	
+#	Make {n} selected clip(s) offline. Their clips show the offline slate until you link them again.	
+#	Makeup	
+#	Male	
+#	Manage Guides	
+#	Manage Guides…	
+#	Manage Saved View Presets	
+#	Mango	
+#	Map Black To	
+#	Map White To	
+#	Maps full-range levels into 16–235 (video range) with a luma curve	
+#	Mark Clip	
+#	Mark In	
+#	Mark In (Hover Scrub)	
+#	Mark In (I)	
+#	Mark Out	
+#	Mark Out (Hover Scrub)	
+#	Mark Out (O)	
+#	Mark Selection	
+#	Mark Split	
+#	Marker	
+#	Markers	
+#	Mask Only	
+#	Master Amplitude	
+#	Master Gain	
+#	Master volume: use the Audio Track Mixer	
+#	Master · {name}	
+#	Mastering	
+#	Match file properties:	
+#	Match Frame	
+#	Match frame sets in point	
+#	Match Playhead	
+#	Match Source	
+#	Match Source ({seq_sr} Hz)	
+#	Match Source – Adaptive High Bitrate	
+#	Match Source – Adaptive Low Bitrate	
+#	Match Source – Adaptive Medium Bitrate	
+#	Match {n} of {total}	
+#	Match:	
+#	Matches	
+#	Matches each of the {n} clips on its own.	
+#	Matte Alpha	
+#	Matte Cleanup	
+#	Matte Generation	
+#	Matte Luma	
+#	Maximize Frame	
+#	Maximize or Restore Active Frame	
+#	Maximize or Restore Frame Under Cursor	
+#	Maximum Amplitude	
+#	Maximum Bit Depth	
+#	Maximum Bitrate	
+#	Maximum Block Size	
+#	Maximum Blur	
+#	Maximum Project Versions	
+#	Maximum Reduction	
+#	Maximum Render Quality	
+#	Maximum Scale	
+#	MB	
+#	Media	
+#	Media Analysis	
+#	Media Analysis & Transcription	
+#	Media Analysis & Transcription…	
+#	Media analysis and transcriptions will be cached in the Media Cache folder. Reanalysis won't be required if the media is imported into another project on this computer.	
+#	Media Browser	
+#	Media Browser Settings	
+#	Media Cache	
+#	Media Cache Database	
+#	Media Cache Files	
+#	Media Cache Management	
+#	Media Cache…	
+#	Media colour space (from file metadata): {detected}	
+#	Media Duration	
+#	Media End	
+#	Media File	
+#	Media files are deleted	
+#	Media files remain on disk	
+#	Media missing	
+#	Media Name:	
+#	Media Source Channels	
+#	Media Start	
+#	Media Start:	
+#	Media Time	
+#	Media Timecode	
+#	Media Type	
+#	MediaBrowser	
+#	MediaCache	
+#	Media…	
+#	Medium Room	
+#	Memory	
+#	Memory…	
+#	Merge Captions	
+#	Merge Clips	
+#	Merge Clips…	
+#	Merge selected captions	
+#	Merged clip created	
+#	Metadata & Timecode Burn-in	
+#	Metadata Display	
+#	Metadata Display…	
+#	Meter Input(s) Only	
+#	Metrics Kerning	
+#	Mid	
+#	Mid Point	
+#	Midtone Blue Balance	
+#	Midtone Green Balance	
+#	Midtone Red Balance	
+#	Midtones Lightness	
+#	Milliseconds	
+#	milliseconds	
+#	Minimize All Tracks	
+#	Minimum time	
+#	Minimum time interval thinning	
+#	Minor Radius	
+#	minute(s)	
+#	Mirror Alternate	
+#	Missing font replacement	
+#	MIT OR Apache-2.0. Fonts: Inter, Noto Serif and JetBrains Mono (SIL OFL 1.1).	
+#	Miter join	
+#	Miter limit	
+#	Mix	
+#	Mixdown video	
+#	Mixed Crystals	
+#	Mixer	
+#	Modern High Gain	
+#	Modifier held / selected	
+#	Modifiers	
+#	Modify Clip: Audio Channels	
+#	Modify Clip: Timecode	
+#	Modulation	
+#	Modulation Rate	
+#	Mono Media	
+#	Monochrome toned cyan-blue	
+#	Monochrome toned warm brown	
+#	Monoscopic	
+#	Monospace only	
+#	More colour in the less saturated areas	
+#	More presets…	
+#	More transport controls	
+#	Morph Cut	
+#	Mosaic (Legacy)	
+#	Mosaic In	
+#	Motion Blur	
+#	Motion Camera	
+#	Motion Graphics Template…	
+#	Motion Preset	
+#	Motion Tween	
+#	Move All Audio Targets Down	
+#	Move All Audio Targets Up	
+#	Move All Video Targets Down	
+#	Move All Video Targets Up	
+#	Move clips to the lowest track possible	
+#	Move Selection Down	
+#	Move Selection End	
+#	Move Selection Home	
+#	Move Selection Left	
+#	Move Selection Page Down	
+#	Move Selection Page Up	
+#	Move Selection Right	
+#	Move Selection Up	
+#	Move source clips to Processed Clips bin	
+#	Movie	
+#	Movie (audio and video)	
+#	Movies, audio and stills from disk	
+#	MPEG-4 audio (.m4a), stereo 48 kHz AAC-LC at 320 kbps	
+#	Multi-Camera	
+#	Multi-Camera Audio Follows Video	
+#	Multi-Camera Layout	
+#	Multi-Camera Record	
+#	Multi-Camera Record off	
+#	Multi-Camera Record on	
+#	Multi-Camera Record On/Off (0)	
+#	Multi-Camera Record On/Off Toggle	
+#	Multi-Camera Selection Top Down	
+#	Multi-camera source sequence with {n} camera(s)	
+#	Multi-Camera View	
+#	Multiband Compressor	
+#	Multicam	
+#	Multichannel Mono Media	
+#	Multiple Clips Selected	
+#	Multiplexer	
+#	Multitap Delay	
+#	Music	
+#	Mute	
+#	Mute input during timeline recording	
+#	Mute Send	
+#	MXF export writes integer PCM only	
+#	MXF OP-Atom	
+#	MXF OP-Atom DNxHR (Avid)	
+#	MXF OP1a	
+#	MXF OP1a DNxHR HQ	
+#	MXF OP1a H.264	
+#	MXF OP1a ProRes 422 HQ	
+#	MXF OP1a, DNxHR HQ (8-bit 4:2:2), 24-bit 48 kHz PCM, start timecode	
+#	MXF OP1a, H.264 High long GOP (0.3 bits per pixel), 24-bit 48 kHz PCM	
+#	MXF OP1a, ProRes 422 HQ, 24-bit 48 kHz PCM, start timecode	
+#	My Shortcuts	
+#	My Templates	
+#	Name and role on a coloured slab that widens with the name.	
+#	Name Color	
+#	Name over a thin rule that always matches the name's width.	
+#	Name Overlay	
+#	Name Size	
+#	Narrow	
+#	Navigate to End of Segment	
+#	Navigate to Next Line	
+#	Navigate to Next Word	
+#	Navigate to Previous Line	
+#	Navigate to Previous Word	
+#	Navigate to Start of Segment	
+#	Neon Color	
+#	Neon Wipe	
+#	Nested Sequence Name	
+#	Nest…	
+#	Network	
+#	Neutral Mono	
+#	New Bin	
+#	New Bin From Selection	
+#	New Color Matte	
+#	New Ellipse	
+#	New Item	
+#	New Media Browser Panel	
+#	New Offline File	
+#	New Project Panel	
+#	New Project Shortcut	
+#	New Rectangle	
+#	New Search Bin	
+#	New Sequence	
+#	New Sequence From Clip	
+#	New Submix	
+#	New Text	
+#	New Text Layer	
+#	New {format} track	
+#	Next in Sequence	
+#	Next in Track	
+#	Next Multi-Camera Page	
+#	Next to original media files	
+#	Next to the media	
+#	Next to the original media, in a Proxies folder	
+#	Night	
+#	Night Exterior	
+#	No background jobs.	
+#	No candidates yet — Search a folder or Locate the file.	
+#	No captions on this track. Press + to add one at the playhead.	
+#	no Chinese font is installed on this system; the interface stays in English	
+#	No contributor data was built into this copy.	
+#	No effects	
+#	No events.	
+#	No export preset named `{name}`	
+#	No Fields (Progressive Scan)	
+#	no GPU adapter: the CPU compositor is used	
+#	no Japanese font is installed on this system; the interface stays in English	
+#	no Korean font is installed on this system; the interface stays in English	
+#	No markers. Press M to add one.	
+#	No matching captions.	
+#	No model credits were built into this copy.	
+#	No Motion	
+#	No multi-camera clip at the playhead	
+#	No plugins are installed. Changes will take effect the next time you start FilmCraft.	
+#	No saved guide templates.	
+#	No Scroll	
+#	No templates match.	
+#	Noise & Grain	
+#	Noise (Legacy)	
+#	Noise Level	
+#	Noise Reduction/Restoration	
+#	Noise Type	
+#	Non-Additive Dissolve	
+#	Normalize All Peaks to:	
+#	Normalize Max Peak to:	
+#	Normalize Mix Track	
+#	Normalize Mix Track to:	
+#	Normalize Mix Track…	
+#	not available in this session	
+#	Not matched yet	
+#	Not Now	
+#	Not supported by FilmCraft's encoders yet	
+#	Not supported in FilmCraft yet	
+#	Notch 1	
+#	Notch 2	
+#	Notch 3	
+#	Notch 4	
+#	Notch 5	
+#	Notch 6	
+#	Notch Filter	
+#	Notch Width	
+#	Notes for this project: to-dos, instructions, frame numbers… Saved with the project.	
+#	Nothing found with that name.	
+#	Nothing is assigned to this key	
+#	Nudge Clip Selection Down	
+#	Nudge Clip Selection Left Five Frames	
+#	Nudge Clip Selection Left One Frame	
+#	Nudge Clip Selection Right Five Frames	
+#	Nudge Clip Selection Right One Frame	
+#	Nudge Clip Selection Up	
+#	Nudge Selected Object down by five	
+#	Nudge Selected Object down by one	
+#	Nudge Selected Object to left by five	
+#	Nudge Selected Object to left by one	
+#	Nudge Selected Object to right by five	
+#	Nudge Selected Object to right by one	
+#	Nudge Selected Object up by five	
+#	Nudge Selected Object up by one	
+#	Nudge Volume +1dB	
+#	Nudge Volume +3dB	
+#	Nudge Volume -1dB	
+#	Nudge Volume -3dB	
+#	Number of Audio Clips:	
+#	Number of Channels:	
+#	Number Of Echoes	
+#	Number of Harmonics	
+#	Numbered BMP stills (24-bit)	
+#	Numbered DPX stills (10-bit RGB)	
+#	Numbered JPEG stills (quality 90)	
+#	Numbered OpenEXR stills (half float, linear, uncompressed)	
+#	Numbered PNG stills at the sequence's frame size	
+#	Numbered Targa stills (24-bit, uncompressed)	
+#	Numbered TIFF stills (RGB, 8-bit)	
+#	Obsolete	
+#	Offline All	
+#	Offline File…	
+#	Offset (Turbulence)	
+#	Offset Audio by:	
+#	Offset From	
+#	Offset To	
+#	OMF Export Settings	
+#	OMF Title:	
+#	OMF…	
+#	Omni	
+#	On Original Image	
+#	On Transparent	
+#	Opacity 0 → 100 % over the first second	
+#	Opacity 100 → 0 % over the last second	
+#	Open a sequence to export	
+#	Open a sequence to see its transcript	
+#	Open a sequence to work with captions	
+#	Open Air	
+#	Open Bin	
+#	Open Demo Project	
+#	Open in New Tab	
+#	Open in New Window	
+#	Open in new window	
+#	Open in Place	
+#	Open in place	
+#	Open In Source Monitor	
+#	Open in Source Monitor	
+#	Open in Timeline	
+#	Open Ingest Settings	
+#	Open Most Recent	
+#	Open new tab	
+#	Open Project…	
+#	Open Search	
+#	Open this address in your browser yourself:	
+#	Opened {url}	
+#	OpenEXR	
+#	OpenEXR Sequence	
+#	Opens in your web browser: {url}	
+#	Opens up the shadows	
+#	OpenTimelineIO…	
+#	Optical Flow	
+#	Order	
+#	Ordering:	
+#	Out	
+#	out	
+#	Out Point	
+#	Out Points	
+#	Out: {name}	
+#	Outer	
+#	Outgoing	
+#	Output Gain	
+#	Output Mapping	
+#	Outro Duration	
+#	Outside Color	
+#	Overflow	
+#	Override media colour space:	
+#	Overshoot	
+#	Overwrite	
+#	Overwrite (.)	
+#	Overwrite Edit	
+#	Overwrite with Current View	
+#	Page Peel	
+#	Page Scroll	
+#	Page Turn	
+#	Paint Bucket	
+#	Paint On Black	
+#	Paint On Original Image	
+#	Paint On Transparent	
+#	Paint On White	
+#	Paint Style	
+#	Paint Surface	
+#	Pan	
+#	Pan (Y Axis)	
+#	Pan / balance (drag; double-click: centre)	
+#	Panel shortcuts override application shortcuts while that panel has focus	
+#	Panel Wipe	
+#	Panner	
+#	Panner - Ambisonics	
+#	Parade	
+#	Parade (RGB)	
+#	Parade ({kind})	
+#	Parade Type	
+#	Paragraph Text	
+#	Parametric Equalizer	
+#	Passband Ripple	
+#	Paste Attributes	
+#	Paste Attributes…	
+#	Paste Insert	
+#	Path Points	
+#	Path: {path}	
+#	Pause Media Encoder queue during playback	
+#	Paused Resolution	
+#	Peak Amplitude: {peak}	
+#	Peak Frequency	
+#	Peak Gain	
+#	Pedestal	
+#	Per line	
+#	Percent Blur	
+#	Phase Difference	
+#	Phaser	
+#	Phone Call	
+#	Phosphor	
+#	Phosphor Color	
+#	Photocopy Color	
+#	Picture-in-picture: 35 % scale in the upper right	
+#	Pillow	
+#	Pin All	
+#	Pin Horizontal	
+#	Pin To	
+#	Pin Vertical	
+#	Pinned Edges	
+#	Pinning	
+#	PiP 35% Upper Right	
+#	Pitch Shifter	
+#	Pixel Aspect Ratio:	
+#	Place files dropped onto the Timeline directly on the Timeline	
+#	Placement	
+#	Placement:	
+#	Plate	
+#	Plateau Wipe	
+#	Plateaus	
+#	Plates	
+#	Play after rendering previews	
+#	Play Around	
+#	Play Around Edit (Space loops, Shift+K once)	
+#	Play audio while scrubbing in Source and Program Monitors	
+#	Play from Playhead to Out Point	
+#	Play In to Out	
+#	Play In to Out with Preroll/Postroll	
+#	Play Source	
+#	Play-Stop Toggle (Space)	
+#	Play/Stop	
+#	Playback	
+#	Playback Resolution	
+#	Playback starts the pre-roll before the playhead (or the In point); with In/Out marked, recording punches in and out there.	
+#	Playback…	
+#	Playhead	
+#	Playhead position determines trim monitor loop playback	
+#	Playhead:	
+#	Plugins	
+#	Plugins…	
+#	PNG	
+#	PNG or JPEG file	
+#	PNG Sequence	
+#	Podcast Voice	
+#	Point 1	
+#	Point 1 Color	
+#	Point 1 Latitude	
+#	Point 1 Longitude	
+#	Point 2	
+#	Point 2 Color	
+#	Point 2 Latitude	
+#	Point 2 Longitude	
+#	Point 3	
+#	Point 3 Color	
+#	Point 3 Latitude	
+#	Point 3 Longitude	
+#	Point 4	
+#	Point 5	
+#	Point 6	
+#	Point 7	
+#	Point 8	
+#	Point Text	
+#	Pointer Color	
+#	Policy	
+#	Polygon Sides	
+#	Pop Motion	
+#	Position & Rotation	
+#	Position Amount	
+#	Position, Scale & Rotation	
+#	Position, Scale, Rotation	
+#	Position: bottom	
+#	Position: middle	
+#	Position: top	
+#	Post-Fader	
+#	Post-roll	
+#	Post-roll:	
+#	Posterize Time	
+#	Postroll	
+#	pre 	
+#	Pre-Delay	
+#	Pre-Fader	
+#	Pre-roll:	
+#	Preroll	
+#	Presence Lift	
+#	Preserve Scale	
+#	Preset name	
+#	Preview Area	
+#	Preview File Format:	
+#	Previous in Sequence	
+#	Previous in Track	
+#	Previous Multi-Camera Page	
+#	ProcAmp	
+#	Processing Options	
+#	Program	
+#	Programme left → device output {l}, right → device output {r}{dev}. Outputs beyond the device's channels fall back to 1 and 2.	
+#	Progress	
+#	Project	
+#	Project Auto Save:	
+#	Project Manager	
+#	Project Manager: writing {path}	
+#	Project Manager…	
+#	Project Metadata	
+#	Project Notes	
+#	Project Settings	
+#	Project View Preset {n}	
+#	Project: {name}	
+#	Projecting cap	
+#	Projection:	
+#	ProjectPanel	
+#	Projects	
+#	Project…	
+#	Protect Highlights	
+#	Proxies are made in the background and attached when done. Export always uses full-resolution media.	
+#	Proxy	
+#	Pull Motion	
+#	Pulls highlights and whites down	
+#	Push	
+#	Push (Legacy)	
+#	Q	
+#	Quality (CRF)	
+#	Queue ({n})	
+#	Quick Export	
+#	Quick Export: open a sequence first	
+#	Quick Export: {path}	
+#	QuickTime (Motion JPEG)	
+#	QuickTime, APV 422-10 (10-bit 4:2:2), 24-bit 48 kHz PCM	
+#	QuickTime, APV 422-12 (12-bit 4:2:2), 24-bit 48 kHz PCM	
+#	QuickTime, DNxHR HQ (8-bit 4:2:2), 24-bit 48 kHz PCM	
+#	QuickTime, DNxHR LB (8-bit 4:2:2), 24-bit 48 kHz PCM	
+#	QuickTime, DNxHR SQ (8-bit 4:2:2), 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 422 HQ, 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 422 LT, 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 422 Proxy, 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 422, 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 4444 (4:4:4) with alpha channel, 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 4444 (4:4:4), 24-bit 48 kHz PCM	
+#	QuickTime, ProRes 4444 XQ (4:4:4), 24-bit 48 kHz PCM	
+#	Quit FilmCraft	
+#	Radial Ramp	
+#	Radial Wipe	
+#	Radial Wipe (Legacy)	
+#	Radio Announcer	
+#	Radio Voice	
+#	RAM reserved for other applications	
+#	Ramp	
+#	Ramp Shape	
+#	Random Seed	
+#	Rate Stretch Tool	
+#	Ray	
+#	Ray Color	
+#	Ray Length	
+#	Rays Only	
+#	Razor Tool	
+#	Read	
+#	Rec. 2100	
+#	Rec. 601	
+#	Rec. 709	
+#	Recent Directories	
+#	Recognize when different speakers are talking	
+#	Reconnect Full Resolution Media…	
+#	Record	
+#	Record (voice-over on the record-enabled track)	
+#	Recorded {n} multi-camera cut(s)	
+#	Recording voice-over…	
+#	Recover Unsaved Changes	
+#	Recover unsaved changes from {when}?	
+#	Recover Unsaved Changes…	
+#	Recovery copy: {dir}	
+#	Red Blurriness	
+#	Red Curve	
+#	Red Offset	
+#	Red Power	
+#	Red Slope	
+#	Red-Blue	
+#	Red-Const	
+#	Red-Green	
+#	Red-Red	
+#	Reduce Axis	
+#	Reduce By	
+#	Reduce Interlace Flicker	
+#	Reduce Reverb	
+#	Reduce Rumble	
+#	Reference	
+#	Reference  {tc}	
+#	Reference Monitor	
+#	Reference track:	
+#	Reference: next frame	
+#	Reference: previous frame	
+#	Reflection Angle	
+#	Reflection Center	
+#	Refraction	
+#	Reframe Offset	
+#	Reframe Zoom	
+#	Refresh Changed Media	
+#	Refresh growing Files Every	
+#	Refresh Project	
+#	Refresh Sort Order	
+#	Rel	
+#	Release	
+#	Release Time	
+#	Relink others automatically	
+#	Remaining	
+#	Remix	
+#	Remix Properties	
+#	Remix Properties…	
+#	Remix Tool	
+#	Remixed to {seconds} s	
+#	Remixing music to a target duration is not available yet. Trim the clip and add a crossfade instead.	
+#	Remove Attributes	
+#	Remove Attributes…	
+#	Remove Audio from AV Clip	
+#	Remove Effect	
+#	Remove Filler Words	
+#	Remove filler words	
+#	Remove Fringe	
+#	Remove from Favorites	
+#	Remove keyframe	
+#	Remove Media Cache Files	
+#	Remove Pauses	
+#	Remove Row	
+#	Remove Send	
+#	Remove Unused	
+#	Render at Maximum Depth	
+#	Render Audio	
+#	Render audio clip effects	
+#	Render audio when rendering video	
+#	Render Edit in Audition files to:	
+#	Render Effects In to Out	
+#	Render In to Out	
+#	Render Selection	
+#	Rendered preview	
+#	Renderer:	
+#	Rendering:	
+#	Repair	
+#	Repeat Edge Pixels	
+#	Replace Color	
+#	Replace Fonts in Projects	
+#	Replace Fonts in Projects…	
+#	Replace With Clip	
+#	Replace With Clip From Source Monitor	
+#	Replaced {n} font uses	
+#	Replicate	
+#	Report an issue	
+#	Reset All Parameters	
+#	Reset Duration	
+#	Reset Effect	
+#	Reset Parameter	
+#	Reset to Grid	
+#	Reset to Saved Layout	
+#	Resize floating panel	
+#	Responsive Design - Position	
+#	Responsive Design - Time	
+#	Restore Arrangement	
+#	Restore Captions from Source Clip	
+#	Restore Frame	
+#	Restore open sequences when opening projects	
+#	Restore Original	
+#	Restore View Preset	
+#	Restore Workspace	
+#	Restrict Trims To Subclip Boundaries	
+#	Resulting Project	
+#	Retro	
+#	Reveal in Project	
+#	Reveal Log Files…	
+#	Reveal Nested Sequence	
+#	Reveal Original Image	
+#	Reveal Project in Finder…	
+#	Reveal Sequence in Project	
+#	Reverb	
+#	Reverb Amount	
+#	Reverse Field Dominance	
+#	Reverse Match Frame	
+#	Reverse Speed	
+#	Revert Remix	
+#	Revert to the preset's colors and names	
+#	RGB Curves	
+#	RGB Split	
+#	RGB-White	
+#	RGBA Channels	
+#	Right - Left	
+#	Right - Right	
+#	Right Align Text	
+#	Right align text	
+#	Right channel to device output	
+#	Right to left	
+#	Ripple Delete	
+#	Ripple Delete Head Frame	
+#	Ripple Edit Tool	
+#	Ripple Edit, Shifting Trailing Clips	
+#	Ripple Sequence Markers	
+#	Ripple trim adds edits to keep both sides of trim in sync	
+#	Ripple Trim In	
+#	Ripple Trim Next Edit to Playhead	
+#	Ripple Trim Out	
+#	Ripple Trim Previous Edit to Playhead	
+#	Role	
+#	Roll	
+#	Roll (Z Axis)	
+#	Roll Edit	
+#	Rolling Edit Tool	
+#	Room Size	
+#	Rose	
+#	Rotation Amount	
+#	Roughen	
+#	Roughen Color	
+#	Roughen Edges	
+#	Round cap	
+#	Round join	
+#	Rounded Crop	
+#	Rule Color	
+#	Rusty	
+#	Rusty Color	
+#	Safe graphics mode: {mode}	
+#	Safe Margins	
+#	Same as Project	
+#	Sample Rate	
+#	Sample Rate:	
+#	Sat vs Sat	
+#	Saturation at 50 %	
+#	Saturation Min	
+#	Save .cfa and .pek media cache files next to original media files when possible	
+#	Save All	
+#	Save Arrangement	
+#	Save Arrangement…	
+#	Save As New View Preset	
+#	Save as New Workspace…	
+#	Save Changes to this Workspace	
+#	Save changes to “{project_name}” before closing?	
+#	Save current settings as:	
+#	Save Current View Preset	
+#	Save Guides as Template	
+#	Save Guides as Template…	
+#	Save Preset	
+#	Save preset as:	
+#	Save Project	
+#	Saved as a FilmCraft graphics template (.fcgt) in your templates folder.	
+#	Saved preset “{name}”	
+#	Saved template {path}	
+#	Saves the view, columns, sort, thumbnail and font size.	
+#	Saves this session's log and shows it in your file manager.	
+#	Scale (Degrees)	
+#	Scale Amount	
+#	Scale Attribute Times	
+#	Scale From	
+#	Scale Height	
+#	Scale Match	
+#	Scale motion effects proportionally when changing frame size	
+#	Scale To	
+#	Scale To Fill	
+#	Scale To Fit	
+#	Scale to Frame Size	
+#	Scale to frame size	
+#	Scale Width	
+#	Scan Lines	
+#	Scene	
+#	Scene Edit Detection	
+#	Scene Edit Detection: analysing in the background (see Progress)	
+#	Scene Edit Detection…	
+#	Scene:	
+#	Scientific Filter	
+#	Scratch disk location for Captured Audio	
+#	Search Bin	
+#	Search commands or keys	
+#	Search effects	
+#	Search fields	
+#	Search in:	
+#	Search presets	
+#	Search templates	
+#	Search:	
+#	second(s)	
+#	Seconds	
+#	seconds	
+#	Segments:	
+#	Select a clip to grade	
+#	Select a clip to see its properties	
+#	Select a clip to view its metadata.	
+#	Select a graphic clip, or use the Type tool (T) on the Program monitor	
+#	Select a layer to edit its properties.	
+#	Select All Matching	
+#	Select All Project Items	
+#	Select an item to preview it	
+#	Select audio clips to edit them here	
+#	Select audio clips, then click a preset to apply it.	
+#	Select Camera 1	
+#	Select Camera 2	
+#	Select Camera 3	
+#	Select Camera 4	
+#	Select Camera 5	
+#	Select Camera 6	
+#	Select Camera 7	
+#	Select Camera 8	
+#	Select Camera 9	
+#	Select Clip at Playhead	
+#	Select Find Box	
+#	Select items to clear	
+#	Select Label Group	
+#	Select Next Clip	
+#	Select Next Graphic	
+#	Select Next Layer	
+#	Select Next Panel	
+#	Select Previous Clip	
+#	Select Previous Graphic	
+#	Select Previous Layer	
+#	Select Previous Panel	
+#	Select to Next Line	
+#	Select to Next Word	
+#	Select to Previous Line	
+#	Select to Previous Word	
+#	Select to Segment End	
+#	Select to Segment Start	
+#	Selected: {command}	
+#	Selection as FilmCraft Project…	
+#	Selection Follows Playhead	
+#	Selection Order	
+#	Selection…	
+#	Semi-tones	
+#	Send exports here with Send to Queue, then start the queue.	
+#	Send to Queue	
+#	Send {n} Level	
+#	Sensitivity:	
+#	Separate Audio	
+#	Separate Files	
+#	Sepia Tone	
+#	Sequence	
+#	Sequence Color Management	
+#	Sequence From Clip	
+#	Sequence Name	
+#	Sequence name	
+#	Sequence Name:	
+#	Sequence Settings	
+#	Sequence Settings…	
+#	Sequence Time	
+#	Sequence Timecode	
+#	Sequence, {w}x{h}, {fps} fps, {rate} Hz	
+#	Sequences	
+#	Sequence…	
+#	Sequentially	
+#	Set Comparison Reference	
+#	Set Creative Look	
+#	Set focus on the Timeline when performing Insert/Overwrite edits	
+#	Set Gain to:	
+#	Set Input LUT	
+#	Set Poster Frame	
+#	Set Project Panel View	
+#	Set the reference to the playhead	
+#	Set Timecode:	
+#	Set to frame size	
+#	Set Transition Duration	
+#	Setting	
+#	SFX	
+#	Shadow Angle	
+#	Shadow Blue Balance	
+#	Shadow Blur	
+#	Shadow Color	
+#	Shadow Distance	
+#	Shadow Green Balance	
+#	Shadow Only	
+#	Shadow Opacity	
+#	Shadow Red Balance	
+#	Shadow Size	
+#	Shadow Tint	
+#	Shadows Lightness	
+#	Shake	
+#	Shape Dissolve	
+#	Shape Flow	
+#	Shape Size	
+#	Shard Size	
+#	Sharp Colors	
+#	Sharpen Amount	
+#	Shift Center To	
+#	Shift clips that overlap trim point during ripple trimming	
+#	Shot	
+#	Shot/Take:	
+#	Show "Project:" and "Bin:" in Project panel tab	
+#	Show Active Caption Tracks Only	
+#	Show All Caption Tracks	
+#	Show All Marker Colors	
+#	Show Audio Waveform	
+#	Show Clip Mismatch Warning dialog	
+#	Show clip names	
+#	Show Dot	
+#	Show durations	
+#	Show Event Indicator	
+#	Show finished jobs	
+#	Show Focus Area	
+#	Show graphs	
+#	Show Home	
+#	Show in the Preset menu	
+#	Show Keyframes	
+#	Show Mask Tracker Preview	
+#	Show Multi-Camera Preview Monitor	
+#	Show Next Screen	
+#	Show Only Noise	
+#	Show Open Dialog	
+#	Show or hide {color} markers	
+#	Show Previous Screen	
+#	Show Program Transcript	
+#	Show Project Load Error Dialog	
+#	Show Rich Tool Tips	
+#	Show Role	
+#	Show system compatibility issues at startup	
+#	Show the presets folder	
+#	Show Through Edits	
+#	Show Transport Controls	
+#	Show Video Thumbnails	
+#	Show Workspace Reset Warning dialog on double click	
+#	Show {n}	
+#	Show/Hide Effects and Sends	
+#	Show/Hide Tracks	
+#	Show/Hide Tracks…	
+#	Shows a report on this computer.	
+#	Shows the version, community links and credits in a FilmCraft window.	
+#	Shrink	
+#	Shutter Angle	
+#	Shuttle Left	
+#	Shuttle Right	
+#	Shuttle Slow Left	
+#	Shuttle Slow Right	
+#	Shuttle Stop	
+#	Signal Scale	
+#	Silver Retention	
+#	Similarity	
+#	Simple Notch Filter	
+#	Simple Parametric EQ	
+#	Simple Text	
+#	Simplify Sequence	
+#	Simplify Sequence…	
+#	Single-band Compressor	
+#	Sinusoidal	
+#	Six procedural 1080p clips with sound	
+#	Size / Opacity	
+#	Skew Axis	
+#	Slab Color	
+#	Slats	
+#	Slide	
+#	Slide (Legacy)	
+#	Slide Clip Selection Left Five Frames	
+#	Slide Clip Selection Left One Frame	
+#	Slide Clip Selection Right Five Frames	
+#	Slide Clip Selection Right One Frame	
+#	Slide Tool	
+#	Slip Clip Selection Left Five Frames	
+#	Slip Clip Selection Left One Frame	
+#	Slip Clip Selection Right Five Frames	
+#	Slip Clip Selection Right One Frame	
+#	Slip Tool	
+#	Slope	
+#	Slow	
+#	Slower Motion	
+#	Small Room	
+#	Smaller	
+#	Smart Limit	
+#	Smart Tools	
+#	Smooth	
+#	Smooth Motion	
+#	Smooth Scroll	
+#	SMPTE HD bars with 1 kHz reference tone	
+#	Snap in Program Monitor	
+#	Snap in Timeline	
+#	Snap in Timeline (S)	
+#	Snap playhead in Timeline when Snap is enabled	
+#	Snap to grid	
+#	Social Vertical 1080×1920	
+#	Soft Clamp	
+#	Soft Clip	
+#	Soft Edges (Best Quality)	
+#	Soft Vignette	
+#	Soft Wipe	
+#	Soften Harshness	
+#	software rendering	
+#	Solid	
+#	Solid Colors	
+#	Solo	
+#	Solo safe	
+#	Something went wrong while drawing the window. Your project is still open; save it to be safe.	
+#	Sort Icons	
+#	Sort Order	
+#	Source channels the selected audio clips play:	
+#	Source In/Out	
+#	Source Play/Stop	
+#	Source Point	
+#	Source Settings	
+#	Source Settings…	
+#	Source Text	
+#	Source Timecode	
+#	Source · {name}	
+#	Source:	
+#	Spacer	
+#	Speaker	
+#	Speaker Angle	
+#	Speaker Labeling	
+#	Special Effects	
+#	Speech model	
+#	Speech-to-text turns the dialogue into editable text.	
+#	Speed {n}%	
+#	Speed/Duration…	
+#	Speed:	
+#	Spiky	
+#	Spill	
+#	Spill Suppression	
+#	Spin	
+#	Spin Direction	
+#	Spin Motion	
+#	Split (Legacy)	
+#	Split Caption	
+#	Split caption at playhead	
+#	Spotlight	
+#	Spread	
+#	Spring Motion	
+#	Square (Width Only)	
+#	Square 1:1	
+#	Square Pixels (1.0)	
+#	Stabilization	
+#	Stabilize Only	
+#	Stabilize, Crop	
+#	Stabilize, Crop, Auto-scale	
+#	Stabilize, Synthesize Edges	
+#	Stack	
+#	Stack Clips	
+#	Stages	
+#	Star Wipe	
+#	Start Angle	
+#	Start at 0	
+#	Start at 1	
+#	Start Color	
+#	Start Export Queue	
+#	Start of Ramp	
+#	Start Off Screen	
+#	Start Point	
+#	Start Queue	
+#	Start Voice-over Recording	
+#	Start with an Empty Project	
+#	Start:	
+#	Starting Intensity	
+#	Static Plates	
+#	Steel Blue	
+#	Step Back 1 Frame	
+#	Step Back 1 Frame (Left)	
+#	Step Back Five Frames	
+#	Step Back One Frame	
+#	Step Forward 1 Frame	
+#	Step Forward 1 Frame (Right)	
+#	Step Forward Five Frames	
+#	Step Forward One Frame	
+#	Step forward/back many	
+#	Stereo	
+#	Stereo Expand	
+#	Stereo Expander	
+#	Stereo Imagery	
+#	Stereo Media	
+#	Stereo Phasing	
+#	Stereo Width	
+#	Stereoscopic - Over/Under	
+#	Stereoscopic - Side by Side	
+#	Still	
+#	Still Image Default Duration	
+#	Stone Church	
+#	Stop Export Queue	
+#	Stop Multi-Camera Recording	
+#	Stop Source	
+#	Stop tracking	
+#	Stop Voice-over Recording	
+#	Stopband Attenuation	
+#	Straight Color	
+#	Stretch Gradient to Fit	
+#	Stretch Map to Fit	
+#	Stretch To Fill	
+#	Stretch to Fit Frame	
+#	Stretch Width or Height	
+#	Stretch Wipe	
+#	Stripe	
+#	Stripes	
+#	Strobe Color	
+#	Strobe Duration (secs)	
+#	Strobe Light	
+#	Strobe Period (secs)	
+#	Stroke 2	
+#	Stroke 2 Color	
+#	Stroke 2 Type	
+#	Stroke 2 Width	
+#	Stroke Angle	
+#	Stroke Density	
+#	Stroke Length (secs)	
+#	Stroke line cap	
+#	Stroke line join	
+#	Stroke Only	
+#	Stroke Randomness	
+#	Stroke Type	
+#	Stroke Width	
+#	Studio Reverb	
+#	Subclip End	
+#	Subclip Start	
+#	Subclip: {name}	
+#	SubRip Subtitle (.srt)	
+#	Subspace Warp	
+#	Sum multichannel outputs to mono in Source Monitor	
+#	Super Narrow	
+#	Surface Gloss	
+#	Surface Material	
+#	Surround Reverb	
+#	Swap	
+#	Swap Channels	
+#	Switch Audio	
+#	Swivel	
+#	Sync Voice-over Capture	
+#	Synchronize Clips	
+#	Synchronize Point	
+#	Synchronized {n} clip group(s)	
+#	Synchronize…	
+#	Synthetic	
+#	System Compatibility Report	
+#	System Compatibility Report…	
+#	System Default	
+#	System Language	
+#	Tag Color	
+#	Tan	
+#	Tape	
+#	Tape Name	
+#	Tape Name:	
+#	Tape/Tube	
+#	Targa	
+#	Targa Sequence	
+#	Target Aspect	
+#	Target Bitrate	
+#	Target Color	
+#	Target Duration:	
+#	Target Field of View	
+#	Target Loudness	
+#	Teal	
+#	Teal & Orange	
+#	Teal Shadows, Warm Skin	
+#	Technical	
+#	Telephone	
+#	Teletext	
+#	Template Name:	
+#	Template Properties	
+#	Temporal Interpolation	
+#	Text (graphics and captions)	
+#	Text Animator	
+#	Text Box Height	
+#	Text Box Width	
+#	Text Color	
+#	Text Layer Type	
+#	Text Properties	
+#	Text Styling	
+#	Text to Speech	
+#	TextPanel	
+#	The default graphics are used from the next start.	
+#	The language changed but could not be saved: {e}	
+#	The media cache holds render previews of unsaved projects and other files FilmCraft can recreate. Deleting them is always safe; FilmCraft rebuilds them as needed.	
+#	The project had not been saved yet.	
+#	The selected clips have different audio types. Assign one type to edit them together.	
+#	The sequence has no caption track.	
+#	This build has no speech-to-text; import a transcript with transcript.set.	
+#	Thr	
+#	Thumbnail controls for all pointing devices	
+#	Thumbnail Size Next	
+#	Thumbnail Size Previous	
+#	Thumbnail View	
+#	Thumbnails show effects applied	
+#	Ticker – Crawl	
+#	TIFF	
+#	TIFF Sequence	
+#	Tile Gradient	
+#	Tilt (X Axis)	
+#	Time and Pitch	
+#	Time Interpolation	
+#	Time Remapping	
+#	Timebase:	
+#	Timecode Conversion	
+#	Timecode Overlay	
+#	Timecode:	
+#	Timecode…	
+#	Timeline Display Settings	
+#	Timeline Mouse Scrolling	
+#	Timeline Playback Auto-Scrolling	
+#	Timeline: (no sequences)	
+#	Timeline…	
+#	Title Color	
+#	Title Safe Area	
+#	Title Size	
+#	Title – Boxed	
+#	Title – Centered	
+#	Titles	
+#	To {name}	
+#	Toggle All Audio Targets	
+#	Toggle All Source Audio	
+#	Toggle All Source Video	
+#	Toggle All Video Targets	
+#	Toggle animation	
+#	Toggle Audio During Scrubbing	
+#	Toggle Full Screen	
+#	Toggle Mute for All Targeted Audio Tracks	
+#	Toggle Proxies	
+#	Toggle Solo for All Targeted Audio Tracks	
+#	Toggle Source/Program Monitor Focus	
+#	Toggle Target Audio 1	
+#	Toggle Target Audio 2	
+#	Toggle Target Audio 3	
+#	Toggle Target Audio 4	
+#	Toggle Target Audio 5	
+#	Toggle Target Audio 6	
+#	Toggle Target Audio 7	
+#	Toggle Target Audio 8	
+#	Toggle Target Video 1	
+#	Toggle Target Video 2	
+#	Toggle Target Video 3	
+#	Toggle Target Video 4	
+#	Toggle Target Video 5	
+#	Toggle Target Video 6	
+#	Toggle Target Video 7	
+#	Toggle Target Video 8	
+#	Toggle Track Output for All Targeted Video Tracks	
+#	Toggle Trim Type	
+#	Toggle View	
+#	Tone	
+#	Top Center	
+#	Total Duration	
+#	Touch	
+#	Track Fx Editor	
+#	Track Keyframes	
+#	Track Matte Key	
+#	Track Select Backward Tool	
+#	Track Select Forward Tool	
+#	Track Selected Mask	
+#	Track selected mask backward	
+#	Track selected mask backward 1 frame	
+#	Track selected mask forward	
+#	Track selected mask forward 1 frame	
+#	Track type	
+#	Tracking method: {method}	
+#	Tracks	
+#	tracks	
+#	Transcode	
+#	Transcribe	
+#	Transcribe Sequence	
+#	Transcribe sequence	
+#	Transcribe Sequence…	
+#	Transcribe…	
+#	Transcript	
+#	Transcription	
+#	Transcription preferences	
+#	Transformers	
+#	Transience	
+#	Transition Completion	
+#	Transition Softness	
+#	Transitions	
+#	Transmit Multi-Camera View	
+#	Transparent Video…	
+#	Trash	
+#	Travel Motion	
+#	Treble	
+#	Trim	
+#	Trim audio files	
+#	Trim Backward	
+#	Trim Backward Many	
+#	Trim Edit	
+#	Trim Forward	
+#	Trim Forward Many	
+#	Trim In	
+#	Trim Next Edit to Playhead	
+#	Trim Out	
+#	Trim Previous Edit to Playhead	
+#	Trimming	
+#	Trim…	
+#	True Peak Limit	
+#	Tube	
+#	Tube-modeled Compressor	
+#	Tubular	
+#	Turbulent Displace	
+#	Turbulent Sharp	
+#	Turbulent Smooth	
+#	Turbulent Smoother	
+#	Turn on animation and add keyframe	
+#	TV Power	
+#	Tweed	
+#	Twirl (Legacy)	
+#	Twirl Center	
+#	Twirl Radius	
+#	Twist Smoother	
+#	Type a shortcut… (Esc cancels)	
+#	UI Scale	
+#	UI:	
+#	Ultra Key	
+#	Uncompressed (PCM)	
+#	Undock Panel	
+#	Uniform Scale	
+#	Uniform Spacing	
+#	Universal Counting Leader…	
+#	Unlink	
+#	Unreadable	
+#	Unrendered: render to play back in real time	
+#	Unrendered: should play back in real time	
+#	Unstack	
+#	Unstack Clips	
+#	Untagged	
+#	Untitled Workspace	
+#	Up One Level	
+#	Up one level	
+#	Update it at least every	
+#	Update Metadata	
+#	Update Metadata…	
+#	Update timeline dynamically during ripple edits.	
+#	Upgrade Caption to Graphic	
+#	Upgrade to Source Graphic	
+#	Upper First	
+#	Upper Frequency	
+#	Upper Left	
+#	Upper Right	
+#	Use Color Noise	
+#	Use Default Graphics	
+#	Use Effect Shutter Angle	
+#	Use End Color	
+#	Use File	
+#	Use file metadata	
+#	Use Glow Color	
+#	Use Maximum Render Quality	
+#	Use Media Source	
+#	Use the file's timecode	
+#	Use Tint Color	
+#	User Order	
+#	Utility	
+#	Validate Content Credentials on import	
+#	Variations:	
+#	VBR, 1 pass	
+#	VBR, 2 pass	
+#	Vectorscope (YUV)	
+#	Vectorscope + Waveform YC	
+#	Vectorscope HLS	
+#	Vectorscope Targets	
+#	Vectorscope YUV	
+#	Velocity	
+#	Venetian Blinds	
+#	vertical	
+#	Vertical 4:5	
+#	Vertical 9:16	
+#	Vertical Blocks	
+#	Vertical Decentering	
+#	Vertical Displacement	
+#	Vertical Flip	
+#	Vertical Margin	
+#	Vertical Text	
+#	Very Narrow	
+#	VHS Damage	
+#	Video 1	
+#	Video 2	
+#	Video 3	
+#	Video 4	
+#	Video 5	
+#	Video 6	
+#	Video 7	
+#	Video 8	
+#	Video and Audio	
+#	Video and Audio Waveform Split	
+#	Video and Waveform	
+#	Video Attributes	
+#	Video Codec	
+#	Video Duration	
+#	Video Effects	
+#	Video effects	
+#	Video Frame	
+#	Video In	
+#	Video In Point	
+#	Video Info	
+#	Video Limiter	
+#	Video Only	
+#	Video Options	
+#	Video Out	
+#	Video Out Point	
+#	Video Previews	
+#	Video Previews:	
+#	Video Rendering and Playback	
+#	Video Thumbnails	
+#	Video Tracks	
+#	Video Transition Default Duration	
+#	Video Transitions	
+#	Video Usage	
+#	Video Usage: {vu}  Audio Usage: {au}	
+#	Video {n}:	
+#	Video:	
+#	Vignette	
+#	Vimeo 1080p Full HD	
+#	Vimeo 2160p 4K Ultra HD	
+#	Vocal Booth	
+#	Vocal Enhancer	
+#	Voice in a Hall	
+#	Voice-over Record	
+#	Voice-over record (right-click: Voice-Over Record Settings…)	
+#	Voice-Over Record Settings	
+#	Voice-Over Record Settings…	
+#	Voice-over recorded: {p}	
+#	Voice-over recording stopped (nothing recorded)	
+#	Voice-over take discarded	
+#	Voiceover	
+#	Volume	
+#	Volume (drag; double-click: 0 dB)	
+#	Volumetric Rays	
+#	VR Blur	
+#	VR Chroma Leaks	
+#	VR Chromatic Aberrations	
+#	VR Color Gradients	
+#	VR De-Noise	
+#	VR Digital Glitch	
+#	VR Fractal Noise	
+#	VR Glow	
+#	VR Gradient Wipe	
+#	VR Iris Wipe	
+#	VR Light Leaks	
+#	VR Light Rays	
+#	VR Mobius Zoom	
+#	VR Plane to Sphere	
+#	VR Projection	
+#	VR Properties	
+#	VR Random Blocks	
+#	VR Rotate Sphere	
+#	VR Sharpen	
+#	VR Spherical Blur	
+#	Warm Film	
+#	Warm highlights, brown shadows	
+#	Warm Negative	
+#	Warm print stock with gentle roll-off	
+#	Warm Room	
+#	Warm Tint	
+#	Warm Voice	
+#	Warm, soft late-afternoon light	
+#	Warnings and Errors	
+#	Warp Stabilizer	
+#	WAV, stereo 48 kHz 16-bit PCM	
+#	WAV, stereo 48 kHz 24-bit PCM	
+#	Wave Height	
+#	Wave Speed	
+#	Wave Warp	
+#	Wave Width	
+#	Waveform	
+#	Waveform (Luma)	
+#	Waveform (RGB)	
+#	Waveform ({kind})	
+#	Waveform Audio	
+#	Waveform Audio 48 kHz 16-bit	
+#	Waveform Audio 48 kHz 24-bit	
+#	Waveform Type	
+#	Wavelength	
+#	Web & Social	
+#	WebVTT (.vtt)	
+#	Wet Out	
+#	When Opening a Project	
+#	Whip	
+#	Whip (Legacy)	
+#	Whisper base (balanced)	
+#	Whisper small (most accurate)	
+#	Whisper tiny (fastest)	
+#	White Input Level	
+#	White/Black	
+#	Wide gamut color (composite in BT.2020)	
+#	Wide Outdoor	
+#	Widener	
+#	Wiggle	
+#	Wipe	
+#	Wipe Angle	
+#	with:	
+#	Without keyframes	
+#	Wonder Glow	
+#	Work Area	
+#	Working Color Space	
+#	Working Color Space:	
+#	Wrap Back	
+#	Write	
+#	Write Automation	
+#	Write clip markers to XMP	
+#	Write keyframes	
+#	Write the metadata of the selected clip(s) ({n}) to XMP files next to their media?	
+#	Write XMP ID to files on import	
+#	Write-on	
+#	X Rotation	
+#	Y Rotation	
+#	YC	
+#	YC no Chroma	
+#	Yellow-green highlights and blue-lifted shadows from crossed channel curves	
+#	YouTube 1080p Full HD	
+#	YouTube 2160p 4K Ultra HD	
+#	YUV	
+#	Z Position	
+#	Z Rotation	
+#	ZIP (1 scan line)	
+#	ZIP (16 scan lines)	
+#	Zoom Amount	
+#	Zoom Blur	
+#	Zoom Program Monitor to 100%	
+#	Zoom Program Monitor to Fit	
+#	Zoom Source Monitor to 100%	
+#	Zoom Source Monitor to Fit	
+#	Zoom Strength	
+#	Zoom to Sequence	
+#	{active} (modified)	
+#	{category} · My Template	
+#	{codec} · {rate} Hz · {n} channel(s)	
+#	{first} - Merged	
+#	{first} Multicam	
+#	{fps} fps · {n} frames queued	
+#	{f} (missing)	
+#	{key} can't be used as a shortcut	
+#	{mode} · no clip	
+#	{mode} · no sequence	
+#	{name} (copy)	
+#	{name} (Modified)	
+#	{name} (Simplified)	
+#	{name} (user)	
+#	{name} - Edited	
+#	{name} Selection.fcproj	
+#	{n} clip(s) can't find their media. Locate them, search a folder, or leave them offline.	
+#	{n} clip(s) selected.	
+#	{n} clip(s) selected; the clip on the reference track stays put.	
+#	{n} clip(s): {names}	
+#	{n} Color	
+#	{n} editable properties	
+#	{n} Font	
+#	{n} items	
+#	{n} Position	
+#	{n} s ago	
+#	{n} sessions have unsaved changes:	
+#	{n} Size	
+#	{n}. (empty)	
+#	{panel} Panel	
+#	{panel} — coming in a later milestone	
+#	{rate} fps Drop-Frame Timecode	
+#	{rate} fps Non Drop-Frame Timecode	
+#	{rate} fps Timecode	
+#	{rate} frames/second	
+#	{sel} of {total} items selected	
+#	{tc}  Chapter	
+#	{total} items	
+#	✓ Enable	
+#	✔ matches	
+#	✔ same file	
+#	✖ different file	

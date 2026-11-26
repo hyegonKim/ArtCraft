@@ -43,16 +43,23 @@ mod links;
 mod marks;
 mod text;
 
+mod default_cmyk;
 mod forms;
+pub mod joboptions;
 mod optional_content;
 mod pdfx;
 mod pdfx1a;
+mod pdfx3;
+mod svg_options;
 mod transitions;
 pub use export::{
-    BookletKind, BookletOptions, booklet_pairs, export_booklet, export_pdf, export_pdf_with_report, merge_pdfs, print_color, sheet_spreads,
+    BookletKind, BookletOptions, booklet_pairs, drawn_children, export_booklet, export_pdf, export_pdf_with_report, item_exported, layer_exported,
+    merge_pdfs, print_color, sheet_spreads, shown_parent_items,
 };
-pub use pdfx::{check_pdfx4, has_rgb_groups, make_pdfx4};
+pub use joboptions::{JobValue, PdfPreset, parse_joboptions, parse_joboptions_bytes, write_joboptions};
+pub use pdfx::{check_pdfx4, has_rgb_groups, make_pdfx4, pdfx_version};
 pub use pdfx1a::check_pdfx1a;
+pub use pdfx3::check_pdfx3;
 pub use transitions::{add_blend_space, add_catalog_entries, add_page_entries, add_transitions};
 
 /// PDF standard to target.
@@ -63,6 +70,8 @@ pub enum Standard {
     None,
     /// PDF/X-4 (PDF 1.6, trim/bleed boxes, output intent and identification).
     PdfX4,
+    /// PDF/X-3:2003 (PDF 1.4, no live transparency, output intent, ICC-managed RGB allowed).
+    PdfX3,
     /// PDF/X-1a:2003 (PDF 1.4, CMYK and spot only, no transparency): the PDF/X-4 file flattened.
     PdfX1a,
     /// PDF/A-2b (archival; validated by krilla).
@@ -70,22 +79,33 @@ pub enum Standard {
 }
 
 impl Standard {
-    /// `none`, `x4` / `pdfx4` / `PDF/X-4`, `x1a` / `pdfx1a` / `PDF/X-1a:2003`, `a2b` / `pdfa2b` /
-    /// `PDF/A-2b`.
+    /// `none`, `x4` / `pdfx4` / `PDF/X-4`, `x3` / `pdfx3` / `PDF/X-3:2003`, `x1a` / `pdfx1a` /
+    /// `PDF/X-1a:2003`, `a2b` / `pdfa2b` / `PDF/A-2b`.
     pub fn parse(s: &str) -> Option<Self> {
         let k: String = s.chars().filter(char::is_ascii_alphanumeric).collect::<String>().to_ascii_lowercase();
         match k.as_str() {
             "" | "none" => Some(Self::None),
             "x4" | "pdfx4" | "pdfx42008" | "pdfx42010" => Some(Self::PdfX4),
+            "x3" | "pdfx3" | "pdfx32002" | "pdfx32003" => Some(Self::PdfX3),
             "x1a" | "pdfx1a" | "pdfx1a2003" => Some(Self::PdfX1a),
             "a2b" | "pdfa2b" => Some(Self::PdfA2b),
             _ => None,
         }
     }
 
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::PdfX4 => "x4",
+            Self::PdfX3 => "x3",
+            Self::PdfX1a => "x1a",
+            Self::PdfA2b => "a2b",
+        }
+    }
+
     /// PDF/X: a CMYK output intent, trim boxes, no interpolation.
     pub fn is_pdfx(self) -> bool {
-        matches!(self, Self::PdfX4 | Self::PdfX1a)
+        matches!(self, Self::PdfX4 | Self::PdfX3 | Self::PdfX1a)
     }
 }
 
@@ -136,7 +156,8 @@ pub struct PdfOptions {
     /// Title for the metadata; `None` = the document title.
     pub title: Option<String>,
     pub author: Option<String>,
-    /// Creation date as Unix seconds (UTC); `None` = now (native) / omitted (wasm).
+    /// Creation date as Unix seconds (UTC). `None` takes `SOURCE_DATE_EPOCH` when it names a date
+    /// a PDF can hold, else the clock (native) / omitted (wasm).
     pub created: Option<i64>,
     /// Tagged PDF: stories become paragraphs in reading order, graphics figures with their alt
     /// text, parent-page items and printer's marks artifacts.
@@ -214,6 +235,8 @@ pub fn parse_page_range(s: &str, count: usize) -> Result<Vec<usize>> {
     let bad = || PdfError::BadRange(s.to_string());
     let num = |v: &str| v.trim().parse::<usize>().map_err(|_| bad());
     let mut out = Vec::new();
+    // The pages selected so far, for ranges that overlap (`1-9, 2-8, …`): a set, not a search.
+    let mut selected = vec![false; count];
     for part in t.split(',').map(str::trim).filter(|p| !p.is_empty()) {
         let (a, b) = match part.split_once('-') {
             Some((a, b)) => {
@@ -233,7 +256,8 @@ pub fn parse_page_range(s: &str, count: usize) -> Result<Vec<usize>> {
             if p > count {
                 return Err(PdfError::BadPage(p));
             }
-            if !out.contains(&(p - 1)) {
+            if let Some(new) = selected.get_mut(p - 1).filter(|s| !**s) {
+                *new = true;
                 out.push(p - 1);
             }
         }

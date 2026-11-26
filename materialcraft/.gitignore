@@ -1,0 +1,13 @@
+*~
+plan/
+/target
+target/
+/dist
+/corpus
+/log
+/secrets
+/temp
+/craft-fonts
+*.mcraft.tmp
+.claude/worktrees/
+pr-review-guidelines.md

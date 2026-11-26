@@ -1,0 +1,3 @@
+# Words the et pack must accept and reject (common words; written for this check).
+correct = ["maja", "raamat", "kool", "vesi", "linn"]
+incorrect = ["raamaat", "kooll", "koool"]

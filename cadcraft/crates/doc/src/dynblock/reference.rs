@@ -256,6 +256,53 @@ pub fn custom_properties(d: &Drawing, insert: Handle) -> Option<(String, Vec<Cus
                 let editable = lookup_sets_what_changes(&m, p.node);
                 out.push(CustomProperty { name: label.clone(), value, choices, editable });
             }
+            ParameterKind::Polar { base: b, end: e } => {
+                let (b, e) = match v {
+                    Some(Value::Points { base, end }) => (*base, *end),
+                    _ => (*b, *e),
+                };
+                let lbl = p.display_label();
+                if !lbl.is_empty() {
+                    let deg = cadcraft_geom::norm_angle((e.xy() - b.xy()).angle()).to_degrees();
+                    out.push(CustomProperty { name: lbl.to_string(), value: number(d, (e - b).len() * sx), choices: Vec::new(), editable: true });
+                    out.push(CustomProperty { name: format!("{lbl} Angle"), value: number(d, deg), choices: Vec::new(), editable: true });
+                }
+            }
+            ParameterKind::Xy { base: b, end: e } => {
+                let (b, e) = match v {
+                    Some(Value::Points { base, end }) => (*base, *end),
+                    _ => (*b, *e),
+                };
+                let lbl = p.display_label();
+                if !lbl.is_empty() {
+                    out.push(CustomProperty { name: format!("{lbl} X"), value: number(d, (e.x - b.x) * sx), choices: Vec::new(), editable: true });
+                    out.push(CustomProperty { name: format!("{lbl} Y"), value: number(d, (e.y - b.y) * sy), choices: Vec::new(), editable: true });
+                }
+            }
+            ParameterKind::Rotation { base: b, end: e } => {
+                let (b, e) = match v {
+                    Some(Value::Points { base, end }) => (*base, *end),
+                    _ => (*b, *e),
+                };
+                let lbl = p.display_label();
+                if !lbl.is_empty() {
+                    let deg = cadcraft_geom::norm_angle((e.xy() - b.xy()).angle()).to_degrees();
+                    out.push(CustomProperty { name: lbl.to_string(), value: number(d, deg), choices: Vec::new(), editable: true });
+                }
+            }
+            ParameterKind::Flip { .. } => {
+                let lbl = p.display_label();
+                if !lbl.is_empty() {
+                    let flipped = matches!(v, Some(Value::Text { value }) if value.eq_ignore_ascii_case("Flipped") || value == "1");
+                    let value = if flipped { "Flipped".to_string() } else { "Not flipped".to_string() };
+                    out.push(CustomProperty {
+                        name: lbl.to_string(),
+                        value,
+                        choices: vec!["Not flipped".into(), "Flipped".into()],
+                        editable: true,
+                    });
+                }
+            }
             _ => {}
         }
     }

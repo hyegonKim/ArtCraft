@@ -127,7 +127,10 @@ pub(super) fn inputs_changed(a: &Document, b: &Document) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
+    use crate::Session;
 
     #[test]
     fn equal_data_with_new_allocations_and_revisions_does_not_trigger_reflow() {
@@ -138,5 +141,24 @@ mod tests {
         story.rev = story.rev.wrapping_add(1);
         b.styles = std::sync::Arc::new((*b.styles).clone());
         assert!(!inputs_changed(&a, &b), "cache identity/revision alone is not a layout change");
+    }
+
+    #[test]
+    fn deleting_reflow_page_preserves_overset_until_text_changes() {
+        let mut s = Session::new();
+        s.execute("file.new", &json!({"primaryTextFrame": true, "width": 200, "height": 200})).unwrap();
+        let sid = s.doc().unwrap().doc.settings.primary_story.unwrap();
+        s.execute("text.select", &json!({"story": sid.0, "anchor": 0, "focus": 0})).unwrap();
+        s.execute("text.insert", &json!({"text": "long flowing text ".repeat(120)})).unwrap();
+        let added_pages = s.doc().unwrap().doc.page_count();
+        assert!(added_pages >= 2, "Smart Text Reflow adds pages for overset text");
+
+        // Deleting the last page must succeed and NOT immediately re-add it via smart_reflow.
+        s.execute("layout.pages.delete", &json!({"pages": [added_pages - 1]})).unwrap();
+        assert_eq!(s.doc().unwrap().doc.page_count(), added_pages - 1);
+
+        // Creating an unrelated paragraph style must not resurrect the deleted page either.
+        s.execute("style.paragraph.create", &json!({"name": "Unused Heading"})).unwrap();
+        assert_eq!(s.doc().unwrap().doc.page_count(), added_pages - 1);
     }
 }

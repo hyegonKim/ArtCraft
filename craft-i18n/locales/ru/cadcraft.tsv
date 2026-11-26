@@ -41,6 +41,7 @@
 	Align Text	Выровнять текст
 	Aligned	Параллельный
 	All Used Layers	Все используемые слои
+	Analyze Shapes	Анализ фигур
 	Animation Effects	Эффекты анимации
 	Annotation scale	Масштаб аннотаций
 	Annotation Visibility	Видимость аннотаций
@@ -68,6 +69,7 @@
 	Blend	Сгладить
 	Block	Блок
 	Block Attribute Manager...	Диспетчер атрибутов блоков...
+	Block Description...	Описание блока...
 	Block Editor	Редактор блоков
 	Block Reference	Вхождение блока
 	Block...	Блок...
@@ -82,6 +84,7 @@
 	ByColor	ПоЦвету
 	ByLayer	Послою
 	CADCraft Help	Справка CADCraft
+	CADCraft is up to date.	У вас последняя версия CADCraft.
 	Cartesian (x, y)	Декартовы (x, y)
 	Center	Центр
 	Center Line	Осевая линия
@@ -94,6 +97,7 @@
 	Center, Start, Length	Центр, начало, длина
 	Change Space	Изменить пространство
 	Change to Current Layer	Перенести на текущий слой
+	Check for Updates…	Проверить обновления…
 	Circumference	Длина окружности
 	Closed	Замкнутый
 	Coincident	Совпадение
@@ -119,6 +123,7 @@
 	Copy Nested Objects	Копировать вложенные объекты
 	Copy Selection	Копировать выделение
 	Copy with Base Point	Копировать с базовой точкой
+	Could not check for updates.	Не удалось проверить обновления.
 	Count	Количество
 	Create Block	Создать блок
 	Creates a user parameter	Создает пользовательский параметр
@@ -127,6 +132,7 @@
 	Current selection	Текущее выделение
 	Current: {color}	Текущий: {color}
 	Custom	Custom
+	Cut with Base Point	Вырезать с базовой точкой
 	Cylinder	Цилиндр
 	Dark	Темная
 	Default Save Format	Формат сохранения по умолчанию
@@ -189,7 +195,7 @@
 	Enter a vertex editing option	Введите параметр редактирования вершины
 	Enter an option	Введите параметр
 	Enter angle of xline	Введите угол вспомогательной прямой
-	Enter angle of xline (0) or	Введите угол вспомогательной прямой (0) или
+	Enter angle of xline (0)	Введите угол вспомогательной прямой (0)
 	Enter area of rectangle in current units	Введите площадь прямоугольника в текущих единицах
 	Enter attribute prompt	Введите подсказку атрибута
 	Enter attribute tag name	Введите имя тега атрибута
@@ -200,7 +206,7 @@
 	Enter default attribute value	Введите значение атрибута по умолчанию
 	Enter degree of spline	Введите степень сплайна
 	Enter delta angle	Введите изменение угла
-	Enter delta length or	Введите изменение длины или
+	Enter delta length	Введите изменение длины
 	Enter dimension text	Введите размерный текст
 	Enter dimension text (<> = measurement)	Введите размерный текст (<> = измеренное значение)
 	Enter dimension value or [name=expression]	Введите размерное значение или [имя=выражение]
@@ -242,6 +248,8 @@
 	File Tab	Вкладка файла
 	Fillet	Сопряжение
 	Filters	Фильтры
+	Find All	Find All
+	Find what:	Find what:
 	Find...	Найти...
 	Fit Points	Точки сглаживания
 	Fix	Фиксация
@@ -365,6 +373,7 @@
 	Make Current	Сделать текущим
 	Make Object's Layer Current	Сделать слой объекта текущим
 	Make...	Создать...
+	Match case	Match case
 	Match Layer	Согласовать слой
 	Match Properties	Копирование свойств
 	Measure	Разметить
@@ -393,6 +402,7 @@
 	Name	Название
 	Name (A–Z)	Название (А–Я)
 	Named	Именованная
+	Named Viewports...	Именованные видовые экраны...
 	Nearest	Ближайшая точка
 	New (metric)	Создать (метрический)
 	New CTB	Новая CTB
@@ -413,9 +423,9 @@
 	No saved layer states	Нет сохраненных состояний слоев
 	No selection	Ничего не выделено
 	Node	Узел
-	Normal	Normal
 	Not a number or distance: {text}	Не число и не расстояние: {text}
 	Not available yet	Пока недоступно
+	Nothing found	Nothing found
 	Object Snap	Объектная привязка
 	Object Snap (F3)	Объектная привязка (F3)
 	Object Snap On (F3)	Включить объектную привязку (F3)
@@ -424,6 +434,7 @@
 	Object type:	Тип объекта:
 	On/Off	Включить/выключить
 	One of the Crafting Apps by the ArtCraft team and community.	Одна из программ Crafting Apps от команды и сообщества ArtCraft.
+	Oops	Восстановить стертые объекты
 	Open (⌘O)	Открыть (⌘O)
 	Open a drawing first.	Сначала откройте чертеж.
 	Open Sample Drawing	Открыть образец чертежа
@@ -527,10 +538,16 @@
 	Rename Text Style	Переименовать текстовый стиль
 	Rename...	Переименовать...
 	Repeat {command}	Повторить {command}
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Заменить блок...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	Требуется точка (x,y, @dx,dy или @d<a).
 	Reset Palettes	Сбросить палитры
 	Reset Panel Layout	Сбросить расположение панелей
 	Restore Layer State	Восстановить состояние слоев
+	Results	Results
 	Reverse	Изменить направление
 	Reverse the order	Изменить порядок на обратный
 	Revision Cloud	Облако
@@ -546,6 +563,7 @@
 	Search for layer	Поиск слоя
 	Search for parameter	Поиск параметра
 	Search for pattern	Поиск образца
+	Searches the current space.	Searches the current space.
 	Second and next points:	Вторая и следующие точки:
 	Select	Выбрать
 	Select 2D polyline	Выберите 2D-полилинию
@@ -572,8 +590,8 @@
 	Select an arc or circle	Выберите дугу или круг
 	Select an arc.	Выберите дугу.
 	Select an object	Выберите объект
-	Select an object to change or	Выберите объект для изменения или
-	Select an object to measure or	Выберите объект для измерения или
+	Select an object to change	Выберите объект для изменения
+	Select an object to measure	Выберите объект для измерения
 	Select an object.	Выберите объект.
 	Select an open curve.	Выберите незамкнутую кривую.
 	Select an open line, arc, polyline, ellipse arc or spline.	Выберите незамкнутый отрезок, дугу, полилинию, эллиптическую дугу или сплайн.
@@ -587,9 +605,8 @@
 	Select first line	Выберите первый отрезок
 	Select first line or arc	Выберите первый отрезок или дугу
 	Select first object	Выберите первый объект
-	Select first object or	Выберите первый объект или
 	Select first point	Выберите первую точку
-	Select nested objects to copy or	Выберите вложенные объекты для копирования или
+	Select nested objects to copy	Выберите вложенные объекты для копирования
 	Select object	Выберите объект
 	Select object to dimension	Выберите объект для нанесения размера
 	Select object to divide	Выберите объект для деления
@@ -606,7 +623,7 @@
 	Select one polyline (Multiple is available through the JSON form).	Выберите одну полилинию (Multiple доступно через JSON).
 	Select path curve	Выберите кривую траектории
 	Select point or object	Выберите точку или объект
-	Select polyline or	Выберите полилинию или
+	Select polyline	Выберите полилинию
 	Select second line	Выберите второй отрезок
 	Select second line or shift-select to apply corner	Выберите второй отрезок или выберите с Shift, чтобы построить угол
 	Select second object	Выберите второй объект
@@ -658,9 +675,8 @@
 	Specify axis endpoint of ellipse	Укажите конечную точку оси эллипса
 	Specify base diameter	Укажите базовый диаметр
 	Specify base point	Укажите базовую точку
-	Specify base point or	Укажите базовую точку или
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Укажите базовую точку или смещение (перетаскивайте средней кнопкой мыши для панорамирования)
-	Specify base radius or	Укажите базовый радиус или
+	Specify base radius	Укажите базовый радиус
 	Specify center of donut	Укажите центр кольца
 	Specify center of ellipse	Укажите центр эллипса
 	Specify center of polygon	Укажите центр многоугольника
@@ -702,7 +718,7 @@
 	Specify first point on circle: _tan to	Укажите первую точку на круге: _tan к
 	Specify first source point	Укажите первую исходную точку
 	Specify height	Укажите высоту
-	Specify helix height or	Укажите высоту спирали или
+	Specify helix height	Укажите высоту спирали
 	Specify included angle	Укажите угол между сторонами
 	Specify insertion base point	Укажите базовую точку вставки
 	Specify insertion point	Укажите точку вставки
@@ -721,7 +737,6 @@
 	Specify new width for all segments	Укажите новую ширину всех сегментов
 	Specify next point	Укажите следующую точку
 	Specify offset distance	Укажите расстояние смещения
-	Specify offset distance or	Укажите расстояние смещения или
 	Specify opposite corner	Укажите противоположный угол
 	Specify other corner point	Укажите другую угловую точку
 	Specify other endpoint of axis	Укажите другую конечную точку оси
@@ -734,7 +749,6 @@
 	Specify radius of circle	Укажите радиус круга
 	Specify rotation angle	Укажите угол поворота
 	Specify rotation angle of text	Укажите угол поворота текста
-	Specify rotation angle or	Укажите угол поворота или
 	Specify scale factor	Укажите масштабный коэффициент
 	Specify second angle endpoint	Укажите вторую конечную точку угла
 	Specify second break point	Укажите вторую точку разрыва
@@ -767,9 +781,9 @@
 	Specify third source point or <continue>	Укажите третью исходную точку или <продолжить>
 	Specify through point	Укажите точку, через которую проходит прямая
 	Specify top diameter	Укажите диаметр вершины
-	Specify top radius or	Укажите радиус вершины или
+	Specify top radius	Укажите радиус вершины
 	Specify total angle	Укажите полный угол
-	Specify total length or	Укажите общую длину или
+	Specify total length	Укажите общую длину
 	Specify width for rectangles	Укажите ширину прямоугольников
 	Sphere	Сфера
 	Spline	Сплайн
@@ -806,6 +820,7 @@
 	Text override	Переопределение текста
 	Text style	Текстовый стиль
 	Text Style...	Текстовый стиль...
+	Text to find	Text to find
 	Thaw All Layers	Разморозить все слои
 	There is nothing here yet.	Здесь пока ничего нет.
 	Thickness	Высота выдавливания
@@ -844,10 +859,12 @@
 	Viewport Properties	Свойства видового экрана
 	Viewport {id}	Видовой экран {id}
 	Viewports	Видовые экраны
+	Volume	Объём
 	VP Color	Цвет ВЭ
 	VP Freeze	Заморозка ВЭ
 	W	З
-	WCS ⌄	МСК ⌄
+	WCS	МСК
+	Whole words	Whole words
 	Width factor	Коэффициент ширины
 	Wipeout	Маскировка
 	Working Set	Рабочий набор
@@ -856,6 +873,7 @@
 	Xline	Вспомогательная прямая
 	Xref and Block In-place Editing	Редактирование xref и блоков на месте
 	Yellow	Желтый
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom	Показать
 	Zoom All	Показать все
 	Zoom Extents	Показать границы объектов

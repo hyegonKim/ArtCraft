@@ -1,0 +1,5 @@
+# Words the th pack must accept and reject (common words; written for this check).
+hidden = true
+reason = "Thai text has no spaces between words: craft-proof needs word segmentation before a Thai dictionary is useful"
+correct = ["บ้าน", "หนังสือ", "โรงเรียน", "น้ำ", "เมือง"]
+incorrect = ["บ้านนนน", "หนังสือออ", "เมืองงงง"]

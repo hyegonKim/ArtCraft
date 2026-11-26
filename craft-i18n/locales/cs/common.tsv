@@ -1271,6 +1271,7 @@ theme	Appearance	Motiv
 	Zoom Out	Oddálit
 	Zoom out	Oddálit
 	Zoom Tool	Nástroj Lupa
+@plural	{n} byte|{n} bytes	{n} bajt|{n} bajty|{n} bajtů
 @plural	{n} commit|{n} commits	{n} commit|{n} commity|{n} commitů
 	{n} files	Soubory: {n}
 	{n} h ago	před {n} h

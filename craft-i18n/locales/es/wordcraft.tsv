@@ -1635,6 +1635,14 @@
 	Remove Table of Contents	Quitar tabla de contenido
 	Remove the control once edited	Quitar el control al editarlo
 	Remove Watermark	Quitar marca de agua
+	No watermark	Sin marca de agua
+	Picture watermark	Marca de agua de imagen
+	Text watermark	Marca de agua de texto
+	Select Picture…	Seleccionar imagen…
+	Washout	Descolorido
+	Semitransparent	Semitransparente
+	Transparency:	Transparencia:
+	Select a picture first.	Seleccione primero una imagen.
 	Rename Document	Cambiar nombre del documento
 	Reopen	Reabrir
 	Repeat as header row on each page	Repetir como fila de encabezado en cada página
@@ -2312,3 +2320,122 @@ preview	Title	Título
 	{words} words	{words} palabras
 	“{text}” ({row}, {series}) isn't a number.	«{text}» ({row}, {series}) no es un número.
 	✓ None	✓ Ninguno
+	Add a language…	Añadir un idioma…
+	Add a language	Añadir un idioma
+	Your languages	Tus idiomas
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Inglés, los idiomas de este documento y cada paquete de idioma instalado. Los paquetes de idioma añaden diccionarios ortográficos y separación silábica.
+	Set as default	Establecer como predeterminado
+	New blank documents are written in this language	Los documentos en blanco nuevos se escriben en este idioma
+	{language} (default)	{language} (predeterminado)
+	Built in	Integrado
+	Your own dictionary	Tu propio diccionario
+	System dictionary	Diccionario del sistema
+	Not available yet	Aún no disponible
+	Grammar built in	Gramática integrada
+	Install spelling ({size})	Instalar ortografía ({size})
+	Its dictionary couldn't be read: {reason}	No se pudo leer su diccionario: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	La descarga está desactivada. Al hacer clic en «Añadir un idioma…» o «Instalar» se activa: WordCraft descargará entonces paquetes de idioma y fuentes desde GitHub.
+	Search:	Buscar:
+	Dutch, Nederlands or nl	Neerlandés, Nederlands o nl
+	No languages to show yet.	Aún no hay idiomas que mostrar.
+	No language matches your search.	Ningún idioma coincide con tu búsqueda.
+	An installed Language pack is used after this folder.	Un paquete de idioma instalado se usa después de esta carpeta.
+	Dictionary files	Archivos de diccionario
+	Possible spelling mistake	Posible error ortográfico
+	Gets the list of Language packs, then this language's pack if there is one.	Obtiene la lista de paquetes de idioma y luego el paquete de este idioma, si lo hay.
+	Afrikaans	afrikáans
+	Belarusian	bielorruso
+	Bulgarian	búlgaro
+	Bosnian	bosnio
+	Catalan	catalán
+	Catalan (Valencian)	catalán (valenciano)
+	Welsh	galés
+	Esperanto	esperanto
+	Persian	persa
+	Irish	irlandés
+	Galician	gallego
+	Hungarian	húngaro
+	Armenian	armenio
+	Icelandic	islandés
+	Georgian	georgiano
+	Lithuanian	lituano
+	Latvian	letón
+	Macedonian	macedonio
+	Norwegian (Nynorsk)	noruego (nynorsk)
+	Slovak	eslovaco
+	Slovenian	esloveno
+	Albanian	albanés
+	Swahili	suajili
+	Tamil	tamil
+	Thai	tailandés
+	Vietnamese	vietnamita
+	Set as Default Language	Establecer como idioma predeterminado
+	U.A.E.	Emiratos Árabes Unidos
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austria
+	Australia	Australia
+	Bosnia and Herzegovina	Bosnia y Herzegovina
+	Belgium	Bélgica
+	Bolivia	Bolivia
+	Brazil	Brasil
+	Belarus	Bielorrusia
+	Canada	Canadá
+	Switzerland	Suiza
+	Chile	Chile
+	China	China
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Cabo Verde
+	Cyprus	Chipre
+	Germany	Alemania
+	Dominican Republic	República Dominicana
+	Ecuador	Ecuador
+	Egypt	Egipto
+	Spain	España
+	Finland	Finlandia
+	France	Francia
+	United Kingdom	Reino Unido
+	Equatorial Guinea	Guinea Ecuatorial
+	Guatemala	Guatemala
+	Hong Kong SAR	RAE de Hong Kong
+	Honduras	Honduras
+	Ireland	Irlanda
+	India	India
+	Iraq	Irak
+	Italy	Italia
+	Jamaica	Jamaica
+	Jordan	Jordania
+	Kuwait	Kuwait
+	Kazakhstan	Kazajistán
+	Lebanon	Líbano
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburgo
+	Morocco	Marruecos
+	Monaco	Mónaco
+	Montenegro	Montenegro
+	Macao SAR	RAE de Macao
+	Mexico	México
+	Malaysia	Malasia
+	Mozambique	Mozambique
+	Nicaragua	Nicaragua
+	Netherlands	Países Bajos
+	New Zealand	Nueva Zelanda
+	Panama	Panamá
+	Peru	Perú
+	Philippines	Filipinas
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Catar
+	Russia	Rusia
+	Singapore	Singapur
+	El Salvador	El Salvador
+	Syria	Siria
+	Taiwan	Taiwán
+	Ukraine	Ucrania
+	United States	Estados Unidos
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Sudáfrica

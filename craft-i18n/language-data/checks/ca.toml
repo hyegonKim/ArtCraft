@@ -1,0 +1,3 @@
+# Words the ca pack must accept and reject (common words; written for this check).
+correct = ["casa", "llibre", "escola", "aigua", "ciutat", "treballar"]
+incorrect = ["llibree", "escoola", "ciutatt"]

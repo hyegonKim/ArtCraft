@@ -1,0 +1,1177 @@
+# Türkçe (tr) interface catalog for CADCraft.
+# Columns, separated by a TAB:  context <TAB> English source text <TAB> translation
+#   context  usually empty. `@plural`, `@id` and `@msg` mean something to the apps; any other
+#            word is a label that tells apart two meanings of the same English.
+#   escapes  \n  \t  \\  inside a column. `{name}` placeholders must appear in both columns (in any
+#            order), and a trailing "…" in one needs one in the other.
+#   @plural  English `one|other`; the translation lists this language's plural forms, `|`-separated.
+#   Lines starting with # and blank lines are ignored. A missing entry shows in English.
+#
+# Clean room: every entry was written from the plain meaning of the English text in ordinary
+# computing vocabulary. No other product's localisation, string table or translated UI was
+# consulted or copied; add entries the same way.
+
+	  Cancel  	  İptal  
+	  OK  	  Tamam  
+	 or [	 veya [
+	% of all commits	Tüm commit'lerin yüzdesi
+	* Wildcard Match	* Joker Karakter Eşleşmesi
+	*VARIES*	*DEĞİŞKEN*
+	+  |  Top  |  2D Wireframe	+  |  Üst  |  2B Tel Kafes
+	+Bin	+Bin
+	+LOC	+LOC
+	1 Viewport	1 Görünüm Penceresi
+	2 Points	2 Nokta
+	2 Viewports	2 Görünüm Penceresi
+	2D Solid	2B Katı
+	3 Points	3 Nokta
+	3 Viewports	3 Görünüm Penceresi
+	3D Face	3B Yüzey
+	3D Mouse	3B Fare
+	3D mouse busy, possibly 3DxWare or missing device permissions	3B fare meşgul; 3DxWare açık olabilir ya da aygıt izinleri eksik
+	3D mouse connected	3B fare bağlandı
+	3D mouse disconnected	3B fare bağlantısı kesildi
+	3D mouse input could not be started	3B fare girişi başlatılamadı
+	3D mouse input is unavailable on this platform	3B fare girişi bu platformda kullanılamıyor
+	3D Mouse Navigation	3B Fare ile Gezinme
+	3D Mouse...	3B Fare...
+	3D Operations	3B İşlemler
+	3D Polyline	3B Çoklu Çizgi
+	4 Viewports	4 Görünüm Penceresi
+	< Less than	< Küçüktür
+	<> Not Equal	<> Eşit Değildir
+	= Equals	= Eşittir
+	> Greater than	> Büyüktür
+	A built-in table: editing it keeps an edited copy in the drawing.	Yerleşik bir tablo: düzenlendiğinde düzenlenmiş bir kopyası çizimde tutulur.
+	A drawing opened from a file keeps that file's format.	Bir dosyadan açılan çizim o dosyanın biçimini korur.
+	A variable name starts with a letter and has only letters, digits and _	Değişken adı bir harfle başlar ve yalnızca harf, rakam ve _ içerir
+	About CADCraft	CADCraft Hakkında
+	Add Current Scale	Geçerli Ölçeği Ekle
+	Add Leader	Kılavuz Çizgisi Ekle
+	Add to Working Set	Çalışma Kümesine Ekle
+	Add Vertex	Köşe Noktası Ekle
+	Add/Delete Scales...	Ölçek Ekle/Sil...
+	Add: Pick points	Ekle: Nokta seç
+	Add: Select objects	Ekle: Nesne seç
+	Additional angles	Ek açılar
+	Align Multileaders	Çoklu Kılavuzları Hizala
+	Aligned	Hizalı
+	All Annotation Objects	Tüm Açıklama Nesneleri
+	All Scales	Tüm Ölçekler
+	All Used Layers	Kullanılan Tüm Katmanlar
+	An array that would create more objects than this is refused.	Bundan daha fazla nesne oluşturacak bir dizi reddedilir.
+	Angular	Açısal
+	Animation Effects	Animasyon Efektleri
+	Annotation scale	Açıklama ölçeği
+	Annotation Visibility	Açıklama Görünürlüğü
+	Annotative Object Scale	Açıklamalı Nesne Ölçeği
+	Annotative Update	Açıklamalı Güncelleme
+	Apparent Intersection	Görünür Kesişim
+	Append to current selection set	Geçerli seçim kümesine ekle
+	Apply to:	Uygulanacak yer:
+	Apply true color	Gerçek renk uygula
+	Arc Length	Yay Uzunluğu
+	Arrange Panel	Paneli Düzenle
+	Array	Dizi
+	Associative	İlişkisel
+	Attach	İliştir
+	Attach DWG...	DWG İliştir...
+	Attribute	Öznitelik
+	Attribute Definition	Öznitelik Tanımı
+	Attribute Display	Öznitelik Görünümü
+	Audit	Denetle
+	Auto (system language)	Otomatik (sistem dili)
+	Auto Constrain	Otomatik Kısıtla
+	AutoConstrain	Otomatik Kısıtla
+	Automatic save every	Otomatik kaydetme aralığı
+	Automatic save file location	Otomatik kaydetme dosya konumu
+	Axis, End	Eksen, Uç
+	B	B
+	Base	Taban
+	Baseline	Taban Çizgisi
+	Batch Publish	Toplu Yayımla
+	Batch Publish...	Toplu Yayımla...
+	Bind	Bağla
+	Bind...	Bağla...
+	Blend	Harmanla
+	Block Attribute Manager...	Blok Öznitelik Yöneticisi...
+	Block Description...	Blok Açıklaması...
+	Block Editor	Blok Düzenleyici
+	Block Reference	Blok Referansı
+	Block to create or edit	Oluşturulacak ya da düzenlenecek blok
+	Block...	Blok...
+	Boolean	Boole
+	Bottom left	Sol alt
+	Bottom right	Sağ alt
+	Boundaries	Sınırlar
+	Boundaries picked: {n}	Seçilen sınır: {n}
+	Boundary	Sınır
+	Boundary...	Sınır...
+	Box	Kutu
+	Break	Kır
+	Break At Point	Noktadan Kır
+	Bring Above Objects	Nesnelerin Üstüne Getir
+	Bring Annotations to Front	Açıklamaları Öne Getir
+	Bulleted list	Madde işaretli liste
+	ByBlock	BloğaGöre
+	ByColor	RengeGöre
+	ByLayer	KatmanaGöre
+	CADCraft	CADCraft
+	CADCraft Help	CADCraft Yardımı
+	CADCraft is up to date.	CADCraft güncel.
+	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	CADCraft bu tercihleri, nesne kenetleme kiplerini ve çizim seçeneklerini kullanıcı hesabınız için saklar ve açılışta geri yükler.
+	Calibrate	Kalibre Et
+	Calibrate 3D Mouse	3B Fareyi Kalibre Et
+	Cartesian (x, y)	Kartezyen (x, y)
+	Center	Merkez
+	Center Line	Merkez Çizgisi
+	Center Mark	Merkez İşareti
+	Center Z	Merkez Z
+	Center, Diameter	Merkez, Çap
+	Center, Radius	Merkez, Yarıçap
+	Center, Start, Angle	Merkez, Başlangıç, Açı
+	Center, Start, End	Merkez, Başlangıç, Bitiş
+	Center, Start, Length	Merkez, Başlangıç, Uzunluk
+	Chamfer	Pah
+	Change Space	Alanı Değiştir
+	Change to Current Layer	Geçerli Katmana Taşı
+	Changed: {n}	Değiştirilen: {n}
+	Changes apply at once and are kept for next time.	Değişiklikler hemen uygulanır ve bir sonraki sefer için saklanır.
+	Check for Updates…	Güncellemeleri denetle…
+	Circumference	Çevre
+	Clear Command History	Komut Geçmişini Temizle
+	Click the ruler to add a tab stop, right-click to remove one	Sekme durağı eklemek için cetvele tıklayın, kaldırmak için sağ tıklayın
+	Click to set new origin	Yeni orijini belirlemek için tıklayın
+	Clip	Kırp
+	Clip Viewport	Görünüm Penceresini Kırp
+	Close All Other Drawings	Diğer Tüm Çizimleri Kapat
+	Close Array Editing	Dizi Düzenlemeyi Kapat
+	Close Block Editor	Blok Düzenleyiciyi Kapat
+	Close Comparison	Karşılaştırmayı Kapat
+	Closed	Kapalı
+	Coincident	Çakışık
+	Collapse Palettes	Paletleri Daralt
+	Collapse Tool Sets	Araç Takımlarını Daralt
+	Collect	Topla
+	Collect Multileaders	Çoklu Kılavuzları Topla
+	Collinear	Doğrusal Hizalı
+	Color 1	Renk 1
+	Color 2	Renk 2
+	Color 8	Renk 8
+	Color 9	Renk 9
+	Color Index	Renk Dizini
+	Color-dependent	Renge bağlı
+	Color...	Renk...
+	Command Aliases	Komut Takma Adları
+	Command History	Komut Geçmişi
+	Command Line	Komut Satırı
+	Command line history	Komut satırı geçmişi
+	Command Line History Lines	Komut Satırı Geçmiş Satırları
+	Command Reference	Komut Başvurusu
+	Compare Drawings...	Çizimleri Karşılaştır...
+	Computer-aided design and drafting: an open-source, clean-room CAD application written in pure Rust.	Bilgisayar destekli tasarım ve teknik çizim: saf Rust ile yazılmış, açık kaynaklı, clean-room bir CAD uygulaması.
+	Concentric	Eş Merkezli
+	Constraint Bars	Kısıtlama Çubukları
+	Constraint Settings	Kısıtlama Ayarları
+	Construction Line	Yapı Çizgisi
+	contains authoring elements. Open in Block Editor?	yazma öğeleri içeriyor. Blok Düzenleyicide açılsın mı?
+	Contents	İçindekiler
+	Continue	Devam
+	Control Vertices	Kontrol Köşe Noktaları
+	Convert to Arc	Yaya Dönüştür
+	Convert to Line	Çizgiye Dönüştür
+	Copy as JSON	JSON Olarak Kopyala
+	Copy Full File Path	Tam Dosya Yolunu Kopyala
+	Copy History	Geçmişi Kopyala
+	Copy Layout	Yerleşimi Kopyala
+	Copy Nested Objects	İç İçe Nesneleri Kopyala
+	Copy Selection	Seçimi Kopyala
+	Copy with Base Point	Taban Noktasıyla Kopyala
+	Could not check for updates.	Güncellemeler denetlenemedi.
+	Count	Say
+	Count List	Sayım Listesi
+	Count Table	Sayım Tablosu
+	Create Block	Blok Oluştur
+	Create separate hatches	Ayrı taramalar oluştur
+	Creates a user parameter	Bir kullanıcı parametresi oluşturur
+	Crosshair size	İmleç boyutu
+	Crossing selection color:	Kesişen seçim rengi:
+	Ctrl+Enter to finish	Bitirmek için Ctrl+Enter
+	Current layer	Geçerli katman
+	Current Scale Only	Yalnızca Geçerli Ölçek
+	Current selection	Geçerli seçim
+	Current: {color}	Geçerli: {color}
+	Curved	Eğri
+	Cut with Base Point	Taban Noktasıyla Kes
+	Cylinder	Silindir
+	Data Extraction...	Veri Çıkarma...
+	Data Link...	Veri Bağlantısı...
+	Default Save Format	Varsayılan Kaydetme Biçimi
+	Default Save Version	Varsayılan Kaydetme Sürümü
+	Default save version	Varsayılan kaydetme sürümü
+	Default to boundary extents	Varsayılan olarak sınır kapsamını kullan
+	Define Attributes	Öznitelik Tanımla
+	Define Attributes...	Öznitelik Tanımla...
+	Defined width	Tanımlı genişlik
+	Degree	Derece
+	Degrees of Freedom	Serbestlik Dereceleri
+	Degrees of freedom: {n}	Serbestlik derecesi: {n}
+	Delete Column	Sütunu Sil
+	Delete Constraints	Kısıtlamaları Sil
+	Delete Current Scale	Geçerli Ölçeği Sil
+	Delete Dimension Style	Ölçülendirme Stilini Sil
+	Delete Duplicate Objects	Yinelenen Nesneleri Sil
+	Delete Layer State	Katman Durumunu Sil
+	Delete Layout	Yerleşimi Sil
+	Delete Row	Satırı Sil
+	Delete Text Style	Metin Stilini Sil
+	Delta X	Delta X
+	Delta Y	Delta Y
+	Deselect All	Tüm Seçimi Kaldır
+	Detach	Ayır
+	Dim style	Ölçü stili
+	Dimension	Ölçü
+menu	Dimension	Ölçülendirme
+	Dimension Break	Ölçü Kırma
+	Dimension Edit	Ölçü Düzenleme
+	Dimension Objects Only	Yalnızca Ölçülendirme Nesneleri
+	Dimension Space	Ölçü Aralığı
+	Dimension style	Ölçülendirme stili
+	Dimension Style Override	Ölçülendirme Stili Geçersiz Kılma
+	Dimension Style...	Ölçülendirme Stili...
+	Dimension Text Edit	Ölçü Metni Düzenleme
+	Dimensional Constraint	Boyutsal Kısıtlama
+	Dimensional Constraint Parameters	Boyutsal Kısıtlama Parametreleri
+	Dimensional Constraints	Boyutsal Kısıtlamalar
+	Disassociate Dimensions	Ölçülerin İlişkisini Kaldır
+	Display	Görüntü
+	Display plot styles	Çizdirme stillerini göster
+	Do not plot (click: plot)	Çizdirme (tıklayın: çizdir)
+	Donut	Halka
+	Double-click to edit the description	Açıklamayı düzenlemek için çift tıklayın
+	Drafting	Çizim
+	Drafting Settings	Çizim Ayarları
+	Drafting Settings...	Çizim Ayarları...
+	Drag Dynamic Grip	Dinamik Tutamacı Sürükle
+menu	Draw	Çiz
+	Draw Order	Çizim Sırası
+	Drawing (DWG)	Çizim (DWG)
+	Drawing (DXF)	Çizim (DXF)
+	Drawing as bytes	Bayt olarak çizim
+	Drawing Limits	Çizim Sınırları
+	Drawing Recovery Manager...	Çizim Kurtarma Yöneticisi...
+	Drawing Template (DWT)	Çizim Şablonu (DWT)
+	Drawing Utilities	Çizim Yardımcı Programları
+	Drawings (DWG, DXF)	Çizimler (DWG, DXF)
+	Drawings with no file yet are saved in the default version. 0 minutes turns automatic save off.	Henüz dosyası olmayan çizimler varsayılan sürümde kaydedilir. 0 dakika otomatik kaydetmeyi kapatır.
+	DWG	DWG
+	DWG Reference...	DWG Referansı...
+	DXF	DXF
+	Dynamic Block Data	Dinamik Blok Verileri
+	Dynamic Block Grips	Dinamik Blok Tutamaçları
+	Dynamic Block Reference	Dinamik Blok Referansı
+	Dynamic Dimensions	Dinamik Ölçüler
+	Dynamic Input	Dinamik Giriş
+	Dynamic Input (F12)	Dinamik Giriş (F12)
+	E	D
+	Edit	Düzenle
+	Edit Array	Diziyi Düzenle
+	Edit Attributes...	Öznitelikleri Düzenle...
+	Edit Block Definition	Blok Tanımını Düzenle
+	Edit Multileader	Çoklu Kılavuzu Düzenle
+	Edit Reference In-Place	Referansı Yerinde Düzenle
+	Edit Table Cell	Tablo Hücresini Düzenle
+	Edit Text...	Metni Düzenle...
+	Elevation	Kot
+	Ellipse	Elips
+	Elliptical Arc	Eliptik Yay
+	Enable 3D mouse navigation	3B fare ile gezinmeyi etkinleştir
+	Enable Dynamic Input (F12)	Dinamik Girişi Etkinleştir (F12)
+	End angle	Bitiş açısı
+	End Object Isolation	Nesne Yalıtımını Sonlandır
+	End Width	Bitiş Genişliği
+	End X	Bitiş X
+	End Y	Bitiş Y
+	Endpoint	Uç Nokta
+	Enter	Enter
+	Enter a fit data option	Bir uydurma verisi seçeneği girin
+	Enter a pattern name	Bir desen adı girin
+	Enter a vertex editing option	Bir köşe noktası düzenleme seçeneği girin
+	Enter an option	Bir seçenek girin
+	Enter angle of xline	Yapı çizgisinin açısını girin
+	Enter angle of xline (0)	Yapı çizgisinin açısını girin (0)
+	Enter area of rectangle in current units	Dikdörtgenin alanını geçerli birimlerle girin
+	Enter attribute prompt	Öznitelik istemini girin
+	Enter attribute tag name	Öznitelik etiket adını girin
+	Enter attribute value	Öznitelik değerini girin
+	Enter block name	Blok adını girin
+	Enter constraint type	Kısıtlama türünü girin
+	Enter continuity	Süreklilik girin
+	Enter default attribute value	Varsayılan öznitelik değerini girin
+	Enter degree of spline	Spline derecesini girin
+	Enter delta angle	Açı farkını girin
+	Enter delta length	Uzunluk farkını girin
+	Enter dimension text	Ölçü metnini girin
+	Enter dimension text (<> = measurement)	Ölçü metnini girin (<> = ölçülen değer)
+	Enter dimension value or [name=expression]	Ölçü değerini girin veya [name=expression]
+	Enter dimension variable name to override	Geçersiz kılınacak ölçü değişkeninin adını girin
+	Enter justification type	Yaslama türünü girin
+	Enter leader text	Kılavuz metnini girin
+	Enter mline scale	Çoklu çizgi ölçeğini girin
+	Enter mode	Kip girin
+	Enter name of block to insert	Eklenecek bloğun adını girin
+	Enter new text	Yeni metni girin
+	Enter next point	Sonraki noktayı girin
+	Enter number of columns	Sütun sayısını girin
+	Enter number of data rows	Veri satırı sayısını girin
+	Enter number of items	Öğe sayısını girin
+	Enter number of items along path	Yol boyunca öğe sayısını girin
+	Enter number of sides	Kenar sayısını girin
+	Enter number of turns	Tur sayısını girin
+	Enter percentage length	Uzunluk yüzdesini girin
+	Enter rectangle length	Dikdörtgen uzunluğunu girin
+	Enter rectangle width	Dikdörtgen genişliğini girin
+	Enter scale factor	Ölçek faktörünü girin
+	Enter text	Metin girin
+	Enter text (use \\P for new paragraphs)	Metin girin (yeni paragraf için \\P kullanın)
+	Enter the number of segments	Parça sayısını girin
+	Enter Top, Zero or Bottom.	Top, Zero veya Bottom girin.
+	Enter twist direction of helix	Helezonun dönüş yönünü girin
+	Entire drawing	Tüm çizim
+	Equal	Eşit
+	error	hata
+	Evaluate	Değerlendir
+	Evaluate LISP	LISP Değerlendir
+	Exclude from new selection set	Yeni seçim kümesinden hariç tut
+	Exclude:	Hariç tut:
+	Explode	Patlat
+	Export Comparison	Karşılaştırmayı Dışa Aktar
+	Export Table	Tabloyu Dışa Aktar
+	Export to PDF...	PDF Olarak Dışa Aktar...
+	Export...	Dışa Aktar...
+	Extend	Uzat
+	Extension	Uzantı
+	Extents	Kapsam
+	External Reference	Dış Referans
+	External References	Dış Referanslar
+	Extrude	Kalınlık Ver
+	File Tab	Dosya Sekmesi
+	Fillet	Yuvarlatma
+	Filters	Filtreler
+	Find All	Find All
+	Find what:	Find what:
+	Find...	Bul...
+	Fit Points	Uydurma Noktaları
+	Fix	Sabitle
+	Flatten Objects	Nesneleri Düzleştir
+	Freehand	Serbest El
+	Freeze	Dondur
+	Freeze in new viewports	Yeni görünüm pencerelerinde dondur
+	Freeze Layer	Katmanı Dondur
+	Freeze/Thaw	Dondur/Çöz
+	Freeze/Thaw in all viewports	Tüm görünüm pencerelerinde dondur/çöz
+	Freeze/Thaw in the current viewport	Geçerli görünüm penceresinde dondur/çöz
+	From	Kaynak
+	From Template...	Şablondan...
+	Geometric Center	Geometrik Merkez
+	Geometric Constraint	Geometrik Kısıtlama
+	Geometric Constraints	Geometrik Kısıtlamalar
+	Get from the Drawing	Çizimden Al
+	Get Variable	Değişkeni Al
+	Get View	Görünümü Al
+	Global	Genel
+	Global width	Genel genişlik
+	Grab bag	Karışık
+	Gradient	Degrade
+	Gradient...	Degrade...
+	Grayscale	Gri Tonlama
+	Grid (F7)	Izgara (F7)
+	Grid Display	Izgara Görünümü
+	Grid On (F7)	Izgara Açık (F7)
+	Grid snap	Izgara kenetlemesi
+	Grid spacing	Izgara aralığı
+	Grip Edit	Tutamaçla Düzenle
+	Grip Mirror	Tutamaçla Aynala
+	Grip Option	Tutamaç Seçeneği
+	Grip Rotate	Tutamaçla Döndür
+	Grip Scale	Tutamaçla Ölçekle
+	Grip size	Tutamaç boyutu
+	Grip Stretch	Tutamaçla Esnet
+	Grips	Tutamaçlar
+	Group Edit	Grubu Düzenle
+	Group Options	Grup Seçenekleri
+	Group Selection	Grup Seçimi
+	Hatch	Tarama
+	Hatch and Gradient	Tarama ve Degrade
+	Hatch Edit	Taramayı Düzenle
+	Hatch origin	Tarama orijini
+	Hatch Pattern	Tarama Deseni
+	Hatch Patterns	Tarama Desenleri
+	Hatch Pick	Tarama Seçimi
+	Hatch...	Tarama...
+	Hatches	Taramalar
+	Height: {height}	Yükseklik: {height}
+	Helix	Helezon
+	Hemispherical	Yarım Küresel
+	Hide All Constraint Bars	Tüm Kısıtlama Çubuklarını Gizle
+	Hide All Dynamic Dimensions	Tüm Dinamik Ölçüleri Gizle
+	Hide CADCraft	CADCraft'ı Gizle
+	Hide Layer List	Katman Listesini Gizle
+	Hide Objects	Nesneleri Gizle
+	Hide Palette	Paleti Gizle
+	Hide Palettes	Paletleri Gizle
+	History	Geçmiş
+	Hold Shift to add to the selection	Seçime eklemek için Shift'i basılı tutun
+	Home	Başlangıç
+	HorizontalDistance	Yatay Uzaklık
+	How to apply:	Uygulama biçimi:
+	ID Point	Nokta Kimliği
+	Import	İçe Aktar
+	Import...	İçe Aktar...
+	In	Yakınlaştır
+	In-window Menu Bar	Pencere İçi Menü Çubuğu
+	Include in new selection set	Yeni seçim kümesine dahil et
+	Increment angle	Artış açısı
+	Index Color	Dizin Rengi
+	Index color: {index}	Dizin rengi: {index}
+	Indicate selection area	Seçim alanını belirtin
+	Infer Constraints	Kısıtlamaları Çıkar
+	Inquiry	Sorgu
+	Insert Block	Blok Ekle
+	Insert Column	Sütun Ekle
+	Insert Row	Satır Ekle
+	Insert tab	Sekme ekle
+	Insert Table Formula	Tablo Formülü Ekle
+	Insert this block	Bu bloğu ekle
+	Insertion	Ekleme
+	Insertion X	Ekleme X
+	Insertion Y	Ekleme Y
+	Insertion Z	Ekleme Z
+	Inspect Constraints	Kısıtlamaları İncele
+	Inspect Drawing	Çizimi İncele
+	Inspection	İnceleme
+	Interface Language	Arayüz Dili
+	Interface theme	Arayüz teması
+	Intersect	Kesiştir
+	Inverted	Ters
+	Island detection	Ada algılama
+	Isolate	Yalıt
+	Isolate Layer	Katmanı Yalıt
+	Isolate Objects	Nesneleri Yalıt
+	Isometric Drafting	İzometrik Çizim
+	Isometric Plane	İzometrik Düzlem
+	Isometric snap	İzometrik kenetleme
+	Jogged	Kırık
+	Jogged Linear	Kırık Doğrusal
+	Join	Birleştir
+	Justify	Yasla
+	Keep an editable copy of this table in the drawing	Bu tablonun düzenlenebilir bir kopyasını çizimde tut
+	Keep the system cursor visible over the drawing area	Sistem imlecini çizim alanı üzerinde görünür tut
+	Largest array	En büyük dizi
+	Layer contains objects (double-click to make current)	Katmanda nesne var (geçerli yapmak için çift tıklayın)
+	Layer Delete	Katman Sil
+	Layer is empty (double-click to make current)	Katman boş (geçerli yapmak için çift tıklayın)
+	Layer Match	Katman Eşle
+	Layer Merge	Katman Birleştir
+	Layer Off	Katmanı Kapat
+	Layer Properties	Katman Özellikleri
+	Layer Properties Manager	Katman Özellikleri Yöneticisi
+	Layer Properties Manager — current viewport	Katman Özellikleri Yöneticisi — geçerli görünüm penceresi
+	Layer State	Katman Durumu
+	Layer States Manager...	Katman Durumları Yöneticisi...
+	Layer Tools	Katman Araçları
+	Layers displayed: {shown} of {total}.   Current layer: {layer}	Gösterilen katmanlar: {shown} / {total}.   Geçerli katman: {layer}
+	Layers Palette	Katmanlar Paleti
+	Layout	Yerleşim
+	Layout list	Yerleşim listesi
+	Layout paper	Yerleşim kağıdı
+	Layout {name}: {table}	Yerleşim {name}: {table}
+	Leader	Kılavuz
+	Leaders Only	Yalnızca Kılavuzlar
+	Left device button: zoom extents. Right device button: calibrate.	Aygıtın sol düğmesi: kapsama yakınlaştır. Sağ düğmesi: kalibre et.
+	Length X	Uzunluk X
+	Length Y	Uzunluk Y
+	Lengthen	Uzat/Kısalt
+	Line	Çizgi
+	Lines +/−	Satırlar +/−
+	Lines of Command History	Komut Geçmişi Satır Sayısı
+	Linetype	Çizgi Tipi
+	Linetype Scale	Çizgi Tipi Ölçeği
+	Linetype scale	Çizgi tipi ölçeği
+	Linetype...	Çizgi Tipi...
+	Lineweight	Çizgi Kalınlığı
+	Lineweight...	Çizgi Kalınlığı...
+	List	Listele
+	List Blocks	Blokları Listele
+	List Dimension Styles	Ölçülendirme Stillerini Listele
+	List Groups	Grupları Listele
+	List Layer States	Katman Durumlarını Listele
+	List Layouts	Yerleşimleri Listele
+	List System Variables	Sistem Değişkenlerini Listele
+	List Text Styles	Metin Stillerini Listele
+	Load all	Tümünü yükle
+	Load Application...	Uygulama Yükle...
+	Load...	Yükle...
+	Loaded	Yüklendi
+	Loaded linetypes	Yüklü çizgi tipleri
+	Lock	Kilitle
+	Lock Layer	Katmanı Kilitle
+	Lock viewport	Görünüm penceresini kilitle
+	Lock/Unlock	Kilitle/Kilidi Aç
+	Loft	Loft
+	Ltscale	Çizgi Tipi Ölçeği
+	Magenta	Eflatun
+	Major line every	Ana çizgi aralığı
+	Make Current	Geçerli Yap
+	Make it a block of this drawing, keeping its layer names	Katman adlarını koruyarak bu çizimin bir bloğu yap
+	Make it a block of this drawing; its layers become NAME$0$LAYER	Bu çizimin bir bloğu yap; katmanları NAME$0$LAYER olur
+	Make Object's Layer Current	Nesnenin Katmanını Geçerli Yap
+	Make...	Oluştur...
+	Match case	Match case
+	Match Layer	Katmanı Eşle
+	Match Properties	Özellikleri Eşle
+	Measure	Ölç
+	Measure Distance	Uzaklık Ölç
+	Measure Geometry	Geometri Ölç
+	Mid Between 2 Points	İki Noktanın Ortası
+	Midpoint	Orta Nokta
+	min	dk
+	Mirror	Aynala
+	MIT OR Apache-2.0. Not affiliated with Autodesk, Inc.	MIT OR Apache-2.0. Autodesk, Inc. ile bağlantısı yoktur.
+	MODEL	MODEL
+	Model background	Model arka planı
+	Model Space (in viewport)	Model Alanı (görünüm penceresinde)
+	Modeling	Modelleme
+menu	Modify	Değiştir
+	More toolbar commands	Diğer araç çubuğu komutları
+	Move sideways to pan; push/pull or twist to zoom.	Kaydırmak için yana itin; yakınlaştırmak için itip çekin ya da çevirin.
+	MText	Çok Satırlı Metin
+	Multileader	Çoklu Kılavuz
+	Multileader style	Çoklu kılavuz stili
+	Multileader Style...	Çoklu Kılavuz Stili...
+	Multiline	Çoklu Çizgi Takımı
+	Multiline Style...	Çoklu Çizgi Takımı Stili...
+	Multiline Text	Çok Satırlı Metin
+	Multiline text	Çok satırlı metin
+	Multiline Text...	Çok Satırlı Metin...
+	Multiline...	Çoklu Çizgi Takımı...
+	Multiple	Çoklu
+	Multiple Point	Çoklu Nokta
+	My	Benim
+	My properties: not available yet	Özelliklerim: henüz kullanılamıyor
+	N	K
+	Named	Adlandırılmış
+	Named Viewports...	Adlandırılmış Görünüm Pencereleri...
+	Named Views...	Adlandırılmış Görünümler...
+	Nearest	En Yakın
+	New (metric)	Yeni (metrik)
+	New block	Yeni blok
+	New CTB	Yeni CTB
+	New Drawing	Yeni Çizim
+	New Drawing (⌘N)	Yeni Çizim (⌘N)
+	New Drawing...	Yeni Çizim...
+	New from Template...	Şablondan Yeni...
+	New Layout	Yeni Yerleşim
+	New layout	Yeni yerleşim
+	New state name	Yeni durum adı
+	New STB	Yeni STB
+	New style	Yeni stil
+	New Viewports...	Yeni Görünüm Pencereleri...
+	New VP Freeze	Yeni GP'de Dondur
+	No blocks defined in this drawing.	Bu çizimde tanımlı blok yok.
+	No contributor data was built into this copy.	Bu kopyaya katkıda bulunan verisi eklenmemiş.
+	No external references are attached.	İliştirilmiş dış referans yok.
+	No model credits were built into this copy.	Bu kopyaya model emeği bilgisi eklenmemiş.
+	No plot style tables.	Çizdirme stili tablosu yok.
+	No saved layer states	Kayıtlı katman durumu yok
+	No supported 3D mouse found	Desteklenen 3B fare bulunamadı
+	Node	Düğüm
+	None	Hiçbiri
+	Not a number or distance: {text}	Sayı ya da uzaklık değil: {text}
+	Not available	Kullanılamıyor
+	Not available yet	Henüz kullanılamıyor
+	Not Found	Bulunamadı
+	Not loaded	Yüklenmedi
+	Nothing found	Nothing found
+	Numbered list	Numaralı liste
+	Object grouping	Nesne gruplama
+	Object selection limit for display of grips	Tutamaçların gösterilmesi için nesne seçim sınırı
+	Object Snap	Nesne Kenetleme
+	Object Snap (F3)	Nesne Kenetleme (F3)
+	Object snap aperture	Nesne kenetleme açıklığı
+	Object snap marker size	Nesne kenetleme işaretçisi boyutu
+	Object Snap On (F3)	Nesne Kenetleme Açık (F3)
+	Object Snap Tracking	Nesne Kenetleme İzleme
+	Object Snap Tracking (F11)	Nesne Kenetleme İzleme (F11)
+	Object Snap Tracking Settings	Nesne Kenetleme İzleme Ayarları
+	Object type:	Nesne türü:
+	objects	nesne
+	Objects on locked layers	Kilitli katmanlardaki nesneler
+	Oblique	Eğik
+	Offset	Öteleme
+	On/Off	Açık/Kapalı
+	One of the Crafting Apps by the ArtCraft team and community.	ArtCraft ekibi ve topluluğunun Crafting Apps uygulamalarından biri.
+	Only in this drawing: {n}	Yalnızca bu çizimde: {n}
+	Only in {name}: {n}	Yalnızca {name} içinde: {n}
+	Oops	Silinen Nesneleri Geri Yükle
+	Open (⌘O)	Aç (⌘O)
+	Open a drawing first.	Önce bir çizim açın.
+	Open and Save	Açma ve Kaydetme
+	Open in Block Editor	Blok Düzenleyicide Aç
+	Open Sample Drawing	Örnek Çizimi Aç
+	Open sample drawing	Örnek çizimi aç
+	Open Xref	Dış Referansı Aç
+	Open...	Aç...
+	Operator:	İşleç:
+	Options...	Seçenekler...
+	Orbit	Yörünge
+	Ordinate	Koordinat
+	Origin: {x}, {y}	Orijin: {x}, {y}
+	Ortho (F8)	Orto (F8)
+	Ortho Mode	Orto Kipi
+	Ortho Mode (F8)	Orto Kipi (F8)
+	Osnap Settings...	Nesne Kenetleme Ayarları...
+	Out	Uzaklaştır
+	Outer	Dış
+	Over-constrained	Aşırı kısıtlı
+	Overlay	Bindirme
+	Overline	Üst çizgi
+	Override	Geçersiz Kıl
+	Page Setup Manager	Sayfa Yapısı Yöneticisi
+	Page Setup Manager...	Sayfa Yapısı Yöneticisi...
+	Pan	Kaydır
+	Pan Down	Aşağı Kaydır
+	Pan Left	Sola Kaydır
+	Pan Right	Sağa Kaydır
+	Pan sensitivity	Kaydırma hassasiyeti
+	Pan Up	Yukarı Kaydır
+	PAPER	KAĞIT
+	Paper Space	Kağıt Alanı
+	Parallel	Paralel
+	Parameters Manager	Parametre Yöneticisi
+	Parametric	Parametrik
+	Paste as Block	Blok Olarak Yapıştır
+	Paste to Command Line	Komut Satırına Yapıştır
+	Paste to Original Coordinates	Özgün Koordinatlara Yapıştır
+	Path Array	Yol Dizisi
+	Perpendicular	Dik
+	Pickbox size	Seçim kutusu boyutu
+	Plot	Çizdir
+	Plot (click: do not plot)	Çizdir (tıklayın: çizdirme)
+	Plot Preview	Çizdirme Önizlemesi
+	Plot style	Çizdirme stili
+	Plot style attached to	Çizdirme stilinin bağlı olduğu yer
+	Plot Style Manager	Çizdirme Stili Yöneticisi
+	Plot Style Manager...	Çizdirme Stili Yöneticisi...
+	Plot style table	Çizdirme stili tablosu
+	Plot Style...	Çizdirme Stili...
+	Plot Styles...	Çizdirme Stilleri...
+	Plot table type	Çizdirme tablosu türü
+	Plot Window	Çizdirme Penceresi
+	Plotter Manager	Çizici Yöneticisi
+	Plotter Manager...	Çizici Yöneticisi...
+	Plus/minus	Artı/eksi
+	Point Filters	Nokta Filtreleri
+	Point Style...	Nokta Stili...
+	Polar (distance < angle)	Kutupsal (uzaklık < açı)
+	Polar angle measurement	Kutupsal açı ölçümü
+	Polar Array	Kutupsal Dizi
+	Polar distance	Kutupsal uzaklık
+	Polar Tracking	Kutupsal İzleme
+	Polar Tracking (F10)	Kutupsal İzleme (F10)
+	Polar Tracking On (F10)	Kutupsal İzleme Açık (F10)
+	Polar: {distance} < {angle}°	Kutupsal: {distance} < {angle}°
+	PolarSnap	Kutupsal Kenetleme
+	Polygonal	Çokgen
+	Polygonal Viewport	Çokgen Görünüm Penceresi
+	Polyline Edit	Çoklu Çizgi Düzenle
+	Position X	Konum X
+	Position Y	Konum Y
+	Position Z	Konum Z
+	Previous Layer	Önceki Katman
+	Primitives	Temel Katılar
+	Print...	Yazdır...
+	Profiles	Profiller
+	Properties Inspector	Özellik Denetçisi
+	Properties:	Özellikler:
+	Proxy	Vekil
+	Purge	Temizle
+	Quadrant	Çeyrek Daire Noktası
+	Query Entities	Varlıkları Sorgula
+	Query Texts	Metinleri Sorgula
+	Quick	Hızlı
+	Quick Dimension	Hızlı Ölçülendirme
+	Quick Properties	Hızlı Özellikler
+	Quick Select	Hızlı Seçim
+	Quick Select Properties	Hızlı Seçim Özellikleri
+	Quick Select...	Hızlı Seçim...
+	QuickCalc	Hızlı Hesap
+	QuickCalc Pick	Hızlı Hesap Seçimi
+	Quit CADCraft	CADCraft'tan Çık
+	Raster Image	Raster Görüntü
+	Ray	Işın
+	Read-only	Salt okunur
+	Realtime	Gerçek zamanlı
+	Reassociate Dimensions	Ölçüleri Yeniden İlişkilendir
+	Recalculate Table Formulas	Tablo Formüllerini Yeniden Hesapla
+	Recent	Son kullanılanlar
+	Recent Commands	Son Komutlar
+	Recent Input	Son Girişler
+	Recover...	Kurtar...
+	Rectangular Array	Dikdörtgen Dizi
+	Rectangular snap	Dikdörtgen kenetleme
+	Redo (⇧⌘Z)	Yinele (⇧⌘Z)
+	Redraw	Yeniden Çiz
+	Reference Manager	Referans Yöneticisi
+	Reference Name	Referans Adı
+	References: {n}	Referanslar: {n}
+	Regen	Yeniden Oluştur
+	Regen All	Tümünü Yeniden Oluştur
+	Region	Bölge
+	Region/Mass Properties	Bölge/Kütle Özellikleri
+	Reinitialize	Yeniden Başlat
+	Relative	Göreli
+	Relative to last segment	Son parçaya göre
+	Release the 3D mouse to calibrate its resting position	Dinlenme konumunu kalibre etmek için 3B fareyi bırakın
+	Reload	Yeniden Yükle
+	Reload All	Tümünü Yeniden Yükle
+	Remove Leader	Kılavuz Çizgisini Kaldır
+	Remove the viewport override	Görünüm penceresi geçersiz kılmasını kaldır
+	Remove Vertex	Köşe Noktasını Kaldır
+	Rename Dimension Style	Ölçülendirme Stilini Yeniden Adlandır
+	Rename Layer	Katmanı Yeniden Adlandır
+	Rename Layer State	Katman Durumunu Yeniden Adlandır
+	Rename Layout	Yerleşimi Yeniden Adlandır
+	Rename Text Style	Metin Stilini Yeniden Adlandır
+	Rename...	Yeniden Adlandır...
+	Repeat {command}	Yinele: {command}
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Bloğu Değiştir...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
+	Requires a point (x,y, @dx,dy or @d<a).	Bir nokta gerekir (x,y, @dx,dy veya @d<a).
+	Reset keeps the interface language.	Sıfırlama arayüz dilini korur.
+	Reset Palettes	Paletleri Sıfırla
+	Reset Panel Layout	Panel Düzenini Sıfırla
+	Reset to Defaults	Varsayılanlara Sıfırla
+	Restore	Geri Yükle
+	Restore Layer State	Katman Durumunu Geri Yükle
+	Results	Results
+	Reverse	Ters Çevir
+	Reverse the order	Sırayı ters çevir
+	Reverse zoom direction	Yakınlaştırma yönünü ters çevir
+	Revision Cloud	Revizyon Bulutu
+	Revolve	Döndürerek Oluştur
+	Run Script...	Komut Dosyası Çalıştır...
+	S	G
+	Save (⌘S)	Kaydet (⌘S)
+	Save As...	Farklı Kaydet...
+	Save Block	Bloğu Kaydet
+	Save Block As	Bloğu Farklı Kaydet
+	Save Layer State	Katman Durumunu Kaydet
+	Save new drawings as	Yeni çizimleri şu biçimde kaydet
+	Save Reference Edits	Referans Düzenlemelerini Kaydet
+	Save State	Durumu Kaydet
+	Saved Path	Kayıtlı Yol
+	Scale List...	Ölçek Listesi...
+	Screen magnifiers, screen readers and recorders follow the system cursor.	Ekran büyüteçleri, ekran okuyucular ve kayıt araçları sistem imlecini izler.
+	Screening	Perdeleme
+	Search for layer	Katman ara
+	Search for parameter	Parametre ara
+	Search for pattern	Desen ara
+	Searches the current space.	Searches the current space.
+	Second and next points:	İkinci ve sonraki noktalar:
+	Select 2D polyline	2B çoklu çizgi seçin
+	Select a 2D polyline.	Bir 2B çoklu çizgi seçin.
+	Select a block reference.	Bir blok referansı seçin.
+	Select a circle or arc.	Bir daire veya yay seçin.
+	Select a closed polyline	Kapalı bir çoklu çizgi seçin
+	Select a closed polyline, circle, ellipse or closed spline.	Kapalı bir çoklu çizgi, daire, elips veya kapalı spline seçin.
+	Select a closed polyline.	Kapalı bir çoklu çizgi seçin.
+	Select a curve as the path.	Yol olarak bir eğri seçin.
+	Select a dimension constraint type	Bir ölçü kısıtlaması türü seçin
+	Select a line object	Bir çizgi nesnesi seçin
+	Select a line object.	Bir çizgi nesnesi seçin.
+	Select a line or an arc.	Bir çizgi veya yay seçin.
+	Select a line or polyline segment	Bir çizgi veya çoklu çizgi parçası seçin
+	Select a line, arc or open polyline.	Bir çizgi, yay veya açık çoklu çizgi seçin.
+	Select a line, arc, circle, polyline, ellipse or spline as the path.	Yol olarak bir çizgi, yay, daire, çoklu çizgi, elips veya spline seçin.
+	Select a line, circle, arc or polyline segment.	Bir çizgi, daire, yay veya çoklu çizgi parçası seçin.
+	Select a line.	Bir çizgi seçin.
+	Select a polyline.	Bir çoklu çizgi seçin.
+	Select a text, mtext, attribute definition or dimension.	Bir metin, çok satırlı metin, öznitelik tanımı veya ölçü seçin.
+	Select an annotation object	Bir açıklama nesnesi seçin
+	Select an arc or circle	Bir yay veya daire seçin
+	Select an arc.	Bir yay seçin.
+	Select an object	Bir nesne seçin
+	Select an object to change	Değiştirilecek nesneyi seçin
+	Select an object to measure	Ölçülecek nesneyi seçin
+	Select an object.	Bir nesne seçin.
+	Select an open curve.	Açık bir eğri seçin.
+	Select an open line, arc, polyline, ellipse arc or spline.	Açık bir çizgi, yay, çoklu çizgi, elips yayı veya spline seçin.
+	Select arc or circle	Yay veya daire seçin
+	Select arc or polyline arc segment	Yay veya çoklu çizgi yay parçası seçin
+	Select arc style	Yay stilini seçin
+	Select arc, circle, line	Yay, daire, çizgi seçin
+	Select at least two objects to join.	Birleştirmek için en az iki nesne seçin.
+	Select circle or arc to add center mark	Merkez işareti eklenecek daireyi veya yayı seçin
+	Select closed objects (regions, closed polylines, circles).	Kapalı nesneler seçin (bölgeler, kapalı çoklu çizgiler, daireler).
+	Select first line	İlk çizgiyi seçin
+	Select first line or arc	İlk çizgiyi veya yayı seçin
+	Select first object	İlk nesneyi seçin
+	Select first point	İlk noktayı seçin
+	Select nested objects to copy	Kopyalanacak iç içe nesneleri seçin
+	Select object	Nesne seçin
+	Select object to dimension	Ölçülendirilecek nesneyi seçin
+	Select object to divide	Bölünecek nesneyi seçin
+	Select object to extend or shift-select to trim	Uzatılacak nesneyi seçin ya da budamak için Shift ile seçin
+	Select object to measure	Ölçülecek nesneyi seçin
+	Select object to offset	Ötelenecek nesneyi seçin
+	Select object to trim or shift-select to extend	Budanacak nesneyi seçin ya da uzatmak için Shift ile seçin
+	Select objects	Nesneleri seçin
+	Select objects (crossing window first corner)	Nesneleri seçin (kesişen pencerenin ilk köşesi)
+	Select objects first, then choose a command	Önce nesneleri seçin, sonra bir komut belirleyin
+	Select objects to array.	Dizi yapılacak nesneleri seçin.
+	Select objects to stretch by crossing-window or crossing-polygon...	Esnetilecek nesneleri kesişen pencere veya kesişen çokgenle seçin...
+	Select objects:	Nesneleri seçin:
+	Select one polyline (Multiple is available through the JSON form).	Bir çoklu çizgi seçin (Multiple seçeneği JSON biçimiyle kullanılabilir).
+	Select path curve	Yol eğrisini seçin
+	Select point or object	Nokta veya nesne seçin
+	Select polyline	Çoklu çizgi seçin
+	Select second line	İkinci çizgiyi seçin
+	Select second line or shift-select to apply corner	İkinci çizgiyi seçin ya da köşe uygulamak için Shift ile seçin
+	Select second object	İkinci nesneyi seçin
+	Select second object or shift-select to apply corner	İkinci nesneyi seçin ya da köşe uygulamak için Shift ile seçin
+	Select second point	İkinci noktayı seçin
+	Select Similar	Benzerlerini Seç
+	Select spline	Spline seçin
+	Select symmetry line	Simetri çizgisini seçin
+	Select two points	İki nokta seçin
+	Selection Area Effect	Seçim Alanı Efekti
+	Selection area opacity:	Seçim alanı opaklığı:
+	Selection Cycling	Seçim Döngüsü
+	Selection effect color	Seçim efekti rengi
+	Selection modes	Seçim kipleri
+	Selection preview	Seçim önizlemesi
+	Selection Preview Filter	Seçim Önizleme Filtresi
+	Send Hatches to Back	Taramaları En Arkaya Gönder
+	Send Under Objects	Nesnelerin Altına Gönder
+	Set Current	Geçerli Yap
+	Set Current Dimension Style	Geçerli Ölçülendirme Stilini Belirle
+	Set Current Text Style	Geçerli Metin Stilini Belirle
+	Set Current Viewport	Geçerli Görünüm Penceresini Belirle
+	Set Dynamic Property	Dinamik Özellik Belirle
+	Set Layer Properties	Katman Özelliklerini Belirle
+	Set Properties	Özellikleri Belirle
+	Set Table Cell	Tablo Hücresini Belirle
+	Set Table Cell Style	Tablo Hücresi Stilini Belirle
+	Set Variable	Değişken Belirle
+	Set View	Görünümü Belirle
+	Settings...	Ayarlar...
+	Sheet Books to PDF...	Sayfa Kitaplarını PDF'ye Aktar...
+	Show All Constraint Bars	Tüm Kısıtlama Çubuklarını Göster
+	Show All Dynamic Dimensions	Tüm Dinamik Ölçüleri Göster
+	Show and hide the tools of this category	Bu kategorinin araçlarını göster ve gizle
+	Show Annotative Objects	Açıklamalı Nesneleri Göster
+	Show command prompting near the crosshairs	Komut istemini artı imlecin yanında göster
+	Show grips	Tutamaçları göster
+	Show in Tool Sets	Araç Takımlarında Göster
+	Show Layer List	Katman Listesini Göster
+	Show Quick Properties for selected objects	Seçili nesneler için Hızlı Özellikleri göster
+	Show System Cursor	Sistem İmlecini Göster
+	Show/Hide Lineweight	Çizgi Kalınlığını Göster/Gizle
+	Show/Hide Transparency	Saydamlığı Göster/Gizle
+	Single Line Text	Tek Satırlı Metin
+	Single Point	Tek Nokta
+	Single...	Tek...
+	Smooth	Yumuşat
+	Snap	Kenetleme
+	Snap and Grid	Kenetleme ve Izgara
+	Snap Mode	Kenetleme Kipi
+	Snap Mode (F9)	Kenetleme Kipi (F9)
+	Snap On (F9)	Kenetleme Açık (F9)
+	Snap Overrides	Kenetleme Geçersiz Kılmaları
+	Snap type	Kenetleme türü
+	Snap X spacing	Kenetleme X aralığı
+	Snap, grid, polar tracking and Dynamic Input:	Kenetleme, ızgara, kutupsal izleme ve Dinamik Giriş:
+	Solid	Katı
+	Solid Editing	Katı Düzenleme
+	Specified origin	Belirtilen orijin
+	Specify a point	Bir nokta belirtin
+	Specify a scale for the hatch pattern	Tarama deseni için bir ölçek belirtin
+	Specify a second extension line origin	İkinci uzatma çizgisinin başlangıcını belirtin
+	Specify an angle for the hatch pattern	Tarama deseni için bir açı belirtin
+	Specify angle end point	Açının bitiş noktasını belirtin
+	Specify angle of dimension line	Ölçü çizgisinin açısını belirtin
+	Specify angle of dimension text	Ölçü metninin açısını belirtin
+	Specify angle start point	Açının başlangıç noktasını belirtin
+	Specify angle vertex	Açının tepe noktasını belirtin
+	Specify angle vertex point	Açının tepe noktasını belirtin
+	Specify arc length dimension location	Yay uzunluğu ölçüsünün konumunu belirtin
+	Specify axis endpoint of ellipse	Elipsin eksen uç noktasını belirtin
+	Specify base diameter	Taban çapını belirtin
+	Specify base point	Taban noktasını belirtin
+	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Taban noktasını veya yer değiştirmeyi belirtin (gerçek zamanlı kaydırma için orta fare düğmesiyle sürükleyin)
+	Specify base radius	Taban yarıçapını belirtin
+	Specify center of donut	Halkanın merkezini belirtin
+	Specify center of ellipse	Elipsin merkezini belirtin
+	Specify center of polygon	Çokgenin merkezini belirtin
+	Specify center point for circle	Dairenin merkez noktasını belirtin
+	Specify center point of arc	Yayın merkez noktasını belirtin
+	Specify center point of array	Dizinin merkez noktasını belirtin
+	Specify center point of base	Tabanın merkez noktasını belirtin
+	Specify corner of viewport	Görünüm penceresinin köşesini belirtin
+	Specify corner of window, enter a scale factor (nX or nXP)	Pencerenin köşesini belirtin, bir ölçek faktörü girin (nX veya nXP)
+	Specify diameter of circle	Dairenin çapını belirtin
+	Specify dimension arc line location	Ölçü yayı çizgisinin konumunu belirtin
+	Specify dimension line location	Ölçü çizgisinin konumunu belirtin
+	Specify distance between turns	Turlar arasındaki uzaklığı belirtin
+	Specify distance to other axis	Diğer eksene olan uzaklığı belirtin
+	Specify end angle	Bitiş açısını belirtin
+	Specify end point of arc	Yayın bitiş noktasını belirtin
+	Specify end point of arc (hold Ctrl to switch direction)	Yayın bitiş noktasını belirtin (yönü değiştirmek için Ctrl'yi basılı tutun)
+	Specify ending width	Bitiş genişliğini belirtin
+	Specify ending width for next segment	Sonraki parçanın bitiş genişliğini belirtin
+	Specify endpoint of arc	Yayın uç noktasını belirtin
+	Specify endpoint of axis	Eksenin uç noktasını belirtin
+	Specify endpoint of line	Çizginin uç noktasını belirtin
+	Specify feature location	Özellik konumunu belirtin
+	Specify fillet radius	Yuvarlatma yarıçapını belirtin
+	Specify fillet radius for rectangles	Dikdörtgenler için yuvarlatma yarıçapını belirtin
+	Specify first angle endpoint	Açının ilk uç noktasını belirtin
+	Specify first chamfer distance	İlk pah uzaklığını belirtin
+	Specify first chamfer distance for rectangles	Dikdörtgenler için ilk pah uzaklığını belirtin
+	Specify first constraint point	İlk kısıtlama noktasını belirtin
+	Specify first corner	İlk köşeyi belirtin
+	Specify first corner point	İlk köşe noktasını belirtin
+	Specify first destination point	İlk hedef noktayı belirtin
+	Specify first end point of circle's diameter	Daire çapının ilk uç noktasını belirtin
+	Specify first endpoint of edge	Kenarın ilk uç noktasını belirtin
+	Specify first extension line origin	İlk uzatma çizgisinin başlangıcını belirtin
+	Specify first point	İlk noktayı belirtin
+	Specify first point of mirror line	Ayna çizgisinin ilk noktasını belirtin
+	Specify first point on circle	Daire üzerindeki ilk noktayı belirtin
+	Specify first point on circle: _tan to	Daire üzerindeki ilk noktayı belirtin: _tan to
+	Specify first source point	İlk kaynak noktayı belirtin
+	Specify height	Yüksekliği belirtin
+	Specify helix height	Helezon yüksekliğini belirtin
+	Specify included angle	İç açıyı belirtin
+	Specify insertion base point	Ekleme taban noktasını belirtin
+	Specify insertion point	Ekleme noktasını belirtin
+	Specify inside diameter of donut	Halkanın iç çapını belirtin
+	Specify leader arrowhead location	Kılavuz ok ucunun konumunu belirtin
+	Specify leader endpoint	Kılavuz uç noktasını belirtin
+	Specify leader landing location	Kılavuz bağlantı konumunu belirtin
+	Specify length for rectangles	Dikdörtgenler için uzunluğu belirtin
+	Specify length of chord	Kirişin uzunluğunu belirtin
+	Specify length of segment	Parçanın uzunluğunu belirtin
+	Specify line width for rectangles	Dikdörtgenler için çizgi genişliğini belirtin
+	Specify location for new vertex	Yeni köşe noktasının konumunu belirtin
+	Specify minimum length of arc	Yayın en kısa uzunluğunu belirtin
+	Specify new end point	Yeni uç noktayı belirtin
+	Specify new location for marked vertex	İşaretli köşe noktasının yeni konumunu belirtin
+	Specify new width for all segments	Tüm parçalar için yeni genişliği belirtin
+	Specify next point	Sonraki noktayı belirtin
+	Specify offset distance	Öteleme uzaklığını belirtin
+	Specify opposite corner	Karşı köşeyi belirtin
+	Specify other corner point	Diğer köşe noktasını belirtin
+	Specify other endpoint of axis	Eksenin diğer uç noktasını belirtin
+	Specify outside diameter of donut	Halkanın dış çapını belirtin
+	Specify point	Nokta belirtin
+	Specify point on object for first tangent of circle	Dairenin ilk teğeti için nesne üzerinde nokta belirtin
+	Specify point on object for second tangent of circle	Dairenin ikinci teğeti için nesne üzerinde nokta belirtin
+	Specify point on side to offset	Ötelenecek taraftaki noktayı belirtin
+	Specify radius of arc	Yayın yarıçapını belirtin
+	Specify radius of circle	Dairenin yarıçapını belirtin
+	Specify rotation angle	Döndürme açısını belirtin
+	Specify rotation angle of text	Metnin döndürme açısını belirtin
+	Specify scale factor	Ölçek faktörünü belirtin
+	Specify second angle endpoint	Açının ikinci uç noktasını belirtin
+	Specify second break point	İkinci kırma noktasını belirtin
+	Specify second chamfer distance for rectangles	Dikdörtgenler için ikinci pah uzaklığını belirtin
+	Specify second constraint point	İkinci kısıtlama noktasını belirtin
+	Specify second destination point	İkinci hedef noktayı belirtin
+	Specify second end point of circle's diameter	Daire çapının ikinci uç noktasını belirtin
+	Specify second endpoint of edge	Kenarın ikinci uç noktasını belirtin
+	Specify second extension line origin	İkinci uzatma çizgisinin başlangıcını belirtin
+	Specify second point	İkinci noktayı belirtin
+	Specify second point of arc	Yayın ikinci noktasını belirtin
+	Specify second point of mirror line	Ayna çizgisinin ikinci noktasını belirtin
+	Specify second point on circle	Daire üzerindeki ikinci noktayı belirtin
+	Specify second point on circle: _tan to	Daire üzerindeki ikinci noktayı belirtin: _tan to
+	Specify second point or <use first point as displacement>	İkinci noktayı belirtin veya <ilk noktayı yer değiştirme olarak kullan>
+	Specify second source point	İkinci kaynak noktayı belirtin
+	Specify side to offset	Ötelenecek tarafı belirtin
+	Specify start angle	Başlangıç açısını belirtin
+	Specify start point	Başlangıç noktasını belirtin
+	Specify start point of arc	Yayın başlangıç noktasını belirtin
+	Specify start point of polyline	Çoklu çizginin başlangıç noktasını belirtin
+	Specify start point of text	Metnin başlangıç noktasını belirtin
+	Specify starting width	Başlangıç genişliğini belirtin
+	Specify starting width for next segment	Sonraki parçanın başlangıç genişliğini belirtin
+	Specify tangent direction for the start point of arc	Yayın başlangıç noktası için teğet yönünü belirtin
+	Specify the elevation for rectangles	Dikdörtgenler için kotu belirtin
+	Specify thickness for rectangles	Dikdörtgenler için kalınlığı belirtin
+	Specify third point on circle	Daire üzerindeki üçüncü noktayı belirtin
+	Specify third point on circle: _tan to	Daire üzerindeki üçüncü noktayı belirtin: _tan to
+	Specify third source point or <continue>	Üçüncü kaynak noktayı belirtin veya <devam>
+	Specify through point	Geçiş noktasını belirtin
+	Specify top diameter	Üst çapı belirtin
+	Specify top radius	Üst yarıçapı belirtin
+	Specify total angle	Toplam açıyı belirtin
+	Specify total length	Toplam uzunluğu belirtin
+	Specify width for rectangles	Dikdörtgenler için genişliği belirtin
+	Sphere	Küre
+	Spherical	Küresel
+	Spline	Spline
+	Spline Edit	Spline Düzenle
+	Stack (type 1/2 then select)	Yığ (1/2 yazıp seçin)
+	Start	Başlangıç
+	Start angle	Başlangıç açısı
+	Start Width	Başlangıç Genişliği
+	Start X	Başlangıç X
+	Start Y	Başlangıç Y
+	Start, Center, Angle	Başlangıç, Merkez, Açı
+	Start, Center, End	Başlangıç, Merkez, Bitiş
+	Start, Center, Length	Başlangıç, Merkez, Uzunluk
+	Start, End, Angle	Başlangıç, Bitiş, Açı
+	Start, End, Direction	Başlangıç, Bitiş, Yön
+	Start, End, Radius	Başlangıç, Bitiş, Yarıçap
+	Stretch	Esnet
+	Stretch Vertex	Köşe Noktasını Esnet
+	Style: Standard	Stil: Standart
+	SVG drawings (SVG, SVGZ)	SVG çizimleri (SVG, SVGZ)
+	Sweep	Süpür
+	Switch between model space in a viewport and paper space	Görünüm penceresindeki model alanı ile kağıt alanı arasında geçiş yap
+	Switch Drawing	Çizimi Değiştir
+	Switch Layout	Yerleşimi Değiştir
+	Symmetric	Simetrik
+	Synchronize Attributes	Öznitelikleri Eşitle
+	Synchronize Multiple-scale Positions	Çok Ölçekli Konumları Eşitle
+	Table Breaks	Tablo Bölmeleri
+	Table Cell Style	Tablo Hücresi Stili
+	Table Style...	Tablo Stili...
+	Table...	Tablo...
+	Tan, Tan, Radius	Teğet, Teğet, Yarıçap
+	Tan, Tan, Tan	Teğet, Teğet, Teğet
+	Tangent	Teğet
+	Temporary track point	Geçici izleme noktası
+	Text Editor	Metin Düzenleyici
+	Text Height	Metin Yüksekliği
+	Text height	Metin yüksekliği
+	Text Objects Only	Yalnızca Metin Nesneleri
+	Text override	Metni geçersiz kıl
+	Text style	Metin stili
+	Text Style...	Metin Stili...
+	Text to find	Text to find
+	Thaw All Layers	Tüm Katmanları Çöz
+	Thaw Layer	Katmanı Çöz
+	The aperture is how near the cursor must come to a point for an object snap to find it.	Açıklık, nesne kenetlemenin bir noktayı bulması için imlecin o noktaya ne kadar yaklaşması gerektiğini belirler.
+	There is nothing here yet.	Burada henüz bir şey yok.
+	This drawing	Bu çizim
+	Time-sensitive right-click: a quick click is Enter, holding opens the menu	Süreye bağlı sağ tıklama: kısa tıklama Enter'dır, basılı tutmak menüyü açar
+	To	Hedef
+	To get started, create or open a drawing.	Başlamak için bir çizim oluşturun veya açın.
+	Toggle PICKADD (off: each pick replaces the selection)	PICKADD'i değiştir (kapalı: her seçim öncekinin yerini alır)
+	Toggle PICKADD (on: picks add to the selection)	PICKADD'i değiştir (açık: seçimler mevcut seçime eklenir)
+	Tolerance...	Tolerans...
+	Tool Bar	Araç Çubuğu
+	Tool Sets	Araç Takımları
+	TOP	ÜST
+	Top left	Sol üst
+	Top right	Sağ üst
+	Torus	Simit
+	Trace	İz
+	Track orthogonally only	Yalnızca dik açılarla izle
+	Track using all polar angle settings	Tüm kutupsal açı ayarlarını kullanarak izle
+	Transparency	Saydamlık
+	Trim	Buda
+	True Color	Gerçek Renk
+	Turn All Layers On	Tüm Katmanları Aç
+	Turn Off Layer	Katmanı Kapat
+	Turn On Layer	Katmanı Aç
+	Turn Quick Properties off (QPMODE)	Hızlı Özellikleri kapat (QPMODE)
+	Turned off, a right-click while a command runs always opens the shortcut menu.	Kapalıyken, bir komut çalışırken sağ tıklama her zaman kısayol menüsünü açar.
+	Type a command	Bir komut yazın
+	Type text; Enter starts a new paragraph	Metin yazın; Enter yeni bir paragraf başlatır
+	UCS Icon	KKS Simgesi
+	Underline	Altı çizili
+	Undo (⌘Z)	Geri Al (⌘Z)
+	Ungroup	Grubu Çöz
+	Unisolate Layer	Katman Yalıtımını Kaldır
+	Units Conversion	Birim Dönüştürme
+	Units...	Birimler...
+	Unload	Kaldır
+	Unloaded	Kaldırıldı
+	Unlock Layer	Katman Kilidini Aç
+	Unlock viewport	Görünüm penceresinin kilidini aç
+	Unmerge Cells	Hücreleri Ayır
+	Unreferenced	Başvurulmayan
+	Unresolved	Çözümlenmemiş
+	Unsaved Layer State	Kaydedilmemiş Katman Durumu
+	Update	Güncelle
+	Update Data Links	Veri Bağlantılarını Güncelle
+	Use current origin	Geçerli orijini kullan
+	Use for this layout	Bu yerleşim için kullan
+	Use object linetype	Nesnenin çizgi tipini kullan
+	Use object lineweight	Nesnenin çizgi kalınlığını kullan
+	Use System Setting	Sistem Ayarını Kullan
+	User	Kullanıcı
+	User Parameters	Kullanıcı Parametreleri
+	User Preferences	Kullanıcı Tercihleri
+	Version 2000	Sürüm 2000
+	Version 2004	Sürüm 2004
+	Version 2007	Sürüm 2007
+	Version 2010	Sürüm 2010
+	Version 2013	Sürüm 2013
+	Version 2018	Sürüm 2018
+	VerticalDistance	Dikey Uzaklık
+menu	View	Görünüm
+	ViewCube	ViewCube
+	Viewport	Görünüm Penceresi
+	Viewport is locked	Görünüm penceresi kilitli
+	Viewport Layer Freeze	Görünüm Penceresinde Katman Dondurma
+	Viewport Properties	Görünüm Penceresi Özellikleri
+	Viewport scale	Görünüm penceresi ölçeği
+	Viewport {id}	Görünüm Penceresi {id}
+	Viewports	Görünüm Pencereleri
+	Visual Effect Settings	Görsel Efekt Ayarları
+	Visual Effect Settings...	Görsel Efekt Ayarları...
+	Volume	Hacim
+	VP Color	GP Rengi
+	VP Freeze	GP'de Dondur
+	W	B
+	WCS	DKS
+	When a command is active	Bir komut etkinken
+	When no command is active	Etkin komut yokken
+	Whole words	Whole words
+	Width factor	Genişlik faktörü
+	Window selection color:	Pencere seçim rengi:
+	Wipeout	Maskeleme
+	Working Set	Çalışma Kümesi
+	Workspace Switching	Çalışma Alanı Değiştirme
+	Write Block	Blok Yaz
+	Xline	Yapı Çizgisi
+	Xref and Block In-place Editing	Dış Referans ve Bloğu Yerinde Düzenleme
+	Xrefs	Dış Referanslar
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
+	Zoom	Yakınlaştır
+	Zoom All	Tümüne Yakınlaştır
+	Zoom Dynamic	Dinamik Yakınlaştırma
+	Zoom Extents	Kapsama Yakınlaştır
+	Zoom Object	Nesneye Yakınlaştır
+	Zoom Previous	Önceki Görünüm
+	Zoom Realtime	Gerçek Zamanlı Yakınlaştırma
+	Zoom sensitivity	Yakınlaştırma hassasiyeti
+	Zoom Window	Pencereye Yakınlaştır
+	{contributors} · {commits}	{contributors} · {commits}
+	{kind} (constraint {id})	{kind} (kısıtlama {id})
+	{kind} constraint {name} = {expression}  (double-click to edit)	{kind} kısıtlaması {name} = {expression}  (düzenlemek için çift tıklayın)
+	{name}: {distance} < {angle}°	{name}: {distance} < {angle}°
+@plural	{n} commit|{n} commits	{n} commit|{n} commit
+@plural	{n} contributor|{n} contributors	{n} katkıda bulunan|{n} katkıda bulunan
+	ƒx  New User Parameter	ƒx  Yeni Kullanıcı Parametresi
+	ΔLOC	ΔLOC
+	−LOC	−LOC
+	⌘↩ to finish	Bitirmek için ⌘↩

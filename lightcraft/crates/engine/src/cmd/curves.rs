@@ -11,10 +11,10 @@ use super::{CommandSpec, always, bad, cmd, has_active, str_param};
 use crate::{Result, Session};
 
 /// Channels `curve.reset` accepts.
-pub const RESET_CHANNELS: [&str; 7] = ["all", "point", "parametric", "master", "red", "green", "blue"];
+pub const RESET_CHANNELS: [&str; 9] = ["all", "point", "parametric", "master", "red", "green", "blue", "hdr", "sdr"];
 
 /// `c` with `channel` back at its default: `all` (the whole Tone Curve, incl. Refine Saturation),
-/// `point` (the four point curves), `parametric` (region sliders and splits) or one point channel.
+/// `point` (the point curves), `parametric` (region sliders and splits) or one point channel.
 pub fn reset_channel(c: &mut ToneCurve, channel: &str) -> std::result::Result<(), String> {
     let d = ToneCurve::default();
     match channel {
@@ -24,6 +24,8 @@ pub fn reset_channel(c: &mut ToneCurve, channel: &str) -> std::result::Result<()
             c.red.clear();
             c.green.clear();
             c.blue.clear();
+            c.hdr_master.clear();
+            c.sdr_master.clear();
         }
         "parametric" => {
             (c.highlights, c.lights, c.darks, c.shadows) = (d.highlights, d.lights, d.darks, d.shadows);
@@ -33,6 +35,8 @@ pub fn reset_channel(c: &mut ToneCurve, channel: &str) -> std::result::Result<()
         "red" => c.red.clear(),
         "green" => c.green.clear(),
         "blue" => c.blue.clear(),
+        "hdr" => c.hdr_master.clear(),
+        "sdr" => c.sdr_master.clear(),
         other => return Err(format!("unknown channel `{other}` (one of {})", RESET_CHANNELS.join(", "))),
     }
     Ok(())
@@ -311,6 +315,13 @@ fn import_presets(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(bad(C, "missing `path` / `paths`"));
     }
     let (mut imported, mut failed) = (Vec::new(), Vec::new());
+    // the user presets by name, kept up to date: a file of many presets replaces or adds each
+    // without a scan of all the others
+    // (the first of two same-named presets, as `upsert` and the lookups find it)
+    let mut by_name: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+    for (i, x) in s.curve_presets.iter().enumerate() {
+        by_name.entry(x.name.to_ascii_lowercase()).or_insert(i);
+    }
     for f in &paths {
         match std::fs::read(f).map_err(|e| e.to_string()).and_then(|b| parse_file(&b)) {
             Ok(list) => {
@@ -321,7 +332,13 @@ fn import_presets(s: &mut Session, p: &Value) -> Result<Value> {
                         preset.name = format!("{} (imported)", preset.name);
                     }
                     imported.push(preset.name.clone());
-                    upsert(s, preset);
+                    match by_name.get(&preset.name.to_ascii_lowercase()).and_then(|&i| s.curve_presets.get_mut(i)) {
+                        Some(x) => *x = preset,
+                        None => {
+                            by_name.insert(preset.name.to_ascii_lowercase(), s.curve_presets.len());
+                            s.curve_presets.push(preset);
+                        }
+                    }
                 }
             }
             Err(e) => failed.push(json!([f, e])),

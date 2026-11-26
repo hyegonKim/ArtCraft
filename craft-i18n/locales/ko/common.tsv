@@ -1249,6 +1249,7 @@ theme	Appearance	외관
 	Zoom Out	축소
 	Zoom out	축소
 	Zoom Tool	확대/축소 도구
+@plural	{n} byte|{n} bytes	{n}바이트
 @plural	{n} commit|{n} commits	커밋 {n}개
 	{n} files	파일 {n}개
 	{n} h ago	{n}시간 전

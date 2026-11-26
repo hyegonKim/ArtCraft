@@ -25,13 +25,6 @@ use photocraft_geom::Rect;
 const BLOCK: i32 = 128;
 /// Blocks kept before the cache starts over (128² RGBA8 is 64 KiB, so at most 64 MiB).
 const MAX_BLOCKS: usize = 1024;
-/// Side of the cached gradient/Sobel feature tiles (px).
-const FIELD_BLOCK: i32 = 32;
-/// Bytes per cached feature cell: edge strength, gradient, ridge flag and edge offset.
-const FIELD_CELL_BYTES: usize = size_of::<f32>() + size_of::<[f32; 2]>() + size_of::<bool>() + size_of::<[f32; 2]>();
-/// Feature tiles kept before the cache starts over: about 32 MiB of them (alongside the pixel
-/// blocks' 64 MiB).
-const MAX_FIELD_BLOCKS: usize = (32 << 20) / (FIELD_CELL_BYTES * (FIELD_BLOCK * FIELD_BLOCK) as usize);
 /// Longest stretch of the pointer's path searched at once (px). Longer paths are traced in pieces
 /// that meet on an edge, which bounds every search to a small area.
 const PIECE: f64 = 256.0;
@@ -88,28 +81,17 @@ impl Settings {
 /// wrong length reads as transparent.
 pub type Fetch<'a> = dyn FnMut(Rect) -> Vec<[u8; 4]> + 'a;
 
-#[derive(Clone, Debug)]
-struct LastTrace {
-    from: [f64; 2],
-    to: [f64; 2],
-    guide: Vec<[f64; 2]>,
-    s: Settings,
-    out: Vec<[f64; 2]>,
-}
-
-/// Edge tracing over one image, caching the pixels and local Sobel/gradient feature tiles it has read.
+/// Edge tracing over one image, caching the pixels it has read.
 #[derive(Debug)]
 pub struct Tracer {
     bounds: Rect,
     blocks: HashMap<(i32, i32), Vec<[u8; 4]>>,
-    fields: HashMap<(i32, i32), Field>,
-    last_trace: Option<LastTrace>,
 }
 
 impl Tracer {
     /// A tracer for an image covering `bounds` (document pixels).
     pub fn new(bounds: Rect) -> Self {
-        Tracer { bounds, blocks: HashMap::new(), fields: HashMap::new(), last_trace: None }
+        Tracer { bounds, blocks: HashMap::new() }
     }
 
     pub fn bounds(&self) -> Rect {
@@ -119,11 +101,6 @@ impl Tracer {
     /// Pixels read so far (for tests and diagnostics).
     pub fn cached_pixels(&self) -> usize {
         self.blocks.values().map(Vec::len).sum()
-    }
-
-    /// Cached 32×32 gradient/Sobel feature tiles (for tests and diagnostics).
-    pub fn cached_field_tiles(&self) -> usize {
-        self.fields.len()
     }
 
     /// Where a fastening point near `p` goes: the centre of the most prominent edge within the
@@ -175,14 +152,6 @@ impl Tracer {
         if length(&g) > MAX_GUIDE_LENGTH {
             return g;
         }
-        if let Some(last) = &self.last_trace
-            && last.from == from
-            && last.to == to
-            && last.s == s
-            && last.guide == g
-        {
-            return last.out.clone();
-        }
         let pieces = split(&g, PIECE);
         let mut out = vec![from];
         let mut cur = from;
@@ -193,9 +162,7 @@ impl Tracer {
             cur = target;
         }
         // Within half a pixel: drops the staircase of pixel steps, keeps the curve of an edge.
-        let out = simplify(&out, 0.5);
-        self.last_trace = Some(LastTrace { from, to, guide: g, s, out: out.clone() });
-        out
+        simplify(&out, 0.5)
     }
 
     /// One piece of [`Tracer::trace`]: the cheapest path from `a` to `b` in the corridor around
@@ -246,85 +213,23 @@ impl Tracer {
         (c(p[0], b.x0, b.x1), c(p[1], b.y0, b.y1))
     }
 
-    /// Edge features over `area` (inside the image), reusing cached 32×32 feature tiles whenever
-    /// their underlying 128×128 pixel blocks are already resident in the cache.
+    /// Edge features over `area` (inside the image).
     fn field(&mut self, fetch: &mut Fetch, area: Rect) -> Field {
-        let area = area.intersect(&self.bounds);
-        let w = area.width() as usize;
-        let n = w * area.height() as usize;
-        if area.is_empty() {
-            return Field { area, w: 0, strength: Vec::new(), grad: Vec::new(), ridge: Vec::new(), offset: Vec::new() };
-        }
         // Sobel reads one ring beyond the gradient, and non-maximum suppression one beyond the area.
-        // Only fetch the 128×128 pixel blocks that `area.inflate(2)` actually touches.
-        let ext_area = area.inflate(2).intersect(&self.bounds);
-        self.ensure_pixel_blocks(fetch, ext_area);
-        if self.fields.len() > MAX_FIELD_BLOCKS {
-            self.fields.clear();
-        }
-        let mut out = Field { area, w, strength: vec![0.0; n], grad: vec![[0.0; 2]; n], ridge: vec![false; n], offset: vec![[0.0; 2]; n] };
-        let (fx0, fy0) = (area.x0.div_euclid(FIELD_BLOCK), area.y0.div_euclid(FIELD_BLOCK));
-        let (fx1, fy1) = ((area.x1 - 1).div_euclid(FIELD_BLOCK), (area.y1 - 1).div_euclid(FIELD_BLOCK));
-        for fy in fy0..=fy1 {
-            for fx in fx0..=fx1 {
-                let fbr = Rect::new(
-                    fx.saturating_mul(FIELD_BLOCK),
-                    fy.saturating_mul(FIELD_BLOCK),
-                    fx.saturating_add(1).saturating_mul(FIELD_BLOCK),
-                    fy.saturating_add(1).saturating_mul(FIELD_BLOCK),
-                )
-                .intersect(&self.bounds);
-                if fbr.is_empty() {
-                    continue;
-                }
-                let f_ext = fbr.inflate(2).intersect(&self.bounds);
-                if !self.fields.contains_key(&(fx, fy)) && self.has_pixel_blocks(f_ext) {
-                    let px = self.pixels(fetch, f_ext);
-                    let tile = Field::new(fbr, f_ext, &px);
-                    self.fields.insert((fx, fy), tile);
-                }
-                let computed;
-                let tile = if let Some(cached) = self.fields.get(&(fx, fy)) {
-                    cached
-                } else {
-                    let sub = fbr.intersect(&area);
-                    let sub_ext = sub.inflate(2).intersect(&self.bounds);
-                    let px = self.pixels(fetch, sub_ext);
-                    computed = Field::new(sub, sub_ext, &px);
-                    &computed
-                };
-                let ov = tile.area.intersect(&area);
-                let len = ov.width() as usize;
-                let tw = tile.w;
-                for y in ov.y0..ov.y1 {
-                    let src = (y - tile.area.y0) as usize * tw + (ov.x0 - tile.area.x0) as usize;
-                    let dst = (y - area.y0) as usize * w + (ov.x0 - area.x0) as usize;
-                    if let (Some(s), Some(d)) = (tile.strength.get(src..src + len), out.strength.get_mut(dst..dst + len)) {
-                        d.copy_from_slice(s);
-                    }
-                    if let (Some(s), Some(d)) = (tile.grad.get(src..src + len), out.grad.get_mut(dst..dst + len)) {
-                        d.copy_from_slice(s);
-                    }
-                    if let (Some(s), Some(d)) = (tile.ridge.get(src..src + len), out.ridge.get_mut(dst..dst + len)) {
-                        d.copy_from_slice(s);
-                    }
-                    if let (Some(s), Some(d)) = (tile.offset.get(src..src + len), out.offset.get_mut(dst..dst + len)) {
-                        d.copy_from_slice(s);
-                    }
-                }
-            }
-        }
-        out
+        let ext = area.inflate(2).intersect(&self.bounds);
+        let px = self.pixels(fetch, ext);
+        Field::new(area, ext, &px)
     }
 
-    /// Ensures all 128×128 pixel blocks overlapping `r` are loaded in `self.blocks`.
-    fn ensure_pixel_blocks(&mut self, fetch: &mut Fetch, r: Rect) {
+    /// Straight RGBA8 pixels of `r` (inside the image), through the block cache.
+    fn pixels(&mut self, fetch: &mut Fetch, r: Rect) -> Vec<[u8; 4]> {
+        let w = r.width() as usize;
+        let mut out = vec![[0u8; 4]; w * r.height() as usize];
         if r.is_empty() {
-            return;
+            return out;
         }
         if self.blocks.len() > MAX_BLOCKS {
             self.blocks.clear();
-            self.fields.clear();
         }
         let (bx0, by0) = (r.x0.div_euclid(BLOCK), r.y0.div_euclid(BLOCK));
         let (bx1, by1) = ((r.x1 - 1).div_euclid(BLOCK), (r.y1 - 1).div_euclid(BLOCK));
@@ -341,61 +246,10 @@ impl Tracer {
                     continue;
                 }
                 let n = br.width() as usize * br.height() as usize;
-                self.blocks.entry((bx, by)).or_insert_with(|| {
+                let block = self.blocks.entry((bx, by)).or_insert_with(|| {
                     let v = fetch(br);
                     if v.len() == n { v } else { vec![[0; 4]; n] }
                 });
-            }
-        }
-    }
-
-    /// True if every 128×128 pixel block overlapping `r` is already cached in `self.blocks`.
-    fn has_pixel_blocks(&self, r: Rect) -> bool {
-        if r.is_empty() {
-            return true;
-        }
-        let (bx0, by0) = (r.x0.div_euclid(BLOCK), r.y0.div_euclid(BLOCK));
-        let (bx1, by1) = ((r.x1 - 1).div_euclid(BLOCK), (r.y1 - 1).div_euclid(BLOCK));
-        for by in by0..=by1 {
-            for bx in bx0..=bx1 {
-                let br = Rect::new(
-                    bx.saturating_mul(BLOCK),
-                    by.saturating_mul(BLOCK),
-                    bx.saturating_add(1).saturating_mul(BLOCK),
-                    by.saturating_add(1).saturating_mul(BLOCK),
-                )
-                .intersect(&self.bounds);
-                if !br.is_empty() && !self.blocks.contains_key(&(bx, by)) {
-                    return false;
-                }
-            }
-        }
-        true
-    }
-
-    /// Straight RGBA8 pixels of `r` (inside the image), through the block cache.
-    fn pixels(&mut self, fetch: &mut Fetch, r: Rect) -> Vec<[u8; 4]> {
-        let w = r.width() as usize;
-        let mut out = vec![[0u8; 4]; w * r.height() as usize];
-        if r.is_empty() {
-            return out;
-        }
-        self.ensure_pixel_blocks(fetch, r);
-        let (bx0, by0) = (r.x0.div_euclid(BLOCK), r.y0.div_euclid(BLOCK));
-        let (bx1, by1) = ((r.x1 - 1).div_euclid(BLOCK), (r.y1 - 1).div_euclid(BLOCK));
-        for by in by0..=by1 {
-            for bx in bx0..=bx1 {
-                let br = Rect::new(
-                    bx.saturating_mul(BLOCK),
-                    by.saturating_mul(BLOCK),
-                    bx.saturating_add(1).saturating_mul(BLOCK),
-                    by.saturating_add(1).saturating_mul(BLOCK),
-                )
-                .intersect(&self.bounds);
-                if br.is_empty() {
-                    continue;
-                }
-                let Some(block) = self.blocks.get(&(bx, by)) else { continue };
                 let ov = br.intersect(&r);
                 let len = ov.width() as usize;
                 for y in ov.y0..ov.y1 {
@@ -412,7 +266,6 @@ impl Tracer {
 }
 
 /// Edge features of the pixels in an area.
-#[derive(Clone, Debug)]
 struct Field {
     area: Rect,
     w: usize,

@@ -41,6 +41,7 @@
 	About WordCraft	Sobre o WordCraft
 	Above Chart	Acima do gráfico
 	Above the item	Acima do item
+	Above/below	Acima/abaixo
 	Accent	Acento
 	Accent Gradient	Gradiente de destaque
 	Accent with Reflection	Destaque com reflexo
@@ -231,6 +232,7 @@
 	Bracket	Colchete
 	Break Link	Quebrar link
 	Breaks	Quebras
+	Bright Green	Verde-vivo
 	Bring Forward	Trazer para frente
 	Browse in WordCraft…	Procurar no WordCraft…
 	Building Block Gallery Content Control	Controle de conteúdo da galeria de blocos de construção
@@ -413,6 +415,28 @@
 	Croatian	Croata
 	Cross-reference	Referência cruzada
 	Cross-reference:	Referência cruzada:
+	Dark Blue	Azul-escuro
+	Dark Red	Vermelho-escuro
+	Dark Yellow	Amarelo-escuro
+	East	Leste
+	Emphasis	Ênfase
+	Gray-25%	Cinza-25%
+	Gray-50%	Cinza-50%
+	Insert reference to:	Inserir referência a:
+	Intense Emphasis	Ênfase intensa
+	No Spacing	Sem espaçamento
+	Nothing of this type in the document.	Nenhum item deste tipo no documento.
+	Strong	Forte
+	Subtle Emphasis	Ênfase sutil
+	Subtle Reference	Referência sutil
+	Teal	Verde-azulado
+	TOC {n}	Sumário {n}
+	tOGGLE cASE	aLTERNAR mAIÚSCULAS/mINÚSCULAS
+	Turquoise	Turquesa
+	{key} starts a new page. Much tidier than pressing Enter until it happens.	{key} inicia uma nova página. Bem mais organizado do que apertar Enter até acontecer.
+	{key} finds and replaces text, formatting and special characters.	{key} localiza e substitui texto, formatação e caracteres especiais.
+	{key} turns the selected text into a link.	{key} transforma o texto selecionado em um link.
+	{key} counts your words, characters and paragraphs.	{key} conta suas palavras, caracteres e parágrafos.
 	Current Position	Posição atual
 	Current record	Registro atual
 	Current style: {style}	Estilo atual: {style}
@@ -1426,6 +1450,14 @@
 	Remove Table of Contents	Remover sumário
 	Remove the control once edited	Remover o controle após a edição
 	Remove Watermark	Remover marca-d'água
+	No watermark	Sem marca-d'água
+	Picture watermark	Marca-d'água de imagem
+	Text watermark	Marca-d'água de texto
+	Select Picture…	Selecionar imagem…
+	Washout	Desbotado
+	Semitransparent	Semitransparente
+	Transparency:	Transparência:
+	Select a picture first.	Selecione uma imagem primeiro.
 	Rename Document	Renomear documento
 	Rename Style	Renomear estilo
 	Reopen	Reabrir
@@ -2015,3 +2047,122 @@
 	{width} × {height} pixels	{width} × {height} pixels
 	{words} words	Palavras: {words}
 	“{text}” ({row}, {series}) isn't a number.	“{text}” ({row}, {series}) não é um número.
+	Add a language…	Adicionar um idioma…
+	Add a language	Adicionar um idioma
+	Your languages	Seus idiomas
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Inglês, os idiomas deste documento e cada pacote de idioma instalado. Os pacotes de idioma adicionam dicionários de ortografia e hifenização.
+	Set as default	Definir como padrão
+	New blank documents are written in this language	Novos documentos em branco são escritos neste idioma
+	{language} (default)	{language} (padrão)
+	Built in	Integrado
+	Your own dictionary	Seu próprio dicionário
+	System dictionary	Dicionário do sistema
+	Not available yet	Ainda não disponível
+	Grammar built in	Gramática integrada
+	Install spelling ({size})	Instalar ortografia ({size})
+	Its dictionary couldn't be read: {reason}	Não foi possível ler o dicionário dele: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	O download está desativado. Clicar em “Adicionar um idioma…” ou “Instalar” o ativa: o WordCraft passa a baixar pacotes de idioma e fontes do GitHub.
+	Search:	Pesquisar:
+	Dutch, Nederlands or nl	Holandês, Nederlands ou nl
+	No languages to show yet.	Ainda não há idiomas para mostrar.
+	No language matches your search.	Nenhum idioma corresponde à sua pesquisa.
+	An installed Language pack is used after this folder.	Um pacote de idioma instalado é usado depois desta pasta.
+	Dictionary files	Arquivos de dicionário
+	Possible spelling mistake	Possível erro de ortografia
+	Gets the list of Language packs, then this language's pack if there is one.	Obtém a lista de pacotes de idioma e depois o pacote deste idioma, se houver.
+	Afrikaans	Africâner
+	Belarusian	Bielorrusso
+	Bulgarian	Búlgaro
+	Bosnian	Bósnio
+	Catalan	Catalão
+	Catalan (Valencian)	Catalão (valenciano)
+	Welsh	Galês
+	Esperanto	Esperanto
+	Persian	Persa
+	Irish	Irlandês
+	Galician	Galego
+	Hungarian	Húngaro
+	Armenian	Armênio
+	Icelandic	Islandês
+	Georgian	Georgiano
+	Lithuanian	Lituano
+	Latvian	Letão
+	Macedonian	Macedônio
+	Norwegian (Nynorsk)	Norueguês (nynorsk)
+	Slovak	Eslovaco
+	Slovenian	Esloveno
+	Albanian	Albanês
+	Swahili	Suaíli
+	Tamil	Tâmil
+	Thai	Tailandês
+	Vietnamese	Vietnamita
+	Set as Default Language	Definir como idioma padrão
+	U.A.E.	Emirados Árabes Unidos
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Áustria
+	Australia	Austrália
+	Bosnia and Herzegovina	Bósnia e Herzegovina
+	Belgium	Bélgica
+	Bolivia	Bolívia
+	Brazil	Brasil
+	Belarus	Belarus
+	Canada	Canadá
+	Switzerland	Suíça
+	Chile	Chile
+	China	China
+	Colombia	Colômbia
+	Costa Rica	Costa Rica
+	Cuba	Cuba
+	Cabo Verde	Cabo Verde
+	Cyprus	Chipre
+	Germany	Alemanha
+	Dominican Republic	República Dominicana
+	Ecuador	Equador
+	Egypt	Egito
+	Spain	Espanha
+	Finland	Finlândia
+	France	França
+	United Kingdom	Reino Unido
+	Equatorial Guinea	Guiné Equatorial
+	Guatemala	Guatemala
+	Hong Kong SAR	RAE de Hong Kong
+	Honduras	Honduras
+	Ireland	Irlanda
+	India	Índia
+	Iraq	Iraque
+	Italy	Itália
+	Jamaica	Jamaica
+	Jordan	Jordânia
+	Kuwait	Kuwait
+	Kazakhstan	Cazaquistão
+	Lebanon	Líbano
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luxemburgo
+	Morocco	Marrocos
+	Monaco	Mônaco
+	Montenegro	Montenegro
+	Macao SAR	RAE de Macau
+	Mexico	México
+	Malaysia	Malásia
+	Mozambique	Moçambique
+	Nicaragua	Nicarágua
+	Netherlands	Países Baixos
+	New Zealand	Nova Zelândia
+	Panama	Panamá
+	Peru	Peru
+	Philippines	Filipinas
+	Puerto Rico	Porto Rico
+	Portugal	Portugal
+	Paraguay	Paraguai
+	Qatar	Catar
+	Russia	Rússia
+	Singapore	Singapura
+	El Salvador	El Salvador
+	Syria	Síria
+	Taiwan	Taiwan
+	Ukraine	Ucrânia
+	United States	Estados Unidos
+	Uruguay	Uruguai
+	Venezuela	Venezuela
+	South Africa	África do Sul

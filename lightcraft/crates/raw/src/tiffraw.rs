@@ -1,9 +1,9 @@
 //! Reading the pixel data of a TIFF IFD (strips or tiles; uncompressed, lossless/lossy JPEG, Deflate, JPEG XL), in parallel.
 
-use crate::unpack::*;
+use crate::unpack::{f16_to_f32, f24_to_f32, inflate, read_u16s, undo_diff_u16, undo_float_predictor, unpack_lsb, unpack_msb, unpack_words32_msb};
 use crate::{MAX_SAMPLES, RawData, RawError, Result, ljpeg};
-use lightcraft_tiff::image::{Chunk, ImageInfo, chunk_bytes};
-use lightcraft_tiff::{ByteOrder, tags::compression as comp};
+use craft_tiff::image::{Chunk, ImageInfo, chunk_bytes};
+use craft_tiff::{ByteOrder, tags::compression as comp};
 use rayon::prelude::*;
 
 /// Bit packing for uncompressed integer data with bit depths other than 8/16.
@@ -51,12 +51,35 @@ pub fn check_image(data: &[u8], info: &ImageInfo) -> Result<usize> {
     let (across, down) = info.grid();
     let planes = if info.planar == 2 { cpp } else { 1 };
     let expected = (across as usize).saturating_mul(down as usize).saturating_mul(planes);
-    if chunks.len() < expected {
-        return Err(RawError::Corrupt(format!("{} image data chunks, expected {expected}", chunks.len())));
+    // the offsets table says how many chunks the image declares: craft-tiff builds at most one
+    // descriptor per byte of file (craft-libs#827), so `chunks` may be shorter on a grid of tiles
+    // sharing one payload, and the bytes behind it are what the bounds below count.
+    if info.offsets.len() < expected {
+        return Err(RawError::Corrupt(format!("{} image data chunks, expected {expected}", info.offsets.len())));
+    }
+    // Tile sizes don't depend on the image size, and every tile is decoded at its nominal size and held until the copy:
+    // a grid of tiles no larger than the image covers less than twice its width and height, so more than four times
+    // its samples (or one tile of more than TILE_SAMPLES_FLOOR on a tiny image) is no picture (issue #2554).
+    let ccpp = if info.planar == 2 { 1 } else { cpp as u64 };
+    let nominal = chunks.iter().fold(0u64, |sum, c| sum.saturating_add(u64::from(c.width).saturating_mul(u64::from(c.height)).saturating_mul(ccpp)));
+    if nominal > (total as u64).saturating_mul(4).max(TILE_SAMPLES_FLOOR) {
+        return Err(RawError::Limit("image data chunks far larger than the image"));
     }
     // Plausibility bound before allocating: no supported coding stores more than ~2000 samples per byte
-    // (Deflate of constant data is the extreme), so tiny files cannot trigger huge allocations.
-    let available: u64 = chunks.iter().map(|c| chunk_bytes(data, c).map_or(0, |s| s.len() as u64)).sum();
+    // (Deflate of constant data is the extreme), so tiny files cannot trigger huge allocations. The
+    // bytes are counted once however many chunks point at them: a grid of tiles sharing one small
+    // payload holds that payload's samples, not the grid's.
+    let mut spans: Vec<(u64, u64)> =
+        chunks.iter().filter_map(|c| Some((c.offset, c.offset.checked_add(chunk_bytes(data, c)?.len() as u64)?))).collect();
+    spans.sort_unstable();
+    let (mut available, mut end) = (0u64, 0u64);
+    for (a, b) in spans {
+        let a = a.max(end);
+        if b > a {
+            available = available.saturating_add(b - a);
+            end = b;
+        }
+    }
     if available.saturating_mul(2048) < total as u64 {
         return Err(RawError::Corrupt(format!("{available} bytes of image data cannot hold {total} samples")));
     }
@@ -94,6 +117,9 @@ pub(crate) fn read_image_in(mode: crate::Mode, data: &[u8], info: &ImageInfo, or
         }
     }
 }
+
+/// The nominal samples of all chunks [`check_image`] allows whatever the image size: one 2048 × 2048 tile.
+const TILE_SAMPLES_FLOOR: u64 = 1 << 22;
 
 /// Decode all chunks of `info` into one buffer of `width × height × cpp` samples.
 pub fn read_image(data: &[u8], info: &ImageInfo, order: ByteOrder, packing: Packing) -> Result<RawData> {
@@ -224,7 +250,12 @@ fn decode_chunk(data: &[u8], info: &ImageInfo, c: &Chunk, order: ByteOrder, pack
         }
         comp::LOSSY_JPEG => {
             // lossy DNG: each chunk is a baseline (DCT) JPEG of 8-bit samples
-            let (px, jw, jh, jc) = lossy_jpeg(src, cpp, MAX_JPEG_SAMPLES)?;
+            // a JPEG decoded for a tile may hold no more samples than the tile (a real one is exactly the tile):
+            // many small tiles pointing at one big JPEG would otherwise each decode all of it
+            // (the JPEG codes whole MCUs, at most 32 × 32 pixels each, so its size is the tile's rounded up to them)
+            let mcu = |v: usize| v.div_ceil(32).saturating_mul(32);
+            let tile_budget = mcu(cw).saturating_mul(mcu(ch)).saturating_mul(if cpp == 1 { 1 } else { 3 }).clamp(1, MAX_JPEG_SAMPLES);
+            let (px, jw, jh, jc) = lossy_jpeg(src, cpp, tile_budget)?;
             // the buffer holds the rows the decoded JPEG covers (the caller zero-fills the tile's
             // remainder and reads only rows it fills): a tile-many-larger decoded JPEG does not
             // get the nominal tile's full buffer (issue #1517)
@@ -248,6 +279,16 @@ fn decode_chunk(data: &[u8], info: &ImageInfo, c: &Chunk, order: ByteOrder, pack
             // Deflate compresses at most about 1:1032, so a source this far under half of its
             // nominal length cannot reconstruct the chunk: refused before the nominal buffer is
             // inflated and predicted, which padding-only work would make gigabytes.
+            // Nor may the nominal chunk be mostly padding outside the image (a tile far larger than the picture):
+            // its allocation and predictor pass would be spent on samples nobody reads.
+            if n > vw
+                .saturating_mul(vh)
+                .saturating_mul(cpp)
+                .saturating_mul(MAX_PADDING_FACTOR)
+                .saturating_add(MAX_WRITER_TILE_SAMPLES.saturating_mul(cpp))
+            {
+                return Err(RawError::Limit("deflated chunk is mostly padding outside the image"));
+            }
             if (src.len() as u64).saturating_mul(2048) < inflate_len {
                 return Err(RawError::Corrupt(format!("a deflated chunk of {inflate_len} bytes is packed into only {} bytes", src.len())));
             }
@@ -277,20 +318,22 @@ fn chunk_dims(info: &ImageInfo, c: &Chunk) -> (usize, usize, usize, usize) {
     (cw, ch, vw, vh)
 }
 
-#[cfg(feature = "jxl")]
-use crate::jxl::{check as jxl_chunk_check, decode as jxl_chunk};
-
-#[cfg(not(feature = "jxl"))]
 #[allow(clippy::too_many_arguments)]
 fn jxl_chunk(_: &[u8], _: usize, _: usize, _: usize, _: usize, _: usize, _: u32, _: bool) -> Result<ChunkPx> {
-    Err(RawError::Unsupported("JPEG XL DNG (built without the `jxl` feature)".into()))
+    Err(RawError::Unsupported("JPEG XL outside a DNG".into()))
 }
 
-#[cfg(not(feature = "jxl"))]
 #[allow(clippy::too_many_arguments)]
 fn jxl_chunk_check(src: &[u8], cw: usize, ch: usize, vw: usize, vh: usize, cpp: usize, bits: u32, float: bool) -> Result<()> {
     jxl_chunk(src, cw, ch, vw, vh, cpp, bits, float).map(|_| ())
 }
+
+/// How many times its in-image samples a deflated chunk's nominal size may reach (plus a writer tile of slack):
+/// edge tiles of real files are mostly inside the image.
+const MAX_PADDING_FACTOR: usize = 32;
+/// Samples per plane of the largest Deflate tile the DNG writer pads to (2048 × 2048, `dngwrite::MAX_DEFLATE_TILE`),
+/// which a small image's one tile is nearly all padding of: such files still decode.
+const MAX_WRITER_TILE_SAMPLES: usize = 2048 * 2048;
 
 /// The most samples a tiled JPEG chunk or a white-balance preview may decode to: far more than
 /// any real lossy tile or preview carries, and small enough that a JPEG header alone cannot size
@@ -416,7 +459,31 @@ fn unpack_chunk(
 #[cfg(test)]
 mod lossy_tests {
     use super::*;
-    use lightcraft_tiff::image::Layout;
+    use craft_tiff::image::Layout;
+
+    /// 65 536 tiles all pointing at the same 256 bytes: the image's samples can't come from them,
+    /// and nothing of its size is allocated to find that out.
+    #[test]
+    fn tiles_sharing_one_payload_count_its_bytes_once() {
+        let file = vec![0u8; 8 + 256];
+        let info = ImageInfo {
+            width: 4096,
+            height: 4096,
+            bits_per_sample: vec![8],
+            samples_per_pixel: 1,
+            compression: comp::NONE,
+            photometric: 34892,
+            planar: 1,
+            predictor: 1,
+            sample_format: 1,
+            new_subfile_type: 0,
+            layout: Layout::Tiles { tile_width: 16, tile_height: 16 },
+            offsets: vec![8; 65_536],
+            byte_counts: vec![256; 65_536],
+        };
+        let err = check_image(&file, &info).unwrap_err().to_string();
+        assert!(err.contains("cannot hold"), "{err}");
+    }
 
     /// A lossy-DNG-style image: two 16×8 tiles, each a baseline JPEG, the right one cut short
     /// by the image edge.
@@ -458,6 +525,39 @@ mod lossy_tests {
         assert!((px(10, 5)[1] as i32 - 150).abs() <= 6, "green ramp: {:?}", px(10, 5));
     }
 
+    /// A small tile may not decode a JPEG much larger than itself (a table of tiny tiles all pointing at one big
+    /// JPEG would decode it once per tile); a JPEG that fills the tile's whole 32 × 32 MCU block still decodes.
+    #[test]
+    fn a_lossy_tile_may_not_decode_a_much_larger_jpeg() {
+        let encode = |w: usize, h: usize| {
+            let mut out = Vec::new();
+            jpeg_encoder::Encoder::new(&mut out, 90).encode(&vec![128u8; w * h * 3], w as u16, h as u16, jpeg_encoder::ColorType::Rgb).unwrap();
+            out
+        };
+        let image = |jpeg: &[u8]| {
+            let mut file = vec![0u8; 8];
+            file.extend_from_slice(jpeg);
+            let info = ImageInfo {
+                width: 4,
+                height: 4,
+                bits_per_sample: vec![8, 8, 8],
+                samples_per_pixel: 3,
+                compression: comp::LOSSY_JPEG,
+                photometric: 34892,
+                planar: 1,
+                predictor: 1,
+                sample_format: 1,
+                new_subfile_type: 0,
+                layout: Layout::Tiles { tile_width: 16, tile_height: 16 },
+                offsets: vec![8],
+                byte_counts: vec![jpeg.len() as u64],
+            };
+            read_image(&file, &info, ByteOrder::Little, Packing::Msb)
+        };
+        assert!(image(&encode(32, 32)).is_ok());
+        assert!(matches!(image(&encode(256, 256)), Err(RawError::Corrupt(_))));
+    }
+
     fn strip_info(compression: u16, offsets: Vec<u64>, byte_counts: Vec<u64>) -> ImageInfo {
         ImageInfo {
             width: 4,
@@ -493,8 +593,9 @@ mod lossy_tests {
         assert!(read_image(&file, &past_end, ByteOrder::Little, Packing::Msb).is_err());
     }
 
-    /// A small image whose uncompressed tile claims to be enormous (16384 x 16384 nominal, a few bytes of data) is
-    /// refused before that tile is allocated (issue #1512); an edge tile stored at its full nominal size decodes.
+    /// A small image whose uncompressed tile claims to be enormous (2048 x 2048 nominal, a few bytes of data) is
+    /// refused before that tile is allocated (issue #1512); an edge tile stored at its full nominal size decodes. (A
+    /// tile larger still is refused by `check_image` before any decode: `tiles_far_larger_than_the_image_are_refused`.)
     #[test]
     fn a_huge_nominal_uncompressed_tile_with_little_data_is_refused() {
         let info = |tile: u32, bytes: u64| ImageInfo {
@@ -515,7 +616,37 @@ mod lossy_tests {
         let small = vec![1u8; 2 * 16 * 16];
         assert!(read_image(&small, &info(16, small.len() as u64), ByteOrder::Little, Packing::Msb).is_ok());
         let data = vec![1u8; 4096];
-        assert!(matches!(read_image(&data, &info(16384, data.len() as u64), ByteOrder::Little, Packing::Msb), Err(RawError::Corrupt(_))));
+        assert!(matches!(read_image(&data, &info(2048, data.len() as u64), ByteOrder::Little, Packing::Msb), Err(RawError::Corrupt(_))));
+    }
+
+    /// A 16 × 16 image whose lossless-JPEG tile claims to be 16384 × 16384 (coded only as tall as the image, so the
+    /// file is small) is refused before the tile is allocated, by the header check too (issue #2554); a 256 × 256
+    /// tile on the same image, as a writer with a fixed tile size stores it, still decodes.
+    #[test]
+    fn tiles_far_larger_than_the_image_are_refused() {
+        let read = |tile: u32, mode: crate::Mode| {
+            let t = ljpeg::encode(&vec![300u16; tile as usize * 16], tile as usize, 16, 1, 12, 1, 0);
+            let info = ImageInfo {
+                width: 16,
+                height: 16,
+                bits_per_sample: vec![12],
+                samples_per_pixel: 1,
+                compression: comp::JPEG,
+                photometric: 32803,
+                planar: 1,
+                predictor: 1,
+                sample_format: 1,
+                new_subfile_type: 0,
+                layout: Layout::Tiles { tile_width: tile, tile_height: tile },
+                offsets: vec![0],
+                byte_counts: vec![t.len() as u64],
+            };
+            read_image_in(mode, &t, &info, ByteOrder::Little, Packing::Msb)
+        };
+        assert_eq!(read(256, crate::Mode::Full), Ok(RawData::U16(vec![300; 16 * 16])));
+        for mode in [crate::Mode::Header, crate::Mode::Full] {
+            assert!(matches!(read(16384, mode), Err(RawError::Limit(_))));
+        }
     }
 
     /// A lossless-JPEG tile may be coded only as tall as the part inside the image, never shorter.

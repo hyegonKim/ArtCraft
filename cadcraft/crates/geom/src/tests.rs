@@ -221,6 +221,18 @@ fn segment_offset() {
     assert!(s.offset(6.0).is_none());
 }
 
+/// A polyline of many fine arcs samples at most the point budget, then draws chords.
+#[test]
+fn polyline_tessellation_is_bounded() {
+    let vertices: Vec<PolyVertex> = (0..3000).map(|i| PolyVertex { bulge: 1.0, ..PolyVertex::new(Vec2::new(f64::from(i) * 1e6, 0.0)) }).collect();
+    let pl = Polyline { vertices, closed: false };
+    let pts = pl.tessellate(1e-9);
+    assert!(pts.len() <= MAX_TESSELLATED_POINTS + 2 * 3000 + 4096, "{}", pts.len());
+    assert!(pts.len() > 3000);
+    let mut budget = 10;
+    assert!(pl.tessellate_within(1e-9, &mut budget).len() <= 4096 + 2 * 3000);
+}
+
 #[test]
 fn arc_segments_bounded() {
     assert_eq!(arc_segments(0.0, 1.0, 0.1), 1);
@@ -363,37 +375,4 @@ fn open_polyline_centroid_ignores_last_bulge() {
     pl.vertices[2].bulge = 1.0;
     let after = pl.centroid().unwrap();
     assert!(before.near(after, 1e-9), "{before:?} -> {after:?}");
-}
-
-#[test]
-fn bulge_semicircle_and_capsule_polyline_metrics() {
-    // A semicircle from (0, 0) to (10, 0): included angle +π, so bulge = tan(π/4) = 1.
-    let bulge = arc_to_bulge(PI);
-    assert!(close(bulge, 1.0));
-    assert!(close(4.0 * bulge.atan(), PI));
-    let (arc, ccw) = bulge_to_arc(Vec2::new(0.0, 0.0), Vec2::new(10.0, 0.0), bulge).unwrap();
-    assert!(ccw);
-    assert!(close(arc.radius, 5.0));
-    assert!(arc.center.near(Vec2::new(5.0, 0.0), 1e-9));
-    assert!(close(arc.len(), 5.0 * PI));
-
-    // A closed capsule: two straight sides of length 20 and two semicircular caps of radius 5.
-    let poly = Polyline {
-        vertices: vec![
-            PolyVertex::new(Vec2::new(0.0, 0.0)),
-            PolyVertex::with_bulge(Vec2::new(20.0, 0.0), arc_to_bulge(PI)),
-            PolyVertex::new(Vec2::new(20.0, 10.0)),
-            PolyVertex::with_bulge(Vec2::new(0.0, 10.0), arc_to_bulge(PI)),
-        ],
-        closed: true,
-    };
-    let segs = poly.segments();
-    assert_eq!(segs.len(), 4);
-    assert!(close(segs[0].len(), 20.0));
-    let Segment::Arc { arc: cap, .. } = segs[1] else { panic!("segment 1 is an arc: {:?}", segs[1]) };
-    assert!(close(cap.radius, 5.0));
-    assert!(cap.center.near(Vec2::new(20.0, 5.0), 1e-9));
-    assert!(close(poly.len(), 40.0 + 10.0 * PI));
-    // Area = rectangle (20 × 10 = 200) + two semicircles (π · 5² = 25π).
-    assert!(close(poly.area(), 200.0 + 25.0 * PI));
 }

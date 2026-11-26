@@ -883,9 +883,17 @@ pub fn tab(resp: &Response, label: &str, selected: bool) {
 }
 
 pub fn checkbox(resp: &Response, label: &str, on: bool) {
+    checkbox_tri(resp, label, Some(on));
+}
+
+/// A checkbox that can be mixed (`None`, announced as "mixed" rather than unchecked).
+pub fn checkbox_tri(resp: &Response, label: &str, state: Option<bool>) {
     node(resp, label, |n| {
         n.set_role(Role::CheckBox);
-        n.set_toggled(toggled(on));
+        n.set_toggled(match state {
+            Some(on) => toggled(on),
+            None => Toggled::Mixed,
+        });
     });
 }
 
@@ -906,6 +914,24 @@ pub fn number(resp: &Response, label: &str, value: Option<f64>, suffix: &str, em
                 n.set_value(format!("{}{suffix}", crate::widgets::fmt_num(v)));
             }
             None => n.set_value(empty),
+        }
+    });
+}
+
+/// A picture described by `label`.
+pub fn image(resp: &Response, label: &str) {
+    node(resp, label, |n| n.set_role(Role::Image));
+}
+
+/// A slider over `min`..=`max` at `value` (None = mixed).
+pub fn slider(resp: &Response, label: &str, value: Option<f64>, min: f64, max: f64) {
+    node(resp, label, |n| {
+        n.set_role(Role::Slider);
+        n.set_min_numeric_value(min);
+        n.set_max_numeric_value(max);
+        if let Some(v) = value {
+            n.set_numeric_value(v);
+            n.set_value(crate::widgets::fmt_num(v));
         }
     });
 }
@@ -967,6 +993,18 @@ pub fn submenu(resp: &Response, label: &str, open: bool) {
 /// `resp` can't be used now (a menu item whose command doesn't apply).
 pub fn disabled(resp: &Response) {
     node(resp, "", |n| n.set_disabled());
+}
+
+/// `resp`'s node also says `text` (a menu row's state, e.g. "locked"), after any description
+/// already set (joined with ", ").
+pub fn describe(resp: &Response, text: &str) {
+    node(resp, "", |n| {
+        let d = match n.description() {
+            Some(old) if !old.is_empty() => format!("{old}, {text}"),
+            _ => text.to_string(),
+        };
+        n.set_description(d);
+    });
 }
 
 /// What a layer row says besides its name.

@@ -37,6 +37,8 @@ const COLOR_COUNTS: [&str; 8] = ["2", "4", "8", "16", "32", "64", "128", "256"];
 /// Matte param values and their labels (`Other`: a colour).
 const MATTES: [&str; 3] = ["none", "white", "black"];
 const MATTE_LABELS: [&str; 4] = ["None", "White", "Black", "Other"];
+/// PNG decomposed export mode param values (Illustrator 2027 `31.0`).
+const DECOMPOSED_MODES: [&str; 4] = ["full", "noText", "textOnly", "textWhiteOnBlack"];
 /// JPEG quality on the dialog's 0–10 scale: the band each step falls in.
 const QUALITY_BANDS: [&str; 11] = ["Low", "Low", "Low", "Medium", "Medium", "Medium", "High", "High", "Maximum", "Maximum", "Maximum"];
 
@@ -76,6 +78,7 @@ pub(super) fn defaults(app: &VectorcraftApp, f: &Format) -> Map<String, Value> {
     match f.id {
         "png" => {
             o.insert("interlaced".into(), json!(false));
+            o.insert("decomposedMode".into(), json!("full"));
         }
         "jpg" => {
             let model = if cmyk { ColorModel::Cmyk } else { ColorModel::Rgb };
@@ -197,6 +200,15 @@ pub(super) fn option_rows(ui: &mut egui::Ui, d: &mut Dialog, id: &str, screens: 
 
     match id {
         "png" => {
+            label(ui, tl!("Decomposed Mode:"));
+            let dm_labels = [
+                tl!("Full"),
+                tl!("No Text"),
+                tl!("Text Only"),
+                tl!("Text White-on-Black Mask"),
+            ];
+            self::choice(ui, d, "decomposedMode", &DECOMPOSED_MODES, &dm_labels);
+            ui.end_row();
             ui.label("");
             form::check(ui, d, "interlaced", tl!("Interlaced"));
             ui.end_row();

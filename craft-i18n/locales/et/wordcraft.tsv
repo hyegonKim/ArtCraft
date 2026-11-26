@@ -1401,6 +1401,14 @@
 	Remove Table of Contents	Eemalda sisukord
 	Remove the control once edited	Eemalda juhtelement pärast redigeerimist
 	Remove Watermark	Eemalda vesimärk
+	No watermark	Vesimärk puudub
+	Picture watermark	Pildist vesimärk
+	Text watermark	Tekstivesimärk
+	Select Picture…	Vali pilt…
+	Washout	Luitunud
+	Semitransparent	Poolläbipaistev
+	Transparency:	Läbipaistvus:
+	Select a picture first.	Vali kõigepealt pilt.
 	Rename Document	Nimeta dokument ümber
 	Reopen	Ava uuesti
 	Repeat as header row on each page	Korda päisereana igal lehel
@@ -1986,3 +1994,122 @@
 	{width} × {height} pixels	{width} × {height} pikslit
 	{words} words	Sõnu: {words}
 	“{text}” ({row}, {series}) isn't a number.	„{text}” ({row}, {series}) ei ole arv.
+	Add a language…	Lisa keel…
+	Add a language	Lisa keel
+	Your languages	Teie keeled
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	Inglise keel, selle dokumendi keeled ja iga installitud keelepakett. Keelepaketid lisavad õigekirjasõnastikke ja poolitusreegleid.
+	Set as default	Määra vaikimisi
+	New blank documents are written in this language	Uued tühjad dokumendid kirjutatakse selles keeles
+	{language} (default)	{language} (vaikimisi)
+	Built in	Sisseehitatud
+	Your own dictionary	Teie enda sõnastik
+	System dictionary	Süsteemi sõnastik
+	Not available yet	Pole veel saadaval
+	Grammar built in	Grammatika on sisseehitatud
+	Install spelling ({size})	Installi õigekiri ({size})
+	Its dictionary couldn't be read: {reason}	Selle sõnastikku ei saanud lugeda: {reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	Allalaadimine on välja lülitatud. Klõps nupul „Lisa keel…“ või „Installi“ lülitab selle sisse: siis laadib WordCraft keelepaketid ja fondid GitHubist alla.
+	Search:	Otsi:
+	Dutch, Nederlands or nl	Hollandi, Nederlands või nl
+	No languages to show yet.	Kuvatavaid keeli veel pole.
+	No language matches your search.	Ükski keel ei vasta teie otsingule.
+	An installed Language pack is used after this folder.	Installitud keelepaketti kasutatakse pärast seda kausta.
+	Dictionary files	Sõnastikufailid
+	Possible spelling mistake	Võimalik õigekirjaviga
+	Gets the list of Language packs, then this language's pack if there is one.	Toob keelepakettide loendi ja seejärel selle keele paketi, kui see on olemas.
+	Afrikaans	afrikaani
+	Belarusian	valgevene
+	Bulgarian	bulgaaria
+	Bosnian	bosnia
+	Catalan	katalaani
+	Catalan (Valencian)	katalaani (valentsia)
+	Welsh	kõmri
+	Esperanto	esperanto
+	Persian	pärsia
+	Irish	iiri
+	Galician	galeegi
+	Hungarian	ungari
+	Armenian	armeenia
+	Icelandic	islandi
+	Georgian	gruusia
+	Lithuanian	leedu
+	Latvian	läti
+	Macedonian	makedoonia
+	Norwegian (Nynorsk)	norra (uusnorra)
+	Slovak	slovaki
+	Slovenian	sloveeni
+	Albanian	albaania
+	Swahili	suahiili
+	Tamil	tamili
+	Thai	tai
+	Vietnamese	vietnami
+	Set as Default Language	Määra vaikekeeleks
+	U.A.E.	Araabia Ühendemiraadid
+	Angola	Angola
+	Argentina	Argentina
+	Austria	Austria
+	Australia	Austraalia
+	Bosnia and Herzegovina	Bosnia ja Hertsegoviina
+	Belgium	Belgia
+	Bolivia	Boliivia
+	Brazil	Brasiilia
+	Belarus	Valgevene
+	Canada	Kanada
+	Switzerland	Šveits
+	Chile	Tšiili
+	China	Hiina
+	Colombia	Colombia
+	Costa Rica	Costa Rica
+	Cuba	Kuuba
+	Cabo Verde	Cabo Verde
+	Cyprus	Küpros
+	Germany	Saksamaa
+	Dominican Republic	Dominikaani Vabariik
+	Ecuador	Ecuador
+	Egypt	Egiptus
+	Spain	Hispaania
+	Finland	Soome
+	France	Prantsusmaa
+	United Kingdom	Ühendkuningriik
+	Equatorial Guinea	Ekvatoriaal-Guinea
+	Guatemala	Guatemala
+	Hong Kong SAR	Hongkongi erihalduspiirkond
+	Honduras	Honduras
+	Ireland	Iirimaa
+	India	India
+	Iraq	Iraak
+	Italy	Itaalia
+	Jamaica	Jamaica
+	Jordan	Jordaania
+	Kuwait	Kuveit
+	Kazakhstan	Kasahstan
+	Lebanon	Liibanon
+	Liechtenstein	Liechtenstein
+	Luxembourg	Luksemburg
+	Morocco	Maroko
+	Monaco	Monaco
+	Montenegro	Montenegro
+	Macao SAR	Macao erihalduspiirkond
+	Mexico	Mehhiko
+	Malaysia	Malaisia
+	Mozambique	Mosambiik
+	Nicaragua	Nicaragua
+	Netherlands	Holland
+	New Zealand	Uus-Meremaa
+	Panama	Panama
+	Peru	Peruu
+	Philippines	Filipiinid
+	Puerto Rico	Puerto Rico
+	Portugal	Portugal
+	Paraguay	Paraguay
+	Qatar	Katar
+	Russia	Venemaa
+	Singapore	Singapur
+	El Salvador	El Salvador
+	Syria	Süüria
+	Taiwan	Taiwan
+	Ukraine	Ukraina
+	United States	Ameerika Ühendriigid
+	Uruguay	Uruguay
+	Venezuela	Venezuela
+	South Africa	Lõuna-Aafrika Vabariik

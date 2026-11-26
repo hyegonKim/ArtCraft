@@ -1,0 +1,14 @@
+[package]
+name = "materialcraft-nodes"
+description = "MaterialCraft node library: definitions and CPU implementations of every node"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-core = { workspace = true }
+materialcraft-image = { workspace = true }
+rayon = { workspace = true }

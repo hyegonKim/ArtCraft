@@ -1446,6 +1446,14 @@
 	Remove Table of Contents	移除目錄
 	Remove the control once edited	編輯後移除控制項
 	Remove Watermark	移除浮水印
+	No watermark	無浮水印
+	Picture watermark	圖片浮水印
+	Text watermark	文字浮水印
+	Select Picture…	選取圖片…
+	Washout	褪色
+	Semitransparent	半透明
+	Transparency:	透明度：
+	Select a picture first.	請先選取圖片。
 	Rename Document	重新命名文件
 	Reopen	重新開啟
 	Repeat as header row on each page	在每頁重複作為標題列
@@ -2051,3 +2059,123 @@
 	{width} × {height} pixels	{width} × {height} 像素
 	{words} words	{words} 個字
 	“{text}” ({row}, {series}) isn't a number.	「{text}」（{row}，{series}）不是數字。
+	Add a language…	新增語言…
+	Add a language	新增語言
+	Your languages	你的語言
+	English, the languages of this document and every installed Language pack. Language packs add spelling dictionaries and hyphenation.	英文、此文件的語言，以及每個已安裝的語言套件。語言套件會加入拼字字典與斷字規則。
+	Set as default	設為預設
+	New blank documents are written in this language	新的空白文件會以此語言書寫
+	{language} (default)	{language}（預設）
+	Built in	內建
+	Your own dictionary	你自己的字典
+	System dictionary	系統字典
+	Not available yet	尚無法使用
+	Grammar built in	已內建文法檢查
+	Install spelling ({size})	安裝拼字檢查（{size}）
+	Its dictionary couldn't be read: {reason}	無法讀取其字典：{reason}
+	Downloading is off. Clicking Add a language… or Install turns it on: WordCraft then downloads language packs and fonts from GitHub.	下載功能已關閉。按一下「新增語言…」或「安裝」會將其開啟，之後 WordCraft 會從 GitHub 下載語言套件與字型。
+	Search:	搜尋：
+	Dutch, Nederlands or nl	荷蘭文、Nederlands 或 nl
+	No languages to show yet.	尚無可顯示的語言。
+	No language matches your search.	沒有符合搜尋的語言。
+	An installed Language pack is used after this folder.	已安裝的語言套件會在此資料夾之後使用。
+	Dictionary files	字典檔案
+	Possible spelling mistake	可能的拼字錯誤
+	Gets the list of Language packs, then this language's pack if there is one.	取得語言套件清單，然後取得此語言的語言套件（若有）。
+	Afrikaans	南非荷蘭文
+	Belarusian	白俄羅斯文
+	Bulgarian	保加利亞文
+	Bosnian	波士尼亞文
+	Catalan	加泰隆尼亞文
+	Catalan (Valencian)	加泰隆尼亞文（瓦倫西亞文）
+	Welsh	威爾斯文
+	Esperanto	世界語
+	Persian	波斯文
+	Irish	愛爾蘭文
+	Galician	加利西亞文
+	Hungarian	匈牙利文
+	Armenian	亞美尼亞文
+	Icelandic	冰島文
+	Georgian	喬治亞文
+	Lithuanian	立陶宛文
+	Latvian	拉脫維亞文
+	Macedonian	馬其頓文
+	Norwegian (Nynorsk)	挪威文（新挪威文）
+	Slovak	斯洛伐克文
+	Slovenian	斯洛維尼亞文
+	Albanian	阿爾巴尼亞文
+	Swahili	斯瓦希里文
+	Tamil	坦米爾文
+	Thai	泰文
+	Vietnamese	越南文
+	Set as Default Language	設為預設語言
+	{language} ({region})	{language}（{region}）
+	U.A.E.	阿拉伯聯合大公國
+	Angola	安哥拉
+	Argentina	阿根廷
+	Austria	奧地利
+	Australia	澳洲
+	Bosnia and Herzegovina	波士尼亞與赫塞哥維納
+	Belgium	比利時
+	Bolivia	玻利維亞
+	Brazil	巴西
+	Belarus	白俄羅斯
+	Canada	加拿大
+	Switzerland	瑞士
+	Chile	智利
+	China	中國
+	Colombia	哥倫比亞
+	Costa Rica	哥斯大黎加
+	Cuba	古巴
+	Cabo Verde	維德角
+	Cyprus	賽普勒斯
+	Germany	德國
+	Dominican Republic	多明尼加共和國
+	Ecuador	厄瓜多
+	Egypt	埃及
+	Spain	西班牙
+	Finland	芬蘭
+	France	法國
+	United Kingdom	英國
+	Equatorial Guinea	赤道幾內亞
+	Guatemala	瓜地馬拉
+	Hong Kong SAR	香港特別行政區
+	Honduras	宏都拉斯
+	Ireland	愛爾蘭
+	India	印度
+	Iraq	伊拉克
+	Italy	義大利
+	Jamaica	牙買加
+	Jordan	約旦
+	Kuwait	科威特
+	Kazakhstan	哈薩克
+	Lebanon	黎巴嫩
+	Liechtenstein	列支敦斯登
+	Luxembourg	盧森堡
+	Morocco	摩洛哥
+	Monaco	摩納哥
+	Montenegro	蒙特內哥羅
+	Macao SAR	澳門特別行政區
+	Mexico	墨西哥
+	Malaysia	馬來西亞
+	Mozambique	莫三比克
+	Nicaragua	尼加拉瓜
+	Netherlands	荷蘭
+	New Zealand	紐西蘭
+	Panama	巴拿馬
+	Peru	秘魯
+	Philippines	菲律賓
+	Puerto Rico	波多黎各
+	Portugal	葡萄牙
+	Paraguay	巴拉圭
+	Qatar	卡達
+	Russia	俄羅斯
+	Singapore	新加坡
+	El Salvador	薩爾瓦多
+	Syria	敘利亞
+	Taiwan	台灣
+	Ukraine	烏克蘭
+	United States	美國
+	Uruguay	烏拉圭
+	Venezuela	委內瑞拉
+	South Africa	南非

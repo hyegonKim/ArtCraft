@@ -49,6 +49,7 @@
 	Align Multileaders	Mehrfachführungslinien ausrichten
 	Aligned	Ausgerichtet
 	All Used Layers	Alle verwendeten Layer
+	Analyze Shapes	Formen analysieren
 	Angular	Winkelbemaßung
 	Animation Effects	Animationseffekte
 	Annotation scale	Beschriftungsmaßstab
@@ -76,6 +77,7 @@
 	Binary assets removed	Binärdateien entfernt
 	Blend	Übergang
 	Block Attribute Manager...	Blockattribut-Manager...
+	Block Description...	Blockbeschreibung...
 	Block Editor	Blockeditor
 	Block Reference	Blockreferenz
 	Block...	Block...
@@ -89,6 +91,7 @@
 	ByColor	VonFarbe
 	ByLayer	VonLayer
 	CADCraft Help	CADCraft-Hilfe
+	CADCraft is up to date.	CADCraft ist auf dem neuesten Stand.
 	Calibrate	Kalibrieren
 	Calibrate 3D Mouse	3D-Maus kalibrieren
 	Cartesian (x, y)	Kartesisch (x, y)
@@ -104,6 +107,7 @@
 	Chamfer	Fase
 	Change Space	Raum wechseln
 	Change to Current Layer	Auf aktuellen Layer ändern
+	Check for Updates…	Nach Updates suchen…
 	Circumference	Umfang
 	Clear History	Clear History
 	Click the ruler to add a tab stop, right-click to remove one	Klick auf das Lineal setzt einen Tabstopp, Rechtsklick entfernt ihn
@@ -136,6 +140,7 @@
 	Copy Nested Objects	Verschachtelte Objekte kopieren
 	Copy Selection	Auswahl kopieren
 	Copy with Base Point	Mit Basispunkt kopieren
+	Could not check for updates.	Die Suche nach Updates ist fehlgeschlagen.
 	Count	Anzahl
 	Create Block	Block erstellen
 	Creates a user parameter	Erstellt einen Benutzerparameter
@@ -144,6 +149,7 @@
 	Current selection	Aktuelle Auswahl
 	Current: {color}	Aktuell: {color}
 	Custom	Custom
+	Cut with Base Point	Mit Basispunkt ausschneiden
 	Cylinder	Zylinder
 	Default Save Format	Standard-Speicherformat
 	Define Attributes	Attribute definieren
@@ -209,7 +215,7 @@
 	Enter a vertex editing option	Geben Sie eine Option zur Scheitelpunktbearbeitung ein
 	Enter an option	Geben Sie eine Option ein
 	Enter angle of xline	Geben Sie den Winkel der Konstruktionslinie ein
-	Enter angle of xline (0) or	Geben Sie den Winkel der Konstruktionslinie ein (0) oder
+	Enter angle of xline (0)	Geben Sie den Winkel der Konstruktionslinie ein (0)
 	Enter area of rectangle in current units	Geben Sie die Fläche des Rechtecks in den aktuellen Einheiten ein
 	Enter attribute prompt	Geben Sie die Attributaufforderung ein
 	Enter attribute tag name	Geben Sie den Attribut-Tag-Namen ein
@@ -220,7 +226,7 @@
 	Enter default attribute value	Geben Sie den Standard-Attributwert ein
 	Enter degree of spline	Geben Sie den Grad des Splines ein
 	Enter delta angle	Geben Sie den Delta-Winkel ein
-	Enter delta length or	Geben Sie die Delta-Länge ein oder
+	Enter delta length	Geben Sie die Delta-Länge ein
 	Enter dimension text	Geben Sie den Bemaßungstext ein
 	Enter dimension text (<> = measurement)	Geben Sie den Bemaßungstext ein (<> = Messwert)
 	Enter dimension value or [name=expression]	Geben Sie einen Bemaßungswert oder [name=expression] ein
@@ -261,6 +267,8 @@
 	File Tab	Dateireiter
 	Fillet	Abrunden
 	Filters	Filter
+	Find All	Find All
+	Find what:	Find what:
 	Find...	Suchen...
 	Fit Points	Anpassungspunkte
 	Fix	Fixieren
@@ -382,6 +390,7 @@
 	Make Current	Als aktuell festlegen
 	Make Object's Layer Current	Layer des Objekts als aktuell festlegen
 	Make...	Erstellen...
+	Match case	Match case
 	Match Layer	Layer angleichen
 	Match Properties	Eigenschaften übertragen
 	Measure Distance	Abstand messen
@@ -405,6 +414,7 @@
 	My properties: not available yet	Meine Eigenschaften: noch nicht verfügbar
 	N	N
 	Named	Benannt
+	Named Viewports...	Benannte Ansichtsfenster...
 	Nearest	Nächstgelegener
 	New (metric)	Neu (metrisch)
 	New CTB	Neue CTB
@@ -428,6 +438,7 @@
 	Node	Knoten
 	Not a number or distance: {text}	Keine Zahl und keine Entfernung: {text}
 	Not available yet	Noch nicht verfügbar
+	Nothing found	Nothing found
 	Object Snap	Objektfang
 	Object Snap (F3)	Objektfang (F3)
 	Object Snap On (F3)	Objektfang ein (F3)
@@ -436,6 +447,7 @@
 	Object type:	Objekttyp:
 	On/Off	Ein/Aus
 	One of the Crafting Apps by the ArtCraft team and community.	Eine der Crafting Apps vom ArtCraft-Team und seiner Community.
+	Oops	Gelöschte Objekte wiederherstellen
 	Open (⌘O)	Öffnen (⌘O)
 	Open a drawing first.	Öffnen Sie zuerst eine Zeichnung.
 	Open Recent	Open Recent
@@ -537,10 +549,16 @@
 	Rename Text Style	Textstil umbenennen
 	Rename...	Umbenennen...
 	Repeat {command}	{command} wiederholen
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Block ersetzen...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	Erfordert einen Punkt (x,y, @dx,dy oder @d<a).
 	Reset Palettes	Paletten zurücksetzen
 	Reset Panel Layout	Panel-Anordnung zurücksetzen
 	Restore Layer State	Layerstatus wiederherstellen
+	Results	Results
 	Reverse zoom direction	Zoomrichtung umkehren
 	Revision Cloud	Revisionswolke
 	Revolve	Rotieren
@@ -555,6 +573,7 @@
 	Search for layer	Layer suchen
 	Search for parameter	Parameter suchen
 	Search for pattern	Muster suchen
+	Searches the current space.	Searches the current space.
 	Second and next points:	Zweiter und nächste Punkte:
 	Select 2D polyline	2D-Polylinie wählen
 	Select a 2D polyline.	Wählen Sie eine 2D-Polylinie.
@@ -580,8 +599,8 @@
 	Select an arc or circle	Wählen Sie einen Bogen oder Kreis
 	Select an arc.	Wählen Sie einen Bogen.
 	Select an object	Wählen Sie ein Objekt
-	Select an object to change or	Wählen Sie ein zu änderndes Objekt oder
-	Select an object to measure or	Wählen Sie ein zu messendes Objekt oder
+	Select an object to change	Wählen Sie ein zu änderndes Objekt
+	Select an object to measure	Wählen Sie ein zu messendes Objekt
 	Select an object.	Wählen Sie ein Objekt.
 	Select an open curve.	Wählen Sie eine offene Kurve.
 	Select an open line, arc, polyline, ellipse arc or spline.	Wählen Sie eine offene Linie, einen Bogen, eine Polylinie, einen Ellipsenbogen oder einen Spline.
@@ -595,9 +614,8 @@
 	Select first line	Wählen Sie die erste Linie
 	Select first line or arc	Wählen Sie die erste Linie oder den ersten Bogen
 	Select first object	Wählen Sie das erste Objekt
-	Select first object or	Wählen Sie das erste Objekt oder
 	Select first point	Wählen Sie den ersten Punkt
-	Select nested objects to copy or	Wählen Sie zu kopierende verschachtelte Objekte oder
+	Select nested objects to copy	Wählen Sie zu kopierende verschachtelte Objekte
 	Select object	Wählen Sie ein Objekt
 	Select object to dimension	Wählen Sie das zu bemaßende Objekt
 	Select object to divide	Wählen Sie das zu teilende Objekt
@@ -614,7 +632,7 @@
 	Select one polyline (Multiple is available through the JSON form).	Wählen Sie eine Polylinie (Multiple ist über die JSON-Form verfügbar).
 	Select path curve	Wählen Sie die Pfadkurve
 	Select point or object	Wählen Sie einen Punkt oder ein Objekt
-	Select polyline or	Wählen Sie eine Polylinie oder
+	Select polyline	Wählen Sie eine Polylinie
 	Select second line	Wählen Sie die zweite Linie
 	Select second line or shift-select to apply corner	Wählen Sie die zweite Linie oder wählen Sie mit der Umschalttaste, um eine Ecke anzuwenden
 	Select second object	Wählen Sie das zweite Objekt
@@ -665,9 +683,8 @@
 	Specify axis endpoint of ellipse	Geben Sie den Achsenendpunkt der Ellipse an
 	Specify base diameter	Geben Sie den Basisdurchmesser an
 	Specify base point	Geben Sie den Basispunkt an
-	Specify base point or	Geben Sie den Basispunkt an oder
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Geben Sie den Basispunkt oder die Verschiebung an (ziehen Sie mit der mittleren Maustaste zum Schwenken in Echtzeit)
-	Specify base radius or	Geben Sie den Basisradius an oder
+	Specify base radius	Geben Sie den Basisradius an
 	Specify center of donut	Geben Sie den Mittelpunkt des Rings an
 	Specify center of ellipse	Geben Sie den Mittelpunkt der Ellipse an
 	Specify center of polygon	Geben Sie den Mittelpunkt des Polygons an
@@ -709,7 +726,7 @@
 	Specify first point on circle: _tan to	Geben Sie den ersten Punkt auf dem Kreis an: _tan zu
 	Specify first source point	Geben Sie den ersten Quellpunkt an
 	Specify height	Geben Sie die Höhe an
-	Specify helix height or	Geben Sie die Höhe der Helix an oder
+	Specify helix height	Geben Sie die Höhe der Helix an
 	Specify included angle	Geben Sie den eingeschlossenen Winkel an
 	Specify insertion base point	Geben Sie den Einfügebasispunkt an
 	Specify insertion point	Geben Sie den Einfügepunkt an
@@ -728,7 +745,6 @@
 	Specify new width for all segments	Geben Sie die neue Breite für alle Segmente an
 	Specify next point	Geben Sie den nächsten Punkt an
 	Specify offset distance	Geben Sie den Versatzabstand an
-	Specify offset distance or	Geben Sie den Versatzabstand an oder
 	Specify opposite corner	Geben Sie die gegenüberliegende Ecke an
 	Specify other corner point	Geben Sie den anderen Eckpunkt an
 	Specify other endpoint of axis	Geben Sie den anderen Endpunkt der Achse an
@@ -741,7 +757,6 @@
 	Specify radius of circle	Geben Sie den Radius des Kreises an
 	Specify rotation angle	Geben Sie den Drehwinkel an
 	Specify rotation angle of text	Geben Sie den Drehwinkel des Textes an
-	Specify rotation angle or	Geben Sie den Drehwinkel an oder
 	Specify scale factor	Geben Sie den Skalierfaktor an
 	Specify second angle endpoint	Geben Sie den zweiten Endpunkt des Winkels an
 	Specify second break point	Geben Sie den zweiten Unterbrechungspunkt an
@@ -774,9 +789,9 @@
 	Specify third source point or <continue>	Geben Sie den dritten Quellpunkt an oder <fortfahren>
 	Specify through point	Geben Sie den Durchgangspunkt an
 	Specify top diameter	Geben Sie den oberen Durchmesser an
-	Specify top radius or	Geben Sie den oberen Radius an oder
+	Specify top radius	Geben Sie den oberen Radius an
 	Specify total angle	Geben Sie den Gesamtwinkel an
-	Specify total length or	Geben Sie die Gesamtlänge an oder
+	Specify total length	Geben Sie die Gesamtlänge an
 	Specify width for rectangles	Geben Sie die Breite für Rechtecke an
 	Sphere	Kugel
 	Spline	Spline
@@ -812,6 +827,7 @@
 	Text override	Textübersteuerung
 	Text style	Textstil
 	Text Style...	Textstil...
+	Text to find	Text to find
 	Thaw All Layers	Alle Layer tauen
 	There is nothing here yet.	Hier gibt es noch nichts.
 	Time	Zeit
@@ -850,10 +866,12 @@
 	Viewport Properties	Ansichtsfenster-Eigenschaften
 	Viewport {id}	Ansichtsfenster {id}
 	Viewports	Ansichtsfenster
+	Volume	Volumen
 	VP Color	AF-Farbe
 	VP Freeze	AF-Frieren
 	W	W
-	WCS ⌄	WKS ⌄
+	WCS	WKS
+	Whole words	Whole words
 	Width factor	Breitenfaktor
 	Wipeout	Abdeckung
 	Working Set	Arbeitssatz
@@ -861,6 +879,7 @@
 	Write Block	Block in Datei schreiben
 	Xline	Konstruktionslinie
 	Xref and Block In-place Editing	Xref- und Block-Bearbeitung am Ort
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom All	Zoom Alles
 	Zoom Extents	Zoom Grenzen
 	Zoom In	Zoom Ein

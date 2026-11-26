@@ -1,0 +1,28 @@
+[package]
+name = "materialcraft-formats"
+description = "MaterialCraft file formats: native SBS packages, bitmap import, texture export"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+materialcraft-core = { workspace = true }
+materialcraft-image = { workspace = true }
+materialcraft-geom = { workspace = true }
+materialcraft-nodes = { workspace = true }
+gltf = { workspace = true }
+tobj = { workspace = true }
+image = { workspace = true }
+dds = { workspace = true }
+bytemuck = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+zip = { workspace = true }
+roxmltree = { workspace = true }
+flate2 = { workspace = true }
+base64 = { workspace = true }
+resvg = { workspace = true }

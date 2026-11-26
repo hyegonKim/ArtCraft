@@ -1,10 +1,12 @@
 //! Floating objects on the sheet: charts (rendered by `gridcraft-chart` into primitives that
-//! we paint with egui), pictures and shapes.
+//! we paint with egui), pictures, shapes, equations, slicers and form controls (`form_controls.rs`).
+
+use std::sync::Arc;
 
 use egui::epaint::{PathShape, PathStroke};
 use egui::{Align2, Color32, FontId, Painter, Pos2, Rect, Stroke, StrokeKind, pos2, vec2};
 use gridcraft_chart::{HAlign, Prim, VAlign};
-use gridcraft_engine::model::{Anchor, ShapeKind, Sheet, Workbook};
+use gridcraft_engine::model::{Anchor, ObjKind, ObjRef, ShapeKind, Sheet, Workbook};
 
 use crate::SheetApp;
 use crate::grid::Geo;
@@ -198,10 +200,11 @@ fn area_mesh(v: &[Pos2], col: Color32) -> egui::Mesh {
 fn paint_shape_text(p: &Painter, wb: &Workbook, sp: &gridcraft_engine::model::Shape, r: Rect, z: f32) {
     use gridcraft_engine::model::{ShapeTextAlign, ShapeTextAnchor};
     let f = &sp.format;
+    let word_art = sp.kind == ShapeKind::WordArt;
     let text_box = sp.kind == ShapeKind::TextBox;
     let align = f.align.unwrap_or(if text_box { ShapeTextAlign::Left } else { ShapeTextAlign::Center });
     let anchor = f.anchor.unwrap_or(if text_box { ShapeTextAnchor::Top } else { ShapeTextAnchor::Middle });
-    let default_color = if text_box { Color32::BLACK } else { Color32::WHITE };
+    let default_color = if text_box || word_art { Color32::BLACK } else { Color32::WHITE };
     let color = f.text_color.and_then(|c| c.resolve(&wb.theme)).map(theme::color32).unwrap_or(default_color);
     // Default 14 px (as before); a set size is in points.
     let size = f.font_size.map_or(14.0, |pt| pt * 96.0 / 72.0).clamp(1.0, 2000.0) * z;
@@ -227,6 +230,11 @@ fn paint_shape_text(p: &Painter, wb: &Workbook, sp: &gridcraft_engine::model::Sh
     };
     let pos = pos2(x, y);
     let clip = p.with_clip_rect(r.intersect(p.clip_rect()));
+    // WordArt's drop shadow: the text again, offset down and right, under everything else.
+    if let Some(sc) = f.text_shadow.and_then(|c| c.resolve(&wb.theme)).map(theme::color32) {
+        let d = (size * 0.05).clamp(1.0, 24.0);
+        clip.galley_with_override_text_color(pos + vec2(d, d), g.clone(), sc);
+    }
     // egui has no stroked text: the outline is the text drawn in the outline colour, offset in
     // eight directions by the outline width, under the filled text.
     if let Some((c, w)) = f.text_outline
@@ -238,6 +246,31 @@ fn paint_shape_text(p: &Painter, wb: &Workbook, sp: &gridcraft_engine::model::Sh
         }
     }
     clip.galley(pos, g, color);
+}
+
+/// Resolves and renders `ch` (chart `ci` of sheet `si`), at zoom `z`.
+fn render_chart(p: &Painter, z: f32, wb: &Workbook, si: usize, ch: &gridcraft_engine::model::Chart) -> Vec<Prim> {
+    #[cfg(test)]
+    tests::RENDERS.with(|c| c.set(c.get() + 1));
+    let data = gridcraft_chart::resolve(wb, si, ch);
+    let m = EguiMeasure { painter: p, z };
+    gridcraft_chart::render(ch, &data, ch.anchor.width, ch.anchor.height, &m)
+}
+
+/// The primitives of chart `ci` of sheet `si`: from the frame cache when the workbook, zoom and
+/// screen scale are those it was rendered for, else rendered now (see [`crate::chartcache`]).
+fn chart_prims(app: &SheetApp, p: &Painter, z: f32, wb: &Arc<Workbook>, si: usize, ci: usize, ch: &gridcraft_engine::model::Chart) -> Arc<[Prim]> {
+    // Only the active document's own workbook is cached: anything else cannot be tied to a uid.
+    let Some(d) = app.session.active().filter(|d| Arc::ptr_eq(&d.wb, wb)) else {
+        return render_chart(p, z, wb, si, ch).into();
+    };
+    // A series that calls NOW or RAND, directly or through a defined name, must be evaluated
+    // again on every paint.
+    if gridcraft_chart::has_volatile_series(wb, si, ch) {
+        return render_chart(p, z, wb, si, ch).into();
+    }
+    let mut cache = app.chart_cache.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    cache.get(d.uid, wb, si, ci, (z, p.ctx().pixels_per_point()), || render_chart(p, z, wb, si, ch))
 }
 
 pub(crate) fn anchor_rect(geo: &Geo, sh: &Sheet, a: &Anchor) -> Rect {
@@ -259,10 +292,27 @@ pub(crate) fn objects_hidden(wb: &Workbook) -> bool {
     wb.show_objects == gridcraft_engine::model::ShowObjects::None
 }
 
-pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workbook, si: usize, sh: &Sheet) -> Vec<PaintedObject> {
+pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Arc<Workbook>, si: usize, sh: &Sheet) -> Vec<PaintedObject> {
     let mut painted = Vec::new();
     if objects_hidden(wb) {
         return painted;
+    }
+    // Source outlines stay in cell space beneath every floating object.
+    if let Some(ch) = sh.charts.iter().find(|ch| app.selected_chart() == Some(ch.id))
+        && anchor_rect(geo, sh, &ch.anchor).intersects(p.clip_rect())
+    {
+        for s in &ch.series {
+            if let Ok(gridcraft_engine::formula::Expr::Ref(rf)) = gridcraft_engine::formula::parse(&s.values)
+                && rf.sheet_name().is_none_or(|n| n.eq_ignore_ascii_case(&sh.name))
+            {
+                let rr = geo.range_rect(sh, rf.range());
+                let color = Tokens::get(p.ctx()).ref_color(0, true);
+                for pane in geo.range_panes(rf.range()) {
+                    let pp = p.with_clip_rect(pane.intersect(p.clip_rect()));
+                    pp.rect_stroke(rr, 0.0, Stroke::new(1.5, color), StrokeKind::Inside);
+                }
+            }
+        }
     }
     let mut done = |start: egui::layers::ShapeIdx, rect: Rect| painted.push(PaintedObject { shapes: start.0..p.add(egui::Shape::Noop).0, rect });
     // The grid paints the active workbook: its pictures are cached under it.
@@ -278,6 +328,8 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
         let line =
             if sp.format.no_line { Color32::TRANSPARENT } else { sp.line.resolve(&wb.theme).map(theme::color32).unwrap_or(Color32::DARK_GRAY) };
         match sp.kind {
+            // WordArt is only its text (no fill or outline of its own).
+            ShapeKind::WordArt => {}
             ShapeKind::Rectangle | ShapeKind::TextBox => {
                 p.rect_filled(r, 0.0, fill);
                 p.rect_stroke(r, 0.0, Stroke::new(1.0, line), StrokeKind::Inside);
@@ -299,11 +351,12 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
                 p.add(PathShape::convex_polygon(vec![pos2(r.center().x, r.top()), r.right_bottom(), r.left_bottom()], fill, Stroke::new(1.0, line)));
             }
             ShapeKind::Ink => {
-                let w = gridcraft_engine::cmd::draw::ink_width(sp) * geo.z;
+                let pt = gridcraft_engine::cmd::draw::ink_width(sp);
+                let w = pt * geo.z;
                 let pts: Vec<Pos2> =
                     gridcraft_engine::cmd::draw::ink_points(sp).iter().map(|q| pos2(r.left() + q[0] * geo.z, r.top() + q[1] * geo.z)).collect();
                 if pts.len() >= 2 {
-                    let col = if w > 8.0 { line.gamma_multiply(0.45) } else { line };
+                    let col = ink_color(line, pt);
                     p.add(PathShape::line(pts, PathStroke::new(w, col)));
                 }
                 label = false;
@@ -313,6 +366,10 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
                     let t = Tokens::get(p.ctx());
                     crate::icons::paint_on_sheet(p, r, icon, if fill == Color32::TRANSPARENT { t.cell_text } else { fill });
                 }
+                label = false;
+            }
+            ShapeKind::Equation => {
+                crate::equation::paint_shape(p, r, sp, wb, geo.z);
                 label = false;
             }
             ShapeKind::Line | ShapeKind::Arrow => {
@@ -328,9 +385,6 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
         if label && !sp.text.is_empty() && !app.editing_text_box(sp.id) {
             paint_shape_text(p, wb, sp, r, geo.z);
         }
-        if label && sp.kind == ShapeKind::TextBox && app.selected_chart == Some(sp.id) {
-            selection_frame(p, r);
-        }
         done(start, r);
     }
     for im in &sh.images {
@@ -344,12 +398,9 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
         } else {
             p.rect_filled(r, 0.0, Tokens::get(p.ctx()).sheet_track);
         }
-        if app.selected_chart == Some(im.id) {
-            selection_frame(p, r);
-        }
         done(start, r);
     }
-    for ch in &sh.charts {
+    for (ci, ch) in sh.charts.iter().enumerate() {
         let r = anchor_rect(geo, sh, &ch.anchor);
         if !r.intersects(p.clip_rect()) {
             continue;
@@ -358,40 +409,61 @@ pub(crate) fn paint_objects(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workboo
         // Soft shadow + white card.
         p.rect_filled(r.translate(vec2(0.0, 1.5)), 2.0, Color32::from_black_alpha(18));
         p.rect_filled(r, 0.0, Tokens::get(p.ctx()).grid_bg);
-        let data = gridcraft_chart::resolve(wb, si, ch);
-        let m = EguiMeasure { painter: p, z: geo.z };
-        let prims = gridcraft_chart::render(ch, &data, ch.anchor.width, ch.anchor.height, &m);
+        let prims = chart_prims(app, p, geo.z, wb, si, ci, ch);
         paint_prims(&p.with_clip_rect(r.intersect(p.clip_rect())), r.min, &prims, geo.z);
-        if app.selected_chart == Some(ch.id) {
-            selection_frame(p, r);
-        }
-        // The source-data highlight below is in cell space: mirrored with the cells.
         done(start, r);
-        if app.selected_chart == Some(ch.id) {
-            // Highlight the source data like Excel does.
-            for s in &ch.series {
-                if let Ok(gridcraft_engine::formula::Expr::Ref(rf)) = gridcraft_engine::formula::parse(&s.values)
-                    && rf.sheet_name().is_none_or(|n| n.eq_ignore_ascii_case(&sh.name))
-                {
-                    let rr = geo.range_rect(sh, rf.range());
-                    let color = Tokens::get(p.ctx()).ref_color(0, true);
-                    for pane in geo.range_panes(rf.range()) {
-                        let pp = p.with_clip_rect(pane.intersect(p.clip_rect()));
-                        pp.rect_stroke(rr, 0.0, Stroke::new(1.5, color), StrokeKind::Inside);
-                    }
-                }
-            }
-        }
     }
-    paint_slicers(app, p, geo, wb, si, sh);
+    for sl in &sh.slicers {
+        let r = anchor_rect(geo, sh, &sl.anchor);
+        if !r.intersects(p.clip_rect()) {
+            continue;
+        }
+        let start = p.add(egui::Shape::Noop);
+        paint_slicer(p, geo, wb, si, sl, r);
+        done(start, r);
+    }
+    for tl in &sh.timelines {
+        let r = anchor_rect(geo, sh, &tl.anchor);
+        if !r.intersects(p.clip_rect()) {
+            continue;
+        }
+        let start = p.add(egui::Shape::Noop);
+        paint_timeline(app.ui.language, p, geo, wb, tl, r);
+        done(start, r);
+    }
+    // Form controls sit above every other object.
+    let hover = p.ctx().input(|i| i.pointer.hover_pos()).map(|h| geo.mirror_pos(h)).filter(|h| geo.in_cells(*h));
+    for c in &sh.controls {
+        let r = anchor_rect(geo, sh, &c.anchor);
+        // A slider's value shows beside it while it is dragged.
+        if !r.expand(24.0).intersects(p.clip_rect()) {
+            continue;
+        }
+        let start = p.add(egui::Shape::Noop);
+        crate::form_controls::paint(p, r, c, geo.z, crate::form_controls::look(app, geo, c, r, hover));
+        done(start, r);
+    }
+    // The selected object's frame and handles go over every object, and move with it on a
+    // right-to-left sheet.
+    if let Some(r) = app.selected_object.and_then(|o| object_rect(geo, sh, o))
+        && r.intersects(p.clip_rect())
+    {
+        let start = p.add(egui::Shape::Noop);
+        selection_frame(p, r);
+        done(start, r);
+    }
     painted
 }
 
 /// Geometry of a slicer's parts within its screen rect.
 pub struct SlicerLayout {
     pub header: Rect,
+    /// Multi-select toggle button in the header.
+    pub multi_select: Rect,
     /// Clear-filter button in the header.
     pub clear: Rect,
+    /// Delete button in the header.
+    pub delete: Rect,
     /// One rect per value tile, in order.
     pub tiles: Vec<Rect>,
 }
@@ -403,7 +475,10 @@ pub fn slicer_layout(rect: Rect, z: f32, n: usize, columns: u32) -> SlicerLayout
     let tile_h = 22.0 * z;
     let header = Rect::from_min_size(rect.min, vec2(rect.width(), header_h));
     let cb = 16.0 * z;
-    let clear = Rect::from_min_size(pos2(header.right() - pad - cb, header.top() + (header_h - cb) / 2.0), vec2(cb, cb));
+    let by = header.top() + (header_h - cb) / 2.0;
+    let delete = Rect::from_min_size(pos2(header.right() - pad - cb, by), vec2(cb, cb));
+    let clear = Rect::from_min_size(pos2(delete.left() - gap - cb, by), vec2(cb, cb));
+    let multi_select = Rect::from_min_size(pos2(clear.left() - gap - cb, by), vec2(cb, cb));
     let cols = columns.max(1) as f32;
     let inner_left = rect.left() + pad;
     let inner_top = header.bottom() + pad;
@@ -417,57 +492,68 @@ pub fn slicer_layout(rect: Rect, z: f32, n: usize, columns: u32) -> SlicerLayout
         let y = inner_top + row * (tile_h + gap);
         tiles.push(Rect::from_min_size(pos2(x, y), vec2(tile_w, tile_h)));
     }
-    SlicerLayout { header, clear, tiles }
+    SlicerLayout { header, multi_select, clear, delete, tiles }
 }
 
-fn paint_slicers(app: &SheetApp, p: &Painter, geo: &Geo, wb: &Workbook, si: usize, sh: &Sheet) {
+fn paint_slicer(p: &Painter, geo: &Geo, wb: &Workbook, si: usize, sl: &gridcraft_engine::model::Slicer, r: Rect) {
     let tk = theme::Tokens::get(p.ctx());
-    for sl in &sh.slicers {
-        let r = anchor_rect(geo, sh, &sl.anchor);
-        if !r.intersects(p.clip_rect()) {
+    let items = gridcraft_engine::cmd::slicer::slicer_items(wb, si, sl);
+    let lay = slicer_layout(r, geo.z, items.len(), sl.columns);
+    let radius = 4.0 * geo.z;
+    // Card + soft shadow.
+    p.rect_filled(r.translate(vec2(0.0, 1.5)), radius, Color32::from_black_alpha(18));
+    p.rect_filled(r, radius, tk.window);
+    p.rect_stroke(r, radius, Stroke::new(1.0, tk.separator), StrokeKind::Inside);
+    // Header.
+    p.rect_filled(lay.header, radius, tk.accent_soft);
+    p.rect_filled(Rect::from_min_max(pos2(lay.header.left(), lay.header.bottom() - radius), lay.header.max), 0.0, tk.accent_soft);
+    let cap = if sl.caption.is_empty() { sl.column.clone() } else { sl.caption.clone() };
+    let cap_clip = Rect::from_min_max(lay.header.min, pos2((lay.multi_select.left() - 3.0 * geo.z).max(lay.header.left()), lay.header.bottom()));
+    p.with_clip_rect(cap_clip.intersect(p.clip_rect())).text(
+        lay.header.left_center() + vec2(8.0 * geo.z, 0.0),
+        Align2::LEFT_CENTER,
+        cap,
+        theme::ui_bold(12.5 * geo.z),
+        tk.accent_dark,
+    );
+    // Multi-Select toggle button.
+    if sl.multi_select {
+        p.rect_filled(lay.multi_select, 3.0 * geo.z, tk.accent);
+        crate::icons::paint(p, lay.multi_select.shrink(1.5 * geo.z), crate::icons::Icon::Check, tk.on_accent);
+    } else {
+        crate::icons::paint(p, lay.multi_select.shrink(1.5 * geo.z), crate::icons::Icon::Check, tk.text_dim);
+    }
+    // Clear-filter button (tinted when a filter is active).
+    let filtered = sl.selected.is_some();
+    crate::icons::paint(p, lay.clear, crate::icons::Icon::Filter, if filtered { tk.accent } else { tk.text_dim });
+    if filtered {
+        p.circle_filled(lay.clear.right_top() + vec2(-2.0 * geo.z, 2.5 * geo.z), 2.5 * geo.z, tk.accent);
+    }
+    // Delete button.
+    crate::icons::paint(p, lay.delete.shrink(2.0 * geo.z), crate::icons::Icon::Close, tk.text_dim);
+    // Value tiles.
+    for ((val, on), tr) in items.iter().zip(&lay.tiles) {
+        if !r.contains(tr.left_top()) {
             continue;
         }
-        let items = gridcraft_engine::cmd::slicer::slicer_items(wb, si, sl);
-        let lay = slicer_layout(r, geo.z, items.len(), sl.columns);
-        let radius = 4.0 * geo.z;
-        // Card + soft shadow.
-        p.rect_filled(r.translate(vec2(0.0, 1.5)), radius, Color32::from_black_alpha(18));
-        p.rect_filled(r, radius, tk.window);
-        p.rect_stroke(r, radius, Stroke::new(1.0, tk.separator), StrokeKind::Inside);
-        // Header.
-        p.rect_filled(lay.header, radius, tk.accent_soft);
-        p.rect_filled(Rect::from_min_max(pos2(lay.header.left(), lay.header.bottom() - radius), lay.header.max), 0.0, tk.accent_soft);
-        let cap = if sl.caption.is_empty() { sl.column.clone() } else { sl.caption.clone() };
-        p.text(lay.header.left_center() + vec2(8.0 * geo.z, 0.0), Align2::LEFT_CENTER, cap, theme::ui_bold(12.5 * geo.z), tk.accent_dark);
-        // Clear-filter button (tinted when a filter is active).
-        let filtered = sl.selected.is_some();
-        if let Some(icon) = crate::icons::from_name("filter") {
-            crate::icons::paint(p, lay.clear, icon, if filtered { tk.accent } else { tk.text_dim });
-        }
-        // Value tiles.
-        for ((val, on), tr) in items.iter().zip(&lay.tiles) {
-            if !r.contains(tr.left_top()) {
-                continue; // overflowed the card; skip (no scroll yet)
-            }
-            let (fill, fg) = if *on { (tk.accent, tk.on_accent) } else { (tk.hover, tk.text_dim) };
-            p.rect_filled(*tr, 3.0 * geo.z, fill);
-            let cp = p.with_clip_rect(tr.intersect(p.clip_rect()));
-            cp.text(tr.left_center() + vec2(6.0 * geo.z, 0.0), Align2::LEFT_CENTER, val, theme::ui_font(12.0 * geo.z), fg);
-        }
-        if app.selected_chart == Some(sl.id) {
-            selection_frame(p, r);
-        }
+        let (fill, fg) = if *on { (tk.accent, tk.on_accent) } else { (tk.hover, tk.text_dim) };
+        p.rect_filled(*tr, 3.0 * geo.z, fill);
+        let cp = p.with_clip_rect(tr.intersect(p.clip_rect()));
+        cp.text(tr.left_center() + vec2(6.0 * geo.z, 0.0), Align2::LEFT_CENTER, val, theme::ui_font(12.0 * geo.z), fg);
     }
 }
 
 /// What a click inside a slicer hit.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SlicerAction {
     Toggle(String),
+    ToggleMultiSelect,
     Clear,
+    Delete,
 }
 
-/// A click on a slicer's value tile or clear button, if any. A click elsewhere in a slicer returns
-/// `None` so the caller can treat it as a select/drag on the object.
+/// A click on a slicer's value tile or header action button, if any. A click elsewhere in a slicer
+/// returns `None` so the caller can treat it as a select/drag on the object.
 pub fn slicer_click(geo: &Geo, sh: &Sheet, wb: &Workbook, si: usize, p: Pos2) -> Option<(u32, SlicerAction)> {
     if !geo.cells.contains(p) || objects_hidden(wb) {
         return None;
@@ -479,8 +565,14 @@ pub fn slicer_click(geo: &Geo, sh: &Sheet, wb: &Workbook, si: usize, p: Pos2) ->
         }
         let items = gridcraft_engine::cmd::slicer::slicer_items(wb, si, sl);
         let lay = slicer_layout(r, geo.z, items.len(), sl.columns);
+        if lay.delete.contains(p) {
+            return Some((sl.id, SlicerAction::Delete));
+        }
         if lay.clear.contains(p) {
             return Some((sl.id, SlicerAction::Clear));
+        }
+        if lay.multi_select.contains(p) {
+            return Some((sl.id, SlicerAction::ToggleMultiSelect));
         }
         for ((val, _on), tr) in items.iter().zip(&lay.tiles) {
             if r.contains(tr.left_top()) && tr.contains(p) {
@@ -492,44 +584,361 @@ pub fn slicer_click(geo: &Geo, sh: &Sheet, wb: &Workbook, si: usize, p: Pos2) ->
     None
 }
 
+/// Geometry of a timeline's parts within its screen rect.
+pub struct TimelineLayout {
+    pub header: Rect,
+    pub clear: Rect,
+    pub delete: Rect,
+    pub subheader: Rect,
+    pub levels: [(gridcraft_engine::model::TimelineLevel, Rect); 4],
+    /// `(period_index, tile_rect)` for each visible period tile.
+    pub periods: Vec<(usize, Rect)>,
+}
+
+pub fn timeline_layout(
+    rect: Rect,
+    z: f32,
+    level: gridcraft_engine::model::TimelineLevel,
+    total_periods: usize,
+    first_selected: Option<usize>,
+) -> TimelineLayout {
+    use gridcraft_engine::model::TimelineLevel;
+    let header_h = 24.0 * z;
+    let sub_h = 22.0 * z;
+    let pad = 6.0 * z;
+    let gap = 3.0 * z;
+    let cb = 16.0 * z;
+    let header = Rect::from_min_size(rect.min, vec2(rect.width(), header_h));
+    let by = header.top() + (header_h - cb) / 2.0;
+    let delete = Rect::from_min_size(pos2(header.right() - pad - cb, by), vec2(cb, cb));
+    let clear = Rect::from_min_size(pos2(delete.left() - gap - cb, by), vec2(cb, cb));
+    let subheader = Rect::from_min_size(pos2(rect.left(), header.bottom()), vec2(rect.width(), sub_h));
+
+    let pill_h = 16.0 * z;
+    let pill_y = subheader.top() + (sub_h - pill_h) / 2.0;
+    let max_pills_w = (rect.width() * 0.62).max(80.0 * z);
+    let pill_w = ((max_pills_w - 3.0 * gap) / 4.0).clamp(24.0 * z, 48.0 * z);
+    let pills_left = (subheader.right() - pad - (4.0 * pill_w + 3.0 * gap)).max(subheader.left() + pad);
+    let all_levels = [TimelineLevel::Years, TimelineLevel::Quarters, TimelineLevel::Months, TimelineLevel::Days];
+    let levels = std::array::from_fn(|i| {
+        let lv = all_levels[i];
+        let pr = Rect::from_min_size(pos2(pills_left + i as f32 * (pill_w + gap), pill_y), vec2(pill_w, pill_h));
+        (lv, pr)
+    });
+
+    let inner_left = rect.left() + pad;
+    let inner_w = (rect.width() - 2.0 * pad).max(1.0);
+    let body_top = subheader.bottom() + 4.0 * z;
+    let body_h = (rect.bottom() - pad - body_top).max(14.0 * z);
+    let min_tile_w = match level {
+        TimelineLevel::Years => 52.0 * z,
+        TimelineLevel::Quarters => 44.0 * z,
+        TimelineLevel::Months => 38.0 * z,
+        TimelineLevel::Days => 30.0 * z,
+    }
+    .max(12.0);
+    let max_vis = (((inner_w + gap) / (min_tile_w + gap)).floor() as usize).max(1);
+    let vis_count = total_periods.min(max_vis);
+    let start_idx = if total_periods <= vis_count {
+        0
+    } else if let Some(sel) = first_selected {
+        sel.saturating_sub(vis_count / 3).min(total_periods - vis_count)
+    } else {
+        0
+    };
+    let tile_w = if vis_count > 0 {
+        ((inner_w - (vis_count.saturating_sub(1) as f32) * gap) / (vis_count as f32)).max(min_tile_w)
+    } else {
+        min_tile_w
+    };
+    let mut periods = Vec::with_capacity(vis_count);
+    for slot in 0..vis_count {
+        let idx = start_idx + slot;
+        let x = inner_left + slot as f32 * (tile_w + gap);
+        let tr = Rect::from_min_size(pos2(x, body_top), vec2(tile_w, body_h));
+        periods.push((idx, tr));
+    }
+    TimelineLayout { header, clear, delete, subheader, levels, periods }
+}
+
+fn paint_timeline(
+    lang: crate::i18n::Language,
+    p: &Painter,
+    geo: &Geo,
+    wb: &Workbook,
+    tl: &gridcraft_engine::model::Timeline,
+    r: Rect,
+) {
+    let tk = theme::Tokens::get(p.ctx());
+    let periods = gridcraft_engine::cmd::slicer::timeline_periods(wb, tl);
+    let first_sel = if tl.is_filtered() { periods.iter().position(|pr| pr.selected) } else { None };
+    let lay = timeline_layout(r, geo.z, tl.level, periods.len(), first_sel);
+    let radius = 4.0 * geo.z;
+    // Card + soft shadow.
+    p.rect_filled(r.translate(vec2(0.0, 1.5)), radius, Color32::from_black_alpha(18));
+    p.rect_filled(r, radius, tk.window);
+    p.rect_stroke(r, radius, Stroke::new(1.0, tk.separator), StrokeKind::Inside);
+    // Header.
+    p.rect_filled(lay.header, radius, tk.accent_soft);
+    p.rect_filled(Rect::from_min_max(pos2(lay.header.left(), lay.header.bottom() - radius), lay.header.max), 0.0, tk.accent_soft);
+    let cap = if tl.caption.is_empty() { tl.field.clone() } else { tl.caption.clone() };
+    let cap_clip = Rect::from_min_max(lay.header.min, pos2((lay.clear.left() - 3.0 * geo.z).max(lay.header.left()), lay.header.bottom()));
+    p.with_clip_rect(cap_clip.intersect(p.clip_rect())).text(
+        lay.header.left_center() + vec2(8.0 * geo.z, 0.0),
+        Align2::LEFT_CENTER,
+        cap,
+        theme::ui_bold(12.5 * geo.z),
+        tk.accent_dark,
+    );
+    let filtered = tl.is_filtered();
+    crate::icons::paint(p, lay.clear, crate::icons::Icon::Filter, if filtered { tk.accent } else { tk.text_dim });
+    if filtered {
+        p.circle_filled(lay.clear.right_top() + vec2(-2.0 * geo.z, 2.5 * geo.z), 2.5 * geo.z, tk.accent);
+    }
+    crate::icons::paint(p, lay.delete.shrink(2.0 * geo.z), crate::icons::Icon::Close, tk.text_dim);
+
+    // Subheader: active period summary on left + granularity selector pills on right.
+    let status = match (&tl.start_date, &tl.end_date) {
+        (Some(s), Some(e)) if s == e => s.clone(),
+        (Some(s), Some(e)) => format!("{s} – {e}"),
+        (Some(s), None) => format!("{s} –"),
+        (None, Some(e)) => format!("– {e}"),
+        (None, None) => lang.tr("All Periods").to_string(),
+    };
+    let status_right = lay.levels.first().map_or(lay.subheader.right(), |(_, pr)| pr.left() - 4.0 * geo.z);
+    let status_clip = Rect::from_min_max(lay.subheader.min, pos2(status_right.max(lay.subheader.left()), lay.subheader.bottom()));
+    p.with_clip_rect(status_clip.intersect(p.clip_rect())).text(
+        lay.subheader.left_center() + vec2(8.0 * geo.z, 0.0),
+        Align2::LEFT_CENTER,
+        status,
+        theme::ui_font(10.5 * geo.z),
+        if filtered { tk.accent_dark } else { tk.text_dim },
+    );
+    for (lv, pr) in &lay.levels {
+        let on = *lv == tl.level;
+        let (fill, fg) = if on { (tk.accent, tk.on_accent) } else { (tk.hover, tk.text_dim) };
+        p.rect_filled(*pr, 3.0 * geo.z, fill);
+        let cp = p.with_clip_rect(pr.intersect(p.clip_rect()));
+        cp.text(pr.center(), Align2::CENTER_CENTER, lang.tr(lv.label()), theme::ui_font(9.5 * geo.z), fg);
+    }
+
+    // Period tiles.
+    let mut prev_sub = "";
+    for (idx, tr) in &lay.periods {
+        let Some(pr) = periods.get(*idx) else { continue };
+        if !r.intersects(*tr) {
+            continue;
+        }
+        let sub_h = if pr.sublabel.is_empty() { 0.0 } else { (12.0 * geo.z).min(tr.height() * 0.35) };
+        if !pr.sublabel.is_empty() && pr.sublabel != prev_sub {
+            let sub_rect = Rect::from_min_size(tr.min, vec2((r.right() - tr.left()).max(tr.width()), sub_h));
+            p.with_clip_rect(sub_rect.intersect(p.clip_rect())).text(
+                pos2(tr.left() + 2.0 * geo.z, tr.top() + sub_h * 0.5),
+                Align2::LEFT_CENTER,
+                &pr.sublabel,
+                theme::ui_font(9.0 * geo.z),
+                tk.text_dim,
+            );
+            prev_sub = &pr.sublabel;
+        }
+        let bar = Rect::from_min_max(pos2(tr.left(), tr.top() + sub_h), tr.max);
+        let (fill, fg) = if filtered {
+            if pr.selected {
+                (tk.accent, tk.on_accent)
+            } else if pr.has_data {
+                (tk.hover, tk.text)
+            } else {
+                (tk.sheet_track, tk.text_dim)
+            }
+        } else if pr.has_data {
+            (tk.accent_soft, tk.accent_dark)
+        } else {
+            (tk.hover, tk.text_dim)
+        };
+        p.rect_filled(bar, 3.0 * geo.z, fill);
+        if !filtered && pr.has_data {
+            let strip = Rect::from_min_max(pos2(bar.left(), (bar.bottom() - 3.0 * geo.z).max(bar.top())), bar.max);
+            p.rect_filled(strip, 1.5 * geo.z, tk.accent);
+        }
+        p.with_clip_rect(bar.intersect(p.clip_rect())).text(
+            bar.center(),
+            Align2::CENTER_CENTER,
+            &pr.label,
+            theme::ui_bold(10.5 * geo.z),
+            fg,
+        );
+    }
+}
+
+/// What a click inside a timeline hit.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TimelineAction {
+    SelectPeriod {
+        start: String,
+        end: String,
+        sole_selected: bool,
+    },
+    SetLevel(gridcraft_engine::model::TimelineLevel),
+    Clear,
+    Delete,
+}
+
+/// A click on a timeline's period tile, level selector, clear button or delete button, if any.
+pub fn timeline_click(geo: &Geo, sh: &Sheet, wb: &Workbook, p: Pos2) -> Option<(u32, TimelineAction)> {
+    if !geo.cells.contains(p) || objects_hidden(wb) {
+        return None;
+    }
+    for tl in sh.timelines.iter().rev() {
+        let r = anchor_rect(geo, sh, &tl.anchor);
+        if !r.contains(p) {
+            continue;
+        }
+        let periods = gridcraft_engine::cmd::slicer::timeline_periods(wb, tl);
+        let first_sel = if tl.is_filtered() { periods.iter().position(|pr| pr.selected) } else { None };
+        let lay = timeline_layout(r, geo.z, tl.level, periods.len(), first_sel);
+        if lay.delete.contains(p) {
+            return Some((tl.id, TimelineAction::Delete));
+        }
+        if lay.clear.contains(p) {
+            return Some((tl.id, TimelineAction::Clear));
+        }
+        for (lv, pr) in &lay.levels {
+            if pr.contains(p) {
+                return Some((tl.id, TimelineAction::SetLevel(*lv)));
+            }
+        }
+        for (idx, tr) in &lay.periods {
+            if tr.contains(p)
+                && let Some(pr) = periods.get(*idx)
+            {
+                let sole_selected = tl.start_date.as_deref() == Some(pr.start_date.as_str())
+                    && tl.end_date.as_deref() == Some(pr.end_date.as_str());
+                return Some((
+                    tl.id,
+                    TimelineAction::SelectPeriod {
+                        start: pr.start_date.clone(),
+                        end: pr.end_date.clone(),
+                        sole_selected,
+                    },
+                ));
+            }
+        }
+        return None; // header/background → select/drag
+    }
+    None
+}
+
 fn selection_frame(p: &Painter, r: Rect) {
     let t = Tokens::get(p.ctx());
     p.rect_stroke(r, 0.0, Stroke::new(1.0, t.sheet_control_border), StrokeKind::Outside);
-    for c in [r.left_top(), r.center_top(), r.right_top(), r.left_center(), r.right_center(), r.left_bottom(), r.center_bottom(), r.right_bottom()] {
+    for h in crate::objects::Handle::ALL {
+        let c = h.pos(r);
         p.circle_filled(c, 4.0, t.sheet_control_bg);
         p.circle_stroke(c, 4.0, Stroke::new(1.0, t.sheet_control_border));
     }
-    let _ = Align2::CENTER_CENTER;
 }
 
-/// The topmost object under `p`: (kind, id, rect).
-pub fn hit(app: &SheetApp, geo: &Geo, sh: &Sheet, p: Pos2) -> Option<(&'static str, u32, Rect)> {
-    if app.session.active().is_some_and(|d| objects_hidden(&d.wb)) {
+/// Where object `o` sits on the sheet (logical coordinates), when it exists on `sh`.
+pub fn object_rect(geo: &Geo, sh: &Sheet, o: ObjRef) -> Option<Rect> {
+    sh.object_anchor(o).map(|a| anchor_rect(geo, sh, &a))
+}
+
+/// The resize handle of the selected object under `p`, with the object and its rect. Handles
+/// reach a little outside their object, so they win over [`hit`], but like it only over the cell
+/// area: a handle that lies under the headers, the formula bar or a scroll bar leaves the press
+/// to them. Nothing while objects are hidden.
+pub fn selected_handle(app: &SheetApp, geo: &Geo, sh: &Sheet, p: Pos2) -> Option<(ObjRef, Rect, crate::objects::Handle)> {
+    if !geo.cells.contains(p) || app.session.active().is_some_and(|d| objects_hidden(&d.wb)) {
         return None;
+    }
+    let o = app.selected_object?;
+    let r = object_rect(geo, sh, o)?;
+    crate::objects::handle_at(r, p).map(|h| (o, r, h))
+}
+
+/// The topmost object under `p` and its rect: form controls paint on top, so they are hit first,
+/// then slicers, charts, pictures and shapes (equations included), each from the top of its stack.
+/// Nothing is hit outside the cell area or while objects are hidden.
+pub fn hit(app: &SheetApp, geo: &Geo, sh: &Sheet, p: Pos2) -> Option<(ObjRef, Rect)> {
+    if !geo.cells.contains(p) || app.session.active().is_some_and(|d| objects_hidden(&d.wb)) {
+        return None;
+    }
+    for c in sh.controls.iter().rev() {
+        let r = anchor_rect(geo, sh, &c.anchor);
+        if r.contains(p) {
+            return Some((ObjRef::new(ObjKind::Control, c.id), r));
+        }
+    }
+    for tl in sh.timelines.iter().rev() {
+        let r = anchor_rect(geo, sh, &tl.anchor);
+        if r.contains(p) {
+            return Some((ObjRef::new(ObjKind::Timeline, tl.id), r));
+        }
     }
     for sl in sh.slicers.iter().rev() {
         let r = anchor_rect(geo, sh, &sl.anchor);
-        if r.contains(p) && geo.cells.contains(p) {
-            return Some(("slicer", sl.id, r));
+        if r.contains(p) {
+            return Some((ObjRef::new(ObjKind::Slicer, sl.id), r));
         }
     }
     for ch in sh.charts.iter().rev() {
         let r = anchor_rect(geo, sh, &ch.anchor);
-        if r.expand(4.0).contains(p) && geo.cells.contains(p) {
-            return Some(("chart", ch.id, r));
+        if r.expand(4.0).contains(p) {
+            return Some((ObjRef::new(ObjKind::Chart, ch.id), r));
         }
     }
     for im in sh.images.iter().rev() {
         let r = anchor_rect(geo, sh, &im.anchor);
-        if r.contains(p) && geo.cells.contains(p) {
-            return Some(("image", im.id, r));
+        if r.contains(p) {
+            return Some((ObjRef::new(ObjKind::Image, im.id), r));
         }
     }
     for s in sh.shapes.iter().rev() {
         let r = anchor_rect(geo, sh, &s.anchor);
-        if r.expand(3.0).contains(p) && geo.cells.contains(p) {
-            return Some(("shape", s.id, r));
+        if r.expand(3.0).contains(p) {
+            let kind = if s.kind == ShapeKind::Equation { ObjKind::Equation } else { ObjKind::Shape };
+            return Some((ObjRef::new(kind, s.id), r));
         }
     }
     None
+}
+
+/// The colour ink is painted in: a highlighter (a stroke over 8 pt wide) is translucent, by its
+/// width in points, so the live pen stroke and the committed ink agree at every zoom.
+pub(crate) fn ink_color(line: Color32, width_pt: f32) -> Color32 {
+    if width_pt > 8.0 { line.gamma_multiply(0.45) } else { line }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use std::cell::Cell;
+
+    use gridcraft_chart::Measure;
+
+    use super::*;
+
+    thread_local! {
+        /// Charts resolved and rendered on this thread (a test runs on its own thread).
+        pub(crate) static RENDERS: Cell<usize> = const { Cell::new(0) };
+    }
+
+    /// The production measure is not monotone for labels with a line break: egui lays the text out
+    /// line by line, so ending a prefix with `\n…` can be narrower than the shorter `iii…`. The
+    /// chart's label fitting must not assume otherwise (#1152).
+    #[test]
+    fn egui_measure_shrinks_when_a_prefix_ends_in_a_line_break() {
+        let ctx = egui::Context::default();
+        ctx.set_fonts(theme::pinned_font_definitions());
+        let mut checked = false;
+        // Fonts are ready from the second pass on.
+        for _ in 0..2 {
+            let mut out = ctx.run_ui(Default::default(), |ui| {
+                let m = EguiMeasure { painter: ui.painter(), z: 1.0 };
+                let (short, long) = (m.text_width("iii…", 11.0, false), m.text_width("iiii\n…", 11.0, false));
+                checked = long < short;
+            });
+            out.textures_delta.clear();
+        }
+        assert!(checked);
+    }
 }

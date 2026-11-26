@@ -24,8 +24,8 @@
 use super::white_from_data;
 use crate::unpack::{unpack_lsb, unpack_words32_msb};
 use crate::{BlackLevel, Cfa, ColorData, Mode, OpcodeLists, RawData, RawError, RawFormat, RawImage, Rect, Result};
+use craft_tiff::{ByteOrder, Ifd, Tiff};
 use lightcraft_geom::Orientation;
-use lightcraft_tiff::{ByteOrder, Ifd, Tiff};
 use rayon::prelude::*;
 
 const CROP_TOP_LEFT: u16 = 0x0110;
@@ -88,7 +88,7 @@ fn pair(h: &Header, tag: u16) -> Option<(usize, usize)> {
 pub(crate) fn raw_ifd(raw: &[u8]) -> Result<Ifd> {
     let tiff = Tiff::parse(raw).map_err(|_| RawError::Unsupported("RAF without a raw IFD (older FinePix layout)".into()))?;
     let off = tiff.ifds.first().and_then(|i| i.u64(0xf000)).ok_or_else(|| RawError::Unsupported("RAF without a raw IFD".into()))?;
-    let (ifd, _) = lightcraft_tiff::parse_ifd_at(raw, off, ByteOrder::Little, 0, false, &Default::default())?;
+    let (ifd, _) = craft_tiff::parse_ifd_at(raw, off, ByteOrder::Little, 0, false, &Default::default())?;
     Ok(ifd)
 }
 
@@ -102,8 +102,10 @@ fn camera_name(b: &[u8]) -> String {
 /// The CFA: X-Trans from the (reversed) layout record, else RGGB.
 fn cfa(h: &Header) -> Cfa {
     match record(h, XTRANS_LAYOUT) {
-        Some(l) if l.len() == 36 && l.iter().all(|&c| c <= 2) => Cfa { width: 6, height: 6, pattern: l.iter().rev().copied().collect() },
-        _ => Cfa::bayer_static("RGGB"),
+        Some(l) if l.len() == 36 && l.iter().all(|&c| c <= 2) => {
+            Cfa { width: 6, height: 6, origin_x: 0, origin_y: 0, pattern: l.iter().rev().copied().collect() }
+        }
+        _ => crate::bayer("RGGB"),
     }
 }
 
@@ -116,6 +118,19 @@ pub(crate) fn unpack_row(src: &[u8], bits: u32, words32: bool, out: &mut [u16]) 
         12 if !words32 => unpack_lsb(src, 12, out),
         _ => unpack_words32_msb(src, ByteOrder::Little, bits, out),
     }
+}
+
+/// The Kelvin scale of a body without colour matrices, from tag `0xf00c` (`WB_GRBLevelsStandard`; tag number from
+/// `exiftool -v3` run as a black-box tool on the files): `G R B 17 G R B 21`, the camera's own neutral multipliers
+/// for Illuminant A and D65 (see [`crate::kelvin_presets::KelvinPresets::from_neutral_pair`]).
+fn fuji_kelvin_presets(ifd: &Ifd) -> Option<crate::kelvin_presets::KelvinPresets> {
+    let v = ifd.f64s(0xf00c).filter(|v| v.len() >= 8)?;
+    let grb = |at: usize, code: f64| {
+        (v[at + 3] == code && v[at] > 0.0 && v[at + 1] > 0.0 && v[at + 2] > 0.0)
+            .then(|| [(v[at + 1] / v[at]) as f32, 1.0, (v[at + 2] / v[at]) as f32])
+    };
+    let (a, d65) = (grb(0, 17.0)?, grb(4, 21.0)?);
+    crate::kelvin_presets::KelvinPresets::from_neutral_pair(a, d65)
 }
 
 pub(crate) fn decode(bytes: &[u8], mode: Mode) -> Result<RawImage> {
@@ -191,6 +206,7 @@ pub(crate) fn decode(bytes: &[u8], mode: Mode) -> Result<RawImage> {
     let wb =
         ifd.f64s(0xf00e).filter(|v| v.len() >= 3 && v.iter().take(3).all(|x| *x > 0.0)).map(|v| [(v[1] / v[0]) as f32, 1.0, (v[2] / v[0]) as f32]);
     let white = white_from_data(&data, bits);
+    let kelvin_presets = fuji_kelvin_presets(&ifd);
 
     let mut metadata = h.jpeg.map(lightcraft_meta::extract).unwrap_or_default();
     metadata.width = Some(active.width as u32);
@@ -209,7 +225,7 @@ pub(crate) fn decode(bytes: &[u8], mode: Mode) -> Result<RawImage> {
         active_area: active,
         crop: Rect::new(0, 0, active.width, active.height),
         orientation,
-        color: ColorData::default(),
+        color: ColorData { kelvin_presets, ..Default::default() },
         wb_multipliers: wb,
         linearized: false,
         pixel_aspect: 1.0,

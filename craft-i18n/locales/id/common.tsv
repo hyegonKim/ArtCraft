@@ -396,7 +396,7 @@ theme	Appearance	Tampilan
 	File Info…	Info berkas…
 	File Name	Nama Berkas
 	File Size	Ukuran Berkas
-@id	file.close	berkas.tutup
+@id	file.close	Tutup
 	Files	File
 	Fill	Isian
 	Fill:	Isian:
@@ -1178,6 +1178,7 @@ theme	Appearance	Tampilan
 	Zoom Out	Perkecil
 	Zoom out	Zoom out
 	Zoom Tool	Alat Zoom
+@plural	{n} byte|{n} bytes	{n} byte
 @plural	{n} commit|{n} commits	{n} commit
 	{n} files	{n} berkas
 	{n} h ago	{n} jam lalu

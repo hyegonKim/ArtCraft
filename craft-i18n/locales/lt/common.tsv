@@ -402,6 +402,7 @@ theme	Appearance	Išvaizda
 	Zoom	Mastelis
 	Zoom in	Priartinti
 	Zoom out	Nutolinti
+@plural	{n} byte|{n} bytes	{n} baitas|{n} baitai|{n} baitų
 	{n} files	Failų: {n}
 	{n} h ago	Prieš {n} val.
 	{n} min ago	Prieš {n} min.

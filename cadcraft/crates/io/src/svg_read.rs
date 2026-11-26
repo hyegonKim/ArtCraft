@@ -1,8 +1,8 @@
 //! SVG → Drawing: the static W3C SVG subset that drawing tools emit.
 //!
 //! Reads shapes (`rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`), `path`
-//! outlines (`M L H V C S Q T A Z`, absolute and relative), `g` grouping with `transform`
-//! attributes, `viewBox` and unit-bearing `width`/`height`, and Inkscape layers
+//! outlines (`M L H V C S Q T A Z`, absolute and relative), `g` grouping, `transform` on groups
+//! and shapes, `viewBox` and unit-bearing `width`/`height`, and Inkscape layers
 //! (`inkscape:groupmode="layer"`). Geometry becomes centre-line entities in millimetres with
 //! the page's top-left corner at the origin and Y pointing up — where a laser or pen job
 //! wants it.
@@ -124,11 +124,8 @@ struct Parser {
     drawing: Drawing,
     /// Root viewBox/unit mapping composed with every open container transform.
     stack: Vec<Mat3>,
-    /// Current layer name (from the innermost open layer group).
+    /// Current Inkscape layer name.
     layer: String,
-    /// The layer in effect outside each open container, in step with `stack`: a layer group's
-    /// layer ends with the group.
-    outer_layers: Vec<String>,
     layers: HashSet<String>,
     layer_color: u8,
     elements: usize,
@@ -181,7 +178,6 @@ impl Parser {
             drawing: Drawing::new_metric(),
             stack: vec![Mat3::IDENTITY],
             layer: "0".into(),
-            outer_layers: Vec::new(),
             layers: HashSet::from(["0".to_string()]),
             layer_color: 1,
             elements: 0,
@@ -266,6 +262,19 @@ impl Parser {
             }
             return Ok(());
         }
+        // A shape's own `transform` (SVG 1.1 §7.5) maps it after its groups', for this element only.
+        let local = attr(e, b"transform").as_deref().and_then(parse_transform);
+        if let Some(local) = local {
+            self.stack.push(self.cur().then_before(local));
+        }
+        let read = self.shape(name, e);
+        if local.is_some() {
+            self.stack.pop();
+        }
+        read
+    }
+
+    fn shape(&mut self, name: &[u8], e: &BytesStart) -> Result<()> {
         match name {
             b"use" => {
                 self.left_out(LeftOut::Use);
@@ -287,10 +296,6 @@ impl Parser {
             self.skip -= 1;
         } else if CONTAINERS.contains(&name) && self.stack.len() > 1 {
             self.stack.pop();
-            // Content after a layer group is back on the layer around it.
-            if let Some(outer) = self.outer_layers.pop() {
-                self.layer = outer;
-            }
         }
     }
 
@@ -298,10 +303,8 @@ impl Parser {
         if name == b"svg" && self.stack.len() == 1 {
             self.stack[0] = viewport(e)?;
         }
-        let outer = self.layer.clone();
-        // An Inkscape layer, or a group naming its layer with a `data-layer` attribute.
-        if name == b"g" && (attr(e, b"inkscape:groupmode").as_deref() == Some("layer") || attr(e, b"data-layer").is_some()) {
-            let raw = attr(e, b"inkscape:label").or_else(|| attr(e, b"data-layer")).or_else(|| attr(e, b"id"));
+        if name == b"g" && attr(e, b"inkscape:groupmode").as_deref() == Some("layer") {
+            let raw = attr(e, b"inkscape:label").or_else(|| attr(e, b"id"));
             if let Some(raw) = raw {
                 self.set_layer(&raw);
             }
@@ -315,7 +318,6 @@ impl Parser {
             None => current,
         };
         self.stack.push(next);
-        self.outer_layers.push(outer);
         Ok(())
     }
 
@@ -588,7 +590,10 @@ fn hidden(e: &BytesStart) -> bool {
 }
 
 fn attr(e: &BytesStart, name: &[u8]) -> Option<String> {
-    for a in e.attributes().flatten() {
+    // Stop at the first malformed attribute: skipping errors resumed the parser's duplicate check,
+    // which rescans the attributes before it each time, so many duplicates were quadratic.
+    for a in e.attributes() {
+        let Ok(a) = a else { return None };
         if a.key.into_inner().as_bytes() == name {
             return a.normalized_value(XmlVersion::Explicit1_0).ok().map(|v| v.into_owned());
         }

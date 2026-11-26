@@ -1,7 +1,9 @@
 //! Property mapping for the REST file JSON: JSON readers, enums, paints, effects, strokes,
 //! corners, constraints, auto layout, layout grids and export settings.
 
-use figcraft_doc::color::{BlendMode, Color, ColorStop, Gradient, GradientKind, ImageFilters, ImagePaint, ImageScaleMode, Paint, PaintKind};
+use figcraft_doc::color::{
+    BlendMode, Color, ColorStop, Gradient, GradientKind, ImageFilters, ImagePaint, ImageScaleMode, Paint, PaintKind, VideoPaint,
+};
 use figcraft_doc::geom::Affine;
 use figcraft_doc::{
     AutoLayout, Blur, BlurType, CellAlign, ChildLayout, Constraints, ContentAlign, CrossAlign, Effect, EffectKind, ExportFormat, ExportSetting,
@@ -13,7 +15,7 @@ use serde_json::Value;
 use super::Ctx;
 
 /// Largest width/height/stroke/radius/spacing value taken from the file.
-pub(super) const MAX_SIZE: f64 = 1e6;
+pub(crate) const MAX_SIZE: f64 = 1e6;
 /// Largest coordinate taken from the file.
 pub(super) const MAX_COORD: f64 = 1e7;
 /// Most entries read from any one list (paints, effects, dashes, grids…).
@@ -137,6 +139,7 @@ fn paint(cx: &mut Ctx, p: &Value) -> Option<Paint> {
         "GRADIENT_ANGULAR" => PaintKind::Gradient(gradient(GradientKind::Angular, p)),
         "GRADIENT_DIAMOND" => PaintKind::Gradient(gradient(GradientKind::Diamond, p)),
         "IMAGE" => PaintKind::Image(image(cx, p)),
+        "VIDEO" => PaintKind::Video(video(cx, p)),
         other => {
             cx.warn(format!("{} paints are not supported and were skipped", clip_str(other)));
             return None;
@@ -216,6 +219,35 @@ fn image(cx: &mut Ctx, p: &Value) -> ImagePaint {
             highlights: filter("highlights"),
             shadows: filter("shadows"),
         },
+    }
+}
+
+fn video(cx: &mut Ctx, p: &Value) -> VideoPaint {
+    let scale_mode = match text(p, "scaleMode") {
+        Some("FIT") => ImageScaleMode::Fit,
+        Some("TILE") => ImageScaleMode::Tile,
+        Some("STRETCH") => ImageScaleMode::Crop,
+        _ => ImageScaleMode::Fill,
+    };
+    let crop = (scale_mode == ImageScaleMode::Crop)
+        .then(|| p.get("imageTransform").and_then(transform))
+        .flatten()
+        .map(|t| t.as_coeffs())
+        .filter(|c| c[0].abs() > 1e-9 && c[3].abs() > 1e-9);
+    let vref = text(p, "videoRef").or_else(|| text(p, "imageRef")).unwrap_or("");
+    let iref = text(p, "imageRef");
+    let (video_hash, poster) = cx.video_key(vref, iref);
+    VideoPaint {
+        video: video_hash,
+        poster,
+        scale_mode,
+        scale: num(p, "scalingFactor").filter(|s| *s > 0.0).map_or(1.0, |s| s.min(1e3)),
+        rotation: (num(p, "rotation").unwrap_or(0.0).clamp(-1e6, 1e6) / 90.0).round().rem_euclid(4.0) as i32,
+        crop,
+        filters: ImageFilters::default(),
+        autoplay: flag(p, "autoplay").unwrap_or(true),
+        loop_playback: flag(p, "loop").or_else(|| flag(p, "loopPlayback")).unwrap_or(true),
+        muted: flag(p, "muted").unwrap_or(false),
     }
 }
 

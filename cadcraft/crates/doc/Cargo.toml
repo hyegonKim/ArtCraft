@@ -11,6 +11,7 @@ workspace = true
 [dependencies]
 cadcraft-geom = { workspace = true }
 cadcraft-color = { workspace = true }
+miniz_oxide = "0.9"
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

@@ -135,13 +135,7 @@ pub(super) fn quick_select_batched<const OPTIMIZED: bool>(
         let img = sampler.rgb_scaled(window, step as usize);
         let (lw, lh) = (img.w, img.h);
         let s = step as f32;
-        let mut pts: Vec<(f32, f32)> = Vec::with_capacity(points.len());
-        for (idx, &(x, y)) in points.iter().enumerate() {
-            let p = ((x - window.x0 as f32) / s, (y - window.y0 as f32) / s);
-            if idx == 0 || idx + 1 == points.len() || pts.last().is_none_or(|&(lx, ly)| (lx - p.0).hypot(ly - p.1) >= 1.0) {
-                pts.push(p);
-            }
-        }
+        let pts: Vec<(f32, f32)> = points.iter().map(|&(x, y)| ((x - window.x0 as f32) / s, (y - window.y0 as f32) / s)).collect();
         let seeds = stroke_mask(&pts, rw.max(0.5), lw, lh);
         if !seeds.iter().any(|v| *v) {
             return Attempt::NoSeeds;
@@ -271,7 +265,7 @@ fn cut_levels<const OPTIMIZED: bool>(
     let (w, h) = (img.w, img.h);
     let zeros = vec![0.0f32; w * h];
     if w * h <= direct_px || w < 8 || h < 8 {
-        return super::grid_cut_impl::<OPTIMIZED>(img, cost_fg, &zeros, fixed, |d2| scale * weight(d2), cancel);
+        return super::grid_cut_impl::<OPTIMIZED>(img, cost_fg, &zeros, fixed, |d2| scale * weight(d2), cancel, false);
     }
     let (cw, ch) = (w.div_ceil(2), h.div_ceil(2));
     let coarse_img = img.downsample(2);
@@ -316,7 +310,7 @@ fn cut_levels<const OPTIMIZED: bool>(
             }
         })
         .collect();
-    super::grid_cut_impl::<OPTIMIZED>(img, cost_fg, &zeros, &banded, |d2| scale * weight(d2), cancel)
+    super::grid_cut_impl::<OPTIMIZED>(img, cost_fg, &zeros, &banded, |d2| scale * weight(d2), cancel, false)
 }
 
 /// Pixels within `radius` (working pixels) of the polyline `pts`, plus each point's own pixel.

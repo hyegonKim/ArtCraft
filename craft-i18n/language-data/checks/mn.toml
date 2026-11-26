@@ -1,0 +1,5 @@
+# Words the mn pack must accept and reject (common words; written for this check).
+hidden = true
+reason = "craft-proof's suggestions take 200–580 ms over its 12,066 affix rules"
+correct = ["байшин", "ном", "сургууль", "ус", "хот"]
+incorrect = ["номмм", "сургуулль", "хоттт"]

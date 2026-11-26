@@ -1220,6 +1220,7 @@
 	Zoom Out	Uzaklaştır
 	Zoom out	Uzaklaştır
 	Zoom Tool	Yakınlaştırma Aracı
+@plural	{n} byte|{n} bytes	{n} bayt|{n} bayt
 	{n} files	{n} dosya
 	{n} h ago	{n} sa önce
 @plural	{n} item|{n} items	{n} öğe|{n} öğe

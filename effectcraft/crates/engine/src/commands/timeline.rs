@@ -14,20 +14,10 @@ use serde_json::{Value, json};
 use super::{CommandSpec, always, bad, comp_id, f_p, has_comp, str_p};
 use crate::{EngineError, Result, Session, cmd};
 
-fn is_motion_format(f: &str) -> bool {
-    matches!(f.trim().to_ascii_lowercase().as_str(), "motion" | "motn" | "moti" | "motr" | "moef" | "ozml")
-}
-
-fn has_motion_ext(path: &str) -> bool {
-    let lower = path.to_ascii_lowercase();
-    lower.ends_with(".motn") || lower.ends_with(".moti") || lower.ends_with(".motr") || lower.ends_with(".moef")
-}
-
 fn format_p(p: &Value, cmd: &str) -> Result<Option<TimelineFormat>> {
     match str_p(p, "format") {
         None | Some("") | Some("auto") => Ok(None),
-        Some(f) if is_motion_format(f) => Ok(None),
-        Some(f) => TimelineFormat::parse(f).map(Some).ok_or_else(|| bad(cmd, format!("unknown format `{f}` (xml, fcpxml, otio, edl, aaf, omf, motion)"))),
+        Some(f) => TimelineFormat::parse(f).map(Some).ok_or_else(|| bad(cmd, format!("unknown format `{f}` (xml, fcpxml, otio, edl, aaf, omf)"))),
     }
 }
 
@@ -40,7 +30,6 @@ fn import_timeline(s: &mut Session, p: &Value) -> Result<Value> {
             "native Premiere Pro projects (.prproj) are not supported: in Premiere Pro use File ▸ Export ▸ Final Cut Pro XML… and import the .xml",
         ));
     }
-    let want_motion = str_p(p, "format").is_some_and(is_motion_format);
     let format = format_p(p, CMD)?;
     let bytes = s.services.read_file(&path).map_err(|e| EngineError::Other(format!("cannot read {path}: {e}")))?;
     let fp = std::path::Path::new(&path);
@@ -49,7 +38,6 @@ fn import_timeline(s: &mut Session, p: &Value) -> Result<Value> {
         name: fp.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "Timeline".into()),
         edl_frame_rate: f_p(p, "edlFrameRate"),
     };
-    let is_motion = want_motion || (format.is_none() && (has_motion_ext(&path) || effectcraft_interchange::is_motion_ozml(&bytes)));
     let importer = s.importer.clone();
     let services = s.services.clone();
     let rate = s.sequence_rate();
@@ -60,11 +48,7 @@ fn import_timeline(s: &mut Session, p: &Value) -> Result<Value> {
         crate::sequence::probe_path(importer.as_deref()?, services.as_ref(), m, rate).ok()
     };
     let res = s.edit("Import Timeline", None, |proj, st| {
-        let r = if is_motion {
-            effectcraft_interchange::import_motion_ozml(proj, &bytes, &opts).map_err(|e| EngineError::Other(e.to_string()))?
-        } else {
-            effectcraft_interchange::import(proj, &bytes, format, &opts, &mut probe).map_err(|e| EngineError::Other(e.to_string()))?
-        };
+        let r = effectcraft_interchange::import(proj, &bytes, format, &opts, &mut probe).map_err(|e| EngineError::Other(e.to_string()))?;
         st.project_selection = r.comps.clone();
         Ok(r)
     })?;
@@ -76,9 +60,8 @@ fn import_timeline(s: &mut Session, p: &Value) -> Result<Value> {
         0 => format!("Imported {}", opts.name),
         _ => format!("Imported {} ({n} missing file{})", opts.name, if n == 1 { "" } else { "s" }),
     });
-    let fmt_id = if is_motion { Some("motion") } else { res.format.map(|f| f.id()) };
     Ok(json!({
-        "format": fmt_id,
+        "format": res.format.map(|f| f.id()),
         "folder": res.folder.0,
         "comps": res.comps.iter().map(|c| c.0).collect::<Vec<_>>(),
         "allComps": res.all_comps.iter().map(|c| c.0).collect::<Vec<_>>(),
@@ -146,63 +129,9 @@ fn prerender(s: &Session, cid: ItemId, lid: LayerId, path: &str) -> std::result:
     Ok(Prerendered { path: r.path, width: comp.width, height: comp.height, frame_rate: comp.frame_rate, duration: end - start })
 }
 
-/// Bake the original complete visual composition once, with its real adjustment/mask/blend
-/// context. Audio is intentionally off here: interchange retains its separate audio tracks.
-fn prerender_composition(s: &Session, cid: ItemId, path: &str) -> std::result::Result<Prerendered, String> {
-    let exporter = s.exporter.clone().ok_or("export is not available in this build")?;
-    if !exporter.formats().contains(&OutputFormat::ProRes) {
-        return Err("ProRes export is not available in this build".into());
-    }
-    let comp = s.project.comp(cid).ok_or("no composition")?;
-    if comp.width == 0 || comp.height == 0 || comp.duration <= effectcraft_time::Tick::ZERO || comp.frame_rate.num <= 0 || comp.frame_rate.den <= 0 {
-        return Err("the composition has no renderable picture or duration".into());
-    }
-    let mut item = RenderQueueItem::new(0, cid);
-    item.settings.time_span = TimeSpan::Custom { start: effectcraft_time::Tick::ZERO, end: comp.duration };
-    item.output = OutputModule::for_format(OutputFormat::ProRes);
-    item.output.channels = Channels::Rgba;
-    item.output.prores_profile = ProResProfile::P4444;
-    item.output.audio = AudioOutput::Off;
-    item.output.output = path.to_string();
-    let job = crate::ExportJob {
-        project: &s.project,
-        footage: s.footage.as_ref(),
-        expr: s.expr.as_deref(),
-        accel: s.accel.as_deref(),
-        item: &item,
-        path,
-        storage: None,
-        label: "Pre-render complete composition".into(),
-        nested_switches: s.prefs.general.switches_affect_nested_comps,
-    };
-    let result = exporter.export(&job, &mut |_, _| true)?;
-    Ok(Prerendered { path: result.path, width: comp.width, height: comp.height, frame_rate: comp.frame_rate, duration: comp.duration })
-}
-
 fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "file.exportTimeline";
     let mut path = str_p(p, "path").ok_or_else(|| bad(CMD, "missing `path`"))?.to_string();
-    let cid = comp_id(s, p)?;
-    if str_p(p, "format").is_some_and(is_motion_format) || (str_p(p, "format").is_none() && has_motion_ext(&path)) {
-        if !has_motion_ext(&path) {
-            path = format!("{path}.motn");
-        }
-        let xml = effectcraft_interchange::export_motion_ozml(&s.project, cid).map_err(|e| EngineError::Other(e.to_string()))?;
-        s.services.write_file(&path, xml.as_bytes()).map_err(|e| EngineError::Other(format!("cannot write {path}: {e}")))?;
-        let layers = s.project.comp(cid).map_or(0, |c| c.layers.len());
-        s.toast(format!("Exported {path} (Apple Motion)"));
-        return Ok(json!({
-            "path": path,
-            "format": "motion",
-            "bytes": xml.len(),
-            "sequences": 1,
-            "videoTracks": layers,
-            "audioTracks": 0,
-            "clips": layers,
-            "prerendered": [],
-            "warnings": [],
-        }));
-    }
     let format = format_p(p, CMD)?.or_else(|| TimelineFormat::from_path(&path)).unwrap_or(TimelineFormat::Fcp7Xml);
     if TimelineFormat::from_path(&path).is_none() || path.to_ascii_lowercase().ends_with(".prproj") {
         if let Some(stem) = path.strip_suffix(".prproj").map(str::to_string) {
@@ -210,6 +139,7 @@ fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
         }
         path = format!("{path}.{}", format.extension());
     }
+    let cid = comp_id(s, p)?;
     let prerender_mode = match str_p(p, "prerender") {
         None => match p.get("prerender").and_then(Value::as_bool) {
             Some(false) => PrerenderMode::None,
@@ -231,20 +161,7 @@ fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
     let mut pre: HashMap<(ItemId, LayerId), Prerendered> = HashMap::new();
     let mut rendered = vec![];
     let mut errors = vec![];
-    let plan = effectcraft_interchange::plan_prerender_with_compositions(&s.project, cid, &opts);
-    let mut composition_pre = HashMap::new();
-    for comp in plan.compositions {
-        let comp_name = s.project.item(comp).map(|item| item.name.clone()).unwrap_or_default();
-        let file = dir.join(format!("{stem}_{}_{}_composition.mov", safe(&comp_name), comp.0)).to_string_lossy().to_string();
-        match prerender_composition(s, comp, &file) {
-            Ok(result) => {
-                rendered.push(result.path.clone());
-                composition_pre.insert(comp, result);
-            }
-            Err(error) => errors.push(format!("{comp_name} ▸ complete composition: {error}")),
-        }
-    }
-    for (c, l) in plan.layers {
+    for (c, l) in effectcraft_interchange::plan_prerender(&s.project, cid, &opts) {
         let comp_name = s.project.item(c).map(|i| i.name.clone()).unwrap_or_default();
         let layer_name = s.project.comp(c).and_then(|cc| cc.layer(l)).map(|x| x.name.clone()).unwrap_or_default();
         let file = dir.join(format!("{stem}_{}_{}_{}.mov", safe(&comp_name), safe(&layer_name), l.0)).to_string_lossy().to_string();
@@ -256,20 +173,14 @@ fn export_timeline(s: &mut Session, p: &Value) -> Result<Value> {
             Err(e) => errors.push(format!("{comp_name} ▸ {layer_name}: {e}")),
         }
     }
-    let out =
-        effectcraft_interchange::export_with_compositions(&s.project, cid, &opts, &pre, &composition_pre).map_err(|e| EngineError::Other(e.to_string()))?;
+    let out = effectcraft_interchange::export(&s.project, cid, &opts, &pre).map_err(|e| EngineError::Other(e.to_string()))?;
     s.services.write_file(&path, &out.bytes).map_err(|e| EngineError::Other(format!("cannot write {path}: {e}")))?;
     let mut warnings = out.warnings.clone();
     warnings.extend(errors.iter().map(|e| format!("pre-render failed: {e}")));
-    let mut notice = match format {
+    s.toast(match format {
         TimelineFormat::Fcp7Xml => format!("Exported {path} (Final Cut Pro XML; import it in Premiere Pro with File ▸ Import)"),
         _ => format!("Exported {path} ({})", format.label()),
-    };
-    if !warnings.is_empty() {
-        notice.push_str("\nExport warnings: ");
-        notice.push_str(&warnings.join("; "));
-    }
-    s.toast(notice);
+    });
     Ok(json!({
         "path": path,
         "format": format.id(),

@@ -12,3 +12,4 @@
 # consulted or copied; add entries the same way.
 
 @id	language.name	Română
+@plural	{n} byte|{n} bytes	{n} octet|{n} octeți|{n} de octeți

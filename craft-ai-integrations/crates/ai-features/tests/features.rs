@@ -1,0 +1,315 @@
+use craft_ai_core::PRESETS;
+use craft_ai_features::*;
+use std::collections::HashSet;
+
+/// The built-in feature with id `id`.
+fn feature(id: &str) -> Feature {
+    builtin().into_iter().find(|f| f.id == id).unwrap()
+}
+
+/// The SAM 3 recipe of `f`, found by its workflow name, never by its place in the list. These
+/// tests check the planner against its real files; SAM 2.1 is listed first (see `sam21.rs`).
+fn sam3(f: &Feature) -> &LocalRecipe {
+    f.locals
+        .iter()
+        .find(|r| r.workflow == "sam3-segment")
+        .unwrap()
+}
+
+/// [`sam3`], to change for one test.
+fn sam3_mut(f: &mut Feature) -> &mut LocalRecipe {
+    f.locals
+        .iter_mut()
+        .find(|r| r.workflow == "sam3-segment")
+        .unwrap()
+}
+
+/// The plan for the SAM 3 recipe of `f` on `inventory`, out of [`plans`].
+fn sam3_plan(f: &Feature, inventory: &Inventory) -> Plan {
+    plans(f, inventory)
+        .into_iter()
+        .find(|p| p.recipe == "sam3-segment")
+        .unwrap()
+}
+
+fn have_sam3() -> Inventory {
+    Inventory {
+        comfyui_found: true,
+        files: vec![InstalledFile {
+            folder: "sam3".into(),
+            filename: "sam3.safetensors".into(),
+            size_bytes: 3_449_860_632,
+        }],
+        node_folders: vec!["comfyui-sam3".into()],
+        vram_mb: Some(24_576),
+        free_disk_bytes: Some(500_000_000_000),
+    }
+}
+
+fn bare() -> Inventory {
+    Inventory {
+        comfyui_found: true,
+        ..Inventory::default()
+    }
+}
+
+/// The catalogue has eight features with unique ids, each with a title, summary and app uses,
+/// every hosted option names a real preset and no feature claims an app ships it yet.
+#[test]
+fn the_catalogue_is_complete_and_consistent() {
+    let all = builtin();
+    assert_eq!(all.len(), 8, "a bad capability id empties the list");
+    let ids: HashSet<_> = all.iter().map(|f| f.id.as_str()).collect();
+    assert_eq!(ids.len(), all.len());
+    let presets: HashSet<_> = PRESETS.iter().map(|p| p.key).collect();
+    for f in &all {
+        assert!(
+            !f.title.is_empty() && !f.summary.is_empty() && !f.uses.is_empty(),
+            "{}",
+            f.id
+        );
+        for c in &f.cloud {
+            assert!(
+                presets.contains(c.preset.as_str()),
+                "{} -> {}",
+                f.id,
+                c.preset
+            );
+        }
+        // Nothing may claim an app ships a tool before an app calls the shared layer.
+        assert_eq!(f.shipped_in().count(), 0, "{}", f.id);
+    }
+}
+
+/// Every model file in every local recipe has a lowercase hex SHA-256, a non-zero size, an
+/// https source and a path that stays inside one sub-folder under its destination folder.
+#[test]
+fn recipes_carry_checkable_files() {
+    for f in builtin() {
+        for m in f.locals.into_iter().flat_map(|local| local.models) {
+            assert_eq!(m.sha256.len(), 64, "{}", m.filename);
+            assert!(
+                m.sha256
+                    .bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            );
+            assert!(m.size_bytes > 0);
+            assert!(m.source.url().starts_with("https://"));
+            // A bundle keeps its files in one sub-folder: at most three plain names, none starting
+            // with a dot and none holding a backslash or a colon.
+            assert!(m.filename.split('/').count() <= 3, "{}", m.filename);
+            assert!(m.filename.split('/').all(|part| !part.is_empty()
+                && !part.starts_with('.')
+                && !part.contains(['\\', ':'])));
+            assert!(!m.folder.contains(['/', '\\', '.']));
+        }
+    }
+}
+
+/// SAM 3's checkpoint pins the size, hash and revision-pinned URL of the real file, and its
+/// licence must be accepted.
+#[test]
+fn the_sam3_recipe_matches_the_real_file() {
+    // Size and checksum of the file the Hugging Face copy serves and of the copy checked on the maintainer's machine.
+    let f = feature("select-subject");
+    let m = &sam3(&f).models[0];
+    assert_eq!(m.size_bytes, 3_449_860_632);
+    assert_eq!(
+        m.sha256,
+        "127037a7a11169c63a210b8e3e9caad24a66abdd65d3a78bbc3a7d8577d57026"
+    );
+    assert_eq!(
+        m.source.url(),
+        "https://huggingface.co/apozz/sam3-safetensors/resolve/e88da2ed02aded4006f4711ee6a9c75d5aa38d0c/sam3.safetensors"
+    );
+    assert!(m.licence.accept_required);
+}
+
+/// No built-in text contains an em dash or an en dash.
+#[test]
+fn no_user_text_uses_an_em_dash() {
+    let json = serde_json::to_string(&builtin()).unwrap();
+    assert!(!json.contains('\u{2014}') && !json.contains('\u{2013}'));
+}
+
+/// With SAM 3's file and node pack present, its plan is Ready with nothing to download or accept.
+#[test]
+fn everything_present_means_ready() {
+    let p = sam3_plan(&feature("select-subject"), &have_sam3());
+    assert_eq!(p.state, State::Ready);
+    assert!(p.missing_files.is_empty() && p.missing_packs.is_empty());
+    assert_eq!(p.download_bytes, 0);
+    assert!(p.licences.is_empty());
+}
+
+/// A bare ComfyUI needs SAM 3's one file, its node pack and its one licence.
+#[test]
+fn a_bare_install_needs_the_model_and_the_pack() {
+    let p = sam3_plan(&feature("select-subject"), &bare());
+    assert_eq!(p.state, State::NeedsInstall);
+    assert_eq!(p.download_bytes, 3_449_860_632);
+    assert_eq!(p.missing_files.len(), 1);
+    assert_eq!(p.missing_packs.len(), 1);
+    assert_eq!(p.licences.len(), 1);
+}
+
+/// A file one byte short, or the right size in the wrong folder, counts as missing.
+#[test]
+fn a_file_of_the_wrong_size_counts_as_missing() {
+    let mut inv = have_sam3();
+    inv.files[0].size_bytes -= 1;
+    let p = sam3_plan(&feature("select-subject"), &inv);
+    assert_eq!(p.state, State::NeedsInstall);
+    assert_eq!(p.missing_files.len(), 1);
+    // Same size but the wrong folder is also missing.
+    let mut inv = have_sam3();
+    inv.files[0].folder = "sams".into();
+    assert_eq!(
+        sam3_plan(&feature("select-subject"), &inv)
+            .missing_files
+            .len(),
+        1
+    );
+}
+
+/// File and node folder names match whatever their case.
+#[test]
+fn names_match_without_regard_to_case() {
+    let mut inv = have_sam3();
+    inv.files[0].filename = "SAM3.safetensors".into();
+    inv.node_folders = vec!["ComfyUI-SAM3".into()];
+    assert_eq!(
+        sam3_plan(&feature("select-subject"), &inv).state,
+        State::Ready
+    );
+}
+
+/// With only the node pack missing, SAM 3 still needs installing but downloads nothing.
+#[test]
+fn only_the_pack_missing_still_needs_install_but_downloads_nothing() {
+    let mut inv = have_sam3();
+    inv.node_folders.clear();
+    let p = sam3_plan(&feature("select-subject"), &inv);
+    assert_eq!(p.state, State::NeedsInstall);
+    assert_eq!(p.download_bytes, 0);
+    assert_eq!(p.missing_packs.len(), 1);
+}
+
+/// Two files under one licence ask for it once.
+#[test]
+fn a_licence_shared_by_two_files_is_asked_once() {
+    let mut f = feature("select-subject");
+    let local = sam3_mut(&mut f);
+    let mut second = local.models[0].clone();
+    second.filename = "other.safetensors".into();
+    local.models.push(second);
+    let p = sam3_plan(&f, &bare());
+    assert_eq!(p.missing_files.len(), 2);
+    assert_eq!(p.licences.len(), 1);
+}
+
+/// Too little graphics memory or disk space blocks the plan, and each blocker says what is
+/// needed and what there is.
+#[test]
+fn not_enough_graphics_memory_or_disk_blocks() {
+    let mut f = feature("select-subject");
+    sam3_mut(&mut f).min_vram_mb = Some(12_000);
+    let mut inv = have_sam3();
+    inv.files.clear();
+    inv.vram_mb = Some(8_000);
+    inv.free_disk_bytes = Some(1_000);
+    let p = sam3_plan(&f, &inv);
+    assert_eq!(p.state, State::Blocked);
+    assert!(p.blockers.contains(&Blocker::NotEnoughVram {
+        needed_mb: 12_000,
+        have_mb: 8_000
+    }));
+    assert!(p.blockers.contains(&Blocker::NotEnoughDisk {
+        needed_bytes: 3_449_860_632,
+        free_bytes: 1_000
+    }));
+}
+
+#[test]
+fn unknown_hardware_does_not_block() {
+    let mut f = feature("select-subject");
+    f.locals[0].min_vram_mb = Some(12_000);
+    let mut inv = bare();
+    inv.vram_mb = None;
+    inv.free_disk_bytes = None;
+    assert_eq!(plan(&f, &inv).state, State::NeedsInstall);
+}
+
+#[test]
+fn no_comfyui_and_no_recipe_are_reported_as_such() {
+    assert_eq!(
+        plan(&feature("select-subject"), &Inventory::default()).state,
+        State::NoRuntime
+    );
+    // Even with ComfyUI present, a feature nobody has worked out locally stays that way.
+    assert_eq!(
+        plan(&feature("remove-object"), &have_sam3()).state,
+        State::NoLocalRoute
+    );
+}
+
+#[test]
+fn plans_and_inventories_survive_a_json_round_trip() {
+    let p = plan(&feature("select-subject"), &bare());
+    let back: Plan = serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+    assert_eq!(back, p);
+    let inv = have_sam3();
+    let back: Inventory = serde_json::from_str(&serde_json::to_string(&inv).unwrap()).unwrap();
+    assert_eq!(back, inv);
+}
+
+#[test]
+fn every_tool_has_a_role_that_names_its_inputs() {
+    for f in builtin() {
+        let role = f.role().unwrap_or_else(|| panic!("{} has no role", f.id));
+        assert_eq!(role.id.as_str(), f.id);
+        assert_eq!(role.capability, f.capability);
+        assert!(!role.inputs.is_empty(), "{}", f.id);
+    }
+}
+
+/// What five of PhotoCraft's six AI tools need from the shared layer: (tool id, capability, inputs
+/// sent). The sixth, Image to Image, is not here on purpose: its entry ("Change a picture",
+/// `image.edit`, hosted through OpenAI) was taken out of the catalogue until the tool is added
+/// properly. It is in the first commit of the PR that added this list, to be put back from there.
+const PHOTOCRAFT_TOOLS: &[(&str, &str, &[&str])] = &[
+    ("generate-image", "image.generate", &["prompt"]),
+    (
+        "generative-fill",
+        "image.inpaint",
+        &["source", "mask", "prompt"],
+    ),
+    ("remove-object", "image.inpaint", &["source", "mask"]),
+    ("remove-background", "image.matte", &["source"]),
+    ("select-subject", "image.segment", &["source", "prompt"]),
+];
+
+#[test]
+fn each_photocraft_tool_has_one_shared_tool_with_the_right_job_and_inputs() {
+    for (id, capability, inputs) in PHOTOCRAFT_TOOLS {
+        let f = builtin()
+            .into_iter()
+            .find(|f| f.id == *id)
+            .unwrap_or_else(|| panic!("{id} is missing from the catalogue"));
+        assert_eq!(f.capability.as_str(), *capability, "{id}");
+        let sent: Vec<&str> = f.inputs.iter().map(|i| i.as_str()).collect();
+        assert_eq!(&sent, inputs, "{id}");
+        assert!(
+            f.uses.iter().any(|u| u.app == "PhotoCraft"),
+            "{id} names no PhotoCraft tool"
+        );
+    }
+}
+
+#[test]
+fn a_tool_without_a_checked_route_offers_none() {
+    // Remove objects has no verified local recipe and no hosted adapter that fills a masked area.
+    let f = feature("remove-object");
+    assert!(f.locals.is_empty());
+    assert!(f.cloud.is_empty());
+}

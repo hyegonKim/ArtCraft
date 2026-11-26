@@ -1,0 +1,3 @@
+# Words the hu pack must accept and reject (common words; written for this check).
+correct = ["ház", "könyv", "iskola", "víz", "város"]
+incorrect = ["könyvv", "iskolla", "várros"]

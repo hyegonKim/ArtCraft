@@ -47,14 +47,22 @@
 	About CADCraft	Informazioni su CADCraft
 	Add Current Scale	Aggiungi scala corrente
 	Add Leader	Aggiungi direttrice
+	Add to Working Set	Aggiungi al set di lavoro
 	Add Vertex	Aggiungi vertice
 	Add/Delete Scales...	Aggiungi/Elimina scale...
+	Add: Pick points	Aggiungi: scegli punti
+	Add: Select objects	Aggiungi: seleziona oggetti
 	Additional angles	Angoli aggiuntivi
+	Add…	Aggiungi…
+	Alias	Alias
+	Alias file: {file}	File degli alias: {file}
+	Align Multileaders	Allinea multidirettrici
 	Aligned	Allineata
 	All Annotation Objects	Tutti gli oggetti di annotazione
 	All Scales	Tutte le scale
 	All Used Layers	Tutti i layer utilizzati
 	An array that would create more objects than this is refused.	Una serie che creerebbe più oggetti di così viene rifiutata.
+	Analyze Shapes	Analizza forme
 	Animation Effects	Effetti di animazione
 	Annotation scale	Scala di annotazione
 	Annotation Visibility	Visibilità annotazioni
@@ -66,6 +74,7 @@
 	Arc Length	Lunghezza arco
 	Arrange Panel	Disponi pannello
 	Array	Serie
+	Associative	Associativo
 	Attach	Associa
 	Attach DWG...	Associa DWG...
 	Attribute	Attributo
@@ -85,22 +94,31 @@
 	Bind...	Unisci...
 	Blend	Fondi
 	Block Attribute Manager...	Gestore attributi blocco...
+	Block Description...	Descrizione blocco...
 	Block Editor	Editor blocchi
 	Block Reference	Riferimento di blocco
+	Block to create or edit	Blocco da creare o modificare
 	Block...	Blocco...
 	Boolean	Booleane
+	Bottom left	In basso a sinistra
+	Bottom right	In basso a destra
+	Boundaries	Contorni
+	Boundaries picked: {n}	Contorni scelti: {n}
 	Boundary	Contorno
 	Boundary...	Contorno...
 	Box	Parallelepipedo
 	Break	Spezza
 	Break At Point	Spezza in un punto
+	Break-line Symbol	Simbolo linea di interruzione
 	Bring Above Objects	Porta sopra gli oggetti
 	Bring Annotations to Front	Porta le annotazioni in primo piano
+	built-in	predefinito
 	Bulleted list	Elenco puntato
 	ByBlock	DaBlocco
 	ByColor	DaColore
 	ByLayer	DaLayer
 	CADCraft Help	Aiuto di CADCraft
+	CADCraft is up to date.	CADCraft è aggiornato.
 	CADCraft keeps these preferences, object snap modes and drafting toggles for your user account and restores them when it starts.	CADCraft conserva queste preferenze, le modalità di snap ad oggetto e le impostazioni di disegno per il tuo account utente e le ripristina all'avvio.
 	Calibrate	Calibra
 	Calibrate 3D Mouse	Calibra mouse 3D
@@ -115,23 +133,33 @@
 	Center, Start, Angle	Centro, inizio, angolo
 	Center, Start, End	Centro, inizio, fine
 	Center, Start, Length	Centro, inizio, lunghezza
-	Chamfer	Cima
+	Centered	Centrata
 	Change Space	Cambia spazio
 	Change to Current Layer	Cambia al layer corrente
 	Changed: {n}	Modificati: {n}
 	Changes apply at once and are kept for next time.	Le modifiche si applicano subito e restano per la prossima volta.
+	Check for Updates…	Verifica aggiornamenti…
+	Choose the command the alias starts.	Scegliere il comando che l'alias avvia.
 	Circumference	Circonferenza
 	Clear Command History	Cancella cronologia comandi
+	Click the ruler to add a tab stop, right-click to remove one	Fare clic sul righello per aggiungere una tabulazione, clic destro per rimuoverla
+	Click to set new origin	Fare clic per impostare una nuova origine
 	Clip	Delimita
 	Clip Viewport	Delimita finestra
+	Clip Xref	Ritaglia xrif
 	Close All Other Drawings	Chiudi tutti gli altri disegni
 	Close Array Editing	Chiudi modifica serie
+	Close Block Editor	Chiudi editor blocchi
 	Close Comparison	Chiudi confronto
 	Closed	Chiusa
 	Coincident	Coincidente
 	Collapse Palettes	Comprimi tavolozze
 	Collapse Tool Sets	Comprimi set di strumenti
+	Collect	Raccogli
+	Collect Multileaders	Raccogli multidirettrici
 	Collinear	Collineare
+	Color 1	Colore 1
+	Color 2	Colore 2
 	Color 8	Colore 8
 	Color 9	Colore 9
 	Color Index	Indice colore
@@ -149,9 +177,11 @@
 	Constraint Bars	Barre dei vincoli
 	Constraint Settings	Impostazioni vincoli
 	Construction Line	Linea di costruzione
+	contains authoring elements. Open in Block Editor?	contiene elementi di creazione. Aprirlo nell'editor blocchi?
 	Contents	Contenuto
 	Contributors	Collaboratori
 	Control Vertices	Vertici di controllo
+	Convert Text to Mtext	Converti testo in testo multilinea
 	Convert to Arc	Converti in arco
 	Convert to Line	Converti in linea
 	Copy as JSON	Copia come JSON
@@ -161,26 +191,33 @@
 	Copy Nested Objects	Copia oggetti nidificati
 	Copy Selection	Copia selezione
 	Copy with Base Point	Copia con punto base
+	Could not check for updates.	Impossibile verificare gli aggiornamenti.
 	Count	Conta
 	Count List	Elenco conteggio
 	Count Table	Tabella conteggio
 	Create Block	Crea blocco
+	Create separate hatches	Crea tratteggi separati
 	Creates a user parameter	Crea un parametro utente
 	Crosshair size	Dimensione cursore a croce
+	Crossing selection color:	Colore selezione interseca:
 	Ctrl+Enter to finish	Ctrl+Invio per terminare
 	Current layer	Layer corrente
 	Current Scale Only	Solo scala corrente
 	Current selection	Selezione corrente
 	Current: {color}	Corrente: {color}
-	Custom	Custom
+	Curved	Curva
+	Customize	Personalizza
+	Cut with Base Point	Taglia con punto base
 	Cylinder	Cilindro
 	Data Extraction...	Estrazione dati...
 	Data Link...	Collegamento dati...
 	Default Save Format	Formato di salvataggio predefinito
 	Default Save Version	Versione di salvataggio predefinita
 	Default save version	Versione di salvataggio predefinita
+	Default to boundary extents	Predefinita sulle estensioni del contorno
 	Define Attributes	Definisci attributi
 	Define Attributes...	Definisci attributi...
+	Define each corner of the selection window with a separate click.	Definire ogni angolo della finestra di selezione con un clic separato.
 	Defined width	Larghezza definita
 	Degree	Grado
 	Degrees of Freedom	Gradi di libertà
@@ -219,6 +256,7 @@
 	Drafting	Disegno
 	Drafting Settings	Impostazioni di disegno
 	Drafting Settings...	Impostazioni di disegno...
+	Drag Dynamic Grip	Trascina grip dinamico
 	Draw Order	Ordine di visualizzazione
 	Drawing (DWG)	Disegno (DWG)
 	Drawing (DXF)	Disegno (DXF)
@@ -233,12 +271,19 @@
 	DWG Reference...	Riferimento DWG...
 	DXF	DXF
 	Dynamic	Dinamico
+	Dynamic Block Data	Dati del blocco dinamico
+	Dynamic Block Grips	Grip del blocco dinamico
+	Dynamic Block Reference	Riferimento a blocco dinamico
 	Dynamic Dimensions	Quote dinamiche
 	Dynamic Input	Input dinamico
 	Dynamic Input (F12)	Input dinamico (F12)
 	E	E
 	Edit Array	Modifica serie
 	Edit Attributes...	Modifica attributi...
+	Edit Block Definition	Modifica definizione del blocco
+	Edit Command Aliases (PGP)...	Modifica alias dei comandi (PGP)...
+	Edit Multileader	Modifica multidirettrice
+	Edit Reference In-Place	Modifica riferimento sul posto
 	Edit Table Cell	Modifica cella tabella
 	Edit Text...	Modifica testo...
 	Elliptical Arc	Arco ellittico
@@ -255,7 +300,7 @@
 	Enter a vertex editing option	Digitare un'opzione di modifica dei vertici
 	Enter an option	Digitare un'opzione
 	Enter angle of xline	Digitare l'angolo della linea di costruzione
-	Enter angle of xline (0) or	Digitare l'angolo della linea di costruzione (0) o
+	Enter angle of xline (0)	Digitare l'angolo della linea di costruzione (0)
 	Enter area of rectangle in current units	Digitare l'area del rettangolo nelle unità correnti
 	Enter attribute prompt	Digitare il messaggio dell'attributo
 	Enter attribute tag name	Digitare il nome dell'etichetta dell'attributo
@@ -266,7 +311,7 @@
 	Enter default attribute value	Digitare il valore predefinito dell'attributo
 	Enter degree of spline	Digitare il grado della spline
 	Enter delta angle	Digitare la variazione dell'angolo
-	Enter delta length or	Digitare la variazione di lunghezza o
+	Enter delta length	Digitare la variazione di lunghezza
 	Enter dimension text	Digitare il testo della quota
 	Enter dimension text (<> = measurement)	Digitare il testo della quota (<> = misura)
 	Enter dimension value or [name=expression]	Digitare il valore della quota o [nome=espressione]
@@ -297,11 +342,16 @@
 	Equal	Uguale
 	error	errore
 	Evaluate	Calcola
+	Evaluate LISP	Valuta LISP
 	Exclude from new selection set	Escludi dal nuovo gruppo di selezione
+	Exclude:	Escludi:
 	Explode	Esplodi
+	Explode Attributes to Text	Esplodi attributi in testo
+	Export Comparison	Esporta confronto
 	Export Table	Esporta tabella
 	Export to PDF...	Esporta in PDF...
 	Export...	Esporta...
+	Express Tools	Strumenti Express
 	Extend	Estendi
 	Extension	Estensione
 	Extents	Estensioni
@@ -311,6 +361,8 @@
 	File Tab	Scheda file
 	Fillet	Raccordo
 	Filters	Filtri
+	Find All	Find All
+	Find what:	Find what:
 	Find...	Trova...
 	Fit Points	Punti di adattamento
 	Fix	Fisso
@@ -344,17 +396,23 @@
 	Grip Scale	Scala con grip
 	Grip size	Dimensione grip
 	Grip Stretch	Stira con grip
+	Grips	Grip
 	Group	Gruppo
 	Group Edit	Modifica gruppo
 	Group Options	Opzioni gruppo
 	Group Selection	Selezione gruppo
 	Hatch	Tratteggio
+	Hatch and Gradient	Tratteggio e sfumatura
 	Hatch Edit	Edita tratteggio
+	Hatch origin	Origine del tratteggio
 	Hatch Pattern	Modello di tratteggio
 	Hatch Patterns	Modelli di tratteggio
+	Hatch Pick	Scelta tratteggio
 	Hatch...	Tratteggio...
+	Hatches	Tratteggi
 	Height: {height}	Altezza: {height}
 	Helix	Elica
+	Hemispherical	Emisferica
 	Hide All Constraint Bars	Nascondi tutte le barre dei vincoli
 	Hide All Dynamic Dimensions	Nascondi tutte le quote dinamiche
 	Hide CADCraft	Nascondi CADCraft
@@ -375,6 +433,7 @@
 	Increment angle	Angolo incrementale
 	Index Color	Colore indice
 	Index color: {index}	Colore indice: {index}
+	Indicate selection area	Indica l'area di selezione
 	Infer Constraints	Deduci vincoli
 	Inquiry	Interroga
 	Insert Block	Inserisci blocco
@@ -390,7 +449,11 @@
 	Inspect Constraints	Ispeziona vincoli
 	Inspect Drawing	Ispeziona disegno
 	Inspection	Ispezione
+	Interface scale	Scala dell'interfaccia
 	Interface theme	Tema dell'interfaccia
+	Inverted	Invertita
+	Island	Isola
+	Island detection	Rilevamento isole
 	Isolate Layer	Isola layer
 	Isolate Objects	Isola oggetti
 	Isometric Drafting	Disegno isometrico
@@ -398,7 +461,6 @@
 	Isometric snap	Snap isometrico
 	Jogged	Spezzata
 	Jogged Linear	Lineare spezzata
-	Justify	Justify
 	Keep an editable copy of this table in the drawing	Conserva una copia modificabile di questa tabella nel disegno
 	Keep the system cursor visible over the drawing area	Mantieni visibile il cursore di sistema sull'area di disegno
 	Largest array	Serie più grande
@@ -444,6 +506,7 @@
 	List System Variables	Elenca variabili di sistema
 	List Text Styles	Elenca stili di testo
 	Load all	Carica tutti
+	Load Application...	Carica applicazione...
 	Load...	Carica...
 	Loaded	Caricato
 	Loaded linetypes	Tipi di linea caricati
@@ -458,6 +521,7 @@
 	Make it a block of this drawing; its layers become NAME$0$LAYER	Lo rende un blocco di questo disegno; i suoi layer diventano NOME$0$LAYER
 	Make Object's Layer Current	Rendi corrente il layer dell'oggetto
 	Make...	Crea...
+	Match case	Match case
 	Match Layer	Associa layer
 	Match Properties	Copia proprietà
 	Measure Distance	Misura distanza
@@ -471,8 +535,10 @@
 	Model Space (in viewport)	Spazio modello (nella finestra)
 	Modeling	Modellazione
 menu	Modify	Edita
+	More than {n} aliases.	Più di {n} alias.
 	More toolbar commands	Altri comandi della barra degli strumenti
 	Move sideways to pan; push/pull or twist to zoom.	Muovere lateralmente per il pan; spingere/tirare o ruotare per lo zoom.
+	Move/Copy/Rotate	Sposta/Copia/Ruota
 	MText	TestoM
 	Multileader	Multidirettrice
 	Multileader style	Stile multidirettrice
@@ -480,6 +546,7 @@ menu	Modify	Edita
 	Multiline	Multilinea
 	Multiline Style...	Stile multilinea...
 	Multiline Text	Testo multilinea
+	Multiline text	Testo multilinea
 	Multiline Text...	Testo multilinea...
 	Multiline...	Multilinea...
 	Multiple	Multiplo
@@ -488,9 +555,11 @@ menu	Modify	Edita
 	My properties: not available yet	Le mie proprietà: non ancora disponibili
 	N	N
 	Named	Con nome
+	Named Viewports...	Finestre con nome...
 	Named Views...	Viste con nome...
 	Nearest	Vicino
 	New (metric)	Nuovo (metrico)
+	New block	Nuovo blocco
 	New CTB	Nuovo CTB
 	New Drawing	Nuovo disegno
 	New Drawing (⌘N)	Nuovo disegno (⌘N)
@@ -504,6 +573,7 @@ menu	Modify	Edita
 	New style	Nuovo stile
 	New Viewports...	Nuove finestre...
 	New VP Freeze	Congela nelle nuove FV
+	No alias file loaded. REINIT replaces these aliases with a file's.	Nessun file di alias caricato. REINIT sostituisce questi alias con quelli di un file.
 	No blocks defined in this drawing.	Nessun blocco definito in questo disegno.
 	No contributor data was built into this copy.	In questa copia non sono inclusi i dati dei collaboratori.
 	No external references are attached.	Nessun riferimento esterno associato.
@@ -512,11 +582,14 @@ menu	Modify	Edita
 	No saved layer states	Nessuno stato layer salvato
 	No supported 3D mouse found	Nessun mouse 3D supportato trovato
 	Node	Nodo
-	Normal	Normal
+	Not a number or distance: {text}	Non è un numero né una distanza: {text}
 	Not available yet	Non ancora disponibile
 	Not Found	Non trovato
 	Not loaded	Non caricato
+	Nothing found	Nothing found
 	Numbered list	Elenco numerato
+	Object grouping	Raggruppamento oggetti
+	Object selection limit for display of grips	Limite di oggetti selezionati per la visualizzazione dei grip
 	Object Snap	Snap ad oggetto
 	Object Snap (F3)	Snap ad oggetto (F3)
 	Object snap aperture	Apertura snap ad oggetto
@@ -527,14 +600,17 @@ menu	Modify	Edita
 	Object Snap Tracking Settings	Impostazioni puntamento snap ad oggetto
 	Object type:	Tipo di oggetto:
 	objects	oggetti
+	Objects on locked layers	Oggetti su layer bloccati
 	Oblique	Obliquo
 	On/Off	Attiva/Disattiva
 	One of the Crafting Apps by the ArtCraft team and community.	Una delle Crafting App del team e della comunità ArtCraft.
 	Only in this drawing: {n}	Solo in questo disegno: {n}
 	Only in {name}: {n}	Solo in {name}: {n}
+	Oops	Ripristina oggetti cancellati
 	Open (⌘O)	Apri (⌘O)
 	Open a drawing first.	Aprire prima un disegno.
 	Open and Save	Apri e salva
+	Open in Block Editor	Apri nell'editor blocchi
 	Open Sample Drawing	Apri disegno di esempio
 	Open sample drawing	Apri disegno di esempio
 	Open Xref	Apri xrif
@@ -543,14 +619,18 @@ menu	Modify	Edita
 	Options...	Opzioni...
 	Orbit	Orbita
 	Ordinate	Coordinata
+	Origin: {x}, {y}	Origine: {x}, {y}
 	Ortho (F8)	Orto (F8)
 	Ortho Mode	Modalità orto
 	Ortho Mode (F8)	Modalità orto (F8)
 	Osnap Settings...	Impostazioni snap ad oggetto...
 	Out	Indietro
+	Outer	Esterno
 	Over-constrained	Sovravincolato
 	Overlay	Sovrapposizione
+	Overline	Sopralineato
 	Override	Sostituisci
+	overrides built-in	sostituisce il predefinito
 	Page Setup Manager	Gestore impostazioni pagina
 	Page Setup Manager...	Gestore impostazioni pagina...
 	Pan	Pan
@@ -614,6 +694,7 @@ menu	Modify	Edita
 	Purge	Elimina
 	Quadrant	Quadrante
 	Query Entities	Interroga entità
+	Query Texts	Interroga testi
 	Quick	Rapida
 	Quick Dimension	Quota rapida
 	Quick Properties	Proprietà rapide
@@ -657,21 +738,31 @@ menu	Modify	Edita
 	Rename Text Style	Rinomina stile di testo
 	Rename...	Rinomina...
 	Repeat {command}	Ripeti {command}
+	Replace	Replace
+	Replace All	Replace All
+	Replace Block...	Sostituisci blocco...
+	Replace with:	Replace with:
+	Replacement text	Replacement text
 	Requires a point (x,y, @dx,dy or @d<a).	Richiede un punto (x,y, @dx,dy o @d<a).
 	Reset keeps the interface language.	Il ripristino conserva la lingua dell'interfaccia.
 	Reset Palettes	Reimposta tavolozze
 	Reset Panel Layout	Reimposta disposizione pannelli
 	Reset to Defaults	Ripristina predefiniti
 	Restore Layer State	Ripristina stato layer
+	Results	Results
 	Reverse zoom direction	Inverti la direzione dello zoom
 	Revision Cloud	Nuvola di revisione
 	Revolve	Rivoluzione
 	Run Script...	Esegui script...
 	S	S
 	Save (⌘S)	Salva (⌘S)
+	Save alias	Salva alias
 	Save As...	Salva con nome...
+	Save Block	Salva blocco
+	Save Block As	Salva blocco con nome
 	Save Layer State	Salva stato layer
 	Save new drawings as	Salva i nuovi disegni come
+	Save Reference Edits	Salva modifiche al riferimento
 	Save State	Salva stato
 	Saved Path	Percorso salvato
 	Scale List...	Elenco scale...
@@ -680,6 +771,7 @@ menu	Modify	Edita
 	Search for layer	Cerca layer
 	Search for parameter	Cerca parametro
 	Search for pattern	Cerca modello
+	Searches the current space.	Searches the current space.
 	Second and next points:	Secondo punto e successivi:
 	Select 2D polyline	Selezionare una polilinea 2D
 	Select a 2D polyline.	Selezionare una polilinea 2D.
@@ -704,8 +796,8 @@ menu	Modify	Edita
 	Select an arc or circle	Selezionare un arco o un cerchio
 	Select an arc.	Selezionare un arco.
 	Select an object	Selezionare un oggetto
-	Select an object to change or	Selezionare l'oggetto da modificare o
-	Select an object to measure or	Selezionare l'oggetto da misurare o
+	Select an object to change	Selezionare l'oggetto da modificare
+	Select an object to measure	Selezionare l'oggetto da misurare
 	Select an object.	Selezionare un oggetto.
 	Select an open curve.	Selezionare una curva aperta.
 	Select an open line, arc, polyline, ellipse arc or spline.	Selezionare una linea, un arco, una polilinea, un arco ellittico o una spline aperti.
@@ -714,14 +806,14 @@ menu	Modify	Edita
 	Select arc style	Selezionare lo stile dell'arco
 	Select arc, circle, line	Selezionare arco, cerchio, linea
 	Select at least two objects to join.	Selezionare almeno due oggetti da unire.
+	Select boundaries to remove	Selezionare i contorni da rimuovere
 	Select circle or arc to add center mark	Selezionare il cerchio o l'arco a cui aggiungere il segno di centro
 	Select closed objects (regions, closed polylines, circles).	Selezionare oggetti chiusi (regioni, polilinee chiuse, cerchi).
 	Select first line	Selezionare la prima linea
 	Select first line or arc	Selezionare la prima linea o il primo arco
 	Select first object	Selezionare il primo oggetto
-	Select first object or	Selezionare il primo oggetto o
 	Select first point	Selezionare il primo punto
-	Select nested objects to copy or	Selezionare gli oggetti nidificati da copiare o
+	Select nested objects to copy	Selezionare gli oggetti nidificati da copiare
 	Select object	Selezionare l'oggetto
 	Select object to dimension	Selezionare l'oggetto da quotare
 	Select object to divide	Selezionare l'oggetto da dividere
@@ -738,7 +830,7 @@ menu	Modify	Edita
 	Select one polyline (Multiple is available through the JSON form).	Selezionare una polilinea (Multiple è disponibile tramite il modulo JSON).
 	Select path curve	Selezionare la curva della traiettoria
 	Select point or object	Selezionare un punto o un oggetto
-	Select polyline or	Selezionare la polilinea o
+	Select polyline	Selezionare la polilinea
 	Select second line	Selezionare la seconda linea
 	Select second line or shift-select to apply corner	Selezionare la seconda linea o selezionare con Maiusc per applicare l'angolo
 	Select second object	Selezionare il secondo oggetto
@@ -748,7 +840,14 @@ menu	Modify	Edita
 	Select spline	Selezionare la spline
 	Select symmetry line	Selezionare la linea di simmetria
 	Select two points	Selezionare due punti
+	Select using two clicks only	Seleziona solo con due clic
+	Selection Area Effect	Effetto area di selezione
+	Selection area opacity:	Opacità area di selezione:
 	Selection Cycling	Ciclo di selezione
+	Selection effect color	Colore effetto di selezione
+	Selection modes	Modalità di selezione
+	Selection preview	Anteprima di selezione
+	Selection Preview Filter	Filtro anteprima di selezione
 	Send Hatches to Back	Porta i tratteggi in secondo piano
 	Send to Back	Porta in secondo piano
 	Send Under Objects	Porta sotto gli oggetti
@@ -756,6 +855,7 @@ menu	Modify	Edita
 	Set Current Dimension Style	Imposta stile di quota corrente
 	Set Current Text Style	Imposta stile di testo corrente
 	Set Current Viewport	Imposta finestra corrente
+	Set Dynamic Property	Imposta proprietà dinamica
 	Set Layer Properties	Imposta proprietà layer
 	Set Properties	Imposta proprietà
 	Set Table Cell	Imposta cella tabella
@@ -763,12 +863,13 @@ menu	Modify	Edita
 	Set Variable	Imposta variabile
 	Set View	Imposta vista
 	Settings...	Impostazioni...
-	Shape	Shape
+	Sheet Books to PDF...	Raccolte di fogli in PDF...
 	Show All Constraint Bars	Mostra tutte le barre dei vincoli
 	Show All Dynamic Dimensions	Mostra tutte le quote dinamiche
 	Show and hide the tools of this category	Mostra e nascondi gli strumenti di questa categoria
 	Show Annotative Objects	Mostra oggetti annotativi
 	Show command prompting near the crosshairs	Mostra i messaggi dei comandi vicino al cursore
+	Show grips	Mostra grip
 	Show in Tool Sets	Mostra nei set di strumenti
 	Show Layer List	Mostra elenco layer
 	Show Quick Properties for selected objects	Mostra le proprietà rapide degli oggetti selezionati
@@ -790,6 +891,7 @@ menu	Modify	Edita
 	Snap, grid, polar tracking and Dynamic Input:	Snap, griglia, puntamento polare e input dinamico:
 	Solid	Solido
 	Solid Editing	Modifica solidi
+	Specified origin	Origine specificata
 	Specify a point	Specificare un punto
 	Specify a scale for the hatch pattern	Specificare la scala del modello di tratteggio
 	Specify a second extension line origin	Specificare l'origine della seconda linea di estensione
@@ -804,9 +906,8 @@ menu	Modify	Edita
 	Specify axis endpoint of ellipse	Specificare l'estremo dell'asse dell'ellisse
 	Specify base diameter	Specificare il diametro di base
 	Specify base point	Specificare il punto base
-	Specify base point or	Specificare il punto base o
 	Specify base point or displacement (drag with the middle mouse button for realtime pan)	Specificare il punto base o lo spostamento (trascinare con il tasto centrale del mouse per il pan in tempo reale)
-	Specify base radius or	Specificare il raggio di base o
+	Specify base radius	Specificare il raggio di base
 	Specify center of donut	Specificare il centro dell'anello
 	Specify center of ellipse	Specificare il centro dell'ellisse
 	Specify center of polygon	Specificare il centro del poligono
@@ -848,7 +949,7 @@ menu	Modify	Edita
 	Specify first point on circle: _tan to	Specificare il primo punto sul cerchio: _tan a
 	Specify first source point	Specificare il primo punto di origine
 	Specify height	Specificare l'altezza
-	Specify helix height or	Specificare l'altezza dell'elica o
+	Specify helix height	Specificare l'altezza dell'elica
 	Specify included angle	Specificare l'angolo compreso
 	Specify insertion base point	Specificare il punto base di inserimento
 	Specify insertion point	Specificare il punto di inserimento
@@ -867,7 +968,6 @@ menu	Modify	Edita
 	Specify new width for all segments	Specificare la nuova larghezza di tutti i segmenti
 	Specify next point	Specificare il punto successivo
 	Specify offset distance	Specificare la distanza di offset
-	Specify offset distance or	Specificare la distanza di offset o
 	Specify opposite corner	Specificare l'angolo opposto
 	Specify other corner point	Specificare l'altro angolo
 	Specify other endpoint of axis	Specificare l'altro estremo dell'asse
@@ -880,7 +980,6 @@ menu	Modify	Edita
 	Specify radius of circle	Specificare il raggio del cerchio
 	Specify rotation angle	Specificare l'angolo di rotazione
 	Specify rotation angle of text	Specificare l'angolo di rotazione del testo
-	Specify rotation angle or	Specificare l'angolo di rotazione o
 	Specify scale factor	Specificare il fattore di scala
 	Specify second angle endpoint	Specificare il secondo estremo dell'angolo
 	Specify second break point	Specificare il secondo punto di interruzione
@@ -913,11 +1012,12 @@ menu	Modify	Edita
 	Specify third source point or <continue>	Specificare il terzo punto di origine o <continua>
 	Specify through point	Specificare il punto di passaggio
 	Specify top diameter	Specificare il diametro superiore
-	Specify top radius or	Specificare il raggio superiore o
+	Specify top radius	Specificare il raggio superiore
 	Specify total angle	Specificare l'angolo totale
-	Specify total length or	Specificare la lunghezza totale o
+	Specify total length	Specificare la lunghezza totale
 	Specify width for rectangles	Specificare la larghezza dei rettangoli
 	Sphere	Sfera
+	Spherical	Sferica
 	Spline	Spline
 	Spline Edit	Edita spline
 	Stack (type 1/2 then select)	Sovrapponi (digitare 1/2, poi selezionare)
@@ -948,11 +1048,11 @@ menu	Modify	Edita
 	Table Cell Style	Stile cella tabella
 	Table Style...	Stile tabella...
 	Table...	Tabella...
-	Tables	Tables
 	Tan, Tan, Radius	Tan, tan, raggio
 	Tan, Tan, Tan	Tan, tan, tan
 	Tangent	Tangente
 	Temporary track point	Punto di puntamento temporaneo
+	Text color	Colore del testo
 	Text Editor	Editor di testo
 	Text Height	Altezza testo
 	Text height	Altezza testo
@@ -960,11 +1060,13 @@ menu	Modify	Edita
 	Text override	Sostituzione testo
 	Text style	Stile di testo
 	Text Style...	Stile di testo...
+	Text to find	Text to find
 	Thaw All Layers	Scongela tutti i layer
 	Thaw Layer	Scongela layer
 	The aperture is how near the cursor must come to a point for an object snap to find it.	L'apertura è la distanza entro cui il cursore deve avvicinarsi a un punto perché lo snap ad oggetto lo trovi.
 	There is nothing here yet.	Qui non c'è ancora niente.
 	Thickness	Altezza oggetto
+	This drawing	Questo disegno
 	Time	Tempo
 	Time-sensitive right-click: a quick click is Enter, holding opens the menu	Clic destro temporizzato: un clic rapido equivale a Invio, tenendo premuto si apre il menu
 	To get started, create or open a drawing.	Per iniziare, crea o apri un disegno.
@@ -974,6 +1076,8 @@ menu	Modify	Edita
 	Tool Bar	Barra degli strumenti
 	Tool Sets	Set di strumenti
 	TOP	ALTO
+	Top left	In alto a sinistra
+	Top right	In alto a destra
 	Torus	Toro
 	Trace	Traccia
 	Track orthogonally only	Puntamento solo ortogonale
@@ -986,6 +1090,7 @@ menu	Modify	Edita
 	Turn Quick Properties off (QPMODE)	Disattiva le proprietà rapide (QPMODE)
 	Turned off, a right-click while a command runs always opens the shortcut menu.	Se disattivato, un clic destro durante un comando apre sempre il menu di scelta rapida.
 	Type a command	Digitare un comando
+	Type an alias name.	Digitare un nome di alias.
 	Type text; Enter starts a new paragraph	Digitare il testo; Invio inizia un nuovo paragrafo
 	UCS Icon	Icona UCS
 	Undo (⌘Z)	Annulla (⌘Z)
@@ -1002,6 +1107,7 @@ menu	Modify	Edita
 	Unresolved	Non risolto
 	Unsaved Layer State	Stato layer non salvato
 	Update Data Links	Aggiorna collegamenti dati
+	Use current origin	Usa l'origine corrente
 	Use for this layout	Usa per questo layout
 	Use object linetype	Usa tipo di linea dell'oggetto
 	Use object lineweight	Usa spessore di linea dell'oggetto
@@ -1025,16 +1131,27 @@ menu	View	Visualizza
 	Viewport scale	Scala finestra
 	Viewport {id}	Finestra {id}
 	Viewports	Finestre
+	Visual Effect Settings	Impostazioni effetti visivi
+	Visual Effect Settings...	Impostazioni effetti visivi...
 	Volume	Volume
 	VP Color	Colore FV
 	VP Freeze	Congela FV
 	W	O
-	WCS ⌄	WCS ⌄
+	WCS	WCS
+	When a command is active	Quando un comando è attivo
+	When no command is active	Quando nessun comando è attivo
+	Whole words	Whole words
 	Width factor	Fattore di larghezza
+	Window selection color:	Colore selezione finestra:
 	Wipeout	Copertura
+	Working Set	Set di lavoro
 	Workspace Switching	Cambio area di lavoro
 	Write Block	Scrivi blocco
 	Xline	Xlinea
+	Xref and Block In-place Editing	Modifica sul posto di xrif e blocchi
+	Xref Clip Frame	Cornice ritaglio xrif
+	Xrefs	Xrif
+	Your changes will be lost if you don't save them.	Your changes will be lost if you don't save them.
 	Zoom	Zoom
 	Zoom All	Zoom tutto
 	Zoom Dynamic	Zoom dinamico
@@ -1044,6 +1161,8 @@ menu	View	Visualizza
 	Zoom Realtime	Zoom in tempo reale
 	Zoom sensitivity	Sensibilità dello zoom
 	Zoom Window	Zoom finestra
+	{alias} is already defined; select it and use Edit.	{alias} è già definito; selezionarlo e usare Modifica.
+	{command} is an unknown command.	{command} è un comando sconosciuto.
 	{contributors} · {commits}	{contributors} · {commits}
 	{kind} (constraint {id})	{kind} (vincolo {id})
 	{kind} constraint {name} = {expression}  (double-click to edit)	Vincolo {kind} {name} = {expression}  (doppio clic per modificare)

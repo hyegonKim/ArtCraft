@@ -19,6 +19,7 @@ pub const RESERVED: &[&str] = &["@plural", "@id", "@msg"];
 
 /// Read a catalog whose locale has `forms` plural forms. Returns the rows that pass, and one
 /// problem (`line N: …`) per row that doesn't; a bad row is left out.
+#[must_use]
 pub fn read_catalog(text: &str, forms: usize) -> (Vec<Row>, Vec<String>) {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let mut rows = Vec::new();
