@@ -412,7 +412,11 @@ fn run_extract_ai_text(s: &mut Session, p: &Value) -> Result<Value> {
             "text": joined.join("\n"),
         }));
     }
-    let doc = &s.doc()?.doc;
+    // Enabled without a document, since a `path` needs none: with neither, say what to give.
+    let Some(state) = s.active() else {
+        return Err(bad(C, "give a `path`, or open a document to read the active one"));
+    };
+    let doc = &state.doc;
     let stories = collect_stories(doc);
     let joined: Vec<&str> = stories.iter().filter_map(|st| st["text"].as_str()).collect();
     Ok(json!({

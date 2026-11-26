@@ -177,8 +177,9 @@ fn lighting_tab_shows_light_fields_and_keeps_the_dialog_compact() {
     }
     let panel = h.ctx.memory(|m| m.area_rect(Id::unique(("dialog", "effect")).with("revolve"))).unwrap();
     // The Shadows switch adds one 28-point row to the 570-point bound; its settings show only
-    // while it is on.
-    assert!(panel.width() < 420.0 && panel.height() < 600.0, "compact lighting controls with light management: {panel:?}");
+    // while it is on. The Ray Tracing switch and its Ambient Occlusion row add two more rows and
+    // 6 points of space above them.
+    assert!(panel.width() < 420.0 && panel.height() < 660.0, "compact lighting controls with light management: {panel:?}");
     h.drag(h.rect("Height").center(), vec2(24.0, 0.0));
     assert_ne!(h.value("lightHeight"), 30.0);
     h.click(h.response(("revolve-reset", "lightHeight")).center());

@@ -107,13 +107,13 @@ impl<'a> Unpacked<'a> {
             if n == 0 || nul.is_some_and(|z| buf.len() >= z + BLOB_MAGIC.len()) {
                 break;
             }
-            if buf.len() as u64 > MAX_JSON + CHUNK {
+            if buf.len() as u64 > max_json.saturating_add(CHUNK) {
                 return Err(FormatError::TooBig);
             }
         }
         if nul.is_none() {
             // No NUL, so no marker: all of it is JSON.
-            if buf.len() as u64 > MAX_JSON {
+            if buf.len() as u64 > max_json {
                 return Err(FormatError::TooBig);
             }
             return Ok((Json::Owned(buf), Tail::None));
@@ -137,6 +137,9 @@ impl<'a> Unpacked<'a> {
         }
         let (json, tail) = split_tail(&buf);
         let (json, tail) = (json.len(), buf.len() - tail.len());
+        if json as u64 > max_json {
+            return Err(FormatError::TooBig);
+        }
         Ok((Json::Whole { buf, json }, Tail::Whole(tail)))
     }
 

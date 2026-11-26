@@ -431,10 +431,11 @@ fn eval(f: &Filter, k: f64) -> Option<V> {
 }
 
 /// A plain SourceGraphic Gaussian can keep both axes without changing any filter graph.
-fn single_gaussian(filter: &Filter) -> Option<(f64, f64)> {
+fn single_gaussian(filter: &Filter) -> Option<(f64, f64, bool)> {
     let [primitive] = filter.primitives() else { return None };
     let Kind::GaussianBlur(blur) = primitive.kind() else { return None };
-    matches!(blur.input(), Input::SourceGraphic).then(|| (blur.std_dev_x().get() as f64, blur.std_dev_y().get() as f64))
+    let linear = primitive.color_interpolation() == ColorInterpolation::LinearRGB;
+    matches!(blur.input(), Input::SourceGraphic).then(|| (blur.std_dev_x().get() as f64, blur.std_dev_y().get() as f64, linear))
 }
 
 /// Diagonal entries of A diag(sx², sy²) Aᵀ when the transformed Gaussian remains axis-aligned.
@@ -457,7 +458,7 @@ pub(super) fn approximates(filters: &[Arc<Filter>], ts: Affine) -> bool {
     let [a, b, c, d, _, _] = ts.as_coeffs();
     let conformal = (a * a + b * b - c * c - d * d).abs() < 1e-8 && (a * c + b * d).abs() < 1e-8;
     filters.iter().any(|filter| {
-        if let Some((sx, sy)) = single_gaussian(filter) {
+        if let Some((sx, sy, _)) = single_gaussian(filter) {
             return gaussian_axes(ts, sx, sy).is_none();
         }
         filter.primitives().iter().any(|primitive| {
@@ -481,17 +482,21 @@ pub(super) fn effects(filters: &[Arc<Filter>], ts: Affine, blends: &HashMap<Stri
     let num = |v: f64| (v * 1000.0).round() / 1000.0;
     let mut out = vec![];
     for f in filters {
-        if let Some((sx, sy)) = single_gaussian(f).and_then(|(x, y)| gaussian_axes(ts, x, y)) {
+        if let Some((sx, sy, linear)) = single_gaussian(f).and_then(|(x, y, linear)| gaussian_axes(ts, x, y).map(|(sx, sy)| (sx, sy, linear))) {
             let (x, y) = (num(2.0 * sx), num(2.0 * sy));
             let radius = x.max(y);
             if radius <= 0.0 {
                 continue;
             }
-            let params = if (x - y).abs() < 1e-6 {
+            let mut params = if (x - y).abs() < 1e-6 {
                 json!({"radius": radius})
             } else {
                 json!({"radius": radius, "anisotropyX": x / radius, "anisotropyY": y / radius})
             };
+            // SVG blurs in linear light unless the filter asks for sRGB (`color-interpolation-filters`).
+            if linear {
+                params["linear"] = json!(true);
+            }
             out.push(Effect { id: "blur.gaussian".into(), params, visible: true });
             continue;
         }

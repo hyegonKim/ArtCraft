@@ -286,6 +286,11 @@ fn run_turntable(s: &mut Session, p: &Value) -> Result<Value> {
         None => selected_roots(s)?,
     };
     let st = s.doc()?;
+    // The turntable goes beside its art, or wraps it: beside or around a layer it would sit at
+    // the top level, where only layers belong.
+    if let Some(layer) = roots.iter().find(|id| st.doc.node(**id).is_some_and(|n| n.is_layer())) {
+        return Err(bad(CMD, format!("{layer} is a layer: give the objects in it")));
+    }
     let orig_bounds = st.doc.bounds_of(&roots, true).ok_or_else(|| bad(CMD, "the selection has no bounds"))?;
     if orig_bounds.width() <= 0.0 && orig_bounds.height() <= 0.0 {
         return Err(bad(CMD, "the selection has no area"));
