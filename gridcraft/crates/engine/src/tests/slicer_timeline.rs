@@ -69,12 +69,7 @@ fn pivot_slicer_filters_placed_and_unplaced_fields_with_undo_redo() {
             }),
         )
         .unwrap();
-    let ids: Vec<u32> = res["slicers"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|x| x.as_u64().unwrap() as u32)
-        .collect();
+    let ids: Vec<u32> = res["slicers"].as_array().unwrap().iter().map(|x| x.as_u64().unwrap() as u32).collect();
     assert_eq!(ids.len(), 2);
     let (reg_slicer, cat_slicer) = (ids[0], ids[1]);
 
@@ -83,11 +78,7 @@ fn pivot_slicer_filters_placed_and_unplaced_fields_with_undo_redo() {
     assert_eq!(grand_total(&s), 150.0);
 
     // Enable `multiSelect` on Region slicer and toggle West in -> East + West = 350.
-    s.execute(
-        "slicer.update",
-        json!({"slicer": reg_slicer, "multiSelect": true, "columns": 2, "caption": "Sales Regions"}),
-    )
-    .unwrap();
+    s.execute("slicer.update", json!({"slicer": reg_slicer, "multiSelect": true, "columns": 2, "caption": "Sales Regions"})).unwrap();
     s.execute("slicer.toggle", json!({"slicer": reg_slicer, "value": "West"})).unwrap();
     assert_eq!(grand_total(&s), 350.0);
 
@@ -185,19 +176,11 @@ fn timeline_filters_pivot_across_years_quarters_months_days_with_undo_redo_and_x
 
     // Filter to Q1 2024 (2024-01-01 .. 2024-03-31) -> 100 + 150 = 250.
     s.execute("timeline.setLevel", json!({"timeline": tl_id, "level": "quarters"})).unwrap();
-    s.execute(
-        "timeline.setRange",
-        json!({"timeline": tl_id, "start": "2024-01-01", "end": "2024-03-31"}),
-    )
-    .unwrap();
+    s.execute("timeline.setRange", json!({"timeline": tl_id, "start": "2024-01-01", "end": "2024-03-31"})).unwrap();
     assert_eq!(grand_total(&s), 250.0);
 
     // Filter to single month May 2024 -> 200.
-    s.execute(
-        "timeline.setRange",
-        json!({"timeline": tl_id, "start": "2024-05-01", "end": "2024-05-31"}),
-    )
-    .unwrap();
+    s.execute("timeline.setRange", json!({"timeline": tl_id, "start": "2024-05-01", "end": "2024-05-31"})).unwrap();
     assert_eq!(grand_total(&s), 200.0);
 
     // Undo -> back to Q1 2024 (250); Redo -> back to May 2024 (200).

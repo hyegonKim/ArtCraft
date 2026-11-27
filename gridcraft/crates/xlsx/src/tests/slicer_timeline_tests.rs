@@ -1,7 +1,7 @@
 use gridcraft_core::{CellRef, RangeRef, Value};
 use gridcraft_model::{
-    Anchor, AnchorMode, Cell, PivotDateFilter, PivotField, PivotFilter, PivotFunc, PivotTable,
-    PivotValue, Slicer, Table, TableColumn, Timeline, TimelineLevel, TotalsFn, Workbook,
+    Anchor, AnchorMode, Cell, PivotDateFilter, PivotField, PivotFilter, PivotFunc, PivotTable, PivotValue, Slicer, Table, TableColumn, Timeline,
+    TimelineLevel, TotalsFn, Workbook,
 };
 
 use crate::{read_xlsx, write_xlsx};
@@ -43,22 +43,8 @@ fn table_slicer_roundtrips_through_xlsx() {
             header_row: true,
             totals_row: false,
             columns: vec![
-                TableColumn {
-                    name: "Region".into(),
-                    totals: TotalsFn::None,
-                    totals_label: None,
-                    formula: None,
-                    unique_name: None,
-                    xml: None,
-                },
-                TableColumn {
-                    name: "Amount".into(),
-                    totals: TotalsFn::None,
-                    totals_label: None,
-                    formula: None,
-                    unique_name: None,
-                    xml: None,
-                },
+                TableColumn { name: "Region".into(), totals: TotalsFn::None, totals_label: None, formula: None, unique_name: None, xml: None },
+                TableColumn { name: "Amount".into(), totals: TotalsFn::None, totals_label: None, formula: None, unique_name: None, xml: None },
             ],
             style: "TableStyleMedium2".into(),
             banded_rows: true,
@@ -77,14 +63,7 @@ fn table_slicer_roundtrips_through_xlsx() {
             pivots: vec![],
             column: "Region".into(),
             caption: "Filter Region".into(),
-            anchor: Anchor {
-                cell: CellRef::parse("D2").unwrap(),
-                dx: 6.0,
-                dy: 8.0,
-                width: 180.0,
-                height: 210.0,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: CellRef::parse("D2").unwrap(), dx: 6.0, dy: 8.0, width: 180.0, height: 210.0, mode: AnchorMode::MoveOnly },
             selected: Some(vec!["East".into(), "North".into()]),
             columns: 2,
             multi_select: true,
@@ -120,13 +99,8 @@ fn pivot_slicer_and_timeline_roundtrip_through_xlsx() {
     let mut wb = Workbook::new();
     {
         let sh = wb.sheet_mut(0).unwrap();
-        for (r, (dt, reg, amt)) in [
-            ("2024-01-15", "East", 100.0),
-            ("2024-04-20", "West", 250.0),
-            ("2024-08-10", "North", 400.0),
-        ]
-        .into_iter()
-        .enumerate()
+        for (r, (dt, reg, amt)) in
+            [("2024-01-15", "East", 100.0), ("2024-04-20", "West", 250.0), ("2024-08-10", "North", 400.0)].into_iter().enumerate()
         {
             if r == 0 {
                 sh.cells.set(CellRef::new(0, 0), Cell::value(Value::text("OrderDate")));
@@ -146,16 +120,8 @@ fn pivot_slicer_and_timeline_roundtrip_through_xlsx() {
             anchor: CellRef::parse("E2").unwrap(),
             rows: vec![PivotField { source_col: "Region".into(), ..PivotField::default() }],
             columns: vec![],
-            values: vec![PivotValue {
-                source_col: "Sales".into(),
-                func: PivotFunc::Sum,
-                name: "Sum of Sales".into(),
-                ..PivotValue::default()
-            }],
-            filters: vec![PivotFilter {
-                source_col: "Region".into(),
-                selected: Some(vec!["East".into(), "North".into()]),
-            }],
+            values: vec![PivotValue { source_col: "Sales".into(), func: PivotFunc::Sum, name: "Sum of Sales".into(), ..PivotValue::default() }],
+            filters: vec![PivotFilter { source_col: "Region".into(), selected: Some(vec!["East".into(), "North".into()]) }],
             date_filters: vec![PivotDateFilter {
                 source_col: "OrderDate".into(),
                 start_date: Some("2024-01-01".into()),
@@ -172,14 +138,7 @@ fn pivot_slicer_and_timeline_roundtrip_through_xlsx() {
             pivots: vec!["SalesPivot".into()],
             column: "Region".into(),
             caption: "Sales Region".into(),
-            anchor: Anchor {
-                cell: CellRef::parse("H2").unwrap(),
-                dx: 4.0,
-                dy: 4.0,
-                width: 172.0,
-                height: 196.0,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: CellRef::parse("H2").unwrap(), dx: 4.0, dy: 4.0, width: 172.0, height: 196.0, mode: AnchorMode::MoveOnly },
             selected: Some(vec!["East".into(), "North".into()]),
             columns: 1,
             multi_select: true,
@@ -196,14 +155,7 @@ fn pivot_slicer_and_timeline_roundtrip_through_xlsx() {
             start_date: Some("2024-01-01".into()),
             end_date: Some("2024-06-30".into()),
             style: "TimeSlicerStyleLight2".into(),
-            anchor: Anchor {
-                cell: CellRef::parse("K2").unwrap(),
-                dx: 4.0,
-                dy: 4.0,
-                width: 320.0,
-                height: 108.0,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: CellRef::parse("K2").unwrap(), dx: 4.0, dy: 4.0, width: 320.0, height: 108.0, mode: AnchorMode::MoveOnly },
         });
     }
 
@@ -247,17 +199,7 @@ fn pivot_slicer_and_timeline_roundtrip_through_xlsx() {
     let pt = &sh.pivots[0];
     assert_eq!(
         pt.date_filters,
-        vec![PivotDateFilter {
-            source_col: "OrderDate".into(),
-            start_date: Some("2024-01-01".into()),
-            end_date: Some("2024-06-30".into()),
-        }]
+        vec![PivotDateFilter { source_col: "OrderDate".into(), start_date: Some("2024-01-01".into()), end_date: Some("2024-06-30".into()) }]
     );
-    assert_eq!(
-        pt.filters,
-        vec![PivotFilter {
-            source_col: "Region".into(),
-            selected: Some(vec!["East".into(), "North".into()]),
-        }]
-    );
+    assert_eq!(pt.filters, vec![PivotFilter { source_col: "Region".into(), selected: Some(vec!["East".into(), "North".into()]) }]);
 }

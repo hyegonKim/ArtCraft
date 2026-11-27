@@ -964,15 +964,8 @@ pub enum ObjKind {
 }
 
 impl ObjKind {
-    pub const ALL: [ObjKind; 7] = [
-        ObjKind::Chart,
-        ObjKind::Image,
-        ObjKind::Shape,
-        ObjKind::Timeline,
-        ObjKind::Slicer,
-        ObjKind::Equation,
-        ObjKind::Control,
-    ];
+    pub const ALL: [ObjKind; 7] =
+        [ObjKind::Chart, ObjKind::Image, ObjKind::Shape, ObjKind::Timeline, ObjKind::Slicer, ObjKind::Equation, ObjKind::Control];
 
     /// The name used in command parameters.
     pub fn name(self) -> &'static str {
@@ -1189,12 +1182,7 @@ pub enum TimelineLevel {
 }
 
 impl TimelineLevel {
-    pub const ALL: [TimelineLevel; 4] = [
-        TimelineLevel::Years,
-        TimelineLevel::Quarters,
-        TimelineLevel::Months,
-        TimelineLevel::Days,
-    ];
+    pub const ALL: [TimelineLevel; 4] = [TimelineLevel::Years, TimelineLevel::Quarters, TimelineLevel::Months, TimelineLevel::Days];
 
     /// Command parameter spelling (`years`, `quarters`, `months`, `days`).
     pub fn as_str(self) -> &'static str {

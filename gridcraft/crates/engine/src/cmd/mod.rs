@@ -4,6 +4,7 @@
 pub mod analysis;
 pub mod controls;
 pub mod data;
+pub mod data_merge;
 pub mod draw;
 pub mod edit;
 pub mod equation;
@@ -170,6 +171,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(controls::specs());
         v.extend(equation::specs());
         v.extend(data::specs());
+        v.extend(data_merge::specs());
         v.extend(formulas::specs());
         v.extend(review::specs());
         v.extend(view::specs());

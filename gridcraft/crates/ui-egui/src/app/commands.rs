@@ -96,6 +96,21 @@ impl SheetApp {
         {
             self.deliver_pdf(r);
         }
+        if matches!(id, "dataMerge.exportIndesignCsv" | "dataMerge.exportIllustratorXml")
+            && let Ok(r) = &r
+            && r.get("path").is_none()
+            && let Some(dl) = &self.services.download
+            && let Some(bytes) = r.get("base64").and_then(Json::as_str).and_then(gridcraft_engine::io::base64_decode)
+        {
+            let ext = if id == "dataMerge.exportIndesignCsv" { "csv" } else { "xml" };
+            let stem = self
+                .session
+                .active()
+                .map(|d| d.display_title())
+                .and_then(|t| std::path::Path::new(&t).file_stem().and_then(std::ffi::OsStr::to_str).map(str::to_owned))
+                .unwrap_or_else(|| "DataMerge".into());
+            dl(&format!("{stem}.{ext}"), &bytes);
+        }
         // The scan stopped at its cell allowance: say that some cells were not checked.
         if id == "data.circleInvalid"
             && let Ok(r) = &r
@@ -146,6 +161,19 @@ impl SheetApp {
             && crate::dialogs::can_open_timeline_dialog(self, &params)
         {
             return self.open_dialog("insertTimeline", params);
+        }
+        if let Some(dlg) = match id {
+            "dataMerge.exportIndesignCsv" if params.as_object().is_some_and(serde_json::Map::is_empty) => Some("exportIndesignCsv"),
+            "dataMerge.importIndesignCsv" if ["path", "base64", "csv", "text"].iter().all(|k| params.get(*k).is_none_or(Json::is_null)) => {
+                Some("importIndesignCsv")
+            }
+            "dataMerge.exportIllustratorXml" if params.as_object().is_some_and(serde_json::Map::is_empty) => Some("exportIllustratorXml"),
+            "dataMerge.importIllustratorXml" if ["path", "base64", "xml", "text"].iter().all(|k| params.get(*k).is_none_or(Json::is_null)) => {
+                Some("importIllustratorXml")
+            }
+            _ => None,
+        } {
+            return self.open_dialog(dlg, params);
         }
         // Switch Windows with no window named (key tip, command search) opens the View tab's
         // list to choose from; programmatic callers of `run` get the list back.

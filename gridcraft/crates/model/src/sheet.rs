@@ -963,12 +963,8 @@ mod tests {
                 format: ShapeFormat::default(),
                 math: EquationCache::default(),
             }),
-            ObjKind::Timeline => {
-                s.timelines.push(Timeline { id, anchor, ..Timeline::default() })
-            }
-            ObjKind::Slicer => {
-                s.slicers.push(Slicer { id, anchor, ..Slicer::default() })
-            }
+            ObjKind::Timeline => s.timelines.push(Timeline { id, anchor, ..Timeline::default() }),
+            ObjKind::Slicer => s.slicers.push(Slicer { id, anchor, ..Slicer::default() }),
             ObjKind::Control => s.controls.push(FormControl { id, anchor, ..Default::default() }),
         }
     }
@@ -1015,17 +1011,10 @@ mod tests {
         // The sequence is the documented one (charts, images, shapes, timelines, slicers, controls, each in
         // insertion order; equations are shapes) and every object appears in it once.
         let collection = |k: ObjKind| if k == ObjKind::Equation { ObjKind::Shape } else { k };
-        let documented: Vec<u32> = [
-            ObjKind::Chart,
-            ObjKind::Image,
-            ObjKind::Shape,
-            ObjKind::Timeline,
-            ObjKind::Slicer,
-            ObjKind::Control,
-        ]
-        .iter()
-        .flat_map(|&k| inserted.iter().filter(move |(kind, _)| collection(*kind) == k).map(|&(_, id)| id))
-        .collect();
+        let documented: Vec<u32> = [ObjKind::Chart, ObjKind::Image, ObjKind::Shape, ObjKind::Timeline, ObjKind::Slicer, ObjKind::Control]
+            .iter()
+            .flat_map(|&k| inserted.iter().filter(move |(kind, _)| collection(*kind) == k).map(|&(_, id)| id))
+            .collect();
         let visited: Vec<u32> = s.object_anchors().map(|a| a.cell.row).collect();
         assert_eq!(visited, documented);
         // The mark written through the bulk accessor landed on the object `object_anchor` finds

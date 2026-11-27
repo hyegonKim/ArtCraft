@@ -45,10 +45,20 @@ const DENIED: &[(&str, &str)] = &[
 const ALLOWED: &[&str] = &["file.properties"];
 
 /// Commands that read a file when given a `path`.
-const READS_FILES: &[&str] = &["data.getData", "data.fromTextCsv", "insert.picture", "pageLayout.background"];
+const READS_FILES: &[&str] =
+    &["data.getData", "data.fromTextCsv", "dataMerge.importIndesignCsv", "dataMerge.importIllustratorXml", "insert.picture", "pageLayout.background"];
 
 /// File commands that only produce bytes unless given a `path` (then they write a file).
-const EXPORTS: &[&str] = &["file.exportPdf", "file.exportCsv", "file.exportHtml", "file.print", "file.printPreview", "file.saveBytes"];
+const EXPORTS: &[&str] = &[
+    "file.exportPdf",
+    "file.exportCsv",
+    "file.exportHtml",
+    "file.print",
+    "file.printPreview",
+    "file.saveBytes",
+    "dataMerge.exportIndesignCsv",
+    "dataMerge.exportIllustratorXml",
+];
 
 /// Whether command `id` with `params` writes a file (an export or print given a `path`).
 pub fn writes_file(id: &str, params: &Json) -> bool {

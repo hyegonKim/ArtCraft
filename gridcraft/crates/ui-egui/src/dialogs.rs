@@ -1109,6 +1109,80 @@ impl Dialog {
             "pickList" => Dialog::custom("pickList", "Pick From List", json!({})),
             "insertSlicer" => open_insert_slicer_dialog(app, &params),
             "insertTimeline" => open_insert_timeline_dialog(app, &params),
+            "exportIndesignCsv" => {
+                let default_range = data_merge_default_range(app, &sel);
+                Dialog::form(
+                    "exportIndesignCsv",
+                    "Export InDesign Data Merge CSV",
+                    "dataMerge.exportIndesignCsv",
+                    vec![
+                        Ref { key: "range", label: "Source range:" },
+                        Choice {
+                            key: "encoding",
+                            label: "Encoding",
+                            options: vec![("utf16le", "UTF-16LE with BOM (InDesign CJK)"), ("utf8Bom", "UTF-8 with BOM"), ("utf8", "UTF-8")],
+                        },
+                        Choice { key: "delimiter", label: "Delimiter", options: vec![(",", "Comma (,)"), ("\t", "Tab")] },
+                        Text { key: "imageColumnsText", label: "Image columns (@image, comma-separated):" },
+                        Text { key: "qrColumnsText", label: "QR code columns (#qrcode, comma-separated):" },
+                        Check { key: "sanitizeFormulaInjection", label: "Sanitize spreadsheet formula injection" },
+                        Text { key: "path", label: "Output file path (blank = Browse / Download):" },
+                    ],
+                    json!({
+                        "range": default_range,
+                        "encoding": "utf16le",
+                        "delimiter": ",",
+                        "imageColumnsText": "",
+                        "qrColumnsText": "",
+                        "sanitizeFormulaInjection": false,
+                        "path": "",
+                    }),
+                )
+            }
+            "importIndesignCsv" => Dialog::form(
+                "importIndesignCsv",
+                "Import InDesign Data Merge CSV",
+                "dataMerge.importIndesignCsv",
+                vec![
+                    Text { key: "path", label: "CSV file path (blank = Browse):" },
+                    Ref { key: "at", label: "Destination cell:" },
+                    Check { key: "newSheet", label: "Import into new sheet" },
+                    Check { key: "stripSanitizedQuote", label: "Unescape sanitized formula prefixes" },
+                ],
+                json!({"path": "", "at": active, "newSheet": false, "stripSanitizedQuote": true}),
+            ),
+            "exportIllustratorXml" => {
+                let default_range = data_merge_default_range(app, &sel);
+                Dialog::form(
+                    "exportIllustratorXml",
+                    "Export Illustrator Variables XML",
+                    "dataMerge.exportIllustratorXml",
+                    vec![
+                        Ref { key: "range", label: "Source range:" },
+                        Text { key: "varSetName", label: "Variable set name:" },
+                        Text { key: "dataSetPrefix", label: "Data set prefix:" },
+                        Text { key: "path", label: "Output XML path (blank = Browse / Download):" },
+                    ],
+                    json!({
+                        "range": default_range,
+                        "varSetName": "binding1",
+                        "dataSetPrefix": "Data Set",
+                        "path": "",
+                    }),
+                )
+            }
+            "importIllustratorXml" => Dialog::form(
+                "importIllustratorXml",
+                "Import Illustrator Variables XML",
+                "dataMerge.importIllustratorXml",
+                vec![
+                    Text { key: "path", label: "Illustrator Variables XML path (blank = Browse):" },
+                    Ref { key: "at", label: "Destination cell:" },
+                    Check { key: "newSheet", label: "Import into new sheet" },
+                    Check { key: "includeDataSetName", label: "Include dataSetName column" },
+                ],
+                json!({"path": "", "at": active, "newSheet": false, "includeDataSetName": false}),
+            ),
             "assignAction" => return crate::control_ui::open_assign(app, &params),
             "formatControl" => return crate::control_ui::open_format(app, &params),
             "controlQuestion" => return crate::control_ui::open_question(&params),
@@ -1138,7 +1212,12 @@ impl Dialog {
     }
 }
 
-fn resolve_slicer_dialog_target(wb: &gridcraft_engine::model::Workbook, active_sheet: usize, active: CellRef, params: &Json) -> Option<(bool, String, Vec<String>)> {
+fn resolve_slicer_dialog_target(
+    wb: &gridcraft_engine::model::Workbook,
+    active_sheet: usize,
+    active: CellRef,
+    params: &Json,
+) -> Option<(bool, String, Vec<String>)> {
     if let Some(pname) = params.get("pivot").and_then(Json::as_str).filter(|s| !s.is_empty())
         && let Some((ps, pi)) = wb.pivot(pname)
         && let Some(pt) = wb.sheet(ps).and_then(|s| s.pivots.get(pi))
@@ -1167,7 +1246,12 @@ fn resolve_slicer_dialog_target(wb: &gridcraft_engine::model::Workbook, active_s
     None
 }
 
-fn resolve_timeline_dialog_target(wb: &gridcraft_engine::model::Workbook, active_sheet: usize, active: CellRef, params: &Json) -> Option<(String, Vec<String>)> {
+fn resolve_timeline_dialog_target(
+    wb: &gridcraft_engine::model::Workbook,
+    active_sheet: usize,
+    active: CellRef,
+    params: &Json,
+) -> Option<(String, Vec<String>)> {
     if let Some(pname) = params.get("pivot").and_then(Json::as_str).filter(|s| !s.is_empty())
         && let Some((ps, pi)) = wb.pivot(pname)
         && let Some(pt) = wb.sheet(ps).and_then(|s| s.pivots.get(pi))
@@ -1177,18 +1261,15 @@ fn resolve_timeline_dialog_target(wb: &gridcraft_engine::model::Workbook, active
         return Some((canon, fields));
     }
     let sh = wb.sheet(active_sheet)?;
-    let (ps, pt) = sh
-        .pivot_at(active)
-        .map(|pt| (active_sheet, pt))
-        .or_else(|| {
-            if sh.pivots.len() == 1 {
-                sh.pivots.first().map(|pt| (active_sheet, pt))
-            } else {
-                let mut all = wb.sheets.iter().enumerate().flat_map(|(si, s)| s.pivots.iter().map(move |pt| (si, pt)));
-                let first = all.next()?;
-                all.next().is_none().then_some(first)
-            }
-        })?;
+    let (ps, pt) = sh.pivot_at(active).map(|pt| (active_sheet, pt)).or_else(|| {
+        if sh.pivots.len() == 1 {
+            sh.pivots.first().map(|pt| (active_sheet, pt))
+        } else {
+            let mut all = wb.sheets.iter().enumerate().flat_map(|(si, s)| s.pivots.iter().map(move |pt| (si, pt)));
+            let first = all.next()?;
+            all.next().is_none().then_some(first)
+        }
+    })?;
     let canon = if pt.name.is_empty() { format!("PivotTable{}", pt.id) } else { pt.name.clone() };
     let fields = gridcraft_engine::cmd::slicer::pivot_date_fields(wb, ps, pt);
     Some((canon, fields))
@@ -1209,10 +1290,7 @@ pub(crate) fn can_open_timeline_dialog(app: &SheetApp, params: &Json) -> bool {
 }
 
 fn open_insert_slicer_dialog(app: &SheetApp, params: &Json) -> Dialog {
-    let resolved = app
-        .session
-        .active()
-        .and_then(|d| resolve_slicer_dialog_target(&d.wb, d.wb.active_sheet(), d.selection.active, params));
+    let resolved = app.session.active().and_then(|d| resolve_slicer_dialog_target(&d.wb, d.wb.active_sheet(), d.selection.active, params));
     let mut init = serde_json::Map::new();
     if let Some((is_pivot, target_name, fields)) = resolved {
         init.insert(if is_pivot { "pivot" } else { "table" }.into(), json!(target_name));
@@ -1229,10 +1307,7 @@ fn open_insert_slicer_dialog(app: &SheetApp, params: &Json) -> Dialog {
 }
 
 fn open_insert_timeline_dialog(app: &SheetApp, params: &Json) -> Dialog {
-    let resolved = app
-        .session
-        .active()
-        .and_then(|d| resolve_timeline_dialog_target(&d.wb, d.wb.active_sheet(), d.selection.active, params));
+    let resolved = app.session.active().and_then(|d| resolve_timeline_dialog_target(&d.wb, d.wb.active_sheet(), d.selection.active, params));
     let mut init = serde_json::Map::new();
     if let Some((pivot_name, fields)) = resolved {
         init.insert("pivot".into(), json!(pivot_name));
@@ -1246,6 +1321,20 @@ fn open_insert_timeline_dialog(app: &SheetApp, params: &Json) -> Dialog {
     let mut d = Dialog::custom("insertTimeline", "Insert Timelines", Json::Object(init));
     d.command = Some("insert.timeline");
     d
+}
+
+fn data_merge_default_range(app: &SheetApp, fallback_sel: &str) -> String {
+    app.session
+        .active()
+        .and_then(|d| {
+            let sh = d.wb.active()?;
+            if let Some(t) = sh.table_at(d.selection.active) {
+                return Some(t.data_range().map(|dr| RangeRef::new(t.range.start, dr.end)).unwrap_or(t.range).a1());
+            }
+            let cur = d.selection.current();
+            if !cur.is_single() { Some(cur.a1()) } else { Some(gridcraft_engine::selection::current_region(sh, d.selection.active).a1()) }
+        })
+        .unwrap_or_else(|| fallback_sel.to_owned())
 }
 
 #[cfg(test)]
@@ -1357,5 +1446,38 @@ mod tests {
         let d = Dialog::open(&mut app, "dataValidation", json!({})).unwrap();
         assert_eq!(d.values["type"], "list");
         assert!(d.values.get("formula1").is_none());
+    }
+
+    #[test]
+    fn data_merge_dialogs_open_build_params_and_deliver_downloads() {
+        use std::{cell::RefCell, rc::Rc};
+        let downloaded = Rc::new(RefCell::new(Vec::<(String, Vec<u8>)>::new()));
+        let sink = downloaded.clone();
+        let services = crate::Services {
+            download: Some(Box::new(move |name, bytes| sink.borrow_mut().push((name.to_owned(), bytes.to_vec())))),
+            ..Default::default()
+        };
+        let mut session = gridcraft_engine::Session::default();
+        session.new_workbook();
+        session
+            .execute("range.setValues", json!({"range": "A1", "values": [["Name", "Photo", "QR"], ["Alice", "alice.png", "https://example.org"]]}))
+            .unwrap();
+        let mut app = SheetApp::new(session, services);
+
+        // Menu-style invocation with empty params opens the export dialog.
+        app.run_or_alert("dataMerge.exportIndesignCsv", json!({}));
+        assert_eq!(app.dialog.as_ref().map(|d| d.name()), Some("exportIndesignCsv"));
+        let mut dlg = app.dialog.take().unwrap();
+        dlg.set_value("imageColumnsText", json!("Photo"));
+        dlg.set_value("qrColumnsText", json!("QR"));
+        let params = build_params(&dlg);
+        assert_eq!(params["imageColumns"], json!(["Photo"]));
+        assert_eq!(params["qrColumns"], json!(["QR"]));
+        assert!(params.get("path").is_none());
+
+        app.run(dlg.command.unwrap(), params).unwrap();
+        assert_eq!(downloaded.borrow().len(), 1);
+        assert!(downloaded.borrow()[0].0.ends_with(".csv"));
+        assert!(downloaded.borrow()[0].1.starts_with(&[0xFF, 0xFE]));
     }
 }

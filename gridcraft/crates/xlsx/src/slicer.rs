@@ -6,9 +6,7 @@ use std::fmt::Write as _;
 use std::sync::Arc;
 
 use gridcraft_core::CellRef;
-use gridcraft_model::{
-    Anchor, AnchorMode, PivotDateFilter, PivotFilter, Slicer, Timeline, TimelineLevel, Workbook,
-};
+use gridcraft_model::{Anchor, AnchorMode, PivotDateFilter, PivotFilter, Slicer, Timeline, TimelineLevel, Workbook};
 
 use crate::IoError;
 use crate::read::Ctx;
@@ -21,11 +19,9 @@ pub const CT_TIMELINE: &str = "application/vnd.ms-excel.timeline+xml";
 pub const CT_TIMELINE_CACHE: &str = "application/vnd.ms-excel.timelineCache+xml";
 
 pub const REL_SLICER: &str = "http://schemas.microsoft.com/office/2007/relationships/slicer";
-pub const REL_SLICER_CACHE: &str =
-    "http://schemas.microsoft.com/office/2007/relationships/slicerCache";
+pub const REL_SLICER_CACHE: &str = "http://schemas.microsoft.com/office/2007/relationships/slicerCache";
 pub const REL_TIMELINE: &str = "http://schemas.microsoft.com/office/2011/relationships/timeline";
-pub const REL_TIMELINE_CACHE: &str =
-    "http://schemas.microsoft.com/office/2011/relationships/timelineCache";
+pub const REL_TIMELINE_CACHE: &str = "http://schemas.microsoft.com/office/2011/relationships/timelineCache";
 
 const NS_X14: &str = "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main";
 const NS_X15: &str = "http://schemas.microsoft.com/office/spreadsheetml/2010/11/main";
@@ -52,20 +48,14 @@ impl SlicerWriter {
     pub fn workbook_ext_xml(&self) -> String {
         let mut s = String::new();
         if !self.slicer_cache_rids.is_empty() {
-            let _ = write!(
-                s,
-                "<ext uri=\"{EXT_WB_SLICER_CACHES}\" xmlns:x14=\"{NS_X14}\"><x14:slicerCaches>"
-            );
+            let _ = write!(s, "<ext uri=\"{EXT_WB_SLICER_CACHES}\" xmlns:x14=\"{NS_X14}\"><x14:slicerCaches>");
             for rid in &self.slicer_cache_rids {
                 let _ = write!(s, "<x14:slicerCache r:id=\"{rid}\"/>");
             }
             s.push_str("</x14:slicerCaches></ext>");
         }
         if !self.timeline_cache_rids.is_empty() {
-            let _ = write!(
-                s,
-                "<ext uri=\"{EXT_WB_TIMELINE_CACHES}\" xmlns:x15=\"{NS_X15}\"><x15:timelineCacheRefs>"
-            );
+            let _ = write!(s, "<ext uri=\"{EXT_WB_TIMELINE_CACHES}\" xmlns:x15=\"{NS_X15}\"><x15:timelineCacheRefs>");
             for rid in &self.timeline_cache_rids {
                 let _ = write!(s, "<x15:timelineCacheRef r:id=\"{rid}\"/>");
             }
@@ -105,51 +95,28 @@ fn write_anchor_attrs(w: &mut String, a: &Anchor) {
 }
 
 fn read_anchor_attrs(el: &El, default_w: f32, default_h: f32) -> Anchor {
-    let cell = el
-        .attr("anchorCell")
-        .and_then(CellRef::parse)
-        .unwrap_or_else(|| CellRef::new(1, 7));
+    let cell = el.attr("anchorCell").and_then(CellRef::parse).unwrap_or_else(|| CellRef::new(1, 7));
     let dx = el.attr_f64("anchorDx").unwrap_or(4.0).clamp(-100_000.0, 100_000.0) as f32;
     let dy = el.attr_f64("anchorDy").unwrap_or(4.0).clamp(-100_000.0, 100_000.0) as f32;
-    let width = el
-        .attr_f64("anchorWidth")
-        .map(|v| v.clamp(40.0, 10_000.0) as f32)
-        .unwrap_or(default_w);
-    let height = el
-        .attr_f64("anchorHeight")
-        .map(|v| v.clamp(40.0, 10_000.0) as f32)
-        .unwrap_or(default_h);
-    let mode = el
-        .attr("anchorMode")
-        .map_or(AnchorMode::MoveOnly, parse_anchor_mode);
+    let width = el.attr_f64("anchorWidth").map(|v| v.clamp(40.0, 10_000.0) as f32).unwrap_or(default_w);
+    let height = el.attr_f64("anchorHeight").map(|v| v.clamp(40.0, 10_000.0) as f32).unwrap_or(default_h);
+    let mode = el.attr("anchorMode").map_or(AnchorMode::MoveOnly, parse_anchor_mode);
     Anchor { cell, dx, dy, width, height, mode }
 }
 
-pub fn write_sheet_filters(
-    wb: &Workbook,
-    si: usize,
-    out: &mut Out,
-    sheet_rels: &mut Rels,
-    wb_rels: &mut Rels,
-    writer: &mut SlicerWriter,
-) -> String {
+pub fn write_sheet_filters(wb: &Workbook, si: usize, out: &mut Out, sheet_rels: &mut Rels, wb_rels: &mut Rels, writer: &mut SlicerWriter) -> String {
     let Some(sheet) = wb.sheet(si) else { return String::new() };
     let mut ext = String::new();
 
     if !sheet.slicers.is_empty() {
         writer.slicer_parts += 1;
         let part_n = writer.slicer_parts;
-        let mut slicers_xml =
-            format!("{XML_DECL}<slicers xmlns=\"{NS_X14}\" xmlns:x=\"{NS_MAIN}\">");
+        let mut slicers_xml = format!("{XML_DECL}<slicers xmlns=\"{NS_X14}\" xmlns:x=\"{NS_MAIN}\">");
 
         for sl in &sheet.slicers {
             writer.slicer_caches += 1;
             let cache_n = writer.slicer_caches;
-            let obj_name = if sl.name.is_empty() {
-                format!("Slicer_{}", cache_n)
-            } else {
-                sl.name.clone()
-            };
+            let obj_name = if sl.name.is_empty() { format!("Slicer_{}", cache_n) } else { sl.name.clone() };
             let cache_name = format!("SlicerCache_{cache_n}");
             let caption = if sl.caption.is_empty() { &sl.column } else { &sl.caption };
             let style = if sl.style.is_empty() { "SlicerStyleLight1" } else { &sl.style };
@@ -158,10 +125,7 @@ pub fn write_sheet_filters(
             let cache_xml = write_slicer_cache_xml(wb, si, sl, &cache_name);
             let cache_part = format!("xl/slicerCaches/slicerCache{cache_n}.xml");
             out.part(&cache_part, Some(CT_SLICER_CACHE), cache_xml.into_bytes());
-            let cache_rid = wb_rels.add_uri(
-                REL_SLICER_CACHE,
-                &format!("slicerCaches/slicerCache{cache_n}.xml"),
-            );
+            let cache_rid = wb_rels.add_uri(REL_SLICER_CACHE, &format!("slicerCaches/slicerCache{cache_n}.xml"));
             writer.slicer_cache_rids.push(cache_rid);
 
             let _ = write!(
@@ -191,17 +155,12 @@ pub fn write_sheet_filters(
     if !sheet.timelines.is_empty() {
         writer.timeline_parts += 1;
         let part_n = writer.timeline_parts;
-        let mut timelines_xml =
-            format!("{XML_DECL}<timelines xmlns=\"{NS_X15}\" xmlns:x=\"{NS_MAIN}\">");
+        let mut timelines_xml = format!("{XML_DECL}<timelines xmlns=\"{NS_X15}\" xmlns:x=\"{NS_MAIN}\">");
 
         for tl in &sheet.timelines {
             writer.timeline_caches += 1;
             let cache_n = writer.timeline_caches;
-            let obj_name = if tl.name.is_empty() {
-                format!("Timeline_{cache_n}")
-            } else {
-                tl.name.clone()
-            };
+            let obj_name = if tl.name.is_empty() { format!("Timeline_{cache_n}") } else { tl.name.clone() };
             let cache_name = format!("TimelineCache_{cache_n}");
             let caption = if tl.caption.is_empty() { &tl.field } else { &tl.caption };
             let style = if tl.style.is_empty() { "TimeSlicerStyleLight1" } else { &tl.style };
@@ -210,10 +169,7 @@ pub fn write_sheet_filters(
             let cache_xml = write_timeline_cache_xml(wb, tl, &cache_name);
             let cache_part = format!("xl/timelineCaches/timelineCache{cache_n}.xml");
             out.part(&cache_part, Some(CT_TIMELINE_CACHE), cache_xml.into_bytes());
-            let cache_rid = wb_rels.add_uri(
-                REL_TIMELINE_CACHE,
-                &format!("timelineCaches/timelineCache{cache_n}.xml"),
-            );
+            let cache_rid = wb_rels.add_uri(REL_TIMELINE_CACHE, &format!("timelineCaches/timelineCache{cache_n}.xml"));
             writer.timeline_cache_rids.push(cache_rid);
 
             let _ = write!(
@@ -257,19 +213,9 @@ fn write_slicer_cache_xml(wb: &Workbook, sheet_idx: usize, sl: &Slicer, cache_na
                 && let Some(pt) = pt_sh.pivots.get(pt_idx)
             {
                 let tab_id = if pt_sh.file_id > 0 { pt_sh.file_id } else { (pt_si + 1) as u32 };
-                let _ = write!(
-                    x,
-                    "<pivotTable tabId=\"{tab_id}\" name=\"{}\" target=\"{}\"/>",
-                    esc_attr(&pt.name),
-                    esc_attr(target),
-                );
+                let _ = write!(x, "<pivotTable tabId=\"{tab_id}\" name=\"{}\" target=\"{}\"/>", esc_attr(&pt.name), esc_attr(target),);
             } else {
-                let _ = write!(
-                    x,
-                    "<pivotTable tabId=\"1\" name=\"{}\" target=\"{}\"/>",
-                    esc_attr(target),
-                    esc_attr(target),
-                );
+                let _ = write!(x, "<pivotTable tabId=\"1\" name=\"{}\" target=\"{}\"/>", esc_attr(target), esc_attr(target),);
             }
         }
         x.push_str("</pivotTables>");
@@ -280,11 +226,7 @@ fn write_slicer_cache_xml(wb: &Workbook, sheet_idx: usize, sl: &Slicer, cache_na
             x.push_str("<data><tabular filtered=\"0\"/></data>");
         }
         Some(items) => {
-            let _ = write!(
-                x,
-                "<data><tabular filtered=\"1\"><items count=\"{}\">",
-                items.len()
-            );
+            let _ = write!(x, "<data><tabular filtered=\"1\"><items count=\"{}\">", items.len());
             for item in items {
                 let _ = write!(x, "<i n=\"{}\" s=\"1\"/>", esc_attr(item));
             }
@@ -295,12 +237,7 @@ fn write_slicer_cache_xml(wb: &Workbook, sheet_idx: usize, sl: &Slicer, cache_na
     if !sl.is_pivot() && !sl.table.is_empty() {
         let resolved = wb
             .sheet(sheet_idx)
-            .and_then(|sh| {
-                sh.tables
-                    .iter()
-                    .position(|t| t.name.eq_ignore_ascii_case(&sl.table))
-                    .map(|ti| (sheet_idx, ti))
-            })
+            .and_then(|sh| sh.tables.iter().position(|t| t.name.eq_ignore_ascii_case(&sl.table)).map(|ti| (sheet_idx, ti)))
             .or_else(|| wb.table(&sl.table));
         let (table_id, col_one_based) = resolved
             .and_then(|(tsi, ti)| {
@@ -333,19 +270,9 @@ fn write_timeline_cache_xml(wb: &Workbook, tl: &Timeline, cache_name: &str) -> S
             && let Some(pt) = pt_sh.pivots.get(pt_idx)
         {
             let tab_id = if pt_sh.file_id > 0 { pt_sh.file_id } else { (pt_si + 1) as u32 };
-            let _ = write!(
-                x,
-                "<pivotTable tabId=\"{tab_id}\" name=\"{}\" target=\"{}\"/>",
-                esc_attr(&pt.name),
-                esc_attr(target),
-            );
+            let _ = write!(x, "<pivotTable tabId=\"{tab_id}\" name=\"{}\" target=\"{}\"/>", esc_attr(&pt.name), esc_attr(target),);
         } else {
-            let _ = write!(
-                x,
-                "<pivotTable tabId=\"1\" name=\"{}\" target=\"{}\"/>",
-                esc_attr(target),
-                esc_attr(target),
-            );
+            let _ = write!(x, "<pivotTable tabId=\"1\" name=\"{}\" target=\"{}\"/>", esc_attr(target), esc_attr(target),);
         }
     }
     x.push_str("</pivotTables><state>");
@@ -398,12 +325,7 @@ fn clean_iso_date(raw: &str) -> Option<String> {
     Some(format!("{y:04}-{m:02}-{d:02}"))
 }
 
-fn resolve_pivot_link(
-    wb: &Workbook,
-    tab_id: Option<u32>,
-    pt_name: &str,
-    explicit_target: Option<&str>,
-) -> String {
+fn resolve_pivot_link(wb: &Workbook, tab_id: Option<u32>, pt_name: &str, explicit_target: Option<&str>) -> String {
     if let Some(t) = explicit_target
         && !t.is_empty()
         && wb.pivot(t).is_some()
@@ -420,12 +342,7 @@ fn resolve_pivot_link(
             && let Some(sh) = wb.sheet(si)
             && sh.pivots.iter().any(|p| p.name.eq_ignore_ascii_case(pt_name))
         {
-            let count = wb
-                .sheets
-                .iter()
-                .flat_map(|s| s.pivots.iter())
-                .filter(|p| p.name.eq_ignore_ascii_case(pt_name))
-                .count();
+            let count = wb.sheets.iter().flat_map(|s| s.pivots.iter()).filter(|p| p.name.eq_ignore_ascii_case(pt_name)).count();
             if count > 1 {
                 return format!("{}!{pt_name}", gridcraft_formula::quote_sheet(&sh.name));
             }
@@ -435,10 +352,7 @@ fn resolve_pivot_link(
     pt_name.to_string()
 }
 
-fn resolve_table_link(
-    wb: &Workbook,
-    cache: &SlicerCacheIn,
-) -> (String, String) {
+fn resolve_table_link(wb: &Workbook, cache: &SlicerCacheIn) -> (String, String) {
     if let Some(tname) = &cache.table_name
         && !tname.is_empty()
     {
@@ -464,7 +378,7 @@ fn resolve_table_link(
     (String::new(), cache.source_name.clone())
 }
 
-fn parse_slicer_cache(el: &El) -> Option< (String, SlicerCacheIn) > {
+fn parse_slicer_cache(el: &El) -> Option<(String, SlicerCacheIn)> {
     if el.name != "slicerCacheDefinition" {
         return None;
     }
@@ -505,24 +419,12 @@ fn parse_slicer_cache(el: &El) -> Option< (String, SlicerCacheIn) > {
                 selected = None;
             }
             Some(true) => {
-                selected = Some(
-                    all_items
-                        .into_iter()
-                        .filter(|(_, on)| *on)
-                        .map(|(lbl, _)| lbl.to_string())
-                        .collect(),
-                );
+                selected = Some(all_items.into_iter().filter(|(_, on)| *on).map(|(lbl, _)| lbl.to_string()).collect());
             }
             None => {
                 // External Excel tabular slicer cache: filtered iff at least one item has `s="0"` / omitted `s`.
                 if !all_items.is_empty() && all_items.iter().any(|(_, on)| !*on) {
-                    selected = Some(
-                        all_items
-                            .into_iter()
-                            .filter(|(_, on)| *on)
-                            .map(|(lbl, _)| lbl.to_string())
-                            .collect(),
-                    );
+                    selected = Some(all_items.into_iter().filter(|(_, on)| *on).map(|(lbl, _)| lbl.to_string()).collect());
                 }
             }
         }
@@ -541,17 +443,7 @@ fn parse_slicer_cache(el: &El) -> Option< (String, SlicerCacheIn) > {
         }
     }
 
-    Some((
-        name,
-        SlicerCacheIn {
-            source_name,
-            table_name,
-            table_id,
-            table_col,
-            pivots,
-            selected,
-        },
-    ))
+    Some((name, SlicerCacheIn { source_name, table_name, table_id, table_col, pivots, selected }))
 }
 
 fn parse_timeline_cache(el: &El) -> Option<(String, TimelineCacheIn)> {
@@ -579,15 +471,7 @@ fn parse_timeline_cache(el: &El) -> Option<(String, TimelineCacheIn)> {
         start_date = sel.attr("startDate").and_then(clean_iso_date);
         end_date = sel.attr("endDate").and_then(clean_iso_date);
     }
-    Some((
-        name,
-        TimelineCacheIn {
-            source_name,
-            pivots,
-            start_date,
-            end_date,
-        },
-    ))
+    Some((name, TimelineCacheIn { source_name, pivots, start_date, end_date }))
 }
 
 pub fn read_workbook_filters(
@@ -664,32 +548,14 @@ pub fn read_workbook_filters(
                     let cache_key = s_el.attr("cache").unwrap_or("").to_ascii_lowercase();
                     let Some(cache) = slicer_caches.get(&cache_key) else { continue };
                     let id = alloc_id(s_el.attr_u32("objectId"));
-                    let name = s_el
-                        .attr("name")
-                        .map(str::to_string)
-                        .unwrap_or_else(|| format!("Slicer_{id}"));
-                    let pivots: Vec<String> = cache
-                        .pivots
-                        .iter()
-                        .map(|(tid, pname, targ)| {
-                            resolve_pivot_link(wb, *tid, pname, targ.as_deref())
-                        })
-                        .collect();
-                    let (table, column) = if pivots.is_empty() {
-                        resolve_table_link(wb, cache)
-                    } else {
-                        (String::new(), cache.source_name.clone())
-                    };
-                    let caption = s_el
-                        .attr("caption")
-                        .map(str::to_string)
-                        .unwrap_or_else(|| column.clone());
+                    let name = s_el.attr("name").map(str::to_string).unwrap_or_else(|| format!("Slicer_{id}"));
+                    let pivots: Vec<String> =
+                        cache.pivots.iter().map(|(tid, pname, targ)| resolve_pivot_link(wb, *tid, pname, targ.as_deref())).collect();
+                    let (table, column) = if pivots.is_empty() { resolve_table_link(wb, cache) } else { (String::new(), cache.source_name.clone()) };
+                    let caption = s_el.attr("caption").map(str::to_string).unwrap_or_else(|| column.clone());
                     let columns = s_el.attr_u32("columnCount").unwrap_or(1).clamp(1, 10);
                     let multi_select = s_el.flag("multiSelect", false);
-                    let style = s_el
-                        .attr("style")
-                        .unwrap_or("SlicerStyleLight1")
-                        .to_string();
+                    let style = s_el.attr("style").unwrap_or("SlicerStyleLight1").to_string();
                     let anchor = read_anchor_attrs(s_el, 180.0, 210.0);
                     read_slicers.push(Slicer {
                         id,
@@ -714,31 +580,17 @@ pub fn read_workbook_filters(
                     let cache_key = t_el.attr("cache").unwrap_or("").to_ascii_lowercase();
                     let Some(cache) = timeline_caches.get(&cache_key) else { continue };
                     let id = alloc_id(t_el.attr_u32("objectId"));
-                    let name = t_el
-                        .attr("name")
-                        .map(str::to_string)
-                        .unwrap_or_else(|| format!("Timeline_{id}"));
-                    let pivots: Vec<String> = cache
-                        .pivots
-                        .iter()
-                        .map(|(tid, pname, targ)| {
-                            resolve_pivot_link(wb, *tid, pname, targ.as_deref())
-                        })
-                        .collect();
+                    let name = t_el.attr("name").map(str::to_string).unwrap_or_else(|| format!("Timeline_{id}"));
+                    let pivots: Vec<String> =
+                        cache.pivots.iter().map(|(tid, pname, targ)| resolve_pivot_link(wb, *tid, pname, targ.as_deref())).collect();
                     let field = cache.source_name.clone();
-                    let caption = t_el
-                        .attr("caption")
-                        .map(str::to_string)
-                        .unwrap_or_else(|| field.clone());
+                    let caption = t_el.attr("caption").map(str::to_string).unwrap_or_else(|| field.clone());
                     let level = t_el
                         .attr("level")
                         .or_else(|| t_el.attr("selectionLevel"))
                         .and_then(TimelineLevel::from_ooxml)
                         .unwrap_or(TimelineLevel::Months);
-                    let style = t_el
-                        .attr("style")
-                        .unwrap_or("TimeSlicerStyleLight1")
-                        .to_string();
+                    let style = t_el.attr("style").unwrap_or("TimeSlicerStyleLight1").to_string();
                     let anchor = read_anchor_attrs(t_el, 320.0, 124.0);
                     read_timelines.push(Timeline {
                         id,
@@ -766,20 +618,14 @@ pub fn read_workbook_filters(
     }
 
     // Sync Timeline date_filters & Pivot Slicer axis/report filters onto linked PivotTables.
-    let all_timelines: Vec<Timeline> = wb
-        .sheets
-        .iter()
-        .flat_map(|s| s.timelines.iter().cloned())
-        .filter(|tl| tl.is_filtered())
-        .collect();
+    let all_timelines: Vec<Timeline> = wb.sheets.iter().flat_map(|s| s.timelines.iter().cloned()).filter(|tl| tl.is_filtered()).collect();
     for tl in all_timelines {
         for target in &tl.pivots {
             if let Some((pt_si, pt_idx)) = wb.pivot(target)
                 && let Some(sh) = wb.sheet_mut(pt_si)
                 && let Some(pt) = sh.pivots.get_mut(pt_idx)
             {
-                pt.date_filters
-                    .retain(|df| !df.source_col.eq_ignore_ascii_case(&tl.field));
+                pt.date_filters.retain(|df| !df.source_col.eq_ignore_ascii_case(&tl.field));
                 pt.date_filters.push(PivotDateFilter {
                     source_col: tl.field.clone(),
                     start_date: tl.start_date.clone(),
@@ -789,36 +635,21 @@ pub fn read_workbook_filters(
         }
     }
 
-    let all_pivot_slicers: Vec<Slicer> = wb
-        .sheets
-        .iter()
-        .flat_map(|s| s.slicers.iter().cloned())
-        .filter(|sl| sl.is_pivot() && sl.selected.is_some())
-        .collect();
+    let all_pivot_slicers: Vec<Slicer> =
+        wb.sheets.iter().flat_map(|s| s.slicers.iter().cloned()).filter(|sl| sl.is_pivot() && sl.selected.is_some()).collect();
     for sl in all_pivot_slicers {
         for target in &sl.pivots {
             if let Some((pt_si, pt_idx)) = wb.pivot(target)
                 && let Some(sh) = wb.sheet_mut(pt_si)
                 && let Some(pt) = sh.pivots.get_mut(pt_idx)
             {
-                let on_axis = pt
-                    .rows
-                    .iter()
-                    .chain(pt.columns.iter())
-                    .any(|f| f.source_col.eq_ignore_ascii_case(&sl.column));
-                if let Some(pos) = pt
-                    .filters
-                    .iter()
-                    .position(|f| f.source_col.eq_ignore_ascii_case(&sl.column))
-                {
+                let on_axis = pt.rows.iter().chain(pt.columns.iter()).any(|f| f.source_col.eq_ignore_ascii_case(&sl.column));
+                if let Some(pos) = pt.filters.iter().position(|f| f.source_col.eq_ignore_ascii_case(&sl.column)) {
                     if let Some(f) = pt.filters.get_mut(pos) {
                         f.selected = sl.selected.clone();
                     }
                 } else if on_axis {
-                    pt.filters.push(PivotFilter {
-                        source_col: sl.column.clone(),
-                        selected: sl.selected.clone(),
-                    });
+                    pt.filters.push(PivotFilter { source_col: sl.column.clone(), selected: sl.selected.clone() });
                 }
             }
         }

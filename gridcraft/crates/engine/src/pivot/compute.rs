@@ -549,8 +549,7 @@ pub(super) fn compute_from(
             sl.selected.is_some()
                 && sl.pivots.iter().any(|target| match wb.pivot(target) {
                     Some((si, pi)) => {
-                        si == pivot_sheet
-                            && wb.sheet(si).and_then(|s| s.pivots.get(pi)).is_some_and(|p| p.name.eq_ignore_ascii_case(&pt.name))
+                        si == pivot_sheet && wb.sheet(si).and_then(|s| s.pivots.get(pi)).is_some_and(|p| p.name.eq_ignore_ascii_case(&pt.name))
                     }
                     None => target.eq_ignore_ascii_case(&pt.name),
                 })
@@ -585,11 +584,7 @@ pub(super) fn compute_from(
             let col = src.col(&df.source_col)?;
             let start = df.start_date.as_deref().and_then(parse_iso_ymd);
             let end = df.end_date.as_deref().and_then(parse_iso_ymd);
-            if start.is_none() && end.is_none() {
-                None
-            } else {
-                Some((col, start, end))
-            }
+            if start.is_none() && end.is_none() { None } else { Some((col, start, end)) }
         })
         .collect();
     let row_fmts: Vec<String> = rows.iter().map(|(c, _)| fmt_of(*c)).collect();

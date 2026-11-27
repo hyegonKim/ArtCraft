@@ -7,6 +7,20 @@ pub(super) fn data(app: &mut SheetApp, ui: &mut Ui) {
     if gd.clicked() {
         app.open_dialog("open", json!({}));
     }
+    let dm = big_button(ui, Icon::Share, "Data\nMerge", "Data Merge Interchange", true);
+    egui::Popup::menu(&dm).show(|ui| {
+        menu_items(
+            app,
+            ui,
+            &[
+                ("Export InDesign Data Merge CSV…", "dialog:exportIndesignCsv", json!({})),
+                ("Import InDesign Data Merge CSV…", "dialog:importIndesignCsv", json!({})),
+                ("-", "", json!({})),
+                ("Export Illustrator Variables XML…", "dialog:exportIllustratorXml", json!({})),
+                ("Import Illustrator Variables XML…", "dialog:importIllustratorXml", json!({})),
+            ],
+        );
+    });
     sep(ui);
     ui.vertical(|ui| {
         let __k = small_button(ui, Icon::SortAsc, "", "Sort A to Z", false);

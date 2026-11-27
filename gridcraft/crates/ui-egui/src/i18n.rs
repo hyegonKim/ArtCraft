@@ -562,4 +562,21 @@ mod tests {
             assert_eq!(Language::Ko.tr(en), ko, "{en}");
         }
     }
+
+    #[test]
+    fn korean_translates_data_merge_and_illustrator_variables_ui() {
+        for (en, ko) in [
+            ("Data\nMerge", "데이터\n병합"),
+            ("Data Merge", "데이터 병합"),
+            ("Data-Driven Graphics", "데이터 기반 그래픽"),
+            ("Export InDesign Data Merge CSV…", "InDesign 데이터 병합 CSV 내보내기…"),
+            ("Import InDesign Data Merge CSV…", "InDesign 데이터 병합 CSV 가져오기…"),
+            ("Export Illustrator Variables XML…", "Illustrator 변수 XML 내보내기…"),
+            ("Import Illustrator Variables XML…", "Illustrator 변수 XML 가져오기…"),
+            ("UTF-16LE with BOM (InDesign CJK)", "UTF-16LE BOM 포함 (InDesign 한중일)"),
+            ("Sanitize spreadsheet formula injection", "스프레드시트 수식 주입 방지 처리"),
+        ] {
+            assert_eq!(Language::Ko.tr(en), ko, "{en}");
+        }
+    }
 }

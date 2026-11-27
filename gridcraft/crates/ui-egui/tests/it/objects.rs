@@ -566,10 +566,7 @@ fn interactive_pivot_slicer_and_timeline_cards_filter_on_sheet_clicks() {
 
     let (sl_ref, tl_ref) = {
         let sh = h.state().session.doc().unwrap().wb.active().unwrap();
-        (
-            ObjRef::new(ObjKind::Slicer, sh.slicers[0].id),
-            ObjRef::new(ObjKind::Timeline, sh.timelines[0].id),
-        )
+        (ObjRef::new(ObjKind::Slicer, sh.slicers[0].id), ObjRef::new(ObjKind::Timeline, sh.timelines[0].id))
     };
 
     let pivot_total = |h: &Harness| -> f64 {

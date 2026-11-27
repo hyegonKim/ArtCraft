@@ -1263,12 +1263,10 @@ fn object_param(s: &Session, p: &Json, cmd: &str) -> Result<(usize, ObjRef)> {
 fn delete_object(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, o) = object_param(s, p, "object.delete")?;
     edit(s, |cx| {
-        let removed_slicer = (o.kind == ObjKind::Slicer)
-            .then(|| cx.wb.sheet(sheet).and_then(|sh| sh.slicers.iter().find(|x| x.id == o.id).cloned()))
-            .flatten();
-        let removed_timeline = (o.kind == ObjKind::Timeline)
-            .then(|| cx.wb.sheet(sheet).and_then(|sh| sh.timelines.iter().find(|x| x.id == o.id).cloned()))
-            .flatten();
+        let removed_slicer =
+            (o.kind == ObjKind::Slicer).then(|| cx.wb.sheet(sheet).and_then(|sh| sh.slicers.iter().find(|x| x.id == o.id).cloned())).flatten();
+        let removed_timeline =
+            (o.kind == ObjKind::Timeline).then(|| cx.wb.sheet(sheet).and_then(|sh| sh.timelines.iter().find(|x| x.id == o.id).cloned())).flatten();
         cx.sheet_mut(sheet)?.remove_object(o);
         if let Some(sl) = removed_slicer.filter(|sl| sl.selected.is_some()) {
             super::slicer::cleanup_deleted_slicer(&mut cx.wb, sheet, &sl);

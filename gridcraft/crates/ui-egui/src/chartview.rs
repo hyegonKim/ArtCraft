@@ -646,11 +646,8 @@ pub fn timeline_layout(
     } else {
         0
     };
-    let tile_w = if vis_count > 0 {
-        ((inner_w - (vis_count.saturating_sub(1) as f32) * gap) / (vis_count as f32)).max(min_tile_w)
-    } else {
-        min_tile_w
-    };
+    let tile_w =
+        if vis_count > 0 { ((inner_w - (vis_count.saturating_sub(1) as f32) * gap) / (vis_count as f32)).max(min_tile_w) } else { min_tile_w };
     let mut periods = Vec::with_capacity(vis_count);
     for slot in 0..vis_count {
         let idx = start_idx + slot;
@@ -661,14 +658,7 @@ pub fn timeline_layout(
     TimelineLayout { header, clear, delete, subheader, levels, periods }
 }
 
-fn paint_timeline(
-    lang: crate::i18n::Language,
-    p: &Painter,
-    geo: &Geo,
-    wb: &Workbook,
-    tl: &gridcraft_engine::model::Timeline,
-    r: Rect,
-) {
+fn paint_timeline(lang: crate::i18n::Language, p: &Painter, geo: &Geo, wb: &Workbook, tl: &gridcraft_engine::model::Timeline, r: Rect) {
     let tk = theme::Tokens::get(p.ctx());
     let periods = gridcraft_engine::cmd::slicer::timeline_periods(wb, tl);
     let first_sel = if tl.is_filtered() { periods.iter().position(|pr| pr.selected) } else { None };
@@ -760,24 +750,14 @@ fn paint_timeline(
             let strip = Rect::from_min_max(pos2(bar.left(), (bar.bottom() - 3.0 * geo.z).max(bar.top())), bar.max);
             p.rect_filled(strip, 1.5 * geo.z, tk.accent);
         }
-        p.with_clip_rect(bar.intersect(p.clip_rect())).text(
-            bar.center(),
-            Align2::CENTER_CENTER,
-            &pr.label,
-            theme::ui_bold(10.5 * geo.z),
-            fg,
-        );
+        p.with_clip_rect(bar.intersect(p.clip_rect())).text(bar.center(), Align2::CENTER_CENTER, &pr.label, theme::ui_bold(10.5 * geo.z), fg);
     }
 }
 
 /// What a click inside a timeline hit.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TimelineAction {
-    SelectPeriod {
-        start: String,
-        end: String,
-        sole_selected: bool,
-    },
+    SelectPeriod { start: String, end: String, sole_selected: bool },
     SetLevel(gridcraft_engine::model::TimelineLevel),
     Clear,
     Delete,
@@ -811,16 +791,8 @@ pub fn timeline_click(geo: &Geo, sh: &Sheet, wb: &Workbook, p: Pos2) -> Option<(
             if tr.contains(p)
                 && let Some(pr) = periods.get(*idx)
             {
-                let sole_selected = tl.start_date.as_deref() == Some(pr.start_date.as_str())
-                    && tl.end_date.as_deref() == Some(pr.end_date.as_str());
-                return Some((
-                    tl.id,
-                    TimelineAction::SelectPeriod {
-                        start: pr.start_date.clone(),
-                        end: pr.end_date.clone(),
-                        sole_selected,
-                    },
-                ));
+                let sole_selected = tl.start_date.as_deref() == Some(pr.start_date.as_str()) && tl.end_date.as_deref() == Some(pr.end_date.as_str());
+                return Some((tl.id, TimelineAction::SelectPeriod { start: pr.start_date.clone(), end: pr.end_date.clone(), sole_selected }));
             }
         }
         return None; // header/background → select/drag

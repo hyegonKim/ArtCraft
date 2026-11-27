@@ -10,19 +10,16 @@
 use gridcraft_core::CellRef;
 use gridcraft_core::date::{DateSystem, days_in_month_in};
 use gridcraft_model::{
-    Anchor, AnchorMode, AutoFilter, FilterCriterion, PivotDateFilter, PivotDateGroup, PivotFilter,
-    PivotTable, Slicer, Timeline, TimelineLevel, Workbook,
+    Anchor, AnchorMode, AutoFilter, FilterCriterion, PivotDateFilter, PivotDateGroup, PivotFilter, PivotTable, Slicer, Timeline, TimelineLevel,
+    Workbook,
 };
 use serde_json::{Value as Json, json};
 
 use super::{
-    CommandSpec, EngineError, Result, Session, bad, bool_param, cell_param_on, cmd, edit,
-    f64_param, has_doc, str_param, target_sheet, u32_param,
+    CommandSpec, EngineError, Result, Session, bad, bool_param, cell_param_on, cmd, edit, f64_param, has_doc, str_param, target_sheet, u32_param,
 };
 
-const SHORT_MONTHS: [&str; 12] = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const SHORT_MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /// Cap on generated timeline tiles so pathological multi-century serial spans stay bounded.
 const MAX_TIMELINE_PERIODS: usize = 732;
@@ -57,24 +54,8 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             insert_slicer
         ),
-        cmd!(
-            "slicer.toggle",
-            "Toggle Slicer Value",
-            [],
-            None,
-            "{slicer?: id, value: \"East\", multi?: false}",
-            has_doc,
-            slicer_toggle
-        ),
-        cmd!(
-            "slicer.toggleItem",
-            "Toggle Slicer Value",
-            [],
-            None,
-            "{slicer?: id, value: \"East\", multi?: false}",
-            has_doc,
-            slicer_toggle
-        ),
+        cmd!("slicer.toggle", "Toggle Slicer Value", [], None, "{slicer?: id, value: \"East\", multi?: false}", has_doc, slicer_toggle),
+        cmd!("slicer.toggleItem", "Toggle Slicer Value", [], None, "{slicer?: id, value: \"East\", multi?: false}", has_doc, slicer_toggle),
         cmd!(
             "slicer.select",
             "Select Slicer Items",
@@ -84,24 +65,8 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             slicer_select
         ),
-        cmd!(
-            "slicer.selectAll",
-            "Clear Slicer Filter",
-            [],
-            None,
-            "{slicer?: id}",
-            has_doc,
-            slicer_select_all
-        ),
-        cmd!(
-            "slicer.clear",
-            "Clear Slicer Filter",
-            [],
-            None,
-            "{slicer?: id}",
-            has_doc,
-            slicer_select_all
-        ),
+        cmd!("slicer.selectAll", "Clear Slicer Filter", [], None, "{slicer?: id}", has_doc, slicer_select_all),
+        cmd!("slicer.clear", "Clear Slicer Filter", [], None, "{slicer?: id}", has_doc, slicer_select_all),
         cmd!(
             "slicer.move",
             "Move Slicer",
@@ -120,15 +85,7 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             slicer_update
         ),
-        cmd!(
-            "slicer.delete",
-            "Delete Slicer",
-            [],
-            None,
-            "{slicer?: id}",
-            has_doc,
-            slicer_delete
-        ),
+        cmd!("slicer.delete", "Delete Slicer", [], None, "{slicer?: id}", has_doc, slicer_delete),
         cmd!(
             "insert.timeline",
             "Timeline",
@@ -156,15 +113,7 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             timeline_set_level
         ),
-        cmd!(
-            "timeline.clear",
-            "Clear Timeline Filter",
-            [],
-            None,
-            "{timeline?: id}",
-            has_doc,
-            timeline_clear
-        ),
+        cmd!("timeline.clear", "Clear Timeline Filter", [], None, "{timeline?: id}", has_doc, timeline_clear),
         cmd!(
             "timeline.move",
             "Move Timeline",
@@ -183,15 +132,7 @@ pub fn specs() -> Vec<CommandSpec> {
             has_doc,
             timeline_update
         ),
-        cmd!(
-            "timeline.delete",
-            "Delete Timeline",
-            [],
-            None,
-            "{timeline?: id}",
-            has_doc,
-            timeline_delete
-        ),
+        cmd!("timeline.delete", "Delete Timeline", [], None, "{timeline?: id}", has_doc, timeline_delete),
     ]
 }
 
@@ -200,12 +141,7 @@ pub fn specs() -> Vec<CommandSpec> {
 pub fn column_values(wb: &Workbook, sheet: usize, table: &str, column: &str) -> Vec<String> {
     let resolved = wb
         .sheet(sheet)
-        .and_then(|sh| {
-            sh.tables
-                .iter()
-                .position(|t| t.name.eq_ignore_ascii_case(table))
-                .map(|ti| (sheet, ti))
-        })
+        .and_then(|sh| sh.tables.iter().position(|t| t.name.eq_ignore_ascii_case(table)).map(|ti| (sheet, ti)))
         .or_else(|| wb.table(table));
     let Some((t_sheet, ti)) = resolved else { return vec![] };
     let Some(sh) = wb.sheet(t_sheet) else { return vec![] };
@@ -266,20 +202,13 @@ pub fn slicer_items(wb: &Workbook, sheet: usize, sl: &Slicer) -> Vec<(String, bo
 
 /// All source field headers of a PivotTable.
 pub fn pivot_fields(wb: &Workbook, pt_sheet: usize, pt: &PivotTable) -> Vec<String> {
-    crate::pivot::read_source(wb, &pt.source, pt_sheet)
-        .map(|src| src.headers)
-        .unwrap_or_default()
+    crate::pivot::read_source(wb, &pt.source, pt_sheet).map(|src| src.headers).unwrap_or_default()
 }
 
 /// Source fields of a PivotTable that hold dates (either formatted Excel date serials or ISO date text).
 pub fn pivot_date_fields(wb: &Workbook, pt_sheet: usize, pt: &PivotTable) -> Vec<String> {
     let Ok(src) = crate::pivot::read_source(wb, &pt.source, pt_sheet) else { return vec![] };
-    src.headers
-        .iter()
-        .enumerate()
-        .filter(|(c, _)| column_is_date(&src, *c))
-        .map(|(_, h)| h.clone())
-        .collect()
+    src.headers.iter().enumerate().filter(|(c, _)| column_is_date(&src, *c)).map(|(_, h)| h.clone()).collect()
 }
 
 fn column_is_date(src: &crate::pivot::Source, col: usize) -> bool {
@@ -467,12 +396,7 @@ pub(crate) fn reapply_slicer(wb: &mut Workbook, sheet: usize, id: u32) {
     }
     let resolved = wb
         .sheet(sheet)
-        .and_then(|sh| {
-            sh.tables
-                .iter()
-                .position(|t| t.name.eq_ignore_ascii_case(&sl.table))
-                .map(|ti| (sheet, ti))
-        })
+        .and_then(|sh| sh.tables.iter().position(|t| t.name.eq_ignore_ascii_case(&sl.table)).map(|ti| (sheet, ti)))
         .or_else(|| wb.table(&sl.table));
     let Some((t_sheet, ti)) = resolved else { return };
     let info = wb.sheet(t_sheet).and_then(|sh| {
@@ -492,12 +416,7 @@ pub(crate) fn reapply_slicer(wb: &mut Workbook, sheet: usize, id: u32) {
     super::data::apply_filter(wb, t_sheet);
 }
 
-fn apply_pivot_slicer_selection(
-    wb: &mut Workbook,
-    pivots: &[String],
-    column: &str,
-    selected: Option<Vec<String>>,
-) {
+fn apply_pivot_slicer_selection(wb: &mut Workbook, pivots: &[String], column: &str, selected: Option<Vec<String>>) {
     let mut targets: Vec<(usize, usize)> = Vec::new();
     for target in pivots {
         if let Some(loc) = wb.pivot(target)
@@ -510,11 +429,7 @@ fn apply_pivot_slicer_selection(
         if let Some(sh) = wb.sheet_mut(pt_sheet)
             && let Some(pt) = sh.pivots.get_mut(pt_idx)
         {
-            let on_axis = pt
-                .rows
-                .iter()
-                .chain(pt.columns.iter())
-                .any(|f| f.source_col.eq_ignore_ascii_case(column));
+            let on_axis = pt.rows.iter().chain(pt.columns.iter()).any(|f| f.source_col.eq_ignore_ascii_case(column));
             if let Some(pos) = pt.filters.iter().position(|f| f.source_col.eq_ignore_ascii_case(column)) {
                 if selected.is_none() && on_axis {
                     pt.filters.remove(pos);
@@ -522,10 +437,7 @@ fn apply_pivot_slicer_selection(
                     f.selected = selected.clone();
                 }
             } else if on_axis && selected.is_some() {
-                pt.filters.push(PivotFilter {
-                    source_col: column.to_string(),
-                    selected: selected.clone(),
-                });
+                pt.filters.push(PivotFilter { source_col: column.to_string(), selected: selected.clone() });
             }
         }
         let _ = crate::pivot::refresh(wb, pt_sheet, pt_idx, true);
@@ -540,12 +452,7 @@ pub(crate) fn cleanup_deleted_slicer(wb: &mut Workbook, sheet: usize, sl: &Slice
     }
     let resolved = wb
         .sheet(sheet)
-        .and_then(|sh| {
-            sh.tables
-                .iter()
-                .position(|t| t.name.eq_ignore_ascii_case(&sl.table))
-                .map(|ti| (sheet, ti))
-        })
+        .and_then(|sh| sh.tables.iter().position(|t| t.name.eq_ignore_ascii_case(&sl.table)).map(|ti| (sheet, ti)))
         .or_else(|| wb.table(&sl.table));
     let Some((t_sheet, ti)) = resolved else { return };
     let abs_col = wb.sheet(t_sheet).and_then(|sh| {
@@ -575,13 +482,7 @@ pub(crate) fn cleanup_deleted_timeline(wb: &mut Workbook, tl: &Timeline) {
     apply_timeline_filter(wb, &tl.pivots, &tl.field, None, None);
 }
 
-fn apply_timeline_filter(
-    wb: &mut Workbook,
-    pivots: &[String],
-    field: &str,
-    start_date: Option<String>,
-    end_date: Option<String>,
-) {
+fn apply_timeline_filter(wb: &mut Workbook, pivots: &[String], field: &str, start_date: Option<String>, end_date: Option<String>) {
     let mut targets: Vec<(usize, usize)> = Vec::new();
     for target in pivots {
         if let Some(loc) = wb.pivot(target)
@@ -596,11 +497,7 @@ fn apply_timeline_filter(
         {
             pt.date_filters.retain(|df| !df.source_col.eq_ignore_ascii_case(field));
             if start_date.is_some() || end_date.is_some() {
-                pt.date_filters.push(PivotDateFilter {
-                    source_col: field.to_string(),
-                    start_date: start_date.clone(),
-                    end_date: end_date.clone(),
-                });
+                pt.date_filters.push(PivotDateFilter { source_col: field.to_string(), start_date: start_date.clone(), end_date: end_date.clone() });
             }
         }
         let _ = crate::pivot::refresh(wb, pt_sheet, pt_idx, true);
@@ -653,29 +550,13 @@ fn pivot_targets_param(wb: &Workbook, p: &Json, cmd: &str) -> Result<Option<(usi
 fn pivot_ref_name(wb: &Workbook, si: usize, pi: usize, fallback: &str) -> String {
     let Some(sh) = wb.sheet(si) else { return fallback.to_string() };
     let Some(pt) = sh.pivots.get(pi) else { return fallback.to_string() };
-    let same_name_count = wb
-        .sheets
-        .iter()
-        .flat_map(|s| s.pivots.iter())
-        .filter(|p| p.name.eq_ignore_ascii_case(&pt.name))
-        .count();
-    if same_name_count > 1 || fallback.contains('!') {
-        format!("{}!{}", crate::pivot::quote_sheet(&sh.name), pt.name)
-    } else {
-        pt.name.clone()
-    }
+    let same_name_count = wb.sheets.iter().flat_map(|s| s.pivots.iter()).filter(|p| p.name.eq_ignore_ascii_case(&pt.name)).count();
+    if same_name_count > 1 || fallback.contains('!') { format!("{}!{}", crate::pivot::quote_sheet(&sh.name), pt.name) } else { pt.name.clone() }
 }
 
 fn sanitize_object_name(prefix: &str, base: &str, id: u32) -> String {
-    let clean: String = base
-        .chars()
-        .map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' })
-        .collect();
-    if clean.is_empty() {
-        format!("{prefix}_{id}")
-    } else {
-        format!("{prefix}_{clean}_{id}")
-    }
+    let clean: String = base.chars().map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' }).collect();
+    if clean.is_empty() { format!("{prefix}_{id}") } else { format!("{prefix}_{clean}_{id}") }
 }
 
 fn requested_fields_param(p: &Json) -> Option<Vec<String>> {
@@ -684,20 +565,14 @@ fn requested_fields_param(p: &Json) -> Option<Vec<String>> {
     {
         return Some(list);
     }
-    str_param(p, "column")
-        .or_else(|| str_param(p, "field"))
-        .map(|s| vec![s.to_string()])
+    str_param(p, "column").or_else(|| str_param(p, "field")).map(|s| vec![s.to_string()])
 }
 
 fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
     let wb_ref = &s.doc()?.wb;
     let explicit_pivots = pivot_targets_param(wb_ref, p, "insert.slicer")?;
     let explicit_table = match str_param(p, "table") {
-        Some(name) => Some(
-            wb_ref
-                .table(name)
-                .ok_or_else(|| bad("insert.slicer", format!("no table named `{name}`")))?,
-        ),
+        Some(name) => Some(wb_ref.table(name).ok_or_else(|| bad("insert.slicer", format!("no table named `{name}`")))?),
         None => None,
     };
 
@@ -732,9 +607,7 @@ fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
         Some((_, ti)) => sh.tables.get(ti),
         None => sh.table_at(d.selection.active),
     }
-    .ok_or_else(|| {
-        EngineError::Other("Select a cell inside a table or PivotTable first, or pass `table` or `pivot`.".into())
-    })?;
+    .ok_or_else(|| EngineError::Other("Select a cell inside a table or PivotTable first, or pass `table` or `pivot`.".into()))?;
 
     let req_fields = match requested_fields_param(p) {
         Some(list) => {
@@ -751,28 +624,14 @@ fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
             resolved
         }
         None => {
-            let idx = d
-                .selection
-                .active
-                .col
-                .checked_sub(t.range.start.col)
-                .map(|o| o as usize)
-                .filter(|o| *o < t.columns.len())
-                .unwrap_or(0);
-            let col = t
-                .columns
-                .get(idx)
-                .map(|tc| tc.name.clone())
-                .ok_or_else(|| bad("insert.slicer", "the table has no columns"))?;
+            let idx = d.selection.active.col.checked_sub(t.range.start.col).map(|o| o as usize).filter(|o| *o < t.columns.len()).unwrap_or(0);
+            let col = t.columns.get(idx).map(|tc| tc.name.clone()).ok_or_else(|| bad("insert.slicer", "the table has no columns"))?;
             vec![col]
         }
     };
 
     let table = t.name.clone();
-    let default_at = CellRef::new(
-        t.range.start.row,
-        t.range.end.col.saturating_add(2).min(gridcraft_core::MAX_COLS - 1),
-    );
+    let default_at = CellRef::new(t.range.start.row, t.range.end.col.saturating_add(2).min(gridcraft_core::MAX_COLS - 1));
     let at = cell_param_on(s, p, "at", sheet)?.unwrap_or(default_at);
     let columns = u32_param(p, "columns").unwrap_or(1).clamp(1, 10);
     let multi_select = bool_param(p, "multiSelect").unwrap_or(false);
@@ -787,15 +646,9 @@ fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
     for (idx, column) in req_fields.into_iter().enumerate() {
         let id = ids.get(idx).copied().unwrap_or(u32::MAX);
         let offset = (idx as f32) * 24.0;
-        let caption = if idx == 0 {
-            caption_override.clone().unwrap_or_else(|| column.clone())
-        } else {
-            column.clone()
-        };
+        let caption = if idx == 0 { caption_override.clone().unwrap_or_else(|| column.clone()) } else { column.clone() };
         let name = if idx == 0 {
-            name_override
-                .clone()
-                .unwrap_or_else(|| sanitize_object_name("Slicer", &column, id))
+            name_override.clone().unwrap_or_else(|| sanitize_object_name("Slicer", &column, id))
         } else {
             sanitize_object_name("Slicer", &column, id)
         };
@@ -806,14 +659,7 @@ fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
             pivots: vec![],
             column,
             caption,
-            anchor: Anchor {
-                cell: at,
-                dx: 4.0 + offset,
-                dy: 4.0 + offset,
-                width,
-                height,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: at, dx: 4.0 + offset, dy: 4.0 + offset, width, height, mode: AnchorMode::MoveOnly },
             selected: None,
             columns,
             multi_select,
@@ -829,27 +675,12 @@ fn insert_slicer(s: &mut Session, p: &Json) -> Result<Json> {
     })
 }
 
-fn insert_pivot_slicers(
-    s: &mut Session,
-    p: &Json,
-    sheet: usize,
-    pt_sheet: usize,
-    pt_idx: usize,
-    pivot_names: Vec<String>,
-) -> Result<Json> {
+fn insert_pivot_slicers(s: &mut Session, p: &Json, sheet: usize, pt_sheet: usize, pt_idx: usize, pivot_names: Vec<String>) -> Result<Json> {
     let (headers, default_at, ids) = {
         let d = s.doc()?;
-        let pt = d
-            .wb
-            .sheet(pt_sheet)
-            .and_then(|sh| sh.pivots.get(pt_idx))
-            .ok_or_else(|| bad("insert.slicer", "no such PivotTable"))?;
-        let src = crate::pivot::read_source(&d.wb, &pt.source, pt_sheet)
-            .map_err(|e| bad("insert.slicer", e))?;
-        let right_col = pt
-            .last_range
-            .map_or(pt.anchor.col.saturating_add(3), |r| r.end.col.saturating_add(2))
-            .min(gridcraft_core::MAX_COLS - 1);
+        let pt = d.wb.sheet(pt_sheet).and_then(|sh| sh.pivots.get(pt_idx)).ok_or_else(|| bad("insert.slicer", "no such PivotTable"))?;
+        let src = crate::pivot::read_source(&d.wb, &pt.source, pt_sheet).map_err(|e| bad("insert.slicer", e))?;
+        let right_col = pt.last_range.map_or(pt.anchor.col.saturating_add(3), |r| r.end.col.saturating_add(2)).min(gridcraft_core::MAX_COLS - 1);
         let top_row = pt.last_range.map_or(pt.anchor.row, |r| r.start.row);
         let count = requested_fields_param(p).map_or(1, |v| v.len().max(1));
         (src.headers, CellRef::new(top_row, right_col), d.wb.free_object_ids(count))
@@ -869,10 +700,7 @@ fn insert_pivot_slicers(
             resolved
         }
         None => {
-            let first = headers
-                .first()
-                .cloned()
-                .ok_or_else(|| bad("insert.slicer", "the PivotTable source has no fields"))?;
+            let first = headers.first().cloned().ok_or_else(|| bad("insert.slicer", "the PivotTable source has no fields"))?;
             vec![first]
         }
     };
@@ -890,15 +718,9 @@ fn insert_pivot_slicers(
     for (idx, column) in req_fields.into_iter().enumerate() {
         let id = ids.get(idx).copied().unwrap_or(u32::MAX);
         let offset = (idx as f32) * 24.0;
-        let caption = if idx == 0 {
-            caption_override.clone().unwrap_or_else(|| column.clone())
-        } else {
-            column.clone()
-        };
+        let caption = if idx == 0 { caption_override.clone().unwrap_or_else(|| column.clone()) } else { column.clone() };
         let name = if idx == 0 {
-            name_override
-                .clone()
-                .unwrap_or_else(|| sanitize_object_name("Slicer", &column, id))
+            name_override.clone().unwrap_or_else(|| sanitize_object_name("Slicer", &column, id))
         } else {
             sanitize_object_name("Slicer", &column, id)
         };
@@ -909,14 +731,7 @@ fn insert_pivot_slicers(
             pivots: pivot_names.clone(),
             column,
             caption,
-            anchor: Anchor {
-                cell: at,
-                dx: 4.0 + offset,
-                dy: 4.0 + offset,
-                width,
-                height,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: at, dx: 4.0 + offset, dy: 4.0 + offset, width, height, mode: AnchorMode::MoveOnly },
             selected: None,
             columns,
             multi_select,
@@ -950,37 +765,23 @@ fn find_slicer(s: &Session, p: &Json) -> Result<(usize, usize, u32)> {
         return Err(bad("slicer", "no slicer with that id"));
     }
     let sh = d.wb.sheet(active_si).ok_or(EngineError::NoDocument)?;
-    let idx = sh
-        .slicers
-        .len()
-        .checked_sub(1)
-        .ok_or_else(|| bad("slicer", "no slicer on this sheet"))?;
+    let idx = sh.slicers.len().checked_sub(1).ok_or_else(|| bad("slicer", "no slicer on this sheet"))?;
     let id = sh.slicers.get(idx).map_or(0, |x| x.id);
     Ok((active_si, idx, id))
 }
 
 fn slicer_toggle(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, idx, id) = find_slicer(s, p)?;
-    let value = str_param(p, "value")
-        .or_else(|| str_param(p, "item"))
-        .ok_or_else(|| bad("slicer.toggle", "missing `value`"))?
-        .to_string();
+    let value = str_param(p, "value").or_else(|| str_param(p, "item")).ok_or_else(|| bad("slicer.toggle", "missing `value`"))?.to_string();
     let (all, current, sl_multi) = {
         let d = s.doc()?;
-        let sl = d
-            .wb
-            .sheet(sheet)
-            .and_then(|sh| sh.slicers.get(idx))
-            .ok_or_else(|| bad("slicer.toggle", "no slicer"))?;
+        let sl = d.wb.sheet(sheet).and_then(|sh| sh.slicers.get(idx)).ok_or_else(|| bad("slicer.toggle", "no slicer"))?;
         let all = slicer_values(&d.wb, sheet, sl);
         (all, sl.selected.clone(), sl.multi_select)
     };
     let multi = bool_param(p, "multi").unwrap_or(sl_multi);
-    let canonical_val = all
-        .iter()
-        .find(|v| v.eq_ignore_ascii_case(&value))
-        .cloned()
-        .ok_or_else(|| bad("slicer.toggle", "value is not in the field"))?;
+    let canonical_val =
+        all.iter().find(|v| v.eq_ignore_ascii_case(&value)).cloned().ok_or_else(|| bad("slicer.toggle", "value is not in the field"))?;
 
     let new_selected: Option<Vec<String>> = if multi {
         let mut set: Vec<String> = current.unwrap_or_else(|| all.clone());
@@ -990,11 +791,7 @@ fn slicer_toggle(s: &mut Session, p: &Json) -> Result<Json> {
             }
             None => set.push(canonical_val),
         }
-        if set.len() == all.len() && all.iter().all(|a| set.iter().any(|x| x.eq_ignore_ascii_case(a))) {
-            None
-        } else {
-            Some(set)
-        }
+        if set.len() == all.len() && all.iter().all(|a| set.iter().any(|x| x.eq_ignore_ascii_case(a))) { None } else { Some(set) }
     } else {
         match &current {
             Some(set) if set.len() == 1 && set.iter().any(|x| x.eq_ignore_ascii_case(&canonical_val)) => None,
@@ -1018,11 +815,7 @@ fn slicer_select(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, idx, id) = find_slicer(s, p)?;
     let all = {
         let d = s.doc()?;
-        let sl = d
-            .wb
-            .sheet(sheet)
-            .and_then(|sh| sh.slicers.get(idx))
-            .ok_or_else(|| bad("slicer.select", "no slicer"))?;
+        let sl = d.wb.sheet(sheet).and_then(|sh| sh.slicers.get(idx)).ok_or_else(|| bad("slicer.select", "no slicer"))?;
         slicer_values(&d.wb, sheet, sl)
     };
     let new_selected: Option<Vec<String>> = match p.get("values") {
@@ -1030,9 +823,7 @@ fn slicer_select(s: &mut Session, p: &Json) -> Result<Json> {
         Some(Json::Array(arr)) => {
             let mut chosen = Vec::with_capacity(arr.len());
             for entry in arr {
-                let raw = entry
-                    .as_str()
-                    .ok_or_else(|| bad("slicer.select", "`values` must be an array of strings"))?;
+                let raw = entry.as_str().ok_or_else(|| bad("slicer.select", "`values` must be an array of strings"))?;
                 let canon = all
                     .iter()
                     .find(|v| v.eq_ignore_ascii_case(raw))
@@ -1042,11 +833,7 @@ fn slicer_select(s: &mut Session, p: &Json) -> Result<Json> {
                     chosen.push(canon);
                 }
             }
-            if chosen.len() == all.len() && all.iter().all(|a| chosen.iter().any(|x| x.eq_ignore_ascii_case(a))) {
-                None
-            } else {
-                Some(chosen)
-            }
+            if chosen.len() == all.len() && all.iter().all(|a| chosen.iter().any(|x| x.eq_ignore_ascii_case(a))) { None } else { Some(chosen) }
         }
         Some(_) => return Err(bad("slicer.select", "`values` must be an array of strings or null")),
     };
@@ -1133,13 +920,7 @@ fn slicer_update(s: &mut Session, p: &Json) -> Result<Json> {
 
 fn slicer_delete(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, idx, id) = find_slicer(s, p)?;
-    let removed = s
-        .doc()?
-        .wb
-        .sheet(sheet)
-        .and_then(|sh| sh.slicers.get(idx))
-        .cloned()
-        .ok_or_else(|| bad("slicer.delete", "no slicer"))?;
+    let removed = s.doc()?.wb.sheet(sheet).and_then(|sh| sh.slicers.get(idx)).cloned().ok_or_else(|| bad("slicer.delete", "no slicer"))?;
     edit(s, |cx| {
         cx.sheet_mut(sheet)?.slicers.retain(|x| x.id != id);
         cleanup_deleted_slicer(&mut cx.wb, sheet, &removed);
@@ -1155,18 +936,14 @@ fn parse_optional_date_param(p: &Json, key: &str, cmd: &str) -> Result<Option<St
         None | Some(Json::Null) => Ok(None),
         Some(Json::String(raw)) if raw.trim().is_empty() => Ok(None),
         Some(Json::String(raw)) => {
-            let (y, m, d) = crate::pivot::parse_iso_ymd(raw)
-                .ok_or_else(|| bad(cmd, format!("`{key}` must be an ISO date `YYYY-MM-DD`")))?;
+            let (y, m, d) = crate::pivot::parse_iso_ymd(raw).ok_or_else(|| bad(cmd, format!("`{key}` must be an ISO date `YYYY-MM-DD`")))?;
             Ok(Some(format_iso_ymd(y, m, d)))
         }
         Some(_) => Err(bad(cmd, format!("`{key}` must be an ISO date string or null"))),
     }
 }
 
-fn normalize_date_bounds(
-    start: Option<String>,
-    end: Option<String>,
-) -> (Option<String>, Option<String>) {
+fn normalize_date_bounds(start: Option<String>, end: Option<String>) -> (Option<String>, Option<String>) {
     match (&start, &end) {
         (Some(a), Some(b)) if a > b => (end, start),
         _ => (start, end),
@@ -1185,11 +962,7 @@ fn insert_timeline(s: &mut Session, p: &Json) -> Result<Json> {
                 .pivot_at(d.selection.active)
                 .and_then(|pt| sh.pivots.iter().position(|x| x.id == pt.id))
                 .or_else(|| (!sh.pivots.is_empty()).then_some(0))
-                .ok_or_else(|| {
-                    EngineError::Other(
-                        "Select a cell inside a PivotTable first, or pass `pivot`.".into(),
-                    )
-                })?;
+                .ok_or_else(|| EngineError::Other("Select a cell inside a PivotTable first, or pass `pivot`.".into()))?;
             let canon = pivot_ref_name(&d.wb, target_sh, pt_idx, "");
             (target_sh, pt_idx, vec![canon])
         }
@@ -1198,36 +971,19 @@ fn insert_timeline(s: &mut Session, p: &Json) -> Result<Json> {
     let sheet = if p.get("sheet").is_some() { target_sheet(s, p)? } else { pt_sheet };
 
     let level = match str_param(p, "level") {
-        Some(lv) => TimelineLevel::parse(lv)
-            .ok_or_else(|| bad("insert.timeline", "level must be years, quarters, months or days"))?,
+        Some(lv) => TimelineLevel::parse(lv).ok_or_else(|| bad("insert.timeline", "level must be years, quarters, months or days"))?,
         None => TimelineLevel::Months,
     };
-    let raw_start = parse_optional_date_param(p, "start", "insert.timeline")?
-        .or(parse_optional_date_param(p, "startDate", "insert.timeline")?);
-    let raw_end = parse_optional_date_param(p, "end", "insert.timeline")?
-        .or(parse_optional_date_param(p, "endDate", "insert.timeline")?);
+    let raw_start = parse_optional_date_param(p, "start", "insert.timeline")?.or(parse_optional_date_param(p, "startDate", "insert.timeline")?);
+    let raw_end = parse_optional_date_param(p, "end", "insert.timeline")?.or(parse_optional_date_param(p, "endDate", "insert.timeline")?);
     let (start_date, end_date) = normalize_date_bounds(raw_start, raw_end);
 
     let (all_headers, date_headers, default_at, ids) = {
         let d = s.doc()?;
-        let pt = d
-            .wb
-            .sheet(pt_sheet)
-            .and_then(|sh| sh.pivots.get(pt_idx))
-            .ok_or_else(|| bad("insert.timeline", "no such PivotTable"))?;
-        let src = crate::pivot::read_source(&d.wb, &pt.source, pt_sheet)
-            .map_err(|e| bad("insert.timeline", e))?;
-        let date_cols: Vec<String> = src
-            .headers
-            .iter()
-            .enumerate()
-            .filter(|(c, _)| column_is_date(&src, *c))
-            .map(|(_, h)| h.clone())
-            .collect();
-        let right_col = pt
-            .last_range
-            .map_or(pt.anchor.col.saturating_add(3), |r| r.end.col.saturating_add(2))
-            .min(gridcraft_core::MAX_COLS - 1);
+        let pt = d.wb.sheet(pt_sheet).and_then(|sh| sh.pivots.get(pt_idx)).ok_or_else(|| bad("insert.timeline", "no such PivotTable"))?;
+        let src = crate::pivot::read_source(&d.wb, &pt.source, pt_sheet).map_err(|e| bad("insert.timeline", e))?;
+        let date_cols: Vec<String> = src.headers.iter().enumerate().filter(|(c, _)| column_is_date(&src, *c)).map(|(_, h)| h.clone()).collect();
+        let right_col = pt.last_range.map_or(pt.anchor.col.saturating_add(3), |r| r.end.col.saturating_add(2)).min(gridcraft_core::MAX_COLS - 1);
         let top_row = pt.last_range.map_or(pt.anchor.row, |r| r.start.row);
         let count = requested_fields_param(p).map_or(1, |v| v.len().max(1));
         (src.headers, date_cols, CellRef::new(top_row, right_col), d.wb.free_object_ids(count))
@@ -1248,9 +1004,7 @@ fn insert_timeline(s: &mut Session, p: &Json) -> Result<Json> {
         }
         None => {
             let first = date_headers.first().cloned().ok_or_else(|| {
-                EngineError::Other(
-                    "We can't create a Timeline for this report because it doesn't have a field formatted as Date.".into(),
-                )
+                EngineError::Other("We can't create a Timeline for this report because it doesn't have a field formatted as Date.".into())
             })?;
             vec![first]
         }
@@ -1267,15 +1021,9 @@ fn insert_timeline(s: &mut Session, p: &Json) -> Result<Json> {
     for (idx, field) in req_fields.into_iter().enumerate() {
         let id = ids.get(idx).copied().unwrap_or(u32::MAX);
         let offset_y = (idx as f32) * (height + 12.0);
-        let caption = if idx == 0 {
-            caption_override.clone().unwrap_or_else(|| field.clone())
-        } else {
-            field.clone()
-        };
+        let caption = if idx == 0 { caption_override.clone().unwrap_or_else(|| field.clone()) } else { field.clone() };
         let name = if idx == 0 {
-            name_override
-                .clone()
-                .unwrap_or_else(|| sanitize_object_name("Timeline", &field, id))
+            name_override.clone().unwrap_or_else(|| sanitize_object_name("Timeline", &field, id))
         } else {
             sanitize_object_name("Timeline", &field, id)
         };
@@ -1289,14 +1037,7 @@ fn insert_timeline(s: &mut Session, p: &Json) -> Result<Json> {
             start_date: start_date.clone(),
             end_date: end_date.clone(),
             style: style.clone(),
-            anchor: Anchor {
-                cell: at,
-                dx: 4.0,
-                dy: 4.0 + offset_y,
-                width,
-                height,
-                mode: AnchorMode::MoveOnly,
-            },
+            anchor: Anchor { cell: at, dx: 4.0, dy: 4.0 + offset_y, width, height, mode: AnchorMode::MoveOnly },
         });
     }
 
@@ -1332,11 +1073,7 @@ fn find_timeline(s: &Session, p: &Json) -> Result<(usize, usize, u32)> {
         return Err(bad("timeline", "no timeline with that id"));
     }
     let sh = d.wb.sheet(active_si).ok_or(EngineError::NoDocument)?;
-    let idx = sh
-        .timelines
-        .len()
-        .checked_sub(1)
-        .ok_or_else(|| bad("timeline", "no timeline on this sheet"))?;
+    let idx = sh.timelines.len().checked_sub(1).ok_or_else(|| bad("timeline", "no timeline on this sheet"))?;
     let id = sh.timelines.get(idx).map_or(0, |x| x.id);
     Ok((active_si, idx, id))
 }
@@ -1348,22 +1085,14 @@ fn timeline_set_range(s: &mut Session, p: &Json) -> Result<Json> {
     } else if p.get("startDate").is_some() {
         parse_optional_date_param(p, "startDate", "timeline.setRange")?
     } else {
-        s.doc()?
-            .wb
-            .sheet(sheet)
-            .and_then(|sh| sh.timelines.get(idx))
-            .and_then(|tl| tl.start_date.clone())
+        s.doc()?.wb.sheet(sheet).and_then(|sh| sh.timelines.get(idx)).and_then(|tl| tl.start_date.clone())
     };
     let raw_end = if p.get("end").is_some() {
         parse_optional_date_param(p, "end", "timeline.setRange")?
     } else if p.get("endDate").is_some() {
         parse_optional_date_param(p, "endDate", "timeline.setRange")?
     } else {
-        s.doc()?
-            .wb
-            .sheet(sheet)
-            .and_then(|sh| sh.timelines.get(idx))
-            .and_then(|tl| tl.end_date.clone())
+        s.doc()?.wb.sheet(sheet).and_then(|sh| sh.timelines.get(idx)).and_then(|tl| tl.end_date.clone())
     };
     let (start_date, end_date) = normalize_date_bounds(raw_start, raw_end);
     edit(s, |cx| {
@@ -1380,8 +1109,7 @@ fn timeline_set_range(s: &mut Session, p: &Json) -> Result<Json> {
 fn timeline_set_level(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, idx, _id) = find_timeline(s, p)?;
     let lv_str = str_param(p, "level").ok_or_else(|| bad("timeline.setLevel", "missing `level`"))?;
-    let level = TimelineLevel::parse(lv_str)
-        .ok_or_else(|| bad("timeline.setLevel", "level must be years, quarters, months or days"))?;
+    let level = TimelineLevel::parse(lv_str).ok_or_else(|| bad("timeline.setLevel", "level must be years, quarters, months or days"))?;
     edit(s, |cx| {
         if let Some(tl) = cx.sheet_mut(sheet)?.timelines.get_mut(idx) {
             tl.level = level;
@@ -1413,10 +1141,7 @@ fn timeline_update(s: &mut Session, p: &Json) -> Result<Json> {
     let caption = str_param(p, "caption").map(str::to_string);
     let style = str_param(p, "style").map(str::to_string);
     let level = match str_param(p, "level") {
-        Some(lv) => Some(
-            TimelineLevel::parse(lv)
-                .ok_or_else(|| bad("timeline.update", "level must be years, quarters, months or days"))?,
-        ),
+        Some(lv) => Some(TimelineLevel::parse(lv).ok_or_else(|| bad("timeline.update", "level must be years, quarters, months or days"))?),
         None => None,
     };
     let new_pivots = if p.get("pivots").is_some() || p.get("pivot").is_some() {
@@ -1465,13 +1190,7 @@ fn timeline_update(s: &mut Session, p: &Json) -> Result<Json> {
 
 fn timeline_delete(s: &mut Session, p: &Json) -> Result<Json> {
     let (sheet, idx, id) = find_timeline(s, p)?;
-    let removed = s
-        .doc()?
-        .wb
-        .sheet(sheet)
-        .and_then(|sh| sh.timelines.get(idx))
-        .cloned()
-        .ok_or_else(|| bad("timeline.delete", "no timeline"))?;
+    let removed = s.doc()?.wb.sheet(sheet).and_then(|sh| sh.timelines.get(idx)).cloned().ok_or_else(|| bad("timeline.delete", "no timeline"))?;
     edit(s, |cx| {
         cx.sheet_mut(sheet)?.timelines.retain(|x| x.id != id);
         cleanup_deleted_timeline(&mut cx.wb, &removed);

@@ -135,11 +135,7 @@ fn every_kind_follows_row_and_column_edits_and_sorts() {
     let cells = |s: &Session| objs.map(|o| cell_of(s, o));
     assert_eq!(cells(&s), ["D2", "D18", "H18", "P2", "L2", "L18", "P18"]);
     s.execute("home.insertRows", json!({"rows": "10:11"})).unwrap();
-    assert_eq!(
-        cells(&s),
-        ["D2", "D20", "H18", "P2", "L2", "L20", "P20"],
-        "rows inserted above move the objects below them; an absolute shape stays"
-    );
+    assert_eq!(cells(&s), ["D2", "D20", "H18", "P2", "L2", "L20", "P20"], "rows inserted above move the objects below them; an absolute shape stays");
     s.execute("home.insertColumns", json!({"cols": "C:C"})).unwrap();
     assert_eq!(cells(&s), ["E2", "E20", "H18", "Q2", "M2", "M20", "Q20"]);
     s.execute("home.deleteColumns", json!({"cols": "C:C"})).unwrap();

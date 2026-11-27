@@ -497,12 +497,7 @@ fn write_sheets(
     out: &mut Out,
     active: usize,
     wb_rels: &mut Rels,
-) -> (
-    String,
-    crate::passthrough::WorkbookKept,
-    crate::pivot::PivotWriter,
-    crate::slicer::SlicerWriter,
-) {
+) -> (String, crate::passthrough::WorkbookKept, crate::pivot::PivotWriter, crate::slicer::SlicerWriter) {
     // Kept content first: the chart sheets among the worksheets need their relationship ids.
     let kept = crate::passthrough::write_workbook(wb, wb_rels, out);
     let mut pivots = crate::pivot::PivotWriter::default();
@@ -512,8 +507,7 @@ fn write_sheets(
     let mut ids = crate::passthrough::SheetIds::new(wb, &kept);
     for (i, sheet) in wb.sheets.iter().enumerate() {
         sheets_xml.push_str(&kept.sheet_entries(i, false, &mut ids));
-        let (xml, mut rels) =
-            crate::sheet_write::write_sheet(wb, i, i == active, out, wb_rels, &mut slicers);
+        let (xml, mut rels) = crate::sheet_write::write_sheet(wb, i, i == active, out, wb_rels, &mut slicers);
         pivots.add_sheet(wb, i, out, &mut rels);
         let name = format!("xl/worksheets/sheet{}.xml", i + 1);
         out.part(&name, Some(CT_WORKSHEET), xml.into_bytes());

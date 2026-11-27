@@ -731,6 +731,22 @@ fn export(app: &mut SheetApp, ui: &mut Ui, out: &mut Outcome) {
             out.close = true;
         }
     }
+    ui.add_space(14.0);
+    section(ui, lang, "Data-Driven Graphics");
+    for (dlg, icon, title, detail) in [
+        (
+            "exportIndesignCsv",
+            Icon::Share,
+            "InDesign Data Merge CSV",
+            "Export text, @image paths and #qrcode fields with UTF-8 or UTF-16LE BOM encoding.",
+        ),
+        ("exportIllustratorXml", Icon::Share, "Illustrator Variables XML", "Export Adobe Illustrator variable sets and sample data sets (.xml)."),
+    ] {
+        if action_row(ui, icon, lang.tr(title), lang.tr(detail)).clicked() && app.commit_edit(0, 0, false, false) {
+            app.open_dialog(dlg, json!({}));
+            out.close = true;
+        }
+    }
 }
 
 /// Exports the active workbook as `pdf`, `csv` or `html`: through the save picker on the desktop,

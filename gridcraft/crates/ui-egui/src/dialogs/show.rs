@@ -121,6 +121,28 @@ pub(crate) fn build_params(d: &Dialog) -> Json {
                 m.remove("availableFields");
             }
         }
+        "exportIndesignCsv" => {
+            if let Some(m) = v.as_object_mut() {
+                for (text_key, arr_key) in [("imageColumnsText", "imageColumns"), ("qrColumnsText", "qrColumns")] {
+                    if let Some(raw) = m.remove(text_key).and_then(|x| x.as_str().map(str::to_owned)) {
+                        let list: Vec<Json> = raw.split(',').map(str::trim).filter(|s| !s.is_empty()).map(|s| json!(s)).collect();
+                        if !list.is_empty() {
+                            m.insert(arr_key.into(), Json::Array(list));
+                        }
+                    }
+                }
+                if m.get("path").and_then(Json::as_str).is_some_and(|s| s.trim().is_empty()) {
+                    m.remove("path");
+                }
+            }
+        }
+        "exportIllustratorXml" | "importIndesignCsv" | "importIllustratorXml" => {
+            if let Some(m) = v.as_object_mut()
+                && m.get("path").and_then(Json::as_str).is_some_and(|s| s.trim().is_empty())
+            {
+                m.remove("path");
+            }
+        }
         _ => {}
     }
     v
@@ -438,27 +460,53 @@ pub fn show(app: &mut SheetApp, ctx: &egui::Context) {
         confirm = false;
     }
     if confirm && let Some(cmd) = d.command {
-        let params = build_params(&d);
-        match app.run(cmd, params) {
-            Ok(r) => {
-                open = false;
-                if d.name == "solver" {
-                    app.open_dialog("solverResults", r);
-                } else if d.name == "openPassword" {
-                    let path = d.values.get("path").and_then(Json::as_str).map(str::to_string);
-                    app.after_open(path.as_deref(), &r);
+        let mut params = build_params(&d);
+        if matches!(d.name.as_str(), "exportIndesignCsv" | "exportIllustratorXml")
+            && params.get("path").is_none()
+            && let Some(pick) = &app.services.pick_save
+        {
+            let ext = if d.name == "exportIndesignCsv" { "csv" } else { "xml" };
+            let title = app.session.active().map(|doc| doc.display_title()).unwrap_or_else(|| "DataMerge".into());
+            let stem = std::path::Path::new(&title).file_stem().and_then(std::ffi::OsStr::to_str).unwrap_or("DataMerge");
+            match pick(&format!("{stem}.{ext}")) {
+                Some(chosen) => {
+                    let full = if std::path::Path::new(&chosen).extension().is_none() { format!("{chosen}.{ext}") } else { chosen };
+                    params["path"] = json!(full);
                 }
+                None => confirm = false,
             }
-            // Data Analysis asks before replacing data in its output range.
-            Err(e) if d.name == "analysisToolPak" && e.contains(gridcraft_engine::cmd::analysis::OVERWRITE_ERROR) => {
-                d.values.insert("askOverwrite".into(), json!(true));
+        } else if matches!(d.name.as_str(), "importIndesignCsv" | "importIllustratorXml")
+            && params.get("path").is_none()
+            && params.get("base64").is_none()
+            && let Some(pick) = &app.services.pick_open
+        {
+            match pick() {
+                Some(chosen) => params["path"] = json!(chosen),
+                None => confirm = false,
             }
-            // A wrong password: say so, clear the field and stay open for another try.
-            Err(e) if d.name == "openPassword" => {
-                d.values.insert("password".into(), json!(""));
-                app.message = Some((d.title.clone(), crate::clean_error(&e)));
+        }
+        if confirm {
+            match app.run(cmd, params) {
+                Ok(r) => {
+                    open = false;
+                    if d.name == "solver" {
+                        app.open_dialog("solverResults", r);
+                    } else if d.name == "openPassword" {
+                        let path = d.values.get("path").and_then(Json::as_str).map(str::to_string);
+                        app.after_open(path.as_deref(), &r);
+                    }
+                }
+                // Data Analysis asks before replacing data in its output range.
+                Err(e) if d.name == "analysisToolPak" && e.contains(gridcraft_engine::cmd::analysis::OVERWRITE_ERROR) => {
+                    d.values.insert("askOverwrite".into(), json!(true));
+                }
+                // A wrong password: say so, clear the field and stay open for another try.
+                Err(e) if d.name == "openPassword" => {
+                    d.values.insert("password".into(), json!(""));
+                    app.message = Some((d.title.clone(), crate::clean_error(&e)));
+                }
+                Err(e) => app.message = Some((d.title.clone(), crate::clean_error(&e))),
             }
-            Err(e) => app.message = Some((d.title.clone(), crate::clean_error(&e))),
         }
     } else if confirm {
         open = false;
@@ -557,11 +605,7 @@ fn form(app: &SheetApp, ui: &mut egui::Ui, d: &mut Dialog, confirm: &mut bool, o
 fn field_picker_dialog(ui: &mut egui::Ui, d: &mut Dialog, confirm: &mut bool, open: &mut bool) {
     let lang = crate::i18n::current(ui.ctx());
     let is_timeline = d.name == "insertTimeline";
-    let prompt = if is_timeline {
-        "Select date fields to create timelines for:"
-    } else {
-        "Select fields to create slicers for:"
-    };
+    let prompt = if is_timeline { "Select date fields to create timelines for:" } else { "Select fields to create slicers for:" };
     ui.label(egui::RichText::new(lang.tr(prompt)).strong());
     ui.add_space(4.0);
     let available: Vec<String> = d
