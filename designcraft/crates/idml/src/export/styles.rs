@@ -8,7 +8,7 @@ use super::{
 impl<'a> Ex<'a> {
     // ---------- Styles.xml ----------
 
-    pub(super) fn styles_part(&mut self) -> Vec<u8> {
+    pub(crate) fn styles_part(&mut self) -> Vec<u8> {
         let d = self.d;
         let styles = d.styles.clone();
         let mut root = pkg_root("Styles");

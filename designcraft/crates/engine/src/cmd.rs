@@ -26,6 +26,7 @@ pub use find::same_find_domain;
 pub(crate) mod flex;
 mod fonts;
 pub(crate) mod guides;
+pub mod icml;
 mod index;
 mod inspect;
 mod interactive;
@@ -179,6 +180,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(file::specs());
         v.extend(file_info::specs());
         v.extend(interchange::specs());
+        v.extend(icml::specs());
         v.extend(export::specs());
         v.extend(export_batch::specs());
         v.extend(edit::specs());

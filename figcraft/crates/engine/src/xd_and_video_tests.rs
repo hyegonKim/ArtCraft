@@ -342,8 +342,7 @@ fn xd_open_import_and_import_xd_commands_preserve_nodes_interactions_and_keep_jo
     assert!(matches!(inst.kind, NodeKind::Instance { .. }));
     let checkout_id = checkout.id;
     assert!(inst.interactions.iter().any(|it| {
-        matches!(it.trigger, Trigger::OnClick)
-            && it.actions.iter().any(|a| matches!(a, Action::Navigate { dest, .. } if *dest == checkout_id))
+        matches!(it.trigger, Trigger::OnClick) && it.actions.iter().any(|a| matches!(a, Action::Navigate { dest, .. } if *dest == checkout_id))
     }));
 
     // 2. Import `.xd` via `file.import` (page append) and `file.importXd` (coordinate placement) + undo/redo.
@@ -365,10 +364,7 @@ fn xd_open_import_and_import_xd_commands_preserve_nodes_interactions_and_keep_jo
     s2.execute("edit.redo", &json!({})).unwrap();
     assert!(s2.doc().unwrap().node(placed_ids[0]).is_some(), "redo restores placed XD artboards");
 
-    assert!(
-        !s2.journal.iter().any(|(_, params)| params.get("data").is_some()),
-        "journal must strip raw base64 archive bytes"
-    );
+    assert!(!s2.journal.iter().any(|(_, params)| params.get("data").is_some()), "journal must strip raw base64 archive bytes");
 }
 
 #[test]

@@ -88,7 +88,7 @@ fn zip_parts(parts: &[(String, Vec<u8>)]) -> Vec<u8> {
     craft_idml::write_package(parts).unwrap_or_default()
 }
 
-struct Ex<'a> {
+pub(crate) struct Ex<'a> {
     d: &'a Document,
     opts: &'a ExportOptions,
     next: u64,
@@ -120,7 +120,7 @@ struct Ex<'a> {
 const MAX_EMBEDDED_BYTES: usize = 512 * 1024 * 1024;
 
 impl<'a> Ex<'a> {
-    fn new(d: &'a Document, opts: &'a ExportOptions) -> Self {
+    pub(crate) fn new(d: &'a Document, opts: &'a ExportOptions) -> Self {
         let mut ex = Ex {
             d,
             opts,

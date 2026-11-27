@@ -31,11 +31,7 @@ pub enum FixedElement {
     /// Rectangular or rounded frame (`<div>`), optionally wrapping nested child elements.
     Box(FixedBox),
     /// Text frame (`<div>`) containing rule/shading boxes and positioned Unicode `<span>` runs.
-    TextFrame {
-        frame: FixedBox,
-        rules: Vec<FixedBox>,
-        spans: Vec<FixedTextSpan>,
-    },
+    TextFrame { frame: FixedBox, rules: Vec<FixedBox>, spans: Vec<FixedTextSpan> },
     /// Non-rectangular vector path, line, ellipse, or polygon (`<svg>`).
     Svg(FixedVectorSvg),
     /// Placed raster image (`<img>`), optionally clipped by an outer frame box.
@@ -194,12 +190,7 @@ fn write_box_style(b: &FixedBox, style: &mut String) {
     }
 }
 
-fn render_element(
-    el: &FixedElement,
-    generics: &BTreeMap<String, String>,
-    assets: &mut AssetRegistry,
-    out: &mut String,
-) {
+fn render_element(el: &FixedElement, generics: &BTreeMap<String, String>, assets: &mut AssetRegistry, out: &mut String) {
     match el {
         FixedElement::Box(b) => {
             if let Some(href) = &b.href {
@@ -263,12 +254,7 @@ fn render_element(
                         xml_text(&sp.text)
                     );
                 } else {
-                    let _ = write!(
-                        out,
-                        "<span class=\"dc-span\"{dir_attr} style=\"{}\">{}</span>",
-                        xml_attr(&ss),
-                        xml_text(&sp.text)
-                    );
+                    let _ = write!(out, "<span class=\"dc-span\"{dir_attr} style=\"{}\">{}</span>", xml_attr(&ss), xml_text(&sp.text));
                 }
             }
             for child in &frame.children {
@@ -283,13 +269,7 @@ fn render_element(
             if let Some(href) = &svg.href {
                 let _ = write!(out, "<a class=\"dc-link\" href=\"{}\">", xml_attr(href));
             }
-            let mut style = format!(
-                "left:{:.2}px;top:{:.2}px;width:{:.2}px;height:{:.2}px;",
-                svg.x,
-                svg.y,
-                svg.width.max(1.0),
-                svg.height.max(1.0)
-            );
+            let mut style = format!("left:{:.2}px;top:{:.2}px;width:{:.2}px;height:{:.2}px;", svg.x, svg.y, svg.width.max(1.0), svg.height.max(1.0));
             if let Some([m0, m1, m2, m3, m4, m5]) = svg.matrix {
                 let _ = write!(style, "transform:matrix({m0:.5},{m1:.5},{m2:.5},{m3:.5},{m4:.2},{m5:.2});");
             }
@@ -351,13 +331,7 @@ fn render_element(
             if let Some([m0, m1, m2, m3, m4, m5]) = ras.img_matrix {
                 let _ = write!(istyle, "transform:matrix({m0:.5},{m1:.5},{m2:.5},{m3:.5},{m4:.2},{m5:.2});");
             }
-            let _ = write!(
-                out,
-                "<img class=\"dc-img\" src=\"{}\" alt=\"{}\" style=\"{}\"/>",
-                xml_attr(&src),
-                xml_attr(&ras.alt),
-                xml_attr(&istyle),
-            );
+            let _ = write!(out, "<img class=\"dc-img\" src=\"{}\" alt=\"{}\" style=\"{}\"/>", xml_attr(&src), xml_attr(&ras.alt), xml_attr(&istyle),);
             out.push_str("</div>");
             if ras.frame.href.is_some() {
                 out.push_str("</a>");
@@ -367,11 +341,7 @@ fn render_element(
 }
 
 /// Exports a pre-paginated EPUB 3.0 package using true HTML5 + CSS3 scene markup per page.
-pub fn export_fixed_epub_scene(
-    doc: &Document,
-    pages: &[FixedPageScene],
-    opts: &EpubOptions,
-) -> Result<Vec<u8>, EpubError> {
+pub fn export_fixed_epub_scene(doc: &Document, pages: &[FixedPageScene], opts: &EpubOptions) -> Result<Vec<u8>, EpubError> {
     let title = capped_title(opts.title.clone().unwrap_or_else(|| doc.metadata_title().to_string()));
     let lang = language_tag(&opts.language);
     let mut resources = Vec::new();
@@ -380,12 +350,7 @@ pub fn export_fixed_epub_scene(
 
     for (index, font) in opts.fonts.iter().enumerate() {
         let (path, mime) = font_file(index, font);
-        resources.push(craft_epub::Resource::new(
-            format!("font{index}"),
-            path,
-            mime,
-            Cow::Borrowed(font.data.as_slice()),
-        ));
+        resources.push(craft_epub::Resource::new(format!("font{index}"), path, mime, Cow::Borrowed(font.data.as_slice())));
     }
 
     let mut assets = AssetRegistry::new();
@@ -430,11 +395,7 @@ pub fn export_fixed_epub_scene(
             xhtml.into_bytes(),
         ));
         spine.push(format!("page{number}"));
-        navigation.push(craft_epub::NavItem {
-            href: format!("page{number}.xhtml"),
-            label,
-            level: 0,
-        });
+        navigation.push(craft_epub::NavItem { href: format!("page{number}.xhtml"), label, level: 0 });
     }
 
     for (idx, (_, (path, mime, data))) in assets.by_key.into_iter().enumerate() {
@@ -442,36 +403,19 @@ pub fn export_fixed_epub_scene(
     }
 
     if let Some(cover) = &opts.cover {
-        let (path, mime) = if cover.starts_with(&[0xFF, 0xD8, 0xFF]) {
-            ("images/cover.jpg", "image/jpeg")
-        } else {
-            ("images/cover.png", "image/png")
-        };
-        resources.push(
-            craft_epub::Resource::new("cover-img", path, mime, Cow::Borrowed(cover.as_slice()))
-                .with_properties("cover-image")
-                .stored(),
-        );
+        let (path, mime) =
+            if cover.starts_with(&[0xFF, 0xD8, 0xFF]) { ("images/cover.jpg", "image/jpeg") } else { ("images/cover.png", "image/png") };
+        resources.push(craft_epub::Resource::new("cover-img", path, mime, Cow::Borrowed(cover.as_slice())).with_properties("cover-image").stored());
     }
 
-    let (width, height) = pages
-        .first()
-        .map_or((612, 792), |p| (p.width.round().max(1.0) as u32, p.height.round().max(1.0) as u32));
-    let heading = opts
-        .toc_title
-        .as_deref()
-        .filter(|v| !v.trim().is_empty())
-        .unwrap_or_else(|| contents_title(&opts.language));
+    let (width, height) = pages.first().map_or((612, 792), |p| (p.width.round().max(1.0) as u32, p.height.round().max(1.0) as u32));
+    let heading = opts.toc_title.as_deref().filter(|v| !v.trim().is_empty()).unwrap_or_else(|| contents_title(&opts.language));
     let book = craft_epub::Book {
         metadata: metadata(doc, opts, &title, lang),
         layout: craft_epub::Layout::PrePaginated { width, height },
         resources,
         spine,
-        nav: craft_epub::Nav {
-            kind: craft_epub::NavKind::PageList,
-            heading: heading.to_owned(),
-            items: navigation,
-        },
+        nav: craft_epub::Nav { kind: craft_epub::NavKind::PageList, heading: heading.to_owned(), items: navigation },
         ncx: false,
     };
     craft_epub::write(&book).map_err(|error| EpubError(error.to_string()))

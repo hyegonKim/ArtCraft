@@ -29,11 +29,7 @@ fn rows(text: &str) -> Vec<(String, String, String)> {
 
 /// The embedded PdfCraft catalog of `code` (not the shared one), `""` without one.
 fn app_catalog(code: &str) -> &'static str {
-    CRAFT_I18N
-        .iter()
-        .find(|(c, ..)| *c == code)
-        .map(|(_, _, app)| *app)
-        .unwrap_or(if code == "ko" { ko_builtin::BUILTIN_KO_TSV } else { "" })
+    CRAFT_I18N.iter().find(|(c, ..)| *c == code).map(|(_, _, app)| *app).unwrap_or(if code == "ko" { ko_builtin::BUILTIN_KO_TSV } else { "" })
 }
 
 /// Every translation `code`'s embedded catalogs hold, each plural form on its own: the fonts must

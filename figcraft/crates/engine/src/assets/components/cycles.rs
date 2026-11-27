@@ -78,12 +78,7 @@ fn find_cycle_from(edges: &BTreeMap<NodeId, BTreeSet<NodeId>>, roots: impl IntoI
     let mut state: BTreeMap<NodeId, u8> = BTreeMap::new();
     let mut path: Vec<NodeId> = Vec::new();
 
-    fn dfs(
-        u: NodeId,
-        edges: &BTreeMap<NodeId, BTreeSet<NodeId>>,
-        state: &mut BTreeMap<NodeId, u8>,
-        path: &mut Vec<NodeId>,
-    ) -> Option<Vec<NodeId>> {
+    fn dfs(u: NodeId, edges: &BTreeMap<NodeId, BTreeSet<NodeId>>, state: &mut BTreeMap<NodeId, u8>, path: &mut Vec<NodeId>) -> Option<Vec<NodeId>> {
         state.insert(u, 1);
         path.push(u);
         if let Some(nexts) = edges.get(&u) {
@@ -125,11 +120,7 @@ pub fn component_cycle(doc: &Document) -> Option<Vec<NodeId>> {
 
 fn component_display_name(doc: &Document, id: NodeId) -> String {
     let Some(n) = doc.node(id) else { return format!("{id}") };
-    if let Some(set_n) = variant_set(doc, id).and_then(|s| doc.node(s)) {
-        format!("{} ({})", set_n.name, n.name)
-    } else {
-        n.name.clone()
-    }
+    if let Some(set_n) = variant_set(doc, id).and_then(|s| doc.node(s)) { format!("{} ({})", set_n.name, n.name) } else { n.name.clone() }
 }
 
 fn format_cycle(doc: &Document, cyc: &[NodeId]) -> String {
@@ -197,11 +188,7 @@ pub fn contains_itself_error(doc: &Document, component: NodeId) -> String {
 
 /// Detach one instance inside `owner` that causes `owner -> target`, returning a repair note.
 fn detach_cyclic_link(doc: &mut Document, owner: NodeId, target: NodeId) -> Option<String> {
-    let candidates: Vec<NodeId> = doc
-        .subtree(owner)
-        .into_iter()
-        .filter(|&id| id != owner && owning_component(doc, id) == Some(owner))
-        .collect();
+    let candidates: Vec<NodeId> = doc.subtree(owner).into_iter().filter(|&id| id != owner && owning_component(doc, id) == Some(owner)).collect();
 
     // Prefer detaching a direct (non-nested) instance inside `owner` that leads to `target`.
     let edges = component_edges(doc);
@@ -214,8 +201,7 @@ fn detach_cyclic_link(doc: &mut Document, owner: NodeId, target: NodeId) -> Opti
         let NodeKind::Instance { component, props } = &n.kind else { continue };
         let direct = *component == target || reaches(&edges, *component, target);
         let via_prop = props.iter().any(|(k, v)| {
-            is_instance_swap_prop(doc, *component, k)
-                && crate::params::id_of(v).is_some_and(|s| s == target || reaches(&edges, s, target))
+            is_instance_swap_prop(doc, *component, k) && crate::params::id_of(v).is_some_and(|s| s == target || reaches(&edges, s, target))
         });
         if direct || via_prop {
             chosen = Some(id);
@@ -223,10 +209,9 @@ fn detach_cyclic_link(doc: &mut Document, owner: NodeId, target: NodeId) -> Opti
         }
     }
     let inst = chosen.or_else(|| {
-        candidates.into_iter().find(|&id| {
-            doc.node(id)
-                .is_some_and(|n| matches!(&n.kind, NodeKind::Instance { component, .. } if *component == target))
-        })
+        candidates
+            .into_iter()
+            .find(|&id| doc.node(id).is_some_and(|n| matches!(&n.kind, NodeKind::Instance { component, .. } if *component == target)))
     })?;
 
     let inst_name = doc.node(inst).map(|n| n.name.clone()).unwrap_or_default();
@@ -251,11 +236,7 @@ fn detach_cyclic_link(doc: &mut Document, owner: NodeId, target: NodeId) -> Opti
             }
             continue;
         }
-        let in_this = doc
-            .node(d)
-            .and_then(|n| n.parent)
-            .and_then(|p| super::owning_instance(doc, p))
-            .is_none();
+        let in_this = doc.node(d).and_then(|n| n.parent).and_then(|p| super::owning_instance(doc, p)).is_none();
         if !in_this {
             continue;
         }
@@ -269,9 +250,7 @@ fn detach_cyclic_link(doc: &mut Document, owner: NodeId, target: NodeId) -> Opti
     for nn in nested {
         rebase_instance(doc, nn);
     }
-    Some(format!(
-        "Instance \"{inst_name}\" in \"{owner_name}\" was detached because components can't contain each other"
-    ))
+    Some(format!("Instance \"{inst_name}\" in \"{owner_name}\" was detached because components can't contain each other"))
 }
 
 /// Break every component containment loop in `doc` by detaching one instance per loop, returning
@@ -290,11 +269,7 @@ pub fn break_component_cycles(doc: &mut Document) -> Vec<String> {
         }
     }
     if !notes.is_empty() {
-        let instances: Vec<NodeId> = doc
-            .nodes()
-            .filter(|n| matches!(n.kind, NodeKind::Instance { .. }))
-            .map(|n| n.id)
-            .collect();
+        let instances: Vec<NodeId> = doc.nodes().filter(|n| matches!(n.kind, NodeKind::Instance { .. })).map(|n| n.id).collect();
         for inst in instances {
             if doc.contains(inst) {
                 super::sync_instance(doc, inst);
@@ -327,13 +302,7 @@ pub(super) fn expansion_layers(doc: &Document, inst: NodeId, component: NodeId) 
         return None;
     }
 
-    fn collect(
-        doc: &Document,
-        cur: NodeId,
-        root_active: &BTreeSet<NodeId>,
-        active: &mut BTreeSet<NodeId>,
-        out: &mut Vec<NodeId>,
-    ) {
+    fn collect(doc: &Document, cur: NodeId, root_active: &BTreeSet<NodeId>, active: &mut BTreeSet<NodeId>, out: &mut Vec<NodeId>) {
         let Some(n) = doc.node(cur) else { return };
         for &child in &n.children {
             out.push(child);

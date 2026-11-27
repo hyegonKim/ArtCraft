@@ -270,7 +270,10 @@ pub(super) const TABLE: &[(&str, &str)] = &[
     ("Text Variables", "텍스트 변수"),
     ("Conditional Text", "조건부 텍스트"),
     ("Conveyor", "컨베이어"),
-    ("Collect objects with the Content Collector (B); place them with the Content Placer.", "내용 수집기(B)로 오브젝트를 수집하고 내용 배치기로 배치합니다."),
+    (
+        "Collect objects with the Content Collector (B); place them with the Content Placer.",
+        "내용 수집기(B)로 오브젝트를 수집하고 내용 배치기로 배치합니다.",
+    ),
     ("New Library…", "새 라이브러리…"),
     ("Open Library…", "라이브러리 열기…"),
     ("Save Library As…", "다른 이름으로 라이브러리 저장…"),
@@ -465,8 +468,16 @@ pub(super) const TABLE: &[(&str, &str)] = &[
     ("Sent {count} page(s) to {printer}", "{printer} 프린터로 {count}페이지를 전송했습니다"),
     ("the default printer", "기본 프린터"),
     ("Export a PDF, IDML or package to share — no cloud account needed.", "클라우드 계정 없이 PDF, IDML 또는 패키지로 내보내 공유할 수 있습니다."),
+    // InCopy (.icml / .icma) & Copyfit Editorial Mode
+    ("Import InCopy Story…", "InCopy 스토리 가져오기…"),
+    ("Export InCopy Story…", "InCopy 스토리 내보내기…"),
+    ("Copyfit Info", "카피핏 정보"),
+    ("Editorial Mode", "편집 모드"),
+    ("Layout View", "레이아웃 보기"),
+    ("Story View", "스토리 보기"),
+    ("Galley View", "갤리 보기"),
+    ("Overset: +{lines} lines ({words} words)", "오버셋: +{lines}줄 ({words}단어)"),
+    ("Copyfit: −{lines} lines ({words} words)", "카피핏 여유: −{lines}줄 ({words}단어)"),
 ];
 
-pub(super) const CONTEXT: &[(&str, &str, &str)] = &[
-    ("Number:", "count", "개수:"),
-];
+pub(super) const CONTEXT: &[(&str, &str, &str)] = &[("Number:", "count", "개수:")];

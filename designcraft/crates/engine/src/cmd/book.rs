@@ -167,10 +167,7 @@ fn no_book() -> EngineError {
 }
 
 fn is_indb_path(path: &str) -> bool {
-    std::path::Path::new(path)
-        .extension()
-        .and_then(std::ffi::OsStr::to_str)
-        .is_some_and(|e| e.eq_ignore_ascii_case("indb"))
+    std::path::Path::new(path).extension().and_then(std::ffi::OsStr::to_str).is_some_and(|e| e.eq_ignore_ascii_case("indb"))
 }
 
 fn xml_escape(s: &str) -> String {
@@ -229,10 +226,7 @@ pub(crate) fn encode_book_bytes(b: &Book) -> Result<Vec<u8>> {
     if is_indb_path(&b.path) {
         let xml = book_to_xml(b).into_bytes();
         let manifest = serde_json::to_vec_pretty(b).map_err(|e| EngineError::Other(e.to_string()))?;
-        let parts = vec![
-            ("Book.xml".to_string(), xml.clone()),
-            ("manifest.json".to_string(), manifest),
-        ];
+        let parts = vec![("Book.xml".to_string(), xml.clone()), ("manifest.json".to_string(), manifest)];
         Ok(craft_idml::write_package(&parts).unwrap_or(xml))
     } else {
         serde_json::to_vec_pretty(b).map_err(|e| EngineError::Other(e.to_string()))
@@ -265,11 +259,7 @@ fn parse_book_xml(xml: &str) -> std::result::Result<Book, String> {
         let craft_xml::Node::El(child) = node else { continue };
         match child.name.as_str() {
             "SyncOptions" => {
-                let flag = |k: &str, d: bool| {
-                    attr(child, k)
-                        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
-                        .unwrap_or(d)
-                };
+                let flag = |k: &str, d: bool| attr(child, k).map(|v| v.eq_ignore_ascii_case("true") || v == "1").unwrap_or(d);
                 b.sync_options.paragraph_styles = flag("ParagraphStyles", true);
                 b.sync_options.character_styles = flag("CharacterStyles", true);
                 b.sync_options.object_styles = flag("ObjectStyles", true);
@@ -316,8 +306,7 @@ fn scan_binary_indb_paths(bytes: &[u8]) -> Option<Book> {
             for ext in [".designcraft", ".idml", ".indd", ".indc"] {
                 if let Some(pos) = lower.find(ext) {
                     let candidate = &trimmed[..pos + ext.len()];
-                    let cleaned = candidate
-                        .trim_start_matches(|c: char| !c.is_alphanumeric() && !matches!(c, '/' | '\\' | '.'));
+                    let cleaned = candidate.trim_start_matches(|c: char| !c.is_alphanumeric() && !matches!(c, '/' | '\\' | '.'));
                     if cleaned.len() > ext.len() && seen.insert(cleaned.to_string()) {
                         found.push(cleaned.to_string());
                     }
@@ -328,25 +317,17 @@ fn scan_binary_indb_paths(bytes: &[u8]) -> Option<Book> {
 
     collect_from(&String::from_utf8_lossy(bytes));
     if bytes.len() >= 4 {
-        let u16_le: Vec<u16> = bytes
-            .chunks_exact(2)
-            .map(|c| u16::from_le_bytes([c[0], c[1]]))
-            .collect();
+        let u16_le: Vec<u16> = bytes.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
         collect_from(&String::from_utf16_lossy(&u16_le));
     }
 
-    if !found.is_empty() || has_magic {
-        Some(Book { documents: found, ..Default::default() })
-    } else {
-        None
-    }
+    if !found.is_empty() || has_magic { Some(Book { documents: found, ..Default::default() }) } else { None }
 }
 
 pub(crate) fn decode_book_bytes(bytes: &[u8]) -> std::result::Result<Book, String> {
     if bytes.starts_with(b"PK\x03\x04") {
         use std::io::Read as _;
-        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
-            .map_err(|e| format!("invalid .indb archive: {e}"))?;
+        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(|e| format!("invalid .indb archive: {e}"))?;
         if let Ok(mut mf) = archive.by_name("manifest.json") {
             let mut buf = Vec::new();
             mf.read_to_end(&mut buf).map_err(|e| e.to_string())?;
@@ -503,8 +484,8 @@ fn writable_chapter(s: &Session, path: &str, command: &'static str) -> Result<()
 fn paginate(s: &mut Session, p: &Value) -> Result<Value> {
     let mut b = s.book.as_ref().ok_or_else(no_book)?.clone();
     if let Some(m) = str_param(p, "mode") {
-        b.page_numbering = PageNumberingMode::parse(m)
-            .ok_or_else(|| bad("book.paginate", format!("unknown mode `{m}` (continue, nextOdd, nextEven)")))?;
+        b.page_numbering =
+            PageNumberingMode::parse(m).ok_or_else(|| bad("book.paginate", format!("unknown mode `{m}` (continue, nextOdd, nextEven)")))?;
     }
     if let Some(ib) = p.get("insertBlankPage").and_then(Value::as_bool) {
         b.insert_blank_page = ib;
@@ -638,9 +619,9 @@ fn sync_chapter_extras(d: &mut designcraft_doc::Document, src: &designcraft_doc:
     if opts.parent_pages {
         for parent in &src.parents {
             let label = parent.parent.as_ref().map(|p| format!("{}-{}", p.prefix, p.name)).unwrap_or_default();
-            if let Some(existing) = d.parents.iter_mut().find(|ep| {
-                ep.parent.as_ref().map(|p| format!("{}-{}", p.prefix, p.name)).unwrap_or_default() == label
-            }) {
+            if let Some(existing) =
+                d.parents.iter_mut().find(|ep| ep.parent.as_ref().map(|p| format!("{}-{}", p.prefix, p.name)).unwrap_or_default() == label)
+            {
                 let mut cloned = (**parent).clone();
                 cloned.id = existing.id;
                 *existing = std::sync::Arc::new(cloned);
@@ -721,8 +702,9 @@ fn start_at(d: &mut designcraft_doc::Document, n: u32) {
 fn preflight_book(s: &mut Session, p: &Value) -> Result<Value> {
     let b = s.book.as_ref().ok_or_else(no_book)?;
     let mut prof = match str_param(p, "profile") {
-        Some(name) => super::preflight::resolve_profile(s, Some(name))
-            .ok_or_else(|| bad("book.preflight", format!("unknown preflight profile `{name}`")))?,
+        Some(name) => {
+            super::preflight::resolve_profile(s, Some(name)).ok_or_else(|| bad("book.preflight", format!("unknown preflight profile `{name}`")))?
+        }
         None => super::preflight::resolve_profile(s, None).unwrap_or_default(),
     };
     if let Some(min) = p.get("minPpi").and_then(Value::as_f64) {
@@ -735,12 +717,7 @@ fn preflight_book(s: &mut Session, p: &Value) -> Result<Value> {
         let mut d = load(path)?;
         let _fonts = super::file::load_document_fonts(&mut d, path).0;
         let cache = designcraft_compose::Cache::new();
-        let issues = super::preflight::check_document_with_profile(
-            &d,
-            &cache,
-            Some(std::path::Path::new(path)),
-            &prof,
-        );
+        let issues = super::preflight::check_document_with_profile(&d, &cache, Some(std::path::Path::new(path)), &prof);
         let errors = issues.iter().filter(|i| i.severity == "error").count();
         let warnings = issues.len().saturating_sub(errors);
         total_errors += errors;
@@ -772,11 +749,8 @@ fn export_book_pdf(s: &mut Session, p: &Value) -> Result<Value> {
         let r = designcraft_pdf::export_pdf_with_report(&super::interchange::with_pdf_boxes(&d), &cache, &opts)
             .map_err(|e| EngineError::Other(e.to_string()))?;
         warnings.extend(r.warnings);
-        let sizes: Vec<(f32, f32)> = designcraft_render::pdf_page_sizes(&r.bytes)
-            .unwrap_or_default()
-            .into_iter()
-            .map(|(w, h)| (w as f32, h as f32))
-            .collect();
+        let sizes: Vec<(f32, f32)> =
+            designcraft_render::pdf_page_sizes(&r.bytes).unwrap_or_default().into_iter().map(|(w, h)| (w as f32, h as f32)).collect();
         parts.push((r.bytes, sizes));
     }
     let pages: usize = parts.iter().map(|pt| pt.1.len()).sum();
@@ -799,13 +773,9 @@ fn export_book_epub(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let fixed = p.get("fixedLayout").and_then(Value::as_bool).unwrap_or(false);
     let embed_fonts = p.get("embedFonts").and_then(Value::as_bool).unwrap_or(true);
-    let book_title = str_param(p, "title").map(str::to_string).unwrap_or_else(|| {
-        std::path::Path::new(&b.path)
-            .file_stem()
-            .and_then(std::ffi::OsStr::to_str)
-            .unwrap_or("Book")
-            .to_string()
-    });
+    let book_title = str_param(p, "title")
+        .map(str::to_string)
+        .unwrap_or_else(|| std::path::Path::new(&b.path).file_stem().and_then(std::ffi::OsStr::to_str).unwrap_or("Book").to_string());
     let mut opts = designcraft_epub::EpubOptions {
         title: Some(book_title),
         author: str_param(p, "author").map(str::to_string),
@@ -834,13 +804,7 @@ fn export_book_epub(s: &mut Session, p: &Value) -> Result<Value> {
         let mut warnings = Vec::new();
         let mut page_offset = 0usize;
         for (d, cache) in &docs_and_caches {
-            let mut builder = super::export::fixed_epub::FixedSceneBuilder::new(
-                d,
-                cache,
-                &mut warnings,
-                page_offset,
-                total_pages,
-            );
+            let mut builder = super::export::fixed_epub::FixedSceneBuilder::new(d, cache, &mut warnings, page_offset, total_pages);
             scenes.extend(builder.build_all_pages());
             if embed_fonts {
                 for f in builder.collect_embedded_fonts() {
@@ -852,8 +816,8 @@ fn export_book_epub(s: &mut Session, p: &Value) -> Result<Value> {
             page_offset += d.page_count();
         }
         opts.fonts = all_fonts;
-        let bytes = designcraft_epub::export_fixed_epub_scene(&docs_and_caches[0].0, &scenes, &opts)
-            .map_err(|e| EngineError::Other(e.to_string()))?;
+        let bytes =
+            designcraft_epub::export_fixed_epub_scene(&docs_and_caches[0].0, &scenes, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
         (bytes, scenes.len(), warnings)
     } else {
         // Merge chapters into a combined reflowable document.
@@ -988,24 +952,24 @@ pub fn specs() -> Vec<CommandSpec> {
             ok()
         }),
         cmd!(noundo "book.options", "Book Numbering & Sync Options", [], None,
-            "{pageNumbering?: \"continue\"|\"nextOdd\"|\"nextEven\", insertBlankPage?: bool, continueLists?: bool, paragraphStyles?: bool, characterStyles?: bool, objectStyles?: bool, tableStyles?: bool, cellStyles?: bool, swatches?: bool, parentPages?: bool, numberedLists?: bool, textVariables?: bool, conditionalText?: bool}",
-            has_book, |s, p| {
-                let mut b = s.book.as_ref().ok_or_else(no_book)?.clone();
-                if let Some(m) = str_param(p, "pageNumbering") {
-                    b.page_numbering = PageNumberingMode::parse(m)
-                        .ok_or_else(|| bad("book.options", format!("unknown pageNumbering `{m}`")))?;
-                }
-                if let Some(ib) = p.get("insertBlankPage").and_then(Value::as_bool) {
-                    b.insert_blank_page = ib;
-                }
-                if let Some(cl) = p.get("continueLists").and_then(Value::as_bool) {
-                    b.continue_lists = cl;
-                }
-                b.sync_options.apply_json(p);
-                save(&b)?;
-                s.book = Some(b);
-                ok()
-            }),
+        "{pageNumbering?: \"continue\"|\"nextOdd\"|\"nextEven\", insertBlankPage?: bool, continueLists?: bool, paragraphStyles?: bool, characterStyles?: bool, objectStyles?: bool, tableStyles?: bool, cellStyles?: bool, swatches?: bool, parentPages?: bool, numberedLists?: bool, textVariables?: bool, conditionalText?: bool}",
+        has_book, |s, p| {
+            let mut b = s.book.as_ref().ok_or_else(no_book)?.clone();
+            if let Some(m) = str_param(p, "pageNumbering") {
+                b.page_numbering = PageNumberingMode::parse(m)
+                    .ok_or_else(|| bad("book.options", format!("unknown pageNumbering `{m}`")))?;
+            }
+            if let Some(ib) = p.get("insertBlankPage").and_then(Value::as_bool) {
+                b.insert_blank_page = ib;
+            }
+            if let Some(cl) = p.get("continueLists").and_then(Value::as_bool) {
+                b.continue_lists = cl;
+            }
+            b.sync_options.apply_json(p);
+            save(&b)?;
+            s.book = Some(b);
+            ok()
+        }),
         cmd!(query "book.list", "Book", [], None, "{} → {path, styleSource, pageNumbering, insertBlankPage, continueLists, syncOptions, documents: [{path, pages, firstPage}]}", has_book, |s, _| {
             let b = s.book.as_ref().ok_or_else(no_book)?;
             let mut first = 1u32;

@@ -23,26 +23,17 @@ pub(crate) fn body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens) -> bool
         app.c2pa_draft.last_doc = Some((id, doc_gen));
         app.c2pa_draft.report = Some(doc.content_credentials());
     }
-    ui.label(
-        egui::RichText::new(tl!(
-            "Inspects C2PA JUMBF manifests in Associated Files, XMP metadata, and embedded images."
-        ))
-        .color(t.text_muted),
-    );
+    ui.label(egui::RichText::new(tl!("Inspects C2PA JUMBF manifests in Associated Files, XMP metadata, and embedded images.")).color(t.text_muted));
     ui.add_space(6.0);
 
     if let Some(report) = &app.c2pa_draft.report {
-        egui::Frame::new()
-            .fill(t.hover)
-            .corner_radius(egui::CornerRadius::same(6))
-            .inner_margin(egui::Margin::same(8))
-            .show(ui, |ui| {
-                ui.set_width(ui.available_width());
-                egui::ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-                    ui.set_min_height(120.0);
-                    render_report_contents(ui, report, t);
-                });
+        egui::Frame::new().fill(t.hover).corner_radius(egui::CornerRadius::same(6)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            egui::ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
+                ui.set_min_height(120.0);
+                render_report_contents(ui, report, t);
             });
+        });
     }
 
     ui.add_space(10.0);
@@ -75,10 +66,7 @@ fn render_report_contents(ui: &mut egui::Ui, report: &ContentCredentialsReport, 
         ui.label(crate::i18n::fmt(tl!("XMP provenance: {uri}"), &[("uri", uri)]));
         ui.add_space(4.0);
     }
-    ui.strong(crate::i18n::fmt(
-        tl!("C2PA manifests found: {n}"),
-        &[("n", &report.manifests.len().to_string())],
-    ));
+    ui.strong(crate::i18n::fmt(tl!("C2PA manifests found: {n}"), &[("n", &report.manifests.len().to_string())]));
     for manifest in &report.manifests {
         ui.separator();
         ui.strong(&manifest.source);
@@ -92,16 +80,10 @@ fn render_report_contents(ui: &mut egui::Ui, report: &ContentCredentialsReport, 
             ui.label(crate::i18n::fmt(tl!("Asset title: {title}"), &[("title", title)]));
         }
         if !manifest.assertions.is_empty() {
-            ui.label(crate::i18n::fmt(
-                tl!("Assertions: {list}"),
-                &[("list", &manifest.assertions.join(", "))],
-            ));
+            ui.label(crate::i18n::fmt(tl!("Assertions: {list}"), &[("list", &manifest.assertions.join(", "))]));
         }
         for signer in &manifest.signers {
-            ui.label(crate::i18n::fmt(
-                tl!("Signed by: {subject} (Issuer: {issuer})"),
-                &[("subject", &signer.subject), ("issuer", &signer.issuer)],
-            ));
+            ui.label(crate::i18n::fmt(tl!("Signed by: {subject} (Issuer: {issuer})"), &[("subject", &signer.subject), ("issuer", &signer.issuer)]));
         }
     }
 }

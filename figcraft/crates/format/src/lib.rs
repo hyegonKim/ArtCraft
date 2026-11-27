@@ -291,13 +291,9 @@ pub fn generate_video_poster_png(width: u32, height: u32) -> Result<Vec<u8>, For
 
 /// Register encoded video bytes with `doc`, storing an optional poster image (or generating a
 /// deterministic poster PNG) in `doc.images`. Returns `(video_hash, poster_hash, width, height, duration_secs)`.
-pub fn add_video(
-    doc: &mut Document,
-    bytes: Vec<u8>,
-    poster_bytes: Option<Vec<u8>>,
-) -> Result<(String, String, u32, u32, f64), FormatError> {
-    let (mime, w, h, dur) = VideoData::probe(&bytes)
-        .ok_or_else(|| FormatError::Corrupt("unsupported video format (expected MP4, MOV, WebM or Ogg)".into()))?;
+pub fn add_video(doc: &mut Document, bytes: Vec<u8>, poster_bytes: Option<Vec<u8>>) -> Result<(String, String, u32, u32, f64), FormatError> {
+    let (mime, w, h, dur) =
+        VideoData::probe(&bytes).ok_or_else(|| FormatError::Corrupt("unsupported video format (expected MP4, MOV, WebM or Ogg)".into()))?;
     let poster_raw = match poster_bytes {
         Some(pb) => pb,
         None => generate_video_poster_png(w, h)?,
@@ -306,14 +302,7 @@ pub fn add_video(
     let hash = image_hash(&bytes);
     doc.videos.insert(
         hash.clone(),
-        VideoData {
-            bytes: Arc::new(bytes),
-            mime: mime.to_string(),
-            width: w,
-            height: h,
-            duration_secs: dur,
-            poster: Some(poster_hash.clone()),
-        },
+        VideoData { bytes: Arc::new(bytes), mime: mime.to_string(), width: w, height: h, duration_secs: dur, poster: Some(poster_hash.clone()) },
     );
     Ok((hash, poster_hash, w, h, dur))
 }
@@ -939,12 +928,8 @@ fn read_videos<R: Read + Seek>(
     budget: ImageBudget,
     unpacked: &mut Unpacked,
 ) -> BTreeMap<String, VideoData> {
-    let mut hashes: Vec<String> = z
-        .file_names()
-        .filter_map(|n| n.strip_prefix("videos/"))
-        .filter(|h| VideoData::is_valid_key(h))
-        .map(str::to_string)
-        .collect();
+    let mut hashes: Vec<String> =
+        z.file_names().filter_map(|n| n.strip_prefix("videos/")).filter(|h| VideoData::is_valid_key(h)).map(str::to_string).collect();
     hashes.sort_by_key(|h| !meta.contains_key(h));
     let mut out = BTreeMap::new();
     let mut left = budget.bytes;

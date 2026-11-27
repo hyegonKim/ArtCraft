@@ -294,20 +294,14 @@ fn decode_base64_field(cmd: &str, p: &Value, key: &str) -> Result<Option<Vec<u8>
     let Some(b64) = string(p, key) else { return Ok(None) };
     use base64::Engine as _;
     let b64 = b64.split_once(',').map(|(_, d)| d.to_string()).unwrap_or(b64);
-    base64::engine::general_purpose::STANDARD
-        .decode(b64.trim())
-        .map(Some)
-        .map_err(|e| bad(cmd, format!("`{key}`: {e}")))
+    base64::engine::general_purpose::STANDARD.decode(b64.trim()).map(Some).map_err(|e| bad(cmd, format!("`{key}`: {e}")))
 }
 
 fn video_bytes(cmd: &str, p: &Value) -> Result<(Vec<u8>, Option<String>)> {
     if let Some(bytes) = decode_base64_field(cmd, p, "data")? {
         Ok((bytes, None))
     } else if let Some(path) = string(p, "path") {
-        let stem = std::path::Path::new(&path)
-            .file_stem()
-            .and_then(std::ffi::OsStr::to_str)
-            .map(str::to_string);
+        let stem = std::path::Path::new(&path).file_stem().and_then(std::ffi::OsStr::to_str).map(str::to_string);
         Ok((read_video_path(&path)?, stem))
     } else {
         Err(bad(cmd, "pass `data` (base64) or `path`"))
@@ -351,15 +345,13 @@ fn upload_video(s: &mut Session, p: &Value) -> Result<Value> {
     let muted = boolean(p, "muted");
 
     let doc = s.doc_mut()?;
-    let (video, poster, width, height, duration_secs) =
-        register_video_with_poster(cmd, doc, bytes, poster_bytes)?;
+    let (video, poster, width, height, duration_secs) = register_video_with_poster(cmd, doc, bytes, poster_bytes)?;
     let mut changed = 0;
     for id in ids {
         let n = doc.get_mut(id)?;
         let list = if stroke { &mut n.strokes } else { &mut n.fills };
-        let at = index
-            .or_else(|| list.iter().rposition(|x| matches!(x.kind, PaintKind::Video(_))))
-            .or_else(|| (!list.is_empty()).then(|| list.len() - 1));
+        let at =
+            index.or_else(|| list.iter().rposition(|x| matches!(x.kind, PaintKind::Video(_)))).or_else(|| (!list.is_empty()).then(|| list.len() - 1));
         if let Some(paint) = at.and_then(|i| list.get_mut(i)) {
             match &mut paint.kind {
                 PaintKind::Video(vid) => {
@@ -379,11 +371,7 @@ fn upload_video(s: &mut Session, p: &Value) -> Result<Value> {
                     }
                 }
                 kind => {
-                    let mut vid = VideoPaint::new(
-                        video.clone(),
-                        Some(poster.clone()),
-                        mode_override.unwrap_or(ImageScaleMode::Fill),
-                    );
+                    let mut vid = VideoPaint::new(video.clone(), Some(poster.clone()), mode_override.unwrap_or(ImageScaleMode::Fill));
                     if let Some(a) = autoplay {
                         vid.autoplay = a;
                     }
@@ -397,11 +385,7 @@ fn upload_video(s: &mut Session, p: &Value) -> Result<Value> {
                 }
             }
         } else if index.is_none() {
-            let mut vid = VideoPaint::new(
-                video.clone(),
-                Some(poster.clone()),
-                mode_override.unwrap_or(ImageScaleMode::Fill),
-            );
+            let mut vid = VideoPaint::new(video.clone(), Some(poster.clone()), mode_override.unwrap_or(ImageScaleMode::Fill));
             if let Some(a) = autoplay {
                 vid.autoplay = a;
             }
@@ -479,11 +463,7 @@ pub fn place_video(s: &mut Session, p: &Value) -> Result<Value> {
     let (video, poster, vw, vh, duration_secs) = register_video_with_poster(cmd, doc, bytes, poster_bytes)?;
     let (placed_w, placed_h) = figcraft_format::placed_size(vw, vh, 1.0, 4096.0);
     let w = num(p, "width").unwrap_or(placed_w);
-    let h = num(p, "height").unwrap_or(if num(p, "width").is_some() {
-        w * f64::from(vh) / f64::from(vw).max(1.0)
-    } else {
-        placed_h
-    });
+    let h = num(p, "height").unwrap_or(if num(p, "width").is_some() { w * f64::from(vh) / f64::from(vw).max(1.0) } else { placed_h });
     let nid = doc.alloc_id();
     let name = explicit_name.or(stem).unwrap_or_else(|| "Video".into());
     let mut node = Node::new(nid, NodeKind::Rectangle, name, w, h);

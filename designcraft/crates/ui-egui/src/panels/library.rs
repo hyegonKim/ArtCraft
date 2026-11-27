@@ -73,9 +73,7 @@ fn library_file_buttons(app: &mut DesignApp, ui: &mut egui::Ui) {
             });
             report(app, "Library", asked);
         }
-        if app.session.library.is_some()
-            && ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "Save As .indl…"))).clicked()
-        {
+        if app.session.library.is_some() && ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "Save As .indl…"))).clicked() {
             let asked = app.ask_save("Library.indl", Bound::App, |app, path| {
                 app.run("library.saveAs", json!({"path": path})).or_else(|e| report_err(app, "Library", e))
             });
@@ -96,17 +94,15 @@ fn library_filter_bar(app: &DesignApp, ui: &mut egui::Ui) -> (String, String, St
     }
     let lang = app.ui.language.as_str();
     ui.horizontal_wrapped(|ui| {
-        ui.add(
-            egui::TextEdit::singleline(&mut query)
-                .desired_width(110.0)
-                .hint_text(crate::i18n::tr(lang, "Search assets…")),
-        );
+        ui.add(egui::TextEdit::singleline(&mut query).desired_width(110.0).hint_text(crate::i18n::tr(lang, "Search assets…")));
         let type_label = if obj_type.is_empty() { "All Types" } else { obj_type.as_str() };
         craft_ui::ComboBox::from_id_salt("lib_type_combo")
             .selected_text(crate::rtl::widget(ui, crate::i18n::tr(lang, type_label)))
             .width(88.0)
             .show_ui(ui, |ui| {
-                for (val, label) in [("", "All Types"), ("text", "text"), ("image", "image"), ("shape", "shape"), ("geometry", "geometry"), ("group", "group")] {
+                for (val, label) in
+                    [("", "All Types"), ("text", "text"), ("image", "image"), ("shape", "shape"), ("geometry", "geometry"), ("group", "group")]
+                {
                     if ui.selectable_label(obj_type == val, crate::rtl::widget(ui, crate::i18n::tr(lang, label))).clicked() {
                         obj_type = val.to_string();
                     }
@@ -222,8 +218,8 @@ fn load_script(app: &mut DesignApp, path: &str, sel_id: egui::Id) {
 fn book_open_buttons(app: &mut DesignApp, ui: &mut egui::Ui) {
     ui.horizontal_wrapped(|ui| {
         if ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "New Book…"))).clicked() {
-            let asked = app
-                .ask_save("Book.indb", Bound::App, |app, path| app.run("book.new", json!({"path": path})).or_else(|e| report_err(app, "Book", e)));
+            let asked =
+                app.ask_save("Book.indb", Bound::App, |app, path| app.run("book.new", json!({"path": path})).or_else(|e| report_err(app, "Book", e)));
             report(app, "Book", asked);
         }
         if ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "Open…"))).clicked() {
@@ -231,12 +227,9 @@ fn book_open_buttons(app: &mut DesignApp, ui: &mut egui::Ui) {
                 app.ask_open("book", Bound::App, |app, path| app.run("book.open", json!({"path": path})).or_else(|e| report_err(app, "Book", e)));
             report(app, "Book", asked);
         }
-        if app.session.book.is_some()
-            && ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "Save As .indb…"))).clicked()
-        {
-            let asked = app.ask_save("Book.indb", Bound::App, |app, path| {
-                app.run("book.saveAs", json!({"path": path})).or_else(|e| report_err(app, "Book", e))
-            });
+        if app.session.book.is_some() && ui.button(crate::rtl::widget(ui, crate::i18n::tr(&app.ui.language, "Save As .indb…"))).clicked() {
+            let asked = app
+                .ask_save("Book.indb", Bound::App, |app, path| app.run("book.saveAs", json!({"path": path})).or_else(|e| report_err(app, "Book", e)));
             report(app, "Book", asked);
         }
     });
@@ -276,34 +269,31 @@ fn book_options_bar(app: &mut DesignApp, ui: &mut egui::Ui, info: &serde_json::V
         }
     });
 
-    egui::CollapsingHeader::new(crate::i18n::tr(&lang, "Synchronize Options"))
-        .id_salt("book_sync_opts")
-        .default_open(false)
-        .show(ui, |ui| {
-            let sync = &info["syncOptions"];
-            let cats = [
-                ("paragraphStyles", "Paragraph Styles"),
-                ("characterStyles", "Character Styles"),
-                ("objectStyles", "Object Styles"),
-                ("tableStyles", "Table Styles"),
-                ("cellStyles", "Cell Styles"),
-                ("swatches", "Swatches"),
-                ("parentPages", "Parent Pages"),
-                ("numberedLists", "Numbered Lists"),
-                ("textVariables", "Text Variables"),
-                ("conditionalText", "Conditional Text"),
-            ];
-            ui.horizontal_wrapped(|ui| {
-                for (key, label) in cats {
-                    let mut checked = sync[key].as_bool().unwrap_or(true);
-                    if ui.checkbox(&mut checked, crate::rtl::widget(ui, crate::i18n::tr(&lang, label))).changed() {
-                        let mut p = serde_json::Map::new();
-                        p.insert(key.into(), json!(checked));
-                        let _ = app.run("book.options", serde_json::Value::Object(p));
-                    }
+    egui::CollapsingHeader::new(crate::i18n::tr(&lang, "Synchronize Options")).id_salt("book_sync_opts").default_open(false).show(ui, |ui| {
+        let sync = &info["syncOptions"];
+        let cats = [
+            ("paragraphStyles", "Paragraph Styles"),
+            ("characterStyles", "Character Styles"),
+            ("objectStyles", "Object Styles"),
+            ("tableStyles", "Table Styles"),
+            ("cellStyles", "Cell Styles"),
+            ("swatches", "Swatches"),
+            ("parentPages", "Parent Pages"),
+            ("numberedLists", "Numbered Lists"),
+            ("textVariables", "Text Variables"),
+            ("conditionalText", "Conditional Text"),
+        ];
+        ui.horizontal_wrapped(|ui| {
+            for (key, label) in cats {
+                let mut checked = sync[key].as_bool().unwrap_or(true);
+                if ui.checkbox(&mut checked, crate::rtl::widget(ui, crate::i18n::tr(&lang, label))).changed() {
+                    let mut p = serde_json::Map::new();
+                    p.insert(key.into(), json!(checked));
+                    let _ = app.run("book.options", serde_json::Value::Object(p));
                 }
-            });
+            }
         });
+    });
 }
 
 fn book_action_buttons(app: &mut DesignApp, ui: &mut egui::Ui) {
@@ -366,15 +356,7 @@ pub fn book(app: &mut DesignApp, ui: &mut egui::Ui) {
     book_action_buttons(app, ui);
 }
 
-fn book_chapter_row(
-    app: &mut DesignApp,
-    ui: &mut egui::Ui,
-    t: Tokens,
-    i: usize,
-    count: usize,
-    source: usize,
-    d: &serde_json::Value,
-) {
+fn book_chapter_row(app: &mut DesignApp, ui: &mut egui::Ui, t: Tokens, i: usize, count: usize, source: usize, d: &serde_json::Value) {
     let path = d["path"].as_str().unwrap_or("").to_string();
     let name = std::path::Path::new(&path).file_stem().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
     let (first, pages) = (d["firstPage"].as_u64().unwrap_or(1), d["pages"].as_u64().unwrap_or(0));

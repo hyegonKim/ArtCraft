@@ -10,7 +10,7 @@ impl<'a> Ex<'a> {
         self.fonts.entry(family.to_string()).or_default().insert(style.to_string());
     }
 
-    pub(super) fn fonts_part(&mut self) -> Vec<u8> {
+    pub(crate) fn fonts_part(&mut self) -> Vec<u8> {
         let mut fonts_part = FontsPart::default();
         for f in &self.d.styles.composite_fonts {
             let mut entries = Vec::new();

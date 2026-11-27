@@ -28,13 +28,14 @@ pub const OPEN_EXTS: &[&str] = &[
     "tex",
     "latex",
     "ltx",
+    "icml",
     "xml",
     "wcraft.json",
     "json",
 ];
 /// Formats WordCraft saves (Save As).
 pub const SAVE_EXTS: &[&str] =
-    &["docx", "docm", "dotx", "dotm", "pdf", "txt", "md", "html", "rtf", "odt", "ott", "fodt", "tex", "png", "json", "xml"];
+    &["docx", "docm", "dotx", "dotm", "pdf", "txt", "md", "html", "rtf", "odt", "ott", "fodt", "tex", "icml", "png", "json", "xml"];
 
 /// Magic number for ZIP package signatures (used by .docx/.docm/.dotx/.dotm).
 const ZIP_SIG: &[u8] = b"PK\x03\x04";
@@ -453,6 +454,9 @@ fn open_by_content(
         (opened?, false)
     } else if wordcraft_formats::pdf_reflow::is_pdf(bytes) {
         let opened = crate::io_ext::open("pdf", bytes, page).unwrap_or_else(|| Err(format!("{name}: can't open PDF")));
+        (opened?, false)
+    } else if wordcraft_formats::icml::is_icml(bytes) {
+        let opened = crate::io_ext::open("icml", bytes, page).unwrap_or_else(|| Err(format!("{name}: can't open InCopy ICML")));
         (opened?, false)
     } else if wordcraft_formats::txt::is_text(bytes) {
         (wordcraft_formats::txt::import_on(bytes, page), false)

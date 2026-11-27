@@ -8,11 +8,7 @@ use crate::layers_drag_tests::Ui;
 #[test]
 fn edited_list_reads_shared_character_fills_or_layer_fills() {
     let mut s = Session::new();
-    let tid = figcraft_doc::NodeId(
-        s.execute("text.create", &json!({"x": 0, "y": 0, "text": "Hello"})).unwrap()["id"]
-            .as_u64()
-            .unwrap(),
-    );
+    let tid = figcraft_doc::NodeId(s.execute("text.create", &json!({"x": 0, "y": 0, "text": "Hello"})).unwrap()["id"].as_u64().unwrap());
     s.execute("fill.set", &json!({"ids": [tid], "color": "#112233"})).unwrap();
     let u = Ui::new(s);
     let node = u.app.session.doc().unwrap().node(tid).unwrap();

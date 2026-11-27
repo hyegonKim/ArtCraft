@@ -353,12 +353,7 @@ pub(super) fn variable_modes_menu(p: &mut Presenter, ui: &mut Ui) {
 /// Play/Pause toggle, clickable scrub bar with `mm:ss` timestamp, and Mute toggle.
 fn video_controls(p: &mut Presenter, ui: &mut Ui, painter: &egui::Painter, l: &Layout, now: f64) {
     let (root, place, clip) = l.active(p.current);
-    let keys: Vec<(super::NodeId, usize)> = p
-        .video_playback
-        .keys()
-        .copied()
-        .filter(|(id, _)| *id == root || l.disp.is_ancestor(root, *id))
-        .collect();
+    let keys: Vec<(super::NodeId, usize)> = p.video_playback.keys().copied().filter(|(id, _)| *id == root || l.disp.is_ancestor(root, *id)).collect();
     if keys.is_empty() {
         return;
     }
@@ -382,10 +377,7 @@ fn video_controls(p: &mut Presenter, ui: &mut Ui, painter: &egui::Painter, l: &L
             continue;
         }
         let bar_h = 26.0_f32.min(vrect.height() - 6.0);
-        let hud = Rect::from_min_max(
-            pos2(vrect.min.x + 6.0, vrect.max.y - bar_h - 6.0),
-            pos2(vrect.max.x - 6.0, vrect.max.y - 6.0),
-        );
+        let hud = Rect::from_min_max(pos2(vrect.min.x + 6.0, vrect.max.y - bar_h - 6.0), pos2(vrect.max.x - 6.0, vrect.max.y - 6.0));
         cp.rect_filled(hud, CornerRadius::same(6), Color32::from_black_alpha(175));
         let play_r = Rect::from_center_size(pos2(hud.min.x + 14.0, hud.center().y), vec2(20.0, 20.0));
         let play_tip = if st.playing { tr("Pause") } else { tr("Play video") };

@@ -378,23 +378,13 @@ fn synthetic_xd_archive_imports_artboards_shapes_text_assets_symbols_and_interac
     }
 
     // Hero Card: asymmetric corner radii + PNG image fill + drop shadow
-    let card = home
-        .children
-        .iter()
-        .filter_map(|&id| doc.node(id))
-        .find(|n| n.name == "Hero Card")
-        .expect("Hero Card");
+    let card = home.children.iter().filter_map(|&id| doc.node(id)).find(|n| n.name == "Hero Card").expect("Hero Card");
     assert_eq!(card.corners.radii, [16.0, 16.0, 8.0, 8.0]);
     assert!(matches!(card.fills.first().map(|p| &p.kind), Some(PaintKind::Image(_))));
     assert!(matches!(card.effects.first().map(|e| &e.kind), Some(EffectKind::DropShadow(_))));
 
     // Promo Video: MP4 video fill with probed 1280×720, 12s duration, muted = true, poster generated
-    let promo = home
-        .children
-        .iter()
-        .filter_map(|&id| doc.node(id))
-        .find(|n| n.name == "Promo Video")
-        .expect("Promo Video");
+    let promo = home.children.iter().filter_map(|&id| doc.node(id)).find(|n| n.name == "Promo Video").expect("Promo Video");
     let Some(PaintKind::Video(vp)) = promo.fills.first().map(|p| &p.kind) else {
         panic!("expected Video fill on Promo Video, got {:?}", promo.fills);
     };
@@ -406,24 +396,14 @@ fn synthetic_xd_archive_imports_artboards_shapes_text_assets_symbols_and_interac
     assert!(doc.images.contains_key(poster_key));
 
     // Check Vector: SVG path converted to editable VectorNetwork
-    let vec_node = home
-        .children
-        .iter()
-        .filter_map(|&id| doc.node(id))
-        .find(|n| n.name == "Check Vector")
-        .expect("Check Vector");
+    let vec_node = home.children.iter().filter_map(|&id| doc.node(id)).find(|n| n.name == "Check Vector").expect("Check Vector");
     let NodeKind::Vector { network } = &vec_node.kind else {
         panic!("expected Vector node");
     };
     assert_eq!(network.segments.len(), 2);
 
     // Headline: area text with Bold + Underline second style run
-    let text_node = home
-        .children
-        .iter()
-        .filter_map(|&id| doc.node(id))
-        .find(|n| n.name == "Headline")
-        .expect("Headline");
+    let text_node = home.children.iter().filter_map(|&id| doc.node(id)).find(|n| n.name == "Headline").expect("Headline");
     let NodeKind::Text(td) = &text_node.kind else {
         panic!("expected Text node");
     };
@@ -435,12 +415,7 @@ fn synthetic_xd_archive_imports_artboards_shapes_text_assets_symbols_and_interac
     assert_eq!(td.runs[0].style.decoration, TextDecoration::Underline);
 
     // Symbol syncRef -> Instance linked to Primary CTA Component (which has linear gradient fill)
-    let cta_inst = home
-        .children
-        .iter()
-        .filter_map(|&id| doc.node(id))
-        .find(|n| n.name == "Buy Now Button")
-        .expect("Buy Now Button instance");
+    let cta_inst = home.children.iter().filter_map(|&id| doc.node(id)).find(|n| n.name == "Buy Now Button").expect("Buy Now Button instance");
     let NodeKind::Instance { component, .. } = cta_inst.kind else {
         panic!("expected Instance kind");
     };

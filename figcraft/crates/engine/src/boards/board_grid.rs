@@ -57,13 +57,7 @@ pub struct BoardGrid {
 
 impl Default for BoardGrid {
     fn default() -> Self {
-        Self {
-            style: GridStyle::Dots,
-            spacing: 24.0,
-            major: 5,
-            size: 1.0,
-            contrast: 1.0,
-        }
+        Self { style: GridStyle::Dots, spacing: 24.0, major: 5, size: 1.0, contrast: 1.0 }
     }
 }
 

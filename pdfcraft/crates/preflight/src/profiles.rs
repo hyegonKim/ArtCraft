@@ -50,21 +50,11 @@ impl PreflightProfile {
 
     pub fn description(self) -> &'static str {
         match self {
-            PreflightProfile::PrintProduction => {
-                "Checks effective image resolution, trim and bleed boxes, output intents, and embedded fonts."
-            }
-            PreflightProfile::PdfA2b => {
-                "Checks ISO 19005-2 structural rules for self-contained archival documents."
-            }
-            PreflightProfile::PdfA3b => {
-                "Checks ISO 19005-3 structural rules including associated embedded files."
-            }
-            PreflightProfile::DigitalPublishing => {
-                "Checks document title, language tag, tagged structure, embedded fonts, and encryption."
-            }
-            PreflightProfile::SecurityAudit => {
-                "Audits scripts, launch and external actions, attachments, unapplied redactions, and XFA."
-            }
+            PreflightProfile::PrintProduction => "Checks effective image resolution, trim and bleed boxes, output intents, and embedded fonts.",
+            PreflightProfile::PdfA2b => "Checks ISO 19005-2 structural rules for self-contained archival documents.",
+            PreflightProfile::PdfA3b => "Checks ISO 19005-3 structural rules including associated embedded files.",
+            PreflightProfile::DigitalPublishing => "Checks document title, language tag, tagged structure, embedded fonts, and encryption.",
+            PreflightProfile::SecurityAudit => "Audits scripts, launch and external actions, attachments, unapplied redactions, and XFA.",
         }
     }
 
@@ -82,9 +72,7 @@ impl PreflightProfile {
             "print" | "print-production" | "press" => Some(PreflightProfile::PrintProduction),
             "pdfa-2b" | "pdfa2b" | "a2b" | "2b" => Some(PreflightProfile::PdfA2b),
             "pdfa-3b" | "pdfa3b" | "a3b" | "3b" => Some(PreflightProfile::PdfA3b),
-            "digital" | "digital-publishing" | "online" | "web" => {
-                Some(PreflightProfile::DigitalPublishing)
-            }
+            "digital" | "digital-publishing" | "online" | "web" => Some(PreflightProfile::DigitalPublishing),
             "security" | "security-audit" | "audit" => Some(PreflightProfile::SecurityAudit),
             _ => None,
         }
@@ -132,33 +120,12 @@ pub struct PreflightSummary {
 
 impl PreflightSummary {
     pub fn from_findings(profile: PreflightProfile, mut findings: Vec<PreflightFinding>) -> Self {
-        findings.sort_by(|a, b| {
-            a.severity
-                .cmp(&b.severity)
-                .then(a.page.cmp(&b.page))
-                .then(a.code.cmp(b.code))
-                .then(a.message.cmp(&b.message))
-        });
+        findings.sort_by(|a, b| a.severity.cmp(&b.severity).then(a.page.cmp(&b.page)).then(a.code.cmp(b.code)).then(a.message.cmp(&b.message)));
         findings.dedup();
-        let errors = findings
-            .iter()
-            .filter(|f| f.severity == PreflightSeverity::Error)
-            .count();
-        let warnings = findings
-            .iter()
-            .filter(|f| f.severity == PreflightSeverity::Warning)
-            .count();
-        let infos = findings
-            .iter()
-            .filter(|f| f.severity == PreflightSeverity::Info)
-            .count();
-        Self {
-            profile,
-            errors,
-            warnings,
-            infos,
-            findings,
-        }
+        let errors = findings.iter().filter(|f| f.severity == PreflightSeverity::Error).count();
+        let warnings = findings.iter().filter(|f| f.severity == PreflightSeverity::Warning).count();
+        let infos = findings.iter().filter(|f| f.severity == PreflightSeverity::Info).count();
+        Self { profile, errors, warnings, infos, findings }
     }
 
     /// Formats a plain-text report without claiming external standard certification.
@@ -180,18 +147,8 @@ impl PreflightSummary {
                 Some(p) => format!(" (page {p})"),
                 None => String::new(),
             };
-            let clause = if f.clause.is_empty() {
-                String::new()
-            } else {
-                format!(" [{}]", f.clause)
-            };
-            out.push_str(&format!(
-                "- [{}]{}{} {}\n",
-                f.severity.label(),
-                clause,
-                loc,
-                f.message
-            ));
+            let clause = if f.clause.is_empty() { String::new() } else { format!(" [{}]", f.clause) };
+            out.push_str(&format!("- [{}]{}{} {}\n", f.severity.label(), clause, loc, f.message));
         }
         out
     }
@@ -281,10 +238,7 @@ fn digital_findings(doc: &Document) -> Vec<PreflightFinding> {
             page: None,
         });
     }
-    let has_lang = cat
-        .get(b"Lang")
-        .and_then(|o| doc.resolve(o).as_string().map(|s| !s.to_text().trim().is_empty()))
-        .unwrap_or(false);
+    let has_lang = cat.get(b"Lang").and_then(|o| doc.resolve(o).as_string().map(|s| !s.to_text().trim().is_empty())).unwrap_or(false);
     if !has_lang {
         out.push(PreflightFinding {
             severity: PreflightSeverity::Warning,
@@ -332,16 +286,12 @@ fn has_document_title(doc: &Document) -> bool {
         .trailer()
         .get(b"Info")
         .and_then(|o| doc.resolve(o).as_dict().cloned())
-        .and_then(|d| {
-            d.get(b"Title")
-                .and_then(|t| doc.resolve(t).as_string().map(|s| !s.to_text().trim().is_empty()))
-        })
+        .and_then(|d| d.get(b"Title").and_then(|t| doc.resolve(t).as_string().map(|s| !s.to_text().trim().is_empty())))
         .unwrap_or(false);
     if info_title {
         return true;
     }
-    metadata(doc)
-        .is_some_and(|xmp| xmp.contains(":title") && !xmp.contains("<dc:title/>"))
+    metadata(doc).is_some_and(|xmp| xmp.contains(":title") && !xmp.contains("<dc:title/>"))
 }
 
 fn security_findings(doc: &Document) -> Vec<PreflightFinding> {
@@ -499,34 +449,16 @@ mod tests {
             let mut d = Dict::new();
             d.set(b"Type".to_vec(), Object::name("Annot"));
             d.set(b"Subtype".to_vec(), Object::name("Redact"));
-            d.set(
-                b"Rect".to_vec(),
-                Object::Array(vec![
-                    Object::Int(0),
-                    Object::Int(0),
-                    Object::Int(50),
-                    Object::Int(20),
-                ]),
-            );
+            d.set(b"Rect".to_vec(), Object::Array(vec![Object::Int(0), Object::Int(0), Object::Int(50), Object::Int(20)]));
             d
         }));
-        let pages_ref = doc
-            .root()
-            .and_then(|r| doc.get(r).as_dict().and_then(|c| c.get(b"Pages").and_then(Object::as_ref)));
+        let pages_ref = doc.root().and_then(|r| doc.get(r).as_dict().and_then(|c| c.get(b"Pages").and_then(Object::as_ref)));
         assert!(pages_ref.is_some());
         if let Some(pages) = pages_ref {
             let mut page = Dict::new();
             page.set(b"Type".to_vec(), Object::name("Page"));
             page.set(b"Parent".to_vec(), Object::Ref(pages));
-            page.set(
-                b"MediaBox".to_vec(),
-                Object::Array(vec![
-                    Object::Int(0),
-                    Object::Int(0),
-                    Object::Int(612),
-                    Object::Int(792),
-                ]),
-            );
+            page.set(b"MediaBox".to_vec(), Object::Array(vec![Object::Int(0), Object::Int(0), Object::Int(612), Object::Int(792)]));
             page.set(b"Annots".to_vec(), Object::Array(vec![Object::Ref(redact_annot)]));
             page.set(b"AA".to_vec(), Object::Ref(js_action));
             let page_ref = doc.add(Object::Dict(page));
@@ -539,12 +471,7 @@ mod tests {
         let summary = run_profile(&doc, PreflightProfile::SecurityAudit);
         assert!(summary.errors >= 2, "{summary:?}");
         assert!(summary.findings.iter().any(|f| f.code == "security-javascript"));
-        assert!(
-            summary
-                .findings
-                .iter()
-                .any(|f| f.code == "security-unapplied-redact" && f.page == Some(1))
-        );
+        assert!(summary.findings.iter().any(|f| f.code == "security-unapplied-redact" && f.page == Some(1)));
         let text = summary.report_text();
         assert!(!text.contains("conforms to"));
         assert!(!text.contains("now conforms"));

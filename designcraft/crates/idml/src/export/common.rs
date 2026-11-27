@@ -47,6 +47,7 @@ pub(super) fn change_type(mark: Option<designcraft_doc::ChangeMark>) -> Option<&
     match mark {
         Some(designcraft_doc::ChangeMark::Deleted) => Some("DeletedText"),
         Some(designcraft_doc::ChangeMark::Inserted) => Some("InsertedText"),
+        Some(designcraft_doc::ChangeMark::Moved) => Some("MovedText"),
         _ => None,
     }
 }

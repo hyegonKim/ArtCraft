@@ -19,25 +19,15 @@ const MAX_CBOR_DEPTH: usize = 6;
 const MAX_CBOR_ITEMS: usize = 256;
 
 /// C2PA JUMBF store UUID (`"c2pa"` prefix `63 32 70 61` + JUMBF suffix).
-pub const C2PA_STORE_UUID: [u8; 16] = [
-    0x63, 0x32, 0x70, 0x61, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
-];
+pub const C2PA_STORE_UUID: [u8; 16] = [0x63, 0x32, 0x70, 0x61, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71];
 /// C2PA Manifest box UUID (`"c2ma"`).
-pub const C2PA_MANIFEST_UUID: [u8; 16] = [
-    0x63, 0x32, 0x6D, 0x61, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
-];
+pub const C2PA_MANIFEST_UUID: [u8; 16] = [0x63, 0x32, 0x6D, 0x61, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71];
 /// C2PA Claim box UUID (`"c2cl"`).
-pub const C2PA_CLAIM_UUID: [u8; 16] = [
-    0x63, 0x32, 0x63, 0x6C, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
-];
+pub const C2PA_CLAIM_UUID: [u8; 16] = [0x63, 0x32, 0x63, 0x6C, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71];
 /// C2PA Assertion Store UUID (`"c2as"`).
-pub const C2PA_ASSERTIONS_UUID: [u8; 16] = [
-    0x63, 0x32, 0x61, 0x73, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
-];
+pub const C2PA_ASSERTIONS_UUID: [u8; 16] = [0x63, 0x32, 0x61, 0x73, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71];
 /// C2PA Claim Signature UUID (`"c2cs"`).
-pub const C2PA_SIGNATURE_UUID: [u8; 16] = [
-    0x63, 0x32, 0x63, 0x73, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
-];
+pub const C2PA_SIGNATURE_UUID: [u8; 16] = [0x63, 0x32, 0x63, 0x73, 0x00, 0x11, 0x00, 0x10, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71];
 
 /// Signer certificate metadata extracted from a C2PA `c2cs` signature box.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -100,12 +90,7 @@ impl ContentCredentialsReport {
         }
         out.push_str(&format!("C2PA manifests found: {}\n", self.manifests.len()));
         for (idx, m) in self.manifests.iter().enumerate() {
-            out.push_str(&format!(
-                "\n{}. {} ({})\n",
-                idx + 1,
-                if m.label.is_empty() { "unnamed-manifest" } else { &m.label },
-                m.source
-            ));
+            out.push_str(&format!("\n{}. {} ({})\n", idx + 1, if m.label.is_empty() { "unnamed-manifest" } else { &m.label }, m.source));
             if let Some(generator) = &m.claim_generator {
                 out.push_str(&format!("   Generator: {generator}\n"));
             }
@@ -116,10 +101,7 @@ impl ContentCredentialsReport {
                 out.push_str(&format!("   Assertions: {}\n", m.assertions.join(", ")));
             }
             if let Some(signer) = m.signers.first() {
-                out.push_str(&format!(
-                    "   Signer: {} (issuer: {})\n",
-                    signer.subject, signer.issuer
-                ));
+                out.push_str(&format!("   Signer: {} (issuer: {})\n", signer.subject, signer.issuer));
             } else if m.has_signature_box {
                 out.push_str("   Signature box: present (certificate chain not embedded in DER)\n");
             }
@@ -130,10 +112,7 @@ impl ContentCredentialsReport {
 
 /// Inspects a PDF COS [`Document`] for C2PA Content Credentials.
 pub fn inspect_content_credentials(doc: &Document) -> ContentCredentialsReport {
-    let mut report = ContentCredentialsReport {
-        xmp_provenance: find_xmp_provenance(doc),
-        manifests: Vec::new(),
-    };
+    let mut report = ContentCredentialsReport { xmp_provenance: find_xmp_provenance(doc), manifests: Vec::new() };
     let mut visited_streams = std::collections::HashSet::new();
     scan_associated_files(doc, &mut visited_streams, &mut report.manifests);
     scan_object_streams(doc, &mut visited_streams, &mut report.manifests);
@@ -147,8 +126,7 @@ fn find_xmp_provenance(doc: &Document) -> Option<String> {
     let Object::Stream(stream) = &*meta else { return None };
     let bytes = stream.decoded_within(MAX_C2PA_STREAM_BYTES).ok()?;
     let text = String::from_utf8_lossy(&bytes);
-    extract_xml_attr_or_tag(&text, "dcterms:provenance")
-        .or_else(|| extract_xml_attr_or_tag(&text, "c2pa:manifest"))
+    extract_xml_attr_or_tag(&text, "dcterms:provenance").or_else(|| extract_xml_attr_or_tag(&text, "c2pa:manifest"))
 }
 
 fn extract_xml_attr_or_tag(xml: &str, key: &str) -> Option<String> {
@@ -170,11 +148,7 @@ fn extract_xml_attr_or_tag(xml: &str, key: &str) -> Option<String> {
     (!val.is_empty()).then(|| val.to_string())
 }
 
-fn scan_associated_files(
-    doc: &Document,
-    visited: &mut std::collections::HashSet<u32>,
-    out: &mut Vec<C2paManifest>,
-) {
+fn scan_associated_files(doc: &Document, visited: &mut std::collections::HashSet<u32>, out: &mut Vec<C2paManifest>) {
     let Some(root) = doc.root() else { return };
     let Some(cat) = doc.get(root).as_dict().cloned() else { return };
     let Some(af_list) = cat.get(b"AF").map(|o| doc.resolve(o)) else { return };
@@ -186,18 +160,9 @@ fn scan_associated_files(
     }
 }
 
-fn inspect_filespec(
-    doc: &Document,
-    filespec: &Dict,
-    origin: &str,
-    visited: &mut std::collections::HashSet<u32>,
-    out: &mut Vec<C2paManifest>,
-) {
-    let filename = filespec
-        .get(b"UF")
-        .or_else(|| filespec.get(b"F"))
-        .and_then(|v| doc.resolve(v).as_string().map(|s| s.to_text()))
-        .unwrap_or_default();
+fn inspect_filespec(doc: &Document, filespec: &Dict, origin: &str, visited: &mut std::collections::HashSet<u32>, out: &mut Vec<C2paManifest>) {
+    let filename =
+        filespec.get(b"UF").or_else(|| filespec.get(b"F")).and_then(|v| doc.resolve(v).as_string().map(|s| s.to_text())).unwrap_or_default();
     let Some(ef) = filespec.get(b"EF").and_then(|v| doc.resolve(v).as_dict().cloned()) else {
         return;
     };
@@ -211,19 +176,11 @@ fn inspect_filespec(
     }
     let resolved = doc.resolve(stream_obj);
     let Object::Stream(stream) = &*resolved else { return };
-    let source = if filename.is_empty() {
-        origin.to_string()
-    } else {
-        format!("{origin}: {filename}")
-    };
+    let source = if filename.is_empty() { origin.to_string() } else { format!("{origin}: {filename}") };
     inspect_stream_bytes(stream, &source, out);
 }
 
-fn scan_object_streams(
-    doc: &Document,
-    visited: &mut std::collections::HashSet<u32>,
-    out: &mut Vec<C2paManifest>,
-) {
+fn scan_object_streams(doc: &Document, visited: &mut std::collections::HashSet<u32>, out: &mut Vec<C2paManifest>) {
     for num in doc.object_numbers() {
         let r = pdfcraft_cos::ObjRef::new(num, doc.generation(num));
         let obj = doc.get(r);
@@ -318,11 +275,7 @@ pub fn extract_jpeg_app11_jumbf(jpeg: &[u8]) -> Option<Vec<u8>> {
 fn strip_outer_jumb_header(buf: &[u8]) -> Option<&[u8]> {
     if buf.get(4..8) == Some(b"jumb") {
         let len = u32::from_be_bytes([*buf.first()?, *buf.get(1)?, *buf.get(2)?, *buf.get(3)?]);
-        if len == 1 {
-            buf.get(16..)
-        } else {
-            buf.get(8..)
-        }
+        if len == 1 { buf.get(16..) } else { buf.get(8..) }
     } else {
         Some(buf)
     }
@@ -360,9 +313,7 @@ fn next_bmff_box(input: &[u8]) -> Option<(BmffBox<'_>, &[u8])> {
         0 => (8usize, input.len()),
         1 => {
             let xl = input.get(8..16)?;
-            let size64 = u64::from_be_bytes([
-                xl[0], xl[1], xl[2], xl[3], xl[4], xl[5], xl[6], xl[7],
-            ]);
+            let size64 = u64::from_be_bytes([xl[0], xl[1], xl[2], xl[3], xl[4], xl[5], xl[6], xl[7]]);
             let total = usize::try_from(size64).ok()?;
             if total < 16 {
                 return None;
@@ -432,11 +383,7 @@ fn walk_jumb_superbox(body: &[u8], source: &str, depth: usize, out: &mut Vec<C2p
         return;
     }
     if is_manifest_box(&hdr) {
-        let mut manifest = C2paManifest {
-            source: source.to_string(),
-            label: hdr.label,
-            ..C2paManifest::default()
-        };
+        let mut manifest = C2paManifest { source: source.to_string(), label: hdr.label, ..C2paManifest::default() };
         populate_manifest(&mut manifest, rest, depth + 1);
         out.push(manifest);
     }
@@ -639,17 +586,11 @@ fn read_cbor_arg(info: u8, rest: &[u8]) -> Option<(u64, &[u8])> {
         }
         26 => {
             let b = rest.get(..4)?;
-            Some((
-                u64::from(u32::from_be_bytes([b[0], b[1], b[2], b[3]])),
-                rest.get(4..)?,
-            ))
+            Some((u64::from(u32::from_be_bytes([b[0], b[1], b[2], b[3]])), rest.get(4..)?))
         }
         27 => {
             let b = rest.get(..8)?;
-            Some((
-                u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]),
-                rest.get(8..)?,
-            ))
+            Some((u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]), rest.get(8..)?))
         }
         _ => None,
     }
@@ -699,19 +640,11 @@ mod tests {
     fn sample_c2pa_store_bytes(cert_der: &[u8]) -> Vec<u8> {
         // CBOR map(3): {"claim_generator": "PdfCraft/0.21", "dc:title": "Press Proof", "alg": "es256"}
         let mut cbor_map = vec![0xA3];
-        for (k, v) in [
-            ("claim_generator", "PdfCraft/0.21"),
-            ("dc:title", "Press Proof"),
-            ("alg", "es256"),
-        ] {
+        for (k, v) in [("claim_generator", "PdfCraft/0.21"), ("dc:title", "Press Proof"), ("alg", "es256")] {
             cbor_map.extend_from_slice(&cbor_text(k));
             cbor_map.extend_from_slice(&cbor_text(v));
         }
-        let claim = jumbf_superbox(
-            C2PA_CLAIM_UUID,
-            "c2pa.claim",
-            &[bmff_box(b"cbor", &cbor_map)],
-        );
+        let claim = jumbf_superbox(C2PA_CLAIM_UUID, "c2pa.claim", &[bmff_box(b"cbor", &cbor_map)]);
         let act = jumbf_superbox([0u8; 16], "c2pa.actions", &[bmff_box(b"cbor", &[0xA0])]);
         let hash = jumbf_superbox([0u8; 16], "c2pa.hash.data", &[bmff_box(b"cbor", &[0xA0])]);
         let assertions = jumbf_superbox(C2PA_ASSERTIONS_UUID, "c2pa.assertions", &[act, hash]);
@@ -719,17 +652,9 @@ mod tests {
         let mut cose_like = vec![0xD2, 0x84, 0x59];
         cose_like.extend_from_slice(&(cert_der.len() as u16).to_be_bytes());
         cose_like.extend_from_slice(cert_der);
-        let signature = jumbf_superbox(
-            C2PA_SIGNATURE_UUID,
-            "c2pa.signature",
-            &[bmff_box(b"cbor", &cose_like)],
-        );
+        let signature = jumbf_superbox(C2PA_SIGNATURE_UUID, "c2pa.signature", &[bmff_box(b"cbor", &cose_like)]);
 
-        let manifest = jumbf_superbox(
-            C2PA_MANIFEST_UUID,
-            "urn:uuid:12345678-1234-5678-9abc-def012345678",
-            &[assertions, claim, signature],
-        );
+        let manifest = jumbf_superbox(C2PA_MANIFEST_UUID, "urn:uuid:12345678-1234-5678-9abc-def012345678", &[assertions, claim, signature]);
         jumbf_superbox(C2PA_STORE_UUID, "c2pa", &[manifest])
     }
 
@@ -747,14 +672,7 @@ mod tests {
         assert!(key.is_ok());
         let Ok(key) = key else { return };
         let subject = Name::build("Newsroom Camera", "", "Example Press", "", "KR");
-        let start = Time {
-            year: 2026,
-            month: 1,
-            day: 1,
-            hour: 0,
-            minute: 0,
-            second: 0,
-        };
+        let start = Time { year: 2026, month: 1, day: 1, hour: 0, minute: 0, second: 0 };
         let cert = Certificate::self_signed(&subject, &key, start, 3, &[0x01, 0x02]);
         assert!(cert.is_ok());
         let Ok(cert) = cert else { return };

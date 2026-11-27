@@ -11,18 +11,8 @@ fn edited_list_prefers_selected_vector_region_fills() {
     let mut s = Session::new();
     let page = s.page().unwrap();
     let net = VectorNetwork {
-        vertices: vec![
-            Vertex::new(0.0, 0.0),
-            Vertex::new(40.0, 0.0),
-            Vertex::new(40.0, 40.0),
-            Vertex::new(0.0, 40.0),
-        ],
-        segments: vec![
-            Segment::line(0, 1),
-            Segment::line(1, 2),
-            Segment::line(2, 3),
-            Segment::line(3, 0),
-        ],
+        vertices: vec![Vertex::new(0.0, 0.0), Vertex::new(40.0, 0.0), Vertex::new(40.0, 40.0), Vertex::new(0.0, 40.0)],
+        segments: vec![Segment::line(0, 1), Segment::line(1, 2), Segment::line(2, 3), Segment::line(3, 0)],
         regions: vec![Region {
             winding: WindingRule::NonZero,
             loops: vec![vec![0, 1, 2, 3]],
@@ -30,11 +20,7 @@ fn edited_list_prefers_selected_vector_region_fills() {
             paint_space: None,
         }],
     };
-    let vid = s
-        .doc_mut()
-        .unwrap()
-        .create(page, NodeKind::Vector { network: net }, "Vec", 0.0, 0.0, 40.0, 40.0)
-        .unwrap();
+    let vid = s.doc_mut().unwrap().create(page, NodeKind::Vector { network: net }, "Vec", 0.0, 0.0, 40.0, 40.0).unwrap();
     figcraft_engine::vectoredit::begin(&mut s, vid).unwrap();
     s.ds_mut().unwrap().vector_edit.as_mut().unwrap().regions = vec![0];
 

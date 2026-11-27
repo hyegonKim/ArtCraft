@@ -326,11 +326,7 @@ impl W<'_> {
                 Some(format!("fill=\"url(#{pid})\"{op}{blend}"))
             }
             PaintKind::Video(vid) => {
-                let key = vid
-                    .poster
-                    .as_deref()
-                    .or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()))
-                    .unwrap_or(&vid.video);
+                let key = vid.poster.as_deref().or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref())).unwrap_or(&vid.video);
                 if self.doc.images.contains_key(key) {
                     let proxy = Paint {
                         kind: PaintKind::Image(vid.as_image_paint(key.to_string())),

@@ -89,6 +89,8 @@ pub const UI_COMMANDS: &[(&str, &str, Option<&str>, &str)] = &[
     ("app.placeAndLink", "Place and Link", None, "{} — a linked copy of the selected frame's story, beside it"),
     ("app.placeWithOptions", "Place with Import Options…", Some("Cmd+Shift+D"), "{path?} — Word/RTF style mapping before placing"),
     ("app.exportText", "Export Text…", None, "{path?} — the story being edited, as Text Only (.txt) or Rich Text Format (.rtf)"),
+    ("app.importIcml", "Import InCopy Story…", None, "{path?} — import an InCopy (.icml) story or (.icma) assignment"),
+    ("app.exportIcml", "Export InCopy Story…", None, "{path?, story?} — export the story as InCopy Markup (.icml)"),
     ("app.exportPdf", "Export PDF…", None, "{path?, …file.exportPdf options} — asks for a path when none is given"),
     (
         "app.exportBatch",
@@ -271,6 +273,7 @@ pub const UI_COMMANDS: &[(&str, &str, Option<&str>, &str)] = &[
         None,
         "{} — the Story Editor's vertical ruler of how deep the text reaches in its frames",
     ),
+    ("view.editorialMode", "Editorial Mode", None, "{mode?: layout|story|galley} — switch between Layout, Story, and Galley editorial views"),
     ("window.hidePanels", "Show/Hide Panels", Some("Tab"), "{} — every panel, the Tools panel included"),
     ("window.hidePanelsExceptTools", "Show/Hide Panels Except Tools", Some("Shift+Tab"), "{}"),
     ("window.nextDocument", "Next Document", Some("Cmd+F6"), "{}"),

@@ -219,12 +219,7 @@ impl VideoData {
             let mime = if &bytes[8..12] == b"qt  " { "video/quicktime" } else { "video/mp4" };
             let (mut w, mut h, mut dur) = (0u32, 0u32, 0.0f64);
             probe_isobmff(bytes, 0, &mut w, &mut h, &mut dur);
-            return Some((
-                mime,
-                if w > 0 { w } else { 640 },
-                if h > 0 { h } else { 360 },
-                if dur.is_finite() && dur > 0.0 { dur } else { 5.0 },
-            ));
+            return Some((mime, if w > 0 { w } else { 640 }, if h > 0 { h } else { 360 }, if dur.is_finite() && dur > 0.0 { dur } else { 5.0 }));
         }
         if bytes.starts_with(b"\x1A\x45\xDF\xA3") {
             return Some(("video/webm", 640, 360, 5.0));
@@ -271,9 +266,7 @@ fn probe_isobmff(buf: &[u8], depth: usize, w: &mut u32, h: &mut u32, dur: &mut f
                     }
                 } else if ver == 1 && body.len() >= 32 {
                     let scale = u32::from_be_bytes([body[20], body[21], body[22], body[23]]);
-                    let ticks = u64::from_be_bytes([
-                        body[24], body[25], body[26], body[27], body[28], body[29], body[30], body[31],
-                    ]);
+                    let ticks = u64::from_be_bytes([body[24], body[25], body[26], body[27], body[28], body[29], body[30], body[31]]);
                     if scale > 0 {
                         *dur = (ticks as f64) / f64::from(scale);
                     }

@@ -240,6 +240,9 @@ impl<'r> Importer<'r> {
                             match container.change_kind() {
                                 Some(craft_idml::model::TrackedChangeKind::Deleted) => ncf.over.change = Some(designcraft_doc::ChangeMark::Deleted),
                                 Some(craft_idml::model::TrackedChangeKind::Inserted) => ncf.over.change = Some(designcraft_doc::ChangeMark::Inserted),
+                                _ if container_el.get("ChangeType") == Some("MovedText") => {
+                                    ncf.over.change = Some(designcraft_doc::ChangeMark::Moved);
+                                }
                                 _ => {}
                             }
                             self.walk_story_nodes(&container.children, b, pf, pchars, &ncf, brk);

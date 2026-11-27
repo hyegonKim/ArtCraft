@@ -51,11 +51,7 @@ fn alpha_fills(doc: &Document, n: &Node, counts: impl Fn(&Paint) -> bool) -> boo
             PaintKind::Pattern(_) => true,
             PaintKind::Image(img) => !crate::paint::fills_box_opaque(doc, img, n.width, n.height),
             PaintKind::Video(vid) => {
-                let key = vid
-                    .poster
-                    .as_deref()
-                    .or_else(|| doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()))
-                    .unwrap_or(&vid.video);
+                let key = vid.poster.as_deref().or_else(|| doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref())).unwrap_or(&vid.video);
                 !crate::paint::fills_box_opaque(doc, &vid.as_image_paint(key.to_string()), n.width, n.height)
             }
             PaintKind::Solid { .. } | PaintKind::Gradient(_) => false,

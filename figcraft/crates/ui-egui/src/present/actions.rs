@@ -312,13 +312,7 @@ impl Presenter {
         let mut keep: HashSet<(NodeId, usize)> = HashSet::with_capacity(active.len());
         for (id, fi, vp) in active {
             keep.insert((id, fi));
-            let duration = doc
-                .videos
-                .get(&vp.video)
-                .map(|v| v.duration_secs)
-                .filter(|d| d.is_finite() && *d > 0.0)
-                .unwrap_or(5.0)
-                .max(0.1);
+            let duration = doc.videos.get(&vp.video).map(|v| v.duration_secs).filter(|d| d.is_finite() && *d > 0.0).unwrap_or(5.0).max(0.1);
             self.video_playback
                 .entry((id, fi))
                 .and_modify(|st| {

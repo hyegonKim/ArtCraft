@@ -12,10 +12,10 @@ pub(crate) fn mark_deleted_reporting(st: &mut Story, r: std::ops::Range<usize>) 
     if r.is_empty() {
         return (r.start, Vec::new());
     }
-    // Inserted pieces inside the range go away; the rest is marked deleted.
+    // Inserted/moved pieces inside the range go away; the rest is marked deleted.
     let mut ins: Vec<std::ops::Range<usize>> = st
         .runs()
-        .filter(|(rr, f)| f.over.change == Some(ChangeMark::Inserted) && rr.start < r.end && rr.end > r.start)
+        .filter(|(rr, f)| matches!(f.over.change, Some(ChangeMark::Inserted | ChangeMark::Moved)) && rr.start < r.end && rr.end > r.start)
         .map(|(rr, _)| rr.start.max(r.start)..rr.end.min(r.end))
         .collect();
     let mut end = r.end;
@@ -38,22 +38,33 @@ pub(crate) fn mark_deleted(st: &mut Story, r: std::ops::Range<usize>) -> usize {
     mark_deleted_reporting(st, r).0
 }
 
-/// Ranges of `mark` in `st`, last first.
-fn ranges(st: &Story, mark: ChangeMark) -> Vec<std::ops::Range<usize>> {
-    let mut v: Vec<std::ops::Range<usize>> = st.runs().filter(|(_, f)| f.over.change == Some(mark)).map(|(r, _)| r).collect();
-    v.sort_by_key(|r| std::cmp::Reverse(r.start));
-    v
-}
-
 /// Accept (or reject) every change in `sid`.
 fn resolve(d: &mut Document, sid: StoryId, accept: bool) -> usize {
-    let (remove, keep) = if accept { (ChangeMark::Deleted, ChangeMark::Inserted) } else { (ChangeMark::Inserted, ChangeMark::Deleted) };
+    let is_added = |m: ChangeMark| matches!(m, ChangeMark::Inserted | ChangeMark::Moved);
     let (removed, keep_count) = {
         let st = match d.story(sid) {
             Some(st) => st,
             None => return 0,
         };
-        (ranges(st, remove), ranges(st, keep).len())
+        let mut rem: Vec<std::ops::Range<usize>> = st
+            .runs()
+            .filter(|(_, f)| match f.over.change {
+                Some(m) if accept => m == ChangeMark::Deleted,
+                Some(m) => is_added(m),
+                None => false,
+            })
+            .map(|(r, _)| r)
+            .collect();
+        rem.sort_by_key(|r| std::cmp::Reverse(r.start));
+        let kept = st
+            .runs()
+            .filter(|(_, f)| match f.over.change {
+                Some(m) if accept => is_added(m),
+                Some(m) => m == ChangeMark::Deleted,
+                None => false,
+            })
+            .count();
+        (rem, kept)
     };
     let n = removed.len() + keep_count;
     if let Some(st) = d.story_mut(sid) {
@@ -82,7 +93,9 @@ fn one(s: &mut Session, p: &Value, accept: bool) -> Result<Value> {
         let (r, mark) = {
             let st = d.story(sid).ok_or_else(|| super::bad(id, "no such story"))?;
             st.runs()
-                .find(|(r, f)| matches!(f.over.change, Some(ChangeMark::Inserted | ChangeMark::Deleted)) && r.start <= start && start < r.end)
+                .find(|(r, f)| {
+                    matches!(f.over.change, Some(ChangeMark::Inserted | ChangeMark::Deleted | ChangeMark::Moved)) && r.start <= start && start < r.end
+                })
                 .map(|(r, f)| (r, f.over.change.unwrap_or_default()))
                 .ok_or_else(|| super::bad(id, "no change there"))?
         };
@@ -127,6 +140,7 @@ pub fn specs() -> Vec<CommandSpec> {
                     let kind = match f.over.change {
                         Some(ChangeMark::Inserted) => "inserted",
                         Some(ChangeMark::Deleted) => "deleted",
+                        Some(ChangeMark::Moved) => "moved",
                         _ => continue,
                     };
                     out.push(json!({"story": st.id.0, "start": r.start, "end": r.end, "kind": kind, "text": st.text[r].to_string()}));

@@ -30,15 +30,9 @@ fn encrypted() -> PdfError {
 /// Finalizes a PDF/X-4 base print PDF into PDF/X-3:2003 (PDF 1.4, no live transparency,
 /// `PDF/X-3:2003` identification, preserving ICC-tagged RGB color spaces when no live
 /// transparency requires flattening).
-pub(crate) fn finish_pdfx3(
-    pdf: &[u8],
-    dpi: f32,
-    pages: &[PageGraphics],
-    warnings: &mut Vec<String>,
-) -> Result<Vec<u8>> {
+pub(crate) fn finish_pdfx3(pdf: &[u8], dpi: f32, pages: &[PageGraphics], warnings: &mut Vec<String>) -> Result<Vec<u8>> {
     let base = if has_live_transparency(pdf) {
-        let (flattened, findings) =
-            craft_prepress::pdfx1a::flatten_x1a(pdf, dpi, pages).map_err(PdfError::Write)?;
+        let (flattened, findings) = craft_prepress::pdfx1a::flatten_x1a(pdf, dpi, pages).map_err(PdfError::Write)?;
         for finding in findings {
             warnings.push(finding.replace("PDF/X-1a", "PDF/X-3"));
         }
@@ -65,9 +59,7 @@ pub(crate) fn has_live_transparency(bytes: &[u8]) -> bool {
             Object::Stream(s) => {
                 let d = s.dict();
                 if d.get::<Name<'_>>(b"Subtype").is_some_and(|n| n.as_ref() == b"Form")
-                    && d.get::<Dict<'_>>(b"Group")
-                        .and_then(|g| g.get::<Name<'_>>(b"S"))
-                        .is_some_and(|s| s.as_ref() == b"Transparency")
+                    && d.get::<Dict<'_>>(b"Group").and_then(|g| g.get::<Name<'_>>(b"S")).is_some_and(|s| s.as_ref() == b"Transparency")
                 {
                     return true;
                 }
@@ -97,9 +89,7 @@ fn dict_has_transparency_state(d: &Dict<'_>) -> bool {
     if let Some(bm) = d.get::<Object<'_>>(b"BM") {
         let normal = match bm {
             Object::Name(n) => matches!(n.as_ref(), b"Normal" | b"Compatible"),
-            Object::Array(a) => a
-                .iter::<Name<'_>>()
-                .all(|n| matches!(n.as_ref(), b"Normal" | b"Compatible")),
+            Object::Array(a) => a.iter::<Name<'_>>().all(|n| matches!(n.as_ref(), b"Normal" | b"Compatible")),
             _ => false,
         };
         if !normal {
@@ -121,11 +111,7 @@ pub(crate) fn relabel_x1a_to_x3(bytes: &[u8]) -> Result<Vec<u8>> {
     {
         let updated = edited_with(
             &info_dict,
-            &[
-                (b"GTS_PDFXVersion", b"(PDF/X-3:2003)"),
-                (b"GTS_PDFXConformance", b"(PDF/X-3:2003)"),
-                (b"Trapped", b"/False"),
-            ],
+            &[(b"GTS_PDFXVersion", b"(PDF/X-3:2003)"), (b"GTS_PDFXConformance", b"(PDF/X-3:2003)"), (b"Trapped", b"/False")],
             damaged,
         )?;
         changes.push((info_id, updated));
@@ -142,16 +128,10 @@ pub(crate) fn relabel_x1a_to_x3(bytes: &[u8]) -> Result<Vec<u8>> {
                 && let Ok(raw_xml) = stream.decoded()
                 && let Ok(xml_str) = std::str::from_utf8(&raw_xml)
             {
-                let replaced = xml_str
-                    .replace("PDF/X-1a:2003", "PDF/X-3:2003")
-                    .replace("PDF/X-1:2003", "PDF/X-3:2003")
-                    .replace("PDF/X-4", "PDF/X-3:2003");
+                let replaced =
+                    xml_str.replace("PDF/X-1a:2003", "PDF/X-3:2003").replace("PDF/X-1:2003", "PDF/X-3:2003").replace("PDF/X-4", "PDF/X-3:2003");
                 let len_bytes = replaced.len().to_string().into_bytes();
-                let dict_bytes = edited_with(
-                    stream.dict(),
-                    &[(b"Length", len_bytes.as_slice()), (b"Filter", b"")],
-                    damaged,
-                )?;
+                let dict_bytes = edited_with(stream.dict(), &[(b"Length", len_bytes.as_slice()), (b"Filter", b"")], damaged)?;
                 let mut stream_obj = dict_bytes;
                 stream_obj.extend_from_slice(b"\nstream\n");
                 stream_obj.extend_from_slice(replaced.as_bytes());
@@ -171,11 +151,7 @@ pub(crate) fn relabel_x1a_to_x3(bytes: &[u8]) -> Result<Vec<u8>> {
         }
     }
 
-    let mut out = if changes.is_empty() {
-        bytes.to_vec()
-    } else {
-        append_with(bytes, &changes, None, damaged, encrypted)?
-    };
+    let mut out = if changes.is_empty() { bytes.to_vec() } else { append_with(bytes, &changes, None, damaged, encrypted)? };
     let head_len = 1024.min(out.len());
     if let Some(head) = out.get_mut(..head_len)
         && let Some(pos) = head.windows(7).position(|w| w == b"%PDF-1.")
@@ -223,17 +199,12 @@ pub fn check_pdfx3(pdf: &[u8]) -> Vec<String> {
         issues.push("no GTS_PDFX output intent".into());
     } else {
         for oi in &intents {
-            let cond = oi
-                .get::<craft_pdf::syntax::object::String<'_>>(b"OutputConditionIdentifier")
-                .map(|s| !s.as_bytes().is_empty())
-                .unwrap_or(false);
+            let cond =
+                oi.get::<craft_pdf::syntax::object::String<'_>>(b"OutputConditionIdentifier").map(|s| !s.as_bytes().is_empty()).unwrap_or(false);
             if !cond {
                 issues.push("the output intent has an empty OutputConditionIdentifier".into());
             }
-            let registered = oi
-                .get::<craft_pdf::syntax::object::String<'_>>(b"RegistryName")
-                .map(|s| !s.as_bytes().is_empty())
-                .unwrap_or(false);
+            let registered = oi.get::<craft_pdf::syntax::object::String<'_>>(b"RegistryName").map(|s| !s.as_bytes().is_empty()).unwrap_or(false);
             match oi.get::<Stream<'_>>(b"DestOutputProfile") {
                 Some(profile) => {
                     if let Ok(data) = profile.decoded()
@@ -278,11 +249,7 @@ pub fn check_pdfx3(pdf: &[u8]) -> Vec<String> {
         } else if has_trim && has_art {
             issues.push(format!("page {} specifies both TrimBox and ArtBox", idx + 1));
         }
-        if raw
-            .get::<Dict<'_>>(b"Group")
-            .and_then(|g| g.get::<Name<'_>>(b"S"))
-            .is_some_and(|s| s.as_ref() == b"Transparency")
-        {
+        if raw.get::<Dict<'_>>(b"Group").and_then(|g| g.get::<Name<'_>>(b"S")).is_some_and(|s| s.as_ref() == b"Transparency") {
             issues.push(format!("page {} defines a transparency group", idx + 1));
         }
     }
@@ -309,8 +276,7 @@ fn has_valid_trapped(pdf: &[u8], file: &Pdf) -> bool {
             || String::from_utf8_lossy(pdf).contains("/Trapped /True");
     };
     let Some(info) = file.xref().get::<Dict<'_>>(info_id) else { return false };
-    info.get::<Name<'_>>(b"Trapped")
-        .is_some_and(|n| matches!(n.as_ref(), b"True" | b"False"))
+    info.get::<Name<'_>>(b"Trapped").is_some_and(|n| matches!(n.as_ref(), b"True" | b"False"))
 }
 
 #[derive(Default)]
@@ -387,10 +353,7 @@ impl X3Scan {
                 && font_dict.get::<Name<'_>>(b"Subtype").is_some_and(|s| s.as_ref() == b"Type3")
                 && let Some(procs) = font_dict.get::<Dict<'_>>(b"CharProcs")
             {
-                let glyph_res = Resources::from_parent(
-                    font_dict.get::<Dict<'_>>(b"Resources").unwrap_or_default(),
-                    res.clone(),
-                );
+                let glyph_res = Resources::from_parent(font_dict.get::<Dict<'_>>(b"Resources").unwrap_or_default(), res.clone());
                 for key in procs.keys() {
                     let kbytes: &[u8] = key.as_ref();
                     if let Some(stream) = procs.get::<Stream<'_>>(kbytes)
@@ -410,17 +373,13 @@ impl X3Scan {
                 self.report("soft mask (/SMask) transparency is not allowed in PDF/X-3:2003");
             }
         }
-        if gs.get::<f32>(b"ca").is_some_and(|v| v < 0.9999)
-            || gs.get::<f32>(b"CA").is_some_and(|v| v < 0.9999)
-        {
+        if gs.get::<f32>(b"ca").is_some_and(|v| v < 0.9999) || gs.get::<f32>(b"CA").is_some_and(|v| v < 0.9999) {
             self.report("non-unit constant opacity (/ca or /CA) is not allowed in PDF/X-3:2003");
         }
         if let Some(bm) = gs.get::<Object<'_>>(b"BM") {
             let normal = match &bm {
                 Object::Name(n) => matches!(n.as_ref(), b"Normal" | b"Compatible"),
-                Object::Array(a) => a
-                    .iter::<Name<'_>>()
-                    .all(|n| matches!(n.as_ref(), b"Normal" | b"Compatible")),
+                Object::Array(a) => a.iter::<Name<'_>>().all(|n| matches!(n.as_ref(), b"Normal" | b"Compatible")),
                 _ => false,
             };
             if !normal {
@@ -491,10 +450,7 @@ impl X3Scan {
                 }
                 b"BI" | b"EI" if !managed => {
                     if let Some(Object::Stream(img)) = last {
-                        let cs = img
-                            .dict()
-                            .get::<Object<'_>>(b"CS")
-                            .or_else(|| img.dict().get::<Object<'_>>(b"ColorSpace"));
+                        let cs = img.dict().get::<Object<'_>>(b"CS").or_else(|| img.dict().get::<Object<'_>>(b"ColorSpace"));
                         if let Some(cs) = cs {
                             self.check_color_space(&cs, res, depth + 1);
                         }
@@ -509,18 +465,10 @@ impl X3Scan {
         if depth > MAX_DEPTH || !self.seen.insert(form.obj_id()) {
             return;
         }
-        if form
-            .dict()
-            .get::<Dict<'_>>(b"Group")
-            .and_then(|g| g.get::<Name<'_>>(b"S"))
-            .is_some_and(|s| s.as_ref() == b"Transparency")
-        {
+        if form.dict().get::<Dict<'_>>(b"Group").and_then(|g| g.get::<Name<'_>>(b"S")).is_some_and(|s| s.as_ref() == b"Transparency") {
             self.report("transparency group in Form XObject is not allowed in PDF/X-3:2003");
         }
-        let res = Resources::from_parent(
-            form.dict().get::<Dict<'_>>(b"Resources").unwrap_or_default(),
-            parent.clone(),
-        );
+        let res = Resources::from_parent(form.dict().get::<Dict<'_>>(b"Resources").unwrap_or_default(), parent.clone());
         self.resources(&res, depth);
         if let Ok(data) = form.decoded() {
             self.content(&data, &res, depth);
@@ -553,10 +501,7 @@ mod tests {
         let mut d = Document::new(&NewDocument::default());
         let lid = d.default_layer();
         let gold = Color::cmyk(0.0, 0.25, 0.9, 0.05);
-        d.swatches.push(Swatch {
-            value: SwatchValue::Color { color: gold, color_type: ColorType::Spot },
-            ..Swatch::color("Gold", gold)
-        });
+        d.swatches.push(Swatch { value: SwatchValue::Color { color: gold, color_type: ColorType::Spot }, ..Swatch::color("Gold", gold) });
         let mut rect_item = Item::new(
             ItemId(d.alloc()),
             lid,
@@ -565,14 +510,7 @@ mod tests {
         );
         rect_item.fill = Fill::swatch("Gold");
         d.insert_item(SpreadRef::Doc(0), rect_item, None).unwrap();
-        d.add_text_frame(
-            SpreadRef::Doc(0),
-            Rect::new(36.0, 180.0, 320.0, 260.0),
-            lid,
-            "PDF/X-3 Live Text",
-            ParaFormat::default(),
-        )
-        .unwrap();
+        d.add_text_frame(SpreadRef::Doc(0), Rect::new(36.0, 180.0, 320.0, 260.0), lid, "PDF/X-3 Live Text", ParaFormat::default()).unwrap();
 
         // Place an RGB PNG image — PDF/X-3 tags it with sRGB ICC v2 (`[/ICCBased ...]`), which
         // PDF/X-3 allows whereas PDF/X-1a would reject unless converted to CMYK.
@@ -581,17 +519,9 @@ mod tests {
             *p = image::Rgb([220, 40, 90]);
         }
         let mut png_bytes = Vec::new();
-        img_buf
-            .write_to(&mut std::io::Cursor::new(&mut png_bytes), image::ImageFormat::Png)
-            .unwrap();
+        img_buf.write_to(&mut std::io::Cursor::new(&mut png_bytes), image::ImageFormat::Png).unwrap();
         let aid = AssetId(d.alloc());
-        d.add_asset(Asset {
-            id: aid,
-            name: "rgb_sample.png".into(),
-            mime: "image/png".into(),
-            data: Arc::new(png_bytes),
-            ..Default::default()
-        });
+        d.add_asset(Asset { id: aid, name: "rgb_sample.png".into(), mime: "image/png".into(), data: Arc::new(png_bytes), ..Default::default() });
         let mut pic_item = Item::new(
             ItemId(d.alloc()),
             lid,
@@ -613,12 +543,7 @@ mod tests {
         });
         d.insert_item(SpreadRef::Doc(0), pic_item, None).unwrap();
 
-        let report = export_pdf_with_report(
-            &d,
-            &Cache::new(),
-            &PdfOptions { standard: Standard::PdfX3, ..PdfOptions::default() },
-        )
-        .unwrap();
+        let report = export_pdf_with_report(&d, &Cache::new(), &PdfOptions { standard: Standard::PdfX3, ..PdfOptions::default() }).unwrap();
         assert!(report.bytes.starts_with(b"%PDF-1.4"));
         assert_eq!(check_pdfx3(&report.bytes), Vec::<String>::new(), "warnings: {:?}", report.warnings);
         assert_eq!(crate::pdfx_version(&report.bytes).as_deref(), Some("PDF/X-3:2003"));
@@ -644,12 +569,8 @@ mod tests {
         item.opacity = 0.5;
         d.insert_item(SpreadRef::Doc(0), item, None).unwrap();
 
-        let report = export_pdf_with_report(
-            &d,
-            &Cache::new(),
-            &PdfOptions { standard: Standard::PdfX3, flatten_dpi: 72.0, ..PdfOptions::default() },
-        )
-        .unwrap();
+        let report =
+            export_pdf_with_report(&d, &Cache::new(), &PdfOptions { standard: Standard::PdfX3, flatten_dpi: 72.0, ..PdfOptions::default() }).unwrap();
         assert_eq!(check_pdfx3(&report.bytes), Vec::<String>::new());
     }
 }

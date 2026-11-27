@@ -165,11 +165,7 @@ pub fn prepare_at(paint: &Paint, w: f64, h: f64, scale: f64, doc: &Document, tim
         }
         PaintKind::Pattern(pt) => crate::pattern::prepare(doc, pt, w, h, scale, time, op),
         PaintKind::Video(vid) => {
-            let poster_key = vid
-                .poster
-                .as_deref()
-                .or_else(|| doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()))
-                .unwrap_or(&vid.video);
+            let poster_key = vid.poster.as_deref().or_else(|| doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref())).unwrap_or(&vid.video);
             let img = vid.as_image_paint(poster_key.to_string());
             let data = doc.images.get(&img.image);
             let pm = still(&img, data, w, h, scale, doc, preview).or_else(fallback_video_poster)?;
@@ -320,9 +316,7 @@ mod video_paint_tests {
             *px = image::Rgba([255, 16, 32, 255]);
         }
         let mut png = Vec::new();
-        image::DynamicImage::ImageRgba8(img)
-            .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
-            .unwrap();
+        image::DynamicImage::ImageRgba8(img).write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png).unwrap();
         doc.images.insert("poster_red".into(), ImageData { bytes: png.into(), width: 4, height: 4 });
         doc.get_mut(rect_fallback).unwrap().fills = vec![Paint {
             kind: PaintKind::Video(VideoPaint::new("video_hash_1", Some("poster_red".into()), ImageScaleMode::Fill)),

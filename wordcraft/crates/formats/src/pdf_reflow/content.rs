@@ -76,16 +76,7 @@ pub(super) fn extract_page_spans(doc: &PdfDoc<'_>, page: &PageInfo) -> Vec<TextS
     }
     let mut all_spans = Vec::new();
     let initial_gs = GraphicsState::default();
-    interpret_stream(
-        doc,
-        &stream_bytes,
-        &page.resources,
-        initial_gs,
-        page.media_box,
-        page.rotate,
-        0,
-        &mut all_spans,
-    );
+    interpret_stream(doc, &stream_bytes, &page.resources, initial_gs, page.media_box, page.rotate, 0, &mut all_spans);
 
     // Prefer visible text (`Tr != 3`); fall back to invisible OCR layer only if the page has no
     // visible text at all.
@@ -414,16 +405,7 @@ fn interpret_stream(
                     {
                         merge_resources(&mut child_res, fres);
                     }
-                    interpret_stream(
-                        doc,
-                        &form_bytes,
-                        &child_res,
-                        child_gs,
-                        media_box,
-                        rotate,
-                        form_depth + 1,
-                        out,
-                    );
+                    interpret_stream(doc, &form_bytes, &child_res, child_gs, media_box, rotate, form_depth + 1, out);
                 }
             }
             _ => {}
@@ -589,12 +571,7 @@ fn last_four_f64(ops: &[PdfVal]) -> Option<(f64, f64, f64, f64)> {
         return None;
     }
     let b = ops.len() - 4;
-    Some((
-        ops.get(b)?.as_f64()?,
-        ops.get(b + 1)?.as_f64()?,
-        ops.get(b + 2)?.as_f64()?,
-        ops.get(b + 3)?.as_f64()?,
-    ))
+    Some((ops.get(b)?.as_f64()?, ops.get(b + 1)?.as_f64()?, ops.get(b + 2)?.as_f64()?, ops.get(b + 3)?.as_f64()?))
 }
 
 fn unit_to_u8(v: f64) -> u8 {
@@ -606,9 +583,5 @@ fn cmyk_to_rgb(c: f64, m: f64, y: f64, k: f64) -> Rgb {
     let m = m.clamp(0.0, 1.0);
     let y = y.clamp(0.0, 1.0);
     let k = k.clamp(0.0, 1.0);
-    Rgb(
-        unit_to_u8((1.0 - c) * (1.0 - k)),
-        unit_to_u8((1.0 - m) * (1.0 - k)),
-        unit_to_u8((1.0 - y) * (1.0 - k)),
-    )
+    Rgb(unit_to_u8((1.0 - c) * (1.0 - k)), unit_to_u8((1.0 - m) * (1.0 - k)), unit_to_u8((1.0 - y) * (1.0 - k)))
 }

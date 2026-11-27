@@ -33,12 +33,19 @@ pub(super) fn file_place(s: &mut Session, p: &Value) -> Result<Value> {
     }
     // An InDesign snippet (.idms): place its objects, stories, styles, and swatches directly.
     if designcraft_idml::is_idms(&bytes)
+        || std::path::Path::new(&name).extension().and_then(std::ffi::OsStr::to_str).is_some_and(|e| e.eq_ignore_ascii_case("idms"))
+    {
+        return super::snippets::snippet_place(s, p);
+    }
+    // An InCopy story (.icml) or assignment (.icma): import into the target story/frame or a new frame.
+    if designcraft_idml::is_icml(&bytes)
+        || designcraft_idml::is_icma(&bytes)
         || std::path::Path::new(&name)
             .extension()
             .and_then(std::ffi::OsStr::to_str)
-            .is_some_and(|e| e.eq_ignore_ascii_case("idms"))
+            .is_some_and(|e| e.eq_ignore_ascii_case("icml") || e.eq_ignore_ascii_case("icma"))
     {
-        return super::snippets::snippet_place(s, p);
+        return crate::cmd::icml::import_icml_cmd(s, p);
     }
     // A page of another layout (IDML or DesignCraft): its objects, as one group.
     let format = craft_file_formats::detect(&name, &bytes);

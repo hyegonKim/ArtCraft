@@ -1307,10 +1307,7 @@ fn korean_pdf_reflow_translations_resolve_in_ko_and_cover_cjk_font_text() {
         assert_eq!(tr(ko, "Import PDF (Reflow)…"), "PDF 리플로우 가져오기…");
         assert_eq!(tr(ko, "Import PDF (Reflow)"), "PDF 리플로우 가져오기");
         assert_eq!(tr(ko, "PDF files"), "PDF 파일");
-        assert_eq!(
-            tr(ko, "Open a PDF as editable reflowed text."),
-            "PDF를 편집 가능한 리플로우 텍스트로 엽니다."
-        );
+        assert_eq!(tr(ko, "Open a PDF as editable reflowed text."), "PDF를 편집 가능한 리플로우 텍스트로 엽니다.");
         assert_eq!(trc(ko, "preview", "Import PDF (Reflow)"), "PDF 리플로우 가져오기");
         assert!(has(ko, "Import PDF (Reflow)"));
         assert!(has(ko, "Import PDF (Reflow)…"));

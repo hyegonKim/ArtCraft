@@ -277,6 +277,127 @@ pub(super) fn inspect(app: &mut FigApp, ui: &mut Ui) {
         app.clipboard_set_text(&code);
         app.toast(trf("Copied {value}", &[("value", &lang.label())]));
     }
+    dreamweaver_section(app, ui, &doc, &sel);
     crate::dev_mode::connect_section(app, ui, &doc, first, lang);
     crate::dev_mode::plugins_section(app, ui);
+}
+
+#[derive(Clone)]
+struct CachedSite {
+    uid: u64,
+    revision: u64,
+    sel: Vec<NodeId>,
+    site: std::sync::Arc<figcraft_engine::dreamweaver::GeneratedSite>,
+}
+
+/// Live HTML5 + CSS3 Split Code Preview and Responsive Site Exporter (375px / 768px / 1440px).
+fn dreamweaver_section(app: &mut FigApp, ui: &mut Ui, doc: &Document, sel: &[NodeId]) {
+    let t = Tokens::get(ui.ctx());
+    widgets::separator(ui);
+    let export_clicked =
+        widgets::section_header(ui, tr("Responsive Web (HTML5 / CSS3)"), &[(Icon::Export, tr("Export responsive HTML site"))], false).is_some();
+
+    let (uid, revision) = app.session.ds().map_or((0, 0), |d| (d.uid, d.revision));
+    let cache_id = Id::unique("inspect_dw_site_cache");
+    let site = match ui.data(|d| d.get_temp::<CachedSite>(cache_id)) {
+        Some(c) if c.uid == uid && c.revision == revision && c.sel == sel => c.site,
+        _ => {
+            let generated =
+                std::sync::Arc::new(figcraft_engine::dreamweaver::generate_site(doc, sel, &figcraft_engine::dreamweaver::SiteOptions::default()));
+            ui.data_mut(|d| {
+                d.insert_temp(cache_id, CachedSite { uid, revision, sel: sel.to_vec(), site: generated.clone() });
+            });
+            generated
+        }
+    };
+
+    let bp_id = Id::unique("inspect_dw_bp");
+    let bp_choice = ui.data(|d| d.get_temp::<Option<u32>>(bp_id)).unwrap_or(None);
+    let view_id = Id::unique("inspect_dw_split_mode");
+    let view_mode = ui.data(|d| d.get_temp::<u8>(view_id)).unwrap_or(0);
+
+    let bp_label = match bp_choice {
+        Some(375) => tr("Mobile 375px"),
+        Some(768) => tr("Tablet 768px"),
+        Some(1440) => tr("Desktop 1440px"),
+        _ => tr("All breakpoints"),
+    };
+    let mode_label = match view_mode {
+        1 => "HTML5",
+        2 => "CSS3",
+        _ => tr("Split HTML / CSS"),
+    };
+
+    row(ui, 32.0, |ui| {
+        let bp_resp = widgets::dropdown(ui, bp_label, 128.0, None);
+        menu_popup(&bp_resp).show(|ui| {
+            for (opt, label) in
+                [(None, tr("All breakpoints")), (Some(375), tr("Mobile 375px")), (Some(768), tr("Tablet 768px")), (Some(1440), tr("Desktop 1440px"))]
+            {
+                if menu_item(ui, label, "") {
+                    ui.data_mut(|d| d.insert_temp(bp_id, opt));
+                    ui.close();
+                }
+            }
+        });
+        let mode_resp = widgets::dropdown(ui, mode_label, 112.0, Some(Icon::Code));
+        menu_popup(&mode_resp).show(|ui| {
+            for (m, label) in [(0u8, tr("Split HTML / CSS")), (1u8, "HTML5"), (2u8, "CSS3")] {
+                if menu_item(ui, label, "") {
+                    ui.data_mut(|d| d.insert_temp(view_id, m));
+                    ui.close();
+                }
+            }
+        });
+    });
+
+    let css_shown = figcraft_engine::dreamweaver::css_for_breakpoint(&site, bp_choice);
+    if view_mode != 2 {
+        code_pane(ui, &t, "HTML5", &site.html);
+    }
+    if view_mode == 0 {
+        ui.add_space(6.0);
+    }
+    if view_mode != 1 {
+        code_pane(ui, &t, "CSS3", &css_shown);
+    }
+
+    ui.add_space(8.0);
+    let mut copy_html = false;
+    let mut copy_css = false;
+    let mut run_export = export_clicked;
+    row(ui, 32.0, |ui| {
+        copy_html |= ui.button(trf("Copy {value}", &[("value", &"HTML")])).clicked();
+        copy_css |= ui.button(trf("Copy {value}", &[("value", &"CSS")])).clicked();
+    });
+    row(ui, 32.0, |ui| {
+        run_export |= ui.button(tr("Export responsive HTML site")).clicked();
+    });
+
+    if copy_html {
+        app.clipboard_set_text(&site.html);
+        app.toast(trf("Copied {value}", &[("value", &"HTML")]));
+    }
+    if copy_css {
+        app.clipboard_set_text(&css_shown);
+        app.toast(trf("Copied {value}", &[("value", &"CSS")]));
+    }
+    if run_export {
+        crate::menus::invoke(app, "file.exportHtmlSite");
+    }
+}
+
+fn code_pane(ui: &mut Ui, t: &Tokens, badge: &str, text: &str) {
+    egui::Frame::NONE
+        .fill(t.field)
+        .corner_radius(CornerRadius::same(6))
+        .inner_margin(egui::Margin::same(10))
+        .outer_margin(egui::Margin::symmetric(16, 0))
+        .show(ui, |ui| {
+            ui.label(egui::RichText::new(badge).strong().size(10.0).color(t.text_secondary));
+            ui.add_space(2.0);
+            egui::ScrollArea::vertical().id_salt(("dw_pane", badge)).max_height(160.0).show(ui, |ui| {
+                ui.label(egui::RichText::new(text).monospace().size(11.0).color(t.text));
+            });
+        });
 }

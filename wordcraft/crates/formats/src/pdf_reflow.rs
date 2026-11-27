@@ -45,12 +45,7 @@ pub fn parse_flow(bytes: &[u8]) -> Result<(Flow, Option<SectionProps>), String> 
             first_section = Some(sec);
         }
         let spans = content::extract_page_spans(&pdf, page_info);
-        extracted_pages.push(reflow::PageSpans {
-            width: page_info.width(),
-            height: page_info.height(),
-            spans,
-            links: page_info.links.clone(),
-        });
+        extracted_pages.push(reflow::PageSpans { width: page_info.width(), height: page_info.height(), spans, links: page_info.links.clone() });
     }
 
     let blocks = reflow::reflow_document(&extracted_pages);

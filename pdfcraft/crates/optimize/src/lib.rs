@@ -44,10 +44,12 @@ mod images;
 mod links;
 mod pool;
 mod samples;
+pub mod scan;
 mod tiles;
 mod unused;
 
 pub use audit::{SpaceCategory, SpaceUse, audit_space};
+pub use scan::{DewarpedRgba, ScanCleanupKind, dewarp_quad_rgba, enhance_whiteboard_or_card};
 
 use pdfcraft_cos::{Dict, Document, ImageBudget, MAX_PAGE_DECODED, ObjRef, Object, Stream, serialize};
 use pdfcraft_filters::{Filter, Params};

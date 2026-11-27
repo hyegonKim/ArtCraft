@@ -47,13 +47,7 @@ pub(crate) struct SummaryDraft {
 
 impl Default for SummaryDraft {
     fn default() -> Self {
-        Self {
-            current_page: false,
-            max_points: 5,
-            key: None,
-            job: None,
-            result: None,
-        }
+        Self { current_page: false, max_points: 5, key: None, job: None, result: None }
     }
 }
 
@@ -161,56 +155,33 @@ pub(crate) fn body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens) -> bool
     render_summary_footer(ui, &app.summary_draft, doc_title.as_deref().unwrap_or(""))
 }
 
-fn render_summary_result(
-    ui: &mut egui::Ui,
-    draft: &SummaryDraft,
-    t: &Tokens,
-    jump_page: &mut Option<usize>,
-) {
-    egui::Frame::new()
-        .fill(t.hover)
-        .corner_radius(egui::CornerRadius::same(6))
-        .inner_margin(egui::Margin::same(8))
-        .show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            egui::ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-                ui.set_min_height(140.0);
-                match &draft.result {
-                    Some(Ok(summary)) => render_summary_ok(ui, summary, t, jump_page),
-                    Some(Err(err)) => {
-                        ui.colored_label(ui.visuals().error_fg_color, err);
-                    }
-                    None => {
-                        ui.spinner();
-                        let done = draft.job.as_ref().map_or(0, |j| j.done.load(Ordering::Relaxed));
-                        ui.label(crate::i18n::fmt(tl!("Summarizing… {n} pages read"), &[("n", &done.to_string())]));
-                    }
+fn render_summary_result(ui: &mut egui::Ui, draft: &SummaryDraft, t: &Tokens, jump_page: &mut Option<usize>) {
+    egui::Frame::new().fill(t.hover).corner_radius(egui::CornerRadius::same(6)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+        ui.set_width(ui.available_width());
+        egui::ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
+            ui.set_min_height(140.0);
+            match &draft.result {
+                Some(Ok(summary)) => render_summary_ok(ui, summary, t, jump_page),
+                Some(Err(err)) => {
+                    ui.colored_label(ui.visuals().error_fg_color, err);
                 }
-            });
+                None => {
+                    ui.spinner();
+                    let done = draft.job.as_ref().map_or(0, |j| j.done.load(Ordering::Relaxed));
+                    ui.label(crate::i18n::fmt(tl!("Summarizing… {n} pages read"), &[("n", &done.to_string())]));
+                }
+            }
         });
+    });
 }
 
-fn render_summary_ok(
-    ui: &mut egui::Ui,
-    summary: &DocumentSummary,
-    t: &Tokens,
-    jump_page: &mut Option<usize>,
-) {
+fn render_summary_ok(ui: &mut egui::Ui, summary: &DocumentSummary, t: &Tokens, jump_page: &mut Option<usize>) {
     ui.strong(crate::i18n::fmt(
         tl!("Words: {w}  ·  Reading time: {m} min"),
-        &[
-            ("w", &summary.word_count.to_string()),
-            ("m", &summary.reading_minutes.to_string()),
-        ],
+        &[("w", &summary.word_count.to_string()), ("m", &summary.reading_minutes.to_string())],
     ));
     if !summary.key_terms.is_empty() {
-        ui.label(
-            egui::RichText::new(crate::i18n::fmt(
-                tl!("Key terms: {terms}"),
-                &[("terms", &summary.key_terms.join(", "))],
-            ))
-            .color(t.text_muted),
-        );
+        ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Key terms: {terms}"), &[("terms", &summary.key_terms.join(", "))])).color(t.text_muted));
     }
     ui.separator();
     if summary.points.is_empty() {
@@ -220,10 +191,7 @@ fn render_summary_ok(
     for pt in &summary.points {
         ui.horizontal_wrapped(|ui| {
             let p_str = pt.page_number().to_string();
-            if ui
-                .small_button(crate::i18n::fmt(tl!("Page {p}"), &[("p", &p_str)]))
-                .clicked()
-            {
+            if ui.small_button(crate::i18n::fmt(tl!("Page {p}"), &[("p", &p_str)])).clicked() {
                 *jump_page = Some(pt.page);
             }
             ui.label(&pt.text);

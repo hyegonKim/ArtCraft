@@ -8,9 +8,7 @@
 
 use pdfcraft_cos::Document;
 use pdfcraft_edit::PageImage;
-use pdfcraft_preflight::{
-    Issue, Level, PreflightFinding, PreflightProfile, PreflightSeverity, PreflightSummary,
-};
+use pdfcraft_preflight::{Issue, Level, PreflightFinding, PreflightProfile, PreflightSeverity, PreflightSummary};
 
 use crate::Document as OpenDocument;
 
@@ -178,13 +176,7 @@ impl OpenDocument {
                     "warn" => PreflightSeverity::Warning,
                     _ => PreflightSeverity::Info,
                 };
-                findings.push(PreflightFinding {
-                    severity,
-                    code: f.id,
-                    clause: "Print",
-                    message: f.message,
-                    page: f.page.map(|p| p as usize),
-                });
+                findings.push(PreflightFinding { severity, code: f.id, clause: "Print", message: f.message, page: f.page.map(|p| p as usize) });
             }
         }
         PreflightSummary::from_findings(profile, findings)

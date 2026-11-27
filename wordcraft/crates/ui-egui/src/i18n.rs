@@ -234,7 +234,8 @@ impl Lang {
     /// order: the catalogs of the CJK languages using that order, and every language's own name (the
     /// Options list). The interface fonts check the embedded faces against it (#486).
     pub fn cjk_font_text(hans: bool) -> (Vec<&'static str>, String) {
-        let mut catalogs: Vec<&'static str> = Lang::all().filter(|l| l.uses_cjk() && l.prefers_hans() == hans).flat_map(Lang::catalog_texts).collect();
+        let mut catalogs: Vec<&'static str> =
+            Lang::all().filter(|l| l.uses_cjk() && l.prefers_hans() == hans).flat_map(Lang::catalog_texts).collect();
         if !hans {
             catalogs.push(KO_FALLBACK_FONT_CHARS);
         }

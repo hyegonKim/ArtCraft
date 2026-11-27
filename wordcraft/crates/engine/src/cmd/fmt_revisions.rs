@@ -72,13 +72,7 @@ impl Recorder<'_> {
     /// The tracked change `after` should carry, given the props `before` the command (`f` strips
     /// everything that isn't formatting); `None` when it already carries the right one.
     #[allow(clippy::type_complexity, clippy::option_option)]
-    fn change<T: Clone + PartialEq>(
-        &mut self,
-        before: &T,
-        after: &T,
-        f: fn(&T) -> T,
-        get: fn(&T) -> &Slot<T>,
-    ) -> Option<Replacement<T>> {
+    fn change<T: Clone + PartialEq>(&mut self, before: &T, after: &T, f: fn(&T) -> T, get: fn(&T) -> &Slot<T>) -> Option<Replacement<T>> {
         let (fb, fa) = (f(before), f(after));
         let (had, has) = (get(before), get(after));
         self.change_values(fb, fa, had, has)

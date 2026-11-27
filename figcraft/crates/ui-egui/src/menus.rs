@@ -36,11 +36,13 @@ pub const UI_COMMANDS: &[&str] = &[
     "file.open",
     "file.import",
     "file.importXd",
+    "file.importHtml",
     "file.placeImage",
     "file.save",
     "file.saveAs",
     "file.export",
     "file.exportSvg",
+    "file.exportHtmlSite",
     "edit.copyAsText",
     "edit.copyAsCss",
     "edit.copyAsSvg",
@@ -102,6 +104,7 @@ pub fn invoke(app: &mut FigApp, id: &str) {
         "plugin.import" => crate::plugins_ui::import_dialog(app),
         "file.import" => app.import_dialog(false),
         "file.importXd" => app.import_xd_dialog(),
+        "file.importHtml" => app.import_html_dialog(),
         "file.placeImage" => app.import_dialog(true),
         "file.save" => app.save(),
         "file.saveAs" => app.save_as_dialog(),
@@ -113,6 +116,7 @@ pub fn invoke(app: &mut FigApp, id: &str) {
         "branch.create" => crate::versions::start_branch(app),
         "file.export" | "file.exportSvg" => app.ui.export_preview = true,
         "file.exportFramesPdf" => export_frames_pdf(app),
+        "file.exportHtmlSite" => app.export_html_site_dialog(),
         "edit.copyAsCss" => {
             let ids = app.session.selection();
             if let (Some(first), Ok(doc)) = (ids.first(), app.session.doc()) {

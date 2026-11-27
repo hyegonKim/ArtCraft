@@ -20,7 +20,12 @@ pub const SEP: &str = "-";
 
 /// Extra search terms the Actions palette reads, by command id: a name a feature had before it was
 /// renamed, so people who know the old name still find the command. Never shown.
-pub static SEARCH_ALIASES: &[(&str, &str)] = &[("view.devMode", "Dev Mode")];
+pub static SEARCH_ALIASES: &[(&str, &str)] = &[
+    ("view.devMode", "Dev Mode"),
+    ("file.exportHtmlSite", "Dreamweaver HTML5 CSS3 Responsive Site"),
+    ("file.importHtml", "Dreamweaver HTML CSS Snippet"),
+    ("code.liveHtmlCss", "Dreamweaver Split Code Preview"),
+];
 
 pub static MENU: &[MenuItem] = &[
     // File
@@ -33,6 +38,7 @@ pub static MENU: &[MenuItem] = &[
     m!("File", "Open…", "file.open"),
     m!("File", "Import from file…", "file.import"),
     m!("File", "Import Adobe XD (.xd)…", "file.importXd"),
+    m!("File", "Import HTML (.html)…", "file.importHtml"),
     m!("File", "Place image…", "file.placeImage"),
     m!("File", SEP, ""),
     m!("File", "Save", "file.save"),
@@ -49,6 +55,7 @@ pub static MENU: &[MenuItem] = &[
     m!("File", "Export…", "file.export"),
     m!("File", "Export frames to PDF…", "file.exportFramesPdf"),
     m!("File", "Export selection as SVG…", "file.exportSvg"),
+    m!("File", "Export responsive HTML site…", "file.exportHtmlSite"),
     m!("File", SEP, ""),
     m!("File", "Duplicate", "file.duplicate"),
     m!("File", "Rename", "file.rename"),
@@ -303,10 +310,12 @@ pub fn items() -> impl Iterator<Item = &'static MenuItem> {
 }
 
 /// Items of FigCraft's own that the parity count leaves out (as it does the `collab.` ones).
-const OWN: [&str; 7] = [
+const OWN: [&str; 9] = [
     "file.newFromTemplate",
     "file.newBoard",
     "file.importXd",
+    "file.importHtml",
+    "file.exportHtmlSite",
     "help.gettingStarted",
     "text.missingFonts",
     "image.crop",

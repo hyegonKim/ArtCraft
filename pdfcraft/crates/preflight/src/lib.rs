@@ -27,6 +27,7 @@ mod gstate;
 mod header;
 pub mod icc;
 mod limits;
+pub mod output_preview;
 pub mod profiles;
 mod spot;
 mod trailer;
@@ -35,6 +36,10 @@ mod xmp;
 mod xmp_extension;
 mod xmp_types;
 
+pub use output_preview::{
+    CmykPlates, DEFAULT_INK_LIMIT_PERCENT, NEWSPRINT_INK_LIMIT_PERCENT, OutputPreviewResult, PageCmykInspection, TacSummary,
+    analyze_cmyk_output_preview, analyze_rgba_output_preview, analyze_rgba_with_stream_info, inspect_page_cmyk_ink, rgb_to_press_cmyk_percent,
+};
 pub use profiles::{PreflightFinding, PreflightProfile, PreflightSeverity, PreflightSummary, run_profile};
 
 use pdfcraft_cos::{Dict, Document, ObjRef, Object, PdfString, Stream};

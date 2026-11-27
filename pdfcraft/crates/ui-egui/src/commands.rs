@@ -232,6 +232,10 @@ impl PdfCraftApp {
                 self.protect_draft = Default::default();
                 self.dialog = Some(Dialog::Protect);
             }
+            "prepress.output_preview" => {
+                self.output_preview_draft.invalidate();
+                self.dialog = Some(Dialog::OutputPreview);
+            }
             "prepress.convert_colors" => self.dialog = Some(Dialog::ConvertColours),
             "prepress.hairlines" => self.dialog = Some(Dialog::FixHairlines),
             "protect.remove" => {

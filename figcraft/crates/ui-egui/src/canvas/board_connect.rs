@@ -30,10 +30,7 @@ fn drag_id() -> Id {
 }
 
 fn eligible_target(app: &FigApp) -> Option<NodeId> {
-    if app.session.active_read_only().is_some()
-        || app.session.tool.tool != ToolId::Move
-        || app.session.tool.busy()
-    {
+    if app.session.active_read_only().is_some() || app.session.tool.tool != ToolId::Move || app.session.tool.busy() {
         return None;
     }
     let ds = app.session.ds().ok()?;
@@ -104,44 +101,41 @@ pub fn show(app: &mut FigApp, ctx: &Context) {
 
     for (side, center) in sides {
         let area_pos = center - vec2(HANDLE_SIZE * 0.5, HANDLE_SIZE * 0.5);
-        egui::Area::new(Id::unique(("board_connect", side)))
-            .fixed_pos(area_pos)
-            .order(Order::Middle)
-            .show(ctx, |ui| {
-                let (rect, resp) = ui.allocate_exact_size(vec2(HANDLE_SIZE, HANDLE_SIZE), Sense::click_and_drag());
-                let resp = resp.on_hover_text(crate::i18n::tr("Add a connected shape"));
-                let is_this_drag = active_drag.as_ref().is_some_and(|d| d.side == side);
-                let hot = resp.hovered() || is_this_drag;
-                let p = ui.painter();
-                let c = rect.center();
-                if hot {
-                    p.circle_filled(c, DOT_RADIUS + 1.5, accent);
-                    p.circle_stroke(c, DOT_RADIUS + 1.5, Stroke::new(1.5, Color32::WHITE));
-                    p.line_segment([c - vec2(4.0, 0.0), c + vec2(4.0, 0.0)], Stroke::new(1.5, Color32::WHITE));
-                    p.line_segment([c - vec2(0.0, 4.0), c + vec2(0.0, 4.0)], Stroke::new(1.5, Color32::WHITE));
-                } else {
-                    p.circle_filled(c, DOT_RADIUS, Color32::WHITE);
-                    p.circle_stroke(c, DOT_RADIUS, Stroke::new(1.5, accent));
-                    p.line_segment([c - vec2(3.5, 0.0), c + vec2(3.5, 0.0)], Stroke::new(1.5, accent));
-                    p.line_segment([c - vec2(0.0, 3.5), c + vec2(0.0, 3.5)], Stroke::new(1.5, accent));
-                }
+        egui::Area::new(Id::unique(("board_connect", side))).fixed_pos(area_pos).order(Order::Middle).show(ctx, |ui| {
+            let (rect, resp) = ui.allocate_exact_size(vec2(HANDLE_SIZE, HANDLE_SIZE), Sense::click_and_drag());
+            let resp = resp.on_hover_text(crate::i18n::tr("Add a connected shape"));
+            let is_this_drag = active_drag.as_ref().is_some_and(|d| d.side == side);
+            let hot = resp.hovered() || is_this_drag;
+            let p = ui.painter();
+            let c = rect.center();
+            if hot {
+                p.circle_filled(c, DOT_RADIUS + 1.5, accent);
+                p.circle_stroke(c, DOT_RADIUS + 1.5, Stroke::new(1.5, Color32::WHITE));
+                p.line_segment([c - vec2(4.0, 0.0), c + vec2(4.0, 0.0)], Stroke::new(1.5, Color32::WHITE));
+                p.line_segment([c - vec2(0.0, 4.0), c + vec2(0.0, 4.0)], Stroke::new(1.5, Color32::WHITE));
+            } else {
+                p.circle_filled(c, DOT_RADIUS, Color32::WHITE);
+                p.circle_stroke(c, DOT_RADIUS, Stroke::new(1.5, accent));
+                p.line_segment([c - vec2(3.5, 0.0), c + vec2(3.5, 0.0)], Stroke::new(1.5, accent));
+                p.line_segment([c - vec2(0.0, 3.5), c + vec2(0.0, 3.5)], Stroke::new(1.5, accent));
+            }
 
-                if resp.clicked() && active_drag.is_none() {
-                    clicked_side = Some(side);
+            if resp.clicked() && active_drag.is_none() {
+                clicked_side = Some(side);
+            }
+            if resp.drag_started() && active_drag.is_none() {
+                let at = ctx.input(|i| i.pointer.interact_pos()).unwrap_or(c);
+                started_drag = Some(DragState { source: target, side, pos: at });
+            }
+            if is_this_drag {
+                if let Some(at) = ctx.input(|i| i.pointer.interact_pos().or(i.pointer.latest_pos())) {
+                    updated_pos = Some(at);
                 }
-                if resp.drag_started() && active_drag.is_none() {
-                    let at = ctx.input(|i| i.pointer.interact_pos()).unwrap_or(c);
-                    started_drag = Some(DragState { source: target, side, pos: at });
+                if resp.drag_stopped() || !ctx.input(|i| i.pointer.primary_down()) {
+                    released_drag = true;
                 }
-                if is_this_drag {
-                    if let Some(at) = ctx.input(|i| i.pointer.interact_pos().or(i.pointer.latest_pos())) {
-                        updated_pos = Some(at);
-                    }
-                    if resp.drag_stopped() || !ctx.input(|i| i.pointer.primary_down()) {
-                        released_drag = true;
-                    }
-                }
-            });
+            }
+        });
     }
 
     if let Some(d) = started_drag {
@@ -179,9 +173,7 @@ pub fn show(app: &mut FigApp, ctx: &Context) {
             return;
         }
         let page_pt = app.to_page(drop_pos);
-        let hit = app.session.ds().ok().and_then(|ds| {
-            figcraft_engine::board::sticky_or_shape_at(&ds.doc, ds.page, page_pt, Some(d.source))
-        });
+        let hit = app.session.ds().ok().and_then(|ds| figcraft_engine::board::sticky_or_shape_at(&ds.doc, ds.page, page_pt, Some(d.source)));
         if let Some(existing) = hit {
             app.run(
                 "board.connector",

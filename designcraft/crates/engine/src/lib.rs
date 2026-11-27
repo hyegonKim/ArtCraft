@@ -30,6 +30,7 @@ use designcraft_compose::Cache;
 use designcraft_doc::{Document, LayerId, Selection};
 use serde_json::Value;
 
+pub use cmd::icml::{CopyfitReport, compute_copyfit};
 pub use cmd::params::{check_keys, check_params};
 pub use cmd::{CommandInfo, CommandSpec, command_specs, find_command};
 pub use designcraft_compose as compose;

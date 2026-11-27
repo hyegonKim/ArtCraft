@@ -971,10 +971,7 @@ impl<'a> Exporter<'a> {
                 return None;
             }
             PaintKind::Video(vid) => {
-                let poster_key = vid
-                    .poster
-                    .as_deref()
-                    .or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()));
+                let poster_key = vid.poster.as_deref().or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()));
                 if let Some(key) = poster_key
                     && let Some(image) = self.image_fill(key, true)
                 {

@@ -37,7 +37,9 @@ impl Dialog {
         let defaults = match id {
             "newDocument" => crate::new_document::defaults(),
             "goToPage" => json!({"page": "1"}),
-            "epubExport" => json!({"fixedLayout": false, "split": false, "mode": "style", "style": designcraft_doc::BASIC_PARAGRAPH, "coverImage": ""}),
+            "epubExport" => {
+                json!({"fixedLayout": false, "split": false, "mode": "style", "style": designcraft_doc::BASIC_PARAGRAPH, "coverImage": ""})
+            }
             "qrCode" => json!({"type": "url", "content": "https://", "color": "[Black]"}),
             "insertTable" => json!({"bodyRows": 4, "columns": 4, "headerRows": 0, "footerRows": 0}),
             "convertTextToTable" => json!({"columnSeparator": "tab", "rowSeparator": "paragraph", "columns": 1}),
@@ -968,16 +970,8 @@ fn print_dialog(app: &crate::DesignApp, ui: &mut egui::Ui, d: &mut Dialog) {
 
 /// The presets offered by the Export PDF dialog, in display order. The stored value is the
 /// English name; the caption is translated.
-const PDF_EXPORT_PRESETS: &[&str] = &[
-    "Desktop Printing",
-    "Commercial Printing",
-    "Screen and Email",
-    "PDF/X-1a:2003",
-    "PDF/X-3:2003",
-    "PDF/X-4",
-    "PDF/A-2b",
-    "Custom",
-];
+const PDF_EXPORT_PRESETS: &[&str] =
+    &["Desktop Printing", "Commercial Printing", "Screen and Email", "PDF/X-1a:2003", "PDF/X-3:2003", "PDF/X-4", "PDF/A-2b", "Custom"];
 
 /// The `file.exportPdf` options the Export PDF dialog's fields stand for (pages and title aside).
 fn pdf_export_params(d: &Dialog) -> Value {
@@ -1131,9 +1125,9 @@ fn pdf_export(app: &mut crate::DesignApp, ui: &mut egui::Ui, d: &mut Dialog) {
             } else {
                 format!("{}.joboptions", cur_preset.replace(['/', ':', '\\'], "_"))
             };
-            if let Err(e) = app.ask_save(&suggested, Bound::App, move |app, path| {
-                app.run("pdfPreset.exportJoboptions", with_path(&snapshot, "path", path))
-            }) {
+            if let Err(e) =
+                app.ask_save(&suggested, Bound::App, move |app, path| app.run("pdfPreset.exportJoboptions", with_path(&snapshot, "path", path)))
+            {
                 app.status_error("Export PDF", e);
             }
         }

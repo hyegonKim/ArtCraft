@@ -52,12 +52,8 @@ pub(crate) fn options_with_session(s: Option<&Session>, p: &Value, page_count: u
             let _ = job_path;
             return Err(bad(ID, "joboptionsPath requires a file system"));
         };
-        let default_name = std::path::Path::new(job_path)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("Imported");
-        let preset = designcraft_pdf::parse_joboptions_bytes(&raw, default_name)
-            .map_err(|e| bad(ID, format!("{job_path}: {e}")))?;
+        let default_name = std::path::Path::new(job_path).file_stem().and_then(|s| s.to_str()).unwrap_or("Imported");
+        let preset = designcraft_pdf::parse_joboptions_bytes(&raw, default_name).map_err(|e| bad(ID, format!("{job_path}: {e}")))?;
         preset.apply_to(&mut base);
     } else if let Some(preset_name) = str_param(p, "preset").filter(|s| !s.is_empty()) {
         let found = s

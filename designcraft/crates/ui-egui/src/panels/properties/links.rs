@@ -306,11 +306,8 @@ pub fn preflight_panel(app: &mut DesignApp, ui: &mut egui::Ui) {
     let checking = !app.preflight.disabled && found.is_none() && app.session.active().is_some();
     let all_issues = found.unwrap_or_default();
     let filter = app.preflight.page_filter.trim().to_string();
-    let visible: Vec<(usize, &designcraft_engine::cmd::preflight::Issue)> = all_issues
-        .iter()
-        .enumerate()
-        .filter(|(_, i)| issue_matches_page_filter(i.page, &filter))
-        .collect();
+    let visible: Vec<(usize, &designcraft_engine::cmd::preflight::Issue)> =
+        all_issues.iter().enumerate().filter(|(_, i)| issue_matches_page_filter(i.page, &filter)).collect();
     let errors = visible.iter().filter(|(_, i)| i.severity == "error").count();
     preflight_status_row(app, ui, t, checking, &visible, errors);
     divider(ui);
@@ -364,25 +361,18 @@ fn preflight_toolbar(app: &mut DesignApp, ui: &mut egui::Ui) {
             let cur = active_prof.clone();
             let file_stem = cur.trim_matches(['[', ']']).replace(['/', ':', '\\'], "_");
             let suggested = if file_stem.is_empty() { "Profile.idpp".into() } else { format!("{file_stem}.idpp") };
-            if let Err(e) = app.ask_save(&suggested, Bound::App, move |app, path| {
-                app.run("preflight.exportIdpp", json!({"name": cur, "path": path}))
-            }) {
+            if let Err(e) = app.ask_save(&suggested, Bound::App, move |app, path| app.run("preflight.exportIdpp", json!({"name": cur, "path": path})))
+            {
                 app.status_error("Preflight", e);
             }
         }
         if ui.small_button(crate::rtl::widget(ui, crate::i18n::tr(&lang, "Save Report…"))).clicked()
-            && let Err(e) = app.ask_save("Preflight Report.txt", Bound::Document, |app, path| {
-                app.run("preflight.saveReport", json!({"path": path}))
-            })
+            && let Err(e) = app.ask_save("Preflight Report.txt", Bound::Document, |app, path| app.run("preflight.saveReport", json!({"path": path})))
         {
             app.status_error("Preflight", e);
         }
         crate::rtl::label(ui, crate::i18n::tr(&lang, "Pages:"));
-        ui.add(
-            egui::TextEdit::singleline(&mut app.preflight.page_filter)
-                .desired_width(72.0)
-                .hint_text(crate::i18n::tr(&lang, "All")),
-        );
+        ui.add(egui::TextEdit::singleline(&mut app.preflight.page_filter).desired_width(72.0).hint_text(crate::i18n::tr(&lang, "All")));
     });
 }
 
@@ -421,38 +411,26 @@ fn preflight_status_row(
     });
 }
 
-fn preflight_category_tree(
-    app: &mut DesignApp,
-    ui: &mut egui::Ui,
-    t: Tokens,
-    visible: &[(usize, &designcraft_engine::cmd::preflight::Issue)],
-) {
+fn preflight_category_tree(app: &mut DesignApp, ui: &mut egui::Ui, t: Tokens, visible: &[(usize, &designcraft_engine::cmd::preflight::Issue)]) {
     const CATEGORIES: &[&str] = &["LINKS", "COLOR", "IMAGES and OBJECTS", "TEXT", "DOCUMENT"];
     for cat in CATEGORIES {
-        let bucket: Vec<(usize, &designcraft_engine::cmd::preflight::Issue)> =
-            visible.iter().copied().filter(|(_, i)| i.category == *cat).collect();
+        let bucket: Vec<(usize, &designcraft_engine::cmd::preflight::Issue)> = visible.iter().copied().filter(|(_, i)| i.category == *cat).collect();
         if bucket.is_empty() {
             continue;
         }
         let header = format!("{} ({})", crate::i18n::tr(&app.ui.language, cat), bucket.len());
-        egui::CollapsingHeader::new(egui::RichText::new(header).size(11.0).strong())
-            .id_salt(("preflight_cat", *cat))
-            .default_open(true)
-            .show(ui, |ui| {
+        egui::CollapsingHeader::new(egui::RichText::new(header).size(11.0).strong()).id_salt(("preflight_cat", *cat)).default_open(true).show(
+            ui,
+            |ui| {
                 for (idx, issue) in bucket {
                     preflight_issue_row(app, ui, t, idx, issue);
                 }
-            });
+            },
+        );
     }
 }
 
-fn preflight_issue_row(
-    app: &mut DesignApp,
-    ui: &mut egui::Ui,
-    t: Tokens,
-    idx: usize,
-    i: &designcraft_engine::cmd::preflight::Issue,
-) {
+fn preflight_issue_row(app: &mut DesignApp, ui: &mut egui::Ui, t: Tokens, idx: usize, i: &designcraft_engine::cmd::preflight::Issue) {
     let page = i.page.filter(|_| app.session.active().is_some()).map(|p| app.session.page_label(p));
     let selected = app.preflight.selected_issue == Some(idx);
     ui.horizontal(|ui| {
@@ -481,12 +459,7 @@ fn jump_to_issue(app: &mut DesignApp, idx: usize, i: &designcraft_engine::cmd::p
     }
 }
 
-fn preflight_info_drawer(
-    app: &DesignApp,
-    ui: &mut egui::Ui,
-    t: Tokens,
-    all_issues: &[designcraft_engine::cmd::preflight::Issue],
-) {
+fn preflight_info_drawer(app: &DesignApp, ui: &mut egui::Ui, t: Tokens, all_issues: &[designcraft_engine::cmd::preflight::Issue]) {
     let Some(idx) = app.preflight.selected_issue else { return };
     let Some(issue) = all_issues.get(idx) else { return };
     divider(ui);
@@ -494,10 +467,7 @@ fn preflight_info_drawer(
         .id_salt("preflight_info_drawer")
         .default_open(true)
         .show(ui, |ui| {
-            crate::rtl::label(
-                ui,
-                egui::RichText::new(format!("{}: {}", crate::i18n::tr(&app.ui.language, "Problem"), issue.message)).size(10.5),
-            );
+            crate::rtl::label(ui, egui::RichText::new(format!("{}: {}", crate::i18n::tr(&app.ui.language, "Problem"), issue.message)).size(10.5));
             if !issue.fix.is_empty() {
                 ui.add_space(2.0);
                 crate::rtl::label(

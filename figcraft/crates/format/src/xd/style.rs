@@ -36,11 +36,7 @@ pub(super) fn parse_transform(v: Option<&Value>) -> Affine {
     let tx = f64_at(t, "tx").or_else(|| f64_at(t, "e")).unwrap_or(0.0).clamp(-MAX_COORD, MAX_COORD);
     let ty = f64_at(t, "ty").or_else(|| f64_at(t, "f")).unwrap_or(0.0).clamp(-MAX_COORD, MAX_COORD);
     let xf = Affine::new([a, b, c, d, tx, ty]);
-    if xf.determinant().abs() < 1e-9 {
-        Affine::translate((tx, ty))
-    } else {
-        xf
-    }
+    if xf.determinant().abs() < 1e-9 { Affine::translate((tx, ty)) } else { xf }
 }
 
 /// Parse an AGC color representation:
@@ -81,11 +77,7 @@ fn rgb_channels(v: &Value, scale_255: bool) -> Option<(f32, f32, f32)> {
     let g = f64_at(v, "g")?;
     let b = f64_at(v, "b")?;
     let denom = if scale_255 || r > 1.0 || g > 1.0 || b > 1.0 { 255.0 } else { 1.0 };
-    Some((
-        (r / denom).clamp(0.0, 1.0) as f32,
-        (g / denom).clamp(0.0, 1.0) as f32,
-        (b / denom).clamp(0.0, 1.0) as f32,
-    ))
+    Some(((r / denom).clamp(0.0, 1.0) as f32, (g / denom).clamp(0.0, 1.0) as f32, (b / denom).clamp(0.0, 1.0) as f32))
 }
 
 pub(super) fn parse_blend_mode(s: Option<&str>) -> BlendMode {
@@ -179,10 +171,7 @@ fn parse_gradient(fill: &Value, box_w: f64, box_h: f64, ctx: &mut ImportCtx<'_>)
         _ => GradientKind::Linear,
     };
 
-    let stops_val = grad
-        .get("stops")
-        .or_else(|| ux_grad.and_then(|u| u.get("stops")))
-        .or_else(|| resolved_def.as_ref().and_then(|d| d.get("stops")));
+    let stops_val = grad.get("stops").or_else(|| ux_grad.and_then(|u| u.get("stops"))).or_else(|| resolved_def.as_ref().and_then(|d| d.get("stops")));
     let mut stops = Vec::new();
     if let Some(arr) = stops_val.and_then(Value::as_array) {
         for s in arr.iter().take(MAX_STOPS) {
@@ -201,9 +190,7 @@ fn parse_gradient(fill: &Value, box_w: f64, box_h: f64, ctx: &mut ImportCtx<'_>)
         stops.push(ColorStop { position: 1.0, color: only.color });
     }
 
-    let units_user = str_at(grad, "units")
-        .or_else(|| resolved_def.as_ref().and_then(|d| str_at(d, "units")))
-        .is_some_and(|u| u == "userSpaceOnUse");
+    let units_user = str_at(grad, "units").or_else(|| resolved_def.as_ref().and_then(|d| str_at(d, "units"))).is_some_and(|u| u == "userSpaceOnUse");
     let norm_x = |v: f64| if units_user && box_w > 1e-6 { (v / box_w).clamp(-10.0, 10.0) } else { v.clamp(-10.0, 10.0) };
     let norm_y = |v: f64| if units_user && box_h > 1e-6 { (v / box_h).clamp(-10.0, 10.0) } else { v.clamp(-10.0, 10.0) };
 
@@ -238,30 +225,20 @@ fn parse_gradient(fill: &Value, box_w: f64, box_h: f64, ctx: &mut ImportCtx<'_>)
 
 fn parse_pattern_fill(fill: &Value, ctx: &mut ImportCtx<'_>) -> Option<Paint> {
     let pat = fill.get("pattern").unwrap_or(fill);
-    let ux = pat
-        .get("meta")
-        .and_then(|m| m.get("ux"))
-        .or_else(|| fill.get("meta").and_then(|m| m.get("ux")));
+    let ux = pat.get("meta").and_then(|m| m.get("ux")).or_else(|| fill.get("meta").and_then(|m| m.get("ux")));
 
     let uid = ux
         .and_then(|u| str_at(u, "uid").or_else(|| str_at(u, "videoUid")))
         .or_else(|| str_at(pat, "uid"))
-        .or_else(|| {
-            str_at(pat, "href").map(|h| h.trim_start_matches("resources/").trim_start_matches("./"))
-        })?;
+        .or_else(|| str_at(pat, "href").map(|h| h.trim_start_matches("resources/").trim_start_matches("./")))?;
 
-    let scale_mode = match ux
-        .and_then(|u| str_at(u, "scaleBehavior"))
-        .or_else(|| str_at(pat, "scaleBehavior"))
-        .unwrap_or("fill")
-        .to_ascii_lowercase()
-        .as_str()
-    {
-        "fit" | "contain" => ImageScaleMode::Fit,
-        "tile" | "repeat" => ImageScaleMode::Tile,
-        "stretch" | "none" | "crop" => ImageScaleMode::Crop,
-        _ => ImageScaleMode::Fill,
-    };
+    let scale_mode =
+        match ux.and_then(|u| str_at(u, "scaleBehavior")).or_else(|| str_at(pat, "scaleBehavior")).unwrap_or("fill").to_ascii_lowercase().as_str() {
+            "fit" | "contain" => ImageScaleMode::Fit,
+            "tile" | "repeat" => ImageScaleMode::Tile,
+            "stretch" | "none" | "crop" => ImageScaleMode::Crop,
+            _ => ImageScaleMode::Fill,
+        };
     let tile_scale = ux.and_then(|u| f64_at(u, "scale")).unwrap_or(1.0).clamp(0.01, 100.0);
 
     let poster_uid = ux.and_then(|u| str_at(u, "posterUid").or_else(|| str_at(u, "thumbnailUid")));
@@ -278,13 +255,7 @@ fn parse_pattern_fill(fill: &Value, ctx: &mut ImportCtx<'_>) -> Option<Paint> {
                 vp.loop_playback = bool_at(u, "loop").or_else(|| bool_at(u, "loopPlayback")).unwrap_or(true);
                 vp.muted = bool_at(u, "muted").unwrap_or(false);
             }
-            return Some(Paint {
-                kind: PaintKind::Video(vp),
-                opacity: 1.0,
-                visible: true,
-                blend: BlendMode::Normal,
-                color_alpha: 1.0,
-            });
+            return Some(Paint { kind: PaintKind::Video(vp), opacity: 1.0, visible: true, blend: BlendMode::Normal, color_alpha: 1.0 });
         }
     }
 
@@ -294,13 +265,7 @@ fn parse_pattern_fill(fill: &Value, ctx: &mut ImportCtx<'_>) -> Option<Paint> {
             if let Some((vhash, phash)) = ctx.register_video_bytes(uid, raw, poster_uid) {
                 let mut vp = VideoPaint::new(vhash, Some(phash), scale_mode);
                 vp.scale = tile_scale;
-                return Some(Paint {
-                    kind: PaintKind::Video(vp),
-                    opacity: 1.0,
-                    visible: true,
-                    blend: BlendMode::Normal,
-                    color_alpha: 1.0,
-                });
+                return Some(Paint { kind: PaintKind::Video(vp), opacity: 1.0, visible: true, blend: BlendMode::Normal, color_alpha: 1.0 });
             }
         } else if let Some(ihash) = ctx.register_image_bytes(uid, raw) {
             return Some(Paint {
@@ -355,13 +320,7 @@ pub(super) fn parse_stroke(style: Option<&Value>, ctx: &mut ImportCtx<'_>) -> (V
         props.miter_limit = ml.clamp(1.0, 100.0);
     }
     if let Some(dashes) = stroke.get("dash").and_then(Value::as_array) {
-        props.dashes = dashes
-            .iter()
-            .take(32)
-            .filter_map(Value::as_f64)
-            .filter(|d| d.is_finite() && *d >= 0.0)
-            .map(|d| d.min(MAX_STROKE))
-            .collect();
+        props.dashes = dashes.iter().take(32).filter_map(Value::as_f64).filter(|d| d.is_finite() && *d >= 0.0).map(|d| d.min(MAX_STROKE)).collect();
     }
 
     let mut paints = Vec::new();
@@ -406,23 +365,13 @@ pub(super) fn parse_effects(style: Option<&Value>, ctx: &mut ImportCtx<'_>) -> V
                 }
             }
             "uxdesign#backgroundBlur" | "backgroundBlur" => {
-                let r = f64_at(params, "blurAmount")
-                    .or_else(|| f64_at(params, "radius"))
-                    .unwrap_or(10.0)
-                    .clamp(0.0, 1000.0);
+                let r = f64_at(params, "blurAmount").or_else(|| f64_at(params, "radius")).unwrap_or(10.0).clamp(0.0, 1000.0);
                 out.push(Effect { kind: EffectKind::BackgroundBlur(Blur::uniform(r)), visible });
             }
             "uxdesign#objectBlur" | "objectBlur" | "uxdesign#blur" | "blur" => {
-                let r = f64_at(params, "blurAmount")
-                    .or_else(|| f64_at(params, "radius"))
-                    .unwrap_or(10.0)
-                    .clamp(0.0, 1000.0);
+                let r = f64_at(params, "blurAmount").or_else(|| f64_at(params, "radius")).unwrap_or(10.0).clamp(0.0, 1000.0);
                 let is_bg = bool_at(params, "backgroundEffect").unwrap_or(false);
-                let kind = if is_bg {
-                    EffectKind::BackgroundBlur(Blur::uniform(r))
-                } else {
-                    EffectKind::LayerBlur(Blur::uniform(r))
-                };
+                let kind = if is_bg { EffectKind::BackgroundBlur(Blur::uniform(r)) } else { EffectKind::LayerBlur(Blur::uniform(r)) };
                 out.push(Effect { kind, visible });
             }
             other if !other.is_empty() => {
@@ -437,22 +386,8 @@ pub(super) fn parse_effects(style: Option<&Value>, ctx: &mut ImportCtx<'_>) -> V
 fn parse_shadow(v: &Value) -> Shadow {
     let dx = f64_at(v, "dx").or_else(|| f64_at(v, "x")).unwrap_or(0.0).clamp(-MAX_STROKE, MAX_STROKE);
     let dy = f64_at(v, "dy").or_else(|| f64_at(v, "y")).unwrap_or(3.0).clamp(-MAX_STROKE, MAX_STROKE);
-    let radius = f64_at(v, "r")
-        .or_else(|| f64_at(v, "blur"))
-        .or_else(|| f64_at(v, "radius"))
-        .unwrap_or(6.0)
-        .clamp(0.0, MAX_STROKE);
+    let radius = f64_at(v, "r").or_else(|| f64_at(v, "blur")).or_else(|| f64_at(v, "radius")).unwrap_or(6.0).clamp(0.0, MAX_STROKE);
     let spread = f64_at(v, "spread").or_else(|| f64_at(v, "choke")).unwrap_or(0.0).clamp(-MAX_STROKE, MAX_STROKE);
-    let color = v
-        .get("color")
-        .and_then(parse_color)
-        .unwrap_or_else(|| Color::new(0.0, 0.0, 0.0, 0.16));
-    Shadow {
-        color,
-        offset: (dx, dy),
-        radius,
-        spread,
-        blend: BlendMode::Normal,
-        show_behind: false,
-    }
+    let color = v.get("color").and_then(parse_color).unwrap_or_else(|| Color::new(0.0, 0.0, 0.0, 0.16));
+    Shadow { color, offset: (dx, dy), radius, spread, blend: BlendMode::Normal, show_behind: false }
 }

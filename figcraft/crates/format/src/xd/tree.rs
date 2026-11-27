@@ -10,16 +10,14 @@ use figcraft_doc::geom::kurbo::Shape as _;
 use figcraft_doc::geom::{Affine, BezPath, Point};
 use figcraft_doc::proto::{Overflow, ScrollPosition};
 use figcraft_doc::{
-    BoolOp, Corners, Document, LetterSpacing, LineHeight, MaskType, Node, NodeId, NodeKind, StyleRun, TextAlignH, TextAutoResize, TextCase,
-    TextData, TextDecoration, TextStyle, VectorNetwork, WindingRule,
+    BoolOp, Corners, Document, LetterSpacing, LineHeight, MaskType, Node, NodeId, NodeKind, StyleRun, TextAlignH, TextAutoResize, TextCase, TextData,
+    TextDecoration, TextStyle, VectorNetwork, WindingRule,
 };
 use serde_json::Value;
 use zip::ZipArchive;
 
 use super::archive::{AssetEntry, Budget, MAX_ASSET_BYTES, ParsedArchive};
-use super::style::{
-    bool_at, f64_at, parse_blend_mode, parse_color, parse_effects, parse_fills, parse_stroke, parse_transform, str_at,
-};
+use super::style::{bool_at, f64_at, parse_blend_mode, parse_color, parse_effects, parse_fills, parse_stroke, parse_transform, str_at};
 use crate::FormatError;
 
 const MAX_NODES: usize = 200_000;
@@ -55,11 +53,7 @@ impl<'a> ImportCtx<'a> {
     }
 
     pub fn read_asset_bytes(&mut self, uid: &str) -> Option<Vec<u8>> {
-        let path = self
-            .assets
-            .get(uid)
-            .map(|a| a.path.clone())
-            .unwrap_or_else(|| format!("resources/{uid}"));
+        let path = self.assets.get(uid).map(|a| a.path.clone()).unwrap_or_else(|| format!("resources/{uid}"));
         self.budget.read_bytes(&mut self.z, &path, MAX_ASSET_BYTES).ok()
     }
 
@@ -163,14 +157,8 @@ pub(super) fn build_document(
         ctx.ingest_agc_resources(&ab.agc);
         let root_artboard = find_agc_artboard_node(&ab.agc);
         let [x, y, w, h] = ab.bounds.unwrap_or_else(|| {
-            let w = root_artboard
-                .and_then(|n| f64_at(n, "width"))
-                .unwrap_or(375.0)
-                .clamp(1.0, 1_000_000.0);
-            let h = root_artboard
-                .and_then(|n| f64_at(n, "height"))
-                .unwrap_or(812.0)
-                .clamp(1.0, 1_000_000.0);
+            let w = root_artboard.and_then(|n| f64_at(n, "width")).unwrap_or(375.0).clamp(1.0, 1_000_000.0);
+            let h = root_artboard.and_then(|n| f64_at(n, "height")).unwrap_or(812.0).clamp(1.0, 1_000_000.0);
             let bx = next_auto_x;
             next_auto_x += w + 100.0;
             [bx, 0.0, w, h]
@@ -242,10 +230,7 @@ fn find_agc_artboard_node(agc: &Value) -> Option<&Value> {
         return Some(agc);
     }
     let children = agc.get("children")?.as_array()?;
-    children
-        .iter()
-        .find(|c| str_at(c, "type") == Some("artboard"))
-        .or_else(|| children.first().filter(|c| c.get("artboard").is_some()))
+    children.iter().find(|c| str_at(c, "type") == Some("artboard")).or_else(|| children.first().filter(|c| c.get("artboard").is_some()))
 }
 
 fn artboard_children<'a>(agc: &'a Value, root_ab: Option<&'a Value>) -> &'a [Value] {
@@ -271,9 +256,8 @@ fn import_master_symbols(ctx: &mut ImportCtx<'_>, res_agc: &Value, page_id: Node
     let mut list: Vec<(String, &Value)> = Vec::new();
     if let Some(arr) = symbols_val.and_then(Value::as_array) {
         for sym in arr.iter().take(2_000) {
-            if let Some(id) = str_at(sym, "id")
-                .or_else(|| sym.get("meta").and_then(|m| m.get("ux")).and_then(|u| str_at(u, "symbolId")))
-                .filter(|s| !s.is_empty())
+            if let Some(id) =
+                str_at(sym, "id").or_else(|| sym.get("meta").and_then(|m| m.get("ux")).and_then(|u| str_at(u, "symbolId"))).filter(|s| !s.is_empty())
             {
                 list.push((id.to_string(), sym));
             }
@@ -290,13 +274,8 @@ fn import_master_symbols(ctx: &mut ImportCtx<'_>, res_agc: &Value, page_id: Node
         let name = str_at(sym, "name").unwrap_or("Component").to_string();
         let w = f64_at(sym, "width").unwrap_or(100.0).clamp(1.0, 100_000.0);
         let h = f64_at(sym, "height").unwrap_or(100.0).clamp(1.0, 100_000.0);
-        let mut comp = Node::new(
-            comp_id,
-            NodeKind::Component { description: String::new(), props: BTreeMap::new(), prop_order: Vec::new() },
-            name,
-            w,
-            h,
-        );
+        let mut comp =
+            Node::new(comp_id, NodeKind::Component { description: String::new(), props: BTreeMap::new(), prop_order: Vec::new() }, name, w, h);
         comp.fills.clear();
         comp.transform = Affine::translate((cursor_x, -400.0));
         if ctx.doc.insert(comp, page_id, None).is_err() {
@@ -304,12 +283,8 @@ fn import_master_symbols(ctx: &mut ImportCtx<'_>, res_agc: &Value, page_id: Node
         }
         ctx.node_count += 1;
 
-        let children = sym
-            .get("group")
-            .and_then(|g| g.get("children"))
-            .or_else(|| sym.get("children"))
-            .and_then(Value::as_array)
-            .map_or(&[][..], Vec::as_slice);
+        let children =
+            sym.get("group").and_then(|g| g.get("children")).or_else(|| sym.get("children")).and_then(Value::as_array).map_or(&[][..], Vec::as_slice);
         for ch in children {
             let _ = import_node(ctx, ch, comp_id, 1);
         }
@@ -325,11 +300,7 @@ fn import_master_symbols(ctx: &mut ImportCtx<'_>, res_agc: &Value, page_id: Node
 }
 
 fn record_interactions(ctx: &mut ImportCtx<'_>, node_id: NodeId, v: &Value) {
-    let ints = v
-        .get("meta")
-        .and_then(|m| m.get("ux"))
-        .and_then(|u| u.get("interactions"))
-        .or_else(|| v.get("interactions"));
+    let ints = v.get("meta").and_then(|m| m.get("ux")).and_then(|u| u.get("interactions")).or_else(|| v.get("interactions"));
     if let Some(arr) = ints.and_then(Value::as_array)
         && !arr.is_empty()
     {
@@ -348,11 +319,7 @@ fn import_node(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize)
     }
 
     // Check local clipPathResources inside `meta.ux`
-    if let Some(clips) = v
-        .get("meta")
-        .and_then(|m| m.get("ux"))
-        .and_then(|u| u.get("clipPathResources"))
-    {
+    if let Some(clips) = v.get("meta").and_then(|m| m.get("ux")).and_then(|u| u.get("clipPathResources")) {
         if let Some(id) = str_at(clips, "id") {
             ctx.clip_paths.insert(id.to_string(), clips.clone());
         } else if let Some(arr) = clips.as_array() {
@@ -371,14 +338,9 @@ fn import_node(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize)
         .or_else(|| str_at(v, "syncSourceGuid"))
         .or_else(|| (ty == "syncRef").then(|| str_at(v, "ref").or_else(|| str_at(v, "guid"))).flatten())
         .or_else(|| {
-            v.get("meta")
-                .and_then(|m| m.get("ux"))
-                .and_then(|u| {
-                    str_at(u, "syncSourceGuid").or_else(|| {
-                        str_at(u, "symbolId")
-                            .filter(|_| v.get("syncSourceGuid").is_some() || ty == "syncRef")
-                    })
-                })
+            v.get("meta").and_then(|m| m.get("ux")).and_then(|u| {
+                str_at(u, "syncSourceGuid").or_else(|| str_at(u, "symbolId").filter(|_| v.get("syncSourceGuid").is_some() || ty == "syncRef"))
+            })
         });
     if let Some(sym_guid) = sync_id {
         if let Some(&comp_id) = ctx.symbols.get(sym_guid) {
@@ -392,11 +354,7 @@ fn import_node(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize)
     }
 
     // Repeat Grid (`meta.ux.repeatGrid`)
-    if let Some(rg) = v
-        .get("meta")
-        .and_then(|m| m.get("ux"))
-        .and_then(|u| u.get("repeatGrid"))
-    {
+    if let Some(rg) = v.get("meta").and_then(|m| m.get("ux")).and_then(|u| u.get("repeatGrid")) {
         return import_repeat_grid(ctx, v, rg, parent, depth);
     }
 
@@ -421,27 +379,13 @@ fn import_node(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize)
 
 fn apply_common_node_props(ctx: &mut ImportCtx<'_>, node: &mut Node, v: &Value, local_offset: (f64, f64)) {
     let style = v.get("style");
-    node.visible = bool_at(v, "visible")
-        .or_else(|| style.and_then(|s| bool_at(s, "visible")))
-        .unwrap_or(true);
-    node.locked = v
-        .get("meta")
-        .and_then(|m| m.get("ux"))
-        .and_then(|u| bool_at(u, "locked"))
-        .unwrap_or(false);
-    node.opacity = style
-        .and_then(|s| f64_at(s, "opacity"))
-        .or_else(|| f64_at(v, "opacity"))
-        .unwrap_or(1.0)
-        .clamp(0.0, 1.0) as f32;
+    node.visible = bool_at(v, "visible").or_else(|| style.and_then(|s| bool_at(s, "visible"))).unwrap_or(true);
+    node.locked = v.get("meta").and_then(|m| m.get("ux")).and_then(|u| bool_at(u, "locked")).unwrap_or(false);
+    node.opacity = style.and_then(|s| f64_at(s, "opacity")).or_else(|| f64_at(v, "opacity")).unwrap_or(1.0).clamp(0.0, 1.0) as f32;
     node.blend = parse_blend_mode(style.and_then(|s| str_at(s, "blendMode")).or_else(|| str_at(v, "blendMode")));
 
     let base_xf = parse_transform(v.get("transform"));
-    node.transform = if local_offset == (0.0, 0.0) {
-        base_xf
-    } else {
-        base_xf * Affine::translate(local_offset)
-    };
+    node.transform = if local_offset == (0.0, 0.0) { base_xf } else { base_xf * Affine::translate(local_offset) };
 
     if !matches!(node.kind, NodeKind::Group) {
         let fills = parse_fills(style, node.width, node.height, ctx);
@@ -459,9 +403,7 @@ fn apply_common_node_props(ctx: &mut ImportCtx<'_>, node: &mut Node, v: &Value, 
     node.effects = parse_effects(style, ctx);
 
     if let Some(ux) = v.get("meta").and_then(|m| m.get("ux")) {
-        if bool_at(ux, "fixed").unwrap_or(false)
-            || ux.get("constraints").and_then(|c| bool_at(c, "fixed")).unwrap_or(false)
-        {
+        if bool_at(ux, "fixed").unwrap_or(false) || ux.get("constraints").and_then(|c| bool_at(c, "fixed")).unwrap_or(false) {
             node.scroll_position = ScrollPosition::Fixed;
         }
         if let Some(scroll) = str_at(ux, "scrollingType") {
@@ -493,13 +435,7 @@ fn instantiate_symbol(ctx: &mut ImportCtx<'_>, v: &Value, comp_id: NodeId, paren
     };
     let inst_id = ctx.doc.alloc_id();
     let name = str_at(v, "name").unwrap_or(&comp_name).to_string();
-    let mut inst = Node::new(
-        inst_id,
-        NodeKind::Instance { component: comp_id, props: BTreeMap::new() },
-        name,
-        comp_w,
-        comp_h,
-    );
+    let mut inst = Node::new(inst_id, NodeKind::Instance { component: comp_id, props: BTreeMap::new() }, name, comp_w, comp_h);
     inst.fills.clear();
     apply_common_node_props(ctx, &mut inst, v, (0.0, 0.0));
     let id = register_node(ctx, inst, v, parent)?;
@@ -554,17 +490,8 @@ fn import_shape(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
                 if let Some(r) = r_val.as_f64().filter(|n| n.is_finite()) {
                     node.corners = Corners { radii: [r.max(0.0); 4], smoothing: 0.0 };
                 } else if let Some(arr) = r_val.as_array() {
-                    let rad = |idx: usize| {
-                        arr.get(idx)
-                            .and_then(Value::as_f64)
-                            .filter(|n| n.is_finite())
-                            .unwrap_or(0.0)
-                            .max(0.0)
-                    };
-                    node.corners = Corners {
-                        radii: [rad(0), rad(1), rad(2), rad(3)],
-                        smoothing: 0.0,
-                    };
+                    let rad = |idx: usize| arr.get(idx).and_then(Value::as_f64).filter(|n| n.is_finite()).unwrap_or(0.0).max(0.0);
+                    node.corners = Corners { radii: [rad(0), rad(1), rad(2), rad(3)], smoothing: 0.0 };
                 }
             }
             apply_common_node_props(ctx, &mut node, v, (x, y));
@@ -574,13 +501,8 @@ fn import_shape(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
             let r = f64_at(sh, "r").unwrap_or(50.0).clamp(0.01, 500_000.0);
             let cx = f64_at(sh, "cx").unwrap_or(r).clamp(-1_000_000.0, 1_000_000.0);
             let cy = f64_at(sh, "cy").unwrap_or(r).clamp(-1_000_000.0, 1_000_000.0);
-            let mut node = Node::new(
-                ctx.doc.alloc_id(),
-                NodeKind::Ellipse { start: 0.0, sweep: std::f64::consts::TAU, inner: 0.0 },
-                name,
-                r * 2.0,
-                r * 2.0,
-            );
+            let mut node =
+                Node::new(ctx.doc.alloc_id(), NodeKind::Ellipse { start: 0.0, sweep: std::f64::consts::TAU, inner: 0.0 }, name, r * 2.0, r * 2.0);
             apply_common_node_props(ctx, &mut node, v, (cx - r, cy - r));
             register_node(ctx, node, v, parent)
         }
@@ -589,13 +511,8 @@ fn import_shape(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
             let ry = f64_at(sh, "ry").unwrap_or(50.0).clamp(0.01, 500_000.0);
             let cx = f64_at(sh, "cx").unwrap_or(rx).clamp(-1_000_000.0, 1_000_000.0);
             let cy = f64_at(sh, "cy").unwrap_or(ry).clamp(-1_000_000.0, 1_000_000.0);
-            let mut node = Node::new(
-                ctx.doc.alloc_id(),
-                NodeKind::Ellipse { start: 0.0, sweep: std::f64::consts::TAU, inner: 0.0 },
-                name,
-                rx * 2.0,
-                ry * 2.0,
-            );
+            let mut node =
+                Node::new(ctx.doc.alloc_id(), NodeKind::Ellipse { start: 0.0, sweep: std::f64::consts::TAU, inner: 0.0 }, name, rx * 2.0, ry * 2.0);
             apply_common_node_props(ctx, &mut node, v, (cx - rx, cy - ry));
             register_node(ctx, node, v, parent)
         }
@@ -614,11 +531,8 @@ fn import_shape(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
             register_node(ctx, node, v, parent)
         }
         "polygon" => {
-            if let Some(count) = sh
-                .get("uxdesign#cornerCount")
-                .or_else(|| sh.get("cornerCount"))
-                .and_then(Value::as_u64)
-                .map(|c| c.clamp(3, 60) as u32)
+            if let Some(count) =
+                sh.get("uxdesign#cornerCount").or_else(|| sh.get("cornerCount")).and_then(Value::as_u64).map(|c| c.clamp(3, 60) as u32)
             {
                 let w = f64_at(sh, "uxdesign#width").or_else(|| f64_at(sh, "width")).unwrap_or(100.0).clamp(1.0, 1_000_000.0);
                 let h = f64_at(sh, "uxdesign#height").or_else(|| f64_at(sh, "height")).unwrap_or(100.0).clamp(1.0, 1_000_000.0);
@@ -690,14 +604,7 @@ fn parse_winding(sh: &Value) -> WindingRule {
     }
 }
 
-fn import_svg_path_shape(
-    ctx: &mut ImportCtx<'_>,
-    d: &str,
-    winding: WindingRule,
-    name: String,
-    v: &Value,
-    parent: NodeId,
-) -> Option<NodeId> {
+fn import_svg_path_shape(ctx: &mut ImportCtx<'_>, d: &str, winding: WindingRule, name: String, v: &Value, parent: NodeId) -> Option<NodeId> {
     if d.len() > (4 << 20) {
         ctx.warn(format!("Vector path `{name}` exceeds 4 MiB and was skipped"));
         return None;
@@ -711,14 +618,7 @@ fn import_svg_path_shape(
     }
 }
 
-fn build_vector_from_bez(
-    ctx: &mut ImportCtx<'_>,
-    mut bez: BezPath,
-    winding: WindingRule,
-    name: String,
-    v: &Value,
-    parent: NodeId,
-) -> Option<NodeId> {
+fn build_vector_from_bez(ctx: &mut ImportCtx<'_>, mut bez: BezPath, winding: WindingRule, name: String, v: &Value, parent: NodeId) -> Option<NodeId> {
     let bb = bez.bounding_box();
     let (ox, oy) = if bb.x0.is_finite() && bb.y0.is_finite() { (bb.x0, bb.y0) } else { (0.0, 0.0) };
     if ox != 0.0 || oy != 0.0 {
@@ -782,26 +682,13 @@ fn import_text(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId) -> Option<Nod
 
     let runs = parse_text_runs(tx, v, &chars_norm, &base_style, ctx);
 
-    let mut td = TextData {
-        characters: chars_norm.clone(),
-        style: base_style,
-        runs,
-        auto_resize,
-        align_h,
-        ..TextData::default()
-    };
-    if let Some(ps) = style_obj
-        .and_then(|s| s.get("textAttributes"))
-        .and_then(|ta| f64_at(ta, "paragraphSpacing"))
-    {
+    let mut td = TextData { characters: chars_norm.clone(), style: base_style, runs, auto_resize, align_h, ..TextData::default() };
+    if let Some(ps) = style_obj.and_then(|s| s.get("textAttributes")).and_then(|ta| f64_at(ta, "paragraphSpacing")) {
         td.paragraph_spacing = ps.clamp(0.0, 10_000.0);
     }
 
     let fallback_name: String = chars_norm.lines().next().unwrap_or("Text").chars().take(48).collect();
-    let name = str_at(v, "name")
-        .filter(|s| !s.is_empty())
-        .unwrap_or(if fallback_name.is_empty() { "Text" } else { &fallback_name })
-        .to_string();
+    let name = str_at(v, "name").filter(|s| !s.is_empty()).unwrap_or(if fallback_name.is_empty() { "Text" } else { &fallback_name }).to_string();
 
     let fx = frame_obj.and_then(|f| f64_at(f, "x")).unwrap_or(0.0);
     let fy = frame_obj.and_then(|f| f64_at(f, "y")).unwrap_or(0.0) + y_shift;
@@ -875,13 +762,7 @@ fn parse_text_style(style_obj: Option<&Value>, base: Option<&TextStyle>, ctx: &m
     out
 }
 
-fn parse_text_runs(
-    tx: &Value,
-    node_val: &Value,
-    chars: &str,
-    base_style: &TextStyle,
-    ctx: &mut ImportCtx<'_>,
-) -> Vec<StyleRun> {
+fn parse_text_runs(tx: &Value, node_val: &Value, chars: &str, base_style: &TextStyle, ctx: &mut ImportCtx<'_>) -> Vec<StyleRun> {
     let total_chars = chars.chars().count();
     if total_chars == 0 {
         return Vec::new();
@@ -895,9 +776,7 @@ fn parse_text_runs(
         }
     }
     let total_utf16 = utf16_to_char.len();
-    let map_u16 = |u: usize| -> usize {
-        if u >= total_utf16 { total_chars } else { utf16_to_char[u] }
-    };
+    let map_u16 = |u: usize| -> usize { if u >= total_utf16 { total_chars } else { utf16_to_char[u] } };
 
     let range_list = node_val
         .get("meta")
@@ -905,12 +784,7 @@ fn parse_text_runs(
         .and_then(|u| u.get("rangedStyles"))
         .or_else(|| tx.get("styleRanges"))
         .or_else(|| tx.get("rangedStyles"))
-        .or_else(|| {
-            tx.get("paragraphs")
-                .and_then(Value::as_array)
-                .and_then(|p| p.first())
-                .and_then(|p0| p0.get("styleRanges"))
-        });
+        .or_else(|| tx.get("paragraphs").and_then(Value::as_array).and_then(|p| p.first()).and_then(|p0| p0.get("styleRanges")));
 
     let Some(arr) = range_list.and_then(Value::as_array) else { return Vec::new() };
     let mut runs = Vec::new();
@@ -980,16 +854,10 @@ fn import_group(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
     let id = register_node(ctx, node, v, parent)?;
 
     // Check if this group has a clipPath mask (`style.clipPath.ref`).
-    if let Some(clip_ref) = v
-        .get("style")
-        .and_then(|s| s.get("clipPath"))
-        .and_then(|cp| str_at(cp, "ref"))
+    if let Some(clip_ref) = v.get("style").and_then(|s| s.get("clipPath")).and_then(|cp| str_at(cp, "ref"))
         && let Some(clip_def) = ctx.clip_paths.get(clip_ref).cloned()
     {
-        let mask_children = clip_def
-            .get("children")
-            .and_then(Value::as_array)
-            .map_or(&[][..], Vec::as_slice);
+        let mask_children = clip_def.get("children").and_then(Value::as_array).map_or(&[][..], Vec::as_slice);
         if let Some(first_mask) = mask_children.first() {
             if let Some(mask_id) = import_node(ctx, first_mask, id, depth + 1)
                 && let Some(mn) = ctx.doc.node_mut(mask_id)
@@ -1006,12 +874,8 @@ fn import_group(ctx: &mut ImportCtx<'_>, v: &Value, parent: NodeId, depth: usize
         }
     }
 
-    let children = v
-        .get("group")
-        .and_then(|g| g.get("children"))
-        .or_else(|| v.get("children"))
-        .and_then(Value::as_array)
-        .map_or(&[][..], Vec::as_slice);
+    let children =
+        v.get("group").and_then(|g| g.get("children")).or_else(|| v.get("children")).and_then(Value::as_array).map_or(&[][..], Vec::as_slice);
     for ch in children {
         let _ = import_node(ctx, ch, id, depth + 1);
     }
@@ -1036,12 +900,8 @@ fn import_repeat_grid(ctx: &mut ImportCtx<'_>, v: &Value, rg: &Value, parent: No
     apply_common_node_props(ctx, &mut frame, v, (0.0, 0.0));
     let id = register_node(ctx, frame, v, parent)?;
 
-    let children = v
-        .get("group")
-        .and_then(|g| g.get("children"))
-        .or_else(|| v.get("children"))
-        .and_then(Value::as_array)
-        .map_or(&[][..], Vec::as_slice);
+    let children =
+        v.get("group").and_then(|g| g.get("children")).or_else(|| v.get("children")).and_then(Value::as_array).map_or(&[][..], Vec::as_slice);
 
     if children.len() > 1 {
         for ch in children.iter().take(MAX_REPEAT_CELLS) {
@@ -1053,10 +913,7 @@ fn import_repeat_grid(ctx: &mut ImportCtx<'_>, v: &Value, rg: &Value, parent: No
     // Single template cell: tile across `gw × gh` using `cellWidth`/`cellHeight` + `paddingX`/`paddingY`.
     if let Some(template) = children.first() {
         let first_cell = import_node(ctx, template, id, depth + 1)?;
-        let (cw, ch_h) = ctx
-            .doc
-            .node(first_cell)
-            .map_or((100.0, 100.0), |n| (n.width.max(1.0), n.height.max(1.0)));
+        let (cw, ch_h) = ctx.doc.node(first_cell).map_or((100.0, 100.0), |n| (n.width.max(1.0), n.height.max(1.0)));
         let cw = f64_at(rg, "cellWidth").unwrap_or(cw).max(1.0);
         let ch_h = f64_at(rg, "cellHeight").unwrap_or(ch_h).max(1.0);
         let step_x = (cw + pad_x).max(1.0);

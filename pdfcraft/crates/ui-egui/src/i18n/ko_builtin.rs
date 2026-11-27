@@ -130,6 +130,20 @@ pub const BUILTIN_KO_TSV: &str = "\
 \tSave as PDF/UA\tPDF/UA로 저장
 \tVerify\t검증
 \tPreflight\t프리플라이트
+\tOutput preview\t출력 미리 보기
+\tOutput preview…\t출력 미리 보기…
+\tProcess plates\t프로세스 인쇄판
+\tCyan (C)\t시안 (C)
+\tMagenta (M)\t마젠타 (M)
+\tYellow (Y)\t옐로우 (Y)
+\tBlack (K)\t블랙 (K)
+\tTotal Area Coverage (TAC)\t총 잉크량 (TAC)
+\tShow TAC heatmap\tTAC 초과 영역 히트맵 표시
+\tInk limit:\t잉크 한계:
+\t300% (Coated offset)\t300% (아트지/코팅 오프셋)
+\t240% (Newsprint / uncoated)\t240% (신문용지/비코팅지)
+\tMax TAC: {max}%  ·  Over limit: {pct}% ({px} px)\t최대 TAC: {max}%  ·  한계 초과: {pct}% ({px} px)
+\tAll pixels are within the {limit}% press ink limit.\t모든 픽셀이 {limit}% 인쇄 잉크 한계 이내입니다.
 \tPrint production\t인쇄 제작
 \tPDF/A-2b archival\tPDF/A-2b 보존용
 \tPDF/A-3b archival\tPDF/A-3b 보존용

@@ -40,10 +40,7 @@ pub struct Library {
 }
 
 fn is_indl_path(path: &str) -> bool {
-    std::path::Path::new(path)
-        .extension()
-        .and_then(std::ffi::OsStr::to_str)
-        .is_some_and(|e| e.eq_ignore_ascii_case("indl"))
+    std::path::Path::new(path).extension().and_then(std::ffi::OsStr::to_str).is_some_and(|e| e.eq_ignore_ascii_case("indl"))
 }
 
 fn xml_escape(s: &str) -> String {
@@ -86,10 +83,8 @@ pub(crate) fn encode_library_bytes(lib: &Library, as_indl: bool) -> Result<Vec<u
         return serde_json::to_vec_pretty(lib).map_err(|e| EngineError::Other(e.to_string()));
     }
     let json_bytes = serde_json::to_vec_pretty(lib).map_err(|e| EngineError::Other(e.to_string()))?;
-    let mut parts: Vec<(String, Vec<u8>)> = vec![
-        ("catalog.xml".into(), build_catalog_xml(lib).into_bytes()),
-        ("library.json".into(), json_bytes.clone()),
-    ];
+    let mut parts: Vec<(String, Vec<u8>)> =
+        vec![("catalog.xml".into(), build_catalog_xml(lib).into_bytes()), ("library.json".into(), json_bytes.clone())];
     for (idx, it) in lib.items.iter().enumerate() {
         let idms_bytes = if let Some(xml) = &it.idms {
             xml.as_bytes().to_vec()
@@ -106,19 +101,11 @@ pub(crate) fn encode_library_bytes(lib: &Library, as_indl: bool) -> Result<Vec<u
 }
 
 fn classify_doc(doc: &designcraft_doc::Document) -> (String, usize, f64, f64) {
-    let items: Vec<&std::sync::Arc<designcraft_doc::Item>> = doc
-        .spreads
-        .first()
-        .map(|sp| sp.items.iter().collect())
-        .unwrap_or_default();
+    let items: Vec<&std::sync::Arc<designcraft_doc::Item>> = doc.spreads.first().map(|sp| sp.items.iter().collect()).unwrap_or_default();
     if items.is_empty() {
         return ("shape".into(), 0, 0.0, 0.0);
     }
-    let bounds = items
-        .iter()
-        .map(|it| it.bounds())
-        .reduce(|a, b| a.union(b))
-        .unwrap_or(designcraft_geom::Rect::ZERO);
+    let bounds = items.iter().map(|it| it.bounds()).reduce(|a, b| a.union(b)).unwrap_or(designcraft_geom::Rect::ZERO);
     let obj_type = if items.len() > 1 || items[0].is_group() {
         "group"
     } else {
@@ -135,8 +122,7 @@ fn classify_doc(doc: &designcraft_doc::Document) -> (String, usize, f64, f64) {
 }
 
 fn item_from_idms_bytes(name_hint: &str, idms_bytes: &[u8]) -> Result<LibraryItem> {
-    let doc = designcraft_idml::import_snippet(idms_bytes)
-        .map_err(|e| EngineError::Other(format!("invalid .idms asset: {e}")))?;
+    let doc = designcraft_idml::import_snippet(idms_bytes).map_err(|e| EngineError::Other(format!("invalid .idms asset: {e}")))?;
     let snip = super::file::to_bytes(&doc)?;
     let (object_type, original_spread, original_x, original_y) = classify_doc(&doc);
     Ok(LibraryItem {
@@ -155,8 +141,7 @@ fn item_from_idms_bytes(name_hint: &str, idms_bytes: &[u8]) -> Result<LibraryIte
 
 fn decode_indl_zip(bytes: &[u8]) -> std::result::Result<Library, String> {
     use std::io::Read as _;
-    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
-        .map_err(|e| format!("invalid .indl archive: {e}"))?;
+    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(|e| format!("invalid .indl archive: {e}"))?;
     if let Ok(mut jf) = archive.by_name("library.json") {
         let mut buf = Vec::new();
         jf.read_to_end(&mut buf).map_err(|e| e.to_string())?;
@@ -181,10 +166,7 @@ fn decode_indl_zip(bytes: &[u8]) -> std::result::Result<Library, String> {
     }
     let mut items = Vec::new();
     for (entry_name, idms_bytes) in idms_entries {
-        let stem = std::path::Path::new(&entry_name)
-            .file_stem()
-            .and_then(std::ffi::OsStr::to_str)
-            .unwrap_or("Asset");
+        let stem = std::path::Path::new(&entry_name).file_stem().and_then(std::ffi::OsStr::to_str).unwrap_or("Asset");
         if let Ok(it) = item_from_idms_bytes(stem, &idms_bytes) {
             items.push(it);
         }
@@ -192,10 +174,15 @@ fn decode_indl_zip(bytes: &[u8]) -> std::result::Result<Library, String> {
     if let Some(xml) = catalog_xml
         && let Ok(root) = craft_xml::Options::default().parse(xml.as_bytes())
     {
-        for (idx, node) in root.children.iter().filter_map(|n| match n {
-            craft_xml::Node::El(e) if e.name == "Asset" => Some(e),
-            _ => None,
-        }).enumerate() {
+        for (idx, node) in root
+            .children
+            .iter()
+            .filter_map(|n| match n {
+                craft_xml::Node::El(e) if e.name == "Asset" => Some(e),
+                _ => None,
+            })
+            .enumerate()
+        {
             if let Some(it) = items.get_mut(idx) {
                 for (k, v) in &node.attrs {
                     match k.as_str() {
@@ -237,11 +224,7 @@ fn scan_binary_indl(bytes: &[u8]) -> Option<Library> {
         }
         search_from = end;
     }
-    if !items.is_empty() || has_magic {
-        Some(Library { path: None, items })
-    } else {
-        None
-    }
+    if !items.is_empty() || has_magic { Some(Library { path: None, items }) } else { None }
 }
 
 pub(crate) fn decode_library_bytes(bytes: &[u8]) -> std::result::Result<Library, String> {
@@ -259,10 +242,7 @@ pub(crate) fn decode_library_bytes(bytes: &[u8]) -> std::result::Result<Library,
 }
 
 fn unix_now() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs() as i64)
-        .unwrap_or(0)
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0)
 }
 
 impl Library {
@@ -286,21 +266,10 @@ fn no_library() -> EngineError {
 
 fn parse_keywords(p: &Value) -> Option<Vec<String>> {
     match p.get("keywords") {
-        Some(Value::Array(arr)) => Some(
-            arr.iter()
-                .filter_map(Value::as_str)
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-                .map(ToString::to_string)
-                .collect(),
-        ),
-        Some(Value::String(s)) => Some(
-            s.split(',')
-                .map(str::trim)
-                .filter(|k| !k.is_empty())
-                .map(ToString::to_string)
-                .collect(),
-        ),
+        Some(Value::Array(arr)) => {
+            Some(arr.iter().filter_map(Value::as_str).map(str::trim).filter(|s| !s.is_empty()).map(ToString::to_string).collect())
+        }
+        Some(Value::String(s)) => Some(s.split(',').map(str::trim).filter(|k| !k.is_empty()).map(ToString::to_string).collect()),
         _ => None,
     }
 }
@@ -324,22 +293,12 @@ fn build_library_item_from_selection(s: &mut Session, p: &Value) -> Result<Libra
         .unwrap_or(0);
     let first = st.selection.items.first().and_then(|id| st.doc.item(*id));
     let kind = first
-        .map(|it| {
-            if !it.label.is_empty() {
-                it.label.clone()
-            } else {
-                it.default_label().trim_matches(|c| c == '<' || c == '>').to_string()
-            }
-        })
+        .map(|it| if !it.label.is_empty() { it.label.clone() } else { it.default_label().trim_matches(|c| c == '<' || c == '>').to_string() })
         .unwrap_or_default();
     let n = st.selection.items.len();
-    let name = str_param(p, "name")
-        .map(str::to_string)
-        .unwrap_or_else(|| if n > 1 { format!("{n} objects") } else { kind });
+    let name = str_param(p, "name").map(str::to_string).unwrap_or_else(|| if n > 1 { format!("{n} objects") } else { kind });
     let description = str_param(p, "description").unwrap_or("").to_string();
-    let object_type = str_param(p, "objectType")
-        .map(str::to_string)
-        .unwrap_or(auto_type);
+    let object_type = str_param(p, "objectType").map(str::to_string).unwrap_or(auto_type);
     let keywords = parse_keywords(p).unwrap_or_default();
 
     Ok(LibraryItem {

@@ -41,9 +41,7 @@ pub fn create_instance_at(doc: &mut Document, component: NodeId, parent: NodeId,
     root.interactions.clear();
     // So do the variable modes the main sets (see `Document::inherited_modes`).
     root.var_modes.clear();
-    if let Some(slot) = super::slot_scope(doc, parent)
-        .filter(|&s| super::owning_instance(doc, s).is_some() && !slot_edited(doc, s))
-    {
+    if let Some(slot) = super::slot_scope(doc, parent).filter(|&s| super::owning_instance(doc, s).is_some() && !slot_edited(doc, s)) {
         super::guard::own_slot_content(doc, slot);
     }
     doc.insert(root, parent, index)?;

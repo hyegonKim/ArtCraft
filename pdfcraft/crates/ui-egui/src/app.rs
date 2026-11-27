@@ -361,6 +361,7 @@ impl PdfCraftApp {
             number_draft: NumberDraft { from: 1, to: 1, style: pdfcraft_engine::LabelStyle::Decimal, prefix: String::new(), start: 1 },
             word_count_draft: word_count_ui::Draft::default(),
             preflight_draft: preflight_ui::PreflightDraft::default(),
+            output_preview_draft: output_preview_ui::OutputPreviewDraft::default(),
             c2pa_draft: c2pa_ui::C2paDraft::default(),
             summary_draft: summary_ui::SummaryDraft::default(),
             printer_marks_draft: Default::default(),

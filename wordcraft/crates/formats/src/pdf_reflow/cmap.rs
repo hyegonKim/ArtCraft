@@ -189,7 +189,13 @@ impl PdfFont {
             width_scale = sx.abs();
         }
         let mut widths = HashMap::new();
-        let mut default_width = if is_type0 { 1.0 } else if mono { 0.60 } else { 0.52 };
+        let mut default_width = if is_type0 {
+            1.0
+        } else if mono {
+            0.60
+        } else {
+            0.52
+        };
         if let Some(desc_cid) = &descendant {
             if let Some(dw) = desc_cid.get(b"DW".as_slice()).and_then(PdfVal::as_f64)
                 && dw >= 0.0
@@ -222,19 +228,7 @@ impl PdfFont {
             }
         }
 
-        Self {
-            family,
-            bold,
-            italic,
-            mono,
-            is_type0,
-            code_lengths,
-            cmap,
-            single_byte,
-            widths,
-            default_width,
-            width_scale,
-        }
+        Self { family, bold, italic, mono, is_type0, code_lengths, cmap, single_byte, widths, default_width, width_scale }
     }
 
     /// Decode a raw PDF content string into `(decoded_text, total_advance_em, space_char_count)`.
@@ -291,11 +285,7 @@ impl PdfFont {
             if step == 1 && code == 0x20 || added == " " {
                 spaces += 1;
             }
-            let glyph_w = if let Some(&w) = self.widths.get(&code) {
-                w
-            } else {
-                estimate_em_width(added, self.default_width, self.mono)
-            };
+            let glyph_w = if let Some(&w) = self.widths.get(&code) { w } else { estimate_em_width(added, self.default_width, self.mono) };
             let _ = self.width_scale;
             adv_em += glyph_w;
             i += step;
@@ -385,11 +375,7 @@ fn parse_cid_widths(doc: &PdfDoc<'_>, arr: &[PdfVal], out: &mut HashMap<u32, f64
 }
 
 /// Parse a `/ToUnicode` CMap stream (`begincodespacerange`, `beginbfchar`, `beginbfrange`).
-pub(super) fn parse_tounicode_cmap(
-    bytes: &[u8],
-    code_lengths: &mut Vec<u8>,
-    cmap: &mut HashMap<(u8, u32), String>,
-) {
+pub(super) fn parse_tounicode_cmap(bytes: &[u8], code_lengths: &mut Vec<u8>, cmap: &mut HashMap<(u8, u32), String>) {
     let mut cur = Cursor::new(bytes, 0);
     while cur.pos < bytes.len() {
         cur.skip_ws_and_comments();
@@ -404,141 +390,135 @@ pub(super) fn parse_tounicode_cmap(
             continue;
         }
         match tok.as_slice() {
-            b"begincodespacerange" => {
-                loop {
-                    cur.skip_ws_and_comments();
-                    if cur.peek().is_none() || cur.eat_keyword(b"endcodespacerange") {
-                        break;
-                    }
-                    if cur.peek() == Some(b'<') && cur.peek_at(1) != Some(b'<') {
-                        let lo = cur.read_hex_string();
-                        cur.skip_ws_and_comments();
-                        if cur.peek() == Some(b'<') {
-                            let _hi = cur.read_hex_string();
-                        }
-                        if (1..=4).contains(&lo.len()) {
-                            code_lengths.push(lo.len() as u8);
-                        }
-                    } else {
-                        let _ = cur.read_regular_token();
-                    }
+            b"begincodespacerange" => loop {
+                cur.skip_ws_and_comments();
+                if cur.peek().is_none() || cur.eat_keyword(b"endcodespacerange") {
+                    break;
                 }
-            }
-            b"beginbfchar" => {
-                loop {
+                if cur.peek() == Some(b'<') && cur.peek_at(1) != Some(b'<') {
+                    let lo = cur.read_hex_string();
                     cur.skip_ws_and_comments();
-                    if cur.peek().is_none() || cur.eat_keyword(b"endbfchar") {
-                        break;
+                    if cur.peek() == Some(b'<') {
+                        let _hi = cur.read_hex_string();
                     }
-                    if cur.peek() != Some(b'<') {
-                        let _ = cur.read_regular_token();
-                        continue;
+                    if (1..=4).contains(&lo.len()) {
+                        code_lengths.push(lo.len() as u8);
                     }
-                    let src = cur.read_hex_string();
-                    cur.skip_ws_and_comments();
-                    let dst_str = match cur.peek() {
-                        Some(b'<') => decode_cmap_target(&cur.read_hex_string()),
-                        Some(b'(') => decode_cmap_target(&cur.read_literal_string()),
-                        Some(b'/') => {
-                            let name = cur.read_name();
-                            glyph_name_to_string(&name).unwrap_or_default()
-                        }
-                        _ => String::new(),
-                    };
-                    if (1..=4).contains(&src.len()) && !dst_str.is_empty() && cmap.len() < 200_000 {
-                        let clen = src.len() as u8;
-                        if !code_lengths.contains(&clen) {
-                            code_lengths.push(clen);
-                        }
-                        cmap.insert((clen, pack_code(&src)), dst_str);
-                    }
+                } else {
+                    let _ = cur.read_regular_token();
                 }
-            }
-            b"beginbfrange" => {
-                loop {
-                    cur.skip_ws_and_comments();
-                    if cur.peek().is_none() || cur.eat_keyword(b"endbfrange") {
-                        break;
+            },
+            b"beginbfchar" => loop {
+                cur.skip_ws_and_comments();
+                if cur.peek().is_none() || cur.eat_keyword(b"endbfchar") {
+                    break;
+                }
+                if cur.peek() != Some(b'<') {
+                    let _ = cur.read_regular_token();
+                    continue;
+                }
+                let src = cur.read_hex_string();
+                cur.skip_ws_and_comments();
+                let dst_str = match cur.peek() {
+                    Some(b'<') => decode_cmap_target(&cur.read_hex_string()),
+                    Some(b'(') => decode_cmap_target(&cur.read_literal_string()),
+                    Some(b'/') => {
+                        let name = cur.read_name();
+                        glyph_name_to_string(&name).unwrap_or_default()
                     }
-                    if cur.peek() != Some(b'<') {
-                        let _ = cur.read_regular_token();
-                        continue;
-                    }
-                    let lo_bytes = cur.read_hex_string();
-                    cur.skip_ws_and_comments();
-                    if cur.peek() != Some(b'<') {
-                        continue;
-                    }
-                    let hi_bytes = cur.read_hex_string();
-                    if lo_bytes.len() != hi_bytes.len() || !(1..=4).contains(&lo_bytes.len()) {
-                        continue;
-                    }
-                    let clen = lo_bytes.len() as u8;
+                    _ => String::new(),
+                };
+                if (1..=4).contains(&src.len()) && !dst_str.is_empty() && cmap.len() < 200_000 {
+                    let clen = src.len() as u8;
                     if !code_lengths.contains(&clen) {
                         code_lengths.push(clen);
                     }
-                    let lo = pack_code(&lo_bytes);
-                    let hi = pack_code(&hi_bytes);
-                    if hi < lo {
-                        continue;
-                    }
-                    let span = (hi - lo).min(MAX_BFRANGE_SPAN);
-                    cur.skip_ws_and_comments();
-                    match cur.peek() {
-                        Some(b'[') => {
-                            cur.pos += 1;
-                            let mut offset = 0u32;
-                            loop {
-                                cur.skip_ws_and_comments();
-                                match cur.peek() {
-                                    None => break,
-                                    Some(b']') => {
-                                        cur.pos += 1;
-                                        break;
-                                    }
-                                    Some(b'<') => {
-                                        let target = decode_cmap_target(&cur.read_hex_string());
-                                        if offset <= span && !target.is_empty() && cmap.len() < 200_000 {
-                                            cmap.insert((clen, lo + offset), target);
-                                        }
-                                        offset += 1;
-                                    }
-                                    Some(b'/') => {
-                                        let name = cur.read_name();
-                                        if let Some(target) = glyph_name_to_string(&name)
-                                            && offset <= span
-                                            && cmap.len() < 200_000
-                                        {
-                                            cmap.insert((clen, lo + offset), target);
-                                        }
-                                        offset += 1;
-                                    }
-                                    _ => {
-                                        let _ = cur.parse_val(0);
-                                        offset += 1;
-                                    }
-                                }
-                            }
-                        }
-                        Some(b'<') => {
-                            let base_dst = cur.read_hex_string();
-                            for offset in 0..=span {
-                                if cmap.len() >= 200_000 {
+                    cmap.insert((clen, pack_code(&src)), dst_str);
+                }
+            },
+            b"beginbfrange" => loop {
+                cur.skip_ws_and_comments();
+                if cur.peek().is_none() || cur.eat_keyword(b"endbfrange") {
+                    break;
+                }
+                if cur.peek() != Some(b'<') {
+                    let _ = cur.read_regular_token();
+                    continue;
+                }
+                let lo_bytes = cur.read_hex_string();
+                cur.skip_ws_and_comments();
+                if cur.peek() != Some(b'<') {
+                    continue;
+                }
+                let hi_bytes = cur.read_hex_string();
+                if lo_bytes.len() != hi_bytes.len() || !(1..=4).contains(&lo_bytes.len()) {
+                    continue;
+                }
+                let clen = lo_bytes.len() as u8;
+                if !code_lengths.contains(&clen) {
+                    code_lengths.push(clen);
+                }
+                let lo = pack_code(&lo_bytes);
+                let hi = pack_code(&hi_bytes);
+                if hi < lo {
+                    continue;
+                }
+                let span = (hi - lo).min(MAX_BFRANGE_SPAN);
+                cur.skip_ws_and_comments();
+                match cur.peek() {
+                    Some(b'[') => {
+                        cur.pos += 1;
+                        let mut offset = 0u32;
+                        loop {
+                            cur.skip_ws_and_comments();
+                            match cur.peek() {
+                                None => break,
+                                Some(b']') => {
+                                    cur.pos += 1;
                                     break;
                                 }
-                                if let Some(s) = increment_cmap_target(&base_dst, offset)
-                                    && !s.is_empty()
-                                {
-                                    cmap.insert((clen, lo + offset), s);
+                                Some(b'<') => {
+                                    let target = decode_cmap_target(&cur.read_hex_string());
+                                    if offset <= span && !target.is_empty() && cmap.len() < 200_000 {
+                                        cmap.insert((clen, lo + offset), target);
+                                    }
+                                    offset += 1;
+                                }
+                                Some(b'/') => {
+                                    let name = cur.read_name();
+                                    if let Some(target) = glyph_name_to_string(&name)
+                                        && offset <= span
+                                        && cmap.len() < 200_000
+                                    {
+                                        cmap.insert((clen, lo + offset), target);
+                                    }
+                                    offset += 1;
+                                }
+                                _ => {
+                                    let _ = cur.parse_val(0);
+                                    offset += 1;
                                 }
                             }
                         }
-                        _ => {
-                            let _ = cur.parse_val(0);
+                    }
+                    Some(b'<') => {
+                        let base_dst = cur.read_hex_string();
+                        for offset in 0..=span {
+                            if cmap.len() >= 200_000 {
+                                break;
+                            }
+                            if let Some(s) = increment_cmap_target(&base_dst, offset)
+                                && !s.is_empty()
+                            {
+                                cmap.insert((clen, lo + offset), s);
+                            }
                         }
                     }
+                    _ => {
+                        let _ = cur.parse_val(0);
+                    }
                 }
-            }
+            },
             _ => {}
         }
     }
@@ -596,10 +576,7 @@ pub(super) fn normalize_postscript_font(raw: &str) -> (String, bool, bool, bool)
     if trimmed.is_empty() {
         return (String::new(), false, false, false);
     }
-    let without_subset = if trimmed.len() > 7
-        && trimmed.as_bytes().get(6) == Some(&b'+')
-        && trimmed[..6].bytes().all(|b| b.is_ascii_uppercase())
-    {
+    let without_subset = if trimmed.len() > 7 && trimmed.as_bytes().get(6) == Some(&b'+') && trimmed[..6].bytes().all(|b| b.is_ascii_uppercase()) {
         &trimmed[7..]
     } else {
         trimmed
@@ -626,23 +603,16 @@ pub(super) fn normalize_postscript_font(raw: &str) -> (String, bool, bool, bool)
         || lower.contains("boldit");
 
     // Extract base family part before `-` or `,` style suffixes.
-    let base_part = without_subset
-        .split([',', ';'])
-        .next()
-        .unwrap_or(without_subset);
+    let base_part = without_subset.split([',', ';']).next().unwrap_or(without_subset);
     let family_stem = strip_style_suffixes(base_part);
     let stem_key: String = family_stem.chars().filter(|c| c.is_ascii_alphanumeric()).map(|c| c.to_ascii_lowercase()).collect();
 
     let known = match stem_key.as_str() {
-        "times" | "timesroman" | "timesnewroman" | "timesnewromanps" | "timesnewromanpsmt" | "nimbusromno9l" => {
-            Some(("Times New Roman", false))
-        }
+        "times" | "timesroman" | "timesnewroman" | "timesnewromanps" | "timesnewromanpsmt" | "nimbusromno9l" => Some(("Times New Roman", false)),
         "helvetica" | "helv" | "nimbussanl" => Some(("Helvetica", false)),
         "helveticaneue" => Some(("Helvetica Neue", false)),
         "arial" | "arialmt" | "arialunicodems" => Some(("Arial", false)),
-        "courier" | "couriernew" | "couriernewps" | "couriernewpsmt" | "nimbusmonl" => {
-            Some(("Courier New", true))
-        }
+        "courier" | "couriernew" | "couriernewps" | "couriernewpsmt" | "nimbusmonl" => Some(("Courier New", true)),
         "calibri" => Some(("Calibri", false)),
         "cambria" => Some(("Cambria", false)),
         "candara" => Some(("Candara", false)),
@@ -795,10 +765,9 @@ fn fill_base_encoding(table: &mut [Option<CompactStr>; 256], enc: BaseEnc) {
     match enc {
         BaseEnc::WinAnsi => {
             const CP1252_80_9F: [char; 32] = [
-                '\u{20AC}', '\u{FFFD}', '\u{201A}', '\u{0192}', '\u{201E}', '\u{2026}', '\u{2020}', '\u{2021}',
-                '\u{02C6}', '\u{2030}', '\u{0160}', '\u{2039}', '\u{0152}', '\u{FFFD}', '\u{017D}', '\u{FFFD}',
-                '\u{FFFD}', '\u{2018}', '\u{2019}', '\u{201C}', '\u{201D}', '\u{2022}', '\u{2013}', '\u{2014}',
-                '\u{02DC}', '\u{2122}', '\u{0161}', '\u{203A}', '\u{0153}', '\u{FFFD}', '\u{017E}', '\u{0178}',
+                '\u{20AC}', '\u{FFFD}', '\u{201A}', '\u{0192}', '\u{201E}', '\u{2026}', '\u{2020}', '\u{2021}', '\u{02C6}', '\u{2030}', '\u{0160}',
+                '\u{2039}', '\u{0152}', '\u{FFFD}', '\u{017D}', '\u{FFFD}', '\u{FFFD}', '\u{2018}', '\u{2019}', '\u{201C}', '\u{201D}', '\u{2022}',
+                '\u{2013}', '\u{2014}', '\u{02DC}', '\u{2122}', '\u{0161}', '\u{203A}', '\u{0153}', '\u{FFFD}', '\u{017E}', '\u{0178}',
             ];
             for (i, &ch) in CP1252_80_9F.iter().enumerate() {
                 if ch != '\u{FFFD}' {
@@ -811,22 +780,18 @@ fn fill_base_encoding(table: &mut [Option<CompactStr>; 256], enc: BaseEnc) {
         }
         BaseEnc::MacRoman => {
             const MAC_ROMAN_80_FF: [char; 128] = [
-                '\u{00C4}', '\u{00C5}', '\u{00C7}', '\u{00C9}', '\u{00D1}', '\u{00D6}', '\u{00DC}', '\u{00E1}',
-                '\u{00E0}', '\u{00E2}', '\u{00E4}', '\u{00E3}', '\u{00E5}', '\u{00E7}', '\u{00E9}', '\u{00E8}',
-                '\u{00EA}', '\u{00EB}', '\u{00ED}', '\u{00EC}', '\u{00EE}', '\u{00EF}', '\u{00F1}', '\u{00F3}',
-                '\u{00F2}', '\u{00F4}', '\u{00F6}', '\u{00F5}', '\u{00FA}', '\u{00F9}', '\u{00FB}', '\u{00FC}',
-                '\u{2020}', '\u{00B0}', '\u{00A2}', '\u{00A3}', '\u{00A7}', '\u{2022}', '\u{00B6}', '\u{00DF}',
-                '\u{00AE}', '\u{00A9}', '\u{2122}', '\u{00B4}', '\u{00A8}', '\u{2260}', '\u{00C6}', '\u{00D8}',
-                '\u{221E}', '\u{00B1}', '\u{2264}', '\u{2265}', '\u{00A5}', '\u{00B5}', '\u{2202}', '\u{2211}',
-                '\u{220F}', '\u{03C0}', '\u{222B}', '\u{00AA}', '\u{00BA}', '\u{03A9}', '\u{00E6}', '\u{00F8}',
-                '\u{00BF}', '\u{00A1}', '\u{00AC}', '\u{221A}', '\u{0192}', '\u{2248}', '\u{2206}', '\u{00AB}',
-                '\u{00BB}', '\u{2026}', '\u{00A0}', '\u{00C0}', '\u{00C3}', '\u{00D5}', '\u{0152}', '\u{0153}',
-                '\u{2013}', '\u{2014}', '\u{201C}', '\u{201D}', '\u{2018}', '\u{2019}', '\u{00F7}', '\u{25CA}',
-                '\u{00FF}', '\u{0178}', '\u{2044}', '\u{20AC}', '\u{2039}', '\u{203A}', '\u{FB01}', '\u{FB02}',
-                '\u{2021}', '\u{00B7}', '\u{201A}', '\u{201E}', '\u{2030}', '\u{00C2}', '\u{00CA}', '\u{00C1}',
-                '\u{00CB}', '\u{00C8}', '\u{00CD}', '\u{00CE}', '\u{00CF}', '\u{00CC}', '\u{00D3}', '\u{00D4}',
-                '\u{F8FF}', '\u{00D2}', '\u{00DA}', '\u{00DB}', '\u{00D9}', '\u{0131}', '\u{02C6}', '\u{02DC}',
-                '\u{00AF}', '\u{02D8}', '\u{02D9}', '\u{02DA}', '\u{00B8}', '\u{02DD}', '\u{02DB}', '\u{02C7}',
+                '\u{00C4}', '\u{00C5}', '\u{00C7}', '\u{00C9}', '\u{00D1}', '\u{00D6}', '\u{00DC}', '\u{00E1}', '\u{00E0}', '\u{00E2}', '\u{00E4}',
+                '\u{00E3}', '\u{00E5}', '\u{00E7}', '\u{00E9}', '\u{00E8}', '\u{00EA}', '\u{00EB}', '\u{00ED}', '\u{00EC}', '\u{00EE}', '\u{00EF}',
+                '\u{00F1}', '\u{00F3}', '\u{00F2}', '\u{00F4}', '\u{00F6}', '\u{00F5}', '\u{00FA}', '\u{00F9}', '\u{00FB}', '\u{00FC}', '\u{2020}',
+                '\u{00B0}', '\u{00A2}', '\u{00A3}', '\u{00A7}', '\u{2022}', '\u{00B6}', '\u{00DF}', '\u{00AE}', '\u{00A9}', '\u{2122}', '\u{00B4}',
+                '\u{00A8}', '\u{2260}', '\u{00C6}', '\u{00D8}', '\u{221E}', '\u{00B1}', '\u{2264}', '\u{2265}', '\u{00A5}', '\u{00B5}', '\u{2202}',
+                '\u{2211}', '\u{220F}', '\u{03C0}', '\u{222B}', '\u{00AA}', '\u{00BA}', '\u{03A9}', '\u{00E6}', '\u{00F8}', '\u{00BF}', '\u{00A1}',
+                '\u{00AC}', '\u{221A}', '\u{0192}', '\u{2248}', '\u{2206}', '\u{00AB}', '\u{00BB}', '\u{2026}', '\u{00A0}', '\u{00C0}', '\u{00C3}',
+                '\u{00D5}', '\u{0152}', '\u{0153}', '\u{2013}', '\u{2014}', '\u{201C}', '\u{201D}', '\u{2018}', '\u{2019}', '\u{00F7}', '\u{25CA}',
+                '\u{00FF}', '\u{0178}', '\u{2044}', '\u{20AC}', '\u{2039}', '\u{203A}', '\u{FB01}', '\u{FB02}', '\u{2021}', '\u{00B7}', '\u{201A}',
+                '\u{201E}', '\u{2030}', '\u{00C2}', '\u{00CA}', '\u{00C1}', '\u{00CB}', '\u{00C8}', '\u{00CD}', '\u{00CE}', '\u{00CF}', '\u{00CC}',
+                '\u{00D3}', '\u{00D4}', '\u{F8FF}', '\u{00D2}', '\u{00DA}', '\u{00DB}', '\u{00D9}', '\u{0131}', '\u{02C6}', '\u{02DC}', '\u{00AF}',
+                '\u{02D8}', '\u{02D9}', '\u{02DA}', '\u{00B8}', '\u{02DD}', '\u{02DB}', '\u{02C7}',
             ];
             for (i, &ch) in MAC_ROMAN_80_FF.iter().enumerate() {
                 table[0x80 + i] = Some(CompactStr::Char(ch));

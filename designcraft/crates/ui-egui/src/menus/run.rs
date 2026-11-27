@@ -251,6 +251,11 @@ fn run_ui_part1(app: &mut DesignApp, id: &str, p: &Value) -> Option<Result<Value
             Ok(Value::Null)
         }
         "app.exportText" => export_bytes(app, p, "rtf", "file.exportText"),
+        "app.exportIcml" => export_bytes(app, p, "icml", "file.exportIcml"),
+        "app.importIcml" => match p.get("path").and_then(Value::as_str) {
+            Some(path) => app.open_file("file.importIcml", json!({"path": path})),
+            None => rerun_with_path(app, "place", id, p, "path"),
+        },
         "app.packageDialog" => {
             // Without a folder, the Package dialog: what the package carries, then the folder.
             let Some(dir) = p.get("dir").and_then(Value::as_str) else {
@@ -374,7 +379,15 @@ fn run_ui_part2(app: &mut DesignApp, id: &str, p: &Value) -> Option<Result<Value
             });
             match target {
                 Some(t) => {
-                    app.story_editor = if app.story_editor == Some(t) { None } else { Some(t) };
+                    if app.story_editor == Some(t) {
+                        app.story_editor = None;
+                        app.ui.editorial_view = crate::state::EditorialViewMode::Layout;
+                    } else {
+                        app.story_editor = Some(t);
+                        if app.ui.editorial_view == crate::state::EditorialViewMode::Layout {
+                            app.ui.editorial_view = crate::state::EditorialViewMode::Story;
+                        }
+                    }
                     Ok(Value::Null)
                 }
                 None => Err("select a text frame or place the cursor in text".into()),
@@ -728,6 +741,34 @@ fn run_ui_part3(app: &mut DesignApp, id: &str, p: &Value) -> Option<Result<Value
         "view.hiddenCharacters" => flag(&mut app.ui.hidden_characters),
         "view.taggedFrames" => flag(&mut app.ui.tagged_frames),
         "view.storyEditorDepthRuler" => flag(&mut app.ui.story_editor_depth_ruler),
+        "view.editorialMode" => {
+            let mode = match p.get("mode").and_then(Value::as_str).unwrap_or("story") {
+                "layout" => crate::state::EditorialViewMode::Layout,
+                "galley" => crate::state::EditorialViewMode::Galley,
+                "story" => crate::state::EditorialViewMode::Story,
+                other => return Some(Err(format!("unknown editorial mode `{other}`"))),
+            };
+            app.ui.editorial_view = mode;
+            if mode == crate::state::EditorialViewMode::Layout {
+                app.story_editor = None;
+            } else if !crate::story_editor::visible(app) {
+                let target = app.session.active().and_then(|st| {
+                    let story = st
+                        .selection
+                        .text
+                        .map(|t| t.story)
+                        .or_else(|| st.selection.items.iter().find_map(|i| st.doc.item(*i)?.text_frame().map(|t| t.story)))
+                        .or_else(|| st.doc.stories.keys().next().copied())?;
+                    Some(crate::story_editor::Target { doc: st.uid, story })
+                });
+                if let Some(t) = target {
+                    app.story_editor = Some(t);
+                } else {
+                    return Some(Err("select a text frame or place the cursor in text".into()));
+                }
+            }
+            Ok(json!(mode))
+        }
         "window.hidePanels" | "window.hidePanelsExceptTools" => {
             let mode = if id == "window.hidePanels" { 1 } else { 2 };
             app.ui.hidden_panels = if app.ui.hidden_panels == mode { 0 } else { mode };

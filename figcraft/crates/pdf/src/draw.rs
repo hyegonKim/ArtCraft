@@ -468,11 +468,7 @@ impl<'a> Exporter<'a> {
         match &p.kind {
             PaintKind::Image(img) => self.image_fill(s, &kp, r, img, p.opacity.clamp(0.0, 1.0), frame.size),
             PaintKind::Video(vid) => {
-                let key = vid
-                    .poster
-                    .as_deref()
-                    .or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()))
-                    .unwrap_or(&vid.video);
+                let key = vid.poster.as_deref().or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref())).unwrap_or(&vid.video);
                 if self.doc.images.contains_key(key) {
                     let img = vid.as_image_paint(key.to_string());
                     self.image_fill(s, &kp, r, &img, p.opacity.clamp(0.0, 1.0), frame.size);

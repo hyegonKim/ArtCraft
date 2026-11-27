@@ -12,13 +12,10 @@ use designcraft_color::swatch::resolve_gradient;
 use designcraft_color::{BlendMode, GradientKind};
 use designcraft_compose::{Cache, ComposedStory, FrameText};
 use designcraft_doc::{
-    ANCHOR_MARK, ButtonAction, Cap, Content, Document, Fill, Graphic, HyperlinkDest,
-    HyperlinkSource, Item, ItemId, Join, Shape, StoryId, Stroke, StrokeType, TextFrame,
+    ANCHOR_MARK, ButtonAction, Cap, Content, Document, Fill, Graphic, HyperlinkDest, HyperlinkSource, Item, ItemId, Join, Shape, StoryId, Stroke,
+    StrokeType, TextFrame,
 };
-use designcraft_epub::{
-    EmbeddedFont, FixedBox, FixedElement, FixedPageScene, FixedRaster, FixedTextSpan,
-    FixedVectorSvg,
-};
+use designcraft_epub::{EmbeddedFont, FixedBox, FixedElement, FixedPageScene, FixedRaster, FixedTextSpan, FixedVectorSvg};
 use designcraft_geom::corners::{self, CornerShape};
 use designcraft_geom::kurbo::{PathEl, Shape as _};
 use designcraft_geom::{Affine, BezPath, Point, Rect};
@@ -37,13 +34,7 @@ pub(crate) struct FixedSceneBuilder<'a> {
 }
 
 impl<'a> FixedSceneBuilder<'a> {
-    pub(crate) fn new(
-        doc: &'a Document,
-        cache: &'a Cache,
-        warnings: &'a mut Vec<String>,
-        page_offset: usize,
-        total_pages: usize,
-    ) -> Self {
+    pub(crate) fn new(doc: &'a Document, cache: &'a Cache, warnings: &'a mut Vec<String>, page_offset: usize, total_pages: usize) -> Self {
         let anchor_pages = collect_anchor_pages(doc, cache);
         let mut item_links = HashMap::new();
         let mut text_links: HashMap<StoryId, Vec<(usize, usize, String)>> = HashMap::new();
@@ -107,11 +98,7 @@ impl<'a> FixedSceneBuilder<'a> {
             } else if face.data().starts_with(b"ttcf") {
                 self.warn(format!("font `{family} {style}` is part of a font collection; not embedded"));
             } else if !out.iter().any(|e: &EmbeddedFont| e.family == family && e.style == face.style) {
-                out.push(EmbeddedFont {
-                    family,
-                    style: face.style.clone(),
-                    data: face.data().to_vec(),
-                });
+                out.push(EmbeddedFont { family, style: face.style.clone(), data: face.data().to_vec() });
             }
         }
         out
@@ -124,15 +111,8 @@ impl<'a> FixedSceneBuilder<'a> {
         let bounds = page.bounds();
         let to_page = Affine::translate(-bounds.origin().to_vec2());
         let b = self.doc.settings.bleed;
-        let clip = Rect::new(
-            bounds.x0 - b[2].max(b[3]),
-            bounds.y0 - b[0],
-            bounds.x1 + b[2].max(b[3]),
-            bounds.y1 + b[1],
-        );
-        let overridden = self
-            .doc
-            .overridden_parent_items(designcraft_doc::SpreadRef::Doc(si), pi);
+        let clip = Rect::new(bounds.x0 - b[2].max(b[3]), bounds.y0 - b[0], bounds.x1 + b[2].max(b[3]), bounds.y1 + b[1]);
+        let overridden = self.doc.overridden_parent_items(designcraft_doc::SpreadRef::Doc(si), pi);
 
         let mut elements = Vec::new();
         for layer in self.doc.layers.iter().rev() {
@@ -149,20 +129,10 @@ impl<'a> FixedSceneBuilder<'a> {
                     if it.layer != layer.id || overridden.contains(&it.id) {
                         continue;
                     }
-                    if parent.pages.len() > 1
-                        && parent.page_at_x(it.bounds().center().x) != Some(ppage)
-                    {
+                    if parent.pages.len() > 1 && parent.page_at_x(it.bounds().center().x) != Some(ppage) {
                         continue;
                     }
-                    self.emit_item(
-                        it,
-                        Affine::translate((dx, 0.0)),
-                        to_page,
-                        clip,
-                        abs,
-                        Some(abs),
-                        &mut elements,
-                    );
+                    self.emit_item(it, Affine::translate((dx, 0.0)), to_page, clip, abs, Some(abs), &mut elements);
                 }
             }
             for it in &sp.items {
@@ -173,13 +143,7 @@ impl<'a> FixedSceneBuilder<'a> {
         }
 
         let paper_bg = css_color(self.doc, "[Paper]", 1.0).filter(|c| c != "#ffffff");
-        Some(FixedPageScene {
-            label: self.doc.page_name(abs),
-            width: bounds.width(),
-            height: bounds.height(),
-            background_css: paper_bg,
-            elements,
-        })
+        Some(FixedPageScene { label: self.doc.page_name(abs), width: bounds.width(), height: bounds.height(), background_css: paper_bg, elements })
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -245,15 +209,7 @@ impl<'a> FixedSceneBuilder<'a> {
             let local_to_box = Affine::translate((-inner.x0, -inner.y0));
             let big_clip = Rect::new(-1e6, -1e6, 1e6, 1e6);
             for child in it.shown_children() {
-                self.emit_item(
-                    child,
-                    Affine::IDENTITY,
-                    local_to_box,
-                    big_clip,
-                    abs_page,
-                    parent_page,
-                    &mut nested,
-                );
+                self.emit_item(child, Affine::IDENTITY, local_to_box, big_clip, abs_page, parent_page, &mut nested);
             }
         }
 
@@ -280,9 +236,7 @@ impl<'a> FixedSceneBuilder<'a> {
         let global_cur = self.page_offset + abs_page;
         match act {
             ButtonAction::GoToUrl { url } if !url.is_empty() => Some(url.clone()),
-            ButtonAction::GoToPage { page } => {
-                Some(format!("page{}.xhtml", self.page_offset + page + 1))
-            }
+            ButtonAction::GoToPage { page } => Some(format!("page{}.xhtml", self.page_offset + page + 1)),
             ButtonAction::GoToFirstPage => Some("page1.xhtml".into()),
             ButtonAction::GoToLastPage => Some(format!("page{}.xhtml", self.total_pages)),
             ButtonAction::GoToNextPage => {
@@ -301,15 +255,8 @@ impl<'a> FixedSceneBuilder<'a> {
         let inner = it.inner_bounds();
         let m_div = m * Affine::translate((inner.x0, inner.y0));
         let [a, b, c, d, tx, ty] = m_div.as_coeffs();
-        let pure_translate = (a - 1.0).abs() < 1e-4
-            && b.abs() < 1e-5
-            && c.abs() < 1e-5
-            && (d - 1.0).abs() < 1e-4;
-        let (x, y, matrix) = if pure_translate {
-            (tx, ty, None)
-        } else {
-            (0.0, 0.0, Some([a, b, c, d, tx, ty]))
-        };
+        let pure_translate = (a - 1.0).abs() < 1e-4 && b.abs() < 1e-5 && c.abs() < 1e-5 && (d - 1.0).abs() < 1e-4;
+        let (x, y, matrix) = if pure_translate { (tx, ty, None) } else { (0.0, 0.0, Some([a, b, c, d, tx, ty])) };
         FixedBox {
             x,
             y,
@@ -327,22 +274,11 @@ impl<'a> FixedSceneBuilder<'a> {
         }
     }
 
-    fn emit_shape(
-        &mut self,
-        it: &Item,
-        m: Affine,
-        abs_page: usize,
-        nested: Vec<FixedElement>,
-        out: &mut Vec<FixedElement>,
-    ) {
+    fn emit_shape(&mut self, it: &Item, m: Affine, abs_page: usize, nested: Vec<FixedElement>, out: &mut Vec<FixedElement>) {
         if can_use_css_box(it) {
             let mut fb = self.frame_box(it, m, abs_page, !nested.is_empty());
             fb.children = nested;
-            if fb.background.is_some()
-                || fb.border.is_some()
-                || fb.href.is_some()
-                || !fb.children.is_empty()
-            {
+            if fb.background.is_some() || fb.border.is_some() || fb.href.is_some() || !fb.children.is_empty() {
                 out.push(FixedElement::Box(fb));
             }
             return;
@@ -360,11 +296,7 @@ impl<'a> FixedSceneBuilder<'a> {
     }
 
     fn build_vector_svg(&mut self, it: &Item, m: Affine, abs_page: usize) -> Option<FixedVectorSvg> {
-        let bp = if it.corners.is_none() {
-            it.path.to_bezpath()
-        } else {
-            corners::apply(&it.path, &it.corners)
-        };
+        let bp = if it.corners.is_none() { it.path.to_bezpath() } else { corners::apply(&it.path, &it.corners) };
         let mut pb = bp;
         pb.apply_affine(m);
         let pad = it.stroke.extent() + 1.0;
@@ -382,14 +314,7 @@ impl<'a> FixedSceneBuilder<'a> {
             if let Some(grad) = resolve_gradient(&self.doc.swatches, &it.fill.swatch) {
                 self.svg_grad_seq += 1;
                 let gid = format!("dcg{}", self.svg_grad_seq);
-                write_svg_gradient(
-                    &gid,
-                    &grad,
-                    &it.fill,
-                    it.inner_bounds(),
-                    m,
-                    &mut gradient_defs,
-                );
+                write_svg_gradient(&gid, &grad, &it.fill, it.inner_bounds(), m, &mut gradient_defs);
                 format!("url(#{gid})")
             } else {
                 css_color(self.doc, &it.fill.swatch, it.fill.tint).unwrap_or_else(|| "none".into())
@@ -406,27 +331,16 @@ impl<'a> FixedSceneBuilder<'a> {
             let color = if let Some(grad) = resolve_gradient(&self.doc.swatches, &it.stroke.swatch) {
                 self.svg_grad_seq += 1;
                 let gid = format!("dcg{}", self.svg_grad_seq);
-                write_svg_gradient(
-                    &gid,
-                    &grad,
-                    &it.stroke.as_fill(),
-                    it.inner_bounds(),
-                    m,
-                    &mut gradient_defs,
-                );
+                write_svg_gradient(&gid, &grad, &it.stroke.as_fill(), it.inner_bounds(), m, &mut gradient_defs);
                 Some(format!("url(#{gid})"))
             } else {
                 css_color(self.doc, &it.stroke.swatch, it.stroke.tint)
             };
             let kind = self.doc.stroke_kind(&it.stroke.kind);
             let dash = match kind {
-                StrokeType::Dashed { pattern } if pattern.iter().any(|v| *v > 0.0) => Some(
-                    pattern
-                        .iter()
-                        .map(|v| format!("{:.2}", (v * stroke_scale).max(0.1)))
-                        .collect::<Vec<_>>()
-                        .join(","),
-                ),
+                StrokeType::Dashed { pattern } if pattern.iter().any(|v| *v > 0.0) => {
+                    Some(pattern.iter().map(|v| format!("{:.2}", (v * stroke_scale).max(0.1))).collect::<Vec<_>>().join(","))
+                }
                 StrokeType::Dotted => {
                     let w = (it.stroke.weight * stroke_scale).max(0.5);
                     Some(format!("0.1,{:.2}", w * 2.0))
@@ -473,19 +387,8 @@ impl<'a> FixedSceneBuilder<'a> {
         })
     }
 
-    fn build_graphic(
-        &mut self,
-        it: &Item,
-        g: &Graphic,
-        m: Affine,
-        abs_page: usize,
-        nested: Vec<FixedElement>,
-    ) -> Option<FixedElement> {
-        let g = if it.media.is_some() {
-            it.drawn_graphic(&self.doc.assets).unwrap_or_else(|| g.clone())
-        } else {
-            g.clone()
-        };
+    fn build_graphic(&mut self, it: &Item, g: &Graphic, m: Affine, abs_page: usize, nested: Vec<FixedElement>) -> Option<FixedElement> {
+        let g = if it.media.is_some() { it.drawn_graphic(&self.doc.assets).unwrap_or_else(|| g.clone()) } else { g.clone() };
         let Some(asset) = self.doc.assets.get(&g.asset).cloned() else {
             let mut out = Vec::new();
             self.emit_shape(it, m, abs_page, nested, &mut out);
@@ -498,10 +401,7 @@ impl<'a> FixedSceneBuilder<'a> {
             return out.into_iter().next();
         }
         if it.alt_text.trim().is_empty() {
-            self.warn(format!(
-                "{}: no alt text (Object Export Options); exported as decorative (alt=\"\")",
-                asset.name
-            ));
+            self.warn(format!("{}: no alt text (Object Export Options); exported as decorative (alt=\"\")", asset.name));
         }
         let Some((mime, bytes)) = raster_or_svg_bytes(&asset) else {
             self.warn(format!("`{}` could not be decoded for EPUB; left out", asset.name));
@@ -561,9 +461,7 @@ impl<'a> FixedSceneBuilder<'a> {
 
         // Non-rectangular frame background/stroke goes behind as `<svg>`.
         let use_box = can_use_css_box(it);
-        if !use_box
-            && let Some(svg) = self.build_vector_svg(it, m, abs_page)
-        {
+        if !use_box && let Some(svg) = self.build_vector_svg(it, m, abs_page) {
             out.push(FixedElement::Svg(svg));
         }
 
@@ -622,10 +520,8 @@ impl<'a> FixedSceneBuilder<'a> {
                 let a = seg.a - origin;
                 let b = seg.b - origin;
                 let hw = seg.stroke.weight * 0.5;
-                let rect = Rect::from_points(a, b).inflate(
-                    if (a.x - b.x).abs() < 1e-3 { hw } else { 0.0 },
-                    if (a.y - b.y).abs() < 1e-3 { hw } else { 0.0 },
-                );
+                let rect =
+                    Rect::from_points(a, b).inflate(if (a.x - b.x).abs() < 1e-3 { hw } else { 0.0 }, if (a.y - b.y).abs() < 1e-3 { hw } else { 0.0 });
                 rules.push(FixedBox {
                     x: rect.x0,
                     y: rect.y0,
@@ -642,21 +538,9 @@ impl<'a> FixedSceneBuilder<'a> {
 
         // Anchored objects placed in this frame's lines.
         if let Some(st) = self.doc.story(tf.story) {
-            let anchored_items: Vec<_> = ft
-                .objects
-                .iter()
-                .filter_map(|o| st.objects.get(o.index).map(|obj| (obj.item.clone(), o.origin)))
-                .collect();
+            let anchored_items: Vec<_> = ft.objects.iter().filter_map(|o| st.objects.get(o.index).map(|obj| (obj.item.clone(), o.origin))).collect();
             for (aitem, aorigin) in anchored_items {
-                self.emit_item(
-                    &aitem,
-                    xf * Affine::translate(aorigin.to_vec2()),
-                    to_page,
-                    clip,
-                    abs_page,
-                    parent_page,
-                    out,
-                );
+                self.emit_item(&aitem, xf * Affine::translate(aorigin.to_vec2()), to_page, clip, abs_page, parent_page, out);
             }
         }
     }
@@ -711,15 +595,9 @@ impl<'a> FixedSceneBuilder<'a> {
 
                 let rs = cs.styles.get(g.style as usize);
                 let font_size = rs.map_or(12.0, |s| s.size).max(1.0);
-                let color = rs
-                    .and_then(|s| css_color(self.doc, &s.fill, s.fill_tint))
-                    .unwrap_or_else(|| "#000000".into());
-                let (underline, strikethrough) =
-                    rs.map_or((false, false), |s| (s.underline, s.strikethrough));
-                let href = links
-                    .iter()
-                    .find(|(s, e, _)| g.byte >= *s && g.byte < *e)
-                    .map(|(_, _, h)| h.clone());
+                let color = rs.and_then(|s| css_color(self.doc, &s.fill, s.fill_tint)).unwrap_or_else(|| "#000000".into());
+                let (underline, strikethrough) = rs.map_or((false, false), |s| (s.underline, s.strikethrough));
+                let href = links.iter().find(|(s, e, _)| g.byte >= *s && g.byte < *e).map(|(_, _, h)| h.clone());
 
                 let family = g.face.family.clone();
                 let style_name = g.face.style.clone();
@@ -806,24 +684,12 @@ fn collect_anchor_pages(doc: &Document, cache: &Cache) -> HashMap<u64, usize> {
     out
 }
 
-fn dest_href(
-    dest: &HyperlinkDest,
-    anchor_pages: &HashMap<u64, usize>,
-    page_offset: usize,
-) -> Option<String> {
+fn dest_href(dest: &HyperlinkDest, anchor_pages: &HashMap<u64, usize>, page_offset: usize) -> Option<String> {
     match dest {
         HyperlinkDest::Url(u) => (!u.trim().is_empty()).then(|| u.clone()),
-        HyperlinkDest::Email(e) => (!e.trim().is_empty()).then(|| {
-            if e.starts_with("mailto:") {
-                e.clone()
-            } else {
-                format!("mailto:{e}")
-            }
-        }),
+        HyperlinkDest::Email(e) => (!e.trim().is_empty()).then(|| if e.starts_with("mailto:") { e.clone() } else { format!("mailto:{e}") }),
         HyperlinkDest::Page(p) => Some(format!("page{}.xhtml", page_offset + p + 1)),
-        HyperlinkDest::Anchor(a) => anchor_pages
-            .get(a)
-            .map(|p| format!("page{}.xhtml", page_offset + p + 1)),
+        HyperlinkDest::Anchor(a) => anchor_pages.get(a).map(|p| format!("page{}.xhtml", page_offset + p + 1)),
     }
 }
 
@@ -893,10 +759,7 @@ fn can_use_css_box(it: &Item) -> bool {
     if !is_exact_rect(&bp, inner) {
         return false;
     }
-    it.corners
-        .corners
-        .iter()
-        .all(|c| c.is_none() || c.shape == CornerShape::Rounded)
+    it.corners.corners.iter().all(|c| c.is_none() || c.shape == CornerShape::Rounded)
 }
 
 fn rounded_corner_css(it: &Item) -> Option<String> {
@@ -905,19 +768,12 @@ fn rounded_corner_css(it: &Item) -> Option<String> {
     }
     let radii: [f64; 4] = std::array::from_fn(|i| {
         let c = it.corners.corners[i];
-        if c.shape == CornerShape::Rounded && c.size > 0.0 {
-            c.size
-        } else {
-            0.0
-        }
+        if c.shape == CornerShape::Rounded && c.size > 0.0 { c.size } else { 0.0 }
     });
     if radii.iter().all(|r| *r <= 0.0) {
         return None;
     }
-    Some(format!(
-        "{:.2}px {:.2}px {:.2}px {:.2}px",
-        radii[0], radii[1], radii[2], radii[3]
-    ))
+    Some(format!("{:.2}px {:.2}px {:.2}px {:.2}px", radii[0], radii[1], radii[2], radii[3]))
 }
 
 fn is_exact_rect(bp: &BezPath, r: Rect) -> bool {
@@ -929,15 +785,11 @@ fn is_exact_rect(bp: &BezPath, r: Rect) -> bool {
             _ => return false,
         }
     }
-    if pts.len() == 5 && pts.first().zip(pts.last()).is_some_and(|(a, b)| (*a - *b).hypot() < 1e-6)
-    {
+    if pts.len() == 5 && pts.first().zip(pts.last()).is_some_and(|(a, b)| (*a - *b).hypot() < 1e-6) {
         pts.pop();
     }
     pts.len() == 4
-        && pts.iter().all(|p| {
-            ((p.x - r.x0).abs() < 1e-6 || (p.x - r.x1).abs() < 1e-6)
-                && ((p.y - r.y0).abs() < 1e-6 || (p.y - r.y1).abs() < 1e-6)
-        })
+        && pts.iter().all(|p| ((p.x - r.x0).abs() < 1e-6 || (p.x - r.x1).abs() < 1e-6) && ((p.y - r.y0).abs() < 1e-6 || (p.y - r.y1).abs() < 1e-6))
 }
 
 fn css_blend_mode(bm: BlendMode) -> Option<&'static str> {
@@ -975,11 +827,7 @@ fn bezpath_to_svg_d(bp: &BezPath) -> String {
                 let _ = write!(d, "Q{:.2} {:.2} {:.2} {:.2}", p1.x, p1.y, p2.x, p2.y);
             }
             PathEl::CurveTo(p1, p2, p3) => {
-                let _ = write!(
-                    d,
-                    "C{:.2} {:.2} {:.2} {:.2} {:.2} {:.2}",
-                    p1.x, p1.y, p2.x, p2.y, p3.x, p3.y
-                );
+                let _ = write!(d, "C{:.2} {:.2} {:.2} {:.2} {:.2} {:.2}", p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
             }
             PathEl::ClosePath => d.push('Z'),
         }
@@ -987,14 +835,7 @@ fn bezpath_to_svg_d(bp: &BezPath) -> String {
     d
 }
 
-fn write_svg_gradient(
-    id: &str,
-    grad: &designcraft_color::Gradient,
-    fill: &Fill,
-    inner_bounds: Rect,
-    m: Affine,
-    defs: &mut String,
-) {
+fn write_svg_gradient(id: &str, grad: &designcraft_color::Gradient, fill: &Fill, inner_bounds: Rect, m: Affine, defs: &mut String) {
     let mut stops_xml = String::new();
     for (off, col, alpha) in grad.expanded_stops() {
         let [r, g, b, a] = col.to_rgba8(alpha);

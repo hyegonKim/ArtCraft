@@ -334,10 +334,9 @@ impl<'b> Archive<'b> {
 
     /// Whether `images/` or `videos/` has a member for asset `hash`.
     fn has_image(&self, hash: &str) -> bool {
-        self.zip.as_ref().is_some_and(|z| {
-            z.index_for_name(&format!("images/{hash}")).is_some()
-                || z.index_for_name(&format!("videos/{hash}")).is_some()
-        })
+        self.zip
+            .as_ref()
+            .is_some_and(|z| z.index_for_name(&format!("images/{hash}")).is_some() || z.index_for_name(&format!("videos/{hash}")).is_some())
     }
 
     /// Bytes of image or video `hash` (lowercase hex) from `images/` or `videos/`.
@@ -348,11 +347,7 @@ impl<'b> Archive<'b> {
         }
         // A clone shares the parsed directory and the bytes; the resolver only has shared access.
         let mut z = self.zip.clone()?;
-        let member = if z.index_for_name(&format!("images/{hash}")).is_some() {
-            format!("images/{hash}")
-        } else {
-            format!("videos/{hash}")
-        };
+        let member = if z.index_for_name(&format!("images/{hash}")).is_some() { format!("images/{hash}") } else { format!("videos/{hash}") };
         let f = z.by_name(&member).ok()?;
         let size = f.size();
         if size > MAX_IMAGE {

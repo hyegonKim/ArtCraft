@@ -793,11 +793,7 @@ fn upload_video_file(app: &mut FigApp, target: &PickerTarget) {
             None => file["data"].as_str().and_then(|d| base64::engine::general_purpose::STANDARD.decode(d).ok()),
         };
         let Some(bytes) = bytes else { return };
-        let added = app
-            .session
-            .doc_mut()
-            .ok()
-            .and_then(|d| figcraft_format::add_video(d, bytes, None).ok());
+        let added = app.session.doc_mut().ok().and_then(|d| figcraft_format::add_video(d, bytes, None).ok());
         let Some((vhash, poster, ..)) = added else { return };
         if let Some(mut paint) = current_paint(app, &target) {
             paint.kind = Paint::video(vhash, Some(poster), ImageScaleMode::Fill).kind;
@@ -813,9 +809,7 @@ fn video_well(app: &mut FigApp, ui: &mut Ui, target: &PickerTarget, paint: &Pain
     widgets::checker(&ui.painter().with_clip_rect(frame), frame, 8.0);
     let ppp = f64::from(ui.ctx().pixels_per_point());
     if let PaintKind::Video(vid) = &paint.kind {
-        let poster_hash = vid.poster.clone().or_else(|| {
-            app.session.doc().ok().and_then(|d| d.videos.get(&vid.video)).and_then(|v| v.poster.clone())
-        });
+        let poster_hash = vid.poster.clone().or_else(|| app.session.doc().ok().and_then(|d| d.videos.get(&vid.video)).and_then(|v| v.poster.clone()));
         if let Some(ph) = poster_hash
             && let Some(tex) = image_texture(app, ui.ctx(), &ph, f64::from(frame.width()) * ppp)
         {
@@ -864,12 +858,8 @@ fn video_controls(app: &mut FigApp, ui: &mut Ui, target: &PickerTarget, paint: &
             write(app, target, paint, false);
         }
     });
-    if let Some((w, h, dur, mime)) = app
-        .session
-        .doc()
-        .ok()
-        .and_then(|d| d.videos.get(&vid.video))
-        .map(|v| (v.width, v.height, v.duration_secs, v.mime.clone()))
+    if let Some((w, h, dur, mime)) =
+        app.session.doc().ok().and_then(|d| d.videos.get(&vid.video)).map(|v| (v.width, v.height, v.duration_secs, v.mime.clone()))
     {
         ui.horizontal(|ui| {
             ui.add_space(16.0);

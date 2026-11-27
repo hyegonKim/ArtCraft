@@ -43,18 +43,17 @@ include!(concat!(env!("OUT_DIR"), "/craft_i18n.rs"));
 #[path = "i18n/ko_builtin.rs"]
 mod ko_builtin;
 
-static EFFECTIVE_CATALOGS: LazyLock<Vec<(&'static str, &'static str, &'static str)>> =
-    LazyLock::new(|| {
-        let mut entries: Vec<(&'static str, &'static str, &'static str)> = CRAFT_I18N.to_vec();
-        if let Some(slot) = entries.iter_mut().find(|(c, ..)| c.eq_ignore_ascii_case("ko")) {
-            if slot.1.is_empty() {
-                slot.1 = ko_builtin::BUILTIN_KO_TSV;
-            }
-        } else {
-            entries.push(("ko", "", ko_builtin::BUILTIN_KO_TSV));
+static EFFECTIVE_CATALOGS: LazyLock<Vec<(&'static str, &'static str, &'static str)>> = LazyLock::new(|| {
+    let mut entries: Vec<(&'static str, &'static str, &'static str)> = CRAFT_I18N.to_vec();
+    if let Some(slot) = entries.iter_mut().find(|(c, ..)| c.eq_ignore_ascii_case("ko")) {
+        if slot.1.is_empty() {
+            slot.1 = ko_builtin::BUILTIN_KO_TSV;
         }
-        entries
-    });
+    } else {
+        entries.push(("ko", "", ko_builtin::BUILTIN_KO_TSV));
+    }
+    entries
+});
 
 /// The embedded catalogs, offering exactly the languages in [`LANGUAGES`]. Built on first use; a
 /// locale is parsed on its first lookup.
@@ -325,11 +324,11 @@ impl Lang {
         let code = self.code();
         let Some(slot) = LANGUAGES.iter().position(|l| l.code == code).and_then(|i| OWN_ROWS.get(i)) else { return false };
         let rows: &HashSet<(&str, &str)> = slot.get_or_init(|| {
-            let app = CRAFT_I18N
-                .iter()
-                .find(|(c, ..)| c.eq_ignore_ascii_case(code))
-                .map(|(_, _, app)| *app)
-                .unwrap_or(if code == "ko" { ko_builtin::BUILTIN_KO_TSV } else { "" });
+            let app = CRAFT_I18N.iter().find(|(c, ..)| c.eq_ignore_ascii_case(code)).map(|(_, _, app)| *app).unwrap_or(if code == "ko" {
+                ko_builtin::BUILTIN_KO_TSV
+            } else {
+                ""
+            });
             app.lines()
                 .filter(|l| !l.starts_with('#'))
                 .filter_map(|l| {
@@ -348,11 +347,7 @@ impl Lang {
         let code = self.code();
         let has_ext = CRAFT_I18N.iter().any(|(c, ..)| c.eq_ignore_ascii_case(code));
         let fallback = (!has_ext && code == "ko").then_some(ko_builtin::BUILTIN_KO_TSV);
-        CRAFT_I18N
-            .iter()
-            .filter(move |(c, ..)| c.eq_ignore_ascii_case(code))
-            .flat_map(|(_, shared, app)| [*shared, *app])
-            .chain(fallback)
+        CRAFT_I18N.iter().filter(move |(c, ..)| c.eq_ignore_ascii_case(code)).flat_map(|(_, shared, app)| [*shared, *app]).chain(fallback)
     }
 }
 

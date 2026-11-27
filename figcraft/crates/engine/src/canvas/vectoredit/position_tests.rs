@@ -8,12 +8,7 @@ use figcraft_doc::{NodeId, NodeKind};
 #[test]
 fn moving_a_vector_vertex_refits_its_layer_box() {
     let mut s = Session::new();
-    let id = NodeId(
-        s.execute("shape.rectangle", &json!({"x": 20, "y": 30, "width": 80, "height": 40}))
-            .unwrap()["id"]
-            .as_u64()
-            .unwrap(),
-    );
+    let id = NodeId(s.execute("shape.rectangle", &json!({"x": 20, "y": 30, "width": 80, "height": 40})).unwrap()["id"].as_u64().unwrap());
     s.execute("select.set", &json!({"ids": [id]})).unwrap();
     s.execute("vector.edit.begin", &json!({})).unwrap();
     assert!(matches!(s.doc().unwrap().node(id).unwrap().kind, NodeKind::Vector { .. }));

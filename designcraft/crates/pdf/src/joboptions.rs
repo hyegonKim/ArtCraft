@@ -249,17 +249,11 @@ fn decode_text(bytes: &[u8]) -> String {
         return String::from_utf8_lossy(rest).into_owned();
     }
     if let Some(rest) = bytes.strip_prefix(&[0xFF, 0xFE]) {
-        let u16s: Vec<u16> = rest
-            .chunks_exact(2)
-            .map(|c| u16::from_le_bytes([c[0], c[1]]))
-            .collect();
+        let u16s: Vec<u16> = rest.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
         return String::from_utf16_lossy(&u16s);
     }
     if let Some(rest) = bytes.strip_prefix(&[0xFE, 0xFF]) {
-        let u16s: Vec<u16> = rest
-            .chunks_exact(2)
-            .map(|c| u16::from_be_bytes([c[0], c[1]]))
-            .collect();
+        let u16s: Vec<u16> = rest.chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
         return String::from_utf16_lossy(&u16s);
     }
     match std::str::from_utf8(bytes) {
@@ -318,23 +312,13 @@ const KNOWN_KEYS: &[&str] = &[
 
 fn preset_from_dict(mut dict: BTreeMap<String, JobValue>, default_name: &str) -> PdfPreset {
     let mut p = PdfPreset::high_quality_print();
-    p.name = dict
-        .get("PresetName")
-        .and_then(JobValue::as_str)
-        .filter(|s| !s.is_empty())
-        .unwrap_or(default_name)
-        .to_string();
+    p.name = dict.get("PresetName").and_then(JobValue::as_str).filter(|s| !s.is_empty()).unwrap_or(default_name).to_string();
 
     if let Some(desc) = dict.get("Description") {
         match desc {
             JobValue::Str(s) => p.description = s.clone(),
             JobValue::Dict(d) => {
-                if let Some(s) = d
-                    .get("ENU")
-                    .or_else(|| d.get("KOR"))
-                    .or_else(|| d.values().next())
-                    .and_then(JobValue::as_str)
-                {
+                if let Some(s) = d.get("ENU").or_else(|| d.get("KOR")).or_else(|| d.values().next()).and_then(JobValue::as_str) {
                     p.description = s.to_string();
                 }
             }
@@ -351,11 +335,7 @@ fn preset_from_dict(mut dict: BTreeMap<String, JobValue>, default_name: &str) ->
     if let Some(JobValue::Array(items)) = dict.get("CheckCompliance") {
         for item in items {
             if let Some(name) = item.as_str() {
-                let norm: String = name
-                    .chars()
-                    .filter(char::is_ascii_alphanumeric)
-                    .collect::<String>()
-                    .to_ascii_lowercase();
+                let norm: String = name.chars().filter(char::is_ascii_alphanumeric).collect::<String>().to_ascii_lowercase();
                 if norm.starts_with("pdfx1a") {
                     p.standard = Standard::PdfX1a;
                 } else if norm.starts_with("pdfx3") {
@@ -375,10 +355,7 @@ fn preset_from_dict(mut dict: BTreeMap<String, JobValue>, default_name: &str) ->
             p.standard = Standard::PdfX3;
         } else if dict.get("PDFX4Check").and_then(JobValue::as_bool) == Some(true) {
             p.standard = Standard::PdfX4;
-        } else if dict
-            .get("PDFACompliance")
-            .is_some_and(|v| v.as_bool() == Some(true) || v.as_i64().unwrap_or(0) > 0)
-        {
+        } else if dict.get("PDFACompliance").is_some_and(|v| v.as_bool() == Some(true) || v.as_i64().unwrap_or(0) > 0) {
             p.standard = Standard::PdfA2b;
         }
     }
@@ -408,22 +385,14 @@ fn preset_from_dict(mut dict: BTreeMap<String, JobValue>, default_name: &str) ->
     if let Some(w) = dict.get("MarkWeight").and_then(JobValue::as_f64) {
         marks.weight = w.clamp(0.05, 10.0);
     }
-    if let Some(off) = dict
-        .get("PageMarksOffset")
-        .or_else(|| dict.get("BleedOffset"))
-        .and_then(JobValue::as_f64)
-    {
+    if let Some(off) = dict.get("PageMarksOffset").or_else(|| dict.get("BleedOffset")).and_then(JobValue::as_f64) {
         marks.offset = off.clamp(0.0, 72.0);
     }
     p.marks = marks;
     p.registration_marks = dict.get("RegistrationMarks").and_then(JobValue::as_bool).unwrap_or(false);
     p.color_bars = dict.get("ColorBars").and_then(JobValue::as_bool).unwrap_or(false);
 
-    if let Some(b) = dict
-        .get("CompressPages")
-        .or_else(|| dict.get("AutoCompress"))
-        .and_then(JobValue::as_bool)
-    {
+    if let Some(b) = dict.get("CompressPages").or_else(|| dict.get("AutoCompress")).and_then(JobValue::as_bool) {
         p.compress_pages = b;
     }
 
@@ -472,11 +441,8 @@ fn preset_from_dict(mut dict: BTreeMap<String, JobValue>, default_name: &str) ->
     if let Some(conv) = dict.get("ColorConversionStrategy").and_then(JobValue::as_str) {
         p.color_conversion = conv.to_string();
     }
-    if let Some(prof) = dict
-        .get("OutputIntentProfileName")
-        .or_else(|| dict.get("PDFXOutputIntentProfile"))
-        .and_then(JobValue::as_str)
-        .filter(|s| !s.is_empty())
+    if let Some(prof) =
+        dict.get("OutputIntentProfileName").or_else(|| dict.get("PDFXOutputIntentProfile")).and_then(JobValue::as_str).filter(|s| !s.is_empty())
     {
         p.output_intent_profile = Some(prof.to_string());
     }
@@ -535,10 +501,7 @@ pub fn write_joboptions(preset: &PdfPreset) -> String {
 
     dict.insert("CompressPages".into(), JobValue::Bool(preset.compress_pages));
     dict.insert("DownsampleColorImages".into(), JobValue::Bool(preset.compress_images));
-    dict.insert(
-        "ColorImageFilter".into(),
-        JobValue::Name(if preset.compress_images { "DCTEncode" } else { "FlateEncode" }.into()),
-    );
+    dict.insert("ColorImageFilter".into(), JobValue::Name(if preset.compress_images { "DCTEncode" } else { "FlateEncode" }.into()));
     dict.insert("ColorImageResolution".into(), JobValue::Int(i64::from(preset.color_image_dpi)));
     dict.insert("GrayImageResolution".into(), JobValue::Int(i64::from(preset.gray_image_dpi)));
     dict.insert("MonoImageResolution".into(), JobValue::Int(i64::from(preset.mono_image_dpi)));
@@ -851,10 +814,7 @@ impl<'a> PsParser<'a> {
 
 fn decode_ps_string_bytes(bytes: &[u8]) -> String {
     if let Some(rest) = bytes.strip_prefix(&[0xFE, 0xFF]) {
-        let u16s: Vec<u16> = rest
-            .chunks_exact(2)
-            .map(|c| u16::from_be_bytes([c[0], c[1]]))
-            .collect();
+        let u16s: Vec<u16> = rest.chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
         return String::from_utf16_lossy(&u16s);
     }
     match std::str::from_utf8(bytes) {

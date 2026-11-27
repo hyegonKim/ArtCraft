@@ -12,6 +12,7 @@
 
 pub mod comments;
 pub mod html;
+pub mod icml;
 pub mod latex;
 pub mod markdown;
 pub mod mathml;
@@ -30,9 +31,8 @@ use wordcraft_doc::Document;
 pub const MAX_ZIP_ENTRIES: u64 = 20_000;
 
 /// Extensions this crate handles.
-pub const EXTENSIONS: &[&str] = &[
-    "txt", "text", "md", "markdown", "html", "htm", "xhtml", "mht", "mhtml", "rtf", "odt", "ott", "fodt", "pdf", "tex", "latex", "ltx",
-];
+pub const EXTENSIONS: &[&str] =
+    &["txt", "text", "md", "markdown", "html", "htm", "xhtml", "mht", "mhtml", "rtf", "odt", "ott", "fodt", "pdf", "tex", "latex", "ltx", "icml"];
 
 /// Import `bytes` in the format named by `ext` (no dot, any case). `None` = not our format.
 pub fn import(ext: &str, bytes: &[u8]) -> Option<Result<Document, String>> {
@@ -47,6 +47,7 @@ pub fn import(ext: &str, bytes: &[u8]) -> Option<Result<Document, String>> {
         "fodt" => odt::import_flat(bytes),
         "pdf" => pdf_reflow::import(bytes),
         "tex" | "latex" | "ltx" => Ok(latex::import(bytes)),
+        "icml" => icml::import(bytes),
         _ => return None,
     };
     Some(r.map(|mut d| {
@@ -64,6 +65,7 @@ pub fn import_on(ext: &str, bytes: &[u8], page: &wordcraft_doc::SectionProps) ->
         "odt" | "ott" => return Some(odt::import_on(bytes, page)),
         "fodt" => return Some(odt::import_flat_on(bytes, page)),
         "pdf" => return Some(pdf_reflow::import_on(bytes, page)),
+        "icml" => return Some(icml::import_on(bytes, page)),
         "txt" | "text" => txt::import_on(bytes, page),
         "md" | "markdown" => markdown::import_on(&txt::decode(bytes), page),
         "html" | "htm" | "xhtml" => html::import_on(&html::decode(bytes), &|_| None, page),
@@ -86,6 +88,7 @@ pub fn export(ext: &str, doc: &Document) -> Option<Result<Vec<u8>, String>> {
         "ott" => odt::export_template(doc),
         "fodt" => odt::export_flat(doc),
         "tex" | "latex" | "ltx" => Ok(latex::export(doc).into_bytes()),
+        "icml" => Ok(icml::export(doc).into_bytes()),
         _ => return None,
     })
 }

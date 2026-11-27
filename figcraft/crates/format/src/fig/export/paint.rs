@@ -99,10 +99,7 @@ impl<'d> Exporter<'d> {
             }
             PaintKind::Video(vid) => {
                 let video_hash = self.video(&vid.video);
-                let poster_key = vid
-                    .poster
-                    .as_deref()
-                    .or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()));
+                let poster_key = vid.poster.as_deref().or_else(|| self.doc.videos.get(&vid.video).and_then(|v| v.poster.as_deref()));
                 let thumb_hash = poster_key.map(|k| self.image(k)).unwrap_or_default();
                 let mode = match vid.scale_mode {
                     ImageScaleMode::Fill => "FILL",

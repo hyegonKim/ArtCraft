@@ -7,8 +7,8 @@ use std::{borrow::Cow, sync::Arc};
 use super::{CommandSpec, bad, cmd, has_doc, str_param};
 use crate::{EngineError, Result, Session};
 
-mod flatten;
 pub(crate) mod fixed_epub;
+mod flatten;
 mod formats;
 mod pdf;
 mod registry;

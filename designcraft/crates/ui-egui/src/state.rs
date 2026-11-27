@@ -79,6 +79,16 @@ pub enum ScreenMode {
     Presentation,
 }
 
+/// InCopy-style editorial view mode (`Layout`, `Story`, or `Galley`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum EditorialViewMode {
+    #[default]
+    Layout,
+    Story,
+    Galley,
+}
+
 /// A saved workspace: which bars show and where the panels are.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -233,6 +243,9 @@ pub struct UiState {
     pub story_editor_size: f32,
     /// View › Story Editor › Show/Hide Depth Ruler.
     pub story_editor_depth_ruler: bool,
+    /// View › Story Editor › Editorial Mode (`Layout` / `Story` / `Galley`).
+    #[serde(default)]
+    pub editorial_view: EditorialViewMode,
     /// The Color Picker's component (its radio button, as `PickComp::key`: `h`, `s`, `b`, `l`,
     /// `la`, `lb`, `r`, `g`, `bl`), kept between openings and sessions, as Photoshop's picker is.
     pub color_picker_component: String,
@@ -411,6 +424,7 @@ impl Default for UiState {
             show_full_menus: false,
             story_editor_size: 14.0,
             story_editor_depth_ruler: true,
+            editorial_view: EditorialViewMode::Layout,
             color_picker_component: "r".into(),
             scripts: vec![
                 ("Number the pages".into(), "# A page-number frame at the bottom of the current page.\nframe.create {\"rect\": [288, 740, 324, 760], \"content\": \"text\", \"text\": \"\"}\ntext.select {\"story\": \"$0.story\", \"anchor\": 0, \"focus\": 0}\ntext.insert {\"text\": \"\\ue000\", \"raw\": true}".into()),

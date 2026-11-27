@@ -1100,11 +1100,7 @@ impl Automation {
         };
         let doc = self.doc(a)?;
         let summary = doc.summarize(pages_opt.as_deref(), max_points).map_err(failed)?;
-        let points: Vec<Value> = summary
-            .points
-            .iter()
-            .map(|p| json!({ "page": p.page_number(), "text": p.text, "score": p.score_milli }))
-            .collect();
+        let points: Vec<Value> = summary.points.iter().map(|p| json!({ "page": p.page_number(), "text": p.text, "score": p.score_milli })).collect();
         Ok(json!({
             "page_count": summary.page_count,
             "pages_without_text": summary.pages_without_text,

@@ -94,6 +94,7 @@ pub enum ChangeMark {
     None,
     Inserted,
     Deleted,
+    Moved,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]

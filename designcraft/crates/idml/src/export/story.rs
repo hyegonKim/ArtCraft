@@ -97,12 +97,19 @@ impl<'a> Ex<'a> {
 
     // ---------- stories ----------
 
-    pub(super) fn story_el(&mut self, s: &Story) -> El {
+    pub(crate) fn story_el(&mut self, s: &Story) -> El {
         let toc = self.d.toc.as_ref().is_some_and(|t| t.story == s.id);
+        let has_changes = self.d.settings.track_changes
+            || s.chars.iter().any(|r| {
+                matches!(
+                    r.format.over.change,
+                    Some(designcraft_doc::ChangeMark::Inserted | designcraft_doc::ChangeMark::Deleted | designcraft_doc::ChangeMark::Moved)
+                )
+            });
         let mut el = El::new("Story")
             .attr("Self", uid(s.id.0))
             .attr("AppliedTOCStyle", if toc { TOC_STYLE_ID } else { "n" })
-            .attr("TrackChanges", "false")
+            .attr("TrackChanges", if has_changes { "true" } else { "false" })
             .attr("StoryTitle", "$ID/");
         el.push(crate::xml::from_craft(
             craft_idml::model::StoryPreference {

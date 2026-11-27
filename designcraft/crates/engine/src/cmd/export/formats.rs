@@ -256,13 +256,7 @@ pub(super) fn export_epub(s: &mut Session, p: &Value) -> Result<Value> {
     };
     if fixed {
         let embed_fixed_fonts = p.get("embedFonts").and_then(Value::as_bool).unwrap_or(true);
-        let mut builder = super::fixed_epub::FixedSceneBuilder::new(
-            epub_doc,
-            &s.cache,
-            &mut warnings,
-            0,
-            epub_doc.page_count(),
-        );
+        let mut builder = super::fixed_epub::FixedSceneBuilder::new(epub_doc, &s.cache, &mut warnings, 0, epub_doc.page_count());
         let pages = builder.build_all_pages();
         if embed_fixed_fonts {
             opts.fonts = builder.collect_embedded_fonts();
@@ -276,14 +270,15 @@ pub(super) fn export_epub(s: &mut Session, p: &Value) -> Result<Value> {
                 opts.cover = Some(png);
             }
         }
-        let bytes = designcraft_epub::export_fixed_epub_scene(epub_doc, &pages, &opts)
-            .map_err(|e| crate::EngineError::Other(e.to_string()))?;
+        let bytes = designcraft_epub::export_fixed_epub_scene(epub_doc, &pages, &opts).map_err(|e| crate::EngineError::Other(e.to_string()))?;
         return match p.get("path").and_then(Value::as_str) {
             Some(path) => {
                 write_file(path, &bytes)?;
                 Ok(serde_json::json!({"path": path, "bytes": bytes.len(), "pages": pages.len(), "warnings": warnings}))
             }
-            None => Ok(serde_json::json!({"base64": crate::cmd::base64_encode(&bytes), "bytes": bytes.len(), "pages": pages.len(), "warnings": warnings})),
+            None => {
+                Ok(serde_json::json!({"base64": crate::cmd::base64_encode(&bytes), "bytes": bytes.len(), "pages": pages.len(), "warnings": warnings}))
+            }
         };
     }
     let (epub_doc, eps_warnings) = eps_previews(epub_doc);
@@ -405,16 +400,9 @@ mod pptx_tests {
     fn fixed_epub_emits_true_html5_css3_scene_graph() {
         let mut s = Session::new();
         s.execute("file.newSample", &json!({})).unwrap();
-        let oval = s
-            .execute("frame.create", &json!({"rect": [50, 50, 150, 120], "shape": "ellipse"}))
-            .unwrap()["id"]
-            .clone();
+        let oval = s.execute("frame.create", &json!({"rect": [50, 50, 150, 120], "shape": "ellipse"})).unwrap()["id"].clone();
         s.execute("object.fill", &json!({"swatch": "[Black]", "ids": [oval]})).unwrap();
-        s.execute(
-            "hyperlink.create",
-            &json!({"ids": [oval], "url": "https://example.org/designcraft"}),
-        )
-        .unwrap();
+        s.execute("hyperlink.create", &json!({"ids": [oval], "url": "https://example.org/designcraft"})).unwrap();
 
         let r = s.execute("file.exportFixedEpub", &json!({"language": "ko"})).unwrap();
         assert_eq!(r["pages"], 4);
@@ -434,12 +422,8 @@ mod pptx_tests {
         assert!(!p1.contains("pages/p1.png"), "not a flat full-page PNG screenshot: {p1}");
 
         let p2 = read(&mut z, "OEBPS/page2.xhtml");
-        let span_text: String = p2
-            .split("class=\"dc-span\"")
-            .skip(1)
-            .filter_map(|part| part.split('>').nth(1))
-            .filter_map(|part| part.split('<').next())
-            .collect();
+        let span_text: String =
+            p2.split("class=\"dc-span\"").skip(1).filter_map(|part| part.split('>').nth(1)).filter_map(|part| part.split('<').next()).collect();
         assert!(span_text.contains("Notes on the Grid"), "live selectable text spans: {span_text}");
     }
 }

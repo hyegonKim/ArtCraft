@@ -12,17 +12,9 @@ pub(crate) fn snippet_bytes(s: &mut Session) -> Result<Vec<u8>> {
 pub(super) fn snippet_export(s: &mut Session, p: &Value) -> Result<Value> {
     let d = crate::cmd::edit::clip_doc(s)?;
     let want_idms = str_param(p, "format").is_some_and(|f| f.eq_ignore_ascii_case("idms"))
-        || str_param(p, "path").is_some_and(|pt| {
-            std::path::Path::new(pt)
-                .extension()
-                .and_then(std::ffi::OsStr::to_str)
-                .is_some_and(|e| e.eq_ignore_ascii_case("idms"))
-        });
-    let bytes = if want_idms {
-        designcraft_idml::export_snippet(&d)
-    } else {
-        to_bytes(&d)?
-    };
+        || str_param(p, "path")
+            .is_some_and(|pt| std::path::Path::new(pt).extension().and_then(std::ffi::OsStr::to_str).is_some_and(|e| e.eq_ignore_ascii_case("idms")));
+    let bytes = if want_idms { designcraft_idml::export_snippet(&d) } else { to_bytes(&d)? };
     match str_param(p, "path") {
         Some(path) => {
             #[cfg(not(target_arch = "wasm32"))]

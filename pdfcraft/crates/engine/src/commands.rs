@@ -424,6 +424,7 @@ pub const COMMANDS: &[CommandSpec] = &[
     c("page.extract", "Extract pages…", PAGES, None, PageExtraction, "file-output"),
     c("page.split", "Split document…", PAGES, None, PageExtraction, "scissors"),
     c("page.number", "Number pages…", PAGES, None, Assembly, "hash"),
+    c("prepress.output_preview", "Output preview…", VIEW, None, Document, "layers"),
     c("prepress.marks", "Add printer marks…", None, None, Modification, "ruler"),
     c("prepress.marks.remove", "Remove printer marks", None, None, Marks(crate::MarkKind::PrinterMarks), "ruler"),
     c("prepress.convert_colors", "Convert colours…", None, None, Modification, "palette"),

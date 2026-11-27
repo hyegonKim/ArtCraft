@@ -13,23 +13,20 @@ use crate::export::{ExportOptions, export_parts_with};
 use crate::xml::{El, Node, document, from_craft, parse};
 use crate::{IdmlError, Result, import_idml_with};
 
-const AID_SNIPPET_PI: &str =
-    "<?aid style=\"50\" type=\"snippet\" readerVersion=\"6.0\" featureSet=\"257\" product=\"20.4(32)\" ?>\n";
+const AID_SNIPPET_PI: &str = "<?aid style=\"50\" type=\"snippet\" readerVersion=\"6.0\" featureSet=\"257\" product=\"20.4(32)\" ?>\n";
 
 /// Returns `true` when `bytes` begins with an XML InDesign Snippet (`.idms`).
 pub fn is_idms(bytes: &[u8]) -> bool {
+    if crate::icml::is_icml(bytes) || crate::icml::is_icma(bytes) {
+        return false;
+    }
     let trimmed = bytes.trim_ascii_start();
-    if !(trimmed.starts_with(b"<?xml")
-        || trimmed.starts_with(b"<?aid")
-        || trimmed.starts_with(b"<Document"))
-    {
+    if !(trimmed.starts_with(b"<?xml") || trimmed.starts_with(b"<?aid") || trimmed.starts_with(b"<Document")) {
         return false;
     }
     let head_len = trimmed.len().min(4096);
     let head = String::from_utf8_lossy(&trimmed[..head_len]);
-    head.contains("type=\"snippet\"")
-        || head.contains("type='snippet'")
-        || head.contains("SnippetType=")
+    head.contains("type=\"snippet\"") || head.contains("type='snippet'") || head.contains("SnippetType=")
 }
 
 /// Export `doc` as a single-file `.idms` XML snippet with embedded images.
@@ -40,10 +37,7 @@ pub fn export_snippet(doc: &Document) -> Vec<u8> {
 /// Export `doc` as a single-file `.idms` XML snippet with `opts`.
 pub fn export_snippet_with(doc: &Document, opts: &ExportOptions) -> Vec<u8> {
     let parts = export_parts_with(doc, opts);
-    let part_map: HashMap<&str, &[u8]> = parts
-        .iter()
-        .map(|(name, data)| (name.as_str(), data.as_slice()))
-        .collect();
+    let part_map: HashMap<&str, &[u8]> = parts.iter().map(|(name, data)| (name.as_str(), data.as_slice())).collect();
 
     let Some(dm_bytes) = part_map.get("designmap.xml") else {
         return Vec::new();
@@ -98,16 +92,10 @@ pub fn import_snippet(bytes: &[u8]) -> Result<Document> {
 }
 
 /// Import an `.idms` XML snippet with custom external link resolution.
-pub fn import_snippet_with(
-    bytes: &[u8],
-    read_link: &dyn Fn(&str) -> Option<Vec<u8>>,
-) -> Result<Document> {
+pub fn import_snippet_with(bytes: &[u8], read_link: &dyn Fn(&str) -> Option<Vec<u8>>) -> Result<Document> {
     let root = parse(bytes).map_err(IdmlError::Invalid)?;
     if root.local() != "Document" {
-        return Err(IdmlError::Invalid(format!(
-            "expected <Document> root in .idms snippet, found <{}>",
-            root.name
-        )));
+        return Err(IdmlError::Invalid(format!("expected <Document> root in .idms snippet, found <{}>", root.name)));
     }
 
     let pkg_wrap = |kind: &str, children: Vec<El>| -> Vec<u8> {
@@ -135,12 +123,15 @@ pub fn import_snippet_with(
     for node in root.children {
         let Node::El(mut el) = node else { continue };
         match el.local() {
-            "Color" | "Ink" | "MixedInk" | "MixedInkGroup" | "Swatch" | "Gradient"
-            | "Tint" | "StrokeStyle" | "DashedStrokeStyle" | "DottedStrokeStyle"
-            | "StripedStrokeStyle" | "PastedSmoothShade" => graphic_els.push(el),
+            "Color" | "Ink" | "MixedInk" | "MixedInkGroup" | "Swatch" | "Gradient" | "Tint" | "StrokeStyle" | "DashedStrokeStyle"
+            | "DottedStrokeStyle" | "StripedStrokeStyle" | "PastedSmoothShade" => graphic_els.push(el),
             "FontFamily" | "CompositeFont" => font_els.push(el),
-            "RootCharacterStyleGroup" | "RootParagraphStyleGroup" | "RootObjectStyleGroup"
-            | "RootCellStyleGroup" | "RootTableStyleGroup" | "TOCStyle" => style_els.push(el),
+            "RootCharacterStyleGroup"
+            | "RootParagraphStyleGroup"
+            | "RootObjectStyleGroup"
+            | "RootCellStyleGroup"
+            | "RootTableStyleGroup"
+            | "TOCStyle" => style_els.push(el),
             m if m.ends_with("Preference") || m == "FrameFittingOption" || m == "AnchoredObjectSetting" => {
                 pref_els.push(el);
             }
@@ -167,22 +158,14 @@ pub fn import_snippet_with(
 
     if !has_layer {
         dm_children.push(
-            El::new("Layer")
-                .attr("Self", "ub")
-                .attr("Name", "Layer 1")
-                .attr("Visible", "true")
-                .attr("Locked", "false")
-                .attr("Printable", "true"),
+            El::new("Layer").attr("Self", "ub").attr("Name", "Layer 1").attr("Visible", "true").attr("Locked", "false").attr("Printable", "true"),
         );
     }
 
     let mut story_ids = Vec::new();
     let mut story_parts = Vec::new();
     for (idx, st_el) in story_els.into_iter().enumerate() {
-        let sid = st_el
-            .get("Self")
-            .map(ToString::to_string)
-            .unwrap_or_else(|| format!("u_st_{idx}"));
+        let sid = st_el.get("Self").map(ToString::to_string).unwrap_or_else(|| format!("u_st_{idx}"));
         story_ids.push(sid.clone());
         let path = format!("Stories/Story_{sid}.xml");
         story_parts.push((path, pkg_wrap("Story", vec![st_el])));
@@ -190,31 +173,19 @@ pub fn import_snippet_with(
 
     let mut master_parts = Vec::new();
     for (idx, ms_el) in master_els.into_iter().enumerate() {
-        let mid = ms_el
-            .get("Self")
-            .map(ToString::to_string)
-            .unwrap_or_else(|| format!("u_ms_{idx}"));
+        let mid = ms_el.get("Self").map(ToString::to_string).unwrap_or_else(|| format!("u_ms_{idx}"));
         let path = format!("MasterSpreads/MasterSpread_{mid}.xml");
         master_parts.push((path, pkg_wrap("MasterSpread", vec![ms_el])));
     }
 
     let mut spread_parts = Vec::new();
     for (idx, sp_el) in spread_els.into_iter().enumerate() {
-        let spid = sp_el
-            .get("Self")
-            .map(ToString::to_string)
-            .unwrap_or_else(|| format!("u_sp_{idx}"));
+        let spid = sp_el.get("Self").map(ToString::to_string).unwrap_or_else(|| format!("u_sp_{idx}"));
         let path = format!("Spreads/Spread_{spid}.xml");
         spread_parts.push((path, pkg_wrap("Spread", vec![sp_el])));
     }
 
-    let mut dm = from_craft(craft_idml::designmap_root(
-        "d",
-        &story_ids.join(" "),
-        &doc_name,
-        &zero_point,
-        &active_layer,
-    ));
+    let mut dm = from_craft(craft_idml::designmap_root("d", &story_ids.join(" "), &doc_name, &zero_point, &active_layer));
     for c in dm_children {
         dm.push(c);
     }
@@ -244,8 +215,7 @@ pub fn import_snippet_with(
     parts.extend(spread_parts);
     parts.extend(story_parts);
 
-    let zip_bytes = craft_idml::write_package(&parts)
-        .map_err(|e| IdmlError::Invalid(format!("failed to stage .idms package: {e}")))?;
+    let zip_bytes = craft_idml::write_package(&parts).map_err(|e| IdmlError::Invalid(format!("failed to stage .idms package: {e}")))?;
     import_idml_with(&zip_bytes, read_link)
 }
 
@@ -261,14 +231,7 @@ mod tests {
     fn snippet_idms_round_trips_text_and_geometry() {
         let mut doc = Document::new(&NewDocument::default());
         let layer = doc.default_layer();
-        doc.add_text_frame(
-            SpreadRef::Doc(0),
-            Rect::new(90.0, 120.0, 310.0, 200.0),
-            layer,
-            "Reusable Callout Card",
-            ParaFormat::default(),
-        )
-        .unwrap();
+        doc.add_text_frame(SpreadRef::Doc(0), Rect::new(90.0, 120.0, 310.0, 200.0), layer, "Reusable Callout Card", ParaFormat::default()).unwrap();
 
         let idms_bytes = export_snippet(&doc);
         assert!(is_idms(&idms_bytes));

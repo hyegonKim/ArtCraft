@@ -583,11 +583,7 @@ fn write_prop_wrapper(writer: &mut Writer<Vec<u8>>, tag: &[u8], inner: &[u8]) {
 }
 
 fn parse_raw_rev(e: &quick_xml::events::BytesStart<'_>) -> RawRev {
-    RawRev {
-        id: attr_value(e, b"id"),
-        author: attr_value(e, b"author").unwrap_or_default(),
-        date: attr_value(e, b"date").unwrap_or_default(),
-    }
+    RawRev { id: attr_value(e, b"id"), author: attr_value(e, b"author").unwrap_or_default(), date: attr_value(e, b"date").unwrap_or_default() }
 }
 
 fn attr_value(e: &quick_xml::events::BytesStart<'_>, key_local: &[u8]) -> Option<String> {

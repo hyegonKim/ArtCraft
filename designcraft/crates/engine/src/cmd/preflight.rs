@@ -161,35 +161,19 @@ impl PreflightProfile {
     }
 
     pub fn builtins() -> Vec<Self> {
-        vec![
-            Self::basic(),
-            Self::digital_publishing(),
-            Self::press_quality_cmyk(),
-            Self::pdfx1a(),
-            Self::pdfx3(),
-            Self::pdfx4(),
-        ]
+        vec![Self::basic(), Self::digital_publishing(), Self::press_quality_cmyk(), Self::pdfx1a(), Self::pdfx3(), Self::pdfx4()]
     }
 }
 
 /// Resolves `name` (or the session's active profile when `None`) against custom + built-in profiles.
 pub fn resolve_profile(s: &Session, name: Option<&str>) -> Option<PreflightProfile> {
     let target = name.unwrap_or(&s.active_preflight_profile);
-    s.preflight_profiles
-        .iter()
-        .find(|p| p.name == target)
-        .cloned()
-        .or_else(|| PreflightProfile::builtins().into_iter().find(|p| p.name == target))
+    s.preflight_profiles.iter().find(|p| p.name == target).cloned().or_else(|| PreflightProfile::builtins().into_iter().find(|p| p.name == target))
 }
 
 /// Serializes a [`PreflightProfile`] to InDesign `.idpp` XML.
 pub fn profile_to_idpp_xml(p: &PreflightProfile) -> String {
-    let esc = |s: &str| {
-        s.replace('&', "&amp;")
-            .replace('<', "&lt;")
-            .replace('>', "&gt;")
-            .replace('"', "&quot;")
-    };
+    let esc = |s: &str| s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;");
     format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\
          <?aid style=\"50\" type=\"preflightProfile\" readerVersion=\"6.0\" featureSet=\"257\" product=\"20.0\"?>\n\
@@ -241,8 +225,7 @@ pub fn write_idpp_bytes(p: &PreflightProfile) -> Vec<u8> {
 pub fn parse_idpp_bytes(bytes: &[u8], fallback_name: &str) -> std::result::Result<PreflightProfile, String> {
     let xml = if bytes.starts_with(b"PK\x03\x04") {
         use std::io::Read as _;
-        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
-            .map_err(|e| format!("invalid .idpp archive: {e}"))?;
+        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(|e| format!("invalid .idpp archive: {e}"))?;
         let mut found = None;
         for idx in 0..archive.len() {
             let mut file = archive.by_index(idx).map_err(|e| format!("invalid .idpp entry: {e}"))?;
@@ -271,10 +254,7 @@ pub fn parse_idpp_xml(xml: &str, fallback_name: &str) -> std::result::Result<Pre
         el.attrs.iter().find(|(name, _)| name == k).map(|(_, val)| val.as_str())
     }
     let mut p = PreflightProfile::basic();
-    p.name = attr(&root, "Name")
-        .filter(|s| !s.trim().is_empty())
-        .unwrap_or(fallback_name)
-        .to_string();
+    p.name = attr(&root, "Name").filter(|s| !s.trim().is_empty()).unwrap_or(fallback_name).to_string();
     if let Some(desc) = attr(&root, "Description") {
         p.description = desc.to_string();
     }
@@ -382,144 +362,144 @@ pub fn specs() -> Vec<CommandSpec> {
             "{minPpi?: 150, profile?: str, pages?: \"1-3,5\" | [1,3]} → {profile, errors, warnings, issues: [{severity, category, kind, message, fix, item?, page?}]}",
             has_doc, run),
         cmd!(query "preflight.profiles", "Preflight Profiles", ["Window", "Output"], None,
-            "{} → {active, profiles: [{name, description, builtin, minPpi, ...}]}",
-            always, |s, _| {
-                let mut list = Vec::new();
-                for p in PreflightProfile::builtins() {
-                    let mut v = serde_json::to_value(&p).unwrap_or_default();
-                    if let Some(obj) = v.as_object_mut() {
-                        obj.insert("builtin".into(), Value::Bool(true));
-                    }
-                    list.push(v);
+        "{} → {active, profiles: [{name, description, builtin, minPpi, ...}]}",
+        always, |s, _| {
+            let mut list = Vec::new();
+            for p in PreflightProfile::builtins() {
+                let mut v = serde_json::to_value(&p).unwrap_or_default();
+                if let Some(obj) = v.as_object_mut() {
+                    obj.insert("builtin".into(), Value::Bool(true));
                 }
-                for p in &s.preflight_profiles {
-                    let mut v = serde_json::to_value(p).unwrap_or_default();
-                    if let Some(obj) = v.as_object_mut() {
-                        obj.insert("builtin".into(), Value::Bool(false));
-                    }
-                    list.push(v);
+                list.push(v);
+            }
+            for p in &s.preflight_profiles {
+                let mut v = serde_json::to_value(p).unwrap_or_default();
+                if let Some(obj) = v.as_object_mut() {
+                    obj.insert("builtin".into(), Value::Bool(false));
                 }
-                Ok(json!({"active": s.active_preflight_profile, "profiles": list}))
-            }),
+                list.push(v);
+            }
+            Ok(json!({"active": s.active_preflight_profile, "profiles": list}))
+        }),
         cmd!(noundo "preflight.setProfile", "Select Preflight Profile", [], None,
-            "{name} → {active}",
-            always, |s, p| {
-                let name = str_param(p, "name").ok_or_else(|| bad("preflight.setProfile", "`name` required"))?;
-                if resolve_profile(s, Some(name)).is_none() {
-                    return Err(bad("preflight.setProfile", format!("unknown preflight profile `{name}`")));
-                }
-                s.active_preflight_profile = name.to_string();
-                Ok(json!({"active": s.active_preflight_profile}))
-            }),
+        "{name} → {active}",
+        always, |s, p| {
+            let name = str_param(p, "name").ok_or_else(|| bad("preflight.setProfile", "`name` required"))?;
+            if resolve_profile(s, Some(name)).is_none() {
+                return Err(bad("preflight.setProfile", format!("unknown preflight profile `{name}`")));
+            }
+            s.active_preflight_profile = name.to_string();
+            Ok(json!({"active": s.active_preflight_profile}))
+        }),
         cmd!(noundo "preflight.saveProfile", "Define Preflight Profile…", [], None,
-            "{name, description?, checkLinks?, checkModifiedLinks?, checkOverset?, checkMissingFonts?, checkMissingGlyphs?, checkEmptyText?, minPpi?, checkBleed?, safeMarginPt?, disallowRgb?, rgbIsError?, disallowSpot?, checkRegistration?, checkWhiteOverprint?, checkNonProportionalScaling?, minStrokePt?, disallowTransparency?} → {profile}",
-            always, |s, p| {
-                let name = str_param(p, "name").filter(|n| !n.trim().is_empty()).ok_or_else(|| bad("preflight.saveProfile", "`name` required"))?.to_string();
-                if PreflightProfile::builtins().iter().any(|b| b.name == name) {
-                    return Err(bad("preflight.saveProfile", format!("cannot overwrite built-in profile `{name}`")));
-                }
-                let mut prof: PreflightProfile = serde_json::from_value(p.clone()).map_err(|e| bad("preflight.saveProfile", e.to_string()))?;
-                prof.name = name;
-                let js = serde_json::to_value(&prof).unwrap_or_default();
-                if let Some(existing) = s.preflight_profiles.iter_mut().find(|x| x.name == prof.name) {
-                    *existing = prof;
-                } else {
-                    s.preflight_profiles.push(prof);
-                }
-                Ok(json!({"profile": js}))
-            }),
+        "{name, description?, checkLinks?, checkModifiedLinks?, checkOverset?, checkMissingFonts?, checkMissingGlyphs?, checkEmptyText?, minPpi?, checkBleed?, safeMarginPt?, disallowRgb?, rgbIsError?, disallowSpot?, checkRegistration?, checkWhiteOverprint?, checkNonProportionalScaling?, minStrokePt?, disallowTransparency?} → {profile}",
+        always, |s, p| {
+            let name = str_param(p, "name").filter(|n| !n.trim().is_empty()).ok_or_else(|| bad("preflight.saveProfile", "`name` required"))?.to_string();
+            if PreflightProfile::builtins().iter().any(|b| b.name == name) {
+                return Err(bad("preflight.saveProfile", format!("cannot overwrite built-in profile `{name}`")));
+            }
+            let mut prof: PreflightProfile = serde_json::from_value(p.clone()).map_err(|e| bad("preflight.saveProfile", e.to_string()))?;
+            prof.name = name;
+            let js = serde_json::to_value(&prof).unwrap_or_default();
+            if let Some(existing) = s.preflight_profiles.iter_mut().find(|x| x.name == prof.name) {
+                *existing = prof;
+            } else {
+                s.preflight_profiles.push(prof);
+            }
+            Ok(json!({"profile": js}))
+        }),
         cmd!(noundo "preflight.deleteProfile", "Delete Preflight Profile", [], None,
-            "{name} → {deleted}",
-            always, |s, p| {
-                let name = str_param(p, "name").ok_or_else(|| bad("preflight.deleteProfile", "`name` required"))?;
-                let before = s.preflight_profiles.len();
-                s.preflight_profiles.retain(|x| x.name != name);
-                if s.active_preflight_profile == name {
-                    s.active_preflight_profile = "[Basic]".into();
-                }
-                Ok(json!({"deleted": s.preflight_profiles.len() < before}))
-            }),
+        "{name} → {deleted}",
+        always, |s, p| {
+            let name = str_param(p, "name").ok_or_else(|| bad("preflight.deleteProfile", "`name` required"))?;
+            let before = s.preflight_profiles.len();
+            s.preflight_profiles.retain(|x| x.name != name);
+            if s.active_preflight_profile == name {
+                s.active_preflight_profile = "[Basic]".into();
+            }
+            Ok(json!({"deleted": s.preflight_profiles.len() < before}))
+        }),
         cmd!(noundo "preflight.importProfile", "Load Preflight Profile (.idpp)…", [], None,
-            "{path?, base64?, xml?, name?} → {profile}",
-            always, |s, p| {
-                let fallback = str_param(p, "name")
-                    .or_else(|| str_param(p, "path").and_then(|pt| std::path::Path::new(pt).file_stem().and_then(|st| st.to_str())))
-                    .unwrap_or("Imported Profile");
-                let mut prof = if let Some(xml) = str_param(p, "xml") {
-                    parse_idpp_xml(xml, fallback).map_err(|e| bad("preflight.importProfile", e))?
-                } else if let Some(b64) = str_param(p, "base64") {
-                    let bytes = super::file::base64_decode(b64);
-                    parse_idpp_bytes(&bytes, fallback).map_err(|e| bad("preflight.importProfile", e))?
-                } else if let Some(path) = str_param(p, "path") {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    let bytes = crate::io::read_file(path).map_err(EngineError::Other)?;
-                    #[cfg(target_arch = "wasm32")]
-                    let bytes: Vec<u8> = {
-                        let _ = path;
-                        return Err(EngineError::Other("importing .idpp from disk requires a file system".into()));
-                    };
-                    parse_idpp_bytes(&bytes, fallback).map_err(|e| bad("preflight.importProfile", e))?
-                } else {
-                    return Err(bad("preflight.importProfile", "`path`, `base64`, or `xml` required"));
+        "{path?, base64?, xml?, name?} → {profile}",
+        always, |s, p| {
+            let fallback = str_param(p, "name")
+                .or_else(|| str_param(p, "path").and_then(|pt| std::path::Path::new(pt).file_stem().and_then(|st| st.to_str())))
+                .unwrap_or("Imported Profile");
+            let mut prof = if let Some(xml) = str_param(p, "xml") {
+                parse_idpp_xml(xml, fallback).map_err(|e| bad("preflight.importProfile", e))?
+            } else if let Some(b64) = str_param(p, "base64") {
+                let bytes = super::file::base64_decode(b64);
+                parse_idpp_bytes(&bytes, fallback).map_err(|e| bad("preflight.importProfile", e))?
+            } else if let Some(path) = str_param(p, "path") {
+                #[cfg(not(target_arch = "wasm32"))]
+                let bytes = crate::io::read_file(path).map_err(EngineError::Other)?;
+                #[cfg(target_arch = "wasm32")]
+                let bytes: Vec<u8> = {
+                    let _ = path;
+                    return Err(EngineError::Other("importing .idpp from disk requires a file system".into()));
                 };
-                if let Some(explicit) = str_param(p, "name").filter(|n| !n.trim().is_empty()) {
-                    prof.name = explicit.to_string();
-                }
-                if PreflightProfile::builtins().iter().any(|b| b.name == prof.name) {
-                    prof.name = format!("{} (Imported)", prof.name);
-                }
-                let js = serde_json::to_value(&prof).unwrap_or_default();
-                if let Some(existing) = s.preflight_profiles.iter_mut().find(|x| x.name == prof.name) {
-                    *existing = prof;
-                } else {
-                    s.preflight_profiles.push(prof);
-                }
-                Ok(json!({"profile": js}))
-            }),
+                parse_idpp_bytes(&bytes, fallback).map_err(|e| bad("preflight.importProfile", e))?
+            } else {
+                return Err(bad("preflight.importProfile", "`path`, `base64`, or `xml` required"));
+            };
+            if let Some(explicit) = str_param(p, "name").filter(|n| !n.trim().is_empty()) {
+                prof.name = explicit.to_string();
+            }
+            if PreflightProfile::builtins().iter().any(|b| b.name == prof.name) {
+                prof.name = format!("{} (Imported)", prof.name);
+            }
+            let js = serde_json::to_value(&prof).unwrap_or_default();
+            if let Some(existing) = s.preflight_profiles.iter_mut().find(|x| x.name == prof.name) {
+                *existing = prof;
+            } else {
+                s.preflight_profiles.push(prof);
+            }
+            Ok(json!({"profile": js}))
+        }),
         cmd!(noundo "preflight.exportProfile", "Save Preflight Profile (.idpp)…", [], None,
-            "{name?, path?} → {path?, base64, xml, bytes}",
-            always, |s, p| {
-                let prof = resolve_profile(s, str_param(p, "name"))
-                    .ok_or_else(|| bad("preflight.exportProfile", "unknown preflight profile"))?;
-                let xml = profile_to_idpp_xml(&prof);
-                let bytes = write_idpp_bytes(&prof);
-                if let Some(path) = str_param(p, "path") {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    crate::io::write_file(path, &bytes).map_err(EngineError::Other)?;
-                    Ok(json!({"path": path, "base64": super::file::base64_encode(&bytes), "xml": xml, "bytes": bytes.len()}))
-                } else {
-                    Ok(json!({"base64": super::file::base64_encode(&bytes), "xml": xml, "bytes": bytes.len()}))
-                }
-            }),
+        "{name?, path?} → {path?, base64, xml, bytes}",
+        always, |s, p| {
+            let prof = resolve_profile(s, str_param(p, "name"))
+                .ok_or_else(|| bad("preflight.exportProfile", "unknown preflight profile"))?;
+            let xml = profile_to_idpp_xml(&prof);
+            let bytes = write_idpp_bytes(&prof);
+            if let Some(path) = str_param(p, "path") {
+                #[cfg(not(target_arch = "wasm32"))]
+                crate::io::write_file(path, &bytes).map_err(EngineError::Other)?;
+                Ok(json!({"path": path, "base64": super::file::base64_encode(&bytes), "xml": xml, "bytes": bytes.len()}))
+            } else {
+                Ok(json!({"base64": super::file::base64_encode(&bytes), "xml": xml, "bytes": bytes.len()}))
+            }
+        }),
         cmd!(noundo "preflight.exportReport", "Save Preflight Report…", [], None,
-            "{path?, profile?: str, pages?: \"1-3,5\" | [1,3]} → {path?, text, errors, warnings}",
-            has_doc, |s, p| {
-                let val = run(s, p)?;
-                let errors = val["errors"].as_u64().unwrap_or(0);
-                let warnings = val["warnings"].as_u64().unwrap_or(0);
-                let prof_name = val["profile"].as_str().unwrap_or("[Basic]");
-                let doc_title = s.active().map(|st| st.title()).unwrap_or_default();
-                let mut text = format!(
-                    "DesignCraft Preflight Report\nDocument: {doc_title}\nProfile: {prof_name}\nSummary: {errors} error(s), {warnings} warning(s)\n\n"
-                );
-                if let Some(arr) = val["issues"].as_array() {
-                    for it in arr {
-                        let sev = it["severity"].as_str().unwrap_or("warning").to_ascii_uppercase();
-                        let cat = it["category"].as_str().unwrap_or("DOCUMENT");
-                        let msg = it["message"].as_str().unwrap_or("");
-                        let pg = it["page"].as_u64().map(|p| format!(" (Page {})", p + 1)).unwrap_or_default();
-                        let fix = it["fix"].as_str().unwrap_or("");
-                        text.push_str(&format!("[{sev}] [{cat}] {msg}{pg}\n  Fix: {fix}\n"));
-                    }
+        "{path?, profile?: str, pages?: \"1-3,5\" | [1,3]} → {path?, text, errors, warnings}",
+        has_doc, |s, p| {
+            let val = run(s, p)?;
+            let errors = val["errors"].as_u64().unwrap_or(0);
+            let warnings = val["warnings"].as_u64().unwrap_or(0);
+            let prof_name = val["profile"].as_str().unwrap_or("[Basic]");
+            let doc_title = s.active().map(|st| st.title()).unwrap_or_default();
+            let mut text = format!(
+                "DesignCraft Preflight Report\nDocument: {doc_title}\nProfile: {prof_name}\nSummary: {errors} error(s), {warnings} warning(s)\n\n"
+            );
+            if let Some(arr) = val["issues"].as_array() {
+                for it in arr {
+                    let sev = it["severity"].as_str().unwrap_or("warning").to_ascii_uppercase();
+                    let cat = it["category"].as_str().unwrap_or("DOCUMENT");
+                    let msg = it["message"].as_str().unwrap_or("");
+                    let pg = it["page"].as_u64().map(|p| format!(" (Page {})", p + 1)).unwrap_or_default();
+                    let fix = it["fix"].as_str().unwrap_or("");
+                    text.push_str(&format!("[{sev}] [{cat}] {msg}{pg}\n  Fix: {fix}\n"));
                 }
-                if let Some(path) = str_param(p, "path") {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    crate::io::write_file(path, text.as_bytes()).map_err(EngineError::Other)?;
-                    Ok(json!({"path": path, "text": text, "errors": errors, "warnings": warnings}))
-                } else {
-                    Ok(json!({"text": text, "errors": errors, "warnings": warnings}))
-                }
-            }),
+            }
+            if let Some(path) = str_param(p, "path") {
+                #[cfg(not(target_arch = "wasm32"))]
+                crate::io::write_file(path, text.as_bytes()).map_err(EngineError::Other)?;
+                Ok(json!({"path": path, "text": text, "errors": errors, "warnings": warnings}))
+            } else {
+                Ok(json!({"text": text, "errors": errors, "warnings": warnings}))
+            }
+        }),
     ]
 }
 
@@ -726,12 +706,7 @@ pub fn check_document(d: &Document, cache: &Cache, document: Option<&std::path::
 }
 
 /// Evaluates `d` against `profile`, returning structured issues with category and fix hints.
-pub fn check_document_with_profile(
-    d: &Document,
-    cache: &Cache,
-    document: Option<&std::path::Path>,
-    profile: &PreflightProfile,
-) -> Vec<Issue> {
+pub fn check_document_with_profile(d: &Document, cache: &Cache, document: Option<&std::path::Path>, profile: &PreflightProfile) -> Vec<Issue> {
     let min_ppi = profile.min_ppi;
     let mut out = Vec::new();
     let mut missing_fonts: Vec<String> = Vec::new();
@@ -979,18 +954,12 @@ pub fn check_document_with_profile(
                 && let Some(pg) = sp.pages.get(pi)
             {
                 let pb = pg.bounds();
-                let inside_trim = bounds.x0 >= pb.x0 - eps
-                    && bounds.y0 >= pb.y0 - eps
-                    && bounds.x1 <= pb.x1 + eps
-                    && bounds.y1 <= pb.y1 + eps;
+                let inside_trim = bounds.x0 >= pb.x0 - eps && bounds.y0 >= pb.y0 - eps && bounds.x1 <= pb.x1 + eps && bounds.y1 <= pb.y1 + eps;
                 let safe = pb.inflate(-profile.safe_margin_pt, -profile.safe_margin_pt);
                 if inside_trim
                     && safe.width() > 0.0
                     && safe.height() > 0.0
-                    && (bounds.x0 < safe.x0 - eps
-                        || bounds.y0 < safe.y0 - eps
-                        || bounds.x1 > safe.x1 + eps
-                        || bounds.y1 > safe.y1 + eps)
+                    && (bounds.x0 < safe.x0 - eps || bounds.y0 < safe.y0 - eps || bounds.x1 > safe.x1 + eps || bounds.y1 > safe.y1 + eps)
                 {
                     out.push(Issue {
                         severity: "warning",
@@ -1007,7 +976,8 @@ pub fn check_document_with_profile(
             // [Registration] swatch misuse check on user objects.
             if profile.check_registration
                 && !it.nonprinting
-                && (it.fill.swatch == swatch::REGISTRATION || (!it.stroke.is_none() && it.stroke.weight > 0.0 && it.stroke.swatch == swatch::REGISTRATION))
+                && (it.fill.swatch == swatch::REGISTRATION
+                    || (!it.stroke.is_none() && it.stroke.weight > 0.0 && it.stroke.swatch == swatch::REGISTRATION))
             {
                 out.push(Issue {
                     severity: "error",
@@ -1118,12 +1088,7 @@ pub fn check_document_with_profile(
                                     severity: "warning",
                                     category: "IMAGES and OBJECTS",
                                     kind: "nonProportionalScaling",
-                                    message: format!(
-                                        "{}: non-proportional scaling ({:.1}% × {:.1}%)",
-                                        a.name,
-                                        sx * 100.0,
-                                        sy * 100.0
-                                    ),
+                                    message: format!("{}: non-proportional scaling ({:.1}% × {:.1}%)", a.name, sx * 100.0, sy * 100.0),
                                     fix: "Use Fit Content Proportionally in Object › Fitting to restore 1:1 aspect ratio.",
                                     item: Some(it.id.0),
                                     page,

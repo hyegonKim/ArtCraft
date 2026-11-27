@@ -79,12 +79,7 @@ impl Session {
             self.live.team = None;
             return Ok(());
         }
-        let req = NetRequest::Hosting {
-            server: server.clone(),
-            file: String::new(),
-            owner: String::new(),
-            req: Some(Admin::Team),
-        };
+        let req = NetRequest::Hosting { server: server.clone(), file: String::new(), owner: String::new(), req: Some(Admin::Team) };
         let (reply, _) = self.net(req)?;
         let list = match reply {
             NetReply::Hosting(Ok((_, Some(AdminReply::Team { web, files })))) => {

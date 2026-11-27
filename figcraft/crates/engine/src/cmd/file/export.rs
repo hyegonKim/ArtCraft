@@ -226,9 +226,7 @@ fn vd_compat_param(cmd: &str, p: &Value) -> Result<Option<VdCompat>> {
 fn color_profile_param(cmd: &str, p: &Value) -> Result<Option<ExportColorProfile>> {
     match get(p, "colorProfile") {
         None | Some(Value::Null) => Ok(None),
-        Some(Value::String(s)) => {
-            ExportColorProfile::from_key(s).map(Some).ok_or_else(|| bad(cmd, "colorProfile: sameAsFile|srgb|displayP3"))
-        }
+        Some(Value::String(s)) => ExportColorProfile::from_key(s).map(Some).ok_or_else(|| bad(cmd, "colorProfile: sameAsFile|srgb|displayP3")),
         Some(_) => Err(bad(cmd, "colorProfile: sameAsFile|srgb|displayP3")),
     }
 }
@@ -276,11 +274,7 @@ pub fn export_file(doc: &Document, ids: &[NodeId], setting: &ExportSetting, scal
                 VdCompat::Exact => figcraft_vectordrawable::Compat::Exact,
                 VdCompat::Ignore => figcraft_vectordrawable::Compat::Ignore,
             };
-            let opts = figcraft_vectordrawable::VdOptions {
-                bounds: Some(area),
-                include_names: setting.svg_id_attribute,
-                compat,
-            };
+            let opts = figcraft_vectordrawable::VdOptions { bounds: Some(area), include_names: setting.svg_id_attribute, compat };
             let vd = figcraft_vectordrawable::try_export(&srgb, &drawn, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
             Ok((vd.xml.into_bytes(), vd.warnings))
         }
@@ -309,8 +303,7 @@ pub fn export_file(doc: &Document, ids: &[NodeId], setting: &ExportSetting, scal
                 }
                 doc.color_profile.conversion_to(target).apply_pixels(pix.data_mut());
             }
-            let bytes = figcraft_render::encode_export_with(&pix, setting.format, target, setting.quality())
-                .map_err(EngineError::Other)?;
+            let bytes = figcraft_render::encode_export_with(&pix, setting.format, target, setting.quality()).map_err(EngineError::Other)?;
             Ok((bytes, Vec::new()))
         }
     }

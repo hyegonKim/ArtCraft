@@ -63,12 +63,7 @@ pub(super) struct Budget {
 
 impl Budget {
     pub(super) fn new() -> Self {
-        Self {
-            remaining: MAX_DECOMPRESSED,
-            exceeded: false,
-            json_values: MAX_JSON_VALUES,
-            json_exceeded: false,
-        }
+        Self { remaining: MAX_DECOMPRESSED, exceeded: false, json_values: MAX_JSON_VALUES, json_exceeded: false }
     }
 
     fn check(&self) -> Result<(), FormatError> {
@@ -81,12 +76,7 @@ impl Budget {
         }
     }
 
-    pub(super) fn read_bytes(
-        &mut self,
-        z: &mut ZipArchive<Cursor<&[u8]>>,
-        path: &str,
-        limit: u64,
-    ) -> Result<Vec<u8>, FormatError> {
+    pub(super) fn read_bytes(&mut self, z: &mut ZipArchive<Cursor<&[u8]>>, path: &str, limit: u64) -> Result<Vec<u8>, FormatError> {
         self.check()?;
         if !is_safe_archive_path(path) {
             return Err(corrupt(format!("unsafe archive member path `{path}`")));
@@ -97,11 +87,7 @@ impl Budget {
         }
         let mut out = Vec::new();
         let mut reader = BudgetReader { inner: entry, budget: self };
-        reader
-            .by_ref()
-            .take(limit.saturating_add(1))
-            .read_to_end(&mut out)
-            .map_err(|e| corrupt(format!("{path}: {e}")))?;
+        reader.by_ref().take(limit.saturating_add(1)).read_to_end(&mut out).map_err(|e| corrupt(format!("{path}: {e}")))?;
         if out.len() as u64 > limit {
             return Err(corrupt(format!("{path} exceeds member size limit")));
         }
@@ -109,11 +95,7 @@ impl Budget {
         Ok(out)
     }
 
-    pub(super) fn read_json(
-        &mut self,
-        z: &mut ZipArchive<Cursor<&[u8]>>,
-        path: &str,
-    ) -> Result<Value, FormatError> {
+    pub(super) fn read_json(&mut self, z: &mut ZipArchive<Cursor<&[u8]>>, path: &str) -> Result<Value, FormatError> {
         let data = self.read_bytes(z, path, MAX_JSON_BYTES)?;
         let mut count = 1usize;
         let (mut quoted, mut escaped) = (false, false);
@@ -337,17 +319,9 @@ pub(super) fn read_archive(
         })
         .to_string();
 
-    let home_artboard = manifest
-        .get("uxdesign#homeArtboard")
-        .and_then(Value::as_str)
-        .map(str::to_string)
-        .or_else(|| {
-            manifest
-                .get("meta")
-                .and_then(|m| m.get("ux"))
-                .and_then(|ux| ux.get("homeArtboard"))
-                .and_then(Value::as_str)
-                .map(str::to_string)
+    let home_artboard =
+        manifest.get("uxdesign#homeArtboard").and_then(Value::as_str).map(str::to_string).or_else(|| {
+            manifest.get("meta").and_then(|m| m.get("ux")).and_then(|ux| ux.get("homeArtboard")).and_then(Value::as_str).map(str::to_string)
         });
 
     let mut artboards = Vec::new();
@@ -364,11 +338,7 @@ pub(super) fn read_archive(
                     for item in items {
                         let item_name = item.get("name").and_then(Value::as_str).unwrap_or("Artboard");
                         let item_path = item.get("path").and_then(Value::as_str).unwrap_or("");
-                        let item_dir = if item_path.starts_with("artwork/") {
-                            item_path.to_string()
-                        } else {
-                            join_path(sec_path, item_path)
-                        };
+                        let item_dir = if item_path.starts_with("artwork/") { item_path.to_string() } else { join_path(sec_path, item_path) };
                         if item_name == "pasteboard" || item_path == "pasteboard" {
                             if let Some(agc_path) = find_agc_path(item, &item_dir, z) {
                                 match budget.read_json(z, &agc_path) {
@@ -415,9 +385,7 @@ pub(super) fn read_archive(
     }
 
     // Fallback scan for `resources/<uid>` entries not listed in manifest components.
-    let names: Vec<String> = (0..z.len())
-        .filter_map(|i| z.by_index(i).ok().map(|f| f.name().to_string()))
-        .collect();
+    let names: Vec<String> = (0..z.len()).filter_map(|i| z.by_index(i).ok().map(|f| f.name().to_string())).collect();
     for name in names {
         if let Some(uid) = name.strip_prefix("resources/")
             && !uid.is_empty()
@@ -425,10 +393,7 @@ pub(super) fn read_archive(
             && !uid.ends_with(".agc")
             && is_safe_archive_path(&name)
         {
-            assets.entry(uid.to_string()).or_insert_with(|| AssetEntry {
-                path: name,
-                mime: String::new(),
-            });
+            assets.entry(uid.to_string()).or_insert_with(|| AssetEntry { path: name, mime: String::new() });
         }
     }
 
@@ -438,12 +403,5 @@ pub(super) fn read_archive(
         }
     }
 
-    Ok(ParsedArchive {
-        title,
-        home_artboard,
-        artboards,
-        pasteboard_agc,
-        resources_agc,
-        assets,
-    })
+    Ok(ParsedArchive { title, home_artboard, artboards, pasteboard_agc, resources_agc, assets })
 }

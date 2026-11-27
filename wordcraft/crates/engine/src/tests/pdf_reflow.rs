@@ -43,45 +43,23 @@ fn pdf_export_to_reflow_import_and_open_round_trip() {
     src.core.creator = "ArtCraft QA".into();
     src.body.clear();
     src.body.push(para_block(
-        Paragraph::with_text(
-            "Quarterly Strategy",
-            CharProps { bold: Some(true), size: Some(22.0), ..Default::default() },
-        )
-        .styled("Heading1"),
+        Paragraph::with_text("Quarterly Strategy", CharProps { bold: Some(true), size: Some(22.0), ..Default::default() }).styled("Heading1"),
     ));
     src.body.push(para_block(
-        Paragraph::with_text(
-            "1. Product Roadmap",
-            CharProps { bold: Some(true), size: Some(15.0), ..Default::default() },
-        )
-        .styled("Heading2"),
+        Paragraph::with_text("1. Product Roadmap", CharProps { bold: Some(true), size: Some(15.0), ..Default::default() }).styled("Heading2"),
     ));
 
-    let mut body_para = Paragraph::with_text(
-        "Reflow preserves ",
-        CharProps { size: Some(11.0), ..Default::default() },
-    );
+    let mut body_para = Paragraph::with_text("Reflow preserves ", CharProps { size: Some(11.0), ..Default::default() });
     let end = body_para.len();
     body_para
         .insert_text(
             end,
             "bold crimson",
-            &CharProps {
-                bold: Some(true),
-                size: Some(11.0),
-                color: Some(TextColor::Rgb(Rgb(200, 30, 30))),
-                ..Default::default()
-            },
+            &CharProps { bold: Some(true), size: Some(11.0), color: Some(TextColor::Rgb(Rgb(200, 30, 30))), ..Default::default() },
         )
         .unwrap();
     let end = body_para.len();
-    body_para
-        .insert_text(
-            end,
-            " and PDF 리플로우 가져오기.",
-            &CharProps { italic: Some(true), size: Some(11.0), ..Default::default() },
-        )
-        .unwrap();
+    body_para.insert_text(end, " and PDF 리플로우 가져오기.", &CharProps { italic: Some(true), size: Some(11.0), ..Default::default() }).unwrap();
     src.body.push(para_block(body_para));
 
     let pdf_bytes = crate::io::save_bytes("quarterly-report.pdf", &src).unwrap();
@@ -90,9 +68,7 @@ fn pdf_export_to_reflow_import_and_open_round_trip() {
     // 1. `file.importPdf` via base64 `data` + `path` stem on an untouched blank session.
     let mut s = Session::new(Document::new());
     let b64 = b64_encode(&pdf_bytes);
-    let imported = s
-        .run("file.importPdf", &json!({"path": "quarterly-report.pdf", "data": b64}))
-        .unwrap();
+    let imported = s.run("file.importPdf", &json!({"path": "quarterly-report.pdf", "data": b64})).unwrap();
     assert_eq!(imported["imported"], true);
     assert!(s.path.is_none(), "imported PDF starts untitled so Save prompts for .docx");
     assert_eq!(s.file_name.as_deref(), Some("quarterly-report"));
@@ -117,18 +93,14 @@ fn pdf_export_to_reflow_import_and_open_round_trip() {
 
     // Importing into a session that already has content opens a second document beside it.
     let before_id = s.document_id();
-    let res2 = s
-        .run("file.importPdf", &json!({"path": pdf_path.to_string_lossy()}))
-        .unwrap();
+    let res2 = s.run("file.importPdf", &json!({"path": pdf_path.to_string_lossy()})).unwrap();
     assert_eq!(res2["imported"], true);
     assert_ne!(s.document_id(), before_id);
     assert_eq!(s.file_name.as_deref(), Some("roadmap"));
 
     // Opening `.pdf` directly via `file.open`.
     let mut s_open = Session::new(Document::new());
-    s_open
-        .run("file.open", &json!({"path": pdf_path.to_string_lossy()}))
-        .unwrap();
+    s_open.run("file.open", &json!({"path": pdf_path.to_string_lossy()})).unwrap();
     assert!(s_open.doc.plain_text(StoryRef::Body).contains("PDF 리플로우 가져오기"));
 
     // Content sniffing when filename has no extension.

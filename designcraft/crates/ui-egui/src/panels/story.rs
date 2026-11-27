@@ -9,7 +9,9 @@ use crate::widgets::{self, NumField};
 /// selected text frames, and the type size its hang amounts are set for. Without text or a text
 /// frame selected, the controls are disabled.
 pub fn show(app: &mut DesignApp, ui: &mut egui::Ui) {
-    let options = super::text_attrs(app).map(|a| a["storyOptions"].clone());
+    let attrs = super::text_attrs(app);
+    let story_id = attrs.as_ref().and_then(|a| a["story"].as_u64());
+    let options = attrs.map(|a| a["storyOptions"].clone());
     let enabled = options.is_some();
     let options = options.unwrap_or(Value::Null);
     let lang = app.ui.language.clone();
@@ -26,6 +28,50 @@ pub fn show(app: &mut DesignApp, ui: &mut egui::Ui) {
                 .range(designcraft_doc::OpticalMargin::MIN_SIZE, designcraft_doc::OpticalMargin::MAX_SIZE);
             if let Some(size) = crate::chrome::icon_field(ui, "font-size", &tr("Optical Margin Size"), field) {
                 let _ = app.run("story.options", json!({"opticalMarginSize": size}));
+            }
+        });
+        ui.separator();
+        ui.label(egui::RichText::new(tr("Editorial Mode")).strong());
+        let active_mode = if crate::story_editor::visible(app) { app.ui.editorial_view } else { crate::state::EditorialViewMode::Layout };
+        ui.horizontal_wrapped(|ui| {
+            if ui.selectable_label(active_mode == crate::state::EditorialViewMode::Layout, tr("Layout View")).clicked() {
+                let _ = app.run("view.editorialMode", json!({"mode": "layout"}));
+            }
+            if ui.selectable_label(active_mode == crate::state::EditorialViewMode::Story, tr("Story View")).clicked() {
+                let _ = app.run("view.editorialMode", json!({"mode": "story"}));
+            }
+            if ui.selectable_label(active_mode == crate::state::EditorialViewMode::Galley, tr("Galley View")).clicked() {
+                let _ = app.run("view.editorialMode", json!({"mode": "galley"}));
+            }
+        });
+        if let Some(sid) = story_id
+            && let Some(st) = app.session.active()
+        {
+            let cs = app.session.cache.get(&st.doc, designcraft_doc::StoryId(sid), None);
+            if let Some(cf) = designcraft_engine::compute_copyfit(&st.doc, &cs, designcraft_doc::StoryId(sid), None) {
+                ui.label(
+                    tr("Copyfit Info")
+                        + &format!(": {} · {} · {:.1} / {:.1} pt", cf.word_count, cf.actual_lines, cf.frame_depth_used, cf.target_depth),
+                );
+                let detail = if cf.overset {
+                    tr("Overset: +{lines} lines ({words} words)")
+                        .replace("{lines}", &cf.overset_lines.to_string())
+                        .replace("{words}", &cf.overset_words.to_string())
+                } else {
+                    tr("Copyfit: −{lines} lines ({words} words)")
+                        .replace("{lines}", &cf.underset_lines.to_string())
+                        .replace("{words}", &cf.underset_words.to_string())
+                };
+                ui.small(detail);
+            }
+        }
+        ui.horizontal_wrapped(|ui| {
+            if ui.small_button(tr("Import InCopy Story…")).clicked() {
+                let _ = app.run("app.importIcml", json!({}));
+            }
+            if ui.small_button(tr("Export InCopy Story…")).clicked() {
+                let p = story_id.map_or_else(|| json!({}), |sid| json!({"story": sid}));
+                let _ = app.run("app.exportIcml", p);
             }
         });
     });

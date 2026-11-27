@@ -92,8 +92,8 @@ use wordcraft_engine::Session;
 
 pub use control::ControlRequest;
 pub use dialogs::{
-    dialogs_chart, dialogs_controls, dialogs_insert, dialogs_keyboard, dialogs_layout, dialogs_lists, dialogs_notes, dialogs_para,
-    dialogs_refs, dialogs_review, dialogs_ribbon, dialogs_smart_art, dialogs_table_style, dialogs_templates,
+    dialogs_chart, dialogs_controls, dialogs_insert, dialogs_keyboard, dialogs_layout, dialogs_lists, dialogs_notes, dialogs_para, dialogs_refs,
+    dialogs_review, dialogs_ribbon, dialogs_smart_art, dialogs_table_style, dialogs_templates,
 };
 pub use file_dialogs::{FileDialogAnswer, FileDialogRequest, open_filters};
 

@@ -6,4 +6,6 @@ pub mod dev_measurements;
 pub mod dev_resources;
 pub mod devcompare;
 pub mod devinspect;
+pub mod dreamweaver;
+pub mod dreamweaver_import;
 pub mod tailwind;

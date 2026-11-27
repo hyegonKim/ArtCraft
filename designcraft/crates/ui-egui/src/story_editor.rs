@@ -48,20 +48,57 @@ pub fn show(app: &mut DesignApp, ctx: &egui::Context) {
     };
     let t = Tokens::get(ctx);
     let cs = app.session.cache.get(&st.doc, sid, None);
+    let copyfit = designcraft_engine::compute_copyfit(&st.doc, &cs, sid, None);
     let overset = cs.overset_at;
     let depths = app.ui.story_editor_depth_ruler.then(|| line_depths(&cs));
     let unit = st.doc.settings.vertical_units;
+    let lang = app.ui.language.clone();
     let mut open = true;
     let mut edit: Option<(usize, usize, String)> = None;
+    let mut mode_action: Option<&'static str> = None;
+    let mut icml_action: Option<&'static str> = None;
+    let galley_mode = app.ui.editorial_view == crate::state::EditorialViewMode::Galley;
     let words = story.text.split_whitespace().count().to_string();
-    egui::Window::new(crate::i18n::tr(&app.ui.language, "Story Editor — {count} words").replace("{count}", &words))
+    egui::Window::new(crate::i18n::tr(&lang, "Story Editor — {count} words").replace("{count}", &words))
         .id(egui::Id::unique("story_editor"))
         .open(&mut open)
         .default_size(vec2(560.0, 520.0))
         .show(ctx, |ui| {
+            // InCopy Editorial Bar: Layout / Story / Galley switcher + live Copyfit status + ICML I/O.
+            ui.horizontal_wrapped(|ui| {
+                if ui.selectable_label(false, crate::i18n::tr(&lang, "Layout View")).clicked() {
+                    mode_action = Some("layout");
+                }
+                if ui.selectable_label(!galley_mode, crate::i18n::tr(&lang, "Story View")).clicked() {
+                    mode_action = Some("story");
+                }
+                if ui.selectable_label(galley_mode, crate::i18n::tr(&lang, "Galley View")).clicked() {
+                    mode_action = Some("galley");
+                }
+                if let Some(cf) = &copyfit {
+                    let fit_badge = if cf.overset {
+                        crate::i18n::tr(&lang, "Overset: +{lines} lines ({words} words)")
+                            .replace("{lines}", &cf.overset_lines.to_string())
+                            .replace("{words}", &cf.overset_words.to_string())
+                    } else {
+                        crate::i18n::tr(&lang, "Copyfit: −{lines} lines ({words} words)")
+                            .replace("{lines}", &cf.underset_lines.to_string())
+                            .replace("{words}", &cf.underset_words.to_string())
+                    };
+                    let badge_color = if cf.overset { OVERSET_RED } else { egui::Color32::from_rgb(70, 185, 100) };
+                    ui.label(egui::RichText::new(fit_badge).size(11.0).color(badge_color));
+                }
+                if ui.small_button(crate::i18n::tr(&lang, "Import InCopy Story…")).clicked() {
+                    icml_action = Some("app.importIcml");
+                }
+                if ui.small_button(crate::i18n::tr(&lang, "Export InCopy Story…")).clicked() {
+                    icml_action = Some("app.exportIcml");
+                }
+            });
+            ui.add_space(4.0);
             egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
                 ui.horizontal_top(|ui| {
-                    // Style column: the labels are painted after the text, at the rows the text really wraps to.
+                    // Style / Galley line-number column: painted after the text, at the rows the text wraps to.
                     let (column, _) = ui.allocate_exact_size(vec2(130.0, 0.0), egui::Sense::hover());
                     ui.separator();
                     // Depth ruler: painted after the text too, beside the rows the lines start on.
@@ -78,14 +115,24 @@ pub fn show(app: &mut DesignApp, ctx: &egui::Context) {
                         .show(ui);
                     let r = out.response;
                     let changed = r.changed();
-                    let starts = paragraph_start_offsets(out.galley.rows.iter().map(|row| (row.pos.y, row.ends_with_newline)));
-                    for (i, y) in starts.into_iter().enumerate() {
-                        let Some(para) = story.paras.get(i) else { break };
-                        let rect = egui::Rect::from_min_size(egui::pos2(column.min.x, out.galley_pos.y + y), vec2(130.0, 14.0));
-                        ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
-                            let name = crate::i18n::style_name(&app.ui.language, &para.style);
-                            crate::rtl::label(ui, egui::RichText::new(name).size(11.0).color(t.text_dim));
-                        });
+                    if galley_mode {
+                        for (row_idx, row) in out.galley.rows.iter().enumerate() {
+                            let rect = egui::Rect::from_min_size(egui::pos2(column.min.x, out.galley_pos.y + row.pos.y), vec2(130.0, 14.0));
+                            ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
+                                let label = format!("{:>3}  Galley", row_idx + 1);
+                                crate::rtl::label(ui, egui::RichText::new(label).size(10.5).color(t.text_dim));
+                            });
+                        }
+                    } else {
+                        let starts = paragraph_start_offsets(out.galley.rows.iter().map(|row| (row.pos.y, row.ends_with_newline)));
+                        for (i, y) in starts.into_iter().enumerate() {
+                            let Some(para) = story.paras.get(i) else { break };
+                            let rect = egui::Rect::from_min_size(egui::pos2(column.min.x, out.galley_pos.y + y), vec2(130.0, 14.0));
+                            ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
+                                let name = crate::i18n::style_name(&app.ui.language, &para.style);
+                                crate::rtl::label(ui, egui::RichText::new(name).size(11.0).color(t.text_dim));
+                            });
+                        }
                     }
                     let overset_y = overset.filter(|_| !changed).map(|o| {
                         let ci = char_offsets(&story.text, std::iter::once(o));
@@ -148,8 +195,16 @@ pub fn show(app: &mut DesignApp, ctx: &egui::Context) {
     if let Some((a, b, text)) = edit {
         let _ = app.run("story.replaceRange", json!({"story": sid.0, "start": a, "end": b, "text": text}));
     }
+    if let Some(mode) = mode_action {
+        let _ = app.run("view.editorialMode", json!({"mode": mode}));
+    }
+    if let Some(cmd_id) = icml_action {
+        let params = if cmd_id == "app.exportIcml" { json!({"story": sid.0}) } else { json!({}) };
+        let _ = app.run(cmd_id, params);
+    }
     if !open {
         app.story_editor = None;
+        app.ui.editorial_view = crate::state::EditorialViewMode::Layout;
     }
 }
 

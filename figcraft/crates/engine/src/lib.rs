@@ -75,6 +75,7 @@ pub use dev::dev_measurements;
 pub use dev::dev_resources;
 pub use dev::devcompare;
 pub use dev::devinspect;
+pub use dev::dreamweaver;
 pub use dev::tailwind;
 pub use extensions::plugin_directory;
 pub use extensions::plugins;

@@ -127,7 +127,8 @@ fn prototype_variable_mode_switcher_re_evaluates_all_variable_types_and_resets()
 #[test]
 fn prototype_video_playback_autoplay_loop_pause_mute_and_seek() {
     let mut s = Session::new();
-    let screen = id_of(&s.execute("frame.create", &json!({"x": 0, "y": 0, "width": 400, "height": 400, "name": "PlayerScreen"})).unwrap()["id"]).unwrap();
+    let screen =
+        id_of(&s.execute("frame.create", &json!({"x": 0, "y": 0, "width": 400, "height": 400, "name": "PlayerScreen"})).unwrap()["id"]).unwrap();
 
     let clip_loop = base64::engine::general_purpose::STANDARD.encode(minimal_mp4(640, 360, 4));
     let clip_once = base64::engine::general_purpose::STANDARD.encode(minimal_mp4(640, 360, 2));
@@ -192,13 +193,9 @@ fn prototype_video_playback_autoplay_loop_pause_mute_and_seek() {
 fn korean_catalog_translates_xd_import_video_fill_and_variable_mode_switcher() {
     let ko = i18n::languages().iter().find(|l| l.code == "ko").expect("Korean (ko) catalog must exist");
     let plain_of = |table: &'static [(&'static str, Text)], key: &str| -> Option<&'static str> {
-        table
-            .binary_search_by(|(k, _)| (*k).cmp(key))
-            .ok()
-            .and_then(|i| table.get(i))
-            .map(|(_, t)| match t {
-                Text::Plain(s) | Text::Plural(Forms { other: s, .. }) => *s,
-            })
+        table.binary_search_by(|(k, _)| (*k).cmp(key)).ok().and_then(|i| table.get(i)).map(|(_, t)| match t {
+            Text::Plain(s) | Text::Plural(Forms { other: s, .. }) => *s,
+        })
     };
 
     assert_eq!(plain_of(ko.ui, "Import Adobe XD"), Some("Adobe XD 가져오기"));
@@ -217,4 +214,17 @@ fn korean_catalog_translates_xd_import_video_fill_and_variable_mode_switcher() {
 
     assert_eq!(plain_of(ko.ui, "Switch variable mode"), Some("변수 모드 전환"));
     assert_eq!(plain_of(ko.ui, "Reset variable modes"), Some("변수 모드 초기화"));
+
+    assert_eq!(plain_of(ko.ui, "Responsive Web (HTML5 / CSS3)"), Some("반응형 웹 (HTML5 / CSS3)"));
+    assert_eq!(plain_of(ko.ui, "Export responsive HTML site"), Some("반응형 HTML 사이트 내보내기"));
+    assert_eq!(plain_of(ko.ui, "Import HTML"), Some("HTML 가져오기"));
+    assert_eq!(plain_of(ko.ui, "Split HTML / CSS"), Some("HTML / CSS 분할 보기"));
+    assert_eq!(plain_of(ko.ui, "Mobile 375px"), Some("모바일 375px"));
+    assert_eq!(plain_of(ko.ui, "Tablet 768px"), Some("태블릿 768px"));
+    assert_eq!(plain_of(ko.ui, "Desktop 1440px"), Some("데스크톱 1440px"));
+    assert_eq!(plain_of(ko.commands, "file.exportHtmlSite"), Some("반응형 HTML 사이트 내보내기"));
+    assert_eq!(plain_of(ko.commands, "file.importHtml"), Some("HTML 가져오기"));
+    assert_eq!(plain_of(ko.commands, "code.liveHtmlCss"), Some("실시간 HTML5 + CSS3"));
+    assert_eq!(plain_of(ko.menu, "file.exportHtmlSite"), Some("반응형 HTML 사이트 내보내기…"));
+    assert_eq!(plain_of(ko.menu, "file.importHtml"), Some("HTML (.html) 가져오기…"));
 }

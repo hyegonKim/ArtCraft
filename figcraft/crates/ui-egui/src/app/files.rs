@@ -84,7 +84,10 @@ impl FigApp {
         let exts: &[&str] = if place {
             &["png", "jpg", "jpeg", "webp", "gif", "tif", "tiff"]
         } else {
-            &["penpot", "xd", "svg", "png", "jpg", "jpeg", "webp", "gif", "tif", "tiff", "mp4", "mov", "webm", "m4v", "ogv", "figcraft", "fig", "jam", "sketch"]
+            &[
+                "penpot", "xd", "svg", "png", "jpg", "jpeg", "webp", "gif", "tif", "tiff", "mp4", "mov", "webm", "m4v", "ogv", "figcraft", "fig",
+                "jam", "sketch",
+            ]
         };
         let title = if place { i18n::tr("Place image") } else { i18n::tr("Import") };
         self.pick_file(title, exts, true, |app, file| {
@@ -95,6 +98,35 @@ impl FigApp {
     pub fn import_xd_dialog(&mut self) {
         self.pick_file(i18n::tr("Import Adobe XD"), &["xd"], true, |app, file| {
             app.run_user("file.importXd", file);
+        });
+    }
+
+    pub fn import_html_dialog(&mut self) {
+        self.pick_file(i18n::tr("Import HTML"), &["html", "htm"], true, |app, file| {
+            if let Some(r) = app.run_user("file.importHtml", file) {
+                let count = r["layers"].as_u64().unwrap_or(1) as usize;
+                app.toast(i18n::trn("Imported {n} HTML layers", count, &[]));
+            }
+        });
+    }
+
+    pub fn export_html_site_dialog(&mut self) {
+        let name = self.session.doc().map(|d| d.name.clone()).unwrap_or_else(|_| "Untitled".into());
+        let ids = self.session.selection();
+        if self.services.downloads() {
+            let file = format!("{name}.html");
+            if let Some(r) = self.run("file.exportHtmlSite", json!({"ids": ids, "inlineCss": true}))
+                && self.download(&file, &r)
+            {
+                self.toast(i18n::trf("Exported {name}", &[("name", &file)]));
+            }
+            return;
+        }
+        self.pick_folder(i18n::tr("Export responsive HTML site"), move |app, dir| {
+            if let Some(r) = app.run("file.exportHtmlSite", json!({"ids": ids, "dir": dir.to_string_lossy()})) {
+                let n = r["files"].as_array().map_or(0, Vec::len);
+                app.toast(i18n::trn("Exported {n} files", n, &[]));
+            }
         });
     }
 

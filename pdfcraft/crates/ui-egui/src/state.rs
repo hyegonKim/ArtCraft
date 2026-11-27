@@ -103,6 +103,7 @@ pub(crate) type GridFile = (String, Result<Vec<u8>, std::path::PathBuf>);
 pub enum Dialog {
     WordCount,
     Preflight,
+    OutputPreview,
     ContentCredentials,
     Summary,
     CreateImages,

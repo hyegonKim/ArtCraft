@@ -76,26 +76,11 @@ fn para_runs(p: &wordcraft_doc::Paragraph) -> Vec<(&str, &wordcraft_doc::CharPro
 
 #[test]
 fn postscript_subset_font_names_normalize_cleanly() {
-    assert_eq!(
-        normalize_postscript_font("ABCDEF+Helvetica-BoldOblique"),
-        ("Helvetica".to_string(), true, true, false)
-    );
-    assert_eq!(
-        normalize_postscript_font("Times-Bold"),
-        ("Times New Roman".to_string(), true, false, false)
-    );
-    assert_eq!(
-        normalize_postscript_font("Courier-Oblique"),
-        ("Courier New".to_string(), false, true, true)
-    );
-    assert_eq!(
-        normalize_postscript_font("XYZQWE+Calibri-Bold"),
-        ("Calibri".to_string(), true, false, false)
-    );
-    assert_eq!(
-        normalize_postscript_font("GHIJKL+MalgunGothicBold"),
-        ("Malgun Gothic".to_string(), true, false, false)
-    );
+    assert_eq!(normalize_postscript_font("ABCDEF+Helvetica-BoldOblique"), ("Helvetica".to_string(), true, true, false));
+    assert_eq!(normalize_postscript_font("Times-Bold"), ("Times New Roman".to_string(), true, false, false));
+    assert_eq!(normalize_postscript_font("Courier-Oblique"), ("Courier New".to_string(), false, true, true));
+    assert_eq!(normalize_postscript_font("XYZQWE+Calibri-Bold"), ("Calibri".to_string(), true, false, false));
+    assert_eq!(normalize_postscript_font("GHIJKL+MalgunGothicBold"), ("Malgun Gothic".to_string(), true, false, false));
 }
 
 #[test]
@@ -214,10 +199,7 @@ ET
         &[
             (1, b"<< /Type /Catalog /Pages 2 0 R >>".to_vec()),
             (2, b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>".to_vec()),
-            (
-                3,
-                b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>".to_vec(),
-            ),
+            (3, b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>".to_vec()),
             (4, b"<< /Type /Font /Subtype /Type1 /BaseFont /Calibri /Encoding /WinAnsiEncoding >>".to_vec()),
             (5, stream_obj("", content, true)),
         ],
@@ -235,10 +217,7 @@ ET
     );
 
     let FBlock::Para(p1) = &flow.blocks[1] else { panic!("expected para 1") };
-    assert_eq!(
-        p1.text(),
-        "A larger vertical gap starts a brand new second paragraph that also wraps smoothly onto its second line."
-    );
+    assert_eq!(p1.text(), "A larger vertical gap starts a brand new second paragraph that also wraps smoothly onto its second line.");
 
     let FBlock::Para(p2) = &flow.blocks[2] else { panic!("expected bullet 1") };
     assert!(p2.list.is_some_and(|l| !l.ordered));
@@ -262,10 +241,7 @@ ET
         &[
             (1, b"<< /Type /Catalog /Pages 2 0 R >>".to_vec()),
             (2, b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>".to_vec()),
-            (
-                3,
-                b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>".to_vec(),
-            ),
+            (3, b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>".to_vec()),
             (4, b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>".to_vec()),
             (5, stream_obj("", content, false)),
         ],
@@ -321,14 +297,8 @@ ET
         &[
             (1, b"<< /Type /Catalog /Pages 2 0 R >>".to_vec()),
             (2, b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>".to_vec()),
-            (
-                3,
-                b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R >>".to_vec(),
-            ),
-            (
-                4,
-                b"<< /Type /Font /Subtype /Type0 /BaseFont /GHIJKL+MalgunGothicBold /Encoding /Identity-H /ToUnicode 5 0 R >>".to_vec(),
-            ),
+            (3, b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R >>".to_vec()),
+            (4, b"<< /Type /Font /Subtype /Type0 /BaseFont /GHIJKL+MalgunGothicBold /Encoding /Identity-H /ToUnicode 5 0 R >>".to_vec()),
             (5, stream_obj("", cmap, true)),
             (6, stream_obj("", content, true)),
         ],
@@ -351,26 +321,14 @@ fn multipage_pdf_preserves_page_breaks_metadata_and_links() {
     let pdf = build_pdf(
         &[
             (1, b"<< /Type /Catalog /Pages 2 0 R >>".to_vec()),
-            (
-                2,
-                b"<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> >>".to_vec(),
-            ),
-            (
-                3,
-                b"<< /Type /Page /Parent 2 0 R /Contents 6 0 R /Annots [8 0 R] >>".to_vec(),
-            ),
+            (2, b"<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> >>".to_vec()),
+            (3, b"<< /Type /Page /Parent 2 0 R /Contents 6 0 R /Annots [8 0 R] >>".to_vec()),
             (4, b"<< /Type /Page /Parent 2 0 R /Contents 7 0 R >>".to_vec()),
             (5, b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>".to_vec()),
             (6, stream_obj("", p1, false)),
             (7, stream_obj("", p2, false)),
-            (
-                8,
-                b"<< /Type /Annot /Subtype /Link /Rect [70 715 240 738] /A << /S /URI /URI (https://example.com/docs) >> >>".to_vec(),
-            ),
-            (
-                9,
-                b"<< /Title (Quarterly Report) /Author (Kim Writer) /CreationDate (D:20261114093000Z) >>".to_vec(),
-            ),
+            (8, b"<< /Type /Annot /Subtype /Link /Rect [70 715 240 738] /A << /S /URI /URI (https://example.com/docs) >> >>".to_vec()),
+            (9, b"<< /Title (Quarterly Report) /Author (Kim Writer) /CreationDate (D:20261114093000Z) >>".to_vec()),
         ],
         Some(9),
     );

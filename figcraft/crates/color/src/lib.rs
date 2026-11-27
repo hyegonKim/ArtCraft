@@ -800,13 +800,7 @@ impl Paint {
     }
 
     pub fn video(hash: impl Into<String>, poster: Option<String>, mode: ImageScaleMode) -> Self {
-        Self {
-            kind: PaintKind::Video(VideoPaint::new(hash, poster, mode)),
-            opacity: 1.0,
-            visible: true,
-            blend: BlendMode::Normal,
-            color_alpha: 1.0,
-        }
+        Self { kind: PaintKind::Video(VideoPaint::new(hash, poster, mode)), opacity: 1.0, visible: true, blend: BlendMode::Normal, color_alpha: 1.0 }
     }
 
     /// The solid colour (with the paint opacity folded into alpha), if solid.

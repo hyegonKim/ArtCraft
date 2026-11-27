@@ -53,11 +53,7 @@ pub struct DocumentSummary {
 
 impl DocumentSummary {
     pub fn to_markdown(&self, title: &str) -> String {
-        let heading = if title.trim().is_empty() {
-            "Document Summary"
-        } else {
-            title.trim()
-        };
+        let heading = if title.trim().is_empty() { "Document Summary" } else { title.trim() };
         let mut out = format!(
             "# {heading}\n\n- Pages analyzed: {}\n- Words: {}\n- Estimated reading time: {} min\n",
             self.page_count, self.word_count, self.reading_minutes
@@ -90,11 +86,7 @@ pub fn summarize(
 
 impl Document {
     /// Summarizes the document (or `pages`, 0-based) locally when text copying is permitted.
-    pub fn summarize(
-        &self,
-        pages: Option<&[usize]>,
-        max_points: usize,
-    ) -> Result<DocumentSummary, EditError> {
+    pub fn summarize(&self, pages: Option<&[usize]>, max_points: usize) -> Result<DocumentSummary, EditError> {
         self.check_copying()?;
         let source = self.export_source();
         let all_pages: Vec<usize>;
@@ -105,8 +97,7 @@ impl Document {
                 &all_pages
             }
         };
-        summarize(source, target_pages, SummaryOptions { max_points }, |_| true)
-            .map_err(EditError::Invalid)
+        summarize(source, target_pages, SummaryOptions { max_points }, |_| true).map_err(EditError::Invalid)
     }
 }
 
@@ -134,17 +125,8 @@ fn summarize_inner(
         if !progress(page_texts.len()) {
             return Err("summary cancelled".into());
         }
-        let filter = TextFilter {
-            tables: false,
-            code: false,
-            images: false,
-            painted: false,
-            mcids: HashSet::new(),
-        };
-        let text = renderer
-            .filtered_text(page, filter)
-            .map_err(|e| format!("page {}: {e}", page.saturating_add(1)))?
-            .plain_text();
+        let filter = TextFilter { tables: false, code: false, images: false, painted: false, mcids: HashSet::new() };
+        let text = renderer.filtered_text(page, filter).map_err(|e| format!("page {}: {e}", page.saturating_add(1)))?.plain_text();
         let words = text.unicode_words().count();
         if words == 0 {
             pages_without_text += 1;
@@ -168,34 +150,16 @@ struct Candidate {
     tf: HashMap<String, f64>,
 }
 
-pub(crate) fn summarize_pages(
-    page_texts: &[(usize, String)],
-    word_count: usize,
-    pages_without_text: usize,
-    max_points: usize,
-) -> DocumentSummary {
+pub(crate) fn summarize_pages(page_texts: &[(usize, String)], word_count: usize, pages_without_text: usize, max_points: usize) -> DocumentSummary {
     let max_k = max_points.clamp(1, 20);
-    let reading_minutes = if word_count == 0 {
-        0
-    } else {
-        word_count.div_ceil(200)
-    };
+    let reading_minutes = if word_count == 0 { 0 } else { word_count.div_ceil(200) };
     let (candidates, term_scores) = collect_candidates_and_terms(page_texts);
     let key_terms = top_terms(&term_scores, 8);
     let points = select_top_sentences(&candidates, &term_scores, max_k);
-    DocumentSummary {
-        page_count: page_texts.len(),
-        pages_without_text,
-        word_count,
-        reading_minutes,
-        key_terms,
-        points,
-    }
+    DocumentSummary { page_count: page_texts.len(), pages_without_text, word_count, reading_minutes, key_terms, points }
 }
 
-fn collect_candidates_and_terms(
-    page_texts: &[(usize, String)],
-) -> (Vec<Candidate>, HashMap<String, f64>) {
+fn collect_candidates_and_terms(page_texts: &[(usize, String)]) -> (Vec<Candidate>, HashMap<String, f64>) {
     let mut tf_total: HashMap<String, usize> = HashMap::new();
     let mut df_chunks: HashMap<String, usize> = HashMap::new();
     let mut candidates = Vec::new();
@@ -221,14 +185,7 @@ fn collect_candidates_and_terms(
             if tf.is_empty() {
                 continue;
             }
-            candidates.push(Candidate {
-                page,
-                order,
-                page_lead: sent_idx == 0,
-                doc_lead: page_idx == 0 && sent_idx < 2,
-                text: sentence,
-                tf,
-            });
+            candidates.push(Candidate { page, order, page_lead: sent_idx == 0, doc_lead: page_idx == 0 && sent_idx < 2, text: sentence, tf });
             order += 1;
         }
     }
@@ -249,18 +206,11 @@ fn top_terms(weights: &HashMap<String, f64>, limit: usize) -> Vec<String> {
     list.into_iter().take(limit).map(|(k, _)| k.clone()).collect()
 }
 
-fn select_top_sentences(
-    candidates: &[Candidate],
-    term_weights: &HashMap<String, f64>,
-    max_k: usize,
-) -> Vec<SummaryPoint> {
+fn select_top_sentences(candidates: &[Candidate], term_weights: &HashMap<String, f64>, max_k: usize) -> Vec<SummaryPoint> {
     if candidates.is_empty() {
         return Vec::new();
     }
-    let norms: Vec<f64> = candidates
-        .iter()
-        .map(|c| vector_norm(&c.tf, term_weights))
-        .collect();
+    let norms: Vec<f64> = candidates.iter().map(|c| vector_norm(&c.tf, term_weights)).collect();
     let mut raw_scores = vec![0.0f64; candidates.len()];
     for (i, cand) in candidates.iter().enumerate() {
         let mut centrality = 0.0;
@@ -269,11 +219,7 @@ fn select_top_sentences(
                 centrality += cosine(&cand.tf, &other.tf, norms[i], norms[j], term_weights);
             }
         }
-        let term_sum: f64 = cand
-            .tf
-            .iter()
-            .map(|(t, &cnt)| cnt * term_weights.get(t).copied().unwrap_or(1.0))
-            .sum();
+        let term_sum: f64 = cand.tf.iter().map(|(t, &cnt)| cnt * term_weights.get(t).copied().unwrap_or(1.0)).sum();
         let len_penalty = (cand.tf.len() as f64).sqrt().max(1.5);
         let mut score = centrality + (term_sum / len_penalty) * 0.25;
         if cand.doc_lead {
@@ -285,31 +231,15 @@ fn select_top_sentences(
     }
 
     let mut ranked: Vec<usize> = (0..candidates.len()).collect();
-    ranked.sort_by(|&a, &b| {
-        raw_scores[b]
-            .total_cmp(&raw_scores[a])
-            .then(candidates[a].order.cmp(&candidates[b].order))
-    });
+    ranked.sort_by(|&a, &b| raw_scores[b].total_cmp(&raw_scores[a]).then(candidates[a].order.cmp(&candidates[b].order)));
 
-    let max_score = raw_scores
-        .iter()
-        .copied()
-        .fold(0.0f64, f64::max)
-        .max(1e-6);
+    let max_score = raw_scores.iter().copied().fold(0.0f64, f64::max).max(1e-6);
     let mut chosen: Vec<usize> = Vec::new();
     for idx in ranked {
         if chosen.len() >= max_k {
             break;
         }
-        let redundant = chosen.iter().any(|&prev| {
-            cosine(
-                &candidates[idx].tf,
-                &candidates[prev].tf,
-                norms[idx],
-                norms[prev],
-                term_weights,
-            ) > 0.65
-        });
+        let redundant = chosen.iter().any(|&prev| cosine(&candidates[idx].tf, &candidates[prev].tf, norms[idx], norms[prev], term_weights) > 0.65);
         if !redundant {
             chosen.push(idx);
         }
@@ -335,13 +265,7 @@ fn vector_norm(tf: &HashMap<String, f64>, weights: &HashMap<String, f64>) -> f64
         .sqrt()
 }
 
-fn cosine(
-    a: &HashMap<String, f64>,
-    b: &HashMap<String, f64>,
-    norm_a: f64,
-    norm_b: f64,
-    weights: &HashMap<String, f64>,
-) -> f64 {
+fn cosine(a: &HashMap<String, f64>, b: &HashMap<String, f64>, norm_a: f64, norm_b: f64, weights: &HashMap<String, f64>) -> f64 {
     if norm_a <= 1e-9 || norm_b <= 1e-9 {
         return 0.0;
     }
@@ -411,7 +335,8 @@ fn strip_korean_josa(token: &str) -> &str {
     if !token.chars().any(|c| matches!(c as u32, 0xAC00..=0xD7A3)) {
         return token;
     }
-    for suffix in ["에서", "으로", "에게", "까지", "부터", "은", "는", "이", "가", "을", "를", "의", "에", "로", "와", "과", "도"] {
+    for suffix in ["에서", "으로", "에게", "까지", "부터", "은", "는", "이", "가", "을", "를", "의", "에", "로", "와", "과", "도"]
+    {
         if let Some(stem) = token.strip_suffix(suffix)
             && stem.chars().count() >= 2
         {
@@ -423,14 +348,87 @@ fn strip_korean_josa(token: &str) -> &str {
 
 fn is_stopword(token: &str) -> bool {
     const EN_KO_STOPWORDS: &[&str] = &[
-        "the", "and", "for", "that", "this", "with", "from", "are", "was", "were", "have", "has",
-        "had", "not", "but", "you", "your", "all", "can", "will", "into", "more", "other", "than",
-        "then", "them", "they", "their", "there", "these", "those", "which", "when", "where",
-        "what", "who", "whom", "whose", "been", "being", "also", "such", "only", "each", "some",
-        "over", "under", "between", "after", "before", "about", "through", "during", "within",
-        "without", "because", "while", "should", "would", "could", "may", "might", "must", "shall",
-        "있으며", "있습니다", "있다", "없는", "없다", "대한", "위해", "통해", "따라", "그리고",
-        "그러나", "또한", "경우", "것이다", "수행", "관한", "해당",
+        "the",
+        "and",
+        "for",
+        "that",
+        "this",
+        "with",
+        "from",
+        "are",
+        "was",
+        "were",
+        "have",
+        "has",
+        "had",
+        "not",
+        "but",
+        "you",
+        "your",
+        "all",
+        "can",
+        "will",
+        "into",
+        "more",
+        "other",
+        "than",
+        "then",
+        "them",
+        "they",
+        "their",
+        "there",
+        "these",
+        "those",
+        "which",
+        "when",
+        "where",
+        "what",
+        "who",
+        "whom",
+        "whose",
+        "been",
+        "being",
+        "also",
+        "such",
+        "only",
+        "each",
+        "some",
+        "over",
+        "under",
+        "between",
+        "after",
+        "before",
+        "about",
+        "through",
+        "during",
+        "within",
+        "without",
+        "because",
+        "while",
+        "should",
+        "would",
+        "could",
+        "may",
+        "might",
+        "must",
+        "shall",
+        "있으며",
+        "있습니다",
+        "있다",
+        "없는",
+        "없다",
+        "대한",
+        "위해",
+        "통해",
+        "따라",
+        "그리고",
+        "그러나",
+        "또한",
+        "경우",
+        "것이다",
+        "수행",
+        "관한",
+        "해당",
     ];
     EN_KO_STOPWORDS.contains(&token)
 }

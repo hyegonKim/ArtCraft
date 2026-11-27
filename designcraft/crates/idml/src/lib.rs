@@ -49,6 +49,7 @@
 mod arabic;
 mod cjk;
 mod export;
+pub mod icml;
 mod import;
 mod names;
 mod ruby;
@@ -61,6 +62,10 @@ mod tests;
 pub use craft_idml::is_idml;
 pub use craft_idml::value::{base64_decode, base64_encode};
 pub use export::{ExportOptions, export_idml, export_idml_report, export_idml_with};
+pub use icml::{
+    ICML_DOM_VERSION, IcmaAssignment, IcmaStoryEntry, IcmlDocument, apply_icml_to_document, export_document_icma, export_icma, export_icml,
+    export_icml_story, export_icml_with_version, import_icma, import_icml, is_icma, is_icml,
+};
 pub use import::{Imported, import_idml, import_idml_report, import_idml_report_with_previews, import_idml_with};
 pub use snippet::{export_snippet, export_snippet_with, import_snippet, import_snippet_with, is_idms};
 

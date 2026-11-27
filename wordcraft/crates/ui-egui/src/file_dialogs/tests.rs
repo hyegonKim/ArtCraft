@@ -740,11 +740,7 @@ fn import_pdf_dialog_and_opened_pdf_save_as_docx() {
     assert_eq!(pdf_filters[0].0, "PDF files");
     assert_eq!(pdf_filters[0].1, vec!["pdf"]);
     assert_eq!(pdf_filters[1].0, "All files");
-    assert!(
-        open_filters("document")
-            .iter()
-            .any(|(_, exts)| exts.contains(&"pdf"))
-    );
+    assert!(open_filters("document").iter().any(|(_, exts)| exts.contains(&"pdf")));
 
     let dir = scratch("import-pdf-reflow");
     let pdf_path = dir.join("memo.pdf");

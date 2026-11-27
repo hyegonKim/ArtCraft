@@ -209,10 +209,7 @@ pub(super) fn import(s: &mut Session, p: &Value) -> Result<Value> {
         }
         "mp4" | "mov" | "webm" | "m4v" | "ogv" => {
             let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
-            crate::cmd::image::place_video(
-                s,
-                &json!({"data": b64, "x": x.unwrap_or(center.0), "y": y.unwrap_or(center.1), "name": file_stem(&name)}),
-            )
+            crate::cmd::image::place_video(s, &json!({"data": b64, "x": x.unwrap_or(center.0), "y": y.unwrap_or(center.1), "name": file_stem(&name)}))
         }
         _ => {
             let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
@@ -354,12 +351,7 @@ pub(super) fn import_xd(s: &mut Session, p: &Value) -> Result<Value> {
                 map.insert(id, doc.alloc_id());
             }
         }
-        let roots_in_other: Vec<NodeId> = other
-            .pages
-            .iter()
-            .filter_map(|pg| other.node(*pg))
-            .flat_map(|pn| pn.children.iter().copied())
-            .collect();
+        let roots_in_other: Vec<NodeId> = other.pages.iter().filter_map(|pg| other.node(*pg)).flat_map(|pn| pn.children.iter().copied()).collect();
         let bb = other.bounds_of(&roots_in_other);
         let dx = target_xy.0.map_or(0.0, |tx| tx - bb.map_or(0.0, |b| b.x0));
         let dy = target_xy.1.map_or(0.0, |ty| ty - bb.map_or(0.0, |b| b.y0));
@@ -391,22 +383,10 @@ pub(super) fn import_xd(s: &mut Session, p: &Value) -> Result<Value> {
     }
 
     let pages = append_pages(s.doc_mut()?, &other)?;
-    let ids: Vec<NodeId> = s
-        .doc()
-        .map(|doc| {
-            pages
-                .iter()
-                .filter_map(|pg| doc.node(*pg))
-                .flat_map(|pn| pn.children.iter().copied())
-                .collect()
-        })
-        .unwrap_or_default();
+    let ids: Vec<NodeId> =
+        s.doc().map(|doc| pages.iter().filter_map(|pg| doc.node(*pg)).flat_map(|pn| pn.children.iter().copied()).collect()).unwrap_or_default();
     if let Some(&first_page) = pages.first() {
-        let current_empty = s
-            .ds()
-            .ok()
-            .and_then(|ds| ds.doc.node(ds.page))
-            .is_some_and(|pg| pg.children.is_empty());
+        let current_empty = s.ds().ok().and_then(|ds| ds.doc.node(ds.page)).is_some_and(|pg| pg.children.is_empty());
         if current_empty && let Ok(ds) = s.ds_mut() {
             ds.page = first_page;
             if let Some(pg) = ds.doc.node(first_page) {

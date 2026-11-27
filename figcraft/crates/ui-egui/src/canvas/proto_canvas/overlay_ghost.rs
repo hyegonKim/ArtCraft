@@ -37,10 +37,7 @@ fn active_ghost(app: &FigApp, ctx: &Context, doc: &Document, page: NodeId) -> Op
     let off = offset.unwrap_or([0.0, src_bounds.height()]);
     let gx = src_bounds.x0 + off[0];
     let gy = src_bounds.y0 + off[1];
-    let screen = Rect::from_two_pos(
-        app.to_screen(gx, gy),
-        app.to_screen(gx + dest_node.width, gy + dest_node.height),
-    );
+    let screen = Rect::from_two_pos(app.to_screen(gx, gy), app.to_screen(gx + dest_node.width, gy + dest_node.height));
     Some((source, index, screen, off))
 }
 
@@ -67,13 +64,8 @@ pub(super) fn end(app: &mut FigApp, ctx: &Context) {
 
 pub(super) fn input(app: &mut FigApp, ctx: &Context, pos: Option<Pos2>, hovered: bool) -> bool {
     let existing: Option<GhostDrag> = ctx.data(|d| d.get_temp(drag_id()));
-    let (pressed, down, released) = ctx.input(|i| {
-        (
-            i.pointer.button_pressed(PointerButton::Primary),
-            i.pointer.primary_down(),
-            i.pointer.button_released(PointerButton::Primary),
-        )
-    });
+    let (pressed, down, released) = ctx
+        .input(|i| (i.pointer.button_pressed(PointerButton::Primary), i.pointer.primary_down(), i.pointer.button_released(PointerButton::Primary)));
 
     if let Some(drag) = existing {
         if let Some(p) = pos {
@@ -120,10 +112,7 @@ pub(super) fn input(app: &mut FigApp, ctx: &Context, pos: Option<Pos2>, hovered:
     }
     let _ = json!({});
     ctx.data_mut(|d| {
-        d.insert_temp(
-            drag_id(),
-            GhostDrag { source, index, start_pointer: p, start_offset: off },
-        );
+        d.insert_temp(drag_id(), GhostDrag { source, index, start_pointer: p, start_offset: off });
     });
     ctx.request_repaint();
     true

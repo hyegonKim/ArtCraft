@@ -74,20 +74,14 @@ pub(super) fn reflow_document(pages: &[PageSpans]) -> Vec<FBlock> {
 }
 
 fn assemble_page_lines(spans: &[TextSpan], links: &[LinkAnnot]) -> Vec<VisualLine> {
-    let mut order: Vec<usize> = (0..spans.len())
-        .filter(|&i| !spans[i].text.is_empty())
-        .collect();
+    let mut order: Vec<usize> = (0..spans.len()).filter(|&i| !spans[i].text.is_empty()).collect();
 
     // Sort top-to-bottom (`y` descending), then left-to-right (`x` ascending).
     order.sort_by(|&a, &b| {
         let ya = spans[a].y;
         let yb = spans[b].y;
         let tol = (f64::from(spans[a].size.min(spans[b].size)) * 0.35).max(2.0);
-        if (ya - yb).abs() > tol {
-            yb.total_cmp(&ya)
-        } else {
-            spans[a].x.total_cmp(&spans[b].x)
-        }
+        if (ya - yb).abs() > tol { yb.total_cmp(&ya) } else { spans[a].x.total_cmp(&spans[b].x) }
     });
 
     let mut raw_clusters: Vec<Vec<&TextSpan>> = Vec::new();
@@ -140,10 +134,7 @@ fn build_visual_line(cluster: &[&TextSpan], links: &[LinkAnnot]) -> Option<Visua
 
     for &sp in cluster {
         // Detect duplicate shadow-bold glyph overlays drawn at nearly identical `(x, y)`.
-        if !prev_raw_text.is_empty()
-            && sp.text == prev_raw_text
-            && (sp.x - prev_x).abs() <= f64::from(sp.size) * 0.14
-        {
+        if !prev_raw_text.is_empty() && sp.text == prev_raw_text && (sp.x - prev_x).abs() <= f64::from(sp.size) * 0.14 {
             if let Some(last_seg) = segs.last_mut() {
                 last_seg.bold = true;
                 last_seg.fmt.bold = true;
@@ -218,11 +209,8 @@ fn build_visual_line(cluster: &[&TextSpan], links: &[LinkAnnot]) -> Option<Visua
         return None;
     }
 
-    let dominant_bucket = size_weights
-        .into_iter()
-        .max_by_key(|&(bucket, weight)| (weight, -bucket))
-        .map(|(b, _)| b)
-        .unwrap_or((max_size * 2.0).round() as i32);
+    let dominant_bucket =
+        size_weights.into_iter().max_by_key(|&(bucket, weight)| (weight, -bucket)).map(|(b, _)| b).unwrap_or((max_size * 2.0).round() as i32);
     let dominant_size = (dominant_bucket as f32) * 0.5;
     let all_bold = bold_chars * 10 >= total_non_ws * 9;
 
@@ -247,12 +235,7 @@ fn push_seg(segs: &mut Vec<RichSeg>, text: &str, fmt: Fmt, size: f32, bold: bool
         last.text.push_str(text);
         return;
     }
-    segs.push(RichSeg {
-        text: text.to_string(),
-        fmt,
-        size,
-        bold,
-    });
+    segs.push(RichSeg { text: text.to_string(), fmt, size, bold });
 }
 
 fn trim_line_edges(segs: &mut Vec<RichSeg>) {
@@ -288,11 +271,7 @@ fn match_link(bbox: [f64; 4], links: &[LinkAnnot]) -> Option<Arc<str>> {
     let cy = 0.5 * (bbox[1] + bbox[3]);
     for l in links {
         let pad = 2.5;
-        if cx >= l.rect[0] - pad
-            && cx <= l.rect[2] + pad
-            && cy >= l.rect[1] - pad
-            && cy <= l.rect[3] + pad
-        {
+        if cx >= l.rect[0] - pad && cx <= l.rect[2] + pad && cy >= l.rect[1] - pad && cy <= l.rect[3] + pad {
             return kept_link(&l.uri);
         }
     }
@@ -311,12 +290,7 @@ fn infer_body_font_size(pages: &[(f64, Vec<VisualLine>)]) -> f32 {
             *weights.entry(bucket).or_insert(0) += line.char_count.max(1);
         }
     }
-    weights
-        .into_iter()
-        .max_by_key(|&(bucket, count)| (count, -bucket))
-        .map(|(b, _)| (b as f32) * 0.5)
-        .unwrap_or(11.0)
-        .clamp(6.0, 36.0)
+    weights.into_iter().max_by_key(|&(bucket, count)| (count, -bucket)).map(|(b, _)| (b as f32) * 0.5).unwrap_or(11.0).clamp(6.0, 36.0)
 }
 
 struct PageMetrics {
@@ -327,30 +301,20 @@ struct PageMetrics {
 }
 
 fn infer_page_metrics(lines: &[VisualLine], body_size: f32, page_width: f64) -> PageMetrics {
-    let mut lefts: Vec<f64> = lines
-        .iter()
-        .filter(|l| (l.dominant_size - body_size).abs() <= 1.5)
-        .map(|l| l.x)
-        .collect();
+    let mut lefts: Vec<f64> = lines.iter().filter(|l| (l.dominant_size - body_size).abs() <= 1.5).map(|l| l.x).collect();
     if lefts.is_empty() {
         lefts = lines.iter().map(|l| l.x).collect();
     }
     lefts.sort_by(|a, b| a.total_cmp(b));
     let body_left = lefts.first().copied().unwrap_or(72.0);
 
-    let col_right = lines
-        .iter()
-        .map(|l| l.end_x)
-        .fold(body_left + 200.0, f64::max);
+    let col_right = lines.iter().map(|l| l.end_x).fold(body_left + 200.0, f64::max);
 
     let mut leadings: Vec<f64> = Vec::new();
     for pair in lines.windows(2) {
         let dy = pair[0].y - pair[1].y;
         let sz = f64::from(pair[0].dominant_size.max(pair[1].dominant_size));
-        if (pair[0].dominant_size - body_size).abs() <= 1.5
-            && (pair[1].dominant_size - body_size).abs() <= 1.5
-            && dy >= sz * 0.80
-            && dy <= sz * 1.95
+        if (pair[0].dominant_size - body_size).abs() <= 1.5 && (pair[1].dominant_size - body_size).abs() <= 1.5 && dy >= sz * 0.80 && dy <= sz * 1.95
         {
             leadings.push(dy);
         }
@@ -363,12 +327,7 @@ fn infer_page_metrics(lines: &[VisualLine], body_size: f32, page_width: f64) -> 
         None
     };
 
-    PageMetrics {
-        body_left,
-        col_right,
-        typical_leading,
-        page_width,
-    }
+    PageMetrics { body_left, col_right, typical_leading, page_width }
 }
 
 fn classify_line_kind(line: &VisualLine, next_line: Option<&VisualLine>, body_size: f32) -> Kind {
@@ -392,9 +351,7 @@ fn classify_line_kind(line: &VisualLine, next_line: Option<&VisualLine>, body_si
     if (ratio - 1.0).abs() <= 0.05 && line.all_bold && line.char_count <= 80 {
         let text = line.plain_text();
         let ends_sentence = text.ends_with(['.', '?', '!', ',', ';']);
-        let followed_by_body = next_line.is_some_and(|nl| {
-            !nl.all_bold && (line.y - nl.y) >= f64::from(line.dominant_size) * 1.15
-        });
+        let followed_by_body = next_line.is_some_and(|nl| !nl.all_bold && (line.y - nl.y) >= f64::from(line.dominant_size) * 1.15);
         if !ends_sentence && followed_by_body {
             return Kind::Heading(3);
         }
@@ -416,16 +373,7 @@ fn detect_list_prefix(line: &VisualLine, body_left: f64) -> Option<(ListInfo, us
             let rest = stripped.trim_start_matches([' ', '\t']);
             if !rest.is_empty() {
                 let prefix_bytes = text.len() - rest.len();
-                return Some((
-                    ListInfo {
-                        ordered: false,
-                        level,
-                        start: 1,
-                        list: 0,
-                        label: None,
-                    },
-                    prefix_bytes,
-                ));
+                return Some((ListInfo { ordered: false, level, start: 1, list: 0, label: None }, prefix_bytes));
             }
         }
     }
@@ -441,10 +389,7 @@ fn detect_list_prefix(line: &VisualLine, body_left: f64) -> Option<(ListInfo, us
         let rest = after_paren.trim_start_matches([' ', '\t']);
         if !rest.is_empty() {
             let start = num_part.parse::<u32>().unwrap_or(1).max(1);
-            return Some((
-                ListInfo { ordered: true, level, start, list: 0, label: None },
-                text.len() - rest.len(),
-            ));
+            return Some((ListInfo { ordered: true, level, start, list: 0, label: None }, text.len() - rest.len()));
         }
     }
 
@@ -457,10 +402,7 @@ fn detect_list_prefix(line: &VisualLine, body_left: f64) -> Option<(ListInfo, us
             let rest = after_punct.trim_start_matches([' ', '\t']);
             if !rest.is_empty() {
                 let start = trimmed[..num_len].parse::<u32>().unwrap_or(1).max(1);
-                return Some((
-                    ListInfo { ordered: true, level, start, list: 0, label: None },
-                    text.len() - rest.len(),
-                ));
+                return Some((ListInfo { ordered: true, level, start, list: 0, label: None }, text.len() - rest.len()));
             }
         }
     }
@@ -468,12 +410,7 @@ fn detect_list_prefix(line: &VisualLine, body_left: f64) -> Option<(ListInfo, us
     None
 }
 
-fn reflow_page_lines(
-    lines: &[VisualLine],
-    body_size: f32,
-    metrics: &PageMetrics,
-    page_break_on_first: bool,
-) -> Vec<FBlock> {
+fn reflow_page_lines(lines: &[VisualLine], body_size: f32, metrics: &PageMetrics, page_break_on_first: bool) -> Vec<FBlock> {
     let mut blocks: Vec<FBlock> = Vec::new();
     let mut active: Option<(Para, VisualLine)> = None;
     let mut pending_page_break = page_break_on_first;
@@ -481,11 +418,7 @@ fn reflow_page_lines(
     for (idx, line) in lines.iter().enumerate() {
         let next_hint = lines.get(idx + 1);
         let mut kind = classify_line_kind(line, next_hint, body_size);
-        let list_hit = if kind == Kind::Normal {
-            detect_list_prefix(line, metrics.body_left)
-        } else {
-            None
-        };
+        let list_hit = if kind == Kind::Normal { detect_list_prefix(line, metrics.body_left) } else { None };
         if list_hit.is_some() {
             kind = Kind::Normal;
         }
@@ -519,15 +452,8 @@ fn reflow_page_lines(
             }
             // Preserve first-line indent when clearly indented relative to body left margin.
             let indent = line.x - metrics.body_left;
-            if kind == Kind::Normal
-                && para.align.is_none()
-                && indent >= f64::from(line.dominant_size) * 1.25
-                && indent <= 72.0
-            {
-                para.spacing = Spacing {
-                    first: Some((indent as f32).round()),
-                    ..Default::default()
-                };
+            if kind == Kind::Normal && para.align.is_none() && indent >= f64::from(line.dominant_size) * 1.25 && indent <= 72.0 {
+                para.spacing = Spacing { first: Some((indent as f32).round()), ..Default::default() };
             }
             append_line_to_para(&mut para, &line.segs, 0);
         }
@@ -561,13 +487,7 @@ fn detect_centered_line(line: &VisualLine, metrics: &PageMetrics) -> Option<Alig
     }
 }
 
-fn should_merge_lines(
-    curr_para: &Para,
-    prev_line: &VisualLine,
-    next_line: &VisualLine,
-    next_kind: Kind,
-    metrics: &PageMetrics,
-) -> bool {
+fn should_merge_lines(curr_para: &Para, prev_line: &VisualLine, next_line: &VisualLine, next_kind: Kind, metrics: &PageMetrics) -> bool {
     let dy = prev_line.y - next_line.y;
     let ref_size = f64::from(prev_line.dominant_size.max(next_line.dominant_size));
     if dy < ref_size * 0.55 {
@@ -607,10 +527,7 @@ fn should_merge_lines(
     // Indentation check: a new first-line indent signals a new paragraph.
     let next_indent_from_body = next_line.x - metrics.body_left;
     let next_shift_from_prev = next_line.x - prev_line.x;
-    if curr_para.list.is_none()
-        && next_indent_from_body >= ref_size * 1.15
-        && next_shift_from_prev >= ref_size * 1.0
-    {
+    if curr_para.list.is_none() && next_indent_from_body >= ref_size * 1.15 && next_shift_from_prev >= ref_size * 1.0 {
         return false;
     }
 
@@ -655,10 +572,7 @@ fn append_line_to_para(para: &mut Para, segs: &[RichSeg], mut skip_bytes: usize)
         // unless joining adjacent Chinese/Japanese characters.
         let dehyphenated = if let Some(Inline::Text(prev_text, _)) = para.inlines.last_mut()
             && prev_text.ends_with('-')
-            && prev_text[..prev_text.len() - 1]
-                .chars()
-                .next_back()
-                .is_some_and(|c| c.is_ascii_alphabetic())
+            && prev_text[..prev_text.len() - 1].chars().next_back().is_some_and(|c| c.is_ascii_alphabetic())
             && first_str.chars().next().is_some_and(|c| c.is_ascii_lowercase())
         {
             prev_text.pop();

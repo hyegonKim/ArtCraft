@@ -47,27 +47,15 @@ fn merge_picks_region_paint_over_node_default_fill() {
             },
         ],
     };
-    let vid = s
-        .doc_mut()
-        .unwrap()
-        .create(page, NodeKind::Vector { network: net }, "Split", 0.0, 0.0, 100.0, 50.0)
-        .unwrap();
+    let vid = s.doc_mut().unwrap().create(page, NodeKind::Vector { network: net }, "Split", 0.0, 0.0, 100.0, 50.0).unwrap();
     s.doc_mut().unwrap().get_mut(vid).unwrap().fills = vec![Paint::solid(Color::from_rgb8_const(0x00, 0x00, 0xFF))];
 
-    let rect = id_of(
-        &s.execute("shape.rectangle", &json!({"x": 60, "y": 10, "width": 60, "height": 30})).unwrap()["id"],
-    )
-    .unwrap();
+    let rect = id_of(&s.execute("shape.rectangle", &json!({"x": 60, "y": 10, "width": 60, "height": 30})).unwrap()["id"]).unwrap();
     s.execute("fill.set", &json!({"ids": [rect], "color": "#CCCCCC"})).unwrap();
     // Put the multi-region vector on top so the right region's green fill styles the merged shape.
     s.execute("arrange.front", &json!({"ids": [vid]})).unwrap();
 
-    let out = s
-        .execute(
-            "shapeBuilder.merge",
-            &json!({"ids": [rect, vid], "points": [[75.0, 25.0], [110.0, 25.0]]}),
-        )
-        .unwrap();
+    let out = s.execute("shapeBuilder.merge", &json!({"ids": [rect, vid], "points": [[75.0, 25.0], [110.0, 25.0]]})).unwrap();
     let merged = id_of(&out["id"]).unwrap();
     let fills = &s.doc().unwrap().node(merged).unwrap().fills;
     assert_eq!(fills.len(), 1);

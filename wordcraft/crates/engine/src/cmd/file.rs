@@ -95,6 +95,12 @@ pub fn specs() -> Vec<CommandSpec> {
         CommandSpec::new("file.importPdf", "Import PDF (Reflow)", "File › Open", import_pdf)
             .params(r#"{"path"?: string, "data"?: base64 (PDF bytes; `path` is optional and names the imported document)}"#)
             .pure(),
+        CommandSpec::new("file.importIcml", "Import InCopy Story", "File › Open", import_icml)
+            .params(r#"{"path"?: string, "data"?: base64, "xml"?: string (InCopy .icml markup; `path` is optional and names the imported story)}"#)
+            .pure(),
+        CommandSpec::new("file.exportIcml", "Export InCopy Story", "File › Export", export_icml)
+            .params(r#"{"path"?: string, "domVersion"?: string (default "22.0"), "inline"?: bool (when true, returns `xml` directly without writing a file)}"#)
+            .pure(),
         CommandSpec::new("file.save", "Save", "File", save)
             .key("Mod+S / Shift+F12 / Alt+Shift+F2")
             .params(r#"{"path"?: string, "password"?: string (encrypt this and later saves with it, as file.encrypt does), "markup"?: bool (Print Markup for a PDF, PNG, HTML, Markdown or text copy: comments shown; default file.printMarkup), "format"?: "wordml2003" (an .xml file as a Word 2003 XML Document) | "flatopc" (as a Word XML Document, the default; saving over a Word 2003 XML file keeps that format), "strict"?: bool (a .pdf or .png only: refuse, writing nothing, if a character can't be drawn or a picture is missing; see file.strictReport)}"#)
@@ -328,7 +334,7 @@ fn read_document(s: &Session, path: &str, v: &Value) -> Result<(Document, bool),
     };
     let ext = std::path::Path::new(path).extension().and_then(std::ffi::OsStr::to_str).unwrap_or("").to_ascii_lowercase();
     if let Some(lang) = s.prefs.default_language.as_ref().or(s.editing_lang.as_ref())
-        && matches!(ext.as_str(), "txt" | "text" | "md" | "markdown" | "pdf")
+        && matches!(ext.as_str(), "txt" | "text" | "md" | "markdown" | "pdf" | "icml")
     {
         Arc::make_mut(&mut doc.styles).default_chr.lang = Some(lang.clone());
     }
@@ -372,10 +378,8 @@ fn import_pdf(s: &mut Session, v: &Value) -> CmdResult {
         Arc::make_mut(&mut doc.styles).default_chr.lang = Some(lang.clone());
     }
 
-    let stem = path
-        .and_then(|p_str| std::path::Path::new(p_str).file_stem())
-        .map(|st| st.to_string_lossy().trim().to_string())
-        .filter(|st| !st.is_empty());
+    let stem =
+        path.and_then(|p_str| std::path::Path::new(p_str).file_stem()).map(|st| st.to_string_lossy().trim().to_string()).filter(|st| !st.is_empty());
 
     match s.used_because() {
         None => s.set_document(doc),
@@ -393,6 +397,99 @@ fn import_pdf(s: &mut Session, v: &Value) -> CmdResult {
         "paragraphs": s.doc.paragraph_count(),
         "words": s.doc.word_count(),
         "id": s.document_id()
+    }))
+}
+
+/// Import an Adobe InCopy (`.icml`) story into an editable WordCraft document (`file.importIcml`),
+/// preserving paragraph/character styles and `<Change>` tracked insertions, deletions, and moves.
+fn import_icml(s: &mut Session, v: &Value) -> CmdResult {
+    let path = p::str(v, "path");
+    let data = p::str(v, "data");
+    let xml_inline = p::str(v, "xml");
+    if path.is_none() && data.is_none() && xml_inline.is_none() {
+        s.push_ui_request(json!({"open": "importIcml"}));
+        return Ok(json!({"imported": false}));
+    }
+    let bytes = if let Some(xml) = xml_inline {
+        xml.as_bytes().to_vec()
+    } else if let Some(b64) = data {
+        super::insert::base64_decode(b64).ok_or_else(|| CmdError::Params("bad base64".into()))?
+    } else if let Some(p_str) = path {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            crate::io::read_document(std::path::Path::new(p_str)).map_err(CmdError::Failed)?
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            let _ = p_str;
+            return Err(CmdError::Params("`data` or `xml` is required on the web".into()));
+        }
+    } else {
+        return Err(CmdError::Params("give `path`, `data`, or `xml`".into()));
+    };
+
+    let page = crate::io::region_page(&s.region());
+    let mut doc = wordcraft_formats::icml::import_on(&bytes, &page).map_err(CmdError::Failed)?;
+    doc.ensure_nonempty();
+    super::references::refresh_date_fields(&mut doc);
+    if doc.styles.default_chr.lang.is_none()
+        && let Some(lang) = s.prefs.default_language.as_ref().or(s.editing_lang.as_ref())
+    {
+        Arc::make_mut(&mut doc.styles).default_chr.lang = Some(lang.clone());
+    }
+
+    let stem =
+        path.and_then(|p_str| std::path::Path::new(p_str).file_stem()).map(|st| st.to_string_lossy().trim().to_string()).filter(|st| !st.is_empty());
+
+    match s.used_because() {
+        None => s.set_document(doc),
+        Some(_) => {
+            let _ = s.add_opened_document(doc);
+        }
+    }
+    if let Some(name) = stem {
+        s.file_name = Some(name);
+    }
+    s.dirty = true;
+    Ok(json!({
+        "imported": true,
+        "path": path,
+        "paragraphs": s.doc.paragraph_count(),
+        "words": s.doc.word_count(),
+        "revisions": s.doc.revisions.len(),
+        "trackChanges": s.doc.settings.track_changes,
+        "id": s.document_id()
+    }))
+}
+
+/// Export the active document as an Adobe InCopy (`.icml`) story (`file.exportIcml`).
+fn export_icml(s: &mut Session, v: &Value) -> CmdResult {
+    let dom_version = p::str(v, "domVersion").unwrap_or(wordcraft_formats::icml::DEFAULT_DOM_VERSION);
+    let inline = p::bool(v, "inline").unwrap_or(false);
+    let path = p::str(v, "path");
+    if path.is_none() && !inline {
+        s.push_ui_request(json!({"open": "exportIcml"}));
+        return Ok(json!({"exported": false}));
+    }
+    let out = super::references::output_fields(&s.doc);
+    let doc = out.as_ref().unwrap_or(&s.doc);
+    let xml = wordcraft_formats::icml::export_with_version(doc, dom_version);
+    if let Some(raw_path) = path {
+        let final_path = if raw_path.to_ascii_lowercase().ends_with(".icml") { raw_path.to_string() } else { format!("{raw_path}.icml") };
+        crate::io::write_file(&final_path, xml.as_bytes()).map_err(CmdError::Failed)?;
+        return Ok(json!({
+            "exported": true,
+            "path": final_path,
+            "bytes": xml.len(),
+            "domVersion": dom_version,
+            "xml": if inline { Value::String(xml) } else { Value::Null }
+        }));
+    }
+    Ok(json!({
+        "exported": true,
+        "bytes": xml.len(),
+        "domVersion": dom_version,
+        "xml": xml
     }))
 }
 
@@ -517,7 +614,10 @@ fn save(s: &mut Session, v: &Value) -> CmdResult {
     // A Markdown file saved as another one loses nothing its own save wouldn't: it moves there.
     let own_file = s.path.as_deref() == Some(path.as_path());
     let markdown_to_markdown = super::md_source::is_markdown_file(&path) && s.path.as_deref().is_some_and(super::md_source::is_markdown_file);
-    if own_file || markdown_to_markdown || ["docx", "docm", "dotx", "dotm", "odt", "ott", "fodt", "rtf", "json", "xml"].contains(&ext.as_str()) {
+    if own_file
+        || markdown_to_markdown
+        || ["docx", "docm", "dotx", "dotm", "odt", "ott", "fodt", "rtf", "icml", "json", "xml"].contains(&ext.as_str())
+    {
         s.path = Some(path.clone());
         s.dirty = false;
         s.relayout();
@@ -807,4 +907,40 @@ fn layout_summary(s: &mut Session, _: &Value) -> CmdResult {
         .collect();
     let caret = l.caret_on(&s.sel.focus, s.page_hint).map(|c| json!({"page": c.page, "x": c.x, "y": c.top, "h": c.height}));
     Ok(json!({"pages": pages, "caret": caret, "ms": l.ms}))
+}
+
+#[cfg(test)]
+mod icml_cmd_tests {
+    use super::*;
+    use wordcraft_doc::{CharProps, Paragraph, Revision, RevisionKind, para_block};
+
+    #[test]
+    fn engine_import_and_export_icml_round_trip() {
+        let mut doc = Document::new();
+        doc.settings.track_changes = true;
+        doc.revisions.push(Revision::new(RevisionKind::Insert, "Editor One", "2026-11-27T10:00:00Z"));
+        doc.revisions.push(Revision::new(RevisionKind::Delete, "Editor Two", "2026-11-27T10:05:00Z"));
+
+        let h = Paragraph::with_text("InCopy Feature Story", CharProps::default()).styled("Heading1");
+        let mut p = Paragraph::with_text("Opening paragraph ", CharProps::default());
+        let n = p.len();
+        p.insert_text(n, "inserted phrase", &CharProps { ins: Some(0), bold: Some(true), ..Default::default() }).unwrap();
+        let n = p.len();
+        p.insert_text(n, " cut phrase", &CharProps { del: Some(1), ..Default::default() }).unwrap();
+        doc.body = vec![para_block(h), para_block(p)];
+
+        let mut s = Session::new(doc);
+        let exported = s.run("file.exportIcml", &json!({"inline": true})).unwrap();
+        assert_eq!(exported["exported"], true);
+        let xml = exported["xml"].as_str().unwrap();
+        assert!(xml.contains("ChangeType=\"InsertedText\""));
+        assert!(xml.contains("ChangeType=\"DeletedText\""));
+
+        let mut s2 = Session::new(Document::new());
+        let imported = s2.run("file.importIcml", &json!({"xml": xml, "path": "feature.icml"})).unwrap();
+        assert_eq!(imported["imported"], true);
+        assert_eq!(imported["trackChanges"], true);
+        assert_eq!(s2.doc.final_text(StoryRef::Body), "InCopy Feature Story\nOpening paragraph inserted phrase");
+        assert!(s2.doc.revisions.iter().any(|r| r.kind == RevisionKind::Delete && r.author == "Editor Two"));
+    }
 }

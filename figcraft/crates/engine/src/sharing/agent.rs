@@ -74,20 +74,12 @@ impl Session {
                     } else if b_sel != sel {
                         sel
                     } else {
-                        self.agent_presence
-                            .as_ref()
-                            .filter(|p| p.doc == uid)
-                            .map(|p| p.layers.clone())
-                            .unwrap_or_default()
+                        self.agent_presence.as_ref().filter(|p| p.doc == uid).map(|p| p.layers.clone()).unwrap_or_default()
                     }
                 } else if b_sel != sel {
                     sel
                 } else {
-                    self.agent_presence
-                        .as_ref()
-                        .filter(|p| p.doc == uid)
-                        .map(|p| p.layers.clone())
-                        .unwrap_or_default()
+                    self.agent_presence.as_ref().filter(|p| p.doc == uid).map(|p| p.layers.clone()).unwrap_or_default()
                 }
             }
             _ => {
@@ -99,12 +91,7 @@ impl Session {
             }
         };
 
-        self.agent_presence = Some(AgentPresence {
-            name,
-            doc: uid,
-            layers,
-            at: Instant::now(),
-        });
+        self.agent_presence = Some(AgentPresence { name, doc: uid, layers, at: Instant::now() });
     }
 
     /// The attached AI agent's presence if it is still within [`LINGER`] of `now`.

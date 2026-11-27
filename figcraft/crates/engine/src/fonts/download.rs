@@ -63,18 +63,12 @@ pub fn source(family: &str) -> Option<String> {
 
 /// Active and recently finished font downloads.
 pub fn downloads() -> Vec<(String, Download)> {
-    jobs()
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .values()
-        .cloned()
-        .collect()
+    jobs().lock().unwrap_or_else(std::sync::PoisonError::into_inner).values().cloned().collect()
 }
 
 /// Whether the user has allowed downloading fonts.
 pub fn downloads_allowed() -> bool {
-    crate::file_access::network_refused().is_none()
-        && open_store(Caller::User).is_some_and(|st| st.network() == Network::On)
+    crate::file_access::network_refused().is_none() && open_store(Caller::User).is_some_and(|st| st.network() == Network::On)
 }
 
 /// Turn font downloads on (from the user's explicit consent in the Missing fonts window).
@@ -88,10 +82,7 @@ pub fn allow_downloads() -> std::result::Result<(), String> {
 
 fn set_job(family: &str, state: Download) {
     let key = family.trim().to_lowercase();
-    jobs()
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .insert(key, (family.trim().to_string(), state));
+    jobs().lock().unwrap_or_else(std::sync::PoisonError::into_inner).insert(key, (family.trim().to_string(), state));
 }
 
 fn font_download_cmd(s: &mut Session, p: &Value) -> Result<Value> {
@@ -124,25 +115,15 @@ fn font_download_cmd(s: &mut Session, p: &Value) -> Result<Value> {
     if let Some(why) = crate::file_access::network_refused() {
         return Err(EngineError::Disabled(cmd.into(), why));
     }
-    let store = open_store(Caller::User)
-        .ok_or_else(|| EngineError::Disabled(cmd.into(), "no user font folder is available".into()))?;
+    let store = open_store(Caller::User).ok_or_else(|| EngineError::Disabled(cmd.into(), "no user font folder is available".into()))?;
     if store.network() != Network::On {
-        return Err(EngineError::Disabled(
-            cmd.into(),
-            "downloading fonts is turned off: allow it in the Missing fonts window first".into(),
-        ));
+        return Err(EngineError::Disabled(cmd.into(), "downloading fonts is turned off: allow it in the Missing fonts window first".into()));
     }
     let index = store.cached_indexes(&PINNED_INDEX).unwrap_or_else(|| store.offline_indexes());
-    let fam = index
-        .family(&family)
-        .cloned()
-        .ok_or_else(|| bad(cmd, format!("the font store doesn't have `{family}`")))?;
+    let fam = index.family(&family).cloned().ok_or_else(|| bad(cmd, format!("the font store doesn't have `{family}`")))?;
 
-    let already_running = jobs()
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .get(&key)
-        .is_some_and(|(_, d)| matches!(d, Download::Running { .. }));
+    let already_running =
+        jobs().lock().unwrap_or_else(std::sync::PoisonError::into_inner).get(&key).is_some_and(|(_, d)| matches!(d, Download::Running { .. }));
     if already_running {
         return Ok(json!({"family": fam.family, "status": "downloading"}));
     }

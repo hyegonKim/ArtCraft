@@ -24,10 +24,7 @@ fn movable_items(doc: &Document, ids: &[NodeId]) -> Vec<Item> {
             continue;
         }
         // Auto-layout flow children are positioned by their parent frame unless absolute.
-        let in_flow = n
-            .parent
-            .and_then(|p| doc.node(p))
-            .is_some_and(|pn| pn.layout.is_some() && !n.child_layout.absolute);
+        let in_flow = n.parent.and_then(|p| doc.node(p)).is_some_and(|pn| pn.layout.is_some() && !n.child_layout.absolute);
         if in_flow {
             continue;
         }
@@ -85,11 +82,8 @@ fn is_column(items: &[Item]) -> bool {
 
 /// Connected interval bands along one axis (`(lo, hi, indices)`), sorted by `lo`.
 fn axis_bands(items: &[Item], horizontal: bool) -> Vec<(f64, f64, Vec<usize>)> {
-    let mut order: Vec<(usize, f64, f64)> = items
-        .iter()
-        .enumerate()
-        .map(|(i, it)| if horizontal { (i, it.rect.x0, it.rect.x1) } else { (i, it.rect.y0, it.rect.y1) })
-        .collect();
+    let mut order: Vec<(usize, f64, f64)> =
+        items.iter().enumerate().map(|(i, it)| if horizontal { (i, it.rect.x0, it.rect.x1) } else { (i, it.rect.y0, it.rect.y1) }).collect();
     order.sort_by(|a, b| a.1.total_cmp(&b.1).then_with(|| a.2.total_cmp(&b.2)));
 
     let mut bands: Vec<(f64, f64, Vec<usize>)> = Vec::new();
@@ -279,9 +273,7 @@ pub fn tidy_moves(doc: &Document, ids: &[NodeId], spacing: Option<f64>, snap: bo
                     }
                 }
                 let row_gap = spacing.unwrap_or_else(|| chosen_gap(&v_gaps));
-                let top_y = (0..cols)
-                    .map(|c| items[cells[0][c]].rect.y0)
-                    .fold(f64::INFINITY, f64::min);
+                let top_y = (0..cols).map(|c| items[cells[0][c]].rect.y0).fold(f64::INFINITY, f64::min);
 
                 let mut col_x = snap_coord(col_boxes[0].0, snap);
                 for c in 0..cols {
@@ -327,9 +319,7 @@ pub fn tidy_moves(doc: &Document, ids: &[NodeId], spacing: Option<f64>, snap: bo
                     }
                 }
                 let col_gap = spacing.unwrap_or_else(|| chosen_gap(&h_gaps));
-                let left_x = (0..rows)
-                    .map(|r| items[cells[r][0]].rect.x0)
-                    .fold(f64::INFINITY, f64::min);
+                let left_x = (0..rows).map(|r| items[cells[r][0]].rect.x0).fold(f64::INFINITY, f64::min);
 
                 let mut row_y = snap_coord(row_boxes[0].0, snap);
                 for r in 0..rows {
@@ -352,11 +342,7 @@ pub fn tidy_moves(doc: &Document, ids: &[NodeId], spacing: Option<f64>, snap: bo
         .into_iter()
         .filter_map(|it| {
             let &(tx, ty) = targets.get(&it.id)?;
-            if (tx - it.rect.x0).abs() > 1e-9 || (ty - it.rect.y0).abs() > 1e-9 {
-                Some((it.id, tx - it.rect.x0, ty - it.rect.y0))
-            } else {
-                None
-            }
+            if (tx - it.rect.x0).abs() > 1e-9 || (ty - it.rect.y0).abs() > 1e-9 { Some((it.id, tx - it.rect.x0, ty - it.rect.y0)) } else { None }
         })
         .collect()
 }

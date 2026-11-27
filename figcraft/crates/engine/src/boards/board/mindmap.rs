@@ -28,9 +28,10 @@ fn coord_param(cmd: &str, p: &Value, key: &str) -> Result<Option<f64>> {
     match get(p, key) {
         None | Some(Value::Null) => Ok(None),
         Some(v) => {
-            let x = v.as_f64().filter(|x| x.is_finite() && (-MAX_COORD..=MAX_COORD).contains(x)).ok_or_else(|| {
-                bad(cmd, format!("`{key}` must be a finite coordinate within ±{MAX_COORD}"))
-            })?;
+            let x = v
+                .as_f64()
+                .filter(|x| x.is_finite() && (-MAX_COORD..=MAX_COORD).contains(x))
+                .ok_or_else(|| bad(cmd, format!("`{key}` must be a finite coordinate within ±{MAX_COORD}")))?;
             Ok(Some(x))
         }
     }
@@ -176,10 +177,7 @@ fn incoming_branches(doc: &Document, page: NodeId) -> BTreeMap<NodeId, (NodeId, 
         let left = match from_side {
             Side::Left => true,
             Side::Right => false,
-            _ => doc
-                .world_bounds(*to)
-                .zip(doc.world_bounds(*from))
-                .is_some_and(|(tb, fb)| tb.center().x < fb.center().x),
+            _ => doc.world_bounds(*to).zip(doc.world_bounds(*from)).is_some_and(|(tb, fb)| tb.center().x < fb.center().x),
         };
         map.entry(*to).or_insert((*from, left, n.id));
     }
@@ -198,12 +196,8 @@ pub(super) fn mind_map_add(s: &mut Session, p: &Value) -> Result<Value> {
         Some(v) => v,
         None => {
             let ds = s.ds()?;
-            let cand = ds
-                .text_edit
-                .as_ref()
-                .map(|t| t.id)
-                .or_else(|| ds.selection.first().copied())
-                .and_then(|i| owner_of_text(&ds.doc, i).or(Some(i)));
+            let cand =
+                ds.text_edit.as_ref().map(|t| t.id).or_else(|| ds.selection.first().copied()).and_then(|i| owner_of_text(&ds.doc, i).or(Some(i)));
             cand.ok_or_else(|| bad(cmd, "select a mind map node"))?
         }
     };
@@ -449,13 +443,8 @@ pub(crate) fn settle_mind_maps(doc: &mut Document, before: &Document, touched: &
                 if !touched.contains(&item.id) {
                     continue;
                 }
-                let moved = before
-                    .node(item.id)
-                    .zip(doc.node(item.id))
-                    .is_some_and(|(b, n)| b.transform != n.transform);
-                if moved
-                    && let Some(&(_, old_left, cid)) = incoming.get(&item.id)
-                {
+                let moved = before.node(item.id).zip(doc.node(item.id)).is_some_and(|(b, n)| b.transform != n.transform);
+                if moved && let Some(&(_, old_left, cid)) = incoming.get(&item.id) {
                     let now_left = item.rect.center().x < par_box.rect.center().x;
                     if now_left != old_left {
                         side_updates.push((cid, now_left));
@@ -491,10 +480,7 @@ pub(crate) fn settle_mind_maps(doc: &mut Document, before: &Document, touched: &
                 if (cur_bounds.x0 - target_origin.x).abs() <= 1e-6 && (cur_bounds.y0 - target_origin.y).abs() <= 1e-6 {
                     continue;
                 }
-                let parent_tf = doc
-                    .node(nid)
-                    .and_then(|n| n.parent)
-                    .map_or(Affine::IDENTITY, |p| doc.world_transform(p));
+                let parent_tf = doc.node(nid).and_then(|n| n.parent).map_or(Affine::IDENTITY, |p| doc.world_transform(p));
                 let local = parent_tf.inverse() * target_origin;
                 if let Some(n) = doc.node_mut(nid) {
                     n.transform = Affine::translate((local.x, local.y));

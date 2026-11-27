@@ -50,14 +50,7 @@ impl<'a> Mapper<'a> {
     /// Convert a FigJam whiteboard's `STICKY` or `SHAPE_WITH_TEXT` into a native [`figcraft_doc::BoardItem`]
     /// frame when its generated records are complete and supported; otherwise warn and return `None`
     /// so `board_snapshot` keeps the generated layers as in a `.fig`.
-    pub(super) fn native_board_item(
-        &mut self,
-        own: &str,
-        o: &mut Obj,
-        v: &View<'a>,
-        rest_id: &str,
-        depth: usize,
-    ) -> Option<Vec<Value>> {
+    pub(super) fn native_board_item(&mut self, own: &str, o: &mut Obj, v: &View<'a>, rest_id: &str, depth: usize) -> Option<Vec<Value>> {
         let out = match own {
             "STICKY" => self.native_sticky(o, v, rest_id, depth),
             "SHAPE_WITH_TEXT" => self.native_shape_with_text(o, v, rest_id, depth),
@@ -141,10 +134,7 @@ impl<'a> Mapper<'a> {
             return None;
         }
         let (raw_w, raw_h) = valid_size(v.get("size"))?;
-        let (cw, ch) = (
-            raw_w.clamp(0.0, crate::rest::props::MAX_SIZE),
-            raw_h.clamp(0.0, crate::rest::props::MAX_SIZE),
-        );
+        let (cw, ch) = (raw_w.clamp(0.0, crate::rest::props::MAX_SIZE), raw_h.clamp(0.0, crate::rest::props::MAX_SIZE));
         let bg = valid_child(v, 0)?;
         let body = valid_child(v, 1)?;
         let chars = raw_text(&body)?;

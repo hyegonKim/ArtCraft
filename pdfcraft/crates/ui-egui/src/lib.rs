@@ -129,7 +129,7 @@ use dialogs::palette;
 use dialogs::printer_marks_ui;
 use dialogs::protect;
 use dialogs::standards_ui;
-use dialogs::{c2pa_ui, preflight_ui, summary_ui, word_count_ui};
+use dialogs::{c2pa_ui, output_preview_ui, preflight_ui, summary_ui, word_count_ui};
 pub use home::folders_ui;
 pub use hooks::{FailedInbox, HostDirtyFn, HostSaveFn, Inbox, OsEvent, OsEventsFn};
 use menus::tab_context;
@@ -799,6 +799,7 @@ pub struct PdfCraftApp {
     pub number_draft: NumberDraft,
     pub(crate) word_count_draft: word_count_ui::Draft,
     pub preflight_draft: preflight_ui::PreflightDraft,
+    pub output_preview_draft: output_preview_ui::OutputPreviewDraft,
     pub c2pa_draft: c2pa_ui::C2paDraft,
     pub(crate) summary_draft: summary_ui::SummaryDraft,
     pub printer_marks_draft: printer_marks_ui::PrinterMarksDraft,

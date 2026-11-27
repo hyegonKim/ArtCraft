@@ -127,11 +127,7 @@ impl PageInfo {
     pub(super) fn section_props(&self) -> Option<SectionProps> {
         let w = self.width() as f32;
         let h = self.height() as f32;
-        if w >= 72.0 && h >= 72.0 && w <= 3600.0 && h <= 3600.0 {
-            Some(SectionProps { page_w: w, page_h: h, ..Default::default() })
-        } else {
-            None
-        }
+        if w >= 72.0 && h >= 72.0 && w <= 3600.0 && h <= 3600.0 { Some(SectionProps { page_w: w, page_h: h, ..Default::default() }) } else { None }
     }
 }
 
@@ -442,24 +438,12 @@ impl<'a> PdfDoc<'a> {
         if let Some(root_pages_ref) = root_dict.get(b"Pages".as_slice()).and_then(PdfVal::as_ref) {
             visited.insert(root_pages_ref.0);
         }
-        let inherited = InheritedPageAttrs {
-            media_box: [0.0, 0.0, 612.0, 792.0],
-            crop_box: None,
-            rotate: 0,
-            resources: HashMap::new(),
-        };
+        let inherited = InheritedPageAttrs { media_box: [0.0, 0.0, 612.0, 792.0], crop_box: None, rotate: 0, resources: HashMap::new() };
         self.walk_page_node(&pages_val, &inherited, &mut visited, &mut out, 0);
         Ok(out)
     }
 
-    fn walk_page_node(
-        &self,
-        node: &PdfVal,
-        parent: &InheritedPageAttrs,
-        visited: &mut HashSet<u32>,
-        out: &mut Vec<PageInfo>,
-        depth: usize,
-    ) {
+    fn walk_page_node(&self, node: &PdfVal, parent: &InheritedPageAttrs, visited: &mut HashSet<u32>, out: &mut Vec<PageInfo>, depth: usize) {
         if depth > MAX_PARSE_DEPTH || out.len() >= MAX_PAGES {
             return;
         }
@@ -502,13 +486,7 @@ impl<'a> PdfDoc<'a> {
             let eff_box = cur.crop_box.unwrap_or(cur.media_box);
             let contents = dict.get(b"Contents".as_slice()).cloned();
             let links = self.extract_page_links(dict);
-            out.push(PageInfo {
-                media_box: eff_box,
-                rotate: cur.rotate,
-                resources: cur.resources,
-                contents,
-                links,
-            });
+            out.push(PageInfo { media_box: eff_box, rotate: cur.rotate, resources: cur.resources, contents, links });
         }
     }
 
@@ -730,10 +708,7 @@ fn stream_decode_parms(dict: &PdfDict, doc: &PdfDoc<'_>) -> Vec<Option<PdfDict>>
     };
     match p_val {
         PdfVal::Dict(d) => vec![Some(d)],
-        PdfVal::Array(arr) => arr
-            .iter()
-            .map(|item| doc.resolve(item, 0).and_then(|v| v.as_dict().cloned()))
-            .collect(),
+        PdfVal::Array(arr) => arr.iter().map(|item| doc.resolve(item, 0).and_then(|v| v.as_dict().cloned())).collect(),
         _ => Vec::new(),
     }
 }
@@ -1023,10 +998,7 @@ fn parse_xref_stream(dict: &PdfDict, data: &[u8], xref: &mut HashMap<u32, XrefEn
                     xref.entry(obj_id).or_insert(XrefEntry::Offset(f1 as usize));
                 }
                 2 if f1 > 0 => {
-                    xref.entry(obj_id).or_insert(XrefEntry::Compressed {
-                        obj_stm: f1 as u32,
-                        index: f2 as usize,
-                    });
+                    xref.entry(obj_id).or_insert(XrefEntry::Compressed { obj_stm: f1 as u32, index: f2 as usize });
                 }
                 _ => {}
             }
@@ -1090,9 +1062,7 @@ impl<'a> Cursor<'a> {
     }
 
     pub(super) fn eat_keyword(&mut self, kw: &[u8]) -> bool {
-        if self.bytes.get(self.pos..self.pos + kw.len()) == Some(kw)
-            && self.bytes.get(self.pos + kw.len()).is_none_or(|&b| is_ws_or_delim(b))
-        {
+        if self.bytes.get(self.pos..self.pos + kw.len()) == Some(kw) && self.bytes.get(self.pos + kw.len()).is_none_or(|&b| is_ws_or_delim(b)) {
             self.pos += kw.len();
             true
         } else {

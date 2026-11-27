@@ -62,13 +62,11 @@ pub(crate) fn body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens) -> bool
     let before = app.preflight_draft.profile;
     ui.horizontal(|ui| {
         ui.label(tl!("Profile:"));
-        craft_ui::ComboBox::from_id_salt("preflight-profile")
-            .selected_text(profile_label(app.preflight_draft.profile))
-            .show_ui(ui, |ui| {
-                for p in PreflightProfile::ALL {
-                    ui.selectable_value(&mut app.preflight_draft.profile, p, profile_label(p));
-                }
-            });
+        craft_ui::ComboBox::from_id_salt("preflight-profile").selected_text(profile_label(app.preflight_draft.profile)).show_ui(ui, |ui| {
+            for p in PreflightProfile::ALL {
+                ui.selectable_value(&mut app.preflight_draft.profile, p, profile_label(p));
+            }
+        });
     });
     if app.preflight_draft.profile != before {
         app.preflight_draft.summary = None;
@@ -87,31 +85,23 @@ pub(crate) fn body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens) -> bool
         ui.horizontal(|ui| {
             ui.strong(crate::i18n::fmt(
                 tl!("Errors: {e}  ·  Warnings: {w}  ·  Info: {i}"),
-                &[
-                    ("e", &summary.errors.to_string()),
-                    ("w", &summary.warnings.to_string()),
-                    ("i", &summary.infos.to_string()),
-                ],
+                &[("e", &summary.errors.to_string()), ("w", &summary.warnings.to_string()), ("i", &summary.infos.to_string())],
             ));
         });
         ui.add_space(4.0);
-        egui::Frame::new()
-            .fill(t.hover)
-            .corner_radius(egui::CornerRadius::same(6))
-            .inner_margin(egui::Margin::same(8))
-            .show(ui, |ui| {
-                ui.set_width(ui.available_width());
-                egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
-                    ui.set_min_height(120.0);
-                    if summary.findings.is_empty() {
-                        ui.label(tl!("Structural preflight checks found no problems for this profile."));
-                        return;
-                    }
-                    for finding in &summary.findings {
-                        render_finding_row(ui, finding, t, &mut jump_to_page);
-                    }
-                });
+        egui::Frame::new().fill(t.hover).corner_radius(egui::CornerRadius::same(6)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
+                ui.set_min_height(120.0);
+                if summary.findings.is_empty() {
+                    ui.label(tl!("Structural preflight checks found no problems for this profile."));
+                    return;
+                }
+                for finding in &summary.findings {
+                    render_finding_row(ui, finding, t, &mut jump_to_page);
+                }
             });
+        });
     }
 
     if let Some(page_zero) = jump_to_page
@@ -124,12 +114,7 @@ pub(crate) fn body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens) -> bool
     render_footer(ui, app, id)
 }
 
-fn render_finding_row(
-    ui: &mut egui::Ui,
-    finding: &pdfcraft_engine::pdfa::PreflightFinding,
-    t: &Tokens,
-    jump_to_page: &mut Option<usize>,
-) {
+fn render_finding_row(ui: &mut egui::Ui, finding: &pdfcraft_engine::pdfa::PreflightFinding, t: &Tokens, jump_to_page: &mut Option<usize>) {
     let badge = match finding.severity {
         PreflightSeverity::Error => (tl!("Error"), ui.visuals().error_fg_color),
         PreflightSeverity::Warning => (tl!("Warning"), ui.visuals().warn_fg_color),

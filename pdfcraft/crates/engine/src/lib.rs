@@ -44,6 +44,7 @@ pub mod ocr;
 mod open;
 pub mod open_parameters;
 pub mod optimizer;
+pub mod output_preview;
 mod page_filter;
 mod pictures;
 pub mod print_raster;
@@ -109,9 +110,11 @@ pub use pdfcraft_edit::{
 };
 pub use pdfcraft_forms::{
     BorderStyle, CalculatedField, CalculationIssue, CalculationOrder, CheckStyle, Field as FormField, FieldAction, FieldChange, FieldFont,
-    FieldKind as FormFieldKind, FieldProps, FieldValue, Look as FieldLook, LookPatch as FieldLookPatch, NewField, TabOrder, Trigger as FieldTrigger,
-    Widget as FormWidget, af as form_scripts, appearance as form_appearance, appearance::auto_text_size_by as field_auto_text_size_by,
-    appearance::comb_auto_text_size as field_comb_auto_text_size, calculations_changed as form_calculations_changed, flags as field_flags,
+    FieldKind as FormFieldKind, FieldProps, FieldValue, FlatCandidateKind, FlatFormCandidate, FlatStamp, Look as FieldLook,
+    LookPatch as FieldLookPatch, NewField, TabOrder, Trigger as FieldTrigger, Widget as FormWidget, af as form_scripts,
+    appearance as form_appearance, appearance::auto_text_size_by as field_auto_text_size_by,
+    appearance::comb_auto_text_size as field_comb_auto_text_size, calculations_changed as form_calculations_changed, detect_flat_form_candidates,
+    flags as field_flags, stamp_flat_form, stamp_flat_form_items,
 };
 
 pub use pdfcraft_a11y as a11y;

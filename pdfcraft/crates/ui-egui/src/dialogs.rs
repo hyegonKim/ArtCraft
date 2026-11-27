@@ -15,6 +15,7 @@ pub(super) mod convert_colours_ui;
 pub(super) mod credits;
 pub(super) mod hairlines_ui;
 pub(super) mod marks_ui;
+pub(super) mod output_preview_ui;
 pub(super) mod pageboxes;
 pub(super) mod palette;
 pub(super) mod preferences;
@@ -422,6 +423,11 @@ fn dialog_body(ui: &mut egui::Ui, app: &mut PdfCraftApp, dialog: Dialog, req: &m
         Dialog::Preflight => {
             ui.set_width(580.0);
             req.close = crate::preflight_ui::body(ui, app, &t);
+            return false;
+        }
+        Dialog::OutputPreview => {
+            ui.set_width(620.0);
+            req.close = crate::output_preview_ui::body(ui, app, &t);
             return false;
         }
         Dialog::ContentCredentials => {

@@ -44,7 +44,7 @@ impl<'a> Ex<'a> {
 
     // ---------- Graphic.xml ----------
 
-    pub(super) fn graphic_part(&mut self) -> Vec<u8> {
+    pub(crate) fn graphic_part(&mut self) -> Vec<u8> {
         let d = self.d;
         let mut graphic = GraphicPart::default();
         // Specials (always present).
