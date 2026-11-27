@@ -712,6 +712,14 @@ impl Host for DesktopHost {
         dialog.pick_folder().and_then(|p| p.to_str().map(str::to_string))
     }
 
+    fn pick_file(&mut self, initial: Option<&str>) -> Option<String> {
+        let mut dialog = rfd::FileDialog::new();
+        if let Some(folder) = nearest_existing_folder(initial) {
+            dialog = dialog.set_directory(folder);
+        }
+        dialog.pick_file().and_then(|p| p.to_str().map(str::to_string))
+    }
+
     fn default_install_folder(&mut self, kind: artcraft_launcher_core::PackageKind, arch: Option<artcraft_launcher_core::Arch>) -> Option<String> {
         if let Some((_, answer)) = self.default_folders.iter().find(|(question, _)| *question == (kind, arch)) {
             return answer.clone();

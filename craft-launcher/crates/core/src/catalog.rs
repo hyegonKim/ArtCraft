@@ -122,19 +122,35 @@ impl CraftApp {
         crate::counterpart::CounterpartSpec::by_app_id(self.id)
     }
 
+    /// Industry counterpart metadata including extended suite entries (`artcraft`, `craft-anything`,
+    /// `solidcraft`, `mailcraft`).
+    pub fn extended_counterpart(&self) -> Option<&'static crate::counterpart::CounterpartSpec> {
+        crate::counterpart::extended_counterpart_by_app_id(self.id)
+    }
+
     /// Primary counterpart display label (`"Adobe Photoshop 2027"`, `"Figma"`, `"Microsoft Word"`).
     pub fn counterpart_name(&self) -> Option<&'static str> {
-        self.counterpart().map(|c| c.display_name)
+        self.extended_counterpart().map(|c| c.display_name)
     }
 
     /// Full counterpart summary including CC 2027 release version / companion metadata.
     pub fn counterpart_summary(&self) -> Option<&'static str> {
-        self.counterpart().map(|c| c.summary_label)
+        self.extended_counterpart().map(|c| c.summary_label)
     }
 
     /// Whether a lowercase search needle matches this app's counterpart metadata.
     pub fn matches_counterpart_query(&self, lower_needle: &str) -> bool {
-        self.counterpart().is_some_and(|c| c.matches_query(lower_needle))
+        self.extended_counterpart().is_some_and(|c| c.matches_query(lower_needle))
+    }
+
+    /// Creative Cloud Desktop domain categories associated with this app.
+    pub fn categories(&self) -> &'static [crate::counterpart::CreativeCategory] {
+        crate::counterpart::categories_for_app(self.id)
+    }
+
+    /// Whether this app belongs to `category` (`CreativeCategory::All` matches every app).
+    pub fn in_category(&self, category: crate::counterpart::CreativeCategory) -> bool {
+        crate::counterpart::app_in_category(self.id, category)
     }
 }
 

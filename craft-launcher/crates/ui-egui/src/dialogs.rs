@@ -40,6 +40,7 @@ impl LauncherUi {
             Dialog::LauncherUpdate(r) => modal.show(ctx, |ui| close = self.launcher_update_dialog(ui, r)),
             Dialog::Versions(id) => modal.show(ctx, |ui| close = self.version_dialog(ui, id)),
             Dialog::LaunchFlags { app, flags } => modal.show(ctx, |ui| close = self.launch_flags_dialog(ui, app, flags)),
+            Dialog::FileRouter { path } => modal.show(ctx, |ui| close = self.file_router_dialog(ui, path, host)),
         };
         if self.dialog.as_ref().is_some_and(|active| active.key() != dialog.key()) {
             // A control inside a dialog opened a different one; don't restore the old dialog.
@@ -351,5 +352,91 @@ impl LauncherUi {
                 folder.clear();
             }
         });
+    }
+
+    /// Quick File Router modal: routes a creative file path or extension (`.psd`, `.ai`, `.prproj`,
+    /// `.pdf`, `.glb`, `.cclibs`, …) to its matching Craft Suite app and opens or installs it.
+    fn file_router_dialog(&mut self, ui: &mut egui::Ui, path: &mut String, host: &mut dyn Host) -> bool {
+        let t = Tokens::get(ui.ctx());
+        ui.set_width(480.0f32.min(ui.ctx().content_rect().width() - 80.0));
+        Self::title(ui, Some(crate::icons::artcraft_mark()), tl!("Open File in Craft App"), "");
+        let label = ui.label(tl!("File path or extension"));
+        ui.horizontal(|ui| {
+            let browse_w = widgets::button_width(ui, tl!("Browse…"), 96.0);
+            let field_w = (ui.available_width() - browse_w - ui.spacing().item_spacing.x).max(120.0);
+            ui.add(
+                egui::TextEdit::singleline(path)
+                    .id_salt("file_router_path")
+                    .hint_text(".psd, .ai, .prproj, .pdf, .glb, .cclibs…")
+                    .desired_width(field_w),
+            )
+            .labelled_by(label.id);
+            if widgets::button(ui, tl!("Browse…"), Kind::Secondary, browse_w).clicked()
+                && let Some(selected) = host.pick_file((!path.is_empty()).then_some(path.as_str()))
+            {
+                *path = selected;
+            }
+        });
+        ui.add_space(10.0);
+        let trimmed = path.trim().trim_matches(['"', '\'']).to_string();
+        let routed = (!trimmed.is_empty()).then(|| artcraft_launcher_core::counterpart::route_file_path(std::path::Path::new(&trimmed))).flatten();
+        match (trimmed.is_empty(), routed) {
+            (true, _) => {
+                ui.label(RichText::new(tl!("Enter a file path or extension to open it in its matching Craft app.")).color(t.muted));
+            }
+            (false, Some(app)) => {
+                egui::Frame::new().fill(t.sunken).stroke(t.hairline()).inner_margin(egui::Margin::symmetric(12, 10)).show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    ui.horizontal(|ui| {
+                        if let Some(icon) = crate::icons::app(app.id) {
+                            ui.add(egui::Image::new(icon).fit_to_exact_size(vec2(32.0, 32.0)));
+                        }
+                        ui.add_space(6.0);
+                        ui.vertical(|ui| {
+                            ui.spacing_mut().item_spacing.y = 2.0;
+                            widgets::wordmark(ui, app, 16.0);
+                            let tagline = crate::i18n::tr_ctx(crate::i18n::current(), app.id, app.tagline);
+                            ui.label(RichText::new(tagline).size(12.5).color(t.muted));
+                        });
+                    });
+                });
+            }
+            (false, None) => {
+                ui.label(RichText::new(tl!("No matching Craft app for this file format.")).color(t.bad));
+            }
+        }
+        ui.add_space(16.0);
+        let mut close = false;
+        ui.horizontal(|ui| {
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                match routed {
+                    Some(app) if self.caps.manage_apps && self.is_installed(app.id) => {
+                        let btn = fmt(tl!("Open in {name}"), &[("name", app.name)]);
+                        if widgets::button(ui, &btn, Kind::Primary, 0.0).clicked() {
+                            self.launch_app_with_file(app.id, &trimmed);
+                            close = true;
+                        }
+                    }
+                    Some(app) if self.caps.manage_apps => {
+                        let btn = fmt(tl!("Install {name}"), &[("name", app.name)]);
+                        if widgets::button(ui, &btn, Kind::Primary, 0.0).clicked() {
+                            close = true;
+                            self.install_app(app.id);
+                        }
+                    }
+                    Some(app) => {
+                        if widgets::button(ui, tl!("App details"), Kind::Primary, 0.0).clicked() {
+                            self.detail = Some(app.id.to_string());
+                            close = true;
+                        }
+                    }
+                    None => {
+                        ui.add_enabled_ui(false, |ui| widgets::button(ui, tl!("Open"), Kind::Primary, 90.0));
+                    }
+                }
+                close |= widgets::button(ui, tl!("Cancel"), Kind::Secondary, 90.0).clicked();
+            });
+        });
+        close
     }
 }

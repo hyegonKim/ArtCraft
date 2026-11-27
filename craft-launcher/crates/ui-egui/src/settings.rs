@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+pub use artcraft_launcher_core::CreativeCategory;
 use artcraft_launcher_core::PackageKind;
 use serde::{Deserialize, Serialize};
 
@@ -90,6 +91,9 @@ pub struct Settings {
     pub install_locations: artcraft_launcher_core::protocol::InstallLocations,
     pub view: ViewMode,
     pub filter: Filter,
+    /// Creative Cloud Desktop domain category filter (`All` shows every app).
+    #[serde(default)]
+    pub category: CreativeCategory,
     pub sort: SortKey,
     pub sort_descending: bool,
     pub theme: ThemeChoice,
@@ -249,6 +253,7 @@ impl Default for Settings {
             install_locations: Default::default(),
             view: ViewMode::Grid,
             filter: Filter::All,
+            category: CreativeCategory::All,
             sort: SortKey::Suite,
             sort_descending: false,
             theme: ThemeChoice::System,
@@ -318,6 +323,15 @@ mod tests {
     fn old_settings_json_loads_with_empty_pinned() {
         let s: Settings = serde_json::from_str(r#"{"view":"Grid"}"#).expect("legacy settings");
         assert!(s.pinned.is_empty());
+        assert_eq!(s.category, CreativeCategory::All);
+    }
+
+    #[test]
+    fn category_round_trips_in_settings_json() {
+        let s = Settings { category: CreativeCategory::ThreeD, ..Settings::default() };
+        let json = serde_json::to_string(&s).expect("serialize settings");
+        let restored: Settings = serde_json::from_str(&json).expect("deserialize settings");
+        assert_eq!(restored.category, CreativeCategory::ThreeD);
     }
 
     #[test]

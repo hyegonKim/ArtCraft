@@ -21,6 +21,7 @@ pub mod time;
 pub mod version;
 
 pub use catalog::{CraftApp, SUITE};
+pub use counterpart::CreativeCategory;
 pub use platform::{Arch, Os, PackageKind, Platform};
 pub use release::{Asset, Release};
 pub use status::{AppStatus, InstallSource, Installed, Latest};

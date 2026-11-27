@@ -680,3 +680,19 @@ mailcraft	Files	표준 파일 호환
 mailcraft	.eml, .mbox, .ics and .vcf in and out, and the mail and contacts of an Outlook .pst file in.	.eml, .mbox, .ics, .vcf 입출력과 Outlook .pst 파일의 메일·연락처 가져오기를 지원합니다.
 mailcraft	Desktop, web and agents	데스크톱, 웹 및 에이전트
 mailcraft	A desktop app, a browser app, a CLI and an MCP server, all running the same commands.	데스크톱 앱, 브라우저 앱, CLI, MCP 서버가 모두 동일한 명령을 실행합니다.
+
+# Creative Cloud Desktop category bar & Quick File Router
+	All Apps	모든 앱
+	Photo	사진
+	Video & Audio	영상 및 오디오
+	Design	디자인
+	Document & PDF	문서 및 PDF
+	3D & Material	3D 및 머티리얼
+	Gen AI	생성형 AI
+	Open File in Craft App…	Craft 앱에서 파일 열기…
+	Open File in Craft App	Craft 앱에서 파일 열기
+	File path or extension	파일 경로 또는 확장자
+	Enter a file path or extension to open it in its matching Craft app.	파일 경로 또는 확장자를 입력하면 알맞은 Craft 앱에서 엽니다.
+	No matching Craft app for this file format.	이 파일 형식과 일치하는 Craft 앱이 없습니다.
+	Open in {name}	{name}에서 열기
+	Install {name}	{name} 설치

@@ -186,6 +186,9 @@ impl LauncherUi {
                 if widgets::nav_icon(ui, widgets::Glyph::Settings, tl!("Settings"), h, false).clicked() {
                     self.dialog = Some(Dialog::Settings);
                 }
+                if widgets::nav_icon(ui, widgets::Glyph::OpenFile, tl!("Open File in Craft App…"), h, false).clicked() {
+                    self.dialog = Some(Dialog::FileRouter { path: String::new() });
+                }
                 // The controls reserve their actual widths before the secondary text gets space.
                 ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
                     if ui.available_width() >= 17.0 + widgets::hud_galley(ui, tl!("Craft App Suite"), t.muted).size().x {
@@ -215,6 +218,22 @@ impl LauncherUi {
         if compact {
             self.toolbar_compact_row(ui, &t, updates);
         }
+        ui.add_space(10.0);
+        self.category_filter_bar(ui);
+    }
+
+    /// Creative Cloud Desktop domain category filter bar (`All Apps`, `Photo`, `Video & Audio`,
+    /// `Design`, `Document & PDF`, `3D & Material`, `Gen AI`).
+    fn category_filter_bar(&mut self, ui: &mut Ui) {
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
+            for cat in artcraft_launcher_core::CreativeCategory::ALL {
+                let selected = self.settings.category == cat;
+                if widgets::category_chip(ui, selected, category_label(cat)).clicked() && !selected {
+                    self.settings.category = cat;
+                }
+            }
+        });
     }
 
     /// A banner over the toolbar when a newer ArtCraft Launcher release is known: either the
@@ -1489,6 +1508,19 @@ fn grid_sort_label((key, descending): (SortKey, bool)) -> &'static str {
         (SortKey::Frequent, _) => tl!("Frequently used"),
         (_, true) => tl!("Name (Z–A)"),
         _ => tl!("Name (A–Z)"),
+    }
+}
+
+pub(crate) fn category_label(category: artcraft_launcher_core::CreativeCategory) -> &'static str {
+    use artcraft_launcher_core::CreativeCategory;
+    match category {
+        CreativeCategory::All => tl!("All Apps"),
+        CreativeCategory::Photo => tl!("Photo"),
+        CreativeCategory::VideoAudio => tl!("Video & Audio"),
+        CreativeCategory::Design => tl!("Design"),
+        CreativeCategory::DocumentPdf => tl!("Document & PDF"),
+        CreativeCategory::ThreeD => tl!("3D & Material"),
+        CreativeCategory::GenAi => tl!("Gen AI"),
     }
 }
 

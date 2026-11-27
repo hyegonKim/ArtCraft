@@ -61,6 +61,9 @@ pub trait Host {
     fn pick_folder(&mut self, _initial: Option<&str>) -> Option<String> {
         None
     }
+    fn pick_file(&mut self, _initial: Option<&str>) -> Option<String> {
+        None
+    }
     /// The folder a new install of this format goes inside when the person hasn't chosen one, so
     /// the install-folder field can show that folder instead of only saying "System default".
     /// `arch` is the package's architecture when the release names one. `None` when this host
@@ -98,6 +101,11 @@ pub(crate) enum UiAction {
     Command(Command),
     /// [`Command::Launch`] with the app's launch flags, plus one launch-count increment.
     Launch(String),
+    /// [`Command::Launch`] with the app's launch flags followed by `file`, plus one launch-count increment.
+    LaunchWithFile {
+        app: String,
+        file: String,
+    },
     /// Re-run the manual update check, clearing the auto-update back-off.
     CheckNow,
     /// A message a UI interaction asked to show.
@@ -118,6 +126,7 @@ pub(crate) enum Dialog {
     LauncherUpdate(artcraft_launcher_core::Release),
     Versions(String),
     LaunchFlags { app: String, flags: String },
+    FileRouter { path: String },
 }
 
 impl Dialog {
@@ -134,6 +143,7 @@ impl Dialog {
             Dialog::LauncherUpdate(r) => ("launcher-update", &r.tag),
             Dialog::Versions(id) => ("versions", id),
             Dialog::LaunchFlags { app, .. } => ("launch-flags", app),
+            Dialog::FileRouter { .. } => ("file-router", ""),
         }
     }
 }
@@ -413,6 +423,20 @@ impl LauncherUi {
                         self.flushed.push(action.clone());
                         continue;
                     };
+                    let opened = self.settings.launches.entry(id.clone()).or_insert(0);
+                    *opened = opened.saturating_add(1);
+                    self.backend.send(Command::Launch { app: id.clone(), args });
+                }
+                UiAction::LaunchWithFile { app: id, file } => {
+                    let flags = self.settings.launch_flags.get(id).map_or("", String::as_str);
+                    let Ok(mut args) = artcraft_launcher_core::args::split(flags) else {
+                        let name = self.entry(id).map_or(id.as_str(), |e| e.app.name).to_string();
+                        let text = crate::i18n::fmt(tl!("{name} wasn't opened: a quote in its launch options isn't closed."), &[("name", &name)]);
+                        self.queue_toast(text, true);
+                        self.flushed.push(action.clone());
+                        continue;
+                    };
+                    args.push(file.clone());
                     let opened = self.settings.launches.entry(id.clone()).or_insert(0);
                     *opened = opened.saturating_add(1);
                     self.backend.send(Command::Launch { app: id.clone(), args });
@@ -951,6 +975,7 @@ impl LauncherUi {
             .enumerate()
             .filter(|(_, e)| {
                 self.in_filter(e, self.settings.filter)
+                    && e.app.in_category(self.settings.category)
                     && !(self.settings.hide_community_apps && e.app.kind == artcraft_launcher_core::catalog::AppKind::Community)
                     && self.platform.is_none_or(|p| e.app.runs_on(p.os))
                     && (needle.is_empty()
@@ -1019,6 +1044,35 @@ impl LauncherUi {
     /// Opens an app with its launch flags, and counts it for "Frequently used".
     pub(crate) fn launch_app(&mut self, id: &str) {
         self.act(UiAction::Launch(id.to_string()));
+    }
+
+    /// Opens an app with `file` appended to its launch flags, and counts it for "Frequently used".
+    pub(crate) fn launch_app_with_file(&mut self, id: &str, file: &str) {
+        self.act(UiAction::LaunchWithFile { app: id.to_string(), file: file.to_string() });
+    }
+
+    /// Opens the Quick File Router modal dialog (`"Open File in Craft App…"`).
+    pub fn open_file_router(&mut self) {
+        self.dialog = Some(Dialog::FileRouter { path: String::new() });
+    }
+
+    /// Routes a file path or extension to its matching Craft Suite app and triggers the appropriate
+    /// action: launches the app with the file when installed, starts installation when managed, or
+    /// opens its details page on web builds.
+    pub fn route_and_open_file(&mut self, raw_path: &str) -> Option<&'static artcraft_launcher_core::CraftApp> {
+        let trimmed = raw_path.trim().trim_matches(['"', '\'']);
+        if trimmed.is_empty() {
+            return None;
+        }
+        let app = artcraft_launcher_core::counterpart::route_file_path(std::path::Path::new(trimmed))?;
+        if self.caps.manage_apps && self.is_installed(app.id) {
+            self.launch_app_with_file(app.id, trimmed);
+        } else if self.caps.manage_apps {
+            self.install_app(app.id);
+        } else {
+            self.detail = Some(app.id.to_string());
+        }
+        Some(app)
     }
 
     /// Whether the app on screen under `id` is installed on this computer.
@@ -1468,5 +1522,134 @@ mod tests {
         assert!(update_check_due(Some(NOW + 60), NOW, EVERY));
         assert!(update_check_due(Some(i64::MAX), NOW, EVERY));
         assert!(update_check_due(Some(i64::MIN), NOW, EVERY));
+    }
+
+    #[test]
+    fn category_filter_narrows_visible_ids_and_all_restores_suite() {
+        use artcraft_launcher_core::CreativeCategory;
+        let (mut launcher, _sent, _ctx) = launcher();
+        let all_len = launcher.visible_ids().len();
+        assert!(all_len >= 19);
+
+        launcher.settings.category = CreativeCategory::Photo;
+        let photo_ids = launcher.visible_ids();
+        assert!(photo_ids.contains(&"photocraft"));
+        assert!(photo_ids.contains(&"lightcraft"));
+        assert!(!photo_ids.contains(&"gridcraft"));
+
+        launcher.settings.category = CreativeCategory::ThreeD;
+        let three_d_ids = launcher.visible_ids();
+        assert!(three_d_ids.contains(&"texturecraft"));
+        assert!(three_d_ids.contains(&"materialcraft"));
+        assert!(three_d_ids.contains(&"cadcraft"));
+        assert!(!three_d_ids.contains(&"wordcraft"));
+
+        launcher.settings.category = CreativeCategory::All;
+        assert_eq!(launcher.visible_ids().len(), all_len);
+    }
+
+    #[test]
+    fn file_router_routes_to_installed_launch_or_details() {
+        let (mut launcher, sent, _ctx) = launcher();
+        launcher.open_file_router();
+        assert_eq!(launcher.dialog, Some(Dialog::FileRouter { path: String::new() }));
+
+        // On unmanaged/web backend, routing opens the matched app's details drawer.
+        let routed = launcher.route_and_open_file("/tmp/illustration.svg").expect("svg routes to vectorcraft");
+        assert_eq!(routed.id, "vectorcraft");
+        assert_eq!(launcher.detail.as_deref(), Some("vectorcraft"));
+
+        // On managed backend with an installed app, routing launches the app with the file path.
+        launcher.caps.manage_apps = true;
+        launcher.handle(Event::Detected {
+            app: "photocraft".into(),
+            installed: Some(artcraft_launcher_core::Installed {
+                version: artcraft_launcher_core::version::parse("0.5.0"),
+                source: artcraft_launcher_core::InstallSource::Launcher,
+                location: "/Applications/PhotoCraft.app".into(),
+                package: None,
+                externally_managed: false,
+                origin: None,
+                installation: None,
+            }),
+        });
+        launcher.settings.launch_flags.insert("photocraft".into(), "--safe".into());
+        launcher.frame = Some(1);
+        let routed = launcher.route_and_open_file("\"/Users/alice/poster.psd\"").expect("psd routes to photocraft");
+        assert_eq!(routed.id, "photocraft");
+        launcher.flush_actions();
+        assert_eq!(*sent.borrow(), [Command::Launch { app: "photocraft".into(), args: vec!["--safe".into(), "/Users/alice/poster.psd".into()] }]);
+        assert!(launcher.route_and_open_file("   ").is_none());
+        assert!(launcher.route_and_open_file("/tmp/unknown.zzzz").is_none());
+    }
+
+    #[test]
+    fn toolbar_category_chips_and_header_file_router_dialog_work_interactively() {
+        use egui_kittest::kittest::Queryable;
+        struct FileHost(Option<String>);
+        impl Host for FileHost {
+            fn pick_file(&mut self, _initial: Option<&str>) -> Option<String> {
+                self.0.take()
+            }
+        }
+
+        let sent = Rc::new(RefCell::new(Vec::new()));
+        let mut backend = Some(Recorder { sent: sent.clone() });
+        let settings = Settings { language: "en".into(), notify: false, ..Settings::default() };
+        let mut host = FileHost(Some("/Users/alice/scene.glb".into()));
+        let mut h = Harness::builder().with_size(egui::vec2(1180.0, 900.0)).with_theme(egui::Theme::Dark).build_ui_state(
+            move |ui, state: &mut Option<LauncherUi>| {
+                if state.is_none()
+                    && let Some(b) = backend.take()
+                {
+                    let mut l = LauncherUi::new(ui.ctx(), Box::new(b), settings.clone());
+                    l.caps.manage_apps = true;
+                    l.handle(Event::Detected {
+                        app: "texturecraft".into(),
+                        installed: Some(artcraft_launcher_core::Installed {
+                            version: artcraft_launcher_core::version::parse("0.2.0"),
+                            source: artcraft_launcher_core::InstallSource::Launcher,
+                            location: "/Applications/TextureCraft.app".into(),
+                            package: None,
+                            externally_managed: false,
+                            origin: None,
+                            installation: None,
+                        }),
+                    });
+                    *state = Some(l);
+                }
+                if let Some(l) = state.as_mut() {
+                    l.logic(&ui.ctx().clone(), &mut host);
+                    l.ui(ui, &mut host);
+                }
+            },
+            None,
+        );
+        h.run_steps(6);
+
+        // Click "3D & Material" category filter chip.
+        h.get_by_label("3D & Material").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().settings.category, artcraft_launcher_core::CreativeCategory::ThreeD);
+        assert!(h.state().as_ref().unwrap().visible_ids_for_test().contains(&"texturecraft"));
+        assert!(!h.state().as_ref().unwrap().visible_ids_for_test().contains(&"wordcraft"));
+
+        // Click "All Apps" to restore full suite.
+        h.get_by_label("All Apps").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().settings.category, artcraft_launcher_core::CreativeCategory::All);
+
+        // Open Quick File Router from header button, browse to `/Users/alice/scene.glb`, and open in TextureCraft.
+        h.get_by_label("Open File in Craft App…").click();
+        h.run_steps(2);
+        h.get_by_label("Browse…").click();
+        h.run_steps(2);
+        h.get_by_label("Open in TextureCraft").click();
+        h.run_steps(2);
+        assert!(
+            sent.borrow().contains(&Command::Launch { app: "texturecraft".into(), args: vec!["/Users/alice/scene.glb".into()] }),
+            "expected TextureCraft launch with routed file, got {:?}",
+            sent.borrow()
+        );
     }
 }

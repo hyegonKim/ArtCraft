@@ -437,3 +437,18 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	Unlock version?	Desbloquear versão?
 	{app} is pinned to {version}. Follow the latest release instead?	{app} está fixado na versão {version}. Usar a versão mais recente?
 	Unlock	Desbloquear
+
+	All Apps	Todos os aplicativos
+	Photo	Foto
+	Video & Audio	Vídeo e áudio
+	Design	Design
+	Document & PDF	Documentos e PDF
+	3D & Material	3D e materiais
+	Gen AI	IA generativa
+	Open File in Craft App…	Abrir arquivo em aplicativo Craft…
+	Open File in Craft App	Abrir arquivo em aplicativo Craft
+	File path or extension	Caminho do arquivo ou extensão
+	Enter a file path or extension to open it in its matching Craft app.	Digite o caminho de um arquivo ou extensão para abri-lo no aplicativo Craft correspondente.
+	No matching Craft app for this file format.	Nenhum aplicativo Craft corresponde a este formato de arquivo.
+	Open in {name}	Abrir no {name}
+	Install {name}	Instalar {name}

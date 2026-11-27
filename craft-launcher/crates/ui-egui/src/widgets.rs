@@ -609,6 +609,27 @@ fn paint_cell<T: PartialEq + Copy>(ui: &mut Ui, value: &mut T, opt: &T, cell: &C
     (rect, changed)
 }
 
+/// A domain category filter chip in the toolbar's category bar: inverted when selected, sunken on
+/// hover, outlined with a 1 px hairline otherwise, so wrapped rows stay crisp at any window width.
+pub fn category_chip(ui: &mut Ui, selected: bool, label: &str) -> Response {
+    let t = Tokens::get(ui.ctx());
+    let galley = hud_galley(ui, label, t.ink);
+    let (rect, resp) = ui.allocate_exact_size(vec2(galley.size().x + 20.0, 28.0), Sense::click());
+    let hovered = resp.hovered();
+    let (fill, ink) = match (selected, hovered) {
+        (true, _) => (t.invert_bg, t.invert_fg),
+        (false, true) => (t.sunken, t.ink_strong),
+        (false, false) => (Color32::TRANSPARENT, t.muted),
+    };
+    ui.painter().rect_filled(rect, CornerRadius::ZERO, fill);
+    if !selected {
+        ui.painter().rect_stroke(rect, CornerRadius::ZERO, t.hairline(), egui::StrokeKind::Inside);
+    }
+    paint_centred(ui, rect, galley, ink);
+    resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, selected, label));
+    resp.on_hover_text(label).on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
 /// A slim square progress bar with a caption above it.
 pub fn progress(ui: &mut Ui, fraction: Option<f32>, caption: &str, color: Color32, width: f32) {
     let t = Tokens::get(ui.ctx());
@@ -662,6 +683,8 @@ pub enum Glyph {
     Lock,
     /// Six-dot grip for reordering pinned apps.
     Grip,
+    /// Folder / file glyph for opening a file in its matching Craft app.
+    OpenFile,
 }
 
 /// Paints one of the launcher's symbols with the painter, centred in `rect`.
@@ -740,6 +763,25 @@ fn glyph_shapes(rect: Rect, glyph: Glyph, color: Color32) -> Vec<egui::Shape> {
                 shapes.push(egui::Shape::circle_filled(m + vec2(dx, dy), 1.35, color));
             }
             shapes
+        }
+        Glyph::OpenFile => {
+            let stroke = Stroke::new(1.4, color);
+            vec![
+                egui::Shape::line(
+                    vec![
+                        m + vec2(-6.0, -2.5),
+                        m + vec2(-6.0, -5.0),
+                        m + vec2(-1.5, -5.0),
+                        m + vec2(0.5, -3.0),
+                        m + vec2(6.0, -3.0),
+                        m + vec2(6.0, 5.0),
+                        m + vec2(-6.0, 5.0),
+                        m + vec2(-6.0, -2.5),
+                    ],
+                    stroke,
+                ),
+                egui::Shape::line_segment([m + vec2(-6.0, -1.0), m + vec2(6.0, -1.0)], stroke),
+            ]
         }
     }
 }
@@ -897,7 +939,7 @@ mod tests {
     /// the tool-button and header-cell sizes, or a click target would draw outside its hit rect.
     #[test]
     fn every_painter_glyph_stays_inside_its_control() {
-        for glyph in [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock] {
+        for glyph in [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile] {
             for side in [20.0, crate::theme::CONTROL_H, 48.0] {
                 let rect = Rect::from_min_size(egui::pos2(100.0, 200.0), egui::vec2(side, side));
                 let shapes = glyph_shapes(rect, glyph, Color32::WHITE);
@@ -1004,7 +1046,7 @@ mod tests {
     #[test]
     fn each_glyph_has_its_own_shapes() {
         let rect = Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(crate::theme::CONTROL_H, crate::theme::CONTROL_H));
-        let bounds: Vec<[u32; 4]> = [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock]
+        let bounds: Vec<[u32; 4]> = [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile]
             .into_iter()
             .map(|glyph| {
                 let union = glyph_shapes(rect, glyph, Color32::WHITE)

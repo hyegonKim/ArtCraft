@@ -280,18 +280,19 @@ impl DetectedCounterpart {
 }
 
 /// Whether a Windows Uninstall registry record (`DisplayName`, `Publisher`) belongs to `spec`.
-pub fn matches_adobe_registry_entry(
-    spec: &artcraft_launcher_core::counterpart::AdobeProductSpec,
-    display_name: &str,
-    publisher: &str,
-) -> bool {
+pub fn matches_adobe_registry_entry(spec: &artcraft_launcher_core::counterpart::AdobeProductSpec, display_name: &str, publisher: &str) -> bool {
     let pub_lower = publisher.trim().to_ascii_lowercase();
     if !pub_lower.is_empty() && !pub_lower.contains("adobe") {
         return false;
     }
     let name_lower = display_name.trim().to_ascii_lowercase();
-    // Do not confuse Adobe Acrobat Reader with full Adobe Acrobat DC when matching Acrobat DC.
-    if spec.id == artcraft_launcher_core::counterpart::AdobeProductId::AcrobatDc && name_lower.contains("reader") {
+    // Do not confuse Adobe Acrobat Reader or Distiller with full Adobe Acrobat DC, or Lightroom Classic with Lightroom CC.
+    if spec.id == artcraft_launcher_core::counterpart::AdobeProductId::AcrobatDc
+        && (name_lower.contains("reader") || name_lower.contains("distiller"))
+    {
+        return false;
+    }
+    if spec.id == artcraft_launcher_core::counterpart::AdobeProductId::LightroomCc && name_lower.contains("classic") {
         return false;
     }
     spec.registry_prefixes.iter().any(|prefix| name_lower.starts_with(&prefix.to_ascii_lowercase()))
@@ -385,8 +386,7 @@ pub fn detect_adobe_product_in_roots(
 
     let companion_version = if spec.companion.is_some() && spec.id != AdobeProductId::CameraRaw {
         let cr_spec = AdobeProductSpec::by_id(AdobeProductId::CameraRaw);
-        detect_adobe_product_in_roots(cr_spec, program_roots, common_roots)
-            .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)))
+        detect_adobe_product_in_roots(cr_spec, program_roots, common_roots).and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)))
     } else {
         None
     };
@@ -413,11 +413,7 @@ pub fn detect_counterparts_in_roots(
     }
     if !spec.non_adobe_windows_exes.is_empty() {
         for rel in spec.non_adobe_windows_exes {
-            let found_path = program_roots
-                .iter()
-                .chain(user_roots.iter())
-                .map(|root| join_windows_rel(root, rel))
-                .find(|p| p.is_file());
+            let found_path = program_roots.iter().chain(user_roots.iter()).map(|root| join_windows_rel(root, rel)).find(|p| p.is_file());
             if let Some(location) = found_path {
                 let ver = file_product_version(&location);
                 out.push(DetectedCounterpart {
@@ -463,10 +459,7 @@ fn system_program_roots() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
 fn detect_mac_bundle_version(bundle: &Path) -> Option<version::Version> {
     let plist = plist::Value::from_file(bundle.join("Contents/Info.plist")).ok()?;
     let dict = plist.as_dictionary()?;
-    ["CFBundleShortVersionString", "CFBundleVersion"]
-        .into_iter()
-        .find_map(|k| dict.get(k).and_then(plist::Value::as_string))
-        .and_then(version::parse)
+    ["CFBundleShortVersionString", "CFBundleVersion"].into_iter().find_map(|k| dict.get(k).and_then(plist::Value::as_string)).and_then(version::parse)
 }
 
 /// Detect installed counterparts for `app` on the running machine (filesystem + Windows Uninstall
@@ -484,9 +477,8 @@ pub fn detect_counterparts(app: &CraftApp) -> Vec<DetectedCounterpart> {
             && let Some(mut reg) = windows::detect_adobe_registry(adobe_spec)
         {
             if adobe_spec.companion.is_some() && adobe_spec.id != artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw {
-                let cr_spec = artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(
-                    artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw,
-                );
+                let cr_spec =
+                    artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw);
                 reg.companion_version = detect_adobe_product_in_roots(cr_spec, &program_roots, &common_roots)
                     .or_else(|| windows::detect_adobe_registry(cr_spec))
                     .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)));
@@ -514,10 +506,9 @@ pub fn detect_counterparts(app: &CraftApp) -> Vec<DetectedCounterpart> {
                 };
                 if let Some(bundle) = candidates.into_iter().find(|p| p.exists()) {
                     let is_2027_bundle = rel.contains("2027") || adobe_spec.id == artcraft_launcher_core::counterpart::AdobeProductId::AcrobatDc;
-                    let ver = detect_mac_bundle_version(&bundle)
-                        .or_else(|| is_2027_bundle.then(|| adobe_spec.parsed_release_version()).flatten());
-                    let is_cc_2027 = ver.as_ref().is_some_and(|v| adobe_spec.matches_cc_2027_version(v))
-                        || (is_2027_bundle && adobe_spec.cc_2027_lineup);
+                    let ver = detect_mac_bundle_version(&bundle).or_else(|| is_2027_bundle.then(|| adobe_spec.parsed_release_version()).flatten());
+                    let is_cc_2027 =
+                        ver.as_ref().is_some_and(|v| adobe_spec.matches_cc_2027_version(v)) || (is_2027_bundle && adobe_spec.cc_2027_lineup);
                     let name = if is_cc_2027 { adobe_spec.name.to_string() } else { adobe_spec.family.to_string() };
                     found.push(DetectedCounterpart { name, version: ver, companion_version: None, location: bundle, is_cc_2027 });
                     break;
@@ -561,9 +552,8 @@ pub fn detect_adobe_cc_2027() -> Vec<DetectedCounterpart> {
                 && item.companion_version.is_none()
                 && spec.id != artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw
             {
-                let cr_spec = artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(
-                    artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw,
-                );
+                let cr_spec =
+                    artcraft_launcher_core::counterpart::AdobeProductSpec::by_id(artcraft_launcher_core::counterpart::AdobeProductId::CameraRaw);
                 item.companion_version = detect_adobe_product_in_roots(cr_spec, &program_roots, &common_roots)
                     .or_else(|| windows::detect_adobe_registry(cr_spec))
                     .and_then(|cr| cr.version.map(|v| ("Camera Raw".to_string(), v)));

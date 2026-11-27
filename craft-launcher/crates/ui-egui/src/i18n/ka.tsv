@@ -468,3 +468,18 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	Added	დამატებულია
 	Remove	წაშლა
 	Add	დამატება
+
+	All Apps	ყველა აპლიკაცია
+	Photo	ფოტო
+	Video & Audio	ვიდეო და აუდიო
+	Design	დიზაინი
+	Document & PDF	დოკუმენტი და PDF
+	3D & Material	3D და მასალა
+	Gen AI	გენერაციული AI
+	Open File in Craft App…	ფაილის გახსნა Craft აპლიკაციაში…
+	Open File in Craft App	ფაილის გახსნა Craft აპლიკაციაში
+	File path or extension	ფაილის მისამართი ან გაფართოება
+	Enter a file path or extension to open it in its matching Craft app.	შეიყვანეთ ფაილის მისამართი ან გაფართოება შესაბამის Craft აპლიკაციაში გასახსნელად.
+	No matching Craft app for this file format.	ამ ფაილის ფორმატისთვის შესაბამისი Craft აპლიკაცია ვერ მოიძებნა.
+	Open in {name}	{name}-ში გახსნა
+	Install {name}	{name}-ის ინსტალაცია

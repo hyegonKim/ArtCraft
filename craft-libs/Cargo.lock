@@ -1363,6 +1363,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "craft-cclibs"
+version = "0.1.0"
+dependencies = [
+ "craft-zip",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "craft-cfb"
 version = "0.1.0"
 dependencies = [

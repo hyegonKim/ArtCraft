@@ -417,3 +417,18 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	Unlock version?	解锁版本？
 	{app} is pinned to {version}. Follow the latest release instead?	{app} 已固定为 {version}。是否改为跟随最新版本？
 	Unlock	解锁
+
+	All Apps	所有应用
+	Photo	摄影
+	Video & Audio	视频与音频
+	Design	设计
+	Document & PDF	文档与 PDF
+	3D & Material	3D 与材质
+	Gen AI	生成式 AI
+	Open File in Craft App…	在 Craft 应用中打开文件…
+	Open File in Craft App	在 Craft 应用中打开文件
+	File path or extension	文件路径或扩展名
+	Enter a file path or extension to open it in its matching Craft app.	输入文件路径或扩展名，即可在对应的 Craft 应用中打开。
+	No matching Craft app for this file format.	没有支持此文件格式的 Craft 应用。
+	Open in {name}	在 {name} 中打开
+	Install {name}	安装 {name}
