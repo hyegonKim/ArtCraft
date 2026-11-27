@@ -707,8 +707,7 @@ fn devanagari_file_and_licence_match_hashes_and_sizes() {
     let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
     assert_eq!(hex, DEVANAGARI_SHA256, "{}: font SHA-256", f.file);
 
-    let licence = std::fs::read(craft_fonts_tests::repo_root().join(f.licence_file))
-        .unwrap_or_else(|e| panic!("{}: {e}", f.licence_file));
+    let licence = read_licence_bytes(f.licence_file);
     assert_eq!(
         licence.len(),
         4_386,
@@ -1482,8 +1481,7 @@ fn latin_inter_files_and_their_upstream_licence_match_their_hashes() {
         );
     }
 
-    let licence = std::fs::read(craft_fonts_tests::repo_root().join(INTER_LICENCE_FILE))
-        .unwrap_or_else(|e| panic!("{INTER_LICENCE_FILE}: {e}"));
+    let licence = read_licence_bytes(INTER_LICENCE_FILE);
     assert_eq!(licence.len(), 4_380, "{INTER_LICENCE_FILE}: size");
     let digest = Sha256::digest(&licence);
     let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
@@ -1758,9 +1756,47 @@ fn all_latin_licences_match_the_reviewed_upstream_catalog() {
     );
     for (path, hash) in expected {
         assert!(actual.contains(path), "missing licence {path}");
-        let data = std::fs::read(craft_fonts_tests::repo_root().join(path)).unwrap();
-        let digest = Sha256::digest(&data);
-        let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
-        assert_eq!(hex, hash, "{path}: complete upstream licence changed");
+        let raw_data = std::fs::read(craft_fonts_tests::repo_root().join(path)).unwrap();
+        let raw_hex: String = Sha256::digest(&raw_data)
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect();
+        #[cfg(windows)]
+        let matches_expected = raw_hex == hash || {
+            let lf_data = read_licence_bytes(path);
+            let lf_hex: String = Sha256::digest(&lf_data)
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect();
+            lf_hex == hash
+        };
+        #[cfg(not(windows))]
+        let matches_expected = raw_hex == hash;
+        assert!(
+            matches_expected,
+            "{path}: complete upstream licence changed (got {raw_hex}, expected {hash})"
+        );
+    }
+}
+
+/// Read a repository text licence file, normalizing Windows `core.autocrlf` CRLF checkouts back to
+/// the canonical upstream LF bytes stored in git.
+fn read_licence_bytes(rel_path: &str) -> Vec<u8> {
+    let raw = std::fs::read(craft_fonts_tests::repo_root().join(rel_path))
+        .unwrap_or_else(|e| panic!("{rel_path}: {e}"));
+    #[cfg(windows)]
+    {
+        let mut normalized = Vec::with_capacity(raw.len());
+        for (i, &b) in raw.iter().enumerate() {
+            if b == b'\r' && raw.get(i + 1) == Some(&b'\n') {
+                continue;
+            }
+            normalized.push(b);
+        }
+        normalized
+    }
+    #[cfg(not(windows))]
+    {
+        raw
     }
 }

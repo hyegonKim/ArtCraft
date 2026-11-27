@@ -23,7 +23,7 @@ impl fmt::Display for ParseIdError {
     match self {
       Self::WrongPrefix { expected, got } => {
         write!(f, "expected id with prefix '{expected}_', got '{got}'")
-      }
+      },
       Self::BadUlid { got } => write!(f, "id '{got}' does not end in a 26-char ULID"),
     }
   }
@@ -33,10 +33,7 @@ impl std::error::Error for ParseIdError {}
 
 /// Validate that `s` is a well-formed `{prefix}_{ulid}` id.
 pub fn validate(s: &str, prefix: &'static str) -> Result<(), ParseIdError> {
-  let rest = s
-    .strip_prefix(prefix)
-    .and_then(|r| r.strip_prefix('_'))
-    .ok_or_else(|| ParseIdError::WrongPrefix { expected: prefix, got: s.to_string() })?;
+  let rest = s.strip_prefix(prefix).and_then(|r| r.strip_prefix('_')).ok_or_else(|| ParseIdError::WrongPrefix { expected: prefix, got: s.to_string() })?;
 
   // A Crockford ULID is 26 chars of lowercase base32 (0-9 a-z after lowercasing).
   if rest.len() != 26 || !rest.bytes().all(|b| b.is_ascii_alphanumeric()) {

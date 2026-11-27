@@ -23,11 +23,26 @@
     clippy::unreachable
 )]
 
+mod activation;
+mod packs;
 mod parse;
+mod resolver;
+mod variation;
 
 use std::path::{Path, PathBuf};
 
+pub use activation::{ActivationStateError, FontActivationRegistry, family_id};
+pub use packs::{
+    FontClassification, FontPack, FontPackCategory, FontSpecimen, all_font_packs, font_pack,
+};
 pub use parse::{Entry, ManifestError, parse_manifest};
+pub use resolver::{
+    FontMatchKind, ResolvedFont, resolve_missing_font, resolve_missing_font_with_catalog,
+};
+pub use variation::{
+    FVAR_AXIS_HIDDEN, KnownAxisTag, NamedInstanceStop, NamedVariationInstance, StatAxisStop,
+    VariableFontInfo, VariationAxis, inspect_variable_font, parse_variation_axes,
+};
 
 /// One font file from `fonts/manifest.txt` or `fonts/latin-manifest.txt`, known at compile time.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

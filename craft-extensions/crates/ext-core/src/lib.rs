@@ -18,6 +18,7 @@ pub mod palette;
 pub mod path;
 pub mod text;
 pub mod tier;
+pub mod uxp;
 pub mod version;
 
 #[cfg(test)]

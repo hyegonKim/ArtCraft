@@ -11,7 +11,7 @@ impl fmt::Display for EnumError {
     match self {
       Self::CouldNotConvertFromString(value) => {
         write!(f, "could not convert string to enum: {value:?}")
-      }
+      },
     }
   }
 }

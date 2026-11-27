@@ -14,3 +14,4 @@ pub mod store;
 #[cfg(test)]
 pub(crate) mod testutil;
 pub mod unpack;
+pub mod uxp;

@@ -101,26 +101,8 @@ impl GenerationSource {
   /// The auth mechanism this source uses.
   pub fn kind(&self) -> CredentialKind {
     match self {
-      Self::Artcraft
-      | Self::ArtcraftLocal
-      | Self::ArtcraftCookies
-      | Self::Grok
-      | Self::GrokCookies
-      | Self::Midjourney
-      | Self::MidjourneyCookies
-      | Self::WorldLabs
-      | Self::WorldLabsCookies
-      | Self::Higgsfield
-      | Self::HiggsfieldCookies
-      | Self::MagnificCookies
-      | Self::OpenArtCookies
-      | Self::RunwayCookies => CredentialKind::Cookies,
-      Self::ArtcraftApi
-      | Self::Fal
-      | Self::FalApi
-      | Self::OpenAiApi
-      | Self::ReplicateApi
-      | Self::XAiApi => CredentialKind::ApiKey,
+      Self::Artcraft | Self::ArtcraftLocal | Self::ArtcraftCookies | Self::Grok | Self::GrokCookies | Self::Midjourney | Self::MidjourneyCookies | Self::WorldLabs | Self::WorldLabsCookies | Self::Higgsfield | Self::HiggsfieldCookies | Self::MagnificCookies | Self::OpenArtCookies | Self::RunwayCookies => CredentialKind::Cookies,
+      Self::ArtcraftApi | Self::Fal | Self::FalApi | Self::OpenAiApi | Self::ReplicateApi | Self::XAiApi => CredentialKind::ApiKey,
     }
   }
 
@@ -149,6 +131,7 @@ impl GenerationSource {
     }
   }
 
+  #[allow(clippy::should_implement_trait)]
   pub fn from_str(value: &str) -> Result<Self, EnumError> {
     match value {
       "artcraft" => Ok(Self::Artcraft),
@@ -177,28 +160,7 @@ impl GenerationSource {
 
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
-    BTreeSet::from([
-      Self::Artcraft,
-      Self::ArtcraftLocal,
-      Self::ArtcraftCookies,
-      Self::ArtcraftApi,
-      Self::Fal,
-      Self::FalApi,
-      Self::Grok,
-      Self::GrokCookies,
-      Self::XAiApi,
-      Self::Midjourney,
-      Self::MidjourneyCookies,
-      Self::OpenAiApi,
-      Self::WorldLabs,
-      Self::WorldLabsCookies,
-      Self::Higgsfield,
-      Self::HiggsfieldCookies,
-      Self::MagnificCookies,
-      Self::OpenArtCookies,
-      Self::RunwayCookies,
-      Self::ReplicateApi,
-    ])
+    BTreeSet::from([Self::Artcraft, Self::ArtcraftLocal, Self::ArtcraftCookies, Self::ArtcraftApi, Self::Fal, Self::FalApi, Self::Grok, Self::GrokCookies, Self::XAiApi, Self::Midjourney, Self::MidjourneyCookies, Self::OpenAiApi, Self::WorldLabs, Self::WorldLabsCookies, Self::Higgsfield, Self::HiggsfieldCookies, Self::MagnificCookies, Self::OpenArtCookies, Self::RunwayCookies, Self::ReplicateApi])
   }
 }
 
@@ -234,10 +196,7 @@ mod tests {
     #[test]
     fn from_str_err() {
       let result = GenerationSource::from_str("asdf");
-      assert_eq!(
-        result,
-        Err(EnumError::CouldNotConvertFromString("asdf".to_string()))
-      );
+      assert_eq!(result, Err(EnumError::CouldNotConvertFromString("asdf".to_string())));
     }
 
     #[test]

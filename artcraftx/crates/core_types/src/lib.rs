@@ -3,9 +3,12 @@
 //!
 //! This crate must stay dependency-light — everything else depends on it.
 
+#![forbid(unsafe_code)]
+
 #[macro_use]
 extern crate serde_derive;
 
 pub mod enums;
 #[macro_use]
 pub mod identifiers;
+pub mod provenance;
