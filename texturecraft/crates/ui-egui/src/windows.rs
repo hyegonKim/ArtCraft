@@ -190,8 +190,46 @@ pub(crate) fn display(app: &mut TextureCraftApp, ui: &mut Ui) {
     slider(ui, tr("Environment rotation"), &mut d.env_rotation, 0.0..=360.0, 0);
     ui.checkbox(&mut d.shadows, tr("Key light (shadow-casting light, direct only)"));
     ui.add_space(6.0);
+    ui.label(caption(tr("Stage & studio lighting")));
+    let mut selected_rig = d.stage.rig;
+    combo(ui, tr("Studio rig"), tr(selected_rig.label()), |ui| {
+        for rig in texturecraft_engine::core::StudioRig::ALL {
+            ui.selectable_value(&mut selected_rig, rig, tr(rig.label()));
+        }
+    });
+    if selected_rig != d.stage.rig {
+        d.stage.rig = selected_rig;
+        if let Some(env_name) = selected_rig.environment_name() {
+            d.environment = env_name.to_string();
+            d.shadows = true;
+        }
+    }
+    if d.stage.rig != texturecraft_engine::core::StudioRig::None {
+        slider(ui, tr("Rig intensity"), &mut d.stage.rig_intensity, 0.0..=4.0, 2);
+        slider(ui, tr("Rig rotation"), &mut d.stage.rig_rotation, -180.0..=180.0, 0);
+    }
+    let mut snap_ground = false;
+    if ui.button(format!("{}  {}", ic::ALIGN_BOTTOM, tr("Snap to ground"))).clicked() {
+        snap_ground = true;
+    }
+    ui.checkbox(&mut d.stage.shadow_catcher, tr("Ground shadow catcher"));
+    ui.add_enabled_ui(d.stage.shadow_catcher, |ui| {
+        ui.checkbox(&mut d.stage.ground_auto, tr("Auto ground from mesh"));
+        if !d.stage.ground_auto {
+            slider(ui, tr("Ground height"), &mut d.stage.ground_y, -5.0..=5.0, 2);
+        }
+        slider(ui, tr("Shadow opacity"), &mut d.stage.shadow_opacity, 0.0..=1.0, 2);
+        slider(ui, tr("Contact AO"), &mut d.stage.contact_ao, 0.0..=1.0, 2);
+        slider(ui, tr("Contact AO radius"), &mut d.stage.contact_ao_radius, 0.1..=3.0, 2);
+        slider(ui, tr("Light softness"), &mut d.stage.light_softness, 0.0..=1.0, 2);
+    });
+    ui.add_space(6.0);
     ui.label(caption(tr("Camera settings")));
     slider(ui, tr("Field of view (deg)"), &mut d.fov, 5.0..=120.0, 0);
+    let mut focal_mm = texturecraft_engine::core::fov_deg_to_focal_mm(d.fov);
+    if slider(ui, tr("Focal length (mm)"), &mut focal_mm, 12.0..=200.0, 1).changed() {
+        d.fov = texturecraft_engine::core::focal_mm_to_fov_deg(focal_mm);
+    }
     let mut ortho = app.session.camera.ortho;
     if ui.checkbox(&mut ortho, tr("Orthographic")).changed() {
         app.run("camera.set", json!({"ortho": ortho}));
@@ -230,6 +268,9 @@ pub(crate) fn display(app: &mut TextureCraftApp, ui: &mut Ui) {
         }
         app.session.doc.project.display = d;
     }
+    if snap_ground {
+        app.run("stage.snapToGround", json!({}));
+    }
     if import_hdr {
         crate::web_files::import_environment(app, &ctx);
     }
@@ -243,7 +284,7 @@ fn cameras(app: &mut TextureCraftApp, ui: &mut Ui) {
     for (i, name) in names.iter().enumerate() {
         ui.horizontal(|ui| {
             if icon_button(ui, ic::VIDEO_CAMERA, tr("View through this camera"), current == Some(i), 20.0).clicked() {
-                app.run("camera.select", json!({"index": i}));
+                app.run("stage.applyCameraBookmark", json!({"index": i}));
             }
             // The name being typed lives in egui's memory until the field loses focus.
             let id = ui.scope_id().with(("camera_name", i));
@@ -263,9 +304,14 @@ fn cameras(app: &mut TextureCraftApp, ui: &mut Ui) {
             }
         });
     }
-    if ui.button(format!("{}  {}", ic::PLUS, tr("Save view as camera"))).clicked() {
-        app.run("camera.add", json!({}));
-    }
+    ui.horizontal_wrapped(|ui| {
+        if ui.button(format!("{}  {}", ic::PLUS, tr("Save view as camera"))).clicked() {
+            app.run("camera.add", json!({}));
+        }
+        if ui.button(format!("{}  {}", ic::BOOKMARK_SIMPLE, tr("Save camera + DoF bookmark"))).clicked() {
+            app.run("stage.saveCameraBookmark", json!({}));
+        }
+    });
 }
 
 /// Wide enough for the longer shader model name

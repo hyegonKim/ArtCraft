@@ -26,8 +26,8 @@ const PIA_OBJECT_LINETYPE: i32 = 31;
 
 /// Standard 27 ISO/ANSI lineweight table entries in millimetres (`0`..=`26`).
 const DEFAULT_LINEWEIGHTS_MM: [f64; 27] = [
-    0.0, 0.05, 0.09, 0.1, 0.13, 0.15, 0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.53, 0.6, 0.65, 0.7, 0.8, 0.9, 1.0, 1.06, 1.2, 1.4, 1.58,
-    2.0, 2.11,
+    0.0, 0.05, 0.09, 0.1, 0.13, 0.15, 0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.53, 0.6, 0.65, 0.7, 0.8, 0.9, 1.0, 1.06, 1.2, 1.4, 1.58, 2.0,
+    2.11,
 ];
 
 /// Standard 31 PIA plot style linetype names (`0`..=`30`; `31` is "Use object linetype").
@@ -483,14 +483,10 @@ fn decode_pia_color(color: i32, policy: i32) -> Option<Rgb> {
             let aci = (u & 0xFF) as u8;
             if aci == 0 { None } else { Some(aci_rgb(aci)) }
         }
-        0xC2 | 0xC0 | 0xC1 => Some(Rgb::from_u32(u)),
+        0xC0..=0xC2 => Some(Rgb::from_u32(u)),
         0x00 => {
             // Plain 0x00RRGGBB integer when explicit colour bit or non-object value is set.
-            if color == 0 && (policy & 4) == 0 && policy != 0 {
-                Some(Rgb(0, 0, 0))
-            } else {
-                Some(Rgb::from_u32(u))
-            }
+            if color == 0 && (policy & 4) == 0 && policy != 0 { Some(Rgb(0, 0, 0)) } else { Some(Rgb::from_u32(u)) }
         }
         _ => Some(Rgb::from_u32(u)),
     }
@@ -683,10 +679,7 @@ pub fn parse_pia_bytes(bytes: &[u8], file_name: Option<&str>) -> Result<PlotStyl
         })
         .collect();
 
-    let inferred_name = file_name
-        .and_then(|f| Path::new(f).file_name())
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
+    let inferred_name = file_name.and_then(|f| Path::new(f).file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
 
     Ok(PlotStyleTable { name: inferred_name, description: pia.description, kind, styles }.sanitized())
 }

@@ -22,14 +22,8 @@ const PARAM_TYPES: [(&str, &str); 8] = [
     ("lookup", "Lookup"),
 ];
 
-const ACTION_TYPES: [(&str, &str); 6] = [
-    ("stretch", "Stretch"),
-    ("move", "Move"),
-    ("scale", "Scale"),
-    ("rotate", "Rotate"),
-    ("flip", "Flip"),
-    ("lookup", "Lookup"),
-];
+const ACTION_TYPES: [(&str, &str); 6] =
+    [("stretch", "Stretch"), ("move", "Move"), ("scale", "Scale"), ("rotate", "Rotate"), ("flip", "Flip"), ("lookup", "Lookup")];
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum AuthorTab {
@@ -371,13 +365,7 @@ fn draw_actions_tab(app: &mut CadApp, ui: &mut egui::Ui, model: Option<&DynamicB
             if app.bauthor.action_type == "stretch"
                 && let Some(o) = p.as_object_mut()
             {
-                o.insert(
-                    "frame".into(),
-                    json!([
-                        [app.bauthor.frame_x1, app.bauthor.frame_y1],
-                        [app.bauthor.frame_x2, app.bauthor.frame_y2]
-                    ]),
-                );
+                o.insert("frame".into(), json!([[app.bauthor.frame_x1, app.bauthor.frame_y1], [app.bauthor.frame_x2, app.bauthor.frame_y2]]));
             }
             if run_author_cmd(app, "baction", p) {
                 app.bauthor.action_name.clear();
@@ -480,10 +468,7 @@ mod tests {
         assert_eq!(app.ui.dialog.as_deref(), Some("bauthor"));
 
         let ctx = egui::Context::default();
-        let raw = egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, vec2(1280.0, 800.0))),
-            ..Default::default()
-        };
+        let raw = egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, vec2(1280.0, 800.0))), ..Default::default() };
         for tab in [AuthorTab::Parameters, AuthorTab::Actions, AuthorTab::Visibility] {
             app.bauthor.tab = tab;
             let mut out = ctx.run_ui(raw.clone(), |ui| app.ui(ui));

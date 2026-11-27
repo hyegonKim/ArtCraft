@@ -136,3 +136,36 @@ fn deleting_an_exposed_input_detaches_its_parameter_functions_and_undo_restores_
     execute(&mut session, "edit.undo", &json!({})).unwrap();
     assert_eq!(*session.graph().unwrap(), original);
 }
+
+#[test]
+fn visible_if_expressions_control_visibility_validate_syntax_and_support_undo() {
+    let mut session = new_session();
+    let blend = execute(&mut session, "graph.node.add", &json!({"def": "blend"})).unwrap()["id"].clone();
+    let blur = execute(&mut session, "graph.node.add", &json!({"def": "blur"})).unwrap()["id"].clone();
+
+    execute(&mut session, "graph.exposed.add", &json!({"id": "mode", "bind": {"node": blend, "param": "mode"}})).unwrap();
+    assert!(
+        execute(&mut session, "graph.exposed.add", &json!({"id": "bad_vis", "visibleIf": "input[\"mode\"] ==", "bind": {"node": blur, "param": "intensity"}}))
+            .is_err()
+    );
+
+    execute(
+        &mut session,
+        "graph.exposed.add",
+        &json!({
+            "id": "detail_blur",
+            "visibleIf": r#"input["mode"] == 3 && input["detail_blur"] >= 0"#,
+            "bind": {"node": blur, "param": "intensity"}
+        }),
+    )
+    .unwrap();
+
+    assert!(!session.graph().unwrap().is_input_visible(&session.graph().unwrap().exposed[1]));
+    execute(&mut session, "graph.exposed.set", &json!({"id": "mode", "value": 3})).unwrap();
+    assert!(session.graph().unwrap().is_input_visible(&session.graph().unwrap().exposed[1]));
+
+    execute(&mut session, "graph.exposed.setVisibleIf", &json!({"id": "detail_blur", "visibleIf": r#"input["mode"] != 3"#})).unwrap();
+    assert!(!session.graph().unwrap().is_input_visible(&session.graph().unwrap().exposed[1]));
+    execute(&mut session, "edit.undo", &json!({})).unwrap();
+    assert!(session.graph().unwrap().is_input_visible(&session.graph().unwrap().exposed[1]));
+}

@@ -46,7 +46,7 @@ pub fn decode(bytes: &[u8], linear: bool) -> Result<Image> {
 
     let mut data = img.into_rgba32f().into_raw();
     if !(float || linear) {
-        for px in data.chunks_exact_mut(4) {
+        for px in data.as_chunks_mut::<4>().0 {
             for c in px.iter_mut().take(3) {
                 *c = srgb_to_linear(*c);
             }

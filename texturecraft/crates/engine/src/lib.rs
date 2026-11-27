@@ -52,6 +52,7 @@ pub mod resource_cmds;
 pub mod session;
 pub mod set_cmds;
 pub mod smart_masks;
+pub mod stage_cmds;
 pub mod template_cmds;
 pub mod text_cmds;
 pub mod thumbs;

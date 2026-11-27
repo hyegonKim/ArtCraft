@@ -778,11 +778,7 @@ fn page_rows(
             crate::plotstyles::select_table(ui.ctx(), &page.plot_style_table);
             set_temp(ui.ctx(), "open_stylesmanager", true);
         }
-        if ui
-            .button(crate::tl!("Load..."))
-            .on_hover_text(crate::tl!("Import an AutoCAD .ctb or .stb plot style table file"))
-            .clicked()
-        {
+        if ui.button(crate::tl!("Load...")).on_hover_text(crate::tl!("Import an AutoCAD .ctb or .stb plot style table file")).clicked() {
             set_temp(ui.ctx(), "pick_plot_style_file", true);
         }
     });

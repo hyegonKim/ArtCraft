@@ -162,12 +162,7 @@ fn bedit_authoring_bparameter_baction_bvstate_blookup_updates_references_and_rou
     let (ed_top, ed_badge) = (ed_handles[0].clone(), ed_handles[1].clone());
 
     // 1. Linear parameter "Width" + Stretch action on `ed_top`'s right endpoint (10, 0).
-    let p_lin = s
-        .execute(
-            "bparameter",
-            &json!({ "type": "linear", "label": "Width", "base": [0, 0], "end": [10, 0] }),
-        )
-        .unwrap();
+    let p_lin = s.execute("bparameter", &json!({ "type": "linear", "label": "Width", "base": [0, 0], "end": [10, 0] })).unwrap();
     let lin_node = p_lin["node"].as_i64().unwrap();
     s.execute(
         "baction",
@@ -189,11 +184,7 @@ fn bedit_authoring_bparameter_baction_bvstate_blookup_updates_references_and_rou
     s.execute("baction", &json!({ "type": "flip", "parameter": "Mirror", "handles": [ed_badge] })).unwrap();
 
     // 4. Visibility parameter "View" with states ["Full", "Minimal"], hiding `ed_badge` in "Minimal".
-    s.execute(
-        "bparameter",
-        &json!({ "type": "visibility", "label": "View", "at": [0, 6], "states": ["Full", "Minimal"] }),
-    )
-    .unwrap();
+    s.execute("bparameter", &json!({ "type": "visibility", "label": "View", "at": [0, 6], "states": ["Full", "Minimal"] })).unwrap();
     s.execute("bvstate", &json!({ "op": "hide", "state": "Minimal", "handles": [ed_badge] })).unwrap();
     s.execute("bvstate", &json!({ "op": "new", "name": "Extra" })).unwrap();
 

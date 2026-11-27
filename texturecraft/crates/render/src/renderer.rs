@@ -84,6 +84,8 @@ struct GlobalsRaw {
     refr: [f32; 4],
     highlight: [f32; 4],
     highlight_shift: [f32; 4],
+    stage_ground: [f32; 4],
+    stage_bounds: [f32; 4],
 }
 
 /// The post pass uniform (see `Post` in post.wgsl).
@@ -180,6 +182,10 @@ pub struct Shade {
     pub displacement: bool,
     /// Bake mode's high poly, cage and UV seams over the 3D view
     pub bake: Option<BakeVisualization>,
+    /// Stage ground shadow catcher: `[enabled (1/0), ground_y, shadow_opacity, contact_ao]`.
+    pub stage_ground: [f32; 4],
+    /// Stage ground parameters: `[ground_auto (1/0), contact_ao_radius, light_softness, 0.0]`.
+    pub stage_params: [f32; 4],
 }
 
 /// The viewport's subsurface scattering approximation: the diffuse lighting wraps around the
@@ -194,16 +200,24 @@ impl Shade {
     /// The project-level shading (display and shader settings); the caller adds the view mode,
     /// channel, height strength and wireframe toggles.
     pub fn from_display(d: &DisplaySettings) -> Shade {
+        let rig = d.stage.rig;
+        let light = if rig != texturecraft_core::StudioRig::None {
+            rig.key_light_vector(d.stage.rig_intensity, d.stage.rig_rotation)
+        } else if d.shadows || d.stage.shadow_catcher {
+            [0.5, 0.8, 0.4, 2.5]
+        } else {
+            [0.0; 4]
+        };
+        let shadows = d.shadows || rig != texturecraft_core::StudioRig::None || d.stage.shadow_catcher;
         Shade {
             exposure_ev: d.env_exposure,
             aces: d.tone_mapping == ToneMapping::AcesFilmic,
-            env_rotation_deg: d.env_rotation,
+            env_rotation_deg: d.env_rotation + d.stage.rig_rotation,
             env_blur: d.env_blur,
             env_opacity: d.env_opacity,
             ao_intensity: d.ao_intensity,
-            // The key light (on with shadows), in environment space.
-            light: if d.shadows { [0.5, 0.8, 0.4, 2.5] } else { [0.0; 4] },
-            shadows: d.shadows,
+            light,
+            shadows,
             post_effects: d.post_effects,
             bloom: d.bloom,
             vignette: d.vignette,
@@ -216,6 +230,13 @@ impl Shade {
             ior: d.ior,
             dof: d.dof.enabled.then_some([d.dof.focus_distance, d.dof.aperture]),
             displacement: d.displacement,
+            stage_ground: [
+                if d.stage.shadow_catcher { 1.0 } else { 0.0 },
+                d.stage.ground_y,
+                d.stage.shadow_opacity.clamp(0.0, 1.0),
+                d.stage.contact_ao.clamp(0.0, 1.0),
+            ],
+            stage_params: [if d.stage.ground_auto { 1.0 } else { 0.0 }, d.stage.contact_ao_radius.clamp(0.1, 5.0), d.stage.light_softness.clamp(0.0, 1.0), 0.0],
             ..Shade::default()
         }
     }
@@ -267,6 +288,8 @@ impl Default for Shade {
             refraction: false,
             displacement: false,
             bake: None,
+            stage_ground: [0.0; 4],
+            stage_params: [1.0, 1.0, 0.35, 0.0],
         }
     }
 }
@@ -1918,6 +1941,9 @@ impl Renderer {
         });
         let sss_d = sss.map_or([0.0; 4], |m| [m[0] * radius, m[1] * radius, m[2] * radius, k]);
         let fwd = cam.forward();
+        let (mesh_center, mesh_lo_y) = self.mesh.as_ref().map_or((Vec3::ZERO, -1.0), |m| (m.center, m.center.y - m.radius * 0.58));
+        let ground_y = if s.stage_params[0] > 0.5 { mesh_lo_y } else { s.stage_ground[1] };
+        let stage_catcher_on = if !data && frame.kind == ViewKind::Scene && s.stage_ground[0] > 0.5 { 1.0 } else { 0.0 };
         let raw = GlobalsRaw {
             view_proj: vp.to_cols_array_2d(),
             inv_view_proj: bg_vp.inverse().to_cols_array_2d(),
@@ -1938,6 +1964,8 @@ impl Renderer {
             refr: [if refraction { 1.0 } else { 0.0 }, (BEHIND_LEVELS - 1) as f32, REFRACTION_DEPTH * radius, 0.0],
             highlight: highlight_globals(s, data),
             highlight_shift: highlight_shift(frame.size),
+            stage_ground: [stage_catcher_on, ground_y, s.stage_ground[2], s.stage_ground[3]],
+            stage_bounds: [mesh_center.x, mesh_center.y, mesh_center.z, radius * s.stage_params[1].max(0.1)],
         };
         let flag = |b: bool| if b { 1.0 } else { 0.0 };
         let post = PostRaw {

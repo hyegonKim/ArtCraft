@@ -1550,3 +1550,47 @@ menu	View	视图
 	Alignment	对齐参数
 	Other	其他
 	Polar Stretch	极轴拉伸
+	3D Solid Primitive	三维实体基本体
+	3D Clay Boolean	三维黏土布尔运算
+	Transform 3D Solid	变换三维实体
+	List 3D Solids	列出三维实体
+	Delete 3D Solid	删除三维实体
+	Clear 3D Solids	清除三维实体
+	Export 3D STL	导出三维 STL
+	Export 3D OBJ	导出三维 OBJ
+	Flatshot 2D Projection	平面摄影二维投影
+	Flatshot 2D View	平面摄影二维视图
+	Base & Projected 3D Views	基础与投影三维视图
+	Base & Projected Views	基础与投影视图
+	3D Solid Modeler	三维实体建模器
+	3D Solid Modeler...	三维实体建模器...
+	Capsule	胶囊体
+	Front	前视
+	Isometric	等轴测
+	Add 3D Primitive	添加三维基本体
+	Size (W, D, H)	尺寸 (宽, 深, 高)
+	Major / Minor radius	主半径 / 次半径
+	Base / Top / Height	底半径 / 顶半径 / 高度
+	Radius / Height	半径 / 高度
+	Position (X, Y, Z)	位置 (X, Y, Z)
+	Create 3D Primitive	创建三维基本体
+	3D Solids in Drawing	图形中的三维实体
+	Clear All	全部清除
+	No 3D solids yet.	尚无三维实体。
+	Clay & CSG Boolean	黏土与布尔运算
+	Operation	运算
+	Target solid	目标实体
+	Tool solid	工具实体
+	Smooth blend (k)	平滑融合 (k)
+	Keep input solids	保留输入实体
+	Apply Boolean	应用布尔运算
+	2D CAD Projection & Mesh Export	二维投影与网格导出
+	Mesh resolution	网格分辨率
+	Projection view	投影视图
+	Origin (X, Y) & Scale	原点 (X, Y) 与比例
+	Show hidden lines	显示隐藏线
+	Binary STL	二进制 STL
+	Project View (FLATSHOT)	投影视图 (FLATSHOT)
+	4-View Layout (VIEWBASE)	四视图布局 (VIEWBASE)
+	Export STL...	导出 STL...
+	Export OBJ...	导出 OBJ...

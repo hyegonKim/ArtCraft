@@ -37,25 +37,12 @@ fn grad_dot(ix: i32, iy: i32, period: i32, tile: bool, dx: f32, dy: f32, disorde
         (ix, iy)
     };
     let base_angle = hash_unit(gx_i, gy_i, seed) * TAU;
-    let extra = if disorder > 0.0 {
-        hash_unit(gx_i ^ 0x5bd1_e995, gy_i ^ 0x27d4_eb2d, seed.wrapping_add(0x1357_9bdf)) * TAU * disorder
-    } else {
-        0.0
-    };
+    let extra = if disorder > 0.0 { hash_unit(gx_i ^ 0x5bd1_e995, gy_i ^ 0x27d4_eb2d, seed.wrapping_add(0x1357_9bdf)) * TAU * disorder } else { 0.0 };
     let angle = base_angle + extra;
     angle.cos() * dx + angle.sin() * dy
 }
 
-pub(crate) fn sample_perlin_fbm(
-    u: f32,
-    v: f32,
-    base_scale: i32,
-    octaves: i32,
-    persistence: f32,
-    disorder: f32,
-    tile: bool,
-    seed: u32,
-) -> f32 {
+pub(crate) fn sample_perlin_fbm(u: f32, v: f32, base_scale: i32, octaves: i32, persistence: f32, disorder: f32, tile: bool, seed: u32) -> f32 {
     let base_scale = base_scale.clamp(1, 64);
     let octaves = octaves.clamp(1, 8);
     let persistence = persistence.clamp(0.0, 1.0);

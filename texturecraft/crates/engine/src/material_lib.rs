@@ -31,15 +31,7 @@ pub fn specs() -> Vec<CommandSpec> {
             always,
             load
         ),
-        cmd!(
-            "material.exportJson",
-            "Export smart material JSON",
-            [],
-            None,
-            "{layer?, name?} -> portable JSON smart material envelope",
-            has_layer,
-            export_json
-        ),
+        cmd!("material.exportJson", "Export smart material JSON", [], None, "{layer?, name?} -> portable JSON smart material envelope", has_layer, export_json),
         cmd!(
             "material.importJson",
             "Import smart material JSON",
@@ -182,7 +174,7 @@ fn decode_hex(command: &str, hex: &str) -> Result<Vec<u8>> {
         }
     };
     let mut out = Vec::with_capacity(trimmed.len() / 2);
-    for pair in trimmed.as_bytes().chunks_exact(2) {
+    for pair in trimmed.as_bytes().as_chunks::<2>().0 {
         let hi = nibble(pair[0]).ok_or_else(|| bad(command, "invalid hex character in smart material payload"))?;
         let lo = nibble(pair[1]).ok_or_else(|| bad(command, "invalid hex character in smart material payload"))?;
         out.push((hi << 4) | lo);

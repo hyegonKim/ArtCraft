@@ -65,6 +65,7 @@ pub mod plotstyles;
 pub mod quick;
 pub mod save_loss;
 pub mod shortcut_menus;
+pub mod solid3d;
 pub mod theme;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod updates_ui;

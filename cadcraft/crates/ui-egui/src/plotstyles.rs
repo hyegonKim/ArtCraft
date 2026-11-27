@@ -353,7 +353,8 @@ fn draw_lineweight_combo(ui: &mut egui::Ui, table_name: &str, st: &PlotStyle, ac
     let lw = st.lineweight.map(|w| format!("{:.2} mm", f64::from(w) / 100.0)).unwrap_or_else(|| crate::tl!("Use object lineweight").to_string());
     craft_ui::ComboBox::from_id_salt(("pstyle_lw", &st.name)).selected_text(lw).width(120.0).show_ui(ui, |ui| {
         if ui.selectable_label(st.lineweight.is_none(), crate::tl!("Use object lineweight")).clicked() {
-            *action = Some(("stylesmanager", json!({ "action": "set", "name": table_name, "style": { "name": st.name, "lineweight": Value::Null } })));
+            *action =
+                Some(("stylesmanager", json!({ "action": "set", "name": table_name, "style": { "name": st.name, "lineweight": Value::Null } })));
         }
         for mm in LINEWEIGHTS {
             let hundredths = (mm * 100.0).round() as u16;

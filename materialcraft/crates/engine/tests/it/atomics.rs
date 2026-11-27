@@ -91,7 +91,7 @@ fn every_catalog_entry_has_a_native_sbs_representation() {
     let bytes = write_sbs(&package).unwrap();
     let loaded = read_sbs(&bytes, "primitives.sbs", &|_| None).unwrap();
     assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
-    assert_eq!(loaded.pkg.graphs[0].nodes.len(), 37);
+    assert_eq!(loaded.pkg.graphs[0].nodes.len(), 39);
     for (before, after) in package.graphs[0].nodes.iter().zip(&loaded.pkg.graphs[0].nodes) {
         assert_eq!(before.def, after.def);
     }

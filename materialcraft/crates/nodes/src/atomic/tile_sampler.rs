@@ -126,11 +126,8 @@ fn tile_sampler(context: &CookContext) -> CookResult {
                     continue;
                 }
 
-                let stamp = if let Some(pat) = &custom_pattern {
-                    pat.sample_gray((rx + 1.0) * 0.5, (ry + 1.0) * 0.5, false)
-                } else {
-                    eval_shape(shape, rx, ry)
-                };
+                let stamp =
+                    if let Some(pat) = &custom_pattern { pat.sample_gray((rx + 1.0) * 0.5, (ry + 1.0) * 0.5, false) } else { eval_shape(shape, rx, ry) };
                 let lum = 1.0 - lum_rnd * cell_rand(cx_id, cy_id, 5, seed) * 0.8;
                 best = best.max(stamp * lum);
             }

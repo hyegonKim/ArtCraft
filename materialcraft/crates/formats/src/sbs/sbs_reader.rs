@@ -279,6 +279,11 @@ impl<'text> SbsReader<'text, '_> {
             }
 
             let group = child_value(input, "group").unwrap_or("").to_string();
+            let visible_if = child_value(input, "visibleIf")
+                .or_else(|| child_element(input, "attributes").and_then(|a| child_value(a, "visibleIf")))
+                .unwrap_or("")
+                .trim()
+                .to_string();
             let mut exposed = ExposedParameter {
                 id,
                 label,
@@ -287,6 +292,7 @@ impl<'text> SbsReader<'text, '_> {
                 min,
                 max,
                 options: Vec::new(),
+                visible_if,
                 description: String::new(),
                 editor: None,
                 clamp: false,
@@ -429,7 +435,18 @@ impl<'text> SbsReader<'text, '_> {
                             }
                         }
                         let inputs = filter.inputs.iter().map(|(sbs, port)| (sbs.to_string(), port.to_string())).collect();
-                        ReadNode { id, index, inputs, outputs: all_outputs_to("output"), open_inputs: false }
+                        let outputs = match find(filter.def) {
+                            Some(def) if !def.outputs.is_empty() => output_uids
+                                .iter()
+                                .enumerate()
+                                .map(|(idx, (uid, _))| {
+                                    let port = def.outputs.get(idx).or_else(|| def.outputs.first()).map_or("output", |p| p.id);
+                                    (uid.clone(), port.to_string())
+                                })
+                                .collect(),
+                            _ => all_outputs_to("output"),
+                        };
+                        ReadNode { id, index, inputs, outputs, open_inputs: false }
                     }
                     None => {
                         let (id, index, node) = push_node(graph, MISSING_NODE, pos);

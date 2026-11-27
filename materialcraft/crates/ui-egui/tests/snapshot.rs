@@ -1468,14 +1468,14 @@ fn material_assignment_previews_outputs_and_survives_function_editing() {
     assert_eq!(harness.state().session.material_maps()[0].0, "baseColor");
     let red_frame = harness.state().view3d.shown.clone().unwrap();
     assert_ne!(before.2, red_frame.2, "assignment must invalidate the rendered frame");
-    let red_pixels = red_frame.2.chunks_exact(4).filter(|pixel| u16::from(pixel[0]) > u16::from(pixel[1]) + 30).count();
+    let red_pixels = red_frame.2.as_chunks::<4>().0.iter().filter(|pixel| u16::from(pixel[0]) > u16::from(pixel[1]) + 30).count();
     assert!(red_pixels > 100, "the rendered mesh must show the assigned red image");
     save(&mut harness, &directory, "material-assigned-red");
 
     harness.state_mut().run("graph.node.param", json!({"id": source, "param": "color", "value": [0.02, 0.04, 0.8, 1.0]})).unwrap();
     settle(&mut harness, 45);
     let blue_frame = harness.state().view3d.shown.clone().unwrap();
-    let blue_pixels = blue_frame.2.chunks_exact(4).filter(|pixel| u16::from(pixel[2]) > u16::from(pixel[0]) + 30).count();
+    let blue_pixels = blue_frame.2.as_chunks::<4>().0.iter().filter(|pixel| u16::from(pixel[2]) > u16::from(pixel[0]) + 30).count();
     assert!(blue_pixels > 100, "edits must refresh the assigned material");
     assert_ne!(red_frame.2, blue_frame.2);
     save(&mut harness, &directory, "material-assigned-blue");
@@ -1578,6 +1578,6 @@ fn explorer_inputs_and_graph_drop_share_labels_and_material_assignment() {
     let binding = &harness.state().session.material_preview.channels[&MaterialChannel::BaseColor];
     assert_eq!((binding.graph, binding.node), (0, NodeId(output)));
     let frame = &harness.state().view3d.shown.as_ref().unwrap().2;
-    assert!(frame.chunks_exact(4).filter(|pixel| u16::from(pixel[0]) > u16::from(pixel[1]) + 30).count() > 100);
+    assert!(frame.as_chunks::<4>().0.iter().filter(|pixel| u16::from(pixel[0]) > u16::from(pixel[1]) + 30).count() > 100);
     save(&mut harness, &directory, "graph-dropped-on-material");
 }

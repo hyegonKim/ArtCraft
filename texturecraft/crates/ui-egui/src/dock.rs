@@ -2369,7 +2369,10 @@ fn generator_properties(app: &mut TextureCraftApp, ui: &mut Ui, id: u64, generat
         );
     }
 
-    if matches!(generator.kind, GeneratorKind::Position | GeneratorKind::Direction | GeneratorKind::WorldSpaceNormal) {
+    if matches!(
+        generator.kind,
+        GeneratorKind::Position | GeneratorKind::Direction | GeneratorKind::WorldSpaceNormal | GeneratorKind::RainStreaks | GeneratorKind::DustSettling
+    ) {
         let mut dir = generator.direction;
         let dx = slider_edit(ui, "X", &mut dir[0], -1.0..=1.0, 2);
         let dy = slider_edit(ui, "Y", &mut dir[1], -1.0..=1.0, 2);

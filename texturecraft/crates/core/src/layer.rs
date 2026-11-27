@@ -507,10 +507,14 @@ pub enum GeneratorKind {
     WorldSpaceNormal,
     /// Micro-crevices and pockets combining multi-radius concave curvature with ambient occlusion.
     Cavity,
+    /// Gravity-advected vertical runoff streaks along exposed vertical walls, sheltered under overhangs.
+    RainStreaks,
+    /// Upward-facing particulate dust accumulation retained inside sheltered crevices and pockets.
+    DustSettling,
 }
 
 impl GeneratorKind {
-    pub const ALL: [GeneratorKind; 9] = [
+    pub const ALL: [GeneratorKind; 11] = [
         GeneratorKind::EdgeWear,
         GeneratorKind::Dirt,
         GeneratorKind::ThinAreas,
@@ -520,6 +524,8 @@ impl GeneratorKind {
         GeneratorKind::Direction,
         GeneratorKind::WorldSpaceNormal,
         GeneratorKind::Cavity,
+        GeneratorKind::RainStreaks,
+        GeneratorKind::DustSettling,
     ];
     pub fn label(self) -> &'static str {
         match self {
@@ -532,6 +538,8 @@ impl GeneratorKind {
             GeneratorKind::Direction => "Light / direction",
             GeneratorKind::WorldSpaceNormal => "World-space normal",
             GeneratorKind::Cavity => "Cavity",
+            GeneratorKind::RainStreaks => "Rain streaks",
+            GeneratorKind::DustSettling => "Dust settling",
         }
     }
     pub fn parse(s: &str) -> Option<GeneratorKind> {
@@ -570,6 +578,8 @@ impl Generator {
             GeneratorKind::Cavity => (0.55, 0.2, 0.25),
             GeneratorKind::Dirt => (0.55, 0.25, 0.35),
             GeneratorKind::ThinAreas => (0.3, 0.2, 0.0),
+            GeneratorKind::RainStreaks => (0.55, 0.22, 0.20),
+            GeneratorKind::DustSettling => (0.55, 0.25, 0.25),
             _ => (0.5, 0.25, 0.0),
         };
         let detail = match kind {
@@ -578,7 +588,8 @@ impl Generator {
             GeneratorKind::Cavity => Some(CurvatureDetail { mode: CurvatureMode::Cavities, weights: CurvatureDetail::EDGE_WEIGHTS }),
             _ => None,
         };
-        Generator { kind, level, softness, noise_amount, noise_scale: 8.0, seed: 7, offset: 0.0, direction: [0.0, 1.0, 0.0], invert: false, detail }
+        let direction = if kind == GeneratorKind::RainStreaks { [0.0, -1.0, 0.0] } else { [0.0, 1.0, 0.0] };
+        Generator { kind, level, softness, noise_amount, noise_scale: 8.0, seed: 7, offset: 0.0, direction, invert: false, detail }
     }
 
     /// The mask value for a (noise-broken) signal `s`: the smooth threshold at `level` over

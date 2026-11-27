@@ -104,7 +104,7 @@ fn glyph(c: char) -> &'static str {
 fn strokes(s: &str) -> impl Iterator<Item = Vec<[f32; 2]>> + '_ {
     s.split(' ')
         .filter(|t| !t.is_empty())
-        .map(|t| t.as_bytes().chunks_exact(2).map(|p| [p[0].saturating_sub(b'0') as f32, p[1].saturating_sub(b'0') as f32]).collect())
+        .map(|t| t.as_bytes().as_chunks::<2>().0.iter().map(|p| [p[0].saturating_sub(b'0') as f32, p[1].saturating_sub(b'0') as f32]).collect())
 }
 
 /// Longest text drawn (an allocation cap)

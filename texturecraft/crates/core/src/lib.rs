@@ -13,6 +13,7 @@ mod block_scales;
 pub mod channel;
 pub mod layer;
 pub mod project;
+pub mod stage;
 
 pub use bake::{
     AmbientOcclusionAttenuation, AmbientOcclusionSettings, BackfaceMode, BakeAntialiasing, BakePaintTarget, BakeResolution, BakeSettings, BakedMap,
@@ -32,6 +33,7 @@ pub use project::{
     AoMixing, BlockScales, Camera, DepthOfField, DisplaySettings, FORMAT_VERSION, MAX_RESOLUTION, MIN_RESOLUTION, NormalFormat, NormalMixing, Project,
     TextureSet, TileGrid, ToneMapping, UDIM_RANGE, udim_at,
 };
+pub use stage::{StageSettings, StudioLight, StudioRig, focal_mm_to_fov_deg, fov_deg_to_focal_mm};
 
 #[derive(Debug, thiserror::Error, Clone, PartialEq)]
 pub enum CoreError {

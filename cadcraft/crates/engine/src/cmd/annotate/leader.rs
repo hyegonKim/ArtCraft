@@ -55,12 +55,7 @@ fn hooked_vertices(pts: &[Vec2], spline: bool, hook: f64) -> (Vec<Vec2>, f64) {
 }
 
 fn add_leader_entity(s: &mut Session, verts: &[Vec2], arrow: bool, spline: bool, style_name: String) -> Result<Handle> {
-    s.add_entity(EntityKind::Leader(Leader {
-        vertices: verts.iter().map(|q| v3(*q)).collect(),
-        arrow,
-        spline,
-        style: style_name,
-    }))
+    s.add_entity(EntityKind::Leader(Leader { vertices: verts.iter().map(|q| v3(*q)).collect(), arrow, spline, style: style_name }))
 }
 
 /// Programmatic `leader` JSON form (`{points, text?}`), using the same hook and text placement as
@@ -75,14 +70,7 @@ pub(super) fn json_leader(s: &mut Session, pts: &[Vec2], text: Option<&str>) -> 
     }
 }
 
-fn place_typed_text(
-    s: &mut Session,
-    pts: &[Vec2],
-    arrow: bool,
-    spline: bool,
-    cfg: &DimCfg,
-    contents: &str,
-) -> Result<Vec<Handle>> {
+fn place_typed_text(s: &mut Session, pts: &[Vec2], arrow: bool, spline: bool, cfg: &DimCfg, contents: &str) -> Result<Vec<Handle>> {
     let Some(&end) = pts.last() else {
         return Ok(Vec::new());
     };
@@ -196,11 +184,7 @@ impl LeaderM {
         let (verts, dir) = hooked_vertices(&adj, self.spline, cfg.arrow_size);
         add_leader_entity(s, &verts, self.arrow, self.spline, cfg.style_name)?;
         let left = dir < 0.0;
-        let insert = if cfg.tad != 0 {
-            picked_end + Vec2::new(dir * cfg.gap, cfg.gap)
-        } else {
-            picked_end + Vec2::new(dir * cfg.gap, 0.0)
-        };
+        let insert = if cfg.tad != 0 { picked_end + Vec2::new(dir * cfg.gap, cfg.gap) } else { picked_end + Vec2::new(dir * cfg.gap, 0.0) };
         s.add_entity(EntityKind::MText(MText {
             insert: v3(insert),
             height,
@@ -374,25 +358,18 @@ impl Interactive for LeaderM {
             Stage::Points => match self.pts.as_slice() {
                 [] => Prompt::new("Specify leader start point", Accept::POINT),
                 [b] => Prompt::new("Specify next point", Accept::POINT).base(*b),
-                [.., b] => Prompt::new("Specify next point", Accept::POINT)
-                    .kw(&["Annotation", "Format", "Undo"])
-                    .default("Annotation")
-                    .base(*b),
+                [.., b] => Prompt::new("Specify next point", Accept::POINT).kw(&["Annotation", "Format", "Undo"]).default("Annotation").base(*b),
             },
-            Stage::Format => Prompt::new("Enter leader format option", KW)
-                .kw(&["Spline", "STraight", "Arrow", "None"])
-                .default("Exit"),
+            Stage::Format => Prompt::new("Enter leader format option", KW).kw(&["Spline", "STraight", "Arrow", "None"]).default("Exit"),
             Stage::FirstLine => Prompt::new("Enter first line of annotation text or", Accept::TEXT).default("options"),
             Stage::NextLine => Prompt::new("Enter next line of annotation text", Accept::TEXT),
-            Stage::Options => Prompt::new("Enter an annotation option", KW)
-                .kw(&["Tolerance", "Copy", "Block", "None", "Mtext"])
-                .default("Mtext"),
+            Stage::Options => Prompt::new("Enter an annotation option", KW).kw(&["Tolerance", "Copy", "Block", "None", "Mtext"]).default("Mtext"),
             Stage::Copy => Prompt::new("Select an object", Accept::SELECT),
             Stage::BlockName => Prompt::new("Enter block name", Accept::TEXT).kw(&["?"]),
             Stage::BlockPoint => Prompt::new("Specify insertion point", Accept::POINT),
-            Stage::BlockXScale => Prompt::new("Enter X scale factor, specify opposite corner", Accept::POINT_OR_NUMBER)
-                .default("1")
-                .base(self.block_at),
+            Stage::BlockXScale => {
+                Prompt::new("Enter X scale factor, specify opposite corner", Accept::POINT_OR_NUMBER).default("1").base(self.block_at)
+            }
             Stage::BlockYScale => Prompt::new("Enter Y scale factor", Accept::NUMBER).default("use X scale factor"),
             Stage::BlockRot => Prompt::new("Specify rotation angle", Accept::POINT_OR_NUMBER).default("0").base(self.block_at),
         }

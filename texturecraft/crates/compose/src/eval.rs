@@ -1244,6 +1244,57 @@ impl<'a, 'b> Texel<'a, 'b> {
                     .unwrap_or(coords.nrm);
                 wn.dot(Vec3::from(generator.direction).try_normalize().unwrap_or(Vec3::Y)) * 0.5 + 0.5
             }
+            (GeneratorKind::RainStreaks, _) => {
+                let wn = self
+                    .baked_color(BakedMap::WorldNormal)
+                    .and_then(|rgb| Vec3::new(rgb[0] * 2.0 - 1.0, rgb[1] * 2.0 - 1.0, rgb[2] * 2.0 - 1.0).try_normalize())
+                    .unwrap_or(coords.nrm);
+                let gravity = Vec3::from(generator.direction).try_normalize().unwrap_or(Vec3::NEG_Y);
+                let up = -gravity;
+                let up_dot = wn.dot(up).clamp(-1.0, 1.0);
+                // Vertical walls receive gravity-advected runoff; horizontal roofs pool less and overhangs are sheltered
+                let wall = (1.0 - up_dot.abs()).max(0.0).powf(0.65);
+                let shelter = ((up_dot + 0.35) / 0.35).clamp(0.0, 1.0);
+                let ref_axis = if up.y.abs() < 0.9 { Vec3::Y } else { Vec3::X };
+                let tangent_a = up.cross(ref_axis).try_normalize().unwrap_or(Vec3::X);
+                let tangent_b = up.cross(tangent_a);
+
+                let (lo, hi) = self.inp.bounds;
+                let span = (hi - lo).length().max(1e-3);
+                let p = (coords.pos - lo) / span;
+                let freq = if generator.noise_scale.is_finite() { generator.noise_scale.clamp(0.25, 256.0) * 0.35 } else { 2.8 };
+                let u_h = p.dot(tangent_a);
+                let v_h = p.dot(tangent_b);
+                let h_up = p.dot(up);
+
+                let warp = (noise::fbm([u_h * freq * 2.0, h_up * freq * 1.5, v_h * freq * 2.0], 2, generator.seed ^ 0xA5A5_5A5A, noise::perlin) - 0.5) * 0.08;
+                let primary = noise::fbm([(u_h + warp) * freq * 9.5, h_up * freq * 0.45, (v_h - warp) * freq * 9.5], 3, generator.seed, noise::perlin);
+                let fine = noise::fbm(
+                    [(u_h - warp * 0.5) * freq * 20.0, h_up * freq * 0.75, (v_h + warp * 0.5) * freq * 20.0],
+                    2,
+                    generator.seed ^ 0x9E37_79B9,
+                    noise::perlin,
+                );
+                let ao_pool = 1.0 - self.baked(BakedMap::AmbientOcclusion).unwrap_or(1.0);
+                let runoff = 0.40 + 0.60 * h_up.clamp(0.0, 1.0);
+                let streaks = (0.68 * primary + 0.32 * fine).clamp(0.0, 1.0);
+                ((streaks * 1.25 * wall * runoff + 0.28 * ao_pool * wall) * shelter).clamp(0.0, 1.0)
+            }
+            (GeneratorKind::DustSettling, _) => {
+                let wn = self
+                    .baked_color(BakedMap::WorldNormal)
+                    .and_then(|rgb| Vec3::new(rgb[0] * 2.0 - 1.0, rgb[1] * 2.0 - 1.0, rgb[2] * 2.0 - 1.0).try_normalize())
+                    .unwrap_or(coords.nrm);
+                let up = Vec3::from(generator.direction).try_normalize().unwrap_or(Vec3::Y);
+                let top_facing = wn.dot(up).clamp(0.0, 1.0).powf(1.25);
+                let ao_pocket = 1.0 - self.baked(BakedMap::AmbientOcclusion).unwrap_or(1.0);
+                let curv_raw = self.baked(BakedMap::Curvature).unwrap_or(0.5);
+                let concave = ((0.5 - curv_raw) * 2.0).clamp(0.0, 1.0);
+                let convex = ((curv_raw - 0.5) * 2.0).clamp(0.0, 1.0);
+                let grain = world_noise(coords.pos, generator.noise_scale.max(0.5) * 2.0, generator.seed ^ 0x517C_C1B7);
+                let settled = top_facing * 0.80 + (ao_pocket * 0.25 + concave * 0.20) * (0.25 + 0.75 * top_facing);
+                (settled * (1.0 - 0.30 * convex) * (0.82 + 0.36 * grain)).clamp(0.0, 1.0)
+            }
         };
         let signal = if generator.noise_amount > 0.0 {
             let noise = world_noise(coords.pos, generator.noise_scale, generator.seed);
@@ -3002,5 +3053,62 @@ soft {soft:?}"
         f.project.insert_layer(0, Layer::new(id, "Top", LayerKind::Fill(fill), &[Channel::Roughness]), None, false).unwrap();
         let expect = texturecraft_core::lum([0.2, 0.4, 0.6]);
         assert!(close(run(&f, None).value(Channel::Roughness, 9, 9), [expect; 3]));
+    }
+
+    #[test]
+    fn rain_streaks_and_dust_settling_masks_respond_to_surface_orientation() {
+        let mut f = fixture();
+        let layer = fill_layer(&mut f.project, [1.0; 3], 1.0);
+        let n = f.mesh.normals[0];
+        let sample_texels: Vec<(u32, u32)> = (4..60).step_by(4).flat_map(|y| (4..60).step_by(4).map(move |x| (x, y))).collect();
+
+        // DustSettling: accumulates on top-facing surfaces (normal aligned with `direction`), zero on undersides.
+        let mut dust_top = Generator::new(GeneratorKind::DustSettling);
+        dust_top.direction = n.to_array();
+        dust_top.level = 0.55;
+        dust_top.softness = 0.35;
+        let mut mask = Mask::new(MaskBackground::Black);
+        mask.effects.push(Effect::new(f.project.alloc_id(), EffectKind::Generator(dust_top)));
+        f.project.layer_mut(layer).unwrap().mask = Some(mask);
+        let top_vals = assert_sparse_mask_matches_image(&f, layer, &sample_texels).unwrap();
+        let top_mean = top_vals.iter().sum::<f32>() / top_vals.len() as f32;
+        assert!(top_mean > 0.45, "top-facing surface should accumulate settled dust: mean={top_mean}");
+
+        let mut dust_under = Generator::new(GeneratorKind::DustSettling);
+        dust_under.direction = (-n).to_array();
+        dust_under.level = 0.55;
+        dust_under.softness = 0.15;
+        let mut mask_under = Mask::new(MaskBackground::Black);
+        mask_under.effects.push(Effect::new(f.project.alloc_id(), EffectKind::Generator(dust_under)));
+        f.project.layer_mut(layer).unwrap().mask = Some(mask_under);
+        let under_vals = assert_sparse_mask_matches_image(&f, layer, &sample_texels).unwrap();
+        let under_mean = under_vals.iter().sum::<f32>() / under_vals.len() as f32;
+        assert!(under_mean < 0.05, "downward-facing overhang should shed dust: mean={under_mean}");
+
+        // RainStreaks: vertical wall (gravity perpendicular to normal) develops spatially varying streaks;
+        // sheltered overhang (gravity along normal) receives zero streaks.
+        let wall_gravity = n.any_orthonormal_vector();
+        let mut rain_wall = Generator::new(GeneratorKind::RainStreaks);
+        rain_wall.direction = wall_gravity.to_array();
+        rain_wall.level = 0.55;
+        rain_wall.softness = 0.35;
+        rain_wall.noise_scale = 8.0;
+        let mut mask_wall = Mask::new(MaskBackground::Black);
+        mask_wall.effects.push(Effect::new(f.project.alloc_id(), EffectKind::Generator(rain_wall)));
+        f.project.layer_mut(layer).unwrap().mask = Some(mask_wall);
+        let wall_vals = assert_sparse_mask_matches_image(&f, layer, &sample_texels).unwrap();
+        let wall_min = wall_vals.iter().copied().fold(f32::INFINITY, f32::min);
+        let wall_max = wall_vals.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+        assert!(wall_max > 0.25 && wall_max - wall_min > 0.08, "vertical wall should show rain streaks: min={wall_min}, max={wall_max}");
+
+        let mut rain_overhang = Generator::new(GeneratorKind::RainStreaks);
+        rain_overhang.direction = n.to_array();
+        rain_overhang.level = 0.5;
+        rain_overhang.softness = 0.1;
+        let mut mask_overhang = Mask::new(MaskBackground::Black);
+        mask_overhang.effects.push(Effect::new(f.project.alloc_id(), EffectKind::Generator(rain_overhang)));
+        f.project.layer_mut(layer).unwrap().mask = Some(mask_overhang);
+        let overhang_vals = assert_sparse_mask_matches_image(&f, layer, &sample_texels).unwrap();
+        assert!(overhang_vals.iter().all(|v| *v < 0.01), "sheltered overhang should not receive rain streaks: {overhang_vals:?}");
     }
 }

@@ -299,6 +299,9 @@ pub struct DisplaySettings {
     pub ior: f32,
     /// Depth of field of the viewport and the path tracer (thin lens).
     pub dof: DepthOfField,
+    /// 3D stage studio lighting rig, ground alignment, and shadow catcher settings.
+    #[serde(default, skip_serializing_if = "crate::StageSettings::is_default")]
+    pub stage: crate::StageSettings,
 }
 
 /// A thin-lens camera's depth of field (Display settings: focus distance and aperture).
@@ -335,16 +338,23 @@ pub struct Camera {
     /// Vertical field of view, degrees (orthographic: the view height at `distance`).
     pub fov: f32,
     pub ortho: bool,
+    /// Equivalent 35mm full-frame focal length in millimeters (24mm vertical sensor height).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub focal_length_mm: Option<f32>,
+    /// Optional saved thin-lens depth of field for stage camera bookmarks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dof: Option<DepthOfField>,
 }
 
 impl Default for Camera {
     fn default() -> Self {
-        Camera { name: "Camera".into(), target: [0.0; 3], yaw: 0.0, pitch: 0.0, distance: 5.0, fov: 40.0, ortho: false }
+        Camera { name: "Camera".into(), target: [0.0; 3], yaw: 0.0, pitch: 0.0, distance: 5.0, fov: 40.0, ortho: false, focal_length_mm: None, dof: None }
     }
 }
 
 /// Built-in environments, in menu order.
-pub const ENVIRONMENTS: [&str; 6] = ["Studio Soft", "Studio Contrast", "Overcast", "Sunset", "Warehouse", "Night"];
+pub const ENVIRONMENTS: [&str; 10] =
+    ["Studio Soft", "Studio Contrast", "Product Three-Point", "Packshot Rim", "Tabletop Warm", "Dramatic Low-Key", "Overcast", "Sunset", "Warehouse", "Night"];
 
 /// Prefix of [`DisplaySettings::environment`] naming an image resource.
 pub const ENV_RESOURCE_PREFIX: &str = "resource:";
@@ -381,6 +391,7 @@ impl Default for DisplaySettings {
             scatter_radius: 0.1,
             ior: 1.5,
             dof: DepthOfField::default(),
+            stage: crate::StageSettings::default(),
         }
     }
 }

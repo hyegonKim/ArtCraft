@@ -123,6 +123,7 @@ pub const UI_COMMANDS: &[(&str, &str, &[&str], Option<&str>)] = &[
     ("ui.dialog.layers", "Layer Properties Manager", &["Window", "Layers"], None),
     ("ui.dialog.blocks", "Blocks", &["Window", "Blocks"], None),
     ("ui.dialog.bauthor", "Dynamic Block Parameters", &["Window", "Dynamic Block Parameters"], None),
+    ("ui.dialog.solid3d", "3D Solid Modeler", &["Draw", "3D Solid Modeler..."], None),
     ("ui.dialog.qselect", "Quick Select...", &[], None),
     ("ui.dialog.parameters", "Parameters Manager", &["Window", "Parameters Manager"], None),
     ("ui.dialog.dsettings", "Drafting Settings...", &[], None),
@@ -529,6 +530,7 @@ fn run_ui_command_inner(app: &mut CadApp, id: &str, params: &Value) -> Option<Re
         | "ui.dialog.layers"
         | "ui.dialog.blocks"
         | "ui.dialog.bauthor"
+        | "ui.dialog.solid3d"
         | "ui.dialog.dsettings"
         | "ui.dialog.about"
         | "ui.dialog.commands"

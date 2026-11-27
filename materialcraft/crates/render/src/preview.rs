@@ -115,7 +115,7 @@ impl Scene {
             // Normals of the displaced surface, shared per spot so seams don't show
             let moved = |i: u32| mesh.positions.get(i as usize).zip(offsets.get(i as usize)).map(|(p, o)| *p + *o);
             let mut face_sums: HashMap<[i32; 3], Vec3> = HashMap::new();
-            for triangle in mesh.indices.chunks_exact(3) {
+            for triangle in mesh.indices.as_chunks::<3>().0 {
                 let (Some(a), Some(b), Some(c)) = (moved(triangle[0]), moved(triangle[1]), moved(triangle[2])) else { continue };
                 let face = (b - a).cross(c - a);
                 for spot in triangle.iter().filter_map(|&i| spots.get(i as usize)) {

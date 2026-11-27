@@ -24,7 +24,7 @@ const BINS: usize = 64;
 /// Histograms of the displayed 8-bit values: one for gray or isolated channels, else R, G and B.
 fn histogram(px: &[u8], channels: usize) -> Vec<[u32; BINS]> {
     let mut h = vec![[0u32; BINS]; channels];
-    for p in px.chunks_exact(4) {
+    for p in px.as_chunks::<4>().0 {
         for (c, bins) in h.iter_mut().enumerate() {
             bins[p[c] as usize * BINS / 256] += 1;
         }

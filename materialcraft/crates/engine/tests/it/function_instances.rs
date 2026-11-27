@@ -22,6 +22,7 @@ fn source() -> Package {
         min: 0.0,
         max: 1.0,
         options: Vec::new(),
+        visible_if: String::new(),
     });
     let mut function = FunctionGraph::default();
     let input = function.add("get_float1", &[], Some(Value::Text("amount".into())));

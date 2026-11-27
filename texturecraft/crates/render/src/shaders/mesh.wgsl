@@ -26,6 +26,8 @@ struct Globals {
     refr: vec4<f32>,     // x screen-space refraction on (1), y lods of the scene behind, z refraction depth (world units), w -
     highlight: vec4<f32>, // rgb highlighted set's edge color in the scene (before exposure and tone mapping), a opacity
     highlight_shift: vec4<f32>, // xy sideways shift of each highlight line copy (clip units), zw -
+    stage_ground: vec4<f32>, // x shadow catcher on (1), y ground_y, z shadow opacity, w contact AO strength
+    stage_bounds: vec4<f32>, // xyz mesh center, w scaled contact AO radius
 };
 
 @group(0) @binding(0) var<uniform> g: Globals;
@@ -642,15 +644,53 @@ fn vs_bg(@builtin(vertex_index) vi: u32) -> BgOut {
 
 @fragment
 fn fs_bg(i: BgOut) -> @location(0) vec4<f32> {
+    if (g.bg.z > 0.5) {
+        return vec4<f32>(0.0);
+    }
     let o = g.bg.x;
-    if (g.bg.z > 0.5 || o <= 0.001) {
+    let catcher_on = g.stage_ground.x > 0.5;
+    if (o <= 0.001 && !catcher_on) {
         return vec4<f32>(0.0);
     }
     let a = g.inv_view_proj * vec4<f32>(i.ndc, 0.0, 1.0);
     let b = g.inv_view_proj * vec4<f32>(i.ndc, 1.0, 1.0);
-    let d = normalize(b.xyz / b.w - a.xyz / a.w);
-    let env = textureSampleLevel(env_tex, env_samp, env_uv(d), g.bg.y).rgb;
-    return vec4<f32>(env * o, o);
+    let orig = a.xyz / a.w;
+    let d = normalize(b.xyz / b.w - orig);
+    var env = vec3<f32>(0.0);
+    if (o > 0.001) {
+        env = textureSampleLevel(env_tex, env_samp, env_uv(d), g.bg.y).rgb;
+    }
+
+    var shadow_alpha = 0.0;
+    if (catcher_on && d.y < -1e-4 && orig.y > g.stage_ground.y) {
+        let t_hit = (g.stage_ground.y - orig.y) / d.y;
+        if (t_hit > 0.0) {
+            let p_hit = orig + d * t_hit;
+            let ao_r = max(g.stage_bounds.w * 0.65, 1e-3);
+            let d_xz = (p_hit.xz - g.stage_bounds.xz) / ao_r;
+            let ao_occ = g.stage_ground.w * exp(-1.6 * dot(d_xz, d_xz));
+
+            var dir_occ = 0.0;
+            if (g.shadow.x > 0.5 && g.light.w > 0.0) {
+                dir_occ = 1.0 - shadow_factor(p_hit, vec3<f32>(0.0, 1.0, 0.0));
+            }
+            if (g.light.w > 0.0) {
+                let l_dir = normalize(g.light.xyz);
+                let h_c = max(g.stage_bounds.y - g.stage_ground.y, ao_r * 0.4);
+                let proj_xz = g.stage_bounds.xz - l_dir.xz * (h_c / max(l_dir.y, 0.18));
+                let s_dist = length(p_hit.xz - proj_xz) / (ao_r * 1.35);
+                let soft_occ = smoothstep(1.25, 0.25, s_dist) * 0.55;
+                dir_occ = max(dir_occ, soft_occ);
+            }
+            let horizon_fade = smoothstep(0.0, 0.06, -d.y);
+            let combined = 1.0 - (1.0 - ao_occ) * (1.0 - dir_occ);
+            shadow_alpha = clamp(g.stage_ground.z * combined * horizon_fade, 0.0, 1.0);
+        }
+    }
+
+    let out_rgb = env * o * (1.0 - shadow_alpha);
+    let out_a = o + shadow_alpha * (1.0 - o);
+    return vec4<f32>(out_rgb, out_a);
 }
 
 // UV wireframe in the 2D view.

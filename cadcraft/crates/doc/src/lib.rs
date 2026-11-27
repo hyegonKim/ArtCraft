@@ -91,6 +91,16 @@ impl Space {
     }
 }
 
+/// A named 3D SDF / CSG solid assembly kept in the drawing for mesh export and 2D view projection.
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Solid3dEntry {
+    pub id: u64,
+    pub name: String,
+    pub layer: String,
+    pub node: cadcraft_geom::sdf3d::Solid3dNode,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Drawing {
     pub header: Header,
@@ -145,6 +155,10 @@ pub struct Drawing {
     pub portable_fonts: bool,
     /// The pixels of the raster images that are loaded (IMAGE). Never written to a file.
     pub rasters: Rasters,
+    /// 3D SDF / CSG solids authored in this drawing session.
+    pub solids3d: Vec<Solid3dEntry>,
+    /// Next free 3D solid identifier.
+    pub next_solid3d_id: u64,
 }
 
 impl Default for Drawing {
@@ -206,7 +220,16 @@ impl Drawing {
             skipped_records: BTreeMap::new(),
             portable_fonts: false,
             rasters: Rasters::default(),
+            solids3d: Vec::new(),
+            next_solid3d_id: 1,
         }
+    }
+
+    /// Allocate a fresh 3D solid identifier.
+    pub fn alloc_solid3d_id(&mut self) -> u64 {
+        let id = self.next_solid3d_id.max(1);
+        self.next_solid3d_id = id.saturating_add(1);
+        id
     }
 
     /// Allocate a fresh handle.

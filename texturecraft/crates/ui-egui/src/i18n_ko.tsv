@@ -129,6 +129,28 @@
 	Light / direction	조명 / 방향
 	World-space normal	월드 공간 노멀
 	Cavity	캐비티 (오목 틈새)
+	Rain streaks	빗물 줄무늬
+	Dust settling	상단 먼지 퇴적
+	Stage & studio lighting	스테이지 및 스튜디오 조명
+	Studio rig	스튜디오 조명 리그
+	Environment only	환경광 단독
+	Product Three-Point	제품 3점 조명
+	Packshot Rim	팩샷 림 조명
+	Tabletop Warm	테이블탑 웜 조명
+	Dramatic Low-Key	드라마틱 로우키
+	Rig intensity	조명 리그 강도
+	Rig rotation	조명 리그 회전
+	Snap to ground	지면에 자동 정렬
+	Snap model to ground plane	모델을 지면에 정렬
+	Ground shadow catcher	지면 그림자 캐처
+	Auto ground from mesh	메시 기준 자동 지면
+	Ground height	지면 높이
+	Shadow opacity	그림자 불투명도
+	Contact AO	접촉 AO
+	Contact AO radius	접촉 AO 반경
+	Light softness	조명 부드러움
+	Focal length (mm)	초점 거리 (mm)
+	Save camera + DoF bookmark	카메라 + 심도 북마크 저장
 	Level	레벨
 	Softness	부드러움
 	Noise amount	노이즈 강도

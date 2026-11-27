@@ -14,7 +14,7 @@ pub(crate) fn decode(bytes: &[u8], linear: bool) -> Result<Image> {
         dds::ImageViewMut::new(bytemuck::cast_slice_mut(&mut data), size, dds::ColorFormat::RGBA_F32).ok_or_else(|| error("Invalid DDS dimensions".into()))?;
     decoder.read_surface(view).map_err(|e| error(e.to_string()))?;
     if !linear && decoder.format().precision() != dds::Precision::F32 {
-        for pixel in data.chunks_exact_mut(4) {
+        for pixel in data.as_chunks_mut::<4>().0 {
             for value in pixel.iter_mut().take(3) {
                 *value = srgb_to_linear(*value);
             }

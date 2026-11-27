@@ -110,6 +110,7 @@ fn base_params(app: &mut MaterialCraftApp, ui: &mut Ui, node: &materialcraft_eng
                     min: descriptor.min,
                     max: descriptor.max,
                     options: descriptor.options,
+                    visible_if: String::new(),
                 };
                 if let Some(value) = ui.add_enabled_ui(editable, |ui| input_editor(ui, &input, &value)).inner {
                     app.run("graph.node.base", json!({"id": node.id, "param": parameter.identifier(), "value": value}));
@@ -169,7 +170,19 @@ fn instance_params(app: &mut MaterialCraftApp, ui: &mut Ui, node: &materialcraft
         ui.label(RichText::new(tr("This graph exposes no inputs")).color(tokens.text_dim));
     }
 
+    let effective_values: std::collections::BTreeMap<String, Value> = exposed
+        .iter()
+        .map(|entry| {
+            let descriptor = ParameterDescriptor::for_node(&app.session.pkg, node, &entry.id);
+            let value = node.params.get(&entry.id).unwrap_or_else(|| descriptor.as_ref().map_or(&entry.default, |descriptor| &descriptor.default)).clone();
+            (entry.id.clone(), value)
+        })
+        .collect();
+
     for entry in exposed {
+        if !materialcraft_engine::core::is_parameter_visible(&entry.visible_if, &|id| effective_values.get(id)) {
+            continue;
+        }
         let descriptor = ParameterDescriptor::for_node(&app.session.pkg, node, &entry.id);
         let current = node.params.get(&entry.id).unwrap_or_else(|| descriptor.as_ref().map_or(&entry.default, |descriptor| &descriptor.default)).clone();
         let literal = |app: &mut MaterialCraftApp, ui: &mut Ui| {
@@ -231,5 +244,29 @@ mod tests {
         if let Some(directory) = directory {
             harness.render().unwrap().save(directory.join("instance-local-override.png")).unwrap();
         }
+    }
+
+    #[test]
+    fn conditional_visible_if_inputs_show_and_hide_in_graph_and_instance_properties() {
+        let mut app = MaterialCraftApp::headless(materialcraft_engine::new_session(), crate::UiState::default());
+        app.session.graph_mut().unwrap().name = "Conditional".into();
+        app.run("graph.node.add", json!({"def": "output"})).unwrap();
+        app.run("graph.exposed.add", json!({"id": "use_detail", "label": "Use Detail", "default": {"t": "bool", "v": false}})).unwrap();
+        app.run("graph.exposed.add", json!({"id": "detail_scale", "label": "Detail Scale", "default": 0.5, "visibleIf": r#"input["use_detail"]"#})).unwrap();
+
+        let mut harness = Harness::builder().with_size(egui::vec2(420.0, 260.0)).with_context_setup(crate::theme::install).build_ui_state(
+            |ui, app: &mut MaterialCraftApp| {
+                let target = materialcraft_engine::GraphTarget::active(&app.session);
+                super::super::graph::show(app, ui, target);
+            },
+            app,
+        );
+        harness.run();
+        let detail_field = || By::new().role(egui::accesskit::Role::TextInput).label("Detail Scale");
+        assert!(harness.query(detail_field()).is_none(), "Detail Scale should be hidden when use_detail is false");
+
+        harness.state_mut().run("graph.exposed.set", json!({"id": "use_detail", "value": true})).unwrap();
+        harness.run();
+        assert!(harness.query(detail_field()).is_some(), "Detail Scale should appear when use_detail becomes true");
     }
 }

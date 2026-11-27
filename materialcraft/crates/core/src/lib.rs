@@ -43,6 +43,7 @@ mod resource_bytes;
 mod size_mode;
 mod value;
 mod value_type;
+mod visible_if;
 
 pub use attributes::Attributes;
 pub use base_parameter::BaseParameter;
@@ -84,6 +85,7 @@ pub use resource_bytes::ResourceBytes;
 pub use size_mode::SizeMode;
 pub use value::Value;
 pub use value_type::ValueType;
+pub use visible_if::{evaluate_visible_if, is_parameter_visible, validate_visible_if};
 
 pub type Result<T> = std::result::Result<T, CoreError>;
 

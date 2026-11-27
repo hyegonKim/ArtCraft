@@ -230,6 +230,11 @@ impl Graph {
         self.inputs.get(id).or_else(|| self.exposed.iter().find(|e| e.id == id).map(|e| &e.default))
     }
 
+    /// Whether `exposed` should be displayed in the UI given the graph's current input values
+    pub fn is_input_visible(&self, exposed: &ExposedParameter) -> bool {
+        crate::is_parameter_visible(&exposed.visible_if, &|id| self.input_value(id))
+    }
+
     /// Graph size in pixels
     pub fn size_px(&self) -> [u32; 2] {
         [1 << self.size[0].clamp(MIN_SIZE_LOG2, MAX_SIZE_LOG2), 1 << self.size[1].clamp(MIN_SIZE_LOG2, MAX_SIZE_LOG2)]

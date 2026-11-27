@@ -41,6 +41,7 @@ pub(crate) use props::{current_color_value, set_current_color_value};
 mod qselect;
 mod selecttools;
 mod settings;
+mod solid3d;
 mod spline_opts;
 mod table;
 mod tolerance;
@@ -211,6 +212,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(tolerance::specs());
         v.extend(txt2mtxt::specs());
         v.extend(constraints::specs());
+        v.extend(solid3d::specs());
         v.extend(lisp::specs());
         v
     })

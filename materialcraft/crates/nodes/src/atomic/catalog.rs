@@ -35,6 +35,8 @@ pub(crate) fn defs() -> Vec<NodeDefinition> {
         curvature::definition(),
         ambient_occlusion::definition(),
         slope_blur::definition(),
+        scan_delight::definition(),
+        image_to_material::definition(),
         input_color::definition(),
         input_grayscale::definition(),
         input_value::definition(),

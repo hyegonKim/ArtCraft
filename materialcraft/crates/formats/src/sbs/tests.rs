@@ -401,3 +401,74 @@ fn input_usage_defaults_and_unknown_metadata_stay_unclassified() {
         }
     }
 }
+
+#[test]
+fn scan_nodes_multi_output_ports_and_visible_if_round_trip_in_sbs() {
+    use materialcraft_core::ExposedParameter;
+
+    let mut pkg = Package::new("ScanMaterial");
+    let mut graph = Graph::new("ScanSurface");
+    let input_bmp = graph.add_node("input_color", [0.0, 0.0]);
+    let delight = graph.add_node("scan_delight", [160.0, 0.0]);
+    graph.node_mut(delight).unwrap().params.insert("strength".into(), Value::Float(0.75));
+    let i2m = graph.add_node("image_to_material", [320.0, 0.0]);
+    graph.node_mut(i2m).unwrap().params.insert("normal_intensity".into(), Value::Float(3.5));
+    graph.connect(input_bmp, "output", delight, "input").unwrap();
+    graph.connect(delight, "output", i2m, "input").unwrap();
+
+    let ports = ["basecolor", "normal", "height", "roughness", "ao", "metallic"];
+    for (idx, port) in ports.iter().enumerate() {
+        let out = graph.add_node("output", [520.0, idx as f32 * 100.0]);
+        graph.node_mut(out).unwrap().params.insert("identifier".into(), Value::Text((*port).to_string()));
+        graph.connect(i2m, port, out, "input").unwrap();
+    }
+
+    graph.exposed.push(ExposedParameter {
+        id: "mode".into(),
+        label: "Mode".into(),
+        group: "General".into(),
+        default: Value::Enum(1),
+        description: String::new(),
+        editor: None,
+        clamp: false,
+        step: None,
+        min: 0.0,
+        max: 2.0,
+        options: vec!["Basic".into(), "Detailed".into(), "Custom".into()],
+        visible_if: String::new(),
+    });
+    graph.exposed.push(ExposedParameter {
+        id: "detail_amount".into(),
+        label: "Detail Amount".into(),
+        group: "Detail".into(),
+        default: Value::Float(0.5),
+        description: String::new(),
+        editor: None,
+        clamp: true,
+        step: Some(0.05),
+        min: 0.0,
+        max: 1.0,
+        options: Vec::new(),
+        visible_if: r#"input["mode"] == 1"#.into(),
+    });
+    pkg.graphs.push(graph);
+
+    let saved = write_sbs(&pkg).unwrap();
+    let xml = std::str::from_utf8(&saved).unwrap();
+    assert!(xml.contains("visibleIf"));
+    let restored = read_sbs(&saved, "scan.sbs", &no_linked_files).unwrap();
+    assert!(restored.warnings.is_empty(), "{:?}", restored.warnings);
+
+    let back = &restored.pkg.graphs[0];
+    assert_eq!(back.exposed.len(), 2);
+    assert_eq!(back.exposed[1].visible_if, r#"input["mode"] == 1"#);
+    assert!(back.is_input_visible(&back.exposed[1]));
+
+    let back_i2m = back.nodes.iter().find(|n| n.def == "image_to_material").unwrap().id;
+    for port in ports {
+        let out_node = back.nodes.iter().find(|n| n.def == "output" && n.params.get("identifier") == Some(&Value::Text(port.into()))).unwrap();
+        let conn = back.input_of(out_node.id, "input").unwrap();
+        assert_eq!(conn.from, back_i2m);
+        assert_eq!(conn.from_port, port, "output port `{port}` should survive SBS save/load");
+    }
+}

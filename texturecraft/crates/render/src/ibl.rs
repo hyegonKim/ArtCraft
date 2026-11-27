@@ -60,6 +60,16 @@ fn sky(d: Vec3, zenith: Vec3, horizon: Vec3, ground: Vec3) -> Vec3 {
 }
 
 fn radiance(name: &str, d: Vec3) -> Vec3 {
+    if let Some(rig) = texturecraft_core::StudioRig::parse(name).filter(|r| *r != texturecraft_core::StudioRig::None) {
+        let (zenith, horizon, ground) = rig.dome_colors();
+        let mut c = sky(d, Vec3::from(zenith), Vec3::from(horizon), Vec3::from(ground));
+        for light in rig.lights() {
+            c +=
+                SoftBox { az: light.azimuth_deg, el: light.elevation_deg, hw: light.half_width_deg, hh: light.half_height_deg, color: Vec3::from(light.color) }
+                    .eval(d);
+        }
+        return c;
+    }
     match name {
         "Studio Contrast" => {
             let base = sky(d, Vec3::splat(0.04), Vec3::splat(0.03), Vec3::splat(0.01));

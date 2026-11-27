@@ -22,10 +22,11 @@ pub(crate) fn specs() -> Vec<CommandSpec> {
             "Expose parameter",
             [],
             None,
-            "{id?, label?, group?, description?, default?, min?, max?, editor?, clamp?, step?, bind?: {node, param}}",
+            "{id?, label?, group?, description?, visibleIf?, default?, min?, max?, editor?, clamp?, step?, bind?: {node, param}}",
             has_graph,
             add
         ),
+        cmd!("graph.exposed.setVisibleIf", "Set input visibility condition", [], None, "{id, visibleIf}", has_graph, set_visible_if),
     ]
 }
 
@@ -46,6 +47,23 @@ fn add(session: &mut Session, parameters: &J) -> Result<J> {
         }
 
         Ok(json!({"id": identifier}))
+    })
+}
+
+fn set_visible_if(session: &mut Session, parameters: &J) -> Result<J> {
+    let command = "graph.exposed.setVisibleIf";
+    let identifier = strp(parameters, "id").map(str::trim).filter(|id| !id.is_empty()).ok_or_else(|| bad(command, "`id` is required"))?.to_string();
+    let visible_if = strp(parameters, "visibleIf").or_else(|| strp(parameters, "visible_if")).unwrap_or("").trim().to_string();
+    materialcraft_core::validate_visible_if(&visible_if).map_err(|e| bad(command, format!("invalid visibleIf: {e}")))?;
+    if !session.graph()?.exposed.iter().any(|input| input.id == identifier) {
+        return Err(bad(command, format!("no input `{identifier}`")));
+    }
+    session.edit("Set input visibility", |session| {
+        let graph = session.graph_mut()?;
+        if let Some(exposed) = graph.exposed.iter_mut().find(|input| input.id == identifier) {
+            exposed.visible_if = visible_if.clone();
+        }
+        Ok(json!({"id": identifier, "visibleIf": visible_if}))
     })
 }
 
@@ -150,6 +168,9 @@ fn prepare_input(session: &Session, parameters: &J) -> Result<(ExposedParameter,
     } else {
         default
     };
+    let visible_if = strp(parameters, "visibleIf").or_else(|| strp(parameters, "visible_if")).unwrap_or("").trim().to_string();
+    materialcraft_core::validate_visible_if(&visible_if).map_err(|e| bad(command, format!("invalid visibleIf: {e}")))?;
+
     let input = ExposedParameter {
         id: identifier.clone(),
         label: strp(parameters, "label").unwrap_or_else(|| descriptor.as_ref().map_or(identifier.as_str(), |descriptor| descriptor.label.as_str())).into(),
@@ -168,6 +189,7 @@ fn prepare_input(session: &Session, parameters: &J) -> Result<(ExposedParameter,
         min: number(parameters, "min")?.unwrap_or_else(|| descriptor.as_ref().map_or(0.0, |descriptor| descriptor.min)),
         max: number(parameters, "max")?.unwrap_or_else(|| descriptor.as_ref().map_or(1.0, |descriptor| descriptor.max)),
         options: descriptor.map_or_else(Vec::new, |descriptor| descriptor.options),
+        visible_if,
     };
     if input.min > input.max {
         return Err(bad(command, "minimum must not exceed maximum"));

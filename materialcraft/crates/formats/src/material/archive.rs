@@ -121,6 +121,7 @@ mod tests {
             min: 0.0,
             max: 1.0,
             options: Vec::new(),
+            visible_if: String::new(),
         };
         Manifest {
             format: FORMAT.into(),

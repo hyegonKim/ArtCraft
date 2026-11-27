@@ -44,7 +44,7 @@ fn every_node_cooks() {
         }
     }
 
-    assert_eq!(catalog().len(), 37);
+    assert_eq!(catalog().len(), 39);
 }
 
 /// Every node cooks with each numeric parameter at a hostile value (huge, negative huge, NaN): the hard limits keep the cook bounded, finite and the right size
@@ -163,4 +163,85 @@ fn procedural_generators_and_normal_filters_behave_as_expected() {
     let color_src = Image::generate_uv(16, 16, Kind::Color, |u, v| [u, v, 0.5, 1.0]);
     let sb_img = cook(find("slope_blur").unwrap(), &[Some(color_src), Some(mound)], 16).unwrap();
     assert_eq!(sb_img[0].kind, Kind::Color);
+}
+
+#[test]
+fn scan_delight_and_image_to_material_synthesize_consistent_pbr_maps() {
+    // 1. Scan delight removes a strong low-frequency lighting ramp while preserving fine grain
+    let unevenly_lit = Image::generate_uv(32, 32, Kind::Color, |u, v| {
+        let ramp = 0.2 + 0.7 * u;
+        let grain = if ((u * 16.0) as i32 + (v * 16.0) as i32) % 2 == 0 { 0.06 } else { -0.06 };
+        let l = (ramp + grain).clamp(0.05, 0.98);
+        [l * 0.9, l * 0.7, l * 0.5, 1.0]
+    });
+    let delit_def = find("scan_delight").unwrap();
+    let mut delit_params = resolve_params(delit_def, &BTreeMap::from([("strength".into(), Value::Float(1.0)), ("large_scale".into(), Value::Float(0.6))]));
+    clamp_params(delit_def, &mut delit_params);
+    let no_res = |_: &str| None;
+    let vars = BTreeMap::new();
+    let inputs = [Some(unevenly_lit.clone())];
+    let ctx = CookContext { w: 32, h: 32, seed: 1, tile: false, inputs: &inputs, params: &delit_params, resource: &no_res, vars: &vars };
+    let delit = (delit_def.cook)(&ctx).unwrap();
+    let half_lum = |img: &Image, x_range: std::ops::Range<u32>| -> f32 {
+        let mut sum = 0.0;
+        let mut n = 0;
+        for y in 4..28 {
+            for x in x_range.clone() {
+                let p = img.get(x as i64, y as i64, false);
+                sum += 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2];
+                n += 1;
+            }
+        }
+        sum / n as f32
+    };
+    let before_gap = (half_lum(&unevenly_lit, 20..30) - half_lum(&unevenly_lit, 2..12)).abs();
+    let after_gap = (half_lum(&delit[0], 20..30) - half_lum(&delit[0], 2..12)).abs();
+    assert!(after_gap < before_gap * 0.45, "delighting should reduce illumination gradient: before={before_gap}, after={after_gap}");
+
+    // 2. Image to material synthesizes 6 PBR channels with OpenGL/DirectX normal flip, roughness micro-variance, AO cavities, and metallic detection
+    let scan_src = Image::generate_uv(32, 32, Kind::Color, |u, v| {
+        if u < 0.5 {
+            // Left half: smooth bright low-saturation steel bump
+            let dx = u - 0.25;
+            let dy = v - 0.5;
+            let bump = (0.85 - (dx * dx + dy * dy) * 3.0).clamp(0.65, 0.92);
+            [bump, bump * 1.01, bump * 1.02, 1.0]
+        } else {
+            // Right half: rough saturated porous dielectric with dark pit at (0.75, 0.5)
+            let dx = u - 0.75;
+            let dy = v - 0.5;
+            let checker = if ((u * 32.0) as i32 + (v * 32.0) as i32) % 2 == 0 { 0.18_f32 } else { -0.18_f32 };
+            let pit = if dx * dx + dy * dy < 0.015 { -0.25_f32 } else { 0.0_f32 };
+            let r = (0.65_f32 + checker + pit).clamp(0.05, 0.95);
+            let g = (0.22_f32 + checker * 0.5 + pit).clamp(0.02, 0.75);
+            let b = (0.14_f32 + checker * 0.3 + pit).clamp(0.02, 0.65);
+            [r, g, b, 1.0]
+        }
+    });
+    let i2m_def = find("image_to_material").unwrap();
+    let ogl_out = cook(i2m_def, &[Some(scan_src.clone())], 32).unwrap();
+    assert_eq!(ogl_out.len(), 6);
+    assert_eq!(ogl_out[0].kind, Kind::Color); // basecolor
+    assert_eq!(ogl_out[1].kind, Kind::Color); // normal
+    assert_eq!(ogl_out[2].kind, Kind::Gray); // height
+    assert_eq!(ogl_out[3].kind, Kind::Gray); // roughness
+    assert_eq!(ogl_out[4].kind, Kind::Gray); // ao
+    assert_eq!(ogl_out[5].kind, Kind::Gray); // metallic
+
+    // DirectX flips normal green channel around 0.5 relative to OpenGL
+    let mut dx_params = resolve_params(i2m_def, &BTreeMap::from([("opengl".into(), Value::Bool(false))]));
+    clamp_params(i2m_def, &mut dx_params);
+    let dx_inputs = [Some(scan_src)];
+    let dx_ctx = CookContext { w: 32, h: 32, seed: 1, tile: true, inputs: &dx_inputs, params: &dx_params, resource: &no_res, vars: &vars };
+    let dx_out = (i2m_def.cook)(&dx_ctx).unwrap();
+    let ogl_ny = ogl_out[1].get(8, 12, true)[1] - 0.5;
+    let dx_ny = dx_out[1].get(8, 12, true)[1] - 0.5;
+    assert!((ogl_ny + dx_ny).abs() < 1e-5, "DirectX should invert Y normal component: ogl={ogl_ny}, dx={dx_ny}");
+
+    // High micro-variance right side has higher roughness than smooth left side
+    assert!(ogl_out[3].get_gray(22, 8, true) > ogl_out[3].get_gray(8, 16, true), "porous side should be rougher than smooth side");
+    // Cavity pixel at (25, 16) (odd checker + pit) has darker AO than convex surface at (8, 16)
+    assert!(ogl_out[4].get_gray(25, 16, true) < ogl_out[4].get_gray(8, 16, true), "cavity pit should have darker AO");
+    // Bright low-saturation steel on left has higher metallic than saturated dielectric on right
+    assert!(ogl_out[5].get_gray(8, 16, true) > ogl_out[5].get_gray(22, 8, true), "steel side should estimate higher metallic than dielectric side");
 }

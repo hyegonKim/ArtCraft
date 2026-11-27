@@ -123,6 +123,11 @@ impl ExposeParameterDialog {
             let response = ui.add(egui::TextEdit::multiline(&mut self.input.description).desired_width(ui.available_width()).desired_rows(4));
             crate::widgets::name(&response, egui::Role::TextInput, "Description");
             ui.end_row();
+            ui.label(tr("Visible if"));
+            let vis_response =
+                ui.add(egui::TextEdit::singleline(&mut self.input.visible_if).hint_text(r#"input["mode"] == 1"#).desired_width(ui.available_width()));
+            crate::widgets::name(&vis_response, egui::Role::TextInput, "Visible if");
+            ui.end_row();
             ui.label(tr("Type / Editor"));
             ui.horizontal(|ui| {
                 ui.add_enabled(
@@ -203,6 +208,10 @@ impl ExposeParameterDialog {
 
         if self.input.step.is_some_and(|step| !step.is_finite() || step <= 0.0) {
             return Some("Step must be greater than zero.");
+        }
+
+        if materialcraft_engine::core::validate_visible_if(&self.input.visible_if).is_err() {
+            return Some("Invalid visibility expression.");
         }
 
         None

@@ -242,6 +242,7 @@ fn instance_parameter_functions_work_without_stored_literals_and_use_instance_si
         min: 0.0,
         max: 1.0,
         options: Vec::new(),
+        visible_if: String::new(),
     });
     let output = source.add_node("output", [200.0, 0.0]);
     source.connect(color, "output", output, "input").unwrap();

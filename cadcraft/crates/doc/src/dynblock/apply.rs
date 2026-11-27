@@ -524,12 +524,7 @@ fn is_flipped_val(v: &Val) -> bool {
     matches!(v, Val::Text(s) if s.eq_ignore_ascii_case("Flipped") || s == "1")
 }
 
-fn matrix_action_transform(
-    m: &DynamicBlock,
-    a: &super::Action,
-    values: &BTreeMap<i32, Value>,
-    set: &BTreeMap<i32, Val>,
-) -> Option<Mat3> {
+fn matrix_action_transform(m: &DynamicBlock, a: &super::Action, values: &BTreeMap<i32, Value>, set: &BTreeMap<i32, Val>) -> Option<Mat3> {
     let p_node = a.connections.first().map(|(n, _)| *n)?;
     let p = m.parameters.iter().find(|p| p.node == p_node)?;
     let nv = set.get(&p_node)?;

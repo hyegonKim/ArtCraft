@@ -47,10 +47,14 @@ fn has_cameras(s: &Session) -> std::result::Result<(), String> {
 
 /// The view as a saved camera.
 fn saved(c: &OrbitCamera, name: String) -> Camera {
-    Camera { name, target: c.target.to_array(), yaw: c.yaw, pitch: c.pitch, distance: c.distance, fov: c.fov, ortho: c.ortho }
+    Camera { name, target: c.target.to_array(), yaw: c.yaw, pitch: c.pitch, distance: c.distance, fov: c.fov, ortho: c.ortho, focal_length_mm: None, dof: None }
 }
 
 /// Move the view to saved camera `c` (values from project files are checked and clamped).
+pub(crate) fn apply_saved_camera(view: &mut OrbitCamera, c: &Camera) {
+    apply(view, c);
+}
+
 fn apply(view: &mut OrbitCamera, c: &Camera) {
     let target = Vec3::from(c.target);
     if target.is_finite() {
@@ -136,6 +140,9 @@ fn select(s: &mut Session, p: &Value) -> Result<Value> {
     let i = which(s, "camera.select", p)?;
     if let Some(c) = s.doc.project.cameras.get(i).cloned() {
         apply(&mut s.camera, &c);
+        if let Some(dof) = c.dof {
+            s.doc.project.display.dof = dof;
+        }
     }
     s.revision = s.revision.wrapping_add(1);
     Ok(crate::view_cmds::camera_json(s))

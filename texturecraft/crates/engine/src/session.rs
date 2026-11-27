@@ -598,15 +598,24 @@ impl Session {
     fn follow_uv_layouts(&mut self, before: &Project) {
         let layout = |p: &Project, ts: usize| p.texture_sets.get(ts).map(uv_layout);
         let changed: Vec<usize> = (0..self.doc.project.texture_sets.len()).filter(|ts| layout(before, *ts) != layout(&self.doc.project, *ts)).collect();
-        if changed.is_empty() && before.texture_sets.len() == self.doc.project.texture_sets.len() {
+        let offset_changed = (before.display.stage.model_offset_y - self.doc.project.display.stage.model_offset_y).abs() > 1e-7;
+        if changed.is_empty() && before.texture_sets.len() == self.doc.project.texture_sets.len() && !offset_changed {
             return;
         }
         self.mesh = tiled_mesh(&self.source, &self.doc.project);
+        if offset_changed {
+            self.bvh = Arc::new(Bvh::new(&self.mesh));
+        }
         self.mesh_id = next_mesh_id();
         self.depth_cache = None;
         for ts in changed {
             if let (Some(c), Some(set)) = (self.caches.get_mut(ts), self.doc.project.texture_sets.get(ts)) {
                 *c = SetCache::new(&self.mesh, set);
+            }
+        }
+        if offset_changed {
+            for c in &mut self.caches {
+                c.invalidate_all();
             }
         }
     }
@@ -1040,10 +1049,16 @@ fn next_mesh_id() -> u64 {
 /// set is UV-tiled).
 fn tiled_mesh(source: &Arc<Mesh>, project: &Project) -> Arc<Mesh> {
     let tiled: Vec<_> = project.texture_sets.iter().filter_map(|ts| Some((ts, ts.tile_grid()?))).collect();
-    if tiled.is_empty() {
+    let offset_y = if project.display.stage.model_offset_y.is_finite() { project.display.stage.model_offset_y } else { 0.0 };
+    if tiled.is_empty() && offset_y.abs() <= 1e-7 {
         return source.clone();
     }
     let mut mesh = (**source).clone();
+    if offset_y.abs() > 1e-7 {
+        for pos in &mut mesh.positions {
+            pos.y += offset_y;
+        }
+    }
     let mut done = BTreeSet::new();
     for (ts, grid) in tiled {
         if done.insert(ts.material) {

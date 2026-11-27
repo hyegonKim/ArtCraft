@@ -49,7 +49,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Add generator",
             ["Layers", "Effects"],
             None,
-            "{layer?, name?, generator?: edgeWear|dirt|thinAreas|curvature|ambientOcclusion|position|direction|worldSpaceNormal|cavity, level?, softness?, noise?, offset?: -1..1 added to the result, direction?: [x,y,z], invert?, mode?: edges|cavities|both|raw, sizes?: [7 weights 0..1, finest first] (curvature, edgeWear and cavity)}",
+            "{layer?, name?, generator?: edgeWear|dirt|thinAreas|curvature|ambientOcclusion|position|direction|worldSpaceNormal|cavity|rainStreaks|dustSettling, level?, softness?, noise?, offset?: -1..1 added to the result, direction?: [x,y,z], invert?, mode?: edges|cavities|both|raw, sizes?: [7 weights 0..1, finest first] (curvature, edgeWear and cavity)}",
             has_layer,
             add_generator
         ),

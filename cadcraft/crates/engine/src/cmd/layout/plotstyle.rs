@@ -471,11 +471,7 @@ fn resolve_save_format(cmd: &str, p: &Value, path: Option<&str>, prefer_binary_w
         None => match path {
             Some(pt) => {
                 let lower = pt.to_ascii_lowercase();
-                if lower.ends_with(".ctb") || lower.ends_with(".stb") {
-                    Ok(SaveFormat::BinaryPia)
-                } else {
-                    Ok(SaveFormat::Json)
-                }
+                if lower.ends_with(".ctb") || lower.ends_with(".stb") { Ok(SaveFormat::BinaryPia) } else { Ok(SaveFormat::Json) }
             }
             None if prefer_binary_without_path => Ok(SaveFormat::BinaryPia),
             None => Ok(SaveFormat::Json),

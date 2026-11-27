@@ -61,8 +61,10 @@ fn show_target(app: &mut MaterialCraftApp, ui: &mut Ui, target: materialcraft_en
         } else {
             presets_bar(ui, graph, &mut emit);
         }
+        let visible_exposed: Vec<&materialcraft_engine::core::ExposedParameter> =
+            graph.exposed.iter().filter(|exposed| graph.is_input_visible(exposed)).collect();
         let mut groups: Vec<&str> = Vec::new();
-        for exposed in &graph.exposed {
+        for exposed in &visible_exposed {
             if !groups.contains(&exposed.group.as_str()) {
                 groups.push(&exposed.group);
             }
@@ -70,7 +72,7 @@ fn show_target(app: &mut MaterialCraftApp, ui: &mut Ui, target: materialcraft_en
         let mut last_group: Option<&str> = None;
         let mut order: Vec<&materialcraft_engine::core::ExposedParameter> = Vec::new();
         for group in &groups {
-            order.extend(graph.exposed.iter().filter(|exposed| exposed.group == *group));
+            order.extend(visible_exposed.iter().copied().filter(|exposed| exposed.group == *group));
         }
         for exposed in order {
             if last_group != Some(exposed.group.as_str()) && !exposed.group.is_empty() {
@@ -122,11 +124,7 @@ fn run_or_pick(app: &mut MaterialCraftApp, id: &str, parameters: JsonValue) {
     }
     #[cfg(not(target_arch = "wasm32"))]
     if id == "ui.exportPresets" {
-        let base = app
-            .session
-            .graph()
-            .map(|g| materialcraft_engine::formats::safe_file_name(&g.name))
-            .unwrap_or_else(|_| "material".into());
+        let base = app.session.graph().map(|g| materialcraft_engine::formats::safe_file_name(&g.name)).unwrap_or_else(|_| "material".into());
         let dialog = craft_dialogs::FileDialog::save().filter("Preset JSON", &["json"]).file_name(format!("{base}-presets.json"));
         let then = crate::native_dialogs::Then::ExportPresets(crate::native_dialogs::GraphRef::active(app));
         crate::native_dialogs::ask(app, dialog, then);

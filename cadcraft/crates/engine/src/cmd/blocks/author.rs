@@ -9,12 +9,9 @@
 
 use cadcraft_doc::Handle;
 use cadcraft_doc::dynblock::author::{
-    AuthorActionSpec, AuthorParamSpec, VisibilityOp, add_action, add_parameter,
-    default_author_point, delete_node, edit_visibility, set_lookup_table,
+    AuthorActionSpec, AuthorParamSpec, VisibilityOp, add_action, add_parameter, default_author_point, delete_node, edit_visibility, set_lookup_table,
 };
-use cadcraft_doc::dynblock::{
-    DynamicBlock, GripPart, LookupColumn, ParameterKind, ValueSet, dynamic_block,
-};
+use cadcraft_doc::dynblock::{DynamicBlock, GripPart, LookupColumn, ParameterKind, ValueSet, dynamic_block};
 use cadcraft_geom::{Vec2, Vec3};
 use serde_json::{Value, json};
 
@@ -59,18 +56,11 @@ fn in_editor(s: &Session) -> std::result::Result<(), String> {
 }
 
 fn editor_block_label(s: &Session) -> String {
-    s.state()
-        .ok()
-        .and_then(|st| st.block_editor().map(str::to_string))
-        .unwrap_or_else(|| MODEL_GRAPH.to_string())
+    s.state().ok().and_then(|st| st.block_editor().map(str::to_string)).unwrap_or_else(|| MODEL_GRAPH.to_string())
 }
 
 fn graph_json(s: &Session) -> Value {
-    s.doc()
-        .ok()
-        .and_then(|d| dynamic_block(d, MODEL_GRAPH))
-        .and_then(|m| serde_json::to_value(m).ok())
-        .unwrap_or(Value::Null)
+    s.doc().ok().and_then(|d| dynamic_block(d, MODEL_GRAPH)).and_then(|m| serde_json::to_value(m).ok()).unwrap_or(Value::Null)
 }
 
 fn parse_handles(p: &Value, key: &str, fallback_sel: &[Handle]) -> Result<Vec<Handle>> {
@@ -136,9 +126,8 @@ fn parse_value_set(p: &Value) -> ValueSet {
 }
 
 fn next_default_label(d: &cadcraft_doc::Drawing, prefix: &str) -> String {
-    let existing: Vec<String> = dynamic_block(d, MODEL_GRAPH)
-        .map(|m| m.parameters.iter().map(|p| p.display_label().to_ascii_uppercase()).collect())
-        .unwrap_or_default();
+    let existing: Vec<String> =
+        dynamic_block(d, MODEL_GRAPH).map(|m| m.parameters.iter().map(|p| p.display_label().to_ascii_uppercase()).collect()).unwrap_or_default();
     for idx in 1..=999 {
         let cand = format!("{prefix}{idx}");
         if !existing.contains(&cand.to_ascii_uppercase()) {
@@ -183,20 +172,11 @@ fn build_param_spec(d: &cadcraft_doc::Drawing, p: &Value) -> Result<AuthorParamS
         (b, e)
     };
     let label_or = |prefix: &str| {
-        str_param(p, "label")
-            .map(str::trim)
-            .filter(|s| !s.is_empty())
-            .map(str::to_string)
-            .unwrap_or_else(|| next_default_label(d, prefix))
+        str_param(p, "label").map(str::trim).filter(|s| !s.is_empty()).map(str::to_string).unwrap_or_else(|| next_default_label(d, prefix))
     };
 
     match kind.as_str() {
-        "point" | "position" => Ok(AuthorParamSpec::Point {
-            at: at_pt(),
-            label: label_or("Position"),
-            description,
-            show_properties,
-        }),
+        "point" | "position" => Ok(AuthorParamSpec::Point { at: at_pt(), label: label_or("Position"), description, show_properties }),
         "linear" | "distance" => {
             let (base, end) = two_pts();
             Ok(AuthorParamSpec::Linear {
@@ -235,20 +215,9 @@ fn build_param_spec(d: &cadcraft_doc::Drawing, p: &Value) -> Result<AuthorParamS
                 .and_then(Value::as_array)
                 .map(|arr| arr.iter().filter_map(Value::as_str).map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect())
                 .unwrap_or_else(|| vec!["VisibilityState0".to_string()]);
-            Ok(AuthorParamSpec::Visibility {
-                at: at_pt(),
-                label: label_or("Visibility"),
-                description,
-                states,
-                show_properties,
-            })
+            Ok(AuthorParamSpec::Visibility { at: at_pt(), label: label_or("Visibility"), description, states, show_properties })
         }
-        "lookup" => Ok(AuthorParamSpec::Lookup {
-            at: at_pt(),
-            label: label_or("Lookup"),
-            description,
-            show_properties,
-        }),
+        "lookup" => Ok(AuthorParamSpec::Lookup { at: at_pt(), label: label_or("Lookup"), description, show_properties }),
         other => Err(bad("bparameter", format!("unknown parameter type {other:?}"))),
     }
 }
@@ -328,12 +297,7 @@ fn parse_frame(p: &Value) -> Result<Vec<Vec2>> {
     Ok(pts)
 }
 
-fn parse_lookup_payload(
-    m: &DynamicBlock,
-    lookup_node: i32,
-    p: &Value,
-    cmd: &str,
-) -> Result<(Vec<LookupColumn>, Vec<Vec<String>>)> {
+fn parse_lookup_payload(m: &DynamicBlock, lookup_node: i32, p: &Value, cmd: &str) -> Result<(Vec<LookupColumn>, Vec<Vec<String>>)> {
     let mut columns = Vec::new();
     if let Some(cols) = p.get("columns").and_then(Value::as_array) {
         for c in cols {
@@ -408,10 +372,7 @@ fn run_bvstate(s: &mut Session, p: &Value) -> Result<Value> {
             VisibilityOp::DeleteState { name }
         }
         "default" | "current" | "set" => {
-            let name = str_param(p, "name")
-                .or_else(|| str_param(p, "state"))
-                .ok_or_else(|| bad("bvstate", "`name` is required"))?
-                .to_string();
+            let name = str_param(p, "name").or_else(|| str_param(p, "state")).ok_or_else(|| bad("bvstate", "`name` is required"))?.to_string();
             VisibilityOp::SetDefault { name }
         }
         "show" | "hide" => {
@@ -478,12 +439,9 @@ impl Interactive for BparamM {
     }
     fn prompt(&self, s: &Session) -> Prompt {
         match self.phase {
-            BparamPhase::ChooseType => Prompt::new(
-                "Enter parameter type [Point/Linear/Polar/XY/Rotation/Flip/Visibility/Lookup/Delete]",
-                KW,
-            )
-            .kw(&["Point", "Linear", "Polar", "XY", "Rotation", "Flip", "Visibility", "Lookup", "Delete"])
-            .default("Linear"),
+            BparamPhase::ChooseType => Prompt::new("Enter parameter type [Point/Linear/Polar/XY/Rotation/Flip/Visibility/Lookup/Delete]", KW)
+                .kw(&["Point", "Linear", "Polar", "XY", "Rotation", "Flip", "Visibility", "Lookup", "Delete"])
+                .default("Linear"),
             BparamPhase::FirstPoint => {
                 let one = matches!(self.kind.as_str(), "point" | "visibility" | "lookup");
                 Prompt::new(if one { "Specify parameter location" } else { "Specify start point" }, Accept::POINT)
@@ -637,12 +595,9 @@ impl Interactive for BactionM {
     fn prompt(&self, _s: &Session) -> Prompt {
         match self.phase {
             BactionPhase::ChooseParam => Prompt::new("Enter parameter name or node ID", Accept::TEXT),
-            BactionPhase::ChooseType => Prompt::new(
-                "Enter action type [Move/Stretch/Scale/Rotate/Flip/Lookup]",
-                KW,
-            )
-            .kw(&["Move", "Stretch", "Scale", "Rotate", "Flip", "Lookup"])
-            .default("Stretch"),
+            BactionPhase::ChooseType => Prompt::new("Enter action type [Move/Stretch/Scale/Rotate/Flip/Lookup]", KW)
+                .kw(&["Move", "Stretch", "Scale", "Rotate", "Flip", "Lookup"])
+                .default("Stretch"),
             BactionPhase::FrameFirst => Prompt::new("Specify first corner of stretch frame", Accept::POINT),
             BactionPhase::FrameSecond => {
                 let p = Prompt::new("Specify opposite corner", Accept::POINT);
@@ -782,10 +737,7 @@ impl Interactive for BvstateM {
         match kw.as_str() {
             "?" | "list" => {
                 let res = run_bvstate(s, &json!({ "op": "list" }))?;
-                let names: Vec<&str> = res["states"]
-                    .as_array()
-                    .map(|a| a.iter().filter_map(|x| x["name"].as_str()).collect())
-                    .unwrap_or_default();
+                let names: Vec<&str> = res["states"].as_array().map(|a| a.iter().filter_map(|x| x["name"].as_str()).collect()).unwrap_or_default();
                 s.echo(if names.is_empty() {
                     "No visibility states defined.".to_string()
                 } else {

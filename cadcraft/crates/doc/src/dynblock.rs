@@ -120,10 +120,7 @@ pub enum ParameterKind {
 impl Parameter {
     /// Display/property label (`kind.label()`, falling back to `element` for 2-point parameters).
     pub fn display_label(&self) -> &str {
-        self.kind
-            .label()
-            .filter(|s| !s.trim().is_empty())
-            .unwrap_or(self.element.as_str())
+        self.kind.label().filter(|s| !s.trim().is_empty()).unwrap_or(self.element.as_str())
     }
 }
 

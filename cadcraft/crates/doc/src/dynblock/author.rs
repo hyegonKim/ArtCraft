@@ -11,10 +11,7 @@ use std::sync::Arc;
 
 use cadcraft_geom::{Bounds2, Vec2, Vec3};
 
-use super::{
-    ActionKind, DynamicBlock, GripPart, LookupColumn, Parameter, ParameterKind, ValueSet,
-    VisibilityState, dynamic_block, sections,
-};
+use super::{ActionKind, DynamicBlock, GripPart, LookupColumn, Parameter, ParameterKind, ValueSet, VisibilityState, dynamic_block, sections};
 use crate::foreign::{Foreign, ForeignObject};
 use crate::{Drawing, EntityStore, Handle, RawTag};
 
@@ -23,62 +20,14 @@ const ETAG_APP: &str = "AcDbBlockRepETag";
 /// Specification for authoring a new dynamic block parameter.
 #[derive(Clone, Debug)]
 pub enum AuthorParamSpec {
-    Point {
-        at: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
-    Linear {
-        base: Vec3,
-        end: Vec3,
-        label: String,
-        description: String,
-        values: ValueSet,
-        from_midpoint: bool,
-        show_properties: bool,
-    },
-    Polar {
-        base: Vec3,
-        end: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
-    Xy {
-        base: Vec3,
-        end: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
-    Rotation {
-        base: Vec3,
-        end: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
-    Flip {
-        base: Vec3,
-        end: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
-    Visibility {
-        at: Vec3,
-        label: String,
-        description: String,
-        states: Vec<String>,
-        show_properties: bool,
-    },
-    Lookup {
-        at: Vec3,
-        label: String,
-        description: String,
-        show_properties: bool,
-    },
+    Point { at: Vec3, label: String, description: String, show_properties: bool },
+    Linear { base: Vec3, end: Vec3, label: String, description: String, values: ValueSet, from_midpoint: bool, show_properties: bool },
+    Polar { base: Vec3, end: Vec3, label: String, description: String, show_properties: bool },
+    Xy { base: Vec3, end: Vec3, label: String, description: String, show_properties: bool },
+    Rotation { base: Vec3, end: Vec3, label: String, description: String, show_properties: bool },
+    Flip { base: Vec3, end: Vec3, label: String, description: String, show_properties: bool },
+    Visibility { at: Vec3, label: String, description: String, states: Vec<String>, show_properties: bool },
+    Lookup { at: Vec3, label: String, description: String, show_properties: bool },
 }
 
 /// Specification for authoring a new dynamic block action.
@@ -150,11 +99,7 @@ fn tag(code: i32, value: impl Into<String>) -> RawTag {
 }
 
 fn fmt_f64(v: f64) -> String {
-    if !v.is_finite() || v.abs() < 1e-12 {
-        "0".to_string()
-    } else {
-        format!("{v}")
-    }
+    if !v.is_finite() || v.abs() < 1e-12 { "0".to_string() } else { format!("{v}") }
 }
 
 fn push_pt(tags: &mut Vec<RawTag>, code: i32, p: Vec3) {
@@ -228,19 +173,12 @@ fn ensure_graph(d: &mut Drawing, block_name: &str) -> (Handle, Handle) {
         });
     }
 
-    f.objects.push(ForeignObject {
-        handle: gr_h,
-        kind: "ACAD_EVALUATION_GRAPH".into(),
-        tags: build_graph_tags(gr_h, xd_h, &[]),
-    });
+    f.objects.push(ForeignObject { handle: gr_h, kind: "ACAD_EVALUATION_GRAPH".into(), tags: build_graph_tags(gr_h, xd_h, &[]) });
     (xd_h, gr_h)
 }
 
 fn existing_block_target(f: &Foreign, upper_block: &str) -> Option<Handle> {
-    f.targets
-        .iter()
-        .find(|(_, (k, n))| k == "BLOCK_RECORD" && n == upper_block)
-        .map(|(h, _)| *h)
+    f.targets.iter().find(|(_, (k, n))| k == "BLOCK_RECORD" && n == upper_block).map(|(h, _)| *h)
 }
 
 fn ensure_block_target(d: &mut Drawing, upper_block: &str, xdict: Handle) {
@@ -264,10 +202,7 @@ fn find_graph_in_dict(f: &Foreign, xdict: Handle) -> Option<Handle> {
     let mut it = dict.tags.iter();
     while let Some(t) = it.next() {
         if t.code == 3 && t.value.eq_ignore_ascii_case("ACAD_ENHANCEDBLOCK") {
-            let gh = it
-                .next()
-                .filter(|n| n.code == 350 || n.code == 360)
-                .and_then(|n| Handle::parse_hex(&n.value))?;
+            let gh = it.next().filter(|n| n.code == 350 || n.code == 360).and_then(|n| Handle::parse_hex(&n.value))?;
             if f.objects.iter().any(|o| o.handle == gh && o.kind.eq_ignore_ascii_case("ACAD_EVALUATION_GRAPH")) {
                 return Some(gh);
             }
@@ -317,10 +252,7 @@ fn read_graph_members(f: &Foreign, graph_h: Handle) -> Vec<(i32, Handle)> {
             && let Some(obj) = by_h.get(&mh)
         {
             let secs = sections(&obj.tags);
-            let expr_node = super::section(&secs, "AcDbEvalExpr")
-                .iter()
-                .find(|x| x.code == 90)
-                .and_then(|x| x.value.trim().parse::<i32>().ok());
+            let expr_node = super::section(&secs, "AcDbEvalExpr").iter().find(|x| x.code == 90).and_then(|x| x.value.trim().parse::<i32>().ok());
             let node = expr_node.or(pending_node).unwrap_or(1);
             out.push((node, mh));
             pending_node = None;
@@ -380,13 +312,7 @@ fn add_active_to_visibility_tags(tags: &mut Vec<RawTag>, extra_active: &[Handle]
             }
         }
     }
-    *tags = build_visibility_tags(
-        (self_h, owner, node, grip),
-        (&elem, &label, &description, show),
-        at,
-        &controlled,
-        &states,
-    );
+    *tags = build_visibility_tags((self_h, owner, node, grip), (&elem, &label, &description, show), at, &controlled, &states);
 }
 
 fn build_visibility_tags(
@@ -435,14 +361,7 @@ fn build_visibility_tags(
     tags
 }
 
-fn push_two_pt_parameter(
-    tags: &mut Vec<RawTag>,
-    show_properties: bool,
-    base: Vec3,
-    end: Vec3,
-    grips: &[i32],
-    from_midpoint: bool,
-) {
+fn push_two_pt_parameter(tags: &mut Vec<RawTag>, show_properties: bool, base: Vec3, end: Vec3, grips: &[i32], from_midpoint: bool) {
     tags.extend([
         tag(100, "AcDbBlockParameter"),
         tag(280, if show_properties { "1" } else { "0" }),
@@ -456,13 +375,7 @@ fn push_two_pt_parameter(
         let g = grips.get(i).copied().unwrap_or(0);
         tags.push(tag(91, g.to_string()));
     }
-    tags.extend([
-        tag(171, "0"),
-        tag(172, "0"),
-        tag(173, "0"),
-        tag(174, "0"),
-        tag(177, if from_midpoint { "1" } else { "0" }),
-    ]);
+    tags.extend([tag(171, "0"), tag(172, "0"), tag(173, "0"), tag(174, "0"), tag(177, if from_midpoint { "1" } else { "0" })]);
 }
 
 fn push_value_set(tags: &mut Vec<RawTag>, vs: &ValueSet) {
@@ -527,10 +440,7 @@ fn build_parameter_objects(
                 tag(1021, fmt_f64(at.y)),
                 tag(1031, fmt_f64(at.z)),
             ]);
-            Ok(vec![
-                (p_node, ForeignObject { handle: p_handle, kind: "BLOCKPOINTPARAMETER".into(), tags }),
-                (g_node, g_obj),
-            ])
+            Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: "BLOCKPOINTPARAMETER".into(), tags }), (g_node, g_obj)])
         }
         AuthorParamSpec::Linear { base, end, label, description, values, from_midpoint, show_properties } => {
             if (end - base).len() < 1e-9 {
@@ -542,28 +452,31 @@ fn build_parameter_objects(
             let go2 = grip_object(d.new_handle(), gr_h, g2, "BLOCKLINEARGRIP", end);
             let mut tags = eval_header(p_handle, gr_h, p_node, &lbl);
             push_two_pt_parameter(&mut tags, show_properties, base, end, &[g1, g2], from_midpoint);
-            tags.extend([
-                tag(100, "AcDbBlockLinearParameter"),
-                tag(305, &lbl),
-                tag(306, &description),
-                tag(140, fmt_f64((end - base).len())),
-            ]);
+            tags.extend([tag(100, "AcDbBlockLinearParameter"), tag(305, &lbl), tag(306, &description), tag(140, fmt_f64((end - base).len()))]);
             push_value_set(&mut tags, &values);
-            Ok(vec![
-                (p_node, ForeignObject { handle: p_handle, kind: "BLOCKLINEARPARAMETER".into(), tags }),
-                (g1, go1),
-                (g2, go2),
-            ])
+            Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: "BLOCKLINEARPARAMETER".into(), tags }), (g1, go1), (g2, go2)])
         }
-        AuthorParamSpec::Polar { base, end, label, description, show_properties } => {
-            build_two_pt_variant(d, gr_h, (p_node, p_handle), ("BLOCKPOLARPARAMETER", "BLOCKPOLARGRIP", "Polar1"), (base, end, &label, &description, show_properties))
-        }
-        AuthorParamSpec::Xy { base, end, label, description, show_properties } => {
-            build_two_pt_variant(d, gr_h, (p_node, p_handle), ("BLOCKXYPARAMETER", "BLOCKXYGRIP", "XY1"), (base, end, &label, &description, show_properties))
-        }
-        AuthorParamSpec::Rotation { base, end, label, description, show_properties } => {
-            build_two_pt_variant(d, gr_h, (p_node, p_handle), ("BLOCKROTATIONPARAMETER", "BLOCKROTATIONGRIP", "Angle1"), (base, end, &label, &description, show_properties))
-        }
+        AuthorParamSpec::Polar { base, end, label, description, show_properties } => build_two_pt_variant(
+            d,
+            gr_h,
+            (p_node, p_handle),
+            ("BLOCKPOLARPARAMETER", "BLOCKPOLARGRIP", "Polar1"),
+            (base, end, &label, &description, show_properties),
+        ),
+        AuthorParamSpec::Xy { base, end, label, description, show_properties } => build_two_pt_variant(
+            d,
+            gr_h,
+            (p_node, p_handle),
+            ("BLOCKXYPARAMETER", "BLOCKXYGRIP", "XY1"),
+            (base, end, &label, &description, show_properties),
+        ),
+        AuthorParamSpec::Rotation { base, end, label, description, show_properties } => build_two_pt_variant(
+            d,
+            gr_h,
+            (p_node, p_handle),
+            ("BLOCKROTATIONPARAMETER", "BLOCKROTATIONGRIP", "Angle1"),
+            (base, end, &label, &description, show_properties),
+        ),
         AuthorParamSpec::Flip { base, end, label, description, show_properties } => {
             if (end - base).len() < 1e-9 {
                 return Err("Flip reflection line points must be distinct.".into());
@@ -574,17 +487,8 @@ fn build_parameter_objects(
             let go1 = grip_object(d.new_handle(), gr_h, g1, "BLOCKFLIPGRIP", mid);
             let mut tags = eval_header(p_handle, gr_h, p_node, &lbl);
             push_two_pt_parameter(&mut tags, show_properties, base, end, &[g1], false);
-            tags.extend([
-                tag(100, "AcDbBlockFlipParameter"),
-                tag(305, &lbl),
-                tag(306, &description),
-                tag(307, "Not flipped"),
-                tag(308, "Flipped"),
-            ]);
-            Ok(vec![
-                (p_node, ForeignObject { handle: p_handle, kind: "BLOCKFLIPPARAMETER".into(), tags }),
-                (g1, go1),
-            ])
+            tags.extend([tag(100, "AcDbBlockFlipParameter"), tag(305, &lbl), tag(306, &description), tag(307, "Not flipped"), tag(308, "Flipped")]);
+            Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: "BLOCKFLIPPARAMETER".into(), tags }), (g1, go1)])
         }
         AuthorParamSpec::Visibility { at, label, description, states, show_properties } => {
             let lbl = non_empty(&label, "Visibility1");
@@ -592,30 +496,13 @@ fn build_parameter_objects(
             let go1 = grip_object(d.new_handle(), gr_h, g1, "BLOCKVISIBILITYGRIP", at);
             let existing_ents = block_entities_handles(d, block_name);
             let existing_members: Vec<Handle> = read_graph_members(&d.foreign, gr_h).into_iter().map(|(_, h)| h).collect();
-            let names: Vec<String> = if states.is_empty() {
-                vec!["VisibilityState0".to_string()]
-            } else {
-                states.into_iter().filter(|s| !s.trim().is_empty()).collect()
-            };
-            let v_states: Vec<VisibilityState> = names
-                .into_iter()
-                .map(|name| VisibilityState {
-                    name,
-                    visible: existing_ents.clone(),
-                    active: existing_members.clone(),
-                })
-                .collect();
-            let tags = build_visibility_tags(
-                (p_handle, gr_h, p_node, g1),
-                (&lbl, &lbl, &description, show_properties),
-                at,
-                &existing_ents,
-                &v_states,
-            );
-            Ok(vec![
-                (p_node, ForeignObject { handle: p_handle, kind: "BLOCKVISIBILITYPARAMETER".into(), tags }),
-                (g1, go1),
-            ])
+            let names: Vec<String> =
+                if states.is_empty() { vec!["VisibilityState0".to_string()] } else { states.into_iter().filter(|s| !s.trim().is_empty()).collect() };
+            let v_states: Vec<VisibilityState> =
+                names.into_iter().map(|name| VisibilityState { name, visible: existing_ents.clone(), active: existing_members.clone() }).collect();
+            let tags =
+                build_visibility_tags((p_handle, gr_h, p_node, g1), (&lbl, &lbl, &description, show_properties), at, &existing_ents, &v_states);
+            Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: "BLOCKVISIBILITYPARAMETER".into(), tags }), (g1, go1)])
         }
         AuthorParamSpec::Lookup { at, label, description, show_properties } => {
             let lbl = non_empty(&label, "Lookup1");
@@ -638,10 +525,7 @@ fn build_parameter_objects(
                 tag(303, &lbl),
                 tag(304, &description),
             ]);
-            Ok(vec![
-                (p_node, ForeignObject { handle: p_handle, kind: "BLOCKLOOKUPPARAMETER".into(), tags }),
-                (g1, go1),
-            ])
+            Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: "BLOCKLOOKUPPARAMETER".into(), tags }), (g1, go1)])
         }
     }
 }
@@ -670,16 +554,8 @@ fn build_two_pt_variant(
         "BLOCKXYPARAMETER" => "AcDbBlockXYParameter",
         _ => "AcDbBlockRotationParameter",
     };
-    tags.extend([
-        tag(100, subclass),
-        tag(305, &lbl),
-        tag(306, description),
-    ]);
-    Ok(vec![
-        (p_node, ForeignObject { handle: p_handle, kind: param_kind.into(), tags }),
-        (g1, go1),
-        (g2, go2),
-    ])
+    tags.extend([tag(100, subclass), tag(305, &lbl), tag(306, description)]);
+    Ok(vec![(p_node, ForeignObject { handle: p_handle, kind: param_kind.into(), tags }), (g1, go1), (g2, go2)])
 }
 
 fn non_empty(s: &str, fallback: &str) -> String {
@@ -717,11 +593,7 @@ pub fn add_action(d: &mut Drawing, block_name: &str, spec: AuthorActionSpec) -> 
 }
 
 fn push_action_base(tags: &mut Vec<RawTag>, selection: &[Handle], at: Vec3) {
-    tags.extend([
-        tag(100, "AcDbBlockAction"),
-        tag(70, "0"),
-        tag(71, selection.len().to_string()),
-    ]);
+    tags.extend([tag(100, "AcDbBlockAction"), tag(70, "0"), tag(71, selection.len().to_string())]);
     for h in selection {
         tags.push(tag(330, h.hex()));
     }
@@ -851,11 +723,7 @@ fn build_action_object(
             let mut tags = eval_header(a_handle, gr_h, a_node, &nm);
             push_action_base(&mut tags, &selection, at);
             push_base_pt_subclass(&mut tags, parameter_node, base);
-            tags.extend([
-                tag(100, "AcDbBlockRotationAction"),
-                tag(94, parameter_node.to_string()),
-                tag(303, "Angle"),
-            ]);
+            tags.extend([tag(100, "AcDbBlockRotationAction"), tag(94, parameter_node.to_string()), tag(303, "Angle")]);
             Ok(("BLOCKROTATEACTION".into(), tags, None))
         }
         AuthorActionSpec::Flip { name, parameter_node, selection, at } => {
@@ -869,11 +737,7 @@ fn build_action_object(
             let nm = non_empty(&name, "Flip");
             let mut tags = eval_header(a_handle, gr_h, a_node, &nm);
             push_action_base(&mut tags, &selection, at);
-            tags.extend([
-                tag(100, "AcDbBlockFlipAction"),
-                tag(92, parameter_node.to_string()),
-                tag(301, "FlipState"),
-            ]);
+            tags.extend([tag(100, "AcDbBlockFlipAction"), tag(92, parameter_node.to_string()), tag(301, "FlipState")]);
             Ok(("BLOCKFLIPACTION".into(), tags, None))
         }
         AuthorActionSpec::Lookup { name, parameter_node, columns, rows, at } => {
@@ -904,32 +768,16 @@ fn push_base_pt_subclass(tags: &mut Vec<RawTag>, parameter_node: i32, base: Vec3
 
 fn ensure_lookup_column(lookup_node: i32, mut columns: Vec<LookupColumn>) -> Vec<LookupColumn> {
     if !columns.iter().any(|c| c.lookup && c.node == lookup_node) {
-        columns.push(LookupColumn {
-            node: lookup_node,
-            property: "lookupString".into(),
-            lookup: true,
-            unmatched: "Custom".into(),
-        });
+        columns.push(LookupColumn { node: lookup_node, property: "lookupString".into(), lookup: true, unmatched: "Custom".into() });
     }
     columns
 }
 
-fn build_lookup_action_tags(
-    ids: (Handle, Handle, i32),
-    name: &str,
-    at: Vec3,
-    columns: &[LookupColumn],
-    rows: &[Vec<String>],
-) -> Vec<RawTag> {
+fn build_lookup_action_tags(ids: (Handle, Handle, i32), name: &str, at: Vec3, columns: &[LookupColumn], rows: &[Vec<String>]) -> Vec<RawTag> {
     let (a_handle, gr_h, a_node) = ids;
     let mut tags = eval_header(a_handle, gr_h, a_node, name);
     push_action_base(&mut tags, &[], at);
-    tags.extend([
-        tag(100, "AcDbBlockLookupAction"),
-        tag(92, rows.len().to_string()),
-        tag(93, columns.len().to_string()),
-        tag(301, ""),
-    ]);
+    tags.extend([tag(100, "AcDbBlockLookupAction"), tag(92, rows.len().to_string()), tag(93, columns.len().to_string()), tag(301, "")]);
     for r in rows {
         for c_idx in 0..columns.len() {
             let cell = r.get(c_idx).map_or("", String::as_str);
@@ -953,10 +801,7 @@ fn build_lookup_action_tags(
 }
 
 fn find_param(m: &DynamicBlock, node: i32) -> Result<&Parameter, String> {
-    m.parameters
-        .iter()
-        .find(|p| p.node == node)
-        .ok_or_else(|| format!("Parameter node {node} was not found in this block."))
+    m.parameters.iter().find(|p| p.node == node).ok_or_else(|| format!("Parameter node {node} was not found in this block."))
 }
 
 /// Update (or create) the lookup table for `lookup_param_node` in `block_name`.
@@ -973,9 +818,11 @@ pub fn set_lookup_table(
         return Err(format!("Node {lookup_param_node} is not a Lookup parameter."));
     };
     let cols = ensure_lookup_column(lookup_param_node, columns);
-    if let Some(act) = m.actions.iter().find(|a| {
-        matches!(&a.kind, ActionKind::Lookup { columns: cs, .. } if cs.iter().any(|c| c.lookup && c.node == lookup_param_node))
-    }) {
+    if let Some(act) = m
+        .actions
+        .iter()
+        .find(|a| matches!(&a.kind, ActionKind::Lookup { columns: cs, .. } if cs.iter().any(|c| c.lookup && c.node == lookup_param_node)))
+    {
         let (_, gr_h) = ensure_graph(d, block_name);
         let tags = build_lookup_action_tags((act.handle, gr_h, act.node), &act.name, act.at, &cols, &rows);
         let f = Arc::make_mut(&mut d.foreign);
@@ -992,9 +839,7 @@ pub fn set_lookup_table(
 /// Apply a [`VisibilityOp`] to `block_name`'s visibility parameter (creating one automatically if
 /// `AddState` is called when none exists yet).
 pub fn edit_visibility(d: &mut Drawing, block_name: &str, op: VisibilityOp) -> Result<Vec<VisibilityState>, String> {
-    if dynamic_block(d, block_name)
-        .is_none_or(|m| !m.parameters.iter().any(|p| matches!(p.kind, ParameterKind::Visibility { .. })))
-    {
+    if dynamic_block(d, block_name).is_none_or(|m| !m.parameters.iter().any(|p| matches!(p.kind, ParameterKind::Visibility { .. }))) {
         if let VisibilityOp::AddState { name, .. } = &op {
             let at = default_author_point(d, block_name);
             add_parameter(
@@ -1019,11 +864,7 @@ pub fn edit_visibility(d: &mut Drawing, block_name: &str, op: VisibilityOp) -> R
     }
 
     let m = dynamic_block(d, block_name).ok_or("Block has no dynamic data.")?;
-    let vp = m
-        .parameters
-        .iter()
-        .find(|p| matches!(p.kind, ParameterKind::Visibility { .. }))
-        .ok_or("Block has no Visibility parameter.")?;
+    let vp = m.parameters.iter().find(|p| matches!(p.kind, ParameterKind::Visibility { .. })).ok_or("Block has no Visibility parameter.")?;
     let ParameterKind::Visibility { at, label, description, mut controlled, mut states } = vp.kind.clone() else {
         return Err("Block has no Visibility parameter.".into());
     };
@@ -1063,17 +904,13 @@ fn apply_visibility_op(
             if states.iter().any(|s| s.name.eq_ignore_ascii_case(nm)) {
                 return Err(format!("Visibility state \"{nm}\" already exists."));
             }
-            let src = copy_from
-                .as_deref()
-                .and_then(|c| states.iter().find(|s| s.name.eq_ignore_ascii_case(c.trim())))
-                .or_else(|| states.first())
-                .cloned();
+            let src =
+                copy_from.as_deref().and_then(|c| states.iter().find(|s| s.name.eq_ignore_ascii_case(c.trim()))).or_else(|| states.first()).cloned();
             let (visible, active) = match src {
                 Some(s) => (s.visible, s.active),
-                None => (
-                    block_entities_handles(d, block_name),
-                    m.parameters.iter().map(|p| p.handle).chain(m.actions.iter().map(|a| a.handle)).collect(),
-                ),
+                None => {
+                    (block_entities_handles(d, block_name), m.parameters.iter().map(|p| p.handle).chain(m.actions.iter().map(|a| a.handle)).collect())
+                }
             };
             states.push(VisibilityState { name: nm.to_string(), visible, active });
         }
@@ -1143,12 +980,7 @@ fn apply_visibility_op(
     Ok(())
 }
 
-fn sync_default_visibility_on_entities(
-    d: &mut Drawing,
-    block_name: &str,
-    controlled: &[Handle],
-    default_state: Option<&VisibilityState>,
-) {
+fn sync_default_visibility_on_entities(d: &mut Drawing, block_name: &str, controlled: &[Handle], default_state: Option<&VisibilityState>) {
     let Some(st) = default_state else { return };
     let vis_set: HashSet<Handle> = st.visible.iter().copied().collect();
     let ctrl_set: HashSet<Handle> = controlled.iter().copied().collect();
@@ -1201,10 +1033,7 @@ pub fn delete_node(d: &mut Drawing, block_name: &str, node_id: i32) -> Result<()
         return Err(format!("Node {node_id} was not found in block \"{block_name}\"."));
     }
 
-    let remaining: Vec<(i32, Handle)> = read_graph_members(&d.foreign, gr_h)
-        .into_iter()
-        .filter(|(_, h)| !drop_handles.contains(h))
-        .collect();
+    let remaining: Vec<(i32, Handle)> = read_graph_members(&d.foreign, gr_h).into_iter().filter(|(_, h)| !drop_handles.contains(h)).collect();
 
     let has_primary = remaining.iter().any(|(_, h)| {
         d.foreign
@@ -1241,7 +1070,8 @@ pub fn remove_block_graph(d: &mut Drawing, block_name: &str) {
         let mut cleaned = Vec::with_capacity(dict.tags.len());
         let mut i = 0;
         while let Some(t) = dict.tags.get(i) {
-            if t.code == 3 && t.value.eq_ignore_ascii_case("ACAD_ENHANCEDBLOCK") && dict.tags.get(i + 1).is_some_and(|n| matches!(n.code, 350 | 360)) {
+            if t.code == 3 && t.value.eq_ignore_ascii_case("ACAD_ENHANCEDBLOCK") && dict.tags.get(i + 1).is_some_and(|n| matches!(n.code, 350 | 360))
+            {
                 i += 2;
                 continue;
             }
@@ -1264,11 +1094,7 @@ pub fn remove_block_graph(d: &mut Drawing, block_name: &str) {
 
 /// Default placement point above a block's geometry bounds for UI/one-point authoring.
 pub fn default_author_point(d: &Drawing, block_name: &str) -> Vec3 {
-    let store = if block_name.eq_ignore_ascii_case("*Model_Space") {
-        Some(&d.model)
-    } else {
-        d.block(block_name).map(|b| &b.entities)
-    };
+    let store = if block_name.eq_ignore_ascii_case("*Model_Space") { Some(&d.model) } else { d.block(block_name).map(|b| &b.entities) };
     let mut b = Bounds2::EMPTY;
     if let Some(st) = store {
         for e in st.iter() {

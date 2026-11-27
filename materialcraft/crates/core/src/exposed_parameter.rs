@@ -27,6 +27,9 @@ pub struct ExposedParameter {
     /// Labels when the value is an enum
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub options: Vec<String>,
+    /// Conditional visibility expression (`input["mode"] == 1 && input["use_detail"]`)
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub visible_if: String,
 }
 
 fn one() -> f32 {

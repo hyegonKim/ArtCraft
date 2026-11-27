@@ -179,7 +179,15 @@ fn stylesmanager_and_dash_plotstyle_binary_ctb_and_stb_round_trip() {
     assert_eq!(got_ctb["description"], "Shop binary CTB");
     let c1 = &got_ctb["styles"][0];
     assert_eq!(
-        (c1["color"].as_str(), c1["screening"].as_u64(), c1["lineweight"].as_u64(), c1["linetype"].as_str(), c1["end"].as_str(), c1["join"].as_str(), c1["fill"].as_str()),
+        (
+            c1["color"].as_str(),
+            c1["screening"].as_u64(),
+            c1["lineweight"].as_u64(),
+            c1["linetype"].as_str(),
+            c1["end"].as_str(),
+            c1["join"].as_str(),
+            c1["fill"].as_str()
+        ),
         (Some("#112233"), Some(75), Some(25), Some("DASHED"), Some("butt"), Some("miter"), Some("crosshatch"))
     );
 

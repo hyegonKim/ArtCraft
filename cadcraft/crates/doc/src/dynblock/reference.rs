@@ -295,12 +295,7 @@ pub fn custom_properties(d: &Drawing, insert: Handle) -> Option<(String, Vec<Cus
                 if !lbl.is_empty() {
                     let flipped = matches!(v, Some(Value::Text { value }) if value.eq_ignore_ascii_case("Flipped") || value == "1");
                     let value = if flipped { "Flipped".to_string() } else { "Not flipped".to_string() };
-                    out.push(CustomProperty {
-                        name: lbl.to_string(),
-                        value,
-                        choices: vec!["Not flipped".into(), "Flipped".into()],
-                        editable: true,
-                    });
+                    out.push(CustomProperty { name: lbl.to_string(), value, choices: vec!["Not flipped".into(), "Flipped".into()], editable: true });
                 }
             }
             _ => {}

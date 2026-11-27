@@ -1337,3 +1337,48 @@ menu	Modify	수정
 	Save Block As	다른 이름으로 블록 저장
 	Close Block Editor	블록 편집기 닫기
 	Unsaved changes	저장되지 않은 변경 사항
+	3D Solid Primitive	3D 솔리드 기본체
+	3D Clay Boolean	3D 클레이 불리언
+	Transform 3D Solid	3D 솔리드 변환
+	List 3D Solids	3D 솔리드 목록
+	Delete 3D Solid	3D 솔리드 삭제
+	Clear 3D Solids	3D 솔리드 모두 지우기
+	Export 3D STL	3D STL 내보내기
+	Export 3D OBJ	3D OBJ 내보내기
+	Flatshot 2D Projection	플랫샷 2D 투영
+	Flatshot 2D View	플랫샷 2D 뷰
+	Base & Projected 3D Views	기준 및 투영 3D 뷰
+	Base & Projected Views	기준 및 투영 뷰
+	3D Solid Modeler	3D 솔리드 모델러
+	3D Solid Modeler...	3D 솔리드 모델러...
+	Capsule	캡슐
+	Front	정면
+	Isometric	등각투영
+	Add 3D Primitive	3D 기본체 추가
+	Shape	모양
+	Size (W, D, H)	크기 (폭, 깊이, 높이)
+	Major / Minor radius	주 / 부 반지름
+	Base / Top / Height	밑면 / 윗면 / 높이
+	Radius / Height	반지름 / 높이
+	Position (X, Y, Z)	위치 (X, Y, Z)
+	Create 3D Primitive	3D 기본체 생성
+	3D Solids in Drawing	도면의 3D 솔리드
+	Clear All	모두 지우기
+	No 3D solids yet.	아직 3D 솔리드가 없습니다.
+	Clay & CSG Boolean	클레이 및 CSG 불리언
+	Operation	연산
+	Target solid	대상 솔리드
+	Tool solid	도구 솔리드
+	Smooth blend (k)	부드러운 혼합 (k)
+	Keep input solids	입력 솔리드 유지
+	Apply Boolean	불리언 적용
+	2D CAD Projection & Mesh Export	2D CAD 투영 및 메쉬 내보내기
+	Mesh resolution	메쉬 해상도
+	Projection view	투영 뷰
+	Origin (X, Y) & Scale	원점 (X, Y) 및 축척
+	Show hidden lines	숨은선 표시
+	Binary STL	바이너리 STL
+	Project View (FLATSHOT)	뷰 투영 (FLATSHOT)
+	4-View Layout (VIEWBASE)	4뷰 배치 (VIEWBASE)
+	Export STL...	STL 내보내기...
+	Export OBJ...	OBJ 내보내기...

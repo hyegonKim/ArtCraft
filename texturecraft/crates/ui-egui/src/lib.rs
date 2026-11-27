@@ -198,8 +198,7 @@ impl TextureCraftApp {
 
         // The first run speaks the OS (or browser) language when backed by persistent app storage;
         // headless harnesses without a state file keep deterministic English defaults.
-        let has_persistence =
-            (cfg!(target_arch = "wasm32") && cc.storage.is_some()) || ui_state_store::FILE.get().is_some();
+        let has_persistence = (cfg!(target_arch = "wasm32") && cc.storage.is_some()) || ui_state_store::FILE.get().is_some();
         let mut ui_store = ui_state_store::UiStateStore::new(ui_state_store::FILE.get().cloned());
         let ui = ui_store.load(cc.storage).unwrap_or_else(|| {
             let mut ui = UiState::default();

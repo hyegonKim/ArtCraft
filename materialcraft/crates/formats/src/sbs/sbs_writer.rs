@@ -193,6 +193,7 @@ impl SbsWriter {
         for exposed in &graph.exposed {
             let default = constant_xml(graph.inputs.get(&exposed.id).unwrap_or(&exposed.default)).unwrap_or_else(|| "<constantValueFloat1 v=\"0\"/>".into());
             let group = if exposed.group.is_empty() { String::new() } else { format!("<group v=\"{}\"/>", xml_escape(&exposed.group)) };
+            let visible_if = if exposed.visible_if.is_empty() { String::new() } else { format!("<visibleIf v=\"{}\"/>", xml_escape(&exposed.visible_if)) };
 
             let _ = write!(
                 out,
@@ -204,7 +205,7 @@ impl SbsWriter {
                 exposed_type_code(&exposed.default)
             );
             super::parameter_widget::write(out, exposed);
-            let _ = write!(out, "{group}</paraminput>");
+            let _ = write!(out, "{group}{visible_if}</paraminput>");
         }
 
         out.push_str("</paraminputs>");
