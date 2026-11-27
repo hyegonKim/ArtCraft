@@ -206,6 +206,26 @@ pub const PLAIN_KO: &[(&str, &str)] = &[
     ("Terrazzo Marble", "테라조 대리석"),
     ("Ceramic Tiles", "세라믹 타일"),
     ("Woven Fabric", "직물 패브릭"),
+    // Adobe Fresco Live Watercolor Wet-Canvas Capillary Diffusion
+    ("Fresco", "Fresco"),
+    ("Fresco Live Watercolor", "Fresco 라이브 수채화"),
+    ("Live Watercolor…", "라이브 수채화…"),
+    ("Live Watercolor", "라이브 수채화"),
+    ("Dry Watercolor Layer", "수채화 레이어 말리기"),
+    ("Watercolor Preset", "수채화 사전 설정"),
+    ("Water Flow", "물 흐름"),
+    ("Diffusion Steps", "모세관 확산 단계"),
+    ("Pigment Advection", "안료 이류"),
+    ("Cauliflower Edge", "번짐 가장자리 링"),
+    ("Paper Grain", "용지 질감"),
+    ("Evaporation", "증발"),
+    ("Canvas Wetness", "캔버스 습윤도"),
+    ("Wet", "젖음"),
+    ("Dry", "마름"),
+    ("Wash Soft", "부드러운 워시"),
+    ("Wet Spatter", "젖은 스패터"),
+    ("Detail Ink", "디테일 잉크"),
+    ("Granulating", "그래뉼레이션"),
 ];
 
 /// Command `@id` -> Korean menu/command label pairs.
@@ -257,13 +277,13 @@ pub const ID_KO: &[(&str, &str)] = &[
     ("filter.material.samplePbr", "재질 샘플러(사진에서 PBR로)…"),
     ("filter.material.proceduralPbr", "절차적 PBR 재질…"),
     ("filter.material.makeSeamless", "이음새 없는 타일 만들기"),
+    ("fresco.applyLiveWatercolor", "라이브 수채화…"),
+    ("fresco.dryLayer", "수채화 레이어 말리기"),
 ];
 
-static PLAIN_MAP: LazyLock<HashMap<&'static str, &'static str>> =
-    LazyLock::new(|| PLAIN_KO.iter().copied().collect());
+static PLAIN_MAP: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| PLAIN_KO.iter().copied().collect());
 
-static ID_MAP: LazyLock<HashMap<&'static str, &'static str>> =
-    LazyLock::new(|| ID_KO.iter().copied().collect());
+static ID_MAP: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| ID_KO.iter().copied().collect());
 
 /// Look up a plain English string in the Korean PS2027/ACR19 catalog.
 pub fn plain(s: &str) -> Option<&'static str> {

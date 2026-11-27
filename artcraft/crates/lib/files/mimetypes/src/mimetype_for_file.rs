@@ -1,18 +1,16 @@
 use std::path::Path;
 
-const DEFAULT_BINARY_MIMETYPE : &str = "application/octet-stream";
+const DEFAULT_BINARY_MIMETYPE: &str = "application/octet-stream";
 
 pub fn get_mimetype_for_file<P: AsRef<Path>>(file: P) -> std::io::Result<Option<&'static str>> {
-  infer::get_from_path(file)
-      .map(|maybe_type| maybe_type.map(|typ| typ.mime_type()))
+  infer::get_from_path(file).map(|maybe_type| maybe_type.map(|typ| typ.mime_type()))
 }
 
 pub fn get_mimetype_for_file_or_default<P: AsRef<Path>>(file: P) -> std::io::Result<&'static str> {
-  get_mimetype_for_file(file)
-      .map(|maybe_type| match maybe_type {
-        Some(mimetype) => mimetype,
-        None => DEFAULT_BINARY_MIMETYPE,
-      })
+  get_mimetype_for_file(file).map(|maybe_type| match maybe_type {
+    Some(mimetype) => mimetype,
+    None => DEFAULT_BINARY_MIMETYPE,
+  })
 }
 
 #[cfg(test)]

@@ -11,10 +11,7 @@ pub enum GrokGenericApiError {
   SerdeResponseParseErrorWithBody(serde_json::Error, String),
 
   /// An uncategorized bad HTTP response with status code and body.
-  UncategorizedBadResponseWithStatusAndBody {
-    status_code: StatusCode,
-    body: String,
-  },
+  UncategorizedBadResponseWithStatusAndBody { status_code: StatusCode, body: String },
 
   /// An uncaught error from the HTTP client (e.g. network/IO).
   ReqwestError(reqwest::Error),
@@ -27,10 +24,10 @@ impl Display for GrokGenericApiError {
     match self {
       Self::SerdeResponseParseErrorWithBody(err, body) => {
         write!(f, "Failed to parse Grok API response body: {:?}. Body: {}", err, body)
-      }
+      },
       Self::UncategorizedBadResponseWithStatusAndBody { status_code, body } => {
         write!(f, "Uncategorized Grok API response: status code {}, body: {}", status_code, body)
-      }
+      },
       Self::ReqwestError(err) => write!(f, "Reqwest error during Grok API call: {}", err),
     }
   }

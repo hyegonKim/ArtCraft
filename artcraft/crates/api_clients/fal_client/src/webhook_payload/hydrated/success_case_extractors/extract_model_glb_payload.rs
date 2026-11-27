@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use crate::webhook_payload::hydrated::hydrated_webhook_contents::ModelGlbData;
 
 /// Extract and deserialize the `model_glb` key from a webhook success payload.
-pub (crate) fn extract_model_glb(obj: &Map<String, Value>) -> Option<ModelGlbData> {
+pub(crate) fn extract_model_glb(obj: &Map<String, Value>) -> Option<ModelGlbData> {
   let value = obj.get("model_glb")?;
   serde_json::from_value(value.clone()).ok()
 }
@@ -17,10 +17,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -32,8 +30,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let glb = contents.model_glb.expect("model_glb should be Some");
     assert_eq!(glb.url.as_deref(), Some("https://v3b.fal.media/files/b/0a95eb37/f7UaAhyfcx0BAnYy0GpFM_model.glb"));
@@ -53,14 +50,17 @@ mod tests {
 
   #[test]
   fn synthetic_model_glb_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb": {
         "url": "https://cdn.example.com/model.glb",
         "content_type": "model/gltf-binary",
         "file_name": "output.glb",
         "file_size": 5432100
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let glb = extract_model_glb(&obj).expect("should extract model_glb");
     assert_eq!(glb.url.as_deref(), Some("https://cdn.example.com/model.glb"));
@@ -71,9 +71,12 @@ mod tests {
 
   #[test]
   fn model_glb_url_only() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb": {"url": "https://cdn.example.com/m.glb"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let glb = extract_model_glb(&obj).expect("should extract model_glb");
     assert_eq!(glb.url.as_deref(), Some("https://cdn.example.com/m.glb"));
@@ -82,9 +85,12 @@ mod tests {
 
   #[test]
   fn missing_model_glb_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "video": {"url": "https://example.com/v.mp4"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_model_glb(&obj).is_none());
   }

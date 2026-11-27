@@ -1,31 +1,13 @@
 use deckcraft_model::Effects;
 use egui::Ui;
 
-pub(super) const SHADOW_PRESETS: &[(&str, &str)] = &[
-    ("None", "none"),
-    ("Outer", "outer"),
-    ("Bottom", "bottom"),
-    ("Center", "center"),
-    ("Inner", "inner"),
-    ("Perspective", "perspective"),
-];
+pub(super) const SHADOW_PRESETS: &[(&str, &str)] =
+    &[("None", "none"), ("Outer", "outer"), ("Bottom", "bottom"), ("Center", "center"), ("Inner", "inner"), ("Perspective", "perspective")];
 
-pub(super) const GLOW_PRESETS: &[(&str, f64)] = &[
-    ("No Glow", 0.0),
-    ("5 pt", 5.0),
-    ("8 pt", 8.0),
-    ("11 pt", 11.0),
-    ("18 pt", 18.0),
-];
+pub(super) const GLOW_PRESETS: &[(&str, f64)] = &[("No Glow", 0.0), ("5 pt", 5.0), ("8 pt", 8.0), ("11 pt", 11.0), ("18 pt", 18.0)];
 
-pub(super) const SOFT_EDGE_PRESETS: &[(&str, f64)] = &[
-    ("No Soft Edges", 0.0),
-    ("1 pt", 1.0),
-    ("2.5 pt", 2.5),
-    ("5 pt", 5.0),
-    ("10 pt", 10.0),
-    ("25 pt", 25.0),
-];
+pub(super) const SOFT_EDGE_PRESETS: &[(&str, f64)] =
+    &[("No Soft Edges", 0.0), ("1 pt", 1.0), ("2.5 pt", 2.5), ("5 pt", 5.0), ("10 pt", 10.0), ("25 pt", 25.0)];
 
 /// Identifies which shadow preset `fx` currently matches, or `None` when modified by sliders.
 pub(super) fn shadow_preset_id(fx: &Effects) -> Option<&'static str> {

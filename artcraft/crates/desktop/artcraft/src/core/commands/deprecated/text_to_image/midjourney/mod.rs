@@ -1,1 +1,1 @@
-pub (super) mod handle_midjourney;
+pub(super) mod handle_midjourney;

@@ -39,8 +39,6 @@ pub struct SeedreamV5LiteTextToImageOutput {
   pub seed: u64,
 }
 
-pub fn http_seedream_5_text_to_image(
-  params: SeedreamV5LiteTextToImageInput,
-) -> FalRequest<SeedreamV5LiteTextToImageInput, SeedreamV5LiteTextToImageOutput> {
+pub fn http_seedream_5_text_to_image(params: SeedreamV5LiteTextToImageInput) -> FalRequest<SeedreamV5LiteTextToImageInput, SeedreamV5LiteTextToImageOutput> {
   FalRequest::new("fal-ai/bytedance/seedream/v5/lite/text-to-image", params)
 }

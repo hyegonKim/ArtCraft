@@ -8,9 +8,7 @@
 use std::collections::VecDeque;
 
 use photocraft_doc::Document;
-use photocraft_io::{
-    TimelapseFormat, TimelapseQuality, TimelapseRawFrame, TimelapseResolution, encode_timelapse_frames, timelapse_target_dimensions,
-};
+use photocraft_io::{TimelapseFormat, TimelapseQuality, TimelapseRawFrame, TimelapseResolution, encode_timelapse_frames, timelapse_target_dimensions};
 use serde_json::{Value, json};
 
 use crate::commands::CommandSpec;
@@ -175,11 +173,7 @@ fn has_doc(s: &Session) -> std::result::Result<(), String> {
 fn can_export(s: &Session) -> std::result::Result<(), String> {
     crate::file_cmds::native(s)?;
     let st = s.active().ok_or_else(|| "no document open".to_string())?;
-    if st.timelapse.frames.is_empty() {
-        Err("no timelapse frames recorded".into())
-    } else {
-        Ok(())
-    }
+    if st.timelapse.frames.is_empty() { Err("no timelapse frames recorded".into()) } else { Ok(()) }
 }
 
 fn status_json(rec: &TimelapseRecorder) -> Value {
@@ -194,22 +188,11 @@ fn status_json(rec: &TimelapseRecorder) -> Value {
 }
 
 /// Encode the active document's recorded timelapse frames to container bytes.
-pub fn export_timelapse_bytes(
-    rec: &TimelapseRecorder,
-    fps: u32,
-    format: TimelapseFormat,
-) -> Result<(Vec<u8>, u32, u32, usize)> {
+pub fn export_timelapse_bytes(rec: &TimelapseRecorder, fps: u32, format: TimelapseFormat) -> Result<(Vec<u8>, u32, u32, usize)> {
     let last = rec.frames.back().ok_or_else(|| EngineError::Other("no timelapse frames recorded".into()))?;
     let (tw, th) = timelapse_target_dimensions(last.width.max(2), last.height.max(2), rec.resolution);
-    let raw_frames: Vec<TimelapseRawFrame> = rec
-        .frames
-        .iter()
-        .map(|f| TimelapseRawFrame {
-            width: tw,
-            height: th,
-            rgba8: resize_rgba_nearest(&f.rgba, f.width, f.height, tw, th),
-        })
-        .collect();
+    let raw_frames: Vec<TimelapseRawFrame> =
+        rec.frames.iter().map(|f| TimelapseRawFrame { width: tw, height: th, rgba8: resize_rgba_nearest(&f.rgba, f.width, f.height, tw, th) }).collect();
     let count = raw_frames.len();
     let bytes = encode_timelapse_frames(&raw_frames, rec.resolution, rec.quality, fps.clamp(1, 60), format)
         .map_err(|e| EngineError::Other(format!("timelapse export failed: {e}")))?;
@@ -272,11 +255,7 @@ pub fn specs() -> Vec<CommandSpec> {
             params: "{}",
             enabled: |s| {
                 let st = s.active().ok_or("no document open")?;
-                if st.timelapse.state == TimelapseState::Recording {
-                    Ok(())
-                } else {
-                    Err("timelapse is not currently recording".into())
-                }
+                if st.timelapse.state == TimelapseState::Recording { Ok(()) } else { Err("timelapse is not currently recording".into()) }
             },
             run: |s, _| {
                 let st = s.active_mut().ok_or(EngineError::NoDocument)?;
@@ -297,11 +276,7 @@ pub fn specs() -> Vec<CommandSpec> {
             params: "{}",
             enabled: |s| {
                 let st = s.active().ok_or("no document open")?;
-                if st.timelapse.state == TimelapseState::Paused {
-                    Ok(())
-                } else {
-                    Err("timelapse is not paused".into())
-                }
+                if st.timelapse.state == TimelapseState::Paused { Ok(()) } else { Err("timelapse is not paused".into()) }
             },
             run: |s, _| {
                 let st = s.active_mut().ok_or(EngineError::NoDocument)?;
@@ -392,12 +367,7 @@ pub fn specs() -> Vec<CommandSpec> {
             enabled: can_export,
             run: |s, p| {
                 const CMD: &str = "file.export.timelapse";
-                let path = p
-                    .get("path")
-                    .and_then(Value::as_str)
-                    .filter(|s| !s.trim().is_empty())
-                    .ok_or_else(|| bad(CMD, "missing `path`"))?
-                    .to_string();
+                let path = p.get("path").and_then(Value::as_str).filter(|s| !s.trim().is_empty()).ok_or_else(|| bad(CMD, "missing `path`"))?.to_string();
                 let fps = p.get("fps").and_then(Value::as_u64).map_or(30, |v| v.clamp(1, 60) as u32);
                 let fmt = parse_format(p, &path, CMD)?;
                 let st = s.active().ok_or(EngineError::NoDocument)?;

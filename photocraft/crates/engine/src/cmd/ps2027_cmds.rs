@@ -85,11 +85,7 @@ fn has_doc(s: &Session) -> std::result::Result<(), String> {
 
 fn has_rgb_or_gray_doc(s: &Session) -> std::result::Result<(), String> {
     let st = s.active().ok_or("no document open")?;
-    if matches!(st.doc.mode, ColorMode::Bitmap | ColorMode::Indexed) {
-        Err(format!("not available in {:?} mode", st.doc.mode))
-    } else {
-        Ok(())
-    }
+    if matches!(st.doc.mode, ColorMode::Bitmap | ColorMode::Indexed) { Err(format!("not available in {:?} mode", st.doc.mode)) } else { Ok(()) }
 }
 
 // ------------------------------------------------------------------ Parsers & Smart Filter Replay
@@ -138,15 +134,7 @@ pub fn parse_relight_lamps(p: &Value, default_lamps: [RelightLamp; 3]) -> [Relig
 }
 
 fn lamps_to_algo(lamps: [RelightLamp; 3]) -> [Lamp3d; 3] {
-    lamps.map(|l| Lamp3d {
-        enabled: l.enabled,
-        x: l.x,
-        y: l.y,
-        z: l.z,
-        intensity: l.intensity,
-        color: l.color,
-        spread: l.spread,
-    })
+    lamps.map(|l| Lamp3d { enabled: l.enabled, x: l.x, y: l.y, z: l.z, intensity: l.intensity, color: l.color, spread: l.spread })
 }
 
 pub fn parse_relight_algo_params(p: &Value) -> Relight3dParams {
@@ -159,11 +147,7 @@ pub fn parse_relight_algo_params(p: &Value) -> Relight3dParams {
 }
 
 pub fn parse_restyle_preset(p: &Value, fallback: RestylePreset) -> RestylePreset {
-    p.get("preset")
-        .or_else(|| p.get("style"))
-        .and_then(Value::as_str)
-        .and_then(RestylePreset::from_id)
-        .unwrap_or(fallback)
+    p.get("preset").or_else(|| p.get("style")).and_then(Value::as_str).and_then(RestylePreset::from_id).unwrap_or(fallback)
 }
 
 fn preset_to_algo_style(preset: RestylePreset) -> RestyleStyle {
@@ -234,13 +218,7 @@ fn commit_filtered_surface(base: &mut Surface, filtered: &Surface, area: Rect, s
 }
 
 /// Shared execution for destructive pixel layer OR non-destructive Smart Object filter.
-fn run_surface_or_smart_filter(
-    s: &mut Session,
-    cmd_id: &str,
-    label: &str,
-    p: &Value,
-    render: impl FnOnce(&Surface, Rect) -> Surface,
-) -> Result<Value> {
+fn run_surface_or_smart_filter(s: &mut Session, cmd_id: &str, label: &str, p: &Value, render: impl FnOnce(&Surface, Rect) -> Surface) -> Result<Value> {
     let layer_id = layer_param(s, p)?;
     let stored_params = {
         let mut q = p.clone();
@@ -267,13 +245,7 @@ fn run_surface_or_smart_filter(
                 Ok(json!({ "layer": layer_id.0 }))
             }
             LayerContent::Smart(_) => {
-                let sf = SmartFilter {
-                    command: cmd_id.to_string(),
-                    params: stored_params,
-                    blend: BlendMode::Normal,
-                    opacity: 1.0,
-                    visible: true,
-                };
+                let sf = SmartFilter { command: cmd_id.to_string(), params: stored_params, blend: BlendMode::Normal, opacity: 1.0, visible: true };
                 crate::smart_cmds::add_smart_filter_in(doc, layer_id, sf, selection.as_ref(), &JobCtx::new())?;
                 Ok(json!({ "layer": layer_id.0, "smartFilter": true }))
             }
@@ -365,11 +337,7 @@ fn update_live_fx(fx: &mut LiveBackdropFx, p: &Value) {
 
 fn has_live_fx_layer(s: &Session) -> std::result::Result<(), String> {
     let l = crate::active_layer_of(s)?;
-    if l.live_fx.is_some() {
-        Ok(())
-    } else {
-        Err("active layer is not a Live Effect (Fireflies / Water Ripple / Relight / Restyle) layer".into())
-    }
+    if l.live_fx.is_some() { Ok(()) } else { Err("active layer is not a Live Effect (Fireflies / Water Ripple / Relight / Restyle) layer".into()) }
 }
 
 // ------------------------------------------------------------------ Oil Brush Tool
@@ -442,8 +410,8 @@ fn set_oil_brush(s: &mut Session, p: &Value) -> Result<Value> {
 fn run_remove_ambient(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "edit.removeAmbientEffects";
     let mode_str = p.get("mode").and_then(Value::as_str).unwrap_or("shadows");
-    let mode = AmbientMode::from_id(mode_str)
-        .ok_or_else(|| bad(CMD, format!("unknown ambient mode `{mode_str}` (shadows|reflections|lensFlares|atmospheric)")))?;
+    let mode =
+        AmbientMode::from_id(mode_str).ok_or_else(|| bad(CMD, format!("unknown ambient mode `{mode_str}` (shadows|reflections|lensFlares|atmospheric)")))?;
     let params = AmbientRemoveParams {
         mode,
         remove_related_elements: bool_or(p, "removeRelatedElements", bool_or(p, "removeRelated", true)),
@@ -456,11 +424,7 @@ fn run_remove_ambient(s: &mut Session, p: &Value) -> Result<Value> {
         let new_id = s.edit("Remove Ambient Effects", |doc, active| {
             let canvas = doc.bounds();
             let selection = doc.selection.clone();
-            let src_surf = doc
-                .layer(src_id)
-                .and_then(Layer::surface)
-                .ok_or_else(|| EngineError::Other("active layer has no raster pixels".into()))?
-                .clone();
+            let src_surf = doc.layer(src_id).and_then(Layer::surface).ok_or_else(|| EngineError::Other("active layer has no raster pixels".into()))?.clone();
             let filtered = remove_ambient_effects_surface(&src_surf, canvas, &params);
             let mut out_surf = src_surf;
             commit_filtered_surface(&mut out_surf, &filtered, canvas, selection.as_ref(), false);
@@ -480,20 +444,12 @@ fn run_remove_ambient(s: &mut Session, p: &Value) -> Result<Value> {
 
 fn has_raster_layer(s: &Session) -> std::result::Result<(), String> {
     let l = crate::active_layer_of(s)?;
-    if matches!(l.content, LayerContent::Raster(_)) {
-        Ok(())
-    } else {
-        Err("Convert to Text Layers requires a raster pixel layer".into())
-    }
+    if matches!(l.content, LayerContent::Raster(_)) { Ok(()) } else { Err("Convert to Text Layers requires a raster pixel layer".into()) }
 }
 
 fn has_type_layer(s: &Session) -> std::result::Result<(), String> {
     let l = crate::active_layer_of(s)?;
-    if matches!(l.content, LayerContent::Text(_)) {
-        Ok(())
-    } else {
-        Err("active layer is not a type layer".into())
-    }
+    if matches!(l.content, LayerContent::Text(_)) { Ok(()) } else { Err("active layer is not a type layer".into()) }
 }
 
 fn has_dynamic_fit_type_layer(s: &Session) -> std::result::Result<(), String> {
@@ -511,12 +467,7 @@ fn run_raster_to_text(s: &mut Session, p: &Value) -> Result<Value> {
     let created = s.edit("Convert to Text Layers", |doc, active| {
         crate::commands::check_pixels_unlocked(doc, src_id)?;
         let (dpi, fmt) = (doc.resolution_dpi, doc.pixel_format());
-        let search_rect = doc
-            .selection
-            .as_ref()
-            .map(Surface::content_bounds)
-            .filter(|r| !r.is_empty())
-            .unwrap_or_else(|| doc.bounds());
+        let search_rect = doc.selection.as_ref().map(Surface::content_bounds).filter(|r| !r.is_empty()).unwrap_or_else(|| doc.bounds());
         let src_surf = doc
             .layer(src_id)
             .and_then(|l| match &l.content {
@@ -565,10 +516,7 @@ fn run_raster_to_text(s: &mut Session, p: &Value) -> Result<Value> {
                 font_family: style.font_family.clone(),
                 size_pt: style.size_pt,
                 color: style.color,
-                transform: Affine::translate(
-                    f64::from(line.bounds.x0),
-                    f64::from(line.bounds.y0) + f64::from(line.bounds.height()) * 0.82,
-                ),
+                transform: Affine::translate(f64::from(line.bounds.x0), f64::from(line.bounds.y0) + f64::from(line.bounds.height()) * 0.82),
                 runs: vec![TextRun { len: line.text.len(), style }],
                 ..TextLayer::default()
             };
@@ -649,12 +597,7 @@ fn run_copy_text_attributes(s: &mut Session, p: &Value) -> Result<Value> {
     };
     let char_style = t.char_runs().into_iter().next().map(|r| r.style).unwrap_or_default();
     let paragraph_style = t.paragraphs.first().map(|p| p.style.clone()).unwrap_or_default();
-    let clip = TextAttributeClipboard {
-        char_style: char_style.clone(),
-        paragraph_style,
-        antialias: t.antialias,
-        orientation: t.orientation,
-    };
+    let clip = TextAttributeClipboard { char_style: char_style.clone(), paragraph_style, antialias: t.antialias, orientation: t.orientation };
     s.text_attr_clipboard = Some(clip);
     Ok(json!({
         "layer": id.0,
@@ -669,11 +612,7 @@ fn can_paste_text_attributes(s: &Session) -> std::result::Result<(), String> {
     }
     let st = s.active().ok_or("no document open")?;
     let has_text = st.selected_layers().into_iter().any(|id| st.doc.layer(id).is_some_and(|l| matches!(l.content, LayerContent::Text(_))));
-    if has_text {
-        Ok(())
-    } else {
-        Err("no type layer selected".into())
-    }
+    if has_text { Ok(()) } else { Err("no type layer selected".into()) }
 }
 
 fn run_paste_text_attributes(s: &mut Session, p: &Value) -> Result<Value> {
@@ -682,10 +621,7 @@ fn run_paste_text_attributes(s: &mut Session, p: &Value) -> Result<Value> {
         vec![layer_param(s, p)?]
     } else {
         let st = s.active().ok_or(EngineError::NoDocument)?;
-        st.selected_layers()
-            .into_iter()
-            .filter(|&id| st.doc.layer(id).is_some_and(|l| matches!(l.content, LayerContent::Text(_))))
-            .collect()
+        st.selected_layers().into_iter().filter(|&id| st.doc.layer(id).is_some_and(|l| matches!(l.content, LayerContent::Text(_)))).collect()
     };
     if targets.is_empty() {
         return Err(EngineError::Other("no type layer selected".into()));
@@ -852,21 +788,13 @@ fn find_mockup_target(doc: &Document, active: LayerId) -> Option<LayerId> {
         return Some(active);
     }
     let path = doc.path_of(active)?;
-    if path.len() >= 2 {
-        doc.layer_at(&path[..path.len() - 1]).filter(|l| l.mockup_lighting.is_some()).map(|l| l.id)
-    } else {
-        None
-    }
+    if path.len() >= 2 { doc.layer_at(&path[..path.len() - 1]).filter(|l| l.mockup_lighting.is_some()).map(|l| l.id) } else { None }
 }
 
 fn has_mockup_target(s: &Session) -> std::result::Result<(), String> {
     let st = s.active().ok_or("no document open")?;
     let active = st.active_layer.ok_or("no active layer")?;
-    if find_mockup_target(&st.doc, active).is_some() {
-        Ok(())
-    } else {
-        Err("active layer is not a Mockup".into())
-    }
+    if find_mockup_target(&st.doc, active).is_some() { Ok(()) } else { Err("active layer is not a Mockup".into()) }
 }
 
 fn run_create_mockup(s: &mut Session, p: &Value) -> Result<Value> {
@@ -896,10 +824,8 @@ fn run_create_mockup(s: &mut Session, p: &Value) -> Result<Value> {
         if children.is_empty() {
             return Err(EngineError::Other("could not group selected layers into Mockup".into()));
         }
-        let mut grp_layer = Layer::new(
-            doc.next_layer_name("Mockup"),
-            LayerContent::Group(Group { children, expanded: true, artboard: None, frame_stroke: None }),
-        );
+        let mut grp_layer =
+            Layer::new(doc.next_layer_name("Mockup"), LayerContent::Group(Group { children, expanded: true, artboard: None, frame_stroke: None }));
         grp_layer.blend = BlendMode::Normal;
         grp_layer.mockup_lighting = Some(lighting);
         let gid = if let Some(anchor) = insert_anchor {
@@ -1056,20 +982,13 @@ fn run_skill_cinematic_grade(s: &mut Session, _: &Value) -> Result<Value> {
             "Cinematic Contrast Curve",
             LayerContent::Adjustment(Adjustment::Curves {
                 master: vec![pt(0.0, 0.03), pt(0.24, 0.19), pt(0.76, 0.83), pt(1.0, 0.98)],
-                per_channel: [
-                    vec![pt(0.0, 0.0), pt(1.0, 1.0)],
-                    vec![pt(0.0, 0.0), pt(1.0, 1.0)],
-                    vec![pt(0.0, 0.04), pt(0.5, 0.5), pt(1.0, 0.95)],
-                ],
+                per_channel: [vec![pt(0.0, 0.0), pt(1.0, 1.0)], vec![pt(0.0, 0.0), pt(1.0, 1.0)], vec![pt(0.0, 0.04), pt(0.5, 0.5), pt(1.0, 0.95)]],
                 space: ToneSpace::Rgb,
                 black: Vec::new(),
                 pencil: false,
             }),
         );
-        let vib = Layer::new(
-            "Film Vibrance",
-            LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 18.0, saturation: -6.0 }),
-        );
+        let vib = Layer::new("Film Vibrance", LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 18.0, saturation: -6.0 }));
         let grp = Layer::new(
             doc.next_layer_name("Cinematic Grade"),
             LayerContent::Group(Group { children: vec![cb, curves, vib], expanded: true, artboard: None, frame_stroke: None }),
@@ -1093,10 +1012,7 @@ fn run_skill_enhance_and_resize(s: &mut Session, p: &Value) -> Result<Value> {
         let new_bounds = Rect::from_size(doc.size);
         let sharpen_fp = FilterParams::SmartSharpen { amount: 85.0, radius: 1.1, reduce_noise: 18.0 };
         upscale_and_sharpen_layers(&mut doc.layers, old, &sharpen_fp, new_bounds, dpi, fmt);
-        let vib = Layer::new(
-            doc.next_layer_name("Detail Vibrance"),
-            LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 12.0, saturation: 3.0 }),
-        );
+        let vib = Layer::new(doc.next_layer_name("Detail Vibrance"), LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 12.0, saturation: 3.0 }));
         let vid = crate::layer_place::insert_new(doc, *active, vib, crate::layer_place::Place::Auto);
         *active = Some(vid);
         Ok((nw, nh))
@@ -1104,14 +1020,7 @@ fn run_skill_enhance_and_resize(s: &mut Session, p: &Value) -> Result<Value> {
     Ok(json!({ "skill": "enhanceAndResize", "width": nw, "height": nh }))
 }
 
-fn upscale_and_sharpen_layers(
-    layers: &mut [Layer],
-    old: Size,
-    fp: &FilterParams,
-    new_bounds: Rect,
-    dpi: f32,
-    fmt: PixelFormat,
-) {
+fn upscale_and_sharpen_layers(layers: &mut [Layer], old: Size, fp: &FilterParams, new_bounds: Rect, dpi: f32, fmt: PixelFormat) {
     let sx = f64::from(new_bounds.width()) / f64::from(old.width.max(1));
     let sy = f64::from(new_bounds.height()) / f64::from(old.height.max(1));
     let scale_aff = Affine { m: [sx, 0.0, 0.0, sy, 0.0, 0.0] };
@@ -1142,14 +1051,7 @@ fn run_skill_perfect_portrait(s: &mut Session, _: &Value) -> Result<Value> {
     let id = s.edit("Agent Skill: Perfect Portrait", |doc, active| {
         let bounds = doc.bounds();
         let stamped = stamp_visible_surface(doc);
-        let smoothed = photocraft_algo::apply_in(
-            &stamped,
-            &FilterParams::SurfaceBlur { radius: 4.0, threshold: 16.0 },
-            bounds,
-            bounds,
-            None,
-            bounds,
-        );
+        let smoothed = photocraft_algo::apply_in(&stamped, &FilterParams::SurfaceBlur { radius: 4.0, threshold: 16.0 }, bounds, bounds, None, bounds);
         let mut skin = Layer::new("Soft Skin Polish", LayerContent::Raster(smoothed));
         skin.opacity = 0.42;
 
@@ -1162,10 +1064,7 @@ fn run_skill_perfect_portrait(s: &mut Session, _: &Value) -> Result<Value> {
         lamps[0].color = [1.0, 0.93, 0.85];
         relight.live_fx = Some(LiveBackdropFx::Relight3d { ambient: 0.68, surface_relief: 0.85, lamps });
 
-        let warm = Layer::new(
-            "Portrait Tone",
-            LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 14.0, saturation: 2.0 }),
-        );
+        let warm = Layer::new("Portrait Tone", LayerContent::Adjustment(Adjustment::Vibrance { vibrance: 14.0, saturation: 2.0 }));
         let grp = Layer::new(
             doc.next_layer_name("Perfect Portrait"),
             LayerContent::Group(Group { children: vec![skin, relight, warm], expanded: true, artboard: None, frame_stroke: None }),
@@ -1239,22 +1138,9 @@ fn run_skill_retouch_portrait(s: &mut Session, _: &Value) -> Result<Value> {
     let id = s.edit("Agent Skill: Retouch Portrait", |doc, active| {
         let bounds = doc.bounds();
         let stamped = stamp_visible_surface(doc);
-        let de_blemish = photocraft_algo::apply_in(
-            &stamped,
-            &FilterParams::SurfaceBlur { radius: 5.0, threshold: 18.0 },
-            bounds,
-            bounds,
-            None,
-            bounds,
-        );
-        let crisp = photocraft_algo::apply_in(
-            &de_blemish,
-            &FilterParams::UnsharpMask { amount: 48.0, radius: 0.9, threshold: 4.0 },
-            bounds,
-            bounds,
-            None,
-            bounds,
-        );
+        let de_blemish = photocraft_algo::apply_in(&stamped, &FilterParams::SurfaceBlur { radius: 5.0, threshold: 18.0 }, bounds, bounds, None, bounds);
+        let crisp =
+            photocraft_algo::apply_in(&de_blemish, &FilterParams::UnsharpMask { amount: 48.0, radius: 0.9, threshold: 4.0 }, bounds, bounds, None, bounds);
         let mut retouch = Layer::new(doc.next_layer_name("Portrait Retouch"), LayerContent::Raster(crisp));
         retouch.opacity = 0.65;
         let rid = crate::layer_place::insert_new(doc, *active, retouch, crate::layer_place::Place::Auto);
@@ -1300,10 +1186,7 @@ fn run_skill_subject_spotlight(s: &mut Session, _: &Value) -> Result<Value> {
         let mut bg_mask = Surface::new(PixelFormat::GRAY8);
         bg_mask.write_region(bounds, &inv_vals);
 
-        let mut dim_bg = Layer::new(
-            "Dim Surroundings",
-            LayerContent::Adjustment(Adjustment::Exposure { exposure: -1.15, offset: 0.0, gamma: 0.92 }),
-        );
+        let mut dim_bg = Layer::new("Dim Surroundings", LayerContent::Adjustment(Adjustment::Exposure { exposure: -1.15, offset: 0.0, gamma: 0.92 }));
         dim_bg.mask = Some(LayerMask { surface: bg_mask, ..LayerMask::reveal_all() });
 
         let mut spot = Layer::new("Subject Key Spotlight", LayerContent::Raster(Surface::new(doc.pixel_format())));
@@ -1391,12 +1274,7 @@ pub fn specs() -> Vec<CommandSpec> {
             enabled: has_rgb_or_gray_doc,
             run: |s, p| {
                 let wp = parse_water_ripple_params(p);
-                let fx = LiveBackdropFx::WaterRipple {
-                    horizon: wp.horizon,
-                    amplitude: wp.amplitude,
-                    frequency: wp.frequency,
-                    progress: wp.progress,
-                };
+                let fx = LiveBackdropFx::WaterRipple { horizon: wp.horizon, amplitude: wp.amplitude, frequency: wp.frequency, progress: wp.progress };
                 create_live_fx_layer(s, "layer.newAdjustmentLayer.waterRipple", "New Water Ripple Layer", "Water Ripple", fx, p)
             },
             journal: true,
@@ -1438,7 +1316,6 @@ pub fn specs() -> Vec<CommandSpec> {
             },
             journal: true,
         },
-
         // 2. Relight / Lightshop Layer & Filter (`새 재조명 레이어…` / `재조명`)
         CommandSpec {
             id: "layer.newRelightLayer",
@@ -1466,11 +1343,7 @@ pub fn specs() -> Vec<CommandSpec> {
             params: r#"{"layer":id?,"ambient":0..1.5?,"surfaceRelief":0..2?,"lamps":[…]?}"#,
             enabled: |s| {
                 let l = crate::active_layer_of(s)?;
-                if matches!(l.live_fx, Some(LiveBackdropFx::Relight3d { .. })) {
-                    Ok(())
-                } else {
-                    Err("active layer is not a Relight layer".into())
-                }
+                if matches!(l.live_fx, Some(LiveBackdropFx::Relight3d { .. })) { Ok(()) } else { Err("active layer is not a Relight layer".into()) }
             },
             run: |s, p| {
                 let id = layer_param(s, p)?;
@@ -1499,7 +1372,6 @@ pub fn specs() -> Vec<CommandSpec> {
             },
             journal: true,
         },
-
         // 3. Oil Brush Tool (`유화 브러시 도구`)
         CommandSpec {
             id: "paint.oilBrush",
@@ -1521,7 +1393,6 @@ pub fn specs() -> Vec<CommandSpec> {
             run: set_oil_brush,
             journal: true,
         },
-
         // 4. Remove Ambient Effects (`주변 효과 제거…`)
         CommandSpec {
             id: "edit.removeAmbientEffects",
@@ -1536,7 +1407,6 @@ pub fn specs() -> Vec<CommandSpec> {
             run: run_remove_ambient,
             journal: true,
         },
-
         // 5. Type 2027 (`Convert to Text Layers`, `Dynamic Text Fit`, `Release Dynamic Fit`, `Copy/Paste Text Attributes`)
         CommandSpec {
             id: "type.rasterToText",
@@ -1588,7 +1458,6 @@ pub fn specs() -> Vec<CommandSpec> {
             run: run_paste_text_attributes,
             journal: true,
         },
-
         // 6. Generative Recompose (`생성형 재구성…`)
         CommandSpec {
             id: "edit.generativeRecompose",
@@ -1600,7 +1469,6 @@ pub fn specs() -> Vec<CommandSpec> {
             run: run_generative_recompose,
             journal: true,
         },
-
         // 7. Restyle Layer, Filter & `Capture as Layer` (`생성형 스타일 변경` / `레이어로 캡처`)
         CommandSpec {
             id: "layer.newRestyleLayer",
@@ -1627,11 +1495,7 @@ pub fn specs() -> Vec<CommandSpec> {
             params: r#"{"layer":id?,"preset":str?,"prompt":str?,"intensity":0..100?}"#,
             enabled: |s| {
                 let l = crate::active_layer_of(s)?;
-                if matches!(l.live_fx, Some(LiveBackdropFx::Restyle { .. })) {
-                    Ok(())
-                } else {
-                    Err("active layer is not a Restyle layer".into())
-                }
+                if matches!(l.live_fx, Some(LiveBackdropFx::Restyle { .. })) { Ok(()) } else { Err("active layer is not a Restyle layer".into()) }
             },
             run: |s, p| {
                 let id = layer_param(s, p)?;
@@ -1670,7 +1534,6 @@ pub fn specs() -> Vec<CommandSpec> {
             },
             journal: true,
         },
-
         // 8. Mockup Group & Environmental Lighting (`목업` / `환경 조명` / `목업 풀기`)
         CommandSpec {
             id: "layer.mockup.create",
@@ -1705,7 +1568,6 @@ pub fn specs() -> Vec<CommandSpec> {
             run: run_release_mockup,
             journal: true,
         },
-
         // 9. Agent Skills 8 One-Click Workflows (`에이전트 스킬`)
         CommandSpec {
             id: "agent.skill.cinematicGrade",
@@ -1829,9 +1691,7 @@ mod tests {
 
         // Oil Brush Tool stroke
         s.execute("tools.setOilBrush", json!({"preset": "blocky", "size": 18, "paintMix": 0.55})).unwrap();
-        let ob = s
-            .execute("paint.oilBrush", json!({"points": [[12, 12, 0.9], [44, 32, 0.85]], "color": "#cc3311"}))
-            .unwrap();
+        let ob = s.execute("paint.oilBrush", json!({"points": [[12, 12, 0.9], [44, 32, 0.85]], "color": "#cc3311"})).unwrap();
         assert_eq!(ob["preset"], "blocky");
 
         // Remove Ambient Effects (all 4 modes)

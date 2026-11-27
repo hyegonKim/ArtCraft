@@ -13,7 +13,6 @@ use wreq::Client;
 
 const SORA_LIST_CLASSIC_TASKS_URL: &str = "https://sora.chatgpt.com/backend/v2/list_tasks?limit=20";
 
-
 /// NB: We omit fields we're not using to prevent breakage.
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -34,7 +33,6 @@ pub struct PartialTaskResponse {
   pub prompt: Option<String>,
 
   pub generations: Vec<PartialGeneration>,
-
   //pub user: String,
   //pub created_at: String,
   //pub status: String, // eg. "succeeded"
@@ -43,7 +41,6 @@ pub struct PartialTaskResponse {
   //pub encodings: Vec<Encoding> // NB: These are webp images.
   // ... lots of other fields ...
 }
-
 
 #[derive(Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -63,7 +60,6 @@ pub struct PartialGeneration {
   // A unique ID for the generation, eg. "gen_01abc..."
   pub id: String,
   pub url: String,
-
   //pub id: String,
   //pub task_id: TaskId,
   //pub created_at: String,
@@ -75,8 +71,7 @@ pub struct PartialGeneration {
 }
 
 pub async fn list_classic_tasks(credentials: &SoraCredentialSet) -> Result<ListTasksResponse, SoraError> {
-
-  let bearer_header = match credentials.jwt_bearer_token.as_ref()  {
+  let bearer_header = match credentials.jwt_bearer_token.as_ref() {
     Some(bearer) => bearer.to_authorization_header_value(),
     None => {
       warn!("No JWT bearer token in client - cannot fetch image gen status!");
@@ -86,11 +81,7 @@ pub async fn list_classic_tasks(credentials: &SoraCredentialSet) -> Result<ListT
 
   let client = Client::new();
 
-  let mut url = Url::parse(SORA_LIST_CLASSIC_TASKS_URL)
-      .map_err(|err| {
-        SoraClientError::UrlParseError(err)
-      })?;
-
+  let mut url = Url::parse(SORA_LIST_CLASSIC_TASKS_URL).map_err(|err| SoraClientError::UrlParseError(err))?;
 
   // TODO: Future pagination.
   // Add query parameters
@@ -101,32 +92,21 @@ pub async fn list_classic_tasks(credentials: &SoraCredentialSet) -> Result<ListT
   //  url.query_pairs_mut().append_pair("before", &before);
   //}
 
-  let http_request = client.get(url.as_str())
-      .header("User-Agent", CLIENT_USER_AGENT)
-      .header("Cookie", credentials.cookies.as_str())
-      .header("Authorization", bearer_header)
-      .header("Content-Type", "application/json");
+  let http_request = client.get(url.as_str()).header("User-Agent", CLIENT_USER_AGENT).header("Cookie", credentials.cookies.as_str()).header("Authorization", bearer_header).header("Content-Type", "application/json");
 
-  let http_request = http_request.build()
-      .map_err(|err| {
-        SoraClientError::WreqClientError(err)
-      })?;
+  let http_request = http_request.build().map_err(|err| SoraClientError::WreqClientError(err))?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Client failed to fetch sora task list: {:?}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Client failed to fetch sora task list: {:?}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = &response.text()
-      .await
-      .map_err(|err| {
-        error!("Client failed to read sora task list: {:?}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let response_body = &response.text().await.map_err(|err| {
+    error!("Client failed to read sora task list: {:?}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
   debug!("response_body: {}", response_body);
 
@@ -136,11 +116,10 @@ pub async fn list_classic_tasks(credentials: &SoraCredentialSet) -> Result<ListT
     return Err(error);
   }
 
-  let response = serde_json::from_str::<ListTasksResponse>(response_body)
-      .map_err(|err| {
-        error!("Failed to parse status response: {:?}", err);
-        SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string())
-      })?;
+  let response = serde_json::from_str::<ListTasksResponse>(response_body).map_err(|err| {
+    error!("Failed to parse status response: {:?}", err);
+    SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string())
+  })?;
 
   Ok(response)
 }

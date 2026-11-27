@@ -47,8 +47,8 @@ impl FalRequestCostCalculator for EnqueueHunyuan3dV3SketchTo3dRequest {
     // Enabling PBR materials adds $0.15.
     // Custom face count adds $0.15.
     let mut cost = match self.generate_type {
-      None => 38, // Round up from $0.375
-      Some(EnqueueHunyuan3dV3SketchTo3dGenerateType::Normal) => 38, // Round up
+      None => 38,                                                     // Round up from $0.375
+      Some(EnqueueHunyuan3dV3SketchTo3dGenerateType::Normal) => 38,   // Round up
       Some(EnqueueHunyuan3dV3SketchTo3dGenerateType::Geometry) => 23, // Round up
       Some(EnqueueHunyuan3dV3SketchTo3dGenerateType::LowPoly) => 45,
     };
@@ -62,29 +62,27 @@ impl FalRequestCostCalculator for EnqueueHunyuan3dV3SketchTo3dRequest {
   }
 }
 
-
 /// Hunyuan3D V3 Sketch-to-3D
 /// https://fal.ai/models/fal-ai/hunyuan3d-v3/sketch-to-3d
-pub async fn enqueue_hunyuan3d_v3_sketch_to_3d_webhook<R: IntoUrl>(
-  args: EnqueueHunyuan3dV3SketchTo3dArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_hunyuan3d_v3_sketch_to_3d_webhook<R: IntoUrl>(args: EnqueueHunyuan3dV3SketchTo3dArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let generate_type = req.generate_type
-      .map(|t| match t {
-        EnqueueHunyuan3dV3SketchTo3dGenerateType::Normal => "Normal",
-        EnqueueHunyuan3dV3SketchTo3dGenerateType::LowPoly => "LowPoly",
-        EnqueueHunyuan3dV3SketchTo3dGenerateType::Geometry => "Geometry",
-      })
-      .map(|s| s.to_string());
+  let generate_type = req
+    .generate_type
+    .map(|t| match t {
+      EnqueueHunyuan3dV3SketchTo3dGenerateType::Normal => "Normal",
+      EnqueueHunyuan3dV3SketchTo3dGenerateType::LowPoly => "LowPoly",
+      EnqueueHunyuan3dV3SketchTo3dGenerateType::Geometry => "Geometry",
+    })
+    .map(|s| s.to_string());
 
-  let polygon_type = req.polygon_type
-      .map(|t| match t {
-        EnqueueHunyuan3dV3SketchTo3dPolygonType::Triangle => "triangle",
-        EnqueueHunyuan3dV3SketchTo3dPolygonType::Quadrilateral => "quadrilateral",
-      })
-      .map(|s| s.to_string());
+  let polygon_type = req
+    .polygon_type
+    .map(|t| match t {
+      EnqueueHunyuan3dV3SketchTo3dPolygonType::Triangle => "triangle",
+      EnqueueHunyuan3dV3SketchTo3dPolygonType::Quadrilateral => "quadrilateral",
+    })
+    .map(|s| s.to_string());
 
   let request = Hunyuan3dV3SketchTo3dInput {
     prompt: req.prompt,
@@ -96,10 +94,7 @@ pub async fn enqueue_hunyuan3d_v3_sketch_to_3d_webhook<R: IntoUrl>(
     enable_pbr: req.enable_pbr,
   };
 
-  let result = hunyuan3d_v3_sketch_to_3d(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = hunyuan3d_v3_sketch_to_3d(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -120,18 +115,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueHunyuan3dV3SketchTo3dArgs {
-      request: EnqueueHunyuan3dV3SketchTo3dRequest {
-        prompt: "A cute robot".to_string(),
-        image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        face_count: None,
-        generate_type: None,
-        polygon_type: None,
-        enable_pbr: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueHunyuan3dV3SketchTo3dArgs { request: EnqueueHunyuan3dV3SketchTo3dRequest { prompt: "A cute robot".to_string(), image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_hunyuan3d_v3_sketch_to_3d_webhook(args).await?;
 

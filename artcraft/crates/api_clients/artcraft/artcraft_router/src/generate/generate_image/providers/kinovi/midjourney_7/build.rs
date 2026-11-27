@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::image::generate_midjourney_v7::{
-  GenerateMidjourneyV7AspectRatio, GenerateMidjourneyV7Quality,
-  GenerateMidjourneyV7Request, KinoviMidjourneyBatchCount,
-};
+use kinovi_web_client::generate::image::generate_midjourney_v7::{GenerateMidjourneyV7AspectRatio, GenerateMidjourneyV7Quality, GenerateMidjourneyV7Request, KinoviMidjourneyBatchCount};
 
 use crate::api::image_list_ref::ImageListRef;
 use crate::api::router_aspect_ratio::RouterAspectRatio;
@@ -13,14 +10,10 @@ use crate::generate::generate_image::generate_image_request_builder::GenerateIma
 use crate::generate::generate_image::image_generation_draft::ImageGenerationDraftRequest;
 use crate::generate::generate_image::image_generation_draft_or_request::ImageGenerationDraftOrRequest;
 use crate::generate::generate_image::image_generation_request::ImageGenerationRequest;
-use crate::generate::generate_image::providers::kinovi::midjourney_7::draft::{
-  KinoviMidjourney7DraftState, KinoviMidjourney7RemainingItems,
-};
+use crate::generate::generate_image::providers::kinovi::midjourney_7::draft::{KinoviMidjourney7DraftState, KinoviMidjourney7RemainingItems};
 use crate::generate::generate_image::providers::kinovi::midjourney_7::request::KinoviMidjourney7RequestState;
 
-pub fn build_kinovi_midjourney_7(
-  mut builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_kinovi_midjourney_7(mut builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio.take(), strategy)?;
@@ -32,37 +25,14 @@ pub fn build_kinovi_midjourney_7(
   // No image inputs → we can build the final request immediately. No
   // draft/upload phase needed.
   if !has_image_inputs(image_inputs.as_ref()) {
-    let request = GenerateMidjourneyV7Request {
-      prompt,
-      aspect_ratio,
-      negative_prompt: None,
-      stylize: None,
-      weird: None,
-      chaos: None,
-      quality,
-      raw_mode: false,
-      batch_count,
-      reference_image_urls: None,
-    };
-    return Ok(ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::KinoviMidjourney7(KinoviMidjourney7RequestState { request }),
-    ));
+    let request = GenerateMidjourneyV7Request { prompt, aspect_ratio, negative_prompt: None, stylize: None, weird: None, chaos: None, quality, raw_mode: false, batch_count, reference_image_urls: None };
+    return Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(KinoviMidjourney7RequestState { request })));
   }
 
   // Image inputs present → must go through the draft phase so we can
   // upload each image to the KinoviWeb CDN before sending.
-  let draft = KinoviMidjourney7DraftState {
-    prompt,
-    aspect_ratio,
-    quality,
-    batch_count,
-    unhandled_request_state: Some(KinoviMidjourney7RemainingItems {
-      reference_images: image_inputs,
-    }),
-  };
-  Ok(ImageGenerationDraftOrRequest::Draft(
-    ImageGenerationDraftRequest::KinoviMidjourney7(draft),
-  ))
+  let draft = KinoviMidjourney7DraftState { prompt, aspect_ratio, quality, batch_count, unhandled_request_state: Some(KinoviMidjourney7RemainingItems { reference_images: image_inputs }) };
+  Ok(ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(draft)))
 }
 
 fn has_image_inputs(image_inputs: Option<&ImageListRef>) -> bool {
@@ -75,19 +45,12 @@ fn has_image_inputs(image_inputs: Option<&ImageListRef>) -> bool {
 
 // ── Plan helpers ──
 
-pub(crate) fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<GenerateMidjourneyV7AspectRatio, ArtcraftRouterError> {
+pub(crate) fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<GenerateMidjourneyV7AspectRatio, ArtcraftRouterError> {
   use GenerateMidjourneyV7AspectRatio as Ar;
   match aspect_ratio {
     // No preference or auto → square, matching Midjourney's own default for new
     // jobs in their UI.
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Ar::Square1x1),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Ar::Square1x1),
 
     // Direct mappings — Midjourney supports every common ratio.
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Ar::Square1x1),
@@ -106,12 +69,7 @@ pub(crate) fn plan_aspect_ratio(
     // the catch-all is reserved for future variants.
     #[allow(unreachable_patterns)]
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Ar::Square1x1),
     },
   }
@@ -127,16 +85,11 @@ pub(crate) fn plan_quality(quality: Option<RouterQuality>) -> Option<GenerateMid
     Some(RouterQuality::Low) => Some(GenerateMidjourneyV7Quality::Quarter),
     Some(RouterQuality::Medium) => Some(GenerateMidjourneyV7Quality::Half),
     // Midjourney tops out at full quality; the higher GPT Image tiers clamp to it.
-    Some(RouterQuality::High)
-    | Some(RouterQuality::XHigh)
-    | Some(RouterQuality::Max) => Some(GenerateMidjourneyV7Quality::Full),
+    Some(RouterQuality::High) | Some(RouterQuality::XHigh) | Some(RouterQuality::Max) => Some(GenerateMidjourneyV7Quality::Full),
   }
 }
 
-pub(crate) fn plan_batch_count(
-  image_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<KinoviMidjourneyBatchCount, ArtcraftRouterError> {
+pub(crate) fn plan_batch_count(image_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<KinoviMidjourneyBatchCount, ArtcraftRouterError> {
   let count = image_batch_count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
@@ -145,18 +98,10 @@ pub(crate) fn plan_batch_count(
     3 => Ok(KinoviMidjourneyBatchCount::Three),
     4 => Ok(KinoviMidjourneyBatchCount::Four),
     other => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "image_batch_count",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_batch_count", value: format!("{}", other) })),
       // Kinovi supports batches of 1–4; only counts of 5+ reach here, so both
       // mitigation strategies clamp to the maximum supported batch.
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(KinoviMidjourneyBatchCount::Four)
-      }
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(KinoviMidjourneyBatchCount::Four),
     },
   }
 }
@@ -180,22 +125,7 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::Midjourney7,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("a corgi astronaut".to_string()),
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::Midjourney7, provider: RouterProvider::KinoviWeb, prompt: Some("a corgi astronaut".to_string()), image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   // ── Mode dispatch: no image inputs → Request; with → Draft ──
@@ -206,62 +136,33 @@ mod tests {
     #[test]
     fn no_image_inputs_returns_request_directly() {
       let result = build_kinovi_midjourney_7(base_builder()).expect("build");
-      assert!(matches!(
-        result,
-        ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(_)),
-      ));
+      assert!(matches!(result, ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(_)),));
     }
 
     #[test]
     fn empty_image_inputs_returns_request_directly() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec![])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec![])), ..base_builder() };
       let result = build_kinovi_midjourney_7(builder).expect("build");
-      assert!(matches!(
-        result,
-        ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(_)),
-      ));
+      assert!(matches!(result, ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(_)),));
     }
 
     #[test]
     fn image_url_inputs_returns_draft() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])), ..base_builder() };
       let result = build_kinovi_midjourney_7(builder).expect("build");
-      assert!(matches!(
-        result,
-        ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(_)),
-      ));
+      assert!(matches!(result, ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(_)),));
     }
 
     #[test]
     fn image_token_inputs_returns_draft() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::MediaFileTokens(vec![
-          MediaFileToken::new("mf_test".to_string()),
-        ])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_test".to_string())])), ..base_builder() };
       let result = build_kinovi_midjourney_7(builder).expect("build");
-      assert!(matches!(
-        result,
-        ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(_)),
-      ));
+      assert!(matches!(result, ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(_)),));
     }
 
     #[test]
     fn draft_remembers_image_inputs() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec![
-          "https://example.com/a.png".to_string(),
-          "https://example.com/b.png".to_string(),
-        ])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string()])), ..base_builder() };
       let draft = unwrap_draft(build_kinovi_midjourney_7(builder));
       let remaining = draft.unhandled_request_state.as_ref().unwrap();
       let urls = match remaining.reference_images.as_ref().unwrap() {
@@ -392,31 +293,16 @@ mod tests {
     #[test]
     fn zero_is_rejected() {
       let builder = GenerateImageRequestBuilder { image_batch_count: Some(0), ..base_builder() };
-      assert!(matches!(
-        build_kinovi_midjourney_7(builder),
-        Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
-      ));
+      assert!(matches!(build_kinovi_midjourney_7(builder), Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),));
     }
 
     /// Kinovi now supports batches of 3, so 3 is a first-class value and the
     /// mitigation strategy no longer applies to it.
     #[test]
     fn three_maps_directly_regardless_of_strategy() {
-      for strategy in [
-        RequestMismatchMitigationStrategy::ErrorOut,
-        RequestMismatchMitigationStrategy::PayMoreUpgrade,
-        RequestMismatchMitigationStrategy::PayLessDowngrade,
-      ] {
-        let builder = GenerateImageRequestBuilder {
-          image_batch_count: Some(3),
-          request_mismatch_mitigation_strategy: strategy,
-          ..base_builder()
-        };
-        assert_eq!(
-          unwrap_direct_request(build_kinovi_midjourney_7(builder)).request.batch_count,
-          KinoviMidjourneyBatchCount::Three,
-          "strategy={:?}", strategy,
-        );
+      for strategy in [RequestMismatchMitigationStrategy::ErrorOut, RequestMismatchMitigationStrategy::PayMoreUpgrade, RequestMismatchMitigationStrategy::PayLessDowngrade] {
+        let builder = GenerateImageRequestBuilder { image_batch_count: Some(3), request_mismatch_mitigation_strategy: strategy, ..base_builder() };
+        assert_eq!(unwrap_direct_request(build_kinovi_midjourney_7(builder)).request.batch_count, KinoviMidjourneyBatchCount::Three, "strategy={:?}", strategy,);
       }
     }
 
@@ -424,54 +310,28 @@ mod tests {
     /// pay-more/pay-less strategies clamp to the maximum supported batch (4).
     #[test]
     fn five_errors_under_strict_and_clamps_to_four_otherwise() {
-      let strict = GenerateImageRequestBuilder {
-        image_batch_count: Some(5),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-        ..base_builder()
-      };
-      assert!(matches!(
-        build_kinovi_midjourney_7(strict),
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { .. })),
-      ));
+      let strict = GenerateImageRequestBuilder { image_batch_count: Some(5), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..base_builder() };
+      assert!(matches!(build_kinovi_midjourney_7(strict), Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { .. })),));
 
-      for strategy in [
-        RequestMismatchMitigationStrategy::PayMoreUpgrade,
-        RequestMismatchMitigationStrategy::PayLessDowngrade,
-      ] {
-        let builder = GenerateImageRequestBuilder {
-          image_batch_count: Some(5),
-          request_mismatch_mitigation_strategy: strategy,
-          ..base_builder()
-        };
-        assert_eq!(
-          unwrap_direct_request(build_kinovi_midjourney_7(builder)).request.batch_count,
-          KinoviMidjourneyBatchCount::Four,
-          "strategy={:?}", strategy,
-        );
+      for strategy in [RequestMismatchMitigationStrategy::PayMoreUpgrade, RequestMismatchMitigationStrategy::PayLessDowngrade] {
+        let builder = GenerateImageRequestBuilder { image_batch_count: Some(5), request_mismatch_mitigation_strategy: strategy, ..base_builder() };
+        assert_eq!(unwrap_direct_request(build_kinovi_midjourney_7(builder)).request.batch_count, KinoviMidjourneyBatchCount::Four, "strategy={:?}", strategy,);
       }
     }
   }
 
   // ── Helpers ──
 
-  fn unwrap_direct_request(
-    result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>,
-  ) -> KinoviMidjourney7RequestState {
+  fn unwrap_direct_request(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> KinoviMidjourney7RequestState {
     match result.expect("build should succeed") {
-      ImageGenerationDraftOrRequest::Request(
-        ImageGenerationRequest::KinoviMidjourney7(req),
-      ) => req,
+      ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(req)) => req,
       other => panic!("expected KinoviMidjourney7 Request, got {:?}", other),
     }
   }
 
-  fn unwrap_draft(
-    result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>,
-  ) -> KinoviMidjourney7DraftState {
+  fn unwrap_draft(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> KinoviMidjourney7DraftState {
     match result.expect("build should succeed") {
-      ImageGenerationDraftOrRequest::Draft(
-        ImageGenerationDraftRequest::KinoviMidjourney7(draft),
-      ) => draft,
+      ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(draft)) => draft,
       other => panic!("expected KinoviMidjourney7 Draft, got {:?}", other),
     }
   }

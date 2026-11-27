@@ -6,67 +6,64 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::fmt::format;
 
-static CLEAN_NON_DIGIT_REGEX : Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#"[^\d]+"#)
-      .expect("Regex should parse")
-});
+static CLEAN_NON_DIGIT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#"[^\d]+"#).expect("Regex should parse"));
 
 /*
-    @staticmethod
-    def simulateStyle(values: List[int], c: int) -> Dict[str,str]:
-        duration = 4096
-        currentTime = round(c / 10.0) * 10
-        t = currentTime / duration
+   @staticmethod
+   def simulateStyle(values: List[int], c: int) -> Dict[str,str]:
+       duration = 4096
+       currentTime = round(c / 10.0) * 10
+       t = currentTime / duration
 
-        cp = [Signature._h(v, -1 if (i % 2) else 0, 1, False) for i, v in enumerate(values[7:])]
+       cp = [Signature._h(v, -1 if (i % 2) else 0, 1, False) for i, v in enumerate(values[7:])]
 
-        easedY = Signature.cubicBezierEased(t, cp[0], cp[1], cp[2], cp[3])
+       easedY = Signature.cubicBezierEased(t, cp[0], cp[1], cp[2], cp[3])
 
-        start = [float(x) for x in values[0:3]]
-        end = [float(x) for x in values[3:6]]
-        r = round(start[0] + (end[0] - start[0]) * easedY)
-        g = round(start[1] + (end[1] - start[1]) * easedY)
-        b = round(start[2] + (end[2] - start[2]) * easedY)
-        color = f"rgb({r}, {g}, {b})"
+       start = [float(x) for x in values[0:3]]
+       end = [float(x) for x in values[3:6]]
+       r = round(start[0] + (end[0] - start[0]) * easedY)
+       g = round(start[1] + (end[1] - start[1]) * easedY)
+       b = round(start[2] + (end[2] - start[2]) * easedY)
+       color = f"rgb({r}, {g}, {b})"
 
-        endAngle = Signature._h(values[6], 60, 360, True)
-        angle = endAngle * easedY
-        rad = angle * pi / 180.0
+       endAngle = Signature._h(values[6], 60, 360, True)
+       angle = endAngle * easedY
+       rad = angle * pi / 180.0
 
-        def is_effectively_zero(val: float) -> bool:
-            return abs(val) < 1e-7
+       def is_effectively_zero(val: float) -> bool:
+           return abs(val) < 1e-7
 
-        def is_effectively_integer(val: float) -> bool:
-            return abs(val - round(val)) < 1e-7
+       def is_effectively_integer(val: float) -> bool:
+           return abs(val - round(val)) < 1e-7
 
-        cosv = cos(rad)
-        sinv = sin(rad)
+       cosv = cos(rad)
+       sinv = sin(rad)
 
-        if is_effectively_zero(cosv):
-            a = 0
-            d = 0
-        else:
-            if is_effectively_integer(cosv):
-                a = int(round(cosv))
-                d = int(round(cosv))
-            else:
-                a = f"{cosv:.6f}"
-                d = f"{cosv:.6f}"
+       if is_effectively_zero(cosv):
+           a = 0
+           d = 0
+       else:
+           if is_effectively_integer(cosv):
+               a = int(round(cosv))
+               d = int(round(cosv))
+           else:
+               a = f"{cosv:.6f}"
+               d = f"{cosv:.6f}"
 
-        if is_effectively_zero(sinv):
-            bval = 0
-            cval = 0
-        else:
-            if is_effectively_integer(sinv):
-                bval = int(round(sinv))
-                cval = int(round(-sinv))
-            else:
-                bval = f"{sinv:.7f}"
-                cval = f"{(-sinv):.7f}"
+       if is_effectively_zero(sinv):
+           bval = 0
+           cval = 0
+       else:
+           if is_effectively_integer(sinv):
+               bval = int(round(sinv))
+               cval = int(round(-sinv))
+           else:
+               bval = f"{sinv:.7f}"
+               cval = f"{(-sinv):.7f}"
 
-        transform = f"matrix({a}, {bval}, {cval}, {d}, 0, 0)"
-        return {"color": color, "transform": transform}
- */
+       transform = f"matrix({a}, {bval}, {cval}, {d}, 0, 0)"
+       return {"color": color, "transform": transform}
+*/
 
 pub struct SimulatedStyle {
   pub color: String,
@@ -95,7 +92,7 @@ pub fn signature_simulate_style(values: &[u32], c: u32) -> Result<SimulatedStyle
   let subvalues = &values[7..];
   let mut cp = Vec::with_capacity(subvalues.len());
   for (i, v) in subvalues.iter().enumerate() {
-    let param = if i % 2 != 0 { - 1.0 } else { 0.0 };
+    let param = if i % 2 != 0 { -1.0 } else { 0.0 };
     let val = signature_h(*v as f64, param, 1.0, false)?;
     cp.push(val);
   }
@@ -165,31 +162,31 @@ pub fn signature_simulate_style(values: &[u32], c: u32) -> Result<SimulatedStyle
   debug!("[simulate_style] sinv = {:?}", sinv);
 
   /*
-        if is_effectively_zero(cosv):
-            a = 0
-            d = 0
-        else:
-            if is_effectively_integer(cosv):
-                a = int(round(cosv))
-                d = int(round(cosv))
-            else:
-                a = f"{cosv:.6f}"
-                d = f"{cosv:.6f}"
+       if is_effectively_zero(cosv):
+           a = 0
+           d = 0
+       else:
+           if is_effectively_integer(cosv):
+               a = int(round(cosv))
+               d = int(round(cosv))
+           else:
+               a = f"{cosv:.6f}"
+               d = f"{cosv:.6f}"
 
-        if is_effectively_zero(sinv):
-            bval = 0
-            cval = 0
-        else:
-            if is_effectively_integer(sinv):
-                bval = int(round(sinv))
-                cval = int(round(-sinv))
-            else:
-                bval = f"{sinv:.7f}"
-                cval = f"{(-sinv):.7f}"
+       if is_effectively_zero(sinv):
+           bval = 0
+           cval = 0
+       else:
+           if is_effectively_integer(sinv):
+               bval = int(round(sinv))
+               cval = int(round(-sinv))
+           else:
+               bval = f"{sinv:.7f}"
+               cval = f"{(-sinv):.7f}"
 
-        transform = f"matrix({a}, {bval}, {cval}, {d}, 0, 0)"
-        return {"color": color, "transform": transform}
-   */
+       transform = f"matrix({a}, {bval}, {cval}, {d}, 0, 0)"
+       return {"color": color, "transform": transform}
+  */
 
   let a;
   let d;
@@ -227,7 +224,7 @@ pub fn signature_simulate_style(values: &[u32], c: u32) -> Result<SimulatedStyle
       // bval = int(round(sinv))
       // cval = int(round(-sinv))
       let rounded_pos = sinv.round() as i32;
-      let rounded_neg= (-1.0 * sinv).round() as i32;
+      let rounded_neg = (-1.0 * sinv).round() as i32;
       bval = format!("{:.0}", rounded_pos);
       cval = format!("{:.0}", rounded_neg);
     } else {
@@ -248,12 +245,8 @@ pub fn signature_simulate_style(values: &[u32], c: u32) -> Result<SimulatedStyle
 
   debug!("[simulate_style] transform = {:?}", transform);
 
-  Ok(SimulatedStyle {
-    color,
-    transform,
-  })
+  Ok(SimulatedStyle { color, transform })
 }
-
 
 fn is_effectively_zero(val: f64) -> bool {
   val.abs() <= 1e-7

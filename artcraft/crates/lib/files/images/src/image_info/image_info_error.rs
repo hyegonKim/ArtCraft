@@ -16,13 +16,13 @@ impl Display for ImageInfoError {
     match self {
       ImageInfoError::CouldNotDetermineMimetype => {
         write!(f, "ImageInfoError::CouldNotDetermineMimetype")
-      }
+      },
       ImageInfoError::ImageError(err) => {
         write!(f, "ImageInfoError::ImageError: {}", err)
-      }
+      },
       ImageInfoError::IoError(err) => {
         write!(f, "ImageInfoError::IoError: {}", err)
-      }
+      },
     }
   }
 }

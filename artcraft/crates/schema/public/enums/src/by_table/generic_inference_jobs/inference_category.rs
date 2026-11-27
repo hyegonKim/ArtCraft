@@ -87,7 +87,7 @@ pub enum InferenceCategory {
   #[serde(rename = "live_portrait")]
   LivePortrait,
 
-  #[serde(rename="seed_vc")]
+  #[serde(rename = "seed_vc")]
   SeedVc,
 
   /// DEPRECATED. Do not use.
@@ -164,27 +164,7 @@ impl InferenceCategory {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::DeprecatedField,
-      Self::LipsyncAnimation,
-      Self::TextToSpeech,
-      Self::VoiceConversion,
-      Self::ImageGeneration,
-      Self::ObjectGeneration,
-      Self::SplatGeneration,
-      Self::CharacterGeneration,
-      Self::VideoGeneration,
-      Self::AudioGeneration,
-      Self::BackgroundRemoval,
-      Self::Mocap,
-      Self::F5TTS,
-      Self::SeedVc,
-      Self::Workflow,
-      Self::FormatConversion,
-      Self::LivePortrait,
-      Self::VideoFilter,
-      Self::ConvertBvhToWorkflow,
-    ])
+    BTreeSet::from([Self::DeprecatedField, Self::LipsyncAnimation, Self::TextToSpeech, Self::VoiceConversion, Self::ImageGeneration, Self::ObjectGeneration, Self::SplatGeneration, Self::CharacterGeneration, Self::VideoGeneration, Self::AudioGeneration, Self::BackgroundRemoval, Self::Mocap, Self::F5TTS, Self::SeedVc, Self::Workflow, Self::FormatConversion, Self::LivePortrait, Self::VideoFilter, Self::ConvertBvhToWorkflow])
   }
 }
 
@@ -268,7 +248,7 @@ mod tests {
     #[test]
     fn all_variants() {
       // Static check
-      const EXPECTED_COUNT : usize = 19;
+      const EXPECTED_COUNT: usize = 19;
 
       assert_eq!(InferenceCategory::all_variants().len(), EXPECTED_COUNT);
       assert_eq!(InferenceCategory::iter().len(), EXPECTED_COUNT);
@@ -299,7 +279,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in InferenceCategory::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

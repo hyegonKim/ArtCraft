@@ -1,6 +1,4 @@
-use crate::requests::api::image::text::flux_1_dev_text_to_image::api::{
-  Flux1DevTextToImageAspectRatio, Flux1DevTextToImageNumImages, Flux1DevTextToImageRequest,
-};
+use crate::requests::api::image::text::flux_1_dev_text_to_image::api::{Flux1DevTextToImageAspectRatio, Flux1DevTextToImageNumImages, Flux1DevTextToImageRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Flux1DevTextToImageRequest {
@@ -23,11 +21,7 @@ mod tests {
   use super::*;
 
   fn make_request(num_images: Flux1DevTextToImageNumImages) -> Flux1DevTextToImageRequest {
-    Flux1DevTextToImageRequest {
-      prompt: "test".to_string(),
-      aspect_ratio: Flux1DevTextToImageAspectRatio::Square,
-      num_images,
-    }
+    Flux1DevTextToImageRequest { prompt: "test".to_string(), aspect_ratio: Flux1DevTextToImageAspectRatio::Square, num_images }
   }
 
   #[test]

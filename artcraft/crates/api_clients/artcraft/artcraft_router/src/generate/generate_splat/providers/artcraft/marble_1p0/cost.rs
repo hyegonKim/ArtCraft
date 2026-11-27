@@ -1,18 +1,10 @@
 use worldlabs_api_client::pricing::check_pricing::InputType;
 
-use crate::generate::generate_splat::providers::artcraft::cost_common::{
-  artcraft_splat_cost_estimate, derive_input_type_for_pricing, ArtcraftSplatPriceTable,
-};
+use crate::generate::generate_splat::providers::artcraft::cost_common::{artcraft_splat_cost_estimate, derive_input_type_for_pricing, ArtcraftSplatPriceTable};
 use crate::generate::generate_splat::providers::artcraft::marble_1p0::request::ArtcraftMarble1p0RequestState;
 use crate::generate::generate_splat::splat_generation_cost_estimate::SplatGenerationCostEstimate;
 
-const PRICES: ArtcraftSplatPriceTable = ArtcraftSplatPriceTable {
-  image_panorama: 156,
-  text: 165,
-  image_non_panorama: 165,
-  multi_image: 167,
-  video: 167,
-};
+const PRICES: ArtcraftSplatPriceTable = ArtcraftSplatPriceTable { image_panorama: 156, text: 165, image_non_panorama: 165, multi_image: 167, video: 167 };
 
 /// Marble 1.0 via Artcraft is flat priced by input type.
 #[derive(Clone, Debug)]
@@ -68,53 +60,26 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      model: RouterSplatModel::Marble1p0,
-      provider: RouterProvider::Artcraft,
-      ..Default::default()
-    }
+    GenerateSplatRequestBuilder { model: RouterSplatModel::Marble1p0, provider: RouterProvider::Artcraft, ..Default::default() }
   }
 
   fn text_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      prompt: Some("a cozy cabin in the snowy mountains".to_string()),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { prompt: Some("a cozy cabin in the snowy mountains".to_string()), ..base_builder() }
   }
 
   fn single_image_builder(is_panoramic: bool) -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_image_1".to_string()),
-      ])),
-      is_panoramic: Some(is_panoramic),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_image_1".to_string())])), is_panoramic: Some(is_panoramic), ..base_builder() }
   }
 
   fn multi_image_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_image_1".to_string()),
-        MediaFileToken::new("mf_image_2".to_string()),
-      ])),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_image_1".to_string()), MediaFileToken::new("mf_image_2".to_string())])), ..base_builder() }
   }
 
   fn video_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_video: Some(VideoRef::MediaFileToken(MediaFileToken::new("mf_video".to_string()))),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_video: Some(VideoRef::MediaFileToken(MediaFileToken::new("mf_video".to_string()))), ..base_builder() }
   }
 
   fn estimate_usd_cents(builder: GenerateSplatRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

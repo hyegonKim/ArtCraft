@@ -1,7 +1,4 @@
-use crate::requests::api::image::text::gpt_image_1p5_text_to_image::api::{
-  GptImage1p5TextToImageNumImages, GptImage1p5TextToImageQuality,
-  GptImage1p5TextToImageRequest, GptImage1p5TextToImageSize,
-};
+use crate::requests::api::image::text::gpt_image_1p5_text_to_image::api::{GptImage1p5TextToImageNumImages, GptImage1p5TextToImageQuality, GptImage1p5TextToImageRequest, GptImage1p5TextToImageSize};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for GptImage1p5TextToImageRequest {
@@ -36,19 +33,8 @@ impl FalRequestCostCalculator for GptImage1p5TextToImageRequest {
 mod tests {
   use super::*;
 
-  fn make_request(
-    num_images: GptImage1p5TextToImageNumImages,
-    quality: Option<GptImage1p5TextToImageQuality>,
-    image_size: Option<GptImage1p5TextToImageSize>,
-  ) -> GptImage1p5TextToImageRequest {
-    GptImage1p5TextToImageRequest {
-      prompt: "test".to_string(),
-      num_images,
-      image_size,
-      background: None,
-      quality,
-      output_format: None,
-    }
+  fn make_request(num_images: GptImage1p5TextToImageNumImages, quality: Option<GptImage1p5TextToImageQuality>, image_size: Option<GptImage1p5TextToImageSize>) -> GptImage1p5TextToImageRequest {
+    GptImage1p5TextToImageRequest { prompt: "test".to_string(), num_images, image_size, background: None, quality, output_format: None }
   }
 
   mod default_tests {
@@ -57,16 +43,12 @@ mod tests {
     #[test]
     fn cost_defaults_one_image() {
       // Default quality=Medium, size=Square => 3 cents
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, None, None)
-          .calculate_cost_in_cents(), 3);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, None, None).calculate_cost_in_cents(), 3);
     }
 
     #[test]
     fn cost_defaults_four_images() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::Four, None, None)
-          .calculate_cost_in_cents(), 12);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::Four, None, None).calculate_cost_in_cents(), 12);
     }
   }
 
@@ -75,23 +57,17 @@ mod tests {
 
     #[test]
     fn cost_low_square_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Square))
-          .calculate_cost_in_cents(), 1);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Square)).calculate_cost_in_cents(), 1);
     }
 
     #[test]
     fn cost_low_wide_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Wide))
-          .calculate_cost_in_cents(), 1);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Wide)).calculate_cost_in_cents(), 1);
     }
 
     #[test]
     fn cost_low_tall_four_images() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::Four, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Tall))
-          .calculate_cost_in_cents(), 4);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::Four, Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Tall)).calculate_cost_in_cents(), 4);
     }
   }
 
@@ -100,30 +76,22 @@ mod tests {
 
     #[test]
     fn cost_medium_square_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square))
-          .calculate_cost_in_cents(), 3);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square)).calculate_cost_in_cents(), 3);
     }
 
     #[test]
     fn cost_medium_wide_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Wide))
-          .calculate_cost_in_cents(), 5);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Wide)).calculate_cost_in_cents(), 5);
     }
 
     #[test]
     fn cost_medium_tall_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Tall))
-          .calculate_cost_in_cents(), 5);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Tall)).calculate_cost_in_cents(), 5);
     }
 
     #[test]
     fn cost_medium_square_three_images() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::Three, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square))
-          .calculate_cost_in_cents(), 9);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::Three, Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square)).calculate_cost_in_cents(), 9);
     }
   }
 
@@ -132,37 +100,27 @@ mod tests {
 
     #[test]
     fn cost_high_square_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square))
-          .calculate_cost_in_cents(), 13);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square)).calculate_cost_in_cents(), 13);
     }
 
     #[test]
     fn cost_high_wide_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide))
-          .calculate_cost_in_cents(), 20);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide)).calculate_cost_in_cents(), 20);
     }
 
     #[test]
     fn cost_high_tall_one_image() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Tall))
-          .calculate_cost_in_cents(), 20);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::One, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Tall)).calculate_cost_in_cents(), 20);
     }
 
     #[test]
     fn cost_high_square_two_images() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::Two, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square))
-          .calculate_cost_in_cents(), 26);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::Two, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square)).calculate_cost_in_cents(), 26);
     }
 
     #[test]
     fn cost_high_wide_four_images() {
-      assert_eq!(
-        make_request(GptImage1p5TextToImageNumImages::Four, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide))
-          .calculate_cost_in_cents(), 80);
+      assert_eq!(make_request(GptImage1p5TextToImageNumImages::Four, Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide)).calculate_cost_in_cents(), 80);
     }
   }
 }

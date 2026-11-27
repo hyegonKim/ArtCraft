@@ -10,40 +10,22 @@ pub struct FalFluxPro1p1CostState {
 impl FalFluxPro1p1CostState {
   pub fn from_request(request: &FalFluxPro1p1RequestState) -> Self {
     // Delegate to the fal_client cost calculator: $0.04 per image (1MP base).
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     // Matches v1: credits == cents (1:1 with USD cents).
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use fal_client::requests_old::webhook::image::text::enqueue_flux_pro_11_text_to_image_webhook::{
-    FluxPro11AspectRatio, FluxPro11NumImages, FluxPro11Request,
-  };
+  use fal_client::requests_old::webhook::image::text::enqueue_flux_pro_11_text_to_image_webhook::{FluxPro11AspectRatio, FluxPro11NumImages, FluxPro11Request};
 
   fn cost_for(n: FluxPro11NumImages) -> ImageGenerationCostEstimate {
-    let state = FalFluxPro1p1CostState::from_request(&FalFluxPro1p1RequestState {
-      request: FluxPro11Request {
-        prompt: "test".to_string(),
-        aspect_ratio: FluxPro11AspectRatio::Square,
-        num_images: n,
-      },
-    });
+    let state = FalFluxPro1p1CostState::from_request(&FalFluxPro1p1RequestState { request: FluxPro11Request { prompt: "test".to_string(), aspect_ratio: FluxPro11AspectRatio::Square, num_images: n } });
     state.estimate_cost()
   }
 

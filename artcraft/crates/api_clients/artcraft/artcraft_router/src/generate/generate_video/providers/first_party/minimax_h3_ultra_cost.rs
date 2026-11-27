@@ -14,19 +14,10 @@ const DEFAULT_DURATION_SECONDS: u64 = 5;
 
 /// Estimate the user-facing Minimax H3 Ultra cost in USD cents.
 /// System credits = cents (same convention as the v2 pipeline).
-pub fn estimate_minimax_h3_ultra_cost_usd_cents(
-  maybe_duration_seconds: Option<u16>,
-  maybe_resolution: Option<CommonResolution>,
-) -> u64 {
-  let duration_seconds = maybe_duration_seconds
-    .map(u64::from)
-    .unwrap_or(DEFAULT_DURATION_SECONDS);
+pub fn estimate_minimax_h3_ultra_cost_usd_cents(maybe_duration_seconds: Option<u16>, maybe_resolution: Option<CommonResolution>) -> u64 {
+  let duration_seconds = maybe_duration_seconds.map(u64::from).unwrap_or(DEFAULT_DURATION_SECONDS);
 
-  let rate = if is_2k(maybe_resolution) {
-    HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-  } else {
-    LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-  };
+  let rate = if is_2k(maybe_resolution) { HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC } else { LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC };
 
   // Round up to the next whole cent.
   (rate * duration_seconds).div_ceil(100)
@@ -37,14 +28,8 @@ pub fn estimate_minimax_h3_ultra_cost_usd_cents(
 fn is_2k(resolution: Option<CommonResolution>) -> bool {
   match resolution {
     None => true, // defaults to 2K
-    Some(CommonResolution::TenEightyP)
-    | Some(CommonResolution::OneK)
-    | Some(CommonResolution::TwoK)
-    | Some(CommonResolution::ThreeK)
-    | Some(CommonResolution::FourK) => true,
-    Some(CommonResolution::HalfK)
-    | Some(CommonResolution::FourEightyP)
-    | Some(CommonResolution::SevenTwentyP) => false,
+    Some(CommonResolution::TenEightyP) | Some(CommonResolution::OneK) | Some(CommonResolution::TwoK) | Some(CommonResolution::ThreeK) | Some(CommonResolution::FourK) => true,
+    Some(CommonResolution::HalfK) | Some(CommonResolution::FourEightyP) | Some(CommonResolution::SevenTwentyP) => false,
   }
 }
 
@@ -59,18 +44,12 @@ mod tests {
 
   #[test]
   fn low_res_5s_is_92() {
-    assert_eq!(
-      estimate_minimax_h3_ultra_cost_usd_cents(Some(5), Some(CommonResolution::SevenTwentyP)),
-      92,
-    );
+    assert_eq!(estimate_minimax_h3_ultra_cost_usd_cents(Some(5), Some(CommonResolution::SevenTwentyP)), 92,);
   }
 
   #[test]
   fn high_res_10s_is_299() {
-    assert_eq!(
-      estimate_minimax_h3_ultra_cost_usd_cents(Some(10), Some(CommonResolution::TenEightyP)),
-      299,
-    );
+    assert_eq!(estimate_minimax_h3_ultra_cost_usd_cents(Some(10), Some(CommonResolution::TenEightyP)), 299,);
   }
 
   #[test]

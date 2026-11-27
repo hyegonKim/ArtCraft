@@ -12,8 +12,6 @@ impl KinoviWebSession {
   }
 
   pub fn from_cookies_string(cookies: String) -> Self {
-    KinoviWebSession {
-      cookies: KinoviWebCookies::new(cookies),
-    }
+    KinoviWebSession { cookies: KinoviWebCookies::new(cookies) }
   }
 }

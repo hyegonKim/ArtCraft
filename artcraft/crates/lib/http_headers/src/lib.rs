@@ -1,6 +1,6 @@
 //! http_headers
 //!
-//! The purpose of this library is to centralize the definition of common header names 
+//! The purpose of this library is to centralize the definition of common header names
 //! and header values that are not already represented by common libraries.
 //!
 
@@ -14,7 +14,6 @@
 #![forbid(unused_imports)]
 #![forbid(unused_mut)]
 #![forbid(unused_variables)]
-
 // Always allow
 #![allow(dead_code)]
 #![allow(non_snake_case)]

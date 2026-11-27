@@ -20,26 +20,14 @@ mod tests {
   use super::*;
 
   fn make_request(duration: Option<u8>) -> Flux3DraftFirstLastFrameToVideoRequest {
-    Flux3DraftFirstLastFrameToVideoRequest {
-      prompt: "test".to_string(),
-      start_image_url: "https://example.com/first.png".to_string(),
-      end_image_url: "https://example.com/last.png".to_string(),
-      duration,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    }
+    Flux3DraftFirstLastFrameToVideoRequest { prompt: "test".to_string(), start_image_url: "https://example.com/first.png".to_string(), end_image_url: "https://example.com/last.png".to_string(), duration, aspect_ratio: None, generate_audio: None, safety_tolerance: None }
   }
 
   mod cost_table {
     use super::*;
 
     // (duration, expected_cents) — 6¢ × secs; None defaults to 5s.
-    const COST_TABLE: &[(Option<u8>, u64)] = &[
-      (Some(5),  30),
-      (Some(20), 120),
-      (None, 30),
-    ];
+    const COST_TABLE: &[(Option<u8>, u64)] = &[(Some(5), 30), (Some(20), 120), (None, 30)];
 
     #[test]
     fn matches_cost_table() {

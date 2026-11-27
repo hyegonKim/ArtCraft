@@ -20,12 +20,10 @@ pub fn aspect_ratio_to_artcraft_flux_pro_1p1_ultra(aspect_ratio: CommonAspectRat
 
     // Best match
     CommonAspectRatio::SquareHd => GenerateFluxPro11UltraTextToImageAspectRatio::Square,
-    
+
     // Special
-    CommonAspectRatio::Auto
-    | CommonAspectRatio::Auto2k
-    | CommonAspectRatio::Auto4k => GenerateFluxPro11UltraTextToImageAspectRatio::Square,
-    
+    CommonAspectRatio::Auto | CommonAspectRatio::Auto2k | CommonAspectRatio::Auto4k => GenerateFluxPro11UltraTextToImageAspectRatio::Square,
+
     // Semantic values
     CommonAspectRatio::Wide => GenerateFluxPro11UltraTextToImageAspectRatio::LandscapeSixteenByNine,
     CommonAspectRatio::Tall => GenerateFluxPro11UltraTextToImageAspectRatio::PortraitNineBySixteen,

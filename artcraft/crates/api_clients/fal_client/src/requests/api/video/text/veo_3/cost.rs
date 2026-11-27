@@ -1,6 +1,4 @@
-use crate::requests::api::video::text::veo_3::api::{
-  Veo3TextToVideoDuration, Veo3TextToVideoRequest,
-};
+use crate::requests::api::video::text::veo_3::api::{Veo3TextToVideoDuration, Veo3TextToVideoRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Veo 3 (non-fast) pricing (see https://fal.ai/models/fal-ai/veo3):
@@ -15,7 +13,11 @@ const RATE_AUDIO_ON: u64 = 400; // $0.40/sec
 
 /// Per-second rate in tenths-of-a-cent for the Veo 3 (non-fast) family.
 pub(crate) fn veo_3_rate_tenth_cents_per_sec(audio_on: bool) -> u64 {
-  if audio_on { RATE_AUDIO_ON } else { RATE_AUDIO_OFF }
+  if audio_on {
+    RATE_AUDIO_ON
+  } else {
+    RATE_AUDIO_OFF
+  }
 }
 
 /// ceil(rate_tenth_cents × seconds / 10) → whole cents.
@@ -27,9 +29,7 @@ impl FalRequestCostCalculator for Veo3TextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // fal defaults when unset: duration = 8s, audio = on. Resolution does not
     // affect price.
-    let duration_secs = self.duration
-      .unwrap_or(Veo3TextToVideoDuration::EightSeconds)
-      .to_seconds();
+    let duration_secs = self.duration.unwrap_or(Veo3TextToVideoDuration::EightSeconds).to_seconds();
     let audio_on = self.generate_audio.unwrap_or(true);
 
     let rate = veo_3_rate_tenth_cents_per_sec(audio_on);
@@ -40,25 +40,10 @@ impl FalRequestCostCalculator for Veo3TextToVideoRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::requests::api::video::text::veo_3::api::{
-    Veo3TextToVideoAspectRatio, Veo3TextToVideoResolution, Veo3TextToVideoSafetyTolerance,
-  };
+  use crate::requests::api::video::text::veo_3::api::{Veo3TextToVideoAspectRatio, Veo3TextToVideoResolution, Veo3TextToVideoSafetyTolerance};
 
-  fn make_request(
-    duration: Option<Veo3TextToVideoDuration>,
-    generate_audio: Option<bool>,
-  ) -> Veo3TextToVideoRequest {
-    Veo3TextToVideoRequest {
-      prompt: "test".to_string(),
-      aspect_ratio: Some(Veo3TextToVideoAspectRatio::SixteenByNine),
-      duration,
-      resolution: None,
-      negative_prompt: None,
-      generate_audio,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    }
+  fn make_request(duration: Option<Veo3TextToVideoDuration>, generate_audio: Option<bool>) -> Veo3TextToVideoRequest {
+    Veo3TextToVideoRequest { prompt: "test".to_string(), aspect_ratio: Some(Veo3TextToVideoAspectRatio::SixteenByNine), duration, resolution: None, negative_prompt: None, generate_audio, seed: None, auto_fix: None, safety_tolerance: None }
   }
 
   /// fal: "a 5s video with audio on will cost $2" → 5s × $0.40 = 200¢.
@@ -72,16 +57,12 @@ mod tests {
     use super::*;
 
     // (duration, generate_audio, expected_cents)
-    const COST_TABLE: &[(
-      Option<Veo3TextToVideoDuration>,
-      Option<bool>,
-      u64,
-    )] = &[
-      (Some(Veo3TextToVideoDuration::FourSeconds),  Some(false), 80),
-      (Some(Veo3TextToVideoDuration::FourSeconds),  Some(true),  160),
-      (Some(Veo3TextToVideoDuration::SixSeconds),   Some(true),  240),
+    const COST_TABLE: &[(Option<Veo3TextToVideoDuration>, Option<bool>, u64)] = &[
+      (Some(Veo3TextToVideoDuration::FourSeconds), Some(false), 80),
+      (Some(Veo3TextToVideoDuration::FourSeconds), Some(true), 160),
+      (Some(Veo3TextToVideoDuration::SixSeconds), Some(true), 240),
       (Some(Veo3TextToVideoDuration::EightSeconds), Some(false), 160),
-      (Some(Veo3TextToVideoDuration::EightSeconds), Some(true),  320),
+      (Some(Veo3TextToVideoDuration::EightSeconds), Some(true), 320),
       // Defaults: duration=None→8s, audio=None→on
       (None, None, 320),
       (None, Some(false), 160),
@@ -110,10 +91,7 @@ mod tests {
       for audio in [Some(false), Some(true), None] {
         let base = make_request(Some(Veo3TextToVideoDuration::EightSeconds), audio).calculate_cost_in_cents();
         for res in [Veo3TextToVideoResolution::SevenTwentyP, Veo3TextToVideoResolution::TenEightyP] {
-          let cost = Veo3TextToVideoRequest {
-            resolution: Some(res),
-            ..make_request(Some(Veo3TextToVideoDuration::EightSeconds), audio)
-          }.calculate_cost_in_cents();
+          let cost = Veo3TextToVideoRequest { resolution: Some(res), ..make_request(Some(Veo3TextToVideoDuration::EightSeconds), audio) }.calculate_cost_in_cents();
           assert_eq!(cost, base, "audio={audio:?} res={res:?}");
         }
       }
@@ -123,17 +101,7 @@ mod tests {
     #[test]
     fn cost_ignores_non_billing_fields() {
       let baseline = make_request(Some(Veo3TextToVideoDuration::EightSeconds), Some(true)).calculate_cost_in_cents();
-      let embellished = Veo3TextToVideoRequest {
-        prompt: "different".to_string(),
-        aspect_ratio: Some(Veo3TextToVideoAspectRatio::NineBySixteen),
-        duration: Some(Veo3TextToVideoDuration::EightSeconds),
-        resolution: Some(Veo3TextToVideoResolution::TenEightyP),
-        negative_prompt: Some("noise".to_string()),
-        generate_audio: Some(true),
-        seed: Some(99),
-        auto_fix: Some(false),
-        safety_tolerance: Some(Veo3TextToVideoSafetyTolerance::Level1),
-      }.calculate_cost_in_cents();
+      let embellished = Veo3TextToVideoRequest { prompt: "different".to_string(), aspect_ratio: Some(Veo3TextToVideoAspectRatio::NineBySixteen), duration: Some(Veo3TextToVideoDuration::EightSeconds), resolution: Some(Veo3TextToVideoResolution::TenEightyP), negative_prompt: Some("noise".to_string()), generate_audio: Some(true), seed: Some(99), auto_fix: Some(false), safety_tolerance: Some(Veo3TextToVideoSafetyTolerance::Level1) }.calculate_cost_in_cents();
       assert_eq!(baseline, embellished);
     }
   }

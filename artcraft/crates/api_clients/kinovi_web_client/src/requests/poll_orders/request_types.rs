@@ -1,8 +1,6 @@
 use serde_derive::Deserialize;
 
-use crate::utils::number_coercion::{
-  de_opt_u32_int_or_float, de_opt_u64_int_or_float,
-};
+use crate::utils::number_coercion::{de_opt_u32_int_or_float, de_opt_u64_int_or_float};
 
 #[derive(Deserialize, Debug)]
 pub(super) struct BatchResponseItem {

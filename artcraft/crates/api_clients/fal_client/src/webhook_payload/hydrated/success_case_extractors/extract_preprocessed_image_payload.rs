@@ -17,10 +17,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -32,8 +30,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let image = contents.preprocessed_image.expect("preprocessed_image should be Some");
     assert_eq!(image.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1b77c/YyJ19g7lJsRNXmvZvahTE_61fc73dbe84446b08b1fcce2167b71d5.png"));
@@ -53,7 +50,8 @@ mod tests {
 
   #[test]
   fn synthetic_preprocessed_image_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "preprocessed_image": {
         "url": "https://cdn.example.com/segmented.png",
         "content_type": "image/png",
@@ -62,7 +60,9 @@ mod tests {
         "width": 1024,
         "height": 1024
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let image = extract_preprocessed_image(&obj).expect("should extract preprocessed_image");
     assert_eq!(image.url.as_deref(), Some("https://cdn.example.com/segmented.png"));
@@ -75,9 +75,12 @@ mod tests {
 
   #[test]
   fn missing_preprocessed_image_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_mesh": {"url": "https://example.com/output.ply"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_preprocessed_image(&obj).is_none());
   }

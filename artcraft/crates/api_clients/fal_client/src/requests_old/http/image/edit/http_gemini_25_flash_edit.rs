@@ -34,8 +34,6 @@ pub struct Gemini25FlashEditOutput {
   pub images: Vec<Gemini25FlashEditFile>,
 }
 
-pub fn gemini_25_flash_edit(
-  params: Gemini25FlashEditInput,
-) -> FalRequest<Gemini25FlashEditInput, Gemini25FlashEditOutput> {
+pub fn gemini_25_flash_edit(params: Gemini25FlashEditInput) -> FalRequest<Gemini25FlashEditInput, Gemini25FlashEditOutput> {
   FalRequest::new("fal-ai/gemini-25-flash-image/edit", params)
 }

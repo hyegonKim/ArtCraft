@@ -23,7 +23,7 @@ use uuid::uuid;
 pub struct LegacyUploadMediaFileFromFileArgs<'a, P: AsRef<Path>> {
   pub api_host: &'a ApiHost,
   pub maybe_creds: Option<&'a StorytellerCredentialSet>,
-  
+
   // NB: Path needs to be owned for the request.
   pub path: P,
 
@@ -33,21 +33,16 @@ pub struct LegacyUploadMediaFileFromFileArgs<'a, P: AsRef<Path>> {
   // /// If provided, this is the prompt that this image is associated with.
   // /// NOTE: Cannot set `is_intermediate_system_file = true` if this is set.
   // pub maybe_prompt_token: Option<&'a PromptToken>,
-
   /// If provided, the third-party provider that generated this file.
   pub maybe_generation_provider: Option<GenerationProvider>,
-
   // /// If provided, this groups the file into a batch
-  // /// TODO: This shouldn't be set clientside without the backend generating the token 
+  // /// TODO: This shouldn't be set clientside without the backend generating the token
   // ///  and cryptographically securing it. But we need to go fast here.
   // pub maybe_batch_token: Option<&'a BatchGenerationToken>,
 }
 
 /// Upload using the legacy endpoint (spz, etc.)
-pub async fn legacy_upload_media_file_from_file<P: AsRef<Path>>(
-  args: LegacyUploadMediaFileFromFileArgs<'_, P>,
-) -> Result<UploadImageMediaFileSuccessResponse, StorytellerError> {
-  
+pub async fn legacy_upload_media_file_from_file<P: AsRef<Path>>(args: LegacyUploadMediaFileFromFileArgs<'_, P>) -> Result<UploadImageMediaFileSuccessResponse, StorytellerError> {
   validate_args(&args)?;
 
   let url = get_route(args.api_host);
@@ -56,26 +51,20 @@ pub async fn legacy_upload_media_file_from_file<P: AsRef<Path>>(
 
   //let mut file = File::open(path)?;
 
-  let client = storyteller_client_builder(args.api_host)
-      .build()
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let client = storyteller_client_builder(args.api_host).build().map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
 
-  let file_bytes = std::fs::read(args.path.as_ref())
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
-  let file_name = args.path.as_ref().file_name()
-      .and_then(|n| n.to_str()).unwrap_or("file").to_string();
-  let mut form = Form::new()
-      .text("uuid_idempotency_token", generate_random_uuid())
-      .part("file", Part::bytes(file_bytes).file_name(file_name));
+  let file_bytes = std::fs::read(args.path.as_ref()).map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let file_name = args.path.as_ref().file_name().and_then(|n| n.to_str()).unwrap_or("file").to_string();
+  let mut form = Form::new().text("uuid_idempotency_token", generate_random_uuid()).part("file", Part::bytes(file_bytes).file_name(file_name));
 
   //if args.is_intermediate_system_file {
   //  form = form.text("is_intermediate_system_file", "true");
   //}
-  
+
   //if let Some(prompt_token) = &args.maybe_prompt_token {
   //  form = form.text("maybe_prompt_token", prompt_token.to_string());
   //}
-  
+
   //if let Some(batch_token) = &args.maybe_batch_token {
   //  form = form.text("maybe_batch_token", batch_token.to_string());
   //}
@@ -84,27 +73,20 @@ pub async fn legacy_upload_media_file_from_file<P: AsRef<Path>>(
     form = form.text("maybe_generation_provider", provider.to_str().to_string());
   }
 
-  let mut request_builder = client.post(url)
-      .header("Accept", APPLICATION_JSON);
-  
+  let mut request_builder = client.post(url).header("Accept", APPLICATION_JSON);
+
   if let Some(creds) = args.maybe_creds {
     if let Some(header) = &creds.maybe_as_cookie_header() {
       request_builder = request_builder.header("Cookie", header);
     }
   }
-  
-  let response = request_builder
-      .multipart(form)
-      .send()
-      .await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+
+  let response = request_builder.multipart(form).send().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   let response = filter_bad_response(response).await?;
-  let response_body = &response.text().await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let response_body = &response.text().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
-  let media_file = serde_json::from_str(&response_body)
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let media_file = serde_json::from_str(&response_body).map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   Ok(media_file)
 }
@@ -122,9 +104,7 @@ pub struct UploadImageMediaFileSuccessResponse {
   pub media_file_token: MediaFileToken,
 }
 
-fn validate_args<P: AsRef<Path>>(
-  args: &LegacyUploadMediaFileFromFileArgs<'_, P>,
-) -> Result<(), StorytellerError> {
+fn validate_args<P: AsRef<Path>>(args: &LegacyUploadMediaFileFromFileArgs<'_, P>) -> Result<(), StorytellerError> {
   // if args.is_intermediate_system_file && args.maybe_prompt_token.is_some() {
   //   return Err(StorytellerError::Client(ClientError::InvalidPreflightRequest(
   //     "Cannot set `is_intermediate_system_file` to true if `maybe_prompt_token` is provided."

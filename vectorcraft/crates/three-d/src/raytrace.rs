@@ -19,8 +19,7 @@ use vectorcraft_geom::{Point, Rect};
 
 use crate::material::{PbrSample, SubstanceMaterial, sample_studio_env, tangent_basis};
 use crate::{
-    Inflate, MAX_SHADOW_FACES, Mesh, Revolve, Shadow, ShadowPosition, TOO_COMPLEX_SHADOW, V3, View,
-    eye_distance, finite, perspective_scale,
+    Inflate, MAX_SHADOW_FACES, Mesh, Revolve, Shadow, ShadowPosition, TOO_COMPLEX_SHADOW, V3, View, eye_distance, finite, perspective_scale,
 };
 
 /// Maximum triangles accepted across all parts of one raytraced 3D scene.
@@ -189,30 +188,15 @@ fn valid_pt3(p: [f64; 3]) -> bool {
 
 fn collect_view_lights(r: Revolve) -> Vec<([f64; 3], [f64; 3], f64, f64)> {
     if let Some(lights) = r.lights {
-        lights
-            .iter()
-            .map(|l| (l.direction(), l.color, l.intensity.clamp(0.0, 4.0), l.softness.clamp(0.0, 1.0)))
-            .collect()
+        lights.iter().map(|l| (l.direction(), l.color, l.intensity.clamp(0.0, 4.0), l.softness.clamp(0.0, 1.0))).collect()
     } else {
-        vec![(
-            r.light_direction(),
-            r.light_color,
-            r.light_intensity.clamp(0.0, 4.0),
-            r.light_softness.clamp(0.0, 1.0),
-        )]
+        vec![(r.light_direction(), r.light_color, r.light_intensity.clamp(0.0, 4.0), r.light_softness.clamp(0.0, 1.0))]
     }
 }
 
 impl RaytraceScene {
     /// Construct a `RaytraceScene` matching `Extrude & Bevel` or `Rotate` camera projection.
-    pub fn for_solid(
-        parts: Vec<RaytracePart>,
-        bounds: Rect,
-        depth: f64,
-        view: View,
-        material: SubstanceMaterial,
-        shadow: Option<Shadow>,
-    ) -> Self {
+    pub fn for_solid(parts: Vec<RaytracePart>, bounds: Rect, depth: f64, view: View, material: SubstanceMaterial, shadow: Option<Shadow>) -> Self {
         let rev = view.revolve();
         let size = (bounds.width() / 2.0).max(bounds.height() / 2.0).max(depth.max(0.0) / 2.0).max(1.0);
         Self {
@@ -268,13 +252,7 @@ impl RaytraceScene {
     }
 
     /// Construct a `RaytraceScene` matching `Revolve`'s axis origin and perspective eye distance.
-    pub fn for_revolve(
-        parts: Vec<RaytracePart>,
-        bounds: Rect,
-        options: Revolve,
-        material: SubstanceMaterial,
-        shadow: Option<Shadow>,
-    ) -> Self {
+    pub fn for_revolve(parts: Vec<RaytracePart>, bounds: Rect, options: Revolve, material: SubstanceMaterial, shadow: Option<Shadow>) -> Self {
         let o = options.sanitized();
         let proj = crate::revolve_projection(bounds, o);
         Self {
@@ -352,12 +330,7 @@ impl Bvh {
 
             if count <= LEAF_LIMIT || depth >= MAX_BVH_DEPTH {
                 if let Some(slot) = nodes.get_mut(node_idx as usize) {
-                    *slot = BvhNode {
-                        aabb_min: n_min,
-                        aabb_max: n_max,
-                        left_or_first: start as u32,
-                        count: count as u32,
-                    };
+                    *slot = BvhNode { aabb_min: n_min, aabb_max: n_max, left_or_first: start as u32, count: count as u32 };
                 }
                 continue;
             }
@@ -420,14 +393,8 @@ impl Bvh {
             } else {
                 let left = node.left_or_first;
                 let right = left + 1;
-                let tl = self
-                    .nodes
-                    .get(left as usize)
-                    .and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, closest_t));
-                let tr = self
-                    .nodes
-                    .get(right as usize)
-                    .and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, closest_t));
+                let tl = self.nodes.get(left as usize).and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, closest_t));
+                let tr = self.nodes.get(right as usize).and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, closest_t));
                 match (tl, tr) {
                     (Some(dl), Some(dr)) if sp + 2 <= stack.len() => {
                         if dl <= dr {
@@ -456,11 +423,7 @@ impl Bvh {
         let tr = &self.tris[tri_index];
         let w = (1.0 - u - v).max(0.0);
         let smooth_normal = norm3(
-            [
-                w * tr.n0[0] + u * tr.n1[0] + v * tr.n2[0],
-                w * tr.n0[1] + u * tr.n1[1] + v * tr.n2[1],
-                w * tr.n0[2] + u * tr.n1[2] + v * tr.n2[2],
-            ],
+            [w * tr.n0[0] + u * tr.n1[0] + v * tr.n2[0], w * tr.n0[1] + u * tr.n1[1] + v * tr.n2[1], w * tr.n0[2] + u * tr.n1[2] + v * tr.n2[2]],
             tr.geom_n,
         );
         let curvature = (w * tr.c0 + u * tr.c1 + v * tr.c2).clamp(0.0, 1.0);
@@ -502,21 +465,13 @@ impl Bvh {
                 let left = node.left_or_first;
                 let right = left + 1;
                 if sp < stack.len()
-                    && self
-                        .nodes
-                        .get(right as usize)
-                        .and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, t_max))
-                        .is_some()
+                    && self.nodes.get(right as usize).and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, t_max)).is_some()
                 {
                     stack[sp] = right;
                     sp += 1;
                 }
                 if sp < stack.len()
-                    && self
-                        .nodes
-                        .get(left as usize)
-                        .and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, t_max))
-                        .is_some()
+                    && self.nodes.get(left as usize).and_then(|n| ray_aabb(origin, inv_dir, n.aabb_min, n.aabb_max, t_min, t_max)).is_some()
                 {
                     stack[sp] = left;
                     sp += 1;
@@ -537,14 +492,7 @@ fn safe_rcp(d: f64) -> f64 {
     }
 }
 
-fn ray_aabb(
-    origin: [f64; 3],
-    inv_dir: [f64; 3],
-    bmin: [f64; 3],
-    bmax: [f64; 3],
-    mut t_min: f64,
-    mut t_max: f64,
-) -> Option<f64> {
+fn ray_aabb(origin: [f64; 3], inv_dir: [f64; 3], bmin: [f64; 3], bmax: [f64; 3], mut t_min: f64, mut t_max: f64) -> Option<f64> {
     for a in 0..3 {
         let t1 = (bmin[a] - origin[a]) * inv_dir[a];
         let t2 = (bmax[a] - origin[a]) * inv_dir[a];
@@ -577,11 +525,7 @@ fn ray_tri(origin: [f64; 3], dir: [f64; 3], tri: &RtTri, t_min: f64, t_max: f64)
         return None;
     }
     let t = dot3(tri.e2, qvec) * inv_det;
-    if t.is_finite() && t >= t_min && t <= t_max {
-        Some((t, u.clamp(0.0, 1.0), v.clamp(0.0, 1.0)))
-    } else {
-        None
-    }
+    if t.is_finite() && t >= t_min && t <= t_max { Some((t, u.clamp(0.0, 1.0), v.clamp(0.0, 1.0))) } else { None }
 }
 
 fn append_part_triangles(mesh: &Mesh, part: u32, out: &mut Vec<RtTri>) {
@@ -593,11 +537,7 @@ fn append_part_triangles(mesh: &Mesh, part: u32, out: &mut Vec<RtTri>) {
     let weld_cell = ((diag[0].max(diag[1]).max(diag[2])) * 1e-5).max(1e-5);
     let inv_cell = 1.0 / weld_cell;
     let quant = |p: [f64; 3]| -> (i64, i64, i64) {
-        (
-            ((p[0] - lo[0]) * inv_cell).round() as i64,
-            ((p[1] - lo[1]) * inv_cell).round() as i64,
-            ((p[2] - lo[2]) * inv_cell).round() as i64,
-        )
+        (((p[0] - lo[0]) * inv_cell).round() as i64, ((p[1] - lo[1]) * inv_cell).round() as i64, ((p[2] - lo[2]) * inv_cell).round() as i64)
     };
 
     struct RawTri {
@@ -611,11 +551,8 @@ fn append_part_triangles(mesh: &Mesh, part: u32, out: &mut Vec<RtTri>) {
     let mut vertex_normals: HashMap<(i64, i64, i64), Vec<[f64; 3]>> = HashMap::new();
 
     for &[i0, i1, i2] in &mesh.triangles {
-        let (Some(&p0), Some(&p1), Some(&p2)) = (
-            mesh.positions.get(i0 as usize),
-            mesh.positions.get(i1 as usize),
-            mesh.positions.get(i2 as usize),
-        ) else {
+        let (Some(&p0), Some(&p1), Some(&p2)) = (mesh.positions.get(i0 as usize), mesh.positions.get(i1 as usize), mesh.positions.get(i2 as usize))
+        else {
             continue;
         };
         if !valid_pt3(p0) || !valid_pt3(p1) || !valid_pt3(p2) {
@@ -663,27 +600,8 @@ fn append_part_triangles(mesh: &Mesh, part: u32, out: &mut Vec<RtTri>) {
         let (n2, c2) = smooth_corner(p2);
         let aabb_min = min3(p0, min3(p1, p2));
         let aabb_max = max3(p0, max3(p1, p2));
-        let centroid = [
-            (p0[0] + p1[0] + p2[0]) / 3.0,
-            (p0[1] + p1[1] + p2[1]) / 3.0,
-            (p0[2] + p1[2] + p2[2]) / 3.0,
-        ];
-        out.push(RtTri {
-            p0,
-            e1: sub3(p1, p0),
-            e2: sub3(p2, p0),
-            geom_n: nf,
-            n0,
-            n1,
-            n2,
-            c0,
-            c1,
-            c2,
-            part,
-            aabb_min,
-            aabb_max,
-            centroid,
-        });
+        let centroid = [(p0[0] + p1[0] + p2[0]) / 3.0, (p0[1] + p1[1] + p2[1]) / 3.0, (p0[2] + p1[2] + p2[2]) / 3.0];
+        out.push(RtTri { p0, e1: sub3(p1, p0), e2: sub3(p2, p0), geom_n: nf, n0, n1, n2, c0, c1, c2, part, aabb_min, aabb_max, centroid });
     }
 }
 
@@ -794,13 +712,8 @@ fn build_shadow_catcher(scene: &RaytraceScene, bvh: &Bvh) -> Option<ShadowCatche
     let s_bounds = finite(settings.bounds, 1.0, 0.1, 4.0);
     let size = (hi[0] - lo[0]).max(hi[1] - lo[1]).max(hi[2] - lo[2]).max(1e-6);
 
-    let rot = Revolve {
-        rotation_x: scene.rotation[0],
-        rotation_y: scene.rotation[1],
-        rotation_z: scene.rotation[2],
-        ..Revolve::default()
-    }
-    .sanitized();
+    let rot =
+        Revolve { rotation_x: scene.rotation[0], rotation_y: scene.rotation[1], rotation_z: scene.rotation[2], ..Revolve::default() }.sanitized();
     let to_mesh = |v: V3| {
         let r = rot.rotate(v).unit();
         [r.0, -r.1, r.2]
@@ -829,17 +742,7 @@ fn build_shadow_catcher(scene: &RaytraceScene, bvh: &Bvh) -> Option<ShadowCatche
     if max_opacity <= 0.0 {
         return None;
     }
-    Some(ShadowCatcher {
-        n,
-        u,
-        w,
-        level,
-        foot,
-        half: 2.0 * s_bounds * size,
-        light_dir,
-        light_softness: softness,
-        opacity: 0.5 * max_opacity,
-    })
+    Some(ShadowCatcher { n, u, w, level, foot, half: 2.0 * s_bounds * size, light_dir, light_softness: softness, opacity: 0.5 * max_opacity })
 }
 
 fn intersect_shadow_catcher(origin: [f64; 3], dir: [f64; 3], c: &ShadowCatcher) -> Option<(f64, [f64; 3])> {
@@ -853,11 +756,7 @@ fn intersect_shadow_catcher(origin: [f64; 3], dir: [f64; 3], c: &ShadowCatcher) 
     }
     let pos = add3(origin, scale3(dir, t));
     let rel = sub3(pos, c.foot);
-    if dot3(c.u, rel).abs() <= c.half && dot3(c.w, rel).abs() <= c.half {
-        Some((t, pos))
-    } else {
-        None
-    }
+    if dot3(c.u, rel).abs() <= c.half && dot3(c.w, rel).abs() <= c.half { Some((t, pos)) } else { None }
 }
 
 fn project_mesh_pt(p: [f64; 3], origin: Point, eye: Option<f64>) -> Point {
@@ -918,15 +817,7 @@ fn spatial_hash(p: [f64; 3], salt: u32) -> f64 {
 }
 
 /// Evaluate soft or hard raytraced visibility (`0.0` fully occluded .. `1.0` fully lit) toward `light_dir`.
-fn light_visibility(
-    bvh: &Bvh,
-    origin: [f64; 3],
-    light_dir: [f64; 3],
-    softness: f64,
-    eps: f64,
-    far: f64,
-    jitter: f64,
-) -> f64 {
+fn light_visibility(bvh: &Bvh, origin: [f64; 3], light_dir: [f64; 3], softness: f64, eps: f64, far: f64, jitter: f64) -> f64 {
     if softness <= 0.015 {
         return if bvh.occluded(origin, light_dir, eps, far) { 0.0 } else { 1.0 };
     }
@@ -940,10 +831,7 @@ fn light_visibility(
         let r = ((i as f64 + 0.5) / SAMPLES as f64).sqrt() * radius;
         let theta = i as f64 * GOLDEN_ANGLE + rot_offset;
         let (s, c) = theta.sin_cos();
-        let dir = norm3(
-            add3(light_dir, add3(scale3(lt, r * c), scale3(lb, r * s))),
-            light_dir,
-        );
+        let dir = norm3(add3(light_dir, add3(scale3(lt, r * c), scale3(lb, r * s))), light_dir);
         if !bvh.occluded(origin, dir, eps, far) {
             unoccluded += 1;
         }
@@ -952,15 +840,7 @@ fn light_visibility(
 }
 
 /// Evaluate cosine-weighted hemisphere Ambient Occlusion (`1.0` open sky .. `1.0 - strength` occluded).
-fn ambient_occlusion_factor(
-    bvh: &Bvh,
-    origin: [f64; 3],
-    normal: [f64; 3],
-    strength: f64,
-    ao_radius: f64,
-    eps: f64,
-    jitter: f64,
-) -> f64 {
+fn ambient_occlusion_factor(bvh: &Bvh, origin: [f64; 3], normal: [f64; 3], strength: f64, ao_radius: f64, eps: f64, jitter: f64) -> f64 {
     let strength = strength.clamp(0.0, 1.0);
     if strength <= 1e-3 || ao_radius <= eps {
         return 1.0;
@@ -976,13 +856,7 @@ fn ambient_occlusion_factor(
         let cos_theta = (1.0 - u1).max(0.0).sqrt();
         let phi = i as f64 * GOLDEN_ANGLE + phi_off;
         let (sp, cp) = phi.sin_cos();
-        let dir = norm3(
-            add3(
-                scale3(normal, cos_theta),
-                add3(scale3(t, sin_theta * cp), scale3(bt, sin_theta * sp)),
-            ),
-            normal,
-        );
+        let dir = norm3(add3(scale3(normal, cos_theta), add3(scale3(t, sin_theta * cp), scale3(bt, sin_theta * sp))), normal);
         if let Some(hit) = bvh.intersect(origin, dir, eps, ao_radius) {
             let falloff = (1.0 - hit.t / ao_radius).clamp(0.0, 1.0);
             occ += 0.35 + 0.65 * falloff;
@@ -991,14 +865,7 @@ fn ambient_occlusion_factor(
     (1.0 - strength * (occ / AO_SAMPLES as f64)).clamp(0.08, 1.0)
 }
 
-fn ggx_direct_brdf(
-    sample: &PbrSample,
-    v: [f64; 3],
-    l: [f64; 3],
-    l_col: [f64; 3],
-    intensity: f64,
-    softness: f64,
-) -> [f64; 3] {
+fn ggx_direct_brdf(sample: &PbrSample, v: [f64; 3], l: [f64; 3], l_col: [f64; 3], intensity: f64, softness: f64) -> [f64; 3] {
     let n = sample.normal;
     let raw_nl = dot3(n, l);
     let wrap_nl = ((raw_nl + softness * 0.45) / (1.0 + softness * 0.45)).max(0.0);
@@ -1025,11 +892,7 @@ fn ggx_direct_brdf(
     std::array::from_fn(|ch| {
         let f0 = 0.04 * (1.0 - m) + sample.albedo[ch] * m;
         let f_ch = f0 + (1.0 - f0) * fresnel_pow;
-        let spec = if n_dot_l > 0.0 {
-            (d_ggx * g_v * g_l * f_ch) / (4.0 * n_dot_v * n_dot_l).max(1e-6) * n_dot_l
-        } else {
-            0.0
-        };
+        let spec = if n_dot_l > 0.0 { (d_ggx * g_v * g_l * f_ch) / (4.0 * n_dot_v * n_dot_l).max(1e-6) * n_dot_l } else { 0.0 };
         let kd = (1.0 - f_ch) * (1.0 - m);
         let diff = kd * sample.albedo[ch] * wrap_nl;
         (diff + spec) * l_col[ch] * intensity
@@ -1135,15 +998,7 @@ impl ShadeContext<'_> {
         let p_bias = add3(hit.position, scale3(orient_geom, self.ray_eps));
         let jitter = spatial_hash(hit.position, self.scene.material.seed.wrapping_add(0x9e37));
 
-        let ao = ambient_occlusion_factor(
-            self.bvh,
-            p_bias,
-            sample.normal,
-            self.scene.ambient_occlusion,
-            self.ao_radius,
-            self.ray_eps,
-            jitter,
-        );
+        let ao = ambient_occlusion_factor(self.bvh, p_bias, sample.normal, self.scene.ambient_occlusion, self.ao_radius, self.ray_eps, jitter);
 
         let m = sample.metallic;
         let amb = self.scene.ambient.clamp(0.0, 2.0);
@@ -1322,12 +1177,7 @@ pub fn raytrace_scene(scene: &RaytraceScene) -> Result<RaytraceImage, String> {
 }
 
 fn pixel_needs_aa(buf: &[[f64; 4]], w: usize, h: usize, x: usize, y: usize, c: [f64; 4]) -> bool {
-    let neighbors = [
-        (x.saturating_sub(1), y),
-        ((x + 1).min(w - 1), y),
-        (x, y.saturating_sub(1)),
-        (x, (y + 1).min(h - 1)),
-    ];
+    let neighbors = [(x.saturating_sub(1), y), ((x + 1).min(w - 1), y), (x, y.saturating_sub(1)), (x, (y + 1).min(h - 1))];
     for (nx, ny) in neighbors {
         let n = buf[ny * w + nx];
         let da = (c[3] - n[3]).abs();
@@ -1405,12 +1255,8 @@ mod tests {
             ambient_occlusion: 0.4,
             ppi: 72.0,
         };
-        let unoccluded = raytrace_scene(&make_scene(vec![RaytracePart {
-            mesh: receiver.clone(),
-            base_rgb: [0.85, 0.85, 0.85],
-            opacity: 1.0,
-        }]))
-        .unwrap();
+        let unoccluded =
+            raytrace_scene(&make_scene(vec![RaytracePart { mesh: receiver.clone(), base_rgb: [0.85, 0.85, 0.85], opacity: 1.0 }])).unwrap();
         let occluded = raytrace_scene(&make_scene(vec![
             RaytracePart { mesh: receiver, base_rgb: [0.85, 0.85, 0.85], opacity: 1.0 },
             RaytracePart { mesh: blocker, base_rgb: [0.85, 0.85, 0.85], opacity: 1.0 },
@@ -1474,14 +1320,9 @@ mod tests {
         let path = rect_path(20.0, 20.0, 68.0, 68.0);
         let bounds = path.bounds().unwrap();
         let view = View::default();
-        let mesh = extrude_mesh(
-            &path,
-            FillRule::NonZero,
-            bounds,
-            Extrude { depth: 36.0, bevel: Some(crate::Bevel::default()), ..Extrude::default() },
-            view,
-        )
-        .unwrap();
+        let mesh =
+            extrude_mesh(&path, FillRule::NonZero, bounds, Extrude { depth: 36.0, bevel: Some(crate::Bevel::default()), ..Extrude::default() }, view)
+                .unwrap();
 
         let mut digests: Vec<(SubstanceMaterialPreset, Vec<u8>)> = Vec::new();
         for preset in SubstanceMaterialPreset::ALL {
@@ -1510,14 +1351,7 @@ mod tests {
 
     #[test]
     fn hostile_empty_and_nan_meshes_never_panic() {
-        let empty = RaytraceScene::for_solid(
-            vec![],
-            Rect::new(0.0, 0.0, 10.0, 10.0),
-            10.0,
-            View::default(),
-            SubstanceMaterial::default(),
-            None,
-        );
+        let empty = RaytraceScene::for_solid(vec![], Rect::new(0.0, 0.0, 10.0, 10.0), 10.0, View::default(), SubstanceMaterial::default(), None);
         let out_empty = raytrace_scene(&empty).unwrap();
         assert_eq!(out_empty.rgba, vec![0, 0, 0, 0]);
 
@@ -1534,11 +1368,7 @@ mod tests {
             triangles: vec![[0, 1, 2], [3, 4, 5], [99, 100, 101]],
         };
         let mut hostile_scene = empty;
-        hostile_scene.parts.push(RaytracePart {
-            mesh: hostile_mesh,
-            base_rgb: [f64::NAN, -5.0, 99.0],
-            opacity: f64::NAN,
-        });
+        hostile_scene.parts.push(RaytracePart { mesh: hostile_mesh, base_rgb: [f64::NAN, -5.0, 99.0], opacity: f64::NAN });
         let out_hostile = raytrace_scene(&hostile_scene).unwrap();
         assert_eq!(out_hostile.rgba, vec![0, 0, 0, 0]);
     }

@@ -8,38 +8,26 @@ use wreq::Client;
 
 // https://sora.com/backend/notif?limit=100&before=task_01jqwwrkvgeqp8jsf5mqk1jceh
 
-pub async fn unimplemented_sora_job_status(
-  task_id: &str,
-  credentials: &SoraCredentialSet,
-) -> Result<(), SoraError> {
+pub async fn unimplemented_sora_job_status(task_id: &str, credentials: &SoraCredentialSet) -> Result<(), SoraError> {
   let url = format!("https://sora.com/backend/notif?limit=100&before={}", task_id);
 
   let cookie = credentials.cookies.to_string();
 
-  let authorization_header = credentials.jwt_bearer_token.as_ref()
-      .ok_or(SoraClientError::NoBearerTokenForRequest)?
-      .to_authorization_header_value();
+  let authorization_header = credentials.jwt_bearer_token.as_ref().ok_or(SoraClientError::NoBearerTokenForRequest)?.to_authorization_header_value();
 
   let client = Client::new();
 
-  let request = client
-      .get(url)
-      .header("Authorization", &authorization_header)
-      .header("User-Agent", CLIENT_USER_AGENT)
-      .header("Cookie", &cookie);
+  let request = client.get(url).header("Authorization", &authorization_header).header("User-Agent", CLIENT_USER_AGENT).header("Cookie", &cookie);
 
-  let response = request.send()
-      .await
-      .map_err(|err| {
-        error!("sora fetch job status error: {}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let response = request.send().await.map_err(|err| {
+    error!("sora fetch job status error: {}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
-  let json_response = &response.text().await
-      .map_err(|err| {
-        error!("sora read job status error: {}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let json_response = &response.text().await.map_err(|err| {
+    error!("sora read job status error: {}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
   unimplemented!("job status is not parsed")
 }
@@ -64,11 +52,7 @@ mod tests {
     let bearer = read_to_string(test_file_path("test_data/temp/bearer.txt")?)?;
     let bearer = bearer.trim().to_string();
 
-    let creds = SoraCredentialBuilder::new()
-        .with_cookies(&cookie)
-        .with_jwt_bearer_token(&bearer)
-        .with_sora_sentinel(&sentinel)
-        .build()?;
+    let creds = SoraCredentialBuilder::new().with_cookies(&cookie).with_jwt_bearer_token(&bearer).with_sora_sentinel(&sentinel).build()?;
 
     let task_id = "task_01jqwwrkvgeqp8jsf5mqk1jceh";
 

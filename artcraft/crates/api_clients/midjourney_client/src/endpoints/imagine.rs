@@ -8,7 +8,7 @@ use cloudflare_errors::filter_cloudflare_errors::filter_cloudflare_errors;
 use log::error;
 use serde::Deserialize;
 
-const DEFAULT_PAGE_SIZE : u64 = 1000;
+const DEFAULT_PAGE_SIZE: u64 = 1000;
 
 /// The semantic parameters for listing Midjourney's job/media feed.
 pub struct ImagineRequest<'a> {
@@ -93,43 +93,21 @@ pub async fn imagine(args: ImagineArgs<'_>) -> Result<ImagineResponse, Midjourne
 
   let referer = format!("https://{}/imagine", hostname.as_str());
 
-  let url = format!("https://{}/api/imagine?user_id={}&page_size={}",
-    hostname.as_str(),
-    args.request.user_id.as_str(),
-    page_size,
-  );
+  let url = format!("https://{}/api/imagine?user_id={}&page_size={}", hostname.as_str(), args.request.user_id.as_str(), page_size,);
 
-  let client = args.browser.clone().unwrap_or_default()
-      .build_client()
-      .map_err(MidjourneyClientError::WreqError)?;
+  let client = args.browser.clone().unwrap_or_default().build_client().map_err(MidjourneyClientError::WreqError)?;
 
   // NB: Browser-identity headers (user-agent, sec-ch-ua*, accept-encoding) come
   // from the emulation on the client; only request-context headers are set here.
-  let http_request = client.get(url)
-      .header("cookie", cookie_header)
-      .header("Referer", &referer)
-      .header("Referrer-Policy", "origin-when-cross-origin")
-      .header("accept", "*/*")
-      .header("accept-language", "en-US,en;q=0.8")
-      .header("content-type", "application/json")
-      .header("priority", "u=1, i")
-      .header("sec-fetch-dest", "empty")
-      .header("sec-fetch-mode", "cors")
-      .header("sec-fetch-site", "same-origin")
-      .header("x-csrf-protection", "1");
+  let http_request = client.get(url).header("cookie", cookie_header).header("Referer", &referer).header("Referrer-Policy", "origin-when-cross-origin").header("accept", "*/*").header("accept-language", "en-US,en;q=0.8").header("content-type", "application/json").header("priority", "u=1, i").header("sec-fetch-dest", "empty").header("sec-fetch-mode", "cors").header("sec-fetch-site", "same-origin").header("x-csrf-protection", "1");
 
-  let http_request  = http_request
-      .build()
-      .map_err(|err| MidjourneyClientError::WreqError(err))?;
+  let http_request = http_request.build().map_err(|err| MidjourneyClientError::WreqError(err))?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|e| MidjourneyApiError::NetworkError(e.to_string()))?;
+  let response = client.execute(http_request).await.map_err(|e| MidjourneyApiError::NetworkError(e.to_string()))?;
 
   let status = response.status();
 
-  let response_body = response.text().await
-      .map_err(|e| MidjourneyApiError::NetworkError(e.to_string()))?;
+  let response_body = response.text().await.map_err(|e| MidjourneyApiError::NetworkError(e.to_string()))?;
 
   if !status.is_success() {
     if let Err(err) = filter_cloudflare_errors(status.as_u16(), &response_body) {
@@ -164,7 +142,6 @@ pub async fn imagine(args: ImagineArgs<'_>) -> Result<ImagineResponse, Midjourne
       "checkpoint": "encrypted something ???"
     }
    */
-
 
   #[derive(Deserialize, Debug)]
   #[allow(non_snake_case)]
@@ -205,22 +182,9 @@ pub async fn imagine(args: ImagineArgs<'_>) -> Result<ImagineResponse, Midjourne
     event_type: Option<String>,
   }
 
-  let response : RawImagineResponse = serde_json::from_str(&response_body)
-      .map_err(|err| MidjourneyApiError::deserialization(err, response_body.as_str()))?;
+  let response: RawImagineResponse = serde_json::from_str(&response_body).map_err(|err| MidjourneyApiError::deserialization(err, response_body.as_str()))?;
 
-  Ok(ImagineResponse {
-    cursor: response.cursor.clone(),
-    items: response.data
-        .into_iter()
-        .map(|item| {
-          ImagineItem {
-            id: item.id,
-            full_command: item.full_command,
-            job_type: item.job_type.as_ref()
-                .map(|jt| MidjourneyJobType::from_str(jt))
-          }
-        }).collect(),
-  })
+  Ok(ImagineResponse { cursor: response.cursor.clone(), items: response.data.into_iter().map(|item| ImagineItem { id: item.id, full_command: item.full_command, job_type: item.job_type.as_ref().map(|jt| MidjourneyJobType::from_str(jt)) }).collect() })
 }
 
 #[cfg(test)]
@@ -237,15 +201,7 @@ mod tests {
     let user_id = read_to_trimmed_string("/Users/bt/secrets/midjourney/user_id.txt")?;
     let user_id = MidjourneyUserId::from_string(user_id);
 
-    let result = imagine(ImagineArgs {
-      request: ImagineRequest {
-        user_id: &user_id,
-        page_size: None,
-      },
-      cookie_header: &cookie_header,
-      hostname: None,
-      browser: None,
-    }).await?;
+    let result = imagine(ImagineArgs { request: ImagineRequest { user_id: &user_id, page_size: None }, cookie_header: &cookie_header, hostname: None, browser: None }).await?;
 
     println!("Response: {:?}\n\n", result);
 
@@ -254,5 +210,3 @@ mod tests {
     Ok(())
   }
 }
-
-

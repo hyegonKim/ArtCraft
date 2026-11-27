@@ -173,13 +173,7 @@ fn curve_editor(ui: &mut egui::Ui, p: &mut CameraRaw, dirty: &mut bool, state: &
         let hdr_stroke = Stroke::new(1.0, t.accent.gamma_multiply(0.75));
         painter.line_segment([pos2(hx, rect.top()), pos2(hx, rect.bottom())], hdr_stroke);
         painter.line_segment([pos2(rect.left(), hy), pos2(rect.right(), hy)], hdr_stroke);
-        painter.text(
-            pos2(rect.right() - 4.0, rect.top() + 4.0),
-            Align2::RIGHT_TOP,
-            format!("HDR +{ev} EV"),
-            crate::theme::mono(10.0),
-            t.accent,
-        );
+        painter.text(pos2(rect.right() - 4.0, rect.top() + 4.0), Align2::RIGHT_TOP, format!("HDR +{ev} EV"), crate::theme::mono(10.0), t.accent);
     }
     let to_screen = |x: f32, y: f32| pos2(rect.left() + x / 255.0 * side, rect.bottom() - y / 255.0 * side);
     // The identity handles are presentation until a gesture actually edits them.
@@ -406,14 +400,7 @@ fn draw(app: &mut PhotocraftApp, ctx: &egui::Context, own_window: bool) {
             ui.horizontal(|ui| {
                 ui.label(tl!("Profile"));
                 let mut adaptive = p.adaptive_profile;
-                if widgets::dropdown(
-                    ui,
-                    "cr-profile-19",
-                    tl!("Profile"),
-                    &mut adaptive,
-                    &[(false, tl!("Adobe Color")), (true, tl!("Adaptive Color"))],
-                    136.0,
-                ) {
+                if widgets::dropdown(ui, "cr-profile-19", tl!("Profile"), &mut adaptive, &[(false, tl!("Adobe Color")), (true, tl!("Adaptive Color"))], 136.0) {
                     p.adaptive_profile = adaptive;
                     dirty = true;
                 }
@@ -429,14 +416,7 @@ fn draw(app: &mut PhotocraftApp, ctx: &egui::Context, own_window: bool) {
                 let mut ev = p.hdr_range_ev.clamp(1, 4);
                 ui.horizontal(|ui| {
                     ui.label(tl!("HDR Range"));
-                    if widgets::dropdown(
-                        ui,
-                        "cr-hdr-ev",
-                        tl!("HDR Range"),
-                        &mut ev,
-                        &[(1u8, "+1 EV"), (2, "+2 EV"), (3, "+3 EV"), (4, "+4 EV")],
-                        88.0,
-                    ) {
+                    if widgets::dropdown(ui, "cr-hdr-ev", tl!("HDR Range"), &mut ev, &[(1u8, "+1 EV"), (2, "+2 EV"), (3, "+3 EV"), (4, "+4 EV")], 88.0) {
                         p.hdr_range_ev = ev;
                         dirty = true;
                     }

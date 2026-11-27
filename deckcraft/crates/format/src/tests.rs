@@ -599,8 +599,7 @@ fn thirty_two_nested_groups_reopen_from_a_two_mib_caller() {
     table.rows[1].cells[1].text = TextBody::from_text("deepest cell");
     let mut shape = Shape { id: ShapeId(1), kind: ShapeKind::Table(table), ..Default::default() };
     for level in 0..32 {
-        shape =
-            Shape { id: ShapeId(level + 2), kind: ShapeKind::Group { children: vec![shape], child: Default::default() }, ..Default::default() };
+        shape = Shape { id: ShapeId(level + 2), kind: ShapeKind::Group { children: vec![shape], child: Default::default() }, ..Default::default() };
     }
     let mut p = Presentation::default();
     Arc::make_mut(&mut p.slides[0]).shapes = vec![shape];
@@ -635,9 +634,7 @@ fn parser_worker_preserves_bad_json_and_recursion_errors() {
     let nested_json = |depth| {
         let mut json = br#"{"format":"deckcraft","version":1,"generator":"t","presentation":{"slides":[{"shapes":["#.to_vec();
         for _ in 0..depth {
-            json.extend_from_slice(
-                br#"{"kind":{"type":"group","child":{"x":0,"y":0,"w":1,"h":1,"rot":0,"flipH":false,"flipV":false},"children":["#,
-            );
+            json.extend_from_slice(br#"{"kind":{"type":"group","child":{"x":0,"y":0,"w":1,"h":1,"rot":0,"flipH":false,"flipV":false},"children":["#);
         }
         json.extend_from_slice(br#"{"kind":{"type":"shape"}}"#);
         for _ in 0..depth {
@@ -660,16 +657,14 @@ fn parser_worker_preserves_bad_json_and_recursion_errors() {
 #[cfg(not(target_family = "wasm"))]
 #[test]
 fn parser_worker_start_and_join_failures_are_results() {
-    let error = parser_worker_result(Err(std::io::Error::other("injected thread creation failure")))
-        .err()
-        .expect("thread creation failure must be returned");
+    let error =
+        parser_worker_result(Err(std::io::Error::other("injected thread creation failure"))).err().expect("thread creation failure must be returned");
     assert!(matches!(error, FormatError::Damaged(_)));
     assert!(error.to_string().contains("couldn't start parser: injected thread creation failure"), "{error}");
     let error = parser_worker_result(Ok(Err(Box::new("injected worker panic")))).err().expect("worker panic must be returned");
     assert!(matches!(error, FormatError::Damaged(_)));
     assert!(error.to_string().contains("couldn't finish parser: worker panicked"), "{error}");
 }
-
 
 #[test]
 fn outline_table_rows_are_indented_and_do_not_become_slides() {
@@ -718,11 +713,9 @@ fn odp_roundtrip_preserves_mimetype_slides_shapes_tables_pictures_transitions_an
 
     // Minimal valid 1×1 RGBA PNG media item.
     let png_bytes: Vec<u8> = vec![
-        0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, b'I', b'H', b'D', b'R',
-        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-        0x89, 0x00, 0x00, 0x00, 0x0A, b'I', b'D', b'A', b'T', 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-        0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, b'I', b'E', b'N', b'D', 0xAE,
-        0x42, 0x60, 0x82,
+        0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, b'I', b'H', b'D', b'R', 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0A, b'I', b'D', b'A', b'T', 0x78, 0x9C, 0x63, 0x00, 0x01,
+        0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, b'I', b'E', b'N', b'D', 0xAE, 0x42, 0x60, 0x82,
     ];
     let media_id = p.add_media("dot.png", "image/png", png_bytes).expect("add_media");
 
@@ -851,12 +844,7 @@ fn odp_roundtrip_preserves_mimetype_slides_shapes_tables_pictures_transitions_an
         .shapes
         .iter()
         .map(|sh| match &sh.kind {
-            ShapeKind::Table(tb) => tb
-                .rows
-                .iter()
-                .flat_map(|r| r.cells.iter().map(|c| c.text.text()))
-                .collect::<Vec<_>>()
-                .join(" "),
+            ShapeKind::Table(tb) => tb.rows.iter().flat_map(|r| r.cells.iter().map(|c| c.text.text())).collect::<Vec<_>>().join(" "),
             _ => sh.text.as_ref().map(|t| t.text()).unwrap_or_default(),
         })
         .collect::<Vec<_>>()

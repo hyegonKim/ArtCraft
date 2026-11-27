@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::image::veo_2::raw_request::{
-  Veo2ImageToVideoInput, Veo2ImageToVideoOutput,
-};
+use crate::requests::api::video::image::veo_2::raw_request::{Veo2ImageToVideoInput, Veo2ImageToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -52,11 +50,7 @@ impl FalEndpoint for Veo2ImageToVideoRequest {
   type RawResponse = Veo2ImageToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_url: self.image_url.clone(),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_url: self.image_url.clone(), duration: self.duration.map(|d| d.to_str().to_string()) })
   }
 }
 
@@ -77,11 +71,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo2ImageToVideoRequest {
-      prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      duration: Some(Veo2ImageToVideoDuration::FiveSeconds),
-    };
+    let request = Veo2ImageToVideoRequest { prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), duration: Some(Veo2ImageToVideoDuration::FiveSeconds) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -95,11 +85,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo2ImageToVideoRequest {
-      prompt: "wind moves through the trees".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      duration: Some(Veo2ImageToVideoDuration::FiveSeconds),
-    };
+    let request = Veo2ImageToVideoRequest { prompt: "wind moves through the trees".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), duration: Some(Veo2ImageToVideoDuration::FiveSeconds) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -111,11 +97,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo2ImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      duration: Some(Veo2ImageToVideoDuration::EightSeconds),
-    };
+    let request = Veo2ImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), duration: Some(Veo2ImageToVideoDuration::EightSeconds) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.image_url, "https://example.com/start.png");
@@ -124,26 +106,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo2ImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      duration: None,
-    };
+    let request = Veo2ImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), duration: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),
-    );
+    assert_eq!(json, serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),);
   }
 
   #[test]
   fn every_duration_maps_to_wire_string_and_seconds() {
-    for (variant, s, secs) in [
-      (Veo2ImageToVideoDuration::FiveSeconds, "5s", 5),
-      (Veo2ImageToVideoDuration::SixSeconds, "6s", 6),
-      (Veo2ImageToVideoDuration::SevenSeconds, "7s", 7),
-      (Veo2ImageToVideoDuration::EightSeconds, "8s", 8),
-    ] {
+    for (variant, s, secs) in [(Veo2ImageToVideoDuration::FiveSeconds, "5s", 5), (Veo2ImageToVideoDuration::SixSeconds, "6s", 6), (Veo2ImageToVideoDuration::SevenSeconds, "7s", 7), (Veo2ImageToVideoDuration::EightSeconds, "8s", 8)] {
       assert_eq!(variant.to_str(), s);
       assert_eq!(variant.to_seconds(), secs);
     }

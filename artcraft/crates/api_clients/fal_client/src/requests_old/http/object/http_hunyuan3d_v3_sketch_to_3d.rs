@@ -25,8 +25,6 @@ pub struct Hunyuan3dV3SketchTo3dInput {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Hunyuan3dV3SketchTo3dOutput {}
 
-pub fn hunyuan3d_v3_sketch_to_3d(
-  params: Hunyuan3dV3SketchTo3dInput,
-) -> FalRequest<Hunyuan3dV3SketchTo3dInput, Hunyuan3dV3SketchTo3dOutput> {
+pub fn hunyuan3d_v3_sketch_to_3d(params: Hunyuan3dV3SketchTo3dInput) -> FalRequest<Hunyuan3dV3SketchTo3dInput, Hunyuan3dV3SketchTo3dOutput> {
   FalRequest::new("fal-ai/hunyuan3d-v3/sketch-to-3d", params)
 }

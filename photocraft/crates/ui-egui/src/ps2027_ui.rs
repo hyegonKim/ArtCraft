@@ -40,30 +40,14 @@ pub fn invoke(app: &mut PhotocraftApp, id: &str, params: &Value) -> Option<Resul
     match id {
         "layer.newRelightLayer" | "filter.render.relight3d" => Some(open_relight_dialog(app, id)),
         "edit.generativeRecompose" => Some(open_recompose_dialog(app)),
-        _ => crate::substance3d_ui::invoke(app, id, params),
+        _ => crate::substance3d_ui::invoke(app, id, params).or_else(|| crate::fresco_ui::invoke(app, id, params)),
     }
 }
 
 fn default_lamps_json() -> Value {
     let l1 = RelightLamp::default();
-    let l2 = RelightLamp {
-        enabled: false,
-        x: 0.72,
-        y: 0.35,
-        z: 0.30,
-        intensity: 0.85,
-        color: [0.55, 0.78, 1.0],
-        spread: 0.50,
-    };
-    let l3 = RelightLamp {
-        enabled: false,
-        x: 0.50,
-        y: 0.78,
-        z: 0.28,
-        intensity: 0.75,
-        color: [1.0, 0.55, 0.75],
-        spread: 0.45,
-    };
+    let l2 = RelightLamp { enabled: false, x: 0.72, y: 0.35, z: 0.30, intensity: 0.85, color: [0.55, 0.78, 1.0], spread: 0.50 };
+    let l3 = RelightLamp { enabled: false, x: 0.50, y: 0.78, z: 0.28, intensity: 0.75, color: [1.0, 0.55, 0.75], spread: 0.45 };
     json!([l1, l2, l3])
 }
 
@@ -85,11 +69,7 @@ pub fn open_relight_dialog(app: &mut PhotocraftApp, cmd: &str) -> Result<Value, 
 }
 
 pub fn open_recompose_dialog(app: &mut PhotocraftApp) -> Result<Value, String> {
-    let (w, h) = app
-        .session
-        .active()
-        .map(|st| (st.doc.size.width, st.doc.size.height))
-        .ok_or_else(|| "no document open".to_string())?;
+    let (w, h) = app.session.active().map(|st| (st.doc.size.width, st.doc.size.height)).ok_or_else(|| "no document open".to_string())?;
     let mut fields = Map::new();
     fields.insert(RECOMPOSE_MARKER.into(), Value::Bool(true));
     fields.insert("__command".into(), json!("edit.generativeRecompose"));
@@ -104,7 +84,8 @@ pub fn open_recompose_dialog(app: &mut PhotocraftApp) -> Result<Value, String> {
 }
 
 fn lamps_from_fields(fields: &Map<String, Value>) -> [RelightLamp; 3] {
-    let mut out = [RelightLamp::default(), RelightLamp { enabled: false, x: 0.72, ..Default::default() }, RelightLamp { enabled: false, y: 0.78, ..Default::default() }];
+    let mut out =
+        [RelightLamp::default(), RelightLamp { enabled: false, x: 0.72, ..Default::default() }, RelightLamp { enabled: false, y: 0.78, ..Default::default() }];
     if let Some(arr) = fields.get("lamps").and_then(Value::as_array) {
         for (i, v) in arr.iter().take(3).enumerate() {
             if let Ok(parsed) = serde_json::from_value::<RelightLamp>(v.clone()) {
@@ -119,11 +100,7 @@ fn lamps_from_fields(fields: &Map<String, Value>) -> [RelightLamp; 3] {
 pub fn relight_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
     let t = Tokens::get(ui.ctx());
     let mut lamps = lamps_from_fields(fields);
-    let mut sel = fields
-        .get("activeLamp")
-        .and_then(Value::as_u64)
-        .unwrap_or(0)
-        .min(2) as usize;
+    let mut sel = fields.get("activeLamp").and_then(Value::as_u64).unwrap_or(0).min(2) as usize;
     let mut ambient = fields.get("ambient").and_then(Value::as_f64).unwrap_or(0.35) as f32;
     let mut relief = fields.get("surfaceRelief").and_then(Value::as_f64).unwrap_or(1.0) as f32;
     let mut changed = false;
@@ -150,10 +127,7 @@ pub fn relight_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
             // Select nearest enabled/visible lamp if clicked near its handle
             let mut best = (sel, f32::MAX);
             for (i, l) in lamps.iter().enumerate() {
-                let lp = pos2(
-                    pad_rect.left() + l.x.clamp(0.0, 1.0) * pad_rect.width(),
-                    pad_rect.top() + l.y.clamp(0.0, 1.0) * pad_rect.height(),
-                );
+                let lp = pos2(pad_rect.left() + l.x.clamp(0.0, 1.0) * pad_rect.width(), pad_rect.top() + l.y.clamp(0.0, 1.0) * pad_rect.height());
                 let dist = lp.distance(pos);
                 if dist < 16.0 && dist < best.1 {
                     best = (i, dist);
@@ -169,10 +143,7 @@ pub fn relight_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
     }
 
     for (i, l) in lamps.iter().enumerate() {
-        let lp: Pos2 = pos2(
-            pad_rect.left() + l.x.clamp(0.0, 1.0) * pad_rect.width(),
-            pad_rect.top() + l.y.clamp(0.0, 1.0) * pad_rect.height(),
-        );
+        let lp: Pos2 = pos2(pad_rect.left() + l.x.clamp(0.0, 1.0) * pad_rect.width(), pad_rect.top() + l.y.clamp(0.0, 1.0) * pad_rect.height());
         let c = Color32::from_rgb(
             (l.color[0].clamp(0.0, 1.0) * 255.0) as u8,
             (l.color[1].clamp(0.0, 1.0) * 255.0) as u8,
@@ -274,11 +245,7 @@ pub fn relight_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
 }
 
 pub fn confirm_relight(app: &mut PhotocraftApp, fields: &Map<String, Value>) -> Result<Value, String> {
-    let cmd = fields
-        .get("__command")
-        .and_then(Value::as_str)
-        .unwrap_or("layer.newRelightLayer")
-        .to_string();
+    let cmd = fields.get("__command").and_then(Value::as_str).unwrap_or("layer.newRelightLayer").to_string();
     let lamps = lamps_from_fields(fields);
     let ambient = fields.get("ambient").and_then(Value::as_f64).unwrap_or(0.35);
     let relief = fields.get("surfaceRelief").and_then(Value::as_f64).unwrap_or(1.0);
@@ -295,30 +262,11 @@ pub fn confirm_relight(app: &mut PhotocraftApp, fields: &Map<String, Value>) -> 
 /// Renders the `Edit › Generative Recompose…` dialog body.
 pub fn recompose_body(app: &mut PhotocraftApp, ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
     let t = Tokens::get(ui.ctx());
-    let (doc_w, doc_h) = app
-        .session
-        .active()
-        .map_or((1920, 1080), |st| (st.doc.size.width, st.doc.size.height));
-    let mut ratio = fields
-        .get("aspectRatio")
-        .and_then(Value::as_str)
-        .unwrap_or("16:9")
-        .to_string();
-    let mut width = fields
-        .get("width")
-        .and_then(Value::as_f64)
-        .unwrap_or(f64::from(doc_w))
-        .clamp(1.0, 16384.0) as f32;
-    let mut height = fields
-        .get("height")
-        .and_then(Value::as_f64)
-        .unwrap_or(f64::from(doc_h))
-        .clamp(1.0, 16384.0) as f32;
-    let mut prompt = fields
-        .get("prompt")
-        .and_then(Value::as_str)
-        .unwrap_or("")
-        .to_string();
+    let (doc_w, doc_h) = app.session.active().map_or((1920, 1080), |st| (st.doc.size.width, st.doc.size.height));
+    let mut ratio = fields.get("aspectRatio").and_then(Value::as_str).unwrap_or("16:9").to_string();
+    let mut width = fields.get("width").and_then(Value::as_f64).unwrap_or(f64::from(doc_w)).clamp(1.0, 16384.0) as f32;
+    let mut height = fields.get("height").and_then(Value::as_f64).unwrap_or(f64::from(doc_h)).clamp(1.0, 16384.0) as f32;
+    let mut prompt = fields.get("prompt").and_then(Value::as_str).unwrap_or("").to_string();
 
     ui.horizontal(|ui| {
         ui.label(RichText::new(tl!("Current")).color(t.text_dim));
@@ -340,9 +288,7 @@ pub fn recompose_body(app: &mut PhotocraftApp, ui: &mut egui::Ui, fields: &mut M
     egui::Grid::new("recompose-dialog-grid").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
         ui.label(RichText::new(tl!("Aspect Ratio")).color(t.text_dim));
         if widgets::dropdown(ui, "recompose-ratio", tl!("Aspect Ratio"), &mut ratio, &ratios, 175.0) {
-            if let Some((num, den)) = ratio
-                .split_once(':')
-                .and_then(|(a, b)| Some((a.parse::<f32>().ok()?, b.parse::<f32>().ok()?)))
+            if let Some((num, den)) = ratio.split_once(':').and_then(|(a, b)| Some((a.parse::<f32>().ok()?, b.parse::<f32>().ok()?)))
                 && den > 0.0
             {
                 height = (width * den / num).round().clamp(1.0, 16384.0);
@@ -409,6 +355,7 @@ pub fn document_properties(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
         live_fx_section(app, ui, bg_id);
     }
     crate::substance3d_ui::properties_section(app, ui);
+    crate::fresco_ui::properties_section(app, ui, None);
     agent_skills_section(app, ui);
 }
 
@@ -417,23 +364,15 @@ pub fn layer_properties(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: La
     live_fx_section(app, ui, layer_id);
     mockup_section(app, ui, layer_id);
     type_2027_section(app, ui, layer_id);
-    let is_raster = app
-        .session
-        .active()
-        .and_then(|st| st.doc.layer(layer_id))
-        .is_some_and(|l| matches!(l.content, LayerContent::Raster(_)));
+    let is_raster = app.session.active().and_then(|st| st.doc.layer(layer_id)).is_some_and(|l| matches!(l.content, LayerContent::Raster(_)));
     if is_raster {
         crate::substance3d_ui::properties_section(app, ui);
+        crate::fresco_ui::properties_section(app, ui, Some(layer_id));
     }
 }
 
 fn live_fx_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: LayerId) {
-    let Some(fx) = app
-        .session
-        .active()
-        .and_then(|st| st.doc.layer(layer_id))
-        .and_then(|l| l.live_fx.clone())
-    else {
+    let Some(fx) = app.session.active().and_then(|st| st.doc.layer(layer_id)).and_then(|l| l.live_fx.clone()) else {
         return;
     };
     let t = Tokens::get(ui.ctx());
@@ -445,14 +384,7 @@ fn live_fx_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: LayerId
     let mut clear_fx = false;
 
     match fx {
-        LiveBackdropFx::Fireflies {
-            mut quantity,
-            mut depth_variation,
-            mut blurriness,
-            mut color,
-            mut progress,
-            seed,
-        } => {
+        LiveBackdropFx::Fireflies { mut quantity, mut depth_variation, mut blurriness, mut color, mut progress, seed } => {
             egui::Grid::new(("fx-fireflies", layer_id.0)).num_columns(2).spacing([8.0, 5.0]).show(ui, |ui| {
                 ui.label(RichText::new(tl!("Quantity")).color(t.text_dim));
                 let mut q = quantity as f32;
@@ -483,19 +415,9 @@ fn live_fx_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: LayerId
                 ui.end_row();
             });
         }
-        LiveBackdropFx::WaterRipple {
-            mut horizon,
-            mut amplitude,
-            mut frequency,
-            mut progress,
-        } => {
+        LiveBackdropFx::WaterRipple { mut horizon, mut amplitude, mut frequency, mut progress } => {
             egui::Grid::new(("fx-water-ripple", layer_id.0)).num_columns(2).spacing([8.0, 5.0]).show(ui, |ui| {
-                for (label, val_kind) in [
-                    (tl!("Horizon"), 0u8),
-                    (tl!("Amplitude"), 1),
-                    (tl!("Frequency"), 2),
-                    (tl!("Progress"), 3),
-                ] {
+                for (label, val_kind) in [(tl!("Horizon"), 0u8), (tl!("Amplitude"), 1), (tl!("Frequency"), 2), (tl!("Progress"), 3)] {
                     ui.label(RichText::new(label).color(t.text_dim));
                     let changed = match val_kind {
                         0 => widgets::value_field(ui, &mut horizon, 5.0..=95.0, "%", 68.0).changed(),
@@ -517,11 +439,7 @@ fn live_fx_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: LayerId
                 }
             });
         }
-        LiveBackdropFx::Relight3d {
-            mut lamps,
-            mut ambient,
-            mut surface_relief,
-        } => {
+        LiveBackdropFx::Relight3d { mut lamps, mut ambient, mut surface_relief } => {
             let sel_key = egui::Id::unique(("props-relight-sel", layer_id.0));
             let mut sel = ui.data(|d| d.get_temp::<usize>(sel_key)).unwrap_or(0).min(2);
             ui.horizontal(|ui| {
@@ -587,10 +505,7 @@ fn live_fx_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: LayerId
         }
         LiveBackdropFx::Restyle { preset, mut intensity, prompt } => {
             let mut preset_id = preset.id().to_string();
-            let presets: Vec<(String, &str)> = RestylePreset::ALL
-                .iter()
-                .map(|p| (p.id().to_string(), tl!(p.label())))
-                .collect();
+            let presets: Vec<(String, &str)> = RestylePreset::ALL.iter().map(|p| (p.id().to_string(), tl!(p.label()))).collect();
             egui::Grid::new(("fx-restyle", layer_id.0)).num_columns(2).spacing([8.0, 5.0]).show(ui, |ui| {
                 ui.label(RichText::new(tl!("Style")).color(t.text_dim));
                 let c_p = widgets::dropdown(ui, "props-restyle-preset", tl!("Style"), &mut preset_id, &presets, 130.0);
@@ -705,12 +620,7 @@ fn type_2027_section(app: &mut PhotocraftApp, ui: &mut egui::Ui, layer_id: Layer
         if widgets::secondary_button(ui, tl!("Copy Text Attributes"), 0.0).clicked() {
             cmd_to_run = Some(("edit.copyTextAttributes", json!({ "layer": layer_id.0 })));
         }
-        if ui
-            .add_enabled_ui(has_clip, |ui| {
-                widgets::secondary_button(ui, tl!("Paste Text Attributes"), 0.0).clicked()
-            })
-            .inner
-        {
+        if ui.add_enabled_ui(has_clip, |ui| widgets::secondary_button(ui, tl!("Paste Text Attributes"), 0.0).clicked()).inner {
             cmd_to_run = Some(("edit.pasteTextAttributes", json!({ "layer": layer_id.0 })));
         }
     });
@@ -732,10 +642,7 @@ fn agent_skills_section(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     ui.horizontal_wrapped(|ui| {
         for &(cmd, label) in AGENT_SKILLS {
             let enabled = app.session.is_enabled(cmd);
-            if ui
-                .add_enabled_ui(enabled, |ui| widgets::secondary_button(ui, tl!(label), 0.0).clicked())
-                .inner
-            {
+            if ui.add_enabled_ui(enabled, |ui| widgets::secondary_button(ui, tl!(label), 0.0).clicked()).inner {
                 picked = Some(cmd);
             }
         }

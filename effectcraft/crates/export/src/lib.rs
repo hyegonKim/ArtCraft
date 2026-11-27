@@ -332,13 +332,7 @@ async fn sequence(cx: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut State<'_>) 
                     &mut buf,
                     &img,
                     comp,
-                    StillOutput {
-                        format: fmt,
-                        channels,
-                        size: (w, h),
-                        quality: cx.output.quality,
-                        png_compression: cx.output.png_compression,
-                    },
+                    StillOutput { format: fmt, channels, size: (w, h), quality: cx.output.quality, png_compression: cx.output.png_compression },
                 )?;
                 let data = buf.into_inner();
                 let path = cx.place(&path, data.len() as u64);

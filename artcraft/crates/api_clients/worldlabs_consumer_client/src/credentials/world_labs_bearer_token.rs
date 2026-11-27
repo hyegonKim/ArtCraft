@@ -35,10 +35,7 @@ pub struct WorldLabsBearerToken {
 impl WorldLabsBearerToken {
   pub fn new(mut bearer_token: String) -> Self {
     if bearer_token.starts_with("Bearer") {
-      bearer_token = bearer_token
-          .trim_start_matches("Bearer")
-          .trim()
-          .to_string();
+      bearer_token = bearer_token.trim_start_matches("Bearer").trim().to_string();
     }
     Self { bearer_token }
   }
@@ -58,12 +55,11 @@ impl WorldLabsBearerToken {
   pub fn to_bearer_token_header_string(&self) -> String {
     format!("Bearer {}", self.bearer_token)
   }
-  
+
   pub fn parse_jwt_claims(&self) -> Result<JwtClaims, WorldLabsError> {
-    JwtClaims::parse_claims(&self.bearer_token)
-        .map_err(|err| {
-          error!("Failed to parse bearer token into JWT claims: {}", err);
-          WorldLabsError::Client(WorldLabsClientError::FailedToParseJwtClaims(err))
-        })
+    JwtClaims::parse_claims(&self.bearer_token).map_err(|err| {
+      error!("Failed to parse bearer token into JWT claims: {}", err);
+      WorldLabsError::Client(WorldLabsClientError::FailedToParseJwtClaims(err))
+    })
   }
 }

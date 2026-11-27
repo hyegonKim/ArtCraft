@@ -47,8 +47,6 @@ pub struct GptImage1p5EditImageOutput {
   pub images: Vec<GptImage1p5EditImageFile>,
 }
 
-pub fn gpt_image_1p5_edit_image(
-  params: GptImage1p5EditImageInput,
-) -> FalRequest<GptImage1p5EditImageInput, GptImage1p5EditImageOutput> {
+pub fn gpt_image_1p5_edit_image(params: GptImage1p5EditImageInput) -> FalRequest<GptImage1p5EditImageInput, GptImage1p5EditImageOutput> {
   FalRequest::new("fal-ai/gpt-image-1.5/edit", params)
 }

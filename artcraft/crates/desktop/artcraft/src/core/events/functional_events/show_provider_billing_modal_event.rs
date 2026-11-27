@@ -4,7 +4,7 @@ use enums::tauri::ux::tauri_event_name::TauriEventName;
 use serde_derive::Serialize;
 use tauri::AppHandle;
 
-/// Send a signal to the frontend to show a modal that suggests fixing or setting up 
+/// Send a signal to the frontend to show a modal that suggests fixing or setting up
 /// service billing requirements.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "snake_case")]

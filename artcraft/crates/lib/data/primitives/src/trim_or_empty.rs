@@ -1,4 +1,3 @@
-
 /// Trim the string. If it trims to empty, return None.
 pub fn trim_or_empty(input: &str) -> Option<&str> {
   let trimmed = input.trim();

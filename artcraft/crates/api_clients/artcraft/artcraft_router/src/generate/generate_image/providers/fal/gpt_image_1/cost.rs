@@ -1,9 +1,5 @@
-use fal_client::requests::api::image::edit::gpt_image_1_edit_image::api::{
-  GptImage1EditImageNumImages, GptImage1EditImageQuality, GptImage1EditImageSize,
-};
-use fal_client::requests::api::image::text::gpt_image_1_text_to_image::api::{
-  GptImage1TextToImageNumImages, GptImage1TextToImageQuality, GptImage1TextToImageSize,
-};
+use fal_client::requests::api::image::edit::gpt_image_1_edit_image::api::{GptImage1EditImageNumImages, GptImage1EditImageQuality, GptImage1EditImageSize};
+use fal_client::requests::api::image::text::gpt_image_1_text_to_image::api::{GptImage1TextToImageNumImages, GptImage1TextToImageQuality, GptImage1TextToImageSize};
 
 use crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate;
 use crate::generate::generate_image::providers::fal::gpt_image_1::request::FalGptImage1RequestState;
@@ -34,14 +30,12 @@ impl FalGptImage1CostState {
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let cost_in_usd_cents = match &self.request {
-      FalGptImage1RequestState::TextToImage(req) => {
-        cost_t2i(req.quality, req.image_size, req.num_images)
-      }
+      FalGptImage1RequestState::TextToImage(req) => cost_t2i(req.quality, req.image_size, req.num_images),
       FalGptImage1RequestState::EditImage(req) => {
         let output_cost = cost_edit_output(req.quality, req.image_size, req.num_images);
         let input_cost = 2 * req.image_urls.len() as u64;
         output_cost + input_cost
-      }
+      },
     };
 
     ImageGenerationCostEstimate {
@@ -57,11 +51,7 @@ impl FalGptImage1CostState {
   }
 }
 
-fn cost_t2i(
-  quality: Option<GptImage1TextToImageQuality>,
-  image_size: Option<GptImage1TextToImageSize>,
-  num_images: GptImage1TextToImageNumImages,
-) -> u64 {
+fn cost_t2i(quality: Option<GptImage1TextToImageQuality>, image_size: Option<GptImage1TextToImageSize>, num_images: GptImage1TextToImageNumImages) -> u64 {
   use GptImage1TextToImageQuality as Q;
   use GptImage1TextToImageSize as S;
   let q = quality.unwrap_or(Q::High);
@@ -70,11 +60,7 @@ fn cost_t2i(
   per_image * t2i_num_images(num_images)
 }
 
-fn cost_edit_output(
-  quality: Option<GptImage1EditImageQuality>,
-  image_size: Option<GptImage1EditImageSize>,
-  num_images: GptImage1EditImageNumImages,
-) -> u64 {
+fn cost_edit_output(quality: Option<GptImage1EditImageQuality>, image_size: Option<GptImage1EditImageSize>, num_images: GptImage1EditImageNumImages) -> u64 {
   use GptImage1EditImageQuality as Q;
   use GptImage1EditImageSize as S;
   let q = quality.unwrap_or(Q::High);

@@ -9,10 +9,8 @@ pub struct AppCredentialsDir {
 impl DataSubdir for AppCredentialsDir {
   const DIRECTORY_NAME: &'static str = "credentials";
 
-  fn new_from<P: AsRef<Path>> (dir: P) -> Self {
-    Self {
-      path: dir.as_ref().to_path_buf(),
-    }
+  fn new_from<P: AsRef<Path>>(dir: P) -> Self {
+    Self { path: dir.as_ref().to_path_buf() }
   }
 
   fn path(&self) -> &Path {
@@ -28,7 +26,7 @@ impl AppCredentialsDir {
   pub fn get_grok_cookies_path(&self) -> PathBuf {
     self.path.join("grok_cookies.txt")
   }
-  
+
   pub fn get_sora_cookie_file_path(&self) -> PathBuf {
     self.path.join("sora_cookies.txt")
   }
@@ -37,7 +35,7 @@ impl AppCredentialsDir {
     self.path.join("sora_bearer_token.txt")
   }
 
-  #[deprecated(note="use the new sentinel token methods")]
+  #[deprecated(note = "use the new sentinel token methods")]
   pub fn get_sora_legacy_sentinel_file_path(&self) -> PathBuf {
     self.path.join("sora_sentinel.txt")
   }
@@ -49,7 +47,7 @@ impl AppCredentialsDir {
   pub fn get_storyteller_avt_cookie_file_path(&self) -> PathBuf {
     self.path.join("artcraft_avt.txt")
   }
-  
+
   pub fn get_storyteller_session_cookie_file_path(&self) -> PathBuf {
     self.path.join("artcraft_session.txt")
   }

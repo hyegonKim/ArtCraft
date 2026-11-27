@@ -27,15 +27,7 @@ impl ArtcraftHunyuan3d3SketchCostState {
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
-    MeshGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    MeshGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -55,61 +47,35 @@ mod tests {
 
   #[test]
   fn pbr_adds_twenty_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      enable_pbr: Some(true),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { enable_pbr: Some(true), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 49 + 20);
   }
 
   #[test]
   fn pbr_false_adds_nothing() {
-    let builder = GenerateMeshRequestBuilder {
-      enable_pbr: Some(false),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { enable_pbr: Some(false), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 49);
   }
 
   #[test]
   fn face_count_adds_twenty_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      face_count: Some(100_000),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { face_count: Some(100_000), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 49 + 20);
   }
 
   #[test]
   fn all_add_ons_stack() {
-    let builder = GenerateMeshRequestBuilder {
-      enable_pbr: Some(true),
-      face_count: Some(100_000),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { enable_pbr: Some(true), face_count: Some(100_000), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 49 + 20 + 20);
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3Sketch,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("a red ceramic teapot".to_string()),
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_sketch".to_string()),
-      ])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3Sketch, provider: RouterProvider::Artcraft, prompt: Some("a red ceramic teapot".to_string()), reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_sketch".to_string())])), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

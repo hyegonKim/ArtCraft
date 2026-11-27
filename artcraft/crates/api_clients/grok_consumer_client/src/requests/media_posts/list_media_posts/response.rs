@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
-pub (crate) struct PostListRawResponse {
+pub(crate) struct PostListRawResponse {
   pub posts: Vec<PostItem>,
 
   #[serde(rename = "nextCursor")]
@@ -9,7 +9,7 @@ pub (crate) struct PostListRawResponse {
 }
 
 #[derive(Deserialize, Debug)]
-pub (crate) struct PostItem {
+pub(crate) struct PostItem {
   /// The "id" of the post.
   /// This is how we assert video task completion
   pub id: String,
@@ -31,7 +31,7 @@ pub (crate) struct PostItem {
 }
 
 #[derive(Deserialize, Debug)]
-pub (crate) struct ChildPostItem {
+pub(crate) struct ChildPostItem {
   pub id: String,
 
   /// eg. `MEDIA_POST_TYPE_VIDEO`

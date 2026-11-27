@@ -76,23 +76,10 @@ mod tests {
   fn round_trips_through_common_mesh_model() {
     use enums::common::generation::common_mesh_model::CommonMeshModel;
 
-    let cases = [
-      (RouterMeshModel::Hunyuan3d2p0, CommonMeshModel::Hunyuan3d2p0),
-      (RouterMeshModel::Hunyuan3d2p1, CommonMeshModel::Hunyuan3d2p1),
-      (RouterMeshModel::Hunyuan3d3, CommonMeshModel::Hunyuan3d3),
-      (RouterMeshModel::Hunyuan3d3Sketch, CommonMeshModel::Hunyuan3d3Sketch),
-      (RouterMeshModel::Hunyuan3d3p1Pro, CommonMeshModel::Hunyuan3d3p1Pro),
-      (RouterMeshModel::Hunyuan3d3p1Rapid, CommonMeshModel::Hunyuan3d3p1Rapid),
-      (RouterMeshModel::Hunyuan3d3p1Part, CommonMeshModel::Hunyuan3d3p1Part),
-      (RouterMeshModel::Hunyuan3d3p1SmartTopology, CommonMeshModel::Hunyuan3d3p1SmartTopology),
-      (RouterMeshModel::Tripo3dH3p1, CommonMeshModel::Tripo3dH3p1),
-      (RouterMeshModel::MeshyV6, CommonMeshModel::MeshyV6),
-      (RouterMeshModel::Rodin2p5Fast, CommonMeshModel::Rodin2p5Fast),
-    ];
+    let cases = [(RouterMeshModel::Hunyuan3d2p0, CommonMeshModel::Hunyuan3d2p0), (RouterMeshModel::Hunyuan3d2p1, CommonMeshModel::Hunyuan3d2p1), (RouterMeshModel::Hunyuan3d3, CommonMeshModel::Hunyuan3d3), (RouterMeshModel::Hunyuan3d3Sketch, CommonMeshModel::Hunyuan3d3Sketch), (RouterMeshModel::Hunyuan3d3p1Pro, CommonMeshModel::Hunyuan3d3p1Pro), (RouterMeshModel::Hunyuan3d3p1Rapid, CommonMeshModel::Hunyuan3d3p1Rapid), (RouterMeshModel::Hunyuan3d3p1Part, CommonMeshModel::Hunyuan3d3p1Part), (RouterMeshModel::Hunyuan3d3p1SmartTopology, CommonMeshModel::Hunyuan3d3p1SmartTopology), (RouterMeshModel::Tripo3dH3p1, CommonMeshModel::Tripo3dH3p1), (RouterMeshModel::MeshyV6, CommonMeshModel::MeshyV6), (RouterMeshModel::Rodin2p5Fast, CommonMeshModel::Rodin2p5Fast)];
     for (router_model, expected_common) in cases {
       let json = serde_json::to_string(&router_model).unwrap();
-      let common: CommonMeshModel = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("CommonMeshModel failed to parse {json}: {e}"));
+      let common: CommonMeshModel = serde_json::from_str(&json).unwrap_or_else(|e| panic!("CommonMeshModel failed to parse {json}: {e}"));
       assert_eq!(common, expected_common, "for {router_model:?}");
     }
   }

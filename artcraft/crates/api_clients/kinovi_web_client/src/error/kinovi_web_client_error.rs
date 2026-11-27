@@ -27,7 +27,7 @@ impl Display for KinoviWebClientError {
       Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
       Self::InvalidRequestField { field, raw_value, reason } => {
         write!(f, "Invalid value for request field `{}`: {:?} ({})", field, raw_value, reason)
-      }
+      },
     }
   }
 }

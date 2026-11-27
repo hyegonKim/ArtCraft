@@ -1,1 +1,1 @@
-pub (super) mod handle_artcraft_object;
+pub(super) mod handle_artcraft_object;

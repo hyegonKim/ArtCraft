@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::video::generate_seedance_2p0_mini::{
-  GenerateSeedance2p0MiniRequest, KinoviSeedance2p0MiniAspectRatio, KinoviSeedance2p0MiniBitrate,
-  KinoviSeedance2p0MiniBatchCount, KinoviSeedance2p0MiniOutputResolution,
-};
+use kinovi_web_client::generate::video::generate_seedance_2p0_mini::{GenerateSeedance2p0MiniRequest, KinoviSeedance2p0MiniAspectRatio, KinoviSeedance2p0MiniBitrate, KinoviSeedance2p0MiniBatchCount, KinoviSeedance2p0MiniOutputResolution};
 
 use crate::api::audio_list_ref::AudioListRef;
 use crate::api::character_list_ref::CharacterListRef;
@@ -9,11 +6,7 @@ use crate::api::image_list_ref::ImageListRef;
 use crate::api::image_ref::ImageRef;
 use crate::api::video_list_ref::VideoListRef;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
-use crate::generate::generate_video::providers::kinovi::resolve::{
-  audio_list_ref_into_urls_or_tokens, image_list_ref_into_urls_or_tokens,
-  resolve_and_upload_list, resolve_and_upload_single, resolve_character_tokens,
-  video_list_ref_into_urls_or_tokens,
-};
+use crate::generate::generate_video::providers::kinovi::resolve::{audio_list_ref_into_urls_or_tokens, image_list_ref_into_urls_or_tokens, resolve_and_upload_list, resolve_and_upload_single, resolve_character_tokens, video_list_ref_into_urls_or_tokens};
 use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::request::KinoviSeedance2p0MiniRequestState;
 use crate::generate::generate_video::video_generation_draft_context::VideoGenerationDraftContext;
 
@@ -40,10 +33,7 @@ pub struct KinoviSeedance2p0MiniRemainingItems {
 }
 
 impl KinoviSeedance2p0MiniDraftState {
-  pub async fn to_request(
-    &mut self,
-    draft_context: &VideoGenerationDraftContext<'_>,
-  ) -> Result<KinoviSeedance2p0MiniRequestState, ArtcraftRouterError> {
+  pub async fn to_request(&mut self, draft_context: &VideoGenerationDraftContext<'_>) -> Result<KinoviSeedance2p0MiniRequestState, ArtcraftRouterError> {
     let client = draft_context.get_kinovi_web_client_ref()?;
     let session = &client.session;
 
@@ -61,39 +51,16 @@ impl KinoviSeedance2p0MiniDraftState {
       start_frame_url = resolve_and_upload_single(session, remaining.start_frame, map, predownloaded).await?;
       end_frame_url = resolve_and_upload_single(session, remaining.end_frame, map, predownloaded).await?;
 
-      reference_image_urls = resolve_and_upload_list(
-        session, remaining.reference_images.map(image_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_image_urls = resolve_and_upload_list(session, remaining.reference_images.map(image_list_ref_into_urls_or_tokens), map, predownloaded).await?;
 
-      reference_video_urls = resolve_and_upload_list(
-        session, remaining.reference_videos.map(video_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_video_urls = resolve_and_upload_list(session, remaining.reference_videos.map(video_list_ref_into_urls_or_tokens), map, predownloaded).await?;
 
-      reference_audio_urls = resolve_and_upload_list(
-        session, remaining.reference_audio.map(audio_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_audio_urls = resolve_and_upload_list(session, remaining.reference_audio.map(audio_list_ref_into_urls_or_tokens), map, predownloaded).await?;
 
-      character_ids = resolve_character_tokens(
-        remaining.reference_character_tokens.as_ref(),
-        draft_context,
-      )?;
+      character_ids = resolve_character_tokens(remaining.reference_character_tokens.as_ref(), draft_context)?;
     }
 
-    let request = GenerateSeedance2p0MiniRequest {
-      prompt: self.prompt.clone(),
-      aspect_ratio: Some(self.aspect_ratio),
-      output_resolution: self.resolution,
-      duration_seconds: self.duration_seconds,
-      batch_count: Some(self.batch_count),
-      start_frame_url,
-      end_frame_url,
-      reference_image_urls,
-      reference_video_urls,
-      reference_audio_urls,
-      character_ids,
-      use_face_blur_hack: None,
-      bitrate: self.bitrate,
-    };
+    let request = GenerateSeedance2p0MiniRequest { prompt: self.prompt.clone(), aspect_ratio: Some(self.aspect_ratio), output_resolution: self.resolution, duration_seconds: self.duration_seconds, batch_count: Some(self.batch_count), start_frame_url, end_frame_url, reference_image_urls, reference_video_urls, reference_audio_urls, character_ids, use_face_blur_hack: None, bitrate: self.bitrate };
 
     Ok(KinoviSeedance2p0MiniRequestState { request })
   }

@@ -43,10 +43,7 @@ impl StaffAuditEntityType {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::User,
-      Self::Wallet,
-    ])
+    BTreeSet::from([Self::User, Self::Wallet])
   }
 }
 

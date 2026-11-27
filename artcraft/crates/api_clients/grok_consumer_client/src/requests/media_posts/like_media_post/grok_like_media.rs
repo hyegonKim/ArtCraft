@@ -38,17 +38,13 @@ pub struct GrokLikeMediaPost<'a> {
 
 /// Response type
 #[derive(Debug)]
-pub struct GrokLikeMediaPostResponse {
-}
+pub struct GrokLikeMediaPostResponse {}
 
-impl <'a> GrokLikeMediaPost<'a> {
+impl<'a> GrokLikeMediaPost<'a> {
   pub async fn send(&self) -> Result<GrokLikeMediaPostResponse, GrokError> {
     info!("Configuring client...");
 
-    let client = Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
     let xai_request_id = Uuid::new_v4().to_string();
     println!("xai_request_id (uuid) = {}", xai_request_id);
@@ -56,13 +52,7 @@ impl <'a> GrokLikeMediaPost<'a> {
     let sentry_trace_header = self.sentry_trace.to_http_request_header();
     println!("sentry_trace = {}", sentry_trace_header);
 
-    let x_statsig_id = generate_xsid(GenerateXsidArgs {
-      path: "/rest/app-chat/conversations/new",
-      method: "POST",
-      verification_token: &self.verification_token,
-      svg_data: &self.svg_data,
-      numbers: &self.numbers,
-    })?;
+    let x_statsig_id = generate_xsid(GenerateXsidArgs { path: "/rest/app-chat/conversations/new", method: "POST", verification_token: &self.verification_token, svg_data: &self.svg_data, numbers: &self.numbers })?;
 
     println!("x_statsig_id = {}", x_statsig_id);
 
@@ -99,35 +89,27 @@ impl <'a> GrokLikeMediaPost<'a> {
       request_builder = request_builder.timeout(timeout);
     }
 
-    let request_body = LikeMediaWireRequest {
-      id: self.file_id.0.to_string(),
-    };
+    let request_body = LikeMediaWireRequest { id: self.file_id.0.to_string() };
 
-    let http_request = request_builder.json(&request_body)
-        .build()
-        .map_err(|err| {
-          error!("Error building create media request: {:?}", err);
-          GrokClientError::WreqClientError(err)
-        })?;
+    let http_request = request_builder.json(&request_body).build().map_err(|err| {
+      error!("Error building create media request: {:?}", err);
+      GrokClientError::WreqClientError(err)
+    })?;
 
-    let response = client.execute(http_request)
-        .await
-        .map_err(|err| {
-          error!("Error during create media: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response = client.execute(http_request).await.map_err(|err| {
+      error!("Error during create media: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     let status = response.status();
 
     info!("Like Media Status: {:?}", status);
 
-    let response_body = &response.text()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok create media response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
-    
+    let response_body = &response.text().await.map_err(|err| {
+      error!("Error reading Grok create media response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
+
     // TODO: Classify errors
     if !status.is_success() {
       warn!("Not successful liking media (status: {:?}) : {:?}", status, response_body);
@@ -138,8 +120,7 @@ impl <'a> GrokLikeMediaPost<'a> {
     //let response : GrokApiUploadFileResponse = serde_json::from_str(response_body)
     //    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-    Ok(GrokLikeMediaPostResponse {
-    })
+    Ok(GrokLikeMediaPostResponse {})
   }
 }
 
@@ -158,9 +139,7 @@ mod tests {
 
     let file_id = FileId("990ddf90-8f34-42b1-81a5-39c509d62ff7".to_string()); // Mochi
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     println!("Verification Token: {:?}", secrets.verification_token);
     println!("Sentry Trace: {:?}", secrets.sentry_trace);
@@ -168,18 +147,7 @@ mod tests {
     println!("Svg Path: {:?}", secrets.svg_path_data);
     println!("Baggage: {:?}", secrets.baggage);
 
-    let request = GrokLikeMediaPost {
-      file_id: &file_id,
-
-      cookie: cookies.as_str(),
-      baggage: &secrets.baggage,
-      sentry_trace: &secrets.sentry_trace,
-      verification_token: &secrets.verification_token,
-      svg_data: &secrets.svg_path_data,
-      numbers: &secrets.numbers,
-      
-      request_timeout: None,
-    };
+    let request = GrokLikeMediaPost { file_id: &file_id, cookie: cookies.as_str(), baggage: &secrets.baggage, sentry_trace: &secrets.sentry_trace, verification_token: &secrets.verification_token, svg_data: &secrets.svg_path_data, numbers: &secrets.numbers, request_timeout: None };
 
     let result = request.send().await?;
 

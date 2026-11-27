@@ -1,16 +1,9 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
-use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{
-  EnqueueSeedance1p5ProTextToVideoDuration, EnqueueSeedance1p5ProTextToVideoRequest,
-  EnqueueSeedance1p5ProTextToVideoResolution,
-};
-use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{
-  EnqueueSeedance1p5ProImageToVideoDuration, EnqueueSeedance1p5ProImageToVideoResolution,
-};
+use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{EnqueueSeedance1p5ProTextToVideoDuration, EnqueueSeedance1p5ProTextToVideoRequest, EnqueueSeedance1p5ProTextToVideoResolution};
+use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{EnqueueSeedance1p5ProImageToVideoDuration, EnqueueSeedance1p5ProImageToVideoResolution};
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::seedance_1p5_pro::request::{
-  FalSeedance1p5ProMode, FalSeedance1p5ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::seedance_1p5_pro::request::{FalSeedance1p5ProMode, FalSeedance1p5ProRequestState};
 
 pub struct FalSeedance1p5ProCostState {
   request: FalSeedance1p5ProRequestState,
@@ -26,26 +19,12 @@ impl FalSeedance1p5ProCostState {
     // to the t2v calculator; v2 does the same to guarantee billing parity.
     let t2v_request = match &self.request.mode {
       FalSeedance1p5ProMode::TextToVideo(req) => req.clone(),
-      FalSeedance1p5ProMode::ImageToVideo(req) => EnqueueSeedance1p5ProTextToVideoRequest {
-        prompt: String::new(),
-        resolution: req.resolution.map(i2v_to_t2v_resolution),
-        duration: req.duration.map(i2v_to_t2v_duration),
-        aspect_ratio: None,
-        generate_audio: req.generate_audio,
-      },
+      FalSeedance1p5ProMode::ImageToVideo(req) => EnqueueSeedance1p5ProTextToVideoRequest { prompt: String::new(), resolution: req.resolution.map(i2v_to_t2v_resolution), duration: req.duration.map(i2v_to_t2v_duration), aspect_ratio: None, generate_audio: req.generate_audio },
     };
 
     let cost_in_usd_cents = t2v_request.calculate_cost_in_cents();
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -87,40 +66,19 @@ mod tests {
   // ── Helpers ──
 
   fn t2v_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance1p5Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance1p5Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   fn i2v_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance1p5Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance1p5Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())), ..Default::default() }
   }
 
-  fn cost_cents(
-    builder_factory: fn() -> GenerateVideoRequestBuilder,
-    resolution: Option<RouterResolution>,
-    duration_seconds: Option<u16>,
-    generate_audio: Option<bool>,
-  ) -> u64 {
+  fn cost_cents(builder_factory: fn() -> GenerateVideoRequestBuilder, resolution: Option<RouterResolution>, duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
     let mut b = builder_factory();
     b.resolution = resolution;
     b.duration_seconds = duration_seconds;
     b.generate_audio = generate_audio;
-    b.build2()
-      .expect("build2")
-      .estimate_cost()
-      .expect("estimate_cost")
-      .cost_in_usd_cents
-      .expect("cost_in_usd_cents")
+    b.build2().expect("build2").estimate_cost().expect("estimate_cost").cost_in_usd_cents.expect("cost_in_usd_cents")
   }
 
   // ── T2V numeric literal pricing assertions ──
@@ -216,26 +174,17 @@ mod tests {
 
     #[test]
     fn p720_5s_audio() {
-      assert_eq!(
-        cost_cents(i2v_builder, Some(RouterResolution::SevenTwentyP), Some(5), Some(true)),
-        cost_cents(t2v_builder, Some(RouterResolution::SevenTwentyP), Some(5), Some(true)),
-      );
+      assert_eq!(cost_cents(i2v_builder, Some(RouterResolution::SevenTwentyP), Some(5), Some(true)), cost_cents(t2v_builder, Some(RouterResolution::SevenTwentyP), Some(5), Some(true)),);
     }
 
     #[test]
     fn p1080_10s_no_audio() {
-      assert_eq!(
-        cost_cents(i2v_builder, Some(RouterResolution::TenEightyP), Some(10), Some(false)),
-        cost_cents(t2v_builder, Some(RouterResolution::TenEightyP), Some(10), Some(false)),
-      );
+      assert_eq!(cost_cents(i2v_builder, Some(RouterResolution::TenEightyP), Some(10), Some(false)), cost_cents(t2v_builder, Some(RouterResolution::TenEightyP), Some(10), Some(false)),);
     }
 
     #[test]
     fn p480_12s_audio() {
-      assert_eq!(
-        cost_cents(i2v_builder, Some(RouterResolution::FourEightyP), Some(12), Some(true)),
-        cost_cents(t2v_builder, Some(RouterResolution::FourEightyP), Some(12), Some(true)),
-      );
+      assert_eq!(cost_cents(i2v_builder, Some(RouterResolution::FourEightyP), Some(12), Some(true)), cost_cents(t2v_builder, Some(RouterResolution::FourEightyP), Some(12), Some(true)),);
     }
   }
 
@@ -280,13 +229,7 @@ mod tests {
     b.generate_audio = Some(true);
     let baseline = b.clone().build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap();
 
-    for ar in [
-      Some(RouterAspectRatio::Auto),
-      Some(RouterAspectRatio::Square),
-      Some(RouterAspectRatio::WideSixteenByNine),
-      Some(RouterAspectRatio::TallNineBySixteen),
-      Some(RouterAspectRatio::WideTwentyOneByNine),
-    ] {
+    for ar in [Some(RouterAspectRatio::Auto), Some(RouterAspectRatio::Square), Some(RouterAspectRatio::WideSixteenByNine), Some(RouterAspectRatio::TallNineBySixteen), Some(RouterAspectRatio::WideTwentyOneByNine)] {
       let mut variant = b.clone();
       variant.aspect_ratio = ar;
       let cost = variant.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap();
@@ -298,11 +241,7 @@ mod tests {
 
   #[test]
   fn combinatorial_positive_cost() {
-    let resolutions = [
-      Some(RouterResolution::FourEightyP),
-      Some(RouterResolution::SevenTwentyP),
-      Some(RouterResolution::TenEightyP),
-    ];
+    let resolutions = [Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP)];
     let durations = [Some(4u16), Some(5), Some(8), Some(12)];
     let audios = [Some(true), Some(false), None];
 

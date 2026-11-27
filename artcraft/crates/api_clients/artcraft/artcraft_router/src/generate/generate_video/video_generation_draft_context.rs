@@ -28,31 +28,23 @@ pub struct VideoGenerationDraftContext<'a> {
   pub predownloaded_media_paths: Option<&'a HashMap<String, PathBuf>>,
 }
 
-impl <'a> VideoGenerationDraftContext<'a> {
+impl<'a> VideoGenerationDraftContext<'a> {
   pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
     let client = self.client.ok_or(ArtcraftRouterError::Client(ClientError::RouterClientNotProvided))?;
-    client.get_kinovi_web_client_ref()
-      .map_err(|err| ArtcraftRouterError::Client(err))
+    client.get_kinovi_web_client_ref().map_err(|err| ArtcraftRouterError::Client(err))
   }
 
   pub fn get_media_file_to_artcraft_url_map(&self) -> Result<&HashMap<MediaFileToken, String>, ArtcraftRouterError> {
-    self.media_file_to_artcraft_url_map
-      .ok_or_else(|| ArtcraftRouterError::Client(ClientError::MediaFileToUrlMapNotProvided))
+    self.media_file_to_artcraft_url_map.ok_or_else(|| ArtcraftRouterError::Client(ClientError::MediaFileToUrlMapNotProvided))
   }
 
   pub fn get_character_token_to_kinovi_map(&self) -> Result<&HashMap<CharacterToken, String>, ArtcraftRouterError> {
-    self.character_token_to_kinovi_id_map
-      .ok_or_else(|| ArtcraftRouterError::Client(ClientError::CharacterTokenToKinoviCharacterIdNotProvided))
+    self.character_token_to_kinovi_id_map.ok_or_else(|| ArtcraftRouterError::Client(ClientError::CharacterTokenToKinoviCharacterIdNotProvided))
   }
 }
 
 impl Debug for VideoGenerationDraftContext<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("VideoGenerationDraftContext")
-      .field("client", &self.client.is_some())
-      .field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map)
-      .field("character_token_to_kinovi_id_map", &self.character_token_to_kinovi_id_map)
-      .field("predownloaded_media_paths", &self.predownloaded_media_paths)
-      .finish()
+    f.debug_struct("VideoGenerationDraftContext").field("client", &self.client.is_some()).field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map).field("character_token_to_kinovi_id_map", &self.character_token_to_kinovi_id_map).field("predownloaded_media_paths", &self.predownloaded_media_paths).finish()
   }
 }

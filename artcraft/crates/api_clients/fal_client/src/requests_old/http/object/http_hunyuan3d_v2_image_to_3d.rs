@@ -24,8 +24,6 @@ pub struct Hunyuan3dV2ImageTo3dInput {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Hunyuan3dV2ImageTo3dOutput {}
 
-pub fn hunyuan3d_v2_image_to_3d(
-  params: Hunyuan3dV2ImageTo3dInput,
-) -> FalRequest<Hunyuan3dV2ImageTo3dInput, Hunyuan3dV2ImageTo3dOutput> {
+pub fn hunyuan3d_v2_image_to_3d(params: Hunyuan3dV2ImageTo3dInput) -> FalRequest<Hunyuan3dV2ImageTo3dInput, Hunyuan3dV2ImageTo3dOutput> {
   FalRequest::new("fal-ai/hunyuan3d/v2", params)
 }

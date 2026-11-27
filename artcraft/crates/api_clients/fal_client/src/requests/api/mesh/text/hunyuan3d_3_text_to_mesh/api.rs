@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::text::hunyuan3d_3_text_to_mesh::raw_request::{
-  Hunyuan3d3TextToMeshInput, Hunyuan3d3TextToMeshOutput,
-};
+use crate::requests::api::mesh::text::hunyuan3d_3_text_to_mesh::raw_request::{Hunyuan3d3TextToMeshInput, Hunyuan3d3TextToMeshOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -42,24 +40,24 @@ impl FalEndpoint for Hunyuan3d3TextToMeshRequest {
   type RawResponse = Hunyuan3d3TextToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    let generate_type = self.generate_type.map(|t| match t {
-      Hunyuan3d3TextToMeshGenerateType::Normal => "Normal",
-      Hunyuan3d3TextToMeshGenerateType::LowPoly => "LowPoly",
-      Hunyuan3d3TextToMeshGenerateType::Geometry => "Geometry",
-    }.to_string());
+    let generate_type = self.generate_type.map(|t| {
+      match t {
+        Hunyuan3d3TextToMeshGenerateType::Normal => "Normal",
+        Hunyuan3d3TextToMeshGenerateType::LowPoly => "LowPoly",
+        Hunyuan3d3TextToMeshGenerateType::Geometry => "Geometry",
+      }
+      .to_string()
+    });
 
-    let polygon_type = self.polygon_type.map(|t| match t {
-      Hunyuan3d3TextToMeshPolygonType::Triangle => "triangle",
-      Hunyuan3d3TextToMeshPolygonType::Quadrilateral => "quadrilateral",
-    }.to_string());
+    let polygon_type = self.polygon_type.map(|t| {
+      match t {
+        Hunyuan3d3TextToMeshPolygonType::Triangle => "triangle",
+        Hunyuan3d3TextToMeshPolygonType::Quadrilateral => "quadrilateral",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      face_count: self.face_count,
-      generate_type,
-      polygon_type,
-      enable_pbr: self.enable_pbr,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), face_count: self.face_count, generate_type, polygon_type, enable_pbr: self.enable_pbr })
   }
 }
 
@@ -77,13 +75,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Hunyuan3d3TextToMeshRequest {
-      prompt: "A velociraptor with an open mouth full of sharp teeth. Large claws, ready to strike.".to_string(),
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3TextToMeshRequest { prompt: "A velociraptor with an open mouth full of sharp teeth. Large claws, ready to strike.".to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -97,13 +89,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Hunyuan3d3TextToMeshRequest {
-      prompt: "A velociraptor with an open mouth full of sharp teeth. Large claws, ready to strike.".to_string(),
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3TextToMeshRequest { prompt: "A velociraptor with an open mouth full of sharp teeth. Large claws, ready to strike.".to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -115,13 +101,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Hunyuan3d3TextToMeshRequest {
-      prompt: "A red ceramic teapot".to_string(),
-      face_count: Some(100_000),
-      generate_type: Some(Hunyuan3d3TextToMeshGenerateType::LowPoly),
-      polygon_type: Some(Hunyuan3d3TextToMeshPolygonType::Quadrilateral),
-      enable_pbr: Some(true),
-    };
+    let request = Hunyuan3d3TextToMeshRequest { prompt: "A red ceramic teapot".to_string(), face_count: Some(100_000), generate_type: Some(Hunyuan3d3TextToMeshGenerateType::LowPoly), polygon_type: Some(Hunyuan3d3TextToMeshPolygonType::Quadrilateral), enable_pbr: Some(true) };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(
       json,
@@ -137,24 +117,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Hunyuan3d3TextToMeshRequest {
-      prompt: "minimal".to_string(),
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3TextToMeshRequest { prompt: "minimal".to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn every_generate_type_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Hunyuan3d3TextToMeshGenerateType::Normal, "Normal"),
-      (Hunyuan3d3TextToMeshGenerateType::LowPoly, "LowPoly"),
-      (Hunyuan3d3TextToMeshGenerateType::Geometry, "Geometry"),
-    ] {
+    for (variant, expected) in [(Hunyuan3d3TextToMeshGenerateType::Normal, "Normal"), (Hunyuan3d3TextToMeshGenerateType::LowPoly, "LowPoly"), (Hunyuan3d3TextToMeshGenerateType::Geometry, "Geometry")] {
       let mut request = base_wire_request();
       request.generate_type = Some(variant);
       let raw = request.to_raw_request().unwrap();
@@ -164,10 +134,7 @@ mod tests {
 
   #[test]
   fn every_polygon_type_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Hunyuan3d3TextToMeshPolygonType::Triangle, "triangle"),
-      (Hunyuan3d3TextToMeshPolygonType::Quadrilateral, "quadrilateral"),
-    ] {
+    for (variant, expected) in [(Hunyuan3d3TextToMeshPolygonType::Triangle, "triangle"), (Hunyuan3d3TextToMeshPolygonType::Quadrilateral, "quadrilateral")] {
       let mut request = base_wire_request();
       request.polygon_type = Some(variant);
       let raw = request.to_raw_request().unwrap();
@@ -183,12 +150,6 @@ mod tests {
   // NB: Pricing tests are in cost.rs
 
   fn base_wire_request() -> Hunyuan3d3TextToMeshRequest {
-    Hunyuan3d3TextToMeshRequest {
-      prompt: "test".to_string(),
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    }
+    Hunyuan3d3TextToMeshRequest { prompt: "test".to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None }
   }
 }

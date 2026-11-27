@@ -1,6 +1,4 @@
-use kinovi_web_client::generate::image::generate_midjourney_v7::{
-  GenerateMidjourneyV7AspectRatio, GenerateMidjourneyV7Request, KinoviMidjourneyBatchCount,
-};
+use kinovi_web_client::generate::image::generate_midjourney_v7::{GenerateMidjourneyV7AspectRatio, GenerateMidjourneyV7Request, KinoviMidjourneyBatchCount};
 
 use crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate;
 use crate::generate::generate_image::providers::kinovi::midjourney_7::draft::KinoviMidjourney7DraftState;
@@ -41,15 +39,7 @@ impl KinoviMidjourney7CostState {
     let cost_in_credits = costs.kinovi_credits;
     let cost_in_usd_cents = costs.usd_cents_rounded_up;
 
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_credits),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_credits), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -114,8 +104,7 @@ mod tests {
 
   #[test]
   fn flags_are_correct() {
-    let cost = KinoviMidjourney7CostState { batch_count: KinoviMidjourneyBatchCount::One }
-      .estimate_cost();
+    let cost = KinoviMidjourney7CostState { batch_count: KinoviMidjourneyBatchCount::One }.estimate_cost();
     assert!(!cost.is_free);
     assert!(!cost.is_unlimited);
     assert!(!cost.is_rate_limited);
@@ -147,10 +136,8 @@ mod tests {
     #[test]
     fn draft_and_request_produce_same_cost() {
       // Same batch count → same cost, regardless of draft vs request path.
-      let req_cost = KinoviMidjourney7CostState::from_request(&build_request_no_image_inputs(2))
-        .estimate_cost();
-      let draft_cost = KinoviMidjourney7CostState::from_draft(&build_draft_with_image_inputs(2))
-        .estimate_cost();
+      let req_cost = KinoviMidjourney7CostState::from_request(&build_request_no_image_inputs(2)).estimate_cost();
+      let draft_cost = KinoviMidjourney7CostState::from_draft(&build_draft_with_image_inputs(2)).estimate_cost();
       assert_eq!(req_cost.cost_in_credits, draft_cost.cost_in_credits);
       assert_eq!(req_cost.cost_in_usd_cents, draft_cost.cost_in_usd_cents);
     }
@@ -159,39 +146,19 @@ mod tests {
   // ── Helpers ──
 
   fn credits_for(batch: KinoviMidjourneyBatchCount) -> u64 {
-    KinoviMidjourney7CostState { batch_count: batch }
-      .estimate_cost().cost_in_credits.unwrap()
+    KinoviMidjourney7CostState { batch_count: batch }.estimate_cost().cost_in_credits.unwrap()
   }
 
   fn usd_cents_for(batch: KinoviMidjourneyBatchCount) -> u64 {
-    KinoviMidjourney7CostState { batch_count: batch }
-      .estimate_cost().cost_in_usd_cents.unwrap()
+    KinoviMidjourney7CostState { batch_count: batch }.estimate_cost().cost_in_usd_cents.unwrap()
   }
 
   fn base_builder() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::Midjourney7,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("test".to_string()),
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::Midjourney7, provider: RouterProvider::KinoviWeb, prompt: Some("test".to_string()), image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   fn build_request_no_image_inputs(batch_count: u16) -> KinoviMidjourney7RequestState {
-    let builder = GenerateImageRequestBuilder {
-      image_batch_count: Some(batch_count),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_batch_count: Some(batch_count), ..base_builder() };
     match builder.build2().expect("build2") {
       ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney7(r)) => r,
       _ => panic!("expected Request"),
@@ -199,11 +166,7 @@ mod tests {
   }
 
   fn build_draft_with_image_inputs(batch_count: u16) -> KinoviMidjourney7DraftState {
-    let builder = GenerateImageRequestBuilder {
-      image_batch_count: Some(batch_count),
-      image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_batch_count: Some(batch_count), image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])), ..base_builder() };
     match builder.build2().expect("build2") {
       ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney7(d)) => d,
       _ => panic!("expected Draft"),

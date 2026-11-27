@@ -7,7 +7,6 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use tauri::{AppHandle, Manager, PhysicalSize, Window};
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct MainWindowSize {
   pub width: u32,
@@ -21,17 +20,12 @@ impl MainWindowSize {
 
   pub fn from_main_window(app: &AppHandle) -> AnyhowResult<Self> {
     let windows = app.windows();
-    windows.get(MAIN_WINDOW_NAME)
-        .map(|window| Self::from_window(window))
-        .unwrap_or_else(|| Err(anyhow::anyhow!("Main window not found")))
+    windows.get(MAIN_WINDOW_NAME).map(|window| Self::from_window(window)).unwrap_or_else(|| Err(anyhow::anyhow!("Main window not found")))
   }
 
   pub fn from_window(window: &Window) -> AnyhowResult<Self> {
     let size = get_window_size_heuristic(window)?;
-    Ok(Self {
-      width: size.width,
-      height: size.height,
-    })
+    Ok(Self { width: size.width, height: size.height })
   }
 
   pub fn from_filesystem_configs(app_data_root: &AppDataRoot) -> AnyhowResult<Option<Self>> {
@@ -47,11 +41,7 @@ impl MainWindowSize {
   pub fn persist_to_filesystem(&self, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
     let filename = app_data_root.get_window_size_config_file();
     let json = serde_json::to_string(self)?;
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(filename)?;
+    let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
     file.write_all(json.as_bytes())?;
     file.flush()?;
     Ok(())

@@ -72,8 +72,6 @@ pub struct NanoBanana2EditImageOutput {
   //pub description: String,
 }
 
-pub fn nano_banana_2_edit_image(
-  params: NanoBanana2EditImageInput,
-) -> FalRequest<NanoBanana2EditImageInput, NanoBanana2EditImageOutput> {
+pub fn nano_banana_2_edit_image(params: NanoBanana2EditImageInput) -> FalRequest<NanoBanana2EditImageInput, NanoBanana2EditImageOutput> {
   FalRequest::new("fal-ai/nano-banana-2/edit", params)
 }

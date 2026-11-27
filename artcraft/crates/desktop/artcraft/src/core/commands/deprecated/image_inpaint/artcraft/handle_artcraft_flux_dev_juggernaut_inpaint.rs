@@ -34,14 +34,7 @@ use artcraft_client::endpoints::media_files::upload_image_media_file_from_file::
 use tauri::AppHandle;
 use tokens::tokens::media_files::MediaFileToken;
 
-pub async fn handle_artcraft_flux_dev_juggernaut_inpaint(
-  request: &EnqueueInpaintImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_artcraft_flux_dev_juggernaut_inpaint(request: &EnqueueInpaintImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => {
@@ -56,11 +49,7 @@ pub async fn handle_artcraft_flux_dev_juggernaut_inpaint(
     },
   };
 
-  let mask_media_token = get_mask(
-    request,
-    app_env_configs,
-    &creds,
-  ).await?;
+  let mask_media_token = get_mask(request, app_env_configs, &creds).await?;
 
   info!("Calling Artcraft flux dev juggernaut inpaint ...");
 
@@ -73,58 +62,30 @@ pub async fn handle_artcraft_flux_dev_juggernaut_inpaint(
     Some(3) => Some(FluxDevJuggernautInpaintImageNumImages::Three),
     Some(4) => Some(FluxDevJuggernautInpaintImageNumImages::Four),
     Some(other) => {
-      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages {
-        min: 1,
-        max: 4,
-        requested: other,
-      }));
+      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages { min: 1, max: 4, requested: other }));
     },
   };
 
-  let request = FluxDevJuggernautInpaintImageRequest {
-    uuid_idempotency_token,
-    prompt: Some(request.prompt.clone()),
-    image_media_token,
-    mask_media_token,
-    num_images,
-  };
+  let request = FluxDevJuggernautInpaintImageRequest { uuid_idempotency_token, prompt: Some(request.prompt.clone()), image_media_token, mask_media_token, num_images };
 
-  let result = flux_dev_juggernaut_inpaint_image(
-    &app_env_configs.storyteller_host,
-    Some(&creds),
-    request,
-  ).await;
-  
+  let result = flux_dev_juggernaut_inpaint_image(&app_env_configs.storyteller_host, Some(&creds), request).await;
+
   let job_id = match result {
     Ok(enqueued) => {
       // TODO(bt,2025-07-05): Enqueue job token?
-      info!("Successfully enqueued Artcraft flux dev juggernaut inpaint. Job token: {}",
-        enqueued.inference_job_token);
+      info!("Successfully enqueued Artcraft flux dev juggernaut inpaint. Job token: {}", enqueued.inference_job_token);
       enqueued.inference_job_token
-    }
+    },
     Err(err) => {
       error!("Failed to use Artcraft flux dev juggernaut inpaint: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
-  
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Artcraft,
-    model: Some(GenerationModel::FluxDevJuggernaut),
-    provider_job_id: Some(job_id.to_string()),
-    task_type: TaskType::ImageInpaintEdit,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Artcraft, model: Some(GenerationModel::FluxDevJuggernaut), provider_job_id: Some(job_id.to_string()), task_type: TaskType::ImageInpaintEdit, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
-async fn get_mask(
-  request: &EnqueueInpaintImageCommand,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds: &StorytellerCredentialSet,
-) -> Result<MediaFileToken, GenerateError> {
-
+async fn get_mask(request: &EnqueueInpaintImageCommand, app_env_configs: &AppEnvConfigs, storyteller_creds: &StorytellerCredentialSet) -> Result<MediaFileToken, GenerateError> {
   if request.mask_image_media_token.is_some() && request.mask_image_raw_bytes.is_some() {
     return Err(GenerateError::both_image_mask_media_token_and_bytes_supplied());
   }
@@ -133,29 +94,19 @@ async fn get_mask(
     return Ok(token.clone());
   };
 
-  let image_bytes = request.mask_image_raw_bytes.as_ref()
-    .ok_or(GenerateError::required_source_image_mask_not_provided())?;
+  let image_bytes = request.mask_image_raw_bytes.as_ref().ok_or(GenerateError::required_source_image_mask_not_provided())?;
 
-  let image_bytes = normalize_image_bytes_to_flux_mask(image_bytes)
-      .map_err(|err| {
-        error!("Failed to convert image bytes to png: {:?}", err);
-        GenerateError::AnyhowError(anyhow!("Failed to convert image bytes to png mask"))
-      })?;
+  let image_bytes = normalize_image_bytes_to_flux_mask(image_bytes).map_err(|err| {
+    error!("Failed to convert image bytes to png: {:?}", err);
+    GenerateError::AnyhowError(anyhow!("Failed to convert image bytes to png mask"))
+  })?;
 
   info!("Uploading image media file from bytes...");
 
-  let result = upload_image_media_file_from_bytes(UploadImageBytesArgs {
-    api_host: &app_env_configs.storyteller_host,
-    maybe_creds: Some(&storyteller_creds),
-    image_bytes: image_bytes.0,
-    image_type: ImageType::Png,
-    is_intermediate_system_file: true,
-      maybe_generation_provider: None,
-  }).await
-      .map_err(|err| {
-        error!("Failed to upload image media file: {:?}", err);
-        GenerateError::from(err)
-      })?;
+  let result = upload_image_media_file_from_bytes(UploadImageBytesArgs { api_host: &app_env_configs.storyteller_host, maybe_creds: Some(&storyteller_creds), image_bytes: image_bytes.0, image_type: ImageType::Png, is_intermediate_system_file: true, maybe_generation_provider: None }).await.map_err(|err| {
+    error!("Failed to upload image media file: {:?}", err);
+    GenerateError::from(err)
+  })?;
 
   Ok(result.media_file_token)
 }

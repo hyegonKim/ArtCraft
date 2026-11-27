@@ -9,9 +9,8 @@
 //!   shadow catcher into a new `"3D Stage"` raster layer.
 
 use photocraft_algo::substance_pbr::{
-    MaterialSamplerParams, ObjMesh, PbrChannel, ProceduralPbrParams, ProceduralPbrPreset, SdfBooleanOp,
-    Stage3dInputs, Stage3dParams, StageMaterialPreset, StageShape, make_seamless_surface, parse_obj_mesh,
-    render_procedural_pbr_surface, render_stage_3d_surface, sample_pbr_channel_surface,
+    MaterialSamplerParams, ObjMesh, PbrChannel, ProceduralPbrParams, ProceduralPbrPreset, SdfBooleanOp, Stage3dInputs, Stage3dParams, StageMaterialPreset,
+    StageShape, make_seamless_surface, parse_obj_mesh, render_procedural_pbr_surface, render_stage_3d_surface, sample_pbr_channel_surface,
     sample_pbr_maps_rgba,
 };
 use photocraft_color::{BlendMode, ColorMode};
@@ -32,17 +31,11 @@ fn bad(cmd: &str, msg: impl Into<String>) -> EngineError {
 }
 
 fn f32_or(p: &Value, k: &str, d: f32) -> f32 {
-    p.get(k)
-        .and_then(Value::as_f64)
-        .filter(|v| v.is_finite())
-        .map_or(d, |v| v as f32)
+    p.get(k).and_then(Value::as_f64).filter(|v| v.is_finite()).map_or(d, |v| v as f32)
 }
 
 fn u32_or(p: &Value, k: &str, d: u32) -> u32 {
-    p.get(k)
-        .and_then(Value::as_u64)
-        .and_then(|v| u32::try_from(v).ok())
-        .unwrap_or(d)
+    p.get(k).and_then(Value::as_u64).and_then(|v| u32::try_from(v).ok()).unwrap_or(d)
 }
 
 fn bool_or(p: &Value, k: &str, d: bool) -> bool {
@@ -56,23 +49,14 @@ fn vec3_or(p: &Value, k: &str, d: [f32; 3], lo: f32, hi: f32) -> [f32; 3] {
     if arr.len() < 3 {
         return d;
     }
-    let elem = |i: usize, def: f32| {
-        arr.get(i)
-            .and_then(Value::as_f64)
-            .filter(|v| v.is_finite())
-            .map_or(def, |v| (v as f32).clamp(lo, hi))
-    };
+    let elem = |i: usize, def: f32| arr.get(i).and_then(Value::as_f64).filter(|v| v.is_finite()).map_or(def, |v| (v as f32).clamp(lo, hi));
     [elem(0, d[0]), elem(1, d[1]), elem(2, d[2])]
 }
 
 fn rgb_or(p: &Value, k: &str, d: [f32; 3]) -> [f32; 3] {
     if let Some(hex) = p.get(k).and_then(Value::as_str) {
         let h = hex.trim().trim_start_matches('#');
-        let byte = |i: usize| {
-            h.get(i..i + 2)
-                .and_then(|s| u8::from_str_radix(s, 16).ok())
-                .map(|v| f32::from(v) / 255.0)
-        };
+        let byte = |i: usize| h.get(i..i + 2).and_then(|s| u8::from_str_radix(s, 16).ok()).map(|v| f32::from(v) / 255.0);
         if let (Some(r), Some(g), Some(b)) = (byte(0), byte(2), byte(4)) {
             return [r, g, b];
         }
@@ -83,11 +67,7 @@ fn rgb_or(p: &Value, k: &str, d: [f32; 3]) -> [f32; 3] {
 
 fn has_supported_doc(s: &Session) -> std::result::Result<(), String> {
     let st = s.active().ok_or("no document open")?;
-    if matches!(st.doc.mode, ColorMode::Bitmap | ColorMode::Indexed) {
-        Err(format!("not available in {:?} mode", st.doc.mode))
-    } else {
-        Ok(())
-    }
+    if matches!(st.doc.mode, ColorMode::Bitmap | ColorMode::Indexed) { Err(format!("not available in {:?} mode", st.doc.mode)) } else { Ok(()) }
 }
 
 fn has_supported_filter_layer(s: &Session) -> std::result::Result<(), String> {
@@ -125,9 +105,7 @@ fn parse_optional_channel(cmd: &str, p: &Value) -> Result<Option<PbrChannel>> {
     if s.trim().is_empty() || s == "group" || s == "all" {
         return Ok(None);
     }
-    PbrChannel::from_id(s)
-        .map(Some)
-        .ok_or_else(|| bad(cmd, format!("unknown PBR channel `{s}` (baseColor|normal|roughness|metallic|height|ambientOcclusion)")))
+    PbrChannel::from_id(s).map(Some).ok_or_else(|| bad(cmd, format!("unknown PBR channel `{s}` (baseColor|normal|roughness|metallic|height|ambientOcclusion)")))
 }
 
 pub fn parse_procedural_params(cmd: &str, p: &Value) -> Result<ProceduralPbrParams> {
@@ -137,10 +115,7 @@ pub fn parse_procedural_params(cmd: &str, p: &Value) -> Result<ProceduralPbrPara
         Some(v) => {
             let s = v.as_str().ok_or_else(|| bad(cmd, "`preset` must be a string"))?;
             ProceduralPbrPreset::from_id(s).ok_or_else(|| {
-                bad(
-                    cmd,
-                    format!("unknown procedural PBR preset `{s}` (brushedSteel|carbonHexWeave|terrazzoMarble|ceramicTiles|weatheredCopper|wovenFabric)"),
-                )
+                bad(cmd, format!("unknown procedural PBR preset `{s}` (brushedSteel|carbonHexWeave|terrazzoMarble|ceramicTiles|weatheredCopper|wovenFabric)"))
             })?
         }
     };
@@ -211,11 +186,7 @@ pub fn parse_stage3d_params(cmd: &str, p: &Value) -> Result<(Stage3dParams, Opti
         None | Some(Value::Null) => None,
         Some(v) => {
             let text = v.as_str().ok_or_else(|| bad(cmd, "`objData` must be a Wavefront .obj string"))?;
-            if text.trim().is_empty() {
-                None
-            } else {
-                Some(parse_obj_mesh(text).map_err(|e| bad(cmd, e))?)
-            }
+            if text.trim().is_empty() { None } else { Some(parse_obj_mesh(text).map_err(|e| bad(cmd, e))?) }
         }
     };
 
@@ -255,11 +226,7 @@ pub fn apply_to_surface(id: &str, params: &Value, surf: &Surface, canvas: Rect) 
     }
     match id {
         "filter.material.samplePbr" => {
-            let ch = params
-                .get("channel")
-                .and_then(Value::as_str)
-                .and_then(PbrChannel::from_id)
-                .unwrap_or(PbrChannel::BaseColor);
+            let ch = params.get("channel").and_then(Value::as_str).and_then(PbrChannel::from_id).unwrap_or(PbrChannel::BaseColor);
             Some(sample_pbr_channel_surface(surf, area, ch, &parse_sampler_params(params)))
         }
         "filter.material.makeSeamless" => {
@@ -274,13 +241,7 @@ pub fn apply_to_surface(id: &str, params: &Value, surf: &Surface, canvas: Rect) 
     }
 }
 
-fn commit_filtered_surface(
-    base: &mut Surface,
-    filtered: &Surface,
-    area: Rect,
-    selection: Option<&Surface>,
-    lock_alpha: bool,
-) {
+fn commit_filtered_surface(base: &mut Surface, filtered: &Surface, area: Rect, selection: Option<&Surface>, lock_alpha: bool) {
     if area.is_empty() {
         return;
     }
@@ -317,13 +278,7 @@ fn commit_filtered_surface(
     base.prune();
 }
 
-fn run_destructive_or_smart_filter(
-    s: &mut Session,
-    cmd_id: &str,
-    label: &str,
-    p: &Value,
-    render: impl FnOnce(&Surface, Rect) -> Surface,
-) -> Result<Value> {
+fn run_destructive_or_smart_filter(s: &mut Session, cmd_id: &str, label: &str, p: &Value, render: impl FnOnce(&Surface, Rect) -> Surface) -> Result<Value> {
     let layer_id = layer_param(s, p)?;
     let mut stored_params = p.clone();
     if let Value::Object(m) = &mut stored_params {
@@ -335,9 +290,7 @@ fn run_destructive_or_smart_filter(
         let locks = doc.effective_locks(layer_id);
         if locks.pixels || locks.all {
             let name = doc.layer(layer_id).map_or("Layer", |l| l.name.as_str());
-            return Err(EngineError::Other(format!(
-                "Could not complete your request because the layer \"{name}\" is locked"
-            )));
+            return Err(EngineError::Other(format!("Could not complete your request because the layer \"{name}\" is locked")));
         }
         let selection = doc.selection.clone();
         let canvas = doc.bounds();
@@ -349,21 +302,11 @@ fn run_destructive_or_smart_filter(
                 Ok(json!({ "layer": layer_id.0 }))
             }
             LayerContent::Smart(_) => {
-                let sf = SmartFilter {
-                    command: cmd_id.to_string(),
-                    params: stored_params,
-                    blend: BlendMode::Normal,
-                    opacity: 1.0,
-                    visible: true,
-                };
+                let sf = SmartFilter { command: cmd_id.to_string(), params: stored_params, blend: BlendMode::Normal, opacity: 1.0, visible: true };
                 crate::smart_cmds::add_smart_filter_in(doc, layer_id, sf, selection.as_ref(), &JobCtx::new())?;
                 Ok(json!({ "layer": layer_id.0, "smartFilter": true }))
             }
-            other => Err(EngineError::Other(format!(
-                "filters need a pixel layer (active layer is {} {} layer)",
-                other.article(),
-                other.kind_name()
-            ))),
+            other => Err(EngineError::Other(format!("filters need a pixel layer (active layer is {} {} layer)", other.article(), other.kind_name()))),
         }
     })
 }
@@ -380,20 +323,13 @@ fn extract_layer_surface(doc: &Document, layer_id: LayerId) -> Option<Surface> {
 }
 
 fn unique_exact_or_numbered(doc: &Document, base: &str) -> String {
-    if doc.walk().iter().any(|(_, _, l)| l.name == base) {
-        doc.next_layer_name(base)
-    } else {
-        base.to_string()
-    }
+    if doc.walk().iter().any(|(_, _, l)| l.name == base) { doc.next_layer_name(base) } else { base.to_string() }
 }
 
 fn run_sample_pbr(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "filter.material.samplePbr";
     let explicit_channel = parse_optional_channel(CMD, p)?;
-    let create_group = p
-        .get("createGroup")
-        .and_then(Value::as_bool)
-        .unwrap_or_else(|| explicit_channel.is_none());
+    let create_group = p.get("createGroup").and_then(Value::as_bool).unwrap_or_else(|| explicit_channel.is_none());
     let sp = parse_sampler_params(p);
 
     if !create_group {
@@ -403,9 +339,7 @@ fn run_sample_pbr(s: &mut Session, p: &Value) -> Result<Value> {
             m.insert("createGroup".into(), json!(false));
             m.insert("channel".into(), json!(ch.id()));
         }
-        return run_destructive_or_smart_filter(s, CMD, "Sample PBR Channel", &single_params, |surf, canvas| {
-            sample_pbr_channel_surface(surf, canvas, ch, &sp)
-        });
+        return run_destructive_or_smart_filter(s, CMD, "Sample PBR Channel", &single_params, |surf, canvas| sample_pbr_channel_surface(surf, canvas, ch, &sp));
     }
 
     let src_id = layer_param(s, p)?;
@@ -414,8 +348,8 @@ fn run_sample_pbr(s: &mut Session, p: &Value) -> Result<Value> {
         if u64::from(canvas.width()) * u64::from(canvas.height()) > MAX_STAGE_PIXELS {
             return Err(bad(CMD, "document dimensions exceed PBR Material Sampler 64 MP working limit"));
         }
-        let src_surf = extract_layer_surface(doc, src_id)
-            .ok_or_else(|| EngineError::Other("PBR Material Sampler requires a pixel or Smart Object layer".into()))?;
+        let src_surf =
+            extract_layer_surface(doc, src_id).ok_or_else(|| EngineError::Other("PBR Material Sampler requires a pixel or Smart Object layer".into()))?;
         let fmt = doc.pixel_format();
         let src_fmt = src_surf.format();
         let src_ch = src_fmt.channels();
@@ -443,15 +377,7 @@ fn run_sample_pbr(s: &mut Session, p: &Value) -> Result<Value> {
         }
 
         let grp_name = unique_exact_or_numbered(doc, "PBR Material Maps");
-        let grp = Layer::new(
-            grp_name,
-            LayerContent::Group(Group {
-                children,
-                expanded: true,
-                artboard: None,
-                frame_stroke: None,
-            }),
-        );
+        let grp = Layer::new(grp_name, LayerContent::Group(Group { children, expanded: true, artboard: None, frame_stroke: None }));
         let gid = crate::layer_place::insert_new(doc, Some(src_id), grp, crate::layer_place::Place::Auto);
         *active = Some(gid);
         Ok((gid, ids))
@@ -472,17 +398,13 @@ fn run_make_seamless(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(bad(CMD, "`feather` must be a finite number in 0.05..0.5"));
     }
     let feather = f32_or(p, "feather", f32_or(p, "tileFeather", 0.22)).clamp(0.05, 0.5);
-    run_destructive_or_smart_filter(s, CMD, "Make Seamless", p, |surf, canvas| {
-        make_seamless_surface(surf, canvas, feather)
-    })
+    run_destructive_or_smart_filter(s, CMD, "Make Seamless", p, |surf, canvas| make_seamless_surface(surf, canvas, feather))
 }
 
 fn run_procedural_pbr(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "filter.material.proceduralPbr";
     let pp = parse_procedural_params(CMD, p)?;
-    run_destructive_or_smart_filter(s, CMD, "Procedural PBR Material", p, |surf, canvas| {
-        render_procedural_pbr_surface(surf, canvas, &pp)
-    })
+    run_destructive_or_smart_filter(s, CMD, "Procedural PBR Material", p, |surf, canvas| render_procedural_pbr_surface(surf, canvas, &pp))
 }
 
 fn extract_decal_rgba(doc: &Document, layer_id: LayerId, canvas: Rect) -> Option<(Vec<[f32; 4]>, usize, usize)> {
@@ -504,12 +426,7 @@ fn extract_decal_rgba(doc: &Document, layer_id: LayerId, canvas: Rect) -> Option
 fn run_new_3d_stage_layer(s: &mut Session, p: &Value) -> Result<Value> {
     const CMD: &str = "layer.new3dStageLayer";
     let (params, custom_mesh) = parse_stage3d_params(CMD, p)?;
-    let custom_name = p
-        .get("name")
-        .and_then(Value::as_str)
-        .map(str::trim)
-        .filter(|n| !n.is_empty())
-        .map(str::to_string);
+    let custom_name = p.get("name").and_then(Value::as_str).map(str::trim).filter(|n| !n.is_empty()).map(str::to_string);
 
     let new_id = s.edit("New 3D Stage Layer", |doc, active| {
         let canvas = doc.bounds();
@@ -520,11 +437,8 @@ fn run_new_3d_stage_layer(s: &mut Session, p: &Value) -> Result<Value> {
         }
 
         let composite = photocraft_compose::render(doc, canvas);
-        let decal_buf = if params.material == StageMaterialPreset::ActiveLayerDecal {
-            active.and_then(|aid| extract_decal_rgba(doc, aid, canvas))
-        } else {
-            None
-        };
+        let decal_buf =
+            if params.material == StageMaterialPreset::ActiveLayerDecal { active.and_then(|aid| extract_decal_rgba(doc, aid, canvas)) } else { None };
 
         let inputs = Stage3dInputs {
             backdrop_rgba: Some((&composite.px, w, h)),
@@ -613,10 +527,7 @@ mod tests {
             s.execute("edit.fill", json!({"contents": "color", "color": "#886644"})).unwrap();
 
             let res = s
-                .execute(
-                    "filter.material.samplePbr",
-                    json!({"createGroup": true, "delightStrength": 0.85, "makeTileable": true, "normalStrength": 2.5}),
-                )
+                .execute("filter.material.samplePbr", json!({"createGroup": true, "delightStrength": 0.85, "makeTileable": true, "normalStrength": 2.5}))
                 .unwrap();
             let group_id = LayerId(res["group"].as_u64().unwrap());
             let layer_ids = res["layers"].as_array().unwrap();
@@ -656,33 +567,13 @@ mod tests {
         s.execute("filter.material.proceduralPbr", json!({"preset": "ceramicTiles", "scale": 3.0})).unwrap();
 
         let tex_id = s.active().unwrap().active_layer.unwrap();
-        let outside_px = s
-            .active()
-            .unwrap()
-            .doc
-            .layer(tex_id)
-            .unwrap()
-            .surface()
-            .unwrap()
-            .read_region(Rect::from_xywh(0, 0, 1, 1));
-        let inside_px = s
-            .active()
-            .unwrap()
-            .doc
-            .layer(tex_id)
-            .unwrap()
-            .surface()
-            .unwrap()
-            .read_region(Rect::from_xywh(12, 12, 1, 1));
+        let outside_px = s.active().unwrap().doc.layer(tex_id).unwrap().surface().unwrap().read_region(Rect::from_xywh(0, 0, 1, 1));
+        let inside_px = s.active().unwrap().doc.layer(tex_id).unwrap().surface().unwrap().read_region(Rect::from_xywh(12, 12, 1, 1));
         assert_ne!(outside_px, inside_px, "selection must confine procedural PBR filter");
 
         s.execute("select.deselect", json!({})).unwrap();
         s.execute("filter.material.makeSeamless", json!({"feather": 0.25})).unwrap();
-        s.execute(
-            "filter.material.samplePbr",
-            json!({"createGroup": false, "channel": "normal", "normalStrength": 3.0}),
-        )
-        .unwrap();
+        s.execute("filter.material.samplePbr", json!({"createGroup": false, "channel": "normal", "normalStrength": 3.0})).unwrap();
 
         // Graceful error on invalid channel / preset / feather (Rule 9)
         assert!(s.execute("filter.material.samplePbr", json!({"channel": 999})).is_err());
@@ -701,11 +592,7 @@ mod tests {
         let dec = s.execute("layer.new.layer", json!({"name": "Brand Label"})).unwrap();
         let dec_id = LayerId(dec["layer"].as_u64().unwrap());
         s.edit("Paint Decal", |doc, _| {
-            doc.layer_mut(dec_id)
-                .unwrap()
-                .surface_mut()
-                .unwrap()
-                .fill_rect(Rect::from_xywh(8, 8, 32, 32), &[0.92, 0.12, 0.15, 1.0]);
+            doc.layer_mut(dec_id).unwrap().surface_mut().unwrap().fill_rect(Rect::from_xywh(8, 8, 32, 32), &[0.92, 0.12, 0.15, 1.0]);
             Ok(())
         })
         .unwrap();

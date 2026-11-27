@@ -1,9 +1,5 @@
-use fal_client::requests::api::video::image::veo_2::api::{
-  Veo2ImageToVideoDuration, Veo2ImageToVideoRequest,
-};
-use fal_client::requests::api::video::text::veo_2::api::{
-  Veo2TextToVideoAspectRatio, Veo2TextToVideoDuration, Veo2TextToVideoRequest,
-};
+use fal_client::requests::api::video::image::veo_2::api::{Veo2ImageToVideoDuration, Veo2ImageToVideoRequest};
+use fal_client::requests::api::video::text::veo_2::api::{Veo2TextToVideoAspectRatio, Veo2TextToVideoDuration, Veo2TextToVideoRequest};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::image_ref::ImageRef;
@@ -25,16 +21,12 @@ pub(crate) enum PlanDuration {
   Eight,
 }
 
-pub fn build_fal_veo_2(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_veo_2(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_veo_2_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalVeo2(state)))
 }
 
-pub(crate) fn build_fal_veo_2_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalVeo2RequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_veo_2_state(builder: GenerateVideoRequestBuilder) -> Result<FalVeo2RequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   if builder.end_frame.is_some() {
@@ -46,26 +38,14 @@ pub(crate) fn build_fal_veo_2_state(
   let duration = plan_duration(builder.duration_seconds, strategy)?;
 
   let mode = match builder.start_frame.clone() {
-    Some(ImageRef::Url(url)) => FalVeo2Mode::ImageToVideo(Veo2ImageToVideoRequest {
-      prompt,
-      image_url: url,
-      duration: duration.map(to_i2v_duration),
-    }),
+    Some(ImageRef::Url(url)) => FalVeo2Mode::ImageToVideo(Veo2ImageToVideoRequest { prompt, image_url: url, duration: duration.map(to_i2v_duration) }),
     Some(ImageRef::MediaFileToken(_)) => {
       return Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls));
-    }
+    },
     None => {
       let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio, strategy)?;
-      FalVeo2Mode::TextToVideo(Veo2TextToVideoRequest {
-        prompt,
-        aspect_ratio,
-        duration: duration.map(to_t2v_duration),
-        negative_prompt,
-        enhance_prompt: None,
-        seed: None,
-        auto_fix: None,
-      })
-    }
+      FalVeo2Mode::TextToVideo(Veo2TextToVideoRequest { prompt, aspect_ratio, duration: duration.map(to_t2v_duration), negative_prompt, enhance_prompt: None, seed: None, auto_fix: None })
+    },
   };
 
   Ok(FalVeo2RequestState { mode })
@@ -73,34 +53,22 @@ pub(crate) fn build_fal_veo_2_state(
 
 /// `None` lets fal pick its default (16:9); the old endpoint's explicit "auto"
 /// no longer exists in the new API, so Auto maps to unset.
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Veo2TextToVideoAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Veo2TextToVideoAspectRatio>, ArtcraftRouterError> {
   use Veo2TextToVideoAspectRatio as Ar;
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(None),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(None),
 
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
     Some(unsupported_ar) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("aspect_ratio", &format!("{:?}", unsupported_ar)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("aspect_ratio", &format!("{:?}", unsupported_ar))),
       _ => Ok(None),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
     Some(5) => Ok(Some(PlanDuration::Five)),
@@ -108,9 +76,7 @@ fn plan_duration(
     Some(7) => Ok(Some(PlanDuration::Seven)),
     Some(8) => Ok(Some(PlanDuration::Eight)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("duration_seconds", &format!("{}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("duration_seconds", &format!("{}", other))),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanDuration::Eight)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanDuration::Five)),
     },
@@ -118,10 +84,7 @@ fn plan_duration(
 }
 
 fn unsupported(field: &'static str, value: &str) -> ArtcraftRouterError {
-  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-    field,
-    value: value.to_string(),
-  })
+  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: value.to_string() })
 }
 
 fn to_t2v_duration(d: PlanDuration) -> Veo2TextToVideoDuration {
@@ -217,12 +180,7 @@ mod tests {
 
     #[test]
     fn duration_5_through_8() {
-      for (seconds, expected) in [
-        (5, Veo2TextToVideoDuration::FiveSeconds),
-        (6, Veo2TextToVideoDuration::SixSeconds),
-        (7, Veo2TextToVideoDuration::SevenSeconds),
-        (8, Veo2TextToVideoDuration::EightSeconds),
-      ] {
+      for (seconds, expected) in [(5, Veo2TextToVideoDuration::FiveSeconds), (6, Veo2TextToVideoDuration::SixSeconds), (7, Veo2TextToVideoDuration::SevenSeconds), (8, Veo2TextToVideoDuration::EightSeconds)] {
         let mut b = base_builder();
         b.duration_seconds = Some(seconds);
         assert_eq!(t2v_request(b).duration, Some(expected));
@@ -314,12 +272,7 @@ mod tests {
   }
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo2,
-      provider: RouterProvider::Fal,
-      prompt: Some("a corgi running".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Veo2, provider: RouterProvider::Fal, prompt: Some("a corgi running".to_string()), ..Default::default() }
   }
 
   fn t2v_request(b: GenerateVideoRequestBuilder) -> Veo2TextToVideoRequest {

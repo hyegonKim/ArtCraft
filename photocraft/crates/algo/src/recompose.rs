@@ -26,12 +26,7 @@ pub struct RecomposeParams {
 
 impl Default for RecomposeParams {
     fn default() -> Self {
-        Self {
-            target_width: 1920,
-            target_height: 1080,
-            aspect_ratio: "16:9".into(),
-            prompt: String::new(),
-        }
+        Self { target_width: 1920, target_height: 1080, aspect_ratio: "16:9".into(), prompt: String::new() }
     }
 }
 
@@ -199,11 +194,7 @@ fn outpaint_horizontal(px: &[[f32; 4]], w: usize, h: usize, target_w: usize, ali
                 out[y * target_w + x] = px[y * w + (x - pad_left)];
                 continue;
             }
-            let (dist, is_left) = if x < pad_left {
-                (pad_left - x, true)
-            } else {
-                (x - (pad_left + w) + 1, false)
-            };
+            let (dist, is_left) = if x < pad_left { (pad_left - x, true) } else { (x - (pad_left + w) + 1, false) };
             // Mirror-folded texture coordinate with jittered vertical offset to avoid obvious mirror symmetry.
             let period = (w.saturating_sub(1)).max(1);
             let raw_m = if period > 1 {
@@ -295,11 +286,7 @@ pub fn generative_recompose_rgba(px: &[[f32; 4]], w: usize, h: usize, params: &R
     // Step 2: Vertical shrink or grow via transpose.
     if th != h {
         let tr = transpose_rgba(&cur, cw, h);
-        let tr_out = if th < h {
-            remove_vertical_seams(tr, h, cw, th)
-        } else {
-            outpaint_horizontal(&tr, h, cw, th, align_y, tint)
-        };
+        let tr_out = if th < h { remove_vertical_seams(tr, h, cw, th) } else { outpaint_horizontal(&tr, h, cw, th, align_y, tint) };
         cur = transpose_rgba(&tr_out, th, cw);
     }
 

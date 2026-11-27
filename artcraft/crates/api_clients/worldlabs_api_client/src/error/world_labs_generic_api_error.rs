@@ -5,20 +5,14 @@ use wreq::StatusCode;
 #[derive(Debug)]
 pub enum WorldLabsGenericApiError {
   /// Unknown error occurred when uploading to signed URL
-  GoogleUploadFailed {
-    status_code: StatusCode,
-    body: String,
-  },
+  GoogleUploadFailed { status_code: StatusCode, body: String },
 
   /// serde_json::Error, likely from JSON deserialization schema mismatch.
   /// Includes the original body.
   SerdeResponseParseErrorWithBody(serde_json::Error, String),
 
   /// An uncategorized bad HTTP response.
-  UncategorizedBadResponseWithStatusAndBody {
-    status_code: StatusCode,
-    body: String,
-  },
+  UncategorizedBadResponseWithStatusAndBody { status_code: StatusCode, body: String },
 
   /// An uncaught error from the API client.
   WreqError(wreq::Error),
@@ -27,10 +21,7 @@ pub enum WorldLabsGenericApiError {
 impl WorldLabsGenericApiError {
   pub fn is_403_forbidden(&self) -> bool {
     match self {
-      Self::UncategorizedBadResponseWithStatusAndBody { status_code, .. }
-      | Self::GoogleUploadFailed { status_code, .. } => {
-        *status_code == StatusCode::FORBIDDEN
-      }
+      Self::UncategorizedBadResponseWithStatusAndBody { status_code, .. } | Self::GoogleUploadFailed { status_code, .. } => *status_code == StatusCode::FORBIDDEN,
       _ => false,
     }
   }

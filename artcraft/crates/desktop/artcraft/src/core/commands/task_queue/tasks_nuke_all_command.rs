@@ -28,29 +28,20 @@ pub struct TasksNukeAllResponse {
 impl SerializeMarker for TasksNukeAllResponse {}
 
 #[tauri::command]
-pub async fn tasks_nuke_all_command(
-  task_database: State<'_, TaskDatabase>,
-) -> ResponseOrErrorMessage<TasksNukeAllResponse> {
-
+pub async fn tasks_nuke_all_command(task_database: State<'_, TaskDatabase>) -> ResponseOrErrorMessage<TasksNukeAllResponse> {
   info!("tasks_nuke_all_command called");
 
-  let result = handle_request(
-    &task_database,
-  ).await;
+  let result = handle_request(&task_database).await;
 
   if let Err(err) = &result {
     error!("tasks_nuke_all_command failed: {:?}", err);
-    return Err("tasks_nuke_all_command failed".into())
+    return Err("tasks_nuke_all_command failed".into());
   }
 
-  Ok(TasksNukeAllResponse{
-    success: true,
-  }.into())
+  Ok(TasksNukeAllResponse { success: true }.into())
 }
 
-pub async fn handle_request(
-  task_database: &TaskDatabase,
-) -> AnyhowResult<()> {
+pub async fn handle_request(task_database: &TaskDatabase) -> AnyhowResult<()> {
   let _result = nuke_all_tasks(task_database.get_connection()).await?;
   let _result = dismiss_all_tasks(task_database.get_connection()).await?;
   Ok(())

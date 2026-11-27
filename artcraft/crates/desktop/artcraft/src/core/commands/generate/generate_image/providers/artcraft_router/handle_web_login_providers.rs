@@ -8,10 +8,6 @@ use crate::core::providers::credentials::payload::web_login::WebLoginData;
 /// Handle image generation for providers that authenticate via web login.
 ///
 /// Not yet implemented — placeholder for Grok, Runway, Higgsfield, etc.
-pub async fn handle_web_login_provider(
-  _request: &TauriGenerateImageRequest,
-  _provider: GenerationProvider,
-  _web_login: &WebLoginData,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub async fn handle_web_login_provider(_request: &TauriGenerateImageRequest, _provider: GenerationProvider, _web_login: &WebLoginData) -> Result<TaskEnqueueSuccess, GenerateError> {
   unimplemented!("Web login provider image generation is not yet supported via the router path")
 }

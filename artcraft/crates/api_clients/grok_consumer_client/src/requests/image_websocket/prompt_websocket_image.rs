@@ -8,7 +8,6 @@ pub struct PromptWebsocketImageArgs<'a> {
   pub aspect_ratio: ClientMessageAspectRatio,
 }
 
-
 pub async fn prompt_websocket_image(args: PromptWebsocketImageArgs<'_>) -> Result<(), GrokError> {
   let message = WebsocketClientMessage::new_image_prompt(args.prompt, args.aspect_ratio);
 
@@ -39,9 +38,7 @@ mod tests {
 
     let cookies = get_test_cookies()?;
 
-    let websocket = create_listen_websocket(CreateListenWebsocketArgs {
-      cookies: &cookies,
-    }).await?;
+    let websocket = create_listen_websocket(CreateListenWebsocketArgs { cookies: &cookies }).await?;
 
     //let websocket = GrokWrappedWebsocket::new(websocket);
     let mut websocket = GrokWebsocket::new(websocket);
@@ -49,11 +46,7 @@ mod tests {
     println!("Sending...");
     std::io::stdout().flush()?;
 
-    let result = prompt_websocket_image(PromptWebsocketImageArgs {
-      websocket: &mut websocket,
-      prompt: "a dog riding a motorcycle",
-      aspect_ratio: ClientMessageAspectRatio::WideThreeByTwo,
-    }).await?;
+    let result = prompt_websocket_image(PromptWebsocketImageArgs { websocket: &mut websocket, prompt: "a dog riding a motorcycle", aspect_ratio: ClientMessageAspectRatio::WideThreeByTwo }).await?;
 
     println!("Reading...");
     std::io::stdout().flush()?;
@@ -104,10 +97,9 @@ mod tests {
       //let maybe_message =
       //    websocket.get_response_with_timeout(Duration::from_millis(1000)).await?;
 
-      let maybe_message =
-          websocket.try_next_timeout(Duration::from_millis(1000)).await?;
+      let maybe_message = websocket.try_next_timeout(Duration::from_millis(1000)).await?;
 
-      let mut maybe_raw_text : Option<String> = None;
+      let mut maybe_raw_text: Option<String> = None;
 
       let maybe_message = match maybe_message {
         None => None,
@@ -129,23 +121,23 @@ mod tests {
         None => {
           println!("No message received within timeout.");
           count = count + 1;
-        }
+        },
         Some(message) => {
           match message {
             WebsocketServerMessage::Image(image) => {
               println!("IMAGE: {:?}", image.percentage_complete);
-            }
+            },
             WebsocketServerMessage::Json(json) => {
               println!("JSON : {:?}", json.percentage_complete);
-            }
+            },
             WebsocketServerMessage::Unknown(unknown) => {
               //let typ = unknown.get("type");
               let unknown_string = unknown.as_str();
               println!("[UNKNOWN] websocket message: {:?}", maybe_raw_text);
-            }
+            },
           }
           count = 0;
-        }
+        },
       }
 
       // TODO: Make sure we capture all the events for images
@@ -164,7 +156,7 @@ mod tests {
 
     log::logger().flush();
 
-    assert_eq!(1,2);
+    assert_eq!(1, 2);
 
     Ok(())
   }

@@ -64,20 +64,20 @@ pub fn signature_to_hex(num: f64) -> Result<String, GrokClientError> {
   }
 
   /*
-        frac_digits = []
-        f = frac
-        for _ in range(20):
-            f *= 16
-            digit = int(floor(f + 1e-12))
-            frac_digits.append(format(digit, "x"))
-            f -= digit
-            if abs(f) < 1e-12:
-                break
-        frac_str = "".join(frac_digits).rstrip("0")
-        if frac_str == "":
-            return sign + format(intpart, "x")
-        return sign + format(intpart, "x") + "." + frac_str
-   */
+       frac_digits = []
+       f = frac
+       for _ in range(20):
+           f *= 16
+           digit = int(floor(f + 1e-12))
+           frac_digits.append(format(digit, "x"))
+           f -= digit
+           if abs(f) < 1e-12:
+               break
+       frac_str = "".join(frac_digits).rstrip("0")
+       if frac_str == "":
+           return sign + format(intpart, "x")
+       return sign + format(intpart, "x") + "." + frac_str
+  */
 
   let mut frac_digits = Vec::new();
 

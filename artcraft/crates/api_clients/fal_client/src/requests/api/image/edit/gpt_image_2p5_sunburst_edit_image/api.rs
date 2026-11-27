@@ -46,20 +46,7 @@ mod tests {
 
   #[test]
   fn to_raw_request_delegates_to_params() {
-    let request = GptImage2p5SunburstEditImageRequest {
-      params: GptImage2p5EditImageParams {
-        prompt: "test".to_string(),
-        image_urls: vec!["https://example.com/image.png".to_string()],
-        mask_url: Some("https://example.com/mask.png".to_string()),
-        num_images: GptImage2p5NumImages::Two,
-        image_size: Some(GptImage2p5ImageSize::Square),
-        resolution: Some(GptImage2Resolution::TwoK),
-        quality: Some(GptImage2p5Quality::Low),
-        background: None,
-        output_format: Some(GptImage2p5OutputFormat::Png),
-        output_compression: None,
-      },
-    };
+    let request = GptImage2p5SunburstEditImageRequest { params: GptImage2p5EditImageParams { prompt: "test".to_string(), image_urls: vec!["https://example.com/image.png".to_string()], mask_url: Some("https://example.com/mask.png".to_string()), num_images: GptImage2p5NumImages::Two, image_size: Some(GptImage2p5ImageSize::Square), resolution: Some(GptImage2Resolution::TwoK), quality: Some(GptImage2p5Quality::Low), background: None, output_format: Some(GptImage2p5OutputFormat::Png), output_compression: None } };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "test");
     assert_eq!(raw.image_urls, vec!["https://example.com/image.png".to_string()]);
@@ -78,24 +65,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2p5SunburstEditImageRequest {
-      params: GptImage2p5EditImageParams {
-        prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-        image_urls: vec![
-          GHOST_IMAGE_URL.to_string(),
-          TREX_SKELETON_IMAGE_URL.to_string(),
-          ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        ],
-        mask_url: None,
-        num_images: GptImage2p5NumImages::Two,
-        image_size: None,
-        resolution: None,
-        quality: None,
-        background: None,
-        output_format: None,
-        output_compression: None,
-      },
-    };
+    let request = GptImage2p5SunburstEditImageRequest { params: GptImage2p5EditImageParams { prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], mask_url: None, num_images: GptImage2p5NumImages::Two, image_size: None, resolution: None, quality: None, background: None, output_format: None, output_compression: None } };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -109,25 +79,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2p5SunburstEditImageRequest {
-      params: GptImage2p5EditImageParams {
-        prompt: "make the ghost wear a top hat".to_string(),
-        image_urls: vec![GHOST_IMAGE_URL.to_string()],
-        mask_url: None,
-        num_images: GptImage2p5NumImages::One,
-        image_size: Some(GptImage2p5ImageSize::Square),
-        resolution: None,
-        quality: Some(GptImage2p5Quality::High),
-        background: None,
-        output_format: Some(GptImage2p5OutputFormat::Png),
-        output_compression: None,
-      },
-    };
+    let request = GptImage2p5SunburstEditImageRequest { params: GptImage2p5EditImageParams { prompt: "make the ghost wear a top hat".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string()], mask_url: None, num_images: GptImage2p5NumImages::One, image_size: Some(GptImage2p5ImageSize::Square), resolution: None, quality: Some(GptImage2p5Quality::High), background: None, output_format: Some(GptImage2p5OutputFormat::Png), output_compression: None } };
 
-    let result = request.send_webhook_request(
-      &api_key,
-      "https://example.com/webhook",
-    ).await?;
+    let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Request ID: {:?}", result.request_id);
     assert!(result.request_id.is_some());
     Ok(())

@@ -18,20 +18,12 @@ pub struct ArtcraftSeedance2p5CostState {
 
 impl ArtcraftSeedance2p5CostState {
   pub fn from_request(request: &ArtcraftSeedance2p5RequestState) -> Self {
-    let resolution = request.request.resolution
-      .unwrap_or(CommonResolution::SevenTwentyP);
+    let resolution = request.request.resolution.unwrap_or(CommonResolution::SevenTwentyP);
     let duration_seconds = request.request.duration_seconds.unwrap_or(5);
 
-    let has_video_references = request.request.reference_video_media_tokens
-      .as_ref()
-      .is_some_and(|tokens| !tokens.is_empty());
+    let has_video_references = request.request.reference_video_media_tokens.as_ref().is_some_and(|tokens| !tokens.is_empty());
 
-    Self {
-      resolution,
-      duration_seconds,
-      has_video_references,
-      maybe_total_input_seconds: request.total_input_seconds,
-    }
+    Self { resolution, duration_seconds, has_video_references, maybe_total_input_seconds: request.total_input_seconds }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -40,23 +32,10 @@ impl ArtcraftSeedance2p5CostState {
     // function.
     let maybe_total_input_seconds = self.maybe_total_input_seconds;
 
-    let usd_cents = seedance_2p5_usd_cents(
-      self.resolution,
-      self.duration_seconds,
-      self.has_video_references,
-      maybe_total_input_seconds,
-    );
+    let usd_cents = seedance_2p5_usd_cents(self.resolution, self.duration_seconds, self.has_video_references, maybe_total_input_seconds);
 
     // ArtCraft credits: 100 credits = $1.00, so credits = cents.
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(usd_cents),
-      cost_in_usd_cents: Some(usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(usd_cents), cost_in_usd_cents: Some(usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -161,10 +140,7 @@ mod tests {
     fn input_seconds_clamp_to_max_billed_input_seconds() {
       // 200 input seconds clamp to 30: 7.24279835 ¢/s × (30+30) = 434.57 → 435¢.
       assert_eq!(cents_with_video_refs(Some(RouterResolution::FourEightyP), 30, Some(200)), 435);
-      assert_eq!(
-        cents_with_video_refs(Some(RouterResolution::FourEightyP), 30, Some(200)),
-        cents_with_video_refs(Some(RouterResolution::FourEightyP), 30, Some(30)),
-      );
+      assert_eq!(cents_with_video_refs(Some(RouterResolution::FourEightyP), 30, Some(200)), cents_with_video_refs(Some(RouterResolution::FourEightyP), 30, Some(30)),);
     }
   }
 
@@ -186,39 +162,28 @@ mod tests {
   // ── Helpers ──
 
   fn estimate_with(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> VideoGenerationCostEstimate {
-    let mut builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p5,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    };
+    let mut builder = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p5, provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() };
     f(&mut builder);
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed")
   }
 
   fn cents(resolution: Option<RouterResolution>, duration_seconds: u16) -> u64 {
     estimate_with(|b| {
       b.resolution = resolution;
       b.duration_seconds = Some(duration_seconds);
-    }).cost_in_usd_cents.unwrap()
+    })
+    .cost_in_usd_cents
+    .unwrap()
   }
 
-  fn cents_with_video_refs(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    total_input_seconds: Option<u16>,
-  ) -> u64 {
+  fn cents_with_video_refs(resolution: Option<RouterResolution>, duration_seconds: u16, total_input_seconds: Option<u16>) -> u64 {
     estimate_with(|b| {
       b.resolution = resolution;
       b.duration_seconds = Some(duration_seconds);
-      b.reference_videos = Some(VideoListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_ref".to_string()),
-      ]));
+      b.reference_videos = Some(VideoListRef::MediaFileTokens(vec![MediaFileToken::new("mf_ref".to_string())]));
       b.total_reference_video_input_seconds = total_input_seconds;
-    }).cost_in_usd_cents.unwrap()
+    })
+    .cost_in_usd_cents
+    .unwrap()
   }
 }

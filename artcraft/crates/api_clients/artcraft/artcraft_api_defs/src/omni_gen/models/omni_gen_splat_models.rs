@@ -5,7 +5,7 @@ use serde_derive::Serialize;
 use utoipa::ToSchema;
 
 /// Splat model to default to if none is specified
-const DEFAULT_SPLAT_MODEL : CommonSplatModel = CommonSplatModel::Marble1p1;
+const DEFAULT_SPLAT_MODEL: CommonSplatModel = CommonSplatModel::Marble1p1;
 
 /// Response body for the splat models endpoint.
 #[derive(Serialize, ToSchema, Clone)]
@@ -36,7 +36,6 @@ pub struct OmniGenSplatProviderModelDetails {
 
 #[derive(Serialize, ToSchema, Clone)]
 pub struct OmniGenSplatModelDetails {
-
   pub model: CommonSplatModel,
 
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,19 +79,6 @@ pub struct OmniGenSplatModelDetails {
 
 impl Default for OmniGenSplatModelDetails {
   fn default() -> Self {
-    Self {
-      model: DEFAULT_SPLAT_MODEL,
-      model_creator: None,
-      full_name: None,
-      extra_info: None,
-      extra_info_short: None,
-      text_prompt_supported: None,
-      image_references_supported: None,
-      image_references_max: None,
-      video_reference_supported: None,
-      panorama_supported: None,
-      disable_recaption_supported: None,
-      is_disabled: None,
-    }
+    Self { model: DEFAULT_SPLAT_MODEL, model_creator: None, full_name: None, extra_info: None, extra_info_short: None, text_prompt_supported: None, image_references_supported: None, image_references_max: None, video_reference_supported: None, panorama_supported: None, disable_recaption_supported: None, is_disabled: None }
   }
 }

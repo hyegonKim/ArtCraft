@@ -75,8 +75,6 @@ pub struct Flux2LoraEditImageAngleOutput {
   pub prompt: Option<String>,
 }
 
-pub fn http_flux_2_lora_edit_image_angle(
-  params: Flux2LoraEditImageAngleInput,
-) -> FalRequest<Flux2LoraEditImageAngleInput, Flux2LoraEditImageAngleOutput> {
+pub fn http_flux_2_lora_edit_image_angle(params: Flux2LoraEditImageAngleInput) -> FalRequest<Flux2LoraEditImageAngleInput, Flux2LoraEditImageAngleOutput> {
   FalRequest::new("fal-ai/flux-2-lora-gallery/multiple-angles", params)
 }

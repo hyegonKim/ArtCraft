@@ -52,13 +52,7 @@ impl DebugLogLevel {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Info,
-      Self::Warn,
-      Self::Error,
-      Self::Debug,
-      Self::Trace,
-    ])
+    BTreeSet::from([Self::Info, Self::Warn, Self::Error, Self::Debug, Self::Trace])
   }
 }
 

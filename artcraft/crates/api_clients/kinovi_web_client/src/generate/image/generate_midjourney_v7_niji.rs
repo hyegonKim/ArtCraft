@@ -1,9 +1,7 @@
 use crate::pricing::cost::kinovi_generation_cost::KinoviGenerationCost;
 use crate::creds::kinovi_web_session::KinoviWebSession;
 use crate::error::kinovi_web_error::KinoviWebError;
-use crate::requests::generate_image::generate_image::{
-  generate_image, GenerateImageArgs, KinoviGenerateImageRequest, KinoviMidjourneyModel,
-};
+use crate::requests::generate_image::generate_image::{generate_image, GenerateImageArgs, KinoviGenerateImageRequest, KinoviMidjourneyModel};
 use crate::requests::kinovi_host::KinoviHost;
 
 // `KinoviMidjourneyBatchCount` is shared across all Midjourney models, so we
@@ -55,19 +53,7 @@ impl GenerateMidjourneyV7NijiRequest {
   }
 
   pub(crate) fn to_inner_request(&self) -> KinoviGenerateImageRequest {
-    KinoviGenerateImageRequest {
-      model: KinoviMidjourneyModel::V7Niji,
-      prompt: self.prompt.clone(),
-      aspect_ratio: self.aspect_ratio.as_api_str().to_string(),
-      negative_prompt: self.negative_prompt.clone(),
-      stylize: self.stylize,
-      weird: self.weird,
-      chaos: self.chaos,
-      quality: self.quality.map(|q| q.as_api_str().to_string()),
-      raw_mode: self.raw_mode,
-      batch_count: self.batch_count,
-      reference_image_urls: self.reference_image_urls.clone(),
-    }
+    KinoviGenerateImageRequest { model: KinoviMidjourneyModel::V7Niji, prompt: self.prompt.clone(), aspect_ratio: self.aspect_ratio.as_api_str().to_string(), negative_prompt: self.negative_prompt.clone(), stylize: self.stylize, weird: self.weird, chaos: self.chaos, quality: self.quality.map(|q| q.as_api_str().to_string()), raw_mode: self.raw_mode, batch_count: self.batch_count, reference_image_urls: self.reference_image_urls.clone() }
   }
 }
 
@@ -140,21 +126,10 @@ pub struct GenerateMidjourneyV7NijiResponse {
 
 // ── Entry point ──
 
-pub async fn generate_midjourney_v7_niji(
-  args: GenerateMidjourneyV7NijiArgs<'_>,
-) -> Result<GenerateMidjourneyV7NijiResponse, KinoviWebError> {
+pub async fn generate_midjourney_v7_niji(args: GenerateMidjourneyV7NijiArgs<'_>) -> Result<GenerateMidjourneyV7NijiResponse, KinoviWebError> {
   let inner_request = args.request.to_inner_request();
-  let result = generate_image(GenerateImageArgs {
-    request: inner_request,
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
-  Ok(GenerateMidjourneyV7NijiResponse {
-    task_id: result.task_id,
-    order_id: result.order_id,
-    task_ids: result.task_ids,
-    order_ids: result.order_ids,
-  })
+  let result = generate_image(GenerateImageArgs { request: inner_request, session: args.session, host_override: args.host_override }).await?;
+  Ok(GenerateMidjourneyV7NijiResponse { task_id: result.task_id, order_id: result.order_id, task_ids: result.task_ids, order_ids: result.order_ids })
 }
 
 // ── Tests ──
@@ -173,18 +148,7 @@ mod tests {
   }
 
   fn make_request(batch_count: KinoviMidjourneyBatchCount) -> GenerateMidjourneyV7NijiRequest {
-    GenerateMidjourneyV7NijiRequest {
-      prompt: "test".to_string(),
-      aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::Square1x1,
-      negative_prompt: None,
-      stylize: None,
-      weird: None,
-      chaos: None,
-      quality: None,
-      raw_mode: false,
-      batch_count,
-      reference_image_urls: None,
-    }
+    GenerateMidjourneyV7NijiRequest { prompt: "test".to_string(), aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::Square1x1, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: None, raw_mode: false, batch_count, reference_image_urls: None }
   }
 
   // ── Inner-request mapping ──
@@ -200,21 +164,7 @@ mod tests {
 
     #[test]
     fn inner_request_preserves_all_fields() {
-      let req = GenerateMidjourneyV7NijiRequest {
-        prompt: "anime mecha duel".to_string(),
-        aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9,
-        negative_prompt: Some("blurry".to_string()),
-        stylize: Some(750),
-        weird: Some(0),
-        chaos: Some(25),
-        quality: Some(GenerateMidjourneyV7NijiQuality::Full),
-        raw_mode: false,
-        batch_count: KinoviMidjourneyBatchCount::Two,
-        reference_image_urls: Some(vec![
-          "https://example.com/a.png".to_string(),
-          "https://example.com/b.png".to_string(),
-        ]),
-      };
+      let req = GenerateMidjourneyV7NijiRequest { prompt: "anime mecha duel".to_string(), aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9, negative_prompt: Some("blurry".to_string()), stylize: Some(750), weird: Some(0), chaos: Some(25), quality: Some(GenerateMidjourneyV7NijiQuality::Full), raw_mode: false, batch_count: KinoviMidjourneyBatchCount::Two, reference_image_urls: Some(vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string()]) };
       let inner = req.to_inner_request();
       assert_eq!(inner.model, KinoviMidjourneyModel::V7Niji);
       assert_eq!(inner.prompt, "anime mecha duel");
@@ -232,19 +182,7 @@ mod tests {
     /// Every wrapper-side aspect ratio must serialize to the canonical wire string.
     #[test]
     fn every_aspect_ratio_maps_to_canonical_wire_string() {
-      let cases = [
-        (GenerateMidjourneyV7NijiAspectRatio::Square1x1, "1:1"),
-        (GenerateMidjourneyV7NijiAspectRatio::Landscape16x9, "16:9"),
-        (GenerateMidjourneyV7NijiAspectRatio::Portrait9x16, "9:16"),
-        (GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9, "21:9"),
-        (GenerateMidjourneyV7NijiAspectRatio::UltraTall9x21, "9:21"),
-        (GenerateMidjourneyV7NijiAspectRatio::Standard4x3, "4:3"),
-        (GenerateMidjourneyV7NijiAspectRatio::Portrait3x4, "3:4"),
-        (GenerateMidjourneyV7NijiAspectRatio::Wide5x4, "5:4"),
-        (GenerateMidjourneyV7NijiAspectRatio::Tall4x5, "4:5"),
-        (GenerateMidjourneyV7NijiAspectRatio::Wide3x2, "3:2"),
-        (GenerateMidjourneyV7NijiAspectRatio::Tall2x3, "2:3"),
-      ];
+      let cases = [(GenerateMidjourneyV7NijiAspectRatio::Square1x1, "1:1"), (GenerateMidjourneyV7NijiAspectRatio::Landscape16x9, "16:9"), (GenerateMidjourneyV7NijiAspectRatio::Portrait9x16, "9:16"), (GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9, "21:9"), (GenerateMidjourneyV7NijiAspectRatio::UltraTall9x21, "9:21"), (GenerateMidjourneyV7NijiAspectRatio::Standard4x3, "4:3"), (GenerateMidjourneyV7NijiAspectRatio::Portrait3x4, "3:4"), (GenerateMidjourneyV7NijiAspectRatio::Wide5x4, "5:4"), (GenerateMidjourneyV7NijiAspectRatio::Tall4x5, "4:5"), (GenerateMidjourneyV7NijiAspectRatio::Wide3x2, "3:2"), (GenerateMidjourneyV7NijiAspectRatio::Tall2x3, "2:3")];
       for (variant, expected) in cases {
         let req = GenerateMidjourneyV7NijiRequest { aspect_ratio: variant, ..make_request(KinoviMidjourneyBatchCount::One) };
         assert_eq!(req.to_inner_request().aspect_ratio, expected, "variant={:?}", variant);
@@ -253,11 +191,7 @@ mod tests {
 
     #[test]
     fn every_quality_maps_to_canonical_wire_string() {
-      let cases = [
-        (GenerateMidjourneyV7NijiQuality::Quarter, "0.25"),
-        (GenerateMidjourneyV7NijiQuality::Half, "0.5"),
-        (GenerateMidjourneyV7NijiQuality::Full, "1"),
-      ];
+      let cases = [(GenerateMidjourneyV7NijiQuality::Quarter, "0.25"), (GenerateMidjourneyV7NijiQuality::Half, "0.5"), (GenerateMidjourneyV7NijiQuality::Full, "1")];
       for (variant, expected) in cases {
         let req = GenerateMidjourneyV7NijiRequest { quality: Some(variant), ..make_request(KinoviMidjourneyBatchCount::One) };
         assert_eq!(req.to_inner_request().quality.as_deref(), Some(expected), "variant={:?}", variant);
@@ -307,12 +241,7 @@ mod tests {
     /// Pricing must match the inner module exactly.
     #[test]
     fn matches_inner_pricing_exactly() {
-      for batch in [
-        KinoviMidjourneyBatchCount::One,
-        KinoviMidjourneyBatchCount::Two,
-        KinoviMidjourneyBatchCount::Three,
-        KinoviMidjourneyBatchCount::Four,
-      ] {
+      for batch in [KinoviMidjourneyBatchCount::One, KinoviMidjourneyBatchCount::Two, KinoviMidjourneyBatchCount::Three, KinoviMidjourneyBatchCount::Four] {
         let outer = make_request(batch);
         let inner = outer.to_inner_request();
         assert_eq!(outer.calculate_costs().kinovi_credits, inner.calculate_costs().kinovi_credits, "batch={:?}", batch);
@@ -331,22 +260,7 @@ mod tests {
     async fn test_generate_v7_niji_anime() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_midjourney_v7_niji(GenerateMidjourneyV7NijiArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateMidjourneyV7NijiRequest {
-          prompt: "A magical shiba inu sorcerer casting spells in a crystal cave".to_string(),
-          aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9,
-          negative_prompt: None,
-          stylize: None,
-          weird: None,
-          chaos: None,
-          quality: None,
-          raw_mode: false,
-          batch_count: KinoviMidjourneyBatchCount::One,
-          reference_image_urls: None,
-        },
-      }).await?;
+      let result = generate_midjourney_v7_niji(GenerateMidjourneyV7NijiArgs { session: &session, host_override: None, request: GenerateMidjourneyV7NijiRequest { prompt: "A magical shiba inu sorcerer casting spells in a crystal cave".to_string(), aspect_ratio: GenerateMidjourneyV7NijiAspectRatio::UltraWide21x9, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: None, raw_mode: false, batch_count: KinoviMidjourneyBatchCount::One, reference_image_urls: None } }).await?;
       println!("v7-niji — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       Ok(())

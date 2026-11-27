@@ -27,16 +27,13 @@ pub struct DownloadedVideoBytes {
   pub bytes: Vec<u8>,
 }
 
-impl <'a> GrokDownloadVideo<'a> {
-
+impl<'a> GrokDownloadVideo<'a> {
   pub async fn download_to_path<P: AsRef<Path>>(&self, path: P) -> Result<(), GrokError> {
     let response = self.send_request().await?;
 
     let mut stream = response.bytes_stream();
 
-    let mut file = File::create(&path)
-        .await
-        .map_err(|err| GrokClientError::CannotOpenLocalFileForWriting(err))?;
+    let mut file = File::create(&path).await.map_err(|err| GrokClientError::CannotOpenLocalFileForWriting(err))?;
 
     //let _r = stream.for_each_concurrent(None, |chunk_result| async {
     //  match chunk_result {
@@ -52,13 +49,8 @@ impl <'a> GrokDownloadVideo<'a> {
     //  }
     //}).await;
 
-    while let Some(chunk) = stream.try_next()
-        .await
-        .map_err(|err| GrokGenericApiError::WreqError(err))?
-    {
-      file.write_all(&chunk)
-          .await
-          .map_err(|err| GrokClientError::CannotOpenLocalFileForWriting(err))?
+    while let Some(chunk) = stream.try_next().await.map_err(|err| GrokGenericApiError::WreqError(err))? {
+      file.write_all(&chunk).await.map_err(|err| GrokClientError::CannotOpenLocalFileForWriting(err))?
     }
 
     file.flush().await.unwrap();
@@ -69,51 +61,28 @@ impl <'a> GrokDownloadVideo<'a> {
   pub async fn download_bytes(&self) -> Result<DownloadedVideoBytes, GrokError> {
     let response = self.send_request().await?;
 
-    let download_bytes = response.bytes()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok create media response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let download_bytes = response.bytes().await.map_err(|err| {
+      error!("Error reading Grok create media response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
-    Ok(DownloadedVideoBytes {
-      bytes: download_bytes.to_vec(),
-    })
+    Ok(DownloadedVideoBytes { bytes: download_bytes.to_vec() })
   }
 
   async fn send_request(&self) -> Result<Response, GrokError> {
-    let client = Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
     let video_url = user_and_file_id_to_video_url(&self.user_id, &self.file_id, false);
 
     info!("Video file URL: {}", video_url);
 
-    let mut request_builder = client.get(&video_url)
-        .header(USER_AGENT, FIREFOX_143_MAC_USER_AGENT)
-        .header(ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-        .header(ACCEPT_LANGUAGE, "en-US,en;q=0.5")
-        .header(ACCEPT_ENCODING, "gzip, deflate, br, zstd")
-        .header(REFERER, "https://grok.com/")
-        .header("Sec-GPC", "1")
-        .header(CONNECTION, "keep-alive")
-        .header(COOKIE, self.cookies.to_string())
-        .header(UPGRADE_INSECURE_REQUESTS, "1")
-        .header("sec-fetch-dest", "document")
-        .header("sec-fetch-mode", "navigate")
-        .header("sec-fetch-site", "same-site")
-        .header("sec-fetch-user", "?1")
-        .header("priority", "u=0, i");
+    let mut request_builder = client.get(&video_url).header(USER_AGENT, FIREFOX_143_MAC_USER_AGENT).header(ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8").header(ACCEPT_LANGUAGE, "en-US,en;q=0.5").header(ACCEPT_ENCODING, "gzip, deflate, br, zstd").header(REFERER, "https://grok.com/").header("Sec-GPC", "1").header(CONNECTION, "keep-alive").header(COOKIE, self.cookies.to_string()).header(UPGRADE_INSECURE_REQUESTS, "1").header("sec-fetch-dest", "document").header("sec-fetch-mode", "navigate").header("sec-fetch-site", "same-site").header("sec-fetch-user", "?1").header("priority", "u=0, i");
 
     if let Some(timeout) = self.request_timeout {
       request_builder = request_builder.timeout(timeout);
     }
 
-    let response = request_builder.send()
-        .await
-        .map_err(|err| GrokGenericApiError::WreqError(err))?;
+    let response = request_builder.send().await.map_err(|err| GrokGenericApiError::WreqError(err))?;
 
     let status = response.status();
 
@@ -145,9 +114,7 @@ mod tests {
 
     let file_id = FileId("d9b300c6-9562-4e24-a87a-3ede2a53f0bc".to_string()); // Ernest
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     println!("Verification Token: {:?}", secrets.verification_token);
     println!("Sentry Trace: {:?}", secrets.sentry_trace);

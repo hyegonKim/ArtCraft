@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use crate::webhook_payload::hydrated::hydrated_webhook_contents::VideoData;
 
 /// Extract and deserialize the `video` key from a webhook success payload.
-pub (crate) fn extract_video(obj: &Map<String, Value>) -> Option<VideoData> {
+pub(crate) fn extract_video(obj: &Map<String, Value>) -> Option<VideoData> {
   let value = obj.get("video")?;
   serde_json::from_value(value.clone()).ok()
 }
@@ -17,10 +17,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -32,8 +30,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let video = contents.video.expect("video should be Some");
 
@@ -50,14 +47,17 @@ mod tests {
 
   #[test]
   fn synthetic_video_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "video": {
         "url": "https://cdn.example.com/output.mp4",
         "content_type": "video/mp4",
         "file_name": "clip.mp4",
         "file_size": 12345678
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let video = extract_video(&obj).expect("should extract video");
     assert_eq!(video.url.as_deref(), Some("https://cdn.example.com/output.mp4"));
@@ -68,9 +68,12 @@ mod tests {
 
   #[test]
   fn synthetic_video_url_only() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "video": {"url": "https://cdn.example.com/v.mp4"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let video = extract_video(&obj).expect("should extract video");
     assert_eq!(video.url.as_deref(), Some("https://cdn.example.com/v.mp4"));
@@ -81,9 +84,12 @@ mod tests {
 
   #[test]
   fn missing_video_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "images": [{"url": "https://example.com/img.png"}]
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_video(&obj).is_none());
   }

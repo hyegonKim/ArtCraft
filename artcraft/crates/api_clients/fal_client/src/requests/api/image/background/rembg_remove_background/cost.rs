@@ -15,9 +15,7 @@ mod tests {
 
   #[test]
   fn cost_is_one_cent() {
-    let request = RembgRemoveBackgroundRequest {
-      image_url: "https://example.com/image.jpg".to_string(),
-    };
+    let request = RembgRemoveBackgroundRequest { image_url: "https://example.com/image.jpg".to_string() };
     assert_eq!(request.calculate_cost_in_cents(), 0);
   }
 }

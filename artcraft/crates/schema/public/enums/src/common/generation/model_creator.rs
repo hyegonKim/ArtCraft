@@ -161,34 +161,7 @@ impl ModelCreator {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Alibaba,
-      Self::ArtCraft,
-      Self::BlackForestLabs,
-      Self::Bytedance,
-      Self::Deemos,
-      Self::Fal,
-      Self::Google,
-      Self::Grok,
-      Self::Hailuo,
-      Self::Higgsfield,
-      Self::Kling,
-      Self::Krea,
-      Self::Meshy,
-      Self::Midjourney,
-      Self::OpenAi,
-      Self::OpenArt,
-      Self::Recraft,
-      Self::Replicate,
-      Self::Runway,
-      Self::Stability,
-      Self::Suno,
-      Self::Tencent,
-      Self::TensorArt,
-      Self::Tripo,
-      Self::Vidu,
-      Self::WorldLabs,
-    ])
+    BTreeSet::from([Self::Alibaba, Self::ArtCraft, Self::BlackForestLabs, Self::Bytedance, Self::Deemos, Self::Fal, Self::Google, Self::Grok, Self::Hailuo, Self::Higgsfield, Self::Kling, Self::Krea, Self::Meshy, Self::Midjourney, Self::OpenAi, Self::OpenArt, Self::Recraft, Self::Replicate, Self::Runway, Self::Stability, Self::Suno, Self::Tencent, Self::TensorArt, Self::Tripo, Self::Vidu, Self::WorldLabs])
   }
 }
 

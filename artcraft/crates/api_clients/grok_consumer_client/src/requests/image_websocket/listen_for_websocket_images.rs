@@ -74,14 +74,13 @@ pub async fn listen_for_websocket_images(args: ListenForWebsocketImagesArgs<'_>)
     let image_data = match maybe_image_data {
       Ok(image_data) => image_data,
       Err(_err) => {
-
         let message = scrub_blobs_for_debug_logging(&message);
         println!("Unknown message: {}", message);
 
         // NB: Might not have been a parse error, since we're parsing irrelevant message payloads too.
         // This is slightly dangerous to do this way as we might mask true parsing errors with image payloads.
         continue;
-      }
+      },
     };
 
     match image_data.percentage_complete {
@@ -90,15 +89,10 @@ pub async fn listen_for_websocket_images(args: ListenForWebsocketImagesArgs<'_>)
         if percent < 100.0 {
           continue;
         }
-      }
+      },
     }
 
-    images.push(ImageData {
-      request_id: RequestId(image_data.request_id),
-      url : image_data.url,
-      enriched_prompt: image_data.full_prompt,
-      user_prompt: image_data.prompt,
-    });
+    images.push(ImageData { request_id: RequestId(image_data.request_id), url: image_data.url, enriched_prompt: image_data.full_prompt, user_prompt: image_data.prompt });
 
     if images.len() >= DEFAULT_IMAGE_COUNT {
       info!("{} images generated; we're done polling.", images.len());
@@ -106,11 +100,8 @@ pub async fn listen_for_websocket_images(args: ListenForWebsocketImagesArgs<'_>)
     }
   }
 
-  Ok(ImageResults {
-    images,
-  })
+  Ok(ImageResults { images })
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -135,9 +126,7 @@ mod tests {
 
     let cookies = get_test_cookies()?;
 
-    let websocket = create_listen_websocket(CreateListenWebsocketArgs {
-      cookies: &cookies,
-    }).await?;
+    let websocket = create_listen_websocket(CreateListenWebsocketArgs { cookies: &cookies }).await?;
 
     //let websocket = GrokWrappedWebsocket::new(websocket);
     let mut websocket = GrokWebsocket::new(websocket);
@@ -145,21 +134,14 @@ mod tests {
     println!("Sending...");
     std::io::stdout().flush()?;
 
-    let _result = prompt_websocket_image(PromptWebsocketImageArgs {
-      websocket: &mut websocket,
-      prompt,
-      aspect_ratio: ClientMessageAspectRatio::WideThreeByTwo,
-    }).await?;
+    let _result = prompt_websocket_image(PromptWebsocketImageArgs { websocket: &mut websocket, prompt, aspect_ratio: ClientMessageAspectRatio::WideThreeByTwo }).await?;
 
     println!("Reading...");
     std::io::stdout().flush()?;
 
     println!("Polling.");
 
-    let images = listen_for_websocket_images(ListenForWebsocketImagesArgs {
-      websocket: &mut websocket,
-      timeout: Duration::from_millis(10_000),
-    }).await?;
+    let images = listen_for_websocket_images(ListenForWebsocketImagesArgs { websocket: &mut websocket, timeout: Duration::from_millis(10_000) }).await?;
 
     println!("Done polling. Images: {}", images.images.len());
 
@@ -169,7 +151,7 @@ mod tests {
 
     log::logger().flush();
 
-    assert_eq!(1,2);
+    assert_eq!(1, 2);
 
     Ok(())
   }

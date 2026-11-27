@@ -39,7 +39,6 @@ pub enum GenericDownloadType {
   //#[serde(rename = "melgan_vocodes")]
   //#[sqlx(rename = "melgan_vocodes")]
   //MelGanVocodes,
-
   /// NB: Our external-facing name for "softvc" is rocketvc.
   /// I wish we could stop being stupid about this.
   #[serde(rename = "rocket_vc")]
@@ -99,16 +98,7 @@ impl GenericDownloadType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::HifiGan,
-      Self::HifiGanRocketVc,
-      Self::HifiGanSoVitsSvc,
-      Self::RocketVc,
-      Self::RvcV2,
-      Self::SoVitsSvc,
-      Self::Tacotron2,
-      Self::Vits,
-    ])
+    BTreeSet::from([Self::HifiGan, Self::HifiGanRocketVc, Self::HifiGanSoVitsSvc, Self::RocketVc, Self::RvcV2, Self::SoVitsSvc, Self::Tacotron2, Self::Vits])
   }
 }
 

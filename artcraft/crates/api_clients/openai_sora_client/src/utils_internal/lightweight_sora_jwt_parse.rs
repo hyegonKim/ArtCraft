@@ -23,77 +23,43 @@ pub struct SoraJwtClaims {
 pub fn lightweight_sora_jwt_parse(token: &str) -> Result<SoraJwtClaims, SoraError> {
   let [_header_str, claims_str, _signature_str] = split_components(token)?;
 
-  let claims = decode_base64(claims_str)
-      .map_err(|err| as_jwt_error(format!("failure to parse claims base64: {:?}", err)))?;
-  
-  let claims : serde_json::Map<String, Value> = serde_json::from_str(&claims)
-      .map_err(|err| as_jwt_error(
-        format!("failure to parse claims json: {:?}", err)))?;
+  let claims = decode_base64(claims_str).map_err(|err| as_jwt_error(format!("failure to parse claims base64: {:?}", err)))?;
 
-  let iat = claims.get("iat")
-      .map(|val| val.as_number())
-      .flatten()
-      .ok_or_else(|| jwt_error("no iat claim"))?;
+  let claims: serde_json::Map<String, Value> = serde_json::from_str(&claims).map_err(|err| as_jwt_error(format!("failure to parse claims json: {:?}", err)))?;
 
-  let iat = iat.as_i64()
-      .ok_or_else(|| jwt_error("iat is not a number"))?;
+  let iat = claims.get("iat").map(|val| val.as_number()).flatten().ok_or_else(|| jwt_error("no iat claim"))?;
 
-  let iat = DateTime::from_timestamp(iat, 0)
-      .ok_or_else(|| jwt_error("iat is not a valid timestamp"))?;
+  let iat = iat.as_i64().ok_or_else(|| jwt_error("iat is not a number"))?;
 
-  let exp = claims.get("exp")
-      .map(|val| val.as_number())
-      .flatten()
-      .ok_or_else(|| jwt_error("no exp claim"))?;
+  let iat = DateTime::from_timestamp(iat, 0).ok_or_else(|| jwt_error("iat is not a valid timestamp"))?;
 
-  let exp = exp.as_i64()
-      .ok_or_else(|| jwt_error("exp is not a number"))?;
+  let exp = claims.get("exp").map(|val| val.as_number()).flatten().ok_or_else(|| jwt_error("no exp claim"))?;
 
-  let exp = DateTime::from_timestamp(exp, 0)
-      .ok_or_else(|| jwt_error("iat is not a valid timestamp"))?;
+  let exp = exp.as_i64().ok_or_else(|| jwt_error("exp is not a number"))?;
 
-  let user_id = claims.get("https://api.openai.com/auth")
-      .map(|val| val.get("user_id"))
-      .flatten()
-      .map(|val| val.as_str())
-      .flatten()
-      .ok_or_else(|| jwt_error("no user_id claim"))?;
+  let exp = DateTime::from_timestamp(exp, 0).ok_or_else(|| jwt_error("iat is not a valid timestamp"))?;
 
-  let profile = claims.get("https://api.openai.com/profile")
-      .ok_or_else(|| jwt_error("no user_id claim"))?;
+  let user_id = claims.get("https://api.openai.com/auth").map(|val| val.get("user_id")).flatten().map(|val| val.as_str()).flatten().ok_or_else(|| jwt_error("no user_id claim"))?;
 
-  let email = profile.get("email")
-      .map(|val| val.as_str())
-      .flatten()
-      .ok_or_else(|| jwt_error("no email claim"))?;
+  let profile = claims.get("https://api.openai.com/profile").ok_or_else(|| jwt_error("no user_id claim"))?;
 
-  let email_verified = profile.get("email_verified")
-      .map(|val| val.as_bool())
-      .flatten()
-      .unwrap_or_else(|| {
-        warn!("no email_verified claim");
-        false
-      });
+  let email = profile.get("email").map(|val| val.as_str()).flatten().ok_or_else(|| jwt_error("no email claim"))?;
 
-  Ok(SoraJwtClaims {
-    created: iat,
-    expiration: exp,
-    user_id: user_id.to_string(),
-    email: email.to_string(),
-    email_verified,
-  })
+  let email_verified = profile.get("email_verified").map(|val| val.as_bool()).flatten().unwrap_or_else(|| {
+    warn!("no email_verified claim");
+    false
+  });
+
+  Ok(SoraJwtClaims { created: iat, expiration: exp, user_id: user_id.to_string(), email: email.to_string(), email_verified })
 }
 
 fn split_components(token: &str) -> Result<[&str; 3], SoraError> {
   let mut components = token.split(SEPARATOR);
-  let header = components.next()
-      .ok_or_else(|| jwt_error("no header component"))?;
-  
-  let claims = components.next()
-      .ok_or_else(|| jwt_error("no claims component"))?;
-  
-  let signature = components.next()
-      .ok_or_else(|| jwt_error("no signature component"))?;
+  let header = components.next().ok_or_else(|| jwt_error("no header component"))?;
+
+  let claims = components.next().ok_or_else(|| jwt_error("no claims component"))?;
+
+  let signature = components.next().ok_or_else(|| jwt_error("no signature component"))?;
 
   if components.next().is_some() {
     return Err(jwt_error("too many components"));
@@ -122,8 +88,7 @@ mod tests {
 
   #[test]
   fn test_sora_jwt_bearer_token() {
-    let token =
-        "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE5MzQ0ZTY1LWJiYzktNDRkMS1hOWQwLWY5NTdiMDc5YmQwZSIsInR5cCI6Ik\
+    let token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE5MzQ0ZTY1LWJiYzktNDRkMS1hOWQwLWY5NTdiMDc5YmQwZSIsInR5cCI6Ik\
         pXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hcGkub3BlbmFpLmNvbS92MSJdLCJjbGllbnRfaWQiOiJhcHBfTTFuUTN0UjV2\
         VzdYOWpMMnBFNmdIOGRLNCIsImV4cCI6MTc0NTgwMDQ3MiwiaHR0cHM6Ly9hcGkub3BlbmFpLmNvbS9hdXRoIjp7InV\
         zZXJfaWQiOiJ1c2VyLTZOeEpmbEFIb0VCREp6Wmw5aVhocWJERyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2\

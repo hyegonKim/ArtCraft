@@ -1,8 +1,5 @@
 use crate::api::requests::videos::video_extension::video_extension::VideoExtensionRequest;
-use crate::api::requests::videos::video_generation::cost::{
-  output_mills_per_second,
-  INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO,
-};
+use crate::api::requests::videos::video_generation::cost::{output_mills_per_second, INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO};
 use crate::api::traits::grok_request_cost_calculator_trait::{GrokRequestCostCalculator, UsdMills};
 use crate::api::types::video_types::video_resolution::VideoResolution;
 
@@ -39,10 +36,7 @@ impl GrokRequestCostCalculator for VideoExtensionRequest {
   fn calculate_cost_in_mills(&self) -> UsdMills {
     let extension_duration = self.duration.unwrap_or(DEFAULT_EXTENSION_DURATION_SECONDS) as u64;
     let output_mills = output_mills_per_second(ASSUMED_RESOLUTION) * extension_duration;
-    let input_mills = self
-      .source_video_duration_seconds_hint
-      .map(|secs| INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO * secs as u64)
-      .unwrap_or(0);
+    let input_mills = self.source_video_duration_seconds_hint.map(|secs| INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO * secs as u64).unwrap_or(0);
     output_mills + input_mills
   }
 }
@@ -50,23 +44,11 @@ impl GrokRequestCostCalculator for VideoExtensionRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::api::requests::videos::video_extension::video_extension::{
-    VideoExtensionRequest, VideoExtensionSource,
-  };
+  use crate::api::requests::videos::video_extension::video_extension::{VideoExtensionRequest, VideoExtensionSource};
   use crate::api::types::video_types::video_model::VideoModel;
 
-  fn make_request(
-    duration: Option<u32>,
-    source: VideoExtensionSource,
-    model: Option<VideoModel>,
-  ) -> VideoExtensionRequest {
-    VideoExtensionRequest {
-      prompt: "test".to_string(),
-      source_video: source,
-      source_video_duration_seconds_hint: None,
-      model,
-      duration,
-    }
+  fn make_request(duration: Option<u32>, source: VideoExtensionSource, model: Option<VideoModel>) -> VideoExtensionRequest {
+    VideoExtensionRequest { prompt: "test".to_string(), source_video: source, source_video_duration_seconds_hint: None, model, duration }
   }
 
   fn url_source() -> VideoExtensionSource {
@@ -155,7 +137,6 @@ mod tests {
       assert_eq!(base.calculate_cost_in_mills(), base_cost);
     }
   }
-
 
   // ── source_video_duration_seconds_hint hint ──
 

@@ -429,10 +429,7 @@ fn surface(
         p_view["rotationX"] = serde_json::json!(options.rotation_x);
         p_view["rotationY"] = serde_json::json!(options.rotation_y);
         p_view["rotationZ"] = serde_json::json!(options.rotation_z);
-        return Some((
-            depths,
-            crate::raytrace_fx::substance_vector_surface(n.id, facets, &paint, opacity, blend, b, &p_view, substance),
-        ));
+        return Some((depths, crate::raytrace_fx::substance_vector_surface(n.id, facets, &paint, opacity, blend, b, &p_view, substance)));
     }
     let colored = options.light_color != [1.0; 3] || options.lights.is_some();
     let faces = vectorcraft_three_d::revolve(path, b, options).ok()?;

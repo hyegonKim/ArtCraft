@@ -32,30 +32,17 @@ use tauri::AppHandle;
 
 const GROK_IMAGE_UPLOAD_TIMEOUT: Duration = Duration::from_millis(1000 * 30); // 30 seconds
 
-pub async fn handle_grok_video(
-  request: &TauriGenerateVideoRequest,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  grok_credential_manager: &GrokCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_grok_video(request: &TauriGenerateVideoRequest, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, grok_credential_manager: &GrokCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = get_grok_creds(app, grok_credential_manager).await?;
 
   let image_token = match request.image_media_token.as_ref() {
     Some(token) => token,
-    None => {
-      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages { min: 1, max: 1, provided: 0 }))
-    }
+    None => return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages { min: 1, max: 1, provided: 0 })),
   };
 
   info!("Downloading image media file...");
 
-  let local_image_file = download_media_file_to_temp_dir(
-    &app_env_configs,
-    &app_data_root,
-    image_token,
-  ).await?;
+  let local_image_file = download_media_file_to_temp_dir(&app_env_configs, &app_data_root, image_token).await?;
 
   let aspect_ratio = match request.grok_aspect_ratio {
     None => AspectRatio::WideThreeByTwo,
@@ -66,21 +53,13 @@ pub async fn handle_grok_video(
 
   info!("Calling Grok Video generate...");
 
-  let upload_result = upload_image_and_generate_video_with_retry(UploadImageAndGenerateVideoWithRetry {
-    credentials: &creds,
-    file: FileUploadSpec::Path(local_image_file.path()),
-    prompt: request.prompt.as_deref(),
-    aspect_ratio: Some(aspect_ratio),
-    wait_for_generation: false,
-    individual_request_timeout: Some(GROK_IMAGE_UPLOAD_TIMEOUT),
-    mode: None,
-  }).await;
+  let upload_result = upload_image_and_generate_video_with_retry(UploadImageAndGenerateVideoWithRetry { credentials: &creds, file: FileUploadSpec::Path(local_image_file.path()), prompt: request.prompt.as_deref(), aspect_ratio: Some(aspect_ratio), wait_for_generation: false, individual_request_timeout: Some(GROK_IMAGE_UPLOAD_TIMEOUT), mode: None }).await;
 
   let post_id = match upload_result {
     Err(err) => {
       error!("Failed to use Grok video: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
     Ok(result) => {
       if let Some(secrets) = result.maybe_new_client_secrets {
         info!("New Grok secrets generated! Storing them in the credential manager...");
@@ -88,7 +67,7 @@ pub async fn handle_grok_video(
       }
       info!("Successfully enqueued Grok Video: post_id = {:?}", result.upload_result.post_id);
       result.upload_result.post_id
-    }
+    },
   };
 
   // NB: Grok's consumer API doesn't take a version selector; this only affects
@@ -98,15 +77,7 @@ pub async fn handle_grok_video(
     _ => GenerationModel::GrokVideo,
   };
 
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Grok,
-    model: Some(generation_model),
-    provider_job_id: Some(post_id.to_string()),
-    task_type: TaskType::VideoGeneration,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Grok, model: Some(generation_model), provider_job_id: Some(post_id.to_string()), task_type: TaskType::VideoGeneration, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 async fn get_grok_creds(app: &AppHandle, grok_credential_manager: &GrokCredentialManager) -> Result<GrokFullCredentials, GenerateError> {
@@ -119,30 +90,28 @@ async fn get_grok_creds(app: &AppHandle, grok_credential_manager: &GrokCredentia
     None => {
       warn!("No Grok Cookie stored. Must login.");
       ShowProviderLoginModalEvent::send_for_provider(GenerationProvider::Grok, &app);
-      return Err(GenerateError::needs_grok_credentials())
-    }
+      return Err(GenerateError::needs_grok_credentials());
+    },
   };
 
   let cookies = GrokCookies::new(cookies);
 
   info!("Requesting Grok client secrets...");
 
-  let upgraded = request_client_secrets(RequestClientSecretsArgs {
-    cookies: &cookies,
-  }).await;
+  let upgraded = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await;
 
   match upgraded {
     Err(err) => {
       error!("Failed to fetch Grok client secrets: {}", err); // NB: Fall-through
-    }
+    },
     Ok(secrets) => {
       info!("Grok client secrets successfully upgraded...");
       let full_creds = GrokFullCredentials::from_cookies_and_client_secrets(cookies, secrets);
       grok_credential_manager.replace_full_credentials(full_creds.clone())?;
       info!("Persisting grok credentials to disk...");
       grok_credential_manager.persist_to_disk()?;
-      return Ok(full_creds)
-    }
+      return Ok(full_creds);
+    },
   }
 
   warn!("Grok upgrade failed. Try logging in again...");

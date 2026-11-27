@@ -1,1 +1,1 @@
-pub (crate) mod custom_infer;
+pub(crate) mod custom_infer;

@@ -23,8 +23,6 @@ pub struct GptImage1ByokTextToImageOutput {
   // Response fields parsed elsewhere
 }
 
-pub fn gpt_image_1_byok_text_to_image(
-  params: GptImage1ByokTextToImageInput,
-) -> FalRequest<GptImage1ByokTextToImageInput, GptImage1ByokTextToImageOutput> {
+pub fn gpt_image_1_byok_text_to_image(params: GptImage1ByokTextToImageInput) -> FalRequest<GptImage1ByokTextToImageInput, GptImage1ByokTextToImageOutput> {
   FalRequest::new("fal-ai/gpt-image-1/text-to-image/byok", params)
 }

@@ -1,4 +1,3 @@
-
 /// Strategy for handling requests where the model only supports text-to-image
 /// but the request includes image inputs (image editing mode).
 #[derive(Copy, Clone, Debug)]

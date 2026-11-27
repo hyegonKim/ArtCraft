@@ -10,22 +10,12 @@ pub struct ArtcraftSeedream5LiteCostState {
 
 impl ArtcraftSeedream5LiteCostState {
   pub fn from_request(request: &ArtcraftSeedream5LiteRequestState) -> Self {
-    Self {
-      num_images: request.request.image_batch_count.unwrap_or(1),
-    }
+    Self { num_images: request.request.image_batch_count.unwrap_or(1) }
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let cost_in_usd_cents = 4u64 * self.num_images as u64;
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -37,28 +27,17 @@ mod tests {
   use crate::generate::generate_image::generate_image_request_builder::GenerateImageRequestBuilder;
 
   fn cost_cents(image_batch_count: u16) -> u64 {
-    let builder = GenerateImageRequestBuilder {
-      model: RouterImageModel::Seedream5Lite,
-      provider: RouterProvider::Artcraft,
-      prompt: None,
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: Some(image_batch_count),
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    };
+    let builder = GenerateImageRequestBuilder { model: RouterImageModel::Seedream5Lite, provider: RouterProvider::Artcraft, prompt: None, image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: Some(image_batch_count), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None };
     builder.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn one_image_costs_4_cents() { assert_eq!(cost_cents(1), 4); }
+  fn one_image_costs_4_cents() {
+    assert_eq!(cost_cents(1), 4);
+  }
 
   #[test]
-  fn four_images_costs_16_cents() { assert_eq!(cost_cents(4), 16); }
+  fn four_images_costs_16_cents() {
+    assert_eq!(cost_cents(4), 16);
+  }
 }

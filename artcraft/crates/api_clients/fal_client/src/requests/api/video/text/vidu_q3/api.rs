@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::vidu_q3::raw_request::{
-  ViduQ3TextToVideoInput, ViduQ3TextToVideoOutput,
-};
+use crate::requests::api::video::text::vidu_q3::raw_request::{ViduQ3TextToVideoInput, ViduQ3TextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -78,14 +76,7 @@ impl FalEndpoint for ViduQ3TextToVideoRequest {
   type RawResponse = ViduQ3TextToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      duration: self.duration,
-      seed: self.seed,
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      audio: self.audio,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), duration: self.duration, seed: self.seed, aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), resolution: self.resolution.map(|r| r.to_str().to_string()), audio: self.audio })
   }
 }
 
@@ -105,14 +96,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TextToVideoRequest {
-      prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(),
-      duration: Some(5),
-      seed: None,
-      aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::SixteenByNine),
-      resolution: Some(ViduQ3TextToVideoResolution::SevenTwentyP),
-      audio: Some(true),
-    };
+    let request = ViduQ3TextToVideoRequest { prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(), duration: Some(5), seed: None, aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::SixteenByNine), resolution: Some(ViduQ3TextToVideoResolution::SevenTwentyP), audio: Some(true) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -126,14 +110,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      duration: Some(5),
-      seed: Some(1234),
-      aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::SixteenByNine),
-      resolution: Some(ViduQ3TextToVideoResolution::ThreeSixtyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), duration: Some(5), seed: Some(1234), aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::SixteenByNine), resolution: Some(ViduQ3TextToVideoResolution::ThreeSixtyP), audio: Some(false) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -145,14 +122,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = ViduQ3TextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: Some(12),
-      seed: Some(42),
-      aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::FourByThree),
-      resolution: Some(ViduQ3TextToVideoResolution::TenEightyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TextToVideoRequest { prompt: "p".to_string(), duration: Some(12), seed: Some(42), aspect_ratio: Some(ViduQ3TextToVideoAspectRatio::FourByThree), resolution: Some(ViduQ3TextToVideoResolution::TenEightyP), audio: Some(false) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.duration, Some(12));
@@ -164,53 +134,28 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = ViduQ3TextToVideoRequest {
-      prompt: "minimal".to_string(),
-      duration: None,
-      seed: None,
-      aspect_ratio: None,
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TextToVideoRequest { prompt: "minimal".to_string(), duration: None, seed: None, aspect_ratio: None, resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn seed_serializes_when_set() {
-    let request = ViduQ3TextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: None,
-      seed: Some(777),
-      aspect_ratio: None,
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TextToVideoRequest { prompt: "p".to_string(), duration: None, seed: Some(777), aspect_ratio: None, resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json.get("seed").and_then(|s| s.as_i64()), Some(777));
   }
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (ViduQ3TextToVideoAspectRatio::SixteenByNine, "16:9"),
-      (ViduQ3TextToVideoAspectRatio::NineBySixteen, "9:16"),
-      (ViduQ3TextToVideoAspectRatio::FourByThree, "4:3"),
-      (ViduQ3TextToVideoAspectRatio::ThreeByFour, "3:4"),
-      (ViduQ3TextToVideoAspectRatio::Square, "1:1"),
-    ] {
+    for (variant, expected) in [(ViduQ3TextToVideoAspectRatio::SixteenByNine, "16:9"), (ViduQ3TextToVideoAspectRatio::NineBySixteen, "9:16"), (ViduQ3TextToVideoAspectRatio::FourByThree, "4:3"), (ViduQ3TextToVideoAspectRatio::ThreeByFour, "3:4"), (ViduQ3TextToVideoAspectRatio::Square, "1:1")] {
       assert_eq!(variant.to_str(), expected);
     }
   }
 
   #[test]
   fn every_resolution_maps_to_wire_string() {
-    for (variant, expected, high) in [
-      (ViduQ3TextToVideoResolution::ThreeSixtyP, "360p", false),
-      (ViduQ3TextToVideoResolution::FiveFortyP, "540p", false),
-      (ViduQ3TextToVideoResolution::SevenTwentyP, "720p", true),
-      (ViduQ3TextToVideoResolution::TenEightyP, "1080p", true),
-    ] {
+    for (variant, expected, high) in [(ViduQ3TextToVideoResolution::ThreeSixtyP, "360p", false), (ViduQ3TextToVideoResolution::FiveFortyP, "540p", false), (ViduQ3TextToVideoResolution::SevenTwentyP, "720p", true), (ViduQ3TextToVideoResolution::TenEightyP, "1080p", true)] {
       assert_eq!(variant.to_str(), expected);
       assert_eq!(variant.is_high_res(), high);
     }

@@ -19,10 +19,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -34,8 +32,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let rendered_image = contents.rendered_image.expect("rendered_image should be Some");
     assert_eq!(rendered_image.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1bbd0/MblV2S5R6CeskRABMS7-V_preview.png"));
@@ -49,14 +46,17 @@ mod tests {
 
   #[test]
   fn synthetic_rendered_image_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "rendered_image": {
         "url": "https://cdn.example.com/preview.png",
         "content_type": "image/png",
         "file_name": "preview.png",
         "file_size": 12345
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let image = extract_rendered_image(&obj).expect("should extract rendered_image");
     assert_eq!(image.url.as_deref(), Some("https://cdn.example.com/preview.png"));
@@ -67,9 +67,12 @@ mod tests {
 
   #[test]
   fn missing_rendered_image_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "thumbnail": {"url": "https://example.com/preview.png"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_rendered_image(&obj).is_none());
   }

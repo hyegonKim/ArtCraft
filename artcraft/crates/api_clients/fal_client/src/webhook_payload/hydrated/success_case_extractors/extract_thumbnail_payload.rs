@@ -17,10 +17,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -32,8 +30,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let thumbnail = contents.thumbnail.expect("thumbnail should be Some");
     assert_eq!(thumbnail.url.as_deref(), Some("https://v3b.fal.media/files/b/0a95eb38/yvwGJWZV9TkWZuZvjxZNj_preview.png"));
@@ -44,14 +41,17 @@ mod tests {
 
   #[test]
   fn synthetic_thumbnail_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "thumbnail": {
         "url": "https://cdn.example.com/thumb.png",
         "content_type": "image/png",
         "file_name": "thumb.png",
         "file_size": 12345
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let thumb = extract_thumbnail(&obj).expect("should extract thumbnail");
     assert_eq!(thumb.url.as_deref(), Some("https://cdn.example.com/thumb.png"));
@@ -62,9 +62,12 @@ mod tests {
 
   #[test]
   fn missing_thumbnail_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb": {"url": "https://example.com/model.glb"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_thumbnail(&obj).is_none());
   }
@@ -78,8 +81,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     assert!(contents.thumbnail.is_none());
   }

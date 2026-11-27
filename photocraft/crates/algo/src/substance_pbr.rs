@@ -16,16 +16,14 @@ pub mod sampler;
 pub mod stage3d;
 
 pub use brdf::{d_ggx, f_schlick, g_smith};
-pub use designer::{
-    ProceduralPbrParams, ProceduralPbrPreset, render_procedural_pbr_rgba, render_procedural_pbr_surface,
-};
+pub use designer::{ProceduralPbrParams, ProceduralPbrPreset, render_procedural_pbr_rgba, render_procedural_pbr_surface};
 pub use sampler::{
-    MaterialSamplerParams, PbrChannel, PbrMaterialMaps, extract_ibl_environment_rgba, make_seamless_rgba,
-    make_seamless_surface, sample_pbr_channel_rgba, sample_pbr_channel_surface, sample_pbr_maps_rgba,
+    MaterialSamplerParams, PbrChannel, PbrMaterialMaps, extract_ibl_environment_rgba, make_seamless_rgba, make_seamless_surface, sample_pbr_channel_rgba,
+    sample_pbr_channel_surface, sample_pbr_maps_rgba,
 };
 pub use stage3d::{
-    MAX_OBJ_ELEMENTS, ObjMesh, SdfBooleanOp, Stage3dInputs, Stage3dParams, StageMaterialPreset,
-    StageShape, parse_obj_mesh, render_stage_3d_rgba, render_stage_3d_surface,
+    MAX_OBJ_ELEMENTS, ObjMesh, SdfBooleanOp, Stage3dInputs, Stage3dParams, StageMaterialPreset, StageShape, parse_obj_mesh, render_stage_3d_rgba,
+    render_stage_3d_surface,
 };
 
 #[cfg(test)]
@@ -35,9 +33,8 @@ mod tests {
     use photocraft_raster::Surface;
 
     use super::{
-        MaterialSamplerParams, ProceduralPbrParams, ProceduralPbrPreset, SdfBooleanOp, Stage3dInputs,
-        Stage3dParams, StageMaterialPreset, StageShape, extract_ibl_environment_rgba, make_seamless_rgba,
-        parse_obj_mesh, render_procedural_pbr_surface, render_stage_3d_rgba, sample_pbr_maps_rgba,
+        MaterialSamplerParams, ProceduralPbrParams, ProceduralPbrPreset, SdfBooleanOp, Stage3dInputs, Stage3dParams, StageMaterialPreset, StageShape,
+        extract_ibl_environment_rgba, make_seamless_rgba, parse_obj_mesh, render_procedural_pbr_surface, render_stage_3d_rgba, sample_pbr_maps_rgba,
     };
 
     #[test]
@@ -62,21 +59,13 @@ mod tests {
             &src,
             w,
             h,
-            &MaterialSamplerParams {
-                delight_strength: 1.0,
-                normal_strength: 3.0,
-                metallic_level: 0.4,
-                ..MaterialSamplerParams::default()
-            },
+            &MaterialSamplerParams { delight_strength: 1.0, normal_strength: 3.0, metallic_level: 0.4, ..MaterialSamplerParams::default() },
         );
 
         let out_left: f32 = (0..h).map(|y| maps.base_color[y * w + 6][0]).sum::<f32>() / h as f32;
         let out_right: f32 = (0..h).map(|y| maps.base_color[y * w + (w - 7)][0]).sum::<f32>() / h as f32;
         let out_grad = (out_right - out_left).abs();
-        assert!(
-            out_grad < in_grad * 0.45,
-            "delighting should reduce global illumination ramp ({out_grad} vs {in_grad})"
-        );
+        assert!(out_grad < in_grad * 0.45, "delighting should reduce global illumination ramp ({out_grad} vs {in_grad})");
 
         // Check every tangent-space normal decodes to unit length and +Z hemisphere
         for n_px in &maps.normal {
@@ -112,12 +101,8 @@ mod tests {
             }
         }
 
-        let seam_jump_x = |img: &[[f32; 4]]| -> f32 {
-            (0..h).map(|y| (img[y * w][0] - img[y * w + (w - 1)][0]).abs()).sum::<f32>() / h as f32
-        };
-        let seam_jump_y = |img: &[[f32; 4]]| -> f32 {
-            (0..w).map(|x| (img[x][0] - img[(h - 1) * w + x][0]).abs()).sum::<f32>() / w as f32
-        };
+        let seam_jump_x = |img: &[[f32; 4]]| -> f32 { (0..h).map(|y| (img[y * w][0] - img[y * w + (w - 1)][0]).abs()).sum::<f32>() / h as f32 };
+        let seam_jump_y = |img: &[[f32; 4]]| -> f32 { (0..w).map(|x| (img[x][0] - img[(h - 1) * w + x][0]).abs()).sum::<f32>() / w as f32 };
 
         let before_x = seam_jump_x(&src);
         let before_y = seam_jump_y(&src);
@@ -155,20 +140,14 @@ mod tests {
             weathering: 0.35,
             ..Stage3dParams::default()
         };
-        let inputs = Stage3dInputs {
-            backdrop_rgba: Some((&backdrop, w, h)),
-            decal_rgba: Some((&decal, 32, 32)),
-            custom_mesh: None,
-        };
+        let inputs = Stage3dInputs { backdrop_rgba: Some((&backdrop, w, h)), decal_rgba: Some((&decal, 32, 32)), custom_mesh: None };
         let single = render_stage_3d_rgba(w, h, &base_params, &inputs);
         let center_px = single[(h / 2) * w + (w / 2)];
         assert!(center_px[3] > 0.95, "center of sphere must be opaque: {center_px:?}");
         assert!(center_px[0] > center_px[1] + 0.15, "red decal should wrap onto sphere front: {center_px:?}");
 
         // Verify ground-plane shadow catcher produces semi-transparent black shadow pixels below object
-        let has_shadow_catcher = single
-            .iter()
-            .any(|q| q[0] == 0.0 && q[1] == 0.0 && q[2] == 0.0 && (0.05..0.90).contains(&q[3]));
+        let has_shadow_catcher = single.iter().any(|q| q[0] == 0.0 && q[1] == 0.0 && q[2] == 0.0 && (0.05..0.90).contains(&q[3]));
         assert!(has_shadow_catcher, "expected semi-transparent ground-plane shadow catcher alpha");
 
         // Verify SDF SmoothUnion expands silhouette while SmoothSubtract carves into primary shape!
@@ -198,12 +177,7 @@ mod tests {
             },
             &inputs,
         );
-        let single_no_shadow = render_stage_3d_rgba(
-            w,
-            h,
-            &Stage3dParams { shadow_catcher: 0.0, ..base_params },
-            &inputs,
-        );
+        let single_no_shadow = render_stage_3d_rgba(w, h, &Stage3dParams { shadow_catcher: 0.0, ..base_params }, &inputs);
         let alpha_sum = |img: &[[f32; 4]]| img.iter().map(|q| q[3]).sum::<f32>();
         assert!(alpha_sum(&union_img) > alpha_sum(&single_no_shadow) + 25.0, "SmoothUnion should expand coverage");
         assert_ne!(subtract_img, single_no_shadow, "SmoothSubtract should alter geometry/normals");
@@ -227,21 +201,12 @@ mod tests {
         let obj_img = render_stage_3d_rgba(
             32,
             32,
-            &Stage3dParams {
-                shape: StageShape::CustomObj,
-                material: StageMaterialPreset::PolishedGold,
-                ..Stage3dParams::default()
-            },
+            &Stage3dParams { shape: StageShape::CustomObj, material: StageMaterialPreset::PolishedGold, ..Stage3dParams::default() },
             &Stage3dInputs { backdrop_rgba: None, decal_rgba: None, custom_mesh: Some(&mesh) },
         );
         assert!(obj_img.iter().any(|q| q[3] > 0.8), "custom OBJ mesh should render visible pixels");
 
-        for hostile in [
-            "",
-            "v NaN Inf -Inf\nf 1 2 3",
-            "v 0 0 0\nv 1 0 0\nf 1 999999 -999999 0",
-            "garbage /// \\\0\n f / / /",
-        ] {
+        for hostile in ["", "v NaN Inf -Inf\nf 1 2 3", "v 0 0 0\nv 1 0 0\nf 1 999999 -999999 0", "garbage /// \\\0\n f / / /"] {
             assert!(parse_obj_mesh(hostile).is_err());
         }
     }
@@ -255,11 +220,7 @@ mod tests {
             src.fill_rect(rect, &[0.5, 0.5, 0.5, 1.0]);
 
             for preset in ProceduralPbrPreset::ALL {
-                let out = render_procedural_pbr_surface(
-                    &src,
-                    rect,
-                    &ProceduralPbrParams { preset, scale: 3.0, ..ProceduralPbrParams::default() },
-                );
+                let out = render_procedural_pbr_surface(&src, rect, &ProceduralPbrParams { preset, scale: 3.0, ..ProceduralPbrParams::default() });
                 assert_eq!(out.format(), fmt);
                 let raw = out.read_region(rect);
                 assert_eq!(raw.len(), 32 * 32 * 4);

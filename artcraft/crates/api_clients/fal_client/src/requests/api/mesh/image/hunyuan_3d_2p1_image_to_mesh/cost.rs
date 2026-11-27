@@ -56,13 +56,6 @@ mod tests {
   }
 
   fn base_request() -> Hunyuan3d2p1ImageToMeshRequest {
-    Hunyuan3d2p1ImageToMeshRequest {
-      image_url: "https://example.com/image.jpg".to_string(),
-      textured_mesh: None,
-      guidance_scale: None,
-      num_inference_steps: None,
-      octree_resolution: None,
-      seed: None,
-    }
+    Hunyuan3d2p1ImageToMeshRequest { image_url: "https://example.com/image.jpg".to_string(), textured_mesh: None, guidance_scale: None, num_inference_steps: None, octree_resolution: None, seed: None }
   }
 }

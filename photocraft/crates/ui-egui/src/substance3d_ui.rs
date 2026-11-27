@@ -6,9 +6,7 @@
 //! - Properties panel `Substance 3D` quick-launch buttons (routing strictly through `menus::invoke`).
 
 use egui::RichText;
-use photocraft_algo::substance_pbr::{
-    PbrChannel, ProceduralPbrPreset, SdfBooleanOp, StageMaterialPreset, StageShape,
-};
+use photocraft_algo::substance_pbr::{PbrChannel, ProceduralPbrPreset, SdfBooleanOp, StageMaterialPreset, StageShape};
 use serde_json::{Map, Value, json};
 
 use crate::props_layout::section;
@@ -125,12 +123,7 @@ fn field_rgb(fields: &Map<String, Value>, k: &str, d: [f32; 3]) -> [f32; 3] {
     let Some(arr) = fields.get(k).and_then(Value::as_array) else {
         return d;
     };
-    let get_c = |i: usize, def: f32| {
-        arr.get(i)
-            .and_then(Value::as_f64)
-            .filter(|v| v.is_finite())
-            .map_or(def, |v| (v as f32).clamp(0.0, 1.0))
-    };
+    let get_c = |i: usize, def: f32| arr.get(i).and_then(Value::as_f64).filter(|v| v.is_finite()).map_or(def, |v| (v as f32).clamp(0.0, 1.0));
     [get_c(0, d[0]), get_c(1, d[1]), get_c(2, d[2])]
 }
 
@@ -203,11 +196,7 @@ pub fn stage3d_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
         pct_row(ui, tl!("Roughness"), fields, "roughness", 0.24, 100.0);
         pct_row(ui, tl!("Edge Wear"), fields, "weathering", 0.15, 100.0);
 
-        for (lbl, key, def) in [
-            (tl!("Rotate X"), "rotX", 12.0f32),
-            (tl!("Rotate Y"), "rotY", -24.0),
-            (tl!("Rotate Z"), "rotZ", 0.0),
-        ] {
+        for (lbl, key, def) in [(tl!("Rotate X"), "rotX", 12.0f32), (tl!("Rotate Y"), "rotY", -24.0), (tl!("Rotate Z"), "rotZ", 0.0)] {
             ui.label(RichText::new(lbl).color(t.text_dim));
             let mut deg = field_f32(fields, key, def);
             if widgets::value_field(ui, &mut deg, -180.0..=180.0, "°", 82.0).changed() {
@@ -319,10 +308,7 @@ pub fn confirm_sample_pbr(app: &mut PhotocraftApp, fields: &Map<String, Value>) 
 pub fn procedural_pbr_body(ui: &mut egui::Ui, fields: &mut Map<String, Value>) {
     let t = Tokens::get(ui.ctx());
     let mut preset = field_str(fields, "preset", "brushedSteel");
-    let preset_opts: Vec<(String, &str)> = ProceduralPbrPreset::ALL
-        .iter()
-        .map(|p| (p.id().into(), tl!(p.label())))
-        .collect();
+    let preset_opts: Vec<(String, &str)> = ProceduralPbrPreset::ALL.iter().map(|p| (p.id().into(), tl!(p.label()))).collect();
 
     egui::Grid::new("proc-pbr-dialog-grid").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
         ui.label(RichText::new(tl!("Material Graph")).color(t.text_dim));
@@ -398,10 +384,7 @@ pub fn properties_section(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     ui.horizontal_wrapped(|ui| {
         for &(cmd, label) in SUBSTANCE_QUICK_ACTIONS {
             let enabled = app.session.is_enabled(cmd);
-            if ui
-                .add_enabled_ui(enabled, |ui| widgets::secondary_button(ui, tl!(label), 0.0).clicked())
-                .inner
-            {
+            if ui.add_enabled_ui(enabled, |ui| widgets::secondary_button(ui, tl!(label), 0.0).clicked()).inner {
                 picked = Some(cmd);
             }
         }
@@ -441,16 +424,7 @@ mod tests {
         }
         crate::dialogs::confirm(&mut app, dlg_id).unwrap();
         assert!(app.ui.dialogs.is_empty());
-        assert!(
-            app.session
-                .active()
-                .unwrap()
-                .doc
-                .layers
-                .iter()
-                .any(|l| l.name == "3D Stage"),
-            "confirming 3D Stage dialog must create 3D Stage layer"
-        );
+        assert!(app.session.active().unwrap().doc.layers.iter().any(|l| l.name == "3D Stage"), "confirming 3D Stage dialog must create 3D Stage layer");
 
         // 2. Parameterless `filter.material.samplePbr` opens Material Sampler dialog -> creates 6-layer group
         let r_pbr = crate::menus::invoke(&mut app, &ctx, "filter.material.samplePbr", json!({})).unwrap();
@@ -459,10 +433,14 @@ mod tests {
         assert!(super::owns_sample_pbr(&app.ui.dialogs[0].fields));
         crate::dialogs::confirm(&mut app, pbr_dlg).unwrap();
         assert!(app.ui.dialogs.is_empty());
-        let has_pbr_group = app.session.active().unwrap().doc.layers.iter().any(|l| {
-            l.name == "PBR Material Maps"
-                && matches!(&l.content, LayerContent::Group(g) if g.children.len() == 6)
-        });
+        let has_pbr_group = app
+            .session
+            .active()
+            .unwrap()
+            .doc
+            .layers
+            .iter()
+            .any(|l| l.name == "PBR Material Maps" && matches!(&l.content, LayerContent::Group(g) if g.children.len() == 6));
         assert!(has_pbr_group, "confirming Material Sampler dialog must create 6-map PBR group");
 
         // 3. Parameterless `filter.material.proceduralPbr` opens Procedural PBR dialog -> applies to active raster layer

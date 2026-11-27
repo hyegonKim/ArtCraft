@@ -207,10 +207,14 @@ pub fn dialog(app: &mut EffectcraftApp, ctx: &egui::Context, t: &Tokens) {
             app.auto.add("dialog.marker.label", r.response.rect, "Label");
         });
         ui.add_space(14.0);
+        let mut open_review = false;
         ui.horizontal(|ui| {
             let r = ui.button(tr("Delete"));
             app.auto.add("dialog.marker.delete", r.rect, "Delete");
             delete = r.clicked();
+            let rev = ui.button(tr("Frame.io Review"));
+            app.auto.add("dialog.marker.frameIoReview", rev.rect, "Frame.io Review");
+            open_review = rev.clicked();
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let r = ui.add(egui::Button::new(egui::RichText::new(tr("   OK   ")).color(Color32::WHITE)).fill(app.tokens.accent));
                 app.auto.add("dialog.marker.ok", r.rect, "OK");
@@ -220,6 +224,9 @@ pub fn dialog(app: &mut EffectcraftApp, ctx: &egui::Context, t: &Tokens) {
                 cancel = r.clicked();
             });
         });
+        if open_review {
+            super::review_ui::open(app);
+        }
     });
     app.dialog_state.marker = d.clone();
     delete |= delete_key && !ok && !cancel;

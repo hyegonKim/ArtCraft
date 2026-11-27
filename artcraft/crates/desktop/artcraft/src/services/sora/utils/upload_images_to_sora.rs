@@ -31,10 +31,7 @@ pub struct UploadImagesToSoraResult {
   pub maybe_new_sora_credentials: Option<SoraCredentialSet>,
 }
 
-pub async fn upload_images_to_sora(
-  args: UploadImagesToSoraArgs<'_>,
-) -> AnyhowResult<UploadImagesToSoraResult> {
-
+pub async fn upload_images_to_sora(args: UploadImagesToSoraArgs<'_>) -> AnyhowResult<UploadImagesToSoraResult> {
   let mut updated_sora_creds = false;
 
   info!("Calling get media file API: {:?}", args.storyteller_host);
@@ -45,15 +42,10 @@ pub async fn upload_images_to_sora(
   for media_token in args.image_media_tokens.iter() {
     info!("Using media token: {:?}", media_token);
 
-    let response = get_media_file(
-      args.storyteller_host,
-      media_token
-    ).await?;
+    let response = get_media_file(args.storyteller_host, media_token).await?;
 
     let media_file_url = &response.media_file.media_links.cdn_url;
-    let extension_with_dot = get_url_file_extension(media_file_url)
-        .map(|ext| format!(".{}", ext))
-        .unwrap_or_else(|| ".png".to_string());
+    let extension_with_dot = get_url_file_extension(media_file_url).map(|ext| format!(".{}", ext)).unwrap_or_else(|| ".png".to_string());
 
     let filename = format!("{}{}", response.media_file.token.as_str(), extension_with_dot);
     let filename = args.app_data_root.downloads_dir().path().join(&filename);
@@ -66,12 +58,10 @@ pub async fn upload_images_to_sora(
   let mut sora_creds = args.sora_creds_manager.get_credentials_required()?;
 
   // TODO: We don't need sentinel anymore?
-  let credential_updated = maybe_upgrade_or_renew_session(&mut sora_creds)
-      .await
-      .map_err(|err| {
-        error!("Failed to upgrade or renew session: {:?}", err);
-        err
-      })?;
+  let credential_updated = maybe_upgrade_or_renew_session(&mut sora_creds).await.map_err(|err| {
+    error!("Failed to upgrade or renew session: {:?}", err);
+    err
+  })?;
 
   if credential_updated {
     info!("Storing updated credentials");
@@ -82,14 +72,14 @@ pub async fn upload_images_to_sora(
   let mut sora_media_tokens = Vec::with_capacity(files_to_upload_to_sora.len());
 
   for (i, file_path) in files_to_upload_to_sora.iter().enumerate() {
-    info!("Uploading image {} of {}...", (i+1), files_to_upload_to_sora.len());
+    info!("Uploading image {} of {}...", (i + 1), files_to_upload_to_sora.len());
 
-    let (response, maybe_new_credentials) =
-        image_upload_from_file_with_session_auto_renew(ImageUploadFromFileAutoRenewRequest {
-          file_path,
-          credentials: &sora_creds,
-          request_timeout: Some(SORA_IMAGE_UPLOAD_TIMEOUT), // TODO: Centralize and make configurable.
-        }).await?;
+    let (response, maybe_new_credentials) = image_upload_from_file_with_session_auto_renew(ImageUploadFromFileAutoRenewRequest {
+      file_path,
+      credentials: &sora_creds,
+      request_timeout: Some(SORA_IMAGE_UPLOAD_TIMEOUT), // TODO: Centralize and make configurable.
+    })
+    .await?;
 
     if let Some(new_creds) = maybe_new_credentials {
       info!("Storing updated credentials.");
@@ -101,14 +91,7 @@ pub async fn upload_images_to_sora(
     sora_media_tokens.push(response.id);
   }
 
-  let maybe_new_sora_credentials = if updated_sora_creds {
-    Some(sora_creds)
-  } else {
-    None
-  };
+  let maybe_new_sora_credentials = if updated_sora_creds { Some(sora_creds) } else { None };
 
-  Ok(UploadImagesToSoraResult {
-    sora_media_tokens,
-    maybe_new_sora_credentials,
-  })
+  Ok(UploadImagesToSoraResult { sora_media_tokens, maybe_new_sora_credentials })
 }

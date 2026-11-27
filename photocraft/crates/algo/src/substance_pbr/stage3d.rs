@@ -15,8 +15,8 @@ use photocraft_raster::{Surface, from_rgba_into};
 use serde::{Deserialize, Serialize};
 
 use super::brdf::{
-    EquirectProbe, Mat3, PbrSurfacePoint, linear3_to_srgb, sanitize_f32, shade_ggx_direct, srgb3_to_linear,
-    tone_map_filmic, v3_add, v3_cross, v3_dot, v3_len, v3_lerp, v3_norm, v3_scale, v3_sub,
+    EquirectProbe, Mat3, PbrSurfacePoint, linear3_to_srgb, sanitize_f32, shade_ggx_direct, srgb3_to_linear, tone_map_filmic, v3_add, v3_cross, v3_dot, v3_len,
+    v3_lerp, v3_norm, v3_scale, v3_sub,
 };
 use super::sampler::extract_ibl_environment_rgba;
 use crate::photo_util::{bilinear, par_rows};
@@ -40,16 +40,7 @@ pub enum StageShape {
 }
 
 impl StageShape {
-    pub const ALL: [Self; 8] = [
-        Self::Sphere,
-        Self::RoundedBox,
-        Self::Bottle,
-        Self::Can,
-        Self::Cylinder,
-        Self::Torus,
-        Self::DisplayCard,
-        Self::CustomObj,
-    ];
+    pub const ALL: [Self; 8] = [Self::Sphere, Self::RoundedBox, Self::Bottle, Self::Can, Self::Cylinder, Self::Torus, Self::DisplayCard, Self::CustomObj];
 
     pub fn id(self) -> &'static str {
         match self {
@@ -104,12 +95,7 @@ pub enum SdfBooleanOp {
 }
 
 impl SdfBooleanOp {
-    pub const ALL: [Self; 4] = [
-        Self::None,
-        Self::SmoothUnion,
-        Self::SmoothSubtract,
-        Self::SmoothIntersect,
-    ];
+    pub const ALL: [Self; 4] = [Self::None, Self::SmoothUnion, Self::SmoothSubtract, Self::SmoothIntersect];
 
     pub fn id(self) -> &'static str {
         match self {
@@ -261,13 +247,8 @@ impl Default for Stage3dParams {
 
 impl Stage3dParams {
     pub fn sanitized(&self) -> Self {
-        let clean3 = |v: [f32; 3], d: [f32; 3], lo: f32, hi: f32| {
-            [
-                sanitize_f32(v[0], d[0], lo, hi),
-                sanitize_f32(v[1], d[1], lo, hi),
-                sanitize_f32(v[2], d[2], lo, hi),
-            ]
-        };
+        let clean3 =
+            |v: [f32; 3], d: [f32; 3], lo: f32, hi: f32| [sanitize_f32(v[0], d[0], lo, hi), sanitize_f32(v[1], d[1], lo, hi), sanitize_f32(v[2], d[2], lo, hi)];
         let raw_ld = clean3(self.light_dir, [0.52, 0.72, 0.46], -10.0, 10.0);
         let light_dir = if v3_len(raw_ld) > 1e-4 { v3_norm(raw_ld) } else { v3_norm([0.52, 0.72, 0.46]) };
         Self {
@@ -283,10 +264,7 @@ impl Stage3dParams {
             weathering: sanitize_f32(self.weathering, 0.15, 0.0, 1.0),
             rot_deg: clean3(self.rot_deg, [12.0, -24.0, 0.0], -3600.0, 3600.0),
             scale: sanitize_f32(self.scale, 1.0, 0.2, 2.5),
-            center: [
-                sanitize_f32(self.center[0], 0.5, -0.5, 1.5),
-                sanitize_f32(self.center[1], 0.5, -0.5, 1.5),
-            ],
+            center: [sanitize_f32(self.center[0], 0.5, -0.5, 1.5), sanitize_f32(self.center[1], 0.5, -0.5, 1.5)],
             fov_deg: sanitize_f32(self.fov_deg, 42.0, 20.0, 90.0),
             match_background_ibl: self.match_background_ibl,
             light_dir,
@@ -398,33 +376,21 @@ pub fn parse_obj_mesh(obj_text: &str) -> Result<ObjMesh, String> {
             bmax[c] = bmax[c].max(v[c]);
         }
     }
-    let center = [
-        0.5 * (bmin[0] + bmax[0]),
-        0.5 * (bmin[1] + bmax[1]),
-        0.5 * (bmin[2] + bmax[2]),
-    ];
+    let center = [0.5 * (bmin[0] + bmax[0]), 0.5 * (bmin[1] + bmax[1]), 0.5 * (bmin[2] + bmax[2])];
     let half_span = ((bmax[0] - bmin[0]).max(bmax[1] - bmin[1]).max(bmax[2] - bmin[2]) * 0.5).max(1e-5);
     let inv_scale = 0.60 / half_span;
 
     let mut vertices = Vec::with_capacity(raw_verts.len());
     let mut max_r2 = 0.04f32;
     for v in &raw_verts {
-        let p = [
-            (v[0] - center[0]) * inv_scale,
-            (v[1] - center[1]) * inv_scale,
-            (v[2] - center[2]) * inv_scale,
-        ];
+        let p = [(v[0] - center[0]) * inv_scale, (v[1] - center[1]) * inv_scale, (v[2] - center[2]) * inv_scale];
         max_r2 = max_r2.max(v3_dot(p, p));
         vertices.push(p);
     }
 
     let mut tris = Vec::with_capacity(faces.len());
     for &[i0, i1, i2] in &faces {
-        let (Some(&a), Some(&b), Some(&c)) = (
-            vertices.get(i0 as usize),
-            vertices.get(i1 as usize),
-            vertices.get(i2 as usize),
-        ) else {
+        let (Some(&a), Some(&b), Some(&c)) = (vertices.get(i0 as usize), vertices.get(i1 as usize), vertices.get(i2 as usize)) else {
             continue;
         };
         let ba = v3_sub(b, a);
@@ -438,12 +404,7 @@ pub fn parse_obj_mesh(obj_text: &str) -> Result<ObjMesh, String> {
         return Err("OBJ mesh faces are degenerate".into());
     }
 
-    Ok(ObjMesh {
-        vertices,
-        faces,
-        bound_radius: max_r2.sqrt() + 0.06,
-        tris,
-    })
+    Ok(ObjMesh { vertices, faces, bound_radius: max_r2.sqrt() + 0.06, tris })
 }
 
 /// Optional image/mesh inputs for [`render_stage_3d_rgba`] and [`render_stage_3d_surface`].
@@ -630,10 +591,7 @@ impl<'a> SceneCtx<'a> {
         let d2 = self.eval_world(v3_add(p_world, v3_scale(k2, eps)));
         let d3 = self.eval_world(v3_add(p_world, v3_scale(k3, eps)));
 
-        let grad = v3_add(
-            v3_add(v3_scale(k0, d0), v3_scale(k1, d1)),
-            v3_add(v3_scale(k2, d2), v3_scale(k3, d3)),
-        );
+        let grad = v3_add(v3_add(v3_scale(k0, d0), v3_scale(k1, d1)), v3_add(v3_scale(k2, d2), v3_scale(k3, d3)));
         let normal = v3_norm(grad);
         let lap = ((d0 + d1 + d2 + d3) - 4.0 * d_center) / (4.0 * eps).max(1e-5);
         (normal, lap.clamp(-2.0, 2.0))
@@ -716,10 +674,7 @@ fn raymarch_object(scene: &SceneCtx<'_>, ro: [f32; 3], rd: [f32; 3]) -> RayHit {
 /// Procedural 3D value hash for marble veins & brushed grooves in local object space.
 #[inline]
 fn hash3(ix: i32, iy: i32, iz: i32) -> f32 {
-    let mut n = (ix as u32)
-        .wrapping_mul(73_856_093)
-        ^ (iy as u32).wrapping_mul(19_349_663)
-        ^ (iz as u32).wrapping_mul(83_492_791);
+    let mut n = (ix as u32).wrapping_mul(73_856_093) ^ (iy as u32).wrapping_mul(19_349_663) ^ (iz as u32).wrapping_mul(83_492_791);
     n = (n ^ (n >> 13)).wrapping_mul(1_274_126_177);
     ((n ^ (n >> 16)) & 0x00FF_FFFF) as f32 / 16_777_215.0
 }
@@ -727,11 +682,7 @@ fn hash3(ix: i32, iy: i32, iz: i32) -> f32 {
 fn value_noise3(p: [f32; 3]) -> f32 {
     let (ix, iy, iz) = (p[0].floor() as i32, p[1].floor() as i32, p[2].floor() as i32);
     let (fx, fy, fz) = (p[0] - ix as f32, p[1] - iy as f32, p[2] - iz as f32);
-    let (ux, uy, uz) = (
-        fx * fx * (3.0 - 2.0 * fx),
-        fy * fy * (3.0 - 2.0 * fy),
-        fz * fz * (3.0 - 2.0 * fz),
-    );
+    let (ux, uy, uz) = (fx * fx * (3.0 - 2.0 * fx), fy * fy * (3.0 - 2.0 * fy), fz * fz * (3.0 - 2.0 * fz));
     let c000 = hash3(ix, iy, iz);
     let c100 = hash3(ix + 1, iy, iz);
     let c010 = hash3(ix, iy + 1, iz);
@@ -776,22 +727,12 @@ fn local_surface_uv(p_local: [f32; 3], shape: StageShape) -> Option<[f32; 2]> {
             let phi = p_local[0].atan2(p_local[2]);
             let u = (phi / (PI * 1.35) + 0.5).clamp(0.0, 1.0);
             let v = (0.5 - p_local[1] / 1.12).clamp(0.0, 1.0);
-            if (-0.68 * PI..=0.68 * PI).contains(&phi) {
-                Some([u, v])
-            } else {
-                None
-            }
+            if (-0.68 * PI..=0.68 * PI).contains(&phi) { Some([u, v]) } else { None }
         }
     }
 }
 
-fn evaluate_stage_material(
-    scene: &SceneCtx<'_>,
-    p_local: [f32; 3],
-    mut normal: [f32; 3],
-    curvature: f32,
-    ao: f32,
-) -> PbrSurfacePoint {
+fn evaluate_stage_material(scene: &SceneCtx<'_>, p_local: [f32; 3], mut normal: [f32; 3], curvature: f32, ao: f32) -> PbrSurfacePoint {
     let user_albedo = srgb3_to_linear(scene.params.base_color);
     let mut albedo_lin = user_albedo;
     let mut metallic = scene.params.metallic;
@@ -872,21 +813,10 @@ fn evaluate_stage_material(
         roughness = (roughness + dirt_mask * 0.35 - edge_mask * 0.12).clamp(0.05, 1.0);
     }
 
-    PbrSurfacePoint {
-        albedo_lin,
-        normal,
-        roughness,
-        metallic,
-        ao,
-    }
+    PbrSurfacePoint { albedo_lin, normal, roughness, metallic, ao }
 }
 
-fn shade_ray_sample(
-    scene: &SceneCtx<'_>,
-    ro: [f32; 3],
-    rd: [f32; 3],
-    screen_uv: [f32; 2],
-) -> ([f32; 4], f32) {
+fn shade_ray_sample(scene: &SceneCtx<'_>, ro: [f32; 3], rd: [f32; 3], screen_uv: [f32; 2]) -> ([f32; 4], f32) {
     let hit = raymarch_object(scene, ro, rd);
     if hit.hit {
         let p_world = v3_add(ro, v3_scale(rd, hit.t));
@@ -896,12 +826,7 @@ fn shade_ray_sample(
         let surf = evaluate_stage_material(scene, p_local, normal, curvature, ao);
 
         let view_dir = v3_scale(rd, -1.0);
-        let shadow = scene.soft_shadow(
-            v3_add(p_world, v3_scale(normal, 0.008 * scene.params.scale)),
-            scene.params.light_dir,
-            4.5,
-            10.0,
-        );
+        let shadow = scene.soft_shadow(v3_add(p_world, v3_scale(normal, 0.008 * scene.params.scale)), scene.params.light_dir, 4.5, 10.0);
         let key_rad = v3_scale([1.0, 0.98, 0.94], scene.params.light_intensity * shadow);
         let direct = shade_ggx_direct(&surf, view_dir, scene.params.light_dir, key_rad);
         let ibl = scene.probe.shade_ibl(&surf, view_dir);
@@ -923,11 +848,7 @@ fn shade_ray_sample(
                 scene.probe.sample_dir(rd, surf.roughness)
             };
             let fresnel = (1.0 - v3_dot(normal, view_dir).clamp(0.0, 1.0)).powi(3);
-            let tinted = [
-                refracted_lin[0] * surf.albedo_lin[0],
-                refracted_lin[1] * surf.albedo_lin[1],
-                refracted_lin[2] * surf.albedo_lin[2],
-            ];
+            let tinted = [refracted_lin[0] * surf.albedo_lin[0], refracted_lin[1] * surf.albedo_lin[1], refracted_lin[2] * surf.albedo_lin[2]];
             total_lin = v3_add(v3_scale(tinted, 0.72 * (1.0 - fresnel)), total_lin);
             out_alpha = (0.78 + 0.22 * fresnel).clamp(0.0, 1.0);
         }
@@ -943,12 +864,7 @@ fn shade_ray_sample(
             let gp = v3_add(ro, v3_scale(rd, t_ground));
             let radial = (gp[0] * gp[0] + gp[2] * gp[2]).sqrt() / scene.params.scale.max(0.2);
             if radial < 2.8 {
-                let lit = scene.soft_shadow(
-                    [gp[0], gp[1] + 0.008, gp[2]],
-                    scene.params.light_dir,
-                    4.5,
-                    7.5,
-                );
+                let lit = scene.soft_shadow([gp[0], gp[1] + 0.008, gp[2]], scene.params.light_dir, 4.5, 7.5);
                 let d_obj = scene.eval_world([gp[0], gp[1] + 0.02 * scene.params.scale, gp[2]]).max(0.0);
                 let contact = (1.0 - (d_obj / (0.28 * scene.params.scale)).clamp(0.0, 1.0)).powi(2) * 0.55;
                 let fade = (1.0 - (radial / 2.8).powi(2)).clamp(0.0, 1.0);
@@ -971,25 +887,13 @@ fn flatten_rgba(opt: Option<(&[[f32; 4]], usize, usize)>) -> (Vec<f32>, (usize, 
     }
     let mut flat = Vec::with_capacity(n * 4);
     for q in px.iter().take(n) {
-        flat.extend_from_slice(&[
-            q[0].clamp(0.0, 1.0),
-            q[1].clamp(0.0, 1.0),
-            q[2].clamp(0.0, 1.0),
-            q[3].clamp(0.0, 1.0),
-        ]);
+        flat.extend_from_slice(&[q[0].clamp(0.0, 1.0), q[1].clamp(0.0, 1.0), q[2].clamp(0.0, 1.0), q[3].clamp(0.0, 1.0)]);
     }
     (flat, (w, h))
 }
 
 #[inline]
-fn camera_ray(
-    px_x: f32,
-    px_y: f32,
-    w: f32,
-    h: f32,
-    center: [f32; 2],
-    tan_half_fov: f32,
-) -> ([f32; 3], [f32; 3]) {
+fn camera_ray(px_x: f32, px_y: f32, w: f32, h: f32, center: [f32; 2], tan_half_fov: f32) -> ([f32; 3], [f32; 3]) {
     let min_dim = w.min(h).max(1.0);
     let ndc_x = (px_x - center[0] * w) / (0.5 * min_dim);
     let ndc_y = (center[1] * h - px_y) / (0.5 * min_dim);
@@ -1001,12 +905,7 @@ fn camera_ray(
 /// Renders a 3D Stager / SDF Clay scene into straight sRGB RGBA (`w × h`), with 2×2 silhouette
 /// edge supersampling, Cook-Torrance GGX shading, backdrop-matched IBL, decal wrapping, and
 /// semi-transparent ground-plane shadow catcher alpha.
-pub fn render_stage_3d_rgba(
-    w: usize,
-    h: usize,
-    params: &Stage3dParams,
-    inputs: &Stage3dInputs<'_>,
-) -> Vec<[f32; 4]> {
+pub fn render_stage_3d_rgba(w: usize, h: usize, params: &Stage3dParams, inputs: &Stage3dInputs<'_>) -> Vec<[f32; 4]> {
     let n = w.saturating_mul(h);
     if n == 0 {
         return Vec::new();
@@ -1026,17 +925,7 @@ pub fn render_stage_3d_rgba(
     let rot_fwd = Mat3::from_euler_deg(p.rot_deg);
     let rot_inv = rot_fwd.transpose();
 
-    let scene = SceneCtx {
-        params: p,
-        rot_inv,
-        rot_fwd,
-        mesh: inputs.custom_mesh,
-        probe,
-        backdrop_flat,
-        backdrop_dim,
-        decal_flat,
-        decal_dim,
-    };
+    let scene = SceneCtx { params: p, rot_inv, rot_fwd, mesh: inputs.custom_mesh, probe, backdrop_flat, backdrop_dim, decal_flat, decal_dim };
 
     let wf = w as f32;
     let hf = h as f32;
@@ -1054,12 +943,13 @@ pub fn render_stage_3d_rgba(
 
             // Check whether ray grazed near object silhouette (`min_d < edge_band`) or hit near grazing angle:
             // run 2x2 premultiplied-alpha supersampling on silhouette border pixels!
-            let needs_ssaa = min_d < edge_band && (min_d > 0.0 || {
-                // Probe one neighbor ray to see if pixel straddles object silhouette
-                let (ro_r, rd_r) = camera_ray(cx + 0.65, cy, wf, hf, p.center, tan_half_fov);
-                let (ro_u, rd_u) = camera_ray(cx, cy + 0.65, wf, hf, p.center, tan_half_fov);
-                !raymarch_object(&scene, ro_r, rd_r).hit || !raymarch_object(&scene, ro_u, rd_u).hit
-            });
+            let needs_ssaa = min_d < edge_band
+                && (min_d > 0.0 || {
+                    // Probe one neighbor ray to see if pixel straddles object silhouette
+                    let (ro_r, rd_r) = camera_ray(cx + 0.65, cy, wf, hf, p.center, tan_half_fov);
+                    let (ro_u, rd_u) = camera_ray(cx, cy + 0.65, wf, hf, p.center, tan_half_fov);
+                    !raymarch_object(&scene, ro_r, rd_r).hit || !raymarch_object(&scene, ro_u, rd_u).hit
+                });
 
             if !needs_ssaa {
                 *dst = c0;
@@ -1082,12 +972,7 @@ pub fn render_stage_3d_rgba(
             let out_a = (pm[3] * 0.25).clamp(0.0, 1.0);
             if out_a > 1e-5 {
                 let inv_a = pm[3].recip();
-                *dst = [
-                    (pm[0] * inv_a).clamp(0.0, 1.0),
-                    (pm[1] * inv_a).clamp(0.0, 1.0),
-                    (pm[2] * inv_a).clamp(0.0, 1.0),
-                    out_a,
-                ];
+                *dst = [(pm[0] * inv_a).clamp(0.0, 1.0), (pm[1] * inv_a).clamp(0.0, 1.0), (pm[2] * inv_a).clamp(0.0, 1.0), out_a];
             } else {
                 *dst = [0.0; 4];
             }
@@ -1097,12 +982,7 @@ pub fn render_stage_3d_rgba(
 }
 
 /// Renders a 3D Stager / SDF Clay scene directly into a depth-agnostic `Surface` (`8`/`16`/`32f`).
-pub fn render_stage_3d_surface(
-    fmt: PixelFormat,
-    rect: Rect,
-    params: &Stage3dParams,
-    inputs: &Stage3dInputs<'_>,
-) -> Surface {
+pub fn render_stage_3d_surface(fmt: PixelFormat, rect: Rect, params: &Stage3dParams, inputs: &Stage3dInputs<'_>) -> Surface {
     if rect.is_empty() {
         return Surface::new(fmt);
     }

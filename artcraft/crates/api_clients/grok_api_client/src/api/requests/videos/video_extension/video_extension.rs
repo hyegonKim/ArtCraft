@@ -94,45 +94,29 @@ pub async fn video_extension(args: VideoExtensionArgs<'_>) -> Result<VideoExtens
 
   info!("Grok video_extension: model={}, duration={:?}", model.as_str(), req.duration);
 
-  let request_body = VideoExtensionRequestBody {
-    prompt: req.prompt,
-    video: to_extension_source_ref(&req.source_video),
-    model: Some(model.as_str().to_string()),
-    duration: req.duration,
-  };
+  let request_body = VideoExtensionRequestBody { prompt: req.prompt, video: to_extension_source_ref(&req.source_video), model: Some(model.as_str().to_string()), duration: req.duration };
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.post(&url)
-    .header("Authorization", bearer)
-    .header("Content-Type", "application/json")
-    .json(&request_body)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.post(&url).header("Authorization", bearer).header("Content-Type", "application/json").json(&request_body).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok video_extension response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: VideoExtensionResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: VideoExtensionResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
   Ok(VideoExtensionSuccess { request_id: parsed.request_id })
 }
 
 fn to_extension_source_ref(source: &VideoExtensionSource) -> VideoExtensionSourceRef {
   match source {
-    VideoExtensionSource::Url(u)    => VideoExtensionSourceRef { url: Some(u.clone()), file_id: None },
+    VideoExtensionSource::Url(u) => VideoExtensionSourceRef { url: Some(u.clone()), file_id: None },
     VideoExtensionSource::FileId(id) => VideoExtensionSourceRef { url: None, file_id: Some(id.clone()) },
   }
 }
@@ -146,12 +130,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_minimal() {
-    let body = VideoExtensionRequestBody {
-      prompt: "keep walking".to_string(),
-      video: VideoExtensionSourceRef { url: Some("https://example.com/v.mp4".to_string()), file_id: None },
-      model: Some("grok-imagine-video".to_string()),
-      duration: None,
-    };
+    let body = VideoExtensionRequestBody { prompt: "keep walking".to_string(), video: VideoExtensionSourceRef { url: Some("https://example.com/v.mp4".to_string()), file_id: None }, model: Some("grok-imagine-video".to_string()), duration: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"prompt\":\"keep walking\""));
     assert!(json.contains("\"video\":{\"url\":\"https://example.com/v.mp4\"}"));
@@ -161,12 +140,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_with_duration() {
-    let body = VideoExtensionRequestBody {
-      prompt: "p".to_string(),
-      video: VideoExtensionSourceRef { url: None, file_id: Some("file_v".to_string()) },
-      model: None,
-      duration: Some(8),
-    };
+    let body = VideoExtensionRequestBody { prompt: "p".to_string(), video: VideoExtensionSourceRef { url: None, file_id: Some("file_v".to_string()) }, model: None, duration: Some(8) };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"duration\":8"));
     assert!(json.contains("\"video\":{\"file_id\":\"file_v\"}"));
@@ -177,16 +151,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = VideoExtensionArgs {
-      api_key: &key,
-      request: VideoExtensionRequest {
-        prompt: "p".to_string(),
-        source_video: VideoExtensionSource::Url("u".to_string()),
-        source_video_duration_seconds_hint: None,
-        model: None,
-        duration: Some(5),
-      },
-    };
+    let args = VideoExtensionArgs { api_key: &key, request: VideoExtensionRequest { prompt: "p".to_string(), source_video: VideoExtensionSource::Url("u".to_string()), source_video_duration_seconds_hint: None, model: None, duration: Some(5) } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"duration\":5"));
@@ -197,13 +162,7 @@ mod tests {
 
   #[test]
   fn source_duration_hint_serializes_when_set() {
-    let req = VideoExtensionRequest {
-      prompt: "p".to_string(),
-      source_video: VideoExtensionSource::Url("u".to_string()),
-      source_video_duration_seconds_hint: Some(7),
-      model: None,
-      duration: Some(5),
-    };
+    let req = VideoExtensionRequest { prompt: "p".to_string(), source_video: VideoExtensionSource::Url("u".to_string()), source_video_duration_seconds_hint: Some(7), model: None, duration: Some(5) };
     let json = serde_json::to_string(&req).unwrap();
     assert!(json.contains("\"source_video_duration_seconds_hint\":7"));
   }
@@ -212,12 +171,7 @@ mod tests {
   fn source_duration_hint_is_not_in_wire_body() {
     // The internal wire body (what actually gets POSTed to xAI) doesn't
     // carry the hint — it's intentionally absent from VideoExtensionRequestBody.
-    let body = VideoExtensionRequestBody {
-      prompt: "p".to_string(),
-      video: VideoExtensionSourceRef { url: Some("u".to_string()), file_id: None },
-      model: None,
-      duration: Some(5),
-    };
+    let body = VideoExtensionRequestBody { prompt: "p".to_string(), video: VideoExtensionSourceRef { url: Some("u".to_string()), file_id: None }, model: None, duration: Some(5) };
     let json = serde_json::to_string(&body).unwrap();
     assert!(!json.contains("source_video_duration_seconds_hint"));
   }
@@ -240,16 +194,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_extension(VideoExtensionArgs {
-      api_key: &api_key,
-      request: VideoExtensionRequest {
-        prompt: "Continue the walk down the same street".to_string(),
-        source_video: VideoExtensionSource::Url(ANGRY_SHIBA_VIDEO_URL.to_string()),
-        source_video_duration_seconds_hint: None,
-        model: None,
-        duration: Some(5),
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = video_extension(VideoExtensionArgs { api_key: &api_key, request: VideoExtensionRequest { prompt: "Continue the walk down the same street".to_string(), source_video: VideoExtensionSource::Url(ANGRY_SHIBA_VIDEO_URL.to_string()), source_video_duration_seconds_hint: None, model: None, duration: Some(5) } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Extension request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());

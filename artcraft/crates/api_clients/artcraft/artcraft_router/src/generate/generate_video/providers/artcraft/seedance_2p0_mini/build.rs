@@ -2,9 +2,7 @@ use enums::common::generation::common_video_model::CommonVideoModel as CommonVid
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, plan_mini_batch_count, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, plan_mini_batch_count, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::seedance_2p0_mini::request::ArtcraftSeedance2p0MiniRequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
@@ -17,12 +15,7 @@ pub fn build_artcraft_seedance_2p0_mini(mut builder: GenerateVideoRequestBuilder
   let strategy = builder.request_mismatch_mitigation_strategy;
   let batch_count = plan_mini_batch_count(builder.video_batch_count.take(), strategy)?;
 
-  let mut request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Seedance2p0Mini,
-    SupportedResolutions::Fast,
-    UltraWideSupport::Supported,
-  )?;
+  let mut request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Seedance2p0Mini, SupportedResolutions::Fast, UltraWideSupport::Supported)?;
   request.video_batch_count = Some(batch_count);
 
   let state = ArtcraftSeedance2p0MiniRequestState { request };
@@ -58,7 +51,9 @@ mod tests {
 
     #[test]
     fn prompt_is_passed_through() {
-      let req = unwrap_request(builder_with(|b| { b.prompt = Some("test".to_string()); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.prompt = Some("test".to_string());
+      }));
       assert_eq!(req.request.prompt, Some("test".to_string()));
     }
 
@@ -70,19 +65,25 @@ mod tests {
 
     #[test]
     fn duration_passed_through() {
-      let req = unwrap_request(builder_with(|b| { b.duration_seconds = Some(10); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.duration_seconds = Some(10);
+      }));
       assert_eq!(req.request.duration_seconds, Some(10));
     }
 
     #[test]
     fn duration_clamped_to_max() {
-      let req = unwrap_request(builder_with(|b| { b.duration_seconds = Some(99); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.duration_seconds = Some(99);
+      }));
       assert_eq!(req.request.duration_seconds, Some(15));
     }
 
     #[test]
     fn batch_count_passed_through() {
-      let req = unwrap_request(builder_with(|b| { b.video_batch_count = Some(4); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.video_batch_count = Some(4);
+      }));
       assert_eq!(req.request.video_batch_count, Some(4));
     }
 
@@ -90,20 +91,26 @@ mod tests {
     fn batch_count_up_to_eight_passed_through() {
       // Mini supports batches of 1-8; execution and billing must agree.
       for batch in 1..=8u16 {
-        let req = unwrap_request(builder_with(move |b| { b.video_batch_count = Some(batch); }));
+        let req = unwrap_request(builder_with(move |b| {
+          b.video_batch_count = Some(batch);
+        }));
         assert_eq!(req.request.video_batch_count, Some(batch));
       }
     }
 
     #[test]
     fn batch_count_above_eight_clamps_to_eight() {
-      let req = unwrap_request(builder_with(|b| { b.video_batch_count = Some(9); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.video_batch_count = Some(9);
+      }));
       assert_eq!(req.request.video_batch_count, Some(8));
     }
 
     #[test]
     fn bitrate_passed_through() {
-      let req = unwrap_request(builder_with(|b| { b.bitrate = Some(RouterBitrate::High); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.bitrate = Some(RouterBitrate::High);
+      }));
       assert_eq!(req.request.bitrate, Some(CommonBitrateEnum::High));
     }
   }
@@ -113,25 +120,33 @@ mod tests {
 
     #[test]
     fn wide() {
-      let req = unwrap_request(builder_with(|b| { b.aspect_ratio = Some(RouterAspectRatio::WideSixteenByNine); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::WideSixteenByNine);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(CommonAspectRatioEnum::WideSixteenByNine));
     }
 
     #[test]
     fn ultra_wide() {
-      let req = unwrap_request(builder_with(|b| { b.aspect_ratio = Some(RouterAspectRatio::WideTwentyOneByNine); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::WideTwentyOneByNine);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(CommonAspectRatioEnum::WideTwentyOneByNine));
     }
 
     #[test]
     fn tall() {
-      let req = unwrap_request(builder_with(|b| { b.aspect_ratio = Some(RouterAspectRatio::TallNineBySixteen); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::TallNineBySixteen);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(CommonAspectRatioEnum::TallNineBySixteen));
     }
 
     #[test]
     fn square() {
-      let req = unwrap_request(builder_with(|b| { b.aspect_ratio = Some(RouterAspectRatio::Square); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::Square);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(CommonAspectRatioEnum::Square));
     }
   }
@@ -141,31 +156,31 @@ mod tests {
 
     #[test]
     fn res_480p() {
-      let req = unwrap_request(builder_with(|b| { b.resolution = Some(RouterResolution::FourEightyP); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.resolution = Some(RouterResolution::FourEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::FourEightyP));
     }
 
     #[test]
     fn res_720p() {
-      let req = unwrap_request(builder_with(|b| { b.resolution = Some(RouterResolution::SevenTwentyP); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.resolution = Some(RouterResolution::SevenTwentyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::SevenTwentyP));
     }
 
     #[test]
     fn res_1080p_downgrades_to_720p() {
-      let req = unwrap_request(builder_with(|b| { b.resolution = Some(RouterResolution::TenEightyP); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.resolution = Some(RouterResolution::TenEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::SevenTwentyP));
     }
 
     #[test]
     fn res_1080p_error_out() {
-      let result = build_artcraft_seedance_2p0_mini(GenerateVideoRequestBuilder {
-        model: RouterVideoModel::Seedance2p0Mini,
-        provider: RouterProvider::Artcraft,
-        resolution: Some(RouterResolution::TenEightyP),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-        ..Default::default()
-      });
+      let result = build_artcraft_seedance_2p0_mini(GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Mini, provider: RouterProvider::Artcraft, resolution: Some(RouterResolution::TenEightyP), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..Default::default() });
       assert!(result.is_err());
     }
 
@@ -182,50 +197,39 @@ mod tests {
     #[test]
     fn start_frame_token_passed_through() {
       let token = MediaFileToken::new("mf_start".to_string());
-      let req = unwrap_request(builder_with(|b| { b.start_frame = Some(ImageRef::MediaFileToken(token.clone())); }));
+      let req = unwrap_request(builder_with(|b| {
+        b.start_frame = Some(ImageRef::MediaFileToken(token.clone()));
+      }));
       assert_eq!(req.request.start_frame_image_media_token, Some(token));
     }
 
     #[test]
     fn url_start_frame_rejected() {
-      let result = build_artcraft_seedance_2p0_mini(GenerateVideoRequestBuilder {
-        model: RouterVideoModel::Seedance2p0Mini,
-        provider: RouterProvider::Artcraft,
-        start_frame: Some(ImageRef::Url("https://example.com".to_string())),
-        ..Default::default()
-      });
+      let result = build_artcraft_seedance_2p0_mini(GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Mini, provider: RouterProvider::Artcraft, start_frame: Some(ImageRef::Url("https://example.com".to_string())), ..Default::default() });
       assert!(result.is_err());
     }
 
     #[test]
     fn reference_image_tokens_passed_through() {
-      let tokens = vec![
-        MediaFileToken::new("mf_a".to_string()),
-        MediaFileToken::new("mf_b".to_string()),
-      ];
-      let req = unwrap_request(builder_with(|b| { b.reference_images = Some(ImageListRef::MediaFileTokens(tokens.clone())); }));
+      let tokens = vec![MediaFileToken::new("mf_a".to_string()), MediaFileToken::new("mf_b".to_string())];
+      let req = unwrap_request(builder_with(|b| {
+        b.reference_images = Some(ImageListRef::MediaFileTokens(tokens.clone()));
+      }));
       assert_eq!(req.request.reference_image_media_tokens, Some(tokens));
     }
 
     #[test]
     fn character_tokens_passed_through() {
-      let tokens = vec![
-        CharacterToken::new("char_a".to_string()),
-        CharacterToken::new("char_b".to_string()),
-      ];
-      let req = unwrap_request(builder_with(|b| { b.reference_character_tokens = Some(CharacterListRef::CharacterTokens(tokens.clone())); }));
+      let tokens = vec![CharacterToken::new("char_a".to_string()), CharacterToken::new("char_b".to_string())];
+      let req = unwrap_request(builder_with(|b| {
+        b.reference_character_tokens = Some(CharacterListRef::CharacterTokens(tokens.clone()));
+      }));
       assert_eq!(req.request.reference_character_tokens, Some(tokens));
     }
   }
 
   fn builder_with(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {
-    let mut builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p0Mini,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    };
+    let mut builder = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Mini, provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() };
     f(&mut builder);
     builder
   }

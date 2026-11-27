@@ -19,37 +19,30 @@ pub struct MultiRouterClient {
 
 impl MultiRouterClient {
   pub fn get_midjourney_client_ref(&self) -> Result<&RouterMidjourneyClient, ClientError> {
-    self.midjourney_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::Midjourney))
+    self.midjourney_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::Midjourney))
   }
 
   pub fn get_artcraft_client_ref(&self) -> Result<&RouterArtcraftClient, ClientError> {
-    self.artcraft_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::Artcraft))
+    self.artcraft_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::Artcraft))
   }
 
   pub fn get_fal_client_ref(&self) -> Result<&RouterFalClient, ClientError> {
-    self.fal_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::Fal))
+    self.fal_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::Fal))
   }
 
   pub fn get_gmicloud_client_ref(&self) -> Result<&RouterGmiCloudClient, ClientError> {
-    self.gmicloud_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::GmiCloud))
+    self.gmicloud_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::GmiCloud))
   }
 
   pub fn get_grok_api_client_ref(&self) -> Result<&RouterGrokApiClient, ClientError> {
-    self.grok_api_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::GrokApi))
+    self.grok_api_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::GrokApi))
   }
 
   pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ClientError> {
-    self.kinovi_web_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::KinoviWeb))
+    self.kinovi_web_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::KinoviWeb))
   }
 
   pub fn get_worldlabs_client_ref(&self) -> Result<&RouterWorldLabsClient, ClientError> {
-    self.worldlabs_client.as_ref()
-      .ok_or(ClientError::ClientNotConfigured(ClientType::WorldLabs))
+    self.worldlabs_client.as_ref().ok_or(ClientError::ClientNotConfigured(ClientType::WorldLabs))
   }
 }

@@ -15,7 +15,6 @@
 #![forbid(unused_imports)]
 #![forbid(unused_mut)]
 #![forbid(unused_variables)]
-
 // Always allow
 #![allow(dead_code)]
 #![allow(non_snake_case)]
@@ -29,4 +28,3 @@ pub mod image_info;
 pub mod mask_images;
 pub mod resize_image_file_preserving_aspect;
 pub mod resize_preserving_aspect;
-

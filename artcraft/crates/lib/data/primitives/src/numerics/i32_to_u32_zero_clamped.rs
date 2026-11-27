@@ -1,7 +1,7 @@
 /// Convert an i32 to a u32. If the i32 is negative, return 0.
 pub fn i32_to_u32_zero_clamped(num: i32) -> u32 {
   if num < 0 {
-    return 0
+    return 0;
   } else {
     num as u32
   }

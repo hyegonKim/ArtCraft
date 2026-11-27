@@ -40,17 +40,10 @@ mod tests {
   fn round_trips_through_common_audio_model() {
     use enums::common::generation::common_audio_model::CommonAudioModel;
 
-    let cases = [
-      (RouterAudioModel::SunoMusic, CommonAudioModel::SunoMusic),
-      (RouterAudioModel::SunoRemix, CommonAudioModel::SunoRemix),
-      (RouterAudioModel::SunoSounds, CommonAudioModel::SunoSounds),
-      (RouterAudioModel::SunoSample, CommonAudioModel::SunoSample),
-      (RouterAudioModel::SeedAudio1p0, CommonAudioModel::SeedAudio1p0),
-    ];
+    let cases = [(RouterAudioModel::SunoMusic, CommonAudioModel::SunoMusic), (RouterAudioModel::SunoRemix, CommonAudioModel::SunoRemix), (RouterAudioModel::SunoSounds, CommonAudioModel::SunoSounds), (RouterAudioModel::SunoSample, CommonAudioModel::SunoSample), (RouterAudioModel::SeedAudio1p0, CommonAudioModel::SeedAudio1p0)];
     for (router_model, expected_common) in cases {
       let json = serde_json::to_string(&router_model).unwrap();
-      let common: CommonAudioModel = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("CommonAudioModel failed to parse {json}: {e}"));
+      let common: CommonAudioModel = serde_json::from_str(&json).unwrap_or_else(|e| panic!("CommonAudioModel failed to parse {json}: {e}"));
       assert_eq!(common, expected_common, "for {router_model:?}");
     }
   }

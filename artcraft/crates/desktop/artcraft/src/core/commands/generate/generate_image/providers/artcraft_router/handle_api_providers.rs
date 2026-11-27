@@ -28,67 +28,28 @@ use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
 use crate::services::storyteller::state::storyteller_credential_manager::StorytellerCredentialManager;
 
 /// Handle image generation for providers that authenticate via API key.
-pub async fn handle_api_key_provider(
-  request: &TauriGenerateImageRequest,
-  provider: GenerationProvider,
-  api_key: &str,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub async fn handle_api_key_provider(request: &TauriGenerateImageRequest, provider: GenerationProvider, api_key: &str, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   match provider {
-    GenerationProvider::Fal => {
-      handle_fal(request, api_key, app_env_configs, storyteller_creds_manager).await
-    }
-    _ => {
-      Err(GenerateError::NotYetImplemented(
-        format!("API key provider {:?} is not yet supported via the router path", provider),
-      ))
-    }
+    GenerationProvider::Fal => handle_fal(request, api_key, app_env_configs, storyteller_creds_manager).await,
+    _ => Err(GenerateError::NotYetImplemented(format!("API key provider {:?} is not yet supported via the router path", provider))),
   }
 }
 
 // ── FAL ──
 
-async fn handle_fal(
-  request: &TauriGenerateImageRequest,
-  api_key: &str,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+async fn handle_fal(request: &TauriGenerateImageRequest, api_key: &str, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let tauri_model = request.model.ok_or(GenerateError::no_model_specified())?;
   let api_host = &app_env_configs.storyteller_host;
 
-  let router_model = tauri_image_model_to_router_model(tauri_model)
-    .ok_or(GenerateError::NotYetImplemented(
-      format!("Model {:?} is not supported via the FAL router path", tauri_model),
-    ))?;
+  let router_model = tauri_image_model_to_router_model(tauri_model).ok_or(GenerateError::NotYetImplemented(format!("Model {:?} is not supported via the FAL router path", tauri_model)))?;
 
   // Collect all media file tokens that need resolving.
   let image_inputs = resolve_image_inputs(request, api_host).await?;
 
-  let router_request = GenerateImageRequestBuilder {
-    model: router_model,
-    provider: RouterProvider::Fal,
-    prompt: request.prompt.clone(),
-    image_inputs,
-    resolution: request.resolution.map(convert_resolution),
-    aspect_ratio: request.aspect_ratio.map(convert_aspect_ratio),
-    quality: request.quality.map(convert_quality),
-    image_batch_count: request.batch_size.map(|n| n as u16),
-    horizontal_angle: request.adjust_horizontal_angle,
-    vertical_angle: request.adjust_vertical_angle,
-    zoom: request.adjust_zoom,
-    request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-    generation_mode_mismatch_strategy: Some(GenerationModeMismatchStrategy::GenerateAnyway),
-    idempotency_token: None,
-  };
+  let router_request = GenerateImageRequestBuilder { model: router_model, provider: RouterProvider::Fal, prompt: request.prompt.clone(), image_inputs, resolution: request.resolution.map(convert_resolution), aspect_ratio: request.aspect_ratio.map(convert_aspect_ratio), quality: request.quality.map(convert_quality), image_batch_count: request.batch_size.map(|n| n as u16), horizontal_angle: request.adjust_horizontal_angle, vertical_angle: request.adjust_vertical_angle, zoom: request.adjust_zoom, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, generation_mode_mismatch_strategy: Some(GenerationModeMismatchStrategy::GenerateAnyway), idempotency_token: None };
 
   // Create a prompt record before sending the generation request.
-  let maybe_prompt_token = create_prompt_record(
-    &router_request,
-    api_host,
-    storyteller_creds_manager,
-  ).await;
+  let maybe_prompt_token = create_prompt_record(&router_request, api_host, storyteller_creds_manager).await;
 
   let fal_client = RouterFalClient::new_polling_only_from_raw_key(api_key);
   let client = RouterClient::Fal(fal_client);
@@ -104,28 +65,23 @@ async fn handle_fal(
     Err(err) => {
       warn!("Could not use FAL: {:?}", err);
       return Err(GenerateError::NotYetImplemented("Error Message: TODO".to_string()));
-    }
+    },
   };
 
   info!("Executing FAL image generation. Request: {:?}", request);
 
   match request.send_request(&client).await {
-    Ok(response) => {
-      build_task_enqueue_success(tauri_model, response, maybe_prompt_token)
-    },
+    Ok(response) => build_task_enqueue_success(tauri_model, response, maybe_prompt_token),
     Err(err) => {
       warn!("Fal image generation failed: {:?}", err);
       Err(err.into())
-    }
+    },
   }
 }
 
 // ── Helpers ──
 
-async fn resolve_image_inputs(
-  request: &TauriGenerateImageRequest,
-  api_host: &ApiHost,
-) -> Result<Option<ImageListRef>, GenerateError> {
+async fn resolve_image_inputs(request: &TauriGenerateImageRequest, api_host: &ApiHost) -> Result<Option<ImageListRef>, GenerateError> {
   let mut tokens: Vec<MediaFileToken> = Vec::new();
 
   if let Some(canvas_token) = &request.canvas_image_media_token {
@@ -150,17 +106,13 @@ async fn resolve_image_inputs(
 
 /// Create a prompt record in the Artcraft backend before sending the generation request.
 /// Fails open: if prompt creation fails, we log and return None rather than blocking generation.
-async fn create_prompt_record(
-  router_request: &GenerateImageRequestBuilder,
-  api_host: &ApiHost,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Option<PromptToken> {
+async fn create_prompt_record(router_request: &GenerateImageRequestBuilder, api_host: &ApiHost, storyteller_creds_manager: &StorytellerCredentialManager) -> Option<PromptToken> {
   let creds = match storyteller_creds_manager.get_credentials() {
     Ok(Some(creds)) => creds,
     _ => {
       warn!("[FalRouter] No Storyteller credentials available, skipping prompt creation");
       return None;
-    }
+    },
   };
 
   let prompt_request = router_image_request_to_artcraft_prompt(router_request);
@@ -169,35 +121,20 @@ async fn create_prompt_record(
     Ok(response) => {
       info!("[FalRouter] Created prompt: {:?}", response.prompt_token);
       Some(response.prompt_token)
-    }
+    },
     Err(err) => {
       error!("[FalRouter] Failed to create prompt (continuing anyway): {:?}", err);
       None
-    }
+    },
   }
 }
 
-fn build_task_enqueue_success(
-  tauri_model: TauriImageModel,
-  response: GenerateImageResponse,
-  maybe_prompt_token: Option<PromptToken>,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-  let fal_payload = response.get_fal_payload()
-    .ok_or(GenerateError::ResponseHadNoJobTokens)?;
+fn build_task_enqueue_success(tauri_model: TauriImageModel, response: GenerateImageResponse, maybe_prompt_token: Option<PromptToken>) -> Result<TaskEnqueueSuccess, GenerateError> {
+  let fal_payload = response.get_fal_payload().ok_or(GenerateError::ResponseHadNoJobTokens)?;
 
-  let provider_job_id = fal_payload.request_id
-    .or(fal_payload.gateway_request_id)
-    .ok_or(GenerateError::ResponseHadNoJobTokens)?;
+  let provider_job_id = fal_payload.request_id.or(fal_payload.gateway_request_id).ok_or(GenerateError::ResponseHadNoJobTokens)?;
 
   let generation_model = tauri_image_model_to_generation_model(tauri_model);
 
-  Ok(TaskEnqueueSuccess {
-    task_type: TaskType::ImageGeneration,
-    model: Some(generation_model),
-    provider: GenerationProvider::Fal,
-    provider_job_id: Some(provider_job_id),
-    maybe_queue_status_url: fal_payload.maybe_status_url,
-    maybe_queue_response_url: fal_payload.maybe_response_url,
-    maybe_prompt_token,
-  })
+  Ok(TaskEnqueueSuccess { task_type: TaskType::ImageGeneration, model: Some(generation_model), provider: GenerationProvider::Fal, provider_job_id: Some(provider_job_id), maybe_queue_status_url: fal_payload.maybe_status_url, maybe_queue_response_url: fal_payload.maybe_response_url, maybe_prompt_token })
 }

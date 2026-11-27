@@ -20,10 +20,7 @@ mod tests {
 
   #[test]
   fn serde_round_trip() {
-    let cases = [
-      (MinimaxWorkerModel::MinimaxH3Turbo, "\"minimax_h3_turbo\""),
-      (MinimaxWorkerModel::MinimaxH3Ultra, "\"minimax_h3_ultra\""),
-    ];
+    let cases = [(MinimaxWorkerModel::MinimaxH3Turbo, "\"minimax_h3_turbo\""), (MinimaxWorkerModel::MinimaxH3Ultra, "\"minimax_h3_ultra\"")];
     for (variant, json) in cases {
       assert_eq!(serde_json::to_string(&variant).unwrap(), json);
       let parsed: MinimaxWorkerModel = serde_json::from_str(json).unwrap();

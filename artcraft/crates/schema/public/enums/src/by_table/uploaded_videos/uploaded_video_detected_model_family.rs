@@ -54,14 +54,7 @@ impl UploadedVideoDetectedModelFamily {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Seedance,
-      Self::Veo,
-      Self::Sora,
-      Self::Kling,
-      Self::Grok,
-      Self::HappyHorse,
-    ])
+    BTreeSet::from([Self::Seedance, Self::Veo, Self::Sora, Self::Kling, Self::Grok, Self::HappyHorse])
   }
 }
 

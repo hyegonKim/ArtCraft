@@ -9,14 +9,14 @@ pub const GENERATE_SEEDANCE_1_0_PRO_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/generat
 pub struct GenerateSeedance10ProImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
 
   /// Optional text prompt.
   pub prompt: Option<String>,
-  
+
   /// Optional: aspect ratio of the generated video.
   pub resolution: Option<GenerateSeedance10ProResolution>,
 

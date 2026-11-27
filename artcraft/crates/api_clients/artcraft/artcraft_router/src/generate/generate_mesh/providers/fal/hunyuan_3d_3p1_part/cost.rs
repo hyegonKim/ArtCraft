@@ -14,9 +14,7 @@ impl FalHunyuan3d3p1PartCostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -41,20 +39,10 @@ mod tests {
   // ── Helpers ──
 
   fn mesh_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3p1Part,
-      provider: RouterProvider::Fal,
-      input_mesh: Some(MeshRef::Url(MESH_URL.to_string())),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3p1Part, provider: RouterProvider::Fal, input_mesh: Some(MeshRef::Url(MESH_URL.to_string())), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

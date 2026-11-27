@@ -34,8 +34,6 @@ pub struct KlingV2p5TurboProTextToVideoOutput {
   pub video: KlingV2p5TurboProTextToVideoVideoFile,
 }
 
-pub fn kling_v2p5_turbo_pro_text_to_video(
-  params: KlingV2p5TurboProTextToVideoInput,
-) -> FalRequest<KlingV2p5TurboProTextToVideoInput, KlingV2p5TurboProTextToVideoOutput> {
+pub fn kling_v2p5_turbo_pro_text_to_video(params: KlingV2p5TurboProTextToVideoInput) -> FalRequest<KlingV2p5TurboProTextToVideoInput, KlingV2p5TurboProTextToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v2.5-turbo/pro/text-to-video", params)
 }

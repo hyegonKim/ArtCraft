@@ -22,8 +22,6 @@ pub struct RembgRemoveBackgroundOutput {
   pub image: RembgRemoveBackgroundFile,
 }
 
-pub fn rembg_remove_background(
-  params: RembgRemoveBackgroundInput,
-) -> FalRequest<RembgRemoveBackgroundInput, RembgRemoveBackgroundOutput> {
+pub fn rembg_remove_background(params: RembgRemoveBackgroundInput) -> FalRequest<RembgRemoveBackgroundInput, RembgRemoveBackgroundOutput> {
   FalRequest::new("fal-ai/imageutils/rembg", params)
 }

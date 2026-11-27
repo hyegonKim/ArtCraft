@@ -152,8 +152,14 @@ pub(super) fn design(app: &mut SlideApp, ui: &mut Ui) {
             if ui.button("Page Setup…").clicked() {
                 app.dialog = Some(crate::dialogs::Dialog::new("slideSize"));
             }
+            ui.separator();
+            if ui.button("Social Smart Resize…").clicked() {
+                app.dialog = Some(crate::dialogs::Dialog::new("smartResize"));
+                ui.close();
+            }
         });
         big(app, ui, Icon::FormatBackground, "Format\nBackground", "view.pane", json!({"pane": "background"}));
+        big(app, ui, Icon::Themes, "Brand\nKit", "app.dialog", json!({"id": "brandKit"}));
     });
     group(ui, |ui| {
         big(app, ui, Icon::DesignIdeas, "Design\nIdeas", "view.pane", json!({"pane": "designer"}));

@@ -22,10 +22,7 @@ pub fn filter_world_labs_http_error(status_code: StatusCode, maybe_body: Option<
   if let Some(body) = maybe_body {
     filter_cloudflare_errors(status_code.as_u16(), body)?;
 
-    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code,
-      body: body.to_string(),
-    }.into());
+    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: body.to_string() }.into());
   }
 
   Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatus(status_code).into())

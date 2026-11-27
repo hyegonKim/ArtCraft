@@ -20,15 +20,7 @@ impl GrokApiGrokImagineVideoCostState {
     // text/image → video, not edit/extension.
     let cost_in_usd_cents = self.request.request.calculate_cost_in_cents();
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: None,
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: None, cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -99,28 +91,14 @@ mod tests {
     #[test]
     fn single_start_frame_image_adds_2_mills() {
       // 5s @ 720p output 350 mills + 1 input image 2 mills = 352 mills → 36¢ (ceil)
-      let cents = cost_cents(
-        Some(RouterResolution::SevenTwentyP),
-        5,
-        Some(ImageRef::Url("https://example.com/a.png".to_string())),
-        None,
-      );
+      let cents = cost_cents(Some(RouterResolution::SevenTwentyP), 5, Some(ImageRef::Url("https://example.com/a.png".to_string())), None);
       assert_eq!(cents, 36);
     }
 
     #[test]
     fn three_reference_images_adds_6_mills() {
       // 5s @ 720p output 350 mills + 3 input images 6 mills = 356 mills → 36¢ (ceil)
-      let cents = cost_cents(
-        Some(RouterResolution::SevenTwentyP),
-        5,
-        None,
-        Some(ImageListRef::Urls(vec![
-          "https://example.com/a.png".to_string(),
-          "https://example.com/b.png".to_string(),
-          "https://example.com/c.png".to_string(),
-        ])),
-      );
+      let cents = cost_cents(Some(RouterResolution::SevenTwentyP), 5, None, Some(ImageListRef::Urls(vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string(), "https://example.com/c.png".to_string()])));
       assert_eq!(cents, 36);
     }
   }
@@ -161,28 +139,8 @@ mod tests {
     }
   }
 
-  fn cost_cents(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    start_frame: Option<ImageRef>,
-    reference_images: Option<ImageListRef>,
-  ) -> u64 {
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::GrokImagineVideo,
-      provider: RouterProvider::GrokApi,
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(1),
-      start_frame,
-      reference_images,
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
-      .cost_in_usd_cents
-      .unwrap()
+  fn cost_cents(resolution: Option<RouterResolution>, duration_seconds: u16, start_frame: Option<ImageRef>, reference_images: Option<ImageListRef>) -> u64 {
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::GrokImagineVideo, provider: RouterProvider::GrokApi, aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(1), start_frame, reference_images, ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed").cost_in_usd_cents.unwrap()
   }
 }

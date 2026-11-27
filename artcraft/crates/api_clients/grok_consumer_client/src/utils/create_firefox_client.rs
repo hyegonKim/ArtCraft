@@ -3,8 +3,5 @@ use wreq::Client;
 use wreq_util::Emulation;
 
 pub fn create_firefox_client() -> Result<Client, GrokClientError> {
-  Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| GrokClientError::WreqClientError(err))
+  Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))
 }

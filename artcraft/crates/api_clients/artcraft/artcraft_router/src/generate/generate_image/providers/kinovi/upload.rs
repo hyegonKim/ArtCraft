@@ -14,31 +14,14 @@ use crate::utils::download_file::download_file;
 /// The actual upload path doesn't care whether the file is a video or an
 /// image, but keeping the two helpers separate lets each side evolve
 /// independently and makes intent clear at call sites.
-pub(crate) async fn upload_to_kinovi_web(
-  session: &KinoviWebSession,
-  source_url: &str,
-) -> Result<String, ArtcraftRouterError> {
-  let extension = extract_extension_from_url_str(source_url, &ExtractExtensions::All)
-    .map(|ext| ext.without_period().to_string())
-    .unwrap_or_else(|| "jpg".to_string());
+pub(crate) async fn upload_to_kinovi_web(session: &KinoviWebSession, source_url: &str) -> Result<String, ArtcraftRouterError> {
+  let extension = extract_extension_from_url_str(source_url, &ExtractExtensions::All).map(|ext| ext.without_period().to_string()).unwrap_or_else(|| "jpg".to_string());
 
   let file_bytes = download_file(source_url).await?;
 
-  let prepare_response = prepare_file_upload(PrepareFileUploadArgs {
-    session,
-    extension,
-    host_override: None,
-  })
-    .await
-    .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+  let prepare_response = prepare_file_upload(PrepareFileUploadArgs { session, extension, host_override: None }).await.map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
 
-  let upload_response = upload_file(UploadFileArgs {
-    upload_url: prepare_response.upload_url,
-    file_bytes,
-    host_override: None,
-  })
-    .await
-    .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+  let upload_response = upload_file(UploadFileArgs { upload_url: prepare_response.upload_url, file_bytes, host_override: None }).await.map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
 
   Ok(upload_response.public_url)
 }

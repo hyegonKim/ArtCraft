@@ -2,9 +2,7 @@ use crate::core::api_adapters::aspect_ratio::common_aspect_ratio::CommonAspectRa
 use crate::core::api_adapters::resolution::common_resolution::CommonResolution as CommonResolution2;
 use crate::core::commands::enqueue::generate_error::{GenerateError, MissingCredentialsReason};
 use crate::core::commands::enqueue::task_enqueue_success::TaskEnqueueSuccess;
-use crate::core::commands::deprecated::text_to_image::enqueue_text_to_image_command::{
-  EnqueueTextToImageRequest, TextToImageResolution, TextToImageSize,
-};
+use crate::core::commands::deprecated::text_to_image::enqueue_text_to_image_command::{EnqueueTextToImageRequest, TextToImageResolution, TextToImageSize};
 use crate::core::events::generation_events::common::GenerationModel;
 use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
 use crate::services::storyteller::state::storyteller_credential_manager::StorytellerCredentialManager;
@@ -23,22 +21,13 @@ use enums::common::generation_provider::GenerationProvider;
 use enums::tauri::tasks::task_type::TaskType;
 use log::{error, info};
 
-pub(super) async fn handle_text_to_image_artcraft_via_router(
-  request: &EnqueueTextToImageRequest,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  model: RouterImageModel,
-  generation_model: GenerationModel,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub(super) async fn handle_text_to_image_artcraft_via_router(request: &EnqueueTextToImageRequest, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager, model: RouterImageModel, generation_model: GenerationModel) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => return Err(GenerateError::MissingCredentials(MissingCredentialsReason::NeedsStorytellerCredentials)),
   };
 
-  let client = RouterClient::Artcraft(RouterArtcraftClient::new(
-    app_env_configs.storyteller_host.clone(),
-    creds,
-  ));
+  let client = RouterClient::Artcraft(RouterArtcraftClient::new(app_env_configs.storyteller_host.clone(), creds));
 
   let image_inputs = request.image_media_tokens.clone().map(ImageListRef::MediaFileTokens);
 
@@ -46,22 +35,7 @@ pub(super) async fn handle_text_to_image_artcraft_via_router(
   let resolution = get_resolution_t2i(request);
   let quality = get_quality_t2i(request);
 
-  let router_request = GenerateImageRequestBuilder {
-    model,
-    provider: RouterProvider::Artcraft,
-    prompt: request.prompt.clone(),
-    image_inputs,
-    resolution,
-    aspect_ratio,
-    quality,
-    image_batch_count: request.number_images.map(|n| n as u16),
-    request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-    generation_mode_mismatch_strategy: None,
-    idempotency_token: None,
-    horizontal_angle: None,
-    vertical_angle: None,
-    zoom: None,
-  };
+  let router_request = GenerateImageRequestBuilder { model, provider: RouterProvider::Artcraft, prompt: request.prompt.clone(), image_inputs, resolution, aspect_ratio, quality, image_batch_count: request.number_images.map(|n| n as u16), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, generation_mode_mismatch_strategy: None, idempotency_token: None, horizontal_angle: None, vertical_angle: None, zoom: None };
 
   let dor = router_request.build2()?;
 
@@ -72,36 +46,23 @@ pub(super) async fn handle_text_to_image_artcraft_via_router(
     // Artcraft never returns a Draft — image-token resolution happens server-side.
     // The only draft-producing models today are Kinovi-Midjourney variants,
     // which are routed to a separate provider.
-    ImageGenerationDraftOrRequest::Draft(_) => unreachable!(
-      "Artcraft router should never produce a draft for text-to-image"
-    ),
+    ImageGenerationDraftOrRequest::Draft(_) => unreachable!("Artcraft router should never produce a draft for text-to-image"),
   };
 
   let response = match request.send_request(&client).await {
     Ok(resp) => {
       info!("Successfully enqueued.");
       resp
-    }
+    },
     Err(err) => {
       error!("Failed to enqueue: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
 
-  let job_id = response
-    .get_artcraft_payload()
-    .map(|p| p.inference_job_token.to_string())
-    .ok_or(GenerateError::ResponseHadNoJobTokens)?;
+  let job_id = response.get_artcraft_payload().map(|p| p.inference_job_token.to_string()).ok_or(GenerateError::ResponseHadNoJobTokens)?;
 
-  Ok(TaskEnqueueSuccess {
-    task_type: TaskType::ImageGeneration,
-    model: Some(generation_model),
-    provider: GenerationProvider::Artcraft,
-    provider_job_id: Some(job_id),
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { task_type: TaskType::ImageGeneration, model: Some(generation_model), provider: GenerationProvider::Artcraft, provider_job_id: Some(job_id), maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 fn get_aspect_ratio_t2i(request: &EnqueueTextToImageRequest) -> Option<RouterAspectRatio> {

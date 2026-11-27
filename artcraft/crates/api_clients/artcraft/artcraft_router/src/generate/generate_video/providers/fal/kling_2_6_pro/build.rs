@@ -1,10 +1,5 @@
-use fal_client::requests::api::video::image::kling_2p6_pro_image_to_video::api::{
-  Kling2p6ProImageToVideoDuration, Kling2p6ProImageToVideoRequest,
-};
-use fal_client::requests::api::video::text::kling_2p6_pro_text_to_video::api::{
-  Kling2p6ProTextToVideoAspectRatio, Kling2p6ProTextToVideoDuration,
-  Kling2p6ProTextToVideoRequest,
-};
+use fal_client::requests::api::video::image::kling_2p6_pro_image_to_video::api::{Kling2p6ProImageToVideoDuration, Kling2p6ProImageToVideoRequest};
+use fal_client::requests::api::video::text::kling_2p6_pro_text_to_video::api::{Kling2p6ProTextToVideoAspectRatio, Kling2p6ProTextToVideoDuration, Kling2p6ProTextToVideoRequest};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigationStrategy;
@@ -12,9 +7,7 @@ use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 use crate::generate::generate_video::providers::fal::kling_1_6_pro::build::optional_url;
-use crate::generate::generate_video::providers::fal::kling_2_6_pro::request::{
-  FalKling2p6ProMode, FalKling2p6ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_2_6_pro::request::{FalKling2p6ProMode, FalKling2p6ProRequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -31,9 +24,7 @@ pub(crate) enum PlanDuration {
   Ten,
 }
 
-pub fn build_fal_kling_2_6_pro(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_kling_2_6_pro(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio, strategy)?;
@@ -46,40 +37,17 @@ pub fn build_fal_kling_2_6_pro(
   let mode = match optional_url(builder.start_frame.clone())? {
     None => {
       if end_image_url.is_some() {
-        return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "end_frame",
-          value: "Kling 2.6 Pro requires a start_frame when end_frame is provided".to_string(),
-        }));
+        return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Kling 2.6 Pro requires a start_frame when end_frame is provided".to_string() }));
       }
-      FalKling2p6ProMode::TextToVideo(Kling2p6ProTextToVideoRequest {
-        prompt,
-        generate_audio,
-        negative_prompt,
-        duration: duration.map(to_t2v_duration),
-        aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio),
-        cfg_scale: None,
-      })
-    }
-    Some(start_image_url) => FalKling2p6ProMode::ImageToVideo(Kling2p6ProImageToVideoRequest {
-      prompt,
-      start_image_url,
-      end_image_url,
-      duration: duration.map(to_i2v_duration),
-      negative_prompt,
-      generate_audio,
-      voice_ids: None,
-    }),
+      FalKling2p6ProMode::TextToVideo(Kling2p6ProTextToVideoRequest { prompt, generate_audio, negative_prompt, duration: duration.map(to_t2v_duration), aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio), cfg_scale: None })
+    },
+    Some(start_image_url) => FalKling2p6ProMode::ImageToVideo(Kling2p6ProImageToVideoRequest { prompt, start_image_url, end_image_url, duration: duration.map(to_i2v_duration), negative_prompt, generate_audio, voice_ids: None }),
   };
 
-  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling2p6Pro(
-    FalKling2p6ProRequestState { mode },
-  )))
+  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling2p6Pro(FalKling2p6ProRequestState { mode })))
 }
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
@@ -88,37 +56,22 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", other) })),
       _ => Ok(Some(Ar::SixteenByNine)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
     Some(5) => Ok(Some(PlanDuration::Five)),
     Some(10) => Ok(Some(PlanDuration::Ten)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanDuration::Ten)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanDuration::Five)),
     },
@@ -156,12 +109,7 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling2p6Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Kling2p6Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   #[test]

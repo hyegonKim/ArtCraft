@@ -1,4 +1,3 @@
-
 /// Truncate a string based on character length, not byte length.
 /// Taken from https://stackoverflow.com/a/38461750
 pub fn truncate_str(s: &str, max_chars: usize) -> &str {

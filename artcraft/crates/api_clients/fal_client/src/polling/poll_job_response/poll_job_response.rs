@@ -4,9 +4,7 @@ use crate::error::api_specific_error::FalSpecificApiError;
 use crate::error::client_error::FalClientError;
 use crate::error::fal_error_plus::FalErrorPlus;
 use crate::polling::poll_job_response::raw_response::RawIncompleteJobResponse;
-use crate::polling::poll_job_response::success_case_extractors::{
-  extract_contents_from_response, PollResponseExtractedContents,
-};
+use crate::polling::poll_job_response::success_case_extractors::{extract_contents_from_response, PollResponseExtractedContents};
 use log::info;
 use serde_json::Value;
 use url::Url;
@@ -48,21 +46,12 @@ pub async fn poll_job_response(args: PollJobResponseArgs<'_>) -> Result<PollJobR
   let host = parsed.host_str().unwrap_or("");
 
   if host != EXPECTED_HOST {
-    return Err(FalErrorPlus::ClientError(FalClientError::InvalidUrl(format!(
-      "Expected host '{}' but got '{}' in response URL: {}",
-      EXPECTED_HOST,
-      host,
-      args.response_url,
-    ))));
+    return Err(FalErrorPlus::ClientError(FalClientError::InvalidUrl(format!("Expected host '{}' but got '{}' in response URL: {}", EXPECTED_HOST, host, args.response_url,))));
   }
 
   info!("Polling FAL job response: {}", args.response_url);
 
-  let response = reqwest::Client::new()
-    .get(args.response_url)
-    .header("Authorization", format!("Key {}", args.api_key.0))
-    .send()
-    .await?;
+  let response = reqwest::Client::new().get(args.response_url).header("Authorization", format!("Key {}", args.api_key.0)).send().await?;
 
   let http_status = response.status();
   let body = response.text().await?;
@@ -71,31 +60,18 @@ pub async fn poll_job_response(args: PollJobResponseArgs<'_>) -> Result<PollJobR
     return Err(classify_error_response(http_status, &body));
   }
 
-  let payload: Value = serde_json::from_str(&body)
-    .map_err(|err| FalErrorPlus::ApiGeneric(
-      FalGenericApiError::SerdeResponseParseErrorWithBody {
-        error: err,
-        body: body.clone(),
-      },
-    ))?;
+  let payload: Value = serde_json::from_str(&body).map_err(|err| FalErrorPlus::ApiGeneric(FalGenericApiError::SerdeResponseParseErrorWithBody { error: err, body: body.clone() }))?;
 
   let extracted_contents = extract_contents_from_response(&payload);
 
-  Ok(PollJobResponse {
-    payload,
-    extracted_contents,
-    raw_body: body,
-  })
+  Ok(PollJobResponse { payload, extracted_contents, raw_body: body })
 }
 
 // ── Helpers ──
 
 /// Classify a non-2xx response. If it's a 400 with "Request is still in progress",
 /// return the specific `IncompleteJob` error. Otherwise fall through to a generic error.
-fn classify_error_response(
-  status_code: reqwest::StatusCode,
-  body: &str,
-) -> FalErrorPlus {
+fn classify_error_response(status_code: reqwest::StatusCode, body: &str) -> FalErrorPlus {
   if status_code == reqwest::StatusCode::BAD_REQUEST {
     if let Ok(raw) = serde_json::from_str::<RawIncompleteJobResponse>(body) {
       if let Some(detail) = raw.detail {
@@ -106,12 +82,7 @@ fn classify_error_response(
     }
   }
 
-  FalErrorPlus::ApiGeneric(
-    FalGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code,
-      body: body.to_string(),
-    },
-  )
+  FalErrorPlus::ApiGeneric(FalGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: body.to_string() })
 }
 
 #[cfg(test)]
@@ -123,10 +94,7 @@ mod tests {
   #[tokio::test]
   async fn rejects_wrong_host() {
     let api_key = FalApiKey::from_str("test-key");
-    let args = PollJobResponseArgs {
-      response_url: "https://evil.example.com/fal-ai/flux/requests/abc123",
-      api_key: &api_key,
-    };
+    let args = PollJobResponseArgs { response_url: "https://evil.example.com/fal-ai/flux/requests/abc123", api_key: &api_key };
     let result = poll_job_response(args).await;
     assert!(result.is_err());
     let err = format!("{}", result.unwrap_err());
@@ -136,10 +104,7 @@ mod tests {
   #[tokio::test]
   async fn rejects_invalid_url() {
     let api_key = FalApiKey::from_str("test-key");
-    let args = PollJobResponseArgs {
-      response_url: "not a url at all",
-      api_key: &api_key,
-    };
+    let args = PollJobResponseArgs { response_url: "not a url at all", api_key: &api_key };
     let result = poll_job_response(args).await;
     assert!(result.is_err());
   }
@@ -367,14 +332,10 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key
   async fn poll_completed_image_job() {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt")
-      .expect("Failed to read fal.api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt").expect("Failed to read fal.api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
 
-    let args = PollJobResponseArgs {
-      response_url: "https://queue.fal.run/fal-ai/flux/requests/019e18d8-8c36-7bc1-aa77-2bc2f70268c6",
-      api_key: &api_key,
-    };
+    let args = PollJobResponseArgs { response_url: "https://queue.fal.run/fal-ai/flux/requests/019e18d8-8c36-7bc1-aa77-2bc2f70268c6", api_key: &api_key };
 
     let result = poll_job_response(args).await.expect("poll should succeed");
     let extracted = result.extracted_contents.expect("should have extracted contents");
@@ -397,14 +358,10 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key
   async fn poll_completed_mesh_job() {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt")
-      .expect("Failed to read fal.api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt").expect("Failed to read fal.api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
 
-    let args = PollJobResponseArgs {
-      response_url: "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/019e194b-f69a-77b1-bada-3f56d7d3c87d",
-      api_key: &api_key,
-    };
+    let args = PollJobResponseArgs { response_url: "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/019e194b-f69a-77b1-bada-3f56d7d3c87d", api_key: &api_key };
 
     let result = poll_job_response(args).await.expect("poll should succeed");
     let extracted = result.extracted_contents.expect("should have extracted contents");

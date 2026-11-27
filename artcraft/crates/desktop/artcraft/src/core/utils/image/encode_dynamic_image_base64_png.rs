@@ -4,7 +4,7 @@ use image::{DynamicImage, ImageFormat};
 use std::io::Cursor;
 
 pub fn encode_dynamic_image_base64_png(image: DynamicImage) -> anyhow::Result<String> {
-  let mut bytes = Vec::with_capacity(1024*1024);
+  let mut bytes = Vec::with_capacity(1024 * 1024);
 
   image.write_to(&mut Cursor::new(&mut bytes), ImageFormat::Png)?;
 

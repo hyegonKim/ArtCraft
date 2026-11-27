@@ -14,9 +14,7 @@ impl FalHunyuan3d2p1CostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -37,39 +35,23 @@ mod tests {
   fn textured_mesh_is_ninety_cents() {
     assert_eq!(estimate_usd_cents(base_builder()), 90);
 
-    let normal = GenerateMeshRequestBuilder {
-      mesh_output_type: Some(CommonMeshOutputType::Normal),
-      ..base_builder()
-    };
+    let normal = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Normal), ..base_builder() };
     assert_eq!(estimate_usd_cents(normal), 90);
   }
 
   #[test]
   fn white_mesh_is_thirty_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      mesh_output_type: Some(CommonMeshOutputType::Geometry),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Geometry), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 30);
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d2p1,
-      provider: RouterProvider::Fal,
-      reference_images: Some(ImageListRef::Urls(vec!["https://example.com/front.png".to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d2p1, provider: RouterProvider::Fal, reference_images: Some(ImageListRef::Urls(vec!["https://example.com/front.png".to_string()])), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

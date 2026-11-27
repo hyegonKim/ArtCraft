@@ -18,10 +18,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -33,8 +31,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let glb = contents.model_glb.expect("model_glb should be Some");
     assert_eq!(glb.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1b969/k5FZWmTsKxHH71404bBR__model.glb"));
@@ -79,8 +76,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let glb = contents.model_glb.expect("model_glb should be Some");
     assert_eq!(glb.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1ba44/OdgIv8M9EkaBP_Mh4TVAB_model.glb"));
@@ -136,8 +132,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     // NB: Hunyuan 3D 3.1 Rapid puts an OBJ under the `model_glb` key. The
     // key name doesn't matter downstream: the webhook handler resolves the
@@ -192,8 +187,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     // Tripo 3D sends its GLB under `model_mesh` (not `model_glb`); the
     // webhook handler picks `model_urls.glb` as the primary GLB instead.
@@ -239,8 +233,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let glb = contents.model_glb.expect("model_glb should be Some");
     assert_eq!(glb.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1bbe1/0vrf9NUhVxKZO4GScA0EI_model.glb"));
@@ -293,7 +286,8 @@ mod tests {
 
   #[test]
   fn synthetic_model_urls_payload_with_distinct_glb() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_urls": {
         "fbx": null,
         "glb": {
@@ -305,7 +299,9 @@ mod tests {
         "obj": null,
         "usdz": null
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let model_urls = extract_model_urls(&obj).expect("should extract model_urls");
     let glb = model_urls.glb.expect("glb slot should be Some");
@@ -318,9 +314,12 @@ mod tests {
 
   #[test]
   fn missing_model_urls_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb": {"url": "https://example.com/model.glb"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_model_urls(&obj).is_none());
   }

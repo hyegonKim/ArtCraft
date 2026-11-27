@@ -4,6 +4,7 @@ use super::columns::columns_dialog;
 use super::date_time::{date_rows, date_time_dialog};
 use super::equation::pretty_equation;
 use super::export::{gif_options, video_export_options};
+use super::express::{brand_kit_dialog, bulk_csv_dialog, qr_code_dialog, smart_resize_dialog};
 use super::find::find_dialog;
 use super::font::font_dialog;
 use super::grid_options::grid_options;
@@ -66,6 +67,10 @@ pub(super) fn body(app: &mut SlideApp, ui: &mut Ui, d: &mut Dialog) -> bool {
         "themeColors" => theme_colors_dialog(app, ui, d),
         "themeFonts" => theme_fonts_dialog(app, ui, d),
         "dateTime" => date_time_dialog(app, ui, d),
+        "brandKit" => brand_kit_dialog(app, ui, d),
+        "smartResize" => smart_resize_dialog(app, ui, d),
+        "bulkCsv" => bulk_csv_dialog(app, ui, d),
+        "qrCode" => qr_code_dialog(app, ui, d),
         _ => {
             ui.label(format!("“{}” is not available yet.", d.id));
             let (ok, cancel) = buttons(ui, "OK");
@@ -1374,17 +1379,14 @@ fn dlg_preferences(app: &mut SlideApp, ui: &mut Ui, d: &mut Dialog) -> bool {
     ui.horizontal(|ui| {
         let lbl = ui.label(crate::i18n::tr_ui(ui.ctx(), loc, "Language:"));
         let cur_disp = crate::i18n::locale_display_label(ui.ctx(), app.ui.locale);
-        let combo = craft_ui::ComboBox::from_id_salt("prefs_ui_locale")
-            .width(180.0)
-            .selected_text(cur_disp)
-            .show_ui(ui, |ui| {
-                for candidate in crate::i18n::Locale::ALL {
-                    let disp = crate::i18n::locale_display_label(ui.ctx(), candidate);
-                    if ui.selectable_label(app.ui.locale == candidate, disp).clicked() {
-                        let _ = app.run("app.language", json!({"locale": candidate.code()}));
-                    }
+        let combo = craft_ui::ComboBox::from_id_salt("prefs_ui_locale").width(180.0).selected_text(cur_disp).show_ui(ui, |ui| {
+            for candidate in crate::i18n::Locale::ALL {
+                let disp = crate::i18n::locale_display_label(ui.ctx(), candidate);
+                if ui.selectable_label(app.ui.locale == candidate, disp).clicked() {
+                    let _ = app.run("app.language", json!({"locale": candidate.code()}));
                 }
-            });
+            }
+        });
         let _ = combo.response.labelled_by(lbl.id);
     });
     // While the pointer holds the slider its value only waits in the dialog: applying it

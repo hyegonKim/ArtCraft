@@ -45,18 +45,7 @@ mod tests {
 
   #[test]
   fn to_raw_request_delegates_to_params() {
-    let request = GptImage2p5SunburstTextToImageRequest {
-      params: GptImage2p5TextToImageParams {
-        prompt: "test".to_string(),
-        num_images: GptImage2p5NumImages::Two,
-        image_size: Some(GptImage2p5ImageSize::Landscape16x9),
-        resolution: Some(GptImage2Resolution::TwoK),
-        quality: Some(GptImage2p5Quality::Medium),
-        background: None,
-        output_format: Some(GptImage2p5OutputFormat::Jpeg),
-        output_compression: Some(75),
-      },
-    };
+    let request = GptImage2p5SunburstTextToImageRequest { params: GptImage2p5TextToImageParams { prompt: "test".to_string(), num_images: GptImage2p5NumImages::Two, image_size: Some(GptImage2p5ImageSize::Landscape16x9), resolution: Some(GptImage2Resolution::TwoK), quality: Some(GptImage2p5Quality::Medium), background: None, output_format: Some(GptImage2p5OutputFormat::Jpeg), output_compression: Some(75) } };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "test");
     assert_eq!(raw.num_images, Some(2));
@@ -75,18 +64,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2p5SunburstTextToImageRequest {
-      params: GptImage2p5TextToImageParams {
-        prompt: "an anime girl riding on the back of a t-rex".to_string(),
-        num_images: GptImage2p5NumImages::One,
-        image_size: None,
-        resolution: None,
-        quality: None,
-        background: None,
-        output_format: None,
-        output_compression: None,
-      },
-    };
+    let request = GptImage2p5SunburstTextToImageRequest { params: GptImage2p5TextToImageParams { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: GptImage2p5NumImages::One, image_size: None, resolution: None, quality: None, background: None, output_format: None, output_compression: None } };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -100,23 +78,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2p5SunburstTextToImageRequest {
-      params: GptImage2p5TextToImageParams {
-        prompt: "a corgi wearing sunglasses at the beach".to_string(),
-        num_images: GptImage2p5NumImages::Two,
-        image_size: Some(GptImage2p5ImageSize::Landscape16x9),
-        resolution: None,
-        quality: Some(GptImage2p5Quality::High),
-        background: None,
-        output_format: Some(GptImage2p5OutputFormat::Png),
-        output_compression: None,
-      },
-    };
+    let request = GptImage2p5SunburstTextToImageRequest { params: GptImage2p5TextToImageParams { prompt: "a corgi wearing sunglasses at the beach".to_string(), num_images: GptImage2p5NumImages::Two, image_size: Some(GptImage2p5ImageSize::Landscape16x9), resolution: None, quality: Some(GptImage2p5Quality::High), background: None, output_format: Some(GptImage2p5OutputFormat::Png), output_compression: None } };
 
-    let result = request.send_webhook_request(
-      &api_key,
-      "https://example.com/webhook",
-    ).await?;
+    let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Request ID: {:?}", result.request_id);
     assert!(result.request_id.is_some());
     Ok(())

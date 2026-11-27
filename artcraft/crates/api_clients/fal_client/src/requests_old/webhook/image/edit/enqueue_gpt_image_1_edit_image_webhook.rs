@@ -2,12 +2,8 @@ use crate::creds::fal_api_key::FalApiKey;
 use crate::error::classify_fal_error::classify_fal_error;
 use crate::error::fal_error_plus::FalErrorPlus;
 use crate::requests::core_api::webhook_response::WebhookResponse;
-use crate::requests_old::http::image::edit::http_gpt_image_1_edit_image::{
-  gpt_image_1_edit_image, GptImage1EditImageInput,
-};
-use crate::requests::traits::fal_request_cost_calculator_trait::{
-  FalRequestCostCalculator, UsdCents,
-};
+use crate::requests_old::http::image::edit::http_gpt_image_1_edit_image::{gpt_image_1_edit_image, GptImage1EditImageInput};
+use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 use reqwest::IntoUrl;
 
 /// Typed args for the non-BYOK `fal-ai/gpt-image-1/edit-image` endpoint.
@@ -90,13 +86,8 @@ impl FalRequestCostCalculator for EnqueueGptImage1EditImageRequest {
     //   Low:    $0.011 (1024x1024) / $0.016 (other) per image
     //   Medium: $0.042 (1024x1024) / $0.063 (other) per image
     //   High:   $0.167 (1024x1024) / $0.25  (other) per image
-    let use_quality = self
-      .quality
-      .unwrap_or(EnqueueGptImage1EditImageQuality::Medium);
-    let is_square = matches!(
-      self.image_size,
-      None | Some(EnqueueGptImage1EditImageSize::Square) | Some(EnqueueGptImage1EditImageSize::Auto)
-    );
+    let use_quality = self.quality.unwrap_or(EnqueueGptImage1EditImageQuality::Medium);
+    let is_square = matches!(self.image_size, None | Some(EnqueueGptImage1EditImageSize::Square) | Some(EnqueueGptImage1EditImageSize::Auto));
     let base_cost: u64 = match (use_quality, is_square) {
       (EnqueueGptImage1EditImageQuality::Low, true) => 2,
       (EnqueueGptImage1EditImageQuality::Low, false) => 2,
@@ -115,9 +106,7 @@ impl FalRequestCostCalculator for EnqueueGptImage1EditImageRequest {
   }
 }
 
-pub async fn enqueue_gpt_image_1_edit_image_webhook<R: IntoUrl>(
-  args: EnqueueGptImage1EditImageArgs<'_, R>,
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_gpt_image_1_edit_image_webhook<R: IntoUrl>(args: EnqueueGptImage1EditImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images: u8 = match req.num_images {
@@ -172,22 +161,9 @@ pub async fn enqueue_gpt_image_1_edit_image_webhook<R: IntoUrl>(
     .to_string()
   });
 
-  let request = GptImage1EditImageInput {
-    prompt: req.prompt,
-    image_urls: req.image_urls,
-    mask_image_url: req.mask_image_url,
-    num_images: Some(num_images),
-    image_size,
-    quality,
-    input_fidelity,
-    background,
-    output_format,
-  };
+  let request = GptImage1EditImageInput { prompt: req.prompt, image_urls: req.image_urls, mask_image_url: req.mask_image_url, num_images: Some(num_images), image_size, quality, input_fidelity, background, output_format };
 
-  let result = gpt_image_1_edit_image(request)
-    .with_api_key(&args.api_key.0)
-    .queue_webhook(args.webhook_url)
-    .await;
+  let result = gpt_image_1_edit_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -195,16 +171,10 @@ pub async fn enqueue_gpt_image_1_edit_image_webhook<R: IntoUrl>(
 #[cfg(test)]
 mod tests {
   use crate::creds::fal_api_key::FalApiKey;
-  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_1_edit_image_webhook::{
-    enqueue_gpt_image_1_edit_image_webhook, EnqueueGptImage1EditImageArgs,
-    EnqueueGptImage1EditImageNumImages, EnqueueGptImage1EditImageQuality,
-    EnqueueGptImage1EditImageRequest, EnqueueGptImage1EditImageSize,
-  };
+  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_1_edit_image_webhook::{enqueue_gpt_image_1_edit_image_webhook, EnqueueGptImage1EditImageArgs, EnqueueGptImage1EditImageNumImages, EnqueueGptImage1EditImageQuality, EnqueueGptImage1EditImageRequest, EnqueueGptImage1EditImageSize};
   use errors::AnyhowResult;
   use std::fs::read_to_string;
-  use test_data::web::image_urls::{
-    ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL,
-  };
+  use test_data::web::image_urls::{ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL};
 
   #[tokio::test]
   #[ignore]
@@ -213,25 +183,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueGptImage1EditImageArgs {
-      request: EnqueueGptImage1EditImageRequest {
-        prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-        image_urls: vec![
-          GHOST_IMAGE_URL.to_string(),
-          TREX_SKELETON_IMAGE_URL.to_string(),
-          ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        ],
-        num_images: EnqueueGptImage1EditImageNumImages::One,
-        mask_image_url: None,
-        image_size: Some(EnqueueGptImage1EditImageSize::Horizontal),
-        quality: Some(EnqueueGptImage1EditImageQuality::Medium),
-        input_fidelity: None,
-        background: None,
-        output_format: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueGptImage1EditImageArgs { request: EnqueueGptImage1EditImageRequest { prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], num_images: EnqueueGptImage1EditImageNumImages::One, mask_image_url: None, image_size: Some(EnqueueGptImage1EditImageSize::Horizontal), quality: Some(EnqueueGptImage1EditImageQuality::Medium), input_fidelity: None, background: None, output_format: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let _result = enqueue_gpt_image_1_edit_image_webhook(args).await?;
 

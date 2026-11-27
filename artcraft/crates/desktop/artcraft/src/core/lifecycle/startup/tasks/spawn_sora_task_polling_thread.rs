@@ -8,25 +8,8 @@ use crate::services::storyteller::state::storyteller_credential_manager::Storyte
 use errors::AnyhowResult;
 use tauri::{AppHandle, Manager};
 
-pub fn spawn_sora_task_polling_thread(
-  app: &AppHandle,
-  root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  task_database: &TaskDatabase,
-  sora_credential_manager: &SoraCredentialManager,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> AnyhowResult<()> {
-
-  tauri::async_runtime::spawn(sora_task_polling_thread(
-    app.clone(),
-    app_env_configs.clone(),
-    root.clone(),
-    task_database.clone(),
-    sora_credential_manager.clone(),
-    storyteller_creds_manager.clone(),
-    sora_task_queue.clone(),
-  ));
+pub fn spawn_sora_task_polling_thread(app: &AppHandle, root: &AppDataRoot, app_env_configs: &AppEnvConfigs, task_database: &TaskDatabase, sora_credential_manager: &SoraCredentialManager, storyteller_creds_manager: &StorytellerCredentialManager, sora_task_queue: &SoraTaskQueue) -> AnyhowResult<()> {
+  tauri::async_runtime::spawn(sora_task_polling_thread(app.clone(), app_env_configs.clone(), root.clone(), task_database.clone(), sora_credential_manager.clone(), storyteller_creds_manager.clone(), sora_task_queue.clone()));
 
   Ok(())
 }

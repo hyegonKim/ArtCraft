@@ -27,8 +27,6 @@ pub struct Veo2TextToVideoOutput {
   pub video: Veo2TextToVideoVideoFile,
 }
 
-pub fn veo_2_text_to_video(
-  params: Veo2TextToVideoInput,
-) -> FalRequest<Veo2TextToVideoInput, Veo2TextToVideoOutput> {
+pub fn veo_2_text_to_video(params: Veo2TextToVideoInput) -> FalRequest<Veo2TextToVideoInput, Veo2TextToVideoOutput> {
   FalRequest::new("fal-ai/veo2", params)
 }

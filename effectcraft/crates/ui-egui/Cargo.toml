@@ -20,6 +20,7 @@ effectcraft-project = { workspace = true }
 effectcraft-path = { workspace = true }
 effectcraft-text = { workspace = true }
 effectcraft-render = { workspace = true }
+effectcraft-interchange = { workspace = true }
 effectcraft-engine = { workspace = true }
 effectcraft-gpu = { workspace = true }
 egui = { workspace = true }

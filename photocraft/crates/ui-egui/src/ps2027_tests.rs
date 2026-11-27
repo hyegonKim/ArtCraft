@@ -20,8 +20,7 @@ fn test_app() -> PhotocraftApp {
         {
             for y in 0..64i32 {
                 for x in 0..96i32 {
-                    let is_glyph_bar = (16..28).contains(&y)
-                        && ((12..18).contains(&x) || (24..30).contains(&x) || (36..44).contains(&x));
+                    let is_glyph_bar = (16..28).contains(&y) && ((12..18).contains(&x) || (24..30).contains(&x) || (36..44).contains(&x));
                     let r = if is_glyph_bar { 0.05 } else { (x as f32 / 95.0) * 0.8 + 0.1 };
                     let g = if is_glyph_bar { 0.05 } else { (y as f32 / 63.0) * 0.7 + 0.15 };
                     let b = if is_glyph_bar { 0.08 } else { 0.55 };
@@ -37,11 +36,7 @@ fn test_app() -> PhotocraftApp {
 fn ko_ps2027_catalog_covers_all_ps2027_and_acr19_strings_and_preserves_ellipsis() {
     for &(en, ko) in crate::ko_ps2027::PLAIN_KO {
         assert!(!ko.is_empty(), "empty Korean translation for {en:?}");
-        assert_eq!(
-            en.ends_with('…'),
-            ko.ends_with('…'),
-            "ellipsis mismatch for plain row {en:?} -> {ko:?}",
-        );
+        assert_eq!(en.ends_with('…'), ko.ends_with('…'), "ellipsis mismatch for plain row {en:?} -> {ko:?}",);
     }
 
     let ko = crate::i18n::ko_ps2027_lang();
@@ -142,8 +137,7 @@ fn ko_ps2027_catalog_covers_type_recompose_mockup_skills_and_acr19() {
 #[test]
 fn ps2027_menus_and_oil_brush_tool_are_wired_end_to_end() {
     let mut app = test_app();
-    let ids: std::collections::HashSet<String> =
-        crate::menus::menu_items(&app).into_iter().map(|i| i.id).collect();
+    let ids: std::collections::HashSet<String> = crate::menus::menu_items(&app).into_iter().map(|i| i.id).collect();
 
     for required in [
         "file.export.timelapse",
@@ -187,11 +181,7 @@ fn ps2027_menus_and_oil_brush_tool_are_wired_end_to_end() {
     assert_eq!(app.ui.tool, Tool::OilBrush);
 
     for preset in ["blocky", "glaze", "round"] {
-        app.run(
-            "tools.setOilBrush",
-            json!({"preset": preset, "size": 18.0, "opacity": 0.9, "paintMix": 0.65}),
-        )
-        .unwrap();
+        app.run("tools.setOilBrush", json!({"preset": preset, "size": 18.0, "opacity": 0.9, "paintMix": 0.65})).unwrap();
         app.run(
             "paint.oilBrush",
             json!({
@@ -215,17 +205,9 @@ fn timelapse_panel_and_export_write_valid_mp4_and_gif() {
     crate::menus::invoke(&mut app, &ctx, "window.toggle.timelapse", json!({})).unwrap();
     assert!(app.ui.panels.timelapse);
 
-    app.run(
-        "timelapse.configure",
-        json!({"resolution": "1920", "quality": "high"}),
-    )
-    .unwrap();
+    app.run("timelapse.configure", json!({"resolution": "1920", "quality": "high"})).unwrap();
     app.run("timelapse.start", json!({})).unwrap();
-    app.run(
-        "paint.oilBrush",
-        json!({"preset": "round", "size": 10.0, "points": [[8.0, 8.0], [40.0, 32.0]]}),
-    )
-    .unwrap();
+    app.run("paint.oilBrush", json!({"preset": "round", "size": 10.0, "points": [[8.0, 8.0], [40.0, 32.0]]})).unwrap();
     app.run("filter.nge.fireflies", json!({"quantity": 0.6, "blurriness": 0.4})).unwrap();
 
     let dir = tempfile::tempdir().unwrap();
@@ -286,11 +268,7 @@ fn ps2027_live_layers_ambient_recompose_type_mockup_skills_psd_and_acr19_work() 
     // 3. Remove Ambient Effects across all 4 modes
     app.run("layer.select", json!({"layer": first_id})).unwrap();
     for mode in ["shadows", "reflections", "lensFlares", "atmospheric"] {
-        app.run(
-            "edit.removeAmbientEffects",
-            json!({"mode": mode, "strength": 65.0, "removeRelatedElements": true, "enhance": true}),
-        )
-        .unwrap();
+        app.run("edit.removeAmbientEffects", json!({"mode": mode, "strength": 65.0, "removeRelatedElements": true, "enhance": true})).unwrap();
     }
 
     // 4. Type 2027: Convert Raster to Text, Dynamic Text Fit, Release Dynamic Fit, Copy/Paste Attributes
@@ -319,16 +297,8 @@ fn ps2027_live_layers_ambient_recompose_type_mockup_skills_psd_and_acr19_work() 
     assert_eq!(app.session.active().unwrap().doc.size.height, 63);
 
     // 6. Camera Raw 19.0 filter params
-    let raster_id = app
-        .session
-        .active()
-        .unwrap()
-        .doc
-        .layers
-        .iter()
-        .find(|l| matches!(l.content, LayerContent::Raster(_)))
-        .map(|l| l.id.0)
-        .expect("raster layer");
+    let raster_id =
+        app.session.active().unwrap().doc.layers.iter().find(|l| matches!(l.content, LayerContent::Raster(_))).map(|l| l.id.0).expect("raster layer");
     app.run("layer.select", json!({"layer": raster_id})).unwrap();
     app.run(
         "filter.cameraRaw",
@@ -354,11 +324,7 @@ fn ps2027_live_layers_ambient_recompose_type_mockup_skills_psd_and_acr19_work() 
     // 8. Multithreaded PSD save
     let dir = tempfile::tempdir().unwrap();
     let psd_path = dir.path().join("ps2027_mt.psd");
-    app.run(
-        "prefs.set",
-        json!({"path": "performance.multithreadedPsdSaving", "value": true}),
-    )
-    .unwrap();
+    app.run("prefs.set", json!({"path": "performance.multithreadedPsdSaving", "value": true})).unwrap();
     assert!(app.session.prefs().performance.multithreaded_psd_saving);
     app.run("file.saveACopy", json!({"path": psd_path.to_string_lossy()})).unwrap();
     let psd_bytes = std::fs::read(&psd_path).unwrap();

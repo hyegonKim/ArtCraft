@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::edit::nano_banana_2_edit_image::raw_request::{
-  NanoBanana2EditImageInput, NanoBanana2EditImageOutput,
-};
+use crate::requests::api::image::edit::nano_banana_2_edit_image::raw_request::{NanoBanana2EditImageInput, NanoBanana2EditImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -68,39 +66,34 @@ impl FalEndpoint for NanoBanana2EditImageRequest {
       NanoBanana2EditImageNumImages::Four => 4,
     };
 
-    let resolution = self.resolution.map(|r| match r {
-      NanoBanana2EditImageResolution::HalfK => "0.5K",
-      NanoBanana2EditImageResolution::OneK => "1K",
-      NanoBanana2EditImageResolution::TwoK => "2K",
-      NanoBanana2EditImageResolution::FourK => "4K",
-    }.to_string());
+    let resolution = self.resolution.map(|r| {
+      match r {
+        NanoBanana2EditImageResolution::HalfK => "0.5K",
+        NanoBanana2EditImageResolution::OneK => "1K",
+        NanoBanana2EditImageResolution::TwoK => "2K",
+        NanoBanana2EditImageResolution::FourK => "4K",
+      }
+      .to_string()
+    });
 
-    let aspect_ratio = self.aspect_ratio.map(|ar| match ar {
-      NanoBanana2EditImageAspectRatio::Auto => "auto",
-      NanoBanana2EditImageAspectRatio::OneByOne => "1:1",
-      NanoBanana2EditImageAspectRatio::FiveByFour => "5:4",
-      NanoBanana2EditImageAspectRatio::FourByThree => "4:3",
-      NanoBanana2EditImageAspectRatio::ThreeByTwo => "3:2",
-      NanoBanana2EditImageAspectRatio::SixteenByNine => "16:9",
-      NanoBanana2EditImageAspectRatio::TwentyOneByNine => "21:9",
-      NanoBanana2EditImageAspectRatio::FourByFive => "4:5",
-      NanoBanana2EditImageAspectRatio::ThreeByFour => "3:4",
-      NanoBanana2EditImageAspectRatio::TwoByThree => "2:3",
-      NanoBanana2EditImageAspectRatio::NineBySixteen => "9:16",
-    }.to_string());
+    let aspect_ratio = self.aspect_ratio.map(|ar| {
+      match ar {
+        NanoBanana2EditImageAspectRatio::Auto => "auto",
+        NanoBanana2EditImageAspectRatio::OneByOne => "1:1",
+        NanoBanana2EditImageAspectRatio::FiveByFour => "5:4",
+        NanoBanana2EditImageAspectRatio::FourByThree => "4:3",
+        NanoBanana2EditImageAspectRatio::ThreeByTwo => "3:2",
+        NanoBanana2EditImageAspectRatio::SixteenByNine => "16:9",
+        NanoBanana2EditImageAspectRatio::TwentyOneByNine => "21:9",
+        NanoBanana2EditImageAspectRatio::FourByFive => "4:5",
+        NanoBanana2EditImageAspectRatio::ThreeByFour => "3:4",
+        NanoBanana2EditImageAspectRatio::TwoByThree => "2:3",
+        NanoBanana2EditImageAspectRatio::NineBySixteen => "9:16",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_urls: self.image_urls.clone(),
-      num_images: Some(num_images),
-      aspect_ratio,
-      resolution,
-      output_format: Some("png".to_string()),
-      safety_tolerance: Some("6".to_string()),
-      limit_generations: None,
-      enable_web_search: None,
-      seed: None,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_urls: self.image_urls.clone(), num_images: Some(num_images), aspect_ratio, resolution, output_format: Some("png".to_string()), safety_tolerance: Some("6".to_string()), limit_generations: None, enable_web_search: None, seed: None })
   }
 }
 
@@ -111,10 +104,7 @@ mod tests {
   use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
   use errors::AnyhowResult;
   use std::fs::read_to_string;
-  use test_data::web::image_urls::{
-    ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL,
-    WHITE_HOUSE_SUNSET_IMAGE_URL,
-  };
+  use test_data::web::image_urls::{ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL, WHITE_HOUSE_SUNSET_IMAGE_URL};
 
   #[tokio::test]
   #[ignore] // manually test — requires real API key, incurs costs
@@ -122,13 +112,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = NanoBanana2EditImageRequest {
-      prompt: "make this image look like a watercolor painting".to_string(),
-      image_urls: vec![GHOST_IMAGE_URL.to_string()],
-      num_images: NanoBanana2EditImageNumImages::One,
-      resolution: Some(NanoBanana2EditImageResolution::OneK),
-      aspect_ratio: None,
-    };
+    let request = NanoBanana2EditImageRequest { prompt: "make this image look like a watercolor painting".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string()], num_images: NanoBanana2EditImageNumImages::One, resolution: Some(NanoBanana2EditImageResolution::OneK), aspect_ratio: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -142,17 +126,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = NanoBanana2EditImageRequest {
-      prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-      image_urls: vec![
-        GHOST_IMAGE_URL.to_string(),
-        TREX_SKELETON_IMAGE_URL.to_string(),
-        ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ],
-      num_images: NanoBanana2EditImageNumImages::Two,
-      resolution: Some(NanoBanana2EditImageResolution::TwoK),
-      aspect_ratio: Some(NanoBanana2EditImageAspectRatio::SixteenByNine),
-    };
+    let request = NanoBanana2EditImageRequest { prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], num_images: NanoBanana2EditImageNumImages::Two, resolution: Some(NanoBanana2EditImageResolution::TwoK), aspect_ratio: Some(NanoBanana2EditImageAspectRatio::SixteenByNine) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -166,17 +140,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = NanoBanana2EditImageRequest {
-      prompt: "Put the scared man and the t-rex in front of the white house scene. Make the man afraid of the t-rex.".to_string(),
-      image_urls: vec![
-        WHITE_HOUSE_SUNSET_IMAGE_URL.to_string(),
-        TREX_SKELETON_IMAGE_URL.to_string(),
-        ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ],
-      num_images: NanoBanana2EditImageNumImages::Two,
-      resolution: Some(NanoBanana2EditImageResolution::TwoK),
-      aspect_ratio: Some(NanoBanana2EditImageAspectRatio::SixteenByNine),
-    };
+    let request = NanoBanana2EditImageRequest { prompt: "Put the scared man and the t-rex in front of the white house scene. Make the man afraid of the t-rex.".to_string(), image_urls: vec![WHITE_HOUSE_SUNSET_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], num_images: NanoBanana2EditImageNumImages::Two, resolution: Some(NanoBanana2EditImageResolution::TwoK), aspect_ratio: Some(NanoBanana2EditImageAspectRatio::SixteenByNine) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);

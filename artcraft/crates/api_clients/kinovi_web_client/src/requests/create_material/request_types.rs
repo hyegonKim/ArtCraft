@@ -1,13 +1,13 @@
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug)]
-pub (super) struct BatchRequest {
+pub(super) struct BatchRequest {
   #[serde(rename = "0")]
   pub zero: BatchRequestInner,
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct BatchRequestInner {
+pub(super) struct BatchRequestInner {
   pub json: MaterialJson,
   /// superjson type annotations. Only present for photos, where the site
   /// marks the null `duration` as `undefined`:
@@ -17,7 +17,7 @@ pub (super) struct BatchRequestInner {
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct MaterialJson {
+pub(super) struct MaterialJson {
   pub url: String,
   /// "video" or "photo".
   pub format: &'static str,
@@ -31,27 +31,27 @@ pub (super) struct MaterialJson {
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct MaterialMeta {
+pub(super) struct MaterialMeta {
   pub values: MaterialMetaValues,
   pub v: u8,
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct MaterialMetaValues {
+pub(super) struct MaterialMetaValues {
   pub duration: [&'static str; 1],
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseItem {
+pub(super) struct BatchResponseItem {
   pub result: BatchResponseResult,
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseResult {
+pub(super) struct BatchResponseResult {
   pub data: BatchResponseData,
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseData {
+pub(super) struct BatchResponseData {
   pub json: super::create_material::KinoviMaterial,
 }

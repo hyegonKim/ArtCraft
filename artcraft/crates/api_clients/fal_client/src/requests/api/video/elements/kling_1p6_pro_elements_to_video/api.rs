@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::elements::kling_1p6_pro_elements_to_video::raw_request::{
-  Kling1p6ProElementsToVideoInput, Kling1p6ProElementsToVideoOutput,
-};
+use crate::requests::api::video::elements::kling_1p6_pro_elements_to_video::raw_request::{Kling1p6ProElementsToVideoInput, Kling1p6ProElementsToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -62,19 +60,16 @@ impl FalEndpoint for Kling1p6ProElementsToVideoRequest {
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
     let duration = self.duration.map(|d| d.to_str().to_string());
 
-    let aspect_ratio = self.aspect_ratio.map(|ar| match ar {
-      Kling1p6ProElementsToVideoAspectRatio::Square => "1:1",
-      Kling1p6ProElementsToVideoAspectRatio::SixteenByNine => "16:9",
-      Kling1p6ProElementsToVideoAspectRatio::NineBySixteen => "9:16",
-    }.to_string());
+    let aspect_ratio = self.aspect_ratio.map(|ar| {
+      match ar {
+        Kling1p6ProElementsToVideoAspectRatio::Square => "1:1",
+        Kling1p6ProElementsToVideoAspectRatio::SixteenByNine => "16:9",
+        Kling1p6ProElementsToVideoAspectRatio::NineBySixteen => "9:16",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      input_image_urls: self.input_image_urls.clone(),
-      aspect_ratio,
-      duration,
-      negative_prompt: self.negative_prompt.clone(),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), input_image_urls: self.input_image_urls.clone(), aspect_ratio, duration, negative_prompt: self.negative_prompt.clone() })
   }
 }
 
@@ -93,16 +88,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling1p6ProElementsToVideoRequest {
-      prompt: "the two dogs run side by side across a sunlit meadow".to_string(),
-      input_image_urls: vec![
-        TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      ],
-      negative_prompt: None,
-      duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds),
-      aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine),
-    };
+    let request = Kling1p6ProElementsToVideoRequest { prompt: "the two dogs run side by side across a sunlit meadow".to_string(), input_image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), JUNO_AT_LAKE_IMAGE_URL.to_string()], negative_prompt: None, duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -116,16 +102,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling1p6ProElementsToVideoRequest {
-      prompt: "the dogs play together in a snowy field".to_string(),
-      input_image_urls: vec![
-        TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      ],
-      negative_prompt: None,
-      duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds),
-      aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine),
-    };
+    let request = Kling1p6ProElementsToVideoRequest { prompt: "the dogs play together in a snowy field".to_string(), input_image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), JUNO_AT_LAKE_IMAGE_URL.to_string()], negative_prompt: None, duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -139,24 +116,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let aspect_ratios = [
-      Kling1p6ProElementsToVideoAspectRatio::Square,
-      Kling1p6ProElementsToVideoAspectRatio::SixteenByNine,
-      Kling1p6ProElementsToVideoAspectRatio::NineBySixteen,
-    ];
+    let aspect_ratios = [Kling1p6ProElementsToVideoAspectRatio::Square, Kling1p6ProElementsToVideoAspectRatio::SixteenByNine, Kling1p6ProElementsToVideoAspectRatio::NineBySixteen];
 
     for ar in aspect_ratios {
       println!("--- aspect ratio: {:?} ---", ar);
-      let request = Kling1p6ProElementsToVideoRequest {
-        prompt: "the dogs play together in a snowy field".to_string(),
-        input_image_urls: vec![
-          TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-          JUNO_AT_LAKE_IMAGE_URL.to_string(),
-        ],
-        negative_prompt: None,
-        duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds),
-        aspect_ratio: Some(ar),
-      };
+      let request = Kling1p6ProElementsToVideoRequest { prompt: "the dogs play together in a snowy field".to_string(), input_image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), JUNO_AT_LAKE_IMAGE_URL.to_string()], negative_prompt: None, duration: Some(Kling1p6ProElementsToVideoDuration::FiveSeconds), aspect_ratio: Some(ar) };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -170,23 +134,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let durations = [
-      Kling1p6ProElementsToVideoDuration::FiveSeconds,
-      Kling1p6ProElementsToVideoDuration::TenSeconds,
-    ];
+    let durations = [Kling1p6ProElementsToVideoDuration::FiveSeconds, Kling1p6ProElementsToVideoDuration::TenSeconds];
 
     for dur in durations {
       println!("--- duration: {:?} ---", dur);
-      let request = Kling1p6ProElementsToVideoRequest {
-        prompt: "the dogs leap through tall grass in golden hour light".to_string(),
-        input_image_urls: vec![
-          TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-          JUNO_AT_LAKE_IMAGE_URL.to_string(),
-        ],
-        negative_prompt: None,
-        duration: Some(dur),
-        aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine),
-      };
+      let request = Kling1p6ProElementsToVideoRequest { prompt: "the dogs leap through tall grass in golden hour light".to_string(), input_image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), JUNO_AT_LAKE_IMAGE_URL.to_string()], negative_prompt: None, duration: Some(dur), aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::SixteenByNine) };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -198,13 +150,7 @@ mod tests {
 
   #[test]
   fn raw_request_aspect_ratio_uses_colon_format() {
-    let request = Kling1p6ProElementsToVideoRequest {
-      prompt: "p".to_string(),
-      input_image_urls: vec!["https://example.com/a.png".to_string()],
-      negative_prompt: None,
-      duration: Some(Kling1p6ProElementsToVideoDuration::TenSeconds),
-      aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::Square),
-    };
+    let request = Kling1p6ProElementsToVideoRequest { prompt: "p".to_string(), input_image_urls: vec!["https://example.com/a.png".to_string()], negative_prompt: None, duration: Some(Kling1p6ProElementsToVideoDuration::TenSeconds), aspect_ratio: Some(Kling1p6ProElementsToVideoAspectRatio::Square) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.aspect_ratio.as_deref(), Some("1:1"));
     assert_eq!(raw.duration.as_deref(), Some("10"));
@@ -212,32 +158,15 @@ mod tests {
 
   #[test]
   fn raw_request_passes_through_input_image_urls() {
-    let urls = vec![
-      "https://example.com/a.png".to_string(),
-      "https://example.com/b.png".to_string(),
-      "https://example.com/c.png".to_string(),
-      "https://example.com/d.png".to_string(),
-    ];
-    let request = Kling1p6ProElementsToVideoRequest {
-      prompt: "p".to_string(),
-      input_image_urls: urls.clone(),
-      negative_prompt: None,
-      duration: None,
-      aspect_ratio: None,
-    };
+    let urls = vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string(), "https://example.com/c.png".to_string(), "https://example.com/d.png".to_string()];
+    let request = Kling1p6ProElementsToVideoRequest { prompt: "p".to_string(), input_image_urls: urls.clone(), negative_prompt: None, duration: None, aspect_ratio: None };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.input_image_urls, urls);
   }
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Kling1p6ProElementsToVideoRequest {
-      prompt: "p".to_string(),
-      input_image_urls: vec!["https://example.com/a.png".to_string()],
-      negative_prompt: None,
-      duration: None,
-      aspect_ratio: None,
-    };
+    let request = Kling1p6ProElementsToVideoRequest { prompt: "p".to_string(), input_image_urls: vec!["https://example.com/a.png".to_string()], negative_prompt: None, duration: None, aspect_ratio: None };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert!(raw.aspect_ratio.is_none());
@@ -247,10 +176,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Kling1p6ProElementsToVideoRequest::ENDPOINT,
-      "fal-ai/kling-video/v1.6/pro/elements",
-    );
+    assert_eq!(Kling1p6ProElementsToVideoRequest::ENDPOINT, "fal-ai/kling-video/v1.6/pro/elements",);
   }
 
   // NB: Pricing tests are in cost.rs

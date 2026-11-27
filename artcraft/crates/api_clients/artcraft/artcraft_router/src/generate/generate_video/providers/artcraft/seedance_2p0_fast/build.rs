@@ -2,20 +2,13 @@ use enums::common::generation::common_video_model::CommonVideoModel as CommonVid
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::seedance_2p0_fast::request::ArtcraftSeedance2p0FastRequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
 pub fn build_artcraft_seedance_2p0_fast(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
-  let request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Seedance2p0Fast,
-    SupportedResolutions::Fast,
-    UltraWideSupport::Supported,
-  )?;
+  let request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Seedance2p0Fast, SupportedResolutions::Fast, UltraWideSupport::Supported)?;
   let state = ArtcraftSeedance2p0FastRequestState { request };
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::ArtcraftSeedance2p0Fast(state)))
 }
@@ -52,7 +45,9 @@ mod tests {
 
     #[test]
     fn prompt_is_passed_through() {
-      let req = unwrap_request(artcraft_fast_builder_with(|b| { b.prompt = Some("test".to_string()); }));
+      let req = unwrap_request(artcraft_fast_builder_with(|b| {
+        b.prompt = Some("test".to_string());
+      }));
       assert_eq!(req.request.prompt, Some("test".to_string()));
     }
 
@@ -70,25 +65,33 @@ mod tests {
 
     #[test]
     fn duration_passed_through() {
-      let req = unwrap_request(artcraft_fast_builder_with(|b| { b.duration_seconds = Some(10); }));
+      let req = unwrap_request(artcraft_fast_builder_with(|b| {
+        b.duration_seconds = Some(10);
+      }));
       assert_eq!(req.request.duration_seconds, Some(10));
     }
 
     #[test]
     fn duration_clamped_to_max() {
-      let req = unwrap_request(artcraft_fast_builder_with(|b| { b.duration_seconds = Some(99); }));
+      let req = unwrap_request(artcraft_fast_builder_with(|b| {
+        b.duration_seconds = Some(99);
+      }));
       assert_eq!(req.request.duration_seconds, Some(15));
     }
 
     #[test]
     fn batch_count_passed_through() {
-      let req = unwrap_request(artcraft_fast_builder_with(|b| { b.video_batch_count = Some(4); }));
+      let req = unwrap_request(artcraft_fast_builder_with(|b| {
+        b.video_batch_count = Some(4);
+      }));
       assert_eq!(req.request.video_batch_count, Some(4));
     }
 
     #[test]
     fn bitrate_passed_through() {
-      let req = unwrap_request(artcraft_fast_builder_with(|b| { b.bitrate = Some(RouterBitrate::High); }));
+      let req = unwrap_request(artcraft_fast_builder_with(|b| {
+        b.bitrate = Some(RouterBitrate::High);
+      }));
       assert_eq!(req.request.bitrate, Some(CommonBitrateEnum::High));
     }
   }
@@ -160,13 +163,7 @@ mod tests {
 
     #[test]
     fn res_1080p_error_out() {
-      let result = build_artcraft_seedance_2p0_fast(GenerateVideoRequestBuilder {
-        model: RouterVideoModel::Seedance2p0Fast,
-        provider: RouterProvider::Artcraft,
-        resolution: Some(RouterResolution::TenEightyP),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-        ..Default::default()
-      });
+      let result = build_artcraft_seedance_2p0_fast(GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Fast, provider: RouterProvider::Artcraft, resolution: Some(RouterResolution::TenEightyP), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..Default::default() });
       assert!(result.is_err());
     }
 
@@ -193,21 +190,13 @@ mod tests {
 
     #[test]
     fn url_start_frame_rejected() {
-      let result = build_artcraft_seedance_2p0_fast(GenerateVideoRequestBuilder {
-        model: RouterVideoModel::Seedance2p0Fast,
-        provider: RouterProvider::Artcraft,
-        start_frame: Some(ImageRef::Url("https://example.com".to_string())),
-        ..Default::default()
-      });
+      let result = build_artcraft_seedance_2p0_fast(GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Fast, provider: RouterProvider::Artcraft, start_frame: Some(ImageRef::Url("https://example.com".to_string())), ..Default::default() });
       assert!(result.is_err());
     }
 
     #[test]
     fn reference_image_tokens_passed_through() {
-      let tokens = vec![
-        MediaFileToken::new("mf_a".to_string()),
-        MediaFileToken::new("mf_b".to_string()),
-      ];
+      let tokens = vec![MediaFileToken::new("mf_a".to_string()), MediaFileToken::new("mf_b".to_string())];
       let req = unwrap_request(artcraft_fast_builder_with(|b| {
         b.reference_images = Some(ImageListRef::MediaFileTokens(tokens.clone()));
       }));
@@ -216,10 +205,7 @@ mod tests {
 
     #[test]
     fn character_tokens_passed_through() {
-      let tokens = vec![
-        CharacterToken::new("char_a".to_string()),
-        CharacterToken::new("char_b".to_string()),
-      ];
+      let tokens = vec![CharacterToken::new("char_a".to_string()), CharacterToken::new("char_b".to_string())];
       let req = unwrap_request(artcraft_fast_builder_with(|b| {
         b.reference_character_tokens = Some(CharacterListRef::CharacterTokens(tokens.clone()));
       }));
@@ -230,13 +216,7 @@ mod tests {
   // ── Helpers ──
 
   fn artcraft_fast_builder_with(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {
-    let mut builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p0Fast,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    };
+    let mut builder = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Fast, provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() };
     f(&mut builder);
     builder
   }
@@ -244,9 +224,7 @@ mod tests {
   fn unwrap_request(builder: GenerateVideoRequestBuilder) -> ArtcraftSeedance2p0FastRequestState {
     let result = build_artcraft_seedance_2p0_fast(builder).expect("build should succeed");
     match result {
-      VideoGenerationDraftOrRequest::Request(
-        VideoGenerationRequest::ArtcraftSeedance2p0Fast(state)
-      ) => state,
+      VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::ArtcraftSeedance2p0Fast(state)) => state,
       _ => panic!("expected ArtcraftSeedance2p0Fast request"),
     }
   }

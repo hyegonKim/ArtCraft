@@ -10,21 +10,16 @@ pub struct GetProviderOrderResponse {
   pub providers: Vec<Provider>,
 }
 
-impl SerializeMarker for GetProviderOrderResponse{}
+impl SerializeMarker for GetProviderOrderResponse {}
 
 #[tauri::command]
-pub async fn get_provider_order_command(
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-) -> ResponseOrErrorMessage<GetProviderOrderResponse> {
+pub async fn get_provider_order_command(provider_priority_store: State<'_, ProviderPriorityStore>) -> ResponseOrErrorMessage<GetProviderOrderResponse> {
   info!("get_provider_order_command called");
 
-  let providers = provider_priority_store.get_priority()
-    .map_err(|err| {
-      error!("Failed to get provider order: {:?}", err);
-      "Failed to retrieve provider order"
-    })?;
+  let providers = provider_priority_store.get_priority().map_err(|err| {
+    error!("Failed to get provider order: {:?}", err);
+    "Failed to retrieve provider order"
+  })?;
 
-  Ok(GetProviderOrderResponse {
-    providers,
-  }.into())
+  Ok(GetProviderOrderResponse { providers }.into())
 }

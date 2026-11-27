@@ -20,20 +20,16 @@ pub struct ProviderSetApiKeyResponse {}
 impl SerializeMarker for ProviderSetApiKeyResponse {}
 
 #[tauri::command]
-pub async fn provider_set_api_key_command(
-  request: ProviderSetApiKeyRequest,
-  credential_cache: State<'_, ProviderCredentialLoadingCache>,
-) -> ResponseOrErrorMessage<ProviderSetApiKeyResponse> {
+pub async fn provider_set_api_key_command(request: ProviderSetApiKeyRequest, credential_cache: State<'_, ProviderCredentialLoadingCache>) -> ResponseOrErrorMessage<ProviderSetApiKeyResponse> {
   info!("provider_set_api_key_command called for provider: {:?}", request.provider_credential);
 
   let api_key_data = ApiKeyData::from_str(&request.api_key);
   let payload = ProviderCredentialPayload::ApiKey(api_key_data);
 
-  credential_cache.save_credentials(request.provider_credential, payload)
-    .map_err(|err| {
-      error!("Failed to save API key: {:?}", err);
-      "Failed to save API key"
-    })?;
+  credential_cache.save_credentials(request.provider_credential, payload).map_err(|err| {
+    error!("Failed to save API key: {:?}", err);
+    "Failed to save API key"
+  })?;
 
   Ok(ProviderSetApiKeyResponse {}.into())
 }

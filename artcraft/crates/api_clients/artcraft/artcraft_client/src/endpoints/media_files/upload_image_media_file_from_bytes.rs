@@ -25,11 +25,11 @@ use uuid::uuid;
 pub struct UploadImageBytesArgs<'a> {
   pub api_host: &'a ApiHost,
   pub maybe_creds: Option<&'a StorytellerCredentialSet>,
-  
+
   // NB: Bytes need to be owned for the request.
   pub image_bytes: Vec<u8>,
   pub image_type: ImageType,
-  
+
   /// If true, we should hide the image from the user's gallery.
   pub is_intermediate_system_file: bool,
 
@@ -64,27 +64,17 @@ impl ImageType {
 /// Upload an image media file from a file.
 /// NB: File type is not checked, so caller needs to enforce.
 /// NB: We need owned bytes for the request.
-pub async fn upload_image_media_file_from_bytes(
-  args: UploadImageBytesArgs<'_>
-) -> Result<UploadImageMediaFileSuccessResponse, StorytellerError> {
-
+pub async fn upload_image_media_file_from_bytes(args: UploadImageBytesArgs<'_>) -> Result<UploadImageMediaFileSuccessResponse, StorytellerError> {
   let url = get_route(args.api_host);
 
   debug!("Requesting {:?}", &url);
 
-  let client = storyteller_client_builder(args.api_host)
-      .build()
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let client = storyteller_client_builder(args.api_host).build().map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
 
-  let part = Part::bytes(args.image_bytes)
-      .file_name(format!("image.{}", args.image_type.file_extension()))
-      .mime_str(args.image_type.mime_type())
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let part = Part::bytes(args.image_bytes).file_name(format!("image.{}", args.image_type.file_extension())).mime_str(args.image_type.mime_type()).map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
 
-  let mut form = Form::new()
-      .text("uuid_idempotency_token", generate_random_uuid())
-      .part("file", part);
-  
+  let mut form = Form::new().text("uuid_idempotency_token", generate_random_uuid()).part("file", part);
+
   if args.is_intermediate_system_file {
     form = form.text("is_intermediate_system_file", "true");
   }
@@ -93,27 +83,20 @@ pub async fn upload_image_media_file_from_bytes(
     form = form.text("maybe_generation_provider", provider.to_str().to_string());
   }
 
-  let mut request_builder = client.post(url)
-      .header("Accept", APPLICATION_JSON);
-  
+  let mut request_builder = client.post(url).header("Accept", APPLICATION_JSON);
+
   if let Some(creds) = args.maybe_creds {
     if let Some(header) = &creds.maybe_as_cookie_header() {
       request_builder = request_builder.header("Cookie", header);
     }
   }
-  
-  let response = request_builder
-      .multipart(form)
-      .send()
-      .await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+
+  let response = request_builder.multipart(form).send().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   let response = filter_bad_response(response).await?;
-  let response_body = &response.text().await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let response_body = &response.text().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
-  let media_file = serde_json::from_str(&response_body)
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let media_file = serde_json::from_str(&response_body).map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   Ok(media_file)
 }

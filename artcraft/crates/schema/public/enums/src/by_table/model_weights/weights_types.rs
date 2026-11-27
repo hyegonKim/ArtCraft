@@ -32,7 +32,6 @@ pub enum WeightsType {
   GptSoVits,
 }
 
-
 impl WeightsType {
   pub fn to_str(&self) -> &'static str {
     match self {
@@ -66,18 +65,7 @@ impl WeightsType {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::HifiganTacotron2,
-      Self::RvcV2,
-      Self::StableDiffusion15,
-      Self::StableDiffusionXL,
-      Self::SoVitsSvc,
-      Self::Tacotron2,
-      Self::LoRA,
-      Self::VallE,
-      Self::ComfyUi,
-      Self::GptSoVits,
-    ])
+    BTreeSet::from([Self::HifiganTacotron2, Self::RvcV2, Self::StableDiffusion15, Self::StableDiffusionXL, Self::SoVitsSvc, Self::Tacotron2, Self::LoRA, Self::VallE, Self::ComfyUi, Self::GptSoVits])
   }
 }
 
@@ -154,7 +142,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in WeightsType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

@@ -33,9 +33,7 @@ pub struct OmniGenListImageModelsArgs<'a> {
 }
 
 /// List available image models.
-pub async fn omni_gen_list_image_models(
-  args: OmniGenListImageModelsArgs<'_>,
-) -> Result<OmniGenImageModelsResponse, StorytellerError> {
+pub async fn omni_gen_list_image_models(args: OmniGenListImageModelsArgs<'_>) -> Result<OmniGenImageModelsResponse, StorytellerError> {
   let path = match args.provider {
     Some(provider) => format!("{}?provider={}", OMNI_GEN_IMAGE_MODELS_PATH, provider.as_query_value()),
     None => OMNI_GEN_IMAGE_MODELS_PATH.to_string(),
@@ -199,13 +197,7 @@ mod live_tests {
     #[ignore] // live: hits http://localhost:12345
     async fn list_image_models() {
       let api_host = ApiHost::Localhost { port: 12345 };
-      let response = omni_gen_list_image_models(OmniGenListImageModelsArgs {
-        api_host: &api_host,
-        maybe_creds: None,
-        provider: None,
-      })
-      .await
-      .expect("request should succeed");
+      let response = omni_gen_list_image_models(OmniGenListImageModelsArgs { api_host: &api_host, maybe_creds: None, provider: None }).await.expect("request should succeed");
 
       println!("[localhost] image models response: {:#?}", response);
       assert!(response.success);
@@ -221,13 +213,7 @@ mod live_tests {
     #[ignore] // live: hits https://api.storyteller.ai
     async fn list_image_models() {
       let api_host = ApiHost::Storyteller;
-      let response = omni_gen_list_image_models(OmniGenListImageModelsArgs {
-        api_host: &api_host,
-        maybe_creds: None,
-        provider: None,
-      })
-      .await
-      .expect("request should succeed");
+      let response = omni_gen_list_image_models(OmniGenListImageModelsArgs { api_host: &api_host, maybe_creds: None, provider: None }).await.expect("request should succeed");
 
       println!("[production] image models response: {:#?}", response);
       assert!(response.success);

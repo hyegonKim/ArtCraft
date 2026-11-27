@@ -92,30 +92,14 @@ mod tests {
 
   #[test]
   fn test_serialization_text_to_image() {
-    let request = EstimateImageCostRequest {
-      model: CommonImageModel::NanoBananaPro,
-      provider: GenerationProvider::Artcraft,
-      generation_mode: GenerationMode::TextToImage,
-      aspect_ratio: None,
-      resolution: None,
-      quality: None,
-      image_batch_count: None,
-    };
+    let request = EstimateImageCostRequest { model: CommonImageModel::NanoBananaPro, provider: GenerationProvider::Artcraft, generation_mode: GenerationMode::TextToImage, aspect_ratio: None, resolution: None, quality: None, image_batch_count: None };
     let serialized = serde_json::to_string(&request).unwrap();
     assert!(serialized.contains("\"generation_mode\":{\"type\":\"text_to_image\"}"));
   }
 
   #[test]
   fn test_serialization_image_edit() {
-    let request = EstimateImageCostRequest {
-      model: CommonImageModel::NanoBananaPro,
-      provider: GenerationProvider::Artcraft,
-      generation_mode: GenerationMode::ImageEdit { count: 2 },
-      aspect_ratio: None,
-      resolution: None,
-      quality: None,
-      image_batch_count: None,
-    };
+    let request = EstimateImageCostRequest { model: CommonImageModel::NanoBananaPro, provider: GenerationProvider::Artcraft, generation_mode: GenerationMode::ImageEdit { count: 2 }, aspect_ratio: None, resolution: None, quality: None, image_batch_count: None };
     let serialized = serde_json::to_string(&request).unwrap();
     assert!(serialized.contains("\"generation_mode\":{\"type\":\"image_edit\",\"count\":2}"));
   }

@@ -11,30 +11,18 @@ pub struct FalQwenEdit2511AnglesCostState {
 
 impl FalQwenEdit2511AnglesCostState {
   pub fn from_request(request: &FalQwenEdit2511AnglesRequestState) -> Self {
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use fal_client::requests::api::image::angle::qwen_edit_2511_edit_image_angle::api::{
-    QwenEdit2511AngleNumImages, QwenEdit2511EditImageAngleRequest,
-  };
+  use fal_client::requests::api::image::angle::qwen_edit_2511_edit_image_angle::api::{QwenEdit2511AngleNumImages, QwenEdit2511EditImageAngleRequest};
 
   #[test]
   fn one_image_is_4_cents() {
@@ -63,20 +51,7 @@ mod tests {
   }
 
   fn cost_for(n: QwenEdit2511AngleNumImages) -> ImageGenerationCostEstimate {
-    let state = FalQwenEdit2511AnglesCostState::from_request(&FalQwenEdit2511AnglesRequestState {
-      request: QwenEdit2511EditImageAngleRequest {
-        image_urls: vec!["https://example.com/x.jpg".to_string()],
-        horizontal_angle: None,
-        vertical_angle: None,
-        zoom: None,
-        additional_prompt: None,
-        num_images: Some(n),
-        image_size: None,
-        lora_scale: None,
-        guidance_scale: None,
-        num_inference_steps: None,
-      },
-    });
+    let state = FalQwenEdit2511AnglesCostState::from_request(&FalQwenEdit2511AnglesRequestState { request: QwenEdit2511EditImageAngleRequest { image_urls: vec!["https://example.com/x.jpg".to_string()], horizontal_angle: None, vertical_angle: None, zoom: None, additional_prompt: None, num_images: Some(n), image_size: None, lora_scale: None, guidance_scale: None, num_inference_steps: None } });
     state.estimate_cost()
   }
 }

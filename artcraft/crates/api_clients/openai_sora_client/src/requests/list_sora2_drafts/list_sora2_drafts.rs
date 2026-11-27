@@ -15,7 +15,6 @@ use wreq::Client;
 
 const SORA_LIST_DRAFTS_URL: &str = "https://sora.chatgpt.com/backend/project_y/profile/drafts?limit=15";
 
-
 /// NB: We omit fields we're not using to prevent breakage.
 #[derive(Clone, Debug)]
 pub struct ListSora2DraftsResponse {
@@ -43,12 +42,9 @@ pub struct DraftFailure {
 }
 
 pub async fn list_sora2_drafts(credentials: &SoraCredentialSet) -> Result<ListSora2DraftsResponse, SoraError> {
-
   let client = Client::new();
 
-  let authorization_header = credentials.jwt_bearer_token.as_ref()
-      .ok_or(SoraClientError::NoBearerTokenForRequest)?
-      .to_authorization_header_value();
+  let authorization_header = credentials.jwt_bearer_token.as_ref().ok_or(SoraClientError::NoBearerTokenForRequest)?.to_authorization_header_value();
 
   let cookie = credentials.cookies.to_string();
 
@@ -75,26 +71,22 @@ pub async fn list_sora2_drafts(credentials: &SoraCredentialSet) -> Result<ListSo
   //  http_request = http_request.timeout(timeout);
   //}
 
-  let http_request = http_request.build()
-      .map_err(|err| {
-        error!("Error building Sora 2 list drafts HTTP request: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let http_request = http_request.build().map_err(|err| {
+    error!("Error building Sora 2 list drafts HTTP request: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during Sora 2 list drafts request: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during Sora 2 list drafts request: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = &response.text().await
-      .map_err(|err| {
-        error!("Error reading Sora 2 list drafts response body: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let response_body = &response.text().await.map_err(|err| {
+    error!("Error reading Sora 2 list drafts response body: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
   if !status.is_success() {
     error!("Sora list drafts request returned an error (code {}) : {:?}", status.as_u16(), response_body);
@@ -104,61 +96,34 @@ pub async fn list_sora2_drafts(credentials: &SoraCredentialSet) -> Result<ListSo
     // let error = classify_general_http_status_code_and_body(status, &response_body).await;
     // return Err(error);
 
-    return Err(SoraGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status,
-      body: response_body.to_string(),
-    }.into());
+    return Err(SoraGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body.to_string() }.into());
   }
 
-  let response : HttpDraftsResponse = serde_json::from_str(response_body)
-      .map_err(|err| SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let response: HttpDraftsResponse = serde_json::from_str(response_body).map_err(|err| SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
   Ok(ListSora2DraftsResponse {
-    drafts: response.items
-        .into_iter()
-        .map(|draft| {
-          let task_id = TaskId::from_string(draft.task_id);
-          match draft.kind {
-            DraftKind::SoraDraft => {
-              match draft.url {
-                Some(url) => {
-                  // Success case
-                  Draft::Success(DraftSuccess {
-                    id: draft.id,
-                    task_id,
-                    url,
-                    prompt: draft.prompt,
-                  })
-                }
-                None => {
-                  return Draft::Failure(DraftFailure {
-                    task_id,
-                    reason_message: "Generation failed. URL missing from the draft.".to_string(),
-                  });
-                }
-              }
+    drafts: response
+      .items
+      .into_iter()
+      .map(|draft| {
+        let task_id = TaskId::from_string(draft.task_id);
+        match draft.kind {
+          DraftKind::SoraDraft => {
+            match draft.url {
+              Some(url) => {
+                // Success case
+                Draft::Success(DraftSuccess { id: draft.id, task_id, url, prompt: draft.prompt })
+              },
+              None => {
+                return Draft::Failure(DraftFailure { task_id, reason_message: "Generation failed. URL missing from the draft.".to_string() });
+              },
             }
-            DraftKind::SoraContentViolation => {
-              Draft::Failure(DraftFailure {
-                task_id,
-                reason_message: format!(
-                  "Generation failed due to content violation: {}",
-                  draft.reason_str
-                    .unwrap_or_else(|| "no additional reason".to_string())),
-              })
-            }
-            DraftKind::Unknown(value) => {
-              Draft::Failure(DraftFailure {
-                task_id,
-                reason_message: format!(
-                  "Generation failed with unknown failure code: {}. Possible message: {}",
-                  value,
-                  draft.reason_str
-                      .unwrap_or_else(|| "no additional message".to_string())),
-              })
-            }
-          }
-        }).collect(),
+          },
+          DraftKind::SoraContentViolation => Draft::Failure(DraftFailure { task_id, reason_message: format!("Generation failed due to content violation: {}", draft.reason_str.unwrap_or_else(|| "no additional reason".to_string())) }),
+          DraftKind::Unknown(value) => Draft::Failure(DraftFailure { task_id, reason_message: format!("Generation failed with unknown failure code: {}. Possible message: {}", value, draft.reason_str.unwrap_or_else(|| "no additional message".to_string())) }),
+        }
+      })
+      .collect(),
   })
 }
 

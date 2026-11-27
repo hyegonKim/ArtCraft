@@ -1,9 +1,7 @@
 use crate::pricing::cost::kinovi_generation_cost::KinoviGenerationCost;
 use crate::creds::kinovi_web_session::KinoviWebSession;
 use crate::error::kinovi_web_error::KinoviWebError;
-use crate::requests::generate_image::generate_image::{
-  generate_image, GenerateImageArgs, KinoviGenerateImageRequest, KinoviMidjourneyModel,
-};
+use crate::requests::generate_image::generate_image::{generate_image, GenerateImageArgs, KinoviGenerateImageRequest, KinoviMidjourneyModel};
 use crate::requests::kinovi_host::KinoviHost;
 
 // `KinoviMidjourneyBatchCount` is shared across all Midjourney models, so we
@@ -55,19 +53,7 @@ impl GenerateMidjourneyV8Request {
   }
 
   pub(crate) fn to_inner_request(&self) -> KinoviGenerateImageRequest {
-    KinoviGenerateImageRequest {
-      model: KinoviMidjourneyModel::V8,
-      prompt: self.prompt.clone(),
-      aspect_ratio: self.aspect_ratio.as_api_str().to_string(),
-      negative_prompt: self.negative_prompt.clone(),
-      stylize: self.stylize,
-      weird: self.weird,
-      chaos: self.chaos,
-      quality: self.quality.map(|q| q.as_api_str().to_string()),
-      raw_mode: self.raw_mode,
-      batch_count: self.batch_count,
-      reference_image_urls: self.reference_image_urls.clone(),
-    }
+    KinoviGenerateImageRequest { model: KinoviMidjourneyModel::V8, prompt: self.prompt.clone(), aspect_ratio: self.aspect_ratio.as_api_str().to_string(), negative_prompt: self.negative_prompt.clone(), stylize: self.stylize, weird: self.weird, chaos: self.chaos, quality: self.quality.map(|q| q.as_api_str().to_string()), raw_mode: self.raw_mode, batch_count: self.batch_count, reference_image_urls: self.reference_image_urls.clone() }
   }
 }
 
@@ -140,21 +126,10 @@ pub struct GenerateMidjourneyV8Response {
 
 // ── Entry point ──
 
-pub async fn generate_midjourney_v8(
-  args: GenerateMidjourneyV8Args<'_>,
-) -> Result<GenerateMidjourneyV8Response, KinoviWebError> {
+pub async fn generate_midjourney_v8(args: GenerateMidjourneyV8Args<'_>) -> Result<GenerateMidjourneyV8Response, KinoviWebError> {
   let inner_request = args.request.to_inner_request();
-  let result = generate_image(GenerateImageArgs {
-    request: inner_request,
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
-  Ok(GenerateMidjourneyV8Response {
-    task_id: result.task_id,
-    order_id: result.order_id,
-    task_ids: result.task_ids,
-    order_ids: result.order_ids,
-  })
+  let result = generate_image(GenerateImageArgs { request: inner_request, session: args.session, host_override: args.host_override }).await?;
+  Ok(GenerateMidjourneyV8Response { task_id: result.task_id, order_id: result.order_id, task_ids: result.task_ids, order_ids: result.order_ids })
 }
 
 // ── Tests ──
@@ -173,18 +148,7 @@ mod tests {
   }
 
   fn make_request(batch_count: KinoviMidjourneyBatchCount) -> GenerateMidjourneyV8Request {
-    GenerateMidjourneyV8Request {
-      prompt: "test".to_string(),
-      aspect_ratio: GenerateMidjourneyV8AspectRatio::Square1x1,
-      negative_prompt: None,
-      stylize: None,
-      weird: None,
-      chaos: None,
-      quality: None,
-      raw_mode: false,
-      batch_count,
-      reference_image_urls: None,
-    }
+    GenerateMidjourneyV8Request { prompt: "test".to_string(), aspect_ratio: GenerateMidjourneyV8AspectRatio::Square1x1, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: None, raw_mode: false, batch_count, reference_image_urls: None }
   }
 
   // ── Inner-request mapping ──
@@ -200,18 +164,7 @@ mod tests {
 
     #[test]
     fn inner_request_preserves_all_fields() {
-      let req = GenerateMidjourneyV8Request {
-        prompt: "abandoned k-mart, overgrown vines".to_string(),
-        aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16,
-        negative_prompt: Some("dark, gloomy".to_string()),
-        stylize: Some(730),
-        weird: Some(2050),
-        chaos: Some(70),
-        quality: Some(GenerateMidjourneyV8Quality::Half),
-        raw_mode: true,
-        batch_count: KinoviMidjourneyBatchCount::Four,
-        reference_image_urls: Some(vec!["https://example.com/ref.jpg".to_string()]),
-      };
+      let req = GenerateMidjourneyV8Request { prompt: "abandoned k-mart, overgrown vines".to_string(), aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16, negative_prompt: Some("dark, gloomy".to_string()), stylize: Some(730), weird: Some(2050), chaos: Some(70), quality: Some(GenerateMidjourneyV8Quality::Half), raw_mode: true, batch_count: KinoviMidjourneyBatchCount::Four, reference_image_urls: Some(vec!["https://example.com/ref.jpg".to_string()]) };
       let inner = req.to_inner_request();
       assert_eq!(inner.model, KinoviMidjourneyModel::V8);
       assert_eq!(inner.prompt, "abandoned k-mart, overgrown vines");
@@ -229,19 +182,7 @@ mod tests {
     /// Every wrapper-side aspect ratio must serialize to the canonical wire string.
     #[test]
     fn every_aspect_ratio_maps_to_canonical_wire_string() {
-      let cases = [
-        (GenerateMidjourneyV8AspectRatio::Square1x1, "1:1"),
-        (GenerateMidjourneyV8AspectRatio::Landscape16x9, "16:9"),
-        (GenerateMidjourneyV8AspectRatio::Portrait9x16, "9:16"),
-        (GenerateMidjourneyV8AspectRatio::UltraWide21x9, "21:9"),
-        (GenerateMidjourneyV8AspectRatio::UltraTall9x21, "9:21"),
-        (GenerateMidjourneyV8AspectRatio::Standard4x3, "4:3"),
-        (GenerateMidjourneyV8AspectRatio::Portrait3x4, "3:4"),
-        (GenerateMidjourneyV8AspectRatio::Wide5x4, "5:4"),
-        (GenerateMidjourneyV8AspectRatio::Tall4x5, "4:5"),
-        (GenerateMidjourneyV8AspectRatio::Wide3x2, "3:2"),
-        (GenerateMidjourneyV8AspectRatio::Tall2x3, "2:3"),
-      ];
+      let cases = [(GenerateMidjourneyV8AspectRatio::Square1x1, "1:1"), (GenerateMidjourneyV8AspectRatio::Landscape16x9, "16:9"), (GenerateMidjourneyV8AspectRatio::Portrait9x16, "9:16"), (GenerateMidjourneyV8AspectRatio::UltraWide21x9, "21:9"), (GenerateMidjourneyV8AspectRatio::UltraTall9x21, "9:21"), (GenerateMidjourneyV8AspectRatio::Standard4x3, "4:3"), (GenerateMidjourneyV8AspectRatio::Portrait3x4, "3:4"), (GenerateMidjourneyV8AspectRatio::Wide5x4, "5:4"), (GenerateMidjourneyV8AspectRatio::Tall4x5, "4:5"), (GenerateMidjourneyV8AspectRatio::Wide3x2, "3:2"), (GenerateMidjourneyV8AspectRatio::Tall2x3, "2:3")];
       for (variant, expected) in cases {
         let req = GenerateMidjourneyV8Request { aspect_ratio: variant, ..make_request(KinoviMidjourneyBatchCount::One) };
         assert_eq!(req.to_inner_request().aspect_ratio, expected, "variant={:?}", variant);
@@ -250,11 +191,7 @@ mod tests {
 
     #[test]
     fn every_quality_maps_to_canonical_wire_string() {
-      let cases = [
-        (GenerateMidjourneyV8Quality::Quarter, "0.25"),
-        (GenerateMidjourneyV8Quality::Half, "0.5"),
-        (GenerateMidjourneyV8Quality::Full, "1"),
-      ];
+      let cases = [(GenerateMidjourneyV8Quality::Quarter, "0.25"), (GenerateMidjourneyV8Quality::Half, "0.5"), (GenerateMidjourneyV8Quality::Full, "1")];
       for (variant, expected) in cases {
         let req = GenerateMidjourneyV8Request { quality: Some(variant), ..make_request(KinoviMidjourneyBatchCount::One) };
         assert_eq!(req.to_inner_request().quality.as_deref(), Some(expected), "variant={:?}", variant);
@@ -304,12 +241,7 @@ mod tests {
     /// Pricing must match the inner module exactly.
     #[test]
     fn matches_inner_pricing_exactly() {
-      for batch in [
-        KinoviMidjourneyBatchCount::One,
-        KinoviMidjourneyBatchCount::Two,
-        KinoviMidjourneyBatchCount::Three,
-        KinoviMidjourneyBatchCount::Four,
-      ] {
+      for batch in [KinoviMidjourneyBatchCount::One, KinoviMidjourneyBatchCount::Two, KinoviMidjourneyBatchCount::Three, KinoviMidjourneyBatchCount::Four] {
         let outer = make_request(batch);
         let inner = outer.to_inner_request();
         assert_eq!(outer.calculate_costs().kinovi_credits, inner.calculate_costs().kinovi_credits, "batch={:?}", batch);
@@ -328,22 +260,7 @@ mod tests {
     async fn test_generate_v8_minimal() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_midjourney_v8(GenerateMidjourneyV8Args {
-        session: &session,
-        host_override: None,
-        request: GenerateMidjourneyV8Request {
-          prompt: "spooky horror scene, ghosts".to_string(),
-          aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16,
-          negative_prompt: None,
-          stylize: None,
-          weird: None,
-          chaos: None,
-          quality: Some(GenerateMidjourneyV8Quality::Full),
-          raw_mode: false,
-          batch_count: KinoviMidjourneyBatchCount::One,
-          reference_image_urls: None,
-        },
-      }).await?;
+      let result = generate_midjourney_v8(GenerateMidjourneyV8Args { session: &session, host_override: None, request: GenerateMidjourneyV8Request { prompt: "spooky horror scene, ghosts".to_string(), aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: Some(GenerateMidjourneyV8Quality::Full), raw_mode: false, batch_count: KinoviMidjourneyBatchCount::One, reference_image_urls: None } }).await?;
       println!("v8 minimal — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       Ok(())
@@ -354,22 +271,7 @@ mod tests {
     async fn test_generate_v8_batch_4() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_midjourney_v8(GenerateMidjourneyV8Args {
-        session: &session,
-        host_override: None,
-        request: GenerateMidjourneyV8Request {
-          prompt: "desolate cliff overlooking the ocean".to_string(),
-          aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16,
-          negative_prompt: None,
-          stylize: None,
-          weird: None,
-          chaos: None,
-          quality: Some(GenerateMidjourneyV8Quality::Full),
-          raw_mode: false,
-          batch_count: KinoviMidjourneyBatchCount::Four,
-          reference_image_urls: None,
-        },
-      }).await?;
+      let result = generate_midjourney_v8(GenerateMidjourneyV8Args { session: &session, host_override: None, request: GenerateMidjourneyV8Request { prompt: "desolate cliff overlooking the ocean".to_string(), aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: Some(GenerateMidjourneyV8Quality::Full), raw_mode: false, batch_count: KinoviMidjourneyBatchCount::Four, reference_image_urls: None } }).await?;
       println!("v8 batch-4 — task_id={}, order_id={}", result.task_id, result.order_id);
       assert_eq!(result.task_ids.as_ref().map(|v| v.len()), Some(4));
       Ok(())
@@ -380,24 +282,7 @@ mod tests {
     async fn test_generate_v8_with_reference_image() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_midjourney_v8(GenerateMidjourneyV8Args {
-        session: &session,
-        host_override: None,
-        request: GenerateMidjourneyV8Request {
-          prompt: "spooky horror scene, ghosts".to_string(),
-          aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16,
-          negative_prompt: None,
-          stylize: None,
-          weird: None,
-          chaos: None,
-          quality: Some(GenerateMidjourneyV8Quality::Full),
-          raw_mode: false,
-          batch_count: KinoviMidjourneyBatchCount::One,
-          reference_image_urls: Some(vec![
-            "https://static.seedance2-pro.com/materials/20260602/1780380104765-10cec276.jpg".to_string(),
-          ]),
-        },
-      }).await?;
+      let result = generate_midjourney_v8(GenerateMidjourneyV8Args { session: &session, host_override: None, request: GenerateMidjourneyV8Request { prompt: "spooky horror scene, ghosts".to_string(), aspect_ratio: GenerateMidjourneyV8AspectRatio::Portrait9x16, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: Some(GenerateMidjourneyV8Quality::Full), raw_mode: false, batch_count: KinoviMidjourneyBatchCount::One, reference_image_urls: Some(vec!["https://static.seedance2-pro.com/materials/20260602/1780380104765-10cec276.jpg".to_string()]) } }).await?;
       println!("v8 with ref image — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       Ok(())

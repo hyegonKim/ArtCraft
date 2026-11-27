@@ -5,7 +5,6 @@ use jwt_light::error::JwtError;
 use jwt_light::parse_jwt_claims_trait::ParseJwtClaims;
 use serde_json::{Map, Value};
 
-
 #[derive(Clone, Debug)]
 pub struct JwtClaims {
   /// From the "iat" field
@@ -23,15 +22,9 @@ pub struct JwtClaims {
 
 impl ParseJwtClaims for JwtClaims {
   fn extract_claims(common_claims: CommonClaims, extra_claims: Map<String, Value>) -> Result<Self, JwtError> {
-    let user_id = extra_claims.get("user_id")
-        .map(|val| val.as_str())
-        .flatten()
-        .map(|val| val.to_string());
+    let user_id = extra_claims.get("user_id").map(|val| val.as_str()).flatten().map(|val| val.to_string());
 
-    let mut email = extra_claims.get("email")
-        .map(|val| val.as_str())
-        .flatten()
-        .map(|val| val.to_string());
+    let mut email = extra_claims.get("email").map(|val| val.as_str()).flatten().map(|val| val.to_string());
 
     if email.is_none() {
       // Parse out email from this field:
@@ -42,23 +35,10 @@ impl ParseJwtClaims for JwtClaims {
       //      ]
       //    },
       //  },
-      email = extra_claims.get("firebase")
-          .and_then(|val| val.as_object())
-          .and_then(|fb| fb.get("identities"))
-          .and_then(|val| val.as_object())
-          .and_then(|id| id.get("email"))
-          .and_then(|emails| emails.as_array())
-          .and_then(|emails| emails.get(0))
-          .and_then(|email| email.as_str())
-          .map(|email| email.to_string());
+      email = extra_claims.get("firebase").and_then(|val| val.as_object()).and_then(|fb| fb.get("identities")).and_then(|val| val.as_object()).and_then(|id| id.get("email")).and_then(|emails| emails.as_array()).and_then(|emails| emails.get(0)).and_then(|email| email.as_str()).map(|email| email.to_string());
     }
 
-    Ok(Self {
-      created: common_claims.created,
-      expiration: common_claims.expiration,
-      user_id,
-      email,
-    })
+    Ok(Self { created: common_claims.created, expiration: common_claims.expiration, user_id, email })
   }
 }
 

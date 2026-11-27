@@ -15,9 +15,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use effectcraft_color::Label;
-use effectcraft_project::{
-    Comp, ItemKind, Layer, LayerSource, Node, Project, PropGroup, Property, Solid, build,
-};
+use effectcraft_project::{Comp, ItemKind, Layer, LayerSource, Node, Project, PropGroup, Property, Solid, build};
 use effectcraft_time::{FrameRate, TICKS_PER_SECOND, Tick};
 
 use crate::export::{AepExportError, ExportOptions};
@@ -48,24 +46,11 @@ pub struct FfxPreset {
     pub report: ImportReport,
 }
 
-const LAYER_GROUP_NAMES: &[&str] = &[
-    "ADBE Abstract Layer",
-    "ADBE Layer",
-    "ADBE AV Layer",
-    "ADBE Text Layer",
-    "ADBE Vector Layer",
-    "ADBE Camera Layer",
-    "ADBE Light Layer",
-];
+const LAYER_GROUP_NAMES: &[&str] =
+    &["ADBE Abstract Layer", "ADBE Layer", "ADBE AV Layer", "ADBE Text Layer", "ADBE Vector Layer", "ADBE Camera Layer", "ADBE Light Layer"];
 
-const TOP_GROUPS: &[&str] = &[
-    "ADBE Effect Parade",
-    "ADBE Transform Group",
-    "ADBE Text Properties",
-    "ADBE Layer Styles",
-    "ADBE Mask Parade",
-    "ADBE Root Vectors Group",
-];
+const TOP_GROUPS: &[&str] =
+    &["ADBE Effect Parade", "ADBE Transform Group", "ADBE Text Properties", "ADBE Layer Styles", "ADBE Mask Parade", "ADBE Root Vectors Group"];
 
 const TRANSFORM_MAP: &[(&str, &str)] = &[
     ("ADBE Anchor Point", "transform/anchor"),
@@ -79,11 +64,7 @@ const TRANSFORM_MAP: &[(&str, &str)] = &[
 ];
 
 /// Imports an After Effects `.ffx` binary (`RIFX` `Egg!` / `FXPr`) or XML animation preset.
-pub fn import_ffx(
-    bytes: &[u8],
-    layer_size: (u32, u32),
-    frame_rate: FrameRate,
-) -> Result<FfxPreset, FfxError> {
+pub fn import_ffx(bytes: &[u8], layer_size: (u32, u32), frame_rate: FrameRate) -> Result<FfxPreset, FfxError> {
     let norm = normalize_rifx_form(bytes);
     let file = crate::parse_any(&norm)?;
     let w = layer_size.0.clamp(1, 30_000);
@@ -114,19 +95,14 @@ pub fn import_ffx(
     let opts = ImportOptions { allow_losses: true, ..ImportOptions::new(&|_| false) };
     let res = crate::import::import(&mut imported, &merged_bytes, &opts)?;
     let preset_name = extract_preset_name(&file.chunks).unwrap_or_else(|| "FFX Preset".to_string());
-    let mut preset = extract_from_imported_project(&imported, res.report, Some(&stored_tr))
-        .ok_or(FfxError::NoPresetData)?;
+    let mut preset = extract_from_imported_project(&imported, res.report, Some(&stored_tr)).ok_or(FfxError::NoPresetData)?;
     preset.name = preset_name;
     Ok(preset)
 }
 
 /// Exports a [`Layer`]'s effects, transform keyframes/expressions, and text animators as a binary
 /// `RIFX` `Egg!` `.ffx` animation preset container.
-pub fn export_ffx(
-    layer: &Layer,
-    layer_size: (u32, u32),
-    frame_rate: FrameRate,
-) -> Result<Vec<u8>, FfxError> {
+pub fn export_ffx(layer: &Layer, layer_size: (u32, u32), frame_rate: FrameRate) -> Result<Vec<u8>, FfxError> {
     let w = layer_size.0.clamp(1, 30_000);
     let h = layer_size.1.clamp(1, 30_000);
     let has_text = layer.props.group("text/animators").is_some();
@@ -149,9 +125,7 @@ pub fn export_ffx(
                 }
             }
         }
-        if let (Some(src_anim), Some(dst_anim)) =
-            (layer.props.group("text/animators"), dst.props.group_mut("text/animators"))
-        {
+        if let (Some(src_anim), Some(dst_anim)) = (layer.props.group("text/animators"), dst.props.group_mut("text/animators")) {
             dst_anim.children = src_anim.children.clone();
         }
     }
@@ -162,14 +136,7 @@ pub fn export_ffx(
 
     let mut chunks: Vec<Chunk<'static>> = Vec::new();
     for ch in &full.chunks {
-        if ch.is(b"svap")
-            || ch.is(b"head")
-            || ch.is(b"nhed")
-            || ch.is(b"nnhd")
-            || ch.is_list(b"Pefl")
-            || ch.is_list(b"EfdG")
-            || ch.is_list(b"ExEn")
-        {
+        if ch.is(b"svap") || ch.is(b"head") || ch.is(b"nhed") || ch.is(b"nnhd") || ch.is_list(b"Pefl") || ch.is_list(b"EfdG") || ch.is_list(b"ExEn") {
             chunks.push(ch.clone());
         }
     }
@@ -190,9 +157,7 @@ fn normalize_rifx_form(bytes: &[u8]) -> Cow<'_, [u8]> {
 }
 
 fn has_nonempty_fold(file: &AepFile<'_>) -> bool {
-    file.chunks.iter().any(|c| {
-        c.is_list(b"Fold") && c.children().iter().any(|k| !k.is(b"fdta"))
-    })
+    file.chunks.iter().any(|c| c.is_list(b"Fold") && c.children().iter().any(|k| !k.is(b"fdta")))
 }
 
 fn chunk_bytes<'a>(c: &'a Chunk<'_>) -> Option<&'a [u8]> {
@@ -221,18 +186,11 @@ fn tdmn_chunk(name: &str) -> Chunk<'static> {
 }
 
 fn tdsn_chunk(name: &str) -> Chunk<'static> {
-    Chunk {
-        id: *b"tdsn",
-        body: Body::Chunks(vec![Chunk::data(*b"Utf8", name.as_bytes().to_vec())]),
-        pad: None,
-    }
+    Chunk { id: *b"tdsn", body: Body::Chunks(vec![Chunk::data(*b"Utf8", name.as_bytes().to_vec())]), pad: None }
 }
 
 fn wrap_tdgp(kids: Vec<Chunk<'static>>) -> Chunk<'static> {
-    let mut body = vec![
-        Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()),
-        tdsn_chunk(""),
-    ];
+    let mut body = vec![Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()), tdsn_chunk("")];
     body.extend(kids);
     body.push(tdmn_chunk("ADBE Group End"));
     Chunk::list(*b"tdgp", body)
@@ -314,11 +272,7 @@ fn extract_preset_tdgp(chunks: &[Chunk<'_>]) -> Option<Chunk<'static>> {
         i += 1;
     }
     if !effect_pairs.is_empty() {
-        let mut parade_body = vec![
-            Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()),
-            tdsn_chunk(""),
-            Chunk::data(*b"fnam", Vec::new()),
-        ];
+        let mut parade_body = vec![Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()), tdsn_chunk(""), Chunk::data(*b"fnam", Vec::new())];
         parade_body.extend(effect_pairs);
         parade_body.push(tdmn_chunk("ADBE Group End"));
         top_pairs.push(tdmn_chunk("ADBE Effect Parade"));
@@ -345,9 +299,7 @@ fn stored_transform_paths(tdgp: &Chunk<'_>) -> HashSet<String> {
     let Some(PropNode::Group(tr)) = root.get("ADBE Transform Group") else { return out };
     for (aep_name, ec_path) in TRANSFORM_MAP {
         let present = match tr.get(aep_name) {
-            Some(PropNode::Property(p)) => {
-                p.is_animated() || p.flags() == Some(1) || p.expression().is_some()
-            }
+            Some(PropNode::Property(p)) => p.is_animated() || p.flags() == Some(1) || p.expression().is_some(),
             Some(PropNode::Other(otst)) => otst.is_list(b"otst"),
             _ => false,
         };
@@ -482,10 +434,7 @@ fn merge_tdgp(shell_tdgp: &mut Chunk<'static>, preset_tdgp: &Chunk<'static>) {
             shell_pairs.push((name, p_node));
         }
     }
-    let mut body = vec![
-        Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()),
-        tdsn_chunk(""),
-    ];
+    let mut body = vec![Chunk::data(*b"tdsb", 1u32.to_be_bytes().to_vec()), tdsn_chunk("")];
     for (name, node) in shell_pairs {
         body.push(tdmn_chunk(&name));
         body.push(node);
@@ -494,30 +443,15 @@ fn merge_tdgp(shell_tdgp: &mut Chunk<'static>, preset_tdgp: &Chunk<'static>) {
     *shell_tdgp = Chunk::list(*b"tdgp", body);
 }
 
-fn extract_from_imported_project(
-    proj: &Project,
-    report: ImportReport,
-    allowed_tr: Option<&HashSet<String>>,
-) -> Option<FfxPreset> {
+fn extract_from_imported_project(proj: &Project, report: ImportReport, allowed_tr: Option<&HashSet<String>>) -> Option<FfxPreset> {
     let comp = proj.items.values().find_map(|it| match &it.kind {
         ItemKind::Comp(c) if !c.layers.is_empty() => Some(c.as_ref()),
         _ => None,
     })?;
-    let layer = comp
-        .layers
-        .iter()
-        .find(|l| !matches!(l.source, LayerSource::Camera | LayerSource::Light { .. }))
-        .or_else(|| comp.layers.first())?;
+    let layer = comp.layers.iter().find(|l| !matches!(l.source, LayerSource::Camera | LayerSource::Light { .. })).or_else(|| comp.layers.first())?;
 
-    let mut effects: Vec<PropGroup> = layer
-        .effects()
-        .map(|fx| fx.groups().cloned().collect())
-        .unwrap_or_default();
-    let mut text_animators: Vec<PropGroup> = layer
-        .props
-        .group("text/animators")
-        .map(|g| g.groups().cloned().collect())
-        .unwrap_or_default();
+    let mut effects: Vec<PropGroup> = layer.effects().map(|fx| fx.groups().cloned().collect()).unwrap_or_default();
+    let mut text_animators: Vec<PropGroup> = layer.props.group("text/animators").map(|g| g.groups().cloned().collect()).unwrap_or_default();
     let mut properties: Vec<(String, Property)> = Vec::new();
     if let Some(tr) = layer.transform() {
         for (_, path) in TRANSFORM_MAP {
@@ -552,20 +486,10 @@ fn extract_from_imported_project(
         }
     }
 
-    Some(FfxPreset {
-        name: layer.name.clone(),
-        effects,
-        properties,
-        text_animators,
-        report,
-    })
+    Some(FfxPreset { name: layer.name.clone(), effects, properties, text_animators, report })
 }
 
-fn earliest_preset_tick(
-    effects: &[PropGroup],
-    animators: &[PropGroup],
-    props: &[(String, Property)],
-) -> Option<Tick> {
+fn earliest_preset_tick(effects: &[PropGroup], animators: &[PropGroup], props: &[(String, Property)]) -> Option<Tick> {
     let mut first: Option<Tick> = None;
     let mut consider = |t: Tick| {
         first = Some(first.map_or(t, |cur| cur.min(t)));
@@ -612,12 +536,8 @@ mod tests {
     fn ffx_round_trips_effect_transform_keyframes_and_expression() {
         let mut proj = Project::default();
         let comp = Comp::new(1920, 1080, FrameRate::FPS_30, Tick(TICKS_PER_SECOND * 5));
-        let solid_id = proj.add_item(
-            "Hero Solid",
-            Label::None,
-            None,
-            ItemKind::Solid(Solid { width: 1920, height: 1080, color: [0.5, 0.5, 0.5], pixel_aspect: 1.0 }),
-        );
+        let solid_id =
+            proj.add_item("Hero Solid", Label::None, None, ItemKind::Solid(Solid { width: 1920, height: 1080, color: [0.5, 0.5, 0.5], pixel_aspect: 1.0 }));
         let mut layer = build::layer(&mut proj, &comp, "Hero", LayerSource::Solid { item: solid_id }, (1920, 1080), None);
         let spec = effectcraft_effects::find("ec.blur.gaussian").unwrap();
         let mut fx_group = effectcraft_effects::instantiate(spec, &mut Ids(&mut proj.next_id), "Soft Blur", [1920.0, 1080.0]);
@@ -626,10 +546,7 @@ mod tests {
 
         {
             let opacity = layer.props.prop_mut("transform/opacity").unwrap();
-            opacity.keys = vec![
-                Keyframe::new(Tick(TICKS_PER_SECOND), Value::Scalar(15.0)),
-                Keyframe::new(Tick(TICKS_PER_SECOND * 2), Value::Scalar(95.0)),
-            ];
+            opacity.keys = vec![Keyframe::new(Tick(TICKS_PER_SECOND), Value::Scalar(15.0)), Keyframe::new(Tick(TICKS_PER_SECOND * 2), Value::Scalar(95.0))];
             opacity.value = Value::Scalar(15.0);
         }
         {

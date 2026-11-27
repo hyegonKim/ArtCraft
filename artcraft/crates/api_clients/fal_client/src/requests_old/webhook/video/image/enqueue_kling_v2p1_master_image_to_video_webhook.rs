@@ -29,7 +29,7 @@ pub enum Kling2p1MasterDuration {
 
 #[derive(Copy, Clone, Debug)]
 pub enum Kling2p1MasterAspectRatio {
-  Square, // 1:1
+  Square,          // 1:1
   WideSixteenNine, // 16:9
   TallNineSixteen, // 9:16
 }
@@ -39,23 +39,20 @@ impl FalRequestCostCalculator for Kling2p1MasterRequest {
     // "For 5s video your request will cost $1.40.
     //  For every additional second you will be charged $0.28."
     match self.duration {
-      Kling2p1MasterDuration::Default => 140, // $1.40 for 5 seconds
+      Kling2p1MasterDuration::Default => 140,     // $1.40 for 5 seconds
       Kling2p1MasterDuration::FiveSeconds => 140, // $1.40 for 5 seconds
-      Kling2p1MasterDuration::TenSeconds => 280, // $1.40 + (0.28 * 5) = $2.80
+      Kling2p1MasterDuration::TenSeconds => 280,  // $1.40 + (0.28 * 5) = $2.80
     }
   }
 }
 
-
 /// Kling 2.1 Master Image-to-Video
 /// https://fal.ai/models/fal-ai/kling-video/v2.1/master/image-to-video
-pub async fn enqueue_kling_v2p1_master_image_to_video_webhook<R: IntoUrl>(
-  args: Kling2p1MasterArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_kling_v2p1_master_image_to_video_webhook<R: IntoUrl>(args: Kling2p1MasterArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
-    Kling2p1MasterDuration::Default => None, // defaults to "5"
+    Kling2p1MasterDuration::Default => None,                      // defaults to "5"
     Kling2p1MasterDuration::FiveSeconds => Some("5".to_string()), // Gross...
     Kling2p1MasterDuration::TenSeconds => Some("10".to_string()),
   };
@@ -77,14 +74,10 @@ pub async fn enqueue_kling_v2p1_master_image_to_video_webhook<R: IntoUrl>(
     tail_image_url: None,
   };
 
-  let result = kling_v2p1_master_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = kling_v2p1_master_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -103,16 +96,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Kling2p1MasterArgs {
-      request: Kling2p1MasterRequest {
-        image_url: image_url.to_string(),
-        prompt: "a shot of the mountains, the camera rotates around to show the mountain range, the sun begins to set, and the moon becomes visible".to_string(),
-        duration: Kling2p1MasterDuration::Default,
-        aspect_ratio: Kling2p1MasterAspectRatio::WideSixteenNine,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Kling2p1MasterArgs { request: Kling2p1MasterRequest { image_url: image_url.to_string(), prompt: "a shot of the mountains, the camera rotates around to show the mountain range, the sun begins to set, and the moon becomes visible".to_string(), duration: Kling2p1MasterDuration::Default, aspect_ratio: Kling2p1MasterAspectRatio::WideSixteenNine }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_kling_v2p1_master_image_to_video_webhook(args).await?;
 

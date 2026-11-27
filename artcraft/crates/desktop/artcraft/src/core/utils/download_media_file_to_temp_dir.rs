@@ -9,16 +9,11 @@ use tokens::tokens::media_files::MediaFileToken;
 // TODO: Better more concrete error handling
 
 pub async fn download_media_file_to_temp_dir(app_env_configs: &AppEnvConfigs, app_data_root: &AppDataRoot, token: &MediaFileToken) -> Result<NamedTempFile, ArtcraftError> {
-  let response = get_media_file(
-    &app_env_configs.storyteller_host, 
-    token
-  ).await?;
+  let response = get_media_file(&app_env_configs.storyteller_host, token).await?;
 
   let media_file_url = &response.media_file.media_links.cdn_url;
 
-  let extension_with_dot = get_url_file_extension(media_file_url)
-      .map(|ext| format!(".{}", ext))
-      .unwrap_or_else(|| ".png".to_string()); // TODO: Better default extension passed by caller as heuristic.
+  let extension_with_dot = get_url_file_extension(media_file_url).map(|ext| format!(".{}", ext)).unwrap_or_else(|| ".png".to_string()); // TODO: Better default extension passed by caller as heuristic.
 
   //let filename = format!("{}{}", response.media_file.token.as_str(), extension_with_dot);
   //let filename = app_data_root.downloads_dir().path().join(&filename);

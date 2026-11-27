@@ -23,23 +23,11 @@ impl ArtcraftViduQ3CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    let rate = if self.is_high_res {
-      HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-    } else {
-      LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-    };
+    let rate = if self.is_high_res { HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC } else { LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC };
     // Round up to the next whole cent.
     let cost_in_usd_cents = (rate * self.duration_seconds).div_ceil(100);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -48,14 +36,8 @@ impl ArtcraftViduQ3CostState {
 fn is_high_res(resolution: Option<CommonResolutionEnum>) -> bool {
   match resolution {
     None => true, // defaults to 720p
-    Some(CommonResolutionEnum::SevenTwentyP)
-    | Some(CommonResolutionEnum::TenEightyP)
-    | Some(CommonResolutionEnum::OneK)
-    | Some(CommonResolutionEnum::TwoK)
-    | Some(CommonResolutionEnum::ThreeK)
-    | Some(CommonResolutionEnum::FourK) => true,
-    Some(CommonResolutionEnum::HalfK)
-    | Some(CommonResolutionEnum::FourEightyP) => false,
+    Some(CommonResolutionEnum::SevenTwentyP) | Some(CommonResolutionEnum::TenEightyP) | Some(CommonResolutionEnum::OneK) | Some(CommonResolutionEnum::TwoK) | Some(CommonResolutionEnum::ThreeK) | Some(CommonResolutionEnum::FourK) => true,
+    Some(CommonResolutionEnum::HalfK) | Some(CommonResolutionEnum::FourEightyP) => false,
   }
 }
 
@@ -71,32 +53,35 @@ mod tests {
   use crate::generate::generate_video::providers::artcraft::vidu_q3::cost::ArtcraftViduQ3CostState;
 
   fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::ViduQ3,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::ViduQ3, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() };
     let state = build_artcraft_vidu_q3_state(b).unwrap();
     ArtcraftViduQ3CostState::from_request(&state).estimate_cost().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn default_resolution_5s_is_82() { assert_eq!(cost_cents(Some(5), None), 82); }
+  fn default_resolution_5s_is_82() {
+    assert_eq!(cost_cents(Some(5), None), 82);
+  }
 
   #[test]
-  fn default_duration_is_5s() { assert_eq!(cost_cents(None, None), 82); }
+  fn default_duration_is_5s() {
+    assert_eq!(cost_cents(None, None), 82);
+  }
 
   #[test]
-  fn high_res_10s_is_164() { assert_eq!(cost_cents(Some(10), Some(RouterResolution::TenEightyP)), 164); }
+  fn high_res_10s_is_164() {
+    assert_eq!(cost_cents(Some(10), Some(RouterResolution::TenEightyP)), 164);
+  }
 
   #[test]
-  fn low_res_5s_is_37() { assert_eq!(cost_cents(Some(5), Some(RouterResolution::FourEightyP)), 37); }
+  fn low_res_5s_is_37() {
+    assert_eq!(cost_cents(Some(5), Some(RouterResolution::FourEightyP)), 37);
+  }
 
   #[test]
-  fn low_res_10s_is_74() { assert_eq!(cost_cents(Some(10), Some(RouterResolution::FourEightyP)), 74); }
+  fn low_res_10s_is_74() {
+    assert_eq!(cost_cents(Some(10), Some(RouterResolution::FourEightyP)), 74);
+  }
 
   #[test]
   fn seven_twenty_p_is_high_res_tier() {

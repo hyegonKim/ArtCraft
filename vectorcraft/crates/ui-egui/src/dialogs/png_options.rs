@@ -201,12 +201,7 @@ pub(super) fn option_rows(ui: &mut egui::Ui, d: &mut Dialog, id: &str, screens: 
     match id {
         "png" => {
             label(ui, tl!("Decomposed Mode:"));
-            let dm_labels = [
-                tl!("Full"),
-                tl!("No Text"),
-                tl!("Text Only"),
-                tl!("Text White-on-Black Mask"),
-            ];
+            let dm_labels = [tl!("Full"), tl!("No Text"), tl!("Text Only"), tl!("Text White-on-Black Mask")];
             self::choice(ui, d, "decomposedMode", &DECOMPOSED_MODES, &dm_labels);
             ui.end_row();
             ui.label("");

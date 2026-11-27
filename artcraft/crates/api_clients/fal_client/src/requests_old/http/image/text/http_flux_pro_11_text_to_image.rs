@@ -43,8 +43,6 @@ pub struct FluxPro11TextToImageOutput {
   pub images: Vec<FluxPro11TextToImageFile>,
 }
 
-pub fn flux_pro_11_text_to_image(
-  params: FluxPro11TextToImageInput,
-) -> FalRequest<FluxPro11TextToImageInput, FluxPro11TextToImageOutput> {
+pub fn flux_pro_11_text_to_image(params: FluxPro11TextToImageInput) -> FalRequest<FluxPro11TextToImageInput, FluxPro11TextToImageOutput> {
   FalRequest::new("fal-ai/flux-pro/v1.1", params)
 }

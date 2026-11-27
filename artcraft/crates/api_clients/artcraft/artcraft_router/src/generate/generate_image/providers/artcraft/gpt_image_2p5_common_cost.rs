@@ -15,19 +15,19 @@ use crate::generate::generate_image::image_generation_cost_estimate::ImageGenera
 /// request builder derives them.
 const OUTPUT_IMAGE_PRICE_TABLE: &[(u32, u32, [u64; 5])] = &[
   // 1:1
-  (1024, 1024, [ 65, 152,  582, 1034, 2327]),
-  (2048, 2048, [103, 239,  919, 1633, 3672]),
+  (1024, 1024, [65, 152, 582, 1034, 2327]),
+  (2048, 2048, [103, 239, 919, 1633, 3672]),
   (2880, 2880, [151, 352, 1357, 2412, 5426]),
   // 4:3
-  (1024,  768, [ 46, 105,  400,  710, 1597]),
-  (2048, 1536, [ 73, 170,  652, 1159, 2605]),
+  (1024, 768, [46, 105, 400, 710, 1597]),
+  (2048, 1536, [73, 170, 652, 1159, 2605]),
   (3072, 2304, [120, 279, 1073, 1906, 4287]),
   (3312, 2480, [134, 311, 1194, 2122, 4773]),
   // 16:9
-  (1088,  608, [ 32,  75,  285,  506, 1139]),
-  (1920, 1080, [ 49, 114,  436,  775, 1743]),
-  (2048, 1152, [ 53, 121,  467,  830, 1865]),
-  (3072, 1728, [ 87, 204,  783, 1390, 3127]),
+  (1088, 608, [32, 75, 285, 506, 1139]),
+  (1920, 1080, [49, 114, 436, 775, 1743]),
+  (2048, 1152, [53, 121, 467, 830, 1865]),
+  (3072, 1728, [87, 204, 783, 1390, 3127]),
   (3840, 2160, [124, 286, 1102, 1957, 4404]),
 ];
 
@@ -47,13 +47,7 @@ pub struct ArtcraftGptImage2p5CostInputs {
 
 impl ArtcraftGptImage2p5CostInputs {
   pub fn from_omni_request(request: &OmniGenImageCostAndGenerateRequest) -> Self {
-    Self {
-      quality: request.quality,
-      aspect_ratio: request.aspect_ratio,
-      resolution: request.resolution,
-      num_reference_images: request.image_media_tokens.as_ref().map(|tokens| tokens.len()).unwrap_or(0),
-      num_images: request.image_batch_count.unwrap_or(1),
-    }
+    Self { quality: request.quality, aspect_ratio: request.aspect_ratio, resolution: request.resolution, num_reference_images: request.image_media_tokens.as_ref().map(|tokens| tokens.len()).unwrap_or(0), num_images: request.image_batch_count.unwrap_or(1) }
   }
 
   /// Per-image price rounded up to whole cents, times the batch size. Quality defaults to
@@ -63,19 +57,10 @@ impl ArtcraftGptImage2p5CostInputs {
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let quality = self.quality.unwrap_or(CommonQualityEnum::High);
     let (width, height) = self.output_dimensions();
-    let hundredths_per_image = output_image_price(quality, width, height)
-      + REFERENCE_IMAGE_PRICE * self.num_reference_images as u64;
+    let hundredths_per_image = output_image_price(quality, width, height) + REFERENCE_IMAGE_PRICE * self.num_reference_images as u64;
     let cost_in_usd_cents = hundredths_per_image.div_ceil(100) * self.num_images as u64;
 
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 
   fn output_dimensions(&self) -> (u32, u32) {
@@ -89,8 +74,7 @@ impl ArtcraftGptImage2p5CostInputs {
 /// Look up the per-image price. Dimensions not in the table fall back to the largest row,
 /// which is the most expensive.
 fn output_image_price(quality: CommonQualityEnum, width: u32, height: u32) -> u64 {
-  let prices = lookup_price_row(width, height)
-    .unwrap_or_else(|| OUTPUT_IMAGE_PRICE_TABLE[OUTPUT_IMAGE_PRICE_TABLE.len() - 1].2);
+  let prices = lookup_price_row(width, height).unwrap_or_else(|| OUTPUT_IMAGE_PRICE_TABLE[OUTPUT_IMAGE_PRICE_TABLE.len() - 1].2);
   match quality {
     CommonQualityEnum::Low => prices[0],
     CommonQualityEnum::Medium => prices[1],
@@ -103,9 +87,7 @@ fn output_image_price(quality: CommonQualityEnum, width: u32, height: u32) -> u6
 fn lookup_price_row(width: u32, height: u32) -> Option<[u64; 5]> {
   let long_edge = width.max(height);
   let short_edge = width.min(height);
-  OUTPUT_IMAGE_PRICE_TABLE.iter()
-    .find(|(w, h, _)| *w == long_edge && *h == short_edge)
-    .map(|(_, _, prices)| *prices)
+  OUTPUT_IMAGE_PRICE_TABLE.iter().find(|(w, h, _)| *w == long_edge && *h == short_edge).map(|(_, _, prices)| *prices)
 }
 
 /// Mirrors the Fal request builder's aspect ratio mapping.
@@ -140,57 +122,49 @@ mod tests {
   use CommonQualityEnum as Q;
   use CommonResolutionEnum as R;
 
-  const ALL_ASPECT_RATIOS: &[Ar] = &[
-    Ar::Auto, Ar::Auto2k, Ar::Auto3k, Ar::Auto4k, Ar::Square, Ar::SquareHd,
-    Ar::WideFourByThree, Ar::WideFiveByFour, Ar::WideThreeByTwo, Ar::WideSixteenByNine,
-    Ar::WideTwentyOneByNine, Ar::Wide, Ar::TallThreeByFour, Ar::TallFourByFive,
-    Ar::TallTwoByThree, Ar::TallNineBySixteen, Ar::TallNineByTwentyOne, Ar::Tall,
-  ];
+  const ALL_ASPECT_RATIOS: &[Ar] = &[Ar::Auto, Ar::Auto2k, Ar::Auto3k, Ar::Auto4k, Ar::Square, Ar::SquareHd, Ar::WideFourByThree, Ar::WideFiveByFour, Ar::WideThreeByTwo, Ar::WideSixteenByNine, Ar::WideTwentyOneByNine, Ar::Wide, Ar::TallThreeByFour, Ar::TallFourByFive, Ar::TallTwoByThree, Ar::TallNineBySixteen, Ar::TallNineByTwentyOne, Ar::Tall];
 
-  const ALL_RESOLUTIONS: &[Option<R>] = &[
-    None, Some(R::HalfK), Some(R::FourEightyP), Some(R::SevenTwentyP), Some(R::OneK),
-    Some(R::TenEightyP), Some(R::TwoK), Some(R::ThreeK), Some(R::FourK),
-  ];
+  const ALL_RESOLUTIONS: &[Option<R>] = &[None, Some(R::HalfK), Some(R::FourEightyP), Some(R::SevenTwentyP), Some(R::OneK), Some(R::TenEightyP), Some(R::TwoK), Some(R::ThreeK), Some(R::FourK)];
 
   // (aspect_ratio, resolution, [low, medium, high]) — cents per image, text-to-image
   const TEXT_GRID: &[(Option<Ar>, Option<R>, [u64; 3])] = &[
-    (None,                        None,           [1, 2,  4]), // landscape 4:3 default
-    (Some(Ar::Square),            None,           [1, 2,  6]),
-    (Some(Ar::Square),            Some(R::OneK),  [1, 2,  6]),
-    (Some(Ar::Square),            Some(R::TwoK),  [2, 3, 10]),
-    (Some(Ar::Square),            Some(R::ThreeK), [2, 4, 14]),
-    (Some(Ar::Square),            Some(R::FourK), [2, 4, 14]),
-    (Some(Ar::SquareHd),          None,           [2, 3, 10]),
-    (Some(Ar::SquareHd),          Some(R::OneK),  [1, 2,  6]),
-    (Some(Ar::WideFourByThree),   None,           [1, 2,  4]),
-    (Some(Ar::WideFourByThree),   Some(R::TwoK),  [1, 2,  7]),
-    (Some(Ar::WideFourByThree),   Some(R::ThreeK), [2, 3, 11]),
-    (Some(Ar::WideFourByThree),   Some(R::FourK), [2, 4, 12]),
-    (Some(Ar::TallThreeByFour),   None,           [1, 2,  4]),
-    (Some(Ar::TallFourByFive),    Some(R::FourK), [2, 4, 12]),
-    (Some(Ar::WideSixteenByNine), None,           [1, 2,  5]),
-    (Some(Ar::WideSixteenByNine), Some(R::OneK),  [1, 1,  3]),
+    (None, None, [1, 2, 4]), // landscape 4:3 default
+    (Some(Ar::Square), None, [1, 2, 6]),
+    (Some(Ar::Square), Some(R::OneK), [1, 2, 6]),
+    (Some(Ar::Square), Some(R::TwoK), [2, 3, 10]),
+    (Some(Ar::Square), Some(R::ThreeK), [2, 4, 14]),
+    (Some(Ar::Square), Some(R::FourK), [2, 4, 14]),
+    (Some(Ar::SquareHd), None, [2, 3, 10]),
+    (Some(Ar::SquareHd), Some(R::OneK), [1, 2, 6]),
+    (Some(Ar::WideFourByThree), None, [1, 2, 4]),
+    (Some(Ar::WideFourByThree), Some(R::TwoK), [1, 2, 7]),
+    (Some(Ar::WideFourByThree), Some(R::ThreeK), [2, 3, 11]),
+    (Some(Ar::WideFourByThree), Some(R::FourK), [2, 4, 12]),
+    (Some(Ar::TallThreeByFour), None, [1, 2, 4]),
+    (Some(Ar::TallFourByFive), Some(R::FourK), [2, 4, 12]),
+    (Some(Ar::WideSixteenByNine), None, [1, 2, 5]),
+    (Some(Ar::WideSixteenByNine), Some(R::OneK), [1, 1, 3]),
     (Some(Ar::WideSixteenByNine), Some(R::TenEightyP), [1, 2, 5]),
-    (Some(Ar::WideSixteenByNine), Some(R::TwoK),  [1, 2,  5]),
-    (Some(Ar::WideSixteenByNine), Some(R::ThreeK), [1, 3,  8]),
+    (Some(Ar::WideSixteenByNine), Some(R::TwoK), [1, 2, 5]),
+    (Some(Ar::WideSixteenByNine), Some(R::ThreeK), [1, 3, 8]),
     (Some(Ar::WideSixteenByNine), Some(R::FourK), [2, 3, 12]),
-    (Some(Ar::TallNineBySixteen), None,           [1, 2,  5]),
-    (Some(Ar::Wide),              Some(R::HalfK), [1, 1,  3]),
-    (Some(Ar::Tall),              Some(R::ThreeK), [1, 3,  8]),
-    (Some(Ar::Auto),              None,           [2, 3, 12]),
-    (Some(Ar::Auto4k),            Some(R::OneK),  [2, 3, 12]),
+    (Some(Ar::TallNineBySixteen), None, [1, 2, 5]),
+    (Some(Ar::Wide), Some(R::HalfK), [1, 1, 3]),
+    (Some(Ar::Tall), Some(R::ThreeK), [1, 3, 8]),
+    (Some(Ar::Auto), None, [2, 3, 12]),
+    (Some(Ar::Auto4k), Some(R::OneK), [2, 3, 12]),
   ];
 
   // (aspect_ratio, resolution, [xhigh, max]) — cents per image, text-to-image
   const TEXT_GRID_UPPER_TIERS: &[(Option<Ar>, Option<R>, [u64; 2])] = &[
-    (None,                        None,           [ 8, 16]), // landscape 4:3 default
-    (Some(Ar::Square),            None,           [11, 24]),
-    (Some(Ar::Square),            Some(R::TwoK),  [17, 37]),
-    (Some(Ar::Square),            Some(R::FourK), [25, 55]),
-    (Some(Ar::WideSixteenByNine), None,           [ 8, 18]),
-    (Some(Ar::WideSixteenByNine), Some(R::OneK),  [ 6, 12]),
+    (None, None, [8, 16]), // landscape 4:3 default
+    (Some(Ar::Square), None, [11, 24]),
+    (Some(Ar::Square), Some(R::TwoK), [17, 37]),
+    (Some(Ar::Square), Some(R::FourK), [25, 55]),
+    (Some(Ar::WideSixteenByNine), None, [8, 18]),
+    (Some(Ar::WideSixteenByNine), Some(R::OneK), [6, 12]),
     (Some(Ar::TallNineBySixteen), Some(R::FourK), [20, 45]),
-    (Some(Ar::Auto),              None,           [20, 45]),
+    (Some(Ar::Auto), None, [20, 45]),
   ];
 
   mod text_to_image_tests {
@@ -224,11 +198,7 @@ mod tests {
     #[test]
     fn auto_prices_as_high() {
       for &(aspect_ratio, resolution, _) in TEXT_GRID {
-        assert_eq!(
-          cents(make_inputs(0, Some(Q::Auto), aspect_ratio, resolution, 1)),
-          cents(make_inputs(0, Some(Q::High), aspect_ratio, resolution, 1)),
-          "{aspect_ratio:?} {resolution:?}",
-        );
+        assert_eq!(cents(make_inputs(0, Some(Q::Auto), aspect_ratio, resolution, 1)), cents(make_inputs(0, Some(Q::High), aspect_ratio, resolution, 1)), "{aspect_ratio:?} {resolution:?}",);
       }
     }
 
@@ -256,10 +226,10 @@ mod tests {
     #[test]
     fn reference_images_add_to_price() {
       // Square high 582, plus 88 per reference image
-      assert_eq!(cents(make_inputs(1, Some(Q::High), Some(Ar::Square), None, 1)), 7);   // 670
-      assert_eq!(cents(make_inputs(4, Some(Q::High), Some(Ar::Square), None, 1)), 10);  // 934
+      assert_eq!(cents(make_inputs(1, Some(Q::High), Some(Ar::Square), None, 1)), 7); // 670
+      assert_eq!(cents(make_inputs(4, Some(Q::High), Some(Ar::Square), None, 1)), 10); // 934
       assert_eq!(cents(make_inputs(16, Some(Q::High), Some(Ar::Square), None, 1)), 20); // 1990
-      assert_eq!(cents(make_inputs(1, Some(Q::Low), Some(Ar::Square), None, 1)), 2);    // 153
+      assert_eq!(cents(make_inputs(1, Some(Q::Low), Some(Ar::Square), None, 1)), 2); // 153
     }
 
     #[test]
@@ -316,13 +286,7 @@ mod tests {
     inputs.estimate_cost().cost_in_usd_cents.unwrap()
   }
 
-  fn make_inputs(
-    num_reference_images: usize,
-    quality: Option<Q>,
-    aspect_ratio: Option<Ar>,
-    resolution: Option<R>,
-    num_images: u16,
-  ) -> ArtcraftGptImage2p5CostInputs {
+  fn make_inputs(num_reference_images: usize, quality: Option<Q>, aspect_ratio: Option<Ar>, resolution: Option<R>, num_images: u16) -> ArtcraftGptImage2p5CostInputs {
     ArtcraftGptImage2p5CostInputs { quality, aspect_ratio, resolution, num_reference_images, num_images }
   }
 }

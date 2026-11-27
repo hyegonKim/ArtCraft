@@ -27,16 +27,14 @@ pub struct UploadVideoFromFileArgs<'a, P: AsRef<Path>> {
 
   // /// If true, we should hide the image from the user's gallery.
   // pub is_intermediate_system_file: bool,
-
   /// If provided, this is the prompt that this image is associated with.
   /// NOTE: Cannot set `is_intermediate_system_file = true` if this is set.
   pub maybe_prompt_token: Option<&'a PromptToken>,
 
   /// If provided, the third-party provider that generated this file.
   pub maybe_generation_provider: Option<GenerationProvider>,
-
   // /// If provided, this groups the file into a batch
-  // /// TODO: This shouldn't be set clientside without the backend generating the token 
+  // /// TODO: This shouldn't be set clientside without the backend generating the token
   // ///  and cryptographically securing it. But we need to go fast here.
   // pub maybe_batch_token: Option<&'a BatchGenerationToken>,
 }
@@ -50,23 +48,16 @@ pub struct UploadVideoMediaFileSuccessResponse {
 }
 
 /// Upload a video media file from a file.
-pub async fn upload_video_media_file_from_file<P: AsRef<Path>>(
-  args: UploadVideoFromFileArgs<'_, P>,
-) -> Result<UploadVideoMediaFileSuccessResponse, ApiError> {
-
+pub async fn upload_video_media_file_from_file<P: AsRef<Path>>(args: UploadVideoFromFileArgs<'_, P>) -> Result<UploadVideoMediaFileSuccessResponse, ApiError> {
   let url = get_route(args.api_host);
 
   debug!("Requesting {:?}", &url);
 
-  let client = storyteller_client_builder(args.api_host)
-      .build()?;
+  let client = storyteller_client_builder(args.api_host).build()?;
 
   let file_bytes = std::fs::read(args.path.as_ref())?;
-  let file_name = args.path.as_ref().file_name()
-      .and_then(|n| n.to_str()).unwrap_or("file").to_string();
-  let mut form = Form::new()
-      .text("uuid_idempotency_token", generate_random_uuid())
-      .part("file", Part::bytes(file_bytes).file_name(file_name));
+  let file_name = args.path.as_ref().file_name().and_then(|n| n.to_str()).unwrap_or("file").to_string();
+  let mut form = Form::new().text("uuid_idempotency_token", generate_random_uuid()).part("file", Part::bytes(file_bytes).file_name(file_name));
 
   if let Some(prompt_token) = &args.maybe_prompt_token {
     form = form.text("maybe_prompt_token", prompt_token.to_string());
@@ -76,19 +67,15 @@ pub async fn upload_video_media_file_from_file<P: AsRef<Path>>(
     form = form.text("maybe_generation_provider", provider.to_str().to_string());
   }
 
-  let mut request_builder = client.post(url)
-      .header("Accept", APPLICATION_JSON);
-  
+  let mut request_builder = client.post(url).header("Accept", APPLICATION_JSON);
+
   if let Some(creds) = args.maybe_creds {
     if let Some(header) = &creds.maybe_as_cookie_header() {
       request_builder = request_builder.header("Cookie", header);
     }
   }
-  
-  let response = request_builder
-      .multipart(form)
-      .send()
-      .await?;
+
+  let response = request_builder.multipart(form).send().await?;
 
   let response = filter_bad_response(response).await?;
   let response_body = &response.text().await?;
@@ -102,4 +89,3 @@ fn get_route(api_host: &ApiHost) -> String {
   let api_hostname_and_scheme = api_host.to_api_hostname_and_scheme();
   format!("{}/v1/media_files/upload/new_video", api_hostname_and_scheme)
 }
-

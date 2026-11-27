@@ -5,7 +5,7 @@ use cloudflare_errors::filter_cloudflare_errors::filter_cloudflare_errors;
 use wreq::StatusCode;
 /*
 
-Old cookie - 
+Old cookie -
 
 Message: {
   "error": {
@@ -16,7 +16,7 @@ Message: {
   }
 }
 
-No cookie - 
+No cookie -
 
 Message: {
   "error": {
@@ -35,17 +35,13 @@ pub fn classify_general_http_status_code_and_body(status: StatusCode, response_b
   let message = response_body.to_string();
 
   // TODO: I *think* this is just the bearer token, not the cookie.
-  let cookie_expired =
-      message.contains("Your authentication token has expired. Please try signing in again.")
-          || message.contains("token_expired");
+  let cookie_expired = message.contains("Your authentication token has expired. Please try signing in again.") || message.contains("token_expired");
 
   if cookie_expired {
     return SoraSpecificApiError::UnauthorizedCookieOrBearerExpired.into();
   }
-  
-  let needs_onboarding = 
-      message.contains("You must onboard before using this service") 
-          || message.contains("onboarding_required");
+
+  let needs_onboarding = message.contains("You must onboard before using this service") || message.contains("onboarding_required");
 
   if needs_onboarding {
     return SoraSpecificApiError::SoraUsernameNotYetCreated.into();
@@ -60,12 +56,9 @@ pub fn classify_general_http_status_code_and_body(status: StatusCode, response_b
   match status_code {
     502 => {
       return SoraGenericApiError::Http502ErrorBadGateway(message.to_string()).into();
-    }
+    },
     _ => {}, // Fall-through
   }
 
-  SoraGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-    status_code: status,
-    body: response_body.to_string(),
-  }.into()
+  SoraGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body.to_string() }.into()
 }

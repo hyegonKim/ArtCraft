@@ -28,7 +28,7 @@ struct BasicEventWrapper<T: Serialize + Debug> {
   data: T,
 }
 
-pub trait BasicSendableEvent : Clone + Debug + Serialize {
+pub trait BasicSendableEvent: Clone + Debug + Serialize {
   /// This is the name of the event that the frontend subscribes to.
   const FRONTEND_EVENT_NAME: TauriEventName;
 
@@ -38,10 +38,7 @@ pub trait BasicSendableEvent : Clone + Debug + Serialize {
   /// Default implementation of send().
   /// This serializes and sends the event to the frontend.
   fn send(&self, app: &AppHandle) -> Result<(), SendableEventError> {
-    let wrapped = BasicEventWrapper {
-      status: Self::EVENT_STATUS,
-      data: self.clone(),
-    };
+    let wrapped = BasicEventWrapper { status: Self::EVENT_STATUS, data: self.clone() };
     info!("Sending event to frontend: {} ; payload = {:?}", Self::FRONTEND_EVENT_NAME.to_str(), wrapped);
     let result = app.emit(Self::FRONTEND_EVENT_NAME.to_str(), wrapped);
     if let Err(err) = result {
@@ -49,7 +46,7 @@ pub trait BasicSendableEvent : Clone + Debug + Serialize {
     }
     Ok(())
   }
-  
+
   fn send_infallible(&self, app: &AppHandle) {
     if let Err(err) = self.send(app) {
       // Fail open

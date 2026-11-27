@@ -27,6 +27,7 @@ use crate::pages::create_audio::{AudioSettings, CreateAudioPage};
 use crate::pages::create_image::{CreateImagePage, ImageSettings};
 use crate::pages::create_video::{CreateVideoPage, VideoSettings};
 use crate::pages::edit_image::EditImagePage;
+use crate::pages::express_studio::ExpressStudioState;
 use crate::pages::other;
 use crate::pages::remove_bg::RemoveBgPage;
 use crate::pages::stage_3d::Stage3dPage;
@@ -93,6 +94,7 @@ pub struct ArtcraftApp {
   edit_image: EditImagePage,
   remove_bg: RemoveBgPage,
   stage_3d: Stage3dPage,
+  express_studio: ExpressStudioState,
   library: FeedStore,
   ratios: RatioCache,
   /// Prompt texts by prompt token (list view, lightbox).
@@ -139,7 +141,50 @@ impl ArtcraftApp {
       backend.load_models(modality);
     }
     backend.refresh_session();
-    let mut app = Self { cache, player, toasts: Toasts::default(), catalog: Catalog::default(), user: None, credits: None, page: saved.page, enter_to_generate: saved.enter_to_generate, view_mode: saved.view_mode, autoplay: saved.autoplay, sidebar_open: saved.sidebar_open, image: CreateImagePage::new(saved.image), video: CreateVideoPage::new(saved.video), audio: CreateAudioPage::new(saved.audio), edit_image: EditImagePage::default(), remove_bg: RemoveBgPage::default(), stage_3d: Stage3dPage::default(), library: FeedStore::default(), ratios: RatioCache::default(), prompts: HashMap::new(), prompt_records: HashMap::new(), requested_prompts: HashSet::new(), pending_recreate: None, batch_kinds: HashMap::new(), lightbox: None, picker: None, login: None, characters_modal: None, characters: Vec::new(), pending_characters: Vec::new(), settings_open: false, provider_setup: None, midjourney_login: None, fal_key_input: String::new(), preview: None, requests: Vec::new(), screenshot: ScreenshotRequest::from_env(), next_poll: 0.0, next_credits: CREDITS_INTERVAL, models_retry_at: None, backend };
+    let mut app = Self {
+      cache,
+      player,
+      toasts: Toasts::default(),
+      catalog: Catalog::default(),
+      user: None,
+      credits: None,
+      page: saved.page,
+      enter_to_generate: saved.enter_to_generate,
+      view_mode: saved.view_mode,
+      autoplay: saved.autoplay,
+      sidebar_open: saved.sidebar_open,
+      image: CreateImagePage::new(saved.image),
+      video: CreateVideoPage::new(saved.video),
+      audio: CreateAudioPage::new(saved.audio),
+      edit_image: EditImagePage::default(),
+      remove_bg: RemoveBgPage::default(),
+      stage_3d: Stage3dPage::default(),
+      express_studio: ExpressStudioState::default(),
+      library: FeedStore::default(),
+      ratios: RatioCache::default(),
+      prompts: HashMap::new(),
+      prompt_records: HashMap::new(),
+      requested_prompts: HashSet::new(),
+      pending_recreate: None,
+      batch_kinds: HashMap::new(),
+      lightbox: None,
+      picker: None,
+      login: None,
+      characters_modal: None,
+      characters: Vec::new(),
+      pending_characters: Vec::new(),
+      settings_open: false,
+      provider_setup: None,
+      midjourney_login: None,
+      fal_key_input: String::new(),
+      preview: None,
+      requests: Vec::new(),
+      screenshot: ScreenshotRequest::from_env(),
+      next_poll: 0.0,
+      next_credits: CREDITS_INTERVAL,
+      models_retry_at: None,
+      backend,
+    };
     app.restore_provider_jobs();
     // Diagnostics: `ARTCRAFT_OPEN=settings` or `midjourney-login` opens that dialog at launch.
     match std::env::var("ARTCRAFT_OPEN").as_deref() {
@@ -456,23 +501,19 @@ impl ArtcraftApp {
         self.toasts.success("Attached studio frame to Create Video");
         self.navigate(Page::CreateVideo);
       },
-      AppRequest::SendRgbaToEditImage { width, height, pixels, layer_name } => {
-        match self.edit_image.import_rgba_layer(width, height, pixels, layer_name) {
-          Ok(()) => {
-            self.toasts.success("Sent the image to Edit Image at its original resolution");
-            self.navigate(Page::EditImage);
-          },
-          Err(err) => self.toasts.error(format!("Couldn't add the image: {err}")),
-        }
+      AppRequest::SendRgbaToEditImage { width, height, pixels, layer_name } => match self.edit_image.import_rgba_layer(width, height, pixels, layer_name) {
+        Ok(()) => {
+          self.toasts.success("Sent the image to Edit Image at its original resolution");
+          self.navigate(Page::EditImage);
+        },
+        Err(err) => self.toasts.error(format!("Couldn't add the image: {err}")),
       },
-      AppRequest::SendRgbaToRemoveBg { width, height, pixels } => {
-        match self.remove_bg.import_source_rgba(width, height, pixels) {
-          Ok(()) => {
-            self.toasts.success("Sent the image to BG Remove at its original resolution");
-            self.navigate(Page::RemoveBackground);
-          },
-          Err(err) => self.toasts.error(format!("Couldn't send the image to BG Remove: {err}")),
-        }
+      AppRequest::SendRgbaToRemoveBg { width, height, pixels } => match self.remove_bg.import_source_rgba(width, height, pixels) {
+        Ok(()) => {
+          self.toasts.success("Sent the image to BG Remove at its original resolution");
+          self.navigate(Page::RemoveBackground);
+        },
+        Err(err) => self.toasts.error(format!("Couldn't send the image to BG Remove: {err}")),
       },
       AppRequest::SendRgbaToStage3d { width, height, pixels, card_name } => {
         self.stage_3d.add_cutout_card(card_name, width, height, pixels);
@@ -687,7 +728,7 @@ impl ArtcraftApp {
             Page::Stage3d => other::local_preview(ui, Page::Stage3d, |ui| self.stage_3d.ui(ui, &mut env)),
             Page::RemoveBackground => other::local_preview(ui, Page::RemoveBackground, |ui| self.remove_bg.ui(ui, &mut env)),
             Page::Library => other::library(ui, &mut env, &mut self.library),
-            Page::CraftSuite => crate::pages::craft_suite::ui(ui, &mut env),
+            Page::CraftSuite => crate::pages::craft_suite::ui(ui, &mut env, &mut self.express_studio),
             page => other::coming_soon(ui, page),
           }
         });
@@ -1011,16 +1052,9 @@ fn file_name_for(item: &FeedItem) -> String {
     MediaKind::Audio => "mp3",
   };
   let without_query = item.full_url.split(['?', '#']).next().unwrap_or("");
-  let path_after_scheme = without_query.split_once("://").map_or(without_query, |(_, rest)| {
-    rest.split_once('/').map_or("", |(_, path)| path)
-  });
+  let path_after_scheme = without_query.split_once("://").map_or(without_query, |(_, rest)| rest.split_once('/').map_or("", |(_, path)| path));
   let file_segment = path_after_scheme.rsplit('/').next().unwrap_or("");
-  let ext = file_segment
-    .rsplit_once('.')
-    .map(|(_, e)| e)
-    .filter(|e| !e.is_empty() && e.len() <= 4 && e.chars().all(|c| c.is_ascii_alphanumeric()))
-    .map(str::to_ascii_lowercase)
-    .unwrap_or_else(|| fallback.to_owned());
+  let ext = file_segment.rsplit_once('.').map(|(_, e)| e).filter(|e| !e.is_empty() && e.len() <= 4 && e.chars().all(|c| c.is_ascii_alphanumeric())).map(str::to_ascii_lowercase).unwrap_or_else(|| fallback.to_owned());
   format!("artcraft_{}.{ext}", item.token)
 }
 
@@ -1029,42 +1063,18 @@ mod tests {
   use super::*;
 
   fn dummy_item(kind: MediaKind, token: &str, full_url: &str) -> FeedItem {
-    FeedItem {
-      token: token.into(),
-      kind,
-      title: None,
-      thumbnail: None,
-      full_url: full_url.into(),
-      created_at: 0,
-      model_id: None,
-      prompt_token: None,
-      batch_token: None,
-      duration_secs: None,
-      animated: None,
-    }
+    FeedItem { token: token.into(), kind, title: None, thumbnail: None, full_url: full_url.into(), created_at: 0, model_id: None, prompt_token: None, batch_token: None, duration_secs: None, animated: None }
   }
 
   #[test]
   fn file_name_for_strips_query_and_fragment_and_falls_back_cleanly() {
-    let signed = dummy_item(
-      MediaKind::Image,
-      "mf_123",
-      "https://cdn.example.com/media/render.WEBP?token=1.234&sig=abc.def#preview",
-    );
+    let signed = dummy_item(MediaKind::Image, "mf_123", "https://cdn.example.com/media/render.WEBP?token=1.234&sig=abc.def#preview");
     assert_eq!(file_name_for(&signed), "artcraft_mf_123.webp");
 
-    let no_ext_with_domain_dot = dummy_item(
-      MediaKind::Video,
-      "mf_456",
-      "https://cdn.artcraft.ai/v1/stream/mf_456?v=2.0",
-    );
+    let no_ext_with_domain_dot = dummy_item(MediaKind::Video, "mf_456", "https://cdn.artcraft.ai/v1/stream/mf_456?v=2.0");
     assert_eq!(file_name_for(&no_ext_with_domain_dot), "artcraft_mf_456.mp4");
 
-    let audio_item = dummy_item(
-      MediaKind::Audio,
-      "mf_789",
-      "https://cdn.artcraft.ai/tracks/song.wav",
-    );
+    let audio_item = dummy_item(MediaKind::Audio, "mf_789", "https://cdn.artcraft.ai/tracks/song.wav");
     assert_eq!(file_name_for(&audio_item), "artcraft_mf_789.wav");
   }
 }

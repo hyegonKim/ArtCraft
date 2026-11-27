@@ -21,15 +21,7 @@ impl FalVeo3CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -56,10 +48,14 @@ mod tests {
     }
 
     #[test]
-    fn audio_on_6s_is_240() { assert_eq!(cost_cents(Some(6), Some(true), false), 240); }
+    fn audio_on_6s_is_240() {
+      assert_eq!(cost_cents(Some(6), Some(true), false), 240);
+    }
 
     #[test]
-    fn audio_on_8s_is_320() { assert_eq!(cost_cents(Some(8), Some(true), false), 320); }
+    fn audio_on_8s_is_320() {
+      assert_eq!(cost_cents(Some(8), Some(true), false), 320);
+    }
 
     #[test]
     fn audio_off_4s_is_80() {
@@ -68,7 +64,9 @@ mod tests {
     }
 
     #[test]
-    fn audio_off_8s_is_160() { assert_eq!(cost_cents(Some(8), Some(false), false), 160); }
+    fn audio_off_8s_is_160() {
+      assert_eq!(cost_cents(Some(8), Some(false), false), 160);
+    }
 
     #[test]
     fn duration_default_is_8s() {
@@ -94,21 +92,11 @@ mod tests {
   }
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>, has_start_frame: bool) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     if has_start_frame {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
     let state = build_fal_veo_3_state(b).expect("build_fal_veo_3_state");
-    FalVeo3CostState::from_request(&state)
-      .estimate_cost()
-      .cost_in_usd_cents
-      .expect("cost_in_usd_cents")
+    FalVeo3CostState::from_request(&state).estimate_cost().cost_in_usd_cents.expect("cost_in_usd_cents")
   }
 }

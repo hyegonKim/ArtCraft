@@ -8,10 +8,10 @@ use std::path::PathBuf;
 pub enum MidjourneyClientError {
   /// The cookie was too short to be valid.
   CookieTooShort,
-  
+
   /// Tried to look up an image out of range [0,4)
   InvalidImageIndex,
-  
+
   /// Could not determine the filetype for the file.
   FileTypeNotKnown(PathBuf),
 

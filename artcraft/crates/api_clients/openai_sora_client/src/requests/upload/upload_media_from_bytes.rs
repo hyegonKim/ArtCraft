@@ -7,12 +7,7 @@ use std::time::Duration;
 
 /// Upload bytes.
 /// The underlying reqwest lib needs to own the bytes, so we can't pass as a reference.
-pub async fn sora_media_upload_from_bytes(
-  bytes: Vec<u8>, 
-  file_name: String, 
-  creds: &SoraCredentialSet,
-  maybe_timeout: Option<Duration>,
-) -> Result<SoraMediaUploadResponse, SoraError> {
+pub async fn sora_media_upload_from_bytes(bytes: Vec<u8>, file_name: String, creds: &SoraCredentialSet, maybe_timeout: Option<Duration>) -> Result<SoraMediaUploadResponse, SoraError> {
   let file_path = PathBuf::from(&file_name);
 
   // TODO: Read file magic bytes first, then fall back to this.

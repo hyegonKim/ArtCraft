@@ -36,8 +36,6 @@ pub struct NanoBananaProTextToImageOutput {
   pub images: Vec<NanoBananaProTextToImageFile>,
 }
 
-pub fn nano_banana_pro_text_to_image(
-  params: NanoBananaProTextToImageInput,
-) -> FalRequest<NanoBananaProTextToImageInput, NanoBananaProTextToImageOutput> {
+pub fn nano_banana_pro_text_to_image(params: NanoBananaProTextToImageInput) -> FalRequest<NanoBananaProTextToImageInput, NanoBananaProTextToImageOutput> {
   FalRequest::new("fal-ai/nano-banana-pro", params)
 }

@@ -767,8 +767,16 @@ pub(super) fn join(s: &mut Session, p: &Value) -> Result<Value> {
                         let st = s.doc()?;
                         let pa = st.doc.node(a).and_then(|n| n.path_data()).ok_or(EngineError::NoNode(a))?;
                         let pb = st.doc.node(b).and_then(|n| n.path_data()).ok_or(EngineError::NoNode(b))?;
-                        let sa = pa.subpaths.iter().position(|sp| !sp.closed && !sp.anchors.is_empty()).ok_or_else(|| EngineError::Other("join needs open paths".into()))?;
-                        let sb = pb.subpaths.iter().position(|sp| !sp.closed && !sp.anchors.is_empty()).ok_or_else(|| EngineError::Other("join needs open paths".into()))?;
+                        let sa = pa
+                            .subpaths
+                            .iter()
+                            .position(|sp| !sp.closed && !sp.anchors.is_empty())
+                            .ok_or_else(|| EngineError::Other("join needs open paths".into()))?;
+                        let sb = pb
+                            .subpaths
+                            .iter()
+                            .position(|sp| !sp.closed && !sp.anchors.is_empty())
+                            .ok_or_else(|| EngineError::Other("join needs open paths".into()))?;
                         (sa, sb)
                     };
                     s.edit("Join", |d, sel| {
@@ -1010,12 +1018,8 @@ fn join_nearest(d: &mut Document, mut open_subs: Vec<(NodeId, usize)>, join_kind
         let mut best: Option<(usize, usize, bool, bool, f64)> = None;
         for (i, &(fa, la)) in ends_info.iter().enumerate() {
             for (j, &(fb, lb)) in ends_info.iter().enumerate().skip(i + 1) {
-                let cands = [
-                    (la.distance(fb), false, false),
-                    (la.distance(lb), false, true),
-                    (fa.distance(fb), true, false),
-                    (fa.distance(lb), true, true),
-                ];
+                let cands =
+                    [(la.distance(fb), false, false), (la.distance(lb), false, true), (fa.distance(fb), true, false), (fa.distance(lb), true, true)];
                 for (dist, rx, ry) in cands {
                     if best.as_ref().is_none_or(|b| dist < b.4) {
                         best = Some((i, j, rx, ry, dist));

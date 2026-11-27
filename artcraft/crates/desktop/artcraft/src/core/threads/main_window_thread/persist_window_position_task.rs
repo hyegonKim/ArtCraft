@@ -5,12 +5,7 @@ use log::info;
 use memory_store::clone_slot::CloneSlot;
 use tauri::Window;
 
-pub async fn persist_window_position_task(
-  window: &Window,
-  app_data_root: &AppDataRoot,
-  window_pos_slot: &CloneSlot<MainWindowPosition>,
-) -> AnyhowResult<()> {
-
+pub async fn persist_window_position_task(window: &Window, app_data_root: &AppDataRoot, window_pos_slot: &CloneSlot<MainWindowPosition>) -> AnyhowResult<()> {
   let current_window_position = MainWindowPosition::from_window(window)?;
   let current_physical_pos = window.outer_position()?;
 

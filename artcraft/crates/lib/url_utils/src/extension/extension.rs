@@ -34,20 +34,14 @@ impl Extension {
   /// const MP4: Extension = Extension::from_static("mp4", ".mp4");
   /// ```
   pub const fn from_static(ext: &'static str, dotted: &'static str) -> Self {
-    Self {
-      value: Cow::Borrowed(ext),
-      dotted: Cow::Borrowed(dotted),
-    }
+    Self { value: Cow::Borrowed(ext), dotted: Cow::Borrowed(dotted) }
   }
 
   /// Creates an `Extension` from a `&str` at runtime.
   /// The input must NOT include a leading period.
   pub fn new(ext: &str) -> Self {
     let dotted = format!(".{}", ext);
-    Self {
-      value: Cow::Owned(ext.to_string()),
-      dotted: Cow::Owned(dotted),
-    }
+    Self { value: Cow::Owned(ext.to_string()), dotted: Cow::Owned(dotted) }
   }
 
   /// Returns the extension without the leading period, e.g. `"png"`.

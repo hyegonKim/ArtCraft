@@ -19,10 +19,7 @@ impl GrokApiGrokImagineVideo1p5CostState {
     // constructed by hand must not get a cost quote for an operation the
     // model will reject.
     if self.request.request.image.is_none() && self.request.request.reference_images.is_none() {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "image_inputs",
-        value: "text-to-video isn't supported by grok-imagine-video-1.5; supply a start_frame or at least one reference image".to_string(),
-      }));
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_inputs", value: "text-to-video isn't supported by grok-imagine-video-1.5; supply a start_frame or at least one reference image".to_string() }));
     }
 
     // grok_api_client's calculator picks the v1.5 pricing tier from the
@@ -33,15 +30,7 @@ impl GrokApiGrokImagineVideo1p5CostState {
     //   Input:  10 mills per source image
     let cost_in_usd_cents = self.request.request.calculate_cost_in_cents();
 
-    Ok(VideoGenerationCostEstimate {
-      cost_in_credits: None,
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    })
+    Ok(VideoGenerationCostEstimate { cost_in_credits: None, cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None })
   }
 }
 
@@ -121,12 +110,7 @@ mod tests {
     #[test]
     fn single_start_frame_image_adds_10_mills() {
       // 5s @ 720p output 700 mills + 1 input image 10 mills = 710 mills → 71¢
-      let cents = cost_cents(
-        Some(RouterResolution::SevenTwentyP),
-        5,
-        Some(ImageRef::Url("https://example.com/a.png".to_string())),
-        None,
-      );
+      let cents = cost_cents(Some(RouterResolution::SevenTwentyP), 5, Some(ImageRef::Url("https://example.com/a.png".to_string())), None);
       assert_eq!(cents, 71);
     }
 
@@ -138,16 +122,7 @@ mod tests {
       // many were submitted as references.
       //
       // 5s @ 720p output 700 mills + 1 effective input image 10 mills = 710 mills → 71¢
-      let cents = cost_cents(
-        Some(RouterResolution::SevenTwentyP),
-        5,
-        None,
-        Some(ImageListRef::Urls(vec![
-          "https://example.com/a.png".to_string(),
-          "https://example.com/b.png".to_string(),
-          "https://example.com/c.png".to_string(),
-        ])),
-      );
+      let cents = cost_cents(Some(RouterResolution::SevenTwentyP), 5, None, Some(ImageListRef::Urls(vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string(), "https://example.com/c.png".to_string()])));
       assert_eq!(cents, 71);
     }
 
@@ -155,22 +130,10 @@ mod tests {
     fn reference_image_count_does_not_scale_cost() {
       // Promote-first collapses any number of reference_images down to one
       // `image` on the wire, so the cost stays flat at the 1-image surcharge.
-      let baseline = cost_cents(
-        Some(RouterResolution::SevenTwentyP),
-        5,
-        None,
-        Some(ImageListRef::Urls(vec!["https://example.com/0.png".to_string()])),
-      );
+      let baseline = cost_cents(Some(RouterResolution::SevenTwentyP), 5, None, Some(ImageListRef::Urls(vec!["https://example.com/0.png".to_string()])));
       for n in 1u64..=5 {
-        let images: Vec<String> = (0..n)
-          .map(|i| format!("https://example.com/{i}.png"))
-          .collect();
-        let cents = cost_cents(
-          Some(RouterResolution::SevenTwentyP),
-          5,
-          None,
-          Some(ImageListRef::Urls(images)),
-        );
+        let images: Vec<String> = (0..n).map(|i| format!("https://example.com/{i}.png")).collect();
+        let cents = cost_cents(Some(RouterResolution::SevenTwentyP), 5, None, Some(ImageListRef::Urls(images)));
         assert_eq!(cents, baseline, "n={n} should still cost the same after promote-first");
       }
     }
@@ -250,40 +213,31 @@ mod tests {
     // else uses an explicit image source.
     const CASES: &[(RouterResolution, u16, bool, usize, u64)] = &[
       // 480p with image-to-video (1 input image, +10 mills)
-      (RouterResolution::FourEightyP,  1, true,  0,   9),  //  80 + 10
-      (RouterResolution::FourEightyP,  5, true,  0,  41),  // 400 + 10
-      (RouterResolution::FourEightyP,  8, true,  0,  65),  // 640 + 10
-      (RouterResolution::FourEightyP, 15, true,  0, 121),  // 1200 + 10
+      (RouterResolution::FourEightyP, 1, true, 0, 9),    //  80 + 10
+      (RouterResolution::FourEightyP, 5, true, 0, 41),   // 400 + 10
+      (RouterResolution::FourEightyP, 8, true, 0, 65),   // 640 + 10
+      (RouterResolution::FourEightyP, 15, true, 0, 121), // 1200 + 10
       // 720p with image-to-video (1 input image, +10 mills)
-      (RouterResolution::SevenTwentyP, 1, true,  0,  15),  //  140 + 10
-      (RouterResolution::SevenTwentyP, 5, true,  0,  71),  //  700 + 10
-      (RouterResolution::SevenTwentyP, 8, true,  0, 113),  // 1120 + 10
-      (RouterResolution::SevenTwentyP,15, true,  0, 211),  // 2100 + 10
-      (RouterResolution::SevenTwentyP,10, true,  0, 141),  // 1400 + 10
+      (RouterResolution::SevenTwentyP, 1, true, 0, 15),   //  140 + 10
+      (RouterResolution::SevenTwentyP, 5, true, 0, 71),   //  700 + 10
+      (RouterResolution::SevenTwentyP, 8, true, 0, 113),  // 1120 + 10
+      (RouterResolution::SevenTwentyP, 15, true, 0, 211), // 2100 + 10
+      (RouterResolution::SevenTwentyP, 10, true, 0, 141), // 1400 + 10
       // 720p reference-to-video. Promote-first collapses any non-empty refs
       // list down to ONE effective image on the wire, so all of these cost
       // the same regardless of ref_count.
-      (RouterResolution::SevenTwentyP, 5, false, 1,  71),  //  700 + 10
-      (RouterResolution::SevenTwentyP, 5, false, 2,  71),  //  700 + 10 (promote-first)
-      (RouterResolution::SevenTwentyP, 5, false, 3,  71),  //  700 + 10 (promote-first)
+      (RouterResolution::SevenTwentyP, 5, false, 1, 71), //  700 + 10
+      (RouterResolution::SevenTwentyP, 5, false, 2, 71), //  700 + 10 (promote-first)
+      (RouterResolution::SevenTwentyP, 5, false, 3, 71), //  700 + 10 (promote-first)
     ];
 
     #[test]
     fn all_matrix_cases() {
       for &(res, duration, has_image, ref_count, expected_cents) in CASES {
-        let start_frame = if has_image {
-          Some(ImageRef::Url("https://example.com/start.png".to_string()))
-        } else { None };
-        let reference_images = if ref_count > 0 {
-          Some(ImageListRef::Urls(
-            (0..ref_count).map(|i| format!("https://example.com/ref_{i}.png")).collect(),
-          ))
-        } else { None };
+        let start_frame = if has_image { Some(ImageRef::Url("https://example.com/start.png".to_string())) } else { None };
+        let reference_images = if ref_count > 0 { Some(ImageListRef::Urls((0..ref_count).map(|i| format!("https://example.com/ref_{i}.png")).collect())) } else { None };
         let cents = cost_cents(Some(res), duration, start_frame, reference_images);
-        assert_eq!(
-          cents, expected_cents,
-          "res={res:?} dur={duration} has_image={has_image} ref_count={ref_count}",
-        );
+        assert_eq!(cents, expected_cents, "res={res:?} dur={duration} has_image={has_image} ref_count={ref_count}",);
       }
     }
   }
@@ -304,24 +258,13 @@ mod tests {
     /// constructed outside of `build()` (e.g. in a misuse).
     #[test]
     fn estimate_cost_returns_err_when_no_image_sources() {
-      let request = GrokVideoGenerationRequest {
-        prompt: "text only".to_string(),
-        model: Some(GrokVideoModel::GrokImagineVideo1p5),
-        image: None,
-        reference_images: None,
-        aspect_ratio: None,
-        duration: Some(5),
-        resolution: None,
-        user: None,
-      };
-      let state = GrokApiGrokImagineVideo1p5CostState::from_request(
-        &GrokApiGrokImagineVideo1p5RequestState { request },
-      );
+      let request = GrokVideoGenerationRequest { prompt: "text only".to_string(), model: Some(GrokVideoModel::GrokImagineVideo1p5), image: None, reference_images: None, aspect_ratio: None, duration: Some(5), resolution: None, user: None };
+      let state = GrokApiGrokImagineVideo1p5CostState::from_request(&GrokApiGrokImagineVideo1p5RequestState { request });
       let err = state.estimate_cost().expect_err("text-only must be rejected");
       match err {
         ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, .. }) => {
           assert_eq!(field, "image_inputs");
-        }
+        },
         other => panic!("expected Client(ModelDoesNotSupportOption), got {:?}", other),
       }
     }
@@ -329,31 +272,15 @@ mod tests {
 
   // ── Helpers ──
 
-  fn cost_cents(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    start_frame: Option<ImageRef>,
-    reference_images: Option<ImageListRef>,
-  ) -> u64 {
+  fn cost_cents(resolution: Option<RouterResolution>, duration_seconds: u16, start_frame: Option<ImageRef>, reference_images: Option<ImageListRef>) -> u64 {
     build_for(RouterVideoModel::GrokImagineVideo1p5, resolution, duration_seconds, start_frame, reference_images)
   }
 
-  fn v1_cost_cents(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    start_frame: Option<ImageRef>,
-    reference_images: Option<ImageListRef>,
-  ) -> u64 {
+  fn v1_cost_cents(resolution: Option<RouterResolution>, duration_seconds: u16, start_frame: Option<ImageRef>, reference_images: Option<ImageListRef>) -> u64 {
     build_for(RouterVideoModel::GrokImagineVideo, resolution, duration_seconds, start_frame, reference_images)
   }
 
-  fn build_for(
-    model: RouterVideoModel,
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    start_frame: Option<ImageRef>,
-    reference_images: Option<ImageListRef>,
-  ) -> u64 {
+  fn build_for(model: RouterVideoModel, resolution: Option<RouterResolution>, duration_seconds: u16, start_frame: Option<ImageRef>, reference_images: Option<ImageListRef>) -> u64 {
     // v1.5 rejects text-to-video at build time. To keep pricing tests
     // focused on duration/resolution/batch scaling (rather than constantly
     // duplicating an image input in every call site), the helper injects a
@@ -365,22 +292,7 @@ mod tests {
       (None, Some(_)) => None,
       (None, None) => Some(ImageRef::Url("https://example.com/default.png".to_string())),
     };
-    let builder = GenerateVideoRequestBuilder {
-      model,
-      provider: RouterProvider::GrokApi,
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(1),
-      start_frame,
-      reference_images,
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
-      .cost_in_usd_cents
-      .unwrap()
+    let builder = GenerateVideoRequestBuilder { model, provider: RouterProvider::GrokApi, aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(1), start_frame, reference_images, ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed").cost_in_usd_cents.unwrap()
   }
 }

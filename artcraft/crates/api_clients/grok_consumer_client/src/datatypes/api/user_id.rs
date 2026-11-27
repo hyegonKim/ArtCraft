@@ -1,4 +1,3 @@
-
 /// Type for User IDs.
 /// User IDs are UUIDs.
 #[derive(Clone, Debug)]
@@ -9,4 +8,3 @@ impl UserId {
     self.0.clone()
   }
 }
-

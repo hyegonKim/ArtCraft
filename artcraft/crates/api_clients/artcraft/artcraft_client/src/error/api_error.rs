@@ -12,7 +12,7 @@ pub enum ApiError {
 
   /// 401. The request was not authorized.
   Unauthorized(String),
-  
+
   // 402. Payment required.
   PaymentRequired(String),
 
@@ -51,7 +51,7 @@ pub enum ApiError {
 
   /// Uncategorized reqwest error.
   OtherReqwestError(reqwest::Error),
-  
+
   /// An error doing file I/O (on our side)
   IoError(io::Error),
 
@@ -71,10 +71,8 @@ impl Display for ApiError {
       ApiError::Forbidden(msg) => write!(f, "Forbidden: {}", msg),
       ApiError::NotFound(msg) => write!(f, "Not found: {}", msg),
       ApiError::TooManyRequests(msg) => write!(f, "Too many requests to Storyteller backend: {}", msg),
-      ApiError::InternalServerError {body, backend_hostname} => 
-        write!(f, "Internal Server Error; backend hostname: {:?} ; body: {}; ", backend_hostname, body),
-      ApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body } => 
-        write!(f, "Uncategorized bad response with status code {} and body: {}", status_code, body),
+      ApiError::InternalServerError { body, backend_hostname } => write!(f, "Internal Server Error; backend hostname: {:?} ; body: {}; ", backend_hostname, body),
+      ApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body } => write!(f, "Uncategorized bad response with status code {} and body: {}", status_code, body),
       // Server response handling errors
       ApiError::DeserializationError(error) => write!(f, "Deserialization error: {}", error),
       // Network errors
@@ -97,7 +95,7 @@ impl From<reqwest::Error> for ApiError {
       let status = status.as_u16();
       match status {
         402 => return ApiError::PaymentRequired(error.to_string()),
-        _ => {} // NB: Fallthrough.
+        _ => {}, // NB: Fallthrough.
       }
     }
     if error.is_timeout() {

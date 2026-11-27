@@ -7,13 +7,11 @@ pub struct AppAssetsDir {
   path: PathBuf,
 }
 
-impl  DataSubdir for AppAssetsDir {
+impl DataSubdir for AppAssetsDir {
   const DIRECTORY_NAME: &'static str = "assets";
 
   fn new_from<P: AsRef<Path>>(dir: P) -> Self {
-    Self {
-      path: dir.as_ref().to_path_buf(),
-    }
+    Self { path: dir.as_ref().to_path_buf() }
   }
 
   fn path(&self) -> &Path {

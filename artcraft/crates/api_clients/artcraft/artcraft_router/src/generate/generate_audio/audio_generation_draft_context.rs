@@ -18,19 +18,15 @@ pub struct AudioGenerationDraftContext<'a> {
   pub media_file_to_artcraft_url_map: Option<&'a HashMap<MediaFileToken, String>>,
 }
 
-impl <'a> AudioGenerationDraftContext<'a> {
+impl<'a> AudioGenerationDraftContext<'a> {
   pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
     let client = self.client.ok_or(ArtcraftRouterError::Client(ClientError::RouterClientNotProvided))?;
-    client.get_kinovi_web_client_ref()
-      .map_err(|err| ArtcraftRouterError::Client(err))
+    client.get_kinovi_web_client_ref().map_err(|err| ArtcraftRouterError::Client(err))
   }
 }
 
 impl Debug for AudioGenerationDraftContext<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("AudioGenerationDraftContext")
-      .field("client", &self.client.is_some())
-      .field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map)
-      .finish()
+    f.debug_struct("AudioGenerationDraftContext").field("client", &self.client.is_some()).field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map).finish()
   }
 }

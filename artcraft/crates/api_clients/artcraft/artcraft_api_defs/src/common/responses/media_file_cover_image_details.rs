@@ -24,7 +24,6 @@ pub struct MediaFileCoverImageDetails {
   // /// (DEPRECATED) Use maybe_links instead.
   // #[deprecated(note="Use `maybe_links` instead.")]
   // pub maybe_media_links: Option<MediaLinks>,
-
   /// Links to the cover image (CDN direct link, thumbnail template)
   /// If a cover image is set, this is the path to the asset.
   /// If a cover image is not set, use the information in `default_cover` instead.

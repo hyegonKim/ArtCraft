@@ -38,8 +38,6 @@ pub struct SeedreamV4p5TextToImageOutput {
   pub images: Vec<SeedreamV4p5TextToImageFile>,
 }
 
-pub fn seedream_4p5_text_to_image(
-  params: SeedreamV4p5TextToImageInput,
-) -> FalRequest<SeedreamV4p5TextToImageInput, SeedreamV4p5TextToImageOutput> {
+pub fn seedream_4p5_text_to_image(params: SeedreamV4p5TextToImageInput) -> FalRequest<SeedreamV4p5TextToImageInput, SeedreamV4p5TextToImageOutput> {
   FalRequest::new("fal-ai/bytedance/seedream/v4.5/text-to-image", params)
 }

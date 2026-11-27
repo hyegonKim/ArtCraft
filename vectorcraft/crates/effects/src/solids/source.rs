@@ -14,10 +14,7 @@ const MAX_DEPTH: usize = 8;
 
 /// Whether `n` is a symbol instance, blend, or clipping group that resolves into vector members.
 pub(crate) fn resolves(n: &Node) -> bool {
-    matches!(
-        n.kind,
-        NodeKind::SymbolInstance { .. } | NodeKind::Blend { .. } | NodeKind::Group { clip: true, .. }
-    )
+    matches!(n.kind, NodeKind::SymbolInstance { .. } | NodeKind::Blend { .. } | NodeKind::Group { clip: true, .. })
 }
 
 /// Refusal message when a raster image is given to a 3D effect.
@@ -32,12 +29,7 @@ pub(crate) fn resolve<'a>(doc: Option<&'a Document>, n: &'a Node, label: &str) -
 }
 
 /// [`resolve`] for plane (`Rotate`) or solid/revolve 3D effects.
-pub(crate) fn resolve_for<'a>(
-    doc: Option<&'a Document>,
-    n: &'a Node,
-    label: &str,
-    plane: bool,
-) -> Result<Cow<'a, Node>, String> {
+pub(crate) fn resolve_for<'a>(doc: Option<&'a Document>, n: &'a Node, label: &str, plane: bool) -> Result<Cow<'a, Node>, String> {
     resolve_depth(doc, n, label, plane, 0)
 }
 
@@ -49,13 +41,7 @@ fn tree_needs_resolve(n: &Node) -> bool {
 }
 
 #[allow(clippy::only_used_in_recursion)]
-fn resolve_depth<'a>(
-    doc: Option<&'a Document>,
-    n: &'a Node,
-    label: &str,
-    plane: bool,
-    depth: usize,
-) -> Result<Cow<'a, Node>, String> {
+fn resolve_depth<'a>(doc: Option<&'a Document>, n: &'a Node, label: &str, plane: bool, depth: usize) -> Result<Cow<'a, Node>, String> {
     if !tree_needs_resolve(n) {
         return Ok(Cow::Borrowed(n));
     }
@@ -72,7 +58,10 @@ fn resolve_depth<'a>(
             };
             let art = vectorcraft_doc::symbol_overrides::dynamic_art(&sym.art, n);
             let Some(art) = doc.place_symbol_art(symbol, &art, *xf) else {
-                return Err(format!("{} can't build solids from this art: its symbol instances, blends and clipping groups hold too many objects", label));
+                return Err(format!(
+                    "{} can't build solids from this art: its symbol instances, blends and clipping groups hold too many objects",
+                    label
+                ));
             };
             let inner = resolve_depth(Some(doc), &art, label, plane, depth + 1)?.into_owned();
             let mut out = n.clone();
@@ -169,12 +158,7 @@ fn clip_member(
     }
     let (path, rule) = super::object_profile(member, label)?;
     let ctx = GeomContext::of(member);
-    let shaped = apply_geometry_with(
-        &member.appearance.effects,
-        &path,
-        path.bounds().unwrap_or_default(),
-        &ctx,
-    );
+    let shaped = apply_geometry_with(&member.appearance.effects, &path, path.bounds().unwrap_or_default(), &ctx);
     let paints = super::solid_paints(member);
     let mut parts = Vec::new();
     for item in &paints {
@@ -217,11 +201,7 @@ fn clip_member(
         _ => {
             let mut g = member.clone();
             g.kind = NodeKind::Group { children: parts, clip: false };
-            g.appearance = Appearance {
-                effects: crate::without_geometry(&member.appearance.effects),
-                ..Default::default()
-            }
-            .into();
+            g.appearance = Appearance { effects: crate::without_geometry(&member.appearance.effects), ..Default::default() }.into();
             out.push(Arc::new(g));
         }
     }

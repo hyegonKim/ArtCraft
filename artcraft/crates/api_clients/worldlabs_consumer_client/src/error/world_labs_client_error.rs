@@ -4,10 +4,9 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum WorldLabsClientError {
-
   /// An error was encountered in building the Wreq client
   WreqClientError(wreq::Error),
-  
+
   /// Failed to parse JWT claims.
   FailedToParseJwtClaims(jwt_light::error::JwtError),
 
@@ -40,13 +39,13 @@ pub enum WorldLabsClientError {
 
   /// Error parsing HTML
   HtmlParsingError,
-  
+
   /// Error decoding verification token
   FailedToDecodeVerificationToken(DecodeError),
-  
+
   /// Verification token bytes are invalid
   InvalidVerificationTokenBytes,
-  
+
   /// Our script logic is out of date
   ScriptLogicOutOfDate,
 
@@ -58,13 +57,13 @@ pub enum WorldLabsClientError {
 
   /// Our script logic is out of date (script 2)
   Script2LogicOutOfDate,
-  
+
   /// Our script logic is out of date (xsid script)
   ScriptXsidLogicOutOfDate,
 
   /// Signature algorithm isn't working with inputs
   BadSignatureInputs,
-  
+
   /// Something is broken with timeout math
   TimeoutMathBroken,
 
@@ -73,42 +72,41 @@ pub enum WorldLabsClientError {
 
   /// Unknown error generating video
   ErrorGeneratingVideo,
-
-//  /// An error reading the file for upload.
-//  FileForUploadReadError(std::io::Error),
-//
-//  /// The file path provided for upload is invalid.
-//  FileForUploadHasInvalidPath,
-//
-//  /// Something is wrong with the JWT bearer token.
-//  /// This error originates on our end as we try to parse the JWT.
-//  LocalJwtClaimsParseError(String),
-//
-//  /// There was an error constructing the form-multipart request.
-//  MultipartFormError(wreq::Error),
-//
-//  /// We haven't received a bearer token yet
-//  /// This is our own internal application state error, not something Sora returns.
-//  /// We know our client can't make the request, so we preemptively fail it.
-//  NoBearerTokenForRequest,
-//
-//  /// A sentinel token is not present in the client, which is required for some requests.
-//  NoSentinelTokenForRequest,
-//
-//  /// Issue with using the SoraCredentialBuilder.
-//  SoraCredentialBuilderError(&'static str),
-//
-//  /// Error parsing a request URL.
-//  UrlParseError(url::ParseError),
-//
-//  /// Error serializing the sentinel store token to JSON (typically for persistent storage).
-//  CouldNotSerializeSentinelTokenStore(serde_json::Error),
-//
-//  /// Error deserializing the sentinel token from JSON (typically for persistent storage).
-//  CouldNotDeserializeSentinelTokenStore {
-//    error: serde_json::Error,
-//    raw_json: String
-//  },
+  //  /// An error reading the file for upload.
+  //  FileForUploadReadError(std::io::Error),
+  //
+  //  /// The file path provided for upload is invalid.
+  //  FileForUploadHasInvalidPath,
+  //
+  //  /// Something is wrong with the JWT bearer token.
+  //  /// This error originates on our end as we try to parse the JWT.
+  //  LocalJwtClaimsParseError(String),
+  //
+  //  /// There was an error constructing the form-multipart request.
+  //  MultipartFormError(wreq::Error),
+  //
+  //  /// We haven't received a bearer token yet
+  //  /// This is our own internal application state error, not something Sora returns.
+  //  /// We know our client can't make the request, so we preemptively fail it.
+  //  NoBearerTokenForRequest,
+  //
+  //  /// A sentinel token is not present in the client, which is required for some requests.
+  //  NoSentinelTokenForRequest,
+  //
+  //  /// Issue with using the SoraCredentialBuilder.
+  //  SoraCredentialBuilderError(&'static str),
+  //
+  //  /// Error parsing a request URL.
+  //  UrlParseError(url::ParseError),
+  //
+  //  /// Error serializing the sentinel store token to JSON (typically for persistent storage).
+  //  CouldNotSerializeSentinelTokenStore(serde_json::Error),
+  //
+  //  /// Error deserializing the sentinel token from JSON (typically for persistent storage).
+  //  CouldNotDeserializeSentinelTokenStore {
+  //    error: serde_json::Error,
+  //    raw_json: String
+  //  },
 }
 
 impl Error for WorldLabsClientError {}
@@ -139,7 +137,6 @@ impl Display for WorldLabsClientError {
       Self::TimeoutMathBroken => write!(f, "Timeout math is broken"),
       Self::NoCookiesPresent => write!(f, "No cookies present"),
       Self::ErrorGeneratingVideo => write!(f, "Error generating video"),
-
       //Self::FileForUploadReadError(err) => write!(f, "Error reading file for upload: {}", err),
       //Self::FileForUploadHasInvalidPath => write!(f, "The file path provided for upload is invalid."),
       //Self::LocalJwtClaimsParseError(msg) => write!(f, "Local JWT claims parse error: {}", msg),

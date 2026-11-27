@@ -92,11 +92,7 @@ impl PreferredDownloadFilename {
       stem = "artcraft".to_string();
     }
     let device_name = stem.split('.').next().unwrap_or_default().to_ascii_uppercase();
-    if matches!(device_name.as_str(), "CON" | "PRN" | "AUX" | "NUL")
-      || (device_name.len() == 4
-        && (device_name.starts_with("COM") || device_name.starts_with("LPT"))
-        && matches!(device_name.as_bytes()[3], b'1'..=b'9'))
-    {
+    if matches!(device_name.as_str(), "CON" | "PRN" | "AUX" | "NUL") || (device_name.len() == 4 && (device_name.starts_with("COM") || device_name.starts_with("LPT")) && matches!(device_name.as_bytes()[3], b'1'..=b'9')) {
       stem.insert_str(0, "artcraft_");
     }
     let extension = sanitize(parts.extension);
@@ -127,52 +123,24 @@ pub fn model_slug_from_model_type_str(model_type: &str) -> String {
   let mut slug = String::with_capacity(model_type.len());
   let chars = model_type.chars().collect::<Vec<_>>();
   for (i, c) in chars.iter().enumerate() {
-    let is_version_dot =
-      *c == 'p' && i > 0 && i + 1 < chars.len() && chars[i - 1].is_ascii_digit() && chars[i + 1].is_ascii_digit();
+    let is_version_dot = *c == 'p' && i > 0 && i + 1 < chars.len() && chars[i - 1].is_ascii_digit() && chars[i + 1].is_ascii_digit();
     slug.push(if is_version_dot { '.' } else { *c });
   }
   slug
 }
 
 fn full_date_string(time: &DateTime<Local>) -> String {
-  format!(
-    "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
-    time.year(),
-    time.month(),
-    time.day(),
-    time.hour(),
-    time.minute(),
-    time.second(),
-  )
+  format!("{:04}-{:02}-{:02}-{:02}-{:02}-{:02}", time.year(), time.month(), time.day(), time.hour(), time.minute(), time.second(),)
 }
 
 fn expand_format_tokens(format: &str, parts: &DownloadFilenameParts<'_>) -> String {
   let time = &parts.download_time;
-  format
-    .replace("{model}", parts.model_slug)
-    .replace("{date}", &full_date_string(time))
-    .replace("{YYYY}", &format!("{:04}", time.year()))
-    .replace("{YY}", &format!("{:02}", time.year() % 100))
-    .replace("{MM}", &format!("{:02}", time.month()))
-    .replace("{DD}", &format!("{:02}", time.day()))
-    .replace("{HH}", &format!("{:02}", time.hour()))
-    .replace("{mm}", &format!("{:02}", time.minute()))
-    .replace("{SS}", &format!("{:02}", time.second()))
-    .replace(
-      "{batch_index}",
-      &parts.maybe_batch_index.map(|i| i.to_string()).unwrap_or_default(),
-    )
+  format.replace("{model}", parts.model_slug).replace("{date}", &full_date_string(time)).replace("{YYYY}", &format!("{:04}", time.year())).replace("{YY}", &format!("{:02}", time.year() % 100)).replace("{MM}", &format!("{:02}", time.month())).replace("{DD}", &format!("{:02}", time.day())).replace("{HH}", &format!("{:02}", time.hour())).replace("{mm}", &format!("{:02}", time.minute())).replace("{SS}", &format!("{:02}", time.second())).replace("{batch_index}", &parts.maybe_batch_index.map(|i| i.to_string()).unwrap_or_default())
 }
 
 /// Strip anything unsafe out of a rendered filename component.
 fn sanitize(value: &str) -> String {
-  value
-    .chars()
-    .filter(|c| !UNSAFE_CHARACTERS.contains(c) && !c.is_control())
-    .collect::<String>()
-    .replace("..", "_")
-    .trim_matches(|c: char| c.is_whitespace() || c == '.')
-    .to_string()
+  value.chars().filter(|c| !UNSAFE_CHARACTERS.contains(c) && !c.is_control()).collect::<String>().replace("..", "_").trim_matches(|c: char| c.is_whitespace() || c == '.').to_string()
 }
 
 #[cfg(test)]
@@ -185,23 +153,13 @@ mod tests {
 
     #[test]
     fn single_file() {
-      let name = PreferredDownloadFilename::ArtcraftConvention.build_filename(&DownloadFilenameParts {
-        model_slug: "seedance_2.0",
-        download_time: test_time(),
-        maybe_batch_index: None,
-        extension: "mp4",
-      });
+      let name = PreferredDownloadFilename::ArtcraftConvention.build_filename(&DownloadFilenameParts { model_slug: "seedance_2.0", download_time: test_time(), maybe_batch_index: None, extension: "mp4" });
       assert_eq!(name, "seedance_2.0_2026-08-05-14-30-09.mp4");
     }
 
     #[test]
     fn batch_file() {
-      let name = PreferredDownloadFilename::ArtcraftConvention.build_filename(&DownloadFilenameParts {
-        model_slug: "flux_pro_1.1",
-        download_time: test_time(),
-        maybe_batch_index: Some(3),
-        extension: "png",
-      });
+      let name = PreferredDownloadFilename::ArtcraftConvention.build_filename(&DownloadFilenameParts { model_slug: "flux_pro_1.1", download_time: test_time(), maybe_batch_index: Some(3), extension: "png" });
       assert_eq!(name, "flux_pro_1.1_2026-08-05-14-30-09_3.png");
     }
   }
@@ -212,55 +170,29 @@ mod tests {
     #[test]
     fn tokens_expand() {
       let format = PreferredDownloadFilename::Custom("{model}-{YYYY}{MM}{DD}-{HH}{mm}{SS}".to_string());
-      let name = format.build_filename(&DownloadFilenameParts {
-        model_slug: "nano_banana",
-        download_time: test_time(),
-        maybe_batch_index: None,
-        extension: "jpg",
-      });
+      let name = format.build_filename(&DownloadFilenameParts { model_slug: "nano_banana", download_time: test_time(), maybe_batch_index: None, extension: "jpg" });
       assert_eq!(name, "nano_banana-20260805-143009.jpg");
     }
 
     #[test]
     fn batch_index_token() {
       let format = PreferredDownloadFilename::Custom("gen_{batch_index}".to_string());
-      let name = format.build_filename(&DownloadFilenameParts {
-        model_slug: "unused",
-        download_time: test_time(),
-        maybe_batch_index: Some(2),
-        extension: "png",
-      });
+      let name = format.build_filename(&DownloadFilenameParts { model_slug: "unused", download_time: test_time(), maybe_batch_index: Some(2), extension: "png" });
       assert_eq!(name, "gen_2.png");
     }
 
     #[test]
     fn batch_index_appended_when_absent_from_format() {
       let format = PreferredDownloadFilename::Custom("gen".to_string());
-      let name = format.build_filename(&DownloadFilenameParts {
-        model_slug: "unused",
-        download_time: test_time(),
-        maybe_batch_index: Some(2),
-        extension: "png",
-      });
+      let name = format.build_filename(&DownloadFilenameParts { model_slug: "unused", download_time: test_time(), maybe_batch_index: Some(2), extension: "png" });
       assert_eq!(name, "gen_2.png");
     }
 
     #[test]
     fn empty_expansions_reserved_names_and_long_unicode_names_are_portable() {
-      let parts = DownloadFilenameParts {
-        model_slug: "midjourney_8",
-        download_time: test_time(),
-        maybe_batch_index: None,
-        extension: "png",
-      };
-      assert_eq!(
-        PreferredDownloadFilename::Custom("{batch_index}".into()).build_filename(&parts),
-        "artcraft.png"
-      );
-      assert_eq!(
-        PreferredDownloadFilename::Custom("CON".into()).build_filename(&parts),
-        "artcraft_CON.png"
-      );
+      let parts = DownloadFilenameParts { model_slug: "midjourney_8", download_time: test_time(), maybe_batch_index: None, extension: "png" };
+      assert_eq!(PreferredDownloadFilename::Custom("{batch_index}".into()).build_filename(&parts), "artcraft.png");
+      assert_eq!(PreferredDownloadFilename::Custom("CON".into()).build_filename(&parts), "artcraft_CON.png");
       let name = PreferredDownloadFilename::Custom("画".repeat(150)).build_filename(&parts);
       assert!(name.len() < 240);
       assert!(name.ends_with(".png"));
@@ -269,12 +201,7 @@ mod tests {
     #[test]
     fn unsafe_characters_stripped_from_output() {
       let format = PreferredDownloadFilename::Custom("weird{model}".to_string());
-      let name = format.build_filename(&DownloadFilenameParts {
-        model_slug: "a/b\\c\"d",
-        download_time: test_time(),
-        maybe_batch_index: None,
-        extension: "png",
-      });
+      let name = format.build_filename(&DownloadFilenameParts { model_slug: "a/b\\c\"d", download_time: test_time(), maybe_batch_index: None, extension: "png" });
       assert_eq!(name, "weirdabcd.png");
     }
   }
@@ -334,10 +261,7 @@ mod tests {
 
     #[test]
     fn round_trips() {
-      for val in [
-        PreferredDownloadFilename::ArtcraftConvention,
-        PreferredDownloadFilename::Custom("{model}".to_string()),
-      ] {
+      for val in [PreferredDownloadFilename::ArtcraftConvention, PreferredDownloadFilename::Custom("{model}".to_string())] {
         let json = serde_json::to_string(&val).unwrap();
         let back: PreferredDownloadFilename = serde_json::from_str(&json).unwrap();
         assert_eq!(back, val);

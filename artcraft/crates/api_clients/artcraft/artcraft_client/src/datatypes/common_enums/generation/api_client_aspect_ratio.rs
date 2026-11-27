@@ -102,26 +102,7 @@ mod tests {
 
   #[test]
   fn every_known_variant_round_trips() {
-    let all = [
-      (ApiClientAspectRatio::Auto, "auto"),
-      (ApiClientAspectRatio::Square, "square"),
-      (ApiClientAspectRatio::WideThreeByTwo, "wide_three_by_two"),
-      (ApiClientAspectRatio::WideFourByThree, "wide_four_by_three"),
-      (ApiClientAspectRatio::WideFiveByFour, "wide_five_by_four"),
-      (ApiClientAspectRatio::WideSixteenByNine, "wide_sixteen_by_nine"),
-      (ApiClientAspectRatio::WideTwentyOneByNine, "wide_twenty_one_by_nine"),
-      (ApiClientAspectRatio::TallTwoByThree, "tall_two_by_three"),
-      (ApiClientAspectRatio::TallThreeByFour, "tall_three_by_four"),
-      (ApiClientAspectRatio::TallFourByFive, "tall_four_by_five"),
-      (ApiClientAspectRatio::TallNineBySixteen, "tall_nine_by_sixteen"),
-      (ApiClientAspectRatio::TallNineByTwentyOne, "tall_nine_by_twenty_one"),
-      (ApiClientAspectRatio::Wide, "wide"),
-      (ApiClientAspectRatio::Tall, "tall"),
-      (ApiClientAspectRatio::Auto2k, "auto_2k"),
-      (ApiClientAspectRatio::Auto3k, "auto_3k"),
-      (ApiClientAspectRatio::Auto4k, "auto_4k"),
-      (ApiClientAspectRatio::SquareHd, "square_hd"),
-    ];
+    let all = [(ApiClientAspectRatio::Auto, "auto"), (ApiClientAspectRatio::Square, "square"), (ApiClientAspectRatio::WideThreeByTwo, "wide_three_by_two"), (ApiClientAspectRatio::WideFourByThree, "wide_four_by_three"), (ApiClientAspectRatio::WideFiveByFour, "wide_five_by_four"), (ApiClientAspectRatio::WideSixteenByNine, "wide_sixteen_by_nine"), (ApiClientAspectRatio::WideTwentyOneByNine, "wide_twenty_one_by_nine"), (ApiClientAspectRatio::TallTwoByThree, "tall_two_by_three"), (ApiClientAspectRatio::TallThreeByFour, "tall_three_by_four"), (ApiClientAspectRatio::TallFourByFive, "tall_four_by_five"), (ApiClientAspectRatio::TallNineBySixteen, "tall_nine_by_sixteen"), (ApiClientAspectRatio::TallNineByTwentyOne, "tall_nine_by_twenty_one"), (ApiClientAspectRatio::Wide, "wide"), (ApiClientAspectRatio::Tall, "tall"), (ApiClientAspectRatio::Auto2k, "auto_2k"), (ApiClientAspectRatio::Auto3k, "auto_3k"), (ApiClientAspectRatio::Auto4k, "auto_4k"), (ApiClientAspectRatio::SquareHd, "square_hd")];
     for (variant, s) in all {
       assert_eq!(String::from(variant.clone()), s, "serialize mismatch for {:?}", variant);
       let parsed: ApiClientAspectRatio = serde_json::from_str(&format!("\"{}\"", s)).unwrap();

@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::minimax_h3::request::{
-  FalMinimaxH3Mode, FalMinimaxH3RequestState,
-};
+use crate::generate::generate_video::providers::fal::minimax_h3::request::{FalMinimaxH3Mode, FalMinimaxH3RequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -24,15 +22,7 @@ impl FalMinimaxH3CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -96,27 +86,12 @@ mod tests {
     assert!(!estimate.is_free);
   }
 
-  fn base_builder(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-  ) -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::MinimaxH3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    }
+  fn base_builder(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> GenerateVideoRequestBuilder {
+    GenerateVideoRequestBuilder { model: RouterVideoModel::MinimaxH3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() }
   }
 
-  fn builder_with_references(
-    image_count: usize,
-    resolution: Option<RouterResolution>,
-  ) -> GenerateVideoRequestBuilder {
-    let urls = (0..image_count)
-      .map(|i| format!("https://example.com/ref-{}.png", i))
-      .collect();
+  fn builder_with_references(image_count: usize, resolution: Option<RouterResolution>) -> GenerateVideoRequestBuilder {
+    let urls = (0..image_count).map(|i| format!("https://example.com/ref-{}.png", i)).collect();
     let mut b = base_builder(Some(5), resolution);
     b.reference_images = Some(ImageListRef::Urls(urls));
     b

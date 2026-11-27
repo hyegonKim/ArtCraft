@@ -13,14 +13,10 @@ use std::path::Path;
 
 /// Check Sora task statuses with session auto-renewal.
 /// If a new sora credential is returned, replace the old one with the new one.
-pub async fn list_classic_sora_tasks_with_session_auto_renew(
-  credentials: &SoraCredentialSet,
-) -> Result<(ListTasksResponse, Option<SoraCredentialSet>), SoraError> {
-
+pub async fn list_classic_sora_tasks_with_session_auto_renew(credentials: &SoraCredentialSet) -> Result<(ListTasksResponse, Option<SoraCredentialSet>), SoraError> {
   let mut maybe_new_creds = maybe_renew_session(&credentials).await?;
 
-  let upgraded_creds = maybe_new_creds.as_ref()
-      .unwrap_or_else(|| &credentials);
+  let upgraded_creds = maybe_new_creds.as_ref().unwrap_or_else(|| &credentials);
 
   let result = list_classic_tasks(&upgraded_creds).await;
 
@@ -47,14 +43,14 @@ async fn maybe_renew_session(creds: &SoraCredentialSet) -> Result<Option<SoraCre
     // TODO: Handle JWT expired case as well.
     return Ok(None);
   }
-  
+
   info!("JWT not set. Upgrading credentials...");
   let mut updated_creds = creds.clone();
-  
+
   if let Err(err) = maybe_upgrade_or_renew_session(&mut updated_creds).await {
     warn!("Failed to upgrade or renew session: {:?}", err);
     return Err(err);
   }
-  
+
   Ok(Some(updated_creds))
 }

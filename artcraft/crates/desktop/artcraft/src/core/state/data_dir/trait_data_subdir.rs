@@ -1,6 +1,6 @@
 use std::path::Path;
 
-pub trait DataSubdir  : Sized {
+pub trait DataSubdir: Sized {
   const DIRECTORY_NAME: &'static str;
 
   fn new_from<P: AsRef<Path>>(dir: P) -> Self;
@@ -18,7 +18,7 @@ pub trait DataSubdir  : Sized {
       Ok(d) => dir = d,
       Err(err) => {
         println!("Error canonicalizing {:?}: {}", dir, err);
-      }
+      },
     }
 
     if !dir.exists() {

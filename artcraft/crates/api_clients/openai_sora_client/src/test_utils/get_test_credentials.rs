@@ -22,12 +22,7 @@ pub fn get_test_credentials() -> AnyhowResult<SoraCredentialSet> {
   let bearer = read_to_string("/Users/bt/Artcraft/credentials/sora_bearer_token.txt")?;
   let bearer = bearer.trim().to_string();
 
-  let creds = SoraCredentialBuilder::new()
-      .with_cookies(&cookie)
-      .with_jwt_bearer_token(&bearer)
-      .with_sora_sentinel(&sentinel)
-      .with_sora_sentinel_token(&sentinel_token)
-      .build()?;
+  let creds = SoraCredentialBuilder::new().with_cookies(&cookie).with_jwt_bearer_token(&bearer).with_sora_sentinel(&sentinel).with_sora_sentinel_token(&sentinel_token).build()?;
 
   Ok(creds)
 }

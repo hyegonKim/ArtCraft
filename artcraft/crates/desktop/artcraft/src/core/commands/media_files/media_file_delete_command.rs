@@ -31,50 +31,25 @@ pub struct MediaFileDeleteSuccessResponse {
 impl SerializeMarker for MediaFileDeleteSuccessResponse {}
 
 #[tauri::command]
-pub async fn media_file_delete_command(
-  app: AppHandle,
-  request: MediaFileDeleteRequest,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> ResponseOrErrorMessage<MediaFileDeleteSuccessResponse> {
-
+pub async fn media_file_delete_command(app: AppHandle, request: MediaFileDeleteRequest, app_env_configs: State<'_, AppEnvConfigs>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> ResponseOrErrorMessage<MediaFileDeleteSuccessResponse> {
   info!("media_file_delete_command called");
 
-  let result = handle_request(
-    request,
-    &app,
-    &app_env_configs,
-    &storyteller_creds_manager,
-  ).await;
+  let result = handle_request(request, &app, &app_env_configs, &storyteller_creds_manager).await;
 
   if let Err(err) = result {
     error!("media_file_delete_command failed: {:?}", err);
-    return Err("delete failed".into())
+    return Err("delete failed".into());
   }
 
-  Ok(MediaFileDeleteSuccessResponse {
-    success: true,
-  }.into())
+  Ok(MediaFileDeleteSuccessResponse { success: true }.into())
 }
 
-pub async fn handle_request(
-  request: MediaFileDeleteRequest,
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<()> {
-
+pub async fn handle_request(request: MediaFileDeleteRequest, app: &AppHandle, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<()> {
   let creds = storyteller_creds_manager.get_credentials()?;
 
-  let _result = delete_media_file(
-    &app_env_configs.storyteller_host,
-    creds.as_ref(),
-    &request.media_file_token
-  ).await?;
+  let _result = delete_media_file(&app_env_configs.storyteller_host, creds.as_ref(), &request.media_file_token).await?;
 
-  MediaFileDeletedEvent {
-    media_file_token: request.media_file_token,
-  }.send_infallible(app);
+  MediaFileDeletedEvent { media_file_token: request.media_file_token }.send_infallible(app);
 
   Ok(())
 }

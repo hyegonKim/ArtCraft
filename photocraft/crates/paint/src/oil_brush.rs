@@ -67,13 +67,7 @@ pub struct OilBrushParams {
 
 impl Default for OilBrushParams {
     fn default() -> Self {
-        Self {
-            preset: OilBrushPreset::Round,
-            size: 28.0,
-            paint_mix: 0.45,
-            opacity: 1.0,
-            color: [0.85, 0.25, 0.18, 1.0],
-        }
+        Self { preset: OilBrushPreset::Round, size: 28.0, paint_mix: 0.45, opacity: 1.0, color: [0.85, 0.25, 0.18, 1.0] }
     }
 }
 
@@ -255,11 +249,7 @@ pub fn paint_oil_stroke(
                 }
 
                 let dst = &mut canvas[ly * w + lx];
-                let out_a = if lock_alpha {
-                    dst[3]
-                } else {
-                    (dab_a + dst[3] * (1.0 - dab_a)).clamp(0.0, 1.0)
-                };
+                let out_a = if lock_alpha { dst[3] } else { (dab_a + dst[3] * (1.0 - dab_a)).clamp(0.0, 1.0) };
                 if out_a > 1e-6 {
                     let eff_a = if lock_alpha { dab_a.min(dst[3]) } else { dab_a };
                     for c in 0..3 {

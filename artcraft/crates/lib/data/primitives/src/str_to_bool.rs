@@ -1,4 +1,3 @@
-
 /// Convert string values to bool.
 /// Empty, "0", "false", "False", and "FALSE" are considered false
 pub fn str_to_bool(input: &str) -> bool {

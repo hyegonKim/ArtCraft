@@ -1,4 +1,3 @@
-
 /// This is for Fal's OpenAI "Bring Your Own Key" (BYOK) endpoints.
 #[derive(Clone)]
 pub struct OpenAiApiKey(pub String);

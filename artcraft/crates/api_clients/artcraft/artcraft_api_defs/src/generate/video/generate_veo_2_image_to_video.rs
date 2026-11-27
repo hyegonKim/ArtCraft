@@ -9,11 +9,11 @@ pub const GENERATE_VEO_2_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/generate/video/veo
 pub struct GenerateVeo2ImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
-  
+
   /// Optional text prompt.
   pub prompt: Option<String>,
 

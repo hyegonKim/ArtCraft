@@ -29,34 +29,31 @@ pub enum EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds {
   Ten,
 }
 
-
 impl FalRequestCostCalculator for EnqueueKlingV2p5TurboStandardImageToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // "For 5s video your request will cost $0.21.
     //  For every additional second you will be charged $0.042."
     match self.duration {
-      None => 21, // $0.21
+      None => 21,                                                                 // $0.21
       Some(EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Five) => 21, // $0.21
-      Some(EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Ten) => 42, // $0.21 + (5 * $0.042) = $0.42
+      Some(EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Ten) => 42,  // $0.21 + (5 * $0.042) = $0.42
     }
   }
 }
 
 /// Kling 2.5 Turbo Standard Image-to-Video
 /// https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/standard/image-to-video
-pub async fn enqueue_kling_v2p5_turbo_standard_image_to_video_webhook<R: IntoUrl>(
-  args: EnqueueKlingV2p5TurboStandardImageToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_kling_v2p5_turbo_standard_image_to_video_webhook<R: IntoUrl>(args: EnqueueKlingV2p5TurboStandardImageToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   // NB: Defaults to 5 seconds.
-  let duration = req.duration
-      .map(|resolution| match resolution {
-        EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Five => "5",
-        EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Ten => "10",
-      })
-      .map(|resolution| resolution.to_string());
+  let duration = req
+    .duration
+    .map(|resolution| match resolution {
+      EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Five => "5",
+      EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Ten => "10",
+    })
+    .map(|resolution| resolution.to_string());
 
   let request = KlingV2p5TurboStandardImageToVideoInput {
     prompt: req.prompt,
@@ -68,10 +65,7 @@ pub async fn enqueue_kling_v2p5_turbo_standard_image_to_video_webhook<R: IntoUrl
     cfg_scale: None,
   };
 
-  let result = kling_v2p5_turbo_standard_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = kling_v2p5_turbo_standard_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -92,16 +86,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueKlingV2p5TurboStandardImageToVideoArgs {
-      request: EnqueueKlingV2p5TurboStandardImageToVideoRequest {
-        image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-        prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(),
-        negative_prompt: None,
-        duration: Some(EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Five),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueKlingV2p5TurboStandardImageToVideoArgs { request: EnqueueKlingV2p5TurboStandardImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(), negative_prompt: None, duration: Some(EnqueueKlingV2p5TurboStandardImageToVideoDurationSeconds::Five) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_kling_v2p5_turbo_standard_image_to_video_webhook(args).await?;
 

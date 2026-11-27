@@ -8,7 +8,7 @@ use std::path::Path;
 /// Read a file into a base64 URL-safe string.
 pub fn file_to_base64_url<P: AsRef<Path>>(path: P) -> AnyhowResult<String> {
   let bytes = std::fs::read(path.as_ref())?;
-  
+
   let mime = match MimetypeInfo::get_for_bytes(&bytes) {
     Some(mime) => mime,
     None => {
@@ -17,7 +17,7 @@ pub fn file_to_base64_url<P: AsRef<Path>>(path: P) -> AnyhowResult<String> {
   };
 
   let base64_bytes = BASE64_STANDARD.encode(&bytes);
-  
+
   match mime.mime_type() {
     "image/png" => Ok(format!("data:image/png;base64,{}", base64_bytes)),
     "image/jpeg" => Ok(format!("data:image/jpeg;base64,{}", base64_bytes)),
@@ -39,7 +39,7 @@ mod tests {
     assert!(base64_url.starts_with("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD"));
     assert!(base64_url.ends_with("z8c2LAteJ5zOIDcX5m04K3P/2Q=="));
     assert_eq!(base64_url.len(), 223991);
-    
+
     Ok(())
   }
 }

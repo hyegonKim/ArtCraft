@@ -6,20 +6,12 @@ use artcraft_api_defs::subscriptions::get_session_subscription::GetSessionSubscr
 use enums::common::payments_namespace::PaymentsNamespace;
 use log::debug;
 
-pub async fn get_session_subscription(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  payments_namespace: PaymentsNamespace
-) -> Result<GetSessionSubscriptionResponse, StorytellerError> {
+pub async fn get_session_subscription(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, payments_namespace: PaymentsNamespace) -> Result<GetSessionSubscriptionResponse, StorytellerError> {
   let url_path = get_url_path(payments_namespace);
 
   debug!("Requesting {:?}", &url_path);
 
-  Ok(basic_json_get_request(
-    api_host,
-    &url_path,
-    maybe_creds,
-  ).await?)
+  Ok(basic_json_get_request(api_host, &url_path, maybe_creds).await?)
 }
 
 fn get_url_path(payments_namespace: PaymentsNamespace) -> String {

@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::kling_3p0_standard_text_to_video::raw_request::{
-  Kling3p0StandardTextToVideoInput, Kling3p0StandardTextToVideoOutput,
-};
+use crate::requests::api::video::text::kling_3p0_standard_text_to_video::raw_request::{Kling3p0StandardTextToVideoInput, Kling3p0StandardTextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -102,26 +100,24 @@ impl FalEndpoint for Kling3p0StandardTextToVideoRequest {
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
     let duration = self.duration.map(|d| d.to_str().to_string());
 
-    let aspect_ratio = self.aspect_ratio.map(|ar| match ar {
-      Kling3p0StandardTextToVideoAspectRatio::Square => "1:1",
-      Kling3p0StandardTextToVideoAspectRatio::SixteenByNine => "16:9",
-      Kling3p0StandardTextToVideoAspectRatio::NineBySixteen => "9:16",
-    }.to_string());
+    let aspect_ratio = self.aspect_ratio.map(|ar| {
+      match ar {
+        Kling3p0StandardTextToVideoAspectRatio::Square => "1:1",
+        Kling3p0StandardTextToVideoAspectRatio::SixteenByNine => "16:9",
+        Kling3p0StandardTextToVideoAspectRatio::NineBySixteen => "9:16",
+      }
+      .to_string()
+    });
 
-    let shot_type = self.shot_type.map(|st| match st {
-      Kling3p0StandardTextToVideoShotType::Customize => "customize",
-      Kling3p0StandardTextToVideoShotType::Intelligent => "intelligent",
-    }.to_string());
+    let shot_type = self.shot_type.map(|st| {
+      match st {
+        Kling3p0StandardTextToVideoShotType::Customize => "customize",
+        Kling3p0StandardTextToVideoShotType::Intelligent => "intelligent",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      generate_audio: self.generate_audio,
-      negative_prompt: self.negative_prompt.clone(),
-      duration,
-      aspect_ratio,
-      shot_type,
-      cfg_scale: None,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), generate_audio: self.generate_audio, negative_prompt: self.negative_prompt.clone(), duration, aspect_ratio, shot_type, cfg_scale: None })
   }
 }
 
@@ -139,14 +135,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling3p0StandardTextToVideoRequest {
-      prompt: "a golden retriever puppy chases butterflies through a sunlit meadow, cinematic slow motion".to_string(),
-      generate_audio: Some(true),
-      negative_prompt: None,
-      duration: Some(Kling3p0StandardTextToVideoDuration::FiveSeconds),
-      aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine),
-      shot_type: None,
-    };
+    let request = Kling3p0StandardTextToVideoRequest { prompt: "a golden retriever puppy chases butterflies through a sunlit meadow, cinematic slow motion".to_string(), generate_audio: Some(true), negative_prompt: None, duration: Some(Kling3p0StandardTextToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine), shot_type: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -160,14 +149,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling3p0StandardTextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      generate_audio: Some(false),
-      negative_prompt: None,
-      duration: Some(Kling3p0StandardTextToVideoDuration::ThreeSeconds),
-      aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine),
-      shot_type: None,
-    };
+    let request = Kling3p0StandardTextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), generate_audio: Some(false), negative_prompt: None, duration: Some(Kling3p0StandardTextToVideoDuration::ThreeSeconds), aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine), shot_type: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -181,22 +163,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let aspect_ratios = [
-      Kling3p0StandardTextToVideoAspectRatio::Square,
-      Kling3p0StandardTextToVideoAspectRatio::SixteenByNine,
-      Kling3p0StandardTextToVideoAspectRatio::NineBySixteen,
-    ];
+    let aspect_ratios = [Kling3p0StandardTextToVideoAspectRatio::Square, Kling3p0StandardTextToVideoAspectRatio::SixteenByNine, Kling3p0StandardTextToVideoAspectRatio::NineBySixteen];
 
     for ar in aspect_ratios {
       println!("--- aspect ratio: {:?} ---", ar);
-      let request = Kling3p0StandardTextToVideoRequest {
-        prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-        generate_audio: Some(true),
-        negative_prompt: None,
-        duration: Some(Kling3p0StandardTextToVideoDuration::ThreeSeconds),
-        aspect_ratio: Some(ar),
-        shot_type: None,
-      };
+      let request = Kling3p0StandardTextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), generate_audio: Some(true), negative_prompt: None, duration: Some(Kling3p0StandardTextToVideoDuration::ThreeSeconds), aspect_ratio: Some(ar), shot_type: None };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -210,32 +181,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let durations = [
-      Kling3p0StandardTextToVideoDuration::ThreeSeconds,
-      Kling3p0StandardTextToVideoDuration::FourSeconds,
-      Kling3p0StandardTextToVideoDuration::FiveSeconds,
-      Kling3p0StandardTextToVideoDuration::SixSeconds,
-      Kling3p0StandardTextToVideoDuration::SevenSeconds,
-      Kling3p0StandardTextToVideoDuration::EightSeconds,
-      Kling3p0StandardTextToVideoDuration::NineSeconds,
-      Kling3p0StandardTextToVideoDuration::TenSeconds,
-      Kling3p0StandardTextToVideoDuration::ElevenSeconds,
-      Kling3p0StandardTextToVideoDuration::TwelveSeconds,
-      Kling3p0StandardTextToVideoDuration::ThirteenSeconds,
-      Kling3p0StandardTextToVideoDuration::FourteenSeconds,
-      Kling3p0StandardTextToVideoDuration::FifteenSeconds,
-    ];
+    let durations = [Kling3p0StandardTextToVideoDuration::ThreeSeconds, Kling3p0StandardTextToVideoDuration::FourSeconds, Kling3p0StandardTextToVideoDuration::FiveSeconds, Kling3p0StandardTextToVideoDuration::SixSeconds, Kling3p0StandardTextToVideoDuration::SevenSeconds, Kling3p0StandardTextToVideoDuration::EightSeconds, Kling3p0StandardTextToVideoDuration::NineSeconds, Kling3p0StandardTextToVideoDuration::TenSeconds, Kling3p0StandardTextToVideoDuration::ElevenSeconds, Kling3p0StandardTextToVideoDuration::TwelveSeconds, Kling3p0StandardTextToVideoDuration::ThirteenSeconds, Kling3p0StandardTextToVideoDuration::FourteenSeconds, Kling3p0StandardTextToVideoDuration::FifteenSeconds];
 
     for dur in durations {
       println!("--- duration: {:?} ---", dur);
-      let request = Kling3p0StandardTextToVideoRequest {
-        prompt: "a candle flame flickers in a dark room".to_string(),
-        generate_audio: Some(false),
-        negative_prompt: None,
-        duration: Some(dur),
-        aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine),
-        shot_type: None,
-      };
+      let request = Kling3p0StandardTextToVideoRequest { prompt: "a candle flame flickers in a dark room".to_string(), generate_audio: Some(false), negative_prompt: None, duration: Some(dur), aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine), shot_type: None };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -249,21 +199,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let shot_types = [
-      Kling3p0StandardTextToVideoShotType::Customize,
-      Kling3p0StandardTextToVideoShotType::Intelligent,
-    ];
+    let shot_types = [Kling3p0StandardTextToVideoShotType::Customize, Kling3p0StandardTextToVideoShotType::Intelligent];
 
     for st in shot_types {
       println!("--- shot type: {:?} ---", st);
-      let request = Kling3p0StandardTextToVideoRequest {
-        prompt: "a bird takes flight from a tree branch".to_string(),
-        generate_audio: Some(true),
-        negative_prompt: None,
-        duration: Some(Kling3p0StandardTextToVideoDuration::FiveSeconds),
-        aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine),
-        shot_type: Some(st),
-      };
+      let request = Kling3p0StandardTextToVideoRequest { prompt: "a bird takes flight from a tree branch".to_string(), generate_audio: Some(true), negative_prompt: None, duration: Some(Kling3p0StandardTextToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine), shot_type: Some(st) };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }

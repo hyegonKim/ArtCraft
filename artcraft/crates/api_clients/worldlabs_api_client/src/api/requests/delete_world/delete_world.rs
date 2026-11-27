@@ -31,28 +31,23 @@ pub async fn delete_world(args: DeleteWorldArgs<'_>) -> Result<DeleteWorldRespon
 
   debug!("Requesting URL: {}", url);
 
-  let mut request_builder = client.delete(&url)
-    .header("WLT-Api-Key", args.creds.api_key());
+  let mut request_builder = client.delete(&url).header("WLT-Api-Key", args.creds.api_key());
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during delete_world request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during delete_world request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("delete_world returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -62,13 +57,9 @@ pub async fn delete_world(args: DeleteWorldArgs<'_>) -> Result<DeleteWorldRespon
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  Ok(DeleteWorldResponse {
-    world_id: WorldId(raw.world_id),
-    deleted: raw.deleted,
-  })
+  Ok(DeleteWorldResponse { world_id: WorldId(raw.world_id), deleted: raw.deleted })
 }
 
 #[cfg(test)]
@@ -88,11 +79,7 @@ mod tests {
     // Use a known world_id to delete
     let world_id = WorldId::from_str("REPLACE_WITH_REAL_ID");
 
-    let response = delete_world(DeleteWorldArgs {
-      creds: &creds,
-      world_id: &world_id,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = delete_world(DeleteWorldArgs { creds: &creds, world_id: &world_id, request_timeout: None }).await.unwrap();
 
     println!("World ID: {}", response.world_id.as_str());
     println!("Deleted: {}", response.deleted);

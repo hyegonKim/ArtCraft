@@ -4,9 +4,7 @@ use crate::pricing::cost::kinovi_generation_cost::KinoviGenerationCost;
 use crate::creds::kinovi_web_session::KinoviWebSession;
 use crate::error::kinovi_web_error::KinoviWebError;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse};
 
 const BUSINESS_TYPE: &str = "suno-remix-generation";
 const MODEL: &str = "suno-remix";
@@ -75,20 +73,10 @@ pub struct GenerateSunoRemixResponse {
 
 // ── Entry point ──
 
-pub async fn generate_suno_remix(
-  args: GenerateSunoRemixArgs<'_>,
-) -> Result<GenerateSunoRemixResponse, KinoviWebError> {
-  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs {
-    business_type: BUSINESS_TYPE,
-    api_params: build_api_params(&args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_suno_remix(args: GenerateSunoRemixArgs<'_>) -> Result<GenerateSunoRemixResponse, KinoviWebError> {
+  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs { business_type: BUSINESS_TYPE, api_params: build_api_params(&args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSunoRemixResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-  })
+  Ok(GenerateSunoRemixResponse { task_id: raw_response.task_id, order_id: raw_response.order_id })
 }
 
 // ── Wire payload ──
@@ -119,17 +107,7 @@ fn build_api_params(request: &GenerateSunoRemixRequest) -> SunoRemixApiParams {
     KinoviSunoRemixSource::MusicId(id) => (None, Some(id.clone())),
   };
 
-  SunoRemixApiParams {
-    model: MODEL,
-    prompt: request.prompt.clone(),
-    audio_url,
-    music_id,
-    custom: false,
-    keep_lyrics: request.keep_lyrics,
-    mv: MODEL_VERSION,
-    tags: request.style_tags.clone(),
-    is_storage: true,
-  }
+  SunoRemixApiParams { model: MODEL, prompt: request.prompt.clone(), audio_url, music_id, custom: false, keep_lyrics: request.keep_lyrics, mv: MODEL_VERSION, tags: request.style_tags.clone(), is_storage: true }
 }
 
 // ── Tests ──
@@ -142,12 +120,7 @@ mod tests {
     use super::*;
 
     fn base_request() -> GenerateSunoRemixRequest {
-      GenerateSunoRemixRequest {
-        prompt: "Make this electronic".to_string(),
-        source: KinoviSunoRemixSource::AudioUrl("https://example.com/a.mp3".to_string()),
-        style_tags: None,
-        keep_lyrics: false,
-      }
+      GenerateSunoRemixRequest { prompt: "Make this electronic".to_string(), source: KinoviSunoRemixSource::AudioUrl("https://example.com/a.mp3".to_string()), style_tags: None, keep_lyrics: false }
     }
 
     #[test]
@@ -168,12 +141,7 @@ mod tests {
     #[test]
     fn options_do_not_affect_cost() {
       let base = base_request().calculate_costs();
-      let other = GenerateSunoRemixRequest {
-        prompt: "Make this a symphony".to_string(),
-        source: KinoviSunoRemixSource::MusicId("abc".to_string()),
-        style_tags: Some("Classical music".to_string()),
-        keep_lyrics: true,
-      }.calculate_costs();
+      let other = GenerateSunoRemixRequest { prompt: "Make this a symphony".to_string(), source: KinoviSunoRemixSource::MusicId("abc".to_string()), style_tags: Some("Classical music".to_string()), keep_lyrics: true }.calculate_costs();
       assert_eq!(base, other);
     }
   }
@@ -184,34 +152,16 @@ mod tests {
     /// Mirrors capture 5_suno_remix.txt (uploaded audio URL, no lyric keep).
     #[test]
     fn audio_url_source() {
-      let params = build_api_params(&GenerateSunoRemixRequest {
-        prompt: "Make this electronic".to_string(),
-        source: KinoviSunoRemixSource::AudioUrl(
-          "https://static.seedance2-pro.com/materials/20260707/1783399892833-7d9668fb.mp3".to_string(),
-        ),
-        style_tags: Some("EDM style".to_string()),
-        keep_lyrics: false,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-remix","prompt":"Make this electronic","audioUrl":"https://static.seedance2-pro.com/materials/20260707/1783399892833-7d9668fb.mp3","custom":false,"keepLyrics":false,"mv":"chirp-v5-5","tags":"EDM style","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoRemixRequest { prompt: "Make this electronic".to_string(), source: KinoviSunoRemixSource::AudioUrl("https://static.seedance2-pro.com/materials/20260707/1783399892833-7d9668fb.mp3".to_string()), style_tags: Some("EDM style".to_string()), keep_lyrics: false });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-remix","prompt":"Make this electronic","audioUrl":"https://static.seedance2-pro.com/materials/20260707/1783399892833-7d9668fb.mp3","custom":false,"keepLyrics":false,"mv":"chirp-v5-5","tags":"EDM style","isStorage":true}"#,);
     }
 
     /// Mirrors capture 6_suno_remix_lyrics.txt (existing track by music id,
     /// keeping the lyrics).
     #[test]
     fn music_id_source_with_kept_lyrics() {
-      let params = build_api_params(&GenerateSunoRemixRequest {
-        prompt: "Make this a symphony".to_string(),
-        source: KinoviSunoRemixSource::MusicId("fea7e70c-5373-452d-9c5e-f079ff837fcd".to_string()),
-        style_tags: Some("Classical music".to_string()),
-        keep_lyrics: true,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-remix","prompt":"Make this a symphony","musicId":"fea7e70c-5373-452d-9c5e-f079ff837fcd","custom":false,"keepLyrics":true,"mv":"chirp-v5-5","tags":"Classical music","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoRemixRequest { prompt: "Make this a symphony".to_string(), source: KinoviSunoRemixSource::MusicId("fea7e70c-5373-452d-9c5e-f079ff837fcd".to_string()), style_tags: Some("Classical music".to_string()), keep_lyrics: true });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-remix","prompt":"Make this a symphony","musicId":"fea7e70c-5373-452d-9c5e-f079ff837fcd","custom":false,"keepLyrics":true,"mv":"chirp-v5-5","tags":"Classical music","isStorage":true}"#,);
     }
 
     #[test]
@@ -237,16 +187,7 @@ mod tests {
       let audio_url = upload_test_audio(&session).await?;
       println!("Uploaded audio: {}", audio_url);
 
-      let result = generate_suno_remix(GenerateSunoRemixArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSunoRemixRequest {
-          prompt: "Make this electronic".to_string(),
-          source: KinoviSunoRemixSource::AudioUrl(audio_url),
-          style_tags: Some("EDM style".to_string()),
-          keep_lyrics: false,
-        },
-      }).await?;
+      let result = generate_suno_remix(GenerateSunoRemixArgs { session: &session, host_override: None, request: GenerateSunoRemixRequest { prompt: "Make this electronic".to_string(), source: KinoviSunoRemixSource::AudioUrl(audio_url), style_tags: Some("EDM style".to_string()), keep_lyrics: false } }).await?;
       println!("suno remix — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -260,22 +201,12 @@ mod tests {
     }
 
     async fn upload_test_audio(session: &KinoviWebSession) -> AnyhowResult<String> {
-      let audio_path = test_utils::test_file_path::test_file_path(
-        "test_data/audio/mp3/super_mario_rpg_beware_the_forests_mushrooms.mp3",
-      )?;
+      let audio_path = test_utils::test_file_path::test_file_path("test_data/audio/mp3/super_mario_rpg_beware_the_forests_mushrooms.mp3")?;
       let audio_bytes = std::fs::read(&audio_path)?;
 
-      let prepare_result = prepare_file_upload(PrepareFileUploadArgs {
-        session,
-        extension: "mp3".to_string(),
-        host_override: None,
-      }).await?;
+      let prepare_result = prepare_file_upload(PrepareFileUploadArgs { session, extension: "mp3".to_string(), host_override: None }).await?;
 
-      let upload_result = upload_file(UploadFileArgs {
-        upload_url: prepare_result.upload_url,
-        file_bytes: audio_bytes,
-        host_override: None,
-      }).await?;
+      let upload_result = upload_file(UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes: audio_bytes, host_override: None }).await?;
 
       Ok(upload_result.public_url)
     }

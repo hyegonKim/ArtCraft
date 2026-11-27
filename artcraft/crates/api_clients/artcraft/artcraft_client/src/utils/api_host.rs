@@ -1,4 +1,3 @@
-
 use artcraft_client_identity::origins::{ARTCRAFT_DESKTOP_DEVELOPMENT_ORIGIN, ARTCRAFT_DESKTOP_ORIGIN};
 
 const HTTP_SCHEME: &str = "http";
@@ -28,7 +27,7 @@ impl ApiHost {
       ApiHost::Localhost { port } => format!("http://localhost:{}", port),
     }
   }
-  
+
   /// The `Origin` the desktop client declares to this API.
   pub fn request_origin(&self) -> &'static str {
     match self {

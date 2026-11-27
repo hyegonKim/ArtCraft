@@ -1,5 +1,5 @@
-//! This is copied from the stripe crate's `SubscriptionStatus`, 
-//! and then from `reusable_types`. 
+//! This is copied from the stripe crate's `SubscriptionStatus`,
+//! and then from `reusable_types`.
 
 // There are three changes from the source create:
 //   - Renamed the struct from SubscriptionStatus to StripeSubscriptionStatus
@@ -14,7 +14,7 @@
 //   - from_str() : changed error from string to EnumError
 //   - Added all_variants()
 //   - commented out all other impls.
-// 
+//
 
 use std::collections::BTreeSet;
 
@@ -24,7 +24,6 @@ use strum::EnumCount;
 #[cfg(test)]
 use strum::EnumIter;
 use utoipa::ToSchema;
-
 
 // NB: Added "sqlx::Type".
 #[cfg_attr(test, derive(EnumIter, EnumCount))]
@@ -55,7 +54,7 @@ impl StripeSubscriptionStatus {
       Self::PastDue => "past_due",
       Self::Trialing => "trialing",
       Self::Unpaid => "unpaid",
-      Self::Paused => "paused"
+      Self::Paused => "paused",
     }
   }
 
@@ -76,16 +75,7 @@ impl StripeSubscriptionStatus {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Active,
-      Self::Canceled,
-      Self::Incomplete,
-      Self::IncompleteExpired,
-      Self::PastDue,
-      Self::Trialing,
-      Self::Unpaid,
-      Self::Paused,
-    ])
+    BTreeSet::from([Self::Active, Self::Canceled, Self::Incomplete, Self::IncompleteExpired, Self::PastDue, Self::Trialing, Self::Unpaid, Self::Paused])
   }
 }
 
@@ -209,7 +199,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in StripeSubscriptionStatus::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);
@@ -218,31 +208,3 @@ mod tests {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

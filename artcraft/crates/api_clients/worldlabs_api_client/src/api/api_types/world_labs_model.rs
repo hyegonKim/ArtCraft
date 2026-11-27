@@ -4,13 +4,13 @@ pub enum WorldLabsModel {
   /// `Marble 0.1-mini` is good for quick drafts
   /// Generation time: 30-45 seconds
   /// Cost: 150-330 credits
-  #[deprecated(note="Marble 0.1-mini is deprecated. Use `marble-1.0-draft` instead.")]
+  #[deprecated(note = "Marble 0.1-mini is deprecated. Use `marble-1.0-draft` instead.")]
   Marble0p1Mini,
 
   /// `Marble 0.1-plus` is best for final renders
   /// Generation time: ~5 minutes,
   /// Cost: 1500-1600 credits
-  #[deprecated(note="Marble 0.1-plus is deprecated. Use `marble-1.0` instead.")]
+  #[deprecated(note = "Marble 0.1-plus is deprecated. Use `marble-1.0` instead.")]
   Marble0p1Plus,
 
   /// marble-1.0
@@ -176,12 +176,7 @@ mod tests {
 
     #[test]
     fn new_models_are_not_deprecated_after_conversion() {
-      for model in [
-        WorldLabsModel::Marble1p0,
-        WorldLabsModel::Marble1p0Draft,
-        WorldLabsModel::Marble1p1,
-        WorldLabsModel::Marble1p1Plus,
-      ] {
+      for model in [WorldLabsModel::Marble1p0, WorldLabsModel::Marble1p0Draft, WorldLabsModel::Marble1p1, WorldLabsModel::Marble1p1Plus] {
         let new = model.to_new_value();
         assert!(!new.is_deprecated(), "{:?} should not be deprecated after to_new_value", model);
       }

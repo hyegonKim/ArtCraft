@@ -49,11 +49,7 @@ impl VoiceConversionModelType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::RvcV2,
-      Self::SoftVc,
-      Self::SoVitsSvc,
-    ])
+    BTreeSet::from([Self::RvcV2, Self::SoftVc, Self::SoVitsSvc])
   }
 }
 

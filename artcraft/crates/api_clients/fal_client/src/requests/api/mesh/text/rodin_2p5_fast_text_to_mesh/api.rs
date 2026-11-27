@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::text::rodin_2p5_fast_text_to_mesh::raw_request::{
-  Rodin2p5FastBboxCondition, Rodin2p5FastTextToMeshInput, Rodin2p5FastTextToMeshOutput,
-};
+use crate::requests::api::mesh::text::rodin_2p5_fast_text_to_mesh::raw_request::{Rodin2p5FastBboxCondition, Rodin2p5FastTextToMeshInput, Rodin2p5FastTextToMeshOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Hyper3D Rodin v2.5 Fast text-to-3D.
@@ -167,21 +165,7 @@ impl FalEndpoint for Rodin2p5FastTextToMeshRequest {
   type RawResponse = Rodin2p5FastTextToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      tier: self.tier.map(|t| t.to_str().to_string()),
-      seed: self.seed,
-      geometry_file_format: self.geometry_file_format.map(|f| f.to_str().to_string()),
-      material: self.material.map(|m| m.to_str().to_string()),
-      quality_mesh_option: self.quality_mesh_option.map(|q| q.to_str().to_string()),
-      texture_mode: self.texture_mode.map(|t| t.to_str().to_string()),
-      enable_creative_mode: self.enable_creative_mode,
-      hd_texture: self.hd_texture,
-      texture_delight: self.texture_delight,
-      is_micro: self.is_micro,
-      ta_pose: self.ta_pose,
-      bbox_condition: self.bbox_condition.clone(),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), tier: self.tier.map(|t| t.to_str().to_string()), seed: self.seed, geometry_file_format: self.geometry_file_format.map(|f| f.to_str().to_string()), material: self.material.map(|m| m.to_str().to_string()), quality_mesh_option: self.quality_mesh_option.map(|q| q.to_str().to_string()), texture_mode: self.texture_mode.map(|t| t.to_str().to_string()), enable_creative_mode: self.enable_creative_mode, hd_texture: self.hd_texture, texture_delight: self.texture_delight, is_micro: self.is_micro, ta_pose: self.ta_pose, bbox_condition: self.bbox_condition.clone() })
   }
 }
 
@@ -194,21 +178,7 @@ mod tests {
   use std::fs::read_to_string;
 
   fn base_request() -> Rodin2p5FastTextToMeshRequest {
-    Rodin2p5FastTextToMeshRequest {
-      prompt: "a futuristic robot with sleek metallic design".to_string(),
-      tier: None,
-      seed: None,
-      geometry_file_format: None,
-      material: None,
-      quality_mesh_option: None,
-      texture_mode: None,
-      enable_creative_mode: None,
-      hd_texture: None,
-      texture_delight: None,
-      is_micro: None,
-      ta_pose: None,
-      bbox_condition: None,
-    }
+    Rodin2p5FastTextToMeshRequest { prompt: "a futuristic robot with sleek metallic design".to_string(), tier: None, seed: None, geometry_file_format: None, material: None, quality_mesh_option: None, texture_mode: None, enable_creative_mode: None, hd_texture: None, texture_delight: None, is_micro: None, ta_pose: None, bbox_condition: None }
   }
 
   #[tokio::test]
@@ -237,16 +207,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_core_fields() {
-    let request = Rodin2p5FastTextToMeshRequest {
-      tier: Some(Rodin2p5FastTier::Low),
-      geometry_file_format: Some(Rodin2p5FastGeometryFileFormat::Fbx),
-      material: Some(Rodin2p5FastMaterial::Pbr),
-      quality_mesh_option: Some(Rodin2p5FastQualityMeshOption::Quad4k),
-      texture_mode: Some(Rodin2p5FastTextureMode::High),
-      ta_pose: Some(true),
-      bbox_condition: Some(Rodin2p5FastBboxCondition { width: 10, height: 20, length: 30 }),
-      ..base_request()
-    };
+    let request = Rodin2p5FastTextToMeshRequest { tier: Some(Rodin2p5FastTier::Low), geometry_file_format: Some(Rodin2p5FastGeometryFileFormat::Fbx), material: Some(Rodin2p5FastMaterial::Pbr), quality_mesh_option: Some(Rodin2p5FastQualityMeshOption::Quad4k), texture_mode: Some(Rodin2p5FastTextureMode::High), ta_pose: Some(true), bbox_condition: Some(Rodin2p5FastBboxCondition { width: 10, height: 20, length: 30 }), ..base_request() };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json["tier"], "Gen-2.5-Low");
     assert_eq!(json["geometry_file_format"], "fbx");
@@ -261,29 +222,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Rodin2p5FastTextToMeshRequest {
-      prompt: "p".to_string(),
-      ..base_request()
-    };
+    let request = Rodin2p5FastTextToMeshRequest { prompt: "p".to_string(), ..base_request() };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "p" }));
   }
 
   #[test]
   fn every_quality_mesh_option_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Rodin2p5FastQualityMeshOption::Auto, "Auto"),
-      (Rodin2p5FastQualityMeshOption::Quad1k, "1K Quad"),
-      (Rodin2p5FastQualityMeshOption::Quad4k, "4K Quad"),
-      (Rodin2p5FastQualityMeshOption::Quad8k, "8K Quad"),
-      (Rodin2p5FastQualityMeshOption::Quad18k, "18K Quad"),
-      (Rodin2p5FastQualityMeshOption::Quad20k, "20K Quad"),
-      (Rodin2p5FastQualityMeshOption::Triangle2k, "2K Triangle"),
-      (Rodin2p5FastQualityMeshOption::Triangle4k, "4K Triangle"),
-      (Rodin2p5FastQualityMeshOption::Triangle8k, "8K Triangle"),
-      (Rodin2p5FastQualityMeshOption::Triangle10k, "10K Triangle"),
-      (Rodin2p5FastQualityMeshOption::Triangle20k, "20K Triangle"),
-    ] {
+    for (variant, expected) in [(Rodin2p5FastQualityMeshOption::Auto, "Auto"), (Rodin2p5FastQualityMeshOption::Quad1k, "1K Quad"), (Rodin2p5FastQualityMeshOption::Quad4k, "4K Quad"), (Rodin2p5FastQualityMeshOption::Quad8k, "8K Quad"), (Rodin2p5FastQualityMeshOption::Quad18k, "18K Quad"), (Rodin2p5FastQualityMeshOption::Quad20k, "20K Quad"), (Rodin2p5FastQualityMeshOption::Triangle2k, "2K Triangle"), (Rodin2p5FastQualityMeshOption::Triangle4k, "4K Triangle"), (Rodin2p5FastQualityMeshOption::Triangle8k, "8K Triangle"), (Rodin2p5FastQualityMeshOption::Triangle10k, "10K Triangle"), (Rodin2p5FastQualityMeshOption::Triangle20k, "20K Triangle")] {
       assert_eq!(variant.to_str(), expected);
     }
   }
@@ -295,10 +241,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Rodin2p5FastTextToMeshRequest::ENDPOINT,
-      "fal-ai/hyper3d/rodin/v2.5/text-to-3d/fast",
-    );
+    assert_eq!(Rodin2p5FastTextToMeshRequest::ENDPOINT, "fal-ai/hyper3d/rodin/v2.5/text-to-3d/fast",);
   }
 
   // NB: Pricing tests are in cost.rs

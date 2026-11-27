@@ -64,6 +64,7 @@ pub const HANGUL_UI_GLYPHS: &str = concat!(
     "명령팔레트환경설정일반어두운테마측정단위인치센티미터편집중스마트격자에맞춤따옴표자동고침",
     "작성자이름댓글완료취소형식해상도프레임속도유지시간초숨겨진포함개체효과무한반복만들기변경",
     "다이어그램도형표디자인레이아웃재생발표검색옵션문서페이지용지가로세로투명배경사용자지정너비높이",
+    "브랜드키트적용조셜일괄생성코",
 );
 
 /// Pure catalog lookup: returns the localized label for `key` in `locale` (falling back to `key`
@@ -89,11 +90,7 @@ pub fn tr_ui(ctx: &egui::Context, locale: Locale, key: &'static str) -> &'static
         return key;
     }
     let translated = tr(locale, key);
-    if translated.is_ascii() || fonts_cover(ctx, translated) {
-        translated
-    } else {
-        key
-    }
+    if translated.is_ascii() || fonts_cover(ctx, translated) { translated } else { key }
 }
 
 /// Display label for `locale` in a combo box or menu, falling back to ASCII when Hangul glyphs are
@@ -103,11 +100,7 @@ pub fn locale_display_label(ctx: &egui::Context, locale: Locale) -> &'static str
         Locale::En => "English",
         Locale::Ko => {
             let rich = "한국어 (Korean)";
-            if fonts_cover(ctx, rich) {
-                rich
-            } else {
-                "Korean (ko)"
-            }
+            if fonts_cover(ctx, rich) { rich } else { "Korean (ko)" }
         }
     }
 }
@@ -296,6 +289,15 @@ fn ko_lookup(key: &str) -> Option<&'static str> {
         "Include slide transitions" => "슬라이드 전환 효과 포함",
         "Loop forever" => "무한 반복",
         "Transparent background" => "투명 배경",
+        "Brand Kit" => "브랜드 키트",
+        "Apply Brand Kit" => "브랜드 키트 적용",
+        "Smart Resize" => "스마트 크기 조정",
+        "Social Smart Resize…" => "소셜 스마트 크기 조정…",
+        "Bulk Create from CSV" => "CSV 일괄 생성",
+        "Bulk Create from CSV…" => "CSV 일괄 생성…",
+        "Insert QR Code" => "QR 코드 삽입",
+        "QR Code" => "QR 코드",
+        "QR Code…" => "QR 코드…",
         _ => return None,
     })
 }

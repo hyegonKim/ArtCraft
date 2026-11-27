@@ -25,51 +25,38 @@ pub struct CommandSuccessResponseWrapper<T: Serialize> {
 /// `Serialize`. Rust's `"specialization"`, which would let us account for this, is an unstable, nightly-only
 /// feature. So instead we manually mark all types other than `()` with `SerializeMarker` as a hack to
 /// distinguish the two.
-pub trait SerializeMarker : Serialize {}
+pub trait SerializeMarker: Serialize {}
 
 impl CommandSuccessResponseWrapper<()> {
   pub fn empty_success() -> Self {
     Self::empty()
   }
   pub fn empty() -> Self {
-    CommandSuccessResponseWrapper {
-      status: CommandSuccessStatus::Success,
-      success_message: None,
-      payload: None,
-    }
+    CommandSuccessResponseWrapper { status: CommandSuccessStatus::Success, success_message: None, payload: None }
   }
 }
 
 // NB: () is Serialize! So we can't broadly implement just `T: Serialize`.
 impl From<()> for CommandSuccessResponseWrapper<()> {
   fn from(_: ()) -> Self {
-    CommandSuccessResponseWrapper {
-      status: CommandSuccessStatus::Success,
-      success_message: None,
-      payload: None,
-    }
+    CommandSuccessResponseWrapper { status: CommandSuccessStatus::Success, success_message: None, payload: None }
   }
 }
 
 /// NB: Note the `"+ SerializeMarker"` bound here. This is a hack to distinguish between `()` and other types
 /// for which we will manually mark as `SerializeMarker`.
-impl <T> From<T> for CommandSuccessResponseWrapper<T> where T: Serialize + SerializeMarker {
+impl<T> From<T> for CommandSuccessResponseWrapper<T>
+where
+  T: Serialize + SerializeMarker,
+{
   fn from(val: T) -> Self {
-    CommandSuccessResponseWrapper {
-      status: CommandSuccessStatus::Success,
-      success_message: None,
-      payload: Some(val),
-    }
+    CommandSuccessResponseWrapper { status: CommandSuccessStatus::Success, success_message: None, payload: Some(val) }
   }
 }
 
 impl From<&str> for CommandSuccessResponseWrapper<String> {
   fn from(msg: &str) -> Self {
-    CommandSuccessResponseWrapper {
-      status: CommandSuccessStatus::Success,
-      success_message: Some(msg.to_string()),
-      payload: None,
-    }
+    CommandSuccessResponseWrapper { status: CommandSuccessStatus::Success, success_message: Some(msg.to_string()), payload: None }
   }
 }
 

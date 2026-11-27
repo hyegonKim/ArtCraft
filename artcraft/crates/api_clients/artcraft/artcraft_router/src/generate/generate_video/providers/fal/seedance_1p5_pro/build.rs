@@ -1,11 +1,5 @@
-use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{
-  EnqueueSeedance1p5ProImageToVideoAspectRatio, EnqueueSeedance1p5ProImageToVideoDuration,
-  EnqueueSeedance1p5ProImageToVideoRequest, EnqueueSeedance1p5ProImageToVideoResolution,
-};
-use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{
-  EnqueueSeedance1p5ProTextToVideoAspectRatio, EnqueueSeedance1p5ProTextToVideoDuration,
-  EnqueueSeedance1p5ProTextToVideoRequest, EnqueueSeedance1p5ProTextToVideoResolution,
-};
+use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{EnqueueSeedance1p5ProImageToVideoAspectRatio, EnqueueSeedance1p5ProImageToVideoDuration, EnqueueSeedance1p5ProImageToVideoRequest, EnqueueSeedance1p5ProImageToVideoResolution};
+use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{EnqueueSeedance1p5ProTextToVideoAspectRatio, EnqueueSeedance1p5ProTextToVideoDuration, EnqueueSeedance1p5ProTextToVideoRequest, EnqueueSeedance1p5ProTextToVideoResolution};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::router_resolution::RouterResolution;
@@ -14,9 +8,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::fal::seedance_1p5_pro::request::{
-  FalSeedance1p5ProMode, FalSeedance1p5ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::seedance_1p5_pro::request::{FalSeedance1p5ProMode, FalSeedance1p5ProRequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -53,9 +45,7 @@ enum PlanAspectRatio {
   NineBySixteen,
 }
 
-pub fn build_fal_seedance_1p5_pro(
-  mut builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_seedance_1p5_pro(mut builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   // Decide t2v vs i2v based on whether a start_frame was provided.
@@ -63,10 +53,7 @@ pub fn build_fal_seedance_1p5_pro(
   let end_image_url = optional_url(builder.end_frame.take())?;
 
   if image_url.is_none() && end_image_url.is_some() {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "end_frame",
-      value: "Seedance 1.5 Pro requires a start_frame when end_frame is provided".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Seedance 1.5 Pro requires a start_frame when end_frame is provided".to_string() }));
   }
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio.take(), strategy)?;
@@ -76,22 +63,8 @@ pub fn build_fal_seedance_1p5_pro(
   let generate_audio = builder.generate_audio.take();
 
   let mode = match image_url {
-    None => FalSeedance1p5ProMode::TextToVideo(EnqueueSeedance1p5ProTextToVideoRequest {
-      prompt,
-      resolution: resolution.map(to_t2v_resolution),
-      duration: duration.map(to_t2v_duration),
-      aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio),
-      generate_audio,
-    }),
-    Some(image_url) => FalSeedance1p5ProMode::ImageToVideo(EnqueueSeedance1p5ProImageToVideoRequest {
-      prompt,
-      image_url,
-      end_image_url,
-      resolution: resolution.map(to_i2v_resolution),
-      duration: duration.map(to_i2v_duration),
-      aspect_ratio: aspect_ratio.map(to_i2v_aspect_ratio),
-      generate_audio,
-    }),
+    None => FalSeedance1p5ProMode::TextToVideo(EnqueueSeedance1p5ProTextToVideoRequest { prompt, resolution: resolution.map(to_t2v_resolution), duration: duration.map(to_t2v_duration), aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio), generate_audio }),
+    Some(image_url) => FalSeedance1p5ProMode::ImageToVideo(EnqueueSeedance1p5ProImageToVideoRequest { prompt, image_url, end_image_url, resolution: resolution.map(to_i2v_resolution), duration: duration.map(to_i2v_duration), aspect_ratio: aspect_ratio.map(to_i2v_aspect_ratio), generate_audio }),
   };
 
   let state = FalSeedance1p5ProRequestState { mode };
@@ -104,26 +77,16 @@ fn optional_url(image_ref: Option<ImageRef>) -> Result<Option<String>, ArtcraftR
   match image_ref {
     None => Ok(None),
     Some(ImageRef::Url(url)) => Ok(Some(url)),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "start_frame/end_frame",
-        value: "Fal only supports image URLs, not media file tokens".to_string(),
-      }))
-    }
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "start_frame/end_frame", value: "Fal only supports image URLs, not media file tokens".to_string() })),
   }
 }
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
 
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(Ar::Square)),
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(Ar::FourByThree)),
@@ -133,12 +96,7 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(nearest_aspect_ratio(unsupported))),
     },
   }
@@ -157,10 +115,7 @@ fn nearest_aspect_ratio(aspect_ratio: RouterAspectRatio) -> PlanAspectRatio {
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
   use PlanResolution as R;
   match resolution {
     None => Ok(None),
@@ -168,22 +123,14 @@ fn plan_resolution(
     Some(RouterResolution::SevenTwentyP) => Ok(Some(R::SevenTwentyP)),
     Some(RouterResolution::TenEightyP) => Ok(Some(R::TenEightyP)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(R::TenEightyP)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(R::FourEightyP)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
   use PlanDuration as D;
   match duration_seconds {
     None => Ok(None),
@@ -197,12 +144,7 @@ fn plan_duration(
     Some(11) => Ok(Some(D::Eleven)),
     Some(12) => Ok(Some(D::Twelve)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(D::Twelve)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(D::Four)),
     },
@@ -308,13 +250,7 @@ mod tests {
   }
 
   fn base_i2v_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance1p5Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("a corgi running".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance1p5Pro, provider: RouterProvider::Fal, prompt: Some("a corgi running".to_string()), start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())), ..Default::default() }
   }
 
   fn make_t2v(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {
@@ -422,7 +358,9 @@ mod tests {
 
     #[test]
     fn t2v_prompt_defaults_to_empty() {
-      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| { b.prompt = None; })));
+      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| {
+        b.prompt = None;
+      })));
       assert_eq!(req.prompt, "");
     }
 
@@ -496,7 +434,9 @@ mod tests {
 
     #[test]
     fn t2v_resolution_none_stays_none() {
-      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| { b.resolution = None; })));
+      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| {
+        b.resolution = None;
+      })));
       assert!(req.resolution.is_none());
     }
 
@@ -535,19 +475,25 @@ mod tests {
 
     #[test]
     fn duration_4s() {
-      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| { b.duration_seconds = Some(4); })));
+      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| {
+        b.duration_seconds = Some(4);
+      })));
       assert!(matches!(req.duration, Some(EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds)));
     }
 
     #[test]
     fn duration_12s() {
-      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| { b.duration_seconds = Some(12); })));
+      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| {
+        b.duration_seconds = Some(12);
+      })));
       assert!(matches!(req.duration, Some(EnqueueSeedance1p5ProTextToVideoDuration::TwelveSeconds)));
     }
 
     #[test]
     fn duration_none_stays_none() {
-      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| { b.duration_seconds = None; })));
+      let req = unwrap_t2v(build_fal_seedance_1p5_pro(make_t2v(|b| {
+        b.duration_seconds = None;
+      })));
       assert!(req.duration.is_none());
     }
 
@@ -632,20 +578,9 @@ mod tests {
 
   #[test]
   fn t2v_combinatorial_pass() {
-    let resolutions = [
-      None,
-      Some(RouterResolution::FourEightyP),
-      Some(RouterResolution::SevenTwentyP),
-      Some(RouterResolution::TenEightyP),
-    ];
+    let resolutions = [None, Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP)];
     let durations = [None, Some(4u16), Some(8u16), Some(12u16)];
-    let aspect_ratios = [
-      None,
-      Some(RouterAspectRatio::Auto),
-      Some(RouterAspectRatio::Square),
-      Some(RouterAspectRatio::WideSixteenByNine),
-      Some(RouterAspectRatio::TallNineBySixteen),
-    ];
+    let aspect_ratios = [None, Some(RouterAspectRatio::Auto), Some(RouterAspectRatio::Square), Some(RouterAspectRatio::WideSixteenByNine), Some(RouterAspectRatio::TallNineBySixteen)];
     let audios = [None, Some(true), Some(false)];
 
     let mut combos = 0;
@@ -669,11 +604,7 @@ mod tests {
 
   #[test]
   fn i2v_combinatorial_pass() {
-    let resolutions = [
-      None,
-      Some(RouterResolution::SevenTwentyP),
-      Some(RouterResolution::TenEightyP),
-    ];
+    let resolutions = [None, Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP)];
     let durations = [None, Some(5u16), Some(12u16)];
     let aspect_ratios = [None, Some(RouterAspectRatio::WideSixteenByNine), Some(RouterAspectRatio::Square)];
     let audios = [None, Some(true), Some(false)];

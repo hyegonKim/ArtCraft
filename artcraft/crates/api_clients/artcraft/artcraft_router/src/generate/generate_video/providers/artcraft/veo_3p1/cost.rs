@@ -32,15 +32,7 @@ impl ArtcraftVeo3p1CostState {
     };
     let cost_in_usd_cents = per_second_cents * self.duration_seconds;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -55,34 +47,30 @@ mod tests {
     cost_cents_at(duration_seconds, generate_audio, None)
   }
 
-  fn cost_cents_at(
-    duration_seconds: Option<u16>,
-    generate_audio: Option<bool>,
-    resolution: Option<RouterResolution>,
-  ) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      resolution,
-      model: RouterVideoModel::Veo3p1,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+  fn cost_cents_at(duration_seconds: Option<u16>, generate_audio: Option<bool>, resolution: Option<RouterResolution>) -> u64 {
+    let b = GenerateVideoRequestBuilder { resolution, model: RouterVideoModel::Veo3p1, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn audio_on_4s_is_192() { assert_eq!(cost_cents(Some(4), Some(true)), 192); }
+  fn audio_on_4s_is_192() {
+    assert_eq!(cost_cents(Some(4), Some(true)), 192);
+  }
 
   #[test]
-  fn audio_on_6s_is_288() { assert_eq!(cost_cents(Some(6), Some(true)), 288); }
+  fn audio_on_6s_is_288() {
+    assert_eq!(cost_cents(Some(6), Some(true)), 288);
+  }
 
   #[test]
-  fn audio_on_8s_is_384() { assert_eq!(cost_cents(Some(8), Some(true)), 384); }
+  fn audio_on_8s_is_384() {
+    assert_eq!(cost_cents(Some(8), Some(true)), 384);
+  }
 
   #[test]
-  fn audio_off_4s_is_96() { assert_eq!(cost_cents(Some(4), Some(false)), 96); }
+  fn audio_off_4s_is_96() {
+    assert_eq!(cost_cents(Some(4), Some(false)), 96);
+  }
 
   #[test]
   fn default_duration_is_6s() {
@@ -106,9 +94,6 @@ mod tests {
 
   #[test]
   fn non_four_k_resolutions_share_the_base_rate() {
-    assert_eq!(
-      cost_cents_at(Some(8), Some(true), Some(RouterResolution::SevenTwentyP)),
-      cost_cents_at(Some(8), Some(true), Some(RouterResolution::TenEightyP)),
-    );
+    assert_eq!(cost_cents_at(Some(8), Some(true), Some(RouterResolution::SevenTwentyP)), cost_cents_at(Some(8), Some(true), Some(RouterResolution::TenEightyP)),);
   }
 }

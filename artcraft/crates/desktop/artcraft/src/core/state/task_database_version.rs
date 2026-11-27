@@ -1,5 +1,3 @@
-
-
 /// Used to bump the task database schema version.
 /// Migrations on customers' machines tend to fail on existing databases,
 /// even if we instruct that the database file be deleted first.

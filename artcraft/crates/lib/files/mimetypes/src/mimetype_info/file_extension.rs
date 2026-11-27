@@ -1,4 +1,3 @@
-
 /// This is a constrained set of file extensions that:
 ///  1. we care about
 ///  2. we can detect with magic bytes

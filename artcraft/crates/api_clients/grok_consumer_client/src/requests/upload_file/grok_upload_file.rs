@@ -18,11 +18,11 @@ use wreq::header::{ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, CACHE_CONTROL, CONT
 use wreq::Client;
 use wreq_util::Emulation;
 
-const UPLOAD_FILE_URL : &str = "https://grok.com/rest/app-chat/upload-file";
+const UPLOAD_FILE_URL: &str = "https://grok.com/rest/app-chat/upload-file";
 
 /// Try to prevent buffer reallocations.
 /// There's a better way to implement this.
-const INITIAL_BUFFER_SIZE : usize = 1024*1024;
+const INITIAL_BUFFER_SIZE: usize = 1024 * 1024;
 
 /// Request builder
 pub struct GrokUploadFile<P: AsRef<Path>> {
@@ -31,7 +31,6 @@ pub struct GrokUploadFile<P: AsRef<Path>> {
   pub request_timeout: Option<Duration>,
 }
 
-
 /// Response type
 #[derive(Clone, Debug)]
 pub struct GrokUploadFileResponse {
@@ -39,45 +38,35 @@ pub struct GrokUploadFileResponse {
   pub file_uri: Option<String>,
 }
 
-impl <P> GrokUploadFile<P> where P: AsRef<Path> {
-
+impl<P> GrokUploadFile<P>
+where
+  P: AsRef<Path>,
+{
   pub async fn upload(&self) -> Result<GrokUploadFileResponse, GrokError> {
     match &self.file {
-      FileUploadSpec::Path(path) => {
-        self.upload_from_file(path.as_ref()).await
-      }
+      FileUploadSpec::Path(path) => self.upload_from_file(path.as_ref()).await,
       FileUploadSpec::Bytes { bytes, filename, mimetype } => {
         unimplemented!("todo: implement bytes upload")
-      }
+      },
     }
   }
 
   async fn upload_from_file(&self, file_path: &Path) -> Result<GrokUploadFileResponse, GrokError> {
-    let mut file = File::open(file_path)
-        .await
-        .map_err(|err| {
-          error!("Failed to open file for upload: {}", err);
-          GrokClientError::CannotOpenLocalFileForUpload(err)
-        })?;
+    let mut file = File::open(file_path).await.map_err(|err| {
+      error!("Failed to open file for upload: {}", err);
+      GrokClientError::CannotOpenLocalFileForUpload(err)
+    })?;
 
     let mut buffer = Vec::with_capacity(INITIAL_BUFFER_SIZE);
 
-    file.read_to_end(&mut buffer)
-        .await
-        .map_err(|err| {
-          error!("Failed to read file for upload: {}", err);
-          GrokClientError::CannotReadLocalFileForUpload(err)
-        })?;
+    file.read_to_end(&mut buffer).await.map_err(|err| {
+      error!("Failed to read file for upload: {}", err);
+      GrokClientError::CannotReadLocalFileForUpload(err)
+    })?;
 
-    let filename = file_path
-        .file_name()
-        .ok_or_else(|| GrokClientError::FileForUploadHasInvalidPath)?
-        .to_string_lossy()
-        .to_string();
+    let filename = file_path.file_name().ok_or_else(|| GrokClientError::FileForUploadHasInvalidPath)?.to_string_lossy().to_string();
 
-    let maybe_ext = file_path
-        .extension()
-        .and_then(|e| e.to_str());
+    let maybe_ext = file_path.extension().and_then(|e| e.to_str());
 
     // TODO: Share library code.
     // TODO: Read file magic bytes first, then fall back to this.
@@ -96,15 +85,11 @@ impl <P> GrokUploadFile<P> where P: AsRef<Path> {
     // The files have base64 padding!
     let base64_file = BASE64_STANDARD.encode(buffer);
 
-    self.do_upload(base64_file, &filename, &mime_type ).await
+    self.do_upload(base64_file, &filename, &mime_type).await
   }
 
   async fn do_upload(&self, base64_file: String, file_name: &str, mime_type: &str) -> Result<GrokUploadFileResponse, GrokError> {
-
-    let client = Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
     info!("Configuring client...");
 
@@ -142,35 +127,24 @@ impl <P> GrokUploadFile<P> where P: AsRef<Path> {
       request_builder = request_builder.timeout(timeout);
     }
 
-    let request_body = UploadFileRequest {
-      fileName: file_name.to_string(),
-      fileMimeType: mime_type.to_string(),
-      content: base64_file,
-      fileSource: "IMAGINE_SELF_UPLOAD_FILE_SOURCE".to_string(),
-    };
+    let request_body = UploadFileRequest { fileName: file_name.to_string(), fileMimeType: mime_type.to_string(), content: base64_file, fileSource: "IMAGINE_SELF_UPLOAD_FILE_SOURCE".to_string() };
 
-    let http_request = request_builder.json(&request_body)
-        .build()
-        .map_err(|err| {
-          error!("Error building image upload request: {:?}", err);
-          GrokClientError::WreqClientError(err)
-        })?;
+    let http_request = request_builder.json(&request_body).build().map_err(|err| {
+      error!("Error building image upload request: {:?}", err);
+      GrokClientError::WreqClientError(err)
+    })?;
 
-    let response = client.execute(http_request)
-        .await
-        .map_err(|err| {
-          error!("Error during image upload: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response = client.execute(http_request).await.map_err(|err| {
+      error!("Error during image upload: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     let status = response.status();
 
-    let response_body = &response.text()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok image upload response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response_body = &response.text().await.map_err(|err| {
+      error!("Error reading Grok image upload response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     // TODO: Handle bad statuses
     if !status.is_success() {
@@ -178,19 +152,13 @@ impl <P> GrokUploadFile<P> where P: AsRef<Path> {
       //return Err(classify_general_http_status_code_and_body(status, response_body));
     }
 
-    let response : GrokApiUploadFileResponse = serde_json::from_str(response_body)
-        .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+    let response: GrokApiUploadFileResponse = serde_json::from_str(response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-    let file_id = response.file_metadata_id
-        .map(|id| FileId(id));
+    let file_id = response.file_metadata_id.map(|id| FileId(id));
 
-    Ok(GrokUploadFileResponse {
-      file_id,
-      file_uri: response.file_uri,
-    })
+    Ok(GrokUploadFileResponse { file_id, file_uri: response.file_uri })
   }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -205,11 +173,7 @@ mod tests {
 
     let cookies = get_test_cookies()?;
 
-    let request = GrokUploadFile {
-      file: FileUploadSpec::Path("/Users/bt/dev/storyteller/storyteller-rust/test_data/image/mochi.jpg"),
-      cookie: cookies.to_string(),
-      request_timeout: None,
-    };
+    let request = GrokUploadFile { file: FileUploadSpec::Path("/Users/bt/dev/storyteller/storyteller-rust/test_data/image/mochi.jpg"), cookie: cookies.to_string(), request_timeout: None };
 
     let result = request.upload().await?;
 

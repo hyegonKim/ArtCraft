@@ -1,6 +1,4 @@
-use crate::requests::api::mesh::text::hunyuan3d_3_text_to_mesh::api::{
-  Hunyuan3d3TextToMeshGenerateType, Hunyuan3d3TextToMeshRequest,
-};
+use crate::requests::api::mesh::text::hunyuan3d_3_text_to_mesh::api::{Hunyuan3d3TextToMeshGenerateType, Hunyuan3d3TextToMeshRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Hunyuan3d3TextToMeshRequest {
@@ -36,13 +34,7 @@ mod tests {
   use super::*;
 
   fn base_request() -> Hunyuan3d3TextToMeshRequest {
-    Hunyuan3d3TextToMeshRequest {
-      prompt: "test".to_string(),
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    }
+    Hunyuan3d3TextToMeshRequest { prompt: "test".to_string(), face_count: None, generate_type: None, polygon_type: None, enable_pbr: None }
   }
 
   mod base_costs {

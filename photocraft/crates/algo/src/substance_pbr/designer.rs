@@ -11,8 +11,7 @@ use photocraft_raster::Surface;
 use serde::{Deserialize, Serialize};
 
 use super::brdf::{
-    EquirectProbe, PbrSurfacePoint, linear3_to_srgb, sanitize_f32, shade_ggx_direct, srgb3_to_linear,
-    tone_map_filmic, v3_add, v3_lerp, v3_norm, v3_scale,
+    EquirectProbe, PbrSurfacePoint, linear3_to_srgb, sanitize_f32, shade_ggx_direct, srgb3_to_linear, tone_map_filmic, v3_add, v3_lerp, v3_norm, v3_scale,
 };
 use super::sampler::write_rgba_to_surface;
 use crate::photo_util::{hash01, par_rows};
@@ -31,14 +30,7 @@ pub enum ProceduralPbrPreset {
 }
 
 impl ProceduralPbrPreset {
-    pub const ALL: [Self; 6] = [
-        Self::BrushedSteel,
-        Self::CarbonHexWeave,
-        Self::TerrazzoMarble,
-        Self::CeramicTiles,
-        Self::WeatheredCopper,
-        Self::WovenFabric,
-    ];
+    pub const ALL: [Self; 6] = [Self::BrushedSteel, Self::CarbonHexWeave, Self::TerrazzoMarble, Self::CeramicTiles, Self::WeatheredCopper, Self::WovenFabric];
 
     pub fn id(self) -> &'static str {
         match self {
@@ -153,9 +145,7 @@ fn periodic_noise(u: f32, v: f32, period: i64, seed: u64) -> f32 {
 
 fn periodic_fbm(u: f32, v: f32, base_period: i64, seed: u64) -> f32 {
     let p = base_period.max(2);
-    0.55 * periodic_noise(u, v, p, seed)
-        + 0.30 * periodic_noise(u, v, p * 2, seed.wrapping_add(17))
-        + 0.15 * periodic_noise(u, v, p * 4, seed.wrapping_add(53))
+    0.55 * periodic_noise(u, v, p, seed) + 0.30 * periodic_noise(u, v, p * 2, seed.wrapping_add(17)) + 0.15 * periodic_noise(u, v, p * 4, seed.wrapping_add(53))
 }
 
 fn eval_brushed_steel(u: f32, v: f32, p: &ProceduralPbrParams, seed: u64) -> ProcSample {
@@ -300,11 +290,7 @@ fn eval_ceramic_tiles(u: f32, v: f32, p: &ProceduralPbrParams, seed: u64) -> Pro
         let tint = 0.82 + jitter - chip * 0.25;
         ProcSample {
             height: (0.45 + 0.45 * smooth_bevel + jitter * 0.4 - chip * 0.3).clamp(0.0, 1.0),
-            albedo_srgb: [
-                (tint * 0.92).clamp(0.0, 1.0),
-                (tint * 0.96).clamp(0.0, 1.0),
-                tint.clamp(0.0, 1.0),
-            ],
+            albedo_srgb: [(tint * 0.92).clamp(0.0, 1.0), (tint * 0.96).clamp(0.0, 1.0), tint.clamp(0.0, 1.0)],
             roughness: (p.roughness * 0.55 + chip * 0.65).clamp(0.05, 0.95),
             metallic: 0.0,
             ao: (0.78 + 0.22 * smooth_bevel).clamp(0.4, 1.0),
@@ -352,11 +338,7 @@ fn eval_woven_fabric(u: f32, v: f32, p: &ProceduralPbrParams, seed: u64) -> Proc
     let fade = p.wear * 0.18 * fuzz;
     ProcSample {
         height: h,
-        albedo_srgb: [
-            (base_col[0] + fade).clamp(0.0, 1.0),
-            (base_col[1] + fade).clamp(0.0, 1.0),
-            (base_col[2] + fade).clamp(0.0, 1.0),
-        ],
+        albedo_srgb: [(base_col[0] + fade).clamp(0.0, 1.0), (base_col[1] + fade).clamp(0.0, 1.0), (base_col[2] + fade).clamp(0.0, 1.0)],
         roughness: (0.68 + 0.24 * (1.0 - yarn) + p.roughness * 0.2).clamp(0.35, 1.0),
         metallic: 0.0,
         ao: (0.50 + 0.50 * yarn).clamp(0.25, 1.0),
@@ -386,16 +368,7 @@ pub fn render_procedural_pbr_rgba(w: usize, h: usize, params: &ProceduralPbrPara
     let hf = h as f32;
 
     // First pass: evaluate procedural material channels across all pixels
-    let mut samples = vec![
-        ProcSample {
-            height: 0.5,
-            albedo_srgb: [0.5; 3],
-            roughness: 0.5,
-            metallic: 0.0,
-            ao: 1.0,
-        };
-        n
-    ];
+    let mut samples = vec![ProcSample { height: 0.5, albedo_srgb: [0.5; 3], roughness: 0.5, metallic: 0.0, ao: 1.0 }; n];
     par_rows(&mut samples, w, 1, |y, row| {
         let v = (y as f32 + 0.5) / hf;
         for (x, dst) in row.iter_mut().enumerate() {
@@ -430,13 +403,7 @@ pub fn render_procedural_pbr_rgba(w: usize, h: usize, params: &ProceduralPbrPara
             let gy = (h_d - h_u) * p.normal_strength * 3.0;
             let normal = v3_norm([-gx, -gy, 1.0]);
 
-            let surf = PbrSurfacePoint {
-                albedo_lin: srgb3_to_linear(s.albedo_srgb),
-                normal,
-                roughness: s.roughness,
-                metallic: s.metallic,
-                ao: s.ao,
-            };
+            let surf = PbrSurfacePoint { albedo_lin: srgb3_to_linear(s.albedo_srgb), normal, roughness: s.roughness, metallic: s.metallic, ao: s.ao };
             let direct = shade_ggx_direct(&surf, view_dir, light_dir, key_radiance);
             let ibl = probe.shade_ibl(&surf, view_dir);
             let lit = linear3_to_srgb(tone_map_filmic(v3_add(direct, v3_scale(ibl, 0.95))));
@@ -447,11 +414,7 @@ pub fn render_procedural_pbr_rgba(w: usize, h: usize, params: &ProceduralPbrPara
 }
 
 /// Depth-agnostic `Surface` wrapper (`8`/`16`/`32f`) for `render_procedural_pbr_rgba`.
-pub fn render_procedural_pbr_surface(
-    src: &Surface,
-    rect: Rect,
-    params: &ProceduralPbrParams,
-) -> Surface {
+pub fn render_procedural_pbr_surface(src: &Surface, rect: Rect, params: &ProceduralPbrParams) -> Surface {
     if rect.is_empty() {
         return Surface::new(src.format());
     }

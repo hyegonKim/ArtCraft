@@ -758,6 +758,5 @@ pub fn slides_to_outline(p: &Presentation) -> String {
     out
 }
 
-
 #[cfg(test)]
 mod tests;

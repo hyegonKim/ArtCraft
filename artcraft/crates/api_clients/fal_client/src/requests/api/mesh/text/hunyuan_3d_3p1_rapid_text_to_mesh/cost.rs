@@ -21,11 +21,7 @@ mod tests {
   use super::*;
 
   fn base_request() -> Hunyuan3d3p1RapidTextToMeshRequest {
-    Hunyuan3d3p1RapidTextToMeshRequest {
-      prompt: "p".to_string(),
-      enable_pbr: None,
-      enable_geometry: None,
-    }
+    Hunyuan3d3p1RapidTextToMeshRequest { prompt: "p".to_string(), enable_pbr: None, enable_geometry: None }
   }
 
   #[test]

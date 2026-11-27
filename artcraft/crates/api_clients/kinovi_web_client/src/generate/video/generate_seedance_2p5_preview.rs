@@ -5,10 +5,7 @@ use crate::pricing::cost::kinovi_fractional_generation_cost::KinoviFractionalGen
 use crate::pricing::kinovi_pricing_rate::KinoviPricingRate;
 use crate::pricing::kinovi_pricing_tier::KinoviPricingTier;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviModelTypeRaw,
-  KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest};
 
 // ── Args ──
 
@@ -72,16 +69,10 @@ pub enum KinoviSeedance2p5PreviewOutputResolution {
 // resolution (None) is 720p.
 
 /// Per-second credit rates for Seedance 2.5 Preview at 480p.
-const SEEDANCE_2P5_PREVIEW_480P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 46.15,
-  maybe_enterprise_credits: Some(42.13),
-};
+const SEEDANCE_2P5_PREVIEW_480P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 46.15, maybe_enterprise_credits: Some(42.13) };
 
 /// Per-second credit rates for Seedance 2.5 Preview at 720p.
-const SEEDANCE_2P5_PREVIEW_720P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 92.03,
-  maybe_enterprise_credits: Some(84.26),
-};
+const SEEDANCE_2P5_PREVIEW_720P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 92.03, maybe_enterprise_credits: Some(84.26) };
 
 impl KinoviCostCalculatorTrait for GenerateSeedance2p5PreviewRequest {
   type Cost = KinoviFractionalGenerationCost;
@@ -113,42 +104,16 @@ pub struct GenerateSeedance2p5PreviewResponse {
 
 // ── Entry point ──
 
-pub async fn generate_seedance_2p5_preview(
-  args: GenerateSeedance2p5PreviewArgs<'_>,
-) -> Result<GenerateSeedance2p5PreviewResponse, KinoviWebError> {
-  let raw_response = workflow_run_task(WorkflowRunTaskArgs {
-    request: to_raw_request(args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_seedance_2p5_preview(args: GenerateSeedance2p5PreviewArgs<'_>) -> Result<GenerateSeedance2p5PreviewResponse, KinoviWebError> {
+  let raw_response = workflow_run_task(WorkflowRunTaskArgs { request: to_raw_request(args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSeedance2p5PreviewResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-    task_ids: raw_response.task_ids,
-    order_ids: raw_response.order_ids,
-  })
+  Ok(GenerateSeedance2p5PreviewResponse { task_id: raw_response.task_id, order_id: raw_response.order_id, task_ids: raw_response.task_ids, order_ids: raw_response.order_ids })
 }
 
 // ── Mapping helpers ──
 
 fn to_raw_request(req: GenerateSeedance2p5PreviewRequest) -> WorkflowRunTaskRequest {
-  WorkflowRunTaskRequest {
-    model_type: KinoviModelTypeRaw::Seedance2p5Preview,
-    prompt: req.prompt,
-    aspect_ratio: map_aspect_ratio(req.aspect_ratio),
-    output_resolution: Some(map_output_resolution(req.output_resolution)),
-    duration_seconds: req.duration_seconds,
-    batch_count: KinoviBatchCountRaw::One,
-    start_frame_url: None,
-    end_frame_url: None,
-    reference_image_urls: req.reference_image_urls,
-    reference_video_urls: req.reference_video_urls,
-    reference_audio_urls: req.reference_audio_urls,
-    character_ids: None,
-    use_face_blur_hack: req.use_face_blur_hack,
-    bitrate: None,
-  }
+  WorkflowRunTaskRequest { model_type: KinoviModelTypeRaw::Seedance2p5Preview, prompt: req.prompt, aspect_ratio: map_aspect_ratio(req.aspect_ratio), output_resolution: Some(map_output_resolution(req.output_resolution)), duration_seconds: req.duration_seconds, batch_count: KinoviBatchCountRaw::One, start_frame_url: None, end_frame_url: None, reference_image_urls: req.reference_image_urls, reference_video_urls: req.reference_video_urls, reference_audio_urls: req.reference_audio_urls, character_ids: None, use_face_blur_hack: req.use_face_blur_hack, bitrate: None }
 }
 
 fn map_aspect_ratio(ar: Option<KinoviSeedance2p5PreviewAspectRatio>) -> KinoviAspectRatioRaw {
@@ -279,11 +244,7 @@ mod tests {
       fn table_480p_with_references_is_identical() {
         for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
           for duration in [4u8, 10, 15, 20, 25, 30] {
-            assert_eq!(
-              with_all_reference_types(r480(duration)).calculate_costs(tier),
-              r480(duration).calculate_costs(tier),
-              "480p at {duration}s ({tier:?})",
-            );
+            assert_eq!(with_all_reference_types(r480(duration)).calculate_costs(tier), r480(duration).calculate_costs(tier), "480p at {duration}s ({tier:?})",);
           }
         }
       }
@@ -292,11 +253,7 @@ mod tests {
       fn table_720p_with_references_is_identical() {
         for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
           for duration in [4u8, 10, 15, 20, 25, 30] {
-            assert_eq!(
-              with_all_reference_types(r720(duration)).calculate_costs(tier),
-              r720(duration).calculate_costs(tier),
-              "720p at {duration}s ({tier:?})",
-            );
+            assert_eq!(with_all_reference_types(r720(duration)).calculate_costs(tier), r720(duration).calculate_costs(tier), "720p at {duration}s ({tier:?})",);
           }
         }
       }
@@ -455,10 +412,7 @@ mod tests {
 
       #[test]
       fn enterprise_is_cheaper_than_consumer() {
-        for resolution in [
-          Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP),
-          Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP),
-        ] {
+        for resolution in [Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP), Some(KinoviSeedance2p5PreviewOutputResolution::SevenTwentyP)] {
           let request = build_request(10, resolution);
           let consumer = request.calculate_consumer_costs();
           let enterprise = request.calculate_enterprise_costs();
@@ -486,41 +440,19 @@ mod tests {
     fn aspect_ratio_does_not_affect_credits() {
       let baseline = r720(10).calculate_consumer_costs().kinovi_credits;
 
-      let ratios = [
-        KinoviSeedance2p5PreviewAspectRatio::Landscape16x9,
-        KinoviSeedance2p5PreviewAspectRatio::UltraWide21x9,
-        KinoviSeedance2p5PreviewAspectRatio::Portrait9x16,
-        KinoviSeedance2p5PreviewAspectRatio::Square1x1,
-        KinoviSeedance2p5PreviewAspectRatio::Standard4x3,
-        KinoviSeedance2p5PreviewAspectRatio::Portrait3x4,
-      ];
+      let ratios = [KinoviSeedance2p5PreviewAspectRatio::Landscape16x9, KinoviSeedance2p5PreviewAspectRatio::UltraWide21x9, KinoviSeedance2p5PreviewAspectRatio::Portrait9x16, KinoviSeedance2p5PreviewAspectRatio::Square1x1, KinoviSeedance2p5PreviewAspectRatio::Standard4x3, KinoviSeedance2p5PreviewAspectRatio::Portrait3x4];
 
       for ar in &ratios {
         let mut request = r720(10);
         request.aspect_ratio = Some(*ar);
-        assert_eq!(
-          request.calculate_consumer_costs().kinovi_credits, baseline,
-          "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,
-        );
+        assert_eq!(request.calculate_consumer_costs().kinovi_credits, baseline, "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,);
       }
     }
 
     // ── Helpers ──
 
-    fn build_request(
-      duration_seconds: u8,
-      output_resolution: Option<KinoviSeedance2p5PreviewOutputResolution>,
-    ) -> GenerateSeedance2p5PreviewRequest {
-      GenerateSeedance2p5PreviewRequest {
-        prompt: String::new(),
-        aspect_ratio: None,
-        output_resolution,
-        duration_seconds,
-        reference_image_urls: None,
-        reference_video_urls: None,
-        reference_audio_urls: None,
-        use_face_blur_hack: None,
-      }
+    fn build_request(duration_seconds: u8, output_resolution: Option<KinoviSeedance2p5PreviewOutputResolution>) -> GenerateSeedance2p5PreviewRequest {
+      GenerateSeedance2p5PreviewRequest { prompt: String::new(), aspect_ratio: None, output_resolution, duration_seconds, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, use_face_blur_hack: None }
     }
 
     fn r480(dur: u8) -> GenerateSeedance2p5PreviewRequest {
@@ -532,10 +464,7 @@ mod tests {
     }
 
     fn with_all_reference_types(mut request: GenerateSeedance2p5PreviewRequest) -> GenerateSeedance2p5PreviewRequest {
-      request.reference_image_urls = Some(vec![
-        "https://example.com/a.jpg".to_string(),
-        "https://example.com/b.png".to_string(),
-      ]);
+      request.reference_image_urls = Some(vec!["https://example.com/a.jpg".to_string(), "https://example.com/b.png".to_string()]);
       request.reference_video_urls = Some(vec!["https://example.com/ref.mp4".to_string()]);
       request.reference_audio_urls = Some(vec!["https://example.com/ref.wav".to_string()]);
       request
@@ -550,20 +479,7 @@ mod tests {
     async fn test_text_to_video_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5PreviewRequest {
-          prompt: "A man is running from a t-rex".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p5PreviewAspectRatio::Landscape16x9),
-          output_resolution: Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP),
-          duration_seconds: 4,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs { session: &session, host_override: None, request: GenerateSeedance2p5PreviewRequest { prompt: "A man is running from a t-rex".to_string(), aspect_ratio: Some(KinoviSeedance2p5PreviewAspectRatio::Landscape16x9), output_resolution: Some(KinoviSeedance2p5PreviewOutputResolution::FourEightyP), duration_seconds: 4, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, use_face_blur_hack: None } }).await?;
       println!("t2v 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -576,20 +492,7 @@ mod tests {
     async fn test_text_to_video_720p_default() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5PreviewRequest {
-          prompt: "A corgi and a shiba are playing chess against one another".to_string(),
-          aspect_ratio: None,
-          output_resolution: None,
-          duration_seconds: 4,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5_preview(GenerateSeedance2p5PreviewArgs { session: &session, host_override: None, request: GenerateSeedance2p5PreviewRequest { prompt: "A corgi and a shiba are playing chess against one another".to_string(), aspect_ratio: None, output_resolution: None, duration_seconds: 4, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, use_face_blur_hack: None } }).await?;
       println!("t2v 720p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());

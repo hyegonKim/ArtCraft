@@ -26,13 +26,13 @@ pub struct AppPreferences {
   /// Key pointing to file; defined in the frontend code.
   /// Defined for enqueue since image enqueue can be async
   pub enqueue_failure_sound: Option<String>,
-  
+
   /// Key pointing to file; defined in the frontend code.
   pub generation_success_sound: Option<String>,
-  
+
   /// Key pointing to file; defined in the frontend code.
   pub generation_failure_sound: Option<String>,
-  
+
   /// Key pointing to file; defined in the frontend code.
   #[deprecated]
   pub generation_enqueue_sound: Option<String>,
@@ -64,19 +64,15 @@ impl AppPreferences {
     }
 
     match AppPreferencesSerializable::load_from_file(data_root) {
-      Ok(Some(serializable)) => {
-        serializable.to_preferences()
-      }
-      Ok(None) => {
-        Self::default()
-      }
+      Ok(Some(serializable)) => serializable.to_preferences(),
+      Ok(None) => Self::default(),
       Err(err) => {
         println!("Error loading app preferences: {}", err);
         Self::default()
-      }
+      },
     }
   }
-  
+
   pub fn to_serializable(&self) -> AppPreferencesSerializable {
     AppPreferencesSerializable::from_preferences(self)
   }

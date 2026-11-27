@@ -79,6 +79,8 @@ pub struct DialogState {
     pub live: super::live_preview::LivePreview,
     /// The user template the Delete Template prompt asks about: its id and name.
     pub delete_template: Option<(String, String)>,
+    /// Frame.io Team Review & Telestrator modal state.
+    pub review: super::review_ui::ReviewDraft,
 }
 
 pub fn open_new_comp(app: &mut EffectcraftApp) {
@@ -328,6 +330,7 @@ pub fn show(app: &mut EffectcraftApp, ctx: &egui::Context) {
         Dialog::Unprecompose => super::unprecompose::show(app, ctx, &t),
         Dialog::GradientEditor => super::gradient_editor::show(app, ctx, &t),
         Dialog::DeleteTemplate => super::templates::show_delete(app, ctx, &t),
+        Dialog::FrameIoReview => super::review_ui::dialog(app, ctx, &t),
     }
 }
 

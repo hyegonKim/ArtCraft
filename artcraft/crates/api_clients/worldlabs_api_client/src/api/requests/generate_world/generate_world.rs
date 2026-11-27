@@ -33,46 +33,29 @@ pub struct GenerateWorldResponse {
 pub async fn generate_world(args: GenerateWorldArgs<'_>) -> Result<GenerateWorldResponse, WorldLabsError> {
   let client = Client::new();
 
-  let model_name = args.model
-      .to_new_value()
-      .get_model_api_name_str()
-      .to_string();
+  let model_name = args.model.to_new_value().get_model_api_name_str().to_string();
 
-  let payload = RawRequest {
-    world_prompt: args.world_prompt,
-    display_name: args.display_name,
-    model: Some(model_name),
-    seed: args.seed,
-    tags: args.tags,
-    permission: args.permission,
-  };
+  let payload = RawRequest { world_prompt: args.world_prompt, display_name: args.display_name, model: Some(model_name), seed: args.seed, tags: args.tags, permission: args.permission };
 
   debug!("Requesting URL: {}", URL);
 
-  let mut request_builder = client.post(URL)
-    .header("WLT-Api-Key", args.creds.api_key())
-    .header("Content-Type", "application/json")
-    .json(&payload);
+  let mut request_builder = client.post(URL).header("WLT-Api-Key", args.creds.api_key()).header("Content-Type", "application/json").json(&payload);
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during generate_world request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during generate_world request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("generate_world returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -82,13 +65,9 @@ pub async fn generate_world(args: GenerateWorldArgs<'_>) -> Result<GenerateWorld
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  Ok(GenerateWorldResponse {
-    operation_id: OperationId(raw.operation_id),
-    done: raw.done.unwrap_or(false),
-  })
+  Ok(GenerateWorldResponse { operation_id: OperationId(raw.operation_id), done: raw.done.unwrap_or(false) })
 }
 
 #[cfg(test)]
@@ -109,19 +88,7 @@ mod tests {
 
     let creds = get_test_api_key().unwrap();
 
-    let response = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Text {
-        text_prompt: Some("A cozy cabin in the snowy mountains".to_string()),
-        disable_recaption: None,
-      },
-      display_name: Some("Test World".to_string()),
-      model: WorldLabsModel::Marble0p1Mini,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Text { text_prompt: Some("A cozy cabin in the snowy mountains".to_string()), disable_recaption: None }, display_name: Some("Test World".to_string()), model: WorldLabsModel::Marble0p1Mini, seed: None, tags: None, permission: None, request_timeout: None }).await.unwrap();
 
     println!("Operation ID: {}", response.operation_id.as_str());
     println!("Done: {}", response.done);
@@ -136,23 +103,7 @@ mod tests {
 
     let creds = get_test_api_key().unwrap();
 
-    let response = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Image {
-        image_prompt: ContentReference::Uri {
-          uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png".to_string(),
-        },
-        text_prompt: None,
-        is_pano: None,
-        disable_recaption: None,
-      },
-      display_name: None,
-      model: WorldLabsModel::Marble0p1Mini,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Image { image_prompt: ContentReference::Uri { uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png".to_string() }, text_prompt: None, is_pano: None, disable_recaption: None }, display_name: None, model: WorldLabsModel::Marble0p1Mini, seed: None, tags: None, permission: None, request_timeout: None }).await.unwrap();
 
     println!("Operation ID: {}", response.operation_id.as_str());
     println!("Done: {}", response.done);
@@ -172,18 +123,12 @@ mod tests {
     let creds = get_test_api_key().unwrap();
 
     // --- Read file ---
-    let file_bytes = file_read_bytes("/Users/bt/dev/storyteller/artcraft/test_data/image/mochi.jpg")
-        .expect("failed to read safe test image");
+    let file_bytes = file_read_bytes("/Users/bt/dev/storyteller/artcraft/test_data/image/mochi.jpg").expect("failed to read safe test image");
     println!("Read {} bytes from safe test image", file_bytes.len());
 
     // --- Step 1: prepare_upload ---
     println!("\n=== Step 1: prepare_upload ===");
-    let prepare_result = prepare_upload(PrepareUploadArgs {
-      creds: &creds,
-      file_name: "mochi.jpg",
-      kind: MediaAssetKind::Image,
-      request_timeout: None,
-    }).await;
+    let prepare_result = prepare_upload(PrepareUploadArgs { creds: &creds, file_name: "mochi.jpg", kind: MediaAssetKind::Image, request_timeout: None }).await;
 
     println!("prepare_upload result: {:?}", prepare_result.as_ref().map(|r| &r.media_asset_id));
 
@@ -193,60 +138,38 @@ mod tests {
         println!("  Upload URL: {}", r.upload_url);
         println!("  Required headers: {:?}", r.required_headers);
         r
-      }
+      },
       Err(err) => {
         println!("  ERROR at prepare_upload: {:?}", err);
         panic!("prepare_upload failed: {:?}", err);
-      }
+      },
     };
 
     // --- Step 2: upload_to_signed_url ---
     println!("\n=== Step 2: upload_to_signed_url ===");
-    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs {
-      upload_url: &prepare_response.upload_url,
-      file_bytes,
-      required_headers: &prepare_response.required_headers,
-      content_type: "image/jpeg",
-      request_timeout: None,
-    }).await;
+    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs { upload_url: &prepare_response.upload_url, file_bytes, required_headers: &prepare_response.required_headers, content_type: "image/jpeg", request_timeout: None }).await;
 
     match &upload_result {
       Ok(()) => println!("  Upload succeeded."),
       Err(err) => {
         println!("  ERROR at upload_to_signed_url: {:?}", err);
         panic!("upload_to_signed_url failed: {:?}", err);
-      }
+      },
     }
 
     // --- Step 3: generate_world ---
     println!("\n=== Step 3: generate_world ===");
-    let generate_result = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Image {
-        image_prompt: ContentReference::MediaAsset {
-          media_asset_id: prepare_response.media_asset_id.as_str().to_string(),
-        },
-        text_prompt: Some("A colorful gradient landscape".to_string()),
-        is_pano: None,
-        disable_recaption: None,
-      },
-      display_name: None,
-      model: WorldLabsModel::Marble0p1Mini,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await;
+    let generate_result = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Image { image_prompt: ContentReference::MediaAsset { media_asset_id: prepare_response.media_asset_id.as_str().to_string() }, text_prompt: Some("A colorful gradient landscape".to_string()), is_pano: None, disable_recaption: None }, display_name: None, model: WorldLabsModel::Marble0p1Mini, seed: None, tags: None, permission: None, request_timeout: None }).await;
 
     match &generate_result {
       Ok(r) => {
         println!("  SUCCESS — safe image");
         println!("  Operation ID: {}", r.operation_id.as_str());
         println!("  Done: {}", r.done);
-      }
+      },
       Err(err) => {
         println!("  ERROR at generate_world: {:?}", err);
-      }
+      },
     }
 
     assert_eq!(1, 2, "Inspect output above");
@@ -269,43 +192,31 @@ mod tests {
     let creds = get_test_api_key().unwrap();
 
     // --- Read file ---
-    let file_bytes = file_read_bytes("/Users/bt/Pictures/nsfw_test/nsfw_test_1.jpg")
-        .expect("failed to read NSFW test image");
+    let file_bytes = file_read_bytes("/Users/bt/Pictures/nsfw_test/nsfw_test_1.jpg").expect("failed to read NSFW test image");
     println!("Read {} bytes from NSFW test image", file_bytes.len());
 
     // --- Step 1: prepare_upload ---
     println!("\n=== Step 1: prepare_upload ===");
-    let prepare_result = prepare_upload(PrepareUploadArgs {
-      creds: &creds,
-      file_name: "nsfw_test_1.jpg",
-      kind: MediaAssetKind::Image,
-      request_timeout: None,
-    }).await;
+    let prepare_result = prepare_upload(PrepareUploadArgs { creds: &creds, file_name: "nsfw_test_1.jpg", kind: MediaAssetKind::Image, request_timeout: None }).await;
 
     let prepare_response = match prepare_result {
       Ok(r) => {
         println!("  OK — Media Asset ID: {}", r.media_asset_id.as_str());
         println!("  Upload URL: {}", r.upload_url);
         r
-      }
+      },
       Err(err) => {
         println!("  NSFW CAUGHT AT STEP 1 (prepare_upload)!");
         println!("  Error (Debug): {:?}", err);
         println!("  Error (Display): {}", err);
         assert_eq!(1, 2, "NSFW caught at prepare_upload — inspect output above");
         unreachable!();
-      }
+      },
     };
 
     // --- Step 2: upload_to_signed_url ---
     println!("\n=== Step 2: upload_to_signed_url ===");
-    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs {
-      upload_url: &prepare_response.upload_url,
-      file_bytes,
-      required_headers: &prepare_response.required_headers,
-      content_type: "image/jpeg",
-      request_timeout: None,
-    }).await;
+    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs { upload_url: &prepare_response.upload_url, file_bytes, required_headers: &prepare_response.required_headers, content_type: "image/jpeg", request_timeout: None }).await;
 
     match &upload_result {
       Ok(()) => println!("  OK — upload succeeded."),
@@ -314,40 +225,24 @@ mod tests {
         println!("  Error (Debug): {:?}", err);
         println!("  Error (Display): {}", err);
         assert_eq!(1, 2, "NSFW caught at upload — inspect output above");
-      }
+      },
     }
 
     // --- Step 3: generate_world ---
     println!("\n=== Step 3: generate_world ===");
-    let generate_result = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Image {
-        image_prompt: ContentReference::MediaAsset {
-          media_asset_id: prepare_response.media_asset_id.as_str().to_string(),
-        },
-        text_prompt: None,
-        is_pano: None,
-        disable_recaption: None,
-      },
-      display_name: None,
-      model: WorldLabsModel::Marble0p1Mini,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await;
+    let generate_result = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Image { image_prompt: ContentReference::MediaAsset { media_asset_id: prepare_response.media_asset_id.as_str().to_string() }, text_prompt: None, is_pano: None, disable_recaption: None }, display_name: None, model: WorldLabsModel::Marble0p1Mini, seed: None, tags: None, permission: None, request_timeout: None }).await;
 
     match &generate_result {
       Ok(r) => {
         println!("  UNEXPECTED SUCCESS — NSFW image was NOT rejected at generate_world!");
         println!("  Operation ID: {}", r.operation_id.as_str());
         println!("  Done: {}", r.done);
-      }
+      },
       Err(err) => {
         println!("  NSFW CAUGHT AT STEP 3 (generate_world)!");
         println!("  Error (Debug): {:?}", err);
         println!("  Error (Display): {}", err);
-      }
+      },
     }
 
     assert_eq!(1, 2, "Inspect output above");
@@ -366,35 +261,19 @@ mod tests {
     println!("=== generate_world with Marble 1.1 ===");
     println!("Image URL: {}", image_url);
 
-    let result = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Image {
-        image_prompt: ContentReference::Uri {
-          uri: image_url.to_string(),
-        },
-        text_prompt: Some("Mountain landscape with a tree".to_string()),
-        is_pano: None,
-        disable_recaption: None,
-      },
-      display_name: None,
-      model: WorldLabsModel::Marble1p1,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await;
+    let result = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Image { image_prompt: ContentReference::Uri { uri: image_url.to_string() }, text_prompt: Some("Mountain landscape with a tree".to_string()), is_pano: None, disable_recaption: None }, display_name: None, model: WorldLabsModel::Marble1p1, seed: None, tags: None, permission: None, request_timeout: None }).await;
 
     match &result {
       Ok(r) => {
         println!("SUCCESS — Marble 1.1");
         println!("  Operation ID: {}", r.operation_id.as_str());
         println!("  Done: {}", r.done);
-      }
+      },
       Err(err) => {
         println!("ERROR — Marble 1.1");
         println!("  Error (Debug): {:?}", err);
         println!("  Error (Display): {}", err);
-      }
+      },
     }
 
     assert_eq!(1, 2, "Inspect output above");
@@ -413,35 +292,19 @@ mod tests {
     println!("=== generate_world with Marble 1.1-plus ===");
     println!("Image URL: {}", image_url);
 
-    let result = generate_world(GenerateWorldArgs {
-      creds: &creds,
-      world_prompt: WorldPrompt::Image {
-        image_prompt: ContentReference::Uri {
-          uri: image_url.to_string(),
-        },
-        text_prompt: Some("Autumn mountain panorama".to_string()),
-        is_pano: None,
-        disable_recaption: None,
-      },
-      display_name: None,
-      model: WorldLabsModel::Marble1p1Plus,
-      seed: None,
-      tags: None,
-      permission: None,
-      request_timeout: None,
-    }).await;
+    let result = generate_world(GenerateWorldArgs { creds: &creds, world_prompt: WorldPrompt::Image { image_prompt: ContentReference::Uri { uri: image_url.to_string() }, text_prompt: Some("Autumn mountain panorama".to_string()), is_pano: None, disable_recaption: None }, display_name: None, model: WorldLabsModel::Marble1p1Plus, seed: None, tags: None, permission: None, request_timeout: None }).await;
 
     match &result {
       Ok(r) => {
         println!("SUCCESS — Marble 1.1-plus");
         println!("  Operation ID: {}", r.operation_id.as_str());
         println!("  Done: {}", r.done);
-      }
+      },
       Err(err) => {
         println!("ERROR — Marble 1.1-plus");
         println!("  Error (Debug): {:?}", err);
         println!("  Error (Display): {}", err);
-      }
+      },
     }
 
     assert_eq!(1, 2, "Inspect output above");

@@ -17,19 +17,9 @@ use sqlite_tasks::queries::task::Task;
 use std::collections::HashMap;
 use tauri::AppHandle;
 
-pub async fn storyteller_task_polling_thread(
-  app_handle: AppHandle,
-  app_env_configs: AppEnvConfigs,
-  task_database: TaskDatabase,
-  storyteller_creds_manager: StorytellerCredentialManager,
-) -> ! {
+pub async fn storyteller_task_polling_thread(app_handle: AppHandle, app_env_configs: AppEnvConfigs, task_database: TaskDatabase, storyteller_creds_manager: StorytellerCredentialManager) -> ! {
   loop {
-    let res = polling_loop(
-      &app_handle,
-      &app_env_configs,
-      &task_database,
-      &storyteller_creds_manager,
-    ).await;
+    let res = polling_loop(&app_handle, &app_env_configs, &task_database, &storyteller_creds_manager).await;
     if let Err(err) = res {
       error!("An error occurred: {:?}", err);
     }
@@ -38,23 +28,14 @@ pub async fn storyteller_task_polling_thread(
   }
 }
 
-async fn polling_loop(
-  app_handle: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<()> {
+async fn polling_loop(app_handle: &AppHandle, app_env_configs: &AppEnvConfigs, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<()> {
   loop {
     // Wait before next request for jobs.
     tokio::time::sleep(std::time::Duration::from_millis(5_000)).await;
 
     let creds = storyteller_creds_manager.get_credentials()?;
 
-    let result = list_session_jobs(
-      &app_env_configs.storyteller_host,
-      creds.as_ref(),
-      States::All,
-    ).await;
+    let result = list_session_jobs(&app_env_configs.storyteller_host, creds.as_ref(), States::All).await;
 
     let jobs = match result {
       Ok(result) => result.jobs,
@@ -63,28 +44,20 @@ async fn polling_loop(
           StorytellerError::Api(ApiError::TooManyRequests(message)) => {
             error!("Too many requests (sleeping): {:?}", message);
             tokio::time::sleep(std::time::Duration::from_millis(60_000)).await;
-          }
-          _ => {}
+          },
+          _ => {},
         }
         return Err(anyhow!(err));
-      }
+      },
     };
 
-    let job_ids = jobs.iter()
-        .map(|job| job.job_token.to_string())
-        .collect::<Vec<_>>();
+    let job_ids = jobs.iter().map(|job| job.job_token.to_string()).collect::<Vec<_>>();
 
-    let tasks = list_tasks_by_provider_and_tokens(ListTasksArgs {
-      db: task_database.get_connection(),
-      provider: GenerationProvider::Artcraft,
-      provider_job_ids: Some(job_ids),
-    }).await?;
+    let tasks = list_tasks_by_provider_and_tokens(ListTasksArgs { db: task_database.get_connection(), provider: GenerationProvider::Artcraft, provider_job_ids: Some(job_ids) }).await?;
 
     let tasks = tasks.tasks;
 
-    let jobs_by_id = jobs.iter()
-        .map(|job| (job.job_token.to_string(), job))
-        .collect::<HashMap<String, _>>();
+    let jobs_by_id = jobs.iter().map(|job| (job.job_token.to_string(), job)).collect::<HashMap<String, _>>();
 
     let tasks_by_provider_job_id = tasks.iter()
         .filter_map(|task| {
@@ -107,23 +80,22 @@ async fn polling_loop(
         JobStatusPlus::CompleteSuccess => {
           match task.status {
             TaskStatus::CompleteSuccess => continue, // NB: We're done with this task.
-            _ => {}
+            _ => {},
           }
           if let Err(err) = handle_successful_job(app_handle, app_env_configs, creds.as_ref(), job, task, task_database).await {
             // One failed local download must not delay other completed jobs.
             error!("Completion for task {} will be retried: {}", task.id.as_str(), err);
           }
-        }
+        },
         JobStatusPlus::CompleteFailure => {
           match task.status {
             TaskStatus::CompleteFailure => continue, // NB: We're done with this task.
-            _ => {}
+            _ => {},
           }
           handle_failed_job(app_handle, job, task, task_database).await?;
-        }
+        },
         _ => continue,
       }
     }
-
   }
 }

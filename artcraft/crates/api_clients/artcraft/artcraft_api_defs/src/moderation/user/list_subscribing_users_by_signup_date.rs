@@ -39,7 +39,7 @@ pub struct ModeratorListSubscribingUsersBySignupDateEntry {
   pub maybe_referral_url: Option<String>,
   pub is_temporary: bool,
 
-  // TODO: Use enum types/strong types - 
+  // TODO: Use enum types/strong types -
   // -- Subscription fields --
   pub subscription_namespace: String,
   pub subscription_product_slug: String,

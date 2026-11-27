@@ -30,10 +30,7 @@ pub fn sniff_odp(bytes: &[u8]) -> bool {
     if !bytes.starts_with(b"PK") {
         return false;
     }
-    if [ODP_MIMETYPE, OTP_MIMETYPE]
-        .iter()
-        .any(|m| bytes.windows(m.len()).take(220).any(|w| w == m.as_bytes()))
-    {
+    if [ODP_MIMETYPE, OTP_MIMETYPE].iter().any(|m| bytes.windows(m.len()).take(220).any(|w| w == m.as_bytes())) {
         return true;
     }
     let Ok(mut z) = zip::ZipArchive::new(Cursor::new(bytes)) else { return false };
@@ -69,10 +66,7 @@ fn read_zip_entry(z: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str, max: u64) 
     }
     let cap = usize::try_from(f.size().min(16 << 20)).unwrap_or(0);
     let mut buf = Vec::with_capacity(cap);
-    f.by_ref()
-        .take(max.saturating_add(1))
-        .read_to_end(&mut buf)
-        .map_err(|e| FormatError::Damaged(format!("{name}: {e}")))?;
+    f.by_ref().take(max.saturating_add(1)).read_to_end(&mut buf).map_err(|e| FormatError::Damaged(format!("{name}: {e}")))?;
     if buf.len() as u64 > max {
         return Err(FormatError::Damaged(format!("{name} exceeds size limit")));
     }
@@ -212,22 +206,17 @@ fn parse_odp_transition(e: &BytesStart<'_>) -> Option<Transition> {
     let pres_style = attr_str(e, b"transition-style");
     let trans_type = attr_str(e, b"transition-type");
     let speed = attr_str(e, b"transition-speed");
-    let dur_ms = attr_str(e, b"dur")
-        .and_then(|d| parse_iso_duration_ms(&d))
-        .unwrap_or_else(|| match speed.as_deref() {
-            Some("fast") => 500,
-            Some("slow") => 1500,
-            _ => 900,
-        });
+    let dur_ms = attr_str(e, b"dur").and_then(|d| parse_iso_duration_ms(&d)).unwrap_or_else(|| match speed.as_deref() {
+        Some("fast") => 500,
+        Some("slow") => 1500,
+        _ => 900,
+    });
     let advance_after_ms = attr_str(e, b"duration").and_then(|d| parse_iso_duration_ms(&d));
     let advance_on_click = !matches!(trans_type.as_deref(), Some("automatic"));
 
     let (kind, option): (&str, &str) = if let Some(st) = smil_type.as_deref() {
         match st {
-            "fade" => (
-                "fade",
-                if smil_sub == "fadeOverColor" { "throughBlack" } else { "smoothly" },
-            ),
+            "fade" => ("fade", if smil_sub == "fadeOverColor" { "throughBlack" } else { "smoothly" }),
             "pushWipe" => (
                 "push",
                 match (smil_sub.as_str(), dir_rev) {
@@ -376,7 +365,8 @@ fn parse_styles_into(xml: &[u8], cat: &mut OdpStyleCatalog) {
     let mut cur_list_name: Option<String> = None;
     let mut master_bg_style: Option<String> = None;
 
-    let mut handle_tag = |e: &BytesStart<'_>, is_start: bool,
+    let mut handle_tag = |e: &BytesStart<'_>,
+                          is_start: bool,
                           cur_style_name: &mut Option<String>,
                           cur_style_family: &mut Option<String>,
                           cur_list_name: &mut Option<String>| {
@@ -384,10 +374,11 @@ fn parse_styles_into(xml: &[u8], cat: &mut OdpStyleCatalog) {
         let ln = local_name(qname.as_ref());
         match ln {
             b"page-layout-properties" => {
-                if let (Some(w), Some(h)) = (
-                    attr_str(e, b"page-width").and_then(|s| parse_length_pt(&s)),
-                    attr_str(e, b"page-height").and_then(|s| parse_length_pt(&s)),
-                ) && w > 10.0 && h > 10.0 && cat.page_size.is_none()
+                if let (Some(w), Some(h)) =
+                    (attr_str(e, b"page-width").and_then(|s| parse_length_pt(&s)), attr_str(e, b"page-height").and_then(|s| parse_length_pt(&s)))
+                    && w > 10.0
+                    && h > 10.0
+                    && cat.page_size.is_none()
                 {
                     cat.page_size = Some(Size::new(w, h));
                 }
@@ -607,10 +598,7 @@ fn parse_xfrm(e: &BytesStart<'_>) -> Xfrm {
                     }
                 }
                 "translate" => {
-                    if let (Some(tx), Some(ty)) = (
-                        parts.first().and_then(|s| parse_length_pt(s)),
-                        parts.get(1).and_then(|s| parse_length_pt(s)),
-                    ) {
+                    if let (Some(tx), Some(ty)) = (parts.first().and_then(|s| parse_length_pt(s)), parts.get(1).and_then(|s| parse_length_pt(s))) {
                         trans = Some((tx, ty));
                     }
                 }
@@ -797,8 +785,8 @@ pub fn load_odp(bytes: &[u8]) -> Result<Presentation> {
         return Err(FormatError::NotOurs("not an OpenDocument presentation (.odp)".into()));
     }
     let mut z = zip::ZipArchive::new(Cursor::new(bytes)).map_err(|e| FormatError::Damaged(e.to_string()))?;
-    let content_xml = read_zip_entry(&mut z, "content.xml", MAX_ENTRY)?
-        .ok_or_else(|| FormatError::Damaged("missing content.xml in .odp archive".into()))?;
+    let content_xml =
+        read_zip_entry(&mut z, "content.xml", MAX_ENTRY)?.ok_or_else(|| FormatError::Damaged("missing content.xml in .odp archive".into()))?;
     let styles_xml = read_zip_entry(&mut z, "styles.xml", MAX_ENTRY)?;
     let meta_xml = read_zip_entry(&mut z, "meta.xml", MAX_ENTRY)?;
 
@@ -847,13 +835,7 @@ pub fn load_odp(bytes: &[u8]) -> Result<Presentation> {
     let default_layout = pres
         .masters
         .first()
-        .and_then(|m| {
-            m.layouts
-                .iter()
-                .find(|l| l.kind == deckcraft_model::LayoutType::Blank)
-                .or_else(|| m.layouts.first())
-                .map(|l| l.id)
-        })
+        .and_then(|m| m.layouts.iter().find(|l| l.kind == deckcraft_model::LayoutType::Blank).or_else(|| m.layouts.first()).map(|l| l.id))
         .unwrap_or(LayoutId(1));
 
     parse_content_pages(&content_xml, &cat, &archive_media, default_layout, &mut pres);
@@ -895,11 +877,7 @@ fn parse_content_pages(
     let mut list_stack: Vec<String> = Vec::new();
     let mut ph_idx_counter = 0u32;
 
-    let finish_shape = |mut sh: Shape,
-                        gstyle: Option<OdpGraphicStyle>,
-                        paras: Vec<Paragraph>,
-                        tbl: Option<Table>,
-                        slide: &mut Slide| {
+    let finish_shape = |mut sh: Shape, gstyle: Option<OdpGraphicStyle>, paras: Vec<Paragraph>, tbl: Option<Table>, slide: &mut Slide| {
         if let Some(table) = tbl {
             sh.kind = ShapeKind::Table(table);
         } else if !matches!(sh.kind, ShapeKind::Picture { .. }) && (!paras.is_empty() || sh.text_box || sh.ph.is_some()) {
@@ -1024,9 +1002,7 @@ fn parse_content_pages(
                     b"table-column" => {
                         if let Some(tbl) = cur_table.as_mut() {
                             let repeat = attr_str(&e, b"number-columns-repeated").and_then(|s| s.parse::<usize>().ok()).unwrap_or(1).clamp(1, 64);
-                            let col_w = attr_str(&e, b"style-name")
-                                .and_then(|_| None::<f64>)
-                                .unwrap_or(120.0);
+                            let col_w = attr_str(&e, b"style-name").and_then(|_| None::<f64>).unwrap_or(120.0);
                             for _ in 0..repeat {
                                 tbl.cols.push(col_w);
                             }
@@ -1056,9 +1032,7 @@ fn parse_content_pages(
                         }
                     }
                     b"list" => {
-                        let lname = attr_str(&e, b"style-name")
-                            .or_else(|| list_stack.last().cloned())
-                            .unwrap_or_default();
+                        let lname = attr_str(&e, b"style-name").or_else(|| list_stack.last().cloned()).unwrap_or_default();
                         list_stack.push(lname);
                     }
                     b"p" | b"h" if in_notes || cur_shape.is_some() => {
@@ -1168,9 +1142,7 @@ fn parse_content_pages(
                             shape_paras.push(para);
                         }
                     }
-                    b"rect" | b"ellipse" | b"circle" | b"line" | b"custom-shape"
-                        if cur_slide.is_some() && !in_notes && cur_shape.is_none() =>
-                    {
+                    b"rect" | b"ellipse" | b"circle" | b"line" | b"custom-shape" if cur_slide.is_some() && !in_notes && cur_shape.is_none() => {
                         let id = ShapeId(pres.alloc_id().unwrap_or(1));
                         let xfrm = parse_xfrm(&e);
                         let preset = match ln {
@@ -1513,9 +1485,7 @@ impl OdpStyleBuilder {
                 props.push_str(&format!(" draw:textarea-vertical-align=\"{va}\""));
             }
         }
-        self.xml.push_str(&format!(
-            "<style:style style:name=\"{id}\" style:family=\"graphic\"><style:graphic-properties{props}/></style:style>"
-        ));
+        self.xml.push_str(&format!("<style:style style:name=\"{id}\" style:family=\"graphic\"><style:graphic-properties{props}/></style:style>"));
         id
     }
 
@@ -1537,9 +1507,7 @@ impl OdpStyleBuilder {
         {
             props.push_str(&format!(" fo:margin-left=\"{ml:.2}pt\""));
         }
-        self.xml.push_str(&format!(
-            "<style:style style:name=\"{id}\" style:family=\"paragraph\"><style:paragraph-properties{props}/></style:style>"
-        ));
+        self.xml.push_str(&format!("<style:style style:name=\"{id}\" style:family=\"paragraph\"><style:paragraph-properties{props}/></style:style>"));
         id
     }
 
@@ -1570,9 +1538,7 @@ impl OdpStyleBuilder {
         if tc.a > 0 {
             props.push_str(&format!(" fo:color=\"{}\"", hex_rgb(tc)));
         }
-        self.xml.push_str(&format!(
-            "<style:style style:name=\"{id}\" style:family=\"text\"><style:text-properties{props}/></style:style>"
-        ));
+        self.xml.push_str(&format!("<style:style style:name=\"{id}\" style:family=\"text\"><style:text-properties{props}/></style:style>"));
         id
     }
 
@@ -1583,15 +1549,10 @@ impl OdpStyleBuilder {
         for lvl in 1..=9 {
             match bullet {
                 Bullet::AutoNum { .. } => {
-                    self.xml.push_str(&format!(
-                        "<text:list-level-style-number text:level=\"{lvl}\" style:num-suffix=\".\" style:num-format=\"1\"/>"
-                    ));
+                    self.xml.push_str(&format!("<text:list-level-style-number text:level=\"{lvl}\" style:num-suffix=\".\" style:num-format=\"1\"/>"));
                 }
                 Bullet::Char { char: ch } => {
-                    self.xml.push_str(&format!(
-                        "<text:list-level-style-bullet text:level=\"{lvl}\" text:bullet-char=\"{}\"/>",
-                        xml_esc(ch)
-                    ));
+                    self.xml.push_str(&format!("<text:list-level-style-bullet text:level=\"{lvl}\" text:bullet-char=\"{}\"/>", xml_esc(ch)));
                 }
                 _ => {
                     self.xml.push_str(&format!("<text:list-level-style-bullet text:level=\"{lvl}\" text:bullet-char=\"•\"/>"));
@@ -1675,13 +1636,7 @@ fn write_odf_text(text: &str, out: &mut String) {
     }
 }
 
-fn write_shape_xml(
-    ctx: &resolve::Ctx<'_>,
-    sh: &Shape,
-    media_paths: &HashMap<MediaId, String>,
-    sb: &mut OdpStyleBuilder,
-    out: &mut String,
-) {
+fn write_shape_xml(ctx: &resolve::Ctx<'_>, sh: &Shape, media_paths: &HashMap<MediaId, String>, sb: &mut OdpStyleBuilder, out: &mut String) {
     if sh.hidden {
         return;
     }
@@ -1814,17 +1769,11 @@ pub fn save_odp(pres: &Presentation) -> Result<Vec<u8>> {
         let ctx = resolve::Ctx::for_slide(pres, sl);
         let dp = sb.add_page_style(ctx.as_ref(), sl);
         let page_name = if sl.name.trim().is_empty() { format!("page{}", idx + 1) } else { sl.name.clone() };
-        pages_xml.push_str(&format!(
-            "<draw:page draw:name=\"{}\" draw:style-name=\"{dp}\" draw:master-page-name=\"Default\">",
-            xml_esc(&page_name)
-        ));
+        pages_xml.push_str(&format!("<draw:page draw:name=\"{}\" draw:style-name=\"{dp}\" draw:master-page-name=\"Default\">", xml_esc(&page_name)));
         if let Some(ctx) = &ctx {
             for shape in &sl.shapes {
                 // Skip untouched empty placeholders.
-                if shape.ph.is_some()
-                    && shape.text.as_ref().is_none_or(|t| t.text().trim().is_empty())
-                    && matches!(shape.kind, ShapeKind::Shape)
-                {
+                if shape.ph.is_some() && shape.text.as_ref().is_none_or(|t| t.text().trim().is_empty()) && matches!(shape.kind, ShapeKind::Shape) {
                     continue;
                 }
                 write_shape_xml(ctx, shape, &media_paths, &mut sb, &mut pages_xml);
@@ -1901,11 +1850,7 @@ pub fn save_odp(pres: &Presentation) -> Result<Vec<u8>> {
         xml_esc(&pres.props.comments),
         xml_esc(&pres.props.author),
         xml_esc(&pres.props.author),
-        if pres.props.keywords.trim().is_empty() {
-            String::new()
-        } else {
-            format!("<meta:keyword>{}</meta:keyword>", xml_esc(&pres.props.keywords))
-        }
+        if pres.props.keywords.trim().is_empty() { String::new() } else { format!("<meta:keyword>{}</meta:keyword>", xml_esc(&pres.props.keywords)) }
     );
 
     let mut manifest_xml = String::from(
@@ -1917,11 +1862,7 @@ pub fn save_odp(pres: &Presentation) -> Result<Vec<u8>> {
          <manifest:file-entry manifest:full-path=\"meta.xml\" manifest:media-type=\"text/xml\"/>",
     );
     for (p, ct) in &manifest_entries {
-        manifest_xml.push_str(&format!(
-            "<manifest:file-entry manifest:full-path=\"{}\" manifest:media-type=\"{}\"/>",
-            xml_esc(p),
-            xml_esc(ct)
-        ));
+        manifest_xml.push_str(&format!("<manifest:file-entry manifest:full-path=\"{}\" manifest:media-type=\"{}\"/>", xml_esc(p), xml_esc(ct)));
     }
     manifest_xml.push_str("</manifest:manifest>");
 

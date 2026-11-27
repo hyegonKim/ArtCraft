@@ -21,10 +21,7 @@ pub struct WorldlabsCredentialManager {
 
 impl WorldlabsCredentialManager {
   pub fn initialize_empty(app_data_root: &AppDataRoot) -> Self {
-    Self {
-      credential_data: Arc::new(RwLock::new(WorldlabsCredentialHolder::empty())),
-      app_data_root: app_data_root.clone(),
-    }
+    Self { credential_data: Arc::new(RwLock::new(WorldlabsCredentialHolder::empty())), app_data_root: app_data_root.clone() }
   }
 
   pub fn initialize_from_disk_infallible(app_data_root: &AppDataRoot) -> Self {
@@ -38,36 +35,21 @@ impl WorldlabsCredentialManager {
       },
       Ok(None) => {
         credential_data = Arc::new(RwLock::new(WorldlabsCredentialHolder::empty()));
-      }
+      },
       Ok(Some(state)) => {
-        let maybe_browser_cookies = state.user_cookies
-            .as_ref()
-            .map(|cookies| cookies.to_cookie_store());
+        let maybe_browser_cookies = state.user_cookies.as_ref().map(|cookies| cookies.to_cookie_store());
 
-        let maybe_cookies = maybe_browser_cookies
-            .as_ref()
-            .map(|cookies| cookies.to_cookie_string())
-            .map(|cookies| WorldLabsCookies::new(cookies));
+        let maybe_cookies = maybe_browser_cookies.as_ref().map(|cookies| cookies.to_cookie_string()).map(|cookies| WorldLabsCookies::new(cookies));
 
-        let maybe_bearer = state.bearer_token
-            .map(|bearer| WorldLabsBearerToken::new(bearer));
+        let maybe_bearer = state.bearer_token.map(|bearer| WorldLabsBearerToken::new(bearer));
 
-        let maybe_refresh = state.refresh_token
-            .map(|bearer| WorldLabsRefreshToken::new(bearer));
+        let maybe_refresh = state.refresh_token.map(|bearer| WorldLabsRefreshToken::new(bearer));
 
-        credential_data = Arc::new(RwLock::new(WorldlabsCredentialHolder {
-          browser_cookies: maybe_browser_cookies,
-          world_labs_cookies: maybe_cookies,
-          world_labs_bearer_token: maybe_bearer,
-          world_labs_refresh_token: maybe_refresh,
-        }));
-      }
+        credential_data = Arc::new(RwLock::new(WorldlabsCredentialHolder { browser_cookies: maybe_browser_cookies, world_labs_cookies: maybe_cookies, world_labs_bearer_token: maybe_bearer, world_labs_refresh_token: maybe_refresh }));
+      },
     };
 
-    Self {
-      credential_data,
-      app_data_root: app_data_root.clone(),
-    }
+    Self { credential_data, app_data_root: app_data_root.clone() }
   }
 
   pub fn maybe_copy_cookie_store(&self) -> anyhow::Result<Option<CookieStore>> {
@@ -79,17 +61,13 @@ impl WorldlabsCredentialManager {
 
   pub fn maybe_copy_cookie_header_string(&self) -> anyhow::Result<Option<String>> {
     let maybe_cookies = self.maybe_copy_cookie_store()?;
-    let maybe_cookies = maybe_cookies.map(|cookies| {
-      cookies.to_cookie_string()
-    });
+    let maybe_cookies = maybe_cookies.map(|cookies| cookies.to_cookie_string());
     Ok(maybe_cookies)
   }
 
   pub fn maybe_copy_typed_cookies(&self) -> anyhow::Result<Option<WorldLabsCookies>> {
     let maybe_cookies = self.maybe_copy_cookie_header_string()?;
-    let maybe_cookies = maybe_cookies.map(|cookies| {
-      WorldLabsCookies::new(cookies)
-    });
+    let maybe_cookies = maybe_cookies.map(|cookies| WorldLabsCookies::new(cookies));
     Ok(maybe_cookies)
   }
 
@@ -113,7 +91,7 @@ impl WorldlabsCredentialManager {
       Ok(mut holder) => {
         holder.browser_cookies = Some(store);
         Ok(())
-      }
+      },
     }
   }
 
@@ -123,7 +101,7 @@ impl WorldlabsCredentialManager {
       Ok(mut holder) => {
         holder.world_labs_bearer_token = Some(token);
         Ok(())
-      }
+      },
     }
   }
 
@@ -133,7 +111,7 @@ impl WorldlabsCredentialManager {
       Ok(mut holder) => {
         holder.world_labs_refresh_token = Some(token);
         Ok(())
-      }
+      },
     }
   }
 
@@ -144,7 +122,7 @@ impl WorldlabsCredentialManager {
         holder.world_labs_bearer_token = Some(bearer_token);
         holder.world_labs_refresh_token = Some(refresh_token);
         Ok(())
-      }
+      },
     }
   }
 
@@ -187,17 +165,11 @@ impl WorldlabsCredentialManager {
 
     let state = WorldlabsSerializableState {
       version: SERIALIZABLE_WORLDLABS_STATE_VERSION,
-      user_cookies: creds.browser_cookies
-          .as_ref()
-          .map(|cookies| cookies.to_serializable()),
-      user_id: None, // TODO
+      user_cookies: creds.browser_cookies.as_ref().map(|cookies| cookies.to_serializable()),
+      user_id: None,    // TODO
       user_email: None, // TODO
-      bearer_token: creds.world_labs_bearer_token
-          .as_ref()
-          .map(|token| token.to_raw_string()),
-      refresh_token: creds.world_labs_refresh_token
-          .as_ref()
-          .map(|token| token.to_raw_string()),
+      bearer_token: creds.world_labs_bearer_token.as_ref().map(|token| token.to_raw_string()),
+      refresh_token: creds.world_labs_refresh_token.as_ref().map(|token| token.to_raw_string()),
     };
 
     let path = self.app_data_root.credentials_dir().get_worldlabs_state_path();

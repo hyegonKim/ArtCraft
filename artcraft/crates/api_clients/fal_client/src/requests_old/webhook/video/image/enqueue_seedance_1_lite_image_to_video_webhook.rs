@@ -32,9 +32,9 @@ pub enum Seedance1LiteDuration {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Seedance1LiteResolution {
-  FourEightyP, // 480p
+  FourEightyP,  // 480p
   SevenTwentyP, // 720p
-  TenEightyP, // 1080p
+  TenEightyP,   // 1080p
 }
 
 /// Possible enum values: 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, auto
@@ -49,23 +49,20 @@ pub enum Seedance1LiteAspectRatio {
   NineBySixteen,
 }
 
-
 impl FalRequestCostCalculator for Seedance1LiteRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // "Each 720p 5 second video costs $0.18.
     //  For other resolutions, 1 million video tokens costs $1.8.
     //  tokens(video) = (height x width x FPS x duration) / 1024."
 
-    if self.resolution == Seedance1LiteResolution::SevenTwentyP
-        && self.duration == Seedance1LiteDuration::FiveSeconds
-    {
+    if self.resolution == Seedance1LiteResolution::SevenTwentyP && self.duration == Seedance1LiteDuration::FiveSeconds {
       return 18;
     }
 
     // TODO: Only correct for some aspect ratios for now.
     let (width, height) = match self.resolution {
       Seedance1LiteResolution::FourEightyP => (640u32, 480u32), // NB: Only for 4:3 !
-      Seedance1LiteResolution::SevenTwentyP => (1280, 720), // NB: Only for 16:9 !
+      Seedance1LiteResolution::SevenTwentyP => (1280, 720),     // NB: Only for 16:9 !
       Seedance1LiteResolution::TenEightyP => (1920, 1080),
     };
 
@@ -76,7 +73,7 @@ impl FalRequestCostCalculator for Seedance1LiteRequest {
 
     // TODO: Not sure if FPS is right.
     //  Inferred from https://help.scenario.com/en/articles/seedance-models-the-essentials/
-    const FPS : f64 = 30.0;
+    const FPS: f64 = 30.0;
 
     let tokens = (height as f64) * (width as f64) * FPS * duration;
     let tokens = tokens / 1024.0;
@@ -89,12 +86,9 @@ impl FalRequestCostCalculator for Seedance1LiteRequest {
   }
 }
 
-
 /// Seedance 1.0 Lite Image-to-Video
 /// https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/image-to-video
-pub async fn enqueue_seedance_1_lite_image_to_video_webhook<V: IntoUrl>(
-  args: Seedance1LiteArgs<'_, V>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_seedance_1_lite_image_to_video_webhook<V: IntoUrl>(args: Seedance1LiteArgs<'_, V>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
@@ -109,17 +103,18 @@ pub async fn enqueue_seedance_1_lite_image_to_video_webhook<V: IntoUrl>(
   };
 
   /// Possible enum values: 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, auto
-  let aspect_ratio = req.aspect_ratio
-      .map(|r| match r {
-        Seedance1LiteAspectRatio::Auto => "auto",
-        Seedance1LiteAspectRatio::TwentyOneByNine => "21:9",
-        Seedance1LiteAspectRatio::SixteenByNine => "16:9",
-        Seedance1LiteAspectRatio::FourByThree => "4:3",
-        Seedance1LiteAspectRatio::Square => "1:1",
-        Seedance1LiteAspectRatio::ThreeByFour => "3:4",
-        Seedance1LiteAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|s| s.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|r| match r {
+      Seedance1LiteAspectRatio::Auto => "auto",
+      Seedance1LiteAspectRatio::TwentyOneByNine => "21:9",
+      Seedance1LiteAspectRatio::SixteenByNine => "16:9",
+      Seedance1LiteAspectRatio::FourByThree => "4:3",
+      Seedance1LiteAspectRatio::Square => "1:1",
+      Seedance1LiteAspectRatio::ThreeByFour => "3:4",
+      Seedance1LiteAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|s| s.to_string());
 
   let request = Seedance1LiteImageToVideoInput {
     image_url: req.image_url,
@@ -135,14 +130,10 @@ pub async fn enqueue_seedance_1_lite_image_to_video_webhook<V: IntoUrl>(
     enable_safety_checker: Some(false),
   };
 
-  let result = seedance_1_lite_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = seedance_1_lite_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -155,16 +146,7 @@ mod tests {
 
   #[test]
   fn test_cost() {
-    let mut req = Seedance1LiteRequest {
-      image_url: String::new(),
-      end_frame_image_url: Some(String::new()),
-      prompt: String::new(),
-      camera_fixed: false,
-      duration: Seedance1LiteDuration::FiveSeconds,
-      resolution: Seedance1LiteResolution::SevenTwentyP,
-      aspect_ratio: None,
-      seed: None,
-    };
+    let mut req = Seedance1LiteRequest { image_url: String::new(), end_frame_image_url: Some(String::new()), prompt: String::new(), camera_fixed: false, duration: Seedance1LiteDuration::FiveSeconds, resolution: Seedance1LiteResolution::SevenTwentyP, aspect_ratio: None, seed: None };
 
     // NB: Constant value specified by FAL
     req.duration = Seedance1LiteDuration::FiveSeconds;
@@ -197,20 +179,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Seedance1LiteArgs {
-      request: Seedance1LiteRequest {
-        image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        end_frame_image_url: Some(JUNO_AT_LAKE_IMAGE_URL.to_string()),
-        prompt: "shiba in glasses runs to the lake and stands by the shore".to_string(),
-        camera_fixed: false,
-        duration: Seedance1LiteDuration::FiveSeconds,
-        resolution: Seedance1LiteResolution::SevenTwentyP,
-        aspect_ratio: None,
-        seed: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Seedance1LiteArgs { request: Seedance1LiteRequest { image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), end_frame_image_url: Some(JUNO_AT_LAKE_IMAGE_URL.to_string()), prompt: "shiba in glasses runs to the lake and stands by the shore".to_string(), camera_fixed: false, duration: Seedance1LiteDuration::FiveSeconds, resolution: Seedance1LiteResolution::SevenTwentyP, aspect_ratio: None, seed: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_seedance_1_lite_image_to_video_webhook(args).await?;
 

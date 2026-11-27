@@ -16,9 +16,7 @@ pub struct Hunyuan3d21Request {
   pub image_url: String,
 }
 
-pub async fn enqueue_hunyuan_3d_2_1_image_to_3d_webhook<R: IntoUrl>(
-  args: Hunyuan3d21Args<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_hunyuan_3d_2_1_image_to_3d_webhook<R: IntoUrl>(args: Hunyuan3d21Args<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let request = Hunyuan3dV21ImageTo3dInput {
@@ -31,10 +29,7 @@ pub async fn enqueue_hunyuan_3d_2_1_image_to_3d_webhook<R: IntoUrl>(
     seed: None,
   };
 
-  let result = hunyuan3d_v21_image_to_3d(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = hunyuan3d_v21_image_to_3d(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -56,13 +51,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Hunyuan3d21Args {
-      request: Hunyuan3d21Request {
-        image_url: image_url.to_string(),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Hunyuan3d21Args { request: Hunyuan3d21Request { image_url: image_url.to_string() }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_hunyuan_3d_2_1_image_to_3d_webhook(args).await?;
 

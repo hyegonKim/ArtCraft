@@ -1,4 +1,3 @@
-
 // TODO(bt, 2023-11-01): Don't generate slurs or dangerous terms in the token generator
 //  see: https://news.ycombinator.com/item?id=35337210
 //  see: https://www.reddit.com/r/ProgrammerHumor/comments/3ov56n/randomly_generating_ids_can_be_dangerous/
@@ -91,9 +90,7 @@ macro_rules! impl_crockford_generator {
       pub fn entropy_suffix(&self) -> &str {
         use crate::prefixes::PrefixGenerator;
 
-        &self.0
-          .strip_prefix($variant.prefix())
-          .unwrap_or(&self.0)
+        &self.0.strip_prefix($variant.prefix()).unwrap_or(&self.0)
       }
 
       #[inline]
@@ -174,5 +171,5 @@ macro_rules! impl_crockford_generator {
       let token_string = $t::generate().to_string();
       assert!(token_string.starts_with(prefix));
     }
-  }
+  };
 }

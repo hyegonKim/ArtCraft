@@ -17,10 +17,6 @@ impl FailureReason {
   /// then falls back to case-insensitive substring matching.
   pub fn from_reason(reason: &str) -> Self {
     let failure_type = FailureType::classify_text(reason);
-    FailureReason {
-      reason: reason.to_string(),
-      failure_type,
-    }
+    FailureReason { reason: reason.to_string(), failure_type }
   }
 }
-

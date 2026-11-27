@@ -7,9 +7,7 @@ use tauri::Webview;
 // NB: Probably best not to use this.
 pub fn keep_on_login_domains(webview: &Webview) -> AnyhowResult<()> {
   let url = webview.url()?;
-  let hostname= url.host()
-      .ok_or(anyhow!("no host in url"))?
-      .to_string();
+  let hostname = url.host().ok_or(anyhow!("no host in url"))?.to_string();
   match hostname.as_str() {
     "auth.openai.com" => {},
     "openai.com" => {},
@@ -22,7 +20,7 @@ pub fn keep_on_login_domains(webview: &Webview) -> AnyhowResult<()> {
     _ => {
       info!("Non login hostname: {}", hostname);
       webview.navigate(SORA_LOGIN_URL.clone())?;
-    }
+    },
   }
   Ok(())
 }

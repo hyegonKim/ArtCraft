@@ -21,49 +21,23 @@ pub struct WebLoginData {
 
 impl WebLoginData {
   pub fn new() -> Self {
-    Self {
-      cookies_header: None,
-      additional_headers: None,
-      username: None,
-      email_address: None,
-      created_at: None,
-      updated_at: None,
-    }
+    Self { cookies_header: None, additional_headers: None, username: None, email_address: None, created_at: None, updated_at: None }
   }
 
   pub fn load_from_file<P: AsRef<Path>>(file_path: P) -> Result<Self, WebLoginDataError> {
-    let contents = std::fs::read_to_string(file_path)
-      .map_err(WebLoginDataError::IoError)?;
+    let contents = std::fs::read_to_string(file_path).map_err(WebLoginDataError::IoError)?;
 
-    let serializable: WebLoginDataSerializable = serde_json::from_str(&contents)
-      .map_err(WebLoginDataError::DeserializeError)?;
+    let serializable: WebLoginDataSerializable = serde_json::from_str(&contents).map_err(WebLoginDataError::DeserializeError)?;
 
-    Ok(Self {
-      cookies_header: serializable.cookies_header,
-      additional_headers: serializable.additional_headers,
-      username: serializable.username,
-      email_address: serializable.email_address,
-      created_at: serializable.created_at,
-      updated_at: serializable.updated_at,
-    })
+    Ok(Self { cookies_header: serializable.cookies_header, additional_headers: serializable.additional_headers, username: serializable.username, email_address: serializable.email_address, created_at: serializable.created_at, updated_at: serializable.updated_at })
   }
 
   pub fn save_to_file<P: AsRef<Path>>(&self, file_path: P) -> Result<(), WebLoginDataError> {
-    let serializable = WebLoginDataSerializable {
-      version: CURRENT_VERSION,
-      cookies_header: self.cookies_header.clone(),
-      additional_headers: self.additional_headers.clone(),
-      username: self.username.clone(),
-      email_address: self.email_address.clone(),
-      created_at: self.created_at,
-      updated_at: self.updated_at,
-    };
+    let serializable = WebLoginDataSerializable { version: CURRENT_VERSION, cookies_header: self.cookies_header.clone(), additional_headers: self.additional_headers.clone(), username: self.username.clone(), email_address: self.email_address.clone(), created_at: self.created_at, updated_at: self.updated_at };
 
-    let contents = serde_json::to_string_pretty(&serializable)
-      .map_err(WebLoginDataError::SerializeError)?;
+    let contents = serde_json::to_string_pretty(&serializable).map_err(WebLoginDataError::SerializeError)?;
 
-    std::fs::write(file_path, contents)
-      .map_err(WebLoginDataError::IoError)?;
+    std::fs::write(file_path, contents).map_err(WebLoginDataError::IoError)?;
 
     Ok(())
   }
@@ -139,7 +113,9 @@ mod tests {
   #[test]
   fn load_reads_all_fields() {
     let mut file = NamedTempFile::new().unwrap();
-    write!(file, r#"{{
+    write!(
+      file,
+      r#"{{
       "version": 1,
       "cookies_header": "session=abc123; visitor=xyz",
       "additional_headers": {{"Authorization": "Bearer tok"}},
@@ -147,7 +123,9 @@ mod tests {
       "email_address": "test@example.com",
       "created_at": "2026-01-01T00:00:00Z",
       "updated_at": "2026-05-10T12:00:00Z"
-    }}"#).unwrap();
+    }}"#
+    )
+    .unwrap();
 
     let data = WebLoginData::load_from_file(file.path()).unwrap();
     assert_eq!(data.cookies_header.as_deref(), Some("session=abc123; visitor=xyz"));
@@ -177,12 +155,16 @@ mod tests {
   #[test]
   fn load_tolerates_null_fields() {
     let mut file = NamedTempFile::new().unwrap();
-    write!(file, r#"{{
+    write!(
+      file,
+      r#"{{
       "version": 1,
       "cookies_header": null,
       "username": null,
       "email_address": null
-    }}"#).unwrap();
+    }}"#
+    )
+    .unwrap();
 
     let data = WebLoginData::load_from_file(file.path()).unwrap();
     assert!(data.cookies_header.is_none());
@@ -214,14 +196,7 @@ mod tests {
 
     let now = Utc::now();
 
-    let original = WebLoginData {
-      cookies_header: Some("session=roundtrip".to_string()),
-      additional_headers: Some(headers),
-      username: Some("round_trip_user".to_string()),
-      email_address: Some("rt@example.com".to_string()),
-      created_at: Some(now),
-      updated_at: Some(now),
-    };
+    let original = WebLoginData { cookies_header: Some("session=roundtrip".to_string()), additional_headers: Some(headers), username: Some("round_trip_user".to_string()), email_address: Some("rt@example.com".to_string()), created_at: Some(now), updated_at: Some(now) };
 
     original.save_to_file(file.path()).unwrap();
     let loaded = WebLoginData::load_from_file(file.path()).unwrap();

@@ -4,17 +4,14 @@ use regex::Regex;
 
 /// Find the user email in the index.html payload
 /// eg.
-static JSON_REGEX: Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#"\\?"email\\?":\s*\\?"([^"\\]+)\\?",?"#)
-      .expect("Regex should parse")
-});
+static JSON_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#"\\?"email\\?":\s*\\?"([^"\\]+)\\?",?"#).expect("Regex should parse"));
 
 /// Parse the user email from the index.html
 pub fn parse_index_user_email(html: &str) -> Option<UserEmail> {
   let maybe_meta = scrape_user_email_via_regex(html);
 
   if let Some(meta) = maybe_meta {
-    return Some(UserEmail(meta))
+    return Some(UserEmail(meta));
   }
 
   None
@@ -37,9 +34,7 @@ mod tests {
   #[ignore] // Manual test invocation
   async fn test() -> AnyhowResult<()> {
     let cookie = get_test_cookies()?;
-    let index = get_index(GetIndexPageArgs {
-      cookie: &cookie,
-    }).await?;
+    let index = get_index(GetIndexPageArgs { cookie: &cookie }).await?;
 
     let user_email = parse_index_user_email(&index.body);
     println!("User Email : {:?}", user_email);

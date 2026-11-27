@@ -42,12 +42,7 @@ pub(crate) fn audio_list_ref_into_urls_or_tokens(list: AudioListRef) -> UrlsOrTo
 }
 
 /// Resolve a single ImageRef and upload to KinoviWeb CDN.
-pub(crate) async fn resolve_and_upload_single(
-  session: &KinoviWebSession,
-  image_ref: Option<ImageRef>,
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-  maybe_predownloaded: Option<&HashMap<String, PathBuf>>,
-) -> Result<Option<String>, ArtcraftRouterError> {
+pub(crate) async fn resolve_and_upload_single(session: &KinoviWebSession, image_ref: Option<ImageRef>, maybe_map: Option<&HashMap<MediaFileToken, String>>, maybe_predownloaded: Option<&HashMap<String, PathBuf>>) -> Result<Option<String>, ArtcraftRouterError> {
   let source_url = match image_ref {
     None => return Ok(None),
     Some(ImageRef::Url(url)) => url,
@@ -59,12 +54,7 @@ pub(crate) async fn resolve_and_upload_single(
 
 /// Resolve a list of refs to URLs and upload each to KinoviWeb CDN.
 /// Order is preserved.
-pub(crate) async fn resolve_and_upload_list(
-  session: &KinoviWebSession,
-  urls_or_tokens: Option<UrlsOrTokens>,
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-  maybe_predownloaded: Option<&HashMap<String, PathBuf>>,
-) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
+pub(crate) async fn resolve_and_upload_list(session: &KinoviWebSession, urls_or_tokens: Option<UrlsOrTokens>, maybe_map: Option<&HashMap<MediaFileToken, String>>, maybe_predownloaded: Option<&HashMap<String, PathBuf>>) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
   let source_urls = match urls_or_tokens {
     None => return Ok(None),
     Some(UrlsOrTokens::Urls(urls)) if urls.is_empty() => return Ok(None),
@@ -83,20 +73,12 @@ pub(crate) async fn resolve_and_upload_list(
 
 /// Look up a caller-predownloaded local copy of the source file (see
 /// `VideoGenerationDraftContext::predownloaded_media_paths`).
-fn predownloaded_path<'a>(
-  maybe_predownloaded: Option<&'a HashMap<String, PathBuf>>,
-  source_url: &str,
-) -> Option<&'a Path> {
-  maybe_predownloaded
-    .and_then(|paths| paths.get(source_url))
-    .map(PathBuf::as_path)
+fn predownloaded_path<'a>(maybe_predownloaded: Option<&'a HashMap<String, PathBuf>>, source_url: &str) -> Option<&'a Path> {
+  maybe_predownloaded.and_then(|paths| paths.get(source_url)).map(PathBuf::as_path)
 }
 
 /// Map character tokens to their Kinovi character IDs, preserving order.
-pub(crate) fn resolve_character_tokens(
-  character_list_ref: Option<&CharacterListRef>,
-  draft_context: &VideoGenerationDraftContext<'_>,
-) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
+pub(crate) fn resolve_character_tokens(character_list_ref: Option<&CharacterListRef>, draft_context: &VideoGenerationDraftContext<'_>) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
   let list = match character_list_ref {
     None => return Ok(None),
     Some(r) => r,
@@ -109,34 +91,16 @@ pub(crate) fn resolve_character_tokens(
 
   let map = draft_context.get_character_token_to_kinovi_map()?;
 
-  let ids: Result<Vec<String>, _> = tokens.iter()
-    .map(|token| {
-      map.get(token).cloned().ok_or_else(|| {
-        ArtcraftRouterError::Client(ClientError::CharacterTokenNotFoundInMap {
-          token: token.clone(),
-        })
-      })
-    })
-    .collect();
+  let ids: Result<Vec<String>, _> = tokens.iter().map(|token| map.get(token).cloned().ok_or_else(|| ArtcraftRouterError::Client(ClientError::CharacterTokenNotFoundInMap { token: token.clone() }))).collect();
 
   ids.map(Some)
 }
 
-fn resolve_token(
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-  token: &MediaFileToken,
-) -> Result<String, ArtcraftRouterError> {
+fn resolve_token(maybe_map: Option<&HashMap<MediaFileToken, String>>, token: &MediaFileToken) -> Result<String, ArtcraftRouterError> {
   let map = maybe_map.ok_or(ArtcraftRouterError::Client(ClientError::MediaFileToUrlMapNotProvided))?;
-  map.get(token).cloned().ok_or_else(|| {
-    ArtcraftRouterError::Client(ClientError::MediaFileTokenNotFoundInMap {
-      token: token.clone(),
-    })
-  })
+  map.get(token).cloned().ok_or_else(|| ArtcraftRouterError::Client(ClientError::MediaFileTokenNotFoundInMap { token: token.clone() }))
 }
 
-fn resolve_tokens(
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-  tokens: &[MediaFileToken],
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_tokens(maybe_map: Option<&HashMap<MediaFileToken, String>>, tokens: &[MediaFileToken]) -> Result<Vec<String>, ArtcraftRouterError> {
   tokens.iter().map(|t| resolve_token(maybe_map, t)).collect()
 }

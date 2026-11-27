@@ -62,10 +62,7 @@ pub fn resolve_host(host_override: Option<&KinoviHost>) -> KinoviHost {
     return host.clone();
   }
 
-  if let (Ok(api_host), Ok(cdn_host)) = (
-    std::env::var(ENV_KINOVI_CUSTOM_API_HOST),
-    std::env::var(ENV_KINOVI_CUSTOM_CDN_HOST),
-  ) {
+  if let (Ok(api_host), Ok(cdn_host)) = (std::env::var(ENV_KINOVI_CUSTOM_API_HOST), std::env::var(ENV_KINOVI_CUSTOM_CDN_HOST)) {
     if !api_host.is_empty() && !cdn_host.is_empty() {
       return KinoviHost::CustomHost { api_host, cdn_host };
     }

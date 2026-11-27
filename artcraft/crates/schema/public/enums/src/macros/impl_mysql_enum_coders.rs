@@ -12,7 +12,6 @@
 ///
 macro_rules! impl_mysql_enum_coders {
   ($t:ident) => {
-
     impl sqlx::Type<sqlx::MySql> for $t {
       fn type_info() -> sqlx_mysql::MySqlTypeInfo {
         // // 0.4.x series:
@@ -24,10 +23,7 @@ macro_rules! impl_mysql_enum_coders {
     }
 
     impl<'q> sqlx::Encode<'q, sqlx::MySql> for $t {
-      fn encode_by_ref(
-        &self,
-        buf: &mut <sqlx::MySql as sqlx_core::database::HasArguments<'q>>::ArgumentBuffer
-      ) -> sqlx_core::encode::IsNull {
+      fn encode_by_ref(&self, buf: &mut <sqlx::MySql as sqlx_core::database::HasArguments<'q>>::ArgumentBuffer) -> sqlx_core::encode::IsNull {
         // // 0.4.x series:
         // // NB: In the absence of `#[derive(sqlx::Type)]` and `#sqlx(rename_all="lowercase")]`,
         // // this controls the casing of the variants when sent to MySQL.
@@ -41,9 +37,7 @@ macro_rules! impl_mysql_enum_coders {
     }
 
     impl<'r> sqlx::Decode<'r, sqlx::MySql> for $t {
-      fn decode(
-        value: sqlx_mysql::MySqlValueRef<'r>,
-      ) -> Result<Self, sqlx_core::error::BoxDynError> {
+      fn decode(value: sqlx_mysql::MySqlValueRef<'r>) -> Result<Self, sqlx_core::error::BoxDynError> {
         // // 0.4.x series:
         // let string = String::decode(value)?;
         // let value = $t::from_str(&string)?;
@@ -56,13 +50,12 @@ macro_rules! impl_mysql_enum_coders {
         Ok(value)
       }
     }
-
-  }
+  };
 }
 
 #[cfg(not(feature = "database"))]
 macro_rules! impl_mysql_enum_coders {
   ($t:ident) => {
     // Intentionally empty
-  }
-}  
+  };
+}

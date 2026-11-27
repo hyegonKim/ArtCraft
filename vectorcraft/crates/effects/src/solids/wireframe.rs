@@ -8,9 +8,8 @@ use vectorcraft_geom::{BezPath, FillRule, PathData, Point, Rect};
 use vectorcraft_three_d::MAX_OBJECT_FACES;
 
 use super::{
-    CLASSIC_EXTRUDE, INFLATE, Profile, built_solids, facets, geometry, has_solid, is_container,
-    is_plane, label_of, members, object_profile, region, reshape_members, resolve, solid,
-    solid_parts, solid_paint_sources, union_bounds,
+    CLASSIC_EXTRUDE, INFLATE, Profile, built_solids, facets, geometry, has_solid, is_container, is_plane, label_of, members, object_profile, region,
+    reshape_members, resolve, solid, solid_paint_sources, solid_parts, union_bounds,
 };
 use crate::{GeomContext, apply_geometry_with};
 
@@ -84,15 +83,8 @@ pub(crate) fn reshaped(paths: Vec<PathData>, fx: &[Effect], ctx: &GeomContext) -
     if paths.is_empty() || !crate::has_geometry(fx) {
         return paths;
     }
-    let bounds = paths
-        .iter()
-        .filter_map(PathData::bounds)
-        .reduce(|a, b| a.union(b))
-        .unwrap_or(Rect::ZERO);
-    paths
-        .into_iter()
-        .map(|p| apply_geometry_with(fx, &p, bounds, ctx))
-        .collect()
+    let bounds = paths.iter().filter_map(PathData::bounds).reduce(|a, b| a.union(b)).unwrap_or(Rect::ZERO);
+    paths.into_iter().map(|p| apply_geometry_with(fx, &p, bounds, ctx)).collect()
 }
 
 /// Extracts the deduplicated wireframe edge paths of `n`'s visible 3D effect.
@@ -100,22 +92,12 @@ pub fn three_d_wireframe_in(doc: Option<&Document>, n: &Node) -> Result<Vec<Path
     if !crate::has_revolve(n) && !has_solid(n) {
         return Err("the object has no 3D effect (Extrude & Bevel, Revolve, Inflate or Rotate)".into());
     }
-    let label = n
-        .appearance
-        .effects
-        .iter()
-        .find(|e| e.visible && super::is_three_d(&e.id))
-        .map_or("This effect", |e| label_of(&e.id));
+    let label = n.appearance.effects.iter().find(|e| e.visible && super::is_three_d(&e.id)).map_or("This effect", |e| label_of(&e.id));
     let resolved = resolve(doc, n, label)?;
     let n = &*resolved;
     let face_paths = if crate::has_revolve(n) {
         let raw = crate::revolve::revolve_face_paths(doc, n)?;
-        if let Some(index) = n
-            .appearance
-            .effects
-            .iter()
-            .position(|e| e.visible && crate::revolve::is_revolve(&e.id))
-        {
+        if let Some(index) = n.appearance.effects.iter().position(|e| e.visible && crate::revolve::is_revolve(&e.id)) {
             let ctx = GeomContext { doc, ..GeomContext::of(n) };
             reshaped(raw, n.appearance.effects.get(index + 1..).unwrap_or_default(), &ctx)
         } else {
@@ -133,8 +115,7 @@ pub fn three_d_wireframe_in(doc: Option<&Document>, n: &Node) -> Result<Vec<Path
 fn solid_face_paths(doc: Option<&Document>, n: &Node, label: &str) -> Result<Vec<PathData>, String> {
     let ctx = GeomContext { doc, ..GeomContext::of(n) };
     if is_container(n) {
-        let (index, fx) = solid(&n.appearance.effects)
-            .ok_or("a 3D effect on a group's fill or stroke draws nothing")?;
+        let (index, fx) = solid(&n.appearance.effects).ok_or("a 3D effect on a group's fill or stroke draws nothing")?;
         let fx_label = label_of(&fx.id);
         let mut shapes = members(n, fx_label)?;
         reshape_members(n, n.appearance.effects.get(..index).unwrap_or_default(), &mut shapes);
@@ -165,8 +146,7 @@ fn solid_face_paths(doc: Option<&Document>, n: &Node, label: &str) -> Result<Vec
 
 fn collect_solid_faces(fx: &Effect, shapes: &[Profile]) -> Result<Vec<PathData>, String> {
     let label = label_of(&fx.id);
-    let b = union_bounds(shapes)
-        .ok_or_else(|| format!("{label} requires a shape with at least two anchors"))?;
+    let b = union_bounds(shapes).ok_or_else(|| format!("{label} requires a shape with at least two anchors"))?;
     let p = crate::merged_params(&fx.id, &fx.params);
     let mut out = Vec::new();
     if is_plane(&fx.id) {
@@ -226,12 +206,7 @@ fn extract_segments(path: &PathData, seen: &mut HashSet<EdgeKey>, edges: &mut Ve
                 cur = p;
             }
             PathEl::QuadTo(p1, p2) => {
-                let c = CubicBez::new(
-                    cur,
-                    cur + (p1 - cur) * (2.0 / 3.0),
-                    p2 + (p1 - p2) * (2.0 / 3.0),
-                    p2,
-                );
+                let c = CubicBez::new(cur, cur + (p1 - cur) * (2.0 / 3.0), p2 + (p1 - p2) * (2.0 / 3.0), p2);
                 push(SegGeom::Cubic(c))?;
                 cur = p2;
             }
@@ -279,11 +254,7 @@ fn chain_wireframe_edges(face_paths: &[PathData], label: &str) -> Result<Vec<Pat
                 continue;
             }
             used[seed] = true;
-            let initial = if pass == 0 && deg_start == 2 && deg_end != 2 {
-                edges[seed].reversed()
-            } else {
-                edges[seed]
-            };
+            let initial = if pass == 0 && deg_start == 2 && deg_end != 2 { edges[seed].reversed() } else { edges[seed] };
             let mut chain = vec![initial];
             // Extend forward while vertex has degree == 2.
             while let Some(tail_seg) = chain.last().copied() {
@@ -299,11 +270,7 @@ fn chain_wireframe_edges(face_paths: &[PathData], label: &str) -> Result<Vec<Pat
                 let oriented = if forward { edges[next_idx] } else { edges[next_idx].reversed() };
                 chain.push(oriented);
             }
-            let closed = chain.len() >= 2
-                && chain
-                    .first()
-                    .zip(chain.last())
-                    .is_some_and(|(a, b)| KeyPt::of(a.start()) == KeyPt::of(b.end()));
+            let closed = chain.len() >= 2 && chain.first().zip(chain.last()).is_some_and(|(a, b)| KeyPt::of(a.start()) == KeyPt::of(b.end()));
             out.push(segments_to_path(&chain, closed));
         }
     }

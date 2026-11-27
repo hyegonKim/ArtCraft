@@ -50,7 +50,6 @@ pub enum Gemini25FlashTextToImageAspectRatio {
   NineBySixteen, // NB: No NineByTwentyOne ?
 }
 
-
 impl FalRequestCostCalculator for Gemini25FlashTextToImageRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // NB: This was copied from the image-to-image case.
@@ -64,11 +63,7 @@ impl FalRequestCostCalculator for Gemini25FlashTextToImageRequest {
   }
 }
 
-
-pub async fn enqueue_gemini_25_flash_text_to_image_webhook<R: IntoUrl>(
-  args: Gemini25FlashTextToImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_gemini_25_flash_text_to_image_webhook<R: IntoUrl>(args: Gemini25FlashTextToImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -78,23 +73,24 @@ pub async fn enqueue_gemini_25_flash_text_to_image_webhook<R: IntoUrl>(
     Gemini25FlashTextToImageNumImages::Four => 4,
   };
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|aspect_ratio| match aspect_ratio {
-        // Square
-        Gemini25FlashTextToImageAspectRatio::OneByOne => "1:1",
-        // Wide
-        Gemini25FlashTextToImageAspectRatio::FiveByFour => "5:4",
-        Gemini25FlashTextToImageAspectRatio::FourByThree => "4:3",
-        Gemini25FlashTextToImageAspectRatio::ThreeByTwo => "3:2",
-        Gemini25FlashTextToImageAspectRatio::SixteenByNine => "16:9",
-        Gemini25FlashTextToImageAspectRatio::TwentyOneByNine => "21:9",
-        // Tall
-        Gemini25FlashTextToImageAspectRatio::FourByFive => "4:5",
-        Gemini25FlashTextToImageAspectRatio::ThreeByFour => "3:4",
-        Gemini25FlashTextToImageAspectRatio::TwoByThree => "2:3",
-        Gemini25FlashTextToImageAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|aspect_ratio| aspect_ratio.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|aspect_ratio| match aspect_ratio {
+      // Square
+      Gemini25FlashTextToImageAspectRatio::OneByOne => "1:1",
+      // Wide
+      Gemini25FlashTextToImageAspectRatio::FiveByFour => "5:4",
+      Gemini25FlashTextToImageAspectRatio::FourByThree => "4:3",
+      Gemini25FlashTextToImageAspectRatio::ThreeByTwo => "3:2",
+      Gemini25FlashTextToImageAspectRatio::SixteenByNine => "16:9",
+      Gemini25FlashTextToImageAspectRatio::TwentyOneByNine => "21:9",
+      // Tall
+      Gemini25FlashTextToImageAspectRatio::FourByFive => "4:5",
+      Gemini25FlashTextToImageAspectRatio::ThreeByFour => "3:4",
+      Gemini25FlashTextToImageAspectRatio::TwoByThree => "2:3",
+      Gemini25FlashTextToImageAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|aspect_ratio| aspect_ratio.to_string());
 
   let request = Gemini25FlashTextToImageInput {
     prompt: req.prompt,
@@ -104,10 +100,7 @@ pub async fn enqueue_gemini_25_flash_text_to_image_webhook<R: IntoUrl>(
     output_format: Some("png".to_string()),
   };
 
-  let result = gemini_25_flash_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gemini_25_flash_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -127,15 +120,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Gemini25FlashTextToImageArgs {
-      request: Gemini25FlashTextToImageRequest {
-        prompt: "a warrior on the field of battle, final fantasy style, lots of hungry raptors rushing the heroes".to_string(),
-        num_images: Gemini25FlashTextToImageNumImages::Two,
-        aspect_ratio: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Gemini25FlashTextToImageArgs { request: Gemini25FlashTextToImageRequest { prompt: "a warrior on the field of battle, final fantasy style, lots of hungry raptors rushing the heroes".to_string(), num_images: Gemini25FlashTextToImageNumImages::Two, aspect_ratio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_gemini_25_flash_text_to_image_webhook(args).await?;
 

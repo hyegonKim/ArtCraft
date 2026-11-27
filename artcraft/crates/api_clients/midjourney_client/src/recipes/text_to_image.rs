@@ -37,9 +37,7 @@ impl TextToImageResponse {
   /// Whether the request was rejected for lack of an active paid Midjourney
   /// subscription. See [`MidjourneySubmitErrorType::SubscriptionRequired`].
   pub fn is_subscription_required(&self) -> bool {
-    self.errors()
-        .iter()
-        .any(|error| error.error_type == MidjourneySubmitErrorType::SubscriptionRequired)
+    self.errors().iter().any(|error| error.error_type == MidjourneySubmitErrorType::SubscriptionRequired)
   }
 }
 
@@ -54,23 +52,7 @@ pub struct TextToImageError {
 pub async fn text_to_image(args: TextToImageArgs<'_>) -> Result<TextToImageResponse, MidjourneyError> {
   let channel_id = args.request.channel_id.to_string();
 
-  let response = submit_job(SubmitJobArgs {
-    request: SubmitJobRequest {
-      prompt: args.request.prompt,
-      channel_id: &channel_id,
-    },
-    cookie_header: args.cookie_header,
-    hostname: args.hostname,
-    browser: args.browser,
-  }).await?;
+  let response = submit_job(SubmitJobArgs { request: SubmitJobRequest { prompt: args.request.prompt, channel_id: &channel_id }, cookie_header: args.cookie_header, hostname: args.hostname, browser: args.browser }).await?;
 
-  Ok(TextToImageResponse {
-    maybe_job_id: response.maybe_job_id,
-    maybe_errors: response.maybe_errors.map(|errs| {
-      errs.into_iter().map(|e| TextToImageError {
-        error_type: e.error_type,
-        message: e.message,
-      }).collect()
-    }),
-  })
+  Ok(TextToImageResponse { maybe_job_id: response.maybe_job_id, maybe_errors: response.maybe_errors.map(|errs| errs.into_iter().map(|e| TextToImageError { error_type: e.error_type, message: e.message }).collect()) })
 }

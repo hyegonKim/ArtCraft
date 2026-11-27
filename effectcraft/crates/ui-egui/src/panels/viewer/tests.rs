@@ -200,8 +200,8 @@ fn every_3d_view_finds_its_japanese_row() {
 
 #[test]
 fn gizmo_3d_projects_origin_translation_and_rotation_handles_for_3d_and_model_layers() {
-    use crate::state::GizmoSpace;
     use super::gizmo3d::{GizmoAxis, has_3d_gizmo, project_gizmo, rot_axis_at};
+    use crate::state::GizmoSpace;
 
     let mut s = effectcraft_engine::Session::default();
     s.execute("comp.new", json!({"name": "GizmoComp", "width": 800, "height": 600, "duration": 2})).unwrap();
@@ -209,12 +209,7 @@ fn gizmo_3d_projects_origin_translation_and_rotation_handles_for_3d_and_model_la
     s.execute("layer.setSwitch", json!({"layers": [solid], "switch": "threeD", "value": true})).unwrap();
     let cube = s.execute("layer.newPrimitive", json!({"kind": "cube", "name": "CubeMesh"})).unwrap()["layer"].as_u64().unwrap();
 
-    let map = ViewerMap {
-        origin: pos2(0.0, 0.0),
-        zoom: 1.0,
-        comp: [800.0, 600.0],
-        area: Rect::from_min_size(pos2(0.0, 0.0), vec2(800.0, 600.0)),
-    };
+    let map = ViewerMap { origin: pos2(0.0, 0.0), zoom: 1.0, comp: [800.0, 600.0], area: Rect::from_min_size(pos2(0.0, 0.0), vec2(800.0, 600.0)) };
 
     with_ctx(&s, |ctx| {
         for lid in [solid, cube] {
@@ -251,7 +246,8 @@ fn gizmo_3d_projects_origin_translation_and_rotation_handles_for_3d_and_model_la
     // Multi-step rotation drag along GizmoAxis::X merges into one undo step via Session::execute.
     let r0 = s.execute("prop.get", json!({"layer": cube, "path": "transform/rotationX"})).unwrap()["value"].as_f64().unwrap();
     for step in 1..=4 {
-        s.execute("prop.set", json!({"layer": cube, "path": GizmoAxis::X.prop_path(), "value": r0 + (step as f64) * 7.5, "merge": "viewer-drag-test"})).unwrap();
+        s.execute("prop.set", json!({"layer": cube, "path": GizmoAxis::X.prop_path(), "value": r0 + (step as f64) * 7.5, "merge": "viewer-drag-test"}))
+            .unwrap();
     }
     let r1 = s.execute("prop.get", json!({"layer": cube, "path": "transform/rotationX"})).unwrap()["value"].as_f64().unwrap();
     assert!((r1 - (r0 + 30.0)).abs() < 1e-6);

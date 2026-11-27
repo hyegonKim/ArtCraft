@@ -6,7 +6,7 @@ use crate::directory_exists::directory_exists;
 /// (maybe this will miss permission errors.)
 pub fn create_dir_all_if_missing<P: AsRef<Path>>(path: P) -> std::io::Result<()> {
   if directory_exists(&path) {
-    return Ok(())
+    return Ok(());
   }
   std::fs::create_dir_all(&path)
 }

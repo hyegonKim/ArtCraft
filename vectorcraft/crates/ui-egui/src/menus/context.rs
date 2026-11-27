@@ -78,6 +78,8 @@ pub fn context_items(app: &VectorcraftApp) -> Vec<Item> {
         // path too.
         v.push(c("Smooth…", "object.path.smooth"));
         v.push(c("Generative Shape Fill…", "object.generativeShapeFill"));
+        v.push(c("Extract Color Theme…", "capture.extractColorTheme"));
+        v.push(c("Extract Pattern Tile…", "capture.extractPatternTile"));
         v.push(c("Turntable…", "object.turntable"));
         if several {
             v.push(c("Make Clipping Mask", "object.clippingMask.make"));

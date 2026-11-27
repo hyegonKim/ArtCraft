@@ -27,10 +27,7 @@ pub enum FluxDevJuggernautInfillNumImages {
   Four,
 }
 
-pub async fn enqueue_flux_dev_juggernaut_infill_webhook<R: IntoUrl>(
-  args: FluxDevJuggernautInfillArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_flux_dev_juggernaut_infill_webhook<R: IntoUrl>(args: FluxDevJuggernautInfillArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -59,10 +56,7 @@ pub async fn enqueue_flux_dev_juggernaut_infill_webhook<R: IntoUrl>(
     sync_mode: None, // Synchronous / slow
   };
 
-  let result = flux_dev_juggernaut_infill(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = flux_dev_juggernaut_infill(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -83,16 +77,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = FluxDevJuggernautInfillArgs {
-      request: FluxDevJuggernautInfillRequest {
-        image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        mask_url: TALL_MOCHI_WITH_GLASSES_GLASSES_MASK_IMAGE_URL.to_string(),
-        prompt: "slick sunglasses, cool glasses, reflection in glasses lenses".to_string(),
-        num_images: FluxDevJuggernautInfillNumImages::Two,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = FluxDevJuggernautInfillArgs { request: FluxDevJuggernautInfillRequest { image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), mask_url: TALL_MOCHI_WITH_GLASSES_GLASSES_MASK_IMAGE_URL.to_string(), prompt: "slick sunglasses, cool glasses, reflection in glasses lenses".to_string(), num_images: FluxDevJuggernautInfillNumImages::Two }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_flux_dev_juggernaut_infill_webhook(args).await?;
 

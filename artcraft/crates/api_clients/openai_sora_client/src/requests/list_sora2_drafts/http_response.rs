@@ -1,16 +1,15 @@
 use serde_derive::Deserialize;
 
 #[derive(Deserialize)]
-pub (super) struct HttpDraftsResponse {
+pub(super) struct HttpDraftsResponse {
   pub items: Vec<PartialItem>,
-
   // NB: This is nullable.
   // It's null in my tests, so I don't know if this is a string or integer yet. Probably an opaque string?
   //pub cursor: Option<String>,
 }
 
 #[derive(Deserialize)]
-pub (super) struct PartialItem {
+pub(super) struct PartialItem {
   /// The generation id, eg. "gen_01abc..."
   pub id: String,
 
@@ -18,7 +17,6 @@ pub (super) struct PartialItem {
   pub task_id: String,
 
   //pub generation_id: String, // it looks like this matches "id" for now
-
   /// The kind of draft
   pub kind: DraftKind,
 
@@ -36,10 +34,8 @@ pub (super) struct PartialItem {
 
   /// If there was a content violation, this will describe why.
   pub reason_str: Option<String>,
-
   // There are other things that might be interesting: "encodings", "width", "height", etc.
 }
-
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

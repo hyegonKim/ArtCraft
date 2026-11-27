@@ -5,18 +5,13 @@ use reqwest::Url;
 use tauri::webview::Cookie;
 use tauri::WebviewWindow;
 
-static ROOT_COOKIE_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://worldlabs.ai").expect("URL should parse")
-});
+static ROOT_COOKIE_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://worldlabs.ai").expect("URL should parse"));
 
 pub fn worldlabs_login_webview_extract_cookies(webview: &WebviewWindow) -> AnyhowResult<CookieStore> {
   let mut cookie_store = CookieStore::empty();
   let cookies = get_all_worldlabs_cookies(webview)?;
   for cookie in cookies.iter() {
-    cookie_store.add_cookie_name_and_value(
-      cookie.name().to_string(),
-      cookie.value().to_string(),
-    );
+    cookie_store.add_cookie_name_and_value(cookie.name().to_string(), cookie.value().to_string());
   }
   Ok(cookie_store)
 }

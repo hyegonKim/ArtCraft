@@ -106,38 +106,17 @@ pub async fn video_generation(args: VideoGenerationArgs<'_>) -> Result<VideoGene
   let req = args.request;
 
   if req.image.is_some() && req.reference_images.as_ref().is_some_and(|v| !v.is_empty()) {
-    return Err(GrokClientError::InvalidRequest(
-      "video_generation cannot combine `image` (image-to-video) with `reference_images` (reference-to-video) in the same request".to_string(),
-    ).into());
+    return Err(GrokClientError::InvalidRequest("video_generation cannot combine `image` (image-to-video) with `reference_images` (reference-to-video) in the same request".to_string()).into());
   }
 
   let url = format!("{}/v1/videos/generations", XAI_API_BASE_URL);
   let model = req.model.unwrap_or(VideoModel::GrokImagineVideo);
 
-  info!(
-    "Grok video_generation: model={}, has_image={}, ref_imgs={}, aspect_ratio={:?}, duration={:?}, resolution={:?}",
-    model.as_str(),
-    req.image.is_some(),
-    req.reference_images.as_ref().map(|v| v.len()).unwrap_or(0),
-    req.aspect_ratio.map(|a| a.as_str()),
-    req.duration,
-    req.resolution.map(|r| r.as_str()),
-  );
+  info!("Grok video_generation: model={}, has_image={}, ref_imgs={}, aspect_ratio={:?}, duration={:?}, resolution={:?}", model.as_str(), req.image.is_some(), req.reference_images.as_ref().map(|v| v.len()).unwrap_or(0), req.aspect_ratio.map(|a| a.as_str()), req.duration, req.resolution.map(|r| r.as_str()),);
 
-  let request_body = VideoGenerationRequestBody {
-    prompt: req.prompt,
-    model: Some(model.as_str().to_string()),
-    image: req.image.as_ref().map(to_video_image_ref),
-    reference_images: req.reference_images.map(|v| v.iter().map(to_video_image_ref).collect()),
-    aspect_ratio: req.aspect_ratio.map(|a| a.as_str().to_string()),
-    duration: req.duration,
-    resolution: req.resolution.map(|r| r.as_str().to_string()),
-    user: req.user,
-  };
+  let request_body = VideoGenerationRequestBody { prompt: req.prompt, model: Some(model.as_str().to_string()), image: req.image.as_ref().map(to_video_image_ref), reference_images: req.reference_images.map(|v| v.iter().map(to_video_image_ref).collect()), aspect_ratio: req.aspect_ratio.map(|a| a.as_str().to_string()), duration: req.duration, resolution: req.resolution.map(|r| r.as_str().to_string()), user: req.user };
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
@@ -149,22 +128,14 @@ pub async fn video_generation(args: VideoGenerationArgs<'_>) -> Result<VideoGene
     Err(err) => warn!("Grok video_generation: failed to serialize request body for logging: {err}"),
   }
 
-  let response = client.post(&url)
-    .header("Authorization", bearer)
-    .header("Content-Type", "application/json")
-    .json(&request_body)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.post(&url).header("Authorization", bearer).header("Content-Type", "application/json").json(&request_body).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
   // Capture headers BEFORE `.text()` consumes the response. Response headers
   // reveal WAF/CDN blocks (e.g. `server: cloudflare`, `cf-ray`, `cf-mitigated`)
   // vs. genuine API errors, and any rate-limit / retry hints.
   let response_headers = format!("{:#?}", response.headers());
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok video_generation response: status={}", status);
 
@@ -173,23 +144,19 @@ pub async fn video_generation(args: VideoGenerationArgs<'_>) -> Result<VideoGene
     // so log the HEADERS here — those aren't captured in the error type and
     // reveal CDN/WAF context (e.g. `server: cloudflare`, `cf-ray`) vs. a
     // genuine API rejection.
-    warn!(
-      "Grok video_generation FAILED: status={status} ({} body bytes)\n--- response headers ---\n{response_headers}",
-      response_body.len(),
-    );
+    warn!("Grok video_generation FAILED: status={status} ({} body bytes)\n--- response headers ---\n{response_headers}", response_body.len(),);
   }
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: VideoGenerationResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: VideoGenerationResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
   Ok(VideoGenerationSuccess { request_id: parsed.request_id })
 }
 
 fn to_video_image_ref(source: &VideoImageSource) -> VideoImageRef {
   match source {
-    VideoImageSource::Url(u)    => VideoImageRef { url: Some(u.clone()), file_id: None },
+    VideoImageSource::Url(u) => VideoImageRef { url: Some(u.clone()), file_id: None },
     VideoImageSource::FileId(id) => VideoImageRef { url: None, file_id: Some(id.clone()) },
   }
 }
@@ -206,16 +173,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_text_only() {
-    let body = VideoGenerationRequestBody {
-      prompt: "a cat dancing".to_string(),
-      model: Some("grok-imagine-video".to_string()),
-      image: None,
-      reference_images: None,
-      aspect_ratio: Some("16:9".to_string()),
-      duration: Some(5),
-      resolution: Some("720p".to_string()),
-      user: None,
-    };
+    let body = VideoGenerationRequestBody { prompt: "a cat dancing".to_string(), model: Some("grok-imagine-video".to_string()), image: None, reference_images: None, aspect_ratio: Some("16:9".to_string()), duration: Some(5), resolution: Some("720p".to_string()), user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"prompt\":\"a cat dancing\""));
     assert!(json.contains("\"duration\":5"));
@@ -226,16 +184,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_image_to_video() {
-    let body = VideoGenerationRequestBody {
-      prompt: "animate this".to_string(),
-      model: None,
-      image: Some(VideoImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }),
-      reference_images: None,
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      user: None,
-    };
+    let body = VideoGenerationRequestBody { prompt: "animate this".to_string(), model: None, image: Some(VideoImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }), reference_images: None, aspect_ratio: None, duration: None, resolution: None, user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"image\":{"));
     assert!(json.contains("\"url\":\"https://example.com/a.png\""));
@@ -243,19 +192,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_reference_to_video() {
-    let body = VideoGenerationRequestBody {
-      prompt: "<IMAGE_1> walking".to_string(),
-      model: None,
-      image: None,
-      reference_images: Some(vec![
-        VideoImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None },
-        VideoImageRef { url: None, file_id: Some("file_xyz".to_string()) },
-      ]),
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      user: None,
-    };
+    let body = VideoGenerationRequestBody { prompt: "<IMAGE_1> walking".to_string(), model: None, image: None, reference_images: Some(vec![VideoImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }, VideoImageRef { url: None, file_id: Some("file_xyz".to_string()) }]), aspect_ratio: None, duration: None, resolution: None, user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"reference_images\":["));
     assert!(json.contains("\"file_id\":\"file_xyz\""));
@@ -266,22 +203,9 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = VideoGenerationArgs {
-      api_key: &key,
-      request: VideoGenerationRequest {
-        prompt: "p".to_string(),
-        model: Some(VideoModel::GrokImagineVideo),
-        image: Some(VideoImageSource::Url("u".to_string())),
-        reference_images: None,
-        aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-        duration: Some(8),
-        resolution: Some(VideoResolution::SevenTwentyP),
-        user: None,
-      },
-    };
+    let args = VideoGenerationArgs { api_key: &key, request: VideoGenerationRequest { prompt: "p".to_string(), model: Some(VideoModel::GrokImagineVideo), image: Some(VideoImageSource::Url("u".to_string())), reference_images: None, aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(8), resolution: Some(VideoResolution::SevenTwentyP), user: None } };
     let json = serde_json::to_string(&args.request).unwrap();
-    assert!(!json.contains("secret_must_not_leak"),
-      "serialized request must not contain the API key. got: {}", json);
+    assert!(!json.contains("secret_must_not_leak"), "serialized request must not contain the API key. got: {}", json);
     assert!(json.contains("\"prompt\":\"p\""));
     assert!(json.contains("\"model\":\"grok-imagine-video\""));
     assert!(json.contains("\"image\":{\"Url\":\"u\"}"));
@@ -292,19 +216,7 @@ mod tests {
   #[tokio::test]
   async fn image_plus_reference_images_returns_bad_request() {
     let api_key = GrokApiKey::new("dummy".to_string());
-    let result = video_generation(VideoGenerationArgs {
-      api_key: &api_key,
-      request: VideoGenerationRequest {
-        prompt: "x".to_string(),
-        model: None,
-        image: Some(VideoImageSource::Url("u".to_string())),
-        reference_images: Some(vec![VideoImageSource::Url("v".to_string())]),
-        aspect_ratio: None,
-        duration: None,
-        resolution: None,
-        user: None,
-      },
-    }).await;
+    let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "x".to_string(), model: None, image: Some(VideoImageSource::Url("u".to_string())), reference_images: Some(vec![VideoImageSource::Url("v".to_string())]), aspect_ratio: None, duration: None, resolution: None, user: None } }).await;
     let err = result.unwrap_err();
     assert!(matches!(err, GrokError::Client(GrokClientError::InvalidRequest(_))));
   }
@@ -324,19 +236,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_generation(VideoGenerationArgs {
-      api_key: &api_key,
-      request: VideoGenerationRequest {
-        prompt: "A glowing crystal rocket launching from Mars".to_string(),
-        model: None,
-        image: None,
-        reference_images: None,
-        aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-        duration: Some(5),
-        resolution: Some(VideoResolution::FourEightyP),
-        user: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "A glowing crystal rocket launching from Mars".to_string(), model: None, image: None, reference_images: None, aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(5), resolution: Some(VideoResolution::FourEightyP), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Video request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());
@@ -354,19 +254,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_generation(VideoGenerationArgs {
-      api_key: &api_key,
-      request: VideoGenerationRequest {
-        prompt: "The camera slowly pushes in toward the building as the sun sinks below the horizon. Soft golden light, gentle breeze rustling the trees.".to_string(),
-        model: None,
-        image: Some(VideoImageSource::Url(WHITE_HOUSE_SUNSET_IMAGE_URL.to_string())),
-        reference_images: None,
-        aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-        duration: Some(5),
-        resolution: Some(VideoResolution::SevenTwentyP),
-        user: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "The camera slowly pushes in toward the building as the sun sinks below the horizon. Soft golden light, gentle breeze rustling the trees.".to_string(), model: None, image: Some(VideoImageSource::Url(WHITE_HOUSE_SUNSET_IMAGE_URL.to_string())), reference_images: None, aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(5), resolution: Some(VideoResolution::SevenTwentyP), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("First-frame video request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());
@@ -387,22 +275,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_generation(VideoGenerationArgs {
-      api_key: &api_key,
-      request: VideoGenerationRequest {
-        prompt: "The dogs from <IMAGE_1> in the scene from <IMAGE_2>. Make them play together.".to_string(),
-        model: None,
-        image: None,
-        reference_images: Some(vec![
-          VideoImageSource::Url(TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()),
-          VideoImageSource::Url(SUPER_WIDE_FALL_MOUNTAINS_IMAGE_URL.to_string()),
-        ]),
-        aspect_ratio: Some(VideoAspectRatio::Portrait9x16),
-        duration: Some(5),
-        resolution: Some(VideoResolution::SevenTwentyP),
-        user: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "The dogs from <IMAGE_1> in the scene from <IMAGE_2>. Make them play together.".to_string(), model: None, image: None, reference_images: Some(vec![VideoImageSource::Url(TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()), VideoImageSource::Url(SUPER_WIDE_FALL_MOUNTAINS_IMAGE_URL.to_string())]), aspect_ratio: Some(VideoAspectRatio::Portrait9x16), duration: Some(5), resolution: Some(VideoResolution::SevenTwentyP), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Reference-to-video request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());
@@ -433,19 +306,7 @@ mod tests {
       setup_test_logging();
 
       let api_key = get_test_api_key()?;
-      let result = video_generation(VideoGenerationArgs {
-        api_key: &api_key,
-        request: VideoGenerationRequest {
-          prompt: "Timelapse of a flower blooming in a sunlit garden.".to_string(),
-          model: Some(VideoModel::GrokImagineVideo1p5),
-          image: None,
-          reference_images: None,
-          aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-          duration: Some(TEST_DURATION_SECONDS),
-          resolution: Some(TEST_RESOLUTION),
-          user: None,
-        },
-      }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+      let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "Timelapse of a flower blooming in a sunlit garden.".to_string(), model: Some(VideoModel::GrokImagineVideo1p5), image: None, reference_images: None, aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(TEST_DURATION_SECONDS), resolution: Some(TEST_RESOLUTION), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
       println!("v1.5 text-to-video request_id: {}", result.request_id);
       assert!(!result.request_id.is_empty());
@@ -460,19 +321,7 @@ mod tests {
       setup_test_logging();
 
       let api_key = get_test_api_key()?;
-      let result = video_generation(VideoGenerationArgs {
-        api_key: &api_key,
-        request: VideoGenerationRequest {
-          prompt: "The camera slowly pushes in toward the building as the sun sinks below the horizon. Soft golden light, gentle breeze rustling the trees.".to_string(),
-          model: Some(VideoModel::GrokImagineVideo1p5),
-          image: Some(VideoImageSource::Url(WHITE_HOUSE_SUNSET_IMAGE_URL.to_string())),
-          reference_images: None,
-          aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-          duration: Some(TEST_DURATION_SECONDS),
-          resolution: Some(TEST_RESOLUTION),
-          user: None,
-        },
-      }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+      let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "The camera slowly pushes in toward the building as the sun sinks below the horizon. Soft golden light, gentle breeze rustling the trees.".to_string(), model: Some(VideoModel::GrokImagineVideo1p5), image: Some(VideoImageSource::Url(WHITE_HOUSE_SUNSET_IMAGE_URL.to_string())), reference_images: None, aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(TEST_DURATION_SECONDS), resolution: Some(TEST_RESOLUTION), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
       println!("v1.5 image-to-video request_id: {}", result.request_id);
       assert!(!result.request_id.is_empty());
@@ -491,22 +340,7 @@ mod tests {
       setup_test_logging();
 
       let api_key = get_test_api_key()?;
-      let result = video_generation(VideoGenerationArgs {
-        api_key: &api_key,
-        request: VideoGenerationRequest {
-          prompt: "The dogs from <IMAGE_1> in the scene from <IMAGE_2>. Make them play together.".to_string(),
-          model: Some(VideoModel::GrokImagineVideo1p5),
-          image: None,
-          reference_images: Some(vec![
-            VideoImageSource::Url(TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()),
-            VideoImageSource::Url(SUPER_WIDE_FALL_MOUNTAINS_IMAGE_URL.to_string()),
-          ]),
-          aspect_ratio: Some(VideoAspectRatio::Landscape16x9),
-          duration: Some(TEST_DURATION_SECONDS),
-          resolution: Some(TEST_RESOLUTION),
-          user: None,
-        },
-      }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+      let result = video_generation(VideoGenerationArgs { api_key: &api_key, request: VideoGenerationRequest { prompt: "The dogs from <IMAGE_1> in the scene from <IMAGE_2>. Make them play together.".to_string(), model: Some(VideoModel::GrokImagineVideo1p5), image: None, reference_images: Some(vec![VideoImageSource::Url(TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()), VideoImageSource::Url(SUPER_WIDE_FALL_MOUNTAINS_IMAGE_URL.to_string())]), aspect_ratio: Some(VideoAspectRatio::Landscape16x9), duration: Some(TEST_DURATION_SECONDS), resolution: Some(TEST_RESOLUTION), user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
       println!("v1.5 reference-to-video request_id: {}", result.request_id);
       assert!(!result.request_id.is_empty());

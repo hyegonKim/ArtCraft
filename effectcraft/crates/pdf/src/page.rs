@@ -1220,11 +1220,7 @@ fn fill_to_rgb(fill: &Fill) -> Option<[f32; 3]> {
 }
 
 fn split_pdf_font_name(raw: &str) -> (String, String) {
-    let stripped = if raw.len() > 7 && raw.as_bytes().get(6) == Some(&b'+') && raw[..6].bytes().all(|b| b.is_ascii_uppercase()) {
-        &raw[7..]
-    } else {
-        raw
-    };
+    let stripped = if raw.len() > 7 && raw.as_bytes().get(6) == Some(&b'+') && raw[..6].bytes().all(|b| b.is_ascii_uppercase()) { &raw[7..] } else { raw };
     let (fam_raw, suffix) = stripped.split_once(['-', ',']).unwrap_or((stripped, ""));
     let low = suffix.to_ascii_lowercase();
     let bold = low.contains("bold") || low.contains("black") || low.contains("heavy");

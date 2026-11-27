@@ -60,7 +60,10 @@ pub(super) fn doc_raster_ppi(doc: &Document) -> f64 {
 /// The effects [`Renderer::pixel_content`] runs on the content's pixels (those changing the
 /// content itself), in stack order.
 pub(super) fn content_changing(fx: &&RasterFx) -> bool {
-    matches!(fx, RasterFx::Feather { .. } | RasterFx::GaussianBlur { .. } | RasterFx::GaussianBlurAxes { .. } | RasterFx::Pixel(_) | RasterFx::Rasterize(_))
+    matches!(
+        fx,
+        RasterFx::Feather { .. } | RasterFx::GaussianBlur { .. } | RasterFx::GaussianBlurAxes { .. } | RasterFx::Pixel(_) | RasterFx::Rasterize(_)
+    )
 }
 
 /// Is the content drawn with hard edges for `chain` into a raster of pixels `px` wide (document

@@ -6,10 +6,7 @@ pub struct PngBytes(pub Vec<u8>);
 
 /// Normalize arbitrary image bytes to a PNG format image.
 /// Make sure the bitmap is in the correct mask format.
-pub fn normalize_image_bytes_to_flux_mask(
-  arbitrary_image_bytes: &[u8],
-) -> Result<PngBytes, ImagesError> {
-
+pub fn normalize_image_bytes_to_flux_mask(arbitrary_image_bytes: &[u8]) -> Result<PngBytes, ImagesError> {
   let reader = ImageReader::new(Cursor::new(arbitrary_image_bytes));
 
   let mut image = reader

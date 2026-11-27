@@ -75,16 +75,7 @@ impl CommonModelClass {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Image,
-      Self::Video,
-      Self::Audio,
-      Self::AudioMusic,
-      Self::AudioVoice,
-      Self::Dimensional,
-      Self::DimensionalMesh,
-      Self::DimensionalSplat,
-    ])
+    BTreeSet::from([Self::Image, Self::Video, Self::Audio, Self::AudioMusic, Self::AudioVoice, Self::Dimensional, Self::DimensionalMesh, Self::DimensionalSplat])
   }
 }
 
@@ -205,12 +196,10 @@ mod tests {
 
       for variant in CommonModelClass::all_variants() {
         let to_str_value = variant.to_str();
-        assert!(valid_pattern.is_match(to_str_value),
-          "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
+        assert!(valid_pattern.is_match(to_str_value), "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
 
         let json_value = serde_json::to_string(&variant).unwrap().replace('"', "");
-        assert!(valid_pattern.is_match(&json_value),
-          "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
+        assert!(valid_pattern.is_match(&json_value), "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
       }
     }
   }

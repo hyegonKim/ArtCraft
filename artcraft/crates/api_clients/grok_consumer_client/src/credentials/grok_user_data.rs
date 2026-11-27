@@ -14,9 +14,6 @@ pub struct GrokUserData {
 
 impl GrokUserData {
   pub fn from_id_and_email(id: String, email: Option<String>) -> Self {
-    Self {
-      user_id: UserId(id),
-      user_email: email.map(|email| UserEmail(email)),
-    }
+    Self { user_id: UserId(id), user_email: email.map(|email| UserEmail(email)) }
   }
 }

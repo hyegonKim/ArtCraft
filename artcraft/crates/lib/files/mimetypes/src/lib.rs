@@ -14,12 +14,11 @@
 #![forbid(unused_imports)]
 #![forbid(unused_mut)]
 #![forbid(unused_variables)]
-
 // Always allow
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-pub (crate) mod custom;
+pub(crate) mod custom;
 pub mod mimetype_for_bytes;
 pub mod mimetype_for_file;
 pub mod mimetype_info;

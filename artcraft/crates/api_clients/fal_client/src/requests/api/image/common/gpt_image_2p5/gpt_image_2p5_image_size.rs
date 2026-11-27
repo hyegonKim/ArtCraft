@@ -1,6 +1,4 @@
-use crate::requests::api::image::common::gpt_image_2_resolution::{
-  compute_custom_image_size, GptImage2AspectRatio, GptImage2Resolution,
-};
+use crate::requests::api::image::common::gpt_image_2_resolution::{compute_custom_image_size, GptImage2AspectRatio, GptImage2Resolution};
 use crate::requests::api::image::common::gpt_image_2p5::raw::gpt_image_2p5_image_size_param::GptImage2p5ImageSizeParam;
 
 /// Output image size preset. Both text-to-image and edit accept the same set, including
@@ -28,9 +26,7 @@ impl GptImage2p5ImageSize {
   /// and any resolution tier is ignored.
   pub fn to_raw_param(self, resolution: Option<GptImage2Resolution>) -> GptImage2p5ImageSizeParam {
     match (self.to_aspect_ratio(), resolution) {
-      (Some(aspect), Some(resolution)) => {
-        GptImage2p5ImageSizeParam::Custom(compute_custom_image_size(aspect, resolution))
-      }
+      (Some(aspect), Some(resolution)) => GptImage2p5ImageSizeParam::Custom(compute_custom_image_size(aspect, resolution)),
       _ => GptImage2p5ImageSizeParam::Preset(self.to_preset_str().to_string()),
     }
   }
@@ -41,7 +37,7 @@ impl GptImage2p5ImageSize {
       (Some(aspect), Some(resolution)) => {
         let custom = compute_custom_image_size(aspect, resolution);
         (custom.width, custom.height)
-      }
+      },
       _ => self.preset_dimensions(),
     }
   }
@@ -91,9 +87,7 @@ mod tests {
   use super::*;
   use GptImage2p5ImageSize::*;
 
-  const ALL_SIZES: &[GptImage2p5ImageSize] = &[
-    SquareHd, Square, Portrait4x3, Portrait16x9, Landscape4x3, Landscape16x9, Auto,
-  ];
+  const ALL_SIZES: &[GptImage2p5ImageSize] = &[SquareHd, Square, Portrait4x3, Portrait16x9, Landscape4x3, Landscape16x9, Auto];
 
   #[test]
   fn wire_strings_match_fal_schema() {
@@ -122,7 +116,7 @@ mod tests {
       GptImage2p5ImageSizeParam::Custom(c) => {
         assert_eq!(c.width, 2048);
         assert_eq!(c.height, 1152);
-      }
+      },
       GptImage2p5ImageSizeParam::Preset(_) => panic!("expected custom"),
     }
   }

@@ -101,9 +101,7 @@ impl FalRequestCostCalculator for EnqueueGptImage2EditImageRequest {
   }
 }
 
-pub async fn enqueue_gpt_image_2_edit_image_webhook<R: IntoUrl>(
-  args: EnqueueGptImage2EditImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_gpt_image_2_edit_image_webhook<R: IntoUrl>(args: EnqueueGptImage2EditImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -113,34 +111,37 @@ pub async fn enqueue_gpt_image_2_edit_image_webhook<R: IntoUrl>(
     EnqueueGptImage2EditImageNumImages::Four => 4,
   };
 
-  let image_size = req.image_size
-      .map(|s| match s {
-        EnqueueGptImage2EditImageSize::SquareHd => "square_hd",
-        EnqueueGptImage2EditImageSize::Square => "square",
-        EnqueueGptImage2EditImageSize::Portrait4x3 => "portrait_4_3",
-        EnqueueGptImage2EditImageSize::Portrait16x9 => "portrait_16_9",
-        EnqueueGptImage2EditImageSize::Landscape4x3 => "landscape_4_3",
-        EnqueueGptImage2EditImageSize::Landscape16x9 => "landscape_16_9",
-        EnqueueGptImage2EditImageSize::Auto => "auto",
-      })
-      .map(|size| size.to_string());
+  let image_size = req
+    .image_size
+    .map(|s| match s {
+      EnqueueGptImage2EditImageSize::SquareHd => "square_hd",
+      EnqueueGptImage2EditImageSize::Square => "square",
+      EnqueueGptImage2EditImageSize::Portrait4x3 => "portrait_4_3",
+      EnqueueGptImage2EditImageSize::Portrait16x9 => "portrait_16_9",
+      EnqueueGptImage2EditImageSize::Landscape4x3 => "landscape_4_3",
+      EnqueueGptImage2EditImageSize::Landscape16x9 => "landscape_16_9",
+      EnqueueGptImage2EditImageSize::Auto => "auto",
+    })
+    .map(|size| size.to_string());
 
-  let quality = req.quality
-      .map(|s| match s {
-        EnqueueGptImage2EditImageQuality::Low => "low",
-        EnqueueGptImage2EditImageQuality::Medium => "medium",
-        EnqueueGptImage2EditImageQuality::High => "high",
-      })
-      .map(|quality| quality.to_string());
+  let quality = req
+    .quality
+    .map(|s| match s {
+      EnqueueGptImage2EditImageQuality::Low => "low",
+      EnqueueGptImage2EditImageQuality::Medium => "medium",
+      EnqueueGptImage2EditImageQuality::High => "high",
+    })
+    .map(|quality| quality.to_string());
 
-  let output_format = req.output_format
-      .map(|s| match s {
-        EnqueueGptImage2EditImageOutputFormat::Jpeg => "jpeg",
-        EnqueueGptImage2EditImageOutputFormat::Png => "png",
-        EnqueueGptImage2EditImageOutputFormat::Webp => "webp",
-      })
-      .map(|format| format.to_string())
-      .unwrap_or_else(|| "png".to_string());
+  let output_format = req
+    .output_format
+    .map(|s| match s {
+      EnqueueGptImage2EditImageOutputFormat::Jpeg => "jpeg",
+      EnqueueGptImage2EditImageOutputFormat::Png => "png",
+      EnqueueGptImage2EditImageOutputFormat::Webp => "webp",
+    })
+    .map(|format| format.to_string())
+    .unwrap_or_else(|| "png".to_string());
 
   let request = GptImage2EditImageInput {
     prompt: req.prompt,
@@ -153,10 +154,7 @@ pub async fn enqueue_gpt_image_2_edit_image_webhook<R: IntoUrl>(
     quality,
   };
 
-  let result = gpt_image_2_edit_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gpt_image_2_edit_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -164,10 +162,7 @@ pub async fn enqueue_gpt_image_2_edit_image_webhook<R: IntoUrl>(
 #[cfg(test)]
 mod tests {
   use crate::creds::fal_api_key::FalApiKey;
-  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_2_edit_image_webhook::{
-    enqueue_gpt_image_2_edit_image_webhook, EnqueueGptImage2EditImageArgs,
-    EnqueueGptImage2EditImageNumImages, EnqueueGptImage2EditImageRequest,
-  };
+  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_2_edit_image_webhook::{enqueue_gpt_image_2_edit_image_webhook, EnqueueGptImage2EditImageArgs, EnqueueGptImage2EditImageNumImages, EnqueueGptImage2EditImageRequest};
   use errors::AnyhowResult;
   use std::fs::read_to_string;
   use test_data::web::image_urls::{ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL};
@@ -180,23 +175,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueGptImage2EditImageArgs {
-      request: EnqueueGptImage2EditImageRequest {
-        image_urls: vec![
-          GHOST_IMAGE_URL.to_string(),
-          TREX_SKELETON_IMAGE_URL.to_string(),
-          ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        ],
-        prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-        num_images: EnqueueGptImage2EditImageNumImages::Two,
-        mask_url: None,
-        image_size: None,
-        quality: None,
-        output_format: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueGptImage2EditImageArgs { request: EnqueueGptImage2EditImageRequest { image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), num_images: EnqueueGptImage2EditImageNumImages::Two, mask_url: None, image_size: None, quality: None, output_format: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_gpt_image_2_edit_image_webhook(args).await?;
 

@@ -54,44 +54,27 @@ pub struct WorldSummary {
 pub async fn list_worlds(args: ListWorldsArgs<'_>) -> Result<ListWorldsResponse, WorldLabsError> {
   let client = Client::new();
 
-  let payload = RawRequest {
-    page_size: args.page_size,
-    page_token: args.page_token,
-    status: args.status,
-    model: args.model,
-    tags: args.tags,
-    is_public: args.is_public,
-    created_after: args.created_after,
-    created_before: args.created_before,
-    sort_by: args.sort_by,
-  };
+  let payload = RawRequest { page_size: args.page_size, page_token: args.page_token, status: args.status, model: args.model, tags: args.tags, is_public: args.is_public, created_after: args.created_after, created_before: args.created_before, sort_by: args.sort_by };
 
   debug!("Requesting URL: {}", URL);
 
-  let mut request_builder = client.post(URL)
-    .header("WLT-Api-Key", args.creds.api_key())
-    .header("Content-Type", "application/json")
-    .json(&payload);
+  let mut request_builder = client.post(URL).header("WLT-Api-Key", args.creds.api_key()).header("Content-Type", "application/json").json(&payload);
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during list_worlds request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during list_worlds request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("list_worlds returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -101,24 +84,11 @@ pub async fn list_worlds(args: ListWorldsArgs<'_>) -> Result<ListWorldsResponse,
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  let worlds = raw.worlds.into_iter().map(|w| WorldSummary {
-    world_id: WorldId(w.world_id),
-    display_name: w.display_name,
-    world_marble_url: w.world_marble_url,
-    created_at: w.created_at,
-    updated_at: w.updated_at,
-    model: w.model,
-    status: w.status,
-    tags: w.tags,
-  }).collect();
+  let worlds = raw.worlds.into_iter().map(|w| WorldSummary { world_id: WorldId(w.world_id), display_name: w.display_name, world_marble_url: w.world_marble_url, created_at: w.created_at, updated_at: w.updated_at, model: w.model, status: w.status, tags: w.tags }).collect();
 
-  Ok(ListWorldsResponse {
-    worlds,
-    next_page_token: raw.next_page_token,
-  })
+  Ok(ListWorldsResponse { worlds, next_page_token: raw.next_page_token })
 }
 
 #[cfg(test)]
@@ -135,19 +105,7 @@ mod tests {
 
     let creds = get_test_api_key().unwrap();
 
-    let response = list_worlds(ListWorldsArgs {
-      creds: &creds,
-      page_size: Some(5),
-      page_token: None,
-      status: None,
-      model: None,
-      tags: None,
-      is_public: None,
-      created_after: None,
-      created_before: None,
-      sort_by: None,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = list_worlds(ListWorldsArgs { creds: &creds, page_size: Some(5), page_token: None, status: None, model: None, tags: None, is_public: None, created_after: None, created_before: None, sort_by: None, request_timeout: None }).await.unwrap();
 
     println!("Worlds count: {}", response.worlds.len());
     println!("Next page token: {:?}", response.next_page_token);

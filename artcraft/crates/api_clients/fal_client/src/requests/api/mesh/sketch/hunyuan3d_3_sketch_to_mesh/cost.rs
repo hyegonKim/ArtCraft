@@ -68,11 +68,6 @@ mod tests {
   }
 
   fn base_request() -> Hunyuan3d3SketchToMeshRequest {
-    Hunyuan3d3SketchToMeshRequest {
-      image_url: "https://example.com/sketch.png".to_string(),
-      prompt: "test".to_string(),
-      face_count: None,
-      enable_pbr: None,
-    }
+    Hunyuan3d3SketchToMeshRequest { image_url: "https://example.com/sketch.png".to_string(), prompt: "test".to_string(), face_count: None, enable_pbr: None }
   }
 }

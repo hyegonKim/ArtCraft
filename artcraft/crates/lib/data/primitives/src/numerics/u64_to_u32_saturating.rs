@@ -1,4 +1,4 @@
-const MAX_U32 : u64 = u32::MAX as u64;
+const MAX_U32: u64 = u32::MAX as u64;
 
 /// Convert a u64 to a u32, saturating to u32::MAX if the u64 overflows the container.
 pub fn u64_to_u32_saturating(num: u64) -> u32 {

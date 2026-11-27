@@ -109,9 +109,8 @@ pub enum MediaFileType {
 
   /// Mp3 audio
   Mp3,
-  
-  // ========================= LESS SUPPORT FOR THE FILES BELOW THIS LINE ========================= //
 
+  // ========================= LESS SUPPORT FOR THE FILES BELOW THIS LINE ========================= //
   /// Webp images
   Webp,
 
@@ -148,7 +147,6 @@ impl_mysql_from_row!(MediaFileType);
 
 /// NB: Legacy API for older code.
 impl MediaFileType {
-  
   /// Jpeg and Png are the most widely supported static image formats for AI inference.
   /// Webp, Webm, and Gif aren't as widely supported, so we don't include them here.
   pub fn is_jpg_or_png(&self) -> bool {
@@ -168,48 +166,21 @@ impl MediaFileType {
   /// The broad `media_class` this file format belongs to.
   pub fn to_media_class(&self) -> MediaFileClass {
     match self {
-      Self::Audio
-      | Self::Wav
-      | Self::Mp3
-      | Self::Opus
-      | Self::Ogg
-      | Self::Aac
-      | Self::M4a
-      | Self::Flac => MediaFileClass::Audio,
+      Self::Audio | Self::Wav | Self::Mp3 | Self::Opus | Self::Ogg | Self::Aac | Self::M4a | Self::Flac => MediaFileClass::Audio,
 
-      Self::Image
-      | Self::Jpg
-      | Self::Png
-      | Self::Gif
-      | Self::Webp => MediaFileClass::Image,
+      Self::Image | Self::Jpg | Self::Png | Self::Gif | Self::Webp => MediaFileClass::Image,
 
-      Self::Video
-      | Self::Mp4
-      | Self::Webm
-      | Self::Mov => MediaFileClass::Video,
+      Self::Video | Self::Mp4 | Self::Webm | Self::Mov => MediaFileClass::Video,
 
-      Self::Fbx
-      | Self::Obj
-      | Self::Glb
-      | Self::Gltf
-      | Self::Pmd
-      | Self::Pmx => MediaFileClass::Mesh,
+      Self::Fbx | Self::Obj | Self::Glb | Self::Gltf | Self::Pmd | Self::Pmx => MediaFileClass::Mesh,
 
-      Self::Spz
-      | Self::Ply => MediaFileClass::Splat,
+      Self::Spz | Self::Ply => MediaFileClass::Splat,
 
       // Animation and auxiliary data formats with no dedicated class yet.
       #[allow(deprecated)]
-      Self::Bvh
-      | Self::Vmd
-      | Self::Csv => MediaFileClass::Dimensional,
+      Self::Bvh | Self::Vmd | Self::Csv => MediaFileClass::Dimensional,
 
-      Self::SceneRon
-      | Self::SceneJson
-      | Self::MoodJson
-      | Self::TimelineJson
-      | Self::EditorJson
-      | Self::Json => MediaFileClass::Project,
+      Self::SceneRon | Self::SceneJson | Self::MoodJson | Self::TimelineJson | Self::EditorJson | Self::Json => MediaFileClass::Project,
     }
   }
 
@@ -252,8 +223,7 @@ impl MediaFileType {
   /// Tries the input as a filename first, then as a bare extension.
   /// Useful as a fallback when `try_from_mime_type` fails.
   pub fn try_from_filename_or_extension(filename_or_extension: &str) -> Option<Self> {
-    Self::try_from_filename(filename_or_extension)
-        .or_else(|| Self::try_from_extension(filename_or_extension))
+    Self::try_from_filename(filename_or_extension).or_else(|| Self::try_from_extension(filename_or_extension))
   }
 
   /// Returns the `MediaFileType` for a filename by examining its extension.
@@ -378,42 +348,7 @@ impl MediaFileType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Audio,
-      Self::Image,
-      Self::Video,
-      Self::Bvh,
-      Self::Fbx,
-      Self::Obj,
-      Self::Ply,
-      Self::Glb,
-      Self::Gltf,
-      Self::Spz,
-      Self::SceneRon,
-      Self::SceneJson,
-      Self::MoodJson,
-      Self::TimelineJson,
-      Self::EditorJson,
-      Self::Pmd,
-      Self::Vmd,
-      Self::Pmx,
-      Self::Csv,
-      Self::Jpg,
-      Self::Png,
-      Self::Gif,
-      Self::Mp4,
-      Self::Wav,
-      Self::Mp3,
-      Self::Webp,
-      Self::Webm,
-      Self::Mov,
-      Self::Opus,
-      Self::Ogg,
-      Self::Aac,
-      Self::M4a,
-      Self::Flac,
-      Self::Json,
-    ])
+    BTreeSet::from([Self::Audio, Self::Image, Self::Video, Self::Bvh, Self::Fbx, Self::Obj, Self::Ply, Self::Glb, Self::Gltf, Self::Spz, Self::SceneRon, Self::SceneJson, Self::MoodJson, Self::TimelineJson, Self::EditorJson, Self::Pmd, Self::Vmd, Self::Pmx, Self::Csv, Self::Jpg, Self::Png, Self::Gif, Self::Mp4, Self::Wav, Self::Mp3, Self::Webp, Self::Webm, Self::Mov, Self::Opus, Self::Ogg, Self::Aac, Self::M4a, Self::Flac, Self::Json])
   }
 }
 
@@ -422,20 +357,20 @@ mod tests {
   use crate::by_table::media_files::media_file_class::MediaFileClass;
   use crate::by_table::media_files::media_file_type::MediaFileType;
   use crate::test_helpers::assert_serialization;
-  
+
   mod utility {
     use super::*;
-    
+
     #[test]
     fn test_jpg_or_png() {
       // True
       assert!(MediaFileType::Jpg.is_jpg_or_png());
       assert!(MediaFileType::Png.is_jpg_or_png());
-      
+
       // Assert these image types are false
       assert!(!MediaFileType::Gif.is_jpg_or_png());
       assert!(!MediaFileType::Image.is_jpg_or_png());
-      
+
       // Everything else is false
       for variant in MediaFileType::all_variants() {
         if matches!(variant, MediaFileType::Jpg | MediaFileType::Png) {
@@ -802,7 +737,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in MediaFileType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

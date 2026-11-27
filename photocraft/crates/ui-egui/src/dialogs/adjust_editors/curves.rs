@@ -350,14 +350,7 @@ fn select_channel_by_key(ui: &egui::Ui, id: egui::Id, count: usize) {
     }
 }
 
-fn draw_curve_backdrop_and_grid(
-    p: &egui::Painter,
-    graph: Rect,
-    chan: &ToneChannel,
-    t: &Tokens,
-    gradient_background: bool,
-    fine_grid: bool,
-) {
+fn draw_curve_backdrop_and_grid(p: &egui::Painter, graph: Rect, chan: &ToneChannel, t: &Tokens, gradient_background: bool, fine_grid: bool) {
     if gradient_background {
         let tint = bar_color(chan, t);
         let lo = Color32::from_rgba_unmultiplied(0, 0, 0, 48);

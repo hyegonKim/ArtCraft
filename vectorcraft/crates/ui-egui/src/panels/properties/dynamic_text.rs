@@ -104,10 +104,7 @@ fn path_rows(app: &mut VectorcraftApp, ui: &mut Ui) -> bool {
     ui.horizontal(|ui| {
         ui.label(tl!("Path Alignment"));
         let labels = ["Rainbow", "Skew", "3D Ribbon", "Stair Step", "Gravity"];
-        let cur = ps
-            .effect
-            .and_then(|eff| PATH_ALIGNMENTS.iter().find(|(_, e)| *e == eff).map(|(l, _)| *l))
-            .unwrap_or("—");
+        let cur = ps.effect.and_then(|eff| PATH_ALIGNMENTS.iter().find(|(_, e)| *e == eff).map(|(l, _)| *l)).unwrap_or("—");
         if let Some(idx) = widgets::dropdown(ui, "props-dt-path-align", cur, &labels, fw * 1.4)
             && let Some((_, eff)) = PATH_ALIGNMENTS.get(idx)
             && let Err(e) = app.run("type.pathOptions", json!({ "effect": eff.id() }))

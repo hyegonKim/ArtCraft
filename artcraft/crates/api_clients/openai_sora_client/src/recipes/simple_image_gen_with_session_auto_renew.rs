@@ -32,7 +32,8 @@ pub async fn simple_image_gen_with_session_auto_renew(request: SimpleImageGenAut
     image_size: request.image_size,
     credentials: request.credentials,
     request_timeout: request.request_timeout,
-  }).await;
+  })
+  .await;
 
   let err = match result {
     Ok(response) => return Ok((response, None)),
@@ -46,40 +47,36 @@ pub async fn simple_image_gen_with_session_auto_renew(request: SimpleImageGenAut
 
   match err {
     // We'll specifically fail these non-retryable requests...
-    
-    SoraError::ApiSpecific(SoraSpecificApiError::TooManyConcurrentTasks) |
-    SoraError::ApiSpecific(SoraSpecificApiError::SoraUsernameNotYetCreated) => {
+    SoraError::ApiSpecific(SoraSpecificApiError::TooManyConcurrentTasks) | SoraError::ApiSpecific(SoraSpecificApiError::SoraUsernameNotYetCreated) => {
       error!("Non-retryable image generation error: {:?}", err);
       return Err(err);
-    }
-    
+    },
+
     // We'll retry these requests...
-    
     SoraError::ApiSpecific(SoraSpecificApiError::SentinelBlockError) => {
       warn!("Image generation failed due to sentinel block error: {:?}", err);
       refresh_sentinel = true;
-    }
+    },
     SoraError::ApiSpecific(SoraSpecificApiError::TokenExpiredError) => {
       warn!("Image generation failed due to token expired error: {:?}", err);
       refresh_sentinel = true; // TODO: Not sure what this error is, actually.
       refresh_jwt = true;
-    }
+    },
     SoraError::ApiSpecific(SoraSpecificApiError::InvalidJwt) => {
       warn!("Image generation failed due to invalid jwt error: {:?}", err);
       refresh_jwt = true;
-    }
+    },
     SoraError::ApiSpecific(SoraSpecificApiError::UnauthorizedCookieOrBearerExpired) => {
       warn!("Image generation failed due to auth error (nb: this is a legacy error): {:?}", err);
       refresh_jwt = true;
       refresh_sentinel = true;
-    }
-    
-    // We'll fail everything else eagerly...
+    },
 
+    // We'll fail everything else eagerly...
     _ => {
       error!("Image generation error: {:?}", err);
       return Err(err);
-    }
+    },
   }
 
   let mut new_bearer = None;
@@ -92,15 +89,13 @@ pub async fn simple_image_gen_with_session_auto_renew(request: SimpleImageGenAut
       Err(err) => {
         error!("Error asking to generate JWT: {:?}", err);
         return Err(err);
-      }
-      Ok(bearer) => {
-        match SoraJwtBearerToken::new(bearer) {
-          Err(err) => {
-            error!("Failed to parse new JWT: {:?}", err);
-            return Err(err);
-          }
-          Ok(bearer) => new_bearer = Some(bearer),
-        }
+      },
+      Ok(bearer) => match SoraJwtBearerToken::new(bearer) {
+        Err(err) => {
+          error!("Failed to parse new JWT: {:?}", err);
+          return Err(err);
+        },
+        Ok(bearer) => new_bearer = Some(bearer),
       },
     }
   }
@@ -113,8 +108,8 @@ pub async fn simple_image_gen_with_session_auto_renew(request: SimpleImageGenAut
     match response {
       Err(err) => {
         error!("failed to generate new sentinel: {:?}", err);
-        return Err(err)
-      }
+        return Err(err);
+      },
       Ok(sentinel) => new_sentinel = Some(SoraSentinel::new(sentinel)),
     }
   }
@@ -131,13 +126,7 @@ pub async fn simple_image_gen_with_session_auto_renew(request: SimpleImageGenAut
 
   // Now try again...
 
-  let result = sora_image_gen_simple(SoraImageGenSimpleRequest {
-    prompt: request.prompt,
-    num_images: request.num_images,
-    image_size: request.image_size,
-    credentials: &new_creds,
-    request_timeout: request.request_timeout,
-  }).await?;
-  
+  let result = sora_image_gen_simple(SoraImageGenSimpleRequest { prompt: request.prompt, num_images: request.num_images, image_size: request.image_size, credentials: &new_creds, request_timeout: request.request_timeout }).await?;
+
   Ok((result, Some(new_creds)))
 }

@@ -67,12 +67,12 @@ pub enum TauriEventName {
   /// Image edit is complete
   #[serde(rename = "image_edit_complete_event")]
   ImageEditCompleteEvent,
-  
+
   /// Special event:
   /// Object (3D mesh) generation is complete
   #[serde(rename = "object_generation_complete_event")]
   ObjectGenerationCompleteEvent,
-  
+
   /// Special event:
   /// Gaussian generation is complete
   #[serde(rename = "gaussian_generation_complete_event")]
@@ -92,12 +92,12 @@ pub enum TauriEventName {
   /// Show a billing modal (a suggestion to pay, etc. for a specific provider)
   #[serde(rename = "show_provider_billing_modal_event")]
   ShowProviderBillingModalEvent,
-  
+
   /// Special event:
   /// Show a login modal (or a suggestion to login)
   #[serde(rename = "show_provider_login_modal_event")]
   ShowProviderLoginModalEvent,
-  
+
   /// Warning event:
   /// Flash a user input error message
   #[serde(rename = "flash_user_input_error_event")]
@@ -166,26 +166,7 @@ impl TauriEventName {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::GenerationEnqueueSuccessEvent,
-      Self::GenerationEnqueueFailureEvent,
-      Self::GenerationCompleteEvent,
-      Self::GenerationFailedEvent,
-      Self::CreditsBalanceChangedEvent,
-      Self::SubscriptionPlanChangedEvent,
-      Self::MediaFileDeletedEvent,
-      Self::CanvasBgRemovedEvent,
-      Self::TextToImageGenerationCompleteEvent,
-      Self::ImageEditCompleteEvent,
-      Self::ObjectGenerationCompleteEvent,
-      Self::GaussianGenerationCompleteEvent,
-      Self::VideoGenerationCompleteEvent,
-      Self::RefreshAccountStateEvent,
-      Self::ShowProviderBillingModalEvent,
-      Self::ShowProviderLoginModalEvent,
-      Self::FlashUserInputErrorEvent,
-      Self::FlashFileDownloadErrorEvent,
-    ])
+    BTreeSet::from([Self::GenerationEnqueueSuccessEvent, Self::GenerationEnqueueFailureEvent, Self::GenerationCompleteEvent, Self::GenerationFailedEvent, Self::CreditsBalanceChangedEvent, Self::SubscriptionPlanChangedEvent, Self::MediaFileDeletedEvent, Self::CanvasBgRemovedEvent, Self::TextToImageGenerationCompleteEvent, Self::ImageEditCompleteEvent, Self::ObjectGenerationCompleteEvent, Self::GaussianGenerationCompleteEvent, Self::VideoGenerationCompleteEvent, Self::RefreshAccountStateEvent, Self::ShowProviderBillingModalEvent, Self::ShowProviderLoginModalEvent, Self::FlashUserInputErrorEvent, Self::FlashFileDownloadErrorEvent])
   }
 }
 
@@ -213,7 +194,7 @@ mod tests {
       assert_serialization(TauriEventName::GaussianGenerationCompleteEvent, "gaussian_generation_complete_event");
       assert_serialization(TauriEventName::VideoGenerationCompleteEvent, "video_generation_complete_event");
       assert_serialization(TauriEventName::RefreshAccountStateEvent, "refresh_account_state_event");
-      assert_serialization(TauriEventName::ShowProviderBillingModalEvent, "show_provider_billing_modal_event"); 
+      assert_serialization(TauriEventName::ShowProviderBillingModalEvent, "show_provider_billing_modal_event");
       assert_serialization(TauriEventName::ShowProviderLoginModalEvent, "show_provider_login_modal_event");
       assert_serialization(TauriEventName::FlashUserInputErrorEvent, "flash_user_input_error_event");
       assert_serialization(TauriEventName::FlashFileDownloadErrorEvent, "flash_file_download_error_event");

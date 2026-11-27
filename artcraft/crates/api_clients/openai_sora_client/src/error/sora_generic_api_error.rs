@@ -28,10 +28,7 @@ pub enum SoraGenericApiError {
   UncategorizedBadResponse(String),
 
   /// An uncategorized bad HTTP response from Sora.
-  UncategorizedBadResponseWithStatusAndBody {
-    status_code: StatusCode,
-    body: String,
-  },
+  UncategorizedBadResponseWithStatusAndBody { status_code: StatusCode, body: String },
 
   /// An uncaught error from the API client.
   WreqError(wreq::Error),

@@ -7,11 +7,7 @@ use crate::generate::generate_image::image_generation_request::ImageGenerationRe
 use crate::generate::generate_image::providers::artcraft::build_common::build_artcraft_omni_image_request;
 use crate::generate::generate_image::providers::artcraft::nano_banana_2::request::ArtcraftNanoBanana2RequestState;
 
-pub fn build_artcraft_nano_banana_2(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_artcraft_nano_banana_2(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let request = build_artcraft_omni_image_request(builder, CommonImageModelEnum::NanoBanana2)?;
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::ArtcraftNanoBanana2(ArtcraftNanoBanana2RequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::ArtcraftNanoBanana2(ArtcraftNanoBanana2RequestState { request })))
 }

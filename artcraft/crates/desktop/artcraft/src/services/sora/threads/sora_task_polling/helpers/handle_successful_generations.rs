@@ -56,17 +56,7 @@ pub struct GenerationItem {
   pub url: String,
 }
 
-pub async fn handle_classic_successful_generations(
-  app_handle: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  task_database: &TaskDatabase,
-  storyteller_creds: &StorytellerCredentialSet,
-  succeeded_tasks_by_id: &HashMap<TaskId, SuccessfulGeneration>,
-  sqlite_tasks_by_sora_task_id: &HashMap<String, Task>,
-  recommended_download_extension: DownloadExtension,
-) -> AnyhowResult<()> {
-
+pub async fn handle_classic_successful_generations(app_handle: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, task_database: &TaskDatabase, storyteller_creds: &StorytellerCredentialSet, succeeded_tasks_by_id: &HashMap<TaskId, SuccessfulGeneration>, sqlite_tasks_by_sora_task_id: &HashMap<String, Task>, recommended_download_extension: DownloadExtension) -> AnyhowResult<()> {
   for (task_id, generation) in succeeded_tasks_by_id.iter() {
     if !sqlite_tasks_by_sora_task_id.contains_key(task_id.as_str()) {
       continue; // Task is irrelevant - previously completed, generated elsewhere, etc.
@@ -88,25 +78,9 @@ pub async fn handle_classic_successful_generations(
       },
     };
 
-    let prompt_request = CreatePromptRequest {
-      uuid_idempotency_token: generate_random_uuid(),
-      positive_prompt: generation.prompt.clone(),
-      negative_prompt: None,
-      model_type: Some(generation.model_type),
-      generation_provider: Some(GenerationProvider::Sora),
-      maybe_generation_mode: None,
-      maybe_aspect_ratio: None,
-      maybe_resolution: None,
-      maybe_batch_count: None,
-      maybe_generate_audio: None,
-      maybe_duration_seconds: None,
-    };
+    let prompt_request = CreatePromptRequest { uuid_idempotency_token: generate_random_uuid(), positive_prompt: generation.prompt.clone(), negative_prompt: None, model_type: Some(generation.model_type), generation_provider: Some(GenerationProvider::Sora), maybe_generation_mode: None, maybe_aspect_ratio: None, maybe_resolution: None, maybe_batch_count: None, maybe_generate_audio: None, maybe_duration_seconds: None };
 
-    let prompt_response = create_prompt(
-      &app_env_configs.storyteller_host,
-      Some(&storyteller_creds),
-      prompt_request
-    ).await?;
+    let prompt_response = create_prompt(&app_env_configs.storyteller_host, Some(&storyteller_creds), prompt_request).await?;
 
     info!("Created prompt: {:?}", &prompt_response.prompt_token);
 
@@ -125,7 +99,8 @@ pub async fn handle_classic_successful_generations(
         maybe_prompt_token: Some(&prompt_response.prompt_token),
         maybe_batch_token: None, // TODO: This should be added soon.
         generation_type,
-      }).await?;
+      })
+      .await?;
 
       if maybe_primary_media_file_token.is_none() {
         maybe_primary_media_file_token = Some(media_token.clone());
@@ -147,19 +122,15 @@ pub async fn handle_classic_successful_generations(
       if let Some(media_file_token) = maybe_primary_media_file_token.as_ref() {
         info!("Looking up file to grab CDN and thumbnail URLs: {:?} ...", media_file_token);
 
-        let lookup_result = get_media_file(
-          &app_env_configs.storyteller_host,
-          media_file_token,
-        ).await;
+        let lookup_result = get_media_file(&app_env_configs.storyteller_host, media_file_token).await;
         match lookup_result {
           Ok(response) => {
             maybe_cdn_url = Some(response.media_file.media_links.cdn_url.to_string());
-            maybe_thumbnail_url_template = media_links_to_thumbnail_template(&response.media_file.media_links)
-                .map(|s| s.to_string());
-          }
+            maybe_thumbnail_url_template = media_links_to_thumbnail_template(&response.media_file.media_links).map(|s| s.to_string());
+          },
           Err(err) => {
             error!("Failed to look up media file after upload: {:?} (failing open)", err);
-          }
+          },
         }
       }
 
@@ -171,7 +142,8 @@ pub async fn handle_classic_successful_generations(
         maybe_primary_media_file_class: Some(generation_class),
         maybe_primary_media_file_thumbnail_url_template: maybe_thumbnail_url_template.as_deref(),
         maybe_primary_media_file_cdn_url: maybe_cdn_url.as_deref(),
-      }).await?;
+      })
+      .await?;
 
       if updated {
         clear_auto_download_checkpoint(app_handle, local_task);
@@ -193,20 +165,14 @@ pub async fn handle_classic_successful_generations(
   Ok(())
 }
 
-async fn download_generation_item(
-  generation: &GenerationItem,
-  app_data_root: &AppDataRoot,
-  recommended_download_extension: DownloadExtension
-) -> AnyhowResult<PathBuf> {
+async fn download_generation_item(generation: &GenerationItem, app_data_root: &AppDataRoot, recommended_download_extension: DownloadExtension) -> AnyhowResult<PathBuf> {
   info!("Downloading generation item from URL: {}", generation.url.as_str());
 
   let response = reqwest::get(&generation.url).await?;
   let image_bytes = response.bytes().await?;
 
-  let extension = extract_download_extension_from_url_str(&generation.url)
-      .map(|ext| ext.as_extension_without_period())
-      .unwrap_or_else(|| recommended_download_extension.as_extension_without_period());
-  
+  let extension = extract_download_extension_from_url_str(&generation.url).map(|ext| ext.as_extension_without_period()).unwrap_or_else(|| recommended_download_extension.as_extension_without_period());
+
   let tempdir = app_data_root.temp_dir().path();
   let download_filename = format!("{}.{}", generation.item_id, extension);
   let download_path = tempdir.join(download_filename);

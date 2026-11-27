@@ -42,8 +42,6 @@ pub struct SeedreamV5LiteEditImageOutput {
   pub seed: u64,
 }
 
-pub fn http_seedream_5_edit_image(
-  params: SeedreamV5LiteEditImageInput,
-) -> FalRequest<SeedreamV5LiteEditImageInput, SeedreamV5LiteEditImageOutput> {
+pub fn http_seedream_5_edit_image(params: SeedreamV5LiteEditImageInput) -> FalRequest<SeedreamV5LiteEditImageInput, SeedreamV5LiteEditImageOutput> {
   FalRequest::new("fal-ai/bytedance/seedream/v5/lite/edit", params)
 }

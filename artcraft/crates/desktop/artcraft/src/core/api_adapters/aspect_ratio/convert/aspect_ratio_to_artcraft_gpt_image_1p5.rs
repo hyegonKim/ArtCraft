@@ -9,25 +9,15 @@ pub fn aspect_ratio_to_artcraft_gpt_image_1p5(aspect_ratio: CommonAspectRatio) -
     CommonAspectRatio::Tall => GptImage1p5MultiFunctionImageGenSize::Tall,
 
     // Non-matching
-    CommonAspectRatio::Auto
-    | CommonAspectRatio::Auto2k
-    | CommonAspectRatio::Auto4k => GptImage1p5MultiFunctionImageGenSize::Square,
+    CommonAspectRatio::Auto | CommonAspectRatio::Auto2k | CommonAspectRatio::Auto4k => GptImage1p5MultiFunctionImageGenSize::Square,
 
     // Mismatch - square
     CommonAspectRatio::SquareHd => GptImage1p5MultiFunctionImageGenSize::Square,
 
     // Mismatch - wide
-    CommonAspectRatio::WideThreeByTwo
-    | CommonAspectRatio::WideFiveByFour
-    | CommonAspectRatio::WideFourByThree
-    | CommonAspectRatio::WideSixteenByNine
-    | CommonAspectRatio::WideTwentyOneByNine => GptImage1p5MultiFunctionImageGenSize::Wide,
+    CommonAspectRatio::WideThreeByTwo | CommonAspectRatio::WideFiveByFour | CommonAspectRatio::WideFourByThree | CommonAspectRatio::WideSixteenByNine | CommonAspectRatio::WideTwentyOneByNine => GptImage1p5MultiFunctionImageGenSize::Wide,
 
     // Mismatch - tall
-    CommonAspectRatio::TallTwoByThree
-    | CommonAspectRatio::TallFourByFive
-    | CommonAspectRatio::TallThreeByFour
-    | CommonAspectRatio::TallNineBySixteen
-    | CommonAspectRatio::TallNineByTwentyOne => GptImage1p5MultiFunctionImageGenSize::Tall,
+    CommonAspectRatio::TallTwoByThree | CommonAspectRatio::TallFourByFive | CommonAspectRatio::TallThreeByFour | CommonAspectRatio::TallNineBySixteen | CommonAspectRatio::TallNineByTwentyOne => GptImage1p5MultiFunctionImageGenSize::Tall,
   }
 }

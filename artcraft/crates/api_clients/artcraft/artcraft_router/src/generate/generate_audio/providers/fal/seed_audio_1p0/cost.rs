@@ -13,21 +13,11 @@ impl FalSeedAudio1p0CostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> AudioGenerationCostEstimate {
-    AudioGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    AudioGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -50,29 +40,15 @@ mod tests {
 
   #[test]
   fn options_do_not_change_the_estimate() {
-    let tuned = GenerateAudioRequestBuilder {
-      sample_rate_hz: Some(48_000),
-      speed: Some(2.0),
-      volume: Some(0.5),
-      pitch: Some(-12.0),
-      ..base_builder()
-    };
+    let tuned = GenerateAudioRequestBuilder { sample_rate_hz: Some(48_000), speed: Some(2.0), volume: Some(0.5), pitch: Some(-12.0), ..base_builder() };
     let base_state = build_fal_seed_audio_1p0_state(base_builder()).expect("build");
     let tuned_state = build_fal_seed_audio_1p0_state(tuned).expect("build");
-    assert_eq!(
-      FalSeedAudio1p0CostState::from_request(&base_state).cost_in_usd_cents,
-      FalSeedAudio1p0CostState::from_request(&tuned_state).cost_in_usd_cents,
-    );
+    assert_eq!(FalSeedAudio1p0CostState::from_request(&base_state).cost_in_usd_cents, FalSeedAudio1p0CostState::from_request(&tuned_state).cost_in_usd_cents,);
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateAudioRequestBuilder {
-    GenerateAudioRequestBuilder {
-      model: RouterAudioModel::SeedAudio1p0,
-      provider: RouterProvider::Fal,
-      prompt: Some("a calm narrator describes ocean waves".to_string()),
-      ..Default::default()
-    }
+    GenerateAudioRequestBuilder { model: RouterAudioModel::SeedAudio1p0, provider: RouterProvider::Fal, prompt: Some("a calm narrator describes ocean waves".to_string()), ..Default::default() }
   }
 }

@@ -40,22 +40,10 @@ mod tests {
 
   #[test]
   fn test_known_variants_convert() {
-    assert_eq!(
-      FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::FaceNotDetected),
-      Some(FrontendFailureCategoryForOldClients::FaceNotDetected)
-    );
-    assert_eq!(
-      FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::KeepAliveElapsed),
-      Some(FrontendFailureCategoryForOldClients::KeepAliveElapsed)
-    );
-    assert_eq!(
-      FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::NotYetImplemented),
-      Some(FrontendFailureCategoryForOldClients::NotYetImplemented)
-    );
-    assert_eq!(
-      FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::RetryableWorkerError),
-      Some(FrontendFailureCategoryForOldClients::RetryableWorkerError)
-    );
+    assert_eq!(FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::FaceNotDetected), Some(FrontendFailureCategoryForOldClients::FaceNotDetected));
+    assert_eq!(FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::KeepAliveElapsed), Some(FrontendFailureCategoryForOldClients::KeepAliveElapsed));
+    assert_eq!(FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::NotYetImplemented), Some(FrontendFailureCategoryForOldClients::NotYetImplemented));
+    assert_eq!(FrontendFailureCategoryForOldClients::try_from_db_enum(FrontendFailureCategory::RetryableWorkerError), Some(FrontendFailureCategoryForOldClients::RetryableWorkerError));
   }
 
   #[test]

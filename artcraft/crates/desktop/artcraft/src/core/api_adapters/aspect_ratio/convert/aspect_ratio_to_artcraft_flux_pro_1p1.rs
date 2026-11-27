@@ -22,9 +22,7 @@ pub fn aspect_ratio_to_artcraft_flux_pro_1p1(aspect_ratio: CommonAspectRatio) ->
     CommonAspectRatio::SquareHd => GenerateFluxPro11TextToImageAspectRatio::Square,
 
     // Special
-    CommonAspectRatio::Auto
-    | CommonAspectRatio::Auto2k
-    | CommonAspectRatio::Auto4k => GenerateFluxPro11TextToImageAspectRatio::Square,
+    CommonAspectRatio::Auto | CommonAspectRatio::Auto2k | CommonAspectRatio::Auto4k => GenerateFluxPro11TextToImageAspectRatio::Square,
 
     // Semantic values
     CommonAspectRatio::Wide => GenerateFluxPro11TextToImageAspectRatio::LandscapeSixteenByNine,

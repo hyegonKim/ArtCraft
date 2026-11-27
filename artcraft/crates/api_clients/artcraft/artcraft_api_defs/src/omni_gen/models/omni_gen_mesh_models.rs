@@ -7,7 +7,7 @@ use serde_derive::Serialize;
 use utoipa::ToSchema;
 
 /// Mesh model to default to if none is specified
-const DEFAULT_MESH_MODEL : CommonMeshModel = CommonMeshModel::Hunyuan3d3;
+const DEFAULT_MESH_MODEL: CommonMeshModel = CommonMeshModel::Hunyuan3d3;
 
 /// Response body for the mesh models endpoint.
 #[derive(Serialize, ToSchema, Clone)]
@@ -38,7 +38,6 @@ pub struct OmniGenMeshProviderModelDetails {
 
 #[derive(Serialize, ToSchema, Clone)]
 pub struct OmniGenMeshModelDetails {
-
   pub model: CommonMeshModel,
 
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -110,25 +109,6 @@ pub struct OmniGenMeshModelDetails {
 
 impl Default for OmniGenMeshModelDetails {
   fn default() -> Self {
-    Self {
-      model: DEFAULT_MESH_MODEL,
-      model_creator: None,
-      full_name: None,
-      extra_info: None,
-      extra_info_short: None,
-      text_prompt_supported: None,
-      image_input_supported: None,
-      sketch_input_supported: None,
-      multi_view_supported: None,
-      mesh_input_supported: None,
-      mesh_output_types: None,
-      polygon_types: None,
-      face_count_supported: None,
-      pbr_supported: None,
-      texture_toggle_supported: None,
-      texture_quality_supported: None,
-      geometry_quality_supported: None,
-      is_disabled: None,
-    }
+    Self { model: DEFAULT_MESH_MODEL, model_creator: None, full_name: None, extra_info: None, extra_info_short: None, text_prompt_supported: None, image_input_supported: None, sketch_input_supported: None, multi_view_supported: None, mesh_input_supported: None, mesh_output_types: None, polygon_types: None, face_count_supported: None, pbr_supported: None, texture_toggle_supported: None, texture_quality_supported: None, geometry_quality_supported: None, is_disabled: None }
   }
 }

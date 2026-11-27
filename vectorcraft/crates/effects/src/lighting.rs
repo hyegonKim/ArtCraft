@@ -57,16 +57,8 @@ pub(crate) fn validate(p: &Value) -> Result<(), String> {
 /// Extract [`vectorcraft_three_d::SubstanceMaterial`] from a 3D effect's JSON parameter map.
 pub fn substance_material(p: &Value) -> vectorcraft_three_d::SubstanceMaterial {
     let num_or = |k: &str, d: f64| p.get(k).and_then(Value::as_f64).filter(|v| v.is_finite()).unwrap_or(d);
-    let preset = p
-        .get("substancePreset")
-        .and_then(Value::as_str)
-        .and_then(vectorcraft_three_d::SubstanceMaterialPreset::parse)
-        .unwrap_or_default();
-    let seed = p
-        .get("materialSeed")
-        .and_then(Value::as_f64)
-        .filter(|v| v.is_finite())
-        .map_or(0, |v| v.round().clamp(0.0, 10_000.0) as u32);
+    let preset = p.get("substancePreset").and_then(Value::as_str).and_then(vectorcraft_three_d::SubstanceMaterialPreset::parse).unwrap_or_default();
+    let seed = p.get("materialSeed").and_then(Value::as_f64).filter(|v| v.is_finite()).map_or(0, |v| v.round().clamp(0.0, 10_000.0) as u32);
     vectorcraft_three_d::SubstanceMaterial {
         preset,
         roughness: (num_or("roughness", 50.0) / 100.0).clamp(0.0, 1.0),

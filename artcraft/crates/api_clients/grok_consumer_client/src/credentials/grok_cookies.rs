@@ -1,4 +1,3 @@
-
 #[derive(Clone)]
 pub struct GrokCookies {
   /// The entire cookies header (for now)

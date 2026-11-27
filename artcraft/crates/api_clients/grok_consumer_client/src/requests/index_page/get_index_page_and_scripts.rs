@@ -22,7 +22,7 @@ pub struct IndexPageAndScripts {
 
   /// Script path -> Javascript payload.
   pub scripts: HashMap<String, String>,
-  
+
   // The client that we used.
   pub client: Client,
 }
@@ -33,26 +33,15 @@ pub async fn get_index_page_and_scripts(args: GetIndexPageAndScriptsArgs<'_>) ->
 
   info!("Fetching index page...");
 
-  let index = get_index_page_with_client(GetIndexPageWithClientArgs {
-    client: &client,
-    cookie: args.cookie,
-  }).await?;
+  let index = get_index_page_with_client(GetIndexPageWithClientArgs { client: &client, cookie: args.cookie }).await?;
 
   let scripts = parse_index_svg_paths(&index.body);
 
   info!("Fetching {} scripts...", scripts.len());
 
-  let scripts = get_index_page_scripts_with_client(GetIndexPageScriptsArgs {
-    client: &client,
-    cookie: &args.cookie,
-    scripts: &scripts,
-  }).await?;
+  let scripts = get_index_page_scripts_with_client(GetIndexPageScriptsArgs { client: &client, cookie: &args.cookie, scripts: &scripts }).await?;
 
-  Ok(IndexPageAndScripts {
-    index_body_html: index.body,
-    scripts,
-    client,
-  })
+  Ok(IndexPageAndScripts { index_body_html: index.body, scripts, client })
 }
 
 #[cfg(test)]
@@ -66,9 +55,7 @@ mod tests {
   async fn test() -> AnyhowResult<()> {
     //setup_test_logging(LevelFilter::Trace);
     let cookie = get_test_cookies()?;
-    let result = get_index_page_and_scripts(GetIndexPageAndScriptsArgs {
-      cookie: &cookie,
-    }).await?;
+    let result = get_index_page_and_scripts(GetIndexPageAndScriptsArgs { cookie: &cookie }).await?;
 
     let mut truncated_body = result.index_body_html.clone();
     truncated_body.truncate(500);

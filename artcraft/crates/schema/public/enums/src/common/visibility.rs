@@ -14,7 +14,6 @@ use strum::EnumIter;
 /// See also: https://docs.rs/sqlx/0.4.0-beta.1/sqlx/trait.Type.html
 ///
 /// *DO NOT CHANGE VALUES WITHOUT A MIGRATION STRATEGY!*
-
 use utoipa::ToSchema;
 
 #[derive(Clone, Copy, Eq, PartialEq, Deserialize, Serialize, ToSchema)]
@@ -32,12 +31,10 @@ pub enum Visibility {
   /// Private entities should only be available to the creator, a list of approved users, and
   /// website moderation staff.
   Private,
-
   // TODO(bt, 2022-12-20): We need a "Shared" option where users can share it with a specified group.
   //  This should perhaps be its own type, eg. VisibilityV2., so that we don't use it in tables that
   //  have not yet been migrated to this scheme.
 }
-
 
 impl_enum_display_and_debug_using_to_str!(Visibility);
 impl_mysql_from_row!(Visibility);
@@ -67,7 +64,9 @@ impl_mysql_from_row!(Visibility);
 //}
 
 impl Default for Visibility {
-  fn default() -> Self { Self::Public }
+  fn default() -> Self {
+    Self::Public
+  }
 }
 
 /// NB: Legacy API for older code.
@@ -98,7 +97,6 @@ mod tests {
   #[test]
   fn test_default() {
     assert_eq!(Visibility::default(), Visibility::Public);
-
   }
 
   #[test]
@@ -183,10 +181,7 @@ mod tests {
     #[test]
     fn nested_deserialize() {
       let payload = r#"{"visibility":"hidden","string":"bar"}"#.to_string();
-      let expected = CompositeType {
-        visibility: Visibility::Hidden,
-        string: "bar".to_string(),
-      };
+      let expected = CompositeType { visibility: Visibility::Hidden, string: "bar".to_string() };
 
       assert_eq!(expected, serde_json::from_str::<CompositeType>(&payload).unwrap());
     }

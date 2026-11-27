@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::veo_3p1::raw_request::{
-  Veo3p1TextToVideoInput, Veo3p1TextToVideoOutput,
-};
+use crate::requests::api::video::text::veo_3p1::raw_request::{Veo3p1TextToVideoInput, Veo3p1TextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -131,17 +129,7 @@ impl FalEndpoint for Veo3p1TextToVideoRequest {
   type RawResponse = Veo3p1TextToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-      negative_prompt: self.negative_prompt.clone(),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      seed: self.seed,
-      auto_fix: self.auto_fix,
-      safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), duration: self.duration.map(|d| d.to_str().to_string()), negative_prompt: self.negative_prompt.clone(), resolution: self.resolution.map(|r| r.to_str().to_string()), generate_audio: self.generate_audio, seed: self.seed, auto_fix: self.auto_fix, safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()) })
   }
 }
 
@@ -161,17 +149,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1TextToVideoRequest {
-      prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(),
-      aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1TextToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1TextToVideoResolution::SevenTwentyP),
-      negative_prompt: None,
-      generate_audio: Some(true),
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1TextToVideoRequest { prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(), aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1TextToVideoDuration::FourSeconds), resolution: Some(Veo3p1TextToVideoResolution::SevenTwentyP), negative_prompt: None, generate_audio: Some(true), seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -185,17 +163,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1TextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1TextToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1TextToVideoResolution::SevenTwentyP),
-      negative_prompt: None,
-      generate_audio: Some(false),
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1TextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1TextToVideoDuration::FourSeconds), resolution: Some(Veo3p1TextToVideoResolution::SevenTwentyP), negative_prompt: None, generate_audio: Some(false), seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -207,17 +175,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo3p1TextToVideoRequest {
-      prompt: "p".to_string(),
-      aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::NineBySixteen),
-      duration: Some(Veo3p1TextToVideoDuration::EightSeconds),
-      resolution: Some(Veo3p1TextToVideoResolution::FourK),
-      negative_prompt: Some("blurry".to_string()),
-      generate_audio: Some(true),
-      seed: Some(42),
-      auto_fix: Some(false),
-      safety_tolerance: Some(Veo3p1TextToVideoSafetyTolerance::Level6),
-    };
+    let request = Veo3p1TextToVideoRequest { prompt: "p".to_string(), aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::NineBySixteen), duration: Some(Veo3p1TextToVideoDuration::EightSeconds), resolution: Some(Veo3p1TextToVideoResolution::FourK), negative_prompt: Some("blurry".to_string()), generate_audio: Some(true), seed: Some(42), auto_fix: Some(false), safety_tolerance: Some(Veo3p1TextToVideoSafetyTolerance::Level6) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.aspect_ratio.as_deref(), Some("9:16"));
@@ -232,38 +190,21 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo3p1TextToVideoRequest {
-      prompt: "minimal".to_string(),
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      negative_prompt: None,
-      generate_audio: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1TextToVideoRequest { prompt: "minimal".to_string(), aspect_ratio: None, duration: None, resolution: None, negative_prompt: None, generate_audio: None, seed: None, auto_fix: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Veo3p1TextToVideoAspectRatio::SixteenByNine, "16:9"),
-      (Veo3p1TextToVideoAspectRatio::NineBySixteen, "9:16"),
-    ] {
+    for (variant, expected) in [(Veo3p1TextToVideoAspectRatio::SixteenByNine, "16:9"), (Veo3p1TextToVideoAspectRatio::NineBySixteen, "9:16")] {
       assert_eq!(variant.to_str(), expected);
     }
   }
 
   #[test]
   fn every_duration_maps_to_wire_string_and_seconds() {
-    for (variant, s, secs) in [
-      (Veo3p1TextToVideoDuration::FourSeconds, "4s", 4),
-      (Veo3p1TextToVideoDuration::SixSeconds, "6s", 6),
-      (Veo3p1TextToVideoDuration::EightSeconds, "8s", 8),
-    ] {
+    for (variant, s, secs) in [(Veo3p1TextToVideoDuration::FourSeconds, "4s", 4), (Veo3p1TextToVideoDuration::SixSeconds, "6s", 6), (Veo3p1TextToVideoDuration::EightSeconds, "8s", 8)] {
       assert_eq!(variant.to_str(), s);
       assert_eq!(variant.to_seconds(), secs);
     }
@@ -271,11 +212,7 @@ mod tests {
 
   #[test]
   fn every_resolution_maps_to_wire_string() {
-    for (variant, expected, four_k) in [
-      (Veo3p1TextToVideoResolution::SevenTwentyP, "720p", false),
-      (Veo3p1TextToVideoResolution::TenEightyP, "1080p", false),
-      (Veo3p1TextToVideoResolution::FourK, "4k", true),
-    ] {
+    for (variant, expected, four_k) in [(Veo3p1TextToVideoResolution::SevenTwentyP, "720p", false), (Veo3p1TextToVideoResolution::TenEightyP, "1080p", false), (Veo3p1TextToVideoResolution::FourK, "4k", true)] {
       assert_eq!(variant.to_str(), expected);
       assert_eq!(variant.is_four_k(), four_k);
     }

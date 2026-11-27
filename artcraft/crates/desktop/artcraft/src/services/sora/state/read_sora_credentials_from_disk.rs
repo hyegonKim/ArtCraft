@@ -18,9 +18,7 @@ pub fn read_sora_credentials_from_disk(app_data_root: &AppDataRoot) -> AnyhowRes
     return Err(anyhow!("Cookie file does not exist: {:?}", cookie_file));
   }
 
-  let value = read_to_string(cookie_file)?
-      .trim()
-      .to_string();
+  let value = read_to_string(cookie_file)?.trim().to_string();
 
   let cookie = SoraCookies::new(value);
 
@@ -29,32 +27,21 @@ pub fn read_sora_credentials_from_disk(app_data_root: &AppDataRoot) -> AnyhowRes
   let mut sentinel_token = None;
 
   if bearer_file.exists() {
-    let value = read_to_string(&bearer_file)?
-        .trim()
-        .to_string();
+    let value = read_to_string(&bearer_file)?.trim().to_string();
     bearer = Some(SoraJwtBearerToken::new(value)?);
   }
 
   if legacy_sentinel_file.exists() {
-    let value = read_to_string(&legacy_sentinel_file)?
-        .trim()
-        .to_string();
+    let value = read_to_string(&legacy_sentinel_file)?.trim().to_string();
 
     sentinel = Some(SoraSentinel::new(value));
   }
 
   if sentinel_token_file.exists() {
-    let value = read_to_string(&sentinel_token_file)?
-        .trim()
-        .to_string();
+    let value = read_to_string(&sentinel_token_file)?.trim().to_string();
 
     sentinel_token = Some(SoraSentinelToken::from_persistent_storage_json(&value)?);
   }
 
-  Ok(SoraCredentialSet::initialize(
-    cookie,
-    bearer,
-    sentinel,
-    sentinel_token,
-  ))
+  Ok(SoraCredentialSet::initialize(cookie, bearer, sentinel, sentinel_token))
 }

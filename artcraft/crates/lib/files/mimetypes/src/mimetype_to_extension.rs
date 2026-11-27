@@ -1,4 +1,3 @@
-
 /// Provide a best guess extension for the given mime type.
 /// Extensions do not include a "." (period) prefix.
 pub fn mimetype_to_extension(mimetype: &str) -> Option<&'static str> {

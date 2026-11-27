@@ -33,23 +33,14 @@ impl FalFlux1SchnellCostState {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use fal_client::requests::api::image::edit::flux_1_schnell_edit_image::api::{
-    Flux1SchnellEditImageNumImages, Flux1SchnellEditImageRequest,
-  };
-  use fal_client::requests::api::image::text::flux_1_schnell_text_to_image::api::{
-    Flux1SchnellTextToImageAspectRatio, Flux1SchnellTextToImageNumImages,
-    Flux1SchnellTextToImageRequest,
-  };
+  use fal_client::requests::api::image::edit::flux_1_schnell_edit_image::api::{Flux1SchnellEditImageNumImages, Flux1SchnellEditImageRequest};
+  use fal_client::requests::api::image::text::flux_1_schnell_text_to_image::api::{Flux1SchnellTextToImageAspectRatio, Flux1SchnellTextToImageNumImages, Flux1SchnellTextToImageRequest};
 
   mod text_to_image_costs {
     use super::*;
 
     fn make_t2i(num_images: Flux1SchnellTextToImageNumImages) -> FalFlux1SchnellRequestState {
-      FalFlux1SchnellRequestState::TextToImage(Flux1SchnellTextToImageRequest {
-        prompt: "test".to_string(),
-        num_images,
-        aspect_ratio: Flux1SchnellTextToImageAspectRatio::Square,
-      })
+      FalFlux1SchnellRequestState::TextToImage(Flux1SchnellTextToImageRequest { prompt: "test".to_string(), num_images, aspect_ratio: Flux1SchnellTextToImageAspectRatio::Square })
     }
 
     #[test]
@@ -75,11 +66,7 @@ mod tests {
     use super::*;
 
     fn make_edit(num_images: Flux1SchnellEditImageNumImages) -> FalFlux1SchnellRequestState {
-      FalFlux1SchnellRequestState::EditImage(Flux1SchnellEditImageRequest {
-        image_url: "https://example.com/img.jpg".to_string(),
-        num_images,
-        image_size: None,
-      })
+      FalFlux1SchnellRequestState::EditImage(Flux1SchnellEditImageRequest { image_url: "https://example.com/img.jpg".to_string(), num_images, image_size: None })
     }
 
     #[test]
@@ -97,13 +84,7 @@ mod tests {
 
   #[test]
   fn cost_flags_are_correct() {
-    let state = FalFlux1SchnellCostState::from_request(
-      &FalFlux1SchnellRequestState::TextToImage(Flux1SchnellTextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: Flux1SchnellTextToImageNumImages::One,
-        aspect_ratio: Flux1SchnellTextToImageAspectRatio::Square,
-      }),
-    );
+    let state = FalFlux1SchnellCostState::from_request(&FalFlux1SchnellRequestState::TextToImage(Flux1SchnellTextToImageRequest { prompt: "test".to_string(), num_images: Flux1SchnellTextToImageNumImages::One, aspect_ratio: Flux1SchnellTextToImageAspectRatio::Square }));
     let cost = state.estimate_cost();
     assert!(!cost.is_free);
     assert!(!cost.is_unlimited);

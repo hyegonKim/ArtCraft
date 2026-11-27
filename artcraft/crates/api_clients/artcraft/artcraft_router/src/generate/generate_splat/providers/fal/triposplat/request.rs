@@ -34,14 +34,7 @@ mod tests {
   async fn send_triposplat_image_to_splat() {
     let client = get_fal_client();
 
-    let builder = GenerateSplatRequestBuilder {
-      model: RouterSplatModel::TripoSplat,
-      provider: RouterProvider::Fal,
-      reference_images: Some(ImageListRef::Urls(vec![
-        ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ])),
-      ..Default::default()
-    };
+    let builder = GenerateSplatRequestBuilder { model: RouterSplatModel::TripoSplat, provider: RouterProvider::Fal, reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])), ..Default::default() };
 
     let draft_or_request = builder.build2().expect("build2 should succeed");
     let request = match draft_or_request {

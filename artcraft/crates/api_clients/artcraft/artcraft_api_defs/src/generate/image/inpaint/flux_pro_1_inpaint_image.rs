@@ -15,7 +15,7 @@ pub struct FluxPro1InpaintImageRequest {
 
   /// The image we're editing.
   pub image_media_token: MediaFileToken,
-  
+
   /// The mask to use against the image.
   pub mask_media_token: MediaFileToken,
 

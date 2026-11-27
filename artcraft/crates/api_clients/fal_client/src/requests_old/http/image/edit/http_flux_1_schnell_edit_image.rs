@@ -41,8 +41,6 @@ pub struct Flux1SchnellEditImageOutput {
   pub images: Vec<Flux1SchnellEditImageFile>,
 }
 
-pub fn flux_1_schnell_edit_image(
-  params: Flux1SchnellEditImageInput,
-) -> FalRequest<Flux1SchnellEditImageInput, Flux1SchnellEditImageOutput> {
+pub fn flux_1_schnell_edit_image(params: Flux1SchnellEditImageInput) -> FalRequest<Flux1SchnellEditImageInput, Flux1SchnellEditImageOutput> {
   FalRequest::new("fal-ai/flux/schnell/redux", params)
 }

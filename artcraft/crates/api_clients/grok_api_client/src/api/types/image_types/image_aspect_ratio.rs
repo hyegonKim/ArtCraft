@@ -55,20 +55,20 @@ impl ImageAspectRatio {
   /// `"aspect_ratio"` field.
   pub fn as_str(&self) -> &'static str {
     match self {
-      Self::Square           => "1:1",
-      Self::Portrait3x4      => "3:4",
-      Self::Landscape4x3     => "4:3",
-      Self::Portrait9x16     => "9:16",
-      Self::Landscape16x9    => "16:9",
-      Self::Portrait2x3      => "2:3",
-      Self::Landscape3x2     => "3:2",
-      Self::Portrait9x19_5   => "9:19.5",
-      Self::Landscape19_5x9  => "19.5:9",
-      Self::Portrait9x20     => "9:20",
-      Self::Landscape20x9    => "20:9",
-      Self::Portrait1x2      => "1:2",
-      Self::Landscape2x1     => "2:1",
-      Self::Auto             => "auto",
+      Self::Square => "1:1",
+      Self::Portrait3x4 => "3:4",
+      Self::Landscape4x3 => "4:3",
+      Self::Portrait9x16 => "9:16",
+      Self::Landscape16x9 => "16:9",
+      Self::Portrait2x3 => "2:3",
+      Self::Landscape3x2 => "3:2",
+      Self::Portrait9x19_5 => "9:19.5",
+      Self::Landscape19_5x9 => "19.5:9",
+      Self::Portrait9x20 => "9:20",
+      Self::Landscape20x9 => "20:9",
+      Self::Portrait1x2 => "1:2",
+      Self::Landscape2x1 => "2:1",
+      Self::Auto => "auto",
     }
   }
 }
@@ -88,22 +88,7 @@ mod tests {
 
   #[test]
   fn every_variant_maps_to_a_distinct_string() {
-    let all = [
-      ImageAspectRatio::Square,
-      ImageAspectRatio::Portrait3x4,
-      ImageAspectRatio::Landscape4x3,
-      ImageAspectRatio::Portrait9x16,
-      ImageAspectRatio::Landscape16x9,
-      ImageAspectRatio::Portrait2x3,
-      ImageAspectRatio::Landscape3x2,
-      ImageAspectRatio::Portrait9x19_5,
-      ImageAspectRatio::Landscape19_5x9,
-      ImageAspectRatio::Portrait9x20,
-      ImageAspectRatio::Landscape20x9,
-      ImageAspectRatio::Portrait1x2,
-      ImageAspectRatio::Landscape2x1,
-      ImageAspectRatio::Auto,
-    ];
+    let all = [ImageAspectRatio::Square, ImageAspectRatio::Portrait3x4, ImageAspectRatio::Landscape4x3, ImageAspectRatio::Portrait9x16, ImageAspectRatio::Landscape16x9, ImageAspectRatio::Portrait2x3, ImageAspectRatio::Landscape3x2, ImageAspectRatio::Portrait9x19_5, ImageAspectRatio::Landscape19_5x9, ImageAspectRatio::Portrait9x20, ImageAspectRatio::Landscape20x9, ImageAspectRatio::Portrait1x2, ImageAspectRatio::Landscape2x1, ImageAspectRatio::Auto];
     let mut strs: Vec<&str> = all.iter().map(|v| v.as_str()).collect();
     strs.sort();
     strs.dedup();

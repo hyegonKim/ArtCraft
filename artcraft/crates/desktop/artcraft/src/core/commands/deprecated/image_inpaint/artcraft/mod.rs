@@ -1,4 +1,4 @@
-pub (super) mod handle_inpaint_artcraft;
+pub(super) mod handle_inpaint_artcraft;
 
 mod handle_artcraft_flux_pro_1_inpaint;
 mod handle_artcraft_flux_dev_juggernaut_inpaint;

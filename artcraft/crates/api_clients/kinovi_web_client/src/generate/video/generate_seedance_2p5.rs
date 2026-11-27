@@ -5,10 +5,7 @@ use crate::pricing::kinovi_cost_calculator_trait::KinoviCostCalculatorTrait;
 use crate::pricing::kinovi_pricing_rate::KinoviPricingRate;
 use crate::pricing::kinovi_pricing_tier::KinoviPricingTier;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviModelTypeRaw,
-  KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest};
 
 // ── Constants ──
 
@@ -73,10 +70,7 @@ pub enum KinoviSeedance2p5Modality {
   /// The aspect ratio is always "Adaptive" — the only choice the API allows
   /// in this modality, expressed on the wire by omitting the `aspectRatio`
   /// field entirely — so there is nothing to configure.
-  Keyframe {
-    start_frame_url: String,
-    end_frame_url: Option<String>,
-  },
+  Keyframe { start_frame_url: String, end_frame_url: Option<String> },
 
   /// Text-to-video / reference-to-video. "Adaptive" is NOT supported here;
   /// `None` defaults to 16:9.
@@ -149,34 +143,16 @@ pub enum KinoviSeedance2p5OutputResolution {
 
 /// Per-second credit rates without video references (billed over the output
 /// duration only).
-const SEEDANCE_2P5_480P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 26.0,
-  maybe_enterprise_credits: None,
-};
-const SEEDANCE_2P5_720P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 59.0,
-  maybe_enterprise_credits: None,
-};
-const SEEDANCE_2P5_1080P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 107.55,
-  maybe_enterprise_credits: Some(103.25),
-};
+const SEEDANCE_2P5_480P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 26.0, maybe_enterprise_credits: None };
+const SEEDANCE_2P5_720P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 59.0, maybe_enterprise_credits: None };
+const SEEDANCE_2P5_1080P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 107.55, maybe_enterprise_credits: Some(103.25) };
 
 /// Per-second credit rates when video references are attached. These REPLACE
 /// the base rates (they are not surcharges) and bill over output + input
 /// seconds.
-const SEEDANCE_2P5_480P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 16.0,
-  maybe_enterprise_credits: None,
-};
-const SEEDANCE_2P5_720P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 35.0,
-  maybe_enterprise_credits: None,
-};
-const SEEDANCE_2P5_1080P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 64.26,
-  maybe_enterprise_credits: Some(61.69),
-};
+const SEEDANCE_2P5_480P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate { consumer_credits: 16.0, maybe_enterprise_credits: None };
+const SEEDANCE_2P5_720P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate { consumer_credits: 35.0, maybe_enterprise_credits: None };
+const SEEDANCE_2P5_1080P_VIDEO_REF: KinoviPricingRate = KinoviPricingRate { consumer_credits: 64.26, maybe_enterprise_credits: Some(61.69) };
 
 impl KinoviCostCalculatorTrait for GenerateSeedance2p5Request {
   type Cost = KinoviFractionalGenerationCost;
@@ -228,34 +204,16 @@ pub struct GenerateSeedance2p5Response {
 
 // ── Entry point ──
 
-pub async fn generate_seedance_2p5(
-  args: GenerateSeedance2p5Args<'_>,
-) -> Result<GenerateSeedance2p5Response, KinoviWebError> {
-  let raw_response = workflow_run_task(WorkflowRunTaskArgs {
-    request: to_raw_request(args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_seedance_2p5(args: GenerateSeedance2p5Args<'_>) -> Result<GenerateSeedance2p5Response, KinoviWebError> {
+  let raw_response = workflow_run_task(WorkflowRunTaskArgs { request: to_raw_request(args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSeedance2p5Response {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-    task_ids: raw_response.task_ids,
-    order_ids: raw_response.order_ids,
-  })
+  Ok(GenerateSeedance2p5Response { task_id: raw_response.task_id, order_id: raw_response.order_id, task_ids: raw_response.task_ids, order_ids: raw_response.order_ids })
 }
 
 // ── Mapping helpers ──
 
 fn to_raw_request(req: GenerateSeedance2p5Request) -> WorkflowRunTaskRequest {
-  let (
-    aspect_ratio,
-    start_frame_url,
-    end_frame_url,
-    reference_image_urls,
-    reference_video_urls,
-    reference_audio_urls,
-  ) = match req.modality {
+  let (aspect_ratio, start_frame_url, end_frame_url, reference_image_urls, reference_video_urls, reference_audio_urls) = match req.modality {
     KinoviSeedance2p5Modality::Keyframe { start_frame_url, end_frame_url } => (
       // Keyframe is always "Adaptive"; the raw layer omits the aspect ratio
       // for 2.5 keyframe requests, so this placeholder never hits the wire.
@@ -266,37 +224,10 @@ fn to_raw_request(req: GenerateSeedance2p5Request) -> WorkflowRunTaskRequest {
       None,
       None,
     ),
-    KinoviSeedance2p5Modality::Reference {
-      aspect_ratio,
-      reference_image_urls,
-      reference_video_urls,
-      reference_audio_urls,
-    } => (
-      map_aspect_ratio(aspect_ratio),
-      None,
-      None,
-      reference_image_urls,
-      reference_video_urls,
-      reference_audio_urls,
-    ),
+    KinoviSeedance2p5Modality::Reference { aspect_ratio, reference_image_urls, reference_video_urls, reference_audio_urls } => (map_aspect_ratio(aspect_ratio), None, None, reference_image_urls, reference_video_urls, reference_audio_urls),
   };
 
-  WorkflowRunTaskRequest {
-    model_type: KinoviModelTypeRaw::Seedance2p5,
-    prompt: req.prompt,
-    aspect_ratio,
-    output_resolution: Some(map_output_resolution(req.output_resolution)),
-    duration_seconds: req.duration_seconds,
-    batch_count: KinoviBatchCountRaw::One,
-    start_frame_url,
-    end_frame_url,
-    reference_image_urls,
-    reference_video_urls,
-    reference_audio_urls,
-    character_ids: None,
-    use_face_blur_hack: req.use_face_blur_hack,
-    bitrate: None,
-  }
+  WorkflowRunTaskRequest { model_type: KinoviModelTypeRaw::Seedance2p5, prompt: req.prompt, aspect_ratio, output_resolution: Some(map_output_resolution(req.output_resolution)), duration_seconds: req.duration_seconds, batch_count: KinoviBatchCountRaw::One, start_frame_url, end_frame_url, reference_image_urls, reference_video_urls, reference_audio_urls, character_ids: None, use_face_blur_hack: req.use_face_blur_hack, bitrate: None }
 }
 
 fn map_aspect_ratio(ar: Option<KinoviSeedance2p5AspectRatio>) -> KinoviAspectRatioRaw {
@@ -392,14 +323,8 @@ mod tests {
         // 480p and 720p have no negotiated enterprise credit rate: both
         // tiers bill the same credits (USD conversion still differs).
         for duration in [4u8, 10, 30] {
-          assert_eq!(
-            t2v_480(duration).calculate_consumer_costs().kinovi_credits,
-            t2v_480(duration).calculate_enterprise_costs().kinovi_credits,
-          );
-          assert_eq!(
-            t2v_720(duration).calculate_consumer_costs().kinovi_credits,
-            t2v_720(duration).calculate_enterprise_costs().kinovi_credits,
-          );
+          assert_eq!(t2v_480(duration).calculate_consumer_costs().kinovi_credits, t2v_480(duration).calculate_enterprise_costs().kinovi_credits,);
+          assert_eq!(t2v_720(duration).calculate_consumer_costs().kinovi_credits, t2v_720(duration).calculate_enterprise_costs().kinovi_credits,);
         }
       }
 
@@ -428,12 +353,7 @@ mod tests {
       #[test]
       fn image_and_audio_references_do_not_change_the_rate() {
         let mut request = t2v_480(10);
-        set_reference_urls(
-          &mut request,
-          Some(vec!["https://example.com/a.png".to_string(), "https://example.com/b.jpg".to_string()]),
-          None,
-          Some(vec!["https://example.com/ref.wav".to_string()]),
-        );
+        set_reference_urls(&mut request, Some(vec!["https://example.com/a.png".to_string(), "https://example.com/b.jpg".to_string()]), None, Some(vec!["https://example.com/ref.wav".to_string()]));
         assert_eq!(request.calculate_consumer_costs().kinovi_credits, 260.0);
       }
 
@@ -475,15 +395,7 @@ mod tests {
       fn two_seven_second_references_bill_forty_four_seconds() {
         // Two 7s references (14s total input) + 30s output = 44 billed seconds.
         let mut request = video_ref_480(30, Some(14));
-        set_reference_urls(
-          &mut request,
-          None,
-          Some(vec![
-            "https://example.com/ref1.mp4".to_string(),
-            "https://example.com/ref2.mp4".to_string(),
-          ]),
-          None,
-        );
+        set_reference_urls(&mut request, None, Some(vec!["https://example.com/ref1.mp4".to_string(), "https://example.com/ref2.mp4".to_string()]), None);
         assert_eq!(request.calculate_consumer_costs().kinovi_credits, 704.0);
       }
 
@@ -549,21 +461,13 @@ mod tests {
       fn input_seconds_clamp_to_max_billed_input_seconds() {
         // 200 input seconds clamp to 30: 30s output + 30 = 60 billed seconds.
         assert_eq!(video_ref_480(30, Some(200)).calculate_consumer_costs().kinovi_credits, 960.0);
-        assert_eq!(
-          video_ref_480(30, Some(200)).calculate_consumer_costs(),
-          video_ref_480(30, Some(MAX_BILLED_INPUT_SECONDS)).calculate_consumer_costs(),
-        );
+        assert_eq!(video_ref_480(30, Some(200)).calculate_consumer_costs(), video_ref_480(30, Some(MAX_BILLED_INPUT_SECONDS)).calculate_consumer_costs(),);
       }
 
       #[test]
       fn mixed_references_still_use_video_reference_rates() {
         let mut request = video_ref_480(10, Some(5));
-        set_reference_urls(
-          &mut request,
-          Some(vec!["https://example.com/a.png".to_string()]),
-          Some(vec!["https://example.com/ref.mp4".to_string()]),
-          Some(vec!["https://example.com/ref.wav".to_string()]),
-        );
+        set_reference_urls(&mut request, Some(vec!["https://example.com/a.png".to_string()]), Some(vec!["https://example.com/ref.mp4".to_string()]), Some(vec!["https://example.com/ref.wav".to_string()]));
         assert_eq!(request.calculate_consumer_costs().kinovi_credits, 240.0);
       }
     }
@@ -671,12 +575,9 @@ mod tests {
         // goes). Compare at the minimum billed input (1s clamps to 4) —
         // unknown or zero input assumes the 30-second maximum, which would
         // swamp the rate comparison.
-        assert!(video_ref_480(10, Some(1)).calculate_consumer_costs().kinovi_credits
-          < t2v_480(10).calculate_consumer_costs().kinovi_credits);
-        assert!(video_ref_720(10, Some(1)).calculate_consumer_costs().kinovi_credits
-          < t2v_720(10).calculate_consumer_costs().kinovi_credits);
-        assert!(video_ref_1080(10, Some(1)).calculate_enterprise_costs().kinovi_credits
-          < t2v_1080(10).calculate_enterprise_costs().kinovi_credits);
+        assert!(video_ref_480(10, Some(1)).calculate_consumer_costs().kinovi_credits < t2v_480(10).calculate_consumer_costs().kinovi_credits);
+        assert!(video_ref_720(10, Some(1)).calculate_consumer_costs().kinovi_credits < t2v_720(10).calculate_consumer_costs().kinovi_credits);
+        assert!(video_ref_1080(10, Some(1)).calculate_enterprise_costs().kinovi_credits < t2v_1080(10).calculate_enterprise_costs().kinovi_credits);
       }
 
       #[test]
@@ -692,10 +593,7 @@ mod tests {
       #[test]
       fn cost_scales_linearly_with_duration() {
         for duration in [1u8, 5, 10, 30] {
-          assert_eq!(
-            t2v_480(duration).calculate_consumer_costs().kinovi_credits,
-            (26 * u64::from(duration)) as f64,
-          );
+          assert_eq!(t2v_480(duration).calculate_consumer_costs().kinovi_credits, (26 * u64::from(duration)) as f64,);
         }
       }
     }
@@ -706,49 +604,19 @@ mod tests {
     fn aspect_ratio_does_not_affect_credits() {
       let baseline = t2v_720(10).calculate_consumer_costs().kinovi_credits;
 
-      let ratios = [
-        KinoviSeedance2p5AspectRatio::Landscape16x9,
-        KinoviSeedance2p5AspectRatio::UltraWide21x9,
-        KinoviSeedance2p5AspectRatio::Portrait9x16,
-        KinoviSeedance2p5AspectRatio::Square1x1,
-        KinoviSeedance2p5AspectRatio::Standard4x3,
-        KinoviSeedance2p5AspectRatio::Portrait3x4,
-      ];
+      let ratios = [KinoviSeedance2p5AspectRatio::Landscape16x9, KinoviSeedance2p5AspectRatio::UltraWide21x9, KinoviSeedance2p5AspectRatio::Portrait9x16, KinoviSeedance2p5AspectRatio::Square1x1, KinoviSeedance2p5AspectRatio::Standard4x3, KinoviSeedance2p5AspectRatio::Portrait3x4];
 
       for ar in &ratios {
         let mut request = t2v_720(10);
-        request.modality = KinoviSeedance2p5Modality::Reference {
-          aspect_ratio: Some(*ar),
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-        };
-        assert_eq!(
-          request.calculate_consumer_costs().kinovi_credits, baseline,
-          "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,
-        );
+        request.modality = KinoviSeedance2p5Modality::Reference { aspect_ratio: Some(*ar), reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None };
+        assert_eq!(request.calculate_consumer_costs().kinovi_credits, baseline, "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,);
       }
     }
 
     // ── Helpers ──
 
-    fn text_to_video_request(
-      duration_seconds: u8,
-      output_resolution: Option<KinoviSeedance2p5OutputResolution>,
-    ) -> GenerateSeedance2p5Request {
-      GenerateSeedance2p5Request {
-        prompt: String::new(),
-        modality: KinoviSeedance2p5Modality::Reference {
-          aspect_ratio: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-        },
-        output_resolution,
-        duration_seconds,
-        total_input_seconds: None,
-        use_face_blur_hack: None,
-      }
+    fn text_to_video_request(duration_seconds: u8, output_resolution: Option<KinoviSeedance2p5OutputResolution>) -> GenerateSeedance2p5Request {
+      GenerateSeedance2p5Request { prompt: String::new(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None }, output_resolution, duration_seconds, total_input_seconds: None, use_face_blur_hack: None }
     }
 
     fn t2v_480(duration: u8) -> GenerateSeedance2p5Request {
@@ -764,17 +632,7 @@ mod tests {
     }
 
     fn keyframe_request(duration: u8) -> GenerateSeedance2p5Request {
-      GenerateSeedance2p5Request {
-        prompt: String::new(),
-        modality: KinoviSeedance2p5Modality::Keyframe {
-          start_frame_url: "https://example.com/start.png".to_string(),
-          end_frame_url: Some("https://example.com/end.png".to_string()),
-        },
-        output_resolution: None,
-        duration_seconds: duration,
-        total_input_seconds: None,
-        use_face_blur_hack: None,
-      }
+      GenerateSeedance2p5Request { prompt: String::new(), modality: KinoviSeedance2p5Modality::Keyframe { start_frame_url: "https://example.com/start.png".to_string(), end_frame_url: Some("https://example.com/end.png".to_string()) }, output_resolution: None, duration_seconds: duration, total_input_seconds: None, use_face_blur_hack: None }
     }
 
     fn video_ref_480(duration: u8, total_input_seconds: Option<u8>) -> GenerateSeedance2p5Request {
@@ -798,18 +656,8 @@ mod tests {
       request
     }
 
-    fn set_reference_urls(
-      request: &mut GenerateSeedance2p5Request,
-      images: Option<Vec<String>>,
-      videos: Option<Vec<String>>,
-      audio: Option<Vec<String>>,
-    ) {
-      let KinoviSeedance2p5Modality::Reference {
-        reference_image_urls,
-        reference_video_urls,
-        reference_audio_urls,
-        ..
-      } = &mut request.modality else {
+    fn set_reference_urls(request: &mut GenerateSeedance2p5Request, images: Option<Vec<String>>, videos: Option<Vec<String>>, audio: Option<Vec<String>>) {
+      let KinoviSeedance2p5Modality::Reference { reference_image_urls, reference_video_urls, reference_audio_urls, .. } = &mut request.modality else {
         panic!("set_reference_urls requires the Reference modality");
       };
       *reference_image_urls = images;
@@ -823,17 +671,7 @@ mod tests {
 
     #[test]
     fn keyframe_maps_frames_and_no_references() {
-      let raw = to_raw_request(GenerateSeedance2p5Request {
-        prompt: "Car drives into the sunset".to_string(),
-        modality: KinoviSeedance2p5Modality::Keyframe {
-          start_frame_url: "https://example.com/start.png".to_string(),
-          end_frame_url: Some("https://example.com/end.png".to_string()),
-        },
-        output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP),
-        duration_seconds: 8,
-        total_input_seconds: None,
-        use_face_blur_hack: None,
-      });
+      let raw = to_raw_request(GenerateSeedance2p5Request { prompt: "Car drives into the sunset".to_string(), modality: KinoviSeedance2p5Modality::Keyframe { start_frame_url: "https://example.com/start.png".to_string(), end_frame_url: Some("https://example.com/end.png".to_string()) }, output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP), duration_seconds: 8, total_input_seconds: None, use_face_blur_hack: None });
 
       assert!(matches!(raw.model_type, KinoviModelTypeRaw::Seedance2p5));
       assert_eq!(raw.start_frame_url.as_deref(), Some("https://example.com/start.png"));
@@ -845,19 +683,7 @@ mod tests {
 
     #[test]
     fn reference_maps_references_and_no_frames() {
-      let raw = to_raw_request(GenerateSeedance2p5Request {
-        prompt: "The t-rex @image1 eats the banana".to_string(),
-        modality: KinoviSeedance2p5Modality::Reference {
-          aspect_ratio: Some(KinoviSeedance2p5AspectRatio::UltraWide21x9),
-          reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]),
-          reference_video_urls: Some(vec!["https://example.com/ref.mp4".to_string()]),
-          reference_audio_urls: Some(vec!["https://example.com/ref.wav".to_string()]),
-        },
-        output_resolution: None,
-        duration_seconds: 8,
-        total_input_seconds: Some(7),
-        use_face_blur_hack: None,
-      });
+      let raw = to_raw_request(GenerateSeedance2p5Request { prompt: "The t-rex @image1 eats the banana".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: Some(KinoviSeedance2p5AspectRatio::UltraWide21x9), reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]), reference_video_urls: Some(vec!["https://example.com/ref.mp4".to_string()]), reference_audio_urls: Some(vec!["https://example.com/ref.wav".to_string()]) }, output_resolution: None, duration_seconds: 8, total_input_seconds: Some(7), use_face_blur_hack: None });
 
       assert!(matches!(raw.aspect_ratio, KinoviAspectRatioRaw::UltraWide21x9));
       assert!(raw.start_frame_url.is_none());
@@ -869,38 +695,14 @@ mod tests {
 
     #[test]
     fn resolution_1080p_maps_to_raw_1080p() {
-      let raw = to_raw_request(GenerateSeedance2p5Request {
-        prompt: "A car driving on the beach".to_string(),
-        modality: KinoviSeedance2p5Modality::Reference {
-          aspect_ratio: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-        },
-        output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP),
-        duration_seconds: 4,
-        total_input_seconds: None,
-        use_face_blur_hack: None,
-      });
+      let raw = to_raw_request(GenerateSeedance2p5Request { prompt: "A car driving on the beach".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None }, output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP), duration_seconds: 4, total_input_seconds: None, use_face_blur_hack: None });
 
       assert!(matches!(raw.output_resolution, Some(KinoviOutputResolutionRaw::TenEightyP)));
     }
 
     #[test]
     fn reference_aspect_ratio_defaults_to_16x9() {
-      let raw = to_raw_request(GenerateSeedance2p5Request {
-        prompt: "Lightning hits a building".to_string(),
-        modality: KinoviSeedance2p5Modality::Reference {
-          aspect_ratio: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-        },
-        output_resolution: None,
-        duration_seconds: 5,
-        total_input_seconds: None,
-        use_face_blur_hack: None,
-      });
+      let raw = to_raw_request(GenerateSeedance2p5Request { prompt: "Lightning hits a building".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None }, output_resolution: None, duration_seconds: 5, total_input_seconds: None, use_face_blur_hack: None });
 
       assert!(matches!(raw.aspect_ratio, KinoviAspectRatioRaw::Landscape16x9));
     }
@@ -914,23 +716,7 @@ mod tests {
     async fn test_text_to_video_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5(GenerateSeedance2p5Args {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5Request {
-          prompt: "Lightning hits a building".to_string(),
-          modality: KinoviSeedance2p5Modality::Reference {
-            aspect_ratio: Some(KinoviSeedance2p5AspectRatio::Landscape16x9),
-            reference_image_urls: None,
-            reference_video_urls: None,
-            reference_audio_urls: None,
-          },
-          output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP),
-          duration_seconds: 5,
-          total_input_seconds: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5(GenerateSeedance2p5Args { session: &session, host_override: None, request: GenerateSeedance2p5Request { prompt: "Lightning hits a building".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: Some(KinoviSeedance2p5AspectRatio::Landscape16x9), reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None }, output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP), duration_seconds: 5, total_input_seconds: None, use_face_blur_hack: None } }).await?;
       println!("t2v 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -945,23 +731,7 @@ mod tests {
       // 1_seedance2p5_1080p.txt.
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5(GenerateSeedance2p5Args {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5Request {
-          prompt: "A car driving on the beach".to_string(),
-          modality: KinoviSeedance2p5Modality::Reference {
-            aspect_ratio: Some(KinoviSeedance2p5AspectRatio::Landscape16x9),
-            reference_image_urls: None,
-            reference_video_urls: None,
-            reference_audio_urls: None,
-          },
-          output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP),
-          duration_seconds: 4,
-          total_input_seconds: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5(GenerateSeedance2p5Args { session: &session, host_override: None, request: GenerateSeedance2p5Request { prompt: "A car driving on the beach".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: Some(KinoviSeedance2p5AspectRatio::Landscape16x9), reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None }, output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP), duration_seconds: 4, total_input_seconds: None, use_face_blur_hack: None } }).await?;
       println!("t2v 1080p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -974,21 +744,7 @@ mod tests {
     async fn test_keyframe_to_video_adaptive_1080p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5(GenerateSeedance2p5Args {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5Request {
-          prompt: "Car drives into the sunset".to_string(),
-          modality: KinoviSeedance2p5Modality::Keyframe {
-            start_frame_url: "https://static.seedance2-pro.com/materials/20260807/1786128486168-a2bf6132.png".to_string(),
-            end_frame_url: Some("https://static.seedance2-pro.com/materials/20260807/1786128493608-d708413a.png".to_string()),
-          },
-          output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP),
-          duration_seconds: 4,
-          total_input_seconds: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5(GenerateSeedance2p5Args { session: &session, host_override: None, request: GenerateSeedance2p5Request { prompt: "Car drives into the sunset".to_string(), modality: KinoviSeedance2p5Modality::Keyframe { start_frame_url: "https://static.seedance2-pro.com/materials/20260807/1786128486168-a2bf6132.png".to_string(), end_frame_url: Some("https://static.seedance2-pro.com/materials/20260807/1786128493608-d708413a.png".to_string()) }, output_resolution: Some(KinoviSeedance2p5OutputResolution::TenEightyP), duration_seconds: 4, total_input_seconds: None, use_face_blur_hack: None } }).await?;
       println!("keyframe 1080p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -1001,21 +757,7 @@ mod tests {
     async fn test_keyframe_to_video_adaptive_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5(GenerateSeedance2p5Args {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5Request {
-          prompt: "Car drives into the sunset".to_string(),
-          modality: KinoviSeedance2p5Modality::Keyframe {
-            start_frame_url: "https://static.seedance2-pro.com/materials/20260807/1786128486168-a2bf6132.png".to_string(),
-            end_frame_url: Some("https://static.seedance2-pro.com/materials/20260807/1786128493608-d708413a.png".to_string()),
-          },
-          output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP),
-          duration_seconds: 8,
-          total_input_seconds: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5(GenerateSeedance2p5Args { session: &session, host_override: None, request: GenerateSeedance2p5Request { prompt: "Car drives into the sunset".to_string(), modality: KinoviSeedance2p5Modality::Keyframe { start_frame_url: "https://static.seedance2-pro.com/materials/20260807/1786128486168-a2bf6132.png".to_string(), end_frame_url: Some("https://static.seedance2-pro.com/materials/20260807/1786128493608-d708413a.png".to_string()) }, output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP), duration_seconds: 8, total_input_seconds: None, use_face_blur_hack: None } }).await?;
       println!("keyframe 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -1028,26 +770,7 @@ mod tests {
     async fn test_reference_to_video_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p5(GenerateSeedance2p5Args {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p5Request {
-          prompt: "The t-rex @image1 eats the banana @image2".to_string(),
-          modality: KinoviSeedance2p5Modality::Reference {
-            aspect_ratio: Some(KinoviSeedance2p5AspectRatio::UltraWide21x9),
-            reference_image_urls: Some(vec![
-              "https://static.seedance2-pro.com/materials/20260807/1786128628611-d6ca7afd.png".to_string(),
-              "https://static.seedance2-pro.com/materials/20260807/1786128638331-5395ff1c.jpg".to_string(),
-            ]),
-            reference_video_urls: None,
-            reference_audio_urls: None,
-          },
-          output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP),
-          duration_seconds: 8,
-          total_input_seconds: None,
-          use_face_blur_hack: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p5(GenerateSeedance2p5Args { session: &session, host_override: None, request: GenerateSeedance2p5Request { prompt: "The t-rex @image1 eats the banana @image2".to_string(), modality: KinoviSeedance2p5Modality::Reference { aspect_ratio: Some(KinoviSeedance2p5AspectRatio::UltraWide21x9), reference_image_urls: Some(vec!["https://static.seedance2-pro.com/materials/20260807/1786128628611-d6ca7afd.png".to_string(), "https://static.seedance2-pro.com/materials/20260807/1786128638331-5395ff1c.jpg".to_string()]), reference_video_urls: None, reference_audio_urls: None }, output_resolution: Some(KinoviSeedance2p5OutputResolution::FourEightyP), duration_seconds: 8, total_input_seconds: None, use_face_blur_hack: None } }).await?;
       println!("reference 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());

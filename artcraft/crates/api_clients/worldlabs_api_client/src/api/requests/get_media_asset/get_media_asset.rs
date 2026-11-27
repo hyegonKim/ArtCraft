@@ -34,28 +34,23 @@ pub async fn get_media_asset(args: GetMediaAssetArgs<'_>) -> Result<GetMediaAsse
 
   debug!("Requesting URL: {}", url);
 
-  let mut request_builder = client.get(&url)
-    .header("WLT-Api-Key", args.creds.api_key());
+  let mut request_builder = client.get(&url).header("WLT-Api-Key", args.creds.api_key());
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during get_media_asset request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during get_media_asset request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("get_media_asset returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -65,17 +60,9 @@ pub async fn get_media_asset(args: GetMediaAssetArgs<'_>) -> Result<GetMediaAsse
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  Ok(GetMediaAssetResponse {
-    media_asset_id: raw.media_asset_id,
-    file_name: raw.file_name,
-    kind: raw.kind,
-    extension: raw.extension,
-    created_at: raw.created_at,
-    updated_at: raw.updated_at,
-  })
+  Ok(GetMediaAssetResponse { media_asset_id: raw.media_asset_id, file_name: raw.file_name, kind: raw.kind, extension: raw.extension, created_at: raw.created_at, updated_at: raw.updated_at })
 }
 
 #[cfg(test)]
@@ -95,11 +82,7 @@ mod tests {
     // Use a known media_asset_id from a previous prepare_upload call
     let media_asset_id = "REPLACE_WITH_REAL_ID";
 
-    let response = get_media_asset(GetMediaAssetArgs {
-      creds: &creds,
-      media_asset_id,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = get_media_asset(GetMediaAssetArgs { creds: &creds, media_asset_id, request_timeout: None }).await.unwrap();
 
     println!("Media asset ID: {}", response.media_asset_id);
     println!("File name: {}", response.file_name);

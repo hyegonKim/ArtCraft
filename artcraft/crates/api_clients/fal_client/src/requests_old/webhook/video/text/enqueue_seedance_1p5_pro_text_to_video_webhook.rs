@@ -69,16 +69,14 @@ impl FalRequestCostCalculator for EnqueueSeedance1p5ProTextToVideoRequest {
     let audio = self.generate_audio.unwrap_or(true);
     let dollars_per_million_tokens = if audio { 2.4 } else { 1.2 };
 
-    if resolution == EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP
-        && duration == EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds
-    {
+    if resolution == EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP && duration == EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds {
       return if audio { 26 } else { 13 };
     }
 
     // TODO: Only correct for some aspect ratios for now.
     let (width, height) = match resolution {
       EnqueueSeedance1p5ProTextToVideoResolution::FourEightyP => (640u32, 480u32), // NB: Only for 4:3 !
-      EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP => (1280, 720), // NB: Only for 16:9 !
+      EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP => (1280, 720),     // NB: Only for 16:9 !
       EnqueueSeedance1p5ProTextToVideoResolution::TenEightyP => (1920, 1080),
     };
 
@@ -109,61 +107,49 @@ impl FalRequestCostCalculator for EnqueueSeedance1p5ProTextToVideoRequest {
 
 /// Seedance 1.5 Pro Text-to-Video
 /// https://fal.ai/models/fal-ai/bytedance/seedance/v1.5/pro/text-to-video
-pub async fn enqueue_seedance_1p5_pro_text_to_video_webhook<R: IntoUrl>(
-  args: EnqueueSeedance1p5ProTextToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_seedance_1p5_pro_text_to_video_webhook<R: IntoUrl>(args: EnqueueSeedance1p5ProTextToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|d| match d {
-        EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds => "4",
-        EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds => "5",
-        EnqueueSeedance1p5ProTextToVideoDuration::SixSeconds => "6",
-        EnqueueSeedance1p5ProTextToVideoDuration::SevenSeconds => "7",
-        EnqueueSeedance1p5ProTextToVideoDuration::EightSeconds => "8",
-        EnqueueSeedance1p5ProTextToVideoDuration::NineSeconds => "9",
-        EnqueueSeedance1p5ProTextToVideoDuration::TenSeconds => "10",
-        EnqueueSeedance1p5ProTextToVideoDuration::ElevenSeconds => "11",
-        EnqueueSeedance1p5ProTextToVideoDuration::TwelveSeconds => "12",
-      })
-      .map(|d| d.to_string());
+  let duration = req
+    .duration
+    .map(|d| match d {
+      EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds => "4",
+      EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds => "5",
+      EnqueueSeedance1p5ProTextToVideoDuration::SixSeconds => "6",
+      EnqueueSeedance1p5ProTextToVideoDuration::SevenSeconds => "7",
+      EnqueueSeedance1p5ProTextToVideoDuration::EightSeconds => "8",
+      EnqueueSeedance1p5ProTextToVideoDuration::NineSeconds => "9",
+      EnqueueSeedance1p5ProTextToVideoDuration::TenSeconds => "10",
+      EnqueueSeedance1p5ProTextToVideoDuration::ElevenSeconds => "11",
+      EnqueueSeedance1p5ProTextToVideoDuration::TwelveSeconds => "12",
+    })
+    .map(|d| d.to_string());
 
-  let resolution = req.resolution
-      .map(|r| match r {
-        EnqueueSeedance1p5ProTextToVideoResolution::FourEightyP => "480p",
-        EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP => "720p",
-        EnqueueSeedance1p5ProTextToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|r| r.to_string());
+  let resolution = req
+    .resolution
+    .map(|r| match r {
+      EnqueueSeedance1p5ProTextToVideoResolution::FourEightyP => "480p",
+      EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP => "720p",
+      EnqueueSeedance1p5ProTextToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|r| r.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|ar| match ar {
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::TwentyOneByNine => "21:9",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine => "16:9",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::FourByThree => "4:3",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::Square => "1:1",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::ThreeByFour => "3:4",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::NineBySixteen => "9:16",
-        EnqueueSeedance1p5ProTextToVideoAspectRatio::Auto => "auto",
-      })
-      .map(|ar| ar.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|ar| match ar {
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::TwentyOneByNine => "21:9",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine => "16:9",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::FourByThree => "4:3",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::Square => "1:1",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::ThreeByFour => "3:4",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::NineBySixteen => "9:16",
+      EnqueueSeedance1p5ProTextToVideoAspectRatio::Auto => "auto",
+    })
+    .map(|ar| ar.to_string());
 
-  let request = Seedance1p5ProTextToVideoInput {
-    prompt: req.prompt,
-    duration,
-    resolution,
-    aspect_ratio,
-    camera_fixed: None,
-    seed: None,
-    enable_safety_checker: Some(false),
-    generate_audio: Some(req.generate_audio.unwrap_or(true)),
-  };
+  let request = Seedance1p5ProTextToVideoInput { prompt: req.prompt, duration, resolution, aspect_ratio, camera_fixed: None, seed: None, enable_safety_checker: Some(false), generate_audio: Some(req.generate_audio.unwrap_or(true)) };
 
-  let result = seedance_1p5_pro_text_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = seedance_1p5_pro_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -179,13 +165,7 @@ mod tests {
 
   #[test]
   fn test_cost() {
-    let mut req = EnqueueSeedance1p5ProTextToVideoRequest {
-      prompt: String::new(),
-      duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds),
-      resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP),
-      aspect_ratio: None,
-      generate_audio: None,
-    };
+    let mut req = EnqueueSeedance1p5ProTextToVideoRequest { prompt: String::new(), duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds), resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP), aspect_ratio: None, generate_audio: None };
 
     // NB: Constant value specified by Fal
     let cost = req.calculate_cost_in_cents();
@@ -210,13 +190,7 @@ mod tests {
 
   #[test]
   fn test_cost_audio_off() {
-    let mut req = EnqueueSeedance1p5ProTextToVideoRequest {
-      prompt: String::new(),
-      duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds),
-      resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP),
-      aspect_ratio: None,
-      generate_audio: Some(false),
-    };
+    let mut req = EnqueueSeedance1p5ProTextToVideoRequest { prompt: String::new(), duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds), resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP), aspect_ratio: None, generate_audio: Some(false) };
 
     // 720p 5s without audio = half of 26
     let cost = req.calculate_cost_in_cents();
@@ -245,17 +219,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueSeedance1p5ProTextToVideoArgs {
-      request: EnqueueSeedance1p5ProTextToVideoRequest {
-        prompt: "a dinosaur walks through a misty forest at dawn, cinematic lighting".to_string(),
-        duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds),
-        aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP),
-        generate_audio: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueSeedance1p5ProTextToVideoArgs { request: EnqueueSeedance1p5ProTextToVideoRequest { prompt: "a dinosaur walks through a misty forest at dawn, cinematic lighting".to_string(), duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FiveSeconds), aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine), resolution: Some(EnqueueSeedance1p5ProTextToVideoResolution::SevenTwentyP), generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_seedance_1p5_pro_text_to_video_webhook(args).await?;
     println!("result: {:?}", result);
@@ -271,17 +235,7 @@ mod tests {
 
     for ar in EnqueueSeedance1p5ProTextToVideoAspectRatio::iter() {
       println!("--- aspect ratio: {:?} ---", ar);
-      let args = EnqueueSeedance1p5ProTextToVideoArgs {
-        request: EnqueueSeedance1p5ProTextToVideoRequest {
-          prompt: "a corgi runs along a beach at golden hour".to_string(),
-          duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds),
-          aspect_ratio: Some(ar),
-          resolution: None,
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProTextToVideoArgs { request: EnqueueSeedance1p5ProTextToVideoRequest { prompt: "a corgi runs along a beach at golden hour".to_string(), duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds), aspect_ratio: Some(ar), resolution: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -297,17 +251,7 @@ mod tests {
 
     for dur in EnqueueSeedance1p5ProTextToVideoDuration::iter() {
       println!("--- duration: {:?} ---", dur);
-      let args = EnqueueSeedance1p5ProTextToVideoArgs {
-        request: EnqueueSeedance1p5ProTextToVideoRequest {
-          prompt: "a corgi runs along a beach at golden hour".to_string(),
-          duration: Some(dur),
-          aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine),
-          resolution: None,
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProTextToVideoArgs { request: EnqueueSeedance1p5ProTextToVideoRequest { prompt: "a corgi runs along a beach at golden hour".to_string(), duration: Some(dur), aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine), resolution: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -323,17 +267,7 @@ mod tests {
 
     for res in EnqueueSeedance1p5ProTextToVideoResolution::iter() {
       println!("--- resolution: {:?} ---", res);
-      let args = EnqueueSeedance1p5ProTextToVideoArgs {
-        request: EnqueueSeedance1p5ProTextToVideoRequest {
-          prompt: "a bird flying over an ocean at golden hour".to_string(),
-          duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds),
-          aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine),
-          resolution: Some(res),
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProTextToVideoArgs { request: EnqueueSeedance1p5ProTextToVideoRequest { prompt: "a bird flying over an ocean at golden hour".to_string(), duration: Some(EnqueueSeedance1p5ProTextToVideoDuration::FourSeconds), aspect_ratio: Some(EnqueueSeedance1p5ProTextToVideoAspectRatio::SixteenByNine), resolution: Some(res), generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }

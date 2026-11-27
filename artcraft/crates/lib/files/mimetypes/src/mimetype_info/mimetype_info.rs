@@ -15,21 +15,16 @@ pub struct MimetypeInfo {
 
 impl MimetypeInfo {
   pub fn get_for_bytes(bytes: &[u8]) -> Option<Self> {
-    CUSTOM_INFER.get(bytes)
-        .map(|t| Self::for_type(t))
+    CUSTOM_INFER.get(bytes).map(|t| Self::for_type(t))
   }
 
   pub fn get_for_path<P: AsRef<Path>>(path: P) -> io::Result<Option<Self>> {
-    CUSTOM_INFER.get_from_path(path)
-        .map(|maybe_type| maybe_type.map(|t| Self::for_type(t)))
+    CUSTOM_INFER.get_from_path(path).map(|maybe_type| maybe_type.map(|t| Self::for_type(t)))
   }
 
   fn for_type(r#type: Type) -> Self {
     let mime_type = r#type.mime_type().to_string();
-    MimetypeInfo {
-      file_extension: FileExtension::from_mimetype(&mime_type),
-      mime_type,
-    }
+    MimetypeInfo { file_extension: FileExtension::from_mimetype(&mime_type), mime_type }
   }
 
   pub fn mime_type(&self) -> &str {

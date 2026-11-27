@@ -15,9 +15,7 @@ use deckcraft_model::resolve::{self, Ctx};
 use deckcraft_model::{Presentation, ShapeId};
 use kurbo::Vec2;
 
-use crate::{
-    Image, MAX_SIDE, ParaState, PathMorph, RenderOpts, ShapeState, SlideParts, TextMorph, composite_transition, render_blend, render_slide,
-};
+use crate::{Image, MAX_SIDE, ParaState, PathMorph, RenderOpts, ShapeState, SlideParts, TextMorph, composite_transition, render_blend, render_slide};
 
 /// Configuration for rendering an animated presentation frame sequence.
 #[derive(Clone, Debug)]
@@ -129,14 +127,7 @@ fn anim_to_shape_state(tl: &Timeline, id: ShapeId, step: usize, t: f64) -> Shape
         .into_iter()
         .map(|pi| {
             let pa = tl.state(id, Some(pi), step, t);
-            (
-                pi,
-                ParaState {
-                    visible: pa.visible,
-                    opacity: pa.opacity,
-                    offset: Vec2::new(pa.offset_x, pa.offset_y),
-                },
-            )
+            (pi, ParaState { visible: pa.visible, opacity: pa.opacity, offset: Vec2::new(pa.offset_x, pa.offset_y) })
         })
         .collect();
     ShapeState {
@@ -168,14 +159,7 @@ pub fn slide_timeline(pres: &Presentation, slide_index: usize) -> Timeline {
 
 /// Render slide `index` at timeline position `(step, t)` (`step == tl.steps()` means all builds done;
 /// `(0, 0.0)` means initial entrance state before any build runs).
-pub fn render_slide_at_timeline(
-    pres: &Presentation,
-    index: usize,
-    tl: &Timeline,
-    step: usize,
-    t: f64,
-    base: &RenderOpts<'_>,
-) -> Image {
+pub fn render_slide_at_timeline(pres: &Presentation, index: usize, tl: &Timeline, step: usize, t: f64, base: &RenderOpts<'_>) -> Image {
     if tl.is_empty() {
         return render_slide(pres, index, base);
     }
@@ -208,13 +192,7 @@ pub fn render_slide_at_timeline(
 /// `index`, respecting any skipped hidden slides in between and supporting `Morph` as well as all
 /// layer/part transitions (`Fade`, `Push`, `Wipe`, `Split`, `Uncover`, `Cover`, `Zoom`, `Dissolve`,
 /// `Cut`, etc.).
-pub fn render_transition_between(
-    pres: &Presentation,
-    prev: Option<usize>,
-    index: usize,
-    t: f64,
-    opts: &RenderOpts<'_>,
-) -> Image {
+pub fn render_transition_between(pres: &Presentation, prev: Option<usize>, index: usize, t: f64, opts: &RenderOpts<'_>) -> Image {
     let Some(slide) = pres.slides.get(index) else { return Image::default() };
     let (kind, option) = slide.transition.as_ref().map(|tr| (tr.kind.as_str(), tr.option.as_str())).unwrap_or(("none", ""));
     let tt = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
@@ -297,15 +275,7 @@ pub fn render_sequence(pres: &Presentation, opts: &SequenceOptions) -> RenderedS
     let off_x = ((f64::from(w) - sw * scale) * 0.5).max(0.0);
     let off_y = ((f64::from(h) - sh * scale) * 0.5).max(0.0);
     let now = deckcraft_text::datetime::DateTime::now_local();
-    let ropts = RenderOpts {
-        scale,
-        offset: (off_x, off_y),
-        size: Some((w, h)),
-        clear: Some(Rgba::BLACK),
-        threads: 4,
-        now,
-        ..Default::default()
-    };
+    let ropts = RenderOpts { scale, offset: (off_x, off_y), size: Some((w, h)), clear: Some(Rgba::BLACK), threads: 4, now, ..Default::default() };
 
     let hold_default = if opts.hold_secs.is_finite() { opts.hold_secs.clamp(0.05, 600.0) } else { 2.0 };
     let step_pause = if opts.step_pause_secs.is_finite() { opts.step_pause_secs.clamp(0.0, 30.0) } else { 0.35 };
@@ -328,11 +298,7 @@ pub fn render_sequence(pres: &Presentation, opts: &SequenceOptions) -> RenderedS
             && (pos > 0 || tr.duration_ms > 0)
         {
             let dur_secs = (f64::from(tr.duration_ms) / 1000.0).clamp(0.0, 30.0);
-            let n_trans = if tr.kind == "cut" {
-                0
-            } else {
-                ((dur_secs * f64::from(fps)).round() as u32).max(if dur_secs > 0.0 { 2 } else { 0 })
-            };
+            let n_trans = if tr.kind == "cut" { 0 } else { ((dur_secs * f64::from(fps)).round() as u32).max(if dur_secs > 0.0 { 2 } else { 0 }) };
             if n_trans > 0 {
                 let prev_idx = prev_final.as_ref().map(|(pi, _)| *pi);
                 if tr.kind == "morph" && prev_idx.is_some() {
@@ -378,11 +344,7 @@ pub fn render_sequence(pres: &Presentation, opts: &SequenceOptions) -> RenderedS
         }
 
         // 3. Final settled slide state + slide hold duration.
-        let final_img = if tl.is_empty() {
-            initial_img
-        } else {
-            render_slide_at_timeline(pres, idx, &tl, tl.steps(), 0.0, &ropts)
-        };
+        let final_img = if tl.is_empty() { initial_img } else { render_slide_at_timeline(pres, idx, &tl, tl.steps(), 0.0, &ropts) };
         let slide_hold = slide
             .transition
             .as_ref()

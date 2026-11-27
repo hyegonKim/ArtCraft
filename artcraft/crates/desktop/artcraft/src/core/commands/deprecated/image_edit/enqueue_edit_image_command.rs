@@ -85,12 +85,11 @@ pub enum ImageEditModel {
 
   #[serde(rename = "flux_2_lora_angles")]
   Flux2LoraAngles,
-
-//  #[serde(rename = "qwen")]
-//  Qwen,
-//
-//  #[serde(rename = "seededit_3")]
-//  SeedEdit3,
+  //  #[serde(rename = "qwen")]
+  //  Qwen,
+  //
+  //  #[serde(rename = "seededit_3")]
+  //  SeedEdit3,
 }
 
 #[derive(Deserialize, Debug)]
@@ -106,8 +105,8 @@ pub struct EnqueueEditImageCommand {
   /// The first image is typically a 2D canvas or 3D stage, but doesn't have to be.
   /// There must be at least one image.
   pub image_media_tokens: Option<Vec<MediaFileToken>>,
-  
-  /// If set, this becomes the first image in the image media tokens (pushing back 
+
+  /// If set, this becomes the first image in the image media tokens (pushing back
   /// each of the `image_media_tokens` by one).
   /// This is useful if we want to do prompt engineering.
   pub scene_image_media_token: Option<MediaFileToken>,
@@ -122,7 +121,7 @@ pub struct EnqueueEditImageCommand {
   pub image_count: Option<u32>,
 
   /// Aspect ratio.
-  #[deprecated(note="use common_aspect_ratio")]
+  #[deprecated(note = "use common_aspect_ratio")]
   pub aspect_ratio: Option<EditImageSize>,
 
   /// New field for aspect ratio.
@@ -222,45 +221,20 @@ pub enum EnqueueEditImageErrorType {
 }
 
 #[derive(Serialize)]
-pub struct EnqueueEditImageSuccessResponse {
-}
+pub struct EnqueueEditImageSuccessResponse {}
 
 impl SerializeMarker for EnqueueEditImageSuccessResponse {}
 
 #[tauri::command]
-pub async fn enqueue_edit_image_command(
-  app: AppHandle,
-  request: EnqueueEditImageCommand,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>,
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-  task_database: State<'_, TaskDatabase>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-  sora_creds_manager: State<'_, SoraCredentialManager>,
-  sora_task_queue: State<'_, SoraTaskQueue>,
-) -> ResponseOrErrorType<EnqueueEditImageSuccessResponse, EnqueueEditImageErrorType> {
+pub async fn enqueue_edit_image_command(app: AppHandle, request: EnqueueEditImageCommand, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>, provider_priority_store: State<'_, ProviderPriorityStore>, task_database: State<'_, TaskDatabase>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>, sora_creds_manager: State<'_, SoraCredentialManager>, sora_task_queue: State<'_, SoraTaskQueue>) -> ResponseOrErrorType<EnqueueEditImageSuccessResponse, EnqueueEditImageErrorType> {
+  info!("enqueue_edit_image_command called; image media tokens : {:?}, full request: {:?}", &request.image_media_tokens, &request);
 
-  info!("enqueue_edit_image_command called; image media tokens : {:?}, full request: {:?}",
-    &request.image_media_tokens, &request);
-
-  let result = handle_request(
-    &request,
-    &app,
-    &app_data_root,
-    &app_env_configs,
-    &artcraft_usage_tracker,
-    &provider_priority_store,
-    &task_database,
-    &storyteller_creds_manager,
-    &sora_creds_manager,
-    &sora_task_queue,
-  ).await;
+  let result = handle_request(&request, &app, &app_data_root, &app_env_configs, &artcraft_usage_tracker, &provider_priority_store, &task_database, &storyteller_creds_manager, &sora_creds_manager, &sora_task_queue).await;
 
   match result {
     Err(err) => {
       error!("Error enqueuing contextual edit image: {:?}", err);
-      
+
       notify_frontend_of_errors(&app, &err).await;
 
       // TODO: Derive from err. Make service provider optional.
@@ -276,78 +250,35 @@ pub async fn enqueue_edit_image_command(
       }
 
       Err(error_to_tauri_response(err))
-    }
+    },
     Ok(event) => {
-      let event = GenerationEnqueueSuccessEvent {
-        action: event.to_frontend_event_action(),
-        service: event.to_frontend_event_service(),
-        model: event.model,
-      };
+      let event = GenerationEnqueueSuccessEvent { action: event.to_frontend_event_action(), service: event.to_frontend_event_service(), model: event.model };
 
       if let Err(err) = event.send(&app) {
         error!("Failed to emit event: {:?}", err); // Fail open.
       }
-      
-      CreditsBalanceChangedEvent{}.send_infallible(&app);
+
+      CreditsBalanceChangedEvent {}.send_infallible(&app);
 
       Ok(EnqueueEditImageSuccessResponse {}.into())
-    }
+    },
   }
 }
 
-pub async fn handle_request(
-  request: &EnqueueEditImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  provider_priority_store: &ProviderPriorityStore,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  sora_creds_manager: &SoraCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_request(request: &EnqueueEditImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, artcraft_usage_tracker: &ArtcraftUsageTracker, provider_priority_store: &ProviderPriorityStore, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager, sora_creds_manager: &SoraCredentialManager, sora_task_queue: &SoraTaskQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
   let model = match request.model {
     Some(model) => model,
-    None => {
-      return Err(GenerateError::no_model_specified())
-    }
+    None => return Err(GenerateError::no_model_specified()),
   };
 
-  let provider = request.provider
-      .unwrap_or(GenerationProvider::Artcraft);
-  
+  let provider = request.provider.unwrap_or(GenerationProvider::Artcraft);
+
   info!("edit image with {:?} via provider {:?}", &model, &provider);
 
   let mut success_event = match provider {
-    GenerationProvider::Artcraft => {
-      handle_image_edit_artcraft(
-        model,
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await?
-    }
-    GenerationProvider::Sora => {
-      handle_image_edit_sora(
-        model,
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        sora_creds_manager,
-        sora_task_queue,
-      ).await?
-    }
-    _ => {
-      return Err(GenerateError::BadProviderForModel {
-        provider,
-        model: image_edit_model_to_model_type(model),
-      })
-    }
+    GenerationProvider::Artcraft => handle_image_edit_artcraft(model, request, app, app_data_root, app_env_configs, storyteller_creds_manager).await?,
+    GenerationProvider::Sora => handle_image_edit_sora(model, request, app, app_data_root, app_env_configs, sora_creds_manager, sora_task_queue).await?,
+    _ => return Err(GenerateError::BadProviderForModel { provider, model: image_edit_model_to_model_type(model) }),
   };
 
   match request.frontend_caller {
@@ -357,19 +288,12 @@ pub async fn handle_request(
       // temporarily fix the UI event binding.
       // TODO: The frontend shouldn't require us to change the type to inpainting.
       success_event.task_type = TaskType::ImageInpaintEdit;
-    }
-    _ => {} // fall-through
+    },
+    _ => {}, // fall-through
   }
 
-  let result = success_event
-      .insert_into_task_database_with_frontend_payload(
-        task_database,
-        request.frontend_caller.clone(),
-        request.frontend_subscriber_id.as_deref(),
-        request.frontend_subscriber_payload.as_deref(),
-      )
-      .await;
-  
+  let result = success_event.insert_into_task_database_with_frontend_payload(task_database, request.frontend_caller.clone(), request.frontend_subscriber_id.as_deref(), request.frontend_subscriber_payload.as_deref()).await;
+
   if let Err(err) = result {
     error!("Failed to create task in database: {:?}", err);
     // NB: Fail open, but find a way to flag this.
@@ -381,7 +305,7 @@ pub async fn handle_request(
     // NB: Fail open.
     warn!("Failed to report usage: {:?}", err);
   }
-  
+
   Ok(success_event)
 }
 
@@ -395,30 +319,24 @@ fn error_to_tauri_response(error: GenerateError) -> CommandErrorResponseWrapper<
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueEditImageErrorType::ModelNotSpecified;
       error_message = "No model specified for image generation".to_string();
-    }
+    },
     GenerateError::NoProviderAvailable => {
       status = CommandErrorStatus::ServerError;
       error_type = EnqueueEditImageErrorType::NoProviderAvailable;
       error_message = "No configured provider available for image generation".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages { min, max, requested }) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueEditImageErrorType::BadRequest;
       error_message = format!("Invalid number of images requested ({}). Must be between {} and {}", requested, min, max);
-
-    }
-    GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages{  min, max, provided }) => {
+    },
+    GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages { min, max, provided }) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueEditImageErrorType::BadRequest;
       error_message = format!("Invalid number of input images ({}). Must be between {} and {}", provided, min, max);
-    }
-    _ => {} // Fall-through for now
+    },
+    _ => {}, // Fall-through for now
   }
 
-  CommandErrorResponseWrapper {
-    status,
-    error_message: Some(error_message.to_string()),
-    error_type: Some(error_type),
-    error_details: None,
-  }
+  CommandErrorResponseWrapper { status, error_message: Some(error_message.to_string()), error_type: Some(error_type), error_details: None }
 }

@@ -1,4 +1,3 @@
-
 /// Convert a boolean to a lower case string, with values of either "true" or "false".
 pub fn bool_to_str(value: bool) -> &'static str {
   if value {

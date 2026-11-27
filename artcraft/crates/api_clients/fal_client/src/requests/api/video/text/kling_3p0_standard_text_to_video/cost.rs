@@ -1,6 +1,4 @@
-use crate::requests::api::video::text::kling_3p0_standard_text_to_video::api::{
-  Kling3p0StandardTextToVideoDuration, Kling3p0StandardTextToVideoRequest,
-};
+use crate::requests::api::video::text::kling_3p0_standard_text_to_video::api::{Kling3p0StandardTextToVideoDuration, Kling3p0StandardTextToVideoRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Kling3p0StandardTextToVideoRequest {
@@ -9,9 +7,7 @@ impl FalRequestCostCalculator for Kling3p0StandardTextToVideoRequest {
     //   Audio off: $0.168/second
     //   Audio on:  $0.252/second
     let generate_audio = self.generate_audio.unwrap_or(true);
-    let duration_secs = self.duration
-      .unwrap_or(Kling3p0StandardTextToVideoDuration::FiveSeconds)
-      .to_seconds();
+    let duration_secs = self.duration.unwrap_or(Kling3p0StandardTextToVideoDuration::FiveSeconds).to_seconds();
 
     // Rate in tenths-of-cents per second, rounded up
     let rate = if generate_audio { 252u64 } else { 168u64 };
@@ -22,22 +18,10 @@ impl FalRequestCostCalculator for Kling3p0StandardTextToVideoRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::requests::api::video::text::kling_3p0_standard_text_to_video::api::{
-    Kling3p0StandardTextToVideoAspectRatio, Kling3p0StandardTextToVideoDuration,
-  };
+  use crate::requests::api::video::text::kling_3p0_standard_text_to_video::api::{Kling3p0StandardTextToVideoAspectRatio, Kling3p0StandardTextToVideoDuration};
 
-  fn make_request(
-    generate_audio: Option<bool>,
-    duration: Option<Kling3p0StandardTextToVideoDuration>,
-  ) -> Kling3p0StandardTextToVideoRequest {
-    Kling3p0StandardTextToVideoRequest {
-      prompt: "test".to_string(),
-      generate_audio,
-      negative_prompt: None,
-      duration,
-      aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine),
-      shot_type: None,
-    }
+  fn make_request(generate_audio: Option<bool>, duration: Option<Kling3p0StandardTextToVideoDuration>) -> Kling3p0StandardTextToVideoRequest {
+    Kling3p0StandardTextToVideoRequest { prompt: "test".to_string(), generate_audio, negative_prompt: None, duration, aspect_ratio: Some(Kling3p0StandardTextToVideoAspectRatio::SixteenByNine), shot_type: None }
   }
 
   mod audio_off {

@@ -1741,16 +1741,8 @@ impl<'a, 'i> Parser<'a, 'i> {
             Paint::Pattern(pat) => pat.fallback.map(|fb| [fb[0] as f32, fb[1] as f32, fb[2] as f32]),
         });
         let stroke_width = if stroke.is_some() { (st.stroke_width * scale_norm).max(0.0) } else { 0.0 };
-        let eff_opacity = if fill.is_some() && stroke.is_none() {
-            (opacity * st.fill_opacity * fill_alpha).clamp(0.0, 1.0)
-        } else {
-            opacity.clamp(0.0, 1.0)
-        };
-        let name = if id_name.is_empty() {
-            text.chars().filter(|c| !c.is_control()).take(40).collect::<String>()
-        } else {
-            id_name.to_string()
-        };
+        let eff_opacity = if fill.is_some() && stroke.is_none() { (opacity * st.fill_opacity * fill_alpha).clamp(0.0, 1.0) } else { opacity.clamp(0.0, 1.0) };
+        let name = if id_name.is_empty() { text.chars().filter(|c| !c.is_control()).take(40).collect::<String>() } else { id_name.to_string() };
         self.texts.push(TextSpan {
             name,
             text,
@@ -2124,7 +2116,17 @@ fn parse_inner(bytes: &[u8], extract_texts: bool) -> Result<(Doc, Vec<TextSpan>)
         Doc {
             width: dw,
             height: dh,
-            root: Group { name: "svg".into(), transform, opacity, children, clip: vec![], blend: BlendMode::Normal, mask: None, isolated: true, knockout: false },
+            root: Group {
+                name: "svg".into(),
+                transform,
+                opacity,
+                children,
+                clip: vec![],
+                blend: BlendMode::Normal,
+                mask: None,
+                isolated: true,
+                knockout: false,
+            },
             skipped: std::mem::take(&mut p.skipped),
         },
         texts,

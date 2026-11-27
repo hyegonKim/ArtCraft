@@ -1,18 +1,18 @@
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug)]
-pub (super) struct BatchRequest {
+pub(super) struct BatchRequest {
   #[serde(rename = "0")]
   pub zero: BatchRequestInner,
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct BatchRequestInner {
+pub(super) struct BatchRequestInner {
   pub json: BatchRequestJson,
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct BatchRequestJson {
+pub(super) struct BatchRequestJson {
   #[serde(rename = "businessType")]
   pub business_type: &'static str,
   #[serde(rename = "apiParams")]
@@ -20,7 +20,7 @@ pub (super) struct BatchRequestJson {
 }
 
 #[derive(Serialize, Debug)]
-pub (super) struct ApiParams {
+pub(super) struct ApiParams {
   pub prompt: String,
   pub resolution: String,
   #[serde(rename = "contentMode")]
@@ -43,23 +43,23 @@ pub (super) struct ApiParams {
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseItem {
+pub(super) struct BatchResponseItem {
   pub result: BatchResponseResult,
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseResult {
+pub(super) struct BatchResponseResult {
   pub data: BatchResponseData,
 }
 
 #[derive(Deserialize, Debug)]
-pub (super) struct BatchResponseData {
+pub(super) struct BatchResponseData {
   pub json: TaskResponseJson,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub (super) struct TaskResponseJson {
+pub(super) struct TaskResponseJson {
   pub task_id: String,
   pub order_id: String,
   pub task_ids: Option<Vec<String>>,

@@ -93,17 +93,7 @@ impl PaymentEventType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::SubscriptionInitial,
-      Self::SubscriptionRenewal,
-      Self::SubscriptionProrationUpgrade,
-      Self::SubscriptionProrationDowngrade,
-      Self::CreditPackPurchase,
-      Self::Refund,
-      Self::Chargeback,
-      Self::ManualAdjustment,
-      Self::SubscriptionMonthlyRefill,
-    ])
+    BTreeSet::from([Self::SubscriptionInitial, Self::SubscriptionRenewal, Self::SubscriptionProrationUpgrade, Self::SubscriptionProrationDowngrade, Self::CreditPackPurchase, Self::Refund, Self::Chargeback, Self::ManualAdjustment, Self::SubscriptionMonthlyRefill])
   }
 }
 

@@ -12,7 +12,7 @@ impl std::fmt::Display for EnumError {
     match self {
       EnumError::CouldNotConvertFromString(value) => {
         write!(f, "Could not convert from string: {}", value)
-      }
+      },
     }
   }
 }

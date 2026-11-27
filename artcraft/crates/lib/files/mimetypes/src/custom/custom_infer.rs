@@ -1,7 +1,7 @@
 use infer::Infer;
 use std::sync::LazyLock;
 
-pub (crate) static CUSTOM_INFER: LazyLock<Infer> = LazyLock::new(|| {
+pub(crate) static CUSTOM_INFER: LazyLock<Infer> = LazyLock::new(|| {
   let mut infer = Infer::new();
   add_custom_types(&mut infer);
   infer
@@ -22,9 +22,7 @@ fn gltf_matcher(buf: &[u8]) -> bool {
 fn ply_matcher(buf: &[u8]) -> bool {
   // PLY files (ASCII and binary alike) start with the line "ply".
   // https://paulbourke.net/dataformats/ply/
-  buf.len() >= 4
-    && &buf[..3] == b"ply"
-    && (buf[3] == b'\n' || buf[3] == b'\r')
+  buf.len() >= 4 && &buf[..3] == b"ply" && (buf[3] == b'\n' || buf[3] == b'\r')
 }
 
 fn fbx_matcher(buf: &[u8]) -> bool {

@@ -74,16 +74,13 @@ pub(super) fn video_export_options(app: &SlideApp, ui: &mut Ui, d: &mut Dialog) 
     };
     ui.horizontal(|ui| {
         let lbl = ui.add_sized(vec2(140.0, 20.0), egui::Label::new(crate::i18n::tr_ui(ui.ctx(), loc, "Format:")));
-        let combo = craft_ui::ComboBox::from_id_salt("video_export_fmt")
-            .width(200.0)
-            .selected_text(fmt_label(&fmt))
-            .show_ui(ui, |ui| {
-                for k in ["mp4", "webm", "gif"] {
-                    if ui.selectable_label(fmt == k, fmt_label(k)).clicked() {
-                        d.fields.insert("vFmt".into(), k.into());
-                    }
+        let combo = craft_ui::ComboBox::from_id_salt("video_export_fmt").width(200.0).selected_text(fmt_label(&fmt)).show_ui(ui, |ui| {
+            for k in ["mp4", "webm", "gif"] {
+                if ui.selectable_label(fmt == k, fmt_label(k)).clicked() {
+                    d.fields.insert("vFmt".into(), k.into());
                 }
-            });
+            }
+        });
         let _ = combo.response.labelled_by(lbl.id);
     });
 
@@ -97,16 +94,13 @@ pub(super) fn video_export_options(app: &SlideApp, ui: &mut Ui, d: &mut Dialog) 
     };
     ui.horizontal(|ui| {
         let lbl = ui.add_sized(vec2(140.0, 20.0), egui::Label::new(crate::i18n::tr_ui(ui.ctx(), loc, "Resolution:")));
-        let combo = craft_ui::ComboBox::from_id_salt("video_export_res")
-            .width(200.0)
-            .selected_text(res_label(&res))
-            .show_ui(ui, |ui| {
-                for k in ["small", "medium", "large", "extraLarge", "custom"] {
-                    if ui.selectable_label(res == k, res_label(k)).clicked() {
-                        d.fields.insert("vRes".into(), k.into());
-                    }
+        let combo = craft_ui::ComboBox::from_id_salt("video_export_res").width(200.0).selected_text(res_label(&res)).show_ui(ui, |ui| {
+            for k in ["small", "medium", "large", "extraLarge", "custom"] {
+                if ui.selectable_label(res == k, res_label(k)).clicked() {
+                    d.fields.insert("vRes".into(), k.into());
                 }
-            });
+            }
+        });
         let _ = combo.response.labelled_by(lbl.id);
     });
     if res == "custom" {
@@ -117,16 +111,13 @@ pub(super) fn video_export_options(app: &SlideApp, ui: &mut Ui, d: &mut Dialog) 
     let fps_str = d.get("vFps", if fmt == "gif" { "15" } else { "24" });
     ui.horizontal(|ui| {
         let lbl = ui.add_sized(vec2(140.0, 20.0), egui::Label::new(crate::i18n::tr_ui(ui.ctx(), loc, "Frame rate (FPS):")));
-        let combo = craft_ui::ComboBox::from_id_salt("video_export_fps")
-            .width(200.0)
-            .selected_text(format!("{fps_str} fps"))
-            .show_ui(ui, |ui| {
-                for f in ["15", "24", "30"] {
-                    if ui.selectable_label(fps_str == f, format!("{f} fps")).clicked() {
-                        d.fields.insert("vFps".into(), f.into());
-                    }
+        let combo = craft_ui::ComboBox::from_id_salt("video_export_fps").width(200.0).selected_text(format!("{fps_str} fps")).show_ui(ui, |ui| {
+            for f in ["15", "24", "30"] {
+                if ui.selectable_label(fps_str == f, format!("{f} fps")).clicked() {
+                    d.fields.insert("vFps".into(), f.into());
                 }
-            });
+            }
+        });
         let _ = combo.response.labelled_by(lbl.id);
     });
 
@@ -138,18 +129,10 @@ pub(super) fn video_export_options(app: &SlideApp, ui: &mut Ui, d: &mut Dialog) 
     let transitions = check(ui, d, crate::i18n::tr_ui(ui.ctx(), loc, "Include slide transitions"), "vTrans", true);
     let builds = check(ui, d, crate::i18n::tr_ui(ui.ctx(), loc, "Include build animations"), "vBuilds", true);
     let hidden = check(ui, d, crate::i18n::tr_ui(ui.ctx(), loc, "Include hidden slides"), "vHidden", false);
-    let loop_forever = if fmt == "gif" {
-        check(ui, d, crate::i18n::tr_ui(ui.ctx(), loc, "Loop forever"), "vLoop", true)
-    } else {
-        true
-    };
+    let loop_forever = if fmt == "gif" { check(ui, d, crate::i18n::tr_ui(ui.ctx(), loc, "Loop forever"), "vLoop", true) } else { true };
 
-    let fps = fps_str
-        .trim()
-        .parse::<u32>()
-        .ok()
-        .filter(|v| (MIN_FPS..=MAX_FPS).contains(v))
-        .ok_or_else(|| format!("FPS: enter {MIN_FPS} to {MAX_FPS}"))?;
+    let fps =
+        fps_str.trim().parse::<u32>().ok().filter(|v| (MIN_FPS..=MAX_FPS).contains(v)).ok_or_else(|| format!("FPS: enter {MIN_FPS} to {MAX_FPS}"))?;
     let hold = num(d, "vHold", f64::NAN);
     if !(MIN_HOLD_SECONDS..=MAX_HOLD_SECONDS).contains(&hold) {
         return Err(format!("Slide hold: enter {MIN_HOLD_SECONDS} to {MAX_HOLD_SECONDS} seconds"));

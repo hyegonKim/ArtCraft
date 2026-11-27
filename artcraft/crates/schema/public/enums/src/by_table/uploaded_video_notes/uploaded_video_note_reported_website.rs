@@ -57,15 +57,7 @@ impl UploadedVideoNoteReportedWebsite {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Runway,
-      Self::Higgsfield,
-      Self::Krea,
-      Self::OpenArt,
-      Self::Artcraft,
-      Self::Magnific,
-      Self::FreePik,
-    ])
+    BTreeSet::from([Self::Runway, Self::Higgsfield, Self::Krea, Self::OpenArt, Self::Artcraft, Self::Magnific, Self::FreePik])
   }
 }
 

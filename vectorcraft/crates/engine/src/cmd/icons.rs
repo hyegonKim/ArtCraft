@@ -7,16 +7,12 @@ use std::sync::Arc;
 use serde_json::{Value, json};
 use vectorcraft_color::{Color, Paint};
 use vectorcraft_doc::{
-    Appearance, AppearanceItem, Artboard, CharStyle, Document, FillLayer, LineCap, LineJoin, Node,
-    NodeKind, StrokeLayer, TextObject,
+    Appearance, AppearanceItem, Artboard, CharStyle, Document, FillLayer, LineCap, LineJoin, Node, NodeKind, StrokeLayer, TextObject,
 };
 use vectorcraft_geom::{Affine, BezPath, PathData, Point, Rect, Vec2, shapes};
 use vectorcraft_render::encode::{RasterExportOptions, RasterFormat};
 
-use super::{
-    CommandSpec, Result, Session, always, bad, cmd, color_value, has_doc, number_or, str_param,
-    switch_or, text_param, unique_name,
-};
+use super::{CommandSpec, Result, Session, always, bad, cmd, color_value, has_doc, number_or, str_param, switch_or, text_param, unique_name};
 
 pub const ICON_CATEGORIES: &[&str] = &["UI", "Arrows", "Media", "Files", "Commerce", "Badges"];
 pub const DEFAULT_BATCH_SIZES: &[u32] = &[16, 24, 32, 48, 64, 128];
@@ -117,15 +113,12 @@ pub fn specs() -> Vec<CommandSpec> {
 
 pub fn matching_icons(query: Option<&str>, category: Option<&str>) -> Vec<&'static BuiltinIcon> {
     let q = query.map(str::trim).filter(|s| !s.is_empty()).map(str::to_ascii_lowercase);
-    let cat = category
-        .map(str::trim)
-        .filter(|s| !s.is_empty() && !s.eq_ignore_ascii_case("all"))
-        .map(str::to_ascii_lowercase);
+    let cat = category.map(str::trim).filter(|s| !s.is_empty() && !s.eq_ignore_ascii_case("all")).map(str::to_ascii_lowercase);
     CATALOG
         .iter()
         .filter(|ic| {
             let cat_ok = cat.as_ref().is_none_or(|c| ic.category.to_ascii_lowercase() == *c);
-            let q_ok = q.as_ref().is_none_or(| needle| {
+            let q_ok = q.as_ref().is_none_or(|needle| {
                 ic.name.contains(needle)
                     || ic.label.to_ascii_lowercase().contains(needle)
                     || ic.category.to_ascii_lowercase().contains(needle)
@@ -401,10 +394,8 @@ fn run_list(_s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "icon.list";
     let q = text_param(p, "query", C)?;
     let cat = text_param(p, "category", C)?;
-    let list: Vec<Value> = matching_icons(q, cat)
-        .into_iter()
-        .map(|ic| json!({"name": ic.name, "label": ic.label, "category": ic.category, "tags": ic.tags}))
-        .collect();
+    let list: Vec<Value> =
+        matching_icons(q, cat).into_iter().map(|ic| json!({"name": ic.name, "label": ic.label, "category": ic.category, "tags": ic.tags})).collect();
     Ok(json!({
         "icons": list,
         "categories": ICON_CATEGORIES,
@@ -437,12 +428,7 @@ fn run_insert(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(bad(C, "`strokeWidth` must be between 0.25 and 24 pt"));
     }
     let color = parse_stroke_color(p, C)?;
-    let ab_center = s
-        .doc()?
-        .doc
-        .artboards
-        .first()
-        .map_or(Point::new(200.0, 200.0), |a| a.rect.center());
+    let ab_center = s.doc()?.doc.artboards.first().map_or(Point::new(200.0, 200.0), |a| a.rect.center());
     let cx = number_or(p, "x", ab_center.x, C)?;
     let cy = number_or(p, "y", ab_center.y, C)?;
     if !cx.is_finite() || !cy.is_finite() {
@@ -507,13 +493,7 @@ fn parse_sheet_layout(p: &Value) -> Result<SheetLayout> {
     })
 }
 
-fn build_sheet_cell(
-    d: &mut Document,
-    ic: &BuiltinIcon,
-    cell_rect: Rect,
-    lay: SheetLayout,
-    color: Color,
-) -> Result<Arc<Node>> {
+fn build_sheet_cell(d: &mut Document, ic: &BuiltinIcon, cell_rect: Rect, lay: SheetLayout, color: Color) -> Result<Arc<Node>> {
     let mut items = Vec::with_capacity(3);
     if lay.show_grid {
         let card = shapes::rounded_rectangle(cell_rect.inflate(-2.0, -2.0), 6.0);
@@ -527,18 +507,11 @@ fn build_sheet_cell(
         items.push(Arc::new(Node::path(d.alloc_id(), card, app)));
     }
     let icon_y_offset = if lay.show_labels { -6.0 } else { 0.0 };
-    let top_left = Point::new(
-        cell_rect.center().x - lay.icon_size * 0.5,
-        cell_rect.center().y - lay.icon_size * 0.5 + icon_y_offset,
-    );
+    let top_left = Point::new(cell_rect.center().x - lay.icon_size * 0.5, cell_rect.center().y - lay.icon_size * 0.5 + icon_y_offset);
     items.push(Arc::new(make_icon_node(d.alloc_id(), ic.name, top_left, lay.icon_size, lay.stroke_w, color)?));
 
     if lay.show_labels {
-        let style = CharStyle {
-            size: 8.0,
-            fill: Paint::solid(Color::rgb(0.36, 0.39, 0.45)),
-            ..CharStyle::default()
-        };
+        let style = CharStyle { size: 8.0, fill: Paint::solid(Color::rgb(0.36, 0.39, 0.45)), ..CharStyle::default() };
         let mut txt = TextObject::point(Point::new(cell_rect.center().x, cell_rect.y1 - 8.0), ic.name, style);
         txt.para.justify = vectorcraft_doc::Justify::Center;
         super::typecmd::refresh_bounds(&mut txt);
@@ -558,14 +531,7 @@ fn run_generate_sheet(s: &mut Session, p: &Value) -> Result<Value> {
     let sheet_w = lay.padding * 2.0 + (lay.columns as f64) * lay.cell_size;
     let sheet_h = lay.padding * 2.0 + (rows as f64) * lay.cell_size;
 
-    let origin_x = s
-        .doc()?
-        .doc
-        .artboards
-        .iter()
-        .map(|a| a.rect.x1)
-        .fold(0.0_f64, f64::max)
-        + if lay.create_artboard { 40.0 } else { 0.0 };
+    let origin_x = s.doc()?.doc.artboards.iter().map(|a| a.rect.x1).fold(0.0_f64, f64::max) + if lay.create_artboard { 40.0 } else { 0.0 };
     let origin_y = s.doc()?.doc.artboards.first().map_or(0.0, |a| a.rect.y0);
     let sheet_rect = Rect::new(origin_x, origin_y, origin_x + sheet_w, origin_y + sheet_h);
 
@@ -697,20 +663,14 @@ fn run_export_batch(_s: &mut Session, p: &Value) -> Result<Value> {
             if want_svg {
                 let svg_text = vectorcraft_svg::export(
                     &doc,
-                    &vectorcraft_svg::ExportOptions {
-                        artboard: Some(0),
-                        object_ids: vectorcraft_svg::ObjectIds::Minimal,
-                        ..Default::default()
-                    },
+                    &vectorcraft_svg::ExportOptions { artboard: Some(0), object_ids: vectorcraft_svg::ObjectIds::Minimal, ..Default::default() },
                 );
                 let out_path = sub_dir.join(format!("{}.svg", ic.name)).to_string_lossy().into_owned();
                 super::fileio::write_file(&out_path, svg_text.as_bytes())?;
                 written.push(out_path);
             }
             if want_png {
-                let png_bytes = renderer
-                    .export_region(&doc, region, RasterFormat::Png, &png_opts)
-                    .map_err(crate::EngineError::Other)?;
+                let png_bytes = renderer.export_region(&doc, region, RasterFormat::Png, &png_opts).map_err(crate::EngineError::Other)?;
                 let out_path = sub_dir.join(format!("{}.png", ic.name)).to_string_lossy().into_owned();
                 super::fileio::write_file(&out_path, &png_bytes)?;
                 written.push(out_path);
@@ -735,8 +695,8 @@ fn run_export_batch(_s: &mut Session, p: &Value) -> Result<Value> {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use crate::Session;
+    use serde_json::json;
 
     #[test]
     fn icon_catalog_insert_sheet_and_multi_size_batch_export_work() {
@@ -755,9 +715,7 @@ mod tests {
         s.execute("edit.undo", &json!({})).unwrap();
         assert!(s.active().unwrap().doc.node(cid).is_none());
 
-        let sheet = s
-            .execute("icon.generateSheet", &json!({"category": "UI", "columns": 3, "cellSize": 56, "createArtboard": true}))
-            .unwrap();
+        let sheet = s.execute("icon.generateSheet", &json!({"category": "UI", "columns": 3, "cellSize": 56, "createArtboard": true})).unwrap();
         assert_eq!(sheet["count"], 6);
         assert_eq!(sheet["columns"], 3);
         assert_eq!(sheet["rows"], 2);

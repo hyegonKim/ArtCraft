@@ -730,12 +730,7 @@ fn material_override_replaces_advanced3d_mesh_material_and_guards_self_reference
     *p.comp_mut(cid).unwrap() = comp.clone();
 
     // Hidden cyan solid layer acts as material override source.
-    let src_id = p.add_item(
-        "CyanTex",
-        Label::Aqua,
-        None,
-        ItemKind::Solid(Solid { color: [0.0, 0.85, 1.0], width: 64, height: 64, pixel_aspect: 1.0 }),
-    );
+    let src_id = p.add_item("CyanTex", Label::Aqua, None, ItemKind::Solid(Solid { color: [0.0, 0.85, 1.0], width: 64, height: 64, pixel_aspect: 1.0 }));
     let mut src_layer = build::layer(&mut p, &comp, "CyanTex", LayerSource::Solid { item: src_id }, (64, 64), None);
     src_layer.switches.video = false;
     let src_lid = src_layer.id;
@@ -744,13 +739,8 @@ fn material_override_replaces_advanced3d_mesh_material_and_guards_self_reference
     let mut plane = build::layer(&mut p, &comp, "Plane", LayerSource::Primitive { kind: PrimitiveKind::Plane }, (120, 80), None);
     plane.switches.three_d = true;
     set(&mut plane, "materialOptions/baseColor", Value::Color([1.0, 0.0, 0.0, 1.0]));
-    plane.material_override = Some(MaterialOverride {
-        enabled: true,
-        source_layer: Some(src_lid),
-        uniform_tiling: true,
-        tile_scale: 1.0,
-        ..MaterialOverride::default()
-    });
+    plane.material_override =
+        Some(MaterialOverride { enabled: true, source_layer: Some(src_lid), uniform_tiling: true, tile_scale: 1.0, ..MaterialOverride::default() });
     let plane_lid = plane.id;
 
     push(&mut p, cid, plane);
@@ -761,11 +751,8 @@ fn material_override_replaces_advanced3d_mesh_material_and_guards_self_reference
     assert!(c[2] > 0.7 && c[0] < 0.1, "override source cyan should replace red base color, got {c:?}");
 
     // Self-reference guard: pointing source_layer at itself falls back to original red material cleanly.
-    p.comp_mut(cid).unwrap().layer_mut(plane_lid).unwrap().material_override = Some(MaterialOverride {
-        enabled: true,
-        source_layer: Some(plane_lid),
-        ..MaterialOverride::default()
-    });
+    p.comp_mut(cid).unwrap().layer_mut(plane_lid).unwrap().material_override =
+        Some(MaterialOverride { enabled: true, source_layer: Some(plane_lid), ..MaterialOverride::default() });
     let img_self = render(&p, cid);
     let cs = img_self.get(i64::from(W / 2), i64::from(H / 2));
     assert!(cs[0] > 0.7 && cs[2] < 0.1, "self-reference must be ignored, got {cs:?}");

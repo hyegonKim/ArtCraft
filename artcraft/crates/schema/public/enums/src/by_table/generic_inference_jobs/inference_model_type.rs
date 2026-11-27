@@ -44,7 +44,6 @@ pub enum InferenceModelType {
   #[serde(rename = "so_vits_svc")]
   SoVitsSvc,
   // TODO: Does this need to be "legacy_tacotron2" ?
-
   #[serde(rename = "seed_vc")]
   SeedVc,
 
@@ -631,7 +630,6 @@ impl InferenceModelType {
       Self::StyleTTS2,
       Self::ConvertFbxToGltf,
       Self::BvhToWorkflow,
-
       // Image models (mirror of CommonModelType)
       Self::Flux1Dev,
       Self::Flux1Schnell,
@@ -673,7 +671,6 @@ impl InferenceModelType {
       Self::Midjourney7,
       Self::Midjourney7Niji,
       Self::Midjourney8,
-
       // Video models
       Self::GrokVideo,
       Self::GrokImagineVideo,
@@ -720,18 +717,15 @@ impl InferenceModelType {
       Self::Veo3p1Lite,
       Self::ViduQ3,
       Self::ViduQ3Turbo,
-
       // Audio models
       Self::SunoMusic,
       Self::SunoRemix,
       Self::SunoSounds,
       Self::SunoSample,
       Self::SeedAudio1p0,
-
       Self::PreviewModel,
       Self::PreviewModelFast,
       Self::SwitchX,
-
       // 3D Object generation models
       Self::Hunyuan3d2_0,
       Self::Hunyuan3d2_1,
@@ -743,7 +737,6 @@ impl InferenceModelType {
       Self::Tripo3dH3_1,
       Self::MeshyV6,
       Self::Rodin2_5Fast,
-
       // Splat generation models (World Labs)
       Self::Marble0p1Mini,
       Self::Marble0p1Plus,
@@ -1344,12 +1337,7 @@ mod tests {
       // is consistent (no swapped variants).
       for common in CommonModelType::all_variants() {
         let inference = InferenceModelType::from_common_model_type(common);
-        assert_eq!(
-          common.to_str(),
-          inference.to_str(),
-          "mismatch: CommonModelType::{:?} -> InferenceModelType::{:?}",
-          common, inference,
-        );
+        assert_eq!(common.to_str(), inference.to_str(), "mismatch: CommonModelType::{:?} -> InferenceModelType::{:?}", common, inference,);
       }
     }
 
@@ -1367,18 +1355,9 @@ mod tests {
 
     #[test]
     fn spot_check_specific_mappings() {
-      assert_eq!(
-        InferenceModelType::from_common_model_type(CommonModelType::Flux1Dev),
-        InferenceModelType::Flux1Dev,
-      );
-      assert_eq!(
-        InferenceModelType::from_common_model_type(CommonModelType::Sora2Pro),
-        InferenceModelType::Sora2Pro,
-      );
-      assert_eq!(
-        InferenceModelType::from_common_model_type(CommonModelType::Marble0p1Plus),
-        InferenceModelType::Marble0p1Plus,
-      );
+      assert_eq!(InferenceModelType::from_common_model_type(CommonModelType::Flux1Dev), InferenceModelType::Flux1Dev,);
+      assert_eq!(InferenceModelType::from_common_model_type(CommonModelType::Sora2Pro), InferenceModelType::Sora2Pro,);
+      assert_eq!(InferenceModelType::from_common_model_type(CommonModelType::Marble0p1Plus), InferenceModelType::Marble0p1Plus,);
     }
   }
 
@@ -1402,7 +1381,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in InferenceModelType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

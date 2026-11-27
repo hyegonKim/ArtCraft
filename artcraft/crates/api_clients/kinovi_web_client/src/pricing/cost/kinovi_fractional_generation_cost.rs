@@ -37,12 +37,7 @@ impl KinoviFractionalGenerationCost {
   pub fn from_kinovi_credits(kinovi_credits: f64) -> Self {
     // usd_cents == credits × 100 / ENTERPRISE_CREDITS_PER_DOLLAR == hundredths / ENTERPRISE_CREDITS_PER_DOLLAR.
     let hundredths_of_credit = (kinovi_credits * 100.0).round() as u64;
-    Self {
-      kinovi_credits,
-      usd_cents_rounded_up: hundredths_of_credit.div_ceil(ENTERPRISE_CREDITS_PER_DOLLAR),
-      usd_cents_rounded_down: hundredths_of_credit / ENTERPRISE_CREDITS_PER_DOLLAR,
-      usd_cents_fractional: hundredths_of_credit as f64 / ENTERPRISE_CREDITS_PER_DOLLAR as f64,
-    }
+    Self { kinovi_credits, usd_cents_rounded_up: hundredths_of_credit.div_ceil(ENTERPRISE_CREDITS_PER_DOLLAR), usd_cents_rounded_down: hundredths_of_credit / ENTERPRISE_CREDITS_PER_DOLLAR, usd_cents_fractional: hundredths_of_credit as f64 / ENTERPRISE_CREDITS_PER_DOLLAR as f64 }
   }
 }
 

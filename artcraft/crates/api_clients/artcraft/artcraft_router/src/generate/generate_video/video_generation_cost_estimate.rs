@@ -7,7 +7,7 @@ pub struct VideoGenerationCostEstimate {
   pub is_unlimited: bool,
   pub is_rate_limited: bool,
   pub has_watermark: bool,
-  
+
   /// Whether failures are refunded.
   /// True: 100% yes
   /// False: 100% no

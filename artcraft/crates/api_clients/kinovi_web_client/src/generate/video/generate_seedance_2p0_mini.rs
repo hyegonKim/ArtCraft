@@ -5,11 +5,7 @@ use crate::pricing::kinovi_cost_calculator_trait::KinoviCostCalculatorTrait;
 use crate::pricing::kinovi_pricing_rate::KinoviPricingRate;
 use crate::pricing::kinovi_pricing_tier::KinoviPricingTier;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviBitrateRaw,
-  KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs,
-  WorkflowRunTaskRequest,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviBitrateRaw, KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest};
 
 // ── Args ──
 
@@ -104,25 +100,13 @@ pub enum KinoviSeedance2p0MiniBitrate {
 // count multiplies the total.
 
 /// Per-second base credit rates by resolution.
-const SEEDANCE_2P0_MINI_480P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 7.5,
-  maybe_enterprise_credits: Some(3.0),
-};
-const SEEDANCE_2P0_MINI_720P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 20.0,
-  maybe_enterprise_credits: Some(8.0),
-};
+const SEEDANCE_2P0_MINI_480P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 7.5, maybe_enterprise_credits: Some(3.0) };
+const SEEDANCE_2P0_MINI_720P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 20.0, maybe_enterprise_credits: Some(8.0) };
 
 /// Per-second video-reference surcharge rates by resolution. Flat per
 /// generation regardless of how many reference videos are attached.
-const SEEDANCE_2P0_MINI_480P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 2.0,
-  maybe_enterprise_credits: Some(0.8),
-};
-const SEEDANCE_2P0_MINI_720P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 4.0,
-  maybe_enterprise_credits: Some(1.6),
-};
+const SEEDANCE_2P0_MINI_480P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate { consumer_credits: 2.0, maybe_enterprise_credits: Some(0.8) };
+const SEEDANCE_2P0_MINI_720P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate { consumer_credits: 4.0, maybe_enterprise_credits: Some(1.6) };
 
 impl KinoviCostCalculatorTrait for GenerateSeedance2p0MiniRequest {
   type Cost = KinoviSeedanceFractionalGenerationCost;
@@ -141,25 +125,15 @@ impl KinoviCostCalculatorTrait for GenerateSeedance2p0MiniRequest {
 
     let output_seconds = f64::from(self.duration_seconds) * f64::from(self.batch_multiplier());
     let base_credits = base_rate.credits(tier) * output_seconds;
-    let maybe_video_reference_surcharge_credits = if self.has_video_reference() {
-      Some(surcharge_rate.credits(tier) * output_seconds)
-    } else {
-      None
-    };
+    let maybe_video_reference_surcharge_credits = if self.has_video_reference() { Some(surcharge_rate.credits(tier) * output_seconds) } else { None };
 
-    KinoviSeedanceFractionalGenerationCost::from_base_and_surcharge_at_tier(
-      tier,
-      base_credits,
-      maybe_video_reference_surcharge_credits,
-    )
+    KinoviSeedanceFractionalGenerationCost::from_base_and_surcharge_at_tier(tier, base_credits, maybe_video_reference_surcharge_credits)
   }
 }
 
 impl GenerateSeedance2p0MiniRequest {
   fn has_video_reference(&self) -> bool {
-    self.reference_video_urls
-      .as_ref()
-      .is_some_and(|urls| !urls.is_empty())
+    self.reference_video_urls.as_ref().is_some_and(|urls| !urls.is_empty())
   }
 
   fn batch_multiplier(&self) -> u8 {
@@ -187,42 +161,16 @@ pub struct GenerateSeedance2p0MiniResponse {
 
 // ── Entry point ──
 
-pub async fn generate_seedance_2p0_mini(
-  args: GenerateSeedance2p0MiniArgs<'_>,
-) -> Result<GenerateSeedance2p0MiniResponse, KinoviWebError> {
-  let raw_response = workflow_run_task(WorkflowRunTaskArgs {
-    request: to_raw_request(args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_seedance_2p0_mini(args: GenerateSeedance2p0MiniArgs<'_>) -> Result<GenerateSeedance2p0MiniResponse, KinoviWebError> {
+  let raw_response = workflow_run_task(WorkflowRunTaskArgs { request: to_raw_request(args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSeedance2p0MiniResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-    task_ids: raw_response.task_ids,
-    order_ids: raw_response.order_ids,
-  })
+  Ok(GenerateSeedance2p0MiniResponse { task_id: raw_response.task_id, order_id: raw_response.order_id, task_ids: raw_response.task_ids, order_ids: raw_response.order_ids })
 }
 
 // ── Mapping helpers ──
 
 fn to_raw_request(req: GenerateSeedance2p0MiniRequest) -> WorkflowRunTaskRequest {
-  WorkflowRunTaskRequest {
-    model_type: KinoviModelTypeRaw::Seedance2Mini,
-    prompt: req.prompt,
-    aspect_ratio: map_aspect_ratio(req.aspect_ratio),
-    output_resolution: Some(map_output_resolution(req.output_resolution)),
-    batch_count: map_batch_count(req.batch_count),
-    duration_seconds: req.duration_seconds,
-    start_frame_url: req.start_frame_url,
-    end_frame_url: req.end_frame_url,
-    reference_image_urls: req.reference_image_urls,
-    reference_video_urls: req.reference_video_urls,
-    reference_audio_urls: req.reference_audio_urls,
-    character_ids: req.character_ids,
-    use_face_blur_hack: req.use_face_blur_hack,
-    bitrate: map_bitrate(req.bitrate),
-  }
+  WorkflowRunTaskRequest { model_type: KinoviModelTypeRaw::Seedance2Mini, prompt: req.prompt, aspect_ratio: map_aspect_ratio(req.aspect_ratio), output_resolution: Some(map_output_resolution(req.output_resolution)), batch_count: map_batch_count(req.batch_count), duration_seconds: req.duration_seconds, start_frame_url: req.start_frame_url, end_frame_url: req.end_frame_url, reference_image_urls: req.reference_image_urls, reference_video_urls: req.reference_video_urls, reference_audio_urls: req.reference_audio_urls, character_ids: req.character_ids, use_face_blur_hack: req.use_face_blur_hack, bitrate: map_bitrate(req.bitrate) }
 }
 
 fn map_aspect_ratio(ar: Option<KinoviSeedance2p0MiniAspectRatio>) -> KinoviAspectRatioRaw {
@@ -457,11 +405,7 @@ mod tests {
         for (tier, make, duration, base, surcharge) in cases {
           let costs = with_video_ref(make(*duration)).calculate_costs(*tier);
           assert_eq!(costs.base_cost.kinovi_credits, *base, "base at {duration}s ({tier:?})");
-          assert_eq!(
-            costs.video_reference_surcharge_cost.map(|c| c.kinovi_credits),
-            Some(*surcharge),
-            "surcharge at {duration}s ({tier:?})",
-          );
+          assert_eq!(costs.video_reference_surcharge_cost.map(|c| c.kinovi_credits), Some(*surcharge), "surcharge at {duration}s ({tier:?})",);
           assert_eq!(costs.total_cost.kinovi_credits, base + surcharge, "total at {duration}s ({tier:?})");
         }
       }
@@ -486,11 +430,7 @@ mod tests {
       /// The surcharge applies per generated video, so batches multiply it.
       #[test]
       fn batch_multiplies_surcharge() {
-        let request = with_video_ref(build_request(
-          5,
-          Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP),
-          Some(KinoviSeedance2p0MiniBatchCount::Two),
-        ));
+        let request = with_video_ref(build_request(5, Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP), Some(KinoviSeedance2p0MiniBatchCount::Two)));
 
         // Consumer: (37.5 base + 10 surcharge) × 2.
         let consumer = request.calculate_consumer_costs();
@@ -513,16 +453,7 @@ mod tests {
 
       #[test]
       fn batch_scales_total_linearly_at_both_tiers() {
-        let by_count = [
-          (KinoviSeedance2p0MiniBatchCount::One, 1.0),
-          (KinoviSeedance2p0MiniBatchCount::Two, 2.0),
-          (KinoviSeedance2p0MiniBatchCount::Three, 3.0),
-          (KinoviSeedance2p0MiniBatchCount::Four, 4.0),
-          (KinoviSeedance2p0MiniBatchCount::Five, 5.0),
-          (KinoviSeedance2p0MiniBatchCount::Six, 6.0),
-          (KinoviSeedance2p0MiniBatchCount::Seven, 7.0),
-          (KinoviSeedance2p0MiniBatchCount::Eight, 8.0),
-        ];
+        let by_count = [(KinoviSeedance2p0MiniBatchCount::One, 1.0), (KinoviSeedance2p0MiniBatchCount::Two, 2.0), (KinoviSeedance2p0MiniBatchCount::Three, 3.0), (KinoviSeedance2p0MiniBatchCount::Four, 4.0), (KinoviSeedance2p0MiniBatchCount::Five, 5.0), (KinoviSeedance2p0MiniBatchCount::Six, 6.0), (KinoviSeedance2p0MiniBatchCount::Seven, 7.0), (KinoviSeedance2p0MiniBatchCount::Eight, 8.0)];
         for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
           let base = r720(5).calculate_costs(tier).total_cost.kinovi_credits;
           for (count, multiplier) in by_count {
@@ -534,11 +465,7 @@ mod tests {
 
       #[test]
       fn batch_eight_480p_with_video_reference() {
-        let request = with_video_ref(build_request(
-          5,
-          Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP),
-          Some(KinoviSeedance2p0MiniBatchCount::Eight),
-        ));
+        let request = with_video_ref(build_request(5, Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP), Some(KinoviSeedance2p0MiniBatchCount::Eight)));
         // Consumer: (37.5 + 10) × 8 = 380. Enterprise: (15 + 4) × 8 = 152.
         assert_eq!(consumer_credits(&request), 380.0);
         assert_eq!(enterprise_credits(&request), 152.0);
@@ -598,14 +525,7 @@ mod tests {
     #[test]
     fn aspect_ratio_does_not_affect_credits() {
       let baseline = consumer_credits(&r720(5));
-      let ratios = [
-        KinoviSeedance2p0MiniAspectRatio::Landscape16x9,
-        KinoviSeedance2p0MiniAspectRatio::UltraWide21x9,
-        KinoviSeedance2p0MiniAspectRatio::Portrait9x16,
-        KinoviSeedance2p0MiniAspectRatio::Square1x1,
-        KinoviSeedance2p0MiniAspectRatio::Standard4x3,
-        KinoviSeedance2p0MiniAspectRatio::Portrait3x4,
-      ];
+      let ratios = [KinoviSeedance2p0MiniAspectRatio::Landscape16x9, KinoviSeedance2p0MiniAspectRatio::UltraWide21x9, KinoviSeedance2p0MiniAspectRatio::Portrait9x16, KinoviSeedance2p0MiniAspectRatio::Square1x1, KinoviSeedance2p0MiniAspectRatio::Standard4x3, KinoviSeedance2p0MiniAspectRatio::Portrait3x4];
       for ar in ratios {
         let mut request = r720(5);
         request.aspect_ratio = Some(ar);
@@ -623,26 +543,8 @@ mod tests {
 
     // ── Helpers ──
 
-    fn build_request(
-      duration_seconds: u8,
-      output_resolution: Option<KinoviSeedance2p0MiniOutputResolution>,
-      batch_count: Option<KinoviSeedance2p0MiniBatchCount>,
-    ) -> GenerateSeedance2p0MiniRequest {
-      GenerateSeedance2p0MiniRequest {
-        prompt: String::new(),
-        aspect_ratio: None,
-        output_resolution,
-        batch_count,
-        duration_seconds,
-        start_frame_url: None,
-        end_frame_url: None,
-        reference_image_urls: None,
-        reference_video_urls: None,
-        reference_audio_urls: None,
-        character_ids: None,
-        use_face_blur_hack: None,
-        bitrate: None,
-      }
+    fn build_request(duration_seconds: u8, output_resolution: Option<KinoviSeedance2p0MiniOutputResolution>, batch_count: Option<KinoviSeedance2p0MiniBatchCount>) -> GenerateSeedance2p0MiniRequest {
+      GenerateSeedance2p0MiniRequest { prompt: String::new(), aspect_ratio: None, output_resolution, batch_count, duration_seconds, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None }
     }
 
     fn r480(dur: u8) -> GenerateSeedance2p0MiniRequest {
@@ -681,21 +583,7 @@ mod tests {
     use super::*;
 
     fn sample() -> GenerateSeedance2p0MiniRequest {
-      GenerateSeedance2p0MiniRequest {
-        prompt: "a corgi".to_string(),
-        aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Standard4x3),
-        output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP),
-        duration_seconds: 10,
-        batch_count: Some(KinoviSeedance2p0MiniBatchCount::Eight),
-        start_frame_url: None,
-        end_frame_url: None,
-        reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]),
-        reference_video_urls: None,
-        reference_audio_urls: None,
-        character_ids: None,
-        use_face_blur_hack: None,
-        bitrate: Some(KinoviSeedance2p0MiniBitrate::High),
-      }
+      GenerateSeedance2p0MiniRequest { prompt: "a corgi".to_string(), aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Standard4x3), output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP), duration_seconds: 10, batch_count: Some(KinoviSeedance2p0MiniBatchCount::Eight), start_frame_url: None, end_frame_url: None, reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]), reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: Some(KinoviSeedance2p0MiniBitrate::High) }
     }
 
     #[test]
@@ -731,16 +619,7 @@ mod tests {
 
     #[test]
     fn all_batch_counts_map() {
-      let expected: &[(KinoviSeedance2p0MiniBatchCount, u8)] = &[
-        (KinoviSeedance2p0MiniBatchCount::One, 1),
-        (KinoviSeedance2p0MiniBatchCount::Two, 2),
-        (KinoviSeedance2p0MiniBatchCount::Three, 3),
-        (KinoviSeedance2p0MiniBatchCount::Four, 4),
-        (KinoviSeedance2p0MiniBatchCount::Five, 5),
-        (KinoviSeedance2p0MiniBatchCount::Six, 6),
-        (KinoviSeedance2p0MiniBatchCount::Seven, 7),
-        (KinoviSeedance2p0MiniBatchCount::Eight, 8),
-      ];
+      let expected: &[(KinoviSeedance2p0MiniBatchCount, u8)] = &[(KinoviSeedance2p0MiniBatchCount::One, 1), (KinoviSeedance2p0MiniBatchCount::Two, 2), (KinoviSeedance2p0MiniBatchCount::Three, 3), (KinoviSeedance2p0MiniBatchCount::Four, 4), (KinoviSeedance2p0MiniBatchCount::Five, 5), (KinoviSeedance2p0MiniBatchCount::Six, 6), (KinoviSeedance2p0MiniBatchCount::Seven, 7), (KinoviSeedance2p0MiniBatchCount::Eight, 8)];
       for (count, n) in expected {
         let mut req = sample();
         req.batch_count = Some(*count);
@@ -755,21 +634,7 @@ mod tests {
     }
 
     fn build_probe() -> GenerateSeedance2p0MiniRequest {
-      GenerateSeedance2p0MiniRequest {
-        prompt: String::new(),
-        aspect_ratio: None,
-        output_resolution: None,
-        duration_seconds: 5,
-        batch_count: None,
-        start_frame_url: None,
-        end_frame_url: None,
-        reference_image_urls: None,
-        reference_video_urls: None,
-        reference_audio_urls: None,
-        character_ids: None,
-        use_face_blur_hack: None,
-        bitrate: None,
-      }
+      GenerateSeedance2p0MiniRequest { prompt: String::new(), aspect_ratio: None, output_resolution: None, duration_seconds: 5, batch_count: None, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None }
     }
   }
 
@@ -788,25 +653,7 @@ mod tests {
     async fn test_text_to_video_720p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0MiniRequest {
-          prompt: "A giant evil teddy bear steps on people in the city.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Landscape16x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs { session: &session, host_override: None, request: GenerateSeedance2p0MiniRequest { prompt: "A giant evil teddy bear steps on people in the city.".to_string(), aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Landscape16x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("mini t2v 720p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -819,25 +666,7 @@ mod tests {
     async fn test_text_to_video_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0MiniRequest {
-          prompt: "A snowman fights a bear".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Standard4x3),
-          output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP),
-          batch_count: None,
-          duration_seconds: 10,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs { session: &session, host_override: None, request: GenerateSeedance2p0MiniRequest { prompt: "A snowman fights a bear".to_string(), aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Standard4x3), output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP), batch_count: None, duration_seconds: 10, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("mini t2v 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -849,27 +678,7 @@ mod tests {
     async fn test_reference_to_video_720p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0MiniRequest {
-          prompt: "Girl walks around in the city, giving a historical tour".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::UltraWide21x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 15,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: Some(vec![
-            "https://static.seedance2-pro.com/materials/20260624/1782342102687-53fe5496.png".to_string(),
-          ]),
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs { session: &session, host_override: None, request: GenerateSeedance2p0MiniRequest { prompt: "Girl walks around in the city, giving a historical tour".to_string(), aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::UltraWide21x9), output_resolution: None, batch_count: None, duration_seconds: 15, start_frame_url: None, end_frame_url: None, reference_image_urls: Some(vec!["https://static.seedance2-pro.com/materials/20260624/1782342102687-53fe5496.png".to_string()]), reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("mini reference-to-video 720p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -881,27 +690,7 @@ mod tests {
     async fn test_video_reference_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0MiniRequest {
-          prompt: "Change @video1 to night time.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Landscape16x9),
-          output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP),
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: Some(vec![
-            "https://static.seedance2-pro.com/materials/20260315/1773594284659-3a46d231.mp4".to_string(),
-          ]),
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_mini(GenerateSeedance2p0MiniArgs { session: &session, host_override: None, request: GenerateSeedance2p0MiniRequest { prompt: "Change @video1 to night time.".to_string(), aspect_ratio: Some(KinoviSeedance2p0MiniAspectRatio::Landscape16x9), output_resolution: Some(KinoviSeedance2p0MiniOutputResolution::FourEightyP), batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: Some(vec!["https://static.seedance2-pro.com/materials/20260315/1773594284659-3a46d231.mp4".to_string()]), reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("mini video ref 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);

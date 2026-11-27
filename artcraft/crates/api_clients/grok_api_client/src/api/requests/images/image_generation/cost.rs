@@ -33,13 +33,13 @@ impl GrokRequestCostCalculator for ImageGenerationRequest {
 /// `image_generation` and `image_edit` (same output side).
 pub(crate) fn output_mills_per_image(model: &ImageModel, resolution: ImageResolution) -> UsdMills {
   match (model, resolution) {
-    (ImageModel::GrokImagineImage,        ImageResolution::OneK) => 20,
-    (ImageModel::GrokImagineImage,        ImageResolution::TwoK) => 20,
+    (ImageModel::GrokImagineImage, ImageResolution::OneK) => 20,
+    (ImageModel::GrokImagineImage, ImageResolution::TwoK) => 20,
     (ImageModel::GrokImagineImageQuality, ImageResolution::OneK) => 50,
     (ImageModel::GrokImagineImageQuality, ImageResolution::TwoK) => 70,
     // Custom: conservatively assume the more expensive `-quality` tier.
-    (ImageModel::Custom(_),               ImageResolution::OneK) => 50,
-    (ImageModel::Custom(_),               ImageResolution::TwoK) => 70,
+    (ImageModel::Custom(_), ImageResolution::OneK) => 50,
+    (ImageModel::Custom(_), ImageResolution::TwoK) => 70,
   }
 }
 
@@ -49,20 +49,8 @@ mod tests {
   use crate::api::types::image_types::image_aspect_ratio::ImageAspectRatio;
   use crate::api::types::image_types::image_response_format::ImageResponseFormat;
 
-  fn make_request(
-    model: Option<ImageModel>,
-    resolution: Option<ImageResolution>,
-    number_images: Option<u32>,
-  ) -> ImageGenerationRequest {
-    ImageGenerationRequest {
-      prompt: "test".to_string(),
-      model,
-      number_images,
-      aspect_ratio: None,
-      resolution,
-      response_format: None,
-      user: None,
-    }
+  fn make_request(model: Option<ImageModel>, resolution: Option<ImageResolution>, number_images: Option<u32>) -> ImageGenerationRequest {
+    ImageGenerationRequest { prompt: "test".to_string(), model, number_images, aspect_ratio: None, resolution, response_format: None, user: None }
   }
 
   // ── Per-image rate at each (model, resolution) combo ──
@@ -192,13 +180,7 @@ mod tests {
     fn cost_is_independent_of_aspect_ratio() {
       let mut base = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1));
       let base_cost = base.calculate_cost_in_mills();
-      for ar in [
-        ImageAspectRatio::Square,
-        ImageAspectRatio::Landscape16x9,
-        ImageAspectRatio::Portrait9x16,
-        ImageAspectRatio::Landscape20x9,
-        ImageAspectRatio::Auto,
-      ] {
+      for ar in [ImageAspectRatio::Square, ImageAspectRatio::Landscape16x9, ImageAspectRatio::Portrait9x16, ImageAspectRatio::Landscape20x9, ImageAspectRatio::Auto] {
         base.aspect_ratio = Some(ar);
         assert_eq!(base.calculate_cost_in_mills(), base_cost, "{ar:?}");
       }
@@ -232,7 +214,7 @@ mod tests {
     fn quality_is_at_least_as_expensive_as_standard() {
       for res in [ImageResolution::OneK, ImageResolution::TwoK] {
         let std = make_request(Some(ImageModel::GrokImagineImage), Some(res), Some(1)).calculate_cost_in_mills();
-        let q   = make_request(Some(ImageModel::GrokImagineImageQuality), Some(res), Some(1)).calculate_cost_in_mills();
+        let q = make_request(Some(ImageModel::GrokImagineImageQuality), Some(res), Some(1)).calculate_cost_in_mills();
         assert!(std <= q, "standard ({std}) should be <= quality ({q}) at {res:?}");
       }
     }

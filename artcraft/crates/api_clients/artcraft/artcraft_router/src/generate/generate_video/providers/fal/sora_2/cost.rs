@@ -1,7 +1,5 @@
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::sora_2::request::{
-  FalSora2Duration, FalSora2RequestState,
-};
+use crate::generate::generate_video::providers::fal::sora_2::request::{FalSora2Duration, FalSora2RequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalSora2CostState {
@@ -10,24 +8,14 @@ pub struct FalSora2CostState {
 
 impl FalSora2CostState {
   pub fn from_request(request: &FalSora2RequestState) -> Self {
-    Self {
-      duration_seconds: duration_seconds_for_cost(request.duration),
-    }
+    Self { duration_seconds: duration_seconds_for_cost(request.duration) }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
     // Sora 2: $0.10/second. Default duration (Fal client): 4s.
     let cost_in_usd_cents = self.duration_seconds * 10;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -46,25 +34,27 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Sora2,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Sora2, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn four_seconds_is_40() { assert_eq!(cost_cents(Some(4)), 40); }
+  fn four_seconds_is_40() {
+    assert_eq!(cost_cents(Some(4)), 40);
+  }
 
   #[test]
-  fn eight_seconds_is_80() { assert_eq!(cost_cents(Some(8)), 80); }
+  fn eight_seconds_is_80() {
+    assert_eq!(cost_cents(Some(8)), 80);
+  }
 
   #[test]
-  fn twelve_seconds_is_120() { assert_eq!(cost_cents(Some(12)), 120); }
+  fn twelve_seconds_is_120() {
+    assert_eq!(cost_cents(Some(12)), 120);
+  }
 
   #[test]
-  fn default_duration_is_4s_priced_at_40() { assert_eq!(cost_cents(None), 40); }
+  fn default_duration_is_4s_priced_at_40() {
+    assert_eq!(cost_cents(None), 40);
+  }
 }

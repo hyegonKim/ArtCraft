@@ -71,12 +71,7 @@ pub struct AmbientRemoveParams {
 
 impl Default for AmbientRemoveParams {
     fn default() -> Self {
-        Self {
-            mode: AmbientMode::Shadows,
-            remove_related_elements: true,
-            enhance: true,
-            strength: 80.0,
-        }
+        Self { mode: AmbientMode::Shadows, remove_related_elements: true, enhance: true, strength: 80.0 }
     }
 }
 
@@ -212,11 +207,7 @@ fn remove_lens_flares(px: &mut [[f32; 4]], w: usize, h: usize, amt: f32, related
         let sat = if mx > 1e-4 { (mx - mn) / mx } else { 0.0 };
         // Detect bright blown flare cores AND purple/cyan/warm secondary aperture ghosts.
         let blown = ((lum - 0.74) / 0.24).clamp(0.0, 1.0) * (1.0 - sat * 0.65);
-        let chroma_ghost = if related {
-            ((lum - 0.55) / 0.35).clamp(0.0, 1.0) * ((b.max(r) - g).max(0.0) * 1.8).clamp(0.0, 1.0)
-        } else {
-            0.0
-        };
+        let chroma_ghost = if related { ((lum - 0.55) / 0.35).clamp(0.0, 1.0) * ((b.max(r) - g).max(0.0) * 1.8).clamp(0.0, 1.0) } else { 0.0 };
         flare_mask[i] = blown.max(chroma_ghost);
     }
     let mask_sigma = (min_side * if related { 0.045 } else { 0.025 }).clamp(1.5, 24.0);
@@ -356,12 +347,22 @@ mod tests {
                 sh[y * w + x] = [0.20, 0.22, 0.26, 1.0];
             }
         }
-        remove_ambient_effects_rgba(&mut sh, w, h, &AmbientRemoveParams { mode: AmbientMode::Shadows, remove_related_elements: true, enhance: false, strength: 90.0 });
+        remove_ambient_effects_rgba(
+            &mut sh,
+            w,
+            h,
+            &AmbientRemoveParams { mode: AmbientMode::Shadows, remove_related_elements: true, enhance: false, strength: 90.0 },
+        );
         assert!(sh[24 * w + 24][0] > 0.36, "shadow center should lift significantly, got {}", sh[24 * w + 24][0]);
 
         // 2. Reflection veil
         let mut rf = vec![[0.55f32, 0.60, 0.65, 1.0]; w * h];
-        remove_ambient_effects_rgba(&mut rf, w, h, &AmbientRemoveParams { mode: AmbientMode::Reflections, remove_related_elements: true, enhance: false, strength: 85.0 });
+        remove_ambient_effects_rgba(
+            &mut rf,
+            w,
+            h,
+            &AmbientRemoveParams { mode: AmbientMode::Reflections, remove_related_elements: true, enhance: false, strength: 85.0 },
+        );
         assert!(rf[24 * w + 24][0] < 0.50, "reflection veil removal lowers milky floor, got {}", rf[24 * w + 24][0]);
 
         // 3. Lens flare hotspot
@@ -371,7 +372,12 @@ mod tests {
                 lf[y * w + x] = [0.98, 0.96, 0.97, 1.0];
             }
         }
-        remove_ambient_effects_rgba(&mut lf, w, h, &AmbientRemoveParams { mode: AmbientMode::LensFlares, remove_related_elements: true, enhance: false, strength: 95.0 });
+        remove_ambient_effects_rgba(
+            &mut lf,
+            w,
+            h,
+            &AmbientRemoveParams { mode: AmbientMode::LensFlares, remove_related_elements: true, enhance: false, strength: 95.0 },
+        );
         assert!(lf[24 * w + 24][0] < 0.72, "flare hotspot should be attenuated toward background, got {}", lf[24 * w + 24][0]);
 
         // 4. Atmospheric fog/haze
@@ -380,7 +386,12 @@ mod tests {
             let v = if i % 2 == 0 { 0.62 } else { 0.86 };
             *q = [v, v + 0.02, v + 0.04, 1.0];
         }
-        remove_ambient_effects_rgba(&mut hz, w, h, &AmbientRemoveParams { mode: AmbientMode::Atmospheric, remove_related_elements: true, enhance: true, strength: 90.0 });
+        remove_ambient_effects_rgba(
+            &mut hz,
+            w,
+            h,
+            &AmbientRemoveParams { mode: AmbientMode::Atmospheric, remove_related_elements: true, enhance: true, strength: 90.0 },
+        );
         assert!(hz[0][0] < 0.55, "dehaze restores dark contrast through haze, got {}", hz[0][0]);
     }
 }

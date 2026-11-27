@@ -33,22 +33,14 @@ impl FalFlux1DevCostState {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use fal_client::requests::api::image::edit::flux_1_dev_edit_image::api::{
-    Flux1DevEditImageNumImages, Flux1DevEditImageRequest,
-  };
-  use fal_client::requests::api::image::text::flux_1_dev_text_to_image::api::{
-    Flux1DevTextToImageAspectRatio, Flux1DevTextToImageNumImages, Flux1DevTextToImageRequest,
-  };
+  use fal_client::requests::api::image::edit::flux_1_dev_edit_image::api::{Flux1DevEditImageNumImages, Flux1DevEditImageRequest};
+  use fal_client::requests::api::image::text::flux_1_dev_text_to_image::api::{Flux1DevTextToImageAspectRatio, Flux1DevTextToImageNumImages, Flux1DevTextToImageRequest};
 
   mod text_to_image_costs {
     use super::*;
 
     fn make_t2i(num_images: Flux1DevTextToImageNumImages) -> FalFlux1DevRequestState {
-      FalFlux1DevRequestState::TextToImage(Flux1DevTextToImageRequest {
-        prompt: "test".to_string(),
-        num_images,
-        aspect_ratio: Flux1DevTextToImageAspectRatio::Square,
-      })
+      FalFlux1DevRequestState::TextToImage(Flux1DevTextToImageRequest { prompt: "test".to_string(), num_images, aspect_ratio: Flux1DevTextToImageAspectRatio::Square })
     }
 
     #[test]
@@ -74,11 +66,7 @@ mod tests {
     use super::*;
 
     fn make_edit(num_images: Flux1DevEditImageNumImages) -> FalFlux1DevRequestState {
-      FalFlux1DevRequestState::EditImage(Flux1DevEditImageRequest {
-        prompt: "test".to_string(),
-        image_url: "https://example.com/img.jpg".to_string(),
-        num_images,
-      })
+      FalFlux1DevRequestState::EditImage(Flux1DevEditImageRequest { prompt: "test".to_string(), image_url: "https://example.com/img.jpg".to_string(), num_images })
     }
 
     #[test]
@@ -96,13 +84,7 @@ mod tests {
 
   #[test]
   fn cost_flags_are_correct() {
-    let state = FalFlux1DevCostState::from_request(
-      &FalFlux1DevRequestState::TextToImage(Flux1DevTextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: Flux1DevTextToImageNumImages::One,
-        aspect_ratio: Flux1DevTextToImageAspectRatio::Square,
-      }),
-    );
+    let state = FalFlux1DevCostState::from_request(&FalFlux1DevRequestState::TextToImage(Flux1DevTextToImageRequest { prompt: "test".to_string(), num_images: Flux1DevTextToImageNumImages::One, aspect_ratio: Flux1DevTextToImageAspectRatio::Square }));
     let cost = state.estimate_cost();
     assert!(!cost.is_free);
     assert!(!cost.is_unlimited);

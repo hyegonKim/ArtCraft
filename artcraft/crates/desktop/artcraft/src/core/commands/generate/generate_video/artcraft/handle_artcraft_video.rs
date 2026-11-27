@@ -9,13 +9,7 @@ use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
 use crate::services::storyteller::state::storyteller_credential_manager::StorytellerCredentialManager;
 use tauri::AppHandle;
 
-pub async fn handle_video_artcraft(
-  request: &TauriGenerateVideoRequest,
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_video_artcraft(request: &TauriGenerateVideoRequest, app: &AppHandle, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = get_storyteller_creds_or_error(app, storyteller_creds_manager)?;
 
   let model = match request.model {

@@ -70,8 +70,6 @@ pub struct NanoBanana2TextToImageOutput {
   //pub description: String,
 }
 
-pub fn nano_banana_2_text_to_image(
-  params: NanoBanana2TextToImageInput,
-) -> FalRequest<NanoBanana2TextToImageInput, NanoBanana2TextToImageOutput> {
+pub fn nano_banana_2_text_to_image(params: NanoBanana2TextToImageInput) -> FalRequest<NanoBanana2TextToImageInput, NanoBanana2TextToImageOutput> {
   FalRequest::new("fal-ai/nano-banana-2", params)
 }

@@ -1,6 +1,4 @@
-use kinovi_web_client::generate::audio::generate_suno_remix::{
-  GenerateSunoRemixRequest, KinoviSunoRemixSource,
-};
+use kinovi_web_client::generate::audio::generate_suno_remix::{GenerateSunoRemixRequest, KinoviSunoRemixSource};
 
 use crate::generate::generate_audio::audio_generation_cost_estimate::AudioGenerationCostEstimate;
 use crate::generate::generate_audio::providers::kinovi::suno_remix::draft::KinoviSunoRemixDraftState;
@@ -22,23 +20,10 @@ impl KinoviSunoRemixCostState {
   pub fn estimate_cost(&self) -> AudioGenerationCostEstimate {
     // Cost math is owned by kinovi_web_client's binding — the router just
     // forwards the result so router cost ≡ binding cost by construction.
-    let pricing_request = GenerateSunoRemixRequest {
-      prompt: String::new(),
-      source: KinoviSunoRemixSource::AudioUrl("pricing-placeholder".to_string()),
-      style_tags: None,
-      keep_lyrics: false,
-    };
+    let pricing_request = GenerateSunoRemixRequest { prompt: String::new(), source: KinoviSunoRemixSource::AudioUrl("pricing-placeholder".to_string()), style_tags: None, keep_lyrics: false };
     let costs = pricing_request.calculate_costs();
 
-    AudioGenerationCostEstimate {
-      cost_in_credits: Some(costs.kinovi_credits),
-      cost_in_usd_cents: Some(costs.usd_cents_rounded_up),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    AudioGenerationCostEstimate { cost_in_credits: Some(costs.kinovi_credits), cost_in_usd_cents: Some(costs.usd_cents_rounded_up), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -61,13 +46,7 @@ mod tests {
 
   #[test]
   fn cost_from_draft_is_seven_cents() {
-    let builder = GenerateAudioRequestBuilder {
-      model: RouterAudioModel::SunoRemix,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("make this electronic".to_string()),
-      audio_references: Some(AudioListRef::Urls(vec!["https://example.com/a.mp3".to_string()])),
-      ..Default::default()
-    };
+    let builder = GenerateAudioRequestBuilder { model: RouterAudioModel::SunoRemix, provider: RouterProvider::KinoviWeb, prompt: Some("make this electronic".to_string()), audio_references: Some(AudioListRef::Urls(vec!["https://example.com/a.mp3".to_string()])), ..Default::default() };
     let draft = build_kinovi_suno_remix_draft(builder).expect("build");
     let estimate = KinoviSunoRemixCostState::from_draft(&draft).estimate_cost();
     assert_eq!(estimate.cost_in_usd_cents, Some(7));

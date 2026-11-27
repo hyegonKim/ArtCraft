@@ -31,34 +31,20 @@ pub struct MarkTaskAsDismissedResponse {
 impl SerializeMarker for MarkTaskAsDismissedResponse {}
 
 #[tauri::command]
-pub async fn mark_task_as_dismissed_command(
-  request: MarkTaskAsDismissedRequest,
-  app: AppHandle,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  task_database: State<'_, TaskDatabase>,
-) -> ResponseOrErrorMessage<MarkTaskAsDismissedResponse> {
-
+pub async fn mark_task_as_dismissed_command(request: MarkTaskAsDismissedRequest, app: AppHandle, app_env_configs: State<'_, AppEnvConfigs>, task_database: State<'_, TaskDatabase>) -> ResponseOrErrorMessage<MarkTaskAsDismissedResponse> {
   info!("mark_task_as_dismissed_command called");
 
-  let result = handle_request(
-    &request.task,
-    &task_database,
-  ).await;
+  let result = handle_request(&request.task, &task_database).await;
 
   if let Err(err) = &result {
     error!("mark_task_as_dismissed_command failed: {:?}", err);
-    return Err("mark_task_as_dismissed_command failed".into())
+    return Err("mark_task_as_dismissed_command failed".into());
   }
 
-  Ok(MarkTaskAsDismissedResponse{
-    success: true,
-  }.into())
+  Ok(MarkTaskAsDismissedResponse { success: true }.into())
 }
 
-pub async fn handle_request(
-  task_id: &TaskId,
-  task_database: &TaskDatabase,
-) -> AnyhowResult<()> {
+pub async fn handle_request(task_id: &TaskId, task_database: &TaskDatabase) -> AnyhowResult<()> {
   let _result = mark_task_as_dismissed(task_database.get_connection(), task_id).await?;
   Ok(())
 }

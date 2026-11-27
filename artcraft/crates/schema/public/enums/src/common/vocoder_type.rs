@@ -17,14 +17,13 @@ pub enum VocoderType {
   #[serde(rename = "hifigan_rocket_vc")]
   #[cfg_attr(feature = "database", sqlx(rename = "hifigan_rocket_vc"))]
   HifiGanRocketVc,
-
 }
 
 /// NB: Legacy API for older code.
 impl VocoderType {
   pub fn to_str(&self) -> &'static str {
     match self {
-      Self::HifiGan=> "hifigan",
+      Self::HifiGan => "hifigan",
       Self::HifiGanSuperResolution => "hifigan-superres",
       Self::HifiGanRocketVc => "hifigan_rocket_vc",
     }

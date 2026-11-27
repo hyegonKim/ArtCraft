@@ -21,55 +21,24 @@ pub struct StorytellerOpenSubscriptionPurchaseCommand {
 }
 
 #[tauri::command]
-pub async fn storyteller_open_subscription_purchase_command(
-  app: AppHandle,
-  request: StorytellerOpenSubscriptionPurchaseCommand,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> Result<String, String> {
+pub async fn storyteller_open_subscription_purchase_command(app: AppHandle, request: StorytellerOpenSubscriptionPurchaseCommand, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> Result<String, String> {
   info!("storyteller_open_subscription_purchase_command called");
 
   let plan = request.plan.ok_or("Plan is required")?;
   let cadence = request.cadence.ok_or("Cadence is required")?;
-  
-  do_open_billing(
-    &app, 
-    &app_data_root, 
-    &app_env_configs, 
-    &storyteller_creds_manager,
-    plan,
-    cadence,
-  )
-      .await
-      .map_err(|err| {
-        error!("Error opening subscription purchase window: {:?}", err);
-        format!("Error opening subscription purchase window: {:?}", err)
-      })?;
+
+  do_open_billing(&app, &app_data_root, &app_env_configs, &storyteller_creds_manager, plan, cadence).await.map_err(|err| {
+    error!("Error opening subscription purchase window: {:?}", err);
+    format!("Error opening subscription purchase window: {:?}", err)
+  })?;
 
   Ok("result".to_string())
 }
 
-async fn do_open_billing(
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  plan: ArtcraftSubscriptionSlug,
-  cadence: PlanBillingCadence,
-) -> AnyhowResult<()> {
+async fn do_open_billing(app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager, plan: ArtcraftSubscriptionSlug, cadence: PlanBillingCadence) -> AnyhowResult<()> {
   info!("Building billing window...");
 
-  open_storyteller_billing_window(OpenStorytellerBillingWindowArgs {
-    app,
-    app_env_configs,
-    app_data_root,
-    storyteller_creds_manager,
-    billing_window_case: BillingWindowCase::Subscription {
-      plan,
-      cadence,
-    }
-  }).await?;
+  open_storyteller_billing_window(OpenStorytellerBillingWindowArgs { app, app_env_configs, app_data_root, storyteller_creds_manager, billing_window_case: BillingWindowCase::Subscription { plan, cadence } }).await?;
 
   info!("Done.");
   Ok(())

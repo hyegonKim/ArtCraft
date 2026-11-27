@@ -1,11 +1,5 @@
-use fal_client::requests_old::webhook::image::edit::enqueue_bytedance_seedream_v4_edit_image_webhook::{
-  EnqueueBytedanceSeedreamV4EditImageNumImages, EnqueueBytedanceSeedreamV4EditImageRequest,
-  EnqueueBytedanceSeedreamV4EditImageSize,
-};
-use fal_client::requests_old::webhook::image::text::enqueue_bytedance_seedream_v4_text_to_image_webhook::{
-  EnqueueBytedanceSeedreamV4TextToImageNumImages, EnqueueBytedanceSeedreamV4TextToImageRequest,
-  EnqueueBytedanceSeedreamV4TextToImageSize,
-};
+use fal_client::requests_old::webhook::image::edit::enqueue_bytedance_seedream_v4_edit_image_webhook::{EnqueueBytedanceSeedreamV4EditImageNumImages, EnqueueBytedanceSeedreamV4EditImageRequest, EnqueueBytedanceSeedreamV4EditImageSize};
+use fal_client::requests_old::webhook::image::text::enqueue_bytedance_seedream_v4_text_to_image_webhook::{EnqueueBytedanceSeedreamV4TextToImageNumImages, EnqueueBytedanceSeedreamV4TextToImageRequest, EnqueueBytedanceSeedreamV4TextToImageSize};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::image_list_ref::ImageListRef;
@@ -17,9 +11,7 @@ use crate::generate::generate_image::image_generation_draft_or_request::ImageGen
 use crate::generate::generate_image::image_generation_request::ImageGenerationRequest;
 use crate::generate::generate_image::providers::fal::seedream_4::request::FalSeedream4RequestState;
 
-pub fn build_fal_seedream_4(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_seedream_4(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
   let image_urls = resolve_image_list_ref(builder.image_inputs.clone())?;
   let is_edit_mode = !image_urls.is_empty();
@@ -27,26 +19,9 @@ pub fn build_fal_seedream_4(
   let num_images = plan_num_images(builder.image_batch_count, strategy)?;
   let prompt = builder.prompt.clone().unwrap_or_default();
 
-  let state = if is_edit_mode {
-    FalSeedream4RequestState::EditImage(EnqueueBytedanceSeedreamV4EditImageRequest {
-      prompt,
-      image_urls,
-      num_images: Some(to_edit_num_images(num_images)),
-      max_images: None,
-      image_size: image_size.map(to_edit_image_size),
-    })
-  } else {
-    FalSeedream4RequestState::TextToImage(EnqueueBytedanceSeedreamV4TextToImageRequest {
-      prompt,
-      num_images: Some(to_t2i_num_images(num_images)),
-      max_images: None,
-      image_size: image_size.map(to_t2i_image_size),
-    })
-  };
+  let state = if is_edit_mode { FalSeedream4RequestState::EditImage(EnqueueBytedanceSeedreamV4EditImageRequest { prompt, image_urls, num_images: Some(to_edit_num_images(num_images)), max_images: None, image_size: image_size.map(to_edit_image_size) }) } else { FalSeedream4RequestState::TextToImage(EnqueueBytedanceSeedreamV4TextToImageRequest { prompt, num_images: Some(to_t2i_num_images(num_images)), max_images: None, image_size: image_size.map(to_t2i_image_size) }) };
 
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::FalSeedream4(state),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalSeedream4(state)))
 }
 
 // ── Num images ──
@@ -59,10 +34,7 @@ enum PlannedNumImages {
   Four,
 }
 
-fn plan_num_images(
-  count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<PlannedNumImages, ArtcraftRouterError> {
+fn plan_num_images(count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<PlannedNumImages, ArtcraftRouterError> {
   let count = count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
@@ -71,12 +43,7 @@ fn plan_num_images(
     3 => Ok(PlannedNumImages::Three),
     4 => Ok(PlannedNumImages::Four),
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "image_batch_count",
-          value: format!("{}", count),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_batch_count", value: format!("{}", count) })),
       _ => Ok(PlannedNumImages::Four),
     },
   }
@@ -117,18 +84,18 @@ enum PlannedImageSize {
   Auto4k,
 }
 
-fn plan_image_size(
-  aspect_ratio: Option<RouterAspectRatio>,
-  is_edit_mode: bool,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlannedImageSize>, ArtcraftRouterError> {
+fn plan_image_size(aspect_ratio: Option<RouterAspectRatio>, is_edit_mode: bool, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlannedImageSize>, ArtcraftRouterError> {
   use PlannedImageSize as S;
   match aspect_ratio {
     None => Ok(None),
 
     Some(RouterAspectRatio::Auto) => {
-      if is_edit_mode { Ok(Some(S::Auto)) } else { Ok(Some(S::Square)) }
-    }
+      if is_edit_mode {
+        Ok(Some(S::Auto))
+      } else {
+        Ok(Some(S::Square))
+      }
+    },
     Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) => Ok(Some(S::Auto2k)),
     Some(RouterAspectRatio::Auto4k) => Ok(Some(S::Auto4k)),
 
@@ -138,30 +105,16 @@ fn plan_image_size(
     Some(RouterAspectRatio::Wide) | Some(RouterAspectRatio::WideSixteenByNine) => Ok(Some(S::LandscapeSixteenNine)),
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(S::LandscapeFourThree)),
 
-    Some(unsupported @ RouterAspectRatio::WideFiveByFour)
-    | Some(unsupported @ RouterAspectRatio::WideThreeByTwo)
-    | Some(unsupported @ RouterAspectRatio::WideTwentyOneByNine) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+    Some(unsupported @ RouterAspectRatio::WideFiveByFour) | Some(unsupported @ RouterAspectRatio::WideThreeByTwo) | Some(unsupported @ RouterAspectRatio::WideTwentyOneByNine) => match strategy {
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(S::LandscapeSixteenNine)),
     },
 
     Some(RouterAspectRatio::Tall) | Some(RouterAspectRatio::TallNineBySixteen) => Ok(Some(S::PortraitSixteenNine)),
     Some(RouterAspectRatio::TallThreeByFour) => Ok(Some(S::PortraitFourThree)),
 
-    Some(unsupported @ RouterAspectRatio::TallFourByFive)
-    | Some(unsupported @ RouterAspectRatio::TallTwoByThree)
-    | Some(unsupported @ RouterAspectRatio::TallNineByTwentyOne) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+    Some(unsupported @ RouterAspectRatio::TallFourByFive) | Some(unsupported @ RouterAspectRatio::TallTwoByThree) | Some(unsupported @ RouterAspectRatio::TallNineByTwentyOne) => match strategy {
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(S::PortraitSixteenNine)),
     },
   }
@@ -199,15 +152,11 @@ fn to_edit_image_size(s: PlannedImageSize) -> EnqueueBytedanceSeedreamV4EditImag
 
 // ── Image inputs ──
 
-fn resolve_image_list_ref(
-  image_list_ref: Option<ImageListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_image_list_ref(image_list_ref: Option<ImageListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match image_list_ref {
     None => Ok(vec![]),
     Some(ImageListRef::Urls(urls)) => Ok(urls),
-    Some(ImageListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
@@ -218,35 +167,20 @@ mod tests {
   use crate::api::router_provider::RouterProvider;
 
   fn base_builder() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::Seedream4,
-      provider: RouterProvider::Fal,
-      prompt: Some("a cat in space".to_string()),
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::Seedream4, provider: RouterProvider::Fal, prompt: Some("a cat in space".to_string()), image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   fn unwrap_t2i(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> EnqueueBytedanceSeedreamV4TextToImageRequest {
-    let ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::FalSeedream4(FalSeedream4RequestState::TextToImage(req))
-    ) = result.expect("build should succeed") else { panic!("expected TextToImage variant") };
+    let ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalSeedream4(FalSeedream4RequestState::TextToImage(req))) = result.expect("build should succeed") else {
+      panic!("expected TextToImage variant")
+    };
     req
   }
 
   fn unwrap_edit(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> EnqueueBytedanceSeedreamV4EditImageRequest {
-    let ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::FalSeedream4(FalSeedream4RequestState::EditImage(req))
-    ) = result.expect("build should succeed") else { panic!("expected EditImage variant") };
+    let ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalSeedream4(FalSeedream4RequestState::EditImage(req))) = result.expect("build should succeed") else {
+      panic!("expected EditImage variant")
+    };
     req
   }
 
@@ -260,24 +194,15 @@ mod tests {
 
   #[test]
   fn image_inputs_is_edit() {
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), ..base_builder() };
     let req = unwrap_edit(build_fal_seedream_4(builder));
     assert_eq!(req.image_urls, vec!["https://example.com/img.jpg".to_string()]);
   }
 
   #[test]
   fn media_tokens_return_error() {
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::MediaFileTokens(vec![])),
-      ..base_builder()
-    };
-    assert!(matches!(
-      build_fal_seedream_4(builder),
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    ));
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::MediaFileTokens(vec![])), ..base_builder() };
+    assert!(matches!(build_fal_seedream_4(builder), Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))));
   }
 
   // ── Image size ──
@@ -290,54 +215,34 @@ mod tests {
 
   #[test]
   fn t2i_auto_maps_to_square() {
-    let builder = GenerateImageRequestBuilder {
-      aspect_ratio: Some(RouterAspectRatio::Auto),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Auto), ..base_builder() };
     let req = unwrap_t2i(build_fal_seedream_4(builder));
     assert!(matches!(req.image_size, Some(EnqueueBytedanceSeedreamV4TextToImageSize::Square)));
   }
 
   #[test]
   fn edit_auto_stays_auto() {
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-      aspect_ratio: Some(RouterAspectRatio::Auto),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), aspect_ratio: Some(RouterAspectRatio::Auto), ..base_builder() };
     let req = unwrap_edit(build_fal_seedream_4(builder));
     assert!(matches!(req.image_size, Some(EnqueueBytedanceSeedreamV4EditImageSize::Auto)));
   }
 
   #[test]
   fn auto4k_maps_to_auto4k() {
-    let builder = GenerateImageRequestBuilder {
-      aspect_ratio: Some(RouterAspectRatio::Auto4k),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Auto4k), ..base_builder() };
     let req = unwrap_t2i(build_fal_seedream_4(builder));
     assert!(matches!(req.image_size, Some(EnqueueBytedanceSeedreamV4TextToImageSize::Auto4k)));
   }
 
   #[test]
   fn wide_21_9_errors_out() {
-    let builder = GenerateImageRequestBuilder {
-      aspect_ratio: Some(RouterAspectRatio::WideTwentyOneByNine),
-      ..base_builder()
-    };
-    assert!(matches!(
-      build_fal_seedream_4(builder),
-      Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", .. }))
-    ));
+    let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideTwentyOneByNine), ..base_builder() };
+    assert!(matches!(build_fal_seedream_4(builder), Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", .. }))));
   }
 
   #[test]
   fn wide_21_9_falls_back_with_upgrade() {
-    let builder = GenerateImageRequestBuilder {
-      aspect_ratio: Some(RouterAspectRatio::WideTwentyOneByNine),
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideTwentyOneByNine), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..base_builder() };
     let req = unwrap_t2i(build_fal_seedream_4(builder));
     assert!(matches!(req.image_size, Some(EnqueueBytedanceSeedreamV4TextToImageSize::LandscapeSixteenNine)));
   }
@@ -352,23 +257,13 @@ mod tests {
 
   #[test]
   fn zero_batch_count_is_error() {
-    let builder = GenerateImageRequestBuilder {
-      image_batch_count: Some(0),
-      ..base_builder()
-    };
-    assert!(matches!(
-      build_fal_seedream_4(builder),
-      Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))
-    ));
+    let builder = GenerateImageRequestBuilder { image_batch_count: Some(0), ..base_builder() };
+    assert!(matches!(build_fal_seedream_4(builder), Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))));
   }
 
   #[test]
   fn over_four_clamps_with_upgrade() {
-    let builder = GenerateImageRequestBuilder {
-      image_batch_count: Some(9),
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_batch_count: Some(9), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..base_builder() };
     let req = unwrap_t2i(build_fal_seedream_4(builder));
     assert!(matches!(req.num_images, Some(EnqueueBytedanceSeedreamV4TextToImageNumImages::Four)));
   }

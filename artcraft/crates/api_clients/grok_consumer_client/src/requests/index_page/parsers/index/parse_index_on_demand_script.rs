@@ -1,10 +1,7 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-static ON_DEMAND_REGEX : Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#""ondemand.s":"([^"]*)""#)
-      .expect("Regex should parse")
-});
+static ON_DEMAND_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#""ondemand.s":"([^"]*)""#).expect("Regex should parse"));
 
 pub fn parse_index_on_demand_script(html: &str) -> Option<String> {
   let on_demand = scrape_on_demand_via_regex(html);
@@ -22,7 +19,6 @@ fn scrape_on_demand_via_regex(html: &str) -> Option<String> {
   Some(capture.as_str().to_string())
 }
 
-
 #[cfg(test)]
 mod tests {
   use crate::requests::index_page::get_index_page::{get_index, GetIndexPageArgs};
@@ -34,9 +30,7 @@ mod tests {
   #[ignore] // Manual test invocation
   async fn test() -> AnyhowResult<()> {
     let cookie = get_test_cookies()?;
-    let index = get_index(GetIndexPageArgs {
-      cookie: &cookie,
-    }).await?;
+    let index = get_index(GetIndexPageArgs { cookie: &cookie }).await?;
 
     let result = parse_index_on_demand_script(&index.body);
     println!("{:?}", result);

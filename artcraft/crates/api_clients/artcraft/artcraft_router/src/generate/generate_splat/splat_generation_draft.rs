@@ -30,7 +30,6 @@ pub enum SplatGenerationDraftRequest {
 }
 
 impl SplatGenerationDraftRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::WorldLabsMarble1p0(_) => RouterProvider::WorldLabs,

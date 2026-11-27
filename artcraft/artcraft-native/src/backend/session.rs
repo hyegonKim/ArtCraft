@@ -180,10 +180,7 @@ mod tests {
     fs::write(unrelated.join("sentinel"), "unchanged").unwrap();
     fs::create_dir_all(root.join("settings")).unwrap();
     fs::write(root.join("settings/env_configs.json"), r#"{"storyteller_host":"production.invalid"}"#).unwrap();
-    let launch = LaunchOptions::parse([
-      "--data-dir".into(), root.clone().into_os_string(),
-      "--api-base-url".into(), "http://localhost:4203".into(),
-    ]).unwrap();
+    let launch = LaunchOptions::parse(["--data-dir".into(), root.clone().into_os_string(), "--api-base-url".into(), "http://localhost:4203".into()]).unwrap();
     let settings = launch.resolve(|| panic!("must not read global root or settings"));
     assert_eq!(settings.api_host.to_api_hostname_and_scheme(), "http://localhost:4203");
     assert!(!settings.import_tauri_cookies);
@@ -195,11 +192,7 @@ mod tests {
     assert_eq!(accounts.midjourney_account(), None);
     accounts.set_fal_key("isolated-fixture-key").unwrap();
     assert_eq!(ProviderAccounts::load(&root).fal_key().as_deref(), Some("isolated-fixture-key"));
-    let job = ProviderJob {
-      id: "local_isolated".into(), provider: Provider::Fal, model_id: "fixture-model".into(), prompt: "fixture".into(),
-      created_at: 1, batch_count: 1, provider_job_id: "fixture-job".into(), maybe_status_url: None, maybe_response_url: None,
-      maybe_prompt_token: None, batch_token: "fixture-batch".into(), upload_tokens: vec![], uploaded: vec![],
-    };
+    let job = ProviderJob { id: "local_isolated".into(), provider: Provider::Fal, model_id: "fixture-model".into(), prompt: "fixture".into(), created_at: 1, batch_count: 1, provider_job_id: "fixture-job".into(), maybe_status_url: None, maybe_response_url: None, maybe_prompt_token: None, batch_token: "fixture-batch".into(), upload_tokens: vec![], uploaded: vec![] };
     JobStore::load(&settings.data_root).put(job.clone());
     assert_eq!(JobStore::load(&root).all(), vec![job]);
     assert!(root.join("credentials/native_session.json").is_file());

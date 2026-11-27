@@ -1,6 +1,6 @@
 use cookie::Cookie;
 
-const SESSION_COOKIE_NAME : &str = "session";
+const SESSION_COOKIE_NAME: &str = "session";
 
 /// The primary FakeYou / Storyteller / Artcraft backend session identifier.
 #[derive(Clone)]
@@ -12,7 +12,7 @@ impl StorytellerSessionCookie {
   pub fn new(cookie: String) -> Self {
     Self { cookie }
   }
-  
+
   pub fn maybe_from_cookie(cookie: &Cookie) -> Option<Self> {
     if cookie.name() == SESSION_COOKIE_NAME {
       Some(Self::new(cookie.value().to_string()))

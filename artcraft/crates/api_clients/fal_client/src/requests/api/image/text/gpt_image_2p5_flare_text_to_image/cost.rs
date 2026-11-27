@@ -22,27 +22,10 @@ mod tests {
   use GptImage2p5Quality::{Low, Medium, High, XHigh, Max};
 
   // (size, quality, num_images, expected_cents)
-  const PRESET_CASES: &[(GptImage2p5ImageSize, GptImage2p5Quality, GptImage2p5NumImages, u64)] = &[
-    (Square,        Low,   One,  1),
-    (Square,        High,  One,  6),
-    (Square,        High,  Four, 24),
-    (Square,        Max,   One,  22),
-    (Landscape4x3,  High,  One,  4),
-    (Landscape16x9, High,  One,  4),
-    (Landscape16x9, XHigh, Two,  16),
-    (SquareHd,      High,  One,  9),
-    (Auto,          High,  One,  11),
-  ];
+  const PRESET_CASES: &[(GptImage2p5ImageSize, GptImage2p5Quality, GptImage2p5NumImages, u64)] = &[(Square, Low, One, 1), (Square, High, One, 6), (Square, High, Four, 24), (Square, Max, One, 22), (Landscape4x3, High, One, 4), (Landscape16x9, High, One, 4), (Landscape16x9, XHigh, Two, 16), (SquareHd, High, One, 9), (Auto, High, One, 11)];
 
   // (size, resolution, quality, num_images, expected_cents)
-  const RESOLUTION_CASES: &[(GptImage2p5ImageSize, GptImage2Resolution, GptImage2p5Quality, GptImage2p5NumImages, u64)] = &[
-    (Square,        OneK,   High, One, 6),
-    (Square,        TwoK,   High, One, 9),
-    (Square,        FourK,  High, One, 13),
-    (Landscape16x9, OneK,   High, One, 3),
-    (Landscape16x9, FourK,  High, One, 11),
-    (Portrait4x3,   ThreeK, Medium, Three, 9),
-  ];
+  const RESOLUTION_CASES: &[(GptImage2p5ImageSize, GptImage2Resolution, GptImage2p5Quality, GptImage2p5NumImages, u64)] = &[(Square, OneK, High, One, 6), (Square, TwoK, High, One, 9), (Square, FourK, High, One, 13), (Landscape16x9, OneK, High, One, 3), (Landscape16x9, FourK, High, One, 11), (Portrait4x3, ThreeK, Medium, Three, 9)];
 
   #[test]
   fn defaults_to_high_quality_landscape_4x3() {
@@ -71,23 +54,7 @@ mod tests {
     assert_eq!(request.calculate_cost_in_cents(), request.params.estimate_cost_in_cents());
   }
 
-  fn make_request(
-    num_images: GptImage2p5NumImages,
-    quality: Option<GptImage2p5Quality>,
-    image_size: Option<GptImage2p5ImageSize>,
-    resolution: Option<GptImage2Resolution>,
-  ) -> GptImage2p5FlareTextToImageRequest {
-    GptImage2p5FlareTextToImageRequest {
-      params: GptImage2p5TextToImageParams {
-        prompt: "test".to_string(),
-        num_images,
-        image_size,
-        resolution,
-        quality,
-        background: None,
-        output_format: None,
-        output_compression: None,
-      },
-    }
+  fn make_request(num_images: GptImage2p5NumImages, quality: Option<GptImage2p5Quality>, image_size: Option<GptImage2p5ImageSize>, resolution: Option<GptImage2Resolution>) -> GptImage2p5FlareTextToImageRequest {
+    GptImage2p5FlareTextToImageRequest { params: GptImage2p5TextToImageParams { prompt: "test".to_string(), num_images, image_size, resolution, quality, background: None, output_format: None, output_compression: None } }
   }
 }

@@ -60,6 +60,7 @@ mod quick_offset;
 mod relink;
 pub(crate) mod relink_moved;
 mod render_queue;
+pub mod review;
 pub(crate) mod rig3d;
 pub mod roto_cmds;
 mod scene_detect;
@@ -196,6 +197,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(anim_tools::specs());
         v.extend(link::specs());
         v.extend(markers::specs());
+        v.extend(review::specs());
         v.extend(mask::specs());
         v.extend(paths::specs());
         v.extend(effect::specs());

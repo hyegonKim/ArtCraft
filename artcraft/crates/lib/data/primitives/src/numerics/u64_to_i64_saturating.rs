@@ -1,4 +1,4 @@
-const MAX_I64 : u64 = i64::MAX as u64;
+const MAX_I64: u64 = i64::MAX as u64;
 
 /// Convert a u64 to a positive i64, saturating to i64::MAX if the u64 overflows the container.
 pub fn u64_to_i64_saturating(num: u64) -> i64 {

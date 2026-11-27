@@ -11,9 +11,7 @@ pub struct StorytellerCredentialHolder {
 
 impl StorytellerCredentialHolder {
   pub fn new() -> Self {
-    Self {
-      credentials: Arc::new(RwLock::new(None)),
-    }
+    Self { credentials: Arc::new(RwLock::new(None)) }
   }
 
   pub fn set_credentials(&self, credentials: &StorytellerCredentialSet) -> AnyhowResult<()> {
@@ -22,7 +20,7 @@ impl StorytellerCredentialHolder {
       Ok(mut creds) => {
         *creds = Some(credentials.clone());
         Ok(())
-      }
+      },
     }
   }
 
@@ -32,16 +30,14 @@ impl StorytellerCredentialHolder {
       Ok(mut creds) => {
         *creds = None;
         Ok(())
-      }
+      },
     }
   }
 
   pub fn get_credentials(&self) -> AnyhowResult<Option<StorytellerCredentialSet>> {
     match self.credentials.read() {
       Err(err) => Err(anyhow!("Failed to acquire read lock: {:?}", err)),
-      Ok(creds) => {
-        Ok(creds.clone())
-      }
+      Ok(creds) => Ok(creds.clone()),
     }
   }
 
@@ -51,7 +47,7 @@ impl StorytellerCredentialHolder {
       Ok(creds) => match &*creds {
         None => Err(anyhow!("Storyteller credentials not set")),
         Some(creds) => Ok(creds.clone()),
-      }
+      },
     }
   }
 }

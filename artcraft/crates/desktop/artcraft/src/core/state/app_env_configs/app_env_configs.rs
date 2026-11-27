@@ -9,29 +9,20 @@ pub struct AppEnvConfigs {
 }
 
 impl AppEnvConfigs {
-
   pub fn load_from_filesystem(root: &AppDataRoot) -> AnyhowResult<Self> {
     println!("Loading app environmental configs from filesystem...");
     let input = AppEnvConfigsSerializable::load_from_filesystem(root)?;
 
-    let storyteller = input.as_ref()
-        .map(|i| i.storyteller_host)
-        .flatten();
+    let storyteller = input.as_ref().map(|i| i.storyteller_host).flatten();
 
     let storyteller_api = match storyteller {
-      Some(StorytellerApiHost::Localhost) => ApiHost::Localhost {
-        port: input.as_ref()
-            .and_then(|i| i.storyteller_port)
-            .unwrap_or(12345)
-      },
+      Some(StorytellerApiHost::Localhost) => ApiHost::Localhost { port: input.as_ref().and_then(|i| i.storyteller_port).unwrap_or(12345) },
       Some(StorytellerApiHost::Production) => ApiHost::Storyteller,
       _ => ApiHost::Storyteller,
     };
-    
+
     println!("Using storyteller API host: {:?}", storyteller_api);
 
-    Ok(Self {
-      storyteller_host: storyteller_api,
-    })
+    Ok(Self { storyteller_host: storyteller_api })
   }
 }

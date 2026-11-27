@@ -1,11 +1,5 @@
-use fal_client::requests::api::video::image::veo_3::api::{
-  Veo3ImageToVideoAspectRatio, Veo3ImageToVideoDuration, Veo3ImageToVideoRequest,
-  Veo3ImageToVideoResolution,
-};
-use fal_client::requests::api::video::text::veo_3::api::{
-  Veo3TextToVideoAspectRatio, Veo3TextToVideoDuration, Veo3TextToVideoRequest,
-  Veo3TextToVideoResolution,
-};
+use fal_client::requests::api::video::image::veo_3::api::{Veo3ImageToVideoAspectRatio, Veo3ImageToVideoDuration, Veo3ImageToVideoRequest, Veo3ImageToVideoResolution};
+use fal_client::requests::api::video::text::veo_3::api::{Veo3TextToVideoAspectRatio, Veo3TextToVideoDuration, Veo3TextToVideoRequest, Veo3TextToVideoResolution};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::router_resolution::RouterResolution;
@@ -33,16 +27,12 @@ pub(crate) enum PlanDuration {
   EightSeconds,
 }
 
-pub fn build_fal_veo_3(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_veo_3(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_veo_3_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalVeo3(state)))
 }
 
-pub(crate) fn build_fal_veo_3_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalVeo3RequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_veo_3_state(builder: GenerateVideoRequestBuilder) -> Result<FalVeo3RequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   if builder.end_frame.is_some() {
@@ -60,36 +50,15 @@ pub(crate) fn build_fal_veo_3_state(
   let mode = match builder.start_frame.clone() {
     Some(ImageRef::Url(url)) => {
       let i2v_aspect_ratio = plan_i2v_aspect_ratio(builder.aspect_ratio, strategy)?;
-      FalVeo3Mode::ImageToVideo(Veo3ImageToVideoRequest {
-        prompt,
-        image_url: url,
-        aspect_ratio: i2v_aspect_ratio,
-        duration: duration.map(to_i2v_duration),
-        resolution: resolution.map(to_i2v_resolution),
-        generate_audio,
-        negative_prompt,
-        seed: None,
-        auto_fix: None,
-        safety_tolerance: None,
-      })
-    }
+      FalVeo3Mode::ImageToVideo(Veo3ImageToVideoRequest { prompt, image_url: url, aspect_ratio: i2v_aspect_ratio, duration: duration.map(to_i2v_duration), resolution: resolution.map(to_i2v_resolution), generate_audio, negative_prompt, seed: None, auto_fix: None, safety_tolerance: None })
+    },
     Some(ImageRef::MediaFileToken(_)) => {
       return Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls));
-    }
+    },
     None => {
       let t2v_aspect_ratio = plan_t2v_aspect_ratio(builder.aspect_ratio, strategy)?;
-      FalVeo3Mode::TextToVideo(Veo3TextToVideoRequest {
-        prompt,
-        aspect_ratio: t2v_aspect_ratio,
-        duration: duration.map(to_t2v_duration),
-        resolution: resolution.map(to_t2v_resolution),
-        negative_prompt,
-        generate_audio,
-        seed: None,
-        auto_fix: None,
-        safety_tolerance: None,
-      })
-    }
+      FalVeo3Mode::TextToVideo(Veo3TextToVideoRequest { prompt, aspect_ratio: t2v_aspect_ratio, duration: duration.map(to_t2v_duration), resolution: resolution.map(to_t2v_resolution), negative_prompt, generate_audio, seed: None, auto_fix: None, safety_tolerance: None })
+    },
   };
 
   Ok(FalVeo3RequestState { mode })
@@ -97,80 +66,56 @@ pub(crate) fn build_fal_veo_3_state(
 
 /// Text-to-video: only 16:9 and 9:16 (no Auto, no Square). `None` lets fal
 /// pick its default (16:9).
-fn plan_t2v_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Veo3TextToVideoAspectRatio>, ArtcraftRouterError> {
+fn plan_t2v_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Veo3TextToVideoAspectRatio>, ArtcraftRouterError> {
   use Veo3TextToVideoAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("aspect_ratio", &format!("{:?}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("aspect_ratio", &format!("{:?}", other))),
       _ => Ok(None),
     },
   }
 }
 
 /// Image-to-video: Auto, 16:9, 9:16 (no Square).
-fn plan_i2v_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Veo3ImageToVideoAspectRatio>, ArtcraftRouterError> {
+fn plan_i2v_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Veo3ImageToVideoAspectRatio>, ArtcraftRouterError> {
   use Veo3ImageToVideoAspectRatio as Ar;
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
 
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("aspect_ratio", &format!("{:?}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("aspect_ratio", &format!("{:?}", other))),
       _ => Ok(Some(Ar::Auto)),
     },
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
   match resolution {
     None => Ok(None),
     Some(RouterResolution::SevenTwentyP) => Ok(Some(PlanResolution::SevenTwentyP)),
     Some(RouterResolution::TenEightyP) => Ok(Some(PlanResolution::TenEightyP)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("resolution", &format!("{:?}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("resolution", &format!("{:?}", other))),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanResolution::TenEightyP)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanResolution::SevenTwentyP)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
     Some(4) => Ok(Some(PlanDuration::FourSeconds)),
     Some(6) => Ok(Some(PlanDuration::SixSeconds)),
     Some(8) => Ok(Some(PlanDuration::EightSeconds)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("duration_seconds", &format!("{}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("duration_seconds", &format!("{}", other))),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanDuration::EightSeconds)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanDuration::FourSeconds)),
     },
@@ -178,10 +123,7 @@ fn plan_duration(
 }
 
 fn unsupported(field: &'static str, value: &str) -> ArtcraftRouterError {
-  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-    field,
-    value: value.to_string(),
-  })
+  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: value.to_string() })
 }
 
 fn to_t2v_duration(d: PlanDuration) -> Veo3TextToVideoDuration {
@@ -225,10 +167,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn no_start_frame_picks_t2v() { let _ = t2v_request(base_t2v_builder()); }
+    fn no_start_frame_picks_t2v() {
+      let _ = t2v_request(base_t2v_builder());
+    }
 
     #[test]
-    fn start_frame_picks_i2v() { let _ = i2v_request(base_i2v_builder()); }
+    fn start_frame_picks_i2v() {
+      let _ = i2v_request(base_i2v_builder());
+    }
 
     #[test]
     fn end_frame_errors() {
@@ -269,11 +215,7 @@ mod tests {
 
     #[test]
     fn t2v_4s_6s_8s() {
-      for (s, expected) in [
-        (4, Veo3TextToVideoDuration::FourSeconds),
-        (6, Veo3TextToVideoDuration::SixSeconds),
-        (8, Veo3TextToVideoDuration::EightSeconds),
-      ] {
+      for (s, expected) in [(4, Veo3TextToVideoDuration::FourSeconds), (6, Veo3TextToVideoDuration::SixSeconds), (8, Veo3TextToVideoDuration::EightSeconds)] {
         let mut b = base_t2v_builder();
         b.duration_seconds = Some(s);
         assert_eq!(t2v_request(b).duration, Some(expected));
@@ -342,19 +284,11 @@ mod tests {
   }
 
   fn base_t2v_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   fn base_i2v_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())),
-      ..base_t2v_builder()
-    }
+    GenerateVideoRequestBuilder { start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())), ..base_t2v_builder() }
   }
 
   fn t2v_request(b: GenerateVideoRequestBuilder) -> Veo3TextToVideoRequest {

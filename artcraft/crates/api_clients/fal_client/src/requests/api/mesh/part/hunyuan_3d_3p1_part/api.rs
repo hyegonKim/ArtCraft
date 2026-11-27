@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::part::hunyuan_3d_3p1_part::raw_request::{
-  Hunyuan3d3p1PartInput, Hunyuan3d3p1PartOutput,
-};
+use crate::requests::api::mesh::part::hunyuan_3d_3p1_part::raw_request::{Hunyuan3d3p1PartInput, Hunyuan3d3p1PartOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Hunyuan 3D v3.1 Part: splits an existing 3D mesh into semantically
@@ -22,9 +20,7 @@ impl FalEndpoint for Hunyuan3d3p1PartRequest {
   type RawResponse = Hunyuan3d3p1PartOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      input_file_url: self.input_file_url.clone(),
-    })
+    Ok(Self::RawRequest { input_file_url: self.input_file_url.clone() })
   }
 }
 
@@ -41,9 +37,7 @@ mod tests {
   async fn test_part_webhook() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = Hunyuan3d3p1PartRequest {
-      input_file_url: "https://example.com/model.fbx".to_string(),
-    };
+    let request = Hunyuan3d3p1PartRequest { input_file_url: "https://example.com/model.fbx".to_string() };
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
     assert!(result.request_id.is_some() || result.gateway_request_id.is_some());
@@ -55,9 +49,7 @@ mod tests {
   async fn test_part_queue() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = Hunyuan3d3p1PartRequest {
-      input_file_url: "https://example.com/model.fbx".to_string(),
-    };
+    let request = Hunyuan3d3p1PartRequest { input_file_url: "https://example.com/model.fbx".to_string() };
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());
@@ -68,14 +60,9 @@ mod tests {
 
   #[test]
   fn raw_request_is_just_input_file_url() {
-    let request = Hunyuan3d3p1PartRequest {
-      input_file_url: "https://example.com/model.fbx".to_string(),
-    };
+    let request = Hunyuan3d3p1PartRequest { input_file_url: "https://example.com/model.fbx".to_string() };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "input_file_url": "https://example.com/model.fbx" }),
-    );
+    assert_eq!(json, serde_json::json!({ "input_file_url": "https://example.com/model.fbx" }),);
   }
 
   #[test]

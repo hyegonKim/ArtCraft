@@ -3,35 +3,23 @@ use once_cell::sync::Lazy;
 use scraper::{Html, Selector};
 
 /// eg. <meta name="baggage" content="sentry-environment=production,sentry-public_key=b311e0f2690c81f25e2c4cf6d4f7ce1c,sentry-trace_id=fb5c42c8cff6fd39161dd245154ca599,sentry-org_id=4508179396558848,sentry-sampled=false,sentry-sample_rand=0.7208394686924251,sentry-sample_rate=0"/>
-static SENTRY_TRACE_SELECTOR : Lazy<Selector> = Lazy::new(|| {
-  Selector::parse("meta[name=sentry-trace]")
-      .expect("HTML selector should parse")
-});
-
+static SENTRY_TRACE_SELECTOR: Lazy<Selector> = Lazy::new(|| Selector::parse("meta[name=sentry-trace]").expect("HTML selector should parse"));
 
 /// Extract the sentry trace, then process it.
 /// The Python library discards the latter half of the trace.
 pub fn parse_index_sentry_trace(html: &str) -> Option<SentryTrace> {
-  get_meta_value(html)
-      .map(|trace| split_sentry_trace(&trace))
-      .map(|trace| SentryTrace(trace))
+  get_meta_value(html).map(|trace| split_sentry_trace(&trace)).map(|trace| SentryTrace(trace))
 }
 
 fn get_meta_value(html: &str) -> Option<String> {
   let document = Html::parse_document(html);
   let selected = document.select(&SENTRY_TRACE_SELECTOR);
-  let mut values = selected
-      .filter_map(|node| node.attr("content"))
-      .map(|s| s.to_string())
-      .collect::<Vec<_>>();
+  let mut values = selected.filter_map(|node| node.attr("content")).map(|s| s.to_string()).collect::<Vec<_>>();
   values.pop()
 }
 
 fn split_sentry_trace(trace: &str) -> String {
-  trace.split("-")
-      .next()
-      .map(|v| v.to_string())
-      .unwrap_or_else(|| trace.to_string())
+  trace.split("-").next().map(|v| v.to_string()).unwrap_or_else(|| trace.to_string())
 }
 
 #[cfg(test)]
@@ -48,9 +36,7 @@ mod tests {
     #[ignore] // Manual test invocation
     async fn test() -> AnyhowResult<()> {
       let cookie = get_test_cookies()?;
-      let index = get_index(GetIndexPageArgs {
-        cookie: &cookie,
-      }).await?;
+      let index = get_index(GetIndexPageArgs { cookie: &cookie }).await?;
 
       let sentry_trace = parse_index_sentry_trace(&index.body);
 

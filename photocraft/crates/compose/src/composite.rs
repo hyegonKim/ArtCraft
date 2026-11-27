@@ -346,14 +346,7 @@ pub(crate) fn composite_pixel_layer(layer: &Layer, surf: &Surface, backdrop: &mu
     recycle_mask(mv);
 }
 
-fn composite_backdrop_transform(
-    layer: &Layer,
-    clipped: &[Layer],
-    backdrop: &mut Buffer,
-    cx: &Ctx,
-    opacity: f32,
-    transform: impl FnOnce(&mut Buffer),
-) {
+fn composite_backdrop_transform(layer: &Layer, clipped: &[Layer], backdrop: &mut Buffer, cx: &Ctx, opacity: f32, transform: impl FnOnce(&mut Buffer)) {
     let rect = backdrop.rect;
     let mv = mask_vals(layer, rect, cx);
     if mv.as_ref().is_some_and(|values| values.iter().all(|&value| opacity * value <= 0.0)) {
@@ -376,8 +369,7 @@ fn composite_backdrop_transform(
             }
         }
     } else {
-        let (k, fill) =
-            if layer.fill_opacity < 1.0 && psblend::fill_is_special(layer.blend) { (layer.opacity, layer.fill_opacity) } else { (opacity, 1.0) };
+        let (k, fill) = if layer.fill_opacity < 1.0 && psblend::fill_is_special(layer.blend) { (layer.opacity, layer.fill_opacity) } else { (opacity, 1.0) };
         match &mv {
             Some(m) => blend_back(&mut backdrop.px, &adjusted.px, m.iter().map(|v| k * v), layer.blend, fill),
             None => blend_back(&mut backdrop.px, &adjusted.px, std::iter::repeat(k), layer.blend, fill),
@@ -807,26 +799,13 @@ pub(crate) fn apply_live_backdrop_fx(fx: &photocraft_doc::LiveBackdropFx, buf: &
                 &mut buf.px,
                 w,
                 h,
-                &photocraft_algo::nge_fx::WaterRippleParams {
-                    horizon: *horizon,
-                    amplitude: *amplitude,
-                    frequency: *frequency,
-                    progress: *progress,
-                },
+                &photocraft_algo::nge_fx::WaterRippleParams { horizon: *horizon, amplitude: *amplitude, frequency: *frequency, progress: *progress },
             );
         }
         photocraft_doc::LiveBackdropFx::Relight3d { ambient, surface_relief, lamps } => {
             let map_lamp = |l: photocraft_doc::RelightLamp| {
                 let s = l.sanitized();
-                photocraft_algo::relight_3d::Lamp3d {
-                    enabled: s.enabled,
-                    x: s.x,
-                    y: s.y,
-                    z: s.z,
-                    intensity: s.intensity,
-                    color: s.color,
-                    spread: s.spread,
-                }
+                photocraft_algo::relight_3d::Lamp3d { enabled: s.enabled, x: s.x, y: s.y, z: s.z, intensity: s.intensity, color: s.color, spread: s.spread }
             };
             photocraft_algo::relight_3d::apply_relight_3d_rgba(
                 &mut buf.px,

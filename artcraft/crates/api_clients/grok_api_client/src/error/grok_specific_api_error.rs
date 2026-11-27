@@ -13,32 +13,22 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub enum GrokSpecificApiError {
   /// 401 Unauthorized — API key is missing, invalid, or revoked.
-  Unauthorized {
-    raw_http_body: Option<String>,
-  },
+  Unauthorized { raw_http_body: Option<String> },
 
   /// 402 Payment Required / insufficient credits to fulfill the request.
-  InsufficientCredits {
-    raw_http_body: Option<String>,
-  },
+  InsufficientCredits { raw_http_body: Option<String> },
 
   /// 403 Forbidden — the API key is valid but lacks permission for this
   /// resource/model (also covers team-level "out of credits / over spending
   /// limit" responses, which xAI returns as 403 `permission-denied`).
-  Forbidden {
-    raw_http_body: Option<String>,
-  },
+  Forbidden { raw_http_body: Option<String> },
 
   /// 404 Not Found — typically returned for an unknown `request_id` on the
   /// video status endpoint.
-  NotFound {
-    raw_http_body: Option<String>,
-  },
+  NotFound { raw_http_body: Option<String> },
 
   /// 429 Too Many Requests — rate limit exceeded.
-  RateLimited {
-    raw_http_body: Option<String>,
-  },
+  RateLimited { raw_http_body: Option<String> },
 
   /// The prompt was rejected by xAI's content moderation.
   PromptModerated {
@@ -67,25 +57,25 @@ impl Display for GrokSpecificApiError {
     match self {
       Self::Unauthorized { raw_http_body } => {
         write!(f, "Grok API: Unauthorized (invalid or missing API key){}", fmt_raw_body(raw_http_body))
-      }
+      },
       Self::InsufficientCredits { raw_http_body } => {
         write!(f, "Grok API: Insufficient credits{}", fmt_raw_body(raw_http_body))
-      }
+      },
       Self::Forbidden { raw_http_body } => {
         write!(f, "Grok API: Forbidden{}", fmt_raw_body(raw_http_body))
-      }
+      },
       Self::NotFound { raw_http_body } => {
         write!(f, "Grok API: Not found{}", fmt_raw_body(raw_http_body))
-      }
+      },
       Self::RateLimited { raw_http_body } => {
         write!(f, "Grok API: Rate limited{}", fmt_raw_body(raw_http_body))
-      }
+      },
       Self::PromptModerated { reason, raw_http_body } => {
         write!(f, "Grok API: Prompt moderated: {}{}", reason, fmt_raw_body(raw_http_body))
-      }
+      },
       Self::BadRequest { reason, raw_http_body } => {
         write!(f, "Grok API: Bad request: {}{}", reason, fmt_raw_body(raw_http_body))
-      }
+      },
     }
   }
 }

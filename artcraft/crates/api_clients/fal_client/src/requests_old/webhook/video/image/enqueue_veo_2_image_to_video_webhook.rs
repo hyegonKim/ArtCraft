@@ -55,12 +55,9 @@ impl FalRequestCostCalculator for Veo2Request {
   }
 }
 
-
 /// Veo 2 Image-to-Video
 /// https://fal.ai/models/fal-ai/veo2/image-to-video
-pub async fn enqueue_veo_2_image_to_video_webhook<R: IntoUrl>(
-  args: Veo2Args<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_veo_2_image_to_video_webhook<R: IntoUrl>(args: Veo2Args<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
@@ -71,20 +68,12 @@ pub async fn enqueue_veo_2_image_to_video_webhook<R: IntoUrl>(
     Veo2Duration::EightSeconds => Some("8s".to_string()),
   };
 
-  let request = Veo2ImageToVideoInput {
-    image_url: req.image_url,
-    prompt: req.prompt,
-    duration,
-  };
+  let request = Veo2ImageToVideoInput { image_url: req.image_url, prompt: req.prompt, duration };
 
-  let result = veo_2_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = veo_2_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -102,15 +91,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Veo2Args {
-      request: Veo2Request {
-        image_url: MOUNTAIN_TREE_IMAGE_URL.to_string(),
-        prompt: "a shot of the mountains as the sun sets and reveals the moon and stars".to_string(),
-        duration: Veo2Duration::Default,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Veo2Args { request: Veo2Request { image_url: MOUNTAIN_TREE_IMAGE_URL.to_string(), prompt: "a shot of the mountains as the sun sets and reveals the moon and stars".to_string(), duration: Veo2Duration::Default }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_veo_2_image_to_video_webhook(args).await?;
 

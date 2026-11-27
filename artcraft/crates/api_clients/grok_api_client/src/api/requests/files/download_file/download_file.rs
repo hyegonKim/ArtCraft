@@ -77,33 +77,23 @@ pub async fn download_file(args: DownloadFileArgs<'_>) -> Result<DownloadFileSuc
 
   info!("Grok download_file: file_id={}", req.file_id);
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.get(&url)
-    .header("Authorization", bearer)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.get(&url).header("Authorization", bearer).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
 
   // On error, read as text so the classifier can quote it back.
   if !status.is_success() {
-    let body = response.text()
-      .await
-      .map_err(GrokGenericApiError::ReqwestError)?;
+    let body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
     classify_grok_http_error(status, Some(&body))?;
     // classify_grok_http_error always returns Err on non-success.
     unreachable!();
   }
 
-  let bytes = response.bytes()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let bytes = response.bytes().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok download_file response: status={}, bytes={}", status, bytes.len());
 
@@ -129,13 +119,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = DownloadFileArgs {
-      api_key: &key,
-      request: DownloadFileRequest {
-        file_id: "file_abc".to_string(),
-        format: Some(DownloadFormat::Original),
-      },
-    };
+    let args = DownloadFileArgs { api_key: &key, request: DownloadFileRequest { file_id: "file_abc".to_string(), format: Some(DownloadFormat::Original) } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"file_id\":\"file_abc\""));

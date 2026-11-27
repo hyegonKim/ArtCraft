@@ -5,17 +5,8 @@ use image::imageops::FilterType;
 ///
 /// If `exact_fit` is true, the image will be resized to fit the largest dimension,
 /// then cropped to fit the precise dimensions specified.
-pub fn resize_preserving_aspect(
-  source_image: &DynamicImage,
-  new_width: u32,
-  new_height: u32,
-  exact_fit: bool,
-) -> DynamicImage {
-  if exact_fit {
-    source_image.resize_to_fill(new_width, new_height, FilterType::Lanczos3)
-  } else {
-    source_image.resize(new_width, new_height, FilterType::Lanczos3)
-  }
+pub fn resize_preserving_aspect(source_image: &DynamicImage, new_width: u32, new_height: u32, exact_fit: bool) -> DynamicImage {
+  if exact_fit { source_image.resize_to_fill(new_width, new_height, FilterType::Lanczos3) } else { source_image.resize(new_width, new_height, FilterType::Lanczos3) }
 }
 
 #[cfg(test)]

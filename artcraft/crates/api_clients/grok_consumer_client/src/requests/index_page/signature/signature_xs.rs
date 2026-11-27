@@ -6,32 +6,29 @@ use log::{debug, error};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-static NUMBER_REGEX : Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#"[\d\.\-]+"#)
-      .expect("Regex should parse")
-});
+static NUMBER_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#"[\d\.\-]+"#).expect("Regex should parse"));
 
 /*
-    @staticmethod
-    def xs(x_bytes: bytes, svg: str, x_values: list) -> str:
-        arr = list(x_bytes) -- we already have this
-        idx = arr[x_values[0]] % 16
-        c = ((arr[x_values[1]] % 16) * (arr[x_values[2]] % 16)) * (arr[x_values[3]] % 16)
-        o = Signature.xa(svg)
-        vals = o[idx]
-        k = Signature.simulateStyle(vals, c)
+   @staticmethod
+   def xs(x_bytes: bytes, svg: str, x_values: list) -> str:
+       arr = list(x_bytes) -- we already have this
+       idx = arr[x_values[0]] % 16
+       c = ((arr[x_values[1]] % 16) * (arr[x_values[2]] % 16)) * (arr[x_values[3]] % 16)
+       o = Signature.xa(svg)
+       vals = o[idx]
+       k = Signature.simulateStyle(vals, c)
 
-        concat = str(k["color"]) + str(k["transform"])
-        matches = findall(r"[\d\.\-]+", concat)
-        converted = []
-        for m in matches:
-            num = float(m)
-            hexstr = Signature.tohex(num)
-            converted.append(hexstr)
-        joined = "".join(converted)
-        cleaned = joined.replace(".", "").replace("-", "")
-        return cleaned
- */
+       concat = str(k["color"]) + str(k["transform"])
+       matches = findall(r"[\d\.\-]+", concat)
+       converted = []
+       for m in matches:
+           num = float(m)
+           hexstr = Signature.tohex(num)
+           converted.append(hexstr)
+       joined = "".join(converted)
+       cleaned = joined.replace(".", "").replace("-", "")
+       return cleaned
+*/
 
 /// Based on "Grok-Api/core/xctid.py"
 /// `bytes` is
@@ -75,17 +72,17 @@ pub fn signature_xs(x_bytes: &[u8], svg_data: &str, x_values: &[u32]) -> Result<
   debug!("[xs] k.transform = {}", &k.transform);
 
   /*
-        concat = str(k["color"]) + str(k["transform"])
-        matches = findall(r"[\d\.\-]+", concat)
-        converted = []
-        for m in matches:
-            num = float(m)
-            hexstr = Signature.tohex(num)
-            converted.append(hexstr)
-        joined = "".join(converted)
-        cleaned = joined.replace(".", "").replace("-", "")
-        return cleaned
-   */
+       concat = str(k["color"]) + str(k["transform"])
+       matches = findall(r"[\d\.\-]+", concat)
+       converted = []
+       for m in matches:
+           num = float(m)
+           hexstr = Signature.tohex(num)
+           converted.append(hexstr)
+       joined = "".join(converted)
+       cleaned = joined.replace(".", "").replace("-", "")
+       return cleaned
+  */
 
   // concat = str(k["color"]) + str(k["transform"])
   let concat = format!("{}{}", k.color, k.transform);
@@ -93,22 +90,19 @@ pub fn signature_xs(x_bytes: &[u8], svg_data: &str, x_values: &[u32]) -> Result<
   debug!("[xs] concat = {}", concat);
 
   // matches = findall(r"[\d\.\-]+", concat)
-  let matches = NUMBER_REGEX.captures_iter(&concat)
-      .filter_map(|captures| captures.get(0))
-      .map(|m| m.as_str().to_string())
-      .collect::<Vec<_>>();
+  let matches = NUMBER_REGEX.captures_iter(&concat).filter_map(|captures| captures.get(0)).map(|m| m.as_str().to_string()).collect::<Vec<_>>();
 
   debug!("[xs] matches = {:?}", matches);
 
   /*
-        converted = []
-        for m in matches:
-            num = float(m)
-            hexstr = Signature.tohex(num)
-            converted.append(hexstr)
-        joined = "".join(converted)
-        cleaned = joined.replace(".", "").replace("-", "")
-   */
+       converted = []
+       for m in matches:
+           num = float(m)
+           hexstr = Signature.tohex(num)
+           converted.append(hexstr)
+       joined = "".join(converted)
+       cleaned = joined.replace(".", "").replace("-", "")
+  */
 
   let mut converted = Vec::new();
 
@@ -132,15 +126,11 @@ pub fn signature_xs(x_bytes: &[u8], svg_data: &str, x_values: &[u32]) -> Result<
 }
 
 fn ith_usize(numbers: &[u32], i: usize) -> Result<usize, GrokClientError> {
-  numbers.get(i)
-      .map(|x| *x as usize)
-      .ok_or_else(|| GrokClientError::BadSignatureInputs)
+  numbers.get(i).map(|x| *x as usize).ok_or_else(|| GrokClientError::BadSignatureInputs)
 }
 
 fn ith_u32(bytes: &[u8], i: usize) -> Result<u32, GrokClientError> {
-  bytes.get(i)
-      .map(|x| *x as u32)
-      .ok_or_else(|| GrokClientError::BadSignatureInputs)
+  bytes.get(i).map(|x| *x as u32).ok_or_else(|| GrokClientError::BadSignatureInputs)
 }
 
 #[cfg(test)]

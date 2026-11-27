@@ -11,20 +11,10 @@ pub struct MidjourneyUserInfo {
 
 impl MidjourneyUserInfo {
   pub fn to_serializable(&self) -> SerializableMidjourneyUserInfo {
-    SerializableMidjourneyUserInfo {
-      user_id: self.user_id
-          .as_ref()
-          .map(|id| id.to_string()),
-      email: self.email.clone(),
-      websocket_token: self.websocket_token.clone(),
-    }
+    SerializableMidjourneyUserInfo { user_id: self.user_id.as_ref().map(|id| id.to_string()), email: self.email.clone(), websocket_token: self.websocket_token.clone() }
   }
-  
+
   pub fn from_api_response(response: GetUserInfoResponse) -> Self {
-    Self {
-      user_id: response.user_id,
-      email: response.email,
-      websocket_token: response.websocket_token,
-    }
+    Self { user_id: response.user_id, email: response.email, websocket_token: response.websocket_token }
   }
 }

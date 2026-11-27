@@ -22,12 +22,24 @@ impl Error for JwtError {}
 impl Display for JwtError {
   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
     match self {
-      Self::ParseError(reason) => { write!(f, "JwtError::ParseError : {}", reason) }
-      Self::JsonParseError(err) => { write!(f, "JwtError::JsonParseError : {:?}", err) }
-      Self::Base64DecodeError(err) => { write!(f, "JwtError::Base64DecodeError : {:?}", err) }
-      Self::Utf8Error(err) => { write!(f, "JwtError::Utf8Error : {:?}", err) }
-      Self::CommonFieldError(reason) => { write!(f, "JwtError::CommonFieldError : {}", reason) }
-      Self::CustomClaimsFieldError(reason) => { write!(f, "JwtError::CustomClaimsFieldError : {}", reason) }
+      Self::ParseError(reason) => {
+        write!(f, "JwtError::ParseError : {}", reason)
+      },
+      Self::JsonParseError(err) => {
+        write!(f, "JwtError::JsonParseError : {:?}", err)
+      },
+      Self::Base64DecodeError(err) => {
+        write!(f, "JwtError::Base64DecodeError : {:?}", err)
+      },
+      Self::Utf8Error(err) => {
+        write!(f, "JwtError::Utf8Error : {:?}", err)
+      },
+      Self::CommonFieldError(reason) => {
+        write!(f, "JwtError::CommonFieldError : {}", reason)
+      },
+      Self::CustomClaimsFieldError(reason) => {
+        write!(f, "JwtError::CustomClaimsFieldError : {}", reason)
+      },
     }
   }
 }

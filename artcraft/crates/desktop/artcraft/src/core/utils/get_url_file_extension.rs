@@ -2,10 +2,7 @@ use reqwest::Url;
 use std::path::Path;
 
 pub fn get_url_file_extension(url: &Url) -> Option<&str> {
-  Path::new(url.path())
-    .extension()
-    .filter(|ext| !ext.is_empty())
-    .and_then(|ext| ext.to_str())
+  Path::new(url.path()).extension().filter(|ext| !ext.is_empty()).and_then(|ext| ext.to_str())
 }
 
 #[cfg(test)]

@@ -17,7 +17,7 @@ pub struct WorldlabsCredentialHolder {
   /// Bearer token
   /// This needs to be persisted to disk.
   pub world_labs_bearer_token: Option<WorldLabsBearerToken>,
-  
+
   /// Refresh token
   /// This needs to be persisted to disk.
   pub world_labs_refresh_token: Option<WorldLabsRefreshToken>,
@@ -25,11 +25,6 @@ pub struct WorldlabsCredentialHolder {
 
 impl WorldlabsCredentialHolder {
   pub fn empty() -> Self {
-    Self {
-      browser_cookies: None,
-      world_labs_cookies: None,
-      world_labs_bearer_token: None,
-      world_labs_refresh_token: None,
-    }
+    Self { browser_cookies: None, world_labs_cookies: None, world_labs_bearer_token: None, world_labs_refresh_token: None }
   }
 }

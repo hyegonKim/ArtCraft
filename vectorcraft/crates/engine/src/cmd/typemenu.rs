@@ -1615,11 +1615,7 @@ fn has_path_type(s: &Session) -> std::result::Result<(), String> {
     has_selection(s)?;
     let st = s.active().ok_or("no document open")?;
     let selected: Vec<NodeId> = st.selection.objects.to_vec();
-    if text_ids(&st.doc, &selected).into_iter().any(|id| path_text(st.doc.node(id)).is_some()) {
-        Ok(())
-    } else {
-        Err("select type on a path".into())
-    }
+    if text_ids(&st.doc, &selected).into_iter().any(|id| path_text(st.doc.node(id)).is_some()) { Ok(()) } else { Err("select type on a path".into()) }
 }
 
 fn reverse_path_direction(s: &mut Session, p: &Value) -> Result<Value> {

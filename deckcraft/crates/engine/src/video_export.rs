@@ -207,10 +207,7 @@ impl AnimatedExportOptions {
             }
             None => (0..total_slides).collect(),
         };
-        let visible_count = indices
-            .into_iter()
-            .filter(|&i| self.include_hidden || doc.slides.get(i).is_some_and(|s| !s.hidden))
-            .count();
+        let visible_count = indices.into_iter().filter(|&i| self.include_hidden || doc.slides.get(i).is_some_and(|s| !s.hidden)).count();
         if visible_count == 0 {
             return Err(bad(cmd, "no slides to export (all slides are hidden, or the presentation is empty)"));
         }
@@ -412,11 +409,8 @@ fn encode_mp4_sequence(seq: &RenderedSequence) -> Result<Vec<u8>> {
 
     let mut wopts = WriterOptions::new(Brand::Mp4);
     wopts.movie_timescale = fps.saturating_mul(1000).max(1000);
-    let mut mux = Mp4Writer::new(Cursor::new(Vec::new()), wopts)
-        .map_err(|e| EngineError::Other(format!("MP4 muxer init failed: {e}")))?;
-    let track = mux
-        .add_track(TrackConfig::new(entry, fps))
-        .map_err(|e| EngineError::Other(format!("MP4 track init failed: {e}")))?;
+    let mut mux = Mp4Writer::new(Cursor::new(Vec::new()), wopts).map_err(|e| EngineError::Other(format!("MP4 muxer init failed: {e}")))?;
+    let track = mux.add_track(TrackConfig::new(entry, fps)).map_err(|e| EngineError::Other(format!("MP4 track init failed: {e}")))?;
 
     let y_stride = w as usize;
     let uv_stride = (w as usize).div_ceil(2);
@@ -433,21 +427,15 @@ fn encode_mp4_sequence(seq: &RenderedSequence) -> Result<Vec<u8>> {
         pts = pts.saturating_add(i64::from(dur));
         for pkt in pkts {
             let sample_dur = pending_durations.pop_front().unwrap_or(1);
-            mux.write_sample(
-                track,
-                WriteSample { data: &pkt.data, duration: sample_dur, composition_offset: 0, is_sync: pkt.keyframe },
-            )
-            .map_err(|e| EngineError::Other(format!("MP4 write failed: {e}")))?;
+            mux.write_sample(track, WriteSample { data: &pkt.data, duration: sample_dur, composition_offset: 0, is_sync: pkt.keyframe })
+                .map_err(|e| EngineError::Other(format!("MP4 write failed: {e}")))?;
         }
     }
     let tail = enc.flush();
     for pkt in tail {
         let sample_dur = pending_durations.pop_front().unwrap_or(1);
-        mux.write_sample(
-            track,
-            WriteSample { data: &pkt.data, duration: sample_dur, composition_offset: 0, is_sync: pkt.keyframe },
-        )
-        .map_err(|e| EngineError::Other(format!("MP4 flush write failed: {e}")))?;
+        mux.write_sample(track, WriteSample { data: &pkt.data, duration: sample_dur, composition_offset: 0, is_sync: pkt.keyframe })
+            .map_err(|e| EngineError::Other(format!("MP4 flush write failed: {e}")))?;
     }
 
     let cursor = mux.finish_faststart().map_err(|e| EngineError::Other(format!("MP4 finalize failed: {e}")))?;
@@ -476,8 +464,8 @@ fn encode_webm_sequence(seq: &RenderedSequence) -> Result<Vec<u8>> {
     tspec.default_duration_ns = Some(frame_ns);
     tspec.video_size = Some((w, h));
     let mopts = MuxOptions { doc_type: "webm".into(), writing_app: "DeckCraft".into(), ..Default::default() };
-    let mut mux = MkvWriter::new(Cursor::new(Vec::new()), vec![tspec], mopts)
-        .map_err(|e| EngineError::Other(format!("WebM muxer init failed: {e}")))?;
+    let mut mux =
+        MkvWriter::new(Cursor::new(Vec::new()), vec![tspec], mopts).map_err(|e| EngineError::Other(format!("WebM muxer init failed: {e}")))?;
 
     let mut pts_ns: i64 = 0;
     for (idx, frame) in seq.frames.iter().enumerate() {
@@ -490,8 +478,7 @@ fn encode_webm_sequence(seq: &RenderedSequence) -> Result<Vec<u8>> {
         let ticks = frame.ticks.max(1);
         let dur_ns = u64::from(ticks).saturating_mul(frame_ns);
         let explicit_dur = (ticks != 1).then_some(dur_ns);
-        mux.write_frame(0, pts_ns, ef.key, &ef.data, explicit_dur)
-            .map_err(|e| EngineError::Other(format!("WebM write failed: {e}")))?;
+        mux.write_frame(0, pts_ns, ef.key, &ef.data, explicit_dur).map_err(|e| EngineError::Other(format!("WebM write failed: {e}")))?;
         pts_ns = pts_ns.saturating_add(i64::try_from(dur_ns).unwrap_or(i64::MAX));
     }
 
@@ -525,11 +512,7 @@ mod tests {
         let id2 = r2["id"].as_u64().unwrap();
         s.execute("shape.fill", &json!({"ids": [id2], "color": "#30E080"})).unwrap();
         s.execute("transition.set", &json!({"kind": "push", "option": "l", "duration": 500})).unwrap();
-        s.execute(
-            "animation.add",
-            &json!({"ids": [id2], "class": "entrance", "effect": "fade", "start": "afterPrevious", "duration": 300}),
-        )
-        .unwrap();
+        s.execute("animation.add", &json!({"ids": [id2], "class": "entrance", "effect": "fade", "start": "afterPrevious", "duration": 300})).unwrap();
         s
     }
 
@@ -541,12 +524,7 @@ mod tests {
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("show.gif");
 
-        let res = s
-            .execute(
-                "file.exportGif",
-                &json!({"path": path.to_string_lossy(), "width": 160, "fps": 10, "holdSeconds": 0.4}),
-            )
-            .unwrap();
+        let res = s.execute("file.exportGif", &json!({"path": path.to_string_lossy(), "width": 160, "fps": 10, "holdSeconds": 0.4})).unwrap();
         let bytes = std::fs::read(&path).unwrap();
         let _ = std::fs::remove_dir_all(&dir);
 
@@ -576,10 +554,7 @@ mod tests {
         // 1. H.264 / MP4
         let mp4_path = dir.join("deck.mp4");
         let mp4_res = s
-            .execute(
-                "file.exportVideo",
-                &json!({"path": mp4_path.to_string_lossy(), "format": "mp4", "width": 320, "fps": 12, "holdSeconds": 0.5}),
-            )
+            .execute("file.exportVideo", &json!({"path": mp4_path.to_string_lossy(), "format": "mp4", "width": 320, "fps": 12, "holdSeconds": 0.5}))
             .unwrap();
         let mp4_bytes = std::fs::read(&mp4_path).unwrap();
         assert!(mp4_bytes.len() > 256);
@@ -601,12 +576,7 @@ mod tests {
 
         // 2. VP9 / WebM
         let webm_path = dir.join("deck.webm");
-        let webm_res = s
-            .execute(
-                "file.export",
-                &json!({"path": webm_path.to_string_lossy(), "width": 320, "fps": 12, "holdSeconds": 0.5}),
-            )
-            .unwrap();
+        let webm_res = s.execute("file.export", &json!({"path": webm_path.to_string_lossy(), "width": 320, "fps": 12, "holdSeconds": 0.5})).unwrap();
         let webm_bytes = std::fs::read(&webm_path).unwrap();
         let _ = std::fs::remove_dir_all(&dir);
 

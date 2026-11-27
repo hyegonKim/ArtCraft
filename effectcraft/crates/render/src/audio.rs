@@ -421,10 +421,9 @@ fn layer_raw_multichannel(env: &MixEnv<'_>, l: &Layer, i0: i64, n: usize, ch: us
     let lt = l.layer_time(sample_tick(i0 + a as i64, rate));
     let buf = match &l.source {
         LayerSource::Footage { item } => match env.project.item(*item).map(|i| &i.kind) {
-            Some(ItemKind::Footage(f)) if f.has_audio => env
-                .footage
-                .audio_channels(*item, f, lt, src_n, rate, ch as u8)
-                .unwrap_or_else(|| vec![0.0; src_n * ch]),
+            Some(ItemKind::Footage(f)) if f.has_audio => {
+                env.footage.audio_channels(*item, f, lt, src_n, rate, ch as u8).unwrap_or_else(|| vec![0.0; src_n * ch])
+            }
             _ => return out,
         },
         LayerSource::Comp { item } => {
@@ -432,14 +431,7 @@ fn layer_raw_multichannel(env: &MixEnv<'_>, l: &Layer, i0: i64, n: usize, ch: us
                 return out;
             }
             let mut sub = vec![0.0f32; src_n * ch];
-            mix_into_multichannel(
-                &AudioSources { project: env.project, footage: env.footage, expr: env.expr, rate },
-                *item,
-                lt,
-                ch,
-                &mut sub,
-                env.depth + 1,
-            );
+            mix_into_multichannel(&AudioSources { project: env.project, footage: env.footage, expr: env.expr, rate }, *item, lt, ch, &mut sub, env.depth + 1);
             sub
         }
         _ => return out,

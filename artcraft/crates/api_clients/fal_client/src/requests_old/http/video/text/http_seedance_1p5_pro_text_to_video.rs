@@ -50,8 +50,6 @@ pub struct Seedance1p5ProTextToVideoOutput {
   pub video: Seedance1p5ProTextToVideoVideoFile,
 }
 
-pub fn seedance_1p5_pro_text_to_video(
-  params: Seedance1p5ProTextToVideoInput,
-) -> FalRequest<Seedance1p5ProTextToVideoInput, Seedance1p5ProTextToVideoOutput> {
+pub fn seedance_1p5_pro_text_to_video(params: Seedance1p5ProTextToVideoInput) -> FalRequest<Seedance1p5ProTextToVideoInput, Seedance1p5ProTextToVideoOutput> {
   FalRequest::new("fal-ai/bytedance/seedance/v1.5/pro/text-to-video", params)
 }

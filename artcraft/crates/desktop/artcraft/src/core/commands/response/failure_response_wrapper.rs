@@ -4,10 +4,10 @@ use serde::Serialize;
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum CommandErrorStatus {
-  BadRequest, // 400
-  Unauthorized, // 401
+  BadRequest,      // 400
+  Unauthorized,    // 401
   TooManyRequests, // 429
-  ServerError, // 500
+  ServerError,     // 500
 }
 
 #[derive(Serialize, Debug)]

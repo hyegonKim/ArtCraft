@@ -12,25 +12,15 @@ use crate::services::grok::state::grok_credential_manager::GrokCredentialManager
 use crate::services::grok::windows::grok_login_window::grok_login_window_thread::grok_login_window_thread;
 
 /// Name of the window
-pub (super) const GROK_LOGIN_WINDOW_NAME: &str = "grok_login_window";
+pub(super) const GROK_LOGIN_WINDOW_NAME: &str = "grok_login_window";
 
-pub (super) static START_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://google.com").expect("URL should parse")
-});
+pub(super) static START_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://google.com").expect("URL should parse"));
 
-pub (super) static GROK_HOMEPAGE_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://grok.com/").expect("URL should parse")
-});
+pub(super) static GROK_HOMEPAGE_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://grok.com/").expect("URL should parse"));
 
-pub (super) static GROK_LOGIN_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://accounts.x.ai/sign-in?redirect=grok-com").expect("URL should parse")
-});
+pub(super) static GROK_LOGIN_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://accounts.x.ai/sign-in?redirect=grok-com").expect("URL should parse"));
 
-pub async fn grok_login_window_open(
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  grok_creds_manager: &GrokCredentialManager,
-) -> AnyhowResult<()> {
+pub async fn grok_login_window_open(app: &AppHandle, app_data_root: &AppDataRoot, grok_creds_manager: &GrokCredentialManager) -> AnyhowResult<()> {
   if app.get_window(GROK_LOGIN_WINDOW_NAME).is_some() {
     return Err(anyhow!("Login window already open"));
   }
@@ -50,8 +40,7 @@ pub async fn grok_login_window_open(
       .devtools(true)
       .build()?;
 
-  let webview = window.get_webview(GROK_LOGIN_WINDOW_NAME)
-      .ok_or_else(|| anyhow!("no webview found"))?;
+  let webview = window.get_webview(GROK_LOGIN_WINDOW_NAME).ok_or_else(|| anyhow!("no webview found"))?;
 
   clear_all_webview_cookies(&webview)?;
 
@@ -64,7 +53,7 @@ pub async fn grok_login_window_open(
 
   let app_handle = app.clone();
   let app_data_root = app_data_root.clone();
-  let grok_creds_manager= grok_creds_manager.clone();
+  let grok_creds_manager = grok_creds_manager.clone();
 
   let _ = tauri::async_runtime::spawn(async move {
     grok_login_window_thread(app_handle, app_data_root, grok_creds_manager).await;

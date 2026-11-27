@@ -135,8 +135,7 @@ pub enum GrokAspectRatio {
 }
 
 #[derive(Serialize)]
-pub struct TauriGenerateVideoResponse {
-}
+pub struct TauriGenerateVideoResponse {}
 
 impl SerializeMarker for TauriGenerateVideoResponse {}
 

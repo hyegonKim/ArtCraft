@@ -8,9 +8,7 @@ pub struct CookieSet {
 
 impl CookieSet {
   pub fn new() -> Self {
-    Self {
-      cookies: HashMap::new(),
-    }
+    Self { cookies: HashMap::new() }
   }
 
   pub fn add_cookie(&mut self, cookie: Cookie) {
@@ -26,11 +24,6 @@ impl CookieSet {
   }
 
   pub fn to_cookie_string(&self) -> String {
-    self
-      .cookies
-      .values()
-      .map(|cookie| format!("{}={}", cookie.name, cookie.value))
-      .collect::<Vec<String>>()
-      .join("; ")
+    self.cookies.values().map(|cookie| format!("{}={}", cookie.name, cookie.value)).collect::<Vec<String>>().join("; ")
   }
 }

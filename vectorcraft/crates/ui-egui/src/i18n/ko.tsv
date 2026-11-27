@@ -7168,4 +7168,23 @@ breakText	Glyphs	글리프
 	Normal Strength	노멀 강도
 	Ray Tracing	레이 트레이싱
 	Ambient Occlusion	앰비언트 오클루전
+	Capture	캡처
+	Extract Color Theme	색상 테마 추출
+	Extract Color Theme…	색상 테마 추출…
+	Extract Pattern Tile	패턴 타일 추출
+	Extract Pattern Tile…	패턴 타일 추출…
+	Color Mood	색상 분위기
+	Theme Name	테마 이름
+	OKLab Preview	OKLab 미리보기
+	Global Swatches	전역 견본
+	Save to Color Themes	색상 테마에 저장
+	Colorful	화려함
+	Bright	밝음
+	Muted	차분함
+	Deep	깊음
+	Pattern Mode	패턴 모드
+	Kaleidoscope	만화경
+	Half-Drop	반 드롭
+	Pattern Name	패턴 이름
+	Place Tile Preview	타일 미리보기 배치
 @plural	{n} artboard selected|{n} artboards selected	{n}개 대지 선택됨

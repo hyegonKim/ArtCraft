@@ -2,9 +2,7 @@ use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestC
 
 use crate::generate::generate_mesh::mesh_generation_cost_estimate::MeshGenerationCostEstimate;
 use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::cost::fal_mesh_cost_estimate;
-use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::request::{
-  FalRodin2p5FastImageRequestState, FalRodin2p5FastTextRequestState,
-};
+use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::request::{FalRodin2p5FastImageRequestState, FalRodin2p5FastTextRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalRodin2p5FastImageCostState {
@@ -16,9 +14,7 @@ impl FalRodin2p5FastImageCostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -33,9 +29,7 @@ pub struct FalRodin2p5FastTextCostState {
 
 impl FalRodin2p5FastTextCostState {
   pub fn from_request(request: &FalRodin2p5FastTextRequestState) -> Self {
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -69,11 +63,7 @@ mod tests {
 
     #[test]
     fn options_do_not_change_the_price() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::Geometry),
-        enable_pbr: Some(true),
-        ..image_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Geometry), enable_pbr: Some(true), ..image_builder() };
       assert_eq!(estimate_usd_cents(builder), 10);
     }
   }
@@ -81,29 +71,14 @@ mod tests {
   // ── Helpers ──
 
   fn image_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Rodin2p5Fast,
-      provider: RouterProvider::Fal,
-      reference_images: Some(ImageListRef::Urls(vec![FRONT_URL.to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Rodin2p5Fast, provider: RouterProvider::Fal, reference_images: Some(ImageListRef::Urls(vec![FRONT_URL.to_string()])), ..Default::default() }
   }
 
   fn text_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Rodin2p5Fast,
-      provider: RouterProvider::Fal,
-      prompt: Some("a red ceramic teapot".to_string()),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Rodin2p5Fast, provider: RouterProvider::Fal, prompt: Some("a red ceramic teapot".to_string()), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

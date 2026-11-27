@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::vidu_q3::request::{
-  FalViduQ3Mode, FalViduQ3RequestState,
-};
+use crate::generate::generate_video::providers::fal::vidu_q3::request::{FalViduQ3Mode, FalViduQ3RequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -25,15 +23,7 @@ impl FalViduQ3CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -95,20 +85,14 @@ mod tests {
   #[test]
   fn reference_5s_540p_is_35() {
     let mut b = base_builder(Some(5), Some(RouterResolution::FourEightyP));
-    b.reference_images = Some(ImageListRef::Urls(vec![
-      "https://example.com/ref-0.png".to_string(),
-    ]));
+    b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/ref-0.png".to_string()]));
     assert_eq!(cost_cents(b), 35);
   }
 
   #[test]
   fn reference_mix_10s_1080p_is_154() {
     let mut b = base_builder(Some(10), Some(RouterResolution::TenEightyP));
-    b.reference_images = Some(ImageListRef::Urls(vec![
-      "https://example.com/ref-0.png".to_string(),
-      "https://example.com/ref-1.png".to_string(),
-      "https://example.com/ref-2.png".to_string(),
-    ]));
+    b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/ref-0.png".to_string(), "https://example.com/ref-1.png".to_string(), "https://example.com/ref-2.png".to_string()]));
     assert_eq!(cost_cents(b), 154);
   }
 
@@ -120,18 +104,8 @@ mod tests {
     assert!(!estimate.is_free);
   }
 
-  fn base_builder(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-  ) -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::ViduQ3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    }
+  fn base_builder(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> GenerateVideoRequestBuilder {
+    GenerateVideoRequestBuilder { model: RouterVideoModel::ViduQ3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() }
   }
 
   fn cost_cents(builder: GenerateVideoRequestBuilder) -> u64 {

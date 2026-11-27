@@ -16,15 +16,7 @@ impl ArtcraftMeshyV6CostState {
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
-    MeshGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    MeshGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -56,13 +48,7 @@ mod tests {
 
     #[test]
     fn options_do_not_change_the_price() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-        polygon_type: Some(CommonPolygonType::Quad),
-        face_count: Some(100_000),
-        enable_pbr: Some(true),
-        ..image_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), polygon_type: Some(CommonPolygonType::Quad), face_count: Some(100_000), enable_pbr: Some(true), ..image_builder() };
       assert_eq!(estimate_usd_cents(builder), 104);
     }
   }
@@ -70,31 +56,14 @@ mod tests {
   // ── Helpers ──
 
   fn image_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::MeshyV6,
-      provider: RouterProvider::Artcraft,
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_front".to_string()),
-      ])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::MeshyV6, provider: RouterProvider::Artcraft, reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_front".to_string())])), ..Default::default() }
   }
 
   fn text_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::MeshyV6,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("a red ceramic teapot".to_string()),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::MeshyV6, provider: RouterProvider::Artcraft, prompt: Some("a red ceramic teapot".to_string()), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

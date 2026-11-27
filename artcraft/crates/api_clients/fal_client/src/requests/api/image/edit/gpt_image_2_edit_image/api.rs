@@ -1,10 +1,6 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::common::gpt_image_2_resolution::{
-  compute_custom_image_size, GptImage2AspectRatio, GptImage2Resolution,
-};
-use crate::requests::api::image::edit::gpt_image_2_edit_image::raw_request::{
-  GptImage2EditImageInput, GptImage2EditImageOutput, ImageSizeParam,
-};
+use crate::requests::api::image::common::gpt_image_2_resolution::{compute_custom_image_size, GptImage2AspectRatio, GptImage2Resolution};
+use crate::requests::api::image::edit::gpt_image_2_edit_image::raw_request::{GptImage2EditImageInput, GptImage2EditImageOutput, ImageSizeParam};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -116,46 +112,42 @@ impl FalEndpoint for GptImage2EditImageRequest {
           Some(aspect) => {
             let custom = compute_custom_image_size(aspect, resolution);
             Some(ImageSizeParam::Custom(custom))
-          }
+          },
           // Auto + resolution: can't compute dimensions, fall back to preset
           None => Some(ImageSizeParam::Preset(size_to_preset_str(size).to_string())),
         }
-      }
+      },
       // Resolution present but no image_size: default to Square
       (None, Some(resolution)) => {
         let custom = compute_custom_image_size(GptImage2AspectRatio::Square, resolution);
         Some(ImageSizeParam::Custom(custom))
-      }
+      },
       // No resolution: use the standard preset string
-      (Some(size), None) => {
-        Some(ImageSizeParam::Preset(size_to_preset_str(size).to_string()))
-      }
+      (Some(size), None) => Some(ImageSizeParam::Preset(size_to_preset_str(size).to_string())),
       // Neither: let the API default
       (None, None) => None,
     };
 
-    let quality = self.quality.map(|q| match q {
-      GptImage2EditImageQuality::Low => "low",
-      GptImage2EditImageQuality::Medium => "medium",
-      GptImage2EditImageQuality::High => "high",
-    }.to_string());
+    let quality = self.quality.map(|q| {
+      match q {
+        GptImage2EditImageQuality::Low => "low",
+        GptImage2EditImageQuality::Medium => "medium",
+        GptImage2EditImageQuality::High => "high",
+      }
+      .to_string()
+    });
 
-    let output_format = Some(match self.output_format {
-      Some(GptImage2EditImageOutputFormat::Jpeg) => "jpeg",
-      Some(GptImage2EditImageOutputFormat::Png) => "png",
-      Some(GptImage2EditImageOutputFormat::Webp) => "webp",
-      None => "png",
-    }.to_string());
+    let output_format = Some(
+      match self.output_format {
+        Some(GptImage2EditImageOutputFormat::Jpeg) => "jpeg",
+        Some(GptImage2EditImageOutputFormat::Png) => "png",
+        Some(GptImage2EditImageOutputFormat::Webp) => "webp",
+        None => "png",
+      }
+      .to_string(),
+    );
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_urls: self.image_urls.clone(),
-      num_images: Some(num_images),
-      mask_url: self.mask_url.clone(),
-      image_size,
-      quality,
-      output_format,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_urls: self.image_urls.clone(), num_images: Some(num_images), mask_url: self.mask_url.clone(), image_size, quality, output_format })
   }
 }
 
@@ -175,20 +167,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2EditImageRequest {
-      image_urls: vec![
-        GHOST_IMAGE_URL.to_string(),
-        TREX_SKELETON_IMAGE_URL.to_string(),
-        ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ],
-      prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-      num_images: GptImage2EditImageNumImages::Two,
-      mask_url: None,
-      image_size: None,
-      resolution: None,
-      quality: None,
-      output_format: None,
-    };
+    let request = GptImage2EditImageRequest { image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), num_images: GptImage2EditImageNumImages::Two, mask_url: None, image_size: None, resolution: None, quality: None, output_format: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -202,21 +181,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage2EditImageRequest {
-      image_urls: vec![GHOST_IMAGE_URL.to_string()],
-      prompt: "make the ghost wear a top hat".to_string(),
-      num_images: GptImage2EditImageNumImages::One,
-      mask_url: None,
-      image_size: Some(GptImage2EditImageSize::Square),
-      resolution: None,
-      quality: Some(GptImage2EditImageQuality::High),
-      output_format: Some(GptImage2EditImageOutputFormat::Png),
-    };
+    let request = GptImage2EditImageRequest { image_urls: vec![GHOST_IMAGE_URL.to_string()], prompt: "make the ghost wear a top hat".to_string(), num_images: GptImage2EditImageNumImages::One, mask_url: None, image_size: Some(GptImage2EditImageSize::Square), resolution: None, quality: Some(GptImage2EditImageQuality::High), output_format: Some(GptImage2EditImageOutputFormat::Png) };
 
-    let result = request.send_webhook_request(
-      &api_key,
-      "https://example.com/webhook",
-    ).await?;
+    let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Request ID: {:?}", result.request_id);
     assert!(result.request_id.is_some());
     Ok(())
@@ -231,21 +198,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let sizes = [
-      ("square", GptImage2EditImageSize::Square),
-      ("square_hd", GptImage2EditImageSize::SquareHd),
-      ("landscape_4x3", GptImage2EditImageSize::Landscape4x3),
-      ("landscape_16x9", GptImage2EditImageSize::Landscape16x9),
-      ("portrait_4x3", GptImage2EditImageSize::Portrait4x3),
-      ("portrait_16x9", GptImage2EditImageSize::Portrait16x9),
-    ];
+    let sizes = [("square", GptImage2EditImageSize::Square), ("square_hd", GptImage2EditImageSize::SquareHd), ("landscape_4x3", GptImage2EditImageSize::Landscape4x3), ("landscape_16x9", GptImage2EditImageSize::Landscape16x9), ("portrait_4x3", GptImage2EditImageSize::Portrait4x3), ("portrait_16x9", GptImage2EditImageSize::Portrait16x9)];
 
-    let resolutions = [
-      ("1K", GptImage2Resolution::OneK),
-      ("2K", GptImage2Resolution::TwoK),
-      ("3K", GptImage2Resolution::ThreeK),
-      ("4K", GptImage2Resolution::FourK),
-    ];
+    let resolutions = [("1K", GptImage2Resolution::OneK), ("2K", GptImage2Resolution::TwoK), ("3K", GptImage2Resolution::ThreeK), ("4K", GptImage2Resolution::FourK)];
 
     let surfaces = ["t-shirt", "sign", "monitor", "billboard", "coffee mug", "poster"];
     let mut surface_idx = 0;
@@ -255,21 +210,9 @@ mod tests {
         let surface = surfaces[surface_idx % surfaces.len()];
         surface_idx += 1;
 
-        let prompt = format!(
-          "Edit this image: add a {} with the text \"{} {}\" prominently displayed, studio lighting",
-          surface, size_name, res_name,
-        );
+        let prompt = format!("Edit this image: add a {} with the text \"{} {}\" prominently displayed, studio lighting", surface, size_name, res_name,);
 
-        let request = GptImage2EditImageRequest {
-          prompt,
-          image_urls: vec![GHOST_IMAGE_URL.to_string()],
-          num_images: GptImage2EditImageNumImages::One,
-          mask_url: None,
-          image_size: Some(*size),
-          resolution: Some(*resolution),
-          quality: Some(GptImage2EditImageQuality::Medium),
-          output_format: Some(GptImage2EditImageOutputFormat::Png),
-        };
+        let request = GptImage2EditImageRequest { prompt, image_urls: vec![GHOST_IMAGE_URL.to_string()], num_images: GptImage2EditImageNumImages::One, mask_url: None, image_size: Some(*size), resolution: Some(*resolution), quality: Some(GptImage2EditImageQuality::Medium), output_format: Some(GptImage2EditImageOutputFormat::Png) };
 
         let result = request.send_queue_request(&api_key).await?;
         println!("[{} + {}] Request ID: {}", size_name, res_name, result.request_id);
@@ -284,26 +227,13 @@ mod tests {
     use super::*;
     use crate::requests::api::image::edit::gpt_image_2_edit_image::raw_request::ImageSizeParam;
 
-    fn make_request(
-      image_size: Option<GptImage2EditImageSize>,
-      resolution: Option<GptImage2Resolution>,
-    ) -> GptImage2EditImageRequest {
-      GptImage2EditImageRequest {
-        prompt: "test".to_string(),
-        image_urls: vec!["https://example.com/image.png".to_string()],
-        num_images: GptImage2EditImageNumImages::One,
-        mask_url: None,
-        image_size,
-        resolution,
-        quality: None,
-        output_format: None,
-      }
+    fn make_request(image_size: Option<GptImage2EditImageSize>, resolution: Option<GptImage2Resolution>) -> GptImage2EditImageRequest {
+      GptImage2EditImageRequest { prompt: "test".to_string(), image_urls: vec!["https://example.com/image.png".to_string()], num_images: GptImage2EditImageNumImages::One, mask_url: None, image_size, resolution, quality: None, output_format: None }
     }
 
     #[test]
     fn preset_without_resolution() {
-      let raw = make_request(Some(GptImage2EditImageSize::Square), None)
-        .to_raw_request().unwrap();
+      let raw = make_request(Some(GptImage2EditImageSize::Square), None).to_raw_request().unwrap();
       match raw.image_size.unwrap() {
         ImageSizeParam::Preset(s) => assert_eq!(s, "square"),
         ImageSizeParam::Custom(_) => panic!("expected preset"),
@@ -312,8 +242,7 @@ mod tests {
 
     #[test]
     fn auto_without_resolution() {
-      let raw = make_request(Some(GptImage2EditImageSize::Auto), None)
-        .to_raw_request().unwrap();
+      let raw = make_request(Some(GptImage2EditImageSize::Auto), None).to_raw_request().unwrap();
       match raw.image_size.unwrap() {
         ImageSizeParam::Preset(s) => assert_eq!(s, "auto"),
         ImageSizeParam::Custom(_) => panic!("expected preset"),
@@ -322,25 +251,19 @@ mod tests {
 
     #[test]
     fn custom_with_resolution() {
-      let raw = make_request(
-        Some(GptImage2EditImageSize::Landscape16x9),
-        Some(GptImage2Resolution::TwoK),
-      ).to_raw_request().unwrap();
+      let raw = make_request(Some(GptImage2EditImageSize::Landscape16x9), Some(GptImage2Resolution::TwoK)).to_raw_request().unwrap();
       match raw.image_size.unwrap() {
         ImageSizeParam::Custom(c) => {
           assert_eq!(c.width, 2048);
           assert_eq!(c.height, 1152);
-        }
+        },
         ImageSizeParam::Preset(_) => panic!("expected custom"),
       }
     }
 
     #[test]
     fn auto_with_resolution_falls_back_to_preset() {
-      let raw = make_request(
-        Some(GptImage2EditImageSize::Auto),
-        Some(GptImage2Resolution::TwoK),
-      ).to_raw_request().unwrap();
+      let raw = make_request(Some(GptImage2EditImageSize::Auto), Some(GptImage2Resolution::TwoK)).to_raw_request().unwrap();
       match raw.image_size.unwrap() {
         ImageSizeParam::Preset(s) => assert_eq!(s, "auto"),
         ImageSizeParam::Custom(_) => panic!("expected preset for Auto + resolution"),
@@ -349,13 +272,12 @@ mod tests {
 
     #[test]
     fn resolution_without_image_size_defaults_to_square() {
-      let raw = make_request(None, Some(GptImage2Resolution::TwoK))
-        .to_raw_request().unwrap();
+      let raw = make_request(None, Some(GptImage2Resolution::TwoK)).to_raw_request().unwrap();
       match raw.image_size.unwrap() {
         ImageSizeParam::Custom(c) => {
           assert_eq!(c.width, 2048);
           assert_eq!(c.height, 2048);
-        }
+        },
         ImageSizeParam::Preset(_) => panic!("expected custom"),
       }
     }

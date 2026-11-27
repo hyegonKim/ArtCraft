@@ -38,7 +38,7 @@ pub enum MediaFileOriginCategory {
   DeviceApi,
 
   /// From Storyteller Studio Engine
-  #[deprecated(note="This db field should only denote file provenance, not the product.")]
+  #[deprecated(note = "This db field should only denote file provenance, not the product.")]
   #[serde(rename = "studio")]
   StorytellerStudio,
 
@@ -80,15 +80,7 @@ impl MediaFileOriginCategory {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Inference,
-      Self::ThirdPartyInference,
-      Self::Processed,
-      Self::Upload,
-      Self::DeviceApi,
-      Self::StorytellerStudio,
-      Self::StoryEngine,
-    ])
+    BTreeSet::from([Self::Inference, Self::ThirdPartyInference, Self::Processed, Self::Upload, Self::DeviceApi, Self::StorytellerStudio, Self::StoryEngine])
   }
 }
 
@@ -169,7 +161,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in MediaFileOriginCategory::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

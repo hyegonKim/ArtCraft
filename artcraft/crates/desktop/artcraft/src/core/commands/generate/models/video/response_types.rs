@@ -13,9 +13,7 @@ use artcraft_client::datatypes::common_enums::generation::api_client_aspect_rati
 use artcraft_client::datatypes::common_enums::generation::api_client_resolution::ApiClientResolution;
 use artcraft_client::datatypes::common_enums::generation::api_client_bitrate::ApiClientBitrate;
 use artcraft_client::datatypes::common_enums::generation::api_client_quality::ApiClientQuality;
-use artcraft_client::endpoints::omni_gen::models::video::omni_gen_list_video_models::{
-  OmniGenVideoModelDetails, OmniGenVideoModelProviderDetails, OmniGenVideoProviderModelDetails, OmniGenVideoModelsResponse,
-};
+use artcraft_client::endpoints::omni_gen::models::video::omni_gen_list_video_models::{OmniGenVideoModelDetails, OmniGenVideoModelProviderDetails, OmniGenVideoProviderModelDetails, OmniGenVideoModelsResponse};
 
 use crate::core::commands::response::success_response_wrapper::SerializeMarker;
 
@@ -496,11 +494,7 @@ pub struct ListVideoModelsResponse {
 
 impl From<OmniGenVideoModelsResponse> for ListVideoModelsResponse {
   fn from(v: OmniGenVideoModelsResponse) -> Self {
-    Self {
-      success: v.success,
-      models: v.models.into_iter().map(Into::into).collect(),
-      providers: v.providers.into_iter().map(Into::into).collect(),
-    }
+    Self { success: v.success, models: v.models.into_iter().map(Into::into).collect(), providers: v.providers.into_iter().map(Into::into).collect() }
   }
 }
 
@@ -512,10 +506,7 @@ pub struct ListVideoModelsProviderDetails {
 
 impl From<OmniGenVideoModelProviderDetails> for ListVideoModelsProviderDetails {
   fn from(v: OmniGenVideoModelProviderDetails) -> Self {
-    Self {
-      provider: v.provider.into(),
-      models: v.models.into_iter().map(Into::into).collect(),
-    }
+    Self { provider: v.provider.into(), models: v.models.into_iter().map(Into::into).collect() }
   }
 }
 
@@ -528,10 +519,7 @@ pub struct ListVideoModelsProviderModelDetails {
 
 impl From<OmniGenVideoProviderModelDetails> for ListVideoModelsProviderModelDetails {
   fn from(v: OmniGenVideoProviderModelDetails) -> Self {
-    Self {
-      model: v.model.into(),
-      overrides: v.overrides.map(Into::into),
-    }
+    Self { model: v.model.into(), overrides: v.overrides.map(Into::into) }
   }
 }
 

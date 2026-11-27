@@ -13,13 +13,10 @@ pub struct ArtcraftSeedance2p0MiniCostState {
 
 impl ArtcraftSeedance2p0MiniCostState {
   pub fn from_request(request: &ArtcraftSeedance2p0MiniRequestState) -> Self {
-    let resolution = request.request.resolution
-      .unwrap_or(CommonResolution::SevenTwentyP);
+    let resolution = request.request.resolution.unwrap_or(CommonResolution::SevenTwentyP);
     let duration_seconds = request.request.duration_seconds.unwrap_or(5);
     let batch_count = request.request.video_batch_count.unwrap_or(1);
-    let has_video_reference = request.request.reference_video_media_tokens
-      .as_ref()
-      .is_some_and(|tokens| !tokens.is_empty());
+    let has_video_reference = request.request.reference_video_media_tokens.as_ref().is_some_and(|tokens| !tokens.is_empty());
 
     Self { resolution, duration_seconds, batch_count, has_video_reference }
   }
@@ -27,23 +24,10 @@ impl ArtcraftSeedance2p0MiniCostState {
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
     // Seedance 2.0 Mini is priced uniformly across its variants; see
     // seedance_common::seedance_2p0_mini_usd_cents.
-    let usd_cents = seedance_2p0_mini_usd_cents(
-      self.resolution,
-      self.duration_seconds,
-      self.batch_count,
-      self.has_video_reference,
-    );
+    let usd_cents = seedance_2p0_mini_usd_cents(self.resolution, self.duration_seconds, self.batch_count, self.has_video_reference);
 
     // ArtCraft credits: 100 credits = $1.00, so credits = cents.
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(usd_cents),
-      cost_in_usd_cents: Some(usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(usd_cents), cost_in_usd_cents: Some(usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -141,10 +125,7 @@ mod tests {
 
     #[test]
     fn batch_above_eight_clamps_to_eight() {
-      assert_eq!(
-        cents(RouterResolution::SevenTwentyP, 5, 9, false),
-        cents(RouterResolution::SevenTwentyP, 5, 8, false),
-      );
+      assert_eq!(cents(RouterResolution::SevenTwentyP, 5, 9, false), cents(RouterResolution::SevenTwentyP, 5, 8, false),);
     }
   }
 
@@ -153,11 +134,7 @@ mod tests {
 
     #[test]
     fn credits_equal_usd_cents_all_combos() {
-      let resolutions = [
-        Some(RouterResolution::FourEightyP),
-        Some(RouterResolution::SevenTwentyP),
-        None,
-      ];
+      let resolutions = [Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), None];
       for res in resolutions {
         for dur in [4u16, 5, 10, 15] {
           for batch in [1u16, 2, 4] {
@@ -171,48 +148,17 @@ mod tests {
     }
   }
 
-  fn build_cost(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-    with_video_reference: bool,
-  ) -> VideoGenerationCostEstimate {
-    let reference_videos = with_video_reference.then(|| {
-      VideoListRef::MediaFileTokens(vec![MediaFileToken::new("mf_ref".to_string())])
-    });
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p0Mini,
-      provider: RouterProvider::Artcraft,
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(video_batch_count),
-      reference_videos,
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
+  fn build_cost(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16, with_video_reference: bool) -> VideoGenerationCostEstimate {
+    let reference_videos = with_video_reference.then(|| VideoListRef::MediaFileTokens(vec![MediaFileToken::new("mf_ref".to_string())]));
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Mini, provider: RouterProvider::Artcraft, resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(video_batch_count), reference_videos, ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed")
   }
 
-  fn cents(
-    resolution: RouterResolution,
-    duration_seconds: u16,
-    video_batch_count: u16,
-    with_video_reference: bool,
-  ) -> u64 {
-    build_cost(Some(resolution), duration_seconds, video_batch_count, with_video_reference)
-      .cost_in_usd_cents
-      .unwrap()
+  fn cents(resolution: RouterResolution, duration_seconds: u16, video_batch_count: u16, with_video_reference: bool) -> u64 {
+    build_cost(Some(resolution), duration_seconds, video_batch_count, with_video_reference).cost_in_usd_cents.unwrap()
   }
 
-  fn cents_no_ref(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-  ) -> u64 {
-    build_cost(resolution, duration_seconds, video_batch_count, false)
-      .cost_in_usd_cents
-      .unwrap()
+  fn cents_no_ref(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16) -> u64 {
+    build_cost(resolution, duration_seconds, video_batch_count, false).cost_in_usd_cents.unwrap()
   }
 }

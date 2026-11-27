@@ -9,26 +9,23 @@ pub struct GrokImagePromptQueue {
   pub prompt_queue: Arc<Mutex<VecDeque<PromptItem>>>,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct PromptItem {
   /// Local database task ID
   pub task_id: String,
-  
+
   /// Text prompt
   pub prompt: String,
-  
+
   /// The aspect ratio of the image
   pub aspect_ratio: ClientMessageAspectRatio,
 }
 
 impl GrokImagePromptQueue {
   pub fn new() -> Self {
-    Self {
-      prompt_queue: Arc::new(Mutex::new(VecDeque::new())),
-    }
+    Self { prompt_queue: Arc::new(Mutex::new(VecDeque::new())) }
   }
-  
+
   pub fn enqueue(&self, prompt_item: PromptItem) -> Result<(), ArtcraftError> {
     match self.prompt_queue.lock() {
       Ok(mut queue) => {
@@ -41,12 +38,10 @@ impl GrokImagePromptQueue {
       },
     }
   }
-  
+
   pub fn dequeue(&self) -> Result<Option<PromptItem>, ArtcraftError> {
     match self.prompt_queue.lock() {
-      Ok(mut queue) => {
-        Ok(queue.pop_front())
-      },
+      Ok(mut queue) => Ok(queue.pop_front()),
       Err(err) => {
         error!("Error locking prompt queue: {:?}", err);
         Err(ArtcraftError::MutexLockError)
@@ -56,9 +51,7 @@ impl GrokImagePromptQueue {
 
   pub fn is_empty(&self) -> Result<bool, ArtcraftError> {
     match self.prompt_queue.lock() {
-      Ok(mut queue) => {
-        Ok(queue.is_empty())
-      },
+      Ok(mut queue) => Ok(queue.is_empty()),
       Err(err) => {
         error!("Error locking prompt queue: {:?}", err);
         Err(ArtcraftError::MutexLockError)
@@ -68,9 +61,7 @@ impl GrokImagePromptQueue {
 
   pub fn len(&self) -> Result<usize, ArtcraftError> {
     match self.prompt_queue.lock() {
-      Ok(mut queue) => {
-        Ok(queue.len())
-      },
+      Ok(mut queue) => Ok(queue.len()),
       Err(err) => {
         error!("Error locking prompt queue: {:?}", err);
         Err(ArtcraftError::MutexLockError)

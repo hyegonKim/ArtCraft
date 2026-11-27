@@ -2,9 +2,7 @@ use enums::common::generation::common_video_model::CommonVideoModel as CommonVid
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::flux_3::build::plan_flux_3_duration;
 use crate::generate::generate_video::providers::artcraft::flux_3_draft::request::ArtcraftFlux3DraftRequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
@@ -24,12 +22,7 @@ pub(crate) fn build_artcraft_flux_3_draft_state(mut builder: GenerateVideoReques
   builder.duration_seconds = final_duration;
 
   let generate_audio = builder.generate_audio;
-  let mut request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Flux3Draft,
-    SupportedResolutions::Full,
-    UltraWideSupport::Supported,
-  )?;
+  let mut request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Flux3Draft, SupportedResolutions::Full, UltraWideSupport::Supported)?;
   request.generate_audio = generate_audio;
   request.duration_seconds = final_duration;
 

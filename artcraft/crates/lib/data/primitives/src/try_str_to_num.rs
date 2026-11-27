@@ -6,7 +6,8 @@ use std::str::FromStr;
 /// This is probably inferior to just using `u32::from_str` directly, but it
 /// serves as good documentation on generics.
 pub fn try_str_to_num<T>(input: &str) -> Result<T, <T as FromStr>::Err>
-  where T: FromStr + Copy + AddAssign + MulAssign
+where
+  T: FromStr + Copy + AddAssign + MulAssign,
 {
   let value = T::from_str(input)?;
   Ok(value)

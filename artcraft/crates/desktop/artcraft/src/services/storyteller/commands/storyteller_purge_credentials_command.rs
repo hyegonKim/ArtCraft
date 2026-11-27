@@ -20,37 +20,26 @@ pub struct PurgeStorytellerCredentialsCommandResponse {
 impl SerializeMarker for PurgeStorytellerCredentialsCommandResponse {}
 
 #[tauri::command]
-pub async fn storyteller_purge_credentials_command(
-  app: AppHandle,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> ResponseOrErrorMessage<PurgeStorytellerCredentialsCommandResponse> {
+pub async fn storyteller_purge_credentials_command(app: AppHandle, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> ResponseOrErrorMessage<PurgeStorytellerCredentialsCommandResponse> {
   info!("storyteller_purge_credentials_command called");
 
-  reset(&app, &storyteller_creds_manager)
-      .await
-      .map_err(|err| {
-        error!("Error purging credentials: {:?}", err);
-        format!("Error purging credentials: {:?}", err)
-      })?;
+  reset(&app, &storyteller_creds_manager).await.map_err(|err| {
+    error!("Error purging credentials: {:?}", err);
+    format!("Error purging credentials: {:?}", err)
+  })?;
 
-  Ok(PurgeStorytellerCredentialsCommandResponse {
-    success: true,
-  }.into())
+  Ok(PurgeStorytellerCredentialsCommandResponse { success: true }.into())
 }
 
-async fn reset(
-  app: &AppHandle,
-  storyteller_creds_manager: &StorytellerCredentialManager
-) -> AnyhowResult<()> {
-
+async fn reset(app: &AppHandle, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<()> {
   clear_main_webview_window_storyteller_cookies(&app)?;
-  
+
   storyteller_creds_manager.clear_credentials()?;
   storyteller_creds_manager.delete_persisted_copies_on_disk()?;
-  
+
   // NB: Twice to be sure.
   storyteller_creds_manager.clear_credentials()?;
   storyteller_creds_manager.delete_persisted_copies_on_disk()?;
-  
+
   Ok(())
 }

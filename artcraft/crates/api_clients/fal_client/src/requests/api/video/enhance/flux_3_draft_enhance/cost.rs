@@ -24,23 +24,14 @@ mod tests {
   use super::*;
 
   fn make_request(expected_duration_seconds: Option<u8>) -> Flux3DraftEnhanceRequest {
-    Flux3DraftEnhanceRequest {
-      draft_cache_url: "https://example.com/cache.bin".to_string(),
-      safety_tolerance: None,
-      expected_duration_seconds,
-    }
+    Flux3DraftEnhanceRequest { draft_cache_url: "https://example.com/cache.bin".to_string(), safety_tolerance: None, expected_duration_seconds }
   }
 
   mod cost_table {
     use super::*;
 
     // (expected_duration, expected_cents) — 29¢ × secs; None estimates at 5s.
-    const COST_TABLE: &[(Option<u8>, u64)] = &[
-      (Some(5),  145),
-      (Some(10), 290),
-      (Some(20), 580),
-      (None, 145),
-    ];
+    const COST_TABLE: &[(Option<u8>, u64)] = &[(Some(5), 145), (Some(10), 290), (Some(20), 580), (None, 145)];
 
     #[test]
     fn matches_cost_table() {

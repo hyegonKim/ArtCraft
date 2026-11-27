@@ -19,17 +19,12 @@ impl MainWindowPosition {
 
   pub fn from_main_window(app: &AppHandle) -> AnyhowResult<Self> {
     let windows = app.windows();
-    windows.get(MAIN_WINDOW_NAME)
-        .map(|window| Self::from_window(window))
-        .unwrap_or_else(|| Err(anyhow::anyhow!("Main window not found")))
+    windows.get(MAIN_WINDOW_NAME).map(|window| Self::from_window(window)).unwrap_or_else(|| Err(anyhow::anyhow!("Main window not found")))
   }
 
   pub fn from_window(window: &Window) -> AnyhowResult<Self> {
     let position = window.outer_position()?;
-    Ok(Self {
-      x: position.x,
-      y: position.y,
-    })
+    Ok(Self { x: position.x, y: position.y })
   }
 
   pub fn from_filesystem_configs(app_data_root: &AppDataRoot) -> AnyhowResult<Option<Self>> {
@@ -38,18 +33,14 @@ impl MainWindowPosition {
       return Ok(None);
     }
     let contents = std::fs::read_to_string(filename)?;
-    let pos : MainWindowPosition = serde_json::from_str(&contents)?;
+    let pos: MainWindowPosition = serde_json::from_str(&contents)?;
     Ok(Some(pos))
   }
 
   pub fn persist_to_filesystem(&self, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
     let filename = app_data_root.get_window_position_config_file();
     let json = serde_json::to_string(self)?;
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(filename)?;
+    let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
     file.write_all(json.as_bytes())?;
     file.flush()?;
     Ok(())

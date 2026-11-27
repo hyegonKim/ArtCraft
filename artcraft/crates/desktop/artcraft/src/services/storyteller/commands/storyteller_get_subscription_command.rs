@@ -45,56 +45,35 @@ pub struct ActiveSubscriptionInfo {
 impl SerializeMarker for GetSubscriptionResponse {}
 
 #[tauri::command]
-pub async fn storyteller_get_subscription_command(
-  app_env_configs: State<'_, AppEnvConfigs>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> ResponseOrErrorMessage<GetSubscriptionResponse> {
-
+pub async fn storyteller_get_subscription_command(app_env_configs: State<'_, AppEnvConfigs>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> ResponseOrErrorMessage<GetSubscriptionResponse> {
   info!("storyteller_get_subscription_command called");
 
-  let credits = get(
-    &app_env_configs,
-    &storyteller_creds_manager)
-      .await
-      .map_err(|err| {
-        error!("Error getting credits: {:?}", err);
-        format!("Error getting credits: {:?}", err)
-      })?;
+  let credits = get(&app_env_configs, &storyteller_creds_manager).await.map_err(|err| {
+    error!("Error getting credits: {:?}", err);
+    format!("Error getting credits: {:?}", err)
+  })?;
 
   Ok(credits.into())
 }
 
-async fn get(
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<GetSubscriptionResponse> {
-
+async fn get(app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<GetSubscriptionResponse> {
   let maybe_creds = storyteller_creds_manager.get_credentials()?;
 
-  let response = get_session_subscription(
-    &app_env_configs.storyteller_host,
-    maybe_creds.as_ref(),
-    PaymentsNamespace::Artcraft,
-  ).await?;
+  let response = get_session_subscription(&app_env_configs.storyteller_host, maybe_creds.as_ref(), PaymentsNamespace::Artcraft).await?;
 
   Ok(GetSubscriptionResponse {
-    active_subscription: response.active_subscription
-        .map(|sub| {
-          let product_slug = match ArtcraftSubscriptionSlug::from_str(&sub.product_slug) {
-            Ok(product_slug) => product_slug,
-            Err(err) => {
-              error!("Received unknown product slug from storyteller: {:?}, error: {:?}", sub.product_slug, err);
-              return None;
-            },
-          };
-          Some(ActiveSubscriptionInfo {
-            subscription_token: sub.subscription_token,
-            product_slug,
-            namespace: sub.namespace,
-            next_bill_at: sub.next_bill_at,
-            subscription_end_at: sub.subscription_end_at,
-          })
-        })
-        .flatten(),
+    active_subscription: response
+      .active_subscription
+      .map(|sub| {
+        let product_slug = match ArtcraftSubscriptionSlug::from_str(&sub.product_slug) {
+          Ok(product_slug) => product_slug,
+          Err(err) => {
+            error!("Received unknown product slug from storyteller: {:?}, error: {:?}", sub.product_slug, err);
+            return None;
+          },
+        };
+        Some(ActiveSubscriptionInfo { subscription_token: sub.subscription_token, product_slug, namespace: sub.namespace, next_bill_at: sub.next_bill_at, subscription_end_at: sub.subscription_end_at })
+      })
+      .flatten(),
   })
 }

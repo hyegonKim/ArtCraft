@@ -17,7 +17,7 @@ pub enum Provider {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ProviderPriority {
-  /// Providers may occur zero or one time. 
+  /// Providers may occur zero or one time.
   /// They are ordered by priority, highest to lowest.
   provider_priority: Vec<Provider>,
 }
@@ -29,26 +29,20 @@ pub struct ProviderPriorityStore {
 
 impl ProviderPriority {
   pub fn default() -> Self {
-    Self {
-      provider_priority: vec![
-        Provider::Artcraft,
-        Provider::Sora,
-        Provider::Fal,
-      ],
-    }
+    Self { provider_priority: vec![Provider::Artcraft, Provider::Sora, Provider::Fal] }
   }
-  
+
   pub fn set_priority(&mut self, ordered_list: &[Provider]) -> AnyhowResult<()> {
-    let set : HashSet<&Provider> = HashSet::from_iter(ordered_list.iter());
-    
+    let set: HashSet<&Provider> = HashSet::from_iter(ordered_list.iter());
+
     if set.len() != ordered_list.len() {
       return Err(anyhow::anyhow!("Duplicate providers in the ordered list"));
     }
-    
+
     self.provider_priority = ordered_list.to_vec();
     Ok(())
   }
-  
+
   pub fn get_priority(&self) -> &[Provider] {
     &self.provider_priority
   }
@@ -59,18 +53,14 @@ impl ProviderPriority {
       return Ok(None);
     }
     let contents = std::fs::read_to_string(filename)?;
-    let providers : Self = serde_json::from_str(&contents)?;
+    let providers: Self = serde_json::from_str(&contents)?;
     Ok(Some(providers))
   }
 
   pub fn persist_to_filesystem(&self, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
     let filename = app_data_root.settings_dir().get_provider_preferences_path();
     let json = serde_json::to_string(self)?;
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(filename)?;
+    let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
     file.write_all(json.as_bytes())?;
     file.flush()?;
     Ok(())
@@ -79,61 +69,44 @@ impl ProviderPriority {
 
 impl ProviderPriorityStore {
   pub fn default() -> Self {
-    Self {
-      provider_priority: Arc::new(RwLock::new(ProviderPriority::default())),
-    }
+    Self { provider_priority: Arc::new(RwLock::new(ProviderPriority::default())) }
   }
 
   pub fn set_priority(&self, ordered_list: &[Provider]) -> AnyhowResult<()> {
     match self.provider_priority.write() {
-      Err(err) => {
-        Err(anyhow::anyhow!("Failed to acquire write lock on provider priority: {}", err))
-      }
+      Err(err) => Err(anyhow::anyhow!("Failed to acquire write lock on provider priority: {}", err)),
       Ok(mut providers) => {
         providers.set_priority(ordered_list)?;
         Ok(())
-      }
+      },
     }
   }
 
   pub fn get_priority(&self) -> AnyhowResult<Vec<Provider>> {
     match self.provider_priority.read() {
-      Err(err) => {
-        Err(anyhow::anyhow!("Failed to acquire read lock on provider priority: {}", err))
-      }
-      Ok(providers) => {
-        Ok(providers.get_priority().to_vec())
-      }
+      Err(err) => Err(anyhow::anyhow!("Failed to acquire read lock on provider priority: {}", err)),
+      Ok(providers) => Ok(providers.get_priority().to_vec()),
     }
   }
 
   pub fn from_filesystem_configs(app_data_root: &AppDataRoot) -> AnyhowResult<Option<Self>> {
     match ProviderPriority::from_filesystem_configs(app_data_root) {
-      Err(err) => {
-        Err(anyhow::anyhow!("Failed to read provider preferences from filesystem: {}", err))
-      }
+      Err(err) => Err(anyhow::anyhow!("Failed to read provider preferences from filesystem: {}", err)),
       Ok(None) => Ok(None),
-      Ok(Some(providers)) => {
-        Ok(Some(Self {
-          provider_priority: Arc::new(RwLock::new(providers)),
-        }))
-      }
+      Ok(Some(providers)) => Ok(Some(Self { provider_priority: Arc::new(RwLock::new(providers)) })),
     }
   }
 
   pub fn persist_to_filesystem(&self, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
     match self.provider_priority.read() {
-      Err(err) => {
-        Err(anyhow::anyhow!("Failed to acquire read lock on provider priority: {}", err))
-      }
+      Err(err) => Err(anyhow::anyhow!("Failed to acquire read lock on provider priority: {}", err)),
       Ok(providers) => {
         providers.persist_to_filesystem(app_data_root)?;
         Ok(())
-      }
+      },
     }
   }
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -20,18 +20,9 @@ impl ArtcraftFlux3DraftCostState {
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
     // Round up to the next whole cent.
-    let cost_in_usd_cents =
-      (GENERATION_RATE_HUNDREDTH_CENTS_PER_SEC * self.duration_seconds).div_ceil(100);
+    let cost_in_usd_cents = (GENERATION_RATE_HUNDREDTH_CENTS_PER_SEC * self.duration_seconds).div_ceil(100);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -45,13 +36,19 @@ mod tests {
   use crate::generate::generate_video::providers::artcraft::flux_3_draft::cost::ArtcraftFlux3DraftCostState;
 
   #[test]
-  fn default_settings_5s_is_35() { assert_eq!(cost_cents(Some(5), None), 35); }
+  fn default_settings_5s_is_35() {
+    assert_eq!(cost_cents(Some(5), None), 35);
+  }
 
   #[test]
-  fn default_duration_is_5s() { assert_eq!(cost_cents(None, None), 35); }
+  fn default_duration_is_5s() {
+    assert_eq!(cost_cents(None, None), 35);
+  }
 
   #[test]
-  fn twenty_seconds_is_138() { assert_eq!(cost_cents(Some(20), None), 138); }
+  fn twenty_seconds_is_138() {
+    assert_eq!(cost_cents(Some(20), None), 138);
+  }
 
   /// Drafts always render 720p; a requested resolution does not change the
   /// bill.
@@ -68,18 +65,8 @@ mod tests {
     assert_eq!(cost_cents(Some(7), None), 49);
   }
 
-  fn cost_cents(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-  ) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Flux3Draft,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    };
+  fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> u64 {
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Flux3Draft, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() };
     let state = build_artcraft_flux_3_draft_state(b).unwrap();
     ArtcraftFlux3DraftCostState::from_request(&state).estimate_cost().cost_in_usd_cents.unwrap()
   }

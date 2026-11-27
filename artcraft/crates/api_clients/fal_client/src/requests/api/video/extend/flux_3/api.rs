@@ -1,10 +1,6 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::extend::flux_3::raw_request::{
-  Flux3ExtendVideoInput, Flux3ExtendVideoOutput,
-};
-use crate::requests::api::video::text::flux_3::api::{
-  Flux3AspectRatio, Flux3Duration, Flux3Resolution,
-};
+use crate::requests::api::video::extend::flux_3::raw_request::{Flux3ExtendVideoInput, Flux3ExtendVideoOutput};
+use crate::requests::api::video::text::flux_3::api::{Flux3AspectRatio, Flux3Duration, Flux3Resolution};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -41,15 +37,7 @@ impl FalEndpoint for Flux3ExtendVideoRequest {
   type RawResponse = Flux3ExtendVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      video_url: self.video_url.clone(),
-      duration: self.duration,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      safety_tolerance: self.safety_tolerance,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), video_url: self.video_url.clone(), duration: self.duration, resolution: self.resolution.map(|r| r.to_str().to_string()), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), generate_audio: self.generate_audio, safety_tolerance: self.safety_tolerance })
   }
 }
 
@@ -69,15 +57,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux3ExtendVideoRequest {
-      prompt: "the camera keeps drifting forward as the scene continues".to_string(),
-      video_url: "https://storage.googleapis.com/falserverless/example_inputs/hunyuan_video_input.mp4".to_string(),
-      duration: Some(Flux3Duration::Seconds(5)),
-      resolution: Some(Flux3Resolution::SevenTwentyP),
-      aspect_ratio: None,
-      generate_audio: Some(false),
-      safety_tolerance: None,
-    };
+    let request = Flux3ExtendVideoRequest { prompt: "the camera keeps drifting forward as the scene continues".to_string(), video_url: "https://storage.googleapis.com/falserverless/example_inputs/hunyuan_video_input.mp4".to_string(), duration: Some(Flux3Duration::Seconds(5)), resolution: Some(Flux3Resolution::SevenTwentyP), aspect_ratio: None, generate_audio: Some(false), safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -89,15 +69,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Flux3ExtendVideoRequest {
-      prompt: "p".to_string(),
-      video_url: "https://example.com/source.mp4".to_string(),
-      duration: Some(Flux3Duration::Seconds(10)),
-      resolution: Some(Flux3Resolution::TenEightyP),
-      aspect_ratio: Some(Flux3AspectRatio::SixteenByNine),
-      generate_audio: Some(true),
-      safety_tolerance: Some(2),
-    };
+    let request = Flux3ExtendVideoRequest { prompt: "p".to_string(), video_url: "https://example.com/source.mp4".to_string(), duration: Some(Flux3Duration::Seconds(10)), resolution: Some(Flux3Resolution::TenEightyP), aspect_ratio: Some(Flux3AspectRatio::SixteenByNine), generate_audio: Some(true), safety_tolerance: Some(2) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.video_url, "https://example.com/source.mp4");
@@ -108,20 +80,15 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Flux3ExtendVideoRequest {
-      prompt: "minimal".to_string(),
-      video_url: "https://example.com/source.mp4".to_string(),
-      duration: None,
-      resolution: None,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    };
+    let request = Flux3ExtendVideoRequest { prompt: "minimal".to_string(), video_url: "https://example.com/source.mp4".to_string(), duration: None, resolution: None, aspect_ratio: None, generate_audio: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(json, serde_json::json!({
-      "prompt": "minimal",
-      "video_url": "https://example.com/source.mp4",
-    }));
+    assert_eq!(
+      json,
+      serde_json::json!({
+        "prompt": "minimal",
+        "video_url": "https://example.com/source.mp4",
+      })
+    );
   }
 
   #[test]

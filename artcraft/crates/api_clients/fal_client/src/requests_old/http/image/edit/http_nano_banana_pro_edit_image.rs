@@ -39,8 +39,6 @@ pub struct NanoBananaProEditImageOutput {
   pub images: Vec<NanoBananaProEditImageFile>,
 }
 
-pub fn nano_banana_pro_edit_image(
-  params: NanoBananaProEditImageInput,
-) -> FalRequest<NanoBananaProEditImageInput, NanoBananaProEditImageOutput> {
+pub fn nano_banana_pro_edit_image(params: NanoBananaProEditImageInput) -> FalRequest<NanoBananaProEditImageInput, NanoBananaProEditImageOutput> {
   FalRequest::new("fal-ai/nano-banana-pro/edit", params)
 }

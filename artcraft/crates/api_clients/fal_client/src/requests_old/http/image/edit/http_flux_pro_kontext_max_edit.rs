@@ -43,8 +43,6 @@ pub struct FluxProKontextMaxEditOutput {
   pub images: Vec<FluxProKontextMaxEditFile>,
 }
 
-pub fn flux_pro_kontext_max_edit(
-  params: FluxProKontextMaxEditInput,
-) -> FalRequest<FluxProKontextMaxEditInput, FluxProKontextMaxEditOutput> {
+pub fn flux_pro_kontext_max_edit(params: FluxProKontextMaxEditInput) -> FalRequest<FluxProKontextMaxEditInput, FluxProKontextMaxEditOutput> {
   FalRequest::new("fal-ai/flux-pro/kontext/max", params)
 }

@@ -29,36 +29,20 @@ impl ArtcraftSplatPriceTable {
 /// Mirrors the request-assembly derivation: video wins over images, two or
 /// more images are multi-image, one image is panorama/non-panorama, and
 /// anything else prices as text.
-pub(crate) fn derive_input_type_for_pricing(
-  request: &OmniGenSplatCostAndGenerateRequest,
-) -> InputType {
-  let image_count = request.reference_image_media_tokens.as_ref()
-    .map(|tokens| tokens.len())
-    .unwrap_or(0);
+pub(crate) fn derive_input_type_for_pricing(request: &OmniGenSplatCostAndGenerateRequest) -> InputType {
+  let image_count = request.reference_image_media_tokens.as_ref().map(|tokens| tokens.len()).unwrap_or(0);
 
   if request.reference_video_media_token.is_some() {
     InputType::Video
   } else if image_count >= 2 {
     InputType::MultiImage
   } else if image_count == 1 {
-    if request.is_panoramic == Some(true) {
-      InputType::ImagePanorama
-    } else {
-      InputType::ImageNonPanorama
-    }
+    if request.is_panoramic == Some(true) { InputType::ImagePanorama } else { InputType::ImageNonPanorama }
   } else {
     InputType::Text
   }
 }
 
 pub(crate) fn artcraft_splat_cost_estimate(cost_in_usd_cents: u64) -> SplatGenerationCostEstimate {
-  SplatGenerationCostEstimate {
-    cost_in_credits: Some(cost_in_usd_cents),
-    cost_in_usd_cents: Some(cost_in_usd_cents),
-    is_free: false,
-    is_unlimited: false,
-    is_rate_limited: false,
-    has_watermark: false,
-    failures_are_refunded: None,
-  }
+  SplatGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
 }

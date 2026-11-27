@@ -23,7 +23,6 @@ pub struct GenerateGptImage1TextToImageRequest {
   pub image_quality: Option<GenerateGptImage1TextToImageImageQuality>,
 }
 
-
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GenerateGptImage1TextToImageImageSize {
@@ -49,7 +48,6 @@ pub enum GenerateGptImage1TextToImageImageQuality {
   Medium,
   High, // Default
 }
-
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct GenerateGptImage1TextToImageResponse {

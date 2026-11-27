@@ -8,28 +8,10 @@ use crate::services::storyteller::threads::storyteller_task_polling_thread::stor
 use errors::AnyhowResult;
 use tauri::{AppHandle, Manager};
 
-pub fn spawn_storyteller_threads(
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  artcraft_platform_info: &ArtcraftPlatformInfo,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<()> {
-  
-  tauri::async_runtime::spawn(storyteller_task_polling_thread(
-    app.clone(),
-    app_env_configs.clone(),
-    task_database.clone(),
-    storyteller_creds_manager.clone(),
-  ));
+pub fn spawn_storyteller_threads(app: &AppHandle, app_env_configs: &AppEnvConfigs, artcraft_usage_tracker: &ArtcraftUsageTracker, artcraft_platform_info: &ArtcraftPlatformInfo, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<()> {
+  tauri::async_runtime::spawn(storyteller_task_polling_thread(app.clone(), app_env_configs.clone(), task_database.clone(), storyteller_creds_manager.clone()));
 
-  tauri::async_runtime::spawn(storyteller_activity_thread(
-    app_env_configs.clone(),
-    artcraft_platform_info.clone(),
-    artcraft_usage_tracker.clone(),
-    storyteller_creds_manager.clone(),
-  ));
-  
+  tauri::async_runtime::spawn(storyteller_activity_thread(app_env_configs.clone(), artcraft_platform_info.clone(), artcraft_usage_tracker.clone(), storyteller_creds_manager.clone()));
+
   Ok(())
 }

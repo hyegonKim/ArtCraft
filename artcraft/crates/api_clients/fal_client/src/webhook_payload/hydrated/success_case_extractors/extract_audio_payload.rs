@@ -18,10 +18,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -33,8 +31,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let audio = contents.audio.expect("audio should be Some");
     assert_eq!(audio.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1bc36/vOSCcxsbibkZIiXR9BIZn_speech.mp3"));
@@ -56,7 +53,8 @@ mod tests {
 
   #[test]
   fn synthetic_audio_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "audio": {
         "url": "https://cdn.example.com/speech.mp3",
         "content_type": "audio/mpeg",
@@ -67,7 +65,9 @@ mod tests {
         "duration": 3.5,
         "sample_rate": 44100
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let audio = extract_audio(&obj).expect("should extract audio");
     assert_eq!(audio.url.as_deref(), Some("https://cdn.example.com/speech.mp3"));
@@ -82,9 +82,12 @@ mod tests {
 
   #[test]
   fn audio_url_only() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "audio": {"url": "https://cdn.example.com/speech.wav"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let audio = extract_audio(&obj).expect("should extract audio");
     assert_eq!(audio.url.as_deref(), Some("https://cdn.example.com/speech.wav"));
@@ -94,9 +97,12 @@ mod tests {
 
   #[test]
   fn missing_audio_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "video": {"url": "https://example.com/video.mp4"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_audio(&obj).is_none());
   }

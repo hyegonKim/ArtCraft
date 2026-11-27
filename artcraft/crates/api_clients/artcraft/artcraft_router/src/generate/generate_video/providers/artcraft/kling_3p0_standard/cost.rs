@@ -13,10 +13,7 @@ pub struct ArtcraftKling3p0StandardCostState {
 
 impl ArtcraftKling3p0StandardCostState {
   pub fn from_request(request: &ArtcraftKling3p0StandardRequestState) -> Self {
-    Self {
-      duration_seconds: request.request.duration_seconds.map(u64::from).unwrap_or(5),
-      generate_audio: request.request.generate_audio.unwrap_or(true),
-    }
+    Self { duration_seconds: request.request.duration_seconds.map(u64::from).unwrap_or(5), generate_audio: request.request.generate_audio.unwrap_or(true) }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -26,15 +23,7 @@ impl ArtcraftKling3p0StandardCostState {
     let base = (rate * self.duration_seconds + 9) / 10;
     let cost_in_usd_cents = base.saturating_mul(MARKUP_NUMERATOR).div_ceil(MARKUP_DENOMINATOR);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -45,14 +34,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling3p0Standard,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling3p0Standard, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 

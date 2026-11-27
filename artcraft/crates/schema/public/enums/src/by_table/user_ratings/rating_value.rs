@@ -33,11 +33,12 @@ pub enum UserRatingValue {
   Negative,
 }
 
-
 impl_enum_display_and_debug_using_to_str!(UserRatingValue);
 
 impl Default for UserRatingValue {
-  fn default() -> Self { Self::Neutral }
+  fn default() -> Self {
+    Self::Neutral
+  }
 }
 
 /// NB: Legacy API for older code.
@@ -152,10 +153,7 @@ mod tests {
     #[test]
     fn nested_deserialize() {
       let payload = r#"{"visibility":"neutral","string":"bar"}"#.to_string();
-      let expected = CompositeType {
-        visibility: UserRatingValue::Neutral,
-        string: "bar".to_string(),
-      };
+      let expected = CompositeType { visibility: UserRatingValue::Neutral, string: "bar".to_string() };
 
       assert_eq!(expected, serde_json::from_str::<CompositeType>(&payload).unwrap());
     }

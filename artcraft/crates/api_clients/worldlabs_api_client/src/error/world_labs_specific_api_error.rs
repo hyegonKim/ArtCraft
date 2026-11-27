@@ -7,9 +7,7 @@ pub enum WorldLabsSpecificApiError {
   InsufficientCredits,
 
   /// The content was rejected by WorldLabs' NSFW / content policy filter.
-  NsfwContentPolicyRejected {
-    message: Option<String>,
-  },
+  NsfwContentPolicyRejected { message: Option<String> },
 }
 
 impl WorldLabsSpecificApiError {
@@ -33,7 +31,7 @@ impl Display for WorldLabsSpecificApiError {
           write!(f, ": {}", msg)?;
         }
         Ok(())
-      }
+      },
     }
   }
 }

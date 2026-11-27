@@ -28,7 +28,7 @@ pub enum ArtcraftRouterError {
 
   /// An error from an underlying provider.
   Provider(ProviderError),
-  
+
   /// A billing error from an underlying provider.
   ProviderBillingError(ProviderError),
 }
@@ -70,11 +70,7 @@ impl From<ProviderError> for ArtcraftRouterError {
       ProviderError::Storyteller(StorytellerError::Api(ApiError::PaymentRequired(_))) => true,
       _ => false,
     };
-    if is_billing_error {
-      Self::ProviderBillingError(error)
-    } else {
-      Self::Provider(error)
-    }
+    if is_billing_error { Self::ProviderBillingError(error) } else { Self::Provider(error) }
   }
 }
 

@@ -44,7 +44,7 @@ pub fn rename_across_devices<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> 
   // Nearly a third of `ErrorKind` is nightly rust, so we're going to have to match on
   // unix error codes until the rest of the ErrorKind enum variants are stable.
   // The error codes are maintained in sys/unix/voice_conversion_to_weights - decode_error_kind(i32)
-  const E_CROSSES_DEVICES : i32 = 18; // pub const EXDEV: ::c_int = 18;
+  const E_CROSSES_DEVICES: i32 = 18; // pub const EXDEV: ::c_int = 18;
 
   if is_filesystem_full_error(&err) {
     error!("Filesystem is full during rename.");
@@ -54,11 +54,11 @@ pub fn rename_across_devices<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> 
   match err.raw_os_error() {
     Some(E_CROSSES_DEVICES) => {
       // NB: Fall through.
-    }
+    },
     _ => {
       // Something else happened. Return original error.
       return Err(RenameError::IoError(err));
-    }
+    },
   }
 
   // NB: In production we've seen std::fs::copy silently succeed, yet copy zero bytes. The reason

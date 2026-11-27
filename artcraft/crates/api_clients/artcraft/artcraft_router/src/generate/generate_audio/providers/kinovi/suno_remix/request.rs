@@ -1,13 +1,9 @@
-use kinovi_web_client::generate::audio::generate_suno_remix::{
-  generate_suno_remix, GenerateSunoRemixArgs, GenerateSunoRemixRequest,
-};
+use kinovi_web_client::generate::audio::generate_suno_remix::{generate_suno_remix, GenerateSunoRemixArgs, GenerateSunoRemixRequest};
 
 use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::provider_error::ProviderError;
-use crate::generate::generate_audio::generate_audio_response::{
-  GenerateAudioResponse, KinoviWebAudioResponsePayload,
-};
+use crate::generate::generate_audio::generate_audio_response::{GenerateAudioResponse, KinoviWebAudioResponsePayload};
 
 #[derive(Debug, Clone)]
 pub struct KinoviSunoRemixRequestState {
@@ -20,20 +16,11 @@ impl KinoviSunoRemixRequestState {
   pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateAudioResponse, ArtcraftRouterError> {
     let session = &client.session;
 
-    let args = GenerateSunoRemixArgs {
-      session,
-      host_override: None,
-      request: self.request.clone(),
-    };
+    let args = GenerateSunoRemixArgs { session, host_override: None, request: self.request.clone() };
 
-    let response = generate_suno_remix(args)
-      .await
-      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+    let response = generate_suno_remix(args).await.map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
 
-    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload {
-      order_id: response.order_id,
-      task_id: response.task_id,
-    }))
+    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload { order_id: response.order_id, task_id: response.task_id }))
   }
 }
 
@@ -63,14 +50,7 @@ mod tests {
     let audio_url = upload_test_audio(&client).await;
     println!("Uploaded audio: {}", audio_url);
 
-    let builder = GenerateAudioRequestBuilder {
-      model: RouterAudioModel::SunoRemix,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("Make this electronic".to_string()),
-      style_prompt: Some("EDM style".to_string()),
-      audio_references: Some(AudioListRef::Urls(vec![audio_url])),
-      ..Default::default()
-    };
+    let builder = GenerateAudioRequestBuilder { model: RouterAudioModel::SunoRemix, provider: RouterProvider::KinoviWeb, prompt: Some("Make this electronic".to_string()), style_prompt: Some("EDM style".to_string()), audio_references: Some(AudioListRef::Urls(vec![audio_url])), ..Default::default() };
 
     let response = run_pipeline(&client, builder).await;
     assert!(matches!(response, GenerateAudioResponse::KinoviWeb(_)));
@@ -80,8 +60,7 @@ mod tests {
   // ── Helpers ──
 
   fn get_kinovi_web_client() -> RouterClient {
-    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/seedance2pro_cookies.txt")
-      .expect("Failed to read kinovi_web cookies");
+    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/seedance2pro_cookies.txt").expect("Failed to read kinovi_web cookies");
     let session = KinoviWebSession::from_cookies_string(cookies.trim().to_string());
     RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
   }
@@ -93,10 +72,7 @@ mod tests {
       _ => panic!("expected Draft variant (Suno Remix uses the draft phase)"),
     };
 
-    let draft_context = AudioGenerationDraftContext {
-      client: Some(client),
-      ..Default::default()
-    };
+    let draft_context = AudioGenerationDraftContext { client: Some(client), ..Default::default() };
 
     let request = draft.finalize(draft_context).await.expect("finalize should succeed");
     let response = request.send_request(client).await.expect("send_request should succeed");
@@ -104,7 +80,7 @@ mod tests {
     match &response {
       GenerateAudioResponse::KinoviWeb(p) => {
         println!("task_id={}, order_id={}", p.task_id, p.order_id);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 
@@ -117,17 +93,9 @@ mod tests {
     let audio_path = test_file_path(TEST_AUDIO_PATH).expect("test audio should exist");
     let audio_bytes = std::fs::read(&audio_path).expect("read test audio");
 
-    let prepare_result = prepare_file_upload(PrepareFileUploadArgs {
-      session,
-      extension: "mp3".to_string(),
-      host_override: None,
-    }).await.expect("prepare upload");
+    let prepare_result = prepare_file_upload(PrepareFileUploadArgs { session, extension: "mp3".to_string(), host_override: None }).await.expect("prepare upload");
 
-    let upload_result = upload_file(UploadFileArgs {
-      upload_url: prepare_result.upload_url,
-      file_bytes: audio_bytes,
-      host_override: None,
-    }).await.expect("upload");
+    let upload_result = upload_file(UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes: audio_bytes, host_override: None }).await.expect("upload");
 
     upload_result.public_url
   }

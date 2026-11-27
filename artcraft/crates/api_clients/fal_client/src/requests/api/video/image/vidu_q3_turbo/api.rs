@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::image::vidu_q3_turbo::raw_request::{
-  ViduQ3TurboImageToVideoInput, ViduQ3TurboImageToVideoOutput,
-};
+use crate::requests::api::video::image::vidu_q3_turbo::raw_request::{ViduQ3TurboImageToVideoInput, ViduQ3TurboImageToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -62,15 +60,7 @@ impl FalEndpoint for ViduQ3TurboImageToVideoRequest {
   type RawResponse = ViduQ3TurboImageToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_url: self.image_url.clone(),
-      end_image_url: self.end_image_url.clone(),
-      duration: self.duration,
-      seed: self.seed,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      audio: self.audio,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_url: self.image_url.clone(), end_image_url: self.end_image_url.clone(), duration: self.duration, seed: self.seed, resolution: self.resolution.map(|r| r.to_str().to_string()), audio: self.audio })
   }
 }
 
@@ -91,15 +81,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TurboImageToVideoRequest {
-      prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      end_image_url: None,
-      duration: Some(5),
-      seed: None,
-      resolution: Some(ViduQ3TurboImageToVideoResolution::SevenTwentyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TurboImageToVideoRequest { prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), end_image_url: None, duration: Some(5), seed: None, resolution: Some(ViduQ3TurboImageToVideoResolution::SevenTwentyP), audio: Some(false) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -113,15 +95,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TurboImageToVideoRequest {
-      prompt: "a smooth transition between the two frames".to_string(),
-      image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-      end_image_url: Some(JUNO_AT_LAKE_IMAGE_URL.to_string()),
-      duration: Some(5),
-      seed: Some(1234),
-      resolution: Some(ViduQ3TurboImageToVideoResolution::SevenTwentyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TurboImageToVideoRequest { prompt: "a smooth transition between the two frames".to_string(), image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), end_image_url: Some(JUNO_AT_LAKE_IMAGE_URL.to_string()), duration: Some(5), seed: Some(1234), resolution: Some(ViduQ3TurboImageToVideoResolution::SevenTwentyP), audio: Some(false) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -133,15 +107,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = ViduQ3TurboImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      end_image_url: Some("https://example.com/end.png".to_string()),
-      duration: Some(7),
-      seed: Some(42),
-      resolution: Some(ViduQ3TurboImageToVideoResolution::TenEightyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TurboImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), end_image_url: Some("https://example.com/end.png".to_string()), duration: Some(7), seed: Some(42), resolution: Some(ViduQ3TurboImageToVideoResolution::TenEightyP), audio: Some(false) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.image_url, "https://example.com/start.png");
@@ -154,43 +120,21 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = ViduQ3TurboImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      end_image_url: None,
-      duration: None,
-      seed: None,
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TurboImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), end_image_url: None, duration: None, seed: None, resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),
-    );
+    assert_eq!(json, serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),);
   }
 
   #[test]
   fn seed_serializes_when_set() {
-    let request = ViduQ3TurboImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      end_image_url: None,
-      duration: None,
-      seed: Some(777),
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TurboImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), end_image_url: None, duration: None, seed: Some(777), resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json.get("seed").and_then(|s| s.as_i64()), Some(777));
   }
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      ViduQ3TurboImageToVideoRequest::ENDPOINT,
-      "fal-ai/vidu/q3/image-to-video/turbo",
-    );
+    assert_eq!(ViduQ3TurboImageToVideoRequest::ENDPOINT, "fal-ai/vidu/q3/image-to-video/turbo",);
   }
 
   // NB: Pricing tests are in cost.rs

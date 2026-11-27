@@ -22,9 +22,7 @@ pub async fn upload_to_signed_url(args: UploadToSignedUrlArgs<'_>) -> Result<(),
 
   debug!("Uploading to signed URL: {}", args.upload_url);
 
-  let mut request_builder = client.put(args.upload_url)
-    .header("Content-Type", args.content_type)
-    .body(args.file_bytes);
+  let mut request_builder = client.put(args.upload_url).header("Content-Type", args.content_type).body(args.file_bytes);
 
   for (key, value) in args.required_headers {
     request_builder = request_builder.header(key.as_str(), value.as_str());
@@ -34,24 +32,17 @@ pub async fn upload_to_signed_url(args: UploadToSignedUrlArgs<'_>) -> Result<(),
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during signed URL upload: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during signed URL upload: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
   if !status.is_success() {
-    let body = response.text()
-      .await
-      .unwrap_or_default();
+    let body = response.text().await.unwrap_or_default();
     error!("Signed URL upload failed (code {}): {:?}", status.as_u16(), body);
-    return Err(WorldLabsGenericApiError::GoogleUploadFailed {
-      status_code: status,
-      body,
-    }.into());
+    return Err(WorldLabsGenericApiError::GoogleUploadFailed { status_code: status, body }.into());
   }
 
   debug!("Upload to signed URL succeeded");

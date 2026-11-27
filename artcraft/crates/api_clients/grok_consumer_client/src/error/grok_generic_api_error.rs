@@ -10,15 +10,11 @@ pub enum GrokGenericApiError {
 
   /// The downloaded index.html did not include the expected data.
   /// This is necessary for handshakes between client and server.
-  IndexHtmlDidNotIncludeExpectedData {
-    message: String,
-  },
+  IndexHtmlDidNotIncludeExpectedData { message: String },
 
   /// The downloaded javascript did not include the expected data.
   /// This is necessary for handshakes between client and server.
-  ScriptBodyDidNotIncludeExpectedData {
-    message: String,
-  },
+  ScriptBodyDidNotIncludeExpectedData { message: String },
 
   /// Error creating the websocket due to 401 Unauthorized, likely an authentication error with Grok.
   /// Unfortunately we can't read the response body text to diagnose more because wreq has some API design issues.
@@ -42,13 +38,10 @@ pub enum GrokGenericApiError {
 
   /// An uncategorized bad HTTP response from Grok.
   UncategorizedBadResponseWithStatus(StatusCode),
-  
+
   /// An uncategorized bad HTTP response from Grok.
-  UncategorizedBadResponseWithStatusAndBody {
-    status_code: StatusCode,
-    body: String,
-  },
-  
+  UncategorizedBadResponseWithStatusAndBody { status_code: StatusCode, body: String },
+
   /// Our previous upload failed
   UploadFailed,
 

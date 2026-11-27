@@ -22,13 +22,11 @@ use strum::EnumIter;
 #[serde(rename_all = "snake_case")]
 pub enum InferenceJobProductCategory {
   // =============== DOWNLOAD ===============
-
   /// Download: GptSoVits
   #[default]
   DownloadGptSoVits,
-  
-  // =============== ARTCRAFT FIRST PARTY ===============
 
+  // =============== ARTCRAFT FIRST PARTY ===============
   /// First-party (our own GPU inference) Minimax H3 video generation.
   /// Covers both the Turbo and Ultra variants; the `job_type` column
   /// distinguishes them.
@@ -36,7 +34,6 @@ pub enum InferenceJobProductCategory {
   ArtcraftMinimaxH3,
 
   // =============== FAL ===============
-
   FalImage,
   FalVideo,
   FalAudio,
@@ -45,22 +42,18 @@ pub enum InferenceJobProductCategory {
   FalBgRemoval,
 
   // =============== GMICLOUD ===============
-
   #[serde(rename = "gmicloud_video")]
   GmiCloudVideo,
 
   // =============== GROK (xAI) ===============
-
   #[serde(rename = "grok_api_video")]
   GrokApiVideo,
 
   // =============== BEEBLE ===============
-
   #[serde(rename = "beeble_video")]
   BeebleVideo,
 
   // =============== SEEDANCE 2 PRO ===============
-
   #[serde(rename = "seedance2pro_video")]
   Seedance2ProVideo,
 
@@ -76,12 +69,10 @@ pub enum InferenceJobProductCategory {
   Seedance2ProAudio,
 
   // =============== SEEDANCE 2 PRO ALT ===============
-
   #[serde(rename = "seedance2pro_video_alt")]
   Seedance2ProVideoAlt,
 
   // =============== SEEDANCE 2 PRO BYTEPLUS ULTRA ===============
-
   #[serde(rename = "seedance2pro_video_bpu")]
   Seedance2ProVideoBytePlusUltra,
 
@@ -90,13 +81,11 @@ pub enum InferenceJobProductCategory {
   Seedance2ProImageBytePlusUltra,
 
   // =============== WORLD LABS ===============
-
   /// World Labs: Gaussian Splat Generation
   #[serde(rename = "worldlabs_splat")]
   WorldlabsSplat,
 
   // =============== TEXT TO SPEECH ===============
-
   /// TTS: GptSoVits
   TtsGptSoVits,
 
@@ -105,12 +94,11 @@ pub enum InferenceJobProductCategory {
 
   /// TTS: StyleTts2 (Zero Shot)
   TtsStyleTts2,
-  
+
   /// TTS: Tacotron2
   TtsTacotron2,
 
   // =============== VOICE CONVERSION ===============
-
   /// Voice Conversion: RVC v2
   VcRvc2,
 
@@ -120,7 +108,6 @@ pub enum InferenceJobProductCategory {
   VcSeedVc, // Ugh
 
   // =============== VIDEO ===============
-
   /// Video: Face Fusion (Lipsync)
   VidLipsyncFaceFusion,
 
@@ -143,7 +130,6 @@ pub enum InferenceJobProductCategory {
   VidStyleTransfer,
 
   // =============== DEPRECATED ===============
-
   /// Lipsync: Face Fusion
   #[deprecated(note = "Use `VidLipsyncFaceFusion` instead")]
   LipsyncFaceFusion,
@@ -277,48 +263,7 @@ impl InferenceJobProductCategory {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::DownloadGptSoVits,
-      Self::ArtcraftMinimaxH3,
-      Self::FalImage,
-      Self::FalVideo,
-      Self::FalAudio,
-      Self::FalObject,
-      Self::FalBgRemoval,
-      Self::GmiCloudVideo,
-      Self::GrokApiVideo,
-      Self::BeebleVideo,
-      Self::Seedance2ProVideo,
-      Self::Seedance2ProCharacter,
-      Self::Seedance2ProImage,
-      Self::Seedance2ProAudio,
-      Self::Seedance2ProVideoAlt,
-      Self::Seedance2ProVideoBytePlusUltra,
-      Self::Seedance2ProImageBytePlusUltra,
-      Self::WorldlabsSplat,
-      Self::TtsGptSoVits,
-      Self::TtsStyleTts2,
-      Self::TtsTacotron2,
-      Self::TtsF5,
-      Self::VcSeedVc,
-      Self::VcSvc,
-      Self::VcRvc2,
-      Self::VidLipsyncFaceFusion,
-      Self::VidLipsyncSadTalker,
-      Self::VidLivePortrait,
-      Self::VidLivePortraitWebcam,
-      Self::VidStudio,
-      Self::VidStudioGen2,
-      Self::VidStyleTransfer,
-      Self::LipsyncFaceFusion,
-      Self::LipsyncSadTalker,
-      Self::LivePortrait,
-      Self::LivePortraitWebcam,
-      Self::StableDiffusion,
-      Self::Studio,
-      Self::VidFaceFusion,
-      Self::Vst,
-    ])
+    BTreeSet::from([Self::DownloadGptSoVits, Self::ArtcraftMinimaxH3, Self::FalImage, Self::FalVideo, Self::FalAudio, Self::FalObject, Self::FalBgRemoval, Self::GmiCloudVideo, Self::GrokApiVideo, Self::BeebleVideo, Self::Seedance2ProVideo, Self::Seedance2ProCharacter, Self::Seedance2ProImage, Self::Seedance2ProAudio, Self::Seedance2ProVideoAlt, Self::Seedance2ProVideoBytePlusUltra, Self::Seedance2ProImageBytePlusUltra, Self::WorldlabsSplat, Self::TtsGptSoVits, Self::TtsStyleTts2, Self::TtsTacotron2, Self::TtsF5, Self::VcSeedVc, Self::VcSvc, Self::VcRvc2, Self::VidLipsyncFaceFusion, Self::VidLipsyncSadTalker, Self::VidLivePortrait, Self::VidLivePortraitWebcam, Self::VidStudio, Self::VidStudioGen2, Self::VidStyleTransfer, Self::LipsyncFaceFusion, Self::LipsyncSadTalker, Self::LivePortrait, Self::LivePortraitWebcam, Self::StableDiffusion, Self::Studio, Self::VidFaceFusion, Self::Vst])
   }
 }
 
@@ -463,11 +408,11 @@ mod tests {
     #[test]
     fn all_variants() {
       // Static check
-      const EXPECTED_COUNT : usize = 40;
+      const EXPECTED_COUNT: usize = 40;
 
       assert_eq!(InferenceJobProductCategory::all_variants().len(), EXPECTED_COUNT);
       assert_eq!(InferenceJobProductCategory::iter().len(), EXPECTED_COUNT);
-      
+
       // Generated check
       use strum::IntoEnumIterator;
       assert_eq!(InferenceJobProductCategory::all_variants().len(), InferenceJobProductCategory::iter().len());
@@ -494,7 +439,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in InferenceJobProductCategory::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

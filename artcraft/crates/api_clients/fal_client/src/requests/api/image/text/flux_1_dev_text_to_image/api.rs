@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::text::flux_1_dev_text_to_image::raw_request::{
-  Flux1DevTextToImageInput, Flux1DevTextToImageOutput,
-};
+use crate::requests::api::image::text::flux_1_dev_text_to_image::raw_request::{Flux1DevTextToImageInput, Flux1DevTextToImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -57,13 +55,7 @@ impl FalEndpoint for Flux1DevTextToImageRequest {
       Flux1DevTextToImageAspectRatio::PortraitNineBySixteen => "portrait_16_9",
     };
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      num_images: Some(num_images),
-      image_size: Some(image_size.to_string()),
-      enable_safety_checker: Some(false),
-      ..Default::default()
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), num_images: Some(num_images), image_size: Some(image_size.to_string()), enable_safety_checker: Some(false), ..Default::default() })
   }
 }
 
@@ -81,11 +73,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux1DevTextToImageRequest {
-      prompt: "a giant robot fighting a dragon in a futuristic city".to_string(),
-      num_images: Flux1DevTextToImageNumImages::One,
-      aspect_ratio: Flux1DevTextToImageAspectRatio::LandscapeFourByThree,
-    };
+    let request = Flux1DevTextToImageRequest { prompt: "a giant robot fighting a dragon in a futuristic city".to_string(), num_images: Flux1DevTextToImageNumImages::One, aspect_ratio: Flux1DevTextToImageAspectRatio::LandscapeFourByThree };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);

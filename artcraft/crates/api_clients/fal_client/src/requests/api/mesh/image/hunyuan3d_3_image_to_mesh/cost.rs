@@ -1,6 +1,4 @@
-use crate::requests::api::mesh::image::hunyuan3d_3_image_to_mesh::api::{
-  Hunyuan3d3ImageToMeshGenerateType, Hunyuan3d3ImageToMeshRequest,
-};
+use crate::requests::api::mesh::image::hunyuan3d_3_image_to_mesh::api::{Hunyuan3d3ImageToMeshGenerateType, Hunyuan3d3ImageToMeshRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Hunyuan3d3ImageToMeshRequest {
@@ -26,9 +24,7 @@ impl FalRequestCostCalculator for Hunyuan3d3ImageToMeshRequest {
     if self.face_count.is_some() {
       cost += 15;
     }
-    let use_multi_view = self.left_image_url.is_some()
-      || self.right_image_url.is_some()
-      || self.back_image_url.is_some();
+    let use_multi_view = self.left_image_url.is_some() || self.right_image_url.is_some() || self.back_image_url.is_some();
     if use_multi_view {
       cost += 15;
     }
@@ -41,16 +37,7 @@ mod tests {
   use super::*;
 
   fn base_request() -> Hunyuan3d3ImageToMeshRequest {
-    Hunyuan3d3ImageToMeshRequest {
-      image_url: "https://example.com/image.jpg".to_string(),
-      back_image_url: None,
-      left_image_url: None,
-      right_image_url: None,
-      face_count: None,
-      generate_type: None,
-      polygon_type: None,
-      enable_pbr: None,
-    }
+    Hunyuan3d3ImageToMeshRequest { image_url: "https://example.com/image.jpg".to_string(), back_image_url: None, left_image_url: None, right_image_url: None, face_count: None, generate_type: None, polygon_type: None, enable_pbr: None }
   }
 
   mod base_costs {

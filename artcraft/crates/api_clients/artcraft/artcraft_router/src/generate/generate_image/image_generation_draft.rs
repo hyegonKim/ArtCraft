@@ -51,19 +51,19 @@ impl ImageGenerationDraftRequest {
       Self::KinoviMidjourney7(mut draft) => {
         let result = draft.to_request(&draft_context).await?;
         Ok(ImageGenerationRequest::KinoviMidjourney7(result))
-      }
+      },
       Self::KinoviMidjourney7Niji(mut draft) => {
         let result = draft.to_request(&draft_context).await?;
         Ok(ImageGenerationRequest::KinoviMidjourney7Niji(result))
-      }
+      },
       Self::KinoviMidjourney8(mut draft) => {
         let result = draft.to_request(&draft_context).await?;
         Ok(ImageGenerationRequest::KinoviMidjourney8(result))
-      }
+      },
       Self::KinoviSeedream5p0Pro(mut draft) => {
         let result = draft.to_request(&draft_context).await?;
         Ok(ImageGenerationRequest::KinoviSeedream5p0Pro(result))
-      }
+      },
     }
   }
 }

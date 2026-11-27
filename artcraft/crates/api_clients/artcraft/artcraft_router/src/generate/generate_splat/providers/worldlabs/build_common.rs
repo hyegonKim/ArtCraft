@@ -19,36 +19,17 @@ pub(crate) enum WorldLabsSplatDraftOrRequest {
 /// Build a World Labs splat draft-or-request from the builder. Text-only
 /// prompts go DIRECT (no upload); any media input needs the draft phase to
 /// re-upload the media as World Labs media assets.
-pub(crate) fn build_worldlabs_splat(
-  mut builder: GenerateSplatRequestBuilder,
-  model: WorldLabsModel,
-) -> Result<WorldLabsSplatDraftOrRequest, ArtcraftRouterError> {
+pub(crate) fn build_worldlabs_splat(mut builder: GenerateSplatRequestBuilder, model: WorldLabsModel) -> Result<WorldLabsSplatDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
   let prompt = builder.prompt.take();
 
-  let input = plan_splat_input(
-    builder.reference_images.take(),
-    builder.reference_video.take(),
-    builder.is_panoramic,
-    prompt.is_some(),
-    strategy,
-  )?;
+  let input = plan_splat_input(builder.reference_images.take(), builder.reference_video.take(), builder.is_panoramic, prompt.is_some(), strategy)?;
 
   match input {
     SplatInput::Text => {
-      let world_prompt = WorldPrompt::Text {
-        text_prompt: prompt,
-        disable_recaption: builder.disable_recaption,
-      };
+      let world_prompt = WorldPrompt::Text { text_prompt: prompt, disable_recaption: builder.disable_recaption };
       Ok(WorldLabsSplatDraftOrRequest::Request(WorldLabsSplatRequest { model, world_prompt }))
-    }
-    media_input => {
-      Ok(WorldLabsSplatDraftOrRequest::Draft(WorldLabsSplatDraft {
-        model,
-        text_prompt: prompt,
-        disable_recaption: builder.disable_recaption,
-        input: media_input,
-      }))
-    }
+    },
+    media_input => Ok(WorldLabsSplatDraftOrRequest::Draft(WorldLabsSplatDraft { model, text_prompt: prompt, disable_recaption: builder.disable_recaption, input: media_input })),
   }
 }

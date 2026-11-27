@@ -1,4 +1,3 @@
-
 pub fn round_two_decimals(f: f64) -> f64 {
   // rounded = round(float(f), 2)
   let rounded = (f * 100.0).round() / 100.0; // NB: Round to two places like Python

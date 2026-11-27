@@ -26,30 +26,15 @@ pub struct RequestClientSecretsArgs<'a> {
 
 /// Load all the things needed to make requests.
 pub async fn request_client_secrets(args: RequestClientSecretsArgs<'_>) -> Result<GrokClientSecrets, GrokError> {
+  let payloads = get_index_page_and_scripts(GetIndexPageAndScriptsArgs { cookie: args.cookies.as_str() }).await?;
 
-  let payloads = get_index_page_and_scripts(GetIndexPageAndScriptsArgs {
-    cookie: args.cookies.as_str(),
-  }).await?;
+  let baggage = parse_index_baggage(&payloads.index_body_html).ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include baggage.".to_string() })?;
 
-  let baggage = parse_index_baggage(&payloads.index_body_html)
-      .ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-        message: "Index did not include baggage.".to_string()
-      })?;
+  let sentry_trace = parse_index_sentry_trace(&payloads.index_body_html).ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include sentry trace.".to_string() })?;
 
-  let sentry_trace = parse_index_sentry_trace(&payloads.index_body_html)
-      .ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-        message: "Index did not include sentry trace.".to_string()
-      })?;
+  let verification_token = parse_index_verification_token(&payloads.index_body_html).ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include verification token.".to_string() })?;
 
-  let verification_token = parse_index_verification_token(&payloads.index_body_html)
-      .ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-        message: "Index did not include verification token.".to_string()
-      })?;
-
-  let user_id = parse_index_user_id(&payloads.index_body_html)
-      .ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-        message: "Index did not include user id.".to_string()
-      })?;
+  let user_id = parse_index_user_id(&payloads.index_body_html).ok_or_else(|| GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include user id.".to_string() })?;
 
   // NB: Optional.
   let maybe_user_email = parse_index_user_email(&payloads.index_body_html);
@@ -58,9 +43,7 @@ pub async fn request_client_secrets(args: RequestClientSecretsArgs<'_>) -> Resul
   let svg_paths = parse_svg_paths_from_index_html(&payloads.index_body_html);
 
   if svg_paths.is_empty() {
-    return Err(GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-      message: "Index did not include any SVG paths.".to_string(),
-    }.into());
+    return Err(GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include any SVG paths.".to_string() }.into());
   }
 
   let loading_anim = convert_verification_token_to_loading_anim(&verification_token)?;
@@ -69,30 +52,15 @@ pub async fn request_client_secrets(args: RequestClientSecretsArgs<'_>) -> Resul
 
   let actions_and_xsid_script = parse_script_actions_and_xsid_script_path(&payloads.scripts)?;
 
-  let xsid_script = get_xsid_script(GetXsidScriptArgs {
-    client: &payloads.client,
-    html: &payloads.index_body_html,
-    cookie: args.cookies.as_str(),
-    xsid_script_id: &actions_and_xsid_script.xsid_script_path,
-  }).await?;
+  let xsid_script = get_xsid_script(GetXsidScriptArgs { client: &payloads.client, html: &payloads.index_body_html, cookie: args.cookies.as_str(), xsid_script_id: &actions_and_xsid_script.xsid_script_path }).await?;
 
   let numbers = parse_xsid_script_numbers(&xsid_script.xsid_script_body);
 
   if numbers.numbers.is_empty() {
-    return Err(GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData {
-      message: "Index did not include any SVG paths.".to_string(),
-    }.into());
+    return Err(GrokGenericApiError::IndexHtmlDidNotIncludeExpectedData { message: "Index did not include any SVG paths.".to_string() }.into());
   }
 
-  Ok(GrokClientSecrets {
-    baggage,
-    sentry_trace,
-    verification_token,
-    svg_path_data,
-    numbers,
-    user_id,
-    user_email: maybe_user_email,
-  })
+  Ok(GrokClientSecrets { baggage, sentry_trace, verification_token, svg_path_data, numbers, user_id, user_email: maybe_user_email })
 }
 
 #[cfg(test)]
@@ -106,9 +74,7 @@ mod tests {
   async fn test() -> AnyhowResult<()> {
     let cookies = get_typed_test_cookies()?;
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     println!("Baggage: {:?}", secrets.baggage);
     println!("Sentry trace: {:?}", secrets.sentry_trace);

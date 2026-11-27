@@ -4,10 +4,7 @@
 
 use effectcraft_keyframe::Value as KV;
 use effectcraft_project::build::{self, Ids};
-use effectcraft_project::{
-    FootageKind, ItemId, ItemKind, Layer, LayerSource, Node, PrimitiveKind, PropGroup, Renderer,
-    SubstancePreset,
-};
+use effectcraft_project::{FootageKind, ItemId, ItemKind, Layer, LayerSource, Node, PrimitiveKind, PropGroup, Renderer, SubstancePreset};
 use effectcraft_time::Tick;
 use serde_json::{Value, json};
 
@@ -391,11 +388,7 @@ fn material_duplicate(s: &mut Session, p: &Value) -> Result<Value> {
     let comp = s.project.comp(cid).ok_or(EngineError::NoComp)?;
     let src_layer = comp.layer(ids[0]).ok_or(EngineError::NoComp)?;
     let src_sub = src_layer.substance_material.clone();
-    let src = src_layer
-        .props
-        .sub("materialOptions")
-        .cloned()
-        .ok_or_else(|| bad("material.duplicateAssign", "the first layer has no material"))?;
+    let src = src_layer.props.sub("materialOptions").cloned().ok_or_else(|| bad("material.duplicateAssign", "the first layer has no material"))?;
     let n = s.edit("Duplicate and Assign Material", None, |proj, _| {
         let mut n = 0;
         for id in &ids[1..] {
@@ -432,23 +425,14 @@ fn substance_material_cmd(s: &mut Session, p: &Value, cmd_name: &'static str) ->
     for id in &ids {
         let l = comp.layer(*id).ok_or(EngineError::NoComp)?;
         if !l.source.is_av() {
-            return Err(bad(
-                cmd_name,
-                format!("`{}` cannot take a 3D Substance PBR material (select a 3D model, primitive, text, or shape layer)", l.name),
-            ));
+            return Err(bad(cmd_name, format!("`{}` cannot take a 3D Substance PBR material (select a 3D model, primitive, text, or shape layer)", l.name)));
         }
     }
-    let clear = str_p(p, "preset")
-        .is_some_and(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "none" | "off" | "clear"));
+    let clear = str_p(p, "preset").is_some_and(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "none" | "off" | "clear"));
     let parsed_preset = match str_p(p, "preset") {
         Some(_) if clear => None,
         Some(v) => Some(SubstancePreset::parse(v).ok_or_else(|| {
-            bad(
-                cmd_name,
-                format!(
-                    "preset: brushedSteel|polishedGold|carbonHexWeave|terrazzoMarble|ceramicTiles|weatheredCopper|none, not `{v}`"
-                ),
-            )
+            bad(cmd_name, format!("preset: brushedSteel|polishedGold|carbonHexWeave|terrazzoMarble|ceramicTiles|weatheredCopper|none, not `{v}`"))
         })?),
         None => None,
     };

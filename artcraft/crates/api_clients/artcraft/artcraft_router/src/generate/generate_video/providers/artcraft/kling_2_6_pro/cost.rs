@@ -27,15 +27,7 @@ impl ArtcraftKling2p6ProCostState {
       (true, true) => 161,
     };
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -46,28 +38,29 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling2p6Pro,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling2p6Pro, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn audio_off_5s_is_41() { assert_eq!(cost_cents(Some(5), Some(false)), 41); }
+  fn audio_off_5s_is_41() {
+    assert_eq!(cost_cents(Some(5), Some(false)), 41);
+  }
 
   #[test]
-  fn audio_off_10s_is_81() { assert_eq!(cost_cents(Some(10), Some(false)), 81); }
+  fn audio_off_10s_is_81() {
+    assert_eq!(cost_cents(Some(10), Some(false)), 81);
+  }
 
   #[test]
-  fn audio_on_5s_is_81() { assert_eq!(cost_cents(Some(5), Some(true)), 81); }
+  fn audio_on_5s_is_81() {
+    assert_eq!(cost_cents(Some(5), Some(true)), 81);
+  }
 
   #[test]
-  fn audio_on_10s_is_161() { assert_eq!(cost_cents(Some(10), Some(true)), 161); }
+  fn audio_on_10s_is_161() {
+    assert_eq!(cost_cents(Some(10), Some(true)), 161);
+  }
 
   #[test]
   fn audio_default_is_on() {

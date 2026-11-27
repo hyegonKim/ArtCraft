@@ -1,6 +1,4 @@
-use fal_client::requests_old::webhook::video::image::enqueue_kling_v2p1_master_image_to_video_webhook::{
-  Kling2p1MasterAspectRatio, Kling2p1MasterDuration, Kling2p1MasterRequest,
-};
+use fal_client::requests_old::webhook::video::image::enqueue_kling_v2p1_master_image_to_video_webhook::{Kling2p1MasterAspectRatio, Kling2p1MasterDuration, Kling2p1MasterRequest};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigationStrategy;
@@ -12,38 +10,23 @@ use crate::generate::generate_video::providers::fal::kling_2_1_master::request::
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
-pub fn build_fal_kling_2_1_master(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_kling_2_1_master(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let image_url = require_url(builder.start_frame.clone(), "start_frame", "Kling 2.1 Master requires a starting frame")?;
   if builder.end_frame.is_some() {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "end_frame",
-      value: "Kling 2.1 Master does not support an ending frame".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Kling 2.1 Master does not support an ending frame".to_string() }));
   }
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio, strategy)?;
   let duration = plan_duration(builder.duration_seconds, strategy)?;
 
-  let request = Kling2p1MasterRequest {
-    image_url,
-    prompt: builder.prompt.clone().unwrap_or_default(),
-    duration,
-    aspect_ratio,
-  };
+  let request = Kling2p1MasterRequest { image_url, prompt: builder.prompt.clone().unwrap_or_default(), duration, aspect_ratio };
 
-  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling21Master(
-    FalKling21MasterRequestState { request },
-  )))
+  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling21Master(FalKling21MasterRequestState { request })))
 }
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Kling2p1MasterAspectRatio, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Kling2p1MasterAspectRatio, ArtcraftRouterError> {
   use Kling2p1MasterAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(Ar::WideSixteenNine),
@@ -52,37 +35,22 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Ar::WideSixteenNine),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Ar::TallNineSixteen),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Ar::WideSixteenNine),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Ar::WideSixteenNine),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", other) })),
       _ => Ok(Ar::WideSixteenNine),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Kling2p1MasterDuration, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Kling2p1MasterDuration, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(Kling2p1MasterDuration::Default),
     Some(5) => Ok(Kling2p1MasterDuration::FiveSeconds),
     Some(10) => Ok(Kling2p1MasterDuration::TenSeconds),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Kling2p1MasterDuration::TenSeconds),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Kling2p1MasterDuration::FiveSeconds),
     },
@@ -98,13 +66,7 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling21Master,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Kling21Master, provider: RouterProvider::Fal, prompt: Some("test".to_string()), start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())), ..Default::default() }
   }
 
   #[test]

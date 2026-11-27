@@ -2,10 +2,9 @@ use uuid::Uuid;
 
 /// "sentry trace" data from the <meta> tags
 #[derive(Debug, Clone)]
-pub struct SentryTrace(pub (crate) String);
+pub struct SentryTrace(pub(crate) String);
 
 impl SentryTrace {
-
   /// Generate the format of trace sent in the HTTP request headers
   pub fn to_http_request_header(&self) -> String {
     // Python reference:

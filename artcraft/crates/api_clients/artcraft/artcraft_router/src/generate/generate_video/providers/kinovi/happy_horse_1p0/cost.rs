@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::video::generate_happy_horse_1p0::{
-  GenerateHappyHorse1p0Request, KinoviHappyHorse1p0BatchCount,
-  KinoviHappyHorse1p0OutputResolution,
-};
+use kinovi_web_client::generate::video::generate_happy_horse_1p0::{GenerateHappyHorse1p0Request, KinoviHappyHorse1p0BatchCount, KinoviHappyHorse1p0OutputResolution};
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::draft::KinoviHappyHorse1p0DraftState;
@@ -15,19 +12,11 @@ pub struct KinoviHappyHorse1p0CostState {
 
 impl KinoviHappyHorse1p0CostState {
   pub fn from_request(request: &KinoviHappyHorse1p0RequestState) -> Self {
-    Self {
-      resolution: request.request.output_resolution,
-      duration_seconds: request.request.duration_seconds,
-      batch_count: request.request.batch_count,
-    }
+    Self { resolution: request.request.output_resolution, duration_seconds: request.request.duration_seconds, batch_count: request.request.batch_count }
   }
 
   pub fn from_draft(draft: &KinoviHappyHorse1p0DraftState) -> Self {
-    Self {
-      resolution: draft.resolution,
-      duration_seconds: draft.duration_seconds,
-      batch_count: draft.batch_count,
-    }
+    Self { resolution: draft.resolution, duration_seconds: draft.duration_seconds, batch_count: draft.batch_count }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -46,15 +35,7 @@ impl KinoviHappyHorse1p0CostState {
     let cost_in_credits = costs.kinovi_credits;
     let cost_in_usd_cents = costs.usd_cents_rounded_up;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_credits),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_credits), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -189,9 +170,7 @@ mod tests {
 
     #[test]
     fn not_free() {
-      let est = KinoviHappyHorse1p0CostState {
-        resolution: None, duration_seconds: 5, batch_count: None,
-      }.estimate_cost();
+      let est = KinoviHappyHorse1p0CostState { resolution: None, duration_seconds: 5, batch_count: None }.estimate_cost();
       assert!(!est.is_free);
     }
   }
@@ -231,9 +210,7 @@ mod tests {
 
     #[test]
     fn from_request_1080p() {
-      let req = make_request_state(
-        Some(KinoviHappyHorse1p0OutputResolution::TenEightyP), 5, None,
-      );
+      let req = make_request_state(Some(KinoviHappyHorse1p0OutputResolution::TenEightyP), 5, None);
       let cost = KinoviHappyHorse1p0CostState::from_request(&req);
       assert_eq!(cost.estimate_cost().cost_in_credits, Some(330));
       assert_eq!(cost.estimate_cost().cost_in_usd_cents, Some(136));
@@ -248,9 +225,7 @@ mod tests {
     #[test]
     fn draft_and_request_produce_same_cost() {
       let draft = make_draft(5, 1, Some(RouterResolution::SevenTwentyP));
-      let req = make_request_state(
-        Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP), 5, None,
-      );
+      let req = make_request_state(Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP), 5, None);
       let draft_cost = KinoviHappyHorse1p0CostState::from_draft(&draft).estimate_cost();
       let req_cost = KinoviHappyHorse1p0CostState::from_request(&req).estimate_cost();
       assert_eq!(draft_cost.cost_in_usd_cents, req_cost.cost_in_usd_cents);
@@ -260,10 +235,7 @@ mod tests {
     #[test]
     fn draft_and_request_produce_same_cost_1080p_batch_2() {
       let draft = make_draft(10, 2, Some(RouterResolution::TenEightyP));
-      let req = make_request_state(
-        Some(KinoviHappyHorse1p0OutputResolution::TenEightyP), 10,
-        Some(KinoviHappyHorse1p0BatchCount::Two),
-      );
+      let req = make_request_state(Some(KinoviHappyHorse1p0OutputResolution::TenEightyP), 10, Some(KinoviHappyHorse1p0BatchCount::Two));
       let draft_cost = KinoviHappyHorse1p0CostState::from_draft(&draft).estimate_cost();
       let req_cost = KinoviHappyHorse1p0CostState::from_request(&req).estimate_cost();
       assert_eq!(draft_cost.cost_in_usd_cents, req_cost.cost_in_usd_cents);
@@ -273,72 +245,29 @@ mod tests {
 
   // ── Helpers ──
 
-  fn credits(
-    resolution: Option<KinoviHappyHorse1p0OutputResolution>,
-    duration_seconds: u8,
-  ) -> u64 {
+  fn credits(resolution: Option<KinoviHappyHorse1p0OutputResolution>, duration_seconds: u8) -> u64 {
     credits_with_batch(resolution, duration_seconds, None)
   }
 
-  fn credits_with_batch(
-    resolution: Option<KinoviHappyHorse1p0OutputResolution>,
-    duration_seconds: u8,
-    batch_count: Option<KinoviHappyHorse1p0BatchCount>,
-  ) -> u64 {
-    KinoviHappyHorse1p0CostState { resolution, duration_seconds, batch_count }
-      .estimate_cost()
-      .cost_in_credits
-      .unwrap()
+  fn credits_with_batch(resolution: Option<KinoviHappyHorse1p0OutputResolution>, duration_seconds: u8, batch_count: Option<KinoviHappyHorse1p0BatchCount>) -> u64 {
+    KinoviHappyHorse1p0CostState { resolution, duration_seconds, batch_count }.estimate_cost().cost_in_credits.unwrap()
   }
 
-  fn usd_cents(
-    resolution: Option<KinoviHappyHorse1p0OutputResolution>,
-    duration_seconds: u8,
-    batch_count: Option<KinoviHappyHorse1p0BatchCount>,
-  ) -> u64 {
-    KinoviHappyHorse1p0CostState { resolution, duration_seconds, batch_count }
-      .estimate_cost()
-      .cost_in_usd_cents
-      .unwrap()
+  fn usd_cents(resolution: Option<KinoviHappyHorse1p0OutputResolution>, duration_seconds: u8, batch_count: Option<KinoviHappyHorse1p0BatchCount>) -> u64 {
+    KinoviHappyHorse1p0CostState { resolution, duration_seconds, batch_count }.estimate_cost().cost_in_usd_cents.unwrap()
   }
 
-  fn make_draft(
-    duration_seconds: u16,
-    video_batch_count: u16,
-    resolution: Option<RouterResolution>,
-  ) -> KinoviHappyHorse1p0DraftState {
+  fn make_draft(duration_seconds: u16, video_batch_count: u16, resolution: Option<RouterResolution>) -> KinoviHappyHorse1p0DraftState {
     use crate::api::router_video_model::RouterVideoModel;
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::HappyHorse1p0,
-      provider: RouterProvider::KinoviWeb,
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(video_batch_count),
-      ..Default::default()
-    };
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::HappyHorse1p0, provider: RouterProvider::KinoviWeb, resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(video_batch_count), ..Default::default() };
 
     match builder.build2().expect("build2 should succeed") {
-      VideoGenerationDraftOrRequest::Draft(
-        VideoGenerationDraftRequest::KinoviHappyHorse1p0(draft)
-      ) => draft,
+      VideoGenerationDraftOrRequest::Draft(VideoGenerationDraftRequest::KinoviHappyHorse1p0(draft)) => draft,
       _ => panic!("expected KinoviHappyHorse1p0 draft"),
     }
   }
 
-  fn make_request_state(
-    resolution: Option<KinoviHappyHorse1p0OutputResolution>,
-    duration_seconds: u8,
-    batch_count: Option<KinoviHappyHorse1p0BatchCount>,
-  ) -> KinoviHappyHorse1p0RequestState {
-    KinoviHappyHorse1p0RequestState {
-      request: GenerateHappyHorse1p0Request {
-        prompt: "test".to_string(),
-        aspect_ratio: None,
-        output_resolution: resolution,
-        batch_count,
-        duration_seconds,
-        start_frame_url: None,
-      },
-    }
+  fn make_request_state(resolution: Option<KinoviHappyHorse1p0OutputResolution>, duration_seconds: u8, batch_count: Option<KinoviHappyHorse1p0BatchCount>) -> KinoviHappyHorse1p0RequestState {
+    KinoviHappyHorse1p0RequestState { request: GenerateHappyHorse1p0Request { prompt: "test".to_string(), aspect_ratio: None, output_resolution: resolution, batch_count, duration_seconds, start_frame_url: None } }
   }
 }

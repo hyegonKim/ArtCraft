@@ -1058,14 +1058,7 @@ def Mesh "Quad"
 }
 "#;
     for deflated in [false, true] {
-        let usdz = make_test_usdz(
-            &[
-                ("root/stage.usda", stage.as_bytes()),
-                ("root/tex/base.png", &albedo),
-                ("root/tex/rough.png", &rough),
-            ],
-            deflated,
-        );
+        let usdz = make_test_usdz(&[("root/stage.usda", stage.as_bytes()), ("root/tex/base.png", &albedo), ("root/tex/rough.png", &rough)], deflated);
         let m = crate::load("asset.usdz", &usdz, &|_| None).unwrap();
         assert_eq!(m.triangle_count(), 2);
         assert_eq!(m.materials.len(), 1);
@@ -1153,6 +1146,7 @@ fn substance_presets_synthesize_unit_normals_bounded_pbr_maps_and_determinism() 
     // WeatheredCopper oxidation shifts metallic -> dielectric patina as wear increases.
     let fresh = generate(SubstancePreset::WeatheredCopper, &SubstanceParams { resolution: 32, wear: 0.0, ..params });
     let oxidized = generate(SubstancePreset::WeatheredCopper, &SubstanceParams { resolution: 32, wear: 0.95, ..params });
-    let mean_metal = |m: &crate::substance::SubstancePbrMaps| m.metallic_roughness.data.iter().map(|p| p[2]).sum::<f32>() / m.metallic_roughness.data.len() as f32;
+    let mean_metal =
+        |m: &crate::substance::SubstancePbrMaps| m.metallic_roughness.data.iter().map(|p| p[2]).sum::<f32>() / m.metallic_roughness.data.len() as f32;
     assert!(mean_metal(&oxidized) < mean_metal(&fresh) - 0.25);
 }

@@ -1,6 +1,4 @@
-use crate::requests::api::video::text::vidu_q3_turbo::api::{
-  ViduQ3TurboTextToVideoRequest, ViduQ3TurboTextToVideoResolution,
-};
+use crate::requests::api::video::text::vidu_q3_turbo::api::{ViduQ3TurboTextToVideoRequest, ViduQ3TurboTextToVideoResolution};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Vidu Q3 Turbo pricing (see https://fal.ai/models/fal-ai/vidu/q3/text-to-video/turbo):
@@ -18,7 +16,11 @@ const RATE_HIGH_RES_TENTH_CENTS: u64 = 77; // $0.077/sec (720p/1080p)
 /// Per-second rate in tenths-of-a-cent for Vidu Q3 Turbo. `is_high_res`
 /// selects the 2.2× 720p/1080p tier.
 pub(crate) fn vidu_q3_turbo_rate_tenth_cents_per_sec(is_high_res: bool) -> u64 {
-  if is_high_res { RATE_HIGH_RES_TENTH_CENTS } else { RATE_LOW_RES_TENTH_CENTS }
+  if is_high_res {
+    RATE_HIGH_RES_TENTH_CENTS
+  } else {
+    RATE_LOW_RES_TENTH_CENTS
+  }
 }
 
 /// ceil(rate_tenth_cents × seconds / 10) → whole cents.
@@ -30,9 +32,7 @@ impl FalRequestCostCalculator for ViduQ3TurboTextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // fal defaults when unset: duration = 5s, resolution = 720p.
     let duration_secs = u64::from(self.duration.unwrap_or(5));
-    let is_high_res = self.resolution
-      .unwrap_or(ViduQ3TurboTextToVideoResolution::SevenTwentyP)
-      .is_high_res();
+    let is_high_res = self.resolution.unwrap_or(ViduQ3TurboTextToVideoResolution::SevenTwentyP).is_high_res();
 
     let rate = vidu_q3_turbo_rate_tenth_cents_per_sec(is_high_res);
     vidu_q3_turbo_cost_cents(rate, duration_secs)
@@ -44,19 +44,8 @@ mod tests {
   use super::*;
   use crate::requests::api::video::text::vidu_q3_turbo::api::ViduQ3TurboTextToVideoAspectRatio;
 
-  fn make_request(
-    duration: Option<u8>,
-    resolution: Option<ViduQ3TurboTextToVideoResolution>,
-    audio: Option<bool>,
-  ) -> ViduQ3TurboTextToVideoRequest {
-    ViduQ3TurboTextToVideoRequest {
-      prompt: "test".to_string(),
-      duration,
-      seed: None,
-      aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine),
-      resolution,
-      audio,
-    }
+  fn make_request(duration: Option<u8>, resolution: Option<ViduQ3TurboTextToVideoResolution>, audio: Option<bool>) -> ViduQ3TurboTextToVideoRequest {
+    ViduQ3TurboTextToVideoRequest { prompt: "test".to_string(), duration, seed: None, aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine), resolution, audio }
   }
 
   mod cost_table {
@@ -67,15 +56,15 @@ mod tests {
     // or 77 (720p/1080p).
     const COST_TABLE: &[(Option<u8>, Option<ViduQ3TurboTextToVideoResolution>, u64)] = &[
       // 360p / 540p → $0.035/s (rounds up)
-      (Some(5),  Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), 18), // 17.5 → 18
-      (Some(5),  Some(ViduQ3TurboTextToVideoResolution::FiveFortyP),  18),
+      (Some(5), Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), 18), // 17.5 → 18
+      (Some(5), Some(ViduQ3TurboTextToVideoResolution::FiveFortyP), 18),
       (Some(16), Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), 56),
-      (Some(1),  Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), 4),  // 3.5 → 4
+      (Some(1), Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), 4), // 3.5 → 4
       // 720p / 1080p → $0.077/s (rounds up)
-      (Some(5),  Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), 39), // 38.5 → 39
-      (Some(5),  Some(ViduQ3TurboTextToVideoResolution::TenEightyP),   39),
+      (Some(5), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), 39), // 38.5 → 39
+      (Some(5), Some(ViduQ3TurboTextToVideoResolution::TenEightyP), 39),
       (Some(10), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), 77),
-      (Some(3),  Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), 24), // 23.1 → 24
+      (Some(3), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), 24), // 23.1 → 24
       // Defaults: duration=None→5s, resolution=None→720p
       (None, None, 39),
     ];
@@ -93,14 +82,8 @@ mod tests {
     #[test]
     fn turbo_high_res_rate_is_half_of_q3() {
       use crate::requests::api::video::text::vidu_q3::cost::vidu_q3_rate_tenth_cents_per_sec;
-      assert_eq!(
-        vidu_q3_turbo_rate_tenth_cents_per_sec(true) * 2,
-        vidu_q3_rate_tenth_cents_per_sec(true),
-      );
-      assert_eq!(
-        vidu_q3_turbo_rate_tenth_cents_per_sec(false) * 2,
-        vidu_q3_rate_tenth_cents_per_sec(false),
-      );
+      assert_eq!(vidu_q3_turbo_rate_tenth_cents_per_sec(true) * 2, vidu_q3_rate_tenth_cents_per_sec(true),);
+      assert_eq!(vidu_q3_turbo_rate_tenth_cents_per_sec(false) * 2, vidu_q3_rate_tenth_cents_per_sec(false),);
     }
 
     #[test]
@@ -115,14 +98,8 @@ mod tests {
     fn cost_ignores_audio_and_aspect_ratio() {
       let baseline = make_request(Some(8), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), Some(true)).calculate_cost_in_cents();
       for audio in [None, Some(false), Some(true)] {
-        for ar in [
-          ViduQ3TurboTextToVideoAspectRatio::SixteenByNine,
-          ViduQ3TurboTextToVideoAspectRatio::Square,
-        ] {
-          let cost = ViduQ3TurboTextToVideoRequest {
-            aspect_ratio: Some(ar),
-            ..make_request(Some(8), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), audio)
-          }.calculate_cost_in_cents();
+        for ar in [ViduQ3TurboTextToVideoAspectRatio::SixteenByNine, ViduQ3TurboTextToVideoAspectRatio::Square] {
+          let cost = ViduQ3TurboTextToVideoRequest { aspect_ratio: Some(ar), ..make_request(Some(8), Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), audio) }.calculate_cost_in_cents();
           assert_eq!(cost, baseline, "audio={audio:?} ar={ar:?}");
         }
       }

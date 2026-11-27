@@ -81,8 +81,6 @@ pub struct QwenEdit2511EditImageAngleOutput {
   pub prompt: Option<String>,
 }
 
-pub fn http_qwen_edit_2511_edit_image_angle(
-  params: QwenEdit2511EditImageAngleInput,
-) -> FalRequest<QwenEdit2511EditImageAngleInput, QwenEdit2511EditImageAngleOutput> {
+pub fn http_qwen_edit_2511_edit_image_angle(params: QwenEdit2511EditImageAngleInput) -> FalRequest<QwenEdit2511EditImageAngleInput, QwenEdit2511EditImageAngleOutput> {
   FalRequest::new("fal-ai/qwen-image-edit-2511-multiple-angles", params)
 }

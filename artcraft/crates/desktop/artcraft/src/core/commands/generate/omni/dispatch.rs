@@ -176,10 +176,7 @@ fn job_tokens(response: &Value) -> Vec<String> {
 fn record_usage(app: &AppHandle, request: &OmniRequest, modality: Modality, count: usize) {
   let tracker = app.state::<ArtcraftUsageTracker>();
   let count = u16::try_from(count).unwrap_or(u16::MAX);
-  let has_media = request.fields.iter().any(|(key, value)| {
-    key.ends_with("media_token") && value.is_string()
-      || key.ends_with("media_tokens") && value.as_array().is_some_and(|values| !values.is_empty())
-  });
+  let has_media = request.fields.iter().any(|(key, value)| key.ends_with("media_token") && value.is_string() || key.ends_with("media_tokens") && value.as_array().is_some_and(|values| !values.is_empty()));
   let usage = if has_media { ArtcraftUsageType::ImageToResult } else { ArtcraftUsageType::TextToResult };
   let result = match modality {
     Modality::Video => tracker.record_video_generation(count, usage, ArtcraftUsagePage::VideoPage),

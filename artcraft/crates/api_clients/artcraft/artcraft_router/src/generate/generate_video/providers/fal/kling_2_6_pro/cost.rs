@@ -1,9 +1,7 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::kling_2_6_pro::request::{
-  FalKling2p6ProMode, FalKling2p6ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_2_6_pro::request::{FalKling2p6ProMode, FalKling2p6ProRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalKling2p6ProCostState {
@@ -23,15 +21,7 @@ impl FalKling2p6ProCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -43,14 +33,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>, has_start: bool) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling2p6Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling2p6Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     if has_start {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
@@ -64,29 +47,38 @@ mod tests {
   // the router build doesn't expose voice_ids yet, so it's not tested here.
 
   #[test]
-  fn t2v_audio_off_5s_is_35() { assert_eq!(cost_cents(Some(5), Some(false), false), 35); }
+  fn t2v_audio_off_5s_is_35() {
+    assert_eq!(cost_cents(Some(5), Some(false), false), 35);
+  }
 
   #[test]
-  fn t2v_audio_off_10s_is_70() { assert_eq!(cost_cents(Some(10), Some(false), false), 70); }
+  fn t2v_audio_off_10s_is_70() {
+    assert_eq!(cost_cents(Some(10), Some(false), false), 70);
+  }
 
   #[test]
-  fn t2v_audio_on_5s_is_70() { assert_eq!(cost_cents(Some(5), Some(true), false), 70); }
+  fn t2v_audio_on_5s_is_70() {
+    assert_eq!(cost_cents(Some(5), Some(true), false), 70);
+  }
 
   #[test]
-  fn t2v_audio_on_10s_is_140() { assert_eq!(cost_cents(Some(10), Some(true), false), 140); }
+  fn t2v_audio_on_10s_is_140() {
+    assert_eq!(cost_cents(Some(10), Some(true), false), 140);
+  }
 
   #[test]
-  fn i2v_audio_off_5s_is_35() { assert_eq!(cost_cents(Some(5), Some(false), true), 35); }
+  fn i2v_audio_off_5s_is_35() {
+    assert_eq!(cost_cents(Some(5), Some(false), true), 35);
+  }
 
   #[test]
-  fn i2v_audio_on_5s_is_70() { assert_eq!(cost_cents(Some(5), Some(true), true), 70); }
+  fn i2v_audio_on_5s_is_70() {
+    assert_eq!(cost_cents(Some(5), Some(true), true), 70);
+  }
 
   #[test]
   fn audio_default_is_on() {
     // generate_audio=None defaults to true on fal's server.
-    assert_eq!(
-      cost_cents(Some(5), None, false),
-      cost_cents(Some(5), Some(true), false),
-    );
+    assert_eq!(cost_cents(Some(5), None, false), cost_cents(Some(5), Some(true), false),);
   }
 }

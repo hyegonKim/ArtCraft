@@ -100,9 +100,7 @@ impl BrushGesture {
         }
         Some(*pos)
       },
-      egui::Event::PointerGone | egui::Event::WindowFocused(false)
-      | egui::Event::PointerButton { button: egui::PointerButton::Middle, pressed: true, .. }
-      | egui::Event::Key { key: egui::Key::Space, pressed: true, .. } => {
+      egui::Event::PointerGone | egui::Event::WindowFocused(false) | egui::Event::PointerButton { button: egui::PointerButton::Middle, pressed: true, .. } | egui::Event::Key { key: egui::Key::Space, pressed: true, .. } => {
         transition.finish_after = self.active;
         self.active = false;
         self.anchor = None;
@@ -134,19 +132,13 @@ impl BrushGesture {
 /// the widget before egui produced a click/drag response. This canvas has no child widgets.
 fn brush_canvas_input_allowed(ui: &Ui, response: &egui::Response, paint_rect: Rect, document_modal: bool, panning: bool) -> bool {
   let ctx = ui.ctx();
-  let other_widget_owns_input = ctx.interaction_snapshot(|state| {
-    [state.clicked, state.dragged, state.drag_started, state.drag_stopped].into_iter().flatten().any(|id| id != response.id)
-  });
+  let other_widget_owns_input = ctx.interaction_snapshot(|state| [state.clicked, state.dragged, state.drag_started, state.drag_stopped].into_iter().flatten().any(|id| id != response.id));
   let batch_press = ctx.input(|input| input.events.clone()).iter().any(|event| {
     matches!(event, egui::Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed: true, .. }
       if pos.is_finite() && paint_rect.intersect(ui.clip_rect()).contains(*pos) && ctx.layer_id_at(*pos) == Some(response.layer_id))
   });
-  let owns_canvas = response.contains_pointer() || response.is_pointer_button_down_on()
-    || response.dragged() || response.drag_stopped() || response.clicked() || batch_press;
-  ui.is_enabled() && response.enabled() && owns_canvas
-    && ctx.memory(|memory| memory.allows_interaction(response.layer_id))
-    && !egui::Popup::is_any_open(ctx) && !other_widget_owns_input && !document_modal && !panning
-    && ctx.input(|input| input.focused && !input.key_down(egui::Key::Space) && !input.pointer.button_down(egui::PointerButton::Middle))
+  let owns_canvas = response.contains_pointer() || response.is_pointer_button_down_on() || response.dragged() || response.drag_stopped() || response.clicked() || batch_press;
+  ui.is_enabled() && response.enabled() && owns_canvas && ctx.memory(|memory| memory.allows_interaction(response.layer_id)) && !egui::Popup::is_any_open(ctx) && !other_widget_owns_input && !document_modal && !panning && ctx.input(|input| input.focused && !input.key_down(egui::Key::Space) && !input.pointer.button_down(egui::PointerButton::Middle))
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -794,9 +786,7 @@ impl EditImagePage {
         let events = ui.input(|input| input.events.clone());
         for event in &events {
           let topmost = match event {
-            egui::Event::PointerMoved(point) | egui::Event::PointerButton { pos: point, .. } => {
-              point.is_finite() && ui.ctx().layer_id_at(*point) == Some(response.layer_id)
-            },
+            egui::Event::PointerMoved(point) | egui::Event::PointerButton { pos: point, .. } => point.is_finite() && ui.ctx().layer_id_at(*point) == Some(response.layer_id),
             _ => true,
           };
           let transition = self.brush_gesture.event(event, topmost, canvas.intersect(viewport).intersect(ui.clip_rect()));
@@ -830,7 +820,9 @@ impl EditImagePage {
         }
       }
     }
-    if self.dirty { ui.ctx().request_repaint(); }
+    if self.dirty {
+      ui.ctx().request_repaint();
+    }
     ui.add_space(8.0);
     if self.preview_reduced && self.zoom >= 1.0 {
       ui.small("GPU-limited display preview; PNG export keeps every original pixel.");
@@ -1173,8 +1165,7 @@ impl EditImagePage {
   }
 
   fn apply_tool_stamp(&mut self, uv: Pos2, previous: Option<Pos2>) -> Result<(), String> {
-    if matches!(self.tool, DrawTool::Brush | DrawTool::Eraser)
-      && std::iter::once(uv).chain(previous).any(|point| !point.is_finite() || !(0.0..=1.0).contains(&point.x) || !(0.0..=1.0).contains(&point.y)) {
+    if matches!(self.tool, DrawTool::Brush | DrawTool::Eraser) && std::iter::once(uv).chain(previous).any(|point| !point.is_finite() || !(0.0..=1.0).contains(&point.x) || !(0.0..=1.0).contains(&point.y)) {
       return Err("Brush coordinates must be inside the document".into());
     }
     let (px, py) = document_pixel_from_uv(self.width, self.height, uv).ok_or("Invalid brush coordinates")?;
@@ -1237,7 +1228,9 @@ impl EditImagePage {
         },
         None => document_point,
       }
-    } else { document_point };
+    } else {
+      document_point
+    };
     let (min_x, max_x) = (segment_start[0].min(document_point[0]) - radius, segment_start[0].max(document_point[0]) + radius);
     let (min_y, max_y) = (segment_start[1].min(document_point[1]) - radius, segment_start[1].max(document_point[1]) + radius);
     let corners = [[min_x, min_y], [max_x, min_y], [min_x, max_y], [max_x, max_y]].map(|point| mapping.to_local(point));
@@ -1251,7 +1244,9 @@ impl EditImagePage {
     if edit_mask {
       let pixels = self.writable_mask_active()?;
       for y in top..bottom {
-        let Some((row_left, row_right)) = capsule_row_span(mapping, y, layer_width, segment_start, document_point, radius) else { continue };
+        let Some((row_left, row_right)) = capsule_row_span(mapping, y, layer_width, segment_start, document_point, radius) else {
+          continue;
+        };
         for x in left.max(row_left)..right.min(row_right) {
           let point = mapping.to_document([x as f64 + 0.5, y as f64 + 0.5]);
           let distance = segment_distance(point, segment_start, document_point);
@@ -1272,7 +1267,9 @@ impl EditImagePage {
       match tool {
         DrawTool::Brush | DrawTool::Eraser => {
           for y in top..bottom {
-            let Some((row_left, row_right)) = capsule_row_span(mapping, y, layer_width, segment_start, document_point, radius) else { continue };
+            let Some((row_left, row_right)) = capsule_row_span(mapping, y, layer_width, segment_start, document_point, radius) else {
+              continue;
+            };
             for x in left.max(row_left)..right.min(row_right) {
               let point = mapping.to_document([x as f64 + 0.5, y as f64 + 0.5]);
               let distance = segment_distance(point, segment_start, document_point);
@@ -1512,9 +1509,7 @@ impl LayerMapping {
 fn segment_distance(point: [f64; 2], start: [f64; 2], end: [f64; 2]) -> f64 {
   let delta = [end[0] - start[0], end[1] - start[1]];
   let length_squared = delta[0] * delta[0] + delta[1] * delta[1];
-  let fraction = if length_squared > 0.0 {
-    (((point[0] - start[0]) * delta[0] + (point[1] - start[1]) * delta[1]) / length_squared).clamp(0.0, 1.0)
-  } else { 0.0 };
+  let fraction = if length_squared > 0.0 { (((point[0] - start[0]) * delta[0] + (point[1] - start[1]) * delta[1]) / length_squared).clamp(0.0, 1.0) } else { 0.0 };
   (point[0] - start[0] - fraction * delta[0]).hypot(point[1] - start[1] - fraction * delta[1])
 }
 
@@ -1558,8 +1553,7 @@ fn capsule_row_span(mapping: LayerMapping, y: u32, width: u32, start: [f64; 2], 
     let across = relative[0] * direction[1] - relative[1] * direction[0];
     let across_slope = vector[0] * direction[1] - vector[1] * direction[0];
     let padding = padded_radius - radius;
-    if intersect_linear_interval(&mut interval, along, along_slope, -padding, length + padding)
-      && intersect_linear_interval(&mut interval, across, across_slope, -padded_radius, padded_radius) {
+    if intersect_linear_interval(&mut interval, along, along_slope, -padding, length + padding) && intersect_linear_interval(&mut interval, across, across_slope, -padded_radius, padded_radius) {
       lower = lower.min(interval[0]);
       upper = upper.max(interval[1]);
     }
@@ -2789,7 +2783,10 @@ mod continuous_brush_tests {
     page.brush_hardness = 0.65;
     page.brush_color = [80, 160, 240, 128];
     let (start_uv, end_uv) = (pos2(0.2, 0.25), pos2(0.75, 0.65));
-    let center = |uv| { let (x, y) = document_pixel_from_uv(83, 57, uv).unwrap(); [x as f64 + 0.5, y as f64 + 0.5] };
+    let center = |uv| {
+      let (x, y) = document_pixel_from_uv(83, 57, uv).unwrap();
+      [x as f64 + 0.5, y as f64 + 0.5]
+    };
     let (start, end) = (center(start_uv), center(end_uv));
     let mapping = LayerMapping::new(&page.layers[0].transform, width, height).unwrap();
     page.apply_tool_at(end_uv, Some(start_uv)).unwrap();
@@ -2802,7 +2799,9 @@ mod continuous_brush_tests {
         expected_alpha.push(alpha);
         let index = (y as usize * width as usize + x as usize) * 4;
         assert_eq!(page.layers[0].pixels[index + 3], alpha, "transformed pixel {x},{y}");
-        if alpha > 0 { assert_eq!(&page.layers[0].pixels[index..index + 3], &[80, 160, 240]); }
+        if alpha > 0 {
+          assert_eq!(&page.layers[0].pixels[index..index + 3], &[80, 160, 240]);
+        }
       }
     }
     let source = page.layers[0].pixels.clone();
@@ -2831,7 +2830,9 @@ mod continuous_brush_tests {
     let rect = Rect::from_min_size(Pos2::ZERO, vec2(101.0, 7.0));
     let undo_before = page.undo.len();
     brush_events(&mut page, &[primary(pos2(1.5, 3.5), true), egui::Event::PointerMoved(pos2(35.5, 3.5)), primary(pos2(99.5, 3.5), false)], rect);
-    for x in 1..=99 { assert_eq!(page.layers[0].pixels[(3 * 101 + x) * 4 + 3], 255, "press/release endpoint omitted at {x}"); }
+    for x in 1..=99 {
+      assert_eq!(page.layers[0].pixels[(3 * 101 + x) * 4 + 3], 255, "press/release endpoint omitted at {x}");
+    }
     assert_eq!(page.undo.len(), undo_before + 1);
     assert!(!page.brush_gesture.active);
     let painted = page.layers[0].pixels.clone();
@@ -2846,11 +2847,7 @@ mod continuous_brush_tests {
     let mut page = page(101, 7, vec![0; 101 * 7 * 4]);
     page.brush_radius = 1.0;
     let rect = Rect::from_min_size(Pos2::ZERO, vec2(101.0, 7.0));
-    brush_events(&mut page, &[
-      primary(pos2(5.5, 3.5), true), egui::Event::PointerMoved(pos2(5.5, -4.0)),
-      egui::Event::PointerMoved(pos2(95.5, 3.5)), primary(pos2(95.5, 3.5), false),
-      primary(pos2(20.5, 3.5), true), primary(pos2(20.5, 3.5), false),
-    ], rect);
+    brush_events(&mut page, &[primary(pos2(5.5, 3.5), true), egui::Event::PointerMoved(pos2(5.5, -4.0)), egui::Event::PointerMoved(pos2(95.5, 3.5)), primary(pos2(95.5, 3.5), false), primary(pos2(20.5, 3.5), true), primary(pos2(20.5, 3.5), false)], rect);
     for x in 0..101 {
       assert_eq!(page.layers[0].pixels[(3 * 101 + x) * 4 + 3] > 0, [5, 20, 95].contains(&x), "unexpected bridging at {x}");
     }
@@ -2872,9 +2869,7 @@ mod continuous_brush_tests {
     assert_eq!(gesture.event(&egui::Event::PointerMoved(pos2(50.0, 20.0)), true, rect).segment, Some((None, pos2(50.0, 20.0))));
     assert!(gesture.event(&egui::Event::PointerMoved(point), false, rect).segment.is_none());
     assert_eq!(gesture.event(&egui::Event::PointerMoved(point), true, rect).segment, Some((None, point)));
-    for cancel in [egui::Event::PointerGone, egui::Event::WindowFocused(false),
-      egui::Event::PointerButton { pos: point, button: egui::PointerButton::Middle, pressed: true, modifiers: egui::Modifiers::NONE },
-      egui::Event::Key { key: egui::Key::Space, physical_key: None, pressed: true, repeat: false, modifiers: egui::Modifiers::NONE }] {
+    for cancel in [egui::Event::PointerGone, egui::Event::WindowFocused(false), egui::Event::PointerButton { pos: point, button: egui::PointerButton::Middle, pressed: true, modifiers: egui::Modifiers::NONE }, egui::Event::Key { key: egui::Key::Space, physical_key: None, pressed: true, repeat: false, modifiers: egui::Modifiers::NONE }] {
       gesture.event(&primary(point, true), true, rect);
       assert!(gesture.event(&cancel, true, rect).finish_after);
       assert!(!gesture.active);
@@ -2902,13 +2897,14 @@ mod continuous_brush_tests {
     assert!(page.redo.is_empty());
   }
 
-
   fn canvas_gate_frame(ctx: &egui::Context, page: &mut EditImagePage, events: Vec<egui::Event>, disabled: bool, other_widget: bool, document_modal: bool, panning: bool) -> bool {
     let mut allowed = false;
     let mut output = ctx.run_ui(egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(300.0, 200.0))), events, focused: true, ..Default::default() }, |_| {
       // This test container must not claim clicks intended for its canvas child.
       egui::Area::new(egui::Id::new("brush_gate_canvas")).sense(Sense::hover()).fixed_pos(Pos2::ZERO).order(egui::Order::Background).show(ctx, |ui| {
-        if disabled { ui.disable(); }
+        if disabled {
+          ui.disable();
+        }
         let canvas = Rect::from_min_size(pos2(20.0, 20.0), vec2(101.0, 7.0));
         let response = ui.allocate_rect(canvas, Sense::click_and_drag());
         if other_widget {
@@ -2941,11 +2937,15 @@ mod continuous_brush_tests {
       let ctx = egui::Context::default();
       let mut page = page(101, 7, vec![0; 101 * 7 * 4]);
       page.brush_radius = 1.0;
-      for _ in 0..2 { canvas_gate_frame(&ctx, &mut page, vec![], false, false, false, false); }
+      for _ in 0..2 {
+        canvas_gate_frame(&ctx, &mut page, vec![], false, false, false, false);
+      }
       assert!(canvas_gate_frame(&ctx, &mut page, vec![primary(pos2(20.25, 23.5), true), primary(release, false)], false, false, false, false));
       assert_eq!(page.layers[0].pixels[(3 * 101) * 4 + 3], 255, "short outside release must keep the initial dab");
       if release.x > 100.0 {
-        for x in 0..100 { assert_eq!(page.layers[0].pixels[(3 * 101 + x) * 4 + 3], 255, "batched endpoint gap at {x}"); }
+        for x in 0..100 {
+          assert_eq!(page.layers[0].pixels[(3 * 101 + x) * 4 + 3], 255, "batched endpoint gap at {x}");
+        }
       } else {
         assert_eq!(page.layers[0].pixels.chunks_exact(4).filter(|pixel| pixel[3] != 0).count(), 1, "outside release cannot clamp/paint a segment on the edge");
       }
@@ -2961,12 +2961,15 @@ mod continuous_brush_tests {
       page.brush_radius = 1.0;
       let disabled = mode == 0;
       let other_widget = mode == 1;
-      for _ in 0..2 { canvas_gate_frame(&ctx, &mut page, vec![], disabled, other_widget, mode == 3, mode == 4); }
-      if mode == 2 { egui::Popup::open_id(&ctx, egui::Id::new("brush_covering_popup")); }
+      for _ in 0..2 {
+        canvas_gate_frame(&ctx, &mut page, vec![], disabled, other_widget, mode == 3, mode == 4);
+      }
+      if mode == 2 {
+        egui::Popup::open_id(&ctx, egui::Id::new("brush_covering_popup"));
+      }
       assert!(!canvas_gate_frame(&ctx, &mut page, vec![primary(pos2(21.5, 23.5), true), primary(pos2(21.5, 23.5), false)], disabled, other_widget, mode == 3, mode == 4), "input gate mode {mode}");
       assert!(page.layers[0].pixels.iter().all(|value| *value == 0), "blocked UI must not paint underneath, mode {mode}");
       assert!(page.undo.is_empty());
     }
   }
-
 }

@@ -1,9 +1,5 @@
-use fal_client::requests::api::video::image::vidu_q3_turbo::api::{
-  ViduQ3TurboImageToVideoRequest, ViduQ3TurboImageToVideoResolution,
-};
-use fal_client::requests::api::video::text::vidu_q3_turbo::api::{
-  ViduQ3TurboTextToVideoAspectRatio, ViduQ3TurboTextToVideoRequest, ViduQ3TurboTextToVideoResolution,
-};
+use fal_client::requests::api::video::image::vidu_q3_turbo::api::{ViduQ3TurboImageToVideoRequest, ViduQ3TurboImageToVideoResolution};
+use fal_client::requests::api::video::text::vidu_q3_turbo::api::{ViduQ3TurboTextToVideoAspectRatio, ViduQ3TurboTextToVideoRequest, ViduQ3TurboTextToVideoResolution};
 
 use crate::api::image_list_ref::ImageListRef;
 use crate::api::router_aspect_ratio::RouterAspectRatio;
@@ -14,9 +10,7 @@ use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 use crate::generate::generate_video::providers::fal::kling_1_6_pro::build::optional_url;
-use crate::generate::generate_video::providers::fal::vidu_q3_turbo::request::{
-  FalViduQ3TurboMode, FalViduQ3TurboRequestState,
-};
+use crate::generate::generate_video::providers::fal::vidu_q3_turbo::request::{FalViduQ3TurboMode, FalViduQ3TurboRequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -41,16 +35,12 @@ pub(crate) enum PlanResolution {
   TenEightyP,
 }
 
-pub fn build_fal_vidu_q3_turbo(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_vidu_q3_turbo(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_vidu_q3_turbo_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalViduQ3Turbo(state)))
 }
 
-pub(crate) fn build_fal_vidu_q3_turbo_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalViduQ3TurboRequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_vidu_q3_turbo_state(builder: GenerateVideoRequestBuilder) -> Result<FalViduQ3TurboRequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   reject_reference_videos(&builder.reference_videos)?;
@@ -71,30 +61,12 @@ pub(crate) fn build_fal_vidu_q3_turbo_state(
     check_i2v_end_frame_resolution(i2v_resolution, end_image_url.is_some())?;
     // Image-to-video has no aspect_ratio input — the output follows the start
     // frame — so any requested aspect ratio is silently dropped here.
-    FalViduQ3TurboMode::ImageToVideo(ViduQ3TurboImageToVideoRequest {
-      prompt,
-      image_url,
-      end_image_url,
-      duration,
-      seed: None,
-      resolution: i2v_resolution,
-      audio,
-    })
+    FalViduQ3TurboMode::ImageToVideo(ViduQ3TurboImageToVideoRequest { prompt, image_url, end_image_url, duration, seed: None, resolution: i2v_resolution, audio })
   } else {
     if end_image_url.is_some() {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "end_frame",
-        value: "Vidu Q3 Turbo requires a start_frame when end_frame is provided".to_string(),
-      }));
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Vidu Q3 Turbo requires a start_frame when end_frame is provided".to_string() }));
     }
-    FalViduQ3TurboMode::TextToVideo(ViduQ3TurboTextToVideoRequest {
-      prompt,
-      duration,
-      seed: None,
-      aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio),
-      resolution: resolution.map(to_t2v_resolution),
-      audio,
-    })
+    FalViduQ3TurboMode::TextToVideo(ViduQ3TurboTextToVideoRequest { prompt, duration, seed: None, aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio), resolution: resolution.map(to_t2v_resolution), audio })
   };
 
   Ok(FalViduQ3TurboRequestState { mode })
@@ -102,36 +74,26 @@ pub(crate) fn build_fal_vidu_q3_turbo_state(
 
 // ── Input helpers ──
 
-fn reject_reference_videos(
-  reference_videos: &Option<VideoListRef>,
-) -> Result<(), ArtcraftRouterError> {
+fn reject_reference_videos(reference_videos: &Option<VideoListRef>) -> Result<(), ArtcraftRouterError> {
   let has_reference_videos = match reference_videos {
     None => false,
     Some(VideoListRef::Urls(urls)) => !urls.is_empty(),
     Some(VideoListRef::MediaFileTokens(tokens)) => !tokens.is_empty(),
   };
   if has_reference_videos {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_videos",
-      value: "Vidu Q3 Turbo does not support video references".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_videos", value: "Vidu Q3 Turbo does not support video references".to_string() }));
   }
   Ok(())
 }
 
-fn reject_reference_images(
-  reference_images: &Option<ImageListRef>,
-) -> Result<(), ArtcraftRouterError> {
+fn reject_reference_images(reference_images: &Option<ImageListRef>) -> Result<(), ArtcraftRouterError> {
   let has_reference_images = match reference_images {
     None => false,
     Some(ImageListRef::Urls(urls)) => !urls.is_empty(),
     Some(ImageListRef::MediaFileTokens(tokens)) => !tokens.is_empty(),
   };
   if has_reference_images {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_images",
-      value: "Vidu Q3 Turbo does not support reference images (use Vidu Q3 for reference-to-video)".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_images", value: "Vidu Q3 Turbo does not support reference images (use Vidu Q3 for reference-to-video)".to_string() }));
   }
   Ok(())
 }
@@ -139,25 +101,16 @@ fn reject_reference_images(
 /// fal rejects 360p image-to-video requests that include an end frame.
 /// `plan_resolution` can't currently produce 360p, but guard anyway so a
 /// future mapping change can't silently ship the rejected combination.
-fn check_i2v_end_frame_resolution(
-  resolution: Option<ViduQ3TurboImageToVideoResolution>,
-  has_end_frame: bool,
-) -> Result<(), ArtcraftRouterError> {
+fn check_i2v_end_frame_resolution(resolution: Option<ViduQ3TurboImageToVideoResolution>, has_end_frame: bool) -> Result<(), ArtcraftRouterError> {
   if has_end_frame && matches!(resolution, Some(ViduQ3TurboImageToVideoResolution::ThreeSixtyP)) {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "resolution",
-      value: "Vidu Q3 Turbo image-to-video does not support 360p when an end_frame is provided".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: "Vidu Q3 Turbo image-to-video does not support 360p when an end_frame is provided".to_string() }));
   }
   Ok(())
 }
 
 // ── Plan helpers ──
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
@@ -168,27 +121,16 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(Ar::FourByThree)),
     Some(RouterAspectRatio::TallThreeByFour) => Ok(Some(Ar::ThreeByFour)),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", other) })),
       _ => Ok(Some(Ar::SixteenByNine)),
     },
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanResolution>, ArtcraftRouterError> {
   match resolution {
     None => Ok(None),
 
@@ -199,38 +141,20 @@ fn plan_resolution(
     Some(RouterResolution::TenEightyP) => Ok(Some(PlanResolution::TenEightyP)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanResolution::TenEightyP)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanResolution::FiveFortyP)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<u8>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<u8>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
-    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => {
-      Ok(Some(seconds as u8))
-    }
+    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => Ok(Some(seconds as u8)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8)),
     },
   }
 }
@@ -375,10 +299,7 @@ mod tests {
     fn i2v_360p_with_end_frame_is_rejected_by_guard() {
       // 360p is unreachable from RouterResolution today, so exercise the
       // guard directly against the fal-level resolution enum.
-      let result = check_i2v_end_frame_resolution(
-        Some(ViduQ3TurboImageToVideoResolution::ThreeSixtyP),
-        true,
-      );
+      let result = check_i2v_end_frame_resolution(Some(ViduQ3TurboImageToVideoResolution::ThreeSixtyP), true);
       assert!(result.is_err());
       assert!(check_i2v_end_frame_resolution(Some(ViduQ3TurboImageToVideoResolution::ThreeSixtyP), false).is_ok());
       assert!(check_i2v_end_frame_resolution(Some(ViduQ3TurboImageToVideoResolution::SevenTwentyP), true).is_ok());
@@ -397,11 +318,6 @@ mod tests {
   }
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::ViduQ3Turbo,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::ViduQ3Turbo, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 }

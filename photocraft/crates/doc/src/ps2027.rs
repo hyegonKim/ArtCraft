@@ -27,15 +27,7 @@ pub struct RelightLamp {
 
 impl Default for RelightLamp {
     fn default() -> Self {
-        Self {
-            enabled: true,
-            x: 0.35,
-            y: 0.30,
-            z: 0.55,
-            intensity: 1.15,
-            color: [1.0, 0.92, 0.80],
-            spread: 0.65,
-        }
+        Self { enabled: true, x: 0.35, y: 0.30, z: 0.55, intensity: 1.15, color: [1.0, 0.92, 0.80], spread: 0.65 }
     }
 }
 
@@ -43,33 +35,9 @@ impl RelightLamp {
     /// Default 3-light studio rig (Key warm active, Cool fill active, Rim accent standby).
     pub fn default_rig() -> [Self; 3] {
         [
-            Self {
-                enabled: true,
-                x: 0.30,
-                y: 0.28,
-                z: 0.55,
-                intensity: 1.20,
-                color: [1.0, 0.90, 0.76],
-                spread: 0.68,
-            },
-            Self {
-                enabled: true,
-                x: 0.74,
-                y: 0.62,
-                z: 0.65,
-                intensity: 0.55,
-                color: [0.72, 0.86, 1.0],
-                spread: 0.80,
-            },
-            Self {
-                enabled: false,
-                x: 0.50,
-                y: 0.14,
-                z: 0.42,
-                intensity: 0.85,
-                color: [1.0, 0.58, 0.82],
-                spread: 0.50,
-            },
+            Self { enabled: true, x: 0.30, y: 0.28, z: 0.55, intensity: 1.20, color: [1.0, 0.90, 0.76], spread: 0.68 },
+            Self { enabled: true, x: 0.74, y: 0.62, z: 0.65, intensity: 0.55, color: [0.72, 0.86, 1.0], spread: 0.80 },
+            Self { enabled: false, x: 0.50, y: 0.14, z: 0.42, intensity: 0.85, color: [1.0, 0.58, 0.82], spread: 0.50 },
         ]
     }
 
@@ -81,11 +49,7 @@ impl RelightLamp {
             y: finite(self.y, 0.5).clamp(-0.5, 1.5),
             z: finite(self.z, 0.55).clamp(0.05, 2.5),
             intensity: finite(self.intensity, 1.0).clamp(0.0, 4.0),
-            color: [
-                finite(self.color[0], 1.0).clamp(0.0, 1.0),
-                finite(self.color[1], 1.0).clamp(0.0, 1.0),
-                finite(self.color[2], 1.0).clamp(0.0, 1.0),
-            ],
+            color: [finite(self.color[0], 1.0).clamp(0.0, 1.0), finite(self.color[1], 1.0).clamp(0.0, 1.0), finite(self.color[2], 1.0).clamp(0.0, 1.0)],
             spread: finite(self.spread, 0.65).clamp(0.05, 3.0),
         }
     }
@@ -107,16 +71,8 @@ pub enum RestylePreset {
 }
 
 impl RestylePreset {
-    pub const ALL: [Self; 8] = [
-        Self::OilPainting,
-        Self::Watercolor,
-        Self::CyberpunkNeon,
-        Self::VintageFilm,
-        Self::PencilSketch,
-        Self::PopArt,
-        Self::AnimeCel,
-        Self::NoirInk,
-    ];
+    pub const ALL: [Self; 8] =
+        [Self::OilPainting, Self::Watercolor, Self::CyberpunkNeon, Self::VintageFilm, Self::PencilSketch, Self::PopArt, Self::AnimeCel, Self::NoirInk];
 
     pub fn id(self) -> &'static str {
         match self {
@@ -210,39 +166,19 @@ fn default_seed() -> u32 {
 
 impl LiveBackdropFx {
     pub fn default_fireflies() -> Self {
-        Self::Fireflies {
-            quantity: 48,
-            depth_variation: 65.0,
-            blurriness: 45.0,
-            color: [1.0, 0.84, 0.32],
-            progress: 25.0,
-            seed: 2027,
-        }
+        Self::Fireflies { quantity: 48, depth_variation: 65.0, blurriness: 45.0, color: [1.0, 0.84, 0.32], progress: 25.0, seed: 2027 }
     }
 
     pub fn default_water_ripple() -> Self {
-        Self::WaterRipple {
-            horizon: 0.58,
-            amplitude: 42.0,
-            frequency: 36.0,
-            progress: 20.0,
-        }
+        Self::WaterRipple { horizon: 0.58, amplitude: 42.0, frequency: 36.0, progress: 20.0 }
     }
 
     pub fn default_relight_3d() -> Self {
-        Self::Relight3d {
-            ambient: 0.55,
-            surface_relief: 1.0,
-            lamps: RelightLamp::default_rig(),
-        }
+        Self::Relight3d { ambient: 0.55, surface_relief: 1.0, lamps: RelightLamp::default_rig() }
     }
 
     pub fn default_restyle() -> Self {
-        Self::Restyle {
-            preset: RestylePreset::OilPainting,
-            prompt: String::new(),
-            intensity: 80.0,
-        }
+        Self::Restyle { preset: RestylePreset::OilPainting, prompt: String::new(), intensity: 80.0 }
     }
 
     pub fn default_layer_name(&self) -> &'static str {

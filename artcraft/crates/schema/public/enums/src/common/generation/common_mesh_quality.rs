@@ -25,14 +25,10 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("standard", CommonMeshQuality::Standard),
-      ("detailed", CommonMeshQuality::Detailed),
-    ];
+    let cases = [("standard", CommonMeshQuality::Standard), ("detailed", CommonMeshQuality::Detailed)];
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonMeshQuality = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonMeshQuality = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }

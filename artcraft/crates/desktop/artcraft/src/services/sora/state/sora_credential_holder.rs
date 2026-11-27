@@ -11,9 +11,7 @@ pub struct SoraCredentialHolder {
 
 impl SoraCredentialHolder {
   pub fn new() -> Self {
-    Self {
-      credentials: Arc::new(RwLock::new(None)),
-    }
+    Self { credentials: Arc::new(RwLock::new(None)) }
   }
 
   pub fn set_credentials(&self, credentials: &SoraCredentialSet) -> AnyhowResult<()> {
@@ -22,7 +20,7 @@ impl SoraCredentialHolder {
       Ok(mut creds) => {
         *creds = Some(credentials.clone());
         Ok(())
-      }
+      },
     }
   }
 
@@ -32,16 +30,14 @@ impl SoraCredentialHolder {
       Ok(mut creds) => {
         *creds = None;
         Ok(())
-      }
+      },
     }
   }
 
   pub fn get_credentials(&self) -> AnyhowResult<Option<SoraCredentialSet>> {
     match self.credentials.read() {
       Err(err) => Err(anyhow!("Failed to acquire read lock: {:?}", err)),
-      Ok(creds) => {
-        Ok(creds.clone())
-      }
+      Ok(creds) => Ok(creds.clone()),
     }
   }
 
@@ -51,7 +47,7 @@ impl SoraCredentialHolder {
       Ok(creds) => match &*creds {
         None => Err(anyhow!("Credentials not set")),
         Some(creds) => Ok(creds.clone()),
-      }
+      },
     }
   }
 
@@ -67,7 +63,7 @@ impl SoraCredentialHolder {
           let has_sentinel = creds.sora_sentinel.is_some();
           Ok(has_cookies && has_bearer && has_sentinel)
         },
-      }
+      },
     }
   }
 }

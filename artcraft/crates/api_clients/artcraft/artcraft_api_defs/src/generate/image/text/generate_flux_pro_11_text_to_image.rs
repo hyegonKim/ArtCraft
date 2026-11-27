@@ -23,12 +23,12 @@ pub struct GenerateFluxPro11TextToImageRequest {
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GenerateFluxPro11TextToImageAspectRatio {
-  Square, // 1:1
-  LandscapeFourByThree, // 4:3
+  Square,                 // 1:1
+  LandscapeFourByThree,   // 4:3
   LandscapeSixteenByNine, // 16:9
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitThreeByFour,    // 3:4
+  PortraitNineBySixteen,  // 9:16
+                          //Custom { width: u32, height: u32 }, // TODO
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]

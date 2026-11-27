@@ -6,4 +6,3 @@ pub enum ProviderCredentialType {
   ApiKey,
   WebLogin,
 }
-

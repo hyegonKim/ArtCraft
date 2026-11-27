@@ -94,45 +94,29 @@ pub async fn video_edit(args: VideoEditArgs<'_>) -> Result<VideoEditSuccess, Gro
 
   info!("Grok video_edit: model={}", model.as_str());
 
-  let request_body = VideoEditRequestBody {
-    prompt: req.prompt,
-    video: to_video_source_ref(&req.source_video),
-    model: Some(model.as_str().to_string()),
-    user: req.user,
-  };
+  let request_body = VideoEditRequestBody { prompt: req.prompt, video: to_video_source_ref(&req.source_video), model: Some(model.as_str().to_string()), user: req.user };
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.post(&url)
-    .header("Authorization", bearer)
-    .header("Content-Type", "application/json")
-    .json(&request_body)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.post(&url).header("Authorization", bearer).header("Content-Type", "application/json").json(&request_body).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok video_edit response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: VideoEditResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: VideoEditResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
   Ok(VideoEditSuccess { request_id: parsed.request_id })
 }
 
 fn to_video_source_ref(source: &VideoSource) -> VideoSourceRef {
   match source {
-    VideoSource::Url(u)    => VideoSourceRef { url: Some(u.clone()), file_id: None },
+    VideoSource::Url(u) => VideoSourceRef { url: Some(u.clone()), file_id: None },
     VideoSource::FileId(id) => VideoSourceRef { url: None, file_id: Some(id.clone()) },
   }
 }
@@ -146,12 +130,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_url_source() {
-    let body = VideoEditRequestBody {
-      prompt: "make it stormy".to_string(),
-      video: VideoSourceRef { url: Some("https://example.com/v.mp4".to_string()), file_id: None },
-      model: Some("grok-imagine-video".to_string()),
-      user: None,
-    };
+    let body = VideoEditRequestBody { prompt: "make it stormy".to_string(), video: VideoSourceRef { url: Some("https://example.com/v.mp4".to_string()), file_id: None }, model: Some("grok-imagine-video".to_string()), user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"prompt\":\"make it stormy\""));
     assert!(json.contains("\"video\":{\"url\":\"https://example.com/v.mp4\"}"));
@@ -161,12 +140,7 @@ mod tests {
 
   #[test]
   fn wire_body_serializes_file_id_source() {
-    let body = VideoEditRequestBody {
-      prompt: "p".to_string(),
-      video: VideoSourceRef { url: None, file_id: Some("file_v".to_string()) },
-      model: None,
-      user: Some("u".to_string()),
-    };
+    let body = VideoEditRequestBody { prompt: "p".to_string(), video: VideoSourceRef { url: None, file_id: Some("file_v".to_string()) }, model: None, user: Some("u".to_string()) };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"video\":{\"file_id\":\"file_v\"}"));
     assert!(json.contains("\"user\":\"u\""));
@@ -177,16 +151,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = VideoEditArgs {
-      api_key: &key,
-      request: VideoEditRequest {
-        prompt: "p".to_string(),
-        source_video: VideoSource::FileId("file_abc".to_string()),
-        source_video_duration_seconds_hint: None,
-        model: None,
-        user: None,
-      },
-    };
+    let args = VideoEditArgs { api_key: &key, request: VideoEditRequest { prompt: "p".to_string(), source_video: VideoSource::FileId("file_abc".to_string()), source_video_duration_seconds_hint: None, model: None, user: None } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"source_video\":{\"FileId\":\"file_abc\"}"));
@@ -196,13 +161,7 @@ mod tests {
 
   #[test]
   fn source_duration_hint_serializes_when_set() {
-    let req = VideoEditRequest {
-      prompt: "p".to_string(),
-      source_video: VideoSource::Url("u".to_string()),
-      source_video_duration_seconds_hint: Some(12),
-      model: None,
-      user: None,
-    };
+    let req = VideoEditRequest { prompt: "p".to_string(), source_video: VideoSource::Url("u".to_string()), source_video_duration_seconds_hint: Some(12), model: None, user: None };
     let json = serde_json::to_string(&req).unwrap();
     assert!(json.contains("\"source_video_duration_seconds_hint\":12"));
   }
@@ -211,12 +170,7 @@ mod tests {
   fn source_duration_hint_is_not_in_wire_body() {
     // The internal wire body (what actually gets POSTed to xAI) doesn't
     // carry the hint — it's intentionally absent from VideoEditRequestBody.
-    let body = VideoEditRequestBody {
-      prompt: "p".to_string(),
-      video: VideoSourceRef { url: Some("u".to_string()), file_id: None },
-      model: None,
-      user: None,
-    };
+    let body = VideoEditRequestBody { prompt: "p".to_string(), video: VideoSourceRef { url: Some("u".to_string()), file_id: None }, model: None, user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(!json.contains("source_video_duration_seconds_hint"));
   }
@@ -239,16 +193,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_edit(VideoEditArgs {
-      api_key: &api_key,
-      request: VideoEditRequest {
-        prompt: "Change the lighting to midnight. Starry sky with the mily way overhead. Add some shooting stars. Everything is glowing under the starlight.".to_string(),
-        source_video: VideoSource::Url(ANGRY_SHIBA_VIDEO_URL.to_string()),
-        source_video_duration_seconds_hint: None,
-        model: None,
-        user: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = video_edit(VideoEditArgs { api_key: &api_key, request: VideoEditRequest { prompt: "Change the lighting to midnight. Starry sky with the mily way overhead. Add some shooting stars. Everything is glowing under the starlight.".to_string(), source_video: VideoSource::Url(ANGRY_SHIBA_VIDEO_URL.to_string()), source_video_duration_seconds_hint: None, model: None, user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Edit request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());

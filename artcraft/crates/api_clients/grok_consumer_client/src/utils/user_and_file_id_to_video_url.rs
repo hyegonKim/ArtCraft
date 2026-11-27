@@ -6,11 +6,7 @@ use crate::datatypes::api::user_id::UserId;
 pub fn user_and_file_id_to_video_url(user: &UserId, file: &FileId, cache_bust: bool) -> String {
   let user_id = &user.0;
   let file_id = &file.0;
-  if cache_bust {
-    format!("https://assets.grok.com/users/{user_id}/generated/{file_id}/generated_video.mp4?cache=1")
-  } else {
-    format!("https://assets.grok.com/users/{user_id}/generated/{file_id}/generated_video.mp4")
-  }
+  if cache_bust { format!("https://assets.grok.com/users/{user_id}/generated/{file_id}/generated_video.mp4?cache=1") } else { format!("https://assets.grok.com/users/{user_id}/generated/{file_id}/generated_video.mp4") }
 }
 
 #[cfg(test)]

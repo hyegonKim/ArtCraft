@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::images::veo_3p1::raw_request::{
-  Veo3p1FirstLastFrameToVideoInput, Veo3p1FirstLastFrameToVideoOutput,
-};
+use crate::requests::api::video::images::veo_3p1::raw_request::{Veo3p1FirstLastFrameToVideoInput, Veo3p1FirstLastFrameToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -139,19 +137,7 @@ impl FalEndpoint for Veo3p1FirstLastFrameToVideoRequest {
   type RawResponse = Veo3p1FirstLastFrameToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      first_frame_url: self.first_frame_url.clone(),
-      last_frame_url: self.last_frame_url.clone(),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      negative_prompt: self.negative_prompt.clone(),
-      seed: self.seed,
-      auto_fix: self.auto_fix,
-      safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), first_frame_url: self.first_frame_url.clone(), last_frame_url: self.last_frame_url.clone(), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), duration: self.duration.map(|d| d.to_str().to_string()), resolution: self.resolution.map(|r| r.to_str().to_string()), generate_audio: self.generate_audio, negative_prompt: self.negative_prompt.clone(), seed: self.seed, auto_fix: self.auto_fix, safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()) })
   }
 }
 
@@ -172,19 +158,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1FirstLastFrameToVideoRequest {
-      prompt: "a smooth transition from the first scene to the last".to_string(),
-      first_frame_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-      last_frame_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      aspect_ratio: Some(Veo3p1FirstLastFrameToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FirstLastFrameToVideoRequest { prompt: "a smooth transition from the first scene to the last".to_string(), first_frame_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), last_frame_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), aspect_ratio: Some(Veo3p1FirstLastFrameToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds), resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP), generate_audio: Some(false), negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -198,19 +172,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1FirstLastFrameToVideoRequest {
-      prompt: "morph between the two frames".to_string(),
-      first_frame_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-      last_frame_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      aspect_ratio: None,
-      duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FirstLastFrameToVideoRequest { prompt: "morph between the two frames".to_string(), first_frame_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), last_frame_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), aspect_ratio: None, duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds), resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP), generate_audio: Some(false), negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -222,19 +184,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo3p1FirstLastFrameToVideoRequest {
-      prompt: "p".to_string(),
-      first_frame_url: "https://example.com/first.png".to_string(),
-      last_frame_url: "https://example.com/last.png".to_string(),
-      aspect_ratio: Some(Veo3p1FirstLastFrameToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP),
-      generate_audio: Some(true),
-      negative_prompt: Some("nope".to_string()),
-      seed: Some(1),
-      auto_fix: Some(true),
-      safety_tolerance: Some(Veo3p1FirstLastFrameToVideoSafetyTolerance::Level3),
-    };
+    let request = Veo3p1FirstLastFrameToVideoRequest { prompt: "p".to_string(), first_frame_url: "https://example.com/first.png".to_string(), last_frame_url: "https://example.com/last.png".to_string(), aspect_ratio: Some(Veo3p1FirstLastFrameToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1FirstLastFrameToVideoDuration::FourSeconds), resolution: Some(Veo3p1FirstLastFrameToVideoResolution::SevenTwentyP), generate_audio: Some(true), negative_prompt: Some("nope".to_string()), seed: Some(1), auto_fix: Some(true), safety_tolerance: Some(Veo3p1FirstLastFrameToVideoSafetyTolerance::Level3) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.first_frame_url, "https://example.com/first.png");
     assert_eq!(raw.last_frame_url, "https://example.com/last.png");
@@ -250,19 +200,7 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo3p1FirstLastFrameToVideoRequest {
-      prompt: "p".to_string(),
-      first_frame_url: "https://example.com/first.png".to_string(),
-      last_frame_url: "https://example.com/last.png".to_string(),
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      generate_audio: None,
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FirstLastFrameToVideoRequest { prompt: "p".to_string(), first_frame_url: "https://example.com/first.png".to_string(), last_frame_url: "https://example.com/last.png".to_string(), aspect_ratio: None, duration: None, resolution: None, generate_audio: None, negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(
       json,
@@ -276,10 +214,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Veo3p1FirstLastFrameToVideoRequest::ENDPOINT,
-      "fal-ai/veo3.1/first-last-frame-to-video",
-    );
+    assert_eq!(Veo3p1FirstLastFrameToVideoRequest::ENDPOINT, "fal-ai/veo3.1/first-last-frame-to-video",);
   }
 
   // NB: Pricing tests are in cost.rs

@@ -10,24 +10,14 @@ use log::{debug, info};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-pub async fn basic_json_delete_request<Req: Serialize, Res: DeserializeOwned>(
-  api_host: &ApiHost,
-  route_path: &str,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  request: Req,
-) -> Result<Res, StorytellerError> {
-
+pub async fn basic_json_delete_request<Req: Serialize, Res: DeserializeOwned>(api_host: &ApiHost, route_path: &str, maybe_creds: Option<&StorytellerCredentialSet>, request: Req) -> Result<Res, StorytellerError> {
   let url = get_route(api_host, route_path);
 
   info!("DELETE {:?}", &url);
 
-  let client = storyteller_client_builder(api_host)
-      .build()
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let client = storyteller_client_builder(api_host).build().map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
 
-  let mut request_builder = client.delete(url)
-      .header("Accept", APPLICATION_JSON)
-      .header("Content-Type", APPLICATION_JSON);
+  let mut request_builder = client.delete(url).header("Accept", APPLICATION_JSON).header("Content-Type", APPLICATION_JSON);
 
   if let Some(creds) = maybe_creds {
     if let Some(header) = &creds.maybe_as_cookie_header() {
@@ -35,39 +25,25 @@ pub async fn basic_json_delete_request<Req: Serialize, Res: DeserializeOwned>(
     }
   }
 
-  let request_body = serde_json::to_string(&request)
-      .map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
+  let request_body = serde_json::to_string(&request).map_err(|err| StorytellerError::Client(ClientError::from(err)))?;
 
   debug!("Request body: {:?}", request_body);
 
-  let response = request_builder
-      .body(request_body)
-      .send()
-      .await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let response = request_builder.body(request_body).send().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
-  let hostname = response.headers().get("x-backend-hostname")
-      .and_then(|v| v.to_str().ok())
-      .map(|s| s.to_owned());
+  let hostname = response.headers().get("x-backend-hostname").and_then(|v| v.to_str().ok()).map(|s| s.to_owned());
 
-  let build_sha = response.headers().get("x-build-sha")
-      .and_then(|v| v.to_str().ok())
-      .map(|s| s.to_owned());
+  let build_sha = response.headers().get("x-build-sha").and_then(|v| v.to_str().ok()).map(|s| s.to_owned());
 
   debug!("[server] x-backend-hostname: {:?}, x-build-sha: {:?}", hostname, build_sha);
-  
-  let response = filter_bad_response(response)
-      .await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
-  let response_body = &response.text()
-      .await
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let response = filter_bad_response(response).await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+
+  let response_body = &response.text().await.map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   debug!("Response body: {:?}", response_body);
 
-  let response = serde_json::from_str(&response_body)
-      .map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
+  let response = serde_json::from_str(&response_body).map_err(|err| StorytellerError::Api(ApiError::from(err)))?;
 
   Ok(response)
 }

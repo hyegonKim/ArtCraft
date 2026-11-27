@@ -104,20 +104,11 @@ pub(super) fn rot_axis_at(hits: &[RotAxisHit], p: Pos2) -> Option<&RotAxisHit> {
         }
         best
     };
-    hits.iter()
-        .map(|h| (h, dist_hit(h)))
-        .filter(|(_, d)| *d < 6.5)
-        .min_by(|a, b| a.1.total_cmp(&b.1))
-        .map(|(h, _)| h)
+    hits.iter().map(|h| (h, dist_hit(h))).filter(|(_, d)| *d < 6.5).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(h, _)| h)
 }
 
 /// Computes the projected 3D gizmo for `layer` in `space` (`Local` or `World`).
-pub(crate) fn project_gizmo(
-    ectx: &EvalCtx,
-    layer: &Layer,
-    map: &ViewerMap,
-    space: GizmoSpace,
-) -> Option<ProjectedGizmo> {
+pub(crate) fn project_gizmo(ectx: &EvalCtx, layer: &Layer, map: &ViewerMap, space: GizmoSpace) -> Option<ProjectedGizmo> {
     let tr = layer.transform()?;
     let anchor = ectx.v3(layer, tr, "anchor", [0.0; 3]);
     let a3 = vec3(anchor[0], anchor[1], anchor[2]);
@@ -167,15 +158,7 @@ fn world_axes(w: &Mat4, space: GizmoSpace) -> [Vec3; 3] {
     }
 }
 
-fn build_rotation_arcs(
-    ectx: &EvalCtx,
-    layer: &Layer,
-    pc: &Mat4,
-    origin_w: Vec3,
-    origin_screen: Pos2,
-    axes_w: &[Vec3; 3],
-    map: &ViewerMap,
-) -> Vec<RotAxisHit> {
+fn build_rotation_arcs(ectx: &EvalCtx, layer: &Layer, pc: &Mat4, origin_w: Vec3, origin_screen: Pos2, axes_w: &[Vec3; 3], map: &ViewerMap) -> Vec<RotAxisHit> {
     let Some(tr) = layer.transform() else { return Vec::new() };
     let zoom = map.zoom.max(1e-4) as f64;
     let radius = 42.0 / zoom;
@@ -196,8 +179,7 @@ fn build_rotation_arcs(
 
     for (axis, b1, b2, edge_bow) in specs {
         // Measure minor-axis projection so edge-on rings bow cleanly away from the translation shaft.
-        let b2_screen = project_segment(pc, origin_w, origin_w + b2 * radius)
-            .map_or(0.0f32, |[o, e]| map.to_screen(e).distance(map.to_screen(o)));
+        let b2_screen = project_segment(pc, origin_w, origin_w + b2 * radius).map_or(0.0f32, |[o, e]| map.to_screen(e).distance(map.to_screen(o)));
         let bow_weight = ((14.0 - b2_screen) / 14.0).clamp(0.0, 1.0);
 
         let mut pts = Vec::with_capacity(SEGMENTS + 1);
@@ -219,14 +201,7 @@ fn build_rotation_arcs(
         let handle = pts[mid_idx];
         let screen_dir = rotation_screen_dir(ectx, layer, pc, origin_w, origin_screen, (b1 + b2).normalize() * radius, axis, map, &pts);
         let start_deg = ectx.f(layer, tr, axis.prop_match_id(), 0.0);
-        out.push(RotAxisHit {
-            layer: layer.id,
-            axis,
-            polyline: pts,
-            handle,
-            screen_dir,
-            start_deg,
-        });
+        out.push(RotAxisHit { layer: layer.id, axis, polyline: pts, handle, screen_dir, start_deg });
     }
     out
 }
@@ -299,11 +274,7 @@ pub(super) fn draw_layer_gizmo(
         painter.line_segment([s - vec2(0.0, 9.0), s + vec2(0.0, 9.0)], Stroke::new(1.0, Color32::WHITE));
         app.auto.add(&format!("viewer.anchor.{}", layer.id.0), Rect::from_center_size(s, vec2(12.0, 12.0)), "anchor point");
     }
-    app.auto.add(
-        &format!("viewer.gizmo.{}.origin", layer.id.0),
-        Rect::from_center_size(s, vec2(12.0, 12.0)),
-        "3D gizmo origin",
-    );
+    app.auto.add(&format!("viewer.gizmo.{}.origin", layer.id.0), Rect::from_center_size(s, vec2(12.0, 12.0)), "3D gizmo origin");
 
     // Draw rotation arcs first so translation arrow tips sit crisply on top.
     for rh in gizmo.rotate {
@@ -313,11 +284,7 @@ pub(super) fn draw_layer_gizmo(
         painter.circle_stroke(rh.handle, 3.2, Stroke::new(1.0, Color32::from_black_alpha(140)));
         if !layer.switches.locked {
             let name = rh.axis.name();
-            app.auto.add(
-                &format!("viewer.gizmo.{}.rotate.{name}", layer.id.0),
-                Rect::from_center_size(rh.handle, vec2(12.0, 12.0)),
-                "3D rotation axis",
-            );
+            app.auto.add(&format!("viewer.gizmo.{}.rotate.{name}", layer.id.0), Rect::from_center_size(rh.handle, vec2(12.0, 12.0)), "3D rotation axis");
             rot_hits.push(rh);
         }
     }

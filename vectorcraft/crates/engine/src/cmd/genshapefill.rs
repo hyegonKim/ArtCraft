@@ -12,10 +12,7 @@ use vectorcraft_geom::{BezPath, FillRule, PathData, Point, Rect, shapes};
 use vectorcraft_pathops::{BoolOp, boolean};
 
 use super::edit::{outermost, selected_roots};
-use super::{
-    CommandSpec, Result, Session, bad, cmd, given_objects, has_selection, number_or,
-    switch_or, text_param,
-};
+use super::{CommandSpec, Result, Session, bad, cmd, given_objects, has_selection, number_or, switch_or, text_param};
 
 const CMD: &str = "object.generativeShapeFill";
 
@@ -245,10 +242,8 @@ fn generate_motifs(bounds: Rect, gp: GenParams, palette: &[Color; 5]) -> Vec<(Pa
             for r in 0..rows {
                 for c in 0..cols {
                     let quad = [grid[r][c], grid[r][c + 1], grid[r + 1][c + 1], grid[r + 1][c]];
-                    let center = Point::new(
-                        (quad[0].x + quad[1].x + quad[2].x + quad[3].x) * 0.25,
-                        (quad[0].y + quad[1].y + quad[2].y + quad[3].y) * 0.25,
-                    );
+                    let center =
+                        Point::new((quad[0].x + quad[1].x + quad[2].x + quad[3].x) * 0.25, (quad[0].y + quad[1].y + quad[2].y + quad[3].y) * 0.25);
                     let mut bp = BezPath::new();
                     for (i, v) in quad.iter().enumerate() {
                         let inset_pt = Point::new(center.x + (v.x - center.x) * 0.86, center.y + (v.y - center.y) * 0.86);
@@ -323,10 +318,7 @@ fn parse_gen_params(p: &Value) -> Result<(GenParams, String)> {
     }
     let keep_outline = switch_or(p, "keepOutline", true, CMD)?;
     let combined_seed = (seed_f as u64) ^ fnv1a(&prompt);
-    Ok((
-        GenParams { style: inferred_style, seed: combined_seed, density, scale, keep_outline },
-        prompt,
-    ))
+    Ok((GenParams { style: inferred_style, seed: combined_seed, density, scale, keep_outline }, prompt))
 }
 
 fn solid_fill_app(color: Color) -> Appearance {
@@ -406,8 +398,8 @@ fn run_generative_shape_fill(s: &mut Session, p: &Value) -> Result<Value> {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use crate::Session;
+    use serde_json::json;
 
     #[test]
     fn generative_shape_fill_clips_motifs_across_styles_and_supports_undo() {
@@ -418,10 +410,7 @@ mod tests {
             let c = s.execute("shape.ellipse", &json!({"x": 40, "y": 40, "width": 160, "height": 160})).unwrap();
             let cid = c["id"].as_u64().unwrap();
             let res = s
-                .execute(
-                    "object.generativeShapeFill",
-                    &json!({"ids": [cid], "style": style, "prompt": "sunset forest", "seed": 7, "density": 55}),
-                )
+                .execute("object.generativeShapeFill", &json!({"ids": [cid], "style": style, "prompt": "sunset forest", "seed": 7, "density": 55}))
                 .unwrap();
             assert_eq!(res["style"], style);
             assert!(res["generated"].as_u64().unwrap() > 0);

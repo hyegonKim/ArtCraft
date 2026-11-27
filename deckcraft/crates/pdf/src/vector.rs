@@ -22,9 +22,7 @@ use krilla::Data;
 use krilla::geom::{Size, Transform};
 use krilla::image::Image;
 use krilla::num::NormalizedF32;
-use krilla::paint::{
-    Fill, FillRule, LineCap, LineJoin, LinearGradient, Paint, RadialGradient, SpreadMethod, Stop, Stroke, StrokeDash,
-};
+use krilla::paint::{Fill, FillRule, LineCap, LineJoin, LinearGradient, Paint, RadialGradient, SpreadMethod, Stop, Stroke, StrokeDash};
 use krilla::surface::Surface;
 use kurbo::{Affine, BezPath, PathEl, Point, Rect, Shape as _, Vec2};
 
@@ -79,11 +77,7 @@ fn gradient_paint(rctx: &Ctx<'_>, g: &Gradient, ph: Option<Rgba>, bounds: Rect, 
     stops.sort_by(|a, b| a.0.total_cmp(&b.0));
     let k_stops: Vec<Stop> = stops
         .iter()
-        .map(|&(pos, c)| Stop {
-            offset: norm(pos),
-            color: rgb_color(c).into(),
-            opacity: norm((f64::from(c.a) / 255.0) * extra_alpha),
-        })
+        .map(|&(pos, c)| Stop { offset: norm(pos), color: rgb_color(c).into(), opacity: norm((f64::from(c.a) / 255.0) * extra_alpha) })
         .collect();
     let [tl, tt, tr, tb] = g.tile.map(|v| if v.is_finite() { v } else { 0.0 });
     let gx0 = bounds.x0 + tl * bounds.width();
@@ -531,15 +525,7 @@ fn stroke_subpath(
     };
     if let Some(kp) = to_path(subpath) {
         s.push_transform(&tf(m));
-        s.set_stroke(Some(Stroke {
-            paint,
-            width: width.max(0.25),
-            miter_limit: 8.0,
-            line_cap,
-            line_join,
-            opacity,
-            dash,
-        }));
+        s.set_stroke(Some(Stroke { paint, width: width.max(0.25), miter_limit: 8.0, line_cap, line_join, opacity, dash }));
         s.draw_path(&kp);
         s.set_stroke(None);
         s.pop();
@@ -595,14 +581,7 @@ fn draw_localized_shape(s: &mut Surface<'_>, pres: &Presentation, slide: &Slide,
     s.pop();
 }
 
-fn draw_table_vector(
-    s: &mut Surface<'_>,
-    pres: &Presentation,
-    rctx: &Ctx<'_>,
-    t: &Table,
-    bg_fill: &(ModelFill, Option<Rgba>),
-    m: Affine,
-) {
+fn draw_table_vector(s: &mut Surface<'_>, pres: &Presentation, rctx: &Ctx<'_>, t: &Table, bg_fill: &(ModelFill, Option<Rgba>), m: Affine) {
     let heights = table_row_heights(rctx, t, &deckcraft_text::NoFields);
     let rects = table_cell_rects(t, &heights);
     if let Some(own_bg) = &t.background
@@ -633,10 +612,8 @@ fn draw_table_vector(
     // Diagonal cell borders
     for &(r, c, rect) in &rects {
         let Some(cell) = t.cell(r, c) else { continue };
-        for (line_opt, p0, p1) in [
-            (&cell.diag_down, (rect.x0, rect.y0), (rect.x1, rect.y1)),
-            (&cell.diag_up, (rect.x0, rect.y1), (rect.x1, rect.y0)),
-        ] {
+        for (line_opt, p0, p1) in [(&cell.diag_down, (rect.x0, rect.y0), (rect.x1, rect.y1)), (&cell.diag_up, (rect.x0, rect.y1), (rect.x1, rect.y0))]
+        {
             if let Some(l) = line_opt.as_ref().filter(|l| l.fill.as_ref().is_some_and(|f| !f.is_none())) {
                 let mut bp = BezPath::new();
                 bp.move_to(p0);
@@ -694,18 +671,15 @@ fn draw_ink_vector(s: &mut Surface<'_>, strokes: &[InkStroke], view: Affine) {
             continue;
         }
         let legacy = ink_pressure_is_legacy(&st.points);
-        let avg_w = st
-            .points
-            .iter()
-            .map(|p| ink_sample_width(st.width, p.2, legacy))
-            .sum::<f64>()
-            / (st.points.len().max(1) as f64);
+        let avg_w = st.points.iter().map(|p| ink_sample_width(st.width, p.2, legacy)).sum::<f64>() / (st.points.len().max(1) as f64);
         let op = (f64::from(st.color.a) / 255.0) * if st.highlighter { 0.5 } else { 1.0 };
         if st.points.len() == 1 {
             let (px, py, pr) = st.points[0];
             let r = (ink_sample_width(st.width, pr, legacy) * 0.5).max(0.5);
             let dot = kurbo::Circle::new((px, py), r).to_path(0.05);
-            if let (Some(f), Some(kp)) = (solid_fill(st.color, if st.highlighter { 0.5 } else { 1.0 }, FillRule::NonZero), to_path(&map_path(&dot, view))) {
+            if let (Some(f), Some(kp)) =
+                (solid_fill(st.color, if st.highlighter { 0.5 } else { 1.0 }, FillRule::NonZero), to_path(&map_path(&dot, view)))
+            {
                 s.set_fill(Some(f));
                 s.draw_path(&kp);
                 s.set_fill(None);
@@ -836,7 +810,10 @@ fn draw_shape_vector(
 
     if line.fill.as_ref().is_some_and(|f| !f.is_none()) {
         let is_conn = matches!(sh.kind, ShapeKind::Connector { .. })
-            || sh.geom.preset_name().is_some_and(|n| n == "line" || n.contains("Connector") || n.starts_with("curvedConnector") || n.starts_with("bentConnector"));
+            || sh
+                .geom
+                .preset_name()
+                .is_some_and(|n| n == "line" || n.contains("Connector") || n.starts_with("curvedConnector") || n.starts_with("bentConnector"));
         for sp in geo.paths.iter().filter(|sp| sp.stroke) {
             stroke_subpath(s, rctx, &line, line_ph, &sp.path, bounds, m, is_conn || geo.paths.len() == 1, 1.0);
         }
@@ -941,11 +918,7 @@ impl Exporter<'_> {
         if self.opts.frame_slides && self.opts.layout != PageLayout::Slides {
             if let Some(path) = to_path(&page_clip) {
                 s.set_fill(None);
-                s.set_stroke(Some(Stroke {
-                    paint: krilla::color::rgb::Color::new(0x80, 0x80, 0x80).into(),
-                    width: 0.5,
-                    ..Default::default()
-                }));
+                s.set_stroke(Some(Stroke { paint: krilla::color::rgb::Color::new(0x80, 0x80, 0x80).into(), width: 0.5, ..Default::default() }));
                 s.draw_path(&path);
                 s.set_stroke(None);
             }

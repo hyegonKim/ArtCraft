@@ -15,10 +15,10 @@ const JWT_EXPIRATION_DEADLINE: TimeDelta = TimeDelta::hours(12);
 /// Call this at session startup to generate the tokens for the first time.
 /// Call this periodically to refresh the JWT as it nears its expiration date.
 /// This will not refresh the sentinel token once it's been generated - we can use other flows to accomplish that.
-#[deprecated(note="The sentinel appears to be going away. Use `maybe_renew_session_jwt` instead for newer '2.0' code.")]
+#[deprecated(note = "The sentinel appears to be going away. Use `maybe_renew_session_jwt` instead for newer '2.0' code.")]
 pub async fn maybe_upgrade_or_renew_session(sora_credentials: &mut SoraCredentialSet) -> Result<bool, SoraError> {
   let mut refresh_jwt = !sora_credentials.jwt_bearer_token.is_some();
-  
+
   if let Some(jwt) = &sora_credentials.jwt_bearer_token {
     let now = Utc::now();
     let refresh_deadline = now.sub(JWT_EXPIRATION_DEADLINE);
@@ -53,11 +53,8 @@ pub async fn maybe_upgrade_or_renew_session(sora_credentials: &mut SoraCredentia
   //  credential_updated = true;
   //}
 
-  let refresh_sentinel_token = sora_credentials.sora_sentinel_token
-      .as_ref()
-      .map(|t| t.is_expired())
-      .unwrap_or(true);
-  
+  let refresh_sentinel_token = sora_credentials.sora_sentinel_token.as_ref().map(|t| t.is_expired()).unwrap_or(true);
+
   if refresh_sentinel_token {
     info!("Refreshing sentinel token...");
     let token = generate_sentinel_token_2().await?;

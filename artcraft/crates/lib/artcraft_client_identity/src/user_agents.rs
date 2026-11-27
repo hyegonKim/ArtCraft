@@ -11,13 +11,10 @@ pub const ARTCRAFT_DESKTOP_USER_AGENT: &str = "storyteller-client/1.0";
 /// the webview's real `navigator.userAgent`, so refresh these periodically by checking
 /// `navigator.userAgent` in the desktop app's devtools on each OS.
 #[cfg(target_os = "macos")]
-pub const WEBVIEW_USER_AGENT: &str =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)";
+pub const WEBVIEW_USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)";
 
 #[cfg(target_os = "windows")]
-pub const WEBVIEW_USER_AGENT: &str =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0";
+pub const WEBVIEW_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0";
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub const WEBVIEW_USER_AGENT: &str =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko)";
+pub const WEBVIEW_USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko)";

@@ -12,15 +12,7 @@ use grok_consumer_client::requests::image_websocket::messages::websocket_client_
 use uuid_utils::uuid::generate_random_uuid;
 use tauri::AppHandle;
 
-pub async fn handle_grok(
-  app: &AppHandle,
-  request: &EnqueueTextToImageRequest,
-  app_env_configs: &AppEnvConfigs,
-  creds_manager: &GrokCredentialManager,
-  grok_image_prompt_queue: &GrokImagePromptQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
-
+pub async fn handle_grok(app: &AppHandle, request: &EnqueueTextToImageRequest, app_env_configs: &AppEnvConfigs, creds_manager: &GrokCredentialManager, grok_image_prompt_queue: &GrokImagePromptQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
   //// TODO: We can request population of the user info if absent or expired.
   //let websocket = get_websocket(
   //  app,
@@ -50,28 +42,13 @@ pub async fn handle_grok(
 
   let job_id = generate_random_uuid();
 
-  let prompt = request.prompt
-      .as_deref()
-      .map(|prompt| prompt.trim().to_string())
-      .unwrap_or_else(|| "".to_string());
+  let prompt = request.prompt.as_deref().map(|prompt| prompt.trim().to_string()).unwrap_or_else(|| "".to_string());
 
   let aspect_ratio = get_aspect_ratio(request);
 
-  grok_image_prompt_queue.enqueue(PromptItem {
-    task_id: job_id.clone(),
-    prompt,
-    aspect_ratio: aspect_ratio.unwrap_or(ClientMessageAspectRatio::Square),
-  })?;
+  grok_image_prompt_queue.enqueue(PromptItem { task_id: job_id.clone(), prompt, aspect_ratio: aspect_ratio.unwrap_or(ClientMessageAspectRatio::Square) })?;
 
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Grok,
-    model: Some(GenerationModel::GrokImage),
-    provider_job_id: Some(job_id),
-    task_type: TaskType::ImageGeneration,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Grok, model: Some(GenerationModel::GrokImage), provider_job_id: Some(job_id), task_type: TaskType::ImageGeneration, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 fn get_aspect_ratio(request: &EnqueueTextToImageRequest) -> Option<ClientMessageAspectRatio> {
@@ -88,7 +65,7 @@ fn get_aspect_ratio(request: &EnqueueTextToImageRequest) -> Option<ClientMessage
       TextToImageSize::Square => Some(ClientMessageAspectRatio::Square),
       TextToImageSize::Wide => Some(ClientMessageAspectRatio::WideThreeByTwo),
       TextToImageSize::Tall => Some(ClientMessageAspectRatio::TallTwoByThree),
-    }
+    };
   }
 
   None

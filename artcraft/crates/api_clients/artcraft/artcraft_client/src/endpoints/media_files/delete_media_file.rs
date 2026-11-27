@@ -8,27 +8,15 @@ use artcraft_api_defs::subscriptions::get_session_subscription::GetSessionSubscr
 use log::debug;
 use tokens::tokens::media_files::MediaFileToken;
 
-pub async fn delete_media_file(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  media_file_token: &MediaFileToken,
-) -> Result<SimpleGenericJsonSuccess, StorytellerError> {
+pub async fn delete_media_file(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, media_file_token: &MediaFileToken) -> Result<SimpleGenericJsonSuccess, StorytellerError> {
   let url_path = get_url_path(media_file_token);
 
   debug!("Requesting {:?}", &url_path);
-  
-  // NB: We probably don't need to expose these options from FakeYou anymore.
-  let request = DeleteMediaFileRequest {
-    set_delete: true,
-    as_mod: None,
-  };
 
-  Ok(basic_json_delete_request(
-    api_host,
-    &url_path,
-    maybe_creds,
-    request,
-  ).await?)
+  // NB: We probably don't need to expose these options from FakeYou anymore.
+  let request = DeleteMediaFileRequest { set_delete: true, as_mod: None };
+
+  Ok(basic_json_delete_request(api_host, &url_path, maybe_creds, request).await?)
 }
 
 fn get_url_path(token: &MediaFileToken) -> String {

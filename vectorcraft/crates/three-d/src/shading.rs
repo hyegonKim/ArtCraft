@@ -242,23 +242,13 @@ impl PbrMaterial {
 
     /// Evaluate Cook-Torrance / Trowbridge-Reitz GGX microfacet BRDF for a view-space unit
     /// `normal` (viewer at `[0, 0, 1]`) and directional `lights` (`(unit_dir, color_rgb, intensity)`).
-    pub fn shade_normal_rgb(
-        self,
-        base_rgb: [f64; 3],
-        normal: [f64; 3],
-        lights: &[([f64; 3], [f64; 3], f64)],
-        ambient: f64,
-    ) -> [f64; 3] {
+    pub fn shade_normal_rgb(self, base_rgb: [f64; 3], normal: [f64; 3], lights: &[([f64; 3], [f64; 3], f64)], ambient: f64) -> [f64; 3] {
         let m = self.metallic.clamp(0.0, 1.0);
         let rough = self.roughness.clamp(0.045, 1.0);
         let alpha = rough * rough;
         let alpha2 = alpha * alpha;
         let k_geom = ((rough + 1.0) * (rough + 1.0)) / 8.0;
-        let f0 = [
-            0.04 * (1.0 - m) + base_rgb[0] * m,
-            0.04 * (1.0 - m) + base_rgb[1] * m,
-            0.04 * (1.0 - m) + base_rgb[2] * m,
-        ];
+        let f0 = [0.04 * (1.0 - m) + base_rgb[0] * m, 0.04 * (1.0 - m) + base_rgb[1] * m, 0.04 * (1.0 - m) + base_rgb[2] * m];
         let n_dot_v = normal[2].abs().max(1e-4);
         let g_v = n_dot_v / (n_dot_v * (1.0 - k_geom) + k_geom);
         let amb = ambient.clamp(0.0, 2.0);

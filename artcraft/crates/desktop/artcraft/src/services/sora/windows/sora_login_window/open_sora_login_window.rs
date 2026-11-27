@@ -10,19 +10,13 @@ use std::time::Duration;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 /// Name of the window
-pub (super) const LOGIN_WINDOW_NAME: &str = "login_window";
+pub(super) const LOGIN_WINDOW_NAME: &str = "login_window";
 
-pub (super) static START_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://google.com").expect("URL should parse")
-});
+pub(super) static START_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://google.com").expect("URL should parse"));
 
-pub (super) static SORA_HOMEPAGE_URL : Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://sora.com/").expect("URL should parse")
-});
+pub(super) static SORA_HOMEPAGE_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://sora.com/").expect("URL should parse"));
 
-pub (super) static SORA_LOGIN_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://chatgpt.com/auth/login?next=%2Fsora%2F").expect("URL should parse")
-});
+pub(super) static SORA_LOGIN_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://chatgpt.com/auth/login?next=%2Fsora%2F").expect("URL should parse"));
 
 //pub const SORA_ROOT_URL_STR: &str = "https://sora.com/";
 //
@@ -30,11 +24,7 @@ pub (super) static SORA_LOGIN_URL: Lazy<Url> = Lazy::new(|| {
 //  Url::parse(SORA_ROOT_URL_STR).expect("URL should parse")
 //});
 
-pub async fn open_sora_login_window(
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  sora_creds_manager: &SoraCredentialManager,
-) -> AnyhowResult<()> {
+pub async fn open_sora_login_window(app: &AppHandle, app_data_root: &AppDataRoot, sora_creds_manager: &SoraCredentialManager) -> AnyhowResult<()> {
   if app.get_window(LOGIN_WINDOW_NAME).is_some() {
     return Err(anyhow!("Login window already open"));
   }
@@ -54,8 +44,7 @@ pub async fn open_sora_login_window(
       .devtools(true)
       .build()?;
 
-  let webview = window.get_webview(LOGIN_WINDOW_NAME)
-      .ok_or_else(|| anyhow!("no webview found"))?;
+  let webview = window.get_webview(LOGIN_WINDOW_NAME).ok_or_else(|| anyhow!("no webview found"))?;
 
   clear_all_webview_cookies(&webview)?;
 
@@ -65,7 +54,7 @@ pub async fn open_sora_login_window(
   tokio::time::sleep(Duration::from_millis(100)).await;
 
   webview.navigate(SORA_LOGIN_URL.clone())?;
-  
+
   let app_handle = app.clone();
   let app_data_root = app_data_root.clone();
   let sora_creds_manager = sora_creds_manager.clone();

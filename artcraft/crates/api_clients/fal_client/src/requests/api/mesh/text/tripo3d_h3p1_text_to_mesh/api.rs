@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::text::tripo3d_h3p1_text_to_mesh::raw_request::{
-  Tripo3dH3p1TextToMeshInput, Tripo3dH3p1TextToMeshOutput,
-};
+use crate::requests::api::mesh::text::tripo3d_h3p1_text_to_mesh::raw_request::{Tripo3dH3p1TextToMeshInput, Tripo3dH3p1TextToMeshOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Tripo3D H3.1 text-to-3D.
@@ -84,20 +82,7 @@ impl FalEndpoint for Tripo3dH3p1TextToMeshRequest {
   type RawResponse = Tripo3dH3p1TextToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      negative_prompt: self.negative_prompt.clone(),
-      face_limit: self.face_limit,
-      texture: self.texture,
-      pbr: self.pbr,
-      model_seed: self.model_seed,
-      image_seed: self.image_seed,
-      texture_seed: self.texture_seed,
-      texture_quality: self.texture_quality.map(|q| q.to_str().to_string()),
-      geometry_quality: self.geometry_quality.map(|q| q.to_str().to_string()),
-      auto_size: self.auto_size,
-      quad: self.quad,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), negative_prompt: self.negative_prompt.clone(), face_limit: self.face_limit, texture: self.texture, pbr: self.pbr, model_seed: self.model_seed, image_seed: self.image_seed, texture_seed: self.texture_seed, texture_quality: self.texture_quality.map(|q| q.to_str().to_string()), geometry_quality: self.geometry_quality.map(|q| q.to_str().to_string()), auto_size: self.auto_size, quad: self.quad })
   }
 }
 
@@ -110,20 +95,7 @@ mod tests {
   use std::fs::read_to_string;
 
   fn base_request() -> Tripo3dH3p1TextToMeshRequest {
-    Tripo3dH3p1TextToMeshRequest {
-      prompt: "a small ceramic teapot".to_string(),
-      negative_prompt: None,
-      face_limit: None,
-      texture: None,
-      pbr: None,
-      model_seed: None,
-      image_seed: None,
-      texture_seed: None,
-      texture_quality: None,
-      geometry_quality: None,
-      auto_size: None,
-      quad: None,
-    }
+    Tripo3dH3p1TextToMeshRequest { prompt: "a small ceramic teapot".to_string(), negative_prompt: None, face_limit: None, texture: None, pbr: None, model_seed: None, image_seed: None, texture_seed: None, texture_quality: None, geometry_quality: None, auto_size: None, quad: None }
   }
 
   #[tokio::test]
@@ -152,20 +124,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Tripo3dH3p1TextToMeshRequest {
-      prompt: "p".to_string(),
-      negative_prompt: Some("blurry".to_string()),
-      face_limit: Some(50_000),
-      texture: Some(true),
-      pbr: Some(false),
-      model_seed: Some(1),
-      image_seed: Some(2),
-      texture_seed: Some(3),
-      texture_quality: Some(Tripo3dH3p1TextureQuality::Detailed),
-      geometry_quality: Some(Tripo3dH3p1GeometryQuality::Detailed),
-      auto_size: Some(true),
-      quad: Some(true),
-    };
+    let request = Tripo3dH3p1TextToMeshRequest { prompt: "p".to_string(), negative_prompt: Some("blurry".to_string()), face_limit: Some(50_000), texture: Some(true), pbr: Some(false), model_seed: Some(1), image_seed: Some(2), texture_seed: Some(3), texture_quality: Some(Tripo3dH3p1TextureQuality::Detailed), geometry_quality: Some(Tripo3dH3p1GeometryQuality::Detailed), auto_size: Some(true), quad: Some(true) };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(
       json,

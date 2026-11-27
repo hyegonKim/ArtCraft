@@ -36,12 +36,7 @@ impl ModerationListAllDebugLogsQueryParams {
       _ => return Ok(None),
     };
 
-    let levels = raw
-      .split(',')
-      .map(str::trim)
-      .filter(|part| !part.is_empty())
-      .map(DebugLogLevel::from_str)
-      .collect::<Result<Vec<DebugLogLevel>, EnumError>>()?;
+    let levels = raw.split(',').map(str::trim).filter(|part| !part.is_empty()).map(DebugLogLevel::from_str).collect::<Result<Vec<DebugLogLevel>, EnumError>>()?;
 
     Ok(if levels.is_empty() { None } else { Some(levels) })
   }

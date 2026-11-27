@@ -39,15 +39,14 @@ pub enum QwenImageEditNumImages {
 
 #[derive(Copy, Clone, Debug)]
 pub enum QwenImageEditSize {
-  Square, // 1:1
-  SquareHd, // 1:1
-  LandscapeFourByThree, // 4:3
+  Square,                 // 1:1
+  SquareHd,               // 1:1
+  LandscapeFourByThree,   // 4:3
   LandscapeSixteenByNine, // 16:9
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitThreeByFour,    // 3:4
+  PortraitNineBySixteen,  // 9:16
+                          //Custom { width: u32, height: u32 }, // TODO
 }
-
 
 impl FalRequestCostCalculator for QwenImageEditRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
@@ -64,30 +63,27 @@ impl FalRequestCostCalculator for QwenImageEditRequest {
   }
 }
 
-
-pub async fn enqueue_qwen_image_edit_webhook<R: IntoUrl>(
-  args: QwenImageEditArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_qwen_image_edit_webhook<R: IntoUrl>(args: QwenImageEditArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let num_images = req.num_images
-      .map(|num| match num {
-        QwenImageEditNumImages::One => 1,
-        QwenImageEditNumImages::Two => 2,
-        QwenImageEditNumImages::Three => 3,
-        QwenImageEditNumImages::Four => 4,
-      });
+  let num_images = req.num_images.map(|num| match num {
+    QwenImageEditNumImages::One => 1,
+    QwenImageEditNumImages::Two => 2,
+    QwenImageEditNumImages::Three => 3,
+    QwenImageEditNumImages::Four => 4,
+  });
 
-  let image_size = req.image_size
-      .map(|size| match size {
-        QwenImageEditSize::Square => "square",
-        QwenImageEditSize::SquareHd => "square_hd",
-        QwenImageEditSize::LandscapeFourByThree => "landscape_4_3",
-        QwenImageEditSize::LandscapeSixteenByNine => "landscape_16_9",
-        QwenImageEditSize::PortraitThreeByFour => "portrait_4_3", // NB: I think they made a mistake
-        QwenImageEditSize::PortraitNineBySixteen => "portrait_16_9", // NB: I think they made a mistake
-      })
-      .map(|size| size.to_string());
+  let image_size = req
+    .image_size
+    .map(|size| match size {
+      QwenImageEditSize::Square => "square",
+      QwenImageEditSize::SquareHd => "square_hd",
+      QwenImageEditSize::LandscapeFourByThree => "landscape_4_3",
+      QwenImageEditSize::LandscapeSixteenByNine => "landscape_16_9",
+      QwenImageEditSize::PortraitThreeByFour => "portrait_4_3",    // NB: I think they made a mistake
+      QwenImageEditSize::PortraitNineBySixteen => "portrait_16_9", // NB: I think they made a mistake
+    })
+    .map(|size| size.to_string());
 
   let request = QwenImageEditInput {
     prompt: req.prompt,
@@ -108,10 +104,7 @@ pub async fn enqueue_qwen_image_edit_webhook<R: IntoUrl>(
     acceleration: None,
   };
 
-  let result = qwen_image_edit(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = qwen_image_edit(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -132,18 +125,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = QwenImageEditArgs {
-      request: QwenImageEditRequest {
-        prompt: "put christmas lights on the tree, add snow to the mountains".to_string(),
-        image_url: MOUNTAIN_TREE_IMAGE_URL.to_string(),
-        num_images: Some(QwenImageEditNumImages::One),
-        image_size: None,
-        negative_prompt: None,
-        acceleration: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = QwenImageEditArgs { request: QwenImageEditRequest { prompt: "put christmas lights on the tree, add snow to the mountains".to_string(), image_url: MOUNTAIN_TREE_IMAGE_URL.to_string(), num_images: Some(QwenImageEditNumImages::One), image_size: None, negative_prompt: None, acceleration: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_qwen_image_edit_webhook(args).await?;
 

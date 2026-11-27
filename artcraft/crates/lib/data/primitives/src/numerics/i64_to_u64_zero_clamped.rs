@@ -1,7 +1,7 @@
 /// Convert an i64 to a u64. If the i64 is negative, return 0.
 pub fn i64_to_u64_zero_clamped(num: i64) -> u64 {
   if num < 0 {
-    return 0
+    return 0;
   } else {
     num as u64
   }

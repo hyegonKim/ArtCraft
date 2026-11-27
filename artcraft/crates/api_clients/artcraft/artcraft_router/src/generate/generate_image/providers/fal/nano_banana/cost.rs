@@ -33,15 +33,7 @@ impl FalNanoBananaCostState {
     const COST_PER_IMAGE: u64 = 4;
     let cost_in_usd_cents = COST_PER_IMAGE * self.num_images;
 
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -52,24 +44,11 @@ mod tests {
   use fal_client::requests_old::webhook::image::text::enqueue_gemini_25_flash_text_to_image_webhook::Gemini25FlashTextToImageRequest;
 
   fn t2i_cost(n: Gemini25FlashTextToImageNumImages) -> ImageGenerationCostEstimate {
-    FalNanoBananaCostState::from_request(&FalNanoBananaRequestState::TextToImage(
-      Gemini25FlashTextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: n,
-        aspect_ratio: None,
-      },
-    )).estimate_cost()
+    FalNanoBananaCostState::from_request(&FalNanoBananaRequestState::TextToImage(Gemini25FlashTextToImageRequest { prompt: "test".to_string(), num_images: n, aspect_ratio: None })).estimate_cost()
   }
 
   fn edit_cost(n: Gemini25FlashEditNumImages) -> ImageGenerationCostEstimate {
-    FalNanoBananaCostState::from_request(&FalNanoBananaRequestState::EditImage(
-      Gemini25FlashEditRequest {
-        prompt: "test".to_string(),
-        image_urls: vec!["https://example.com/x.jpg".to_string()],
-        num_images: n,
-        aspect_ratio: None,
-      },
-    )).estimate_cost()
+    FalNanoBananaCostState::from_request(&FalNanoBananaRequestState::EditImage(Gemini25FlashEditRequest { prompt: "test".to_string(), image_urls: vec!["https://example.com/x.jpg".to_string()], num_images: n, aspect_ratio: None })).estimate_cost()
   }
 
   #[test]
@@ -94,10 +73,7 @@ mod tests {
 
   #[test]
   fn edit_two_images_matches_t2i_two_images() {
-    assert_eq!(
-      edit_cost(Gemini25FlashEditNumImages::Two).cost_in_usd_cents,
-      t2i_cost(Gemini25FlashTextToImageNumImages::Two).cost_in_usd_cents,
-    );
+    assert_eq!(edit_cost(Gemini25FlashEditNumImages::Two).cost_in_usd_cents, t2i_cost(Gemini25FlashTextToImageNumImages::Two).cost_in_usd_cents,);
   }
 
   #[test]

@@ -108,15 +108,7 @@ pub struct SubstanceMaterial {
 
 impl Default for SubstanceMaterial {
     fn default() -> Self {
-        Self {
-            preset: SubstanceMaterialPreset::None,
-            roughness: 0.5,
-            metallic: 0.0,
-            scale: 1.0,
-            wear: 0.0,
-            normal_strength: 1.0,
-            seed: 0,
-        }
+        Self { preset: SubstanceMaterialPreset::None, roughness: 0.5, metallic: 0.0, scale: 1.0, wear: 0.0, normal_strength: 1.0, seed: 0 }
     }
 }
 
@@ -192,9 +184,7 @@ pub fn value_noise3(p: [f64; 3], seed: u32) -> f64 {
     let (iy, fy) = safe_grid(p[1]);
     let (iz, fz) = safe_grid(p[2]);
     let (ux, uy, uz) = (smooth5(fx), smooth5(fy), smooth5(fz));
-    let c = |dx: i32, dy: i32, dz: i32| {
-        hash_unit(hash3(ix.wrapping_add(dx), iy.wrapping_add(dy), iz.wrapping_add(dz), seed))
-    };
+    let c = |dx: i32, dy: i32, dz: i32| hash_unit(hash3(ix.wrapping_add(dx), iy.wrapping_add(dy), iz.wrapping_add(dz), seed));
     let x00 = lerp(c(0, 0, 0), c(1, 0, 0), ux);
     let x10 = lerp(c(0, 1, 0), c(1, 1, 0), ux);
     let x01 = lerp(c(0, 0, 1), c(1, 0, 1), ux);
@@ -303,14 +293,7 @@ impl SubstanceMaterial {
     /// (`~ -1..1` across the object) with `shading_normal` in the caller's shading frame,
     /// `object_normal` in object-local coordinates, `base_rgb` (`0..1`), and `curvature` (`0..1`,
     /// higher near sharp bevels/edges or concavities).
-    pub fn sample_3d(
-        self,
-        object_pos: [f64; 3],
-        object_normal: [f64; 3],
-        shading_normal: [f64; 3],
-        base_rgb: [f64; 3],
-        curvature: f64,
-    ) -> PbrSample {
+    pub fn sample_3d(self, object_pos: [f64; 3], object_normal: [f64; 3], shading_normal: [f64; 3], base_rgb: [f64; 3], curvature: f64) -> PbrSample {
         let s = self.sanitized();
         let n_shade = normalize3(shading_normal, [0.0, 0.0, 1.0]);
         let base = base_rgb.map(|c| clamp_finite(c, 0.5, 0.0, 1.0));
@@ -329,8 +312,7 @@ impl SubstanceMaterial {
         let p = [object_pos[0] * freq, object_pos[1] * freq, object_pos[2] * freq];
         let uv = triplanar_uv(p, n_obj);
         let wear_noise = fbm3([p[0] * 1.4, p[1] * 1.4, p[2] * 1.4], 3, s.seed.wrapping_add(7919));
-        let wear_mask = (s.wear * (0.45 + 0.55 * curvature.clamp(0.0, 1.0)) * (0.55 + 0.9 * wear_noise))
-            .clamp(0.0, 1.0);
+        let wear_mask = (s.wear * (0.45 + 0.55 * curvature.clamp(0.0, 1.0)) * (0.55 + 0.9 * wear_noise)).clamp(0.0, 1.0);
 
         let ctx = EvalCtx { p, uv, base_rgb: base, wear_mask, seed: s.seed };
         let raw = eval_preset(s.preset, &ctx);
@@ -338,11 +320,7 @@ impl SubstanceMaterial {
         // User roughness/metallic sliders smoothly offset around their default (0.5 / 0.0) so
         // presets immediately exhibit physical materials while remaining fully customizable.
         let rough_delta = (s.roughness - 0.5) * 0.85;
-        let metal_blend = if s.metallic > 1e-4 {
-            lerp(raw.metallic, s.metallic, 0.65)
-        } else {
-            raw.metallic
-        };
+        let metal_blend = if s.metallic > 1e-4 { lerp(raw.metallic, s.metallic, 0.65) } else { raw.metallic };
         let roughness = (raw.roughness + rough_delta).clamp(0.045, 1.0);
         let metallic = metal_blend.clamp(0.0, 1.0);
 
@@ -372,13 +350,7 @@ fn tint_toward(preset_rgb: [f64; 3], base_rgb: [f64; 3], base_share: f64) -> [f6
 
 fn eval_preset(preset: SubstanceMaterialPreset, c: &EvalCtx) -> RawSurface {
     match preset {
-        SubstanceMaterialPreset::None => RawSurface {
-            albedo: c.base_rgb,
-            metallic: 0.0,
-            roughness: 0.5,
-            bump_u: 0.0,
-            bump_v: 0.0,
-        },
+        SubstanceMaterialPreset::None => RawSurface { albedo: c.base_rgb, metallic: 0.0, roughness: 0.5, bump_u: 0.0, bump_v: 0.0 },
         SubstanceMaterialPreset::BrushedAluminum => eval_brushed_aluminum(c),
         SubstanceMaterialPreset::PolishedGold => eval_polished_gold(c),
         SubstanceMaterialPreset::SatinCopper => eval_satin_copper(c),
@@ -439,10 +411,7 @@ fn eval_satin_copper(c: &EvalCtx) -> RawSurface {
 
 fn eval_weathered_patina(c: &EvalCtx) -> RawSurface {
     let warp = fbm3([c.p[0] * 1.3, c.p[1] * 1.3, c.p[2] * 1.3], 4, c.seed.wrapping_add(401));
-    let (cell_d, cell_edge) = worley3(
-        [c.p[0] * 2.1 + warp * 0.9, c.p[1] * 2.1 - warp * 0.7, c.p[2] * 2.1],
-        c.seed.wrapping_add(409),
-    );
+    let (cell_d, cell_edge) = worley3([c.p[0] * 2.1 + warp * 0.9, c.p[1] * 2.1 - warp * 0.7, c.p[2] * 2.1], c.seed.wrapping_add(409));
     let base_patina = (0.42 + 0.58 * c.wear_mask) * (0.35 + 0.85 * warp) * (1.0 - 0.35 * cell_d);
     let mask = base_patina.clamp(0.0, 1.0);
     let aged_bronze = tint_toward([0.66, 0.50, 0.28], c.base_rgb, 0.20);
@@ -506,11 +475,7 @@ fn eval_carbon_weave(c: &EvalCtx) -> RawSurface {
     let warp_top = pattern < 2;
     let profile = |f: f64| ((f * std::f64::consts::PI).sin()).max(0.0);
     let strand = if warp_top { profile(fu) } else { profile(fv) };
-    let slope = if warp_top {
-        (fu * std::f64::consts::PI).cos()
-    } else {
-        (fv * std::f64::consts::PI).cos()
-    };
+    let slope = if warp_top { (fu * std::f64::consts::PI).cos() } else { (fv * std::f64::consts::PI).cos() };
     let dark_resin = [0.07, 0.08, 0.09];
     let fiber_sheen = tint_toward([0.22, 0.24, 0.27], c.base_rgb, 0.22);
     let base = lerp3(dark_resin, fiber_sheen, strand * 0.85);
@@ -570,11 +535,7 @@ pub fn sample_studio_env(dir: [f64; 3], roughness: f64) -> [f64; 3] {
     let ground = [0.14, 0.15, 0.17];
     let horizon = [0.46, 0.49, 0.54];
     let zenith = [0.64, 0.74, 0.90];
-    let dome = if d[1] >= 0.0 {
-        lerp3(horizon, zenith, d[1].powf(0.65))
-    } else {
-        lerp3(horizon, ground, (-d[1]).powf(0.55))
-    };
+    let dome = if d[1] >= 0.0 { lerp3(horizon, zenith, d[1].powf(0.65)) } else { lerp3(horizon, ground, (-d[1]).powf(0.55)) };
 
     // Overhead key softbox + warm right rim + soft front fill
     let dot3 = |a: [f64; 3], b: [f64; 3]| (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]).max(0.0);

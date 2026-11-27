@@ -20,7 +20,7 @@ pub struct TaskEnqueueSuccess {
   pub maybe_prompt_token: Option<PromptToken>,
 }
 
-impl TaskEnqueueSuccess{
+impl TaskEnqueueSuccess {
   pub fn to_frontend_event_action(&self) -> GenerationAction {
     match self.task_type {
       TaskType::ImageGeneration => GenerationAction::GenerateImage,
@@ -32,7 +32,7 @@ impl TaskEnqueueSuccess{
       TaskType::ImageInpaintEdit => GenerationAction::ImageInpaintEdit,
     }
   }
-  
+
   pub fn to_frontend_event_service(&self) -> GenerationServiceProvider {
     match self.provider {
       GenerationProvider::Artcraft => GenerationServiceProvider::Artcraft,
@@ -51,24 +51,13 @@ impl TaskEnqueueSuccess{
       GenerationProvider::Runway => GenerationServiceProvider::Runway,
     }
   }
-  
+
   pub async fn insert_into_task_database(&self, task_database: &TaskDatabase) -> Result<TaskId, SqliteTasksError> {
-    self.insert_into_task_database_with_frontend_payload(
-      task_database,
-      None,
-      None,
-      None,
-    ).await
+    self.insert_into_task_database_with_frontend_payload(task_database, None, None, None).await
   }
 
   // TODO: This belongs somewhere else, not as a method of an event struct.
-  pub async fn insert_into_task_database_with_frontend_payload(
-    &self,
-    task_database: &TaskDatabase,
-    frontend_caller: Option<TauriCommandCaller>,
-    frontend_subscriber_id: Option<&str>,
-    frontend_subscriber_payload: Option<&str>,
-  ) -> Result<TaskId, SqliteTasksError> {
+  pub async fn insert_into_task_database_with_frontend_payload(&self, task_database: &TaskDatabase, frontend_caller: Option<TauriCommandCaller>, frontend_subscriber_id: Option<&str>, frontend_subscriber_payload: Option<&str>) -> Result<TaskId, SqliteTasksError> {
     // TODO: Move this mapping elsewhere, or remove the other models.
     let model_type = match &self.model {
       None => None,
@@ -129,23 +118,10 @@ impl TaskEnqueueSuccess{
 
       // TODO: These seem wrong -
       Some(GenerationModel::Kling1_6) => Some(TaskModelType::Kling16Pro), // NB: `VideoModel::Kling16Pro`.
-      Some(GenerationModel::Kling2_0) => None, // TODO: unused elsewhere?
-      Some(GenerationModel::Sora) => None, // TODO: unused elsewhere?
+      Some(GenerationModel::Kling2_0) => None,                            // TODO: unused elsewhere?
+      Some(GenerationModel::Sora) => None,                                // TODO: unused elsewhere?
     };
 
-    create_task(CreateTaskArgs {
-      db: task_database.get_connection(),
-      status: TaskStatus::Pending,
-      task_type: self.task_type,
-      model_type,
-      provider: self.provider,
-      provider_job_id: self.provider_job_id.as_deref(),
-      queue_status_url: self.maybe_queue_status_url.as_deref(),
-      queue_response_url: self.maybe_queue_response_url.as_deref(),
-      prompt_token: self.maybe_prompt_token.as_ref(),
-      frontend_caller,
-      frontend_subscriber_id,
-      frontend_subscriber_payload,
-    }).await
+    create_task(CreateTaskArgs { db: task_database.get_connection(), status: TaskStatus::Pending, task_type: self.task_type, model_type, provider: self.provider, provider_job_id: self.provider_job_id.as_deref(), queue_status_url: self.maybe_queue_status_url.as_deref(), queue_response_url: self.maybe_queue_response_url.as_deref(), prompt_token: self.maybe_prompt_token.as_ref(), frontend_caller, frontend_subscriber_id, frontend_subscriber_payload }).await
   }
 }

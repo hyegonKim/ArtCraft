@@ -1,9 +1,5 @@
-use fal_client::requests::api::image::edit::gpt_image_1p5_edit_image::api::{
-  GptImage1p5EditImageNumImages, GptImage1p5EditImageQuality, GptImage1p5EditImageSize,
-};
-use fal_client::requests::api::image::text::gpt_image_1p5_text_to_image::api::{
-  GptImage1p5TextToImageNumImages, GptImage1p5TextToImageQuality, GptImage1p5TextToImageSize,
-};
+use fal_client::requests::api::image::edit::gpt_image_1p5_edit_image::api::{GptImage1p5EditImageNumImages, GptImage1p5EditImageQuality, GptImage1p5EditImageSize};
+use fal_client::requests::api::image::text::gpt_image_1p5_text_to_image::api::{GptImage1p5TextToImageNumImages, GptImage1p5TextToImageQuality, GptImage1p5TextToImageSize};
 
 use crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate;
 use crate::generate::generate_image::providers::fal::gpt_image_1p5::request::FalGptImage1p5RequestState;
@@ -33,12 +29,8 @@ impl FalGptImage1p5CostState {
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let cost_in_usd_cents = match &self.request {
-      FalGptImage1p5RequestState::TextToImage(req) => {
-        cost_t2i(req.quality, req.image_size, req.num_images)
-      }
-      FalGptImage1p5RequestState::EditImage(req) => {
-        cost_edit(req.quality, req.image_size, req.num_images)
-      }
+      FalGptImage1p5RequestState::TextToImage(req) => cost_t2i(req.quality, req.image_size, req.num_images),
+      FalGptImage1p5RequestState::EditImage(req) => cost_edit(req.quality, req.image_size, req.num_images),
     };
 
     ImageGenerationCostEstimate {
@@ -55,13 +47,13 @@ impl FalGptImage1p5CostState {
 }
 
 #[derive(Copy, Clone)]
-enum SizeBucket { Square, Wide, Tall }
+enum SizeBucket {
+  Square,
+  Wide,
+  Tall,
+}
 
-fn cost_t2i(
-  quality: Option<GptImage1p5TextToImageQuality>,
-  image_size: Option<GptImage1p5TextToImageSize>,
-  num_images: GptImage1p5TextToImageNumImages,
-) -> u64 {
+fn cost_t2i(quality: Option<GptImage1p5TextToImageQuality>, image_size: Option<GptImage1p5TextToImageSize>, num_images: GptImage1p5TextToImageNumImages) -> u64 {
   use GptImage1p5TextToImageQuality as Q;
   use GptImage1p5TextToImageSize as S;
   let q = quality.unwrap_or(Q::High);
@@ -74,11 +66,7 @@ fn cost_t2i(
   per_image * t2i_num_images(num_images)
 }
 
-fn cost_edit(
-  quality: Option<GptImage1p5EditImageQuality>,
-  image_size: Option<GptImage1p5EditImageSize>,
-  num_images: GptImage1p5EditImageNumImages,
-) -> u64 {
+fn cost_edit(quality: Option<GptImage1p5EditImageQuality>, image_size: Option<GptImage1p5EditImageSize>, num_images: GptImage1p5EditImageNumImages) -> u64 {
   use GptImage1p5EditImageQuality as Q;
   use GptImage1p5EditImageSize as S;
   let q = quality.unwrap_or(Q::High);
@@ -93,7 +81,10 @@ fn cost_edit(
 
 fn output_cost(is_low: bool, is_medium: bool, bucket: SizeBucket) -> u64 {
   if is_low {
-    match bucket { SizeBucket::Square => 1, _ => 2 }
+    match bucket {
+      SizeBucket::Square => 1,
+      _ => 2,
+    }
   } else if is_medium {
     match bucket {
       SizeBucket::Square => 4,
@@ -102,7 +93,10 @@ fn output_cost(is_low: bool, is_medium: bool, bucket: SizeBucket) -> u64 {
     }
   } else {
     // High (default)
-    match bucket { SizeBucket::Square => 14, _ => 20 }
+    match bucket {
+      SizeBucket::Square => 14,
+      _ => 20,
+    }
   }
 }
 
@@ -156,35 +150,13 @@ mod tests {
   // v1 rates: Low=1/2 (sq/wide-tall), Medium=4/5/6 (sq/wide/tall),
   // High=14/20/20 (sq/wide/tall). Default quality is High.
   fn text_to_image_price_cases() -> [(Option<GptImage1p5TextToImageQuality>, Option<GptImage1p5TextToImageSize>, [u64; 4]); 10] {
-    [
-      (None, None, [14, 28, 42, 56]),
-      (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Square), [1, 2, 3, 4]),
-      (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Wide), [2, 4, 6, 8]),
-      (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Tall), [2, 4, 6, 8]),
-      (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square), [4, 8, 12, 16]),
-      (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Wide), [5, 10, 15, 20]),
-      (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Tall), [6, 12, 18, 24]),
-      (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square), [14, 28, 42, 56]),
-      (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide), [20, 40, 60, 80]),
-      (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Tall), [20, 40, 60, 80]),
-    ]
+    [(None, None, [14, 28, 42, 56]), (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Square), [1, 2, 3, 4]), (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Wide), [2, 4, 6, 8]), (Some(GptImage1p5TextToImageQuality::Low), Some(GptImage1p5TextToImageSize::Tall), [2, 4, 6, 8]), (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Square), [4, 8, 12, 16]), (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Wide), [5, 10, 15, 20]), (Some(GptImage1p5TextToImageQuality::Medium), Some(GptImage1p5TextToImageSize::Tall), [6, 12, 18, 24]), (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Square), [14, 28, 42, 56]), (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Wide), [20, 40, 60, 80]), (Some(GptImage1p5TextToImageQuality::High), Some(GptImage1p5TextToImageSize::Tall), [20, 40, 60, 80])]
   }
 
   // Edit-mode pricing is identical to t2i (v1 has no input-image fee for
   // gpt_image_1p5 — that's only gpt_image_1).
   fn edit_image_price_cases() -> [(Option<GptImage1p5EditImageQuality>, Option<GptImage1p5EditImageSize>, [u64; 4]); 10] {
-    [
-      (None, None, [14, 28, 42, 56]),
-      (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Square), [1, 2, 3, 4]),
-      (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Wide), [2, 4, 6, 8]),
-      (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Tall), [2, 4, 6, 8]),
-      (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Square), [4, 8, 12, 16]),
-      (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Wide), [5, 10, 15, 20]),
-      (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Tall), [6, 12, 18, 24]),
-      (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Square), [14, 28, 42, 56]),
-      (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Wide), [20, 40, 60, 80]),
-      (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Tall), [20, 40, 60, 80]),
-    ]
+    [(None, None, [14, 28, 42, 56]), (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Square), [1, 2, 3, 4]), (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Wide), [2, 4, 6, 8]), (Some(GptImage1p5EditImageQuality::Low), Some(GptImage1p5EditImageSize::Tall), [2, 4, 6, 8]), (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Square), [4, 8, 12, 16]), (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Wide), [5, 10, 15, 20]), (Some(GptImage1p5EditImageQuality::Medium), Some(GptImage1p5EditImageSize::Tall), [6, 12, 18, 24]), (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Square), [14, 28, 42, 56]), (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Wide), [20, 40, 60, 80]), (Some(GptImage1p5EditImageQuality::High), Some(GptImage1p5EditImageSize::Tall), [20, 40, 60, 80])]
   }
 
   fn text_to_image_num_image_cases(expected_by_count: [u64; 4]) -> [(GptImage1p5TextToImageNumImages, u64); 4] {

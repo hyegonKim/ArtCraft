@@ -37,8 +37,6 @@ pub struct Flux1SchnellTextToImageOutput {
   pub images: Vec<Flux1SchnellTextToImageFile>,
 }
 
-pub fn flux_1_schnell_text_to_image(
-  params: Flux1SchnellTextToImageInput,
-) -> FalRequest<Flux1SchnellTextToImageInput, Flux1SchnellTextToImageOutput> {
+pub fn flux_1_schnell_text_to_image(params: Flux1SchnellTextToImageInput) -> FalRequest<Flux1SchnellTextToImageInput, Flux1SchnellTextToImageOutput> {
   FalRequest::new("fal-ai/flux/schnell", params)
 }

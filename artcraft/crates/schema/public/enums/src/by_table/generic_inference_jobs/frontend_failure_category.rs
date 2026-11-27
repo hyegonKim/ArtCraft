@@ -184,26 +184,7 @@ impl FrontendFailureCategory {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::FaceNotDetected,
-      Self::NoForegroundSubjectDetected,
-      Self::FormatNotSupported,
-      Self::KeepAliveElapsed,
-      Self::NotYetImplemented,
-      Self::RetryableWorkerError,
-      Self::ModelRulesViolation,
-      Self::RuleBansUserImage,
-      Self::RuleBansUserImageWithFaces,
-      Self::RuleBansUserTextPrompt,
-      Self::RuleBansUserContent,
-      Self::RuleBansGeneratedVideo,
-      Self::RuleBansGeneratedAudio,
-      Self::RuleBansGeneratedContent,
-      Self::FilesizeTooLarge,
-      Self::ImageDimensionsTooSmall,
-      Self::ImageDimensionsTooLarge,
-      Self::GenerationFailed,
-    ])
+    BTreeSet::from([Self::FaceNotDetected, Self::NoForegroundSubjectDetected, Self::FormatNotSupported, Self::KeepAliveElapsed, Self::NotYetImplemented, Self::RetryableWorkerError, Self::ModelRulesViolation, Self::RuleBansUserImage, Self::RuleBansUserImageWithFaces, Self::RuleBansUserTextPrompt, Self::RuleBansUserContent, Self::RuleBansGeneratedVideo, Self::RuleBansGeneratedAudio, Self::RuleBansGeneratedContent, Self::FilesizeTooLarge, Self::ImageDimensionsTooSmall, Self::ImageDimensionsTooLarge, Self::GenerationFailed])
   }
 }
 
@@ -332,11 +313,7 @@ mod tests {
       const MAX_LENGTH: usize = 32;
       for variant in FrontendFailureCategory::all_variants() {
         let serialized = variant.to_str();
-        assert!(
-          serialized.len() <= MAX_LENGTH,
-          "{:?} serializes to {:?} ({} chars), exceeds VARCHAR({}) limit",
-          variant, serialized, serialized.len(), MAX_LENGTH,
-        );
+        assert!(serialized.len() <= MAX_LENGTH, "{:?} serializes to {:?} ({} chars), exceeds VARCHAR({}) limit", variant, serialized, serialized.len(), MAX_LENGTH,);
       }
     }
   }

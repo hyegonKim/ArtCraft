@@ -50,11 +50,7 @@ pub struct RestyleParams {
 
 impl Default for RestyleParams {
     fn default() -> Self {
-        Self {
-            style: RestyleStyle::OilPainting,
-            prompt: String::new(),
-            intensity: 80.0,
-        }
+        Self { style: RestyleStyle::OilPainting, prompt: String::new(), intensity: 80.0 }
     }
 }
 
@@ -180,7 +176,13 @@ pub fn apply_restyle_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &Rest
                 }
                 RestyleStyle::AnimeCel => {
                     // Clean 3-tone cel shading + saturated colors + crisp dark lineart.
-                    let cel = if sl < 0.30 { 0.58 } else if sl < 0.72 { 0.96 } else { 1.18 };
+                    let cel = if sl < 0.30 {
+                        0.58
+                    } else if sl < 0.72 {
+                        0.96
+                    } else {
+                        1.18
+                    };
                     let line = (1.0 - (edge * 3.2 - 0.25).max(0.0)).clamp(0.10, 1.0);
                     let boost_sat = |v: f32| (sl + (v - sl) * 1.32) * cel * line;
                     [boost_sat(sr).clamp(0.0, 1.0), boost_sat(sg).clamp(0.0, 1.0), boost_sat(sb).clamp(0.0, 1.0)]
@@ -188,7 +190,13 @@ pub fn apply_restyle_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &Rest
                 RestyleStyle::NoirInk => {
                     // High-contrast graphic novel sumi-ink monochrome with crimson accent on strong reds.
                     let red_accent = ((q[0] - q[1].max(q[2]) - 0.18) * 3.0).clamp(0.0, 1.0);
-                    let bw = if sl - edge * 0.9 > 0.46 { 0.96 } else if sl > 0.22 { 0.35 * sl } else { 0.03 };
+                    let bw = if sl - edge * 0.9 > 0.46 {
+                        0.96
+                    } else if sl > 0.22 {
+                        0.35 * sl
+                    } else {
+                        0.03
+                    };
                     [
                         (bw * (1.0 - red_accent) + 0.86 * red_accent).clamp(0.0, 1.0),
                         (bw * (1.0 - red_accent) + 0.08 * red_accent).clamp(0.0, 1.0),

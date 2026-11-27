@@ -50,30 +50,17 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("suno_music", CommonAudioModel::SunoMusic),
-      ("suno_remix", CommonAudioModel::SunoRemix),
-      ("suno_sounds", CommonAudioModel::SunoSounds),
-      ("suno_sample", CommonAudioModel::SunoSample),
-      ("seed_audio_1p0", CommonAudioModel::SeedAudio1p0),
-    ];
+    let cases = [("suno_music", CommonAudioModel::SunoMusic), ("suno_remix", CommonAudioModel::SunoRemix), ("suno_sounds", CommonAudioModel::SunoSounds), ("suno_sample", CommonAudioModel::SunoSample), ("seed_audio_1p0", CommonAudioModel::SeedAudio1p0)];
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonAudioModel = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonAudioModel = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }
 
   #[test]
   fn test_round_trip() {
-    let all = [
-      CommonAudioModel::SunoMusic,
-      CommonAudioModel::SunoRemix,
-      CommonAudioModel::SunoSounds,
-      CommonAudioModel::SunoSample,
-      CommonAudioModel::SeedAudio1p0,
-    ];
+    let all = [CommonAudioModel::SunoMusic, CommonAudioModel::SunoRemix, CommonAudioModel::SunoSounds, CommonAudioModel::SunoSample, CommonAudioModel::SeedAudio1p0];
     for variant in all {
       let json = serde_json::to_string(&variant).unwrap();
       let deserialized: CommonAudioModel = serde_json::from_str(&json).unwrap();
@@ -83,13 +70,7 @@ mod tests {
 
   #[test]
   fn all_audio_models_convert_to_common_model_type() {
-    let models = [
-      (CommonAudioModel::SunoMusic, CommonModelType::SunoMusic),
-      (CommonAudioModel::SunoRemix, CommonModelType::SunoRemix),
-      (CommonAudioModel::SunoSounds, CommonModelType::SunoSounds),
-      (CommonAudioModel::SunoSample, CommonModelType::SunoSample),
-      (CommonAudioModel::SeedAudio1p0, CommonModelType::SeedAudio1p0),
-    ];
+    let models = [(CommonAudioModel::SunoMusic, CommonModelType::SunoMusic), (CommonAudioModel::SunoRemix, CommonModelType::SunoRemix), (CommonAudioModel::SunoSounds, CommonModelType::SunoSounds), (CommonAudioModel::SunoSample, CommonModelType::SunoSample), (CommonAudioModel::SeedAudio1p0, CommonModelType::SeedAudio1p0)];
     for (audio_model, expected) in models {
       assert_eq!(audio_model.to_common_model_type(), expected);
     }

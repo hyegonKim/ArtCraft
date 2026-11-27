@@ -15,7 +15,7 @@ use wreq::header::{ACCEPT, ACCEPT_LANGUAGE, CACHE_CONTROL, CONTENT_TYPE, COOKIE,
 use wreq::Client;
 use wreq_util::Emulation;
 
-const CREATE_MEDIA_POST_URL : &str = "https://grok.com/rest/media/post/create";
+const CREATE_MEDIA_POST_URL: &str = "https://grok.com/rest/media/post/create";
 
 /// Request builder
 pub struct GrokCreateMediaPost<'a> {
@@ -39,14 +39,11 @@ pub struct GrokCreateMediaPostResponse {
   pub post_id: PostId,
 }
 
-impl <'a> GrokCreateMediaPost<'a> {
+impl<'a> GrokCreateMediaPost<'a> {
   pub async fn send(&self) -> Result<GrokCreateMediaPostResponse, GrokError> {
     info!("Configuring client...");
 
-    let client = Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
     // TODO: Headers were from Chromium, not Firefox. Partial implementation.
     let mut request_builder = client.post(CREATE_MEDIA_POST_URL)
@@ -88,33 +85,24 @@ impl <'a> GrokCreateMediaPost<'a> {
       MediaPostType::Video => unimplemented!("implement for videos"),
     };
 
-    let request_body = CreateMediaPostWireRequest {
-      media_type: "MEDIA_POST_TYPE_IMAGE".to_string(),
-      media_url,
-    };
+    let request_body = CreateMediaPostWireRequest { media_type: "MEDIA_POST_TYPE_IMAGE".to_string(), media_url };
 
-    let http_request = request_builder.json(&request_body)
-        .build()
-        .map_err(|err| {
-          error!("Error building create media request: {:?}", err);
-          GrokClientError::WreqClientError(err)
-        })?;
+    let http_request = request_builder.json(&request_body).build().map_err(|err| {
+      error!("Error building create media request: {:?}", err);
+      GrokClientError::WreqClientError(err)
+    })?;
 
-    let response = client.execute(http_request)
-        .await
-        .map_err(|err| {
-          error!("Error during create media: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response = client.execute(http_request).await.map_err(|err| {
+      error!("Error during create media: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     let status = response.status();
 
-    let response_body = response.text()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok create media response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response_body = response.text().await.map_err(|err| {
+      error!("Error reading Grok create media response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     // TODO: Handle errors (Cloudflare, Grok, etc.)
     if !status.is_success() {
@@ -122,12 +110,9 @@ impl <'a> GrokCreateMediaPost<'a> {
       //return Err(classify_general_http_status_code_and_body(status, response_body));
     }
 
-    let response : CreateMediaPostRawResponse = serde_json::from_str(&response_body)
-        .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+    let response: CreateMediaPostRawResponse = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-    Ok(GrokCreateMediaPostResponse {
-      post_id: PostId(response.post.id),
-    })
+    Ok(GrokCreateMediaPostResponse { post_id: PostId(response.post.id) })
   }
 }
 
@@ -146,13 +131,7 @@ mod tests {
     let user_id = UserId("85980643-ffab-4984-a3de-59a608c47d7f".to_string()); // User
     let file_id = FileId("990ddf90-8f34-42b1-81a5-39c509d62ff7".to_string()); // Mochi
 
-    let request = GrokCreateMediaPost {
-      user_id: &user_id,
-      file_id: &file_id,
-      media_type: MediaPostType::UserUploadedImage,
-      cookie: &cookies,
-      request_timeout: None,
-    };
+    let request = GrokCreateMediaPost { user_id: &user_id, file_id: &file_id, media_type: MediaPostType::UserUploadedImage, cookie: &cookies, request_timeout: None };
 
     let result = request.send().await?;
 

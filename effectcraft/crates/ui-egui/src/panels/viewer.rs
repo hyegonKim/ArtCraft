@@ -1296,13 +1296,7 @@ fn phase_dragstart(app: &mut EffectcraftApp, ui: &mut egui::Ui, ectx: &EvalCtx, 
                         Gesture::Move { layers, start: cpt, snap_src: None }
                     })
                 } else if let Some(rh) = gizmo3d::rot_axis_at(&rot_axis_hits, press) {
-                    Some(Gesture::Rotate3D {
-                        layer: rh.layer,
-                        axis: rh.axis,
-                        press,
-                        screen_dir: rh.screen_dir,
-                        start_deg: rh.start_deg,
-                    })
+                    Some(Gesture::Rotate3D { layer: rh.layer, axis: rh.axis, press, screen_dir: rh.screen_dir, start_deg: rh.start_deg })
                 } else if let Some((lid, hi, ..)) = handle_hits.iter().find(|(_, _, h, _)| h.distance(press) < HANDLE + 2.0).cloned() {
                     let layer = comp.layer(lid).cloned();
                     layer.and_then(|layer| {
@@ -1491,10 +1485,7 @@ fn phase_drag(app: &mut EffectcraftApp, ui: &mut egui::Ui, ectx: &EvalCtx, resp:
                 let raw = start_deg + proj_pts * 1.2;
                 let deg = if mods.shift { (raw / 15.0).round() * 15.0 } else { raw };
                 if deg.is_finite() {
-                    let _ = app.session.execute(
-                        "prop.set",
-                        json!({"layer": layer.0, "path": axis.prop_path(), "value": deg, "merge": merge}),
-                    );
+                    let _ = app.session.execute("prop.set", json!({"layer": layer.0, "path": axis.prop_path(), "value": deg, "merge": merge}));
                 }
             }
             Gesture::Anchor { layer, start_anchor, start_pos, start, inv, l2p, own, anchor_only } => {
@@ -2008,8 +1999,8 @@ mod view;
 use frame::{empty_state, rect_of, show_frame};
 pub(crate) use frame::{extended_region, minify_factor, snap_to_pixels, styled_line, zoom_sampler, zoom_texture_options};
 use geometry::{
-    anchor_in_comp, cam_state, drag_ratio, handle_axes, handle_cursor, handle_point, one_axis, quad_intersects_box, rotate_value,
-    rotation_sign, selected_others, snap_handle, turn_delta,
+    anchor_in_comp, cam_state, drag_ratio, handle_axes, handle_cursor, handle_point, one_axis, quad_intersects_box, rotate_value, rotation_sign,
+    selected_others, snap_handle, turn_delta,
 };
 #[cfg(test)]
 use geometry::{box_corners, project_clipped, project_segment};
@@ -2017,9 +2008,9 @@ pub(crate) use geometry::{from_effect_space, fx2c, l2c, layer_outline, layer_qua
 use gesture::{Gesture, HANDLE, ROTO_HINT, pen_id, roi_drag, roi_handles, vertex_grab_radius};
 pub(crate) use shapes::{click_pick, layer_at, layer_at_including_locked, layers_at, pick, selectable_layers};
 use shapes::{create_shape, draw_shape_ghost, shape_drag};
+use tools::{add_motion_key, axis_at, drag_axes, draw_rigs, pen_cursor, pen_cursor_icon, pen_press, select_motion_key};
 #[cfg(test)]
 use tools::{axis_drag, constrain_45};
-use tools::{add_motion_key, axis_at, drag_axes, draw_rigs, pen_cursor, pen_cursor_icon, pen_press, select_motion_key};
 pub(crate) use view::checker;
 use view::{aux_views, locked_pane};
 

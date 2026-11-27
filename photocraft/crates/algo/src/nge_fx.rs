@@ -28,14 +28,7 @@ pub struct FirefliesParams {
 
 impl Default for FirefliesParams {
     fn default() -> Self {
-        Self {
-            quantity: 48,
-            depth_variation: 65.0,
-            blurriness: 45.0,
-            color: [1.0, 0.84, 0.32],
-            progress: 25.0,
-            seed: 2027,
-        }
+        Self { quantity: 48, depth_variation: 65.0, blurriness: 45.0, color: [1.0, 0.84, 0.32], progress: 25.0, seed: 2027 }
     }
 }
 
@@ -60,11 +53,7 @@ pub fn apply_fireflies_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &Fi
     let depth_var = (if params.depth_variation.is_finite() { params.depth_variation } else { 50.0 }).clamp(0.0, 100.0) / 100.0;
     let blur = (if params.blurriness.is_finite() { params.blurriness } else { 45.0 }).clamp(0.0, 100.0) / 100.0;
     let phase = (if params.progress.is_finite() { params.progress } else { 0.0 }).clamp(0.0, 100.0) / 100.0 * std::f32::consts::TAU;
-    let base_col = [
-        params.color[0].clamp(0.05, 1.0),
-        params.color[1].clamp(0.05, 1.0),
-        params.color[2].clamp(0.05, 1.0),
-    ];
+    let base_col = [params.color[0].clamp(0.05, 1.0), params.color[1].clamp(0.05, 1.0), params.color[2].clamp(0.05, 1.0)];
     let min_side = (w.min(h) as f32).max(16.0);
     let seed = u64::from(params.seed);
 
@@ -125,11 +114,7 @@ pub fn apply_fireflies_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &Fi
         }
         for (x, q) in row.iter_mut().enumerate() {
             let fx = x as f32 + 0.5;
-            let mut lin = [
-                srgb_to_linear(q[0].max(0.0)),
-                srgb_to_linear(q[1].max(0.0)),
-                srgb_to_linear(q[2].max(0.0)),
-            ];
+            let mut lin = [srgb_to_linear(q[0].max(0.0)), srgb_to_linear(q[1].max(0.0)), srgb_to_linear(q[2].max(0.0))];
             let mut glow_alpha = 0.0f32;
             for p in &active {
                 let dx = fx - p.cx;
@@ -187,12 +172,7 @@ pub struct WaterRippleParams {
 
 impl Default for WaterRippleParams {
     fn default() -> Self {
-        Self {
-            horizon: 0.58,
-            amplitude: 42.0,
-            frequency: 36.0,
-            progress: 20.0,
-        }
+        Self { horizon: 0.58, amplitude: 42.0, frequency: 36.0, progress: 20.0 }
     }
 }
 

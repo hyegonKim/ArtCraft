@@ -19,19 +19,22 @@ pub async fn filter_bad_response(response: reqwest::Response) -> Result<reqwest:
   }
 
   // The host in the fleet that handled the request.
-  let backend_hostname= response.headers()
-      .get("x-backend-hostname")
-      .map(|header| header.to_str().unwrap_or_else(|err| {
+  let backend_hostname = response
+    .headers()
+    .get("x-backend-hostname")
+    .map(|header| {
+      header.to_str().unwrap_or_else(|err| {
         error!("Failed to parse x-backend-hostname header: {:?}", err);
         "unknown"
-      }))
-      .map(|s| s.to_string());
+      })
+    })
+    .map(|s| s.to_string());
 
   let response_body = match response.text().await {
     Ok(text) => text.to_string(),
     Err(err) => format!("Could not read response body: {:?}", err),
   };
-  
+
   let status_code = status.as_u16();
 
   filter_cloudflare_errors(status_code, &response_body)?;

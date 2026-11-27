@@ -19,14 +19,13 @@ use std::{fs, io};
 pub struct SoraCredentialManager {
   holder: SoraCredentialHolder,
   app_data_root: AppDataRoot,
-  
+
   /// This is meant to help debug credential issues, keep credentials cached, fresh, etc.
   // TODO: Put this into the same structure as the credentials and also persist to disk.
   stats: CloneCell<SoraCredentialStats>,
 }
 
 impl SoraCredentialManager {
-
   pub fn initialize_from_disk_infallible(app_data_root: &AppDataRoot) -> Self {
     let holder = SoraCredentialHolder::new();
 
@@ -34,14 +33,10 @@ impl SoraCredentialManager {
       Err(err) => warn!("Failed to read credentials from disk: {:?}", err),
       Ok(creds) => {
         holder.set_credentials(&creds).expect("Failed to set credentials");
-      }
+      },
     }
 
-    Self {
-      holder,
-      app_data_root: app_data_root.clone(),
-      stats: CloneCell::with_owned(SoraCredentialStats::new()),
-    }
+    Self { holder, app_data_root: app_data_root.clone(), stats: CloneCell::with_owned(SoraCredentialStats::new()) }
   }
 
   pub fn record_credential_success(&self) -> AnyhowResult<()> {
@@ -57,16 +52,16 @@ impl SoraCredentialManager {
     self.stats.set_owned(stats)?;
     Ok(())
   }
-  
+
   pub fn reset_credential_stats(&self) -> AnyhowResult<()> {
     self.stats.set_owned(SoraCredentialStats::new())
   }
-  
+
   /// This does not guarantee the credentials are correct
   pub fn has_apparently_complete_credentials(&self) -> AnyhowResult<bool> {
     self.holder.has_apparently_complete_credentials()
   }
-  
+
   pub fn get_credential_stats(&self) -> AnyhowResult<SoraCredentialStats> {
     self.stats.get_clone()
   }
@@ -91,10 +86,10 @@ impl SoraCredentialManager {
     remove_file_if_exists(creds_dir.get_sora_cookie_file_path())?;
     remove_file_if_exists(creds_dir.get_sora_bearer_token_file_path())?;
     remove_file_if_exists(creds_dir.get_sora_legacy_sentinel_file_path())?;
-    
+
     Ok(())
   }
-  
+
   /// This is meant to be infallible.
   pub fn try_purge_credentials_from_disk(&self) {
     let creds_dir = self.app_data_root.credentials_dir();
@@ -149,12 +144,10 @@ impl SoraCredentialManager {
 
     info!("Generating token...");
 
-    let sentinel = generate_sentinel_token()
-        .await
-        .map_err(|err| {
-          error!("Failed to refresh: {:?}", err);
-          err
-        })?;
+    let sentinel = generate_sentinel_token().await.map_err(|err| {
+      error!("Failed to refresh: {:?}", err);
+      err
+    })?;
 
     info!("Token obtained.");
 
@@ -162,11 +155,7 @@ impl SoraCredentialManager {
 
     self.holder.set_credentials(&creds)?;
 
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(self.app_data_root.get_sora_legacy_sentinel_file_path())?;
+    let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(self.app_data_root.get_sora_legacy_sentinel_file_path())?;
 
     file.write_all(sentinel.as_bytes())?;
     file.flush()?;
@@ -178,11 +167,7 @@ impl SoraCredentialManager {
 fn persist_cookies_to_disk(cookies: &SoraCookies, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
   let filename = app_data_root.get_sora_cookie_file_path();
 
-  let mut file = OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(filename)?;
+  let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
 
   file.write_all(cookies.as_bytes())?;
   file.flush()?;
@@ -193,11 +178,7 @@ fn persist_cookies_to_disk(cookies: &SoraCookies, app_data_root: &AppDataRoot) -
 fn persist_jwt_bearer_to_disk(bearer: &SoraJwtBearerToken, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
   let filename = app_data_root.get_sora_bearer_token_file_path();
 
-  let mut file = OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(filename)?;
+  let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
 
   file.write_all(bearer.as_bytes())?;
   file.flush()?;
@@ -208,11 +189,7 @@ fn persist_jwt_bearer_to_disk(bearer: &SoraJwtBearerToken, app_data_root: &AppDa
 fn persist_sentinel_to_disk(sentinel: &SoraSentinel, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
   let filename = app_data_root.get_sora_legacy_sentinel_file_path();
 
-  let mut file = OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(filename)?;
+  let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
 
   file.write_all(sentinel.as_bytes())?;
   file.flush()?;

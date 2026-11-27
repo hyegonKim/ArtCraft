@@ -15,7 +15,7 @@ pub enum PreferredDownloadDirectory {
   /// The system-default downloads directory, which varies by OS.
   /// NB: Serializes as `"system_default"` in JSON.
   System(SystemDownloadDirectory),
-  
+
   /// A user-defined path
   /// NB: Serializes as `{"custom": "/path/to/dir"}` in JSON.
   Custom(PathBuf),
@@ -33,12 +33,8 @@ impl PreferredDownloadDirectory {
   pub fn maybe_to_download_directory(&self) -> Option<PathBuf> {
     match self {
       PreferredDownloadDirectory::Custom(path) => Some(path.clone()),
-      PreferredDownloadDirectory::System(SystemDownloadDirectory::Documents) => {
-        dirs::document_dir()
-      }
-      PreferredDownloadDirectory::System(SystemDownloadDirectory::Downloads) => {
-        dirs::download_dir()
-      }
+      PreferredDownloadDirectory::System(SystemDownloadDirectory::Documents) => dirs::document_dir(),
+      PreferredDownloadDirectory::System(SystemDownloadDirectory::Downloads) => dirs::download_dir(),
     }
   }
 
@@ -84,7 +80,6 @@ mod tests {
   use crate::core::state::app_preferences::preferred_download_directory::PreferredDownloadDirectory;
   use crate::core::state::app_preferences::preferred_download_directory::SystemDownloadDirectory;
 
-
   mod json {
     use super::*;
 
@@ -94,7 +89,7 @@ mod tests {
       let val = serde_json::to_string(&val).unwrap();
       assert_eq!(&val, "{\"system\":\"documents\"}");
     }
-    
+
     #[test]
     fn to_json_custom() {
       let val = PreferredDownloadDirectory::Custom("/tmp".into());

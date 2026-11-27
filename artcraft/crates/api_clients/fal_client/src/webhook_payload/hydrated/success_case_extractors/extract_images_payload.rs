@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use crate::webhook_payload::hydrated::hydrated_webhook_contents::ImagesData;
 
 /// Extract and deserialize the `images` key from a webhook success payload.
-pub (crate) fn extract_images(obj: &Map<String, Value>) -> Option<Vec<ImagesData>> {
+pub(crate) fn extract_images(obj: &Map<String, Value>) -> Option<Vec<ImagesData>> {
   let value = obj.get("images")?;
   serde_json::from_value(value.clone()).ok()
 }
@@ -17,10 +17,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -32,8 +30,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let images = contents.images.expect("images should be Some");
     assert_eq!(images.len(), 2);
@@ -54,12 +51,15 @@ mod tests {
 
   #[test]
   fn synthetic_images_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "images": [
         {"url": "https://example.com/a.png", "content_type": "image/png", "width": 1024, "height": 768},
         {"url": "https://example.com/b.jpg", "content_type": "image/jpeg", "file_size": 54321}
       ]
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let images = extract_images(&obj).expect("should extract images");
     assert_eq!(images.len(), 2);
@@ -77,9 +77,12 @@ mod tests {
 
   #[test]
   fn empty_images_array_returns_empty_vec() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "images": []
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let images = extract_images(&obj).expect("should extract empty images");
     assert!(images.is_empty());
@@ -87,9 +90,12 @@ mod tests {
 
   #[test]
   fn missing_images_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "video": {"url": "https://example.com/v.mp4"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_images(&obj).is_none());
   }

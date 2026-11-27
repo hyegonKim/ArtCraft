@@ -27,7 +27,6 @@ pub struct GptImage1EditImageRequest {
   pub image_quality: Option<GptImage1EditImageImageQuality>,
 }
 
-
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GptImage1EditImageImageSize {
@@ -53,7 +52,6 @@ pub enum GptImage1EditImageImageQuality {
   Medium,
   High, // Default
 }
-
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct GptImage1EditImageResponse {

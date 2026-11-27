@@ -33,17 +33,9 @@ pub fn extract_contents_from_response(value: &Value) -> Option<PollResponseExtra
   let model_glb = extract_model_glb::extract_model_glb(value);
   let thumbnail = extract_thumbnail::extract_thumbnail(value);
 
-  if image.is_none() && images.is_none() && video.is_none()
-    && model_glb.is_none() && thumbnail.is_none()
-  {
+  if image.is_none() && images.is_none() && video.is_none() && model_glb.is_none() && thumbnail.is_none() {
     return None;
   }
 
-  Some(PollResponseExtractedContents {
-    image,
-    images,
-    video,
-    model_glb,
-    thumbnail,
-  })
+  Some(PollResponseExtractedContents { image, images, video, model_glb, thumbnail })
 }

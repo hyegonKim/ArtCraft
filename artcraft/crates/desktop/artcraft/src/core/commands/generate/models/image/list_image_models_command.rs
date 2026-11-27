@@ -29,11 +29,8 @@ struct CacheEntry {
 
 static CACHE: Lazy<RwLock<Option<CacheEntry>>> = Lazy::new(|| RwLock::new(None));
 
-
 #[tauri::command]
-pub async fn list_image_models_command(
-  app_env_configs: State<'_, AppEnvConfigs>,
-) -> ResponseOrErrorMessage<ListImageModelsResponse> {
+pub async fn list_image_models_command(app_env_configs: State<'_, AppEnvConfigs>) -> ResponseOrErrorMessage<ListImageModelsResponse> {
   if let Some(cached) = cached_response() {
     debug!("list_image_models_command: serving cached response");
     return Ok(cached.into());
@@ -44,7 +41,7 @@ pub async fn list_image_models_command(
       let response: ListImageModelsResponse = api_response.into();
       store_response(response.clone());
       Ok(response.into())
-    }
+    },
     Err(error_message) => {
       warn!("list_image_models_command failed after {} attempts: {}", MAX_ATTEMPTS, error_message);
       if let Some(stale) = any_cached_response() {
@@ -52,7 +49,7 @@ pub async fn list_image_models_command(
         return Ok(stale.into());
       }
       Err(error_message.into())
-    }
+    },
   }
 }
 
@@ -91,7 +88,7 @@ async fn fetch_with_retry(api_host: &ApiHost) -> Result<OmniGenImageModelsRespon
         if attempt < MAX_ATTEMPTS {
           tokio::time::sleep(RETRY_BACKOFF).await;
         }
-      }
+      },
     }
   }
   Err(last_error)

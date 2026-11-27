@@ -22,8 +22,6 @@ pub struct Veo2ImageToVideoOutput {
   pub video: Veo2ImageToVideoVideoFile,
 }
 
-pub fn veo_2_image_to_video(
-  params: Veo2ImageToVideoInput,
-) -> FalRequest<Veo2ImageToVideoInput, Veo2ImageToVideoOutput> {
+pub fn veo_2_image_to_video(params: Veo2ImageToVideoInput) -> FalRequest<Veo2ImageToVideoInput, Veo2ImageToVideoOutput> {
   FalRequest::new("fal-ai/veo2/image-to-video", params)
 }

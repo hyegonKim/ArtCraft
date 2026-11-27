@@ -125,23 +125,7 @@ impl IdCategory {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::MediaFile,
-      Self::LipsyncAnimationResult,
-      Self::FaceFusionResult,
-      Self::VideoFilterResult,
-      Self::LivePortraitResult,
-      Self::StudioRender,
-      Self::TtsResult,
-      Self::VoiceConversionResult,
-      Self::ZeroShotTtsResult,
-      Self::ZeroShotVoiceDataset,
-      Self::ZeroShotVoiceEmbedding,
-      Self::ModelWeights,
-      Self::FileUpload,
-      Self::MocapResult,
-      Self::WorkflowResult,
-    ])
+    BTreeSet::from([Self::MediaFile, Self::LipsyncAnimationResult, Self::FaceFusionResult, Self::VideoFilterResult, Self::LivePortraitResult, Self::StudioRender, Self::TtsResult, Self::VoiceConversionResult, Self::ZeroShotTtsResult, Self::ZeroShotVoiceDataset, Self::ZeroShotVoiceEmbedding, Self::ModelWeights, Self::FileUpload, Self::MocapResult, Self::WorkflowResult])
   }
 }
 

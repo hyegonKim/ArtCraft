@@ -43,26 +43,14 @@ pub struct VideoStatusResponse {
 #[derive(Debug, Clone)]
 pub enum VideoStatus {
   /// Still working. `progress` is 0–100 when xAI provides it.
-  Pending {
-    progress: Option<u8>,
-  },
+  Pending { progress: Option<u8> },
   /// Finished successfully — `video.url` is typically populated.
-  Complete {
-    model: Option<String>,
-    video: Option<VideoOutputInfo>,
-    cost_in_usd_ticks: Option<u64>,
-  },
+  Complete { model: Option<String>, video: Option<VideoOutputInfo>, cost_in_usd_ticks: Option<u64> },
   /// xAI couldn't render this. `reason` is our best classification; the
   /// remaining fields surface whatever xAI told us so the caller can log,
   /// mark the row failed, and (where applicable) refund / surface a
   /// user-facing message.
-  Failed {
-    reason: FailureReason,
-    code: Option<String>,
-    error: Option<String>,
-    cost_in_usd_ticks: Option<u64>,
-    full_error_json_payload: Option<String>,
-  },
+  Failed { reason: FailureReason, code: Option<String>, error: Option<String>, cost_in_usd_ticks: Option<u64>, full_error_json_payload: Option<String> },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -100,28 +88,19 @@ pub async fn video_status(args: VideoStatusArgs<'_>) -> Result<VideoStatusRespon
 
   info!("Grok video_status: request_id={}", req.request_id);
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.get(&url)
-    .header("Authorization", bearer)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.get(&url).header("Authorization", bearer).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let http_status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok video_status response: http_status={}", http_status);
 
   if http_status.is_success() {
-    let parsed: VideoStatusResponseBody = serde_json::from_str(&response_body)
-      .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+    let parsed: VideoStatusResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
     return classify_status_field(&parsed, &response_body);
   }
 
@@ -137,77 +116,29 @@ pub async fn video_status(args: VideoStatusArgs<'_>) -> Result<VideoStatusRespon
   Err(unwrap_classify_err(classify_grok_http_error(http_status, Some(&response_body))))
 }
 
-fn classify_status_field(
-  parsed: &VideoStatusResponseBody,
-  raw_body: &str,
-) -> Result<VideoStatusResponse, GrokError> {
+fn classify_status_field(parsed: &VideoStatusResponseBody, raw_body: &str) -> Result<VideoStatusResponse, GrokError> {
   let cost = parsed.usage.as_ref().and_then(|u| u.cost_in_usd_ticks);
 
   match parsed.status.as_str() {
-    "pending" | "queued" | "in_progress" | "processing" => Ok(VideoStatusResponse {
-      status: VideoStatus::Pending { progress: parsed.progress },
-    }),
+    "pending" | "queued" | "in_progress" | "processing" => Ok(VideoStatusResponse { status: VideoStatus::Pending { progress: parsed.progress } }),
     "done" | "completed" | "succeeded" => {
-      let video = parsed.video.as_ref().map(|v| VideoOutputInfo {
-        url: v.url.clone(),
-        duration: v.duration,
-        respect_moderation: v.respect_moderation,
-      });
-      Ok(VideoStatusResponse {
-        status: VideoStatus::Complete {
-          model: parsed.model.clone(),
-          video,
-          cost_in_usd_ticks: cost,
-        },
-      })
-    }
+      let video = parsed.video.as_ref().map(|v| VideoOutputInfo { url: v.url.clone(), duration: v.duration, respect_moderation: v.respect_moderation });
+      Ok(VideoStatusResponse { status: VideoStatus::Complete { model: parsed.model.clone(), video, cost_in_usd_ticks: cost } })
+    },
     "failed" => {
       let code = parsed.error.as_ref().map(|e| e.code.clone());
       let error_msg = parsed.error.as_ref().map(|e| e.message.clone());
-      let reason = if text_indicates_moderation(error_msg.as_deref())
-        || body_indicates_moderation(raw_body)
-      {
-        FailureReason::ContentModerated
-      } else {
-        FailureReason::Unknown
-      };
-      Ok(VideoStatusResponse {
-        status: VideoStatus::Failed {
-          reason,
-          code,
-          error: error_msg,
-          cost_in_usd_ticks: cost,
-          full_error_json_payload: Some(raw_body.to_string()),
-        },
-      })
-    }
-    "expired" => Ok(VideoStatusResponse {
-      status: VideoStatus::Failed {
-        reason: FailureReason::Unknown,
-        code: Some("expired".to_string()),
-        error: Some("video job expired".to_string()),
-        cost_in_usd_ticks: cost,
-        full_error_json_payload: Some(raw_body.to_string()),
-      },
-    }),
-    other => Err(GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: reqwest::StatusCode::OK,
-      body: format!("unknown video status: {:?}", other),
-    }.into()),
+      let reason = if text_indicates_moderation(error_msg.as_deref()) || body_indicates_moderation(raw_body) { FailureReason::ContentModerated } else { FailureReason::Unknown };
+      Ok(VideoStatusResponse { status: VideoStatus::Failed { reason, code, error: error_msg, cost_in_usd_ticks: cost, full_error_json_payload: Some(raw_body.to_string()) } })
+    },
+    "expired" => Ok(VideoStatusResponse { status: VideoStatus::Failed { reason: FailureReason::Unknown, code: Some("expired".to_string()), error: Some("video job expired".to_string()), cost_in_usd_ticks: cost, full_error_json_payload: Some(raw_body.to_string()) } }),
+    other => Err(GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: reqwest::StatusCode::OK, body: format!("unknown video status: {:?}", other) }.into()),
   }
 }
 
 fn build_moderated_failed_response(raw_body: &str) -> VideoStatusResponse {
   let (code, error_msg, cost) = parse_error_body(raw_body);
-  VideoStatusResponse {
-    status: VideoStatus::Failed {
-      reason: FailureReason::ContentModerated,
-      code,
-      error: error_msg,
-      cost_in_usd_ticks: cost,
-      full_error_json_payload: Some(raw_body.to_string()),
-    },
-  }
+  VideoStatusResponse { status: VideoStatus::Failed { reason: FailureReason::ContentModerated, code, error: error_msg, cost_in_usd_ticks: cost, full_error_json_payload: Some(raw_body.to_string()) } }
 }
 
 /// Best-effort extraction of `{code, error, usage.cost_in_usd_ticks}` from
@@ -223,9 +154,7 @@ fn parse_error_body(body: &str) -> (Option<String>, Option<String>, Option<u64>)
     Err(_) => return (None, None, None),
   };
 
-  let top_level_code = parsed.get("code")
-    .and_then(JsonValue::as_str)
-    .map(str::to_string);
+  let top_level_code = parsed.get("code").and_then(JsonValue::as_str).map(str::to_string);
 
   let (error_msg, nested_code) = match parsed.get("error") {
     Some(JsonValue::String(s)) => (Some(s.clone()), None),
@@ -233,15 +162,13 @@ fn parse_error_body(body: &str) -> (Option<String>, Option<String>, Option<u64>)
       let msg = obj.get("message").and_then(JsonValue::as_str).map(str::to_string);
       let nested = obj.get("code").and_then(JsonValue::as_str).map(str::to_string);
       (msg, nested)
-    }
+    },
     _ => (None, None),
   };
 
   let code = top_level_code.or(nested_code);
 
-  let cost = parsed.get("usage")
-    .and_then(|u| u.get("cost_in_usd_ticks"))
-    .and_then(JsonValue::as_u64);
+  let cost = parsed.get("usage").and_then(|u| u.get("cost_in_usd_ticks")).and_then(JsonValue::as_u64);
 
   (code, error_msg, cost)
 }
@@ -255,10 +182,7 @@ fn text_indicates_moderation(maybe_text: Option<&str>) -> bool {
 /// site rather than `.unwrap_err()` on the inline expression.
 fn unwrap_classify_err(result: Result<(), GrokError>) -> GrokError {
   match result {
-    Ok(()) => GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: reqwest::StatusCode::OK,
-      body: "classify_grok_http_error returned Ok for a non-2xx response".to_string(),
-    }.into(),
+    Ok(()) => GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: reqwest::StatusCode::OK, body: "classify_grok_http_error returned Ok for a non-2xx response".to_string() }.into(),
     Err(err) => err,
   }
 }
@@ -311,7 +235,7 @@ mod tests {
         assert_eq!(video.duration, Some(5));
         assert_eq!(video.respect_moderation, Some(true));
         assert_eq!(cost_in_usd_ticks, Some(42));
-      }
+      },
       other => panic!("expected Complete, got: {:?}", other),
     }
   }
@@ -333,7 +257,7 @@ mod tests {
         assert_eq!(error.as_deref(), Some("duration too long"));
         assert_eq!(cost_in_usd_ticks, Some(7));
         assert_eq!(full_error_json_payload.as_deref(), Some(json));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -352,7 +276,7 @@ mod tests {
         assert_eq!(reason, FailureReason::ContentModerated);
         assert_eq!(code.as_deref(), Some("permission_denied"));
         assert_eq!(cost_in_usd_ticks, Some(11));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -367,7 +291,7 @@ mod tests {
         assert_eq!(reason, FailureReason::Unknown);
         assert!(code.is_none());
         assert!(error.is_none());
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -382,7 +306,7 @@ mod tests {
         assert_eq!(reason, FailureReason::Unknown);
         assert_eq!(code.as_deref(), Some("expired"));
         assert_eq!(cost_in_usd_ticks, Some(3));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -412,7 +336,7 @@ mod tests {
         assert_eq!(error.as_deref(), Some("Generated video rejected by content moderation."));
         assert_eq!(cost_in_usd_ticks, Some(11_300_000_000));
         assert_eq!(full_error_json_payload.as_deref(), Some(body));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -426,7 +350,7 @@ mod tests {
         assert_eq!(reason, FailureReason::ContentModerated);
         assert_eq!(code.as_deref(), Some("content_policy"));
         assert_eq!(error.as_deref(), Some("Content moderation blocked this prompt"));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -441,7 +365,7 @@ mod tests {
         assert!(code.is_none());
         assert!(error.is_none());
         assert_eq!(full_error_json_payload.as_deref(), Some(body));
-      }
+      },
       other => panic!("expected Failed, got: {:?}", other),
     }
   }
@@ -451,12 +375,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = VideoStatusArgs {
-      api_key: &key,
-      request: VideoStatusRequest {
-        request_id: "req_abc".to_string(),
-      },
-    };
+    let args = VideoStatusArgs { api_key: &key, request: VideoStatusRequest { request_id: "req_abc".to_string() } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"request_id\":\"req_abc\""));
@@ -473,17 +392,11 @@ mod tests {
 
     let api_key = get_test_api_key()?;
     // Random UUID — should yield 404.
-    let result = video_status(VideoStatusArgs {
-      api_key: &api_key,
-      request: VideoStatusRequest {
-        request_id: "00000000-0000-0000-0000-000000000000".to_string(),
-      },
-    }).await;
+    let result = video_status(VideoStatusArgs { api_key: &api_key, request: VideoStatusRequest { request_id: "00000000-0000-0000-0000-000000000000".to_string() } }).await;
 
     println!("Result: {:?}", result.as_ref().map(|r| &r.status));
     let err = result.unwrap_err();
-    assert!(matches!(err, GrokError::ApiSpecific(GrokSpecificApiError::NotFound { .. })),
-      "expected NotFound, got: {:?}", err);
+    assert!(matches!(err, GrokError::ApiSpecific(GrokSpecificApiError::NotFound { .. })), "expected NotFound, got: {:?}", err);
     Ok(())
   }
 
@@ -499,12 +412,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_status(VideoStatusArgs {
-      api_key: &api_key,
-      request: VideoStatusRequest {
-        request_id: "ce681bd0-133d-9cf3-975c-422d292d4e8e".to_string(),
-      },
-    }).await;
+    let result = video_status(VideoStatusArgs { api_key: &api_key, request: VideoStatusRequest { request_id: "ce681bd0-133d-9cf3-975c-422d292d4e8e".to_string() } }).await;
 
     match &result {
       Ok(r) => println!("status: {:?}", r.status),
@@ -523,12 +431,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_status(VideoStatusArgs {
-      api_key: &api_key,
-      request: VideoStatusRequest {
-        request_id: "7b2fa3dc-8e63-9100-b117-faffb3178773".to_string(),
-      },
-    }).await;
+    let result = video_status(VideoStatusArgs { api_key: &api_key, request: VideoStatusRequest { request_id: "7b2fa3dc-8e63-9100-b117-faffb3178773".to_string() } }).await;
 
     match &result {
       Ok(r) => println!("status: {:?}", r.status),
@@ -546,12 +449,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = video_status(VideoStatusArgs {
-      api_key: &api_key,
-      request: VideoStatusRequest {
-        request_id: "4d4a6185-209e-95f3-942b-510042637839".to_string(),
-      },
-    }).await;
+    let result = video_status(VideoStatusArgs { api_key: &api_key, request: VideoStatusRequest { request_id: "4d4a6185-209e-95f3-942b-510042637839".to_string() } }).await;
 
     match &result {
       Ok(r) => println!("status: {:?}", r.status),

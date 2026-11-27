@@ -30,14 +30,7 @@ pub enum PbrChannel {
 }
 
 impl PbrChannel {
-    pub const ALL: [Self; 6] = [
-        Self::BaseColor,
-        Self::Normal,
-        Self::Roughness,
-        Self::Metallic,
-        Self::Height,
-        Self::AmbientOcclusion,
-    ];
+    pub const ALL: [Self; 6] = [Self::BaseColor, Self::Normal, Self::Roughness, Self::Metallic, Self::Height, Self::AmbientOcclusion];
 
     pub fn id(self) -> &'static str {
         match self {
@@ -214,12 +207,7 @@ pub fn make_seamless_rgba(px: &[[f32; 4]], w: usize, h: usize, feather: f32) -> 
         let q = px[i];
         let e = env.get(i).copied().unwrap_or(mean_l).max(0.05);
         let gain = (1.0 + 0.55 * (mean_l / e - 1.0)).clamp(0.45, 2.2);
-        leveled[i] = [
-            (q[0] * gain).clamp(0.0, 1.0),
-            (q[1] * gain).clamp(0.0, 1.0),
-            (q[2] * gain).clamp(0.0, 1.0),
-            q[3].clamp(0.0, 1.0),
-        ];
+        leveled[i] = [(q[0] * gain).clamp(0.0, 1.0), (q[1] * gain).clamp(0.0, 1.0), (q[2] * gain).clamp(0.0, 1.0), q[3].clamp(0.0, 1.0)];
     }
 
     let hx = w / 2;
@@ -274,19 +262,10 @@ fn neighbor_idx(coord: usize, delta: isize, size: usize, wrap: bool) -> usize {
         return 0;
     }
     let next = coord as isize + delta;
-    if wrap {
-        next.rem_euclid(size as isize) as usize
-    } else {
-        next.clamp(0, size as isize - 1) as usize
-    }
+    if wrap { next.rem_euclid(size as isize) as usize } else { next.clamp(0, size as isize - 1) as usize }
 }
 
-fn compute_delighted_albedo_and_luma(
-    src_px: &[[f32; 4]],
-    w: usize,
-    h: usize,
-    delight_strength: f32,
-) -> (Vec<[f32; 4]>, Vec<f32>, Vec<f32>) {
+fn compute_delighted_albedo_and_luma(src_px: &[[f32; 4]], w: usize, h: usize, delight_strength: f32) -> (Vec<[f32; 4]>, Vec<f32>, Vec<f32>) {
     let n = w * h;
     let mut lin_rgb = vec![[0.0f32; 3]; n];
     let mut luma = vec![0.0f32; n];
@@ -352,12 +331,7 @@ fn compute_bandpass_height(luma: &[f32], w: usize, h: usize) -> Vec<f32> {
 
 /// Extracts all 6 PBR material maps (`BaseColor`, `Normal`, `Roughness`, `Metallic`, `Height`, `AO`)
 /// from straight sRGB RGBA pixels (`w × h`).
-pub fn sample_pbr_maps_rgba(
-    px: &[[f32; 4]],
-    w: usize,
-    h: usize,
-    params: &MaterialSamplerParams,
-) -> PbrMaterialMaps {
+pub fn sample_pbr_maps_rgba(px: &[[f32; 4]], w: usize, h: usize, params: &MaterialSamplerParams) -> PbrMaterialMaps {
     let n = w.saturating_mul(h);
     if n == 0 || px.len() < n {
         return PbrMaterialMaps {
@@ -459,36 +433,16 @@ pub fn sample_pbr_maps_rgba(
         roughness[i] = [r, r, r, work_px[i][3].clamp(0.0, 1.0)];
     }
 
-    PbrMaterialMaps {
-        width: w,
-        height: h,
-        base_color,
-        normal,
-        roughness,
-        metallic,
-        height_map,
-        ambient_occlusion,
-    }
+    PbrMaterialMaps { width: w, height: h, base_color, normal, roughness, metallic, height_map, ambient_occlusion }
 }
 
 /// Extracts a single PBR channel as RGBA (`w × h`).
-pub fn sample_pbr_channel_rgba(
-    px: &[[f32; 4]],
-    w: usize,
-    h: usize,
-    channel: PbrChannel,
-    params: &MaterialSamplerParams,
-) -> Vec<[f32; 4]> {
+pub fn sample_pbr_channel_rgba(px: &[[f32; 4]], w: usize, h: usize, channel: PbrChannel, params: &MaterialSamplerParams) -> Vec<[f32; 4]> {
     sample_pbr_maps_rgba(px, w, h, params).into_channel(channel)
 }
 
 /// Depth-agnostic `Surface` wrapper (`8`/`16`/`32f`) for `sample_pbr_channel_rgba`.
-pub fn sample_pbr_channel_surface(
-    src: &Surface,
-    rect: Rect,
-    channel: PbrChannel,
-    params: &MaterialSamplerParams,
-) -> Surface {
+pub fn sample_pbr_channel_surface(src: &Surface, rect: Rect, channel: PbrChannel, params: &MaterialSamplerParams) -> Surface {
     if rect.is_empty() {
         return Surface::new(src.format());
     }
@@ -504,13 +458,7 @@ pub fn sample_pbr_channel_surface(
 
 /// Converts a backdrop/photo (`w × h` straight sRGB RGBA) into a smooth `2:1` spherical
 /// equirectangular environment lighting map (`w_env × h_env`) with mirror-seamless azimuth wrap.
-pub fn extract_ibl_environment_rgba(
-    backdrop_px: &[[f32; 4]],
-    w: usize,
-    h: usize,
-    w_env: usize,
-    h_env: usize,
-) -> Vec<[f32; 4]> {
+pub fn extract_ibl_environment_rgba(backdrop_px: &[[f32; 4]], w: usize, h: usize, w_env: usize, h_env: usize) -> Vec<[f32; 4]> {
     let out_n = w_env.saturating_mul(h_env);
     if out_n == 0 {
         return Vec::new();

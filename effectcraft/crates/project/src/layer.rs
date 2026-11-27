@@ -694,15 +694,7 @@ pub struct SubstanceMaterial {
 
 impl Default for SubstanceMaterial {
     fn default() -> Self {
-        Self {
-            enabled: true,
-            preset: SubstancePreset::BrushedSteel,
-            tile_scale: 1.0,
-            normal_scale: 1.0,
-            wear: 0.25,
-            seed: 1,
-            resolution: 128,
-        }
+        Self { enabled: true, preset: SubstancePreset::BrushedSteel, tile_scale: 1.0, normal_scale: 1.0, wear: 0.25, seed: 1, resolution: 128 }
     }
 }
 

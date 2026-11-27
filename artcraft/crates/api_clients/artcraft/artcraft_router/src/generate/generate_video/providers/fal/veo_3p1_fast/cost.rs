@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::veo_3p1_fast::request::{
-  FalVeo3p1FastMode, FalVeo3p1FastRequestState,
-};
+use crate::generate::generate_video::providers::fal::veo_3p1_fast::request::{FalVeo3p1FastMode, FalVeo3p1FastRequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -26,15 +24,7 @@ impl FalVeo3p1FastCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -111,10 +101,7 @@ mod tests {
 
     #[test]
     fn t2v_1080p_bills_same_as_720p() {
-      assert_eq!(
-        cost_cents(Modality::TextToVideo, Some(8), Some(RouterResolution::TenEightyP), Some(true)),
-        cost_cents(Modality::TextToVideo, Some(8), Some(RouterResolution::SevenTwentyP), Some(true)),
-      );
+      assert_eq!(cost_cents(Modality::TextToVideo, Some(8), Some(RouterResolution::TenEightyP), Some(true)), cost_cents(Modality::TextToVideo, Some(8), Some(RouterResolution::SevenTwentyP), Some(true)),);
     }
   }
 
@@ -195,47 +182,28 @@ mod tests {
 
   #[test]
   fn audio_costs_more_than_no_audio() {
-    assert!(
-      cost_cents(Modality::TextToVideo, Some(8), None, Some(false))
-        < cost_cents(Modality::TextToVideo, Some(8), None, Some(true))
-    );
+    assert!(cost_cents(Modality::TextToVideo, Some(8), None, Some(false)) < cost_cents(Modality::TextToVideo, Some(8), None, Some(true)));
   }
 
-  fn cost_cents(
-    modality: Modality,
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-    generate_audio: Option<bool>,
-  ) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3p1Fast,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      generate_audio,
-      ..Default::default()
-    };
+  fn cost_cents(modality: Modality, duration_seconds: Option<u16>, resolution: Option<RouterResolution>, generate_audio: Option<bool>) -> u64 {
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3p1Fast, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, generate_audio, ..Default::default() };
     match modality {
-      Modality::TextToVideo => {}
+      Modality::TextToVideo => {},
       Modality::ImageToVideo => {
         b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
-      }
+      },
       Modality::FirstLastFrame => {
         b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
         b.end_frame = Some(ImageRef::Url("https://example.com/b.png".to_string()));
-      }
+      },
       Modality::Reference => {
         b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()]));
-      }
+      },
       Modality::Extend => {
         b.reference_videos = Some(VideoListRef::Urls(vec!["https://example.com/in.mp4".to_string()]));
-      }
+      },
     }
     let state = build_fal_veo_3p1_fast_state(b).expect("build state");
-    FalVeo3p1FastCostState::from_request(&state)
-      .estimate_cost()
-      .cost_in_usd_cents
-      .expect("cost")
+    FalVeo3p1FastCostState::from_request(&state).estimate_cost().cost_in_usd_cents.expect("cost")
   }
 }

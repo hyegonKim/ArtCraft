@@ -340,10 +340,7 @@ impl Tool for PenTool {
                     if let Some((other, osi, at_first)) = raw_other.or_else(|| open_end_at(cx, p, tol, Some((id, si)))) {
                         self.stop();
                         let end = if at_first { "first" } else { "last" };
-                        return vec![Action::Exec(
-                            "path.join".into(),
-                            json!({"ids": [id.0, other.0], "ends": ["last", end], "subpaths": [si, osi]}),
-                        )];
+                        return vec![Action::Exec("path.join".into(), json!({"ids": [id.0, other.0], "ends": ["last", end], "subpaths": [si, osi]}))];
                     }
                     self.drag = Some(Place { at: p, path: Some(id), subpath: Some(si), closing: false, moved: false });
                     self.in_h = p;
@@ -368,11 +365,8 @@ impl Tool for PenTool {
                         self.path = Some(id);
                         self.subpath = Some(si);
                         if picked == Endpoint::First {
-                            let p = if cx.selection.objects.as_slice() == [id] {
-                                json!({"subpath": si})
-                            } else {
-                                json!({"ids": [id.0], "subpath": si})
-                            };
+                            let p =
+                                if cx.selection.objects.as_slice() == [id] { json!({"subpath": si}) } else { json!({"ids": [id.0], "subpath": si}) };
                             return vec![Action::Exec("path.reverse".into(), p)];
                         }
                         return vec![];

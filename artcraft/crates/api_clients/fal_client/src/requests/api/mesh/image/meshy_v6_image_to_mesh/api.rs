@@ -1,10 +1,6 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::image::meshy_v6_image_to_mesh::raw_request::{
-  MeshyV6ImageToMeshInput, MeshyV6ImageToMeshOutput,
-};
-use crate::requests::api::mesh::text::meshy_v6_text_to_mesh::api::{
-  MeshyV6ModelType, MeshyV6PoseMode, MeshyV6SymmetryMode, MeshyV6Topology,
-};
+use crate::requests::api::mesh::image::meshy_v6_image_to_mesh::raw_request::{MeshyV6ImageToMeshInput, MeshyV6ImageToMeshOutput};
+use crate::requests::api::mesh::text::meshy_v6_text_to_mesh::api::{MeshyV6ModelType, MeshyV6PoseMode, MeshyV6SymmetryMode, MeshyV6Topology};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Meshy 6 image-to-3D. Shares its option enums with the text binding.
@@ -69,24 +65,7 @@ impl FalEndpoint for MeshyV6ImageToMeshRequest {
   type RawResponse = MeshyV6ImageToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      image_url: self.image_url.clone(),
-      model_type: self.model_type.map(|m| m.to_str().to_string()),
-      topology: self.topology.map(|t| t.to_str().to_string()),
-      target_polycount: self.target_polycount,
-      symmetry_mode: self.symmetry_mode.map(|s| s.to_str().to_string()),
-      should_remesh: self.should_remesh,
-      should_texture: self.should_texture,
-      enable_pbr: self.enable_pbr,
-      pose_mode: self.pose_mode.map(|p| p.to_str().to_string()),
-      texture_prompt: self.texture_prompt.clone(),
-      texture_image_url: self.texture_image_url.clone(),
-      enable_rigging: self.enable_rigging,
-      rigging_height_meters: self.rigging_height_meters,
-      enable_animation: self.enable_animation,
-      animation_action_id: self.animation_action_id,
-      enable_safety_checker: self.enable_safety_checker,
-    })
+    Ok(Self::RawRequest { image_url: self.image_url.clone(), model_type: self.model_type.map(|m| m.to_str().to_string()), topology: self.topology.map(|t| t.to_str().to_string()), target_polycount: self.target_polycount, symmetry_mode: self.symmetry_mode.map(|s| s.to_str().to_string()), should_remesh: self.should_remesh, should_texture: self.should_texture, enable_pbr: self.enable_pbr, pose_mode: self.pose_mode.map(|p| p.to_str().to_string()), texture_prompt: self.texture_prompt.clone(), texture_image_url: self.texture_image_url.clone(), enable_rigging: self.enable_rigging, rigging_height_meters: self.rigging_height_meters, enable_animation: self.enable_animation, animation_action_id: self.animation_action_id, enable_safety_checker: self.enable_safety_checker })
   }
 }
 
@@ -100,24 +79,7 @@ mod tests {
   use test_data::web::image_urls::ERNEST_SCARED_STUPID_IMAGE_URL;
 
   fn base_request() -> MeshyV6ImageToMeshRequest {
-    MeshyV6ImageToMeshRequest {
-      image_url: "https://example.com/input.jpg".to_string(),
-      model_type: None,
-      topology: None,
-      target_polycount: None,
-      symmetry_mode: None,
-      should_remesh: None,
-      should_texture: None,
-      enable_pbr: None,
-      pose_mode: None,
-      texture_prompt: None,
-      texture_image_url: None,
-      enable_rigging: None,
-      rigging_height_meters: None,
-      enable_animation: None,
-      animation_action_id: None,
-      enable_safety_checker: None,
-    }
+    MeshyV6ImageToMeshRequest { image_url: "https://example.com/input.jpg".to_string(), model_type: None, topology: None, target_polycount: None, symmetry_mode: None, should_remesh: None, should_texture: None, enable_pbr: None, pose_mode: None, texture_prompt: None, texture_image_url: None, enable_rigging: None, rigging_height_meters: None, enable_animation: None, animation_action_id: None, enable_safety_checker: None }
   }
 
   #[tokio::test]
@@ -125,10 +87,7 @@ mod tests {
   async fn test_image_to_mesh_webhook() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = MeshyV6ImageToMeshRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ..base_request()
-    };
+    let request = MeshyV6ImageToMeshRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), ..base_request() };
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
     assert!(result.request_id.is_some() || result.gateway_request_id.is_some());
@@ -140,10 +99,7 @@ mod tests {
   async fn test_image_to_mesh_queue() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = MeshyV6ImageToMeshRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ..base_request()
-    };
+    let request = MeshyV6ImageToMeshRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), ..base_request() };
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());
@@ -154,13 +110,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_core_fields() {
-    let request = MeshyV6ImageToMeshRequest {
-      model_type: Some(MeshyV6ModelType::LowPoly),
-      topology: Some(MeshyV6Topology::Quad),
-      should_texture: Some(false),
-      enable_pbr: Some(true),
-      ..base_request()
-    };
+    let request = MeshyV6ImageToMeshRequest { model_type: Some(MeshyV6ModelType::LowPoly), topology: Some(MeshyV6Topology::Quad), should_texture: Some(false), enable_pbr: Some(true), ..base_request() };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json["image_url"], "https://example.com/input.jpg");
     assert_eq!(json["model_type"], "lowpoly");

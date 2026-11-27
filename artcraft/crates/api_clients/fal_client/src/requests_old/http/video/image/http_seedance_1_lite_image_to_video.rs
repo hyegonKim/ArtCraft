@@ -41,8 +41,6 @@ pub struct Seedance1LiteImageToVideoOutput {
   pub video: Seedance1LiteImageToVideoVideoFile,
 }
 
-pub fn seedance_1_lite_image_to_video(
-  params: Seedance1LiteImageToVideoInput,
-) -> FalRequest<Seedance1LiteImageToVideoInput, Seedance1LiteImageToVideoOutput> {
+pub fn seedance_1_lite_image_to_video(params: Seedance1LiteImageToVideoInput) -> FalRequest<Seedance1LiteImageToVideoInput, Seedance1LiteImageToVideoOutput> {
   FalRequest::new("fal-ai/bytedance/seedance/v1/lite/image-to-video", params)
 }

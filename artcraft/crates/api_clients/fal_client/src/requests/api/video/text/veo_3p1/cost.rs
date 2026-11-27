@@ -1,6 +1,4 @@
-use crate::requests::api::video::text::veo_3p1::api::{
-  Veo3p1TextToVideoDuration, Veo3p1TextToVideoRequest, Veo3p1TextToVideoResolution,
-};
+use crate::requests::api::video::text::veo_3p1::api::{Veo3p1TextToVideoDuration, Veo3p1TextToVideoRequest, Veo3p1TextToVideoResolution};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Veo 3.1 (non-fast) pricing (see https://fal.ai/models/fal-ai/veo3.1):
@@ -35,12 +33,8 @@ pub(crate) fn veo_3p1_cost_cents(rate_tenth_cents_per_sec: u64, duration_secs: u
 impl FalRequestCostCalculator for Veo3p1TextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // fal defaults when unset: duration = 8s, resolution = 720p, audio = on.
-    let duration_secs = self.duration
-      .unwrap_or(Veo3p1TextToVideoDuration::EightSeconds)
-      .to_seconds();
-    let four_k = self.resolution
-      .unwrap_or(Veo3p1TextToVideoResolution::SevenTwentyP)
-      .is_four_k();
+    let duration_secs = self.duration.unwrap_or(Veo3p1TextToVideoDuration::EightSeconds).to_seconds();
+    let four_k = self.resolution.unwrap_or(Veo3p1TextToVideoResolution::SevenTwentyP).is_four_k();
     let audio_on = self.generate_audio.unwrap_or(true);
 
     let rate = veo_3p1_rate_tenth_cents_per_sec(four_k, audio_on);
@@ -51,26 +45,10 @@ impl FalRequestCostCalculator for Veo3p1TextToVideoRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::requests::api::video::text::veo_3p1::api::{
-    Veo3p1TextToVideoAspectRatio, Veo3p1TextToVideoSafetyTolerance,
-  };
+  use crate::requests::api::video::text::veo_3p1::api::{Veo3p1TextToVideoAspectRatio, Veo3p1TextToVideoSafetyTolerance};
 
-  fn make_request(
-    duration: Option<Veo3p1TextToVideoDuration>,
-    resolution: Option<Veo3p1TextToVideoResolution>,
-    generate_audio: Option<bool>,
-  ) -> Veo3p1TextToVideoRequest {
-    Veo3p1TextToVideoRequest {
-      prompt: "test".to_string(),
-      aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine),
-      duration,
-      resolution,
-      negative_prompt: None,
-      generate_audio,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    }
+  fn make_request(duration: Option<Veo3p1TextToVideoDuration>, resolution: Option<Veo3p1TextToVideoResolution>, generate_audio: Option<bool>) -> Veo3p1TextToVideoRequest {
+    Veo3p1TextToVideoRequest { prompt: "test".to_string(), aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::SixteenByNine), duration, resolution, negative_prompt: None, generate_audio, seed: None, auto_fix: None, safety_tolerance: None }
   }
 
   /// fal: "a 5 second video at 1080p with audio on will cost $2.00".
@@ -86,27 +64,22 @@ mod tests {
     use super::*;
 
     // (duration, resolution, generate_audio, expected_cents)
-    const COST_TABLE: &[(
-      Option<Veo3p1TextToVideoDuration>,
-      Option<Veo3p1TextToVideoResolution>,
-      Option<bool>,
-      u64,
-    )] = &[
+    const COST_TABLE: &[(Option<Veo3p1TextToVideoDuration>, Option<Veo3p1TextToVideoResolution>, Option<bool>, u64)] = &[
       // 720p, audio off ($0.20/s)
-      (Some(Veo3p1TextToVideoDuration::FourSeconds),  Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(false), 80),
-      (Some(Veo3p1TextToVideoDuration::SixSeconds),   Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(false), 120),
+      (Some(Veo3p1TextToVideoDuration::FourSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(false), 80),
+      (Some(Veo3p1TextToVideoDuration::SixSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(false), 120),
       (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(false), 160),
       // 720p, audio on ($0.40/s)
-      (Some(Veo3p1TextToVideoDuration::FourSeconds),  Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(true),  160),
-      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(true),  320),
+      (Some(Veo3p1TextToVideoDuration::FourSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(true), 160),
+      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), Some(true), 320),
       // 1080p bills the same as 720p
-      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP),   Some(false), 160),
-      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP),   Some(true),  320),
+      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), Some(false), 160),
+      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), Some(true), 320),
       // 4k, audio off ($0.40/s) and on ($0.60/s)
-      (Some(Veo3p1TextToVideoDuration::FourSeconds),  Some(Veo3p1TextToVideoResolution::FourK),        Some(false), 160),
-      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK),        Some(false), 320),
-      (Some(Veo3p1TextToVideoDuration::FourSeconds),  Some(Veo3p1TextToVideoResolution::FourK),        Some(true),  240),
-      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK),        Some(true),  480),
+      (Some(Veo3p1TextToVideoDuration::FourSeconds), Some(Veo3p1TextToVideoResolution::FourK), Some(false), 160),
+      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK), Some(false), 320),
+      (Some(Veo3p1TextToVideoDuration::FourSeconds), Some(Veo3p1TextToVideoResolution::FourK), Some(true), 240),
+      (Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK), Some(true), 480),
       // Defaults: duration=None→8s, resolution=None→720p, audio=None→on
       (None, None, None, 320),
       (None, None, Some(false), 160),
@@ -116,24 +89,15 @@ mod tests {
     fn matches_cost_table() {
       for &(duration, resolution, generate_audio, expected) in COST_TABLE {
         let got = make_request(duration, resolution, generate_audio).calculate_cost_in_cents();
-        assert_eq!(
-          got, expected,
-          "duration={duration:?} resolution={resolution:?} audio={generate_audio:?}",
-        );
+        assert_eq!(got, expected, "duration={duration:?} resolution={resolution:?} audio={generate_audio:?}",);
       }
     }
 
     #[test]
     fn audio_on_is_more_expensive_than_off() {
-      for res in [
-        Veo3p1TextToVideoResolution::SevenTwentyP,
-        Veo3p1TextToVideoResolution::TenEightyP,
-        Veo3p1TextToVideoResolution::FourK,
-      ] {
-        let off = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(res), Some(false))
-          .calculate_cost_in_cents();
-        let on = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(res), Some(true))
-          .calculate_cost_in_cents();
+      for res in [Veo3p1TextToVideoResolution::SevenTwentyP, Veo3p1TextToVideoResolution::TenEightyP, Veo3p1TextToVideoResolution::FourK] {
+        let off = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(res), Some(false)).calculate_cost_in_cents();
+        let on = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(res), Some(true)).calculate_cost_in_cents();
         assert!(on > off, "resolution={res:?}: audio_on={on}¢ should exceed audio_off={off}¢");
       }
     }
@@ -141,10 +105,8 @@ mod tests {
     #[test]
     fn four_k_is_more_expensive_than_sd() {
       for audio in [Some(false), Some(true)] {
-        let sd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), audio)
-          .calculate_cost_in_cents();
-        let four_k = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK), audio)
-          .calculate_cost_in_cents();
+        let sd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), audio).calculate_cost_in_cents();
+        let four_k = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::FourK), audio).calculate_cost_in_cents();
         assert!(four_k > sd, "audio={audio:?}: 4k={four_k}¢ should exceed 1080p={sd}¢");
       }
     }
@@ -152,10 +114,8 @@ mod tests {
     #[test]
     fn seven_twenty_and_ten_eighty_cost_the_same() {
       for audio in [Some(false), Some(true), None] {
-        let sd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), audio)
-          .calculate_cost_in_cents();
-        let hd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), audio)
-          .calculate_cost_in_cents();
+        let sd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::SevenTwentyP), audio).calculate_cost_in_cents();
+        let hd = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), audio).calculate_cost_in_cents();
         assert_eq!(sd, hd, "audio={audio:?}: 720p and 1080p should bill the same");
       }
     }
@@ -163,23 +123,9 @@ mod tests {
     /// Neither aspect ratio, seed, auto_fix, nor safety tolerance affect the bill.
     #[test]
     fn cost_ignores_non_billing_fields() {
-      let baseline = make_request(
-        Some(Veo3p1TextToVideoDuration::EightSeconds),
-        Some(Veo3p1TextToVideoResolution::TenEightyP),
-        Some(true),
-      ).calculate_cost_in_cents();
+      let baseline = make_request(Some(Veo3p1TextToVideoDuration::EightSeconds), Some(Veo3p1TextToVideoResolution::TenEightyP), Some(true)).calculate_cost_in_cents();
 
-      let embellished = Veo3p1TextToVideoRequest {
-        prompt: "different prompt".to_string(),
-        aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::NineBySixteen),
-        duration: Some(Veo3p1TextToVideoDuration::EightSeconds),
-        resolution: Some(Veo3p1TextToVideoResolution::TenEightyP),
-        negative_prompt: Some("noise".to_string()),
-        generate_audio: Some(true),
-        seed: Some(99),
-        auto_fix: Some(false),
-        safety_tolerance: Some(Veo3p1TextToVideoSafetyTolerance::Level1),
-      }.calculate_cost_in_cents();
+      let embellished = Veo3p1TextToVideoRequest { prompt: "different prompt".to_string(), aspect_ratio: Some(Veo3p1TextToVideoAspectRatio::NineBySixteen), duration: Some(Veo3p1TextToVideoDuration::EightSeconds), resolution: Some(Veo3p1TextToVideoResolution::TenEightyP), negative_prompt: Some("noise".to_string()), generate_audio: Some(true), seed: Some(99), auto_fix: Some(false), safety_tolerance: Some(Veo3p1TextToVideoSafetyTolerance::Level1) }.calculate_cost_in_cents();
 
       assert_eq!(baseline, embellished);
     }

@@ -23,17 +23,17 @@ pub struct Task {
 
 #[derive(Debug)]
 #[derive(sqlx::FromRow)]
-pub (crate) struct RawTask {
-  pub (crate) id: String,
-  pub (crate) task_status: String,
-  pub (crate) task_type: String,
-  pub (crate) model_type: Option<String>,
-  pub (crate) provider: String,
-  pub (crate) provider_job_id: Option<String>,
-  pub (crate) queue_status_url: Option<String>,
-  pub (crate) queue_response_url: Option<String>,
-  pub (crate) prompt_token: Option<String>,
-  pub (crate) frontend_caller: Option<String>,
-  pub (crate) frontend_subscriber_id: Option<String>,
-  pub (crate) frontend_subscriber_payload: Option<String>,
+pub(crate) struct RawTask {
+  pub(crate) id: String,
+  pub(crate) task_status: String,
+  pub(crate) task_type: String,
+  pub(crate) model_type: Option<String>,
+  pub(crate) provider: String,
+  pub(crate) provider_job_id: Option<String>,
+  pub(crate) queue_status_url: Option<String>,
+  pub(crate) queue_response_url: Option<String>,
+  pub(crate) prompt_token: Option<String>,
+  pub(crate) frontend_caller: Option<String>,
+  pub(crate) frontend_subscriber_id: Option<String>,
+  pub(crate) frontend_subscriber_payload: Option<String>,
 }

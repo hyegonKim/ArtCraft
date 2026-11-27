@@ -10,51 +10,11 @@ use crate::core::state::data_dir::app_data_root::AppDataRoot;
 use crate::services::storyteller::state::storyteller_credential_manager::StorytellerCredentialManager;
 use tauri::AppHandle;
 
-pub async fn handle_inpaint_artcraft(
-  model: ImageInpaintModel,
-  request: &EnqueueInpaintImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_inpaint_artcraft(model: ImageInpaintModel, request: &EnqueueInpaintImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   match model {
-    ImageInpaintModel::FluxDevJuggernaut => {
-      handle_artcraft_flux_dev_juggernaut_inpaint(
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await
-    }
-    ImageInpaintModel::FluxPro1 => {
-      handle_artcraft_flux_pro_1_inpaint(
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await
-    }
-    ImageInpaintModel::FluxProKontextMax => {
-      handle_artcraft_flux_pro_kontext_inpaint(
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await
-    }
-    ImageInpaintModel::Gemini25Flash => {
-      handle_artcraft_nano_banana_inpaint(
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await
-    }
+    ImageInpaintModel::FluxDevJuggernaut => handle_artcraft_flux_dev_juggernaut_inpaint(request, app, app_data_root, app_env_configs, storyteller_creds_manager).await,
+    ImageInpaintModel::FluxPro1 => handle_artcraft_flux_pro_1_inpaint(request, app, app_data_root, app_env_configs, storyteller_creds_manager).await,
+    ImageInpaintModel::FluxProKontextMax => handle_artcraft_flux_pro_kontext_inpaint(request, app, app_data_root, app_env_configs, storyteller_creds_manager).await,
+    ImageInpaintModel::Gemini25Flash => handle_artcraft_nano_banana_inpaint(request, app, app_data_root, app_env_configs, storyteller_creds_manager).await,
   }
 }

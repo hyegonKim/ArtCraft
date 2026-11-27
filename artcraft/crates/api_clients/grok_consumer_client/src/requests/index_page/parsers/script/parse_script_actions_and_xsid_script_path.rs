@@ -4,17 +4,11 @@ use regex::Regex;
 use std::collections::HashMap;
 use log::info;
 
-static ACTIONS_REGEX : Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#"createServerReference\)\("([a-f0-9]+)""#)
-      .expect("Regex should parse")
-});
+static ACTIONS_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#"createServerReference\)\("([a-f0-9]+)""#).expect("Regex should parse"));
 
 /// 2025-10-01: "(static/chunks/[^"]+\.js)"[^}]*?a\(880932\)"
 /// 2025-12-01: "(static/chunks/[^"]+\.js)"[^}]*?\(880932\)"
-static XSID_SCRIPT_REGEX : Lazy<Regex> = Lazy::new(|| {
-  Regex::new(r#""(static/chunks/[^"]+\.js)"[^}]*?\(880932\)"#)
-      .expect("Regex should parse")
-});
+static XSID_SCRIPT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#""(static/chunks/[^"]+\.js)"[^}]*?\(880932\)"#).expect("Regex should parse"));
 
 #[derive(Debug, Clone)]
 pub struct ActionsAndXsid {
@@ -60,24 +54,15 @@ pub fn parse_script_actions_and_xsid_script_path(scripts: &HashMap<String, Strin
   //println!("Script content 2:");
   //println!("{}", script_content_2);
 
-  let actions = ACTIONS_REGEX.captures_iter(&script_content_1)
-      .flat_map(|captures| captures.get(1).map(|m| m.as_str().to_string()))
-      .collect::<Vec<_>>();
+  let actions = ACTIONS_REGEX.captures_iter(&script_content_1).flat_map(|captures| captures.get(1).map(|m| m.as_str().to_string())).collect::<Vec<_>>();
 
   let xsid_script_path = parse_xsid_script_path_from_turbopack_script(&script_content_2)?;
 
-  Ok(ActionsAndXsid {
-    actions,
-    xsid_script_path,
-  })
+  Ok(ActionsAndXsid { actions, xsid_script_path })
 }
 
 fn parse_xsid_script_path_from_turbopack_script(script_source: &str) -> Result<String, GrokClientError> {
-  let xsid_script_path = XSID_SCRIPT_REGEX.captures(&script_source)
-      .map(|captures| captures.get(1)
-          .map(|m| m.as_str()
-              .to_string()))
-      .flatten();
+  let xsid_script_path = XSID_SCRIPT_REGEX.captures(&script_source).map(|captures| captures.get(1).map(|m| m.as_str().to_string())).flatten();
 
   match xsid_script_path {
     Some(xsid_script) => Ok(xsid_script),
@@ -97,9 +82,7 @@ mod tests {
   async fn test() -> AnyhowResult<()> {
     //setup_test_logging(LevelFilter::Trace);
     let cookie = get_test_cookies()?;
-    let page_and_scripts = get_index_page_and_scripts(GetIndexPageAndScriptsArgs {
-      cookie: &cookie,
-    }).await?;
+    let page_and_scripts = get_index_page_and_scripts(GetIndexPageAndScriptsArgs { cookie: &cookie }).await?;
 
     let result = parse_script_actions_and_xsid_script_path(&page_and_scripts.scripts)?;
 

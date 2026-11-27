@@ -5,14 +5,14 @@ use std::fmt::{Display, Formatter};
 pub enum SoraClientError {
   /// An error reading the file for upload.
   FileForUploadReadError(std::io::Error),
-  
+
   /// The file path provided for upload is invalid.
   FileForUploadHasInvalidPath,
 
   /// Something is wrong with the JWT bearer token.
   /// This error originates on our end as we try to parse the JWT.
   LocalJwtClaimsParseError(String),
-  
+
   /// There was an error constructing the form-multipart request.
   MultipartFormError(wreq::Error),
 
@@ -20,30 +20,27 @@ pub enum SoraClientError {
   /// This is our own internal application state error, not something Sora returns.
   /// We know our client can't make the request, so we preemptively fail it.
   NoBearerTokenForRequest,
-  
+
   /// A sentinel token is not present in the client, which is required for some requests.
   NoSentinelTokenForRequest,
 
   /// Issue with using the SoraCredentialBuilder.
   SoraCredentialBuilderError(&'static str),
-  
+
   /// Error parsing a request URL.
   UrlParseError(url::ParseError),
 
   /// An error was encountered in building the Wreq client
   WreqClientError(wreq::Error),
-  
+
   /// Error serializing the sentinel token to JSON
   CouldNotSerializeSentinelToken(serde_json::Error),
 
   /// Error serializing the sentinel store token to JSON (typically for persistent storage).
   CouldNotSerializeSentinelTokenStore(serde_json::Error),
-  
+
   /// Error deserializing the sentinel token from JSON (typically for persistent storage).
-  CouldNotDeserializeSentinelTokenStore { 
-    error: serde_json::Error, 
-    raw_json: String 
-  },
+  CouldNotDeserializeSentinelTokenStore { error: serde_json::Error, raw_json: String },
 }
 
 impl Error for SoraClientError {}
@@ -62,7 +59,7 @@ impl Display for SoraClientError {
       Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
       Self::CouldNotSerializeSentinelToken(err) => write!(f, "Could not serialize sentinel token to JSON: {}", err),
       Self::CouldNotSerializeSentinelTokenStore(err) => write!(f, "Could not serialize sentinel token store to JSON: {}", err),
-      Self::CouldNotDeserializeSentinelTokenStore { error, raw_json} => {
+      Self::CouldNotDeserializeSentinelTokenStore { error, raw_json } => {
         write!(f, "Could not deserialize sentinel token store from JSON: {:?}, raw JSON: {}", error, raw_json)
       },
     }

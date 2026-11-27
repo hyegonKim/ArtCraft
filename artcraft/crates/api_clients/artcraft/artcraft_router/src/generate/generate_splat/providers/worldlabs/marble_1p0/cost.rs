@@ -25,15 +25,7 @@ impl WorldLabsMarble1p0CostState {
 
   pub fn estimate_cost(&self) -> SplatGenerationCostEstimate {
     let cost = calculate_cost(MODEL, self.input_type);
-    SplatGenerationCostEstimate {
-      cost_in_credits: Some(cost.worldlabs_credits as u64),
-      cost_in_usd_cents: Some(cost.us_dollar_cents as u64),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    SplatGenerationCostEstimate { cost_in_credits: Some(cost.worldlabs_credits as u64), cost_in_usd_cents: Some(cost.us_dollar_cents as u64), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -74,63 +66,33 @@ mod tests {
 
   #[test]
   fn credits_come_from_the_provider_pricing_table() {
-    let estimate = text_builder().build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed");
+    let estimate = text_builder().build2().expect("build should succeed").estimate_cost().expect("estimate should succeed");
     assert_eq!(estimate.cost_in_credits, Some(1580));
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      model: RouterSplatModel::Marble1p0,
-      provider: RouterProvider::WorldLabs,
-      ..Default::default()
-    }
+    GenerateSplatRequestBuilder { model: RouterSplatModel::Marble1p0, provider: RouterProvider::WorldLabs, ..Default::default() }
   }
 
   fn text_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      prompt: Some("a cozy cabin in the snowy mountains".to_string()),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { prompt: Some("a cozy cabin in the snowy mountains".to_string()), ..base_builder() }
   }
 
   fn single_image_builder(is_panoramic: bool) -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_image_1".to_string()),
-      ])),
-      is_panoramic: Some(is_panoramic),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_image_1".to_string())])), is_panoramic: Some(is_panoramic), ..base_builder() }
   }
 
   fn multi_image_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_image_1".to_string()),
-        MediaFileToken::new("mf_image_2".to_string()),
-      ])),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_image_1".to_string()), MediaFileToken::new("mf_image_2".to_string())])), ..base_builder() }
   }
 
   fn video_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      reference_video: Some(VideoRef::MediaFileToken(MediaFileToken::new("mf_video".to_string()))),
-      ..base_builder()
-    }
+    GenerateSplatRequestBuilder { reference_video: Some(VideoRef::MediaFileToken(MediaFileToken::new("mf_video".to_string()))), ..base_builder() }
   }
 
   fn estimate_usd_cents(builder: GenerateSplatRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

@@ -282,11 +282,7 @@ pub fn par_map<T: Send, R: Send>(items: Vec<T>, f: impl Fn(T) -> R + Sync) -> Ve
 
 /// `0..n` split into about one band per core.
 pub fn bands(n: usize) -> Vec<std::ops::Range<usize>> {
-    let k = if cfg!(target_arch = "wasm32") || !MULTITHREADED.get() {
-        1
-    } else {
-        std::thread::available_parallelism().map_or(1, |v| v.get()).clamp(1, 32)
-    };
+    let k = if cfg!(target_arch = "wasm32") || !MULTITHREADED.get() { 1 } else { std::thread::available_parallelism().map_or(1, |v| v.get()).clamp(1, 32) };
     let step = n.div_ceil(k).max(1);
     (0..n).step_by(step).map(|a| a..(a + step).min(n)).collect()
 }

@@ -76,19 +76,7 @@ mod tests {
   use crate::common::generation::common_model_type::CommonModelType;
   use crate::test_helpers::assert_serialization;
 
-  const ALL_VARIANTS: [CommonMeshModel; 11] = [
-    CommonMeshModel::Hunyuan3d2p0,
-    CommonMeshModel::Hunyuan3d2p1,
-    CommonMeshModel::Hunyuan3d3,
-    CommonMeshModel::Hunyuan3d3Sketch,
-    CommonMeshModel::Hunyuan3d3p1Pro,
-    CommonMeshModel::Hunyuan3d3p1Rapid,
-    CommonMeshModel::Hunyuan3d3p1Part,
-    CommonMeshModel::Hunyuan3d3p1SmartTopology,
-    CommonMeshModel::Tripo3dH3p1,
-    CommonMeshModel::MeshyV6,
-    CommonMeshModel::Rodin2p5Fast,
-  ];
+  const ALL_VARIANTS: [CommonMeshModel; 11] = [CommonMeshModel::Hunyuan3d2p0, CommonMeshModel::Hunyuan3d2p1, CommonMeshModel::Hunyuan3d3, CommonMeshModel::Hunyuan3d3Sketch, CommonMeshModel::Hunyuan3d3p1Pro, CommonMeshModel::Hunyuan3d3p1Rapid, CommonMeshModel::Hunyuan3d3p1Part, CommonMeshModel::Hunyuan3d3p1SmartTopology, CommonMeshModel::Tripo3dH3p1, CommonMeshModel::MeshyV6, CommonMeshModel::Rodin2p5Fast];
 
   #[test]
   fn test_serialization() {
@@ -107,24 +95,11 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("hunyuan_3d_2p0", CommonMeshModel::Hunyuan3d2p0),
-      ("hunyuan_3d_2p1", CommonMeshModel::Hunyuan3d2p1),
-      ("hunyuan_3d_3", CommonMeshModel::Hunyuan3d3),
-      ("hunyuan_3d_3_sketch", CommonMeshModel::Hunyuan3d3Sketch),
-      ("hunyuan_3d_3p1_pro", CommonMeshModel::Hunyuan3d3p1Pro),
-      ("hunyuan_3d_3p1_rapid", CommonMeshModel::Hunyuan3d3p1Rapid),
-      ("hunyuan_3d_3p1_part", CommonMeshModel::Hunyuan3d3p1Part),
-      ("hunyuan_3d_3p1_topology", CommonMeshModel::Hunyuan3d3p1SmartTopology),
-      ("tripo3d_h3p1", CommonMeshModel::Tripo3dH3p1),
-      ("meshy_v6", CommonMeshModel::MeshyV6),
-      ("rodin_2p5_fast", CommonMeshModel::Rodin2p5Fast),
-    ];
+    let cases = [("hunyuan_3d_2p0", CommonMeshModel::Hunyuan3d2p0), ("hunyuan_3d_2p1", CommonMeshModel::Hunyuan3d2p1), ("hunyuan_3d_3", CommonMeshModel::Hunyuan3d3), ("hunyuan_3d_3_sketch", CommonMeshModel::Hunyuan3d3Sketch), ("hunyuan_3d_3p1_pro", CommonMeshModel::Hunyuan3d3p1Pro), ("hunyuan_3d_3p1_rapid", CommonMeshModel::Hunyuan3d3p1Rapid), ("hunyuan_3d_3p1_part", CommonMeshModel::Hunyuan3d3p1Part), ("hunyuan_3d_3p1_topology", CommonMeshModel::Hunyuan3d3p1SmartTopology), ("tripo3d_h3p1", CommonMeshModel::Tripo3dH3p1), ("meshy_v6", CommonMeshModel::MeshyV6), ("rodin_2p5_fast", CommonMeshModel::Rodin2p5Fast)];
     assert_eq!(cases.len(), ALL_VARIANTS.len());
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonMeshModel = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonMeshModel = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }

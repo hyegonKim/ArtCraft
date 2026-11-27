@@ -409,13 +409,7 @@ fn encode_merged_planes(compression: Compression, planes: &[u8], header: &Header
         let plane_len = planes.len() / ch;
         let count_bytes = if header.version.is_psb() { 4 } else { 2 };
         let table_len = h.checked_mul(count_bytes).ok_or(craft_psd::PsdError::LimitExceeded("merged RLE row table overflow"))?;
-        let layout = craft_psd::compression::PlaneLayout {
-            planes: 1,
-            width: w,
-            height: h,
-            depth: header.depth,
-            version: header.version,
-        };
+        let layout = craft_psd::compression::PlaneLayout { planes: 1, width: w, height: h, depth: header.depth, version: header.version };
         let slices: Vec<&[u8]> = planes.chunks_exact(plane_len).collect();
         let encoded = crate::pixels::par_map(slices, |plane| -> craft_psd::Result<(Vec<u8>, Vec<u8>)> {
             let mut packed = craft_psd::compression::encode_planes(Compression::Rle, plane, &layout)?;

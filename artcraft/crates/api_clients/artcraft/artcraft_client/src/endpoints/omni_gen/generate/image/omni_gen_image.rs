@@ -7,15 +7,6 @@ use artcraft_api_defs::omni_gen::generate_response::omni_gen_image_generate_resp
 
 pub const OMNI_GEN_IMAGE_GENERATE_PATH: &str = "/v1/omni_gen/generate/image";
 
-pub async fn omni_gen_image_generate(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  request: OmniGenImageCostAndGenerateRequest,
-) -> Result<OmniGenImageGenerateResponse, StorytellerError> {
-  Ok(basic_json_post_request(
-    api_host,
-    OMNI_GEN_IMAGE_GENERATE_PATH,
-    maybe_creds,
-    request,
-  ).await?)
+pub async fn omni_gen_image_generate(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, request: OmniGenImageCostAndGenerateRequest) -> Result<OmniGenImageGenerateResponse, StorytellerError> {
+  Ok(basic_json_post_request(api_host, OMNI_GEN_IMAGE_GENERATE_PATH, maybe_creds, request).await?)
 }

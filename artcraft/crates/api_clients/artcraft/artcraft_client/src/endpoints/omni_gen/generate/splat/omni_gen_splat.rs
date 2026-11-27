@@ -7,15 +7,6 @@ use artcraft_api_defs::omni_gen::generate_response::omni_gen_splat_generate_resp
 
 pub const OMNI_GEN_SPLAT_GENERATE_PATH: &str = "/v1/omni_gen/generate/splat";
 
-pub async fn omni_gen_splat_generate(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  request: OmniGenSplatCostAndGenerateRequest,
-) -> Result<OmniGenSplatGenerateResponse, StorytellerError> {
-  Ok(basic_json_post_request(
-    api_host,
-    OMNI_GEN_SPLAT_GENERATE_PATH,
-    maybe_creds,
-    request,
-  ).await?)
+pub async fn omni_gen_splat_generate(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, request: OmniGenSplatCostAndGenerateRequest) -> Result<OmniGenSplatGenerateResponse, StorytellerError> {
+  Ok(basic_json_post_request(api_host, OMNI_GEN_SPLAT_GENERATE_PATH, maybe_creds, request).await?)
 }

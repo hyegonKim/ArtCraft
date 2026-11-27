@@ -45,10 +45,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_pro_image_to_mesh() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])),
-      ..pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])), ..pro_builder() }).await;
     let payload = response.get_fal_payload().expect("expected Fal payload");
     assert!(payload.request_id.is_some() || payload.gateway_request_id.is_some());
     assert_eq!(1, 2, "Inspect output above");
@@ -57,10 +54,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_pro_text_to_mesh() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      prompt: Some("A velociraptor with an open mouth full of sharp teeth.".to_string()),
-      ..pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { prompt: Some("A velociraptor with an open mouth full of sharp teeth.".to_string()), ..pro_builder() }).await;
     let payload = response.get_fal_payload().expect("expected Fal payload");
     assert!(payload.request_id.is_some() || payload.gateway_request_id.is_some());
     assert_eq!(1, 2, "Inspect output above");
@@ -69,11 +63,7 @@ mod tests {
   // ── Helpers ──
 
   fn pro_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3p1Pro,
-      provider: RouterProvider::Fal,
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3p1Pro, provider: RouterProvider::Fal, ..Default::default() }
   }
 
   async fn run_pipeline(builder: GenerateMeshRequestBuilder) -> GenerateMeshResponse {

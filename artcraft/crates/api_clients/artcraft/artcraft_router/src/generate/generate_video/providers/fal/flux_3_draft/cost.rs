@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::flux_3_draft::request::{
-  FalFlux3DraftMode, FalFlux3DraftRequestState,
-};
+use crate::generate::generate_video::providers::fal::flux_3_draft::request::{FalFlux3DraftMode, FalFlux3DraftRequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -24,15 +22,7 @@ impl FalFlux3DraftCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -60,13 +50,7 @@ mod tests {
   }
 
   fn base_builder(duration_seconds: Option<u16>) -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Flux3Draft,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Flux3Draft, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, ..Default::default() }
   }
 
   fn cost_cents(builder: GenerateVideoRequestBuilder) -> u64 {

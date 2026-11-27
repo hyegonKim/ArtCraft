@@ -1,9 +1,7 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::kling_1_6_pro::request::{
-  FalKling16ProMode, FalKling16ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_1_6_pro::request::{FalKling16ProMode, FalKling16ProRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalKling16ProCostState {
@@ -24,15 +22,7 @@ impl FalKling16ProCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -45,12 +35,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents_with(mut configure: impl FnMut(&mut GenerateVideoRequestBuilder)) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling16Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling16Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() };
     configure(&mut b);
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }

@@ -58,7 +58,6 @@ pub enum Sora2MultiFunctionVideoGenAspectRatio {
   SixteenByNine,
 }
 
-
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct Sora2MultiFunctionVideoGenResponse {
   pub success: bool,

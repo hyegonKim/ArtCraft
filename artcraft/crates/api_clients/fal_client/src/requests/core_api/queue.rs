@@ -17,48 +17,20 @@ pub struct Queue<Response: DeserializeOwned> {
 }
 
 impl<Response: DeserializeOwned> Queue<Response> {
-  pub fn new(
-    client: reqwest::Client,
-    endpoint: impl Into<String>,
-    api_key: String,
-    payload: QueueResponse,
-  ) -> Self {
-    Self {
-      client: Some(client),
-      endpoint: endpoint.into(),
-      api_key,
-      payload,
-      phantom: PhantomData,
-    }
+  pub fn new(client: reqwest::Client, endpoint: impl Into<String>, api_key: String, payload: QueueResponse) -> Self {
+    Self { client: Some(client), endpoint: endpoint.into(), api_key, payload, phantom: PhantomData }
   }
 
   /// Get the status of the Queue request
   pub async fn status(&self, show_logs: bool) -> Result<QueueStatus, FalError> {
-    let response = self
-      .client
-      .as_ref()
-      .unwrap()
-      .get(&self.payload.status_url)
-      .query(&[("logs", if show_logs { "1" } else { "0" })])
-      .header("Authorization", format!("Key {}", self.api_key))
-      .header("Content-Type", "application/json")
-      .send()
-      .await?;
+    let response = self.client.as_ref().unwrap().get(&self.payload.status_url).query(&[("logs", if show_logs { "1" } else { "0" })]).header("Authorization", format!("Key {}", self.api_key)).header("Content-Type", "application/json").send().await?;
 
     Ok(response.error_for_status()?.json().await?)
   }
 
   /// Get the response of the Queue request, if the request is Completed
   pub async fn response(&self) -> Result<Response, FalError> {
-    let response = self
-      .client
-      .as_ref()
-      .unwrap()
-      .get(&self.payload.response_url)
-      .header("Authorization", format!("Key {}", self.api_key))
-      .header("Content-Type", "application/json")
-      .send()
-      .await?;
+    let response = self.client.as_ref().unwrap().get(&self.payload.response_url).header("Authorization", format!("Key {}", self.api_key)).header("Content-Type", "application/json").send().await?;
 
     if response.status() != 200 {
       let error = response.text().await?;
@@ -70,14 +42,7 @@ impl<Response: DeserializeOwned> Queue<Response> {
 
   /// Cancel the Queue request
   pub async fn cancel(&self) -> Result<(), FalError> {
-    let response = self
-      .client
-      .as_ref()
-      .unwrap()
-      .put(&self.payload.cancel_url)
-      .header("Authorization", format!("Key {}", self.api_key))
-      .send()
-      .await?;
+    let response = self.client.as_ref().unwrap().put(&self.payload.cancel_url).header("Authorization", format!("Key {}", self.api_key)).send().await?;
 
     response.error_for_status()?;
 

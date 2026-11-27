@@ -7,11 +7,7 @@ use crate::generate::generate_image::image_generation_request::ImageGenerationRe
 use crate::generate::generate_image::providers::artcraft::build_common::build_artcraft_omni_image_request;
 use crate::generate::generate_image::providers::artcraft::seedream_4::request::ArtcraftSeedream4RequestState;
 
-pub fn build_artcraft_seedream_4(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_artcraft_seedream_4(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let request = build_artcraft_omni_image_request(builder, CommonImageModelEnum::Seedream4)?;
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::ArtcraftSeedream4(ArtcraftSeedream4RequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::ArtcraftSeedream4(ArtcraftSeedream4RequestState { request })))
 }

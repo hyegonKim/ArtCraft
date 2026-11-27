@@ -59,23 +59,14 @@ impl GmiCloudPollResponse {
 }
 
 /// Poll the status of a GmiCloud request.
-pub async fn poll_gmicloud_request(
-  api_key: &GmiCloudApiKey,
-  request_id: &str,
-) -> Result<GmiCloudPollResponse, GmiCloudError> {
+pub async fn poll_gmicloud_request(api_key: &GmiCloudApiKey, request_id: &str) -> Result<GmiCloudPollResponse, GmiCloudError> {
   let url = format!("{}/requests/{}", BASE_URL, request_id);
 
   let client = reqwest::Client::new();
-  let response = client
-    .get(&url)
-    .header("Authorization", format!("Bearer {}", api_key.as_str()))
-    .send()
-    .await
-    .map_err(GmiCloudGenericApiError::from)?;
+  let response = client.get(&url).header("Authorization", format!("Bearer {}", api_key.as_str())).send().await.map_err(GmiCloudGenericApiError::from)?;
 
   let status = response.status();
-  let body_text = response.text().await
-    .map_err(GmiCloudGenericApiError::from)?;
+  let body_text = response.text().await.map_err(GmiCloudGenericApiError::from)?;
 
   if status == reqwest::StatusCode::UNAUTHORIZED {
     return Err(GmiCloudSpecificApiError::Unauthorized.into());
@@ -83,14 +74,10 @@ pub async fn poll_gmicloud_request(
 
   if !status.is_success() {
     warn!("GmiCloud poll error: status={}, body={}", status, body_text);
-    return Err(GmiCloudGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status.as_u16(),
-      body: body_text,
-    }.into());
+    return Err(GmiCloudGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status.as_u16(), body: body_text }.into());
   }
 
-  let parsed: GmiCloudPollResponse = serde_json::from_str(&body_text)
-    .map_err(|err| GmiCloudGenericApiError::SerdeResponseParseErrorWithBody(err, body_text))?;
+  let parsed: GmiCloudPollResponse = serde_json::from_str(&body_text).map_err(|err| GmiCloudGenericApiError::SerdeResponseParseErrorWithBody(err, body_text))?;
 
   Ok(parsed)
 }
@@ -202,8 +189,7 @@ mod tests {
     #[ignore] // requires real API key
     async fn poll_seedance_20_720p() {
       let api_key = crate::test_utils::load_api_key();
-      let response = poll_gmicloud_request(&api_key, "40f63632-dd9d-4725-ab73-5bb764e773be")
-        .await.unwrap();
+      let response = poll_gmicloud_request(&api_key, "40f63632-dd9d-4725-ab73-5bb764e773be").await.unwrap();
 
       assert_eq!(response.request_id, "40f63632-dd9d-4725-ab73-5bb764e773be");
       assert_eq!(response.model, "seedance-2-0-260128");
@@ -223,8 +209,7 @@ mod tests {
     #[ignore] // requires real API key
     async fn poll_seedance_20_480p() {
       let api_key = crate::test_utils::load_api_key();
-      let response = poll_gmicloud_request(&api_key, "4a0efe0d-990f-480d-9792-5bb71dd26b85")
-        .await.unwrap();
+      let response = poll_gmicloud_request(&api_key, "4a0efe0d-990f-480d-9792-5bb71dd26b85").await.unwrap();
 
       assert_eq!(response.request_id, "4a0efe0d-990f-480d-9792-5bb71dd26b85");
       assert_eq!(response.model, "seedance-2-0-260128");
@@ -243,8 +228,7 @@ mod tests {
     #[ignore] // requires real API key
     async fn poll_seedance_20_fast_720p() {
       let api_key = crate::test_utils::load_api_key();
-      let response = poll_gmicloud_request(&api_key, "2fbbe377-7c92-482e-b1eb-92fd296b0a68")
-        .await.unwrap();
+      let response = poll_gmicloud_request(&api_key, "2fbbe377-7c92-482e-b1eb-92fd296b0a68").await.unwrap();
 
       assert_eq!(response.request_id, "2fbbe377-7c92-482e-b1eb-92fd296b0a68");
       assert_eq!(response.model, "seedance-2-0-fast-260128");
@@ -263,8 +247,7 @@ mod tests {
     #[ignore] // requires real API key
     async fn poll_seedance_20_fast_480p() {
       let api_key = crate::test_utils::load_api_key();
-      let response = poll_gmicloud_request(&api_key, "1b654a85-d99e-4380-b615-c7a8985ed15b")
-        .await.unwrap();
+      let response = poll_gmicloud_request(&api_key, "1b654a85-d99e-4380-b615-c7a8985ed15b").await.unwrap();
 
       assert_eq!(response.request_id, "1b654a85-d99e-4380-b615-c7a8985ed15b");
       assert_eq!(response.model, "seedance-2-0-fast-260128");

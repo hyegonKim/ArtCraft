@@ -15,22 +15,10 @@ impl KinoviSunoMusicCostState {
   pub fn estimate_cost(&self) -> AudioGenerationCostEstimate {
     // Cost math is owned by kinovi_web_client's binding — the router just
     // forwards the result so router cost ≡ binding cost by construction.
-    let pricing_request = GenerateSunoMusicRequest {
-      prompt: String::new(),
-      style_tags: None,
-      instrumental: false,
-    };
+    let pricing_request = GenerateSunoMusicRequest { prompt: String::new(), style_tags: None, instrumental: false };
     let costs = pricing_request.calculate_costs();
 
-    AudioGenerationCostEstimate {
-      cost_in_credits: Some(costs.kinovi_credits),
-      cost_in_usd_cents: Some(costs.usd_cents_rounded_up),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    AudioGenerationCostEstimate { cost_in_credits: Some(costs.kinovi_credits), cost_in_usd_cents: Some(costs.usd_cents_rounded_up), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -52,12 +40,7 @@ mod tests {
 
   #[test]
   fn cost_from_built_request_is_seven_cents() {
-    let builder = GenerateAudioRequestBuilder {
-      model: RouterAudioModel::SunoMusic,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("a song".to_string()),
-      ..Default::default()
-    };
+    let builder = GenerateAudioRequestBuilder { model: RouterAudioModel::SunoMusic, provider: RouterProvider::KinoviWeb, prompt: Some("a song".to_string()), ..Default::default() };
     let state = build_kinovi_suno_music_state(builder).expect("build");
     let estimate = KinoviSunoMusicCostState::from_request(&state).estimate_cost();
     assert_eq!(estimate.cost_in_usd_cents, Some(7));

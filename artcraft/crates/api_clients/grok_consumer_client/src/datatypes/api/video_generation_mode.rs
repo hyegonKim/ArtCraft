@@ -1,4 +1,3 @@
-
 /// The video generation mode selector.
 #[derive(Copy, Clone, Debug)]
 pub enum VideoGenerationMode {
@@ -14,7 +13,6 @@ pub enum VideoGenerationMode {
 }
 
 impl VideoGenerationMode {
-
   /// This is the value for `--mode` in video generation chats.
   pub fn as_api_mode_arg(&self) -> &'static str {
     match self {

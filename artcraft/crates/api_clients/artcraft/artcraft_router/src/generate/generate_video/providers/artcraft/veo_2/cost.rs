@@ -19,15 +19,7 @@ impl ArtcraftVeo2CostState {
     let extra = self.duration_seconds.saturating_sub(5);
     let cost_in_usd_cents = 275 + extra * 55;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -38,28 +30,32 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo2,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo2, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn default_is_5s_priced_at_275() { assert_eq!(cost_cents(None), 275); }
+  fn default_is_5s_priced_at_275() {
+    assert_eq!(cost_cents(None), 275);
+  }
 
   #[test]
-  fn five_seconds_is_275() { assert_eq!(cost_cents(Some(5)), 275); }
+  fn five_seconds_is_275() {
+    assert_eq!(cost_cents(Some(5)), 275);
+  }
 
   #[test]
-  fn six_seconds_is_330() { assert_eq!(cost_cents(Some(6)), 330); }
+  fn six_seconds_is_330() {
+    assert_eq!(cost_cents(Some(6)), 330);
+  }
 
   #[test]
-  fn seven_seconds_is_385() { assert_eq!(cost_cents(Some(7)), 385); }
+  fn seven_seconds_is_385() {
+    assert_eq!(cost_cents(Some(7)), 385);
+  }
 
   #[test]
-  fn eight_seconds_is_440() { assert_eq!(cost_cents(Some(8)), 440); }
+  fn eight_seconds_is_440() {
+    assert_eq!(cost_cents(Some(8)), 440);
+  }
 }

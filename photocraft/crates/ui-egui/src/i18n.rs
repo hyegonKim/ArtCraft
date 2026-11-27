@@ -418,8 +418,7 @@ pub fn sync_context(ctx: &egui::Context, language: &str) {
 
 /// Does `lang` have a catalog entry for this plain string? (English never does: it is the source.)
 pub fn has(lang: Lang, s: &str) -> bool {
-    lang.i18n().get(lang.lang, "", s).is_some()
-        || (lang.code() == "ko" && crate::ko_ps2027::has_plain(s))
+    lang.i18n().get(lang.lang, "", s).is_some() || (lang.code() == "ko" && crate::ko_ps2027::has_plain(s))
 }
 
 /// Translate an English UI string into the current language ([`tr`] with [`current`]).

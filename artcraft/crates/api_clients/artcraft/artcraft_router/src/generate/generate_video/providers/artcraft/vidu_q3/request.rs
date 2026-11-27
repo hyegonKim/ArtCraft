@@ -38,11 +38,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to the Artcraft backend, incurs cost
   async fn text_to_video() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("A red kite soaring over coastal cliffs, cinematic.".to_string()),
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      ..artcraft_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A red kite soaring over coastal cliffs, cinematic.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
     assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
@@ -50,11 +46,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to the Artcraft backend, incurs cost
   async fn keyframe_start_frame() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("The dog stands up and walks toward the lake.".to_string()),
-      start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string()))),
-      ..artcraft_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("The dog stands up and walks toward the lake.".to_string()), start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string()))), ..artcraft_builder() }).await;
     assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
@@ -62,11 +54,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to the Artcraft backend, incurs cost
   async fn reference_images_to_video() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("The dog explores a mossy forest clearing.".to_string()),
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string())])),
-      ..artcraft_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("The dog explores a mossy forest clearing.".to_string()), reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string())])), ..artcraft_builder() }).await;
     assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
@@ -74,22 +62,13 @@ mod tests {
   // ── Helpers ──
 
   fn artcraft_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::ViduQ3,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::ViduQ3, provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn get_artcraft_client() -> RouterClient {
-    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt")
-      .expect("Failed to read artcraft cookies");
+    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt").expect("Failed to read artcraft cookies");
     let cookies = cookies.trim().to_string();
-    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies)
-      .expect("Failed to parse cookies")
-      .expect("No credentials found");
+    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies).expect("Failed to parse cookies").expect("No credentials found");
     RouterClient::Artcraft(RouterArtcraftClient::new(ApiHost::Storyteller, credentials))
   }
 
@@ -108,7 +87,7 @@ mod tests {
       GenerateVideoResponse::Artcraft(p) => {
         println!("inference_job_token={:?}", p.inference_job_token);
         println!("all_inference_job_tokens={:?}", p.all_inference_job_tokens);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 

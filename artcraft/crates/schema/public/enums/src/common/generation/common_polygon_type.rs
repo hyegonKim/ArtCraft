@@ -24,24 +24,17 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("triangle", CommonPolygonType::Triangle),
-      ("quad", CommonPolygonType::Quad),
-    ];
+    let cases = [("triangle", CommonPolygonType::Triangle), ("quad", CommonPolygonType::Quad)];
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonPolygonType = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonPolygonType = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }
 
   #[test]
   fn test_round_trip() {
-    let all = [
-      CommonPolygonType::Triangle,
-      CommonPolygonType::Quad,
-    ];
+    let all = [CommonPolygonType::Triangle, CommonPolygonType::Quad];
     for variant in all {
       let json = serde_json::to_string(&variant).unwrap();
       let deserialized: CommonPolygonType = serde_json::from_str(&json).unwrap();

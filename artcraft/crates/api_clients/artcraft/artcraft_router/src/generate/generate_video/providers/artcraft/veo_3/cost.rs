@@ -21,15 +21,7 @@ impl ArtcraftVeo3CostState {
     let per_second_cents: u64 = if self.generate_audio { 48 } else { 24 };
     let cost_in_usd_cents = per_second_cents * self.duration_seconds;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -49,31 +41,34 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn audio_off_4s_is_96() { assert_eq!(cost_cents(Some(4), Some(false)), 96); }
+  fn audio_off_4s_is_96() {
+    assert_eq!(cost_cents(Some(4), Some(false)), 96);
+  }
 
   #[test]
-  fn audio_off_6s_is_144() { assert_eq!(cost_cents(Some(6), Some(false)), 144); }
+  fn audio_off_6s_is_144() {
+    assert_eq!(cost_cents(Some(6), Some(false)), 144);
+  }
 
   #[test]
-  fn audio_off_8s_is_192() { assert_eq!(cost_cents(Some(8), Some(false)), 192); }
+  fn audio_off_8s_is_192() {
+    assert_eq!(cost_cents(Some(8), Some(false)), 192);
+  }
 
   #[test]
-  fn audio_on_4s_is_192() { assert_eq!(cost_cents(Some(4), Some(true)), 192); }
+  fn audio_on_4s_is_192() {
+    assert_eq!(cost_cents(Some(4), Some(true)), 192);
+  }
 
   #[test]
-  fn audio_on_8s_is_384() { assert_eq!(cost_cents(Some(8), Some(true)), 384); }
+  fn audio_on_8s_is_384() {
+    assert_eq!(cost_cents(Some(8), Some(true)), 384);
+  }
 
   #[test]
   fn default_duration_is_8s() {

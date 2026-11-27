@@ -18,8 +18,7 @@ pub(crate) fn artcraft_default_user_agent(destination: &Url) -> &'static str {
 pub(crate) fn normalize_artcraft_origin(destination: &Url, headers: &mut HeaderMap) {
   let origin = headers.get(header::ORIGIN).and_then(|value| value.to_str().ok());
   // Packaged-app webview origins on macOS and Windows.
-  let packaged_origin = headers.get(header::ORIGIN).is_none()
-    || matches!(origin, Some("null" | "http://tauri.localhost" | "tauri://localhost"));
+  let packaged_origin = headers.get(header::ORIGIN).is_none() || matches!(origin, Some("null" | "http://tauri.localhost" | "tauri://localhost"));
   // Development webview origins (Vite on any loopback port).
   let webview_origin = packaged_origin || origin.is_some_and(is_loopback_origin);
 
@@ -66,54 +65,31 @@ mod tests {
   const UNKNOWN: &str = "https://www.gravatar.com/avatar/a";
 
   const DEV_WEBVIEW_ORIGIN: &str = "http://127.0.0.1:5193";
-  const PACKAGED_ORIGINS: [Option<&str>; 4] =
-    [None, Some("null"), Some("http://tauri.localhost"), Some("tauri://localhost")];
+  const PACKAGED_ORIGINS: [Option<&str>; 4] = [None, Some("null"), Some("http://tauri.localhost"), Some("tauri://localhost")];
 
   mod development {
     use super::*;
 
     #[test]
     fn normalizes_dynamic_ports_and_loopback_hosts() {
-      for origin in [
-        "http://127.0.0.1:5193",
-        "http://127.0.0.1:5194",
-        "http://127.0.0.1:65535",
-        "http://localhost:5173",
-        "http://[::1]:5193",
-      ] {
+      for origin in ["http://127.0.0.1:5193", "http://127.0.0.1:5194", "http://127.0.0.1:65535", "http://localhost:5173", "http://[::1]:5193"] {
         assert_eq!(normalized(API, Some(origin)), "https://desktop.getartcraft.com");
         assert_eq!(normalized(LOCAL_API, Some(origin)), "http://localhost");
         assert_eq!(normalized(GROK, Some(origin)), "https://grok.com");
       }
-      assert_eq!(
-        normalized("https://api.fakeyou.com/v1/session", Some(DEV_WEBVIEW_ORIGIN)),
-        "https://desktop.getartcraft.com"
-      );
+      assert_eq!(normalized("https://api.fakeyou.com/v1/session", Some(DEV_WEBVIEW_ORIGIN)), "https://desktop.getartcraft.com");
     }
 
     #[test]
     fn leaves_cdns_and_unknown_destinations_unchanged() {
-      for destination in [
-        CDN,
-        GCS,
-        UNKNOWN,
-        "https://api.storyteller.ai.example.com/v1/session",
-        "http://api.storyteller.ai/v1/session",
-      ] {
+      for destination in [CDN, GCS, UNKNOWN, "https://api.storyteller.ai.example.com/v1/session", "http://api.storyteller.ai/v1/session"] {
         assert_eq!(normalized(destination, Some(DEV_WEBVIEW_ORIGIN)), DEV_WEBVIEW_ORIGIN, "{destination}");
       }
     }
 
     #[test]
     fn leaves_non_webview_origins_unchanged() {
-      for origin in [
-        "https://app.getartcraft.com",
-        "https://example.com",
-        "http://localhost.example.com:5193",
-        "http://192.168.1.2:5193",
-        "not a URL",
-        "",
-      ] {
+      for origin in ["https://app.getartcraft.com", "https://example.com", "http://localhost.example.com:5193", "http://192.168.1.2:5193", "not a URL", ""] {
         assert_eq!(normalized(API, Some(origin)), origin);
         assert_eq!(normalized(GROK, Some(origin)), origin);
       }

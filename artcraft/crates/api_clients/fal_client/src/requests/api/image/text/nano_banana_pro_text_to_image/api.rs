@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::text::nano_banana_pro_text_to_image::raw_request::{
-  NanoBananaProTextToImageInput, NanoBananaProTextToImageOutput,
-};
+use crate::requests::api::image::text::nano_banana_pro_text_to_image::raw_request::{NanoBananaProTextToImageInput, NanoBananaProTextToImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -63,32 +61,32 @@ impl FalEndpoint for NanoBananaProTextToImageRequest {
       NanoBananaProTextToImageNumImages::Four => 4,
     };
 
-    let resolution = self.resolution.map(|r| match r {
-      NanoBananaProTextToImageResolution::OneK => "1K",
-      NanoBananaProTextToImageResolution::TwoK => "2K",
-      NanoBananaProTextToImageResolution::FourK => "4K",
-    }.to_string());
+    let resolution = self.resolution.map(|r| {
+      match r {
+        NanoBananaProTextToImageResolution::OneK => "1K",
+        NanoBananaProTextToImageResolution::TwoK => "2K",
+        NanoBananaProTextToImageResolution::FourK => "4K",
+      }
+      .to_string()
+    });
 
-    let aspect_ratio = self.aspect_ratio.map(|ar| match ar {
-      NanoBananaProTextToImageAspectRatio::OneByOne => "1:1",
-      NanoBananaProTextToImageAspectRatio::FiveByFour => "5:4",
-      NanoBananaProTextToImageAspectRatio::FourByThree => "4:3",
-      NanoBananaProTextToImageAspectRatio::ThreeByTwo => "3:2",
-      NanoBananaProTextToImageAspectRatio::SixteenByNine => "16:9",
-      NanoBananaProTextToImageAspectRatio::TwentyOneByNine => "21:9",
-      NanoBananaProTextToImageAspectRatio::FourByFive => "4:5",
-      NanoBananaProTextToImageAspectRatio::ThreeByFour => "3:4",
-      NanoBananaProTextToImageAspectRatio::TwoByThree => "2:3",
-      NanoBananaProTextToImageAspectRatio::NineBySixteen => "9:16",
-    }.to_string());
+    let aspect_ratio = self.aspect_ratio.map(|ar| {
+      match ar {
+        NanoBananaProTextToImageAspectRatio::OneByOne => "1:1",
+        NanoBananaProTextToImageAspectRatio::FiveByFour => "5:4",
+        NanoBananaProTextToImageAspectRatio::FourByThree => "4:3",
+        NanoBananaProTextToImageAspectRatio::ThreeByTwo => "3:2",
+        NanoBananaProTextToImageAspectRatio::SixteenByNine => "16:9",
+        NanoBananaProTextToImageAspectRatio::TwentyOneByNine => "21:9",
+        NanoBananaProTextToImageAspectRatio::FourByFive => "4:5",
+        NanoBananaProTextToImageAspectRatio::ThreeByFour => "3:4",
+        NanoBananaProTextToImageAspectRatio::TwoByThree => "2:3",
+        NanoBananaProTextToImageAspectRatio::NineBySixteen => "9:16",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      num_images: Some(num_images),
-      aspect_ratio,
-      resolution,
-      output_format: Some("png".to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), num_images: Some(num_images), aspect_ratio, resolution, output_format: Some("png".to_string()) })
   }
 }
 
@@ -106,12 +104,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = NanoBananaProTextToImageRequest {
-      prompt: "an anime girl riding on the back of a t-rex".to_string(),
-      num_images: NanoBananaProTextToImageNumImages::One,
-      resolution: Some(NanoBananaProTextToImageResolution::TwoK),
-      aspect_ratio: Some(NanoBananaProTextToImageAspectRatio::SixteenByNine),
-    };
+    let request = NanoBananaProTextToImageRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: NanoBananaProTextToImageNumImages::One, resolution: Some(NanoBananaProTextToImageResolution::TwoK), aspect_ratio: Some(NanoBananaProTextToImageAspectRatio::SixteenByNine) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/test").await?;
     println!("Request ID: {:?}", result.request_id);

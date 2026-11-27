@@ -17,18 +17,14 @@ pub async fn get_index_page_scripts_with_client(args: GetIndexPageScriptsArgs<'_
   let mut map = HashMap::with_capacity(args.scripts.len());
 
   for script_url in args.scripts {
-    let result = get_index_page_script_with_client(GetIndexPageScriptArgs {
-      client: args.client,
-      cookie: args.cookie,
-      script_url,
-    }).await;
+    let result = get_index_page_script_with_client(GetIndexPageScriptArgs { client: args.client, cookie: args.cookie, script_url }).await;
 
     let script = match result {
       Ok(script) => script,
       Err(err) => {
         error!("Error fetching script: {}: {:?}", script_url, err);
         return Err(err);
-      }
+      },
     };
 
     map.insert(script_url.to_string(), script);
@@ -54,18 +50,11 @@ mod tests {
     let client = create_firefox_client()?;
     let cookie = get_test_cookies()?;
 
-    let index = get_index_page_with_client(GetIndexPageWithClientArgs {
-      client: &client,
-      cookie: &cookie,
-    }).await?;
+    let index = get_index_page_with_client(GetIndexPageWithClientArgs { client: &client, cookie: &cookie }).await?;
 
     let scripts = parse_index_svg_paths(&index.body);
 
-    let scripts = get_index_page_scripts_with_client(GetIndexPageScriptsArgs {
-      client: &client,
-      cookie: &cookie,
-      scripts: &scripts,
-    }).await?;
+    let scripts = get_index_page_scripts_with_client(GetIndexPageScriptsArgs { client: &client, cookie: &cookie, scripts: &scripts }).await?;
 
     for (k, v) in scripts.iter() {
       let mut body = v.to_string();

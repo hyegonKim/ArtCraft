@@ -57,11 +57,7 @@ mod tests {
 
   #[test]
   fn every_known_variant_round_trips() {
-    let all = [
-      (ApiClientQuality::High, "high"),
-      (ApiClientQuality::Medium, "medium"),
-      (ApiClientQuality::Low, "low"),
-    ];
+    let all = [(ApiClientQuality::High, "high"), (ApiClientQuality::Medium, "medium"), (ApiClientQuality::Low, "low")];
     for (variant, s) in all {
       assert_eq!(String::from(variant.clone()), s, "serialize mismatch for {:?}", variant);
       let parsed: ApiClientQuality = serde_json::from_str(&format!("\"{}\"", s)).unwrap();

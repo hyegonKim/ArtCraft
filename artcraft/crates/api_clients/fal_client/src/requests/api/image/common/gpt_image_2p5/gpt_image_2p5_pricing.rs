@@ -45,8 +45,7 @@ const ESTIMATED_INPUT_TOKENS_PER_REFERENCE_IMAGE: f64 = 1_000.0;
 /// Estimated cost of rendering one output image of the given size at the given quality.
 pub fn estimate_output_image_cost(quality: GptImage2p5Quality, width: u32, height: u32) -> UsdHundredthsOfCent {
   let megapixels = width as f64 * height as f64 / 1_000_000.0;
-  let low_quality_tokens = low_quality_base_tokens(width, height)
-    + LOW_QUALITY_OUTPUT_TOKENS_PER_MEGAPIXEL * megapixels;
+  let low_quality_tokens = low_quality_base_tokens(width, height) + LOW_QUALITY_OUTPUT_TOKENS_PER_MEGAPIXEL * megapixels;
   let tokens = low_quality_tokens * quality_token_multiplier(quality);
   usd_to_hundredths_of_cent(tokens * OUTPUT_IMAGE_TOKEN_USD)
 }
@@ -105,25 +104,11 @@ mod tests {
   const ALL_QUALITIES: [GptImage2p5Quality; 5] = [Low, Medium, High, XHigh, Max];
 
   /// Fal's published canonical table, in hundredths of a cent: (width, height, [low, medium, high, xhigh, max]).
-  const FAL_PUBLISHED_TABLE: &[(u32, u32, [u64; 5])] = &[
-    (1024,  768, [ 40,  90,  361,  642, 1444]),
-    (1024, 1024, [ 59, 132,  527,  937, 2107]),
-    (1024, 1536, [ 47, 103,  412,  738, 1646]),
-    (1920, 1080, [ 44, 103,  396,  704, 1584]),
-    (2560, 1440, [ 62, 143,  553,  983, 2211]),
-    (3840, 2160, [111, 260, 1001, 1779, 4003]),
-  ];
+  const FAL_PUBLISHED_TABLE: &[(u32, u32, [u64; 5])] = &[(1024, 768, [40, 90, 361, 642, 1444]), (1024, 1024, [59, 132, 527, 937, 2107]), (1024, 1536, [47, 103, 412, 738, 1646]), (1920, 1080, [44, 103, 396, 704, 1584]), (2560, 1440, [62, 143, 553, 983, 2211]), (3840, 2160, [111, 260, 1001, 1779, 4003])];
 
   /// What our model produces at the canonical sizes, in hundredths of a cent. Pinned so a
   /// change to the fit is a deliberate, visible diff.
-  const MODEL_TABLE: &[(u32, u32, [u64; 5])] = &[
-    (1024,  768, [ 41,  95,  363,  645, 1451]),
-    (1024, 1024, [ 59, 138,  529,  940, 2115]),
-    (1024, 1536, [ 48, 111,  426,  757, 1703]),
-    (1920, 1080, [ 44, 103,  396,  704, 1584]),
-    (2560, 1440, [ 62, 144,  553,  983, 2211]),
-    (3840, 2160, [112, 260, 1001, 1779, 4003]),
-  ];
+  const MODEL_TABLE: &[(u32, u32, [u64; 5])] = &[(1024, 768, [41, 95, 363, 645, 1451]), (1024, 1024, [59, 138, 529, 940, 2115]), (1024, 1536, [48, 111, 426, 757, 1703]), (1920, 1080, [44, 103, 396, 704, 1584]), (2560, 1440, [62, 144, 553, 983, 2211]), (3840, 2160, [112, 260, 1001, 1779, 4003])];
 
   mod canonical_table_tests {
     use super::*;
@@ -176,11 +161,7 @@ mod tests {
     #[test]
     fn auto_is_priced_as_high() {
       for &(w, h, _) in FAL_PUBLISHED_TABLE {
-        assert_eq!(
-          estimate_output_image_cost(Auto, w, h),
-          estimate_output_image_cost(High, w, h),
-          "{w}x{h}",
-        );
+        assert_eq!(estimate_output_image_cost(Auto, w, h), estimate_output_image_cost(High, w, h), "{w}x{h}",);
       }
     }
 
@@ -272,4 +253,3 @@ mod tests {
     }
   }
 }
-

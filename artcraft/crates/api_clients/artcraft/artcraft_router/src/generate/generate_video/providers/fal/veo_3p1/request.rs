@@ -10,9 +10,7 @@ use fal_client::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 use crate::client::router_fal_client::RouterFalClient;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
-use crate::generate::generate_video::generate_video_response::{
-  FalVideoResponsePayload, GenerateVideoResponse,
-};
+use crate::generate::generate_video::generate_video_response::{FalVideoResponsePayload, GenerateVideoResponse};
 
 #[derive(Clone, Debug)]
 pub enum FalVeo3p1Mode {
@@ -48,13 +46,7 @@ where
 {
   let outbound: Arc<dyn Debug + Send + Sync> = Arc::new(request.clone());
   let payload = send_fal_request(request, client).await?;
-  Ok(GenerateVideoResponse::Fal(FalVideoResponsePayload {
-    request_id: payload.request_id,
-    gateway_request_id: payload.gateway_request_id,
-    maybe_status_url: payload.status_url,
-    maybe_response_url: payload.response_url,
-    maybe_outbound_request: Some(outbound),
-  }))
+  Ok(GenerateVideoResponse::Fal(FalVideoResponsePayload { request_id: payload.request_id, gateway_request_id: payload.gateway_request_id, maybe_status_url: payload.status_url, maybe_response_url: payload.response_url, maybe_outbound_request: Some(outbound) }))
 }
 
 struct FalResponseIds {
@@ -64,26 +56,13 @@ struct FalResponseIds {
   response_url: Option<String>,
 }
 
-async fn send_fal_request<T: FalEndpoint>(
-  request: &T,
-  client: &RouterFalClient,
-) -> Result<FalResponseIds, ArtcraftRouterError> {
+async fn send_fal_request<T: FalEndpoint>(request: &T, client: &RouterFalClient) -> Result<FalResponseIds, ArtcraftRouterError> {
   if let Some(webhook_url) = &client.webhook_url {
     let response = request.send_webhook_request(&client.api_key, webhook_url).await?;
-    Ok(FalResponseIds {
-      request_id: response.request_id,
-      gateway_request_id: response.gateway_request_id,
-      status_url: None,
-      response_url: None,
-    })
+    Ok(FalResponseIds { request_id: response.request_id, gateway_request_id: response.gateway_request_id, status_url: None, response_url: None })
   } else {
     let response = request.send_queue_request(&client.api_key).await?;
-    Ok(FalResponseIds {
-      request_id: Some(response.request_id),
-      gateway_request_id: None,
-      status_url: Some(response.status_url),
-      response_url: Some(response.response_url),
-    })
+    Ok(FalResponseIds { request_id: Some(response.request_id), gateway_request_id: None, status_url: Some(response.status_url), response_url: Some(response.response_url) })
   }
 }
 
@@ -106,72 +85,40 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn live_text_to_video_720p_4s() {
-    let r = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("a quiet meadow with wildflowers".to_string()),
-      resolution: Some(RouterResolution::SevenTwentyP),
-      duration_seconds: Some(4),
-      ..builder()
-    }).await;
+    let r = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("a quiet meadow with wildflowers".to_string()), resolution: Some(RouterResolution::SevenTwentyP), duration_seconds: Some(4), ..builder() }).await;
     assert!(matches!(r, GenerateVideoResponse::Fal(_)));
   }
 
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn live_image_to_video_8s() {
-    let r = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("the dog leaps into the lake.".to_string()),
-      start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      duration_seconds: Some(8),
-      ..builder()
-    }).await;
+    let r = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("the dog leaps into the lake.".to_string()), start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), duration_seconds: Some(8), ..builder() }).await;
     assert!(matches!(r, GenerateVideoResponse::Fal(_)));
   }
 
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn live_first_last_frame() {
-    let r = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("a smooth transition between scenes".to_string()),
-      start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      end_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      duration_seconds: Some(6),
-      ..builder()
-    }).await;
+    let r = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("a smooth transition between scenes".to_string()), start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), end_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), duration_seconds: Some(6), ..builder() }).await;
     assert!(matches!(r, GenerateVideoResponse::Fal(_)));
   }
 
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn live_reference_to_video_4s() {
-    let r = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("the dog runs across a sunlit meadow".to_string()),
-      reference_images: Some(ImageListRef::Urls(vec![JUNO_AT_LAKE_IMAGE_URL.to_string()])),
-      duration_seconds: Some(4),
-      generate_audio: Some(false),
-      ..builder()
-    }).await;
+    let r = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("the dog runs across a sunlit meadow".to_string()), reference_images: Some(ImageListRef::Urls(vec![JUNO_AT_LAKE_IMAGE_URL.to_string()])), duration_seconds: Some(4), generate_audio: Some(false), ..builder() }).await;
     assert!(matches!(r, GenerateVideoResponse::Fal(_)));
   }
 
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn live_extend_video_7s() {
-    let r = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("the scene continues naturally, keeping the same motion and style".to_string()),
-      reference_videos: Some(VideoListRef::Urls(vec![ANGRY_SHIBA_VIDEO_URL.to_string()])),
-      duration_seconds: Some(7),
-      generate_audio: Some(false),
-      ..builder()
-    }).await;
+    let r = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("the scene continues naturally, keeping the same motion and style".to_string()), reference_videos: Some(VideoListRef::Urls(vec![ANGRY_SHIBA_VIDEO_URL.to_string()])), duration_seconds: Some(7), generate_audio: Some(false), ..builder() }).await;
     assert!(matches!(r, GenerateVideoResponse::Fal(_)));
   }
 
   fn builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3p1,
-      provider: RouterProvider::Fal,
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3p1, provider: RouterProvider::Fal, ..Default::default() }
   }
 
   async fn run_pipeline(b: GenerateVideoRequestBuilder) -> GenerateVideoResponse {

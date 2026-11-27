@@ -28,7 +28,7 @@ use wreq_util::Emulation;
 
 /// NB: key is the public API key for WorldLabs
 /// https://docs.cloud.google.com/identity-platform/docs/use-rest-api
-const URL : &str = "https://securetoken.googleapis.com/v1/token?key=AIzaSyAA88yObUN-0pnXAxcgOrT2exZxFWLW1BI";
+const URL: &str = "https://securetoken.googleapis.com/v1/token?key=AIzaSyAA88yObUN-0pnXAxcgOrT2exZxFWLW1BI";
 pub struct GoogleRefreshTokenArgs<'a> {
   pub refresh_token: &'a WorldLabsRefreshToken,
   pub request_timeout: Option<Duration>,
@@ -41,25 +41,11 @@ pub struct GoogleRefreshTokenResponse {
 
 /// Refresh Access Token for WorldLabs using Google.
 pub async fn google_refresh_token(args: GoogleRefreshTokenArgs<'_>) -> Result<GoogleRefreshTokenResponse, WorldLabsError> {
-  let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
-
+  let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| WorldLabsClientError::WreqClientError(err))?;
 
   debug!("Requesting URL: {}", URL);
 
-  let mut request_builder = client.post(URL)
-      .header(ACCEPT, ACCEPT_ALL)
-      .header(ACCEPT_LANGUAGE, ACCEPT_LANGUAGE_EN_US)
-      .header(ACCEPT_ENCODING, ACCEPT_ENCODING_GZIP_ETC)
-      .header(REFERER, REFERER_VALUE)
-      .header(CONNECTION, CONNECTION_KEEP_ALIVE)
-      .header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY)
-      .header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS)
-      .header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE)
-      .header(PRIORITY, PRIORITY_4)
-      .header(TE, TE_TRAILERS);
+  let mut request_builder = client.post(URL).header(ACCEPT, ACCEPT_ALL).header(ACCEPT_LANGUAGE, ACCEPT_LANGUAGE_EN_US).header(ACCEPT_ENCODING, ACCEPT_ENCODING_GZIP_ETC).header(REFERER, REFERER_VALUE).header(CONNECTION, CONNECTION_KEEP_ALIVE).header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY).header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS).header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE).header(PRIORITY, PRIORITY_4).header(TE, TE_TRAILERS);
 
   let mut form = HashMap::new();
   form.insert("grant_type", "refresh_token".to_string());
@@ -69,29 +55,22 @@ pub async fn google_refresh_token(args: GoogleRefreshTokenArgs<'_>) -> Result<Go
     request_builder = request_builder.timeout(timeout);
   }
 
-  let http_request = request_builder
-      .form(&form)
-      .build()
-      .map_err(|err| {
-        error!("Error building request: {:?}", err);
-        WorldLabsClientError::WreqClientError(err)
-      })?;
+  let http_request = request_builder.form(&form).build().map_err(|err| {
+    error!("Error building request: {:?}", err);
+    WorldLabsClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during request execution: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during request execution: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-      .await
-      .map_err(|err| {
-        error!("Error reading response body: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("Request returned an error (code {}) : {:?}", status.as_u16(), response_body);
@@ -105,16 +84,12 @@ pub async fn google_refresh_token(args: GoogleRefreshTokenArgs<'_>) -> Result<Go
 
   debug!("Response body (200): {}", response_body);
 
-  let response : RawResponse = serde_json::from_str(&response_body)
-      .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let response: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
   let bearer_token = WorldLabsBearerToken::new(response.access_token);
   let refresh_token = WorldLabsRefreshToken::new(response.refresh_token);
 
-  Ok(GoogleRefreshTokenResponse {
-    bearer_token,
-    refresh_token,
-  })
+  Ok(GoogleRefreshTokenResponse { bearer_token, refresh_token })
 }
 
 #[derive(Deserialize)]
@@ -144,10 +119,7 @@ mod tests {
     let refresh_token = "AMf-vByUgA0J9S93vULECe-sD50cbR85AFVYF60gKAmLFF1MBYwXlKRJCsv7z3oSpLtP0ApyOU5fAl52qHWM2U0yKgEu5gQ5UCUDt5SEG4UBRHWvHEmLLcu-Zl04Fq4ljocSEO3qJzuX1wyshmptZxlDPRkjdLYgyn-Kp03woI2yRPKLuQF5hQtABHabsNUh9Zhs129sgxuUlOuw4zsFI4L8UdE3bEuF3k6Mic7KlE3440YwyQ8Qtmk9zHtXIx2ob56N-1WTGSqwMUuQ1mX4OOvLve9bw2zDW3UzchomTWkh732886RPrP-DNRkPbO3FejUEMxuYQFWYX3EEeIEdfNGXFNGPL1dNniSXlSaKadpX699Ishjviv-x9o-pPQa3zoAj3NzWLyd8mn5rDBh9qAO_iDETaeo01Sjhb4mGYfAWZ-g4S6nW778";
     let refresh_token = WorldLabsRefreshToken::new(refresh_token.to_string());
 
-    let result = google_refresh_token(GoogleRefreshTokenArgs {
-      refresh_token: &refresh_token,
-      request_timeout: None,
-    }).await?;
+    let result = google_refresh_token(GoogleRefreshTokenArgs { refresh_token: &refresh_token, request_timeout: None }).await?;
 
     Ok(())
   }

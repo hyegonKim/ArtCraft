@@ -362,6 +362,7 @@ fn command_body_more(app: &mut PhotocraftApp, ui: &mut egui::Ui, d: &Dialog, fie
         _ if crate::substance3d_ui::owns_stage3d(fields) => crate::substance3d_ui::stage3d_body(ui, fields),
         _ if crate::substance3d_ui::owns_sample_pbr(fields) => crate::substance3d_ui::sample_pbr_body(ui, fields),
         _ if crate::substance3d_ui::owns_procedural_pbr(fields) => crate::substance3d_ui::procedural_pbr_body(ui, fields),
+        _ if crate::fresco_ui::owns_watercolor(fields) => crate::fresco_ui::watercolor_body(ui, fields),
         _ if fields.contains_key("__export") => crate::export_dialog::body(app, ui, fields),
         // Image Size and Canvas Size open on Width, selected (#2329).
         _ if fields.contains_key("__sizing") => first_field_focused(ui, id, |ui| crate::sizing::body(ui, fields)),
@@ -955,6 +956,7 @@ const ROUTES: &[fn(&Fields) -> bool] = &[
     crate::substance3d_ui::owns_stage3d,
     crate::substance3d_ui::owns_sample_pbr,
     crate::substance3d_ui::owns_procedural_pbr,
+    crate::fresco_ui::owns_watercolor,
     |f| f.contains_key("__export"),
     |f| f.contains_key("__smartFilter"),
     |f| f.contains_key(crate::actions::RESUME),
@@ -1194,6 +1196,7 @@ fn confirm_command_more(app: &mut PhotocraftApp, d: Dialog) -> Result<Value, Str
         _ if crate::substance3d_ui::owns_stage3d(&d.fields) => crate::substance3d_ui::confirm_stage3d(app, &d.fields),
         _ if crate::substance3d_ui::owns_sample_pbr(&d.fields) => crate::substance3d_ui::confirm_sample_pbr(app, &d.fields),
         _ if crate::substance3d_ui::owns_procedural_pbr(&d.fields) => crate::substance3d_ui::confirm_procedural_pbr(app, &d.fields),
+        _ if crate::fresco_ui::owns_watercolor(&d.fields) => crate::fresco_ui::confirm_watercolor(app, &d.fields),
         _ if d.fields.contains_key("__export") => crate::export_dialog::confirm(app, &d.fields),
         _ => confirm_generic_command(app, d),
     }

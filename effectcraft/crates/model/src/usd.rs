@@ -10,8 +10,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::{
-    AlphaMode, MAX_IMPORT_TEXTURE_PIXELS, Mat4, Material, Mesh, Model, ModelError, Node, Primitive,
-    Result, TexRef, Texture, Wrap, perr, quat_matrix, vec3,
+    AlphaMode, MAX_IMPORT_TEXTURE_PIXELS, Mat4, Material, Mesh, Model, ModelError, Node, Primitive, Result, TexRef, Texture, Wrap, perr, quat_matrix, vec3,
 };
 
 const MAX_USD_DEPTH: usize = 128;
@@ -27,9 +26,7 @@ pub fn parse(bytes: &[u8], resolve: &dyn Fn(&str) -> Option<Vec<u8>>) -> Result<
         return parse_usdz(bytes);
     }
     if bytes.starts_with(b"PXR-USDC") {
-        return Err(ModelError::Unsupported(
-            "binary USD Crate (.usdc) is not supported; use ASCII .usda or .usdz".into(),
-        ));
+        return Err(ModelError::Unsupported("binary USD Crate (.usdc) is not supported; use ASCII .usda or .usdz".into()));
     }
     if starts_with_usda(bytes) {
         return parse_usda(bytes, resolve);
@@ -72,17 +69,13 @@ pub fn parse_usdz(bytes: &[u8]) -> Result<Model> {
         .iter()
         .position(|(name, _)| {
             let ext = name.rsplit('.').next().unwrap_or("");
-            ext.eq_ignore_ascii_case("usda")
-                || ext.eq_ignore_ascii_case("usd")
-                || ext.eq_ignore_ascii_case("usdc")
+            ext.eq_ignore_ascii_case("usda") || ext.eq_ignore_ascii_case("usd") || ext.eq_ignore_ascii_case("usdc")
         })
         .ok_or_else(|| perr("usdz: archive contains no `.usda` or `.usd` root stage"))?;
 
     let (stage_name, stage_bytes) = &entries[stage_idx];
     if stage_bytes.starts_with(b"PXR-USDC") {
-        return Err(ModelError::Unsupported(format!(
-            "usdz root stage `{stage_name}` uses binary Crate (.usdc); export with ASCII `.usda` root stage"
-        )));
+        return Err(ModelError::Unsupported(format!("usdz root stage `{stage_name}` uses binary Crate (.usdc); export with ASCII `.usda` root stage")));
     }
     let stage_dir = stage_name.rsplit_once('/').map_or("", |(d, _)| d);
     let mut map: HashMap<String, &[u8]> = HashMap::with_capacity(entries.len());
@@ -171,12 +164,7 @@ fn try_read_central_directory(bytes: &[u8]) -> Option<Result<Vec<(String, Vec<u8
     Some(extract_from_cd(bytes, cd_offset, cd_end, total_entries))
 }
 
-fn extract_from_cd(
-    bytes: &[u8],
-    mut pos: usize,
-    cd_end: usize,
-    expected: usize,
-) -> Result<Vec<(String, Vec<u8>)>> {
+fn extract_from_cd(bytes: &[u8], mut pos: usize, cd_end: usize, expected: usize) -> Result<Vec<(String, Vec<u8>)>> {
     let mut out = Vec::with_capacity(expected.min(64));
     let mut budget = MAX_USDZ_TOTAL_BYTES;
     for _ in 0..expected {
@@ -195,15 +183,11 @@ fn extract_from_cd(
         let lfh_off = read_u32_le(bytes, pos + 42).ok_or_else(|| perr("usdz: truncated cd"))? as usize;
         let name_start = pos.checked_add(46).ok_or_else(|| perr("usdz: cd overflow"))?;
         let name_end = name_start.checked_add(name_len).ok_or_else(|| perr("usdz: cd overflow"))?;
-        let next = name_end
-            .checked_add(extra_len)
-            .and_then(|x| x.checked_add(comment_len))
-            .ok_or_else(|| perr("usdz: cd overflow"))?;
+        let next = name_end.checked_add(extra_len).and_then(|x| x.checked_add(comment_len)).ok_or_else(|| perr("usdz: cd overflow"))?;
         if next > cd_end {
             return Err(perr("usdz: central directory entry past end"));
         }
-        let raw_name = std::str::from_utf8(bytes.get(name_start..name_end).unwrap_or_default())
-            .map_err(|_| perr("usdz: non-UTF-8 entry name"))?;
+        let raw_name = std::str::from_utf8(bytes.get(name_start..name_end).unwrap_or_default()).map_err(|_| perr("usdz: non-UTF-8 entry name"))?;
         pos = next;
         if raw_name.ends_with('/') {
             continue;
@@ -248,8 +232,7 @@ fn read_local_headers(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
         if data_end > bytes.len() {
             return Err(perr("usdz: truncated entry payload"));
         }
-        let raw_name = std::str::from_utf8(bytes.get(name_start..name_end).unwrap_or_default())
-            .map_err(|_| perr("usdz: non-UTF-8 entry name"))?;
+        let raw_name = std::str::from_utf8(bytes.get(name_start..name_end).unwrap_or_default()).map_err(|_| perr("usdz: non-UTF-8 entry name"))?;
         if !raw_name.ends_with('/')
             && let Some(norm_name) = normalize_archive_path("", raw_name)
         {
@@ -261,14 +244,7 @@ fn read_local_headers(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
     Ok(out)
 }
 
-fn extract_lfh_payload(
-    bytes: &[u8],
-    lfh_off: usize,
-    method: u16,
-    comp_size: usize,
-    uncomp_size: usize,
-    budget: &mut usize,
-) -> Result<Vec<u8>> {
+fn extract_lfh_payload(bytes: &[u8], lfh_off: usize, method: u16, comp_size: usize, uncomp_size: usize, budget: &mut usize) -> Result<Vec<u8>> {
     if bytes.get(lfh_off..lfh_off.saturating_add(4)) != Some(b"PK\x03\x04") {
         return Err(perr("usdz: bad local file header offset"));
     }
@@ -293,9 +269,7 @@ fn extract_lfh_payload(
         }
         8 => inflate_bounded(payload, *budget)?,
         other => {
-            return Err(ModelError::Unsupported(format!(
-                "usdz compression method {other} (only Stored and Deflate are supported)"
-            )));
+            return Err(ModelError::Unsupported(format!("usdz compression method {other} (only Stored and Deflate are supported)")));
         }
     };
     *budget = budget.saturating_sub(out.len());
@@ -490,28 +464,12 @@ fn inflate_bounded(src: &[u8], max_out: usize) -> Result<Vec<u8>> {
     Ok(out)
 }
 
-fn inflate_huff_block(
-    br: &mut BitReader<'_>,
-    lit_h: &Huff,
-    dist_h: &Huff,
-    max_out: usize,
-    out: &mut Vec<u8>,
-) -> Result<()> {
-    const LEN_BASE: [u16; 29] = [
-        3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115,
-        131, 163, 195, 227, 258,
-    ];
-    const LEN_EXTRA: [u8; 29] = [
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0,
-    ];
-    const DIST_BASE: [u16; 30] = [
-        1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537,
-        2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
-    ];
-    const DIST_EXTRA: [u8; 30] = [
-        0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12,
-        13, 13,
-    ];
+fn inflate_huff_block(br: &mut BitReader<'_>, lit_h: &Huff, dist_h: &Huff, max_out: usize, out: &mut Vec<u8>) -> Result<()> {
+    const LEN_BASE: [u16; 29] = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258];
+    const LEN_EXTRA: [u8; 29] = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0];
+    const DIST_BASE: [u16; 30] =
+        [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577];
+    const DIST_EXTRA: [u8; 30] = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13];
     loop {
         let sym = decode_sym(lit_h, br)?;
         if sym < 256 {
@@ -650,8 +608,7 @@ fn starts_number(bytes: &[u8], pos: usize) -> bool {
     if (b == b'-' || b == b'+')
         && let Some(&n) = bytes.get(pos + 1)
     {
-        return n.is_ascii_digit()
-            || (n == b'.' && bytes.get(pos + 2).is_some_and(u8::is_ascii_digit));
+        return n.is_ascii_digit() || (n == b'.' && bytes.get(pos + 2).is_some_and(u8::is_ascii_digit));
     }
     b == b'.' && bytes.get(pos + 1).is_some_and(u8::is_ascii_digit)
 }
@@ -686,9 +643,7 @@ fn lex_ident(text: &str, start: usize) -> Result<(String, usize)> {
     let bytes = text.as_bytes();
     let mut end = start;
     while let Some(&c) = bytes.get(end) {
-        if c.is_ascii_whitespace()
-            || matches!(c, b'(' | b')' | b'{' | b'}' | b'[' | b']' | b'=' | b',' | b';' | b'"' | b'\'' | b'@' | b'<' | b'>' | b'#')
-        {
+        if c.is_ascii_whitespace() || matches!(c, b'(' | b')' | b'{' | b'}' | b'[' | b']' | b'=' | b',' | b';' | b'"' | b'\'' | b'@' | b'<' | b'>' | b'#') {
             break;
         }
         let ch_len = text.get(end..).and_then(|s| s.chars().next()).map_or(1, char::len_utf8);
@@ -1257,25 +1212,12 @@ pub fn parse_usda(bytes: &[u8], resolve: &dyn Fn(&str) -> Option<Vec<u8>>) -> Re
 
     if stage.up_axis == "Z" && !roots.is_empty() {
         let s = std::f64::consts::FRAC_1_SQRT_2;
-        let z_up_root = Node {
-            name: "ZUpToYUp".into(),
-            rotation: [-s, 0.0, 0.0, s],
-            children: roots,
-            ..Node::default()
-        };
+        let z_up_root = Node { name: "ZUpToYUp".into(), rotation: [-s, 0.0, 0.0, s], children: roots, ..Node::default() };
         ctx.nodes.push(z_up_root);
         roots = vec![ctx.nodes.len() - 1];
     }
 
-    Ok(Model {
-        meshes: ctx.meshes,
-        nodes: ctx.nodes,
-        roots,
-        materials: ctx.materials,
-        textures: ctx.textures,
-        warnings: ctx.warnings,
-        ..Model::default()
-    })
+    Ok(Model { meshes: ctx.meshes, nodes: ctx.nodes, roots, materials: ctx.materials, textures: ctx.textures, warnings: ctx.warnings, ..Model::default() })
 }
 
 struct BuildCtx<'a> {
@@ -1386,11 +1328,7 @@ fn parse_wrap(v: Option<&UsdVal>) -> Wrap {
     }
 }
 
-fn resolve_uv_texture(
-    shader_map: &HashMap<String, &UsdPrim>,
-    conn: &str,
-    ctx: &mut BuildCtx<'_>,
-) -> Option<TexRef> {
+fn resolve_uv_texture(shader_map: &HashMap<String, &UsdPrim>, conn: &str, ctx: &mut BuildCtx<'_>) -> Option<TexRef> {
     let sh = *shader_map.get(shader_path_from_conn(conn))?;
     let id = find_prop(sh, "info:id").and_then(UsdVal::as_str).unwrap_or("");
     if !id.is_empty() && id != "UsdUVTexture" {
@@ -1406,25 +1344,13 @@ fn build_usd_material(mat_prim: &UsdPrim, ctx: &mut BuildCtx<'_>) -> Material {
     let mut shaders = HashMap::new();
     collect_shaders(mat_prim, &mut shaders);
 
-    let surface_conn = find_prop(mat_prim, "outputs:surface.connect")
-        .or_else(|| find_prop(mat_prim, "outputs:surface"))
-        .and_then(UsdVal::as_str);
+    let surface_conn = find_prop(mat_prim, "outputs:surface.connect").or_else(|| find_prop(mat_prim, "outputs:surface")).and_then(UsdVal::as_str);
 
     let surface = surface_conn
         .and_then(|c| shaders.get(shader_path_from_conn(c)).copied())
-        .or_else(|| {
-            shaders.values().copied().find(|s| {
-                find_prop(s, "info:id").and_then(UsdVal::as_str) == Some("UsdPreviewSurface")
-            })
-        });
+        .or_else(|| shaders.values().copied().find(|s| find_prop(s, "info:id").and_then(UsdVal::as_str) == Some("UsdPreviewSurface")));
 
-    let mut mat = Material {
-        name: mat_prim.name.clone(),
-        base_color: [0.18, 0.18, 0.18, 1.0],
-        metallic: 0.0,
-        roughness: 0.5,
-        ..Material::default()
-    };
+    let mut mat = Material { name: mat_prim.name.clone(), base_color: [0.18, 0.18, 0.18, 1.0], metallic: 0.0, roughness: 0.5, ..Material::default() };
     let Some(surf) = surface else {
         return mat;
     };
@@ -1467,12 +1393,8 @@ fn build_usd_material(mat_prim: &UsdPrim, ctx: &mut BuildCtx<'_>) -> Material {
         mat.occlusion_tex = resolve_uv_texture(&shaders, conn, ctx);
     }
 
-    let opacity = find_prop(surf, "inputs:opacity")
-        .and_then(UsdVal::as_f64)
-        .map_or(1.0, |o| (o as f32).clamp(0.0, 1.0));
-    let threshold = find_prop(surf, "inputs:opacityThreshold")
-        .and_then(UsdVal::as_f64)
-        .map_or(0.0, |t| (t as f32).clamp(0.0, 1.0));
+    let opacity = find_prop(surf, "inputs:opacity").and_then(UsdVal::as_f64).map_or(1.0, |o| (o as f32).clamp(0.0, 1.0));
+    let threshold = find_prop(surf, "inputs:opacityThreshold").and_then(UsdVal::as_f64).map_or(0.0, |t| (t as f32).clamp(0.0, 1.0));
     mat.base_color[3] = opacity;
     if threshold > 0.0 {
         mat.alpha_mode = AlphaMode::Mask;
@@ -1483,12 +1405,7 @@ fn build_usd_material(mat_prim: &UsdPrim, ctx: &mut BuildCtx<'_>) -> Material {
     mat
 }
 
-fn apply_usd_mr_textures(
-    surf: &UsdPrim,
-    shaders: &HashMap<String, &UsdPrim>,
-    ctx: &mut BuildCtx<'_>,
-    mat: &mut Material,
-) {
+fn apply_usd_mr_textures(surf: &UsdPrim, shaders: &HashMap<String, &UsdPrim>, ctx: &mut BuildCtx<'_>, mat: &mut Material) {
     let m_conn = find_prop(surf, "inputs:metallic.connect").and_then(UsdVal::as_str);
     let r_conn = find_prop(surf, "inputs:roughness.connect").and_then(UsdVal::as_str);
     if m_conn.is_none() && r_conn.is_none() {
@@ -1525,18 +1442,11 @@ fn apply_usd_mr_textures(
 }
 
 fn bound_material(prim: &UsdPrim, ctx: &BuildCtx<'_>) -> Option<usize> {
-    let path = find_prop(prim, "material:binding")
-        .or_else(|| find_prop(prim, "material:binding.connect"))
-        .and_then(UsdVal::as_str)?;
+    let path = find_prop(prim, "material:binding").or_else(|| find_prop(prim, "material:binding.connect")).and_then(UsdVal::as_str)?;
     ctx.material_by_path.get(path).copied()
 }
 
-fn build_prim_node(
-    prim: &UsdPrim,
-    inherited_mat: Option<usize>,
-    ctx: &mut BuildCtx<'_>,
-    depth: usize,
-) -> Result<Option<usize>> {
+fn build_prim_node(prim: &UsdPrim, inherited_mat: Option<usize>, ctx: &mut BuildCtx<'_>, depth: usize) -> Result<Option<usize>> {
     if depth > MAX_USD_DEPTH {
         return Err(perr("usda: scene hierarchy depth exceeded"));
     }
@@ -1561,28 +1471,14 @@ fn build_prim_node(
     }
 
     let idx = ctx.nodes.len();
-    ctx.nodes.push(Node {
-        name: prim.name.clone(),
-        translation,
-        rotation,
-        scale,
-        matrix,
-        mesh: mesh_idx,
-        children,
-        ..Node::default()
-    });
+    ctx.nodes.push(Node { name: prim.name.clone(), translation, rotation, scale, matrix, mesh: mesh_idx, children, ..Node::default() });
     Ok(Some(idx))
 }
 
 fn eval_xform_ops(prim: &UsdPrim) -> ([f64; 3], [f64; 4], [f64; 3], Option<Mat4>) {
     let order: Vec<String> = match find_prop(prim, "xformOpOrder") {
         Some(UsdVal::ArrayStr(list)) => list.clone(),
-        _ => prim
-            .props
-            .iter()
-            .filter(|p| p.name.starts_with("xformOp:"))
-            .map(|p| p.name.clone())
-            .collect(),
+        _ => prim.props.iter().filter(|p| p.name.starts_with("xformOp:")).map(|p| p.name.clone()).collect(),
     };
     if order.is_empty() {
         return ([0.0; 3], [0.0, 0.0, 0.0, 1.0], [1.0; 3], None);
@@ -1733,11 +1629,7 @@ fn read_int_array(val: Option<&UsdVal>) -> Vec<i64> {
 
 fn read_vec3_array(val: Option<&UsdVal>) -> Vec<[f32; 3]> {
     match val {
-        Some(UsdVal::ArrayTuple(v)) => v
-            .iter()
-            .filter(|t| t.len() >= 3)
-            .map(|t| [t[0] as f32, t[1] as f32, t[2] as f32])
-            .collect(),
+        Some(UsdVal::ArrayTuple(v)) => v.iter().filter(|t| t.len() >= 3).map(|t| [t[0] as f32, t[1] as f32, t[2] as f32]).collect(),
         _ => Vec::new(),
     }
 }
@@ -1767,13 +1659,7 @@ fn ensure_double_sided_material(mat_idx: Option<usize>, ctx: &mut BuildCtx<'_>) 
             Some(next)
         }
         None => {
-            let m = Material {
-                base_color: [0.8, 0.8, 0.8, 1.0],
-                metallic: 0.0,
-                roughness: 0.5,
-                double_sided: true,
-                ..Material::default()
-            };
+            let m = Material { base_color: [0.8, 0.8, 0.8, 1.0], metallic: 0.0, roughness: 0.5, double_sided: true, ..Material::default() };
             let next = ctx.materials.len();
             ctx.materials.push(m);
             Some(next)
@@ -1781,11 +1667,7 @@ fn ensure_double_sided_material(mat_idx: Option<usize>, ctx: &mut BuildCtx<'_>) 
     }
 }
 
-fn build_usd_mesh(
-    prim: &UsdPrim,
-    default_mat: Option<usize>,
-    ctx: &mut BuildCtx<'_>,
-) -> Result<Option<usize>> {
+fn build_usd_mesh(prim: &UsdPrim, default_mat: Option<usize>, ctx: &mut BuildCtx<'_>) -> Result<Option<usize>> {
     let points = read_vec3_array(find_prop(prim, "points"));
     let counts = read_int_array(find_prop(prim, "faceVertexCounts"));
     let indices = read_int_array(find_prop(prim, "faceVertexIndices"));
@@ -1794,9 +1676,7 @@ fn build_usd_mesh(
     }
 
     let double_sided = find_prop(prim, "doubleSided").and_then(UsdVal::as_bool).unwrap_or(false);
-    let left_handed = find_prop(prim, "orientation")
-        .and_then(UsdVal::as_str)
-        .is_some_and(|s| s == "leftHanded");
+    let left_handed = find_prop(prim, "orientation").and_then(UsdVal::as_str).is_some_and(|s| s == "leftHanded");
 
     let (normals, norm_indices) = read_mesh_normals(prim);
     let (uvs, uv_indices) = read_mesh_uvs(prim);
@@ -1820,15 +1700,7 @@ fn build_usd_mesh(
                 } else {
                     [corner_cursor, corner_cursor + k, corner_cursor + k + 1]
                 };
-                if !emit_usd_tri(
-                    pb,
-                    tri,
-                    face_idx,
-                    &points,
-                    &indices,
-                    (&normals, &norm_indices),
-                    (&uvs, &uv_indices),
-                ) {
+                if !emit_usd_tri(pb, tri, face_idx, &points, &indices, (&normals, &norm_indices), (&uvs, &uv_indices)) {
                     continue;
                 }
             }
@@ -1883,13 +1755,7 @@ fn read_mesh_uvs(prim: &UsdPrim) -> (Vec<[f32; 2]>, Vec<i64>) {
     (Vec::new(), Vec::new())
 }
 
-fn resolve_face_materials(
-    prim: &UsdPrim,
-    face_count: usize,
-    default_mat: Option<usize>,
-    double_sided: bool,
-    ctx: &mut BuildCtx<'_>,
-) -> Vec<Option<usize>> {
+fn resolve_face_materials(prim: &UsdPrim, face_count: usize, default_mat: Option<usize>, double_sided: bool, ctx: &mut BuildCtx<'_>) -> Vec<Option<usize>> {
     let base_mat = if double_sided { ensure_double_sided_material(default_mat, ctx) } else { default_mat };
     let mut face_mats = vec![base_mat; face_count];
     for ch in &prim.children {
@@ -1927,20 +1793,11 @@ struct PrimBuilder {
 
 impl PrimBuilder {
     fn new(material: Option<usize>) -> Self {
-        Self {
-            prim: Primitive { material, ..Primitive::default() },
-            has_normals: false,
-            has_uvs: false,
-            dedup: HashMap::new(),
-        }
+        Self { prim: Primitive { material, ..Primitive::default() }, has_normals: false, has_uvs: false, dedup: HashMap::new() }
     }
 
     fn push_vertex(&mut self, pos_idx: u32, pos: [f32; 3], norm: Option<[f32; 3]>, uv: Option<[f32; 2]>) -> u32 {
-        let key = VertKey {
-            pos: pos_idx,
-            norm: norm.map_or([u32::MAX; 3], |n| n.map(f32::to_bits)),
-            uv: uv.map_or([u32::MAX; 2], |u| u.map(f32::to_bits)),
-        };
+        let key = VertKey { pos: pos_idx, norm: norm.map_or([u32::MAX; 3], |n| n.map(f32::to_bits)), uv: uv.map_or([u32::MAX; 2], |u| u.map(f32::to_bits)) };
         if let Some(&id) = self.dedup.get(&key) {
             return id;
         }

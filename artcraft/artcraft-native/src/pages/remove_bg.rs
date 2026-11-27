@@ -58,24 +58,7 @@ pub enum BackdropPreview {
 
 impl Default for RemoveBgPage {
   fn default() -> Self {
-    let mut page = Self {
-      src_rgba: sample_image(SAMPLE_W, SAMPLE_H),
-      cutout_rgba: Vec::new(),
-      width: SAMPLE_W,
-      height: SAMPLE_H,
-      mode: KeyMode::CornerColor,
-      backdrop: BackdropPreview::Checkerboard,
-      threshold: 0.36,
-      feather_radius: 1.5,
-      edge_decontaminate: 0.65,
-      spill_suppression: 0.55,
-      edge_sharpen: 0.45,
-      edge_contrast: 0.35,
-      edge_shift: 0.0,
-      split_wipe: 0.15,
-      texture: None,
-      dirty: true,
-    };
+    let mut page = Self { src_rgba: sample_image(SAMPLE_W, SAMPLE_H), cutout_rgba: Vec::new(), width: SAMPLE_W, height: SAMPLE_H, mode: KeyMode::CornerColor, backdrop: BackdropPreview::Checkerboard, threshold: 0.36, feather_radius: 1.5, edge_decontaminate: 0.65, spill_suppression: 0.55, edge_sharpen: 0.45, edge_contrast: 0.35, edge_shift: 0.0, split_wipe: 0.15, texture: None, dirty: true };
     page.recompute_matte().expect("valid built-in background-removal sample");
     page
   }
@@ -170,7 +153,9 @@ impl RemoveBgPage {
       changed = true;
     }
     if changed {
-      if let Err(error) = self.recompute_matte() { env.toasts.error(error); }
+      if let Err(error) = self.recompute_matte() {
+        env.toasts.error(error);
+      }
     }
   }
 
@@ -251,11 +236,9 @@ impl RemoveBgPage {
     };
     let name = common::file_name(&path);
     match decode_original_rgba(&path) {
-      Ok(rgba) => {
-        match self.import_source_rgba(rgba.width(), rgba.height(), rgba.into_raw()) {
-          Ok(()) => env.toasts.success(format!("Loaded {name} at its original resolution")),
-          Err(err) => env.toasts.error(format!("Couldn't load {name}: {err}")),
-        }
+      Ok(rgba) => match self.import_source_rgba(rgba.width(), rgba.height(), rgba.into_raw()) {
+        Ok(()) => env.toasts.success(format!("Loaded {name} at its original resolution")),
+        Err(err) => env.toasts.error(format!("Couldn't load {name}: {err}")),
       },
       Err(err) => env.toasts.error(format!("Couldn't open {name}: {err}")),
     }
@@ -288,11 +271,7 @@ impl RemoveBgPage {
       return;
     }
     let side = ctx.input(|input| input.max_texture_side).min(2048).max(1) as u32;
-    let (width, height) = if self.width > side || self.height > side {
-      fit_dims(self.width, self.height, side, side)
-    } else {
-      (self.width, self.height)
-    };
+    let (width, height) = if self.width > side || self.height > side { fit_dims(self.width, self.height, side, side) } else { (self.width, self.height) };
     let preview = if (width, height) == (self.width, self.height) {
       render_backdrop_preview(&self.src_rgba, &self.cutout_rgba, width, height, self.backdrop, self.split_wipe)
     } else {
@@ -376,19 +355,15 @@ pub fn compute_alpha_matte(src: &[u8], width: u32, height: u32, mode: KeyMode, t
   let thresh = threshold.clamp(0.05, 0.95);
   let mut alpha = Vec::new();
   alpha.try_reserve_exact(count).map_err(|_| "Not enough memory for the full-resolution matte")?;
-  alpha.extend(src
-    .chunks_exact(4)
-    .take(count)
-    .map(|px| {
-      let (r, g, b) = (px[0] as f32, px[1] as f32, px[2] as f32);
-      let score = match mode {
-        KeyMode::CornerColor => ((r - bg_r).abs() + (g - bg_g).abs() + (b - bg_b).abs()) / 765.0 * 1.8,
-        KeyMode::GreenScreen => 1.0 - ((g - r.max(b)).max(0.0) / 255.0 * 2.4).clamp(0.0, 1.0),
-        KeyMode::Luma => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0,
-      };
-      ((score - thresh) / 0.14).clamp(0.0, 1.0)
-    })
-  );
+  alpha.extend(src.chunks_exact(4).take(count).map(|px| {
+    let (r, g, b) = (px[0] as f32, px[1] as f32, px[2] as f32);
+    let score = match mode {
+      KeyMode::CornerColor => ((r - bg_r).abs() + (g - bg_g).abs() + (b - bg_b).abs()) / 765.0 * 1.8,
+      KeyMode::GreenScreen => 1.0 - ((g - r.max(b)).max(0.0) / 255.0 * 2.4).clamp(0.0, 1.0),
+      KeyMode::Luma => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0,
+    };
+    ((score - thresh) / 0.14).clamp(0.0, 1.0)
+  }));
 
   let rad = feather_radius.round() as i32;
   if rad >= 1 {
@@ -450,8 +425,12 @@ fn box_feather(alpha: &mut [f32], width: usize, height: usize, radius: usize) ->
 
 /// The preview: the source left of `split_wipe`, the cutout over `backdrop` to its right.
 pub fn render_backdrop_preview(src: &[u8], cutout: &[u8], width: u32, height: u32, backdrop: BackdropPreview, split_wipe: f32) -> Vec<u8> {
-  let Ok(len) = checked_rgba_len(width, height) else { return Vec::new(); };
-  if src.len() != len || cutout.len() != len { return Vec::new(); }
+  let Ok(len) = checked_rgba_len(width, height) else {
+    return Vec::new();
+  };
+  if src.len() != len || cutout.len() != len {
+    return Vec::new();
+  }
   let mut out = vec![0u8; len];
   let wipe_x = (split_wipe.clamp(0.0, 1.0) * width as f32).round() as u32;
   for y in 0..height {
@@ -469,7 +448,11 @@ pub fn render_backdrop_preview(src: &[u8], cutout: &[u8], width: u32, height: u3
           continue;
         },
         BackdropPreview::Checkerboard => {
-          if ((x / 8) + (y / 8)) % 2 == 0 { 48.0 } else { 28.0 }
+          if ((x / 8) + (y / 8)) % 2 == 0 {
+            48.0
+          } else {
+            28.0
+          }
         },
         BackdropPreview::SolidDark => 20.0,
       };

@@ -24,12 +24,7 @@ use artcraft_client::endpoints::generate::image::edit::gpt_image_1_edit_image::g
 use artcraft_client::endpoints::generate::image::text::generate_gpt_image_1_text_to_image::generate_gpt_image_1_text_to_image;
 use tauri::AppHandle;
 
-pub async fn handle_artcraft_gpt_image_1_text_to_image(
-  request: &EnqueueTextToImageRequest,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_artcraft_gpt_image_1_text_to_image(request: &EnqueueTextToImageRequest, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => {
@@ -42,7 +37,7 @@ pub async fn handle_artcraft_gpt_image_1_text_to_image(
   let uuid_idempotency_token = generate_random_uuid();
 
   let image_quality = Some(GenerateGptImage1TextToImageImageQuality::High);
-  
+
   //let image_quality = request.image_quality
   //    .map(|quality| match quality {
   //      EditImageQuality::Auto => GenerateGptImage1TextToImageImageQuality::Auto,
@@ -51,13 +46,12 @@ pub async fn handle_artcraft_gpt_image_1_text_to_image(
   //      EditImageQuality::Low => GenerateGptImage1TextToImageImageQuality::Low,
   //    });
 
-  let image_size = request.aspect_ratio
-      .map(|size| match size {
-        TextToImageSize::Auto => GenerateGptImage1TextToImageImageSize::Square,
-        TextToImageSize::Square => GenerateGptImage1TextToImageImageSize::Square,
-        TextToImageSize::Tall => GenerateGptImage1TextToImageImageSize::Vertical,
-        TextToImageSize::Wide => GenerateGptImage1TextToImageImageSize::Horizontal,
-      });
+  let image_size = request.aspect_ratio.map(|size| match size {
+    TextToImageSize::Auto => GenerateGptImage1TextToImageImageSize::Square,
+    TextToImageSize::Square => GenerateGptImage1TextToImageImageSize::Square,
+    TextToImageSize::Tall => GenerateGptImage1TextToImageImageSize::Vertical,
+    TextToImageSize::Wide => GenerateGptImage1TextToImageImageSize::Horizontal,
+  });
 
   let num_images = match request.number_images {
     None => None,
@@ -76,40 +70,21 @@ pub async fn handle_artcraft_gpt_image_1_text_to_image(
     _ => Some(GenerateGptImage1TextToImageNumImages::One), // Default to one image if invalid number
   };
 
-  let request = GenerateGptImage1TextToImageRequest {
-    uuid_idempotency_token,
-    prompt: request.prompt.clone(),
-    image_size,
-    num_images,
-    image_quality,
-  };
+  let request = GenerateGptImage1TextToImageRequest { uuid_idempotency_token, prompt: request.prompt.clone(), image_size, num_images, image_quality };
 
-  let result = generate_gpt_image_1_text_to_image(
-    &app_env_configs.storyteller_host,
-    Some(&creds),
-    request,
-  ).await;
+  let result = generate_gpt_image_1_text_to_image(&app_env_configs.storyteller_host, Some(&creds), request).await;
 
   let job_id = match result {
     Ok(enqueued) => {
       // TODO(bt,2025-07-05): Enqueue job token?
-      info!("Successfully enqueued Artcraft gpt-image-1. Job token: {}", 
-        enqueued.inference_job_token);
+      info!("Successfully enqueued Artcraft gpt-image-1. Job token: {}", enqueued.inference_job_token);
       enqueued.inference_job_token
-    }
+    },
     Err(err) => {
       error!("Failed to use Artcraft gpt-image-1: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
 
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Artcraft,
-    model: Some(GenerationModel::GptImage1),
-    provider_job_id: Some(job_id.to_string()),
-    task_type: TaskType::ImageGeneration,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Artcraft, model: Some(GenerationModel::GptImage1), provider_job_id: Some(job_id.to_string()), task_type: TaskType::ImageGeneration, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }

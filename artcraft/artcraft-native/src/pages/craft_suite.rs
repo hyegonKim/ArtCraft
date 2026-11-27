@@ -5,11 +5,12 @@ use std::path::PathBuf;
 use egui::Ui;
 
 use crate::pages::common::Env;
+use crate::pages::express_studio::ExpressStudioState;
 use crate::pages::suite_registry::{self, SUITE_APPS};
 use crate::theme;
 use crate::ui::widgets;
 
-pub fn ui(ui: &mut Ui, env: &mut Env<'_>) {
+pub fn ui(ui: &mut Ui, env: &mut Env<'_>, express: &mut ExpressStudioState) {
   let current_exe = match std::env::current_exe() {
     Ok(path) => path,
     Err(err) => {
@@ -21,7 +22,9 @@ pub fn ui(ui: &mut Ui, env: &mut Env<'_>) {
   egui::ScrollArea::vertical().id_salt("craft_suite_apps").show(ui, |ui| {
     ui.add_space(20.0);
     ui.label(widgets::heading("Craft Suite", 28.0));
-    ui.label("Open creative tools in a separate window.");
+    ui.label("Open creative tools in a separate window or hand off Brand Kit & Social presets.");
+    ui.add_space(12.0);
+    express.ui(ui, env);
     ui.add_space(16.0);
     for app in SUITE_APPS {
       let available = suite_registry::resolve_binary(app.id, override_dir.as_deref(), &current_exe);

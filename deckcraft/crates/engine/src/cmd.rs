@@ -7,6 +7,7 @@ pub mod background;
 pub mod compress;
 pub mod design;
 pub mod edit;
+pub mod express;
 pub mod file;
 pub mod find;
 pub mod format;
@@ -179,6 +180,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(text::specs());
         v.extend(format::specs());
         v.extend(design::specs());
+        v.extend(express::specs());
         v.extend(ideas::specs());
         v.extend(transition::specs());
         v.extend(animation::specs());

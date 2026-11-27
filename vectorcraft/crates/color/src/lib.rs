@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 pub mod blend;
+pub mod capture;
 pub mod cms;
 pub mod freeform;
 pub mod gradient;

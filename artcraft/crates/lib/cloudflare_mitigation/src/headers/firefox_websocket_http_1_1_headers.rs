@@ -3,7 +3,7 @@ use wreq::header::OrigHeaderMap;
 
 /// Header casing and order needed to bypass Cloudflare WebSocket HTTP/1.1 checks.
 /// This is the set of headers sent by Firefox 143 on macOS.
-static FIREFOX_WEBSOCKET_HTTP_1_1_HEADERS : Lazy<OrigHeaderMap> = Lazy::new(|| {
+static FIREFOX_WEBSOCKET_HTTP_1_1_HEADERS: Lazy<OrigHeaderMap> = Lazy::new(|| {
   let mut original_headers = OrigHeaderMap::new();
 
   original_headers.insert("Host");

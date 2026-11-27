@@ -7,17 +7,17 @@ use log::{info, warn};
 use std::io::Write;
 use std::ops::Sub;
 
-const EXPIRATION_DEADLINE : TimeDelta = TimeDelta::hours(12);
+const EXPIRATION_DEADLINE: TimeDelta = TimeDelta::hours(12);
 
 /// Returns a new set of credentials if they were updated, or None if no update was needed.
 pub async fn maybe_renew_session_jwt(creds: &SoraCredentialSet) -> Result<Option<SoraCredentialSet>, SoraError> {
   let mut refresh_jwt = false;
-  
+
   match creds.jwt_bearer_token.as_ref() {
     None => {
       info!("JWT not set. It needs to be generated...");
       refresh_jwt = true;
-    }
+    },
     Some(jwt) => {
       let now = Utc::now();
       let refresh_deadline = now.sub(EXPIRATION_DEADLINE);
@@ -28,9 +28,9 @@ pub async fn maybe_renew_session_jwt(creds: &SoraCredentialSet) -> Result<Option
         info!("JWT expiration time is under the expiration deadline. It needs to be renewed...");
         refresh_jwt = true;
       }
-    }
+    },
   }
-  
+
   if !refresh_jwt {
     return Ok(None);
   }
@@ -43,6 +43,6 @@ pub async fn maybe_renew_session_jwt(creds: &SoraCredentialSet) -> Result<Option
 
   let mut updated_creds = creds.clone();
   updated_creds.jwt_bearer_token = Some(token);
-  
+
   Ok(Some(updated_creds))
 }

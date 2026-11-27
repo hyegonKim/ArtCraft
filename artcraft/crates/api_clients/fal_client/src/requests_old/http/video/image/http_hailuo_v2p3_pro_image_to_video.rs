@@ -21,8 +21,6 @@ pub struct HailuoV2p3ProImageToVideoOutput {
   pub video: HailuoV2p3ProImageToVideoVideoFile,
 }
 
-pub fn hailuo_v2p3_pro_image_to_video(
-  params: HailuoV2p3ProImageToVideoInput,
-) -> FalRequest<HailuoV2p3ProImageToVideoInput, HailuoV2p3ProImageToVideoOutput> {
+pub fn hailuo_v2p3_pro_image_to_video(params: HailuoV2p3ProImageToVideoInput) -> FalRequest<HailuoV2p3ProImageToVideoInput, HailuoV2p3ProImageToVideoOutput> {
   FalRequest::new("fal-ai/minimax/hailuo-2.3/pro/image-to-video", params)
 }

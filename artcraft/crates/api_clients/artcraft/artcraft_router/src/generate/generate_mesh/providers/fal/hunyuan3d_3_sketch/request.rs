@@ -33,13 +33,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_sketch_to_mesh() {
-    let builder = GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3Sketch,
-      provider: RouterProvider::Fal,
-      prompt: Some("A cartoon character, colorful, plastic material".to_string()),
-      reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])),
-      ..Default::default()
-    };
+    let builder = GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3Sketch, provider: RouterProvider::Fal, prompt: Some("A cartoon character, colorful, plastic material".to_string()), reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])), ..Default::default() };
 
     let client = get_fal_client();
     let draft_or_request = builder.build2().expect("build2 should succeed");
@@ -59,8 +53,7 @@ mod tests {
   // ── Helpers ──
 
   fn get_fal_client() -> RouterClient {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")
-      .expect("Failed to read fal_api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt").expect("Failed to read fal_api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
     let webhook_url = "https://example.com/fal-webhook-test".to_string();
     RouterClient::Fal(RouterFalClient::new_with_webhook(api_key, webhook_url))

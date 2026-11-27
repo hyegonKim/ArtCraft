@@ -39,7 +39,6 @@ pub enum AudioGenerationRequest {
 }
 
 impl AudioGenerationRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::ArtcraftSunoMusic(_) => RouterProvider::Artcraft,

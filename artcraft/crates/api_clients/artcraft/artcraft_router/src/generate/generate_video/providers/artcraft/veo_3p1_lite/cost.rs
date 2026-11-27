@@ -37,27 +37,13 @@ impl ArtcraftVeo3p1LiteCostState {
     // Round up to the next whole cent.
     let cost_in_usd_cents = (rate * self.duration_seconds).div_ceil(100);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
 /// Veo 3.1 Lite renders 720p (the default) or 1080p.
 fn is_1080p(resolution: Option<CommonResolutionEnum>) -> bool {
-  matches!(
-    resolution,
-    Some(CommonResolutionEnum::TenEightyP)
-    | Some(CommonResolutionEnum::TwoK)
-    | Some(CommonResolutionEnum::ThreeK)
-    | Some(CommonResolutionEnum::FourK)
-  )
+  matches!(resolution, Some(CommonResolutionEnum::TenEightyP) | Some(CommonResolutionEnum::TwoK) | Some(CommonResolutionEnum::ThreeK) | Some(CommonResolutionEnum::FourK))
 }
 
 #[cfg(test)]
@@ -69,26 +55,16 @@ mod tests {
   use crate::generate::generate_video::providers::artcraft::veo_3p1_lite::build::build_artcraft_veo_3p1_lite_state;
   use crate::generate::generate_video::providers::artcraft::veo_3p1_lite::cost::ArtcraftVeo3p1LiteCostState;
 
-  fn cost_cents(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-    generate_audio: Option<bool>,
-  ) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3p1Lite,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      generate_audio,
-      ..Default::default()
-    };
+  fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>, generate_audio: Option<bool>) -> u64 {
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3p1Lite, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, resolution, generate_audio, ..Default::default() };
     let state = build_artcraft_veo_3p1_lite_state(b).unwrap();
     ArtcraftVeo3p1LiteCostState::from_request(&state).estimate_cost().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn defaults_8s_720p_audio_on_is_46() { assert_eq!(cost_cents(None, None, None), 46); }
+  fn defaults_8s_720p_audio_on_is_46() {
+    assert_eq!(cost_cents(None, None, None), 46);
+  }
 
   #[test]
   fn audio_off_8s_720p_is_28() {

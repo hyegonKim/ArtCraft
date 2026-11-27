@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use crate::webhook_payload::hydrated::hydrated_webhook_contents::ModelObjData;
 
 /// Extract and deserialize the `model_obj` key from a webhook success payload.
-pub (crate) fn extract_model_obj(obj: &Map<String, Value>) -> Option<ModelObjData> {
+pub(crate) fn extract_model_obj(obj: &Map<String, Value>) -> Option<ModelObjData> {
   let value = obj.get("model_obj")?;
   serde_json::from_value(value.clone()).ok()
 }
@@ -14,14 +14,17 @@ mod tests {
 
   #[test]
   fn synthetic_model_obj_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_obj": {
         "url": "https://cdn.example.com/model.obj",
         "content_type": "model/obj",
         "file_name": "model.obj",
         "file_size": 654321
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let model_obj = extract_model_obj(&obj).expect("should extract model_obj");
     assert_eq!(model_obj.url.as_deref(), Some("https://cdn.example.com/model.obj"));
@@ -32,9 +35,12 @@ mod tests {
 
   #[test]
   fn model_obj_url_only() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_obj": {"url": "https://cdn.example.com/m.obj"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let model_obj = extract_model_obj(&obj).expect("should extract model_obj");
     assert_eq!(model_obj.url.as_deref(), Some("https://cdn.example.com/m.obj"));
@@ -43,9 +49,12 @@ mod tests {
 
   #[test]
   fn missing_model_obj_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_mesh": {"url": "https://example.com/mesh.glb"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_model_obj(&obj).is_none());
   }

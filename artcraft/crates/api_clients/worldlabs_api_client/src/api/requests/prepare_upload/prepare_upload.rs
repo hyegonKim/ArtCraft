@@ -43,10 +43,7 @@ pub struct PrepareUploadResponse {
 
 /// Parse the file extension from a file name, defaulting to "png".
 fn extension_from_file_name(file_name: &str) -> String {
-  file_name
-    .rsplit_once('.')
-    .map(|(_, ext)| ext.to_lowercase())
-    .unwrap_or_else(|| "png".to_string())
+  file_name.rsplit_once('.').map(|(_, ext)| ext.to_lowercase()).unwrap_or_else(|| "png".to_string())
 }
 
 /// POST /marble/v1/media-assets:prepare_upload
@@ -58,39 +55,27 @@ pub async fn prepare_upload(args: PrepareUploadArgs<'_>) -> Result<PrepareUpload
 
   let extension = extension_from_file_name(args.file_name);
 
-  let payload = RawRequest {
-    file_name: args.file_name.to_string(),
-    kind: args.kind.as_str().to_string(),
-    extension: Some(extension),
-    metadata: None,
-  };
+  let payload = RawRequest { file_name: args.file_name.to_string(), kind: args.kind.as_str().to_string(), extension: Some(extension), metadata: None };
 
   debug!("Requesting URL: {}", URL);
 
-  let mut request_builder = client.post(URL)
-    .header("WLT-Api-Key", args.creds.api_key())
-    .header("Content-Type", "application/json")
-    .json(&payload);
+  let mut request_builder = client.post(URL).header("WLT-Api-Key", args.creds.api_key()).header("Content-Type", "application/json").json(&payload);
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during prepare_upload request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during prepare_upload request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("prepare_upload returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -100,15 +85,9 @@ pub async fn prepare_upload(args: PrepareUploadArgs<'_>) -> Result<PrepareUpload
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  Ok(PrepareUploadResponse {
-    media_asset_id: MediaAssetId(raw.media_asset.media_asset_id),
-    upload_url: raw.upload_info.upload_url,
-    upload_method: raw.upload_info.upload_method,
-    required_headers: raw.upload_info.required_headers.unwrap_or_default(),
-  })
+  Ok(PrepareUploadResponse { media_asset_id: MediaAssetId(raw.media_asset.media_asset_id), upload_url: raw.upload_info.upload_url, upload_method: raw.upload_info.upload_method, required_headers: raw.upload_info.required_headers.unwrap_or_default() })
 }
 
 #[cfg(test)]
@@ -125,12 +104,7 @@ mod tests {
 
     let creds = get_test_api_key().unwrap();
 
-    let response = prepare_upload(PrepareUploadArgs {
-      creds: &creds,
-      file_name: "test_image.jpg",
-      kind: MediaAssetKind::Image,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = prepare_upload(PrepareUploadArgs { creds: &creds, file_name: "test_image.jpg", kind: MediaAssetKind::Image, request_timeout: None }).await.unwrap();
 
     println!("Media asset ID: {}", response.media_asset_id.as_str());
     println!("Upload URL: {}", response.upload_url);

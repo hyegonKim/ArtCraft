@@ -51,15 +51,14 @@ impl SoraSentinelToken {
   pub fn is_expired(&self) -> bool {
     let now = Utc::now();
 
-    let maybe_expires_at = self.generated_at
-        .checked_add_signed(TimeDelta::seconds(self.expires_in_seconds as i64));
+    let maybe_expires_at = self.generated_at.checked_add_signed(TimeDelta::seconds(self.expires_in_seconds as i64));
 
     let expires_at = match maybe_expires_at {
       Some(expires_at) => expires_at,
       None => {
         error!("Could not compute expires_at for sentinel token!");
         return false;
-      }
+      },
     };
 
     if now >= expires_at {
@@ -80,20 +79,17 @@ impl SoraSentinelToken {
   }
 
   pub fn to_persistent_storage_json(&self) -> Result<String, SoraClientError> {
-    serde_json::to_string(self)
-        .map_err(|err| SoraClientError::CouldNotSerializeSentinelTokenStore(err))
+    serde_json::to_string(self).map_err(|err| SoraClientError::CouldNotSerializeSentinelTokenStore(err))
   }
 
   pub fn from_persistent_storage_json(json: &str) -> Result<Self, SoraClientError> {
-    serde_json::from_str(json)
-        .map_err(|err| SoraClientError::CouldNotDeserializeSentinelTokenStore { error: err, raw_json: json.to_owned() })
+    serde_json::from_str(json).map_err(|err| SoraClientError::CouldNotDeserializeSentinelTokenStore { error: err, raw_json: json.to_owned() })
   }
 }
 
 impl RawSoraSentinelToken {
   /// Convert to JSON, which is the raw over-the-wire format Sora consumes.
   pub fn to_request_header_json(&self) -> Result<String, SoraClientError> {
-    serde_json::to_string(self)
-        .map_err(|err| SoraClientError::CouldNotSerializeSentinelToken(err))
+    serde_json::to_string(self).map_err(|err| SoraClientError::CouldNotSerializeSentinelToken(err))
   }
 }

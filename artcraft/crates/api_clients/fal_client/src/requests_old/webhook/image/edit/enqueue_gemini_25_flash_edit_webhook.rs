@@ -51,7 +51,6 @@ pub enum Gemini25FlashEditAspectRatio {
   NineBySixteen, // NB: No NineByTwentyOne ?
 }
 
-
 impl FalRequestCostCalculator for Gemini25FlashEditRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // Your request will cost $0.039 per image. For $1.00, you can run this model 25 times.
@@ -64,10 +63,7 @@ impl FalRequestCostCalculator for Gemini25FlashEditRequest {
   }
 }
 
-
-pub async fn enqueue_gemini_25_flash_edit_webhook<R: IntoUrl>(
-  args: Gemini25FlashEditArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_gemini_25_flash_edit_webhook<R: IntoUrl>(args: Gemini25FlashEditArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -77,25 +73,26 @@ pub async fn enqueue_gemini_25_flash_edit_webhook<R: IntoUrl>(
     Gemini25FlashEditNumImages::Four => 4,
   };
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|aspect_ratio| match aspect_ratio {
-        // Auto
-        Gemini25FlashEditAspectRatio::Auto => "auto",
-        // Square
-        Gemini25FlashEditAspectRatio::OneByOne => "1:1",
-        // Wide
-        Gemini25FlashEditAspectRatio::FiveByFour => "5:4",
-        Gemini25FlashEditAspectRatio::FourByThree => "4:3",
-        Gemini25FlashEditAspectRatio::ThreeByTwo => "3:2",
-        Gemini25FlashEditAspectRatio::SixteenByNine => "16:9",
-        Gemini25FlashEditAspectRatio::TwentyOneByNine => "21:9",
-        // Tall
-        Gemini25FlashEditAspectRatio::FourByFive => "4:5",
-        Gemini25FlashEditAspectRatio::ThreeByFour => "3:4",
-        Gemini25FlashEditAspectRatio::TwoByThree => "2:3",
-        Gemini25FlashEditAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|aspect_ratio| aspect_ratio.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|aspect_ratio| match aspect_ratio {
+      // Auto
+      Gemini25FlashEditAspectRatio::Auto => "auto",
+      // Square
+      Gemini25FlashEditAspectRatio::OneByOne => "1:1",
+      // Wide
+      Gemini25FlashEditAspectRatio::FiveByFour => "5:4",
+      Gemini25FlashEditAspectRatio::FourByThree => "4:3",
+      Gemini25FlashEditAspectRatio::ThreeByTwo => "3:2",
+      Gemini25FlashEditAspectRatio::SixteenByNine => "16:9",
+      Gemini25FlashEditAspectRatio::TwentyOneByNine => "21:9",
+      // Tall
+      Gemini25FlashEditAspectRatio::FourByFive => "4:5",
+      Gemini25FlashEditAspectRatio::ThreeByFour => "3:4",
+      Gemini25FlashEditAspectRatio::TwoByThree => "2:3",
+      Gemini25FlashEditAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|aspect_ratio| aspect_ratio.to_string());
 
   let request = Gemini25FlashEditInput {
     prompt: req.prompt,
@@ -106,10 +103,7 @@ pub async fn enqueue_gemini_25_flash_edit_webhook<R: IntoUrl>(
     output_format: Some("png".to_string()),
   };
 
-  let result = gemini_25_flash_edit(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gemini_25_flash_edit(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -130,19 +124,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Gemini25FlashEditArgs {
-      request: Gemini25FlashEditRequest {
-        image_urls: vec![
-          GHOST_IMAGE_URL.to_string(),
-          TREX_SKELETON_IMAGE_URL.to_string(),
-        ],
-        num_images: Gemini25FlashEditNumImages::Two,
-        aspect_ratio: None,
-        prompt: "add the ghost to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Gemini25FlashEditArgs { request: Gemini25FlashEditRequest { image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string()], num_images: Gemini25FlashEditNumImages::Two, aspect_ratio: None, prompt: "add the ghost to the image of the t-rex skeleton, make it look spooky but friendly".to_string() }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_gemini_25_flash_edit_webhook(args).await?;
 

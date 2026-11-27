@@ -8,9 +8,7 @@ const FORM_FIELD_ORDER: [&str; 3] = ["username", "email_address", "password"];
 pub(super) fn password_auth_error_message(error: &LoginChallengeClientError, is_signup: bool) -> String {
   let Some(status) = error.status else {
     return match error.message {
-      "Unable to reach the login server" => {
-        "Couldn't reach the ArtCraft servers. Check your internet connection and try again.".to_owned()
-      }
+      "Unable to reach the login server" => "Couldn't reach the ArtCraft servers. Check your internet connection and try again.".to_owned(),
       _ => "Something went wrong while signing in. Please try again.".to_owned(),
     };
   };
@@ -33,24 +31,11 @@ pub(super) fn password_auth_error_message(error: &LoginChallengeClientError, is_
 fn rejection_message(rejection: &LoginRejection) -> Option<String> {
   match rejection.error_type.as_deref() {
     Some("InvalidCredentials") => return Some("Incorrect username, email, or password.".to_owned()),
-    Some("AccountNeedsPassword") => {
-      return Some(
-        "This account doesn't have a password yet. Sign in through the website, or reset your password.".to_owned(),
-      )
-    }
-    _ => {}
+    Some("AccountNeedsPassword") => return Some("This account doesn't have a password yet. Sign in through the website, or reset your password.".to_owned()),
+    _ => {},
   }
 
-  let ordered_fields = FORM_FIELD_ORDER
-    .iter()
-    .filter_map(|field| rejection.error_fields.get(*field))
-    .chain(
-      rejection
-        .error_fields
-        .iter()
-        .filter(|(field, _)| !FORM_FIELD_ORDER.contains(&field.as_str()))
-        .map(|(_, reason)| reason),
-    );
+  let ordered_fields = FORM_FIELD_ORDER.iter().filter_map(|field| rejection.error_fields.get(*field)).chain(rejection.error_fields.iter().filter(|(field, _)| !FORM_FIELD_ORDER.contains(&field.as_str())).map(|(_, reason)| reason));
   let field_messages: Vec<String> = ordered_fields.map(|reason| field_reason_message(reason)).collect();
   if !field_messages.is_empty() {
     return Some(field_messages.join(" "));
@@ -60,11 +45,7 @@ fn rejection_message(rejection: &LoginRejection) -> Option<String> {
     Some("UsernameTaken") => Some(field_reason_message("username is taken")),
     Some("EmailTaken") => Some(field_reason_message("email is taken")),
     Some("UsernameReserved") => Some(field_reason_message("username is reserved")),
-    _ => rejection
-      .error_message
-      .as_deref()
-      .filter(|message| !message.trim().is_empty())
-      .map(sentence),
+    _ => rejection.error_message.as_deref().filter(|message| !message.trim().is_empty()).map(sentence),
   }
 }
 
@@ -76,9 +57,7 @@ fn field_reason_message(reason: &str) -> String {
     "username is reserved" | "username contains slurs" => "That username isn't available. Please choose another.",
     "username is too short" => "Usernames must be at least 3 characters.",
     "username is too long" => "Usernames can be at most 16 characters.",
-    "invalid username characters" => {
-      "Usernames can only contain letters, numbers, underscores (_), and hyphens (-)."
-    }
+    "invalid username characters" => "Usernames can only contain letters, numbers, underscores (_), and hyphens (-).",
     "email is taken" => "An account with that email already exists. Try logging in instead.",
     "invalid email address" => "Please enter a valid email address.",
     "password is too short" => "Passwords must be at least 6 characters.",
@@ -130,16 +109,8 @@ mod tests {
 
     #[test]
     fn multiple_bad_fields_follow_form_order() {
-      let error = rejected(
-        400,
-        Some("BadInput"),
-        None,
-        &[("password", "password is too short"), ("email_address", "invalid email address"), ("username", "invalid username characters")],
-      );
-      assert_eq!(
-        signup_message(&error),
-        "Usernames can only contain letters, numbers, underscores (_), and hyphens (-). Please enter a valid email address. Passwords must be at least 6 characters."
-      );
+      let error = rejected(400, Some("BadInput"), None, &[("password", "password is too short"), ("email_address", "invalid email address"), ("username", "invalid username characters")]);
+      assert_eq!(signup_message(&error), "Usernames can only contain letters, numbers, underscores (_), and hyphens (-). Please enter a valid email address. Passwords must be at least 6 characters.");
     }
 
     #[test]
@@ -167,10 +138,7 @@ mod tests {
     #[test]
     fn account_needs_password() {
       let error = rejected(401, Some("AccountNeedsPassword"), Some("account was created without a password"), &[]);
-      assert_eq!(
-        login_message(&error),
-        "This account doesn't have a password yet. Sign in through the website, or reset your password."
-      );
+      assert_eq!(login_message(&error), "This account doesn't have a password yet. Sign in through the website, or reset your password.");
     }
 
     #[test]
@@ -190,19 +158,13 @@ mod tests {
     #[test]
     fn server_error() {
       let error = rejected(500, Some("ServerError"), Some("server error"), &[]);
-      assert_eq!(
-        signup_message(&error),
-        "ArtCraft's servers are having trouble right now. Please try again in a few minutes."
-      );
+      assert_eq!(signup_message(&error), "ArtCraft's servers are having trouble right now. Please try again in a few minutes.");
     }
 
     #[test]
     fn unreachable() {
       let error = LoginChallengeClientError::invalid("Unable to reach the login server");
-      assert_eq!(
-        login_message(&error),
-        "Couldn't reach the ArtCraft servers. Check your internet connection and try again."
-      );
+      assert_eq!(login_message(&error), "Couldn't reach the ArtCraft servers. Check your internet connection and try again.");
     }
 
     #[test]
@@ -226,29 +188,10 @@ mod tests {
   }
 
   fn status_only(status: u16) -> LoginChallengeClientError {
-    LoginChallengeClientError {
-      status: Some(status),
-      message: "Login server rejected the request",
-      maybe_rejection: None,
-    }
+    LoginChallengeClientError { status: Some(status), message: "Login server rejected the request", maybe_rejection: None }
   }
 
-  fn rejected(
-    status: u16,
-    error_type: Option<&str>,
-    error_message: Option<&str>,
-    error_fields: &[(&str, &str)],
-  ) -> LoginChallengeClientError {
-    LoginChallengeClientError {
-      maybe_rejection: Some(LoginRejection {
-        error_type: error_type.map(str::to_owned),
-        error_message: error_message.map(str::to_owned),
-        error_fields: error_fields
-          .iter()
-          .map(|(field, reason)| (field.to_string(), reason.to_string()))
-          .collect::<BTreeMap<_, _>>(),
-      }),
-      ..status_only(status)
-    }
+  fn rejected(status: u16, error_type: Option<&str>, error_message: Option<&str>, error_fields: &[(&str, &str)]) -> LoginChallengeClientError {
+    LoginChallengeClientError { maybe_rejection: Some(LoginRejection { error_type: error_type.map(str::to_owned), error_message: error_message.map(str::to_owned), error_fields: error_fields.iter().map(|(field, reason)| (field.to_string(), reason.to_string())).collect::<BTreeMap<_, _>>() }), ..status_only(status) }
   }
 }

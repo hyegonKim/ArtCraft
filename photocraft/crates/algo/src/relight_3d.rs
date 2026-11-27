@@ -27,15 +27,7 @@ pub struct Lamp3d {
 
 impl Default for Lamp3d {
     fn default() -> Self {
-        Self {
-            enabled: true,
-            x: 0.32,
-            y: 0.28,
-            z: 0.55,
-            intensity: 1.15,
-            color: [1.0, 0.90, 0.76],
-            spread: 0.68,
-        }
+        Self { enabled: true, x: 0.32, y: 0.28, z: 0.55, intensity: 1.15, color: [1.0, 0.90, 0.76], spread: 0.68 }
     }
 }
 
@@ -92,12 +84,7 @@ pub fn apply_relight_3d_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &R
     let relief = (if params.surface_relief.is_finite() { params.surface_relief } else { 1.0 }).clamp(0.0, 3.0);
     let step = (sig_fine.round() as isize).clamp(1, 16);
 
-    let active_lamps: Vec<Lamp3d> = params
-        .lamps
-        .iter()
-        .copied()
-        .filter(|l| l.enabled && l.intensity.is_finite() && l.intensity > 1e-4)
-        .collect();
+    let active_lamps: Vec<Lamp3d> = params.lamps.iter().copied().filter(|l| l.enabled && l.intensity.is_finite() && l.intensity > 1e-4).collect();
 
     let wf = w as f32;
     let hf = h as f32;
@@ -132,11 +119,7 @@ pub fn apply_relight_3d_rgba(px: &mut [[f32; 4]], w: usize, h: usize, params: &R
 
             // Intrinsic shading normalization (Retinex): remove soft existing illumination envelope while keeping texture.
             let shade_env = coarse[idx].clamp(0.06, 1.0);
-            let lin = [
-                srgb_to_linear(q[0].max(0.0)),
-                srgb_to_linear(q[1].max(0.0)),
-                srgb_to_linear(q[2].max(0.0)),
-            ];
+            let lin = [srgb_to_linear(q[0].max(0.0)), srgb_to_linear(q[1].max(0.0)), srgb_to_linear(q[2].max(0.0))];
             let albedo_boost = (0.38 / shade_env).clamp(0.45, 2.25);
 
             let px_norm = (x as f32 + 0.5) / wf;
@@ -205,14 +188,7 @@ pub fn apply_relight_3d_surface(src: &Surface, rect: Rect, params: &Relight3dPar
 /// Applies Photoshop 2027 Mockup surface displacement + `Environmental Lighting` (`환경 조명`)
 /// when compositing `decal_px` onto `base_px` (`w × h`, straight sRGB RGBA) and writes the
 /// combined Mockup result into `out_px`.
-pub fn composite_mockup_rgba(
-    base_px: &[[f32; 4]],
-    decal_px: &[[f32; 4]],
-    out_px: &mut [[f32; 4]],
-    w: usize,
-    h: usize,
-    lighting_strength: f32,
-) {
+pub fn composite_mockup_rgba(base_px: &[[f32; 4]], decal_px: &[[f32; 4]], out_px: &mut [[f32; 4]], w: usize, h: usize, lighting_strength: f32) {
     let n = w * h;
     if n == 0 || base_px.len() < n || decal_px.len() < n || out_px.len() < n {
         return;

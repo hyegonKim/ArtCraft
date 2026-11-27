@@ -1,9 +1,7 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::kling_2_5_turbo_pro::request::{
-  FalKling2p5TurboProMode, FalKling2p5TurboProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_2_5_turbo_pro::request::{FalKling2p5TurboProMode, FalKling2p5TurboProRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalKling2p5TurboProCostState {
@@ -22,15 +20,7 @@ impl FalKling2p5TurboProCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -42,13 +32,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, has_start: bool) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling2p5TurboPro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling2p5TurboPro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, ..Default::default() };
     if has_start {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
@@ -58,17 +42,27 @@ mod tests {
   // Pricing: $0.07/sec flat → 5s = 35¢, 10s = 70¢. Same for t2v and i2v.
 
   #[test]
-  fn t2v_5s_is_35() { assert_eq!(cost_cents(Some(5), false), 35); }
+  fn t2v_5s_is_35() {
+    assert_eq!(cost_cents(Some(5), false), 35);
+  }
 
   #[test]
-  fn t2v_10s_is_70() { assert_eq!(cost_cents(Some(10), false), 70); }
+  fn t2v_10s_is_70() {
+    assert_eq!(cost_cents(Some(10), false), 70);
+  }
 
   #[test]
-  fn i2v_5s_is_35() { assert_eq!(cost_cents(Some(5), true), 35); }
+  fn i2v_5s_is_35() {
+    assert_eq!(cost_cents(Some(5), true), 35);
+  }
 
   #[test]
-  fn i2v_10s_is_70() { assert_eq!(cost_cents(Some(10), true), 70); }
+  fn i2v_10s_is_70() {
+    assert_eq!(cost_cents(Some(10), true), 70);
+  }
 
   #[test]
-  fn default_is_5s_priced_at_35() { assert_eq!(cost_cents(None, false), 35); }
+  fn default_is_5s_priced_at_35() {
+    assert_eq!(cost_cents(None, false), 35);
+  }
 }

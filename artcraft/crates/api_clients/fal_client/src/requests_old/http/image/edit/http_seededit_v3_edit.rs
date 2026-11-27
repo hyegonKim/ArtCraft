@@ -24,8 +24,6 @@ pub struct SeedEditV3EditOutput {
   pub image: Vec<SeedEditV3EditFile>,
 }
 
-pub fn seededit_v3_edit(
-  params: SeedEditV3EditInput,
-) -> FalRequest<SeedEditV3EditInput, SeedEditV3EditOutput> {
+pub fn seededit_v3_edit(params: SeedEditV3EditInput) -> FalRequest<SeedEditV3EditInput, SeedEditV3EditOutput> {
   FalRequest::new("fal-ai/bytedance/seededit/v3/edit-image", params)
 }

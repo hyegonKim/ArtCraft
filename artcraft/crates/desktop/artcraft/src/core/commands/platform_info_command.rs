@@ -54,8 +54,5 @@ pub fn platform_info_command() -> InfallibleResponse<PlatformInfoResponse> {
     DetectedOs::Unknown => WebviewRuntime::Unknown,
   };
 
-  PlatformInfoResponse {
-    os_platform,
-    webview_runtime,
-  }.into()
+  PlatformInfoResponse { os_platform, webview_runtime }.into()
 }

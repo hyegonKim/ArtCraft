@@ -17,21 +17,14 @@ use tauri::AppHandle;
 use tokens::tokens::batch_generations::BatchGenerationToken;
 use tokens::tokens::media_files::MediaFileToken;
 
-pub async fn maybe_handle_inpainting_complete_event(
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  task: &Task,
-  job: &ListSessionJobsItem,
-) -> AnyhowResult<()> {
-
+pub async fn maybe_handle_inpainting_complete_event(app: &AppHandle, app_env_configs: &AppEnvConfigs, maybe_creds: Option<&StorytellerCredentialSet>, task: &Task, job: &ListSessionJobsItem) -> AnyhowResult<()> {
   match task.task_type {
-    TaskType::ImageInpaintEdit => {} // NB: Fall-through
+    TaskType::ImageInpaintEdit => {}, // NB: Fall-through
     _ => return Ok(()),
   }
 
   match task.frontend_caller {
-    Some(TauriCommandCaller::ImageEditor) => {} // NB: Fall-through
+    Some(TauriCommandCaller::ImageEditor) => {}, // NB: Fall-through
     _ => return Ok(()),
   }
 
@@ -44,25 +37,8 @@ pub async fn maybe_handle_inpainting_complete_event(
   };
 
   let event = match job_result.maybe_batch_token.as_ref() {
-    Some(batch_token) => {
-      handle_batch(
-        app,
-        app_env_configs,
-        maybe_creds,
-        task,
-        job,
-        job_result,
-        batch_token
-      ).await?
-    }
-    None => {
-      handle_single(
-        app,
-        task,
-        job,
-        job_result,
-      ).await?
-    }
+    Some(batch_token) => handle_batch(app, app_env_configs, maybe_creds, task, job, job_result, batch_token).await?,
+    None => handle_single(app, task, job, job_result).await?,
   };
 
   if let Err(err) = event.send(&app) {
@@ -72,55 +48,18 @@ pub async fn maybe_handle_inpainting_complete_event(
   Ok(())
 }
 
-pub async fn handle_single(
-  app: &AppHandle,
-  task: &Task,
-  job: &ListSessionJobsItem,
-  job_result: &ListSessionResultDetailsResponse,
-) -> AnyhowResult<ImageEditCompleteEvent> {
-  Ok(ImageEditCompleteEvent {
-    edited_images: vec![EditedImage {
-      media_token: MediaFileToken::new_from_str(&job_result.entity_token),
-      cdn_url: job_result.media_links.cdn_url.clone(),
-      maybe_thumbnail_template: job_result.media_links.maybe_thumbnail_template.clone(),
-    }],
-    maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(),
-    maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone(),
-  })
+pub async fn handle_single(app: &AppHandle, task: &Task, job: &ListSessionJobsItem, job_result: &ListSessionResultDetailsResponse) -> AnyhowResult<ImageEditCompleteEvent> {
+  Ok(ImageEditCompleteEvent { edited_images: vec![EditedImage { media_token: MediaFileToken::new_from_str(&job_result.entity_token), cdn_url: job_result.media_links.cdn_url.clone(), maybe_thumbnail_template: job_result.media_links.maybe_thumbnail_template.clone() }], maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(), maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone() })
 }
 
-pub async fn handle_batch(
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  task: &Task,
-  job: &ListSessionJobsItem,
-  job_result: &ListSessionResultDetailsResponse,
-  batch_token: &BatchGenerationToken,
-) -> AnyhowResult<ImageEditCompleteEvent> {
-
-  let result = list_batch_generated_redux_media_files(
-    &app_env_configs.storyteller_host,
-    maybe_creds,
-    batch_token,
-  ).await?;
+pub async fn handle_batch(app: &AppHandle, app_env_configs: &AppEnvConfigs, maybe_creds: Option<&StorytellerCredentialSet>, task: &Task, job: &ListSessionJobsItem, job_result: &ListSessionResultDetailsResponse, batch_token: &BatchGenerationToken) -> AnyhowResult<ImageEditCompleteEvent> {
+  let result = list_batch_generated_redux_media_files(&app_env_configs.storyteller_host, maybe_creds, batch_token).await?;
 
   if result.media_files.is_empty() {
     return Err(anyhow!("No media files found for batch token: {}", batch_token));
   }
 
-  let media_files = result.media_files
-      .into_iter()
-      .map(|file| EditedImage {
-        media_token: file.token,
-        cdn_url: file.media_links.cdn_url,
-        maybe_thumbnail_template: file.media_links.maybe_thumbnail_template,
-      })
-      .collect();
+  let media_files = result.media_files.into_iter().map(|file| EditedImage { media_token: file.token, cdn_url: file.media_links.cdn_url, maybe_thumbnail_template: file.media_links.maybe_thumbnail_template }).collect();
 
-  Ok(ImageEditCompleteEvent {
-    edited_images: media_files,
-    maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(),
-    maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone(),
-  })
+  Ok(ImageEditCompleteEvent { edited_images: media_files, maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(), maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone() })
 }

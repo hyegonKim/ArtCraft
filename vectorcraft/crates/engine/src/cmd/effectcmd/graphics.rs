@@ -40,25 +40,14 @@ fn add_graphic(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(bad(C, "select objects to add as a graphic"));
     }
     let d = &s.doc()?.doc;
-    let nodes: Vec<Arc<Node>> = ids
-        .iter()
-        .filter_map(|id| d.node(*id).map(|n| Arc::new(n.clone())))
-        .collect();
+    let nodes: Vec<Arc<Node>> = ids.iter().filter_map(|id| d.node(*id).map(|n| Arc::new(n.clone()))).collect();
     if nodes.is_empty() {
         return Err(bad(C, "select objects to add as a graphic"));
     }
-    let mut art = if nodes.len() == 1 {
-        (*nodes[0]).clone()
-    } else {
-        Node::group(NodeId(0), nodes)
-    };
+    let mut art = if nodes.len() == 1 { (*nodes[0]).clone() } else { Node::group(NodeId(0), nodes) };
     crate::cmd::threads::keep_shown_text(d, &mut art);
-    let (normalized, size, _) = crate::cmd::brushsym::normalize(art)
-        .map_err(|e| bad(C, e.to_string()))?;
-    let base = str_param(p, "name")
-        .map(str::trim)
-        .filter(|n| !n.is_empty())
-        .unwrap_or("Graphic");
+    let (normalized, size, _) = crate::cmd::brushsym::normalize(art).map_err(|e| bad(C, e.to_string()))?;
+    let base = str_param(p, "name").map(str::trim).filter(|n| !n.is_empty()).unwrap_or("Graphic");
     let name = d.unique_symbol_name(base);
     s.edit("Add as Single Graphic", |doc, _| {
         crate::cmd::brushsym::store_symbol(doc, &normalized, &name, size);
@@ -69,11 +58,7 @@ fn add_graphic(s: &mut Session, p: &Value) -> Result<Value> {
 
 fn map_graphic(s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "threeD.mapGraphic";
-    let symbol = str_param(p, "symbol")
-        .map(str::trim)
-        .filter(|n| !n.is_empty())
-        .ok_or_else(|| bad(C, "pass `symbol`"))?
-        .to_string();
+    let symbol = str_param(p, "symbol").map(str::trim).filter(|n| !n.is_empty()).ok_or_else(|| bad(C, "pass `symbol`"))?.to_string();
     let targets = edit_targets(s, p)?;
     if targets.is_empty() {
         return Err(bad(C, "select an object with an Extrude & Bevel, Rotate or Revolve effect"));
@@ -84,18 +69,12 @@ fn map_graphic(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let face = match p.get("face") {
         None | Some(Value::Null) => PlanarFace::Front,
-        Some(v) => v
-            .as_str()
-            .and_then(PlanarFace::parse)
-            .ok_or_else(|| bad(C, "face must be \"front\" or \"back\""))?,
+        Some(v) => v.as_str().and_then(PlanarFace::parse).ok_or_else(|| bad(C, "face must be \"front\" or \"back\""))?,
     };
     let num_field = |key: &str, default: f64| -> Result<f64> {
         match p.get(key) {
             None | Some(Value::Null) => Ok(default),
-            Some(v) => v
-                .as_f64()
-                .filter(|x| x.is_finite())
-                .ok_or_else(|| bad(C, format!("`{key}` must be a number"))),
+            Some(v) => v.as_f64().filter(|x| x.is_finite()).ok_or_else(|| bad(C, format!("`{key}` must be a number"))),
         }
     };
     let graphic = MappedGraphic {
@@ -110,10 +89,7 @@ fn map_graphic(s: &mut Session, p: &Value) -> Result<Value> {
     let item = item_target(s, p, C)?;
     let explicit_index = match p.get("index") {
         None | Some(Value::Null) => None,
-        Some(v) => Some(
-            v.as_u64()
-                .ok_or_else(|| bad(C, "`index` must be a non-negative integer"))? as usize,
-        ),
+        Some(v) => Some(v.as_u64().ok_or_else(|| bad(C, "`index` must be a non-negative integer"))? as usize),
     };
 
     let mut resolved_locations: Vec<(NodeId, Option<usize>, usize, Value)> = Vec::with_capacity(targets.len());
@@ -131,8 +107,7 @@ fn map_graphic(s: &mut Session, p: &Value) -> Result<Value> {
         let updated_merged = effects::with_graphic(&merged, graphic.clone());
         let updated_stored = effects::with_graphic(&fx.params, graphic.clone());
         if fx.visible {
-            effects::validate_three_d_at_in(Some(d), n, &fx.id, &updated_merged, (found_item, fx_idx))
-                .map_err(|e| bad(C, e))?;
+            effects::validate_three_d_at_in(Some(d), n, &fx.id, &updated_merged, (found_item, fx_idx)).map_err(|e| bad(C, e))?;
         } else {
             effects::validate_three_d_params(&fx.id, &updated_merged).map_err(|e| bad(C, e))?;
         }
@@ -145,15 +120,9 @@ fn map_graphic(s: &mut Session, p: &Value) -> Result<Value> {
             let app = &mut n.appearance;
             let list = match item_idx {
                 None => &mut app.effects,
-                Some(k) => app
-                    .items
-                    .get_mut(k)
-                    .ok_or_else(|| bad(C, "missing appearance item"))?
-                    .effects_mut(),
+                Some(k) => app.items.get_mut(k).ok_or_else(|| bad(C, "missing appearance item"))?.effects_mut(),
             };
-            let fx = list
-                .get_mut(fx_idx)
-                .ok_or_else(|| bad(C, "missing 3D effect"))?;
+            let fx = list.get_mut(fx_idx).ok_or_else(|| bad(C, "missing 3D effect"))?;
             fx.params = new_params.clone();
         }
         Ok(())
@@ -169,32 +138,23 @@ fn find_three_d_slot<'a>(
     cmd: &str,
 ) -> Result<(Option<usize>, usize, &'a vectorcraft_doc::Effect)> {
     if let Some(item_idx) = requested_item {
-        let fx_list = n
-            .appearance
-            .items
-            .get(item_idx)
-            .ok_or_else(|| bad(cmd, "no such appearance item"))?
-            .effects();
+        let fx_list = n.appearance.items.get(item_idx).ok_or_else(|| bad(cmd, "no such appearance item"))?.effects();
         if let Some(idx) = explicit_index {
-            let fx = fx_list
-                .get(idx)
-                .filter(|e| effects::is_three_d(&e.id))
-                .ok_or_else(|| bad(cmd, format!("no 3D effect at index {idx}")))?;
+            let fx = fx_list.get(idx).filter(|e| effects::is_three_d(&e.id)).ok_or_else(|| bad(cmd, format!("no 3D effect at index {idx}")))?;
             return Ok((Some(item_idx), idx, fx));
         }
-        if let Some((idx, fx)) = fx_list.iter().enumerate().find(|(_, e)| e.visible && effects::is_three_d(&e.id)).or_else(|| {
-            fx_list.iter().enumerate().find(|(_, e)| effects::is_three_d(&e.id))
-        }) {
+        if let Some((idx, fx)) = fx_list
+            .iter()
+            .enumerate()
+            .find(|(_, e)| e.visible && effects::is_three_d(&e.id))
+            .or_else(|| fx_list.iter().enumerate().find(|(_, e)| effects::is_three_d(&e.id)))
+        {
             return Ok((Some(item_idx), idx, fx));
         }
     }
     if let Some(idx) = explicit_index {
-        let fx = n
-            .appearance
-            .effects
-            .get(idx)
-            .filter(|e| effects::is_three_d(&e.id))
-            .ok_or_else(|| bad(cmd, format!("no 3D effect at index {idx}")))?;
+        let fx =
+            n.appearance.effects.get(idx).filter(|e| effects::is_three_d(&e.id)).ok_or_else(|| bad(cmd, format!("no 3D effect at index {idx}")))?;
         return Ok((None, idx, fx));
     }
     if let Some((idx, fx)) = n

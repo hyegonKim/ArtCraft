@@ -43,10 +43,10 @@ pub use frame::Frame;
 pub use mode::{ColorTable, Duotone, DuotoneInk, StackMode};
 pub use motion::{MotionExportOptions, export_motion_ozml};
 pub use pattern::Pattern;
-pub use ps2027::{LiveBackdropFx, RelightLamp, RestylePreset, TextAttributeClipboard};
 pub use photocraft_color::{BlendMode, Color, ColorMode, PixelFormat, SampleType};
 pub use photocraft_geom::{Affine, Rect, Size};
 pub use photocraft_raster::Surface;
+pub use ps2027::{LiveBackdropFx, RelightLamp, RestylePreset, TextAttributeClipboard};
 use serde::{Deserialize, Serialize};
 pub use slices::{Slice, SliceKind, SliceOrigin, Slices};
 pub use text_styles::TextStyles;
@@ -709,11 +709,7 @@ impl Layer {
     /// transparency and position locked. Only the bottom layer of a document with them is the
     /// Background: use [`Document::background`] / [`Document::is_background`] to identify it.
     pub fn has_background_traits(&self) -> bool {
-        self.locks.transparency
-            && self.locks.position
-            && !self.clipped
-            && self.live_fx.is_none()
-            && matches!(self.content, LayerContent::Raster(_))
+        self.locks.transparency && self.locks.position && !self.clipped && self.live_fx.is_none() && matches!(self.content, LayerContent::Raster(_))
     }
 
     pub fn new(name: impl Into<String>, content: LayerContent) -> Self {

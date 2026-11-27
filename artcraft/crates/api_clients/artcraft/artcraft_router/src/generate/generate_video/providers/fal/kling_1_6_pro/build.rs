@@ -1,15 +1,6 @@
-use fal_client::requests::api::video::elements::kling_1p6_pro_elements_to_video::api::{
-  Kling1p6ProElementsToVideoAspectRatio, Kling1p6ProElementsToVideoDuration,
-  Kling1p6ProElementsToVideoRequest,
-};
-use fal_client::requests::api::video::image::kling_1p6_pro_image_to_video::api::{
-  Kling1p6ProImageToVideoAspectRatio, Kling1p6ProImageToVideoDuration,
-  Kling1p6ProImageToVideoRequest,
-};
-use fal_client::requests::api::video::text::kling_1p6_pro_text_to_video::api::{
-  Kling1p6ProTextToVideoAspectRatio, Kling1p6ProTextToVideoDuration,
-  Kling1p6ProTextToVideoRequest,
-};
+use fal_client::requests::api::video::elements::kling_1p6_pro_elements_to_video::api::{Kling1p6ProElementsToVideoAspectRatio, Kling1p6ProElementsToVideoDuration, Kling1p6ProElementsToVideoRequest};
+use fal_client::requests::api::video::image::kling_1p6_pro_image_to_video::api::{Kling1p6ProImageToVideoAspectRatio, Kling1p6ProImageToVideoDuration, Kling1p6ProImageToVideoRequest};
+use fal_client::requests::api::video::text::kling_1p6_pro_text_to_video::api::{Kling1p6ProTextToVideoAspectRatio, Kling1p6ProTextToVideoDuration, Kling1p6ProTextToVideoRequest};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::image_list_ref::ImageListRef;
@@ -18,9 +9,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::fal::kling_1_6_pro::request::{
-  FalKling16ProMode, FalKling16ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_1_6_pro::request::{FalKling16ProMode, FalKling16ProRequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -37,9 +26,7 @@ pub(crate) enum PlanDuration {
   Ten,
 }
 
-pub fn build_fal_kling_1_6_pro(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_kling_1_6_pro(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio, strategy)?;
@@ -55,50 +42,20 @@ pub fn build_fal_kling_1_6_pro(
   // Elements-to-video has no concept of start/end frame, so passing both with
   // reference_images is rejected unless the strategy is lenient.
   let mode = if !reference_image_urls.is_empty() {
-    if (start_image_url.is_some() || end_image_url.is_some())
-      && matches!(strategy, RequestMismatchMitigationStrategy::ErrorOut)
-    {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "reference_images",
-        value: "Kling 1.6 Pro elements-to-video cannot also accept start_frame or end_frame".to_string(),
-      }));
+    if (start_image_url.is_some() || end_image_url.is_some()) && matches!(strategy, RequestMismatchMitigationStrategy::ErrorOut) {
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_images", value: "Kling 1.6 Pro elements-to-video cannot also accept start_frame or end_frame".to_string() }));
     }
-    FalKling16ProMode::ElementsToVideo(Kling1p6ProElementsToVideoRequest {
-      prompt,
-      input_image_urls: reference_image_urls,
-      negative_prompt,
-      duration: duration.map(to_elements_duration),
-      aspect_ratio: aspect_ratio.map(to_elements_aspect_ratio),
-    })
+    FalKling16ProMode::ElementsToVideo(Kling1p6ProElementsToVideoRequest { prompt, input_image_urls: reference_image_urls, negative_prompt, duration: duration.map(to_elements_duration), aspect_ratio: aspect_ratio.map(to_elements_aspect_ratio) })
   } else if let Some(image_url) = start_image_url {
-    FalKling16ProMode::ImageToVideo(Kling1p6ProImageToVideoRequest {
-      prompt,
-      image_url,
-      end_image_url,
-      negative_prompt,
-      duration: duration.map(to_i2v_duration),
-      aspect_ratio: aspect_ratio.map(to_i2v_aspect_ratio),
-      cfg_scale: None,
-    })
+    FalKling16ProMode::ImageToVideo(Kling1p6ProImageToVideoRequest { prompt, image_url, end_image_url, negative_prompt, duration: duration.map(to_i2v_duration), aspect_ratio: aspect_ratio.map(to_i2v_aspect_ratio), cfg_scale: None })
   } else {
     if end_image_url.is_some() {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "end_frame",
-        value: "Kling 1.6 Pro requires a start_frame when end_frame is provided".to_string(),
-      }));
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Kling 1.6 Pro requires a start_frame when end_frame is provided".to_string() }));
     }
-    FalKling16ProMode::TextToVideo(Kling1p6ProTextToVideoRequest {
-      prompt,
-      negative_prompt,
-      duration: duration.map(to_t2v_duration),
-      aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio),
-      cfg_scale: None,
-    })
+    FalKling16ProMode::TextToVideo(Kling1p6ProTextToVideoRequest { prompt, negative_prompt, duration: duration.map(to_t2v_duration), aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio), cfg_scale: None })
   };
 
-  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling16Pro(
-    FalKling16ProRequestState { mode },
-  )))
+  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling16Pro(FalKling16ProRequestState { mode })))
 }
 
 // ── Shared URL helpers ──
@@ -106,20 +63,11 @@ pub fn build_fal_kling_1_6_pro(
 // `optional_url` is also imported by other Kling router modules (e.g.
 // kling_3p0_pro) to avoid copy/paste. Preserve the signature.
 
-pub(crate) fn require_url(
-  image_ref: Option<ImageRef>,
-  field: &'static str,
-  reason: &str,
-) -> Result<String, ArtcraftRouterError> {
+pub(crate) fn require_url(image_ref: Option<ImageRef>, field: &'static str, reason: &str) -> Result<String, ArtcraftRouterError> {
   match image_ref {
     Some(ImageRef::Url(url)) => Ok(url),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
-    None => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field,
-      value: reason.to_string(),
-    })),
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
+    None => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: reason.to_string() })),
   }
 }
 
@@ -127,30 +75,21 @@ pub(crate) fn optional_url(image_ref: Option<ImageRef>) -> Result<Option<String>
   match image_ref {
     None => Ok(None),
     Some(ImageRef::Url(url)) => Ok(Some(url)),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
-fn resolve_reference_image_urls(
-  reference_images: Option<ImageListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_reference_image_urls(reference_images: Option<ImageListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match reference_images {
     None => Ok(vec![]),
     Some(ImageListRef::Urls(urls)) => Ok(urls),
-    Some(ImageListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
 // ── Plan helpers ──
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
@@ -159,37 +98,22 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::SixteenByNine)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", other) })),
       _ => Ok(Some(Ar::SixteenByNine)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanDuration>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
     Some(5) => Ok(Some(PlanDuration::Five)),
     Some(10) => Ok(Some(PlanDuration::Ten)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(PlanDuration::Ten)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(PlanDuration::Five)),
     },
@@ -249,12 +173,7 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling16Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Kling16Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   // ── Mode dispatch ──
@@ -365,10 +284,7 @@ mod tests {
     #[test]
     fn elements_input_image_urls_propagate() {
       let mut b = base_builder();
-      b.reference_images = Some(ImageListRef::Urls(vec![
-        "https://example.com/a.png".to_string(),
-        "https://example.com/b.png".to_string(),
-      ]));
+      b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string()]));
       let result = build_fal_kling_1_6_pro(b).expect("build");
       let VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalKling16Pro(s)) = result else {
         panic!("expected FalKling16Pro");
@@ -388,13 +304,8 @@ mod tests {
     #[test]
     fn media_file_token_rejected_for_start_frame() {
       let mut b = base_builder();
-      b.start_frame = Some(ImageRef::MediaFileToken(
-        tokens::tokens::media_files::MediaFileToken::new_from_str("mf_xxx"),
-      ));
-      assert!(matches!(
-        build_fal_kling_1_6_pro(b),
-        Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-      ));
+      b.start_frame = Some(ImageRef::MediaFileToken(tokens::tokens::media_files::MediaFileToken::new_from_str("mf_xxx")));
+      assert!(matches!(build_fal_kling_1_6_pro(b), Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))));
     }
 
     #[test]

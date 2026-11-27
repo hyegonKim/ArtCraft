@@ -18,19 +18,15 @@ pub struct SplatGenerationDraftContext<'a> {
   pub media_file_to_artcraft_url_map: Option<&'a HashMap<MediaFileToken, String>>,
 }
 
-impl <'a> SplatGenerationDraftContext<'a> {
+impl<'a> SplatGenerationDraftContext<'a> {
   pub fn get_worldlabs_client_ref(&self) -> Result<&RouterWorldLabsClient, ArtcraftRouterError> {
     let client = self.client.ok_or(ArtcraftRouterError::Client(ClientError::RouterClientNotProvided))?;
-    client.get_worldlabs_client_ref()
-      .map_err(|err| ArtcraftRouterError::Client(err))
+    client.get_worldlabs_client_ref().map_err(|err| ArtcraftRouterError::Client(err))
   }
 }
 
 impl Debug for SplatGenerationDraftContext<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SplatGenerationDraftContext")
-      .field("client", &self.client.is_some())
-      .field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map)
-      .finish()
+    f.debug_struct("SplatGenerationDraftContext").field("client", &self.client.is_some()).field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map).finish()
   }
 }

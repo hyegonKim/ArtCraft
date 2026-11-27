@@ -31,16 +31,12 @@ pub struct ImageGenerationDraftContext<'a> {
 impl<'a> ImageGenerationDraftContext<'a> {
   pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
     let client = self.client.ok_or(ArtcraftRouterError::Client(ClientError::RouterClientNotProvided))?;
-    client.get_kinovi_web_client_ref()
-      .map_err(ArtcraftRouterError::Client)
+    client.get_kinovi_web_client_ref().map_err(ArtcraftRouterError::Client)
   }
 }
 
 impl Debug for ImageGenerationDraftContext<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("ImageGenerationDraftContext")
-      .field("client", &self.client.is_some())
-      .field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map.map(|m| m.len()))
-      .finish()
+    f.debug_struct("ImageGenerationDraftContext").field("client", &self.client.is_some()).field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map.map(|m| m.len())).finish()
   }
 }

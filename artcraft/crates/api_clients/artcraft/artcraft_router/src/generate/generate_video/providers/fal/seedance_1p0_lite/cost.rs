@@ -16,15 +16,7 @@ impl FalSeedance10LiteCostState {
     // Mirrors v1 — delegate to the Fal client's cost calculator for billing parity.
     let cost_in_usd_cents = self.request.request.calculate_cost_in_cents();
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -40,25 +32,14 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance10Lite,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance10Lite, provider: RouterProvider::Fal, prompt: Some("test".to_string()), start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())), ..Default::default() }
   }
 
   fn cost_cents(resolution: Option<RouterResolution>, duration_seconds: Option<u16>) -> u64 {
     let mut b = base_builder();
     b.resolution = resolution;
     b.duration_seconds = duration_seconds;
-    b.build2()
-      .expect("build2")
-      .estimate_cost()
-      .expect("estimate_cost")
-      .cost_in_usd_cents
-      .expect("cost_in_usd_cents")
+    b.build2().expect("build2").estimate_cost().expect("estimate_cost").cost_in_usd_cents.expect("cost_in_usd_cents")
   }
 
   // ── Numeric literal price assertions (break if pricing changes) ──
@@ -147,19 +128,9 @@ mod tests {
 
   #[test]
   fn combinatorial_positive_cost() {
-    let resolutions = [
-      Some(RouterResolution::FourEightyP),
-      Some(RouterResolution::SevenTwentyP),
-      Some(RouterResolution::TenEightyP),
-    ];
+    let resolutions = [Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP)];
     let durations = [Some(5u16), Some(10u16)];
-    let aspect_ratios = [
-      None,
-      Some(RouterAspectRatio::Auto),
-      Some(RouterAspectRatio::Square),
-      Some(RouterAspectRatio::WideSixteenByNine),
-      Some(RouterAspectRatio::TallNineBySixteen),
-    ];
+    let aspect_ratios = [None, Some(RouterAspectRatio::Auto), Some(RouterAspectRatio::Square), Some(RouterAspectRatio::WideSixteenByNine), Some(RouterAspectRatio::TallNineBySixteen)];
 
     let mut combos = 0;
     for &res in &resolutions {

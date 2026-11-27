@@ -21,11 +21,7 @@ mod tests {
   use super::*;
 
   fn base_request() -> Hunyuan3d3p1RapidImageToMeshRequest {
-    Hunyuan3d3p1RapidImageToMeshRequest {
-      image_url: "https://example.com/front.jpg".to_string(),
-      enable_pbr: None,
-      enable_geometry: None,
-    }
+    Hunyuan3d3p1RapidImageToMeshRequest { image_url: "https://example.com/front.jpg".to_string(), enable_pbr: None, enable_geometry: None }
   }
 
   #[test]

@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::vidu_q3_turbo::raw_request::{
-  ViduQ3TurboTextToVideoInput, ViduQ3TurboTextToVideoOutput,
-};
+use crate::requests::api::video::text::vidu_q3_turbo::raw_request::{ViduQ3TurboTextToVideoInput, ViduQ3TurboTextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -78,14 +76,7 @@ impl FalEndpoint for ViduQ3TurboTextToVideoRequest {
   type RawResponse = ViduQ3TurboTextToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      duration: self.duration,
-      seed: self.seed,
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      audio: self.audio,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), duration: self.duration, seed: self.seed, aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), resolution: self.resolution.map(|r| r.to_str().to_string()), audio: self.audio })
   }
 }
 
@@ -105,14 +96,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TurboTextToVideoRequest {
-      prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(),
-      duration: Some(5),
-      seed: None,
-      aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine),
-      resolution: Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP),
-      audio: Some(true),
-    };
+    let request = ViduQ3TurboTextToVideoRequest { prompt: "a golden retriever puppy chases butterflies through a sunlit meadow".to_string(), duration: Some(5), seed: None, aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine), resolution: Some(ViduQ3TurboTextToVideoResolution::SevenTwentyP), audio: Some(true) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -126,14 +110,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = ViduQ3TurboTextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      duration: Some(5),
-      seed: Some(1234),
-      aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine),
-      resolution: Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TurboTextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), duration: Some(5), seed: Some(1234), aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::SixteenByNine), resolution: Some(ViduQ3TurboTextToVideoResolution::ThreeSixtyP), audio: Some(false) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -145,14 +122,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = ViduQ3TurboTextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: Some(12),
-      seed: Some(42),
-      aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::FourByThree),
-      resolution: Some(ViduQ3TurboTextToVideoResolution::TenEightyP),
-      audio: Some(false),
-    };
+    let request = ViduQ3TurboTextToVideoRequest { prompt: "p".to_string(), duration: Some(12), seed: Some(42), aspect_ratio: Some(ViduQ3TurboTextToVideoAspectRatio::FourByThree), resolution: Some(ViduQ3TurboTextToVideoResolution::TenEightyP), audio: Some(false) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.duration, Some(12));
@@ -164,38 +134,21 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = ViduQ3TurboTextToVideoRequest {
-      prompt: "minimal".to_string(),
-      duration: None,
-      seed: None,
-      aspect_ratio: None,
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TurboTextToVideoRequest { prompt: "minimal".to_string(), duration: None, seed: None, aspect_ratio: None, resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn seed_serializes_when_set() {
-    let request = ViduQ3TurboTextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: None,
-      seed: Some(777),
-      aspect_ratio: None,
-      resolution: None,
-      audio: None,
-    };
+    let request = ViduQ3TurboTextToVideoRequest { prompt: "p".to_string(), duration: None, seed: Some(777), aspect_ratio: None, resolution: None, audio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json.get("seed").and_then(|s| s.as_i64()), Some(777));
   }
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      ViduQ3TurboTextToVideoRequest::ENDPOINT,
-      "fal-ai/vidu/q3/text-to-video/turbo",
-    );
+    assert_eq!(ViduQ3TurboTextToVideoRequest::ENDPOINT, "fal-ai/vidu/q3/text-to-video/turbo",);
   }
 
   // NB: Pricing tests are in cost.rs

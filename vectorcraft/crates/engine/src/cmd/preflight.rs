@@ -89,23 +89,11 @@ fn check_paint_gamut(paint: &Paint, nid: u64, stats: &mut ScanStats, flagged: &m
     }
     if hit && *flagged < 10 {
         *flagged += 1;
-        stats.push(
-            "warning",
-            "outOfGamutColor",
-            format!("Object #{nid} uses high-chroma RGB colors outside standard CMYK print gamut"),
-            Some(nid),
-        );
+        stats.push("warning", "outOfGamutColor", format!("Object #{nid} uses high-chroma RGB colors outside standard CMYK print gamut"), Some(nid));
     }
 }
 
-fn check_node(
-    node: &Node,
-    doc: &Document,
-    target_print: bool,
-    min_ppi: f64,
-    stats: &mut ScanStats,
-    gamut_flagged: &mut usize,
-) {
+fn check_node(node: &Node, doc: &Document, target_print: bool, min_ppi: f64, stats: &mut ScanStats, gamut_flagged: &mut usize) {
     if !node.visible {
         return;
     }
@@ -123,12 +111,7 @@ fn check_node(
         NodeKind::Path { path, guide: false, clipping: false, .. } => {
             let stray = !path.subpaths.is_empty() && path.subpaths.iter().all(|sp| sp.anchors.len() <= 1);
             if stray {
-                stats.push(
-                    "warning",
-                    "strayPoint",
-                    format!("Path #{} is an isolated single-anchor stray point", node.id.0),
-                    Some(node.id.0),
-                );
+                stats.push("warning", "strayPoint", format!("Path #{} is an isolated single-anchor stray point", node.id.0), Some(node.id.0));
             }
         }
         NodeKind::Text(t) => {
@@ -157,13 +140,11 @@ fn check_node(
         NodeKind::Image(img) => {
             stats.raster_objects += 1;
             if !doc.images.contains_key(&img.key) && img.link.is_none() {
-                stats.push(
-                    "error",
-                    "missingLink",
-                    format!("Placed image #{} has missing or empty pixel data", node.id.0),
-                    Some(node.id.0),
-                );
-            } else if img.width > 0 && img.height > 0 && let Some(b) = node.geometric_bounds() {
+                stats.push("error", "missingLink", format!("Placed image #{} has missing or empty pixel data", node.id.0), Some(node.id.0));
+            } else if img.width > 0
+                && img.height > 0
+                && let Some(b) = node.geometric_bounds()
+            {
                 let eff_x = if b.width() > 1e-6 { f64::from(img.width) / (b.width() / 72.0) } else { f64::INFINITY };
                 let eff_y = if b.height() > 1e-6 { f64::from(img.height) / (b.height() / 72.0) } else { f64::INFINITY };
                 let eff = eff_x.min(eff_y);
@@ -193,12 +174,7 @@ fn check_artboard_and_bleed(doc: &Document, target_print: bool, stats: &mut Scan
     if target_print {
         let b = doc.setup.bleed;
         if b.iter().all(|&v| v <= 0.0) {
-            stats.push(
-                "warning",
-                "missingBleed",
-                "Document bleed is 0 pt on all sides; 9 pt (0.125 in) is recommended for print".into(),
-                None,
-            );
+            stats.push("warning", "missingBleed", "Document bleed is 0 pt on all sides; 9 pt (0.125 in) is recommended for print".into(), None);
         }
     }
     if doc.artboards.is_empty() {
@@ -214,10 +190,8 @@ fn check_artboard_and_bleed(doc: &Document, target_print: bool, stats: &mut Scan
                 continue;
             }
             if let Some(gb) = obj.geometric_bounds() {
-                let touches_any = doc
-                    .artboards
-                    .iter()
-                    .any(|ab| gb.x0 <= ab.rect.x1 && ab.rect.x0 <= gb.x1 && gb.y0 <= ab.rect.y1 && ab.rect.y0 <= gb.y1);
+                let touches_any =
+                    doc.artboards.iter().any(|ab| gb.x0 <= ab.rect.x1 && ab.rect.x0 <= gb.x1 && gb.y0 <= ab.rect.y1 && ab.rect.y0 <= gb.y1);
                 if !touches_any {
                     stats.push(
                         "warning",
@@ -345,23 +319,15 @@ fn run_export_text_mask(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let ab_idx = ab_f as usize;
     let doc = &s.doc()?.doc;
-    let region: Rect = doc
-        .artboards
-        .get(ab_idx)
-        .ok_or_else(|| bad(C, format!("no artboard {ab_idx} (the document has {})", doc.artboards.len())))?
-        .rect;
+    let region: Rect =
+        doc.artboards.get(ab_idx).ok_or_else(|| bad(C, format!("no artboard {ab_idx} (the document has {})", doc.artboards.len())))?.rect;
 
     let text_count = count_text_nodes(doc);
     let masked_doc = super::fileio::apply_decomposed_mode(doc, DecomposedMode::TextWhiteOnBlack);
-    let opts = RasterExportOptions {
-        ppi,
-        background: Some([0, 0, 0]),
-        ..RasterExportOptions::default()
-    };
+    let opts = RasterExportOptions { ppi, background: Some([0, 0, 0]), ..RasterExportOptions::default() };
     let (w, h) = vectorcraft_render::raster_size(region, opts.scale()).map_err(|e| bad(C, e))?;
-    let bytes = vectorcraft_render::Renderer::new()
-        .export_region(&masked_doc, region, RasterFormat::Png, &opts)
-        .map_err(crate::EngineError::Other)?;
+    let bytes =
+        vectorcraft_render::Renderer::new().export_region(&masked_doc, region, RasterFormat::Png, &opts).map_err(crate::EngineError::Other)?;
 
     if let Some(path) = str_param(p, "path").map(str::trim).filter(|s| !s.is_empty()) {
         super::fileio::write_file(path, &bytes)?;
@@ -429,8 +395,8 @@ fn run_extract_ai_text(s: &mut Session, p: &Value) -> Result<Value> {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use crate::Session;
+    use serde_json::json;
 
     #[test]
     fn preflight_detects_issues_and_decomposed_text_mask_and_extraction_work() {
@@ -458,11 +424,13 @@ mod tests {
 
         // Verify `document.export` decomposed modes ("noText" vs "textOnly" vs "textWhiteOnBlack").
         let no_txt = s.execute("document.export", &json!({"format": "png", "decomposedMode": "noText", "background": "black"})).unwrap();
-        let no_txt_img = image::load_from_memory(&vectorcraft_format::base64_decode(no_txt["dataBase64"].as_str().unwrap()).unwrap()).unwrap().to_rgba8();
+        let no_txt_img =
+            image::load_from_memory(&vectorcraft_format::base64_decode(no_txt["dataBase64"].as_str().unwrap()).unwrap()).unwrap().to_rgba8();
         assert_eq!(no_txt_img.get_pixel(40, 40).0, [0, 255, 34, 255], "neon green rectangle stays in noText mode");
 
         let txt_only = s.execute("document.export", &json!({"format": "png", "decomposedMode": "textOnly"})).unwrap();
-        let txt_only_img = image::load_from_memory(&vectorcraft_format::base64_decode(txt_only["dataBase64"].as_str().unwrap()).unwrap()).unwrap().to_rgba8();
+        let txt_only_img =
+            image::load_from_memory(&vectorcraft_format::base64_decode(txt_only["dataBase64"].as_str().unwrap()).unwrap()).unwrap().to_rgba8();
         assert_eq!(txt_only_img.get_pixel(25, 25).0[3], 0, "non-text rectangle is omitted (transparent) in textOnly mode");
 
         let extracted = s.execute("document.extractAiText", &json!({})).unwrap();

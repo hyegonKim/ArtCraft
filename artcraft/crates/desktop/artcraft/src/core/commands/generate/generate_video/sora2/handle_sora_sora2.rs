@@ -19,14 +19,7 @@ use tauri::AppHandle;
 use tokens::tokens::media_files::MediaFileToken;
 
 #[deprecated(note = "Legacy direct-provider handler; desktop generation now uses ArtCraft.")]
-pub async fn handle_sora_sora2(
-  request: &TauriGenerateVideoRequest,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  sora_creds_manager: &SoraCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_sora_sora2(request: &TauriGenerateVideoRequest, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, sora_creds_manager: &SoraCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let mut sora_creds = match sora_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => {
@@ -40,21 +33,16 @@ pub async fn handle_sora_sora2(
     Some(token) => vec![token.clone()],
     None => vec![],
   };
-  
+
   let mut image_reference_media_ids = None;
-  
+
   if !image_media_tokens.is_empty() {
-    let result = upload_images_to_sora(UploadImagesToSoraArgs {
-      storyteller_host: &app_env_configs.storyteller_host,
-      image_media_tokens: &image_media_tokens,
-      app_data_root,
-      sora_creds_manager,
-    }).await?;
-    
+    let result = upload_images_to_sora(UploadImagesToSoraArgs { storyteller_host: &app_env_configs.storyteller_host, image_media_tokens: &image_media_tokens, app_data_root, sora_creds_manager }).await?;
+
     if let Some(creds) = result.maybe_new_sora_credentials {
       sora_creds = creds;
     }
-    
+
     image_reference_media_ids = Some(result.sora_media_tokens);
   }
 
@@ -63,44 +51,28 @@ pub async fn handle_sora_sora2(
     Some(SoraOrientation::Portrait) => Orientation::Portrait,
     None => Orientation::Landscape,
   };
-  
+
   info!("Calling Sora 2 generate...");
 
-  let result = generate_sora2_video_with_session_auto_renew(
-    GenerateSora2VideoArgs {
-      prompt: request.prompt.as_deref().unwrap_or(""),
-      credentials: &sora_creds,
-      request_timeout: None,
-      orientation,
-      image_reference_media_ids: image_reference_media_ids.as_ref(),
-    }
-  ).await;
+  let result = generate_sora2_video_with_session_auto_renew(GenerateSora2VideoArgs { prompt: request.prompt.as_deref().unwrap_or(""), credentials: &sora_creds, request_timeout: None, orientation, image_reference_media_ids: image_reference_media_ids.as_ref() }).await;
 
   let job_id = match result {
     Ok((response, maybe_new_session)) => {
       info!("Successfully enqueued Sora2 Video: {}", response.task_id);
-      
+
       if let Some(new_creds) = maybe_new_session {
         if let Err(err) = sora_creds_manager.set_credentials(&new_creds) {
           error!("Failed to save renewed Sora credentials: {:?}", err);
         }
       }
-      
+
       response.task_id
-    }
+    },
     Err(err) => {
       error!("Failed to use Sora2 video: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
 
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Sora,
-    model: Some(GenerationModel::Sora2),
-    provider_job_id: Some(job_id.to_string()),
-    task_type: TaskType::VideoGeneration,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Sora, model: Some(GenerationModel::Sora2), provider_job_id: Some(job_id.to_string()), task_type: TaskType::VideoGeneration, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }

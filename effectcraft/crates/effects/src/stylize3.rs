@@ -599,12 +599,8 @@ fn luma_straight(rgb: [f32; 3]) -> f32 {
 
 fn sample_image_palette(straight: &[[f32; 4]], k: usize) -> Vec<[f32; 3]> {
     let stride = (straight.len() / 4096).max(1);
-    let mut samples: Vec<[f32; 3]> = straight
-        .iter()
-        .step_by(stride)
-        .filter(|p| p[3] > 0.05)
-        .map(|p| [p[0].clamp(0.0, 1.0), p[1].clamp(0.0, 1.0), p[2].clamp(0.0, 1.0)])
-        .collect();
+    let mut samples: Vec<[f32; 3]> =
+        straight.iter().step_by(stride).filter(|p| p[3] > 0.05).map(|p| [p[0].clamp(0.0, 1.0), p[1].clamp(0.0, 1.0), p[2].clamp(0.0, 1.0)]).collect();
     if samples.is_empty() {
         return (0..k).map(|i| [i as f32 / (k.saturating_sub(1).max(1)) as f32; 3]).collect();
     }
@@ -690,14 +686,18 @@ fn outline_paint(ctx: &EffectCtx, b: Buf) -> Buf {
     let out_thresh = (ctx.params.f("outlineThreshold") / 100.0).clamp(0.01, 0.99) as f32;
     let out_col = ctx.params.color("outlineColor");
 
-    let straight: Vec<[f32; 4]> = b.img.data.iter().copied().map(|px| {
-        let (c, a) = unpremul(px);
-        [c[0], c[1], c[2], a]
-    }).collect();
+    let straight: Vec<[f32; 4]> = b
+        .img
+        .data
+        .iter()
+        .copied()
+        .map(|px| {
+            let (c, a) = unpremul(px);
+            [c[0], c[1], c[2], a]
+        })
+        .collect();
     let luma: Vec<f32> = straight.iter().map(|p| luma_straight([p[0], p[1], p[2]]) * p[3]).collect();
-    let clamp_xy = |x: i32, y: i32| -> usize {
-        (y.clamp(0, h as i32 - 1) as usize) * w + (x.clamp(0, w as i32 - 1) as usize)
-    };
+    let clamp_xy = |x: i32, y: i32| -> usize { (y.clamp(0, h as i32 - 1) as usize) * w + (x.clamp(0, w as i32 - 1) as usize) };
 
     // Pass 1: edge-guided directional brush smear.
     let smeared: Vec<[f32; 4]> = if smear_r < 0.25 {
@@ -711,9 +711,13 @@ fn outline_paint(ctx: &EffectCtx, b: Buf) -> Buf {
             for (x, dst) in row.iter_mut().enumerate() {
                 let xi = x as i32;
                 let gx = -luma[clamp_xy(xi - 1, yi - 1)] - 2.0 * luma[clamp_xy(xi - 1, yi)] - luma[clamp_xy(xi - 1, yi + 1)]
-                    + luma[clamp_xy(xi + 1, yi - 1)] + 2.0 * luma[clamp_xy(xi + 1, yi)] + luma[clamp_xy(xi + 1, yi + 1)];
+                    + luma[clamp_xy(xi + 1, yi - 1)]
+                    + 2.0 * luma[clamp_xy(xi + 1, yi)]
+                    + luma[clamp_xy(xi + 1, yi + 1)];
                 let gy = -luma[clamp_xy(xi - 1, yi - 1)] - 2.0 * luma[clamp_xy(xi, yi - 1)] - luma[clamp_xy(xi + 1, yi - 1)]
-                    + luma[clamp_xy(xi - 1, yi + 1)] + 2.0 * luma[clamp_xy(xi, yi + 1)] + luma[clamp_xy(xi + 1, yi + 1)];
+                    + luma[clamp_xy(xi - 1, yi + 1)]
+                    + 2.0 * luma[clamp_xy(xi, yi + 1)]
+                    + luma[clamp_xy(xi + 1, yi + 1)];
                 let gmag = gx.hypot(gy);
                 // Tangent runs perpendicular to gradient; blend with user brush angle.
                 let (tx, ty) = if gmag > 0.04 {
@@ -809,11 +813,7 @@ fn outline_paint(ctx: &EffectCtx, b: Buf) -> Buf {
                 let edge = (gx.hypot(gy) * 0.5).clamp(0.0, 1.0);
                 let ink = smoothstep(out_thresh * 0.7, (out_thresh * 1.15).min(1.0), edge) * (out_w.min(1.0)) * out_col[3];
                 if ink > 1e-4 {
-                    rgb = [
-                        rgb[0] * (1.0 - ink) + out_col[0] * ink,
-                        rgb[1] * (1.0 - ink) + out_col[1] * ink,
-                        rgb[2] * (1.0 - ink) + out_col[2] * ink,
-                    ];
+                    rgb = [rgb[0] * (1.0 - ink) + out_col[0] * ink, rgb[1] * (1.0 - ink) + out_col[1] * ink, rgb[2] * (1.0 - ink) + out_col[2] * ink];
                 }
             }
             let painted = premul(rgb, sp[3]);
@@ -971,9 +971,9 @@ mod tests {
             img.clone(),
         );
         let swatches = [[0.9f32, 0.1, 0.1], [0.1, 0.8, 0.2], [0.1, 0.2, 0.9]];
-        assert!(o.img.data.iter().all(|px| {
-            swatches.iter().any(|s| (px[0] - s[0]).abs() < 1e-3 && (px[1] - s[1]).abs() < 1e-3 && (px[2] - s[2]).abs() < 1e-3)
-        }));
+        assert!(
+            o.img.data.iter().all(|px| { swatches.iter().any(|s| (px[0] - s[0]).abs() < 1e-3 && (px[1] - s[1]).abs() < 1e-3 && (px[2] - s[2]).abs() < 1e-3) })
+        );
 
         // Sampled 4-color crisp posterization produces at most 4 distinct colors without outlines.
         let sampled = run(
@@ -981,12 +981,8 @@ mod tests {
             &[("sampleFromImage", Value::Bool(true)), ("paletteColors", num(4.0)), ("softness", num(0.0)), ("outlineWidth", num(0.0))],
             img,
         );
-        let mut distinct: Vec<[u32; 3]> = sampled
-            .img
-            .data
-            .iter()
-            .map(|p| [(p[0] * 1000.0).round() as u32, (p[1] * 1000.0).round() as u32, (p[2] * 1000.0).round() as u32])
-            .collect();
+        let mut distinct: Vec<[u32; 3]> =
+            sampled.img.data.iter().map(|p| [(p[0] * 1000.0).round() as u32, (p[1] * 1000.0).round() as u32, (p[2] * 1000.0).round() as u32]).collect();
         distinct.sort();
         distinct.dedup();
         assert!(distinct.len() <= 4 && distinct.len() >= 2, "distinct={}", distinct.len());

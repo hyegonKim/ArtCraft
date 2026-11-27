@@ -21,16 +21,16 @@ pub struct FluxPro11UltraRequest {
 
 #[derive(Copy, Clone, Debug)]
 pub enum FluxPro11UltraAspectRatio {
-  Square, // 1:1
-  LandscapeThreeByTwo, // 3:2
-  LandscapeFourByThree, // 4:3
-  LandscapeSixteenByNine, // 16:9
+  Square,                   // 1:1
+  LandscapeThreeByTwo,      // 3:2
+  LandscapeFourByThree,     // 4:3
+  LandscapeSixteenByNine,   // 16:9
   LandscapeTwentyOneByNine, // 21:9
-  PortraitTwoByThree, // 2:3
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  PortraitNineByTwentyOne, // 9:21
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitTwoByThree,       // 2:3
+  PortraitThreeByFour,      // 3:4
+  PortraitNineBySixteen,    // 9:16
+  PortraitNineByTwentyOne,  // 9:21
+                            //Custom { width: u32, height: u32 }, // TODO
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -40,7 +40,6 @@ pub enum FluxPro11UltraNumImages {
   Three,
   Four,
 }
-
 
 impl FalRequestCostCalculator for FluxPro11UltraRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
@@ -56,11 +55,7 @@ impl FalRequestCostCalculator for FluxPro11UltraRequest {
   }
 }
 
-
-pub async fn enqueue_flux_pro_11_ultra_text_to_image_webhook<U: IntoUrl>(
-  args: FluxPro11UltraArgs<'_, U>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_flux_pro_11_ultra_text_to_image_webhook<U: IntoUrl>(args: FluxPro11UltraArgs<'_, U>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -97,10 +92,7 @@ pub async fn enqueue_flux_pro_11_ultra_text_to_image_webhook<U: IntoUrl>(
     sync_mode: None, // Synchronous / slow
   };
 
-  let result = flux_pro_11_ultra_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = flux_pro_11_ultra_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -120,15 +112,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = FluxPro11UltraArgs {
-      request: FluxPro11UltraRequest {
-        prompt: "a giant robot fighting a dragon in a futuristic city".to_string(),
-        num_images: FluxPro11UltraNumImages::One,
-        aspect_ratio: FluxPro11UltraAspectRatio::LandscapeSixteenByNine,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = FluxPro11UltraArgs { request: FluxPro11UltraRequest { prompt: "a giant robot fighting a dragon in a futuristic city".to_string(), num_images: FluxPro11UltraNumImages::One, aspect_ratio: FluxPro11UltraAspectRatio::LandscapeSixteenByNine }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_flux_pro_11_ultra_text_to_image_webhook(args).await?;
 

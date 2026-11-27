@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::text::meshy_v6_text_to_mesh::raw_request::{
-  MeshyV6TextToMeshInput, MeshyV6TextToMeshOutput,
-};
+use crate::requests::api::mesh::text::meshy_v6_text_to_mesh::raw_request::{MeshyV6TextToMeshInput, MeshyV6TextToMeshOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Meshy 6 text-to-3D.
@@ -146,26 +144,7 @@ impl FalEndpoint for MeshyV6TextToMeshRequest {
   type RawResponse = MeshyV6TextToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      mode: self.mode.map(|m| m.to_str().to_string()),
-      seed: self.seed,
-      model_type: self.model_type.map(|m| m.to_str().to_string()),
-      topology: self.topology.map(|t| t.to_str().to_string()),
-      target_polycount: self.target_polycount,
-      should_remesh: self.should_remesh,
-      symmetry_mode: self.symmetry_mode.map(|s| s.to_str().to_string()),
-      enable_pbr: self.enable_pbr,
-      pose_mode: self.pose_mode.map(|p| p.to_str().to_string()),
-      enable_prompt_expansion: self.enable_prompt_expansion,
-      texture_prompt: self.texture_prompt.clone(),
-      texture_image_url: self.texture_image_url.clone(),
-      enable_rigging: self.enable_rigging,
-      rigging_height_meters: self.rigging_height_meters,
-      enable_animation: self.enable_animation,
-      animation_action_id: self.animation_action_id,
-      enable_safety_checker: self.enable_safety_checker,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), mode: self.mode.map(|m| m.to_str().to_string()), seed: self.seed, model_type: self.model_type.map(|m| m.to_str().to_string()), topology: self.topology.map(|t| t.to_str().to_string()), target_polycount: self.target_polycount, should_remesh: self.should_remesh, symmetry_mode: self.symmetry_mode.map(|s| s.to_str().to_string()), enable_pbr: self.enable_pbr, pose_mode: self.pose_mode.map(|p| p.to_str().to_string()), enable_prompt_expansion: self.enable_prompt_expansion, texture_prompt: self.texture_prompt.clone(), texture_image_url: self.texture_image_url.clone(), enable_rigging: self.enable_rigging, rigging_height_meters: self.rigging_height_meters, enable_animation: self.enable_animation, animation_action_id: self.animation_action_id, enable_safety_checker: self.enable_safety_checker })
   }
 }
 
@@ -178,26 +157,7 @@ mod tests {
   use std::fs::read_to_string;
 
   fn base_request() -> MeshyV6TextToMeshRequest {
-    MeshyV6TextToMeshRequest {
-      prompt: "a small ceramic teapot".to_string(),
-      mode: None,
-      seed: None,
-      model_type: None,
-      topology: None,
-      target_polycount: None,
-      should_remesh: None,
-      symmetry_mode: None,
-      enable_pbr: None,
-      pose_mode: None,
-      enable_prompt_expansion: None,
-      texture_prompt: None,
-      texture_image_url: None,
-      enable_rigging: None,
-      rigging_height_meters: None,
-      enable_animation: None,
-      animation_action_id: None,
-      enable_safety_checker: None,
-    }
+    MeshyV6TextToMeshRequest { prompt: "a small ceramic teapot".to_string(), mode: None, seed: None, model_type: None, topology: None, target_polycount: None, should_remesh: None, symmetry_mode: None, enable_pbr: None, pose_mode: None, enable_prompt_expansion: None, texture_prompt: None, texture_image_url: None, enable_rigging: None, rigging_height_meters: None, enable_animation: None, animation_action_id: None, enable_safety_checker: None }
   }
 
   #[tokio::test]
@@ -226,16 +186,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_core_fields() {
-    let request = MeshyV6TextToMeshRequest {
-      mode: Some(MeshyV6Mode::Preview),
-      model_type: Some(MeshyV6ModelType::LowPoly),
-      topology: Some(MeshyV6Topology::Quad),
-      target_polycount: Some(5_000),
-      symmetry_mode: Some(MeshyV6SymmetryMode::On),
-      enable_pbr: Some(true),
-      pose_mode: Some(MeshyV6PoseMode::TPose),
-      ..base_request()
-    };
+    let request = MeshyV6TextToMeshRequest { mode: Some(MeshyV6Mode::Preview), model_type: Some(MeshyV6ModelType::LowPoly), topology: Some(MeshyV6Topology::Quad), target_polycount: Some(5_000), symmetry_mode: Some(MeshyV6SymmetryMode::On), enable_pbr: Some(true), pose_mode: Some(MeshyV6PoseMode::TPose), ..base_request() };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json["mode"], "preview");
     assert_eq!(json["model_type"], "lowpoly");
@@ -255,11 +206,7 @@ mod tests {
 
   #[test]
   fn every_symmetry_mode_maps_to_wire_string() {
-    for (variant, expected) in [
-      (MeshyV6SymmetryMode::Off, "off"),
-      (MeshyV6SymmetryMode::Auto, "auto"),
-      (MeshyV6SymmetryMode::On, "on"),
-    ] {
+    for (variant, expected) in [(MeshyV6SymmetryMode::Off, "off"), (MeshyV6SymmetryMode::Auto, "auto"), (MeshyV6SymmetryMode::On, "on")] {
       assert_eq!(variant.to_str(), expected);
     }
   }

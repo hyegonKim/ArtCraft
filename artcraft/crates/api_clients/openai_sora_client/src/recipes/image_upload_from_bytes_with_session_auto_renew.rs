@@ -20,23 +20,21 @@ pub struct ImageUploadFromBytesAutoRenewRequest<'a> {
   pub filename: String,
   pub mime_type: &'a str,
   pub credentials: &'a SoraCredentialSet,
-  
+
   /// This function can try to upload several times. This is the timeout for *individual* requests.
   pub request_timeout: Option<Duration>,
 }
 
 /// Image upload with retry and session auto-renewal.
 /// If a new sora credential is returned, replace the old one with the new one.
-pub async fn image_upload_from_bytes_with_session_auto_renew(
-  request: ImageUploadFromBytesAutoRenewRequest<'_>
-) -> Result<(SoraMediaUploadResponse, Option<SoraCredentialSet>), SoraError> {
-
+pub async fn image_upload_from_bytes_with_session_auto_renew(request: ImageUploadFromBytesAutoRenewRequest<'_>) -> Result<(SoraMediaUploadResponse, Option<SoraCredentialSet>), SoraError> {
   let result = sora_media_upload_from_bytes(
     request.file_bytes.clone(), // FIXME(bt): This is horrible, but the client needs to take ownership. :(
-    request.filename.clone(), // FIXME: Same
+    request.filename.clone(),   // FIXME: Same
     request.credentials,
     request.request_timeout,
-  ).await;
+  )
+  .await;
 
   let err = match result {
     Ok(response) => return Ok((response, None)),
@@ -51,12 +49,7 @@ pub async fn image_upload_from_bytes_with_session_auto_renew(
 
   info!("Retrying image upload with new credentials...");
 
-  let result = sora_media_upload_from_bytes(
-    request.file_bytes,
-    request.filename,
-    &new_creds,
-    request.request_timeout,
-  ).await?;
+  let result = sora_media_upload_from_bytes(request.file_bytes, request.filename, &new_creds, request.request_timeout).await?;
 
   Ok((result, Some(new_creds)))
 }

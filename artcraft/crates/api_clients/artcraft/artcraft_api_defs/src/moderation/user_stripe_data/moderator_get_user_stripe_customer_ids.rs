@@ -3,8 +3,7 @@ use serde_derive::{Deserialize, Serialize};
 use tokens::tokens::users::UserToken;
 use utoipa::ToSchema;
 
-pub const MODERATOR_GET_USER_STRIPE_CUSTOMER_IDS_PATH: &str =
-    "/v1/moderation/user_stripe_data/{user_token}/customer_ids";
+pub const MODERATOR_GET_USER_STRIPE_CUSTOMER_IDS_PATH: &str = "/v1/moderation/user_stripe_data/{user_token}/customer_ids";
 
 #[derive(Deserialize, ToSchema)]
 pub struct ModeratorGetUserStripeCustomerIdsPathInfo {

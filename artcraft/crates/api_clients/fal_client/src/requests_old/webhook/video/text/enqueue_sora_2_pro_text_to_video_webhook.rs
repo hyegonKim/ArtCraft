@@ -39,7 +39,6 @@ pub enum EnqueueSora2ProTextToVideoAspectRatio {
   SixteenByNine,
 }
 
-
 impl FalRequestCostCalculator for EnqueueSora2ProTextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // Pricing: $0.30/s for 720p and $0.50/s for 1080p.
@@ -59,44 +58,34 @@ impl FalRequestCostCalculator for EnqueueSora2ProTextToVideoRequest {
 
 /// Sora 2 Pro Text-to-Video
 /// https://fal.ai/models/fal-ai/sora-2/text-to-video/pro
-pub async fn enqueue_sora_2_pro_text_to_video_webhook<R: IntoUrl>(
-  args: EnqueueSora2ProTextToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_sora_2_pro_text_to_video_webhook<R: IntoUrl>(args: EnqueueSora2ProTextToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|d| match d {
-        EnqueueSora2ProTextToVideoDurationSeconds::Four => 4,
-        EnqueueSora2ProTextToVideoDurationSeconds::Eight => 8,
-        EnqueueSora2ProTextToVideoDurationSeconds::Twelve => 12,
-      });
+  let duration = req.duration.map(|d| match d {
+    EnqueueSora2ProTextToVideoDurationSeconds::Four => 4,
+    EnqueueSora2ProTextToVideoDurationSeconds::Eight => 8,
+    EnqueueSora2ProTextToVideoDurationSeconds::Twelve => 12,
+  });
 
-  let resolution = req.resolution
-      .map(|r| match r {
-        EnqueueSora2ProTextToVideoResolution::SevenTwentyP => "720p",
-        EnqueueSora2ProTextToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|r| r.to_string());
+  let resolution = req
+    .resolution
+    .map(|r| match r {
+      EnqueueSora2ProTextToVideoResolution::SevenTwentyP => "720p",
+      EnqueueSora2ProTextToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|r| r.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|ar| match ar {
-        EnqueueSora2ProTextToVideoAspectRatio::NineBySixteen => "9:16",
-        EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine => "16:9",
-      })
-      .map(|ar| ar.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|ar| match ar {
+      EnqueueSora2ProTextToVideoAspectRatio::NineBySixteen => "9:16",
+      EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine => "16:9",
+    })
+    .map(|ar| ar.to_string());
 
-  let request = Sora2ProTextToVideoInput {
-    prompt: req.prompt,
-    duration,
-    resolution,
-    aspect_ratio,
-    delete_video: Some(false),
-  };
+  let request = Sora2ProTextToVideoInput { prompt: req.prompt, duration, resolution, aspect_ratio, delete_video: Some(false) };
 
-  let result = sora_2_pro_text_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = sora_2_pro_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -115,16 +104,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueSora2ProTextToVideoArgs {
-      request: EnqueueSora2ProTextToVideoRequest {
-        prompt: "a dinosaur turns to the camera and asks, 'do you have adequate car insurance?' it then stomps off and attacks a brontosaurus".to_string(),
-        duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Eight),
-        aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::NineBySixteen),
-        resolution: Some(EnqueueSora2ProTextToVideoResolution::SevenTwentyP),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueSora2ProTextToVideoArgs { request: EnqueueSora2ProTextToVideoRequest { prompt: "a dinosaur turns to the camera and asks, 'do you have adequate car insurance?' it then stomps off and attacks a brontosaurus".to_string(), duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Eight), aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::NineBySixteen), resolution: Some(EnqueueSora2ProTextToVideoResolution::SevenTwentyP) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_sora_2_pro_text_to_video_webhook(args).await?;
     println!("result: {:?}", result);
@@ -140,16 +120,7 @@ mod tests {
 
     for ar in EnqueueSora2ProTextToVideoAspectRatio::iter() {
       println!("--- aspect ratio: {:?} ---", ar);
-      let args = EnqueueSora2ProTextToVideoArgs {
-        request: EnqueueSora2ProTextToVideoRequest {
-          prompt: "a serene mountain lake at sunset with gentle ripples".to_string(),
-          duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Four),
-          aspect_ratio: Some(ar),
-          resolution: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProTextToVideoArgs { request: EnqueueSora2ProTextToVideoRequest { prompt: "a serene mountain lake at sunset with gentle ripples".to_string(), duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Four), aspect_ratio: Some(ar), resolution: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -165,16 +136,7 @@ mod tests {
 
     for dur in EnqueueSora2ProTextToVideoDurationSeconds::iter() {
       println!("--- duration: {:?} ---", dur);
-      let args = EnqueueSora2ProTextToVideoArgs {
-        request: EnqueueSora2ProTextToVideoRequest {
-          prompt: "Suspenseful Hollywood movie. Interior, night. Customers are eating at a city diner. Suddenly a t-rex bursts its head through the large windows. The customers run.".to_string(),
-          duration: Some(dur),
-          aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine),
-          resolution: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProTextToVideoArgs { request: EnqueueSora2ProTextToVideoRequest { prompt: "Suspenseful Hollywood movie. Interior, night. Customers are eating at a city diner. Suddenly a t-rex bursts its head through the large windows. The customers run.".to_string(), duration: Some(dur), aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine), resolution: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -190,16 +152,7 @@ mod tests {
 
     for res in EnqueueSora2ProTextToVideoResolution::iter() {
       println!("--- resolution: {:?} ---", res);
-      let args = EnqueueSora2ProTextToVideoArgs {
-        request: EnqueueSora2ProTextToVideoRequest {
-          prompt: "a bird flying over an ocean at golden hour".to_string(),
-          duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Four),
-          aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine),
-          resolution: Some(res),
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProTextToVideoArgs { request: EnqueueSora2ProTextToVideoRequest { prompt: "a bird flying over an ocean at golden hour".to_string(), duration: Some(EnqueueSora2ProTextToVideoDurationSeconds::Four), aspect_ratio: Some(EnqueueSora2ProTextToVideoAspectRatio::SixteenByNine), resolution: Some(res) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_text_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }

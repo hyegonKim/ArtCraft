@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::angle::qwen_edit_2511_edit_image_angle::raw_request::{
-  QwenEdit2511EditImageAngleInput, QwenEdit2511EditImageAngleOutput,
-};
+use crate::requests::api::image::angle::qwen_edit_2511_edit_image_angle::raw_request::{QwenEdit2511EditImageAngleInput, QwenEdit2511EditImageAngleOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -48,15 +46,15 @@ impl FalEndpoint for QwenEdit2511EditImageAngleRequest {
   type RawResponse = QwenEdit2511EditImageAngleOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    let num_images = self.num_images
-      .map(|n| match n {
-        QwenEdit2511AngleNumImages::One => 1,
-        QwenEdit2511AngleNumImages::Two => 2,
-        QwenEdit2511AngleNumImages::Three => 3,
-        QwenEdit2511AngleNumImages::Four => 4,
-      });
+    let num_images = self.num_images.map(|n| match n {
+      QwenEdit2511AngleNumImages::One => 1,
+      QwenEdit2511AngleNumImages::Two => 2,
+      QwenEdit2511AngleNumImages::Three => 3,
+      QwenEdit2511AngleNumImages::Four => 4,
+    });
 
-    let image_size = self.image_size
+    let image_size = self
+      .image_size
       .map(|s| match s {
         QwenEdit2511AngleImageSize::Square => "square",
         QwenEdit2511AngleImageSize::SquareHd => "square_hd",
@@ -104,18 +102,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = QwenEdit2511EditImageAngleRequest {
-      image_urls: vec![JUNO_AT_LAKE_IMAGE_URL.to_string()],
-      horizontal_angle: Some(45.0),
-      vertical_angle: Some(15.0),
-      zoom: Some(5.0),
-      additional_prompt: Some("cinematic lighting".to_string()),
-      num_images: Some(QwenEdit2511AngleNumImages::One),
-      image_size: Some(QwenEdit2511AngleImageSize::SquareHd),
-      lora_scale: None,
-      guidance_scale: None,
-      num_inference_steps: None,
-    };
+    let request = QwenEdit2511EditImageAngleRequest { image_urls: vec![JUNO_AT_LAKE_IMAGE_URL.to_string()], horizontal_angle: Some(45.0), vertical_angle: Some(15.0), zoom: Some(5.0), additional_prompt: Some("cinematic lighting".to_string()), num_images: Some(QwenEdit2511AngleNumImages::One), image_size: Some(QwenEdit2511AngleImageSize::SquareHd), lora_scale: None, guidance_scale: None, num_inference_steps: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {:?}", result.request_id);
@@ -136,18 +123,7 @@ mod tests {
     for &h in &horizontal_angles {
       for &v in &vertical_angles {
         for &z in &zoom_levels {
-          let request = QwenEdit2511EditImageAngleRequest {
-            image_urls: vec![JUNO_AT_LAKE_IMAGE_URL.to_string()],
-            horizontal_angle: Some(h),
-            vertical_angle: Some(v),
-            zoom: Some(z),
-            additional_prompt: None,
-            num_images: Some(QwenEdit2511AngleNumImages::One),
-            image_size: Some(QwenEdit2511AngleImageSize::SquareHd),
-            lora_scale: None,
-            guidance_scale: None,
-            num_inference_steps: None,
-          };
+          let request = QwenEdit2511EditImageAngleRequest { image_urls: vec![JUNO_AT_LAKE_IMAGE_URL.to_string()], horizontal_angle: Some(h), vertical_angle: Some(v), zoom: Some(z), additional_prompt: None, num_images: Some(QwenEdit2511AngleNumImages::One), image_size: Some(QwenEdit2511AngleImageSize::SquareHd), lora_scale: None, guidance_scale: None, num_inference_steps: None };
 
           let result = request.send_queue_request(&api_key).await?;
           println!("Enqueued: h={}, v={}, z={}, request_id={:?}", h, v, z, result.request_id);

@@ -41,9 +41,7 @@ impl BetaKeyProduct {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Studio,
-    ])
+    BTreeSet::from([Self::Studio])
   }
 }
 

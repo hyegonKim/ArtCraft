@@ -10,12 +10,7 @@ fn substance_presets_and_raytracing_execute_undo_redo_and_round_trip_vectorcraft
     for effect in ["threeD.extrude", "threeD.revolve", "threeD.inflate", "threeD.rotate"] {
         let mut s = Session::new();
         s.execute("file.new", &json!({"width": 300, "height": 300})).unwrap();
-        let id = NodeId(
-            s.execute("shape.rectangle", &json!({"x": 80, "y": 80, "width": 90, "height": 90}))
-                .unwrap()["id"]
-                .as_u64()
-                .unwrap(),
-        );
+        let id = NodeId(s.execute("shape.rectangle", &json!({"x": 80, "y": 80, "width": 90, "height": 90})).unwrap()["id"].as_u64().unwrap());
         s.execute("paint.setFill", &json!({"color": "#d66833"})).unwrap();
 
         // Legacy params without new keys deserialize cleanly to defaults.

@@ -7,18 +7,12 @@ use std::sync::Arc;
 
 use serde_json::{Value, json};
 use vectorcraft_color::{Color, Paint};
-use vectorcraft_doc::{
-    Appearance, AppearanceItem, Artboard, CharStyle, Document, FillLayer, Node, NodeKind,
-    StrokeLayer, TextObject,
-};
+use vectorcraft_doc::{Appearance, AppearanceItem, Artboard, CharStyle, Document, FillLayer, Node, NodeKind, StrokeLayer, TextObject};
 use vectorcraft_geom::{Affine, FillRule, PathData, Point, Rect, Vec2};
 use vectorcraft_three_d::{Extrude, Facet, PbrMaterial, View, extrude};
 
 use super::edit::{outermost, selected_roots};
-use super::{
-    CommandSpec, EngineError, Result, Session, bad, cmd, given_objects, has_selection,
-    number_or, switch_or, text_param, unique_name,
-};
+use super::{CommandSpec, EngineError, Result, Session, bad, cmd, given_objects, has_selection, number_or, switch_or, text_param, unique_name};
 
 const CMD: &str = "object.turntable";
 const ISO_PITCH_DEG: f64 = 35.264_389_682_754_65;
@@ -78,10 +72,7 @@ fn parse_opts(p: &Value) -> Result<TurntableOpts> {
         "isometric" => ProjKind::Isometric,
         "perspective" => ProjKind::Perspective,
         other => {
-            return Err(bad(
-                CMD,
-                format!("unknown projection `{other}` (orthographic|isometric|perspective)"),
-            ));
+            return Err(bad(CMD, format!("unknown projection `{other}` (orthographic|isometric|perspective)")));
         }
     };
     let extrude_depth = number_or(p, "extrudeDepth", 24.0, CMD)?;
@@ -179,10 +170,7 @@ fn collect_parts(node: &Node, out: &mut Vec<ProfilePart>) {
 fn build_facet_appearance(rgb: [f64; 3]) -> Appearance {
     let col = Color::rgb(rgb[0] as f32, rgb[1] as f32, rgb[2] as f32);
     Appearance {
-        items: vec![
-            AppearanceItem::Fill(FillLayer::new(Paint::solid(col))),
-            AppearanceItem::Stroke(StrokeLayer::new(Paint::solid(col), 0.25)),
-        ],
+        items: vec![AppearanceItem::Fill(FillLayer::new(Paint::solid(col))), AppearanceItem::Stroke(StrokeLayer::new(Paint::solid(col), 0.25))],
         ..Appearance::default()
     }
 }
@@ -200,9 +188,8 @@ fn foreshortened_fallback(part: &ProfilePart, center: Point, yaw_deg: f64, pitch
     let sx = yaw_deg.to_radians().cos().clamp(-1.0, 1.0);
     let sx = if sx.abs() < 0.08 { 0.08 * sx.signum() } else { sx };
     let sy = pitch_deg.to_radians().cos().clamp(0.15, 1.0);
-    let xf = Affine::translate(Vec2::new(center.x, center.y))
-        * Affine::scale_non_uniform(sx, sy)
-        * Affine::translate(Vec2::new(-center.x, -center.y));
+    let xf =
+        Affine::translate(Vec2::new(center.x, center.y)) * Affine::scale_non_uniform(sx, sy) * Affine::translate(Vec2::new(-center.x, -center.y));
     let path = part.path.transformed(xf);
     let col = Color::rgb(part.base_rgb[0] as f32, part.base_rgb[1] as f32, part.base_rgb[2] as f32);
     let app = match part.stroke_width {
@@ -212,26 +199,14 @@ fn foreshortened_fallback(part: &ProfilePart, center: Point, yaw_deg: f64, pitch
     (path, app)
 }
 
-fn build_view_shapes(
-    parts: &[ProfilePart],
-    orig_bounds: Rect,
-    opts: TurntableOpts,
-    yaw_deg: f64,
-) -> Vec<(PathData, FillRule, Appearance)> {
+fn build_view_shapes(parts: &[ProfilePart], orig_bounds: Rect, opts: TurntableOpts, yaw_deg: f64) -> Vec<(PathData, FillRule, Appearance)> {
     let wrapped_yaw = if yaw_deg > 180.0 { yaw_deg - 360.0 } else { yaw_deg };
     let (pitch, persp) = match opts.projection {
         ProjKind::Isometric => (ISO_PITCH_DEG, 0.0),
         ProjKind::Perspective => (opts.elevation, 35.0),
         ProjKind::Orthographic => (opts.elevation, 0.0),
     };
-    let view = View {
-        rotation_x: -pitch,
-        rotation_y: wrapped_yaw,
-        rotation_z: 0.0,
-        perspective: persp,
-        shade: true,
-        ..View::default()
-    };
+    let view = View { rotation_x: -pitch, rotation_y: wrapped_yaw, rotation_z: 0.0, perspective: persp, shade: true, ..View::default() };
     let ext = Extrude { depth: opts.extrude_depth, cap: true, ..Extrude::default() };
     let pbr = PbrMaterial::new(opts.metallic / 100.0, opts.roughness / 100.0);
     let mut shapes_out = Vec::new();
@@ -267,11 +242,7 @@ fn shapes_bounds(shapes: &[(PathData, FillRule, Appearance)], fallback: Rect) ->
 }
 
 fn make_angle_label(d: &mut Document, center_x: f64, baseline_y: f64, deg: i32) -> Arc<Node> {
-    let style = CharStyle {
-        size: 9.0,
-        fill: Paint::solid(Color::rgb(0.32, 0.34, 0.38)),
-        ..CharStyle::default()
-    };
+    let style = CharStyle { size: 9.0, fill: Paint::solid(Color::rgb(0.32, 0.34, 0.38)), ..CharStyle::default() };
     let label = format!("{deg}°");
     let mut txt = TextObject::point(Point::new(center_x, baseline_y), &label, style);
     txt.para.justify = vectorcraft_doc::Justify::Center;
@@ -318,11 +289,7 @@ fn run_turntable(s: &mut Session, p: &Value) -> Result<Value> {
 
     let max_h = prebuilt.iter().map(|(_, _, b)| b.height()).fold(orig_bounds.height().max(12.0), f64::max);
     let start_x = orig_bounds.x0;
-    let row_center_y = if opts.keep_original {
-        orig_bounds.y1 + opts.spacing.max(24.0) + max_h * 0.5
-    } else {
-        orig_bounds.y0 + max_h * 0.5
-    };
+    let row_center_y = if opts.keep_original { orig_bounds.y1 + opts.spacing.max(24.0) + max_h * 0.5 } else { orig_bounds.y0 + max_h * 0.5 };
     let top_root = *roots.last().ok_or_else(|| bad(CMD, "nothing selected"))?;
 
     let (group_id, ab_index) = s.edit("Turntable", |d, sel| {
@@ -409,8 +376,8 @@ fn run_turntable(s: &mut Session, p: &Value) -> Result<Value> {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use crate::Session;
+    use serde_json::json;
 
     #[test]
     fn turntable_generates_multi_angle_views_artboard_and_supports_undo_redo() {

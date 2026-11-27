@@ -9,14 +9,14 @@ pub const GENERATE_KLING_2_1_MASTER_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/generat
 pub struct GenerateKling21MasterImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
-  
+
   /// Optional text prompt.
   pub prompt: Option<String>,
-  
+
   /// Optional: aspect ratio of the generated video.
   pub aspect_ratio: Option<GenerateKling21MasterAspectRatio>,
 

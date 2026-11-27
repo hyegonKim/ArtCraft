@@ -221,11 +221,7 @@ fn apply_ozml_switches_and_transform(layer: &mut Layer, node: &XmlNode, cw: u32,
     if !matches!(layer.source, LayerSource::Shape)
         && let Some(pos_node) = tr.child("position")
     {
-        let xyz = [
-            pos_node.attr_f64("x").unwrap_or(cw as f64 * 0.5),
-            pos_node.attr_f64("y").unwrap_or(ch as f64 * 0.5),
-            pos_node.attr_f64("z").unwrap_or(0.0),
-        ];
+        let xyz = [pos_node.attr_f64("x").unwrap_or(cw as f64 * 0.5), pos_node.attr_f64("y").unwrap_or(ch as f64 * 0.5), pos_node.attr_f64("z").unwrap_or(0.0)];
         if let Some(pos_prop) = layer.transform_mut().and_then(|t| t.get_mut("position")) {
             pos_prop.value = Value::Vec3(xyz);
         }

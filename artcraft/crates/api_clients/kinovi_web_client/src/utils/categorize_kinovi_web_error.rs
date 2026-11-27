@@ -6,9 +6,7 @@ use crate::error::kinovi_web_generic_api_error::KinoviWebGenericApiError;
 use crate::error::kinovi_web_specific_api_error::KinoviWebSpecificApiError;
 
 /// Known error message substrings that indicate a billing/credits error.
-const BILLING_ERROR_MARKERS: &[&str] = &[
-  "credits not enough",
-];
+const BILLING_ERROR_MARKERS: &[&str] = &["credits not enough"];
 
 /// Zod validation message for a string field exceeding its maximum length,
 /// eg. "参数验证失败 - String must contain at most 10000 character(s)".
@@ -29,15 +27,9 @@ const UPLOADED_URLS_FIELD_MARKER: &str = "\"uploadedUrls\"";
 /// Checks the response body for known patterns (e.g. billing errors, request
 /// validation failures) and returns a specific error variant when possible,
 /// falling back to `UncategorizedBadResponseWithStatusAndBody` otherwise.
-pub fn categorize_kinovi_web_error(
-  status_code: StatusCode,
-  body: String,
-) -> KinoviWebError {
+pub fn categorize_kinovi_web_error(status_code: StatusCode, body: String) -> KinoviWebError {
   if is_billing_error(&body) {
-    return KinoviWebSpecificApiError::BillingError {
-      status_code,
-      body,
-    }.into();
+    return KinoviWebSpecificApiError::BillingError { status_code, body }.into();
   }
 
   if status_code == StatusCode::BAD_REQUEST {
@@ -49,10 +41,7 @@ pub fn categorize_kinovi_web_error(
     }
   }
 
-  KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-    status_code,
-    body,
-  }.into()
+  KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body }.into()
 }
 
 /// Check if the response body contains a known billing error marker.
@@ -86,12 +75,10 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, body);
 
       match error {
-        KinoviWebError::ApiSpecific(
-          KinoviWebSpecificApiError::BillingError { status_code, body }
-        ) => {
+        KinoviWebError::ApiSpecific(KinoviWebSpecificApiError::BillingError { status_code, body }) => {
           assert_eq!(status_code, StatusCode::BAD_REQUEST);
           assert!(body.contains("credits not enough"));
-        }
+        },
         other => panic!("Expected BillingError, got: {:?}", other),
       }
     }
@@ -103,9 +90,7 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, body);
 
       match error {
-        KinoviWebError::ApiSpecific(
-          KinoviWebSpecificApiError::BillingError { .. }
-        ) => {}
+        KinoviWebError::ApiSpecific(KinoviWebSpecificApiError::BillingError { .. }) => {},
         other => panic!("Expected BillingError, got: {:?}", other),
       }
     }
@@ -121,12 +106,10 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, body);
 
       match error {
-        KinoviWebError::ApiBadRequest(
-          KinoviWebBadRequestApiError::PromptIsTooLong { raw_body }
-        ) => {
+        KinoviWebError::ApiBadRequest(KinoviWebBadRequestApiError::PromptIsTooLong { raw_body }) => {
           assert!(raw_body.contains("String must contain at most 10000 character(s)"));
           assert!(raw_body.contains("\"prompt\""));
-        }
+        },
         other => panic!("Expected PromptIsTooLong, got: {:?}", other),
       }
     }
@@ -138,12 +121,10 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, body);
 
       match error {
-        KinoviWebError::ApiBadRequest(
-          KinoviWebBadRequestApiError::TooManyUrls { raw_body }
-        ) => {
+        KinoviWebError::ApiBadRequest(KinoviWebBadRequestApiError::TooManyUrls { raw_body }) => {
           assert!(raw_body.contains("Array must contain at most 9 element(s)"));
           assert!(raw_body.contains("\"uploadedUrls\""));
-        }
+        },
         other => panic!("Expected TooManyUrls, got: {:?}", other),
       }
     }
@@ -155,9 +136,7 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::INTERNAL_SERVER_ERROR, body);
 
       match error {
-        KinoviWebError::ApiGeneric(
-          KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-        ) => {}
+        KinoviWebError::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }) => {},
         other => panic!("Expected UncategorizedBadResponseWithStatusAndBody, got: {:?}", other),
       }
     }
@@ -170,9 +149,7 @@ mod tests {
       let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, body);
 
       match error {
-        KinoviWebError::ApiGeneric(
-          KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-        ) => {}
+        KinoviWebError::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }) => {},
         other => panic!("Expected UncategorizedBadResponseWithStatusAndBody, got: {:?}", other),
       }
     }
@@ -185,40 +162,29 @@ mod tests {
     fn unknown_error_falls_back_to_uncategorized() {
       let body = r#"{"error":"something else went wrong"}"#.to_string();
 
-      let error = categorize_kinovi_web_error(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        body.clone(),
-      );
+      let error = categorize_kinovi_web_error(StatusCode::INTERNAL_SERVER_ERROR, body.clone());
 
       match error {
-        KinoviWebError::ApiGeneric(
-          KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: b }
-        ) => {
+        KinoviWebError::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: b }) => {
           assert_eq!(status_code, StatusCode::INTERNAL_SERVER_ERROR);
           assert_eq!(b, body);
-        }
+        },
         other => panic!("Expected UncategorizedBadResponseWithStatusAndBody, got: {:?}", other),
       }
     }
 
     #[test]
     fn empty_body_falls_back_to_uncategorized() {
-      let error = categorize_kinovi_web_error(
-        StatusCode::BAD_REQUEST,
-        String::new(),
-      );
+      let error = categorize_kinovi_web_error(StatusCode::BAD_REQUEST, String::new());
 
       match error {
-        KinoviWebError::ApiGeneric(
-          KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-        ) => {}
+        KinoviWebError::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }) => {},
         other => panic!("Expected UncategorizedBadResponseWithStatusAndBody, got: {:?}", other),
       }
     }
   }
 
   fn read_response_body(filename: &str) -> String {
-    std::fs::read_to_string(format!("test_data/responses/{}", filename))
-        .expect("Failed to read test data file")
+    std::fs::read_to_string(format!("test_data/responses/{}", filename)).expect("Failed to read test data file")
   }
 }

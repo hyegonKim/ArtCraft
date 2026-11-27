@@ -102,16 +102,16 @@ pub struct EnqueueTextToImageRequest {
   /// Not all models support each of these resolutions, but we can choose or interpolate sensibly.
   pub common_resolution: Option<CommonResolution>,
 
-  /// Quality. 
+  /// Quality.
   /// Tends to be used by OpenAI models.
   pub quality: Option<CommonQuality>,
 
   /// Aspect ratio.
-  #[deprecated(note="use common_aspect_ratio")]
+  #[deprecated(note = "use common_aspect_ratio")]
   pub aspect_ratio: Option<TextToImageSize>,
 
   /// Aspect ratio.
-  #[deprecated(note="use common_resolution")]
+  #[deprecated(note = "use common_resolution")]
   pub image_resolution: Option<TextToImageResolution>,
 
   /// The number of images to generate.
@@ -167,8 +167,7 @@ pub enum TextToImageResolution {
 }
 
 #[derive(Serialize)]
-pub struct EnqueueTextToImageSuccessResponse {
-}
+pub struct EnqueueTextToImageSuccessResponse {}
 
 impl SerializeMarker for EnqueueTextToImageSuccessResponse {}
 
@@ -190,41 +189,12 @@ pub enum EnqueueTextToImageErrorType {
 }
 
 #[tauri::command]
-pub async fn enqueue_text_to_image_command(
-  request: EnqueueTextToImageRequest,
-  app: AppHandle,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>,
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-  task_database: State<'_, TaskDatabase>,
-  mj_creds_manager: State<'_, MidjourneyCredentialManager>,
-  grok_creds_manager: State<'_, GrokCredentialManager>,
-  grok_image_prompt_queue: State<'_, GrokImagePromptQueue>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-  sora_creds_manager: State<'_, SoraCredentialManager>,
-  sora_task_queue: State<'_, SoraTaskQueue>,
-) -> Response<EnqueueTextToImageSuccessResponse, EnqueueTextToImageErrorType, ()> {
-
+pub async fn enqueue_text_to_image_command(request: EnqueueTextToImageRequest, app: AppHandle, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>, provider_priority_store: State<'_, ProviderPriorityStore>, task_database: State<'_, TaskDatabase>, mj_creds_manager: State<'_, MidjourneyCredentialManager>, grok_creds_manager: State<'_, GrokCredentialManager>, grok_image_prompt_queue: State<'_, GrokImagePromptQueue>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>, sora_creds_manager: State<'_, SoraCredentialManager>, sora_task_queue: State<'_, SoraTaskQueue>) -> Response<EnqueueTextToImageSuccessResponse, EnqueueTextToImageErrorType, ()> {
   info!("enqueue_text_to_image called");
 
   info!("request: {:?}", request);
 
-  let result = handle_request(
-    request,
-    &app,
-    &app_data_root,
-    &artcraft_usage_tracker,
-    &provider_priority_store,
-    &task_database,
-    &mj_creds_manager,
-    &grok_creds_manager,
-    &grok_image_prompt_queue,
-    &storyteller_creds_manager,
-    &app_env_configs,
-    &sora_creds_manager,
-    &sora_task_queue,
-  ).await;
+  let result = handle_request(request, &app, &app_data_root, &artcraft_usage_tracker, &provider_priority_store, &task_database, &mj_creds_manager, &grok_creds_manager, &grok_image_prompt_queue, &storyteller_creds_manager, &app_env_configs, &sora_creds_manager, &sora_task_queue).await;
 
   match result {
     Err(err) => {
@@ -241,12 +211,12 @@ pub async fn enqueue_text_to_image_command(
           status = CommandErrorStatus::BadRequest;
           error_type = EnqueueTextToImageErrorType::ModelNotSpecified;
           error_message = "No model specified for image generation";
-        }
+        },
         GenerateError::NoProviderAvailable => {
           status = CommandErrorStatus::ServerError;
           error_type = EnqueueTextToImageErrorType::NoProviderAvailable;
           error_message = "No configured provider available for image generation";
-        }
+        },
         GenerateError::MissingCredentials(MissingCredentialsReason::NeedsFalApiKey) => {
           status = CommandErrorStatus::Unauthorized;
           error_type = EnqueueTextToImageErrorType::NeedsFalApiKey;
@@ -255,74 +225,31 @@ pub async fn enqueue_text_to_image_command(
         _ => {}, // Fall-through
       }
 
-      Err(CommandErrorResponseWrapper {
-        status,
-        error_message: Some(error_message.to_string()),
-        error_type: Some(error_type),
-        error_details: None,
-      })
-    }
+      Err(CommandErrorResponseWrapper { status, error_message: Some(error_message.to_string()), error_type: Some(error_type), error_details: None })
+    },
     Ok(event) => {
-      let event = GenerationEnqueueSuccessEvent {
-        action: event.to_frontend_event_action(),
-        service: event.to_frontend_event_service(),
-        model: event.model,
-      };
+      let event = GenerationEnqueueSuccessEvent { action: event.to_frontend_event_action(), service: event.to_frontend_event_service(), model: event.model };
 
       if let Err(err) = event.send(&app) {
         error!("Failed to emit event: {:?}", err); // Fail open.
       }
-      
-      CreditsBalanceChangedEvent{}.send_infallible(&app);
+
+      CreditsBalanceChangedEvent {}.send_infallible(&app);
 
       Ok(EnqueueTextToImageSuccessResponse {}.into())
-    }
+    },
   }
 }
 
-pub async fn handle_request(
-  request: EnqueueTextToImageRequest,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  provider_priority_store: &ProviderPriorityStore,
-  task_database: &TaskDatabase,
-  mj_creds_manager: &MidjourneyCredentialManager,
-  grok_creds_manager: &GrokCredentialManager,
-  grok_image_prompt_queue: &GrokImagePromptQueue,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  app_env_configs: &AppEnvConfigs,
-  sora_creds_manager: &SoraCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-  
-  let result = dispatch_request(
-    &request,
-    &app,
-    &app_data_root,
-    &provider_priority_store,
-    &storyteller_creds_manager,
-    &app_env_configs,
-    &mj_creds_manager,
-    &grok_creds_manager,
-    &grok_image_prompt_queue,
-    &sora_creds_manager,
-    &sora_task_queue,
-  ).await;
-  
+pub async fn handle_request(request: EnqueueTextToImageRequest, app: &AppHandle, app_data_root: &AppDataRoot, artcraft_usage_tracker: &ArtcraftUsageTracker, provider_priority_store: &ProviderPriorityStore, task_database: &TaskDatabase, mj_creds_manager: &MidjourneyCredentialManager, grok_creds_manager: &GrokCredentialManager, grok_image_prompt_queue: &GrokImagePromptQueue, storyteller_creds_manager: &StorytellerCredentialManager, app_env_configs: &AppEnvConfigs, sora_creds_manager: &SoraCredentialManager, sora_task_queue: &SoraTaskQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
+  let result = dispatch_request(&request, &app, &app_data_root, &provider_priority_store, &storyteller_creds_manager, &app_env_configs, &mj_creds_manager, &grok_creds_manager, &grok_image_prompt_queue, &sora_creds_manager, &sora_task_queue).await;
+
   let success_event = match result {
     Err(err) => return Err(err),
     Ok(event) => event,
   };
 
-  let result = success_event
-      .insert_into_task_database_with_frontend_payload(
-        task_database,
-        request.frontend_caller,
-        request.frontend_subscriber_id.as_deref(),
-        request.frontend_subscriber_payload.as_deref(),
-      )
-      .await;
+  let result = success_event.insert_into_task_database_with_frontend_payload(task_database, request.frontend_caller, request.frontend_subscriber_id.as_deref(), request.frontend_subscriber_payload.as_deref()).await;
 
   if let Err(err) = result {
     error!("Failed to create task in database: {:?}", err);
@@ -330,45 +257,23 @@ pub async fn handle_request(
   }
 
   let num_images = request.number_images.map(|n| n as u16).unwrap_or(1);
-  
-  let is_image_to_image = request.image_media_tokens
-      .as_ref()
-      .map(|tokens| !tokens.is_empty())
-      .unwrap_or(false);
-  
-  let usage_type = if is_image_to_image {
-    ArtcraftUsageType::ImageToResult
-  } else {
-    ArtcraftUsageType::TextToResult
-  };
-  
+
+  let is_image_to_image = request.image_media_tokens.as_ref().map(|tokens| !tokens.is_empty()).unwrap_or(false);
+
+  let usage_type = if is_image_to_image { ArtcraftUsageType::ImageToResult } else { ArtcraftUsageType::TextToResult };
+
   if let Err(err) = artcraft_usage_tracker.record_image_generation(num_images, usage_type, ArtcraftUsagePage::ImagePage) {
     // NB: Fail open.
     warn!("Failed to report usage: {:?}", err);
   }
-  
+
   Ok(success_event)
 }
 
-pub async fn dispatch_request(
-  request: &EnqueueTextToImageRequest,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  provider_priority_store: &ProviderPriorityStore,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  app_env_configs: &AppEnvConfigs,
-  mj_creds_manager: &MidjourneyCredentialManager,
-  grok_creds_manager: &GrokCredentialManager,
-  grok_image_prompt_queue: &GrokImagePromptQueue,
-  sora_creds_manager: &SoraCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn dispatch_request(request: &EnqueueTextToImageRequest, app: &AppHandle, app_data_root: &AppDataRoot, provider_priority_store: &ProviderPriorityStore, storyteller_creds_manager: &StorytellerCredentialManager, app_env_configs: &AppEnvConfigs, mj_creds_manager: &MidjourneyCredentialManager, grok_creds_manager: &GrokCredentialManager, grok_image_prompt_queue: &GrokImagePromptQueue, sora_creds_manager: &SoraCredentialManager, sora_task_queue: &SoraTaskQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
   let model = match request.model {
     Some(model) => model,
-    None => {
-      return Err(GenerateError::no_model_specified())
-    }
+    None => return Err(GenerateError::no_model_specified()),
   };
 
   let provider = match (model, request.provider) {
@@ -380,46 +285,10 @@ pub async fn dispatch_request(
   info!("generate image with {:?} via provider {:?}", &model, &provider);
 
   match provider {
-    GenerationProvider::Artcraft => {
-      handle_text_to_image_artcraft(
-        model,
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await
-    }
-    GenerationProvider::Grok => {
-      handle_grok(
-        app,
-        request,
-        app_env_configs,
-        grok_creds_manager,
-        grok_image_prompt_queue,
-      ).await
-    }
-    GenerationProvider::Midjourney => {
-      handle_midjourney(
-        app,
-        request,
-        app_env_configs,
-        mj_creds_manager,
-      ).await
-    }
-    GenerationProvider::Sora => {
-      handle_text_to_image_sora(
-        request,
-        app,
-        sora_creds_manager,
-        sora_task_queue,
-      ).await
-    }
-    _ => {
-      Err(GenerateError::BadProviderForModel {
-        provider,
-        model: text_to_image_model_to_model_type(model),
-      })
-    }
+    GenerationProvider::Artcraft => handle_text_to_image_artcraft(model, request, app, app_data_root, app_env_configs, storyteller_creds_manager).await,
+    GenerationProvider::Grok => handle_grok(app, request, app_env_configs, grok_creds_manager, grok_image_prompt_queue).await,
+    GenerationProvider::Midjourney => handle_midjourney(app, request, app_env_configs, mj_creds_manager).await,
+    GenerationProvider::Sora => handle_text_to_image_sora(request, app, sora_creds_manager, sora_task_queue).await,
+    _ => Err(GenerateError::BadProviderForModel { provider, model: text_to_image_model_to_model_type(model) }),
   }
 }

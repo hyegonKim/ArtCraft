@@ -20,51 +20,23 @@ pub struct StorytellerOpenCreditsPurchaseCommand {
 }
 
 #[tauri::command]
-pub async fn storyteller_open_credits_purchase_command(
-  app: AppHandle,
-  request: StorytellerOpenCreditsPurchaseCommand,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> Result<String, String> {
+pub async fn storyteller_open_credits_purchase_command(app: AppHandle, request: StorytellerOpenCreditsPurchaseCommand, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> Result<String, String> {
   info!("storyteller_open_credits_purchase_command called");
 
   let credits_pack = request.credits_pack.ok_or("Credits pack is required")?;
-  
-  do_open_billing(
-    &app, 
-    &app_data_root, 
-    &app_env_configs, 
-    &storyteller_creds_manager,
-    credits_pack,
-  )
-      .await
-      .map_err(|err| {
-        error!("Error opening credits purchase window: {:?}", err);
-        format!("Error opening credits purchase window: {:?}", err)
-      })?;
+
+  do_open_billing(&app, &app_data_root, &app_env_configs, &storyteller_creds_manager, credits_pack).await.map_err(|err| {
+    error!("Error opening credits purchase window: {:?}", err);
+    format!("Error opening credits purchase window: {:?}", err)
+  })?;
 
   Ok("result".to_string())
 }
 
-async fn do_open_billing(
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  credits_pack: ArtcraftCreditsPackSlug,
-) -> AnyhowResult<()> {
+async fn do_open_billing(app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager, credits_pack: ArtcraftCreditsPackSlug) -> AnyhowResult<()> {
   info!("Building billing window...");
 
-  open_storyteller_billing_window(OpenStorytellerBillingWindowArgs {
-    app,
-    app_data_root,
-    app_env_configs,
-    storyteller_creds_manager,
-    billing_window_case: BillingWindowCase::CreditsPack {
-      credits_pack,
-    }
-  }).await?;
+  open_storyteller_billing_window(OpenStorytellerBillingWindowArgs { app, app_data_root, app_env_configs, storyteller_creds_manager, billing_window_case: BillingWindowCase::CreditsPack { credits_pack } }).await?;
 
   info!("Done.");
   Ok(())

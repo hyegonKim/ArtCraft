@@ -72,16 +72,7 @@ mod tests {
 
   #[test]
   fn every_known_variant_round_trips() {
-    let all = [
-      (ApiClientResolution::OneK, "one_k"),
-      (ApiClientResolution::TwoK, "two_k"),
-      (ApiClientResolution::ThreeK, "three_k"),
-      (ApiClientResolution::FourK, "four_k"),
-      (ApiClientResolution::HalfK, "half_k"),
-      (ApiClientResolution::FourEightyP, "four_eighty_p"),
-      (ApiClientResolution::SevenTwentyP, "seven_twenty_p"),
-      (ApiClientResolution::TenEightyP, "ten_eighty_p"),
-    ];
+    let all = [(ApiClientResolution::OneK, "one_k"), (ApiClientResolution::TwoK, "two_k"), (ApiClientResolution::ThreeK, "three_k"), (ApiClientResolution::FourK, "four_k"), (ApiClientResolution::HalfK, "half_k"), (ApiClientResolution::FourEightyP, "four_eighty_p"), (ApiClientResolution::SevenTwentyP, "seven_twenty_p"), (ApiClientResolution::TenEightyP, "ten_eighty_p")];
     for (variant, s) in all {
       assert_eq!(String::from(variant.clone()), s, "serialize mismatch for {:?}", variant);
       let parsed: ApiClientResolution = serde_json::from_str(&format!("\"{}\"", s)).unwrap();

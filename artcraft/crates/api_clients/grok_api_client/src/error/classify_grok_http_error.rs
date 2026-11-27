@@ -19,11 +19,11 @@ pub fn classify_grok_http_error(status_code: StatusCode, maybe_body: Option<&str
   let raw_body = || maybe_body.map(|b| b.to_string());
 
   match status_code {
-    StatusCode::UNAUTHORIZED   => return Err(GrokSpecificApiError::Unauthorized { raw_http_body: raw_body() }.into()),
+    StatusCode::UNAUTHORIZED => return Err(GrokSpecificApiError::Unauthorized { raw_http_body: raw_body() }.into()),
     StatusCode::PAYMENT_REQUIRED => return Err(GrokSpecificApiError::InsufficientCredits { raw_http_body: raw_body() }.into()),
-    StatusCode::NOT_FOUND      => return Err(GrokSpecificApiError::NotFound { raw_http_body: raw_body() }.into()),
+    StatusCode::NOT_FOUND => return Err(GrokSpecificApiError::NotFound { raw_http_body: raw_body() }.into()),
     StatusCode::TOO_MANY_REQUESTS => return Err(GrokSpecificApiError::RateLimited { raw_http_body: raw_body() }.into()),
-    _ => {}
+    _ => {},
   }
 
   // 403 is Forbidden unless the body indicates content moderation.
@@ -51,10 +51,7 @@ pub fn classify_grok_http_error(status_code: StatusCode, maybe_body: Option<&str
   }
 
   // Everything else falls through to the generic catch-all.
-  Err(GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-    status_code,
-    body: maybe_body.unwrap_or("").to_string(),
-  }.into())
+  Err(GrokGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: maybe_body.unwrap_or("").to_string() }.into())
 }
 
 /// xAI returns OpenAI-compatible error envelopes:
@@ -148,7 +145,7 @@ mod tests {
     match err {
       GrokError::ApiSpecific(GrokSpecificApiError::BadRequest { reason: msg, .. }) => {
         assert_eq!(msg, "unknown field 'foo'");
-      }
+      },
       other => panic!("expected BadRequest, got: {:?}", other),
     }
   }
@@ -160,7 +157,7 @@ mod tests {
     match err {
       GrokError::ApiSpecific(GrokSpecificApiError::BadRequest { reason: msg, .. }) => {
         assert_eq!(msg, "definitely not json");
-      }
+      },
       other => panic!("expected BadRequest, got: {:?}", other),
     }
   }
@@ -171,7 +168,7 @@ mod tests {
     match err {
       GrokError::ApiSpecific(GrokSpecificApiError::BadRequest { reason: msg, .. }) => {
         assert!(msg.is_empty());
-      }
+      },
       other => panic!("expected BadRequest, got: {:?}", other),
     }
   }

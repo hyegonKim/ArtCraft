@@ -8,10 +8,7 @@ use utoipa::ToSchema;
 
 use tokens::tokens::uploaded_videos::UploadedVideoToken;
 
-use crate::video_info::read_only::{
-  DreaminaVideoInfo, KlingVideoInfo, SeedanceVideoInfo, SoraVideoInfo, VeoVideoInfo,
-  VideoProvenanceKind,
-};
+use crate::video_info::read_only::{DreaminaVideoInfo, KlingVideoInfo, SeedanceVideoInfo, SoraVideoInfo, VeoVideoInfo, VideoProvenanceKind};
 
 /// Response for `POST /v1/video_info/upload`. Mirrors
 /// [`crate::video_info::read_only::VideoInfoReadOnlyResponse`] and adds the

@@ -104,7 +104,6 @@ pub struct GenerateImageRequestBuilder {
 }
 
 impl GenerateImageRequestBuilder {
-
   /// Build an executable image generation request for the configured
   /// (provider, model) pair. Returns either a directly-sendable `Request`
   /// or a `Draft` that needs media-token resolution before sending.
@@ -168,13 +167,10 @@ impl GenerateImageRequestBuilder {
   }
 
   fn unsupported_provider_and_model(&self) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
-    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(
-      format!("Image generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)
-    ))
+    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(format!("Image generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)))
   }
 
   pub fn get_or_generate_idempotency_token(&self) -> String {
-    self.idempotency_token.clone()
-        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+    self.idempotency_token.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
   }
 }

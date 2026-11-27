@@ -21,23 +21,11 @@ pub struct FailedGeneration {
   pub reason: Option<String>,
 }
 
-pub async fn handle_classic_failed_generations(
-  app_handle: &AppHandle,
-  task_database: &TaskDatabase,
-  local_sqlite_tasks_by_sora_task_id: &HashMap<String, Task>,
-  sora_failed_tasks_by_id: &HashMap<TaskId, FailedGeneration>,
-  sora_task_queue: &SoraTaskQueue,
-) -> AnyhowResult<()> {
-
+pub async fn handle_classic_failed_generations(app_handle: &AppHandle, task_database: &TaskDatabase, local_sqlite_tasks_by_sora_task_id: &HashMap<String, Task>, sora_failed_tasks_by_id: &HashMap<TaskId, FailedGeneration>, sora_task_queue: &SoraTaskQueue) -> AnyhowResult<()> {
   for (task_id, task) in sora_failed_tasks_by_id.iter() {
     // Emit events for failed tasks.
     if local_sqlite_tasks_by_sora_task_id.contains_key(task_id.as_str()) {
-      let event = GenerationFailedEvent {
-        action: GenerationAction::GenerateImage,
-        service: GenerationServiceProvider::Sora,
-        model: None,
-        reason: task.reason.clone(),
-      };
+      let event = GenerationFailedEvent { action: GenerationAction::GenerateImage, service: GenerationServiceProvider::Sora, model: None, reason: task.reason.clone() };
 
       event.send_infallible(&app_handle);
     }
@@ -46,11 +34,7 @@ pub async fn handle_classic_failed_generations(
     if let Some(local_task) = local_sqlite_tasks_by_sora_task_id.get(task_id.as_str()) {
       info!("Marking local task as failed: {:?}", local_task.id);
 
-      let _updated = update_task_status(UpdateTaskArgs {
-        db: task_database.get_connection(),
-        task_id: &local_task.id,
-        status: task_status::TaskStatus::CompleteFailure,
-      }).await?;
+      let _updated = update_task_status(UpdateTaskArgs { db: task_database.get_connection(), task_id: &local_task.id, status: task_status::TaskStatus::CompleteFailure }).await?;
     }
   }
 

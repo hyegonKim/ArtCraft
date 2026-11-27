@@ -1,5 +1,3 @@
-
-
 // Don't generate slurs or dangerous terms in the token generator
 // Beware, this is an n*m*k operation.
 //  see: https://news.ycombinator.com/item?id=35337210
@@ -20,71 +18,47 @@ pub fn entropy_is_safe(entropic_string: &str) -> bool {
 /// be short as long strings are improbable.
 /// Some of this list came via ChatGPT.
 /// Note: Crockford does not have `i`, `l`, `o`, `u`, ...
-const BAD_LIST : [&str; 64] = [
-  "000",
-  "111",
-  "1s15", // ISIS
+const BAD_LIST: [&str; 64] = [
+  "000", "111", "1s15", // ISIS
   "1s1s", // ISIS
-  "1sd",
-  "455", // ass
+  "1sd", "455", // ass
   "4s5", // ass
   "4ss", // ass
-  "53x",
-  "5ex", // sex
-  "5h1t",
-  "a1ep", // https://news.ycombinator.com/item?id=35337210
-  "a55", // ass
-  "a5s", // ass
-  "as5", // ass
-  "ass",
-  "b0mb",
-  "bmb", // bomb
-  "crp",
-  "cvm", // cum
+  "53x", "5ex", // sex
+  "5h1t", "a1ep", // https://news.ycombinator.com/item?id=35337210
+  "a55",  // ass
+  "a5s",  // ass
+  "as5",  // ass
+  "ass", "b0mb", "bmb", // bomb
+  "crp", "cvm", // cum
   "d1c", // dick
   "d1e", // die
   "d1k", // dick
   "dyk", // dyk[e] / ~dick
-  "f3c",
-  "f4ck", // fuck
-  "f4g", // fag
-  "fag",
-  "fec",
-  "fvc", // fvc[k]
+  "f3c", "f4ck", // fuck
+  "f4g",  // fag
+  "fag", "fec", "fvc", // fvc[k]
   "fvk", // fuck
-  "g0d",
-  "g4y", // gay
-  "gay",
-  "gvn", // gun
-  "jew",
-  "k11", // kill
-  "mvs",
-  "n1g",
-  "p00",
-  "p0t",
-  "p15", // piss
+  "g0d", "g4y", // gay
+  "gay", "gvn", // gun
+  "jew", "k11", // kill
+  "mvs", "n1g", "p00", "p0t", "p15", // piss
   "p1s", // piss
   "p33", // pee
   "p3e", // pee
   "p3n", // p3n[1s]
-  "pcp",
-  "pe3", // pee
-  "pee",
-  "pen", // pen[1s]
+  "pcp", "pe3", // pee
+  "pee", "pen",  // pen[1s]
   "pn15", // penis
-  "pn5", // penis
-  "pns", // penis
-  "pvs", // pus
-  "r1p",
-  "s3x", // sex
-  "sex",
-  "sh1t", // shit
-  "sht", // shit
-  "t1t",
-  "tw4t", // twat
-  "twt", // twat
-  "war",
-  "xxx",
+  "pn5",  // penis
+  "pns",  // penis
+  "pvs",  // pus
+  "r1p", "s3x", // sex
+  "sex", "sh1t", // shit
+  "sht",  // shit
+  "t1t", "tw4t", // twat
+  "twt",  // twat
+  "war", "xxx",
 ];
 
 #[cfg(test)]

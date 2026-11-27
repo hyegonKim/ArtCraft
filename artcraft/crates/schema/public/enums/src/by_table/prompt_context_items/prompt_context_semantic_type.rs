@@ -90,18 +90,7 @@ impl PromptContextSemanticType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::VidStartFrame,
-      Self::VidEndFrame,
-      Self::VidRef,
-      Self::Imgsrc,
-      Self::Imgmask,
-      Self::Imgref,
-      Self::ImgrefCharacter,
-      Self::ImgrefStyle,
-      Self::ImgrefBg,
-      Self::Audioref,
-    ])
+    BTreeSet::from([Self::VidStartFrame, Self::VidEndFrame, Self::VidRef, Self::Imgsrc, Self::Imgmask, Self::Imgref, Self::ImgrefCharacter, Self::ImgrefStyle, Self::ImgrefBg, Self::Audioref])
   }
 }
 
@@ -204,7 +193,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in PromptContextSemanticType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

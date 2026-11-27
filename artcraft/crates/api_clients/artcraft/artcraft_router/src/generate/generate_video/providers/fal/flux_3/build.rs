@@ -1,8 +1,6 @@
 use fal_client::requests::api::video::image::flux_3::api::Flux3ImageToVideoRequest;
 use fal_client::requests::api::video::images::flux_3::api::Flux3FirstLastFrameToVideoRequest;
-use fal_client::requests::api::video::text::flux_3::api::{
-  Flux3AspectRatio, Flux3Duration, Flux3Resolution, Flux3TextToVideoRequest,
-};
+use fal_client::requests::api::video::text::flux_3::api::{Flux3AspectRatio, Flux3Duration, Flux3Resolution, Flux3TextToVideoRequest};
 
 use crate::api::audio_list_ref::AudioListRef;
 use crate::api::image_list_ref::ImageListRef;
@@ -14,9 +12,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::fal::flux_3::request::{
-  FalFlux3Mode, FalFlux3RequestState,
-};
+use crate::generate::generate_video::providers::fal::flux_3::request::{FalFlux3Mode, FalFlux3RequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -34,16 +30,12 @@ pub(crate) enum PlanAspectRatio {
   NineBySixteen,
 }
 
-pub fn build_fal_flux_3(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_flux_3(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_flux_3_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalFlux3(state)))
 }
 
-pub(crate) fn build_fal_flux_3_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalFlux3RequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_flux_3_state(builder: GenerateVideoRequestBuilder) -> Result<FalFlux3RequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   // Flux 3 exposes no reference modality here — only text, starting keyframe,
@@ -82,24 +74,19 @@ pub(crate) fn build_fal_flux_3_state(
       generate_audio,
       safety_tolerance: Some(4), // NB: 4 is the most permissive.
     }),
-    (Some(start_image_url), Some(end_image_url)) => FalFlux3Mode::FirstLastFrameToVideo(
-      Flux3FirstLastFrameToVideoRequest {
-        prompt,
-        start_image_url,
-        end_image_url,
-        duration: fixed_duration,
-        resolution,
-        aspect_ratio: aspect_ratio.map(to_flux_3_aspect_ratio),
-        generate_audio,
-        safety_tolerance: Some(4), // NB: 4 is the most permissive.
-      },
-    ),
+    (Some(start_image_url), Some(end_image_url)) => FalFlux3Mode::FirstLastFrameToVideo(Flux3FirstLastFrameToVideoRequest {
+      prompt,
+      start_image_url,
+      end_image_url,
+      duration: fixed_duration,
+      resolution,
+      aspect_ratio: aspect_ratio.map(to_flux_3_aspect_ratio),
+      generate_audio,
+      safety_tolerance: Some(4), // NB: 4 is the most permissive.
+    }),
     (None, Some(_)) => {
-      return Err(unsupported(
-        "end_frame",
-        "Flux 3 requires a start_frame when end_frame is provided",
-      ));
-    }
+      return Err(unsupported("end_frame", "Flux 3 requires a start_frame when end_frame is provided"));
+    },
   };
 
   Ok(FalFlux3RequestState { mode })
@@ -108,10 +95,7 @@ pub(crate) fn build_fal_flux_3_state(
 // ── Input helpers (shared with the draft variant) ──
 
 pub(crate) fn unsupported(field: &'static str, value: &str) -> ArtcraftRouterError {
-  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-    field,
-    value: value.to_string(),
-  })
+  ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: value.to_string() })
 }
 
 /// Flux 3 supports no reference inputs — no image, video, or audio references.
@@ -150,26 +134,18 @@ pub(crate) fn optional_url(image_ref: Option<ImageRef>) -> Result<Option<String>
   match image_ref {
     None => Ok(None),
     Some(ImageRef::Url(url)) => Ok(Some(url)),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
 // ── Plan helpers (shared with the draft variant) ──
 
-pub(crate) fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+pub(crate) fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
 
     Some(RouterAspectRatio::WideTwentyOneByNine) => Ok(Some(Ar::TwentyOneByNine)),
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
@@ -179,30 +155,22 @@ pub(crate) fn plan_aspect_ratio(
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(Ar::Square)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("aspect_ratio", &format!("{:?}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("aspect_ratio", &format!("{:?}", other))),
       _ => Ok(Some(Ar::Auto)),
     },
   }
 }
 
 /// Flux 3 renders 720p or 1080p; 480p rounds up to 720p (same billing tier).
-pub(crate) fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Flux3Resolution>, ArtcraftRouterError> {
+pub(crate) fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Flux3Resolution>, ArtcraftRouterError> {
   match resolution {
     None => Ok(None),
 
-    Some(RouterResolution::FourEightyP)
-    | Some(RouterResolution::SevenTwentyP) => Ok(Some(Flux3Resolution::SevenTwentyP)),
+    Some(RouterResolution::FourEightyP) | Some(RouterResolution::SevenTwentyP) => Ok(Some(Flux3Resolution::SevenTwentyP)),
     Some(RouterResolution::TenEightyP) => Ok(Some(Flux3Resolution::TenEightyP)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("resolution", &format!("{:?}", other)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("resolution", &format!("{:?}", other))),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(Flux3Resolution::TenEightyP)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(Flux3Resolution::SevenTwentyP)),
     },
@@ -211,32 +179,19 @@ pub(crate) fn plan_resolution(
 
 /// Duration for the modalities that accept `auto` (text, image). `None` stays
 /// unset so fal's `auto` default applies.
-pub(crate) fn plan_flexible_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Flux3Duration>, ArtcraftRouterError> {
+pub(crate) fn plan_flexible_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Flux3Duration>, ArtcraftRouterError> {
   Ok(plan_fixed_duration(duration_seconds, strategy)?.map(Flux3Duration::Seconds))
 }
 
 /// Duration for the fixed-duration first-last-frame modality. `None` stays
 /// unset so fal's 5-second default applies.
-pub(crate) fn plan_fixed_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<u8>, ArtcraftRouterError> {
+pub(crate) fn plan_fixed_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<u8>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
-    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => {
-      Ok(Some(seconds as u8))
-    }
+    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => Ok(Some(seconds as u8)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(unsupported("duration_seconds", &format!("{}", other)))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(unsupported("duration_seconds", &format!("{}", other))),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8)),
     },
   }
 }
@@ -406,11 +361,6 @@ mod tests {
   }
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Flux3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Flux3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 }

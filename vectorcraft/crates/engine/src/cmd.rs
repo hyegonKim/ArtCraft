@@ -11,6 +11,7 @@ mod attributes;
 pub mod brushlib;
 mod brushsym;
 mod buildcmds;
+pub mod capture;
 pub mod clipboard;
 mod colorcmds;
 pub mod colormgmt;
@@ -406,6 +407,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(turntable::specs());
         v.extend(preflight::specs());
         v.extend(genshapefill::specs());
+        v.extend(capture::specs());
         // Last, so the reference it writes ends with its own section.
         v.extend(apiref::specs());
         v

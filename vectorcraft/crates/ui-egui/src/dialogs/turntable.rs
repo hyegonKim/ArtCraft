@@ -16,14 +16,8 @@ const CMD: &str = "object.turntable";
 const LABEL_W: f32 = 104.0;
 const ANGLE_PRESETS: [&str; 4] = ["4", "6", "8", "12"];
 
-pub(super) const SPEC: DialogSpec = DialogSpec {
-    heading: |_| tl!("Turntable").into(),
-    body,
-    confirm,
-    preview: true,
-    min_width: 360.0,
-    ..DialogSpec::FORM
-};
+pub(super) const SPEC: DialogSpec =
+    DialogSpec { heading: |_| tl!("Turntable").into(), body, confirm, preview: true, min_width: 360.0, ..DialogSpec::FORM };
 
 pub fn fields() -> Value {
     json!({
@@ -52,11 +46,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
         }
     });
 
-    let projections = [
-        ("orthographic", tl!("Orthographic")),
-        ("isometric", tl!("Isometric")),
-        ("perspective", tl!("Perspective")),
-    ];
+    let projections = [("orthographic", tl!("Orthographic")), ("isometric", tl!("Isometric")), ("perspective", tl!("Perspective"))];
     form::choice(ui, d, "projection", tl!("Projection"), (LABEL_W, 148.0), &projections);
 
     if d.str("projection") != "isometric" {

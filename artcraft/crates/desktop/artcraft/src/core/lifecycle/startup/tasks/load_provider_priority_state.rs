@@ -5,23 +5,20 @@ use errors::AnyhowResult;
 use log::{error, info, warn};
 use tauri::{AppHandle, Manager};
 
-pub fn load_provider_priority_state(
-  app: &AppHandle,
-  root: &AppDataRoot,
-) -> AnyhowResult<()> {
+pub fn load_provider_priority_state(app: &AppHandle, root: &AppDataRoot) -> AnyhowResult<()> {
   let provider_priority = match ProviderPriorityStore::from_filesystem_configs(root) {
     Ok(Some(priority)) => {
       info!("Loaded provider priority from disk: {:?}", priority.get_priority());
       priority
-    }
+    },
     Ok(None) => {
       info!("No provider priority found on disk, using default.");
       ProviderPriorityStore::default()
-    }
+    },
     Err(err) => {
       warn!("Failed to read provider priority from disk: {:?}", err);
       ProviderPriorityStore::default()
-    }
+    },
   };
 
   let success = app.manage(provider_priority);

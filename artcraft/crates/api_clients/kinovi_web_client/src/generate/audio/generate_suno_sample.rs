@@ -4,9 +4,7 @@ use crate::pricing::cost::kinovi_generation_cost::KinoviGenerationCost;
 use crate::creds::kinovi_web_session::KinoviWebSession;
 use crate::error::kinovi_web_error::KinoviWebError;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse};
 
 const BUSINESS_TYPE: &str = "suno-sample-generation";
 const MODEL: &str = "suno-sample";
@@ -73,20 +71,10 @@ pub struct GenerateSunoSampleResponse {
 
 // ── Entry point ──
 
-pub async fn generate_suno_sample(
-  args: GenerateSunoSampleArgs<'_>,
-) -> Result<GenerateSunoSampleResponse, KinoviWebError> {
-  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs {
-    business_type: BUSINESS_TYPE,
-    api_params: build_api_params(&args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_suno_sample(args: GenerateSunoSampleArgs<'_>) -> Result<GenerateSunoSampleResponse, KinoviWebError> {
+  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs { business_type: BUSINESS_TYPE, api_params: build_api_params(&args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSunoSampleResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-  })
+  Ok(GenerateSunoSampleResponse { task_id: raw_response.task_id, order_id: raw_response.order_id })
 }
 
 // ── Wire payload ──
@@ -115,19 +103,7 @@ struct SunoSampleApiParams {
 }
 
 fn build_api_params(request: &GenerateSunoSampleRequest) -> SunoSampleApiParams {
-  SunoSampleApiParams {
-    model: MODEL,
-    prompt: request.prompt.clone(),
-    audio_url: request.audio_url.clone(),
-    chop_sample_start_s: request.chop_sample_start_seconds,
-    chop_sample_end_s: request.chop_sample_end_seconds,
-    custom: false,
-    instrumental: request.instrumental,
-    auto_lyrics: true,
-    mv: MODEL_VERSION,
-    tags: request.style_tags.clone(),
-    is_storage: true,
-  }
+  SunoSampleApiParams { model: MODEL, prompt: request.prompt.clone(), audio_url: request.audio_url.clone(), chop_sample_start_s: request.chop_sample_start_seconds, chop_sample_end_s: request.chop_sample_end_seconds, custom: false, instrumental: request.instrumental, auto_lyrics: true, mv: MODEL_VERSION, tags: request.style_tags.clone(), is_storage: true }
 }
 
 // ── Tests ──
@@ -140,14 +116,7 @@ mod tests {
     use super::*;
 
     fn base_request() -> GenerateSunoSampleRequest {
-      GenerateSunoSampleRequest {
-        prompt: "Mystical RPG adventure".to_string(),
-        audio_url: "https://example.com/a.aac".to_string(),
-        chop_sample_start_seconds: 0,
-        chop_sample_end_seconds: 41,
-        style_tags: None,
-        instrumental: true,
-      }
+      GenerateSunoSampleRequest { prompt: "Mystical RPG adventure".to_string(), audio_url: "https://example.com/a.aac".to_string(), chop_sample_start_seconds: 0, chop_sample_end_seconds: 41, style_tags: None, instrumental: true }
     }
 
     #[test]
@@ -168,14 +137,7 @@ mod tests {
     #[test]
     fn options_do_not_affect_cost() {
       let base = base_request().calculate_costs();
-      let other = GenerateSunoSampleRequest {
-        prompt: "A vocal fantasy track".to_string(),
-        audio_url: "https://example.com/b.aac".to_string(),
-        chop_sample_start_seconds: 10,
-        chop_sample_end_seconds: 30,
-        style_tags: Some("Fantasy video game".to_string()),
-        instrumental: false,
-      }.calculate_costs();
+      let other = GenerateSunoSampleRequest { prompt: "A vocal fantasy track".to_string(), audio_url: "https://example.com/b.aac".to_string(), chop_sample_start_seconds: 10, chop_sample_end_seconds: 30, style_tags: Some("Fantasy video game".to_string()), instrumental: false }.calculate_costs();
       assert_eq!(base, other);
     }
   }
@@ -186,31 +148,14 @@ mod tests {
     /// Mirrors capture 11_suno_sample_1.txt (instrumental).
     #[test]
     fn instrumental_sample() {
-      let params = build_api_params(&GenerateSunoSampleRequest {
-        prompt: "Mystical RPG adventure, make it have a grand climax".to_string(),
-        audio_url: "https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac".to_string(),
-        chop_sample_start_seconds: 0,
-        chop_sample_end_seconds: 41,
-        style_tags: Some("Fantasy video game, Motoi Sakuraba, Golden Sun".to_string()),
-        instrumental: true,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-sample","prompt":"Mystical RPG adventure, make it have a grand climax","audioUrl":"https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac","chopSampleStartS":0,"chopSampleEndS":41,"custom":false,"instrumental":true,"autoLyrics":true,"mv":"chirp-v5-5","tags":"Fantasy video game, Motoi Sakuraba, Golden Sun","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoSampleRequest { prompt: "Mystical RPG adventure, make it have a grand climax".to_string(), audio_url: "https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac".to_string(), chop_sample_start_seconds: 0, chop_sample_end_seconds: 41, style_tags: Some("Fantasy video game, Motoi Sakuraba, Golden Sun".to_string()), instrumental: true });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-sample","prompt":"Mystical RPG adventure, make it have a grand climax","audioUrl":"https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac","chopSampleStartS":0,"chopSampleEndS":41,"custom":false,"instrumental":true,"autoLyrics":true,"mv":"chirp-v5-5","tags":"Fantasy video game, Motoi Sakuraba, Golden Sun","isStorage":true}"#,);
     }
 
     /// Mirrors capture 12_suno_sample_2.txt (with vocals).
     #[test]
     fn vocal_sample() {
-      let params = build_api_params(&GenerateSunoSampleRequest {
-        prompt: "Give this a lyrics track, a woman singing in a fantasy language".to_string(),
-        audio_url: "https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac".to_string(),
-        chop_sample_start_seconds: 0,
-        chop_sample_end_seconds: 41,
-        style_tags: Some("Fantasy video game, Motoi Sakuraba, Golden Sun".to_string()),
-        instrumental: false,
-      });
+      let params = build_api_params(&GenerateSunoSampleRequest { prompt: "Give this a lyrics track, a woman singing in a fantasy language".to_string(), audio_url: "https://static.seedance2-pro.com/materials/20260707/1783401649804-e654f994.aac".to_string(), chop_sample_start_seconds: 0, chop_sample_end_seconds: 41, style_tags: Some("Fantasy video game, Motoi Sakuraba, Golden Sun".to_string()), instrumental: false });
       let json = serde_json::to_string(&params).unwrap();
       assert!(json.contains(r#""instrumental":false"#), "{json}");
       assert!(json.contains(r#""autoLyrics":true"#), "{json}");
@@ -241,18 +186,7 @@ mod tests {
       let audio_url = upload_test_audio(&session).await?;
       println!("Uploaded audio: {}", audio_url);
 
-      let result = generate_suno_sample(GenerateSunoSampleArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSunoSampleRequest {
-          prompt: "Mystical RPG adventure, make it have a grand climax".to_string(),
-          audio_url,
-          chop_sample_start_seconds: 0,
-          chop_sample_end_seconds: 30,
-          style_tags: Some("Fantasy video game score".to_string()),
-          instrumental: true,
-        },
-      }).await?;
+      let result = generate_suno_sample(GenerateSunoSampleArgs { session: &session, host_override: None, request: GenerateSunoSampleRequest { prompt: "Mystical RPG adventure, make it have a grand climax".to_string(), audio_url, chop_sample_start_seconds: 0, chop_sample_end_seconds: 30, style_tags: Some("Fantasy video game score".to_string()), instrumental: true } }).await?;
       println!("suno sample — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -266,22 +200,12 @@ mod tests {
     }
 
     async fn upload_test_audio(session: &KinoviWebSession) -> AnyhowResult<String> {
-      let audio_path = test_utils::test_file_path::test_file_path(
-        "test_data/audio/aac/golden_sun_elemental_stars_cyanne.aac",
-      )?;
+      let audio_path = test_utils::test_file_path::test_file_path("test_data/audio/aac/golden_sun_elemental_stars_cyanne.aac")?;
       let audio_bytes = std::fs::read(&audio_path)?;
 
-      let prepare_result = prepare_file_upload(PrepareFileUploadArgs {
-        session,
-        extension: "aac".to_string(),
-        host_override: None,
-      }).await?;
+      let prepare_result = prepare_file_upload(PrepareFileUploadArgs { session, extension: "aac".to_string(), host_override: None }).await?;
 
-      let upload_result = upload_file(UploadFileArgs {
-        upload_url: prepare_result.upload_url,
-        file_bytes: audio_bytes,
-        host_override: None,
-      }).await?;
+      let upload_result = upload_file(UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes: audio_bytes, host_override: None }).await?;
 
       Ok(upload_result.public_url)
     }

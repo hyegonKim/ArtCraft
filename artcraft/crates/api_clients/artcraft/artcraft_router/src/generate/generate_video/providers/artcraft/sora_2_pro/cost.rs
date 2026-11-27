@@ -12,10 +12,7 @@ pub struct ArtcraftSora2ProCostState {
 impl ArtcraftSora2ProCostState {
   pub fn from_request(request: &ArtcraftSora2ProRequestState) -> Self {
     let req = &request.request;
-    Self {
-      duration_seconds: req.duration_seconds.map(u64::from).unwrap_or(4),
-      is_ten_eighty_p: is_ten_eighty_p_for_cost(req.resolution, req.start_frame_image_media_token.is_some()),
-    }
+    Self { duration_seconds: req.duration_seconds.map(u64::from).unwrap_or(4), is_ten_eighty_p: is_ten_eighty_p_for_cost(req.resolution, req.start_frame_image_media_token.is_some()) }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -24,15 +21,7 @@ impl ArtcraftSora2ProCostState {
     let per_second_centi_cents: u64 = if self.is_ten_eighty_p { 5_750 } else { 3_450 };
     let cost_in_usd_cents = (per_second_centi_cents * self.duration_seconds).div_ceil(100);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -55,19 +44,8 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
   use tokens::tokens::media_files::MediaFileToken;
 
-  fn cost_cents(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-    has_start_frame: bool,
-  ) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Sora2Pro,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    };
+  fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>, has_start_frame: bool) -> u64 {
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Sora2Pro, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() };
     if has_start_frame {
       b.start_frame = Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_x".to_string())));
     }
@@ -78,19 +56,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn p720_4s_is_138() { assert_eq!(cost_cents(Some(4), Some(RouterResolution::SevenTwentyP), false), 138); }
+    fn p720_4s_is_138() {
+      assert_eq!(cost_cents(Some(4), Some(RouterResolution::SevenTwentyP), false), 138);
+    }
 
     #[test]
-    fn p720_8s_is_276() { assert_eq!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false), 276); }
+    fn p720_8s_is_276() {
+      assert_eq!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false), 276);
+    }
 
     #[test]
-    fn p720_12s_is_414() { assert_eq!(cost_cents(Some(12), Some(RouterResolution::SevenTwentyP), false), 414); }
+    fn p720_12s_is_414() {
+      assert_eq!(cost_cents(Some(12), Some(RouterResolution::SevenTwentyP), false), 414);
+    }
 
     #[test]
-    fn p1080_4s_is_230() { assert_eq!(cost_cents(Some(4), Some(RouterResolution::TenEightyP), false), 230); }
+    fn p1080_4s_is_230() {
+      assert_eq!(cost_cents(Some(4), Some(RouterResolution::TenEightyP), false), 230);
+    }
 
     #[test]
-    fn p1080_12s_is_690() { assert_eq!(cost_cents(Some(12), Some(RouterResolution::TenEightyP), false), 690); }
+    fn p1080_12s_is_690() {
+      assert_eq!(cost_cents(Some(12), Some(RouterResolution::TenEightyP), false), 690);
+    }
 
     #[test]
     fn t2v_default_resolution_priced_as_1080p() {

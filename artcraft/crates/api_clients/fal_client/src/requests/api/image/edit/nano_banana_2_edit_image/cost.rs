@@ -1,6 +1,4 @@
-use crate::requests::api::image::edit::nano_banana_2_edit_image::api::{
-  NanoBanana2EditImageNumImages, NanoBanana2EditImageRequest, NanoBanana2EditImageResolution,
-};
+use crate::requests::api::image::edit::nano_banana_2_edit_image::api::{NanoBanana2EditImageNumImages, NanoBanana2EditImageRequest, NanoBanana2EditImageResolution};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for NanoBanana2EditImageRequest {
@@ -28,17 +26,8 @@ impl FalRequestCostCalculator for NanoBanana2EditImageRequest {
 mod tests {
   use super::*;
 
-  fn make_request(
-    num_images: NanoBanana2EditImageNumImages,
-    resolution: Option<NanoBanana2EditImageResolution>,
-  ) -> NanoBanana2EditImageRequest {
-    NanoBanana2EditImageRequest {
-      prompt: "test".to_string(),
-      image_urls: vec!["https://example.com/image.jpg".to_string()],
-      num_images,
-      resolution,
-      aspect_ratio: None,
-    }
+  fn make_request(num_images: NanoBanana2EditImageNumImages, resolution: Option<NanoBanana2EditImageResolution>) -> NanoBanana2EditImageRequest {
+    NanoBanana2EditImageRequest { prompt: "test".to_string(), image_urls: vec!["https://example.com/image.jpg".to_string()], num_images, resolution, aspect_ratio: None }
   }
 
   #[test]

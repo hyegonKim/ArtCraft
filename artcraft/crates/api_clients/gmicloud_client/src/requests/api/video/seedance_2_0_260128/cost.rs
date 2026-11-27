@@ -1,9 +1,5 @@
-use crate::requests::api::video::seedance_2_0_260128::api::{
-  Seedance20Request, Seedance20Resolution,
-};
-use crate::traits::gmicloud_request_cost_calculator_trait::{
-  GmiCloudRequestCostCalculator, UsdCents,
-};
+use crate::requests::api::video::seedance_2_0_260128::api::{Seedance20Request, Seedance20Resolution};
+use crate::traits::gmicloud_request_cost_calculator_trait::{GmiCloudRequestCostCalculator, UsdCents};
 
 impl GmiCloudRequestCostCalculator for Seedance20Request {
   fn calculate_cost_in_cents(&self) -> UsdCents {
@@ -30,22 +26,7 @@ mod tests {
   use crate::requests::api::video::seedance_2_0_260128::api::Seedance20Ratio;
 
   fn make_request(duration: Option<u8>, resolution: Option<Seedance20Resolution>) -> Seedance20Request {
-    Seedance20Request {
-      prompt: "test".to_string(),
-      duration,
-      resolution,
-      ratio: None,
-      seed: None,
-      watermark: None,
-      generate_audio: None,
-      web_search: None,
-      first_frame: None,
-      last_frame: None,
-      reference_images: None,
-      reference_videos: None,
-      reference_audios: None,
-      reference_asset_ids: None,
-    }
+    Seedance20Request { prompt: "test".to_string(), duration, resolution, ratio: None, seed: None, watermark: None, generate_audio: None, web_search: None, first_frame: None, last_frame: None, reference_images: None, reference_videos: None, reference_audios: None, reference_asset_ids: None }
   }
 
   mod default_resolution_tests {
@@ -141,17 +122,8 @@ mod tests {
 
     #[test]
     fn cost_is_independent_of_ratio() {
-      let ratios = [
-        Seedance20Ratio::Landscape16x9,
-        Seedance20Ratio::Portrait9x16,
-        Seedance20Ratio::Square,
-        Seedance20Ratio::Standard4x3,
-        Seedance20Ratio::Portrait3x4,
-        Seedance20Ratio::UltraWide21x9,
-        Seedance20Ratio::Adaptive,
-      ];
-      let base = make_request(Some(10), Some(Seedance20Resolution::SevenTwentyP))
-        .calculate_cost_in_cents();
+      let ratios = [Seedance20Ratio::Landscape16x9, Seedance20Ratio::Portrait9x16, Seedance20Ratio::Square, Seedance20Ratio::Standard4x3, Seedance20Ratio::Portrait3x4, Seedance20Ratio::UltraWide21x9, Seedance20Ratio::Adaptive];
+      let base = make_request(Some(10), Some(Seedance20Resolution::SevenTwentyP)).calculate_cost_in_cents();
       for ratio in ratios {
         let mut request = make_request(Some(10), Some(Seedance20Resolution::SevenTwentyP));
         request.ratio = Some(ratio);

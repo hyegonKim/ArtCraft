@@ -339,16 +339,8 @@ impl Layouter {
             }
             let origin_along = if t.orientation == Orientation::Vertical { box_y } else { box_x };
             let origin_cross = if t.orientation == Orientation::Vertical { box_x } else { box_y };
-            let max_span = lay
-                .lines
-                .iter()
-                .map(|ln| (ln.x1 - origin_along).max(ln.x1 - ln.x0))
-                .fold(0.0f32, f32::max);
-            let max_cross = lay
-                .lines
-                .iter()
-                .map(|ln| (ln.baseline + ln.descent) - origin_cross)
-                .fold(0.0f32, f32::max);
+            let max_span = lay.lines.iter().map(|ln| (ln.x1 - origin_along).max(ln.x1 - ln.x0)).fold(0.0f32, f32::max);
+            let max_cross = lay.lines.iter().map(|ln| (ln.baseline + ln.descent) - origin_cross).fold(0.0f32, f32::max);
             max_span <= span_limit * 0.985 + 0.5 && max_cross <= cross_limit * 0.985 + 0.5
         };
 

@@ -1,4 +1,3 @@
-
 // Default methods for string wrapper types.
 macro_rules! impl_string_token {
   ($t:ident) => {
@@ -26,5 +25,5 @@ macro_rules! impl_string_token {
         write!(f, "{}", self.0)
       }
     }
-  }
+  };
 }

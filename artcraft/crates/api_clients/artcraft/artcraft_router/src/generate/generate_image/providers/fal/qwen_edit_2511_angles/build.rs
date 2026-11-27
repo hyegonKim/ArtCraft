@@ -1,6 +1,4 @@
-use fal_client::requests::api::image::angle::qwen_edit_2511_edit_image_angle::api::{
-  QwenEdit2511AngleImageSize, QwenEdit2511AngleNumImages, QwenEdit2511EditImageAngleRequest,
-};
+use fal_client::requests::api::image::angle::qwen_edit_2511_edit_image_angle::api::{QwenEdit2511AngleImageSize, QwenEdit2511AngleNumImages, QwenEdit2511EditImageAngleRequest};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::image_list_ref::ImageListRef;
@@ -12,52 +10,29 @@ use crate::generate::generate_image::image_generation_draft_or_request::ImageGen
 use crate::generate::generate_image::image_generation_request::ImageGenerationRequest;
 use crate::generate::generate_image::providers::fal::qwen_edit_2511_angles::request::FalQwenEdit2511AnglesRequestState;
 
-pub fn build_fal_qwen_edit_2511_angles(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_qwen_edit_2511_angles(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
   let image_urls = resolve_image_urls(builder.image_inputs.clone())?;
   if image_urls.is_empty() {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "image_inputs",
-      value: "Angle models require at least one input image URL".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_inputs", value: "Angle models require at least one input image URL".to_string() }));
   }
   let num_images = plan_num_images(builder.image_batch_count, strategy)?;
   let image_size = plan_image_size(builder.aspect_ratio, strategy)?;
 
-  let request = QwenEdit2511EditImageAngleRequest {
-    image_urls,
-    horizontal_angle: builder.horizontal_angle,
-    vertical_angle: builder.vertical_angle,
-    zoom: builder.zoom,
-    additional_prompt: builder.prompt.clone(),
-    num_images: Some(num_images),
-    image_size,
-    lora_scale: None,
-    guidance_scale: None,
-    num_inference_steps: None,
-  };
+  let request = QwenEdit2511EditImageAngleRequest { image_urls, horizontal_angle: builder.horizontal_angle, vertical_angle: builder.vertical_angle, zoom: builder.zoom, additional_prompt: builder.prompt.clone(), num_images: Some(num_images), image_size, lora_scale: None, guidance_scale: None, num_inference_steps: None };
 
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::FalQwenEdit2511Angles(FalQwenEdit2511AnglesRequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalQwenEdit2511Angles(FalQwenEdit2511AnglesRequestState { request })))
 }
 
 fn resolve_image_urls(image_inputs: Option<ImageListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match image_inputs {
     None => Ok(vec![]),
     Some(ImageListRef::Urls(urls)) => Ok(urls),
-    Some(ImageListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
-fn plan_num_images(
-  image_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<QwenEdit2511AngleNumImages, ArtcraftRouterError> {
+fn plan_num_images(image_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<QwenEdit2511AngleNumImages, ArtcraftRouterError> {
   use QwenEdit2511AngleNumImages as N;
   let count = image_batch_count.unwrap_or(1);
   match count {
@@ -67,29 +42,18 @@ fn plan_num_images(
     3 => Ok(N::Three),
     4 => Ok(N::Four),
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "image_batch_count",
-          value: format!("{}", count),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_batch_count", value: format!("{}", count) })),
       _ => Ok(N::Four),
     },
   }
 }
 
-fn plan_image_size(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<QwenEdit2511AngleImageSize>, ArtcraftRouterError> {
+fn plan_image_size(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<QwenEdit2511AngleImageSize>, ArtcraftRouterError> {
   use QwenEdit2511AngleImageSize as S;
   match aspect_ratio {
     None => Ok(None),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(S::SquareHd)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(S::SquareHd)),
 
     Some(RouterAspectRatio::Square) => Ok(Some(S::Square)),
     Some(RouterAspectRatio::SquareHd) => Ok(Some(S::SquareHd)),
@@ -101,12 +65,7 @@ fn plan_image_size(
     Some(RouterAspectRatio::TallThreeByFour) => Ok(Some(S::PortraitFourThree)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(S::SquareHd)),
     },
   }
@@ -135,14 +94,8 @@ mod tests {
   #[test]
   fn media_file_tokens_rejected() {
     use tokens::tokens::media_files::MediaFileToken;
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new_from_str("mf_test")])),
-      ..base()
-    };
-    assert!(matches!(
-      build_fal_qwen_edit_2511_angles(builder),
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    ));
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new_from_str("mf_test")])), ..base() };
+    assert!(matches!(build_fal_qwen_edit_2511_angles(builder), Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))));
   }
 
   #[test]
@@ -154,46 +107,22 @@ mod tests {
   #[test]
   fn batch_zero_errors() {
     let builder = GenerateImageRequestBuilder { image_batch_count: Some(0), ..base() };
-    assert!(matches!(
-      build_fal_qwen_edit_2511_angles(builder),
-      Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))
-    ));
+    assert!(matches!(build_fal_qwen_edit_2511_angles(builder), Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))));
   }
 
   #[test]
   fn batch_over_four_clamps_with_upgrade() {
-    let builder = GenerateImageRequestBuilder {
-      image_batch_count: Some(9),
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      ..base()
-    };
+    let builder = GenerateImageRequestBuilder { image_batch_count: Some(9), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..base() };
     let req = unwrap_request(build_fal_qwen_edit_2511_angles(builder));
     assert!(matches!(req.num_images, Some(QwenEdit2511AngleNumImages::Four)));
   }
 
   fn base() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::QwenEdit2511Angles,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/x.jpg".to_string()])),
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: Some(45.0),
-      vertical_angle: Some(-15.0),
-      zoom: Some(2.0),
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::QwenEdit2511Angles, provider: RouterProvider::Fal, prompt: Some("test".to_string()), image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/x.jpg".to_string()])), resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: Some(45.0), vertical_angle: Some(-15.0), zoom: Some(2.0), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   fn unwrap_request(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> QwenEdit2511EditImageAngleRequest {
-    let ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::FalQwenEdit2511Angles(state)
-    ) = result.expect("build should succeed") else {
+    let ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalQwenEdit2511Angles(state)) = result.expect("build should succeed") else {
       panic!("expected FalQwenEdit2511Angles variant")
     };
     state.request

@@ -10,38 +10,26 @@ use crate::api::mesh_ref::MeshRef;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 
-pub(super) fn resolve_image_list_ref(
-  image_list_ref: Option<ImageListRef>,
-) -> Result<Option<Vec<MediaFileToken>>, ArtcraftRouterError> {
+pub(super) fn resolve_image_list_ref(image_list_ref: Option<ImageListRef>) -> Result<Option<Vec<MediaFileToken>>, ArtcraftRouterError> {
   match image_list_ref {
     None => Ok(None),
     Some(ImageListRef::MediaFileTokens(tokens)) => Ok(Some(tokens)),
-    Some(ImageListRef::Urls(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens))
-    }
+    Some(ImageListRef::Urls(_)) => Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens)),
   }
 }
 
-pub(super) fn resolve_image_ref(
-  image_ref: Option<ImageRef>,
-) -> Result<Option<MediaFileToken>, ArtcraftRouterError> {
+pub(super) fn resolve_image_ref(image_ref: Option<ImageRef>) -> Result<Option<MediaFileToken>, ArtcraftRouterError> {
   match image_ref {
     None => Ok(None),
     Some(ImageRef::MediaFileToken(token)) => Ok(Some(token)),
-    Some(ImageRef::Url(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens))
-    }
+    Some(ImageRef::Url(_)) => Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens)),
   }
 }
 
-pub(super) fn resolve_mesh_ref(
-  mesh_ref: Option<MeshRef>,
-) -> Result<Option<MediaFileToken>, ArtcraftRouterError> {
+pub(super) fn resolve_mesh_ref(mesh_ref: Option<MeshRef>) -> Result<Option<MediaFileToken>, ArtcraftRouterError> {
   match mesh_ref {
     None => Ok(None),
     Some(MeshRef::MediaFileToken(token)) => Ok(Some(token)),
-    Some(MeshRef::Url(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens))
-    }
+    Some(MeshRef::Url(_)) => Err(ArtcraftRouterError::Client(ClientError::ArtcraftOnlySupportsMediaTokens)),
   }
 }

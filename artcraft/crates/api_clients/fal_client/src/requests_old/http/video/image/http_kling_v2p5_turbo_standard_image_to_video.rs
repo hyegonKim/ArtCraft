@@ -28,8 +28,6 @@ pub struct KlingV2p5TurboStandardImageToVideoOutput {
   pub video: KlingV2p5TurboStandardImageToVideoVideoFile,
 }
 
-pub fn kling_v2p5_turbo_standard_image_to_video(
-  params: KlingV2p5TurboStandardImageToVideoInput,
-) -> FalRequest<KlingV2p5TurboStandardImageToVideoInput, KlingV2p5TurboStandardImageToVideoOutput> {
+pub fn kling_v2p5_turbo_standard_image_to_video(params: KlingV2p5TurboStandardImageToVideoInput) -> FalRequest<KlingV2p5TurboStandardImageToVideoInput, KlingV2p5TurboStandardImageToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v2.5-turbo/standard/image-to-video", params)
 }

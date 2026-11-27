@@ -1,7 +1,5 @@
 use crate::requests::api::video::extend::flux_3_draft::api::Flux3DraftExtendVideoRequest;
-use crate::requests::api::video::text::flux_3::cost::{
-  flux_3_estimated_duration_secs, flux_3_video_cost_cents,
-};
+use crate::requests::api::video::text::flux_3::cost::{flux_3_estimated_duration_secs, flux_3_video_cost_cents};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Flux 3 Draft extend-video pricing (see
@@ -26,26 +24,14 @@ mod tests {
   use crate::requests::api::video::text::flux_3::api::Flux3Duration;
 
   fn make_request(duration: Option<Flux3Duration>) -> Flux3DraftExtendVideoRequest {
-    Flux3DraftExtendVideoRequest {
-      prompt: "test".to_string(),
-      video_url: "https://example.com/source.mp4".to_string(),
-      duration,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    }
+    Flux3DraftExtendVideoRequest { prompt: "test".to_string(), video_url: "https://example.com/source.mp4".to_string(), duration, aspect_ratio: None, generate_audio: None, safety_tolerance: None }
   }
 
   mod cost_table {
     use super::*;
 
     // (duration, expected_cents) — 12¢ × secs; None/auto estimate at 5s.
-    const COST_TABLE: &[(Option<Flux3Duration>, u64)] = &[
-      (Some(Flux3Duration::Seconds(5)),  60),
-      (Some(Flux3Duration::Seconds(20)), 240),
-      (None, 60),
-      (Some(Flux3Duration::Auto), 60),
-    ];
+    const COST_TABLE: &[(Option<Flux3Duration>, u64)] = &[(Some(Flux3Duration::Seconds(5)), 60), (Some(Flux3Duration::Seconds(20)), 240), (None, 60), (Some(Flux3Duration::Auto), 60)];
 
     #[test]
     fn matches_cost_table() {

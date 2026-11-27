@@ -4,20 +4,16 @@ use crate::core::providers::credentials::provider_credential_type::ProviderCrede
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProviderCredentialKey {
-
   // ========== API KEYS==========
-
   FalApiKey,
   ReplicateApiKey,
 
   // ========== WEB LOGINS ==========
-
   GrokWebLogin,
   HiggsfieldWebLogin,
   MidjourneyLogin,
   RunwayWebLogin,
 }
-
 
 impl ProviderCredentialKey {
   pub fn get_type(&self) -> ProviderCredentialType {
@@ -46,5 +42,3 @@ impl ProviderCredentialKey {
     }
   }
 }
-
-

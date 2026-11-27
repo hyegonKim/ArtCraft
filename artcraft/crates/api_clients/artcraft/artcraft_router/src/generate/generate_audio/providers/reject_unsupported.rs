@@ -14,32 +14,19 @@ use crate::errors::client_error::ClientError;
 
 /// Reject (under `ErrorOut`) or silently drop a set option the model doesn't
 /// support.
-pub(crate) fn reject_unsupported_option<T: Debug>(
-  field: &'static str,
-  value: Option<&T>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<(), ArtcraftRouterError> {
+pub(crate) fn reject_unsupported_option<T: Debug>(field: &'static str, value: Option<&T>, strategy: RequestMismatchMitigationStrategy) -> Result<(), ArtcraftRouterError> {
   let Some(value) = value else {
     return Ok(());
   };
   match strategy {
-    RequestMismatchMitigationStrategy::ErrorOut => {
-      Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field,
-        value: format!("{:?}", value),
-      }))
-    }
-    RequestMismatchMitigationStrategy::PayMoreUpgrade
-    | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(()),
+    RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: format!("{:?}", value) })),
+    RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(()),
   }
 }
 
 /// Reject (under `ErrorOut`) or silently drop audio references for models
 /// that take none. Empty lists are treated as absent.
-pub(crate) fn reject_unsupported_audio_references(
-  refs: Option<&AudioListRef>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<(), ArtcraftRouterError> {
+pub(crate) fn reject_unsupported_audio_references(refs: Option<&AudioListRef>, strategy: RequestMismatchMitigationStrategy) -> Result<(), ArtcraftRouterError> {
   let has_refs = match refs {
     None => false,
     Some(AudioListRef::Urls(urls)) => !urls.is_empty(),
@@ -53,10 +40,7 @@ pub(crate) fn reject_unsupported_audio_references(
 
 /// Reject (under `ErrorOut`) or silently drop image references for models
 /// that take none. Empty lists are treated as absent.
-pub(crate) fn reject_unsupported_image_references(
-  refs: Option<&ImageListRef>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<(), ArtcraftRouterError> {
+pub(crate) fn reject_unsupported_image_references(refs: Option<&ImageListRef>, strategy: RequestMismatchMitigationStrategy) -> Result<(), ArtcraftRouterError> {
   let has_refs = match refs {
     None => false,
     Some(ImageListRef::Urls(urls)) => !urls.is_empty(),

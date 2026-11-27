@@ -24,15 +24,7 @@ pub struct ArtcraftGptImage1CostState {
 
 impl ArtcraftGptImage1CostState {
   pub fn from_request(request: &ArtcraftGptImage1RequestState) -> Self {
-    Self {
-      quality: request.request.quality,
-      aspect_ratio: request.request.aspect_ratio,
-      num_images: request.request.image_batch_count.unwrap_or(1),
-      num_input_images: request.request.image_media_tokens
-        .as_ref()
-        .map(|t| t.len() as u64)
-        .unwrap_or(0),
-    }
+    Self { quality: request.request.quality, aspect_ratio: request.request.aspect_ratio, num_images: request.request.image_batch_count.unwrap_or(1), num_input_images: request.request.image_media_tokens.as_ref().map(|t| t.len() as u64).unwrap_or(0) }
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
@@ -53,15 +45,7 @@ impl ArtcraftGptImage1CostState {
     let input_image_cost = 2 * self.num_input_images;
     let cost_in_usd_cents = output_cost + input_image_cost;
 
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -71,26 +55,13 @@ fn clamp_to_supported_quality(quality: Option<CommonQualityEnum>) -> CommonQuali
   match quality {
     Some(CommonQualityEnum::Low) => CommonQualityEnum::Low,
     Some(CommonQualityEnum::Medium) => CommonQualityEnum::Medium,
-    Some(CommonQualityEnum::High)
-    | Some(CommonQualityEnum::XHigh)
-    | Some(CommonQualityEnum::Max)
-    | Some(CommonQualityEnum::Auto)
-    | None => CommonQualityEnum::High,
+    Some(CommonQualityEnum::High) | Some(CommonQualityEnum::XHigh) | Some(CommonQualityEnum::Max) | Some(CommonQualityEnum::Auto) | None => CommonQualityEnum::High,
   }
 }
 
 fn is_square_or_none(aspect_ratio: Option<CommonAspectRatioEnum>) -> bool {
   use CommonAspectRatioEnum as Ar;
-  matches!(
-    aspect_ratio,
-    None
-    | Some(Ar::Auto)
-    | Some(Ar::Auto2k)
-    | Some(Ar::Auto3k)
-    | Some(Ar::Auto4k)
-    | Some(Ar::Square)
-    | Some(Ar::SquareHd)
-  )
+  matches!(aspect_ratio, None | Some(Ar::Auto) | Some(Ar::Auto2k) | Some(Ar::Auto3k) | Some(Ar::Auto4k) | Some(Ar::Square) | Some(Ar::SquareHd))
 }
 
 #[cfg(test)]
@@ -105,91 +76,87 @@ mod tests {
   use tokens::tokens::media_files::MediaFileToken;
 
   fn base() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::GptImage1,
-      provider: RouterProvider::Artcraft,
-      prompt: None,
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: Some(1),
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::GptImage1, provider: RouterProvider::Artcraft, prompt: None, image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: Some(1), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   fn cost_text(quality: Option<RouterQuality>, aspect_ratio: Option<RouterAspectRatio>, batch: u16) -> u64 {
-    let builder = GenerateImageRequestBuilder {
-      quality,
-      aspect_ratio,
-      image_batch_count: Some(batch),
-      ..base()
-    };
+    let builder = GenerateImageRequestBuilder { quality, aspect_ratio, image_batch_count: Some(batch), ..base() };
     builder.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   fn cost_edit(quality: Option<RouterQuality>, aspect_ratio: Option<RouterAspectRatio>, batch: u16, num_inputs: usize) -> u64 {
-    let tokens: Vec<MediaFileToken> = (0..num_inputs)
-      .map(|i| MediaFileToken::new_from_str(&format!("mf_test{:028}", i)))
-      .collect();
-    let builder = GenerateImageRequestBuilder {
-      quality,
-      aspect_ratio,
-      image_batch_count: Some(batch),
-      image_inputs: Some(ImageListRef::MediaFileTokens(tokens)),
-      ..base()
-    };
+    let tokens: Vec<MediaFileToken> = (0..num_inputs).map(|i| MediaFileToken::new_from_str(&format!("mf_test{:028}", i))).collect();
+    let builder = GenerateImageRequestBuilder { quality, aspect_ratio, image_batch_count: Some(batch), image_inputs: Some(ImageListRef::MediaFileTokens(tokens)), ..base() };
     builder.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   // ── Default (High square) → 17¢ ───────────────────────────────────────────
 
   #[test]
-  fn default_one_image_is_17c() { assert_eq!(cost_text(None, None, 1), 17); }
+  fn default_one_image_is_17c() {
+    assert_eq!(cost_text(None, None, 1), 17);
+  }
 
   #[test]
-  fn default_four_images_is_68c() { assert_eq!(cost_text(None, None, 4), 68); }
+  fn default_four_images_is_68c() {
+    assert_eq!(cost_text(None, None, 4), 68);
+  }
 
   // ── Low → 2¢ all sizes ────────────────────────────────────────────────────
 
   #[test]
-  fn low_square_one() { assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::Square), 1), 2); }
+  fn low_square_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::Square), 1), 2);
+  }
 
   #[test]
-  fn low_wide_one() { assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::WideSixteenByNine), 1), 2); }
+  fn low_wide_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::WideSixteenByNine), 1), 2);
+  }
 
   #[test]
-  fn low_tall_one() { assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::TallNineBySixteen), 1), 2); }
+  fn low_tall_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Low), Some(RouterAspectRatio::TallNineBySixteen), 1), 2);
+  }
 
   #[test]
-  fn low_four_images() { assert_eq!(cost_text(Some(RouterQuality::Low), None, 4), 8); }
+  fn low_four_images() {
+    assert_eq!(cost_text(Some(RouterQuality::Low), None, 4), 8);
+  }
 
   // ── Medium ────────────────────────────────────────────────────────────────
 
   #[test]
-  fn medium_square_one() { assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::Square), 1), 5); }
+  fn medium_square_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::Square), 1), 5);
+  }
 
   #[test]
-  fn medium_wide_one() { assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::WideSixteenByNine), 1), 7); }
+  fn medium_wide_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::WideSixteenByNine), 1), 7);
+  }
 
   #[test]
-  fn medium_tall_one() { assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::TallNineBySixteen), 1), 7); }
+  fn medium_tall_one() {
+    assert_eq!(cost_text(Some(RouterQuality::Medium), Some(RouterAspectRatio::TallNineBySixteen), 1), 7);
+  }
 
   // ── High ──────────────────────────────────────────────────────────────────
 
   #[test]
-  fn high_square_one() { assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::Square), 1), 17); }
+  fn high_square_one() {
+    assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::Square), 1), 17);
+  }
 
   #[test]
-  fn high_wide_one() { assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::WideSixteenByNine), 1), 25); }
+  fn high_wide_one() {
+    assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::WideSixteenByNine), 1), 25);
+  }
 
   #[test]
-  fn high_wide_four() { assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::WideSixteenByNine), 4), 100); }
+  fn high_wide_four() {
+    assert_eq!(cost_text(Some(RouterQuality::High), Some(RouterAspectRatio::WideSixteenByNine), 4), 100);
+  }
 
   // ── Edit mode adds 2¢ per input image ─────────────────────────────────────
 

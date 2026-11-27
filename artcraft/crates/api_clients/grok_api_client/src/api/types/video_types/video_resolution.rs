@@ -27,9 +27,9 @@ impl VideoResolution {
   /// `"resolution"` field.
   pub fn as_str(&self) -> &'static str {
     match self {
-      Self::FourEightyP  => "480p",
+      Self::FourEightyP => "480p",
       Self::SevenTwentyP => "720p",
-      Self::TenEightyP   => "1080p",
+      Self::TenEightyP => "1080p",
     }
   }
 }

@@ -4,9 +4,7 @@ use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::flux_3::raw_request::{
-  Flux3TextToVideoInput, Flux3TextToVideoOutput,
-};
+use crate::requests::api::video::text::flux_3::raw_request::{Flux3TextToVideoInput, Flux3TextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -95,15 +93,11 @@ impl<'de> Deserialize<'de> for Flux3Duration {
       }
 
       fn visit_u64<E: de::Error>(self, value: u64) -> Result<Flux3Duration, E> {
-        u8::try_from(value)
-          .map(Flux3Duration::Seconds)
-          .map_err(|_| E::invalid_value(de::Unexpected::Unsigned(value), &self))
+        u8::try_from(value).map(Flux3Duration::Seconds).map_err(|_| E::invalid_value(de::Unexpected::Unsigned(value), &self))
       }
 
       fn visit_i64<E: de::Error>(self, value: i64) -> Result<Flux3Duration, E> {
-        u8::try_from(value)
-          .map(Flux3Duration::Seconds)
-          .map_err(|_| E::invalid_value(de::Unexpected::Signed(value), &self))
+        u8::try_from(value).map(Flux3Duration::Seconds).map_err(|_| E::invalid_value(de::Unexpected::Signed(value), &self))
       }
     }
 
@@ -147,14 +141,7 @@ impl FalEndpoint for Flux3TextToVideoRequest {
   type RawResponse = Flux3TextToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      duration: self.duration,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      safety_tolerance: self.safety_tolerance,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), duration: self.duration, resolution: self.resolution.map(|r| r.to_str().to_string()), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), generate_audio: self.generate_audio, safety_tolerance: self.safety_tolerance })
   }
 }
 
@@ -174,14 +161,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux3TextToVideoRequest {
-      prompt: "a white kitten chases a butterfly across a sunlit garden".to_string(),
-      duration: Some(Flux3Duration::Seconds(5)),
-      resolution: Some(Flux3Resolution::SevenTwentyP),
-      aspect_ratio: Some(Flux3AspectRatio::SixteenByNine),
-      generate_audio: Some(false),
-      safety_tolerance: None,
-    };
+    let request = Flux3TextToVideoRequest { prompt: "a white kitten chases a butterfly across a sunlit garden".to_string(), duration: Some(Flux3Duration::Seconds(5)), resolution: Some(Flux3Resolution::SevenTwentyP), aspect_ratio: Some(Flux3AspectRatio::SixteenByNine), generate_audio: Some(false), safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -195,14 +175,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux3TextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      duration: Some(Flux3Duration::Seconds(5)),
-      resolution: Some(Flux3Resolution::SevenTwentyP),
-      aspect_ratio: Some(Flux3AspectRatio::SixteenByNine),
-      generate_audio: Some(false),
-      safety_tolerance: None,
-    };
+    let request = Flux3TextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), duration: Some(Flux3Duration::Seconds(5)), resolution: Some(Flux3Resolution::SevenTwentyP), aspect_ratio: Some(Flux3AspectRatio::SixteenByNine), generate_audio: Some(false), safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -214,14 +187,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Flux3TextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: Some(Flux3Duration::Seconds(12)),
-      resolution: Some(Flux3Resolution::TenEightyP),
-      aspect_ratio: Some(Flux3AspectRatio::TwoByOne),
-      generate_audio: Some(false),
-      safety_tolerance: Some(4),
-    };
+    let request = Flux3TextToVideoRequest { prompt: "p".to_string(), duration: Some(Flux3Duration::Seconds(12)), resolution: Some(Flux3Resolution::TenEightyP), aspect_ratio: Some(Flux3AspectRatio::TwoByOne), generate_audio: Some(false), safety_tolerance: Some(4) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.duration, Some(Flux3Duration::Seconds(12)));
@@ -233,14 +199,7 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Flux3TextToVideoRequest {
-      prompt: "minimal".to_string(),
-      duration: None,
-      resolution: None,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    };
+    let request = Flux3TextToVideoRequest { prompt: "minimal".to_string(), duration: None, resolution: None, aspect_ratio: None, generate_audio: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
@@ -260,10 +219,7 @@ mod tests {
 
   #[test]
   fn every_resolution_maps_to_wire_string() {
-    for (variant, expected, is_1080p) in [
-      (Flux3Resolution::SevenTwentyP, "720p", false),
-      (Flux3Resolution::TenEightyP, "1080p", true),
-    ] {
+    for (variant, expected, is_1080p) in [(Flux3Resolution::SevenTwentyP, "720p", false), (Flux3Resolution::TenEightyP, "1080p", true)] {
       assert_eq!(variant.to_str(), expected);
       assert_eq!(variant.is_1080p(), is_1080p);
     }
@@ -271,16 +227,7 @@ mod tests {
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Flux3AspectRatio::Auto, "auto"),
-      (Flux3AspectRatio::TwentyOneByNine, "21:9"),
-      (Flux3AspectRatio::TwoByOne, "2:1"),
-      (Flux3AspectRatio::SixteenByNine, "16:9"),
-      (Flux3AspectRatio::FourByThree, "4:3"),
-      (Flux3AspectRatio::Square, "1:1"),
-      (Flux3AspectRatio::ThreeByFour, "3:4"),
-      (Flux3AspectRatio::NineBySixteen, "9:16"),
-    ] {
+    for (variant, expected) in [(Flux3AspectRatio::Auto, "auto"), (Flux3AspectRatio::TwentyOneByNine, "21:9"), (Flux3AspectRatio::TwoByOne, "2:1"), (Flux3AspectRatio::SixteenByNine, "16:9"), (Flux3AspectRatio::FourByThree, "4:3"), (Flux3AspectRatio::Square, "1:1"), (Flux3AspectRatio::ThreeByFour, "3:4"), (Flux3AspectRatio::NineBySixteen, "9:16")] {
       assert_eq!(variant.to_str(), expected);
     }
   }

@@ -12,7 +12,6 @@ use log::info;
 use wreq::Client;
 use wreq_util::Emulation;
 
-
 // --- Args & response ---
 
 pub struct PollOrdersArgs<'a> {
@@ -139,8 +138,12 @@ impl OrderMediaType {
     }
   }
 
-  pub fn is_image(&self) -> bool { matches!(self, Self::Image) }
-  pub fn is_video(&self) -> bool { matches!(self, Self::Video) }
+  pub fn is_image(&self) -> bool {
+    matches!(self, Self::Image)
+  }
+  pub fn is_video(&self) -> bool {
+    matches!(self, Self::Video)
+  }
 }
 
 // --- Implementation ---
@@ -154,69 +157,32 @@ pub async fn poll_orders(args: PollOrdersArgs<'_>) -> Result<PollOrdersResponse,
 
   let input_json = build_input_json(args.cursor);
 
-  let client = Client::builder()
-    .emulation(Emulation::Firefox143)
-    .timeout(KINOVI_REQUEST_TIMEOUT)
-    .build()
-    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).timeout(KINOVI_REQUEST_TIMEOUT).build().map_err(|err| KinoviWebClientError::WreqClientError(err))?;
 
   let cookie = args.session.cookies.as_str();
   let referer = format!("{}/app/gallery", base_url);
 
-  let request = client.get(&get_orders_url)
-    .query(&[("batch", "1"), ("input", input_json.as_str())])
-    .header("User-Agent", FIREFOX_USER_AGENT)
-    .header("Accept", "*/*")
-    .header("Accept-Language", "en-US,en;q=0.9")
-    .header("Accept-Encoding", "gzip, deflate, br, zstd")
-    .header("Referer", &referer)
-    .header("content-type", "application/json")
-    .header("x-trpc-source", "client")
-    .header("Connection", "keep-alive")
-    .header("Cookie", cookie)
-    .header("Sec-Fetch-Dest", "empty")
-    .header("Sec-Fetch-Mode", "cors")
-    .header("Sec-Fetch-Site", "same-origin")
-    .header("Priority", "u=4")
-    .header("TE", "trailers")
-    .build()
-    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+  let request = client.get(&get_orders_url).query(&[("batch", "1"), ("input", input_json.as_str())]).header("User-Agent", FIREFOX_USER_AGENT).header("Accept", "*/*").header("Accept-Language", "en-US,en;q=0.9").header("Accept-Encoding", "gzip, deflate, br, zstd").header("Referer", &referer).header("content-type", "application/json").header("x-trpc-source", "client").header("Connection", "keep-alive").header("Cookie", cookie).header("Sec-Fetch-Dest", "empty").header("Sec-Fetch-Mode", "cors").header("Sec-Fetch-Site", "same-origin").header("Priority", "u=4").header("TE", "trailers").build().map_err(|err| KinoviWebClientError::WreqClientError(err))?;
 
-  let response = client.execute(request)
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response = client.execute(request).await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response_body = response.text().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   info!("Poll orders response status: {}", status);
 
   if !status.is_success() {
-    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status,
-      body: response_body,
-    }.into());
+    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body }.into());
   }
 
-  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body)
-    .map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body).map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  let json = batch_response
-    .into_iter()
-    .next()
-    .ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape {
-      explanation: "Empty batch response array".to_string(),
-      raw_body: response_body.clone(),
-    })?
-    .result
-    .data
-    .json;
+  let json = batch_response.into_iter().next().ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape { explanation: "Empty batch response array".to_string(), raw_body: response_body.clone() })?.result.data.json;
 
   let next_cursor = json.next_cursor;
 
-  let orders: Vec<OrderStatus> = json.orders
+  let orders: Vec<OrderStatus> = json
+    .orders
     .into_iter()
     .map(|o| {
       let task_status = TaskStatus::from_str(&o.task_status);
@@ -225,27 +191,11 @@ pub async fn poll_orders(args: PollOrdersArgs<'_>) -> Result<PollOrdersResponse,
         (None, TaskStatus::Failed) => Some(FailureReason::from_reason("(no reason)")),
         _ => None,
       };
-      let created_at_utc = DateTime::parse_from_rfc3339(&o.created_at)
-        .map(|dt| dt.with_timezone(&Utc))
-        .ok();
+      let created_at_utc = DateTime::parse_from_rfc3339(&o.created_at).map(|dt| dt.with_timezone(&Utc)).ok();
 
       let media_type = o.media_type.as_deref().map(OrderMediaType::from_str);
 
-      OrderStatus {
-        order_id: o.order_id,
-        task_status,
-        result_url: o.result_url,
-        results: o.results.into_iter().map(|r| MediaResult {
-          url: r.url,
-          maybe_width: r.maybe_width,
-          maybe_height: r.maybe_height,
-        }).collect(),
-        fail_reason,
-        created_at: o.created_at,
-        created_at_utc,
-        media_type,
-        total_credits: o.total_credits,
-      }
+      OrderStatus { order_id: o.order_id, task_status, result_url: o.result_url, results: o.results.into_iter().map(|r| MediaResult { url: r.url, maybe_width: r.maybe_width, maybe_height: r.maybe_height }).collect(), fail_reason, created_at: o.created_at, created_at_utc, media_type, total_credits: o.total_credits }
     })
     .collect();
 
@@ -259,10 +209,7 @@ pub async fn poll_orders(args: PollOrdersArgs<'_>) -> Result<PollOrdersResponse,
 fn build_input_json(cursor: Option<u64>) -> String {
   match cursor {
     None => r#"{"0":{"json":{"limit":30,"format":null,"toolId":null,"direction":"forward"},"meta":{"values":{"format":["undefined"],"toolId":["undefined"]},"v":1}}}"#.to_string(),
-    Some(c) => format!(
-      r#"{{"0":{{"json":{{"limit":30,"format":null,"toolId":null,"cursor":{cursor},"direction":"forward"}},"meta":{{"values":{{"format":["undefined"],"toolId":["undefined"]}},"v":1}}}}}}"#,
-      cursor = c
-    ),
+    Some(c) => format!(r#"{{"0":{{"json":{{"limit":30,"format":null,"toolId":null,"cursor":{cursor},"direction":"forward"}},"meta":{{"values":{{"format":["undefined"],"toolId":["undefined"]}},"v":1}}}}}}"#, cursor = c),
   }
 }
 
@@ -293,20 +240,9 @@ mod tests {
     let get_orders_url = format!("{}/api/trpc/userOrder.getOrders", base_url);
     let input_json = build_input_json(None);
 
-    let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build()?;
 
-    let response = client.get(&get_orders_url)
-      .query(&[("batch", "1"), ("input", input_json.as_str())])
-      .header("User-Agent", FIREFOX_USER_AGENT)
-      .header("Accept", "*/*")
-      .header("Referer", format!("{}/app/gallery", base_url))
-      .header("content-type", "application/json")
-      .header("x-trpc-source", "client")
-      .header("Cookie", session.cookies.as_str())
-      .send()
-      .await?;
+    let response = client.get(&get_orders_url).query(&[("batch", "1"), ("input", input_json.as_str())]).header("User-Agent", FIREFOX_USER_AGENT).header("Accept", "*/*").header("Referer", format!("{}/app/gallery", base_url)).header("content-type", "application/json").header("x-trpc-source", "client").header("Cookie", session.cookies.as_str()).send().await?;
 
     let body = response.text().await?;
     let parsed: serde_json::Value = serde_json::from_str(&body)?;
@@ -353,13 +289,19 @@ mod tests {
       for i in start..bytes.len() {
         let c = bytes[i] as char;
         if in_str {
-          if esc { esc = false; }
-          else if c == '\\' { esc = true; }
-          else if c == '"' { in_str = false; }
+          if esc {
+            esc = false;
+          } else if c == '\\' {
+            esc = true;
+          } else if c == '"' {
+            in_str = false;
+          }
         } else {
-          if c == '"' { in_str = true; }
-          else if c == '[' || c == '{' { depth += 1; }
-          else if c == ']' || c == '}' {
+          if c == '"' {
+            in_str = true;
+          } else if c == '[' || c == '{' {
+            depth += 1;
+          } else if c == ']' || c == '}' {
             depth -= 1;
             if depth == 0 {
               return &raw[start..=i];
@@ -384,18 +326,29 @@ mod tests {
         let c = bytes[i] as char;
         if in_str {
           out.push(c);
-          if esc { esc = false; }
-          else if c == '\\' { esc = true; }
-          else if c == '"' { in_str = false; }
+          if esc {
+            esc = false;
+          } else if c == '\\' {
+            esc = true;
+          } else if c == '"' {
+            in_str = false;
+          }
           i += 1;
           continue;
         }
-        if c == '"' { in_str = true; out.push(c); i += 1; continue; }
+        if c == '"' {
+          in_str = true;
+          out.push(c);
+          i += 1;
+          continue;
+        }
         if c == ',' {
           // Peek ahead past whitespace; if the next non-whitespace char is
           // `]` or `}`, drop the comma.
           let mut j = i + 1;
-          while j < bytes.len() && (bytes[j] as char).is_whitespace() { j += 1; }
+          while j < bytes.len() && (bytes[j] as char).is_whitespace() {
+            j += 1;
+          }
           if j < bytes.len() && (bytes[j] == b']' || bytes[j] == b'}') {
             i += 1;
             continue;
@@ -412,30 +365,21 @@ mod tests {
       let body = strip_trailing_commas(body);
       let batch: Vec<BatchResponseItem> = serde_json::from_str(&body).expect("parse batch");
       let json = batch.into_iter().next().expect("non-empty batch").result.data.json;
-      json.orders.into_iter().map(|o| {
-        let task_status = TaskStatus::from_str(&o.task_status);
-        let fail_reason = match (&o.fail_reason, &task_status) {
-          (Some(r), _) => Some(FailureReason::from_reason(r)),
-          (None, TaskStatus::Failed) => Some(FailureReason::from_reason("(no reason)")),
-          _ => None,
-        };
-        let created_at_utc = DateTime::parse_from_rfc3339(&o.created_at)
-          .map(|dt| dt.with_timezone(&Utc)).ok();
-        let media_type = o.media_type.as_deref().map(OrderMediaType::from_str);
-        OrderStatus {
-          order_id: o.order_id,
-          task_status,
-          result_url: o.result_url,
-          results: o.results.into_iter().map(|r| MediaResult {
-            url: r.url, maybe_width: r.maybe_width, maybe_height: r.maybe_height,
-          }).collect(),
-          fail_reason,
-          created_at: o.created_at,
-          created_at_utc,
-          media_type,
-          total_credits: o.total_credits,
-        }
-      }).collect()
+      json
+        .orders
+        .into_iter()
+        .map(|o| {
+          let task_status = TaskStatus::from_str(&o.task_status);
+          let fail_reason = match (&o.fail_reason, &task_status) {
+            (Some(r), _) => Some(FailureReason::from_reason(r)),
+            (None, TaskStatus::Failed) => Some(FailureReason::from_reason("(no reason)")),
+            _ => None,
+          };
+          let created_at_utc = DateTime::parse_from_rfc3339(&o.created_at).map(|dt| dt.with_timezone(&Utc)).ok();
+          let media_type = o.media_type.as_deref().map(OrderMediaType::from_str);
+          OrderStatus { order_id: o.order_id, task_status, result_url: o.result_url, results: o.results.into_iter().map(|r| MediaResult { url: r.url, maybe_width: r.maybe_width, maybe_height: r.maybe_height }).collect(), fail_reason, created_at: o.created_at, created_at_utc, media_type, total_credits: o.total_credits }
+        })
+        .collect()
     }
 
     /// Back-compat: when the raw payload omits `mediaType` (older video-only
@@ -564,14 +508,9 @@ mod tests {
         Some(OrderMediaType::Unknown(_)) => unknown += 1,
         None => missing += 1,
       }
-      println!("  {} | {:?} | media={:?} | results={} | result_url={:?} | fail={:?}",
-        order.order_id, order.task_status, order.media_type,
-        order.results.len(), order.result_url, order.fail_reason);
+      println!("  {} | {:?} | media={:?} | results={} | result_url={:?} | fail={:?}", order.order_id, order.task_status, order.media_type, order.results.len(), order.result_url, order.fail_reason);
     }
-    println!(
-      "media_type tally: image={}, video={}, unknown={}, missing={}",
-      images, videos, unknown, missing,
-    );
+    println!("media_type tally: image={}, video={}, unknown={}, missing={}", images, videos, unknown, missing,);
     assert_eq!(1, 2); // NB: Intentional failure to inspect output.
     Ok(())
   }
@@ -587,9 +526,7 @@ mod tests {
     println!("Orders returned (with cursor {}): {}", cursor, result.orders.len());
     println!("Next cursor: {:?}", result.next_cursor);
     for order in &result.orders {
-      println!("  {} | {:?} | media={:?} | results={} | result_url={:?} | fail={:?}",
-        order.order_id, order.task_status, order.media_type,
-        order.results.len(), order.result_url, order.fail_reason);
+      println!("  {} | {:?} | media={:?} | results={} | result_url={:?} | fail={:?}", order.order_id, order.task_status, order.media_type, order.results.len(), order.result_url, order.fail_reason);
     }
     assert_eq!(1, 2); // NB: Intentional failure to inspect output.
     Ok(())
@@ -610,9 +547,7 @@ mod tests {
     let mut pages_scanned = 0usize;
 
     for _ in 0..MAX_PAGES {
-      let result = poll_orders(PollOrdersArgs {
-        session: &session, cursor, host_override: None,
-      }).await?;
+      let result = poll_orders(PollOrdersArgs { session: &session, cursor, host_override: None }).await?;
       pages_scanned += 1;
       println!("Page {}: {} orders, next_cursor={:?}", pages_scanned, result.orders.len(), result.next_cursor);
 
@@ -621,26 +556,30 @@ mod tests {
           found_image_orders.push(order.clone());
         }
       }
-      if !found_image_orders.is_empty() { break; }
+      if !found_image_orders.is_empty() {
+        break;
+      }
       cursor = result.next_cursor;
-      if cursor.is_none() { break; }
+      if cursor.is_none() {
+        break;
+      }
     }
 
     println!("Scanned {} pages; found {} image order(s)", pages_scanned, found_image_orders.len());
     for o in &found_image_orders {
-      println!("  IMG {} | {:?} | results={} | result_url={:?}",
-        o.order_id, o.task_status, o.results.len(), o.result_url);
+      println!("  IMG {} | {:?} | results={} | result_url={:?}", o.order_id, o.task_status, o.results.len(), o.result_url);
     }
 
-    assert!(!found_image_orders.is_empty(),
+    assert!(
+      !found_image_orders.is_empty(),
       "expected to find at least one image order within {} pages — \
-       create a Midjourney generation if needed and rerun", MAX_PAGES);
+       create a Midjourney generation if needed and rerun",
+      MAX_PAGES
+    );
 
     // Each Midjourney task returns exactly 4 images when completed.
     if let Some(completed) = found_image_orders.iter().find(|o| o.task_status == TaskStatus::Completed) {
-      assert_eq!(completed.results.len(), 4,
-        "completed Midjourney image order should have 4 results, got {}",
-        completed.results.len());
+      assert_eq!(completed.results.len(), 4, "completed Midjourney image order should have 4 results, got {}", completed.results.len());
     }
     Ok(())
   }
@@ -687,19 +626,11 @@ mod tests {
   async fn live_cursor_all_accounts() -> AnyhowResult<()> {
     setup_test_logging(LevelFilter::Info);
 
-    const SECRETS_ENV: &str = concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../../../crates/service/job/seedance2_pro_job/config/seedance2-pro-job.development-secrets.env",
-    );
-    const ACCOUNTS: &[&str] = &[
-      "SEEDANCE2PRO_VOLCENGINE_COOKIES",
-      "SEEDANCE2PRO_BYTEPLUS_COOKIES",
-      "SEEDANCE2PRO_BYTEPLUS_ULTRA_COOKIES",
-    ];
+    const SECRETS_ENV: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../../crates/service/job/seedance2_pro_job/config/seedance2-pro-job.development-secrets.env",);
+    const ACCOUNTS: &[&str] = &["SEEDANCE2PRO_VOLCENGINE_COOKIES", "SEEDANCE2PRO_BYTEPLUS_COOKIES", "SEEDANCE2PRO_BYTEPLUS_ULTRA_COOKIES"];
     const MAX_PAGES: usize = 5;
 
-    let env_contents = std::fs::read_to_string(SECRETS_ENV)
-      .unwrap_or_else(|e| panic!("could not read secrets env at {}: {}", SECRETS_ENV, e));
+    let env_contents = std::fs::read_to_string(SECRETS_ENV).unwrap_or_else(|e| panic!("could not read secrets env at {}: {}", SECRETS_ENV, e));
 
     for account in ACCOUNTS {
       let Some(cookies) = read_env_value(&env_contents, account) else {
@@ -723,20 +654,19 @@ mod tests {
             pages += 1;
             total += result.orders.len();
             cursor = result.next_cursor;
-            if cursor.is_none() { break; }
-          }
+            if cursor.is_none() {
+              break;
+            }
+          },
           Err(err) => {
             ok = false;
             println!("[{}] FAILED on page {}: {:?}", account, pages + 1, err);
             break;
-          }
+          },
         }
       }
 
-      println!(
-        "[{}] {} — {} page(s), {} order(s) parsed cleanly",
-        account, if ok { "OK" } else { "ERROR" }, pages, total,
-      );
+      println!("[{}] {} — {} page(s), {} order(s) parsed cleanly", account, if ok { "OK" } else { "ERROR" }, pages, total,);
     }
 
     Ok(())
@@ -748,9 +678,15 @@ mod tests {
   fn read_env_value(contents: &str, key: &str) -> Option<String> {
     for line in contents.lines() {
       let line = line.trim();
-      if line.starts_with('#') { continue; }
-      let Some((k, v)) = line.split_once('=') else { continue; };
-      if k.trim() != key { continue; }
+      if line.starts_with('#') {
+        continue;
+      }
+      let Some((k, v)) = line.split_once('=') else {
+        continue;
+      };
+      if k.trim() != key {
+        continue;
+      }
       let v = v.trim().trim_matches('"').trim_matches('\'').to_string();
       return Some(v);
     }

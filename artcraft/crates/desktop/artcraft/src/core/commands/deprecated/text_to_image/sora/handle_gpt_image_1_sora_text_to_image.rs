@@ -20,35 +20,27 @@ use openai_sora_client::requests::image_gen::common::{ImageSize, NumImages};
 use std::time::Duration;
 use tauri::AppHandle;
 
-const SORA_SIMPLE_IMAGE_GEN_TIMEOUT : Duration = Duration::from_millis(1000 * 30); // 30 seconds
+const SORA_SIMPLE_IMAGE_GEN_TIMEOUT: Duration = Duration::from_millis(1000 * 30); // 30 seconds
 
-pub async fn handle_gpt_image_1_sora_text_to_image(
-  request: &EnqueueTextToImageRequest,
-  app: &AppHandle,
-  sora_creds_manager: &SoraCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_gpt_image_1_sora_text_to_image(request: &EnqueueTextToImageRequest, app: &AppHandle, sora_creds_manager: &SoraCredentialManager, sora_task_queue: &SoraTaskQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
   let mut creds = match sora_creds_manager.get_credentials() {
     Ok(Some(creds)) => creds,
     Ok(None) => {
       error!("Sora credentials not found.");
       ShowProviderLoginModalEvent::send_for_provider(GenerationProvider::Sora, &app);
       return Err(GenerateError::needs_sora_credentials());
-    }
+    },
     Err(err) => {
       error!("Error reading Sora credentials: {:?}", err);
       ShowProviderLoginModalEvent::send_for_provider(GenerationProvider::Sora, &app);
       return Err(GenerateError::needs_sora_credentials());
-    }
+    },
   };
 
-  let credential_updated = maybe_upgrade_or_renew_session(&mut creds)
-      .await
-      .map_err(|err| {
-        error!("Failed to upgrade or renew session: {:?}", err);
-        err
-      })?;
+  let credential_updated = maybe_upgrade_or_renew_session(&mut creds).await.map_err(|err| {
+    error!("Failed to upgrade or renew session: {:?}", err);
+    err
+  })?;
 
   if credential_updated {
     info!("Storing updated credentials");
@@ -56,9 +48,8 @@ pub async fn handle_gpt_image_1_sora_text_to_image(
   }
 
   let prompt = request.prompt.as_deref().unwrap_or("");
-  
-  let aspect_ratio = get_aspect_ratio(request)
-      .unwrap_or(ImageSize::Square);
+
+  let aspect_ratio = get_aspect_ratio(request).unwrap_or(ImageSize::Square);
 
   let num_images = match request.number_images {
     None => NumImages::One,
@@ -69,33 +60,20 @@ pub async fn handle_gpt_image_1_sora_text_to_image(
     _ => NumImages::One,
   };
 
-  let result =
-      simple_image_gen_with_session_auto_renew(SimpleImageGenAutoRenewRequest {
-        prompt: prompt.to_string(),
-        num_images,
-        image_size: aspect_ratio,
-        credentials: &creds,
-        request_timeout: Some(SORA_SIMPLE_IMAGE_GEN_TIMEOUT),
-      }).await;
+  let result = simple_image_gen_with_session_auto_renew(SimpleImageGenAutoRenewRequest { prompt: prompt.to_string(), num_images, image_size: aspect_ratio, credentials: &creds, request_timeout: Some(SORA_SIMPLE_IMAGE_GEN_TIMEOUT) }).await;
 
-  let (response, maybe_new_creds) = 
-      match result {
-        Ok((response, maybe_new_creds)) => (response, maybe_new_creds),
-        Err(err) => {
-          let event = GenerationEnqueueFailureEvent {
-            action: GenerationAction::GenerateImage,
-            service: GenerationServiceProvider::Sora,
-            model: None,
-            reason: None,
-          };
+  let (response, maybe_new_creds) = match result {
+    Ok((response, maybe_new_creds)) => (response, maybe_new_creds),
+    Err(err) => {
+      let event = GenerationEnqueueFailureEvent { action: GenerationAction::GenerateImage, service: GenerationServiceProvider::Sora, model: None, reason: None };
 
-          if let Err(err) = event.send(app) {
-            error!("Failed to emit event: {:?}", err); // Fail open.
-          }
+      if let Err(err) = event.send(app) {
+        error!("Failed to emit event: {:?}", err); // Fail open.
+      }
 
-          return Err(GenerateError::from(err));
-        }
-      };
+      return Err(GenerateError::from(err));
+    },
+  };
 
   if let Some(new_creds) = maybe_new_creds {
     info!("Storing updated credentials.");
@@ -106,15 +84,7 @@ pub async fn handle_gpt_image_1_sora_text_to_image(
 
   sora_task_queue.insert(&response.task_id)?;
 
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Sora,
-    task_type: TaskType::ImageGeneration,
-    model: Some(GenerationModel::GptImage1),
-    provider_job_id: Some(response.task_id.to_string()),
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Sora, task_type: TaskType::ImageGeneration, model: Some(GenerationModel::GptImage1), provider_job_id: Some(response.task_id.to_string()), maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 fn get_aspect_ratio(request: &EnqueueTextToImageRequest) -> Option<ImageSize> {
@@ -131,7 +101,7 @@ fn get_aspect_ratio(request: &EnqueueTextToImageRequest) -> Option<ImageSize> {
       TextToImageSize::Square => Some(ImageSize::Square),
       TextToImageSize::Wide => Some(ImageSize::Wide),
       TextToImageSize::Tall => Some(ImageSize::Tall),
-    }
+    };
   }
 
   None

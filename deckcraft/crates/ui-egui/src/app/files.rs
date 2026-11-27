@@ -236,13 +236,15 @@ impl SlideApp {
                 return any;
             }
             "pdf" => deckcraft_engine::cmd::file::pdf_bytes(&doc, &extra),
-            "gif" if deckcraft_engine::video_export::wants_animated_gif(&extra) => deckcraft_engine::video_export::AnimatedExportOptions::from_params(
-                &extra,
-                deckcraft_engine::video_export::AnimatedFormat::Gif,
-                "file.export",
-                doc.slides.len(),
-            )
-            .and_then(|o| deckcraft_engine::video_export::encode_animated(&doc, &o).map(|r| r.bytes)),
+            "gif" if deckcraft_engine::video_export::wants_animated_gif(&extra) => {
+                deckcraft_engine::video_export::AnimatedExportOptions::from_params(
+                    &extra,
+                    deckcraft_engine::video_export::AnimatedFormat::Gif,
+                    "file.export",
+                    doc.slides.len(),
+                )
+                .and_then(|o| deckcraft_engine::video_export::encode_animated(&doc, &o).map(|r| r.bytes))
+            }
             "gif" => deckcraft_engine::cmd::file::gif_bytes(&doc, &extra),
             "mp4" => deckcraft_engine::video_export::AnimatedExportOptions::from_params(
                 &extra,

@@ -45,15 +45,13 @@ pub enum EnqueueVeo3p1TextToVideoResolution {
   TenEightyP,
 }
 
-
 impl FalRequestCostCalculator for EnqueueVeo3p1TextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // "For every second of video you generated, you will be charged
     //  $0.20 (audio off) or
     //  $0.40 (audio on).
     //  For example, a 5s video with audio on will cost $2."
-    let duration = self.duration
-        .unwrap_or(EnqueueVeo3p1TextToVideoDurationSeconds::Eight);
+    let duration = self.duration.unwrap_or(EnqueueVeo3p1TextToVideoDurationSeconds::Eight);
 
     let generate_audio = self.generate_audio.unwrap_or(true);
 
@@ -68,36 +66,36 @@ impl FalRequestCostCalculator for EnqueueVeo3p1TextToVideoRequest {
   }
 }
 
-
 /// Veo 3.1 Text-to-Video
 /// https://fal.ai/models/fal-ai/veo3.1
-pub async fn enqueue_veo_3p1_text_to_video_webhook<R: IntoUrl>(
-  args: EnqueueVeo3p1TextToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_veo_3p1_text_to_video_webhook<R: IntoUrl>(args: EnqueueVeo3p1TextToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|resolution| match resolution {
-        EnqueueVeo3p1TextToVideoDurationSeconds::Four => "4s",
-        EnqueueVeo3p1TextToVideoDurationSeconds::Six => "6s",
-        EnqueueVeo3p1TextToVideoDurationSeconds::Eight=> "8s",
-      })
-      .map(|s| s.to_string());
+  let duration = req
+    .duration
+    .map(|resolution| match resolution {
+      EnqueueVeo3p1TextToVideoDurationSeconds::Four => "4s",
+      EnqueueVeo3p1TextToVideoDurationSeconds::Six => "6s",
+      EnqueueVeo3p1TextToVideoDurationSeconds::Eight => "8s",
+    })
+    .map(|s| s.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|aspect_ratio| match aspect_ratio {
-        EnqueueVeo3p1TextToVideoAspectRatio::Auto => "auto",
-        EnqueueVeo3p1TextToVideoAspectRatio::SixteenByNine => "16:9",
-        EnqueueVeo3p1TextToVideoAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|s| s.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|aspect_ratio| match aspect_ratio {
+      EnqueueVeo3p1TextToVideoAspectRatio::Auto => "auto",
+      EnqueueVeo3p1TextToVideoAspectRatio::SixteenByNine => "16:9",
+      EnqueueVeo3p1TextToVideoAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|s| s.to_string());
 
-  let resolution = req.resolution
-      .map(|resolution| match resolution {
-        EnqueueVeo3p1TextToVideoResolution::SevenTwentyP => "720p",
-        EnqueueVeo3p1TextToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|s| s.to_string());
+  let resolution = req
+    .resolution
+    .map(|resolution| match resolution {
+      EnqueueVeo3p1TextToVideoResolution::SevenTwentyP => "720p",
+      EnqueueVeo3p1TextToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|s| s.to_string());
 
   let request = Veo3p1TextToVideoInput {
     prompt: req.prompt,
@@ -112,10 +110,7 @@ pub async fn enqueue_veo_3p1_text_to_video_webhook<R: IntoUrl>(
     auto_fix: req.auto_fix,
   };
 
-  let result = veo_3p1_text_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = veo_3p1_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -135,21 +130,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueVeo3p1TextToVideoArgs {
-      request: EnqueueVeo3p1TextToVideoRequest {
-        prompt: "An alien space ship hovers over new york city. it looks ominous, ready to attack. suddenly, it drops a bunch of ping pong balls on the city".to_string(),
-        duration: Some(EnqueueVeo3p1TextToVideoDurationSeconds::Eight),
-        aspect_ratio: Some(EnqueueVeo3p1TextToVideoAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueVeo3p1TextToVideoResolution::TenEightyP),
-        generate_audio: Some(true),
-        negative_prompt: None,
-        enhance_prompt: Some(true),
-        auto_fix: Some(true),
-        seed: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueVeo3p1TextToVideoArgs { request: EnqueueVeo3p1TextToVideoRequest { prompt: "An alien space ship hovers over new york city. it looks ominous, ready to attack. suddenly, it drops a bunch of ping pong balls on the city".to_string(), duration: Some(EnqueueVeo3p1TextToVideoDurationSeconds::Eight), aspect_ratio: Some(EnqueueVeo3p1TextToVideoAspectRatio::SixteenByNine), resolution: Some(EnqueueVeo3p1TextToVideoResolution::TenEightyP), generate_audio: Some(true), negative_prompt: None, enhance_prompt: Some(true), auto_fix: Some(true), seed: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_veo_3p1_text_to_video_webhook(args).await?;
 

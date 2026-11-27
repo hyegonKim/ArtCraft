@@ -21,6 +21,7 @@ pub mod brush_delete;
 pub mod brush_options;
 pub mod brush_replace_art;
 pub mod bullets_numbering;
+pub mod capture;
 pub mod char_style_options;
 pub mod color_balance;
 pub mod color_guide_options;
@@ -433,6 +434,8 @@ registry! {
     ScriptNotice: [script_run::NOTICE_KIND] => script_run::NOTICE_SPEC,
     VectorHalftone: [halftone::KIND] => halftone::SPEC,
     GenerativeShapeFill: [generative_shape_fill::KIND] => generative_shape_fill::SPEC,
+    CaptureColorTheme: [capture::COLOR_THEME_KIND] => capture::THEME_SPEC,
+    CapturePatternTile: [capture::PATTERN_TILE_KIND] => capture::PATTERN_SPEC,
     IconSheet: [icon_sheet::KIND] => icon_sheet::SPEC,
     Preflight: [preflight::KIND] => preflight::SPEC,
     Turntable: [turntable::KIND] => turntable::SPEC,

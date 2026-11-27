@@ -59,9 +59,7 @@ impl MappedGraphic {
     }
 
     fn local_transform(&self) -> Affine {
-        Affine::translate((self.x, self.y))
-            * Affine::rotate((-self.rotation).to_radians())
-            * Affine::scale(self.scale / 100.0)
+        Affine::translate((self.x, self.y)) * Affine::rotate((-self.rotation).to_radians()) * Affine::scale(self.scale / 100.0)
     }
 }
 
@@ -108,10 +106,7 @@ pub fn mapped_graphics(p: &Value) -> Vec<MappedGraphic> {
     let Some(list) = p.get(GRAPHICS).and_then(Value::as_array) else {
         return Vec::new();
     };
-    list.iter()
-        .take(MAX_GRAPHICS)
-        .filter_map(parse_entry_lenient)
-        .collect()
+    list.iter().take(MAX_GRAPHICS).filter_map(parse_entry_lenient).collect()
 }
 
 fn parse_entry_lenient(v: &Value) -> Option<MappedGraphic> {
@@ -120,11 +115,7 @@ fn parse_entry_lenient(v: &Value) -> Option<MappedGraphic> {
     if symbol.is_empty() {
         return None;
     }
-    let face = obj
-        .get("face")
-        .and_then(Value::as_str)
-        .and_then(PlanarFace::parse)
-        .unwrap_or(PlanarFace::Front);
+    let face = obj.get("face").and_then(Value::as_str).and_then(PlanarFace::parse).unwrap_or(PlanarFace::Front);
     let num_or = |k: &str, d: f64| obj.get(k).and_then(Value::as_f64).filter(|x| x.is_finite()).unwrap_or(d);
     Some(MappedGraphic {
         symbol: symbol.to_string(),
@@ -139,11 +130,7 @@ fn parse_entry_lenient(v: &Value) -> Option<MappedGraphic> {
 /// Returns `params` with `graphic` appended to its `graphics` array.
 pub fn with_graphic(params: &Value, graphic: MappedGraphic) -> Value {
     let mut map = params.as_object().cloned().unwrap_or_default();
-    let mut list = map
-        .get(GRAPHICS)
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default();
+    let mut list = map.get(GRAPHICS).and_then(Value::as_array).cloned().unwrap_or_default();
     list.push(graphic.to_value());
     map.insert(GRAPHICS.into(), Value::Array(list));
     Value::Object(map)
@@ -190,9 +177,7 @@ pub fn appearance_graphic_symbols(app: &Appearance) -> Vec<String> {
 /// missing symbol that was already present in `previous`).
 pub fn missing_symbol(doc: &Document, params: &Value, previous: Option<&Value>) -> Option<String> {
     let prev_names = previous.map(param_graphic_symbols).unwrap_or_default();
-    param_graphic_symbols(params)
-        .into_iter()
-        .find(|name| !doc.symbols.iter().any(|s| s.name == *name) && !prev_names.contains(name))
+    param_graphic_symbols(params).into_iter().find(|name| !doc.symbols.iter().any(|s| s.name == *name) && !prev_names.contains(name))
 }
 
 /// Renames symbol `from` to `to` inside a single 3D effect parameter JSON `params` (`true` if changed).
@@ -311,12 +296,9 @@ pub(crate) fn validate(id: &str, p: &Value) -> Result<(), String> {
                 return Err("A plane has one face: map its graphics onto the front".into());
             }
         }
-        for (key, lo, hi) in [
-            ("x", -MAX_OFFSET, MAX_OFFSET),
-            ("y", -MAX_OFFSET, MAX_OFFSET),
-            ("scale", SCALE_RANGE.0, SCALE_RANGE.1),
-            ("rotation", -360.0, 360.0),
-        ] {
+        for (key, lo, hi) in
+            [("x", -MAX_OFFSET, MAX_OFFSET), ("y", -MAX_OFFSET, MAX_OFFSET), ("scale", SCALE_RANGE.0, SCALE_RANGE.1), ("rotation", -360.0, 360.0)]
+        {
             if let Some(v) = obj.get(key) {
                 let Some(n) = v.as_f64().filter(|n| n.is_finite()) else {
                     return Err(format!("`{GRAPHICS}` {key} must be a number from {lo} to {hi}"));
@@ -379,10 +361,7 @@ pub(crate) fn validate_surface_symbols(doc: &Document, p: &Value) -> Result<(), 
 /// Bounds of symbol `name`'s graphic artwork in centered natural coordinates.
 pub(crate) fn art_bounds(doc: &Document, name: &str) -> Option<Rect> {
     let shapes = symbol_shapes(doc, name, 0)?;
-    shapes
-        .iter()
-        .filter_map(|s| s.path.bounds())
-        .reduce(|a, b| a.union(b))
+    shapes.iter().filter_map(|s| s.path.bounds()).reduce(|a, b| a.union(b))
 }
 
 #[derive(Clone)]
@@ -398,9 +377,7 @@ fn natural_symbol_node(doc: &Document, name: &str) -> Option<Node> {
     let sym = doc.symbols.iter().find(|s| s.name == name)?;
     let mut art = (*sym.art).clone();
     if let Some(sizes) = doc.unknown.get(vectorcraft_doc::SYMBOL_SIZES).and_then(Value::as_object)
-        && let Some([w, h]) = sizes.get(name).and_then(Value::as_array).and_then(|a| {
-            Some([a.first()?.as_f64()?, a.get(1)?.as_f64()?])
-        })
+        && let Some([w, h]) = sizes.get(name).and_then(Value::as_array).and_then(|a| Some([a.first()?.as_f64()?, a.get(1)?.as_f64()?]))
         && w > 0.0
         && h > 0.0
     {
@@ -423,13 +400,7 @@ fn symbol_shapes(doc: &Document, name: &str, depth: usize) -> Option<Vec<Graphic
     (!out.is_empty()).then_some(out)
 }
 
-fn collect_graphic_shapes(
-    doc: &Document,
-    n: &Node,
-    parent_opacity: f32,
-    depth: usize,
-    out: &mut Vec<GraphicShape>,
-) {
+fn collect_graphic_shapes(doc: &Document, n: &Node, parent_opacity: f32, depth: usize, out: &mut Vec<GraphicShape>) {
     if depth > 6 || !n.visible || n.is_guide() {
         return;
     }
@@ -478,12 +449,7 @@ fn collect_graphic_shapes(
         return;
     };
     let ctx = GeomContext { doc: Some(doc), ..GeomContext::of(n) };
-    let shaped = crate::apply_geometry_with(
-        &n.appearance.effects,
-        &raw_path,
-        raw_path.bounds().unwrap_or(Rect::ZERO),
-        &ctx,
-    );
+    let shaped = crate::apply_geometry_with(&n.appearance.effects, &raw_path, raw_path.bounds().unwrap_or(Rect::ZERO), &ctx);
     for item in super::solid_paints(n) {
         match item {
             AppearanceItem::Fill(fill) if fill.opacity > 0.0 && !matches!(fill.paint, Paint::None) => {
@@ -495,9 +461,7 @@ fn collect_graphic_shapes(
                     blend: fill.blend,
                 });
             }
-            AppearanceItem::Stroke(stroke)
-                if stroke.opacity > 0.0 && stroke.width > 0.0 && !matches!(stroke.paint, Paint::None) =>
-            {
+            AppearanceItem::Stroke(stroke) if stroke.opacity > 0.0 && stroke.width > 0.0 && !matches!(stroke.paint, Paint::None) => {
                 let region = crate::stroke::outline_region(&shaped, raw_rule, &stroke);
                 if region.bounds().is_some() {
                     out.push(GraphicShape {
@@ -586,12 +550,7 @@ pub(crate) fn face_art(
             }
             let placed_paint = page_xf.map_or_else(|| s.paint.clone(), |xf| transform_paint(&s.paint, xf));
             let items = crate::lighting::fills(&placed_paint, map.illumination, map.brightness, colored);
-            let mut node = crate::group::shape_node(
-                id,
-                clipped,
-                FillRule::NonZero,
-                Appearance { items, ..Default::default() },
-            );
+            let mut node = crate::group::shape_node(id, clipped, FillRule::NonZero, Appearance { items, ..Default::default() });
             node.opacity = s.opacity;
             node.blend = s.blend;
             drawn.push(Arc::new(node));
@@ -684,11 +643,8 @@ pub(crate) fn surface_parts(
                 if !rects_touch(shape_bounds, *cell_rect) {
                     continue;
                 }
-                let overlapping: Vec<(usize, &PathData)> = contours
-                    .iter()
-                    .filter(|(cb, _, _)| rects_touch(*cb, *cell_rect))
-                    .map(|(_, n_pts, p)| (*n_pts, p))
-                    .collect();
+                let overlapping: Vec<(usize, &PathData)> =
+                    contours.iter().filter(|(cb, _, _)| rects_touch(*cb, *cell_rect)).map(|(_, n_pts, p)| (*n_pts, p)).collect();
                 if overlapping.is_empty() {
                     continue;
                 }
@@ -743,12 +699,7 @@ struct PartStyle<'a> {
     has_seam: bool,
 }
 
-fn rgb_clipped_part(
-    id: NodeId,
-    clip_path: &PathData,
-    paint: &Paint,
-    light: vectorcraft_three_d::RgbGradient,
-) -> Node {
+fn rgb_clipped_part(id: NodeId, clip_path: &PathData, paint: &Paint, light: vectorcraft_three_d::RgbGradient) -> Node {
     use vectorcraft_doc::color::BlendMode;
     use vectorcraft_geom::shapes;
 
@@ -817,8 +768,7 @@ fn build_surface_part_node(
         group.blend = style.blend;
         return group;
     }
-    let colored = face.light_gradient.is_some()
-        || face.illumination.windows(2).any(|w| (w[0] - w[1]).abs() > 1e-6);
+    let colored = face.light_gradient.is_some() || face.illumination.windows(2).any(|w| (w[0] - w[1]).abs() > 1e-6);
     if let Some(c) = uv_paint.color() {
         let lit_paint = shade(face, c);
         let fill = FillLayer::new(lit_paint.clone());
@@ -862,11 +812,7 @@ fn build_surface_part_node(
     node.blend = style.blend;
     if let Some(mask_paint) = mask {
         let bounds = node.visual_bounds().unwrap_or(Rect::ZERO).inflate(1.0, 1.0);
-        let cov = Node::path(
-            id,
-            vectorcraft_geom::shapes::rectangle(bounds),
-            Appearance::basic(mask_paint, Paint::None, 0.0),
-        );
+        let cov = Node::path(id, vectorcraft_geom::shapes::rectangle(bounds), Appearance::basic(mask_paint, Paint::None, 0.0));
         node.extras_mut().mask = Some(Box::new(OpacityMask::new(cov, true)));
     }
     node
@@ -878,10 +824,7 @@ fn gradient_shadow_paint(g: vectorcraft_three_d::ShadeGradient) -> Paint {
         .brightness
         .into_iter()
         .enumerate()
-        .map(|(i, b)| GradientStop {
-            opacity: (1.0 - b).clamp(0.0, 1.0) as f32,
-            ..GradientStop::new(i as f32, Color::BLACK)
-        })
+        .map(|(i, b)| GradientStop { opacity: (1.0 - b).clamp(0.0, 1.0) as f32, ..GradientStop::new(i as f32, Color::BLACK) })
         .collect();
     let mut gp = GradientPaint::new(Gradient::new(GradientKind::Linear, stops));
     gp.geom = Some(GradientGeom { start: g.start, end: g.end, aspect: 1.0, focal: None });
@@ -993,10 +936,7 @@ fn barycentric(q: Point, u: [Point; 3], p: [Point; 3]) -> Option<(Point, f64)> {
     let w2 = v0.cross(d) / det;
     let w0 = 1.0 - w1 - w2;
     let outside = (-w0).max(0.0) + (-w1).max(0.0) + (-w2).max(0.0);
-    let out = Point::new(
-        w0 * p[0].x + w1 * p[1].x + w2 * p[2].x,
-        w0 * p[0].y + w1 * p[1].y + w2 * p[2].y,
-    );
+    let out = Point::new(w0 * p[0].x + w1 * p[1].x + w2 * p[2].x, w0 * p[0].y + w1 * p[1].y + w2 * p[2].y);
     (out.x.is_finite() && out.y.is_finite()).then_some((out, outside))
 }
 

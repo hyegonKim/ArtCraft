@@ -10,10 +10,7 @@ pub struct UpdateTaskArgs<'a> {
 }
 
 /// Returns true if rows were updated.
-pub async fn update_task_status(
-  args: UpdateTaskArgs<'_>,
-) -> Result<bool, SqliteTasksError> {
-
+pub async fn update_task_status(args: UpdateTaskArgs<'_>) -> Result<bool, SqliteTasksError> {
   // TODO(bt,2025-07-12): Fix this. The sqlx mysql queries never required temporaries
   let task_id_temp = args.task_id.as_str();
   let status_temp = args.status.to_str();
@@ -21,13 +18,14 @@ pub async fn update_task_status(
   // info!("Update task id: {}, status: {}", task_id_temp, status_temp);
 
   // TODO(bt,2025-07-15): We can't set a LIMIT without a certain compiler flag for SQLite ?
-  let query = sqlx::query!(r#"
+  let query = sqlx::query!(
+    r#"
     UPDATE tasks
     SET task_status = ?
     WHERE id = ?
   "#,
-      status_temp,
-      task_id_temp,
+    status_temp,
+    task_id_temp,
   );
 
   // info!("query: {:?}", query.sql());

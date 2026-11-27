@@ -8,27 +8,15 @@ pub fn build_timestamp() -> DateTime<Utc> {
 }
 
 pub fn git_commit_id() -> Option<&'static str> {
-  version().version_control
-      .as_ref()
-      .map(|vc| vc.git())
-      .flatten()
-      .map(|git| git.commit_id.deref())
+  version().version_control.as_ref().map(|vc| vc.git()).flatten().map(|git| git.commit_id.deref())
 }
 
 pub fn git_commit_short_id() -> Option<&'static str> {
-  version().version_control
-      .as_ref()
-      .map(|vc| vc.git())
-      .flatten()
-      .map(|git| git.commit_short_id.deref())
+  version().version_control.as_ref().map(|vc| vc.git()).flatten().map(|git| git.commit_short_id.deref())
 }
 
 pub fn git_commit_timestamp() -> Option<DateTime<Utc>> {
-  version().version_control
-      .as_ref()
-      .map(|vc| vc.git())
-      .flatten()
-      .map(|git| git.commit_timestamp)
+  version().version_control.as_ref().map(|vc| vc.git()).flatten().map(|git| git.commit_timestamp)
 }
 
 #[cfg(test)]

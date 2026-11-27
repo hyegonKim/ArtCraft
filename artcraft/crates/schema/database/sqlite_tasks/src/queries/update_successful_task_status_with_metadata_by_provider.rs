@@ -6,7 +6,7 @@ use enums::tauri::tasks::task_status::TaskStatus;
 use tokens::tokens::batch_generations::BatchGenerationToken;
 use tokens::tokens::media_files::MediaFileToken;
 
-const SUCCESSFUL_STATUS : &str = TaskStatus::CompleteSuccess.to_str();
+const SUCCESSFUL_STATUS: &str = TaskStatus::CompleteSuccess.to_str();
 
 pub struct UpdateSuccessfulTaskByProviderArgs<'a> {
   pub db: &'a TaskDbConnection,
@@ -20,10 +20,7 @@ pub struct UpdateSuccessfulTaskByProviderArgs<'a> {
 }
 
 /// Returns true if rows were updated.
-pub async fn update_successful_task_status_with_metadata_by_provider(
-  args: UpdateSuccessfulTaskByProviderArgs<'_>,
-) -> Result<bool, SqliteTasksError> {
-
+pub async fn update_successful_task_status_with_metadata_by_provider(args: UpdateSuccessfulTaskByProviderArgs<'_>) -> Result<bool, SqliteTasksError> {
   // TODO(bt,2025-07-12): Fix this. The sqlx mysql queries never required temporaries
   let provider_temp = args.provider.to_str();
   let provider_job_id_temp = args.provider_job_id;
@@ -32,7 +29,8 @@ pub async fn update_successful_task_status_with_metadata_by_provider(
   let maybe_primary_media_class = args.maybe_primary_media_file_class.map(|c| c.to_str());
 
   // TODO(bt,2025-07-15): We can't set a LIMIT without a certain compiler flag for SQLite ?
-  let query = sqlx::query!(r#"
+  let query = sqlx::query!(
+    r#"
     UPDATE tasks
     SET
       task_status = ?,
@@ -45,14 +43,14 @@ pub async fn update_successful_task_status_with_metadata_by_provider(
       provider = ?
       AND provider_job_id = ?
   "#,
-      SUCCESSFUL_STATUS,
-      maybe_batch_token_temp,
-      maybe_primary_media_token_temp,
-      maybe_primary_media_class,
-      args.maybe_primary_media_file_cdn_url,
-      args.maybe_primary_media_file_thumbnail_url_template,
-      provider_temp,
-      provider_job_id_temp,
+    SUCCESSFUL_STATUS,
+    maybe_batch_token_temp,
+    maybe_primary_media_token_temp,
+    maybe_primary_media_class,
+    args.maybe_primary_media_file_cdn_url,
+    args.maybe_primary_media_file_thumbnail_url_template,
+    provider_temp,
+    provider_job_id_temp,
   );
 
   // info!("query: {:?}", query.sql());

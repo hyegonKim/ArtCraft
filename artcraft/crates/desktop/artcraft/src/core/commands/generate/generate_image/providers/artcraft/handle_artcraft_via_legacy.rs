@@ -14,36 +14,15 @@ use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
 /// Handle image generation via legacy model-specific paths.
 ///
 /// Dispatches to dedicated handlers for each supported legacy model.
-pub async fn handle_artcraft_via_legacy(
-  request: &TauriGenerateImageRequest,
-  semantic_media_files: &SemanticMediaFiles,
-  creds: &StorytellerCredentialSet,
-  app_env_configs: &AppEnvConfigs,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub async fn handle_artcraft_via_legacy(request: &TauriGenerateImageRequest, semantic_media_files: &SemanticMediaFiles, creds: &StorytellerCredentialSet, app_env_configs: &AppEnvConfigs) -> Result<TaskEnqueueSuccess, GenerateError> {
   let model = request.model.ok_or(GenerateError::no_model_specified())?;
 
   match model {
-    TauriImageModel::FluxDevJuggernaut => {
-      handle_flux_dev_juggernaut_inpaint(request, semantic_media_files, creds, app_env_configs).await
-    }
-    TauriImageModel::FluxProKontextMax => {
-      handle_flux_pro_kontext_edit(request, semantic_media_files, creds, app_env_configs).await
-    }
-    TauriImageModel::QwenEdit2511Angles => {
-      handle_qwen_edit_2511_angles(request, semantic_media_files, creds, app_env_configs).await
-    }
-    TauriImageModel::Flux2LoraAngles => {
-      handle_flux_2_lora_angles(request, semantic_media_files, creds, app_env_configs).await
-    }
-    TauriImageModel::Midjourney | TauriImageModel::Recraft3 => {
-      Err(GenerateError::NotYetImplemented(
-        format!("Model {:?} is not supported by provider Artcraft", model),
-      ))
-    }
-    other => {
-      Err(GenerateError::NotYetImplemented(
-        format!("Model {:?} was incorrectly handled", other),
-      ))
-    }
+    TauriImageModel::FluxDevJuggernaut => handle_flux_dev_juggernaut_inpaint(request, semantic_media_files, creds, app_env_configs).await,
+    TauriImageModel::FluxProKontextMax => handle_flux_pro_kontext_edit(request, semantic_media_files, creds, app_env_configs).await,
+    TauriImageModel::QwenEdit2511Angles => handle_qwen_edit_2511_angles(request, semantic_media_files, creds, app_env_configs).await,
+    TauriImageModel::Flux2LoraAngles => handle_flux_2_lora_angles(request, semantic_media_files, creds, app_env_configs).await,
+    TauriImageModel::Midjourney | TauriImageModel::Recraft3 => Err(GenerateError::NotYetImplemented(format!("Model {:?} is not supported by provider Artcraft", model))),
+    other => Err(GenerateError::NotYetImplemented(format!("Model {:?} was incorrectly handled", other))),
   }
 }

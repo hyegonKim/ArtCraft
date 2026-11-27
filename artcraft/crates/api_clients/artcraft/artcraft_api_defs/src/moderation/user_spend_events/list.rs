@@ -4,8 +4,7 @@ use tokens::tokens::user_spend_events::UserSpendEventToken;
 use tokens::tokens::users::UserToken;
 use utoipa::{IntoParams, ToSchema};
 
-pub const MODERATOR_LIST_USER_SPEND_EVENTS_PATH: &str =
-  "/v1/moderation/user_spend_events/list";
+pub const MODERATOR_LIST_USER_SPEND_EVENTS_PATH: &str = "/v1/moderation/user_spend_events/list";
 
 #[derive(Deserialize, IntoParams)]
 pub struct ModeratorListUserSpendEventsQueryParams {

@@ -35,10 +35,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to World Labs, incurs cost
   async fn text_to_world() {
-    let response = run_pipeline(GenerateSplatRequestBuilder {
-      prompt: Some("A cozy cabin in the snowy mountains".to_string()),
-      ..base_builder()
-    }).await;
+    let response = run_pipeline(GenerateSplatRequestBuilder { prompt: Some("A cozy cabin in the snowy mountains".to_string()), ..base_builder() }).await;
     let payload = response.get_worldlabs_payload().expect("expected WorldLabs payload");
     assert!(!payload.operation_id.is_empty());
     assert_eq!(1, 2, "Inspect output above");
@@ -47,11 +44,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to World Labs, incurs cost; uploads media
   async fn image_to_world() {
-    let response = run_pipeline(GenerateSplatRequestBuilder {
-      prompt: Some("Mountain landscape with a tree".to_string()),
-      reference_images: Some(ImageListRef::Urls(vec![MOUNTAIN_TREE_IMAGE_URL.to_string()])),
-      ..base_builder()
-    }).await;
+    let response = run_pipeline(GenerateSplatRequestBuilder { prompt: Some("Mountain landscape with a tree".to_string()), reference_images: Some(ImageListRef::Urls(vec![MOUNTAIN_TREE_IMAGE_URL.to_string()])), ..base_builder() }).await;
     let payload = response.get_worldlabs_payload().expect("expected WorldLabs payload");
     assert!(!payload.operation_id.is_empty());
     assert_eq!(1, 2, "Inspect output above");
@@ -60,16 +53,11 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateSplatRequestBuilder {
-    GenerateSplatRequestBuilder {
-      model: RouterSplatModel::Marble1p0Draft,
-      provider: RouterProvider::WorldLabs,
-      ..Default::default()
-    }
+    GenerateSplatRequestBuilder { model: RouterSplatModel::Marble1p0Draft, provider: RouterProvider::WorldLabs, ..Default::default() }
   }
 
   fn get_worldlabs_client() -> RouterClient {
-    let api_key = std::fs::read_to_string(WORLDLABS_API_KEY_PATH)
-      .expect("Failed to read world_labs_api_key.txt");
+    let api_key = std::fs::read_to_string(WORLDLABS_API_KEY_PATH).expect("Failed to read world_labs_api_key.txt");
     RouterClient::WorldLabs(RouterWorldLabsClient::new_from_raw_key(api_key.trim()))
   }
 
@@ -80,12 +68,9 @@ mod tests {
     let request = match draft_or_request {
       SplatGenerationDraftOrRequest::Request(request) => request,
       SplatGenerationDraftOrRequest::Draft(draft) => {
-        let draft_context = SplatGenerationDraftContext {
-          client: Some(&client),
-          ..Default::default()
-        };
+        let draft_context = SplatGenerationDraftContext { client: Some(&client), ..Default::default() };
         draft.finalize(draft_context).await.expect("finalize should succeed")
-      }
+      },
     };
 
     let response = request.send_request(&client).await.expect("send_request should succeed");
@@ -93,7 +78,7 @@ mod tests {
     match &response {
       GenerateSplatResponse::WorldLabs(p) => {
         println!("operation_id={}, done={}", p.operation_id, p.done);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 

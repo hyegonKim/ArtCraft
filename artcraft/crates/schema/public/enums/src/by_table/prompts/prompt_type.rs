@@ -57,11 +57,7 @@ impl PromptType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::ArtcraftApp,
-      Self::StableDiffusion,
-      Self::ComfyUi,
-    ])
+    BTreeSet::from([Self::ArtcraftApp, Self::StableDiffusion, Self::ComfyUi])
   }
 }
 
@@ -134,7 +130,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in PromptType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

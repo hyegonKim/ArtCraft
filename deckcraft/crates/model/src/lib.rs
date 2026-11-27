@@ -12,6 +12,7 @@ pub mod bidi;
 pub mod chart;
 pub mod defaults;
 pub mod edit;
+pub mod express;
 pub mod numfmt;
 pub mod resolve;
 pub mod style;
@@ -30,6 +31,7 @@ use serde::{Deserialize, Serialize};
 pub use anim::{AnimClass, AnimStart, Animation, Transition};
 pub use bidi::{first_strong_is_rtl, is_rtl_script};
 pub use chart::Chart;
+pub use express::{BrandKit, QrMatrix, SocialChannelPreset};
 pub use style::{ColorBase, ColorRef, Effects, Fill, Line, ShapeStyle};
 pub use table::{Cell, Table};
 pub use text::{Paragraph, Run, RunProps, TextBody};
@@ -1009,6 +1011,9 @@ pub struct Presentation {
     /// Drawing guides (View › Guides), shared by every slide (`p:guideLst` in viewProps).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub guides: Vec<DrawGuide>,
+    /// Express Brand Kit saved with the presentation (`express.applyBrandKit`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub brand_kit: Option<BrandKit>,
     /// Unmodelled presentation-level XML kept for round-trip.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub raw_ext: Option<String>,

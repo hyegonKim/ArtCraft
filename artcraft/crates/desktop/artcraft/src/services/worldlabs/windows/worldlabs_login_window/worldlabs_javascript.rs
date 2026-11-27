@@ -1,7 +1,4 @@
-
-
-
-pub (super) const WORLDLABS_JAVASCRIPT_EXPORT_BEARER_TOKENS : &str = r#"
+pub(super) const WORLDLABS_JAVASCRIPT_EXPORT_BEARER_TOKENS: &str = r#"
     (async () => {
       if (window.tokensExported) {
         return;
@@ -57,9 +54,8 @@ pub (super) const WORLDLABS_JAVASCRIPT_EXPORT_BEARER_TOKENS : &str = r#"
     })();
   "#;
 
-
 /// Take the Bearer tokens and send them to Tauri
-pub (super) const WORLDLABS_JAVASCRIPT_SEND_BEARER_TO_TAURI : &str = r#"
+pub(super) const WORLDLABS_JAVASCRIPT_SEND_BEARER_TO_TAURI: &str = r#"
     (async () => {
       if (!(window.tokens?.accessToken && window.tokens?.refreshToken)) {
         return;
@@ -77,11 +73,10 @@ pub (super) const WORLDLABS_JAVASCRIPT_SEND_BEARER_TO_TAURI : &str = r#"
     })();
   "#;
 
-
 /// See if the pricing button exists.
 /// This is only for the logged-in state.
 /// We can use redirection to detect completion.
-pub (super) const WORLDLABS_JAVASCRIPT_SEE_IF_PRICING_EXISTS : &str = r#"
+pub(super) const WORLDLABS_JAVASCRIPT_SEE_IF_PRICING_EXISTS: &str = r#"
     (() => {
       let pricing = document.querySelectorAll("a[href='/pricing']");
       if (pricing.length > 0) {

@@ -48,8 +48,6 @@ pub struct FluxPro11UltraTextToImageOutput {
   pub images: Vec<FluxPro11UltraTextToImageFile>,
 }
 
-pub fn flux_pro_11_ultra_text_to_image(
-  params: FluxPro11UltraTextToImageInput,
-) -> FalRequest<FluxPro11UltraTextToImageInput, FluxPro11UltraTextToImageOutput> {
+pub fn flux_pro_11_ultra_text_to_image(params: FluxPro11UltraTextToImageInput) -> FalRequest<FluxPro11UltraTextToImageInput, FluxPro11UltraTextToImageOutput> {
   FalRequest::new("fal-ai/flux-pro/v1.1-ultra", params)
 }

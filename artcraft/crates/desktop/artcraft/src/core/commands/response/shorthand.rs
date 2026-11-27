@@ -26,32 +26,27 @@ use crate::core::commands::response::success_response_wrapper::CommandSuccessRes
 pub type InfallibleResponse<SuccessPayload> = CommandSuccessResponseWrapper<SuccessPayload>;
 
 /// Easy to use Result<T, E> type.
-/// 
-/// There are easier ways to use Response<S, Et, Ep> : 
+///
+/// There are easier ways to use Response<S, Et, Ep> :
 ///  - `SimpleResponse` just returns strings on success or error (but provides clues to the frontend)
 ///  - `SuccessOrErrorMessage` returns an empty success payload or an error message
 ///  - `ResponseOrErrorMessage<SuccessPayload>` returns a success payload or an error message
 ///  - `ResponseOrErrorType<SuccessPayload, ErrType>` returns a success payload or an error type
 ///  - `ResponseOrError<SuccessPayload, ErrPayload>` returns a success payload or an error payload
-/// 
-pub type Response<SuccessPayload, ErrType, ErrPayload> =
-  Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<ErrType, ErrPayload>>;
+///
+pub type Response<SuccessPayload, ErrType, ErrPayload> = Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<ErrType, ErrPayload>>;
 
 /// No inner payloads for this type. Just strings as messages.
 pub type SimpleResponse = Response<(), (), ()>;
 
 /// Either an empty success payload or error message.
-pub type SuccessOrErrorMessage =
-  Result<CommandSuccessResponseWrapper<()>, CommandErrorResponseWrapper<(), ()>>;
+pub type SuccessOrErrorMessage = Result<CommandSuccessResponseWrapper<()>, CommandErrorResponseWrapper<(), ()>>;
 
 /// Either a success or error message.
-pub type ResponseOrErrorMessage<SuccessPayload> =
-  Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<(), ()>>;
+pub type ResponseOrErrorMessage<SuccessPayload> = Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<(), ()>>;
 
 /// Either a success or error type.
-pub type ResponseOrErrorType<SuccessPayload, ErrType> =
-  Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<ErrType, ()>>;
+pub type ResponseOrErrorType<SuccessPayload, ErrType> = Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<ErrType, ()>>;
 
 /// Either a success or error payload.
-pub type ResponseOrError<SuccessPayload, ErrPayload> =
-  Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<(), ErrPayload>>;
+pub type ResponseOrError<SuccessPayload, ErrPayload> = Result<CommandSuccessResponseWrapper<SuccessPayload>, CommandErrorResponseWrapper<(), ErrPayload>>;

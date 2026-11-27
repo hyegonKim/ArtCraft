@@ -74,6 +74,8 @@ pub(super) fn menu_dialog(app: &VectorcraftApp, id: &str) -> Option<(&'static st
         }
         "object.vectorHalftone" => (crate::dialogs::halftone::KIND, crate::dialogs::halftone::fields()),
         "object.generativeShapeFill" => (crate::dialogs::generative_shape_fill::KIND, crate::dialogs::generative_shape_fill::fields()),
+        "capture.extractColorTheme" => (crate::dialogs::capture::COLOR_THEME_KIND, crate::dialogs::capture::theme_fields()),
+        "capture.extractPatternTile" => (crate::dialogs::capture::PATTERN_TILE_KIND, crate::dialogs::capture::pattern_fields()),
         "object.turntable" => (crate::dialogs::turntable::KIND, crate::dialogs::turntable::fields()),
         "icon.generateSheet" => (crate::dialogs::icon_sheet::KIND, crate::dialogs::icon_sheet::fields()),
         "document.preflight" => (crate::dialogs::preflight::KIND, crate::dialogs::preflight::fields()),

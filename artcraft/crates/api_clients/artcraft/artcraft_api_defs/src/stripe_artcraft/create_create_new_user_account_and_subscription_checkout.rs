@@ -41,10 +41,10 @@ pub enum PlanBillingCadence {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct StripeArtcraftCreateSubscriptionCheckoutWithUserSignupResponse {
   pub success: bool,
-  
+
   /// The checkout session URL.
   pub stripe_checkout_redirect_url: String,
-  
+
   /// If a user account was created, these are the details.
   pub generated_user: Option<UserDetails>,
 

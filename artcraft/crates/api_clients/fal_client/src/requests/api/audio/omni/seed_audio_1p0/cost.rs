@@ -84,35 +84,19 @@ mod tests {
     use super::*;
 
     fn make_request() -> SeedAudio1p0Request {
-      SeedAudio1p0Request {
-        prompt: "test".to_string(),
-        voice: None,
-        audio_urls: None,
-        image_url: None,
-        output_format: None,
-        sample_rate: None,
-        speed: None,
-        volume: None,
-        pitch: None,
-      }
+      SeedAudio1p0Request { prompt: "test".to_string(), voice: None, audio_urls: None, image_url: None, output_format: None, sample_rate: None, speed: None, volume: None, pitch: None }
     }
 
     #[test]
     fn estimates_one_minute() {
       // 60s at $0.1875/min = 18.75¢ → rounds up to 19¢.
       assert_eq!(make_request().calculate_cost_in_cents(), 19);
-      assert_eq!(
-        make_request().calculate_cost_in_cents(),
-        seed_audio_1p0_cost_cents_for_duration_seconds(SEED_AUDIO_1P0_ESTIMATED_DURATION_SECONDS),
-      );
+      assert_eq!(make_request().calculate_cost_in_cents(), seed_audio_1p0_cost_cents_for_duration_seconds(SEED_AUDIO_1P0_ESTIMATED_DURATION_SECONDS),);
     }
 
     #[test]
     fn request_options_do_not_affect_the_estimate() {
-      use crate::requests::api::audio::omni::seed_audio_1p0::api::{
-        SeedAudio1p0OutputFormat, SeedAudio1p0SampleRate, SeedAudio1p0Voice,
-        SeedAudio1p0VoicePreset,
-      };
+      use crate::requests::api::audio::omni::seed_audio_1p0::api::{SeedAudio1p0OutputFormat, SeedAudio1p0SampleRate, SeedAudio1p0Voice, SeedAudio1p0VoicePreset};
 
       let mut tuned = make_request();
       tuned.voice = Some(SeedAudio1p0Voice::Preset(SeedAudio1p0VoicePreset::FelixZh));

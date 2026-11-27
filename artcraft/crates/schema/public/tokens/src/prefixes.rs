@@ -106,8 +106,8 @@ pub(crate) enum LegacyTokenPrefix {
 #[cfg_attr(test, derive(EnumIter, EnumCount))]
 enum RetiredTokenPrefix {
   _DownloadJobDeprecatedNotNotUse,
-  _UserDeprecatedDoNotUse, // NB: Users prior to 2023-10-24. Kept to prevent collision.
-  _UserSessionDeprecatedDoNotUse, // NB: Sessions prior to 2023-10-24. Kept to prevent collision.
+  _UserDeprecatedDoNotUse,             // NB: Users prior to 2023-10-24. Kept to prevent collision.
+  _UserSessionDeprecatedDoNotUse,      // NB: Sessions prior to 2023-10-24. Kept to prevent collision.
   _UserSubscriptionDeprecatedDoNotUse, // NB: Subscriptions prior to ~2025-09-08. Kept to prevent collision.
 }
 
@@ -201,9 +201,9 @@ impl PrefixGenerator for LegacyTokenPrefix {
 impl PrefixGenerator for RetiredTokenPrefix {
   fn prefix(self) -> &'static str {
     match self {
-      Self::_DownloadJobDeprecatedNotNotUse => "JGUP:", // NB: Download jobs changed roughly around 2022-12-16
-      Self::_UserDeprecatedDoNotUse => "U:", // NB: Users prior to 2023-10-24 used this prefix.
-      Self::_UserSessionDeprecatedDoNotUse => "SESSION:", // NB: Users prior to 2023-10-24 used this prefix.
+      Self::_DownloadJobDeprecatedNotNotUse => "JGUP:",    // NB: Download jobs changed roughly around 2022-12-16
+      Self::_UserDeprecatedDoNotUse => "U:",               // NB: Users prior to 2023-10-24 used this prefix.
+      Self::_UserSessionDeprecatedDoNotUse => "SESSION:",  // NB: Users prior to 2023-10-24 used this prefix.
       Self::_UserSubscriptionDeprecatedDoNotUse => "SUB:", // NB: Subscriptions prior to ~2025-09-08 used this prefix.
     }
   }
@@ -225,32 +225,21 @@ mod tests {
 
     #[test]
     pub fn no_duplicate_prefixes() {
-      let entities = TokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .collect::<HashSet<&str>>();
+      let entities = TokenPrefix::iter().map(|entity| entity.prefix()).collect::<HashSet<&str>>();
 
       assert_eq!(entities.len(), TokenPrefix::COUNT);
     }
 
     #[test]
     fn all_prefixes_are_unique_regardless_of_case_and_suffix() {
-      let entities = TokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .map(|prefix| prefix.to_lowercase())
-          .map(|prefix| prefix.replace("-", ""))
-          .map(|prefix| prefix.replace(":", ""))
-          .map(|prefix| prefix.replace("_", ""))
-          .collect::<HashSet<String>>();
+      let entities = TokenPrefix::iter().map(|entity| entity.prefix()).map(|prefix| prefix.to_lowercase()).map(|prefix| prefix.replace("-", "")).map(|prefix| prefix.replace(":", "")).map(|prefix| prefix.replace("_", "")).collect::<HashSet<String>>();
 
       assert_eq!(entities.len(), TokenPrefix::COUNT);
     }
 
     #[test]
     pub fn all_prefixes_end_with_underscore() {
-      let entities = TokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .filter(|prefix| prefix.ends_with("_"))
-          .collect::<HashSet<&str>>();
+      let entities = TokenPrefix::iter().map(|entity| entity.prefix()).filter(|prefix| prefix.ends_with("_")).collect::<HashSet<&str>>();
 
       assert_eq!(entities.len(), TokenPrefix::COUNT);
     }
@@ -263,37 +252,26 @@ mod tests {
 
     #[test]
     pub fn no_duplicate_prefixes() {
-      let entities = LegacyTokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .collect::<HashSet<&str>>();
+      let entities = LegacyTokenPrefix::iter().map(|entity| entity.prefix()).collect::<HashSet<&str>>();
       assert_eq!(entities.len(), LegacyTokenPrefix::COUNT);
     }
 
     #[test]
     fn all_prefixes_are_unique_regardless_of_case_and_suffix() {
-      let entities = LegacyTokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .map(|prefix| prefix.to_lowercase())
-          .map(|prefix| prefix.replace("-", ""))
-          .map(|prefix| prefix.replace(":", ""))
-          .map(|prefix| prefix.replace("_", ""))
-          .collect::<HashSet<String>>();
+      let entities = LegacyTokenPrefix::iter().map(|entity| entity.prefix()).map(|prefix| prefix.to_lowercase()).map(|prefix| prefix.replace("-", "")).map(|prefix| prefix.replace(":", "")).map(|prefix| prefix.replace("_", "")).collect::<HashSet<String>>();
 
       assert_eq!(entities.len(), LegacyTokenPrefix::COUNT);
     }
 
     #[test]
     pub fn all_prefixes_end_with_colon() {
-      let entities = LegacyTokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .filter(|prefix| prefix.ends_with(":"))
-          .collect::<HashSet<&str>>();
+      let entities = LegacyTokenPrefix::iter().map(|entity| entity.prefix()).filter(|prefix| prefix.ends_with(":")).collect::<HashSet<&str>>();
       assert_eq!(entities.len(), LegacyTokenPrefix::COUNT);
     }
 
     #[test]
     pub fn do_not_add_new_legacy_token_prefixes() {
-      const DO_NOT_INCREASE_THIS_COUNT : usize = 17;
+      const DO_NOT_INCREASE_THIS_COUNT: usize = 17;
       assert_eq!(LegacyTokenPrefix::COUNT, DO_NOT_INCREASE_THIS_COUNT);
     }
   }
@@ -304,72 +282,41 @@ mod tests {
     use super::*;
 
     fn get_all_prefixes() -> HashSet<&'static str> {
-      TokenPrefix::iter()
-          .map(|entity| entity.prefix())
-          .chain(LegacyTokenPrefix::iter()
-              .map(|entity| entity.prefix()))
-          .chain(RetiredTokenPrefix::iter()
-              .map(|entity| entity.prefix()))
-          .collect::<HashSet<&'static str>>()
+      TokenPrefix::iter().map(|entity| entity.prefix()).chain(LegacyTokenPrefix::iter().map(|entity| entity.prefix())).chain(RetiredTokenPrefix::iter().map(|entity| entity.prefix())).collect::<HashSet<&'static str>>()
     }
 
     #[test]
     fn test_all_prefixes_are_unique_across_all_token_generations() {
-      let entities = get_all_prefixes().iter()
-          .map(|s| s.to_string())
-          .collect::<HashSet<String>>();
+      let entities = get_all_prefixes().iter().map(|s| s.to_string()).collect::<HashSet<String>>();
 
-      const ALL_TOKEN_PREFIX_COUNT: usize = TokenPrefix::COUNT
-          + LegacyTokenPrefix::COUNT
-          + RetiredTokenPrefix::COUNT;
+      const ALL_TOKEN_PREFIX_COUNT: usize = TokenPrefix::COUNT + LegacyTokenPrefix::COUNT + RetiredTokenPrefix::COUNT;
 
       assert_eq!(entities.len(), ALL_TOKEN_PREFIX_COUNT);
     }
 
     #[test]
     fn test_all_prefixes_are_unique_across_all_token_generations_regardless_of_case_and_suffix() {
-      let entities = get_all_prefixes().iter()
-          .map(|prefix| prefix.to_lowercase())
-          .map(|prefix| prefix.replace("-", ""))
-          .map(|prefix| prefix.replace(":", ""))
-          .map(|prefix| prefix.replace("_", ""))
-          .collect::<HashSet<String>>();
+      let entities = get_all_prefixes().iter().map(|prefix| prefix.to_lowercase()).map(|prefix| prefix.replace("-", "")).map(|prefix| prefix.replace(":", "")).map(|prefix| prefix.replace("_", "")).collect::<HashSet<String>>();
 
       // NB: We're accounting for collision in a few new/legacy token prefixes:
       //  - `SESSION:` vs `session_` (the same table)
       //  - `VCR:` vs `vcr_` (two actually separate tables!)
       //  Don't let this happen anymore!
-      const ALL_TOKEN_PREFIX_COUNT: usize = TokenPrefix::COUNT
-          + LegacyTokenPrefix::COUNT
-          + RetiredTokenPrefix::COUNT
-          - 2;
+      const ALL_TOKEN_PREFIX_COUNT: usize = TokenPrefix::COUNT + LegacyTokenPrefix::COUNT + RetiredTokenPrefix::COUNT - 2;
 
       assert_eq!(entities.len(), ALL_TOKEN_PREFIX_COUNT);
     }
 
     #[test]
     fn test_all_prefixes_end_with_separator() {
-      assert!(get_all_prefixes()
-          .iter()
-          .all(|prefix| prefix.ends_with(":") || prefix.ends_with("_")));
+      assert!(get_all_prefixes().iter().all(|prefix| prefix.ends_with(":") || prefix.ends_with("_")));
     }
 
     // TODO: Just kill this test
     #[test]
     fn test_all_prefixes_end_with_separator_length_one() {
       for prefix in get_all_prefixes().iter().map(|s| *s) {
-        if prefix == "news_story_"
-            || prefix == "INT_API:"
-            || prefix == "batch_g_"
-            || prefix == "beta_key_"
-            || prefix == "api_key_"
-            || prefix == "email_job_"
-            || prefix == "pw_reset_"
-            || prefix == "tts_task_"
-            || prefix == "app_session_"
-            || prefix == "mcp_session_"
-            || prefix == "mcp_refresh_"
-        {
+        if prefix == "news_story_" || prefix == "INT_API:" || prefix == "batch_g_" || prefix == "beta_key_" || prefix == "api_key_" || prefix == "email_job_" || prefix == "pw_reset_" || prefix == "tts_task_" || prefix == "app_session_" || prefix == "mcp_session_" || prefix == "mcp_refresh_" {
           // TODO/FIXME: I'm too tired at 5AM to replacen from the left. Make this test valid.
           //  These tokens are from the AIChatBot sidecar, so asserting their validity is less important.
           continue;

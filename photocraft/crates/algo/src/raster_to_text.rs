@@ -245,14 +245,7 @@ fn find_char_spans(fg_mask: &[bool], w: usize, by0: usize, by1: usize) -> Vec<(u
     chars_x
 }
 
-fn extract_band_lines(
-    bands: &[(usize, usize)],
-    fg_mask: &[bool],
-    px: &[[f32; 4]],
-    w: usize,
-    rect: Rect,
-    dpi_scale: f32,
-) -> Vec<DetectedTextLine> {
+fn extract_band_lines(bands: &[(usize, usize)], fg_mask: &[bool], px: &[[f32; 4]], w: usize, rect: Rect, dpi_scale: f32) -> Vec<DetectedTextLine> {
     let mut lines = Vec::new();
     for &(by0, by1) in bands {
         let bh = by1 - by0;
@@ -399,10 +392,7 @@ mod tests {
             for (ry, row) in bits.into_iter().enumerate() {
                 for rx in 0..5 {
                     if (row >> (4 - rx)) & 1 == 1 {
-                        surf.fill_rect(
-                            Rect::new(ox + rx * 2, oy + ry as i32 * 2, ox + rx * 2 + 2, oy + ry as i32 * 2 + 2),
-                            &[0.08, 0.12, 0.55, 1.0],
-                        );
+                        surf.fill_rect(Rect::new(ox + rx * 2, oy + ry as i32 * 2, ox + rx * 2 + 2, oy + ry as i32 * 2 + 2), &[0.08, 0.12, 0.55, 1.0]);
                     }
                 }
             }

@@ -22,10 +22,10 @@ pub enum GenerateError {
 
   /// We couldn't find a provider to dispatch the request to.
   NoProviderAvailable,
-  
+
   /// We pulled out Fal (for now) - it's impacting build speeds. We'll add it in the future.
   FalNoLongerSupported,
-  
+
   /// Wrong provider for the model
   BadProviderForModel {
     provider: GenerationProvider,
@@ -58,16 +58,8 @@ pub enum BadInputReason {
   Base64DecodeError,
   BothImageMaskMediaTokenAndBytesSupplied,
   CannotDetermineImageMimeType,
-  InvalidNumberOfInputImages {
-    provided: u32,
-    min: u32,
-    max: u32,
-  },
-  InvalidNumberOfRequestedImages {
-    requested: u32,
-    min: u32,
-    max: u32,
-  },
+  InvalidNumberOfInputImages { provided: u32, min: u32, max: u32 },
+  InvalidNumberOfRequestedImages { requested: u32, min: u32, max: u32 },
   NoModelSpecified,
   RequiredSourceImageMaskNotProvided,
   RequiredSourceImageNotProvided,
@@ -115,7 +107,6 @@ pub enum ProviderFailureReason {
 }
 
 impl GenerateError {
-
   //
   // Bad input
   //

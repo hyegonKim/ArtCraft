@@ -36,11 +36,7 @@ mod tests {
   use artcraft_client::utils::api_host::ApiHost;
 
   use test_data::web::character_tokens::{JIM, KNIGHT};
-  use test_data::web::image_media_tokens::{
-    FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN,
-    JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN,
-    WHITE_HOUSE_SUNSET_PRODUCTION_MEDIA_TOKEN,
-  };
+  use test_data::web::image_media_tokens::{FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN, JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN, WHITE_HOUSE_SUNSET_PRODUCTION_MEDIA_TOKEN};
 
   // -- Aspect ratio tests --
 
@@ -50,11 +46,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn landscape() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -62,11 +54,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn portrait() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A cat sitting on a windowsill watching rain.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A cat sitting on a windowsill watching rain.".to_string()), aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -74,11 +62,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn square() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A hummingbird hovering near a flower.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::Square),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A hummingbird hovering near a flower.".to_string()), aspect_ratio: Some(RouterAspectRatio::Square), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -92,11 +76,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn res_480p() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A shiba inu playing in autumn leaves.".to_string()),
-        resolution: Some(RouterResolution::FourEightyP),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A shiba inu playing in autumn leaves.".to_string()), resolution: Some(RouterResolution::FourEightyP), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -104,11 +84,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn res_720p() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A golden retriever catching a frisbee on the beach.".to_string()),
-        resolution: Some(RouterResolution::SevenTwentyP),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A golden retriever catching a frisbee on the beach.".to_string()), resolution: Some(RouterResolution::SevenTwentyP), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -116,11 +92,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn res_1080p() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A fox walking through a snowy forest.".to_string()),
-        resolution: Some(RouterResolution::TenEightyP),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A fox walking through a snowy forest.".to_string()), resolution: Some(RouterResolution::TenEightyP), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -135,11 +107,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn text_to_video() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A whale breaching in the open ocean at dawn, cinematic.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A whale breaching in the open ocean at dawn, cinematic.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -147,13 +115,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn keyframe_start_and_end_frame() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("The dog walks from the lake to the forest.".to_string()),
-        start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string()))),
-        end_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN.to_string()))),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("The dog walks from the lake to the forest.".to_string()), start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(JUNO_AT_LAKE_PRODUCTION_MEDIA_TOKEN.to_string()))), end_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new(FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN.to_string()))), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -161,16 +123,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn image_references() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("The dog in @2 runs through the scenery in @1 towards the building in @3.".to_string()),
-        reference_images: Some(ImageListRef::MediaFileTokens(vec![
-          MediaFileToken::new(FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN.to_string()),
-          MediaFileToken::new(TALL_MOCHI_WITH_GLASSES_PRODUCTION_MEDIA_TOKEN.to_string()),
-          MediaFileToken::new(WHITE_HOUSE_SUNSET_PRODUCTION_MEDIA_TOKEN.to_string()),
-        ])),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("The dog in @2 runs through the scenery in @1 towards the building in @3.".to_string()), reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new(FOREST_BACKDROP_PRODUCTION_MEDIA_TOKEN.to_string()), MediaFileToken::new(TALL_MOCHI_WITH_GLASSES_PRODUCTION_MEDIA_TOKEN.to_string()), MediaFileToken::new(WHITE_HOUSE_SUNSET_PRODUCTION_MEDIA_TOKEN.to_string())])), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -178,15 +131,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn character_references() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("@Jim and @Knight are sparring in a medieval arena.".to_string()),
-        reference_character_tokens: Some(CharacterListRef::CharacterTokens(vec![
-          CharacterToken::new(JIM.token.to_string()),
-          CharacterToken::new(KNIGHT.token.to_string()),
-        ])),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..artcraft_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("@Jim and @Knight are sparring in a medieval arena.".to_string()), reference_character_tokens: Some(CharacterListRef::CharacterTokens(vec![CharacterToken::new(JIM.token.to_string()), CharacterToken::new(KNIGHT.token.to_string())])), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..artcraft_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -195,21 +140,13 @@ mod tests {
   // -- Helpers --
 
   fn artcraft_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(4),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { provider: RouterProvider::Artcraft, duration_seconds: Some(4), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn get_artcraft_client() -> RouterClient {
-    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt")
-      .expect("Failed to read artcraft cookies");
+    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt").expect("Failed to read artcraft cookies");
     let cookies = cookies.trim().to_string();
-    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies)
-      .expect("Failed to parse cookies")
-      .expect("No credentials found");
+    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies).expect("Failed to parse cookies").expect("No credentials found");
     RouterClient::Artcraft(RouterArtcraftClient::new(ApiHost::Storyteller, credentials))
   }
 
@@ -228,7 +165,7 @@ mod tests {
       GenerateVideoResponse::Artcraft(p) => {
         println!("inference_job_token={:?}", p.inference_job_token);
         println!("all_inference_job_tokens={:?}", p.all_inference_job_tokens);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 

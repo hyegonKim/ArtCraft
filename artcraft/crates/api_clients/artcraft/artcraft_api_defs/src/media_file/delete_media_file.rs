@@ -5,7 +5,7 @@ use tokens::tokens::media_files::MediaFileToken;
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct DeleteMediaFileRequest {
   pub set_delete: bool,
-  
+
   /// NB: this is only to disambiguate when a user is both a mod and an author.
   pub as_mod: Option<bool>,
 }
@@ -15,5 +15,3 @@ pub struct DeleteMediaFileRequest {
 pub struct DeleteMediaFilePathInfo {
   pub token: MediaFileToken,
 }
-
-

@@ -10,6 +10,6 @@ pub async fn classify_general_http_error(response: wreq::Response) -> SoraError 
     Ok(text) => text,
     Err(err) => return SoraGenericApiError::WreqError(err).into(),
   };
-  
+
   classify_general_http_status_code_and_body(status, &message)
 }

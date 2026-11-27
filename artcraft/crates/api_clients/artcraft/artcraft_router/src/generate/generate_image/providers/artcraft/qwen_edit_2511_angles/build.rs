@@ -8,12 +8,8 @@ use crate::generate::generate_image::providers::artcraft::angle_validation::requ
 use crate::generate::generate_image::providers::artcraft::build_common::build_artcraft_omni_image_request;
 use crate::generate::generate_image::providers::artcraft::qwen_edit_2511_angles::request::ArtcraftQwenEdit2511AnglesRequestState;
 
-pub fn build_artcraft_qwen_edit_2511_angles(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_artcraft_qwen_edit_2511_angles(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   require_at_least_one_image_input(&builder.image_inputs)?;
   let request = build_artcraft_omni_image_request(builder, CommonImageModelEnum::QwenEdit2511Angles)?;
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::ArtcraftQwenEdit2511Angles(ArtcraftQwenEdit2511AnglesRequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::ArtcraftQwenEdit2511Angles(ArtcraftQwenEdit2511AnglesRequestState { request })))
 }

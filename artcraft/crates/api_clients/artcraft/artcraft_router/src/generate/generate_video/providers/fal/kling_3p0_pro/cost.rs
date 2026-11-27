@@ -2,9 +2,7 @@ use fal_client::requests_old::webhook::video::image::enqueue_kling_3p0_pro_image
 use fal_client::requests_old::webhook::video::text::enqueue_kling_3p0_pro_text_to_video_webhook::EnqueueKling3p0ProTextToVideoDuration;
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::kling_3p0_pro::request::{
-  FalKling3p0ProMode, FalKling3p0ProRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_3p0_pro::request::{FalKling3p0ProMode, FalKling3p0ProRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalKling3p0ProCostState {
@@ -15,14 +13,8 @@ pub struct FalKling3p0ProCostState {
 impl FalKling3p0ProCostState {
   pub fn from_request(request: &FalKling3p0ProRequestState) -> Self {
     let (duration_seconds, generate_audio) = match &request.mode {
-      FalKling3p0ProMode::TextToVideo(req) => (
-        t2v_duration_seconds(req.duration),
-        req.generate_audio.unwrap_or(true),
-      ),
-      FalKling3p0ProMode::ImageToVideo(req) => (
-        i2v_duration_seconds(req.duration),
-        req.generate_audio.unwrap_or(true),
-      ),
+      FalKling3p0ProMode::TextToVideo(req) => (t2v_duration_seconds(req.duration), req.generate_audio.unwrap_or(true)),
+      FalKling3p0ProMode::ImageToVideo(req) => (i2v_duration_seconds(req.duration), req.generate_audio.unwrap_or(true)),
     };
     Self { duration_seconds, generate_audio }
   }
@@ -35,15 +27,7 @@ impl FalKling3p0ProCostState {
     let rate: u64 = if self.generate_audio { 336 } else { 224 };
     let cost_in_usd_cents = (rate * self.duration_seconds + 9) / 10;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -95,14 +79,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling3p0Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling3p0Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 

@@ -9,7 +9,7 @@ pub struct SoraImageGenResponse {
 pub enum NumImages {
   One,
   Two,
-  Four
+  Four,
 }
 
 impl NumImages {

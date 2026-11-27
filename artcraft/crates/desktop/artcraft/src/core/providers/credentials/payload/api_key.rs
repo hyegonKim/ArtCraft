@@ -15,14 +15,12 @@ impl ApiKeyData {
   }
 
   pub fn load_from_file<P: AsRef<Path>>(file_path: P) -> Result<Self, ApiKeyDataError> {
-    let contents = std::fs::read_to_string(file_path)
-      .map_err(ApiKeyDataError::IoError)?;
+    let contents = std::fs::read_to_string(file_path).map_err(ApiKeyDataError::IoError)?;
     Ok(Self(contents.trim().to_string()))
   }
 
   pub fn save_to_file<P: AsRef<Path>>(&self, file_path: P) -> Result<(), ApiKeyDataError> {
-    std::fs::write(file_path, self.0.trim())
-      .map_err(ApiKeyDataError::IoError)?;
+    std::fs::write(file_path, self.0.trim()).map_err(ApiKeyDataError::IoError)?;
     Ok(())
   }
 }

@@ -20,13 +20,13 @@ pub struct Flux1SchnellRequest {
 
 #[derive(Copy, Clone, Debug)]
 pub enum Flux1SchnellAspectRatio {
-  Square, // 1:1
-  SquareHd, // 1:1
-  LandscapeFourByThree, // 4:3
+  Square,                 // 1:1
+  SquareHd,               // 1:1
+  LandscapeFourByThree,   // 4:3
   LandscapeSixteenByNine, // 16:9
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitThreeByFour,    // 3:4
+  PortraitNineBySixteen,  // 9:16
+                          //Custom { width: u32, height: u32 }, // TODO
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -37,10 +37,7 @@ pub enum Flux1SchnellNumImages {
   Four,
 }
 
-pub async fn enqueue_flux_1_schnell_text_to_image_webhook<U: IntoUrl>(
-  args: Flux1SchnellArgs<'_, U>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_flux_1_schnell_text_to_image_webhook<U: IntoUrl>(args: Flux1SchnellArgs<'_, U>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -72,10 +69,7 @@ pub async fn enqueue_flux_1_schnell_text_to_image_webhook<U: IntoUrl>(
     sync_mode: None, // Synchronous / slow
   };
 
-  let result = flux_1_schnell_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = flux_1_schnell_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -95,15 +89,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Flux1SchnellArgs {
-      request: Flux1SchnellRequest {
-        prompt: "a giant robot fighting a dragon in a futuristic city".to_string(),
-        num_images: Flux1SchnellNumImages::One,
-        aspect_ratio: Flux1SchnellAspectRatio::LandscapeSixteenByNine,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Flux1SchnellArgs { request: Flux1SchnellRequest { prompt: "a giant robot fighting a dragon in a futuristic city".to_string(), num_images: Flux1SchnellNumImages::One, aspect_ratio: Flux1SchnellAspectRatio::LandscapeSixteenByNine }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_flux_1_schnell_text_to_image_webhook(args).await?;
 

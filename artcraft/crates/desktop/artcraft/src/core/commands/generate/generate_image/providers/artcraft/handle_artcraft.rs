@@ -10,13 +10,8 @@ use crate::core::commands::generate::generate_image::utils::parse_semantic_media
 use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
 use crate::services::storyteller::state::storyteller_credential_manager::StorytellerCredentialManager;
 
-
 /// Dispatch an image generation request to Artcraft.
-pub async fn handle_artcraft(
-  request: &TauriGenerateImageRequest,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub async fn handle_artcraft(request: &TauriGenerateImageRequest, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   // Resolve credentials.
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
@@ -24,40 +19,18 @@ pub async fn handle_artcraft(
   };
 
   // Resolve semantic media files (upload raw bytes if provided).
-  let semantic_media_files = parse_semantic_media_files(
-    request,
-    &creds,
-    &app_env_configs.storyteller_host,
-  ).await?;
+  let semantic_media_files = parse_semantic_media_files(request, &creds, &app_env_configs.storyteller_host).await?;
 
-  let use_legacy = request.model
-      .is_some_and(|m| is_legacy_only_model(m));
+  let use_legacy = request.model.is_some_and(|m| is_legacy_only_model(m));
 
   if use_legacy {
     info!("Model {:?} is legacy-only, routing to artcraft_router path.", request.model);
-    handle_artcraft_via_legacy(
-      request,
-      &semantic_media_files,
-      &creds,
-      app_env_configs,
-    ).await
+    handle_artcraft_via_legacy(request, &semantic_media_files, &creds, app_env_configs).await
   } else {
-    handle_artcraft_via_omni_endpoint(
-      request,
-      &semantic_media_files,
-      &creds,
-      app_env_configs,
-    ).await
+    handle_artcraft_via_omni_endpoint(request, &semantic_media_files, &creds, app_env_configs).await
   }
 }
 
 fn is_legacy_only_model(model: TauriImageModel) -> bool {
-  matches!(
-    model,
-    TauriImageModel::GrokImage
-      | TauriImageModel::Recraft3
-      | TauriImageModel::Midjourney
-      | TauriImageModel::FluxProKontextMax
-      | TauriImageModel::FluxDevJuggernaut
-  )
+  matches!(model, TauriImageModel::GrokImage | TauriImageModel::Recraft3 | TauriImageModel::Midjourney | TauriImageModel::FluxProKontextMax | TauriImageModel::FluxDevJuggernaut)
 }

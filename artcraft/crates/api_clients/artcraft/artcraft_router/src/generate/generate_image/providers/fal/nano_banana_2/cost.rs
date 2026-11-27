@@ -1,9 +1,5 @@
-use fal_client::requests::api::image::edit::nano_banana_2_edit_image::api::{
-  NanoBanana2EditImageNumImages, NanoBanana2EditImageResolution,
-};
-use fal_client::requests::api::image::text::nano_banana_2_text_to_image::api::{
-  NanoBanana2TextToImageNumImages, NanoBanana2TextToImageResolution,
-};
+use fal_client::requests::api::image::edit::nano_banana_2_edit_image::api::{NanoBanana2EditImageNumImages, NanoBanana2EditImageResolution};
+use fal_client::requests::api::image::text::nano_banana_2_text_to_image::api::{NanoBanana2TextToImageNumImages, NanoBanana2TextToImageResolution};
 
 use crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate;
 use crate::generate::generate_image::providers::fal::nano_banana_2::request::FalNanoBanana2RequestState;
@@ -25,12 +21,8 @@ pub struct FalNanoBanana2CostState {
 impl FalNanoBanana2CostState {
   pub fn from_request(request: &FalNanoBanana2RequestState) -> Self {
     let (cost_per_image, num_images) = match request {
-      FalNanoBanana2RequestState::TextToImage(req) => {
-        (cost_per_image_for_t2i_resolution(req.resolution), t2i_num_images(req.num_images))
-      }
-      FalNanoBanana2RequestState::EditImage(req) => {
-        (cost_per_image_for_edit_resolution(req.resolution), edit_num_images(req.num_images))
-      }
+      FalNanoBanana2RequestState::TextToImage(req) => (cost_per_image_for_t2i_resolution(req.resolution), t2i_num_images(req.num_images)),
+      FalNanoBanana2RequestState::EditImage(req) => (cost_per_image_for_edit_resolution(req.resolution), edit_num_images(req.num_images)),
     };
     Self { cost_in_usd_cents: cost_per_image * num_images }
   }
@@ -88,69 +80,45 @@ fn edit_num_images(n: NanoBanana2EditImageNumImages) -> u64 {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use fal_client::requests::api::image::edit::nano_banana_2_edit_image::api::{
-    NanoBanana2EditImageNumImages, NanoBanana2EditImageRequest,
-    NanoBanana2EditImageResolution,
-  };
-  use fal_client::requests::api::image::text::nano_banana_2_text_to_image::api::{
-    NanoBanana2TextToImageNumImages, NanoBanana2TextToImageRequest,
-    NanoBanana2TextToImageResolution,
-  };
+  use fal_client::requests::api::image::edit::nano_banana_2_edit_image::api::{NanoBanana2EditImageNumImages, NanoBanana2EditImageRequest, NanoBanana2EditImageResolution};
+  use fal_client::requests::api::image::text::nano_banana_2_text_to_image::api::{NanoBanana2TextToImageNumImages, NanoBanana2TextToImageRequest, NanoBanana2TextToImageResolution};
 
   mod text_to_image_costs {
     use super::*;
 
-    fn make_t2i(
-      num_images: NanoBanana2TextToImageNumImages,
-      resolution: Option<NanoBanana2TextToImageResolution>,
-    ) -> FalNanoBanana2RequestState {
-      FalNanoBanana2RequestState::TextToImage(NanoBanana2TextToImageRequest {
-        prompt: "test".to_string(),
-        num_images,
-        resolution,
-        aspect_ratio: None,
-      })
+    fn make_t2i(num_images: NanoBanana2TextToImageNumImages, resolution: Option<NanoBanana2TextToImageResolution>) -> FalNanoBanana2RequestState {
+      FalNanoBanana2RequestState::TextToImage(NanoBanana2TextToImageRequest { prompt: "test".to_string(), num_images, resolution, aspect_ratio: None })
     }
 
     #[test]
     fn one_image_default_resolution() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_t2i(NanoBanana2TextToImageNumImages::One, None),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_t2i(NanoBanana2TextToImageNumImages::One, None));
       // None defaults to 1K = 8¢ per v1's rate table.
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(8));
     }
 
     #[test]
     fn one_image_half_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_t2i(NanoBanana2TextToImageNumImages::One, Some(NanoBanana2TextToImageResolution::HalfK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_t2i(NanoBanana2TextToImageNumImages::One, Some(NanoBanana2TextToImageResolution::HalfK)));
       // HalfK = 0.75x base = 6¢ per v1's rate table.
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(6));
     }
 
     #[test]
     fn four_images_one_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_t2i(NanoBanana2TextToImageNumImages::Four, Some(NanoBanana2TextToImageResolution::OneK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_t2i(NanoBanana2TextToImageNumImages::Four, Some(NanoBanana2TextToImageResolution::OneK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(32));
     }
 
     #[test]
     fn one_image_four_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_t2i(NanoBanana2TextToImageNumImages::One, Some(NanoBanana2TextToImageResolution::FourK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_t2i(NanoBanana2TextToImageNumImages::One, Some(NanoBanana2TextToImageResolution::FourK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(16));
     }
 
     #[test]
     fn two_images_four_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_t2i(NanoBanana2TextToImageNumImages::Two, Some(NanoBanana2TextToImageResolution::FourK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_t2i(NanoBanana2TextToImageNumImages::Two, Some(NanoBanana2TextToImageResolution::FourK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(32));
     }
   }
@@ -158,62 +126,38 @@ mod tests {
   mod edit_image_costs {
     use super::*;
 
-    fn make_edit(
-      num_images: NanoBanana2EditImageNumImages,
-      resolution: Option<NanoBanana2EditImageResolution>,
-    ) -> FalNanoBanana2RequestState {
-      FalNanoBanana2RequestState::EditImage(NanoBanana2EditImageRequest {
-        prompt: "test".to_string(),
-        image_urls: vec!["https://example.com/image.jpg".to_string()],
-        num_images,
-        resolution,
-        aspect_ratio: None,
-      })
+    fn make_edit(num_images: NanoBanana2EditImageNumImages, resolution: Option<NanoBanana2EditImageResolution>) -> FalNanoBanana2RequestState {
+      FalNanoBanana2RequestState::EditImage(NanoBanana2EditImageRequest { prompt: "test".to_string(), image_urls: vec!["https://example.com/image.jpg".to_string()], num_images, resolution, aspect_ratio: None })
     }
 
     #[test]
     fn one_image_default_resolution() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_edit(NanoBanana2EditImageNumImages::One, None),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_edit(NanoBanana2EditImageNumImages::One, None));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(8));
     }
 
     #[test]
     fn one_image_half_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_edit(NanoBanana2EditImageNumImages::One, Some(NanoBanana2EditImageResolution::HalfK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_edit(NanoBanana2EditImageNumImages::One, Some(NanoBanana2EditImageResolution::HalfK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(6));
     }
 
     #[test]
     fn three_images_two_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_edit(NanoBanana2EditImageNumImages::Three, Some(NanoBanana2EditImageResolution::TwoK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_edit(NanoBanana2EditImageNumImages::Three, Some(NanoBanana2EditImageResolution::TwoK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(36));
     }
 
     #[test]
     fn one_image_four_k() {
-      let state = FalNanoBanana2CostState::from_request(
-        &make_edit(NanoBanana2EditImageNumImages::One, Some(NanoBanana2EditImageResolution::FourK)),
-      );
+      let state = FalNanoBanana2CostState::from_request(&make_edit(NanoBanana2EditImageNumImages::One, Some(NanoBanana2EditImageResolution::FourK)));
       assert_eq!(state.estimate_cost().cost_in_usd_cents, Some(16));
     }
   }
 
   #[test]
   fn cost_flags_are_correct() {
-    let state = FalNanoBanana2CostState::from_request(
-      &FalNanoBanana2RequestState::TextToImage(NanoBanana2TextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: NanoBanana2TextToImageNumImages::One,
-        resolution: None,
-        aspect_ratio: None,
-      }),
-    );
+    let state = FalNanoBanana2CostState::from_request(&FalNanoBanana2RequestState::TextToImage(NanoBanana2TextToImageRequest { prompt: "test".to_string(), num_images: NanoBanana2TextToImageNumImages::One, resolution: None, aspect_ratio: None }));
     let cost = state.estimate_cost();
     assert!(!cost.is_free);
     assert!(!cost.is_unlimited);

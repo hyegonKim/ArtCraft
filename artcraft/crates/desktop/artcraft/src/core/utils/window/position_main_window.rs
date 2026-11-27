@@ -6,11 +6,7 @@ use tauri::{AppHandle, Manager, PhysicalPosition};
 /// Try to position the main window at startup.
 /// If it doesn't meet certain placement heuristics, abandon manual placement and let the OS
 /// decide where to place the app.
-pub fn position_main_window(
-  app: &AppHandle,
-  position: &MainWindowPosition,
-) -> AnyhowResult<()> {
-
+pub fn position_main_window(app: &AppHandle, position: &MainWindowPosition) -> AnyhowResult<()> {
   // NB: This non-negative position heuristic is good for MacBook (single screen).
   // Not sure how this fares on Windows, Linux, or multiscreen setups.
   // On Mac, this prevents the windows from being positioned off to the top-left,
@@ -25,8 +21,7 @@ pub fn position_main_window(
 
   let windows = app.windows();
 
-  let window = windows.get(MAIN_WINDOW_NAME)
-      .ok_or_else(|| anyhow::anyhow!("Main window not found"))?;
+  let window = windows.get(MAIN_WINDOW_NAME).ok_or_else(|| anyhow::anyhow!("Main window not found"))?;
 
   if let Ok(Some(monitor)) = window.current_monitor() {
     // Reports the size of the monitor, e.g. PhysicalSize { width: 4112, height: 2658 }
@@ -51,11 +46,9 @@ pub fn position_main_window(
     // Prevent the window from being positioned off the screen to the bottom, right, and bottom right.
     // This works on MacBook (single screen), but should be tested on Windows, Linux, and multiscreen setups.
     if position.x > max_width {
-      return Err(anyhow::anyhow!("X position must be less than or equal to {} (monitor width {})",
-        max_width, monitor_size.width));
+      return Err(anyhow::anyhow!("X position must be less than or equal to {} (monitor width {})", max_width, monitor_size.width));
     } else if position.y > max_height {
-      return Err(anyhow::anyhow!("Y position must be less than or equal to {} (monitor height {})",
-        max_height, monitor_size.height));
+      return Err(anyhow::anyhow!("Y position must be less than or equal to {} (monitor height {})", max_height, monitor_size.height));
     }
   }
 

@@ -9,24 +9,20 @@ const SENTINEL_FLOW_OLD: &str = "sora_create_task";
 pub struct SentinelRequest {
   /// "Proof of Work" token
   #[serde(rename = "p")]
-  pub (crate) p: String,
+  pub(crate) p: String,
 
   /// Random UUID
   #[serde(rename = "id")]
-  pub (crate) id: String,
+  pub(crate) id: String,
 
   /// Frontend UI flow
   #[serde(rename = "flow")]
-  pub (crate) flow: String,
+  pub(crate) flow: String,
 }
 
 impl SentinelRequest {
   pub fn new(pow_token: String) -> Self {
     let id = generate_random_uuid();
-    Self {
-      p: pow_token, 
-      id, 
-      flow: SENTINEL_FLOW.to_string() 
-    }
+    Self { p: pow_token, id, flow: SENTINEL_FLOW.to_string() }
   }
 }

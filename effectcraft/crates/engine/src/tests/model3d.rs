@@ -402,9 +402,7 @@ def Xform "SceneRoot"
         let mut s = session();
         s.execute("comp.new", json!({"name": "USDComp", "width": 160, "height": 120, "duration": 1})).unwrap();
         s.execute("layer.newLight", json!({"kind": "Point", "intensity": 180.0, "position": [80.0, 60.0, -250.0]})).unwrap();
-        let res = s
-            .execute_checked("layer.newModel", json!({"path": path.to_string_lossy()}))
-            .unwrap();
+        let res = s.execute_checked("layer.newModel", json!({"path": path.to_string_lossy()})).unwrap();
         let lid = res["layer"].as_u64().unwrap();
         assert_eq!(s.active_comp().unwrap().renderer, Renderer::Advanced3D);
         assert!(matches!(layer(&s, lid).source, LayerSource::Model { .. }));
@@ -425,11 +423,7 @@ fn apply_substance_pbr_material_to_3d_and_extruded_layers_with_undo_redo_and_per
     let mut s = session();
     s.execute("comp.new", json!({"name": "SubComp", "width": 160, "height": 120, "duration": 1})).unwrap();
     s.execute("layer.newLight", json!({"kind": "Point", "intensity": 200.0, "position": [60.0, 40.0, -220.0]})).unwrap();
-    let sphere = s
-        .execute_checked("layer.newPrimitive", json!({"kind": "sphere", "radius": 45.0, "baseColor": "#202020"}))
-        .unwrap()["layer"]
-        .as_u64()
-        .unwrap();
+    let sphere = s.execute_checked("layer.newPrimitive", json!({"kind": "sphere", "radius": 45.0, "baseColor": "#202020"})).unwrap()["layer"].as_u64().unwrap();
 
     let cid = s.active_comp_id().unwrap();
     let before = s.render(cid, Tick::ZERO, effectcraft_render::RenderOpts::default());
@@ -459,13 +453,7 @@ fn apply_substance_pbr_material_to_3d_and_extruded_layers_with_undo_redo_and_per
     // Project JSON round-trip preserves `substance_material`.
     let saved = serde_json::to_string(&*s.project).unwrap();
     let loaded: Project = serde_json::from_str(&saved).unwrap();
-    let reloaded_sub = loaded
-        .comp(cid)
-        .unwrap()
-        .layer(LayerId(sphere))
-        .unwrap()
-        .substance_material
-        .clone();
+    let reloaded_sub = loaded.comp(cid).unwrap().layer(LayerId(sphere)).unwrap().substance_material.clone();
     assert_eq!(reloaded_sub, Some(sub));
 
     // Undo clears Substance material; Redo restores it.
@@ -478,11 +466,7 @@ fn apply_substance_pbr_material_to_3d_and_extruded_layers_with_undo_redo_and_per
     let txt = s.execute("layer.newText", json!({"text": "3D"})).unwrap()["layer"].as_u64().unwrap();
     s.execute("layer.setSwitch", json!({"layers": [txt], "switch": "threeD", "value": true})).unwrap();
     s.execute("prop.set", json!({"layer": txt, "path": "geometryOptions/extrusionDepth", "value": 30.0})).unwrap();
-    s.execute_checked(
-        "model.applySubstanceMaterial",
-        json!({"layer": txt, "preset": "weatheredCopper", "wear": 0.6, "resolution": 32}),
-    )
-    .unwrap();
+    s.execute_checked("model.applySubstanceMaterial", json!({"layer": txt, "preset": "weatheredCopper", "wear": 0.6, "resolution": 32})).unwrap();
     assert_eq!(layer(&s, txt).substance_material.unwrap().preset, SubstancePreset::WeatheredCopper);
     let extruded_frame = s.render(cid, Tick::ZERO, effectcraft_render::RenderOpts::default());
     assert!(extruded_frame.data.iter().any(|p| p[3] > 0.5));

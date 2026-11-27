@@ -25,8 +25,6 @@ pub struct GptImage1ByokEditImageOutput {
   // Response fields parsed elsewhere
 }
 
-pub fn gpt_image_1_byok_edit_image(
-  params: GptImage1ByokEditImageInput,
-) -> FalRequest<GptImage1ByokEditImageInput, GptImage1ByokEditImageOutput> {
+pub fn gpt_image_1_byok_edit_image(params: GptImage1ByokEditImageInput) -> FalRequest<GptImage1ByokEditImageInput, GptImage1ByokEditImageOutput> {
   FalRequest::new("fal-ai/gpt-image-1/edit-image/byok", params)
 }

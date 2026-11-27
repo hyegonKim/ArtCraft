@@ -67,48 +67,36 @@ impl FalRequestCostCalculator for EnqueueSora2ProImageToVideoRequest {
 
 /// Sora 2 Pro Image-to-Video
 /// https://fal.ai/models/fal-ai/sora-2/image-to-video/pro
-pub async fn enqueue_sora_2_pro_image_to_video_webhook<R: IntoUrl>(
-  args: EnqueueSora2ProImageToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_sora_2_pro_image_to_video_webhook<R: IntoUrl>(args: EnqueueSora2ProImageToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|d| match d {
-        EnqueueSora2ProImageToVideoDurationSeconds::Four => 4,
-        EnqueueSora2ProImageToVideoDurationSeconds::Eight => 8,
-        EnqueueSora2ProImageToVideoDurationSeconds::Twelve => 12,
-      });
+  let duration = req.duration.map(|d| match d {
+    EnqueueSora2ProImageToVideoDurationSeconds::Four => 4,
+    EnqueueSora2ProImageToVideoDurationSeconds::Eight => 8,
+    EnqueueSora2ProImageToVideoDurationSeconds::Twelve => 12,
+  });
 
-  let resolution = req.resolution
-      .map(|r| match r {
-        EnqueueSora2ProImageToVideoResolution::Auto => "auto",
-        EnqueueSora2ProImageToVideoResolution::SevenTwentyP => "720p",
-        EnqueueSora2ProImageToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|r| r.to_string());
+  let resolution = req
+    .resolution
+    .map(|r| match r {
+      EnqueueSora2ProImageToVideoResolution::Auto => "auto",
+      EnqueueSora2ProImageToVideoResolution::SevenTwentyP => "720p",
+      EnqueueSora2ProImageToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|r| r.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|ar| match ar {
-        EnqueueSora2ProImageToVideoAspectRatio::Auto => "auto",
-        EnqueueSora2ProImageToVideoAspectRatio::NineBySixteen => "9:16",
-        EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine => "16:9",
-      })
-      .map(|ar| ar.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|ar| match ar {
+      EnqueueSora2ProImageToVideoAspectRatio::Auto => "auto",
+      EnqueueSora2ProImageToVideoAspectRatio::NineBySixteen => "9:16",
+      EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine => "16:9",
+    })
+    .map(|ar| ar.to_string());
 
-  let request = Sora2ProImageToVideoInput {
-    prompt: req.prompt,
-    image_url: req.image_url,
-    duration,
-    resolution,
-    aspect_ratio,
-    delete_video: Some(false),
-  };
+  let request = Sora2ProImageToVideoInput { prompt: req.prompt, image_url: req.image_url, duration, resolution, aspect_ratio, delete_video: Some(false) };
 
-  let result = sora_2_pro_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = sora_2_pro_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -128,17 +116,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueSora2ProImageToVideoArgs {
-      request: EnqueueSora2ProImageToVideoRequest {
-        image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-        prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(),
-        duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Twelve),
-        aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueSora2ProImageToVideoResolution::TenEightyP),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueSora2ProImageToVideoArgs { request: EnqueueSora2ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(), duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Twelve), aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine), resolution: Some(EnqueueSora2ProImageToVideoResolution::TenEightyP) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_sora_2_pro_image_to_video_webhook(args).await?;
     println!("result: {:?}", result);
@@ -154,17 +132,7 @@ mod tests {
 
     for ar in EnqueueSora2ProImageToVideoAspectRatio::iter() {
       println!("--- aspect ratio: {:?} ---", ar);
-      let args = EnqueueSora2ProImageToVideoArgs {
-        request: EnqueueSora2ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton comes alive and roars at the camera".to_string(),
-          duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Four),
-          aspect_ratio: Some(ar),
-          resolution: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProImageToVideoArgs { request: EnqueueSora2ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton comes alive and roars at the camera".to_string(), duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Four), aspect_ratio: Some(ar), resolution: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -180,17 +148,7 @@ mod tests {
 
     for dur in EnqueueSora2ProImageToVideoDurationSeconds::iter() {
       println!("--- duration: {:?} ---", dur);
-      let args = EnqueueSora2ProImageToVideoArgs {
-        request: EnqueueSora2ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton slowly turns its head".to_string(),
-          duration: Some(dur),
-          aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine),
-          resolution: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProImageToVideoArgs { request: EnqueueSora2ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton slowly turns its head".to_string(), duration: Some(dur), aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine), resolution: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -206,17 +164,7 @@ mod tests {
 
     for res in EnqueueSora2ProImageToVideoResolution::iter() {
       println!("--- resolution: {:?} ---", res);
-      let args = EnqueueSora2ProImageToVideoArgs {
-        request: EnqueueSora2ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton slowly comes alive".to_string(),
-          duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Four),
-          aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine),
-          resolution: Some(res),
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSora2ProImageToVideoArgs { request: EnqueueSora2ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton slowly comes alive".to_string(), duration: Some(EnqueueSora2ProImageToVideoDurationSeconds::Four), aspect_ratio: Some(EnqueueSora2ProImageToVideoAspectRatio::SixteenByNine), resolution: Some(res) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_sora_2_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }

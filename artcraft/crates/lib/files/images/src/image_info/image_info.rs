@@ -22,24 +22,14 @@ impl ImageInfo {
   pub fn decode_image_from_bytes(bytes: &[u8]) -> Result<Self, ImageInfoError> {
     let image = ImageReader::new(Cursor::new(bytes)).with_guessed_format()?.decode()?;
     let (width, height) = image.dimensions();
-    Ok(ImageInfo {
-      mimetype_info: MimetypeInfo::get_for_bytes(bytes)
-          .ok_or_else(|| ImageInfoError::CouldNotDetermineMimetype)?,
-      width,
-      height,
-    })
+    Ok(ImageInfo { mimetype_info: MimetypeInfo::get_for_bytes(bytes).ok_or_else(|| ImageInfoError::CouldNotDetermineMimetype)?, width, height })
   }
 
   /// Note: This has to do a full file read, and we throw the parsed image on the floor.
   pub fn decode_image_from_path<P: AsRef<Path>>(path: P) -> Result<Self, ImageInfoError> {
     let image = ImageReader::open(&path)?.decode()?;
     let (width, height) = image.dimensions();
-    Ok(ImageInfo {
-      mimetype_info: MimetypeInfo::get_for_path(path)?
-          .ok_or_else(|| ImageInfoError::CouldNotDetermineMimetype)?,
-      width,
-      height,
-    })
+    Ok(ImageInfo { mimetype_info: MimetypeInfo::get_for_path(path)?.ok_or_else(|| ImageInfoError::CouldNotDetermineMimetype)?, width, height })
   }
 
   pub fn width(&self) -> u32 {

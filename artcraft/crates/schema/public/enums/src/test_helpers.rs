@@ -7,14 +7,12 @@ pub fn to_toml<T: Serialize>(t: &T) -> String {
     Ok(s) => s.replace("\"", ""), // JSON values are quoted, so we remove quotes
     Err(err) => {
       panic!("serialization error: {}", err);
-    }
+    },
   }
 }
 
 pub fn to_json<T: Serialize>(t: &T) -> String {
-  serde_json::to_string(t)
-      .expect("serialization error")
-      .replace("\"", "") // JSON values are quoted, so we remove quotes
+  serde_json::to_string(t).expect("serialization error").replace("\"", "") // JSON values are quoted, so we remove quotes
 }
 
 /// Assert that the Serialize is represented by the expected string value.

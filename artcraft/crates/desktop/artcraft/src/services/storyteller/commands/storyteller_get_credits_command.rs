@@ -30,42 +30,21 @@ pub struct GetCreditsResponse {
 impl SerializeMarker for GetCreditsResponse {}
 
 #[tauri::command]
-pub async fn storyteller_get_credits_command(
-  app_env_configs: State<'_, AppEnvConfigs>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> ResponseOrErrorMessage<GetCreditsResponse> {
-
+pub async fn storyteller_get_credits_command(app_env_configs: State<'_, AppEnvConfigs>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> ResponseOrErrorMessage<GetCreditsResponse> {
   info!("storyteller_get_credits_command called");
 
-  let credits = get_credits(
-    &app_env_configs,
-    &storyteller_creds_manager)
-      .await
-      .map_err(|err| {
-        error!("Error getting credits: {:?}", err);
-        format!("Error getting credits: {:?}", err)
-      })?;
+  let credits = get_credits(&app_env_configs, &storyteller_creds_manager).await.map_err(|err| {
+    error!("Error getting credits: {:?}", err);
+    format!("Error getting credits: {:?}", err)
+  })?;
 
   Ok(credits.into())
 }
 
-async fn get_credits(
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<GetCreditsResponse> {
-
+async fn get_credits(app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<GetCreditsResponse> {
   let maybe_creds = storyteller_creds_manager.get_credentials()?;
 
-  let response = get_session_credits(
-    &app_env_configs.storyteller_host,
-    maybe_creds.as_ref(),
-    PaymentsNamespace::Artcraft,
-  ).await?;
+  let response = get_session_credits(&app_env_configs.storyteller_host, maybe_creds.as_ref(), PaymentsNamespace::Artcraft).await?;
 
-  Ok(GetCreditsResponse {
-    free_credits: response.free_credits,
-    monthly_credits: response.monthly_credits,
-    banked_credits: response.banked_credits,
-    sum_total_credits: response.sum_total_credits,
-  })
+  Ok(GetCreditsResponse { free_credits: response.free_credits, monthly_credits: response.monthly_credits, banked_credits: response.banked_credits, sum_total_credits: response.sum_total_credits })
 }

@@ -4,9 +4,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::kling_3p0_pro::request::ArtcraftKling3p0ProRequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
@@ -21,12 +19,7 @@ pub fn build_artcraft_kling_3p0_pro(mut builder: GenerateVideoRequestBuilder) ->
   let final_duration = plan_kling_3p0_duration(builder.duration_seconds, strategy)?;
   builder.duration_seconds = final_duration.map(|d| d.max(4));
 
-  let mut request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Kling3p0Pro,
-    SupportedResolutions::Full,
-    UltraWideSupport::Unsupported,
-  )?;
+  let mut request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Kling3p0Pro, SupportedResolutions::Full, UltraWideSupport::Unsupported)?;
   request.generate_audio = generate_audio;
   request.duration_seconds = final_duration;
 
@@ -35,22 +28,14 @@ pub fn build_artcraft_kling_3p0_pro(mut builder: GenerateVideoRequestBuilder) ->
 }
 
 /// Kling 3.0 (Pro and Standard) supports durations of 3-15 seconds.
-pub(crate) fn plan_kling_3p0_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<u16>, ArtcraftRouterError> {
+pub(crate) fn plan_kling_3p0_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<u16>, ArtcraftRouterError> {
   const MIN: u16 = 3;
   const MAX: u16 = 15;
   match duration_seconds {
     None => Ok(None),
     Some(d) if (MIN..=MAX).contains(&d) => Ok(Some(d)),
     Some(d) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", d),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", d) })),
       _ => Ok(Some(d.clamp(MIN, MAX))),
     },
   }

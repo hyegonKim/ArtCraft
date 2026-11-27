@@ -43,7 +43,6 @@ use tokens::tokens::media_files::MediaFileToken;
 pub struct EnqueueImageBgRemovalCommand {
   // /// The bg removal model to use (optional).
   // pub model: Option<TODO>,
-
   /// Image media file; the image to remove the background from.
   pub image_media_token: Option<MediaFileToken>,
 
@@ -74,10 +73,10 @@ pub enum EnqueueImageBgRemovalErrorType {
 
   /// No image was provided for background removal
   MissingImage,
-  
+
   /// Bad base64 image data
   Base64DecodeError,
-  
+
   /// Generic bad request error
   BadRequest,
 
@@ -86,40 +85,20 @@ pub enum EnqueueImageBgRemovalErrorType {
 }
 
 #[derive(Serialize)]
-pub struct EnqueueImageBgRemovalSuccessResponse {
-}
+pub struct EnqueueImageBgRemovalSuccessResponse {}
 
 impl SerializeMarker for EnqueueImageBgRemovalSuccessResponse {}
 
 #[tauri::command]
-pub async fn enqueue_image_bg_removal_command(
-  app: AppHandle,
-  request: EnqueueImageBgRemovalCommand,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>,
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-  task_database: State<'_, TaskDatabase>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-) -> ResponseOrErrorType<EnqueueImageBgRemovalSuccessResponse, EnqueueImageBgRemovalErrorType> {
-
+pub async fn enqueue_image_bg_removal_command(app: AppHandle, request: EnqueueImageBgRemovalCommand, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>, provider_priority_store: State<'_, ProviderPriorityStore>, task_database: State<'_, TaskDatabase>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>) -> ResponseOrErrorType<EnqueueImageBgRemovalSuccessResponse, EnqueueImageBgRemovalErrorType> {
   info!("enqueue_image_bg_removal_command called");
 
-  let result = handle_request(
-    &request,
-    &app,
-    &app_data_root,
-    &app_env_configs,
-    &artcraft_usage_tracker,
-    &provider_priority_store,
-    &task_database,
-    &storyteller_creds_manager,
-  ).await;
+  let result = handle_request(&request, &app, &app_data_root, &app_env_configs, &artcraft_usage_tracker, &provider_priority_store, &task_database, &storyteller_creds_manager).await;
 
   match result {
     Err(err) => {
       error!("Error removing background: {:?}", err);
-      
+
       notify_frontend_of_errors(&app, &err).await;
 
       // TODO: Derive from err. Make service provider optional.
@@ -135,7 +114,7 @@ pub async fn enqueue_image_bg_removal_command(
       }
 
       Err(error_to_tauri_response(err))
-    }
+    },
     Ok(event) => {
       let event = GenerationEnqueueSuccessEvent {
         action: event.to_frontend_event_action(),
@@ -147,48 +126,25 @@ pub async fn enqueue_image_bg_removal_command(
         error!("Failed to emit event: {:?}", err); // Fail open.
       }
 
-      CreditsBalanceChangedEvent{}.send_infallible(&app);
+      CreditsBalanceChangedEvent {}.send_infallible(&app);
 
       Ok(EnqueueImageBgRemovalSuccessResponse {}.into())
-    }
+    },
   }
 }
 
-pub async fn handle_request(
-  request: &EnqueueImageBgRemovalCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  provider_priority_store: &ProviderPriorityStore,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-  
+pub async fn handle_request(request: &EnqueueImageBgRemovalCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, artcraft_usage_tracker: &ArtcraftUsageTracker, provider_priority_store: &ProviderPriorityStore, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   // TODO(bt,2025-07-07): Other model/provider routing...
-  
-  let success_event = handle_generic_bg_removal_artcraft(
-    request,
-    app,
-    app_data_root,
-    app_env_configs,
-    storyteller_creds_manager,
-  ).await?;
 
-  let result = success_event
-      .insert_into_task_database_with_frontend_payload(
-        task_database,
-        request.frontend_caller,
-        request.frontend_subscriber_id.as_deref(),
-        request.frontend_subscriber_payload.as_deref()
-      )
-      .await;
+  let success_event = handle_generic_bg_removal_artcraft(request, app, app_data_root, app_env_configs, storyteller_creds_manager).await?;
+
+  let result = success_event.insert_into_task_database_with_frontend_payload(task_database, request.frontend_caller, request.frontend_subscriber_id.as_deref(), request.frontend_subscriber_payload.as_deref()).await;
 
   if let Err(err) = result {
     error!("Failed to create task in database: {:?}", err);
     // NB: Fail open, but find a way to flag this.
   }
-  
+
   if let Err(err) = artcraft_usage_tracker.record_image_generation(1, ArtcraftUsageType::ImageToResult, ArtcraftUsagePage::EditPage) {
     // NB: Fail open.
     warn!("Failed to report usage: {:?}", err);
@@ -207,24 +163,19 @@ fn error_to_tauri_response(error: GenerateError) -> CommandErrorResponseWrapper<
       status = CommandErrorStatus::ServerError;
       error_type = EnqueueImageBgRemovalErrorType::NoProviderAvailable;
       error_message = "No configured provider available for background removal".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::RequiredSourceImageNotProvided) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueImageBgRemovalErrorType::MissingImage;
       error_message = "No image provided for background removal".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::Base64DecodeError) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueImageBgRemovalErrorType::Base64DecodeError;
       error_message = "Failed to decode base64 image data".to_string();
-    }
+    },
     _ => {}, // Other cases fall through.
   }
 
-  CommandErrorResponseWrapper {
-    status,
-    error_message: Some(error_message.to_string()),
-    error_type: Some(error_type),
-    error_details: None,
-  }
+  CommandErrorResponseWrapper { status, error_message: Some(error_message.to_string()), error_type: Some(error_type), error_details: None }
 }

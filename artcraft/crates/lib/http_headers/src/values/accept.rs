@@ -1,2 +1,1 @@
-
-pub const ACCEPT_ALL : &str = "*/*";
+pub const ACCEPT_ALL: &str = "*/*";

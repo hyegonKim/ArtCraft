@@ -8,19 +8,15 @@ pub fn filter_cloudflare_errors(status_code: u16, body: &str) -> Result<(), Clou
 
   match status_code {
     403 => {
-      if body.contains("challenge-platform")
-          || body.contains("challenge-error-text")
-          || body.contains("cType: 'managed'")
-          || body.contains("Just a moment...") {
+      if body.contains("challenge-platform") || body.contains("challenge-error-text") || body.contains("cType: 'managed'") || body.contains("Just a moment...") {
         return Err(CloudflareError::ChallengeInterstitial403);
       }
-    }
+    },
     _ => {}, // Fall-through
   }
 
   // TODO: This is a really bad heuristic.
-  let is_cloudflare = body.contains("cloudflare")
-      || body.contains("Cloudflare");
+  let is_cloudflare = body.contains("cloudflare") || body.contains("Cloudflare");
 
   // let is_cloudflare = body.contains("cloudflare.com")
   //     || body.contains("Cloudflare Ray ID");
@@ -37,10 +33,7 @@ pub fn filter_cloudflare_errors(status_code: u16, body: &str) -> Result<(), Clou
     _ => {},
   }
 
-  if body.contains("errorcode_504")
-      || body.contains("Gateway time-out")
-      || body.contains("Error code 504")
-  {
+  if body.contains("errorcode_504") || body.contains("Gateway time-out") || body.contains("Error code 504") {
     return Err(CloudflareError::GatewayTimeout504);
   }
 

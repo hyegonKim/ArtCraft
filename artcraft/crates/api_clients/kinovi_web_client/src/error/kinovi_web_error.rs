@@ -19,13 +19,11 @@ impl KinoviWebError {
       Self::ApiGeneric(KinoviWebGenericApiError::CloudflareError(CloudflareError::BadGateway502)) => true,
       Self::ApiGeneric(KinoviWebGenericApiError::CloudflareError(CloudflareError::GatewayTimeout504)) => true,
       Self::ApiGeneric(KinoviWebGenericApiError::CloudflareError(CloudflareError::TimeoutOccurred524)) => true,
-      Self::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: _ }) => {
-        match status_code.as_u16() {
-          502 => true,
-          504 => true,
-          524 => true,
-          _ => false,
-        }
+      Self::ApiGeneric(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: _ }) => match status_code.as_u16() {
+        502 => true,
+        504 => true,
+        524 => true,
+        _ => false,
       },
       _ => false,
     }

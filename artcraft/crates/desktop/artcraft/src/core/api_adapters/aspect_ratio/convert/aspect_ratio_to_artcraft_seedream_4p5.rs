@@ -7,7 +7,7 @@ pub fn aspect_ratio_to_artcraft_seedream_4p5(aspect_ratio: CommonAspectRatio) ->
     CommonAspectRatio::Auto2k => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::Auto2k,
     CommonAspectRatio::Auto4k => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::Auto4k,
     CommonAspectRatio::Square => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::Square,
-    CommonAspectRatio::SquareHd  => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::SquareHd,
+    CommonAspectRatio::SquareHd => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::SquareHd,
     CommonAspectRatio::WideFourByThree => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::LandscapeFourThree,
     CommonAspectRatio::WideSixteenByNine => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::LandscapeSixteenNine,
     CommonAspectRatio::TallThreeByFour => BytedanceSeedreamV4p5MultiFunctionImageGenImageSize::PortraitFourThree,

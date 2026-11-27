@@ -61,10 +61,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_tripo3d_h3p1_text_to_mesh() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      prompt: Some("A velociraptor with an open mouth full of sharp teeth.".to_string()),
-      ..tripo3d_h3p1_builder()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { prompt: Some("A velociraptor with an open mouth full of sharp teeth.".to_string()), ..tripo3d_h3p1_builder() }).await;
     let payload = response.get_fal_payload().expect("expected Fal payload");
     assert!(payload.request_id.is_some() || payload.gateway_request_id.is_some());
     assert_eq!(1, 2, "Inspect output above");
@@ -73,10 +70,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_tripo3d_h3p1_image_to_mesh() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])),
-      ..tripo3d_h3p1_builder()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])), ..tripo3d_h3p1_builder() }).await;
     let payload = response.get_fal_payload().expect("expected Fal payload");
     assert!(payload.request_id.is_some() || payload.gateway_request_id.is_some());
     assert_eq!(1, 2, "Inspect output above");
@@ -85,11 +79,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs cost
   async fn send_tripo3d_h3p1_multiview_to_mesh() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])),
-      back_image: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      ..tripo3d_h3p1_builder()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { reference_images: Some(ImageListRef::Urls(vec![ERNEST_SCARED_STUPID_IMAGE_URL.to_string()])), back_image: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), ..tripo3d_h3p1_builder() }).await;
     let payload = response.get_fal_payload().expect("expected Fal payload");
     assert!(payload.request_id.is_some() || payload.gateway_request_id.is_some());
     assert_eq!(1, 2, "Inspect output above");
@@ -98,16 +88,11 @@ mod tests {
   // ── Helpers ──
 
   fn tripo3d_h3p1_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Tripo3dH3p1,
-      provider: RouterProvider::Fal,
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Tripo3dH3p1, provider: RouterProvider::Fal, ..Default::default() }
   }
 
   fn get_fal_client() -> RouterClient {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")
-      .expect("Failed to read fal_api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt").expect("Failed to read fal_api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
     let webhook_url = "https://example.com/fal-webhook-test".to_string();
     RouterClient::Fal(RouterFalClient::new_with_webhook(api_key, webhook_url))

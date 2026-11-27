@@ -38,11 +38,10 @@ pub enum Seedance1ProDuration {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Seedance1ProResolution {
-  FourEightyP, // 480p
+  FourEightyP,  // 480p
   SevenTwentyP, // 720p
-  TenEightyP, // 1080p
+  TenEightyP,   // 1080p
 }
-
 
 impl FalRequestCostCalculator for Seedance1ProRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
@@ -50,16 +49,14 @@ impl FalRequestCostCalculator for Seedance1ProRequest {
     //  For other resolutions, 1 million video tokens costs $2.5.
     //  tokens(video) = (height x width x FPS x duration) / 1024."
 
-    if self.resolution == Seedance1ProResolution::TenEightyP
-        && self.duration == Seedance1ProDuration::FiveSeconds
-    {
+    if self.resolution == Seedance1ProResolution::TenEightyP && self.duration == Seedance1ProDuration::FiveSeconds {
       return 62;
     }
 
     // TODO: Only correct for some aspect ratios for now.
     let (width, height) = match self.resolution {
       Seedance1ProResolution::FourEightyP => (640u32, 480u32), // NB: Only for 4:3 !
-      Seedance1ProResolution::SevenTwentyP => (1280, 720), // NB: Only for 16:9 !
+      Seedance1ProResolution::SevenTwentyP => (1280, 720),     // NB: Only for 16:9 !
       Seedance1ProResolution::TenEightyP => (1920, 1080),
     };
 
@@ -78,7 +75,7 @@ impl FalRequestCostCalculator for Seedance1ProRequest {
 
     // TODO: Not sure if FPS is right.
     //  Inferred from https://help.scenario.com/en/articles/seedance-models-the-essentials/
-    const FPS : f64 = 30.0;
+    const FPS: f64 = 30.0;
 
     let tokens = (height as f64) * (width as f64) * FPS * duration;
     let tokens = tokens / 1024.0;
@@ -93,9 +90,7 @@ impl FalRequestCostCalculator for Seedance1ProRequest {
 
 /// Seedance 1.0 Pro Image-to-Video
 /// https://fal.ai/models/fal-ai/bytedance/seedance/v1/pro/image-to-video
-pub async fn enqueue_seedance_1_pro_image_to_video_webhook<V: IntoUrl>(
-  args: Seedance1ProArgs<'_, V>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_seedance_1_pro_image_to_video_webhook<V: IntoUrl>(args: Seedance1ProArgs<'_, V>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
@@ -128,14 +123,10 @@ pub async fn enqueue_seedance_1_pro_image_to_video_webhook<V: IntoUrl>(
     enable_safety_checker: Some(false),
   };
 
-  let result = seedance_1_pro_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = seedance_1_pro_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -148,14 +139,7 @@ mod tests {
 
   #[test]
   fn test_cost() {
-    let mut req = Seedance1ProRequest {
-      image_url: String::new(),
-      prompt: String::new(),
-      camera_fixed: false,
-      duration: Seedance1ProDuration::FiveSeconds,
-      resolution: Seedance1ProResolution::TenEightyP,
-      seed: None,
-    };
+    let mut req = Seedance1ProRequest { image_url: String::new(), prompt: String::new(), camera_fixed: false, duration: Seedance1ProDuration::FiveSeconds, resolution: Seedance1ProResolution::TenEightyP, seed: None };
 
     // NB: Constant value specified by FAL
     req.duration = Seedance1ProDuration::FiveSeconds;
@@ -188,18 +172,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Seedance1ProArgs {
-      request: Seedance1ProRequest {
-        image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        prompt: "shiba in glasses runs to the lake and stands by the shore".to_string(),
-        camera_fixed: false,
-        duration: Seedance1ProDuration::FiveSeconds,
-        resolution: Seedance1ProResolution::SevenTwentyP,
-        seed: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Seedance1ProArgs { request: Seedance1ProRequest { image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), prompt: "shiba in glasses runs to the lake and stands by the shore".to_string(), camera_fixed: false, duration: Seedance1ProDuration::FiveSeconds, resolution: Seedance1ProResolution::SevenTwentyP, seed: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_seedance_1_pro_image_to_video_webhook(args).await?;
 

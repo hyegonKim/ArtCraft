@@ -2,17 +2,16 @@ use log::debug;
 use crate::error::grok_client_error::GrokClientError;
 use crate::requests::index_page::signature::round_two_decimals::round_two_decimals;
 /*
-    @staticmethod
-    def _h(x: float, _param: float, c: float, e: bool):
-        f = ((x * (c - _param)) / 255.0) + _param
-        if e:
-            return floor(f)
-        rounded = round(float(f), 2)
-        if rounded == 0.0:
-            return 0.0
-        return rounded
- */
-
+   @staticmethod
+   def _h(x: float, _param: float, c: float, e: bool):
+       f = ((x * (c - _param)) / 255.0) + _param
+       if e:
+           return floor(f)
+       rounded = round(float(f), 2)
+       if rounded == 0.0:
+           return 0.0
+       return rounded
+*/
 
 /// Based on "Grok-Api/core/xctid.py"
 /// Some kind of stroke angle calculator or trig function
@@ -29,7 +28,7 @@ pub fn signature_h(x: f64, param: f64, c: f64, e: bool) -> Result<f64, GrokClien
   if e {
     let floor = f.floor();
     debug!("[signature_h] floor = {}", floor);
-    return Ok(floor)
+    return Ok(floor);
   }
 
   // rounded = round(float(f), 2)
@@ -39,12 +38,11 @@ pub fn signature_h(x: f64, param: f64, c: f64, e: bool) -> Result<f64, GrokClien
 
   if rounded == 0.0 {
     debug!("[signature_h] rounded is zero");
-    return Ok(0.0) // TODO: This might not work
+    return Ok(0.0); // TODO: This might not work
   }
 
   Ok(rounded) // TODO: Looks like it can return ints or floats
 }
-
 
 #[cfg(test)]
 mod tests {

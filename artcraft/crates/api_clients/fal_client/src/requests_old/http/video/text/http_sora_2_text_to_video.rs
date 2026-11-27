@@ -37,8 +37,6 @@ pub struct Sora2TextToVideoOutput {
   pub video: Sora2TextToVideoVideoFile,
 }
 
-pub fn sora_2_text_to_video(
-  params: Sora2TextToVideoInput,
-) -> FalRequest<Sora2TextToVideoInput, Sora2TextToVideoOutput> {
+pub fn sora_2_text_to_video(params: Sora2TextToVideoInput) -> FalRequest<Sora2TextToVideoInput, Sora2TextToVideoOutput> {
   FalRequest::new("fal-ai/sora-2/text-to-video", params)
 }

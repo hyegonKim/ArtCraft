@@ -39,20 +39,15 @@ impl GenerateSplatRequest {
       RouterSplatModel::Marble0p1Plus => plan_generate_splat_artcraft_marble_0p1_plus(self),
       // The marble 1.x models are only supported by the new
       // `GenerateSplatRequestBuilder::build2()` pipeline.
-      _ => Err(ArtcraftRouterError::UnsupportedModel(
-        format!("Splat generation for model `{:?}` is not supported by the legacy plan API; use GenerateSplatRequestBuilder::build2()", self.model)
-      )),
+      _ => Err(ArtcraftRouterError::UnsupportedModel(format!("Splat generation for model `{:?}` is not supported by the legacy plan API; use GenerateSplatRequestBuilder::build2()", self.model))),
     }
   }
 
   fn unsupported_provider(&self) -> Result<SplatGenerationPlan, ArtcraftRouterError> {
-    Err(ArtcraftRouterError::UnsupportedModel(
-      format!("Splat generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)
-    ))
+    Err(ArtcraftRouterError::UnsupportedModel(format!("Splat generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)))
   }
 
   pub fn get_or_generate_idempotency_token(&self) -> String {
-    self.idempotency_token.clone()
-        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+    self.idempotency_token.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
   }
 }

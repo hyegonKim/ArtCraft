@@ -59,7 +59,7 @@ pub enum TaskModelType {
   GrokImage,
   #[serde(rename = "recraft_3")]
   Recraft3,
-  
+
   // Generic Midjourney model, version unknown.
   #[serde(rename = "midjourney")]
   Midjourney,
@@ -611,7 +611,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 24;
+      const MAX_LENGTH: usize = 24;
       for variant in TaskModelType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

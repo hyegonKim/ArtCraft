@@ -54,10 +54,7 @@ mod tests {
 
   #[test]
   fn every_known_variant_round_trips() {
-    let all = [
-      (ApiClientBitrate::Normal, "normal"),
-      (ApiClientBitrate::High, "high"),
-    ];
+    let all = [(ApiClientBitrate::Normal, "normal"), (ApiClientBitrate::High, "high")];
     for (variant, s) in all {
       assert_eq!(String::from(variant.clone()), s, "serialize mismatch for {:?}", variant);
       let parsed: ApiClientBitrate = serde_json::from_str(&format!("\"{}\"", s)).unwrap();

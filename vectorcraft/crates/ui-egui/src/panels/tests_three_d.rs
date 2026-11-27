@@ -849,10 +849,7 @@ fn materials_tab_exposes_substance_presets_and_raytracing_with_korean_i18n() {
     assert_eq!(params["ambientOcclusion"], 70.0);
 
     app.run("edit.undo", json!({})).unwrap();
-    assert_eq!(
-        vectorcraft_effects::merged_params("threeD.extrude", &effect(&app).1)["substancePreset"],
-        "none"
-    );
+    assert_eq!(vectorcraft_effects::merged_params("threeD.extrude", &effect(&app).1)["substancePreset"], "none");
     app.run("edit.redo", json!({})).unwrap();
     assert_eq!(effect(&app).1["substancePreset"], "carraraMarble");
 

@@ -35,7 +35,7 @@ pub mod test_fonts;
 pub mod thread;
 
 pub use bitmap::GlyphImage;
-pub use colr::{colr_palette_count, colour_glyph_vector, colour_glyph_with_palette, has_colr_table};
+pub use colr::{colour_glyph_vector, colour_glyph_with_palette, colr_palette_count, has_colr_table};
 pub use context_alternates::{ContextAlternate, ContextAlternates, alternate_changes, alternates_in_context, is_alternate_feature};
 pub use craft_fonts::{CRAFT_FONTS, CraftFont, WEB_FONTS, WebFont};
 pub use features::{

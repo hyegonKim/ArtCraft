@@ -13,15 +13,7 @@ impl ArtcraftFlux1SchnellCostState {
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
-    ImageGenerationCostEstimate {
-      cost_in_credits: None,
-      cost_in_usd_cents: None,
-      is_free: true,
-      is_unlimited: true,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: None, cost_in_usd_cents: None, is_free: true, is_unlimited: true, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -33,22 +25,7 @@ mod tests {
   use crate::generate::generate_image::generate_image_request_builder::GenerateImageRequestBuilder;
 
   fn build_estimate() -> crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate {
-    let builder = GenerateImageRequestBuilder {
-      model: RouterImageModel::Flux1Schnell,
-      provider: RouterProvider::Artcraft,
-      prompt: None,
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: Some(1),
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    };
+    let builder = GenerateImageRequestBuilder { model: RouterImageModel::Flux1Schnell, provider: RouterProvider::Artcraft, prompt: None, image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: Some(1), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None };
     builder.build2().unwrap().estimate_cost().unwrap()
   }
 

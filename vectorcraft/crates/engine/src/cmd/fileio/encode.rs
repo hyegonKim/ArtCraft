@@ -333,10 +333,8 @@ fn transform_node_decomposed(node: &std::sync::Arc<vectorcraft_doc::Node>, mode:
             }
             NodeKind::Layer { .. } | NodeKind::Group { .. } => {
                 let mut copy = Node::clone(node);
-                let kept: Vec<_> = copy
-                    .children()
-                    .map(|ch| ch.iter().filter_map(|c| transform_node_decomposed(c, mode)).collect())
-                    .unwrap_or_default();
+                let kept: Vec<_> =
+                    copy.children().map(|ch| ch.iter().filter_map(|c| transform_node_decomposed(c, mode)).collect()).unwrap_or_default();
                 if kept.is_empty() && !matches!(copy.kind, NodeKind::Layer { .. }) {
                     return None;
                 }
@@ -763,12 +761,8 @@ fn encode_files(doc: &Document, f: &Format, p: &Value) -> Result<Encoded> {
         }
         "png" | "jpg" | "webp" | "gif" | "png8" | "tiff" | "bmp" | "tga" | "psd" => {
             let o: RasterOptions = options(f, p)?;
-            let decomposed = parse(
-                o.decomposed_mode.as_deref(),
-                DecomposedMode::from_id,
-                "decomposedMode",
-                "full, noText, textOnly or textWhiteOnBlack",
-            )?;
+            let decomposed =
+                parse(o.decomposed_mode.as_deref(), DecomposedMode::from_id, "decomposedMode", "full, noText, textOnly or textWhiteOnBlack")?;
             // New Document → Background Contents: White makes the export opaque, unless `background`
             // says otherwise (JPEG has no alpha: white either way).
             let page = (doc.setup.background == vectorcraft_doc::Background::White).then_some([255; 3]);

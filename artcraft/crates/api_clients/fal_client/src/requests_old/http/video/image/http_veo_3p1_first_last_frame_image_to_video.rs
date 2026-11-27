@@ -35,8 +35,6 @@ pub struct Veo3p1FirstLastFrameImageToVideoOutput {
   pub video: Veo3p1FirstLastFrameImageToVideoVideoFile,
 }
 
-pub fn veo_3p1_first_last_frame_image_to_video(
-  params: Veo3p1FirstLastFrameImageToVideoInput,
-) -> FalRequest<Veo3p1FirstLastFrameImageToVideoInput, Veo3p1FirstLastFrameImageToVideoOutput> {
+pub fn veo_3p1_first_last_frame_image_to_video(params: Veo3p1FirstLastFrameImageToVideoInput) -> FalRequest<Veo3p1FirstLastFrameImageToVideoInput, Veo3p1FirstLastFrameImageToVideoOutput> {
   FalRequest::new("fal-ai/veo3.1/first-last-frame-to-video", params)
 }

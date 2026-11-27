@@ -40,8 +40,6 @@ pub struct Flux1DevTextToImageOutput {
   pub images: Vec<Flux1DevTextToImageFile>,
 }
 
-pub fn flux_1_dev_text_to_image(
-  params: Flux1DevTextToImageInput,
-) -> FalRequest<Flux1DevTextToImageInput, Flux1DevTextToImageOutput> {
+pub fn flux_1_dev_text_to_image(params: Flux1DevTextToImageInput) -> FalRequest<Flux1DevTextToImageInput, Flux1DevTextToImageOutput> {
   FalRequest::new("fal-ai/flux/dev", params)
 }

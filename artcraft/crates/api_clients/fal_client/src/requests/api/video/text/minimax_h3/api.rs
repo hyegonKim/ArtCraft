@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::minimax_h3::raw_request::{
-  MinimaxH3TextToVideoInput, MinimaxH3TextToVideoOutput,
-};
+use crate::requests::api::video::text::minimax_h3::raw_request::{MinimaxH3TextToVideoInput, MinimaxH3TextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -72,12 +70,7 @@ impl FalEndpoint for MinimaxH3TextToVideoRequest {
   type RawResponse = MinimaxH3TextToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      duration: self.duration,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), duration: self.duration, resolution: self.resolution.map(|r| r.to_str().to_string()), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()) })
   }
 }
 
@@ -97,12 +90,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3TextToVideoRequest {
-      prompt: "a white kitten chases a butterfly across a sunlit garden".to_string(),
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-      aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::SixteenByNine),
-    };
+    let request = MinimaxH3TextToVideoRequest { prompt: "a white kitten chases a butterfly across a sunlit garden".to_string(), duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP), aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::SixteenByNine) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -116,12 +104,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3TextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-      aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::SixteenByNine),
-    };
+    let request = MinimaxH3TextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP), aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::SixteenByNine) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -133,12 +116,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = MinimaxH3TextToVideoRequest {
-      prompt: "p".to_string(),
-      duration: Some(12),
-      resolution: Some(MinimaxH3Resolution::TwoK),
-      aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::FourByThree),
-    };
+    let request = MinimaxH3TextToVideoRequest { prompt: "p".to_string(), duration: Some(12), resolution: Some(MinimaxH3Resolution::TwoK), aspect_ratio: Some(MinimaxH3TextToVideoAspectRatio::FourByThree) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.duration, Some(12));
@@ -148,22 +126,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = MinimaxH3TextToVideoRequest {
-      prompt: "minimal".to_string(),
-      duration: None,
-      resolution: None,
-      aspect_ratio: None,
-    };
+    let request = MinimaxH3TextToVideoRequest { prompt: "minimal".to_string(), duration: None, resolution: None, aspect_ratio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn every_resolution_maps_to_wire_string() {
-    for (variant, expected, is_2k) in [
-      (MinimaxH3Resolution::SevenSixtyEightP, "768P", false),
-      (MinimaxH3Resolution::TwoK, "2K", true),
-    ] {
+    for (variant, expected, is_2k) in [(MinimaxH3Resolution::SevenSixtyEightP, "768P", false), (MinimaxH3Resolution::TwoK, "2K", true)] {
       assert_eq!(variant.to_str(), expected);
       assert_eq!(variant.is_2k(), is_2k);
     }
@@ -171,14 +141,7 @@ mod tests {
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (MinimaxH3TextToVideoAspectRatio::TwentyOneByNine, "21:9"),
-      (MinimaxH3TextToVideoAspectRatio::SixteenByNine, "16:9"),
-      (MinimaxH3TextToVideoAspectRatio::FourByThree, "4:3"),
-      (MinimaxH3TextToVideoAspectRatio::Square, "1:1"),
-      (MinimaxH3TextToVideoAspectRatio::ThreeByFour, "3:4"),
-      (MinimaxH3TextToVideoAspectRatio::NineBySixteen, "9:16"),
-    ] {
+    for (variant, expected) in [(MinimaxH3TextToVideoAspectRatio::TwentyOneByNine, "21:9"), (MinimaxH3TextToVideoAspectRatio::SixteenByNine, "16:9"), (MinimaxH3TextToVideoAspectRatio::FourByThree, "4:3"), (MinimaxH3TextToVideoAspectRatio::Square, "1:1"), (MinimaxH3TextToVideoAspectRatio::ThreeByFour, "3:4"), (MinimaxH3TextToVideoAspectRatio::NineBySixteen, "9:16")] {
       assert_eq!(variant.to_str(), expected);
     }
   }

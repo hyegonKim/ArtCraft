@@ -7,12 +7,11 @@ use regex::Regex;
 /// eg. {\"videoId\":\"34fa0313-3cde-4693-b046-319093374dbe\"
 static JSON_REGEX: Lazy<Regex> = Lazy::new(|| {
   // NB: Should be a 36 character UUID.
-  Regex::new(r#"\\?"videoI[dD]\\?":\s*\\?"([a-zA-Z0-9-]{25,})\\?",?"#)
-      .expect("Regex should parse")
+  Regex::new(r#"\\?"videoI[dD]\\?":\s*\\?"([a-zA-Z0-9-]{25,})\\?",?"#).expect("Regex should parse")
 });
 
 /// Look for this in the incomplete byte stream to try parsing it out.
-const VIDEO_BYTES : &[u8] = b"videoI";
+const VIDEO_BYTES: &[u8] = b"videoI";
 
 /// Parse the video ID from the streamed response
 pub fn parse_video_id_from_partial_byte_stream_buffer(bytes: &[u8]) -> Option<FileId> {
@@ -25,7 +24,7 @@ pub fn parse_video_id_from_partial_byte_stream_buffer(bytes: &[u8]) -> Option<Fi
   let maybe_meta = scrape_video_id_via_regex(&partial_json);
 
   if let Some(meta) = maybe_meta {
-    return Some(FileId(meta))
+    return Some(FileId(meta));
   }
 
   None

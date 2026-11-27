@@ -22,36 +22,20 @@ pub struct ArtcraftSeedream5p0ProCostState {
 
 impl ArtcraftSeedream5p0ProCostState {
   pub fn from_request(request: &ArtcraftSeedream5p0ProRequestState) -> Self {
-    Self {
-      resolution: request.request.resolution,
-      num_images: request.request.image_batch_count.unwrap_or(1),
-    }
+    Self { resolution: request.request.resolution, num_images: request.request.image_batch_count.unwrap_or(1) }
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let cost_per_image: u64 = cost_per_image_in_cents(self.resolution);
     let cost_in_usd_cents = cost_per_image * self.num_images as u64;
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
 fn cost_per_image_in_cents(resolution: Option<CommonResolutionEnum>) -> u64 {
   use CommonResolutionEnum as R;
   match resolution {
-    None
-    | Some(R::HalfK)
-    | Some(R::OneK)
-    | Some(R::FourEightyP)
-    | Some(R::SevenTwentyP)
-    | Some(R::TenEightyP) => USD_CENTS_PER_IMAGE_1K,
+    None | Some(R::HalfK) | Some(R::OneK) | Some(R::FourEightyP) | Some(R::SevenTwentyP) | Some(R::TenEightyP) => USD_CENTS_PER_IMAGE_1K,
     Some(R::TwoK) | Some(R::ThreeK) | Some(R::FourK) => USD_CENTS_PER_IMAGE_2K,
   }
 }
@@ -66,22 +50,7 @@ mod tests {
   use crate::generate::generate_image::generate_image_request_builder::GenerateImageRequestBuilder;
 
   fn estimate(resolution: Option<RouterResolution>, image_batch_count: u16) -> ImageGenerationCostEstimate {
-    let builder = GenerateImageRequestBuilder {
-      model: RouterImageModel::Seedream5p0Pro,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("an anime girl riding a dinosaur".to_string()),
-      image_inputs: None,
-      resolution,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: Some(image_batch_count),
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    };
+    let builder = GenerateImageRequestBuilder { model: RouterImageModel::Seedream5p0Pro, provider: RouterProvider::Artcraft, prompt: Some("an anime girl riding a dinosaur".to_string()), image_inputs: None, resolution, aspect_ratio: None, quality: None, image_batch_count: Some(image_batch_count), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None };
     builder.build2().unwrap().estimate_cost().unwrap()
   }
 
@@ -92,44 +61,42 @@ mod tests {
   // ── Default / 1K (7¢) ──
 
   #[test]
-  fn default_resolution_one_image_is_7c() { assert_eq!(cost_cents(None, 1), 7); }
+  fn default_resolution_one_image_is_7c() {
+    assert_eq!(cost_cents(None, 1), 7);
+  }
 
   #[test]
-  fn one_k_one_image_is_7c() { assert_eq!(cost_cents(Some(RouterResolution::OneK), 1), 7); }
+  fn one_k_one_image_is_7c() {
+    assert_eq!(cost_cents(Some(RouterResolution::OneK), 1), 7);
+  }
 
   #[test]
-  fn one_k_four_images_is_28c() { assert_eq!(cost_cents(Some(RouterResolution::OneK), 4), 28); }
+  fn one_k_four_images_is_28c() {
+    assert_eq!(cost_cents(Some(RouterResolution::OneK), 4), 28);
+  }
 
   // ── 2K (12¢) ──
 
   #[test]
-  fn two_k_one_image_is_12c() { assert_eq!(cost_cents(Some(RouterResolution::TwoK), 1), 12); }
+  fn two_k_one_image_is_12c() {
+    assert_eq!(cost_cents(Some(RouterResolution::TwoK), 1), 12);
+  }
 
   #[test]
-  fn two_k_four_images_is_48c() { assert_eq!(cost_cents(Some(RouterResolution::TwoK), 4), 48); }
+  fn two_k_four_images_is_48c() {
+    assert_eq!(cost_cents(Some(RouterResolution::TwoK), 4), 48);
+  }
 
   // ── Fallbacks ──
 
   #[test]
   fn four_k_falls_back_to_two_k_pricing() {
-    assert_eq!(
-      ArtcraftSeedream5p0ProCostState {
-        resolution: Some(CommonResolutionEnum::FourK),
-        num_images: 1,
-      }.estimate_cost().cost_in_usd_cents,
-      Some(12),
-    );
+    assert_eq!(ArtcraftSeedream5p0ProCostState { resolution: Some(CommonResolutionEnum::FourK), num_images: 1 }.estimate_cost().cost_in_usd_cents, Some(12),);
   }
 
   #[test]
   fn half_k_falls_back_to_one_k_pricing() {
-    assert_eq!(
-      ArtcraftSeedream5p0ProCostState {
-        resolution: Some(CommonResolutionEnum::HalfK),
-        num_images: 1,
-      }.estimate_cost().cost_in_usd_cents,
-      Some(7),
-    );
+    assert_eq!(ArtcraftSeedream5p0ProCostState { resolution: Some(CommonResolutionEnum::HalfK), num_images: 1 }.estimate_cost().cost_in_usd_cents, Some(7),);
   }
 
   // ── Credits track USD cents exactly (1 credit = 1 cent) ──
@@ -148,28 +115,14 @@ mod tests {
 
   #[test]
   fn price_covers_kinovi_cost() {
-    use kinovi_web_client::generate::image::generate_seedream_5p0_pro::{
-      KinoviSeedream5p0ProBatchCount, KinoviSeedream5p0ProResolution,
-    };
+    use kinovi_web_client::generate::image::generate_seedream_5p0_pro::{KinoviSeedream5p0ProBatchCount, KinoviSeedream5p0ProResolution};
     use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::cost::KinoviSeedream5p0ProCostState;
 
-    let cases = [
-      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 1u16, KinoviSeedream5p0ProBatchCount::One),
-      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
-      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 1u16, KinoviSeedream5p0ProBatchCount::One),
-      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
-    ];
+    let cases = [(RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 1u16, KinoviSeedream5p0ProBatchCount::One), (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 4u16, KinoviSeedream5p0ProBatchCount::Four), (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 1u16, KinoviSeedream5p0ProBatchCount::One), (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 4u16, KinoviSeedream5p0ProBatchCount::Four)];
     for (router_res, kinovi_res, batch, kinovi_batch) in cases {
       let artcraft_cents = cost_cents(Some(router_res), batch);
-      let kinovi_cents = KinoviSeedream5p0ProCostState {
-        resolution: kinovi_res,
-        batch_count: kinovi_batch,
-      }.estimate_cost().cost_in_usd_cents.unwrap();
-      assert!(
-        artcraft_cents > kinovi_cents,
-        "artcraft price {}¢ must exceed kinovi cost {}¢ ({:?} batch {})",
-        artcraft_cents, kinovi_cents, router_res, batch,
-      );
+      let kinovi_cents = KinoviSeedream5p0ProCostState { resolution: kinovi_res, batch_count: kinovi_batch }.estimate_cost().cost_in_usd_cents.unwrap();
+      assert!(artcraft_cents > kinovi_cents, "artcraft price {}¢ must exceed kinovi cost {}¢ ({:?} batch {})", artcraft_cents, kinovi_cents, router_res, batch,);
     }
   }
 

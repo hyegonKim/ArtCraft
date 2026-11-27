@@ -10,8 +10,5 @@ pub(crate) fn storyteller_client_builder(api_host: &ApiHost) -> ClientBuilder {
   let mut headers = HeaderMap::new();
   headers.insert(ORIGIN, HeaderValue::from_static(api_host.request_origin()));
 
-  Client::builder()
-    .user_agent(ARTCRAFT_DESKTOP_USER_AGENT)
-    .default_headers(headers)
-    .gzip(true)
+  Client::builder().user_agent(ARTCRAFT_DESKTOP_USER_AGENT).default_headers(headers).gzip(true)
 }

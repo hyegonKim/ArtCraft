@@ -16,14 +16,8 @@ pub const KIND: &str = "preflight";
 
 const LABEL_W: f32 = 96.0;
 
-pub(super) const SPEC: DialogSpec = DialogSpec {
-    heading: |_| tl!("Review Before Export").into(),
-    body,
-    confirm,
-    ok: Some("Export…"),
-    min_width: 420.0,
-    ..DialogSpec::FORM
-};
+pub(super) const SPEC: DialogSpec =
+    DialogSpec { heading: |_| tl!("Review Before Export").into(), body, confirm, ok: Some("Export…"), min_width: 420.0, ..DialogSpec::FORM };
 
 pub fn fields() -> Value {
     json!({
@@ -34,13 +28,7 @@ pub fn fields() -> Value {
 
 fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
     let t = Tokens::get(ui.ctx());
-    let targets = [
-        ("web", tl!("Web")),
-        ("print", tl!("Print")),
-        ("pdf", tl!("PDF")),
-        ("svg", tl!("SVG")),
-        ("png", tl!("PNG")),
-    ];
+    let targets = [("web", tl!("Web")), ("print", tl!("Print")), ("pdf", tl!("PDF")), ("svg", tl!("SVG")), ("png", tl!("PNG"))];
     form::choice(ui, d, "target", tl!("Target"), (LABEL_W, 148.0), &targets);
     form::slider_w(ui, d, ("minPpi", tl!("Minimum PPI"), LABEL_W), 72.0..=600.0, " ppi", &|x| c32(&Color::gray(0.25 + 0.55 * x)));
 
@@ -69,11 +57,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
 }
 
 fn mask_pick() -> FilePick {
-    FilePick {
-        name: "text-mask.png".into(),
-        folder: None,
-        filters: vec![FilePick::filter("PNG", &["png"])],
-    }
+    FilePick { name: "text-mask.png".into(), folder: None, filters: vec![FilePick::filter("PNG", &["png"])] }
 }
 
 fn draw_report(ui: &mut egui::Ui, rep: &Value, t: &Tokens) {
@@ -89,19 +73,12 @@ fn draw_report(ui: &mut egui::Ui, rep: &Value, t: &Tokens) {
     let status_text = if errors == 0 && warnings == 0 {
         tl!("Ready to export — no issues detected").to_string()
     } else {
-        crate::i18n::fmt(
-            tl!("Errors: {errors}, Warnings: {warnings}"),
-            &[("errors", &errors.to_string()), ("warnings", &warnings.to_string())],
-        )
+        crate::i18n::fmt(tl!("Errors: {errors}, Warnings: {warnings}"), &[("errors", &errors.to_string()), ("warnings", &warnings.to_string())])
     };
     ui.label(egui::RichText::new(status_text).strong().color(badge_col));
 
     let rec_fmt = rep["recommendedFormat"].as_str().unwrap_or("svg").to_ascii_uppercase();
-    ui.label(
-        egui::RichText::new(crate::i18n::fmt(tl!("Recommended format: {format}"), &[("format", &rec_fmt)]))
-            .size(11.5)
-            .color(t.text_dim),
-    );
+    ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Recommended format: {format}"), &[("format", &rec_fmt)])).size(11.5).color(t.text_dim));
 
     if let Some(issues) = rep["issues"].as_array()
         && !issues.is_empty()

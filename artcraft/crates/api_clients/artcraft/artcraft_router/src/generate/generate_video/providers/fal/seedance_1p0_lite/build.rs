@@ -1,6 +1,4 @@
-use fal_client::requests_old::webhook::video::image::enqueue_seedance_1_lite_image_to_video_webhook::{
-  Seedance1LiteAspectRatio, Seedance1LiteDuration, Seedance1LiteRequest, Seedance1LiteResolution,
-};
+use fal_client::requests_old::webhook::video::image::enqueue_seedance_1_lite_image_to_video_webhook::{Seedance1LiteAspectRatio, Seedance1LiteDuration, Seedance1LiteRequest, Seedance1LiteResolution};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::router_resolution::RouterResolution;
@@ -13,32 +11,17 @@ use crate::generate::generate_video::providers::fal::seedance_1p0_lite::request:
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
-pub fn build_fal_seedance_1p0_lite(
-  mut builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_seedance_1p0_lite(mut builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
-  let image_url = require_url(
-    builder.start_frame.take(),
-    "start_frame",
-    "Seedance 1.0 Lite requires a starting frame",
-  )?;
+  let image_url = require_url(builder.start_frame.take(), "start_frame", "Seedance 1.0 Lite requires a starting frame")?;
   let end_frame_image_url = optional_url(builder.end_frame.take())?;
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio.take(), strategy)?;
   let resolution = plan_resolution(builder.resolution.take(), strategy)?;
   let duration = plan_duration(builder.duration_seconds.take(), strategy)?;
   let prompt = builder.prompt.take().unwrap_or_default();
 
-  let request = Seedance1LiteRequest {
-    image_url,
-    end_frame_image_url,
-    prompt,
-    duration,
-    resolution,
-    aspect_ratio,
-    camera_fixed: false,
-    seed: None,
-  };
+  let request = Seedance1LiteRequest { image_url, end_frame_image_url, prompt, duration, resolution, aspect_ratio, camera_fixed: false, seed: None };
 
   let state = FalSeedance10LiteRequestState { request };
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalSeedance10Lite(state)))
@@ -46,23 +29,11 @@ pub fn build_fal_seedance_1p0_lite(
 
 // ── Plan helpers (copies of v1 logic; kept in sync intentionally) ──
 
-fn require_url(
-  start_frame: Option<ImageRef>,
-  field: &'static str,
-  msg: &'static str,
-) -> Result<String, ArtcraftRouterError> {
+fn require_url(start_frame: Option<ImageRef>, field: &'static str, msg: &'static str) -> Result<String, ArtcraftRouterError> {
   match start_frame {
     Some(ImageRef::Url(url)) => Ok(url),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field,
-        value: "Fal only supports image URLs, not media file tokens".to_string(),
-      }))
-    }
-    None => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field,
-      value: msg.to_string(),
-    })),
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: "Fal only supports image URLs, not media file tokens".to_string() })),
+    None => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, value: msg.to_string() })),
   }
 }
 
@@ -70,26 +41,16 @@ fn optional_url(image_ref: Option<ImageRef>) -> Result<Option<String>, ArtcraftR
   match image_ref {
     None => Ok(None),
     Some(ImageRef::Url(url)) => Ok(Some(url)),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "end_frame",
-        value: "Fal only supports image URLs, not media file tokens".to_string(),
-      }))
-    }
+    Some(ImageRef::MediaFileToken(_)) => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Fal only supports image URLs, not media file tokens".to_string() })),
   }
 }
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<Seedance1LiteAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<Seedance1LiteAspectRatio>, ArtcraftRouterError> {
   use Seedance1LiteAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
 
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(Ar::Square)),
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(Ar::FourByThree)),
@@ -99,21 +60,13 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(Ar::Auto)),
     },
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Seedance1LiteResolution, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Seedance1LiteResolution, ArtcraftRouterError> {
   use Seedance1LiteResolution as R;
   match resolution {
     None => Ok(R::SevenTwentyP),
@@ -121,33 +74,20 @@ fn plan_resolution(
     Some(RouterResolution::SevenTwentyP) => Ok(R::SevenTwentyP),
     Some(RouterResolution::TenEightyP) => Ok(R::TenEightyP),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(R::TenEightyP),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(R::FourEightyP),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Seedance1LiteDuration, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Seedance1LiteDuration, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(Seedance1LiteDuration::FiveSeconds),
     Some(5) => Ok(Seedance1LiteDuration::FiveSeconds),
     Some(10) => Ok(Seedance1LiteDuration::TenSeconds),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Seedance1LiteDuration::TenSeconds),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Seedance1LiteDuration::FiveSeconds),
     },
@@ -167,13 +107,7 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance10Lite,
-      provider: RouterProvider::Fal,
-      prompt: Some("a corgi running".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance10Lite, provider: RouterProvider::Fal, prompt: Some("a corgi running".to_string()), start_frame: Some(ImageRef::Url("https://example.com/start.png".to_string())), ..Default::default() }
   }
 
   fn make_builder(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {
@@ -204,7 +138,9 @@ mod tests {
 
     #[test]
     fn prompt_defaults_to_empty() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.prompt = None; })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.prompt = None;
+      })));
       assert_eq!(req.prompt, "");
     }
 
@@ -250,7 +186,9 @@ mod tests {
 
     #[test]
     fn missing_start_frame_errors() {
-      let result = build_fal_seedance_1p0_lite(make_builder(|b| { b.start_frame = None; }));
+      let result = build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.start_frame = None;
+      }));
       assert!(result.is_err());
     }
 
@@ -311,7 +249,9 @@ mod tests {
 
     #[test]
     fn resolution_none_defaults_to_720p() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.resolution = None; })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.resolution = None;
+      })));
       assert_eq!(req.resolution, Seedance1LiteResolution::SevenTwentyP);
     }
 
@@ -350,19 +290,25 @@ mod tests {
 
     #[test]
     fn duration_5s() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.duration_seconds = Some(5); })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.duration_seconds = Some(5);
+      })));
       assert_eq!(req.duration, Seedance1LiteDuration::FiveSeconds);
     }
 
     #[test]
     fn duration_10s() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.duration_seconds = Some(10); })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.duration_seconds = Some(10);
+      })));
       assert_eq!(req.duration, Seedance1LiteDuration::TenSeconds);
     }
 
     #[test]
     fn duration_none_defaults_to_5s() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.duration_seconds = None; })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.duration_seconds = None;
+      })));
       assert_eq!(req.duration, Seedance1LiteDuration::FiveSeconds);
     }
 
@@ -457,7 +403,9 @@ mod tests {
 
     #[test]
     fn none() {
-      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| { b.aspect_ratio = None; })));
+      let req = unwrap_request(build_fal_seedance_1p0_lite(make_builder(|b| {
+        b.aspect_ratio = None;
+      })));
       assert!(req.aspect_ratio.is_none());
     }
 
@@ -484,23 +432,9 @@ mod tests {
 
   #[test]
   fn full_combinatorial_pass() {
-    let resolutions = [
-      None,
-      Some(RouterResolution::FourEightyP),
-      Some(RouterResolution::SevenTwentyP),
-      Some(RouterResolution::TenEightyP),
-    ];
+    let resolutions = [None, Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP)];
     let durations = [None, Some(5u16), Some(10u16)];
-    let aspect_ratios = [
-      None,
-      Some(RouterAspectRatio::Auto),
-      Some(RouterAspectRatio::Square),
-      Some(RouterAspectRatio::WideFourByThree),
-      Some(RouterAspectRatio::WideSixteenByNine),
-      Some(RouterAspectRatio::WideTwentyOneByNine),
-      Some(RouterAspectRatio::TallThreeByFour),
-      Some(RouterAspectRatio::TallNineBySixteen),
-    ];
+    let aspect_ratios = [None, Some(RouterAspectRatio::Auto), Some(RouterAspectRatio::Square), Some(RouterAspectRatio::WideFourByThree), Some(RouterAspectRatio::WideSixteenByNine), Some(RouterAspectRatio::WideTwentyOneByNine), Some(RouterAspectRatio::TallThreeByFour), Some(RouterAspectRatio::TallNineBySixteen)];
 
     let mut combos = 0;
     for &res in &resolutions {

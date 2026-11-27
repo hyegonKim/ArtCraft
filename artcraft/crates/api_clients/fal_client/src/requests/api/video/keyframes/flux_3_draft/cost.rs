@@ -21,27 +21,14 @@ mod tests {
   use crate::requests::api::video::keyframes::flux_3::raw_request::Flux3Keyframe;
 
   fn make_request(duration: Option<u8>) -> Flux3DraftKeyframesToVideoRequest {
-    Flux3DraftKeyframesToVideoRequest {
-      prompt: "test".to_string(),
-      keyframes: vec![
-        Flux3Keyframe { image_url: "https://example.com/a.png".to_string(), frame_index: 0 },
-      ],
-      duration,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    }
+    Flux3DraftKeyframesToVideoRequest { prompt: "test".to_string(), keyframes: vec![Flux3Keyframe { image_url: "https://example.com/a.png".to_string(), frame_index: 0 }], duration, aspect_ratio: None, generate_audio: None, safety_tolerance: None }
   }
 
   mod cost_table {
     use super::*;
 
     // (duration, expected_cents) — 6¢ × secs; None defaults to 5s.
-    const COST_TABLE: &[(Option<u8>, u64)] = &[
-      (Some(5),  30),
-      (Some(20), 120),
-      (None, 30),
-    ];
+    const COST_TABLE: &[(Option<u8>, u64)] = &[(Some(5), 30), (Some(20), 120), (None, 30)];
 
     #[test]
     fn matches_cost_table() {

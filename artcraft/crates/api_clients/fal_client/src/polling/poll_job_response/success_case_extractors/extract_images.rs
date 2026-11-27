@@ -13,8 +13,10 @@ pub struct PollResponseImageEntry {
 
 pub fn extract_images(value: &Value) -> Option<Vec<PollResponseImageEntry>> {
   let arr = value.get("images")?.as_array()?;
-  let images: Vec<PollResponseImageEntry> = arr.iter()
-    .filter_map(|v| serde_json::from_value(v.clone()).ok())
-    .collect();
-  if images.is_empty() { None } else { Some(images) }
+  let images: Vec<PollResponseImageEntry> = arr.iter().filter_map(|v| serde_json::from_value(v.clone()).ok()).collect();
+  if images.is_empty() {
+    None
+  } else {
+    Some(images)
+  }
 }

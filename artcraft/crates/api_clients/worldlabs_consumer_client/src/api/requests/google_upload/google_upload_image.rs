@@ -32,46 +32,34 @@ pub struct GoogleUploadImageArgs<'a> {
 /// Upload the binary to GCP using the signed URL
 /// Request #4 (of ~10)
 pub async fn google_upload_image(args: GoogleUploadImageArgs<'_>) -> Result<(), WorldLabsError> {
-  let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| WorldLabsClientError::WreqClientError(err))?;
 
   let content_type = args.upload_mime_type.content_type();
 
   debug!("Requesting URL: {}", args.upload_url);
 
-  let mut request_builder = client.put(args.upload_url)
-      .header(CONTENT_TYPE, content_type)
-      .header("x-goog-content-length-range", "0,1048576000");
+  let mut request_builder = client.put(args.upload_url).header(CONTENT_TYPE, content_type).header("x-goog-content-length-range", "0,1048576000");
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let http_request = request_builder
-      .body(args.file_bytes)
-      .build()
-      .map_err(|err| {
-        error!("Error building request: {:?}", err);
-        WorldLabsClientError::WreqClientError(err)
-      })?;
+  let http_request = request_builder.body(args.file_bytes).build().map_err(|err| {
+    error!("Error building request: {:?}", err);
+    WorldLabsClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during request execution: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during request execution: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-      .await
-      .map_err(|err| {
-        error!("Error reading response body: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("Request returned an error (code {}) : {:?}", status.as_u16(), response_body);
@@ -87,5 +75,4 @@ pub async fn google_upload_image(args: GoogleUploadImageArgs<'_>) -> Result<(), 
 }
 
 #[cfg(test)]
-mod tests {
-}
+mod tests {}

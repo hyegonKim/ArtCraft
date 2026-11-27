@@ -55,7 +55,6 @@ pub enum EnqueueBytedanceSeedreamV5LiteTextToImageSize {
   Auto3k, // NB: v5 uses auto_3K instead of v4's auto_4K
 }
 
-
 impl FalRequestCostCalculator for EnqueueBytedanceSeedreamV5LiteTextToImageRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // TODO(bt): Verify actual pricing for Seedream v5 Lite on fal.ai.
@@ -71,41 +70,36 @@ impl FalRequestCostCalculator for EnqueueBytedanceSeedreamV5LiteTextToImageReque
   }
 }
 
-
-pub async fn enqueue_bytedance_seedream_v5_lite_text_to_image_webhook<R: IntoUrl>(
-  args: EnqueueBytedanceSeedreamV5LiteTextToImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_bytedance_seedream_v5_lite_text_to_image_webhook<R: IntoUrl>(args: EnqueueBytedanceSeedreamV5LiteTextToImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let num_images = req.num_images
-      .map(|n| match n {
-        EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::One => 1,
-        EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Two => 2,
-        EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Three => 3,
-        EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Four => 4,
-      });
+  let num_images = req.num_images.map(|n| match n {
+    EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::One => 1,
+    EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Two => 2,
+    EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Three => 3,
+    EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Four => 4,
+  });
 
-  let max_images = req.max_images
-      .map(|n| match n {
-        EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::One => 1,
-        EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Two => 2,
-        EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Three => 3,
-        EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Four => 4,
-      });
+  let max_images = req.max_images.map(|n| match n {
+    EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::One => 1,
+    EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Two => 2,
+    EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Three => 3,
+    EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Four => 4,
+  });
 
-  let image_size = req.image_size
-      .map(|s| match s {
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::Square => "square",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::SquareHd => "square_hd",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::PortraitFourThree => "portrait_4_3",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::PortraitSixteenNine => "portrait_16_9",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeFourThree => "landscape_4_3",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeSixteenNine => "landscape_16_9",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::Auto2k => "auto_2K",
-        EnqueueBytedanceSeedreamV5LiteTextToImageSize::Auto3k => "auto_3K",
-      })
-      .map(|s| s.to_string());
+  let image_size = req
+    .image_size
+    .map(|s| match s {
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::Square => "square",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::SquareHd => "square_hd",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::PortraitFourThree => "portrait_4_3",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::PortraitSixteenNine => "portrait_16_9",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeFourThree => "landscape_4_3",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeSixteenNine => "landscape_16_9",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::Auto2k => "auto_2K",
+      EnqueueBytedanceSeedreamV5LiteTextToImageSize::Auto3k => "auto_3K",
+    })
+    .map(|s| s.to_string());
 
   let request = SeedreamV5LiteTextToImageInput {
     prompt: req.prompt,
@@ -117,10 +111,7 @@ pub async fn enqueue_bytedance_seedream_v5_lite_text_to_image_webhook<R: IntoUrl
     enable_safety_checker: Some(false),
   };
 
-  let result = http_seedream_5_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = http_seedream_5_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -140,16 +131,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueBytedanceSeedreamV5LiteTextToImageArgs {
-      request: EnqueueBytedanceSeedreamV5LiteTextToImageRequest {
-        prompt: "an anime girl is riding a t-rex in the forest".to_string(),
-        num_images: Some(EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Two),
-        max_images: Some(EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Two),
-        image_size: Some(EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeSixteenNine),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueBytedanceSeedreamV5LiteTextToImageArgs { request: EnqueueBytedanceSeedreamV5LiteTextToImageRequest { prompt: "an anime girl is riding a t-rex in the forest".to_string(), num_images: Some(EnqueueBytedanceSeedreamV5LiteTextToImageNumImages::Two), max_images: Some(EnqueueBytedanceSeedreamV5LiteTextToImageMaxImages::Two), image_size: Some(EnqueueBytedanceSeedreamV5LiteTextToImageSize::LandscapeSixteenNine) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_bytedance_seedream_v5_lite_text_to_image_webhook(args).await?;
 

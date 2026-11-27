@@ -70,14 +70,7 @@ impl InferenceResultType {
   pub fn all_variants() -> BTreeSet<InferenceResultType> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      InferenceResultType::MediaFile,
-      InferenceResultType::TextToSpeech,
-      InferenceResultType::VoiceConversion,
-      InferenceResultType::ZeroShotVoiceEmbedding,
-      InferenceResultType::UploadModel,
-      InferenceResultType::Character,
-    ])
+    BTreeSet::from([InferenceResultType::MediaFile, InferenceResultType::TextToSpeech, InferenceResultType::VoiceConversion, InferenceResultType::ZeroShotVoiceEmbedding, InferenceResultType::UploadModel, InferenceResultType::Character])
   }
 }
 

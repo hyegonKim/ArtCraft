@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::video::generate_happy_horse_1p0::{
-  GenerateHappyHorse1p0Request, KinoviHappyHorse1p0AspectRatio,
-  KinoviHappyHorse1p0BatchCount, KinoviHappyHorse1p0OutputResolution,
-};
+use kinovi_web_client::generate::video::generate_happy_horse_1p0::{GenerateHappyHorse1p0Request, KinoviHappyHorse1p0AspectRatio, KinoviHappyHorse1p0BatchCount, KinoviHappyHorse1p0OutputResolution};
 
 use crate::api::image_ref::ImageRef;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
@@ -26,10 +23,7 @@ pub struct KinoviHappyHorse1p0RemainingItems {
 }
 
 impl KinoviHappyHorse1p0DraftState {
-  pub async fn to_request(
-    &mut self,
-    draft_context: &VideoGenerationDraftContext<'_>,
-  ) -> Result<KinoviHappyHorse1p0RequestState, ArtcraftRouterError> {
+  pub async fn to_request(&mut self, draft_context: &VideoGenerationDraftContext<'_>) -> Result<KinoviHappyHorse1p0RequestState, ArtcraftRouterError> {
     let client = draft_context.get_kinovi_web_client_ref()?;
     let session = &client.session;
 
@@ -41,14 +35,7 @@ impl KinoviHappyHorse1p0DraftState {
       start_frame_url = resolve_and_upload_single(session, remaining.start_frame, map, predownloaded).await?;
     }
 
-    let request = GenerateHappyHorse1p0Request {
-      prompt: self.prompt.clone(),
-      aspect_ratio: self.aspect_ratio,
-      output_resolution: self.resolution,
-      batch_count: self.batch_count,
-      duration_seconds: self.duration_seconds,
-      start_frame_url,
-    };
+    let request = GenerateHappyHorse1p0Request { prompt: self.prompt.clone(), aspect_ratio: self.aspect_ratio, output_resolution: self.resolution, batch_count: self.batch_count, duration_seconds: self.duration_seconds, start_frame_url };
 
     Ok(KinoviHappyHorse1p0RequestState { request })
   }

@@ -48,34 +48,22 @@ pub async fn delete_file(args: DeleteFileArgs<'_>) -> Result<DeleteFileSuccess, 
 
   info!("Grok delete_file: file_id={}", req.file_id);
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.delete(&url)
-    .header("Authorization", bearer)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.delete(&url).header("Authorization", bearer).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok delete_file response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: DeleteFileResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: DeleteFileResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  Ok(DeleteFileSuccess {
-    file_id: parsed.id,
-    deleted: parsed.deleted.unwrap_or(false),
-  })
+  Ok(DeleteFileSuccess { file_id: parsed.id, deleted: parsed.deleted.unwrap_or(false) })
 }
 
 #[cfg(test)]
@@ -104,10 +92,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = DeleteFileArgs {
-      api_key: &key,
-      request: DeleteFileRequest { file_id: "file_abc".to_string() },
-    };
+    let args = DeleteFileArgs { api_key: &key, request: DeleteFileRequest { file_id: "file_abc".to_string() } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"file_id\":\"file_abc\""));

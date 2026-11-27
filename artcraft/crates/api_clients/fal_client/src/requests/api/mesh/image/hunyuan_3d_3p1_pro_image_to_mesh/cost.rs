@@ -30,19 +30,7 @@ mod tests {
   use crate::requests::api::mesh::image::hunyuan_3d_3p1_pro_image_to_mesh::api::Hunyuan3d3p1ProImageToMeshGenerateType;
 
   fn base_request() -> Hunyuan3d3p1ProImageToMeshRequest {
-    Hunyuan3d3p1ProImageToMeshRequest {
-      image_url: "https://example.com/front.jpg".to_string(),
-      back_image_url: None,
-      left_image_url: None,
-      right_image_url: None,
-      top_image_url: None,
-      bottom_image_url: None,
-      left_front_image_url: None,
-      right_front_image_url: None,
-      generate_type: None,
-      face_count: None,
-      enable_pbr: None,
-    }
+    Hunyuan3d3p1ProImageToMeshRequest { image_url: "https://example.com/front.jpg".to_string(), back_image_url: None, left_image_url: None, right_image_url: None, top_image_url: None, bottom_image_url: None, left_front_image_url: None, right_front_image_url: None, generate_type: None, face_count: None, enable_pbr: None }
   }
 
   #[test]
@@ -52,10 +40,7 @@ mod tests {
 
   #[test]
   fn generate_type_does_not_change_cost() {
-    for t in [
-      Hunyuan3d3p1ProImageToMeshGenerateType::Normal,
-      Hunyuan3d3p1ProImageToMeshGenerateType::Geometry,
-    ] {
+    for t in [Hunyuan3d3p1ProImageToMeshGenerateType::Normal, Hunyuan3d3p1ProImageToMeshGenerateType::Geometry] {
       let mut req = base_request();
       req.generate_type = Some(t);
       assert_eq!(req.calculate_cost_in_cents(), 38);

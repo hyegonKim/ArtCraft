@@ -1,9 +1,7 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::kling_3p0_standard::request::{
-  FalKling3p0StandardMode, FalKling3p0StandardRequestState,
-};
+use crate::generate::generate_video::providers::fal::kling_3p0_standard::request::{FalKling3p0StandardMode, FalKling3p0StandardRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalKling3p0StandardCostState {
@@ -23,15 +21,7 @@ impl FalKling3p0StandardCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -71,18 +61,8 @@ mod tests {
   }
 
   fn cost_cents(duration_seconds: Option<u16>, generate_audio: Option<bool>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling3p0Standard,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      generate_audio,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling3p0Standard, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, generate_audio, ..Default::default() };
     let state = build_fal_kling_3p0_standard_state(b).expect("build_fal_kling_3p0_standard_state");
-    FalKling3p0StandardCostState::from_request(&state)
-      .estimate_cost()
-      .cost_in_usd_cents
-      .expect("cost_in_usd_cents")
+    FalKling3p0StandardCostState::from_request(&state).estimate_cost().cost_in_usd_cents.expect("cost_in_usd_cents")
   }
 }

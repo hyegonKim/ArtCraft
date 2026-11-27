@@ -20,16 +20,13 @@ pub trait TrimOrEmptyable {
 
 impl TrimOrEmptyable for Option<&str> {
   fn trim_or_empty(&self) -> Option<&str> {
-    self.map(|s| s.trim())
-        .filter(|s| !s.is_empty())
+    self.map(|s| s.trim()).filter(|s| !s.is_empty())
   }
 }
 
 impl TrimOrEmptyable for Option<String> {
   fn trim_or_empty(&self) -> Option<&str> {
-    self.as_deref()
-        .map(|s| s.trim())
-        .filter(|s| !s.is_empty())
+    self.as_deref().map(|s| s.trim()).filter(|s| !s.is_empty())
   }
 }
 
@@ -100,7 +97,6 @@ mod tests {
       assert_eq!(Some("    ").trim_or_empty(), None);
       assert_eq!(Some("   \n\t   \t   ").trim_or_empty(), None);
       assert_eq!(None::<&str>.trim_or_empty(), None);
-
     }
 
     #[test]

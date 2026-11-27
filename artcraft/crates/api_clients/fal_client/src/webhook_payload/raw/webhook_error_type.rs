@@ -46,8 +46,7 @@ pub enum WebhookErrorType {
 
 impl WebhookErrorType {
   pub fn from_str(value: &str) -> Self {
-    serde_json::from_value(serde_json::Value::String(value.to_string()))
-        .unwrap_or_else(|_| Self::Unknown(value.to_string()))
+    serde_json::from_value(serde_json::Value::String(value.to_string())).unwrap_or_else(|_| Self::Unknown(value.to_string()))
   }
 }
 

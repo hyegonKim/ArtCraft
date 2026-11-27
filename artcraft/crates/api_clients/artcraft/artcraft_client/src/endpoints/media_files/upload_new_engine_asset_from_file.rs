@@ -21,23 +21,15 @@ use uuid::uuid;
 // TODO: The naming of these methods is ridiculous. It needs to be cleaned up.
 
 /// Upload an image media file from a file.
-pub async fn upload_new_engine_asset_from_file<P: AsRef<Path>>(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  path: P,
-  maybe_generation_provider: Option<GenerationProvider>,
-) -> Result<UploadImageMediaFileSuccessResponse, ApiError> {
-
+pub async fn upload_new_engine_asset_from_file<P: AsRef<Path>>(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, path: P, maybe_generation_provider: Option<GenerationProvider>) -> Result<UploadImageMediaFileSuccessResponse, ApiError> {
   let url = get_route(api_host);
 
   debug!("Requesting {:?}", &url);
 
-  let client = storyteller_client_builder(api_host)
-      .build()?;
+  let client = storyteller_client_builder(api_host).build()?;
 
   let file_bytes = std::fs::read(path.as_ref())?;
-  let file_name = path.as_ref().file_name()
-      .and_then(|n| n.to_str()).unwrap_or("file").to_string();
+  let file_name = path.as_ref().file_name().and_then(|n| n.to_str()).unwrap_or("file").to_string();
   let mut form = Form::new()
       .text("uuid_idempotency_token", generate_random_uuid())
       .text("engine_category", "object") // TODO: Which type should we use?
@@ -47,19 +39,15 @@ pub async fn upload_new_engine_asset_from_file<P: AsRef<Path>>(
     form = form.text("maybe_generation_provider", provider.to_str().to_string());
   }
 
-  let mut request_builder = client.post(url)
-      .header("Accept", APPLICATION_JSON);
-  
+  let mut request_builder = client.post(url).header("Accept", APPLICATION_JSON);
+
   if let Some(creds) = maybe_creds {
     if let Some(header) = &creds.maybe_as_cookie_header() {
       request_builder = request_builder.header("Cookie", header);
     }
   }
-  
-  let response = request_builder
-      .multipart(form)
-      .send()
-      .await?;
+
+  let response = request_builder.multipart(form).send().await?;
 
   let response = filter_bad_response(response).await?;
   let response_body = &response.text().await?;

@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::reference::veo_3p1::raw_request::{
-  Veo3p1ReferenceToVideoInput, Veo3p1ReferenceToVideoOutput,
-};
+use crate::requests::api::video::reference::veo_3p1::raw_request::{Veo3p1ReferenceToVideoInput, Veo3p1ReferenceToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -128,16 +126,7 @@ impl FalEndpoint for Veo3p1ReferenceToVideoRequest {
   type RawResponse = Veo3p1ReferenceToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_urls: self.image_urls.clone(),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      auto_fix: self.auto_fix,
-      safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_urls: self.image_urls.clone(), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), duration: self.duration.map(|d| d.to_str().to_string()), resolution: self.resolution.map(|r| r.to_str().to_string()), generate_audio: self.generate_audio, auto_fix: self.auto_fix, safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()) })
   }
 }
 
@@ -158,19 +147,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1ReferenceToVideoRequest {
-      prompt: "the two dogs run side by side across a sunlit meadow".to_string(),
-      image_urls: vec![
-        TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      ],
-      aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1ReferenceToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1ReferenceToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1ReferenceToVideoRequest { prompt: "the two dogs run side by side across a sunlit meadow".to_string(), image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), JUNO_AT_LAKE_IMAGE_URL.to_string()], aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1ReferenceToVideoDuration::FourSeconds), resolution: Some(Veo3p1ReferenceToVideoResolution::SevenTwentyP), generate_audio: Some(false), auto_fix: None, safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -184,16 +161,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1ReferenceToVideoRequest {
-      prompt: "the dogs play together in a snowy field".to_string(),
-      image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()],
-      aspect_ratio: None,
-      duration: Some(Veo3p1ReferenceToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1ReferenceToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1ReferenceToVideoRequest { prompt: "the dogs play together in a snowy field".to_string(), image_urls: vec![TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string()], aspect_ratio: None, duration: Some(Veo3p1ReferenceToVideoDuration::FourSeconds), resolution: Some(Veo3p1ReferenceToVideoResolution::SevenTwentyP), generate_audio: Some(false), auto_fix: None, safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -205,16 +173,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo3p1ReferenceToVideoRequest {
-      prompt: "p".to_string(),
-      image_urls: vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string()],
-      aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::NineBySixteen),
-      duration: Some(Veo3p1ReferenceToVideoDuration::SixSeconds),
-      resolution: Some(Veo3p1ReferenceToVideoResolution::FourK),
-      generate_audio: Some(true),
-      auto_fix: Some(false),
-      safety_tolerance: Some(Veo3p1ReferenceToVideoSafetyTolerance::Level5),
-    };
+    let request = Veo3p1ReferenceToVideoRequest { prompt: "p".to_string(), image_urls: vec!["https://example.com/a.png".to_string(), "https://example.com/b.png".to_string()], aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::NineBySixteen), duration: Some(Veo3p1ReferenceToVideoDuration::SixSeconds), resolution: Some(Veo3p1ReferenceToVideoResolution::FourK), generate_audio: Some(true), auto_fix: Some(false), safety_tolerance: Some(Veo3p1ReferenceToVideoSafetyTolerance::Level5) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.image_urls.len(), 2);
     assert_eq!(raw.aspect_ratio.as_deref(), Some("9:16"));
@@ -227,37 +186,16 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo3p1ReferenceToVideoRequest {
-      prompt: "p".to_string(),
-      image_urls: vec!["https://example.com/a.png".to_string()],
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      generate_audio: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1ReferenceToVideoRequest { prompt: "p".to_string(), image_urls: vec!["https://example.com/a.png".to_string()], aspect_ratio: None, duration: None, resolution: None, generate_audio: None, auto_fix: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "prompt": "p", "image_urls": ["https://example.com/a.png"] }),
-    );
+    assert_eq!(json, serde_json::json!({ "prompt": "p", "image_urls": ["https://example.com/a.png"] }),);
   }
 
   /// This endpoint's schema has no `negative_prompt`/`seed` fields, so they
   /// must never appear on the wire regardless of other settings.
   #[test]
   fn raw_request_never_emits_negative_prompt_or_seed() {
-    let request = Veo3p1ReferenceToVideoRequest {
-      prompt: "p".to_string(),
-      image_urls: vec!["https://example.com/a.png".to_string()],
-      aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1ReferenceToVideoDuration::EightSeconds),
-      resolution: Some(Veo3p1ReferenceToVideoResolution::TenEightyP),
-      generate_audio: Some(true),
-      auto_fix: Some(true),
-      safety_tolerance: Some(Veo3p1ReferenceToVideoSafetyTolerance::Level4),
-    };
+    let request = Veo3p1ReferenceToVideoRequest { prompt: "p".to_string(), image_urls: vec!["https://example.com/a.png".to_string()], aspect_ratio: Some(Veo3p1ReferenceToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1ReferenceToVideoDuration::EightSeconds), resolution: Some(Veo3p1ReferenceToVideoResolution::TenEightyP), generate_audio: Some(true), auto_fix: Some(true), safety_tolerance: Some(Veo3p1ReferenceToVideoSafetyTolerance::Level4) };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert!(json.get("negative_prompt").is_none(), "unexpected negative_prompt: {json}");
     assert!(json.get("seed").is_none(), "unexpected seed: {json}");
@@ -265,10 +203,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Veo3p1ReferenceToVideoRequest::ENDPOINT,
-      "fal-ai/veo3.1/reference-to-video",
-    );
+    assert_eq!(Veo3p1ReferenceToVideoRequest::ENDPOINT, "fal-ai/veo3.1/reference-to-video",);
   }
 
   // NB: Pricing tests are in cost.rs

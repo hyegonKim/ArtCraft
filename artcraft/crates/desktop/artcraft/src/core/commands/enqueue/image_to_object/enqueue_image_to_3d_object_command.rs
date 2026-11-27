@@ -27,7 +27,7 @@ pub struct EnqueueImageTo3dObjectRequest {
   /// Image media file; the image to remove the background from.
   /// TODO: In the future we may support base64 images, URLs, or file paths here.
   pub image_media_token: Option<MediaFileToken>,
-  
+
   /// The model to use.
   pub model: Option<EnqueueImageTo3dObjectModel>,
 
@@ -50,7 +50,7 @@ pub struct EnqueueImageTo3dObjectRequest {
 #[derive(Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum EnqueueImageTo3dObjectModel {
-  #[deprecated(note="Use `hunyuan_3d_2_0` instead")]
+  #[deprecated(note = "Use `hunyuan_3d_2_0` instead")]
   #[serde(rename = "hunyuan_3d_2")]
   Hunyuan3d2,
   #[serde(rename = "hunyuan_3d_2_0")]
@@ -62,8 +62,7 @@ pub enum EnqueueImageTo3dObjectModel {
 }
 
 #[derive(Serialize)]
-pub struct EnqueueImageTo3dObjectSuccessResponse {
-}
+pub struct EnqueueImageTo3dObjectSuccessResponse {}
 
 impl SerializeMarker for EnqueueImageTo3dObjectSuccessResponse {}
 
@@ -85,35 +84,15 @@ pub enum EnqueueImageTo3dObjectErrorType {
 }
 
 #[tauri::command]
-pub async fn enqueue_image_to_3d_object_command(
-  app: AppHandle,
-  request: EnqueueImageTo3dObjectRequest,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  app_data_root: State<'_, AppDataRoot>,
-  artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>,
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-  task_database: State<'_, TaskDatabase>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-  sora_task_queue: State<'_, SoraTaskQueue>,
-) -> Response<EnqueueImageTo3dObjectSuccessResponse, EnqueueImageTo3dObjectErrorType, ()> {
-
+pub async fn enqueue_image_to_3d_object_command(app: AppHandle, request: EnqueueImageTo3dObjectRequest, app_env_configs: State<'_, AppEnvConfigs>, app_data_root: State<'_, AppDataRoot>, artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>, provider_priority_store: State<'_, ProviderPriorityStore>, task_database: State<'_, TaskDatabase>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>, sora_task_queue: State<'_, SoraTaskQueue>) -> Response<EnqueueImageTo3dObjectSuccessResponse, EnqueueImageTo3dObjectErrorType, ()> {
   info!("enqueue_image_to_3d_object_command called");
 
-  let result = handle_request(
-    request,
-    &app,
-    &app_env_configs,
-    &app_data_root,
-    &artcraft_usage_tracker,
-    &provider_priority_store,
-    &task_database,
-    &storyteller_creds_manager,
-  ).await;
+  let result = handle_request(request, &app, &app_env_configs, &app_data_root, &artcraft_usage_tracker, &provider_priority_store, &task_database, &storyteller_creds_manager).await;
 
   match result {
     Err(err) => {
       error!("error: {:?}", err);
-      
+
       notify_frontend_of_errors(&app, &err).await;
 
       let mut status = CommandErrorStatus::ServerError;
@@ -125,12 +104,12 @@ pub async fn enqueue_image_to_3d_object_command(
           status = CommandErrorStatus::BadRequest;
           error_type = EnqueueImageTo3dObjectErrorType::ModelNotSpecified;
           error_message = "No model specified for object generation";
-        }
+        },
         GenerateError::NoProviderAvailable => {
           status = CommandErrorStatus::ServerError;
           error_type = EnqueueImageTo3dObjectErrorType::NoProviderAvailable;
           error_message = "No configured provider available for object generation";
-        }
+        },
         GenerateError::MissingCredentials(MissingCredentialsReason::NeedsFalApiKey) => {
           status = CommandErrorStatus::Unauthorized;
           error_type = EnqueueImageTo3dObjectErrorType::NeedsFalApiKey;
@@ -140,68 +119,35 @@ pub async fn enqueue_image_to_3d_object_command(
           status = CommandErrorStatus::Unauthorized;
           error_type = EnqueueImageTo3dObjectErrorType::NeedsStorytellerCredentials;
           error_message = "You need to be logged into Artcraft.";
-        }
+        },
         _ => {}, // Fall-through
       }
 
-      Err(CommandErrorResponseWrapper {
-        status,
-        error_message: Some(error_message.to_string()),
-        error_type: Some(error_type),
-        error_details: None,
-      })
-    }
+      Err(CommandErrorResponseWrapper { status, error_message: Some(error_message.to_string()), error_type: Some(error_type), error_details: None })
+    },
     Ok(event) => {
-      let event = GenerationEnqueueSuccessEvent {
-        action: event.to_frontend_event_action(),
-        service: event.to_frontend_event_service(),
-        model: event.model,
-      };
+      let event = GenerationEnqueueSuccessEvent { action: event.to_frontend_event_action(), service: event.to_frontend_event_service(), model: event.model };
 
       if let Err(err) = event.send(&app) {
         error!("Failed to emit event: {:?}", err); // Fail open.
       }
-      
-      CreditsBalanceChangedEvent{}.send_infallible(&app);
-      
+
+      CreditsBalanceChangedEvent {}.send_infallible(&app);
+
       Ok(EnqueueImageTo3dObjectSuccessResponse {}.into())
-    }
+    },
   }
 }
 
+pub async fn handle_request(request: EnqueueImageTo3dObjectRequest, app: &AppHandle, app_env_configs: &AppEnvConfigs, app_data_root: &AppDataRoot, artcraft_usage_tracker: &ArtcraftUsageTracker, provider_priority_store: &ProviderPriorityStore, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
+  let result = handle_artcraft_object(&request, &app, &app_env_configs, &app_data_root, &storyteller_creds_manager).await;
 
-pub async fn handle_request(
-  request: EnqueueImageTo3dObjectRequest,
-  app: &AppHandle,
-  app_env_configs: &AppEnvConfigs,
-  app_data_root: &AppDataRoot,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  provider_priority_store: &ProviderPriorityStore,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
-  let result = handle_artcraft_object(
-    &request,
-    &app,
-    &app_env_configs,
-    &app_data_root,
-    &storyteller_creds_manager,
-  ).await;
-  
   let success_event = match result {
     Err(err) => return Err(err),
     Ok(event) => event,
   };
 
-  let result = success_event
-      .insert_into_task_database_with_frontend_payload(
-        task_database,
-        request.frontend_caller.clone(),
-        request.frontend_subscriber_id.as_deref(),
-        request.frontend_subscriber_payload.as_deref(),
-      )
-      .await;
+  let result = success_event.insert_into_task_database_with_frontend_payload(task_database, request.frontend_caller.clone(), request.frontend_subscriber_id.as_deref(), request.frontend_subscriber_payload.as_deref()).await;
 
   if let Err(err) = result {
     error!("Failed to create task in database: {:?}", err);

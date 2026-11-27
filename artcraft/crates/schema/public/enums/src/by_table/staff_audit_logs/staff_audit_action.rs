@@ -79,16 +79,7 @@ impl StaffAuditAction {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::ImpersonateUserRequest,
-      Self::ImpersonateUserRedeem,
-      Self::BanUser,
-      Self::UnbanUser,
-      Self::AddWalletBankedBalance,
-      Self::SendAlert,
-      Self::EditUserFeatureFlags,
-      Self::ChangeUserEmail,
-    ])
+    BTreeSet::from([Self::ImpersonateUserRequest, Self::ImpersonateUserRedeem, Self::BanUser, Self::UnbanUser, Self::AddWalletBankedBalance, Self::SendAlert, Self::EditUserFeatureFlags, Self::ChangeUserEmail])
   }
 }
 

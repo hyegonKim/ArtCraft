@@ -159,9 +159,7 @@ impl ThreeDMaterialSettings {
         {
             out.substance_preset = p;
         }
-        let read_f64 = |key: &str, d: f64| {
-            obj.get(key).and_then(serde_json::Value::as_f64).filter(|v| v.is_finite()).unwrap_or(d)
-        };
+        let read_f64 = |key: &str, d: f64| obj.get(key).and_then(serde_json::Value::as_f64).filter(|v| v.is_finite()).unwrap_or(d);
         out.roughness = read_f64("roughness", out.roughness);
         out.metallic = read_f64("metallic", out.metallic);
         out.material_scale = read_f64("materialScale", out.material_scale);

@@ -56,7 +56,6 @@ pub enum EnqueueGptImage2TextToImageOutputFormat {
   Webp,
 }
 
-
 impl FalRequestCostCalculator for EnqueueGptImage2TextToImageRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // Cost table (per image) by approximate pixel dimensions:
@@ -95,11 +94,7 @@ impl FalRequestCostCalculator for EnqueueGptImage2TextToImageRequest {
   }
 }
 
-
-pub async fn enqueue_gpt_image_2_text_to_image_webhook<R: IntoUrl>(
-  args: EnqueueGptImage2TextToImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_gpt_image_2_text_to_image_webhook<R: IntoUrl>(args: EnqueueGptImage2TextToImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -109,33 +104,36 @@ pub async fn enqueue_gpt_image_2_text_to_image_webhook<R: IntoUrl>(
     EnqueueGptImage2TextToImageNumImages::Four => 4,
   };
 
-  let image_size = req.image_size
-      .map(|s| match s {
-        EnqueueGptImage2TextToImageSize::SquareHd => "square_hd",
-        EnqueueGptImage2TextToImageSize::Square => "square",
-        EnqueueGptImage2TextToImageSize::Portrait4x3 => "portrait_4_3",
-        EnqueueGptImage2TextToImageSize::Portrait16x9 => "portrait_16_9",
-        EnqueueGptImage2TextToImageSize::Landscape4x3 => "landscape_4_3",
-        EnqueueGptImage2TextToImageSize::Landscape16x9 => "landscape_16_9",
-      })
-      .map(|size| size.to_string());
+  let image_size = req
+    .image_size
+    .map(|s| match s {
+      EnqueueGptImage2TextToImageSize::SquareHd => "square_hd",
+      EnqueueGptImage2TextToImageSize::Square => "square",
+      EnqueueGptImage2TextToImageSize::Portrait4x3 => "portrait_4_3",
+      EnqueueGptImage2TextToImageSize::Portrait16x9 => "portrait_16_9",
+      EnqueueGptImage2TextToImageSize::Landscape4x3 => "landscape_4_3",
+      EnqueueGptImage2TextToImageSize::Landscape16x9 => "landscape_16_9",
+    })
+    .map(|size| size.to_string());
 
-  let quality = req.quality
-      .map(|s| match s {
-        EnqueueGptImage2TextToImageQuality::Low => "low",
-        EnqueueGptImage2TextToImageQuality::Medium => "medium",
-        EnqueueGptImage2TextToImageQuality::High => "high",
-      })
-      .map(|quality| quality.to_string());
+  let quality = req
+    .quality
+    .map(|s| match s {
+      EnqueueGptImage2TextToImageQuality::Low => "low",
+      EnqueueGptImage2TextToImageQuality::Medium => "medium",
+      EnqueueGptImage2TextToImageQuality::High => "high",
+    })
+    .map(|quality| quality.to_string());
 
-  let output_format = req.output_format
-      .map(|s| match s {
-        EnqueueGptImage2TextToImageOutputFormat::Jpeg => "jpeg",
-        EnqueueGptImage2TextToImageOutputFormat::Png => "png",
-        EnqueueGptImage2TextToImageOutputFormat::Webp => "webp",
-      })
-      .map(|format| format.to_string())
-      .unwrap_or_else(|| "png".to_string());
+  let output_format = req
+    .output_format
+    .map(|s| match s {
+      EnqueueGptImage2TextToImageOutputFormat::Jpeg => "jpeg",
+      EnqueueGptImage2TextToImageOutputFormat::Png => "png",
+      EnqueueGptImage2TextToImageOutputFormat::Webp => "webp",
+    })
+    .map(|format| format.to_string())
+    .unwrap_or_else(|| "png".to_string());
 
   let request = GptImage2TextToImageInput {
     prompt: req.prompt,
@@ -146,10 +144,7 @@ pub async fn enqueue_gpt_image_2_text_to_image_webhook<R: IntoUrl>(
     quality,
   };
 
-  let result = gpt_image_2_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gpt_image_2_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -169,17 +164,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueGptImage2TextToImageArgs {
-      request: EnqueueGptImage2TextToImageRequest {
-        prompt: "an anime girl riding on the back of a t-rex".to_string(),
-        num_images: EnqueueGptImage2TextToImageNumImages::Two,
-        image_size: None,
-        quality: None,
-        output_format: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueGptImage2TextToImageArgs { request: EnqueueGptImage2TextToImageRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: EnqueueGptImage2TextToImageNumImages::Two, image_size: None, quality: None, output_format: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_gpt_image_2_text_to_image_webhook(args).await?;
 

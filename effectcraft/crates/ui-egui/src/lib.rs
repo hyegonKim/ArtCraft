@@ -162,6 +162,8 @@ pub enum Dialog {
     GradientEditor,
     /// Delete a user template from Home? (`panels::templates`).
     DeleteTemplate,
+    /// Frame.io Team Review & Telestrator (`panels::review_ui`).
+    FrameIoReview,
 }
 
 /// A non-blocking file dialog's answer for the command that asked (`menus::dialog_answered`).

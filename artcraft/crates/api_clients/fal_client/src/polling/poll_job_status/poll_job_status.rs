@@ -9,10 +9,10 @@ use url::Url;
 const EXPECTED_HOST: &str = "queue.fal.run";
 
 pub struct PollJobStatusArgs<'a> {
-  /// This is the "status" URL, not the "response" URL. 
+  /// This is the "status" URL, not the "response" URL.
   /// This only gives us the progress of the job, not details of the final results upon completion.
   pub status_url: &'a str,
-  
+
   pub api_key: &'a FalApiKey,
 }
 
@@ -53,43 +53,23 @@ pub async fn poll_job_status(args: PollJobStatusArgs<'_>) -> Result<PollJobStatu
   let parsed = Url::parse(args.status_url)?;
 
   let host = parsed.host_str().unwrap_or("");
-  
+
   if host != EXPECTED_HOST {
-    return Err(FalErrorPlus::ClientError(FalClientError::InvalidUrl(format!(
-      "Expected host '{}' but got '{}' in status URL: {}",
-      EXPECTED_HOST,
-      host,
-      args.status_url,
-    ))));
+    return Err(FalErrorPlus::ClientError(FalClientError::InvalidUrl(format!("Expected host '{}' but got '{}' in status URL: {}", EXPECTED_HOST, host, args.status_url,))));
   }
 
   info!("Polling FAL job status: {}", args.status_url);
 
-  let response = reqwest::Client::new()
-    .get(args.status_url)
-    .header("Authorization", format!("Key {}", args.api_key.0))
-    .send()
-    .await?;
+  let response = reqwest::Client::new().get(args.status_url).header("Authorization", format!("Key {}", args.api_key.0)).send().await?;
 
   let http_status = response.status();
   let body = response.text().await?;
 
   if !http_status.is_success() {
-    return Err(FalErrorPlus::ApiGeneric(
-      FalGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-        status_code: http_status,
-        body,
-      },
-    ));
+    return Err(FalErrorPlus::ApiGeneric(FalGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: http_status, body }));
   }
 
-  let raw: RawPollJobStatusResponse = serde_json::from_str(&body)
-    .map_err(|err| FalErrorPlus::ApiGeneric(
-      FalGenericApiError::SerdeResponseParseErrorWithBody {
-        error: err,
-        body: body.clone(),
-      },
-    ))?;
+  let raw: RawPollJobStatusResponse = serde_json::from_str(&body).map_err(|err| FalErrorPlus::ApiGeneric(FalGenericApiError::SerdeResponseParseErrorWithBody { error: err, body: body.clone() }))?;
 
   let status = match raw.status.as_str() {
     "IN_QUEUE" => FalJobStatus::InQueue,
@@ -98,17 +78,9 @@ pub async fn poll_job_status(args: PollJobStatusArgs<'_>) -> Result<PollJobStatu
     other => FalJobStatus::Unknown(other.to_string()),
   };
 
-  let maybe_inference_time = raw.metrics
-    .and_then(|m| m.inference_time);
+  let maybe_inference_time = raw.metrics.and_then(|m| m.inference_time);
 
-  Ok(PollJobStatusResponse {
-    status,
-    request_id: raw.request_id,
-    response_url: raw.response_url,
-    maybe_queue_position: raw.queue_position,
-    maybe_inference_time,
-    raw_body: body,
-  })
+  Ok(PollJobStatusResponse { status, request_id: raw.request_id, response_url: raw.response_url, maybe_queue_position: raw.queue_position, maybe_inference_time, raw_body: body })
 }
 
 #[cfg(test)]
@@ -120,10 +92,7 @@ mod tests {
   #[tokio::test]
   async fn rejects_wrong_host() {
     let api_key = FalApiKey::from_str("test-key");
-    let args = PollJobStatusArgs {
-      status_url: "https://evil.example.com/fal-ai/flux/requests/abc123",
-      api_key: &api_key,
-    };
+    let args = PollJobStatusArgs { status_url: "https://evil.example.com/fal-ai/flux/requests/abc123", api_key: &api_key };
     let result = poll_job_status(args).await;
     assert!(result.is_err());
     let err = format!("{}", result.unwrap_err());
@@ -133,10 +102,7 @@ mod tests {
   #[tokio::test]
   async fn rejects_invalid_url() {
     let api_key = FalApiKey::from_str("test-key");
-    let args = PollJobStatusArgs {
-      status_url: "not a url at all",
-      api_key: &api_key,
-    };
+    let args = PollJobStatusArgs { status_url: "not a url at all", api_key: &api_key };
     let result = poll_job_status(args).await;
     assert!(result.is_err());
   }
@@ -176,15 +142,24 @@ mod tests {
     #[test]
     fn status_enum_mapping() {
       assert_eq!(
-        match "IN_QUEUE" { "IN_QUEUE" => FalJobStatus::InQueue, _ => unreachable!() },
+        match "IN_QUEUE" {
+          "IN_QUEUE" => FalJobStatus::InQueue,
+          _ => unreachable!(),
+        },
         FalJobStatus::InQueue
       );
       assert_eq!(
-        match "IN_PROGRESS" { "IN_PROGRESS" => FalJobStatus::InProgress, _ => unreachable!() },
+        match "IN_PROGRESS" {
+          "IN_PROGRESS" => FalJobStatus::InProgress,
+          _ => unreachable!(),
+        },
         FalJobStatus::InProgress
       );
       assert_eq!(
-        match "COMPLETED" { "COMPLETED" => FalJobStatus::Completed, _ => unreachable!() },
+        match "COMPLETED" {
+          "COMPLETED" => FalJobStatus::Completed,
+          _ => unreachable!(),
+        },
         FalJobStatus::Completed
       );
     }
@@ -206,14 +181,10 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key
   async fn poll_single_image_job() {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt")
-      .expect("Failed to read fal.api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt").expect("Failed to read fal.api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
 
-    let args = PollJobStatusArgs {
-      status_url: "https://queue.fal.run/fal-ai/flux/requests/019e18d8-8c36-7bc1-aa77-2bc2f70268c6",
-      api_key: &api_key,
-    };
+    let args = PollJobStatusArgs { status_url: "https://queue.fal.run/fal-ai/flux/requests/019e18d8-8c36-7bc1-aa77-2bc2f70268c6", api_key: &api_key };
 
     let result = poll_job_status(args).await.expect("poll should succeed");
     println!("Status: {:?}", result.status);
@@ -226,14 +197,10 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key
   async fn poll_single_mesh_status_job() {
-    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt")
-      .expect("Failed to read fal.api_key.txt");
+    let secret = std::fs::read_to_string("/Users/bt/Artcraft/credentials/fal.api_key.txt").expect("Failed to read fal.api_key.txt");
     let api_key = FalApiKey::from_str(secret.trim());
 
-    let args = PollJobStatusArgs {
-      status_url: "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/019e194b-f69a-77b1-bada-3f56d7d3c87d/status",
-      api_key: &api_key,
-    };
+    let args = PollJobStatusArgs { status_url: "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/019e194b-f69a-77b1-bada-3f56d7d3c87d/status", api_key: &api_key };
 
     let result = poll_job_status(args).await.expect("poll should succeed");
     println!("Status: {:?}", result.status);

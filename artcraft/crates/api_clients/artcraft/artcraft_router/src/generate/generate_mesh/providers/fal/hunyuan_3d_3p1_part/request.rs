@@ -30,12 +30,7 @@ mod tests {
   #[ignore] // requires real API key and a real FBX URL, incurs cost
   async fn send_part_split() {
     let client = get_fal_client();
-    let builder = GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3p1Part,
-      provider: RouterProvider::Fal,
-      input_mesh: Some(MeshRef::Url("https://example.com/model.fbx".to_string())),
-      ..Default::default()
-    };
+    let builder = GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3p1Part, provider: RouterProvider::Fal, input_mesh: Some(MeshRef::Url("https://example.com/model.fbx".to_string())), ..Default::default() };
 
     let draft_or_request = builder.build2().expect("build2 should succeed");
     let request = match draft_or_request {

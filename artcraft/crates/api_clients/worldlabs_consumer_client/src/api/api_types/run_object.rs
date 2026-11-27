@@ -5,7 +5,7 @@ use serde_json::Value;
 
 const RUN_MIME_TYPE: &str = "application/run+json";
 
-const RUN_VERSION : &str = "0.0.1";
+const RUN_VERSION: &str = "0.0.1";
 
 /// World Labs' API is very frontend driven
 /// They send whole objects back to the frontend that the frontend is in charge of mutatingbjects or PATCH them back to the server (yuck):
@@ -47,18 +47,7 @@ impl Default for RunObject {
   fn default() -> Self {
     let now = Utc::now();
     let now = now.timestamp().unsigned_abs() * 1000; // Millisecond resolution
-    Self {
-      id: None,
-      metadata: RunObjectMetadata{
-        version: RUN_VERSION.to_string(),
-        created_at: now,
-        updated_at: now,
-        uses_advanced_editing: false,
-        draft_mode: false,
-        nodes: HashMap::new(),
-      },
-      mime_type: RUN_MIME_TYPE.to_string(),
-    }
+    Self { id: None, metadata: RunObjectMetadata { version: RUN_VERSION.to_string(), created_at: now, updated_at: now, uses_advanced_editing: false, draft_mode: false, nodes: HashMap::new() }, mime_type: RUN_MIME_TYPE.to_string() }
   }
 }
 
@@ -76,4 +65,3 @@ mod tests {
     assert_eq!(&object.mime_type, "application/run+json");
   }
 }
-

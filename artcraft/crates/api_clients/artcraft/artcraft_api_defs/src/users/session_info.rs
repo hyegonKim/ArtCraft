@@ -32,7 +32,7 @@ pub struct SessionUserInfo {
   pub username: String,
   pub display_name: String,
   pub email_gravatar_hash: String,
-  
+
   pub onboarding: SessionOnboardingState,
 
   // TODO(bt,2024-03-30): Remove legacy feature flag
@@ -82,13 +82,13 @@ pub struct SessionUserInfo {
 pub struct SessionOnboardingState {
   /// If true, the user hasn't set their email.
   pub email_not_set: bool,
-  
+
   /// If true, the user hasn't confirmed their email.
   pub email_not_confirmed: bool,
 
   /// If true, the user hasn't set their password.
   pub password_not_set: bool,
-  
+
   /// If true, the user hasn't set their username (the username they have is random).
   pub username_not_customized: bool,
 }
@@ -104,7 +104,9 @@ pub struct SessionInfoSuccessResponse {
 // Ignore only unknown flag names; malformed values and authentication fields
 // still fail decoding. Unknown flags never grant a client-side capability.
 fn deserialize_known_feature_flags<'de, D>(deserializer: D) -> Result<BTreeSet<UserFeatureFlag>, D::Error>
-where D: Deserializer<'de> {
+where
+  D: Deserializer<'de>,
+{
   let names = Vec::<String>::deserialize(deserializer)?;
   Ok(names.into_iter().filter_map(|name| UserFeatureFlag::from_str(&name).ok()).collect())
 }

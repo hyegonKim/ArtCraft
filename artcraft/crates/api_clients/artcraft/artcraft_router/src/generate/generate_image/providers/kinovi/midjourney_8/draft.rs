@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::image::generate_midjourney_v8::{
-  GenerateMidjourneyV8AspectRatio, GenerateMidjourneyV8Quality,
-  GenerateMidjourneyV8Request, KinoviMidjourneyBatchCount,
-};
+use kinovi_web_client::generate::image::generate_midjourney_v8::{GenerateMidjourneyV8AspectRatio, GenerateMidjourneyV8Quality, GenerateMidjourneyV8Request, KinoviMidjourneyBatchCount};
 
 use crate::api::image_list_ref::ImageListRef;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
@@ -25,33 +22,17 @@ pub struct KinoviMidjourney8RemainingItems {
 }
 
 impl KinoviMidjourney8DraftState {
-  pub async fn to_request(
-    &mut self,
-    draft_context: &ImageGenerationDraftContext<'_>,
-  ) -> Result<KinoviMidjourney8RequestState, ArtcraftRouterError> {
+  pub async fn to_request(&mut self, draft_context: &ImageGenerationDraftContext<'_>) -> Result<KinoviMidjourney8RequestState, ArtcraftRouterError> {
     let client = draft_context.get_kinovi_web_client_ref()?;
     let session = &client.session;
 
     let mut reference_image_urls = None;
     if let Some(remaining) = self.unhandled_request_state.take() {
       let map = draft_context.media_file_to_artcraft_url_map;
-      reference_image_urls = resolve_and_upload_image_list(
-        session, remaining.reference_images, map,
-      ).await?;
+      reference_image_urls = resolve_and_upload_image_list(session, remaining.reference_images, map).await?;
     }
 
-    let request = GenerateMidjourneyV8Request {
-      prompt: self.prompt.clone(),
-      aspect_ratio: self.aspect_ratio,
-      negative_prompt: None,
-      stylize: None,
-      weird: None,
-      chaos: None,
-      quality: self.quality,
-      raw_mode: false,
-      batch_count: self.batch_count,
-      reference_image_urls,
-    };
+    let request = GenerateMidjourneyV8Request { prompt: self.prompt.clone(), aspect_ratio: self.aspect_ratio, negative_prompt: None, stylize: None, weird: None, chaos: None, quality: self.quality, raw_mode: false, batch_count: self.batch_count, reference_image_urls };
 
     Ok(KinoviMidjourney8RequestState { request })
   }

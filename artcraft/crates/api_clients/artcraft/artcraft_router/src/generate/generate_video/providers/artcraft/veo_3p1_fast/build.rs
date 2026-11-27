@@ -2,9 +2,7 @@ use enums::common::generation::common_video_model::CommonVideoModel as CommonVid
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::veo_3p1::build::plan_veo_3p1_duration;
 use crate::generate::generate_video::providers::artcraft::veo_3p1_fast::request::ArtcraftVeo3p1FastRequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
@@ -17,12 +15,7 @@ pub fn build_artcraft_veo_3p1_fast(mut builder: GenerateVideoRequestBuilder) -> 
   builder.duration_seconds = final_duration;
 
   let generate_audio = builder.generate_audio;
-  let mut request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Veo3p1Fast,
-    SupportedResolutions::FullWith4k,
-    UltraWideSupport::Unsupported,
-  )?;
+  let mut request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Veo3p1Fast, SupportedResolutions::FullWith4k, UltraWideSupport::Unsupported)?;
   request.generate_audio = generate_audio;
 
   let state = ArtcraftVeo3p1FastRequestState { request };

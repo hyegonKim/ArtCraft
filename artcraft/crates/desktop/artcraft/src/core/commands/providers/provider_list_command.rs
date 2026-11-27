@@ -9,14 +9,7 @@ use serde_derive::Serialize;
 use tauri::State;
 
 /// All known credential keys. Add new ones here as providers are added.
-const ALL_KEYS: &[ProviderCredentialKey] = &[
-  ProviderCredentialKey::FalApiKey,
-  ProviderCredentialKey::ReplicateApiKey,
-  ProviderCredentialKey::GrokWebLogin,
-  ProviderCredentialKey::HiggsfieldWebLogin,
-  ProviderCredentialKey::MidjourneyLogin,
-  ProviderCredentialKey::RunwayWebLogin,
-];
+const ALL_KEYS: &[ProviderCredentialKey] = &[ProviderCredentialKey::FalApiKey, ProviderCredentialKey::ReplicateApiKey, ProviderCredentialKey::GrokWebLogin, ProviderCredentialKey::HiggsfieldWebLogin, ProviderCredentialKey::MidjourneyLogin, ProviderCredentialKey::RunwayWebLogin];
 
 const REDACTED_KEY_VISIBLE_CHARS: usize = 6;
 
@@ -48,9 +41,7 @@ pub struct ProviderCredentialDetails {
 }
 
 #[tauri::command]
-pub async fn provider_list_command(
-  credential_cache: State<'_, ProviderCredentialLoadingCache>,
-) -> ResponseOrErrorMessage<ProviderListResponse> {
+pub async fn provider_list_command(credential_cache: State<'_, ProviderCredentialLoadingCache>) -> ResponseOrErrorMessage<ProviderListResponse> {
   info!("provider_list_command called");
 
   let mut providers = Vec::with_capacity(ALL_KEYS.len());
@@ -61,36 +52,17 @@ pub async fn provider_list_command(
       Err(err) => {
         warn!("Error checking credential for {:?}: {:?}", key, err);
         None
-      }
+      },
     };
 
     let has_credentials = maybe_payload.is_some();
 
     let maybe_details = maybe_payload.map(|payload| match payload {
-      ProviderCredentialPayload::ApiKey(data) => {
-        ProviderCredentialDetails {
-          maybe_key_start: Some(redact_key(data.as_str())),
-          maybe_full_key: Some(data.as_str().to_string()),
-          maybe_email_address: None,
-          maybe_username: None,
-        }
-      }
-      ProviderCredentialPayload::WebLogin(data) => {
-        ProviderCredentialDetails {
-          maybe_key_start: None,
-          maybe_full_key: None,
-          maybe_email_address: data.email_address,
-          maybe_username: data.username,
-        }
-      }
+      ProviderCredentialPayload::ApiKey(data) => ProviderCredentialDetails { maybe_key_start: Some(redact_key(data.as_str())), maybe_full_key: Some(data.as_str().to_string()), maybe_email_address: None, maybe_username: None },
+      ProviderCredentialPayload::WebLogin(data) => ProviderCredentialDetails { maybe_key_start: None, maybe_full_key: None, maybe_email_address: data.email_address, maybe_username: data.username },
     });
 
-    providers.push(ProviderListEntry {
-      provider_credential: key,
-      credential_type: key.get_type(),
-      has_credentials,
-      maybe_details,
-    });
+    providers.push(ProviderListEntry { provider_credential: key, credential_type: key.get_type(), has_credentials, maybe_details });
   }
 
   Ok(ProviderListResponse { providers }.into())

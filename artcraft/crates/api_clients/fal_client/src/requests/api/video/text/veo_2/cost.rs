@@ -23,9 +23,7 @@ pub(crate) fn veo_2_cost_cents(duration_secs: u64) -> UsdCents {
 impl FalRequestCostCalculator for Veo2TextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // fal default when unset: duration = 5s.
-    let duration_secs = self.duration
-      .unwrap_or(Veo2TextToVideoDuration::FiveSeconds)
-      .to_seconds();
+    let duration_secs = self.duration.unwrap_or(Veo2TextToVideoDuration::FiveSeconds).to_seconds();
     veo_2_cost_cents(duration_secs)
   }
 }
@@ -36,15 +34,7 @@ mod tests {
   use crate::requests::api::video::text::veo_2::api::Veo2TextToVideoAspectRatio;
 
   fn make_request(duration: Option<Veo2TextToVideoDuration>) -> Veo2TextToVideoRequest {
-    Veo2TextToVideoRequest {
-      prompt: "test".to_string(),
-      aspect_ratio: Some(Veo2TextToVideoAspectRatio::SixteenByNine),
-      duration,
-      negative_prompt: None,
-      enhance_prompt: None,
-      seed: None,
-      auto_fix: None,
-    }
+    Veo2TextToVideoRequest { prompt: "test".to_string(), aspect_ratio: Some(Veo2TextToVideoAspectRatio::SixteenByNine), duration, negative_prompt: None, enhance_prompt: None, seed: None, auto_fix: None }
   }
 
   /// fal: "For 5s video your request will cost $2.50" → 250¢.
@@ -64,8 +54,8 @@ mod tests {
 
     // (duration, expected_cents): 250 base + 50 per second over 5s.
     const COST_TABLE: &[(Option<Veo2TextToVideoDuration>, u64)] = &[
-      (Some(Veo2TextToVideoDuration::FiveSeconds),  250),
-      (Some(Veo2TextToVideoDuration::SixSeconds),   300),
+      (Some(Veo2TextToVideoDuration::FiveSeconds), 250),
+      (Some(Veo2TextToVideoDuration::SixSeconds), 300),
       (Some(Veo2TextToVideoDuration::SevenSeconds), 350),
       (Some(Veo2TextToVideoDuration::EightSeconds), 400),
       // Default: duration=None → 5s
@@ -75,11 +65,7 @@ mod tests {
     #[test]
     fn matches_cost_table() {
       for &(duration, expected) in COST_TABLE {
-        assert_eq!(
-          make_request(duration).calculate_cost_in_cents(),
-          expected,
-          "duration={duration:?}",
-        );
+        assert_eq!(make_request(duration).calculate_cost_in_cents(), expected, "duration={duration:?}",);
       }
     }
 
@@ -95,15 +81,7 @@ mod tests {
     #[test]
     fn cost_ignores_non_billing_fields() {
       let baseline = make_request(Some(Veo2TextToVideoDuration::EightSeconds)).calculate_cost_in_cents();
-      let embellished = Veo2TextToVideoRequest {
-        prompt: "different".to_string(),
-        aspect_ratio: Some(Veo2TextToVideoAspectRatio::Square),
-        duration: Some(Veo2TextToVideoDuration::EightSeconds),
-        negative_prompt: Some("noise".to_string()),
-        enhance_prompt: Some(false),
-        seed: Some(99),
-        auto_fix: Some(false),
-      }.calculate_cost_in_cents();
+      let embellished = Veo2TextToVideoRequest { prompt: "different".to_string(), aspect_ratio: Some(Veo2TextToVideoAspectRatio::Square), duration: Some(Veo2TextToVideoDuration::EightSeconds), negative_prompt: Some("noise".to_string()), enhance_prompt: Some(false), seed: Some(99), auto_fix: Some(false) }.calculate_cost_in_cents();
       assert_eq!(baseline, embellished);
     }
   }

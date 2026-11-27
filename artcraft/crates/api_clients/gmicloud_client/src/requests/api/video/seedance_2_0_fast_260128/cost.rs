@@ -1,9 +1,5 @@
-use crate::requests::api::video::seedance_2_0_fast_260128::api::{
-  Seedance20FastRequest, Seedance20FastResolution,
-};
-use crate::traits::gmicloud_request_cost_calculator_trait::{
-  GmiCloudRequestCostCalculator, UsdCents,
-};
+use crate::requests::api::video::seedance_2_0_fast_260128::api::{Seedance20FastRequest, Seedance20FastResolution};
+use crate::traits::gmicloud_request_cost_calculator_trait::{GmiCloudRequestCostCalculator, UsdCents};
 
 impl GmiCloudRequestCostCalculator for Seedance20FastRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
@@ -28,22 +24,7 @@ mod tests {
   use crate::requests::api::video::seedance_2_0_fast_260128::api::Seedance20FastRatio;
 
   fn make_request(duration: Option<u8>, resolution: Option<Seedance20FastResolution>) -> Seedance20FastRequest {
-    Seedance20FastRequest {
-      prompt: "test".to_string(),
-      duration,
-      resolution,
-      ratio: None,
-      seed: None,
-      watermark: None,
-      generate_audio: None,
-      web_search: None,
-      first_frame: None,
-      last_frame: None,
-      reference_images: None,
-      reference_videos: None,
-      reference_audios: None,
-      reference_asset_ids: None,
-    }
+    Seedance20FastRequest { prompt: "test".to_string(), duration, resolution, ratio: None, seed: None, watermark: None, generate_audio: None, web_search: None, first_frame: None, last_frame: None, reference_images: None, reference_videos: None, reference_audios: None, reference_asset_ids: None }
   }
 
   mod default_resolution_tests {
@@ -117,17 +98,8 @@ mod tests {
 
     #[test]
     fn cost_is_independent_of_ratio() {
-      let ratios = [
-        Seedance20FastRatio::Landscape16x9,
-        Seedance20FastRatio::Portrait9x16,
-        Seedance20FastRatio::Square,
-        Seedance20FastRatio::Standard4x3,
-        Seedance20FastRatio::Portrait3x4,
-        Seedance20FastRatio::UltraWide21x9,
-        Seedance20FastRatio::Adaptive,
-      ];
-      let base = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP))
-        .calculate_cost_in_cents();
+      let ratios = [Seedance20FastRatio::Landscape16x9, Seedance20FastRatio::Portrait9x16, Seedance20FastRatio::Square, Seedance20FastRatio::Standard4x3, Seedance20FastRatio::Portrait3x4, Seedance20FastRatio::UltraWide21x9, Seedance20FastRatio::Adaptive];
+      let base = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP)).calculate_cost_in_cents();
       for ratio in ratios {
         let mut request = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP));
         request.ratio = Some(ratio);
@@ -141,44 +113,20 @@ mod tests {
 
     #[test]
     fn fast_is_cheaper_than_standard_at_720p() {
-      use crate::requests::api::video::seedance_2_0_260128::api::{
-        Seedance20Request, Seedance20Resolution,
-      };
+      use crate::requests::api::video::seedance_2_0_260128::api::{Seedance20Request, Seedance20Resolution};
       use crate::traits::gmicloud_request_cost_calculator_trait::GmiCloudRequestCostCalculator;
 
-      let standard = Seedance20Request {
-        prompt: "test".to_string(),
-        duration: Some(10),
-        resolution: Some(Seedance20Resolution::SevenTwentyP),
-        ratio: None,
-        seed: None,
-        watermark: None,
-        generate_audio: None,
-        web_search: None,
-        first_frame: None,
-        last_frame: None,
-        reference_images: None,
-        reference_videos: None,
-        reference_audios: None,
-        reference_asset_ids: None,
-      };
+      let standard = Seedance20Request { prompt: "test".to_string(), duration: Some(10), resolution: Some(Seedance20Resolution::SevenTwentyP), ratio: None, seed: None, watermark: None, generate_audio: None, web_search: None, first_frame: None, last_frame: None, reference_images: None, reference_videos: None, reference_audios: None, reference_asset_ids: None };
 
       let fast = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP));
 
-      assert!(
-        fast.calculate_cost_in_cents() < standard.calculate_cost_in_cents(),
-        "Fast 720p ({}¢) should be cheaper than Standard 720p ({}¢)",
-        fast.calculate_cost_in_cents(),
-        standard.calculate_cost_in_cents(),
-      );
+      assert!(fast.calculate_cost_in_cents() < standard.calculate_cost_in_cents(), "Fast 720p ({}¢) should be cheaper than Standard 720p ({}¢)", fast.calculate_cost_in_cents(), standard.calculate_cost_in_cents(),);
     }
 
     #[test]
     fn higher_resolution_costs_more() {
-      let cost_480 = make_request(Some(10), Some(Seedance20FastResolution::FourEightyP))
-        .calculate_cost_in_cents();
-      let cost_720 = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP))
-        .calculate_cost_in_cents();
+      let cost_480 = make_request(Some(10), Some(Seedance20FastResolution::FourEightyP)).calculate_cost_in_cents();
+      let cost_720 = make_request(Some(10), Some(Seedance20FastResolution::SevenTwentyP)).calculate_cost_in_cents();
       assert!(cost_480 < cost_720, "480p ({}¢) should be cheaper than 720p ({}¢)", cost_480, cost_720);
     }
   }

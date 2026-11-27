@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::video::generate_happy_horse_1p0::{
-  KinoviHappyHorse1p0AspectRatio, KinoviHappyHorse1p0BatchCount,
-  KinoviHappyHorse1p0OutputResolution,
-};
+use kinovi_web_client::generate::video::generate_happy_horse_1p0::{KinoviHappyHorse1p0AspectRatio, KinoviHappyHorse1p0BatchCount, KinoviHappyHorse1p0OutputResolution};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::router_resolution::RouterResolution;
@@ -9,9 +6,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::draft::{
-  KinoviHappyHorse1p0DraftState, KinoviHappyHorse1p0RemainingItems,
-};
+use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::draft::{KinoviHappyHorse1p0DraftState, KinoviHappyHorse1p0RemainingItems};
 use crate::generate::generate_video::video_generation_draft::VideoGenerationDraftRequest;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 
@@ -29,55 +24,26 @@ fn do_build(mut builder: GenerateVideoRequestBuilder) -> Result<KinoviHappyHorse
   let duration_seconds = plan_duration(builder.duration_seconds.take(), strategy)?;
   let prompt = builder.prompt.take().unwrap_or_default();
 
-  let unhandled_request_state = KinoviHappyHorse1p0RemainingItems {
-    start_frame: builder.start_frame.take(),
-  };
+  let unhandled_request_state = KinoviHappyHorse1p0RemainingItems { start_frame: builder.start_frame.take() };
 
-  Ok(KinoviHappyHorse1p0DraftState {
-    prompt,
-    aspect_ratio,
-    resolution,
-    duration_seconds,
-    batch_count,
-    unhandled_request_state: Some(unhandled_request_state),
-  })
+  Ok(KinoviHappyHorse1p0DraftState { prompt, aspect_ratio, resolution, duration_seconds, batch_count, unhandled_request_state: Some(unhandled_request_state) })
 }
 
 // ── Plan helpers ──
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<KinoviHappyHorse1p0AspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<KinoviHappyHorse1p0AspectRatio>, ArtcraftRouterError> {
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(None),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(None),
 
-    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => {
-      Ok(Some(KinoviHappyHorse1p0AspectRatio::Landscape16x9))
-    }
-    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => {
-      Ok(Some(KinoviHappyHorse1p0AspectRatio::Portrait9x16))
-    }
-    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => {
-      Ok(Some(KinoviHappyHorse1p0AspectRatio::Square1x1))
-    }
+    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(KinoviHappyHorse1p0AspectRatio::Landscape16x9)),
+    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(KinoviHappyHorse1p0AspectRatio::Portrait9x16)),
+    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(KinoviHappyHorse1p0AspectRatio::Square1x1)),
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(KinoviHappyHorse1p0AspectRatio::Landscape4x3)),
     Some(RouterAspectRatio::TallThreeByFour) => Ok(Some(KinoviHappyHorse1p0AspectRatio::Portrait3x4)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(nearest_aspect_ratio(unsupported)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(nearest_aspect_ratio(unsupported))),
     },
   }
 }
@@ -95,10 +61,7 @@ fn nearest_aspect_ratio(aspect_ratio: RouterAspectRatio) -> KinoviHappyHorse1p0A
 }
 
 // Happy Horse supports 720p and 1080p only (no 480p).
-fn plan_output_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<KinoviHappyHorse1p0OutputResolution>, ArtcraftRouterError> {
+fn plan_output_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<KinoviHappyHorse1p0OutputResolution>, ArtcraftRouterError> {
   match resolution {
     // Unset defaults to explicit 720p. Cost estimation prices unset as 720p,
     // so the request must pin 720p too — never leave the resolution up to the
@@ -109,26 +72,14 @@ fn plan_output_resolution(
     Some(RouterResolution::TenEightyP) => Ok(Some(KinoviHappyHorse1p0OutputResolution::TenEightyP)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", unsupported),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade => {
-        Ok(Some(KinoviHappyHorse1p0OutputResolution::TenEightyP))
-      }
-      RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", unsupported) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(KinoviHappyHorse1p0OutputResolution::TenEightyP)),
+      RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP)),
     },
   }
 }
 
-fn plan_batch_count(
-  video_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<KinoviHappyHorse1p0BatchCount>, ArtcraftRouterError> {
+fn plan_batch_count(video_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<KinoviHappyHorse1p0BatchCount>, ArtcraftRouterError> {
   let count = video_batch_count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
@@ -136,27 +87,15 @@ fn plan_batch_count(
     2 => Ok(Some(KinoviHappyHorse1p0BatchCount::Two)),
     4 => Ok(Some(KinoviHappyHorse1p0BatchCount::Four)),
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "video_batch_count",
-          value: format!("{}", count),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade => {
-        Ok(Some(if count >= 4 { KinoviHappyHorse1p0BatchCount::Four } else { KinoviHappyHorse1p0BatchCount::Two }))
-      }
-      RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(if count <= 2 { KinoviHappyHorse1p0BatchCount::Two } else { KinoviHappyHorse1p0BatchCount::Four }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "video_batch_count", value: format!("{}", count) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(if count >= 4 { KinoviHappyHorse1p0BatchCount::Four } else { KinoviHappyHorse1p0BatchCount::Two })),
+      RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(if count <= 2 { KinoviHappyHorse1p0BatchCount::Two } else { KinoviHappyHorse1p0BatchCount::Four })),
     },
   }
 }
 
 // Happy Horse supports 4–15 seconds, defaults to 5.
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  _strategy: RequestMismatchMitigationStrategy,
-) -> Result<u8, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, _strategy: RequestMismatchMitigationStrategy) -> Result<u8, ArtcraftRouterError> {
   let seconds = duration_seconds.unwrap_or(5);
   Ok(seconds.clamp(4, 15) as u8)
 }
@@ -243,30 +182,21 @@ mod tests {
 
     #[test]
     fn aspect_ratio_wide() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.aspect_ratio, Some(KinoviHappyHorse1p0AspectRatio::Landscape16x9)));
     }
 
     #[test]
     fn aspect_ratio_tall() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.aspect_ratio, Some(KinoviHappyHorse1p0AspectRatio::Portrait9x16)));
     }
 
     #[test]
     fn aspect_ratio_square() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::Square),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Square), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.aspect_ratio, Some(KinoviHappyHorse1p0AspectRatio::Square1x1)));
     }
@@ -280,31 +210,21 @@ mod tests {
 
     #[test]
     fn aspect_ratio_auto_defaults_to_none() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::Auto),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Auto), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(draft.aspect_ratio.is_none());
     }
 
     #[test]
     fn unsupported_aspect_ratio_falls_back() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::WideFiveByFour),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideFiveByFour), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.aspect_ratio, Some(KinoviHappyHorse1p0AspectRatio::Landscape4x3)));
     }
 
     #[test]
     fn unsupported_aspect_ratio_errors_out() {
-      let builder = GenerateVideoRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::WideFiveByFour),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideFiveByFour), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..happy_horse_builder() };
       assert!(build_kinovi_happy_horse_1p0(builder).is_err());
     }
   }
@@ -316,20 +236,14 @@ mod tests {
 
     #[test]
     fn resolution_720p() {
-      let builder = GenerateVideoRequestBuilder {
-        resolution: Some(RouterResolution::SevenTwentyP),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { resolution: Some(RouterResolution::SevenTwentyP), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.resolution, Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP)));
     }
 
     #[test]
     fn resolution_1080p() {
-      let builder = GenerateVideoRequestBuilder {
-        resolution: Some(RouterResolution::TenEightyP),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { resolution: Some(RouterResolution::TenEightyP), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.resolution, Some(KinoviHappyHorse1p0OutputResolution::TenEightyP)));
     }
@@ -343,32 +257,20 @@ mod tests {
 
     #[test]
     fn unsupported_resolution_error_out() {
-      let builder = GenerateVideoRequestBuilder {
-        resolution: Some(RouterResolution::FourEightyP),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { resolution: Some(RouterResolution::FourEightyP), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..happy_horse_builder() };
       assert!(build_kinovi_happy_horse_1p0(builder).is_err());
     }
 
     #[test]
     fn unsupported_resolution_upgrades() {
-      let builder = GenerateVideoRequestBuilder {
-        resolution: Some(RouterResolution::FourK),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { resolution: Some(RouterResolution::FourK), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.resolution, Some(KinoviHappyHorse1p0OutputResolution::TenEightyP)));
     }
 
     #[test]
     fn unsupported_resolution_downgrades() {
-      let builder = GenerateVideoRequestBuilder {
-        resolution: Some(RouterResolution::FourK),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayLessDowngrade,
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { resolution: Some(RouterResolution::FourK), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayLessDowngrade, ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       assert!(matches!(draft.resolution, Some(KinoviHappyHorse1p0OutputResolution::SevenTwentyP)));
     }
@@ -387,10 +289,7 @@ mod tests {
 
     #[test]
     fn start_frame_url_placed_in_unhandled() {
-      let builder = GenerateVideoRequestBuilder {
-        start_frame: Some(ImageRef::Url("https://example.com/start.jpg".to_string())),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { start_frame: Some(ImageRef::Url("https://example.com/start.jpg".to_string())), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       let remaining = draft.unhandled_request_state.unwrap();
       assert!(matches!(remaining.start_frame, Some(ImageRef::Url(url)) if url == "https://example.com/start.jpg"));
@@ -398,10 +297,7 @@ mod tests {
 
     #[test]
     fn start_frame_media_token_placed_in_unhandled() {
-      let builder = GenerateVideoRequestBuilder {
-        start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_test123".to_string()))),
-        ..happy_horse_builder()
-      };
+      let builder = GenerateVideoRequestBuilder { start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_test123".to_string()))), ..happy_horse_builder() };
       let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
       let remaining = draft.unhandled_request_state.unwrap();
       assert!(matches!(remaining.start_frame, Some(ImageRef::MediaFileToken(t)) if t.as_str() == "mf_test123"));
@@ -419,15 +315,7 @@ mod tests {
 
   #[test]
   fn full_request_all_fields() {
-    let builder = GenerateVideoRequestBuilder {
-      prompt: Some("full test".to_string()),
-      aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen),
-      resolution: Some(RouterResolution::TenEightyP),
-      duration_seconds: Some(10),
-      video_batch_count: Some(4),
-      start_frame: Some(ImageRef::Url("https://example.com/start.jpg".to_string())),
-      ..happy_horse_builder()
-    };
+    let builder = GenerateVideoRequestBuilder { prompt: Some("full test".to_string()), aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen), resolution: Some(RouterResolution::TenEightyP), duration_seconds: Some(10), video_batch_count: Some(4), start_frame: Some(ImageRef::Url("https://example.com/start.jpg".to_string())), ..happy_horse_builder() };
     let draft = unwrap_draft(build_kinovi_happy_horse_1p0(builder));
 
     assert_eq!(draft.prompt, "full test");
@@ -443,20 +331,12 @@ mod tests {
   // ── Helpers ──
 
   fn happy_horse_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("a cat dancing".to_string()),
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { provider: RouterProvider::KinoviWeb, prompt: Some("a cat dancing".to_string()), duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn unwrap_draft(result: Result<VideoGenerationDraftOrRequest, ArtcraftRouterError>) -> KinoviHappyHorse1p0DraftState {
     match result.expect("build should succeed") {
-      VideoGenerationDraftOrRequest::Draft(
-        VideoGenerationDraftRequest::KinoviHappyHorse1p0(draft)
-      ) => draft,
+      VideoGenerationDraftOrRequest::Draft(VideoGenerationDraftRequest::KinoviHappyHorse1p0(draft)) => draft,
       _ => panic!("expected KinoviHappyHorse1p0 draft"),
     }
   }

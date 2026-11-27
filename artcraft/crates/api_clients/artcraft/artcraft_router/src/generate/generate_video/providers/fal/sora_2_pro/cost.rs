@@ -1,7 +1,5 @@
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
-use crate::generate::generate_video::providers::fal::sora_2_pro::request::{
-  FalSora2ProDuration, FalSora2ProMode, FalSora2ProRequestState, FalSora2ProResolution,
-};
+use crate::generate::generate_video::providers::fal::sora_2_pro::request::{FalSora2ProDuration, FalSora2ProMode, FalSora2ProRequestState, FalSora2ProResolution};
 
 #[derive(Clone, Debug)]
 pub struct FalSora2ProCostState {
@@ -11,10 +9,7 @@ pub struct FalSora2ProCostState {
 
 impl FalSora2ProCostState {
   pub fn from_request(request: &FalSora2ProRequestState) -> Self {
-    Self {
-      duration_seconds: duration_seconds_for_cost(request.duration),
-      is_ten_eighty_p: is_ten_eighty_p_for_cost(&request.mode, request.resolution),
-    }
+    Self { duration_seconds: duration_seconds_for_cost(request.duration), is_ten_eighty_p: is_ten_eighty_p_for_cost(&request.mode, request.resolution) }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -22,15 +17,7 @@ impl FalSora2ProCostState {
     let per_second_cents: u64 = if self.is_ten_eighty_p { 50 } else { 30 };
     let cost_in_usd_cents = per_second_cents * self.duration_seconds;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -62,14 +49,7 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>, has_start: bool) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Sora2Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Sora2Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() };
     if has_start {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
@@ -86,10 +66,14 @@ mod tests {
     }
 
     #[test]
-    fn p720_8s_is_240() { assert_eq!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false), 240); }
+    fn p720_8s_is_240() {
+      assert_eq!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false), 240);
+    }
 
     #[test]
-    fn p720_12s_is_360() { assert_eq!(cost_cents(Some(12), Some(RouterResolution::SevenTwentyP), false), 360); }
+    fn p720_12s_is_360() {
+      assert_eq!(cost_cents(Some(12), Some(RouterResolution::SevenTwentyP), false), 360);
+    }
 
     #[test]
     fn p1080_4s_is_200() {
@@ -98,10 +82,14 @@ mod tests {
     }
 
     #[test]
-    fn p1080_8s_is_400() { assert_eq!(cost_cents(Some(8), Some(RouterResolution::TenEightyP), false), 400); }
+    fn p1080_8s_is_400() {
+      assert_eq!(cost_cents(Some(8), Some(RouterResolution::TenEightyP), false), 400);
+    }
 
     #[test]
-    fn p1080_12s_is_600() { assert_eq!(cost_cents(Some(12), Some(RouterResolution::TenEightyP), false), 600); }
+    fn p1080_12s_is_600() {
+      assert_eq!(cost_cents(Some(12), Some(RouterResolution::TenEightyP), false), 600);
+    }
 
     #[test]
     fn t2v_default_resolution_priced_as_1080p() {
@@ -118,10 +106,7 @@ mod tests {
 
   #[test]
   fn higher_resolution_costs_more() {
-    assert!(
-      cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false)
-        < cost_cents(Some(8), Some(RouterResolution::TenEightyP), false)
-    );
+    assert!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), false) < cost_cents(Some(8), Some(RouterResolution::TenEightyP), false));
   }
 
   #[test]

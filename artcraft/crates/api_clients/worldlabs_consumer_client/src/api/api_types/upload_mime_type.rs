@@ -12,7 +12,7 @@ impl UploadMimeType {
       Self::ImageJpeg => "image/jpeg",
     }
   }
-  
+
   pub fn extension_without_period(&self) -> &'static str {
     match self {
       Self::ImageJpeg => "jpeg",

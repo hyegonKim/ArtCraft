@@ -1,6 +1,4 @@
-use crate::requests::api::image::edit::flux_1_dev_edit_image::api::{
-  Flux1DevEditImageNumImages, Flux1DevEditImageRequest,
-};
+use crate::requests::api::image::edit::flux_1_dev_edit_image::api::{Flux1DevEditImageNumImages, Flux1DevEditImageRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Flux1DevEditImageRequest {
@@ -23,11 +21,7 @@ mod tests {
   use super::*;
 
   fn make_request(num_images: Flux1DevEditImageNumImages) -> Flux1DevEditImageRequest {
-    Flux1DevEditImageRequest {
-      prompt: "test".to_string(),
-      image_url: "https://example.com/image.jpg".to_string(),
-      num_images,
-    }
+    Flux1DevEditImageRequest { prompt: "test".to_string(), image_url: "https://example.com/image.jpg".to_string(), num_images }
   }
 
   #[test]

@@ -390,17 +390,8 @@ fn graph(ui: &mut egui::Ui, d: &mut CameraRawDialog, view: &mut CameraRawScopeSt
         let ev = d.params.hdr_range_ev.clamp(1, 4);
         let sdr_frac = 4.0 / (4.0 + f32::from(ev));
         let split_x = plot.left() + sdr_frac * plot.width();
-        ui.painter().line_segment(
-            [pos2(split_x, plot.top()), pos2(split_x, plot.bottom())],
-            Stroke::new(1.0, t.accent.gamma_multiply(0.8)),
-        );
-        ui.painter().text(
-            pos2(split_x + 4.0, plot.bottom() - 3.0),
-            Align2::LEFT_BOTTOM,
-            format!("+{ev} EV HDR"),
-            crate::theme::mono(10.0),
-            t.accent,
-        );
+        ui.painter().line_segment([pos2(split_x, plot.top()), pos2(split_x, plot.bottom())], Stroke::new(1.0, t.accent.gamma_multiply(0.8)));
+        ui.painter().text(pos2(split_x + 4.0, plot.bottom() - 3.0), Align2::LEFT_BOTTOM, format!("+{ev} EV HDR"), crate::theme::mono(10.0), t.accent);
     }
     let corner = 18.0;
     if let Some(sample) = d.hover_sample(false) {

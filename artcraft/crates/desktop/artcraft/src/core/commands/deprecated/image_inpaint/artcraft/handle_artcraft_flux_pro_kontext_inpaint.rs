@@ -35,14 +35,7 @@ use artcraft_client::endpoints::media_files::upload_image_media_file_from_file::
 use tauri::AppHandle;
 use tokens::tokens::media_files::MediaFileToken;
 
-pub async fn handle_artcraft_flux_pro_kontext_inpaint(
-  request: &EnqueueInpaintImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_artcraft_flux_pro_kontext_inpaint(request: &EnqueueInpaintImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => {
@@ -66,7 +59,7 @@ pub async fn handle_artcraft_flux_pro_kontext_inpaint(
   //})?;
 
   // TODO: Experiment in seeing if we can use the mask in any useful way.
-  
+
   // let mask_media_token = get_mask(
   //   request,
   //   app_env_configs,
@@ -84,49 +77,25 @@ pub async fn handle_artcraft_flux_pro_kontext_inpaint(
     Some(3) => Some(FluxProKontextMaxEditImageNumImages::Three),
     Some(4) => Some(FluxProKontextMaxEditImageNumImages::Four),
     Some(other) => {
-      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages {
-        min: 1,
-        max: 4,
-        requested: other,
-      }));
+      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages { min: 1, max: 4, requested: other }));
     },
   };
 
+  let request = FluxProKontextMaxEditImageRequest { uuid_idempotency_token, prompt: Some(request.prompt.clone()), image_media_token, num_images };
 
-  let request = FluxProKontextMaxEditImageRequest {
-    uuid_idempotency_token,
-    prompt: Some(request.prompt.clone()),
-    image_media_token,
-    num_images,
-  };
-
-  let result = flux_pro_kontext_max_edit_image(
-    &app_env_configs.storyteller_host,
-    Some(&creds),
-    request,
-  ).await;
-
+  let result = flux_pro_kontext_max_edit_image(&app_env_configs.storyteller_host, Some(&creds), request).await;
 
   let job_id = match result {
     Ok(enqueued) => {
       // TODO(bt,2025-07-05): Enqueue job token?
-      info!("Successfully enqueued Artcraft flux pro kontext inpaint. Job token: {}",
-        enqueued.inference_job_token);
+      info!("Successfully enqueued Artcraft flux pro kontext inpaint. Job token: {}", enqueued.inference_job_token);
       enqueued.inference_job_token
-    }
+    },
     Err(err) => {
       error!("Failed to use Artcraft flux pro kontext inpaint: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
-  
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Artcraft,
-    model: Some(GenerationModel::FluxProKontextMax),
-    provider_job_id: Some(job_id.to_string()),
-    task_type: TaskType::ImageInpaintEdit,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Artcraft, model: Some(GenerationModel::FluxProKontextMax), provider_job_id: Some(job_id.to_string()), task_type: TaskType::ImageInpaintEdit, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }

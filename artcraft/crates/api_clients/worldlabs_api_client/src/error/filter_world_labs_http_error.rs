@@ -22,24 +22,15 @@ pub fn filter_world_labs_http_error(status_code: StatusCode, maybe_body: Option<
   }
 
   if let Some(body) = maybe_body {
-    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code,
-      body: body.to_string(),
-    }.into());
+    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: body.to_string() }.into());
   }
 
-  Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-    status_code,
-    body: String::new(),
-  }.into())
+  Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body: String::new() }.into())
 }
 
 /// Check if a 403 response is an NSFW content policy rejection.
 /// Returns `Some(WorldLabsSpecificApiError)` if it matches, `None` otherwise.
-fn check_nsfw_content_rejection(
-  status_code: StatusCode,
-  maybe_body: Option<&str>,
-) -> Option<WorldLabsSpecificApiError> {
+fn check_nsfw_content_rejection(status_code: StatusCode, maybe_body: Option<&str>) -> Option<WorldLabsSpecificApiError> {
   if status_code != StatusCode::FORBIDDEN {
     return None;
   }
@@ -47,13 +38,7 @@ fn check_nsfw_content_rejection(
   let body = maybe_body?;
   let body_lower = body.to_lowercase();
 
-  if body_lower.contains("nsfw") || body_lower.contains("sexuality") {
-    Some(WorldLabsSpecificApiError::NsfwContentPolicyRejected {
-      message: Some(body.to_string()),
-    })
-  } else {
-    None
-  }
+  if body_lower.contains("nsfw") || body_lower.contains("sexuality") { Some(WorldLabsSpecificApiError::NsfwContentPolicyRejected { message: Some(body.to_string()) }) } else { None }
 }
 
 #[cfg(test)]
@@ -81,9 +66,7 @@ mod tests {
     let err = result.unwrap_err();
 
     assert!(err.is_403_forbidden());
-    assert!(matches!(err, WorldLabsError::ApiSpecific(
-      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
-    )));
+    assert!(matches!(err, WorldLabsError::ApiSpecific(WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. })));
   }
 
   #[test]
@@ -103,18 +86,14 @@ mod tests {
   fn nsfw_403_case_insensitive_nsfw() {
     let body = r#"{"detail":"nsfw content detected"}"#;
     let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
-    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(
-      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
-    )));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. })));
   }
 
   #[test]
   fn nsfw_403_case_insensitive_sexuality() {
     let body = r#"{"detail":"Rejected due to Sexuality content"}"#;
     let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
-    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(
-      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
-    )));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. })));
   }
 
   // --- Non-NSFW 403 ---
@@ -126,9 +105,7 @@ mod tests {
     let err = result.unwrap_err();
 
     assert!(err.is_403_forbidden());
-    assert!(matches!(err, WorldLabsError::ApiGeneric(
-      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-    )));
+    assert!(matches!(err, WorldLabsError::ApiGeneric(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. })));
   }
 
   #[test]
@@ -136,9 +113,7 @@ mod tests {
     let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, None);
     let err = result.unwrap_err();
     assert!(err.is_403_forbidden());
-    assert!(matches!(err, WorldLabsError::ApiGeneric(
-      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-    )));
+    assert!(matches!(err, WorldLabsError::ApiGeneric(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. })));
   }
 
   // --- 402 Payment Required ---
@@ -147,9 +122,7 @@ mod tests {
   fn payment_required_402() {
     let result = filter_world_labs_http_error(StatusCode::PAYMENT_REQUIRED, Some("{}"));
     let err = result.unwrap_err();
-    assert!(matches!(err, WorldLabsError::ApiSpecific(
-      WorldLabsSpecificApiError::InsufficientCredits
-    )));
+    assert!(matches!(err, WorldLabsError::ApiSpecific(WorldLabsSpecificApiError::InsufficientCredits)));
     assert!(!err.is_403_forbidden());
   }
 
@@ -161,18 +134,14 @@ mod tests {
     let result = filter_world_labs_http_error(StatusCode::INTERNAL_SERVER_ERROR, Some(body));
     let err = result.unwrap_err();
     assert!(!err.is_403_forbidden());
-    assert!(matches!(err, WorldLabsError::ApiGeneric(
-      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-    )));
+    assert!(matches!(err, WorldLabsError::ApiGeneric(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. })));
   }
 
   #[test]
   fn bad_request_400_is_generic() {
     let body = r#"{"detail":"Bad request"}"#;
     let result = filter_world_labs_http_error(StatusCode::BAD_REQUEST, Some(body));
-    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(
-      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-    )));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. })));
   }
 
   #[test]
@@ -180,9 +149,7 @@ mod tests {
     // Even if the body mentions "nsfw", a 400 should NOT be classified as NSFW rejection.
     let body = r#"{"detail":"nsfw check failed"}"#;
     let result = filter_world_labs_http_error(StatusCode::BAD_REQUEST, Some(body));
-    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(
-      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
-    )));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. })));
   }
 
   #[test]

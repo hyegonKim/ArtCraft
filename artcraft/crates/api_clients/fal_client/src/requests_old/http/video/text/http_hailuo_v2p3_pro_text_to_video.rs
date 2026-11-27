@@ -19,8 +19,6 @@ pub struct HailuoV2p3ProTextToVideoOutput {
   pub video: HailuoV2p3ProTextToVideoVideoFile,
 }
 
-pub fn hailuo_v2p3_pro_text_to_video(
-  params: HailuoV2p3ProTextToVideoInput,
-) -> FalRequest<HailuoV2p3ProTextToVideoInput, HailuoV2p3ProTextToVideoOutput> {
+pub fn hailuo_v2p3_pro_text_to_video(params: HailuoV2p3ProTextToVideoInput) -> FalRequest<HailuoV2p3ProTextToVideoInput, HailuoV2p3ProTextToVideoOutput> {
   FalRequest::new("fal-ai/minimax/hailuo-2.3/pro/text-to-video", params)
 }

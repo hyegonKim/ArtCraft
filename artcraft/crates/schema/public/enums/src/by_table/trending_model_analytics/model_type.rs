@@ -14,7 +14,6 @@ use strum::EnumIter;
 pub enum ModelType {
   /// TTS models
   Tts,
-
   // NB: It's assumed we'll use this same system to track
   // trending VC models too, so the next type would be "VC".
 }

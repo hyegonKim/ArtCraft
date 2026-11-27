@@ -21,15 +21,7 @@ impl FalGptImage2p5FlareCostState {
   }
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -49,36 +41,36 @@ mod tests {
 
   // (quality, aspect_ratio, resolution, batch, expected_cents) — text-to-image
   const TEXT_CASES: &[(Option<Q>, Option<Ar>, Option<R>, u16, u64)] = &[
-    (None,            None,                    None,          1,  4), // Fal default: landscape_4_3, high
-    (Some(Q::Low),    Some(Ar::Square),        None,          1,  1),
-    (Some(Q::Medium), Some(Ar::Square),        None,          1,  2),
-    (Some(Q::High),   Some(Ar::Square),        None,          1,  6),
-    (Some(Q::Auto),   Some(Ar::Square),        None,          1,  6), // auto is priced as high
-    (Some(Q::XHigh),  Some(Ar::Square),        None,          1, 10),
-    (Some(Q::Max),    Some(Ar::Square),        None,          1, 22),
-    (Some(Q::High),   Some(Ar::Square),        None,          4, 24),
-    (Some(Q::High),   Some(Ar::SquareHd),      None,          1,  9),
-    (Some(Q::High),   Some(Ar::Square),        Some(R::TwoK), 1,  9),
-    (Some(Q::High),   Some(Ar::Square),        Some(R::FourK), 1, 13),
-    (Some(Q::High),   Some(Ar::WideFourByThree), None,        1,  4),
-    (Some(Q::High),   Some(Ar::TallThreeByFour), None,        1,  4),
-    (Some(Q::High),   Some(Ar::WideSixteenByNine), None,      1,  4),
-    (Some(Q::High),   Some(Ar::WideSixteenByNine), Some(R::OneK), 1, 3),
-    (Some(Q::High),   Some(Ar::WideSixteenByNine), Some(R::FourK), 1, 11),
+    (None, None, None, 1, 4), // Fal default: landscape_4_3, high
+    (Some(Q::Low), Some(Ar::Square), None, 1, 1),
+    (Some(Q::Medium), Some(Ar::Square), None, 1, 2),
+    (Some(Q::High), Some(Ar::Square), None, 1, 6),
+    (Some(Q::Auto), Some(Ar::Square), None, 1, 6), // auto is priced as high
+    (Some(Q::XHigh), Some(Ar::Square), None, 1, 10),
+    (Some(Q::Max), Some(Ar::Square), None, 1, 22),
+    (Some(Q::High), Some(Ar::Square), None, 4, 24),
+    (Some(Q::High), Some(Ar::SquareHd), None, 1, 9),
+    (Some(Q::High), Some(Ar::Square), Some(R::TwoK), 1, 9),
+    (Some(Q::High), Some(Ar::Square), Some(R::FourK), 1, 13),
+    (Some(Q::High), Some(Ar::WideFourByThree), None, 1, 4),
+    (Some(Q::High), Some(Ar::TallThreeByFour), None, 1, 4),
+    (Some(Q::High), Some(Ar::WideSixteenByNine), None, 1, 4),
+    (Some(Q::High), Some(Ar::WideSixteenByNine), Some(R::OneK), 1, 3),
+    (Some(Q::High), Some(Ar::WideSixteenByNine), Some(R::FourK), 1, 11),
     (Some(Q::Medium), Some(Ar::TallNineBySixteen), Some(R::ThreeK), 2, 4),
-    (Some(Q::High),   Some(Ar::Auto),          None,          1, 11),
-    (Some(Q::High),   Some(Ar::Auto4k),        None,          1, 11),
+    (Some(Q::High), Some(Ar::Auto), None, 1, 11),
+    (Some(Q::High), Some(Ar::Auto4k), None, 1, 11),
   ];
 
   // (reference_images, quality, aspect_ratio, resolution, batch, expected_cents) — edit
   const EDIT_CASES: &[(usize, Option<Q>, Option<Ar>, Option<R>, u16, u64)] = &[
-    (1, None,          None,             None,          1, 11), // Fal default: auto, high
-    (1, Some(Q::Low),  Some(Ar::Square), None,          1,  2),
-    (1, Some(Q::High), Some(Ar::Square), None,          1,  7),
-    (3, Some(Q::High), Some(Ar::Square), None,          1,  8),
-    (1, Some(Q::High), Some(Ar::Square), None,          4, 28),
+    (1, None, None, None, 1, 11), // Fal default: auto, high
+    (1, Some(Q::Low), Some(Ar::Square), None, 1, 2),
+    (1, Some(Q::High), Some(Ar::Square), None, 1, 7),
+    (3, Some(Q::High), Some(Ar::Square), None, 1, 8),
+    (1, Some(Q::High), Some(Ar::Square), None, 4, 28),
     (1, Some(Q::High), Some(Ar::WideSixteenByNine), Some(R::FourK), 1, 11),
-    (2, Some(Q::High), Some(Ar::Auto),   None,          1, 12),
+    (2, Some(Q::High), Some(Ar::Auto), None, 1, 12),
   ];
 
   #[test]
@@ -106,31 +98,11 @@ mod tests {
   }
 
   fn cost_cents(refs: usize, quality: Option<Q>, aspect_ratio: Option<Ar>, resolution: Option<R>, batch: u16) -> u64 {
-    builder(refs, quality, aspect_ratio, resolution, batch)
-      .build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
+    builder(refs, quality, aspect_ratio, resolution, batch).build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   fn builder(refs: usize, quality: Option<Q>, aspect_ratio: Option<Ar>, resolution: Option<R>, batch: u16) -> GenerateImageRequestBuilder {
-    let image_inputs = if refs == 0 {
-      None
-    } else {
-      Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string(); refs]))
-    };
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::GptImage2p5Flare,
-      provider: RouterProvider::Fal,
-      prompt: Some("a cat in space".to_string()),
-      image_inputs,
-      resolution,
-      aspect_ratio,
-      quality,
-      image_batch_count: Some(batch),
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    let image_inputs = if refs == 0 { None } else { Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string(); refs])) };
+    GenerateImageRequestBuilder { model: RouterImageModel::GptImage2p5Flare, provider: RouterProvider::Fal, prompt: Some("a cat in space".to_string()), image_inputs, resolution, aspect_ratio, quality, image_batch_count: Some(batch), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 }

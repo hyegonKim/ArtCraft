@@ -60,7 +60,6 @@ pub enum EnqueueNanoBanana2TextToImageAspectRatio {
   NineBySixteen,
 }
 
-
 impl FalRequestCostCalculator for EnqueueNanoBanana2TextToImageRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // TODO(bt): Verify actual pricing for Nano Banana 2 on fal.ai.
@@ -82,11 +81,7 @@ impl FalRequestCostCalculator for EnqueueNanoBanana2TextToImageRequest {
   }
 }
 
-
-pub async fn enqueue_nano_banana_2_text_to_image_webhook<R: IntoUrl>(
-  args: EnqueueNanoBanana2TextToImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_nano_banana_2_text_to_image_webhook<R: IntoUrl>(args: EnqueueNanoBanana2TextToImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -96,34 +91,36 @@ pub async fn enqueue_nano_banana_2_text_to_image_webhook<R: IntoUrl>(
     EnqueueNanoBanana2TextToImageNumImages::Four => 4,
   };
 
-  let resolution = req.resolution
-      .map(|resolution| match resolution {
-        EnqueueNanoBanana2TextToImageResolution::HalfK => "0.5K",
-        EnqueueNanoBanana2TextToImageResolution::OneK => "1K",
-        EnqueueNanoBanana2TextToImageResolution::TwoK => "2K",
-        EnqueueNanoBanana2TextToImageResolution::FourK => "4K",
-      })
-      .map(|r| r.to_string());
+  let resolution = req
+    .resolution
+    .map(|resolution| match resolution {
+      EnqueueNanoBanana2TextToImageResolution::HalfK => "0.5K",
+      EnqueueNanoBanana2TextToImageResolution::OneK => "1K",
+      EnqueueNanoBanana2TextToImageResolution::TwoK => "2K",
+      EnqueueNanoBanana2TextToImageResolution::FourK => "4K",
+    })
+    .map(|r| r.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|ar| match ar {
-        // Auto
-        EnqueueNanoBanana2TextToImageAspectRatio::Auto => "auto",
-        // Square
-        EnqueueNanoBanana2TextToImageAspectRatio::OneByOne => "1:1",
-        // Wide
-        EnqueueNanoBanana2TextToImageAspectRatio::FiveByFour => "5:4",
-        EnqueueNanoBanana2TextToImageAspectRatio::FourByThree => "4:3",
-        EnqueueNanoBanana2TextToImageAspectRatio::ThreeByTwo => "3:2",
-        EnqueueNanoBanana2TextToImageAspectRatio::SixteenByNine => "16:9",
-        EnqueueNanoBanana2TextToImageAspectRatio::TwentyOneByNine => "21:9",
-        // Tall
-        EnqueueNanoBanana2TextToImageAspectRatio::FourByFive => "4:5",
-        EnqueueNanoBanana2TextToImageAspectRatio::ThreeByFour => "3:4",
-        EnqueueNanoBanana2TextToImageAspectRatio::TwoByThree => "2:3",
-        EnqueueNanoBanana2TextToImageAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|ar| ar.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|ar| match ar {
+      // Auto
+      EnqueueNanoBanana2TextToImageAspectRatio::Auto => "auto",
+      // Square
+      EnqueueNanoBanana2TextToImageAspectRatio::OneByOne => "1:1",
+      // Wide
+      EnqueueNanoBanana2TextToImageAspectRatio::FiveByFour => "5:4",
+      EnqueueNanoBanana2TextToImageAspectRatio::FourByThree => "4:3",
+      EnqueueNanoBanana2TextToImageAspectRatio::ThreeByTwo => "3:2",
+      EnqueueNanoBanana2TextToImageAspectRatio::SixteenByNine => "16:9",
+      EnqueueNanoBanana2TextToImageAspectRatio::TwentyOneByNine => "21:9",
+      // Tall
+      EnqueueNanoBanana2TextToImageAspectRatio::FourByFive => "4:5",
+      EnqueueNanoBanana2TextToImageAspectRatio::ThreeByFour => "3:4",
+      EnqueueNanoBanana2TextToImageAspectRatio::TwoByThree => "2:3",
+      EnqueueNanoBanana2TextToImageAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|ar| ar.to_string());
 
   let request = NanoBanana2TextToImageInput {
     prompt: req.prompt,
@@ -139,10 +136,7 @@ pub async fn enqueue_nano_banana_2_text_to_image_webhook<R: IntoUrl>(
     seed: None,
   };
 
-  let result = nano_banana_2_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = nano_banana_2_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -162,16 +156,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueNanoBanana2TextToImageArgs {
-      request: EnqueueNanoBanana2TextToImageRequest {
-        prompt: "an anime girl riding on the back of a t-rex".to_string(),
-        num_images: EnqueueNanoBanana2TextToImageNumImages::One,
-        aspect_ratio: Some(EnqueueNanoBanana2TextToImageAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueNanoBanana2TextToImageResolution::TwoK),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueNanoBanana2TextToImageArgs { request: EnqueueNanoBanana2TextToImageRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: EnqueueNanoBanana2TextToImageNumImages::One, aspect_ratio: Some(EnqueueNanoBanana2TextToImageAspectRatio::SixteenByNine), resolution: Some(EnqueueNanoBanana2TextToImageResolution::TwoK) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_nano_banana_2_text_to_image_webhook(args).await?;
 

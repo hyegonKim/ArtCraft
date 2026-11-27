@@ -1,10 +1,6 @@
 use fal_client::requests::api::video::image::minimax_h3::api::MinimaxH3ImageToVideoRequest;
-use fal_client::requests::api::video::reference::minimax_h3::api::{
-  MinimaxH3ReferenceToVideoAspectRatio, MinimaxH3ReferenceToVideoRequest,
-};
-use fal_client::requests::api::video::text::minimax_h3::api::{
-  MinimaxH3Resolution, MinimaxH3TextToVideoAspectRatio, MinimaxH3TextToVideoRequest,
-};
+use fal_client::requests::api::video::reference::minimax_h3::api::{MinimaxH3ReferenceToVideoAspectRatio, MinimaxH3ReferenceToVideoRequest};
+use fal_client::requests::api::video::text::minimax_h3::api::{MinimaxH3Resolution, MinimaxH3TextToVideoAspectRatio, MinimaxH3TextToVideoRequest};
 
 use crate::api::audio_list_ref::AudioListRef;
 use crate::api::image_list_ref::ImageListRef;
@@ -16,9 +12,7 @@ use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 use crate::generate::generate_video::providers::fal::kling_1_6_pro::build::optional_url;
-use crate::generate::generate_video::providers::fal::minimax_h3::request::{
-  FalMinimaxH3Mode, FalMinimaxH3RequestState,
-};
+use crate::generate::generate_video::providers::fal::minimax_h3::request::{FalMinimaxH3Mode, FalMinimaxH3RequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
@@ -39,16 +33,12 @@ pub(crate) enum PlanAspectRatio {
   NineBySixteen,
 }
 
-pub fn build_fal_minimax_h3(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_minimax_h3(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_minimax_h3_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalMinimaxH3(state)))
 }
 
-pub(crate) fn build_fal_minimax_h3_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalMinimaxH3RequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_minimax_h3_state(builder: GenerateVideoRequestBuilder) -> Result<FalMinimaxH3RequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio, strategy)?;
@@ -61,55 +51,24 @@ pub(crate) fn build_fal_minimax_h3_state(
   let start_image_url = optional_url(builder.start_frame.clone())?;
   let end_image_url = optional_url(builder.end_frame.clone())?;
 
-  let has_references = !reference_image_urls.is_empty()
-    || !reference_video_urls.is_empty()
-    || !reference_audio_urls.is_empty();
+  let has_references = !reference_image_urls.is_empty() || !reference_video_urls.is_empty() || !reference_audio_urls.is_empty();
 
   // Dispatch: any reference asset → reference-to-video; start_frame → image; else → text.
   let mode = if has_references {
     if start_image_url.is_some() || end_image_url.is_some() {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "reference_images",
-        value: "MiniMax H3 reference-to-video cannot also accept a start_frame or end_frame".to_string(),
-      }));
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_images", value: "MiniMax H3 reference-to-video cannot also accept a start_frame or end_frame".to_string() }));
     }
-    check_reference_counts(
-      reference_image_urls.len(),
-      reference_video_urls.len(),
-      reference_audio_urls.len(),
-    )?;
-    FalMinimaxH3Mode::ReferenceToVideo(MinimaxH3ReferenceToVideoRequest {
-      prompt,
-      reference_image_urls: non_empty(reference_image_urls),
-      reference_video_urls: non_empty(reference_video_urls),
-      reference_audio_urls: non_empty(reference_audio_urls),
-      duration,
-      resolution,
-      aspect_ratio: aspect_ratio.map(to_reference_aspect_ratio),
-    })
+    check_reference_counts(reference_image_urls.len(), reference_video_urls.len(), reference_audio_urls.len())?;
+    FalMinimaxH3Mode::ReferenceToVideo(MinimaxH3ReferenceToVideoRequest { prompt, reference_image_urls: non_empty(reference_image_urls), reference_video_urls: non_empty(reference_video_urls), reference_audio_urls: non_empty(reference_audio_urls), duration, resolution, aspect_ratio: aspect_ratio.map(to_reference_aspect_ratio) })
   } else if let Some(image_url) = start_image_url {
     // Image-to-video has no aspect_ratio input — the output follows the start
     // frame — so any requested aspect ratio is silently dropped here.
-    FalMinimaxH3Mode::ImageToVideo(MinimaxH3ImageToVideoRequest {
-      prompt,
-      image_url,
-      end_image_url,
-      duration,
-      resolution,
-    })
+    FalMinimaxH3Mode::ImageToVideo(MinimaxH3ImageToVideoRequest { prompt, image_url, end_image_url, duration, resolution })
   } else {
     if end_image_url.is_some() {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "end_frame",
-        value: "MiniMax H3 requires a start_frame when end_frame is provided".to_string(),
-      }));
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "MiniMax H3 requires a start_frame when end_frame is provided".to_string() }));
     }
-    FalMinimaxH3Mode::TextToVideo(MinimaxH3TextToVideoRequest {
-      prompt,
-      duration,
-      resolution,
-      aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio),
-    })
+    FalMinimaxH3Mode::TextToVideo(MinimaxH3TextToVideoRequest { prompt, duration, resolution, aspect_ratio: aspect_ratio.map(to_t2v_aspect_ratio) })
   };
 
   Ok(FalMinimaxH3RequestState { mode })
@@ -119,78 +78,47 @@ pub(crate) fn build_fal_minimax_h3_state(
 
 /// fal's reference limits: at most 9 images, 3 videos, 3 audio clips, and 12
 /// files overall; audio cannot be the only reference input.
-fn check_reference_counts(
-  image_count: usize,
-  video_count: usize,
-  audio_count: usize,
-) -> Result<(), ArtcraftRouterError> {
+fn check_reference_counts(image_count: usize, video_count: usize, audio_count: usize) -> Result<(), ArtcraftRouterError> {
   if image_count > MAX_REFERENCE_IMAGES {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_images",
-      value: format!("MiniMax H3 supports at most {MAX_REFERENCE_IMAGES} reference images, got {image_count}"),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_images", value: format!("MiniMax H3 supports at most {MAX_REFERENCE_IMAGES} reference images, got {image_count}") }));
   }
   if video_count > MAX_REFERENCE_VIDEOS {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_videos",
-      value: format!("MiniMax H3 supports at most {MAX_REFERENCE_VIDEOS} reference videos, got {video_count}"),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_videos", value: format!("MiniMax H3 supports at most {MAX_REFERENCE_VIDEOS} reference videos, got {video_count}") }));
   }
   if audio_count > MAX_REFERENCE_AUDIO {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_audio",
-      value: format!("MiniMax H3 supports at most {MAX_REFERENCE_AUDIO} reference audio clips, got {audio_count}"),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_audio", value: format!("MiniMax H3 supports at most {MAX_REFERENCE_AUDIO} reference audio clips, got {audio_count}") }));
   }
   let total = image_count + video_count + audio_count;
   if total > MAX_REFERENCE_FILES {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_images",
-      value: format!("MiniMax H3 supports at most {MAX_REFERENCE_FILES} reference files overall, got {total}"),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_images", value: format!("MiniMax H3 supports at most {MAX_REFERENCE_FILES} reference files overall, got {total}") }));
   }
   if audio_count > 0 && image_count == 0 && video_count == 0 {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "reference_audio",
-      value: "MiniMax H3 requires at least one reference image or video alongside reference audio".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "reference_audio", value: "MiniMax H3 requires at least one reference image or video alongside reference audio".to_string() }));
   }
   Ok(())
 }
 
-fn resolve_image_urls(
-  reference_images: Option<ImageListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_image_urls(reference_images: Option<ImageListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match reference_images {
     None => Ok(vec![]),
     Some(ImageListRef::Urls(urls)) => Ok(urls),
-    Some(ImageListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
-fn resolve_video_urls(
-  reference_videos: Option<VideoListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_video_urls(reference_videos: Option<VideoListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match reference_videos {
     None => Ok(vec![]),
     Some(VideoListRef::Urls(urls)) => Ok(urls),
-    Some(VideoListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(VideoListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
-fn resolve_audio_urls(
-  reference_audio: Option<AudioListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_audio_urls(reference_audio: Option<AudioListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match reference_audio {
     None => Ok(vec![]),
     Some(AudioListRef::Urls(urls)) => Ok(urls),
-    Some(AudioListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(AudioListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
@@ -203,17 +131,10 @@ fn non_empty(urls: Vec<String>) -> Option<Vec<String>> {
 /// `None` (including the `Auto*` ratios) leaves the field unset so fal's
 /// per-mode default applies: 16:9 for text-to-video, adaptive for
 /// reference-to-video.
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<PlanAspectRatio>, ArtcraftRouterError> {
   use PlanAspectRatio as Ar;
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(None),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(None),
 
     Some(RouterAspectRatio::WideTwentyOneByNine) => Ok(Some(Ar::TwentyOneByNine)),
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
@@ -223,64 +144,36 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(Ar::Square)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", other) })),
       _ => Ok(Some(Ar::SixteenByNine)),
     },
   }
 }
 
 /// MiniMax H3 offers exactly two output sizes: 768P and 2K.
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<MinimaxH3Resolution>, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<MinimaxH3Resolution>, ArtcraftRouterError> {
   match resolution {
     None => Ok(None),
 
     // 480p/720p round up to 768P, the smallest size H3 offers.
-    Some(RouterResolution::FourEightyP)
-    | Some(RouterResolution::SevenTwentyP) => Ok(Some(MinimaxH3Resolution::SevenSixtyEightP)),
-    Some(RouterResolution::TenEightyP)
-    | Some(RouterResolution::TwoK) => Ok(Some(MinimaxH3Resolution::TwoK)),
+    Some(RouterResolution::FourEightyP) | Some(RouterResolution::SevenTwentyP) => Ok(Some(MinimaxH3Resolution::SevenSixtyEightP)),
+    Some(RouterResolution::TenEightyP) | Some(RouterResolution::TwoK) => Ok(Some(MinimaxH3Resolution::TwoK)),
 
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(MinimaxH3Resolution::TwoK)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(MinimaxH3Resolution::SevenSixtyEightP)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<u8>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<u8>, ArtcraftRouterError> {
   match duration_seconds {
     None => Ok(None),
-    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => {
-      Ok(Some(seconds as u8))
-    }
+    Some(seconds) if (MIN_DURATION_SECONDS..=MAX_DURATION_SECONDS).contains(&seconds) => Ok(Some(seconds as u8)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(other.clamp(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS) as u8)),
     },
   }
 }
@@ -387,9 +280,7 @@ mod tests {
     #[test]
     fn four_reference_videos_error() {
       let mut b = base_builder();
-      b.reference_videos = Some(VideoListRef::Urls(
-        (0..4).map(|i| format!("https://example.com/v-{i}.mp4")).collect(),
-      ));
+      b.reference_videos = Some(VideoListRef::Urls((0..4).map(|i| format!("https://example.com/v-{i}.mp4")).collect()));
       assert!(build_fal_minimax_h3_state(b).is_err());
     }
 
@@ -397,9 +288,7 @@ mod tests {
     fn thirteen_reference_files_error() {
       // 9 images + 3 videos + 1 audio = 13 > 12 total.
       let mut b = builder_with_reference_images(9);
-      b.reference_videos = Some(VideoListRef::Urls(
-        (0..3).map(|i| format!("https://example.com/v-{i}.mp4")).collect(),
-      ));
+      b.reference_videos = Some(VideoListRef::Urls((0..3).map(|i| format!("https://example.com/v-{i}.mp4")).collect()));
       b.reference_audio = Some(AudioListRef::Urls(vec!["https://example.com/a.mp3".to_string()]));
       assert!(build_fal_minimax_h3_state(b).is_err());
     }
@@ -524,18 +413,11 @@ mod tests {
   }
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::MinimaxH3,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::MinimaxH3, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   fn builder_with_reference_images(count: usize) -> GenerateVideoRequestBuilder {
-    let urls = (0..count)
-      .map(|i| format!("https://example.com/ref-{}.png", i))
-      .collect();
+    let urls = (0..count).map(|i| format!("https://example.com/ref-{}.png", i)).collect();
     let mut b = base_builder();
     b.reference_images = Some(ImageListRef::Urls(urls));
     b

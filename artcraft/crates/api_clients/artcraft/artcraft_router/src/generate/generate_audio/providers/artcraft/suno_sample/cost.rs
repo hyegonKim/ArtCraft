@@ -14,15 +14,7 @@ impl ArtcraftSunoSampleCostState {
   }
 
   pub fn estimate_cost(&self) -> AudioGenerationCostEstimate {
-    AudioGenerationCostEstimate {
-      cost_in_credits: Some(COST_IN_USD_CENTS),
-      cost_in_usd_cents: Some(COST_IN_USD_CENTS),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    AudioGenerationCostEstimate { cost_in_credits: Some(COST_IN_USD_CENTS), cost_in_usd_cents: Some(COST_IN_USD_CENTS), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -39,15 +31,7 @@ mod tests {
 
   #[test]
   fn flat_cost_is_eight_cents() {
-    let builder = GenerateAudioRequestBuilder {
-      model: RouterAudioModel::SunoSample,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("mystical RPG adventure".to_string()),
-      audio_references: Some(AudioListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_test123".to_string()),
-      ])),
-      ..Default::default()
-    };
+    let builder = GenerateAudioRequestBuilder { model: RouterAudioModel::SunoSample, provider: RouterProvider::Artcraft, prompt: Some("mystical RPG adventure".to_string()), audio_references: Some(AudioListRef::MediaFileTokens(vec![MediaFileToken::new("mf_test123".to_string())])), ..Default::default() };
     let estimate = builder.build2().unwrap().estimate_cost().unwrap();
     assert_eq!(estimate.cost_in_usd_cents, Some(8));
     assert_eq!(estimate.cost_in_credits, Some(8));

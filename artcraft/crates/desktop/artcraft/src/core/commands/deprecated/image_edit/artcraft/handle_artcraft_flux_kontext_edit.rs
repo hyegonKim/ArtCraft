@@ -21,14 +21,7 @@ use artcraft_client::endpoints::generate::image::edit::flux_pro_kontext_max_edit
 use artcraft_client::endpoints::generate::image::edit::gpt_image_1_edit_image::gpt_image_1_edit_image;
 use tauri::AppHandle;
 
-pub async fn handle_artcraft_flux_kontext_edit(
-  request: &EnqueueEditImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_artcraft_flux_kontext_edit(request: &EnqueueEditImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => {
@@ -39,7 +32,7 @@ pub async fn handle_artcraft_flux_kontext_edit(
   info!("Calling Artcraft flux kontext max edit (edit) ...");
 
   let uuid_idempotency_token = generate_random_uuid();
-  
+
   let num_images = match request.image_count {
     None => None,
     Some(1) => Some(FluxProKontextMaxEditImageNumImages::One),
@@ -47,39 +40,27 @@ pub async fn handle_artcraft_flux_kontext_edit(
     Some(3) => Some(FluxProKontextMaxEditImageNumImages::Three),
     Some(4) => Some(FluxProKontextMaxEditImageNumImages::Four),
     Some(other) => {
-      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages {
-        min: 1,
-        max: 4,
-        requested: other,
-      }));
+      return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages { min: 1, max: 4, requested: other }));
     },
   };
-  
+
   let mut maybe_media_token = None;
 
-  let list_count = request.image_media_tokens
-      .as_ref()
-      .map(|tokens| tokens.len())
-      .unwrap_or(0);
+  let list_count = request.image_media_tokens.as_ref().map(|tokens| tokens.len()).unwrap_or(0);
 
   if request.scene_image_media_token.is_some() && list_count > 0 {
-    return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments(
-      "Cannot specify both scene_image_media_token and image_media_tokens for Flux Kontext Max".to_string())));
+    return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments("Cannot specify both scene_image_media_token and image_media_tokens for Flux Kontext Max".to_string())));
   }
 
   if list_count > 1 {
-    return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments(
-      "Cannot specify more than one image in image_media_tokens for Flux Kontext Max".to_string())));
+    return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments("Cannot specify more than one image in image_media_tokens for Flux Kontext Max".to_string())));
   }
 
   if let Some(media_token) = &request.scene_image_media_token {
     maybe_media_token = Some(media_token.clone());
   }
 
-  let maybe_list_media_token = request.image_media_tokens
-      .as_ref()
-      .map(|tokens| tokens.first())
-      .flatten();
+  let maybe_list_media_token = request.image_media_tokens.as_ref().map(|tokens| tokens.first()).flatten();
 
   if let Some(media_token) = maybe_list_media_token {
     maybe_media_token = Some(media_token.clone());
@@ -88,44 +69,25 @@ pub async fn handle_artcraft_flux_kontext_edit(
   let media_token = match maybe_media_token {
     Some(token) => token,
     None => {
-      return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments(
-        "No input image specified for Flux Kontext Max edit".to_string())));
+      return Err(GenerateError::BadInput(BadInputReason::WrongImageArguments("No input image specified for Flux Kontext Max edit".to_string())));
     },
   };
 
-  let request = FluxProKontextMaxEditImageRequest {
-    uuid_idempotency_token,
-    prompt: Some(request.prompt.clone()),
-    image_media_token: media_token,
-    num_images,
-  };
+  let request = FluxProKontextMaxEditImageRequest { uuid_idempotency_token, prompt: Some(request.prompt.clone()), image_media_token: media_token, num_images };
 
-  let result = flux_pro_kontext_max_edit_image(
-    &app_env_configs.storyteller_host,
-    Some(&creds),
-    request,
-  ).await;
-  
+  let result = flux_pro_kontext_max_edit_image(&app_env_configs.storyteller_host, Some(&creds), request).await;
+
   let job_id = match result {
     Ok(enqueued) => {
       // TODO(bt,2025-07-05): Enqueue job token?
-      info!("Successfully enqueued Artcraft gpt-image-1. Job token: {}", 
-        enqueued.inference_job_token);
+      info!("Successfully enqueued Artcraft gpt-image-1. Job token: {}", enqueued.inference_job_token);
       enqueued.inference_job_token
-    }
+    },
     Err(err) => {
       error!("Failed to use Artcraft gpt-image-1: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
-  
-  Ok(TaskEnqueueSuccess {
-    provider: GenerationProvider::Artcraft,
-    model: Some(GenerationModel::FluxProKontextMax),
-    provider_job_id: Some(job_id.to_string()),
-    task_type: TaskType::ImageGeneration,
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+
+  Ok(TaskEnqueueSuccess { provider: GenerationProvider::Artcraft, model: Some(GenerationModel::FluxProKontextMax), provider_job_id: Some(job_id.to_string()), task_type: TaskType::ImageGeneration, maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }

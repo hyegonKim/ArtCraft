@@ -38,8 +38,6 @@ pub struct KlingV2p6ProTextToVideoOutput {
   pub video: KlingV2p6ProTextToVideoVideoFile,
 }
 
-pub fn kling_v2p6_pro_text_to_video(
-  params: KlingV2p6ProTextToVideoInput,
-) -> FalRequest<KlingV2p6ProTextToVideoInput, KlingV2p6ProTextToVideoOutput> {
+pub fn kling_v2p6_pro_text_to_video(params: KlingV2p6ProTextToVideoInput) -> FalRequest<KlingV2p6ProTextToVideoInput, KlingV2p6ProTextToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v2.6/pro/text-to-video", params)
 }

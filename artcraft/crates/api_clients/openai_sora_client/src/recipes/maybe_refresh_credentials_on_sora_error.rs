@@ -10,18 +10,17 @@ use log::{error, info, warn};
 // TODO: Make other APIs work with this.
 
 pub async fn maybe_refresh_credentials_on_sora_error(creds: &SoraCredentialSet, error: SoraError) -> Result<SoraCredentialSet, SoraError> {
-
   match error {
     SoraError::Client(SoraClientError::NoBearerTokenForRequest) => {
       error!("Previous request failed due to missing bearer token.");
-    }
+    },
     SoraError::ApiSpecific(SoraSpecificApiError::UnauthorizedCookieOrBearerExpired) => {
       error!("Previous request failed due to invalid bearer token.");
-    }
+    },
     _ => {
       error!("Previous request failed due to the following error: {:?}", error);
-      return Err(error)
-    }
+      return Err(error);
+    },
   }
 
   info!("Generating new JWT bearer token...");
@@ -33,16 +32,14 @@ pub async fn maybe_refresh_credentials_on_sora_error(creds: &SoraCredentialSet, 
     Err(err) => {
       error!("Error generating new JWT bearer token: {}", err);
       return Err(err);
-    }
-    Ok(bearer) => {
-      match SoraJwtBearerToken::new(bearer) {
-        Err(err) => {
-          error!("Error parsing new JWT bearer token: {}", err);
-          return Err(err);
-        }
-        Ok(bearer) => bearer,
-      }
-    }
+    },
+    Ok(bearer) => match SoraJwtBearerToken::new(bearer) {
+      Err(err) => {
+        error!("Error parsing new JWT bearer token: {}", err);
+        return Err(err);
+      },
+      Ok(bearer) => bearer,
+    },
   };
 
   let mut new_creds = creds.clone();

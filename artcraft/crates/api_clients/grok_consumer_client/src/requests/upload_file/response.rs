@@ -1,12 +1,11 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub (super) struct GrokApiUploadFileResponse {
-  
+pub(super) struct GrokApiUploadFileResponse {
   /// The uploaded file_id, which is used to reference the file later.
   #[serde(rename = "fileMetadataId")]
   pub file_metadata_id: Option<String>,
-  
+
   /// Partial path to the media file, not a full URI.
   /// eg. `users/{user_id}/{file_id}/content`
   #[serde(rename = "fileUri")]

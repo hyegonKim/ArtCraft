@@ -11,7 +11,7 @@ mod tests {
 
   use crate::path_to_string::path_to_string;
 
-  const TEST_CASES : [&'static str; 9] = [
+  const TEST_CASES: [&'static str; 9] = [
     // Absolute
     "/",
     "/usr/bin",

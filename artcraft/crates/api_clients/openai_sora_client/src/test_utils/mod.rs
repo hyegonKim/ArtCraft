@@ -1,2 +1,2 @@
 #[cfg(test)]
-pub (crate) mod get_test_credentials;
+pub(crate) mod get_test_credentials;

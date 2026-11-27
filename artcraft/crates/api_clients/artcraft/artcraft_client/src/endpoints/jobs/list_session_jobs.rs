@@ -13,31 +13,16 @@ pub enum States {
   Exclude(HashSet<JobStatusPlus>),
 }
 
-pub async fn list_session_jobs(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  job_states: States,
-) -> Result<ListSessionJobsSuccessResponse, StorytellerError> {
-  
+pub async fn list_session_jobs(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, job_states: States) -> Result<ListSessionJobsSuccessResponse, StorytellerError> {
   let url = match job_states {
-    States::All => 
-      LIST_SESSION_JOBS_URL_PATH.to_string(),
-    States::Include(states) => 
-      format!("{}?include_states={}", LIST_SESSION_JOBS_URL_PATH, states_string(&states)),
-    States::Exclude(states) => 
-      format!("{}?exclude_states={}", LIST_SESSION_JOBS_URL_PATH, states_string(&states)),
+    States::All => LIST_SESSION_JOBS_URL_PATH.to_string(),
+    States::Include(states) => format!("{}?include_states={}", LIST_SESSION_JOBS_URL_PATH, states_string(&states)),
+    States::Exclude(states) => format!("{}?exclude_states={}", LIST_SESSION_JOBS_URL_PATH, states_string(&states)),
   };
-  
-  Ok(basic_json_get_request(
-    api_host,
-    &url,
-    maybe_creds,
-  ).await?)
+
+  Ok(basic_json_get_request(api_host, &url, maybe_creds).await?)
 }
 
 fn states_string(states: &HashSet<JobStatusPlus>) -> String {
-  states.iter()
-    .map(|state| state.to_str())
-    .collect::<Vec<_>>()
-    .join(",")
+  states.iter().map(|state| state.to_str()).collect::<Vec<_>>().join(",")
 }

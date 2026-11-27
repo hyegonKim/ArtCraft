@@ -39,8 +39,6 @@ pub struct FluxPro1InfillOutput {
   pub images: Vec<FluxPro1InfillFile>,
 }
 
-pub fn flux_pro_1_infill(
-  params: FluxPro1InfillInput,
-) -> FalRequest<FluxPro1InfillInput, FluxPro1InfillOutput> {
+pub fn flux_pro_1_infill(params: FluxPro1InfillInput) -> FalRequest<FluxPro1InfillInput, FluxPro1InfillOutput> {
   FalRequest::new("fal-ai/flux-pro/v1/fill", params)
 }

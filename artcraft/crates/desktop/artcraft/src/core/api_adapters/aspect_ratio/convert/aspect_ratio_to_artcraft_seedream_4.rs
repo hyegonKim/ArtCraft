@@ -8,7 +8,7 @@ pub fn aspect_ratio_to_artcraft_seedream_4(aspect_ratio: CommonAspectRatio) -> B
     CommonAspectRatio::Auto2k => BytedanceSeedreamV4MultiFunctionImageGenImageSize::Auto2k,
     CommonAspectRatio::Auto4k => BytedanceSeedreamV4MultiFunctionImageGenImageSize::Auto4k,
     CommonAspectRatio::Square => BytedanceSeedreamV4MultiFunctionImageGenImageSize::Square,
-    CommonAspectRatio::SquareHd  => BytedanceSeedreamV4MultiFunctionImageGenImageSize::SquareHd,
+    CommonAspectRatio::SquareHd => BytedanceSeedreamV4MultiFunctionImageGenImageSize::SquareHd,
     CommonAspectRatio::WideFourByThree => BytedanceSeedreamV4MultiFunctionImageGenImageSize::LandscapeFourThree,
     CommonAspectRatio::WideSixteenByNine => BytedanceSeedreamV4MultiFunctionImageGenImageSize::LandscapeSixteenNine,
     CommonAspectRatio::TallThreeByFour => BytedanceSeedreamV4MultiFunctionImageGenImageSize::PortraitFourThree,
@@ -21,7 +21,7 @@ pub fn aspect_ratio_to_artcraft_seedream_4(aspect_ratio: CommonAspectRatio) -> B
     CommonAspectRatio::TallFourByFive => BytedanceSeedreamV4MultiFunctionImageGenImageSize::PortraitFourThree,
     CommonAspectRatio::TallTwoByThree => BytedanceSeedreamV4MultiFunctionImageGenImageSize::PortraitFourThree,
     CommonAspectRatio::TallNineByTwentyOne => BytedanceSeedreamV4MultiFunctionImageGenImageSize::PortraitSixteenNine,
-    
+
     // Semantic values
     CommonAspectRatio::Wide => BytedanceSeedreamV4MultiFunctionImageGenImageSize::LandscapeSixteenNine,
     CommonAspectRatio::Tall => BytedanceSeedreamV4MultiFunctionImageGenImageSize::PortraitSixteenNine,

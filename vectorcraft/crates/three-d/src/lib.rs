@@ -18,18 +18,12 @@ pub use shading::{ClassicShading, ClassicSurface, LightGradient, PbrMaterial, Rg
 mod lights;
 pub use lights::{Light, Lights, MAX_LIGHTS};
 mod material;
-pub use material::{
-    PbrSample, SubstanceMaterial, SubstanceMaterialPreset, fbm3, sample_studio_env,
-    shade_facet_substance, value_noise3, worley3,
-};
+pub use material::{PbrSample, SubstanceMaterial, SubstanceMaterialPreset, fbm3, sample_studio_env, shade_facet_substance, value_noise3, worley3};
 mod caps;
 mod mesh;
 pub use mesh::{Mesh, extrude_mesh, inflate_meshes, plane_mesh, revolve_mesh};
 mod raytrace;
-pub use raytrace::{
-    Bvh, MAX_RAYTRACE_DIM, MAX_RAYTRACE_TRIANGLES, RayHit, RaytraceImage, RaytracePart,
-    RaytraceScene, raytrace_scene,
-};
+pub use raytrace::{Bvh, MAX_RAYTRACE_DIM, MAX_RAYTRACE_TRIANGLES, RayHit, RaytraceImage, RaytracePart, RaytraceScene, raytrace_scene};
 mod shadow;
 pub use shadow::{MAX_SHADOW_FACES, Shadow, ShadowCaster, ShadowPlane, ShadowPosition, TOO_COMPLEX_SHADOW};
 

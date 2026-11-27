@@ -5,6 +5,7 @@ pub mod create_video;
 pub mod craft_suite;
 pub mod curves;
 pub mod edit_image;
+pub mod express_studio;
 pub mod image_project;
 mod levels;
 pub mod other;

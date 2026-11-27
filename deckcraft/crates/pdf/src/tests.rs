@@ -7,8 +7,8 @@ use deckcraft_render::RenderOpts;
 use kurbo::Rect;
 
 use super::{
-    MAX_RASTER_PIXELS, PAPERS, PageLayout, PdfError, PdfOptions, Presentation, export, fill_clear, glyph_text_ranges, handout_boxes,
-    handout_slots, master_text_pieces, master_texts, notes_frames, notes_slide_box, opaque, paper_size, raster_scale,
+    MAX_RASTER_PIXELS, PAPERS, PageLayout, PdfError, PdfOptions, Presentation, export, fill_clear, glyph_text_ranges, handout_boxes, handout_slots,
+    master_text_pieces, master_texts, notes_frames, notes_slide_box, opaque, paper_size, raster_scale,
 };
 use deckcraft_model::text::TextBody;
 
@@ -773,18 +773,12 @@ fn handouts_and_notes_export_with_speaker_notes_and_recover_notes_text() {
         Arc::make_mut(sl).notes = TextBody::from_text(&format!("UniqueNoteMarker{i}"));
     }
     for per_page in [1, 2, 3, 4, 6] {
-        let with_notes = export(
-            &p,
-            &PdfOptions { include_speaker_notes: true, text_layer: false, ..opts(PageLayout::Handouts { per_page }) },
-        )
-        .unwrap();
+        let with_notes =
+            export(&p, &PdfOptions { include_speaker_notes: true, text_layer: false, ..opts(PageLayout::Handouts { per_page }) }).unwrap();
         let text = all_page_text(&with_notes, 0);
         assert!(text.contains("UniqueNoteMarker0"), "per_page={per_page}: {text}");
-        let without_notes = export(
-            &p,
-            &PdfOptions { include_speaker_notes: false, text_layer: false, ..opts(PageLayout::Handouts { per_page }) },
-        )
-        .unwrap();
+        let without_notes =
+            export(&p, &PdfOptions { include_speaker_notes: false, text_layer: false, ..opts(PageLayout::Handouts { per_page }) }).unwrap();
         let text_off = all_page_text(&without_notes, 0);
         assert!(!text_off.contains("UniqueNoteMarker0"), "per_page={per_page}: {text_off}");
     }
@@ -816,12 +810,7 @@ fn page_image_xobject_count(bytes: &[u8], index: usize) -> usize {
     let Some(xobjects) = resources.get::<Dict<'_>>(b"XObject") else { return 0 };
     xobjects
         .keys()
-        .filter(|k| {
-            xobjects
-                .get::<Stream<'_>>(k)
-                .and_then(|s| s.dict().get::<Name<'_>>(b"Subtype").map(|n| n.as_ref() == b"Image"))
-                .unwrap_or(false)
-        })
+        .filter(|k| xobjects.get::<Stream<'_>>(k).and_then(|s| s.dict().get::<Name<'_>>(b"Subtype").map(|n| n.as_ref() == b"Image")).unwrap_or(false))
         .count()
 }
 
@@ -886,14 +875,8 @@ fn vector_pdf_exports_paths_gradients_tables_and_text_without_slide_backdrop_ras
             kind: ShapeKind::Table(Table {
                 cols: vec![160.0, 160.0],
                 rows: vec![
-                    Row {
-                        height: 50.0,
-                        cells: vec![Cell::new("HeaderColA"), Cell::new("HeaderColB")],
-                    },
-                    Row {
-                        height: 50.0,
-                        cells: vec![Cell::new("CellValue42"), Cell::new("CellValue99")],
-                    },
+                    Row { height: 50.0, cells: vec![Cell::new("HeaderColA"), Cell::new("HeaderColB")] },
+                    Row { height: 50.0, cells: vec![Cell::new("CellValue42"), Cell::new("CellValue99")] },
                 ],
                 ..Default::default()
             }),

@@ -27,7 +27,6 @@
 #![forbid(unused_imports)]
 #![forbid(unused_mut)]
 #![forbid(unused_variables)]
-
 // Always allow
 #![allow(dead_code)]
 #![allow(non_snake_case)]
@@ -45,13 +44,13 @@ pub(crate) enum TokenCharacterSet {
 }
 
 /// Every token must have at least this many "characters" of entropy.
-pub(crate) static MINIMUM_CHARACTER_ENTROPY : usize = 8;
+pub(crate) static MINIMUM_CHARACTER_ENTROPY: usize = 8;
 
 #[macro_use]
-pub (crate) mod macros;
+pub(crate) mod macros;
 
-pub (crate) mod deterministic_rng;
-pub (crate) mod prefixes;
+pub(crate) mod deterministic_rng;
+pub(crate) mod prefixes;
 
 pub mod tokens;
 pub mod traits;

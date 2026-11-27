@@ -1,22 +1,14 @@
 use std::fmt::Debug;
 use std::sync::Arc;
 
-use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{
-  enqueue_seedance_1p5_pro_image_to_video_webhook, EnqueueSeedance1p5ProImageToVideoArgs,
-  EnqueueSeedance1p5ProImageToVideoRequest,
-};
-use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{
-  enqueue_seedance_1p5_pro_text_to_video_webhook, EnqueueSeedance1p5ProTextToVideoArgs,
-  EnqueueSeedance1p5ProTextToVideoRequest,
-};
+use fal_client::requests_old::webhook::video::image::enqueue_seedance_1p5_pro_image_to_video_webhook::{enqueue_seedance_1p5_pro_image_to_video_webhook, EnqueueSeedance1p5ProImageToVideoArgs, EnqueueSeedance1p5ProImageToVideoRequest};
+use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{enqueue_seedance_1p5_pro_text_to_video_webhook, EnqueueSeedance1p5ProTextToVideoArgs, EnqueueSeedance1p5ProTextToVideoRequest};
 
 use crate::client::router_fal_client::RouterFalClient;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::errors::provider_error::ProviderError;
-use crate::generate::generate_video::generate_video_response::{
-  FalVideoResponsePayload, GenerateVideoResponse,
-};
+use crate::generate::generate_video::generate_video_response::{FalVideoResponsePayload, GenerateVideoResponse};
 
 #[derive(Clone, Debug)]
 pub enum FalSeedance1p5ProMode {
@@ -31,39 +23,23 @@ pub struct FalSeedance1p5ProRequestState {
 
 impl FalSeedance1p5ProRequestState {
   pub async fn send(&self, client: &RouterFalClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
-    let webhook_url = client.webhook_url.as_deref()
-      .ok_or(ArtcraftRouterError::Client(ClientError::WebhookUrlRequired))?;
+    let webhook_url = client.webhook_url.as_deref().ok_or(ArtcraftRouterError::Client(ClientError::WebhookUrlRequired))?;
     let (webhook_response, outbound_request): (_, Arc<dyn Debug + Send + Sync>) = match &self.mode {
       FalSeedance1p5ProMode::TextToVideo(request) => {
         let outbound: Arc<dyn Debug + Send + Sync> = Arc::new(request.clone());
-        let args = EnqueueSeedance1p5ProTextToVideoArgs {
-          request: request.clone(),
-          webhook_url,
-          api_key: &client.api_key,
-        };
+        let args = EnqueueSeedance1p5ProTextToVideoArgs { request: request.clone(), webhook_url, api_key: &client.api_key };
         (enqueue_seedance_1p5_pro_text_to_video_webhook(args).await, outbound)
-      }
+      },
       FalSeedance1p5ProMode::ImageToVideo(request) => {
         let outbound: Arc<dyn Debug + Send + Sync> = Arc::new(request.clone());
-        let args = EnqueueSeedance1p5ProImageToVideoArgs {
-          request: request.clone(),
-          webhook_url,
-          api_key: &client.api_key,
-        };
+        let args = EnqueueSeedance1p5ProImageToVideoArgs { request: request.clone(), webhook_url, api_key: &client.api_key };
         (enqueue_seedance_1p5_pro_image_to_video_webhook(args).await, outbound)
-      }
+      },
     };
 
-    let webhook_response = webhook_response
-      .map_err(|e| ArtcraftRouterError::Provider(ProviderError::Fal(e)))?;
+    let webhook_response = webhook_response.map_err(|e| ArtcraftRouterError::Provider(ProviderError::Fal(e)))?;
 
-    Ok(GenerateVideoResponse::Fal(FalVideoResponsePayload {
-      request_id: webhook_response.request_id,
-      gateway_request_id: webhook_response.gateway_request_id,
-      maybe_status_url: None,
-      maybe_response_url: None,
-      maybe_outbound_request: Some(outbound_request),
-    }))
+    Ok(GenerateVideoResponse::Fal(FalVideoResponsePayload { request_id: webhook_response.request_id, gateway_request_id: webhook_response.gateway_request_id, maybe_status_url: None, maybe_response_url: None, maybe_outbound_request: Some(outbound_request) }))
   }
 }
 
@@ -86,14 +62,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs costs
   async fn live_text_to_video_720p_5s() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("a serene mountain landscape at sunrise.".to_string()),
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      resolution: Some(RouterResolution::SevenTwentyP),
-      duration_seconds: Some(5),
-      generate_audio: Some(true),
-      ..fal_seedance_1p5_pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("a serene mountain landscape at sunrise.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), resolution: Some(RouterResolution::SevenTwentyP), duration_seconds: Some(5), generate_audio: Some(true), ..fal_seedance_1p5_pro_builder() }).await;
     println!("response: {:?}", response);
     assert!(matches!(response, GenerateVideoResponse::Fal(_)));
   }
@@ -101,13 +70,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs costs
   async fn live_text_to_video_1080p_no_audio() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("a city street bustling with people".to_string()),
-      resolution: Some(RouterResolution::TenEightyP),
-      duration_seconds: Some(5),
-      generate_audio: Some(false),
-      ..fal_seedance_1p5_pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("a city street bustling with people".to_string()), resolution: Some(RouterResolution::TenEightyP), duration_seconds: Some(5), generate_audio: Some(false), ..fal_seedance_1p5_pro_builder() }).await;
     println!("response: {:?}", response);
     assert!(matches!(response, GenerateVideoResponse::Fal(_)));
   }
@@ -115,14 +78,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs costs
   async fn live_image_to_video_720p_5s() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("the dog leaps into the lake and splashes around.".to_string()),
-      start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      resolution: Some(RouterResolution::SevenTwentyP),
-      duration_seconds: Some(5),
-      ..fal_seedance_1p5_pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("the dog leaps into the lake and splashes around.".to_string()), start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), resolution: Some(RouterResolution::SevenTwentyP), duration_seconds: Some(5), ..fal_seedance_1p5_pro_builder() }).await;
     println!("response: {:?}", response);
     assert!(matches!(response, GenerateVideoResponse::Fal(_)));
   }
@@ -130,24 +86,13 @@ mod tests {
   #[tokio::test]
   #[ignore] // requires real API key, incurs costs
   async fn live_image_to_video_with_end_frame() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("a smooth transition between two scenes".to_string()),
-      start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      end_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())),
-      duration_seconds: Some(5),
-      ..fal_seedance_1p5_pro_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("a smooth transition between two scenes".to_string()), start_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), end_frame: Some(ImageRef::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())), duration_seconds: Some(5), ..fal_seedance_1p5_pro_builder() }).await;
     println!("response: {:?}", response);
     assert!(matches!(response, GenerateVideoResponse::Fal(_)));
   }
 
   fn fal_seedance_1p5_pro_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance1p5Pro,
-      provider: RouterProvider::Fal,
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance1p5Pro, provider: RouterProvider::Fal, video_batch_count: Some(1), ..Default::default() }
   }
 
   async fn run_pipeline(builder: GenerateVideoRequestBuilder) -> GenerateVideoResponse {

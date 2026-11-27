@@ -13,7 +13,6 @@ use serde_derive::Deserialize;
 #[serde(rename_all = "snake_case")]
 pub enum TauriImageModel {
   // Text-to-image models
-
   #[serde(rename = "flux_1_dev")]
   Flux1Dev,
   #[serde(rename = "flux_1_schnell")]
@@ -64,7 +63,6 @@ pub enum TauriImageModel {
   Midjourney8,
 
   // Image edit models
-
   #[serde(rename = "flux_pro_kontext_max")]
   FluxProKontextMax,
   #[serde(rename = "qwen_edit_2511_angles")]
@@ -73,7 +71,6 @@ pub enum TauriImageModel {
   Flux2LoraAngles,
 
   // Inpainting models
-
   #[serde(rename = "flux_dev_juggernaut")]
   FluxDevJuggernaut,
   #[serde(rename = "flux_pro_1")]

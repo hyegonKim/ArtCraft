@@ -1,7 +1,5 @@
 use kinovi_web_client::pricing::kinovi_cost_calculator_trait::KinoviCostCalculatorTrait;
-use kinovi_web_client::generate::video::generate_seedance_2p5_preview::{
-  GenerateSeedance2p5PreviewRequest, KinoviSeedance2p5PreviewOutputResolution,
-};
+use kinovi_web_client::generate::video::generate_seedance_2p5_preview::{GenerateSeedance2p5PreviewRequest, KinoviSeedance2p5PreviewOutputResolution};
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::draft::KinoviSeedance2p5PreviewDraftState;
@@ -17,17 +15,11 @@ pub struct KinoviSeedance2p5PreviewCostState {
 
 impl KinoviSeedance2p5PreviewCostState {
   pub fn from_request(request: &KinoviSeedance2p5PreviewRequestState) -> Self {
-    Self {
-      resolution: request.request.output_resolution,
-      duration_seconds: request.request.duration_seconds,
-    }
+    Self { resolution: request.request.output_resolution, duration_seconds: request.request.duration_seconds }
   }
 
   pub fn from_draft(draft: &KinoviSeedance2p5PreviewDraftState) -> Self {
-    Self {
-      resolution: draft.resolution,
-      duration_seconds: draft.duration_seconds,
-    }
+    Self { resolution: draft.resolution, duration_seconds: draft.duration_seconds }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
@@ -53,15 +45,7 @@ impl KinoviSeedance2p5PreviewCostState {
     let cost_in_credits = costs.kinovi_credits.round() as u64;
     let cost_in_usd_cents = costs.usd_cents_rounded_up;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_credits),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_credits), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 

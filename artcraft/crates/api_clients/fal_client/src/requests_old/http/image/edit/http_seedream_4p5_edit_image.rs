@@ -41,8 +41,6 @@ pub struct SeedreamV4p5EditImageOutput {
   pub images: Vec<SeedreamV4p5EditImageFile>,
 }
 
-pub fn seedream_4p5_edit_image(
-  params: SeedreamV4p5EditImageInput,
-) -> FalRequest<SeedreamV4p5EditImageInput, SeedreamV4p5EditImageOutput> {
+pub fn seedream_4p5_edit_image(params: SeedreamV4p5EditImageInput) -> FalRequest<SeedreamV4p5EditImageInput, SeedreamV4p5EditImageOutput> {
   FalRequest::new("fal-ai/bytedance/seedream/v4.5/edit", params)
 }

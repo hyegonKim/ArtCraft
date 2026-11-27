@@ -33,12 +33,7 @@ impl KinoviPricingTier {
     let credit_hundredths = (kinovi_credits * 100.0).round();
     // usd_cents == credits × 100 / credits_per_dollar == hundredths / credits_per_dollar.
     let usd_cents_fractional = credit_hundredths / self.credits_per_dollar();
-    KinoviFractionalGenerationCost {
-      kinovi_credits: credit_hundredths / 100.0,
-      usd_cents_rounded_up: usd_cents_fractional.ceil() as u64,
-      usd_cents_rounded_down: usd_cents_fractional.floor() as u64,
-      usd_cents_fractional,
-    }
+    KinoviFractionalGenerationCost { kinovi_credits: credit_hundredths / 100.0, usd_cents_rounded_up: usd_cents_fractional.ceil() as u64, usd_cents_rounded_down: usd_cents_fractional.floor() as u64, usd_cents_fractional }
   }
 }
 

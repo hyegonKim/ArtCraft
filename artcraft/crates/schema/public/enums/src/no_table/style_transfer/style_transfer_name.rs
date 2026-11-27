@@ -48,7 +48,6 @@ pub enum StyleTransferName {
   AnimeStandard,
 
   // New Styles (2024-05-03)
-
   #[serde(rename = "hr_giger")]
   HrGiger,
   #[serde(rename = "simpsons")]
@@ -85,7 +84,6 @@ pub enum StyleTransferName {
   RealisticCyberpunk,
 
   // New Styles (2024-06-27)
-
   #[serde(rename = "dreamer")] // TODO: Land this in Gitub
   Dreamer,
 }
@@ -99,44 +97,44 @@ impl_enum_display_and_debug_using_to_str!(StyleTransferName);
 impl StyleTransferName {
   pub fn to_str(&self) -> &'static str {
     match self {
-        Self::Anime2_5D => "anime_2_5d",
-        Self::Anime2DFlat => "anime_2d_flat",
-        Self::Cartoon3D => "cartoon_3d",
-        Self::ComicBook => "comic_book",
-        Self::AnimeGhibli => "anime_ghibli",
-        Self::InkPunk => "ink_punk",
-        Self::InkSplash => "ink_splash",
-        Self::InkBWStyle => "ink_bw_style",
-        Self::JojoStyle => "jojo_style",
-        Self::PaperOrigami => "paper_origami",
-        Self::PixelArt => "pixel_art",
-        Self::PopArt => "pop_art",
-        Self::Realistic1 => "realistic_1",
-        Self::Realistic2 => "realistic_2",
-        Self::AnimeRetroNeon => "anime_retro_neon",
-        Self::AnimeStandard => "anime_standard",
+      Self::Anime2_5D => "anime_2_5d",
+      Self::Anime2DFlat => "anime_2d_flat",
+      Self::Cartoon3D => "cartoon_3d",
+      Self::ComicBook => "comic_book",
+      Self::AnimeGhibli => "anime_ghibli",
+      Self::InkPunk => "ink_punk",
+      Self::InkSplash => "ink_splash",
+      Self::InkBWStyle => "ink_bw_style",
+      Self::JojoStyle => "jojo_style",
+      Self::PaperOrigami => "paper_origami",
+      Self::PixelArt => "pixel_art",
+      Self::PopArt => "pop_art",
+      Self::Realistic1 => "realistic_1",
+      Self::Realistic2 => "realistic_2",
+      Self::AnimeRetroNeon => "anime_retro_neon",
+      Self::AnimeStandard => "anime_standard",
 
-        // New Styles (2024-05-03)
-        Self::HrGiger => "hr_giger",
-        Self::Simpsons => "simpsons",
-        Self::Carnage => "carnage",
-        Self::AnimePastelCute => "pastel_cute_anime", // TODO: Rename
-        Self::BloomLighting => "bloom_lighting",
-        Self::Horror2_5D => "25d_horror", // TODO: Rename
-        Self::Creepy => "creepy",
-        Self::CreepyVhs => "creepy_vhs",
-        Self::TrailCamFootage => "trail_cam_footage",
-        Self::OldBlackWhiteMovie => "old_black_white_movie",
-        Self::HorrorNoirBlackWhite => "horror_noir_black_white",
-        Self::TechnoNoirBlackWhite => "techno_noir_black_white",
-        Self::BlackWhite20s => "black_white_20s",
-        Self::CyberpunkAnime => "cyberpunk_anime",
-        Self::Dragonball => "dragonball",
-        Self::RealisticMatrix => "realistic_matrix",
-        Self::RealisticCyberpunk => "realistic_cyberpunk",
+      // New Styles (2024-05-03)
+      Self::HrGiger => "hr_giger",
+      Self::Simpsons => "simpsons",
+      Self::Carnage => "carnage",
+      Self::AnimePastelCute => "pastel_cute_anime", // TODO: Rename
+      Self::BloomLighting => "bloom_lighting",
+      Self::Horror2_5D => "25d_horror", // TODO: Rename
+      Self::Creepy => "creepy",
+      Self::CreepyVhs => "creepy_vhs",
+      Self::TrailCamFootage => "trail_cam_footage",
+      Self::OldBlackWhiteMovie => "old_black_white_movie",
+      Self::HorrorNoirBlackWhite => "horror_noir_black_white",
+      Self::TechnoNoirBlackWhite => "techno_noir_black_white",
+      Self::BlackWhite20s => "black_white_20s",
+      Self::CyberpunkAnime => "cyberpunk_anime",
+      Self::Dragonball => "dragonball",
+      Self::RealisticMatrix => "realistic_matrix",
+      Self::RealisticCyberpunk => "realistic_cyberpunk",
 
-        // New Styles (2024-06-27)
-        Self::Dreamer => "dreamer",
+      // New Styles (2024-06-27)
+      Self::Dreamer => "dreamer",
     }
   }
 
@@ -224,44 +222,7 @@ impl StyleTransferName {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Anime2_5D,
-      Self::Anime2DFlat,
-      Self::Cartoon3D,
-      Self::ComicBook,
-      Self::AnimeGhibli,
-      Self::InkPunk,
-      Self::InkSplash,
-      Self::InkBWStyle,
-      Self::JojoStyle,
-      Self::PaperOrigami,
-      Self::PixelArt,
-      Self::PopArt,
-      Self::Realistic1,
-      Self::Realistic2,
-      Self::AnimeRetroNeon,
-      Self::AnimeStandard,
-
-      Self::HrGiger,
-      Self::Simpsons,
-      Self::Carnage,
-      Self::AnimePastelCute,
-      Self::BloomLighting,
-      Self::Horror2_5D,
-      Self::Creepy,
-      Self::CreepyVhs,
-      Self::TrailCamFootage,
-      Self::OldBlackWhiteMovie,
-      Self::HorrorNoirBlackWhite,
-      Self::TechnoNoirBlackWhite,
-      Self::BlackWhite20s,
-      Self::CyberpunkAnime,
-      Self::Dragonball,
-      Self::RealisticMatrix,
-      Self::RealisticCyberpunk,
-
-      Self::Dreamer,
-    ])
+    BTreeSet::from([Self::Anime2_5D, Self::Anime2DFlat, Self::Cartoon3D, Self::ComicBook, Self::AnimeGhibli, Self::InkPunk, Self::InkSplash, Self::InkBWStyle, Self::JojoStyle, Self::PaperOrigami, Self::PixelArt, Self::PopArt, Self::Realistic1, Self::Realistic2, Self::AnimeRetroNeon, Self::AnimeStandard, Self::HrGiger, Self::Simpsons, Self::Carnage, Self::AnimePastelCute, Self::BloomLighting, Self::Horror2_5D, Self::Creepy, Self::CreepyVhs, Self::TrailCamFootage, Self::OldBlackWhiteMovie, Self::HorrorNoirBlackWhite, Self::TechnoNoirBlackWhite, Self::BlackWhite20s, Self::CyberpunkAnime, Self::Dragonball, Self::RealisticMatrix, Self::RealisticCyberpunk, Self::Dreamer])
   }
 }
 

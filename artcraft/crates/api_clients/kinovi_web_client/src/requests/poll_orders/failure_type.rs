@@ -1,4 +1,3 @@
-
 /// Categorized failure type for a Seedance2 Pro order.
 #[derive(Debug, Clone, PartialEq)]
 pub enum FailureType {
@@ -26,29 +25,18 @@ impl FailureType {
   pub fn classify_text(reason: &str) -> Self {
     // --- Exact matches first ---
     match reason {
-      "Your uploaded image violates platform rules. Please modify and try again." =>
-        return Self::RuleBansUserImage,
-      "Face detected in uploaded media. Please adjust your media and try again." =>
-        return Self::RuleBansUserImageWithFaces,
-      "Your input text violates platform rules. Please modify and try again." =>
-        return Self::RuleBansUserTextPrompt,
-      "Content violates platform rules. Please modify and try again." =>
-        return Self::RuleBansUserContent,
-      "The generated video did not pass review. Credits will not be deducted." =>
-        return Self::RuleBansGeneratedVideo,
-      "The generated audio violates platform rules. Please adjust your prompt or images and try again." =>
-        return Self::RuleBansGeneratedAudio,
-      "The generated content violates platform rules. Please adjust your prompt or images and try again." =>
-        return Self::RuleBansGeneratedContent,
-      "Video generation failed. Please try again." =>
-        return Self::GenerationFailed,
-      "Generation timed out. Please try again." =>
-        return Self::GenerationFailed,
-      "Server error. Please try again later." =>
-        return Self::GenerationFailed,
-      "Your content could not be processed. Please try different images or adjust your prompt." =>
-        return Self::GenerationFailed,
-      _ => {}
+      "Your uploaded image violates platform rules. Please modify and try again." => return Self::RuleBansUserImage,
+      "Face detected in uploaded media. Please adjust your media and try again." => return Self::RuleBansUserImageWithFaces,
+      "Your input text violates platform rules. Please modify and try again." => return Self::RuleBansUserTextPrompt,
+      "Content violates platform rules. Please modify and try again." => return Self::RuleBansUserContent,
+      "The generated video did not pass review. Credits will not be deducted." => return Self::RuleBansGeneratedVideo,
+      "The generated audio violates platform rules. Please adjust your prompt or images and try again." => return Self::RuleBansGeneratedAudio,
+      "The generated content violates platform rules. Please adjust your prompt or images and try again." => return Self::RuleBansGeneratedContent,
+      "Video generation failed. Please try again." => return Self::GenerationFailed,
+      "Generation timed out. Please try again." => return Self::GenerationFailed,
+      "Server error. Please try again later." => return Self::GenerationFailed,
+      "Your content could not be processed. Please try different images or adjust your prompt." => return Self::GenerationFailed,
+      _ => {},
     }
 
     // --- Substring matches (case-insensitive) ---

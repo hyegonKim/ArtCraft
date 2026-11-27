@@ -13,27 +13,15 @@ use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 /// Name of the window
-pub (super) const WORLDLABS_LOGIN_WINDOW_NAME: &str = "worldlabs_login_window";
+pub(super) const WORLDLABS_LOGIN_WINDOW_NAME: &str = "worldlabs_login_window";
 
-pub (super) static START_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://google.com").expect("URL should parse")
-});
+pub(super) static START_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://google.com").expect("URL should parse"));
 
-pub (super) static WORLDLABS_HOMEPAGE_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://marble.worldlabs.ai/").expect("URL should parse")
-});
+pub(super) static WORLDLABS_HOMEPAGE_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://marble.worldlabs.ai/").expect("URL should parse"));
 
-pub (super) static WORLDLABS_LOGIN_URL: Lazy<Url> = Lazy::new(|| {
-  Url::parse("https://marble.worldlabs.ai/").expect("URL should parse")
-});
+pub(super) static WORLDLABS_LOGIN_URL: Lazy<Url> = Lazy::new(|| Url::parse("https://marble.worldlabs.ai/").expect("URL should parse"));
 
-pub async fn worldlabs_login_window_open(
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  worldlabs_bearer_bridge: &WorldlabsBearerBridge,
-  worldlabs_creds_manager: &WorldlabsCredentialManager,
-) -> AnyhowResult<()> {
-
+pub async fn worldlabs_login_window_open(app: &AppHandle, app_data_root: &AppDataRoot, worldlabs_bearer_bridge: &WorldlabsBearerBridge, worldlabs_creds_manager: &WorldlabsCredentialManager) -> AnyhowResult<()> {
   if app.get_window(WORLDLABS_LOGIN_WINDOW_NAME).is_some() {
     return Err(anyhow!("Login window already open"));
   }
@@ -63,8 +51,7 @@ pub async fn worldlabs_login_window_open(
       .devtools(true)
       .build()?;
 
-  let webview = window.get_webview(WORLDLABS_LOGIN_WINDOW_NAME)
-      .ok_or_else(|| anyhow!("no webview found"))?;
+  let webview = window.get_webview(WORLDLABS_LOGIN_WINDOW_NAME).ok_or_else(|| anyhow!("no webview found"))?;
 
   clear_all_webview_cookies(&webview)?;
 
@@ -74,14 +61,14 @@ pub async fn worldlabs_login_window_open(
 
   info!("Running script...");
 
-  for _ in 0 .. 10 {
+  for _ in 0..10 {
     tokio::time::sleep(Duration::from_millis(100)).await;
 
     // Close the "welcome" modal
     webview.eval(r#"document.querySelectorAll("div:has(h2) ~ button[data-slot=dialog-close]").forEach((el) => el.click())"#)?;
   }
 
-  for _ in 0 .. 10 {
+  for _ in 0..10 {
     tokio::time::sleep(Duration::from_millis(100)).await;
 
     // Open the "login" modal
@@ -96,12 +83,7 @@ pub async fn worldlabs_login_window_open(
   let worldlabs_bearer_bridge = worldlabs_bearer_bridge.clone();
 
   let _ = tauri::async_runtime::spawn(async move {
-    worldlabs_login_window_thread(
-      app_handle,
-      app_data_root,
-      worldlabs_bearer_bridge,
-      worldlabs_creds_manager
-    ).await;
+    worldlabs_login_window_thread(app_handle, app_data_root, worldlabs_bearer_bridge, worldlabs_creds_manager).await;
   });
 
   Ok(())

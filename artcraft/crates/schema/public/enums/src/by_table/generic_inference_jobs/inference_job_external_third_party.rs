@@ -82,16 +82,7 @@ impl InferenceJobExternalThirdParty {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Beeble,
-      Self::Fal,
-      Self::GmiCloud,
-      Self::GrokApi,
-      Self::Seedance2Pro,
-      Self::Seedance2ProAlt,
-      Self::Seedance2ProBytePlusUltra,
-      Self::Worldlabs,
-    ])
+    BTreeSet::from([Self::Beeble, Self::Fal, Self::GmiCloud, Self::GrokApi, Self::Seedance2Pro, Self::Seedance2ProAlt, Self::Seedance2ProBytePlusUltra, Self::Worldlabs])
   }
 }
 
@@ -142,8 +133,8 @@ mod tests {
     #[test]
     fn all_variants() {
       // Static check
-      const EXPECTED_COUNT : usize = 8;
-      
+      const EXPECTED_COUNT: usize = 8;
+
       assert_eq!(InferenceJobExternalThirdParty::all_variants().len(), EXPECTED_COUNT);
       assert_eq!(InferenceJobExternalThirdParty::iter().len(), EXPECTED_COUNT);
 
@@ -173,7 +164,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in InferenceJobExternalThirdParty::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

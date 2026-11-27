@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::edit::gpt_image_1_edit_image::raw_request::{
-  GptImage1EditImageInput, GptImage1EditImageOutput,
-};
+use crate::requests::api::image::edit::gpt_image_1_edit_image::raw_request::{GptImage1EditImageInput, GptImage1EditImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -94,48 +92,53 @@ impl FalEndpoint for GptImage1EditImageRequest {
       GptImage1EditImageNumImages::Four => 4,
     };
 
-    let image_size = self.image_size.map(|s| match s {
-      GptImage1EditImageSize::Auto => "auto",
-      GptImage1EditImageSize::Square => "1024x1024",
-      GptImage1EditImageSize::Horizontal => "1536x1024",
-      GptImage1EditImageSize::Vertical => "1024x1536",
-    }.to_string());
+    let image_size = self.image_size.map(|s| {
+      match s {
+        GptImage1EditImageSize::Auto => "auto",
+        GptImage1EditImageSize::Square => "1024x1024",
+        GptImage1EditImageSize::Horizontal => "1536x1024",
+        GptImage1EditImageSize::Vertical => "1024x1536",
+      }
+      .to_string()
+    });
 
-    let quality = self.quality.map(|q| match q {
-      GptImage1EditImageQuality::Low => "low",
-      GptImage1EditImageQuality::Medium => "medium",
-      GptImage1EditImageQuality::High => "high",
-    }.to_string());
+    let quality = self.quality.map(|q| {
+      match q {
+        GptImage1EditImageQuality::Low => "low",
+        GptImage1EditImageQuality::Medium => "medium",
+        GptImage1EditImageQuality::High => "high",
+      }
+      .to_string()
+    });
 
-    let input_fidelity = self.input_fidelity.map(|f| match f {
-      GptImage1EditImageInputFidelity::Low => "low",
-      GptImage1EditImageInputFidelity::High => "high",
-    }.to_string());
+    let input_fidelity = self.input_fidelity.map(|f| {
+      match f {
+        GptImage1EditImageInputFidelity::Low => "low",
+        GptImage1EditImageInputFidelity::High => "high",
+      }
+      .to_string()
+    });
 
-    let background = self.background.map(|b| match b {
-      GptImage1EditImageBackground::Auto => "auto",
-      GptImage1EditImageBackground::Transparent => "transparent",
-      GptImage1EditImageBackground::Opaque => "opaque",
-    }.to_string());
+    let background = self.background.map(|b| {
+      match b {
+        GptImage1EditImageBackground::Auto => "auto",
+        GptImage1EditImageBackground::Transparent => "transparent",
+        GptImage1EditImageBackground::Opaque => "opaque",
+      }
+      .to_string()
+    });
 
-    let output_format = Some(match self.output_format {
-      Some(GptImage1EditImageOutputFormat::Jpeg) => "jpeg",
-      Some(GptImage1EditImageOutputFormat::Png) => "png",
-      Some(GptImage1EditImageOutputFormat::Webp) => "webp",
-      None => "png",
-    }.to_string());
+    let output_format = Some(
+      match self.output_format {
+        Some(GptImage1EditImageOutputFormat::Jpeg) => "jpeg",
+        Some(GptImage1EditImageOutputFormat::Png) => "png",
+        Some(GptImage1EditImageOutputFormat::Webp) => "webp",
+        None => "png",
+      }
+      .to_string(),
+    );
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_urls: self.image_urls.clone(),
-      num_images: Some(num_images),
-      mask_image_url: self.mask_image_url.clone(),
-      image_size,
-      quality,
-      input_fidelity,
-      background,
-      output_format,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_urls: self.image_urls.clone(), num_images: Some(num_images), mask_image_url: self.mask_image_url.clone(), image_size, quality, input_fidelity, background, output_format })
   }
 }
 
@@ -154,21 +157,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage1EditImageRequest {
-      prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-      image_urls: vec![
-        GHOST_IMAGE_URL.to_string(),
-        TREX_SKELETON_IMAGE_URL.to_string(),
-        ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ],
-      num_images: GptImage1EditImageNumImages::One,
-      mask_image_url: None,
-      image_size: Some(GptImage1EditImageSize::Horizontal),
-      quality: Some(GptImage1EditImageQuality::Medium),
-      input_fidelity: None,
-      background: None,
-      output_format: None,
-    };
+    let request = GptImage1EditImageRequest { prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], num_images: GptImage1EditImageNumImages::One, mask_image_url: None, image_size: Some(GptImage1EditImageSize::Horizontal), quality: Some(GptImage1EditImageQuality::Medium), input_fidelity: None, background: None, output_format: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -182,22 +171,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage1EditImageRequest {
-      image_urls: vec![GHOST_IMAGE_URL.to_string()],
-      prompt: "make the ghost wear a top hat".to_string(),
-      num_images: GptImage1EditImageNumImages::One,
-      mask_image_url: None,
-      image_size: None,
-      quality: Some(GptImage1EditImageQuality::High),
-      input_fidelity: None,
-      background: None,
-      output_format: Some(GptImage1EditImageOutputFormat::Png),
-    };
+    let request = GptImage1EditImageRequest { image_urls: vec![GHOST_IMAGE_URL.to_string()], prompt: "make the ghost wear a top hat".to_string(), num_images: GptImage1EditImageNumImages::One, mask_image_url: None, image_size: None, quality: Some(GptImage1EditImageQuality::High), input_fidelity: None, background: None, output_format: Some(GptImage1EditImageOutputFormat::Png) };
 
-    let result = request.send_webhook_request(
-      &api_key,
-      "https://example.com/webhook",
-    ).await?;
+    let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Request ID: {:?}", result.request_id);
     assert!(result.request_id.is_some());
     Ok(())

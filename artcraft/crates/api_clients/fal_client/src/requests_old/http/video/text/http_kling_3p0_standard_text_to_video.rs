@@ -44,8 +44,6 @@ pub struct Kling3p0StandardTextToVideoOutput {
   pub video: Kling3p0StandardTextToVideoVideoFile,
 }
 
-pub fn kling_3p0_standard_text_to_video(
-  params: Kling3p0StandardTextToVideoInput,
-) -> FalRequest<Kling3p0StandardTextToVideoInput, Kling3p0StandardTextToVideoOutput> {
+pub fn kling_3p0_standard_text_to_video(params: Kling3p0StandardTextToVideoInput) -> FalRequest<Kling3p0StandardTextToVideoInput, Kling3p0StandardTextToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v3/standard/text-to-video", params)
 }

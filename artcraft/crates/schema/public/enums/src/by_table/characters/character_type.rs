@@ -36,9 +36,7 @@ impl CharacterType {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::KinoviSeedance,
-    ])
+    BTreeSet::from([Self::KinoviSeedance])
   }
 }
 

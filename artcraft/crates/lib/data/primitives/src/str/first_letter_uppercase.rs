@@ -1,4 +1,3 @@
-
 /// Converts the first letter of a string to uppercase.
 /// eg, "foobar" is converted to "Foobar".
 /// From https://stackoverflow.com/a/53570840

@@ -35,46 +35,30 @@ pub struct UploadImageMediaFileToGrokResult {
   pub grok_file_id: FileId,
 }
 
-pub async fn upload_image_media_file_to_grok(
-  args: UploadImageMediaFileToGrok<'_>,
-) -> AnyhowResult<UploadImageMediaFileToGrokResult> {
-
+pub async fn upload_image_media_file_to_grok(args: UploadImageMediaFileToGrok<'_>) -> AnyhowResult<UploadImageMediaFileToGrokResult> {
   info!("Calling get media file API: {:?}", args.storyteller_host);
 
   info!("Using media token: {:?}", args.image_media_token);
 
-  let response = get_media_file(
-    args.storyteller_host,
-    args.image_media_token
-  ).await?;
+  let response = get_media_file(args.storyteller_host, args.image_media_token).await?;
 
   let media_file_url = &response.media_file.media_links.cdn_url;
-  let extension_with_dot = get_url_file_extension(media_file_url)
-      .map(|ext| format!(".{}", ext))
-      .unwrap_or_else(|| ".png".to_string());
+  let extension_with_dot = get_url_file_extension(media_file_url).map(|ext| format!(".{}", ext)).unwrap_or_else(|| ".png".to_string());
 
   let filename = format!("{}{}", response.media_file.token.as_str(), extension_with_dot);
   let filename = args.app_data_root.downloads_dir().path().join(&filename);
 
   simple_http_download(&media_file_url, &filename).await?;
 
-  let cookies = args.grok_creds_manager.maybe_copy_cookie_header_string()?
-      .ok_or_else(|| anyhow!("Missing Grok cookies"))?;
+  let cookies = args.grok_creds_manager.maybe_copy_cookie_header_string()?.ok_or_else(|| anyhow!("Missing Grok cookies"))?;
 
   info!("Uploading image to Grok...");
 
-  let upload = GrokUploadFile {
-    file: FileUploadSpec::Path(filename),
-    cookie: cookies,
-    request_timeout: Some(GROK_IMAGE_UPLOAD_TIMEOUT),
-  };
+  let upload = GrokUploadFile { file: FileUploadSpec::Path(filename), cookie: cookies, request_timeout: Some(GROK_IMAGE_UPLOAD_TIMEOUT) };
 
   let response = upload.upload().await?;
 
-  let file_id = response.file_id
-      .ok_or_else(|| anyhow!("Media upload did not produce a file_id!"))?;
+  let file_id = response.file_id.ok_or_else(|| anyhow!("Media upload did not produce a file_id!"))?;
 
-  Ok(UploadImageMediaFileToGrokResult {
-    grok_file_id: file_id,
-  })
+  Ok(UploadImageMediaFileToGrokResult { grok_file_id: file_id })
 }

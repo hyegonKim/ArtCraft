@@ -21,20 +21,10 @@ impl BasicSendableEvent for GenerationEnqueueFailureEvent {
 
 impl GenerationEnqueueFailureEvent {
   pub fn no_artcraft_credentials(action: GenerationAction) -> Self {
-    Self {
-      action,
-      service: GenerationServiceProvider::Artcraft,
-      model: None,
-      reason: Some("Please log into Artcraft.".to_string()),
-    }
+    Self { action, service: GenerationServiceProvider::Artcraft, model: None, reason: Some("Please log into Artcraft.".to_string()) }
   }
-  
+
   pub fn no_fal_api_key(action: GenerationAction) -> Self {
-    Self {
-      action,
-      service: GenerationServiceProvider::Fal,
-      model: None,
-      reason: Some("No FAL API key is set. Configure this in your settings.".to_string()),
-    }
+    Self { action, service: GenerationServiceProvider::Fal, model: None, reason: Some("No FAL API key is set. Configure this in your settings.".to_string()) }
   }
 }

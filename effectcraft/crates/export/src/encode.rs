@@ -410,11 +410,7 @@ pub(crate) async fn movie(job: &Cx<'_>, comp: &Comp, w: u32, h: u32, st: &mut St
     let vt = mux.add_track(vcfg).map_err(mux_err)?;
     let sr = job.output.audio_sample_rate.clamp(8_000, 192_000);
     let with_audio = wants_audio(job);
-    let chans = if brand == Brand::Mp4 {
-        if job.output.audio_channels == 1 { 1u32 } else { 2 }
-    } else {
-        u32::from(job.output.audio_channels.clamp(1, 32))
-    };
+    let chans = if brand == Brand::Mp4 { if job.output.audio_channels == 1 { 1u32 } else { 2 } } else { u32::from(job.output.audio_channels.clamp(1, 32)) };
     let afmt = job.output.audio_format;
     let mut audio = None;
     if with_audio {

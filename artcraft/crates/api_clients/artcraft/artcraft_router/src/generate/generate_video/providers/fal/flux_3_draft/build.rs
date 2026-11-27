@@ -4,19 +4,12 @@ use fal_client::requests::api::video::text::flux_3_draft::api::Flux3DraftTextToV
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::fal::flux_3::build::{
-  optional_url, plan_aspect_ratio, plan_fixed_duration, plan_flexible_duration,
-  reject_references, to_flux_3_aspect_ratio, unsupported,
-};
-use crate::generate::generate_video::providers::fal::flux_3_draft::request::{
-  FalFlux3DraftMode, FalFlux3DraftRequestState,
-};
+use crate::generate::generate_video::providers::fal::flux_3::build::{optional_url, plan_aspect_ratio, plan_fixed_duration, plan_flexible_duration, reject_references, to_flux_3_aspect_ratio, unsupported};
+use crate::generate::generate_video::providers::fal::flux_3_draft::request::{FalFlux3DraftMode, FalFlux3DraftRequestState};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
-pub fn build_fal_flux_3_draft(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_flux_3_draft(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_flux_3_draft_state(builder)?;
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalFlux3Draft(state)))
 }
@@ -25,9 +18,7 @@ pub fn build_fal_flux_3_draft(
 /// text, starting keyframe, and start/end keyframes; no references — but
 /// against the draft endpoints, which always render 720p and take no
 /// resolution input, so any requested resolution is silently dropped.
-pub(crate) fn build_fal_flux_3_draft_state(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<FalFlux3DraftRequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_flux_3_draft_state(builder: GenerateVideoRequestBuilder) -> Result<FalFlux3DraftRequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   reject_references(&builder)?;
@@ -57,23 +48,18 @@ pub(crate) fn build_fal_flux_3_draft_state(
       generate_audio,
       safety_tolerance: Some(4), // NB: 4 is the most permissive.
     }),
-    (Some(start_image_url), Some(end_image_url)) => FalFlux3DraftMode::FirstLastFrameToVideo(
-      Flux3DraftFirstLastFrameToVideoRequest {
-        prompt,
-        start_image_url,
-        end_image_url,
-        duration: fixed_duration,
-        aspect_ratio: aspect_ratio.map(to_flux_3_aspect_ratio),
-        generate_audio,
-        safety_tolerance: Some(4), // NB: 4 is the most permissive.
-      },
-    ),
+    (Some(start_image_url), Some(end_image_url)) => FalFlux3DraftMode::FirstLastFrameToVideo(Flux3DraftFirstLastFrameToVideoRequest {
+      prompt,
+      start_image_url,
+      end_image_url,
+      duration: fixed_duration,
+      aspect_ratio: aspect_ratio.map(to_flux_3_aspect_ratio),
+      generate_audio,
+      safety_tolerance: Some(4), // NB: 4 is the most permissive.
+    }),
     (None, Some(_)) => {
-      return Err(unsupported(
-        "end_frame",
-        "Flux 3 Draft requires a start_frame when end_frame is provided",
-      ));
-    }
+      return Err(unsupported("end_frame", "Flux 3 Draft requires a start_frame when end_frame is provided"));
+    },
   };
 
   Ok(FalFlux3DraftRequestState { mode })
@@ -141,11 +127,6 @@ mod tests {
   }
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Flux3Draft,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Flux3Draft, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 }

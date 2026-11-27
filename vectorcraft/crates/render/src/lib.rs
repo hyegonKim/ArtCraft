@@ -275,8 +275,8 @@ mod threads;
 pub use bounds::{drawn_bounds, drawn_outline, drawn_outlines, effect_bounds, painted_bounds};
 pub use frame::FrameStats;
 use frame::{
-    ClipEntry, ClipPaintEntry, Frame, FxArtEntry, GeomEntry, PlacedEntry, PlacedKey, PtrHasher, PtrMap,
-    SliceEntry, StrokeEntry, StrokeKey, TypeEdgeEntry,
+    ClipEntry, ClipPaintEntry, Frame, FxArtEntry, GeomEntry, PlacedEntry, PlacedKey, PtrHasher, PtrMap, SliceEntry, StrokeEntry, StrokeKey,
+    TypeEdgeEntry,
 };
 #[cfg(test)]
 #[allow(unused_imports)]

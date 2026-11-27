@@ -34,9 +34,7 @@ pub struct OmniGenListVideoModelsArgs<'a> {
 }
 
 /// List available video models.
-pub async fn omni_gen_list_video_models(
-  args: OmniGenListVideoModelsArgs<'_>,
-) -> Result<OmniGenVideoModelsResponse, StorytellerError> {
+pub async fn omni_gen_list_video_models(args: OmniGenListVideoModelsArgs<'_>) -> Result<OmniGenVideoModelsResponse, StorytellerError> {
   let path = match args.provider {
     Some(provider) => format!("{}?provider={}", OMNI_GEN_VIDEO_MODELS_PATH, provider.as_query_value()),
     None => OMNI_GEN_VIDEO_MODELS_PATH.to_string(),
@@ -257,13 +255,7 @@ mod live_tests {
     #[ignore] // live: hits http://localhost:12345
     async fn list_video_models() {
       let api_host = ApiHost::Localhost { port: 12345 };
-      let response = omni_gen_list_video_models(OmniGenListVideoModelsArgs {
-        api_host: &api_host,
-        maybe_creds: None,
-        provider: None,
-      })
-      .await
-      .expect("request should succeed");
+      let response = omni_gen_list_video_models(OmniGenListVideoModelsArgs { api_host: &api_host, maybe_creds: None, provider: None }).await.expect("request should succeed");
 
       println!("[localhost] video models response: {:#?}", response);
       assert!(response.success);
@@ -279,13 +271,7 @@ mod live_tests {
     #[ignore] // live: hits https://api.storyteller.ai
     async fn list_video_models() {
       let api_host = ApiHost::Storyteller;
-      let response = omni_gen_list_video_models(OmniGenListVideoModelsArgs {
-        api_host: &api_host,
-        maybe_creds: None,
-        provider: None,
-      })
-      .await
-      .expect("request should succeed");
+      let response = omni_gen_list_video_models(OmniGenListVideoModelsArgs { api_host: &api_host, maybe_creds: None, provider: None }).await.expect("request should succeed");
 
       println!("[production] video models response: {:#?}", response);
       assert!(response.success);

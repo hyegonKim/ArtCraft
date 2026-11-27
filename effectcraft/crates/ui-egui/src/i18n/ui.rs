@@ -55,6 +55,7 @@ const ROWS: &[(&str, &[(&str, &str)])] = &[
     ("ka", GEORGIAN_PANELS),
     ("sv", SWEDISH),
     ("fr", FRENCH),
+    ("ko", KOREAN_PANELS),
 ];
 
 /// The catalog for `language`, indexed by English source (built on first use: panels translate
@@ -71,6 +72,7 @@ fn catalog(language: &str) -> Option<&'static Index> {
     static KA: OnceLock<Index> = OnceLock::new();
     static SV: OnceLock<Index> = OnceLock::new();
     static FR: OnceLock<Index> = OnceLock::new();
+    static KO: OnceLock<Index> = OnceLock::new();
     let (index, rows) = match language {
         "ja" => (&JA, JAPANESE),
         "zh-hans" => (&HANS, SIMPLIFIED_CHINESE),
@@ -84,6 +86,7 @@ fn catalog(language: &str) -> Option<&'static Index> {
         // Georgian also reads its own rows for text the other catalogs don't have yet.
         "ka" => return Some(KA.get_or_init(|| GEORGIAN.iter().chain(GEORGIAN_PANELS).copied().collect())),
         "sv" => (&SV, SWEDISH),
+        "ko" => (&KO, KOREAN_PANELS),
         _ => return None,
     };
     Some(index.get_or_init(|| rows.iter().copied().collect()))
@@ -10318,6 +10321,36 @@ const FRENCH: &[(&str, &str)] = &[
     ("Close font search", "Fermer la recherche de polices"),
 ];
 
+const KOREAN_PANELS: &[(&str, &str)] = &[
+    ("Frame.io Review", "Frame.io 리뷰"),
+    ("Needs Review", "검토 필요"),
+    ("In Progress", "진행 중"),
+    ("Approved", "승인됨"),
+    ("All", "전체"),
+    ("Export JSON", "JSON 내보내기"),
+    ("Export CSV", "CSV 내보내기"),
+    ("Import Frame.io...", "Frame.io 가져오기..."),
+    ("Copied {} Frame.io review comment(s)", "Frame.io 리뷰 코멘트 {}개 복사됨"),
+    ("Paste Frame.io JSON or CSV:", "Frame.io JSON 또는 CSV 붙여넣기:"),
+    ("Import Review Notes", "리뷰 노트 가져오기"),
+    ("Imported {} Frame.io review comment(s)", "Frame.io 리뷰 코멘트 {}개 가져옴"),
+    ("Author:", "작성자:"),
+    ("Add frame-accurate review note...", "프레임 단위 리뷰 노트 추가..."),
+    ("Add Note", "노트 추가"),
+    ("Telestrator:", "텔estrator:"),
+    ("Freehand", "자유곡선"),
+    ("Arrow", "화살표"),
+    ("Rectangle", "사각형"),
+    ("Ellipse", "타원"),
+    ("Add or select a comment to draw Telestrator markup", "텔estrator 마크업을 그리려면 코멘트를 추가하거나 선택하세요"),
+    ("No Frame.io review comments", "Frame.io 리뷰 코멘트 없음"),
+    ("Reply to thread...", "스레드에 답글 달기..."),
+    ("Reply", "답글"),
+    ("{} drawing(s)", "드로잉 {}개"),
+    ("Close", "닫기"),
+    ("(no composition)", "(컴포지션 없음)"),
+];
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -10399,6 +10432,7 @@ mod tests {
         ("panels/project.rs", include_str!("../panels/project.rs")),
         ("panels/properties.rs", include_str!("../panels/properties.rs")),
         ("panels/roto_tool.rs", include_str!("../panels/roto_tool.rs")),
+        ("panels/review_ui.rs", include_str!("../panels/review_ui.rs")),
         ("panels/render_queue.rs", include_str!("../panels/render_queue.rs")),
         ("panels/rq_templates.rs", include_str!("../panels/rq_templates.rs")),
         ("panels/scopes_panel.rs", include_str!("../panels/scopes_panel.rs")),

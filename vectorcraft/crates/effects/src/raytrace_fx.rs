@@ -5,20 +5,13 @@ use std::sync::Arc;
 
 use serde_json::Value;
 use vectorcraft_doc::color::{BlendMode, Color, Paint};
-use vectorcraft_doc::{
-    Appearance, AppearanceItem, Document, Effect, FillLayer, ImageBlob, ImageObject, Node, NodeId,
-    NodeKind,
-};
+use vectorcraft_doc::{Appearance, AppearanceItem, Document, Effect, FillLayer, ImageBlob, ImageObject, Node, NodeId, NodeKind};
 use vectorcraft_geom::{Affine, FillRule, PathData, Point, Rect};
 use vectorcraft_three_d::{
-    Facet, Mesh, RaytraceImage, RaytracePart, RaytraceScene, Revolve, SubstanceMaterial, View,
-    raytrace_scene, revolve_mesh, shade_facet_substance,
+    Facet, Mesh, RaytraceImage, RaytracePart, RaytraceScene, Revolve, SubstanceMaterial, View, raytrace_scene, revolve_mesh, shade_facet_substance,
 };
 
-use crate::solids::{
-    EXTRUDE, INFLATE, Profile, ROTATE, extrude_options, inflate_options, mesh_color, union_bounds,
-    view_options,
-};
+use crate::solids::{EXTRUDE, INFLATE, Profile, ROTATE, extrude_options, inflate_options, mesh_color, union_bounds, view_options};
 use crate::util::{flag, num};
 
 pub(crate) fn is_raytraced(p: &Value) -> bool {
@@ -44,27 +37,14 @@ pub(crate) fn image_node(id: NodeId, img: RaytraceImage) -> Option<Node> {
     let sx = img.bounds.width() / f64::from(w);
     let sy = img.bounds.height() / f64::from(h);
     let xf = Affine::translate((img.bounds.x0, img.bounds.y0)) * Affine::scale_non_uniform(sx, sy);
-    let obj = ImageObject {
-        key: blob.content_key(),
-        width: w,
-        height: h,
-        xf,
-        link: None,
-        placement: Default::default(),
-        pixels: Some(Arc::new(blob)),
-    };
+    let obj =
+        ImageObject { key: blob.content_key(), width: w, height: h, xf, link: None, placement: Default::default(), pixels: Some(Arc::new(blob)) };
     Some(Node::new(id, NodeKind::Image(Box::new(obj))))
 }
 
 /// Raytrace `EXTRUDE`, `INFLATE`, or `ROTATE` for `shapes` into an image node (with optional
 /// planar mapped graphics layered above it).
-pub(crate) fn raytrace_solid(
-    doc: Option<&Document>,
-    n: &Node,
-    fx: &Effect,
-    shapes: &[Profile],
-    solid_meshes: Vec<crate::SolidMesh>,
-) -> Option<Node> {
+pub(crate) fn raytrace_solid(doc: Option<&Document>, n: &Node, fx: &Effect, shapes: &[Profile], solid_meshes: Vec<crate::SolidMesh>) -> Option<Node> {
     let b = union_bounds(shapes)?;
     let p = crate::merged_params(&fx.id, &fx.params);
     let view = view_options(&p);
@@ -121,11 +101,7 @@ pub(crate) fn raytrace_revolve_single(
         return None;
     }
     let col = mesh_color(paint, 1.0);
-    let part = RaytracePart {
-        mesh,
-        base_rgb: [f64::from(col[0]), f64::from(col[1]), f64::from(col[2])],
-        opacity: f64::from(col[3]),
-    };
+    let part = RaytracePart { mesh, base_rgb: [f64::from(col[0]), f64::from(col[1]), f64::from(col[2])], opacity: f64::from(col[3]) };
     let material = crate::lighting::substance_material(&p);
     let shadow = crate::solids::shadow::options(&p);
     let mut scene = RaytraceScene::for_revolve(vec![part], bounds, options, material, shadow);
@@ -160,11 +136,7 @@ pub(crate) fn raytrace_revolve_group(
             continue;
         }
         let col = mesh_color(paint, item_op * s.opacity);
-        parts.push(RaytracePart {
-            mesh,
-            base_rgb: [f64::from(col[0]), f64::from(col[1]), f64::from(col[2])],
-            opacity: f64::from(col[3]),
-        });
+        parts.push(RaytracePart { mesh, base_rgb: [f64::from(col[0]), f64::from(col[1]), f64::from(col[2])], opacity: f64::from(col[3]) });
     }
     if parts.is_empty() {
         return None;
@@ -191,12 +163,8 @@ fn active_lights_view(view: View) -> Vec<([f64; 3], [f64; 3], f64)> {
     if let Some(lights) = view.lights {
         lights.iter().map(|l| (l.direction(), l.color, l.intensity)).collect()
     } else {
-        let rev = Revolve {
-            light_rotation: view.light_rotation,
-            light_height: view.light_height,
-            light_behind: view.light_behind,
-            ..Revolve::default()
-        };
+        let rev =
+            Revolve { light_rotation: view.light_rotation, light_height: view.light_height, light_behind: view.light_behind, ..Revolve::default() };
         vec![(rev.light_direction(), view.light_color, view.light_intensity)]
     }
 }
@@ -233,11 +201,7 @@ pub(crate) fn substance_vector_surface(
                 sum_y += pt.y;
                 cnt += 1;
             }
-            let center = if cnt > 0 {
-                Point::new(sum_x / cnt as f64, sum_y / cnt as f64)
-            } else {
-                origin
-            };
+            let center = if cnt > 0 { Point::new(sum_x / cnt as f64, sum_y / cnt as f64) } else { origin };
             let z = if face.depth.is_finite() && face.depth.abs() < 1e6 { face.depth } else { 0.0 };
             let v_pos = [center.x - origin.x, center.y - origin.y, z];
             let o_pos_down = inv_rotate_view(rot, v_pos);

@@ -47,13 +47,12 @@ pub enum GptEditImageQuality {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum GptEditImageNumImages{
+pub enum GptEditImageNumImages {
   One,
   Two,
   Three,
   Four,
 }
-
 
 // NB: These are BYOK, so they're not Fal's prices
 impl FalRequestCostCalculator for GptEditImageByokRequest {
@@ -74,10 +73,7 @@ impl FalRequestCostCalculator for GptEditImageByokRequest {
   }
 }
 
-
-pub async fn enqueue_gpt_image_1_byok_edit_image_webhook<V: IntoUrl>(
-  args: GptEditImageByokArgs<'_, V>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_gpt_image_1_byok_edit_image_webhook<V: IntoUrl>(args: GptEditImageByokArgs<'_, V>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let image_size = match req.image_size {
@@ -101,19 +97,9 @@ pub async fn enqueue_gpt_image_1_byok_edit_image_webhook<V: IntoUrl>(
     GptEditImageNumImages::Four => 4,
   };
 
-  let request = GptImage1ByokEditImageInput {
-    image_urls: req.image_urls,
-    prompt: req.prompt,
-    image_size: image_size.to_string(),
-    num_images,
-    quality: quality.to_string(),
-    openai_api_key: args.openai_api_key.0.to_string(),
-  };
+  let request = GptImage1ByokEditImageInput { image_urls: req.image_urls, prompt: req.prompt, image_size: image_size.to_string(), num_images, quality: quality.to_string(), openai_api_key: args.openai_api_key.0.to_string() };
 
-  let result = gpt_image_1_byok_edit_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gpt_image_1_byok_edit_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -122,15 +108,10 @@ pub async fn enqueue_gpt_image_1_byok_edit_image_webhook<V: IntoUrl>(
 mod tests {
   use crate::creds::fal_api_key::FalApiKey;
   use crate::creds::open_ai_api_key::OpenAiApiKey;
-  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_1_byok_edit_image_webhook::{
-    enqueue_gpt_image_1_byok_edit_image_webhook, GptEditImageByokArgs, GptEditImageByokRequest,
-    GptEditImageNumImages, GptEditImageQuality, GptEditImageSize,
-  };
+  use crate::requests_old::webhook::image::edit::enqueue_gpt_image_1_byok_edit_image_webhook::{enqueue_gpt_image_1_byok_edit_image_webhook, GptEditImageByokArgs, GptEditImageByokRequest, GptEditImageNumImages, GptEditImageQuality, GptEditImageSize};
   use errors::AnyhowResult;
   use std::fs::read_to_string;
-  use test_data::web::image_urls::{
-    ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL,
-  };
+  use test_data::web::image_urls::{ERNEST_SCARED_STUPID_IMAGE_URL, GHOST_IMAGE_URL, TREX_SKELETON_IMAGE_URL};
 
   #[tokio::test]
   #[ignore]
@@ -142,22 +123,7 @@ mod tests {
     let openai_secret = read_to_string("/Users/bt/Artcraft/credentials/openai_api_key.txt")?;
     let openai_api_key = OpenAiApiKey::from_str(&openai_secret);
 
-    let args = GptEditImageByokArgs {
-      request: GptEditImageByokRequest {
-        image_urls: vec![
-          GHOST_IMAGE_URL.to_string(),
-          TREX_SKELETON_IMAGE_URL.to_string(),
-          ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        ],
-        prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(),
-        image_size: GptEditImageSize::Horizontal,
-        num_images: GptEditImageNumImages::One,
-        quality: GptEditImageQuality::High,
-      },
-      api_key: &fal_api_key,
-      openai_api_key: &openai_api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = GptEditImageByokArgs { request: GptEditImageByokRequest { image_urls: vec![GHOST_IMAGE_URL.to_string(), TREX_SKELETON_IMAGE_URL.to_string(), ERNEST_SCARED_STUPID_IMAGE_URL.to_string()], prompt: "add the ghost and scared man to the image of the t-rex skeleton, make it look spooky but friendly".to_string(), image_size: GptEditImageSize::Horizontal, num_images: GptEditImageNumImages::One, quality: GptEditImageQuality::High }, api_key: &fal_api_key, openai_api_key: &openai_api_key, webhook_url: "https://example.com/webhook" };
 
     let _result = enqueue_gpt_image_1_byok_edit_image_webhook(args).await?;
 

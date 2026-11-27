@@ -1,4 +1,3 @@
-
 pub fn optional_false_to_none(optional: Option<bool>) -> Option<bool> {
   optional.filter(|&value| value)
 }

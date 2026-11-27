@@ -85,7 +85,6 @@ fn credits_to_us_dollar_cents(credits: u32) -> u32 {
   ((credits as u64 * 100) / 1250) as u32
 }
 
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -93,14 +92,7 @@ mod tests {
 
   #[test]
   fn test_pricing_table() {
-    let models = [
-      WorldLabsModel::Marble0p1Mini,
-      WorldLabsModel::Marble0p1Plus,
-      WorldLabsModel::Marble1p0,
-      WorldLabsModel::Marble1p0Draft,
-      WorldLabsModel::Marble1p1,
-      WorldLabsModel::Marble1p1Plus,
-    ];
+    let models = [WorldLabsModel::Marble0p1Mini, WorldLabsModel::Marble0p1Plus, WorldLabsModel::Marble1p0, WorldLabsModel::Marble1p0Draft, WorldLabsModel::Marble1p1, WorldLabsModel::Marble1p1Plus];
 
     println!("\n{:<20} {:<20} {:>10} {:>12}", "Model", "Input Type", "Credits", "USD Cents");
     println!("{}", "-".repeat(65));
@@ -108,13 +100,7 @@ mod tests {
     for model in &models {
       for input_type in InputType::iter() {
         let cost = calculate_cost(*model, input_type);
-        println!(
-          "{:<20} {:<20} {:>10} {:>12}",
-          model.get_model_api_name_str(),
-          input_type,
-          cost.worldlabs_credits,
-          cost.us_dollar_cents,
-        );
+        println!("{:<20} {:<20} {:>10} {:>12}", model.get_model_api_name_str(), input_type, cost.worldlabs_credits, cost.us_dollar_cents,);
       }
     }
   }
@@ -182,11 +168,7 @@ mod tests {
     for input_type in InputType::iter() {
       let standard = calculate_cost(WorldLabsModel::Marble1p1, input_type);
       let plus = calculate_cost(WorldLabsModel::Marble1p1Plus, input_type);
-      assert!(
-        plus.worldlabs_credits > standard.worldlabs_credits,
-        "1.1-plus should cost more than 1.1 for {:?}: {} vs {}",
-        input_type, plus.worldlabs_credits, standard.worldlabs_credits,
-      );
+      assert!(plus.worldlabs_credits > standard.worldlabs_credits, "1.1-plus should cost more than 1.1 for {:?}: {} vs {}", input_type, plus.worldlabs_credits, standard.worldlabs_credits,);
     }
   }
 
@@ -206,14 +188,7 @@ mod tests {
 
   #[test]
   fn test_all_combinations_have_costs() {
-    let models = [
-      WorldLabsModel::Marble0p1Mini,
-      WorldLabsModel::Marble0p1Plus,
-      WorldLabsModel::Marble1p0,
-      WorldLabsModel::Marble1p0Draft,
-      WorldLabsModel::Marble1p1,
-      WorldLabsModel::Marble1p1Plus,
-    ];
+    let models = [WorldLabsModel::Marble0p1Mini, WorldLabsModel::Marble0p1Plus, WorldLabsModel::Marble1p0, WorldLabsModel::Marble1p0Draft, WorldLabsModel::Marble1p1, WorldLabsModel::Marble1p1Plus];
 
     for model in &models {
       for input_type in InputType::iter() {

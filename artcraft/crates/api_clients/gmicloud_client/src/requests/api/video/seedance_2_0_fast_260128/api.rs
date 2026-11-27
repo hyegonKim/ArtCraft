@@ -1,10 +1,7 @@
 use crate::creds::gmicloud_api_key::GmiCloudApiKey;
 use crate::error::gmicloud_error::GmiCloudError;
 use crate::requests::api::video::seedance_2_0_fast_260128::raw_request::Seedance20FastPayload;
-use crate::requests::common::create_request::{
-  create_gmicloud_request, create_gmicloud_request_with_context,
-  GmiCloudCreateRequest, GmiCloudCreateResponse,
-};
+use crate::requests::common::create_request::{create_gmicloud_request, create_gmicloud_request_with_context, GmiCloudCreateRequest, GmiCloudCreateResponse};
 use crate::requests::context::request_context::RequestContext;
 
 const MODEL_ID: &str = "seedance-2-0-fast-260128";
@@ -84,19 +81,25 @@ impl Seedance20FastRequest {
     Seedance20FastPayload {
       prompt: self.prompt.clone(),
       duration: self.duration,
-      resolution: self.resolution.map(|r| match r {
-        Seedance20FastResolution::FourEightyP => "480p",
-        Seedance20FastResolution::SevenTwentyP => "720p",
-      }.to_string()),
-      ratio: self.ratio.map(|r| match r {
-        Seedance20FastRatio::Landscape16x9 => "16:9",
-        Seedance20FastRatio::Standard4x3 => "4:3",
-        Seedance20FastRatio::Square => "1:1",
-        Seedance20FastRatio::Portrait3x4 => "3:4",
-        Seedance20FastRatio::Portrait9x16 => "9:16",
-        Seedance20FastRatio::UltraWide21x9 => "21:9",
-        Seedance20FastRatio::Adaptive => "adaptive",
-      }.to_string()),
+      resolution: self.resolution.map(|r| {
+        match r {
+          Seedance20FastResolution::FourEightyP => "480p",
+          Seedance20FastResolution::SevenTwentyP => "720p",
+        }
+        .to_string()
+      }),
+      ratio: self.ratio.map(|r| {
+        match r {
+          Seedance20FastRatio::Landscape16x9 => "16:9",
+          Seedance20FastRatio::Standard4x3 => "4:3",
+          Seedance20FastRatio::Square => "1:1",
+          Seedance20FastRatio::Portrait3x4 => "3:4",
+          Seedance20FastRatio::Portrait9x16 => "9:16",
+          Seedance20FastRatio::UltraWide21x9 => "21:9",
+          Seedance20FastRatio::Adaptive => "adaptive",
+        }
+        .to_string()
+      }),
       seed: self.seed,
       watermark: self.watermark,
       generate_audio: self.generate_audio,
@@ -110,25 +113,13 @@ impl Seedance20FastRequest {
     }
   }
 
-  pub async fn send_request(
-    &self,
-    api_key: &GmiCloudApiKey,
-  ) -> Result<GmiCloudCreateResponse, GmiCloudError> {
-    let context = RequestContext {
-      api_key,
-      maybe_timeout: None,
-    };
+  pub async fn send_request(&self, api_key: &GmiCloudApiKey) -> Result<GmiCloudCreateResponse, GmiCloudError> {
+    let context = RequestContext { api_key, maybe_timeout: None };
     self.send_request_with_context(&context).await
   }
 
-  pub async fn send_request_with_context(
-    &self,
-    context: &RequestContext<'_>,
-  ) -> Result<GmiCloudCreateResponse, GmiCloudError> {
-    let body = GmiCloudCreateRequest {
-      model: MODEL_ID.to_string(),
-      payload: self.to_raw_payload(),
-    };
+  pub async fn send_request_with_context(&self, context: &RequestContext<'_>) -> Result<GmiCloudCreateResponse, GmiCloudError> {
+    let body = GmiCloudCreateRequest { model: MODEL_ID.to_string(), payload: self.to_raw_payload() };
     create_gmicloud_request_with_context(context, &body).await
   }
 
@@ -143,22 +134,7 @@ impl Seedance20FastRequest {
 }
 
 fn minimal_request() -> Seedance20FastRequest {
-  Seedance20FastRequest {
-    prompt: "test".to_string(),
-    duration: None,
-    resolution: None,
-    ratio: None,
-    seed: None,
-    watermark: None,
-    generate_audio: None,
-    web_search: None,
-    first_frame: None,
-    last_frame: None,
-    reference_images: None,
-    reference_videos: None,
-    reference_audios: None,
-    reference_asset_ids: None,
-  }
+  Seedance20FastRequest { prompt: "test".to_string(), duration: None, resolution: None, ratio: None, seed: None, watermark: None, generate_audio: None, web_search: None, first_frame: None, last_frame: None, reference_images: None, reference_videos: None, reference_audios: None, reference_asset_ids: None }
 }
 
 #[cfg(test)]
@@ -180,22 +156,7 @@ mod tests {
 
     #[test]
     fn full_request_serializes_all_fields() {
-      let request = Seedance20FastRequest {
-        prompt: "a cat sitting on a windowsill".to_string(),
-        duration: Some(10),
-        resolution: Some(Seedance20FastResolution::SevenTwentyP),
-        ratio: Some(Seedance20FastRatio::Portrait9x16),
-        seed: Some(123),
-        watermark: Some(true),
-        generate_audio: Some(false),
-        web_search: Some(true),
-        first_frame: Some("https://example.com/first.png".to_string()),
-        last_frame: Some("https://example.com/last.png".to_string()),
-        reference_images: Some(vec!["https://example.com/ref.png".to_string()]),
-        reference_videos: Some(vec!["https://example.com/ref.mp4".to_string()]),
-        reference_audios: Some(vec!["https://example.com/ref.wav".to_string()]),
-        reference_asset_ids: Some(vec!["asset_456".to_string()]),
-      };
+      let request = Seedance20FastRequest { prompt: "a cat sitting on a windowsill".to_string(), duration: Some(10), resolution: Some(Seedance20FastResolution::SevenTwentyP), ratio: Some(Seedance20FastRatio::Portrait9x16), seed: Some(123), watermark: Some(true), generate_audio: Some(false), web_search: Some(true), first_frame: Some("https://example.com/first.png".to_string()), last_frame: Some("https://example.com/last.png".to_string()), reference_images: Some(vec!["https://example.com/ref.png".to_string()]), reference_videos: Some(vec!["https://example.com/ref.mp4".to_string()]), reference_audios: Some(vec!["https://example.com/ref.wav".to_string()]), reference_asset_ids: Some(vec!["asset_456".to_string()]) };
       let json = serde_json::to_value(&request.to_raw_payload()).unwrap();
       assert_eq!(json["prompt"], "a cat sitting on a windowsill");
       assert_eq!(json["duration"], 10);
@@ -211,15 +172,7 @@ mod tests {
 
     #[test]
     fn all_ratios_serialize() {
-      let cases = [
-        (Seedance20FastRatio::Landscape16x9, "16:9"),
-        (Seedance20FastRatio::Standard4x3, "4:3"),
-        (Seedance20FastRatio::Square, "1:1"),
-        (Seedance20FastRatio::Portrait3x4, "3:4"),
-        (Seedance20FastRatio::Portrait9x16, "9:16"),
-        (Seedance20FastRatio::UltraWide21x9, "21:9"),
-        (Seedance20FastRatio::Adaptive, "adaptive"),
-      ];
+      let cases = [(Seedance20FastRatio::Landscape16x9, "16:9"), (Seedance20FastRatio::Standard4x3, "4:3"), (Seedance20FastRatio::Square, "1:1"), (Seedance20FastRatio::Portrait3x4, "3:4"), (Seedance20FastRatio::Portrait9x16, "9:16"), (Seedance20FastRatio::UltraWide21x9, "21:9"), (Seedance20FastRatio::Adaptive, "adaptive")];
       for (ratio, expected) in cases {
         let mut request = minimal_request();
         request.ratio = Some(ratio);
@@ -233,10 +186,7 @@ mod tests {
       let mut request = minimal_request();
       request.duration = Some(5);
       request.ratio = Some(Seedance20FastRatio::Square);
-      let body = GmiCloudCreateRequest {
-        model: Seedance20FastRequest::model_id().to_string(),
-        payload: request.to_raw_payload(),
-      };
+      let body = GmiCloudCreateRequest { model: Seedance20FastRequest::model_id().to_string(), payload: request.to_raw_payload() };
       let json = serde_json::to_value(&body).unwrap();
       assert_eq!(json["model"], "seedance-2-0-fast-260128");
       assert_eq!(json["payload"]["prompt"], "test");

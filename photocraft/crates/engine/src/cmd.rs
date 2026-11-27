@@ -97,6 +97,7 @@ pub mod fill_key_cmds;
 pub mod float_cmds;
 pub mod font_library_cmds;
 pub mod frame_cmds;
+pub mod fresco_cmds;
 pub mod fx_view_cmds;
 pub mod fx_visibility_cmds;
 pub mod gallery_cmds;
@@ -145,7 +146,6 @@ pub mod plugin_cmds;
 pub mod preset_import_cmds;
 pub mod print_cmds;
 pub mod ps2027_cmds;
-pub mod substance3d_cmds;
 pub mod rasterize_style_cmds;
 pub mod redeye_cmds;
 pub mod render_cmds;
@@ -163,6 +163,7 @@ pub mod smartselect_cmds;
 pub mod solid_fill_cmds;
 pub mod stamp_cmds;
 pub mod style_asl_cmds;
+pub mod substance3d_cmds;
 pub mod swatch_cmds;
 pub mod symmetry_cmds;
 pub mod timelapse_cmds;
@@ -1467,6 +1468,7 @@ fn build() -> Vec<CommandSpec> {
     v.extend(crate::timelapse_cmds::specs());
     v.extend(crate::ps2027_cmds::specs());
     v.extend(crate::substance3d_cmds::specs());
+    v.extend(crate::fresco_cmds::specs());
     // The dispatch guard's unit test needs a command that panics on purpose (REL-3).
     #[cfg(test)]
     v.push(test_panic_command());

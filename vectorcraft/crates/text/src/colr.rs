@@ -108,13 +108,7 @@ pub fn colr_palette_count(font_bytes: &[u8], face_index: u32) -> u16 {
 
 /// Read COLR v0/v1 glyph `gid` as a pure vector node tree using CPAL `palette_index`, returning
 /// `None` if the glyph uses paints that require extended vector conversion or is not a COLR glyph.
-pub fn colour_glyph_with_palette(
-    font_bytes: &[u8],
-    face_index: u32,
-    gid: u32,
-    palette_index: u16,
-    foreground: Color,
-) -> Option<Arc<Node>> {
+pub fn colour_glyph_with_palette(font_bytes: &[u8], face_index: u32, gid: u32, palette_index: u16, foreground: Color) -> Option<Arc<Node>> {
     let font = skrifa::FontRef::from_index(font_bytes, face_index).ok()?;
     let glyph = ColorGlyphCollection::new(&font).get(GlyphId::new(gid))?;
     let mut tree = Tree::with_options(&font, LocationRef::default(), palette_index, foreground, false);
@@ -128,13 +122,7 @@ pub fn colour_glyph_with_palette(
 /// Read COLR v0/v1 glyph `gid` as an extended multi-layer vector node tree using CPAL
 /// `palette_index`, mapping `SweepGradient` to conic vector gradients, `Extend::{Repeat, Reflect}`
 /// to `GradientSpread`, and two-circle focal `RadialGradient` to focal radial vector gradients.
-pub fn colour_glyph_vector(
-    font_bytes: &[u8],
-    face_index: u32,
-    gid: u32,
-    palette_index: u16,
-    foreground: Color,
-) -> Option<Arc<Node>> {
+pub fn colour_glyph_vector(font_bytes: &[u8], face_index: u32, gid: u32, palette_index: u16, foreground: Color) -> Option<Arc<Node>> {
     let font = skrifa::FontRef::from_index(font_bytes, face_index).ok()?;
     let glyph = ColorGlyphCollection::new(&font).get(GlyphId::new(gid))?;
     let mut tree = Tree::with_options(&font, LocationRef::default(), palette_index, foreground, true);
@@ -215,13 +203,7 @@ impl<'a> Tree<'a> {
         Self::with_options(font, location, 0, foreground, false)
     }
 
-    fn with_options(
-        font: &'a skrifa::FontRef<'a>,
-        location: LocationRef<'a>,
-        palette_index: u16,
-        foreground: Color,
-        vector_extended: bool,
-    ) -> Self {
+    fn with_options(font: &'a skrifa::FontRef<'a>, location: LocationRef<'a>, palette_index: u16, foreground: Color, vector_extended: bool) -> Self {
         let root = Open { clip: None, blend: Some(BlendMode::Normal), children: vec![], flooded: false };
         Tree {
             font,

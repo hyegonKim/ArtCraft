@@ -31,8 +31,6 @@ pub struct Gemini25FlashTextToImageOutput {
   pub images: Vec<Gemini25FlashTextToImageFile>,
 }
 
-pub fn gemini_25_flash_text_to_image(
-  params: Gemini25FlashTextToImageInput,
-) -> FalRequest<Gemini25FlashTextToImageInput, Gemini25FlashTextToImageOutput> {
+pub fn gemini_25_flash_text_to_image(params: Gemini25FlashTextToImageInput) -> FalRequest<Gemini25FlashTextToImageInput, Gemini25FlashTextToImageOutput> {
   FalRequest::new("fal-ai/gemini-25-flash-image", params)
 }

@@ -5,11 +5,7 @@ use crate::pricing::kinovi_cost_calculator_trait::KinoviCostCalculatorTrait;
 use crate::pricing::kinovi_pricing_rate::KinoviPricingRate;
 use crate::pricing::kinovi_pricing_tier::KinoviPricingTier;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviBitrateRaw,
-  KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs,
-  WorkflowRunTaskRequest,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task, KinoviAspectRatioRaw, KinoviBatchCountRaw, KinoviBitrateRaw, KinoviModelTypeRaw, KinoviOutputResolutionRaw, WorkflowRunTaskArgs, WorkflowRunTaskRequest};
 
 // ── Args ──
 
@@ -97,26 +93,14 @@ pub enum KinoviSeedance2p0FastBitrate {
 // Default resolution (None) is 720p. Batch count multiplies the total cost.
 
 /// Per-second base credit rates by resolution.
-const SEEDANCE_2P0_FAST_480P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 14.0,
-  maybe_enterprise_credits: Some(10.5),
-};
-const SEEDANCE_2P0_FAST_720P: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 28.0,
-  maybe_enterprise_credits: Some(21.0),
-};
+const SEEDANCE_2P0_FAST_480P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 14.0, maybe_enterprise_credits: Some(10.5) };
+const SEEDANCE_2P0_FAST_720P: KinoviPricingRate = KinoviPricingRate { consumer_credits: 28.0, maybe_enterprise_credits: Some(21.0) };
 
 /// Per-second video-reference surcharge rates by resolution. Flat per
 /// generation regardless of how many reference videos are attached
 /// (assumption — Kinovi's pricing page only shows one).
-const SEEDANCE_2P0_FAST_480P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 4.0,
-  maybe_enterprise_credits: Some(3.0),
-};
-const SEEDANCE_2P0_FAST_720P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate {
-  consumer_credits: 6.0,
-  maybe_enterprise_credits: Some(4.5),
-};
+const SEEDANCE_2P0_FAST_480P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate { consumer_credits: 4.0, maybe_enterprise_credits: Some(3.0) };
+const SEEDANCE_2P0_FAST_720P_VIDEO_REF_SURCHARGE: KinoviPricingRate = KinoviPricingRate { consumer_credits: 6.0, maybe_enterprise_credits: Some(4.5) };
 
 impl KinoviCostCalculatorTrait for GenerateSeedance2p0FastRequest {
   type Cost = KinoviSeedanceFractionalGenerationCost;
@@ -142,25 +126,15 @@ impl KinoviCostCalculatorTrait for GenerateSeedance2p0FastRequest {
 
     let output_seconds = f64::from(self.duration_seconds) * batch_multiplier;
     let base_credits = base_rate.credits(tier) * output_seconds;
-    let maybe_video_reference_surcharge_credits = if self.has_video_reference() {
-      Some(surcharge_rate.credits(tier) * output_seconds)
-    } else {
-      None
-    };
+    let maybe_video_reference_surcharge_credits = if self.has_video_reference() { Some(surcharge_rate.credits(tier) * output_seconds) } else { None };
 
-    KinoviSeedanceFractionalGenerationCost::from_base_and_surcharge_at_tier(
-      tier,
-      base_credits,
-      maybe_video_reference_surcharge_credits,
-    )
+    KinoviSeedanceFractionalGenerationCost::from_base_and_surcharge_at_tier(tier, base_credits, maybe_video_reference_surcharge_credits)
   }
 }
 
 impl GenerateSeedance2p0FastRequest {
   fn has_video_reference(&self) -> bool {
-    self.reference_video_urls
-      .as_ref()
-      .is_some_and(|urls| !urls.is_empty())
+    self.reference_video_urls.as_ref().is_some_and(|urls| !urls.is_empty())
   }
 }
 
@@ -175,40 +149,14 @@ pub struct GenerateSeedance2p0FastResponse {
 
 // ── Entry point ──
 
-pub async fn generate_seedance_2p0_fast(
-  args: GenerateSeedance2p0FastArgs<'_>,
-) -> Result<GenerateSeedance2p0FastResponse, KinoviWebError> {
+pub async fn generate_seedance_2p0_fast(args: GenerateSeedance2p0FastArgs<'_>) -> Result<GenerateSeedance2p0FastResponse, KinoviWebError> {
   let req = args.request;
 
-  let raw_request = WorkflowRunTaskRequest {
-    model_type: KinoviModelTypeRaw::Seedance2Fast,
-    prompt: req.prompt,
-    aspect_ratio: map_aspect_ratio(req.aspect_ratio),
-    output_resolution: Some(map_output_resolution(req.output_resolution)),
-    batch_count: map_batch_count(req.batch_count),
-    duration_seconds: req.duration_seconds,
-    start_frame_url: req.start_frame_url,
-    end_frame_url: req.end_frame_url,
-    reference_image_urls: req.reference_image_urls,
-    reference_video_urls: req.reference_video_urls,
-    reference_audio_urls: req.reference_audio_urls,
-    character_ids: req.character_ids,
-    use_face_blur_hack: req.use_face_blur_hack,
-    bitrate: map_bitrate(req.bitrate),
-  };
+  let raw_request = WorkflowRunTaskRequest { model_type: KinoviModelTypeRaw::Seedance2Fast, prompt: req.prompt, aspect_ratio: map_aspect_ratio(req.aspect_ratio), output_resolution: Some(map_output_resolution(req.output_resolution)), batch_count: map_batch_count(req.batch_count), duration_seconds: req.duration_seconds, start_frame_url: req.start_frame_url, end_frame_url: req.end_frame_url, reference_image_urls: req.reference_image_urls, reference_video_urls: req.reference_video_urls, reference_audio_urls: req.reference_audio_urls, character_ids: req.character_ids, use_face_blur_hack: req.use_face_blur_hack, bitrate: map_bitrate(req.bitrate) };
 
-  let raw_response = workflow_run_task(WorkflowRunTaskArgs {
-    request: raw_request,
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+  let raw_response = workflow_run_task(WorkflowRunTaskArgs { request: raw_request, session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSeedance2p0FastResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-    task_ids: raw_response.task_ids,
-    order_ids: raw_response.order_ids,
-  })
+  Ok(GenerateSeedance2p0FastResponse { task_id: raw_response.task_id, order_id: raw_response.order_id, task_ids: raw_response.task_ids, order_ids: raw_response.order_ids })
 }
 
 // ── Mapping helpers ──
@@ -440,11 +388,7 @@ mod tests {
         for (tier, make, duration, base, surcharge) in cases {
           let costs = with_video_ref(make(*duration)).calculate_costs(*tier);
           assert_eq!(costs.base_cost.kinovi_credits, *base, "base at {duration}s ({tier:?})");
-          assert_eq!(
-            costs.video_reference_surcharge_cost.map(|c| c.kinovi_credits),
-            Some(*surcharge),
-            "surcharge at {duration}s ({tier:?})",
-          );
+          assert_eq!(costs.video_reference_surcharge_cost.map(|c| c.kinovi_credits), Some(*surcharge), "surcharge at {duration}s ({tier:?})",);
           assert_eq!(costs.total_cost.kinovi_credits, base + surcharge, "total at {duration}s ({tier:?})");
         }
       }
@@ -493,10 +437,7 @@ mod tests {
       #[test]
       fn multiple_video_references_charge_once() {
         let mut request = r720(5);
-        request.reference_video_urls = Some(vec![
-          "https://example.com/a.mp4".to_string(),
-          "https://example.com/b.mp4".to_string(),
-        ]);
+        request.reference_video_urls = Some(vec!["https://example.com/a.mp4".to_string(), "https://example.com/b.mp4".to_string()]);
         assert_eq!(consumer_credits(&request), 170.0);
         assert_eq!(enterprise_credits(&request), 127.5);
       }
@@ -529,11 +470,7 @@ mod tests {
       fn batch_multiplies_at_both_tiers() {
         for tier in [KinoviPricingTier::Enterprise, KinoviPricingTier::Consumer] {
           let base = r720(5).calculate_costs(tier).total_cost.kinovi_credits;
-          for (batch, multiplier) in [
-            (KinoviSeedance2p0FastBatchCount::Two, 2.0),
-            (KinoviSeedance2p0FastBatchCount::Three, 3.0),
-            (KinoviSeedance2p0FastBatchCount::Four, 4.0),
-          ] {
+          for (batch, multiplier) in [(KinoviSeedance2p0FastBatchCount::Two, 2.0), (KinoviSeedance2p0FastBatchCount::Three, 3.0), (KinoviSeedance2p0FastBatchCount::Four, 4.0)] {
             let batched = build_request(5, None, Some(batch)).calculate_costs(tier).total_cost.kinovi_credits;
             assert_eq!(batched, base * multiplier, "{batch:?} at {tier:?}");
           }
@@ -593,22 +530,12 @@ mod tests {
     fn aspect_ratio_does_not_affect_credits() {
       let baseline = consumer_credits(&r720(5));
 
-      let ratios = [
-        KinoviSeedance2p0FastAspectRatio::Landscape16x9,
-        KinoviSeedance2p0FastAspectRatio::UltraWide21x9,
-        KinoviSeedance2p0FastAspectRatio::Portrait9x16,
-        KinoviSeedance2p0FastAspectRatio::Square1x1,
-        KinoviSeedance2p0FastAspectRatio::Standard4x3,
-        KinoviSeedance2p0FastAspectRatio::Portrait3x4,
-      ];
+      let ratios = [KinoviSeedance2p0FastAspectRatio::Landscape16x9, KinoviSeedance2p0FastAspectRatio::UltraWide21x9, KinoviSeedance2p0FastAspectRatio::Portrait9x16, KinoviSeedance2p0FastAspectRatio::Square1x1, KinoviSeedance2p0FastAspectRatio::Standard4x3, KinoviSeedance2p0FastAspectRatio::Portrait3x4];
 
       for ar in &ratios {
         let mut request = r720(5);
         request.aspect_ratio = Some(*ar);
-        assert_eq!(
-          consumer_credits(&request), baseline,
-          "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,
-        );
+        assert_eq!(consumer_credits(&request), baseline, "Aspect ratio {:?} should not change credits from baseline {}", ar, baseline,);
       }
     }
 
@@ -621,34 +548,13 @@ mod tests {
       let mut high = r720(5);
       high.bitrate = Some(KinoviSeedance2p0FastBitrate::High);
 
-      assert_eq!(
-        consumer_credits(&high), baseline,
-        "High bitrate should not change credits from baseline {}", baseline,
-      );
+      assert_eq!(consumer_credits(&high), baseline, "High bitrate should not change credits from baseline {}", baseline,);
     }
 
     // ── Helpers ──
 
-    fn build_request(
-      duration_seconds: u8,
-      output_resolution: Option<KinoviSeedance2p0FastOutputResolution>,
-      batch_count: Option<KinoviSeedance2p0FastBatchCount>,
-    ) -> GenerateSeedance2p0FastRequest {
-      GenerateSeedance2p0FastRequest {
-        prompt: String::new(),
-        aspect_ratio: None,
-        output_resolution,
-        batch_count,
-        duration_seconds,
-        start_frame_url: None,
-        end_frame_url: None,
-        reference_image_urls: None,
-        reference_video_urls: None,
-        reference_audio_urls: None,
-        character_ids: None,
-        use_face_blur_hack: None,
-        bitrate: None,
-      }
+    fn build_request(duration_seconds: u8, output_resolution: Option<KinoviSeedance2p0FastOutputResolution>, batch_count: Option<KinoviSeedance2p0FastBatchCount>) -> GenerateSeedance2p0FastRequest {
+      GenerateSeedance2p0FastRequest { prompt: String::new(), aspect_ratio: None, output_resolution, batch_count, duration_seconds, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None }
     }
 
     fn r480(dur: u8) -> GenerateSeedance2p0FastRequest {
@@ -695,25 +601,7 @@ mod tests {
     async fn test_text_to_video_default() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "A corgi and a shiba are playing chess against one another".to_string(),
-          aspect_ratio: None,
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "A corgi and a shiba are playing chess against one another".to_string(), aspect_ratio: None, output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("t2v fast default — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -726,25 +614,7 @@ mod tests {
     async fn test_text_to_video_480p() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "A golden retriever running through a field of sunflowers".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9),
-          output_resolution: Some(KinoviSeedance2p0FastOutputResolution::FourEightyP),
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "A golden retriever running through a field of sunflowers".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9), output_resolution: Some(KinoviSeedance2p0FastOutputResolution::FourEightyP), batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("t2v fast 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -760,25 +630,7 @@ mod tests {
     async fn test_text_to_video_21x9() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "A shiba is riding on the back of a sauropod dinosaur".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::UltraWide21x9),
-          output_resolution: Some(KinoviSeedance2p0FastOutputResolution::FourEightyP),
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "A shiba is riding on the back of a sauropod dinosaur".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::UltraWide21x9), output_resolution: Some(KinoviSeedance2p0FastOutputResolution::FourEightyP), batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast t2v 21:9 480p — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -792,25 +644,7 @@ mod tests {
       let session = test_session()?;
       let start_frame_url = upload_test_image(&session, test_data::web::image_urls::WIDE_CORGI_SHIBA_TREASURE_OCEAN_URL).await?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "The dogs in @1 set sail across the ocean on a treasure ship.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::UltraWide21x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: Some(vec![start_frame_url]),
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "The dogs in @1 set sail across the ocean on a treasure ship.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::UltraWide21x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: Some(vec![start_frame_url]), reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast keyframe 21:9 — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -828,25 +662,7 @@ mod tests {
       let session = test_session()?;
       let start_frame_url = upload_test_image(&session, test_data::web::image_urls::JUNO_AT_LAKE_IMAGE_URL).await?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "A corgi dog runs along the lake shore, splashing water.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: Some(start_frame_url),
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "A corgi dog runs along the lake shore, splashing water.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: Some(start_frame_url), end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast keyframe — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -865,25 +681,7 @@ mod tests {
       let img1 = upload_test_image(&session, test_data::web::image_urls::FOREST_BACKDROP_IMAGE_URL).await?;
       let img2 = upload_test_image(&session, test_data::web::image_urls::WHITE_HOUSE_SUNSET_IMAGE_URL).await?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "The dog in @1 runs through the scenery in @2. Golden hour.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: Some(vec![img1, img2]),
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "The dog in @1 runs through the scenery in @2. Golden hour.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: Some(vec![img1, img2]), reference_video_urls: None, reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast image ref — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -900,27 +698,7 @@ mod tests {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "Change @video1 to night time.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: Some(vec![
-            "https://static.seedance2-pro.com/materials/20260315/1773594284659-3a46d231.mp4".to_string(),
-          ]),
-          reference_audio_urls: None,
-          character_ids: None,
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "Change @video1 to night time.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: Some(vec!["https://static.seedance2-pro.com/materials/20260315/1773594284659-3a46d231.mp4".to_string()]), reference_audio_urls: None, character_ids: None, use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast video ref — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -937,25 +715,7 @@ mod tests {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "@Mochi the shiba inu is eating a cheese pizza on the table.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Portrait9x16),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: Some(vec![MOCHI_ID.to_string()]),
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "@Mochi the shiba inu is eating a cheese pizza on the table.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Portrait9x16), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: Some(vec![MOCHI_ID.to_string()]), use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast character — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -968,25 +728,7 @@ mod tests {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
 
-      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSeedance2p0FastRequest {
-          prompt: "@Steampunk Clown and @Mochi are playing fetch in a sunny park.".to_string(),
-          aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9),
-          output_resolution: None,
-          batch_count: None,
-          duration_seconds: 5,
-          start_frame_url: None,
-          end_frame_url: None,
-          reference_image_urls: None,
-          reference_video_urls: None,
-          reference_audio_urls: None,
-          character_ids: Some(vec![STEAMPUNK_CLOWN_ID.to_string(), MOCHI_ID.to_string()]),
-          use_face_blur_hack: None,
-          bitrate: None,
-        },
-      }).await?;
+      let result = generate_seedance_2p0_fast(GenerateSeedance2p0FastArgs { session: &session, host_override: None, request: GenerateSeedance2p0FastRequest { prompt: "@Steampunk Clown and @Mochi are playing fetch in a sunny park.".to_string(), aspect_ratio: Some(KinoviSeedance2p0FastAspectRatio::Landscape16x9), output_resolution: None, batch_count: None, duration_seconds: 5, start_frame_url: None, end_frame_url: None, reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, character_ids: Some(vec![STEAMPUNK_CLOWN_ID.to_string(), MOCHI_ID.to_string()]), use_face_blur_hack: None, bitrate: None } }).await?;
       println!("fast two characters — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2);
@@ -1000,21 +742,11 @@ mod tests {
   }
 
   async fn upload_test_image(session: &KinoviWebSession, image_url: &str) -> AnyhowResult<String> {
-    let image_bytes = crate::test_utils::http_download::http_download_to_bytes(
-      image_url,
-    ).await?;
+    let image_bytes = crate::test_utils::http_download::http_download_to_bytes(image_url).await?;
 
-    let prepare_result = prepare_file_upload(PrepareFileUploadArgs {
-      session,
-      extension: "jpg".to_string(),
-      host_override: None,
-    }).await?;
+    let prepare_result = prepare_file_upload(PrepareFileUploadArgs { session, extension: "jpg".to_string(), host_override: None }).await?;
 
-    let upload_result = upload_file(UploadFileArgs {
-      upload_url: prepare_result.upload_url,
-      file_bytes: image_bytes,
-      host_override: None,
-    }).await?;
+    let upload_result = upload_file(UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes: image_bytes, host_override: None }).await?;
 
     Ok(upload_result.public_url)
   }

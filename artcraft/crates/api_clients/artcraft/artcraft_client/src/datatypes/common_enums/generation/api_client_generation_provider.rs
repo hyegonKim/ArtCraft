@@ -90,22 +90,7 @@ mod tests {
 
   #[test]
   fn every_known_variant_round_trips() {
-    let all = [
-      (ApiClientGenerationProvider::Artcraft, "artcraft"),
-      (ApiClientGenerationProvider::Fal, "fal"),
-      (ApiClientGenerationProvider::Grok, "grok"),
-      (ApiClientGenerationProvider::Midjourney, "midjourney"),
-      (ApiClientGenerationProvider::Sora, "sora"),
-      (ApiClientGenerationProvider::WorldLabs, "world_labs"),
-      (ApiClientGenerationProvider::Higgsfield, "higgsfield"),
-      (ApiClientGenerationProvider::Krea, "krea"),
-      (ApiClientGenerationProvider::Leonardo, "leonardo"),
-      (ApiClientGenerationProvider::Magnific, "magnific"),
-      (ApiClientGenerationProvider::Openart, "openart"),
-      (ApiClientGenerationProvider::Picsart, "picsart"),
-      (ApiClientGenerationProvider::Pixverse, "pixverse"),
-      (ApiClientGenerationProvider::Runway, "runway"),
-    ];
+    let all = [(ApiClientGenerationProvider::Artcraft, "artcraft"), (ApiClientGenerationProvider::Fal, "fal"), (ApiClientGenerationProvider::Grok, "grok"), (ApiClientGenerationProvider::Midjourney, "midjourney"), (ApiClientGenerationProvider::Sora, "sora"), (ApiClientGenerationProvider::WorldLabs, "world_labs"), (ApiClientGenerationProvider::Higgsfield, "higgsfield"), (ApiClientGenerationProvider::Krea, "krea"), (ApiClientGenerationProvider::Leonardo, "leonardo"), (ApiClientGenerationProvider::Magnific, "magnific"), (ApiClientGenerationProvider::Openart, "openart"), (ApiClientGenerationProvider::Picsart, "picsart"), (ApiClientGenerationProvider::Pixverse, "pixverse"), (ApiClientGenerationProvider::Runway, "runway")];
     for (variant, s) in all {
       assert_eq!(String::from(variant.clone()), s, "serialize mismatch for {:?}", variant);
       let parsed: ApiClientGenerationProvider = serde_json::from_str(&format!("\"{}\"", s)).unwrap();

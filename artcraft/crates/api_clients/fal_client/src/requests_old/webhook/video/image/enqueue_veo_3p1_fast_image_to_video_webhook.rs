@@ -47,15 +47,13 @@ pub enum EnqueueVeo3p1FastImageToVideoResolution {
   TenEightyP,
 }
 
-
 impl FalRequestCostCalculator for EnqueueVeo3p1FastImageToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // "For every second of video you generated, you will be charged
     // $0.10 (audio off) or
     // $0.15 (audio on).
     // For example, a 5s video with audio on will cost $0.75."
-    let duration = self.duration
-        .unwrap_or(EnqueueVeo3p1FastImageToVideoDurationSeconds::Eight);
+    let duration = self.duration.unwrap_or(EnqueueVeo3p1FastImageToVideoDurationSeconds::Eight);
 
     let generate_audio = self.generate_audio.unwrap_or(true);
 
@@ -70,36 +68,36 @@ impl FalRequestCostCalculator for EnqueueVeo3p1FastImageToVideoRequest {
   }
 }
 
-
 /// Veo 3.1 Fast Image-to-Video
 /// https://fal.ai/models/fal-ai/veo3.1/fast/image-to-video
-pub async fn enqueue_veo_3p1_fast_image_to_video_webhook<R: IntoUrl>(
-  args: EnqueueVeo3p1FastImageToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_veo_3p1_fast_image_to_video_webhook<R: IntoUrl>(args: EnqueueVeo3p1FastImageToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|resolution| match resolution {
-        EnqueueVeo3p1FastImageToVideoDurationSeconds::Four => "4s",
-        EnqueueVeo3p1FastImageToVideoDurationSeconds::Six => "6s",
-        EnqueueVeo3p1FastImageToVideoDurationSeconds::Eight=> "8s",
-      })
-      .map(|s| s.to_string());
+  let duration = req
+    .duration
+    .map(|resolution| match resolution {
+      EnqueueVeo3p1FastImageToVideoDurationSeconds::Four => "4s",
+      EnqueueVeo3p1FastImageToVideoDurationSeconds::Six => "6s",
+      EnqueueVeo3p1FastImageToVideoDurationSeconds::Eight => "8s",
+    })
+    .map(|s| s.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|aspect_ratio| match aspect_ratio {
-        EnqueueVeo3p1FastImageToVideoAspectRatio::Auto => "auto",
-        EnqueueVeo3p1FastImageToVideoAspectRatio::SixteenByNine => "16:9",
-        EnqueueVeo3p1FastImageToVideoAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|s| s.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|aspect_ratio| match aspect_ratio {
+      EnqueueVeo3p1FastImageToVideoAspectRatio::Auto => "auto",
+      EnqueueVeo3p1FastImageToVideoAspectRatio::SixteenByNine => "16:9",
+      EnqueueVeo3p1FastImageToVideoAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|s| s.to_string());
 
-  let resolution = req.resolution
-      .map(|resolution| match resolution {
-        EnqueueVeo3p1FastImageToVideoResolution::SevenTwentyP => "720p",
-        EnqueueVeo3p1FastImageToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|s| s.to_string());
+  let resolution = req
+    .resolution
+    .map(|resolution| match resolution {
+      EnqueueVeo3p1FastImageToVideoResolution::SevenTwentyP => "720p",
+      EnqueueVeo3p1FastImageToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|s| s.to_string());
 
   let request = Veo3p1FastImageToVideoInput {
     prompt: req.prompt,
@@ -111,10 +109,7 @@ pub async fn enqueue_veo_3p1_fast_image_to_video_webhook<R: IntoUrl>(
     resolution,
   };
 
-  let result = veo_3p1_fast_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = veo_3p1_fast_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -135,18 +130,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueVeo3p1FastImageToVideoArgs {
-      request: EnqueueVeo3p1FastImageToVideoRequest {
-        image_url: TALL_CORGI_SHIBA_TREASURE_OCEAN_URL.to_string(),
-        prompt: "There is a tiny ocean island with a corgi and shiba and treasure chest on it. The corgi and shiba are barking at the chest, when suddenly the island launches itself into the air. The camera tracks the island and follows it up high in the sky. The sun beams over the horizon. The dogs are happy and bark. The gold coins gleam in the sun.".to_string(),
-        duration: Some(EnqueueVeo3p1FastImageToVideoDurationSeconds::Four),
-        aspect_ratio: Some(EnqueueVeo3p1FastImageToVideoAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueVeo3p1FastImageToVideoResolution::TenEightyP),
-        generate_audio: Some(true),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueVeo3p1FastImageToVideoArgs { request: EnqueueVeo3p1FastImageToVideoRequest { image_url: TALL_CORGI_SHIBA_TREASURE_OCEAN_URL.to_string(), prompt: "There is a tiny ocean island with a corgi and shiba and treasure chest on it. The corgi and shiba are barking at the chest, when suddenly the island launches itself into the air. The camera tracks the island and follows it up high in the sky. The sun beams over the horizon. The dogs are happy and bark. The gold coins gleam in the sun.".to_string(), duration: Some(EnqueueVeo3p1FastImageToVideoDurationSeconds::Four), aspect_ratio: Some(EnqueueVeo3p1FastImageToVideoAspectRatio::SixteenByNine), resolution: Some(EnqueueVeo3p1FastImageToVideoResolution::TenEightyP), generate_audio: Some(true) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_veo_3p1_fast_image_to_video_webhook(args).await?;
 

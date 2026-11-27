@@ -45,90 +45,58 @@ pub struct UpdateAppPreferencesResponse {
 }
 
 #[tauri::command]
-pub async fn update_app_preferences_command(
-  request: UpdateAppPreferencesRequest,
-  app_prefs: State<'_, AppPreferencesManager>,
-  app_data_root: State<'_, AppDataRoot>,
-) -> Result<UpdateAppPreferencesResponse, String> {
+pub async fn update_app_preferences_command(request: UpdateAppPreferencesRequest, app_prefs: State<'_, AppPreferencesManager>, app_data_root: State<'_, AppDataRoot>) -> Result<UpdateAppPreferencesResponse, String> {
   info!("update_app_preferences_command called");
 
-  update_prefs(request, &app_prefs, &app_data_root)
-      .await
-      .map_err(|err| {
-        error!("Error getting app preferences: {:?}", err);
-        format!("Error getting app preferences: {:?}", err)
-      })?;
+  update_prefs(request, &app_prefs, &app_data_root).await.map_err(|err| {
+    error!("Error getting app preferences: {:?}", err);
+    format!("Error getting app preferences: {:?}", err)
+  })?;
 
-  Ok(UpdateAppPreferencesResponse {
-    success: true,
-  })
+  Ok(UpdateAppPreferencesResponse { success: true })
 }
 
-async fn update_prefs(
-  request: UpdateAppPreferencesRequest, 
-  app_prefs: &AppPreferencesManager,
-  app_data_root: &AppDataRoot,
-) -> AnyhowResult<()> {
+async fn update_prefs(request: UpdateAppPreferencesRequest, app_prefs: &AppPreferencesManager, app_data_root: &AppDataRoot) -> AnyhowResult<()> {
   let mut prefs = app_prefs.get_clone()?;
-  
+
   info!("Value is: {:?}", request.value);
-  
+
   match request.preference {
-    PreferenceName::AutoDownload => {
-      match request.value {
-        Some(ValueType::Bool(value)) => prefs.auto_download = value,
-        _ => return Err(anyhow!("Auto Download must be a boolean")),
-      }
-    }
+    PreferenceName::AutoDownload => match request.value {
+      Some(ValueType::Bool(value)) => prefs.auto_download = value,
+      _ => return Err(anyhow!("Auto Download must be a boolean")),
+    },
     PreferenceName::PreferredDownloadFilename => {
       prefs.preferred_download_filename = filename_value(request.value)?;
-    }
-    PreferenceName::PreferredDownloadDirectory => {
-      match request.value {
-        Some(ValueType::DownloadDirectory(dir)) => 
-          prefs.preferred_download_directory = dir,
-        _ =>
-          return Err(anyhow!("Invalid value: {:?}", request.value)),
-      }
-    }
-    PreferenceName::PlaySounds => {
-      match request.value {
-        Some(ValueType::Bool(val)) => 
-          prefs.play_sounds = val,
-        _ => 
-          return Err(anyhow!("Invalid value: {:?}", request.value)),
-      }
-    }
+    },
+    PreferenceName::PreferredDownloadDirectory => match request.value {
+      Some(ValueType::DownloadDirectory(dir)) => prefs.preferred_download_directory = dir,
+      _ => return Err(anyhow!("Invalid value: {:?}", request.value)),
+    },
+    PreferenceName::PlaySounds => match request.value {
+      Some(ValueType::Bool(val)) => prefs.play_sounds = val,
+      _ => return Err(anyhow!("Invalid value: {:?}", request.value)),
+    },
     PreferenceName::DeleteFileSound => {
-      prefs.delete_file_sound = request.value
-          .map(|val| string_value(&val))
-          .transpose()?;
-    }
+      prefs.delete_file_sound = request.value.map(|val| string_value(&val)).transpose()?;
+    },
     PreferenceName::EnqueueSuccessSound => {
-      prefs.enqueue_success_sound = request.value
-          .map(|val| string_value(&val))
-          .transpose()?;
-    }
+      prefs.enqueue_success_sound = request.value.map(|val| string_value(&val)).transpose()?;
+    },
     PreferenceName::EnqueueFailureSound => {
-      prefs.enqueue_failure_sound = request.value
-          .map(|val| string_value(&val))
-          .transpose()?;
-    }
+      prefs.enqueue_failure_sound = request.value.map(|val| string_value(&val)).transpose()?;
+    },
     PreferenceName::GenerationSuccessSound => {
-      prefs.generation_success_sound = request.value
-          .map(|val| string_value(&val))
-          .transpose()?;
-    }
+      prefs.generation_success_sound = request.value.map(|val| string_value(&val)).transpose()?;
+    },
     PreferenceName::GenerationFailureSound => {
-      prefs.generation_failure_sound = request.value
-          .map(|val| string_value(&val))
-          .transpose()?;
-    }
+      prefs.generation_failure_sound = request.value.map(|val| string_value(&val)).transpose()?;
+    },
   }
-  
+
   app_data_root.settings_dir().write_app_preferences(&prefs)?;
   app_prefs.set_clone(&prefs)?;
-  
+
   Ok(())
 }
 
@@ -162,11 +130,7 @@ mod tests {
     let dir = tempfile::tempdir().unwrap();
     let root = AppDataRoot::create_existing(dir.path()).unwrap();
     let manager = AppPreferencesManager::with_owned(AppPreferences::default());
-    for request in [
-      serde_json::json!({ "preference": "preferred_download_directory", "value": {"custom": "/existing/downloads"} }),
-      serde_json::json!({ "preference": "auto_download", "value": true }),
-      serde_json::json!({ "preference": "preferred_download_filename", "value": {"custom_format": "my_{model}_{date}"} }),
-    ] {
+    for request in [serde_json::json!({ "preference": "preferred_download_directory", "value": {"custom": "/existing/downloads"} }), serde_json::json!({ "preference": "auto_download", "value": true }), serde_json::json!({ "preference": "preferred_download_filename", "value": {"custom_format": "my_{model}_{date}"} })] {
       update_prefs(serde_json::from_value(request).unwrap(), &manager, &root).await.unwrap();
     }
     let prefs = AppPreferences::load_from_file_or_default(&root);

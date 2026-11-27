@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::mesh::sketch::hunyuan3d_3_sketch_to_mesh::raw_request::{
-  Hunyuan3d3SketchToMeshInput, Hunyuan3d3SketchToMeshOutput,
-};
+use crate::requests::api::mesh::sketch::hunyuan3d_3_sketch_to_mesh::raw_request::{Hunyuan3d3SketchToMeshInput, Hunyuan3d3SketchToMeshOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Hunyuan3D V3 sketch-to-3D: turns a sketch or line-art image plus a text
@@ -35,12 +33,7 @@ impl FalEndpoint for Hunyuan3d3SketchToMeshRequest {
   type RawResponse = Hunyuan3d3SketchToMeshOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      input_image_url: self.image_url.clone(),
-      prompt: self.prompt.clone(),
-      face_count: self.face_count,
-      enable_pbr: self.enable_pbr,
-    })
+    Ok(Self::RawRequest { input_image_url: self.image_url.clone(), prompt: self.prompt.clone(), face_count: self.face_count, enable_pbr: self.enable_pbr })
   }
 }
 
@@ -61,12 +54,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Hunyuan3d3SketchToMeshRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      prompt: "A cute robot".to_string(),
-      face_count: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3SketchToMeshRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), prompt: "A cute robot".to_string(), face_count: None, enable_pbr: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -80,12 +68,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Hunyuan3d3SketchToMeshRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      prompt: "A cute robot".to_string(),
-      face_count: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3SketchToMeshRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), prompt: "A cute robot".to_string(), face_count: None, enable_pbr: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -97,12 +80,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Hunyuan3d3SketchToMeshRequest {
-      image_url: "https://example.com/sketch.png".to_string(),
-      prompt: "A red ceramic teapot".to_string(),
-      face_count: Some(100_000),
-      enable_pbr: Some(true),
-    };
+    let request = Hunyuan3d3SketchToMeshRequest { image_url: "https://example.com/sketch.png".to_string(), prompt: "A red ceramic teapot".to_string(), face_count: Some(100_000), enable_pbr: Some(true) };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(
       json,
@@ -117,12 +95,7 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Hunyuan3d3SketchToMeshRequest {
-      image_url: "https://example.com/sketch.png".to_string(),
-      prompt: "minimal".to_string(),
-      face_count: None,
-      enable_pbr: None,
-    };
+    let request = Hunyuan3d3SketchToMeshRequest { image_url: "https://example.com/sketch.png".to_string(), prompt: "minimal".to_string(), face_count: None, enable_pbr: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(
       json,

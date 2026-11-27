@@ -31,41 +31,22 @@ pub struct GmiCloudCreateResponse {
 }
 
 /// Submit a request to GmiCloud using just an API key (default timeout).
-pub async fn create_gmicloud_request<P: Serialize>(
-  api_key: &GmiCloudApiKey,
-  body: &GmiCloudCreateRequest<P>,
-) -> Result<GmiCloudCreateResponse, GmiCloudError> {
-  let context = RequestContext {
-    api_key,
-    maybe_timeout: None,
-  };
+pub async fn create_gmicloud_request<P: Serialize>(api_key: &GmiCloudApiKey, body: &GmiCloudCreateRequest<P>) -> Result<GmiCloudCreateResponse, GmiCloudError> {
+  let context = RequestContext { api_key, maybe_timeout: None };
   create_gmicloud_request_with_context(&context, body).await
 }
 
 /// Submit a request to GmiCloud with explicit context (custom timeout, etc.).
-pub async fn create_gmicloud_request_with_context<P: Serialize>(
-  context: &RequestContext<'_>,
-  body: &GmiCloudCreateRequest<P>,
-) -> Result<GmiCloudCreateResponse, GmiCloudError> {
+pub async fn create_gmicloud_request_with_context<P: Serialize>(context: &RequestContext<'_>, body: &GmiCloudCreateRequest<P>) -> Result<GmiCloudCreateResponse, GmiCloudError> {
   let url = format!("{}/requests", BASE_URL);
   let timeout = context.maybe_timeout.unwrap_or(DEFAULT_TIMEOUT);
 
-  let client = reqwest::Client::builder()
-    .timeout(timeout)
-    .build()
-    .map_err(GmiCloudGenericApiError::from)?;
+  let client = reqwest::Client::builder().timeout(timeout).build().map_err(GmiCloudGenericApiError::from)?;
 
-  let response = client
-    .post(&url)
-    .header("Authorization", format!("Bearer {}", context.api_key.as_str()))
-    .json(body)
-    .send()
-    .await
-    .map_err(GmiCloudGenericApiError::from)?;
+  let response = client.post(&url).header("Authorization", format!("Bearer {}", context.api_key.as_str())).json(body).send().await.map_err(GmiCloudGenericApiError::from)?;
 
   let status = response.status();
-  let body_text = response.text().await
-    .map_err(GmiCloudGenericApiError::from)?;
+  let body_text = response.text().await.map_err(GmiCloudGenericApiError::from)?;
 
   if status == reqwest::StatusCode::UNAUTHORIZED {
     return Err(GmiCloudSpecificApiError::Unauthorized.into());
@@ -79,14 +60,10 @@ pub async fn create_gmicloud_request_with_context<P: Serialize>(
       return Err(specific.into());
     }
 
-    return Err(GmiCloudGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status.as_u16(),
-      body: body_text,
-    }.into());
+    return Err(GmiCloudGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status.as_u16(), body: body_text }.into());
   }
 
-  let parsed: GmiCloudCreateResponse = serde_json::from_str(&body_text)
-    .map_err(|err| GmiCloudGenericApiError::SerdeResponseParseErrorWithBody(err, body_text))?;
+  let parsed: GmiCloudCreateResponse = serde_json::from_str(&body_text).map_err(|err| GmiCloudGenericApiError::SerdeResponseParseErrorWithBody(err, body_text))?;
 
   Ok(parsed)
 }
@@ -95,8 +72,7 @@ pub async fn create_gmicloud_request_with_context<P: Serialize>(
 /// GmiCloud sometimes wraps inner API errors as a JSON string within `{"error": "..."}`.
 fn classify_error_body(body: &str) -> Option<GmiCloudSpecificApiError> {
   if body.contains("InputImageSensitiveContentDetected") {
-    let message = extract_inner_message(body)
-      .unwrap_or_else(|| "Input image may contain a real person".to_string());
+    let message = extract_inner_message(body).unwrap_or_else(|| "Input image may contain a real person".to_string());
     return Some(GmiCloudSpecificApiError::ContentContainsRealPerson(message));
   }
   None

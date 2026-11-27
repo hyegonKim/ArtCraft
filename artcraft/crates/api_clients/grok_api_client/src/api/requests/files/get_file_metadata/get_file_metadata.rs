@@ -50,38 +50,22 @@ pub async fn get_file_metadata(args: GetFileMetadataArgs<'_>) -> Result<FileMeta
 
   info!("Grok get_file_metadata: file_id={}", req.file_id);
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.get(&url)
-    .header("Authorization", bearer)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.get(&url).header("Authorization", bearer).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok get_file_metadata response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: FileMetadataResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: FileMetadataResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  Ok(FileMetadata {
-    file_id: parsed.id,
-    bytes: parsed.bytes,
-    created_at: parsed.created_at,
-    expires_at: parsed.expires_at,
-    filename: parsed.filename,
-    purpose: parsed.purpose,
-  })
+  Ok(FileMetadata { file_id: parsed.id, bytes: parsed.bytes, created_at: parsed.created_at, expires_at: parsed.expires_at, filename: parsed.filename, purpose: parsed.purpose })
 }
 
 #[cfg(test)]
@@ -110,10 +94,7 @@ mod tests {
   #[test]
   fn request_serializes_without_api_key() {
     let key = GrokApiKey::new("secret_must_not_leak".to_string());
-    let args = GetFileMetadataArgs {
-      api_key: &key,
-      request: GetFileMetadataRequest { file_id: "file_abc".to_string() },
-    };
+    let args = GetFileMetadataArgs { api_key: &key, request: GetFileMetadataRequest { file_id: "file_abc".to_string() } };
     let json = serde_json::to_string(&args.request).unwrap();
     assert!(!json.contains("secret_must_not_leak"));
     assert!(json.contains("\"file_id\":\"file_abc\""));
@@ -127,15 +108,9 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = get_file_metadata(GetFileMetadataArgs {
-      api_key: &api_key,
-      request: GetFileMetadataRequest {
-        file_id: "file_doesnotexist000000".to_string(),
-      },
-    }).await;
+    let result = get_file_metadata(GetFileMetadataArgs { api_key: &api_key, request: GetFileMetadataRequest { file_id: "file_doesnotexist000000".to_string() } }).await;
     let err = result.unwrap_err();
-    assert!(matches!(err, GrokError::ApiSpecific(GrokSpecificApiError::NotFound { .. })),
-      "expected NotFound, got: {:?}", err);
+    assert!(matches!(err, GrokError::ApiSpecific(GrokSpecificApiError::NotFound { .. })), "expected NotFound, got: {:?}", err);
     Ok(())
   }
 }

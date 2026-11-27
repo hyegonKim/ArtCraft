@@ -15,7 +15,7 @@ pub(crate) use ui::catalog_characters;
 pub(crate) use ui::{set_current, tr, tr_args};
 
 /// Every language with a catalog, in the order Settings ▸ General ▸ Language lists them.
-const CATALOG_CODES: [&str; 13] = ["cs", "de", "es", "fr", "pl", "pt-br", "sv", "ru", "uk", "ka", "ja", "zh-hans", "zh-hant"];
+const CATALOG_CODES: [&str; 14] = ["cs", "de", "es", "fr", "pl", "pt-br", "sv", "ru", "uk", "ka", "ja", "zh-hans", "zh-hant", "ko"];
 
 /// The active interface language: the stored preference when it names a catalog, otherwise `en`
 /// (English is the source of every label and needs no lookup).
@@ -128,7 +128,7 @@ fn first_supported(requested: Option<&str>, browser: &[String], drawable: impl F
 /// rather than draw boxes; `?lang=` and a language chosen in Settings still select them.
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 fn web_draws(language: &str) -> bool {
-    !matches!(language, "ja" | "zh-hans" | "zh-hant" | "ka")
+    !matches!(language, "ja" | "zh-hans" | "zh-hant" | "ka" | "ko")
 }
 
 /// The language EffectCraft shows for a BCP 47 locale (`ja-JP` → `ja`, `zh-Hans-CN` → `zh-hans`,
@@ -150,6 +150,7 @@ fn supported(locale: Option<&str>) -> &'static str {
         "de" => "de",
         "fr" => "fr",
         "sv" => "sv",
+        "ko" => "ko",
         // The only Portuguese catalog: Brazil's, also for Portugal rather than English.
         "pt" => "pt-br",
         "zh" => {
@@ -221,9 +222,19 @@ fn menu_catalog(language: &str) -> Option<&'static [(&'static str, &'static str,
         "pl" => POLISH,
         "ka" => GEORGIAN,
         "sv" => SWEDISH,
+        "ko" => KOREAN,
         _ => return None,
     })
 }
+
+const KOREAN: &[(&str, &str, &str)] = &[
+    ("comp.new", "New Composition...", "새 컴포지션..."),
+    ("path.toggleClosed", "Closed", "닫힘"),
+    ("edit.undo", "Undo", "실행 취소"),
+    ("edit.redo", "Redo", "다시 실행"),
+    ("file.importAep", "Adobe After Effects Project...", "Adobe After Effects 프로젝트..."),
+    ("file.exportAep", "Adobe After Effects Project...", "Adobe After Effects 프로젝트..."),
+];
 
 /// A command's label drawn outside the menu bar (the dock's tab titles, the workspace bar), in the
 /// language the panels draw in: the menu bar's row for (`command`, `source`), else the panel

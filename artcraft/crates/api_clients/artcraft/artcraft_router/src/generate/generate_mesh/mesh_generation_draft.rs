@@ -17,7 +17,6 @@ use crate::generate::generate_mesh::mesh_generation_request::MeshGenerationReque
 pub enum MeshGenerationDraftRequest {}
 
 impl MeshGenerationDraftRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match *self {}
   }

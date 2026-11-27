@@ -16,14 +16,10 @@ pub struct StorytellerCredentialManager {
 }
 
 impl StorytellerCredentialManager {
-
   pub fn initialize_empty(app_data_root: &AppDataRoot) -> Self {
-    Self {
-      holder: StorytellerCredentialHolder::new(),
-      app_data_root: app_data_root.clone(),
-    }
+    Self { holder: StorytellerCredentialHolder::new(), app_data_root: app_data_root.clone() }
   }
-  
+
   pub fn initialize_from_disk_infallible(app_data_root: &AppDataRoot) -> Self {
     let holder = StorytellerCredentialHolder::new();
 
@@ -31,13 +27,10 @@ impl StorytellerCredentialManager {
       Err(err) => warn!("Failed to read credentials from disk: {:?}", err),
       Ok(creds) => {
         holder.set_credentials(&creds).expect("Failed to set credentials");
-      }
+      },
     }
 
-    Self {
-      holder,
-      app_data_root: app_data_root.clone(),
-    }
+    Self { holder, app_data_root: app_data_root.clone() }
   }
 
   pub fn set_credentials(&self, creds: &StorytellerCredentialSet) -> AnyhowResult<()> {
@@ -100,11 +93,7 @@ fn persist_session_to_disk(session: &StorytellerSessionCookie, app_data_root: &A
   let creds_dir = app_data_root.credentials_dir();
   let filename = creds_dir.get_storyteller_session_cookie_file_path();
 
-  let mut file = OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(filename)?;
+  let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
 
   file.write_all(session.as_bytes())?;
   file.flush()?;
@@ -116,11 +105,7 @@ fn persist_avt_to_disk(avt: &StorytellerAvtCookie, app_data_root: &AppDataRoot) 
   let creds_dir = app_data_root.credentials_dir();
   let filename = creds_dir.get_storyteller_avt_cookie_file_path();
 
-  let mut file = OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(filename)?;
+  let mut file = OpenOptions::new().create(true).write(true).truncate(true).open(filename)?;
 
   file.write_all(avt.as_bytes())?;
   file.flush()?;

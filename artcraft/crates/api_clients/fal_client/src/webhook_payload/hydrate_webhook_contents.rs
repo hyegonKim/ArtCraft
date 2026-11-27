@@ -15,32 +15,22 @@ pub fn hydrate_webhook_contents(webhook: &RawWebhookPayload) -> HydratedWebhookC
     RawWebhookStatus::Error => {
       let (message, error_type) = extract_error_first_detail(&webhook.payload);
 
-      HydratedWebhookContents::Error(ErrorData {
-        message,
-        error_type,
-      })
-    }
+      HydratedWebhookContents::Error(ErrorData { message, error_type })
+    },
     RawWebhookStatus::Ok => {
       // Check for `payload_error` case: status=OK but no payload, has payload_error.
       if webhook.payload.is_none() {
         if let Some(ref payload_error) = webhook.payload_error {
-          return HydratedWebhookContents::PayloadError(PayloadErrorData {
-            payload_error: payload_error.clone(),
-          });
+          return HydratedWebhookContents::PayloadError(PayloadErrorData { payload_error: payload_error.clone() });
         }
       }
 
-      let value = webhook.payload
-          .clone()
-          .unwrap_or(Value::Null);
+      let value = webhook.payload.clone().unwrap_or(Value::Null);
 
       let extracted_contents = extract_contents_from_payload(&value);
 
-      HydratedWebhookContents::Success(WebhookSuccessData {
-        payload: value,
-        extracted_contents,
-      })
-    }
+      HydratedWebhookContents::Success(WebhookSuccessData { payload: value, extracted_contents })
+    },
   }
 }
 
@@ -63,10 +53,7 @@ fn extract_error_first_detail(payload: &Option<Value>) -> (Option<String>, Optio
 
   let message = first.get("msg").and_then(|v| v.as_str()).map(|s| s.to_string());
 
-  let error_type = first
-      .get("type")
-      .and_then(|v| v.as_str())
-      .map(WebhookErrorType::from_str);
+  let error_type = first.get("type").and_then(|v| v.as_str()).map(WebhookErrorType::from_str);
 
   (message, error_type)
 }
@@ -77,10 +64,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -90,15 +75,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::ContentPolicyViolation),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("The content could not be processed because it contained material flagged by a content checker."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::ContentPolicyViolation),);
+        assert_eq!(data.message.as_deref(), Some("The content could not be processed because it contained material flagged by a content checker."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -110,15 +89,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::InvalidApiKey),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("Invalid API key"),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::InvalidApiKey),);
+        assert_eq!(data.message.as_deref(), Some("Invalid API key"),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -130,15 +103,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::FileTooLarge),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("File size exceeds the maximum allowed size of 10485760 bytes. Please upload a smaller file."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::FileTooLarge),);
+        assert_eq!(data.message.as_deref(), Some("File size exceeds the maximum allowed size of 10485760 bytes. Please upload a smaller file."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -150,15 +117,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::ContentPolicyViolation),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("The content could not be processed because it contained material flagged by a content checker."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::ContentPolicyViolation),);
+        assert_eq!(data.message.as_deref(), Some("The content could not be processed because it contained material flagged by a content checker."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -170,14 +131,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::NoMediaGenerated),
-        );
-        assert!(
-          data.message.as_deref().unwrap().starts_with("The model did not generate"),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::NoMediaGenerated),);
+        assert!(data.message.as_deref().unwrap().starts_with("The model did not generate"),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -189,15 +145,9 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::ValueError),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("Part generation only supports FBX format. Please provide an FBX file or use /convert-format to convert your model to FBX first."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::ValueError),);
+        assert_eq!(data.message.as_deref(), Some("Part generation only supports FBX format. Please provide an FBX file or use /convert-format to convert your model to FBX first."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
@@ -209,57 +159,37 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::InputValueError),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("No foreground subject could be detected in the input image after background removal. Provide an image with a clear, visible subject against a plain or distinct background."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::InputValueError),);
+        assert_eq!(data.message.as_deref(), Some("No foreground subject could be detected in the input image after background removal. Provide an image with a clear, visible subject against a plain or distinct background."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
 
   #[test]
   fn payload_error_case() {
-    let webhook = RawWebhookPayload {
-      request_id: "test-123".to_string(),
-      gateway_request_id: "test-123".to_string(),
-      status: RawWebhookStatus::Ok,
-      error: None,
-      payload: None,
-      payload_error: Some("encoding error occurred".to_string()),
-    };
+    let webhook = RawWebhookPayload { request_id: "test-123".to_string(), gateway_request_id: "test-123".to_string(), status: RawWebhookStatus::Ok, error: None, payload: None, payload_error: Some("encoding error occurred".to_string()) };
 
     let result = hydrate_webhook_contents(&webhook);
 
     match result {
       HydratedWebhookContents::PayloadError(data) => {
         assert_eq!(data.payload_error, "encoding error occurred");
-      }
+      },
       other => panic!("Expected HydratedWebhookContents::PayloadError, got {:?}", other),
     }
   }
 
   #[test]
   fn success_case() {
-    let webhook = RawWebhookPayload {
-      request_id: "test-456".to_string(),
-      gateway_request_id: "test-456".to_string(),
-      status: RawWebhookStatus::Ok,
-      error: None,
-      payload: Some(serde_json::json!({"images": [{"url": "https://example.com/img.png"}]})),
-      payload_error: None,
-    };
+    let webhook = RawWebhookPayload { request_id: "test-456".to_string(), gateway_request_id: "test-456".to_string(), status: RawWebhookStatus::Ok, error: None, payload: Some(serde_json::json!({"images": [{"url": "https://example.com/img.png"}]})), payload_error: None };
 
     let result = hydrate_webhook_contents(&webhook);
 
     match result {
       HydratedWebhookContents::Success(data) => {
         assert!(data.payload.get("images").is_some());
-      }
+      },
       other => panic!("Expected HydratedWebhookContents::Success, got {:?}", other),
     }
   }
@@ -271,29 +201,16 @@ mod tests {
 
     match result {
       HydratedWebhookContents::Error(data) => {
-        assert_eq!(
-          data.error_type,
-          Some(WebhookErrorType::ContentPolicyViolation),
-        );
-        assert_eq!(
-          data.message.as_deref(),
-          Some("The content could not be processed because it contained material flagged by a content checker."),
-        );
-      }
+        assert_eq!(data.error_type, Some(WebhookErrorType::ContentPolicyViolation),);
+        assert_eq!(data.message.as_deref(), Some("The content could not be processed because it contained material flagged by a content checker."),);
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }
 
   #[test]
   fn error_with_no_payload() {
-    let webhook = RawWebhookPayload {
-      request_id: "test-789".to_string(),
-      gateway_request_id: "test-789".to_string(),
-      status: RawWebhookStatus::Error,
-      error: Some("Internal server error".to_string()),
-      payload: None,
-      payload_error: None,
-    };
+    let webhook = RawWebhookPayload { request_id: "test-789".to_string(), gateway_request_id: "test-789".to_string(), status: RawWebhookStatus::Error, error: Some("Internal server error".to_string()), payload: None, payload_error: None };
 
     let result = hydrate_webhook_contents(&webhook);
 
@@ -301,7 +218,7 @@ mod tests {
       HydratedWebhookContents::Error(data) => {
         assert_eq!(data.message, None);
         assert_eq!(data.error_type, None);
-      }
+      },
       other => panic!("Expected HydratedWebhookContents::Error, got {:?}", other),
     }
   }

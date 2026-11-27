@@ -33,11 +33,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // manually run — fires a real API request and incurs cost
   async fn text_to_video() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()),
-      aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-      ..mini_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..mini_builder() }).await;
     assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
@@ -45,32 +41,19 @@ mod tests {
   #[tokio::test]
   #[ignore] // manually run — fires a real API request and incurs cost
   async fn res_480p() {
-    let response = run_pipeline(GenerateVideoRequestBuilder {
-      prompt: Some("A shiba inu playing in autumn leaves.".to_string()),
-      resolution: Some(RouterResolution::FourEightyP),
-      ..mini_builder()
-    }).await;
+    let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A shiba inu playing in autumn leaves.".to_string()), resolution: Some(RouterResolution::FourEightyP), ..mini_builder() }).await;
     assert!(matches!(response, GenerateVideoResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
 
   fn mini_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p0Mini,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(4),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p0Mini, provider: RouterProvider::Artcraft, duration_seconds: Some(4), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn get_artcraft_client() -> RouterClient {
-    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt")
-      .expect("Failed to read artcraft cookies");
+    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/artcraft_cookies.txt").expect("Failed to read artcraft cookies");
     let cookies = cookies.trim().to_string();
-    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies)
-      .expect("Failed to parse cookies")
-      .expect("No credentials found");
+    let credentials = StorytellerCredentialSet::parse_multi_cookie_header(&cookies).expect("Failed to parse cookies").expect("No credentials found");
     RouterClient::Artcraft(RouterArtcraftClient::new(ApiHost::Storyteller, credentials))
   }
 

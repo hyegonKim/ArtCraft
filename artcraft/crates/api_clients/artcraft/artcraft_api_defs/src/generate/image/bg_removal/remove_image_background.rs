@@ -9,7 +9,7 @@ pub const REMOVE_IMAGE_BACKGROUND_PATH: &str = "/v1/generate/image/remove_backgr
 pub struct RemoveImageBackgroundRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the file to remove the background from.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,

@@ -23,15 +23,7 @@ impl ArtcraftHunyuan3d2p1CostState {
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
-    MeshGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    MeshGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -53,41 +45,23 @@ mod tests {
 
   #[test]
   fn normal_is_one_seventeen_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      mesh_output_type: Some(CommonMeshOutputType::Normal),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Normal), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 117);
   }
 
   #[test]
   fn geometry_is_thirty_nine_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      mesh_output_type: Some(CommonMeshOutputType::Geometry),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Geometry), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 39);
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d2p1,
-      provider: RouterProvider::Artcraft,
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_front".to_string()),
-      ])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d2p1, provider: RouterProvider::Artcraft, reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_front".to_string())])), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

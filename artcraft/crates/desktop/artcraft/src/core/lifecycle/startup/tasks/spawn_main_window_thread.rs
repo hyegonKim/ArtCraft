@@ -4,17 +4,8 @@ use crate::services::storyteller::state::storyteller_credential_manager::Storyte
 use errors::AnyhowResult;
 use tauri::{AppHandle, Manager};
 
-pub fn spawn_main_window_thread(
-  app: &AppHandle,
-  root: &AppDataRoot,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-) -> AnyhowResult<()> {
-
-  tauri::async_runtime::spawn(main_window_thread(
-    app.clone(),
-    root.clone(),
-    storyteller_creds_manager.clone(),
-  ));
+pub fn spawn_main_window_thread(app: &AppHandle, root: &AppDataRoot, storyteller_creds_manager: &StorytellerCredentialManager) -> AnyhowResult<()> {
+  tauri::async_runtime::spawn(main_window_thread(app.clone(), root.clone(), storyteller_creds_manager.clone()));
 
   Ok(())
 }

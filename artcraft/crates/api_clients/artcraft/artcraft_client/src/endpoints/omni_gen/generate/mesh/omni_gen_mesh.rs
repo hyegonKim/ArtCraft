@@ -7,15 +7,6 @@ use artcraft_api_defs::omni_gen::generate_response::omni_gen_mesh_generate_respo
 
 pub const OMNI_GEN_MESH_GENERATE_PATH: &str = "/v1/omni_gen/generate/mesh";
 
-pub async fn omni_gen_mesh_generate(
-  api_host: &ApiHost,
-  maybe_creds: Option<&StorytellerCredentialSet>,
-  request: OmniGenMeshCostAndGenerateRequest,
-) -> Result<OmniGenMeshGenerateResponse, StorytellerError> {
-  Ok(basic_json_post_request(
-    api_host,
-    OMNI_GEN_MESH_GENERATE_PATH,
-    maybe_creds,
-    request,
-  ).await?)
+pub async fn omni_gen_mesh_generate(api_host: &ApiHost, maybe_creds: Option<&StorytellerCredentialSet>, request: OmniGenMeshCostAndGenerateRequest) -> Result<OmniGenMeshGenerateResponse, StorytellerError> {
+  Ok(basic_json_post_request(api_host, OMNI_GEN_MESH_GENERATE_PATH, maybe_creds, request).await?)
 }

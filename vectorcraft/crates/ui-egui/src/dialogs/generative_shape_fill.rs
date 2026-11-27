@@ -15,14 +15,8 @@ pub const KIND: &str = "generativeShapeFill";
 const CMD: &str = "object.generativeShapeFill";
 const LABEL_W: f32 = 92.0;
 
-pub(super) const SPEC: DialogSpec = DialogSpec {
-    heading: |_| tl!("Generative Shape Fill").into(),
-    body,
-    confirm,
-    preview: true,
-    min_width: 360.0,
-    ..DialogSpec::FORM
-};
+pub(super) const SPEC: DialogSpec =
+    DialogSpec { heading: |_| tl!("Generative Shape Fill").into(), body, confirm, preview: true, min_width: 360.0, ..DialogSpec::FORM };
 
 pub fn fields() -> Value {
     json!({
@@ -37,12 +31,7 @@ pub fn fields() -> Value {
 }
 
 fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
-    let styles = [
-        ("geometric", tl!("Geometric")),
-        ("botanical", tl!("Botanical")),
-        ("halftone", tl!("Halftone")),
-        ("mosaic", tl!("Mosaic")),
-    ];
+    let styles = [("geometric", tl!("Geometric")), ("botanical", tl!("Botanical")), ("halftone", tl!("Halftone")), ("mosaic", tl!("Mosaic"))];
     form::choice(ui, d, "style", tl!("Style"), (LABEL_W, 152.0), &styles);
 
     widgets::label_row(ui, tl!("Prompt"), LABEL_W, |ui| {

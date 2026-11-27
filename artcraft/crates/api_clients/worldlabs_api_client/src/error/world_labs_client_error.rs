@@ -3,7 +3,6 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum WorldLabsClientError {
-
   /// An error was encountered in building the Wreq client
   WreqClientError(wreq::Error),
 

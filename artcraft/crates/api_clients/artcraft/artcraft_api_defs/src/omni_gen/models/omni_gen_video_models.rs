@@ -10,7 +10,7 @@ use utoipa::{IntoParams, ToSchema};
 use enums::common::generation::common_bitrate::CommonBitrate;
 
 /// Video model to default to if none is specified
-const DEFAULT_VIDEO_MODEL : CommonVideoModel = CommonVideoModel::Seedance2p0;
+const DEFAULT_VIDEO_MODEL: CommonVideoModel = CommonVideoModel::Seedance2p0;
 
 /// Query string parameters for the video models endpoint.
 #[derive(Deserialize, IntoParams, ToSchema)]
@@ -40,11 +40,11 @@ impl Default for OmniGenVideoModelsProvider {
 #[derive(Serialize, ToSchema, Clone)]
 pub struct OmniGenVideoModelsResponse {
   pub success: bool,
-  
+
   /// A list of all models: details, features, and capabilities
   pub models: Vec<OmniGenVideoModelDetails>,
-  
-  /// Provider-by-provider model offering and capability list, 
+
+  /// Provider-by-provider model offering and capability list,
   /// with possible capability overrides (future)
   pub providers: Vec<OmniGenVideoModelProviderDetails>,
 }
@@ -65,12 +65,11 @@ pub struct OmniGenVideoProviderModelDetails {
 
 #[derive(Serialize, ToSchema, Clone)]
 pub struct OmniGenVideoModelDetails {
-
   pub model: CommonVideoModel,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub model_creator: Option<ModelCreator>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub full_name: Option<String>,
 
@@ -88,19 +87,19 @@ pub struct OmniGenVideoModelDetails {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub text_prompt_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub text_prompt_max_length: Option<u16>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub negative_text_prompt_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub negative_text_prompt_max_length: Option<u16>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub starting_keyframe_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub starting_keyframe_required: Option<bool>,
 
@@ -109,25 +108,25 @@ pub struct OmniGenVideoModelDetails {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub image_references_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub image_references_max: Option<u16>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub video_references_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub video_references_max: Option<u16>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub video_references_max_total_duration_seconds: Option<u16>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub audio_references_supported: Option<bool>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub audio_references_max: Option<u16>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub audio_references_max_total_duration_seconds: Option<u16>,
 
@@ -142,13 +141,13 @@ pub struct OmniGenVideoModelDetails {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub aspect_ratio_options: Option<Vec<CommonAspectRatio>>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub aspect_ratio_default: Option<CommonAspectRatio>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub resolution_options: Option<Vec<CommonResolution>>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub resolution_default: Option<CommonResolution>,
 
@@ -163,16 +162,16 @@ pub struct OmniGenVideoModelDetails {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub output_format_default: Option<CommonVideoOutputFormat>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub quality_options: Option<Vec<CommonQuality>>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub default_quality: Option<CommonQuality>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub duration_seconds_min: Option<u16>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub duration_seconds_max: Option<u16>,
 
@@ -183,19 +182,19 @@ pub struct OmniGenVideoModelDetails {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub duration_seconds_options: Option<Vec<u16>>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub duration_seconds_default: Option<u16>,
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub batch_size_min: Option<u16>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub batch_size_max: Option<u16>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub batch_size_options: Option<Vec<u16>>,
-  
+
   #[serde(skip_serializing_if = "Option::is_none")]
   pub batch_size_default: Option<u16>,
 

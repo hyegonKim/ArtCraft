@@ -23,51 +23,28 @@ pub struct VideoFile {
 }
 
 pub async fn download_video_file(args: DownloadVideoFileArgs<'_>) -> Result<VideoFile, GrokError> {
-
-  let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| GrokClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
   let video_url = user_and_file_id_to_video_url(&args.user_id, &args.file_id, false);
 
   info!("Video file URL: {}", video_url);
 
-  let mut request_builder = client.get(&video_url)
-      .header(USER_AGENT, FIREFOX_143_MAC_USER_AGENT)
-      .header(ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-      .header(ACCEPT_LANGUAGE, "en-US,en;q=0.5")
-      .header(ACCEPT_ENCODING, "gzip, deflate, br, zstd")
-      .header(REFERER, "https://grok.com/")
-      .header("Sec-GPC", "1")
-      .header(CONNECTION, "keep-alive")
-      .header(COOKIE, args.cookies)
-      .header(UPGRADE_INSECURE_REQUESTS, "1")
-      .header("sec-fetch-dest", "document")
-      .header("sec-fetch-mode", "navigate")
-      .header("sec-fetch-site", "same-site")
-      .header("sec-fetch-user", "?1")
-      .header("priority", "u=0, i");
-
+  let mut request_builder = client.get(&video_url).header(USER_AGENT, FIREFOX_143_MAC_USER_AGENT).header(ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8").header(ACCEPT_LANGUAGE, "en-US,en;q=0.5").header(ACCEPT_ENCODING, "gzip, deflate, br, zstd").header(REFERER, "https://grok.com/").header("Sec-GPC", "1").header(CONNECTION, "keep-alive").header(COOKIE, args.cookies).header(UPGRADE_INSECURE_REQUESTS, "1").header("sec-fetch-dest", "document").header("sec-fetch-mode", "navigate").header("sec-fetch-site", "same-site").header("sec-fetch-user", "?1").header("priority", "u=0, i");
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-      .await
-      .map_err(|err| GrokGenericApiError::WreqError(err))?;
+  let response = request_builder.send().await.map_err(|err| GrokGenericApiError::WreqError(err))?;
 
   let status = response.status();
 
   info!("Download video status: {:?}", status);
 
-  let download_bytes = &response.bytes()
-      .await
-      .map_err(|err| {
-        error!("Error reading Grok create media response body: {:?}", err);
-        GrokGenericApiError::WreqError(err)
-      })?;
+  let download_bytes = &response.bytes().await.map_err(|err| {
+    error!("Error reading Grok create media response body: {:?}", err);
+    GrokGenericApiError::WreqError(err)
+  })?;
 
   // TODO: Classify errors
   if !status.is_success() {
@@ -76,9 +53,7 @@ pub async fn download_video_file(args: DownloadVideoFileArgs<'_>) -> Result<Vide
     //  return Err(classify_general_http_status_code_and_body(status, response_body));
   }
 
-  Ok(VideoFile {
-    bytes: download_bytes.to_vec(),
-  })
+  Ok(VideoFile { bytes: download_bytes.to_vec() })
 }
 
 #[cfg(test)]
@@ -100,9 +75,7 @@ mod tests {
 
     let file_id = FileId("d9b300c6-9562-4e24-a87a-3ede2a53f0bc".to_string()); // Ernest
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     println!("Verification Token: {:?}", secrets.verification_token);
     println!("Sentry Trace: {:?}", secrets.sentry_trace);
@@ -110,12 +83,7 @@ mod tests {
     println!("Svg Path: {:?}", secrets.svg_path_data);
     println!("Baggage: {:?}", secrets.baggage);
 
-    let download = download_video_file(DownloadVideoFileArgs {
-      cookies: cookies.as_str(),
-      user_id: &secrets.user_id,
-      file_id: &file_id,
-      request_timeout: None,
-    }).await?;
+    let download = download_video_file(DownloadVideoFileArgs { cookies: cookies.as_str(), user_id: &secrets.user_id, file_id: &file_id, request_timeout: None }).await?;
 
     println!("Video byte length: {:?}", download.bytes.len());
 

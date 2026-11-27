@@ -1,7 +1,4 @@
-use crate::requests::api::image::text::nano_banana_pro_text_to_image::api::{
-  NanoBananaProTextToImageNumImages, NanoBananaProTextToImageRequest,
-  NanoBananaProTextToImageResolution,
-};
+use crate::requests::api::image::text::nano_banana_pro_text_to_image::api::{NanoBananaProTextToImageNumImages, NanoBananaProTextToImageRequest, NanoBananaProTextToImageResolution};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for NanoBananaProTextToImageRequest {
@@ -28,16 +25,8 @@ impl FalRequestCostCalculator for NanoBananaProTextToImageRequest {
 mod tests {
   use super::*;
 
-  fn make_request(
-    num_images: NanoBananaProTextToImageNumImages,
-    resolution: Option<NanoBananaProTextToImageResolution>,
-  ) -> NanoBananaProTextToImageRequest {
-    NanoBananaProTextToImageRequest {
-      prompt: "test".to_string(),
-      num_images,
-      resolution,
-      aspect_ratio: None,
-    }
+  fn make_request(num_images: NanoBananaProTextToImageNumImages, resolution: Option<NanoBananaProTextToImageResolution>) -> NanoBananaProTextToImageRequest {
+    NanoBananaProTextToImageRequest { prompt: "test".to_string(), num_images, resolution, aspect_ratio: None }
   }
 
   #[test]

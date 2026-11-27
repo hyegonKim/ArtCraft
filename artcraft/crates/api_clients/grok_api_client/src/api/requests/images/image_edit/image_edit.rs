@@ -105,73 +105,35 @@ pub async fn image_edit(args: ImageEditArgs<'_>) -> Result<ImageEditSuccess, Gro
   let req = args.request;
 
   if req.source_images.is_empty() {
-    return Err(GrokClientError::InvalidRequest(
-      "image_edit requires at least one source image".to_string(),
-    ).into());
+    return Err(GrokClientError::InvalidRequest("image_edit requires at least one source image".to_string()).into());
   }
 
   let url = format!("{}/v1/images/edits", XAI_API_BASE_URL);
   let model = req.model.unwrap_or(ImageModel::GrokImagineImageQuality);
 
-  info!(
-    "Grok image_edit: model={}, sources={}, aspect_ratio={:?}, resolution={:?}",
-    model.as_str(), req.source_images.len(),
-    req.aspect_ratio.map(|a| a.as_str()),
-    req.resolution.map(|r| r.as_str()),
-  );
+  info!("Grok image_edit: model={}, sources={}, aspect_ratio={:?}, resolution={:?}", model.as_str(), req.source_images.len(), req.aspect_ratio.map(|a| a.as_str()), req.resolution.map(|r| r.as_str()),);
 
   // Single source → `image`. Multiple sources → `images`.
-  let (image, images) = if req.source_images.len() == 1 {
-    (Some(to_image_ref(&req.source_images[0])), None)
-  } else {
-    (None, Some(req.source_images.iter().map(to_image_ref).collect()))
-  };
+  let (image, images) = if req.source_images.len() == 1 { (Some(to_image_ref(&req.source_images[0])), None) } else { (None, Some(req.source_images.iter().map(to_image_ref).collect())) };
 
-  let request_body = ImageEditRequestBody {
-    prompt: req.prompt,
-    image,
-    images,
-    model: Some(model.as_str().to_string()),
-    n: req.number_images,
-    aspect_ratio: req.aspect_ratio.map(|a| a.as_str().to_string()),
-    resolution: req.resolution.map(|r| r.as_str().to_string()),
-    response_format: req.response_format.map(|f| f.as_str().to_string()),
-    user: req.user,
-  };
+  let request_body = ImageEditRequestBody { prompt: req.prompt, image, images, model: Some(model.as_str().to_string()), n: req.number_images, aspect_ratio: req.aspect_ratio.map(|a| a.as_str().to_string()), resolution: req.resolution.map(|r| r.as_str().to_string()), response_format: req.response_format.map(|f| f.as_str().to_string()), user: req.user };
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.post(&url)
-    .header("Authorization", bearer)
-    .header("Content-Type", "application/json")
-    .json(&request_body)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.post(&url).header("Authorization", bearer).header("Content-Type", "application/json").json(&request_body).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok image_edit response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: ImageEditResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: ImageEditResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  Ok(ImageEditSuccess {
-    images: parsed.data.into_iter().map(|d| EditedImage {
-      url: d.url,
-      b64_json: d.b64_json,
-      revised_prompt: d.revised_prompt,
-    }).collect(),
-  })
+  Ok(ImageEditSuccess { images: parsed.data.into_iter().map(|d| EditedImage { url: d.url, b64_json: d.b64_json, revised_prompt: d.revised_prompt }).collect() })
 }
 
 fn to_image_ref(source: &ImageSource) -> ImageRef {
@@ -190,17 +152,7 @@ mod tests {
 
   #[test]
   fn wire_body_single_source_uses_image_field() {
-    let body = ImageEditRequestBody {
-      prompt: "make it sepia".to_string(),
-      image: Some(ImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }),
-      images: None,
-      model: Some("grok-imagine-image-quality".to_string()),
-      n: None,
-      aspect_ratio: None,
-      resolution: None,
-      response_format: None,
-      user: None,
-    };
+    let body = ImageEditRequestBody { prompt: "make it sepia".to_string(), image: Some(ImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }), images: None, model: Some("grok-imagine-image-quality".to_string()), n: None, aspect_ratio: None, resolution: None, response_format: None, user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"image\":{"));
     assert!(!json.contains("\"images\""));
@@ -209,20 +161,7 @@ mod tests {
 
   #[test]
   fn wire_body_multi_source_uses_images_array() {
-    let body = ImageEditRequestBody {
-      prompt: "combine these".to_string(),
-      image: None,
-      images: Some(vec![
-        ImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None },
-        ImageRef { url: None, file_id: Some("file_xyz".to_string()) },
-      ]),
-      model: None,
-      n: None,
-      aspect_ratio: Some("1:1".to_string()),
-      resolution: None,
-      response_format: None,
-      user: None,
-    };
+    let body = ImageEditRequestBody { prompt: "combine these".to_string(), image: None, images: Some(vec![ImageRef { url: Some("https://example.com/a.png".to_string()), file_id: None }, ImageRef { url: None, file_id: Some("file_xyz".to_string()) }]), model: None, n: None, aspect_ratio: Some("1:1".to_string()), resolution: None, response_format: None, user: None };
     let json = serde_json::to_string(&body).unwrap();
     assert!(json.contains("\"images\":["));
     assert!(!json.contains("\"image\":{"));
@@ -234,16 +173,7 @@ mod tests {
 
   #[test]
   fn request_serializes_with_typed_enums() {
-    let req = ImageEditRequest {
-      prompt: "edit me".to_string(),
-      source_images: vec![ImageSource::Url("https://example.com/a.png".to_string())],
-      model: Some(ImageModel::GrokImagineImageQuality),
-      number_images: Some(2),
-      aspect_ratio: Some(ImageAspectRatio::Landscape16x9),
-      resolution: Some(ImageResolution::TwoK),
-      response_format: Some(ImageResponseFormat::B64Json),
-      user: Some("user_xyz".to_string()),
-    };
+    let req = ImageEditRequest { prompt: "edit me".to_string(), source_images: vec![ImageSource::Url("https://example.com/a.png".to_string())], model: Some(ImageModel::GrokImagineImageQuality), number_images: Some(2), aspect_ratio: Some(ImageAspectRatio::Landscape16x9), resolution: Some(ImageResolution::TwoK), response_format: Some(ImageResponseFormat::B64Json), user: Some("user_xyz".to_string()) };
     let json = serde_json::to_string(&req).unwrap();
     assert!(json.contains("\"prompt\":\"edit me\""));
     assert!(json.contains("\"model\":\"grok-imagine-image-quality\""));
@@ -255,16 +185,7 @@ mod tests {
 
   #[test]
   fn request_omits_none_fields() {
-    let req = ImageEditRequest {
-      prompt: "p".to_string(),
-      source_images: vec![ImageSource::FileId("file_abc".to_string())],
-      model: None,
-      number_images: None,
-      aspect_ratio: None,
-      resolution: None,
-      response_format: None,
-      user: None,
-    };
+    let req = ImageEditRequest { prompt: "p".to_string(), source_images: vec![ImageSource::FileId("file_abc".to_string())], model: None, number_images: None, aspect_ratio: None, resolution: None, response_format: None, user: None };
     let json = serde_json::to_string(&req).unwrap();
     assert!(!json.contains("\"model\""));
     assert!(!json.contains("\"aspect_ratio\""));
@@ -276,40 +197,15 @@ mod tests {
   #[test]
   fn request_does_not_serialize_api_key() {
     let key = GrokApiKey::new("secret_value_must_not_leak".to_string());
-    let args = ImageEditArgs {
-      api_key: &key,
-      request: ImageEditRequest {
-        prompt: "p".to_string(),
-        source_images: vec![ImageSource::Url("u".to_string())],
-        model: None,
-        number_images: None,
-        aspect_ratio: None,
-        resolution: None,
-        response_format: None,
-        user: None,
-      },
-    };
+    let args = ImageEditArgs { api_key: &key, request: ImageEditRequest { prompt: "p".to_string(), source_images: vec![ImageSource::Url("u".to_string())], model: None, number_images: None, aspect_ratio: None, resolution: None, response_format: None, user: None } };
     let json = serde_json::to_string(&args.request).unwrap();
-    assert!(!json.contains("secret_value_must_not_leak"),
-      "serialized request must not contain the API key. got: {}", json);
+    assert!(!json.contains("secret_value_must_not_leak"), "serialized request must not contain the API key. got: {}", json);
   }
 
   #[tokio::test]
   async fn empty_sources_returns_bad_request() {
     let api_key = GrokApiKey::new("dummy".to_string());
-    let result = image_edit(ImageEditArgs {
-      api_key: &api_key,
-      request: ImageEditRequest {
-        prompt: "edit".to_string(),
-        source_images: vec![],
-        model: None,
-        number_images: None,
-        aspect_ratio: None,
-        resolution: None,
-        response_format: None,
-        user: None,
-      },
-    }).await;
+    let result = image_edit(ImageEditArgs { api_key: &api_key, request: ImageEditRequest { prompt: "edit".to_string(), source_images: vec![], model: None, number_images: None, aspect_ratio: None, resolution: None, response_format: None, user: None } }).await;
     let err = result.unwrap_err();
     assert!(matches!(err, GrokError::Client(GrokClientError::InvalidRequest(_))));
   }
@@ -348,19 +244,7 @@ mod tests {
     setup_test_logging();
 
     let api_key = get_test_api_key()?;
-    let result = image_edit(ImageEditArgs {
-      api_key: &api_key,
-      request: ImageEditRequest {
-        prompt: "Render this as a pencil sketch with detailed shading".to_string(),
-        source_images: vec![ImageSource::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())],
-        model: None,
-        number_images: None,
-        aspect_ratio: None,
-        resolution: None,
-        response_format: None,
-        user: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = image_edit(ImageEditArgs { api_key: &api_key, request: ImageEditRequest { prompt: "Render this as a pencil sketch with detailed shading".to_string(), source_images: vec![ImageSource::Url(JUNO_AT_LAKE_IMAGE_URL.to_string())], model: None, number_images: None, aspect_ratio: None, resolution: None, response_format: None, user: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Edited {} image(s)", result.images.len());
     for (i, img) in result.images.iter().enumerate() {

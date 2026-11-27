@@ -38,22 +38,15 @@ pub struct DownloadMediaFileResult {
   pub filesize_bytes: usize,
 }
 
-pub async fn download_media_file<P: AsRef<Path>>(
-  args: DownloadMediaFileArgs<'_, P>,
-) -> Result<DownloadMediaFileResult, StorytellerError> {
-  let DownloadMediaFileArgs {
-    media_token,
-    api_host,
-    download_path
-  } = args;
+pub async fn download_media_file<P: AsRef<Path>>(args: DownloadMediaFileArgs<'_, P>) -> Result<DownloadMediaFileResult, StorytellerError> {
+  let DownloadMediaFileArgs { media_token, api_host, download_path } = args;
 
   // 1. Fetch media file info from the API.
   let response = get_media_file(api_host, media_token).await?;
   let media_class = &response.media_file.media_class;
   let cdn_url = &response.media_file.media_links.cdn_url;
 
-  info!("Downloading media file {} of class {} from CDN: {}",
-    media_token.as_str(), media_class.to_str(), cdn_url);
+  info!("Downloading media file {} of class {} from CDN: {}", media_token.as_str(), media_class.to_str(), cdn_url);
 
   // 2. Determine the output file path.
   let output_path = match &download_path {
@@ -61,43 +54,30 @@ pub async fn download_media_file<P: AsRef<Path>>(
     DownloadPath::Directory(dir) => {
       let filename = derive_filename_from_url(cdn_url, &media_token);
       dir.as_ref().join(filename)
-    }
+    },
   };
 
   // 3. Download the bytes from the CDN.
   let bytes = download_bytes(cdn_url).await?;
 
   // 4. Write to disk.
-  let mut file = fs::File::create(&output_path)
-    .map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
+  let mut file = fs::File::create(&output_path).map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
 
-  file.write_all(&bytes)
-    .map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
+  file.write_all(&bytes).map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
 
-  file.flush()
-    .map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
+  file.flush().map_err(|err| StorytellerError::Client(ClientError::IoError(err)))?;
 
   info!("Downloaded {} bytes to {:?}", bytes.len(), output_path);
 
-  Ok(DownloadMediaFileResult {
-    downloaded_file_path: output_path,
-    media_file_response: response,
-    filesize_bytes: bytes.len(),
-  })
+  Ok(DownloadMediaFileResult { downloaded_file_path: output_path, media_file_response: response, filesize_bytes: bytes.len() })
 }
 
 // ── Helpers ──
 
 async fn download_bytes(url: &Url) -> Result<Vec<u8>, StorytellerError> {
-  let client = Client::builder()
-    .gzip(true)
-    .build()
-    .map_err(|err| StorytellerError::Client(ClientError::ReqwestError(err)))?;
+  let client = Client::builder().gzip(true).build().map_err(|err| StorytellerError::Client(ClientError::ReqwestError(err)))?;
 
-  let response = client.get(url.as_str())
-    .send()
-    .await
-    .map_err(|err| StorytellerError::Api(ApiError::OtherReqwestError(err)))?;
+  let response = client.get(url.as_str()).send().await.map_err(|err| StorytellerError::Api(ApiError::OtherReqwestError(err)))?;
 
   let status_code = response.status();
 
@@ -106,15 +86,10 @@ async fn download_bytes(url: &Url) -> Result<Vec<u8>, StorytellerError> {
       warn!("Failed to retrieve response body: {}", err);
       "".to_string()
     });
-    return Err(StorytellerError::Api(ApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code,
-      body,
-    }));
+    return Err(StorytellerError::Api(ApiError::UncategorizedBadResponseWithStatusAndBody { status_code, body }));
   }
 
-  let bytes = response.bytes()
-    .await
-    .map_err(|err| StorytellerError::Client(ClientError::ReqwestError(err)))?;
+  let bytes = response.bytes().await.map_err(|err| StorytellerError::Client(ClientError::ReqwestError(err)))?;
 
   Ok(bytes.to_vec())
 }

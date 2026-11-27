@@ -34,8 +34,7 @@ pub struct ArtcraftHappyHorse1p0CostState {
 
 impl ArtcraftHappyHorse1p0CostState {
   pub fn from_request(request: &ArtcraftHappyHorse1p0RequestState) -> Self {
-    let resolution = request.request.resolution
-      .unwrap_or(CommonResolution::SevenTwentyP);
+    let resolution = request.request.resolution.unwrap_or(CommonResolution::SevenTwentyP);
     let duration_seconds = request.request.duration_seconds.unwrap_or(5);
     let batch_count = request.request.video_batch_count.unwrap_or(1);
 
@@ -48,22 +47,12 @@ impl ArtcraftHappyHorse1p0CostState {
       _ => UPSTREAM_CREDITS_PER_SECOND_720P,
     };
 
-    let upstream_credits = credits_per_second as u64
-      * self.duration_seconds as u64
-      * self.batch_count as u64;
+    let upstream_credits = credits_per_second as u64 * self.duration_seconds as u64 * self.batch_count as u64;
 
     let usd_cents = (upstream_credits as f64 / UPSTREAM_CREDITS_PER_DOLLAR * 100.0).round() as u64;
 
     // ArtCraft credits = USD cents.
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(usd_cents),
-      cost_in_usd_cents: Some(usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false, 
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(usd_cents), cost_in_usd_cents: Some(usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -151,10 +140,7 @@ mod tests {
         let c720 = cost_cents(Some(RouterResolution::SevenTwentyP), dur, 1);
         let c1080 = cost_cents(Some(RouterResolution::TenEightyP), dur, 1);
         let expected = c720 * 2;
-        assert!(
-          c1080 >= expected - 1 && c1080 <= expected + 1,
-          "1080p ({}) should be ~2× 720p ({}) at {}s", c1080, c720, dur,
-        );
+        assert!(c1080 >= expected - 1 && c1080 <= expected + 1, "1080p ({}) should be ~2× 720p ({}) at {}s", c1080, c720, dur,);
       }
     }
 
@@ -184,20 +170,12 @@ mod tests {
 
     #[test]
     fn credits_equal_usd_cents() {
-      let resolutions = [
-        Some(RouterResolution::SevenTwentyP),
-        Some(RouterResolution::TenEightyP),
-        None,
-      ];
+      let resolutions = [Some(RouterResolution::SevenTwentyP), Some(RouterResolution::TenEightyP), None];
       for res in resolutions {
         for dur in [4, 5, 10, 15] {
           for batch in [1, 2, 4] {
             let cost = build_cost(res, dur, batch);
-            assert_eq!(
-              cost.cost_in_credits, cost.cost_in_usd_cents,
-              "credits should equal cents for res={:?} dur={}s batch={}",
-              res, dur, batch,
-            );
+            assert_eq!(cost.cost_in_credits, cost.cost_in_usd_cents, "credits should equal cents for res={:?} dur={}s batch={}", res, dur, batch,);
           }
         }
       }
@@ -206,32 +184,12 @@ mod tests {
 
   // ── Helpers ──
 
-  fn build_cost(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-  ) -> crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate {
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::HappyHorse1p0,
-      provider: RouterProvider::Artcraft,
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(video_batch_count),
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
+  fn build_cost(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16) -> crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate {
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::HappyHorse1p0, provider: RouterProvider::Artcraft, resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(video_batch_count), ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed")
   }
 
-  fn cost_cents(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-  ) -> u64 {
-    build_cost(resolution, duration_seconds, video_batch_count)
-      .cost_in_usd_cents
-      .unwrap()
+  fn cost_cents(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16) -> u64 {
+    build_cost(resolution, duration_seconds, video_batch_count).cost_in_usd_cents.unwrap()
   }
 }

@@ -3,18 +3,8 @@ use errors::AnyhowResult;
 use tauri::window::Color;
 use tauri::{AppHandle, TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
 
-pub async fn setup_main_window(
-  app: &AppHandle,
-) -> AnyhowResult<()> {
-
-  let win_builder =
-      WebviewWindowBuilder::new(app, MAIN_WINDOW_NAME, WebviewUrl::default())
-          .title("ArtCraft")
-          .resizable(true)
-          .fullscreen(false)
-          .background_color(Color(0, 0, 0, 0))
-          .enable_clipboard_access()
-          .inner_size(2400.0, 1300.0);
+pub async fn setup_main_window(app: &AppHandle) -> AnyhowResult<()> {
+  let win_builder = WebviewWindowBuilder::new(app, MAIN_WINDOW_NAME, WebviewUrl::default()).title("ArtCraft").resizable(true).fullscreen(false).background_color(Color(0, 0, 0, 0)).enable_clipboard_access().inner_size(2400.0, 1300.0);
 
   #[cfg(target_os = "macos")]
   let win_builder = win_builder
@@ -31,8 +21,7 @@ pub async fn setup_main_window(
   // fixable another way, but for now it seems fine to disable this. There also seem to
   // be some performance loss with decorations(false), but I might be imagining it.
   #[cfg(target_os = "windows")]
-  let win_builder = win_builder
-      .decorations(false); // NB: This breaks Mac! (And breaks resize on Linux)
+  let win_builder = win_builder.decorations(false); // NB: This breaks Mac! (And breaks resize on Linux)
 
   // On macOS, Cmd+A/C/V/X/Z and friends are dispatched by AppKit through the application
   // menu. Without an Edit submenu containing the standard predefined items, these
@@ -49,49 +38,11 @@ pub async fn setup_main_window(
 fn install_macos_app_menu(app: &AppHandle) -> AnyhowResult<()> {
   use tauri::menu::{Menu, PredefinedMenuItem, Submenu};
 
-  let app_submenu = Submenu::with_items(
-    app,
-    "ArtCraft",
-    true,
-    &[
-      &PredefinedMenuItem::about(app, None, None)?,
-      &PredefinedMenuItem::separator(app)?,
-      &PredefinedMenuItem::services(app, None)?,
-      &PredefinedMenuItem::separator(app)?,
-      &PredefinedMenuItem::hide(app, None)?,
-      &PredefinedMenuItem::hide_others(app, None)?,
-      &PredefinedMenuItem::show_all(app, None)?,
-      &PredefinedMenuItem::separator(app)?,
-      &PredefinedMenuItem::quit(app, None)?,
-    ],
-  )?;
+  let app_submenu = Submenu::with_items(app, "ArtCraft", true, &[&PredefinedMenuItem::about(app, None, None)?, &PredefinedMenuItem::separator(app)?, &PredefinedMenuItem::services(app, None)?, &PredefinedMenuItem::separator(app)?, &PredefinedMenuItem::hide(app, None)?, &PredefinedMenuItem::hide_others(app, None)?, &PredefinedMenuItem::show_all(app, None)?, &PredefinedMenuItem::separator(app)?, &PredefinedMenuItem::quit(app, None)?])?;
 
-  let edit_submenu = Submenu::with_items(
-    app,
-    "Edit",
-    true,
-    &[
-      &PredefinedMenuItem::undo(app, None)?,
-      &PredefinedMenuItem::redo(app, None)?,
-      &PredefinedMenuItem::separator(app)?,
-      &PredefinedMenuItem::cut(app, None)?,
-      &PredefinedMenuItem::copy(app, None)?,
-      &PredefinedMenuItem::paste(app, None)?,
-      &PredefinedMenuItem::select_all(app, None)?,
-    ],
-  )?;
+  let edit_submenu = Submenu::with_items(app, "Edit", true, &[&PredefinedMenuItem::undo(app, None)?, &PredefinedMenuItem::redo(app, None)?, &PredefinedMenuItem::separator(app)?, &PredefinedMenuItem::cut(app, None)?, &PredefinedMenuItem::copy(app, None)?, &PredefinedMenuItem::paste(app, None)?, &PredefinedMenuItem::select_all(app, None)?])?;
 
-  let window_submenu = Submenu::with_items(
-    app,
-    "Window",
-    true,
-    &[
-      &PredefinedMenuItem::minimize(app, None)?,
-      &PredefinedMenuItem::maximize(app, None)?,
-      &PredefinedMenuItem::separator(app)?,
-      &PredefinedMenuItem::close_window(app, None)?,
-    ],
-  )?;
+  let window_submenu = Submenu::with_items(app, "Window", true, &[&PredefinedMenuItem::minimize(app, None)?, &PredefinedMenuItem::maximize(app, None)?, &PredefinedMenuItem::separator(app)?, &PredefinedMenuItem::close_window(app, None)?])?;
 
   let menu = Menu::with_items(app, &[&app_submenu, &edit_submenu, &window_submenu])?;
   app.set_menu(menu)?;

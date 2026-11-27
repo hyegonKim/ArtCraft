@@ -34,11 +34,7 @@ impl ArtcraftGrokImagineVideoCostState {
     let batch_count = request.request.video_batch_count.unwrap_or(1);
 
     // Mirror grok_api_client's input-image counting: start_frame + reference_images.
-    let input_image_count = (request.request.start_frame_image_media_token.is_some() as u64)
-      + (request.request.reference_image_media_tokens
-        .as_ref()
-        .map(|v| v.len() as u64)
-        .unwrap_or(0));
+    let input_image_count = (request.request.start_frame_image_media_token.is_some() as u64) + (request.request.reference_image_media_tokens.as_ref().map(|v| v.len() as u64).unwrap_or(0));
 
     Self { resolution, duration_seconds, batch_count, input_image_count }
   }
@@ -56,15 +52,7 @@ impl ArtcraftGrokImagineVideoCostState {
 
     let usd_cents = (video_cents + input_cents).ceil() as u64;
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(usd_cents),
-      cost_in_usd_cents: Some(usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(usd_cents), cost_in_usd_cents: Some(usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -111,10 +99,7 @@ mod tests {
 
     #[test]
     fn none_defaults_to_720p() {
-      assert_eq!(
-        cost_cents(None, 5, 1),
-        cost_cents(Some(RouterResolution::SevenTwentyP), 5, 1),
-      );
+      assert_eq!(cost_cents(None, 5, 1), cost_cents(Some(RouterResolution::SevenTwentyP), 5, 1),);
     }
   }
 
@@ -156,7 +141,7 @@ mod tests {
       // 720p 5s batch 1 = 45.5 + 0.26 (one start_frame) = 45.76 → ceil 46
       // Identical to the no-image case (45.5 → 46) because of ceil rounding.
       let with_img = cost_cents_with_images(Some(RouterResolution::SevenTwentyP), 5, 1, true, 0);
-      let no_img   = cost_cents_with_images(Some(RouterResolution::SevenTwentyP), 5, 1, false, 0);
+      let no_img = cost_cents_with_images(Some(RouterResolution::SevenTwentyP), 5, 1, false, 0);
       assert_eq!(with_img, 46);
       assert_eq!(no_img, 46);
     }
@@ -187,7 +172,7 @@ mod tests {
 
     #[test]
     fn cost_scales_with_duration() {
-      let c5  = cost_cents(Some(RouterResolution::SevenTwentyP), 5, 1);
+      let c5 = cost_cents(Some(RouterResolution::SevenTwentyP), 5, 1);
       let c10 = cost_cents(Some(RouterResolution::SevenTwentyP), 10, 1);
       let c15 = cost_cents(Some(RouterResolution::SevenTwentyP), 15, 1);
       assert!(c5 < c10);
@@ -211,20 +196,12 @@ mod tests {
 
     #[test]
     fn credits_equal_usd_cents_all_combos() {
-      let resolutions = [
-        Some(RouterResolution::FourEightyP),
-        Some(RouterResolution::SevenTwentyP),
-        None,
-      ];
+      let resolutions = [Some(RouterResolution::FourEightyP), Some(RouterResolution::SevenTwentyP), None];
       for res in resolutions {
         for dur in [4, 5, 10, 15] {
           for batch in [1, 2, 4] {
             let cost = build_cost(res, dur, batch);
-            assert_eq!(
-              cost.cost_in_credits, cost.cost_in_usd_cents,
-              "credits should equal cents for res={:?} dur={}s batch={}",
-              res, dur, batch,
-            );
+            assert_eq!(cost.cost_in_credits, cost.cost_in_usd_cents, "credits should equal cents for res={:?} dur={}s batch={}", res, dur, batch,);
           }
         }
       }
@@ -233,68 +210,20 @@ mod tests {
 
   // ── Helpers ──
 
-  fn build_cost(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-  ) -> VideoGenerationCostEstimate {
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::GrokImagineVideo,
-      provider: RouterProvider::Artcraft,
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(video_batch_count),
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
+  fn build_cost(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16) -> VideoGenerationCostEstimate {
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::GrokImagineVideo, provider: RouterProvider::Artcraft, resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(video_batch_count), ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed")
   }
 
-  fn cost_cents(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-  ) -> u64 {
-    build_cost(resolution, duration_seconds, video_batch_count)
-      .cost_in_usd_cents
-      .unwrap()
+  fn cost_cents(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16) -> u64 {
+    build_cost(resolution, duration_seconds, video_batch_count).cost_in_usd_cents.unwrap()
   }
 
-  fn cost_cents_with_images(
-    resolution: Option<RouterResolution>,
-    duration_seconds: u16,
-    video_batch_count: u16,
-    has_start_frame: bool,
-    extra_reference_images: usize,
-  ) -> u64 {
-    let start_frame = if has_start_frame {
-      Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_start".to_string())))
-    } else { None };
-    let reference_images = if extra_reference_images > 0 {
-      Some(ImageListRef::MediaFileTokens(
-        (0..extra_reference_images)
-          .map(|i| MediaFileToken::new(format!("mf_ref_{i}")))
-          .collect(),
-      ))
-    } else { None };
+  fn cost_cents_with_images(resolution: Option<RouterResolution>, duration_seconds: u16, video_batch_count: u16, has_start_frame: bool, extra_reference_images: usize) -> u64 {
+    let start_frame = if has_start_frame { Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_start".to_string()))) } else { None };
+    let reference_images = if extra_reference_images > 0 { Some(ImageListRef::MediaFileTokens((0..extra_reference_images).map(|i| MediaFileToken::new(format!("mf_ref_{i}"))).collect())) } else { None };
 
-    let builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::GrokImagineVideo,
-      provider: RouterProvider::Artcraft,
-      resolution,
-      duration_seconds: Some(duration_seconds),
-      video_batch_count: Some(video_batch_count),
-      start_frame,
-      reference_images,
-      ..Default::default()
-    };
-    builder.build2()
-      .expect("build2 should succeed")
-      .estimate_cost()
-      .expect("estimate_cost should succeed")
-      .cost_in_usd_cents
-      .unwrap()
+    let builder = GenerateVideoRequestBuilder { model: RouterVideoModel::GrokImagineVideo, provider: RouterProvider::Artcraft, resolution, duration_seconds: Some(duration_seconds), video_batch_count: Some(video_batch_count), start_frame, reference_images, ..Default::default() };
+    builder.build2().expect("build2 should succeed").estimate_cost().expect("estimate_cost should succeed").cost_in_usd_cents.unwrap()
   }
 }

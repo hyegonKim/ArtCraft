@@ -40,8 +40,6 @@ pub struct PixverseV5TextToVideoOutput {
   pub video: PixverseV5TextToVideoVideoFile,
 }
 
-pub fn pixverse_v5_text_to_video(
-  params: PixverseV5TextToVideoInput,
-) -> FalRequest<PixverseV5TextToVideoInput, PixverseV5TextToVideoOutput> {
+pub fn pixverse_v5_text_to_video(params: PixverseV5TextToVideoInput) -> FalRequest<PixverseV5TextToVideoInput, PixverseV5TextToVideoOutput> {
   FalRequest::new("fal-ai/pixverse/v5/text-to-video", params)
 }

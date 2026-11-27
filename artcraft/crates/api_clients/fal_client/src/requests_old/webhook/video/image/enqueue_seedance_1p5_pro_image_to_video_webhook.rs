@@ -69,16 +69,14 @@ impl FalRequestCostCalculator for EnqueueSeedance1p5ProImageToVideoRequest {
     let audio = self.generate_audio.unwrap_or(true);
     let dollars_per_million_tokens = if audio { 2.4 } else { 1.2 };
 
-    if resolution == EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP
-        && duration == EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds
-    {
+    if resolution == EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP && duration == EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds {
       return if audio { 26 } else { 13 };
     }
 
     // TODO: Only correct for some aspect ratios for now.
     let (width, height) = match resolution {
       EnqueueSeedance1p5ProImageToVideoResolution::FourEightyP => (640u32, 480u32), // NB: Only for 4:3 !
-      EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP => (1280, 720), // NB: Only for 16:9 !
+      EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP => (1280, 720),     // NB: Only for 16:9 !
       EnqueueSeedance1p5ProImageToVideoResolution::TenEightyP => (1920, 1080),
     };
 
@@ -109,63 +107,49 @@ impl FalRequestCostCalculator for EnqueueSeedance1p5ProImageToVideoRequest {
 
 /// Seedance 1.5 Pro Image-to-Video
 /// https://fal.ai/models/fal-ai/bytedance/seedance/v1.5/pro/image-to-video
-pub async fn enqueue_seedance_1p5_pro_image_to_video_webhook<R: IntoUrl>(
-  args: EnqueueSeedance1p5ProImageToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_seedance_1p5_pro_image_to_video_webhook<R: IntoUrl>(args: EnqueueSeedance1p5ProImageToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|d| match d {
-        EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds => "4",
-        EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds => "5",
-        EnqueueSeedance1p5ProImageToVideoDuration::SixSeconds => "6",
-        EnqueueSeedance1p5ProImageToVideoDuration::SevenSeconds => "7",
-        EnqueueSeedance1p5ProImageToVideoDuration::EightSeconds => "8",
-        EnqueueSeedance1p5ProImageToVideoDuration::NineSeconds => "9",
-        EnqueueSeedance1p5ProImageToVideoDuration::TenSeconds => "10",
-        EnqueueSeedance1p5ProImageToVideoDuration::ElevenSeconds => "11",
-        EnqueueSeedance1p5ProImageToVideoDuration::TwelveSeconds => "12",
-      })
-      .map(|d| d.to_string());
+  let duration = req
+    .duration
+    .map(|d| match d {
+      EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds => "4",
+      EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds => "5",
+      EnqueueSeedance1p5ProImageToVideoDuration::SixSeconds => "6",
+      EnqueueSeedance1p5ProImageToVideoDuration::SevenSeconds => "7",
+      EnqueueSeedance1p5ProImageToVideoDuration::EightSeconds => "8",
+      EnqueueSeedance1p5ProImageToVideoDuration::NineSeconds => "9",
+      EnqueueSeedance1p5ProImageToVideoDuration::TenSeconds => "10",
+      EnqueueSeedance1p5ProImageToVideoDuration::ElevenSeconds => "11",
+      EnqueueSeedance1p5ProImageToVideoDuration::TwelveSeconds => "12",
+    })
+    .map(|d| d.to_string());
 
-  let resolution = req.resolution
-      .map(|r| match r {
-        EnqueueSeedance1p5ProImageToVideoResolution::FourEightyP => "480p",
-        EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP => "720p",
-        EnqueueSeedance1p5ProImageToVideoResolution::TenEightyP => "1080p",
-      })
-      .map(|r| r.to_string());
+  let resolution = req
+    .resolution
+    .map(|r| match r {
+      EnqueueSeedance1p5ProImageToVideoResolution::FourEightyP => "480p",
+      EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP => "720p",
+      EnqueueSeedance1p5ProImageToVideoResolution::TenEightyP => "1080p",
+    })
+    .map(|r| r.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|ar| match ar {
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::TwentyOneByNine => "21:9",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine => "16:9",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::FourByThree => "4:3",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::Square => "1:1",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::ThreeByFour => "3:4",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::NineBySixteen => "9:16",
-        EnqueueSeedance1p5ProImageToVideoAspectRatio::Auto => "auto",
-      })
-      .map(|ar| ar.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|ar| match ar {
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::TwentyOneByNine => "21:9",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine => "16:9",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::FourByThree => "4:3",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::Square => "1:1",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::ThreeByFour => "3:4",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::NineBySixteen => "9:16",
+      EnqueueSeedance1p5ProImageToVideoAspectRatio::Auto => "auto",
+    })
+    .map(|ar| ar.to_string());
 
-  let request = Seedance1p5ProImageToVideoInput {
-    prompt: req.prompt,
-    image_url: req.image_url,
-    end_image_url: req.end_image_url,
-    duration,
-    resolution,
-    aspect_ratio,
-    camera_fixed: None,
-    seed: None,
-    enable_safety_checker: Some(false),
-    generate_audio: Some(req.generate_audio.unwrap_or(true)),
-  };
+  let request = Seedance1p5ProImageToVideoInput { prompt: req.prompt, image_url: req.image_url, end_image_url: req.end_image_url, duration, resolution, aspect_ratio, camera_fixed: None, seed: None, enable_safety_checker: Some(false), generate_audio: Some(req.generate_audio.unwrap_or(true)) };
 
-  let result = seedance_1p5_pro_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = seedance_1p5_pro_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -182,15 +166,7 @@ mod tests {
 
   #[test]
   fn test_cost() {
-    let mut req = EnqueueSeedance1p5ProImageToVideoRequest {
-      prompt: String::new(),
-      image_url: String::new(),
-      end_image_url: None,
-      duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds),
-      resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP),
-      aspect_ratio: None,
-      generate_audio: None,
-    };
+    let mut req = EnqueueSeedance1p5ProImageToVideoRequest { prompt: String::new(), image_url: String::new(), end_image_url: None, duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds), resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP), aspect_ratio: None, generate_audio: None };
 
     // NB: Constant value specified by Fal
     let cost = req.calculate_cost_in_cents();
@@ -215,15 +191,7 @@ mod tests {
 
   #[test]
   fn test_cost_audio_off() {
-    let mut req = EnqueueSeedance1p5ProImageToVideoRequest {
-      prompt: String::new(),
-      image_url: String::new(),
-      end_image_url: None,
-      duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds),
-      resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP),
-      aspect_ratio: None,
-      generate_audio: Some(false),
-    };
+    let mut req = EnqueueSeedance1p5ProImageToVideoRequest { prompt: String::new(), image_url: String::new(), end_image_url: None, duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds), resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP), aspect_ratio: None, generate_audio: Some(false) };
 
     // 720p 5s without audio = half of 26
     let cost = req.calculate_cost_in_cents();
@@ -252,19 +220,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueSeedance1p5ProImageToVideoArgs {
-      request: EnqueueSeedance1p5ProImageToVideoRequest {
-        image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-        prompt: "the t-rex skeleton gets off the podium and begins walking to the camera".to_string(),
-        duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds),
-        aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine),
-        resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP),
-        end_image_url: None,
-        generate_audio: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueSeedance1p5ProImageToVideoArgs { request: EnqueueSeedance1p5ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the t-rex skeleton gets off the podium and begins walking to the camera".to_string(), duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FiveSeconds), aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine), resolution: Some(EnqueueSeedance1p5ProImageToVideoResolution::SevenTwentyP), end_image_url: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_seedance_1p5_pro_image_to_video_webhook(args).await?;
     println!("result: {:?}", result);
@@ -280,19 +236,7 @@ mod tests {
 
     for ar in EnqueueSeedance1p5ProImageToVideoAspectRatio::iter() {
       println!("--- aspect ratio: {:?} ---", ar);
-      let args = EnqueueSeedance1p5ProImageToVideoArgs {
-        request: EnqueueSeedance1p5ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton comes alive and roars at the camera".to_string(),
-          duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds),
-          aspect_ratio: Some(ar),
-          resolution: None,
-          end_image_url: None,
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProImageToVideoArgs { request: EnqueueSeedance1p5ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton comes alive and roars at the camera".to_string(), duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds), aspect_ratio: Some(ar), resolution: None, end_image_url: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -308,19 +252,7 @@ mod tests {
 
     for dur in EnqueueSeedance1p5ProImageToVideoDuration::iter() {
       println!("--- duration: {:?} ---", dur);
-      let args = EnqueueSeedance1p5ProImageToVideoArgs {
-        request: EnqueueSeedance1p5ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton slowly turns its head".to_string(),
-          duration: Some(dur),
-          aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine),
-          resolution: None,
-          end_image_url: None,
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProImageToVideoArgs { request: EnqueueSeedance1p5ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton slowly turns its head".to_string(), duration: Some(dur), aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine), resolution: None, end_image_url: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }
@@ -336,19 +268,7 @@ mod tests {
 
     for res in EnqueueSeedance1p5ProImageToVideoResolution::iter() {
       println!("--- resolution: {:?} ---", res);
-      let args = EnqueueSeedance1p5ProImageToVideoArgs {
-        request: EnqueueSeedance1p5ProImageToVideoRequest {
-          image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-          prompt: "the skeleton slowly comes alive".to_string(),
-          duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds),
-          aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine),
-          resolution: Some(res),
-          end_image_url: None,
-          generate_audio: None,
-        },
-        api_key: &api_key,
-        webhook_url: "https://example.com/webhook",
-      };
+      let args = EnqueueSeedance1p5ProImageToVideoArgs { request: EnqueueSeedance1p5ProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the skeleton slowly comes alive".to_string(), duration: Some(EnqueueSeedance1p5ProImageToVideoDuration::FourSeconds), aspect_ratio: Some(EnqueueSeedance1p5ProImageToVideoAspectRatio::SixteenByNine), resolution: Some(res), end_image_url: None, generate_audio: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
       let result = enqueue_seedance_1p5_pro_image_to_video_webhook(args).await?;
       println!("result: {:?}", result);
     }

@@ -49,18 +49,16 @@ pub enum ImageInpaintModel {
   /*
    * Mask-based inpainting models
    */
-  
   #[serde(rename = "flux_dev_juggernaut")]
   FluxDevJuggernaut,
-  
+
   #[serde(rename = "flux_pro_1")]
   FluxPro1,
 
-  /* 
+  /*
    * Non-inpainting, instructive editing models
    * NB: We're supporting these to keep the app simple and not over-complicate the javascript
    */
-  
   #[serde(rename = "flux_pro_kontext_max")]
   FluxProKontextMax,
 
@@ -97,10 +95,10 @@ pub struct EnqueueInpaintImageCommand {
   /// Number of images to generate.
   pub image_count: Option<u32>,
 
-  /// Quality. 
+  /// Quality.
   /// Tends to be used by OpenAI models.
   pub quality: Option<CommonQuality>,
-  
+
   /// If true, force the dimensions of the source image and mask image to match.
   pub require_matching_dimensions: Option<bool>,
 
@@ -140,7 +138,7 @@ pub enum EnqueueInpaintImageErrorType {
 
   /// Bad mask image was supplied.
   BadMaskImage,
-  
+
   /// Generic bad request error
   BadRequest,
 
@@ -149,45 +147,20 @@ pub enum EnqueueInpaintImageErrorType {
 }
 
 #[derive(Serialize)]
-pub struct EnqueueImageInpaintSuccessResponse {
-}
+pub struct EnqueueImageInpaintSuccessResponse {}
 
 impl SerializeMarker for EnqueueImageInpaintSuccessResponse {}
 
 #[tauri::command]
-pub async fn enqueue_image_inpaint_command(
-  app: AppHandle,
-  request: EnqueueInpaintImageCommand,
-  app_data_root: State<'_, AppDataRoot>,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>,
-  provider_priority_store: State<'_, ProviderPriorityStore>,
-  task_database: State<'_, TaskDatabase>,
-  storyteller_creds_manager: State<'_, StorytellerCredentialManager>,
-  sora_creds_manager: State<'_, SoraCredentialManager>,
-  sora_task_queue: State<'_, SoraTaskQueue>,
-) -> ResponseOrErrorType<EnqueueImageInpaintSuccessResponse, EnqueueInpaintImageErrorType> {
+pub async fn enqueue_image_inpaint_command(app: AppHandle, request: EnqueueInpaintImageCommand, app_data_root: State<'_, AppDataRoot>, app_env_configs: State<'_, AppEnvConfigs>, artcraft_usage_tracker: State<'_, ArtcraftUsageTracker>, provider_priority_store: State<'_, ProviderPriorityStore>, task_database: State<'_, TaskDatabase>, storyteller_creds_manager: State<'_, StorytellerCredentialManager>, sora_creds_manager: State<'_, SoraCredentialManager>, sora_task_queue: State<'_, SoraTaskQueue>) -> ResponseOrErrorType<EnqueueImageInpaintSuccessResponse, EnqueueInpaintImageErrorType> {
+  info!("enqueue_image_inpaint_command called; model: {:?}, image_media_token: {:?}, prompt: {:?}, image_count: {:?}", &request.model, &request.image_media_token, &request.prompt, &request.image_count);
 
-  info!("enqueue_image_inpaint_command called; model: {:?}, image_media_token: {:?}, prompt: {:?}, image_count: {:?}",
-    &request.model, &request.image_media_token, &request.prompt, &request.image_count);
-
-  let result = handle_request(
-    &request,
-    &app,
-    &app_data_root,
-    &app_env_configs,
-    &artcraft_usage_tracker,
-    &provider_priority_store,
-    &task_database,
-    &storyteller_creds_manager,
-    &sora_creds_manager,
-    &sora_task_queue,
-  ).await;
+  let result = handle_request(&request, &app, &app_data_root, &app_env_configs, &artcraft_usage_tracker, &provider_priority_store, &task_database, &storyteller_creds_manager, &sora_creds_manager, &sora_task_queue).await;
 
   match result {
     Err(err) => {
       error!("Error enqueuing inpaint image: {:?}", err);
-      
+
       notify_frontend_of_errors(&app, &err).await;
 
       // TODO: Derive from err. Make service provider optional.
@@ -203,77 +176,37 @@ pub async fn enqueue_image_inpaint_command(
       }
 
       Err(error_to_tauri_response(err))
-    }
+    },
     Ok(event) => {
-      let event = GenerationEnqueueSuccessEvent {
-        action: event.to_frontend_event_action(),
-        service: event.to_frontend_event_service(),
-        model: event.model,
-      };
+      let event = GenerationEnqueueSuccessEvent { action: event.to_frontend_event_action(), service: event.to_frontend_event_service(), model: event.model };
 
       if let Err(err) = event.send(&app) {
         error!("Failed to emit event: {:?}", err); // Fail open.
       }
 
-      CreditsBalanceChangedEvent{}.send_infallible(&app);
+      CreditsBalanceChangedEvent {}.send_infallible(&app);
 
       Ok(EnqueueImageInpaintSuccessResponse {}.into())
-    }
+    },
   }
 }
 
-pub async fn handle_request(
-  request: &EnqueueInpaintImageCommand,
-  app: &AppHandle,
-  app_data_root: &AppDataRoot,
-  app_env_configs: &AppEnvConfigs,
-  artcraft_usage_tracker: &ArtcraftUsageTracker,
-  provider_priority_store: &ProviderPriorityStore,
-  task_database: &TaskDatabase,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  sora_creds_manager: &SoraCredentialManager,
-  sora_task_queue: &SoraTaskQueue,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-
+pub async fn handle_request(request: &EnqueueInpaintImageCommand, app: &AppHandle, app_data_root: &AppDataRoot, app_env_configs: &AppEnvConfigs, artcraft_usage_tracker: &ArtcraftUsageTracker, provider_priority_store: &ProviderPriorityStore, task_database: &TaskDatabase, storyteller_creds_manager: &StorytellerCredentialManager, sora_creds_manager: &SoraCredentialManager, sora_task_queue: &SoraTaskQueue) -> Result<TaskEnqueueSuccess, GenerateError> {
   let model = match request.model {
     Some(model) => model,
-    None => {
-      return Err(GenerateError::no_model_specified())
-    }
+    None => return Err(GenerateError::no_model_specified()),
   };
 
-  let provider = request.provider
-      .unwrap_or(GenerationProvider::Artcraft);
+  let provider = request.provider.unwrap_or(GenerationProvider::Artcraft);
 
   info!("image inpaint with {:?} via provider {:?}", &model, &provider);
 
   let success_event = match provider {
-    GenerationProvider::Artcraft => {
-      handle_inpaint_artcraft(
-        model,
-        request,
-        app,
-        app_data_root,
-        app_env_configs,
-        storyteller_creds_manager,
-      ).await?
-    }
-    _ => {
-      return Err(GenerateError::BadProviderForModel {
-        provider,
-        model: image_inpaint_model_to_model_type(model),
-      })
-    }
+    GenerationProvider::Artcraft => handle_inpaint_artcraft(model, request, app, app_data_root, app_env_configs, storyteller_creds_manager).await?,
+    _ => return Err(GenerateError::BadProviderForModel { provider, model: image_inpaint_model_to_model_type(model) }),
   };
 
-  let result = success_event
-      .insert_into_task_database_with_frontend_payload(
-        task_database,
-        request.frontend_caller,
-        request.frontend_subscriber_id.as_deref(),
-        request.frontend_subscriber_payload.as_deref()
-      )
-      .await;
+  let result = success_event.insert_into_task_database_with_frontend_payload(task_database, request.frontend_caller, request.frontend_subscriber_id.as_deref(), request.frontend_subscriber_payload.as_deref()).await;
 
   if let Err(err) = result {
     error!("Failed to create task in database: {:?}", err);
@@ -300,49 +233,44 @@ pub fn error_to_tauri_response(error: GenerateError) -> CommandErrorResponseWrap
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::ModelNotSpecified;
       error_message = "No model specified for image generation".to_string();
-    }
+    },
     GenerateError::NoProviderAvailable => {
       status = CommandErrorStatus::ServerError;
       error_type = EnqueueInpaintImageErrorType::NoProviderAvailable;
       error_message = "No configured provider available for image generation".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::RequiredSourceImageNotProvided) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::NoSourceImageSpecified;
       error_message = "No source image was provided".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::RequiredSourceImageMaskNotProvided) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::NoMaskImageSpecified;
       error_message = "No mask image was provided".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::BothImageMaskMediaTokenAndBytesSupplied) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::MultipleMaskImagesSpecified;
       error_message = "multiple mask images provided".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::CannotDetermineImageMimeType) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::BadMaskImage;
       error_message = "bad mask image (mime)".to_string();
-    }
+    },
     GenerateError::BadInput(BadInputReason::InvalidNumberOfRequestedImages { min, max, requested }) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::BadRequest;
       error_message = format!("Invalid number of images requested ({}). Must be between {} and {}", requested, min, max);
-    }
-    GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages{  min, max, provided }) => {
+    },
+    GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages { min, max, provided }) => {
       status = CommandErrorStatus::BadRequest;
       error_type = EnqueueInpaintImageErrorType::BadRequest;
       error_message = format!("Invalid number of input images ({}). Must be between {} and {}", provided, min, max);
-    }
+    },
     _ => {}, // Other cases fall through.
   }
 
-  CommandErrorResponseWrapper {
-    status,
-    error_message: Some(error_message.to_string()),
-    error_type: Some(error_type),
-    error_details: None,
-  }
+  CommandErrorResponseWrapper { status, error_message: Some(error_message.to_string()), error_type: Some(error_type), error_details: None }
 }

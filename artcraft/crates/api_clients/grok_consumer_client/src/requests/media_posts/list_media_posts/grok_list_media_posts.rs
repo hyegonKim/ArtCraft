@@ -42,7 +42,7 @@ pub struct MediaPost {
   pub post_id: PostId,
 
   /// Only populated if there's a video and all the video data is present.
-  pub video_data: Option<VideoData>
+  pub video_data: Option<VideoData>,
 }
 
 #[derive(Debug, Clone)]
@@ -52,15 +52,11 @@ pub struct VideoData {
   pub prompt: Option<String>,
 }
 
-impl <'a> GrokMediaPostListRequest<'a> {
-
+impl<'a> GrokMediaPostListRequest<'a> {
   pub async fn send(&self) -> Result<GrokMediaPostList, GrokError> {
     info!("Configuring client...");
 
-    let client = Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?;
+    let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?;
 
     // TODO: Headers were from Chromium, not Firefox. Partial implementation.
     let mut request_builder = client.post(MEDIA_LIST_URL)
@@ -94,35 +90,24 @@ impl <'a> GrokMediaPostListRequest<'a> {
       request_builder = request_builder.timeout(timeout);
     }
 
-    let request_body = MediaPostListRawRequest {
-      limit: 40,
-      filter: FilterData {
-        source: "MEDIA_POST_SOURCE_LIKED".to_string(),
-      },
-    };
+    let request_body = MediaPostListRawRequest { limit: 40, filter: FilterData { source: "MEDIA_POST_SOURCE_LIKED".to_string() } };
 
-    let http_request = request_builder.json(&request_body)
-        .build()
-        .map_err(|err| {
-          error!("Error building create media request: {:?}", err);
-          GrokClientError::WreqClientError(err)
-        })?;
+    let http_request = request_builder.json(&request_body).build().map_err(|err| {
+      error!("Error building create media request: {:?}", err);
+      GrokClientError::WreqClientError(err)
+    })?;
 
-    let response = client.execute(http_request)
-        .await
-        .map_err(|err| {
-          error!("Error during create media: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response = client.execute(http_request).await.map_err(|err| {
+      error!("Error during create media: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     let status = response.status();
 
-    let response_body = response.text()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok create media response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response_body = response.text().await.map_err(|err| {
+      error!("Error reading Grok create media response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     // TODO: Handle errors (Cloudflare, Grok, etc.)
     if !status.is_success() {
@@ -130,8 +115,7 @@ impl <'a> GrokMediaPostListRequest<'a> {
       //return Err(classify_general_http_status_code_and_body(status, response_body));
     }
 
-    let response : PostListRawResponse = serde_json::from_str(&response_body)
-        .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+    let response: PostListRawResponse = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
     let mut posts = Vec::new();
 
@@ -158,25 +142,15 @@ impl <'a> GrokMediaPostListRequest<'a> {
               maybe_video_prompt = maybe_parent_prompt.clone();
             }
 
-            video_data = Some(VideoData {
-              file_id: FileId(child.id),
-              video_url: url,
-              prompt: maybe_video_prompt,
-            });
+            video_data = Some(VideoData { file_id: FileId(child.id), video_url: url, prompt: maybe_video_prompt });
           }
         }
       }
 
-      posts.push(MediaPost {
-        post_id: PostId(post_id),
-        video_data,
-      })
+      posts.push(MediaPost { post_id: PostId(post_id), video_data })
     }
 
-    Ok(GrokMediaPostList {
-      posts,
-      next_cursor: response.next_cursor,
-    })
+    Ok(GrokMediaPostList { posts, next_cursor: response.next_cursor })
   }
 }
 
@@ -187,7 +161,6 @@ pub fn empty_to_none(opt: Option<String>) -> Option<String> {
     _ => opt,
   }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -204,11 +177,7 @@ mod tests {
 
     let cookies = get_test_cookies()?;
 
-    let request = GrokMediaPostListRequest {
-      cookie: &cookies,
-      request_timeout: None,
-      cursor: None,
-    };
+    let request = GrokMediaPostListRequest { cookie: &cookies, request_timeout: None, cursor: None };
 
     let result = request.send().await?;
 

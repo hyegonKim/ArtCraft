@@ -31,39 +31,20 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 
     ui.horizontal(|ui| {
         widgets::dim_label(ui, tl!("Search:"));
-        let r = ui.add(
-            egui::TextEdit::singleline(&mut query)
-                .hint_text(tl!("Search icons…"))
-                .desired_width((ui.available_width() - 8.0).max(80.0)),
-        );
+        let r = ui.add(egui::TextEdit::singleline(&mut query).hint_text(tl!("Search icons…")).desired_width((ui.available_width() - 8.0).max(80.0)));
         if r.changed() {
             ui.data_mut(|d| d.insert_temp(query_id, query.clone()));
         }
     });
 
     ui.add_space(4.0);
-    let cat_labels = [
-        tl!("All"),
-        tl!("UI"),
-        tl!("Arrows"),
-        tl!("Media"),
-        tl!("Files"),
-        tl!("Commerce"),
-        tl!("Badges"),
-    ];
-    let cat_idx = ICON_CATEGORIES
-        .iter()
-        .position(|c| c.eq_ignore_ascii_case(&category))
-        .map_or(0, |i| i + 1);
+    let cat_labels = [tl!("All"), tl!("UI"), tl!("Arrows"), tl!("Media"), tl!("Files"), tl!("Commerce"), tl!("Badges")];
+    let cat_idx = ICON_CATEGORIES.iter().position(|c| c.eq_ignore_ascii_case(&category)).map_or(0, |i| i + 1);
 
     ui.horizontal(|ui| {
         widgets::dim_label(ui, tl!("Category:"));
         if let Some(picked) = widgets::dropdown(ui, "icons-cat", cat_labels[cat_idx], &cat_labels, 108.0) {
-            category = if picked == 0 {
-                String::new()
-            } else {
-                ICON_CATEGORIES.get(picked - 1).copied().unwrap_or_default().to_string()
-            };
+            category = if picked == 0 { String::new() } else { ICON_CATEGORIES.get(picked - 1).copied().unwrap_or_default().to_string() };
             ui.data_mut(|d| d.insert_temp(cat_id, category.clone()));
         }
         if let Some(sz) = widgets::range_field(ui, "icons-size", insert_size, 8.0..=256.0, " pt", 0, 56.0) {
@@ -155,10 +136,7 @@ pub fn menu(app: &mut VectorcraftApp, ui: &mut Ui) {
     if widgets::menu_item(ui, tl!("Batch Export…"), can_folder, false) {
         picks::button(app, |app| {
             if let Some(dir) = picks::folder(app)
-                && let Err(e) = app.run(
-                    "icon.exportBatch",
-                    json!({"dir": dir, "sizes": [16, 24, 32, 48, 64, 128], "formats": ["svg", "png"]}),
-                )
+                && let Err(e) = app.run("icon.exportBatch", json!({"dir": dir, "sizes": [16, 24, 32, 48, 64, 128], "formats": ["svg", "png"]}))
             {
                 app.status(e);
             }
@@ -188,10 +166,7 @@ fn draw_icon_tile(ui: &mut Ui, name: &str, label: &str, enabled: bool, side: f32
 
 fn paint_icon_bez(ui: &Ui, target: Rect, bez: &vectorcraft_geom::BezPath, stroke: Stroke) {
     let map_pt = |p: vectorcraft_geom::Point| -> Pos2 {
-        Pos2::new(
-            target.left() + (p.x as f32 / 24.0) * target.width(),
-            target.top() + (p.y as f32 / 24.0) * target.height(),
-        )
+        Pos2::new(target.left() + (p.x as f32 / 24.0) * target.width(), target.top() + (p.y as f32 / 24.0) * target.height())
     };
     let mut start = Pos2::ZERO;
     let mut cur = Pos2::ZERO;
@@ -230,10 +205,7 @@ fn paint_icon_bez(ui: &Ui, target: Rect, bez: &vectorcraft_geom::BezPath, stroke
                     let b1 = 3.0 * inv * inv * u;
                     let b2 = 3.0 * inv * u * u;
                     let b3 = u * u * u;
-                    let pt = Pos2::new(
-                        b0 * cur.x + b1 * p1.x + b2 * p2.x + b3 * end.x,
-                        b0 * cur.y + b1 * p1.y + b2 * p2.y + b3 * end.y,
-                    );
+                    let pt = Pos2::new(b0 * cur.x + b1 * p1.x + b2 * p2.x + b3 * end.x, b0 * cur.y + b1 * p1.y + b2 * p2.y + b3 * end.y);
                     ui.painter().line_segment([prev, pt], stroke);
                     prev = pt;
                 }
@@ -269,13 +241,7 @@ mod tests {
 
         let entries = crate::menus::menu_entries(&app);
         assert!(entries.iter().any(|e| e.label == "Icons" && e.params.get("panel").and_then(|v| v.as_str()) == Some(ID)));
-        for cmd in [
-            "document.preflight",
-            "object.turntable",
-            "icon.generateSheet",
-            "object.generativeShapeFill",
-            "type.reversePathDirection",
-        ] {
+        for cmd in ["document.preflight", "object.turntable", "icon.generateSheet", "object.generativeShapeFill", "type.reversePathDirection"] {
             assert!(entries.iter().any(|e| e.command.as_deref() == Some(cmd)), "missing menu entry for {cmd}");
         }
 

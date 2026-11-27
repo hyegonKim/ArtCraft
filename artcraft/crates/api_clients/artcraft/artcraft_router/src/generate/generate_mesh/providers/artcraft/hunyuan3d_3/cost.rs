@@ -31,9 +31,7 @@ impl ArtcraftHunyuan3d3CostState {
     if request.face_count.is_some() {
       cost += ADD_ON_COST_IN_USD_CENTS;
     }
-    let uses_multi_view = request.back_image_media_token.is_some()
-      || request.left_image_media_token.is_some()
-      || request.right_image_media_token.is_some();
+    let uses_multi_view = request.back_image_media_token.is_some() || request.left_image_media_token.is_some() || request.right_image_media_token.is_some();
     if uses_multi_view {
       cost += ADD_ON_COST_IN_USD_CENTS;
     }
@@ -42,15 +40,7 @@ impl ArtcraftHunyuan3d3CostState {
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
-    MeshGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    MeshGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -77,49 +67,32 @@ mod tests {
 
     #[test]
     fn normal_is_forty_nine_cents() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::Normal),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Normal), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49);
     }
 
     #[test]
     fn low_poly_is_fifty_nine_cents() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 59);
     }
 
     #[test]
     fn geometry_is_thirty_cents() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::Geometry),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Geometry), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 30);
     }
 
     #[test]
     fn text_mode_prices_the_same_as_image_mode() {
       // Text-only request (no image references).
-      let text_builder = GenerateMeshRequestBuilder {
-        model: RouterMeshModel::Hunyuan3d3,
-        provider: RouterProvider::Artcraft,
-        prompt: Some("a red ceramic teapot".to_string()),
-        ..Default::default()
-      };
+      let text_builder = GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3, provider: RouterProvider::Artcraft, prompt: Some("a red ceramic teapot".to_string()), ..Default::default() };
       assert_eq!(estimate_usd_cents(text_builder), 49);
     }
 
     #[test]
     fn polygon_type_does_not_change_the_price() {
-      let builder = GenerateMeshRequestBuilder {
-        polygon_type: Some(CommonPolygonType::Quad),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { polygon_type: Some(CommonPolygonType::Quad), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49);
     }
   }
@@ -129,28 +102,19 @@ mod tests {
 
     #[test]
     fn pbr_adds_twenty_cents() {
-      let builder = GenerateMeshRequestBuilder {
-        enable_pbr: Some(true),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { enable_pbr: Some(true), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49 + 20);
     }
 
     #[test]
     fn pbr_false_adds_nothing() {
-      let builder = GenerateMeshRequestBuilder {
-        enable_pbr: Some(false),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { enable_pbr: Some(false), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49);
     }
 
     #[test]
     fn face_count_adds_twenty_cents() {
-      let builder = GenerateMeshRequestBuilder {
-        face_count: Some(100_000),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { face_count: Some(100_000), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49 + 20);
     }
 
@@ -167,36 +131,19 @@ mod tests {
         assert_eq!(estimate_usd_cents(builder), 49 + 20, "for {side} image");
       }
 
-      let builder = GenerateMeshRequestBuilder {
-        back_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_back".to_string()))),
-        left_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_left".to_string()))),
-        right_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_right".to_string()))),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { back_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_back".to_string()))), left_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_left".to_string()))), right_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_right".to_string()))), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 49 + 20);
     }
 
     #[test]
     fn all_add_ons_stack() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-        enable_pbr: Some(true),
-        face_count: Some(100_000),
-        back_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_back".to_string()))),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), enable_pbr: Some(true), face_count: Some(100_000), back_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_back".to_string()))), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 59 + 20 + 20 + 20);
     }
 
     #[test]
     fn geometry_with_all_add_ons() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::Geometry),
-        enable_pbr: Some(true),
-        face_count: Some(10_000),
-        left_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_left".to_string()))),
-        ..base_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::Geometry), enable_pbr: Some(true), face_count: Some(10_000), left_image: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_left".to_string()))), ..base_builder() };
       assert_eq!(estimate_usd_cents(builder), 30 + 20 + 20 + 20);
     }
   }
@@ -204,22 +151,10 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3,
-      provider: RouterProvider::Artcraft,
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_front".to_string()),
-      ])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3, provider: RouterProvider::Artcraft, reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_front".to_string())])), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

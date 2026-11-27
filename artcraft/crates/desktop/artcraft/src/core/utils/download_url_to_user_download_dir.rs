@@ -12,33 +12,16 @@ use tempfile::NamedTempFile;
 use tokio::io::AsyncWriteExt;
 use url::Url;
 
-pub async fn download_url_to_user_download_dir(
-  url: &Url,
-  app_data_root: &AppDataRoot,
-  app_prefs: &AppPreferences,
-) -> Result<PathBuf, ArtcraftError> {
+pub async fn download_url_to_user_download_dir(url: &Url, app_data_root: &AppDataRoot, app_prefs: &AppPreferences) -> Result<PathBuf, ArtcraftError> {
   let filename = suggested_download_filename(url, app_prefs, None, None, Local::now());
-  let download_directory = app_prefs
-      .preferred_download_directory
-      .download_directory(app_data_root);
+  let download_directory = app_prefs.preferred_download_directory.download_directory(app_data_root);
   download_url_with_filename(url, &download_directory, &filename).await
 }
 
-pub fn suggested_download_filename(
-  url: &Url,
-  prefs: &AppPreferences,
-  maybe_model: Option<&str>,
-  maybe_batch_index: Option<usize>,
-  download_time: DateTime<Local>,
-) -> String {
+pub fn suggested_download_filename(url: &Url, prefs: &AppPreferences, maybe_model: Option<&str>, maybe_batch_index: Option<usize>, download_time: DateTime<Local>) -> String {
   let extension = Path::new(url.path()).extension().and_then(|ext| ext.to_str()).unwrap_or("bin");
   let model_slug = model_slug_from_model_type_str(maybe_model.unwrap_or("artcraft"));
-  prefs.preferred_download_filename.build_filename(&DownloadFilenameParts {
-    model_slug: &model_slug,
-    download_time,
-    maybe_batch_index,
-    extension,
-  })
+  prefs.preferred_download_filename.build_filename(&DownloadFilenameParts { model_slug: &model_slug, download_time, maybe_batch_index, extension })
 }
 
 /// Stream to a temporary file in the destination directory, then publish the
@@ -86,21 +69,12 @@ fn check_url_file_name_for_downloadability(filename: &str) -> Result<(), Artcraf
 
   PreferredDownloadFilename::validate_custom_format(filename).map_err(|err| anyhow!(err))?;
 
-  if filename.contains("/")
-      || filename.contains("..")
-      || filename.contains("\\")
-  {
+  if filename.contains("/") || filename.contains("..") || filename.contains("\\") {
     error!("Cannot download filename that has relative path components: {:?}", filename);
     return Err(ArtcraftError::BadDownloadFilename { path: filename.into() }.into());
   }
 
-  if filename.contains("'")
-      || filename.contains("\"")
-      || filename.contains("%")
-      || filename.contains("<")
-      || filename.contains(">")
-      || filename.contains("|")
-  {
+  if filename.contains("'") || filename.contains("\"") || filename.contains("%") || filename.contains("<") || filename.contains(">") || filename.contains("|") {
     error!("Download filename has dangerous path components: {:?}", filename);
     return Err(ArtcraftError::BadDownloadFilename { path: filename.into() }.into());
   }
@@ -116,7 +90,8 @@ fn check_url_file_name_for_downloadability(filename: &str) -> Result<(), Artcraf
       || filename.ends_with(".sh")
       || filename.ends_with(".so")
       || filename.ends_with("dll") // Don't even risk the '.'
-      || filename.ends_with("exe") // Don't even risk the '.'
+      || filename.ends_with("exe")
+  // Don't even risk the '.'
   {
     error!("Cannot download filename that resembles executable: {:?}", filename);
     return Err(ArtcraftError::BadDownloadFilename { path: filename.into() }.into());

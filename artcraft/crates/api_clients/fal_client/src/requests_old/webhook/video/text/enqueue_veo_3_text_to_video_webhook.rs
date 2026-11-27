@@ -2,12 +2,8 @@ use crate::creds::fal_api_key::FalApiKey;
 use crate::error::classify_fal_error::classify_fal_error;
 use crate::error::fal_error_plus::FalErrorPlus;
 use crate::requests::core_api::webhook_response::WebhookResponse;
-use crate::requests_old::http::video::text::http_veo_3_text_to_video::{
-  veo_3_text_to_video, Veo3TextToVideoInput,
-};
-use crate::requests::traits::fal_request_cost_calculator_trait::{
-  FalRequestCostCalculator, UsdCents,
-};
+use crate::requests_old::http::video::text::http_veo_3_text_to_video::{veo_3_text_to_video, Veo3TextToVideoInput};
+use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 use reqwest::IntoUrl;
 
 pub struct Veo3TextToVideoArgs<'a, V: IntoUrl> {
@@ -39,7 +35,7 @@ pub enum Veo3T2vDuration {
 /// Only 16:9 and 9:16 are supported. No Auto, no Square.
 #[derive(Copy, Clone, Debug)]
 pub enum Veo3T2vAspectRatio {
-  Default, // Default is 16:9
+  Default,         // Default is 16:9
   WideSixteenNine, // 16:9
   TallNineSixteen, // 9:16
 }
@@ -70,9 +66,7 @@ impl FalRequestCostCalculator for Veo3TextToVideoRequest {
 
 /// Veo 3 Text-to-Video
 /// https://fal.ai/models/fal-ai/veo3
-pub async fn enqueue_veo_3_text_to_video_webhook<V: IntoUrl>(
-  args: Veo3TextToVideoArgs<'_, V>,
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_veo_3_text_to_video_webhook<V: IntoUrl>(args: Veo3TextToVideoArgs<'_, V>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
@@ -94,19 +88,9 @@ pub async fn enqueue_veo_3_text_to_video_webhook<V: IntoUrl>(
     Veo3T2vResolution::TenEightyP => Some("1080p".to_string()),
   };
 
-  let request = Veo3TextToVideoInput {
-    prompt: req.prompt,
-    aspect_ratio,
-    resolution,
-    duration,
-    generate_audio: Some(req.generate_audio),
-    negative_prompt: req.negative_prompt,
-  };
+  let request = Veo3TextToVideoInput { prompt: req.prompt, aspect_ratio, resolution, duration, generate_audio: Some(req.generate_audio), negative_prompt: req.negative_prompt };
 
-  let result = veo_3_text_to_video(request)
-    .with_api_key(&args.api_key.0)
-    .queue_webhook(args.webhook_url)
-    .await;
+  let result = veo_3_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -114,10 +98,7 @@ pub async fn enqueue_veo_3_text_to_video_webhook<V: IntoUrl>(
 #[cfg(test)]
 mod tests {
   use crate::creds::fal_api_key::FalApiKey;
-  use crate::requests_old::webhook::video::text::enqueue_veo_3_text_to_video_webhook::{
-    enqueue_veo_3_text_to_video_webhook, Veo3TextToVideoArgs, Veo3TextToVideoRequest,
-    Veo3T2vAspectRatio, Veo3T2vDuration, Veo3T2vResolution,
-  };
+  use crate::requests_old::webhook::video::text::enqueue_veo_3_text_to_video_webhook::{enqueue_veo_3_text_to_video_webhook, Veo3TextToVideoArgs, Veo3TextToVideoRequest, Veo3T2vAspectRatio, Veo3T2vDuration, Veo3T2vResolution};
   use errors::AnyhowResult;
   use std::fs::read_to_string;
 
@@ -127,18 +108,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Veo3TextToVideoArgs {
-      request: Veo3TextToVideoRequest {
-        prompt: "a drone shot of a coastal sunset with waves crashing on rocks".to_string(),
-        negative_prompt: None,
-        duration: Veo3T2vDuration::EightSeconds,
-        aspect_ratio: Veo3T2vAspectRatio::WideSixteenNine,
-        resolution: Veo3T2vResolution::TenEightyP,
-        generate_audio: true,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Veo3TextToVideoArgs { request: Veo3TextToVideoRequest { prompt: "a drone shot of a coastal sunset with waves crashing on rocks".to_string(), negative_prompt: None, duration: Veo3T2vDuration::EightSeconds, aspect_ratio: Veo3T2vAspectRatio::WideSixteenNine, resolution: Veo3T2vResolution::TenEightyP, generate_audio: true }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let _result = enqueue_veo_3_text_to_video_webhook(args).await?;
     Ok(())

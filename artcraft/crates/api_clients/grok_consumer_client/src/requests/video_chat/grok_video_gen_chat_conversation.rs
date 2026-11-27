@@ -69,8 +69,7 @@ pub struct GrokVideoGenChatConversationPartialResponse {
   pub video_file_id: Option<FileId>,
 }
 
-impl <'a> GrokVideoGenChatConversationBuilder<'a> {
-
+impl<'a> GrokVideoGenChatConversationBuilder<'a> {
   /// Send the request and only wait long enough to get the video ID.
   pub async fn stream_only_video_id(&self) -> Result<GrokVideoGenChatConversationPartialResponse, GrokError> {
     info!("Configuring client and request...");
@@ -86,7 +85,7 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
     info!("Video Generation Enqueue Status: {:?}", status);
 
     let mut stream = response.bytes_stream();
-    
+
     let mut buffer = Vec::with_capacity(1024 * 1024);
 
     let mut file_id = None;
@@ -109,12 +108,9 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
         file_id = Some(id);
       }
     }
-    
-    Ok(GrokVideoGenChatConversationPartialResponse {
-      video_file_id: file_id,
-    })
-  }
 
+    Ok(GrokVideoGenChatConversationPartialResponse { video_file_id: file_id })
+  }
 
   pub async fn wait_for_video(&self) -> Result<GrokVideoGenChatConversationResponse, GrokError> {
     info!("Configuring client and request...");
@@ -144,12 +140,10 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
 
     /// TODO: Handle anti-bot detection
     /// Body: {"error":{"code":7,"message":"Request rejected by anti-bot rules.","details":[]}}
-    let response_body = response.text()
-        .await
-        .map_err(|err| {
-          error!("Error reading Grok create media response body: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response_body = response.text().await.map_err(|err| {
+      error!("Error reading Grok create media response body: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     info!("Read body.");
 
@@ -165,17 +159,11 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
 
     let file_id = parse_video_id(&response_body);
 
-    Ok(GrokVideoGenChatConversationResponse {
-      video_file_id: file_id,
-    })
+    Ok(GrokVideoGenChatConversationResponse { video_file_id: file_id })
   }
 
-
   fn build_client() -> Result<Client, GrokClientError> {
-    Ok(Client::builder()
-        .emulation(Emulation::Firefox143)
-        .build()
-        .map_err(|err| GrokClientError::WreqClientError(err))?)
+    Ok(Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| GrokClientError::WreqClientError(err))?)
   }
 
   fn build_request(&self, client: &Client) -> Result<Request, GrokClientError> {
@@ -185,13 +173,7 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
     debug!("xai_request_id (uuid) = {}", xai_request_id);
     debug!("sentry_trace = {}", sentry_trace_header);
 
-    let x_statsig_id = generate_xsid(GenerateXsidArgs {
-      path: "/rest/app-chat/conversations/new",
-      method: "POST",
-      verification_token: &self.verification_token,
-      svg_data: &self.svg_data,
-      numbers: &self.numbers,
-    })?;
+    let x_statsig_id = generate_xsid(GenerateXsidArgs { path: "/rest/app-chat/conversations/new", method: "POST", verification_token: &self.verification_token, svg_data: &self.svg_data, numbers: &self.numbers })?;
 
     debug!("x_statsig_id = {}", x_statsig_id);
 
@@ -234,17 +216,13 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
       VideoMediaPostType::Video => unimplemented!("implement for videos"),
     };
 
-    let mode_string = self.mode
-        .unwrap_or(VideoGenerationMode::Normal)
-        .as_api_mode_arg();
+    let mode_string = self.mode.unwrap_or(VideoGenerationMode::Normal).as_api_mode_arg();
 
     let mut prompt = format!("{media_url}  --mode={mode_string}");
 
     if let Some(user_prompt) = self.prompt {
       // If a text prompt is set, mode seems to typically be "custom".
-      let mode_string = self.mode
-          .unwrap_or(VideoGenerationMode::Custom)
-          .as_api_mode_arg();
+      let mode_string = self.mode.unwrap_or(VideoGenerationMode::Custom).as_api_mode_arg();
 
       prompt = format!("{media_url}  {user_prompt} --mode={mode_string}");
     }
@@ -262,12 +240,8 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
       temporary: true,
       model_name: "grok-3".to_string(),
       message: prompt,
-      file_attachments: vec![
-        self.file_id.0.to_string(),
-      ],
-      tool_overrides: ToolOverrides {
-        video_gen: true,
-      },
+      file_attachments: vec![self.file_id.0.to_string()],
+      tool_overrides: ToolOverrides { video_gen: true },
       response_metadata: ResponseMetadata {
         model_config_override: ModelConfigOverride {
           model_map: ModelMap {
@@ -281,36 +255,33 @@ impl <'a> GrokVideoGenChatConversationBuilder<'a> {
       },
     };
 
-    let http_request = request_builder.json(&request_body)
-        .build()
-        .map_err(|err| {
-          error!("Error building create media request: {:?}", err);
-          GrokClientError::WreqClientError(err)
-        })?;
+    let http_request = request_builder.json(&request_body).build().map_err(|err| {
+      error!("Error building create media request: {:?}", err);
+      GrokClientError::WreqClientError(err)
+    })?;
 
     Ok(http_request)
   }
 
   async fn send_request(client: &Client, request: Request) -> Result<Response, GrokError> {
-    let response = client.execute(request)
-        .await
-        .map_err(|err| {
-          error!("Error during create media: {:?}", err);
-          GrokGenericApiError::WreqError(err)
-        })?;
+    let response = client.execute(request).await.map_err(|err| {
+      error!("Error during create media: {:?}", err);
+      GrokGenericApiError::WreqError(err)
+    })?;
 
     let status = response.status();
 
     if !status.is_success() {
-      let maybe_body = response.text()
-          .await
-          .map_err(|err| {
-            error!("Error reading Grok video generation response body: {:?}", err);
-            err
-          })
-          .ok();
+      let maybe_body = response
+        .text()
+        .await
+        .map_err(|err| {
+          error!("Error reading Grok video generation response body: {:?}", err);
+          err
+        })
+        .ok();
 
-      return Err(categorize_grok_http_error(status, maybe_body.as_deref()))
+      return Err(categorize_grok_http_error(status, maybe_body.as_deref()));
     }
 
     Ok(response)
@@ -340,15 +311,9 @@ mod tests {
 
     let cookies = get_typed_test_cookies()?;
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
-    let upload_request = GrokUploadFile {
-      file: FileUploadSpec::Path(image_path),
-      cookie: cookies.to_string(),
-      request_timeout: None,
-    };
+    let upload_request = GrokUploadFile { file: FileUploadSpec::Path(image_path), cookie: cookies.to_string(), request_timeout: None };
 
     let upload_result = upload_request.upload().await?;
 
@@ -360,23 +325,7 @@ mod tests {
     println!("Svg Path: {:?}", secrets.svg_path_data);
     println!("Baggage: {:?}", secrets.baggage);
 
-    let request = GrokVideoGenChatConversationBuilder {
-      file_id: &file_id,
-      media_type: VideoMediaPostType::UserUploadedImage,
-      prompt: maybe_prompt,
-      mode: Some(VideoGenerationMode::Custom),
-      aspect_ratio: Some(AspectRatio::TallTwoByThree),
-
-      cookie: cookies.as_str(),
-      user_id: &secrets.user_id,
-      baggage: &secrets.baggage,
-      sentry_trace: &secrets.sentry_trace,
-      verification_token: &secrets.verification_token,
-      svg_data: &secrets.svg_path_data,
-      numbers: &secrets.numbers,
-
-      request_timeout: None,
-    };
+    let request = GrokVideoGenChatConversationBuilder { file_id: &file_id, media_type: VideoMediaPostType::UserUploadedImage, prompt: maybe_prompt, mode: Some(VideoGenerationMode::Custom), aspect_ratio: Some(AspectRatio::TallTwoByThree), cookie: cookies.as_str(), user_id: &secrets.user_id, baggage: &secrets.baggage, sentry_trace: &secrets.sentry_trace, verification_token: &secrets.verification_token, svg_data: &secrets.svg_path_data, numbers: &secrets.numbers, request_timeout: None };
 
     let result = request.wait_for_video().await?;
 
@@ -393,7 +342,6 @@ mod tests {
     Ok(())
   }
 
-
   #[tokio::test]
   #[ignore]
   async fn stream_video_id() -> AnyhowResult<()> {
@@ -404,15 +352,9 @@ mod tests {
 
     let cookies = get_typed_test_cookies()?;
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
-    let upload_request = GrokUploadFile {
-      file: FileUploadSpec::Path(image_path),
-      cookie: cookies.to_string(),
-      request_timeout: None,
-    };
+    let upload_request = GrokUploadFile { file: FileUploadSpec::Path(image_path), cookie: cookies.to_string(), request_timeout: None };
 
     let upload_result = upload_request.upload().await?;
 
@@ -424,23 +366,7 @@ mod tests {
     println!("Svg Path: {:?}", secrets.svg_path_data);
     println!("Baggage: {:?}", secrets.baggage);
 
-    let request = GrokVideoGenChatConversationBuilder {
-      file_id: &file_id,
-      media_type: VideoMediaPostType::UserUploadedImage,
-      prompt: maybe_prompt,
-      mode: None,
-      aspect_ratio: Some(AspectRatio::Square),
-
-      cookie: cookies.as_str(),
-      user_id: &secrets.user_id,
-      baggage: &secrets.baggage,
-      sentry_trace: &secrets.sentry_trace,
-      verification_token: &secrets.verification_token,
-      svg_data: &secrets.svg_path_data,
-      numbers: &secrets.numbers,
-
-      request_timeout: None,
-    };
+    let request = GrokVideoGenChatConversationBuilder { file_id: &file_id, media_type: VideoMediaPostType::UserUploadedImage, prompt: maybe_prompt, mode: None, aspect_ratio: Some(AspectRatio::Square), cookie: cookies.as_str(), user_id: &secrets.user_id, baggage: &secrets.baggage, sentry_trace: &secrets.sentry_trace, verification_token: &secrets.verification_token, svg_data: &secrets.svg_path_data, numbers: &secrets.numbers, request_timeout: None };
 
     let result = request.stream_only_video_id().await?;
 

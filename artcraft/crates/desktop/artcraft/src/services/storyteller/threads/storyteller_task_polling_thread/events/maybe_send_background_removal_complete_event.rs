@@ -10,19 +10,14 @@ use sqlite_tasks::queries::list_tasks_by_provider_and_tokens::{list_tasks_by_pro
 use sqlite_tasks::queries::task::Task;
 use tokens::tokens::media_files::MediaFileToken;
 
-pub async fn maybe_send_background_removal_complete_event(
-  app: &tauri::AppHandle,
-  task: &Task,
-  job: &ListSessionJobsItem,
-) -> AnyhowResult<()> {
-
+pub async fn maybe_send_background_removal_complete_event(app: &tauri::AppHandle, task: &Task, job: &ListSessionJobsItem) -> AnyhowResult<()> {
   match task.task_type {
-    TaskType::BackgroundRemoval => {} // NB: Fall-through
+    TaskType::BackgroundRemoval => {}, // NB: Fall-through
     _ => return Ok(()),
   }
 
   match task.frontend_caller {
-    Some(TauriCommandCaller::Canvas) => {} // NB: Fall-through
+    Some(TauriCommandCaller::Canvas) => {}, // NB: Fall-through
     _ => return Ok(()),
   }
 
@@ -34,12 +29,7 @@ pub async fn maybe_send_background_removal_complete_event(
     },
   };
 
-  let event = CanvasBackgroundRemovalCompleteEvent {
-    media_token: MediaFileToken::new_from_str(&result.entity_token),
-    image_cdn_url: result.media_links.cdn_url.clone(),
-    maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(),
-    maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone(),
-  };
+  let event = CanvasBackgroundRemovalCompleteEvent { media_token: MediaFileToken::new_from_str(&result.entity_token), image_cdn_url: result.media_links.cdn_url.clone(), maybe_frontend_subscriber_id: task.frontend_subscriber_id.clone(), maybe_frontend_subscriber_payload: task.frontend_subscriber_payload.clone() };
 
   if let Err(err) = event.send(&app) {
     error!("Failed to send CanvasBackgroundRemovalCompleteEvent: {:?}", err); // Fail open

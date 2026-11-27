@@ -26,9 +26,7 @@ pub enum FluxProKontextMaxNumImages {
   Four,
 }
 
-pub async fn enqueue_flux_pro_kontext_max_edit_webhook<R: IntoUrl>(
-  args: FluxProKontextMaxArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_flux_pro_kontext_max_edit_webhook<R: IntoUrl>(args: FluxProKontextMaxArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -46,17 +44,14 @@ pub async fn enqueue_flux_pro_kontext_max_edit_webhook<R: IntoUrl>(
     // Maybe expose
     aspect_ratio: None,
     safety_tolerance: Some("5".to_string()), // NB: 5 is most tolerant
-    output_format: Some("png".to_string()), // png or jpeg
+    output_format: Some("png".to_string()),  // png or jpeg
     seed: None,
 
     // Constants
     sync_mode: None, // Synchronous / slow
   };
 
-  let result = flux_pro_kontext_max_edit(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = flux_pro_kontext_max_edit(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -77,15 +72,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = FluxProKontextMaxArgs {
-      request: FluxProKontextMaxRequest {
-        prompt: "turn the glasses into sunglasses, make them sleek sunglasses with black rims, square shaped".to_string(),
-        image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(),
-        num_images: FluxProKontextMaxNumImages::One,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = FluxProKontextMaxArgs { request: FluxProKontextMaxRequest { prompt: "turn the glasses into sunglasses, make them sleek sunglasses with black rims, square shaped".to_string(), image_url: TALL_MOCHI_WITH_GLASSES_IMAGE_URL.to_string(), num_images: FluxProKontextMaxNumImages::One }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_flux_pro_kontext_max_edit_webhook(args).await?;
 

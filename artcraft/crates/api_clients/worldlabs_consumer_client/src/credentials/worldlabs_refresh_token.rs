@@ -1,4 +1,3 @@
-
 #[derive(Clone)]
 pub struct WorldLabsRefreshToken {
   /// The refresh token

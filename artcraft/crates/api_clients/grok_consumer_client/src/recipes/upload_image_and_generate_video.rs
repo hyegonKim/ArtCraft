@@ -63,17 +63,10 @@ pub struct ImageUploadAndGenerateVideoResult {
   pub generation_is_complete: bool,
 }
 
-pub async fn upload_image_and_generate_video<P: AsRef<Path>>(args: UploadImageAndGenerateVideo<'_, P>)
-  -> Result<ImageUploadAndGenerateVideoResult, GrokError>
-{
-
+pub async fn upload_image_and_generate_video<P: AsRef<Path>>(args: UploadImageAndGenerateVideo<'_, P>) -> Result<ImageUploadAndGenerateVideoResult, GrokError> {
   info!("Uploading file to Grok...");
 
-  let request = GrokUploadFile {
-    file: args.file,
-    cookie: args.full_credentials.cookies.to_string(),
-    request_timeout: args.individual_request_timeout,
-  };
+  let request = GrokUploadFile { file: args.file, cookie: args.full_credentials.cookies.to_string(), request_timeout: args.individual_request_timeout };
 
   let upload_result = request.upload().await?;
 
@@ -85,25 +78,16 @@ pub async fn upload_image_and_generate_video<P: AsRef<Path>>(args: UploadImageAn
     None => {
       error!("Previous file upload failed. Cannot continue.");
       return Err(GrokGenericApiError::UploadFailed.into());
-    }
+    },
   };
 
-  let url = user_and_file_id_to_image_url(
-    &args.full_credentials.client_secrets.user_id,
-    &upload_file_id
-  );
+  let url = user_and_file_id_to_image_url(&args.full_credentials.client_secrets.user_id, &upload_file_id);
 
   info!("Uploaded URI: {:?}", url);
 
   info!("Creating media post...");
 
-  let request = GrokCreateMediaPost {
-    user_id: &args.full_credentials.client_secrets.user_id,
-    file_id: &upload_file_id,
-    media_type: MediaPostType::UserUploadedImage,
-    cookie: args.full_credentials.cookies.as_str(),
-    request_timeout: args.individual_request_timeout,
-  };
+  let request = GrokCreateMediaPost { user_id: &args.full_credentials.client_secrets.user_id, file_id: &upload_file_id, media_type: MediaPostType::UserUploadedImage, cookie: args.full_credentials.cookies.as_str(), request_timeout: args.individual_request_timeout };
 
   let post_result = request.send().await?;
 
@@ -114,21 +98,7 @@ pub async fn upload_image_and_generate_video<P: AsRef<Path>>(args: UploadImageAn
 
   info!("Generate video...");
 
-  let request = GrokVideoGenChatConversationBuilder {
-    user_id: &args.full_credentials.client_secrets.user_id,
-    file_id: &upload_file_id,
-    media_type: VideoMediaPostType::UserUploadedImage,
-    cookie: args.full_credentials.cookies.as_str(),
-    prompt: args.prompt,
-    mode: args.mode,
-    aspect_ratio: args.aspect_ratio,
-    request_timeout: args.individual_request_timeout,
-    baggage: &args.full_credentials.client_secrets.baggage,
-    sentry_trace: &args.full_credentials.client_secrets.sentry_trace,
-    verification_token: &args.full_credentials.client_secrets.verification_token,
-    svg_data: &args.full_credentials.client_secrets.svg_path_data,
-    numbers: &args.full_credentials.client_secrets.numbers,
-  };
+  let request = GrokVideoGenChatConversationBuilder { user_id: &args.full_credentials.client_secrets.user_id, file_id: &upload_file_id, media_type: VideoMediaPostType::UserUploadedImage, cookie: args.full_credentials.cookies.as_str(), prompt: args.prompt, mode: args.mode, aspect_ratio: args.aspect_ratio, request_timeout: args.individual_request_timeout, baggage: &args.full_credentials.client_secrets.baggage, sentry_trace: &args.full_credentials.client_secrets.sentry_trace, verification_token: &args.full_credentials.client_secrets.verification_token, svg_data: &args.full_credentials.client_secrets.svg_path_data, numbers: &args.full_credentials.client_secrets.numbers };
 
   let maybe_video_file_id;
   let generation_is_complete;
@@ -145,40 +115,20 @@ pub async fn upload_image_and_generate_video<P: AsRef<Path>>(args: UploadImageAn
     generation_is_complete = false;
   }
 
-  let maybe_video_url = maybe_video_file_id
-      .as_ref()
-      .map(|file_id| {
-        user_and_file_id_to_video_url(&args.full_credentials.client_secrets.user_id, file_id, false)
-      });
+  let maybe_video_url = maybe_video_file_id.as_ref().map(|file_id| user_and_file_id_to_video_url(&args.full_credentials.client_secrets.user_id, file_id, false));
 
   info!("Video Generation Enqueued");
 
   info!("Liking media...");
 
-  let request = GrokLikeMediaPost {
-    file_id: &upload_file_id,
-    cookie: args.full_credentials.cookies.as_str(),
-    request_timeout: args.individual_request_timeout,
-    baggage: &args.full_credentials.client_secrets.baggage,
-    sentry_trace: &args.full_credentials.client_secrets.sentry_trace,
-    verification_token: &args.full_credentials.client_secrets.verification_token,
-    svg_data: &args.full_credentials.client_secrets.svg_path_data,
-    numbers: &args.full_credentials.client_secrets.numbers,
-  };
+  let request = GrokLikeMediaPost { file_id: &upload_file_id, cookie: args.full_credentials.cookies.as_str(), request_timeout: args.individual_request_timeout, baggage: &args.full_credentials.client_secrets.baggage, sentry_trace: &args.full_credentials.client_secrets.sentry_trace, verification_token: &args.full_credentials.client_secrets.verification_token, svg_data: &args.full_credentials.client_secrets.svg_path_data, numbers: &args.full_credentials.client_secrets.numbers };
 
   let _like_result = request.send().await?;
 
   info!("Media Liked");
 
-  Ok(ImageUploadAndGenerateVideoResult {
-    post_id: post_result.post_id,
-    image_file_id: upload_file_id,
-    video_file_id: maybe_video_file_id,
-    video_url: maybe_video_url,
-    generation_is_complete,
-  })
+  Ok(ImageUploadAndGenerateVideoResult { post_id: post_result.post_id, image_file_id: upload_file_id, video_file_id: maybe_video_file_id, video_url: maybe_video_url, generation_is_complete })
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -208,9 +158,7 @@ mod tests {
 
     let cookies = get_typed_test_cookies()?;
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     println!("[test] Verification Token: {:?}", secrets.verification_token);
     println!("[test] Sentry Trace: {:?}", secrets.sentry_trace);
@@ -220,15 +168,7 @@ mod tests {
 
     let credentials = GrokFullCredentials::from_cookies_and_client_secrets(cookies, secrets);
 
-    let video_result = upload_image_and_generate_video(UploadImageAndGenerateVideo {
-      full_credentials: &credentials,
-      file: FileUploadSpec::Path(image_path),
-      prompt: maybe_prompt,
-      aspect_ratio: Some(AspectRatio::Square),
-      mode: None,
-      individual_request_timeout: None,
-      wait_for_generation: false,
-    }).await?;
+    let video_result = upload_image_and_generate_video(UploadImageAndGenerateVideo { full_credentials: &credentials, file: FileUploadSpec::Path(image_path), prompt: maybe_prompt, aspect_ratio: Some(AspectRatio::Square), mode: None, individual_request_timeout: None, wait_for_generation: false }).await?;
 
     println!("[test] Post ID: {:?}", video_result.post_id);
     println!("[test] Image File ID: {:?}", video_result.image_file_id);

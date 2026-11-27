@@ -30,7 +30,7 @@ pub struct GptTextToImageByokRequest {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum GptTextToImageSize{
+pub enum GptTextToImageSize {
   Auto,
   Square,
   Horizontal,
@@ -46,13 +46,12 @@ pub enum GptTextToImageQuality {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum GptTextToImageNumImages{
+pub enum GptTextToImageNumImages {
   One,
   Two,
   Three,
   Four,
 }
-
 
 // NB: These are BYOK, so they're not Fal's prices
 impl FalRequestCostCalculator for GptTextToImageByokRequest {
@@ -77,11 +76,7 @@ impl FalRequestCostCalculator for GptTextToImageByokRequest {
   }
 }
 
-
-pub async fn enqueue_gpt_image_1_byok_text_to_image_webhook<V: IntoUrl>(
-  args: GptTextToImageByokArgs<'_, V>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_gpt_image_1_byok_text_to_image_webhook<V: IntoUrl>(args: GptTextToImageByokArgs<'_, V>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   // auto, 1024x1024, 1536x1024, 1024x1536
@@ -106,18 +101,9 @@ pub async fn enqueue_gpt_image_1_byok_text_to_image_webhook<V: IntoUrl>(
     GptTextToImageNumImages::Four => 4,
   };
 
-  let request = GptImage1ByokTextToImageInput {
-    prompt: req.prompt,
-    image_size: image_size.to_string(),
-    num_images,
-    quality: quality.to_string(),
-    openai_api_key: args.openai_api_key.0.to_string(),
-  };
+  let request = GptImage1ByokTextToImageInput { prompt: req.prompt, image_size: image_size.to_string(), num_images, quality: quality.to_string(), openai_api_key: args.openai_api_key.0.to_string() };
 
-  let result = gpt_image_1_byok_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gpt_image_1_byok_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -126,11 +112,7 @@ pub async fn enqueue_gpt_image_1_byok_text_to_image_webhook<V: IntoUrl>(
 mod tests {
   use crate::creds::fal_api_key::FalApiKey;
   use crate::creds::open_ai_api_key::OpenAiApiKey;
-  use crate::requests_old::webhook::image::text::enqueue_gpt_image_1_byok_text_to_image_webhook::{
-    enqueue_gpt_image_1_byok_text_to_image_webhook, GptTextToImageByokArgs,
-    GptTextToImageByokRequest, GptTextToImageNumImages, GptTextToImageQuality,
-    GptTextToImageSize,
-  };
+  use crate::requests_old::webhook::image::text::enqueue_gpt_image_1_byok_text_to_image_webhook::{enqueue_gpt_image_1_byok_text_to_image_webhook, GptTextToImageByokArgs, GptTextToImageByokRequest, GptTextToImageNumImages, GptTextToImageQuality, GptTextToImageSize};
   use errors::AnyhowResult;
   use std::fs::read_to_string;
 
@@ -144,17 +126,7 @@ mod tests {
     let openai_secret = read_to_string("/Users/bt/Artcraft/credentials/openai_api_key.txt")?;
     let openai_api_key = OpenAiApiKey::from_str(&openai_secret);
 
-    let args = GptTextToImageByokArgs {
-      request: GptTextToImageByokRequest {
-        prompt: "an anime girl riding on the back of a t-rex".to_string(),
-        image_size: GptTextToImageSize::Horizontal,
-        num_images: GptTextToImageNumImages::One,
-        quality: GptTextToImageQuality::High,
-      },
-      api_key: &fal_api_key,
-      openai_api_key: &openai_api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = GptTextToImageByokArgs { request: GptTextToImageByokRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), image_size: GptTextToImageSize::Horizontal, num_images: GptTextToImageNumImages::One, quality: GptTextToImageQuality::High }, api_key: &fal_api_key, openai_api_key: &openai_api_key, webhook_url: "https://example.com/webhook" };
 
     let _result = enqueue_gpt_image_1_byok_text_to_image_webhook(args).await?;
 

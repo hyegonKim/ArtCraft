@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::text::gpt_image_1p5_text_to_image::raw_request::{
-  GptImage1p5TextToImageInput, GptImage1p5TextToImageOutput,
-};
+use crate::requests::api::image::text::gpt_image_1p5_text_to_image::raw_request::{GptImage1p5TextToImageInput, GptImage1p5TextToImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -78,39 +76,44 @@ impl FalEndpoint for GptImage1p5TextToImageRequest {
       GptImage1p5TextToImageNumImages::Four => 4,
     };
 
-    let image_size = self.image_size.map(|s| match s {
-      GptImage1p5TextToImageSize::Square => "1024x1024",
-      GptImage1p5TextToImageSize::Wide => "1536x1024",
-      GptImage1p5TextToImageSize::Tall => "1024x1536",
-    }.to_string());
+    let image_size = self.image_size.map(|s| {
+      match s {
+        GptImage1p5TextToImageSize::Square => "1024x1024",
+        GptImage1p5TextToImageSize::Wide => "1536x1024",
+        GptImage1p5TextToImageSize::Tall => "1024x1536",
+      }
+      .to_string()
+    });
 
-    let background = self.background.map(|b| match b {
-      GptImage1p5TextToImageBackground::Auto => "auto",
-      GptImage1p5TextToImageBackground::Transparent => "transparent",
-      GptImage1p5TextToImageBackground::Opaque => "opaque",
-    }.to_string());
+    let background = self.background.map(|b| {
+      match b {
+        GptImage1p5TextToImageBackground::Auto => "auto",
+        GptImage1p5TextToImageBackground::Transparent => "transparent",
+        GptImage1p5TextToImageBackground::Opaque => "opaque",
+      }
+      .to_string()
+    });
 
-    let quality = self.quality.map(|q| match q {
-      GptImage1p5TextToImageQuality::Low => "low",
-      GptImage1p5TextToImageQuality::Medium => "medium",
-      GptImage1p5TextToImageQuality::High => "high",
-    }.to_string());
+    let quality = self.quality.map(|q| {
+      match q {
+        GptImage1p5TextToImageQuality::Low => "low",
+        GptImage1p5TextToImageQuality::Medium => "medium",
+        GptImage1p5TextToImageQuality::High => "high",
+      }
+      .to_string()
+    });
 
-    let output_format = Some(match self.output_format {
-      Some(GptImage1p5TextToImageOutputFormat::Jpeg) => "jpeg",
-      Some(GptImage1p5TextToImageOutputFormat::Png) => "png",
-      Some(GptImage1p5TextToImageOutputFormat::Webp) => "webp",
-      None => "png",
-    }.to_string());
+    let output_format = Some(
+      match self.output_format {
+        Some(GptImage1p5TextToImageOutputFormat::Jpeg) => "jpeg",
+        Some(GptImage1p5TextToImageOutputFormat::Png) => "png",
+        Some(GptImage1p5TextToImageOutputFormat::Webp) => "webp",
+        None => "png",
+      }
+      .to_string(),
+    );
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      num_images: Some(num_images),
-      image_size,
-      background,
-      quality,
-      output_format,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), num_images: Some(num_images), image_size, background, quality, output_format })
   }
 }
 
@@ -128,14 +131,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage1p5TextToImageRequest {
-      prompt: "an anime girl riding on the back of a t-rex".to_string(),
-      num_images: GptImage1p5TextToImageNumImages::One,
-      image_size: None,
-      background: None,
-      quality: None,
-      output_format: None,
-    };
+    let request = GptImage1p5TextToImageRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: GptImage1p5TextToImageNumImages::One, image_size: None, background: None, quality: None, output_format: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -149,19 +145,9 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = GptImage1p5TextToImageRequest {
-      prompt: "a corgi wearing sunglasses at the beach".to_string(),
-      num_images: GptImage1p5TextToImageNumImages::Two,
-      image_size: Some(GptImage1p5TextToImageSize::Wide),
-      background: None,
-      quality: Some(GptImage1p5TextToImageQuality::High),
-      output_format: Some(GptImage1p5TextToImageOutputFormat::Png),
-    };
+    let request = GptImage1p5TextToImageRequest { prompt: "a corgi wearing sunglasses at the beach".to_string(), num_images: GptImage1p5TextToImageNumImages::Two, image_size: Some(GptImage1p5TextToImageSize::Wide), background: None, quality: Some(GptImage1p5TextToImageQuality::High), output_format: Some(GptImage1p5TextToImageOutputFormat::Png) };
 
-    let result = request.send_webhook_request(
-      &api_key,
-      "https://example.com/webhook",
-    ).await?;
+    let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Request ID: {:?}", result.request_id);
     assert!(result.request_id.is_some());
     Ok(())

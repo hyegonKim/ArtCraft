@@ -25,14 +25,14 @@ pub struct MediaLinks {
 pub struct VideoPreviews {
   /// A static single frame preview image of the video.
   pub still: Url,
-  
+
   /// An animated gif preview of the video.
   pub animated: Url,
-  
+
   /// A template used to construct the still thumbnail URL.
   /// Replace the string `{WIDTH}` with the desired width.
   pub still_thumbnail_template: String,
-  
+
   /// A template used to construct the animated thumbnail URL.
   /// Replace the string `{WIDTH}` with the desired width.
   pub animated_thumbnail_template: String,

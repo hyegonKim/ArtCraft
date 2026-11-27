@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::vidu_q3_turbo::request::{
-  FalViduQ3TurboMode, FalViduQ3TurboRequestState,
-};
+use crate::generate::generate_video::providers::fal::vidu_q3_turbo::request::{FalViduQ3TurboMode, FalViduQ3TurboRequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -23,15 +21,7 @@ impl FalViduQ3TurboCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -105,18 +95,8 @@ mod tests {
     assert!(!estimate.is_free);
   }
 
-  fn base_builder(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-  ) -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::ViduQ3Turbo,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    }
+  fn base_builder(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> GenerateVideoRequestBuilder {
+    GenerateVideoRequestBuilder { model: RouterVideoModel::ViduQ3Turbo, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() }
   }
 
   fn cost_cents(builder: GenerateVideoRequestBuilder) -> u64 {

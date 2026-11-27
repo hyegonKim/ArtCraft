@@ -5,12 +5,12 @@ use chrono::{DateTime, Utc};
 #[derive(Clone, Debug)]
 pub struct ArtcraftPlatformInfo {
   pub artcraft_version: String,
-  
+
   pub os_platform: ArtcraftOs,
   pub os_version: String,
-  
+
   pub build_timestamp: DateTime<Utc>,
-  
+
   pub git_commit_id: Option<String>,
   pub git_commit_short_id: Option<String>,
   pub git_commit_timestamp: Option<DateTime<Utc>>,
@@ -25,7 +25,6 @@ pub enum ArtcraftOs {
 }
 
 impl ArtcraftPlatformInfo {
-  
   pub fn get() -> Self {
     let build_timestamp = build_metadata::build_timestamp();
     let git_commit_id = build_metadata::git_commit_id().map(|s| s.to_string());
@@ -33,12 +32,9 @@ impl ArtcraftPlatformInfo {
     let git_commit_timestamp = build_metadata::git_commit_timestamp();
 
     let os_info = os_info::get();
-    
-    let maybe_os_version = Some(os_info.version().to_string())
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "unknown".to_string());
-    
+
+    let maybe_os_version = Some(os_info.version().to_string()).map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).unwrap_or_else(|| "unknown".to_string());
+
     Self {
       artcraft_version: ARTCRAFT_VERSION.to_string(),
       os_platform: match OsPlatform::maybe_get() {

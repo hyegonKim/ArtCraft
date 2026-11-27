@@ -17,9 +17,6 @@ pub struct MeshGenerationDraftContext<'a> {
 
 impl Debug for MeshGenerationDraftContext<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("MeshGenerationDraftContext")
-      .field("client", &self.client.is_some())
-      .field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map)
-      .finish()
+    f.debug_struct("MeshGenerationDraftContext").field("client", &self.client.is_some()).field("media_file_to_artcraft_url_map", &self.media_file_to_artcraft_url_map).finish()
   }
 }

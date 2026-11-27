@@ -18,10 +18,7 @@ use std::sync::Arc;
 use effectcraft_effects::Buf;
 use effectcraft_geom::{Mat4, Vec3, vec3};
 use effectcraft_model::{self as model, Primitive};
-use effectcraft_project::{
-    ItemKind, Layer, LayerSource, LightKind, PrimitiveKind, Property, SubstanceMaterial,
-    SubstancePreset,
-};
+use effectcraft_project::{ItemKind, Layer, LayerSource, LightKind, PrimitiveKind, Property, SubstanceMaterial, SubstancePreset};
 use effectcraft_time::Tick;
 
 use super::shade::srgb_to_linear;
@@ -505,11 +502,7 @@ fn prepare_substance_primitive(p: &Primitive, tile_scale: f64) -> Primitive {
         out.compute_normals();
     }
     let scale = (1.0 / tile_scale.abs().clamp(0.01, 1000.0)) as f32;
-    let has_uvs = out.uvs.len() == out.positions.len()
-        && out
-            .uvs
-            .windows(2)
-            .any(|w| (w[0][0] - w[1][0]).abs() > 1e-6 || (w[0][1] - w[1][1]).abs() > 1e-6);
+    let has_uvs = out.uvs.len() == out.positions.len() && out.uvs.windows(2).any(|w| (w[0][0] - w[1][0]).abs() > 1e-6 || (w[0][1] - w[1][1]).abs() > 1e-6);
     if has_uvs {
         for uv in &mut out.uvs {
             uv[0] *= scale;
@@ -524,10 +517,7 @@ fn prepare_substance_primitive(p: &Primitive, tile_scale: f64) -> Primitive {
                 lmax[c] = lmax[c].max(q[c]);
             }
         }
-        let span = (lmax[0] - lmin[0])
-            .max(lmax[1] - lmin[1])
-            .max(lmax[2] - lmin[2])
-            .max(1e-3);
+        let span = (lmax[0] - lmin[0]).max(lmax[1] - lmin[1]).max(lmax[2] - lmin[2]).max(1e-3);
         out.uvs = out
             .positions
             .iter()

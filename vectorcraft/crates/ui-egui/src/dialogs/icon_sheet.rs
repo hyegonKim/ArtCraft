@@ -15,14 +15,8 @@ pub const KIND: &str = "iconSheet";
 const CMD: &str = "icon.generateSheet";
 const LABEL_W: f32 = 96.0;
 
-pub(super) const SPEC: DialogSpec = DialogSpec {
-    heading: |_| tl!("Generate Icon Sheet").into(),
-    body,
-    confirm,
-    preview: true,
-    min_width: 356.0,
-    ..DialogSpec::FORM
-};
+pub(super) const SPEC: DialogSpec =
+    DialogSpec { heading: |_| tl!("Generate Icon Sheet").into(), body, confirm, preview: true, min_width: 356.0, ..DialogSpec::FORM };
 
 pub fn fields() -> Value {
     json!({

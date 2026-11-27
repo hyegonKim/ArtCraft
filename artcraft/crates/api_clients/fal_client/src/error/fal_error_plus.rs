@@ -10,7 +10,6 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub enum FalErrorPlus {
   // =============== Newer error types ===============
-
   /// A client-side error (invalid input, bad URL, etc.).
   ClientError(FalClientError),
 
@@ -21,7 +20,6 @@ pub enum FalErrorPlus {
   ApiSpecific(FalSpecificApiError),
 
   // =============== Older error types (gradually replace these) ===============
-
   /// An error arising in the `fal` crate.
   FalError(crate::error::fal_error::FalError),
   /// The fal API key is invalid.

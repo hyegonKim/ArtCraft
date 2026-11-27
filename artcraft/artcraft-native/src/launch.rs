@@ -11,7 +11,10 @@ const USAGE: &str = "Usage: artcraft-native [--data-dir <absolute-directory> --a
 pub enum LaunchOptions {
   #[default]
   Default,
-  Isolated { data_dir: PathBuf, api_port: u32 },
+  Isolated {
+    data_dir: PathBuf,
+    api_port: u32,
+  },
 }
 
 pub struct RuntimeSettings {
@@ -42,13 +45,10 @@ impl LaunchOptions {
             return Err(format!("--api-base-url must be specified once. {USAGE}"));
           }
           let value = args.next().ok_or_else(|| format!("Missing --api-base-url value. {USAGE}"))?;
-          let url = value.to_str().and_then(|value| url::Url::parse(value).ok())
-            .ok_or_else(|| "Invalid --api-base-url".to_owned())?;
+          let url = value.to_str().and_then(|value| url::Url::parse(value).ok()).ok_or_else(|| "Invalid --api-base-url".to_owned())?;
           // The shared ApiHost represents local endpoints by port on localhost.
           // Reject unsupported URL components instead of silently changing their meaning.
-          if url.scheme() != "http" || url.host_str() != Some("localhost") || !url.username().is_empty()
-            || url.password().is_some() || url.path() != "/" || url.query().is_some() || url.fragment().is_some()
-          {
+          if url.scheme() != "http" || url.host_str() != Some("localhost") || !url.username().is_empty() || url.password().is_some() || url.path() != "/" || url.query().is_some() || url.fragment().is_some() {
             return Err("--api-base-url must be http://localhost[:port] without credentials, path, query, or fragment".into());
           }
           let port = url.port_or_known_default().ok_or_else(|| "Missing API port".to_owned())?;
@@ -73,9 +73,7 @@ impl LaunchOptions {
         let (data_root, api_host) = defaults();
         RuntimeSettings { data_root, api_host, import_tauri_cookies: true }
       },
-      Self::Isolated { data_dir, api_port } => RuntimeSettings {
-        data_root: data_dir.clone(), api_host: ApiHost::Localhost { port: *api_port }, import_tauri_cookies: false,
-      },
+      Self::Isolated { data_dir, api_port } => RuntimeSettings { data_root: data_dir.clone(), api_host: ApiHost::Localhost { port: *api_port }, import_tauri_cookies: false },
     }
   }
 
@@ -106,10 +104,7 @@ mod tests {
   fn isolated_launch_never_resolves_global_defaults() {
     let dir = tempfile::tempdir().unwrap();
     let root = dir.path().join("isolated");
-    let launch = LaunchOptions::parse([
-      OsString::from("--api-base-url"), OsString::from("http://localhost:4203"),
-      OsString::from("--data-dir"), root.clone().into_os_string(),
-    ]).unwrap();
+    let launch = LaunchOptions::parse([OsString::from("--api-base-url"), OsString::from("http://localhost:4203"), OsString::from("--data-dir"), root.clone().into_os_string()]).unwrap();
     let settings = launch.resolve(|| panic!("isolated launch must not read global settings"));
     assert_eq!(settings.data_root, root);
     assert!(!settings.import_tauri_cookies);
@@ -124,31 +119,17 @@ mod tests {
   fn malformed_arguments_fail_before_filesystem_io() {
     let dir = tempfile::tempdir().unwrap();
     let root = dir.path().join("must-not-exist");
-    let result = LaunchOptions::parse([
-      OsString::from("--data-dir"), root.clone().into_os_string(),
-      OsString::from("--api-base-url"), OsString::from("https://production.invalid"),
-    ]);
+    let result = LaunchOptions::parse([OsString::from("--data-dir"), root.clone().into_os_string(), OsString::from("--api-base-url"), OsString::from("https://production.invalid")]);
     assert!(result.is_err());
     assert!(!root.exists());
-    for args in [
-      vec!["--unknown"], vec!["unexpected"], vec!["--data-dir"], vec!["--api-base-url"],
-      vec!["--data-dir", "/tmp/isolated"], vec!["--api-base-url", "http://localhost:4203"],
-      vec!["--data-dir", "relative", "--api-base-url", "http://localhost:4203"],
-      vec!["--data-dir", "/tmp/../outside", "--api-base-url", "http://localhost:4203"],
-      vec!["--data-dir", "/tmp/a", "--data-dir", "/tmp/b", "--api-base-url", "http://localhost:4203"],
-      vec!["--data-dir", "/tmp/a", "--api-base-url", "http://localhost:4203", "--api-base-url", "http://localhost:4204"],
-    ] {
+    for args in [vec!["--unknown"], vec!["unexpected"], vec!["--data-dir"], vec!["--api-base-url"], vec!["--data-dir", "/tmp/isolated"], vec!["--api-base-url", "http://localhost:4203"], vec!["--data-dir", "relative", "--api-base-url", "http://localhost:4203"], vec!["--data-dir", "/tmp/../outside", "--api-base-url", "http://localhost:4203"], vec!["--data-dir", "/tmp/a", "--data-dir", "/tmp/b", "--api-base-url", "http://localhost:4203"], vec!["--data-dir", "/tmp/a", "--api-base-url", "http://localhost:4203", "--api-base-url", "http://localhost:4204"]] {
       assert!(parse(&args).is_err(), "invalid invocation must fail: {args:?}");
     }
   }
 
   #[test]
   fn unsupported_api_urls_are_rejected_instead_of_normalized() {
-    for value in [
-      "not a URL", "https://localhost:4203", "http://production.invalid", "http://127.0.0.1:4203",
-      "http://localhost:0", "http://localhost:70000", "http://user:pass@localhost:4203",
-      "http://localhost:4203/api", "http://localhost:4203/?route=production", "http://localhost:4203/#fragment",
-    ] {
+    for value in ["not a URL", "https://localhost:4203", "http://production.invalid", "http://127.0.0.1:4203", "http://localhost:0", "http://localhost:70000", "http://user:pass@localhost:4203", "http://localhost:4203/api", "http://localhost:4203/?route=production", "http://localhost:4203/#fragment"] {
       assert!(parse(&["--data-dir", "/tmp/isolated", "--api-base-url", value]).is_err(), "unsupported endpoint must fail");
     }
   }

@@ -21,19 +21,7 @@ pub fn setup_test_logging(level: LevelFilter) {
 
   // try_init: several #[ignore] live tests may run in one process, and only
   // the first can install the logger.
-  let _ = Builder::new()
-    .is_test(true)
-    .format(|buf, record| {
-      writeln!(buf,
-        "{} [{}] - {}",
-        Local::now().format("%H:%M:%S%.6f"),
-        record.level(),
-        record.args()
-      )
-    })
-    .filter(None, level)
-    .filter_level(level)
-    .try_init();
+  let _ = Builder::new().is_test(true).format(|buf, record| writeln!(buf, "{} [{}] - {}", Local::now().format("%H:%M:%S%.6f"), record.level(), record.args())).filter(None, level).filter_level(level).try_init();
 
   trace!("Test trace log");
   debug!("Test debug log");

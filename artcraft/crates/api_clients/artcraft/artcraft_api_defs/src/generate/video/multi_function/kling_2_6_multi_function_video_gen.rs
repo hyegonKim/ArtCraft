@@ -31,7 +31,6 @@ pub struct Kling2p6ProMultiFunctionVideoGenRequest {
   // /// Only for image-to-video
   // /// Source of the ending frame (if desired)
   // pub end_frame_image_media_token: Option<MediaFileToken>,
-
   /// Optional
   /// Duration of the video
   pub duration: Option<Kling2p6ProMultiFunctionVideoGenDuration>,
@@ -59,7 +58,6 @@ pub enum Kling2p6ProMultiFunctionVideoGenAspectRatio {
   SixteenByNine,
   NineBySixteen,
 }
-
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct Kling2p6ProMultiFunctionVideoGenResponse {

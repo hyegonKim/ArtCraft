@@ -31,26 +31,17 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("normal", CommonMeshOutputType::Normal),
-      ("low_poly", CommonMeshOutputType::LowPoly),
-      ("geometry", CommonMeshOutputType::Geometry),
-    ];
+    let cases = [("normal", CommonMeshOutputType::Normal), ("low_poly", CommonMeshOutputType::LowPoly), ("geometry", CommonMeshOutputType::Geometry)];
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonMeshOutputType = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonMeshOutputType = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }
 
   #[test]
   fn test_round_trip() {
-    let all = [
-      CommonMeshOutputType::Normal,
-      CommonMeshOutputType::LowPoly,
-      CommonMeshOutputType::Geometry,
-    ];
+    let all = [CommonMeshOutputType::Normal, CommonMeshOutputType::LowPoly, CommonMeshOutputType::Geometry];
     for variant in all {
       let json = serde_json::to_string(&variant).unwrap();
       let deserialized: CommonMeshOutputType = serde_json::from_str(&json).unwrap();

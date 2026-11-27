@@ -9,7 +9,7 @@ use crate::error::api_error::ApiError;
 pub enum ClientError {
   /// An invalid request was detected before it was sent.
   InvalidPreflightRequest(String),
-  
+
   /// Could not determine the filetype for the file.
   FileTypeNotKnown(PathBuf),
 
@@ -21,7 +21,7 @@ pub enum ClientError {
 
   /// An error setting up the client
   ReqwestError(reqwest::Error),
-  
+
   /// A serialization error with the request.
   SerializationError(serde_json::Error),
 }

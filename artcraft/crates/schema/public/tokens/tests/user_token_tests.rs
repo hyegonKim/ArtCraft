@@ -1,5 +1,4 @@
 /// Test UserToken in isolation, just in case our macro-derived tests break.
-
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -67,17 +66,17 @@ mod serialization {
 
   use crate::CompositeType;
 
-// NB(bt,2024-09-25): These tests are broken with a recent upgrade
-//  #[test]
-//  fn serialize() {
-//    let expected = "\"user_foo\"".to_string(); // NB: Quoted
-//
-//    let token = UserToken("user_foo".to_string());
-//    assert_eq!(expected, toml::to_string(&token).unwrap());
-//
-//    // Just to show this serializes the same as a string
-//    assert_eq!(expected, toml::to_string("user_foo").unwrap());
-//  }
+  // NB(bt,2024-09-25): These tests are broken with a recent upgrade
+  //  #[test]
+  //  fn serialize() {
+  //    let expected = "\"user_foo\"".to_string(); // NB: Quoted
+  //
+  //    let token = UserToken("user_foo".to_string());
+  //    assert_eq!(expected, toml::to_string(&token).unwrap());
+  //
+  //    // Just to show this serializes the same as a string
+  //    assert_eq!(expected, toml::to_string("user_foo").unwrap());
+  //  }
 
   #[test]
   fn nested_serialize() {
@@ -108,10 +107,7 @@ mod deserialization {
   #[test]
   fn nested_deserialize() {
     let payload = r#"{"user_token":"user_foo","string":"bar"}"#.to_string();
-    let expected = CompositeType {
-      user_token: UserToken("user_foo".to_string()),
-      string: "bar".to_string(),
-    };
+    let expected = CompositeType { user_token: UserToken("user_foo".to_string()), string: "bar".to_string() };
 
     assert_eq!(expected, serde_json::from_str::<CompositeType>(&payload).unwrap());
   }
@@ -121,7 +117,7 @@ mod deserialization {
 mod crockford_traits {
   use tokens::tokens::users::UserToken;
 
-  const ENTROPIC_CHARACTERS_MINIMUM : usize = 8;
+  const ENTROPIC_CHARACTERS_MINIMUM: usize = 8;
 
   #[test]
   fn entropy_is_sufficient() {

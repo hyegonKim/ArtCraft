@@ -1,9 +1,6 @@
 use log::info;
 
-use grok_api_client::api::requests::videos::video_generation::video_generation::{
-  VideoGenerationRequest as GrokVideoGenerationRequest,
-  VideoImageSource as GrokVideoImageSource,
-};
+use grok_api_client::api::requests::videos::video_generation::video_generation::{VideoGenerationRequest as GrokVideoGenerationRequest, VideoImageSource as GrokVideoImageSource};
 use grok_api_client::api::types::video_types::video_aspect_ratio::VideoAspectRatio as GrokAspectRatio;
 use grok_api_client::api::types::video_types::video_resolution::VideoResolution as GrokResolution;
 
@@ -33,9 +30,7 @@ use crate::generate::generate_video::video_generation_request::VideoGenerationRe
 /// `start_frame` (image-to-video) and drop `reference_images`. This keeps the
 /// pipeline tolerant when callers fan a single builder out to multiple providers
 /// with different capabilities.
-pub fn build_grok_api_grok_imagine_video(
-  mut builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_grok_api_grok_imagine_video(mut builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   // Scalar fields.
@@ -63,7 +58,7 @@ pub fn build_grok_api_grok_imagine_video(
         count_image_list_ref(&refs),
       );
       (Some(img), None)
-    }
+    },
     (Some(img), None) => (Some(img), None),
     (None, Some(refs)) => (None, resolve_url_list_to_image_sources(refs)),
     (None, None) => (None, None),
@@ -81,36 +76,21 @@ pub fn build_grok_api_grok_imagine_video(
   };
 
   let state = GrokApiGrokImagineVideoRequestState { request };
-  Ok(VideoGenerationDraftOrRequest::Request(
-    VideoGenerationRequest::GrokApiGrokImagineVideo(state),
-  ))
+  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::GrokApiGrokImagineVideo(state)))
 }
 
 // ── Field planners ──
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  _strategy: RequestMismatchMitigationStrategy,
-) -> Option<GrokAspectRatio> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, _strategy: RequestMismatchMitigationStrategy) -> Option<GrokAspectRatio> {
   // xAI supports exactly: 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3.
   // Auto / unsupported ratios fall back to the closest match (or None → xAI default 16:9).
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => None,
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => None,
 
-    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => {
-      Some(GrokAspectRatio::Square)
-    }
+    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Some(GrokAspectRatio::Square),
 
-    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => {
-      Some(GrokAspectRatio::Landscape16x9)
-    }
-    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => {
-      Some(GrokAspectRatio::Portrait9x16)
-    }
+    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Some(GrokAspectRatio::Landscape16x9),
+    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Some(GrokAspectRatio::Portrait9x16),
 
     Some(RouterAspectRatio::WideFourByThree) => Some(GrokAspectRatio::Landscape4x3),
     Some(RouterAspectRatio::TallThreeByFour) => Some(GrokAspectRatio::Portrait3x4),
@@ -119,31 +99,21 @@ fn plan_aspect_ratio(
     Some(RouterAspectRatio::TallTwoByThree) => Some(GrokAspectRatio::Portrait2x3),
 
     // No exact xAI match — pick the closest cardinal direction.
-    Some(RouterAspectRatio::WideFiveByFour)
-    | Some(RouterAspectRatio::WideTwentyOneByNine) => Some(GrokAspectRatio::Landscape16x9),
-    Some(RouterAspectRatio::TallFourByFive)
-    | Some(RouterAspectRatio::TallNineByTwentyOne) => Some(GrokAspectRatio::Portrait9x16),
+    Some(RouterAspectRatio::WideFiveByFour) | Some(RouterAspectRatio::WideTwentyOneByNine) => Some(GrokAspectRatio::Landscape16x9),
+    Some(RouterAspectRatio::TallFourByFive) | Some(RouterAspectRatio::TallNineByTwentyOne) => Some(GrokAspectRatio::Portrait9x16),
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  _strategy: RequestMismatchMitigationStrategy,
-) -> Option<GrokResolution> {
+fn plan_resolution(resolution: Option<RouterResolution>, _strategy: RequestMismatchMitigationStrategy) -> Option<GrokResolution> {
   // Grok supports 480p and 720p only (1080p is downsized to 720p per xAI docs).
   match resolution {
     None => None,
     Some(RouterResolution::FourEightyP) => Some(GrokResolution::FourEightyP),
     Some(RouterResolution::SevenTwentyP) => Some(GrokResolution::SevenTwentyP),
     // Higher-than-720p requests get clamped to 720p (Grok's cap).
-    Some(RouterResolution::TenEightyP)
-    | Some(RouterResolution::TwoK)
-    | Some(RouterResolution::ThreeK)
-    | Some(RouterResolution::FourK) => Some(GrokResolution::SevenTwentyP),
+    Some(RouterResolution::TenEightyP) | Some(RouterResolution::TwoK) | Some(RouterResolution::ThreeK) | Some(RouterResolution::FourK) => Some(GrokResolution::SevenTwentyP),
     // Lower-than-480p requests get bumped to 480p (Grok's floor).
-    Some(RouterResolution::HalfK) | Some(RouterResolution::OneK) => {
-      Some(GrokResolution::FourEightyP)
-    }
+    Some(RouterResolution::HalfK) | Some(RouterResolution::OneK) => Some(GrokResolution::FourEightyP),
   }
 }
 
@@ -160,7 +130,7 @@ fn resolve_url_to_image_source(image_ref: Option<ImageRef>) -> Option<GrokVideoI
         token,
       );
       None
-    }
+    },
   }
 }
 
@@ -175,7 +145,7 @@ fn resolve_url_list_to_image_sources(list_ref: ImageListRef) -> Option<Vec<GrokV
         tokens.len(),
       );
       None
-    }
+    },
   }
 }
 
@@ -200,10 +170,7 @@ fn log_and_drop_reference_videos(refs: Option<VideoListRef>) {
       VideoListRef::Urls(v) => v.len(),
       VideoListRef::MediaFileTokens(v) => v.len(),
     };
-    info!(
-      "grok_imagine_video: dropping {} reference video(s) — Grok doesn't accept reference videos.",
-      count,
-    );
+    info!("grok_imagine_video: dropping {} reference video(s) — Grok doesn't accept reference videos.", count,);
   }
 }
 
@@ -213,10 +180,7 @@ fn log_and_drop_reference_audio(refs: Option<AudioListRef>) {
       AudioListRef::Urls(v) => v.len(),
       AudioListRef::MediaFileTokens(v) => v.len(),
     };
-    info!(
-      "grok_imagine_video: dropping {} reference audio clip(s) — Grok doesn't accept reference audio.",
-      count,
-    );
+    info!("grok_imagine_video: dropping {} reference audio clip(s) — Grok doesn't accept reference audio.", count,);
   }
 }
 
@@ -244,31 +208,41 @@ mod tests {
 
     #[test]
     fn prompt_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.prompt = Some("test prompt".to_string()); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.prompt = Some("test prompt".to_string());
+      }));
       assert_eq!(req.request.prompt, "test prompt");
     }
 
     #[test]
     fn duration_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = Some(8); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = Some(8);
+      }));
       assert_eq!(req.request.duration, Some(8));
     }
 
     #[test]
     fn duration_clamped_to_min() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = Some(0); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = Some(0);
+      }));
       assert_eq!(req.request.duration, Some(1));
     }
 
     #[test]
     fn duration_clamped_to_max() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = Some(99); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = Some(99);
+      }));
       assert_eq!(req.request.duration, Some(15));
     }
 
     #[test]
     fn duration_none_stays_none() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = None; }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = None;
+      }));
       assert_eq!(req.request.duration, None);
     }
   }
@@ -280,49 +254,65 @@ mod tests {
 
     #[test]
     fn square() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::Square); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::Square);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Square));
     }
 
     #[test]
     fn landscape_16x9() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::WideSixteenByNine); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::WideSixteenByNine);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Landscape16x9));
     }
 
     #[test]
     fn portrait_9x16() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::TallNineBySixteen); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::TallNineBySixteen);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Portrait9x16));
     }
 
     #[test]
     fn landscape_4x3() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::WideFourByThree); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::WideFourByThree);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Landscape4x3));
     }
 
     #[test]
     fn portrait_3x4() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::TallThreeByFour); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::TallThreeByFour);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Portrait3x4));
     }
 
     #[test]
     fn landscape_3x2() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::WideThreeByTwo); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::WideThreeByTwo);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Landscape3x2));
     }
 
     #[test]
     fn portrait_2x3() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::TallTwoByThree); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::TallTwoByThree);
+      }));
       assert_eq!(req.request.aspect_ratio, Some(GrokAspectRatio::Portrait2x3));
     }
 
     #[test]
     fn auto_maps_to_none() {
-      let req = unwrap_request(make_builder(|b| { b.aspect_ratio = Some(RouterAspectRatio::Auto); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.aspect_ratio = Some(RouterAspectRatio::Auto);
+      }));
       assert_eq!(req.request.aspect_ratio, None);
     }
 
@@ -350,31 +340,41 @@ mod tests {
 
     #[test]
     fn res_480p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::FourEightyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::FourEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(GrokResolution::FourEightyP));
     }
 
     #[test]
     fn res_720p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::SevenTwentyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::SevenTwentyP);
+      }));
       assert_eq!(req.request.resolution, Some(GrokResolution::SevenTwentyP));
     }
 
     #[test]
     fn res_1080p_clamps_to_720p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::TenEightyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::TenEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(GrokResolution::SevenTwentyP));
     }
 
     #[test]
     fn res_4k_clamps_to_720p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::FourK); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::FourK);
+      }));
       assert_eq!(req.request.resolution, Some(GrokResolution::SevenTwentyP));
     }
 
     #[test]
     fn res_1k_bumps_to_480p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::OneK); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::OneK);
+      }));
       assert_eq!(req.request.resolution, Some(GrokResolution::FourEightyP));
     }
 
@@ -426,10 +426,7 @@ mod tests {
     #[test]
     fn reference_image_tokens_silently_dropped() {
       let req = unwrap_request(make_builder(|b| {
-        b.reference_images = Some(ImageListRef::MediaFileTokens(vec![
-          MediaFileToken::new("mf_a".to_string()),
-          MediaFileToken::new("mf_b".to_string()),
-        ]));
+        b.reference_images = Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_a".to_string()), MediaFileToken::new("mf_b".to_string())]));
       }));
       // All tokens dropped; reference_images becomes None.
       assert!(req.request.reference_images.is_none());
@@ -440,10 +437,7 @@ mod tests {
     fn start_frame_and_reference_images_together_prefers_start_frame() {
       let req = unwrap_request(make_builder(|b| {
         b.start_frame = Some(ImageRef::Url("https://example.com/start.png".to_string()));
-        b.reference_images = Some(ImageListRef::Urls(vec![
-          "https://example.com/ref1.png".to_string(),
-          "https://example.com/ref2.png".to_string(),
-        ]));
+        b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/ref1.png".to_string(), "https://example.com/ref2.png".to_string()]));
       }));
       // start_frame wins; reference_images dropped (mutually exclusive on the wire).
       match &req.request.image {
@@ -502,9 +496,7 @@ mod tests {
         b.prompt = Some("kitchen sink".to_string());
         b.start_frame = Some(ImageRef::Url("https://example.com/start.png".to_string()));
         b.end_frame = Some(ImageRef::Url("https://example.com/end.png".to_string()));
-        b.reference_images = Some(ImageListRef::Urls(vec![
-          "https://example.com/ref.png".to_string(),
-        ]));
+        b.reference_images = Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()]));
         b.reference_videos = Some(VideoListRef::Urls(vec!["https://example.com/v.mp4".to_string()]));
         b.reference_audio = Some(AudioListRef::Urls(vec!["https://example.com/a.wav".to_string()]));
         b.resolution = Some(RouterResolution::SevenTwentyP);
@@ -513,10 +505,7 @@ mod tests {
       }));
       // Kept: prompt + start_frame + resolution + aspect_ratio + duration.
       assert_eq!(req.request.prompt, "kitchen sink");
-      assert!(matches!(
-        req.request.image,
-        Some(GrokVideoImageSource::Url(_))
-      ));
+      assert!(matches!(req.request.image, Some(GrokVideoImageSource::Url(_))));
       // Dropped because start_frame won the image-source contest.
       assert!(req.request.reference_images.is_none());
       assert_eq!(req.request.resolution, Some(GrokResolution::SevenTwentyP));
@@ -528,13 +517,7 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::GrokImagineVideo,
-      provider: RouterProvider::GrokApi,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::GrokImagineVideo, provider: RouterProvider::GrokApi, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn make_builder(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {

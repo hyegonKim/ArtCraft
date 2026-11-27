@@ -1390,13 +1390,7 @@ impl OutputModule {
         if self.format.supports_audio() {
             v.push((
                 "Audio Output",
-                format!(
-                    "{:?} · {} Hz · {} · {}",
-                    self.audio,
-                    self.audio_sample_rate,
-                    audio_channels_label(self.audio_channels),
-                    self.audio_format.label()
-                ),
+                format!("{:?} · {} Hz · {} · {}", self.audio, self.audio_sample_rate, audio_channels_label(self.audio_channels), self.audio_format.label()),
             ));
         }
         v.push(("Include Project Link", if self.include_project_link { "On" } else { "Off" }.into()));

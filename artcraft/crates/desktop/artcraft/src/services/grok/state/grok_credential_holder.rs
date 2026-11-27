@@ -17,9 +17,6 @@ pub struct GrokCredentialHolder {
 
 impl GrokCredentialHolder {
   pub fn empty() -> Self {
-    Self {
-      browser_cookies: None,
-      grok_full_credentials: None,
-    }
+    Self { browser_cookies: None, grok_full_credentials: None }
   }
 }

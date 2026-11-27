@@ -28,7 +28,7 @@ pub enum WalletLedgerEntryType {
   /// Deduct credits (mixed durable and monthly deduction)
   #[serde(rename = "deduct_mixed")]
   DeductMixed,
-  
+
   /// Deduct durable banked credits
   #[serde(rename = "deduct_banked")]
   DeductBanked,
@@ -44,7 +44,6 @@ pub enum WalletLedgerEntryType {
   /// Support staff manually credit account
   #[serde(rename = "staff_add_banked")]
   StaffAddBanked,
-
   // TODO: No clean way to do "mixed" refunds yet, and if we
   //  refund close to the cutoff it might be unfair. Let's
   //  just not do monthly refunds yet and instead credit our
@@ -91,16 +90,7 @@ impl WalletLedgerEntryType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::Create,
-      Self::CreditBanked,
-      Self::CreditMonthly,
-      Self::DeductMixed,
-      Self::DeductBanked,
-      Self::DeductMonthly,
-      Self::RefundBanked,
-      Self::StaffAddBanked,
-    ])
+    BTreeSet::from([Self::Create, Self::CreditBanked, Self::CreditMonthly, Self::DeductMixed, Self::DeductBanked, Self::DeductMonthly, Self::RefundBanked, Self::StaffAddBanked])
   }
 }
 
@@ -193,7 +183,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 16;
+      const MAX_LENGTH: usize = 16;
       for variant in WalletLedgerEntryType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

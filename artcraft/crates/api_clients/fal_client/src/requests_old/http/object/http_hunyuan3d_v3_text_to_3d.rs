@@ -23,8 +23,6 @@ pub struct Hunyuan3dV3TextTo3dInput {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Hunyuan3dV3TextTo3dOutput {}
 
-pub fn hunyuan3d_v3_text_to_3d(
-  params: Hunyuan3dV3TextTo3dInput,
-) -> FalRequest<Hunyuan3dV3TextTo3dInput, Hunyuan3dV3TextTo3dOutput> {
+pub fn hunyuan3d_v3_text_to_3d(params: Hunyuan3dV3TextTo3dInput) -> FalRequest<Hunyuan3dV3TextTo3dInput, Hunyuan3dV3TextTo3dOutput> {
   FalRequest::new("fal-ai/hunyuan3d-v3/text-to-3d", params)
 }

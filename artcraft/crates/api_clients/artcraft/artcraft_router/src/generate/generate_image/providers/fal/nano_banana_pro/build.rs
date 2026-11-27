@@ -1,11 +1,5 @@
-use fal_client::requests::api::image::edit::nano_banana_pro_edit_image::api::{
-  NanoBananaProEditImageAspectRatio, NanoBananaProEditImageNumImages,
-  NanoBananaProEditImageRequest, NanoBananaProEditImageResolution,
-};
-use fal_client::requests::api::image::text::nano_banana_pro_text_to_image::api::{
-  NanoBananaProTextToImageAspectRatio, NanoBananaProTextToImageNumImages,
-  NanoBananaProTextToImageRequest, NanoBananaProTextToImageResolution,
-};
+use fal_client::requests::api::image::edit::nano_banana_pro_edit_image::api::{NanoBananaProEditImageAspectRatio, NanoBananaProEditImageNumImages, NanoBananaProEditImageRequest, NanoBananaProEditImageResolution};
+use fal_client::requests::api::image::text::nano_banana_pro_text_to_image::api::{NanoBananaProTextToImageAspectRatio, NanoBananaProTextToImageNumImages, NanoBananaProTextToImageRequest, NanoBananaProTextToImageResolution};
 
 use crate::api::router_aspect_ratio::RouterAspectRatio;
 use crate::api::router_resolution::RouterResolution;
@@ -18,9 +12,7 @@ use crate::generate::generate_image::image_generation_draft_or_request::ImageGen
 use crate::generate::generate_image::image_generation_request::ImageGenerationRequest;
 use crate::generate::generate_image::providers::fal::nano_banana_pro::request::FalNanoBananaProRequestState;
 
-pub fn build_fal_nano_banana_pro(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_nano_banana_pro(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let prompt = builder.prompt.clone().unwrap_or_default();
@@ -32,28 +24,15 @@ pub fn build_fal_nano_banana_pro(
     // Text-to-image
     let aspect_ratio = plan_t2i_aspect_ratio(builder.aspect_ratio);
 
-    FalNanoBananaProRequestState::TextToImage(NanoBananaProTextToImageRequest {
-      prompt,
-      num_images: to_t2i_num_images(num_images),
-      resolution: resolution.map(to_t2i_resolution),
-      aspect_ratio,
-    })
+    FalNanoBananaProRequestState::TextToImage(NanoBananaProTextToImageRequest { prompt, num_images: to_t2i_num_images(num_images), resolution: resolution.map(to_t2i_resolution), aspect_ratio })
   } else {
     // Edit image
     let aspect_ratio = plan_edit_aspect_ratio(builder.aspect_ratio);
 
-    FalNanoBananaProRequestState::EditImage(NanoBananaProEditImageRequest {
-      prompt,
-      image_urls,
-      num_images: to_edit_num_images(num_images),
-      resolution: resolution.map(to_edit_resolution),
-      aspect_ratio,
-    })
+    FalNanoBananaProRequestState::EditImage(NanoBananaProEditImageRequest { prompt, image_urls, num_images: to_edit_num_images(num_images), resolution: resolution.map(to_edit_resolution), aspect_ratio })
   };
 
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::FalNanoBananaPro(state),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalNanoBananaPro(state)))
 }
 
 // ── Num images ──
@@ -66,10 +45,7 @@ enum PlannedNumImages {
   Four,
 }
 
-fn plan_num_images(
-  count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<PlannedNumImages, ArtcraftRouterError> {
+fn plan_num_images(count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<PlannedNumImages, ArtcraftRouterError> {
   let count = count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
@@ -78,12 +54,7 @@ fn plan_num_images(
     3 => Ok(PlannedNumImages::Three),
     4 => Ok(PlannedNumImages::Four),
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "image_batch_count",
-          value: format!("{}", count),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_batch_count", value: format!("{}", count) })),
       _ => Ok(PlannedNumImages::Four),
     },
   }
@@ -118,8 +89,7 @@ enum PlannedResolution {
 
 fn plan_resolution(resolution: Option<RouterResolution>) -> Option<PlannedResolution> {
   resolution.map(|r| match r {
-    RouterResolution::HalfK | RouterResolution::FourEightyP | RouterResolution::SevenTwentyP
-    | RouterResolution::OneK | RouterResolution::TenEightyP => PlannedResolution::OneK,
+    RouterResolution::HalfK | RouterResolution::FourEightyP | RouterResolution::SevenTwentyP | RouterResolution::OneK | RouterResolution::TenEightyP => PlannedResolution::OneK,
     RouterResolution::TwoK => PlannedResolution::TwoK,
     // 3K isn't natively supported on Fal nano_banana_pro; v1 downgrades to 2K
     // pricing (and TwoK resolution). Match v1 here so cost+behavior agree.
@@ -146,9 +116,7 @@ fn to_edit_resolution(r: PlannedResolution) -> NanoBananaProEditImageResolution 
 
 // ── Aspect ratio ──
 
-fn plan_t2i_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-) -> Option<NanoBananaProTextToImageAspectRatio> {
+fn plan_t2i_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>) -> Option<NanoBananaProTextToImageAspectRatio> {
   use NanoBananaProTextToImageAspectRatio as T;
   aspect_ratio.and_then(|ar| match ar {
     RouterAspectRatio::Square | RouterAspectRatio::SquareHd => Some(T::OneByOne),
@@ -162,18 +130,14 @@ fn plan_t2i_aspect_ratio(
     RouterAspectRatio::TallTwoByThree | RouterAspectRatio::Tall => Some(T::TwoByThree),
     RouterAspectRatio::TallNineBySixteen => Some(T::NineBySixteen),
     RouterAspectRatio::TallNineByTwentyOne => Some(T::NineBySixteen), // nearest match
-    RouterAspectRatio::Auto | RouterAspectRatio::Auto2k
-    | RouterAspectRatio::Auto3k | RouterAspectRatio::Auto4k => None,
+    RouterAspectRatio::Auto | RouterAspectRatio::Auto2k | RouterAspectRatio::Auto3k | RouterAspectRatio::Auto4k => None,
   })
 }
 
-fn plan_edit_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-) -> Option<NanoBananaProEditImageAspectRatio> {
+fn plan_edit_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>) -> Option<NanoBananaProEditImageAspectRatio> {
   use NanoBananaProEditImageAspectRatio as E;
   aspect_ratio.map(|ar| match ar {
-    RouterAspectRatio::Auto | RouterAspectRatio::Auto2k
-    | RouterAspectRatio::Auto3k | RouterAspectRatio::Auto4k => E::Auto,
+    RouterAspectRatio::Auto | RouterAspectRatio::Auto2k | RouterAspectRatio::Auto3k | RouterAspectRatio::Auto4k => E::Auto,
     RouterAspectRatio::Square | RouterAspectRatio::SquareHd => E::OneByOne,
     RouterAspectRatio::WideFiveByFour => E::FiveByFour,
     RouterAspectRatio::WideFourByThree => E::FourByThree,
@@ -190,15 +154,11 @@ fn plan_edit_aspect_ratio(
 
 // ── Image inputs ──
 
-fn resolve_image_urls(
-  image_inputs: Option<ImageListRef>,
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_image_urls(image_inputs: Option<ImageListRef>) -> Result<Vec<String>, ArtcraftRouterError> {
   match image_inputs {
     None => Ok(vec![]),
     Some(ImageListRef::Urls(urls)) => Ok(urls),
-    Some(ImageListRef::MediaFileTokens(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
+    Some(ImageListRef::MediaFileTokens(_)) => Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls)),
   }
 }
 
@@ -209,41 +169,18 @@ mod tests {
   use crate::api::router_provider::RouterProvider;
 
   fn base_builder() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::NanoBananaPro,
-      provider: RouterProvider::Fal,
-      prompt: Some("a cat in space".to_string()),
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::NanoBananaPro, provider: RouterProvider::Fal, prompt: Some("a cat in space".to_string()), image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   fn unwrap_t2i(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> NanoBananaProTextToImageRequest {
-    let ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::FalNanoBananaPro(
-        FalNanoBananaProRequestState::TextToImage(req)
-      )
-    ) = result.expect("build should succeed") else {
+    let ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalNanoBananaPro(FalNanoBananaProRequestState::TextToImage(req))) = result.expect("build should succeed") else {
       panic!("expected TextToImage variant")
     };
     req
   }
 
   fn unwrap_edit(result: Result<ImageGenerationDraftOrRequest, ArtcraftRouterError>) -> NanoBananaProEditImageRequest {
-    let ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::FalNanoBananaPro(
-        FalNanoBananaProRequestState::EditImage(req)
-      )
-    ) = result.expect("build should succeed") else {
+    let ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::FalNanoBananaPro(FalNanoBananaProRequestState::EditImage(req))) = result.expect("build should succeed") else {
       panic!("expected EditImage variant")
     };
     req
@@ -263,10 +200,7 @@ mod tests {
 
     #[test]
     fn urls_yield_edit_image() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), ..base_builder() };
       let result = build_fal_nano_banana_pro(builder);
       let req = unwrap_edit(result);
       assert_eq!(req.image_urls, vec!["https://example.com/img.jpg"]);
@@ -274,15 +208,9 @@ mod tests {
 
     #[test]
     fn media_tokens_return_error() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::MediaFileTokens(vec![])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::MediaFileTokens(vec![])), ..base_builder() };
       let result = build_fal_nano_banana_pro(builder);
-      assert!(matches!(
-        result,
-        Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-      ));
+      assert!(matches!(result, Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))));
     }
   }
 
@@ -299,56 +227,33 @@ mod tests {
 
     #[test]
     fn explicit_three() {
-      let builder = GenerateImageRequestBuilder {
-        image_batch_count: Some(3),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_batch_count: Some(3), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.num_images, NanoBananaProTextToImageNumImages::Three));
     }
 
     #[test]
     fn zero_is_error() {
-      let builder = GenerateImageRequestBuilder {
-        image_batch_count: Some(0),
-        ..base_builder()
-      };
-      assert!(matches!(
-        build_fal_nano_banana_pro(builder),
-        Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))
-      ));
+      let builder = GenerateImageRequestBuilder { image_batch_count: Some(0), ..base_builder() };
+      assert!(matches!(build_fal_nano_banana_pro(builder), Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations))));
     }
 
     #[test]
     fn over_four_error_out() {
-      let builder = GenerateImageRequestBuilder {
-        image_batch_count: Some(7),
-        ..base_builder()
-      };
-      assert!(matches!(
-        build_fal_nano_banana_pro(builder),
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { .. }))
-      ));
+      let builder = GenerateImageRequestBuilder { image_batch_count: Some(7), ..base_builder() };
+      assert!(matches!(build_fal_nano_banana_pro(builder), Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { .. }))));
     }
 
     #[test]
     fn over_four_clamps_with_upgrade() {
-      let builder = GenerateImageRequestBuilder {
-        image_batch_count: Some(7),
-        request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_batch_count: Some(7), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.num_images, NanoBananaProTextToImageNumImages::Four));
     }
 
     #[test]
     fn edit_mode_num_images() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-        image_batch_count: Some(2),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), image_batch_count: Some(2), ..base_builder() };
       let req = unwrap_edit(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.num_images, NanoBananaProEditImageNumImages::Two));
     }
@@ -367,30 +272,21 @@ mod tests {
 
     #[test]
     fn one_k_maps_to_one_k() {
-      let builder = GenerateImageRequestBuilder {
-        resolution: Some(RouterResolution::OneK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { resolution: Some(RouterResolution::OneK), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProTextToImageResolution::OneK)));
     }
 
     #[test]
     fn two_k_maps_to_two_k() {
-      let builder = GenerateImageRequestBuilder {
-        resolution: Some(RouterResolution::TwoK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { resolution: Some(RouterResolution::TwoK), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProTextToImageResolution::TwoK)));
     }
 
     #[test]
     fn four_k_maps_to_four_k() {
-      let builder = GenerateImageRequestBuilder {
-        resolution: Some(RouterResolution::FourK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { resolution: Some(RouterResolution::FourK), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProTextToImageResolution::FourK)));
     }
@@ -398,31 +294,21 @@ mod tests {
     #[test]
     fn three_k_rounds_down_to_two_k() {
       // Match v1's downgrade behavior: 3K → 2K (cheaper, no 3K native support).
-      let builder = GenerateImageRequestBuilder {
-        resolution: Some(RouterResolution::ThreeK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { resolution: Some(RouterResolution::ThreeK), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProTextToImageResolution::TwoK)));
     }
 
     #[test]
     fn half_k_rounds_to_one_k() {
-      let builder = GenerateImageRequestBuilder {
-        resolution: Some(RouterResolution::HalfK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { resolution: Some(RouterResolution::HalfK), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProTextToImageResolution::OneK)));
     }
 
     #[test]
     fn edit_mode_resolution() {
-      let builder = GenerateImageRequestBuilder {
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-        resolution: Some(RouterResolution::FourK),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), resolution: Some(RouterResolution::FourK), ..base_builder() };
       let req = unwrap_edit(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.resolution, Some(NanoBananaProEditImageResolution::FourK)));
     }
@@ -441,62 +327,42 @@ mod tests {
 
     #[test]
     fn square_maps_to_one_by_one() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::Square),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Square), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.aspect_ratio, Some(NanoBananaProTextToImageAspectRatio::OneByOne)));
     }
 
     #[test]
     fn wide_sixteen_by_nine() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.aspect_ratio, Some(NanoBananaProTextToImageAspectRatio::SixteenByNine)));
     }
 
     #[test]
     fn tall_nine_by_sixteen() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.aspect_ratio, Some(NanoBananaProTextToImageAspectRatio::NineBySixteen)));
     }
 
     #[test]
     fn auto_yields_none_for_t2i() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::Auto),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Auto), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert!(req.aspect_ratio.is_none());
     }
 
     #[test]
     fn auto_yields_auto_for_edit() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::Auto),
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::Auto), image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), ..base_builder() };
       let req = unwrap_edit(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.aspect_ratio, Some(NanoBananaProEditImageAspectRatio::Auto)));
     }
 
     #[test]
     fn edit_square() {
-      let builder = GenerateImageRequestBuilder {
-        aspect_ratio: Some(RouterAspectRatio::SquareHd),
-        image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { aspect_ratio: Some(RouterAspectRatio::SquareHd), image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/img.jpg".to_string()])), ..base_builder() };
       let req = unwrap_edit(build_fal_nano_banana_pro(builder));
       assert!(matches!(req.aspect_ratio, Some(NanoBananaProEditImageAspectRatio::OneByOne)));
     }
@@ -509,20 +375,14 @@ mod tests {
 
     #[test]
     fn prompt_is_passed_through() {
-      let builder = GenerateImageRequestBuilder {
-        prompt: Some("my custom prompt".to_string()),
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { prompt: Some("my custom prompt".to_string()), ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert_eq!(req.prompt, "my custom prompt");
     }
 
     #[test]
     fn missing_prompt_defaults_to_empty() {
-      let builder = GenerateImageRequestBuilder {
-        prompt: None,
-        ..base_builder()
-      };
+      let builder = GenerateImageRequestBuilder { prompt: None, ..base_builder() };
       let req = unwrap_t2i(build_fal_nano_banana_pro(builder));
       assert_eq!(req.prompt, "");
     }

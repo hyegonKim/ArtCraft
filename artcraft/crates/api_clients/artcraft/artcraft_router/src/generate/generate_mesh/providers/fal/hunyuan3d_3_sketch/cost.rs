@@ -14,9 +14,7 @@ impl FalHunyuan3d3SketchCostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -38,50 +36,29 @@ mod tests {
 
   #[test]
   fn pbr_adds_fifteen_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      enable_pbr: Some(true),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { enable_pbr: Some(true), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 38 + 15);
   }
 
   #[test]
   fn face_count_adds_fifteen_cents() {
-    let builder = GenerateMeshRequestBuilder {
-      face_count: Some(100_000),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { face_count: Some(100_000), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 38 + 15);
   }
 
   #[test]
   fn all_add_ons_stack() {
-    let builder = GenerateMeshRequestBuilder {
-      enable_pbr: Some(true),
-      face_count: Some(100_000),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { enable_pbr: Some(true), face_count: Some(100_000), ..base_builder() };
     assert_eq!(estimate_usd_cents(builder), 38 + 15 + 15);
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3Sketch,
-      provider: RouterProvider::Fal,
-      prompt: Some("a red ceramic teapot".to_string()),
-      reference_images: Some(ImageListRef::Urls(vec!["https://example.com/sketch.png".to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3Sketch, provider: RouterProvider::Fal, prompt: Some("a red ceramic teapot".to_string()), reference_images: Some(ImageListRef::Urls(vec!["https://example.com/sketch.png".to_string()])), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

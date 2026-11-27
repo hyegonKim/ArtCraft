@@ -37,19 +37,12 @@ pub struct GenerateSora2VideoResponse {
   pub task_id: TaskId,
 }
 
-pub (crate) async fn generate_sora2_video(
-  args: GenerateSora2VideoArgs<'_>,
-) -> Result<GenerateSora2VideoResponse, SoraError> {
-
+pub(crate) async fn generate_sora2_video(args: GenerateSora2VideoArgs<'_>) -> Result<GenerateSora2VideoResponse, SoraError> {
   let client = Client::new();
 
-  let authorization_header = args.credentials.jwt_bearer_token.as_ref()
-      .ok_or(SoraClientError::NoBearerTokenForRequest)?
-      .to_authorization_header_value();
+  let authorization_header = args.credentials.jwt_bearer_token.as_ref().ok_or(SoraClientError::NoBearerTokenForRequest)?.to_authorization_header_value();
 
-  let sentinel_token = args.credentials.sora_sentinel_token
-      .as_ref()
-      .ok_or(SoraClientError::NoSentinelTokenForRequest)?;
+  let sentinel_token = args.credentials.sora_sentinel_token.as_ref().ok_or(SoraClientError::NoSentinelTokenForRequest)?;
 
   let sentinel_token = sentinel_token.to_request_header_json()?;
 
@@ -58,23 +51,7 @@ pub (crate) async fn generate_sora2_video(
   // TODO: Make the sec-* headers match the user agent and platform
   // TODO: device id
   //-H 'oai-device-id: 7c216860-5b73-4e63-983f-142dbcae1809' \
-  let mut request_builder = client.post(GENERATE_SORA_2_VIDEO_URL)
-      .header(ACCEPT, "*/*")
-      .header("priority", "u=1, i")
-      .header(REFERER, "https://sora.chatgpt.com/explore")
-      .header(ORIGIN, "https://sora.chatgpt.com")
-      .header(ACCEPT_LANGUAGE, "en-US,en;q=0.9")
-      .header(USER_AGENT, CLIENT_USER_AGENT)
-      .header(COOKIE, &cookie)
-      .header("OpenAI-Sentinel-Token", sentinel_token)
-      .header(AUTHORIZATION, &authorization_header)
-      .header(CONTENT_TYPE, "application/json")
-      .header("sec-ch-ua", "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"")
-      .header("sec-ch-ua-mobile", "?0")
-      .header("sec-ch-ua-platform", "macOS")
-      .header("sec-fetch-dest", "empty")
-      .header("sec-fetch-mode", "cors")
-      .header("sec-fetch-site", "same-origin");
+  let mut request_builder = client.post(GENERATE_SORA_2_VIDEO_URL).header(ACCEPT, "*/*").header("priority", "u=1, i").header(REFERER, "https://sora.chatgpt.com/explore").header(ORIGIN, "https://sora.chatgpt.com").header(ACCEPT_LANGUAGE, "en-US,en;q=0.9").header(USER_AGENT, CLIENT_USER_AGENT).header(COOKIE, &cookie).header("OpenAI-Sentinel-Token", sentinel_token).header(AUTHORIZATION, &authorization_header).header(CONTENT_TYPE, "application/json").header("sec-ch-ua", "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"").header("sec-ch-ua-mobile", "?0").header("sec-ch-ua-platform", "macOS").header("sec-fetch-dest", "empty").header("sec-fetch-mode", "cors").header("sec-fetch-site", "same-origin");
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
@@ -88,67 +65,38 @@ pub (crate) async fn generate_sora2_video(
   let inpaint_items;
 
   if let Some(media_ids) = args.image_reference_media_ids {
-    inpaint_items = media_ids.iter()
-        .map(|item_id| InpaintItem {
-          kind: "upload".to_string(),
-          upload_id: item_id.to_string(),
-        })
-        .collect();
+    inpaint_items = media_ids.iter().map(|item_id| InpaintItem { kind: "upload".to_string(), upload_id: item_id.to_string() }).collect();
   } else {
     inpaint_items = Vec::new();
   }
 
-  let request_body = HttpCreateRequest {
-    kind: "video".to_string(),
-    prompt: args.prompt.to_string(),
-    title: None,
-    orientation: orientation.to_string(),
-    size: "small".to_string(),
-    n_frames: 300,
-    inpaint_items,
-    cameo_ids: None,
-    cameo_replacements: None,
-    model: "sy_8".to_string(),
-    style_id: None,
-    audio_caption: None,
-    audio_transcript: None,
-    video_caption: None,
-    storyboard_id: None,
-  };
+  let request_body = HttpCreateRequest { kind: "video".to_string(), prompt: args.prompt.to_string(), title: None, orientation: orientation.to_string(), size: "small".to_string(), n_frames: 300, inpaint_items, cameo_ids: None, cameo_replacements: None, model: "sy_8".to_string(), style_id: None, audio_caption: None, audio_transcript: None, video_caption: None, storyboard_id: None };
 
-  let http_request = request_builder.json(&request_body)
-      .build()
-      .map_err(|err| {
-        error!("Error building Sora image generation HTTP request: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let http_request = request_builder.json(&request_body).build().map_err(|err| {
+    error!("Error building Sora image generation HTTP request: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during Sora image generation request: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during Sora image generation request: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = &response.text().await
-      .map_err(|err| {
-        error!("Error reading Sora image generation response body: {:?}", err);
-        SoraClientError::WreqClientError(err)
-      })?;
+  let response_body = &response.text().await.map_err(|err| {
+    error!("Error reading Sora image generation response body: {:?}", err);
+    SoraClientError::WreqClientError(err)
+  })?;
 
   if !status.is_success() {
     error!("Sora image generation request returned an error (code {}) : {:?}", status.as_u16(), response_body);
     return Err(classify_general_http_status_code_and_body(status, response_body));
   }
 
-  let response : HttpCreateResponse = serde_json::from_str(response_body)
-      .map_err(|err| SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let response: HttpCreateResponse = serde_json::from_str(response_body).map_err(|err| SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  Ok(GenerateSora2VideoResponse {
-    task_id: response.id,
-  })
+  Ok(GenerateSora2VideoResponse { task_id: response.id })
 }
 
 #[cfg(test)]

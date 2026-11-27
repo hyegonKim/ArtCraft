@@ -9,7 +9,7 @@ pub async fn wait_for_image_gen_status(task_id: &String, creds: &SoraCredentialS
     // before: Some(task_id.clone()),
   };
   let retry_limit = retry_limit.unwrap_or(10);
-  
+
   for _ in 0..retry_limit {
     tokio::time::sleep(std::time::Duration::from_secs(10)).await;
 

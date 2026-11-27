@@ -25,7 +25,7 @@ use wreq::header::{ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, AUTHORIZATION, CACH
 use wreq::Client;
 use wreq_util::Emulation;
 
-const BASE_URL : &str = "https://api.worldlabs.ai/api/v1/objects";
+const BASE_URL: &str = "https://api.worldlabs.ai/api/v1/objects";
 
 // Note: WorldLabs is phasing out the old URL scheme:
 // const BASE_URL : &str = "https://marble2-kgw-prod-iac1.wlt-ai.art/api/v1/objects";
@@ -50,78 +50,49 @@ pub struct BeginObjectImageUploadResponse {
 /// This request follows object attachment and signals upload. It returns the upload URL.
 /// Request #3 (of ~10)
 pub async fn begin_object_image_upload(args: BeginObjectImageUploadArgs<'_>) -> Result<BeginObjectImageUploadResponse, WorldLabsError> {
-  let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| WorldLabsClientError::WreqClientError(err))?;
 
   let url = get_url(args.upload_id);
 
   debug!("Requesting URL: {}", url);
 
-  let mut request_builder = client.post(url)
-      .header(ACCEPT, ACCEPT_ALL)
-      .header(ACCEPT_LANGUAGE, "en-US,en;q=0.5")
-      .header(ACCEPT_ENCODING, "gzip, deflate, br, zstd")
-      .header(REFERER, REFERER_VALUE)
-      .header(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
-      .header(AUTHORIZATION, args.bearer_token.to_bearer_token_header_string())
-      .header(ORIGIN, ORIGIN_VALUE)
-      .header(SEC_GPC, "1")
-      .header(CONNECTION, CONNECTION_KEEP_ALIVE)
-      .header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY)
-      .header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS)
-      .header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE)
-      .header(PRIORITY, PRIORITY_4)
-      .header(PRAGMA, PRAGMA_NO_CACHE)
-      .header(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE)
-      .header(CONTENT_LENGTH, 0)
-      .header(TE, TE_TRAILERS);
+  let mut request_builder = client.post(url).header(ACCEPT, ACCEPT_ALL).header(ACCEPT_LANGUAGE, "en-US,en;q=0.5").header(ACCEPT_ENCODING, "gzip, deflate, br, zstd").header(REFERER, REFERER_VALUE).header(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON).header(AUTHORIZATION, args.bearer_token.to_bearer_token_header_string()).header(ORIGIN, ORIGIN_VALUE).header(SEC_GPC, "1").header(CONNECTION, CONNECTION_KEEP_ALIVE).header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY).header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS).header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE).header(PRIORITY, PRIORITY_4).header(PRAGMA, PRAGMA_NO_CACHE).header(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE).header(CONTENT_LENGTH, 0).header(TE, TE_TRAILERS);
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let http_request = request_builder
-      .build()
-      .map_err(|err| {
-        error!("Error building request: {:?}", err);
-        WorldLabsClientError::WreqClientError(err)
-      })?;
+  let http_request = request_builder.build().map_err(|err| {
+    error!("Error building request: {:?}", err);
+    WorldLabsClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during request execution: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during request execution: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-      .await
-      .map_err(|err| {
-        error!("Error reading response body: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   // TODO: Handle errors (Cloudflare, Grok, etc.)
   if !status.is_success() {
     error!("Request returned an error (code {}) : {:?}", status.as_u16(), response_body);
     //return Err(classify_general_http_status_code_and_body(status, response_body));
-    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body}.into())
+    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body }.into());
   }
 
   debug!("Response body (200) (ready for Google upload): {}", response_body);
 
-  let response : RawResponse = serde_json::from_str(&response_body)
-      .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let response: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
   info!("Curl command: {}", response.curl_example);
 
-  Ok(BeginObjectImageUploadResponse {
-    upload_url: response.upload_url,
-  })
+  Ok(BeginObjectImageUploadResponse { upload_url: response.upload_url })
 }
 
 #[derive(Deserialize)]

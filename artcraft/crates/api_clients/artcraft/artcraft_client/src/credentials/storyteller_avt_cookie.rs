@@ -1,6 +1,6 @@
 use cookie::Cookie;
 
-const AVT_COOKIE_NAME : &str = "visitor";
+const AVT_COOKIE_NAME: &str = "visitor";
 
 /// The "anonymous visitor token" cookie allows users to interact with
 /// the service in a logged-out state with some continuity.
@@ -33,7 +33,7 @@ impl StorytellerAvtCookie {
   pub fn to_string(&self) -> String {
     self.cookie.clone()
   }
-  
+
   pub fn equals(&self, other: &Self) -> bool {
     self.cookie == other.cookie
   }

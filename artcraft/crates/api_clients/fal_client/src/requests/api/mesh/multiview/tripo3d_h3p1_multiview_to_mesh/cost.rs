@@ -1,6 +1,4 @@
-use crate::requests::api::mesh::image::tripo3d_h3p1_image_to_mesh::api::{
-  Tripo3dH3p1ImageGeometryQuality, Tripo3dH3p1ImageTextureQuality,
-};
+use crate::requests::api::mesh::image::tripo3d_h3p1_image_to_mesh::api::{Tripo3dH3p1ImageGeometryQuality, Tripo3dH3p1ImageTextureQuality};
 use crate::requests::api::mesh::multiview::tripo3d_h3p1_multiview_to_mesh::api::Tripo3dH3p1MultiviewToMeshRequest;
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
@@ -40,23 +38,7 @@ mod tests {
   use super::*;
 
   fn base_request() -> Tripo3dH3p1MultiviewToMeshRequest {
-    Tripo3dH3p1MultiviewToMeshRequest {
-      image_urls: vec![
-        "https://example.com/front.jpg".to_string(),
-        "https://example.com/left.jpg".to_string(),
-      ],
-      face_limit: None,
-      texture: None,
-      pbr: None,
-      model_seed: None,
-      texture_seed: None,
-      texture_quality: None,
-      geometry_quality: None,
-      texture_alignment: None,
-      auto_size: None,
-      orientation: None,
-      quad: None,
-    }
+    Tripo3dH3p1MultiviewToMeshRequest { image_urls: vec!["https://example.com/front.jpg".to_string(), "https://example.com/left.jpg".to_string()], face_limit: None, texture: None, pbr: None, model_seed: None, texture_seed: None, texture_quality: None, geometry_quality: None, texture_alignment: None, auto_size: None, orientation: None, quad: None }
   }
 
   #[test]

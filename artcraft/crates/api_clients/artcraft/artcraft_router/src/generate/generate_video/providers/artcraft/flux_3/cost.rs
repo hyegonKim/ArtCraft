@@ -23,23 +23,11 @@ impl ArtcraftFlux3CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    let rate = if self.is_1080p {
-      HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-    } else {
-      LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC
-    };
+    let rate = if self.is_1080p { HIGH_RES_RATE_HUNDREDTH_CENTS_PER_SEC } else { LOW_RES_RATE_HUNDREDTH_CENTS_PER_SEC };
     // Round up to the next whole cent.
     let cost_in_usd_cents = (rate * self.duration_seconds).div_ceil(100);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -49,14 +37,8 @@ impl ArtcraftFlux3CostState {
 fn is_1080p(resolution: Option<CommonResolutionEnum>) -> bool {
   match resolution {
     None => false, // defaults to 720p
-    Some(CommonResolutionEnum::TenEightyP)
-    | Some(CommonResolutionEnum::OneK)
-    | Some(CommonResolutionEnum::TwoK)
-    | Some(CommonResolutionEnum::ThreeK)
-    | Some(CommonResolutionEnum::FourK) => true,
-    Some(CommonResolutionEnum::HalfK)
-    | Some(CommonResolutionEnum::FourEightyP)
-    | Some(CommonResolutionEnum::SevenTwentyP) => false,
+    Some(CommonResolutionEnum::TenEightyP) | Some(CommonResolutionEnum::OneK) | Some(CommonResolutionEnum::TwoK) | Some(CommonResolutionEnum::ThreeK) | Some(CommonResolutionEnum::FourK) => true,
+    Some(CommonResolutionEnum::HalfK) | Some(CommonResolutionEnum::FourEightyP) | Some(CommonResolutionEnum::SevenTwentyP) => false,
   }
 }
 
@@ -72,13 +54,19 @@ mod tests {
   use crate::generate::generate_video::providers::artcraft::flux_3::cost::ArtcraftFlux3CostState;
 
   #[test]
-  fn default_settings_5s_is_98() { assert_eq!(cost_cents(Some(5), None), 98); }
+  fn default_settings_5s_is_98() {
+    assert_eq!(cost_cents(Some(5), None), 98);
+  }
 
   #[test]
-  fn default_duration_is_5s() { assert_eq!(cost_cents(None, None), 98); }
+  fn default_duration_is_5s() {
+    assert_eq!(cost_cents(None, None), 98);
+  }
 
   #[test]
-  fn low_res_20s_is_391() { assert_eq!(cost_cents(Some(20), Some(RouterResolution::SevenTwentyP)), 391); }
+  fn low_res_20s_is_391() {
+    assert_eq!(cost_cents(Some(20), Some(RouterResolution::SevenTwentyP)), 391);
+  }
 
   #[test]
   fn four_eighty_p_lands_on_low_tier() {
@@ -86,10 +74,14 @@ mod tests {
   }
 
   #[test]
-  fn high_res_5s_is_167() { assert_eq!(cost_cents(Some(5), Some(RouterResolution::TenEightyP)), 167); }
+  fn high_res_5s_is_167() {
+    assert_eq!(cost_cents(Some(5), Some(RouterResolution::TenEightyP)), 167);
+  }
 
   #[test]
-  fn high_res_10s_is_334() { assert_eq!(cost_cents(Some(10), Some(RouterResolution::TenEightyP)), 334); }
+  fn high_res_10s_is_334() {
+    assert_eq!(cost_cents(Some(10), Some(RouterResolution::TenEightyP)), 334);
+  }
 
   #[test]
   fn odd_duration_rounds_up_to_whole_cents() {
@@ -105,18 +97,8 @@ mod tests {
     assert!(!super::is_1080p(Some(CommonResolutionEnum::FourEightyP)));
   }
 
-  fn cost_cents(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-  ) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Flux3,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      ..Default::default()
-    };
+  fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>) -> u64 {
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Flux3, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, resolution, ..Default::default() };
     let state = build_artcraft_flux_3_state(b).unwrap();
     ArtcraftFlux3CostState::from_request(&state).estimate_cost().cost_in_usd_cents.unwrap()
   }

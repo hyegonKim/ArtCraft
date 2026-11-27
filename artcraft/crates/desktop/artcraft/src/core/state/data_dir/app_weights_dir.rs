@@ -10,9 +10,7 @@ impl DataSubdir for AppWeightsDir {
   const DIRECTORY_NAME: &'static str = "weights";
 
   fn new_from<P: AsRef<Path>>(dir: P) -> Self {
-    Self {
-      path: dir.as_ref().to_path_buf(),
-    }
+    Self { path: dir.as_ref().to_path_buf() }
   }
 
   fn path(&self) -> &Path {

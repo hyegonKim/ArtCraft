@@ -97,16 +97,7 @@ mod tests {
 
   #[test]
   fn test_serialization_tagging1() {
-    let request = EstimateVideoCostRequest {
-      model: CommonVideoModel::GrokVideo,
-      provider: GenerationProvider::Artcraft,
-      generation_mode: GenerationMode::TextToVideo,
-      aspect_ratio: None,
-      resolution: None,
-      duration_seconds: None,
-      video_batch_count: None,
-      generate_audio: None,
-    };
+    let request = EstimateVideoCostRequest { model: CommonVideoModel::GrokVideo, provider: GenerationProvider::Artcraft, generation_mode: GenerationMode::TextToVideo, aspect_ratio: None, resolution: None, duration_seconds: None, video_batch_count: None, generate_audio: None };
     let serialized = serde_json::to_string(&request).unwrap();
     assert!(serialized.contains("\"generation_mode\":{\"type\":\"text_to_video\"}"));
     //assert_eq!(serialized, "{}");
@@ -114,16 +105,7 @@ mod tests {
 
   #[test]
   fn test_serialization_tagging2() {
-    let request = EstimateVideoCostRequest {
-      model: CommonVideoModel::GrokVideo,
-      provider: GenerationProvider::Artcraft,
-      generation_mode: GenerationMode::ReferenceImageToVideo { count: 1 },
-      aspect_ratio: None,
-      resolution: None,
-      duration_seconds: None,
-      video_batch_count: None,
-      generate_audio: None,
-    };
+    let request = EstimateVideoCostRequest { model: CommonVideoModel::GrokVideo, provider: GenerationProvider::Artcraft, generation_mode: GenerationMode::ReferenceImageToVideo { count: 1 }, aspect_ratio: None, resolution: None, duration_seconds: None, video_batch_count: None, generate_audio: None };
     let serialized = serde_json::to_string(&request).unwrap();
     assert!(serialized.contains("\"generation_mode\":{\"type\":\"reference_image_to_video\",\"count\":1}"));
   }

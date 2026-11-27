@@ -11,7 +11,6 @@ pub enum AudioGenerationDraftOrRequest {
 }
 
 impl AudioGenerationDraftOrRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::Draft(draft) => draft.get_provider(),

@@ -2,9 +2,9 @@
 //! Setup set it, new documents start in the preference), Stroke and Type are preferences, and the
 //! canvas measurement labels follow them.
 
+use crate::{Session, ViewInfo};
 use serde_json::json;
 use vectorcraft_doc::{NodeId, NodeKind, Unit};
-use crate::{Session, ViewInfo};
 use vectorcraft_tools::{Mods, Overlay, PointerEvent, PointerKind};
 
 use crate::cmd::prefscmds::{EAST_ASIAN_UNITS, PREF_SPECS, PrefKind, UNITS};

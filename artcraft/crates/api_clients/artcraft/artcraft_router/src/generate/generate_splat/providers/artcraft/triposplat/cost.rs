@@ -32,20 +32,8 @@ mod tests {
 
   #[test]
   fn flat_seven_cents() {
-    let builder = GenerateSplatRequestBuilder {
-      model: RouterSplatModel::TripoSplat,
-      provider: RouterProvider::Artcraft,
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_test123".to_string()),
-      ])),
-      ..Default::default()
-    };
-    let cost = builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present");
+    let builder = GenerateSplatRequestBuilder { model: RouterSplatModel::TripoSplat, provider: RouterProvider::Artcraft, reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_test123".to_string())])), ..Default::default() };
+    let cost = builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present");
     assert_eq!(cost, 7);
   }
 }

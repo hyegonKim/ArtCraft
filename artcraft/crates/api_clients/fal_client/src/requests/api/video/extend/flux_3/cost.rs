@@ -1,7 +1,5 @@
 use crate::requests::api::video::extend::flux_3::api::Flux3ExtendVideoRequest;
-use crate::requests::api::video::text::flux_3::cost::{
-  flux_3_estimated_duration_secs, flux_3_is_1080p, flux_3_video_cost_cents,
-};
+use crate::requests::api::video::text::flux_3::cost::{flux_3_estimated_duration_secs, flux_3_is_1080p, flux_3_video_cost_cents};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Flux 3 extend-video pricing (see https://fal.ai/models/blackforestlabs/flux-3/extend-video):
@@ -17,11 +15,7 @@ const EXTEND_RATE_1080P_CENTS_PER_SEC: u64 = 53; // $0.53/sec
 impl FalRequestCostCalculator for Flux3ExtendVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     let duration_secs = flux_3_estimated_duration_secs(self.duration);
-    let rate = if flux_3_is_1080p(self.resolution) {
-      EXTEND_RATE_1080P_CENTS_PER_SEC
-    } else {
-      EXTEND_RATE_720P_CENTS_PER_SEC
-    };
+    let rate = if flux_3_is_1080p(self.resolution) { EXTEND_RATE_1080P_CENTS_PER_SEC } else { EXTEND_RATE_720P_CENTS_PER_SEC };
     flux_3_video_cost_cents(rate, duration_secs)
   }
 }
@@ -31,19 +25,8 @@ mod tests {
   use super::*;
   use crate::requests::api::video::text::flux_3::api::{Flux3Duration, Flux3Resolution};
 
-  fn make_request(
-    duration: Option<Flux3Duration>,
-    resolution: Option<Flux3Resolution>,
-  ) -> Flux3ExtendVideoRequest {
-    Flux3ExtendVideoRequest {
-      prompt: "test".to_string(),
-      video_url: "https://example.com/source.mp4".to_string(),
-      duration,
-      resolution,
-      aspect_ratio: None,
-      generate_audio: None,
-      safety_tolerance: None,
-    }
+  fn make_request(duration: Option<Flux3Duration>, resolution: Option<Flux3Resolution>) -> Flux3ExtendVideoRequest {
+    Flux3ExtendVideoRequest { prompt: "test".to_string(), video_url: "https://example.com/source.mp4".to_string(), duration, resolution, aspect_ratio: None, generate_audio: None, safety_tolerance: None }
   }
 
   mod cost_table {
@@ -53,9 +36,9 @@ mod tests {
     // Math: rate × secs where rate (cents) = 41 (720p) or 53 (1080p);
     // None/auto durations are estimated at the 5s floor.
     const COST_TABLE: &[(Option<Flux3Duration>, Option<Flux3Resolution>, u64)] = &[
-      (Some(Flux3Duration::Seconds(5)),  Some(Flux3Resolution::SevenTwentyP), 205),
+      (Some(Flux3Duration::Seconds(5)), Some(Flux3Resolution::SevenTwentyP), 205),
       (Some(Flux3Duration::Seconds(20)), Some(Flux3Resolution::SevenTwentyP), 820),
-      (Some(Flux3Duration::Seconds(5)),  Some(Flux3Resolution::TenEightyP), 265),
+      (Some(Flux3Duration::Seconds(5)), Some(Flux3Resolution::TenEightyP), 265),
       (Some(Flux3Duration::Seconds(20)), Some(Flux3Resolution::TenEightyP), 1060),
       // Defaults: duration=None/auto→5s estimate, resolution=None→720p
       (None, None, 205),

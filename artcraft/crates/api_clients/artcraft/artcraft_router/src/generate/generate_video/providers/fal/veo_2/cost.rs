@@ -21,15 +21,7 @@ impl FalVeo2CostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -90,20 +82,11 @@ mod tests {
   }
 
   fn cost_cents(duration_seconds: Option<u16>, has_start_frame: bool) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo2,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    };
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo2, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, ..Default::default() };
     if has_start_frame {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
     let state = build_fal_veo_2_state(b).expect("build_fal_veo_2_state");
-    FalVeo2CostState::from_request(&state)
-      .estimate_cost()
-      .cost_in_usd_cents
-      .expect("cost_in_usd_cents")
+    FalVeo2CostState::from_request(&state).estimate_cost().cost_in_usd_cents.expect("cost_in_usd_cents")
   }
 }

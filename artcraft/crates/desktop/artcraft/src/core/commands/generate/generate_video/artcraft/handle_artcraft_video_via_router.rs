@@ -21,17 +21,8 @@ use enums::common::generation_provider::GenerationProvider;
 use enums::tauri::tasks::task_type::TaskType;
 use log::{error, info};
 
-pub(super) async fn handle_artcraft_video_via_router(
-  request: &TauriGenerateVideoRequest,
-  app_env_configs: &AppEnvConfigs,
-  creds: &StorytellerCredentialSet,
-  model: RouterVideoModel,
-  generation_model: GenerationModel,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
-  let client = RouterClient::Artcraft(RouterArtcraftClient::new(
-    app_env_configs.storyteller_host.clone(),
-    creds.clone(),
-  ));
+pub(super) async fn handle_artcraft_video_via_router(request: &TauriGenerateVideoRequest, app_env_configs: &AppEnvConfigs, creds: &StorytellerCredentialSet, model: RouterVideoModel, generation_model: GenerationModel) -> Result<TaskEnqueueSuccess, GenerateError> {
+  let client = RouterClient::Artcraft(RouterArtcraftClient::new(app_env_configs.storyteller_host.clone(), creds.clone()));
 
   let start_frame = request.image_media_token.clone().map(ImageRef::MediaFileToken);
   let end_frame = request.end_frame_image_media_token.clone().map(ImageRef::MediaFileToken);
@@ -42,51 +33,18 @@ pub(super) async fn handle_artcraft_video_via_router(
 
   let reference_character_tokens = request.reference_character_tokens.clone().map(CharacterListRef::CharacterTokens);
 
-  let router_request = GenerateVideoRequestBuilder {
-    model,
-    provider: RouterProvider::Artcraft,
-    prompt: request.prompt.clone(),
-    start_frame,
-    end_frame,
-    reference_images,
-    reference_videos,
-    reference_audio,
-    reference_character_tokens,
-    resolution: request.resolution,
-    aspect_ratio: request.aspect_ratio,
-    bitrate: None,
-    duration_seconds: request.duration_seconds,
-    video_batch_count: request.video_batch_count,
-    generate_audio: request.generate_audio,
-    total_reference_video_input_seconds: None,
-    request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-    idempotency_token: None,
-    negative_prompt: None,
-  };
+  let router_request = GenerateVideoRequestBuilder { model, provider: RouterProvider::Artcraft, prompt: request.prompt.clone(), start_frame, end_frame, reference_images, reference_videos, reference_audio, reference_character_tokens, resolution: request.resolution, aspect_ratio: request.aspect_ratio, bitrate: None, duration_seconds: request.duration_seconds, video_batch_count: request.video_batch_count, generate_audio: request.generate_audio, total_reference_video_input_seconds: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, idempotency_token: None, negative_prompt: None };
 
   info!("Building request for artcraft_router (v2 pipeline)...");
   let response = generate_via_v2(router_request, &client).await?;
 
-  let job_id = response.get_artcraft_payload()
-    .map(|p| p.inference_job_token.to_string())
-    .ok_or(GenerateError::ResponseHadNoJobTokens)?;
+  let job_id = response.get_artcraft_payload().map(|p| p.inference_job_token.to_string()).ok_or(GenerateError::ResponseHadNoJobTokens)?;
 
-  Ok(TaskEnqueueSuccess {
-    task_type: TaskType::VideoGeneration,
-    model: Some(generation_model),
-    provider: GenerationProvider::Artcraft,
-    provider_job_id: Some(job_id),
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { task_type: TaskType::VideoGeneration, model: Some(generation_model), provider: GenerationProvider::Artcraft, provider_job_id: Some(job_id), maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 /// V2 pipeline: build2 → send_request (Artcraft skips draft phase).
-async fn generate_via_v2(
-  router_request: GenerateVideoRequestBuilder,
-  client: &RouterClient,
-) -> Result<GenerateVideoResponse, GenerateError> {
+async fn generate_via_v2(router_request: GenerateVideoRequestBuilder, client: &RouterClient) -> Result<GenerateVideoResponse, GenerateError> {
   let draft_or_request = router_request.build2()?;
 
   let request = match draft_or_request {
@@ -94,7 +52,7 @@ async fn generate_via_v2(
     VideoGenerationDraftOrRequest::Draft(_) => {
       error!("Unexpected Draft variant for Artcraft provider");
       return Err(GenerateError::NotYetImplemented("Artcraft provider should not produce a draft request".to_string()));
-    }
+    },
   };
 
   let response = request.send_request(client).await.map_err(|err| {

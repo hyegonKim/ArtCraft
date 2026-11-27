@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::enhance::flux_3_draft_enhance::raw_request::{
-  Flux3DraftEnhanceInput, Flux3DraftEnhanceOutput,
-};
+use crate::requests::api::video::enhance::flux_3_draft_enhance::raw_request::{Flux3DraftEnhanceInput, Flux3DraftEnhanceOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// Re-render a Flux 3 Draft generation at full quality (1080p, with
@@ -29,10 +27,7 @@ impl FalEndpoint for Flux3DraftEnhanceRequest {
   type RawResponse = Flux3DraftEnhanceOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      draft_cache_url: self.draft_cache_url.clone(),
-      safety_tolerance: self.safety_tolerance,
-    })
+    Ok(Self::RawRequest { draft_cache_url: self.draft_cache_url.clone(), safety_tolerance: self.safety_tolerance })
   }
 }
 
@@ -55,11 +50,7 @@ mod tests {
     // Paste a `draft_cache` URL from a recent Flux 3 Draft generation here.
     let draft_cache_url = read_to_string("/tmp/flux3_draft_cache_url.txt")?;
 
-    let request = Flux3DraftEnhanceRequest {
-      draft_cache_url: draft_cache_url.trim().to_string(),
-      safety_tolerance: None,
-      expected_duration_seconds: Some(5),
-    };
+    let request = Flux3DraftEnhanceRequest { draft_cache_url: draft_cache_url.trim().to_string(), safety_tolerance: None, expected_duration_seconds: Some(5) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -71,11 +62,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Flux3DraftEnhanceRequest {
-      draft_cache_url: "https://example.com/cache.bin".to_string(),
-      safety_tolerance: Some(3),
-      expected_duration_seconds: Some(10),
-    };
+    let request = Flux3DraftEnhanceRequest { draft_cache_url: "https://example.com/cache.bin".to_string(), safety_tolerance: Some(3), expected_duration_seconds: Some(10) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.draft_cache_url, "https://example.com/cache.bin");
     assert_eq!(raw.safety_tolerance, Some(3));
@@ -85,15 +72,14 @@ mod tests {
   /// reach the wire.
   #[test]
   fn expected_duration_is_not_serialized() {
-    let request = Flux3DraftEnhanceRequest {
-      draft_cache_url: "https://example.com/cache.bin".to_string(),
-      safety_tolerance: None,
-      expected_duration_seconds: Some(20),
-    };
+    let request = Flux3DraftEnhanceRequest { draft_cache_url: "https://example.com/cache.bin".to_string(), safety_tolerance: None, expected_duration_seconds: Some(20) };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(json, serde_json::json!({
-      "draft_cache_url": "https://example.com/cache.bin",
-    }));
+    assert_eq!(
+      json,
+      serde_json::json!({
+        "draft_cache_url": "https://example.com/cache.bin",
+      })
+    );
   }
 
   #[test]

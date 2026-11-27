@@ -516,6 +516,7 @@ pub fn blank_presentation(size: Size, theme: Theme, title_slide: bool) -> Presen
         tags: vec![],
         kept_parts: vec![],
         guides: vec![],
+        brand_kit: None,
         raw_ext: None,
     };
     if title_slide {

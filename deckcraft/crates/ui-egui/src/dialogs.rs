@@ -74,6 +74,10 @@ fn title(id: &str) -> &'static str {
         "quit" => "DeckCraft",
         "themeColors" => "Create New Theme Colors",
         "themeFonts" => "Create New Theme Fonts",
+        "brandKit" => "Brand Kit",
+        "smartResize" => "Smart Resize",
+        "bulkCsv" => "Bulk Create from CSV",
+        "qrCode" => "Insert QR Code",
         _ => "DeckCraft",
     }
 }
@@ -211,6 +215,7 @@ mod columns;
 mod date_time;
 mod equation;
 mod export;
+mod express;
 mod find;
 mod font;
 mod grid_options;

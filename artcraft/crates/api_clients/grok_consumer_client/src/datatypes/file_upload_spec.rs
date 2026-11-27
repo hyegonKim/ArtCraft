@@ -14,5 +14,5 @@ pub enum FileUploadSpec<P: AsRef<Path>> {
     filename: String,
     /// Mime type
     mimetype: String,
-  }
+  },
 }

@@ -1,9 +1,5 @@
 use crate::api::requests::videos::video_edit::video_edit::VideoEditRequest;
-use crate::api::requests::videos::video_generation::cost::{
-  output_mills_per_second,
-  DEFAULT_VIDEO_DURATION_SECONDS,
-  INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO,
-};
+use crate::api::requests::videos::video_generation::cost::{output_mills_per_second, DEFAULT_VIDEO_DURATION_SECONDS, INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO};
 use crate::api::traits::grok_request_cost_calculator_trait::{GrokRequestCostCalculator, UsdMills};
 use crate::api::types::video_types::video_resolution::VideoResolution;
 
@@ -41,9 +37,7 @@ impl GrokRequestCostCalculator for VideoEditRequest {
   ///
   /// At the 8-second default: 8 × 80 = **640 mills (64¢)**.
   fn calculate_cost_in_mills(&self) -> UsdMills {
-    let secs = self
-      .source_video_duration_seconds_hint
-      .unwrap_or(DEFAULT_VIDEO_DURATION_SECONDS) as u64;
+    let secs = self.source_video_duration_seconds_hint.unwrap_or(DEFAULT_VIDEO_DURATION_SECONDS) as u64;
     let per_second = INPUT_MILLS_PER_SECOND_OF_SOURCE_VIDEO + output_mills_per_second(ASSUMED_RESOLUTION);
     per_second * secs
   }
@@ -56,13 +50,7 @@ mod tests {
   use crate::api::types::video_types::video_model::VideoModel;
 
   fn make_request(source_video: VideoSource, model: Option<VideoModel>) -> VideoEditRequest {
-    VideoEditRequest {
-      prompt: "test edit".to_string(),
-      source_video,
-      source_video_duration_seconds_hint: None,
-      model,
-      user: None,
-    }
+    VideoEditRequest { prompt: "test edit".to_string(), source_video, source_video_duration_seconds_hint: None, model, user: None }
   }
 
   // Default base-trait estimate assumes 8s source @ 720p, so:
@@ -72,10 +60,7 @@ mod tests {
 
   #[test]
   fn base_estimate_is_conservative_eight_seconds_seven_twenty_p() {
-    let cases = [
-      VideoSource::Url("https://example.com/v.mp4".to_string()),
-      VideoSource::FileId("file_abc".to_string()),
-    ];
+    let cases = [VideoSource::Url("https://example.com/v.mp4".to_string()), VideoSource::FileId("file_abc".to_string())];
     for source in cases {
       let req = make_request(source, None);
       assert_eq!(req.calculate_cost_in_mills(), EXPECTED_BASE_ESTIMATE_MILLS);
@@ -86,12 +71,11 @@ mod tests {
   #[test]
   fn base_estimate_is_independent_of_model() {
     let r_default = make_request(VideoSource::Url("u".to_string()), None).calculate_cost_in_mills();
-    let r_known   = make_request(VideoSource::Url("u".to_string()), Some(VideoModel::GrokImagineVideo)).calculate_cost_in_mills();
-    let r_custom  = make_request(VideoSource::Url("u".to_string()),
-      Some(VideoModel::Custom("future".to_string()))).calculate_cost_in_mills();
+    let r_known = make_request(VideoSource::Url("u".to_string()), Some(VideoModel::GrokImagineVideo)).calculate_cost_in_mills();
+    let r_custom = make_request(VideoSource::Url("u".to_string()), Some(VideoModel::Custom("future".to_string()))).calculate_cost_in_mills();
     assert_eq!(r_default, EXPECTED_BASE_ESTIMATE_MILLS);
-    assert_eq!(r_known,   EXPECTED_BASE_ESTIMATE_MILLS);
-    assert_eq!(r_custom,  EXPECTED_BASE_ESTIMATE_MILLS);
+    assert_eq!(r_known, EXPECTED_BASE_ESTIMATE_MILLS);
+    assert_eq!(r_custom, EXPECTED_BASE_ESTIMATE_MILLS);
   }
 
   #[test]
@@ -128,7 +112,7 @@ mod tests {
     fn one_second_hint() {
       let mut req = make_request(VideoSource::Url("u".to_string()), None);
       req.source_video_duration_seconds_hint = Some(1);
-      assert_eq!(req.calculate_cost_in_mills(), 80);  // 1 × 80
+      assert_eq!(req.calculate_cost_in_mills(), 80); // 1 × 80
       assert_eq!(req.calculate_cost_in_cents(), 8);
     }
 
@@ -136,7 +120,7 @@ mod tests {
     fn fifteen_second_hint() {
       let mut req = make_request(VideoSource::Url("u".to_string()), None);
       req.source_video_duration_seconds_hint = Some(15);
-      assert_eq!(req.calculate_cost_in_mills(), 1200);  // 15 × 80
+      assert_eq!(req.calculate_cost_in_mills(), 1200); // 15 × 80
       assert_eq!(req.calculate_cost_in_cents(), 120);
     }
 

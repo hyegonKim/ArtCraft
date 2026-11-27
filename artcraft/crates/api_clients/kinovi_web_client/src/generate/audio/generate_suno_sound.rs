@@ -4,9 +4,7 @@ use crate::pricing::cost::kinovi_generation_cost::KinoviGenerationCost;
 use crate::creds::kinovi_web_session::KinoviWebSession;
 use crate::error::kinovi_web_error::KinoviWebError;
 use crate::requests::kinovi_host::KinoviHost;
-use crate::requests::workflow_run_task::workflow_run_task::{
-  workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse,
-};
+use crate::requests::workflow_run_task::workflow_run_task::{workflow_run_task_custom, WorkflowRunTaskCustomArgs, WorkflowRunTaskResponse};
 
 const BUSINESS_TYPE: &str = "suno-sounds-generation";
 const MODEL: &str = "suno-sounds";
@@ -92,20 +90,10 @@ pub struct GenerateSunoSoundResponse {
 
 // ── Entry point ──
 
-pub async fn generate_suno_sound(
-  args: GenerateSunoSoundArgs<'_>,
-) -> Result<GenerateSunoSoundResponse, KinoviWebError> {
-  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs {
-    business_type: BUSINESS_TYPE,
-    api_params: build_api_params(&args.request),
-    session: args.session,
-    host_override: args.host_override,
-  }).await?;
+pub async fn generate_suno_sound(args: GenerateSunoSoundArgs<'_>) -> Result<GenerateSunoSoundResponse, KinoviWebError> {
+  let raw_response: WorkflowRunTaskResponse = workflow_run_task_custom(WorkflowRunTaskCustomArgs { business_type: BUSINESS_TYPE, api_params: build_api_params(&args.request), session: args.session, host_override: args.host_override }).await?;
 
-  Ok(GenerateSunoSoundResponse {
-    task_id: raw_response.task_id,
-    order_id: raw_response.order_id,
-  })
+  Ok(GenerateSunoSoundResponse { task_id: raw_response.task_id, order_id: raw_response.order_id })
 }
 
 // ── Wire payload ──
@@ -127,15 +115,7 @@ struct SunoSoundApiParams {
 }
 
 fn build_api_params(request: &GenerateSunoSoundRequest) -> SunoSoundApiParams {
-  SunoSoundApiParams {
-    model: MODEL,
-    prompt: request.prompt.clone(),
-    mv: MODEL_VERSION,
-    sound_type: sound_type_as_api_str(request.sound_type),
-    bpm: request.bpm,
-    key: key_as_api_str(request.key),
-    is_storage: true,
-  }
+  SunoSoundApiParams { model: MODEL, prompt: request.prompt.clone(), mv: MODEL_VERSION, sound_type: sound_type_as_api_str(request.sound_type), bpm: request.bpm, key: key_as_api_str(request.key), is_storage: true }
 }
 
 fn sound_type_as_api_str(sound_type: KinoviSunoSoundType) -> &'static str {
@@ -174,12 +154,7 @@ mod tests {
     use super::*;
 
     fn base_request() -> GenerateSunoSoundRequest {
-      GenerateSunoSoundRequest {
-        prompt: "Rain sound effects".to_string(),
-        sound_type: KinoviSunoSoundType::SingleHit,
-        bpm: None,
-        key: KinoviSunoSoundKey::Auto,
-      }
+      GenerateSunoSoundRequest { prompt: "Rain sound effects".to_string(), sound_type: KinoviSunoSoundType::SingleHit, bpm: None, key: KinoviSunoSoundKey::Auto }
     }
 
     #[test]
@@ -200,12 +175,7 @@ mod tests {
     #[test]
     fn options_do_not_affect_cost() {
       let base = base_request().calculate_costs();
-      let other = GenerateSunoSoundRequest {
-        prompt: "Thunder".to_string(),
-        sound_type: KinoviSunoSoundType::Loopable,
-        bpm: Some(180),
-        key: KinoviSunoSoundKey::DMinor,
-      }.calculate_costs();
+      let other = GenerateSunoSoundRequest { prompt: "Thunder".to_string(), sound_type: KinoviSunoSoundType::Loopable, bpm: Some(180), key: KinoviSunoSoundKey::DMinor }.calculate_costs();
       assert_eq!(base, other);
     }
   }
@@ -217,80 +187,34 @@ mod tests {
     /// which transmits "C").
     #[test]
     fn single_hit_no_bpm_auto_key() {
-      let params = build_api_params(&GenerateSunoSoundRequest {
-        prompt: "Rain sound effects".to_string(),
-        sound_type: KinoviSunoSoundType::SingleHit,
-        bpm: None,
-        key: KinoviSunoSoundKey::Auto,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-sounds","prompt":"Rain sound effects","mv":"chirp-v5-5","type":"one-shot","key":"C","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoSoundRequest { prompt: "Rain sound effects".to_string(), sound_type: KinoviSunoSoundType::SingleHit, bpm: None, key: KinoviSunoSoundKey::Auto });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-sounds","prompt":"Rain sound effects","mv":"chirp-v5-5","type":"one-shot","key":"C","isStorage":true}"#,);
     }
 
     /// Mirrors capture 8_suno_sounds_2.txt (loop, 60 BPM, D minor).
     #[test]
     fn loop_with_bpm_and_minor_key() {
-      let params = build_api_params(&GenerateSunoSoundRequest {
-        prompt: "Thunder".to_string(),
-        sound_type: KinoviSunoSoundType::Loopable,
-        bpm: Some(60),
-        key: KinoviSunoSoundKey::DMinor,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-sounds","prompt":"Thunder","mv":"chirp-v5-5","type":"loop","bpm":60,"key":"Dm","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoSoundRequest { prompt: "Thunder".to_string(), sound_type: KinoviSunoSoundType::Loopable, bpm: Some(60), key: KinoviSunoSoundKey::DMinor });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-sounds","prompt":"Thunder","mv":"chirp-v5-5","type":"loop","bpm":60,"key":"Dm","isStorage":true}"#,);
     }
 
     /// Mirrors capture 9_suno_sounds_3.txt (loop, 180 BPM, F major).
     #[test]
     fn loop_with_major_key() {
-      let params = build_api_params(&GenerateSunoSoundRequest {
-        prompt: "Plates crashing in the kitchen".to_string(),
-        sound_type: KinoviSunoSoundType::Loopable,
-        bpm: Some(180),
-        key: KinoviSunoSoundKey::FMajor,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-sounds","prompt":"Plates crashing in the kitchen","mv":"chirp-v5-5","type":"loop","bpm":180,"key":"F","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoSoundRequest { prompt: "Plates crashing in the kitchen".to_string(), sound_type: KinoviSunoSoundType::Loopable, bpm: Some(180), key: KinoviSunoSoundKey::FMajor });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-sounds","prompt":"Plates crashing in the kitchen","mv":"chirp-v5-5","type":"loop","bpm":180,"key":"F","isStorage":true}"#,);
     }
 
     /// Mirrors capture 10_suno_sounds_4.txt (single hit, 100 BPM, C minor).
     #[test]
     fn single_hit_with_bpm_and_minor_key() {
-      let params = build_api_params(&GenerateSunoSoundRequest {
-        prompt: "Car crash".to_string(),
-        sound_type: KinoviSunoSoundType::SingleHit,
-        bpm: Some(100),
-        key: KinoviSunoSoundKey::CMinor,
-      });
-      assert_eq!(
-        serde_json::to_string(&params).unwrap(),
-        r#"{"model":"suno-sounds","prompt":"Car crash","mv":"chirp-v5-5","type":"one-shot","bpm":100,"key":"Cm","isStorage":true}"#,
-      );
+      let params = build_api_params(&GenerateSunoSoundRequest { prompt: "Car crash".to_string(), sound_type: KinoviSunoSoundType::SingleHit, bpm: Some(100), key: KinoviSunoSoundKey::CMinor });
+      assert_eq!(serde_json::to_string(&params).unwrap(), r#"{"model":"suno-sounds","prompt":"Car crash","mv":"chirp-v5-5","type":"one-shot","bpm":100,"key":"Cm","isStorage":true}"#,);
     }
 
     #[test]
     fn every_key_wire_value() {
-      let cases = [
-        (KinoviSunoSoundKey::Auto, "C"),
-        (KinoviSunoSoundKey::CMajor, "C"),
-        (KinoviSunoSoundKey::CMinor, "Cm"),
-        (KinoviSunoSoundKey::DMajor, "D"),
-        (KinoviSunoSoundKey::DMinor, "Dm"),
-        (KinoviSunoSoundKey::FMajor, "F"),
-        (KinoviSunoSoundKey::FMinor, "Fm"),
-        (KinoviSunoSoundKey::GMajor, "G"),
-        (KinoviSunoSoundKey::GMinor, "Gm"),
-        (KinoviSunoSoundKey::AMajor, "A"),
-        (KinoviSunoSoundKey::AMinor, "Am"),
-        (KinoviSunoSoundKey::BMajor, "B"),
-        (KinoviSunoSoundKey::BMinor, "Bm"),
-      ];
+      let cases = [(KinoviSunoSoundKey::Auto, "C"), (KinoviSunoSoundKey::CMajor, "C"), (KinoviSunoSoundKey::CMinor, "Cm"), (KinoviSunoSoundKey::DMajor, "D"), (KinoviSunoSoundKey::DMinor, "Dm"), (KinoviSunoSoundKey::FMajor, "F"), (KinoviSunoSoundKey::FMinor, "Fm"), (KinoviSunoSoundKey::GMajor, "G"), (KinoviSunoSoundKey::GMinor, "Gm"), (KinoviSunoSoundKey::AMajor, "A"), (KinoviSunoSoundKey::AMinor, "Am"), (KinoviSunoSoundKey::BMajor, "B"), (KinoviSunoSoundKey::BMinor, "Bm")];
       for (key, expected) in cases {
         assert_eq!(key_as_api_str(key), expected, "wire value for {key:?}");
       }
@@ -314,16 +238,7 @@ mod tests {
     async fn test_single_hit() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_suno_sound(GenerateSunoSoundArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSunoSoundRequest {
-          prompt: "A heavy castle door creaking open".to_string(),
-          sound_type: KinoviSunoSoundType::SingleHit,
-          bpm: None,
-          key: KinoviSunoSoundKey::Auto,
-        },
-      }).await?;
+      let result = generate_suno_sound(GenerateSunoSoundArgs { session: &session, host_override: None, request: GenerateSunoSoundRequest { prompt: "A heavy castle door creaking open".to_string(), sound_type: KinoviSunoSoundType::SingleHit, bpm: None, key: KinoviSunoSoundKey::Auto } }).await?;
       println!("suno sound single hit — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert!(!result.order_id.is_empty());
@@ -336,16 +251,7 @@ mod tests {
     async fn test_loop_with_bpm_and_key() -> AnyhowResult<()> {
       setup_test_logging(LevelFilter::Trace);
       let session = test_session()?;
-      let result = generate_suno_sound(GenerateSunoSoundArgs {
-        session: &session,
-        host_override: None,
-        request: GenerateSunoSoundRequest {
-          prompt: "Lo-fi vinyl crackle groove".to_string(),
-          sound_type: KinoviSunoSoundType::Loopable,
-          bpm: Some(85),
-          key: KinoviSunoSoundKey::AMinor,
-        },
-      }).await?;
+      let result = generate_suno_sound(GenerateSunoSoundArgs { session: &session, host_override: None, request: GenerateSunoSoundRequest { prompt: "Lo-fi vinyl crackle groove".to_string(), sound_type: KinoviSunoSoundType::Loopable, bpm: Some(85), key: KinoviSunoSoundKey::AMinor } }).await?;
       println!("suno sound loop — task_id={}, order_id={}", result.task_id, result.order_id);
       assert!(!result.task_id.is_empty());
       assert_eq!(1, 2, "Inspect output above");

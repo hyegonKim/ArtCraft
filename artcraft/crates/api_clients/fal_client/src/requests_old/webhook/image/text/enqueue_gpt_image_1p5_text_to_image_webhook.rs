@@ -64,7 +64,6 @@ pub enum EnqueueGptImage1p5TextToImageOutputFormat {
   Webp,
 }
 
-
 impl FalRequestCostCalculator for EnqueueGptImage1p5TextToImageRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // NB: copied from edit image case - should be correct, but not verified.
@@ -92,11 +91,7 @@ impl FalRequestCostCalculator for EnqueueGptImage1p5TextToImageRequest {
   }
 }
 
-
-pub async fn enqueue_gpt_image_1p5_text_to_image_webhook<R: IntoUrl>(
-  args: EnqueueGptImage1p5TextToImageArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_gpt_image_1p5_text_to_image_webhook<R: IntoUrl>(args: EnqueueGptImage1p5TextToImageArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let num_images = match req.num_images {
@@ -106,38 +101,42 @@ pub async fn enqueue_gpt_image_1p5_text_to_image_webhook<R: IntoUrl>(
     EnqueueGptImage1p5TextToImageNumImages::Four => 4,
   };
 
-  let image_size = req.image_size
-      .map(|s| match s {
-        EnqueueGptImage1p5TextToImageSize::Square => "1024x1024",
-        EnqueueGptImage1p5TextToImageSize::Wide => "1536x1024",
-        EnqueueGptImage1p5TextToImageSize::Tall => "1024x1536",
-      })
-      .map(|resolution| resolution.to_string());
+  let image_size = req
+    .image_size
+    .map(|s| match s {
+      EnqueueGptImage1p5TextToImageSize::Square => "1024x1024",
+      EnqueueGptImage1p5TextToImageSize::Wide => "1536x1024",
+      EnqueueGptImage1p5TextToImageSize::Tall => "1024x1536",
+    })
+    .map(|resolution| resolution.to_string());
 
-  let background = req.background
-      .map(|s| match s {
-        EnqueueGptImage1p5TextToImageBackground::Auto => "auto",
-        EnqueueGptImage1p5TextToImageBackground::Transparent => "transparent",
-        EnqueueGptImage1p5TextToImageBackground::Opaque => "opaque",
-      })
-      .map(|aspect_ratio| aspect_ratio.to_string());
+  let background = req
+    .background
+    .map(|s| match s {
+      EnqueueGptImage1p5TextToImageBackground::Auto => "auto",
+      EnqueueGptImage1p5TextToImageBackground::Transparent => "transparent",
+      EnqueueGptImage1p5TextToImageBackground::Opaque => "opaque",
+    })
+    .map(|aspect_ratio| aspect_ratio.to_string());
 
-  let quality = req.quality
-      .map(|s| match s {
-        EnqueueGptImage1p5TextToImageQuality::Low => "low",
-        EnqueueGptImage1p5TextToImageQuality::Medium => "medium",
-        EnqueueGptImage1p5TextToImageQuality::High => "high",
-      })
-      .map(|aspect_ratio| aspect_ratio.to_string());
+  let quality = req
+    .quality
+    .map(|s| match s {
+      EnqueueGptImage1p5TextToImageQuality::Low => "low",
+      EnqueueGptImage1p5TextToImageQuality::Medium => "medium",
+      EnqueueGptImage1p5TextToImageQuality::High => "high",
+    })
+    .map(|aspect_ratio| aspect_ratio.to_string());
 
-  let output_format = req.output_format
-      .map(|s| match s {
-        EnqueueGptImage1p5TextToImageOutputFormat::Jpeg => "jpeg",
-        EnqueueGptImage1p5TextToImageOutputFormat::Png => "png",
-        EnqueueGptImage1p5TextToImageOutputFormat::Webp => "webp",
-      })
-      .map(|aspect_ratio| aspect_ratio.to_string())
-      .unwrap_or_else(|| "png".to_string());
+  let output_format = req
+    .output_format
+    .map(|s| match s {
+      EnqueueGptImage1p5TextToImageOutputFormat::Jpeg => "jpeg",
+      EnqueueGptImage1p5TextToImageOutputFormat::Png => "png",
+      EnqueueGptImage1p5TextToImageOutputFormat::Webp => "webp",
+    })
+    .map(|aspect_ratio| aspect_ratio.to_string())
+    .unwrap_or_else(|| "png".to_string());
 
   let request = GptImage1p5TextToImageInput {
     prompt: req.prompt,
@@ -149,10 +148,7 @@ pub async fn enqueue_gpt_image_1p5_text_to_image_webhook<R: IntoUrl>(
     quality,
   };
 
-  let result = gpt_image_1p5_text_to_image(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = gpt_image_1p5_text_to_image(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -172,18 +168,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueGptImage1p5TextToImageArgs {
-      request: EnqueueGptImage1p5TextToImageRequest {
-        prompt: "an anime girl riding on the back of a t-rex".to_string(),
-        num_images: EnqueueGptImage1p5TextToImageNumImages::Two,
-        image_size: None,
-        background: None,
-        quality: None,
-        output_format: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueGptImage1p5TextToImageArgs { request: EnqueueGptImage1p5TextToImageRequest { prompt: "an anime girl riding on the back of a t-rex".to_string(), num_images: EnqueueGptImage1p5TextToImageNumImages::Two, image_size: None, background: None, quality: None, output_format: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_gpt_image_1p5_text_to_image_webhook(args).await?;
 

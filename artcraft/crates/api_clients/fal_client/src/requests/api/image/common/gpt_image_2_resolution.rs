@@ -121,21 +121,9 @@ pub fn compute_custom_image_size(aspect: GptImage2AspectRatio, resolution: GptIm
 mod tests {
   use super::*;
 
-  const ALL_ASPECTS: &[GptImage2AspectRatio] = &[
-    GptImage2AspectRatio::Square,
-    GptImage2AspectRatio::SquareHd,
-    GptImage2AspectRatio::Landscape4x3,
-    GptImage2AspectRatio::Landscape16x9,
-    GptImage2AspectRatio::Portrait4x3,
-    GptImage2AspectRatio::Portrait16x9,
-  ];
+  const ALL_ASPECTS: &[GptImage2AspectRatio] = &[GptImage2AspectRatio::Square, GptImage2AspectRatio::SquareHd, GptImage2AspectRatio::Landscape4x3, GptImage2AspectRatio::Landscape16x9, GptImage2AspectRatio::Portrait4x3, GptImage2AspectRatio::Portrait16x9];
 
-  const ALL_RESOLUTIONS: &[GptImage2Resolution] = &[
-    GptImage2Resolution::OneK,
-    GptImage2Resolution::TwoK,
-    GptImage2Resolution::ThreeK,
-    GptImage2Resolution::FourK,
-  ];
+  const ALL_RESOLUTIONS: &[GptImage2Resolution] = &[GptImage2Resolution::OneK, GptImage2Resolution::TwoK, GptImage2Resolution::ThreeK, GptImage2Resolution::FourK];
 
   #[test]
   fn all_combinations_satisfy_constraints() {

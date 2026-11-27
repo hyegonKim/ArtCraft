@@ -42,7 +42,6 @@ pub enum Gemini25FlashEditImageImageQuality {
   High, // Default
 }
 
-
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct Gemini25FlashEditImageResponse {
   pub success: bool,

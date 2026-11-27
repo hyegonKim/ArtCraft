@@ -7,11 +7,7 @@ use crate::generate::generate_image::image_generation_request::ImageGenerationRe
 use crate::generate::generate_image::providers::artcraft::build_common::build_artcraft_omni_image_request;
 use crate::generate::generate_image::providers::artcraft::midjourney_8::request::ArtcraftMidjourney8RequestState;
 
-pub fn build_artcraft_midjourney_8(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_artcraft_midjourney_8(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let request = build_artcraft_omni_image_request(builder, CommonImageModelEnum::Midjourney8)?;
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::ArtcraftMidjourney8(ArtcraftMidjourney8RequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::ArtcraftMidjourney8(ArtcraftMidjourney8RequestState { request })))
 }

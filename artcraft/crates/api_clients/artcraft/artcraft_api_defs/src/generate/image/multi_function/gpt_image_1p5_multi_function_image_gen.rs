@@ -17,14 +17,14 @@ pub struct GptImage1p5MultiFunctionImageGenRequest {
   /// If present, we're doing image editing (image-to-image / image-editing / image-inpainting)
   /// If absent, we're doing image generation (text-to-image)
   pub image_media_tokens: Option<Vec<MediaFileToken>>,
-  
+
   /// Only for image editing, which turns this into an inpainting task.
   /// Text to image should not set this.
   pub mask_image_token: Option<MediaFileToken>,
 
   /// Number of images to generate. Default is one.
   pub num_images: Option<GptImage1p5MultiFunctionImageGenNumImages>,
-  
+
   pub image_size: Option<GptImage1p5MultiFunctionImageGenSize>,
 
   pub background: Option<GptImage1p5MultiFunctionImageGenBackground>,

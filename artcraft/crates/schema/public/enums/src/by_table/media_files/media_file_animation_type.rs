@@ -115,21 +115,7 @@ impl MediaFileAnimationType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::ArKit,
-      Self::MikuMikuDance,
-      Self::MikuMikuDanceArKit,
-      Self::Mixamo,
-      Self::MixamoArKit,
-      Self::MocapNet,
-      Self::MocapNetArKit,
-      Self::MoveAi,
-      Self::MoveAiArKit,
-      Self::Rigify,
-      Self::RigifyArKit,
-      Self::Rokoko,
-      Self::RokokoArKit,
-    ])
+    BTreeSet::from([Self::ArKit, Self::MikuMikuDance, Self::MikuMikuDanceArKit, Self::Mixamo, Self::MixamoArKit, Self::MocapNet, Self::MocapNetArKit, Self::MoveAi, Self::MoveAiArKit, Self::Rigify, Self::RigifyArKit, Self::Rokoko, Self::RokokoArKit])
   }
 }
 
@@ -234,7 +220,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in MediaFileAnimationType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

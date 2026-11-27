@@ -56,7 +56,7 @@ pub enum ClientError {
   /// in polling/queue mode (no webhook URL). Returned by webhook-only
   /// endpoints (those whose fal_client wrapper has no `api::` queue variant).
   WebhookUrlRequired,
-  
+
   /// The pre-dispatch context of media file token to URL map was not supplied.
   MediaFileToUrlMapNotProvided,
 
@@ -77,40 +77,40 @@ impl Display for ClientError {
     match self {
       Self::RouterClientNotProvided => {
         write!(f, "A RouterClient is required but was not provided on the draft context")
-      }
+      },
       Self::ClientNotConfigured(client_type) => {
         write!(f, "{} client is not configured on the RouterClient", client_type)
-      }
+      },
       Self::ModelDoesNotSupportOption { field, value } => {
         write!(f, "Model does not support '{}' for field '{}'", value, field)
-      }
+      },
       Self::UserRequestedZeroGenerations => {
         write!(f, "Cannot request zero generations")
-      }
+      },
       Self::ArtcraftOnlySupportsMediaTokens => {
         write!(f, "ArtCraft only supports media tokens for image inputs; upload the image first to obtain a media token")
-      }
+      },
       Self::FalOnlySupportsUrls => {
         write!(f, "Fal only supports image URLs for image inputs, not media tokens")
-      }
+      },
       Self::KinoviWebOnlySupportsUrls => {
         write!(f, "KinoviWeb only supports URLs for media inputs; resolve media tokens to URLs before calling this provider")
-      }
+      },
       Self::WebhookUrlRequired => {
         write!(f, "This Fal endpoint only supports webhook dispatch; the caller built RouterFalClient in polling-only mode (no webhook URL)")
-      }
+      },
       Self::MediaFileToUrlMapNotProvided => {
         write!(f, "Media file to URL map was not provided")
-      }
+      },
       Self::MediaFileTokenNotFoundInMap { token } => {
         write!(f, "Media file token '{}' was not found in the provided URL map", token.as_str())
-      }
+      },
       Self::CharacterTokenToKinoviCharacterIdNotProvided => {
         write!(f, "Character token to Kinovi character ID map was not provided")
-      }
+      },
       Self::CharacterTokenNotFoundInMap { token } => {
         write!(f, "Character token '{}' was not found in the provided character-token-to-id map", token.as_str())
-      }
+      },
     }
   }
 }

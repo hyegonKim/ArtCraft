@@ -1,6 +1,4 @@
-use kinovi_web_client::generate::video::generate_happy_horse_1p0::{
-  generate_happy_horse_1p0, GenerateHappyHorse1p0Args, GenerateHappyHorse1p0Request,
-};
+use kinovi_web_client::generate::video::generate_happy_horse_1p0::{generate_happy_horse_1p0, GenerateHappyHorse1p0Args, GenerateHappyHorse1p0Request};
 
 use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
@@ -16,22 +14,11 @@ impl KinoviHappyHorse1p0RequestState {
   pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
     let session = &client.session;
 
-    let args = GenerateHappyHorse1p0Args {
-      session,
-      host_override: None,
-      request: self.request.clone(),
-    };
+    let args = GenerateHappyHorse1p0Args { session, host_override: None, request: self.request.clone() };
 
-    let response = generate_happy_horse_1p0(args)
-      .await
-      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+    let response = generate_happy_horse_1p0(args).await.map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
 
-    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
-      order_id: response.order_id,
-      task_id: response.task_id,
-      maybe_order_ids: response.order_ids,
-      maybe_task_ids: response.task_ids,
-    }))
+    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload { order_id: response.order_id, task_id: response.task_id, maybe_order_ids: response.order_ids, maybe_task_ids: response.task_ids }))
   }
 }
 
@@ -61,11 +48,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn landscape() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A corgi running through a field of wildflowers at sunset.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -73,11 +56,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn portrait() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A cat sitting on a windowsill watching rain.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A cat sitting on a windowsill watching rain.".to_string()), aspect_ratio: Some(RouterAspectRatio::TallNineBySixteen), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -85,11 +64,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn square() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A hummingbird hovering near a flower.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::Square),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A hummingbird hovering near a flower.".to_string()), aspect_ratio: Some(RouterAspectRatio::Square), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -101,11 +76,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn res_720p() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A golden retriever catching a frisbee on the beach.".to_string()),
-        resolution: Some(RouterResolution::SevenTwentyP),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A golden retriever catching a frisbee on the beach.".to_string()), resolution: Some(RouterResolution::SevenTwentyP), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -113,11 +84,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn res_1080p() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A fox walking through a snowy forest.".to_string()),
-        resolution: Some(RouterResolution::TenEightyP),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A fox walking through a snowy forest.".to_string()), resolution: Some(RouterResolution::TenEightyP), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -129,11 +96,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn text_to_video() {
-      let response = run_pipeline(GenerateVideoRequestBuilder {
-        prompt: Some("A whale breaching in the open ocean at dawn, cinematic.".to_string()),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..happy_horse_builder()
-      }).await;
+      let response = run_pipeline(GenerateVideoRequestBuilder { prompt: Some("A whale breaching in the open ocean at dawn, cinematic.".to_string()), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..happy_horse_builder() }).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -146,12 +109,7 @@ mod tests {
       let mut media_map = HashMap::new();
       media_map.insert(start_token.clone(), JUNO_AT_LAKE_IMAGE_URL.to_string());
 
-      let response = run_pipeline_with_media_map(GenerateVideoRequestBuilder {
-        prompt: Some("The dog watches the sunset over the lake.".to_string()),
-        start_frame: Some(ImageRef::MediaFileToken(start_token)),
-        aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine),
-        ..happy_horse_builder()
-      }, media_map).await;
+      let response = run_pipeline_with_media_map(GenerateVideoRequestBuilder { prompt: Some("The dog watches the sunset over the lake.".to_string()), start_frame: Some(ImageRef::MediaFileToken(start_token)), aspect_ratio: Some(RouterAspectRatio::WideSixteenByNine), ..happy_horse_builder() }, media_map).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -164,14 +122,7 @@ mod tests {
       let mut media_map = HashMap::new();
       media_map.insert(start_token.clone(), JUNO_AT_LAKE_IMAGE_URL.to_string());
 
-      let response = run_pipeline_with_media_map(GenerateVideoRequestBuilder {
-        prompt: Some("A dragon soaring over the mountains.".to_string()),
-        start_frame: Some(ImageRef::MediaFileToken(start_token)),
-        aspect_ratio: Some(RouterAspectRatio::Square),
-        resolution: Some(RouterResolution::TenEightyP),
-        duration_seconds: Some(15),
-        ..happy_horse_builder()
-      }, media_map).await;
+      let response = run_pipeline_with_media_map(GenerateVideoRequestBuilder { prompt: Some("A dragon soaring over the mountains.".to_string()), start_frame: Some(ImageRef::MediaFileToken(start_token)), aspect_ratio: Some(RouterAspectRatio::Square), resolution: Some(RouterResolution::TenEightyP), duration_seconds: Some(15), ..happy_horse_builder() }, media_map).await;
       assert!(matches!(response, GenerateVideoResponse::KinoviWeb(_)));
       assert_eq!(1, 2, "Inspect output above");
     }
@@ -180,18 +131,11 @@ mod tests {
   // ── Helpers ──
 
   fn happy_horse_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::HappyHorse1p0,
-      provider: RouterProvider::KinoviWeb,
-      duration_seconds: Some(4),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::HappyHorse1p0, provider: RouterProvider::KinoviWeb, duration_seconds: Some(4), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn get_kinovi_web_client() -> RouterClient {
-    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/seedance2pro_cookies.txt")
-      .expect("Failed to read kinovi_web cookies");
+    let cookies = std::fs::read_to_string("/Users/bt/Artcraft/credentials/seedance2pro_cookies.txt").expect("Failed to read kinovi_web cookies");
     let session = KinoviWebSession::from_cookies_string(cookies.trim().to_string());
     RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
   }
@@ -205,10 +149,7 @@ mod tests {
       _ => panic!("expected Draft variant"),
     };
 
-    let draft_context = VideoGenerationDraftContext {
-      client: Some(&client),
-      ..Default::default()
-    };
+    let draft_context = VideoGenerationDraftContext { client: Some(&client), ..Default::default() };
 
     let request = draft.finalize(draft_context).await.expect("finalize should succeed");
     let response = request.send_request(&client).await.expect("send_request should succeed");
@@ -216,17 +157,14 @@ mod tests {
     match &response {
       GenerateVideoResponse::KinoviWeb(p) => {
         println!("task_id={}, order_id={}", p.task_id, p.order_id);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 
     response
   }
 
-  async fn run_pipeline_with_media_map(
-    builder: GenerateVideoRequestBuilder,
-    media_map: HashMap<MediaFileToken, String>,
-  ) -> GenerateVideoResponse {
+  async fn run_pipeline_with_media_map(builder: GenerateVideoRequestBuilder, media_map: HashMap<MediaFileToken, String>) -> GenerateVideoResponse {
     let client = get_kinovi_web_client();
 
     let draft_or_request = builder.build2().expect("build2 should succeed");
@@ -235,11 +173,7 @@ mod tests {
       _ => panic!("expected Draft variant"),
     };
 
-    let draft_context = VideoGenerationDraftContext {
-      client: Some(&client),
-      media_file_to_artcraft_url_map: Some(&media_map),
-      ..Default::default()
-    };
+    let draft_context = VideoGenerationDraftContext { client: Some(&client), media_file_to_artcraft_url_map: Some(&media_map), ..Default::default() };
 
     let request = draft.finalize(draft_context).await.expect("finalize should succeed");
     let response = request.send_request(&client).await.expect("send_request should succeed");
@@ -247,7 +181,7 @@ mod tests {
     match &response {
       GenerateVideoResponse::KinoviWeb(p) => {
         println!("task_id={}, order_id={}", p.task_id, p.order_id);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 

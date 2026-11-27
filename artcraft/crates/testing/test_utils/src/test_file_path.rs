@@ -12,14 +12,10 @@ use errors::{anyhow, AnyhowResult};
 pub fn test_file_path<P: AsRef<Path>>(path_from_repo_root: P) -> AnyhowResult<PathBuf> {
   // https://doc.rust-lang.org/cargo/reference/environment-variables.html
   let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-  let file = path_from_repo_root
-      .as_ref()
-      .to_str()
-      .ok_or(anyhow!("path cannot convert to string"))?;
+  let file = path_from_repo_root.as_ref().to_str().ok_or(anyhow!("path cannot convert to string"))?;
   path.push(format!("../../../{}", file));
   println!(" >>> path = {:?}", path);
   Ok(path.canonicalize()?)
-
 }
 
 #[cfg(test)]

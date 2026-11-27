@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::text::kling_1p6_pro_text_to_video::raw_request::{
-  Kling1p6ProTextToVideoInput, Kling1p6ProTextToVideoOutput,
-};
+use crate::requests::api::video::text::kling_1p6_pro_text_to_video::raw_request::{Kling1p6ProTextToVideoInput, Kling1p6ProTextToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -61,19 +59,16 @@ impl FalEndpoint for Kling1p6ProTextToVideoRequest {
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
     let duration = self.duration.map(|d| d.to_str().to_string());
 
-    let aspect_ratio = self.aspect_ratio.map(|ar| match ar {
-      Kling1p6ProTextToVideoAspectRatio::Square => "1:1",
-      Kling1p6ProTextToVideoAspectRatio::SixteenByNine => "16:9",
-      Kling1p6ProTextToVideoAspectRatio::NineBySixteen => "9:16",
-    }.to_string());
+    let aspect_ratio = self.aspect_ratio.map(|ar| {
+      match ar {
+        Kling1p6ProTextToVideoAspectRatio::Square => "1:1",
+        Kling1p6ProTextToVideoAspectRatio::SixteenByNine => "16:9",
+        Kling1p6ProTextToVideoAspectRatio::NineBySixteen => "9:16",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      aspect_ratio,
-      duration,
-      negative_prompt: self.negative_prompt.clone(),
-      cfg_scale: self.cfg_scale,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), aspect_ratio, duration, negative_prompt: self.negative_prompt.clone(), cfg_scale: self.cfg_scale })
   }
 }
 
@@ -91,13 +86,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling1p6ProTextToVideoRequest {
-      prompt: "a golden retriever puppy chases butterflies through a sunlit meadow, cinematic slow motion".to_string(),
-      negative_prompt: None,
-      duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds),
-      aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine),
-      cfg_scale: None,
-    };
+    let request = Kling1p6ProTextToVideoRequest { prompt: "a golden retriever puppy chases butterflies through a sunlit meadow, cinematic slow motion".to_string(), negative_prompt: None, duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine), cfg_scale: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -111,13 +100,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling1p6ProTextToVideoRequest {
-      prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-      negative_prompt: None,
-      duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds),
-      aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine),
-      cfg_scale: None,
-    };
+    let request = Kling1p6ProTextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), negative_prompt: None, duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds), aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine), cfg_scale: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -131,21 +114,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let aspect_ratios = [
-      Kling1p6ProTextToVideoAspectRatio::Square,
-      Kling1p6ProTextToVideoAspectRatio::SixteenByNine,
-      Kling1p6ProTextToVideoAspectRatio::NineBySixteen,
-    ];
+    let aspect_ratios = [Kling1p6ProTextToVideoAspectRatio::Square, Kling1p6ProTextToVideoAspectRatio::SixteenByNine, Kling1p6ProTextToVideoAspectRatio::NineBySixteen];
 
     for ar in aspect_ratios {
       println!("--- aspect ratio: {:?} ---", ar);
-      let request = Kling1p6ProTextToVideoRequest {
-        prompt: "a wave crashes against a rocky shoreline at sunset".to_string(),
-        negative_prompt: None,
-        duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds),
-        aspect_ratio: Some(ar),
-        cfg_scale: None,
-      };
+      let request = Kling1p6ProTextToVideoRequest { prompt: "a wave crashes against a rocky shoreline at sunset".to_string(), negative_prompt: None, duration: Some(Kling1p6ProTextToVideoDuration::FiveSeconds), aspect_ratio: Some(ar), cfg_scale: None };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -159,20 +132,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let durations = [
-      Kling1p6ProTextToVideoDuration::FiveSeconds,
-      Kling1p6ProTextToVideoDuration::TenSeconds,
-    ];
+    let durations = [Kling1p6ProTextToVideoDuration::FiveSeconds, Kling1p6ProTextToVideoDuration::TenSeconds];
 
     for dur in durations {
       println!("--- duration: {:?} ---", dur);
-      let request = Kling1p6ProTextToVideoRequest {
-        prompt: "a candle flame flickers in a dark room".to_string(),
-        negative_prompt: None,
-        duration: Some(dur),
-        aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine),
-        cfg_scale: None,
-      };
+      let request = Kling1p6ProTextToVideoRequest { prompt: "a candle flame flickers in a dark room".to_string(), negative_prompt: None, duration: Some(dur), aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::SixteenByNine), cfg_scale: None };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -184,13 +148,7 @@ mod tests {
 
   #[test]
   fn raw_request_aspect_ratio_uses_colon_format() {
-    let request = Kling1p6ProTextToVideoRequest {
-      prompt: "p".to_string(),
-      negative_prompt: None,
-      duration: Some(Kling1p6ProTextToVideoDuration::TenSeconds),
-      aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::NineBySixteen),
-      cfg_scale: None,
-    };
+    let request = Kling1p6ProTextToVideoRequest { prompt: "p".to_string(), negative_prompt: None, duration: Some(Kling1p6ProTextToVideoDuration::TenSeconds), aspect_ratio: Some(Kling1p6ProTextToVideoAspectRatio::NineBySixteen), cfg_scale: None };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.aspect_ratio.as_deref(), Some("9:16"));
     assert_eq!(raw.duration.as_deref(), Some("10"));
@@ -198,13 +156,7 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Kling1p6ProTextToVideoRequest {
-      prompt: "p".to_string(),
-      negative_prompt: None,
-      duration: None,
-      aspect_ratio: None,
-      cfg_scale: None,
-    };
+    let request = Kling1p6ProTextToVideoRequest { prompt: "p".to_string(), negative_prompt: None, duration: None, aspect_ratio: None, cfg_scale: None };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert!(raw.aspect_ratio.is_none());
@@ -215,10 +167,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Kling1p6ProTextToVideoRequest::ENDPOINT,
-      "fal-ai/kling-video/v1.6/pro/text-to-video",
-    );
+    assert_eq!(Kling1p6ProTextToVideoRequest::ENDPOINT, "fal-ai/kling-video/v1.6/pro/text-to-video",);
   }
 
   // NB: Pricing tests are in cost.rs

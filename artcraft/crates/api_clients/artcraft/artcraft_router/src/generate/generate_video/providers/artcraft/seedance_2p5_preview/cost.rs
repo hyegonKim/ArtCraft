@@ -13,29 +13,17 @@ pub struct ArtcraftSeedance2p5PreviewCostState {
 
 impl ArtcraftSeedance2p5PreviewCostState {
   pub fn from_request(request: &ArtcraftSeedance2p5PreviewRequestState) -> Self {
-    let resolution = request.request.resolution
-      .unwrap_or(CommonResolution::SevenTwentyP);
+    let resolution = request.request.resolution.unwrap_or(CommonResolution::SevenTwentyP);
     let duration_seconds = request.request.duration_seconds.unwrap_or(5);
 
     Self { resolution, duration_seconds }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    let usd_cents = seedance_2p5_preview_usd_cents(
-      self.resolution,
-      self.duration_seconds,
-    );
+    let usd_cents = seedance_2p5_preview_usd_cents(self.resolution, self.duration_seconds);
 
     // ArtCraft credits: 100 credits = $1.00, so credits = cents.
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(usd_cents),
-      cost_in_usd_cents: Some(usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(usd_cents), cost_in_usd_cents: Some(usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -93,9 +81,7 @@ mod tests {
       let estimate = estimate_with(|b| {
         b.resolution = Some(RouterResolution::SevenTwentyP);
         b.duration_seconds = Some(10);
-        b.reference_videos = Some(VideoListRef::MediaFileTokens(vec![
-          MediaFileToken::new("mf_ref".to_string()),
-        ]));
+        b.reference_videos = Some(VideoListRef::MediaFileTokens(vec![MediaFileToken::new("mf_ref".to_string())]));
       });
       assert_eq!(estimate.cost_in_usd_cents, Some(without));
     }
@@ -119,24 +105,17 @@ mod tests {
   // ── Helpers ──
 
   fn estimate_with(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> VideoGenerationCostEstimate {
-    let mut builder = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance2p5Preview,
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    };
+    let mut builder = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance2p5Preview, provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() };
     f(&mut builder);
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed")
   }
 
   fn cents(resolution: Option<RouterResolution>, duration_seconds: u16) -> u64 {
     estimate_with(|b| {
       b.resolution = resolution;
       b.duration_seconds = Some(duration_seconds);
-    }).cost_in_usd_cents.unwrap()
+    })
+    .cost_in_usd_cents
+    .unwrap()
   }
 }

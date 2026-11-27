@@ -22,6 +22,7 @@ pub mod bg_erase;
 pub mod brush;
 pub mod curve;
 pub mod dynamics;
+pub mod fresco_watercolor;
 mod mip_cache;
 pub mod mixer;
 pub mod oil_brush;
@@ -41,6 +42,7 @@ pub use brush::{
     Scattering, SectionLocks, ShapeDynamics, Smoothing, Texture, TipShape, Transfer,
 };
 pub use curve::ResponseCurve;
+pub use fresco_watercolor::{FrescoWatercolorParams, FrescoWatercolorPreset, WetCanvasMap, apply_live_watercolor_surface};
 pub use mip_cache::{mip_cache_bytes, purge_mip_cache};
 pub use mixer::MixerSettings;
 pub use oil_brush::{OilBrushParams, OilBrushPreset, paint_oil_stroke};

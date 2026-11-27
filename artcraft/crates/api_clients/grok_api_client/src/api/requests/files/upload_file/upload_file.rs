@@ -63,13 +63,7 @@ impl fmt::Debug for UploadFileRequest {
   // Print byte-length, not raw bytes — derived Debug on Vec<u8> would dump
   // the entire file into the log line.
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("UploadFileRequest")
-      .field("file_bytes_len", &self.file_bytes.len())
-      .field("filename", &self.filename)
-      .field("maybe_content_type", &self.maybe_content_type)
-      .field("expires_after_seconds", &self.expires_after_seconds)
-      .field("purpose", &self.purpose)
-      .finish()
+    f.debug_struct("UploadFileRequest").field("file_bytes_len", &self.file_bytes.len()).field("filename", &self.filename).field("maybe_content_type", &self.maybe_content_type).field("expires_after_seconds", &self.expires_after_seconds).field("purpose", &self.purpose).finish()
   }
 }
 
@@ -103,27 +97,19 @@ pub async fn upload_file(args: UploadFileArgs<'_>) -> Result<UploadFileSuccess, 
   let req = args.request;
 
   if req.file_bytes.is_empty() {
-    return Err(GrokClientError::InvalidRequest(
-      "upload_file: file_bytes is empty".to_string(),
-    ).into());
+    return Err(GrokClientError::InvalidRequest("upload_file: file_bytes is empty".to_string()).into());
   }
   if req.file_bytes.len() as u64 > MAX_FILE_BYTES {
-    return Err(GrokClientError::InvalidRequest(
-      format!("upload_file: file_bytes is {} bytes, exceeds xAI's 50 MB limit", req.file_bytes.len()),
-    ).into());
+    return Err(GrokClientError::InvalidRequest(format!("upload_file: file_bytes is {} bytes, exceeds xAI's 50 MB limit", req.file_bytes.len())).into());
   }
 
   let url = format!("{}/v1/files", XAI_API_BASE_URL);
 
-  info!(
-    "Grok upload_file: filename={}, bytes={}, expires_after={:?}, purpose={:?}",
-    req.filename, req.file_bytes.len(), req.expires_after_seconds, req.purpose
-  );
+  info!("Grok upload_file: filename={}, bytes={}, expires_after={:?}, purpose={:?}", req.filename, req.file_bytes.len(), req.expires_after_seconds, req.purpose);
 
   let mut file_part = Part::bytes(req.file_bytes).file_name(req.filename.clone());
   if let Some(ct) = req.maybe_content_type.as_deref() {
-    file_part = file_part.mime_str(ct)
-      .map_err(GrokClientError::ReqwestClientError)?;
+    file_part = file_part.mime_str(ct).map_err(GrokClientError::ReqwestClientError)?;
   }
 
   let mut form = Form::new().part("file", file_part);
@@ -134,39 +120,22 @@ pub async fn upload_file(args: UploadFileArgs<'_>) -> Result<UploadFileSuccess, 
     form = form.text("purpose", purpose);
   }
 
-  let client = reqwest::Client::builder()
-    .build()
-    .map_err(GrokClientError::ReqwestClientError)?;
+  let client = reqwest::Client::builder().build().map_err(GrokClientError::ReqwestClientError)?;
 
   let bearer = format!("Bearer {}", args.api_key.api_key);
 
-  let response = client.post(&url)
-    .header("Authorization", bearer)
-    .multipart(form)
-    .send()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response = client.post(&url).header("Authorization", bearer).multipart(form).send().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(GrokGenericApiError::ReqwestError)?;
+  let response_body = response.text().await.map_err(GrokGenericApiError::ReqwestError)?;
 
   info!("Grok upload_file response: status={}", status);
 
   classify_grok_http_error(status, Some(&response_body))?;
 
-  let parsed: UploadFileResponseBody = serde_json::from_str(&response_body)
-    .map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let parsed: UploadFileResponseBody = serde_json::from_str(&response_body).map_err(|err| GrokGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  Ok(UploadFileSuccess {
-    file_id: parsed.id,
-    bytes: parsed.bytes,
-    created_at: parsed.created_at,
-    expires_at: parsed.expires_at,
-    filename: parsed.filename,
-    purpose: parsed.purpose,
-  })
+  Ok(UploadFileSuccess { file_id: parsed.id, bytes: parsed.bytes, created_at: parsed.created_at, expires_at: parsed.expires_at, filename: parsed.filename, purpose: parsed.purpose })
 }
 
 #[cfg(test)]
@@ -181,16 +150,7 @@ mod tests {
   #[tokio::test]
   async fn empty_bytes_returns_bad_request() {
     let api_key = GrokApiKey::new("dummy".to_string());
-    let result = upload_file(UploadFileArgs {
-      api_key: &api_key,
-      request: UploadFileRequest {
-        file_bytes: vec![],
-        filename: "x.png".to_string(),
-        maybe_content_type: None,
-        expires_after_seconds: None,
-        purpose: None,
-      },
-    }).await;
+    let result = upload_file(UploadFileArgs { api_key: &api_key, request: UploadFileRequest { file_bytes: vec![], filename: "x.png".to_string(), maybe_content_type: None, expires_after_seconds: None, purpose: None } }).await;
     let err = result.unwrap_err();
     assert!(matches!(err, GrokError::Client(GrokClientError::InvalidRequest(_))));
   }
@@ -199,16 +159,7 @@ mod tests {
   async fn over_size_limit_returns_bad_request() {
     let api_key = GrokApiKey::new("dummy".to_string());
     let oversized: Vec<u8> = vec![0u8; (MAX_FILE_BYTES + 1) as usize];
-    let result = upload_file(UploadFileArgs {
-      api_key: &api_key,
-      request: UploadFileRequest {
-        file_bytes: oversized,
-        filename: "x.png".to_string(),
-        maybe_content_type: None,
-        expires_after_seconds: None,
-        purpose: None,
-      },
-    }).await;
+    let result = upload_file(UploadFileArgs { api_key: &api_key, request: UploadFileRequest { file_bytes: oversized, filename: "x.png".to_string(), maybe_content_type: None, expires_after_seconds: None, purpose: None } }).await;
     let err = result.unwrap_err();
     assert!(matches!(err, GrokError::Client(GrokClientError::InvalidRequest(_))));
   }
@@ -240,13 +191,7 @@ mod tests {
 
   #[test]
   fn debug_does_not_dump_file_bytes() {
-    let req = UploadFileRequest {
-      file_bytes: vec![0u8; 1_000_000],
-      filename: "huge.bin".to_string(),
-      maybe_content_type: None,
-      expires_after_seconds: None,
-      purpose: None,
-    };
+    let req = UploadFileRequest { file_bytes: vec![0u8; 1_000_000], filename: "huge.bin".to_string(), maybe_content_type: None, expires_after_seconds: None, purpose: None };
     let debug = format!("{:?}", req);
     assert!(debug.contains("file_bytes_len: 1000000"), "expected length, got: {}", debug);
     assert!(!debug.contains(", 0, 0, 0, 0"), "raw bytes leaked into Debug: {}", debug);
@@ -281,29 +226,10 @@ mod tests {
     setup_test_logging();
 
     // 1x1 transparent PNG
-    let png_bytes: Vec<u8> = vec![
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-      0x89, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41,
-      0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-      0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-      0x42, 0x60, 0x82,
-    ];
+    let png_bytes: Vec<u8> = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82];
 
     let api_key = get_test_api_key()?;
-    let result = upload_file(UploadFileArgs {
-      api_key: &api_key,
-      request: UploadFileRequest {
-        file_bytes: png_bytes,
-        filename: "test_1x1.png".to_string(),
-        maybe_content_type: Some("image/png".to_string()),
-        expires_after_seconds: Some(3600),
-        purpose: None,
-      },
-    }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
+    let result = upload_file(UploadFileArgs { api_key: &api_key, request: UploadFileRequest { file_bytes: png_bytes, filename: "test_1x1.png".to_string(), maybe_content_type: Some("image/png".to_string()), expires_after_seconds: Some(3600), purpose: None } }).await.map_err(|e| anyhow::anyhow!("{}", e))?;
 
     println!("Uploaded file_id={}, bytes={:?}", result.file_id, result.bytes);
     assert!(!result.file_id.is_empty());

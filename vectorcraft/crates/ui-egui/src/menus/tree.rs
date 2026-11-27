@@ -198,6 +198,10 @@ pub fn menu_tree_named(english_names: bool) -> Vec<(&'static str, Vec<Item>)> {
                 c("Vector Halftone…", "object.vectorHalftone"),
                 c("Generative Shape Fill…", "object.generativeShapeFill"),
                 c("Turntable…", "object.turntable"),
+                sub(
+                    "Capture",
+                    vec![c("Extract Color Theme…", "capture.extractColorTheme"), c("Extract Pattern Tile…", "capture.extractPatternTile")],
+                ),
                 c("Generate Icon Sheet…", "icon.generateSheet"),
                 c("Create Trim Marks", "object.createTrimMarks"),
                 c("Flatten Transparency…", "ui.flattenTransparencyDialog"),

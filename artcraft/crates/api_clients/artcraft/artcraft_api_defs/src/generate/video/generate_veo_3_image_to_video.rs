@@ -9,11 +9,11 @@ pub const GENERATE_VEO_3_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/generate/video/veo
 pub struct GenerateVeo3ImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
-  
+
   /// Optional text prompt.
   pub prompt: Option<String>,
 
@@ -28,7 +28,6 @@ pub struct GenerateVeo3ImageToVideoRequest {
 
   /// Optional: Generate an audio track along with the video
   pub generate_audio: Option<bool>,
-
   // /// Optional.
   // pub enhance_prompt: Option<bool>,
   // /// Optional. Whether to automatically attempt to fix prompts that fail
@@ -42,9 +41,9 @@ pub struct GenerateVeo3ImageToVideoRequest {
 pub enum GenerateVeo3AspectRatio {
   WideSixteenNine, // 16:9
   TallNineSixteen, // 9:16
-  
-  /// NB: DO NOT REMOVE. This is an unsupported resolution for Veo 3, but we can't 
-  /// impact existing callers by removing it. The handler will convert this to a 
+
+  /// NB: DO NOT REMOVE. This is an unsupported resolution for Veo 3, but we can't
+  /// impact existing callers by removing it. The handler will convert this to a
   /// supported resolution or 400 the request instead.
   Square, // 1:1
 }
@@ -53,7 +52,7 @@ pub enum GenerateVeo3AspectRatio {
 #[serde(rename_all = "snake_case")]
 pub enum GenerateVeo3Resolution {
   SevenTwentyP, // 720p
-  TenEightyP, // 1080p
+  TenEightyP,   // 1080p
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]

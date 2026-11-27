@@ -1,9 +1,6 @@
 use enums::common::generation::common_resolution::CommonResolution as CommonResolutionEnum;
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
-use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{
-  EnqueueSeedance1p5ProTextToVideoDuration, EnqueueSeedance1p5ProTextToVideoRequest,
-  EnqueueSeedance1p5ProTextToVideoResolution,
-};
+use fal_client::requests_old::webhook::video::text::enqueue_seedance_1p5_pro_text_to_video_webhook::{EnqueueSeedance1p5ProTextToVideoDuration, EnqueueSeedance1p5ProTextToVideoRequest, EnqueueSeedance1p5ProTextToVideoResolution};
 
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 use crate::generate::generate_video::providers::artcraft::seedance_1p5_pro::request::ArtcraftSeedance1p5ProRequestState;
@@ -23,36 +20,18 @@ impl ArtcraftSeedance1p5ProCostState {
   pub fn from_request(request: &ArtcraftSeedance1p5ProRequestState) -> Self {
     let duration = request.request.duration_seconds.and_then(seconds_to_duration);
     let resolution = request.request.resolution.and_then(common_resolution_to_seedance);
-    Self {
-      duration,
-      resolution,
-      generate_audio: request.request.generate_audio,
-    }
+    Self { duration, resolution, generate_audio: request.request.generate_audio }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
     // Delegate to the Fal client's cost calculator. Pricing is identical for
     // text-to-video and image-to-video at the same resolution+duration+audio,
     // so we use the text-to-video request type as a stand-in.
-    let req = EnqueueSeedance1p5ProTextToVideoRequest {
-      prompt: String::new(),
-      duration: self.duration,
-      resolution: self.resolution,
-      aspect_ratio: None,
-      generate_audio: self.generate_audio,
-    };
+    let req = EnqueueSeedance1p5ProTextToVideoRequest { prompt: String::new(), duration: self.duration, resolution: self.resolution, aspect_ratio: None, generate_audio: self.generate_audio };
     let base = req.calculate_cost_in_cents();
     let cost_in_usd_cents = base.saturating_mul(MARKUP_NUMERATOR).div_ceil(MARKUP_DENOMINATOR);
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -88,27 +67,29 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Seedance1p5Pro,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Seedance1p5Pro, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), duration_seconds, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   // Numeric literals mirror the v1 Artcraft Seedance 1.5 Pro tests we deleted:
   // resolution=None + generate_audio=None → fal client defaults (720p, audio on).
   #[test]
-  fn default_5s_is_30() { assert_eq!(cost_cents(Some(5)), 30); }
+  fn default_5s_is_30() {
+    assert_eq!(cost_cents(Some(5)), 30);
+  }
 
   #[test]
-  fn default_4s_is_30() { assert_eq!(cost_cents(Some(4)), 30); }
+  fn default_4s_is_30() {
+    assert_eq!(cost_cents(Some(4)), 30);
+  }
 
   #[test]
-  fn default_10s_is_75() { assert_eq!(cost_cents(Some(10)), 75); }
+  fn default_10s_is_75() {
+    assert_eq!(cost_cents(Some(10)), 75);
+  }
 
   #[test]
-  fn default_12s_is_90() { assert_eq!(cost_cents(Some(12)), 90); }
+  fn default_12s_is_90() {
+    assert_eq!(cost_cents(Some(12)), 90);
+  }
 }

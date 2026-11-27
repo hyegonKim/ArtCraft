@@ -11,32 +11,23 @@ use tokio::io::AsyncReadExt;
 
 /// Try to prevent buffer reallocations.
 /// There's a better way to implement this.
-const INITIAL_BUFFER_SIZE : usize = 1024*1024;
+const INITIAL_BUFFER_SIZE: usize = 1024 * 1024;
 
-pub async fn sora_media_upload_from_file<P: AsRef<Path>>(
-  file_path: P, 
-  creds: &SoraCredentialSet,
-  maybe_timeout: Option<Duration>,
-) -> Result<SoraMediaUploadResponse, SoraError> {
-  let mut file = File::open(&file_path).await
-      .map_err(|err| {
-        error!("Failed to open file for upload: {}", err);
-        SoraClientError::FileForUploadReadError(err)
-      })?;
-  
+pub async fn sora_media_upload_from_file<P: AsRef<Path>>(file_path: P, creds: &SoraCredentialSet, maybe_timeout: Option<Duration>) -> Result<SoraMediaUploadResponse, SoraError> {
+  let mut file = File::open(&file_path).await.map_err(|err| {
+    error!("Failed to open file for upload: {}", err);
+    SoraClientError::FileForUploadReadError(err)
+  })?;
+
   let mut buffer = Vec::with_capacity(INITIAL_BUFFER_SIZE);
 
-  file.read_to_end(&mut buffer).await
-      .map_err(|err| {
-        error!("Failed to read file for upload: {}", err);
-        SoraClientError::FileForUploadReadError(err)
-      })?;
+  file.read_to_end(&mut buffer).await.map_err(|err| {
+    error!("Failed to read file for upload: {}", err);
+    SoraClientError::FileForUploadReadError(err)
+  })?;
 
-  let filename = file_path.as_ref().file_name()
-    .ok_or_else(|| SoraClientError::FileForUploadHasInvalidPath)?
-    .to_string_lossy()
-    .to_string();
-  
+  let filename = file_path.as_ref().file_name().ok_or_else(|| SoraClientError::FileForUploadHasInvalidPath)?.to_string_lossy().to_string();
+
   let maybe_ext = file_path.as_ref().extension().and_then(|e| e.to_str());
 
   // TODO: Read file magic bytes first, then fall back to this.
@@ -68,11 +59,7 @@ mod tests {
 
     let image_path = test_file_path("test_data/image/juno.jpg")?; // media_01jqyqgqpwf40tkcapq5bmaz5d
 
-    let response = sora_media_upload_from_file(
-      image_path,
-      &creds,
-      None,
-    ).await?;
+    let response = sora_media_upload_from_file(image_path, &creds, None).await?;
 
     println!("media: {:?}", response);
 

@@ -44,8 +44,6 @@ pub struct Kling3p0ProTextToVideoOutput {
   pub video: Kling3p0ProTextToVideoVideoFile,
 }
 
-pub fn kling_3p0_pro_text_to_video(
-  params: Kling3p0ProTextToVideoInput,
-) -> FalRequest<Kling3p0ProTextToVideoInput, Kling3p0ProTextToVideoOutput> {
+pub fn kling_3p0_pro_text_to_video(params: Kling3p0ProTextToVideoInput) -> FalRequest<Kling3p0ProTextToVideoInput, Kling3p0ProTextToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v3/pro/text-to-video", params)
 }

@@ -23,7 +23,6 @@ pub enum AudioGenerationDraftRequest {
 }
 
 impl AudioGenerationDraftRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::KinoviSunoRemix(_) => RouterProvider::KinoviWeb,

@@ -12,7 +12,6 @@
 ///
 macro_rules! impl_sqlite_enum_coders {
   ($t:ident) => {
-
     // TODO(bt,2023-11-19): We're not using sqlite anymore. Consider removing this.
     //impl sqlx::Type<sqlx_core::sqlite::Sqlite> for $t {
     //  fn type_info() -> sqlx_core::sqlite::SqliteTypeInfo {
@@ -44,13 +43,12 @@ macro_rules! impl_sqlite_enum_coders {
     //    Ok(value)
     //  }
     //}
-
-  }
+  };
 }
 
 #[cfg(not(feature = "database"))]
 macro_rules! impl_sqlite_enum_coders {
   ($t:ident) => {
     // Intentionally empty
-  }
+  };
 }

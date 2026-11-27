@@ -53,11 +53,7 @@ impl TimelapseResolution {
     #[must_use]
     pub fn parse_str(s: &str) -> Self {
         let lower = s.trim().to_ascii_lowercase();
-        if lower.contains("2560") || lower.contains("2k") {
-            Self::Res2560
-        } else {
-            Self::Res1920
-        }
+        if lower.contains("2560") || lower.contains("2k") { Self::Res2560 } else { Self::Res1920 }
     }
 }
 
@@ -123,11 +119,7 @@ impl TimelapseFormat {
     /// Infers the container format from a file path or extension.
     #[must_use]
     pub fn from_path_or_ext(name_or_ext: &str) -> Self {
-        let ext = name_or_ext
-            .rsplit(['.', '/', '\\'])
-            .next()
-            .unwrap_or(name_or_ext)
-            .to_ascii_lowercase();
+        let ext = name_or_ext.rsplit(['.', '/', '\\']).next().unwrap_or(name_or_ext).to_ascii_lowercase();
         match ext.as_str() {
             "webm" => Self::Webm,
             "avi" => Self::Avi,
@@ -158,10 +150,7 @@ pub fn target_dimensions(src_w: u32, src_h: u32, res: TimelapseResolution) -> (u
     let long = w.max(h);
     let (scaled_w, scaled_h) = if long > max_edge {
         let scale = max_edge as f64 / long as f64;
-        (
-            ((w as f64 * scale).round() as u32).max(2),
-            ((h as f64 * scale).round() as u32).max(2),
-        )
+        (((w as f64 * scale).round() as u32).max(2), ((h as f64 * scale).round() as u32).max(2))
     } else {
         (w, h)
     };
@@ -184,9 +173,7 @@ pub fn encode_timelapse_frames(
     let fps = fps.clamp(1, 120);
     let (out_w, out_h) = target_dimensions(first.width, first.height, res);
 
-    let rgb_frames: Vec<Vec<u8>> = crate::pixels::par_map(frames.iter().collect(), |frame| {
-        scale_and_matte_rgb8(frame, out_w, out_h)
-    });
+    let rgb_frames: Vec<Vec<u8>> = crate::pixels::par_map(frames.iter().collect(), |frame| scale_and_matte_rgb8(frame, out_w, out_h));
 
     match format {
         TimelapseFormat::Gif => encode_animated_gif(&rgb_frames, out_w, out_h, fps),
@@ -216,11 +203,7 @@ fn scale_and_matte_rgb8(frame: &TimelapseRawFrame, out_w: u32, out_h: u32) -> Ve
 
     let sample_rgba = |x: usize, y: usize| -> [f32; 4] {
         let idx = (y.min(sh - 1) * sw + x.min(sw - 1)) * 4;
-        if let Some(px) = frame.rgba8.get(idx..idx + 4) {
-            [px[0] as f32, px[1] as f32, px[2] as f32, px[3] as f32 / 255.0]
-        } else {
-            [255.0, 255.0, 255.0, 1.0]
-        }
+        if let Some(px) = frame.rgba8.get(idx..idx + 4) { [px[0] as f32, px[1] as f32, px[2] as f32, px[3] as f32 / 255.0] } else { [255.0, 255.0, 255.0, 1.0] }
     };
 
     for dy in 0..dh {
@@ -257,18 +240,8 @@ fn scale_and_matte_rgb8(frame: &TimelapseRawFrame, out_w: u32, out_h: u32) -> Ve
     out
 }
 
-fn encode_jpeg_frames(
-    rgb_frames: &[Vec<u8>],
-    w: u32,
-    h: u32,
-    quality: TimelapseQuality,
-) -> Result<Vec<Vec<u8>>, IoError> {
-    let opts = EncodeOptions {
-        jpeg_quality: quality.jpeg_quality(),
-        embed_icc: false,
-        embed_metadata: false,
-        ..EncodeOptions::default()
-    };
+fn encode_jpeg_frames(rgb_frames: &[Vec<u8>], w: u32, h: u32, quality: TimelapseQuality) -> Result<Vec<Vec<u8>>, IoError> {
+    let opts = EncodeOptions { jpeg_quality: quality.jpeg_quality(), embed_icc: false, embed_metadata: false, ..EncodeOptions::default() };
     let encoded: Vec<Result<Vec<u8>, IoError>> = crate::pixels::par_map(rgb_frames.iter().collect(), |rgb| {
         let img = Image::from_raw(w, h, ChannelLayout::Rgb, CSample::U8, rgb.clone())?;
         Ok(codecs::encode(&img, Format::Jpeg, &opts)?)
@@ -707,9 +680,7 @@ fn encode_animated_gif(rgb_frames: &[Vec<u8>], w: u32, h: u32, fps: u32) -> Resu
     out.push(0); // pixel aspect ratio
 
     // NETSCAPE2.0 infinite-loop application extension
-    out.extend_from_slice(&[
-        0x21, 0xFF, 0x0B, b'N', b'E', b'T', b'S', b'C', b'A', b'P', b'E', b'2', b'.', b'0', 0x03, 0x01, 0x00, 0x00, 0x00,
-    ]);
+    out.extend_from_slice(&[0x21, 0xFF, 0x0B, b'N', b'E', b'T', b'S', b'C', b'A', b'P', b'E', b'2', b'.', b'0', 0x03, 0x01, 0x00, 0x00, 0x00]);
 
     for gif in &gifs {
         append_gif_frame(&mut out, gif, delay_cs)?;

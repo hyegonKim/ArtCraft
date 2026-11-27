@@ -20,10 +20,7 @@ mod tests {
   fn builds_jpeg_url_with_jpg_extension() {
     let id = UploadObjectId("abc123".to_string());
     let url = upload_id_to_image_url(&id, UploadMimeType::ImageJpeg);
-    assert_eq!(
-      url,
-      "https://cdn.marble.worldlabs.ai/object/abc123/asset.jpg"
-    );
+    assert_eq!(url, "https://cdn.marble.worldlabs.ai/object/abc123/asset.jpg");
   }
 
   // llm tests... sigh

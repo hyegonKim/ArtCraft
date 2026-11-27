@@ -28,12 +28,7 @@ mod tests {
   #[tokio::test]
   #[ignore] // sends a real generation to the Artcraft backend, incurs cost
   async fn text_to_mesh_teapot() {
-    let response = run_pipeline(GenerateMeshRequestBuilder {
-      model: RouterMeshModel::MeshyV6,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("A red ceramic teapot with a curved spout.".to_string()),
-      ..Default::default()
-    }).await;
+    let response = run_pipeline(GenerateMeshRequestBuilder { model: RouterMeshModel::MeshyV6, provider: RouterProvider::Artcraft, prompt: Some("A red ceramic teapot with a curved spout.".to_string()), ..Default::default() }).await;
     assert!(matches!(response, GenerateMeshResponse::Artcraft(_)));
     assert_eq!(1, 2, "Inspect output above");
   }
@@ -55,7 +50,7 @@ mod tests {
       GenerateMeshResponse::Artcraft(p) => {
         println!("inference_job_token={:?}", p.inference_job_token);
         println!("all_inference_job_tokens={:?}", p.all_inference_job_tokens);
-      }
+      },
       other => println!("response: {:?}", other),
     }
 

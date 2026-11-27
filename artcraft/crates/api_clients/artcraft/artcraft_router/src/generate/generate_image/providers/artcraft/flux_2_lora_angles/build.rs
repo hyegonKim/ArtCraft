@@ -8,12 +8,8 @@ use crate::generate::generate_image::providers::artcraft::angle_validation::requ
 use crate::generate::generate_image::providers::artcraft::build_common::build_artcraft_omni_image_request;
 use crate::generate::generate_image::providers::artcraft::flux_2_lora_angles::request::ArtcraftFlux2LoraAnglesRequestState;
 
-pub fn build_artcraft_flux_2_lora_angles(
-  builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_artcraft_flux_2_lora_angles(builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   require_at_least_one_image_input(&builder.image_inputs)?;
   let request = build_artcraft_omni_image_request(builder, CommonImageModelEnum::Flux2LoraAngles)?;
-  Ok(ImageGenerationDraftOrRequest::Request(
-    ImageGenerationRequest::ArtcraftFlux2LoraAngles(ArtcraftFlux2LoraAnglesRequestState { request }),
-  ))
+  Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::ArtcraftFlux2LoraAngles(ArtcraftFlux2LoraAnglesRequestState { request })))
 }

@@ -31,7 +31,7 @@ use wreq::header::{ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, AUTHORIZATION, CACH
 use wreq::Client;
 use wreq_util::Emulation;
 use crate::api::api_types::world_id::WorldObjectId;
-const BASE_URL : &str = "https://api.worldlabs.ai/api/v1/objects";
+const BASE_URL: &str = "https://api.worldlabs.ai/api/v1/objects";
 
 // Note: WorldLabs is phasing out the old URL scheme:
 // const BASE_URL : &str = "https://marble2-kgw-prod-iac1.wlt-ai.art/api/v1/objects";
@@ -78,32 +78,13 @@ pub struct UpdateRunObjectWithWorldResponse {
 /// more fields - prompt, world_id, etc.
 /// Request #9 (of ~10)
 pub async fn update_run_object_with_world(args: UpdateRunObjectWithWorldArgs<'_>) -> Result<UpdateRunObjectWithWorldResponse, WorldLabsError> {
-  let client = Client::builder()
-      .emulation(Emulation::Firefox143)
-      .build()
-      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).build().map_err(|err| WorldLabsClientError::WreqClientError(err))?;
 
   let url = get_url(args.payload_args.run_id);
 
   debug!("Requesting URL: {}", url);
 
-  let mut request_builder = client.patch(url)
-      .header(ACCEPT, ACCEPT_ALL)
-      .header(ACCEPT_LANGUAGE, "en-US,en;q=0.5")
-      .header(ACCEPT_ENCODING, "gzip, deflate, br, zstd")
-      .header(REFERER, REFERER_VALUE)
-      .header(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
-      .header(AUTHORIZATION, args.bearer_token.to_bearer_token_header_string())
-      .header(ORIGIN, ORIGIN_VALUE)
-      .header(SEC_GPC, "1")
-      .header(CONNECTION, CONNECTION_KEEP_ALIVE)
-      .header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY)
-      .header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS)
-      .header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE)
-      .header(PRIORITY, PRIORITY_4)
-      .header(PRAGMA, PRAGMA_NO_CACHE)
-      .header(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE)
-      .header(TE, TE_TRAILERS);
+  let mut request_builder = client.patch(url).header(ACCEPT, ACCEPT_ALL).header(ACCEPT_LANGUAGE, "en-US,en;q=0.5").header(ACCEPT_ENCODING, "gzip, deflate, br, zstd").header(REFERER, REFERER_VALUE).header(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON).header(AUTHORIZATION, args.bearer_token.to_bearer_token_header_string()).header(ORIGIN, ORIGIN_VALUE).header(SEC_GPC, "1").header(CONNECTION, CONNECTION_KEEP_ALIVE).header(SEC_FETCH_DEST, SEC_FETCH_DEST_EMPTY).header(SEC_FETCH_MODE, SEC_FETCH_MODE_CORS).header(SEC_FETCH_SITE, SEC_FETCH_SITE_CROSS_SITE).header(PRIORITY, PRIORITY_4).header(PRAGMA, PRAGMA_NO_CACHE).header(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE).header(TE, TE_TRAILERS);
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
@@ -111,40 +92,33 @@ pub async fn update_run_object_with_world(args: UpdateRunObjectWithWorldArgs<'_>
 
   let payload = RawRequest::from_args(&args.payload_args);
 
-  let http_request = request_builder.json(&payload)
-      .build()
-      .map_err(|err| {
-        error!("Error building request: {:?}", err);
-        WorldLabsClientError::WreqClientError(err)
-      })?;
+  let http_request = request_builder.json(&payload).build().map_err(|err| {
+    error!("Error building request: {:?}", err);
+    WorldLabsClientError::WreqClientError(err)
+  })?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Error during request execution: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Error during request execution: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-      .await
-      .map_err(|err| {
-        error!("Error reading response body: {:?}", err);
-        WorldLabsGenericApiError::WreqError(err)
-      })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   // TODO: Handle errors (Cloudflare, Grok, etc.)
   if !status.is_success() {
     error!("Request returned an error (code {}) : {:?}", status.as_u16(), response_body);
     //return Err(classify_general_http_status_code_and_body(status, response_body));
-    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body}.into())
+    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body }.into());
   }
 
   debug!("Response body (200): {}", response_body);
 
-  let _response : RawResponse = serde_json::from_str(&response_body)
-      .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let _response: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
   Ok(UpdateRunObjectWithWorldResponse {
     //image_input_id: args.payload_args.image_input_id.clone(),
@@ -163,20 +137,7 @@ impl Default for RawRequest {
   fn default() -> Self {
     let now = Utc::now();
     let now = now.timestamp_millis().unsigned_abs();
-    Self {
-      object: ObjectDef {
-        metadata: ObjectMetadata {
-          version: "0.0.1".to_string(),
-          name: None,
-          created_at: now,
-          updated_at: now,
-          uses_advanced_editing: false,
-          draft_mode: false,
-          nodes: IndexMap::new(),
-        }
-      },
-      update_mask: vec!["metadata".to_string()]
-    }
+    Self { object: ObjectDef { metadata: ObjectMetadata { version: "0.0.1".to_string(), name: None, created_at: now, updated_at: now, uses_advanced_editing: false, draft_mode: false, nodes: IndexMap::new() } }, update_mask: vec!["metadata".to_string()] }
   }
 }
 
@@ -203,7 +164,7 @@ impl RawRequest {
     request.add_world_node({
       let mut node = WorldNode::default();
       node.id = args.meta_world_id.to_string();
-      node.parent_id=  Some(args.pano_id.to_string());
+      node.parent_id = Some(args.pano_id.to_string());
       node.source.world_id = Some(args.world_id.to_string());
       node.created_at = args.first_patch_timestamp;
       node
@@ -292,29 +253,26 @@ struct ImageInputNodeSource {
 enum TypeInput {
   #[serde(rename = "input")]
   #[default]
-  Input
+  Input,
 }
 
 #[derive(Serialize, Default)]
 enum TypeImage {
   #[serde(rename = "image")]
   #[default]
-  Image
+  Image,
 }
 
 #[derive(Serialize, Default)]
 enum StatusPending {
   #[serde(rename = "pending")]
   #[default]
-  Pending
+  Pending,
 }
 
 impl ImageInputNode {
-  pub fn with_id(id: &str) -> Self{
-    Self {
-      id: id.to_string(),
-      ..Default::default()
-    }
+  pub fn with_id(id: &str) -> Self {
+    Self { id: id.to_string(), ..Default::default() }
   }
 }
 
@@ -341,22 +299,19 @@ struct PanoNodeSource {
 enum TypePano {
   #[serde(rename = "pano")]
   #[default]
-  Pano
+  Pano,
 }
 
 #[derive(Serialize, Default)]
 enum TypeGenerateWorld {
   #[serde(rename = "generate_world")]
   #[default]
-  GenerateWorld
+  GenerateWorld,
 }
 
 impl PanoNode {
-  pub fn with_id(id: &str) -> Self{
-    Self {
-      id: id.to_string(),
-      ..Default::default()
-    }
+  pub fn with_id(id: &str) -> Self {
+    Self { id: id.to_string(), ..Default::default() }
   }
 }
 
@@ -386,15 +341,12 @@ struct WorldNodeSource {
 enum TypeWorld {
   #[serde(rename = "world")]
   #[default]
-  World
+  World,
 }
 
 impl WorldNode {
-  pub fn with_id(id: &str) -> Self{
-    Self {
-      id: id.to_string(),
-      ..Default::default()
-    }
+  pub fn with_id(id: &str) -> Self {
+    Self { id: id.to_string(), ..Default::default() }
   }
 }
 
@@ -435,18 +387,7 @@ mod tests {
     let title = "Cows Grazing in Indoor Pasture";
     let caption = "The scene is a surreal indoor agricultural environment, depicted with a realistic and slightly eerie tone, as rows of bright lights illuminate a vast, artificial pasture. The overall mood is quiet and contemplative, emphasizing the unusual juxtaposition of natural elements within a manufactured setting. Large herds of cattle are distributed across the lush, green grassy floor, peacefully grazing on the abundant vegetation. The entire space is encased within a massive, warehouse-like structure, supported by countless concrete columns that extend from the floor to the ceiling in an orderly grid. Above the columns, a network of metal beams forms the infrastructure of the roof, from which an extensive array of industrial lights is suspended. These lights are arranged in long, parallel lines, creating a striking visual perspective that converges towards a distant vanishing point at the center of the structure. The dense, vibrant green grass covers every inch of the ground, appearing soft and uniform, without any discernible paths or bare patches. Each cow is distinct, varying in color from black to brown and white, and each is engaged in individual grazing or resting. The concrete columns maintain a consistent light gray color and texture, creating a rhythmic architectural presence throughout the vast indoor landscape. To the right, another cluster of columns continues the architectural pattern, while the grassy expanse remains uninterrupted, extending toward the edges of the structure. ";
 
-    let args = UpdateRunObjectWithWorldPayloadArgs {
-      run_created_at_timestamp: 1765756772176,
-      first_patch_timestamp: 1765756773647,
-      image_upload_url: "https://cdn.marble.worldlabs.ai/object/13ca760c-8ef9-4bf5-acc3-5a507fad3abf/asset.jpg",
-      run_id: &run_id,
-      image_input_id: &image_input_id,
-      pano_id: &pano_id,
-      meta_world_id: &meta_world_id,
-      world_id: &world_id,
-      title,
-      text_prompt: caption,
-    };
+    let args = UpdateRunObjectWithWorldPayloadArgs { run_created_at_timestamp: 1765756772176, first_patch_timestamp: 1765756773647, image_upload_url: "https://cdn.marble.worldlabs.ai/object/13ca760c-8ef9-4bf5-acc3-5a507fad3abf/asset.jpg", run_id: &run_id, image_input_id: &image_input_id, pano_id: &pano_id, meta_world_id: &meta_world_id, world_id: &world_id, title, text_prompt: caption };
 
     let request = RawRequest::from_args(&args);
 

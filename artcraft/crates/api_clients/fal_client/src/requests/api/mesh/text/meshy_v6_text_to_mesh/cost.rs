@@ -16,26 +16,7 @@ mod tests {
 
   #[test]
   fn flat_cost_regardless_of_options() {
-    let mut request = MeshyV6TextToMeshRequest {
-      prompt: "p".to_string(),
-      mode: None,
-      seed: None,
-      model_type: None,
-      topology: None,
-      target_polycount: None,
-      should_remesh: None,
-      symmetry_mode: None,
-      enable_pbr: None,
-      pose_mode: None,
-      enable_prompt_expansion: None,
-      texture_prompt: None,
-      texture_image_url: None,
-      enable_rigging: None,
-      rigging_height_meters: None,
-      enable_animation: None,
-      animation_action_id: None,
-      enable_safety_checker: None,
-    };
+    let mut request = MeshyV6TextToMeshRequest { prompt: "p".to_string(), mode: None, seed: None, model_type: None, topology: None, target_polycount: None, should_remesh: None, symmetry_mode: None, enable_pbr: None, pose_mode: None, enable_prompt_expansion: None, texture_prompt: None, texture_image_url: None, enable_rigging: None, rigging_height_meters: None, enable_animation: None, animation_action_id: None, enable_safety_checker: None };
     assert_eq!(request.calculate_cost_in_cents(), 80);
 
     request.enable_pbr = Some(true);

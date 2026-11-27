@@ -44,8 +44,6 @@ pub struct Veo3p1TextToVideoOutput {
   pub video: Veo3p1TextToVideoVideoFile,
 }
 
-pub fn veo_3p1_text_to_video(
-  params: Veo3p1TextToVideoInput,
-) -> FalRequest<Veo3p1TextToVideoInput, Veo3p1TextToVideoOutput> {
+pub fn veo_3p1_text_to_video(params: Veo3p1TextToVideoInput) -> FalRequest<Veo3p1TextToVideoInput, Veo3p1TextToVideoOutput> {
   FalRequest::new("fal-ai/veo3.1", params)
 }

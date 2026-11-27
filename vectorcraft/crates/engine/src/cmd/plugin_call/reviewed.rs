@@ -124,6 +124,8 @@ pub(super) const ALLOWED: &[&str] = &[
     "brush.selectionArt",
     "brush.setCurrent",
     "brush.unused",
+    "capture.extractColorTheme",
+    "capture.extractPatternTile",
     "charStyle.apply",
     "charStyle.delete",
     "charStyle.duplicate",

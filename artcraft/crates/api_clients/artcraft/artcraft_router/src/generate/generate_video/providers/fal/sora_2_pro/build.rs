@@ -5,23 +5,15 @@ use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 use crate::generate::generate_video::providers::fal::kling_1_6_pro::build::optional_url;
-use crate::generate::generate_video::providers::fal::sora_2_pro::request::{
-  FalSora2ProAspectRatio, FalSora2ProDuration, FalSora2ProMode, FalSora2ProRequestState,
-  FalSora2ProResolution,
-};
+use crate::generate::generate_video::providers::fal::sora_2_pro::request::{FalSora2ProAspectRatio, FalSora2ProDuration, FalSora2ProMode, FalSora2ProRequestState, FalSora2ProResolution};
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
-pub fn build_fal_sora_2_pro(
-  builder: GenerateVideoRequestBuilder,
-) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_fal_sora_2_pro(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   if builder.end_frame.is_some() {
-    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-      field: "end_frame",
-      value: "Sora 2 Pro does not support an ending frame".to_string(),
-    }));
+    return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "end_frame", value: "Sora 2 Pro does not support an ending frame".to_string() }));
   }
 
   let mode = match optional_url(builder.start_frame.clone())? {
@@ -33,70 +25,41 @@ pub fn build_fal_sora_2_pro(
   let resolution = plan_resolution(builder.resolution, strategy)?;
   let duration = plan_duration(builder.duration_seconds, strategy)?;
 
-  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalSora2Pro(
-    FalSora2ProRequestState {
-      prompt: builder.prompt.clone().unwrap_or_default(),
-      mode,
-      aspect_ratio,
-      resolution,
-      duration,
-    },
-  )))
+  Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalSora2Pro(FalSora2ProRequestState { prompt: builder.prompt.clone().unwrap_or_default(), mode, aspect_ratio, resolution, duration })))
 }
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<FalSora2ProAspectRatio>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<FalSora2ProAspectRatio>, ArtcraftRouterError> {
   use FalSora2ProAspectRatio as Ar;
   match aspect_ratio {
     None => Ok(None),
 
-    Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
+    Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(Some(Ar::Auto)),
 
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(Ar::SixteenByNine)),
     Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(Ar::NineBySixteen)),
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Some(Ar::SixteenByNine)),
     },
   }
 }
 
-fn plan_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<FalSora2ProResolution>, ArtcraftRouterError> {
+fn plan_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<FalSora2ProResolution>, ArtcraftRouterError> {
   use FalSora2ProResolution as R;
   match resolution {
     None => Ok(None),
     Some(RouterResolution::SevenTwentyP) => Ok(Some(R::SevenTwentyP)),
     Some(RouterResolution::TenEightyP) => Ok(Some(R::TenEightyP)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(R::TenEightyP)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(R::SevenTwentyP)),
     },
   }
 }
 
-fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<FalSora2ProDuration>, ArtcraftRouterError> {
+fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<FalSora2ProDuration>, ArtcraftRouterError> {
   use FalSora2ProDuration as D;
   match duration_seconds {
     None => Ok(None),
@@ -104,12 +67,7 @@ fn plan_duration(
     Some(8) => Ok(Some(D::Eight)),
     Some(12) => Ok(Some(D::Twelve)),
     Some(other) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", other) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(D::Twelve)),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(D::Four)),
     },
@@ -125,12 +83,7 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Sora2Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { model: RouterVideoModel::Sora2Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), ..Default::default() }
   }
 
   #[test]
@@ -138,7 +91,9 @@ mod tests {
     let r = build_fal_sora_2_pro(base_builder()).expect("build");
     if let VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalSora2Pro(s)) = r {
       assert!(matches!(s.mode, FalSora2ProMode::TextToVideo));
-    } else { panic!("expected FalSora2Pro"); }
+    } else {
+      panic!("expected FalSora2Pro");
+    }
   }
 
   #[test]
@@ -148,7 +103,9 @@ mod tests {
     let r = build_fal_sora_2_pro(b).expect("build");
     if let VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::FalSora2Pro(s)) = r {
       assert!(matches!(s.mode, FalSora2ProMode::ImageToVideo { .. }));
-    } else { panic!("expected FalSora2Pro"); }
+    } else {
+      panic!("expected FalSora2Pro");
+    }
   }
 
   #[test]

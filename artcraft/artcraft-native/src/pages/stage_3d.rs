@@ -64,21 +64,7 @@ pub struct StageObject {
 
 impl Default for Stage3dPage {
   fn default() -> Self {
-    Self {
-      pose_preset: PosePreset::PowerStance,
-      pose: MannequinPose::from_preset(PosePreset::PowerStance),
-      objects: vec![
-        StageObject { name: "Mannequin".into(), visible: true, pos: [0.0, 0.0, 0.0], scale: 1.0, color: [89, 167, 255], cutout_rgba: None },
-        StageObject { name: "Pillar Left".into(), visible: true, pos: [-1.05, -0.2, 0.5], scale: 0.85, color: [140, 150, 175], cutout_rgba: None },
-        StageObject { name: "Pillar Right".into(), visible: true, pos: [1.05, -0.2, 0.5], scale: 0.85, color: [140, 150, 175], cutout_rgba: None },
-      ],
-      selected_object: 0,
-      cam_yaw_deg: 22.0,
-      cam_pitch_deg: 16.0,
-      cam_zoom: 1.0,
-      focal_length_mm: 35.0,
-      shot_prompt: String::new(),
-    }
+    Self { pose_preset: PosePreset::PowerStance, pose: MannequinPose::from_preset(PosePreset::PowerStance), objects: vec![StageObject { name: "Mannequin".into(), visible: true, pos: [0.0, 0.0, 0.0], scale: 1.0, color: [89, 167, 255], cutout_rgba: None }, StageObject { name: "Pillar Left".into(), visible: true, pos: [-1.05, -0.2, 0.5], scale: 0.85, color: [140, 150, 175], cutout_rgba: None }, StageObject { name: "Pillar Right".into(), visible: true, pos: [1.05, -0.2, 0.5], scale: 0.85, color: [140, 150, 175], cutout_rgba: None }], selected_object: 0, cam_yaw_deg: 22.0, cam_pitch_deg: 16.0, cam_zoom: 1.0, focal_length_mm: 35.0, shot_prompt: String::new() }
   }
 }
 
@@ -121,10 +107,16 @@ impl Stage3dPage {
 
     let frame = Rect::from_min_size(pos2(0.0, 0.0), vec2(width as f32, height as f32));
     let zoom = self.lens_zoom();
-    let mut props: Vec<(Rect, f32, &StageObject)> = self.objects.iter().skip(1).filter(|o| o.visible).map(|o| {
-      let (rect, depth) = object_rect(o, self.cam_yaw_deg, self.cam_pitch_deg, zoom, frame);
-      (rect, depth, o)
-    }).collect();
+    let mut props: Vec<(Rect, f32, &StageObject)> = self
+      .objects
+      .iter()
+      .skip(1)
+      .filter(|o| o.visible)
+      .map(|o| {
+        let (rect, depth) = object_rect(o, self.cam_yaw_deg, self.cam_pitch_deg, zoom, frame);
+        (rect, depth, o)
+      })
+      .collect();
     props.sort_by(|a, b| b.1.total_cmp(&a.1));
     for (rect, _, obj) in props {
       fill_object(&mut out, width, height, rect, obj);
@@ -274,10 +266,16 @@ impl Stage3dPage {
       p.line_segment([c, d], grid);
     }
 
-    let mut props: Vec<(Rect, f32, &StageObject)> = self.objects.iter().skip(1).filter(|o| o.visible).map(|o| {
-      let (r, depth) = object_rect(o, yaw, pitch, zoom, frame);
-      (r, depth, o)
-    }).collect();
+    let mut props: Vec<(Rect, f32, &StageObject)> = self
+      .objects
+      .iter()
+      .skip(1)
+      .filter(|o| o.visible)
+      .map(|o| {
+        let (r, depth) = object_rect(o, yaw, pitch, zoom, frame);
+        (r, depth, o)
+      })
+      .collect();
     props.sort_by(|a, b| b.1.total_cmp(&a.1));
     for (r, _, obj) in props {
       let color = Color32::from_rgb(obj.color[0], obj.color[1], obj.color[2]);

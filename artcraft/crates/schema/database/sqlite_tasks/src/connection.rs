@@ -17,7 +17,7 @@ impl TaskDbConnection {
         Ok(pool) => return Ok(Self { pool }),
         Err(err) => {
           error!("Error running SQLite migrations: {:?}", err);
-        }
+        },
       }
 
       info!("Deleting and recreating SQLite database at {:?}", database_file.as_ref());
@@ -46,10 +46,7 @@ impl TaskDbConnection {
 }
 
 async fn run_migrations<P: AsRef<Path>>(database_file: P) -> Result<SqlitePool, MigrateError> {
-  let connection_options = SqliteConnectOptions::new()
-      .filename(database_file)
-      .create_if_missing(true)
-      .journal_mode(SqliteJournalMode::Wal);
+  let connection_options = SqliteConnectOptions::new().filename(database_file).create_if_missing(true).journal_mode(SqliteJournalMode::Wal);
 
   let pool = SqlitePool::connect_with(connection_options).await?;
 

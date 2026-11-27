@@ -54,7 +54,6 @@ pub enum NanoBananaMultiFunctionImageGenAspectRatio {
   NineBySixteen, // NB: No NineByTwentyOne ?
 }
 
-
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct NanoBananaMultiFunctionImageGenResponse {
   pub success: bool,

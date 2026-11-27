@@ -17,9 +17,7 @@ pub struct SeedEditV3EditRequest {
   pub image_url: String,
 }
 
-pub async fn enqueue_seededit_v3_edit_webhook<R: IntoUrl>(
-  args: SeedEditV3EditArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_seededit_v3_edit_webhook<R: IntoUrl>(args: SeedEditV3EditArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let request = SeedEditV3EditInput {
@@ -31,10 +29,7 @@ pub async fn enqueue_seededit_v3_edit_webhook<R: IntoUrl>(
     enable_safety_checker: None,
   };
 
-  let result = seededit_v3_edit(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = seededit_v3_edit(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -55,14 +50,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = SeedEditV3EditArgs {
-      request: SeedEditV3EditRequest {
-        prompt: "put christmas lights on the tree, add snow to the mountains".to_string(),
-        image_url: MOUNTAIN_TREE_IMAGE_URL.to_string(),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = SeedEditV3EditArgs { request: SeedEditV3EditRequest { prompt: "put christmas lights on the tree, add snow to the mountains".to_string(), image_url: MOUNTAIN_TREE_IMAGE_URL.to_string() }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_seededit_v3_edit_webhook(args).await?;
 

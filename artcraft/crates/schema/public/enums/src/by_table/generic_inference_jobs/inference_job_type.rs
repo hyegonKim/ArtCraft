@@ -228,39 +228,7 @@ impl InferenceJobType {
   pub fn all_variants() -> BTreeSet<Self> {
     // NB: BTreeSet is sorted
     // NB: BTreeSet::from() isn't const, but not worth using LazyStatic, etc.
-    BTreeSet::from([
-      Self::FalQueue,
-      Self::GmiCloudQueue,
-      Self::GrokApiQueue,
-      Self::ArtcraftMinimaxH3Turbo,
-      Self::ArtcraftMinimaxH3Ultra,
-      Self::BeebleQueue,
-      Self::Seedance2ProQueue,
-      Self::Seedance2ProCharacter,
-      Self::Seedance2ProAltQueue,
-      Self::Seedance2ProBytePlusUltraQueue,
-      Self::WorldlabsQueue,
-      Self::VideoRender,
-      Self::LivePortrait,
-      Self::FaceFusion,
-      Self::F5TTS,
-      Self::GptSovits,
-      Self::ComfyUi,
-      Self::StudioGen2,
-      Self::ImageGenApi,
-      Self::ConvertFbxToGltf,
-      Self::MocapNet,
-      Self::RvcV2,
-      Self::SadTalker,
-      Self::SeedVc,
-      Self::SoVitsSvc,
-      Self::StableDiffusion,
-      Self::StyleTTS2,
-      Self::Tacotron2,
-      Self::Unknown,
-      Self::BevyToWorkflow,
-      Self::RerenderAVideo,
-    ])
+    BTreeSet::from([Self::FalQueue, Self::GmiCloudQueue, Self::GrokApiQueue, Self::ArtcraftMinimaxH3Turbo, Self::ArtcraftMinimaxH3Ultra, Self::BeebleQueue, Self::Seedance2ProQueue, Self::Seedance2ProCharacter, Self::Seedance2ProAltQueue, Self::Seedance2ProBytePlusUltraQueue, Self::WorldlabsQueue, Self::VideoRender, Self::LivePortrait, Self::FaceFusion, Self::F5TTS, Self::GptSovits, Self::ComfyUi, Self::StudioGen2, Self::ImageGenApi, Self::ConvertFbxToGltf, Self::MocapNet, Self::RvcV2, Self::SadTalker, Self::SeedVc, Self::SoVitsSvc, Self::StableDiffusion, Self::StyleTTS2, Self::Tacotron2, Self::Unknown, Self::BevyToWorkflow, Self::RerenderAVideo])
   }
 }
 
@@ -385,8 +353,8 @@ mod tests {
     #[test]
     fn all_variants() {
       // Static check
-      const EXPECTED_COUNT : usize = 31;
-      
+      const EXPECTED_COUNT: usize = 31;
+
       assert_eq!(InferenceJobType::all_variants().len(), EXPECTED_COUNT);
       assert_eq!(InferenceJobType::iter().len(), EXPECTED_COUNT);
 
@@ -416,7 +384,7 @@ mod tests {
 
     #[test]
     fn serialized_length_ok_for_database() {
-      const MAX_LENGTH : usize = 32;
+      const MAX_LENGTH: usize = 32;
       for variant in InferenceJobType::all_variants() {
         let serialized = variant.to_str();
         assert!(serialized.len() > 0, "variant {:?} is too short", variant);

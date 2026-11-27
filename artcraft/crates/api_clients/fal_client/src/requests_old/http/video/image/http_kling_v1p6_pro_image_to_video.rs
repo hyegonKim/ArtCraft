@@ -35,8 +35,6 @@ pub struct KlingV1p6ProImageToVideoOutput {
   pub video: KlingV1p6ProImageToVideoVideoFile,
 }
 
-pub fn kling_v1p6_pro_image_to_video(
-  params: KlingV1p6ProImageToVideoInput,
-) -> FalRequest<KlingV1p6ProImageToVideoInput, KlingV1p6ProImageToVideoOutput> {
+pub fn kling_v1p6_pro_image_to_video(params: KlingV1p6ProImageToVideoInput) -> FalRequest<KlingV1p6ProImageToVideoInput, KlingV1p6ProImageToVideoOutput> {
   FalRequest::new("fal-ai/kling-video/v1.6/pro/image-to-video", params)
 }

@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use crate::webhook_payload::hydrated::hydrated_webhook_contents::ImageData;
 
 /// Extract and deserialize the `image` key from a webhook success payload.
-pub (crate) fn extract_image(obj: &Map<String, Value>) -> Option<ImageData> {
+pub(crate) fn extract_image(obj: &Map<String, Value>) -> Option<ImageData> {
   let value = obj.get("image")?;
   serde_json::from_value(value.clone()).ok()
 }
@@ -17,14 +17,7 @@ mod tests {
 
   #[test]
   fn payload_without_known_keys_has_none_extracted_contents() {
-    let webhook = RawWebhookPayload {
-      request_id: "test-no-keys".to_string(),
-      gateway_request_id: "test-no-keys".to_string(),
-      status: RawWebhookStatus::Ok,
-      error: None,
-      payload: Some(serde_json::json!({"some_other_key": "value"})),
-      payload_error: None,
-    };
+    let webhook = RawWebhookPayload { request_id: "test-no-keys".to_string(), gateway_request_id: "test-no-keys".to_string(), status: RawWebhookStatus::Ok, error: None, payload: Some(serde_json::json!({"some_other_key": "value"})), payload_error: None };
 
     let result = hydrate_webhook_contents(&webhook);
 
@@ -37,14 +30,7 @@ mod tests {
 
   #[test]
   fn null_payload_has_none_extracted_contents() {
-    let webhook = RawWebhookPayload {
-      request_id: "test-null".to_string(),
-      gateway_request_id: "test-null".to_string(),
-      status: RawWebhookStatus::Ok,
-      error: None,
-      payload: None,
-      payload_error: None,
-    };
+    let webhook = RawWebhookPayload { request_id: "test-null".to_string(), gateway_request_id: "test-null".to_string(), status: RawWebhookStatus::Ok, error: None, payload: None, payload_error: None };
 
     let result = hydrate_webhook_contents(&webhook);
 
@@ -57,7 +43,8 @@ mod tests {
 
   #[test]
   fn synthetic_image_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "image": {
         "url": "https://cdn.example.com/single.png",
         "content_type": "image/png",
@@ -66,7 +53,9 @@ mod tests {
         "width": 512,
         "height": 512
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let image = extract_image(&obj).expect("should extract image");
     assert_eq!(image.url.as_deref(), Some("https://cdn.example.com/single.png"));
@@ -79,9 +68,12 @@ mod tests {
 
   #[test]
   fn synthetic_image_url_only() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "image": {"url": "https://cdn.example.com/img.jpg"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let image = extract_image(&obj).expect("should extract image");
     assert_eq!(image.url.as_deref(), Some("https://cdn.example.com/img.jpg"));
@@ -91,9 +83,12 @@ mod tests {
 
   #[test]
   fn missing_image_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "images": [{"url": "https://example.com/img.png"}]
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_image(&obj).is_none());
   }

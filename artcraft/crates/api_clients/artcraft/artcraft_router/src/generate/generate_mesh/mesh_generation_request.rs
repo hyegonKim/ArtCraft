@@ -25,12 +25,8 @@ use crate::generate::generate_mesh::providers::artcraft::rodin_2p5_fast::cost::A
 use crate::generate::generate_mesh::providers::artcraft::rodin_2p5_fast::request::ArtcraftRodin2p5FastRequestState;
 use crate::generate::generate_mesh::providers::artcraft::tripo3d_h3p1::cost::ArtcraftTripo3dH3p1CostState;
 use crate::generate::generate_mesh::providers::artcraft::tripo3d_h3p1::request::ArtcraftTripo3dH3p1RequestState;
-use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::cost::{
-  FalHunyuan3d3ImageCostState, FalHunyuan3d3TextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::request::{
-  FalHunyuan3d3ImageRequestState, FalHunyuan3d3TextRequestState,
-};
+use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::cost::{FalHunyuan3d3ImageCostState, FalHunyuan3d3TextCostState};
+use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::request::{FalHunyuan3d3ImageRequestState, FalHunyuan3d3TextRequestState};
 use crate::generate::generate_mesh::providers::fal::hunyuan3d_3_sketch::cost::FalHunyuan3d3SketchCostState;
 use crate::generate::generate_mesh::providers::fal::hunyuan3d_3_sketch::request::FalHunyuan3d3SketchRequestState;
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_2p0::cost::FalHunyuan3d2p0CostState;
@@ -39,38 +35,18 @@ use crate::generate::generate_mesh::providers::fal::hunyuan_3d_2p1::cost::FalHun
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_2p1::request::FalHunyuan3d2p1RequestState;
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_part::cost::FalHunyuan3d3p1PartCostState;
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_part::request::FalHunyuan3d3p1PartRequestState;
-use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_pro::cost::{
-  FalHunyuan3d3p1ProImageCostState, FalHunyuan3d3p1ProTextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_pro::request::{
-  FalHunyuan3d3p1ProImageRequestState, FalHunyuan3d3p1ProTextRequestState,
-};
-use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_rapid::cost::{
-  FalHunyuan3d3p1RapidImageCostState, FalHunyuan3d3p1RapidTextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_rapid::request::{
-  FalHunyuan3d3p1RapidImageRequestState, FalHunyuan3d3p1RapidTextRequestState,
-};
+use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_pro::cost::{FalHunyuan3d3p1ProImageCostState, FalHunyuan3d3p1ProTextCostState};
+use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_pro::request::{FalHunyuan3d3p1ProImageRequestState, FalHunyuan3d3p1ProTextRequestState};
+use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_rapid::cost::{FalHunyuan3d3p1RapidImageCostState, FalHunyuan3d3p1RapidTextCostState};
+use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_rapid::request::{FalHunyuan3d3p1RapidImageRequestState, FalHunyuan3d3p1RapidTextRequestState};
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_smart_topology::cost::FalHunyuan3d3p1SmartTopologyCostState;
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_smart_topology::request::FalHunyuan3d3p1SmartTopologyRequestState;
-use crate::generate::generate_mesh::providers::fal::meshy_v6::cost::{
-  FalMeshyV6ImageCostState, FalMeshyV6TextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::meshy_v6::request::{
-  FalMeshyV6ImageRequestState, FalMeshyV6TextRequestState,
-};
-use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::cost::{
-  FalRodin2p5FastImageCostState, FalRodin2p5FastTextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::request::{
-  FalRodin2p5FastImageRequestState, FalRodin2p5FastTextRequestState,
-};
-use crate::generate::generate_mesh::providers::fal::tripo3d_h3p1::cost::{
-  FalTripo3dH3p1ImageCostState, FalTripo3dH3p1MultiviewCostState, FalTripo3dH3p1TextCostState,
-};
-use crate::generate::generate_mesh::providers::fal::tripo3d_h3p1::request::{
-  FalTripo3dH3p1ImageRequestState, FalTripo3dH3p1MultiviewRequestState, FalTripo3dH3p1TextRequestState,
-};
+use crate::generate::generate_mesh::providers::fal::meshy_v6::cost::{FalMeshyV6ImageCostState, FalMeshyV6TextCostState};
+use crate::generate::generate_mesh::providers::fal::meshy_v6::request::{FalMeshyV6ImageRequestState, FalMeshyV6TextRequestState};
+use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::cost::{FalRodin2p5FastImageCostState, FalRodin2p5FastTextCostState};
+use crate::generate::generate_mesh::providers::fal::rodin_2p5_fast::request::{FalRodin2p5FastImageRequestState, FalRodin2p5FastTextRequestState};
+use crate::generate::generate_mesh::providers::fal::tripo3d_h3p1::cost::{FalTripo3dH3p1ImageCostState, FalTripo3dH3p1MultiviewCostState, FalTripo3dH3p1TextCostState};
+use crate::generate::generate_mesh::providers::fal::tripo3d_h3p1::request::{FalTripo3dH3p1ImageRequestState, FalTripo3dH3p1MultiviewRequestState, FalTripo3dH3p1TextRequestState};
 
 #[derive(Clone, Debug)]
 pub enum MeshGenerationRequest {
@@ -106,38 +82,10 @@ pub enum MeshGenerationRequest {
 }
 
 impl MeshGenerationRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
-      Self::ArtcraftHunyuan3d2p0(_)
-      | Self::ArtcraftHunyuan3d2p1(_)
-      | Self::ArtcraftHunyuan3d3(_)
-      | Self::ArtcraftHunyuan3d3Sketch(_)
-      | Self::ArtcraftHunyuan3d3p1Pro(_)
-      | Self::ArtcraftHunyuan3d3p1Rapid(_)
-      | Self::ArtcraftHunyuan3d3p1Part(_)
-      | Self::ArtcraftHunyuan3d3p1SmartTopology(_)
-      | Self::ArtcraftTripo3dH3p1(_)
-      | Self::ArtcraftMeshyV6(_)
-      | Self::ArtcraftRodin2p5Fast(_) => RouterProvider::Artcraft,
-      Self::FalHunyuan3d2p0(_)
-      | Self::FalHunyuan3d2p1(_)
-      | Self::FalHunyuan3d3Image(_)
-      | Self::FalHunyuan3d3Text(_)
-      | Self::FalHunyuan3d3Sketch(_)
-      | Self::FalHunyuan3d3p1ProImage(_)
-      | Self::FalHunyuan3d3p1ProText(_)
-      | Self::FalHunyuan3d3p1RapidImage(_)
-      | Self::FalHunyuan3d3p1RapidText(_)
-      | Self::FalHunyuan3d3p1Part(_)
-      | Self::FalHunyuan3d3p1SmartTopology(_)
-      | Self::FalTripo3dH3p1Text(_)
-      | Self::FalTripo3dH3p1Image(_)
-      | Self::FalTripo3dH3p1Multiview(_)
-      | Self::FalMeshyV6Text(_)
-      | Self::FalMeshyV6Image(_)
-      | Self::FalRodin2p5FastText(_)
-      | Self::FalRodin2p5FastImage(_) => RouterProvider::Fal,
+      Self::ArtcraftHunyuan3d2p0(_) | Self::ArtcraftHunyuan3d2p1(_) | Self::ArtcraftHunyuan3d3(_) | Self::ArtcraftHunyuan3d3Sketch(_) | Self::ArtcraftHunyuan3d3p1Pro(_) | Self::ArtcraftHunyuan3d3p1Rapid(_) | Self::ArtcraftHunyuan3d3p1Part(_) | Self::ArtcraftHunyuan3d3p1SmartTopology(_) | Self::ArtcraftTripo3dH3p1(_) | Self::ArtcraftMeshyV6(_) | Self::ArtcraftRodin2p5Fast(_) => RouterProvider::Artcraft,
+      Self::FalHunyuan3d2p0(_) | Self::FalHunyuan3d2p1(_) | Self::FalHunyuan3d3Image(_) | Self::FalHunyuan3d3Text(_) | Self::FalHunyuan3d3Sketch(_) | Self::FalHunyuan3d3p1ProImage(_) | Self::FalHunyuan3d3p1ProText(_) | Self::FalHunyuan3d3p1RapidImage(_) | Self::FalHunyuan3d3p1RapidText(_) | Self::FalHunyuan3d3p1Part(_) | Self::FalHunyuan3d3p1SmartTopology(_) | Self::FalTripo3dH3p1Text(_) | Self::FalTripo3dH3p1Image(_) | Self::FalTripo3dH3p1Multiview(_) | Self::FalMeshyV6Text(_) | Self::FalMeshyV6Image(_) | Self::FalRodin2p5FastText(_) | Self::FalRodin2p5FastImage(_) => RouterProvider::Fal,
     }
   }
 

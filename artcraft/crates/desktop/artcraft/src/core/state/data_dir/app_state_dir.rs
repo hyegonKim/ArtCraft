@@ -7,13 +7,11 @@ pub struct AppStateDir {
   path: PathBuf,
 }
 
-impl DataSubdir for AppStateDir{
+impl DataSubdir for AppStateDir {
   const DIRECTORY_NAME: &'static str = "state";
 
   fn new_from<P: AsRef<Path>>(dir: P) -> Self {
-    Self {
-      path: dir.as_ref().to_path_buf(),
-    }
+    Self { path: dir.as_ref().to_path_buf() }
   }
 
   fn path(&self) -> &Path {

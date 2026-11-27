@@ -31,9 +31,9 @@ impl VideoModel {
   /// Wire representation — the exact string xAI expects in the `"model"` field.
   pub fn as_str(&self) -> &str {
     match self {
-      Self::GrokImagineVideo          => "grok-imagine-video",
+      Self::GrokImagineVideo => "grok-imagine-video",
       Self::GrokImagineVideo1p5 => "grok-imagine-video-1.5",
-      Self::Custom(s)                 => s.as_str(),
+      Self::Custom(s) => s.as_str(),
     }
   }
 
@@ -46,11 +46,7 @@ impl VideoModel {
       Self::GrokImagineVideo => VideoModelPricingTier::V1,
       Self::GrokImagineVideo1p5 => VideoModelPricingTier::V1p5,
       Self::Custom(s) => match s.as_str() {
-        "grok-imagine-video-1.5"
-        | "grok-imagine-video-1.5-preview"
-        | "grok-imagine-video-1.5-2026-05-30" => {
-          VideoModelPricingTier::V1p5
-        }
+        "grok-imagine-video-1.5" | "grok-imagine-video-1.5-preview" | "grok-imagine-video-1.5-2026-05-30" => VideoModelPricingTier::V1p5,
         _ => VideoModelPricingTier::V1,
       },
     }
@@ -90,14 +86,8 @@ mod tests {
 
   #[test]
   fn one_point_five_preview_serializes_canonical_name() {
-    assert_eq!(
-      VideoModel::GrokImagineVideo1p5.as_str(),
-      "grok-imagine-video-1.5",
-    );
-    assert_eq!(
-      serde_json::to_string(&VideoModel::GrokImagineVideo1p5).unwrap(),
-      "\"grok-imagine-video-1.5\"",
-    );
+    assert_eq!(VideoModel::GrokImagineVideo1p5.as_str(), "grok-imagine-video-1.5",);
+    assert_eq!(serde_json::to_string(&VideoModel::GrokImagineVideo1p5).unwrap(), "\"grok-imagine-video-1.5\"",);
   }
 
   #[test]
@@ -125,10 +115,7 @@ mod tests {
 
     #[test]
     fn one_point_five_preview_enum_is_v1p5() {
-      assert_eq!(
-        VideoModel::GrokImagineVideo1p5.pricing_tier(),
-        VideoModelPricingTier::V1p5,
-      );
+      assert_eq!(VideoModel::GrokImagineVideo1p5.pricing_tier(), VideoModelPricingTier::V1p5,);
     }
 
     #[test]

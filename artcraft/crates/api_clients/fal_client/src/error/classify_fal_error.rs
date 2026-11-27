@@ -1,7 +1,7 @@
 use crate::error::fal_error::FalError;
 use crate::error::fal_error_plus::FalErrorPlus;
 
-const BILLING_ERROR : &str = "{\"detail\": \"User is locked. Reason: Exhausted balance. Top up your balance at fal.ai/dashboard/billing.\"}";
+const BILLING_ERROR: &str = "{\"detail\": \"User is locked. Reason: Exhausted balance. Top up your balance at fal.ai/dashboard/billing.\"}";
 
 /// Better classify the `FalError` into a more user-friendly `FalErrorPlus`.
 pub fn classify_fal_error(err: FalError) -> FalErrorPlus {
@@ -22,6 +22,6 @@ pub fn classify_fal_error(err: FalError) -> FalErrorPlus {
       } else {
         FalErrorPlus::FalError(err)
       }
-    }
+    },
   }
 }

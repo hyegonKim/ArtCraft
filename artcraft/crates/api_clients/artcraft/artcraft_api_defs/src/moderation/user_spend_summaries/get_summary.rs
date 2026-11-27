@@ -3,8 +3,7 @@ use serde_derive::{Deserialize, Serialize};
 use tokens::tokens::users::UserToken;
 use utoipa::{IntoParams, ToSchema};
 
-pub const MODERATOR_GET_USER_SPEND_SUMMARY_PATH: &str =
-  "/v1/moderation/user_spend_summaries/summary/{user_token}";
+pub const MODERATOR_GET_USER_SPEND_SUMMARY_PATH: &str = "/v1/moderation/user_spend_summaries/summary/{user_token}";
 
 #[derive(Deserialize, IntoParams)]
 pub struct ModeratorGetUserSpendSummaryQueryParams {

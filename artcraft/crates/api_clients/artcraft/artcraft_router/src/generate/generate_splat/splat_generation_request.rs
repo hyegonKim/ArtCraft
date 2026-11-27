@@ -39,7 +39,6 @@ pub enum SplatGenerationRequest {
 }
 
 impl SplatGenerationRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::ArtcraftMarble1p0(_) => RouterProvider::Artcraft,

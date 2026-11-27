@@ -40,8 +40,6 @@ pub struct PixverseV5ImageToVideoOutput {
   pub video: PixverseV5ImageToVideoVideoFile,
 }
 
-pub fn pixverse_v5_image_to_video(
-  params: PixverseV5ImageToVideoInput,
-) -> FalRequest<PixverseV5ImageToVideoInput, PixverseV5ImageToVideoOutput> {
+pub fn pixverse_v5_image_to_video(params: PixverseV5ImageToVideoInput) -> FalRequest<PixverseV5ImageToVideoInput, PixverseV5ImageToVideoOutput> {
   FalRequest::new("fal-ai/pixverse/v5/image-to-video", params)
 }

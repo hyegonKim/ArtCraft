@@ -17,11 +17,7 @@ pub fn expanduser<P: AsRef<str>>(path: P) -> io::Result<PathBuf> {
 }
 
 pub fn home_dir() -> io::Result<PathBuf> {
-  env::var_os("HOME")
-    .filter(|v| !v.is_empty())
-    .map(PathBuf::from)
-    .or_else(dirs::home_dir)
-    .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "no home directory is set"))
+  env::var_os("HOME").filter(|v| !v.is_empty()).map(PathBuf::from).or_else(dirs::home_dir).ok_or_else(|| io::Error::new(io::ErrorKind::Other, "no home directory is set"))
 }
 
 #[cfg(test)]

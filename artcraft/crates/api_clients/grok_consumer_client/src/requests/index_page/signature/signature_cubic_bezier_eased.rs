@@ -1,28 +1,26 @@
-
-
 pub fn signature_cubic_bezier_eased(t: f64, x1: f64, y1: f64, x2: f64, y2: f64) -> f64 {
   /*
-      @staticmethod
-      def cubicBezierEased(t: float, x1: float, y1: float, x2: float, y2: float) -> float:
-          def bezier(u: float):
-              omu = 1.0 - u
-              b1 = 3.0 * omu * omu * u
-              b2 = 3.0 * omu * u * u
-              b3 = u * u * u
-              x = b1 * x1 + b2 * x2 + b3
-              y = b1 * y1 + b2 * y2 + b3
-              return x, y
+     @staticmethod
+     def cubicBezierEased(t: float, x1: float, y1: float, x2: float, y2: float) -> float:
+         def bezier(u: float):
+             omu = 1.0 - u
+             b1 = 3.0 * omu * omu * u
+             b2 = 3.0 * omu * u * u
+             b3 = u * u * u
+             x = b1 * x1 + b2 * x2 + b3
+             y = b1 * y1 + b2 * y2 + b3
+             return x, y
 
-          lo, hi = 0.0, 1.0
-          for _ in range(80):
-              mid = 0.5 * (lo + hi)
-              if bezier(mid)[0] < t:
-                  lo = mid
-              else:
-                  hi = mid
-          u = 0.5 * (lo + hi)
-          return bezier(u)[1]
-   */
+         lo, hi = 0.0, 1.0
+         for _ in range(80):
+             mid = 0.5 * (lo + hi)
+             if bezier(mid)[0] < t:
+                 lo = mid
+             else:
+                 hi = mid
+         u = 0.5 * (lo + hi)
+         return bezier(u)[1]
+  */
 
   let mut lo = 0.0;
   let mut hi = 1.0;
@@ -41,18 +39,17 @@ pub fn signature_cubic_bezier_eased(t: f64, x1: f64, y1: f64, x2: f64, y2: f64) 
   bezier(u, x1, y1, x2, y2).1
 }
 
-
 fn bezier(u: f64, x1: f64, y1: f64, x2: f64, y2: f64) -> (f64, f64) {
   /*
-        def bezier(u: float):
-            omu = 1.0 - u
-            b1 = 3.0 * omu * omu * u
-            b2 = 3.0 * omu * u * u
-            b3 = u * u * u
-            x = b1 * x1 + b2 * x2 + b3
-            y = b1 * y1 + b2 * y2 + b3
-            return x, y
-   */
+       def bezier(u: float):
+           omu = 1.0 - u
+           b1 = 3.0 * omu * omu * u
+           b2 = 3.0 * omu * u * u
+           b3 = u * u * u
+           x = b1 * x1 + b2 * x2 + b3
+           y = b1 * y1 + b2 * y2 + b3
+           return x, y
+  */
 
   let omu = 1.0 - u;
   let b1 = 3.0 * omu * omu * u;

@@ -18,16 +18,10 @@ pub enum KinoviWebGenericApiError {
 
   /// A response that parsed, but didn't have the shape we expected
   /// (eg. an empty batch response array).
-  UnexpectedResponseShape {
-    explanation: String,
-    raw_body: String,
-  },
+  UnexpectedResponseShape { explanation: String, raw_body: String },
 
   /// An uncategorized bad HTTP response with status code and body.
-  UncategorizedBadResponseWithStatusAndBody {
-    status_code: StatusCode,
-    body: String,
-  },
+  UncategorizedBadResponseWithStatusAndBody { status_code: StatusCode, body: String },
 
   /// An uncaught error from the HTTP client.
   WreqError(wreq::Error),

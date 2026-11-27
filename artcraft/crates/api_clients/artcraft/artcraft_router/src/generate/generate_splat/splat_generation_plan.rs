@@ -16,30 +16,23 @@ pub enum SplatGenerationPlan {
 }
 
 impl SplatGenerationPlan {
-  pub async fn generate_splat(
-    &self,
-    client: &RouterClient,
-  ) -> Result<GenerateSplatResponse, ArtcraftRouterError> {
+  pub async fn generate_splat(&self, client: &RouterClient) -> Result<GenerateSplatResponse, ArtcraftRouterError> {
     match self {
       SplatGenerationPlan::ArtcraftMarble0p1Mini(plan) => {
         let artcraft_client = client.get_artcraft_client_ref()?;
         execute_artcraft_marble_0p1_mini(plan, artcraft_client).await
-      }
+      },
       SplatGenerationPlan::ArtcraftMarble0p1Plus(plan) => {
         let artcraft_client = client.get_artcraft_client_ref()?;
         execute_artcraft_marble_0p1_plus(plan, artcraft_client).await
-      }
+      },
     }
   }
 
   pub fn estimate_costs(&self) -> SplatGenerationCostEstimate {
     match self {
-      SplatGenerationPlan::ArtcraftMarble0p1Mini(plan) => {
-        estimate_splat_cost_artcraft_marble_0p1_mini(plan)
-      }
-      SplatGenerationPlan::ArtcraftMarble0p1Plus(plan) => {
-        estimate_splat_cost_artcraft_marble_0p1_plus(plan)
-      }
+      SplatGenerationPlan::ArtcraftMarble0p1Mini(plan) => estimate_splat_cost_artcraft_marble_0p1_mini(plan),
+      SplatGenerationPlan::ArtcraftMarble0p1Plus(plan) => estimate_splat_cost_artcraft_marble_0p1_plus(plan),
     }
   }
 }

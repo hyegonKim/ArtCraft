@@ -33,8 +33,6 @@ pub struct Veo3FastImageToVideoOutput {
   pub video: Veo3FastImageToVideoVideoFile,
 }
 
-pub fn veo_3_fast_image_to_video(
-  params: Veo3FastImageToVideoInput,
-) -> FalRequest<Veo3FastImageToVideoInput, Veo3FastImageToVideoOutput> {
+pub fn veo_3_fast_image_to_video(params: Veo3FastImageToVideoInput) -> FalRequest<Veo3FastImageToVideoInput, Veo3FastImageToVideoOutput> {
   FalRequest::new("fal-ai/veo3/fast/image-to-video", params)
 }

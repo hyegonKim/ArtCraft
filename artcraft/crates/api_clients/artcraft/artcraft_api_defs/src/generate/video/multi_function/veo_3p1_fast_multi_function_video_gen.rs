@@ -39,7 +39,7 @@ pub struct Veo3p1FastMultiFunctionVideoGenRequest {
 
   /// Optional.
   pub aspect_ratio: Option<Veo3p1FastMultiFunctionVideoGenAspectRatio>,
-  
+
   /// Optional.
   pub resolution: Option<Veo3p1FastMultiFunctionVideoGenResolution>,
 

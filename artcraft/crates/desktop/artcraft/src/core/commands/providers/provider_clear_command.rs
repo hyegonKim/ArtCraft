@@ -17,17 +17,13 @@ pub struct ProviderClearResponse {}
 impl SerializeMarker for ProviderClearResponse {}
 
 #[tauri::command]
-pub async fn provider_clear_command(
-  request: ProviderClearRequest,
-  credential_cache: State<'_, ProviderCredentialLoadingCache>,
-) -> ResponseOrErrorMessage<ProviderClearResponse> {
+pub async fn provider_clear_command(request: ProviderClearRequest, credential_cache: State<'_, ProviderCredentialLoadingCache>) -> ResponseOrErrorMessage<ProviderClearResponse> {
   info!("provider_clear_command called for key: {:?}", request.provider_credential);
 
-  credential_cache.delete_credentials(request.provider_credential)
-    .map_err(|err| {
-      error!("Failed to clear provider credential: {:?}", err);
-      "Failed to clear provider credential"
-    })?;
+  credential_cache.delete_credentials(request.provider_credential).map_err(|err| {
+    error!("Failed to clear provider credential: {:?}", err);
+    "Failed to clear provider credential"
+  })?;
 
   Ok(ProviderClearResponse {}.into())
 }

@@ -32,8 +32,6 @@ mod labels;
 mod markers;
 mod series;
 
-
-
 #[cfg(test)]
 use axis::{nice_axis, tick_values};
 #[cfg(test)]

@@ -11,25 +11,24 @@ pub struct GenerateFlux1SchnellTextToImageRequest {
 
   /// Text prompt to generate the image from.
   pub prompt: Option<String>,
-  
+
   /// Aspect ratio of the output images.
   pub aspect_ratio: Option<GenerateFlux1SchnellTextToImageAspectRatio>,
-  
+
   /// Number of images to generate. Default is one.
   pub num_images: Option<GenerateFlux1SchnellTextToImageNumImages>,
 }
 
-
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GenerateFlux1SchnellTextToImageAspectRatio {
-  Square, // 1:1
-  SquareHd, // 1:1
-  LandscapeFourByThree, // 4:3
+  Square,                 // 1:1
+  SquareHd,               // 1:1
+  LandscapeFourByThree,   // 4:3
   LandscapeSixteenByNine, // 16:9
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitThreeByFour,    // 3:4
+  PortraitNineBySixteen,  // 9:16
+                          //Custom { width: u32, height: u32 }, // TODO
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
@@ -40,7 +39,6 @@ pub enum GenerateFlux1SchnellTextToImageNumImages {
   Three,
   Four,
 }
-
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct GenerateFlux1SchnellTextToImageResponse {

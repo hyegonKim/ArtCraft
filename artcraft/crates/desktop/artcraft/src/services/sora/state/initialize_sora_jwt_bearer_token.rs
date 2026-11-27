@@ -14,9 +14,7 @@ pub async fn initialize_sora_jwt_bearer_token(app_data_root: &AppDataRoot) -> An
     return Ok(()); // Bearer token already exists.
   }
 
-  let cookie = std::fs::read_to_string(app_data_root.get_sora_cookie_file_path())?
-      .trim()
-      .to_string();
+  let cookie = std::fs::read_to_string(app_data_root.get_sora_cookie_file_path())?.trim().to_string();
 
   info!("Requesting initial JWT bearer token...");
 

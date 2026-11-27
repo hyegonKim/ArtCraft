@@ -1,6 +1,4 @@
-use crate::requests::api::video::image::vidu_q3::api::{
-  ViduQ3ImageToVideoRequest, ViduQ3ImageToVideoResolution,
-};
+use crate::requests::api::video::image::vidu_q3::api::{ViduQ3ImageToVideoRequest, ViduQ3ImageToVideoResolution};
 use crate::requests::api::video::text::vidu_q3::cost::{vidu_q3_cost_cents, vidu_q3_rate_tenth_cents_per_sec};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
@@ -14,9 +12,7 @@ impl FalRequestCostCalculator for ViduQ3ImageToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // fal defaults when unset: duration = 5s, resolution = 720p.
     let duration_secs = u64::from(self.duration.unwrap_or(5));
-    let is_high_res = self.resolution
-      .unwrap_or(ViduQ3ImageToVideoResolution::SevenTwentyP)
-      .is_high_res();
+    let is_high_res = self.resolution.unwrap_or(ViduQ3ImageToVideoResolution::SevenTwentyP).is_high_res();
 
     let rate = vidu_q3_rate_tenth_cents_per_sec(is_high_res);
     vidu_q3_cost_cents(rate, duration_secs)
@@ -27,19 +23,8 @@ impl FalRequestCostCalculator for ViduQ3ImageToVideoRequest {
 mod tests {
   use super::*;
 
-  fn make_request(
-    duration: Option<u8>,
-    resolution: Option<ViduQ3ImageToVideoResolution>,
-  ) -> ViduQ3ImageToVideoRequest {
-    ViduQ3ImageToVideoRequest {
-      prompt: "test".to_string(),
-      image_url: "https://example.com/x.png".to_string(),
-      end_image_url: None,
-      duration,
-      seed: None,
-      resolution,
-      audio: Some(true),
-    }
+  fn make_request(duration: Option<u8>, resolution: Option<ViduQ3ImageToVideoResolution>) -> ViduQ3ImageToVideoRequest {
+    ViduQ3ImageToVideoRequest { prompt: "test".to_string(), image_url: "https://example.com/x.png".to_string(), end_image_url: None, duration, seed: None, resolution, audio: Some(true) }
   }
 
   mod cost_table {
@@ -47,10 +32,10 @@ mod tests {
 
     // (duration, resolution, expected_cents)
     const COST_TABLE: &[(Option<u8>, Option<ViduQ3ImageToVideoResolution>, u64)] = &[
-      (Some(5),  Some(ViduQ3ImageToVideoResolution::ThreeSixtyP),  35),
-      (Some(5),  Some(ViduQ3ImageToVideoResolution::FiveFortyP),   35),
-      (Some(5),  Some(ViduQ3ImageToVideoResolution::SevenTwentyP), 77),
-      (Some(5),  Some(ViduQ3ImageToVideoResolution::TenEightyP),   77),
+      (Some(5), Some(ViduQ3ImageToVideoResolution::ThreeSixtyP), 35),
+      (Some(5), Some(ViduQ3ImageToVideoResolution::FiveFortyP), 35),
+      (Some(5), Some(ViduQ3ImageToVideoResolution::SevenTwentyP), 77),
+      (Some(5), Some(ViduQ3ImageToVideoResolution::TenEightyP), 77),
       (Some(10), Some(ViduQ3ImageToVideoResolution::SevenTwentyP), 154),
       // Defaults: duration=None→5s, resolution=None→720p
       (None, None, 77),
@@ -68,10 +53,7 @@ mod tests {
     #[test]
     fn cost_is_independent_of_end_frame() {
       let without = make_request(Some(8), Some(ViduQ3ImageToVideoResolution::SevenTwentyP)).calculate_cost_in_cents();
-      let with = ViduQ3ImageToVideoRequest {
-        end_image_url: Some("https://example.com/end.png".to_string()),
-        ..make_request(Some(8), Some(ViduQ3ImageToVideoResolution::SevenTwentyP))
-      }.calculate_cost_in_cents();
+      let with = ViduQ3ImageToVideoRequest { end_image_url: Some("https://example.com/end.png".to_string()), ..make_request(Some(8), Some(ViduQ3ImageToVideoResolution::SevenTwentyP)) }.calculate_cost_in_cents();
       assert_eq!(without, with);
     }
   }

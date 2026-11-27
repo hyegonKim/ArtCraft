@@ -12,9 +12,7 @@ impl DataSubdir for TemporaryDir {
   const DIRECTORY_NAME: &'static str = "temp";
 
   fn new_from<P: AsRef<Path>>(dir: P) -> Self {
-    Self {
-      path: dir.as_ref().to_path_buf(),
-    }
+    Self { path: dir.as_ref().to_path_buf() }
   }
 
   fn path(&self) -> &Path {
@@ -29,23 +27,13 @@ impl TemporaryDir {
   }
 
   pub fn new_named_temp_file(&self) -> anyhow::Result<NamedTempFile> {
-    let tempfile = Builder::new()
-        .prefix("temp_")
-        .suffix(".bin")
-        .tempfile_in(&self.path)?;
+    let tempfile = Builder::new().prefix("temp_").suffix(".bin").tempfile_in(&self.path)?;
     Ok(tempfile)
   }
 
   pub fn new_named_temp_file_with_extension(&self, extension: &str) -> Result<NamedTempFile, std::io::Error> {
-    let extension = if extension.starts_with(".") {
-      extension.to_string()
-    } else {
-      format!(".{}", extension)
-    };
-    let tempfile = Builder::new()
-        .prefix("temp_")
-        .suffix(&extension)
-        .tempfile_in(&self.path)?;
+    let extension = if extension.starts_with(".") { extension.to_string() } else { format!(".{}", extension) };
+    let tempfile = Builder::new().prefix("temp_").suffix(&extension).tempfile_in(&self.path)?;
     Ok(tempfile)
   }
 }

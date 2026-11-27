@@ -5,21 +5,15 @@ use crate::generate::generate_mesh::generate_mesh_request_builder::GenerateMeshR
 use crate::generate::generate_mesh::mesh_generation_draft_or_request::MeshGenerationDraftOrRequest;
 use crate::generate::generate_mesh::mesh_generation_request::MeshGenerationRequest;
 use crate::generate::generate_mesh::providers::fal::hunyuan3d_3_sketch::request::FalHunyuan3d3SketchRequestState;
-use crate::generate::generate_mesh::providers::fal::resolve::{
-  plan_face_count, plan_primary_image_url,
-};
-use crate::generate::generate_mesh::providers::reject_unsupported::{
-  reject_unsupported_image_ref, reject_unsupported_option,
-};
+use crate::generate::generate_mesh::providers::fal::resolve::{plan_face_count, plan_primary_image_url};
+use crate::generate::generate_mesh::providers::reject_unsupported::{reject_unsupported_image_ref, reject_unsupported_option};
 
 pub fn build_fal_hunyuan3d_3_sketch(builder: GenerateMeshRequestBuilder) -> Result<MeshGenerationDraftOrRequest, ArtcraftRouterError> {
   let state = build_fal_hunyuan3d_3_sketch_state(builder)?;
   Ok(MeshGenerationDraftOrRequest::Request(MeshGenerationRequest::FalHunyuan3d3Sketch(state)))
 }
 
-pub(crate) fn build_fal_hunyuan3d_3_sketch_state(
-  mut builder: GenerateMeshRequestBuilder,
-) -> Result<FalHunyuan3d3SketchRequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_hunyuan3d_3_sketch_state(mut builder: GenerateMeshRequestBuilder) -> Result<FalHunyuan3d3SketchRequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   // fal's sketch-to-3d schema has no generate_type/polygon_type parameters,
@@ -30,27 +24,11 @@ pub(crate) fn build_fal_hunyuan3d_3_sketch_state(
   reject_unsupported_image_ref("left_image", builder.left_image.as_ref(), strategy)?;
   reject_unsupported_image_ref("right_image", builder.right_image.as_ref(), strategy)?;
 
-  let image_url = plan_primary_image_url(
-    builder.reference_images.take(),
-    builder.front_image.take(),
-    strategy,
-  )?
-    .ok_or_else(|| ArtcraftRouterError::InvalidInput(
-      "A sketch image is required for Hunyuan 3D v3 sketch-to-3D".to_string(),
-    ))?;
+  let image_url = plan_primary_image_url(builder.reference_images.take(), builder.front_image.take(), strategy)?.ok_or_else(|| ArtcraftRouterError::InvalidInput("A sketch image is required for Hunyuan 3D v3 sketch-to-3D".to_string()))?;
 
-  let prompt = builder.prompt.take().ok_or_else(|| {
-    ArtcraftRouterError::InvalidInput(
-      "A prompt is required for Hunyuan 3D v3 sketch-to-3D".to_string(),
-    )
-  })?;
+  let prompt = builder.prompt.take().ok_or_else(|| ArtcraftRouterError::InvalidInput("A prompt is required for Hunyuan 3D v3 sketch-to-3D".to_string()))?;
 
-  let request = Hunyuan3d3SketchToMeshRequest {
-    image_url,
-    prompt,
-    face_count: plan_face_count(builder.face_count, strategy)?,
-    enable_pbr: builder.enable_pbr,
-  };
+  let request = Hunyuan3d3SketchToMeshRequest { image_url, prompt, face_count: plan_face_count(builder.face_count, strategy)?, enable_pbr: builder.enable_pbr };
 
   Ok(FalHunyuan3d3SketchRequestState { request })
 }
@@ -80,28 +58,18 @@ mod tests {
   #[test]
   fn missing_sketch_is_rejected() {
     let builder = GenerateMeshRequestBuilder { reference_images: None, ..base_builder() };
-    assert!(matches!(
-      build_fal_hunyuan3d_3_sketch_state(builder),
-      Err(ArtcraftRouterError::InvalidInput(_))
-    ));
+    assert!(matches!(build_fal_hunyuan3d_3_sketch_state(builder), Err(ArtcraftRouterError::InvalidInput(_))));
   }
 
   #[test]
   fn missing_prompt_is_rejected() {
     let builder = GenerateMeshRequestBuilder { prompt: None, ..base_builder() };
-    assert!(matches!(
-      build_fal_hunyuan3d_3_sketch_state(builder),
-      Err(ArtcraftRouterError::InvalidInput(_))
-    ));
+    assert!(matches!(build_fal_hunyuan3d_3_sketch_state(builder), Err(ArtcraftRouterError::InvalidInput(_))));
   }
 
   #[test]
   fn face_count_and_pbr_pass_through() {
-    let builder = GenerateMeshRequestBuilder {
-      face_count: Some(100_000),
-      enable_pbr: Some(true),
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { face_count: Some(100_000), enable_pbr: Some(true), ..base_builder() };
     let state = build_fal_hunyuan3d_3_sketch_state(builder).expect("build");
     assert_eq!(state.request.face_count, Some(100_000));
     assert_eq!(state.request.enable_pbr, Some(true));
@@ -109,20 +77,7 @@ mod tests {
 
   #[test]
   fn unsupported_options_error_out() {
-    let cases: Vec<GenerateMeshRequestBuilder> = vec![
-      GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-        ..base_builder()
-      },
-      GenerateMeshRequestBuilder {
-        polygon_type: Some(CommonPolygonType::Quad),
-        ..base_builder()
-      },
-      GenerateMeshRequestBuilder {
-        back_image: Some(ImageRef::Url("https://example.com/back.png".to_string())),
-        ..base_builder()
-      },
-    ];
+    let cases: Vec<GenerateMeshRequestBuilder> = vec![GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), ..base_builder() }, GenerateMeshRequestBuilder { polygon_type: Some(CommonPolygonType::Quad), ..base_builder() }, GenerateMeshRequestBuilder { back_image: Some(ImageRef::Url("https://example.com/back.png".to_string())), ..base_builder() }];
     for mut builder in cases {
       builder.request_mismatch_mitigation_strategy = RequestMismatchMitigationStrategy::ErrorOut;
       assert!(build_fal_hunyuan3d_3_sketch_state(builder).is_err());
@@ -131,24 +86,13 @@ mod tests {
 
   #[test]
   fn unsupported_options_are_dropped_under_lenient_strategies() {
-    let builder = GenerateMeshRequestBuilder {
-      mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-      polygon_type: Some(CommonPolygonType::Quad),
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      ..base_builder()
-    };
+    let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), polygon_type: Some(CommonPolygonType::Quad), request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, ..base_builder() };
     assert!(build_fal_hunyuan3d_3_sketch_state(builder).is_ok());
   }
 
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3Sketch,
-      provider: RouterProvider::Fal,
-      prompt: Some("a red ceramic teapot".to_string()),
-      reference_images: Some(ImageListRef::Urls(vec![SKETCH_URL.to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3Sketch, provider: RouterProvider::Fal, prompt: Some("a red ceramic teapot".to_string()), reference_images: Some(ImageListRef::Urls(vec![SKETCH_URL.to_string()])), ..Default::default() }
   }
 }

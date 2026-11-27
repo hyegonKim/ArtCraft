@@ -9,17 +9,11 @@ use errors::AnyhowResult;
 
 use crate::resize_preserving_aspect::resize_preserving_aspect;
 
-pub fn resize_image_file_preserving_aspect<P: AsRef<Path>>(
-  source_image_file: P,
-  new_width: u32,
-  new_height: u32,
-  exact_fit: bool,
-) -> AnyhowResult<DynamicImage> {
+pub fn resize_image_file_preserving_aspect<P: AsRef<Path>>(source_image_file: P, new_width: u32, new_height: u32, exact_fit: bool) -> AnyhowResult<DynamicImage> {
   let file = File::open(source_image_file)?;
   let reader = BufReader::new(file);
 
-  let reader = Reader::new(reader)
-      .with_guessed_format()?;
+  let reader = Reader::new(reader).with_guessed_format()?;
 
   let img = reader.decode()?;
 

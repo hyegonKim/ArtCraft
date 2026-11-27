@@ -27,4 +27,3 @@ pub struct StripeArtcraftCreateSubscriptionCheckoutResponse {
   pub success: bool,
   pub stripe_checkout_redirect_url: String,
 }
-

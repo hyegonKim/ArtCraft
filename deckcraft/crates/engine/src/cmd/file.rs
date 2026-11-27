@@ -361,8 +361,16 @@ pub fn save_bytes(doc: &Presentation, format: &str) -> Result<Vec<u8>> {
         "rtf" => Ok(deckcraft_format::rtf::slides_to_rtf(doc).into_bytes()),
         "pdf" => deckcraft_pdf::export(doc, &Default::default()).map_err(|e| EngineError::Other(e.to_string())),
         "gif" => gif_bytes(doc, &Value::Null),
-        "mp4" => Ok(crate::video_export::encode_animated(doc, &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Mp4))?.bytes),
-        "webm" => Ok(crate::video_export::encode_animated(doc, &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Webm))?.bytes),
+        "mp4" => Ok(crate::video_export::encode_animated(
+            doc,
+            &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Mp4),
+        )?
+        .bytes),
+        "webm" => Ok(crate::video_export::encode_animated(
+            doc,
+            &crate::video_export::AnimatedExportOptions::for_format(crate::video_export::AnimatedFormat::Webm),
+        )?
+        .bytes),
         "png" | "jpeg" | "jpg" => Err(EngineError::Other("saving a presentation as a single image isn't supported; use file.export".into())),
         _ => deckcraft_format::save(doc).map_err(|e| EngineError::Other(e.to_string())),
     }
@@ -450,9 +458,8 @@ pub fn pdf_bytes(doc: &Presentation, p: &Value) -> Result<Vec<u8>> {
 }
 
 /// The output extensions [`format_for_path`] maps to a writer of that format.
-pub const WRITABLE_EXTENSIONS: &[&str] = &[
-    "deckcraft", "pptx", "potx", "ppsx", "odp", "pdf", "png", "jpg", "jpeg", "gif", "mp4", "webm", "txt", "md", "rtf",
-];
+pub const WRITABLE_EXTENSIONS: &[&str] =
+    &["deckcraft", "pptx", "potx", "ppsx", "odp", "pdf", "png", "jpg", "jpeg", "gif", "mp4", "webm", "txt", "md", "rtf"];
 
 /// The format a file named `path` is written in, or `None` when its extension names no format
 /// DeckCraft writes (`.svg`, no extension …): [`format_for_path`] would save
@@ -700,12 +707,7 @@ fn export_gif(s: &mut Session, p: &Value) -> Result<Value> {
     export_animated_with(s, p, crate::video_export::AnimatedFormat::Gif, "file.exportGif")
 }
 
-fn export_animated_with(
-    s: &mut Session,
-    p: &Value,
-    default_format: crate::video_export::AnimatedFormat,
-    cmd: &str,
-) -> Result<Value> {
+fn export_animated_with(s: &mut Session, p: &Value, default_format: crate::video_export::AnimatedFormat, cmd: &str) -> Result<Value> {
     let path = str_param(p, "path").ok_or_else(|| bad(cmd, "missing `path`"))?.to_string();
     let st = s.doc()?;
     let opts = crate::video_export::AnimatedExportOptions::from_params(p, default_format, cmd, st.doc.slides.len())?;

@@ -13,21 +13,11 @@ pub struct FalTripoSplatCostState {
 
 impl FalTripoSplatCostState {
   pub fn from_request(request: &FalTripoSplatRequestState) -> Self {
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> SplatGenerationCostEstimate {
-    SplatGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    SplatGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -40,20 +30,8 @@ mod tests {
 
   #[test]
   fn flat_five_cents() {
-    let builder = GenerateSplatRequestBuilder {
-      model: RouterSplatModel::TripoSplat,
-      provider: RouterProvider::Fal,
-      reference_images: Some(ImageListRef::Urls(vec![
-        "https://example.com/object.png".to_string(),
-      ])),
-      ..Default::default()
-    };
-    let cost = builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present");
+    let builder = GenerateSplatRequestBuilder { model: RouterSplatModel::TripoSplat, provider: RouterProvider::Fal, reference_images: Some(ImageListRef::Urls(vec!["https://example.com/object.png".to_string()])), ..Default::default() };
+    let cost = builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present");
     assert_eq!(cost, 5);
   }
 }

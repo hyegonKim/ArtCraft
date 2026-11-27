@@ -46,11 +46,7 @@ impl FaceMap {
     }
 
     fn v3_at(&self, u: f64, v: f64) -> V3 {
-        V3(
-            self.center.0 + self.x.0 * u + self.y.0 * v,
-            self.center.1 + self.x.1 * u + self.y.1 * v,
-            self.center.2 + self.x.2 * u + self.y.2 * v,
-        )
+        V3(self.center.0 + self.x.0 * u + self.y.0 * v, self.center.1 + self.x.1 * u + self.y.1 * v, self.center.2 + self.x.2 * u + self.y.2 * v)
     }
 
     /// Projects a face-local offset `(u, v)` from the face's center onto the document page.
@@ -136,12 +132,7 @@ impl FaceMap {
                     bp.line_to(self.project_offset(p.x, p.y)?);
                 }
                 PathEl::QuadTo(p1, p2) => {
-                    let c = CubicBez::new(
-                        cur,
-                        cur + (p1 - cur) * (2.0 / 3.0),
-                        p2 + (p1 - p2) * (2.0 / 3.0),
-                        p2,
-                    );
+                    let c = CubicBez::new(cur, cur + (p1 - cur) * (2.0 / 3.0), p2 + (p1 - p2) * (2.0 / 3.0), p2);
                     project_cubic(self, c, 0, &mut bp)?;
                     cur = p2;
                 }
@@ -166,14 +157,8 @@ fn project_cubic(map: &FaceMap, c: CubicBez, depth: u8, bp: &mut BezPath) -> Opt
     let s2 = c.eval(2.0 / 3.0);
     let m1 = map.project_offset(s1.x, s1.y)?;
     let m2 = map.project_offset(s2.x, s2.y)?;
-    let c1 = Point::new(
-        (-5.0 * q0.x + 18.0 * m1.x - 9.0 * m2.x + 2.0 * q3.x) / 6.0,
-        (-5.0 * q0.y + 18.0 * m1.y - 9.0 * m2.y + 2.0 * q3.y) / 6.0,
-    );
-    let c2 = Point::new(
-        (2.0 * q0.x - 9.0 * m1.x + 18.0 * m2.x - 5.0 * q3.x) / 6.0,
-        (2.0 * q0.y - 9.0 * m1.y + 18.0 * m2.y - 5.0 * q3.y) / 6.0,
-    );
+    let c1 = Point::new((-5.0 * q0.x + 18.0 * m1.x - 9.0 * m2.x + 2.0 * q3.x) / 6.0, (-5.0 * q0.y + 18.0 * m1.y - 9.0 * m2.y + 2.0 * q3.y) / 6.0);
+    let c2 = Point::new((2.0 * q0.x - 9.0 * m1.x + 18.0 * m2.x - 5.0 * q3.x) / 6.0, (2.0 * q0.y - 9.0 * m1.y + 18.0 * m2.y - 5.0 * q3.y) / 6.0);
     let fitted = CubicBez::new(q0, c1, c2, q3);
     if depth < 3 {
         let sm = c.eval(0.5);

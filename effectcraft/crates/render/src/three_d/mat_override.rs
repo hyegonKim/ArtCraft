@@ -28,10 +28,7 @@ pub(crate) struct ResolvedOverride {
 
 /// Whether `layer` supports 3D Material Override and currently has an active override.
 pub(crate) fn active_override(layer: &Layer) -> Option<&MaterialOverride> {
-    if !matches!(
-        layer.source,
-        LayerSource::Text | LayerSource::Shape | LayerSource::Primitive { .. } | LayerSource::Model { .. }
-    ) {
+    if !matches!(layer.source, LayerSource::Text | LayerSource::Shape | LayerSource::Primitive { .. } | LayerSource::Model { .. }) {
         return None;
     }
     layer.material_override.as_ref().filter(|ov| ov.is_active())
@@ -49,12 +46,7 @@ fn has_override_cycle(ctx: &EvalCtx, start: LayerId, target: LayerId) -> bool {
         if !visited.insert(id) {
             return true;
         }
-        cur = ctx
-            .comp
-            .layer(id)
-            .and_then(|l| l.material_override.as_ref())
-            .filter(|ov| ov.enabled)
-            .and_then(|ov| ov.source_layer);
+        cur = ctx.comp.layer(id).and_then(|l| l.material_override.as_ref()).filter(|ov| ov.enabled).and_then(|ov| ov.source_layer);
     }
     false
 }
@@ -84,42 +76,16 @@ pub(crate) fn resolve(r: &Renderer, ctx: &EvalCtx, layer: &Layer) -> Option<(Mat
                 if a < 0.999 {
                     opaque = false;
                 }
-                if a <= 1e-6 {
-                    [0.0, 0.0, 0.0, 0.0]
-                } else {
-                    [p[0] / a, p[1] / a, p[2] / a, a]
-                }
+                if a <= 1e-6 { [0.0, 0.0, 0.0, 0.0] } else { [p[0] / a, p[1] / a, p[2] / a, a] }
             })
             .collect();
         let already_linear = r.pipe.linear || r.pipe.linear_blend;
-        return Some((
-            ov,
-            ResolvedOverride {
-                width: buf.img.width,
-                height: buf.img.height,
-                texels,
-                already_linear,
-                opaque,
-                metallic,
-                roughness,
-            },
-        ));
+        return Some((ov, ResolvedOverride { width: buf.img.width, height: buf.img.height, texels, already_linear, opaque, metallic, roughness }));
     }
 
     let proc_kind = ov.procedural?;
     let (texels, opaque) = synthesize_procedural(proc_kind, ov.random_seed);
-    Some((
-        ov,
-        ResolvedOverride {
-            width: PROC_SIZE,
-            height: PROC_SIZE,
-            texels,
-            already_linear: false,
-            opaque,
-            metallic,
-            roughness,
-        },
-    ))
+    Some((ov, ResolvedOverride { width: PROC_SIZE, height: PROC_SIZE, texels, already_linear: false, opaque, metallic, roughness }))
 }
 
 const PROC_SIZE: u32 = 128;
@@ -143,10 +109,7 @@ pub(crate) fn uv_offset(ov: &MaterialOverride, sub_index: u32) -> [f32; 2] {
     if !ov.randomize_offset {
         return [0.0, 0.0];
     }
-    [
-        hash_unit(ov.random_seed, sub_index, 0x1357_9bdf),
-        hash_unit(ov.random_seed, sub_index, 0x2468_ace0),
-    ]
+    [hash_unit(ov.random_seed, sub_index, 0x1357_9bdf), hash_unit(ov.random_seed, sub_index, 0x2468_ace0)]
 }
 
 fn synthesize_procedural(kind: ProceduralMaterial, seed: u32) -> (Vec<[f32; 4]>, bool) {
@@ -189,9 +152,7 @@ fn synthesize_procedural(kind: ProceduralMaterial, seed: u32) -> (Vec<[f32; 4]>,
                     [l * 1.01, l * 0.99, l * 0.95, 1.0]
                 }
                 ProceduralMaterial::GoldFoil => {
-                    let crinkle = ((u * tau * 5.0 + (v * tau * 3.0).sin()).cos()
-                        * (v * tau * 4.0 - (u * tau * 2.0).cos()).sin())
-                        * 0.12;
+                    let crinkle = ((u * tau * 5.0 + (v * tau * 3.0).sin()).cos() * (v * tau * 4.0 - (u * tau * 2.0).cos()).sin()) * 0.12;
                     let sparkle = (hash_unit(seed, x / 3, y / 3) - 0.5) * 0.08;
                     let k = (0.88 + crinkle + sparkle).clamp(0.55, 1.15);
                     [(1.0 * k).clamp(0.0, 1.0), (0.78 * k).clamp(0.0, 1.0), (0.26 * k).clamp(0.0, 1.0), 1.0]
@@ -212,22 +173,13 @@ pub(crate) fn linear_texels(res: &ResolvedOverride, scene_linear_io: bool) -> Ve
     if res.already_linear || scene_linear_io {
         res.texels.clone()
     } else {
-        res.texels
-            .iter()
-            .map(|p| [srgb_to_linear(p[0]), srgb_to_linear(p[1]), srgb_to_linear(p[2]), p[3]])
-            .collect()
+        res.texels.iter().map(|p| [srgb_to_linear(p[0]), srgb_to_linear(p[1]), srgb_to_linear(p[2]), p[3]]).collect()
     }
 }
 
 /// Remaps or generates UVs on a 3D [`Primitive`] for `ov`, accounting for `uniform_tiling`,
 /// `tile_scale`, and per-submesh `randomize_offset`.
-pub(crate) fn remap_primitive(
-    p: &Primitive,
-    world: &Mat4,
-    ov: &MaterialOverride,
-    res: &ResolvedOverride,
-    sub_index: u32,
-) -> Primitive {
+pub(crate) fn remap_primitive(p: &Primitive, world: &Mat4, ov: &MaterialOverride, res: &ResolvedOverride, sub_index: u32) -> Primitive {
     let mut out = p.clone();
     if out.positions.is_empty() {
         return out;
@@ -251,16 +203,8 @@ pub(crate) fn remap_primitive(
             wmax[c] = wmax[c].max(wp[c]);
         }
     }
-    let lspan = [
-        (lmax[0] - lmin[0]).max(1e-3),
-        (lmax[1] - lmin[1]).max(1e-3),
-        (lmax[2] - lmin[2]).max(1e-3),
-    ];
-    let wspan = [
-        (wmax[0] - wmin[0]).max(1e-3),
-        (wmax[1] - wmin[1]).max(1e-3),
-        (wmax[2] - wmin[2]).max(1e-3),
-    ];
+    let lspan = [(lmax[0] - lmin[0]).max(1e-3), (lmax[1] - lmin[1]).max(1e-3), (lmax[2] - lmin[2]).max(1e-3)];
+    let wspan = [(wmax[0] - wmin[0]).max(1e-3), (wmax[1] - wmin[1]).max(1e-3), (wmax[2] - wmin[2]).max(1e-3)];
     let wx = world.apply_vec(vec3(1.0, 0.0, 0.0)).length().max(1e-4) as f32;
     let wy = world.apply_vec(vec3(0.0, 1.0, 0.0)).length().max(1e-4) as f32;
     let wz = world.apply_vec(vec3(0.0, 0.0, 1.0)).length().max(1e-4) as f32;
@@ -322,11 +266,7 @@ fn sample_repeat(res: &ResolvedOverride, u: f32, v: f32, want_linear: bool) -> [
 
     let fetch = |x: u32, y: u32| -> [f32; 4] {
         let p = res.texels[(y * w + x) as usize];
-        if want_linear && !res.already_linear {
-            [srgb_to_linear(p[0]), srgb_to_linear(p[1]), srgb_to_linear(p[2]), p[3]]
-        } else {
-            p
-        }
+        if want_linear && !res.already_linear { [srgb_to_linear(p[0]), srgb_to_linear(p[1]), srgb_to_linear(p[2]), p[3]] } else { p }
     };
     let c00 = fetch(x0, y0);
     let c10 = fetch(x1, y0);
@@ -343,14 +283,7 @@ fn sample_repeat(res: &ResolvedOverride, u: f32, v: f32, want_linear: bool) -> [
 
 /// Applies [`ResolvedOverride`] onto a flat 3D Text or 3D Shape card buffer while preserving its
 /// vector/glyph alpha silhouette.
-pub(crate) fn modulate_card_buf(
-    buf: &Buf,
-    world: &Mat4,
-    ov: &MaterialOverride,
-    res: &ResolvedOverride,
-    blend_linear: bool,
-    sub_index: u32,
-) -> Arc<Buf> {
+pub(crate) fn modulate_card_buf(buf: &Buf, world: &Mat4, ov: &MaterialOverride, res: &ResolvedOverride, blend_linear: bool, sub_index: u32) -> Arc<Buf> {
     let w = buf.img.width;
     let h = buf.img.height;
     if w == 0 || h == 0 {
@@ -387,9 +320,5 @@ pub(crate) fn modulate_card_buf(
             data.push([m[0] * out_a, m[1] * out_a, m[2] * out_a, out_a]);
         }
     }
-    Arc::new(Buf {
-        img: Image { width: w, height: h, data },
-        offset: buf.offset,
-        scale: buf.scale,
-    })
+    Arc::new(Buf { img: Image { width: w, height: h, data }, offset: buf.offset, scale: buf.scale })
 }

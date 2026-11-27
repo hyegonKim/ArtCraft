@@ -16,27 +16,20 @@ pub struct GrokWebsocket {
 
 impl GrokWebsocket {
   pub fn new(websocket: WebSocket) -> Self {
-    Self {
-      websocket,
-    }
+    Self { websocket }
   }
 
   pub async fn send(&mut self, message: String) -> Result<(), GrokError> {
     let message = Message::text(message);
-    self.websocket.send(message)
-        .await
-        .map_err(|err| {
-          GrokClientError::WreqClientError(err)
-        })?;
+    self.websocket.send(message).await.map_err(|err| GrokClientError::WreqClientError(err))?;
     Ok(())
   }
 
   pub async fn send_serializable<T: Serialize>(&mut self, message: T) -> Result<(), GrokError> {
-    let message_json = serde_json::to_string(&message)
-        .map_err(|err| {
-          warn!("Failed to serialize prompt websocket message: {}", err);
-          GrokClientError::WebsocketRequestSerializationError(err)
-        })?;
+    let message_json = serde_json::to_string(&message).map_err(|err| {
+      warn!("Failed to serialize prompt websocket message: {}", err);
+      GrokClientError::WebsocketRequestSerializationError(err)
+    })?;
     self.send(message_json).await
   }
 
@@ -47,7 +40,7 @@ impl GrokWebsocket {
       Err(elapsed) => {
         info!("Websocket try_next() elapsed without receiving a message: {:?}", elapsed);
         Ok(None) // Timeout elapsed.
-      }
+      },
       Ok(inner) => {
         let maybe_message = inner.map_err(GrokClientError::WebsocketReadError)?;
 
@@ -62,7 +55,7 @@ impl GrokWebsocket {
             Ok(None)
           },
         }
-      }
+      },
     }
   }
 
@@ -73,11 +66,11 @@ impl GrokWebsocket {
       Err(elapsed) => {
         info!("Websocket try_next() elapsed without receiving a message: {:?}", elapsed);
         Ok(None) // Timeout elapsed.
-      }
+      },
       Ok(inner) => {
         let maybe_message = inner.map_err(GrokClientError::WebsocketReadError)?;
         Ok(maybe_message)
-      }
+      },
     }
   }
 

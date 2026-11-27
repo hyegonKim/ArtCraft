@@ -21,43 +21,22 @@ pub struct IndexPage {
 }
 
 pub async fn get_index_page_with_client(args: GetIndexPageWithClientArgs<'_>) -> Result<IndexPage, GrokError> {
-  let builder = args.client.get(INDEX_URL)
-      .header("User-Agent", FIREFOX_143_MAC_USER_AGENT)
-      .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-      .header("Accept-Encoding", "gzip, deflate, br, zstd")
-      .header("Accept-Language", "en-US,en;q=0.5")
-      .header("Connection", "keep-alive")
-      .header("Sec-Fetch-Dest", "document")
-      .header("Sec-Fetch-Mode", "navigate")
-      .header("Sec-Fetch-Site", "none")
-      .header("Sec-Fetch-User", "?1")
-      .header("Sec-GPC", "1")
-      .header("priority", "u=0, i")
-      .header("Pragma", "no-cache")
-      .header("Cache-Control", "no-cache")
-      .header("Cookie", args.cookie.to_string())
-      .header("TE", "trailers");
+  let builder = args.client.get(INDEX_URL).header("User-Agent", FIREFOX_143_MAC_USER_AGENT).header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8").header("Accept-Encoding", "gzip, deflate, br, zstd").header("Accept-Language", "en-US,en;q=0.5").header("Connection", "keep-alive").header("Sec-Fetch-Dest", "document").header("Sec-Fetch-Mode", "navigate").header("Sec-Fetch-Site", "none").header("Sec-Fetch-User", "?1").header("Sec-GPC", "1").header("priority", "u=0, i").header("Pragma", "no-cache").header("Cache-Control", "no-cache").header("Cookie", args.cookie.to_string()).header("TE", "trailers");
 
   info!("Sending request for index page...");
 
-  let response = builder.send()
-      .await
-      .map_err(|err| GrokClientError::WreqClientError(err))?;
+  let response = builder.send().await.map_err(|err| GrokClientError::WreqClientError(err))?;
 
   let status = response.status();
 
-  let body = response.text()
-      .await
-      .map_err(|err| GrokClientError::WreqClientError(err))?;
+  let body = response.text().await.map_err(|err| GrokClientError::WreqClientError(err))?;
 
   // TODO: Cloudflare handling
   if !status.is_success() {
     warn!("could not get index page script: {}, body: {}", status, body);
   }
-  
-  Ok(IndexPage {
-    body,
-  })
+
+  Ok(IndexPage { body })
 }
 
 #[cfg(test)]
@@ -75,10 +54,7 @@ mod tests {
     setup_test_logging(LevelFilter::Trace);
     let cookie = get_test_cookies()?;
     let client = create_firefox_client()?;
-    let result = get_index_page_with_client(GetIndexPageWithClientArgs {
-      client: &client,
-      cookie: &cookie,
-    }).await?;
+    let result = get_index_page_with_client(GetIndexPageWithClientArgs { client: &client, cookie: &cookie }).await?;
     println!("Body:\n\n");
     println!("{}", result.body);
     assert_eq!(1, 2);

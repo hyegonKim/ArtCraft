@@ -60,11 +60,7 @@ pub(crate) fn options(p: &Value) -> Option<Shadow> {
 }
 
 fn shadow_node(id: NodeId, path: vectorcraft_geom::PathData, ink: Ink) -> Node {
-    let mut node = Node::path(
-        id,
-        path,
-        Appearance::basic(Paint::solid(Color::BLACK), Paint::None, 0.0),
-    );
+    let mut node = Node::path(id, path, Appearance::basic(Paint::solid(Color::BLACK), Paint::None, 0.0));
     node.opacity = (0.5 * ink.opacity).clamp(0.0, 1.0);
     node.blend = ink.blend;
     node
@@ -81,13 +77,7 @@ pub(crate) fn art(id: NodeId, caster: &ShadowCaster, settings: Shadow, ink: Ink)
 
 /// Builds the shadow nodes for `cast` on one shared shadow plane, grouping runs that share the
 /// same scopes and ink, and wrapping in member opacity masks/blending scopes when `masked`.
-pub(crate) fn scoped_art(
-    id: NodeId,
-    caster: &ShadowCaster,
-    settings: Shadow,
-    cast: Vec<Cast<'_>>,
-    masked: bool,
-) -> Vec<Arc<Node>> {
+pub(crate) fn scoped_art(id: NodeId, caster: &ShadowCaster, settings: Shadow, cast: Vec<Cast<'_>>, masked: bool) -> Vec<Arc<Node>> {
     let all_ranges: Vec<Range<usize>> = cast.iter().map(|(_, _, r)| r.clone()).filter(|r| !r.is_empty()).collect();
     if all_ranges.is_empty() {
         return Vec::new();
@@ -125,17 +115,9 @@ pub(crate) fn scoped_art(
     let mask_scopes: Vec<(Vec<Scope>, Arc<Node>)> = built
         .into_iter()
         .map(|(scopes, n)| {
-            let filtered = scopes
-                .iter()
-                .filter(|s| composites(s))
-                .map(|s| Scope { opacity: 1.0, ..s.clone() })
-                .collect();
+            let filtered = scopes.iter().filter(|s| composites(s)).map(|s| Scope { opacity: 1.0, ..s.clone() }).collect();
             (filtered, n)
         })
         .collect();
-    crate::revolve::scoped(
-        id,
-        mask_scopes.iter().map(|(sc, n)| (sc.as_slice(), n.clone())).collect(),
-        0,
-    )
+    crate::revolve::scoped(id, mask_scopes.iter().map(|(sc, n)| (sc.as_slice(), n.clone())).collect(), 0)
 }

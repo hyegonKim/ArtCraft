@@ -321,10 +321,7 @@ pub fn menu_tree_for(locale: crate::i18n::Locale) -> Vec<(&'static str, Vec<(&'s
         .into_iter()
         .map(|(menu, items)| {
             let m = crate::i18n::tr(locale, menu);
-            let sub = items
-                .into_iter()
-                .map(|(label, cmd)| if label == "-" { (label, cmd) } else { (crate::i18n::tr(locale, label), cmd) })
-                .collect();
+            let sub = items.into_iter().map(|(label, cmd)| if label == "-" { (label, cmd) } else { (crate::i18n::tr(locale, label), cmd) }).collect();
             (m, sub)
         })
         .collect()

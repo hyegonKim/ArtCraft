@@ -52,8 +52,6 @@ pub struct FluxDevJuggernautInfillOutput {
   pub images: Vec<FluxDevJuggernautInfillFile>,
 }
 
-pub fn flux_dev_juggernaut_infill(
-  params: FluxDevJuggernautInfillInput,
-) -> FalRequest<FluxDevJuggernautInfillInput, FluxDevJuggernautInfillOutput> {
+pub fn flux_dev_juggernaut_infill(params: FluxDevJuggernautInfillInput) -> FalRequest<FluxDevJuggernautInfillInput, FluxDevJuggernautInfillOutput> {
   FalRequest::new("rundiffusion-fal/juggernaut-flux-lora/inpainting", params)
 }

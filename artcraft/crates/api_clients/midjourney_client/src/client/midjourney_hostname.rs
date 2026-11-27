@@ -1,4 +1,3 @@
-
 /// Multiple third party Midjourney clients make this configurable.
 /// Not sure why, I'm just cargo culting it.
 #[derive(Clone)]

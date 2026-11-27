@@ -54,10 +54,7 @@ fn directed_subsegment(curve: CubicBez, t0: f64, t1: f64) -> CubicBez {
 }
 
 fn same_curve(a: CubicBez, b: CubicBez) -> bool {
-    a.p0.distance(b.p0) <= 1e-9
-        && a.p1.distance(b.p1) <= 1e-9
-        && a.p2.distance(b.p2) <= 1e-9
-        && a.p3.distance(b.p3) <= 1e-9
+    a.p0.distance(b.p0) <= 1e-9 && a.p1.distance(b.p1) <= 1e-9 && a.p2.distance(b.p2) <= 1e-9 && a.p3.distance(b.p3) <= 1e-9
 }
 
 fn spans_continue(a: Option<Span>, b: Option<Span>) -> Option<Span> {
@@ -81,10 +78,7 @@ fn eval_pinned(span: &Span, t0: f64, t1: f64, u: f64, p0: Point, p3: Point, alon
     let raw = (along.at)(span, t0 + (t1 - t0) * u);
     let d0 = p0 - raw0;
     let d1 = p3 - raw1;
-    Point::new(
-        raw.x + (1.0 - u) * d0.x + u * d1.x,
-        raw.y + (1.0 - u) * d0.y + u * d1.y,
-    )
+    Point::new(raw.x + (1.0 - u) * d0.x + u * d1.x, raw.y + (1.0 - u) * d0.y + u * d1.y)
 }
 
 /// Evaluates the derivative of `along.at` with respect to `t` via central finite differences.
@@ -131,11 +125,7 @@ fn fit_range(
         let mid_p = eval_pinned(span, t0, t1, 0.5, p0, p3, along);
         let q_lo = eval_pinned(span, t0, t1, 0.25, p0, p3, along);
         let q_hi = eval_pinned(span, t0, t1, 0.75, p0, p3, along);
-        let err = cubic
-            .eval(0.5)
-            .distance(mid_p)
-            .max(cubic.eval(0.25).distance(q_lo))
-            .max(cubic.eval(0.75).distance(q_hi));
+        let err = cubic.eval(0.5).distance(mid_p).max(cubic.eval(0.25).distance(q_lo)).max(cubic.eval(0.75).distance(q_hi));
         if err > tol && mid_p.x.is_finite() && mid_p.y.is_finite() {
             let tm = 0.5 * (t0 + t1);
             return fit_range(span, (t0, tm), (p0, mid_p), along, depth + 1, out, budget)
@@ -172,9 +162,7 @@ pub(super) fn face(rings: &[&Ring], contours: &[Vec<Point>], along: &Along<'_>, 
         if along.affine && along.map.is_some() {
             // Start at an anchor boundary where the previous edge does not continue into this edge,
             // so a cubic that wraps across index 0 still merges into a single segment.
-            let start = (0..n)
-                .find(|&i| spans_continue(ring.spans[(i + n - 1) % n], ring.spans[i]).is_none())
-                .unwrap_or(0);
+            let start = (0..n).find(|&i| spans_continue(ring.spans[(i + n - 1) % n], ring.spans[i]).is_none()).unwrap_or(0);
             bp.move_to(contour[start]);
             let mut step = 0usize;
             while step < n {
@@ -222,13 +210,7 @@ pub(super) fn face(rings: &[&Ring], contours: &[Vec<Point>], along: &Along<'_>, 
 
 /// Builds the outline of a 4-point wall quad `[a0, a1, b1, b0]` where `a0 -> a1` may follow `near`
 /// and `b1 -> b0` may follow `far` (reversed so it shares the exact cubics of `b0 -> b1`).
-pub(super) fn wall(
-    span: &Span,
-    quad: &[Point],
-    near: Option<&Along<'_>>,
-    far: Option<&Along<'_>>,
-    budget: &mut Budget,
-) -> Option<PathData> {
+pub(super) fn wall(span: &Span, quad: &[Point], near: Option<&Along<'_>>, far: Option<&Along<'_>>, budget: &mut Budget) -> Option<PathData> {
     let [a0, a1, b1, b0] = *quad else { return None };
     if near.is_none() && far.is_none() {
         return None;

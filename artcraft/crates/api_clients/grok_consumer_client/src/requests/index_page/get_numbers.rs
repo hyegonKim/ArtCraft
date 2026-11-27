@@ -16,7 +16,6 @@ pub struct GetNumbersArgs<'a> {
 }
 
 pub async fn get_numbers(args: GetNumbersArgs<'_>) -> Result<XsidNumbers, GrokError> {
-
   let script_link = match args.xsid_script_id {
     "ondemand.s" => {
       // TODO: Not sure this is relevant anymore. Not a full or correct implementation of this branch.
@@ -27,11 +26,7 @@ pub async fn get_numbers(args: GetNumbersArgs<'_>) -> Result<XsidNumbers, GrokEr
     _ => format!("https://grok.com/_next/{}", args.xsid_script_id),
   };
 
-  let xsid_script_body = get_index_page_script_with_client(GetIndexPageScriptArgs {
-    client: &args.client,
-    cookie: args.cookie,
-    script_url: &script_link,
-  }).await?;
+  let xsid_script_body = get_index_page_script_with_client(GetIndexPageScriptArgs { client: &args.client, cookie: args.cookie, script_url: &script_link }).await?;
 
   Ok(parse_xsid_script_numbers(&xsid_script_body))
 }
@@ -51,12 +46,9 @@ mod tests {
   async fn test() -> AnyhowResult<()> {
     let cookie = get_test_cookies()?;
 
-    let page_and_scripts = get_index_page_and_scripts(GetIndexPageAndScriptsArgs {
-      cookie: &cookie,
-    }).await?;
+    let page_and_scripts = get_index_page_and_scripts(GetIndexPageAndScriptsArgs { cookie: &cookie }).await?;
 
-    let verification_token = parse_index_verification_token(&page_and_scripts.index_body_html)
-        .expect("expected verification token");
+    let verification_token = parse_index_verification_token(&page_and_scripts.index_body_html).expect("expected verification token");
 
     println!("Verification Token: {:?}", verification_token);
 
@@ -68,13 +60,7 @@ mod tests {
 
     println!("Actions and XSID: {:?}", actions_and_xsid_script);
 
-    let result = get_numbers(GetNumbersArgs {
-      client: &page_and_scripts.client,
-      html: &page_and_scripts.index_body_html,
-      cookie: &cookie,
-      loading_anim: &loading_anim,
-      xsid_script_id: &actions_and_xsid_script.xsid_script_path,
-    }).await?;
+    let result = get_numbers(GetNumbersArgs { client: &page_and_scripts.client, html: &page_and_scripts.index_body_html, cookie: &cookie, loading_anim: &loading_anim, xsid_script_id: &actions_and_xsid_script.xsid_script_path }).await?;
 
     println!("Final Numbers: {:?}", result);
 

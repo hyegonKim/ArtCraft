@@ -83,28 +83,23 @@ pub async fn get_operation(args: GetOperationArgs<'_>) -> Result<GetOperationRes
 
   debug!("Requesting URL: {}", url);
 
-  let mut request_builder = client.get(&url)
-    .header("WLT-Api-Key", args.creds.api_key());
+  let mut request_builder = client.get(&url).header("WLT-Api-Key", args.creds.api_key());
 
   if let Some(timeout) = args.request_timeout {
     request_builder = request_builder.timeout(timeout);
   }
 
-  let response = request_builder.send()
-    .await
-    .map_err(|err| {
-      error!("Error during get_operation request: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response = request_builder.send().await.map_err(|err| {
+    error!("Error during get_operation request: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = response.text()
-    .await
-    .map_err(|err| {
-      error!("Error reading response body: {:?}", err);
-      WorldLabsGenericApiError::WreqError(err)
-    })?;
+  let response_body = response.text().await.map_err(|err| {
+    error!("Error reading response body: {:?}", err);
+    WorldLabsGenericApiError::WreqError(err)
+  })?;
 
   if !status.is_success() {
     error!("get_operation returned error (code {}): {:?}", status.as_u16(), response_body);
@@ -114,32 +109,17 @@ pub async fn get_operation(args: GetOperationArgs<'_>) -> Result<GetOperationRes
 
   debug!("Response body (200): {}", response_body);
 
-  let raw: RawResponse = serde_json::from_str(&response_body)
-    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+  let raw: RawResponse = serde_json::from_str(&response_body).map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
 
-  let world = raw.response.and_then(|raw_world| {
-    match try_parse_world(raw_world) {
-      Some(w) => Some(w),
-      None => {
-        warn!("Operation response present but missing world_id — skipping world parse");
-        None
-      }
-    }
+  let world = raw.response.and_then(|raw_world| match try_parse_world(raw_world) {
+    Some(w) => Some(w),
+    None => {
+      warn!("Operation response present but missing world_id — skipping world parse");
+      None
+    },
   });
 
-  Ok(GetOperationResponse {
-    operation_id: raw.operation_id,
-    done: raw.done.unwrap_or(false),
-    created_at: raw.created_at,
-    updated_at: raw.updated_at,
-    expires_at: raw.expires_at,
-    error: raw.error.map(|e| OperationError {
-      code: e.code,
-      message: e.message,
-    }),
-    metadata: raw.metadata,
-    world,
-  })
+  Ok(GetOperationResponse { operation_id: raw.operation_id, done: raw.done.unwrap_or(false), created_at: raw.created_at, updated_at: raw.updated_at, expires_at: raw.expires_at, error: raw.error.map(|e| OperationError { code: e.code, message: e.message }), metadata: raw.metadata, world })
 }
 
 /// Try to parse a RawWorld into a strongly-typed World.
@@ -150,35 +130,13 @@ fn try_parse_world(raw: RawWorld) -> Option<World> {
   let assets = raw.assets.map(|a| {
     let splats = a.splats.map(|s| {
       let semantics = s.semantics_metadata;
-      SplatAssets {
-        spz_url_100k: s.spz_urls.as_ref().and_then(|u| u.low.clone()),
-        spz_url_500k: s.spz_urls.as_ref().and_then(|u| u.medium.clone()),
-        spz_url_full_res: s.spz_urls.as_ref().and_then(|u| u.full_res.clone()),
-        metric_scale_factor: semantics.as_ref().and_then(|m| m.metric_scale_factor),
-        ground_plane_offset: semantics.as_ref().and_then(|m| m.ground_plane_offset),
-      }
+      SplatAssets { spz_url_100k: s.spz_urls.as_ref().and_then(|u| u.low.clone()), spz_url_500k: s.spz_urls.as_ref().and_then(|u| u.medium.clone()), spz_url_full_res: s.spz_urls.as_ref().and_then(|u| u.full_res.clone()), metric_scale_factor: semantics.as_ref().and_then(|m| m.metric_scale_factor), ground_plane_offset: semantics.as_ref().and_then(|m| m.ground_plane_offset) }
     });
 
-    WorldAssets {
-      caption: a.caption,
-      thumbnail_url: a.thumbnail_url,
-      pano_url: a.imagery.and_then(|i| i.pano_url),
-      collider_mesh_url: a.mesh.and_then(|m| m.collider_mesh_url),
-      splats,
-    }
+    WorldAssets { caption: a.caption, thumbnail_url: a.thumbnail_url, pano_url: a.imagery.and_then(|i| i.pano_url), collider_mesh_url: a.mesh.and_then(|m| m.collider_mesh_url), splats }
   });
 
-  Some(World {
-    world_id: WorldId(world_id),
-    display_name: raw.display_name,
-    world_marble_url: raw.world_marble_url,
-    created_at: raw.created_at,
-    updated_at: raw.updated_at,
-    model: raw.model,
-    status: raw.status,
-    tags: raw.tags,
-    assets,
-  })
+  Some(World { world_id: WorldId(world_id), display_name: raw.display_name, world_marble_url: raw.world_marble_url, created_at: raw.created_at, updated_at: raw.updated_at, model: raw.model, status: raw.status, tags: raw.tags, assets })
 }
 
 #[cfg(test)]
@@ -198,11 +156,7 @@ mod tests {
     //let operation_id = OperationId("1fab3bf1-05a1-4929-907e-c6df07c539e2".to_string());
     let operation_id = OperationId("a0894fa6-594d-4680-8f3a-5109f22664b1".to_string());
 
-    let response = get_operation(GetOperationArgs {
-      creds: &creds,
-      operation_id: &operation_id,
-      request_timeout: None,
-    }).await.unwrap();
+    let response = get_operation(GetOperationArgs { creds: &creds, operation_id: &operation_id, request_timeout: None }).await.unwrap();
 
     println!("Operation ID: {}", response.operation_id);
     println!("Done: {}", response.done);
@@ -241,11 +195,11 @@ mod tests {
                 println!("      SPZ full res: {:?}", splats.spz_url_full_res);
                 println!("      Metric scale factor: {:?}", splats.metric_scale_factor);
                 println!("      Ground plane offset: {:?}", splats.ground_plane_offset);
-              }
+              },
             }
-          }
+          },
         }
-      }
+      },
     }
 
     assert_eq!(1, 2);

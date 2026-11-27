@@ -31,7 +31,7 @@ pub enum WebContentType {
 
   #[serde(rename = "slashdot_article")]
   SlashdotArticle,
-  
+
   #[serde(rename = "substack_post")]
   SubstackPost,
 

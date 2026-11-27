@@ -396,11 +396,7 @@ fn brush_specific_options(app: &mut PhotocraftApp, ui: &mut egui::Ui, t: Tokens,
             let mut size = ob.size;
             let mut opacity_pct = (ob.opacity * 100.0).clamp(1.0, 100.0);
             let mut mix_pct = (ob.paint_mix * 100.0).clamp(0.0, 100.0);
-            let presets = [
-                ("blocky".to_string(), tl!("Blocky")),
-                ("glaze".to_string(), tl!("Glaze")),
-                ("round".to_string(), tl!("Round")),
-            ];
+            let presets = [("blocky".to_string(), tl!("Blocky")), ("glaze".to_string(), tl!("Glaze")), ("round".to_string(), tl!("Round"))];
             opt_label(ui, tl!("Preset"));
             let c_preset = widgets::dropdown(ui, "oil-brush-preset", tl!("Preset"), &mut preset, &presets, 96.0);
             widgets::vline(ui, 22.0);

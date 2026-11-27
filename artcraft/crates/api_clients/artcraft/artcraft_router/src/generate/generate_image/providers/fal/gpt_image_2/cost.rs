@@ -1,9 +1,5 @@
-use fal_client::requests::api::image::edit::gpt_image_2_edit_image::api::{
-  GptImage2EditImageNumImages, GptImage2EditImageQuality, GptImage2EditImageSize,
-};
-use fal_client::requests::api::image::text::gpt_image_2_text_to_image::api::{
-  GptImage2TextToImageNumImages, GptImage2TextToImageQuality, GptImage2TextToImageSize,
-};
+use fal_client::requests::api::image::edit::gpt_image_2_edit_image::api::{GptImage2EditImageNumImages, GptImage2EditImageQuality, GptImage2EditImageSize};
+use fal_client::requests::api::image::text::gpt_image_2_text_to_image::api::{GptImage2TextToImageNumImages, GptImage2TextToImageQuality, GptImage2TextToImageSize};
 
 use crate::generate::generate_image::image_generation_cost_estimate::ImageGenerationCostEstimate;
 use crate::generate::generate_image::providers::fal::gpt_image_2::request::FalGptImage2RequestState;
@@ -35,12 +31,8 @@ impl FalGptImage2CostState {
 
   pub fn estimate_cost(&self) -> ImageGenerationCostEstimate {
     let cost_in_usd_cents = match &self.request {
-      FalGptImage2RequestState::TextToImage(req) => {
-        cost_t2i(req.quality, req.image_size, req.num_images)
-      }
-      FalGptImage2RequestState::EditImage(req) => {
-        cost_edit(req.quality, req.image_size, req.num_images)
-      }
+      FalGptImage2RequestState::TextToImage(req) => cost_t2i(req.quality, req.image_size, req.num_images),
+      FalGptImage2RequestState::EditImage(req) => cost_edit(req.quality, req.image_size, req.num_images),
     };
 
     ImageGenerationCostEstimate {
@@ -67,11 +59,7 @@ enum SizeBucket {
   Auto,
 }
 
-fn cost_t2i(
-  quality: Option<GptImage2TextToImageQuality>,
-  image_size: Option<GptImage2TextToImageSize>,
-  num_images: GptImage2TextToImageNumImages,
-) -> u64 {
+fn cost_t2i(quality: Option<GptImage2TextToImageQuality>, image_size: Option<GptImage2TextToImageSize>, num_images: GptImage2TextToImageNumImages) -> u64 {
   use GptImage2TextToImageQuality as Q;
   use GptImage2TextToImageSize as S;
   let q = quality.unwrap_or(Q::High);
@@ -88,11 +76,7 @@ fn cost_t2i(
   output_cost(matches!(q, Q::Low), matches!(q, Q::Medium), bucket) * t2i_num_images(num_images)
 }
 
-fn cost_edit(
-  quality: Option<GptImage2EditImageQuality>,
-  image_size: Option<GptImage2EditImageSize>,
-  num_images: GptImage2EditImageNumImages,
-) -> u64 {
+fn cost_edit(quality: Option<GptImage2EditImageQuality>, image_size: Option<GptImage2EditImageSize>, num_images: GptImage2EditImageNumImages) -> u64 {
   use GptImage2EditImageQuality as Q;
   use GptImage2EditImageSize as S;
   let q = quality.unwrap_or(Q::High);
@@ -115,8 +99,7 @@ fn output_cost(is_low: bool, is_medium: bool, bucket: SizeBucket) -> u64 {
   if is_medium {
     return match bucket {
       SizeBucket::Square | SizeBucket::SquareHd | SizeBucket::Auto => 6,
-      SizeBucket::Landscape4x3 | SizeBucket::Portrait4x3
-      | SizeBucket::Landscape16x9 | SizeBucket::Portrait16x9 => 4,
+      SizeBucket::Landscape4x3 | SizeBucket::Portrait4x3 | SizeBucket::Landscape16x9 | SizeBucket::Portrait16x9 => 4,
     };
   }
   // High (default)

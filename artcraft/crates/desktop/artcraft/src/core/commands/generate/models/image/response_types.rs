@@ -12,9 +12,7 @@ use artcraft_client::datatypes::common_enums::generation::api_client_image_model
 use artcraft_client::datatypes::common_enums::generation::api_client_aspect_ratio::ApiClientAspectRatio;
 use artcraft_client::datatypes::common_enums::generation::api_client_resolution::ApiClientResolution;
 use artcraft_client::datatypes::common_enums::generation::api_client_quality::ApiClientQuality;
-use artcraft_client::endpoints::omni_gen::models::image::omni_gen_list_image_models::{
-  OmniGenImageModelDetails, OmniGenImageModelProviderDetails, OmniGenImageProviderModelDetails, OmniGenImageModelsResponse,
-};
+use artcraft_client::endpoints::omni_gen::models::image::omni_gen_list_image_models::{OmniGenImageModelDetails, OmniGenImageModelProviderDetails, OmniGenImageProviderModelDetails, OmniGenImageModelsResponse};
 
 use crate::core::commands::response::success_response_wrapper::SerializeMarker;
 
@@ -438,11 +436,7 @@ pub struct ListImageModelsResponse {
 
 impl From<OmniGenImageModelsResponse> for ListImageModelsResponse {
   fn from(v: OmniGenImageModelsResponse) -> Self {
-    Self {
-      success: v.success,
-      models: v.models.into_iter().map(Into::into).collect(),
-      providers: v.providers.into_iter().map(Into::into).collect(),
-    }
+    Self { success: v.success, models: v.models.into_iter().map(Into::into).collect(), providers: v.providers.into_iter().map(Into::into).collect() }
   }
 }
 
@@ -454,10 +448,7 @@ pub struct ListImageModelsProviderDetails {
 
 impl From<OmniGenImageModelProviderDetails> for ListImageModelsProviderDetails {
   fn from(v: OmniGenImageModelProviderDetails) -> Self {
-    Self {
-      provider: v.provider.into(),
-      models: v.models.into_iter().map(Into::into).collect(),
-    }
+    Self { provider: v.provider.into(), models: v.models.into_iter().map(Into::into).collect() }
   }
 }
 
@@ -470,10 +461,7 @@ pub struct ListImageModelsProviderModelDetails {
 
 impl From<OmniGenImageProviderModelDetails> for ListImageModelsProviderModelDetails {
   fn from(v: OmniGenImageProviderModelDetails) -> Self {
-    Self {
-      model: v.model.into(),
-      overrides: v.overrides.map(Into::into),
-    }
+    Self { model: v.model.into(), overrides: v.overrides.map(Into::into) }
   }
 }
 

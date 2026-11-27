@@ -5,7 +5,7 @@ use serde_derive::Serialize;
 use utoipa::ToSchema;
 
 /// Audio model to default to if none is specified
-const DEFAULT_AUDIO_MODEL : CommonAudioModel = CommonAudioModel::SunoMusic;
+const DEFAULT_AUDIO_MODEL: CommonAudioModel = CommonAudioModel::SunoMusic;
 
 /// Response body for the audio models endpoint.
 #[derive(Serialize, ToSchema, Clone)]
@@ -36,7 +36,6 @@ pub struct OmniGenAudioProviderModelDetails {
 
 #[derive(Serialize, ToSchema, Clone)]
 pub struct OmniGenAudioModelDetails {
-
   pub model: CommonAudioModel,
 
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,29 +110,6 @@ pub struct OmniGenAudioModelDetails {
 
 impl Default for OmniGenAudioModelDetails {
   fn default() -> Self {
-    Self {
-      model: DEFAULT_AUDIO_MODEL,
-      model_creator: None,
-      full_name: None,
-      extra_info: None,
-      extra_info_short: None,
-      text_prompt_supported: None,
-      style_prompt_supported: None,
-      audio_references_supported: None,
-      audio_references_max: None,
-      image_references_supported: None,
-      image_references_max: None,
-      keep_lyrics_supported: None,
-      instrumental_toggle_supported: None,
-      loopable_toggle_supported: None,
-      bpm_supported: None,
-      musical_key_supported: None,
-      sample_rate_hz_options: None,
-      sample_rate_hz_default: None,
-      speed_supported: None,
-      volume_supported: None,
-      pitch_supported: None,
-      is_disabled: None,
-    }
+    Self { model: DEFAULT_AUDIO_MODEL, model_creator: None, full_name: None, extra_info: None, extra_info_short: None, text_prompt_supported: None, style_prompt_supported: None, audio_references_supported: None, audio_references_max: None, image_references_supported: None, image_references_max: None, keep_lyrics_supported: None, instrumental_toggle_supported: None, loopable_toggle_supported: None, bpm_supported: None, musical_key_supported: None, sample_rate_hz_options: None, sample_rate_hz_default: None, speed_supported: None, volume_supported: None, pitch_supported: None, is_disabled: None }
   }
 }

@@ -19,7 +19,6 @@ use wreq::Client;
 // https://sora.chatgpt.com/backend/v2/list_tasks?limit=20
 const SORA_STATUS_URL: &str = "https://sora.com/backend/video_gen";
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub enum TaskStatus {
   Queued,
@@ -197,8 +196,7 @@ impl StatusRequest {
 
 /// Gets the status of image generation tasks from Sora API
 pub async fn get_image_gen_status(status_request: &StatusRequest, credentials: &SoraCredentialSet) -> Result<VideoGenStatusResponse, SoraError> {
-
-  let bearer_header = match credentials.jwt_bearer_token.as_ref()  {
+  let bearer_header = match credentials.jwt_bearer_token.as_ref() {
     Some(bearer) => bearer.to_authorization_header_value(),
     None => {
       warn!("No JWT bearer token in client - cannot fetch image gen status!");
@@ -208,10 +206,7 @@ pub async fn get_image_gen_status(status_request: &StatusRequest, credentials: &
 
   let client = Client::new();
 
-  let mut url = Url::parse(SORA_STATUS_URL)
-      .map_err(|err| {
-        SoraClientError::UrlParseError(err)
-      })?;
+  let mut url = Url::parse(SORA_STATUS_URL).map_err(|err| SoraClientError::UrlParseError(err))?;
 
   // Add query parameters
   if let Some(limit) = status_request.limit {
@@ -222,32 +217,21 @@ pub async fn get_image_gen_status(status_request: &StatusRequest, credentials: &
     url.query_pairs_mut().append_pair("before", &before);
   }
 
-  let http_request = client.get(url.as_str())
-      .header("User-Agent", CLIENT_USER_AGENT)
-      .header("Cookie", credentials.cookies.as_str())
-      .header("Authorization", bearer_header)
-      .header("Content-Type", "application/json");
+  let http_request = client.get(url.as_str()).header("User-Agent", CLIENT_USER_AGENT).header("Cookie", credentials.cookies.as_str()).header("Authorization", bearer_header).header("Content-Type", "application/json");
 
-  let http_request = http_request.build()
-      .map_err(|err| {
-        SoraClientError::WreqClientError(err)
-      })?;
+  let http_request = http_request.build().map_err(|err| SoraClientError::WreqClientError(err))?;
 
-  let response = client.execute(http_request)
-      .await
-      .map_err(|err| {
-        error!("Client failed to fetch sora image gen status: {:?}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let response = client.execute(http_request).await.map_err(|err| {
+    error!("Client failed to fetch sora image gen status: {:?}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
   let status = response.status();
 
-  let response_body = &response.text()
-      .await
-      .map_err(|err| {
-        error!("Client failed to read sora image gen status: {:?}", err);
-        SoraGenericApiError::WreqError(err)
-      })?;
+  let response_body = &response.text().await.map_err(|err| {
+    error!("Client failed to read sora image gen status: {:?}", err);
+    SoraGenericApiError::WreqError(err)
+  })?;
 
   debug!("response_body: {}", response_body);
 
@@ -263,9 +247,8 @@ pub async fn get_image_gen_status(status_request: &StatusRequest, credentials: &
     Ok(response) => Ok(response),
     Err(err) => {
       warn!("Failed to parse status response: {:?}", err);
-      Err(SoraGenericApiError::SerdeResponseParseErrorWithBody(
-        err, response_body.to_string()).into())
-    }
+      Err(SoraGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()).into())
+    },
   }
 }
 
@@ -325,11 +308,7 @@ mod tests {
     let bearer = read_to_string(test_file_path("test_data/temp/bearer.txt")?)?;
     let bearer = bearer.trim().to_string();
 
-    let creds = SoraCredentialBuilder::new()
-        .with_cookies(&cookie)
-        .with_jwt_bearer_token(&bearer)
-        .with_sora_sentinel(&sentinel)
-        .build()?;
+    let creds = SoraCredentialBuilder::new().with_cookies(&cookie).with_jwt_bearer_token(&bearer).with_sora_sentinel(&sentinel).build()?;
 
     // Get the task status for a specific task
     // let response = get_image_gen_status(&StatusRequest::new(None, Some("task_01jr9yvpfyetx9r7qvvx38scna".to_string())), &creds).await?;
@@ -338,11 +317,7 @@ mod tests {
     println!("task_id: {}", response.task_responses[0].id);
 
     let task_id = response.task_responses[0].id.clone();
-    let task_response = wait_for_image_gen_status(
-      &task_id.0,
-      &creds,
-      Some(10)
-    ).await?;
+    let task_response = wait_for_image_gen_status(&task_id.0, &creds, Some(10)).await?;
 
     assert!(task_response.status == "succeeded");
     Ok(())

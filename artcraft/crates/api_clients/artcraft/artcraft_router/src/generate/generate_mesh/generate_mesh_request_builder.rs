@@ -100,31 +100,11 @@ pub struct GenerateMeshRequestBuilder {
 
 impl Default for GenerateMeshRequestBuilder {
   fn default() -> Self {
-    Self {
-      model: RouterMeshModel::Hunyuan3d3,
-      provider: RouterProvider::Artcraft,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      prompt: None,
-      reference_images: None,
-      front_image: None,
-      back_image: None,
-      left_image: None,
-      right_image: None,
-      input_mesh: None,
-      mesh_output_type: None,
-      polygon_type: None,
-      face_count: None,
-      enable_pbr: None,
-      enable_texture: None,
-      texture_quality: None,
-      geometry_quality: None,
-      idempotency_token: None,
-    }
+    Self { model: RouterMeshModel::Hunyuan3d3, provider: RouterProvider::Artcraft, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, prompt: None, reference_images: None, front_image: None, back_image: None, left_image: None, right_image: None, input_mesh: None, mesh_output_type: None, polygon_type: None, face_count: None, enable_pbr: None, enable_texture: None, texture_quality: None, geometry_quality: None, idempotency_token: None }
   }
 }
 
 impl GenerateMeshRequestBuilder {
-
   pub fn build2(self) -> Result<MeshGenerationDraftOrRequest, ArtcraftRouterError> {
     match (self.provider, self.model) {
       // Artcraft
@@ -156,14 +136,11 @@ impl GenerateMeshRequestBuilder {
   }
 
   pub fn get_or_generate_idempotency_token(&self) -> String {
-    self.idempotency_token.clone()
-        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+    self.idempotency_token.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
   }
 
   fn unsupported_provider_and_model(&self) -> Result<MeshGenerationDraftOrRequest, ArtcraftRouterError> {
-    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(
-      format!("Mesh generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)
-    ))
+    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(format!("Mesh generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)))
   }
 }
 
@@ -180,83 +157,45 @@ mod tests {
 
     #[test]
     fn artcraft_models_dispatch() {
-      let cases = [
-        RouterMeshModel::Hunyuan3d2p0,
-        RouterMeshModel::Hunyuan3d2p1,
-        RouterMeshModel::Hunyuan3d3,
-        RouterMeshModel::Hunyuan3d3Sketch,
-      ];
+      let cases = [RouterMeshModel::Hunyuan3d2p0, RouterMeshModel::Hunyuan3d2p1, RouterMeshModel::Hunyuan3d3, RouterMeshModel::Hunyuan3d3Sketch];
       for model in cases {
-        let result = builder_with_token_image(RouterProvider::Artcraft, model).build2()
-          .unwrap_or_else(|e| panic!("build should succeed for {model:?}: {e}"));
+        let result = builder_with_token_image(RouterProvider::Artcraft, model).build2().unwrap_or_else(|e| panic!("build should succeed for {model:?}: {e}"));
         let request = expect_request(result);
-        let matches = matches!(
-          (model, &request),
-          (RouterMeshModel::Hunyuan3d2p0, MeshGenerationRequest::ArtcraftHunyuan3d2p0(_))
-            | (RouterMeshModel::Hunyuan3d2p1, MeshGenerationRequest::ArtcraftHunyuan3d2p1(_))
-            | (RouterMeshModel::Hunyuan3d3, MeshGenerationRequest::ArtcraftHunyuan3d3(_))
-            | (RouterMeshModel::Hunyuan3d3Sketch, MeshGenerationRequest::ArtcraftHunyuan3d3Sketch(_))
-        );
+        let matches = matches!((model, &request), (RouterMeshModel::Hunyuan3d2p0, MeshGenerationRequest::ArtcraftHunyuan3d2p0(_)) | (RouterMeshModel::Hunyuan3d2p1, MeshGenerationRequest::ArtcraftHunyuan3d2p1(_)) | (RouterMeshModel::Hunyuan3d3, MeshGenerationRequest::ArtcraftHunyuan3d3(_)) | (RouterMeshModel::Hunyuan3d3Sketch, MeshGenerationRequest::ArtcraftHunyuan3d3Sketch(_)));
         assert!(matches, "unexpected dispatch for {model:?}: {request:?}");
       }
     }
 
     #[test]
     fn fal_hunyuan3d_3_with_image_dispatches_to_image_endpoint() {
-      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d3)
-        .build2().expect("build");
-      assert!(matches!(
-        expect_request(result),
-        MeshGenerationRequest::FalHunyuan3d3Image(_)
-      ));
+      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d3).build2().expect("build");
+      assert!(matches!(expect_request(result), MeshGenerationRequest::FalHunyuan3d3Image(_)));
     }
 
     #[test]
     fn fal_hunyuan3d_3_with_prompt_only_dispatches_to_text_endpoint() {
-      let builder = GenerateMeshRequestBuilder {
-        provider: RouterProvider::Fal,
-        model: RouterMeshModel::Hunyuan3d3,
-        prompt: Some("a red ceramic teapot".to_string()),
-        ..Default::default()
-      };
+      let builder = GenerateMeshRequestBuilder { provider: RouterProvider::Fal, model: RouterMeshModel::Hunyuan3d3, prompt: Some("a red ceramic teapot".to_string()), ..Default::default() };
       let result = builder.build2().expect("build");
-      assert!(matches!(
-        expect_request(result),
-        MeshGenerationRequest::FalHunyuan3d3Text(_)
-      ));
+      assert!(matches!(expect_request(result), MeshGenerationRequest::FalHunyuan3d3Text(_)));
     }
 
     #[test]
     fn fal_hunyuan3d_3_sketch_dispatches() {
-      let builder = GenerateMeshRequestBuilder {
-        prompt: Some("a red ceramic teapot".to_string()),
-        ..builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d3Sketch)
-      };
+      let builder = GenerateMeshRequestBuilder { prompt: Some("a red ceramic teapot".to_string()), ..builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d3Sketch) };
       let result = builder.build2().expect("build");
-      assert!(matches!(
-        expect_request(result),
-        MeshGenerationRequest::FalHunyuan3d3Sketch(_)
-      ));
+      assert!(matches!(expect_request(result), MeshGenerationRequest::FalHunyuan3d3Sketch(_)));
     }
 
     #[test]
     fn fal_hunyuan_3d_2p0_dispatches() {
-      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d2p0)
-        .build2().expect("build");
-      assert!(matches!(
-        expect_request(result),
-        MeshGenerationRequest::FalHunyuan3d2p0(_)
-      ));
+      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d2p0).build2().expect("build");
+      assert!(matches!(expect_request(result), MeshGenerationRequest::FalHunyuan3d2p0(_)));
     }
 
     #[test]
     fn fal_hunyuan_3d_2p1_dispatches() {
-      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d2p1)
-        .build2().expect("build");
-      assert!(matches!(
-        expect_request(result),
-        MeshGenerationRequest::FalHunyuan3d2p1(_)
-      ));
+      let result = builder_with_url_image(RouterProvider::Fal, RouterMeshModel::Hunyuan3d2p1).build2().expect("build");
+      assert!(matches!(expect_request(result), MeshGenerationRequest::FalHunyuan3d2p1(_)));
     }
   }
 
@@ -265,17 +204,9 @@ mod tests {
 
     #[test]
     fn non_mesh_providers_are_unsupported() {
-      for provider in [
-        RouterProvider::GmiCloud,
-        RouterProvider::GrokApi,
-        RouterProvider::KinoviWeb,
-        RouterProvider::WorldLabs,
-      ] {
+      for provider in [RouterProvider::GmiCloud, RouterProvider::GrokApi, RouterProvider::KinoviWeb, RouterProvider::WorldLabs] {
         let result = builder_with_url_image(provider, RouterMeshModel::Hunyuan3d3).build2();
-        assert!(
-          matches!(result, Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(_))),
-          "expected unsupported error for {provider:?}",
-        );
+        assert!(matches!(result, Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(_))), "expected unsupported error for {provider:?}",);
       }
     }
   }
@@ -283,25 +214,12 @@ mod tests {
   // ── Helpers ──
 
   fn builder_with_url_image(provider: RouterProvider, model: RouterMeshModel) -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      provider,
-      model,
-      reference_images: Some(ImageListRef::Urls(vec![IMAGE_URL.to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { provider, model, reference_images: Some(ImageListRef::Urls(vec![IMAGE_URL.to_string()])), ..Default::default() }
   }
 
   fn builder_with_token_image(provider: RouterProvider, model: RouterMeshModel) -> GenerateMeshRequestBuilder {
     use tokens::tokens::media_files::MediaFileToken;
-    GenerateMeshRequestBuilder {
-      provider,
-      model,
-      prompt: Some("a red ceramic teapot".to_string()),
-      reference_images: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_test123".to_string()),
-      ])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { provider, model, prompt: Some("a red ceramic teapot".to_string()), reference_images: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_test123".to_string())])), ..Default::default() }
   }
 
   fn expect_request(result: MeshGenerationDraftOrRequest) -> MeshGenerationRequest {

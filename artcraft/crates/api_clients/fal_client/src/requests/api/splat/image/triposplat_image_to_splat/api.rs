@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::splat::image::triposplat_image_to_splat::raw_request::{
-  TripoSplatImageToSplatInput, TripoSplatImageToSplatOutput,
-};
+use crate::requests::api::splat::image::triposplat_image_to_splat::raw_request::{TripoSplatImageToSplatInput, TripoSplatImageToSplatOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 /// TripoSplat image-to-Gaussian-splat: reconstructs a 3D Gaussian splat from
@@ -53,15 +51,7 @@ impl FalEndpoint for TripoSplatImageToSplatRequest {
   type RawResponse = TripoSplatImageToSplatOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      image_url: self.image_url.clone(),
-      num_gaussians: self.num_gaussians,
-      num_inference_steps: self.num_inference_steps,
-      guidance_scale: self.guidance_scale,
-      output_format: self.output_format.map(|f| f.to_str().to_string()),
-      seed: self.seed,
-      enable_safety_checker: self.enable_safety_checker,
-    })
+    Ok(Self::RawRequest { image_url: self.image_url.clone(), num_gaussians: self.num_gaussians, num_inference_steps: self.num_inference_steps, guidance_scale: self.guidance_scale, output_format: self.output_format.map(|f| f.to_str().to_string()), seed: self.seed, enable_safety_checker: self.enable_safety_checker })
   }
 }
 
@@ -94,15 +84,7 @@ mod tests {
 
     #[test]
     fn full_request_serializes_all_fields() {
-      let request = TripoSplatImageToSplatRequest {
-        num_gaussians: Some(131_072),
-        num_inference_steps: Some(30),
-        guidance_scale: Some(5.0),
-        output_format: Some(TripoSplatOutputFormat::Ply),
-        seed: Some(42),
-        enable_safety_checker: Some(false),
-        ..base_request()
-      };
+      let request = TripoSplatImageToSplatRequest { num_gaussians: Some(131_072), num_inference_steps: Some(30), guidance_scale: Some(5.0), output_format: Some(TripoSplatOutputFormat::Ply), seed: Some(42), enable_safety_checker: Some(false), ..base_request() };
       let raw = request.to_raw_request().expect("to_raw_request");
       let json = serde_json::to_value(&raw).unwrap();
       assert_eq!(json["num_gaussians"], 131_072);
@@ -117,15 +99,7 @@ mod tests {
   // ── Helpers ──
 
   fn base_request() -> TripoSplatImageToSplatRequest {
-    TripoSplatImageToSplatRequest {
-      image_url: "https://example.com/input.png".to_string(),
-      num_gaussians: None,
-      num_inference_steps: None,
-      guidance_scale: None,
-      output_format: None,
-      seed: None,
-      enable_safety_checker: None,
-    }
+    TripoSplatImageToSplatRequest { image_url: "https://example.com/input.png".to_string(), num_gaussians: None, num_inference_steps: None, guidance_scale: None, output_format: None, seed: None, enable_safety_checker: None }
   }
 
   #[tokio::test]
@@ -133,10 +107,7 @@ mod tests {
   async fn test_image_to_splat_webhook() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = TripoSplatImageToSplatRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ..base_request()
-    };
+    let request = TripoSplatImageToSplatRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), ..base_request() };
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
     assert!(result.request_id.is_some() || result.gateway_request_id.is_some());
@@ -148,10 +119,7 @@ mod tests {
   async fn test_image_to_splat_queue() -> AnyhowResult<()> {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
-    let request = TripoSplatImageToSplatRequest {
-      image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-      ..base_request()
-    };
+    let request = TripoSplatImageToSplatRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), ..base_request() };
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
     assert!(!result.request_id.is_empty());

@@ -37,7 +37,14 @@ pub(super) fn insert(app: &mut SlideApp, ui: &mut Ui) {
             run(app, "slide.new", json!({}));
         }
         if let Some(a) = arrow {
-            egui::Popup::menu(&a).width(420.0).show(|ui| layout_menu(app, ui, "slide.new"));
+            egui::Popup::menu(&a).width(420.0).show(|ui| {
+                layout_menu(app, ui, "slide.new");
+                ui.separator();
+                if ui.button("Bulk Create from CSV…").clicked() {
+                    app.dialog = Some(crate::dialogs::Dialog::new("bulkCsv"));
+                    ui.close();
+                }
+            });
         }
     });
     group(ui, |ui| {
@@ -92,6 +99,7 @@ pub(super) fn insert(app: &mut SlideApp, ui: &mut Ui) {
         let r = big_button(ui, Icon::Zoom, "Zoom", enabled(app, "insert.zoom"));
         egui::Popup::menu(&r).close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside).width(300.0).show(|ui| zoom_menu(app, ui));
         big(app, ui, Icon::Link, "Link", "app.dialog", json!({"id": "hyperlink"}));
+        big(app, ui, Icon::Shapes, "QR\nCode", "app.dialog", json!({"id": "qrCode"}));
         let r = big_button(ui, Icon::Action, "Action", enabled(app, "insert.actionButton"));
         egui::Popup::menu(&r).show(|ui| {
             for k in ["back", "forward", "beginning", "end", "home", "information", "return", "movie", "document", "sound", "help", "custom"] {

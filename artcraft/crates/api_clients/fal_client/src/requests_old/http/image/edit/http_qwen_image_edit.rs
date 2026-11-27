@@ -55,8 +55,6 @@ pub struct QwenImageEditOutput {
   pub images: Vec<QwenImageEditFile>,
 }
 
-pub fn qwen_image_edit(
-  params: QwenImageEditInput,
-) -> FalRequest<QwenImageEditInput, QwenImageEditOutput> {
+pub fn qwen_image_edit(params: QwenImageEditInput) -> FalRequest<QwenImageEditInput, QwenImageEditOutput> {
   FalRequest::new("fal-ai/qwen-image-edit", params)
 }

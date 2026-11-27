@@ -51,9 +51,9 @@ impl FalRequestCostCalculator for EnqueueHunyuan3dV3ImageTo3dRequest {
     // Enabling PBR materials adds $0.15.
     // Using multi-view images (back/left/right) adds $0.15.
     // Custom face count adds $0.15.
-    let mut cost = match self.generate_type{
-      None => 38, // Round up from $0.375
-      Some(EnqueueHunyuan3dV3ImageTo3dGenerateType::Normal) => 38, // Round up
+    let mut cost = match self.generate_type {
+      None => 38,                                                    // Round up from $0.375
+      Some(EnqueueHunyuan3dV3ImageTo3dGenerateType::Normal) => 38,   // Round up
       Some(EnqueueHunyuan3dV3ImageTo3dGenerateType::Geometry) => 23, // Round up
       Some(EnqueueHunyuan3dV3ImageTo3dGenerateType::LowPoly) => 45,
     };
@@ -63,9 +63,7 @@ impl FalRequestCostCalculator for EnqueueHunyuan3dV3ImageTo3dRequest {
     if self.face_count.is_some() {
       cost += 15;
     }
-    let use_multi_view = self.left_image_url.is_some()
-        || self.right_image_url.is_some()
-        || self.back_image_url.is_some();
+    let use_multi_view = self.left_image_url.is_some() || self.right_image_url.is_some() || self.back_image_url.is_some();
     if use_multi_view {
       cost += 15;
     }
@@ -73,29 +71,27 @@ impl FalRequestCostCalculator for EnqueueHunyuan3dV3ImageTo3dRequest {
   }
 }
 
-
 /// Veo 3.1 Image-to-Video
 /// https://fal.ai/models/fal-ai/veo3.1/image-to-video
-pub async fn enqueue_hunyuan3d_v3_image_to_3d_webhook<R: IntoUrl>(
-  args: EnqueueHunyuan3dV3ImageTo3dArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_hunyuan3d_v3_image_to_3d_webhook<R: IntoUrl>(args: EnqueueHunyuan3dV3ImageTo3dArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let generate_type = req.generate_type
-      .map(|t| match t {
-        EnqueueHunyuan3dV3ImageTo3dGenerateType::Normal => "Normal",
-        EnqueueHunyuan3dV3ImageTo3dGenerateType::LowPoly => "LowPoly",
-        EnqueueHunyuan3dV3ImageTo3dGenerateType::Geometry => "Geometry",
-      })
-      .map(|s| s.to_string());
+  let generate_type = req
+    .generate_type
+    .map(|t| match t {
+      EnqueueHunyuan3dV3ImageTo3dGenerateType::Normal => "Normal",
+      EnqueueHunyuan3dV3ImageTo3dGenerateType::LowPoly => "LowPoly",
+      EnqueueHunyuan3dV3ImageTo3dGenerateType::Geometry => "Geometry",
+    })
+    .map(|s| s.to_string());
 
-  let polygon_type = req.polygon_type
-      .map(|t| match t {
-        EnqueueHunyuan3dV3ImageTo3dPolygonType::Triangle => "triangle",
-        EnqueueHunyuan3dV3ImageTo3dPolygonType::Quadrilateral => "quadrilateral",
-      })
-      .map(|s| s.to_string());
+  let polygon_type = req
+    .polygon_type
+    .map(|t| match t {
+      EnqueueHunyuan3dV3ImageTo3dPolygonType::Triangle => "triangle",
+      EnqueueHunyuan3dV3ImageTo3dPolygonType::Quadrilateral => "quadrilateral",
+    })
+    .map(|s| s.to_string());
 
   let request = Hunyuan3dV3ImageTo3dInput {
     input_image_url: req.image_url,
@@ -109,10 +105,7 @@ pub async fn enqueue_hunyuan3d_v3_image_to_3d_webhook<R: IntoUrl>(
     enable_pbr: req.enable_pbr,
   };
 
-  let result = hunyuan3d_v3_image_to_3d(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = hunyuan3d_v3_image_to_3d(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -133,20 +126,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueHunyuan3dV3ImageTo3dArgs {
-      request: EnqueueHunyuan3dV3ImageTo3dRequest {
-        image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(),
-        back_image_url: None,
-        left_image_url: None,
-        right_image_url: None,
-        face_count: None,
-        generate_type: None,
-        polygon_type: None,
-        enable_pbr: None,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueHunyuan3dV3ImageTo3dArgs { request: EnqueueHunyuan3dV3ImageTo3dRequest { image_url: ERNEST_SCARED_STUPID_IMAGE_URL.to_string(), back_image_url: None, left_image_url: None, right_image_url: None, face_count: None, generate_type: None, polygon_type: None, enable_pbr: None }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_hunyuan3d_v3_image_to_3d_webhook(args).await?;
 

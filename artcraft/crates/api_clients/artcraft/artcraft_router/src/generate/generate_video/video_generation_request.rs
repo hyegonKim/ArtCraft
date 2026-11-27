@@ -216,7 +216,6 @@ pub enum VideoGenerationRequest {
 }
 
 impl VideoGenerationRequest {
-
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::ArtcraftGrokImagineVideo(_) => RouterProvider::Artcraft,

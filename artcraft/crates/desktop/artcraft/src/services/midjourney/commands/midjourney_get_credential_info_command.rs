@@ -15,38 +15,28 @@ pub struct MidjourneyGetCredentialInfoResponse {
 impl SerializeMarker for MidjourneyGetCredentialInfoResponse {}
 
 #[tauri::command]
-pub async fn midjourney_get_credential_info_command(
-  creds_manager: State<'_, MidjourneyCredentialManager>,
-) -> ResponseOrErrorMessage<MidjourneyGetCredentialInfoResponse> {
+pub async fn midjourney_get_credential_info_command(creds_manager: State<'_, MidjourneyCredentialManager>) -> ResponseOrErrorMessage<MidjourneyGetCredentialInfoResponse> {
   info!("midjourney_get_credential_info_command called");
 
-  let info = get_info(&creds_manager)
-      .map_err(|err| {
-        error!("Error getting info: {:?}", err);
-        "error getting info"
-      })?;
+  let info = get_info(&creds_manager).map_err(|err| {
+    error!("Error getting info: {:?}", err);
+    "error getting info"
+  })?;
 
   Ok(info.into())
 }
 
-fn get_info(
-  creds: &MidjourneyCredentialManager,
-) -> AnyhowResult<MidjourneyGetCredentialInfoResponse> {
+fn get_info(creds: &MidjourneyCredentialManager) -> AnyhowResult<MidjourneyGetCredentialInfoResponse> {
   let mut can_clear_state = true;
-  
+
   let maybe_cookies = creds.maybe_copy_cookie_store()?;
   let maybe_user_info = creds.maybe_copy_user_info()?;
-  
-  if maybe_cookies.is_none()  && maybe_user_info.is_none() {
+
+  if maybe_cookies.is_none() && maybe_user_info.is_none() {
     can_clear_state = false;
   }
-  
-  let maybe_email = maybe_user_info
-      .map(|info| info.email.clone())
-      .flatten();
-  
-  Ok(MidjourneyGetCredentialInfoResponse {
-    maybe_email,
-    can_clear_state,
-  })
+
+  let maybe_email = maybe_user_info.map(|info| info.email.clone()).flatten();
+
+  Ok(MidjourneyGetCredentialInfoResponse { maybe_email, can_clear_state })
 }

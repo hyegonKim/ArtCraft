@@ -11,11 +11,11 @@ impl ImageInputObjectId {
     let uuid = Uuid::new_v4().to_string();
     Self(uuid)
   }
-  
+
   pub fn from_str(s: &str) -> Self {
     Self(s.to_string())
   }
-  
+
   pub fn as_str(&self) -> &str {
     &self.0
   }

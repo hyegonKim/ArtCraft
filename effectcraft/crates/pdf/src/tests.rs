@@ -1321,4 +1321,3 @@ fn parse_page_framed_with_texts_extracts_pdf_text_and_keeps_shapes() {
     assert!((span.font_size - 24.0).abs() < 1e-5);
     assert!((span.fill.unwrap()[0] - 1.0).abs() < 1e-5);
 }
-

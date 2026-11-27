@@ -62,12 +62,9 @@ impl FalRequestCostCalculator for Veo3FastRequest {
   }
 }
 
-
 /// Veo 3 Fast Image-to-Video
 /// https://fal.ai/models/fal-ai/veo3/fast/image-to-video
-pub async fn enqueue_veo_3_fast_image_to_video_webhook<R: IntoUrl>(
-  args: Veo3FastArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
+pub async fn enqueue_veo_3_fast_image_to_video_webhook<R: IntoUrl>(args: Veo3FastArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
   let duration = match req.duration {
@@ -89,23 +86,12 @@ pub async fn enqueue_veo_3_fast_image_to_video_webhook<R: IntoUrl>(
     Veo3FastResolution::TenEightyP => Some("1080p".to_string()),
   };
 
-  let request = Veo3FastImageToVideoInput {
-    image_url: req.image_url,
-    prompt: req.prompt,
-    aspect_ratio,
-    resolution,
-    duration,
-    generate_audio: Some(req.generate_audio),
-  };
+  let request = Veo3FastImageToVideoInput { image_url: req.image_url, prompt: req.prompt, aspect_ratio, resolution, duration, generate_audio: Some(req.generate_audio) };
 
-  let result = veo_3_fast_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = veo_3_fast_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -125,18 +111,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = Veo3FastArgs {
-      request: Veo3FastRequest {
-        image_url: image_url.to_string(),
-        prompt: "man is standing next to a ghost and t-rex, they begin to chase him as the camera pulls back to show the wider scene".to_string(),
-        aspect_ratio: Veo3FastAspectRatio::WideSixteenNine,
-        duration: Veo3FastDuration::EightSeconds,
-        generate_audio: true,
-        resolution: Veo3FastResolution::TenEightyP,
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = Veo3FastArgs { request: Veo3FastRequest { image_url: image_url.to_string(), prompt: "man is standing next to a ghost and t-rex, they begin to chase him as the camera pulls back to show the wider scene".to_string(), aspect_ratio: Veo3FastAspectRatio::WideSixteenNine, duration: Veo3FastDuration::EightSeconds, generate_audio: true, resolution: Veo3FastResolution::TenEightyP }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_veo_3_fast_image_to_video_webhook(args).await?;
 

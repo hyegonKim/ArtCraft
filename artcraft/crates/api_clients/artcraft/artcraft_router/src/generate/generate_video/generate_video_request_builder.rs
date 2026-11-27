@@ -153,32 +153,11 @@ pub struct GenerateVideoRequestBuilder {
 
 impl Default for GenerateVideoRequestBuilder {
   fn default() -> Self {
-    Self {
-      model: RouterVideoModel::Seedance2p0,
-      provider: RouterProvider::Artcraft,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade,
-      prompt: None,
-      negative_prompt: None,
-      start_frame: None,
-      end_frame: None,
-      reference_images: None,
-      reference_videos: None,
-      reference_audio: None,
-      reference_character_tokens: None,
-      resolution: None,
-      aspect_ratio: None,
-      bitrate: None,
-      duration_seconds: None,
-      video_batch_count: None,
-      generate_audio: None,
-      total_reference_video_input_seconds: None,
-      idempotency_token: None,
-    }
+    Self { model: RouterVideoModel::Seedance2p0, provider: RouterProvider::Artcraft, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, prompt: None, negative_prompt: None, start_frame: None, end_frame: None, reference_images: None, reference_videos: None, reference_audio: None, reference_character_tokens: None, resolution: None, aspect_ratio: None, bitrate: None, duration_seconds: None, video_batch_count: None, generate_audio: None, total_reference_video_input_seconds: None, idempotency_token: None }
   }
 }
 
 impl GenerateVideoRequestBuilder {
-
   pub fn build2(self) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
     match (self.provider, self.model) {
       // Artcraft
@@ -261,13 +240,10 @@ impl GenerateVideoRequestBuilder {
   }
 
   fn unsupported_provider_and_model(&self) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
-    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(
-      format!("Video generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)
-    ))
+    Err(ArtcraftRouterError::UnsupportedProviderAndModelForNewApi(format!("Video generation for model `{:?}` is not supported for provider {:?}", self.model, self.provider)))
   }
 
   pub fn get_or_generate_idempotency_token(&self) -> String {
-    self.idempotency_token.clone()
-        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+    self.idempotency_token.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
   }
 }

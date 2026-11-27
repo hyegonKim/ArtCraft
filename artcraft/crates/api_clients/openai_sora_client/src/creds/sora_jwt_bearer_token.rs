@@ -11,16 +11,13 @@ pub struct SoraJwtBearerToken {
 impl SoraJwtBearerToken {
   pub fn new(token: String) -> Result<Self, SoraError> {
     let jwt_claims = lightweight_sora_jwt_parse(&token)?;
-    Ok(SoraJwtBearerToken {
-      token,
-      jwt_claims,
-    })
+    Ok(SoraJwtBearerToken { token, jwt_claims })
   }
 
   pub fn token_str(&self) -> &str {
     &self.token
   }
-  
+
   pub fn as_str(&self) -> &str {
     &self.token
   }

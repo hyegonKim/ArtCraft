@@ -234,13 +234,6 @@ fn render_mockup_group(children: &[Layer], rect: Rect, cx: &Ctx, strength: f32) 
     let mut decal_buf = Buffer::transparent(rect);
     composite_stack(&children[base_idx + 1..], &mut decal_buf, cx);
     let mut out = Buffer::transparent(rect);
-    photocraft_algo::relight_3d::composite_mockup_rgba(
-        &base_buf.px,
-        &decal_buf.px,
-        &mut out.px,
-        rect.width() as usize,
-        rect.height() as usize,
-        strength,
-    );
+    photocraft_algo::relight_3d::composite_mockup_rgba(&base_buf.px, &decal_buf.px, &mut out.px, rect.width() as usize, rect.height() as usize, strength);
     out
 }

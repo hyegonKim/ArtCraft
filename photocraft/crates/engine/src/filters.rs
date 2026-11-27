@@ -219,6 +219,10 @@ pub(crate) fn apply_filter_to_surface_in(
     if let Some(out) = crate::substance3d_cmds::apply_to_surface(id, params, surf, canvas) {
         return Ok(Some(out));
     }
+    // Adobe Fresco Live Watercolor smart filter replay (fresco_cmds).
+    if let Some(out) = crate::fresco_cmds::apply_to_surface(id, params, surf, canvas) {
+        return Ok(Some(out));
+    }
     // Image › Adjustments recorded as smart filters (Levels, Curves, Shadows/Highlights… from PSD).
     if let Some(kind) = id.strip_prefix("image.adjustments.") {
         return crate::adjust_cmds::adjust_as_filter(kind, params, surf, None);

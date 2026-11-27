@@ -1,8 +1,6 @@
 use crate::core::api_adapters::aspect_ratio::common_aspect_ratio::CommonAspectRatio as DesktopCommonAspectRatio;
 use crate::core::commands::enqueue::generate_error::{BadInputReason, GenerateError, MissingCredentialsReason};
-use crate::core::commands::deprecated::image_edit::enqueue_edit_image_command::{
-  EditImageResolution, EditImageSize, EnqueueEditImageCommand,
-};
+use crate::core::commands::deprecated::image_edit::enqueue_edit_image_command::{EditImageResolution, EditImageSize, EnqueueEditImageCommand};
 use crate::core::commands::enqueue::task_enqueue_success::TaskEnqueueSuccess;
 use crate::core::events::generation_events::common::GenerationModel;
 use crate::core::state::app_env_configs::app_env_configs::AppEnvConfigs;
@@ -23,22 +21,13 @@ use log::{error, info};
 
 pub(super) const MAX_EDIT_IMAGES: usize = 10;
 
-pub(super) async fn handle_image_edit_artcraft_via_router(
-  request: &EnqueueEditImageCommand,
-  app_env_configs: &AppEnvConfigs,
-  storyteller_creds_manager: &StorytellerCredentialManager,
-  model: RouterImageModel,
-  generation_model: GenerationModel,
-) -> Result<TaskEnqueueSuccess, GenerateError> {
+pub(super) async fn handle_image_edit_artcraft_via_router(request: &EnqueueEditImageCommand, app_env_configs: &AppEnvConfigs, storyteller_creds_manager: &StorytellerCredentialManager, model: RouterImageModel, generation_model: GenerationModel) -> Result<TaskEnqueueSuccess, GenerateError> {
   let creds = match storyteller_creds_manager.get_credentials()? {
     Some(creds) => creds,
     None => return Err(GenerateError::MissingCredentials(MissingCredentialsReason::NeedsStorytellerCredentials)),
   };
 
-  let client = RouterClient::Artcraft(RouterArtcraftClient::new(
-    app_env_configs.storyteller_host.clone(),
-    creds,
-  ));
+  let client = RouterClient::Artcraft(RouterArtcraftClient::new(app_env_configs.storyteller_host.clone(), creds));
 
   let mut media_tokens = Vec::with_capacity(MAX_EDIT_IMAGES);
 
@@ -50,18 +39,10 @@ pub(super) async fn handle_image_edit_artcraft_via_router(
   }
 
   if media_tokens.len() > MAX_EDIT_IMAGES {
-    return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages {
-      min: 1,
-      max: MAX_EDIT_IMAGES as u32,
-      provided: media_tokens.len() as u32,
-    }));
+    return Err(GenerateError::BadInput(BadInputReason::InvalidNumberOfInputImages { min: 1, max: MAX_EDIT_IMAGES as u32, provided: media_tokens.len() as u32 }));
   }
 
-  let image_inputs = if media_tokens.is_empty() {
-    None
-  } else {
-    Some(ImageListRef::MediaFileTokens(media_tokens))
-  };
+  let image_inputs = if media_tokens.is_empty() { None } else { Some(ImageListRef::MediaFileTokens(media_tokens)) };
 
   let aspect_ratio = get_aspect_ratio_edit(request);
   let resolution = get_resolution_edit(request);
@@ -92,38 +73,25 @@ pub(super) async fn handle_image_edit_artcraft_via_router(
     // Artcraft never returns a Draft — image-token resolution happens server-side.
     // The only draft-producing models today are Kinovi-Midjourney variants,
     // which are routed to a separate provider.
-    ImageGenerationDraftOrRequest::Draft(_) => unreachable!(
-      "Artcraft router should never produce a draft for image edits"
-    ),
+    ImageGenerationDraftOrRequest::Draft(_) => unreachable!("Artcraft router should never produce a draft for image edits"),
   };
 
   let response = match request.send_request(&client).await {
     Ok(resp) => {
       info!("Successfully enqueued.");
       resp
-    }
+    },
     Err(err) => {
       error!("Failed to enqueue: {:?}", err);
       return Err(GenerateError::from(err));
-    }
+    },
   };
 
-  let job_id = response
-    .get_artcraft_payload()
-    .map(|p| p.inference_job_token.to_string())
-    .ok_or(GenerateError::ResponseHadNoJobTokens)?;
+  let job_id = response.get_artcraft_payload().map(|p| p.inference_job_token.to_string()).ok_or(GenerateError::ResponseHadNoJobTokens)?;
 
   info!("Job token: {}", job_id);
 
-  Ok(TaskEnqueueSuccess {
-    task_type: TaskType::ImageGeneration,
-    model: Some(generation_model),
-    provider: GenerationProvider::Artcraft,
-    provider_job_id: Some(job_id),
-    maybe_queue_status_url: None,
-    maybe_prompt_token: None,
-    maybe_queue_response_url: None,
-  })
+  Ok(TaskEnqueueSuccess { task_type: TaskType::ImageGeneration, model: Some(generation_model), provider: GenerationProvider::Artcraft, provider_job_id: Some(job_id), maybe_queue_status_url: None, maybe_prompt_token: None, maybe_queue_response_url: None })
 }
 
 fn get_aspect_ratio_edit(request: &EnqueueEditImageCommand) -> Option<RouterAspectRatio> {

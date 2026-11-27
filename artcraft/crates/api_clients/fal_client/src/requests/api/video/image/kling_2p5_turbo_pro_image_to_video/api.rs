@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::image::kling_2p5_turbo_pro_image_to_video::raw_request::{
-  Kling2p5TurboProImageToVideoInput, Kling2p5TurboProImageToVideoOutput,
-};
+use crate::requests::api::video::image::kling_2p5_turbo_pro_image_to_video::raw_request::{Kling2p5TurboProImageToVideoInput, Kling2p5TurboProImageToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -57,14 +55,7 @@ impl FalEndpoint for Kling2p5TurboProImageToVideoRequest {
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
     let duration = self.duration.map(|d| d.to_str().to_string());
 
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_url: self.image_url.clone(),
-      duration,
-      tail_image_url: self.tail_image_url.clone(),
-      negative_prompt: self.negative_prompt.clone(),
-      cfg_scale: self.cfg_scale,
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_url: self.image_url.clone(), duration, tail_image_url: self.tail_image_url.clone(), negative_prompt: self.negative_prompt.clone(), cfg_scale: self.cfg_scale })
   }
 }
 
@@ -83,14 +74,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling2p5TurboProImageToVideoRequest {
-      prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      tail_image_url: None,
-      duration: Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds),
-      negative_prompt: None,
-      cfg_scale: None,
-    };
+    let request = Kling2p5TurboProImageToVideoRequest { prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), tail_image_url: None, duration: Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds), negative_prompt: None, cfg_scale: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -104,14 +88,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Kling2p5TurboProImageToVideoRequest {
-      prompt: "wind moves through the trees".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      tail_image_url: None,
-      duration: Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds),
-      negative_prompt: None,
-      cfg_scale: None,
-    };
+    let request = Kling2p5TurboProImageToVideoRequest { prompt: "wind moves through the trees".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), tail_image_url: None, duration: Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds), negative_prompt: None, cfg_scale: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -125,21 +102,11 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let durations = [
-      Kling2p5TurboProImageToVideoDuration::FiveSeconds,
-      Kling2p5TurboProImageToVideoDuration::TenSeconds,
-    ];
+    let durations = [Kling2p5TurboProImageToVideoDuration::FiveSeconds, Kling2p5TurboProImageToVideoDuration::TenSeconds];
 
     for dur in durations {
       println!("--- duration: {:?} ---", dur);
-      let request = Kling2p5TurboProImageToVideoRequest {
-        prompt: "the dog wags its tail".to_string(),
-        image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-        tail_image_url: None,
-        duration: Some(dur),
-        negative_prompt: None,
-        cfg_scale: None,
-      };
+      let request = Kling2p5TurboProImageToVideoRequest { prompt: "the dog wags its tail".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), tail_image_url: None, duration: Some(dur), negative_prompt: None, cfg_scale: None };
       let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
       println!("result: {:?}", result);
     }
@@ -151,14 +118,7 @@ mod tests {
 
   #[test]
   fn raw_request_uses_canonical_field_names() {
-    let request = Kling2p5TurboProImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      tail_image_url: Some("https://example.com/end.png".to_string()),
-      duration: Some(Kling2p5TurboProImageToVideoDuration::TenSeconds),
-      negative_prompt: Some("nope".to_string()),
-      cfg_scale: Some(0.5),
-    };
+    let request = Kling2p5TurboProImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), tail_image_url: Some("https://example.com/end.png".to_string()), duration: Some(Kling2p5TurboProImageToVideoDuration::TenSeconds), negative_prompt: Some("nope".to_string()), cfg_scale: Some(0.5) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.image_url, "https://example.com/start.png");
@@ -170,14 +130,7 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Kling2p5TurboProImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      tail_image_url: None,
-      duration: None,
-      negative_prompt: None,
-      cfg_scale: None,
-    };
+    let request = Kling2p5TurboProImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), tail_image_url: None, duration: None, negative_prompt: None, cfg_scale: None };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.image_url, "https://example.com/start.png");
     assert!(raw.tail_image_url.is_none());
@@ -188,10 +141,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Kling2p5TurboProImageToVideoRequest::ENDPOINT,
-      "fal-ai/kling-video/v2.5-turbo/pro/image-to-video",
-    );
+    assert_eq!(Kling2p5TurboProImageToVideoRequest::ENDPOINT, "fal-ai/kling-video/v2.5-turbo/pro/image-to-video",);
   }
 
   /// Wire-shape and endpoint parity vs the legacy
@@ -204,46 +154,23 @@ mod tests {
   /// documented pricing instead.
   mod legacy_parity {
     use super::*;
-    use crate::requests_old::http::video::image::http_kling_v2p5_turbo_pro_image_to_video::{
-      kling_v2p5_turbo_pro_image_to_video, KlingV2p5TurboProImageToVideoInput,
-    };
+    use crate::requests_old::http::video::image::http_kling_v2p5_turbo_pro_image_to_video::{kling_v2p5_turbo_pro_image_to_video, KlingV2p5TurboProImageToVideoInput};
 
     /// Same `fal-ai/kling-video/v2.5-turbo/pro/image-to-video` path.
     #[test]
     fn endpoint_path_matches_legacy() {
-      let legacy = kling_v2p5_turbo_pro_image_to_video(KlingV2p5TurboProImageToVideoInput {
-        prompt: "p".to_string(),
-        image_url: "https://example.com/x.png".to_string(),
-        ..Default::default()
-      });
-      assert_eq!(
-        Kling2p5TurboProImageToVideoRequest::ENDPOINT,
-        legacy.endpoint,
-      );
+      let legacy = kling_v2p5_turbo_pro_image_to_video(KlingV2p5TurboProImageToVideoInput { prompt: "p".to_string(), image_url: "https://example.com/x.png".to_string(), ..Default::default() });
+      assert_eq!(Kling2p5TurboProImageToVideoRequest::ENDPOINT, legacy.endpoint,);
     }
 
     /// At a representative fully-populated case, the new module's serialized
     /// `RawRequest` must equal the legacy `Input`'s JSON.
     #[test]
     fn wire_json_matches_legacy_fully_populated() {
-      let new = Kling2p5TurboProImageToVideoRequest {
-        prompt: "shared prompt".to_string(),
-        image_url: "https://example.com/start.png".to_string(),
-        tail_image_url: Some("https://example.com/end.png".to_string()),
-        duration: Some(Kling2p5TurboProImageToVideoDuration::TenSeconds),
-        negative_prompt: Some("blurry".to_string()),
-        cfg_scale: Some(0.5),
-      };
+      let new = Kling2p5TurboProImageToVideoRequest { prompt: "shared prompt".to_string(), image_url: "https://example.com/start.png".to_string(), tail_image_url: Some("https://example.com/end.png".to_string()), duration: Some(Kling2p5TurboProImageToVideoDuration::TenSeconds), negative_prompt: Some("blurry".to_string()), cfg_scale: Some(0.5) };
       let new_json = serde_json::to_value(new.to_raw_request().unwrap()).unwrap();
 
-      let legacy = KlingV2p5TurboProImageToVideoInput {
-        prompt: "shared prompt".to_string(),
-        image_url: "https://example.com/start.png".to_string(),
-        duration: Some("10".to_string()),
-        tail_image_url: Some("https://example.com/end.png".to_string()),
-        negative_prompt: Some("blurry".to_string()),
-        cfg_scale: Some(0.5),
-      };
+      let legacy = KlingV2p5TurboProImageToVideoInput { prompt: "shared prompt".to_string(), image_url: "https://example.com/start.png".to_string(), duration: Some("10".to_string()), tail_image_url: Some("https://example.com/end.png".to_string()), negative_prompt: Some("blurry".to_string()), cfg_scale: Some(0.5) };
       let legacy_json = serde_json::to_value(&legacy).unwrap();
 
       assert_eq!(new_json, legacy_json);
@@ -253,21 +180,10 @@ mod tests {
     /// omitted on the wire just like the legacy struct.
     #[test]
     fn wire_json_matches_legacy_minimal() {
-      let new = Kling2p5TurboProImageToVideoRequest {
-        prompt: "minimal".to_string(),
-        image_url: "https://example.com/x.png".to_string(),
-        tail_image_url: None,
-        duration: None,
-        negative_prompt: None,
-        cfg_scale: None,
-      };
+      let new = Kling2p5TurboProImageToVideoRequest { prompt: "minimal".to_string(), image_url: "https://example.com/x.png".to_string(), tail_image_url: None, duration: None, negative_prompt: None, cfg_scale: None };
       let new_json = serde_json::to_value(new.to_raw_request().unwrap()).unwrap();
 
-      let legacy = KlingV2p5TurboProImageToVideoInput {
-        prompt: "minimal".to_string(),
-        image_url: "https://example.com/x.png".to_string(),
-        ..Default::default()
-      };
+      let legacy = KlingV2p5TurboProImageToVideoInput { prompt: "minimal".to_string(), image_url: "https://example.com/x.png".to_string(), ..Default::default() };
       let legacy_json = serde_json::to_value(&legacy).unwrap();
 
       assert_eq!(new_json, legacy_json);
@@ -284,37 +200,16 @@ mod tests {
     /// wire JSON must match the legacy `Input`.
     #[test]
     fn wire_json_matches_legacy_at_every_combo() {
-      let durations = [
-        (None,                                                       None),
-        (Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds),    Some("5")),
-        (Some(Kling2p5TurboProImageToVideoDuration::TenSeconds),     Some("10")),
-      ];
+      let durations = [(None, None), (Some(Kling2p5TurboProImageToVideoDuration::FiveSeconds), Some("5")), (Some(Kling2p5TurboProImageToVideoDuration::TenSeconds), Some("10"))];
       let tail_urls: [Option<&str>; 2] = [None, Some("https://example.com/tail.png")];
 
       for (d_new, d_legacy) in durations {
         for tail in tail_urls {
-          let new = Kling2p5TurboProImageToVideoRequest {
-            prompt: "p".to_string(),
-            image_url: "https://example.com/x.png".to_string(),
-            tail_image_url: tail.map(String::from),
-            duration: d_new,
-            negative_prompt: None,
-            cfg_scale: None,
-          };
-          let legacy = KlingV2p5TurboProImageToVideoInput {
-            prompt: "p".to_string(),
-            image_url: "https://example.com/x.png".to_string(),
-            duration: d_legacy.map(String::from),
-            tail_image_url: tail.map(String::from),
-            negative_prompt: None,
-            cfg_scale: None,
-          };
+          let new = Kling2p5TurboProImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/x.png".to_string(), tail_image_url: tail.map(String::from), duration: d_new, negative_prompt: None, cfg_scale: None };
+          let legacy = KlingV2p5TurboProImageToVideoInput { prompt: "p".to_string(), image_url: "https://example.com/x.png".to_string(), duration: d_legacy.map(String::from), tail_image_url: tail.map(String::from), negative_prompt: None, cfg_scale: None };
           let new_json = serde_json::to_value(new.to_raw_request().unwrap()).unwrap();
           let legacy_json = serde_json::to_value(&legacy).unwrap();
-          assert_eq!(
-            new_json, legacy_json,
-            "duration={d_new:?} tail_image_url={tail:?}",
-          );
+          assert_eq!(new_json, legacy_json, "duration={d_new:?} tail_image_url={tail:?}",);
         }
       }
     }

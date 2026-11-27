@@ -1180,4 +1180,3 @@ fn parse_with_texts_extracts_styled_text_spans_and_keeps_vector_shapes() {
     assert_eq!(texts[1].text, "World");
     assert!((texts[1].position[1] - 85.0).abs() < 1e-6);
 }
-

@@ -23,7 +23,6 @@ pub struct UserDetailsLight {
 
   /// For users without a gravatar, we show one of our own avatars.
   pub default_avatar: UserDefaultAvatarInfo,
-
   // In the future, we'll also support user-uploaded avatars that we store on our servers.
 }
 

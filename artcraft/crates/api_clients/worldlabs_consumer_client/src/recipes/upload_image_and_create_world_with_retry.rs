@@ -60,7 +60,6 @@ pub struct NewAccessTokens {
 /// Mark the upload as complete.
 /// Request #5 (of ~10)
 pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreateWorldWithRetryArgs<'_>) -> Result<UploadImageAndCreateWorldWithRetryResponse, WorldLabsError> {
-
   info!("Checking to see if bearer token needs refresh (fails open) ...");
 
   let mut maybe_refresh_bearer = false;
@@ -68,7 +67,7 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
   match args.bearer_token.parse_jwt_claims() {
     Err(err) => {
       warn!("Failed to parse bearer_token jwt claims (failing open) : {}", err);
-    }
+    },
     Ok(jwt) => {
       let now = Utc::now();
       if now > jwt.expiration {
@@ -76,15 +75,13 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
         maybe_refresh_bearer = true;
       }
 
-      let sooner_expiry = jwt.expiration
-          .checked_sub_signed(TimeDelta::minutes(30))
-          .unwrap_or(jwt.expiration);
+      let sooner_expiry = jwt.expiration.checked_sub_signed(TimeDelta::minutes(30)).unwrap_or(jwt.expiration);
 
       if now > sooner_expiry {
         info!("Bearer will expire soon, so we're renewing it in advance.");
         maybe_refresh_bearer = true;
       }
-    }
+    },
   };
 
   let mut maybe_new_access_tokens = None;
@@ -92,31 +89,22 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
   if maybe_refresh_bearer {
     info!("Refreshing bearer token...");
 
-    let updated = google_refresh_token(GoogleRefreshTokenArgs {
-      refresh_token: &args.refresh_token,
-      request_timeout: args.individual_request_timeout,
-    }).await?;
+    let updated = google_refresh_token(GoogleRefreshTokenArgs { refresh_token: &args.refresh_token, request_timeout: args.individual_request_timeout }).await?;
 
     info!("Bearer token refreshed!");
 
-    maybe_new_access_tokens = Some(NewAccessTokens {
-      bearer_token: updated.bearer_token,
-      refresh_token: updated.refresh_token,
-    });
+    maybe_new_access_tokens = Some(NewAccessTokens { bearer_token: updated.bearer_token, refresh_token: updated.refresh_token });
   }
 
-  let use_bearer_token = maybe_new_access_tokens
-      .as_ref()
-      .map(|tokens| &tokens.bearer_token)
-      .unwrap_or_else(|| args.bearer_token);
+  let use_bearer_token = maybe_new_access_tokens.as_ref().map(|tokens| &tokens.bearer_token).unwrap_or_else(|| args.bearer_token);
 
   info!("Checking file input...");
-  
+
   let file_bytes = match args.file {
     FileBytesOrPath::Bytes(bytes) => {
       info!("File bytes provided");
       bytes
-    }
+    },
     FileBytesOrPath::Path(path) => {
       info!("File path provided");
       match file_read_bytes(&path) {
@@ -124,18 +112,14 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
         Err(err) => {
           error!("Error reading file bytes from path: {:?} - error: {:?}", path, err);
           return Err(WorldLabsClientError::CannotReadLocalFileForUpload(err).into());
-        }
+        },
       }
-    }
+    },
   };
 
   info!("Request #1 of 10: create run object ...");
 
-  let response = create_run_object(CreateRunObjectArgs {
-    cookies: args.cookies,
-    bearer_token: use_bearer_token,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = create_run_object(CreateRunObjectArgs { cookies: args.cookies, bearer_token: use_bearer_token, request_timeout: args.individual_request_timeout }).await?;
 
   let run_object_id = response.id;
   let run_object = response.run_object;
@@ -143,16 +127,11 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
   info!("Object id: {}", run_object_id.0);
 
   // TODO - multiple types.
-  let upload_mime_type= UploadMimeType::ImageJpeg;
+  let upload_mime_type = UploadMimeType::ImageJpeg;
 
   info!("Request #2 of 10: begin image attachment ...");
 
-  let response = create_upload_object(CreateUploadObjectArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    upload_mime_type,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = create_upload_object(CreateUploadObjectArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, upload_mime_type, request_timeout: args.individual_request_timeout }).await?;
 
   let upload_id = response.id;
 
@@ -160,13 +139,7 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
 
   info!("Request #3 of 10: begin image upload ...");
 
-  let response = begin_object_image_upload(BeginObjectImageUploadArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    upload_mime_type,
-    request_timeout: args.individual_request_timeout,
-    upload_id: &upload_id,
-  }).await?;
+  let response = begin_object_image_upload(BeginObjectImageUploadArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, upload_mime_type, request_timeout: args.individual_request_timeout, upload_id: &upload_id }).await?;
 
   let google_upload_url = response.upload_url;
 
@@ -174,21 +147,11 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
 
   info!("Google upload URL: {:?}", &google_upload_url);
 
-  let _response = google_upload_image(GoogleUploadImageArgs {
-    upload_url: &google_upload_url,
-    upload_mime_type,
-    file_bytes,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let _response = google_upload_image(GoogleUploadImageArgs { upload_url: &google_upload_url, upload_mime_type, file_bytes, request_timeout: args.individual_request_timeout }).await?;
 
   info!("Request #5 of 10: finalize object upload ...");
 
-  let response = finalize_object_image_upload(FinalizeObjectImageUploadArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    upload_id: &upload_id,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = finalize_object_image_upload(FinalizeObjectImageUploadArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, upload_id: &upload_id, request_timeout: args.individual_request_timeout }).await?;
 
   let image_url = response.object_url;
 
@@ -200,32 +163,13 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
   let pano_id = PanoObjectId::generate_new();
   let meta_world_id = MetaWorldObjectId::generate_new();
 
-  let response = update_run_object_with_upload(UpdateRunObjectWithUploadArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    payload_args: UpdateRunObjectWithUploadPayloadArgs {
-      run_id: &run_object_id,
-      run_created_at_timestamp: run_object.metadata.created_at,
-      image_upload_url: &image_url,
-      image_input_id: &image_input_id,
-      pano_id: &pano_id,
-      meta_world_id: &meta_world_id,
-    },
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = update_run_object_with_upload(UpdateRunObjectWithUploadArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, payload_args: UpdateRunObjectWithUploadPayloadArgs { run_id: &run_object_id, run_created_at_timestamp: run_object.metadata.created_at, image_upload_url: &image_url, image_input_id: &image_input_id, pano_id: &pano_id, meta_world_id: &meta_world_id }, request_timeout: args.individual_request_timeout }).await?;
 
   let run_first_updated_at = response.run_updated_timestamp;
 
   info!("Request #7 of 10: captioning with VLM ...");
 
-  let response = recaption_image(RecaptionImageArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    upload_id: &upload_id,
-    upload_mime_type,
-    run_id: &run_object_id,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = recaption_image(RecaptionImageArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, upload_id: &upload_id, upload_mime_type, run_id: &run_object_id, request_timeout: args.individual_request_timeout }).await?;
 
   info!("Title: {}", response.title);
   info!("Caption: {}", response.caption);
@@ -235,13 +179,7 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
 
   info!("Request #8 of 10: create world ...");
 
-  let response = create_world(CreateWorldArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    text_prompt: &text_prompt,
-    image_upload_url: &image_url,
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = create_world(CreateWorldArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, text_prompt: &text_prompt, image_upload_url: &image_url, request_timeout: args.individual_request_timeout }).await?;
 
   let world_id = response.world_id;
 
@@ -249,30 +187,9 @@ pub async fn upload_image_and_create_world_with_retry(args: UploadImageAndCreate
 
   info!("Request #9 of 10: patch run with new info (second time) ...");
 
-  let response = update_run_object_with_world(UpdateRunObjectWithWorldArgs {
-    cookies: &args.cookies,
-    bearer_token: &use_bearer_token,
-    payload_args: UpdateRunObjectWithWorldPayloadArgs {
-      run_id: &run_object_id,
-      run_created_at_timestamp: run_object.metadata.created_at,
-      first_patch_timestamp: run_first_updated_at,
-      image_upload_url: &image_url,
-      image_input_id: &image_input_id,
-      pano_id: &pano_id,
-      meta_world_id: &meta_world_id,
-      world_id: &world_id,
-      title: &title,
-      text_prompt: &text_prompt,
-    },
-    request_timeout: args.individual_request_timeout,
-  }).await?;
+  let response = update_run_object_with_world(UpdateRunObjectWithWorldArgs { cookies: &args.cookies, bearer_token: &use_bearer_token, payload_args: UpdateRunObjectWithWorldPayloadArgs { run_id: &run_object_id, run_created_at_timestamp: run_object.metadata.created_at, first_patch_timestamp: run_first_updated_at, image_upload_url: &image_url, image_input_id: &image_input_id, pano_id: &pano_id, meta_world_id: &meta_world_id, world_id: &world_id, title: &title, text_prompt: &text_prompt }, request_timeout: args.individual_request_timeout }).await?;
 
-  Ok(UploadImageAndCreateWorldWithRetryResponse {
-    run_id: run_object_id,
-    image_upload_url: image_url,
-    world_id,
-    maybe_new_access_tokens,
-  })
+  Ok(UploadImageAndCreateWorldWithRetryResponse { run_id: run_object_id, image_upload_url: image_url, world_id, maybe_new_access_tokens })
 }
 
 #[cfg(test)]
@@ -300,13 +217,7 @@ mod tests {
 
     println!("File bytes len: {}", file_bytes.len());
 
-    let results = upload_image_and_create_world_with_retry(UploadImageAndCreateWorldWithRetryArgs {
-      cookies: &cookies,
-      bearer_token: &bearer_token,
-      refresh_token: &refresh_token,
-      individual_request_timeout: None,
-      file: FileBytesOrPath::Bytes(file_bytes),
-    }).await.unwrap();
+    let results = upload_image_and_create_world_with_retry(UploadImageAndCreateWorldWithRetryArgs { cookies: &cookies, bearer_token: &bearer_token, refresh_token: &refresh_token, individual_request_timeout: None, file: FileBytesOrPath::Bytes(file_bytes) }).await.unwrap();
 
     println!("Object ID: {}", results.run_id.0);
     println!("World ID: {}", results.world_id.0);
@@ -315,7 +226,6 @@ mod tests {
 
     assert_eq!(1, 2);
   }
-
 
   #[tokio::test]
   #[ignore] // Client side tests only
@@ -332,13 +242,7 @@ mod tests {
 
     println!("File bytes len: {}", file_bytes.len());
 
-    let results = upload_image_and_create_world_with_retry(UploadImageAndCreateWorldWithRetryArgs {
-      cookies: &cookies,
-      bearer_token: &bearer_token,
-      refresh_token: &refresh_token,
-      individual_request_timeout: None,
-      file: FileBytesOrPath::Bytes(file_bytes),
-    }).await.unwrap();
+    let results = upload_image_and_create_world_with_retry(UploadImageAndCreateWorldWithRetryArgs { cookies: &cookies, bearer_token: &bearer_token, refresh_token: &refresh_token, individual_request_timeout: None, file: FileBytesOrPath::Bytes(file_bytes) }).await.unwrap();
 
     println!("Upload URL: {}", results.image_upload_url);
     println!("Object ID: {}", results.run_id.0);

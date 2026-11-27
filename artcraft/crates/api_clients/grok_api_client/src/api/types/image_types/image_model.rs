@@ -33,9 +33,9 @@ impl ImageModel {
   /// Wire representation — the exact string xAI expects in the `"model"` field.
   pub fn as_str(&self) -> &str {
     match self {
-      Self::GrokImagineImage        => "grok-imagine-image",
+      Self::GrokImagineImage => "grok-imagine-image",
       Self::GrokImagineImageQuality => "grok-imagine-image-quality",
-      Self::Custom(s)               => s.as_str(),
+      Self::Custom(s) => s.as_str(),
     }
   }
 }
@@ -78,10 +78,7 @@ mod tests {
 
   #[test]
   fn standard_and_quality_are_distinct_strings() {
-    assert_ne!(
-      ImageModel::GrokImagineImage.as_str(),
-      ImageModel::GrokImagineImageQuality.as_str()
-    );
+    assert_ne!(ImageModel::GrokImagineImage.as_str(), ImageModel::GrokImagineImageQuality.as_str());
   }
 
   #[test]

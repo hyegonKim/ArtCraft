@@ -32,11 +32,7 @@ pub(crate) fn v3_dot(a: [f32; 3], b: [f32; 3]) -> f32 {
 
 #[inline]
 pub(crate) fn v3_cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
+    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
 }
 
 #[inline]
@@ -58,11 +54,7 @@ pub(crate) fn v3_norm(a: [f32; 3]) -> [f32; 3] {
 #[inline]
 pub(crate) fn v3_lerp(a: [f32; 3], b: [f32; 3], t: f32) -> [f32; 3] {
     let k = t.clamp(0.0, 1.0);
-    [
-        a[0] + (b[0] - a[0]) * k,
-        a[1] + (b[1] - a[1]) * k,
-        a[2] + (b[2] - a[2]) * k,
-    ]
+    [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]
 }
 
 #[inline]
@@ -73,20 +65,12 @@ pub(crate) fn v3_reflect(incident: [f32; 3], normal: [f32; 3]) -> [f32; 3] {
 
 #[inline]
 pub(crate) fn srgb3_to_linear(c: [f32; 3]) -> [f32; 3] {
-    [
-        srgb_to_linear(c[0].clamp(0.0, 1.0)),
-        srgb_to_linear(c[1].clamp(0.0, 1.0)),
-        srgb_to_linear(c[2].clamp(0.0, 1.0)),
-    ]
+    [srgb_to_linear(c[0].clamp(0.0, 1.0)), srgb_to_linear(c[1].clamp(0.0, 1.0)), srgb_to_linear(c[2].clamp(0.0, 1.0))]
 }
 
 #[inline]
 pub(crate) fn linear3_to_srgb(c: [f32; 3]) -> [f32; 3] {
-    [
-        linear_to_srgb(c[0].clamp(0.0, 1.0)),
-        linear_to_srgb(c[1].clamp(0.0, 1.0)),
-        linear_to_srgb(c[2].clamp(0.0, 1.0)),
-    ]
+    [linear_to_srgb(c[0].clamp(0.0, 1.0)), linear_to_srgb(c[1].clamp(0.0, 1.0)), linear_to_srgb(c[2].clamp(0.0, 1.0))]
 }
 
 /// Soft ACES-inspired filmic highlight roll-off in linear RGB `[0, inf) -> [0, 1]`.
@@ -132,11 +116,7 @@ impl Mat3 {
 
     #[inline]
     pub fn mul_vec(&self, v: [f32; 3]) -> [f32; 3] {
-        [
-            v3_dot(self.rows[0], v),
-            v3_dot(self.rows[1], v),
-            v3_dot(self.rows[2], v),
-        ]
+        [v3_dot(self.rows[0], v), v3_dot(self.rows[1], v), v3_dot(self.rows[2], v)]
     }
 
     #[inline]
@@ -181,11 +161,7 @@ pub fn g_smith(ndotv: f32, ndotl: f32, roughness: f32) -> f32 {
 #[inline]
 pub fn f_schlick(cos_theta: f32, f0: [f32; 3]) -> [f32; 3] {
     let m = (1.0 - cos_theta.clamp(0.0, 1.0)).powi(5);
-    [
-        f0[0] + (1.0 - f0[0]) * m,
-        f0[1] + (1.0 - f0[1]) * m,
-        f0[2] + (1.0 - f0[2]) * m,
-    ]
+    [f0[0] + (1.0 - f0[0]) * m, f0[1] + (1.0 - f0[1]) * m, f0[2] + (1.0 - f0[2]) * m]
 }
 
 /// Roughness-aware Schlick Fresnel for split-sum ambient IBL reflections.
@@ -193,11 +169,7 @@ pub fn f_schlick(cos_theta: f32, f0: [f32; 3]) -> [f32; 3] {
 pub(crate) fn f_schlick_roughness(cos_theta: f32, f0: [f32; 3], roughness: f32) -> [f32; 3] {
     let m = (1.0 - cos_theta.clamp(0.0, 1.0)).powi(5);
     let gloss = 1.0 - roughness.clamp(0.04, 1.0);
-    [
-        f0[0] + (gloss.max(f0[0]) - f0[0]) * m,
-        f0[1] + (gloss.max(f0[1]) - f0[1]) * m,
-        f0[2] + (gloss.max(f0[2]) - f0[2]) * m,
-    ]
+    [f0[0] + (gloss.max(f0[0]) - f0[0]) * m, f0[1] + (gloss.max(f0[1]) - f0[1]) * m, f0[2] + (gloss.max(f0[2]) - f0[2]) * m]
 }
 
 /// Surface material point properties evaluated in linear RGB.
@@ -211,12 +183,7 @@ pub(crate) struct PbrSurfacePoint {
 }
 
 /// Evaluates direct Cook-Torrance GGX radiance for a directional light `(light_dir, light_radiance)`.
-pub(crate) fn shade_ggx_direct(
-    surf: &PbrSurfacePoint,
-    view_dir: [f32; 3],
-    light_dir: [f32; 3],
-    light_radiance: [f32; 3],
-) -> [f32; 3] {
+pub(crate) fn shade_ggx_direct(surf: &PbrSurfacePoint, view_dir: [f32; 3], light_dir: [f32; 3], light_radiance: [f32; 3]) -> [f32; 3] {
     let n = surf.normal;
     let v = view_dir;
     let l = light_dir;

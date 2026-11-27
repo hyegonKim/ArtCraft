@@ -1,8 +1,6 @@
 use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestCostCalculator;
 
-use crate::generate::generate_video::providers::fal::veo_3p1_lite::request::{
-  FalVeo3p1LiteMode, FalVeo3p1LiteRequestState,
-};
+use crate::generate::generate_video::providers::fal::veo_3p1_lite::request::{FalVeo3p1LiteMode, FalVeo3p1LiteRequestState};
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 
 #[derive(Clone, Debug)]
@@ -24,15 +22,7 @@ impl FalVeo3p1LiteCostState {
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(self.cost_in_usd_cents),
-      cost_in_usd_cents: Some(self.cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(self.cost_in_usd_cents), cost_in_usd_cents: Some(self.cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -130,35 +120,16 @@ mod tests {
 
   #[test]
   fn audio_costs_more_than_no_audio() {
-    assert!(
-      cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(false), 0)
-        < cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(true), 0)
-    );
+    assert!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(false), 0) < cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(true), 0));
   }
 
   #[test]
   fn ten_eighty_costs_more_than_seven_twenty() {
-    assert!(
-      cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(true), 0)
-        < cost_cents(Some(8), Some(RouterResolution::TenEightyP), Some(true), 0)
-    );
+    assert!(cost_cents(Some(8), Some(RouterResolution::SevenTwentyP), Some(true), 0) < cost_cents(Some(8), Some(RouterResolution::TenEightyP), Some(true), 0));
   }
 
-  fn cost_cents(
-    duration_seconds: Option<u16>,
-    resolution: Option<RouterResolution>,
-    generate_audio: Option<bool>,
-    frames: u8,
-  ) -> u64 {
-    let mut b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Veo3p1Lite,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      duration_seconds,
-      resolution,
-      generate_audio,
-      ..Default::default()
-    };
+  fn cost_cents(duration_seconds: Option<u16>, resolution: Option<RouterResolution>, generate_audio: Option<bool>, frames: u8) -> u64 {
+    let mut b = GenerateVideoRequestBuilder { model: RouterVideoModel::Veo3p1Lite, provider: RouterProvider::Fal, prompt: Some("test".to_string()), duration_seconds, resolution, generate_audio, ..Default::default() };
     if frames >= 1 {
       b.start_frame = Some(ImageRef::Url("https://example.com/a.png".to_string()));
     }
@@ -166,9 +137,6 @@ mod tests {
       b.end_frame = Some(ImageRef::Url("https://example.com/b.png".to_string()));
     }
     let state = build_fal_veo_3p1_lite_state(b).expect("build state");
-    FalVeo3p1LiteCostState::from_request(&state)
-      .estimate_cost()
-      .cost_in_usd_cents
-      .expect("cost")
+    FalVeo3p1LiteCostState::from_request(&state).estimate_cost().cost_in_usd_cents.expect("cost")
   }
 }

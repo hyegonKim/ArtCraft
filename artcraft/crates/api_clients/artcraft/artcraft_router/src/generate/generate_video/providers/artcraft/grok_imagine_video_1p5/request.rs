@@ -18,13 +18,8 @@ impl ArtcraftGrokImagineVideo1p5RequestState {
     // allow image-less states so the cost path can quote a request the user
     // is still composing. Bouncing here costs nothing and avoids an upstream
     // call we know will fail.
-    if self.request.start_frame_image_media_token.is_none()
-      && self.request.reference_image_media_tokens.as_ref().map_or(true, |v| v.is_empty())
-    {
-      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-        field: "image_inputs",
-        value: "text-to-video isn't supported by grok-imagine-video-1.5; supply a start_frame or at least one reference image".to_string(),
-      }));
+    if self.request.start_frame_image_media_token.is_none() && self.request.reference_image_media_tokens.as_ref().map_or(true, |v| v.is_empty()) {
+      return Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_inputs", value: "text-to-video isn't supported by grok-imagine-video-1.5; supply a start_frame or at least one reference image".to_string() }));
     }
 
     send_artcraft_omni_video_request(&self.request, client).await
@@ -44,42 +39,17 @@ mod tests {
   /// send-time guard is the router's last line of defense.
   #[tokio::test]
   async fn send_rejects_image_less_request_before_any_network_call() {
-    let state = ArtcraftGrokImagineVideo1p5RequestState {
-      request: OmniGenVideoCostAndGenerateRequest {
-        idempotency_token: Some("a1b2c3d4-e5f6-7890-abcd-ef1234567890".to_string()),
-        model: Some(CommonVideoModelEnum::GrokImagineVideo1p5),
-        prompt: Some("a corgi running through a field".to_string()),
-        negative_prompt: None,
-        start_frame_image_media_token: None,
-        end_frame_image_media_token: None,
-        reference_image_media_tokens: None,
-        reference_video_media_tokens: None,
-        reference_audio_media_tokens: None,
-        reference_character_tokens: None,
-        resolution: None,
-        aspect_ratio: None,
-        bitrate: None,
-        maybe_output_format: None,
-        quality: None,
-        duration_seconds: Some(5),
-        video_batch_count: Some(1),
-        generate_audio: None,
-        estimate_only: None,
-      },
-    };
+    let state = ArtcraftGrokImagineVideo1p5RequestState { request: OmniGenVideoCostAndGenerateRequest { idempotency_token: Some("a1b2c3d4-e5f6-7890-abcd-ef1234567890".to_string()), model: Some(CommonVideoModelEnum::GrokImagineVideo1p5), prompt: Some("a corgi running through a field".to_string()), negative_prompt: None, start_frame_image_media_token: None, end_frame_image_media_token: None, reference_image_media_tokens: None, reference_video_media_tokens: None, reference_audio_media_tokens: None, reference_character_tokens: None, resolution: None, aspect_ratio: None, bitrate: None, maybe_output_format: None, quality: None, duration_seconds: Some(5), video_batch_count: Some(1), generate_audio: None, estimate_only: None } };
 
     // The guard fires before the client is used, so an unroutable localhost
     // client with empty credentials proves no network call happens.
-    let client = RouterArtcraftClient::new(
-      ApiHost::Localhost { port: 1 },
-      StorytellerCredentialSet::empty(),
-    );
+    let client = RouterArtcraftClient::new(ApiHost::Localhost { port: 1 }, StorytellerCredentialSet::empty());
 
     let err = state.send(&client).await.expect_err("image-less send should be rejected");
     match err {
       ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field, .. }) => {
         assert_eq!(field, "image_inputs");
-      }
+      },
       other => panic!("expected Client(ModelDoesNotSupportOption), got {:?}", other),
     }
   }

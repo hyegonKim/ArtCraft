@@ -81,38 +81,25 @@ pub struct FailedItemData {
 impl SerializeMarker for GetTaskQueueCommandResponse {}
 
 #[tauri::command]
-pub async fn get_task_queue_command(
-  app: AppHandle,
-  app_env_configs: State<'_, AppEnvConfigs>,
-  task_database: State<'_, TaskDatabase>,
-) -> ResponseOrErrorMessage<GetTaskQueueCommandResponse> {
-
+pub async fn get_task_queue_command(app: AppHandle, app_env_configs: State<'_, AppEnvConfigs>, task_database: State<'_, TaskDatabase>) -> ResponseOrErrorMessage<GetTaskQueueCommandResponse> {
   // NB: This is debug because it spams the logs.
   debug!("get_task_queue_command called");
 
-  let result = handle_request(
-    &task_database,
-  ).await;
+  let result = handle_request(&task_database).await;
 
   let tasks = match result {
     Ok(items) => items,
     Err(err) => {
       error!("get_task_queue_command failed: {:?}", err);
-      return Err("get_task_queue_command failed".into())
-    }
+      return Err("get_task_queue_command failed".into());
+    },
   };
 
-  Ok(GetTaskQueueCommandResponse{
-    tasks,
-  }.into())
+  Ok(GetTaskQueueCommandResponse { tasks }.into())
 }
 
-pub async fn handle_request(
-  task_database: &TaskDatabase,
-) -> AnyhowResult<Vec<TaskQueueItem>> {
-
-  let tasks = list_tasks_for_frontend(task_database.get_connection())
-      .await?;
+pub async fn handle_request(task_database: &TaskDatabase) -> AnyhowResult<Vec<TaskQueueItem>> {
+  let tasks = list_tasks_for_frontend(task_database.get_connection()).await?;
 
   let mut transformed_tasks = Vec::with_capacity(tasks.tasks.len());
 
@@ -121,8 +108,7 @@ pub async fn handle_request(
     let mut failure_reason = None;
 
     if task.status == TaskStatus::CompleteSuccess {
-      let token_and_url = task.on_complete_primary_media_file_token
-          .zip(task.on_complete_primary_media_file_cdn_url);
+      let token_and_url = task.on_complete_primary_media_file_token.zip(task.on_complete_primary_media_file_cdn_url);
 
       if let Some((primary_media_file_token, media_file_url)) = token_and_url {
         completed_item = Some(CompletedItemData {
@@ -142,31 +128,13 @@ pub async fn handle_request(
     } else {
       // If either failure field is present, fill out the failure report.
       if let Some(failure_message) = task.on_failure_message.as_deref() {
-        failure_reason = Some(FailedItemData {
-          failure_type: task.on_failure_type.unwrap_or(TaskFailureType::Unknown),
-          failure_message: Some(failure_message.to_string()),
-        });
+        failure_reason = Some(FailedItemData { failure_type: task.on_failure_type.unwrap_or(TaskFailureType::Unknown), failure_message: Some(failure_message.to_string()) });
       } else if let Some(failure_type) = task.on_failure_type {
-        failure_reason = Some(FailedItemData {
-          failure_type,
-          failure_message: None,
-        });
+        failure_reason = Some(FailedItemData { failure_type, failure_message: None });
       }
     }
 
-    transformed_tasks.push(TaskQueueItem {
-      id: task.id,
-      task_status: task.status,
-      task_type: task.task_type,
-      model_type: task.model_type,
-      provider: task.provider,
-      provider_job_id: task.provider_job_id,
-      created_at: task.created_at,
-      updated_at: task.updated_at,
-      completed_at: task.completed_at,
-      completed_item,
-      failure_reason,
-    })
+    transformed_tasks.push(TaskQueueItem { id: task.id, task_status: task.status, task_type: task.task_type, model_type: task.model_type, provider: task.provider, provider_job_id: task.provider_job_id, created_at: task.created_at, updated_at: task.updated_at, completed_at: task.completed_at, completed_item, failure_reason })
   }
 
   Ok(transformed_tasks)

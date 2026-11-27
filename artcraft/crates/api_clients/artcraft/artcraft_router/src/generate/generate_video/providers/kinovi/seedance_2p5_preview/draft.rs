@@ -1,16 +1,10 @@
-use kinovi_web_client::generate::video::generate_seedance_2p5_preview::{
-  GenerateSeedance2p5PreviewRequest, KinoviSeedance2p5PreviewAspectRatio,
-  KinoviSeedance2p5PreviewOutputResolution,
-};
+use kinovi_web_client::generate::video::generate_seedance_2p5_preview::{GenerateSeedance2p5PreviewRequest, KinoviSeedance2p5PreviewAspectRatio, KinoviSeedance2p5PreviewOutputResolution};
 
 use crate::api::audio_list_ref::AudioListRef;
 use crate::api::image_list_ref::ImageListRef;
 use crate::api::video_list_ref::VideoListRef;
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
-use crate::generate::generate_video::providers::kinovi::resolve::{
-  audio_list_ref_into_urls_or_tokens, image_list_ref_into_urls_or_tokens,
-  resolve_and_upload_list, video_list_ref_into_urls_or_tokens,
-};
+use crate::generate::generate_video::providers::kinovi::resolve::{audio_list_ref_into_urls_or_tokens, image_list_ref_into_urls_or_tokens, resolve_and_upload_list, video_list_ref_into_urls_or_tokens};
 use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::request::KinoviSeedance2p5PreviewRequestState;
 use crate::generate::generate_video::video_generation_draft_context::VideoGenerationDraftContext;
 
@@ -34,10 +28,7 @@ pub struct KinoviSeedance2p5PreviewRemainingItems {
 }
 
 impl KinoviSeedance2p5PreviewDraftState {
-  pub async fn to_request(
-    &mut self,
-    draft_context: &VideoGenerationDraftContext<'_>,
-  ) -> Result<KinoviSeedance2p5PreviewRequestState, ArtcraftRouterError> {
+  pub async fn to_request(&mut self, draft_context: &VideoGenerationDraftContext<'_>) -> Result<KinoviSeedance2p5PreviewRequestState, ArtcraftRouterError> {
     let client = draft_context.get_kinovi_web_client_ref()?;
     let session = &client.session;
 
@@ -49,29 +40,14 @@ impl KinoviSeedance2p5PreviewDraftState {
       let map = draft_context.media_file_to_artcraft_url_map;
       let predownloaded = draft_context.predownloaded_media_paths;
 
-      reference_image_urls = resolve_and_upload_list(
-        session, remaining.reference_images.map(image_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_image_urls = resolve_and_upload_list(session, remaining.reference_images.map(image_list_ref_into_urls_or_tokens), map, predownloaded).await?;
 
-      reference_video_urls = resolve_and_upload_list(
-        session, remaining.reference_videos.map(video_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_video_urls = resolve_and_upload_list(session, remaining.reference_videos.map(video_list_ref_into_urls_or_tokens), map, predownloaded).await?;
 
-      reference_audio_urls = resolve_and_upload_list(
-        session, remaining.reference_audio.map(audio_list_ref_into_urls_or_tokens), map, predownloaded,
-      ).await?;
+      reference_audio_urls = resolve_and_upload_list(session, remaining.reference_audio.map(audio_list_ref_into_urls_or_tokens), map, predownloaded).await?;
     }
 
-    let request = GenerateSeedance2p5PreviewRequest {
-      prompt: self.prompt.clone(),
-      aspect_ratio: Some(self.aspect_ratio),
-      output_resolution: self.resolution,
-      duration_seconds: self.duration_seconds,
-      reference_image_urls,
-      reference_video_urls,
-      reference_audio_urls,
-      use_face_blur_hack: None,
-    };
+    let request = GenerateSeedance2p5PreviewRequest { prompt: self.prompt.clone(), aspect_ratio: Some(self.aspect_ratio), output_resolution: self.resolution, duration_seconds: self.duration_seconds, reference_image_urls, reference_video_urls, reference_audio_urls, use_face_blur_hack: None };
 
     Ok(KinoviSeedance2p5PreviewRequestState { request })
   }

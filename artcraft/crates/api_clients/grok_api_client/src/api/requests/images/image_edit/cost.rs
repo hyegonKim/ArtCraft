@@ -30,10 +30,10 @@ impl GrokRequestCostCalculator for ImageEditRequest {
 /// Input rate in mills per source image, by model.
 fn input_mills_per_image(model: &ImageModel) -> UsdMills {
   match model {
-    ImageModel::GrokImagineImage        => 2,
+    ImageModel::GrokImagineImage => 2,
     ImageModel::GrokImagineImageQuality => 10,
     // Custom: conservatively assume the more expensive `-quality` tier.
-    ImageModel::Custom(_)               => 10,
+    ImageModel::Custom(_) => 10,
   }
 }
 
@@ -43,24 +43,8 @@ mod tests {
   use crate::api::requests::images::image_edit::image_edit::ImageSource;
   use crate::api::types::image_types::image_aspect_ratio::ImageAspectRatio;
 
-  fn make_request(
-    model: Option<ImageModel>,
-    resolution: Option<ImageResolution>,
-    number_images: Option<u32>,
-    source_count: usize,
-  ) -> ImageEditRequest {
-    ImageEditRequest {
-      prompt: "test".to_string(),
-      source_images: (0..source_count)
-        .map(|i| ImageSource::Url(format!("https://example.com/{i}.png")))
-        .collect(),
-      model,
-      number_images,
-      aspect_ratio: None,
-      resolution,
-      response_format: None,
-      user: None,
-    }
+  fn make_request(model: Option<ImageModel>, resolution: Option<ImageResolution>, number_images: Option<u32>, source_count: usize) -> ImageEditRequest {
+    ImageEditRequest { prompt: "test".to_string(), source_images: (0..source_count).map(|i| ImageSource::Url(format!("https://example.com/{i}.png"))).collect(), model, number_images, aspect_ratio: None, resolution, response_format: None, user: None }
   }
 
   // ── Per-rate components ──
@@ -151,10 +135,8 @@ mod tests {
 
     #[test]
     fn batch_scales_only_output_not_input() {
-      let single = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::TwoK), Some(1), 1)
-        .calculate_cost_in_mills(); // 10 + 70 = 80
-      let quad = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::TwoK), Some(4), 1)
-        .calculate_cost_in_mills(); // 10 + 70 × 4 = 290
+      let single = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::TwoK), Some(1), 1).calculate_cost_in_mills(); // 10 + 70 = 80
+      let quad = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::TwoK), Some(4), 1).calculate_cost_in_mills(); // 10 + 70 × 4 = 290
       assert_eq!(single, 80);
       assert_eq!(quad, 290);
       // Input doesn't scale with n.
@@ -193,12 +175,7 @@ mod tests {
     fn cost_is_independent_of_aspect_ratio() {
       let mut base = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 1);
       let base_cost = base.calculate_cost_in_mills();
-      for ar in [
-        ImageAspectRatio::Square,
-        ImageAspectRatio::Landscape16x9,
-        ImageAspectRatio::Portrait9x16,
-        ImageAspectRatio::Auto,
-      ] {
+      for ar in [ImageAspectRatio::Square, ImageAspectRatio::Landscape16x9, ImageAspectRatio::Portrait9x16, ImageAspectRatio::Auto] {
         base.aspect_ratio = Some(ar);
         assert_eq!(base.calculate_cost_in_mills(), base_cost, "{ar:?}");
       }
@@ -207,10 +184,7 @@ mod tests {
     #[test]
     fn cost_is_independent_of_source_url_content() {
       let mut req = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 0);
-      req.source_images = vec![
-        ImageSource::Url("https://example.com/a.png".to_string()),
-        ImageSource::FileId("file_abc".to_string()),
-      ];
+      req.source_images = vec![ImageSource::Url("https://example.com/a.png".to_string()), ImageSource::FileId("file_abc".to_string())];
       // 10 × 2 + 50 = 70 mills
       assert_eq!(req.calculate_cost_in_mills(), 70);
     }
@@ -245,12 +219,15 @@ mod tests {
     ];
 
     #[derive(Copy, Clone, Debug)]
-    enum ImageModelKind { Standard, Quality }
+    enum ImageModelKind {
+      Standard,
+      Quality,
+    }
 
     fn to_model(kind: ImageModelKind) -> ImageModel {
       match kind {
         ImageModelKind::Standard => ImageModel::GrokImagineImage,
-        ImageModelKind::Quality  => ImageModel::GrokImagineImageQuality,
+        ImageModelKind::Quality => ImageModel::GrokImagineImageQuality,
       }
     }
 
@@ -258,8 +235,7 @@ mod tests {
     fn all_matrix_cases() {
       for &(kind, res, n, sources, expected) in CASES {
         let req = make_request(Some(to_model(kind)), Some(res), Some(n), sources);
-        assert_eq!(req.calculate_cost_in_mills(), expected,
-          "model={:?} res={:?} n={} sources={}", kind, res, n, sources);
+        assert_eq!(req.calculate_cost_in_mills(), expected, "model={:?} res={:?} n={} sources={}", kind, res, n, sources);
       }
     }
   }
@@ -271,19 +247,15 @@ mod tests {
 
     #[test]
     fn more_sources_cost_more() {
-      let one = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 1)
-        .calculate_cost_in_mills();
-      let three = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 3)
-        .calculate_cost_in_mills();
+      let one = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 1).calculate_cost_in_mills();
+      let three = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 3).calculate_cost_in_mills();
       assert!(one < three);
     }
 
     #[test]
     fn more_outputs_cost_more() {
-      let one = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 1)
-        .calculate_cost_in_mills();
-      let four = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(4), 1)
-        .calculate_cost_in_mills();
+      let one = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(1), 1).calculate_cost_in_mills();
+      let four = make_request(Some(ImageModel::GrokImagineImageQuality), Some(ImageResolution::OneK), Some(4), 1).calculate_cost_in_mills();
       assert!(one < four);
     }
 

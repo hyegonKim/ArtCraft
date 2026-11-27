@@ -11,7 +11,7 @@ use crate::path_to_string::path_to_string;
 /// This is not efficient.
 pub fn filename_concat<P: AsRef<Path>, Q: AsRef<Path>>(part_1: P, part_2: Q) -> String {
   let mut base = path_to_string(part_1);
-  let suffix= path_to_string(part_2);
+  let suffix = path_to_string(part_2);
   base.push_str(&suffix);
   base
 }
@@ -27,7 +27,7 @@ mod tests {
   use crate::filename_concat::filename_concat;
 
   // Layout: Base, Suffix, Expected Result
-  const TEST_CASES : [(&'static str, &'static str, &'static str); 11] = [
+  const TEST_CASES: [(&'static str, &'static str, &'static str); 11] = [
     // Absolute
     ("/", "foo", "/foo"),
     ("/usr/bin", "baz", "/usr/binbaz"),
@@ -59,8 +59,7 @@ mod tests {
       let test_part_1 = PathBuf::from(part_1);
       let test_part_2 = PathBuf::from(part_2);
 
-      assert_eq!(filename_concat(test_part_1.as_path(), test_part_2.as_path()),
-                 expected.to_string());
+      assert_eq!(filename_concat(test_part_1.as_path(), test_part_2.as_path()), expected.to_string());
     }
   }
 

@@ -73,12 +73,7 @@ pub(crate) fn validate_rotate(p: &Value) -> Result<(), String> {
 }
 
 /// Shared parameter validator for Extrude & Bevel (Classic), Revolve (Classic), and Rotate (Classic).
-pub(crate) fn validate_classic(
-    id: &str,
-    p: &Value,
-    ranges: &[(&str, f64, f64, bool)],
-    flags: &[&str],
-) -> Result<(), String> {
+pub(crate) fn validate_classic(id: &str, p: &Value, ranges: &[(&str, f64, f64, bool)], flags: &[&str]) -> Result<(), String> {
     let Some(obj) = p.as_object() else {
         let got = p.to_string();
         return Err(format!("the params must be an object, not {got}"));
@@ -127,9 +122,7 @@ pub(crate) fn validate_classic(
         }
     }
     if let Some(val) = obj.get("surface") {
-        let ok = val.as_str().is_some_and(|s| {
-            if rotate { ROTATE_SURFACES.contains(&s) } else { ClassicSurface::parse(s).is_some() }
-        });
+        let ok = val.as_str().is_some_and(|s| if rotate { ROTATE_SURFACES.contains(&s) } else { ClassicSurface::parse(s).is_some() });
         if !ok {
             let allowed = if rotate { ROTATE_SURFACES.join(", ") } else { "wireframe, none, diffuse, plastic".to_string() };
             return Err(format!("`surface` must be one of {}", allowed));
@@ -230,14 +223,7 @@ fn classic_seam(paint: Paint, width: f64) -> StrokeLayer {
 }
 
 /// Draws `facets` as one classic 3D surface group (`Wireframe`, `NoShading`, `Diffuse`, or `Plastic`).
-pub(crate) fn surface(
-    n: &Node,
-    facets: Vec<Facet>,
-    paint: &Paint,
-    opacity: f32,
-    blend: BlendMode,
-    p: &Value,
-) -> Node {
+pub(crate) fn surface(n: &Node, facets: Vec<Facet>, paint: &Paint, opacity: f32, blend: BlendMode, p: &Value) -> Node {
     let shading = classic_shading(p);
     if shading.surface == ClassicSurface::Wireframe {
         let stroke_paint = if matches!(paint, Paint::None) { Paint::solid(Color::BLACK) } else { paint.clone() };
@@ -255,11 +241,7 @@ pub(crate) fn surface(
         group.blend = blend;
         return group;
     }
-    let (opaque, mask) = if shading.surface == ClassicSurface::NoShading {
-        (paint.clone(), None)
-    } else {
-        crate::lighting::opaque_paint(paint)
-    };
+    let (opaque, mask) = if shading.surface == ClassicSurface::NoShading { (paint.clone(), None) } else { crate::lighting::opaque_paint(paint) };
     let lights = classic_lights(p);
     let target = shade_target(p);
     let children = facets

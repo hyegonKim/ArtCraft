@@ -129,7 +129,6 @@ pub enum CommonModelType {
   //FluxPro1Infill,
 
   // Video models
-  
   /// Generic grok video model without a version
   /// NB: This was for the consumer web login API
   #[deprecated(note = "use GrokImagineVideo instead")]
@@ -594,7 +593,6 @@ impl CommonModelType {
       Self::Midjourney7,
       Self::Midjourney7Niji,
       Self::Midjourney8,
-
       // Video models
       Self::GrokVideo,
       Self::GrokImagineVideo,
@@ -641,18 +639,15 @@ impl CommonModelType {
       Self::Veo3p1Lite,
       Self::ViduQ3,
       Self::ViduQ3Turbo,
-
       // Audio models
       Self::SunoMusic,
       Self::SunoRemix,
       Self::SunoSounds,
       Self::SunoSample,
       Self::SeedAudio1p0,
-
       Self::PreviewModel,
       Self::PreviewModelFast,
       Self::SwitchX,
-
       // 3D Object generation models
       Self::Hunyuan3d2_0,
       Self::Hunyuan3d2_1,
@@ -664,7 +659,6 @@ impl CommonModelType {
       Self::Tripo3dH3_1,
       Self::MeshyV6,
       Self::Rodin2_5Fast,
-
       // Splat generation models (World Labs)
       Self::Marble0p1Mini,
       Self::Marble0p1Plus,
@@ -1344,12 +1338,10 @@ mod tests {
 
       for variant in CommonModelType::all_variants() {
         let to_str_value = variant.to_str();
-        assert!(valid_pattern.is_match(to_str_value),
-          "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
+        assert!(valid_pattern.is_match(to_str_value), "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
 
         let json_value = serde_json::to_string(&variant).unwrap().replace('"', "");
-        assert!(valid_pattern.is_match(&json_value),
-          "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
+        assert!(valid_pattern.is_match(&json_value), "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
       }
     }
 
@@ -1358,8 +1350,7 @@ mod tests {
       for variant in CommonModelType::all_variants() {
         let class = variant.get_model_class();
         // Verify the class is a known value (not panicking is the main test)
-        assert!(CommonModelClass::all_variants().contains(&class),
-          "get_model_class() for {:?} returned {:?} which is not a known CommonModelClass variant", variant, class);
+        assert!(CommonModelClass::all_variants().contains(&class), "get_model_class() for {:?} returned {:?} which is not a known CommonModelClass variant", variant, class);
       }
     }
 

@@ -47,8 +47,6 @@ pub struct Flux1DevEditImageOutput {
   pub images: Vec<Flux1DevEditImageFile>,
 }
 
-pub fn flux_1_dev_edit_image(
-  params: Flux1DevEditImageInput,
-) -> FalRequest<Flux1DevEditImageInput, Flux1DevEditImageOutput> {
+pub fn flux_1_dev_edit_image(params: Flux1DevEditImageInput) -> FalRequest<Flux1DevEditImageInput, Flux1DevEditImageOutput> {
   FalRequest::new("fal-ai/flux/dev/image-to-image", params)
 }

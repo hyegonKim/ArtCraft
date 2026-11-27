@@ -18,17 +18,14 @@ impl LoadingAnim {
 /// The verification token comes from the index HTML.
 pub fn convert_verification_token_to_loading_anim(verification_token: &VerificationToken) -> Result<LoadingAnim, GrokClientError> {
   // array: list = list(b64decode(verification_token)) -- note: we don't need to convert to a list
-  let decoded_bytes = BASE64_STANDARD.decode(&verification_token.0)
-      .map_err(|err| {
-        error!("Failed to decode verification token: {} ; err = {:?}", verification_token.0, err);
-        GrokClientError::FailedToDecodeVerificationToken(err)
-      })?;
+  let decoded_bytes = BASE64_STANDARD.decode(&verification_token.0).map_err(|err| {
+    error!("Failed to decode verification token: {} ; err = {:?}", verification_token.0, err);
+    GrokClientError::FailedToDecodeVerificationToken(err)
+  })?;
 
   // anim: str = "loading-x-anim-" + str(array[5] % 4)
-  let byte = decoded_bytes.get(5)
-      .map(|byte| *byte)
-      .ok_or(GrokClientError::InvalidVerificationTokenBytes)?;
-  
+  let byte = decoded_bytes.get(5).map(|byte| *byte).ok_or(GrokClientError::InvalidVerificationTokenBytes)?;
+
   debug!("verification token byte: {}", byte);
 
   // note, we'll put the string construction in the `to_id()` method since we need the raw integer again

@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::extend::veo_3p1_fast::raw_request::{
-  Veo3p1FastExtendVideoInput, Veo3p1FastExtendVideoOutput,
-};
+use crate::requests::api::video::extend::veo_3p1_fast::raw_request::{Veo3p1FastExtendVideoInput, Veo3p1FastExtendVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -138,18 +136,7 @@ impl FalEndpoint for Veo3p1FastExtendVideoRequest {
   type RawResponse = Veo3p1FastExtendVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      video_url: self.video_url.clone(),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-      negative_prompt: self.negative_prompt.clone(),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      seed: self.seed,
-      auto_fix: self.auto_fix,
-      safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), video_url: self.video_url.clone(), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), duration: self.duration.map(|d| d.to_str().to_string()), negative_prompt: self.negative_prompt.clone(), resolution: self.resolution.map(|r| r.to_str().to_string()), generate_audio: self.generate_audio, seed: self.seed, auto_fix: self.auto_fix, safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()) })
   }
 }
 
@@ -170,18 +157,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1FastExtendVideoRequest {
-      prompt: "the scene continues naturally, keeping the same motion and style".to_string(),
-      video_url: ANGRY_SHIBA_VIDEO_URL.to_string(),
-      aspect_ratio: None,
-      duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds),
-      resolution: Some(Veo3p1FastExtendVideoResolution::SevenTwentyP),
-      negative_prompt: None,
-      generate_audio: Some(false),
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FastExtendVideoRequest { prompt: "the scene continues naturally, keeping the same motion and style".to_string(), video_url: ANGRY_SHIBA_VIDEO_URL.to_string(), aspect_ratio: None, duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds), resolution: Some(Veo3p1FastExtendVideoResolution::SevenTwentyP), negative_prompt: None, generate_audio: Some(false), seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -195,18 +171,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1FastExtendVideoRequest {
-      prompt: "the camera pulls back to reveal more of the landscape".to_string(),
-      video_url: ANGRY_SHIBA_VIDEO_URL.to_string(),
-      aspect_ratio: None,
-      duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds),
-      resolution: Some(Veo3p1FastExtendVideoResolution::SevenTwentyP),
-      negative_prompt: None,
-      generate_audio: Some(false),
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FastExtendVideoRequest { prompt: "the camera pulls back to reveal more of the landscape".to_string(), video_url: ANGRY_SHIBA_VIDEO_URL.to_string(), aspect_ratio: None, duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds), resolution: Some(Veo3p1FastExtendVideoResolution::SevenTwentyP), negative_prompt: None, generate_audio: Some(false), seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -218,18 +183,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo3p1FastExtendVideoRequest {
-      prompt: "p".to_string(),
-      video_url: "https://example.com/in.mp4".to_string(),
-      aspect_ratio: Some(Veo3p1FastExtendVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds),
-      resolution: Some(Veo3p1FastExtendVideoResolution::TenEightyP),
-      negative_prompt: Some("nope".to_string()),
-      generate_audio: Some(true),
-      seed: Some(3),
-      auto_fix: Some(false),
-      safety_tolerance: Some(Veo3p1FastExtendVideoSafetyTolerance::Level4),
-    };
+    let request = Veo3p1FastExtendVideoRequest { prompt: "p".to_string(), video_url: "https://example.com/in.mp4".to_string(), aspect_ratio: Some(Veo3p1FastExtendVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1FastExtendVideoDuration::SevenSeconds), resolution: Some(Veo3p1FastExtendVideoResolution::TenEightyP), negative_prompt: Some("nope".to_string()), generate_audio: Some(true), seed: Some(3), auto_fix: Some(false), safety_tolerance: Some(Veo3p1FastExtendVideoSafetyTolerance::Level4) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.video_url, "https://example.com/in.mp4");
     assert_eq!(raw.aspect_ratio.as_deref(), Some("16:9"));
@@ -244,33 +198,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo3p1FastExtendVideoRequest {
-      prompt: "p".to_string(),
-      video_url: "https://example.com/in.mp4".to_string(),
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      negative_prompt: None,
-      generate_audio: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1FastExtendVideoRequest { prompt: "p".to_string(), video_url: "https://example.com/in.mp4".to_string(), aspect_ratio: None, duration: None, resolution: None, negative_prompt: None, generate_audio: None, seed: None, auto_fix: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "prompt": "p", "video_url": "https://example.com/in.mp4" }),
-    );
+    assert_eq!(json, serde_json::json!({ "prompt": "p", "video_url": "https://example.com/in.mp4" }),);
   }
 
   #[test]
   fn every_duration_maps_to_wire_string_and_seconds() {
-    for (variant, s, secs) in [
-      (Veo3p1FastExtendVideoDuration::FourSeconds, "4s", 4),
-      (Veo3p1FastExtendVideoDuration::SixSeconds, "6s", 6),
-      (Veo3p1FastExtendVideoDuration::SevenSeconds, "7s", 7),
-      (Veo3p1FastExtendVideoDuration::EightSeconds, "8s", 8),
-    ] {
+    for (variant, s, secs) in [(Veo3p1FastExtendVideoDuration::FourSeconds, "4s", 4), (Veo3p1FastExtendVideoDuration::SixSeconds, "6s", 6), (Veo3p1FastExtendVideoDuration::SevenSeconds, "7s", 7), (Veo3p1FastExtendVideoDuration::EightSeconds, "8s", 8)] {
       assert_eq!(variant.to_str(), s);
       assert_eq!(variant.to_seconds(), secs);
     }
@@ -278,10 +213,7 @@ mod tests {
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Veo3p1FastExtendVideoRequest::ENDPOINT,
-      "fal-ai/veo3.1/fast/extend-video",
-    );
+    assert_eq!(Veo3p1FastExtendVideoRequest::ENDPOINT, "fal-ai/veo3.1/fast/extend-video",);
   }
 
   // NB: Pricing tests are in cost.rs

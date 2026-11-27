@@ -18,15 +18,7 @@ impl ArtcraftKling16ProCostState {
     // 5s = 57¢, 10s = 113¢.
     let cost_in_usd_cents: u64 = if self.is_ten_seconds { 113 } else { 57 };
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -39,23 +31,22 @@ mod tests {
   use tokens::tokens::media_files::MediaFileToken;
 
   fn cost_cents(duration_seconds: Option<u16>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling16Pro,
-      provider: RouterProvider::Artcraft,
-      prompt: Some("test".to_string()),
-      start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_x".to_string()))),
-      duration_seconds,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling16Pro, provider: RouterProvider::Artcraft, prompt: Some("test".to_string()), start_frame: Some(ImageRef::MediaFileToken(MediaFileToken::new("mf_x".to_string()))), duration_seconds, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn five_seconds_is_57() { assert_eq!(cost_cents(Some(5)), 57); }
+  fn five_seconds_is_57() {
+    assert_eq!(cost_cents(Some(5)), 57);
+  }
 
   #[test]
-  fn ten_seconds_is_113() { assert_eq!(cost_cents(Some(10)), 113); }
+  fn ten_seconds_is_113() {
+    assert_eq!(cost_cents(Some(10)), 113);
+  }
 
   #[test]
-  fn default_duration_is_5s_priced_at_57() { assert_eq!(cost_cents(None), 57); }
+  fn default_duration_is_5s_priced_at_57() {
+    assert_eq!(cost_cents(None), 57);
+  }
 }

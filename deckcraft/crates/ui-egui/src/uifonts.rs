@@ -139,9 +139,7 @@ impl UiFonts {
             return false;
         }
         let font = egui::FontId::proportional(13.0);
-        ctx.fonts_mut(|f| {
-            text.chars().any(|c| wanted(c) && !f.has_glyph(&font, c) && self.faces.iter().any(|face| face.covers(c)))
-        })
+        ctx.fonts_mut(|f| text.chars().any(|c| wanted(c) && !f.has_glyph(&font, c) && self.faces.iter().any(|face| face.covers(c))))
     }
 }
 

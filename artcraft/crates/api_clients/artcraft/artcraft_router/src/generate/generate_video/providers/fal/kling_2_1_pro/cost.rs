@@ -10,24 +10,14 @@ pub struct FalKling21ProCostState {
 
 impl FalKling21ProCostState {
   pub fn from_request(request: &FalKling21ProRequestState) -> Self {
-    Self {
-      is_ten_seconds: matches!(request.request.duration, Kling2p1ProDuration::TenSeconds),
-    }
+    Self { is_ten_seconds: matches!(request.request.duration, Kling2p1ProDuration::TenSeconds) }
   }
 
   pub fn estimate_cost(&self) -> VideoGenerationCostEstimate {
     // Mirrors fal_client kling_v2p1_pro: 5s = 45¢, 10s = 90¢.
     let cost_in_usd_cents: u64 = if self.is_ten_seconds { 90 } else { 45 };
 
-    VideoGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    VideoGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -39,23 +29,22 @@ mod tests {
   use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
 
   fn cost_cents(duration_seconds: Option<u16>) -> u64 {
-    let b = GenerateVideoRequestBuilder {
-      model: RouterVideoModel::Kling21Pro,
-      provider: RouterProvider::Fal,
-      prompt: Some("test".to_string()),
-      start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())),
-      duration_seconds,
-      ..Default::default()
-    };
+    let b = GenerateVideoRequestBuilder { model: RouterVideoModel::Kling21Pro, provider: RouterProvider::Fal, prompt: Some("test".to_string()), start_frame: Some(ImageRef::Url("https://example.com/a.png".to_string())), duration_seconds, ..Default::default() };
     b.build2().unwrap().estimate_cost().unwrap().cost_in_usd_cents.unwrap()
   }
 
   #[test]
-  fn five_seconds_is_45() { assert_eq!(cost_cents(Some(5)), 45); }
+  fn five_seconds_is_45() {
+    assert_eq!(cost_cents(Some(5)), 45);
+  }
 
   #[test]
-  fn ten_seconds_is_90() { assert_eq!(cost_cents(Some(10)), 90); }
+  fn ten_seconds_is_90() {
+    assert_eq!(cost_cents(Some(10)), 90);
+  }
 
   #[test]
-  fn default_duration_is_5s_priced_at_45() { assert_eq!(cost_cents(None), 45); }
+  fn default_duration_is_5s_priced_at_45() {
+    assert_eq!(cost_cents(None), 45);
+  }
 }

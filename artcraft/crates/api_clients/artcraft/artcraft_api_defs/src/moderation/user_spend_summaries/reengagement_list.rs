@@ -3,8 +3,7 @@ use serde_derive::{Deserialize, Serialize};
 use tokens::tokens::users::UserToken;
 use utoipa::{IntoParams, ToSchema};
 
-pub const MODERATOR_REENGAGEMENT_LIST_PATH: &str =
-  "/v1/moderation/user_spend_summaries/reengagement_list";
+pub const MODERATOR_REENGAGEMENT_LIST_PATH: &str = "/v1/moderation/user_spend_summaries/reengagement_list";
 
 #[derive(Deserialize, IntoParams)]
 pub struct ModeratorReengagementListQueryParams {

@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::reference::minimax_h3::raw_request::{
-  MinimaxH3ReferenceToVideoInput, MinimaxH3ReferenceToVideoOutput,
-};
+use crate::requests::api::video::reference::minimax_h3::raw_request::{MinimaxH3ReferenceToVideoInput, MinimaxH3ReferenceToVideoOutput};
 use crate::requests::api::video::text::minimax_h3::api::MinimaxH3Resolution;
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
@@ -69,15 +67,7 @@ impl FalEndpoint for MinimaxH3ReferenceToVideoRequest {
   type RawResponse = MinimaxH3ReferenceToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      reference_image_urls: self.reference_image_urls.clone(),
-      reference_video_urls: self.reference_video_urls.clone(),
-      reference_audio_urls: self.reference_audio_urls.clone(),
-      duration: self.duration,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), reference_image_urls: self.reference_image_urls.clone(), reference_video_urls: self.reference_video_urls.clone(), reference_audio_urls: self.reference_audio_urls.clone(), duration: self.duration, resolution: self.resolution.map(|r| r.to_str().to_string()), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()) })
   }
 }
 
@@ -89,8 +79,7 @@ mod tests {
   use errors::AnyhowResult;
   use std::fs::read_to_string;
 
-  const EXAMPLE_IMAGE_URL: &str =
-    "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg";
+  const EXAMPLE_IMAGE_URL: &str = "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg";
 
   // ── Real requests (manually run; require a live key and cost money) ──
 
@@ -100,15 +89,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3ReferenceToVideoRequest {
-      prompt: "Image 1 is the subject. Keep the subject consistent while the camera slowly orbits.".to_string(),
-      reference_image_urls: Some(vec![EXAMPLE_IMAGE_URL.to_string()]),
-      reference_video_urls: None,
-      reference_audio_urls: None,
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-      aspect_ratio: Some(MinimaxH3ReferenceToVideoAspectRatio::Adaptive),
-    };
+    let request = MinimaxH3ReferenceToVideoRequest { prompt: "Image 1 is the subject. Keep the subject consistent while the camera slowly orbits.".to_string(), reference_image_urls: Some(vec![EXAMPLE_IMAGE_URL.to_string()]), reference_video_urls: None, reference_audio_urls: None, duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP), aspect_ratio: Some(MinimaxH3ReferenceToVideoAspectRatio::Adaptive) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -122,15 +103,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3ReferenceToVideoRequest {
-      prompt: "Image 1 is the subject. The subject walks through a sunlit garden.".to_string(),
-      reference_image_urls: Some(vec![EXAMPLE_IMAGE_URL.to_string()]),
-      reference_video_urls: None,
-      reference_audio_urls: None,
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-      aspect_ratio: None,
-    };
+    let request = MinimaxH3ReferenceToVideoRequest { prompt: "Image 1 is the subject. The subject walks through a sunlit garden.".to_string(), reference_image_urls: Some(vec![EXAMPLE_IMAGE_URL.to_string()]), reference_video_urls: None, reference_audio_urls: None, duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP), aspect_ratio: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -142,15 +115,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = MinimaxH3ReferenceToVideoRequest {
-      prompt: "p".to_string(),
-      reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]),
-      reference_video_urls: Some(vec!["https://example.com/b.mp4".to_string()]),
-      reference_audio_urls: Some(vec!["https://example.com/c.mp3".to_string()]),
-      duration: Some(12),
-      resolution: Some(MinimaxH3Resolution::TwoK),
-      aspect_ratio: Some(MinimaxH3ReferenceToVideoAspectRatio::Adaptive),
-    };
+    let request = MinimaxH3ReferenceToVideoRequest { prompt: "p".to_string(), reference_image_urls: Some(vec!["https://example.com/a.png".to_string()]), reference_video_urls: Some(vec!["https://example.com/b.mp4".to_string()]), reference_audio_urls: Some(vec!["https://example.com/c.mp3".to_string()]), duration: Some(12), resolution: Some(MinimaxH3Resolution::TwoK), aspect_ratio: Some(MinimaxH3ReferenceToVideoAspectRatio::Adaptive) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.reference_image_urls.as_deref(), Some(&["https://example.com/a.png".to_string()][..]));
@@ -163,30 +128,14 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = MinimaxH3ReferenceToVideoRequest {
-      prompt: "minimal".to_string(),
-      reference_image_urls: None,
-      reference_video_urls: None,
-      reference_audio_urls: None,
-      duration: None,
-      resolution: None,
-      aspect_ratio: None,
-    };
+    let request = MinimaxH3ReferenceToVideoRequest { prompt: "minimal".to_string(), reference_image_urls: None, reference_video_urls: None, reference_audio_urls: None, duration: None, resolution: None, aspect_ratio: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
     assert_eq!(json, serde_json::json!({ "prompt": "minimal" }));
   }
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (MinimaxH3ReferenceToVideoAspectRatio::Adaptive, "adaptive"),
-      (MinimaxH3ReferenceToVideoAspectRatio::TwentyOneByNine, "21:9"),
-      (MinimaxH3ReferenceToVideoAspectRatio::SixteenByNine, "16:9"),
-      (MinimaxH3ReferenceToVideoAspectRatio::FourByThree, "4:3"),
-      (MinimaxH3ReferenceToVideoAspectRatio::Square, "1:1"),
-      (MinimaxH3ReferenceToVideoAspectRatio::ThreeByFour, "3:4"),
-      (MinimaxH3ReferenceToVideoAspectRatio::NineBySixteen, "9:16"),
-    ] {
+    for (variant, expected) in [(MinimaxH3ReferenceToVideoAspectRatio::Adaptive, "adaptive"), (MinimaxH3ReferenceToVideoAspectRatio::TwentyOneByNine, "21:9"), (MinimaxH3ReferenceToVideoAspectRatio::SixteenByNine, "16:9"), (MinimaxH3ReferenceToVideoAspectRatio::FourByThree, "4:3"), (MinimaxH3ReferenceToVideoAspectRatio::Square, "1:1"), (MinimaxH3ReferenceToVideoAspectRatio::ThreeByFour, "3:4"), (MinimaxH3ReferenceToVideoAspectRatio::NineBySixteen, "9:16")] {
       assert_eq!(variant.to_str(), expected);
     }
   }

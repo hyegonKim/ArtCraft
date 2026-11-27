@@ -28,13 +28,9 @@ impl FalRequestCostCalculator for EnqueueHailuoV2p3ProTextToVideoRequest {
   }
 }
 
-
 /// Hailuo 2.3 Pro Text-to-Video
 /// https://fal.ai/models/fal-ai/minimax/hailuo-2.3/pro/text-to-video
-pub async fn enqueue_hailuo_v2p3_pro_text_to_video_webhook<R: IntoUrl>(
-  args: EnqueueHailuoV2p3ProTextToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_hailuo_v2p3_pro_text_to_video_webhook<R: IntoUrl>(args: EnqueueHailuoV2p3ProTextToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
   let prompt_optimizer = req.prompt_optimizer.unwrap_or(true);
 
@@ -44,10 +40,7 @@ pub async fn enqueue_hailuo_v2p3_pro_text_to_video_webhook<R: IntoUrl>(
     prompt_optimizer: Some(prompt_optimizer),
   };
 
-  let result = hailuo_v2p3_pro_text_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = hailuo_v2p3_pro_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -67,14 +60,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueHailuoV2p3ProTextToVideoArgs {
-      request: EnqueueHailuoV2p3ProTextToVideoRequest {
-        prompt: "a gray alien with big eyes dressed in an american flag tank top gives the peace symbol, it then barbecues some hot dogs on the grill".to_string(),
-        prompt_optimizer: Some(true),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueHailuoV2p3ProTextToVideoArgs { request: EnqueueHailuoV2p3ProTextToVideoRequest { prompt: "a gray alien with big eyes dressed in an american flag tank top gives the peace symbol, it then barbecues some hot dogs on the grill".to_string(), prompt_optimizer: Some(true) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_hailuo_v2p3_pro_text_to_video_webhook(args).await?;
 

@@ -71,6 +71,8 @@ pub struct DocState {
     pub(crate) typed_names: std::collections::HashMap<LayerId, String>,
     /// Photoshop 2027 (`28.0`) Timelapse recording state & frame ring buffer.
     pub timelapse: crate::timelapse_cmds::TimelapseRecorder,
+    /// Adobe Fresco (`FRSC v5.7.1`) per-layer wet-canvas moisture & mobile pigment maps.
+    pub fresco_wetness: std::collections::HashMap<LayerId, photocraft_paint::fresco_watercolor::WetCanvasMap>,
 }
 
 impl DocState {
@@ -130,6 +132,7 @@ impl DocState {
             source_snapshot: None,
             typed_names: Default::default(),
             timelapse: Default::default(),
+            fresco_wetness: Default::default(),
         }
     }
     /// The selected layers in bottom-to-top document order, always including the active layer.

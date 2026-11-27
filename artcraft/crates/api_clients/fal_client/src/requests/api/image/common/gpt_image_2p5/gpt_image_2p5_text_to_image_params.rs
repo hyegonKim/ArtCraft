@@ -3,9 +3,7 @@ use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_background
 use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_image_size::GptImage2p5ImageSize;
 use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_num_images::GptImage2p5NumImages;
 use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_output_format::GptImage2p5OutputFormat;
-use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_pricing::{
-  estimate_output_image_cost, hundredths_of_cent_to_cents,
-};
+use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_pricing::{estimate_output_image_cost, hundredths_of_cent_to_cents};
 use crate::requests::api::image::common::gpt_image_2p5::gpt_image_2p5_quality::GptImage2p5Quality;
 use crate::requests::api::image::common::gpt_image_2p5::raw::gpt_image_2p5_text_to_image_input::GptImage2p5TextToImageInput;
 use crate::requests::traits::fal_request_cost_calculator_trait::UsdCents;
@@ -50,29 +48,15 @@ impl GptImage2p5TextToImageParams {
 
   pub fn to_raw_input(&self) -> GptImage2p5TextToImageInput {
     let output_format = self.output_format.unwrap_or(GptImage2p5OutputFormat::Png);
-    let output_compression = if output_format.supports_compression() {
-      self.output_compression.map(|c| c.min(100))
-    } else {
-      None
-    };
+    let output_compression = if output_format.supports_compression() { self.output_compression.map(|c| c.min(100)) } else { None };
 
-    GptImage2p5TextToImageInput {
-      prompt: self.prompt.clone(),
-      image_size: self.image_size.map(|size| size.to_raw_param(self.resolution)),
-      background: self.background.map(|b| b.to_str().to_string()),
-      quality: self.quality.map(|q| q.to_str().to_string()),
-      num_images: Some(self.num_images.to_u8()),
-      output_format: Some(output_format.to_str().to_string()),
-      output_compression,
-    }
+    GptImage2p5TextToImageInput { prompt: self.prompt.clone(), image_size: self.image_size.map(|size| size.to_raw_param(self.resolution)), background: self.background.map(|b| b.to_str().to_string()), quality: self.quality.map(|q| q.to_str().to_string()), num_images: Some(self.num_images.to_u8()), output_format: Some(output_format.to_str().to_string()), output_compression }
   }
 
   /// Estimated cost in whole cents, rounded up per image.
   pub fn estimate_cost_in_cents(&self) -> UsdCents {
     let quality = self.quality.unwrap_or(Self::DEFAULT_QUALITY);
-    let (width, height) = self.image_size
-      .unwrap_or(Self::DEFAULT_IMAGE_SIZE)
-      .estimated_output_dimensions(self.resolution);
+    let (width, height) = self.image_size.unwrap_or(Self::DEFAULT_IMAGE_SIZE).estimated_output_dimensions(self.resolution);
     let hundredths_per_image = estimate_output_image_cost(quality, width, height);
     hundredths_of_cent_to_cents(hundredths_per_image) * self.num_images.to_u64()
   }
@@ -106,35 +90,32 @@ mod tests {
     fn minimal_request_serializes_to_expected_json() {
       let raw = make_params(One, None, None, None).to_raw_input();
       let json = serde_json::to_value(&raw).unwrap();
-      assert_eq!(json, serde_json::json!({
-        "prompt": "test",
-        "num_images": 1,
-        "output_format": "png",
-      }));
+      assert_eq!(
+        json,
+        serde_json::json!({
+          "prompt": "test",
+          "num_images": 1,
+          "output_format": "png",
+        })
+      );
     }
 
     #[test]
     fn full_request_serializes_to_expected_json() {
-      let params = GptImage2p5TextToImageParams {
-        prompt: "a corgi".to_string(),
-        num_images: Three,
-        image_size: Some(Landscape16x9),
-        resolution: Some(TwoK),
-        quality: Some(XHigh),
-        background: Some(GptImage2p5Background::Transparent),
-        output_format: Some(GptImage2p5OutputFormat::Webp),
-        output_compression: Some(80),
-      };
+      let params = GptImage2p5TextToImageParams { prompt: "a corgi".to_string(), num_images: Three, image_size: Some(Landscape16x9), resolution: Some(TwoK), quality: Some(XHigh), background: Some(GptImage2p5Background::Transparent), output_format: Some(GptImage2p5OutputFormat::Webp), output_compression: Some(80) };
       let json = serde_json::to_value(params.to_raw_input()).unwrap();
-      assert_eq!(json, serde_json::json!({
-        "prompt": "a corgi",
-        "image_size": { "width": 2048, "height": 1152 },
-        "background": "transparent",
-        "quality": "xhigh",
-        "num_images": 3,
-        "output_format": "webp",
-        "output_compression": 80,
-      }));
+      assert_eq!(
+        json,
+        serde_json::json!({
+          "prompt": "a corgi",
+          "image_size": { "width": 2048, "height": 1152 },
+          "background": "transparent",
+          "quality": "xhigh",
+          "num_images": 3,
+          "output_format": "webp",
+          "output_compression": 80,
+        })
+      );
     }
 
     #[test]
@@ -200,42 +181,42 @@ mod tests {
     // Pinned from the model in `gpt_image_2p5_pricing`; a change here must be deliberate.
     const GRID: &[(GptImage2p5ImageSize, Option<GptImage2Resolution>, [u64; 5])] = &[
       // 1:1
-      (Square,        None,         [1, 2,  6, 10, 22]), // 1024x1024
-      (Square,        Some(OneK),   [1, 2,  6, 10, 22]), // 1024x1024
-      (Square,        Some(TwoK),   [1, 3,  9, 15, 34]), // 2048x2048
-      (Square,        Some(ThreeK), [2, 4, 13, 22, 50]), // 2880x2880
-      (Square,        Some(FourK),  [2, 4, 13, 22, 50]), // 2880x2880 (pixel cap)
-      (SquareHd,      None,         [1, 3,  9, 15, 34]), // 2048x2048
-      (SquareHd,      Some(OneK),   [1, 2,  6, 10, 22]), // 1024x1024
-      (SquareHd,      Some(TwoK),   [1, 3,  9, 15, 34]), // 2048x2048
-      (SquareHd,      Some(ThreeK), [2, 4, 13, 22, 50]), // 2880x2880
-      (SquareHd,      Some(FourK),  [2, 4, 13, 22, 50]), // 2880x2880 (pixel cap)
+      (Square, None, [1, 2, 6, 10, 22]),            // 1024x1024
+      (Square, Some(OneK), [1, 2, 6, 10, 22]),      // 1024x1024
+      (Square, Some(TwoK), [1, 3, 9, 15, 34]),      // 2048x2048
+      (Square, Some(ThreeK), [2, 4, 13, 22, 50]),   // 2880x2880
+      (Square, Some(FourK), [2, 4, 13, 22, 50]),    // 2880x2880 (pixel cap)
+      (SquareHd, None, [1, 3, 9, 15, 34]),          // 2048x2048
+      (SquareHd, Some(OneK), [1, 2, 6, 10, 22]),    // 1024x1024
+      (SquareHd, Some(TwoK), [1, 3, 9, 15, 34]),    // 2048x2048
+      (SquareHd, Some(ThreeK), [2, 4, 13, 22, 50]), // 2880x2880
+      (SquareHd, Some(FourK), [2, 4, 13, 22, 50]),  // 2880x2880 (pixel cap)
       // 4:3
-      (Landscape4x3,  None,         [1, 1,  4,  7, 15]), // 1024x768
-      (Landscape4x3,  Some(OneK),   [1, 1,  4,  7, 15]), // 1024x768
-      (Landscape4x3,  Some(TwoK),   [1, 2,  6, 11, 24]), // 2048x1536
-      (Landscape4x3,  Some(ThreeK), [2, 3, 10, 18, 39]), // 3072x2304
-      (Landscape4x3,  Some(FourK),  [2, 3, 11, 20, 44]), // 3312x2480 (pixel cap)
-      (Portrait4x3,   None,         [1, 1,  4,  7, 15]), // 768x1024
-      (Portrait4x3,   Some(OneK),   [1, 1,  4,  7, 15]), // 768x1024
-      (Portrait4x3,   Some(TwoK),   [1, 2,  6, 11, 24]), // 1536x2048
-      (Portrait4x3,   Some(ThreeK), [2, 3, 10, 18, 39]), // 2304x3072
-      (Portrait4x3,   Some(FourK),  [2, 3, 11, 20, 44]), // 2480x3312 (pixel cap)
+      (Landscape4x3, None, [1, 1, 4, 7, 15]),           // 1024x768
+      (Landscape4x3, Some(OneK), [1, 1, 4, 7, 15]),     // 1024x768
+      (Landscape4x3, Some(TwoK), [1, 2, 6, 11, 24]),    // 2048x1536
+      (Landscape4x3, Some(ThreeK), [2, 3, 10, 18, 39]), // 3072x2304
+      (Landscape4x3, Some(FourK), [2, 3, 11, 20, 44]),  // 3312x2480 (pixel cap)
+      (Portrait4x3, None, [1, 1, 4, 7, 15]),            // 768x1024
+      (Portrait4x3, Some(OneK), [1, 1, 4, 7, 15]),      // 768x1024
+      (Portrait4x3, Some(TwoK), [1, 2, 6, 11, 24]),     // 1536x2048
+      (Portrait4x3, Some(ThreeK), [2, 3, 10, 18, 39]),  // 2304x3072
+      (Portrait4x3, Some(FourK), [2, 3, 11, 20, 44]),   // 2480x3312 (pixel cap)
       // 16:9
-      (Landscape16x9, None,         [1, 2,  4,  8, 16]), // 1920x1080
-      (Landscape16x9, Some(OneK),   [1, 1,  3,  5, 11]), // 1088x608
-      (Landscape16x9, Some(TwoK),   [1, 2,  5,  8, 17]), // 2048x1152
-      (Landscape16x9, Some(ThreeK), [1, 2,  8, 13, 29]), // 3072x1728
-      (Landscape16x9, Some(FourK),  [2, 3, 11, 18, 41]), // 3840x2160
-      (Portrait16x9,  None,         [1, 2,  4,  8, 16]), // 1080x1920
-      (Portrait16x9,  Some(OneK),   [1, 1,  3,  5, 11]), // 608x1088
-      (Portrait16x9,  Some(TwoK),   [1, 2,  5,  8, 17]), // 1152x2048
-      (Portrait16x9,  Some(ThreeK), [1, 2,  8, 13, 29]), // 1728x3072
-      (Portrait16x9,  Some(FourK),  [2, 3, 11, 18, 41]), // 2160x3840
+      (Landscape16x9, None, [1, 2, 4, 8, 16]),          // 1920x1080
+      (Landscape16x9, Some(OneK), [1, 1, 3, 5, 11]),    // 1088x608
+      (Landscape16x9, Some(TwoK), [1, 2, 5, 8, 17]),    // 2048x1152
+      (Landscape16x9, Some(ThreeK), [1, 2, 8, 13, 29]), // 3072x1728
+      (Landscape16x9, Some(FourK), [2, 3, 11, 18, 41]), // 3840x2160
+      (Portrait16x9, None, [1, 2, 4, 8, 16]),           // 1080x1920
+      (Portrait16x9, Some(OneK), [1, 1, 3, 5, 11]),     // 608x1088
+      (Portrait16x9, Some(TwoK), [1, 2, 5, 8, 17]),     // 1152x2048
+      (Portrait16x9, Some(ThreeK), [1, 2, 8, 13, 29]),  // 1728x3072
+      (Portrait16x9, Some(FourK), [2, 3, 11, 18, 41]),  // 2160x3840
       // Auto always prices at the conservative 3840x2160
-      (Auto,          None,         [2, 3, 11, 18, 41]),
-      (Auto,          Some(OneK),   [2, 3, 11, 18, 41]),
-      (Auto,          Some(FourK),  [2, 3, 11, 18, 41]),
+      (Auto, None, [2, 3, 11, 18, 41]),
+      (Auto, Some(OneK), [2, 3, 11, 18, 41]),
+      (Auto, Some(FourK), [2, 3, 11, 18, 41]),
     ];
 
     const ALL_QUALITIES: [GptImage2p5Quality; 5] = [Low, Medium, High, XHigh, Max];
@@ -282,10 +263,7 @@ mod tests {
 
     #[test]
     fn resolution_without_size_prices_at_default_aspect() {
-      assert_eq!(
-        make_params(One, Some(High), None, Some(TwoK)).estimate_cost_in_cents(),
-        make_params(One, Some(High), Some(Landscape4x3), Some(TwoK)).estimate_cost_in_cents(),
-      );
+      assert_eq!(make_params(One, Some(High), None, Some(TwoK)).estimate_cost_in_cents(), make_params(One, Some(High), Some(Landscape4x3), Some(TwoK)).estimate_cost_in_cents(),);
     }
 
     #[test]
@@ -298,21 +276,7 @@ mod tests {
     }
   }
 
-  fn make_params(
-    num_images: GptImage2p5NumImages,
-    quality: Option<GptImage2p5Quality>,
-    image_size: Option<GptImage2p5ImageSize>,
-    resolution: Option<GptImage2Resolution>,
-  ) -> GptImage2p5TextToImageParams {
-    GptImage2p5TextToImageParams {
-      prompt: "test".to_string(),
-      num_images,
-      image_size,
-      resolution,
-      quality,
-      background: None,
-      output_format: None,
-      output_compression: None,
-    }
+  fn make_params(num_images: GptImage2p5NumImages, quality: Option<GptImage2p5Quality>, image_size: Option<GptImage2p5ImageSize>, resolution: Option<GptImage2Resolution>) -> GptImage2p5TextToImageParams {
+    GptImage2p5TextToImageParams { prompt: "test".to_string(), num_images, image_size, resolution, quality, background: None, output_format: None, output_compression: None }
   }
 }

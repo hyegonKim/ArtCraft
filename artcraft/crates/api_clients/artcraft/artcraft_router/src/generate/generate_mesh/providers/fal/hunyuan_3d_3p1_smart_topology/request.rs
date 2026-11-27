@@ -30,12 +30,7 @@ mod tests {
   #[ignore] // requires real API key and a real GLB URL, incurs cost
   async fn send_smart_topology() {
     let client = get_fal_client();
-    let builder = GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3p1SmartTopology,
-      provider: RouterProvider::Fal,
-      input_mesh: Some(MeshRef::Url("https://example.com/model.glb".to_string())),
-      ..Default::default()
-    };
+    let builder = GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3p1SmartTopology, provider: RouterProvider::Fal, input_mesh: Some(MeshRef::Url("https://example.com/model.glb".to_string())), ..Default::default() };
 
     let draft_or_request = builder.build2().expect("build2 should succeed");
     let request = match draft_or_request {

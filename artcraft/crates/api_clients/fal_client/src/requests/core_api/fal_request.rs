@@ -45,15 +45,7 @@ pub struct FalRequest<Params: Serialize, Response: DeserializeOwned> {
 
 impl<Params: Serialize, Response: DeserializeOwned> FalRequest<Params, Response> {
   pub fn new(endpoint: impl Into<String>, params: Params) -> Self {
-    Self {
-      client: reqwest::Client::new(),
-      endpoint: endpoint.into(),
-      params,
-      api_key: std::env::var("FAL_API_KEY").ok(),
-      sync_base_url: DEFAULT_SYNC_BASE_URL.to_string(),
-      queue_base_url: DEFAULT_QUEUE_BASE_URL.to_string(),
-      phantom: PhantomData,
-    }
+    Self { client: reqwest::Client::new(), endpoint: endpoint.into(), params, api_key: std::env::var("FAL_API_KEY").ok(), sync_base_url: DEFAULT_SYNC_BASE_URL.to_string(), queue_base_url: DEFAULT_QUEUE_BASE_URL.to_string(), phantom: PhantomData }
   }
 
   /// Use a specific Reqwest Client to make requests
@@ -82,21 +74,7 @@ impl<Params: Serialize, Response: DeserializeOwned> FalRequest<Params, Response>
 
   /// Send the request and wait for the response
   pub async fn send(self) -> Result<Response, FalError> {
-    let response = self
-      .client
-      .post(format!("{}/{}", self.sync_base_url, self.endpoint))
-      .json(&self.params)
-      .header(
-        "Authorization",
-        format!(
-          "Key {}",
-          self.api_key.expect(
-            "No fal API key provided, and FAL_API_KEY environment variable is not set"
-          )
-        ),
-      )
-      .send()
-      .await?;
+    let response = self.client.post(format!("{}/{}", self.sync_base_url, self.endpoint)).json(&self.params).header("Authorization", format!("Key {}", self.api_key.expect("No fal API key provided, and FAL_API_KEY environment variable is not set"))).send().await?;
 
     if response.status() != 200 {
       let error = response.text().await?;
@@ -108,17 +86,9 @@ impl<Params: Serialize, Response: DeserializeOwned> FalRequest<Params, Response>
 
   /// Submit the request to the Fal queue system.
   pub async fn queue(self) -> Result<Queue<Response>, FalError> {
-    let key = self
-      .api_key
-      .expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
+    let key = self.api_key.expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
 
-    let response = self
-      .client
-      .post(format!("{}/{}", self.queue_base_url, self.endpoint))
-      .json(&self.params)
-      .header("Authorization", format!("Key {}", &key))
-      .send()
-      .await?;
+    let response = self.client.post(format!("{}/{}", self.queue_base_url, self.endpoint)).json(&self.params).header("Authorization", format!("Key {}", &key)).send().await?;
 
     if response.status() != 200 {
       let error = response.text().await?;
@@ -136,27 +106,16 @@ impl<Params: Serialize, Response: DeserializeOwned> FalRequest<Params, Response>
   /// change, a raw `fal_webhook=https://host/path` value is silently ignored: the job completes
   /// but no webhook is ever delivered. `query_pairs_mut` encodes it for us.
   pub async fn queue_webhook<U: IntoUrl>(self, url: U) -> Result<WebhookResponse, FalError> {
-    let key = self
-      .api_key
-      .expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
+    let key = self.api_key.expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
 
     let webhook_url = url.into_url()?;
 
-    let mut request_url = Url::parse(&format!("{}/{}", self.queue_base_url, self.endpoint))
-      .map_err(|err| FalError::Other(format!("invalid fal queue url: {}", err)))?;
-    request_url
-      .query_pairs_mut()
-      .append_pair("fal_webhook", webhook_url.as_str());
+    let mut request_url = Url::parse(&format!("{}/{}", self.queue_base_url, self.endpoint)).map_err(|err| FalError::Other(format!("invalid fal queue url: {}", err)))?;
+    request_url.query_pairs_mut().append_pair("fal_webhook", webhook_url.as_str());
 
     info!("Sending request to FAL queue webhook: {}", request_url);
 
-    let response = self
-      .client
-      .post(request_url)
-      .json(&self.params)
-      .header("Authorization", format!("Key {}", &key))
-      .send()
-      .await?;
+    let response = self.client.post(request_url).json(&self.params).header("Authorization", format!("Key {}", &key)).send().await?;
 
     if response.status() != 200 {
       let error = response.text().await?;
@@ -170,17 +129,9 @@ impl<Params: Serialize, Response: DeserializeOwned> FalRequest<Params, Response>
 
   /// Submit the request to the Fal queue system.
   pub async fn queue_request(self) -> Result<QueueResponse, FalError> {
-    let key = self
-        .api_key
-        .expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
+    let key = self.api_key.expect("No fal API key provided, and FAL_API_KEY environment variable is not set");
 
-    let response = self
-        .client
-        .post(format!("{}/{}", self.queue_base_url, self.endpoint))
-        .json(&self.params)
-        .header("Authorization", format!("Key {}", &key))
-        .send()
-        .await?;
+    let response = self.client.post(format!("{}/{}", self.queue_base_url, self.endpoint)).json(&self.params).header("Authorization", format!("Key {}", &key)).send().await?;
 
     if response.status() != 200 {
       let error = response.text().await?;
@@ -236,11 +187,7 @@ mod tests {
     async fn queue_sends_exactly_one_json_content_type() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      let queue = new_request()
-        .with_queue_base_url(base_url)
-        .queue()
-        .await
-        .expect("queue should succeed");
+      let queue = new_request().with_queue_base_url(base_url).queue().await.expect("queue should succeed");
 
       assert_eq!(queue.payload.request_id, "01a082d7-767c-7fb3-bae3-ce9cd1d0a360");
       assert_single_json_content_type_with_params(&captured.await.unwrap());
@@ -250,11 +197,7 @@ mod tests {
     async fn queue_webhook_sends_exactly_one_json_content_type() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      let response = new_request()
-        .with_queue_base_url(base_url)
-        .queue_webhook(WEBHOOK_URL)
-        .await
-        .expect("queue_webhook should succeed");
+      let response = new_request().with_queue_base_url(base_url).queue_webhook(WEBHOOK_URL).await.expect("queue_webhook should succeed");
 
       assert_eq!(response.request_id.as_deref(), Some("01a082d7-767c-7fb3-bae3-ce9cd1d0a360"));
 
@@ -267,11 +210,7 @@ mod tests {
     async fn queue_request_sends_exactly_one_json_content_type() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      let response = new_request()
-        .with_queue_base_url(base_url)
-        .queue_request()
-        .await
-        .expect("queue_request should succeed");
+      let response = new_request().with_queue_base_url(base_url).queue_request().await.expect("queue_request should succeed");
 
       assert_eq!(response.request_id, "01a082d7-767c-7fb3-bae3-ce9cd1d0a360");
       assert_single_json_content_type_with_params(&captured.await.unwrap());
@@ -281,11 +220,7 @@ mod tests {
     async fn send_sends_exactly_one_json_content_type() {
       let (base_url, captured) = spawn_capture_server(SYNC_RESPONSE_BODY).await;
 
-      let response = new_request()
-        .with_sync_base_url(base_url)
-        .send()
-        .await
-        .expect("send should succeed");
+      let response = new_request().with_sync_base_url(base_url).send().await.expect("send should succeed");
 
       assert!(response.ok);
       assert_single_json_content_type_with_params(&captured.await.unwrap());
@@ -303,40 +238,23 @@ mod tests {
     async fn webhook_url_is_percent_encoded_in_query_string() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      new_request()
-        .with_queue_base_url(base_url)
-        .queue_webhook(WEBHOOK_URL)
-        .await
-        .expect("queue_webhook should succeed");
+      new_request().with_queue_base_url(base_url).queue_webhook(WEBHOOK_URL).await.expect("queue_webhook should succeed");
 
       let raw = captured.await.unwrap();
-      assert!(
-        raw.request_line.contains(&format!("?fal_webhook={}", ENCODED_WEBHOOK_URL)),
-        "webhook url not percent-encoded: {}", raw.request_line,
-      );
-      assert!(
-        !raw.request_line.contains("fal_webhook=https://"),
-        "webhook url sent raw: {}", raw.request_line,
-      );
+      assert!(raw.request_line.contains(&format!("?fal_webhook={}", ENCODED_WEBHOOK_URL)), "webhook url not percent-encoded: {}", raw.request_line,);
+      assert!(!raw.request_line.contains("fal_webhook=https://"), "webhook url sent raw: {}", raw.request_line,);
     }
 
     #[tokio::test]
     async fn encoded_webhook_url_decodes_back_to_the_original() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      new_request()
-        .with_queue_base_url(base_url)
-        .queue_webhook(WEBHOOK_URL)
-        .await
-        .expect("queue_webhook should succeed");
+      new_request().with_queue_base_url(base_url).queue_webhook(WEBHOOK_URL).await.expect("queue_webhook should succeed");
 
       let raw = captured.await.unwrap();
       let path_and_query = raw.request_line.split_whitespace().nth(1).expect("request target");
       let parsed = Url::parse(&format!("http://localhost{}", path_and_query)).unwrap();
-      let decoded = parsed.query_pairs()
-        .find(|(k, _)| k == "fal_webhook")
-        .map(|(_, v)| v.into_owned())
-        .expect("fal_webhook param");
+      let decoded = parsed.query_pairs().find(|(k, _)| k == "fal_webhook").map(|(_, v)| v.into_owned()).expect("fal_webhook param");
       assert_eq!(decoded, WEBHOOK_URL);
     }
   }
@@ -355,18 +273,10 @@ mod tests {
     async fn queue_path_is_base_url_plus_endpoint() {
       let (base_url, captured) = spawn_capture_server(QUEUE_RESPONSE_BODY).await;
 
-      new_request()
-        .with_queue_base_url(base_url)
-        .queue_request()
-        .await
-        .expect("queue_request should succeed");
+      new_request().with_queue_base_url(base_url).queue_request().await.expect("queue_request should succeed");
 
       let raw = captured.await.unwrap();
-      assert!(
-        raw.request_line.starts_with(&format!("POST /{} HTTP/1.1", ENDPOINT)),
-        "unexpected request line: {}",
-        raw.request_line
-      );
+      assert!(raw.request_line.starts_with(&format!("POST /{} HTTP/1.1", ENDPOINT)), "unexpected request line: {}", raw.request_line);
     }
   }
 
@@ -393,19 +303,9 @@ mod tests {
   }
 
   fn assert_single_json_content_type_with_params(raw: &CapturedRequest) {
-    let content_types: Vec<&str> = raw
-      .headers
-      .iter()
-      .filter(|(name, _)| name == "content-type")
-      .map(|(_, value)| value.as_str())
-      .collect();
+    let content_types: Vec<&str> = raw.headers.iter().filter(|(name, _)| name == "content-type").map(|(_, value)| value.as_str()).collect();
 
-    assert_eq!(
-      content_types,
-      vec!["application/json"],
-      "expected exactly one Content-Type header, got {:?}",
-      content_types
-    );
+    assert_eq!(content_types, vec!["application/json"], "expected exactly one Content-Type header, got {:?}", content_types);
 
     let authorization = header_value(raw, "authorization");
     assert_eq!(authorization, Some(format!("Key {}", API_KEY)));
@@ -416,11 +316,7 @@ mod tests {
   }
 
   fn header_value(raw: &CapturedRequest, name: &str) -> Option<String> {
-    raw
-      .headers
-      .iter()
-      .find(|(n, _)| n == name)
-      .map(|(_, v)| v.clone())
+    raw.headers.iter().find(|(n, _)| n == name).map(|(_, v)| v.clone())
   }
 
   /// Bind a one-shot HTTP/1.1 server on localhost. It records the raw request it receives,
@@ -446,16 +342,9 @@ mod tests {
       let head = String::from_utf8_lossy(&buffer[..header_end]).to_string();
       let mut lines = head.split("\r\n");
       let request_line = lines.next().unwrap_or_default().to_string();
-      let headers: Vec<(String, String)> = lines
-        .filter_map(|line| line.split_once(':'))
-        .map(|(name, value)| (name.trim().to_ascii_lowercase(), value.trim().to_string()))
-        .collect();
+      let headers: Vec<(String, String)> = lines.filter_map(|line| line.split_once(':')).map(|(name, value)| (name.trim().to_ascii_lowercase(), value.trim().to_string())).collect();
 
-      let content_length: usize = headers
-        .iter()
-        .find(|(name, _)| name == "content-length")
-        .and_then(|(_, value)| value.parse().ok())
-        .expect("reqwest sends Content-Length for a JSON body");
+      let content_length: usize = headers.iter().find(|(name, _)| name == "content-length").and_then(|(_, value)| value.parse().ok()).expect("reqwest sends Content-Length for a JSON body");
 
       let body_start = header_end + 4;
       while buffer.len() < body_start + content_length {
@@ -466,11 +355,7 @@ mod tests {
       }
       let body = String::from_utf8_lossy(&buffer[body_start..body_start + content_length]).to_string();
 
-      let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-        response_body.len(),
-        response_body
-      );
+      let response = format!("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", response_body.len(), response_body);
       socket.write_all(response.as_bytes()).await.expect("write response");
       socket.shutdown().await.ok();
 

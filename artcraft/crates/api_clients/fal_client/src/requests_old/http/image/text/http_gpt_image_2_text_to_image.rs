@@ -34,8 +34,6 @@ pub struct GptImage2TextToImageOutput {
   pub images: Vec<GptImage2TextToImageFile>,
 }
 
-pub fn gpt_image_2_text_to_image(
-  params: GptImage2TextToImageInput,
-) -> FalRequest<GptImage2TextToImageInput, GptImage2TextToImageOutput> {
+pub fn gpt_image_2_text_to_image(params: GptImage2TextToImageInput) -> FalRequest<GptImage2TextToImageInput, GptImage2TextToImageOutput> {
   FalRequest::new("openai/gpt-image-2", params)
 }

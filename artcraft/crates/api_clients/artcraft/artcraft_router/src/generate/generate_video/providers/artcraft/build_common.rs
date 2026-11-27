@@ -11,10 +11,7 @@ use crate::client::request_mismatch_mitigation_strategy::RequestMismatchMitigati
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::resolve::{
-  resolve_audio_list_ref, resolve_character_list_ref, resolve_image_list_ref,
-  resolve_image_ref, resolve_video_list_ref,
-};
+use crate::generate::generate_video::providers::artcraft::resolve::{resolve_audio_list_ref, resolve_character_list_ref, resolve_image_list_ref, resolve_image_ref, resolve_video_list_ref};
 
 /// Which output resolutions a model supports.
 #[derive(Copy, Clone)]
@@ -41,12 +38,7 @@ pub enum UltraWideSupport {
 /// Build an `OmniGenVideoCostAndGenerateRequest` from the builder, using
 /// model-specific configuration for the model enum variant, resolution
 /// strategy, and ultra-wide aspect ratio support.
-pub fn build_artcraft_omni_video_request(
-  mut builder: GenerateVideoRequestBuilder,
-  model: CommonVideoModelEnum,
-  resolutions: SupportedResolutions,
-  ultra_wide: UltraWideSupport,
-) -> Result<OmniGenVideoCostAndGenerateRequest, ArtcraftRouterError> {
+pub fn build_artcraft_omni_video_request(mut builder: GenerateVideoRequestBuilder, model: CommonVideoModelEnum, resolutions: SupportedResolutions, ultra_wide: UltraWideSupport) -> Result<OmniGenVideoCostAndGenerateRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio.take(), strategy, ultra_wide)?;
@@ -64,78 +56,32 @@ pub fn build_artcraft_omni_video_request(
   let reference_characters = resolve_character_list_ref(builder.reference_character_tokens.take());
   let idempotency_token = builder.get_or_generate_idempotency_token();
 
-  Ok(OmniGenVideoCostAndGenerateRequest {
-    model: Some(model),
-    idempotency_token: Some(idempotency_token),
-    prompt,
-    start_frame_image_media_token: start_frame,
-    end_frame_image_media_token: end_frame,
-    reference_image_media_tokens: reference_images,
-    reference_video_media_tokens: reference_videos,
-    reference_audio_media_tokens: reference_audio,
-    reference_character_tokens: reference_characters,
-    resolution,
-    aspect_ratio,
-    bitrate,
-    maybe_output_format: None,
-    duration_seconds: duration_seconds.map(|d| d as u16),
-    video_batch_count: Some(batch_count),
-    negative_prompt: None,
-    generate_audio: None,
-    quality: None,
-    estimate_only: None,
-  })
+  Ok(OmniGenVideoCostAndGenerateRequest { model: Some(model), idempotency_token: Some(idempotency_token), prompt, start_frame_image_media_token: start_frame, end_frame_image_media_token: end_frame, reference_image_media_tokens: reference_images, reference_video_media_tokens: reference_videos, reference_audio_media_tokens: reference_audio, reference_character_tokens: reference_characters, resolution, aspect_ratio, bitrate, maybe_output_format: None, duration_seconds: duration_seconds.map(|d| d as u16), video_batch_count: Some(batch_count), negative_prompt: None, generate_audio: None, quality: None, estimate_only: None })
 }
 
 // ── Plan helpers ──
 
-fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-  ultra_wide: UltraWideSupport,
-) -> Result<Option<CommonAspectRatioEnum>, ArtcraftRouterError> {
+fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy, ultra_wide: UltraWideSupport) -> Result<Option<CommonAspectRatioEnum>, ArtcraftRouterError> {
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(None),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto4k) => Ok(None),
 
-    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => {
-      Ok(Some(CommonAspectRatioEnum::WideSixteenByNine))
-    }
-    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => {
-      Ok(Some(CommonAspectRatioEnum::TallNineBySixteen))
-    }
-    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => {
-      Ok(Some(CommonAspectRatioEnum::Square))
-    }
+    Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Some(CommonAspectRatioEnum::WideSixteenByNine)),
+    Some(RouterAspectRatio::TallNineBySixteen) | Some(RouterAspectRatio::Tall) => Ok(Some(CommonAspectRatioEnum::TallNineBySixteen)),
+    Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Some(CommonAspectRatioEnum::Square)),
     Some(RouterAspectRatio::WideFourByThree) => Ok(Some(CommonAspectRatioEnum::WideFourByThree)),
     Some(RouterAspectRatio::TallThreeByFour) => Ok(Some(CommonAspectRatioEnum::TallThreeByFour)),
 
     Some(RouterAspectRatio::WideTwentyOneByNine) => match ultra_wide {
       UltraWideSupport::Supported => Ok(Some(CommonAspectRatioEnum::WideTwentyOneByNine)),
       UltraWideSupport::Unsupported => match strategy {
-        RequestMismatchMitigationStrategy::ErrorOut => {
-          Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-            field: "aspect_ratio",
-            value: format!("{:?}", RouterAspectRatio::WideTwentyOneByNine),
-          }))
-        }
+        RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", RouterAspectRatio::WideTwentyOneByNine) })),
         _ => Ok(Some(nearest_aspect_ratio(RouterAspectRatio::WideTwentyOneByNine))),
       },
     },
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(nearest_aspect_ratio(unsupported)))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(nearest_aspect_ratio(unsupported))),
     },
   }
 }
@@ -152,25 +98,14 @@ fn nearest_aspect_ratio(aspect_ratio: RouterAspectRatio) -> CommonAspectRatioEnu
   }
 }
 
-fn plan_output_resolution(
-  resolution: Option<RouterResolution>,
-  strategy: RequestMismatchMitigationStrategy,
-  supported: SupportedResolutions,
-) -> Result<Option<CommonResolutionEnum>, ArtcraftRouterError> {
+fn plan_output_resolution(resolution: Option<RouterResolution>, strategy: RequestMismatchMitigationStrategy, supported: SupportedResolutions) -> Result<Option<CommonResolutionEnum>, ArtcraftRouterError> {
   match resolution {
     None => Ok(None),
 
     Some(RouterResolution::FourEightyP) => match supported {
-      SupportedResolutions::Full | SupportedResolutions::FullWith4k | SupportedResolutions::Fast => {
-        Ok(Some(CommonResolutionEnum::FourEightyP))
-      }
+      SupportedResolutions::Full | SupportedResolutions::FullWith4k | SupportedResolutions::Fast => Ok(Some(CommonResolutionEnum::FourEightyP)),
       SupportedResolutions::NoFourEightyP => match strategy {
-        RequestMismatchMitigationStrategy::ErrorOut => {
-          Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-            field: "resolution",
-            value: format!("{:?}", RouterResolution::FourEightyP),
-          }))
-        }
+        RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", RouterResolution::FourEightyP) })),
         RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(CommonResolutionEnum::TenEightyP)),
         RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(CommonResolutionEnum::SevenTwentyP)),
       },
@@ -179,16 +114,9 @@ fn plan_output_resolution(
     Some(RouterResolution::SevenTwentyP) => Ok(Some(CommonResolutionEnum::SevenTwentyP)),
 
     Some(RouterResolution::TenEightyP) => match supported {
-      SupportedResolutions::Full | SupportedResolutions::FullWith4k | SupportedResolutions::NoFourEightyP => {
-        Ok(Some(CommonResolutionEnum::TenEightyP))
-      }
+      SupportedResolutions::Full | SupportedResolutions::FullWith4k | SupportedResolutions::NoFourEightyP => Ok(Some(CommonResolutionEnum::TenEightyP)),
       SupportedResolutions::Fast => match strategy {
-        RequestMismatchMitigationStrategy::ErrorOut => {
-          Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-            field: "resolution",
-            value: format!("{:?}", RouterResolution::TenEightyP),
-          }))
-        }
+        RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", RouterResolution::TenEightyP) })),
         _ => Ok(Some(CommonResolutionEnum::SevenTwentyP)),
       },
     },
@@ -197,58 +125,36 @@ fn plan_output_resolution(
     // 2.0 family). Other models error out or fall back to their best resolution.
     Some(RouterResolution::FourK) => match (supported, strategy) {
       (SupportedResolutions::FullWith4k, _) => Ok(Some(CommonResolutionEnum::FourK)),
-      (_, RequestMismatchMitigationStrategy::ErrorOut) => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", RouterResolution::FourK),
-        }))
-      }
+      (_, RequestMismatchMitigationStrategy::ErrorOut) => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", RouterResolution::FourK) })),
       (SupportedResolutions::Fast, _) => Ok(Some(CommonResolutionEnum::SevenTwentyP)),
       (_, _) => Ok(Some(CommonResolutionEnum::TenEightyP)),
     },
 
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "resolution",
-          value: format!("{:?}", unsupported),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade => {
-        Ok(Some(match (unsupported, supported) {
-          (RouterResolution::HalfK, _) => CommonResolutionEnum::FourEightyP,
-          (_, SupportedResolutions::Fast) => CommonResolutionEnum::SevenTwentyP,
-          _ => CommonResolutionEnum::TenEightyP,
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(Some(match (unsupported, supported) {
-          (RouterResolution::HalfK, _) => CommonResolutionEnum::FourEightyP,
-          (_, SupportedResolutions::Fast) => CommonResolutionEnum::SevenTwentyP,
-          _ => CommonResolutionEnum::TenEightyP,
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "resolution", value: format!("{:?}", unsupported) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(Some(match (unsupported, supported) {
+        (RouterResolution::HalfK, _) => CommonResolutionEnum::FourEightyP,
+        (_, SupportedResolutions::Fast) => CommonResolutionEnum::SevenTwentyP,
+        _ => CommonResolutionEnum::TenEightyP,
+      })),
+      RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(Some(match (unsupported, supported) {
+        (RouterResolution::HalfK, _) => CommonResolutionEnum::FourEightyP,
+        (_, SupportedResolutions::Fast) => CommonResolutionEnum::SevenTwentyP,
+        _ => CommonResolutionEnum::TenEightyP,
+      })),
     },
   }
 }
 
 /// Batch counts: 1 through 4.
-pub fn plan_batch_count(
-  video_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<u16, ArtcraftRouterError> {
+pub fn plan_batch_count(video_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<u16, ArtcraftRouterError> {
   let count = video_batch_count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
     1..=4 => Ok(count),
     // 5 and above:
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "video_batch_count",
-          value: format!("{}", count),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "video_batch_count", value: format!("{}", count) })),
       RequestMismatchMitigationStrategy::PayMoreUpgrade => Ok(4),
       RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(4),
     },
@@ -258,23 +164,14 @@ pub fn plan_batch_count(
 /// Batch counts for the Seedance 2.0 Mini family: 1-8 are all valid
 /// (wider than the shared 1/2/4 planning); higher counts clamp to 8 per the
 /// mitigation strategy.
-pub fn plan_mini_batch_count(
-  video_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<u16, ArtcraftRouterError> {
+pub fn plan_mini_batch_count(video_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<u16, ArtcraftRouterError> {
   let count = video_batch_count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
     1..=8 => Ok(count),
     _ => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "video_batch_count",
-          value: format!("{}", count),
-        }))
-      }
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(8),
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "video_batch_count", value: format!("{}", count) })),
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(8),
     },
   }
 }
@@ -293,22 +190,14 @@ fn plan_bitrate(bitrate: Option<RouterBitrate>) -> Option<CommonBitrateEnum> {
 }
 
 /// Duration: 4-15 seconds.
-pub fn plan_duration(
-  duration_seconds: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<Option<u8>, ArtcraftRouterError> {
+pub fn plan_duration(duration_seconds: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<Option<u8>, ArtcraftRouterError> {
   const MIN: u16 = 4;
   const MAX: u16 = 15;
   match duration_seconds {
     None => Ok(None),
     Some(d) if d >= MIN && d <= MAX => Ok(Some(d as u8)),
     Some(d) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "duration_seconds",
-          value: format!("{}", d),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "duration_seconds", value: format!("{}", d) })),
       _ => Ok(Some(d.clamp(MIN, MAX) as u8)),
     },
   }

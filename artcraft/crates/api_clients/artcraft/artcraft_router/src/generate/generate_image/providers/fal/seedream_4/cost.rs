@@ -34,15 +34,7 @@ impl FalSeedream4CostState {
     const COST_PER_IMAGE: u64 = 3;
     let cost_in_usd_cents = COST_PER_IMAGE * self.num_images;
 
-    ImageGenerationCostEstimate {
-      cost_in_credits: Some(cost_in_usd_cents),
-      cost_in_usd_cents: Some(cost_in_usd_cents),
-      is_free: false,
-      is_unlimited: false,
-      is_rate_limited: false,
-      has_watermark: false,
-      failures_are_refunded: None,
-    }
+    ImageGenerationCostEstimate { cost_in_credits: Some(cost_in_usd_cents), cost_in_usd_cents: Some(cost_in_usd_cents), is_free: false, is_unlimited: false, is_rate_limited: false, has_watermark: false, failures_are_refunded: None }
   }
 }
 
@@ -53,26 +45,11 @@ mod tests {
   use fal_client::requests_old::webhook::image::text::enqueue_bytedance_seedream_v4_text_to_image_webhook::EnqueueBytedanceSeedreamV4TextToImageRequest;
 
   fn t2i_cost(n: EnqueueBytedanceSeedreamV4TextToImageNumImages) -> ImageGenerationCostEstimate {
-    FalSeedream4CostState::from_request(&FalSeedream4RequestState::TextToImage(
-      EnqueueBytedanceSeedreamV4TextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: Some(n),
-        max_images: None,
-        image_size: None,
-      },
-    )).estimate_cost()
+    FalSeedream4CostState::from_request(&FalSeedream4RequestState::TextToImage(EnqueueBytedanceSeedreamV4TextToImageRequest { prompt: "test".to_string(), num_images: Some(n), max_images: None, image_size: None })).estimate_cost()
   }
 
   fn edit_cost(n: EnqueueBytedanceSeedreamV4EditImageNumImages) -> ImageGenerationCostEstimate {
-    FalSeedream4CostState::from_request(&FalSeedream4RequestState::EditImage(
-      EnqueueBytedanceSeedreamV4EditImageRequest {
-        prompt: "test".to_string(),
-        image_urls: vec!["https://example.com/x.jpg".to_string()],
-        num_images: Some(n),
-        max_images: None,
-        image_size: None,
-      },
-    )).estimate_cost()
+    FalSeedream4CostState::from_request(&FalSeedream4RequestState::EditImage(EnqueueBytedanceSeedreamV4EditImageRequest { prompt: "test".to_string(), image_urls: vec!["https://example.com/x.jpg".to_string()], num_images: Some(n), max_images: None, image_size: None })).estimate_cost()
   }
 
   #[test]
@@ -97,23 +74,13 @@ mod tests {
 
   #[test]
   fn t2i_none_num_images_defaults_to_one() {
-    let cost = FalSeedream4CostState::from_request(&FalSeedream4RequestState::TextToImage(
-      EnqueueBytedanceSeedreamV4TextToImageRequest {
-        prompt: "test".to_string(),
-        num_images: None,
-        max_images: None,
-        image_size: None,
-      },
-    )).estimate_cost();
+    let cost = FalSeedream4CostState::from_request(&FalSeedream4RequestState::TextToImage(EnqueueBytedanceSeedreamV4TextToImageRequest { prompt: "test".to_string(), num_images: None, max_images: None, image_size: None })).estimate_cost();
     assert_eq!(cost.cost_in_usd_cents, Some(3));
   }
 
   #[test]
   fn edit_two_images_matches_t2i_two_images() {
-    assert_eq!(
-      edit_cost(EnqueueBytedanceSeedreamV4EditImageNumImages::Two).cost_in_usd_cents,
-      t2i_cost(EnqueueBytedanceSeedreamV4TextToImageNumImages::Two).cost_in_usd_cents,
-    );
+    assert_eq!(edit_cost(EnqueueBytedanceSeedreamV4EditImageNumImages::Two).cost_in_usd_cents, t2i_cost(EnqueueBytedanceSeedreamV4TextToImageNumImages::Two).cost_in_usd_cents,);
   }
 
   #[test]

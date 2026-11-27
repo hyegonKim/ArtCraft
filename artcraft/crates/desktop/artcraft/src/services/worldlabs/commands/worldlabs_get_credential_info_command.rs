@@ -17,25 +17,20 @@ pub struct WorldlabsGetCredentialInfoResponse {
 impl SerializeMarker for WorldlabsGetCredentialInfoResponse {}
 
 #[tauri::command]
-pub async fn worldlabs_get_credential_info_command(
-  creds_manager: State<'_, WorldlabsCredentialManager>,
-) -> ResponseOrErrorMessage<WorldlabsGetCredentialInfoResponse> {
+pub async fn worldlabs_get_credential_info_command(creds_manager: State<'_, WorldlabsCredentialManager>) -> ResponseOrErrorMessage<WorldlabsGetCredentialInfoResponse> {
   info!("worldlabs_get_credential_info_command called");
 
-  let info = get_info(&creds_manager)
-      .map_err(|err| {
-        error!("Error getting info: {:?}", err);
-        "error getting info"
-      })?;
+  let info = get_info(&creds_manager).map_err(|err| {
+    error!("Error getting info: {:?}", err);
+    "error getting info"
+  })?;
 
   Ok(info.into())
 }
 
-fn get_info(
-  creds: &WorldlabsCredentialManager,
-) -> AnyhowResult<WorldlabsGetCredentialInfoResponse> {
+fn get_info(creds: &WorldlabsCredentialManager) -> AnyhowResult<WorldlabsGetCredentialInfoResponse> {
   let mut can_clear_state = true;
-  
+
   let maybe_cookies = creds.maybe_copy_cookie_store()?;
   let maybe_bearer = creds.maybe_copy_bearer_token()?;
 
@@ -49,15 +44,12 @@ fn get_info(
     match bearer.parse_jwt_claims() {
       Ok(claims) => {
         maybe_email = claims.email;
-      }
+      },
       Err(err) => {
         error!("Failed to parse JWT bearer claims: {}", err);
-      }
+      },
     }
   }
 
-  Ok(WorldlabsGetCredentialInfoResponse {
-    maybe_email,
-    can_clear_state,
-  })
+  Ok(WorldlabsGetCredentialInfoResponse { maybe_email, can_clear_state })
 }

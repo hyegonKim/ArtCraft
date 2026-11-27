@@ -115,125 +115,62 @@ pub async fn poll_characters(args: PollCharactersArgs<'_>) -> Result<PollCharact
 
   // The query param is URL-encoded JSON: {"0":{"json":{"limit":N}}} or {"0":{"json":{"limit":N,"cursor":C}}}
   let input = match args.cursor {
-    Some(cursor) => format!(
-      r#"{{"0":{{"json":{{"limit":{},"cursor":{}}}}}}}"#,
-      limit, cursor
-    ),
-    None => format!(
-      r#"{{"0":{{"json":{{"limit":{}}}}}}}"#,
-      limit
-    ),
+    Some(cursor) => format!(r#"{{"0":{{"json":{{"limit":{},"cursor":{}}}}}}}"#, limit, cursor),
+    None => format!(r#"{{"0":{{"json":{{"limit":{}}}}}}}"#, limit),
   };
 
   let encoded_input: String = url::form_urlencoded::byte_serialize(input.as_bytes()).collect();
 
-  let url = format!(
-    "{}/api/trpc/character.getCharacters?batch=1&input={}",
-    base_url,
-    encoded_input,
-  );
+  let url = format!("{}/api/trpc/character.getCharacters?batch=1&input={}", base_url, encoded_input,);
 
   info!("Polling characters (limit={}, cursor={:?})...", limit, args.cursor);
 
   let cookie = args.session.cookies.as_str();
   let referer = format!("{}/app/characters", base_url);
 
-  let client = Client::builder()
-    .emulation(Emulation::Firefox143)
-    .timeout(KINOVI_REQUEST_TIMEOUT)
-    .build()
-    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).timeout(KINOVI_REQUEST_TIMEOUT).build().map_err(|err| KinoviWebClientError::WreqClientError(err))?;
 
-  let response = client.get(&url)
-    .header("User-Agent", FIREFOX_USER_AGENT)
-    .header("Accept", "*/*")
-    .header("Accept-Language", "en-US,en;q=0.9")
-    .header("Accept-Encoding", "gzip, deflate, br, zstd")
-    .header("Referer", &referer)
-    .header("Content-Type", "application/json")
-    .header("x-trpc-source", "client")
-    .header("Connection", "keep-alive")
-    .header("Cookie", cookie)
-    .header("Sec-Fetch-Dest", "empty")
-    .header("Sec-Fetch-Mode", "cors")
-    .header("Sec-Fetch-Site", "same-origin")
-    .header("Priority", "u=4")
-    .header("TE", "trailers")
-    .send()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response = client.get(&url).header("User-Agent", FIREFOX_USER_AGENT).header("Accept", "*/*").header("Accept-Language", "en-US,en;q=0.9").header("Accept-Encoding", "gzip, deflate, br, zstd").header("Referer", &referer).header("Content-Type", "application/json").header("x-trpc-source", "client").header("Connection", "keep-alive").header("Cookie", cookie).header("Sec-Fetch-Dest", "empty").header("Sec-Fetch-Mode", "cors").header("Sec-Fetch-Site", "same-origin").header("Priority", "u=4").header("TE", "trailers").send().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response_body = response.text().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   info!("Poll characters response: status={}", status);
 
   if !status.is_success() {
-    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status,
-      body: response_body,
-    }.into());
+    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body }.into());
   }
 
-  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body)
-    .map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body).map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  let data = batch_response
+  let data = batch_response.into_iter().next().ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape { explanation: "Empty batch response array".to_string(), raw_body: response_body.clone() })?.result.data.json;
+
+  let characters: Vec<CharacterStatus> = data
+    .items
     .into_iter()
-    .next()
-    .ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape {
-      explanation: "Empty batch response array".to_string(),
-      raw_body: response_body.clone(),
-    })?
-    .result
-    .data
-    .json;
+    .map(|item| {
+      let result_images = item.result_images.unwrap_or_default().into_iter().map(|img| CharacterResultImage { url: img.url, image_type: img.image_type }).collect();
 
-  let characters: Vec<CharacterStatus> = data.items.into_iter().map(|item| {
-    let result_images = item.result_images
-      .unwrap_or_default()
-      .into_iter()
-      .map(|img| CharacterResultImage {
-        url: img.url,
-        image_type: img.image_type,
-      })
-      .collect();
+      // Derive our status from the raw Kinovi API fields.
+      // Kinovi reports "COMPLETED" even when the character actually failed:
+      //   - assetStatus "Failed" => the asset generation failed
+      //   - assetStatus null (no assetId) => the task completed but produced no asset
+      // Only taskStatus "COMPLETED" + assetStatus "Active" is a true success.
+      let status = match item.task_status.as_str() {
+        "FAILED" => CharacterCreationStatus::Failed,
+        "COMPLETED" => match item.asset_status.as_deref() {
+          Some("Active") => CharacterCreationStatus::Success,
+          _ => CharacterCreationStatus::Failed, // "Failed", null, or any other value
+        },
+        _ => CharacterCreationStatus::Pending,
+      };
 
-    // Derive our status from the raw Kinovi API fields.
-    // Kinovi reports "COMPLETED" even when the character actually failed:
-    //   - assetStatus "Failed" => the asset generation failed
-    //   - assetStatus null (no assetId) => the task completed but produced no asset
-    // Only taskStatus "COMPLETED" + assetStatus "Active" is a true success.
-    let status = match item.task_status.as_str() {
-      "FAILED" => CharacterCreationStatus::Failed,
-      "COMPLETED" => match item.asset_status.as_deref() {
-        Some("Active") => CharacterCreationStatus::Success,
-        _ => CharacterCreationStatus::Failed, // "Failed", null, or any other value
-      },
-      _ => CharacterCreationStatus::Pending,
-    };
-
-    CharacterStatus {
-      id: item.id,
-      character_id: item.character_id,
-      name: item.name,
-      description: item.description,
-      avatar_url: item.avatar_url,
-      result_images,
-      status,
-      fail_reason: item.fail_reason,
-      asset_id: item.asset_id,
-      raw_task_status: item.task_status,
-      raw_asset_status: item.asset_status,
-      created_at: item.created_at,
-    }
-  }).collect();
+      CharacterStatus { id: item.id, character_id: item.character_id, name: item.name, description: item.description, avatar_url: item.avatar_url, result_images, status, fail_reason: item.fail_reason, asset_id: item.asset_id, raw_task_status: item.task_status, raw_asset_status: item.asset_status, created_at: item.created_at }
+    })
+    .collect();
 
   // Parse next_cursor: it's either a JSON number or null.
-  let next_cursor = data.next_cursor
-    .and_then(|v| v.as_u64());
+  let next_cursor = data.next_cursor.and_then(|v| v.as_u64());
 
   info!("Polled {} character(s), next_cursor={:?}", characters.len(), next_cursor);
 
@@ -259,20 +196,12 @@ mod tests {
   async fn test_poll_characters() -> AnyhowResult<()> {
     setup_test_logging(LevelFilter::Trace);
     let session = test_session()?;
-    let result = poll_characters(PollCharactersArgs {
-      session: &session,
-      limit: None,
-      cursor: None,
-      host_override: None,
-    }).await?;
+    let result = poll_characters(PollCharactersArgs { session: &session, limit: None, cursor: None, host_override: None }).await?;
 
     println!("Characters returned: {}", result.characters.len());
     println!("Next cursor: {:?}", result.next_cursor);
     for ch in &result.characters {
-      println!(
-        "  {} | {} | {:?} | asset_id={:?} | avatar={:?}",
-        ch.character_id, ch.name, ch.status, ch.asset_id, ch.avatar_url,
-      );
+      println!("  {} | {} | {:?} | asset_id={:?} | avatar={:?}", ch.character_id, ch.name, ch.status, ch.asset_id, ch.avatar_url,);
     }
     assert_eq!(1, 2); // NB: Intentional failure to inspect output.
     Ok(())
@@ -283,20 +212,12 @@ mod tests {
   async fn test_poll_characters_small_limit() -> AnyhowResult<()> {
     setup_test_logging(LevelFilter::Trace);
     let session = test_session()?;
-    let result = poll_characters(PollCharactersArgs {
-      session: &session,
-      limit: Some(2),
-      cursor: None,
-      host_override: None,
-    }).await?;
+    let result = poll_characters(PollCharactersArgs { session: &session, limit: Some(2), cursor: None, host_override: None }).await?;
 
     println!("Characters returned (limit=2): {}", result.characters.len());
     println!("Next cursor: {:?}", result.next_cursor);
     for ch in &result.characters {
-      println!(
-        "  {} | {} | {:?} | asset_id={:?}",
-        ch.character_id, ch.name, ch.status, ch.asset_id,
-      );
+      println!("  {} | {} | {:?} | asset_id={:?}", ch.character_id, ch.name, ch.status, ch.asset_id,);
     }
     assert_eq!(1, 2); // NB: Intentional failure to inspect output.
     Ok(())
@@ -314,12 +235,7 @@ mod tests {
 
     loop {
       page += 1;
-      let result = poll_characters(PollCharactersArgs {
-        session: &session,
-        limit: Some(2),
-        cursor,
-        host_override: None,
-      }).await?;
+      let result = poll_characters(PollCharactersArgs { session: &session, limit: Some(2), cursor, host_override: None }).await?;
 
       let page_count = result.characters.len();
       total_characters += page_count;
@@ -345,12 +261,7 @@ mod tests {
   async fn test_poll_all_characters_verbose() -> AnyhowResult<()> {
     setup_test_logging(LevelFilter::Trace);
     let session = test_session()?;
-    let result = poll_characters(PollCharactersArgs {
-      session: &session,
-      limit: None,
-      cursor: None,
-      host_override: None,
-    }).await?;
+    let result = poll_characters(PollCharactersArgs { session: &session, limit: None, cursor: None, host_override: None }).await?;
 
     println!("=== All Characters ({} total) ===", result.characters.len());
     for ch in &result.characters {

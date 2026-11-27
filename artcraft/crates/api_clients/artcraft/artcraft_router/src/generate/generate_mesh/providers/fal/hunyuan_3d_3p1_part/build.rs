@@ -6,9 +6,7 @@ use crate::generate::generate_mesh::mesh_generation_draft_or_request::MeshGenera
 use crate::generate::generate_mesh::mesh_generation_request::MeshGenerationRequest;
 use crate::generate::generate_mesh::providers::fal::hunyuan_3d_3p1_part::request::FalHunyuan3d3p1PartRequestState;
 use crate::generate::generate_mesh::providers::fal::resolve::plan_input_mesh_url;
-use crate::generate::generate_mesh::providers::reject_unsupported::{
-  reject_unsupported_image_ref, reject_unsupported_option,
-};
+use crate::generate::generate_mesh::providers::reject_unsupported::{reject_unsupported_image_ref, reject_unsupported_option};
 
 /// Hunyuan 3D v3.1 Part splits an existing mesh into semantic parts. It takes
 /// only a mesh file (FBX) as input — text, images, and generation options are
@@ -18,16 +16,10 @@ pub fn build_fal_hunyuan_3d_3p1_part(builder: GenerateMeshRequestBuilder) -> Res
   Ok(MeshGenerationDraftOrRequest::Request(MeshGenerationRequest::FalHunyuan3d3p1Part(state)))
 }
 
-pub(crate) fn build_fal_hunyuan_3d_3p1_part_state(
-  mut builder: GenerateMeshRequestBuilder,
-) -> Result<FalHunyuan3d3p1PartRequestState, ArtcraftRouterError> {
+pub(crate) fn build_fal_hunyuan_3d_3p1_part_state(mut builder: GenerateMeshRequestBuilder) -> Result<FalHunyuan3d3p1PartRequestState, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
-  let input_file_url = plan_input_mesh_url(builder.input_mesh.take())?.ok_or_else(|| {
-    ArtcraftRouterError::InvalidInput(
-      "Hunyuan 3D v3.1 Part requires an input mesh file (FBX)".to_string(),
-    )
-  })?;
+  let input_file_url = plan_input_mesh_url(builder.input_mesh.take())?.ok_or_else(|| ArtcraftRouterError::InvalidInput("Hunyuan 3D v3.1 Part requires an input mesh file (FBX)".to_string()))?;
 
   // Part splitting takes only the mesh file; every other option is
   // unsupported.
@@ -83,14 +75,8 @@ mod tests {
 
     #[test]
     fn media_token_input_mesh_is_rejected() {
-      let builder = GenerateMeshRequestBuilder {
-        input_mesh: Some(MeshRef::MediaFileToken(MediaFileToken::new("mf_mesh".to_string()))),
-        ..base_builder()
-      };
-      assert!(matches!(
-        build_fal_hunyuan_3d_3p1_part_state(builder),
-        Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-      ));
+      let builder = GenerateMeshRequestBuilder { input_mesh: Some(MeshRef::MediaFileToken(MediaFileToken::new("mf_mesh".to_string()))), ..base_builder() };
+      assert!(matches!(build_fal_hunyuan_3d_3p1_part_state(builder), Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))));
     }
   }
 
@@ -99,21 +85,9 @@ mod tests {
 
     #[test]
     fn each_unsupported_option_errors_out_under_error_out() {
-      let cases: Vec<fn(&mut GenerateMeshRequestBuilder)> = vec![
-        |b| b.prompt = Some("a red ceramic teapot".to_string()),
-        |b| b.front_image = Some(ImageRef::Url("https://example.com/front.png".to_string())),
-        |b| b.back_image = Some(ImageRef::Url("https://example.com/back.png".to_string())),
-        |b| b.mesh_output_type = Some(CommonMeshOutputType::Normal),
-        |b| b.polygon_type = Some(CommonPolygonType::Quad),
-        |b| b.face_count = Some(100_000),
-        |b| b.enable_pbr = Some(true),
-        |b| b.enable_texture = Some(false),
-      ];
+      let cases: Vec<fn(&mut GenerateMeshRequestBuilder)> = vec![|b| b.prompt = Some("a red ceramic teapot".to_string()), |b| b.front_image = Some(ImageRef::Url("https://example.com/front.png".to_string())), |b| b.back_image = Some(ImageRef::Url("https://example.com/back.png".to_string())), |b| b.mesh_output_type = Some(CommonMeshOutputType::Normal), |b| b.polygon_type = Some(CommonPolygonType::Quad), |b| b.face_count = Some(100_000), |b| b.enable_pbr = Some(true), |b| b.enable_texture = Some(false)];
       for (index, set) in cases.into_iter().enumerate() {
-        let mut builder = GenerateMeshRequestBuilder {
-          request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-          ..mesh_builder()
-        };
+        let mut builder = GenerateMeshRequestBuilder { request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, ..mesh_builder() };
         set(&mut builder);
         assert!(build_fal_hunyuan_3d_3p1_part_state(builder).is_err(), "for case {index}");
       }
@@ -121,13 +95,7 @@ mod tests {
 
     #[test]
     fn unsupported_options_are_dropped_under_lenient_strategies() {
-      let builder = GenerateMeshRequestBuilder {
-        prompt: Some("a red ceramic teapot".to_string()),
-        mesh_output_type: Some(CommonMeshOutputType::Normal),
-        face_count: Some(100_000),
-        enable_pbr: Some(true),
-        ..mesh_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { prompt: Some("a red ceramic teapot".to_string()), mesh_output_type: Some(CommonMeshOutputType::Normal), face_count: Some(100_000), enable_pbr: Some(true), ..mesh_builder() };
       let state = build_fal_hunyuan_3d_3p1_part_state(builder).expect("build");
       assert_eq!(state.request.input_file_url, MESH_URL);
     }
@@ -136,17 +104,10 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::Hunyuan3d3p1Part,
-      provider: RouterProvider::Fal,
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::Hunyuan3d3p1Part, provider: RouterProvider::Fal, ..Default::default() }
   }
 
   fn mesh_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      input_mesh: Some(MeshRef::Url(MESH_URL.to_string())),
-      ..base_builder()
-    }
+    GenerateMeshRequestBuilder { input_mesh: Some(MeshRef::Url(MESH_URL.to_string())), ..base_builder() }
   }
 }

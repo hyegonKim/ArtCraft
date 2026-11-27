@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::image::edit::flux_1_schnell_edit_image::raw_request::{
-  Flux1SchnellEditImageInput, Flux1SchnellEditImageOutput,
-};
+use crate::requests::api::image::edit::flux_1_schnell_edit_image::raw_request::{Flux1SchnellEditImageInput, Flux1SchnellEditImageOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -48,23 +46,19 @@ impl FalEndpoint for Flux1SchnellEditImageRequest {
       Flux1SchnellEditImageNumImages::Four => 4,
     };
 
-    let image_size = self.image_size.map(|s| match s {
-      Flux1SchnellEditImageSize::Square => "square",
-      Flux1SchnellEditImageSize::SquareHd => "square_hd",
-      Flux1SchnellEditImageSize::LandscapeFourByThree => "landscape_4_3",
-      Flux1SchnellEditImageSize::LandscapeSixteenByNine => "landscape_16_9",
-      Flux1SchnellEditImageSize::PortraitThreeByFour => "portrait_4_3",
-      Flux1SchnellEditImageSize::PortraitNineBySixteen => "portrait_16_9",
-    }.to_string());
+    let image_size = self.image_size.map(|s| {
+      match s {
+        Flux1SchnellEditImageSize::Square => "square",
+        Flux1SchnellEditImageSize::SquareHd => "square_hd",
+        Flux1SchnellEditImageSize::LandscapeFourByThree => "landscape_4_3",
+        Flux1SchnellEditImageSize::LandscapeSixteenByNine => "landscape_16_9",
+        Flux1SchnellEditImageSize::PortraitThreeByFour => "portrait_4_3",
+        Flux1SchnellEditImageSize::PortraitNineBySixteen => "portrait_16_9",
+      }
+      .to_string()
+    });
 
-    Ok(Self::RawRequest {
-      image_url: self.image_url.clone(),
-      num_images: Some(num_images),
-      image_size,
-      enable_safety_checker: Some(false),
-      output_format: Some("png".to_string()),
-      ..Default::default()
-    })
+    Ok(Self::RawRequest { image_url: self.image_url.clone(), num_images: Some(num_images), image_size, enable_safety_checker: Some(false), output_format: Some("png".to_string()), ..Default::default() })
   }
 }
 
@@ -83,11 +77,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux1SchnellEditImageRequest {
-      image_url: GHOST_IMAGE_URL.to_string(),
-      num_images: Flux1SchnellEditImageNumImages::One,
-      image_size: None,
-    };
+    let request = Flux1SchnellEditImageRequest { image_url: GHOST_IMAGE_URL.to_string(), num_images: Flux1SchnellEditImageNumImages::One, image_size: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);
@@ -101,11 +91,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Flux1SchnellEditImageRequest {
-      image_url: GHOST_IMAGE_URL.to_string(),
-      num_images: Flux1SchnellEditImageNumImages::Two,
-      image_size: Some(Flux1SchnellEditImageSize::LandscapeSixteenByNine),
-    };
+    let request = Flux1SchnellEditImageRequest { image_url: GHOST_IMAGE_URL.to_string(), num_images: Flux1SchnellEditImageNumImages::Two, image_size: Some(Flux1SchnellEditImageSize::LandscapeSixteenByNine) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Request ID: {}", result.request_id);

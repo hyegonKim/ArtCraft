@@ -42,28 +42,9 @@ pub fn extract_contents_from_payload(payload: &Value) -> Option<ExtractedContent
   let rendered_image = extract_rendered_image_payload::extract_rendered_image(obj);
   let preprocessed_image = extract_preprocessed_image_payload::extract_preprocessed_image(obj);
 
-  if image.is_none() && images.is_none() && video.is_none() && audio.is_none()
-    && model_glb.is_none() && model_glb_pbr.is_none() && model_urls.is_none()
-    && model_mesh.is_none() && model_obj.is_none()
-    && result_files.is_none() && thumbnail.is_none() && rendered_image.is_none()
-    && preprocessed_image.is_none()
-  {
+  if image.is_none() && images.is_none() && video.is_none() && audio.is_none() && model_glb.is_none() && model_glb_pbr.is_none() && model_urls.is_none() && model_mesh.is_none() && model_obj.is_none() && result_files.is_none() && thumbnail.is_none() && rendered_image.is_none() && preprocessed_image.is_none() {
     return None;
   }
 
-  Some(ExtractedContents {
-    image,
-    images,
-    video,
-    audio,
-    model_glb,
-    model_glb_pbr,
-    model_urls,
-    model_mesh,
-    model_obj,
-    result_files,
-    thumbnail,
-    rendered_image,
-    preprocessed_image,
-  })
+  Some(ExtractedContents { image, images, video, audio, model_glb, model_glb_pbr, model_urls, model_mesh, model_obj, result_files, thumbnail, rendered_image, preprocessed_image })
 }

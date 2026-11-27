@@ -1,9 +1,9 @@
 #[cfg(test)]
-pub (crate) mod test_utils;
+pub(crate) mod test_utils;
 
 // Internal lib
-pub (crate) mod constants;
-pub (crate) mod utils_internal;
+pub(crate) mod constants;
+pub(crate) mod utils_internal;
 
 // User API
 pub mod creds;

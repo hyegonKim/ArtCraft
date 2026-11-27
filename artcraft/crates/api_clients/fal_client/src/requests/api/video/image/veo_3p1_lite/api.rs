@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::image::veo_3p1_lite::raw_request::{
-  Veo3p1LiteImageToVideoInput, Veo3p1LiteImageToVideoOutput,
-};
+use crate::requests::api::video::image::veo_3p1_lite::raw_request::{Veo3p1LiteImageToVideoInput, Veo3p1LiteImageToVideoOutput};
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
 #[derive(Clone, Debug)]
@@ -136,18 +134,7 @@ impl FalEndpoint for Veo3p1LiteImageToVideoRequest {
   type RawResponse = Veo3p1LiteImageToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_url: self.image_url.clone(),
-      aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()),
-      duration: self.duration.map(|d| d.to_str().to_string()),
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-      generate_audio: self.generate_audio,
-      negative_prompt: self.negative_prompt.clone(),
-      seed: self.seed,
-      auto_fix: self.auto_fix,
-      safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_url: self.image_url.clone(), aspect_ratio: self.aspect_ratio.map(|ar| ar.to_str().to_string()), duration: self.duration.map(|d| d.to_str().to_string()), resolution: self.resolution.map(|r| r.to_str().to_string()), generate_audio: self.generate_audio, negative_prompt: self.negative_prompt.clone(), seed: self.seed, auto_fix: self.auto_fix, safety_tolerance: self.safety_tolerance.map(|s| s.to_str().to_string()) })
   }
 }
 
@@ -168,18 +155,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1LiteImageToVideoRequest {
-      prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      aspect_ratio: Some(Veo3p1LiteImageToVideoAspectRatio::SixteenByNine),
-      duration: Some(Veo3p1LiteImageToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1LiteImageToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1LiteImageToVideoRequest { prompt: "the lake comes alive with gentle ripples and dappled sunlight".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), aspect_ratio: Some(Veo3p1LiteImageToVideoAspectRatio::SixteenByNine), duration: Some(Veo3p1LiteImageToVideoDuration::FourSeconds), resolution: Some(Veo3p1LiteImageToVideoResolution::SevenTwentyP), generate_audio: Some(false), negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -193,18 +169,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = Veo3p1LiteImageToVideoRequest {
-      prompt: "wind moves through the trees".to_string(),
-      image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(),
-      aspect_ratio: None,
-      duration: Some(Veo3p1LiteImageToVideoDuration::FourSeconds),
-      resolution: Some(Veo3p1LiteImageToVideoResolution::SevenTwentyP),
-      generate_audio: Some(false),
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1LiteImageToVideoRequest { prompt: "wind moves through the trees".to_string(), image_url: JUNO_AT_LAKE_IMAGE_URL.to_string(), aspect_ratio: None, duration: Some(Veo3p1LiteImageToVideoDuration::FourSeconds), resolution: Some(Veo3p1LiteImageToVideoResolution::SevenTwentyP), generate_audio: Some(false), negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -216,18 +181,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = Veo3p1LiteImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      aspect_ratio: Some(Veo3p1LiteImageToVideoAspectRatio::Auto),
-      duration: Some(Veo3p1LiteImageToVideoDuration::SixSeconds),
-      resolution: Some(Veo3p1LiteImageToVideoResolution::TenEightyP),
-      generate_audio: Some(false),
-      negative_prompt: Some("nope".to_string()),
-      seed: Some(7),
-      auto_fix: Some(true),
-      safety_tolerance: Some(Veo3p1LiteImageToVideoSafetyTolerance::Level2),
-    };
+    let request = Veo3p1LiteImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), aspect_ratio: Some(Veo3p1LiteImageToVideoAspectRatio::Auto), duration: Some(Veo3p1LiteImageToVideoDuration::SixSeconds), resolution: Some(Veo3p1LiteImageToVideoResolution::TenEightyP), generate_audio: Some(false), negative_prompt: Some("nope".to_string()), seed: Some(7), auto_fix: Some(true), safety_tolerance: Some(Veo3p1LiteImageToVideoSafetyTolerance::Level2) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.image_url, "https://example.com/start.png");
@@ -243,42 +197,21 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = Veo3p1LiteImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/start.png".to_string(),
-      aspect_ratio: None,
-      duration: None,
-      resolution: None,
-      generate_audio: None,
-      negative_prompt: None,
-      seed: None,
-      auto_fix: None,
-      safety_tolerance: None,
-    };
+    let request = Veo3p1LiteImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/start.png".to_string(), aspect_ratio: None, duration: None, resolution: None, generate_audio: None, negative_prompt: None, seed: None, auto_fix: None, safety_tolerance: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(
-      json,
-      serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),
-    );
+    assert_eq!(json, serde_json::json!({ "prompt": "p", "image_url": "https://example.com/start.png" }),);
   }
 
   #[test]
   fn every_aspect_ratio_maps_to_wire_string() {
-    for (variant, expected) in [
-      (Veo3p1LiteImageToVideoAspectRatio::Auto, "auto"),
-      (Veo3p1LiteImageToVideoAspectRatio::SixteenByNine, "16:9"),
-      (Veo3p1LiteImageToVideoAspectRatio::NineBySixteen, "9:16"),
-    ] {
+    for (variant, expected) in [(Veo3p1LiteImageToVideoAspectRatio::Auto, "auto"), (Veo3p1LiteImageToVideoAspectRatio::SixteenByNine, "16:9"), (Veo3p1LiteImageToVideoAspectRatio::NineBySixteen, "9:16")] {
       assert_eq!(variant.to_str(), expected);
     }
   }
 
   #[test]
   fn endpoint_path_is_canonical() {
-    assert_eq!(
-      Veo3p1LiteImageToVideoRequest::ENDPOINT,
-      "fal-ai/veo3.1/lite/image-to-video",
-    );
+    assert_eq!(Veo3p1LiteImageToVideoRequest::ENDPOINT, "fal-ai/veo3.1/lite/image-to-video",);
   }
 
   // NB: Pricing tests are in cost.rs

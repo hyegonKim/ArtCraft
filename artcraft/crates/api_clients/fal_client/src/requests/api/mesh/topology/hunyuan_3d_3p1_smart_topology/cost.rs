@@ -12,18 +12,11 @@ impl FalRequestCostCalculator for Hunyuan3d3p1SmartTopologyRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::requests::api::mesh::topology::hunyuan_3d_3p1_smart_topology::api::{
-    Hunyuan3d3p1SmartTopologyFaceLevel, Hunyuan3d3p1SmartTopologyPolygonType,
-  };
+  use crate::requests::api::mesh::topology::hunyuan_3d_3p1_smart_topology::api::{Hunyuan3d3p1SmartTopologyFaceLevel, Hunyuan3d3p1SmartTopologyPolygonType};
 
   #[test]
   fn flat_cost_regardless_of_options() {
-    let mut request = Hunyuan3d3p1SmartTopologyRequest {
-      input_file_url: "https://example.com/model.glb".to_string(),
-      input_file_type: None,
-      polygon_type: None,
-      face_level: None,
-    };
+    let mut request = Hunyuan3d3p1SmartTopologyRequest { input_file_url: "https://example.com/model.glb".to_string(), input_file_type: None, polygon_type: None, face_level: None };
     assert_eq!(request.calculate_cost_in_cents(), 75);
 
     request.polygon_type = Some(Hunyuan3d3p1SmartTopologyPolygonType::Quadrilateral);

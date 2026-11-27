@@ -4,19 +4,10 @@ use crate::origins::{ARTCRAFT_DESKTOP_DEVELOPMENT_ORIGIN, ARTCRAFT_DESKTOP_ORIGI
 use crate::third_party_provider::{ThirdPartyProvider, THIRD_PARTY_PROVIDERS};
 
 /// Hostnames of our deployed APIs (HTTPS only).
-const ARTCRAFT_API_HOSTNAMES: [&str; 3] = [
-  "api.storyteller.ai",
-  "api.getartcraft.com",
-  "api.fakeyou.com",
-];
+const ARTCRAFT_API_HOSTNAMES: [&str; 3] = ["api.storyteller.ai", "api.getartcraft.com", "api.fakeyou.com"];
 
 /// Domains we own. Subdomains match too (CDNs, uploads, websites).
-const ARTCRAFT_DOMAINS: [&str; 4] = [
-  "storyteller.ai",
-  "getartcraft.com",
-  "fakeyou.com",
-  "artcraft.ai",
-];
+const ARTCRAFT_DOMAINS: [&str; 4] = ["storyteller.ai", "getartcraft.com", "fakeyou.com", "artcraft.ai"];
 
 /// Who a request is going to, which decides how the desktop app identifies itself.
 #[derive(Debug, PartialEq, Eq)]
@@ -45,10 +36,7 @@ impl Destination {
     if ARTCRAFT_DOMAINS.iter().any(|domain| is_domain_or_subdomain(host, domain)) {
       return Self::ArtcraftHost;
     }
-    THIRD_PARTY_PROVIDERS
-      .iter()
-      .find(|provider| provider.domains.iter().any(|domain| is_domain_or_subdomain(host, domain)))
-      .map_or(Self::Unknown, Self::ThirdParty)
+    THIRD_PARTY_PROVIDERS.iter().find(|provider| provider.domains.iter().any(|domain| is_domain_or_subdomain(host, domain))).map_or(Self::Unknown, Self::ThirdParty)
   }
 }
 
@@ -65,10 +53,7 @@ fn is_local_development_api(destination: &Url) -> bool {
 }
 
 fn is_domain_or_subdomain(host: &str, domain: &str) -> bool {
-  host == domain
-    || host
-      .strip_suffix(domain)
-      .is_some_and(|prefix| prefix.ends_with('.'))
+  host == domain || host.strip_suffix(domain).is_some_and(|prefix| prefix.ends_with('.'))
 }
 
 #[cfg(test)]
@@ -80,37 +65,21 @@ mod tests {
 
     #[test]
     fn deployed_apis_get_desktop_origin() {
-      for destination in [
-        "https://api.storyteller.ai/v1/session",
-        "https://api.getartcraft.com/v1/session",
-        "https://api.fakeyou.com/v1/session",
-      ] {
+      for destination in ["https://api.storyteller.ai/v1/session", "https://api.getartcraft.com/v1/session", "https://api.fakeyou.com/v1/session"] {
         assert_eq!(classify(destination), Destination::ArtcraftApi { origin: "https://desktop.getartcraft.com" });
       }
     }
 
     #[test]
     fn local_apis_get_development_origin() {
-      for destination in [
-        "http://localhost:12345/v1/session",
-        "https://localhost:12345/v1/session",
-        "http://127.0.0.1:12345/v1/session",
-        "http://[::1]:12345/v1/session",
-      ] {
+      for destination in ["http://localhost:12345/v1/session", "https://localhost:12345/v1/session", "http://127.0.0.1:12345/v1/session", "http://[::1]:12345/v1/session"] {
         assert_eq!(classify(destination), Destination::ArtcraftApi { origin: "http://localhost" });
       }
     }
 
     #[test]
     fn other_owned_hosts_are_not_apis() {
-      for destination in [
-        "https://cdn-2.fakeyou.com/media/a/b.png",
-        "https://cdn.storyteller.ai/media/a/b.png",
-        "https://style.storyteller.ai/",
-        "https://app.getartcraft.com/",
-        "https://getartcraft.com/",
-        "http://api.storyteller.ai/v1/session",
-      ] {
+      for destination in ["https://cdn-2.fakeyou.com/media/a/b.png", "https://cdn.storyteller.ai/media/a/b.png", "https://style.storyteller.ai/", "https://app.getartcraft.com/", "https://getartcraft.com/", "http://api.storyteller.ai/v1/session"] {
         assert_eq!(classify(destination), Destination::ArtcraftHost, "{destination}");
       }
     }
@@ -145,16 +114,7 @@ mod tests {
 
     #[test]
     fn lookalikes_and_others_are_unknown() {
-      for destination in [
-        "https://api.storyteller.ai.example.com/v1/session",
-        "https://notstoryteller.ai/",
-        "https://evilgrok.com/",
-        "https://grok.com.example.com/",
-        "https://www.gravatar.com/avatar/a",
-        "https://storage.googleapis.com/bucket/a.png",
-        "http://192.168.1.2:12345/v1/session",
-        "tauri://localhost",
-      ] {
+      for destination in ["https://api.storyteller.ai.example.com/v1/session", "https://notstoryteller.ai/", "https://evilgrok.com/", "https://grok.com.example.com/", "https://www.gravatar.com/avatar/a", "https://storage.googleapis.com/bucket/a.png", "http://192.168.1.2:12345/v1/session", "tauri://localhost"] {
         assert_eq!(classify(destination), Destination::Unknown, "{destination}");
       }
     }

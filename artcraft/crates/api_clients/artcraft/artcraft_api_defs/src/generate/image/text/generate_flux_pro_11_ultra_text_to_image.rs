@@ -22,16 +22,16 @@ pub struct GenerateFluxPro11UltraTextToImageRequest {
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GenerateFluxPro11UltraTextToImageAspectRatio {
-  Square, // 1:1
-  LandscapeThreeByTwo, // 3:2
-  LandscapeFourByThree, // 4:3
-  LandscapeSixteenByNine, // 16:9
+  Square,                   // 1:1
+  LandscapeThreeByTwo,      // 3:2
+  LandscapeFourByThree,     // 4:3
+  LandscapeSixteenByNine,   // 16:9
   LandscapeTwentyOneByNine, // 21:9
-  PortraitTwoByThree, // 2:3
-  PortraitThreeByFour, // 3:4
-  PortraitNineBySixteen, // 9:16
-  PortraitNineByTwentyOne, // 9:21
-  //Custom { width: u32, height: u32 }, // TODO
+  PortraitTwoByThree,       // 2:3
+  PortraitThreeByFour,      // 3:4
+  PortraitNineBySixteen,    // 9:16
+  PortraitNineByTwentyOne,  // 9:21
+                            //Custom { width: u32, height: u32 }, // TODO
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]

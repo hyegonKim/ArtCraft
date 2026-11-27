@@ -322,11 +322,7 @@ pub(super) fn export(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                     }
                 }
                 ExportTask::Video => {
-                    ui.label(
-                        RichText::new(crate::i18n::tr_ui(ui.ctx(), loc, "Export Animated Video / GIF"))
-                            .font(theme::font(16.0))
-                            .color(t.text),
-                    );
+                    ui.label(RichText::new(crate::i18n::tr_ui(ui.ctx(), loc, "Export Animated Video / GIF")).font(theme::font(16.0)).color(t.text));
                     bullets(
                         ui,
                         &[
@@ -342,16 +338,16 @@ pub(super) fn export(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                     };
                     ui.horizontal(|ui| {
                         ui.label(crate::i18n::tr_ui(ui.ctx(), loc, "Format:"));
-                        craft_ui::ComboBox::from_id_salt("backstage_video_fmt")
-                            .width(220.0)
-                            .selected_text(fmt_label(bs.video_format))
-                            .show_ui(ui, |ui| {
+                        craft_ui::ComboBox::from_id_salt("backstage_video_fmt").width(220.0).selected_text(fmt_label(bs.video_format)).show_ui(
+                            ui,
+                            |ui| {
                                 for k in ["mp4", "webm", "gif"] {
                                     if ui.selectable_label(bs.video_format == k, fmt_label(k)).clicked() {
                                         bs.video_format = k;
                                     }
                                 }
-                            });
+                            },
+                        );
                     });
                     ui.add_space(4.0);
                     let size_label = |k: &str| match k {
@@ -362,30 +358,30 @@ pub(super) fn export(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                     };
                     ui.horizontal(|ui| {
                         ui.label(crate::i18n::tr_ui(ui.ctx(), loc, "Resolution:"));
-                        craft_ui::ComboBox::from_id_salt("backstage_video_res")
-                            .width(220.0)
-                            .selected_text(size_label(bs.video_size))
-                            .show_ui(ui, |ui| {
+                        craft_ui::ComboBox::from_id_salt("backstage_video_res").width(220.0).selected_text(size_label(bs.video_size)).show_ui(
+                            ui,
+                            |ui| {
                                 for k in ["small", "medium", "large", "extraLarge"] {
                                     if ui.selectable_label(bs.video_size == k, size_label(k)).clicked() {
                                         bs.video_size = k;
                                     }
                                 }
-                            });
+                            },
+                        );
                     });
                     ui.add_space(4.0);
                     ui.horizontal(|ui| {
                         ui.label(crate::i18n::tr_ui(ui.ctx(), loc, "Frame rate (FPS):"));
-                        craft_ui::ComboBox::from_id_salt("backstage_video_fps")
-                            .width(120.0)
-                            .selected_text(format!("{} fps", bs.video_fps))
-                            .show_ui(ui, |ui| {
+                        craft_ui::ComboBox::from_id_salt("backstage_video_fps").width(120.0).selected_text(format!("{} fps", bs.video_fps)).show_ui(
+                            ui,
+                            |ui| {
                                 for fps in [15u32, 24, 30] {
                                     if ui.selectable_label(bs.video_fps == fps, format!("{fps} fps")).clicked() {
                                         bs.video_fps = fps;
                                     }
                                 }
-                            });
+                            },
+                        );
                     });
                     ui.add_space(4.0);
                     ui.horizontal(|ui| {

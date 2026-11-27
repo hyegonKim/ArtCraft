@@ -59,82 +59,29 @@ pub async fn generate_character(args: GenerateCharacterArgs<'_>) -> Result<Gener
 
   info!("Creating character '{}'", args.name);
 
-  let request_body = BatchRequest {
-    zero: BatchRequestInner {
-      json: BatchRequestJson {
-        name: args.name,
-        description: args.description,
-        reference_image_urls: vec![args.reference_image_url],
-        mode: "upload",
-        is_public: args.is_public,
-      },
-    },
-  };
+  let request_body = BatchRequest { zero: BatchRequestInner { json: BatchRequestJson { name: args.name, description: args.description, reference_image_urls: vec![args.reference_image_url], mode: "upload", is_public: args.is_public } } };
 
   let cookie = args.session.cookies.as_str();
   let referer = format!("{}/app/characters", base_url);
 
-  let client = Client::builder()
-    .emulation(Emulation::Firefox143)
-    .timeout(KINOVI_REQUEST_TIMEOUT)
-    .build()
-    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).timeout(KINOVI_REQUEST_TIMEOUT).build().map_err(|err| KinoviWebClientError::WreqClientError(err))?;
 
-  let response = client.post(&url)
-    .header("User-Agent", FIREFOX_USER_AGENT)
-    .header("Accept", "*/*")
-    .header("Accept-Language", "en-US,en;q=0.9")
-    .header("Accept-Encoding", "gzip, deflate, br, zstd")
-    .header("Referer", &referer)
-    .header("Content-Type", "application/json")
-    .header("x-trpc-source", "client")
-    .header("Origin", base_url)
-    .header("Connection", "keep-alive")
-    .header("Cookie", cookie)
-    .header("Sec-Fetch-Dest", "empty")
-    .header("Sec-Fetch-Mode", "cors")
-    .header("Sec-Fetch-Site", "same-origin")
-    .header("Priority", "u=4")
-    .header("TE", "trailers")
-    .json(&request_body)
-    .send()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response = client.post(&url).header("User-Agent", FIREFOX_USER_AGENT).header("Accept", "*/*").header("Accept-Language", "en-US,en;q=0.9").header("Accept-Encoding", "gzip, deflate, br, zstd").header("Referer", &referer).header("Content-Type", "application/json").header("x-trpc-source", "client").header("Origin", base_url).header("Connection", "keep-alive").header("Cookie", cookie).header("Sec-Fetch-Dest", "empty").header("Sec-Fetch-Mode", "cors").header("Sec-Fetch-Site", "same-origin").header("Priority", "u=4").header("TE", "trailers").json(&request_body).send().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   let status = response.status();
-  let response_body = response.text()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response_body = response.text().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   info!("Create character response: status={}, body={}", status, response_body);
 
   if !status.is_success() {
-    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status,
-      body: response_body,
-    }.into());
+    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body: response_body }.into());
   }
 
-  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body)
-    .map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
+  let batch_response: Vec<BatchResponseItem> = serde_json::from_str(&response_body).map_err(|err| KinoviWebGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.clone()))?;
 
-  let data = batch_response
-    .into_iter()
-    .next()
-    .ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape {
-      explanation: "Empty batch response array".to_string(),
-      raw_body: response_body.clone(),
-    })?
-    .result
-    .data
-    .json;
+  let data = batch_response.into_iter().next().ok_or_else(|| KinoviWebGenericApiError::UnexpectedResponseShape { explanation: "Empty batch response array".to_string(), raw_body: response_body.clone() })?.result.data.json;
 
-  Ok(GenerateCharacterResponse {
-    id: data.id,
-    character_id: data.character_id,
-    name: data.name,
-    created_at: data.created_at,
-  })
+  Ok(GenerateCharacterResponse { id: data.id, character_id: data.character_id, name: data.name, created_at: data.created_at })
 }
 
 #[cfg(test)]
@@ -156,17 +103,9 @@ mod tests {
   async fn upload_image_from_url(session: &KinoviWebSession, image_url: &str, extension: &str) -> AnyhowResult<String> {
     let image_bytes = crate::test_utils::http_download::http_download_to_bytes(image_url).await?;
 
-    let prepare_result = prepare_file_upload(PrepareFileUploadArgs {
-      session,
-      extension: extension.to_string(),
-      host_override: None,
-    }).await?;
+    let prepare_result = prepare_file_upload(PrepareFileUploadArgs { session, extension: extension.to_string(), host_override: None }).await?;
 
-    let upload_result = upload_file(UploadFileArgs {
-      upload_url: prepare_result.upload_url,
-      file_bytes: image_bytes,
-      host_override: None,
-    }).await?;
+    let upload_result = upload_file(UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes: image_bytes, host_override: None }).await?;
 
     Ok(upload_result.public_url)
   }
@@ -177,22 +116,11 @@ mod tests {
     setup_test_logging(LevelFilter::Trace);
     let session = test_session()?;
 
-    let public_url = upload_image_from_url(
-      &session,
-      test_data::web::image_urls::JUNO_AT_LAKE_IMAGE_URL,
-      "jpg",
-    ).await?;
+    let public_url = upload_image_from_url(&session, test_data::web::image_urls::JUNO_AT_LAKE_IMAGE_URL, "jpg").await?;
 
     println!("Uploaded image: {}", public_url);
 
-    let result = generate_character(GenerateCharacterArgs {
-      session: &session,
-      name: "Juno".to_string(),
-      description: "Juno the shiba inu at the lake".to_string(),
-      reference_image_url: public_url,
-      is_public: false,
-      host_override: None,
-    }).await?;
+    let result = generate_character(GenerateCharacterArgs { session: &session, name: "Juno".to_string(), description: "Juno the shiba inu at the lake".to_string(), reference_image_url: public_url, is_public: false, host_override: None }).await?;
 
     println!("Character ID: {}", result.character_id);
     println!("Name: {}", result.name);
@@ -209,22 +137,11 @@ mod tests {
     setup_test_logging(LevelFilter::Trace);
     let session = test_session()?;
 
-    let public_url = upload_image_from_url(
-      &session,
-      test_data::web::image_urls::ERNEST_SCARED_STUPID_IMAGE_URL,
-      "jpg",
-    ).await?;
+    let public_url = upload_image_from_url(&session, test_data::web::image_urls::ERNEST_SCARED_STUPID_IMAGE_URL, "jpg").await?;
 
     println!("Uploaded image: {}", public_url);
 
-    let result = generate_character(GenerateCharacterArgs {
-      session: &session,
-      name: "Ernest".to_string(),
-      description: "Ernest".to_string(),
-      reference_image_url: public_url,
-      is_public: false,
-      host_override: None,
-    }).await?;
+    let result = generate_character(GenerateCharacterArgs { session: &session, name: "Ernest".to_string(), description: "Ernest".to_string(), reference_image_url: public_url, is_public: false, host_override: None }).await?;
 
     println!("Character ID: {}", result.character_id);
     println!("Name: {}", result.name);

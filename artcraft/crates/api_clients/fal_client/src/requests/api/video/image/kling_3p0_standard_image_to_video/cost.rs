@@ -1,6 +1,4 @@
-use crate::requests::api::video::image::kling_3p0_standard_image_to_video::api::{
-  Kling3p0StandardImageToVideoDuration, Kling3p0StandardImageToVideoRequest,
-};
+use crate::requests::api::video::image::kling_3p0_standard_image_to_video::api::{Kling3p0StandardImageToVideoDuration, Kling3p0StandardImageToVideoRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 impl FalRequestCostCalculator for Kling3p0StandardImageToVideoRequest {
@@ -9,9 +7,7 @@ impl FalRequestCostCalculator for Kling3p0StandardImageToVideoRequest {
     //   Audio off: $0.168/second
     //   Audio on:  $0.252/second
     let generate_audio = self.generate_audio.unwrap_or(true);
-    let duration_secs = self.duration
-      .unwrap_or(Kling3p0StandardImageToVideoDuration::FiveSeconds)
-      .to_seconds();
+    let duration_secs = self.duration.unwrap_or(Kling3p0StandardImageToVideoDuration::FiveSeconds).to_seconds();
 
     // Rate in tenths-of-cents per second, rounded up
     let rate = if generate_audio { 252u64 } else { 168u64 };
@@ -22,24 +18,10 @@ impl FalRequestCostCalculator for Kling3p0StandardImageToVideoRequest {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::requests::api::video::image::kling_3p0_standard_image_to_video::api::{
-    Kling3p0StandardImageToVideoAspectRatio, Kling3p0StandardImageToVideoDuration,
-  };
+  use crate::requests::api::video::image::kling_3p0_standard_image_to_video::api::{Kling3p0StandardImageToVideoAspectRatio, Kling3p0StandardImageToVideoDuration};
 
-  fn make_request(
-    generate_audio: Option<bool>,
-    duration: Option<Kling3p0StandardImageToVideoDuration>,
-  ) -> Kling3p0StandardImageToVideoRequest {
-    Kling3p0StandardImageToVideoRequest {
-      prompt: "test".to_string(),
-      image_url: "https://example.com/image.jpg".to_string(),
-      end_image_url: None,
-      generate_audio,
-      negative_prompt: None,
-      duration,
-      aspect_ratio: Some(Kling3p0StandardImageToVideoAspectRatio::SixteenByNine),
-      shot_type: None,
-    }
+  fn make_request(generate_audio: Option<bool>, duration: Option<Kling3p0StandardImageToVideoDuration>) -> Kling3p0StandardImageToVideoRequest {
+    Kling3p0StandardImageToVideoRequest { prompt: "test".to_string(), image_url: "https://example.com/image.jpg".to_string(), end_image_url: None, generate_audio, negative_prompt: None, duration, aspect_ratio: Some(Kling3p0StandardImageToVideoAspectRatio::SixteenByNine), shot_type: None }
   }
 
   mod audio_off {

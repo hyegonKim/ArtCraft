@@ -70,7 +70,6 @@ pub struct OmniGenImageModelDetails {
 
   // TODO: sub-features like inpainting masking,
   // TODO: angle edit models
-
   #[serde(skip_serializing_if = "Option::is_none")]
   pub text_prompt_supported: Option<bool>,
 
@@ -131,29 +130,6 @@ pub struct OmniGenImageModelDetails {
 
 impl Default for OmniGenImageModelDetails {
   fn default() -> Self {
-    Self {
-      model: CommonImageModel::NanoBananaPro,
-      model_creator: None,
-      full_name: None,
-      text_prompt_supported: None,
-      text_prompt_max_length: None,
-      negative_text_prompt_supported: None,
-      negative_text_prompt_max_length: None,
-      image_refs_supported: None,
-      image_refs_max: None,
-      has_fixed_editing_aspect_ratio: None,
-      aspect_ratio_options: None,
-      aspect_ratio_default: None,
-      aspect_ratio_default_when_editing: None,
-      resolution_options: None,
-      resolution_default: None,
-      quality_options: None,
-      default_quality: None,
-      batch_size_min: None,
-      batch_size_max: None,
-      batch_size_options: None,
-      batch_size_default: None,
-      is_disabled: None,
-    }
+    Self { model: CommonImageModel::NanoBananaPro, model_creator: None, full_name: None, text_prompt_supported: None, text_prompt_max_length: None, negative_text_prompt_supported: None, negative_text_prompt_max_length: None, image_refs_supported: None, image_refs_max: None, has_fixed_editing_aspect_ratio: None, aspect_ratio_options: None, aspect_ratio_default: None, aspect_ratio_default_when_editing: None, resolution_options: None, resolution_default: None, quality_options: None, default_quality: None, batch_size_min: None, batch_size_max: None, batch_size_options: None, batch_size_default: None, is_disabled: None }
   }
 }

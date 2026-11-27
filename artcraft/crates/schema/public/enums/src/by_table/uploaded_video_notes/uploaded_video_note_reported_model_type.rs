@@ -159,36 +159,7 @@ impl UploadedVideoNoteReportedModelType {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::GrokVideo,
-      Self::GrokImagineVideo,
-      Self::GrokImagineVideo1p5,
-      Self::Kling16Pro,
-      Self::Kling21Pro,
-      Self::Kling21Master,
-      Self::Kling2p5TurboPro,
-      Self::Kling2p6Pro,
-      Self::Kling3p0Standard,
-      Self::Kling3p0Pro,
-      Self::HappyHorse1p0,
-      Self::Seedance10Lite,
-      Self::Seedance1p5Pro,
-      Self::Seedance2p0,
-      Self::Seedance2p0Fast,
-      Self::Seedance2p0BytePlus,
-      Self::Seedance2p0BytePlusFast,
-      Self::Seedance2p0Ultra,
-      Self::Seedance2p0UltraFast,
-      Self::Seedance2p0BytePlusUltra,
-      Self::Seedance2p0BytePlusUltraFast,
-      Self::Sora2,
-      Self::Sora2Pro,
-      Self::Veo2,
-      Self::Veo3,
-      Self::Veo3Fast,
-      Self::Veo3p1,
-      Self::Veo3p1Fast,
-    ])
+    BTreeSet::from([Self::GrokVideo, Self::GrokImagineVideo, Self::GrokImagineVideo1p5, Self::Kling16Pro, Self::Kling21Pro, Self::Kling21Master, Self::Kling2p5TurboPro, Self::Kling2p6Pro, Self::Kling3p0Standard, Self::Kling3p0Pro, Self::HappyHorse1p0, Self::Seedance10Lite, Self::Seedance1p5Pro, Self::Seedance2p0, Self::Seedance2p0Fast, Self::Seedance2p0BytePlus, Self::Seedance2p0BytePlusFast, Self::Seedance2p0Ultra, Self::Seedance2p0UltraFast, Self::Seedance2p0BytePlusUltra, Self::Seedance2p0BytePlusUltraFast, Self::Sora2, Self::Sora2Pro, Self::Veo2, Self::Veo3, Self::Veo3Fast, Self::Veo3p1, Self::Veo3p1Fast])
   }
 }
 
@@ -234,16 +205,9 @@ mod tests {
   /// Retired `preview_model*` values must still decode, collapsing onto Seedance 2.0.
   #[test]
   fn legacy_preview_values_map_to_seedance() {
-    assert_eq!(
-      UploadedVideoNoteReportedModelType::from_str("preview_model").unwrap(),
-      UploadedVideoNoteReportedModelType::Seedance2p0
-    );
-    assert_eq!(
-      UploadedVideoNoteReportedModelType::from_str("preview_model_fast").unwrap(),
-      UploadedVideoNoteReportedModelType::Seedance2p0Fast
-    );
-    let decoded: UploadedVideoNoteReportedModelType =
-      serde_json::from_str("\"preview_model\"").unwrap();
+    assert_eq!(UploadedVideoNoteReportedModelType::from_str("preview_model").unwrap(), UploadedVideoNoteReportedModelType::Seedance2p0);
+    assert_eq!(UploadedVideoNoteReportedModelType::from_str("preview_model_fast").unwrap(), UploadedVideoNoteReportedModelType::Seedance2p0Fast);
+    let decoded: UploadedVideoNoteReportedModelType = serde_json::from_str("\"preview_model\"").unwrap();
     assert_eq!(decoded, UploadedVideoNoteReportedModelType::Seedance2p0);
   }
 

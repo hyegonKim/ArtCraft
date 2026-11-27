@@ -87,12 +87,7 @@ pub struct SubstanceParams {
 
 impl Default for SubstanceParams {
     fn default() -> Self {
-        Self {
-            resolution: 128,
-            seed: 1,
-            wear: 0.25,
-            normal_scale: 1.0,
-        }
+        Self { resolution: 128, seed: 1, wear: 0.25, normal_scale: 1.0 }
     }
 }
 
@@ -186,12 +181,7 @@ pub fn generate(preset: SubstancePreset, params: &SubstanceParams) -> SubstanceP
         for x in 0..n {
             let u = (x as f32 + 0.5) * inv_n;
             let s = eval_preset(preset, u, v, params.seed, wear);
-            base_data.push([
-                s.albedo[0].clamp(0.0, 1.0),
-                s.albedo[1].clamp(0.0, 1.0),
-                s.albedo[2].clamp(0.0, 1.0),
-                1.0,
-            ]);
+            base_data.push([s.albedo[0].clamp(0.0, 1.0), s.albedo[1].clamp(0.0, 1.0), s.albedo[2].clamp(0.0, 1.0), 1.0]);
             mr_data.push([1.0, s.roughness.clamp(0.04, 1.0), s.metallic.clamp(0.0, 1.0), 1.0]);
             let ao = s.ao.clamp(0.0, 1.0);
             ao_data.push([ao, ao, ao, 1.0]);
@@ -251,9 +241,7 @@ fn normals_from_heightfield(heights: &[f32], n: u32, slope: f32) -> Vec<[f32; 4]
 // ---------------------------------------------------------------------------
 
 fn hash3(seed: u32, x: i32, y: i32) -> u32 {
-    let mut h = seed
-        ^ (x as u32).wrapping_mul(0x9e37_79b9)
-        ^ (y as u32).wrapping_mul(0x85eb_ca6b);
+    let mut h = seed ^ (x as u32).wrapping_mul(0x9e37_79b9) ^ (y as u32).wrapping_mul(0x85eb_ca6b);
     h ^= h >> 16;
     h = h.wrapping_mul(0x7feb_352d);
     h ^= h >> 15;

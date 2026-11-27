@@ -292,8 +292,7 @@ pub(super) fn color_lookup_tables(s: &mut Session, p: &Value) -> Result<Value> {
         let mut lut = craft_cms::lutfile::parse_cube(&cube).map_err(|e| EngineError::Other(e.to_string()))?;
         if let Some(chain_path) = p.get("chainPath").and_then(Value::as_str) {
             let bytes = read_file(chain_path)?;
-            let next = craft_cms::lutfile::parse(chain_path, &bytes)
-                .map_err(|e| EngineError::BadParams { cmd: CMD.into(), msg: format!("chainPath: {e}") })?;
+            let next = craft_cms::lutfile::parse(chain_path, &bytes).map_err(|e| EngineError::BadParams { cmd: CMD.into(), msg: format!("chainPath: {e}") })?;
             lut = lut_chain(&lut, &next, size as usize, &title)?;
         }
         if let Some(intensity) = p.get("intensity").and_then(Value::as_f64) {

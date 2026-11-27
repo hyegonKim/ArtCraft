@@ -38,8 +38,6 @@ pub struct GptImage1p5TextToImageOutput {
   pub images: Vec<GptImage1p5TextToImageFile>,
 }
 
-pub fn gpt_image_1p5_text_to_image(
-  params: GptImage1p5TextToImageInput,
-) -> FalRequest<GptImage1p5TextToImageInput, GptImage1p5TextToImageOutput> {
+pub fn gpt_image_1p5_text_to_image(params: GptImage1p5TextToImageInput) -> FalRequest<GptImage1p5TextToImageInput, GptImage1p5TextToImageOutput> {
   FalRequest::new("fal-ai/gpt-image-1.5", params)
 }

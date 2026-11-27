@@ -51,19 +51,10 @@ mod tests {
   fn round_trips_through_common_splat_model() {
     use enums::common::generation::common_splat_model::CommonSplatModel;
 
-    let cases = [
-      (RouterSplatModel::Marble0p1Mini, CommonSplatModel::Marble0p1Mini),
-      (RouterSplatModel::Marble0p1Plus, CommonSplatModel::Marble0p1Plus),
-      (RouterSplatModel::Marble1p0, CommonSplatModel::Marble1p0),
-      (RouterSplatModel::Marble1p0Draft, CommonSplatModel::Marble1p0Draft),
-      (RouterSplatModel::Marble1p1, CommonSplatModel::Marble1p1),
-      (RouterSplatModel::Marble1p1Plus, CommonSplatModel::Marble1p1Plus),
-      (RouterSplatModel::TripoSplat, CommonSplatModel::TripoSplat),
-    ];
+    let cases = [(RouterSplatModel::Marble0p1Mini, CommonSplatModel::Marble0p1Mini), (RouterSplatModel::Marble0p1Plus, CommonSplatModel::Marble0p1Plus), (RouterSplatModel::Marble1p0, CommonSplatModel::Marble1p0), (RouterSplatModel::Marble1p0Draft, CommonSplatModel::Marble1p0Draft), (RouterSplatModel::Marble1p1, CommonSplatModel::Marble1p1), (RouterSplatModel::Marble1p1Plus, CommonSplatModel::Marble1p1Plus), (RouterSplatModel::TripoSplat, CommonSplatModel::TripoSplat)];
     for (router_model, expected_common) in cases {
       let json = serde_json::to_string(&router_model).unwrap();
-      let common: CommonSplatModel = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("CommonSplatModel failed to parse {json}: {e}"));
+      let common: CommonSplatModel = serde_json::from_str(&json).unwrap_or_else(|e| panic!("CommonSplatModel failed to parse {json}: {e}"));
       assert_eq!(common, expected_common, "for {router_model:?}");
     }
   }

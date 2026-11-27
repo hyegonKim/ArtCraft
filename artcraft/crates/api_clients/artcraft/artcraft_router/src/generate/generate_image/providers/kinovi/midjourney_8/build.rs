@@ -1,7 +1,4 @@
-use kinovi_web_client::generate::image::generate_midjourney_v8::{
-  GenerateMidjourneyV8AspectRatio, GenerateMidjourneyV8Quality,
-  GenerateMidjourneyV8Request, KinoviMidjourneyBatchCount,
-};
+use kinovi_web_client::generate::image::generate_midjourney_v8::{GenerateMidjourneyV8AspectRatio, GenerateMidjourneyV8Quality, GenerateMidjourneyV8Request, KinoviMidjourneyBatchCount};
 
 use crate::api::image_list_ref::ImageListRef;
 use crate::api::router_aspect_ratio::RouterAspectRatio;
@@ -13,14 +10,10 @@ use crate::generate::generate_image::generate_image_request_builder::GenerateIma
 use crate::generate::generate_image::image_generation_draft::ImageGenerationDraftRequest;
 use crate::generate::generate_image::image_generation_draft_or_request::ImageGenerationDraftOrRequest;
 use crate::generate::generate_image::image_generation_request::ImageGenerationRequest;
-use crate::generate::generate_image::providers::kinovi::midjourney_8::draft::{
-  KinoviMidjourney8DraftState, KinoviMidjourney8RemainingItems,
-};
+use crate::generate::generate_image::providers::kinovi::midjourney_8::draft::{KinoviMidjourney8DraftState, KinoviMidjourney8RemainingItems};
 use crate::generate::generate_image::providers::kinovi::midjourney_8::request::KinoviMidjourney8RequestState;
 
-pub fn build_kinovi_midjourney_8(
-  mut builder: GenerateImageRequestBuilder,
-) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
+pub fn build_kinovi_midjourney_8(mut builder: GenerateImageRequestBuilder) -> Result<ImageGenerationDraftOrRequest, ArtcraftRouterError> {
   let strategy = builder.request_mismatch_mitigation_strategy;
 
   let aspect_ratio = plan_aspect_ratio(builder.aspect_ratio.take(), strategy)?;
@@ -30,35 +23,12 @@ pub fn build_kinovi_midjourney_8(
   let image_inputs = builder.image_inputs.take();
 
   if !has_image_inputs(image_inputs.as_ref()) {
-    let request = GenerateMidjourneyV8Request {
-      prompt,
-      aspect_ratio,
-      negative_prompt: None,
-      stylize: None,
-      weird: None,
-      chaos: None,
-      quality,
-      raw_mode: false,
-      batch_count,
-      reference_image_urls: None,
-    };
-    return Ok(ImageGenerationDraftOrRequest::Request(
-      ImageGenerationRequest::KinoviMidjourney8(KinoviMidjourney8RequestState { request }),
-    ));
+    let request = GenerateMidjourneyV8Request { prompt, aspect_ratio, negative_prompt: None, stylize: None, weird: None, chaos: None, quality, raw_mode: false, batch_count, reference_image_urls: None };
+    return Ok(ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney8(KinoviMidjourney8RequestState { request })));
   }
 
-  let draft = KinoviMidjourney8DraftState {
-    prompt,
-    aspect_ratio,
-    quality,
-    batch_count,
-    unhandled_request_state: Some(KinoviMidjourney8RemainingItems {
-      reference_images: image_inputs,
-    }),
-  };
-  Ok(ImageGenerationDraftOrRequest::Draft(
-    ImageGenerationDraftRequest::KinoviMidjourney8(draft),
-  ))
+  let draft = KinoviMidjourney8DraftState { prompt, aspect_ratio, quality, batch_count, unhandled_request_state: Some(KinoviMidjourney8RemainingItems { reference_images: image_inputs }) };
+  Ok(ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney8(draft)))
 }
 
 fn has_image_inputs(image_inputs: Option<&ImageListRef>) -> bool {
@@ -71,17 +41,10 @@ fn has_image_inputs(image_inputs: Option<&ImageListRef>) -> bool {
 
 // ── Plan helpers ──
 
-pub(crate) fn plan_aspect_ratio(
-  aspect_ratio: Option<RouterAspectRatio>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<GenerateMidjourneyV8AspectRatio, ArtcraftRouterError> {
+pub(crate) fn plan_aspect_ratio(aspect_ratio: Option<RouterAspectRatio>, strategy: RequestMismatchMitigationStrategy) -> Result<GenerateMidjourneyV8AspectRatio, ArtcraftRouterError> {
   use GenerateMidjourneyV8AspectRatio as Ar;
   match aspect_ratio {
-    None
-    | Some(RouterAspectRatio::Auto)
-    | Some(RouterAspectRatio::Auto2k)
-    | Some(RouterAspectRatio::Auto3k)
-    | Some(RouterAspectRatio::Auto4k) => Ok(Ar::Square1x1),
+    None | Some(RouterAspectRatio::Auto) | Some(RouterAspectRatio::Auto2k) | Some(RouterAspectRatio::Auto3k) | Some(RouterAspectRatio::Auto4k) => Ok(Ar::Square1x1),
 
     Some(RouterAspectRatio::Square) | Some(RouterAspectRatio::SquareHd) => Ok(Ar::Square1x1),
     Some(RouterAspectRatio::WideSixteenByNine) | Some(RouterAspectRatio::Wide) => Ok(Ar::Landscape16x9),
@@ -97,12 +60,7 @@ pub(crate) fn plan_aspect_ratio(
 
     #[allow(unreachable_patterns)]
     Some(unsupported) => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "aspect_ratio",
-          value: format!("{:?}", unsupported),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "aspect_ratio", value: format!("{:?}", unsupported) })),
       _ => Ok(Ar::Square1x1),
     },
   }
@@ -115,16 +73,11 @@ pub(crate) fn plan_quality(quality: Option<RouterQuality>) -> Option<GenerateMid
     Some(RouterQuality::Low) => Some(GenerateMidjourneyV8Quality::Quarter),
     Some(RouterQuality::Medium) => Some(GenerateMidjourneyV8Quality::Half),
     // Midjourney tops out at full quality; the higher GPT Image tiers clamp to it.
-    Some(RouterQuality::High)
-    | Some(RouterQuality::XHigh)
-    | Some(RouterQuality::Max) => Some(GenerateMidjourneyV8Quality::Full),
+    Some(RouterQuality::High) | Some(RouterQuality::XHigh) | Some(RouterQuality::Max) => Some(GenerateMidjourneyV8Quality::Full),
   }
 }
 
-pub(crate) fn plan_batch_count(
-  image_batch_count: Option<u16>,
-  strategy: RequestMismatchMitigationStrategy,
-) -> Result<KinoviMidjourneyBatchCount, ArtcraftRouterError> {
+pub(crate) fn plan_batch_count(image_batch_count: Option<u16>, strategy: RequestMismatchMitigationStrategy) -> Result<KinoviMidjourneyBatchCount, ArtcraftRouterError> {
   let count = image_batch_count.unwrap_or(1);
   match count {
     0 => Err(ArtcraftRouterError::Client(ClientError::UserRequestedZeroGenerations)),
@@ -133,18 +86,10 @@ pub(crate) fn plan_batch_count(
     3 => Ok(KinoviMidjourneyBatchCount::Three),
     4 => Ok(KinoviMidjourneyBatchCount::Four),
     other => match strategy {
-      RequestMismatchMitigationStrategy::ErrorOut => {
-        Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption {
-          field: "image_batch_count",
-          value: format!("{}", other),
-        }))
-      }
+      RequestMismatchMitigationStrategy::ErrorOut => Err(ArtcraftRouterError::Client(ClientError::ModelDoesNotSupportOption { field: "image_batch_count", value: format!("{}", other) })),
       // Kinovi supports batches of 1–4; only counts of 5+ reach here, so both
       // mitigation strategies clamp to the maximum supported batch.
-      RequestMismatchMitigationStrategy::PayMoreUpgrade
-      | RequestMismatchMitigationStrategy::PayLessDowngrade => {
-        Ok(KinoviMidjourneyBatchCount::Four)
-      }
+      RequestMismatchMitigationStrategy::PayMoreUpgrade | RequestMismatchMitigationStrategy::PayLessDowngrade => Ok(KinoviMidjourneyBatchCount::Four),
     },
   }
 }
@@ -166,44 +111,20 @@ mod tests {
   use super::*;
 
   fn base_builder() -> GenerateImageRequestBuilder {
-    GenerateImageRequestBuilder {
-      model: RouterImageModel::Midjourney8,
-      provider: RouterProvider::KinoviWeb,
-      prompt: Some("a spooky horror scene".to_string()),
-      image_inputs: None,
-      resolution: None,
-      aspect_ratio: None,
-      quality: None,
-      image_batch_count: None,
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut,
-      generation_mode_mismatch_strategy: None,
-      idempotency_token: None,
-    }
+    GenerateImageRequestBuilder { model: RouterImageModel::Midjourney8, provider: RouterProvider::KinoviWeb, prompt: Some("a spooky horror scene".to_string()), image_inputs: None, resolution: None, aspect_ratio: None, quality: None, image_batch_count: None, horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::ErrorOut, generation_mode_mismatch_strategy: None, idempotency_token: None }
   }
 
   #[test]
   fn no_image_inputs_returns_request_directly() {
     let result = build_kinovi_midjourney_8(base_builder()).expect("build");
-    assert!(matches!(
-      result,
-      ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney8(_)),
-    ));
+    assert!(matches!(result, ImageGenerationDraftOrRequest::Request(ImageGenerationRequest::KinoviMidjourney8(_)),));
   }
 
   #[test]
   fn image_inputs_returns_draft() {
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::Urls(vec!["https://example.com/ref.png".to_string()])), ..base_builder() };
     let result = build_kinovi_midjourney_8(builder).expect("build");
-    assert!(matches!(
-      result,
-      ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney8(_)),
-    ));
+    assert!(matches!(result, ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney8(_)),));
   }
 
   #[test]
@@ -228,12 +149,7 @@ mod tests {
 
   #[test]
   fn media_file_token_route_through_draft() {
-    let builder = GenerateImageRequestBuilder {
-      image_inputs: Some(ImageListRef::MediaFileTokens(vec![
-        MediaFileToken::new("mf_x".to_string()),
-      ])),
-      ..base_builder()
-    };
+    let builder = GenerateImageRequestBuilder { image_inputs: Some(ImageListRef::MediaFileTokens(vec![MediaFileToken::new("mf_x".to_string())])), ..base_builder() };
     let draft = match build_kinovi_midjourney_8(builder).expect("build") {
       ImageGenerationDraftOrRequest::Draft(ImageGenerationDraftRequest::KinoviMidjourney8(d)) => d,
       _ => panic!("expected Draft"),

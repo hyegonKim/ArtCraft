@@ -86,8 +86,7 @@ mod tests {
     ];
 
     for (json, expected) in cases {
-      let parsed: FrontendFailureCategoryForApiClients = serde_json::from_str(json)
-          .unwrap_or_else(|e| panic!("failed to parse {}: {}", json, e));
+      let parsed: FrontendFailureCategoryForApiClients = serde_json::from_str(json).unwrap_or_else(|e| panic!("failed to parse {}: {}", json, e));
       assert_eq!(parsed, expected, "mismatch for {}", json);
     }
   }
@@ -121,17 +120,8 @@ mod tests {
 
   #[test]
   fn test_from_db_enum() {
-    assert_eq!(
-      FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::FaceNotDetected),
-      FrontendFailureCategoryForApiClients::FaceNotDetected
-    );
-    assert_eq!(
-      FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::GenerationFailed),
-      FrontendFailureCategoryForApiClients::GenerationFailed
-    );
-    assert_eq!(
-      FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::RuleBansGeneratedContent),
-      FrontendFailureCategoryForApiClients::RuleBansGeneratedContent
-    );
+    assert_eq!(FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::FaceNotDetected), FrontendFailureCategoryForApiClients::FaceNotDetected);
+    assert_eq!(FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::GenerationFailed), FrontendFailureCategoryForApiClients::GenerationFailed);
+    assert_eq!(FrontendFailureCategoryForApiClients::from_db_enum(FrontendFailureCategory::RuleBansGeneratedContent), FrontendFailureCategoryForApiClients::RuleBansGeneratedContent);
   }
 }

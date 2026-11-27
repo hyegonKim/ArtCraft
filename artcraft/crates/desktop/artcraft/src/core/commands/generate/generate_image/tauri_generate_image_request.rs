@@ -40,7 +40,6 @@ pub struct TauriGenerateImageRequest {
   pub image_media_tokens: Option<Vec<MediaFileToken>>,
 
   // ── Canvas / scene images ──
-
   /// Supply this *XOR* `canvas_image_raw_bytes`.
   /// Becomes the first image reference (pushing back `image_media_tokens` by one).
   pub canvas_image_media_token: Option<MediaFileToken>,
@@ -58,7 +57,6 @@ pub struct TauriGenerateImageRequest {
   pub scene_image_raw_bytes: Option<Vec<u8>>,
 
   // ── Inpainting ──
-
   /// Supply this *XOR* `inpainting_mask_image_raw_bytes`.
   /// The mask to focus the edit (already uploaded).
   pub inpainting_mask_image_media_token: Option<MediaFileToken>,
@@ -68,7 +66,6 @@ pub struct TauriGenerateImageRequest {
   pub inpainting_mask_image_raw_bytes: Option<Vec<u8>>,
 
   // ── Angle adjustment (for edit models like QwenEdit, Flux2LoraAngles) ──
-
   /// Horizontal angle adjustment.
   pub adjust_horizontal_angle: Option<f64>,
 
@@ -82,7 +79,6 @@ pub struct TauriGenerateImageRequest {
   pub enable_system_prompt: Option<bool>,
 
   // ── Frontend metadata ──
-
   /// Name of the frontend caller.
   pub frontend_caller: Option<TauriCommandCaller>,
 
@@ -96,8 +92,7 @@ pub struct TauriGenerateImageRequest {
 // ── Response ──
 
 #[derive(Serialize)]
-pub struct TauriGenerateImageResponse {
-}
+pub struct TauriGenerateImageResponse {}
 
 impl SerializeMarker for TauriGenerateImageResponse {}
 

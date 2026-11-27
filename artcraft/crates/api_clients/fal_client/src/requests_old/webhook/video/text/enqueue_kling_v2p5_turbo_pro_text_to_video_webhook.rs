@@ -36,42 +36,39 @@ pub enum EnqueueKlingV2p5TurboProTextToVideoAspectRatio {
   NineBySixteen,
 }
 
-
 impl FalRequestCostCalculator for EnqueueKlingV2p5TurboProTextToVideoRequest {
   fn calculate_cost_in_cents(&self) -> UsdCents {
     // "For 5s video your request will cost $0.35.
     //  For every additional second you will be charged $0.07."
     match self.duration {
-      None => 35, // $0.35
+      None => 35,                                                           // $0.35
       Some(EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Five) => 35, // $0.35
-      Some(EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Ten) => 70, // $0.35 + (5 * $0.07) = $0.70
+      Some(EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Ten) => 70,  // $0.35 + (5 * $0.07) = $0.70
     }
   }
 }
 
-
 /// Kling 2.5 Turbo Pro Text-to-Video
 /// https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video
-pub async fn enqueue_kling_v2p5_turbo_pro_text_to_video_webhook<R: IntoUrl>(
-  args: EnqueueKlingV2p5TurboProTextToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_kling_v2p5_turbo_pro_text_to_video_webhook<R: IntoUrl>(args: EnqueueKlingV2p5TurboProTextToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
 
-  let duration = req.duration
-      .map(|resolution| match resolution {
-        EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Five => "5",
-        EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Ten => "10",
-      })
-      .map(|s| s.to_string());
+  let duration = req
+    .duration
+    .map(|resolution| match resolution {
+      EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Five => "5",
+      EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Ten => "10",
+    })
+    .map(|s| s.to_string());
 
-  let aspect_ratio = req.aspect_ratio
-      .map(|aspect| match aspect {
-        EnqueueKlingV2p5TurboProTextToVideoAspectRatio::Square => "1:1",
-        EnqueueKlingV2p5TurboProTextToVideoAspectRatio::SixteenByNine => "16:9",
-        EnqueueKlingV2p5TurboProTextToVideoAspectRatio::NineBySixteen => "9:16",
-      })
-      .map(|s| s.to_string());
+  let aspect_ratio = req
+    .aspect_ratio
+    .map(|aspect| match aspect {
+      EnqueueKlingV2p5TurboProTextToVideoAspectRatio::Square => "1:1",
+      EnqueueKlingV2p5TurboProTextToVideoAspectRatio::SixteenByNine => "16:9",
+      EnqueueKlingV2p5TurboProTextToVideoAspectRatio::NineBySixteen => "9:16",
+    })
+    .map(|s| s.to_string());
 
   let request = KlingV2p5TurboProTextToVideoInput {
     prompt: req.prompt,
@@ -83,10 +80,7 @@ pub async fn enqueue_kling_v2p5_turbo_pro_text_to_video_webhook<R: IntoUrl>(
     cfg_scale: None,
   };
 
-  let result = kling_v2p5_turbo_pro_text_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = kling_v2p5_turbo_pro_text_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -106,16 +100,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueKlingV2p5TurboProTextToVideoArgs {
-      request: EnqueueKlingV2p5TurboProTextToVideoRequest {
-        prompt: "an owl flies by an abandoned castle at dusk. the camera tracks the flying owl. the castle stones are damp and gritty. there are lots of trees. fireflies dance over the fields".to_string(),
-        negative_prompt: None,
-        aspect_ratio: Some(EnqueueKlingV2p5TurboProTextToVideoAspectRatio::SixteenByNine),
-        duration: Some(EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Five),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueKlingV2p5TurboProTextToVideoArgs { request: EnqueueKlingV2p5TurboProTextToVideoRequest { prompt: "an owl flies by an abandoned castle at dusk. the camera tracks the flying owl. the castle stones are damp and gritty. there are lots of trees. fireflies dance over the fields".to_string(), negative_prompt: None, aspect_ratio: Some(EnqueueKlingV2p5TurboProTextToVideoAspectRatio::SixteenByNine), duration: Some(EnqueueKlingV2p5TurboProTextToVideoDurationSeconds::Five) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_kling_v2p5_turbo_pro_text_to_video_webhook(args).await?;
 

@@ -22,17 +22,7 @@ mod tests {
   use super::*;
 
   fn make_request(num_images: Option<Flux2LoraAngleNumImages>) -> Flux2LoraEditImageAngleRequest {
-    Flux2LoraEditImageAngleRequest {
-      image_urls: vec!["https://example.com/image.jpg".to_string()],
-      horizontal_angle: None,
-      vertical_angle: None,
-      zoom: None,
-      num_images,
-      image_size: None,
-      lora_scale: None,
-      guidance_scale: None,
-      num_inference_steps: None,
-    }
+    Flux2LoraEditImageAngleRequest { image_urls: vec!["https://example.com/image.jpg".to_string()], horizontal_angle: None, vertical_angle: None, zoom: None, num_images, image_size: None, lora_scale: None, guidance_scale: None, num_inference_steps: None }
   }
 
   #[test]

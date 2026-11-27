@@ -14,7 +14,6 @@
 #![forbid(unused_imports)]
 #![forbid(unused_mut)]
 #![forbid(unused_variables)]
-
 // Always allow
 #![allow(dead_code)]
 #![allow(non_snake_case)]
@@ -28,4 +27,3 @@ pub use anyhow::bail;
 pub type AnyhowResult<T> = anyhow::Result<T>;
 
 pub type AnyhowError = anyhow::Error;
-

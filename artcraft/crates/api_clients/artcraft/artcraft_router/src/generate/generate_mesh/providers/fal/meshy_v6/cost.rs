@@ -2,9 +2,7 @@ use fal_client::requests::traits::fal_request_cost_calculator_trait::FalRequestC
 
 use crate::generate::generate_mesh::mesh_generation_cost_estimate::MeshGenerationCostEstimate;
 use crate::generate::generate_mesh::providers::fal::hunyuan3d_3::cost::fal_mesh_cost_estimate;
-use crate::generate::generate_mesh::providers::fal::meshy_v6::request::{
-  FalMeshyV6ImageRequestState, FalMeshyV6TextRequestState,
-};
+use crate::generate::generate_mesh::providers::fal::meshy_v6::request::{FalMeshyV6ImageRequestState, FalMeshyV6TextRequestState};
 
 #[derive(Clone, Debug)]
 pub struct FalMeshyV6ImageCostState {
@@ -16,9 +14,7 @@ impl FalMeshyV6ImageCostState {
     // Cost math is owned by fal_client's per-endpoint
     // `FalRequestCostCalculator` implementations. The router state just
     // forwards the result so router cost ≡ fal_client cost by construction.
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -33,9 +29,7 @@ pub struct FalMeshyV6TextCostState {
 
 impl FalMeshyV6TextCostState {
   pub fn from_request(request: &FalMeshyV6TextRequestState) -> Self {
-    Self {
-      cost_in_usd_cents: request.request.calculate_cost_in_cents(),
-    }
+    Self { cost_in_usd_cents: request.request.calculate_cost_in_cents() }
   }
 
   pub fn estimate_cost(&self) -> MeshGenerationCostEstimate {
@@ -70,13 +64,7 @@ mod tests {
 
     #[test]
     fn options_do_not_change_the_price() {
-      let builder = GenerateMeshRequestBuilder {
-        mesh_output_type: Some(CommonMeshOutputType::LowPoly),
-        polygon_type: Some(CommonPolygonType::Quad),
-        face_count: Some(100_000),
-        enable_pbr: Some(true),
-        ..image_builder()
-      };
+      let builder = GenerateMeshRequestBuilder { mesh_output_type: Some(CommonMeshOutputType::LowPoly), polygon_type: Some(CommonPolygonType::Quad), face_count: Some(100_000), enable_pbr: Some(true), ..image_builder() };
       assert_eq!(estimate_usd_cents(builder), 80);
     }
   }
@@ -84,29 +72,14 @@ mod tests {
   // ── Helpers ──
 
   fn image_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::MeshyV6,
-      provider: RouterProvider::Fal,
-      reference_images: Some(ImageListRef::Urls(vec![FRONT_URL.to_string()])),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::MeshyV6, provider: RouterProvider::Fal, reference_images: Some(ImageListRef::Urls(vec![FRONT_URL.to_string()])), ..Default::default() }
   }
 
   fn text_builder() -> GenerateMeshRequestBuilder {
-    GenerateMeshRequestBuilder {
-      model: RouterMeshModel::MeshyV6,
-      provider: RouterProvider::Fal,
-      prompt: Some("a red ceramic teapot".to_string()),
-      ..Default::default()
-    }
+    GenerateMeshRequestBuilder { model: RouterMeshModel::MeshyV6, provider: RouterProvider::Fal, prompt: Some("a red ceramic teapot".to_string()), ..Default::default() }
   }
 
   fn estimate_usd_cents(builder: GenerateMeshRequestBuilder) -> u64 {
-    builder.build2()
-      .expect("build should succeed")
-      .estimate_cost()
-      .expect("estimate should succeed")
-      .cost_in_usd_cents
-      .expect("cost should be present")
+    builder.build2().expect("build should succeed").estimate_cost().expect("estimate should succeed").cost_in_usd_cents.expect("cost should be present")
   }
 }

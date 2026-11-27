@@ -94,26 +94,7 @@ impl CommonAspectRatio {
   }
 
   pub fn all_variants() -> BTreeSet<Self> {
-    BTreeSet::from([
-      Self::Auto,
-      Self::Square,
-      Self::WideThreeByTwo,
-      Self::WideFourByThree,
-      Self::WideFiveByFour,
-      Self::WideSixteenByNine,
-      Self::WideTwentyOneByNine,
-      Self::TallTwoByThree,
-      Self::TallThreeByFour,
-      Self::TallFourByFive,
-      Self::TallNineBySixteen,
-      Self::TallNineByTwentyOne,
-      Self::Wide,
-      Self::Tall,
-      Self::Auto2k,
-      Self::Auto3k,
-      Self::Auto4k,
-      Self::SquareHd,
-    ])
+    BTreeSet::from([Self::Auto, Self::Square, Self::WideThreeByTwo, Self::WideFourByThree, Self::WideFiveByFour, Self::WideSixteenByNine, Self::WideTwentyOneByNine, Self::TallTwoByThree, Self::TallThreeByFour, Self::TallFourByFive, Self::TallNineBySixteen, Self::TallNineByTwentyOne, Self::Wide, Self::Tall, Self::Auto2k, Self::Auto3k, Self::Auto4k, Self::SquareHd])
   }
 }
 
@@ -259,12 +240,10 @@ mod tests {
 
       for variant in CommonAspectRatio::all_variants() {
         let to_str_value = variant.to_str();
-        assert!(valid_pattern.is_match(to_str_value),
-          "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
+        assert!(valid_pattern.is_match(to_str_value), "to_str() for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, to_str_value);
 
         let json_value = serde_json::to_string(&variant).unwrap().replace('"', "");
-        assert!(valid_pattern.is_match(&json_value),
-          "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
+        assert!(valid_pattern.is_match(&json_value), "JSON serialization for {:?} contains invalid characters: {:?} (only a-z, 0-9, _ allowed)", variant, json_value);
       }
     }
   }

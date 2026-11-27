@@ -9,7 +9,7 @@ pub const GENERATE_SEEDANCE_1_0_LITE_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/genera
 pub struct GenerateSeedance10LiteImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
@@ -20,7 +20,7 @@ pub struct GenerateSeedance10LiteImageToVideoRequest {
 
   /// Optional text prompt.
   pub prompt: Option<String>,
-  
+
   /// Optional: resolution of the generated video.
   pub resolution: Option<GenerateSeedance10LiteResolution>,
 
@@ -44,7 +44,6 @@ pub enum GenerateSeedance10LiteDuration {
   FiveSeconds,
   TenSeconds,
 }
-
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]

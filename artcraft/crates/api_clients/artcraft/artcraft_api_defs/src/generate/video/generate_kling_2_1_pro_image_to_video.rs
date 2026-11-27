@@ -9,7 +9,7 @@ pub const GENERATE_KLING_2_1_PRO_IMAGE_TO_VIDEO_URL_PATH: &str = "/v1/generate/v
 pub struct GenerateKling21ProImageToVideoRequest {
   /// Idempotency token to prevent duplicate requests.
   pub uuid_idempotency_token: String,
-  
+
   /// Source of the image file to convert to video.
   /// It must be an image.
   pub media_file_token: Option<MediaFileToken>,
@@ -17,10 +17,10 @@ pub struct GenerateKling21ProImageToVideoRequest {
   /// Optional.
   /// Image media file; the image to remove the background from.
   pub end_frame_image_media_token: Option<MediaFileToken>,
-  
+
   /// Optional text prompt.
   pub prompt: Option<String>,
-  
+
   /// Optional: aspect ratio of the generated video.
   pub aspect_ratio: Option<GenerateKling21ProAspectRatio>,
 

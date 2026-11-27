@@ -1,70 +1,69 @@
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub (super) struct CreateChatConversationWireRequest {
+pub(super) struct CreateChatConversationWireRequest {
   #[serde(rename = "temporary")]
-  pub (super) temporary: bool,
+  pub(super) temporary: bool,
 
   #[serde(rename = "modelName")]
-  pub (super) model_name: String,
+  pub(super) model_name: String,
 
   /// The prompt
   #[serde(rename = "message")]
-  pub (super) message: String,
+  pub(super) message: String,
 
   #[serde(rename = "fileAttachments")]
-  pub (super) file_attachments: Vec<String>,
+  pub(super) file_attachments: Vec<String>,
 
   #[serde(rename = "toolOverrides")]
-  pub (super) tool_overrides: ToolOverrides,
+  pub(super) tool_overrides: ToolOverrides,
 
   #[serde(rename = "responseMetadata")]
-  pub (super) response_metadata: ResponseMetadata,
+  pub(super) response_metadata: ResponseMetadata,
 }
 
 #[derive(Serialize)]
-pub (super) struct ToolOverrides {
+pub(super) struct ToolOverrides {
   #[serde(rename = "videoGen")]
-  pub (super) video_gen: bool,
+  pub(super) video_gen: bool,
 }
 
 #[derive(Serialize)]
-pub (super) struct ResponseMetadata {
+pub(super) struct ResponseMetadata {
   #[serde(rename = "modelConfigOverride")]
-  pub (super) model_config_override: ModelConfigOverride,
+  pub(super) model_config_override: ModelConfigOverride,
 }
 
 #[derive(Serialize)]
-pub (super) struct ModelConfigOverride {
+pub(super) struct ModelConfigOverride {
   #[serde(rename = "modelMap")]
-  pub (super) model_map: ModelMap,
+  pub(super) model_map: ModelMap,
 }
 
-
 #[derive(Serialize)]
-pub (super) struct ModelMap {
+pub(super) struct ModelMap {
   #[serde(rename = "videoGenModelConfig")]
-  pub (super) video_gen_model_config: VideoGenModelConfig,
+  pub(super) video_gen_model_config: VideoGenModelConfig,
 }
 
 #[derive(Serialize)]
-pub (super) struct VideoGenModelConfig {
+pub(super) struct VideoGenModelConfig {
   #[serde(rename = "parentPostId")]
-  pub (super) parent_post_id: String,
+  pub(super) parent_post_id: String,
 
   /// Newer field as of November
   /// values: "1:1", "2:3" (tall),
   #[serde(rename = "aspectRatio")]
-  pub (super) aspect_ratio: VideoGenAspectRatio,
+  pub(super) aspect_ratio: VideoGenAspectRatio,
 
   /// Newer field as of November
   /// default seems to be "6"
   #[serde(rename = "videoLength")]
-  pub (super) video_length: u32,
+  pub(super) video_length: u32,
 }
 
 #[derive(Serialize, Clone, Copy, Debug)]
-pub (super) enum VideoGenAspectRatio {
+pub(super) enum VideoGenAspectRatio {
   #[serde(rename = "2:3")]
   TallTwoByThree,
 
@@ -160,4 +159,3 @@ October 22 request struct -
   }
 
 */
-

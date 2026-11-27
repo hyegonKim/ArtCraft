@@ -14,11 +14,7 @@ use crate::generate::generate_image::providers::kinovi::upload::upload_to_kinovi
 /// Returns `Ok(None)` when the input is `None` or an empty list — the
 /// caller can then omit the field from the wire request entirely. (The
 /// downstream Midjourney API rejects empty arrays.)
-pub(crate) async fn resolve_and_upload_image_list(
-  session: &KinoviWebSession,
-  list: Option<ImageListRef>,
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
+pub(crate) async fn resolve_and_upload_image_list(session: &KinoviWebSession, list: Option<ImageListRef>, maybe_map: Option<&HashMap<MediaFileToken, String>>) -> Result<Option<Vec<String>>, ArtcraftRouterError> {
   let source_urls = match list {
     None => return Ok(None),
     Some(ImageListRef::Urls(urls)) if urls.is_empty() => return Ok(None),
@@ -34,18 +30,7 @@ pub(crate) async fn resolve_and_upload_image_list(
   Ok(Some(uploaded))
 }
 
-fn resolve_tokens(
-  maybe_map: Option<&HashMap<MediaFileToken, String>>,
-  tokens: &[MediaFileToken],
-) -> Result<Vec<String>, ArtcraftRouterError> {
+fn resolve_tokens(maybe_map: Option<&HashMap<MediaFileToken, String>>, tokens: &[MediaFileToken]) -> Result<Vec<String>, ArtcraftRouterError> {
   let map = maybe_map.ok_or(ArtcraftRouterError::Client(ClientError::MediaFileToUrlMapNotProvided))?;
-  tokens.iter()
-    .map(|token| {
-      map.get(token).cloned().ok_or_else(|| {
-        ArtcraftRouterError::Client(ClientError::MediaFileTokenNotFoundInMap {
-          token: token.clone(),
-        })
-      })
-    })
-    .collect()
+  tokens.iter().map(|token| map.get(token).cloned().ok_or_else(|| ArtcraftRouterError::Client(ClientError::MediaFileTokenNotFoundInMap { token: token.clone() }))).collect()
 }

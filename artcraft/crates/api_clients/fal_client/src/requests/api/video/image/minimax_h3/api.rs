@@ -1,7 +1,5 @@
 use crate::error::fal_error_plus::FalErrorPlus;
-use crate::requests::api::video::image::minimax_h3::raw_request::{
-  MinimaxH3ImageToVideoInput, MinimaxH3ImageToVideoOutput,
-};
+use crate::requests::api::video::image::minimax_h3::raw_request::{MinimaxH3ImageToVideoInput, MinimaxH3ImageToVideoOutput};
 use crate::requests::api::video::text::minimax_h3::api::MinimaxH3Resolution;
 use crate::requests::traits::fal_endpoint_trait::FalEndpoint;
 
@@ -32,13 +30,7 @@ impl FalEndpoint for MinimaxH3ImageToVideoRequest {
   type RawResponse = MinimaxH3ImageToVideoOutput;
 
   fn to_raw_request(&self) -> Result<Self::RawRequest, FalErrorPlus> {
-    Ok(Self::RawRequest {
-      prompt: self.prompt.clone(),
-      image_url: self.image_url.clone(),
-      end_image_url: self.end_image_url.clone(),
-      duration: self.duration,
-      resolution: self.resolution.map(|r| r.to_str().to_string()),
-    })
+    Ok(Self::RawRequest { prompt: self.prompt.clone(), image_url: self.image_url.clone(), end_image_url: self.end_image_url.clone(), duration: self.duration, resolution: self.resolution.map(|r| r.to_str().to_string()) })
   }
 }
 
@@ -50,8 +42,7 @@ mod tests {
   use errors::AnyhowResult;
   use std::fs::read_to_string;
 
-  const EXAMPLE_IMAGE_URL: &str =
-    "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg";
+  const EXAMPLE_IMAGE_URL: &str = "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg";
 
   // ── Real requests (manually run; require a live key and cost money) ──
 
@@ -61,13 +52,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3ImageToVideoRequest {
-      prompt: "the camera slowly pulls back, revealing the full landscape".to_string(),
-      image_url: EXAMPLE_IMAGE_URL.to_string(),
-      end_image_url: None,
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-    };
+    let request = MinimaxH3ImageToVideoRequest { prompt: "the camera slowly pulls back, revealing the full landscape".to_string(), image_url: EXAMPLE_IMAGE_URL.to_string(), end_image_url: None, duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP) };
 
     let result = request.send_webhook_request(&api_key, "https://example.com/webhook").await?;
     println!("Webhook result: {:?}", result);
@@ -81,13 +66,7 @@ mod tests {
     let secret = read_to_string("/Users/bt/Artcraft/credentials/fal_api_key.txt")?;
     let api_key = FalApiKey::from_str(&secret);
 
-    let request = MinimaxH3ImageToVideoRequest {
-      prompt: "gentle wind moves through the scene as clouds drift overhead".to_string(),
-      image_url: EXAMPLE_IMAGE_URL.to_string(),
-      end_image_url: None,
-      duration: Some(5),
-      resolution: Some(MinimaxH3Resolution::SevenSixtyEightP),
-    };
+    let request = MinimaxH3ImageToVideoRequest { prompt: "gentle wind moves through the scene as clouds drift overhead".to_string(), image_url: EXAMPLE_IMAGE_URL.to_string(), end_image_url: None, duration: Some(5), resolution: Some(MinimaxH3Resolution::SevenSixtyEightP) };
 
     let result = request.send_queue_request(&api_key).await?;
     println!("Queue result — request_id: {}", result.request_id);
@@ -99,13 +78,7 @@ mod tests {
 
   #[test]
   fn raw_request_maps_all_fields() {
-    let request = MinimaxH3ImageToVideoRequest {
-      prompt: "p".to_string(),
-      image_url: "https://example.com/first.png".to_string(),
-      end_image_url: Some("https://example.com/last.png".to_string()),
-      duration: Some(12),
-      resolution: Some(MinimaxH3Resolution::TwoK),
-    };
+    let request = MinimaxH3ImageToVideoRequest { prompt: "p".to_string(), image_url: "https://example.com/first.png".to_string(), end_image_url: Some("https://example.com/last.png".to_string()), duration: Some(12), resolution: Some(MinimaxH3Resolution::TwoK) };
     let raw = request.to_raw_request().unwrap();
     assert_eq!(raw.prompt, "p");
     assert_eq!(raw.image_url, "https://example.com/first.png");
@@ -116,18 +89,15 @@ mod tests {
 
   #[test]
   fn raw_request_omits_unset_optionals() {
-    let request = MinimaxH3ImageToVideoRequest {
-      prompt: "minimal".to_string(),
-      image_url: "https://example.com/first.png".to_string(),
-      end_image_url: None,
-      duration: None,
-      resolution: None,
-    };
+    let request = MinimaxH3ImageToVideoRequest { prompt: "minimal".to_string(), image_url: "https://example.com/first.png".to_string(), end_image_url: None, duration: None, resolution: None };
     let json = serde_json::to_value(request.to_raw_request().unwrap()).unwrap();
-    assert_eq!(json, serde_json::json!({
-      "prompt": "minimal",
-      "image_url": "https://example.com/first.png",
-    }));
+    assert_eq!(
+      json,
+      serde_json::json!({
+        "prompt": "minimal",
+        "image_url": "https://example.com/first.png",
+      })
+    );
   }
 
   #[test]

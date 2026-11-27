@@ -20,14 +20,12 @@ pub struct ListSessionJobsQueryParams {
   //pub sort_ascending: Option<bool>,
   //pub page_size: Option<usize>, // TODO(bt,2024-04-23): One page for now.
   //pub page_index: Option<usize>, // TODO(bt,2024-04-23): One page for now.
-
   /// NB: This can be one (or more comma-separated values) from `JobStatusPlus`.
   /// ?include_states=pending or ?include_states=pending,started,complete_success (etc.)
   pub include_states: Option<String>,
 
   /// The opposite of include_states, this filters out states from view.
   pub exclude_states: Option<String>,
-
   // TODO(bt,2024-04-23): Add the ability for users to dismiss completed/dead jobs from view.
 }
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -107,13 +105,13 @@ pub struct ListSessionStatusDetailsResponse {
   ///
   /// An enum the frontend can use to display localized/I18N error
   /// messages. These pertain to both transient and permanent failures.
-  #[deprecated(note="use maybe_failure_category_updated")]
+  #[deprecated(note = "use maybe_failure_category_updated")]
   pub maybe_failure_category: Option<FrontendFailureCategoryForOldClients>,
 
   /// An enum the frontend can use to display localized/I18N error
   /// messages. These pertain to both transient and permanent failures.
   pub maybe_failure_category_updated: Option<FrontendFailureCategoryForApiClients>,
-  
+
   /// User-facing failure messages
   pub maybe_failure_message: Option<String>,
 
@@ -127,12 +125,12 @@ pub struct ListSessionStatusDetailsResponse {
 pub struct ListSessionResultDetailsResponse {
   pub entity_type: String,
   pub entity_token: String,
-  
+
   /// If generated as part of a batch, the batch token.
   pub maybe_batch_token: Option<BatchGenerationToken>,
 
   /// (DEPRECATED) URL path to the media file
-  #[deprecated(note="This field doesn't point to the full URL. Use media_links instead to leverage the CDN.")]
+  #[deprecated(note = "This field doesn't point to the full URL. Use media_links instead to leverage the CDN.")]
   pub maybe_public_bucket_media_path: Option<String>,
 
   /// Rich CDN links to the media, including thumbnails, previews, and more.

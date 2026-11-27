@@ -2,7 +2,10 @@ use serde_json::{Value, json};
 
 use super::access::file_list;
 use super::formats::formats;
-use super::{CommandSpec, EngineError, Result, Session, action_batch, always, batch, cmd, export, has_doc, has_selection, load, pdfimport, save, screens, write_or_return};
+use super::{
+    CommandSpec, EngineError, Result, Session, action_batch, always, batch, cmd, export, has_doc, has_selection, load, pdfimport, save, screens,
+    write_or_return,
+};
 
 pub fn specs() -> Vec<CommandSpec> {
     vec![
@@ -202,9 +205,5 @@ fn export_motion(s: &mut Session, p: &Value) -> Result<Value> {
         opts.publish_parameters = pub_params;
     }
     let ozml = vectorcraft_doc::motion::export_motion_ozml(doc, &opts);
-    write_or_return(
-        p.get("path").and_then(Value::as_str),
-        ozml.as_bytes(),
-        json!({ "format": "motion", "ozml": ozml }),
-    )
+    write_or_return(p.get("path").and_then(Value::as_str), ozml.as_bytes(), json!({ "format": "motion", "ozml": ozml }))
 }

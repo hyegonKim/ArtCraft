@@ -12,12 +12,11 @@ pub struct StripeArtcraftCustomerPortalSwitchPlanRequest {
   /// REQUIRED
   /// The plan we're switching to.
   pub plan: Option<ArtcraftSubscriptionSlug>,
-  
+
   /// REQUIRED
   /// The cadence for the plan billing.
   pub cadence: Option<PlanBillingCadenceConfirmation>,
 }
-
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Copy, Clone)]
 pub enum PlanBillingCadenceConfirmation {
@@ -28,10 +27,8 @@ pub enum PlanBillingCadenceConfirmation {
   Yearly,
 }
 
-
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct StripeArtcraftCustomerPortalSwitchPlanResponse {
   pub success: bool,
   pub stripe_portal_url: String,
 }
-

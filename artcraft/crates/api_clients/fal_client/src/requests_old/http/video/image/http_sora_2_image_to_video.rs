@@ -40,8 +40,6 @@ pub struct Sora2ImageToVideoOutput {
   pub video: Sora2ImageToVideoVideoFile,
 }
 
-pub fn sora_2_image_to_video(
-  params: Sora2ImageToVideoInput,
-) -> FalRequest<Sora2ImageToVideoInput, Sora2ImageToVideoOutput> {
+pub fn sora_2_image_to_video(params: Sora2ImageToVideoInput) -> FalRequest<Sora2ImageToVideoInput, Sora2ImageToVideoOutput> {
   FalRequest::new("fal-ai/sora-2/image-to-video", params)
 }

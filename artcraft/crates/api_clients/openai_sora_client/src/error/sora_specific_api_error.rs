@@ -9,11 +9,11 @@ pub enum SoraSpecificApiError {
 
   /// The endpoint told us we used an invalid JWT.
   InvalidJwt,
-  
+
   /// Sora has responded with "sentinel block".
   /// This usually means we need to refresh our sentinel token.
   SentinelBlockError,
-  
+
   /// Sora requires users to set up an account username before they can generate images.
   /// This requires the user to set up that username.
   SoraUsernameNotYetCreated,
@@ -39,13 +39,9 @@ pub enum SoraSpecificApiError {
   ///     }
   ///   }
   UnauthorizedCookieOrBearerExpired,
-  
+
   /// The Sora sentinel token response is missing fields
-  SentinelResponseIsMissingFields {
-    missing_token: bool,
-    missing_turnstile: bool,
-    raw_response: String,
-  },
+  SentinelResponseIsMissingFields { missing_token: bool, missing_turnstile: bool, raw_response: String },
 }
 
 impl Error for SoraSpecificApiError {}

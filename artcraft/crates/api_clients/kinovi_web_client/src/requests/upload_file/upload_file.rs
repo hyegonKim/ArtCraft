@@ -30,8 +30,7 @@ pub struct UploadFileResponse {
 /// e.g. `https://comm.….r2.cloudflarestorage.com/materials/20260219/…?X-Amz-…`
 ///   -> `https://static.kinovi.ai/materials/20260219/…`
 fn build_public_url(upload_url: &str, host: &KinoviHost) -> Result<String, KinoviWebError> {
-  let parsed = Url::parse(upload_url)
-    .map_err(|err| KinoviWebClientError::UrlParseError(err))?;
+  let parsed = Url::parse(upload_url).map_err(|err| KinoviWebClientError::UrlParseError(err))?;
   let path = parsed.path(); // e.g. "/materials/20260219/1771463564512-b14bfe90.png"
   Ok(format!("{}{}", host.cdn_base_url(), path))
 }
@@ -42,44 +41,20 @@ pub async fn upload_file(args: UploadFileArgs) -> Result<UploadFileResponse, Kin
 
   info!("Uploading file to: {}", args.upload_url);
 
-  let client = Client::builder()
-    .emulation(Emulation::Firefox143)
-    .timeout(KINOVI_UPLOAD_TIMEOUT)
-    .build()
-    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+  let client = Client::builder().emulation(Emulation::Firefox143).timeout(KINOVI_UPLOAD_TIMEOUT).build().map_err(|err| KinoviWebClientError::WreqClientError(err))?;
 
   let referer = format!("{}/", base_url);
 
-  let response = client.put(&args.upload_url)
-    .header("User-Agent", FIREFOX_USER_AGENT)
-    .header("Accept", "*/*")
-    .header("Accept-Language", "en-US,en;q=0.9")
-    .header("Accept-Encoding", "gzip, deflate, br, zstd")
-    .header("Referer", &referer)
-    .header("Origin", base_url)
-    .header("Connection", "keep-alive")
-    .header("Sec-Fetch-Dest", "empty")
-    .header("Sec-Fetch-Mode", "cors")
-    .header("Sec-Fetch-Site", "cross-site")
-    .header("Priority", "u=4")
-    .body(args.file_bytes)
-    .send()
-    .await
-    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+  let response = client.put(&args.upload_url).header("User-Agent", FIREFOX_USER_AGENT).header("Accept", "*/*").header("Accept-Language", "en-US,en;q=0.9").header("Accept-Encoding", "gzip, deflate, br, zstd").header("Referer", &referer).header("Origin", base_url).header("Connection", "keep-alive").header("Sec-Fetch-Dest", "empty").header("Sec-Fetch-Mode", "cors").header("Sec-Fetch-Site", "cross-site").header("Priority", "u=4").body(args.file_bytes).send().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
   let status = response.status();
 
   info!("Upload response status: {}", status);
 
   if !status.is_success() {
-    let body = response.text()
-      .await
-      .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+    let body = response.text().await.map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
 
-    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody {
-      status_code: status,
-      body,
-    }.into());
+    return Err(KinoviWebGenericApiError::UncategorizedBadResponseWithStatusAndBody { status_code: status, body }.into());
   }
 
   let public_url = build_public_url(&args.upload_url, &host)?;
@@ -95,9 +70,7 @@ mod tests {
   use crate::creds::kinovi_web_session::KinoviWebSession;
   use crate::test_utils::get_test_cookies::get_test_cookies;
   use crate::test_utils::setup_test_logging::setup_test_logging;
-  use crate::requests::prepare_file_upload::prepare_file_upload::{
-    prepare_file_upload, PrepareFileUploadArgs,
-  };
+  use crate::requests::prepare_file_upload::prepare_file_upload::{prepare_file_upload, PrepareFileUploadArgs};
   use errors::AnyhowResult;
   use log::LevelFilter;
   use std::fs;
@@ -110,11 +83,7 @@ mod tests {
     // Step 1: Get a signed upload URL
     let cookies = get_test_cookies()?;
     let session = KinoviWebSession::from_cookies_string(cookies);
-    let prepare_args = PrepareFileUploadArgs {
-      session: &session,
-      extension: "jpg".to_string(),
-      host_override: None,
-    };
+    let prepare_args = PrepareFileUploadArgs { session: &session, extension: "jpg".to_string(), host_override: None };
     let prepare_result = prepare_file_upload(prepare_args).await?;
     println!("Upload URL: {}", prepare_result.upload_url);
 
@@ -123,11 +92,7 @@ mod tests {
     println!("File size: {} bytes", file_bytes.len());
 
     // Step 3: Upload
-    let upload_args = UploadFileArgs {
-      upload_url: prepare_result.upload_url,
-      file_bytes,
-      host_override: None,
-    };
+    let upload_args = UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes, host_override: None };
     let result = upload_file(upload_args).await?;
     println!("Public URL: {}", result.public_url);
 
@@ -145,11 +110,7 @@ mod tests {
     // Step 1: Get a signed upload URL
     let cookies = get_test_cookies()?;
     let session = KinoviWebSession::from_cookies_string(cookies);
-    let prepare_args = PrepareFileUploadArgs {
-      session: &session,
-      extension: "mp4".to_string(),
-      host_override: None,
-    };
+    let prepare_args = PrepareFileUploadArgs { session: &session, extension: "mp4".to_string(), host_override: None };
     let prepare_result = prepare_file_upload(prepare_args).await?;
     println!("Upload URL: {}", prepare_result.upload_url);
 
@@ -158,11 +119,7 @@ mod tests {
     println!("File size: {} bytes", file_bytes.len());
 
     // Step 3: Upload
-    let upload_args = UploadFileArgs {
-      upload_url: prepare_result.upload_url,
-      file_bytes,
-      host_override: None,
-    };
+    let upload_args = UploadFileArgs { upload_url: prepare_result.upload_url, file_bytes, host_override: None };
     let result = upload_file(upload_args).await?;
     println!("Public URL: {}", result.public_url);
 

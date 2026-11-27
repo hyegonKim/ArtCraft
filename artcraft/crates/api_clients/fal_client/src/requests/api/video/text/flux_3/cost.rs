@@ -1,6 +1,4 @@
-use crate::requests::api::video::text::flux_3::api::{
-  Flux3Duration, Flux3Resolution, Flux3TextToVideoRequest,
-};
+use crate::requests::api::video::text::flux_3::api::{Flux3Duration, Flux3Resolution, Flux3TextToVideoRequest};
 use crate::requests::traits::fal_request_cost_calculator_trait::{FalRequestCostCalculator, UsdCents};
 
 // Flux 3 pricing (see https://fal.ai/models/blackforestlabs/flux-3/text-to-video):
@@ -22,7 +20,11 @@ const ASSUMED_AUTO_DURATION_SECS: u64 = 5;
 /// Per-second rate in whole cents for the standard (non-extend) Flux 3
 /// modalities. `is_1080p` selects the 1080p tier.
 pub(crate) fn flux_3_standard_rate_cents_per_sec(is_1080p: bool) -> u64 {
-  if is_1080p { RATE_1080P_CENTS_PER_SEC } else { RATE_720P_CENTS_PER_SEC }
+  if is_1080p {
+    RATE_1080P_CENTS_PER_SEC
+  } else {
+    RATE_720P_CENTS_PER_SEC
+  }
 }
 
 /// Per-second rate × duration → whole cents (all Flux 3 rates are exact
@@ -59,18 +61,8 @@ mod tests {
   use super::*;
   use crate::requests::api::video::text::flux_3::api::Flux3AspectRatio;
 
-  fn make_request(
-    duration: Option<Flux3Duration>,
-    resolution: Option<Flux3Resolution>,
-  ) -> Flux3TextToVideoRequest {
-    Flux3TextToVideoRequest {
-      prompt: "test".to_string(),
-      duration,
-      resolution,
-      aspect_ratio: Some(Flux3AspectRatio::SixteenByNine),
-      generate_audio: Some(true),
-      safety_tolerance: None,
-    }
+  fn make_request(duration: Option<Flux3Duration>, resolution: Option<Flux3Resolution>) -> Flux3TextToVideoRequest {
+    Flux3TextToVideoRequest { prompt: "test".to_string(), duration, resolution, aspect_ratio: Some(Flux3AspectRatio::SixteenByNine), generate_audio: Some(true), safety_tolerance: None }
   }
 
   mod cost_table {
@@ -81,11 +73,11 @@ mod tests {
     // None/auto durations are estimated at the 5s floor.
     const COST_TABLE: &[(Option<Flux3Duration>, Option<Flux3Resolution>, u64)] = &[
       // 720p → $0.17/s
-      (Some(Flux3Duration::Seconds(5)),  Some(Flux3Resolution::SevenTwentyP), 85),
+      (Some(Flux3Duration::Seconds(5)), Some(Flux3Resolution::SevenTwentyP), 85),
       (Some(Flux3Duration::Seconds(10)), Some(Flux3Resolution::SevenTwentyP), 170),
       (Some(Flux3Duration::Seconds(20)), Some(Flux3Resolution::SevenTwentyP), 340),
       // 1080p → $0.29/s
-      (Some(Flux3Duration::Seconds(5)),  Some(Flux3Resolution::TenEightyP), 145),
+      (Some(Flux3Duration::Seconds(5)), Some(Flux3Resolution::TenEightyP), 145),
       (Some(Flux3Duration::Seconds(20)), Some(Flux3Resolution::TenEightyP), 580),
       // Defaults: duration=None/auto→5s estimate, resolution=None→720p
       (None, None, 85),
@@ -122,12 +114,7 @@ mod tests {
       let baseline = make_request(Some(Flux3Duration::Seconds(8)), None).calculate_cost_in_cents();
       for generate_audio in [None, Some(false), Some(true)] {
         for safety_tolerance in [None, Some(0), Some(4)] {
-          let cost = Flux3TextToVideoRequest {
-            aspect_ratio: Some(Flux3AspectRatio::NineBySixteen),
-            generate_audio,
-            safety_tolerance,
-            ..make_request(Some(Flux3Duration::Seconds(8)), None)
-          }.calculate_cost_in_cents();
+          let cost = Flux3TextToVideoRequest { aspect_ratio: Some(Flux3AspectRatio::NineBySixteen), generate_audio, safety_tolerance, ..make_request(Some(Flux3Duration::Seconds(8)), None) }.calculate_cost_in_cents();
           assert_eq!(cost, baseline, "audio={generate_audio:?} safety={safety_tolerance:?}");
         }
       }

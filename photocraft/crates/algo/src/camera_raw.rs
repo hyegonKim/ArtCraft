@@ -889,11 +889,7 @@ pub fn develop(px: &mut [[f32; 4]], w: usize, h: usize, p: &CameraRaw, float: bo
         });
     }
     if !float {
-        let ceiling = if p.hdr_mode {
-            linear_to_srgb(2.0f32.powi(i32::from(p.hdr_range_ev.clamp(1, 4))))
-        } else {
-            1.0
-        };
+        let ceiling = if p.hdr_mode { linear_to_srgb(2.0f32.powi(i32::from(p.hdr_range_ev.clamp(1, 4)))) } else { 1.0 };
         for q in px.iter_mut() {
             for c in 0..3 {
                 q[c] = q[c].clamp(0.0, ceiling);

@@ -39,5 +39,5 @@ pub enum RawWebhookStatus {
 
   /// Failure case
   #[serde(alias = "ERROR")]
-  Error
+  Error,
 }

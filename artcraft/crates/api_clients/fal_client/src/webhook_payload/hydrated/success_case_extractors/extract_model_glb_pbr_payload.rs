@@ -18,10 +18,8 @@ mod tests {
 
   fn load_test_webhook(filename: &str) -> RawWebhookPayload {
     let path = format!("test_data/webhooks/{}", filename);
-    let json = std::fs::read_to_string(&path)
-      .unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
-    serde_json::from_str(&json)
-      .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
+    let json = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path, e));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to parse {}: {}", path, e))
   }
 
   #[test]
@@ -33,8 +31,7 @@ mod tests {
       panic!("Expected Success, got {:?}", result);
     };
 
-    let contents = data.extracted_contents
-      .expect("extracted_contents should be Some");
+    let contents = data.extracted_contents.expect("extracted_contents should be Some");
 
     let glb = contents.model_glb.expect("model_glb should be Some");
     assert_eq!(glb.url.as_deref(), Some("https://v3b.fal.media/files/b/0aa1b916/QKdBTd8WJW_rtPB3IwlEN_demo_textured.glb"));
@@ -60,14 +57,17 @@ mod tests {
 
   #[test]
   fn synthetic_model_glb_pbr_payload() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb_pbr": {
         "url": "https://cdn.example.com/model_pbr.glb",
         "content_type": "model/gltf-binary",
         "file_name": "model_pbr.glb",
         "file_size": 7654321
       }
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     let glb_pbr = extract_model_glb_pbr(&obj).expect("should extract model_glb_pbr");
     assert_eq!(glb_pbr.url.as_deref(), Some("https://cdn.example.com/model_pbr.glb"));
@@ -78,9 +78,12 @@ mod tests {
 
   #[test]
   fn missing_model_glb_pbr_key_returns_none() {
-    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{
+    let obj: serde_json::Map<String, serde_json::Value> = serde_json::from_str(
+      r#"{
       "model_glb": {"url": "https://example.com/model.glb"}
-    }"#).unwrap();
+    }"#,
+    )
+    .unwrap();
 
     assert!(extract_model_glb_pbr(&obj).is_none());
   }

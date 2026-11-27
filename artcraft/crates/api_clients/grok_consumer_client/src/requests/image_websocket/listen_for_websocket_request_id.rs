@@ -55,18 +55,15 @@ pub async fn listen_for_websocket_request_id(args: ListenForWebsocketRequestIdAr
         // NB: Might not have been a parse error, since we're parsing irrelevant message payloads too.
         // This is slightly dangerous to do this way as we might mask true parsing errors with image payloads.
         continue;
-      }
+      },
     };
 
     request_id = Some(RequestId(parsed.request_id));
     break;
   }
 
-  Ok(RequestIdResult {
-    request_id,
-  })
+  Ok(RequestIdResult { request_id })
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -91,9 +88,7 @@ mod tests {
 
     let cookies = get_test_cookies()?;
 
-    let mut websocket = create_listen_websocket(CreateListenWebsocketArgs {
-      cookies: &cookies,
-    }).await?;
+    let mut websocket = create_listen_websocket(CreateListenWebsocketArgs { cookies: &cookies }).await?;
 
     //let websocket = GrokWrappedWebsocket::new(websocket);
     let mut websocket = GrokWebsocket::new(websocket);
@@ -101,26 +96,19 @@ mod tests {
     println!("Sending...");
     std::io::stdout().flush()?;
 
-    let _result = prompt_websocket_image(PromptWebsocketImageArgs {
-      websocket: &mut websocket,
-      prompt,
-      aspect_ratio: ClientMessageAspectRatio::Square,
-    }).await?;
+    let _result = prompt_websocket_image(PromptWebsocketImageArgs { websocket: &mut websocket, prompt, aspect_ratio: ClientMessageAspectRatio::Square }).await?;
 
     println!("Reading...");
     std::io::stdout().flush()?;
 
     println!("Polling.");
 
-    let request_data = listen_for_websocket_request_id(ListenForWebsocketRequestIdArgs {
-      websocket: &mut websocket,
-      timeout: Duration::from_millis(10_000),
-    }).await?;
+    let request_data = listen_for_websocket_request_id(ListenForWebsocketRequestIdArgs { websocket: &mut websocket, timeout: Duration::from_millis(10_000) }).await?;
 
     println!("Done polling. Request Data: {:?}", request_data);
     log::logger().flush();
 
-    assert_eq!(1,2);
+    assert_eq!(1, 2);
 
     Ok(())
   }

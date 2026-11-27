@@ -9,10 +9,7 @@ use crate::core::commands::enqueue::generate_error::GenerateError;
 ///
 /// FAL (and other third-party providers) can fetch images by URL directly,
 /// so we just need the CDN link — no need to download the bytes locally.
-pub async fn map_media_file_tokens_to_cdn_urls(
-  tokens: &[MediaFileToken],
-  api_host: &ApiHost,
-) -> Result<Vec<String>, GenerateError> {
+pub async fn map_media_file_tokens_to_cdn_urls(tokens: &[MediaFileToken], api_host: &ApiHost) -> Result<Vec<String>, GenerateError> {
   let mut urls = Vec::with_capacity(tokens.len());
 
   for token in tokens {

@@ -16,39 +16,30 @@ use openai_sora_client::recipes::maybe_upgrade_or_renew_session::maybe_upgrade_o
 use openai_sora_client::utils::has_session_cookie::{has_session_cookie, SessionCookiePresence};
 use tauri::{AppHandle, Manager, WebviewWindow};
 
-pub async fn sora_login_thread(
-  app: AppHandle,
-  app_data_root: AppDataRoot,
-  sora_creds_manager: SoraCredentialManager
-) {
+pub async fn sora_login_thread(app: AppHandle, app_data_root: AppDataRoot, sora_creds_manager: SoraCredentialManager) {
   loop {
     let login_webview_window = match app.get_webview_window(LOGIN_WINDOW_NAME) {
       Some(webview) => webview,
       None => {
         info!("Exit sora login thread.");
         return; // NB: Only exit if we don't have the webview.
-      }
+      },
     };
 
-    let result = check_login_window(
-      &app,
-      &login_webview_window,
-      &app_data_root,
-      &sora_creds_manager,
-    ).await;
- 
+    let result = check_login_window(&app, &login_webview_window, &app_data_root, &sora_creds_manager).await;
+
     match result {
       Err(err) => {
         error!("Error checking login window: {:?}", err);
-      }
-      Ok(false) => {} // Continue iteration and try again...
+      },
+      Ok(false) => {}, // Continue iteration and try again...
       Ok(true) => {
         info!("Successfully saved cookies from login window. Closing.");
         if let Err(err) = login_webview_window.close() {
           error!("Error closing login window: {:?}", err);
         }
         return;
-      }
+      },
     }
 
     tokio::time::sleep(std::time::Duration::from_millis(2_000)).await;
@@ -56,22 +47,16 @@ pub async fn sora_login_thread(
 }
 
 /// Returns true if we can exit.
-async fn check_login_window(
-  app_handle: &AppHandle,
-  webview_window: &WebviewWindow,
-  app_data_root: &AppDataRoot,
-  sora_credential_manager: &SoraCredentialManager,
-) -> AnyhowResult<bool> {
-  
+async fn check_login_window(app_handle: &AppHandle, webview_window: &WebviewWindow, app_data_root: &AppDataRoot, sora_credential_manager: &SoraCredentialManager) -> AnyhowResult<bool> {
   /* Login flow looks like this:
-  
+
   1. Start: https://sora.chatgpt.com/
   2. Login Start: https://chatgpt.com/auth/login?next=%2Fsora%2F [this is where we start]
   3. Login Continue: https://auth.openai.com/log-in
   4. SSO / Google Login (etc): https://accounts.google.com/v3/signin/challenge/pwd?[query]
   5. Done / Landing: https://sora.chatgpt.com/explore
    */
-  
+
   /*
   - Do not use credential manager until the end (we don't load old cookies!)
   - Check if we're on the correct domain, if not exit? (or inverse, that we're not in login flow)
@@ -103,11 +88,10 @@ async fn check_login_window(
 
   let webview_cookies = extract_sora_webview_cookies(webview_window)?.trim().to_string();
 
-  let session_cookie_presence = has_session_cookie(&webview_cookies)
-      .unwrap_or_else(|err| {
-        error!("Failed to check for session cookie: {:?}", err);
-        SessionCookiePresence::MaybePresent
-      });
+  let session_cookie_presence = has_session_cookie(&webview_cookies).unwrap_or_else(|err| {
+    error!("Failed to check for session cookie: {:?}", err);
+    SessionCookiePresence::MaybePresent
+  });
 
   info!("Sora login webview is at hostname `{}`; cookie status: {:?}.", hostname, session_cookie_presence);
 
@@ -115,13 +99,12 @@ async fn check_login_window(
     SessionCookiePresence::Absent => {
       info!("Session cookies are absent.");
       return Ok(false);
-    }
+    },
     _ => {},
   }
 
-  let mut new_credentials =
-      SoraCredentialSet::initialize_with_just_cookies_str(&webview_cookies);
-  
+  let mut new_credentials = SoraCredentialSet::initialize_with_just_cookies_str(&webview_cookies);
+
   let _upgraded = maybe_upgrade_or_renew_session(&mut new_credentials).await?;
 
   // TODO(bt): Race conditions ahead.
@@ -138,9 +121,7 @@ async fn check_login_window(
 }
 
 fn send_frontend_login_events(app_handle: &AppHandle) {
-  let event = RefreshAccountStateEvent {
-    provider: Some(GenerationProvider::Sora),
-  };
+  let event = RefreshAccountStateEvent { provider: Some(GenerationProvider::Sora) };
 
   event.send_infallible(app_handle);
 

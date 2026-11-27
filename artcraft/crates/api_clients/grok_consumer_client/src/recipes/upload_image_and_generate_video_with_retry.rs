@@ -54,20 +54,13 @@ pub struct ImageUploadAndGenerateVideoWithRetryResult {
   pub upload_result: ImageUploadAndGenerateVideoResult,
 }
 
-pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
-  args: UploadImageAndGenerateVideoWithRetry<'_, P>
-) -> Result<ImageUploadAndGenerateVideoWithRetryResult, GrokError> {
-
+pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(args: UploadImageAndGenerateVideoWithRetry<'_, P>) -> Result<ImageUploadAndGenerateVideoWithRetryResult, GrokError> {
   let mut current_full_credentials_ref = args.credentials;
   let mut maybe_new_credentials = None;
 
   info!("Uploading file to Grok...");
 
-  let request = GrokUploadFile {
-    file: args.file,
-    cookie: current_full_credentials_ref.cookies.to_string(),
-    request_timeout: args.individual_request_timeout,
-  };
+  let request = GrokUploadFile { file: args.file, cookie: current_full_credentials_ref.cookies.to_string(), request_timeout: args.individual_request_timeout };
 
   let upload_result = request.upload().await?;
 
@@ -79,25 +72,16 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
     None => {
       error!("Previous file upload failed. Cannot continue.");
       return Err(GrokGenericApiError::UploadFailed.into());
-    }
+    },
   };
 
-  let url = user_and_file_id_to_image_url(
-    &current_full_credentials_ref.client_secrets.user_id,
-    &upload_file_id
-  );
+  let url = user_and_file_id_to_image_url(&current_full_credentials_ref.client_secrets.user_id, &upload_file_id);
 
   info!("Uploaded URI: {:?}", url);
 
   info!("Creating media post...");
 
-  let request = GrokCreateMediaPost {
-    user_id: &current_full_credentials_ref.client_secrets.user_id,
-    file_id: &upload_file_id,
-    media_type: MediaPostType::UserUploadedImage,
-    cookie: current_full_credentials_ref.cookies.as_str(),
-    request_timeout: args.individual_request_timeout,
-  };
+  let request = GrokCreateMediaPost { user_id: &current_full_credentials_ref.client_secrets.user_id, file_id: &upload_file_id, media_type: MediaPostType::UserUploadedImage, cookie: current_full_credentials_ref.cookies.as_str(), request_timeout: args.individual_request_timeout };
 
   let post_result = request.send().await?;
 
@@ -107,39 +91,16 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
   info!("Video aspect ratio: {:?}", args.aspect_ratio);
 
   let mut video_enqueued_successfully = false;
-  let mut generation_is_complete= false;
+  let mut generation_is_complete = false;
   let mut maybe_video_file_id = None;
   let mut last_error = None;
 
   for i in 0..3 {
-    info!("Generate video... attempt {}", (i+1));
+    info!("Generate video... attempt {}", (i + 1));
 
-    let request = GrokVideoGenChatConversationBuilder {
-      user_id: &current_full_credentials_ref.client_secrets.user_id,
-      file_id: &upload_file_id,
-      media_type: VideoMediaPostType::UserUploadedImage,
-      cookie: current_full_credentials_ref.cookies.as_str(),
-      prompt: args.prompt,
-      mode: args.mode,
-      aspect_ratio: args.aspect_ratio,
-      request_timeout: args.individual_request_timeout,
-      baggage: &current_full_credentials_ref.client_secrets.baggage,
-      sentry_trace: &current_full_credentials_ref.client_secrets.sentry_trace,
-      verification_token: &current_full_credentials_ref.client_secrets.verification_token,
-      svg_data: &current_full_credentials_ref.client_secrets.svg_path_data,
-      numbers: &current_full_credentials_ref.client_secrets.numbers,
-    };
+    let request = GrokVideoGenChatConversationBuilder { user_id: &current_full_credentials_ref.client_secrets.user_id, file_id: &upload_file_id, media_type: VideoMediaPostType::UserUploadedImage, cookie: current_full_credentials_ref.cookies.as_str(), prompt: args.prompt, mode: args.mode, aspect_ratio: args.aspect_ratio, request_timeout: args.individual_request_timeout, baggage: &current_full_credentials_ref.client_secrets.baggage, sentry_trace: &current_full_credentials_ref.client_secrets.sentry_trace, verification_token: &current_full_credentials_ref.client_secrets.verification_token, svg_data: &current_full_credentials_ref.client_secrets.svg_path_data, numbers: &current_full_credentials_ref.client_secrets.numbers };
 
-    let video_gen_result =
-      if args.wait_for_generation {
-        request.wait_for_video()
-            .await
-            .map(|res| res.video_file_id)
-      } else {
-        request.stream_only_video_id()
-            .await
-            .map(|res| res.video_file_id)
-      };
+    let video_gen_result = if args.wait_for_generation { request.wait_for_video().await.map(|res| res.video_file_id) } else { request.stream_only_video_id().await.map(|res| res.video_file_id) };
 
     match video_gen_result {
       Ok(res) => {
@@ -148,31 +109,26 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
         generation_is_complete = args.wait_for_generation; // If we synchronously waited, it'll be complete.
         maybe_video_file_id = res;
         break;
-      }
+      },
       Err(GrokError::ApiSpecific(GrokSpecificApiError::AutomationBlocked)) => {
         info!("Grok automation blocked; renewing credentials.");
         last_error = Some(GrokError::ApiSpecific(GrokSpecificApiError::AutomationBlocked));
-      }
+      },
       Err(err) => {
         info!("Grok error; renewing credentials. Error = {:?}", err);
         last_error = Some(err);
-      }
+      },
     }
 
     info!("Refreshing Grok client secrets...");
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &current_full_credentials_ref.cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &current_full_credentials_ref.cookies }).await?;
 
     // NB: This is just to appease the borrow checker. It doesn't like that we're borrowing `maybe_new_credentials`
     // in a loop and replacing it while borrowed, hence this hack.
     current_full_credentials_ref = args.credentials;
 
-    maybe_new_credentials = Some(GrokFullCredentials::from_cookies_and_client_secrets(
-      current_full_credentials_ref.cookies.clone(),
-      secrets,
-    ));
+    maybe_new_credentials = Some(GrokFullCredentials::from_cookies_and_client_secrets(current_full_credentials_ref.cookies.clone(), secrets));
 
     if let Some(creds) = maybe_new_credentials.as_ref() {
       current_full_credentials_ref = creds;
@@ -184,7 +140,7 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
       return Err(err);
     } else {
       // NB: This branch should be impossible as we should always set last_error.
-      return Err(GrokError::Client(GrokClientError::ErrorGeneratingVideo))
+      return Err(GrokError::Client(GrokClientError::ErrorGeneratingVideo));
     }
   }
 
@@ -192,18 +148,9 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
   let mut last_error = None;
 
   for i in 0..3 {
-    info!("Liking media ... attempt {}", (i+1));
+    info!("Liking media ... attempt {}", (i + 1));
 
-    let request = GrokLikeMediaPost {
-      file_id: &upload_file_id,
-      cookie: current_full_credentials_ref.cookies.as_str(),
-      request_timeout: args.individual_request_timeout,
-      baggage: &current_full_credentials_ref.client_secrets.baggage,
-      sentry_trace: &current_full_credentials_ref.client_secrets.sentry_trace,
-      verification_token: &current_full_credentials_ref.client_secrets.verification_token,
-      svg_data: &current_full_credentials_ref.client_secrets.svg_path_data,
-      numbers: &current_full_credentials_ref.client_secrets.numbers,
-    };
+    let request = GrokLikeMediaPost { file_id: &upload_file_id, cookie: current_full_credentials_ref.cookies.as_str(), request_timeout: args.individual_request_timeout, baggage: &current_full_credentials_ref.client_secrets.baggage, sentry_trace: &current_full_credentials_ref.client_secrets.sentry_trace, verification_token: &current_full_credentials_ref.client_secrets.verification_token, svg_data: &current_full_credentials_ref.client_secrets.svg_path_data, numbers: &current_full_credentials_ref.client_secrets.numbers };
 
     let like_result = request.send().await;
 
@@ -212,31 +159,26 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
         info!("Media Liked");
         video_liked_successfully = true;
         break;
-      }
+      },
       Err(GrokError::ApiSpecific(GrokSpecificApiError::AutomationBlocked)) => {
         info!("Grok automation blocked liking media; renewing credentials.");
         last_error = Some(GrokError::ApiSpecific(GrokSpecificApiError::AutomationBlocked));
-      }
+      },
       Err(err) => {
         info!("Grok error liking media; renewing credentials. Error = {:?}", err);
         last_error = Some(err);
-      }
+      },
     }
 
     info!("Refreshing Grok client secrets...");
 
-    let secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &current_full_credentials_ref.cookies,
-    }).await?;
+    let secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &current_full_credentials_ref.cookies }).await?;
 
     // NB: This is just to appease the borrow checker. It doesn't like that we're borrowing `maybe_new_credentials`
     // in a loop and replacing it while borrowed, hence this hack.
     current_full_credentials_ref = args.credentials;
 
-    maybe_new_credentials = Some(GrokFullCredentials::from_cookies_and_client_secrets(
-      current_full_credentials_ref.cookies.clone(),
-      secrets,
-    ));
+    maybe_new_credentials = Some(GrokFullCredentials::from_cookies_and_client_secrets(current_full_credentials_ref.cookies.clone(), secrets));
 
     if let Some(creds) = maybe_new_credentials.as_ref() {
       current_full_credentials_ref = creds;
@@ -248,29 +190,14 @@ pub async fn upload_image_and_generate_video_with_retry<P: AsRef<Path>>(
       return Err(err);
     } else {
       // NB: This branch should be impossible as we should always set last_error.
-      return Err(GrokError::Client(GrokClientError::ErrorGeneratingVideo))
+      return Err(GrokError::Client(GrokClientError::ErrorGeneratingVideo));
     }
   }
 
-  let maybe_video_url = maybe_video_file_id
-      .as_ref()
-      .map(|file_id| {
-        user_and_file_id_to_video_url(&current_full_credentials_ref.client_secrets.user_id, file_id, false)
-      });
+  let maybe_video_url = maybe_video_file_id.as_ref().map(|file_id| user_and_file_id_to_video_url(&current_full_credentials_ref.client_secrets.user_id, file_id, false));
 
-  Ok(ImageUploadAndGenerateVideoWithRetryResult {
-    maybe_new_client_secrets: maybe_new_credentials
-        .map(|secrets| secrets.client_secrets),
-    upload_result: ImageUploadAndGenerateVideoResult {
-      post_id: post_result.post_id,
-      image_file_id: upload_file_id,
-      video_file_id: maybe_video_file_id,
-      video_url: maybe_video_url,
-      generation_is_complete,
-    }
-  })
+  Ok(ImageUploadAndGenerateVideoWithRetryResult { maybe_new_client_secrets: maybe_new_credentials.map(|secrets| secrets.client_secrets), upload_result: ImageUploadAndGenerateVideoResult { post_id: post_result.post_id, image_file_id: upload_file_id, video_file_id: maybe_video_file_id, video_url: maybe_video_url, generation_is_complete } })
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -302,9 +229,7 @@ mod tests {
 
     let cookies = get_typed_test_cookies()?;
 
-    let mut bad_secrets = request_client_secrets(RequestClientSecretsArgs {
-      cookies: &cookies,
-    }).await?;
+    let mut bad_secrets = request_client_secrets(RequestClientSecretsArgs { cookies: &cookies }).await?;
 
     // NB: We're purposely messing these up to trigger "retry".
     bad_secrets.numbers.numbers = Vec::new();
@@ -312,15 +237,7 @@ mod tests {
 
     let credentials = GrokFullCredentials::from_cookies_and_client_secrets(cookies, bad_secrets);
 
-    let result = upload_image_and_generate_video_with_retry(UploadImageAndGenerateVideoWithRetry {
-      credentials: &credentials,
-      file: FileUploadSpec::Path(image_path),
-      prompt: maybe_prompt,
-      mode: Some(VideoGenerationMode::Custom),
-      aspect_ratio: Some(AspectRatio::TallTwoByThree),
-      individual_request_timeout: None,
-      wait_for_generation: false,
-    }).await?;
+    let result = upload_image_and_generate_video_with_retry(UploadImageAndGenerateVideoWithRetry { credentials: &credentials, file: FileUploadSpec::Path(image_path), prompt: maybe_prompt, mode: Some(VideoGenerationMode::Custom), aspect_ratio: Some(AspectRatio::TallTwoByThree), individual_request_timeout: None, wait_for_generation: false }).await?;
 
     let new_secrets = result.maybe_new_client_secrets;
 

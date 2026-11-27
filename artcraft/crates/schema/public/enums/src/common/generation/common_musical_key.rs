@@ -71,46 +71,17 @@ mod tests {
 
   #[test]
   fn test_deserialization() {
-    let cases = [
-      ("auto", CommonMusicalKey::Auto),
-      ("c_major", CommonMusicalKey::CMajor),
-      ("c_minor", CommonMusicalKey::CMinor),
-      ("d_major", CommonMusicalKey::DMajor),
-      ("d_minor", CommonMusicalKey::DMinor),
-      ("f_major", CommonMusicalKey::FMajor),
-      ("f_minor", CommonMusicalKey::FMinor),
-      ("g_major", CommonMusicalKey::GMajor),
-      ("g_minor", CommonMusicalKey::GMinor),
-      ("a_major", CommonMusicalKey::AMajor),
-      ("a_minor", CommonMusicalKey::AMinor),
-      ("b_major", CommonMusicalKey::BMajor),
-      ("b_minor", CommonMusicalKey::BMinor),
-    ];
+    let cases = [("auto", CommonMusicalKey::Auto), ("c_major", CommonMusicalKey::CMajor), ("c_minor", CommonMusicalKey::CMinor), ("d_major", CommonMusicalKey::DMajor), ("d_minor", CommonMusicalKey::DMinor), ("f_major", CommonMusicalKey::FMajor), ("f_minor", CommonMusicalKey::FMinor), ("g_major", CommonMusicalKey::GMajor), ("g_minor", CommonMusicalKey::GMinor), ("a_major", CommonMusicalKey::AMajor), ("a_minor", CommonMusicalKey::AMinor), ("b_major", CommonMusicalKey::BMajor), ("b_minor", CommonMusicalKey::BMinor)];
     for (json_str, expected) in cases {
       let json = format!("\"{}\"", json_str);
-      let deserialized: CommonMusicalKey = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
+      let deserialized: CommonMusicalKey = serde_json::from_str(&json).unwrap_or_else(|e| panic!("Failed to deserialize {:?}: {}", json_str, e));
       assert_eq!(deserialized, expected, "Failed for {:?}", json_str);
     }
   }
 
   #[test]
   fn test_round_trip() {
-    let all = [
-      CommonMusicalKey::Auto,
-      CommonMusicalKey::CMajor,
-      CommonMusicalKey::CMinor,
-      CommonMusicalKey::DMajor,
-      CommonMusicalKey::DMinor,
-      CommonMusicalKey::FMajor,
-      CommonMusicalKey::FMinor,
-      CommonMusicalKey::GMajor,
-      CommonMusicalKey::GMinor,
-      CommonMusicalKey::AMajor,
-      CommonMusicalKey::AMinor,
-      CommonMusicalKey::BMajor,
-      CommonMusicalKey::BMinor,
-    ];
+    let all = [CommonMusicalKey::Auto, CommonMusicalKey::CMajor, CommonMusicalKey::CMinor, CommonMusicalKey::DMajor, CommonMusicalKey::DMinor, CommonMusicalKey::FMajor, CommonMusicalKey::FMinor, CommonMusicalKey::GMajor, CommonMusicalKey::GMinor, CommonMusicalKey::AMajor, CommonMusicalKey::AMinor, CommonMusicalKey::BMajor, CommonMusicalKey::BMinor];
     for variant in all {
       let json = serde_json::to_string(&variant).unwrap();
       let deserialized: CommonMusicalKey = serde_json::from_str(&json).unwrap();

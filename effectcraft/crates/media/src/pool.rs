@@ -663,14 +663,7 @@ impl MediaPool {
         })
     }
 
-    fn try_decode_audio_channels(
-        &self,
-        footage: &Footage,
-        start: Tick,
-        frames: usize,
-        rate: u32,
-        ch: usize,
-    ) -> std::result::Result<Vec<f32>, String> {
+    fn try_decode_audio_channels(&self, footage: &Footage, start: Tick, frames: usize, rate: u32, ch: usize) -> std::result::Result<Vec<f32>, String> {
         let path: Arc<str> = footage.path.as_str().into();
         let Opened { src, .. } = self.inner.opened(&path).ok_or("the file can't be opened")?;
         let s0 = start.to_units_floor(rate as i64);

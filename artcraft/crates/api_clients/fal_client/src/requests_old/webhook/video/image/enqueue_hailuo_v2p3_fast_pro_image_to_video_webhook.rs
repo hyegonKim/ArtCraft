@@ -29,13 +29,9 @@ impl FalRequestCostCalculator for EnqueueHailuoV2p3FastProImageToVideoRequest {
   }
 }
 
-
 /// Hailuo 2.3 Fast Pro Image-to-Video
 /// https://fal.ai/models/fal-ai/minimax/hailuo-2.3-fast/pro/image-to-video
-pub async fn enqueue_hailuo_v2p3_fast_pro_image_to_video_webhook<R: IntoUrl>(
-  args: EnqueueHailuoV2p3FastProImageToVideoArgs<'_, R>
-) -> Result<WebhookResponse, FalErrorPlus> {
-
+pub async fn enqueue_hailuo_v2p3_fast_pro_image_to_video_webhook<R: IntoUrl>(args: EnqueueHailuoV2p3FastProImageToVideoArgs<'_, R>) -> Result<WebhookResponse, FalErrorPlus> {
   let req = args.request;
   let prompt_optimizer = req.prompt_optimizer.unwrap_or(true);
 
@@ -46,10 +42,7 @@ pub async fn enqueue_hailuo_v2p3_fast_pro_image_to_video_webhook<R: IntoUrl>(
     prompt_optimizer: Some(prompt_optimizer),
   };
 
-  let result = hailuo_v2p3_fast_pro_image_to_video(request)
-      .with_api_key(&args.api_key.0)
-      .queue_webhook(args.webhook_url)
-      .await;
+  let result = hailuo_v2p3_fast_pro_image_to_video(request).with_api_key(&args.api_key.0).queue_webhook(args.webhook_url).await;
 
   result.map_err(|err| classify_fal_error(err))
 }
@@ -70,15 +63,7 @@ mod tests {
 
     let api_key = FalApiKey::from_str(&secret);
 
-    let args = EnqueueHailuoV2p3FastProImageToVideoArgs {
-      request: EnqueueHailuoV2p3FastProImageToVideoRequest {
-        image_url: TREX_SKELETON_IMAGE_URL.to_string(),
-        prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(),
-        prompt_optimizer: Some(true),
-      },
-      api_key: &api_key,
-      webhook_url: "https://example.com/webhook",
-    };
+    let args = EnqueueHailuoV2p3FastProImageToVideoArgs { request: EnqueueHailuoV2p3FastProImageToVideoRequest { image_url: TREX_SKELETON_IMAGE_URL.to_string(), prompt: "the t-rex skeleton gets off the podium and begins walking to the camera. the camera orbits slightly. The t-rex gets close and then bites.".to_string(), prompt_optimizer: Some(true) }, api_key: &api_key, webhook_url: "https://example.com/webhook" };
 
     let result = enqueue_hailuo_v2p3_fast_pro_image_to_video_webhook(args).await?;
 

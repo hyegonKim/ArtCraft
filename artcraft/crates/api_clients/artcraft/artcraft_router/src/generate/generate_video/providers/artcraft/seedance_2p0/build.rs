@@ -2,20 +2,13 @@ use enums::common::generation::common_video_model::CommonVideoModel as CommonVid
 
 use crate::errors::artcraft_router_error::ArtcraftRouterError;
 use crate::generate::generate_video::generate_video_request_builder::GenerateVideoRequestBuilder;
-use crate::generate::generate_video::providers::artcraft::build_common::{
-  build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport,
-};
+use crate::generate::generate_video::providers::artcraft::build_common::{build_artcraft_omni_video_request, SupportedResolutions, UltraWideSupport};
 use crate::generate::generate_video::providers::artcraft::seedance_2p0::request::ArtcraftSeedance2p0RequestState;
 use crate::generate::generate_video::video_generation_draft_or_request::VideoGenerationDraftOrRequest;
 use crate::generate::generate_video::video_generation_request::VideoGenerationRequest;
 
 pub fn build_artcraft_seedance_2p0(builder: GenerateVideoRequestBuilder) -> Result<VideoGenerationDraftOrRequest, ArtcraftRouterError> {
-  let request = build_artcraft_omni_video_request(
-    builder,
-    CommonVideoModelEnum::Seedance2p0,
-    SupportedResolutions::FullWith4k,
-    UltraWideSupport::Supported,
-  )?;
+  let request = build_artcraft_omni_video_request(builder, CommonVideoModelEnum::Seedance2p0, SupportedResolutions::FullWith4k, UltraWideSupport::Supported)?;
   let state = ArtcraftSeedance2p0RequestState { request };
   Ok(VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::ArtcraftSeedance2p0(state)))
 }
@@ -53,31 +46,41 @@ mod tests {
 
     #[test]
     fn prompt_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.prompt = Some("test".to_string()); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.prompt = Some("test".to_string());
+      }));
       assert_eq!(req.request.prompt, Some("test".to_string()));
     }
 
     #[test]
     fn duration_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = Some(10); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = Some(10);
+      }));
       assert_eq!(req.request.duration_seconds, Some(10));
     }
 
     #[test]
     fn duration_clamped_to_max() {
-      let req = unwrap_request(make_builder(|b| { b.duration_seconds = Some(99); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.duration_seconds = Some(99);
+      }));
       assert_eq!(req.request.duration_seconds, Some(15));
     }
 
     #[test]
     fn batch_count_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.video_batch_count = Some(4); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.video_batch_count = Some(4);
+      }));
       assert_eq!(req.request.video_batch_count, Some(4));
     }
 
     #[test]
     fn bitrate_passed_through() {
-      let req = unwrap_request(make_builder(|b| { b.bitrate = Some(RouterBitrate::High); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.bitrate = Some(RouterBitrate::High);
+      }));
       assert_eq!(req.request.bitrate, Some(CommonBitrateEnum::High));
     }
   }
@@ -89,25 +92,33 @@ mod tests {
 
     #[test]
     fn res_480p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::FourEightyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::FourEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::FourEightyP));
     }
 
     #[test]
     fn res_720p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::SevenTwentyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::SevenTwentyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::SevenTwentyP));
     }
 
     #[test]
     fn res_1080p() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::TenEightyP); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::TenEightyP);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::TenEightyP));
     }
 
     #[test]
     fn res_4k() {
-      let req = unwrap_request(make_builder(|b| { b.resolution = Some(RouterResolution::FourK); }));
+      let req = unwrap_request(make_builder(|b| {
+        b.resolution = Some(RouterResolution::FourK);
+      }));
       assert_eq!(req.request.resolution, Some(CommonResolutionEnum::FourK));
     }
 
@@ -134,10 +145,7 @@ mod tests {
 
     #[test]
     fn url_start_frame_rejected() {
-      let result = build_artcraft_seedance_2p0(GenerateVideoRequestBuilder {
-        start_frame: Some(ImageRef::Url("https://example.com".to_string())),
-        ..base_builder()
-      });
+      let result = build_artcraft_seedance_2p0(GenerateVideoRequestBuilder { start_frame: Some(ImageRef::Url("https://example.com".to_string())), ..base_builder() });
       assert!(result.is_err());
     }
 
@@ -163,12 +171,7 @@ mod tests {
   // ── Helpers ──
 
   fn base_builder() -> GenerateVideoRequestBuilder {
-    GenerateVideoRequestBuilder {
-      provider: RouterProvider::Artcraft,
-      duration_seconds: Some(5),
-      video_batch_count: Some(1),
-      ..Default::default()
-    }
+    GenerateVideoRequestBuilder { provider: RouterProvider::Artcraft, duration_seconds: Some(5), video_batch_count: Some(1), ..Default::default() }
   }
 
   fn make_builder(f: impl FnOnce(&mut GenerateVideoRequestBuilder)) -> GenerateVideoRequestBuilder {
@@ -180,9 +183,7 @@ mod tests {
   fn unwrap_request(builder: GenerateVideoRequestBuilder) -> ArtcraftSeedance2p0RequestState {
     let result = build_artcraft_seedance_2p0(builder).expect("build should succeed");
     match result {
-      VideoGenerationDraftOrRequest::Request(
-        VideoGenerationRequest::ArtcraftSeedance2p0(state)
-      ) => state,
+      VideoGenerationDraftOrRequest::Request(VideoGenerationRequest::ArtcraftSeedance2p0(state)) => state,
       _ => panic!("expected ArtcraftSeedance2p0 request"),
     }
   }
