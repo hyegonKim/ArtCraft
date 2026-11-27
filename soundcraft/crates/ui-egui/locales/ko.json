@@ -179,5 +179,18 @@
   "Rename Marker": "마커 이름 바꾸기",
   "Tempo Change (BPM)": "템포 변경 (BPM)",
   "Spot": "스팟",
-  "Rename Selected Clips": "선택한 클립 이름 바꾸기"
+  "Rename Selected Clips": "선택한 클립 이름 바꾸기",
+  "Multitrack XML (.sesx)...": "멀티트랙 XML (.sesx)...",
+  "DeClicker": "디클리커 (클릭 노이즈 제거)",
+  "DeClipper": "디클리퍼 (클리핑 피크 복원)",
+  "Remix Duration": "리믹스 길이 맞춤",
+  "Remix Duration...": "리믹스 길이 맞춤...",
+  "Max Click Width": "최대 클릭 폭",
+  "Clip Threshold": "클리핑 임계값",
+  "Output Ceiling": "출력 상한 레벨",
+  "Auto Detect Ceiling": "클리핑 상한 자동 감지",
+  "Target Duration (s)": "목표 재생 시간 (초)",
+  "Crossfade (ms)": "크로스페이드 (ms)",
+  "Min Segment (beats)": "최소 구간 길이 (박)",
+  "Scan Diagnostics": "오디오 진단 스캔"
 }

@@ -17,7 +17,11 @@ fn run(s: &mut Session, id: &str, p: Value) -> Value {
 fn walk() -> (Session, LayerId, ElementId) {
     let mut s = Session::default();
     let layer = s.layer;
-    let id = ElementId(run(&mut s, "draw.rect", json!({"x": 10, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"].as_u64().unwrap());
+    let id = ElementId(
+        run(&mut s, "draw.rect", json!({"x": 10, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"]
+            .as_u64()
+            .unwrap(),
+    );
     for f in [4, 8] {
         run(&mut s, "timeline.goto", json!({"frame": f}));
         run(&mut s, "timeline.insert_keyframe", json!({}));
@@ -171,7 +175,12 @@ fn raw_pair() -> (Session, LayerId) {
 }
 
 fn raw_fills(s: &Session, layer: LayerId, start: u32) -> Vec<Rect> {
-    key(s, layer, start).elements.iter().filter(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.merge && sh.fill.is_some())).map(|e| e.bounds(&s.doc)).collect()
+    key(s, layer, start)
+        .elements
+        .iter()
+        .filter(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.merge && sh.fill.is_some()))
+        .map(|e| e.bounds(&s.doc))
+        .collect()
 }
 
 #[test]
@@ -237,7 +246,11 @@ fn a_motion_tweens_object_moves_but_does_not_scale_on_several_frames() {
 /// A symbol open in place (ADR 0045) whose own timeline has keyframes on 0 and 4, the playhead on 4.
 fn in_symbol() -> (Session, LayerId, ElementId) {
     let mut s = Session::default();
-    let id = ElementId(run(&mut s, "draw.rect", json!({"x": 0, "y": 0, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"].as_u64().unwrap());
+    let id = ElementId(
+        run(&mut s, "draw.rect", json!({"x": 0, "y": 0, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"]
+            .as_u64()
+            .unwrap(),
+    );
     run(&mut s, "modify.convert_to_symbol", json!({"name": "Walker"}));
     run(&mut s, "element.translate", json!({"dx": 100, "dy": 50}));
     run(&mut s, "symbol.edit", json!({}));
@@ -306,7 +319,6 @@ fn make_off(pic: &crate::editing::StagePicture) -> crate::render_service::FrameJ
     crate::render_service::make_job(pic.state, &pic.doc, pic.frame, view, None).inside(pic.front.clone())
 }
 
-
 /// Measured numbers for ADR 0051: `cargo test -p anicraft-engine --lib multi_timings -- --ignored --nocapture`.
 #[test]
 #[ignore]
@@ -333,14 +345,35 @@ fn multi_timings() {
         f(&mut s2);
         eprintln!("{label}: {:.2} ms", t0.elapsed().as_secs_f64() * 1000.0);
     };
-    let objects = |s: &Session| -> Vec<Value> { s.multi_frame_items(0, last).into_iter().filter(|(it, _)| key(s, it.layer, it.frame).elements.iter().any(|e| e.id == it.element && !matches!(&e.kind, ElementKind::Shape(sh) if sh.merge))).map(|(it, _)| it.to_json()).collect() };
-    let raws = |s: &Session| -> Vec<Value> { s.multi_frame_items(0, last).into_iter().filter(|(it, _)| key(s, it.layer, it.frame).elements.iter().any(|e| e.id == it.element && matches!(&e.kind, ElementKind::Shape(sh) if sh.merge))).map(|(it, _)| it.to_json()).take(24 * 12).collect() };
+    let objects = |s: &Session| -> Vec<Value> {
+        s.multi_frame_items(0, last)
+            .into_iter()
+            .filter(|(it, _)| {
+                key(s, it.layer, it.frame).elements.iter().any(|e| e.id == it.element && !matches!(&e.kind, ElementKind::Shape(sh) if sh.merge))
+            })
+            .map(|(it, _)| it.to_json())
+            .collect()
+    };
+    let raws = |s: &Session| -> Vec<Value> {
+        s.multi_frame_items(0, last)
+            .into_iter()
+            .filter(|(it, _)| {
+                key(s, it.layer, it.frame).elements.iter().any(|e| e.id == it.element && matches!(&e.kind, ElementKind::Shape(sh) if sh.merge))
+            })
+            .map(|(it, _)| it.to_json())
+            .take(24 * 12)
+            .collect()
+    };
     let (objects, raws) = (objects(&s), raws(&s));
     eprintln!("items shown: {}, objects: {}, raw: {}", s.multi_frame_items(0, last).len(), objects.len(), raws.len());
     t("list what is shown (24 keyframes)", &mut |s| drop(s.multi_frame_items(0, last)));
-    t("move 1,200 objects, a drag step", &mut |s| drop(run(s, "frames.edit_multiple", json!({"first": 0, "last": last, "dx": 1, "dy": 0, "items": objects, "merge": false}))));
+    t("move 1,200 objects, a drag step", &mut |s| {
+        drop(run(s, "frames.edit_multiple", json!({"first": 0, "last": last, "dx": 1, "dy": 0, "items": objects, "merge": false})))
+    });
     t("rotate 1,200 objects", &mut |s| drop(run(s, "frames.transform", json!({"first": 0, "last": last, "rotate": 15, "items": objects}))));
-    t("move and merge 288 raw squares (24 keyframes)", &mut |s| drop(run(s, "frames.edit_multiple", json!({"first": 0, "last": last, "dx": 25, "dy": 0, "items": raws}))));
+    t("move and merge 288 raw squares (24 keyframes)", &mut |s| {
+        drop(run(s, "frames.edit_multiple", json!({"first": 0, "last": last, "dx": 25, "dy": 0, "items": raws})))
+    });
     t("copy 1,200 objects, paste in place", &mut |s| {
         run(s, "frames.copy", json!({"first": 0, "last": last, "items": objects}));
         run(s, "frames.paste", json!({"first": 0, "last": last}));

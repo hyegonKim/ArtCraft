@@ -497,6 +497,35 @@ pub(crate) fn finish_deep(p: &Prepared, s: &DevelopSettings, frame: &Frame, info
     DeepImage { width: w, height: h, space, samples }
 }
 
+#[inline]
+fn apply_vignette(mut d: [f32; 3], v: &Vig, [u, vv]: [f32; 2], aspect: f32, hdr: bool) -> [f32; 3] {
+    let sx = 1.0 + (aspect - 1.0) * v.aspect_mix;
+    let sy = 1.0 + (1.0 / aspect - 1.0) * v.aspect_mix;
+    let (ax, ay) = ((u * sx.max(1.0) / sx.max(sy)).abs(), (vv * sy.max(1.0) / sx.max(sy)).abs());
+    let dist = (ax.powf(v.power) + ay.powf(v.power)).powf(1.0 / v.power);
+    let t = smooth(v.start, v.start + v.width, dist);
+    if t > 0.0 {
+        let lum = luminance_2020(d).clamp(0.0, 1.0);
+        if v.amount < 0.0 {
+            let mut f = 1.0 + v.amount * t;
+            if v.style == VignetteStyle::HighlightPriority {
+                f += (1.0 - f) * v.highlights * smooth(0.4, 1.0, lum);
+            }
+            if v.style == VignetteStyle::PaintOverlay {
+                d = d.map(|c| c * (1.0 - (-v.amount) * t));
+            } else {
+                d = d.map(|c| c * f);
+            }
+        } else if hdr {
+            // lighten towards SDR white; never pull HDR highlights down to it
+            d = d.map(|c| c + (1.0 - c).max(0.0) * v.amount * t * 0.85);
+        } else {
+            d = d.map(|c| c + (1.0 - c) * v.amount * t * 0.85);
+        }
+    }
+    d
+}
+
 /// The per-pixel stage: every output pixel's colour in the output primaries, encoded with the sRGB
 /// curve (tone curves and grain applied; not clamped), handed to `store` for the final encoding.
 /// `exact`: encode with the exact sRGB curve instead of the (8/10-bit accurate) table.
@@ -577,30 +606,7 @@ pub(crate) fn finish_with<T: Copy + Default + Send>(
             if let Some(v) = vig {
                 let u = (vx + x as f32 + 0.5) / vw * 2.0 - 1.0;
                 let vv = (vy + y as f32 + 0.5) / vh * 2.0 - 1.0;
-                let sx = 1.0 + (aspect - 1.0) * v.aspect_mix;
-                let sy = 1.0 + (1.0 / aspect - 1.0) * v.aspect_mix;
-                let (ax, ay) = ((u * sx.max(1.0) / sx.max(sy)).abs(), (vv * sy.max(1.0) / sx.max(sy)).abs());
-                let dist = (ax.powf(v.power) + ay.powf(v.power)).powf(1.0 / v.power);
-                let t = smooth(v.start, v.start + v.width, dist);
-                if t > 0.0 {
-                    let lum = luminance_2020(d).clamp(0.0, 1.0);
-                    if v.amount < 0.0 {
-                        let mut f = 1.0 + v.amount * t;
-                        if v.style == VignetteStyle::HighlightPriority {
-                            f += (1.0 - f) * v.highlights * smooth(0.4, 1.0, lum);
-                        }
-                        if v.style == VignetteStyle::PaintOverlay {
-                            d = d.map(|c| c * (1.0 - (-v.amount) * t) + 0.0);
-                        } else {
-                            d = d.map(|c| c * f);
-                        }
-                    } else if hdr {
-                        // lighten towards SDR white; never pull HDR highlights down to it
-                        d = d.map(|c| c + (1.0 - c).max(0.0) * v.amount * t * 0.85);
-                    } else {
-                        d = d.map(|c| c + (1.0 - c) * v.amount * t * 0.85);
-                    }
-                }
+                d = apply_vignette(d, v, [u, vv], aspect, hdr);
             }
 
             // --- gamut map to the output space (desaturate towards luminance until in range);
@@ -657,9 +663,7 @@ pub(crate) fn finish_with<T: Copy + Default + Send>(
                         [l[0].eval(e[0]), l[1].eval(e[1]), l[2].eval(e[2])]
                     };
                 }
-                if hdr
-                    && let Some(hc) = &fp.hdr_curve
-                {
+                if hdr && let Some(hc) = &fp.hdr_curve {
                     let max_enc = linear_to_srgb(peak).max(1.0001);
                     e = std::array::from_fn(|k| {
                         let u = (e[k] / max_enc).clamp(0.0, 1.0);

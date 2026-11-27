@@ -231,7 +231,13 @@ impl Dash {
                 Dash::Dashed { lengths: la.iter().zip(lb.iter()).map(|(&x, &y)| mix(x, y)).collect(), offset: mix(*oa, *ob) }.sanitized()
             }
             (Some(Dash::Dotted { spacing: sa }), Some(Dash::Dotted { spacing: sb })) => Some(Dash::Dotted { spacing: mix(*sa, *sb) }),
-            _ => if t >= 1.0 { b.cloned() } else { a.cloned() },
+            _ => {
+                if t >= 1.0 {
+                    b.cloned()
+                } else {
+                    a.cloned()
+                }
+            }
         }
     }
 }
@@ -294,7 +300,13 @@ impl StrokeStyle {
     /// caps and joins of the start hold until the end keyframe.
     pub fn lerp(&self, o: &StrokeStyle, t: f32) -> StrokeStyle {
         let pick = if t >= 1.0 { o } else { self };
-        StrokeStyle { cap: pick.cap, join: pick.join, miter_limit: self.miter_limit + (o.miter_limit - self.miter_limit) * t, dash: Dash::lerp(self.dash.as_ref(), o.dash.as_ref(), t) }.sanitized()
+        StrokeStyle {
+            cap: pick.cap,
+            join: pick.join,
+            miter_limit: self.miter_limit + (o.miter_limit - self.miter_limit) * t,
+            dash: Dash::lerp(self.dash.as_ref(), o.dash.as_ref(), t),
+        }
+        .sanitized()
     }
 }
 

@@ -282,7 +282,12 @@ pub fn plan(doc: &Document, path: Option<&Path>, only: Option<&[PublishFormat]>)
         // case-insensitive file systems of Windows and macOS see them).
         let same = |a: &Path, b: &Path| a.to_string_lossy().to_lowercase() == b.to_string_lossy().to_lowercase();
         if let Some(other) = steps.iter().find(|s| s.outputs.iter().any(|o| outputs.iter().any(|n| same(o, n)))) {
-            return Err(format!("{} and {} would both write {}: give one of them another output name", other.format.label(), f.label(), rel.display()));
+            return Err(format!(
+                "{} and {} would both write {}: give one of them another output name",
+                other.format.label(),
+                f.label(),
+                rel.display()
+            ));
         }
         steps.push(Step { format: f, command, params: Value::Object(p), outputs, scene, frames, skip });
     }
@@ -321,7 +326,13 @@ pub fn formats_param(p: &Value) -> Result<Option<Vec<PublishFormat>>> {
         Some(Value::Array(list)) => list
             .iter()
             .take(64)
-            .map(|v| v.as_str().and_then(PublishFormat::from_key).ok_or_else(|| EngineError::Param(format!("unknown format {v} (html, gif, apng, webp, video, lottie, sprite_sheet, png_sequence, png, svg or audio)"))))
+            .map(|v| {
+                v.as_str().and_then(PublishFormat::from_key).ok_or_else(|| {
+                    EngineError::Param(format!(
+                        "unknown format {v} (html, gif, apng, webp, video, lottie, sprite_sheet, png_sequence, png, svg or audio)"
+                    ))
+                })
+            })
             .collect::<Result<Vec<_>>>()
             .map(Some),
         Some(_) => Err(EngineError::Param("param 'formats' must be a list of format names".into())),
@@ -485,7 +496,9 @@ impl Publisher {
         self.s.scene = st.scene.min(self.s.doc.scenes.len().saturating_sub(1));
         self.s.editing.clear();
         self.s.frame = 0;
-        let result = crate::find_command(st.command).ok_or_else(|| EngineError::UnknownCommand(st.command.into())).and_then(|spec| (spec.run)(&mut self.s, &st.params));
+        let result = crate::find_command(st.command)
+            .ok_or_else(|| EngineError::UnknownCommand(st.command.into()))
+            .and_then(|spec| (spec.run)(&mut self.s, &st.params));
         match result {
             Ok(v) => {
                 out.files.clone_from(&st.outputs);
@@ -493,7 +506,11 @@ impl Publisher {
             }
             Err(EngineError::Cancelled) => {
                 out.status = Status::Cancelled;
-                out.message = if st.format == PublishFormat::PngSequence { "stopped part-way (the frames written so far are kept)".into() } else { "stopped before it was written".into() };
+                out.message = if st.format == PublishFormat::PngSequence {
+                    "stopped part-way (the frames written so far are kept)".into()
+                } else {
+                    "stopped before it was written".into()
+                };
             }
             Err(e) => {
                 out.status = Status::Failed;
@@ -721,14 +738,19 @@ fn settings_set(s: &mut Session, p: &Value) -> Result<Value> {
     let mut prof = match p.get("profile") {
         None | Some(Value::Null) => (*s.doc.publish).clone(),
         Some(v) => {
-            let mut prof: PublishProfile = serde_json::from_value(v.clone()).map_err(|e| EngineError::Param(format!("param 'profile' is not a publish profile: {e}")))?;
+            let mut prof: PublishProfile =
+                serde_json::from_value(v.clone()).map_err(|e| EngineError::Param(format!("param 'profile' is not a publish profile: {e}")))?;
             prof.sanitize();
             prof
         }
     };
     match opt_str(p, "format")? {
         Some(k) => {
-            let f = PublishFormat::from_key(k).ok_or_else(|| EngineError::Param(format!("unknown format '{k}' (html, gif, apng, webp, video, lottie, sprite_sheet, png_sequence, png, svg or audio)")))?;
+            let f = PublishFormat::from_key(k).ok_or_else(|| {
+                EngineError::Param(format!(
+                    "unknown format '{k}' (html, gif, apng, webp, video, lottie, sprite_sheet, png_sequence, png, svg or audio)"
+                ))
+            })?;
             apply(&mut prof, f, p)?;
         }
         None if p.get("profile").is_none_or(Value::is_null) && p.as_object().is_some_and(|o| o.keys().any(|k| k != "confirm" && k != "profile")) => {
@@ -751,7 +773,11 @@ pub fn zip(files: &[(PathBuf, Vec<u8>)]) -> std::result::Result<Vec<u8>, String>
     let le16 = |v: &mut Vec<u8>, x: u16| v.extend_from_slice(&x.to_le_bytes());
     let le32 = |v: &mut Vec<u8>, x: u32| v.extend_from_slice(&x.to_le_bytes());
     for (path, data) in files {
-        let name: String = path.components().filter_map(|c| if let Component::Normal(p) = c { Some(p.to_string_lossy().into_owned()) } else { None }).collect::<Vec<_>>().join("/");
+        let name: String = path
+            .components()
+            .filter_map(|c| if let Component::Normal(p) = c { Some(p.to_string_lossy().into_owned()) } else { None })
+            .collect::<Vec<_>>()
+            .join("/");
         let name_len = u16::try_from(name.len()).map_err(|_| "a file name is too long".to_string())?;
         let size = u32::try_from(data.len()).map_err(|_| format!("{name} is too large for a ZIP archive (4 GB)"))?;
         let offset = u32::try_from(out.len()).map_err(|_| "the archive is too large (4 GB)".to_string())?;

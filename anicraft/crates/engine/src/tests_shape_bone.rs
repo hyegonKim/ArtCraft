@@ -31,7 +31,13 @@ fn tail() -> Session {
     }
     p.close();
     let shape = Shape { merge: true, ..Shape::filled(p, Paint::Solid(Rgba::BLACK)) };
-    let el = Arc::new(Element { id: ElementId(TAIL), name: String::new(), transform: Affine::translate(100.0, 150.0), color: ColorEffect::default(), kind: ElementKind::Shape(shape) });
+    let el = Arc::new(Element {
+        id: ElementId(TAIL),
+        name: String::new(),
+        transform: Affine::translate(100.0, 150.0),
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(shape),
+    });
     let l = Arc::make_mut(&mut d.timeline_mut(0).layers[0]);
     l.keyframes = vec![Arc::new({
         let mut k = Keyframe::new(0, 20);
@@ -215,13 +221,20 @@ fn shape_bones_refuse_what_cant_be_done() {
     }
     assert_eq!(s.history_len(), steps, "refusals leave no undo steps");
     let (mut s, b1, _) = rigged();
-    for (p, want) in [(json!({"bone": b1, "points": [9999]}), "below"), (json!({"bone": b1, "mode": "glue"}), "mode"), (json!({"bone": b1, "points": "all"}), "points"), (json!({"bone": 4242}), "no bone")] {
+    for (p, want) in [
+        (json!({"bone": b1, "points": [9999]}), "below"),
+        (json!({"bone": b1, "mode": "glue"}), "mode"),
+        (json!({"bone": b1, "points": "all"}), "points"),
+        (json!({"bone": 4242}), "no bone"),
+    ] {
         let e = s.execute("bone.bind", &p).unwrap_err().to_string();
         assert!(e.contains(want), "{p}: {e}");
     }
     // The shape's outline is the armature's: artwork edits are refused on its layer.
     s.select_only([ElementId(TAIL)]);
-    for (id, p) in [("element.translate", json!({"dx": 5, "dy": 0})), ("edit.delete", json!({})), ("draw.rect", json!({"x": 0, "y": 0, "w": 5, "h": 5}))] {
+    for (id, p) in
+        [("element.translate", json!({"dx": 5, "dy": 0})), ("edit.delete", json!({})), ("draw.rect", json!({"x": 0, "y": 0, "w": 5, "h": 5}))]
+    {
         let e = s.execute(id, &p).unwrap_err().to_string();
         assert!(e.contains("armature"), "{id}: {e}");
     }
@@ -229,7 +242,10 @@ fn shape_bones_refuse_what_cant_be_done() {
     let (mut inst, ib1, _) = crate::tests_bone::rigged();
     assert!(inst.execute("bone.bind", &json!({"bone": ib1})).unwrap_err().to_string().contains("instances"));
     assert!(inst.execute("bone.add_in_shape", &json!({"parent": ib1, "tail": [0, 0]})).unwrap_err().to_string().contains("instances"));
-    let e = inst.execute("bone.add_in_shape", &json!({"shape": crate::tests_bone::ROOT, "head": [150, 100], "tail": [190, 100]})).unwrap_err().to_string();
+    let e = inst
+        .execute("bone.add_in_shape", &json!({"shape": crate::tests_bone::ROOT, "head": [150, 100], "tail": [190, 100]}))
+        .unwrap_err()
+        .to_string();
     assert!(e.contains("shape"), "{e}");
 }
 
@@ -252,7 +268,10 @@ fn removing_shape_bones_rebinds_and_the_last_frees_the_shape_as_it_looks() {
     let tl = s.doc.timeline(0);
     assert_eq!(tl.layers.len(), 2, "no layer for freed instances: a shape's bones move none");
     let arm = tl.layers[0].armature.as_ref().unwrap();
-    assert!(arm.skin.as_ref().unwrap().points.iter().all(|p| p.bones == vec![anicraft_doc::skin::Influence(anicraft_doc::BoneId(b1), 1.0)]), "every point follows the bone that's left");
+    assert!(
+        arm.skin.as_ref().unwrap().points.iter().all(|p| p.bones == vec![anicraft_doc::skin::Influence(anicraft_doc::BoneId(b1), 1.0)]),
+        "every point follows the bone that's left"
+    );
     let shown = points(&s, 0);
     run(&mut s, "bone.remove", json!({"bone": b1}));
     let tl = s.doc.timeline(0);

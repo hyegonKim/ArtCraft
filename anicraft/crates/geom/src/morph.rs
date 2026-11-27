@@ -165,7 +165,9 @@ fn nearest_on(s: &Sub, p: Vec2) -> Option<(At, Vec2, f32)> {
         let a = seg_start(s, i);
         // A cubic lies inside its control points' box: skip segments that can't be nearer.
         if let Some((_, _, bd)) = best {
-            let (lo, hi) = [g[0], g[1], g[2]].iter().fold((a, a), |(lo, hi), q| (Vec2::new(lo.x.min(q.x), lo.y.min(q.y)), Vec2::new(hi.x.max(q.x), hi.y.max(q.y))));
+            let (lo, hi) = [g[0], g[1], g[2]]
+                .iter()
+                .fold((a, a), |(lo, hi), q| (Vec2::new(lo.x.min(q.x), lo.y.min(q.y)), Vec2::new(hi.x.max(q.x), hi.y.max(q.y))));
             let (dx, dy) = ((lo.x - p.x).max(p.x - hi.x).max(0.0), (lo.y - p.y).max(p.y - hi.y).max(0.0));
             if dx * dx + dy * dy > bd {
                 continue;
@@ -513,11 +515,14 @@ fn align(a: &Sub, b: &Sub) -> Sub {
     let step = n.div_ceil(ALIGN_EXACT).max(1);
     let mut best = (0usize, f32::INFINITY);
     for k in (0..n).step_by(step) {
-        let cost: f32 = (0..n).step_by(step).map(|i| {
-            let (Some(p), Some(q)) = (pa.get(i), pb.get((i + k) % n)) else { return 0.0 };
-            let d = *p - *q;
-            d.dot(d)
-        }).sum();
+        let cost: f32 = (0..n)
+            .step_by(step)
+            .map(|i| {
+                let (Some(p), Some(q)) = (pa.get(i), pb.get((i + k) % n)) else { return 0.0 };
+                let d = *p - *q;
+                d.dot(d)
+            })
+            .sum();
         if cost < best.1 {
             best = (k, cost);
         }
@@ -585,7 +590,8 @@ pub fn compatible_hinted(a: &Path, b: &Path, hints: &[(Vec2, Vec2)]) -> Option<(
     let oa = order(&sa, &|i| forced.iter().any(|f| f.0 == i));
     let ob = order(&sb, &|j| forced.iter().any(|f| f.1 == j));
     let n = oa.len().max(ob.len());
-    let rows: Vec<(Option<usize>, Option<usize>)> = forced.iter().map(|&(i, j)| (Some(i), Some(j))).chain((0..n).map(|r| (oa.get(r).copied(), ob.get(r).copied()))).collect();
+    let rows: Vec<(Option<usize>, Option<usize>)> =
+        forced.iter().map(|&(i, j)| (Some(i), Some(j))).chain((0..n).map(|r| (oa.get(r).copied(), ob.get(r).copied()))).collect();
     let mut pa: Vec<Sub> = Vec::with_capacity(rows.len());
     let mut pb: Vec<Sub> = Vec::with_capacity(rows.len());
     let mut pair_hints: Vec<Vec<(Vec2, Vec2)>> = Vec::with_capacity(rows.len());
@@ -836,7 +842,8 @@ mod tests {
         l1.move_to(Vec2::new(0.0, 0.0)).line_to(Vec2::new(100.0, 0.0));
         let mut l2 = Path::default();
         l2.move_to(Vec2::new(0.0, 50.0)).line_to(Vec2::new(50.0, 80.0)).line_to(Vec2::new(100.0, 50.0));
-        let (x, y) = compatible_hinted(&l1, &l2, &[(Vec2::new(25.0, 0.0), Vec2::new(50.0, 80.0)), (Vec2::new(0.0, 0.0), Vec2::new(0.0, 50.0))]).unwrap();
+        let (x, y) =
+            compatible_hinted(&l1, &l2, &[(Vec2::new(25.0, 0.0), Vec2::new(50.0, 80.0)), (Vec2::new(0.0, 0.0), Vec2::new(0.0, 50.0))]).unwrap();
         let k = anchors_of(&x).iter().position(|v| close(*v, Vec2::new(25.0, 0.0))).unwrap();
         assert!(close(anchors_of(&y)[k], Vec2::new(50.0, 80.0)));
     }

@@ -24,7 +24,8 @@ fn media(dir: &Path) -> (String, String, String, String) {
     let png = dir.join("photo.png");
     std::fs::write(&png, anicraft_render::encode_png(4, 2, &[255u8; 4 * 2 * 4]).unwrap()).unwrap();
     let svg = dir.join("badge.svg");
-    std::fs::write(&svg, r##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#f00"/></svg>"##).unwrap();
+    std::fs::write(&svg, r##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#f00"/></svg>"##)
+        .unwrap();
     let wav = dir.join("beep.wav");
     std::fs::write(&wav, crate::cmds_sound::test_wav(8000, &[0.25; 4000])).unwrap();
     let masked = dir.join("masked.svg");
@@ -57,7 +58,11 @@ fn an_svg_imported_to_the_library_is_one_graphic_symbol_centred_on_its_registrat
     assert_eq!(run(&mut s, "file.import_to_library", json!({"path": svg}))["name"], "badge 2");
     run(&mut s, "file.import_to_library", json!({"path": masked}));
     let m = s.doc.library.last().unwrap();
-    assert!(m.timeline.layers.iter().any(|l| l.kind == anicraft_doc::LayerKind::Mask) && m.timeline.layers.len() == 2, "{:?}", m.timeline.layers.iter().map(|l| (&l.name, l.kind)).collect::<Vec<_>>());
+    assert!(
+        m.timeline.layers.iter().any(|l| l.kind == anicraft_doc::LayerKind::Mask) && m.timeline.layers.len() == 2,
+        "{:?}",
+        m.timeline.layers.iter().map(|l| (&l.name, l.kind)).collect::<Vec<_>>()
+    );
     // Placed, it shows.
     run(&mut s, "library.place", json!({"symbol": sym.id.0, "x": 100, "y": 100}));
     assert!(!anicraft_doc::evaluate(&s.doc, 0).items.is_empty());
@@ -97,7 +102,10 @@ fn an_image_dropped_on_a_layers_frame_goes_into_a_keyframe_there_in_one_step() {
         let b = s.element_bounds(id);
         assert!((b.center().x - 200.0).abs() < 0.01 && (b.center().y - 100.0).abs() < 0.01, "{b:?}");
     }
-    assert!(s.timeline().layer(anicraft_doc::LayerId(above)).unwrap().keyframes.iter().all(|k| k.elements.is_empty()), "the layer active before the drop is untouched");
+    assert!(
+        s.timeline().layer(anicraft_doc::LayerId(above)).unwrap().keyframes.iter().all(|k| k.elements.is_empty()),
+        "the layer active before the drop is untouched"
+    );
     run(&mut s, "edit.undo", json!({}));
     let l = s.timeline().layer(layer).unwrap();
     assert!(l.keyframe_starting_at(5).is_none() && s.doc.bitmaps.is_empty());

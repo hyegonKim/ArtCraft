@@ -108,7 +108,9 @@ impl FilterLibrary {
     /// Saves `filters` under `name`, replacing the preset of that name. Returns the name kept
     /// and whether it replaced one.
     pub fn save(&mut self, name: &str, filters: &[FilterEntry]) -> Result<(String, bool)> {
-        let p = FilterPreset { name: name.to_string(), filters: filters.to_vec() }.sanitized().ok_or_else(|| EngineError::Param("a filter preset needs a name".into()))?;
+        let p = FilterPreset { name: name.to_string(), filters: filters.to_vec() }
+            .sanitized()
+            .ok_or_else(|| EngineError::Param("a filter preset needs a name".into()))?;
         if p.filters.is_empty() {
             return Err(EngineError::State("there are no filters to save; add one first".into()));
         }
@@ -167,7 +169,11 @@ impl FilterLibrary {
 
     /// A preset file holding `presets`.
     pub fn file_json(presets: &[FilterPreset]) -> String {
-        let f = PresetFile { format: FILE_FORMAT.into(), version: FILE_VERSION, presets: presets.iter().filter_map(|p| serde_json::to_value(p).ok()).collect() };
+        let f = PresetFile {
+            format: FILE_FORMAT.into(),
+            version: FILE_VERSION,
+            presets: presets.iter().filter_map(|p| serde_json::to_value(p).ok()).collect(),
+        };
         serde_json::to_string_pretty(&f).unwrap_or_default()
     }
 
@@ -178,9 +184,17 @@ impl FilterLibrary {
             return Err(EngineError::Param(format!("not a filter preset file (its format is '{}')", f.format.chars().take(40).collect::<String>())));
         }
         if f.version > FILE_VERSION {
-            return Err(EngineError::Param(format!("this filter preset file is version {}, newer than this AniCraft reads ({FILE_VERSION})", f.version)));
+            return Err(EngineError::Param(format!(
+                "this filter preset file is version {}, newer than this AniCraft reads ({FILE_VERSION})",
+                f.version
+            )));
         }
-        Ok(f.presets.into_iter().take(MAX_PRESETS * 4).filter_map(|v| serde_json::from_value::<FilterPreset>(v).ok()).filter_map(FilterPreset::sanitized).collect())
+        Ok(f.presets
+            .into_iter()
+            .take(MAX_PRESETS * 4)
+            .filter_map(|v| serde_json::from_value::<FilterPreset>(v).ok())
+            .filter_map(FilterPreset::sanitized)
+            .collect())
     }
 }
 
@@ -216,7 +230,10 @@ mod tests {
     #[test]
     fn preset_files_round_trip_and_reject_junk() {
         let off = FilterEntry { filter: Filter::new("glow").unwrap(), enabled: false };
-        let mine = vec![FilterPreset { name: "A".into(), filters: vec![blur(3.0), off] }, FilterPreset { name: "B".into(), filters: vec![Filter::new("bevel").unwrap().into()] }];
+        let mine = vec![
+            FilterPreset { name: "A".into(), filters: vec![blur(3.0), off] },
+            FilterPreset { name: "B".into(), filters: vec![Filter::new("bevel").unwrap().into()] },
+        ];
         let text = FilterLibrary::file_json(&mine);
         assert!(text.contains("\"enabled\": false"), "a switched-off filter keeps its switch: {text}");
         assert_eq!(FilterLibrary::parse_file(&text).unwrap(), mine);
@@ -229,7 +246,9 @@ mod tests {
         assert_eq!(got[0].filters[0], Filter::Blur { blur_x: 0.0, blur_y: 5.0, quality: 1 }.into());
         assert!(matches!(got[0].filters[1], FilterEntry { filter: Filter::Glow { blur_x: 5.0, .. }, enabled: true }));
         // Preferences: the library as a list, names made unique.
-        let lib = FilterLibrary::from_values(serde_json::from_str::<Vec<Value>>(&serde_json::to_string(&[mine[0].clone(), mine[0].clone()]).unwrap()).unwrap());
+        let lib = FilterLibrary::from_values(
+            serde_json::from_str::<Vec<Value>>(&serde_json::to_string(&[mine[0].clone(), mine[0].clone()]).unwrap()).unwrap(),
+        );
         assert_eq!(lib.presets().iter().map(|p| p.name.as_str()).collect::<Vec<_>>(), ["A", "A 2"]);
         assert_eq!(lib.clone().sanitized(), lib);
     }

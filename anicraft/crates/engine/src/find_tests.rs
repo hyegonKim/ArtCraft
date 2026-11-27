@@ -3,7 +3,10 @@
 //! (symbols opened in place through the instances that lead to them).
 
 use super::*;
-use anicraft_doc::{ColorEffect, Document, Element, ElementKind, FrameSound, GradientStop, Keyframe, Layer, LayerId, LoopMode, Paint, Rgba, Scene, Shape, SourceScript, Symbol, SymbolKind, TextAlign, TextBlock};
+use anicraft_doc::{
+    ColorEffect, Document, Element, ElementKind, FrameSound, GradientStop, Keyframe, Layer, LayerId, LoopMode, Paint, Rgba, Scene, Shape,
+    SourceScript, Symbol, SymbolKind, TextAlign, TextBlock,
+};
 use anicraft_geom::{Affine, Path, Vec2};
 use serde_json::{Value, json};
 use std::sync::Arc;
@@ -38,15 +41,43 @@ impl Build {
         self.doc.alloc_id()
     }
     pub fn text(&mut self, t: &str, color: Rgba) -> Element {
-        let block = TextBlock { text: t.into(), font: "Test Sans".into(), size: 20.0, bold: false, italic: false, color, align: TextAlign::Left, letter_spacing: 0.0, line_spacing: 0.0, width: None, outline: Arc::new(Path::new()), box_width: 10.0, box_height: 10.0, field: None, on_path: None };
-        Element { id: ElementId(self.id()), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Text(Arc::new(block)) }
+        let block = TextBlock {
+            text: t.into(),
+            font: "Test Sans".into(),
+            size: 20.0,
+            bold: false,
+            italic: false,
+            color,
+            align: TextAlign::Left,
+            letter_spacing: 0.0,
+            line_spacing: 0.0,
+            width: None,
+            outline: Arc::new(Path::new()),
+            box_width: 10.0,
+            box_height: 10.0,
+            field: None,
+            on_path: None,
+        };
+        Element {
+            id: ElementId(self.id()),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: ColorEffect::default(),
+            kind: ElementKind::Text(Arc::new(block)),
+        }
     }
     pub fn rect(&mut self, fill: Paint, stroke: Option<Rgba>) -> Element {
         let mut sh = Shape::filled(Path::rect(0.0, 0.0, 10.0, 10.0), fill);
         if let Some(c) = stroke {
             sh = sh.with_stroke(c, 2.0);
         }
-        Element { id: ElementId(self.id()), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(sh) }
+        Element {
+            id: ElementId(self.id()),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: ColorEffect::default(),
+            kind: ElementKind::Shape(sh),
+        }
     }
     pub fn instance(&mut self, symbol: SymbolId, name: &str) -> Element {
         Element {
@@ -54,7 +85,14 @@ impl Build {
             name: name.into(),
             transform: Affine::translate(100.0, 50.0),
             color: ColorEffect::default(),
-            kind: ElementKind::Symbol { symbol, loop_mode: LoopMode::Loop, first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+            kind: ElementKind::Symbol {
+                symbol,
+                loop_mode: LoopMode::Loop,
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
         }
     }
     /// A layer with keyframes `(start, duration, label, elements)`.
@@ -78,7 +116,15 @@ impl Build {
     }
     pub fn symbol(&mut self, name: &str, kind: SymbolKind) -> SymbolId {
         let id = SymbolId(self.id());
-        self.doc.library.push(Arc::new(Symbol { id, name: name.into(), kind, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline::default() }));
+        self.doc.library.push(Arc::new(Symbol {
+            id,
+            name: name.into(),
+            kind,
+            linkage: None,
+            scale_grid_kept: None,
+            scale_grid: None,
+            timeline: Timeline::default(),
+        }));
         id
     }
     pub fn fill(&mut self, id: SymbolId, layers: Vec<Layer>) {
@@ -119,7 +165,14 @@ pub(crate) fn movie() -> (Session, SymbolId, SymbolId, SymbolId) {
         k.script = Some(FrameScript::Source(Arc::new(SourceScript::new(Default::default(), "stop(); // say hello"))));
     }
     b.scene("Scene 1", vec![actions, art]);
-    let r = b.rect(Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(10.0, 0.0), vec![GradientStop { offset: 0.0, color: Rgba::hex(RED) }, GradientStop { offset: 1.0, color: Rgba::WHITE }]), None);
+    let r = b.rect(
+        Paint::linear(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(10.0, 0.0),
+            vec![GradientStop { offset: 0.0, color: Rgba::hex(RED) }, GradientStop { offset: 1.0, color: Rgba::WHITE }],
+        ),
+        None,
+    );
     let l = b.layer("Back", vec![(0, 1, "", vec![r])]);
     b.scene("Scene 2", vec![l]);
     (Session::new(b.doc), outer, inner, unused)
@@ -239,10 +292,17 @@ fn replace_all_is_one_undo_step_and_undo_brings_everything_back() {
     let v = run(&mut s, "find.replace", json!({"kind": "text", "text": "hello", "with": "bye", "in": ["text", "labels", "scripts"]}));
     assert_eq!(v["replaced"], 5, "{v}");
     assert_eq!(s.history_len(), steps + 1);
-    let texts: Vec<String> = s.doc.timelines().flat_map(|t| &t.layers).flat_map(|l| &l.keyframes).flat_map(|k| &k.elements).filter_map(|e| match &e.kind {
-        ElementKind::Text(t) => Some(t.text.clone()),
-        _ => None,
-    }).collect();
+    let texts: Vec<String> = s
+        .doc
+        .timelines()
+        .flat_map(|t| &t.layers)
+        .flat_map(|l| &l.keyframes)
+        .flat_map(|k| &k.elements)
+        .filter_map(|e| match &e.kind {
+            ElementKind::Text(t) => Some(t.text.clone()),
+            _ => None,
+        })
+        .collect();
     // Case-insensitive, every match; the unused symbol is outside the scene's scope.
     assert_eq!(texts, ["bye world", "bye bye again", "bye inside", "hello unused"]);
     assert_eq!(s.doc.timeline(0).layers[1].keyframes[1].label, "intro bye");
@@ -251,7 +311,12 @@ fn replace_all_is_one_undo_step_and_undo_brings_everything_back() {
         other => panic!("{other:?}"),
     }
     // A replaced text is laid out again (its outline was empty).
-    assert!(s.doc.timeline(0).layers[1].keyframes[1].elements.iter().any(|e| matches!(&e.kind, ElementKind::Text(t) if t.text == "bye bye again" && t.box_width != 10.0)));
+    assert!(
+        s.doc.timeline(0).layers[1].keyframes[1]
+            .elements
+            .iter()
+            .any(|e| matches!(&e.kind, ElementKind::Text(t) if t.text == "bye bye again" && t.box_width != 10.0))
+    );
     run(&mut s, "edit.undo", json!({}));
     assert_eq!(s.doc, before);
     // Nothing to replace is an error, and records nothing.
@@ -271,7 +336,9 @@ fn replace_one_changes_only_that_match() {
     });
     assert_eq!(t.as_deref(), Some("hello HI again"));
     // The same hit again is gone.
-    assert!(err(&mut s, "find.replace", json!({"kind": "text", "text": "hello", "in": ["text"], "with": "HI", "at": second})).contains("isn't there"));
+    assert!(
+        err(&mut s, "find.replace", json!({"kind": "text", "text": "hello", "in": ["text"], "with": "HI", "at": second})).contains("isn't there")
+    );
     // Groups expand with a pattern, not with plain text.
     run(&mut s, "find.replace", json!({"kind": "text", "text": r"(\w+) world", "regex": true, "with": "$1, $1 world"}));
     let first = s.doc.timeline(0).layers[1].keyframes[0].elements.iter().find_map(|e| match &e.kind {
@@ -280,7 +347,9 @@ fn replace_one_changes_only_that_match() {
     });
     assert_eq!(first.as_deref(), Some("Hello, Hello world"));
     run(&mut s, "find.replace", json!({"kind": "text", "text": "world", "with": "$0$1"}));
-    assert!(s.doc.timeline(0).layers[1].keyframes[0].elements.iter().any(|e| matches!(&e.kind, ElementKind::Text(t) if t.text == "Hello, Hello $0$1")));
+    assert!(
+        s.doc.timeline(0).layers[1].keyframes[0].elements.iter().any(|e| matches!(&e.kind, ElementKind::Text(t) if t.text == "Hello, Hello $0$1"))
+    );
     // A layer name can't become empty: skipped, and said why.
     assert!(err(&mut s, "find.replace", json!({"kind": "text", "text": "Actions", "in": ["layers"], "with": ""})).contains("can't be empty"));
 }
@@ -297,7 +366,9 @@ fn colours_keep_alpha_and_fonts_lay_out_again() {
         other => panic!("{other:?}"),
     }
     match &s.doc.timeline(1).layers[0].keyframes[0].elements[0].kind {
-        ElementKind::Shape(sh) => assert!(matches!(&sh.fill, Some(Paint::Linear { stops, .. }) if stops[0].color == Rgba::hex(0x00ff00) && stops[1].color == Rgba::WHITE)),
+        ElementKind::Shape(sh) => {
+            assert!(matches!(&sh.fill, Some(Paint::Linear { stops, .. }) if stops[0].color == Rgba::hex(0x00ff00) && stops[1].color == Rgba::WHITE))
+        }
         other => panic!("{other:?}"),
     }
     let v = run(&mut s, "find.replace", json!({"kind": "font", "font": "Test Sans", "with": "Inter"}));
@@ -385,7 +456,9 @@ fn search_and_replace_are_fast_on_a_large_document() {
     let mut b = Build::new();
     let mut layers = Vec::new();
     for li in 0..40 {
-        let keys: Vec<(u32, u32, &str, Vec<Element>)> = (0..300).map(|k| (k, 1, "", vec![b.text(&format!("caption {li} {k} needle"), Rgba::BLACK), b.rect(Paint::Solid(Rgba::hex(RED)), None)])).collect();
+        let keys: Vec<(u32, u32, &str, Vec<Element>)> = (0..300)
+            .map(|k| (k, 1, "", vec![b.text(&format!("caption {li} {k} needle"), Rgba::BLACK), b.rect(Paint::Solid(Rgba::hex(RED)), None)]))
+            .collect();
         layers.push(b.layer(&format!("Layer {li}"), keys));
     }
     b.scene("Big", layers);

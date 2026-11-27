@@ -18,7 +18,15 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("draw.path", "Pen Path", "", None, "{d: SVG path data (stage space), fill?, stroke?, stroke_width?, object?}", true, draw_path as crate::RunFn),
+        c(
+            "draw.path",
+            "Pen Path",
+            "",
+            None,
+            "{d: SVG path data (stage space), fill?, stroke?, stroke_width?, object?}",
+            true,
+            draw_path as crate::RunFn,
+        ),
         c(
             "draw.freehand",
             "Pencil Stroke",
@@ -28,7 +36,15 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             draw_freehand,
         ),
-        c("path.move_points", "Move Points", "", None, "{id, points: [[cmd, slot], ..], dx, dy, smooth?: bool} (a handle moved alone at a smooth anchor turns the other one with it, keeping its length, unless smooth is false: Alt breaks the pair)", true, move_points),
+        c(
+            "path.move_points",
+            "Move Points",
+            "",
+            None,
+            "{id, points: [[cmd, slot], ..], dx, dy, smooth?: bool} (a handle moved alone at a smooth anchor turns the other one with it, keeping its length, unless smooth is false: Alt breaks the pair)",
+            true,
+            move_points,
+        ),
         c("path.add_point", "Add Anchor Point", "", None, "{id, x, y, slop?}", true, add_point),
         c("path.delete_points", "Delete Anchor Points", "", None, "{id, cmds: [..]}", true, delete_points),
         c("path.convert_point", "Convert Anchor Point", "", None, "{id, cmd, smooth: bool}", true, convert_point),
@@ -176,7 +192,8 @@ fn move_points(s: &mut Session, p: &Value) -> Result<Value> {
             }
         }
         // The other handle of a smooth anchor whose handle moves alone (ADR 0045), as it was.
-        let partners: Vec<(usize, u8, Vec2, Vec2)> = if smooth { set.iter().filter_map(|&(cmd, slot)| partner(path, &set, cmd, slot)).collect() } else { Vec::new() };
+        let partners: Vec<(usize, u8, Vec2, Vec2)> =
+            if smooth { set.iter().filter_map(|&(cmd, slot)| partner(path, &set, cmd, slot)).collect() } else { Vec::new() };
         for &(cmd, slot) in &set {
             if let Some(q) = path.point(cmd, slot) {
                 path.set_point(cmd, slot, q + local);

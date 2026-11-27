@@ -59,12 +59,14 @@ fn strip(app: &mut App, ui: &mut egui::Ui, f: &Float, layout: &Layout, anchor: b
             egui::Popup::menu(&resp).show(|ui| crate::dock_ui::panel_menu(ui, at, p, layout, acts));
         }
         let r = tab_row(app, ui, at, &f.tabs, f.active, layout, acts);
-        if anchor
-            && let (Some(p), Some(r)) = (shown, &r)
-        {
+        if anchor && let (Some(p), Some(r)) = (shown, &r) {
             a11y::anchor(ui, region(p), ui.max_rect(), r);
         }
-        let tip = if f.tabs.len() > 1 { tr!("Put the panels back in the docks they came from") } else { tr!("Put the panel back in the dock it came from") };
+        let tip = if f.tabs.len() > 1 {
+            tr!("Put the panels back in the docks they came from")
+        } else {
+            tr!("Put the panel back in the dock it came from")
+        };
         if ui.button(tr!("Dock")).on_hover_text(tip).clicked() {
             acts.push(match (f.tabs.len(), shown) {
                 (1, Some(p)) => Act::DockBack(p),
@@ -97,7 +99,8 @@ fn float_body(app: &mut App, ui: &mut egui::Ui, f: &Float, layout: &Layout, anch
     let head = strip(app, ui, f, layout, anchor, acts);
     let rest = ui.available_rect_before_wrap();
     if let Some(p) = f.shown() {
-        let mut child = ui.new_child(egui::UiBuilder::new().max_rect(rest).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", p.id())));
+        let mut child =
+            ui.new_child(egui::UiBuilder::new().max_rect(rest).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", p.id())));
         child.set_clip_rect(rest.intersect(ui.clip_rect()));
         panel_body(app, &mut child, p);
     }
@@ -112,12 +115,16 @@ fn inside(app: &mut App, ctx: &egui::Context, f: &Float, layout: &Layout, acts: 
     let title = crate::i18n::t(p.label());
     let mut open = true;
     let size = vec2(f.size[0], f.size[1]);
-    let mut w = egui::Window::new(title).id(id).open(&mut open).collapsible(false).resizable(true).default_size(size).min_size([crate::dock::MIN_FLOAT, 120.0]);
+    let mut w = egui::Window::new(title)
+        .id(id)
+        .open(&mut open)
+        .collapsible(false)
+        .resizable(true)
+        .default_size(size)
+        .min_size([crate::dock::MIN_FLOAT, 120.0]);
     let at = f.at.map_or_else(|| ctx.content_rect().center() - size * 0.5, |a| pos2(a[0], a[1]));
     w = if app.dock_view.placed.insert(f.id) { w.current_pos(at) } else { w.default_pos(at) };
-    let shown = w.show(ctx, |ui| {
-        float_body(app, ui, f, layout, true, acts)
-    });
+    let shown = w.show(ctx, |ui| float_body(app, ui, f, layout, true, acts));
     a11y::name_title_bar(&shown, title);
     if let Some(s) = &shown {
         let r = s.response.rect;
@@ -146,7 +153,8 @@ fn inside(app: &mut App, ctx: &egui::Context, f: &Float, layout: &Layout, acts: 
 fn own_window(app: &mut App, ctx: &egui::Context, f: &Float, layout: &Layout, acts: &mut Vec<Act>) {
     let Some(p) = f.shown() else { return };
     let title = crate::i18n::t(p.label()).to_string();
-    let mut builder = egui::ViewportBuilder::default().with_title(title.clone()).with_inner_size(f.size).with_min_inner_size([crate::dock::MIN_FLOAT, 120.0]);
+    let mut builder =
+        egui::ViewportBuilder::default().with_title(title.clone()).with_inner_size(f.size).with_min_inner_size([crate::dock::MIN_FLOAT, 120.0]);
     if let Some(at) = f.at.filter(|_| crate::platform::window_positions()) {
         builder = builder.with_position(at);
     }
@@ -161,7 +169,8 @@ fn own_window(app: &mut App, ctx: &egui::Context, f: &Float, layout: &Layout, ac
         // A drag that began here: this window holds the pointer until the button is let go,
         // so it tells the editor where the pointer is (the editor shows the drop targets).
         if app.dock_view.drag.is_some() && app.dock_view.from_window.is_some() && app.dock_view.from_window == own(ui) {
-            let (pos, down, esc) = ui.input_mut(|i| (i.pointer.latest_pos(), i.pointer.primary_down(), i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)));
+            let (pos, down, esc) =
+                ui.input_mut(|i| (i.pointer.latest_pos(), i.pointer.primary_down(), i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)));
             if esc {
                 end_drag(&mut app.dock_view);
             } else if let (Some(pos), Some(i)) = (pos, inner) {
@@ -183,7 +192,13 @@ fn own_window(app: &mut App, ctx: &egui::Context, f: &Float, layout: &Layout, ac
         let commands: Vec<&'static str> = if ui.ctx().text_edit_focused() {
             Vec::new()
         } else {
-            ui.input_mut(|i| shortcuts.iter().filter(|(m, _, id)| (m.command || m.ctrl || m.alt) && !id.starts_with("view.") && !id.starts_with("tool.")).filter_map(|(m, k, id)| i.consume_key(*m, *k).then_some(*id)).collect())
+            ui.input_mut(|i| {
+                shortcuts
+                    .iter()
+                    .filter(|(m, _, id)| (m.command || m.ctrl || m.alt) && !id.starts_with("view.") && !id.starts_with("tool."))
+                    .filter_map(|(m, k, id)| i.consume_key(*m, *k).then_some(*id))
+                    .collect()
+            })
         };
         (close, commands)
     });

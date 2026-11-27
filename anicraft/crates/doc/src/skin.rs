@@ -65,9 +65,11 @@ impl Binding {
     pub fn normalize(&mut self, keep: impl Fn(BoneId) -> bool) -> bool {
         let before = self.bones.clone();
         let mut seen = Vec::with_capacity(self.bones.len());
-        self.bones.retain(|i| i.1.is_finite() && i.1 > 0.0 && keep(i.0) && !seen.contains(&i.0) && {
-            seen.push(i.0);
-            true
+        self.bones.retain(|i| {
+            i.1.is_finite() && i.1 > 0.0 && keep(i.0) && !seen.contains(&i.0) && {
+                seen.push(i.0);
+                true
+            }
         });
         self.bones.sort_by(|a, b| b.1.total_cmp(&a.1));
         self.bones.truncate(MAX_INFLUENCES);

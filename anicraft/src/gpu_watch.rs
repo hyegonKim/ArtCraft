@@ -150,11 +150,14 @@ pub fn on_surface_status(status: &eframe::wgpu::CurrentSurfaceTexture) -> eframe
     let recreate = matches!(action, eframe::egui_wgpu::SurfaceErrorAction::RecreateSurface);
     // The first of a run, and each new surface: a failing surface would otherwise log a line a frame.
     if (s == Surface::Validation && in_a_row <= 1) || recreate {
-        crate::startup::line(&format!("the window's surface: {s:?}, {} ({in_a_row} in a row)", match action {
-            eframe::egui_wgpu::SurfaceErrorAction::Reconfigure => "reconfiguring it", // i18n-exempt: log text
-            eframe::egui_wgpu::SurfaceErrorAction::RecreateSurface => "making it anew", // i18n-exempt: log text
-            eframe::egui_wgpu::SurfaceErrorAction::SkipFrame => "skipping the frame", // i18n-exempt: log text
-        }));
+        crate::startup::line(&format!(
+            "the window's surface: {s:?}, {} ({in_a_row} in a row)",
+            match action {
+                eframe::egui_wgpu::SurfaceErrorAction::Reconfigure => "reconfiguring it", // i18n-exempt: log text
+                eframe::egui_wgpu::SurfaceErrorAction::RecreateSurface => "making it anew", // i18n-exempt: log text
+                eframe::egui_wgpu::SurfaceErrorAction::SkipFrame => "skipping the frame", // i18n-exempt: log text
+            }
+        ));
     }
     if in_a_row >= RECREATE_AFTER {
         with(|h| h.in_a_row = 0);

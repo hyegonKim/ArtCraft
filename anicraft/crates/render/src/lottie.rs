@@ -49,7 +49,8 @@ pub struct LottieExport {
 
 /// The report line for artwork keyed frame by frame while it moves: exact at every frame,
 /// held between frames (ADR 0089).
-pub const STEPPED: &str = "motion keyed frame by frame (Elastic, Sine and similar eases, motion guides, tweens inside tweening symbols: no Lottie ease draws them)";
+pub const STEPPED: &str =
+    "motion keyed frame by frame (Elastic, Sine and similar eases, motion guides, tweens inside tweening symbols: no Lottie ease draws them)";
 
 /// How animated values are keyed.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -99,7 +100,12 @@ impl Bez {
 
     /// The path through `m`.
     fn transformed(&self, m: &Affine) -> Bez {
-        Bez { closed: self.closed, v: self.v.iter().map(|p| m.apply(*p)).collect(), i: self.i.iter().map(|t| m.apply_vector(*t)).collect(), o: self.o.iter().map(|t| m.apply_vector(*t)).collect() }
+        Bez {
+            closed: self.closed,
+            v: self.v.iter().map(|p| m.apply(*p)).collect(),
+            i: self.i.iter().map(|t| m.apply_vector(*t)).collect(),
+            o: self.o.iter().map(|t| m.apply_vector(*t)).collect(),
+        }
     }
 
     /// Writes every cubic whose handles sit a third and two thirds along its chord as the
@@ -267,7 +273,12 @@ fn look(s: &Sample) -> Look {
         Some(Fill::Gradient { stops, .. }) => stops.len(),
         _ => 0,
     };
-    (s.paths.iter().map(|b| (b.closed, b.v.len())).collect(), s.fill.as_ref().map_or(0, Fill::code), stops, s.stroke.as_ref().map(|l| (l.cap, l.join, l.dash.len())))
+    (
+        s.paths.iter().map(|b| (b.closed, b.v.len())).collect(),
+        s.fill.as_ref().map_or(0, Fill::code),
+        stops,
+        s.stroke.as_ref().map(|l| (l.cap, l.join, l.dash.len())),
+    )
 }
 
 /// A stroke in one frame, in the artwork's own space (a hairline's width is in stage pixels).
@@ -430,7 +441,14 @@ pub fn to_lottie(doc: &Document, name: &str, from: u32, to: u32, background: boo
 
 /// [`to_lottie`], keyed the way `keys` says.
 pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, background: bool, keys: LottieKeys) -> LottieExport {
-    let names: HashMap<u64, String> = doc.scenes.iter().map(|s| &s.timeline).chain(doc.library.iter().map(|s| &s.timeline)).flat_map(|t| t.layers.iter()).map(|l| (l.id.0, l.name.clone())).collect();
+    let names: HashMap<u64, String> = doc
+        .scenes
+        .iter()
+        .map(|s| &s.timeline)
+        .chain(doc.library.iter().map(|s| &s.timeline))
+        .flat_map(|t| t.layers.iter())
+        .map(|l| (l.id.0, l.name.clone()))
+        .collect();
     let mut notes: HashMap<&'static str, HashSet<usize>> = HashMap::new();
     let mut tracks: Vec<Track> = Vec::new();
     // Open track per key: the index of the track it continues.
@@ -484,7 +502,8 @@ pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, backgroun
                     }
                     if dl.clip_mode(c).is_soft() {
                         // A soft mask is a track matte: alpha, or luma.
-                        matte = soft_art.get(c as usize).map(|a| Matte { luma: dl.clip_mode(c) == anicraft_doc::MaskMode::Luminance, art: a.clone() });
+                        matte =
+                            soft_art.get(c as usize).map(|a| Matte { luma: dl.clip_mode(c) == anicraft_doc::MaskMode::Luminance, art: a.clone() });
                         Vec::new()
                     } else {
                         clip_art.get(c as usize).cloned().unwrap_or_default()
@@ -516,7 +535,11 @@ pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, backgroun
             }
             let blend = lottie_blend(blend_mode);
             if !blend_mode.is_normal() {
-                flags.insert(if blend.is_some() { "blend modes (applied shape by shape)" } else { "Subtract, Invert, Alpha and Erase blending (Lottie has no equivalent; drawn normally)" });
+                flags.insert(if blend.is_some() {
+                    "blend modes (applied shape by shape)"
+                } else {
+                    "Subtract, Invert, Alpha and Erase blending (Lottie has no equivalent; drawn normally)"
+                });
             }
             let blend = blend.unwrap_or(0);
             let Some(mut s) = sample(item, opacity, masks, &mut flags) else {
@@ -564,7 +587,11 @@ pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, backgroun
             if slot.is_some() {
                 continue;
             }
-            let found = open.iter().filter(|(k, ti)| k.same_look(key) && !taken.contains(ti) && tracks.get(**ti).is_some_and(|tr| tr.last + 1 == t)).map(|(_, ti)| *ti).min();
+            let found = open
+                .iter()
+                .filter(|(k, ti)| k.same_look(key) && !taken.contains(ti) && tracks.get(**ti).is_some_and(|tr| tr.last + 1 == t))
+                .map(|(_, ti)| *ti)
+                .min();
             if let Some(ti) = found {
                 taken.insert(ti);
                 *slot = Some(ti);
@@ -574,7 +601,14 @@ pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, backgroun
             let ti = match slot {
                 Some(ti) => ti,
                 None => {
-                    tracks.push(Track { key: key.clone(), name: names.get(&layer_id).cloned().unwrap_or_default(), first: t, last: t, frames: Vec::new(), first_index: index });
+                    tracks.push(Track {
+                        key: key.clone(),
+                        name: names.get(&layer_id).cloned().unwrap_or_default(),
+                        first: t,
+                        last: t,
+                        frames: Vec::new(),
+                        first_index: index,
+                    });
                     tracks.len() - 1
                 }
             };
@@ -608,7 +642,8 @@ pub fn to_lottie_keyed(doc: &Document, name: &str, from: u32, to: u32, backgroun
         }
     }
     let rank = |i: usize| tracks.get(i).map_or((u32::MAX, usize::MAX), |t| (t.first, t.first_index));
-    let mut ready: std::collections::BTreeSet<((u32, usize), usize)> = (0..tracks.len()).filter(|&i| indegree.get(i) == Some(&0)).map(|i| (rank(i), i)).collect();
+    let mut ready: std::collections::BTreeSet<((u32, usize), usize)> =
+        (0..tracks.len()).filter(|&i| indegree.get(i) == Some(&0)).map(|i| (rank(i), i)).collect();
     let mut bottom_up: Vec<usize> = Vec::with_capacity(tracks.len());
     while let Some(first) = ready.pop_first() {
         let i = first.1;
@@ -818,7 +853,10 @@ fn transforms(frames: &[(u32, Sample)]) -> Option<Vec<Tr>> {
     }
     // A frame squashed flat has no rotation or skew of its own: its neighbour's.
     let near = |i: usize| -> (f64, f64) {
-        (0..raw.len()).filter_map(|j| raw.get(j).copied().flatten().map(|v| (i.abs_diff(j), v))).min_by_key(|(d, _)| *d).map_or((0.0, 0.0), |(_, v)| v)
+        (0..raw.len())
+            .filter_map(|j| raw.get(j).copied().flatten().map(|v| (i.abs_diff(j), v)))
+            .min_by_key(|(d, _)| *d)
+            .map_or((0.0, 0.0), |(_, v)| v)
     };
     let mut out: Vec<Tr> = Vec::with_capacity(frames.len());
     let mut prev_r: Option<f64> = None;
@@ -927,10 +965,12 @@ fn layer(tr: &Track, ind: usize, w: &mut Writer<'_>) -> Value {
     match f.first().and_then(|(_, s)| s.fill.clone()) {
         Some(Fill::Solid { rule: r, .. }) => {
             let solid = |g: &dyn Fn(Rgba) -> Vec<f64>| -> Vec<Vec<f64>> {
-                f.iter().filter_map(|(_, s)| match &s.fill {
-                    Some(Fill::Solid { color, .. }) => Some(g(*color)),
-                    _ => None,
-                }).collect()
+                f.iter()
+                    .filter_map(|(_, s)| match &s.fill {
+                        Some(Fill::Solid { color, .. }) => Some(g(*color)),
+                        _ => None,
+                    })
+                    .collect()
             };
             let color = w.prop(first, &solid(&rgb), TOL_COLOR, Enc::Vector);
             let opacity = w.prop(first, &solid(&|c| vec![f64::from(c.sanitized().a) * 100.0]), TOL_OPACITY, Enc::Scalar);
@@ -972,7 +1012,11 @@ fn layer(tr: &Track, ind: usize, w: &mut Writer<'_>) -> Value {
                     colors.push(k);
                 }
             }
-            let (s, e, g) = (w.prop(first, &start, TOL_PX, Enc::Vector), w.prop(first, &end, TOL_PX, Enc::Vector), w.prop(first, &colors, TOL_COLOR, Enc::Vector));
+            let (s, e, g) = (
+                w.prop(first, &start, TOL_PX, Enc::Vector),
+                w.prop(first, &end, TOL_PX, Enc::Vector),
+                w.prop(first, &colors, TOL_COLOR, Enc::Vector),
+            );
             items.push(json!({"ty": "gf", "nm": "Gradient Fill", "t": if radial { 2 } else { 1 }, "s": s, "e": e,
                 "g": {"p": count, "k": g}, "o": {"a": 0, "k": 100}, "r": rule(r), "h": {"a": 0, "k": 0}, "a": {"a": 0, "k": 0}}));
         }
@@ -1062,7 +1106,13 @@ mod tests {
             l.kind = kind;
             l.parent = parent;
             l.mask_mode = if kind == LayerKind::Mask { mode } else { Default::default() };
-            Arc::make_mut(&mut l.keyframes[0]).elements.push(Arc::new(Element { id: ElementId(100 + id), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(shape) }));
+            Arc::make_mut(&mut l.keyframes[0]).elements.push(Arc::new(Element {
+                id: ElementId(100 + id),
+                name: String::new(),
+                transform: Affine::IDENTITY,
+                color: ColorEffect::default(),
+                kind: ElementKind::Shape(shape),
+            }));
             d.timeline_mut(0).layers.push(Arc::new(l));
         }
         d
@@ -1094,7 +1144,13 @@ mod tests {
     #[test]
     fn beziers_bake_lines_quads_and_closing_points() {
         let mut p = Path::new();
-        p.cmds = vec![PathCmd::MoveTo(Vec2::new(0.0, 0.0)), PathCmd::LineTo(Vec2::new(10.0, 0.0)), PathCmd::QuadTo(Vec2::new(10.0, 10.0), Vec2::new(0.0, 10.0)), PathCmd::LineTo(Vec2::new(0.0, 0.0)), PathCmd::Close];
+        p.cmds = vec![
+            PathCmd::MoveTo(Vec2::new(0.0, 0.0)),
+            PathCmd::LineTo(Vec2::new(10.0, 0.0)),
+            PathCmd::QuadTo(Vec2::new(10.0, 10.0), Vec2::new(0.0, 10.0)),
+            PathCmd::LineTo(Vec2::new(0.0, 0.0)),
+            PathCmd::Close,
+        ];
         let b = beziers(&p, &Affine::translate(100.0, 0.0));
         assert_eq!(b.len(), 1);
         let b = &b[0];
@@ -1117,7 +1173,10 @@ mod tests {
         let frames = doc.frame_count();
         let e = to_lottie(&doc, "demo", 0, frames - 1, true);
         let v = parse(&e);
-        assert_eq!((v["w"].as_u64(), v["h"].as_u64(), v["op"].as_u64()), (Some(u64::from(doc.stage.width)), Some(u64::from(doc.stage.height)), Some(u64::from(frames))));
+        assert_eq!(
+            (v["w"].as_u64(), v["h"].as_u64(), v["op"].as_u64()),
+            (Some(u64::from(doc.stage.width)), Some(u64::from(doc.stage.height)), Some(u64::from(frames)))
+        );
         assert_eq!(v["fr"].as_f64(), Some(f64::from(doc.stage.fps)));
         let layers = v["layers"].as_array().unwrap();
         assert_eq!(layers.len(), e.layers + 1, "shape layers and the stage");
@@ -1141,14 +1200,30 @@ mod tests {
 
     /// A property's keyframes as written (`a: 0` is one key).
     fn keys_of(p: &Value) -> Vec<Kf> {
-        let vec = |v: &Value| -> Vec<f64> { if let Some(a) = v.as_array() { a.iter().map(|x| x.as_f64().unwrap()).collect() } else { vec![v.as_f64().unwrap()] } };
+        let vec = |v: &Value| -> Vec<f64> {
+            if let Some(a) = v.as_array() { a.iter().map(|x| x.as_f64().unwrap()).collect() } else { vec![v.as_f64().unwrap()] }
+        };
         if p["a"] == 0 {
             return vec![Kf { t: 0.0, s: vec(&p["k"]), out: Out::End }];
         }
-        p["k"].as_array().unwrap().iter().map(|k| {
-            let out = if k["h"] == 1 { Out::Hold } else if k.get("o").is_some() { Out::Ease((k["o"]["x"].as_f64().unwrap(), k["o"]["y"].as_f64().unwrap()), (k["i"]["x"].as_f64().unwrap(), k["i"]["y"].as_f64().unwrap())) } else { Out::End };
-            Kf { t: k["t"].as_f64().unwrap(), s: vec(&k["s"]), out }
-        }).collect()
+        p["k"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|k| {
+                let out = if k["h"] == 1 {
+                    Out::Hold
+                } else if k.get("o").is_some() {
+                    Out::Ease(
+                        (k["o"]["x"].as_f64().unwrap(), k["o"]["y"].as_f64().unwrap()),
+                        (k["i"]["x"].as_f64().unwrap(), k["i"]["y"].as_f64().unwrap()),
+                    )
+                } else {
+                    Out::End
+                };
+                Kf { t: k["t"].as_f64().unwrap(), s: vec(&k["s"]), out }
+            })
+            .collect()
     }
 
     /// A square on layer 1 tweening from `a` to `b` over ten frames with `ease`.
@@ -1159,7 +1234,15 @@ mod tests {
         if stroke {
             shape.stroke = Some(Stroke::new(Rgba::WHITE, 2.0));
         }
-        let sq = |m: Affine| Arc::new(Element { id: ElementId(70), name: String::new(), transform: m, color: ColorEffect::default(), kind: ElementKind::Shape(shape.clone()) });
+        let sq = |m: Affine| {
+            Arc::new(Element {
+                id: ElementId(70),
+                name: String::new(),
+                transform: m,
+                color: ColorEffect::default(),
+                kind: ElementKind::Shape(shape.clone()),
+            })
+        };
         let mut doc = Document::default();
         let mut k0 = Keyframe::new(0, 10);
         k0.elements = vec![sq(a)];
@@ -1181,7 +1264,10 @@ mod tests {
         // eases, the second at the time the curve's middle point falls; the outline stays put.
         use anicraft_doc::{CustomEase, Easing};
         use std::sync::Arc;
-        let curve = CustomEase::from_flat(&[(0.0, 0.0), (0.2, 1.4), (0.3, 1.4), (0.4, 1.4), (0.6, 0.5), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| Vec2::new(x, y))).unwrap();
+        let curve = CustomEase::from_flat(
+            &[(0.0, 0.0), (0.2, 1.4), (0.3, 1.4), (0.4, 1.4), (0.6, 0.5), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| Vec2::new(x, y)),
+        )
+        .unwrap();
         let ease = Easing::Custom(Arc::new(curve));
         let doc = tweened(Affine::IDENTITY, Affine::translate(100.0, 0.0), ease.clone(), false);
         let e = to_lottie(&doc, "eased", 0, 14, false);
@@ -1283,8 +1369,21 @@ mod tests {
     fn variable_width_strokes_export_as_filled_outlines() {
         use anicraft_doc::{Document, Element, ElementId, ElementKind, ProfilePreset, Shape, Stroke};
         let mut doc = Document::default();
-        let shape = Shape { path: std::sync::Arc::new(Path::line(Vec2::new(10.0, 10.0), Vec2::new(200.0, 10.0))), fill: None, stroke: Some(Stroke::new(Rgba::hex(0x00ff00), 10.0).with_profile(ProfilePreset::TaperEnd.profile())), fill_rule: FillRule::NonZero, merge: false, warp: None };
-        let el = Element { id: ElementId(77), name: String::new(), transform: Affine::IDENTITY, color: Default::default(), kind: ElementKind::Shape(shape) };
+        let shape = Shape {
+            path: std::sync::Arc::new(Path::line(Vec2::new(10.0, 10.0), Vec2::new(200.0, 10.0))),
+            fill: None,
+            stroke: Some(Stroke::new(Rgba::hex(0x00ff00), 10.0).with_profile(ProfilePreset::TaperEnd.profile())),
+            fill_rule: FillRule::NonZero,
+            merge: false,
+            warp: None,
+        };
+        let el = Element {
+            id: ElementId(77),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: Default::default(),
+            kind: ElementKind::Shape(shape),
+        };
         let layer = std::sync::Arc::make_mut(&mut doc.timeline_mut(0).layers[0]);
         layer.keyframe_mut(0).unwrap().elements.push(std::sync::Arc::new(el));
         let e = to_lottie(&doc, "w", 0, 0, false);
@@ -1300,8 +1399,21 @@ mod tests {
         use anicraft_doc::{Cap, Dash, Document, Element, ElementId, ElementKind, Join, Shape, Stroke, StrokeStyle};
         let export = |st: Stroke| {
             let mut doc = Document::default();
-            let shape = Shape { path: std::sync::Arc::new(Path::line(Vec2::new(10.0, 10.0), Vec2::new(200.0, 10.0))), fill: None, stroke: Some(st), fill_rule: FillRule::NonZero, merge: false, warp: None };
-            let el = Element { id: ElementId(77), name: String::new(), transform: Affine::scale(2.0, 2.0), color: Default::default(), kind: ElementKind::Shape(shape) };
+            let shape = Shape {
+                path: std::sync::Arc::new(Path::line(Vec2::new(10.0, 10.0), Vec2::new(200.0, 10.0))),
+                fill: None,
+                stroke: Some(st),
+                fill_rule: FillRule::NonZero,
+                merge: false,
+                warp: None,
+            };
+            let el = Element {
+                id: ElementId(77),
+                name: String::new(),
+                transform: Affine::scale(2.0, 2.0),
+                color: Default::default(),
+                kind: ElementKind::Shape(shape),
+            };
             let layer = std::sync::Arc::make_mut(&mut doc.timeline_mut(0).layers[0]);
             layer.keyframe_mut(0).unwrap().elements.push(std::sync::Arc::new(el));
             let v = parse(&to_lottie(&doc, "s", 0, 0, false));
@@ -1311,14 +1423,24 @@ mod tests {
         let st = export(Stroke::new(Rgba::BLACK, 3.0));
         assert_eq!((st["lc"].clone(), st["lj"].clone(), st["ml"].clone(), st.get("d").is_none()), (json!(2), json!(2), json!(4), true));
         // Butt caps, miter joins with their limit, dashes scaled like the width.
-        let style = StrokeStyle { cap: Cap::Butt, join: Join::Miter, miter_limit: 6.0, dash: Some(Dash::Dashed { lengths: vec![4.0, 1.5].into(), offset: 1.0 }) };
+        let style = StrokeStyle {
+            cap: Cap::Butt,
+            join: Join::Miter,
+            miter_limit: 6.0,
+            dash: Some(Dash::Dashed { lengths: vec![4.0, 1.5].into(), offset: 1.0 }),
+        };
         let st = export(Stroke::new(Rgba::BLACK, 3.0).with_style(style));
         assert_eq!((st["lc"].clone(), st["lj"].clone(), st["ml"].clone(), st["w"]["k"].clone()), (json!(1), json!(1), json!(6), json!(6)));
         let d = st["d"].as_array().unwrap();
         let got: Vec<(&str, f64)> = d.iter().map(|e| (e["n"].as_str().unwrap(), e["v"]["k"].as_f64().unwrap())).collect();
         assert_eq!(got, [("d", 8.0), ("g", 3.0), ("o", 2.0)]);
         // Dots: zero-length dashes with round caps, whatever the cap.
-        let st = export(Stroke::new(Rgba::BLACK, 3.0).with_style(StrokeStyle { cap: Cap::Square, join: Join::Bevel, dash: Dash::dotted(2.0), ..StrokeStyle::default() }));
+        let st = export(Stroke::new(Rgba::BLACK, 3.0).with_style(StrokeStyle {
+            cap: Cap::Square,
+            join: Join::Bevel,
+            dash: Dash::dotted(2.0),
+            ..StrokeStyle::default()
+        }));
         assert_eq!((st["lc"].clone(), st["lj"].clone()), (json!(2), json!(3)));
         assert_eq!((st["d"][0]["v"]["k"].as_f64(), st["d"][1]["v"]["k"].as_f64()), (Some(0.0), Some(10.0)));
     }

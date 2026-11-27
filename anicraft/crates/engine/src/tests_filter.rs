@@ -90,7 +90,9 @@ fn a_filter_switched_off_is_as_if_absent_and_keeps_its_settings() {
     let html = |s: &Session| anicraft_render::html::movie(&s.doc, &Default::default()).json;
     assert_eq!(html(&only), html(&off));
     // Its settings stay, and the file keeps the switch.
-    let Some(FilterEntry { filter: Filter::Glow { strength, blur_x, .. }, enabled: false }) = list(&off).get(1).cloned() else { panic!("{:?}", list(&off)) };
+    let Some(FilterEntry { filter: Filter::Glow { strength, blur_x, .. }, enabled: false }) = list(&off).get(1).cloned() else {
+        panic!("{:?}", list(&off))
+    };
     assert_eq!((strength, blur_x), (3.0, 12.0));
     let text = crate::format::to_json(&off.doc).unwrap();
     assert!(text.contains("\"enabled\":false") || text.contains("\"enabled\": false"), "saved switched off");
@@ -101,7 +103,11 @@ fn a_filter_switched_off_is_as_if_absent_and_keeps_its_settings() {
     assert_eq!(anicraft_render::render_frame(&off.doc, 0, 1.0).unwrap().data, both.data);
     // All off, then removing one and all.
     run(&mut off, "filter.enable", json!({"enabled": false}));
-    assert_eq!(anicraft_render::render_frame(&off.doc, 0, 1.0).unwrap().data, anicraft_render::render_frame(&clip().doc, 0, 1.0).unwrap().data, "all off is no filters");
+    assert_eq!(
+        anicraft_render::render_frame(&off.doc, 0, 1.0).unwrap().data,
+        anicraft_render::render_frame(&clip().doc, 0, 1.0).unwrap().data,
+        "all off is no filters"
+    );
     run(&mut off, "filter.remove", json!({"index": 0}));
     assert_eq!(kinds(&off), [("Glow", false)]);
     assert!(off.execute("filter.enable", &json!({"index": 3, "enabled": true})).is_err());
@@ -119,7 +125,12 @@ fn graphics_take_no_filters() {
     let mut s = Session::default();
     run(&mut s, "draw.rect", json!({"x": 100, "y": 100, "w": 100, "h": 100, "fill": "#ff0000", "stroke": null}));
     run(&mut s, "modify.convert_to_symbol", json!({"name": "G"}));
-    for (id, p) in [("filter.enable", json!({"enabled": false})), ("filter.remove", json!({})), ("filter.move", json!({"from": 0, "to": 1})), ("filter.copy", json!({}))] {
+    for (id, p) in [
+        ("filter.enable", json!({"enabled": false})),
+        ("filter.remove", json!({})),
+        ("filter.move", json!({"from": 0, "to": 1})),
+        ("filter.copy", json!({})),
+    ] {
         let e = s.execute(id, &p).unwrap_err().to_string();
         assert!(e.contains("movie clip"), "{id}: {e}");
     }
@@ -139,7 +150,13 @@ fn copy_and_paste_filters_between_instances() {
     let second = s.selection.on(s.layer);
     assert_ne!(first, second);
     run(&mut s, "filter.paste", json!({}));
-    let of = |s: &Session, id: anicraft_doc::ElementId| match &s.doc.timeline(s.scene).layers[0].keyframes[0].elements.iter().find(|e| e.id == id).unwrap().kind {
+    let of = |s: &Session, id: anicraft_doc::ElementId| match &s.doc.timeline(s.scene).layers[0].keyframes[0]
+        .elements
+        .iter()
+        .find(|e| e.id == id)
+        .unwrap()
+        .kind
+    {
         ElementKind::Symbol { filters, .. } => filters.iter().map(|e| (e.filter.label(), e.enabled)).collect::<Vec<_>>(),
         _ => Vec::new(),
     };
@@ -171,7 +188,11 @@ fn filter_presets_save_apply_rename_delete_and_round_trip() {
     assert_eq!((v["name"].as_str(), v["replaced"].as_bool()), (Some("Shadowed"), Some(false)));
     // Saving over it asks (the old one can't come back), and replaces when confirmed.
     assert!(matches!(s.execute("filter.preset_save", &json!({"name": "shadowed"})), Err(EngineError::NeedsConfirmation(_))));
-    run(&mut s, "filter.preset_save", json!({"name": "shadowed", "filters": [{"type": "glow", "color": "#ff00ff"}, {"type": "blur", "enabled": false}], "confirm": true}));
+    run(
+        &mut s,
+        "filter.preset_save",
+        json!({"name": "shadowed", "filters": [{"type": "glow", "color": "#ff00ff"}, {"type": "blur", "enabled": false}], "confirm": true}),
+    );
     assert_eq!(s.filter_presets.presets().len(), 1);
     // Saving and listing are outside the document and its undo.
     assert_eq!(s.revision, rev);
@@ -190,7 +211,10 @@ fn filter_presets_save_apply_rename_delete_and_round_trip() {
     let path = dir.join("presets.json");
     let _ = std::fs::remove_file(&path);
     run(&mut s, "filter.preset_export", json!({"path": path.display().to_string()}));
-    assert!(matches!(s.execute("filter.preset_export", &json!({"path": path.display().to_string()})), Err(EngineError::NeedsConfirmation(_))), "replacing the file asks");
+    assert!(
+        matches!(s.execute("filter.preset_export", &json!({"path": path.display().to_string()})), Err(EngineError::NeedsConfirmation(_))),
+        "replacing the file asks"
+    );
     let mut other = Session::default();
     run(&mut other, "filter.preset_save", json!({"name": "neon", "filters": [{"type": "blur"}]}));
     let v = run(&mut other, "filter.preset_import", json!({"path": path.display().to_string()}));
@@ -216,21 +240,37 @@ fn filter_presets_save_apply_rename_delete_and_round_trip() {
 fn classic_tweens_carry_blur_and_glow_to_their_midpoint() {
     // Blur 0 → 20 and a glow's strength 0 → 200 %, over a linear tween of 10 frames.
     let mut s = clip();
-    run(&mut s, "element.set_filters", json!({"filters": [{"type": "blur", "blur_x": 0, "blur_y": 0}, {"type": "glow", "strength": 0, "color": "#0000ff"}]}));
+    run(
+        &mut s,
+        "element.set_filters",
+        json!({"filters": [{"type": "blur", "blur_x": 0, "blur_y": 0}, {"type": "glow", "strength": 0, "color": "#0000ff"}]}),
+    );
     run(&mut s, "timeline.goto", json!({"frame": 10}));
     run(&mut s, "timeline.insert_keyframe", json!({}));
     run(&mut s, "edit.select_all", json!({}));
-    run(&mut s, "element.set_filters", json!({"filters": [{"type": "blur", "blur_x": 20, "blur_y": 20}, {"type": "glow", "strength": 2, "color": "#0000ff"}]}));
+    run(
+        &mut s,
+        "element.set_filters",
+        json!({"filters": [{"type": "blur", "blur_x": 20, "blur_y": 20}, {"type": "glow", "strength": 2, "color": "#0000ff"}]}),
+    );
     run(&mut s, "timeline.goto", json!({"frame": 0}));
     run(&mut s, "timeline.create_tween", json!({"easing": "Linear"}));
     let dl = anicraft_doc::evaluate(&s.doc, 5);
     let g = dl.groups.iter().find(|g| !g.filters.is_empty()).expect("a filtered group");
     assert_eq!(g.filters.len(), 2);
-    assert!(matches!(g.filters[0], Filter::Blur { blur_x, blur_y, .. } if (blur_x - 10.0).abs() < 1e-4 && (blur_y - 10.0).abs() < 1e-4), "{:?}", g.filters[0]);
+    assert!(
+        matches!(g.filters[0], Filter::Blur { blur_x, blur_y, .. } if (blur_x - 10.0).abs() < 1e-4 && (blur_y - 10.0).abs() < 1e-4),
+        "{:?}",
+        g.filters[0]
+    );
     assert!(matches!(g.filters[1], Filter::Glow { strength, .. } if (strength - 1.0).abs() < 1e-4), "{:?}", g.filters[1]);
     // The midpoint renders as a still instance with the midpoint's values.
     let mut still = clip();
-    run(&mut still, "element.set_filters", json!({"filters": [{"type": "blur", "blur_x": 10, "blur_y": 10}, {"type": "glow", "strength": 1, "color": "#0000ff"}]}));
+    run(
+        &mut still,
+        "element.set_filters",
+        json!({"filters": [{"type": "blur", "blur_x": 10, "blur_y": 10}, {"type": "glow", "strength": 1, "color": "#0000ff"}]}),
+    );
     assert_eq!(anicraft_render::render_frame(&s.doc, 5, 1.0).unwrap().data, anicraft_render::render_frame(&still.doc, 0, 1.0).unwrap().data);
     // A filter switched off on the first keyframe stays off through the tween, values travelling.
     s.set_frame(0);

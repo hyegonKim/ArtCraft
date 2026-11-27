@@ -269,7 +269,17 @@ impl<'a> Walk<'a> {
                 let folder = l.kind == LayerKind::Folder;
                 let children = if folder { tl.group_range(i).len() > 1 } else { l.keyframes.iter().any(|k| self.frame_items(k)) };
                 let open = children && self.open(&lkey, d);
-                if !self.push(Row { key: lkey.clone(), depth: d, kind: NodeKind::Layer(l.kind), name: l.name.clone(), extra: String::new(), frame: None, children, open, go: lgo.clone() }) {
+                if !self.push(Row {
+                    key: lkey.clone(),
+                    depth: d,
+                    kind: NodeKind::Layer(l.kind),
+                    name: l.name.clone(),
+                    extra: String::new(),
+                    frame: None,
+                    children,
+                    open,
+                    go: lgo.clone(),
+                }) {
                     return;
                 }
                 if folder {
@@ -289,7 +299,17 @@ impl<'a> Walk<'a> {
                     let kgo = Go { frame: Some(k.start), ..lgo.clone() };
                     let children = self.keyframe_has(k);
                     let open = children && self.open(&kkey, d + 1);
-                    if !self.push(Row { key: kkey.clone(), depth: d + 1, kind: NodeKind::Frame, name: k.label.clone(), extra: String::new(), frame: Some(k.start), children, open, go: kgo.clone() }) {
+                    if !self.push(Row {
+                        key: kkey.clone(),
+                        depth: d + 1,
+                        kind: NodeKind::Frame,
+                        name: k.label.clone(),
+                        extra: String::new(),
+                        frame: Some(k.start),
+                        children,
+                        open,
+                        go: kgo.clone(),
+                    }) {
                         return;
                     }
                     if open {
@@ -309,7 +329,9 @@ impl<'a> Walk<'a> {
     /// Whether a keyframe row has children (its label alone makes the row, not children).
     fn keyframe_has(&self, k: &Keyframe) -> bool {
         let s = self.o.show;
-        (s.scripts && k.script.is_some()) || (s.media && k.sound.is_some()) || anicraft_doc::expand_groups(&k.elements).iter().any(|e| self.element_shows(e))
+        (s.scripts && k.script.is_some())
+            || (s.media && k.sound.is_some())
+            || anicraft_doc::expand_groups(&k.elements).iter().any(|e| self.element_shows(e))
     }
 
     fn element_shows(&self, e: &anicraft_doc::Element) -> bool {
@@ -325,7 +347,17 @@ impl<'a> Walk<'a> {
     /// What is on keyframe `k`: its script, its sound, then its elements.
     fn keyframe(&mut self, k: &Keyframe, key: &str, depth: usize, go: &Go, stack: &[SymbolId]) {
         let s = self.o.show;
-        let leaf = |key: String, kind: NodeKind, name: String, extra: String, go: Go| Row { key, depth, kind, name, extra, frame: Some(k.start), children: false, open: false, go };
+        let leaf = |key: String, kind: NodeKind, name: String, extra: String, go: Go| Row {
+            key,
+            depth,
+            kind,
+            name,
+            extra,
+            frame: Some(k.start),
+            children: false,
+            open: false,
+            go,
+        };
         if s.scripts
             && let Some(script) = &k.script
         {
@@ -375,7 +407,17 @@ impl<'a> Walk<'a> {
                     if s.scripts {
                         for (n, h) in events.iter().enumerate() {
                             let desc = h.actions.iter().map(anicraft_doc::Action::describe).collect::<Vec<_>>().join("; ");
-                            if !self.push(Row { key: format!("{ekey}/h{n}"), depth: depth + 1, kind: NodeKind::Handler, name: h.event.key().to_string(), extra: line(&desc), frame: Some(k.start), children: false, open: false, go: ego.clone() }) {
+                            if !self.push(Row {
+                                key: format!("{ekey}/h{n}"),
+                                depth: depth + 1,
+                                kind: NodeKind::Handler,
+                                name: h.event.key().to_string(),
+                                extra: line(&desc),
+                                frame: Some(k.start),
+                                children: false,
+                                open: false,
+                                go: ego.clone(),
+                            }) {
                                 return;
                             }
                         }
@@ -413,7 +455,14 @@ impl<'a> Walk<'a> {
 /// The rows showing for `o`, from scene `scene` (the scope's scene).
 pub fn tree(doc: &Document, scene: usize, o: &Options) -> Tree {
     let filter = o.filter.trim().to_lowercase();
-    let mut w = Walk { doc, syms: doc.library.iter().map(|s| (s.id, &**s)).collect(), o, every: o.all || !filter.is_empty(), rows: Vec::new(), truncated: false };
+    let mut w = Walk {
+        doc,
+        syms: doc.library.iter().map(|s| (s.id, &**s)).collect(),
+        o,
+        every: o.all || !filter.is_empty(),
+        rows: Vec::new(),
+        truncated: false,
+    };
     let scenes: Vec<usize> = match o.scope {
         Scope::Document => (0..doc.scenes.len()).collect(),
         Scope::Scene => vec![scene.min(doc.scenes.len().saturating_sub(1))],
@@ -424,7 +473,17 @@ pub fn tree(doc: &Document, scene: usize, o: &Options) -> Tree {
         let children = w.has_items(&sc.timeline);
         let open = children && w.open(&key, 0);
         let go = Go { scene: Some(i), ..Go::default() };
-        if !w.push(Row { key: key.clone(), depth: 0, kind: NodeKind::Scene, name: sc.name.clone(), extra: String::new(), frame: None, children, open, go: go.clone() }) {
+        if !w.push(Row {
+            key: key.clone(),
+            depth: 0,
+            kind: NodeKind::Scene,
+            name: sc.name.clone(),
+            extra: String::new(),
+            frame: None,
+            children,
+            open,
+            go: go.clone(),
+        }) {
             break;
         }
         if open {
@@ -433,14 +492,34 @@ pub fn tree(doc: &Document, scene: usize, o: &Options) -> Tree {
     }
     if o.definitions && !doc.library.is_empty() && !w.full() {
         let open = w.open("d", 0);
-        w.push(Row { key: "d".into(), depth: 0, kind: NodeKind::Definitions, name: String::new(), extra: String::new(), frame: None, children: true, open, go: Go::default() });
+        w.push(Row {
+            key: "d".into(),
+            depth: 0,
+            kind: NodeKind::Definitions,
+            name: String::new(),
+            extra: String::new(),
+            frame: None,
+            children: true,
+            open,
+            go: Go::default(),
+        });
         if open {
             for sym in &doc.library {
                 let key = format!("d/y{}", sym.id.0);
                 let children = w.has_items(&sym.timeline);
                 let open = children && w.open(&key, 1);
                 let go = Go { symbol: Some(sym.id), ..Go::default() };
-                if !w.push(Row { key: key.clone(), depth: 1, kind: NodeKind::Symbol(sym.kind), name: sym.name.clone(), extra: String::new(), frame: None, children, open, go: go.clone() }) {
+                if !w.push(Row {
+                    key: key.clone(),
+                    depth: 1,
+                    kind: NodeKind::Symbol(sym.kind),
+                    name: sym.name.clone(),
+                    extra: String::new(),
+                    frame: None,
+                    children,
+                    open,
+                    go: go.clone(),
+                }) {
                     break;
                 }
                 if open {
@@ -496,7 +575,13 @@ pub fn options_of(p: &Value) -> Result<Options> {
     };
     let show = match p.get("show") {
         None | Some(Value::Null) => Show::default(),
-        Some(v) if v.is_object() => Show { text: opt_flag(v, "text")?, symbols: opt_flag(v, "symbols")?, scripts: opt_flag(v, "scripts")?, media: opt_flag(v, "media")?, frames: opt_flag(v, "frames")? },
+        Some(v) if v.is_object() => Show {
+            text: opt_flag(v, "text")?,
+            symbols: opt_flag(v, "symbols")?,
+            scripts: opt_flag(v, "scripts")?,
+            media: opt_flag(v, "media")?,
+            frames: opt_flag(v, "frames")?,
+        },
         Some(_) => return Err(EngineError::Param("'show' must be {text?, symbols?, scripts?, media?, frames?}".into())),
     };
     let expanded = match p.get("expanded") {
@@ -505,7 +590,11 @@ pub fn options_of(p: &Value) -> Result<Options> {
             if list.len() > MAX_ROWS {
                 return Err(EngineError::Param(format!("'expanded' names at most {MAX_ROWS} rows")));
             }
-            Some(list.iter().map(|v| v.as_str().map(str::to_string).ok_or_else(|| EngineError::Param("'expanded' must be a list of row keys".into()))).collect::<Result<HashSet<_>>>()?)
+            Some(
+                list.iter()
+                    .map(|v| v.as_str().map(str::to_string).ok_or_else(|| EngineError::Param("'expanded' must be a list of row keys".into())))
+                    .collect::<Result<HashSet<_>>>()?,
+            )
         }
         Some(_) => return Err(EngineError::Param("'expanded' must be a list of row keys".into())),
     };

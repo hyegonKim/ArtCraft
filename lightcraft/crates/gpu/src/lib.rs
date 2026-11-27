@@ -648,8 +648,7 @@ fn run(
         let s = &*lightcraft_pipeline::settings_for(s, req);
         // content-aware Fill spots (`spots::fill_box`) and extended HDR master point curves have no GPU kernel: the CPU renders the photo
         if s.spots.iter().any(|sp| sp.mode == lightcraft_develop::SpotMode::Fill)
-            || (req.depth == lightcraft_pipeline::OutputDepth::F32Hdr
-                && !lightcraft_develop::ToneCurve::point_curve_is_identity(&s.curve.hdr_master))
+            || (req.depth == lightcraft_pipeline::OutputDepth::F32Hdr && !lightcraft_develop::ToneCurve::point_curve_is_identity(&s.curve.hdr_master))
         {
             return Err(Fallback::NotTried);
         }

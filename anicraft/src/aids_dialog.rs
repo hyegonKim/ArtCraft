@@ -60,7 +60,15 @@ fn hex(c: [u8; 4]) -> String {
 /// Opens Edit Grid with the grid as it is.
 pub fn open_grid(app: &mut App) {
     let (a, g) = (app.s.aids, app.s.doc.aids.grid);
-    app.aids_dialogs.grid = Some(GridDialog { color: to_u8(g.color), show: a.show_grid, over_objects: g.over_objects, snap: a.snap_grid, spacing_x: g.spacing_x, spacing_y: g.spacing_y, accuracy: a.grid_accuracy });
+    app.aids_dialogs.grid = Some(GridDialog {
+        color: to_u8(g.color),
+        show: a.show_grid,
+        over_objects: g.over_objects,
+        snap: a.snap_grid,
+        spacing_x: g.spacing_x,
+        spacing_y: g.spacing_y,
+        accuracy: a.grid_accuracy,
+    });
 }
 
 /// Opens Edit Guides with this scene's guides; `add` puts the keyboard on the new guide's
@@ -137,23 +145,29 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
 fn grid_window(app: &mut App, ctx: &egui::Context) {
     let Some(d) = &mut app.aids_dialogs.grid else { return };
     let (mut ok, mut cancel) = (false, false);
-    egui::Window::new(tr!("Edit Grid")).id(egui::Id::new("edit_grid")).collapsible(false).resizable(false).anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0]).show(ctx, |ui| {
-        ui.set_min_width(380.0);
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Colour"), |ui| {
-            crate::colour::button_alpha(ui, &mut d.color).named(tr!("Grid colour"));
-        });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Grid"), |ui| {
-            ui.vertical(|ui| {
-                crate::theme::checkbox(ui, &mut d.show, tr!("Show grid"));
-                crate::theme::checkbox(ui, &mut d.over_objects, tr!("Show over objects")).on_hover_text(tr!("Draw the grid over the artwork; off, it shows under it, on the stage"));
-                crate::theme::checkbox(ui, &mut d.snap, tr!("Snap to grid"));
+    egui::Window::new(tr!("Edit Grid"))
+        .id(egui::Id::new("edit_grid"))
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0])
+        .show(ctx, |ui| {
+            ui.set_min_width(380.0);
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Colour"), |ui| {
+                crate::colour::button_alpha(ui, &mut d.color).named(tr!("Grid colour"));
             });
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Grid"), |ui| {
+                ui.vertical(|ui| {
+                    crate::theme::checkbox(ui, &mut d.show, tr!("Show grid"));
+                    crate::theme::checkbox(ui, &mut d.over_objects, tr!("Show over objects"))
+                        .on_hover_text(tr!("Draw the grid over the artwork; off, it shows under it, on the stage"));
+                    crate::theme::checkbox(ui, &mut d.snap, tr!("Snap to grid"));
+                });
+            });
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Spacing ↔"), |ui| spacing_field(ui, &mut d.spacing_x, tr!("Horizontal spacing")));
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Spacing ↕"), |ui| spacing_field(ui, &mut d.spacing_y, tr!("Vertical spacing")));
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Snap accuracy"), |ui| accuracy_combo(ui, "grid_accuracy", &mut d.accuracy, &Accuracy::ALL));
+            (ok, cancel) = buttons(ui);
         });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Spacing ↔"), |ui| spacing_field(ui, &mut d.spacing_x, tr!("Horizontal spacing")));
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Spacing ↕"), |ui| spacing_field(ui, &mut d.spacing_y, tr!("Vertical spacing")));
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Snap accuracy"), |ui| accuracy_combo(ui, "grid_accuracy", &mut d.accuracy, &Accuracy::ALL));
-        (ok, cancel) = buttons(ui);
-    });
     if ok {
         accept_grid(app);
     } else if cancel {
@@ -171,69 +185,104 @@ pub fn accept_grid(app: &mut App) {
 fn guides_window(app: &mut App, ctx: &egui::Context) {
     let Some(d) = &mut app.aids_dialogs.guides else { return };
     let (mut ok, mut cancel) = (false, false);
-    egui::Window::new(tr!("Edit Guides")).id(egui::Id::new("edit_guides")).collapsible(false).resizable(false).anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0]).show(ctx, |ui| {
-        ui.set_min_width(420.0);
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Colour"), |ui| {
-            crate::colour::button_alpha(ui, &mut d.color).named(tr!("Guide colour"));
-        });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Guides"), |ui| {
-            ui.vertical(|ui| {
-                crate::theme::checkbox(ui, &mut d.show, tr!("Show guides"));
-                crate::theme::checkbox(ui, &mut d.snap, tr!("Snap to guides"));
-                crate::theme::checkbox(ui, &mut d.lock, tr!("Lock guides")).on_hover_text(tr!("Locked guides can't be dragged; new ones can still be added"));
+    egui::Window::new(tr!("Edit Guides"))
+        .id(egui::Id::new("edit_guides"))
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0])
+        .show(ctx, |ui| {
+            ui.set_min_width(420.0);
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Colour"), |ui| {
+                crate::colour::button_alpha(ui, &mut d.color).named(tr!("Guide colour"));
             });
-        });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Snap accuracy"), |ui| accuracy_combo(ui, "guide_accuracy", &mut d.accuracy, &[Accuracy::Close, Accuracy::Normal, Accuracy::Distant]));
-        ui.separator();
-        ui.label(text(Type::Heading, tr!("Guides in this scene")));
-        if d.guides.is_empty() {
-            ui.label(text(Type::Caption, tr!("None yet. Add one below, or drag one from a ruler (View › Rulers).")));
-        }
-        let mut remove = None;
-        egui::ScrollArea::vertical().max_height(180.0).show(ui, |ui| {
-            for (i, g) in d.guides.iter_mut().enumerate() {
-                ui.horizontal(|ui| {
-                    let axis = axis_label(g.axis);
-                    ui.add_sized([FORM_LABEL_DIALOG - 8.0, crate::theme::TARGET], egui::Label::new(text(Type::Label, axis)));
-                    let name = tr!("{axis} guide {n} position", axis = axis, n = i + 1);
-                    with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut g.at).range(-anicraft_engine::doc::GUIDE_REACH..=anicraft_engine::doc::GUIDE_REACH).suffix(" px").speed(1.0).max_decimals(2)).named(&name));
-                    if ui.button(tr!("Delete")).on_hover_text(tr!("Delete this guide")).named(&tr!("Delete {axis} guide {n}", axis = axis, n = i + 1)).clicked() {
-                        remove = Some(i);
-                    }
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Guides"), |ui| {
+                ui.vertical(|ui| {
+                    crate::theme::checkbox(ui, &mut d.show, tr!("Show guides"));
+                    crate::theme::checkbox(ui, &mut d.snap, tr!("Snap to guides"));
+                    crate::theme::checkbox(ui, &mut d.lock, tr!("Lock guides"))
+                        .on_hover_text(tr!("Locked guides can't be dragged; new ones can still be added"));
                 });
+            });
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Snap accuracy"), |ui| {
+                accuracy_combo(ui, "guide_accuracy", &mut d.accuracy, &[Accuracy::Close, Accuracy::Normal, Accuracy::Distant])
+            });
+            ui.separator();
+            ui.label(text(Type::Heading, tr!("Guides in this scene")));
+            if d.guides.is_empty() {
+                ui.label(text(Type::Caption, tr!("None yet. Add one below, or drag one from a ruler (View › Rulers).")));
             }
-        });
-        if let Some(i) = remove.filter(|i| *i < d.guides.len()) {
-            d.guides.remove(i);
-        }
-        ui.horizontal(|ui| {
-            egui::ComboBox::from_id_salt("new_guide_axis")
-                .width(FORM_LABEL_DIALOG - 16.0)
-                .selected_text(axis_label(d.new_axis))
-                .show_ui(ui, |ui| {
-                    for a in [GuideAxis::Horizontal, GuideAxis::Vertical] {
-                        if ui.selectable_label(d.new_axis == a, axis_label(a)).clicked() {
-                            d.new_axis = a;
+            let mut remove = None;
+            egui::ScrollArea::vertical().max_height(180.0).show(ui, |ui| {
+                for (i, g) in d.guides.iter_mut().enumerate() {
+                    ui.horizontal(|ui| {
+                        let axis = axis_label(g.axis);
+                        ui.add_sized([FORM_LABEL_DIALOG - 8.0, crate::theme::TARGET], egui::Label::new(text(Type::Label, axis)));
+                        let name = tr!("{axis} guide {n} position", axis = axis, n = i + 1);
+                        with_type(ui, Type::Data, |ui| {
+                            ui.add(
+                                egui::DragValue::new(&mut g.at)
+                                    .range(-anicraft_engine::doc::GUIDE_REACH..=anicraft_engine::doc::GUIDE_REACH)
+                                    .suffix(" px")
+                                    .speed(1.0)
+                                    .max_decimals(2),
+                            )
+                            .named(&name)
+                        });
+                        if ui
+                            .button(tr!("Delete"))
+                            .on_hover_text(tr!("Delete this guide"))
+                            .named(&tr!("Delete {axis} guide {n}", axis = axis, n = i + 1))
+                            .clicked()
+                        {
+                            remove = Some(i);
                         }
-                    }
-                })
-                .response
-                .set_name(tr!("New guide direction"));
-            let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut d.new_at).range(-anicraft_engine::doc::GUIDE_REACH..=anicraft_engine::doc::GUIDE_REACH).suffix(" px").speed(1.0).max_decimals(2)).named(tr!("New guide position")));
-            if d.focus_new {
-                r.request_focus();
-                d.focus_new = false;
+                    });
+                }
+            });
+            if let Some(i) = remove.filter(|i| *i < d.guides.len()) {
+                d.guides.remove(i);
             }
-            let enter = r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter));
-            let full = d.guides.len() >= MAX_GUIDES;
-            if (ui.add_enabled(!full, egui::Button::new(tr!("Add guide"))).on_hover_text(tr!("Horizontal guides are at y, vertical ones at x, in stage pixels from its top-left corner")).clicked() || (enter && !full))
-                && let Some(g) = Guide::new(d.new_axis, d.new_at)
-            {
-                d.guides.push(g);
-            }
+            ui.horizontal(|ui| {
+                egui::ComboBox::from_id_salt("new_guide_axis")
+                    .width(FORM_LABEL_DIALOG - 16.0)
+                    .selected_text(axis_label(d.new_axis))
+                    .show_ui(ui, |ui| {
+                        for a in [GuideAxis::Horizontal, GuideAxis::Vertical] {
+                            if ui.selectable_label(d.new_axis == a, axis_label(a)).clicked() {
+                                d.new_axis = a;
+                            }
+                        }
+                    })
+                    .response
+                    .set_name(tr!("New guide direction"));
+                let r = with_type(ui, Type::Data, |ui| {
+                    ui.add(
+                        egui::DragValue::new(&mut d.new_at)
+                            .range(-anicraft_engine::doc::GUIDE_REACH..=anicraft_engine::doc::GUIDE_REACH)
+                            .suffix(" px")
+                            .speed(1.0)
+                            .max_decimals(2),
+                    )
+                    .named(tr!("New guide position"))
+                });
+                if d.focus_new {
+                    r.request_focus();
+                    d.focus_new = false;
+                }
+                let enter = r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter));
+                let full = d.guides.len() >= MAX_GUIDES;
+                if (ui
+                    .add_enabled(!full, egui::Button::new(tr!("Add guide")))
+                    .on_hover_text(tr!("Horizontal guides are at y, vertical ones at x, in stage pixels from its top-left corner"))
+                    .clicked()
+                    || (enter && !full))
+                    && let Some(g) = Guide::new(d.new_axis, d.new_at)
+                {
+                    d.guides.push(g);
+                }
+            });
+            (ok, cancel) = buttons(ui);
         });
-        (ok, cancel) = buttons(ui);
-    });
     if ok {
         accept_guides(app);
     } else if cancel {

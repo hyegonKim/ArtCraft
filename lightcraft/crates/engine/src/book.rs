@@ -26,13 +26,8 @@ pub enum BookFormat {
 }
 
 impl BookFormat {
-    pub const ALL: [BookFormat; 5] = [
-        BookFormat::StandardPortrait,
-        BookFormat::StandardLandscape,
-        BookFormat::LargeLandscape,
-        BookFormat::LargeSquare,
-        BookFormat::SmallSquare,
-    ];
+    pub const ALL: [BookFormat; 5] =
+        [BookFormat::StandardPortrait, BookFormat::StandardLandscape, BookFormat::LargeLandscape, BookFormat::LargeSquare, BookFormat::SmallSquare];
 
     /// `(width_pt, height_pt)` at 72 points per inch.
     pub fn size_pt(self) -> (f64, f64) {
@@ -84,13 +79,7 @@ pub enum PageLayout {
 }
 
 impl PageLayout {
-    pub const ALL: [PageLayout; 5] = [
-        PageLayout::Single,
-        PageLayout::FullBleed,
-        PageLayout::TwoUp,
-        PageLayout::Grid2x2,
-        PageLayout::CaptionBottom,
-    ];
+    pub const ALL: [PageLayout; 5] = [PageLayout::Single, PageLayout::FullBleed, PageLayout::TwoUp, PageLayout::Grid2x2, PageLayout::CaptionBottom];
 
     /// Maximum photo slots on one page of this layout.
     pub fn slots(self) -> usize {
@@ -145,12 +134,7 @@ impl PageLayout {
             PageLayout::Grid2x2 => {
                 let cw = ((iw - gx) * 0.5).max(0.05);
                 let ch = ((ih - gy) * 0.5).max(0.05);
-                vec![
-                    [mx, my, cw, ch],
-                    [mx + cw + gx, my, cw, ch],
-                    [mx, my + ch + gy, cw, ch],
-                    [mx + cw + gx, my + ch + gy, cw, ch],
-                ]
+                vec![[mx, my, cw, ch], [mx + cw + gx, my, cw, ch], [mx, my + ch + gy, cw, ch], [mx + cw + gx, my + ch + gy, cw, ch]]
             }
         }
     }
@@ -226,11 +210,7 @@ impl BookSettings {
             if self.pages.len() >= 500 {
                 break;
             }
-            self.pages.push(BookPage {
-                layout,
-                photos: chunk.to_vec(),
-                caption: String::new(),
-            });
+            self.pages.push(BookPage { layout, photos: chunk.to_vec(), caption: String::new() });
         }
     }
 }
@@ -240,7 +220,7 @@ fn text_ink(bg: [u8; 3]) -> [u8; 3] {
     if luma > 132.0 { [32, 32, 35] } else { [238, 238, 240] }
 }
 
-fn blend_text(rgb: &mut [u8], w: usize, h: usize, text: &str, px: f32, cx: f32, top_y: f32, ink: [u8; 3]) {
+fn blend_text(rgb: &mut [u8], (w, h): (usize, usize), text: &str, px: f32, (cx, top_y): (f32, f32), ink: [u8; 3]) {
     let Some(layout) = TextLayout::new(text, px, false, CRAFT_FONTS) else { return };
     let ox = (cx - layout.width * 0.5).max(12.0);
     layout.draw_in(ox, top_y, w as f32, h as f32, |x, y, cov| {
@@ -261,14 +241,7 @@ fn blend_text(rgb: &mut [u8], w: usize, h: usize, text: &str, px: f32, cx: f32, 
     });
 }
 
-fn blit_rgba(
-    rgb: &mut [u8],
-    pw: usize,
-    ph: usize,
-    src: &lightcraft_raster::Rgba8,
-    cell_px: [usize; 4],
-    zoom_to_fill: bool,
-) {
+fn blit_rgba(rgb: &mut [u8], pw: usize, ph: usize, src: &lightcraft_raster::Rgba8, cell_px: [usize; 4], zoom_to_fill: bool) {
     let [cx, cy, cw, ch] = cell_px;
     if cw == 0 || ch == 0 || src.width == 0 || src.height == 0 {
         return;
@@ -351,7 +324,7 @@ pub fn render_pdf(s: &mut Session, dpi_override: Option<u32>) -> Result<(Vec<u8>
 
     if has_cover {
         let mut rgb = vec![0u8; pw * ph * 3];
-        for px in rgb.chunks_exact_mut(3) {
+        for px in rgb.as_chunks_mut::<3>().0 {
             px.copy_from_slice(&book.background);
         }
         // Optional cover hero photo from the first page if present
@@ -364,35 +337,25 @@ pub fn render_pdf(s: &mut Session, dpi_override: Option<u32>) -> Result<(Vec<u8>
         }
         let mut ty = ph as f32 * 0.60;
         if !book.title.trim().is_empty() {
-            blend_text(&mut rgb, pw, ph, book.title.trim(), 28.0 * scale_px, pw as f32 * 0.5, ty, ink);
+            blend_text(&mut rgb, (pw, ph), book.title.trim(), 28.0 * scale_px, (pw as f32 * 0.5, ty), ink);
             ty += 38.0 * scale_px;
         }
         if !book.subtitle.trim().is_empty() {
-            blend_text(&mut rgb, pw, ph, book.subtitle.trim(), 16.0 * scale_px, pw as f32 * 0.5, ty, ink);
+            blend_text(&mut rgb, (pw, ph), book.subtitle.trim(), 16.0 * scale_px, (pw as f32 * 0.5, ty), ink);
             ty += 26.0 * scale_px;
         }
         if !book.author.trim().is_empty() {
-            blend_text(&mut rgb, pw, ph, book.author.trim(), 13.0 * scale_px, pw as f32 * 0.5, ty + 8.0 * scale_px, ink);
+            blend_text(&mut rgb, (pw, ph), book.author.trim(), 13.0 * scale_px, (pw as f32 * 0.5, ty + 8.0 * scale_px), ink);
         }
-        let img = PdfImage {
-            width: pw as u32,
-            height: ph as u32,
-            channels: 3,
-            data: ImageData::Raw { bits: 8, samples: rgb },
-            icc: None,
-        }
-        .deflated()
-        .map_err(EngineError::Other)?;
-        pdf_pages.push(PdfPage {
-            width: w_pt,
-            height: h_pt,
-            images: vec![(img, Placement { x: 0.0, y: 0.0, width: w_pt, height: h_pt })],
-        });
+        let img = PdfImage { width: pw as u32, height: ph as u32, channels: 3, data: ImageData::Raw { bits: 8, samples: rgb }, icc: None }
+            .deflated()
+            .map_err(EngineError::Other)?;
+        pdf_pages.push(PdfPage { width: w_pt, height: h_pt, images: vec![(img, Placement { x: 0.0, y: 0.0, width: w_pt, height: h_pt })] });
     }
 
     for (idx, page) in book.pages.iter().enumerate() {
         let mut rgb = vec![0u8; pw * ph * 3];
-        for px in rgb.chunks_exact_mut(3) {
+        for px in rgb.as_chunks_mut::<3>().0 {
             px.copy_from_slice(&book.background);
         }
         let cells = page.layout.cells(w_pt, h_pt, book.padding_pt, book.cell_gap_pt);
@@ -409,34 +372,21 @@ pub fn render_pdf(s: &mut Session, dpi_override: Option<u32>) -> Result<(Vec<u8>
         }
         if !page.caption.trim().is_empty() {
             let cap_y = (ph as f32 - (book.padding_pt as f32 * scale_px).max(28.0 * scale_px) - 14.0 * scale_px).max(8.0);
-            blend_text(&mut rgb, pw, ph, page.caption.trim(), 12.0 * scale_px, pw as f32 * 0.5, cap_y, ink);
+            blend_text(&mut rgb, (pw, ph), page.caption.trim(), 12.0 * scale_px, (pw as f32 * 0.5, cap_y), ink);
         }
         if book.page_numbers && page.layout != PageLayout::FullBleed {
             let num_text = format!("{}", idx + 1);
             let num_y = (ph as f32 - 20.0 * scale_px).max(4.0);
-            blend_text(&mut rgb, pw, ph, &num_text, 10.0 * scale_px, pw as f32 * 0.5, num_y, ink);
+            blend_text(&mut rgb, (pw, ph), &num_text, 10.0 * scale_px, (pw as f32 * 0.5, num_y), ink);
         }
-        let img = PdfImage {
-            width: pw as u32,
-            height: ph as u32,
-            channels: 3,
-            data: ImageData::Raw { bits: 8, samples: rgb },
-            icc: None,
-        }
-        .deflated()
-        .map_err(EngineError::Other)?;
-        pdf_pages.push(PdfPage {
-            width: w_pt,
-            height: h_pt,
-            images: vec![(img, Placement { x: 0.0, y: 0.0, width: w_pt, height: h_pt })],
-        });
+        let img = PdfImage { width: pw as u32, height: ph as u32, channels: 3, data: ImageData::Raw { bits: 8, samples: rgb }, icc: None }
+            .deflated()
+            .map_err(EngineError::Other)?;
+        pdf_pages.push(PdfPage { width: w_pt, height: h_pt, images: vec![(img, Placement { x: 0.0, y: 0.0, width: w_pt, height: h_pt })] });
     }
 
     let count = pdf_pages.len();
-    let info = PdfInfo {
-        title: (!book.title.trim().is_empty()).then(|| book.title.trim().to_string()),
-        output_intent: None,
-    };
+    let info = PdfInfo { title: (!book.title.trim().is_empty()).then(|| book.title.trim().to_string()), output_intent: None };
     let bytes = crate::print_pdf::write(&pdf_pages, &info).map_err(EngineError::Other)?;
     Ok((bytes, count))
 }

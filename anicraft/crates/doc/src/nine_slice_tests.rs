@@ -1,6 +1,9 @@
 //! 9-slice scaling (ADR 0055), analytically: what evaluation draws for a scaled instance.
 
-use crate::{ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, Paint, Rgba, ScaleGrid, Shape, Symbol, SymbolId, SymbolKind, Timeline, evaluate};
+use crate::{
+    ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, Paint, Rgba, ScaleGrid, Shape, Symbol, SymbolId, SymbolKind,
+    Timeline, evaluate,
+};
 use anicraft_geom::{Affine, Path, Vec2};
 use std::sync::Arc;
 
@@ -11,7 +14,18 @@ fn el(id: u64, transform: Affine, kind: ElementKind) -> Element {
 }
 
 fn instance(of: SymbolId, transform: Affine) -> Element {
-    el(1, transform, ElementKind::Symbol { symbol: of, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() })
+    el(
+        1,
+        transform,
+        ElementKind::Symbol {
+            symbol: of,
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
+    )
 }
 
 /// A 100×40 rounded rectangle (corner radius 10) at the symbol's origin, guides 10 in from each
@@ -25,7 +39,15 @@ fn doc(xf: Affine, grid: Option<ScaleGrid>, extra: Vec<Element>) -> Document {
     k.elements.extend(extra.into_iter().map(Arc::new));
     let mut layer = Layer::new(LayerId(901), "art");
     layer.keyframes = vec![Arc::new(k)];
-    d.library.push(Arc::new(Symbol { id: SYM, name: "Panel".into(), kind: SymbolKind::MovieClip, linkage: None, scale_grid_kept: None, scale_grid: grid, timeline: Timeline { layers: vec![Arc::new(layer)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SYM,
+        name: "Panel".into(),
+        kind: SymbolKind::MovieClip,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: grid,
+        timeline: Timeline { layers: vec![Arc::new(layer)] },
+    }));
     let mut k = Keyframe::new(0, 1);
     k.elements.push(Arc::new(instance(SYM, xf)));
     Arc::make_mut(&mut d.timeline_mut(0).layers[0]).keyframes = vec![Arc::new(k)];
@@ -58,10 +80,17 @@ fn a_rounded_rect_scaled_3x_keeps_its_corner_radii_exact() {
     let d = doc(Affine::scale(3.0, 3.0), Some(GRID), Vec::new());
     let pts = outline(&d);
     // The box lands where plain scaling puts it: 0..300 by 0..120.
-    let (lo, hi) = pts.iter().fold((Vec2::new(f32::MAX, f32::MAX), Vec2::new(f32::MIN, f32::MIN)), |(lo, hi), p| (Vec2::new(lo.x.min(p.x), lo.y.min(p.y)), Vec2::new(hi.x.max(p.x), hi.y.max(p.y))));
+    let (lo, hi) = pts.iter().fold((Vec2::new(f32::MAX, f32::MAX), Vec2::new(f32::MIN, f32::MIN)), |(lo, hi), p| {
+        (Vec2::new(lo.x.min(p.x), lo.y.min(p.y)), Vec2::new(hi.x.max(p.x), hi.y.max(p.y)))
+    });
     assert!((lo.x).abs() < 1e-3 && (lo.y).abs() < 1e-3 && (hi.x - 300.0).abs() < 1e-3 && (hi.y - 120.0).abs() < 1e-3, "{lo:?} {hi:?}");
     // Each corner is the same radius-10 arc, moved to its corner of the bigger box.
-    let corners = [(Vec2::new(10.0, 10.0), Vec2::ZERO, 180.0f32), (Vec2::new(90.0, 10.0), Vec2::new(200.0, 0.0), 270.0), (Vec2::new(90.0, 30.0), Vec2::new(200.0, 80.0), 0.0), (Vec2::new(10.0, 30.0), Vec2::new(0.0, 80.0), 90.0)];
+    let corners = [
+        (Vec2::new(10.0, 10.0), Vec2::ZERO, 180.0f32),
+        (Vec2::new(90.0, 10.0), Vec2::new(200.0, 0.0), 270.0),
+        (Vec2::new(90.0, 30.0), Vec2::new(200.0, 80.0), 0.0),
+        (Vec2::new(10.0, 30.0), Vec2::new(0.0, 80.0), 90.0),
+    ];
     for (c, shift, from) in corners {
         for i in 0..=8 {
             let a = (from + i as f32 * 90.0 / 8.0).to_radians();
@@ -147,7 +176,15 @@ fn unscaled_instances_and_nested_symbols_draw_as_they_are() {
     k.elements.push(Arc::new(el(3, Affine::IDENTITY, ElementKind::Shape(Shape::filled(Path::rect(0.0, 0.0, 4.0, 4.0), Paint::Solid(Rgba::WHITE))))));
     let mut l = Layer::new(LayerId(951), "dot");
     l.keyframes = vec![Arc::new(k)];
-    d.library.push(Arc::new(Symbol { id: SymbolId(950), name: "Dot".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(l)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SymbolId(950),
+        name: "Dot".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(l)] },
+    }));
     let dl = evaluate(&d, 0);
     let dot = dl.items.iter().find(|i| i.path.bounds().width() == 4.0).unwrap();
     assert_eq!(dot.transform, Affine::scale(3.0, 3.0).mul(&Affine::translate(50.0, 20.0)));
@@ -161,7 +198,9 @@ fn hostile_guides_and_scales_never_break_evaluation() {
         ScaleGrid { left: -1e9, right: 1e9, top: -5.0, bottom: 500.0 },
         ScaleGrid { left: 50.0, right: 50.0, top: 20.0, bottom: 20.0 },
     ] {
-        for xf in [Affine::scale(3.0, 3.0), Affine::scale(1e-30, 1e30), Affine::scale(f32::INFINITY, 1.0), Affine { m: [0.0, 0.0, 0.0, 0.0, 1.0, 1.0] }] {
+        for xf in
+            [Affine::scale(3.0, 3.0), Affine::scale(1e-30, 1e30), Affine::scale(f32::INFINITY, 1.0), Affine { m: [0.0, 0.0, 0.0, 0.0, 1.0, 1.0] }]
+        {
             let dl = evaluate(&doc(xf, Some(grid), Vec::new()), 0);
             for it in &dl.items {
                 let _ = it.path.flatten(&it.transform, 0.25);

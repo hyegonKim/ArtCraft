@@ -7,6 +7,7 @@
 mod activity;
 mod before;
 pub mod book;
+pub mod bridge;
 pub(crate) mod browse;
 pub mod color;
 pub(crate) mod convert;
@@ -187,6 +188,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(focus::specs());
         v.extend(activity::specs());
         v.extend(book::specs());
+        v.extend(bridge::specs());
         v.extend(tether::specs());
         v.extend(video::specs());
         v

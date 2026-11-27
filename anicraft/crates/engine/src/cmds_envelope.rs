@@ -129,12 +129,16 @@ fn open(s: &mut Session, _: &Value) -> Result<Value> {
         return Err(EngineError::State("select the shapes or drawing objects to bend with an envelope".into()));
     }
     if !picked.iter().all(|e| bendable(e)) {
-        return Err(EngineError::State("an envelope bends shapes and drawing objects only: break symbols, text, groups and bitmaps apart first (Modify › Break Apart)".into()));
+        return Err(EngineError::State(
+            "an envelope bends shapes and drawing objects only: break symbols, text, groups and bitmaps apart first (Modify › Break Apart)".into(),
+        ));
     }
     // A warp (ADR 0079) bends the outline as drawn on every keyframe of its layer: baking an
     // envelope into one of them would fight it.
     if picked.iter().any(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.warp.is_some())) {
-        return Err(EngineError::State("an envelope can't bend warped artwork (Asset Warp): remove its warp first (Modify › Asset Warp › Remove Warp)".into()));
+        return Err(EngineError::State(
+            "an envelope can't bend warped artwork (Asset Warp): remove its warp first (Modify › Asset Warp › Remove Warp)".into(),
+        ));
     }
     if picked.len() > MAX_SHAPES {
         return Err(EngineError::State(format!("an envelope bends at most {MAX_SHAPES} shapes at once")));
@@ -160,12 +164,14 @@ fn asked(p: &Value, current: &Mesh) -> Result<Mesh> {
         let mut m = [Vec2::ZERO; 16];
         for (slot, v) in m.iter_mut().zip(list) {
             let xy = v.as_array().filter(|a| a.len() == 2).ok_or_else(bad)?;
-            let n = |i: usize| xy.get(i).and_then(Value::as_f64).map(|f| f as f32).filter(|f| f.is_finite() && f.abs() <= crate::cmds_draw::MAX_EXTENT);
+            let n =
+                |i: usize| xy.get(i).and_then(Value::as_f64).map(|f| f as f32).filter(|f| f.is_finite() && f.abs() <= crate::cmds_draw::MAX_EXTENT);
             *slot = Vec2::new(n(0).ok_or_else(bad)?, n(1).ok_or_else(bad)?);
         }
         return Ok(m);
     }
-    let i = opt_u32(p, "index")?.ok_or_else(|| EngineError::Param("give the whole mesh ('points') or one point ('index', 'x', 'y')".into()))? as usize;
+    let i =
+        opt_u32(p, "index")?.ok_or_else(|| EngineError::Param("give the whole mesh ('points') or one point ('index', 'x', 'y')".into()))? as usize;
     if i >= 16 {
         return Err(EngineError::Param("param 'index' must be 0 to 15".into()));
     }
@@ -213,7 +219,9 @@ fn move_points(s: &mut Session, p: &Value) -> Result<Value> {
     let made: Vec<Arc<Element>> = originals
         .iter()
         .map(|o| match &o.kind {
-            ElementKind::Shape(sh) => bent(o, sh, &mesh, &rest, tol).map(Arc::new).ok_or_else(|| EngineError::State("the envelope bends those shapes too far to draw; move the handles back a little".into())),
+            ElementKind::Shape(sh) => bent(o, sh, &mesh, &rest, tol)
+                .map(Arc::new)
+                .ok_or_else(|| EngineError::State("the envelope bends those shapes too far to draw; move the handles back a little".into())),
             _ => Ok(o.clone()),
         })
         .collect::<Result<_>>()?;

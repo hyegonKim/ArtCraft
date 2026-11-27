@@ -282,11 +282,7 @@ fn load_bytes_now(
     let twin = denoise
         .and_then(|spec| {
             let full = lightcraft_denoise::product::read(&spec.product, &spec.key, 1).ok()?;
-            let fitted = if full.width.max(full.height) > max_edge {
-                fit(&full, max_edge, max_edge, Filter::Mitchell)
-            } else {
-                full
-            };
+            let fitted = if full.width.max(full.height) > max_edge { fit(&full, max_edge, max_edge, Filter::Mitchell) } else { full };
             Some(fitted.into_oriented(orient))
         })
         .filter(|t| t.width == img.width && t.height == img.height);

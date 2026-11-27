@@ -201,7 +201,11 @@ impl Registry {
     /// module is reported and skipped; the others still load.
     pub fn load_folder(&mut self, dir: &Path) -> Result<FolderReport> {
         let rd = std::fs::read_dir(dir).map_err(|e| Error::Io(format!("{}: {e}", dir.display())))?;
-        let mut files: Vec<PathBuf> = rd.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm"))).take(MAX_FOLDER_FILES * 4).collect();
+        let mut files: Vec<PathBuf> = rd
+            .filter_map(|e| e.ok().map(|e| e.path()))
+            .filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm")))
+            .take(MAX_FOLDER_FILES * 4)
+            .collect();
         files.sort();
         files.truncate(MAX_FOLDER_FILES);
         let mut report = FolderReport::default();

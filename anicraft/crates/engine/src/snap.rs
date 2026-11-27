@@ -89,7 +89,17 @@ pub struct ViewAids {
 impl Default for ViewAids {
     fn default() -> Self {
         // As in Animate: guides show and snap; the rulers, grid and pixel snapping are off.
-        ViewAids { rulers: false, show_grid: false, show_guides: true, lock_guides: false, snap_grid: false, snap_guides: true, snap_pixels: false, grid_accuracy: Accuracy::Normal, guide_accuracy: Accuracy::Normal }
+        ViewAids {
+            rulers: false,
+            show_grid: false,
+            show_guides: true,
+            lock_guides: false,
+            snap_grid: false,
+            snap_guides: true,
+            snap_pixels: false,
+            grid_accuracy: Accuracy::Normal,
+            guide_accuracy: Accuracy::Normal,
+        }
     }
 }
 
@@ -247,7 +257,8 @@ mod tests {
     fn the_radius_follows_the_zoom() {
         // The shell asks for 10 screen pixels: 10 / zoom stage pixels.
         let s = session(&[Guide { axis: GuideAxis::Vertical, at: 100.0 }]);
-        for (zoom, off, snaps) in [(1.0, 8.0, true), (1.0, 12.0, false), (4.0, 2.0, true), (4.0, 3.0, false), (0.25, 39.0, true), (0.25, 41.0, false)] {
+        for (zoom, off, snaps) in [(1.0, 8.0, true), (1.0, 12.0, false), (4.0, 2.0, true), (4.0, 3.0, false), (0.25, 39.0, true), (0.25, 41.0, false)]
+        {
             let r = 10.0 / zoom;
             assert_eq!(resolve(&s, Vec2::new(100.0 + off, 0.0), r, None).is_some(), snaps, "zoom {zoom}, {off} px off");
         }

@@ -60,7 +60,7 @@ pub struct TokenHelp {
 
 /// Every template token, in the order the help shows them.
 pub const TOKENS: &[TokenHelp] = &[
-    TokenHelp { tag: "{name}", aliases: &["{filename}"], meaning: "Original file name without its extension" },
+    TokenHelp { tag: "{name}", aliases: &["{filename}", "{orig}"], meaning: "Original file name without its extension" },
     TokenHelp { tag: "{num}", aliases: &[], meaning: "The number at the end of the original name (IMG_0042 → 0042)" },
     TokenHelp { tag: "{seq}", aliases: &["{n}"], meaning: "Sequence number, counting from the start number" },
     TokenHelp { tag: "{seq:3}", aliases: &["{n:3}"], meaning: "Sequence number zero-padded to N digits (1–9)" },
@@ -254,7 +254,7 @@ pub fn expand_tokens_with(
         let v = match extra(&lower, arg, tok) {
             Some(v) => v,
             None => match lower.as_str() {
-                "name" | "filename" => stem.to_string(),
+                "name" | "filename" | "orig" => stem.to_string(),
                 "num" => {
                     let digits = stem.chars().rev().take_while(char::is_ascii_digit).count();
                     stem[stem.len() - digits..].to_string()

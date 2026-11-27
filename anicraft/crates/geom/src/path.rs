@@ -261,11 +261,7 @@ impl Path {
     /// Axis-aligned rectangle, clockwise on a y-down screen.
     pub fn rect(x: f32, y: f32, w: f32, h: f32) -> Path {
         let mut p = Path::new();
-        p.move_to(Vec2::new(x, y))
-            .line_to(Vec2::new(x + w, y))
-            .line_to(Vec2::new(x + w, y + h))
-            .line_to(Vec2::new(x, y + h))
-            .close();
+        p.move_to(Vec2::new(x, y)).line_to(Vec2::new(x + w, y)).line_to(Vec2::new(x + w, y + h)).line_to(Vec2::new(x, y + h)).close();
         p
     }
 
@@ -548,10 +544,13 @@ mod tests {
     /// Shoelace area of a polygon.
     fn poly_area(pts: &[Vec2]) -> f64 {
         let n = pts.len();
-        (0..n).map(|i| {
-            let (a, b) = (pts[i], pts[(i + 1) % n]);
-            f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)
-        }).sum::<f64>() * 0.5
+        (0..n)
+            .map(|i| {
+                let (a, b) = (pts[i], pts[(i + 1) % n]);
+                f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)
+            })
+            .sum::<f64>()
+            * 0.5
     }
 
     /// ADR 0080: a regular polygon's corners are on its circle, its first straight up, and its

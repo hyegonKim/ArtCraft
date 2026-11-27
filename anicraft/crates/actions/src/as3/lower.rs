@@ -5,7 +5,10 @@
 //! as [`Free`] names, which the timeline must have for the script to run), and instances become
 //! name paths from a base.
 
-use super::ir::{self, Base, BinOp, Expr as X, FuncRef, Function, LValue, ListenEvent, MathFn, Method, Param as IrParam, Place, Prop, S as IS, Stmt as IStmt, Ty, UnOp, Value};
+use super::ir::{
+    self, Base, BinOp, Expr as X, FuncRef, Function, LValue, ListenEvent, MathFn, Method, Param as IrParam, Place, Prop, S as IS, Stmt as IStmt, Ty,
+    UnOp, Value,
+};
 use super::parse::{E, Expr, Func, S, Stmt, VarDecl};
 use super::{Compiled, Free, MAX_LISTENERS, MAX_PROBLEMS, Pos, Problem};
 use crate::{MAX_FRAME, MAX_LABEL_CHARS, Target, valid_instance_name};
@@ -13,7 +16,20 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
 /// Names a script's own function can't take: they would hide the timeline's methods.
-const BUILTINS: [&str; 12] = ["stop", "play", "gotoAndPlay", "gotoAndStop", "nextFrame", "prevFrame", "nextScene", "prevScene", "trace", "addEventListener", "removeEventListener", "getChildByName"];
+const BUILTINS: [&str; 12] = [
+    "stop",
+    "play",
+    "gotoAndPlay",
+    "gotoAndStop",
+    "nextFrame",
+    "prevFrame",
+    "nextScene",
+    "prevScene",
+    "trace",
+    "addEventListener",
+    "removeEventListener",
+    "getChildByName",
+];
 /// Calls that would reach outside the movie: ignored, and noted.
 const OUTSIDE: [&str; 4] = ["navigateToURL", "sendToURL", "fscommand", "fsCommand"];
 /// Type casts that leave an instance path as it is (`MovieClip(parent)`).
@@ -29,7 +45,9 @@ fn var_type(ty: &Option<(String, Pos)>) -> Result<Option<Ty>, (Pos, String)> {
     match ty {
         None => Ok(Some(Ty::Any)),
         Some((t, _)) if t.ends_with("Event") => Ok(None),
-        Some((t, p)) => Ty::from_name(t).map(Some).ok_or_else(|| (*p, format!("variables of type `{t}` aren't supported yet (Number, int, uint, Boolean, String and untyped ones are)"))),
+        Some((t, p)) => Ty::from_name(t)
+            .map(Some)
+            .ok_or_else(|| (*p, format!("variables of type `{t}` aren't supported yet (Number, int, uint, Boolean, String and untyped ones are)"))),
     }
 }
 
@@ -523,7 +541,10 @@ impl<'a> Lower<'a> {
             Some((t, p)) => match Ty::from_name(t) {
                 Some(t) => Some(t),
                 None => {
-                    self.problem(*p, format!("functions returning `{t}` aren't supported yet (Number, int, uint, Boolean, String, void and untyped ones are)"));
+                    self.problem(
+                        *p,
+                        format!("functions returning `{t}` aren't supported yet (Number, int, uint, Boolean, String, void and untyped ones are)"),
+                    );
                     None
                 }
             },
@@ -563,7 +584,9 @@ impl<'a> Lower<'a> {
                 return None;
             }
             E::Name(n) => Place::named(n.clone()),
-            E::Member(o, m) if (m == "currentTarget" || m == "target") && matches!(&o.kind, E::Name(n) if u.events.contains(n)) => Place { base: if m == "target" { Base::Target } else { Base::Current }, path: Target::this() },
+            E::Member(o, m) if (m == "currentTarget" || m == "target") && matches!(&o.kind, E::Name(n) if u.events.contains(n)) => {
+                Place { base: if m == "target" { Base::Target } else { Base::Current }, path: Target::this() }
+            }
             E::Member(o, m) => {
                 let mut p = self.place(o, u)?;
                 if p.base == Base::Stage {
@@ -574,7 +597,9 @@ impl<'a> Lower<'a> {
                 p.path = Target::new(path);
                 p
             }
-            E::Call(f, args) if matches!(&f.kind, E::Name(c) if CASTS.contains(&c.as_str())) && args.len() == 1 => return args.first().and_then(|a| self.place(a, u)),
+            E::Call(f, args) if matches!(&f.kind, E::Name(c) if CASTS.contains(&c.as_str())) && args.len() == 1 => {
+                return args.first().and_then(|a| self.place(a, u));
+            }
             E::Binary("as", x, _) => return self.place(x, u),
             _ => {
                 self.problem(e.pos, "this isn't an instance (a name path such as `hero_mc.arm_mc`, `parent` or `root`)");
@@ -641,7 +666,12 @@ impl<'a> Lower<'a> {
                         }
                     };
                 }
-                if self.funcs.contains_key(n.as_str()) || PATH_WORDS.contains(&n.as_str()) || CLASSES.contains(&n.as_str()) || BUILTINS.contains(&n.as_str()) || matches!(n.as_str(), "undefined" | "NaN" | "Infinity") {
+                if self.funcs.contains_key(n.as_str())
+                    || PATH_WORDS.contains(&n.as_str())
+                    || CLASSES.contains(&n.as_str())
+                    || BUILTINS.contains(&n.as_str())
+                    || matches!(n.as_str(), "undefined" | "NaN" | "Infinity")
+                {
                     self.problem(e.pos, format!("`{n}` can't be assigned to"));
                     return None;
                 }
@@ -651,7 +681,10 @@ impl<'a> Lower<'a> {
             E::Member(o, m) if m == "text" => Some(LValue::Text { at: self.field_place(o, u)? }),
             E::Member(o, m) => {
                 let Some(p) = Prop::from_member(m) else {
-                    self.problem(e.pos, format!("setting `{m}` isn't supported yet (x, y, alpha, visible, rotation, scaleX, scaleY and a text field's text are)"));
+                    self.problem(
+                        e.pos,
+                        format!("setting `{m}` isn't supported yet (x, y, alpha, visible, rotation, scaleX, scaleY and a text field's text are)"),
+                    );
                     return None;
                 };
                 let Some(p) = p.settable() else {
@@ -928,7 +961,16 @@ impl<'a> Lower<'a> {
                 if let Some(f) = local {
                     let required = f.params.iter().filter(|p| p.default.is_none() && !p.rest).count();
                     if args.len() < required || args.len() > f.params.len() {
-                        self.problem(pos, format!("`{n}` takes {}{} argument{}, not {}", required, if required == f.params.len() { String::new() } else { format!(" to {}", f.params.len()) }, if f.params.len() == 1 { "" } else { "s" }, args.len()));
+                        self.problem(
+                            pos,
+                            format!(
+                                "`{n}` takes {}{} argument{}, not {}",
+                                required,
+                                if required == f.params.len() { String::new() } else { format!(" to {}", f.params.len()) },
+                                if f.params.len() == 1 { "" } else { "s" },
+                                args.len()
+                            ),
+                        );
                         return None;
                     }
                 }
@@ -1017,7 +1059,12 @@ fn declare<'a>(list: &'a [Stmt], funcs: &mut BTreeMap<&'a str, &'a Func>, proble
         match &s.kind {
             S::Function(f) => {
                 let Some(n) = f.name.as_deref() else { continue };
-                if BUILTINS.contains(&n) || CASTS.contains(&n) || CLASSES.contains(&n) || Prop::from_name(n).is_some() || matches!(n, "int" | "uint" | "Number" | "String" | "Boolean") {
+                if BUILTINS.contains(&n)
+                    || CASTS.contains(&n)
+                    || CLASSES.contains(&n)
+                    || Prop::from_name(n).is_some()
+                    || matches!(n, "int" | "uint" | "Number" | "String" | "Boolean")
+                {
                     problems.push(Problem::at(s.pos, format!("a function named `{n}` would hide ActionScript's own `{n}`")));
                 } else if funcs.insert(n, f).is_some() {
                     problems.push(Problem::at(s.pos, format!("`{n}` is declared twice")));
@@ -1062,12 +1109,18 @@ pub(super) fn lower(prog: &[Stmt]) -> Result<Compiled, Vec<Problem>> {
                 continue;
             }
         };
-        if Prop::from_name(&d.name).is_some() || PATH_WORDS.contains(&d.name.as_str()) || funcs.contains_key(d.name.as_str()) || BUILTINS.contains(&d.name.as_str()) {
+        if Prop::from_name(&d.name).is_some()
+            || PATH_WORDS.contains(&d.name.as_str())
+            || funcs.contains_key(d.name.as_str())
+            || BUILTINS.contains(&d.name.as_str())
+        {
             problems.push(Problem::at(d.pos, format!("`{}` is already a name of the timeline; choose another name for the variable", d.name)));
             continue;
         }
         match vars.get(&d.name) {
-            Some(old) if *old != t && d.ty.is_some() => problems.push(Problem::at(d.pos, format!("`{}` is declared again with another type", d.name))),
+            Some(old) if *old != t && d.ty.is_some() => {
+                problems.push(Problem::at(d.pos, format!("`{}` is declared again with another type", d.name)))
+            }
             Some(_) => {}
             None => {
                 vars.insert(d.name.clone(), t);

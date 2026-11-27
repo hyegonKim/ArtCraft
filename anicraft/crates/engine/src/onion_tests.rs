@@ -17,7 +17,11 @@ fn run(s: &mut Session, id: &str, p: Value) -> Value {
 fn walk() -> (Session, LayerId, ElementId) {
     let mut s = Session::default();
     let layer = s.layer;
-    let id = ElementId(run(&mut s, "draw.rect", json!({"x": 10, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"].as_u64().unwrap());
+    let id = ElementId(
+        run(&mut s, "draw.rect", json!({"x": 10, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"]
+            .as_u64()
+            .unwrap(),
+    );
     for f in [4, 8] {
         run(&mut s, "timeline.goto", json!({"frame": f}));
         run(&mut s, "timeline.insert_keyframe", json!({}));
@@ -184,7 +188,16 @@ fn composed_onion_frames_are_tinted_faded_and_under_the_playhead() {
     let dl = compose(&s.doc, 0, 4, Some(&skin), |sc, f| evaluate_scene(&s.doc, sc, f));
     // Frames 2, 6, 3, 5 under frame 4: the keyframes there hold the rectangle at 10, 50, 10, 50.
     let got: Vec<(f32, f32, f32)> = dl.items.iter().map(|i| (left(i), i.color.mul[3], 1.0 - i.color.mul[0])).collect();
-    assert_eq!(got, vec![(10.0, FAR_ALPHA, TINT_AMOUNT), (50.0, FAR_ALPHA, TINT_AMOUNT), (10.0, NEAR_ALPHA, TINT_AMOUNT), (50.0, NEAR_ALPHA, TINT_AMOUNT), (50.0, 1.0, 0.0)]);
+    assert_eq!(
+        got,
+        vec![
+            (10.0, FAR_ALPHA, TINT_AMOUNT),
+            (50.0, FAR_ALPHA, TINT_AMOUNT),
+            (10.0, NEAR_ALPHA, TINT_AMOUNT),
+            (50.0, NEAR_ALPHA, TINT_AMOUNT),
+            (50.0, 1.0, 0.0)
+        ]
+    );
     let tint = |c| anicraft_doc::ColorTransform::tint(c, TINT_AMOUNT).add;
     assert_eq!(dl.items.first().map(|i| i.color.add), Some(tint(skin.past)));
     assert_eq!(dl.items.get(1).map(|i| i.color.add), Some(tint(skin.future)));
@@ -232,7 +245,10 @@ fn edit_multiple_frames_shows_keyframes_within_the_markers_at_full_strength() {
     // doesn't; the one on 4 is the playhead's.
     assert_eq!(multi_frames(tl, 4, 2, 6).iter().map(|e| e.frame).collect::<Vec<_>>(), vec![0]);
     let dl = compose(&s.doc, 0, 4, Some(&near), |sc, f| evaluate_scene(&s.doc, sc, f));
-    assert_eq!(dl.items.iter().map(|i| (left(i), i.color.mul[3], 1.0 - i.color.mul[0])).collect::<Vec<_>>(), vec![(10.0, 1.0, 0.0), (50.0, 1.0, 0.0)]);
+    assert_eq!(
+        dl.items.iter().map(|i| (left(i), i.color.mul[3], 1.0 - i.color.mul[0])).collect::<Vec<_>>(),
+        vec![(10.0, 1.0, 0.0), (50.0, 1.0, 0.0)]
+    );
     let wide = OnionSkin { markers: Markers::Relative { before: 5, after: 5 }, ..near };
     let dl = compose(&s.doc, 0, 4, Some(&wide), |sc, f| evaluate_scene(&s.doc, sc, f));
     assert_eq!(dl.items.iter().map(left).collect::<Vec<_>>(), vec![10.0, 90.0, 50.0], "other keyframes in frame order, the playhead's on top");
@@ -323,7 +339,15 @@ fn every_setting_composes_and_renders_on_the_sample() {
     let view = View { transform: Affine::scale(0.1, 0.1), width: 128, height: 72, background: Some(doc.stage.background) };
     let mut count = 0;
     for bits in 0u32..64 {
-        let mut o = OnionSkin { ghosts: bits & 1 != 0, edit_multiple: bits & 2 != 0, tint: bits & 4 != 0, fade: bits & 8 != 0, outlines: bits & 16 != 0, keyframes_only: bits & 32 != 0, ..OnionSkin::default() };
+        let mut o = OnionSkin {
+            ghosts: bits & 1 != 0,
+            edit_multiple: bits & 2 != 0,
+            tint: bits & 4 != 0,
+            fade: bits & 8 != 0,
+            outlines: bits & 16 != 0,
+            keyframes_only: bits & 32 != 0,
+            ..OnionSkin::default()
+        };
         for (i, f) in [0, n / 2, n - 1, n + 40].into_iter().enumerate() {
             match i {
                 1 => o.all(),
@@ -356,7 +380,11 @@ fn onion_timings() {
     let doc = sample::demo();
     let five = OnionSkin { markers: Markers::Relative { before: 5, after: 5 }, ..OnionSkin::default() };
     let view = View { transform: Affine::scale(1.5, 1.5), width: 256, height: 256, background: Some(doc.stage.background) };
-    let jobs = |o: &OnionSkin| (0..40).map(|i| make_job(1, &doc, 30, View { transform: Affine::translate(-(i as f32) * 10.0, 0.0).mul(&view.transform), ..view }, Some(o))).collect::<Vec<_>>();
+    let jobs = |o: &OnionSkin| {
+        (0..40)
+            .map(|i| make_job(1, &doc, 30, View { transform: Affine::translate(-(i as f32) * 10.0, 0.0).mul(&view.transform), ..view }, Some(o)))
+            .collect::<Vec<_>>()
+    };
     let svc = RenderService::new(1 << 30, None);
     let first = svc.render_now_batch(jobs(&five));
     let t = std::time::Instant::now();
@@ -377,7 +405,12 @@ fn timings_of(doc: &anicraft_doc::Document) {
         let mut v = Vec::new();
         for ty in 0..h.div_ceil(tile) {
             for tx in 0..w.div_ceil(tile) {
-                let view = View { transform: Affine::translate(-((tx * tile) as f32), -((ty * tile) as f32)).mul(&Affine::scale(z, z)), width: tile.min(w - tx * tile), height: tile.min(h - ty * tile), background: Some(doc.stage.background) };
+                let view = View {
+                    transform: Affine::translate(-((tx * tile) as f32), -((ty * tile) as f32)).mul(&Affine::scale(z, z)),
+                    width: tile.min(w - tx * tile),
+                    height: tile.min(h - ty * tile),
+                    background: Some(doc.stage.background),
+                };
                 v.push(make_job(1, doc, frame, view, onion));
             }
         }
@@ -412,7 +445,10 @@ fn extra_frames_sit_on_their_own_layer_over_an_opaque_background() {
     let doc = sample::demo();
     let tl = doc.timeline(0);
     let rank = |l: LayerId| tl.layers.iter().position(|x| x.id == l).unwrap();
-    for o in [OnionSkin { markers: Markers::Relative { before: 5, after: 5 }, ..OnionSkin::default() }, OnionSkin { edit_multiple: true, markers: Markers::Relative { before: 5, after: 5 }, ..OnionSkin::default() }] {
+    for o in [
+        OnionSkin { markers: Markers::Relative { before: 5, after: 5 }, ..OnionSkin::default() },
+        OnionSkin { edit_multiple: true, markers: Markers::Relative { before: 5, after: 5 }, ..OnionSkin::default() },
+    ] {
         let dl = compose(&doc, 0, 12, Some(&o), |sc, f| evaluate_scene(&doc, sc, f));
         let plain = evaluate_scene(&doc, 0, 12);
         assert!(dl.items.len() > plain.items.len());

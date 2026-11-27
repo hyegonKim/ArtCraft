@@ -12,7 +12,11 @@ fn run(s: &mut Session, id: &str, p: Value) -> Value {
 }
 
 fn rect(s: &mut Session, x: f32) -> ElementId {
-    ElementId(run(s, "draw.rect", json!({"x": x, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"].as_u64().unwrap())
+    ElementId(
+        run(s, "draw.rect", json!({"x": x, "y": 10, "w": 20, "h": 20, "fill": "#000000", "stroke": null, "object": true}))["element"]
+            .as_u64()
+            .unwrap(),
+    )
 }
 
 /// Two layers, each a square that moves 40 px right on frames 0, 2 and 4: `top` starts at x 0,
@@ -153,8 +157,15 @@ fn layer_height_is_100_200_or_300_percent() {
 fn layer_properties_set_everything_as_one_step_or_nothing() {
     let (mut s, top, bottom) = two_walks();
     let undo = s.history.undo_len();
-    let r = run(&mut s, "layer.set_properties", json!({"layer": bottom.0, "name": "Sky", "color": "#123456", "outline": true, "height": 200, "locked": true, "visible": false, "onion": false, "type": "guide"}));
-    assert_eq!(r, json!({"layer": bottom.0, "name": "Sky", "type": "guide", "mask": null, "color": "#123456", "outline": true, "height": 200, "visible": false, "locked": true, "onion": false}));
+    let r = run(
+        &mut s,
+        "layer.set_properties",
+        json!({"layer": bottom.0, "name": "Sky", "color": "#123456", "outline": true, "height": 200, "locked": true, "visible": false, "onion": false, "type": "guide"}),
+    );
+    assert_eq!(
+        r,
+        json!({"layer": bottom.0, "name": "Sky", "type": "guide", "mask": null, "color": "#123456", "outline": true, "height": 200, "visible": false, "locked": true, "onion": false})
+    );
     assert_eq!(s.history.undo_len(), undo + 1, "one undo step");
     assert_eq!(run(&mut s, "layer.properties", json!({"layer": bottom.0})), r);
     // The same type again changes nothing (a masked layer stays masked by the same mask).
@@ -165,7 +176,14 @@ fn layer_properties_set_everything_as_one_step_or_nothing() {
     let back = run(&mut s, "layer.properties", json!({"layer": bottom.0}));
     assert_eq!((back["name"].as_str(), back["type"].as_str(), back["height"].as_u64()), (Some("Layer 1"), Some("normal"), Some(100)));
     // A bad value anywhere changes nothing.
-    for bad in [json!({"name": "  "}), json!({"name": "X", "height": 250}), json!({"name": "X", "color": "red"}), json!({"name": "X", "type": "masked"}), json!({"name": "X", "type": "banana"}), json!({"name": "X", "locked": 1})] {
+    for bad in [
+        json!({"name": "  "}),
+        json!({"name": "X", "height": 250}),
+        json!({"name": "X", "color": "red"}),
+        json!({"name": "X", "type": "masked"}),
+        json!({"name": "X", "type": "banana"}),
+        json!({"name": "X", "locked": 1}),
+    ] {
         let mut p = bad.clone();
         p["layer"] = json!(top.0);
         assert!(s.execute("layer.set_properties", &p).is_err(), "{bad}");
@@ -267,7 +285,8 @@ fn onion_skin_inside_a_symbol_shows_the_parent_timeline_frames_dimmed() {
     let dl = crate::render_service::display_list_inside(&pic.doc, pic.frame, &front, &skin);
     let left = |i: &anicraft_doc::DisplayItem| i.path.bounds().transformed(&i.transform).min.x;
     // The walker on the scene: frame 2 (x 40) dimmed, frames 0 and 4 (x 0, 80) tinted and fainter.
-    let mut walk: Vec<(f32, f32, bool)> = dl.items.iter().filter(|i| left(i) < 150.0).map(|i| (left(i), dl.effective_alpha(i), i.color.changes_colour())).collect();
+    let mut walk: Vec<(f32, f32, bool)> =
+        dl.items.iter().filter(|i| left(i) < 150.0).map(|i| (left(i), dl.effective_alpha(i), i.color.changes_colour())).collect();
     walk.sort_by(|a, b| a.0.total_cmp(&b.0));
     assert_eq!(walk.iter().map(|w| w.0).collect::<Vec<_>>(), vec![0.0, 40.0, 80.0], "the parent's onion frames around its frame 2");
     let dim = parent.dim;

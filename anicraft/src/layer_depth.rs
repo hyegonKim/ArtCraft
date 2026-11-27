@@ -45,7 +45,10 @@ pub fn depth_row(app: &mut App, ui: &mut egui::Ui, layer: &Layer, frame: u32) {
         key_button(app, ui, layer, frame);
     });
     let mut attached = layer.attached;
-    if crate::theme::checkbox(ui, &mut attached, tr!("Attach layer to camera")).on_hover_text(tr!("The layer stays where it is on screen while the camera moves: for titles and HUDs")).changed() {
+    if crate::theme::checkbox(ui, &mut attached, tr!("Attach layer to camera"))
+        .on_hover_text(tr!("The layer stays where it is on screen while the camera moves: for titles and HUDs"))
+        .changed()
+    {
         app.run("layer.set_attached", json!({"layer": layer.id.0, "attached": attached}));
     }
 }
@@ -58,7 +61,13 @@ fn key_button(app: &mut App, ui: &mut egui::Ui, layer: &Layer, frame: u32) {
     let c = rect.center();
     let r = rect.height() * 0.28;
     let pts = vec![c - vec2(0.0, r), c + vec2(r, 0.0), c + vec2(0.0, r), c - vec2(r, 0.0)];
-    let color = if resp.hovered() { T.icon_hot } else if keyed { T.accent } else { T.icon };
+    let color = if resp.hovered() {
+        T.icon_hot
+    } else if keyed {
+        T.accent
+    } else {
+        T.icon
+    };
     let fill = if here { color } else { egui::Color32::TRANSPARENT };
     ui.painter().add(egui::Shape::convex_polygon(pts, fill, Stroke::new(1.5, color)));
     let tip = if here { tr!("Remove the depth key on this frame") } else { tr!("Key the depth on this frame: the depth then tweens between keys") };
@@ -110,13 +119,20 @@ fn layer_row(app: &mut App, ui: &mut egui::Ui, layer: &Layer, frame: u32) {
     ui.horizontal(|ui| {
         let (chip, _) = ui.allocate_exact_size(vec2(10.0, TARGET * 0.8), Sense::hover());
         ui.painter().rect_filled(egui::Rect::from_center_size(chip.center(), vec2(8.0, 8.0)), 2.0, to_color32(layer.color));
-        let name = ui.add(egui::Label::new(text(Type::Body, layer.name.clone()).color(if active { T.text } else { T.text_dim })).truncate().sense(Sense::click()));
+        let name = ui.add(
+            egui::Label::new(text(Type::Body, layer.name.clone()).color(if active { T.text } else { T.text_dim })).truncate().sense(Sense::click()),
+        );
         if name.clicked() {
             app.run("layer.select", json!({"layer": layer.id.0}));
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let mut attached = layer.attached;
-            if ui.toggle_value(&mut attached, text(Type::Label, tr!("Attach"))).named(&tr!("Attach {layer} to camera", layer = layer.name)).on_hover_text(tr!("Attach Layer to Camera: the layer stays where it is on screen while the camera moves")).changed() {
+            if ui
+                .toggle_value(&mut attached, text(Type::Label, tr!("Attach")))
+                .named(&tr!("Attach {layer} to camera", layer = layer.name))
+                .on_hover_text(tr!("Attach Layer to Camera: the layer stays where it is on screen while the camera moves"))
+                .changed()
+            {
                 app.run("layer.set_attached", json!({"layer": layer.id.0, "attached": attached}));
             }
             key_button(app, ui, layer, frame);

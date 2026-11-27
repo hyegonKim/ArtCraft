@@ -66,7 +66,11 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
                     if !builtin {
                         let sure = app.manage_workspaces.confirm.as_deref() == Some(key.as_str());
                         let label = if sure { tr!("Delete for Good") } else { tr!("Delete") };
-                        let tip = if sure { tr!("Click again to delete it; this can't be undone") } else { tr!("Delete this workspace (asks with a second click)") };
+                        let tip = if sure {
+                            tr!("Click again to delete it; this can't be undone")
+                        } else {
+                            tr!("Delete this workspace (asks with a second click)")
+                        };
                         if ui.button(label).on_hover_text(tip).clicked() {
                             if sure {
                                 app.manage_workspaces.confirm = None;
@@ -82,7 +86,11 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
                         }
                     }
                     let changed = key == current || app.prefs.workspaces.changed(&key);
-                    if ui.add_enabled(changed, egui::Button::new(tr!("Reset"))).on_hover_text(tr!("Back to the workspace as built or saved")).clicked() {
+                    if ui
+                        .add_enabled(changed, egui::Button::new(tr!("Reset")))
+                        .on_hover_text(tr!("Back to the workspace as built or saved"))
+                        .clicked()
+                    {
                         if key == current {
                             app.reset_workspace();
                         } else {

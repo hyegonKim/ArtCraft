@@ -186,12 +186,13 @@ fn webp_movie(frames: &[(Vec<u8>, u32)], n: u64, ratio: (u64, u64)) -> Vec<Vec<u
         t += u64::from(*ms);
     }
     assert_eq!(t, start_ms(n, ratio), "the running time is exact to the millisecond");
-    (0..n).map(|f| {
-        let at = start_ms(f, ratio);
-        let i = starts.iter().rposition(|s| *s <= at).unwrap();
-        frames[i].0.clone()
-    })
-    .collect()
+    (0..n)
+        .map(|f| {
+            let at = start_ms(f, ratio);
+            let i = starts.iter().rposition(|s| *s <= at).unwrap();
+            frames[i].0.clone()
+        })
+        .collect()
 }
 
 fn same(got: &[Vec<u8>], want: &[Vec<u8>], what: &str) {
@@ -242,10 +243,13 @@ fn frame_rates_are_exact_fractions() {
     assert_eq!(frames, 200_000);
     // A rate with a huge denominator falls back to milliseconds, still adding up.
     let odd = (100_003, 1000);
-    let ms: u64 = apng_delays(0, 1000, odd).iter().map(|&(n, d)| {
-        assert_eq!(d, 1000);
-        u64::from(n)
-    }).sum();
+    let ms: u64 = apng_delays(0, 1000, odd)
+        .iter()
+        .map(|&(n, d)| {
+            assert_eq!(d, 1000);
+            u64::from(n)
+        })
+        .sum();
     assert_eq!(ms, start_ms(1000, odd));
     let hours = webp_durations(0, 100_000, (1, 1));
     assert_eq!(hours.iter().map(|&m| u64::from(m)).sum::<u64>(), 100_000_000);
@@ -304,7 +308,11 @@ fn webp_frames_match_the_renderer_exactly() {
     let mut s = Session::new(sample::demo());
     for background in [false, true] {
         let path = dir.join(format!("walk-{background}.webp"));
-        let v = run(&mut s, "file.export_webp", json!({"path": path.display().to_string(), "scale": 0.25, "from": 4, "to": 27, "background": background}));
+        let v = run(
+            &mut s,
+            "file.export_webp",
+            json!({"path": path.display().to_string(), "scale": 0.25, "from": 4, "to": 27, "background": background}),
+        );
         assert_eq!(v["frames"], 24);
         let bytes = std::fs::read(&path).unwrap();
         assert!(bytes.starts_with(b"RIFF") && &bytes[8..12] == b"WEBP");
@@ -349,7 +357,14 @@ fn bad_params_are_refused_and_overwrites_confirm() {
     let mut s = holds();
     let at = |n: &str| dir.join(n).display().to_string();
     for id in ["file.export_apng", "file.export_webp"] {
-        for bad in [json!({"loop": -1}), json!({"loop": 70_000}), json!({"loop": "yes"}), json!({"scale": 0}), json!({"from": 9, "to": 2}), json!({"background": 3})] {
+        for bad in [
+            json!({"loop": -1}),
+            json!({"loop": 70_000}),
+            json!({"loop": "yes"}),
+            json!({"scale": 0}),
+            json!({"from": 9, "to": 2}),
+            json!({"background": 3}),
+        ] {
             let mut p = bad.clone();
             p["path"] = json!(at("x.out"));
             assert!(s.execute(id, &p).is_err(), "{id} {bad}");
@@ -399,7 +414,12 @@ fn sizes() {
             p["confirm"] = json!(true);
             let t = std::time::Instant::now();
             let v = run(&mut s, id, p);
-            row.push_str(&format!(" | {id} {extra}: {} KB, {} stored, {} ms", v["bytes"].as_u64().unwrap() / 1024, v["stored_frames"], t.elapsed().as_millis()));
+            row.push_str(&format!(
+                " | {id} {extra}: {} KB, {} stored, {} ms",
+                v["bytes"].as_u64().unwrap() / 1024,
+                v["stored_frames"],
+                t.elapsed().as_millis()
+            ));
         }
         println!("{row}");
     }

@@ -69,7 +69,20 @@ fn exports_come_back_as_files() {
         s.execute("file.export_png_sequence", &json!({"dir": "frames", "to": 2})).unwrap();
         let out = vfs::take_written();
         let n = names(&out);
-        for want in ["frame.png", "frame.svg", "movie.gif", "movie.png", "movie.webp", "movie.json", "movie.html", "track.wav", "sheet.png", "sheet.json", "frames/frame_00001.png", "frames/frame_00003.png"] {
+        for want in [
+            "frame.png",
+            "frame.svg",
+            "movie.gif",
+            "movie.png",
+            "movie.webp",
+            "movie.json",
+            "movie.html",
+            "track.wav",
+            "sheet.png",
+            "sheet.json",
+            "frames/frame_00001.png",
+            "frames/frame_00003.png",
+        ] {
             assert!(n.iter().any(|x| x == want), "{want} missing from {n:?}");
         }
         assert!(out.iter().all(|(_, b)| !b.is_empty()));

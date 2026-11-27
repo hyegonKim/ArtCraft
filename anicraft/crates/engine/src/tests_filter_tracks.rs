@@ -41,7 +41,13 @@ fn value(s: &mut Session, frame: u32, key: &str) -> f64 {
 fn track_keys(s: &mut Session, key: &str) -> Vec<(u64, f64)> {
     let v = run(s, "motion.info", json!({}));
     let t = v["tracks"].as_array().and_then(|ts| ts.iter().find(|t| t["property"] == key).cloned());
-    t.map(|t| t["keys"].as_array().map(|ks| ks.iter().map(|k| (k["frame"].as_u64().unwrap_or(0), k["value"].as_f64().unwrap_or(0.0))).collect()).unwrap_or_default()).unwrap_or_default()
+    t.map(|t| {
+        t["keys"]
+            .as_array()
+            .map(|ks| ks.iter().map(|k| (k["frame"].as_u64().unwrap_or(0), k["value"].as_f64().unwrap_or(0.0))).collect())
+            .unwrap_or_default()
+    })
+    .unwrap_or_default()
 }
 
 /// The green of a pixel: 1 on the white stage, less where the red box's blur reaches.
@@ -73,7 +79,12 @@ fn a_blur_tweens_by_commands_with_eases_and_retiming() {
     let v = run(&mut s, "motion.remove_key", json!({"property": "filter.0.blur_y", "frame": 12}));
     assert_eq!(v["removed"], json!(["filter.0.blur_y"]));
     // What can't be keyed says why.
-    for (p, want) in [(json!({"property": "filter.1.blur_x", "value": 3}), "no filter 1"), (json!({"property": "filter.0.angle", "value": 3}), "has no Angle"), (json!({"property": "filter.0.blur_x", "value": 900}), "between"), (json!({"property": "filter.0.sparkle", "value": 1}), "unknown property")] {
+    for (p, want) in [
+        (json!({"property": "filter.1.blur_x", "value": 3}), "no filter 1"),
+        (json!({"property": "filter.0.angle", "value": 3}), "has no Angle"),
+        (json!({"property": "filter.0.blur_x", "value": 900}), "between"),
+        (json!({"property": "filter.0.sparkle", "value": 1}), "unknown property"),
+    ] {
         let e = s.execute("motion.set_key", &p).expect_err("refused").to_string();
         assert!(e.contains(want), "{p}: {e}");
     }

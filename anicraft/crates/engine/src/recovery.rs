@@ -270,7 +270,11 @@ pub fn find(dir: &Path, id: &str) -> Result<Entry> {
     }
     let document = document_path(dir, id);
     let ours = file(dir, id, "lock").is_file() || file(dir, id, "json").is_file();
-    let bytes = std::fs::metadata(&document).ok().filter(|m| ours && m.is_file()).ok_or_else(|| EngineError::State(format!("no autosaved document '{id}' in {}", dir.display())))?.len();
+    let bytes = std::fs::metadata(&document)
+        .ok()
+        .filter(|m| ours && m.is_file())
+        .ok_or_else(|| EngineError::State(format!("no autosaved document '{id}' in {}", dir.display())))?
+        .len();
     Ok(Entry { session: id.to_string(), document, meta: read_meta(dir, id), bytes })
 }
 

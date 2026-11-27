@@ -49,10 +49,26 @@ fn overflow(app: &mut App, ctx: &egui::Context, p: Panel) -> Vec<String> {
         .filter(|n| !containers.contains(&n.role()))
         .filter_map(|n| n.bounds().map(|b| (n, b)))
         // In the panel (scrolled out of view or not)...
-        .filter(|(_, b)| b.x1 > b.x0 && b.x0 >= f64::from(body.left()) - 0.5 && b.x0 < f64::from(body.right()) && b.y0 >= f64::from(body.top()) - 0.5 && b.y0 < f64::from(body.bottom()))
+        .filter(|(_, b)| {
+            b.x1 > b.x0
+                && b.x0 >= f64::from(body.left()) - 0.5
+                && b.x0 < f64::from(body.right())
+                && b.y0 >= f64::from(body.top()) - 0.5
+                && b.y0 < f64::from(body.bottom())
+        })
         // ...and running past its edge.
         .filter(|(_, b)| b.x1 > f64::from(body.right()) + 0.5)
-        .map(|(n, b)| format!("{p:?}: {:?} {:?} at x {:.0}–{:.0} (panel to {:.0}), y {:.0}", n.role(), n.label().or(n.value()).unwrap_or_default(), b.x0, b.x1, body.right(), b.y0))
+        .map(|(n, b)| {
+            format!(
+                "{p:?}: {:?} {:?} at x {:.0}–{:.0} (panel to {:.0}), y {:.0}",
+                n.role(),
+                n.label().or(n.value()).unwrap_or_default(),
+                b.x0,
+                b.x1,
+                body.right(),
+                b.y0
+            )
+        })
         .collect()
 }
 

@@ -100,10 +100,8 @@ pub fn estimate_rgb_noise(img: &Rgb32f) -> (f32, f32) {
 /// over overlapping `256 × 256` tiles.
 pub fn denoise_rgb(img: &Rgb32f, parallel: usize, ctl: &Control<'_>) -> Result<Rgb32f, Error> {
     let (w, h) = (img.width, img.height);
-    let pixels = w
-        .checked_mul(h)
-        .filter(|&n| n > 0 && n <= MAX_PIXELS)
-        .ok_or_else(|| Error::Input("the picture has no size, or is too large".into()))?;
+    let pixels =
+        w.checked_mul(h).filter(|&n| n > 0 && n <= MAX_PIXELS).ok_or_else(|| Error::Input("the picture has no size, or is too large".into()))?;
     if img.data.len() != pixels {
         return Err(Error::Input("pixel buffer size does not match width × height".into()));
     }
@@ -241,12 +239,7 @@ mod tests {
             [(base[0] + n0).clamp(0.0, 1.0), (base[1] + n1).clamp(0.0, 1.0), (base[2] + n2).clamp(0.0, 1.0)]
         });
         let mse = |a: &Rgb32f, b: &Rgb32f| -> f64 {
-            a.data
-                .iter()
-                .zip(&b.data)
-                .flat_map(|(p, q)| (0..3).map(move |c| f64::from(p[c] - q[c]).powi(2)))
-                .sum::<f64>()
-                / (a.data.len() * 3) as f64
+            a.data.iter().zip(&b.data).flat_map(|(p, q)| (0..3).map(move |c| f64::from(p[c] - q[c]).powi(2))).sum::<f64>() / (a.data.len() * 3) as f64
         };
         let before = mse(&noisy, &clean);
         let denoised = denoise_rgb(&noisy, 2, &Control::default()).unwrap();

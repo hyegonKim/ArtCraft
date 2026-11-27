@@ -394,7 +394,14 @@ mod tests {
     #[test]
     fn a_closing_line_is_drawn_out_so_it_bends_at_the_guides() {
         // A triangle whose closing edge runs diagonally across the left guide.
-        let p = Path { cmds: vec![PathCmd::MoveTo(Vec2::new(0.0, 0.0)), PathCmd::LineTo(Vec2::new(100.0, 0.0)), PathCmd::LineTo(Vec2::new(100.0, 40.0)), PathCmd::Close] };
+        let p = Path {
+            cmds: vec![
+                PathCmd::MoveTo(Vec2::new(0.0, 0.0)),
+                PathCmd::LineTo(Vec2::new(100.0, 0.0)),
+                PathCmd::LineTo(Vec2::new(100.0, 40.0)),
+                PathCmd::Close,
+            ],
+        };
         let map = Slice9 { x: Axis::new(0.0, 10.0, 90.0, 100.0, 3.0).unwrap(), y: Axis::identity(0.0, 40.0) };
         let s = slice_path(&p, &Affine::IDENTITY, &map);
         assert_eq!(s.cmds.last(), Some(&PathCmd::Close));

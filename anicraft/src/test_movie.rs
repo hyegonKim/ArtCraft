@@ -180,7 +180,26 @@ pub fn open(app: &mut App) {
     let old = app.test_movie.as_ref();
     let hit_areas = old.is_some_and(|t| t.hit_areas);
     let (placement, last_pos) = (old.and_then(|t| t.placement), old.and_then(|t| t.last_pos));
-    let mut tm = TestMovie { doc, movie, paused: false, acc: 0.0, texture: None, shown: None, pointer: None, down: false, name, ms: 0.0, voices: Vec::new(), audio: false, skipped, focus: true, shift: false, hit_areas, placement, last_pos };
+    let mut tm = TestMovie {
+        doc,
+        movie,
+        paused: false,
+        acc: 0.0,
+        texture: None,
+        shown: None,
+        pointer: None,
+        down: false,
+        name,
+        ms: 0.0,
+        voices: Vec::new(),
+        audio: false,
+        skipped,
+        focus: true,
+        shift: false,
+        hit_areas,
+        placement,
+        last_pos,
+    };
     // Sound only when there is some, and never in screenshot runs or tests.
     if sound::has_sounds(&tm.doc) && app.shot.is_none() {
         tm.resume(&mut app.sound);
@@ -281,7 +300,11 @@ pub fn output_panel(app: &mut App, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().id_salt("output_panel").auto_shrink([false, false]).stick_to_bottom(true).show(ui, |ui| {
             ui.spacing_mut().item_spacing.y = 2.0;
             if lines.is_empty() {
-                let hint = if key.is_empty() { tr!("Test the movie: its trace actions, frame-script logs and anything that couldn't run appear here.").to_string() } else { tr!("Test the movie ({key}): its trace actions, frame-script logs and anything that couldn't run appear here.", key = key) };
+                let hint = if key.is_empty() {
+                    tr!("Test the movie: its trace actions, frame-script logs and anything that couldn't run appear here.").to_string()
+                } else {
+                    tr!("Test the movie ({key}): its trace actions, frame-script logs and anything that couldn't run appear here.", key = key)
+                };
                 ui.label(text(Type::Caption, hint));
             }
             for (tick, line) in lines.iter() {
@@ -364,7 +387,11 @@ fn own_window(app: &mut App, ctx: &egui::Context) -> Asked {
         let (close, quit, commands) = ui.input_mut(|i| {
             let close = i.consume_key(egui::Modifiers::NONE, egui::Key::Escape) || i.consume_key(egui::Modifiers::COMMAND, egui::Key::W);
             let quit = i.consume_key(egui::Modifiers::COMMAND, egui::Key::Q);
-            let fire: Vec<&'static str> = shortcuts.iter().filter(|(m, _, id)| (m.command || m.ctrl || m.alt) && !id.starts_with("view.") && !id.starts_with("tool.")).filter_map(|(m, k, id)| i.consume_key(*m, *k).then_some(*id)).collect();
+            let fire: Vec<&'static str> = shortcuts
+                .iter()
+                .filter(|(m, _, id)| (m.command || m.ctrl || m.alt) && !id.starts_with("view.") && !id.starts_with("tool."))
+                .filter_map(|(m, k, id)| i.consume_key(*m, *k).then_some(*id))
+                .collect();
             (close, quit, fire)
         });
         asked.close = close_requested || close;
@@ -398,19 +425,33 @@ fn inside(app: &mut App, ctx: &egui::Context, why: crate::platform::Inside) -> A
     crate::a11y::name_title_bar(&win, &title);
     // Esc closes it from anywhere in the editor, as it always has; Ctrl+W (⌘W) while the movie
     // has the keyboard.
-    let esc = ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) || (has_keys(ctx) && ctx.input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::W)));
+    let esc = ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape))
+        || (has_keys(ctx) && ctx.input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::W)));
     Asked { restart, close: !shown || esc, ..Default::default() }
 }
 
 /// The window's contents, wherever it is: the controls, the movie under the pointer and the
 /// keyboard, and the Output. Returns whether Restart was clicked.
-fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &mut crate::sound::SoundOut, ui: &mut egui::Ui, note: Option<&str>) -> bool {
+fn body(
+    tm: &mut TestMovie,
+    plugins: &anicraft_engine::plugins::Registry,
+    out: &mut crate::sound::SoundOut,
+    ui: &mut egui::Ui,
+    note: Option<&str>,
+) -> bool {
     let ctx = ui.ctx().clone();
     let mut restart = false;
     let (sw, sh) = (tm.doc.stage.width as f32, tm.doc.stage.height as f32);
     // ---- controls ----
     ui.horizontal(|ui| {
-        if crate::timeline::icon_button(ui, &tr!("Restart from frame 1 with the document as it is now ({key})", key = crate::platform::shortcut_label("Ctrl+Enter")), None, Icon::First).clicked() {
+        if crate::timeline::icon_button(
+            ui,
+            &tr!("Restart from frame 1 with the document as it is now ({key})", key = crate::platform::shortcut_label("Ctrl+Enter")),
+            None,
+            Icon::First,
+        )
+        .clicked()
+        {
             restart = true;
         }
         let (icon, tip) = if tm.paused { (Icon::Play, tr!("Play")) } else { (Icon::Pause, tr!("Pause")) };
@@ -434,7 +475,13 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
         let frames = tm.doc.timeline(st.scene).frame_count();
         ui.label(text(Type::Body, scene).color(T.text_dim));
         ui.label(text(Type::Data, format!("{:>4} / {frames}", st.root.frame + 1))).on_hover_text(tr!("Main timeline frame"));
-        let what = if tm.paused { tr!("paused") } else if st.root.playing { tr!("playing") } else { tr!("stopped") };
+        let what = if tm.paused {
+            tr!("paused")
+        } else if st.root.playing {
+            tr!("playing")
+        } else {
+            tr!("stopped")
+        };
         ui.label(text(Type::Caption, what));
         // A movie that listens for keys says where they go.
         if tm.movie.state.stage.iter().any(|l| l.event.is_key()) {
@@ -442,10 +489,12 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
             ui.label(text(Type::Caption, keys).color(T.text_dim));
         }
         ui.add_space(8.0);
-        ui.checkbox(&mut tm.hit_areas, tr!("Show hit areas")).on_hover_text(tr!("Draw where each button answers the pointer (its Hit frame) over the movie"));
+        ui.checkbox(&mut tm.hit_areas, tr!("Show hit areas"))
+            .on_hover_text(tr!("Draw where each button answers the pointer (its Hit frame) over the movie"));
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             // i18n-exempt: numbers and units (data)
-            ui.label(text(Type::Data, format!("{:.0} fps · {:.1} ms", tm.doc.stage.fps, tm.ms)).color(T.text_faint)).on_hover_text(tr!("Frame rate, and the time the last picture took to draw"));
+            ui.label(text(Type::Data, format!("{:.0} fps · {:.1} ms", tm.doc.stage.fps, tm.ms)).color(T.text_faint))
+                .on_hover_text(tr!("Frame rate, and the time the last picture took to draw"));
         });
     });
     // Why it isn't in a window of its own, when that isn't the user's choice.
@@ -471,7 +520,9 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
     }
     // Tab and the arrows are the movie's keys while it has them, not focus moves.
     if resp.has_focus() {
-        ui.memory_mut(|m| m.set_focus_lock_filter(resp.id, egui::EventFilter { tab: true, horizontal_arrows: true, vertical_arrows: true, escape: false }));
+        ui.memory_mut(|m| {
+            m.set_focus_lock_filter(resp.id, egui::EventFilter { tab: true, horizontal_arrows: true, vertical_arrows: true, escape: false })
+        });
     }
     // The pointer, in stage coordinates, to the player.
     let mut events = Vec::new();
@@ -526,7 +577,9 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
                         }
                     }
                     // Typing, pasting and input methods go into the field with the keyboard.
-                    egui::Event::Text(t) | egui::Event::Paste(t) | egui::Event::Ime(egui::ImeEvent::Commit(t)) => events.extend(t.chars().take(anicraft_engine::player::MAX_TYPED).map(Event::Char)),
+                    egui::Event::Text(t) | egui::Event::Paste(t) | egui::Event::Ime(egui::ImeEvent::Commit(t)) => {
+                        events.extend(t.chars().take(anicraft_engine::player::MAX_TYPED).map(Event::Char))
+                    }
                     egui::Event::Copy => copy = field,
                     _ => {}
                 }
@@ -541,7 +594,8 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
     tm.feed(out);
     if inside && tm.movie.state.hover.is_some() {
         ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
-    } else if inside && let Some(p) = tm.pointer
+    } else if inside
+        && let Some(p) = tm.pointer
         && anicraft_engine::doc::player::field_at(&tm.doc, &tm.movie.state, p).is_some()
     {
         ctx.set_cursor_icon(egui::CursorIcon::Text);
@@ -552,7 +606,14 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
     {
         let password = focused_block(tm).and_then(|t| t.field.as_ref().map(|f| f.lines == anicraft_engine::doc::LineType::Password)).unwrap_or(false);
         let purpose = if password { egui::IMEPurpose::Password } else { egui::IMEPurpose::Normal };
-        ctx.output_mut(|o| o.ime = Some(egui::output::IMEOutput { purpose, rect: r, cursor_rect: egui::Rect::from_min_size(r.left_bottom(), egui::vec2(1.0, 1.0)), should_interrupt_composition: false }));
+        ctx.output_mut(|o| {
+            o.ime = Some(egui::output::IMEOutput {
+                purpose,
+                rect: r,
+                cursor_rect: egui::Rect::from_min_size(r.left_bottom(), egui::vec2(1.0, 1.0)),
+                should_interrupt_composition: false,
+            })
+        });
     }
     // ---- time: the document's frame rate, kept by the sound while it plays ----
     if !tm.paused {
@@ -626,18 +687,21 @@ fn body(tm: &mut TestMovie, plugins: &anicraft_engine::plugins::Registry, out: &
         });
     });
     egui::Frame::NONE.fill(T.field).inner_margin(egui::Margin::symmetric(8, 6)).show(ui, |ui| {
-        egui::ScrollArea::vertical().id_salt("test_movie_output").max_height(output_h).auto_shrink([false, false]).stick_to_bottom(true).show(ui, |ui| {
-            ui.spacing_mut().item_spacing.y = 2.0;
-            if tm.movie.output.is_empty() {
-                ui.label(text(Type::Caption, tr!("Trace actions, frame-script logs and anything that couldn't run appear here.")));
-            }
-            for (tick, line) in &tm.movie.output {
-                ui.horizontal(|ui| {
-                    ui.label(text(Type::DataSmall, format!("{tick:>5}")).color(T.text_faint));
-                    ui.label(text(Type::Data, line.as_str()));
-                });
-            }
-        });
+        egui::ScrollArea::vertical().id_salt("test_movie_output").max_height(output_h).auto_shrink([false, false]).stick_to_bottom(true).show(
+            ui,
+            |ui| {
+                ui.spacing_mut().item_spacing.y = 2.0;
+                if tm.movie.output.is_empty() {
+                    ui.label(text(Type::Caption, tr!("Trace actions, frame-script logs and anything that couldn't run appear here.")));
+                }
+                for (tick, line) in &tm.movie.output {
+                    ui.horizontal(|ui| {
+                        ui.label(text(Type::DataSmall, format!("{tick:>5}")).color(T.text_faint));
+                        ui.label(text(Type::Data, line.as_str()));
+                    });
+                }
+            },
+        );
     });
     restart
 }
@@ -654,7 +718,16 @@ pub fn demo_typing(app: &mut App) {
     ev.extend("Ada Lovelace".chars().map(Event::Char));
     ev.extend([Event::KeyDown(13), Event::KeyUp(13)]);
     let notes = Vec2::new(380.0, 228.0);
-    ev.extend([Event::Down(notes), Event::Up(notes), Event::KeyDown(16), Event::KeyDown(37), Event::KeyDown(37), Event::KeyDown(37), Event::KeyDown(37), Event::KeyUp(16)]);
+    ev.extend([
+        Event::Down(notes),
+        Event::Up(notes),
+        Event::KeyDown(16),
+        Event::KeyDown(37),
+        Event::KeyDown(37),
+        Event::KeyDown(37),
+        Event::KeyDown(37),
+        Event::KeyUp(16),
+    ]);
     tm.movie.input(&tm.doc, &ev, &mut r);
     tm.paused = true;
 }
@@ -748,7 +821,11 @@ mod tests {
     use serde_json::json;
 
     fn frame(ctx: &egui::Context, app: &mut App, events: Vec<egui::Event>) {
-        let input = egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 940.0))), events, ..Default::default() };
+        let input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 940.0))),
+            events,
+            ..Default::default()
+        };
         let mut out = ctx.run_ui(input, |ui| app.frame(ui));
         out.textures_delta.clear();
     }
@@ -885,16 +962,34 @@ mod tests {
     #[test]
     fn key_codes_are_actionscript_s() {
         use egui::Key as K;
-        for (k, code) in [(K::A, 65), (K::Z, 90), (K::Num0, 48), (K::Num9, 57), (K::ArrowLeft, 37), (K::ArrowUp, 38), (K::ArrowRight, 39), (K::ArrowDown, 40), (K::Space, 32), (K::Enter, 13), (K::Tab, 9), (K::Backspace, 8), (K::F1, 112), (K::F12, 123), (K::Comma, 188)] {
+        for (k, code) in [
+            (K::A, 65),
+            (K::Z, 90),
+            (K::Num0, 48),
+            (K::Num9, 57),
+            (K::ArrowLeft, 37),
+            (K::ArrowUp, 38),
+            (K::ArrowRight, 39),
+            (K::ArrowDown, 40),
+            (K::Space, 32),
+            (K::Enter, 13),
+            (K::Tab, 9),
+            (K::Backspace, 8),
+            (K::F1, 112),
+            (K::F12, 123),
+            (K::Comma, 188),
+        ] {
             assert_eq!(key_code(k), Some(code), "{k:?}");
-            assert!(anicraft_engine::doc::actions::as3::ir::key_code(match k {
-                K::ArrowLeft => "LEFT",
-                K::Space => "SPACE",
-                K::A => "A",
-                K::Num0 => "NUMBER_0",
-                _ => "F1",
-            })
-            .is_some());
+            assert!(
+                anicraft_engine::doc::actions::as3::ir::key_code(match k {
+                    K::ArrowLeft => "LEFT",
+                    K::Space => "SPACE",
+                    K::A => "A",
+                    K::Num0 => "NUMBER_0",
+                    _ => "F1",
+                })
+                .is_some()
+            );
         }
         assert_eq!(anicraft_engine::doc::actions::as3::ir::key_code("LEFT"), key_code(K::ArrowLeft));
         assert_eq!(anicraft_engine::doc::actions::as3::ir::key_code("NUMBER_7"), key_code(K::Num7));

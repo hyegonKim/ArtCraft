@@ -79,7 +79,10 @@ impl MemFs {
         let old = self.files.get(&k).map_or(0, |f| f.data.len() as u64);
         let total = self.bytes - old + data.len() as u64;
         if total > MAX_MEMORY_BYTES {
-            return Err(io::Error::new(io::ErrorKind::OutOfMemory, format!("{} does not fit in memory ({} MB at most)", path.display(), MAX_MEMORY_BYTES >> 20)));
+            return Err(io::Error::new(
+                io::ErrorKind::OutOfMemory,
+                format!("{} does not fit in memory ({} MB at most)", path.display(), MAX_MEMORY_BYTES >> 20),
+            ));
         }
         if self.is_dir(path) {
             return Err(unsupported("a folder has that name"));
@@ -323,7 +326,10 @@ mod tests {
         assert!(m.write(Path::new("in"), vec![]).is_err(), "a folder's name is taken");
         assert_eq!(m.read(Path::new("nope")).unwrap_err().kind(), io::ErrorKind::NotFound);
         let out = m.take_written();
-        assert_eq!(out.iter().map(|(p, _)| p.clone()).collect::<Vec<_>>(), vec![PathBuf::from("out").join("frame_0001.png"), PathBuf::from("out").join("frame_0002.png")]);
+        assert_eq!(
+            out.iter().map(|(p, _)| p.clone()).collect::<Vec<_>>(),
+            vec![PathBuf::from("out").join("frame_0001.png"), PathBuf::from("out").join("frame_0002.png")]
+        );
         assert_eq!((m.bytes(), m.is_file(Path::new("in/walk.anicraft"))), (0, false), "emptied, the picked file too");
     }
 

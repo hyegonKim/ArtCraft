@@ -26,7 +26,10 @@ fn a_kept_script_replaces_actions_in_one_undo_step_and_lists_verbatim() {
     assert_eq!(kept(&s, 0, 0), Some((Language::ActionScript1or2, "stop();".into())));
     let list = s.execute("script.list", &json!({})).unwrap();
     assert_eq!(list["frames"].as_array().map(Vec::len), Some(1));
-    assert_eq!((list["frames"][0]["text"].as_str(), list["frames"][0]["scene"].as_u64(), list["frames"][0]["layer_name"].as_str()), (Some("stop();"), Some(0), Some("Actions")));
+    assert_eq!(
+        (list["frames"][0]["text"].as_str(), list["frames"][0]["scene"].as_u64(), list["frames"][0]["layer_name"].as_str()),
+        (Some("stop();"), Some(0), Some("Actions"))
+    );
     assert!(s.execute("script.list", &json!({"text": false})).unwrap()["frames"][0].get("text").is_none());
     // `actions.list` shows it too (without the text), with the timeline's "a" marker source.
     let a = s.execute("actions.list", &json!({})).unwrap();
@@ -61,7 +64,14 @@ fn bad_script_params_are_refused_whole() {
     ] {
         assert!(s.execute("script.set", &bad).is_err(), "accepted {}", bad.to_string().chars().take(80).collect::<String>());
     }
-    for bad in [json!({"class": "two words"}), json!({"class": "1x"}), json!({"class": "", "base": "Base"}), json!({"class": "Main", "base": "Base"}), json!({"symbol": u64::MAX, "class": "A"}), json!({})] {
+    for bad in [
+        json!({"class": "two words"}),
+        json!({"class": "1x"}),
+        json!({"class": "", "base": "Base"}),
+        json!({"class": "Main", "base": "Base"}),
+        json!({"symbol": u64::MAX, "class": "A"}),
+        json!({}),
+    ] {
         assert!(s.execute("script.set_class", &bad).is_err(), "accepted {bad}");
     }
     assert!(s.doc == before, "a refused command changes nothing");
@@ -107,7 +117,10 @@ fn kept_scripts_survive_the_file_and_hostile_ones_are_dropped_whole() {
     s.execute("script.set_class", &json!({"class": "Main"})).unwrap();
     let text = format::to_json(&s.doc).unwrap();
     let mut v: Value = serde_json::from_str(&text).unwrap();
-    assert_eq!(v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"], json!({"source": {"language": "actionscript3", "text": AS3}}));
+    assert_eq!(
+        v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"],
+        json!({"source": {"language": "actionscript3", "text": AS3}})
+    );
     assert_eq!(v["document"]["document_class"], "Main");
     let back = format::from_json(&text).unwrap();
     assert!(back == s.doc, "the file opens as the same document");
@@ -147,12 +160,20 @@ fn scripts_in_the_subset_run_and_the_rest_are_kept_and_said_so() {
     let out = anicraft_render::html::to_html(&s.doc, &anicraft_render::html::HtmlOptions::default()).unwrap();
     assert!(out.html.contains("xyzzy-") && !out.report.keys().any(|k| k.starts_with("kept frame scripts")), "{:?}", out.report);
     // One outside the subset doesn't run at all, and Test Movie says where and why.
-    let v = s.execute("script.set", &json!({"layer": layer, "frame": 1, "text": "stop();
-var n:int = 1; switch (n) { }"})).unwrap();
+    let v = s
+        .execute(
+            "script.set",
+            &json!({"layer": layer, "frame": 1, "text": "stop();
+var n:int = 1; switch (n) { }"}),
+        )
+        .unwrap();
     assert_eq!(v["runs"], false);
     assert_eq!(v["problems"][0], json!({"line": 2, "column": 16, "message": "`switch` statements aren't supported yet"}));
     let v = s.execute("control.test_movie", &json!({"frames": 20, "events": [{"tick": 2, "type": "click", "x": 640, "y": 400}]})).unwrap();
-    assert_eq!(v["output"][0]["line"], "Frame script not run: Scene 1 › Actions, frame 2: line 2, column 16: `switch` statements aren't supported yet");
+    assert_eq!(
+        v["output"][0]["line"],
+        "Frame script not run: Scene 1 › Actions, frame 2: line 2, column 16: `switch` statements aren't supported yet"
+    );
     assert!(v["state"]["frame"].as_u64().unwrap() > 10, "it played on: {}", v["state"]);
     let out = anicraft_render::html::to_html(&s.doc, &anicraft_render::html::HtmlOptions::default()).unwrap();
     assert!(out.report.keys().any(|k| k.starts_with("kept frame scripts")), "{:?}", out.report);
@@ -169,10 +190,15 @@ var n:int = 1; switch (n) { }"})).unwrap();
 fn script_check_says_what_a_text_would_do_and_changes_nothing() {
     let mut s = Session::new(sample::interactive());
     let before = s.doc.clone();
-    let v = s.execute("script.check", &json!({"text": "stop();
+    let v = s
+        .execute(
+            "script.check",
+            &json!({"text": "stop();
 btn.addEventListener(MouseEvent.CLICK, go);
 function go(e:MouseEvent):void { gotoAndPlay(\"run\"); }
-navigateToURL(new URLRequest(\"x\"));"})).unwrap();
+navigateToURL(new URLRequest(\"x\"));"}),
+        )
+        .unwrap();
     assert_eq!(v["runs"], true);
     assert_eq!(v["steps"], 3);
     assert_eq!(v["program"]["body"][1]["s"], "listen");
@@ -181,7 +207,10 @@ navigateToURL(new URLRequest(\"x\"));"})).unwrap();
     assert_eq!(v["notes"][0]["line"], 4);
     // Names from other frames are listed; the text alone can't say whether they are there.
     let v = s.execute("script.check", &json!({"text": "score += bonus(2);"})).unwrap();
-    assert_eq!((v["runs"].as_bool(), v["uses"].clone()), (Some(true), json!([{"name": "score", "line": 1, "column": 1, "call": false}, {"name": "bonus", "line": 1, "column": 10, "call": true}])));
+    assert_eq!(
+        (v["runs"].as_bool(), v["uses"].clone()),
+        (Some(true), json!([{"name": "score", "line": 1, "column": 1, "call": false}, {"name": "bonus", "line": 1, "column": 10, "call": true}]))
+    );
     let v = s.execute("script.check", &json!({"text": "stop();", "language": "actionscript1or2"})).unwrap();
     assert_eq!((v["runs"].as_bool(), v["problems"][0]["line"].as_u64()), (Some(false), Some(0)));
     assert!(s.execute("script.check", &json!({})).is_err());
@@ -204,14 +233,24 @@ fn scripts_link_through_their_timeline_and_test_movie_plays_keys() {
     assert!(list["frames"].as_array().unwrap().iter().all(|f| f["runs"] == true), "{list}");
     let play = |s: &mut Session, seed: u64| {
         let v = s.execute("control.test_movie", &json!({"frames": 6, "seed": seed, "events": [{"tick": 3, "type": "key_down", "key": "LEFT"}, {"tick": 4, "type": "key", "key": "a"}, {"tick": 5, "type": "key_down", "key": 32}]})).unwrap();
-        v["output"].as_array().unwrap().iter().filter_map(|l| l["line"].as_str().map(str::to_string)).filter(|l| l.starts_with("key ")).collect::<Vec<_>>()
+        v["output"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|l| l["line"].as_str().map(str::to_string))
+            .filter(|l| l.starts_with("key "))
+            .collect::<Vec<_>>()
     };
     let a = play(&mut s, 1);
     assert_eq!(a.len(), 3, "{a:?}");
     assert!(a[0].starts_with("key 37 1 ") && a[1].starts_with("key 65 2 ") && a[2].starts_with("key 32 3 "), "{a:?}");
     assert_eq!(play(&mut s, 1), a, "the same seed plays the same");
     assert_ne!(play(&mut s, 2), a, "another seed draws other numbers");
-    for bad in [json!({"tick": 1, "type": "key_down"}), json!({"tick": 1, "type": "key_down", "key": 0}), json!({"tick": 1, "type": "key_up", "key": "WIGGLE"})] {
+    for bad in [
+        json!({"tick": 1, "type": "key_down"}),
+        json!({"tick": 1, "type": "key_down", "key": 0}),
+        json!({"tick": 1, "type": "key_up", "key": "WIGGLE"}),
+    ] {
         assert!(s.execute("control.test_movie", &json!({"events": [bad]})).is_err());
     }
 }
@@ -238,7 +277,11 @@ fn text_fields_are_made_named_saved_and_typed_into() {
     ok(&mut s, "text.create", json!({"text": "", "type": "input", "x": 20, "y": 80, "size": 20}));
     ok(&mut s, "text.field", json!({"width": 200, "height": 30, "max_chars": 5}));
     ok(&mut s, "instance.set_name", json!({"name": "name_txt"}));
-    ok(&mut s, "script.set", json!({"frame": 0, "text": "stop();\nstage.addEventListener(KeyboardEvent.KEY_DOWN, k);\nfunction k(e:KeyboardEvent):void { if (e.keyCode == Keyboard.ENTER) { score_txt.text = \"Hi \" + name_txt.text; trace(name_txt.length); } }"}));
+    ok(
+        &mut s,
+        "script.set",
+        json!({"frame": 0, "text": "stop();\nstage.addEventListener(KeyboardEvent.KEY_DOWN, k);\nfunction k(e:KeyboardEvent):void { if (e.keyCode == Keyboard.ENTER) { score_txt.text = \"Hi \" + name_txt.text; trace(name_txt.length); } }"}),
+    );
     // Saved and opened again, the fields are the same.
     let dir = std::env::temp_dir().join(format!("anicraft-fields-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
@@ -249,7 +292,11 @@ fn text_fields_are_made_named_saved_and_typed_into() {
     assert_eq!(field(&back, "name_txt").kind, field(&s, "name_txt").kind);
     std::fs::remove_dir_all(&dir).ok();
     // Headless Test Movie: click the input field, type past its limit, press Enter.
-    let v = ok(&mut back, "control.test_movie", json!({"frames": 3, "events": [{"tick": 1, "type": "click", "x": 40, "y": 92}, {"tick": 1, "type": "text", "text": "Adalovelace"}, {"tick": 2, "type": "key", "key": "ENTER"}]}));
+    let v = ok(
+        &mut back,
+        "control.test_movie",
+        json!({"frames": 3, "events": [{"tick": 1, "type": "click", "x": 40, "y": 92}, {"tick": 1, "type": "text", "text": "Adalovelace"}, {"tick": 2, "type": "key", "key": "ENTER"}]}),
+    );
     let fields = v["state"]["fields"].as_array().unwrap();
     let text_of = |n: &str| fields.iter().find(|f| f["name"] == n).map(|f| f["text"].clone()).unwrap();
     assert_eq!(text_of("name_txt"), "Adalo", "at most 5 characters");

@@ -124,7 +124,8 @@ fn parent_onion(doc: &Document, p: &crate::editing::Around, front: &Front, skin:
         let (first, last) = skin.range(front.frame, front.timeline.frame_count());
         own.markers = crate::onion::Markers::Relative { before: front.frame.saturating_sub(first), after: last.saturating_sub(front.frame) };
     }
-    let composed = crate::onion::compose_timeline(&p.timeline, p.frame, Some(&own), |f| anicraft_doc::evaluate_timeline_at(doc, &p.timeline, f, p.at));
+    let composed =
+        crate::onion::compose_timeline(&p.timeline, p.frame, Some(&own), |f| anicraft_doc::evaluate_timeline_at(doc, &p.timeline, f, p.at));
     // It fades as one, as the dimmed instance it replaces does: everything in a group at `dim`.
     let alpha = if p.dim.is_finite() { p.dim.clamp(0.0, 1.0) } else { 1.0 };
     let mut dl = DisplayList::default();
@@ -207,7 +208,17 @@ pub fn frame_key(state: StateId, frame: u32, view: &View, onion: Option<&OnionSk
 /// A job whose `scene` is derived from the same inputs as its key.
 pub fn make_job(state: StateId, doc: &Document, frame: u32, view: View, onion: Option<&OnionSkin>) -> FrameJob {
     let onion = onion.filter(|o| o.shows()).copied();
-    FrameJob { key: frame_key(state, frame, &view, onion.as_ref()), raster: 0, scene: scene_key(state, frame, onion.as_ref()), doc: doc.clone(), frame, view, onion, camera: false, front: None }
+    FrameJob {
+        key: frame_key(state, frame, &view, onion.as_ref()),
+        raster: 0,
+        scene: scene_key(state, frame, onion.as_ref()),
+        doc: doc.clone(),
+        frame,
+        view,
+        onion,
+        camera: false,
+        front: None,
+    }
 }
 
 /// A job for rasterizer `raster` (from [`RenderService::raster_id`]; 0 is the CPU oracle, and
@@ -232,7 +243,13 @@ pub fn display_list_with_onion(doc: &Document, frame: u32, onion: Option<&OnionS
 /// [`display_list_with_onion`], seen through the scene's camera when `camera` (ADR 0027).
 pub fn display_list_for(doc: &Document, frame: u32, onion: Option<&OnionSkin>, camera: bool) -> DisplayList {
     let (scene, local) = doc.locate(frame);
-    crate::onion::compose(doc, scene, local, onion, |scene, f| if camera { evaluate_scene_camera(doc, scene, f) } else { evaluate_scene(doc, scene, f) })
+    crate::onion::compose(
+        doc,
+        scene,
+        local,
+        onion,
+        |scene, f| if camera { evaluate_scene_camera(doc, scene, f) } else { evaluate_scene(doc, scene, f) },
+    )
 }
 
 /// Renders a job against an already evaluated scene, on the CPU oracle.
@@ -266,7 +283,19 @@ fn render_job_by(job: &FrameJob, dl: &DisplayList, raster: Option<&Rasterizer>) 
         Err(_) => (Vec::new(), RenderStats::default(), Some("the renderer failed on this frame".into())),
     };
     let (width, height) = if error.is_none() { (job.view.width, job.view.height) } else { (0, 0) };
-    FrameImage { key: job.key, frame: job.frame, width, height, rgba_premul: rgba, native: None, ms: t0.elapsed().as_secs_f32() * 1000.0, stats, error, gpu: false, fallback }
+    FrameImage {
+        key: job.key,
+        frame: job.frame,
+        width,
+        height,
+        rgba_premul: rgba,
+        native: None,
+        ms: t0.elapsed().as_secs_f32() * 1000.0,
+        stats,
+        error,
+        gpu: false,
+        fallback,
+    }
 }
 
 /// Renders a job synchronously, evaluating its scene.
@@ -325,7 +354,16 @@ fn cost(img: &FrameImage) -> (usize, usize) {
 
 impl FrameCache {
     pub fn new(budget_bytes: usize) -> Self {
-        FrameCache { map: HashMap::new(), tick: 0, bytes: 0, native_bytes: 0, budget_bytes, native_budget_bytes: DEFAULT_NATIVE_CACHE_BYTES, hits: 0, misses: 0 }
+        FrameCache {
+            map: HashMap::new(),
+            tick: 0,
+            bytes: 0,
+            native_bytes: 0,
+            budget_bytes,
+            native_budget_bytes: DEFAULT_NATIVE_CACHE_BYTES,
+            hits: 0,
+            misses: 0,
+        }
     }
     pub fn get(&mut self, key: u64) -> Option<Arc<FrameImage>> {
         self.tick += 1;
@@ -422,7 +460,13 @@ impl RenderService {
     /// Starts the worker. `notify` runs on the worker after each finished batch (the UI passes
     /// "request a repaint"). If no thread can be spawned, requests render synchronously.
     pub fn new(cache_bytes: usize, notify: Option<Box<dyn Fn() + Send + Sync>>) -> RenderService {
-        let shared = Arc::new(Shared { queue: Mutex::new(Queue::default()), raster: Mutex::new(RasterSlot::default()), wake: Condvar::new(), cache: Mutex::new(FrameCache::new(cache_bytes)), notify });
+        let shared = Arc::new(Shared {
+            queue: Mutex::new(Queue::default()),
+            raster: Mutex::new(RasterSlot::default()),
+            wake: Condvar::new(),
+            cache: Mutex::new(FrameCache::new(cache_bytes)),
+            notify,
+        });
         let s = shared.clone();
         let worker = std::thread::Builder::new().name("anicraft-render".into()).spawn(move || worker_loop(&s)).ok();
         RenderService { shared, worker }
@@ -549,7 +593,19 @@ impl RenderService {
         let key = job.key;
         let frame = job.frame;
         self.render_now_batch(vec![job]).into_iter().next().unwrap_or_else(|| {
-            Arc::new(FrameImage { key, frame, width: 0, height: 0, rgba_premul: Vec::new(), native: None, ms: 0.0, stats: RenderStats::default(), error: Some("render failed".into()), gpu: false, fallback: None })
+            Arc::new(FrameImage {
+                key,
+                frame,
+                width: 0,
+                height: 0,
+                rgba_premul: Vec::new(),
+                native: None,
+                ms: 0.0,
+                stats: RenderStats::default(),
+                error: Some("render failed".into()),
+                gpu: false,
+                fallback: None,
+            })
         })
     }
 
@@ -803,7 +859,19 @@ mod tests {
     fn cache_respects_budget_lru() {
         let mut c = FrameCache::new(3 * 1000);
         for k in 0..10u64 {
-            c.insert(Arc::new(FrameImage { key: k, frame: 0, width: 0, height: 0, rgba_premul: vec![0; 800], native: None, ms: 0.0, stats: RenderStats::default(), error: None, gpu: false, fallback: None }));
+            c.insert(Arc::new(FrameImage {
+                key: k,
+                frame: 0,
+                width: 0,
+                height: 0,
+                rgba_premul: vec![0; 800],
+                native: None,
+                ms: 0.0,
+                stats: RenderStats::default(),
+                error: None,
+                gpu: false,
+                fallback: None,
+            }));
         }
         assert!(c.bytes() <= 3000);
         assert!(c.contains(9) && !c.contains(0));
@@ -817,7 +885,19 @@ mod tests {
         c.native_budget_bytes = 1000;
         let img = |k: u64, native: bool| {
             let n: Option<NativeImage> = native.then(|| Arc::new(k) as NativeImage);
-            Arc::new(FrameImage { key: k, frame: 0, width: 10, height: 10, rgba_premul: if native { Vec::new() } else { vec![0; 400] }, native: n, ms: 0.0, stats: RenderStats::default(), error: None, gpu: native, fallback: None })
+            Arc::new(FrameImage {
+                key: k,
+                frame: 0,
+                width: 10,
+                height: 10,
+                rgba_premul: if native { Vec::new() } else { vec![0; 400] },
+                native: n,
+                ms: 0.0,
+                stats: RenderStats::default(),
+                error: None,
+                gpu: native,
+                fallback: None,
+            })
         };
         c.insert(img(100, false));
         for k in 0..5 {

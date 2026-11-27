@@ -358,7 +358,8 @@ pub fn workspace(app: &mut App, ui: &mut egui::Ui) {
             continue;
         }
         let id = Id::new(("dock_zone", side, app.dock_view.epoch));
-        let (auto, max, min) = if side.stacks() { (dock_w, (room.x * 0.5).max(MIN_SIDE + 20.0), MIN_SIDE) } else { (dock_h, (room.y * 0.6).max(200.0), MIN_ROW) };
+        let (auto, max, min) =
+            if side.stacks() { (dock_w, (room.x * 0.5).max(MIN_SIDE + 20.0), MIN_SIDE) } else { (dock_h, (room.y * 0.6).max(200.0), MIN_ROW) };
         let size = zone.size.unwrap_or(auto).clamp(min, max);
         let panel = match side {
             Side::Left => egui::Panel::left(id),
@@ -366,7 +367,12 @@ pub fn workspace(app: &mut App, ui: &mut egui::Ui) {
             Side::Top => egui::Panel::top(id),
             Side::Bottom => egui::Panel::bottom(id),
         };
-        let shown = panel.resizable(true).default_size(size).size_range(min..=max).frame(egui::Frame::NONE.fill(T.panel)).show(ui, |ui| zone_ui(app, ui, side, &zone.groups, &layout, &mut acts));
+        let shown = panel
+            .resizable(true)
+            .default_size(size)
+            .size_range(min..=max)
+            .frame(egui::Frame::NONE.fill(T.panel))
+            .show(ui, |ui| zone_ui(app, ui, side, &zone.groups, &layout, &mut acts));
         let resize = id.with("__resize");
         if ctx.is_being_dragged(resize) {
             let r = shown.response.rect;
@@ -411,7 +417,8 @@ impl DockView {
 /// them elsewhere (and their menu).
 fn tools_bar(app: &mut App, ui: &mut egui::Ui, side: Side, layout: &Layout, acts: &mut Vec<Act>) {
     let id = if side == Side::Left { Id::new("tools") } else { Id::new(("tools", side)) };
-    let margin = if side.stacks() { egui::Margin { left: 0, right: 0, top: 2, bottom: 8 } } else { egui::Margin { left: 2, right: 8, top: 0, bottom: 0 } };
+    let margin =
+        if side.stacks() { egui::Margin { left: 0, right: 0, top: 2, bottom: 8 } } else { egui::Margin { left: 2, right: 8, top: 0, bottom: 0 } };
     let frame = egui::Frame::NONE.fill(T.panel).inner_margin(margin);
     let panel = match side {
         Side::Left => egui::Panel::left(id),
@@ -478,7 +485,11 @@ fn zone_ui(app: &mut App, ui: &mut egui::Ui, side: Side, groups: &[Group], layou
         let folded = g.folded && side.stacks();
         let body = if folded { 0.0 } else { free * g.share / sum };
         let len = body + if side.stacks() { BAND_H } else { 0.0 };
-        let rect = if side.stacks() { Rect::from_min_size(pos2(area.left(), at), vec2(area.width(), len)) } else { Rect::from_min_size(pos2(at, area.top()), vec2(len, area.height())) };
+        let rect = if side.stacks() {
+            Rect::from_min_size(pos2(area.left(), at), vec2(area.width(), len))
+        } else {
+            Rect::from_min_size(pos2(at, area.top()), vec2(len, area.height()))
+        };
         at += len;
         bodies.push(body);
         let next = groups.get(i + 1).and_then(|g| g.tabs.first().copied());
@@ -505,7 +516,11 @@ fn zone_ui(app: &mut App, ui: &mut egui::Ui, side: Side, groups: &[Group], layou
         });
         if resp.hovered() || resp.dragged() {
             ui.ctx().set_cursor_icon(if side.stacks() { egui::CursorIcon::ResizeVertical } else { egui::CursorIcon::ResizeHorizontal });
-            let line = if side.stacks() { Rect::from_center_size(grab.center(), vec2(grab.width(), 2.0)) } else { Rect::from_center_size(grab.center(), vec2(2.0, grab.height())) };
+            let line = if side.stacks() {
+                Rect::from_center_size(grab.center(), vec2(grab.width(), 2.0))
+            } else {
+                Rect::from_center_size(grab.center(), vec2(2.0, grab.height()))
+            };
             ui.painter().rect_filled(line, theme::SQUARE, T.accent);
         }
         let d = if side.stacks() { resp.drag_delta().y } else { resp.drag_delta().x };
@@ -527,7 +542,17 @@ fn zone_ui(app: &mut App, ui: &mut egui::Ui, side: Side, groups: &[Group], layou
 
 /// A tab group: its header (tabs, fold, menu) and the shown panel.
 #[allow(clippy::too_many_arguments)]
-fn group_ui(app: &mut App, ui: &mut egui::Ui, side: Side, g: &Group, rect: Rect, next: Option<Panel>, first_group: bool, layout: &Layout, acts: &mut Vec<Act>) {
+fn group_ui(
+    app: &mut App,
+    ui: &mut egui::Ui,
+    side: Side,
+    g: &Group,
+    rect: Rect,
+    next: Option<Panel>,
+    first_group: bool,
+    layout: &Layout,
+    acts: &mut Vec<Act>,
+) {
     let Some(shown) = g.shown() else { return };
     let header = if side.stacks() {
         let header = Rect::from_min_size(rect.min, vec2(rect.width(), BAND_H));
@@ -545,7 +570,8 @@ fn group_ui(app: &mut App, ui: &mut egui::Ui, side: Side, g: &Group, rect: Rect,
     if body.height() < 1.0 || body.width() < 1.0 {
         return;
     }
-    let mut child = ui.new_child(egui::UiBuilder::new().max_rect(body).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", shown.id())));
+    let mut child =
+        ui.new_child(egui::UiBuilder::new().max_rect(body).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", shown.id())));
     child.set_clip_rect(body.intersect(ui.clip_rect()));
     panel_body(app, &mut child, shown);
     // Groups side by side are parted by a line.
@@ -572,7 +598,12 @@ fn band_header(ui: &mut egui::Ui, side: Side, g: &Group, rect: Rect, first_group
     resp.widget_info(|| egui::WidgetInfo::selected(WidgetType::CollapsingHeader, true, open, name));
     a11y::focus_ring(ui, &resp);
     let hot = resp.hovered() || resp.has_focus();
-    crate::icons::paint(&p, Rect::from_center_size(chevron.center(), vec2(14.0, 14.0)), if open { Icon::ChevronDown } else { Icon::ChevronRight }, if hot { T.text } else { T.text_dim });
+    crate::icons::paint(
+        &p,
+        Rect::from_center_size(chevron.center(), vec2(14.0, 14.0)),
+        if open { Icon::ChevronDown } else { Icon::ChevronRight },
+        if hot { T.text } else { T.text_dim },
+    );
     if resp.on_hover_text(if open { tr!("Fold this panel group") } else { tr!("Unfold this panel group") }).clicked() {
         acts.push(Act::Fold(shown));
     }
@@ -645,7 +676,11 @@ fn band_header(ui: &mut egui::Ui, side: Side, g: &Group, rect: Rect, first_group
     for (edge, more) in [(strip.left(), scroll > 0.5), (strip.right(), scroll < overflow - 0.5)] {
         if more {
             let w = 10.0;
-            let fade = if edge == strip.left() { Rect::from_min_size(pos2(edge, rect.top() + 1.0), vec2(w, rect.height() - 2.0)) } else { Rect::from_min_size(pos2(edge - w, rect.top() + 1.0), vec2(w, rect.height() - 2.0)) };
+            let fade = if edge == strip.left() {
+                Rect::from_min_size(pos2(edge, rect.top() + 1.0), vec2(w, rect.height() - 2.0))
+            } else {
+                Rect::from_min_size(pos2(edge - w, rect.top() + 1.0), vec2(w, rect.height() - 2.0))
+            };
             p.rect_filled(fade, theme::SQUARE, T.panel_alt.gamma_multiply(0.85));
             let c = fade.center();
             let (tip, back) = if edge == strip.left() { (c.x - 2.5, c.x + 2.0) } else { (c.x + 2.5, c.x - 2.0) };
@@ -667,7 +702,13 @@ pub(crate) fn icon_button(ui: &mut egui::Ui, r: Rect, id: Id, icon: Icon, name: 
         ui.painter().rect_filled(r, T.rc(), T.hover);
     }
     a11y::focus_ring(ui, &resp);
-    let tint = if on { T.on_active } else if resp.hovered() || resp.has_focus() { T.icon_hot } else { T.icon };
+    let tint = if on {
+        T.on_active
+    } else if resp.hovered() || resp.has_focus() {
+        T.icon_hot
+    } else {
+        T.icon
+    };
     let s = (r.height().min(r.width()) * 0.5).clamp(12.0, theme::TOOL_ICON);
     crate::icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(s, s)), icon, tint);
     resp.on_hover_text(name)
@@ -704,7 +745,15 @@ fn row_header(app: &mut App, ui: &mut egui::Ui, side: Side, g: &Group, group: Re
 
 /// Tabs in a row (above and below the stage, and in floating windows): click to show, drag to
 /// move, right-click for the panel's menu. Returns the shown tab's response.
-pub(crate) fn tab_row(app: &mut App, ui: &mut egui::Ui, at: Where, tabs: &[Panel], active: usize, layout: &Layout, acts: &mut Vec<Act>) -> Option<egui::Response> {
+pub(crate) fn tab_row(
+    app: &mut App,
+    ui: &mut egui::Ui,
+    at: Where,
+    tabs: &[Panel],
+    active: usize,
+    layout: &Layout,
+    acts: &mut Vec<Act>,
+) -> Option<egui::Response> {
     let mut anchor = None;
     for (i, tab) in tabs.iter().enumerate() {
         let on = i == active.min(tabs.len().saturating_sub(1));
@@ -745,7 +794,15 @@ fn elided(p: &egui::Painter, name: &str, width: f32) -> std::sync::Arc<egui::Gal
 
 /// A side dock's tab: named and selectable for screen readers, dragged to move its panel.
 /// `shown` is the part of `r` inside the tab strip (it scrolls).
-fn tab_widget(ui: &mut egui::Ui, tab: Panel, r: Rect, shown: Rect, active: bool, galley: &std::sync::Arc<egui::Galley>, several: bool) -> egui::Response {
+fn tab_widget(
+    ui: &mut egui::Ui,
+    tab: Panel,
+    r: Rect,
+    shown: Rect,
+    active: bool,
+    galley: &std::sync::Arc<egui::Galley>,
+    several: bool,
+) -> egui::Response {
     let resp = ui.interact(shown, Id::new(("dock_tab", tab.id())), Sense::click_and_drag());
     let name = crate::i18n::t(tab.label());
     resp.widget_info(|| egui::WidgetInfo::selected(WidgetType::SelectableLabel, true, active, name));
@@ -1035,7 +1092,10 @@ fn strip(app: &mut App, ui: &mut egui::Ui, side: Side, zone: &Zone, layout: &Lay
 /// as the dock was. Esc or a click outside it closes it.
 fn flyout(app: &mut App, ctx: &egui::Context, auto: (f32, f32), layout: &Layout, acts: &mut Vec<Act>) {
     let Some(p) = app.dock_view.flyout else { return };
-    let (Some(side), Some(strip)) = (layout.collapsed_side(p), app.dock_view.drawn.iter().find(|d| matches!(d.over, Over::Strip(s) if Some(s) == layout.collapsed_side(p))).map(|d| d.rect)) else {
+    let (Some(side), Some(strip)) = (
+        layout.collapsed_side(p),
+        app.dock_view.drawn.iter().find(|d| matches!(d.over, Over::Strip(s) if Some(s) == layout.collapsed_side(p))).map(|d| d.rect),
+    ) else {
         app.dock_view.flyout = None;
         return;
     };
@@ -1074,7 +1134,8 @@ fn flyout(app: &mut App, ctx: &egui::Context, auto: (f32, f32), layout: &Layout,
         let menu = close.translate(vec2(-MENU_W, 0.0));
         menu_button(ui, at, p, menu, layout, acts);
         let body = Rect::from_min_max(pos2(rect.left() + 1.0, header.bottom()), rect.max - vec2(1.0, 1.0));
-        let mut child = ui.new_child(egui::UiBuilder::new().max_rect(body).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", p.id())));
+        let mut child =
+            ui.new_child(egui::UiBuilder::new().max_rect(body).layout(egui::Layout::top_down(egui::Align::Min)).id_salt(("dock_body", p.id())));
         child.set_clip_rect(body);
         panel_body(app, &mut child, p);
         ui.allocate_rect(rect, Sense::hover());
@@ -1148,7 +1209,11 @@ pub(crate) fn drop_target(view: &DockView, layout: &Layout, what: Drag, at: Pos2
         && s.height() > 1.0
     {
         let (fx, fy) = ((at.x - s.left()) / s.width(), (at.y - s.top()) / s.height());
-        let side = [(fx, Side::Left), (1.0 - fx, Side::Right), (fy, Side::Top), (1.0 - fy, Side::Bottom)].into_iter().filter(|(f, _)| *f < EDGE).min_by(|a, b| a.0.total_cmp(&b.0)).map(|(_, s)| s);
+        let side = [(fx, Side::Left), (1.0 - fx, Side::Right), (fy, Side::Top), (1.0 - fy, Side::Bottom)]
+            .into_iter()
+            .filter(|(f, _)| *f < EDGE)
+            .min_by(|a, b| a.0.total_cmp(&b.0))
+            .map(|(_, s)| s);
         if let Some(side) = side {
             let band = match side {
                 Side::Left => Rect::from_min_max(s.min, pos2(s.left() + s.width() * EDGE, s.bottom())),
@@ -1435,7 +1500,10 @@ mod tests {
             let menu_left = d.header.right() - MENU_W - 4.0;
             for t in tabs {
                 if let Some((r, _)) = rect(&ctx, t) {
-                    assert!(r.right() <= menu_left + 0.5 && r.left() >= d.header.left() + 29.5, "{size}: {t:?} {r:?} leaves the strip (menu at {menu_left})");
+                    assert!(
+                        r.right() <= menu_left + 0.5 && r.left() >= d.header.left() + 29.5,
+                        "{size}: {t:?} {r:?} leaves the strip (menu at {menu_left})"
+                    );
                 }
             }
             // The shown tab is always in view, and its name is whole or ends in an ellipsis.
@@ -1456,7 +1524,10 @@ mod tests {
         assert_eq!(app.dock.tools_bar, Some(Side::Left), "the tools on the left, as before");
         // Its groups: four on the right, one below the stage.
         let sides: Vec<Over> = app.dock_view.drawn.iter().map(|d| d.over).collect();
-        assert_eq!(sides, vec![Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Bottom)]);
+        assert_eq!(
+            sides,
+            vec![Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Right), Over::Group(Side::Bottom)]
+        );
     }
 
     #[test]
@@ -1475,7 +1546,9 @@ mod tests {
         let tab = drawn(&app, Over::Group(Side::Top)).map(|d| d.header.left_center() + vec2(40.0, 0.0));
         let (Some(library), Some(tab)) = (library, tab) else { panic!("drawn") };
         drag(&ctx, &mut app, tab, library);
-        let Some(Place::Docked { side: Side::Right, group, .. }) = app.dock.place(Panel::Timeline) else { panic!("{:?}", app.dock.place(Panel::Timeline)) };
+        let Some(Place::Docked { side: Side::Right, group, .. }) = app.dock.place(Panel::Timeline) else {
+            panic!("{:?}", app.dock.place(Panel::Timeline))
+        };
         assert_eq!(app.dock.right.groups[group].tabs, vec![Panel::Library, Panel::MovieExplorer, Panel::Timeline]);
         assert!(app.dock.top.groups.is_empty(), "the top dock is gone with its last group");
     }
@@ -1500,7 +1573,10 @@ mod tests {
         // The middle of the stage: a floating window there.
         drag(&ctx, &mut app, history, stage.center());
         assert!(app.dock.is_floating(Panel::History));
-        assert_eq!(app.dock.floating.first().and_then(|f| f.at).map(|a| [a[0].round(), a[1].round()]), Some([stage.center().x.round(), stage.center().y.round()]));
+        assert_eq!(
+            app.dock.floating.first().and_then(|f| f.at).map(|a| [a[0].round(), a[1].round()]),
+            Some([stage.center().x.round(), stage.center().y.round()])
+        );
     }
 
     #[test]
@@ -1539,10 +1615,18 @@ mod tests {
             }
             settle(&ctx, &mut app);
             assert!(app.panel_visible(p), "{p:?}");
-            let drawn = app.dock.is_floating(p) || app.dock.tools_bar.is_some() && p == Panel::Tools || app.dock_view.drawn.iter().any(|d| app.dock.zone(match d.over {
-                Over::Group(s) | Over::Strip(s) => s,
-                Over::Window(_) => return false,
-            }).groups.iter().any(|g| g.tabs.first() == Some(&d.first) && g.shown() == Some(p)));
+            let drawn = app.dock.is_floating(p)
+                || app.dock.tools_bar.is_some() && p == Panel::Tools
+                || app.dock_view.drawn.iter().any(|d| {
+                    app.dock
+                        .zone(match d.over {
+                            Over::Group(s) | Over::Strip(s) => s,
+                            Over::Window(_) => return false,
+                        })
+                        .groups
+                        .iter()
+                        .any(|g| g.tabs.first() == Some(&d.first) && g.shown() == Some(p))
+                });
             assert!(drawn, "{p:?} is on screen");
         }
     }
@@ -1647,8 +1731,14 @@ mod tests {
         frame(&ctx, &mut app, pointer(library, Some(false)));
         settle(&ctx, &mut app);
         assert!(app.dock.floating.is_empty(), "{:?}", app.dock.floating);
-        let Some(Place::Docked { side: Side::Right, group, .. }) = app.dock.place(Panel::Colour) else { panic!("{:?}", app.dock.place(Panel::Colour)) };
-        assert_eq!(app.dock.right.groups[group].tabs, vec![Panel::Library, Panel::MovieExplorer, Panel::Colour, Panel::History], "in the window's order");
+        let Some(Place::Docked { side: Side::Right, group, .. }) = app.dock.place(Panel::Colour) else {
+            panic!("{:?}", app.dock.place(Panel::Colour))
+        };
+        assert_eq!(
+            app.dock.right.groups[group].tabs,
+            vec![Panel::Library, Panel::MovieExplorer, Panel::Colour, Panel::History],
+            "in the window's order"
+        );
         assert!(app.dock.is_shown(Panel::Colour), "the one shown stays in front");
     }
 

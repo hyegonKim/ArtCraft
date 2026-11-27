@@ -83,7 +83,19 @@ pub fn texture(mesh: &WarpMesh, m: &Affine, matrix: &Affine, repeat: bool, px: &
 
 /// Writes the pixels of rows `top..bottom` whose centres `t` holds.
 #[allow(clippy::too_many_arguments)]
-fn fill_tri(t: &Tri, b: IRect, top: i32, bottom: i32, w: usize, px: &Pixels, repeat: bool, smooth: bool, fx: &ColorTransform, out: &mut [u8], seen: &mut [bool]) {
+fn fill_tri(
+    t: &Tri,
+    b: IRect,
+    top: i32,
+    bottom: i32,
+    w: usize,
+    px: &Pixels,
+    repeat: bool,
+    smooth: bool,
+    fx: &ColorTransform,
+    out: &mut [u8],
+    seen: &mut [bool],
+) {
     let [a, p1, p2] = t.p;
     let area = (p1 - a).cross(p2 - a);
     if area.abs() <= 1e-9 || area.is_nan() {

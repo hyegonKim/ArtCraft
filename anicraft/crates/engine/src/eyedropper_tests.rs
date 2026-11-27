@@ -26,7 +26,11 @@ fn rect(s: &mut Session, x: f32, fill: &str) -> u64 {
 
 /// A linear gradient across the shape's own width (local space: the shape is centred on 0).
 fn gradient() -> Paint {
-    Paint::linear(Vec2::new(-50.0, 0.0), Vec2::new(50.0, 0.0), vec![GradientStop { offset: 0.0, color: Rgba::hex(0xff8800) }, GradientStop { offset: 1.0, color: Rgba::hex(0x0044ff) }])
+    Paint::linear(
+        Vec2::new(-50.0, 0.0),
+        Vec2::new(50.0, 0.0),
+        vec![GradientStop { offset: 0.0, color: Rgba::hex(0xff8800) }, GradientStop { offset: 1.0, color: Rgba::hex(0x0044ff) }],
+    )
 }
 
 #[test]
@@ -62,7 +66,9 @@ fn a_picked_gradient_stays_where_it_is_on_the_stage() {
     assert_eq!(s.style.fill, Rgba::hex(0xff8800), "the swatch shows its first colour");
     // In stage space: the shape's centre is (150, 150).
     match &s.style.fill_paint {
-        Some(Paint::Linear { start, end, .. }) => assert!(start.distance(Vec2::new(100.0, 150.0)) < 1e-3 && end.distance(Vec2::new(200.0, 150.0)) < 1e-3, "{start:?} {end:?}"),
+        Some(Paint::Linear { start, end, .. }) => {
+            assert!(start.distance(Vec2::new(100.0, 150.0)) < 1e-3 && end.distance(Vec2::new(200.0, 150.0)) < 1e-3, "{start:?} {end:?}")
+        }
         other => panic!("{other:?}"),
     }
     // The Paint Bucket pours it into the other shape, mapped into that shape's space, so the
@@ -88,7 +94,11 @@ fn picking_a_line_takes_its_colour_width_and_profile() {
     assert!((s.style.stroke_width - 6.0).abs() < 1e-4);
     assert_eq!(s.style.stroke_profile, ProfilePreset::TaperBoth);
     // A custom profile, on a line drawn twice the size: the width is as it shows on the stage.
-    run(&mut s, "draw.line", json!({"x0": 100, "y0": 300, "x1": 300, "y1": 300, "stroke": "#000000", "stroke_width": 4, "profile": [[0, 1, 1], [0.3, 2, 2], [1, 0.5, 0.5]]}));
+    run(
+        &mut s,
+        "draw.line",
+        json!({"x0": 100, "y0": 300, "x1": 300, "y1": 300, "stroke": "#000000", "stroke_width": 4, "profile": [[0, 1, 1], [0.3, 2, 2], [1, 0.5, 0.5]]}),
+    );
     run(&mut s, "element.set_transform", json!({"sx": 2, "sy": 2}));
     let r = run(&mut s, "paint.pick", json!({"x": 200, "y": 300}));
     assert_eq!(r["profile"], "custom");

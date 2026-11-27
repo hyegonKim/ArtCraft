@@ -13,8 +13,24 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("draw.drop", "Drop", "", None, "{} the selected raw shapes cut and join the raw shapes they touch (after a move), on each layer", true, (|s, p| s.each_layer(true, |s| drop(s, p))) as crate::RunFn),
-        c("element.select_connected", "Select Connected", "", None, "{x, y, add?, slop?} a raw stroke and the strokes joined to it, or a raw fill and the strokes on and in it", false, select_connected),
+        c(
+            "draw.drop",
+            "Drop",
+            "",
+            None,
+            "{} the selected raw shapes cut and join the raw shapes they touch (after a move), on each layer",
+            true,
+            (|s, p| s.each_layer(true, |s| drop(s, p))) as crate::RunFn,
+        ),
+        c(
+            "element.select_connected",
+            "Select Connected",
+            "",
+            None,
+            "{x, y, add?, slop?} a raw stroke and the strokes joined to it, or a raw fill and the strokes on and in it",
+            false,
+            select_connected,
+        ),
     ]
 }
 
@@ -72,7 +88,13 @@ pub(crate) fn merge_in_order(s: &mut Session, new: Vec<Element>, order: Order) -
     let all: Vec<Part> = match order {
         Order::Top => old.iter().map(|e| Part::Shape(e, false)).chain(new.iter().map(|e| Part::Shape(e, true))).collect(),
         Order::Behind => new.iter().map(|e| Part::Shape(e, true)).chain(old.iter().map(|e| Part::Shape(e, false))).collect(),
-        Order::UnderLines => old.iter().filter(|e| !is_line(e)).map(|e| Part::Shape(e, false)).chain(new.iter().map(|e| Part::Shape(e, true))).chain(old.iter().filter(|e| is_line(e)).map(|e| Part::Shape(e, false))).collect(),
+        Order::UnderLines => old
+            .iter()
+            .filter(|e| !is_line(e))
+            .map(|e| Part::Shape(e, false))
+            .chain(new.iter().map(|e| Part::Shape(e, true)))
+            .chain(old.iter().filter(|e| is_line(e)).map(|e| Part::Shape(e, false)))
+            .collect(),
     };
     let Some((out, picked)) = remerge(s, &all) else {
         // Too much to merge at once: keep the new shapes whole, as objects.
@@ -175,7 +197,8 @@ fn remerge_doc(doc: &mut Document, parts: &[Part], cutter: Option<&Path>) -> Opt
         None => planar::merge(&items)?,
     };
     // Item numbers back to part numbers (parts that are not raw shapes made no item).
-    let part_of: Vec<usize> = parts.iter().enumerate().filter(|(_, p)| !matches!(p, Part::Shape(e, _) if mergeable(e).is_none())).map(|(i, _)| i).collect();
+    let part_of: Vec<usize> =
+        parts.iter().enumerate().filter(|(_, p)| !matches!(p, Part::Shape(e, _) if mergeable(e).is_none())).map(|(i, _)| i).collect();
     let mut out: Vec<Arc<Element>> = Vec::with_capacity(merged.fills.len() + merged.strokes.len());
     let (mut picked, mut inside, mut from) = (Vec::new(), Vec::new(), Vec::new());
     for (piece, is_fill) in merged.fills.iter().map(|p| (p, true)).chain(merged.strokes.iter().map(|p| (p, false))) {
@@ -209,7 +232,14 @@ fn remerge_doc(doc: &mut Document, parts: &[Part], cutter: Option<&Path>) -> Opt
             name: String::new(),
             transform: Affine::translate(c.x, c.y),
             color,
-            kind: ElementKind::Shape(Shape { path: Arc::new(piece.path.transformed(&Affine::translate(-c.x, -c.y))), fill: fill.map(|f| f.transformed(&Affine::translate(-c.x, -c.y))), stroke, fill_rule: Default::default(), merge: true, warp: None }),
+            kind: ElementKind::Shape(Shape {
+                path: Arc::new(piece.path.transformed(&Affine::translate(-c.x, -c.y))),
+                fill: fill.map(|f| f.transformed(&Affine::translate(-c.x, -c.y))),
+                stroke,
+                fill_rule: Default::default(),
+                merge: true,
+                warp: None,
+            }),
         }));
     }
     Some(Remerged { out, picked, inside, from })
@@ -262,8 +292,14 @@ pub(crate) fn same_paint(x: &Paint, y: &Paint) -> bool {
     let near = |p: Vec2, q: Vec2| p.distance(q) <= EPS;
     match (x, y) {
         (Paint::Solid(x), Paint::Solid(y)) => x == y,
-        (Paint::Linear { start: s0, end: e0, stops: a, spread: p0, linear_rgb: l0 }, Paint::Linear { start: s1, end: e1, stops: b, spread: p1, linear_rgb: l1 }) => near(*s0, *s1) && near(*e0, *e1) && a == b && p0 == p1 && l0 == l1,
-        (Paint::Radial { stops: a, spread: p0, linear_rgb: l0, focal: f0, .. }, Paint::Radial { stops: b, spread: p1, linear_rgb: l1, focal: f1, .. }) => {
+        (
+            Paint::Linear { start: s0, end: e0, stops: a, spread: p0, linear_rgb: l0 },
+            Paint::Linear { start: s1, end: e1, stops: b, spread: p1, linear_rgb: l1 },
+        ) => near(*s0, *s1) && near(*e0, *e1) && a == b && p0 == p1 && l0 == l1,
+        (
+            Paint::Radial { stops: a, spread: p0, linear_rgb: l0, focal: f0, .. },
+            Paint::Radial { stops: b, spread: p1, linear_rgb: l1, focal: f1, .. },
+        ) => {
             // The same ring: the frames agree (centre, axes and size).
             let same_frame = match (x.frame(None), y.frame(None)) {
                 (Some(m0), Some(m1)) => m0.m.iter().zip(m1.m).all(|(u, v)| (u - v).abs() <= EPS * u.abs().max(v.abs()).max(1.0)),
@@ -432,7 +468,12 @@ fn merge_timeline_at(doc: &mut Document, tl: &mut Timeline, depth: usize) -> usi
         let layer = Arc::make_mut(layer);
         // A tween pairs its keyframes' shapes in order, so the keyframes it joins keep theirs.
         let shape_tween = |k: &anicraft_doc::Keyframe| k.tween.is_some() || k.motion.is_some();
-        let morphing: Vec<bool> = (0..layer.keyframes.len()).map(|i| layer.keyframes.get(i).is_some_and(|k| shape_tween(k)) || i.checked_sub(1).and_then(|j| layer.keyframes.get(j)).is_some_and(|k| shape_tween(k))).collect();
+        let morphing: Vec<bool> = (0..layer.keyframes.len())
+            .map(|i| {
+                layer.keyframes.get(i).is_some_and(|k| shape_tween(k))
+                    || i.checked_sub(1).and_then(|j| layer.keyframes.get(j)).is_some_and(|k| shape_tween(k))
+            })
+            .collect();
         for (kf, morph) in layer.keyframes.iter_mut().zip(morphing) {
             let idx: Vec<usize> = kf.elements.iter().enumerate().filter(|(_, e)| mergeable(e).is_some()).map(|(i, _)| i).collect();
             if idx.is_empty() || morph {
@@ -508,14 +549,17 @@ fn select_connected(s: &mut Session, p: &Value) -> Result<Value> {
         if sh.fill.is_some() {
             // The fill, and the strokes along its edge or inside it.
             for (o, osh) in raw.iter().filter(|(_, x)| x.fill.is_none()) {
-                if middle(&osh.path, &o.transform).is_some_and(|q| sh.path.contains(q, &e.transform, sh.fill_rule) || sh.path.distance_to_edge(q, &e.transform) <= 2.0 * SNAP) {
+                if middle(&osh.path, &o.transform)
+                    .is_some_and(|q| sh.path.contains(q, &e.transform, sh.fill_rule) || sh.path.distance_to_edge(q, &e.transform) <= 2.0 * SNAP)
+                {
                     picked.push(o.id);
                 }
             }
         } else {
             // The stroke, and every stroke joined to it end to end.
             let mut frontier = ends(&sh.path, &e.transform);
-            let mut todo: Vec<(&Element, Vec<Vec2>)> = raw.iter().filter(|(o, x)| x.fill.is_none() && o.id != hit).map(|(o, x)| (*o, ends(&x.path, &o.transform))).collect();
+            let mut todo: Vec<(&Element, Vec<Vec2>)> =
+                raw.iter().filter(|(o, x)| x.fill.is_none() && o.id != hit).map(|(o, x)| (*o, ends(&x.path, &o.transform))).collect();
             while let Some(q) = frontier.pop() {
                 let mut i = 0;
                 while i < todo.len() {

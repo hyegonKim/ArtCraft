@@ -341,10 +341,7 @@ mod tests {
         let lines = path.flatten(&Affine::IDENTITY, 0.05);
         pts.iter()
             .map(|p| {
-                lines
-                    .iter()
-                    .flat_map(|l| l.points.windows(2).map(|w| crate::path::segment_distance(*p, w[0], w[1])))
-                    .fold(f32::INFINITY, f32::min)
+                lines.iter().flat_map(|l| l.points.windows(2).map(|w| crate::path::segment_distance(*p, w[0], w[1]))).fold(f32::INFINITY, f32::min)
             })
             .fold(0.0, f32::max)
     }
@@ -381,7 +378,10 @@ mod tests {
         let path = fit_curve(&pts, 0.5, 3.0, true);
         assert!(max_dist(&path, &pts) <= 0.55);
         let start = path.point(0, crate::edit::ANCHOR);
-        assert!(start.is_some_and(|s| [(0.0, 0.0), (50.0, 0.0), (50.0, 50.0), (0.0, 50.0)].iter().any(|c| s.distance(Vec2::new(c.0, c.1)) < 1e-3)), "{start:?}");
+        assert!(
+            start.is_some_and(|s| [(0.0, 0.0), (50.0, 0.0), (50.0, 50.0), (0.0, 50.0)].iter().any(|c| s.distance(Vec2::new(c.0, c.1)) < 1e-3)),
+            "{start:?}"
+        );
         // Every point of the curve is on the square's outline (no shortcut across it).
         for pl in path.flatten(&Affine::IDENTITY, 0.05) {
             assert!(pl.points.iter().all(|p| p.x.min(p.y).min(50.0 - p.x).min(50.0 - p.y).abs() < 0.6), "a segment cuts across");
@@ -390,10 +390,12 @@ mod tests {
 
     #[test]
     fn closed_loop_and_degenerate_input() {
-        let circle: Vec<Vec2> = (0..120).map(|i| {
-            let a = i as f32 / 120.0 * std::f32::consts::TAU;
-            Vec2::new(50.0 + 30.0 * a.cos(), 50.0 + 30.0 * a.sin())
-        }).collect();
+        let circle: Vec<Vec2> = (0..120)
+            .map(|i| {
+                let a = i as f32 / 120.0 * std::f32::consts::TAU;
+                Vec2::new(50.0 + 30.0 * a.cos(), 50.0 + 30.0 * a.sin())
+            })
+            .collect();
         let path = fit_curve(&circle, 0.5, 3.0, true);
         assert!(matches!(path.cmds.last(), Some(PathCmd::Close)));
         assert!(max_dist(&path, &circle) <= 0.55);

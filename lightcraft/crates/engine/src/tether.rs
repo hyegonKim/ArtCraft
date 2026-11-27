@@ -73,10 +73,7 @@ impl TetherState {
 }
 
 fn sanitize_prefix(s: &str) -> String {
-    let cleaned: String = s
-        .chars()
-        .map(|c| if c.is_alphanumeric() || matches!(c, '-' | '_') { c } else { '_' })
-        .collect();
+    let cleaned: String = s.chars().map(|c| if c.is_alphanumeric() || matches!(c, '-' | '_') { c } else { '_' }).collect();
     let trimmed = cleaned.trim_matches('_');
     if trimmed.is_empty() { "Shoot".to_string() } else { trimmed.to_string() }
 }
@@ -116,7 +113,8 @@ pub fn poll_watch_folder(s: &mut Session, require_settled: bool) -> Result<Value
             continue;
         }
         // Skip photos already catalogued at this exact path
-        let already_in_catalog = s.catalog.photos().any(|p| matches!(&p.source, lightcraft_catalog::Source::File { path: existing } if existing == &key));
+        let already_in_catalog =
+            s.catalog.photos().any(|p| matches!(&p.source, lightcraft_catalog::Source::File { path: existing } if existing == &key));
         if already_in_catalog {
             s.tether.ingested_paths.insert(key);
             continue;
@@ -191,9 +189,7 @@ pub fn poll_watch_folder(s: &mut Session, require_settled: bool) -> Result<Value
         }
     }
 
-    if auto_advance
-        && let Some(&last) = newly_imported.last()
-    {
+    if auto_advance && let Some(&last) = newly_imported.last() {
         s.selection = Selection::single(last);
     }
 

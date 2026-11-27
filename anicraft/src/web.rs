@@ -80,7 +80,10 @@ pub fn start() {
 
 async fn run() -> Result<(), String> {
     // i18n-exempt: for the console and the page's loading text, before the interface starts
-    let canvas = element(CANVAS_ID).ok_or("the page has no canvas for AniCraft")?.dyn_into::<web_sys::HtmlCanvasElement>().map_err(|_| "the AniCraft element is not a canvas")?;
+    let canvas = element(CANVAS_ID)
+        .ok_or("the page has no canvas for AniCraft")?
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| "the AniCraft element is not a canvas")?;
     // Text needs a face to lay out with, and a page can't see the computer's fonts.
     anicraft_engine::text::Fonts::register(fonts());
     let session = anicraft_engine::Session::new(anicraft_engine::doc::sample::demo());
@@ -107,7 +110,8 @@ async fn run() -> Result<(), String> {
 fn fonts() -> Vec<Arc<[u8]>> {
     let mut faces = crate::theme::embedded_fonts();
     if faces.is_empty()
-        && let Some(f) = egui::FontDefinitions::default().font_data.get("Ubuntu-Light") // i18n-exempt: a font key
+        && let Some(f) = egui::FontDefinitions::default().font_data.get("Ubuntu-Light")
+    // i18n-exempt: a font key
     {
         faces.push(Arc::from(f.font.as_ref()));
     }
@@ -311,7 +315,8 @@ pub fn storage_get(key: &str) -> Option<String> {
 
 pub fn storage_set(key: &str, value: &str) -> Result<(), String> {
     let s = storage().ok_or(tr!("this browser keeps no storage for the site (private browsing?)"))?;
-    s.set_item(key, value).map_err(|_| tr!("the browser's storage for this site is full (documents with large images or sounds may not fit)").to_string())
+    s.set_item(key, value)
+        .map_err(|_| tr!("the browser's storage for this site is full (documents with large images or sounds may not fit)").to_string())
 }
 
 fn storage_remove(key: &str) {
@@ -371,7 +376,10 @@ impl BrowserSaver {
                 // The description last: a description always has its whole document.
                 let meta_json = serde_json::to_string(&meta).unwrap_or_default();
                 match storage_set(&doc_key(&self.id), &json).and_then(|()| storage_set(&meta_key(&self.id), &meta_json)) {
-                    Ok(()) => Outcome::Written { tag, stats: WriteStats { bytes: json.len() as u64, serialize_ms, write_ms: t.elapsed().as_secs_f64() * 1000.0 } },
+                    Ok(()) => Outcome::Written {
+                        tag,
+                        stats: WriteStats { bytes: json.len() as u64, serialize_ms, write_ms: t.elapsed().as_secs_f64() * 1000.0 },
+                    },
                     Err(error) => Outcome::Failed { tag, error },
                 }
             }
@@ -425,7 +433,8 @@ fn hold_lock(id: &str) {
 /// Web Locks every other session counts as closed (its copy is offered; restoring is a copy).
 pub fn refresh_live() {
     LIVE.with(|l| *l.borrow_mut() = None);
-    let query = locks().and_then(|locks| method(&locks, "query").and_then(|q| q.call0(&locks).ok())).and_then(|p| p.dyn_into::<js_sys::Promise>().ok());
+    let query =
+        locks().and_then(|locks| method(&locks, "query").and_then(|q| q.call0(&locks).ok())).and_then(|p| p.dyn_into::<js_sys::Promise>().ok());
     let Some(query) = query else {
         LIVE.with(|l| *l.borrow_mut() = Some(Vec::new()));
         return;

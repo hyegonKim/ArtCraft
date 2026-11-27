@@ -23,18 +23,60 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("script.set", "Set Frame Script", "", None, "{text?: the script, verbatim (\"\" clears; at most 1 MiB), language?: actionscript3|actionscript1or2|other (default: the script's, else actionscript3), symbol?: id, layer?, frame?} keeps a script on the keyframe at the frame (it replaces actions there); ActionScript 3.0 in the subset runs in Test Movie and the HTML export, the rest is kept and not run (`runs`, `problems` say which)", true, set as crate::RunFn),
-        c("script.clear", "Clear Frame Script", "", None, "{symbol?, layer?, frame?} removes the keyframe's kept script (actions are left alone: actions.clear)", true, clear),
-        c("script.list", "List Frame Scripts", "", None, "{text?: bool (default true)} every kept script in every scene and symbol, with its text, whether it runs and its problems, plus symbol linkage classes and the document class", false, list),
-        c("script.check", "Check Frame Script", "", None, "{text: the script, language?: actionscript3|actionscript1or2|other (default actionscript3)} whether it would run (the ActionScript 3.0 subset, ADR 0013), its problems with line and column, what is ignored, the names it takes from other frames of its timeline (`uses`), and what it compiles to (`steps`, `program`); changes nothing", false, check),
-        c("script.set_class", "Set Script Class", "", None, "{symbol?: id (default: the document), class: dotted class name (\"\" clears), base?: the class it extends} sets a symbol's linkage class, or the document class; kept as text, not run", true, set_class),
+        c(
+            "script.set",
+            "Set Frame Script",
+            "",
+            None,
+            "{text?: the script, verbatim (\"\" clears; at most 1 MiB), language?: actionscript3|actionscript1or2|other (default: the script's, else actionscript3), symbol?: id, layer?, frame?} keeps a script on the keyframe at the frame (it replaces actions there); ActionScript 3.0 in the subset runs in Test Movie and the HTML export, the rest is kept and not run (`runs`, `problems` say which)",
+            true,
+            set as crate::RunFn,
+        ),
+        c(
+            "script.clear",
+            "Clear Frame Script",
+            "",
+            None,
+            "{symbol?, layer?, frame?} removes the keyframe's kept script (actions are left alone: actions.clear)",
+            true,
+            clear,
+        ),
+        c(
+            "script.list",
+            "List Frame Scripts",
+            "",
+            None,
+            "{text?: bool (default true)} every kept script in every scene and symbol, with its text, whether it runs and its problems, plus symbol linkage classes and the document class",
+            false,
+            list,
+        ),
+        c(
+            "script.check",
+            "Check Frame Script",
+            "",
+            None,
+            "{text: the script, language?: actionscript3|actionscript1or2|other (default actionscript3)} whether it would run (the ActionScript 3.0 subset, ADR 0013), its problems with line and column, what is ignored, the names it takes from other frames of its timeline (`uses`), and what it compiles to (`steps`, `program`); changes nothing",
+            false,
+            check,
+        ),
+        c(
+            "script.set_class",
+            "Set Script Class",
+            "",
+            None,
+            "{symbol?: id (default: the document), class: dotted class name (\"\" clears), base?: the class it extends} sets a symbol's linkage class, or the document class; kept as text, not run",
+            true,
+            set_class,
+        ),
     ]
 }
 
 fn language(p: &Value) -> Result<Option<Language>> {
     match opt_str(p, "language")? {
         None => Ok(None),
-        Some(k) => Language::from_key(k).map(Some).ok_or_else(|| EngineError::Param("param 'language' must be actionscript3, actionscript1or2 or other".into())),
+        Some(k) => Language::from_key(k)
+            .map(Some)
+            .ok_or_else(|| EngineError::Param("param 'language' must be actionscript3, actionscript1or2 or other".into())),
     }
 }
 
@@ -112,7 +154,10 @@ fn set(s: &mut Session, p: &Value) -> Result<Value> {
     let old = k.script.as_ref().and_then(FrameScript::source).cloned();
     let text = match text {
         Some(t) => t,
-        None => old.as_ref().map(|o| o.text.clone()).ok_or_else(|| EngineError::State(format!("the keyframe at frame {} keeps no script to change the language of", k.start + 1)))?,
+        None => old
+            .as_ref()
+            .map(|o| o.text.clone())
+            .ok_or_else(|| EngineError::State(format!("the keyframe at frame {} keeps no script to change the language of", k.start + 1)))?,
     };
     if text.trim().is_empty() {
         // An empty script clears it (not actions that are there).
@@ -147,7 +192,12 @@ fn list(s: &mut Session, p: &Value) -> Result<Value> {
     let with_text = opt_bool(p, "text")?.unwrap_or(true);
     let mut frames = Vec::new();
     let doc = &s.doc;
-    let timelines = doc.scenes.iter().enumerate().map(|(i, sc)| (json!({"scene": i}), sc.name.as_str(), &sc.timeline, Some(TimelineRef::Root))).chain(doc.library.iter().map(|sym| (json!({"symbol": sym.id.0}), sym.name.as_str(), &sym.timeline, timeline_of(doc, Some(sym.id)))));
+    let timelines = doc
+        .scenes
+        .iter()
+        .enumerate()
+        .map(|(i, sc)| (json!({"scene": i}), sc.name.as_str(), &sc.timeline, Some(TimelineRef::Root)))
+        .chain(doc.library.iter().map(|sym| (json!({"symbol": sym.id.0}), sym.name.as_str(), &sym.timeline, timeline_of(doc, Some(sym.id)))));
     for (at, name, tl, which) in timelines {
         for l in &tl.layers {
             for k in &l.keyframes {
@@ -166,7 +216,12 @@ fn list(s: &mut Session, p: &Value) -> Result<Value> {
             }
         }
     }
-    let classes: Vec<Value> = s.doc.library.iter().filter_map(|sym| sym.linkage.as_ref().map(|l| json!({"symbol": sym.id.0, "name": sym.name, "class": l.class, "base": l.base}))).collect();
+    let classes: Vec<Value> = s
+        .doc
+        .library
+        .iter()
+        .filter_map(|sym| sym.linkage.as_ref().map(|l| json!({"symbol": sym.id.0, "name": sym.name, "class": l.class, "base": l.base})))
+        .collect();
     Ok(json!({"frames": frames, "classes": classes, "document_class": s.doc.document_class}))
 }
 

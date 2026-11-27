@@ -40,9 +40,7 @@ pub fn specs() -> Vec<CommandSpec> {
                 // unless `importExisting: true` is passed.
                 let import_existing = bool_or(p, "importExisting", false);
                 let mut ingested = std::collections::HashSet::new();
-                if !import_existing
-                    && let Ok(rd) = std::fs::read_dir(&watch_dir)
-                {
+                if !import_existing && let Ok(rd) = std::fs::read_dir(&watch_dir) {
                     for entry in rd.flatten() {
                         let path = entry.path();
                         if path.is_file() {

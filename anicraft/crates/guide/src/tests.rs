@@ -80,14 +80,23 @@ fn slugs_match_github() {
 
 #[test]
 fn links_become_pages_and_headings_get_ids() {
-    let pages = [Page { file: "index.md", markdown: "# Guide\n\nSee [the timeline](timeline.md#onion-skin) and [web](https://example.com/a.md).\n\n## Same\n\n## Same\n\n<b>raw</b>\n" }, Page { file: "timeline.md", markdown: "# Timeline\n\n## Onion skin\n" }];
+    let pages = [
+        Page {
+            file: "index.md",
+            markdown: "# Guide\n\nSee [the timeline](timeline.md#onion-skin) and [web](https://example.com/a.md).\n\n## Same\n\n## Same\n\n<b>raw</b>\n",
+        },
+        Page { file: "timeline.md", markdown: "# Timeline\n\n## Onion skin\n" },
+    ];
     let html = render_page(&pages, 0);
     assert!(html.contains("href=\"timeline.html#onion-skin\""), "{html}");
     assert!(html.contains("href=\"https://example.com/a.md\""), "external links stay as written");
     assert!(html.contains("id=\"same\"") && html.contains("id=\"same-1\""), "repeated headings are numbered");
     assert!(html.contains("&lt;b&gt;raw&lt;/b&gt;"), "raw HTML is shown, never passed through");
     assert!(html.contains("rel=\"next\""));
-    let nested = [Page { file: "index.md", markdown: "# Guide\n\n[c](reference/commands.md)\n" }, Page { file: "reference/commands.md", markdown: "# Commands\n\n[back](../index.md)\n" }];
+    let nested = [
+        Page { file: "index.md", markdown: "# Guide\n\n[c](reference/commands.md)\n" },
+        Page { file: "reference/commands.md", markdown: "# Commands\n\n[back](../index.md)\n" },
+    ];
     let html = render_page(&nested, 1);
     assert!(html.contains("href=\"../style.css\"") && html.contains("href=\"../index.html\""), "{html}");
     assert!(check(&nested, &[]).is_empty(), "{:?}", check(&nested, &[]));
@@ -96,12 +105,25 @@ fn links_become_pages_and_headings_get_ids() {
 #[test]
 fn the_check_finds_what_is_wrong() {
     let pages = [
-        Page { file: "index.md", markdown: "# Guide\n\n[a](a.md) [gone](missing.md) [anchor](a.md#nope) [out](../README.md) [ftp](ftp://x) ![p](images/none.png)\n" },
+        Page {
+            file: "index.md",
+            markdown: "# Guide\n\n[a](a.md) [gone](missing.md) [anchor](a.md#nope) [out](../README.md) [ftp](ftp://x) ![p](images/none.png)\n",
+        },
         Page { file: "a.md", markdown: "# A\n\n# Second title\n" },
         Page { file: "island.md", markdown: "# Island\n\n<div>x</div>\n" },
     ];
     let problems = check(&pages, &["images/unused.png"]).join("\n");
-    for expect in ["missing.md is not a page", "has no heading #nope", "../README.md leaves the book", "ftp://x is neither", "images/none.png is not one", "a.md: has 2 level-one", "island.md: can't be reached", "island.md: has raw HTML", "images/unused.png: no page shows it"] {
+    for expect in [
+        "missing.md is not a page",
+        "has no heading #nope",
+        "../README.md leaves the book",
+        "ftp://x is neither",
+        "images/none.png is not one",
+        "a.md: has 2 level-one",
+        "island.md: can't be reached",
+        "island.md: has raw HTML",
+        "images/unused.png: no page shows it",
+    ] {
         assert!(problems.contains(expect), "expected {expect:?} in:\n{problems}");
     }
 }

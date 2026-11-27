@@ -59,7 +59,8 @@ impl TimelineGeo {
     pub fn at(&self, p: Pos2, playhead: u32) -> Option<(LayerId, u32, Rect)> {
         let (row, layer) = *self.rows.iter().find(|(r, _)| r.contains(p))?;
         let cw = self.cell_w.max(1.0);
-        let frame = if p.x >= self.cells_left { ((p.x - self.x0) / cw).floor().clamp(0.0, anicraft_engine::MAX_FRAME as f32) as u32 } else { playhead };
+        let frame =
+            if p.x >= self.cells_left { ((p.x - self.x0) / cw).floor().clamp(0.0, anicraft_engine::MAX_FRAME as f32) as u32 } else { playhead };
         let left = self.x0 + frame as f32 * cw;
         Some((layer, frame, Rect::from_min_max(pos2(left.max(self.cells_left), row.top()), pos2((left + cw).max(self.cells_left), row.bottom()))))
     }
@@ -97,7 +98,10 @@ pub struct Plan {
 /// Why a file can't go there, in the interface language.
 fn refusal(kind: DropKind, start: bool) -> String {
     match kind {
-        DropKind::Unsupported => tr!("AniCraft opens .anicraft, .fla and .xfl documents, and imports SVG drawings, PNG and JPEG images, and WAV, Ogg and MP3 sounds").into(),
+        DropKind::Unsupported => {
+            tr!("AniCraft opens .anicraft, .fla and .xfl documents, and imports SVG drawings, PNG and JPEG images, and WAV, Ogg and MP3 sounds")
+                .into()
+        }
         _ if start => tr!("Open or create a document first, then drop drawings, images and sounds on its stage").into(),
         _ => tr!("Drop drawings, images and sounds on the stage or a layer's frame to place them, or on the Library to add them").into(),
     }
@@ -213,7 +217,8 @@ fn drag_pointer(app: &App, ctx: &egui::Context) -> Option<Pos2> {
 /// After the panels drew: the highlight while files hover, and what was dropped.
 pub fn frame(app: &mut App, ctx: &egui::Context) {
     let (hovered, dropped, moved, now) = ctx.input(|i| {
-        let hovered: Vec<PathBuf> = i.raw.hovered_files.iter().map(|h| h.path.clone().unwrap_or_else(|| PathBuf::from(guess_name(&h.mime)))).collect();
+        let hovered: Vec<PathBuf> =
+            i.raw.hovered_files.iter().map(|h| h.path.clone().unwrap_or_else(|| PathBuf::from(guess_name(&h.mime)))).collect();
         let moved = i.events.iter().any(|e| matches!(e, egui::Event::PointerMoved(_)));
         (hovered, i.raw.dropped_files.clone(), moved, i.time)
     });
@@ -307,7 +312,11 @@ pub fn run(app: &mut App, files: &[PathBuf], spot: Spot) {
         app.start = None;
         app.request("file.open", json!({"path": doc.display().to_string()}));
         if let Some((_, why)) = plan.left_out.first() {
-            app.status_ok(tr!("Left out {files}: {why}", files = names(&plan.left_out.iter().map(|(p, _)| p.clone()).collect::<Vec<_>>()), why = why));
+            app.status_ok(tr!(
+                "Left out {files}: {why}",
+                files = names(&plan.left_out.iter().map(|(p, _)| p.clone()).collect::<Vec<_>>()),
+                why = why
+            ));
         }
         return;
     }
@@ -335,7 +344,9 @@ pub fn run(app: &mut App, files: &[PathBuf], spot: Spot) {
                     _ => {}
                 }
                 match folder.and_then(|f| app.s.doc.folder(f)).map(|f| f.name.clone()) {
-                    Some(name) => trn!("Added {n} file to “{folder}” in the Library", "Added {n} files to “{folder}” in the Library", n, folder = name),
+                    Some(name) => {
+                        trn!("Added {n} file to “{folder}” in the Library", "Added {n} files to “{folder}” in the Library", n, folder = name)
+                    }
                     None => trn!("Added {n} file to the Library", "Added {n} files to the Library", n),
                 }
             })
@@ -348,9 +359,23 @@ pub fn run(app: &mut App, files: &[PathBuf], spot: Spot) {
                 let name = app.s.timeline().layer(layer).map(|l| l.name.clone()).unwrap_or_default();
                 let (frame, undo) = (frame + 1, app.undo_key());
                 if v["keyframe_made"].as_bool() == Some(true) {
-                    trn!("Placed {n} file on {layer} at frame {frame}, in a new keyframe — {undo} to undo", "Placed {n} files on {layer} at frame {frame}, in a new keyframe — {undo} to undo", n, layer = name, frame = frame, undo = undo)
+                    trn!(
+                        "Placed {n} file on {layer} at frame {frame}, in a new keyframe — {undo} to undo",
+                        "Placed {n} files on {layer} at frame {frame}, in a new keyframe — {undo} to undo",
+                        n,
+                        layer = name,
+                        frame = frame,
+                        undo = undo
+                    )
                 } else {
-                    trn!("Placed {n} file on {layer} at frame {frame} — {undo} to undo", "Placed {n} files on {layer} at frame {frame} — {undo} to undo", n, layer = name, frame = frame, undo = undo)
+                    trn!(
+                        "Placed {n} file on {layer} at frame {frame} — {undo} to undo",
+                        "Placed {n} files on {layer} at frame {frame} — {undo} to undo",
+                        n,
+                        layer = name,
+                        frame = frame,
+                        undo = undo
+                    )
                 }
             })
         }
@@ -369,9 +394,23 @@ pub fn run(app: &mut App, files: &[PathBuf], spot: Spot) {
                 let layer = app.s.active_layer().map(|l| l.name.clone()).unwrap_or_default();
                 let (frame, undo) = (app.s.frame + 1, app.undo_key());
                 if centred {
-                    trn!("Placed {n} file on {layer} at frame {frame}, in the middle of the view — {undo} to undo", "Placed {n} files on {layer} at frame {frame}, in the middle of the view — {undo} to undo", n, layer = layer, frame = frame, undo = undo)
+                    trn!(
+                        "Placed {n} file on {layer} at frame {frame}, in the middle of the view — {undo} to undo",
+                        "Placed {n} files on {layer} at frame {frame}, in the middle of the view — {undo} to undo",
+                        n,
+                        layer = layer,
+                        frame = frame,
+                        undo = undo
+                    )
                 } else {
-                    trn!("Placed {n} file on {layer} at frame {frame} — {undo} to undo", "Placed {n} files on {layer} at frame {frame} — {undo} to undo", n, layer = layer, frame = frame, undo = undo)
+                    trn!(
+                        "Placed {n} file on {layer} at frame {frame} — {undo} to undo",
+                        "Placed {n} files on {layer} at frame {frame} — {undo} to undo",
+                        n,
+                        layer = layer,
+                        frame = frame,
+                        undo = undo
+                    )
                 }
             })
         }
@@ -466,7 +505,11 @@ fn highlight(app: &App, ctx: &egui::Context, files: &[PathBuf], p: Option<Pos2>)
     };
     if let Some(doc) = docs.first() {
         painter.rect_stroke(screen, T.rc(), stroke, StrokeKind::Inside);
-        let text = if app.s.is_dirty() { tr!("Open {name} (you'll be asked about unsaved changes)", name = crate::recent::display_name(doc)) } else { tr!("Open {name}", name = crate::recent::display_name(doc)) };
+        let text = if app.s.is_dirty() {
+            tr!("Open {name} (you'll be asked about unsaved changes)", name = crate::recent::display_name(doc))
+        } else {
+            tr!("Open {name}", name = crate::recent::display_name(doc))
+        };
         label(screen.center_top() + vec2(-120.0, 12.0), text, true);
         return;
     }
@@ -487,12 +530,18 @@ fn highlight(app: &App, ctx: &egui::Context, files: &[PathBuf], p: Option<Pos2>)
             painter.line_segment([p - vec2(0.0, r), p + vec2(0.0, r)], Stroke::new(1.5, T.accent));
             let ok = fits(DropTarget::Stage);
             let layer = app.s.active_layer().map(|l| l.name.clone()).unwrap_or_default();
-            let text = if ok { tr!("Place {what} on {layer} at frame {frame}", what = what, layer = layer, frame = app.s.frame + 1) } else { refusal(DropKind::Unsupported, false) };
+            let text = if ok {
+                tr!("Place {what} on {layer} at frame {frame}", what = what, layer = layer, frame = app.s.frame + 1)
+            } else {
+                refusal(DropKind::Unsupported, false)
+            };
             label(p + vec2(14.0, 12.0), text, ok);
         }
         (Spot::Timeline(layer, frame), Some(p)) => {
             // The row outlined and the frame's cell filled: where it lands.
-            if let Some((row, cell)) = app.drop.timeline.as_ref().and_then(|t| Some((t.rows.iter().find(|(_, l)| *l == layer)?.0, t.at(p, app.s.frame)?.2))) {
+            if let Some((row, cell)) =
+                app.drop.timeline.as_ref().and_then(|t| Some((t.rows.iter().find(|(_, l)| *l == layer)?.0, t.at(p, app.s.frame)?.2)))
+            {
                 painter.rect_stroke(row, crate::theme::SQUARE, Stroke::new(1.5, T.accent), StrokeKind::Inside);
                 painter.rect_filled(cell, crate::theme::SQUARE, T.accent.gamma_multiply(0.45));
                 painter.rect_stroke(cell, crate::theme::SQUARE, stroke, StrokeKind::Inside);
@@ -533,7 +582,11 @@ fn highlight(app: &App, ctx: &egui::Context, files: &[PathBuf], p: Option<Pos2>)
         (Spot::Unknown, _) => {
             // The desktop doesn't say where the pointer is during a drag: say what each place does.
             painter.rect_stroke(screen, T.rc(), Stroke::new(1.5, T.accent), StrokeKind::Inside);
-            label(screen.center_top() + vec2(-180.0, 12.0), tr!("Drop {what} on the stage or a layer's frame to place it, or on the Library to add it", what = what), true);
+            label(
+                screen.center_top() + vec2(-180.0, 12.0),
+                tr!("Drop {what} on the stage or a layer's frame to place it, or on the Library to add it", what = what),
+                true,
+            );
         }
         (spot, p) => {
             let at = p.unwrap_or(screen.center_top()) + vec2(14.0, 12.0);
@@ -639,7 +692,13 @@ mod tests {
         let undo = app.s.history_len();
         run(&mut app, std::slice::from_ref(&png), Spot::Timeline(star, 9));
         assert_eq!(app.s.history_len(), undo + 1);
-        assert!(app.s.timeline().layer(star).and_then(|l| l.keyframe_at(9)).is_some_and(|k| k.start == 9 && k.elements.iter().any(|e| app.s.selection.contains(star, e.id))));
+        assert!(
+            app.s
+                .timeline()
+                .layer(star)
+                .and_then(|l| l.keyframe_at(9))
+                .is_some_and(|k| k.start == 9 && k.elements.iter().any(|e| app.s.selection.contains(star, e.id)))
+        );
         assert!(app.status.as_ref().is_some_and(|s| !s.error && s.text.contains("new keyframe")), "{:?}", app.status.as_ref().map(|s| &s.text));
         // A locked layer says why, and nothing changes.
         app.s.layer = star;
@@ -673,7 +732,10 @@ mod tests {
         let mut app = App::with_context(&ctx, anicraft_engine::Session::new(anicraft_engine::doc::sample::demo()), Some(PathBuf::from("unused.png")));
         crate::start::open(&mut app);
         let frame = |app: &mut App| {
-            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1600.0, 940.0))), ..Default::default() }, |ui| app.frame(ui));
+            let mut out = ctx
+                .run_ui(egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1600.0, 940.0))), ..Default::default() }, |ui| {
+                    app.frame(ui)
+                });
             out.textures_delta.clear();
             out
         };

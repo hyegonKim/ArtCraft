@@ -62,8 +62,12 @@ impl Default for BindOptions {
 pub fn brush_label(b: Brush) -> (&'static str, &'static str) {
     match b {
         Brush::Add => (tr_noop!("Add"), tr_noop!("Raises how much the bone moves the points under the brush")),
-        Brush::Subtract => (tr_noop!("Subtract"), tr_noop!("Lowers how much the bone moves the points under the brush; their other bones take up the rest")),
-        Brush::Smooth => (tr_noop!("Smooth"), tr_noop!("Evens out the bone's share across the points under the brush, softening a hard edge between bones")),
+        Brush::Subtract => {
+            (tr_noop!("Subtract"), tr_noop!("Lowers how much the bone moves the points under the brush; their other bones take up the rest"))
+        }
+        Brush::Smooth => {
+            (tr_noop!("Smooth"), tr_noop!("Evens out the bone's share across the points under the brush, softening a hard edge between bones"))
+        }
     }
 }
 
@@ -170,9 +174,24 @@ fn bind(app: &mut App, bone: BoneId, points: Vec<usize>, shift: bool, command: b
     if let Some(v) = app.run("bone.bind", json!({"bone": bone.0, "points": points, "mode": m})) {
         let bound = v["bound"].as_u64().unwrap_or(0);
         let msg = match m {
-            "remove" => trn!("Took {n} point from the bone; it follows {bound} points.", "Took {n} points from the bone; it follows {bound} points.", n, bound = bound),
-            "add" => trn!("{n} point now shares the bone; it moves {bound} points.", "{n} points now share the bone; it moves {bound} points.", n, bound = bound),
-            _ => trn!("{n} point now follows only this bone; it moves {bound} points.", "{n} points now follow only this bone; it moves {bound} points.", n, bound = bound),
+            "remove" => trn!(
+                "Took {n} point from the bone; it follows {bound} points.",
+                "Took {n} points from the bone; it follows {bound} points.",
+                n,
+                bound = bound
+            ),
+            "add" => trn!(
+                "{n} point now shares the bone; it moves {bound} points.",
+                "{n} points now share the bone; it moves {bound} points.",
+                n,
+                bound = bound
+            ),
+            _ => trn!(
+                "{n} point now follows only this bone; it moves {bound} points.",
+                "{n} points now follow only this bone; it moves {bound} points.",
+                n,
+                bound = bound
+            ),
         };
         app.status_ok(msg);
     }
@@ -180,7 +199,11 @@ fn bind(app: &mut App, bone: BoneId, points: Vec<usize>, shift: bool, command: b
 
 /// The nearest unlocked shape point within grabbing reach of screen point `p`: its layer and index.
 fn point_at(app: &App, xf: Xf, p: Pos2) -> Option<(LayerId, usize)> {
-    shown(app).into_iter().rev().filter(|s| !s.locked).find_map(|s| s.points.iter().position(|(at, _)| xf.to_screen(*at).distance(p) <= GRAB).map(|i| (s.layer, i)))
+    shown(app)
+        .into_iter()
+        .rev()
+        .filter(|s| !s.locked)
+        .find_map(|s| s.points.iter().position(|(at, _)| xf.to_screen(*at).distance(p) <= GRAB).map(|i| (s.layer, i)))
 }
 
 /// Sends dabs at stage points `at` with the brush in hand (inside the stroke's gesture).
@@ -234,7 +257,11 @@ pub fn click(app: &mut App, xf: Xf, p: Pos2, shift: bool, command: bool) {
 pub fn drag_start(app: &mut App, xf: Xf, press: Pos2) -> Drag {
     let sp = xf.to_stage(press);
     if app.bone_sel.is_none() {
-        app.status_ok(if app.bind.paint { tr!("Pick a bone of a shape first (click it), then paint its weights.") } else { tr!("Pick a bone of a shape first (click it), then drag a box around the points it should move.") });
+        app.status_ok(if app.bind.paint {
+            tr!("Pick a bone of a shape first (click it), then paint its weights.")
+        } else {
+            tr!("Pick a bone of a shape first (click it), then drag a box around the points it should move.")
+        });
         return Drag::None;
     }
     if app.bind.paint {
@@ -270,9 +297,20 @@ pub fn paint_to(app: &mut App, last: Pos2, cur: Pos2) -> Pos2 {
 pub fn paint_end(app: &mut App) {
     app.s.end_gesture();
     if let Some(bone) = picked_shape_bone(app) {
-        let n = app.s.timeline().layers.iter().find_map(|l| l.armature.as_ref().and_then(|a| a.skin.as_ref()).filter(|_| l.armature.as_ref().is_some_and(|a| a.bone(bone).is_some())).map(|k| k.points.iter().filter(|b| b.weight(bone) > 0.0).count()));
+        let n = app.s.timeline().layers.iter().find_map(|l| {
+            l.armature
+                .as_ref()
+                .and_then(|a| a.skin.as_ref())
+                .filter(|_| l.armature.as_ref().is_some_and(|a| a.bone(bone).is_some()))
+                .map(|k| k.points.iter().filter(|b| b.weight(bone) > 0.0).count())
+        });
         if let Some(n) = n {
-            app.status_ok(trn!("The bone moves {n} point. {undo} to undo the stroke.", "The bone moves {n} points. {undo} to undo the stroke.", n, undo = app.undo_key()));
+            app.status_ok(trn!(
+                "The bone moves {n} point. {undo} to undo the stroke.",
+                "The bone moves {n} points. {undo} to undo the stroke.",
+                n,
+                undo = app.undo_key()
+            ));
         }
     }
 }
@@ -380,7 +418,13 @@ mod tests {
     }
 
     fn weights(app: &App, bone: BoneId) -> Vec<f32> {
-        app.s.timeline().layers.iter().find_map(|l| l.armature.as_ref().and_then(|a| a.skin.as_ref())).map(|k| k.points.iter().map(|b| b.weight(bone)).collect()).unwrap_or_default()
+        app.s
+            .timeline()
+            .layers
+            .iter()
+            .find_map(|l| l.armature.as_ref().and_then(|a| a.skin.as_ref()))
+            .map(|k| k.points.iter().map(|b| b.weight(bone)).collect())
+            .unwrap_or_default()
     }
 
     #[test]

@@ -169,10 +169,25 @@ pub fn items(app: &App) -> (Vec<Item>, usize) {
             let detail = if b.is_empty() {
                 tr!("Layer {layer}", layer = layer.name)
             } else {
-                tr!("Layer {layer} · x {x}, y {y} · {w} × {h} px", layer = layer.name, x = format!("{:.0}", b.min.x), y = format!("{:.0}", b.min.y), w = format!("{:.0}", b.width()), h = format!("{:.0}", b.height()))
+                tr!(
+                    "Layer {layer} · x {x}, y {y} · {w} × {h} px",
+                    layer = layer.name,
+                    x = format!("{:.0}", b.min.x),
+                    y = format!("{:.0}", b.min.y),
+                    w = format!("{:.0}", b.width()),
+                    h = format!("{:.0}", b.height())
+                )
             };
             let detail = if locked { tr!("{detail} · locked", detail = detail) } else { detail };
-            out.push(Item { layer: layer.id, element: e.id, name: element_name(&s.doc, e), detail, bounds: b, selected: s.selection.contains(layer.id, e.id), locked });
+            out.push(Item {
+                layer: layer.id,
+                element: e.id,
+                name: element_name(&s.doc, e),
+                detail,
+                bounds: b,
+                selected: s.selection.contains(layer.id, e.id),
+                locked,
+            });
         }
     }
     (out, total)
@@ -215,7 +230,11 @@ fn element_keys(i: &mut egui::InputState) -> Option<Step> {
 
 /// Selects `it` alone (`toggle`: adds it to the selection or takes it out) and says so.
 fn select(app: &mut App, it: &Item, toggle: bool) {
-    let params = if toggle { json!({"ids": [it.element.0], "layer": it.layer.0, "toggle": true}) } else { json!({"ids": [it.element.0], "layer": it.layer.0}) };
+    let params = if toggle {
+        json!({"ids": [it.element.0], "layer": it.layer.0, "toggle": true})
+    } else {
+        json!({"ids": [it.element.0], "layer": it.layer.0})
+    };
     if app.run("element.select", params).is_some() {
         let n = app.s.selection.len();
         let now = app.s.selection.contains(it.layer, it.element);
@@ -335,7 +354,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui, stage: &Response, to_screen: impl 
     if on_canvas {
         // Tab goes into the list (when there is one); the arrows nudge, as before.
         let tab = !list.is_empty();
-        ctx.memory_mut(|m| m.set_focus_lock_filter(stage.id, egui::EventFilter { tab, horizontal_arrows: true, vertical_arrows: true, ..Default::default() }));
+        ctx.memory_mut(|m| {
+            m.set_focus_lock_filter(stage.id, egui::EventFilter { tab, horizontal_arrows: true, vertical_arrows: true, ..Default::default() })
+        });
     }
     if let Some(id) = focus_to {
         ctx.memory_mut(|m| m.request_focus(id));

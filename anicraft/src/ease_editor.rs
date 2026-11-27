@@ -48,8 +48,17 @@ pub enum EaseTarget {
 enum Drag {
     /// A point or one of its handles; the value range is frozen so the graph doesn't rescale
     /// under the pointer.
-    Point { i: usize, lo: f32, hi: f32 },
-    Handle { i: usize, h: Handle, lo: f32, hi: f32 },
+    Point {
+        i: usize,
+        lo: f32,
+        hi: f32,
+    },
+    Handle {
+        i: usize,
+        h: Handle,
+        lo: f32,
+        hi: f32,
+    },
 }
 
 /// The Custom Ease window's state.
@@ -168,7 +177,8 @@ pub fn picker(app: &App, ui: &mut egui::Ui, menu: &str, current: &Easing, width:
             out = Some(Picked::Ease(json!("Linear")));
         }
         let classic = matches!(current, Easing::Classic(_));
-        if ui.selectable_label(classic, tr!("Classic Ease")).on_hover_text(tr!("One strength: −100 eases in, +100 eases out")).clicked() && !classic {
+        if ui.selectable_label(classic, tr!("Classic Ease")).on_hover_text(tr!("One strength: −100 eases in, +100 eases out")).clicked() && !classic
+        {
             out = Some(Picked::Ease(json!({"classic": -50})));
         }
         ui.separator();
@@ -245,7 +255,17 @@ fn plugin_eases(app: &App, ui: &mut egui::Ui, current: &Easing) -> Option<Picked
 fn thumb(ui: &mut egui::Ui, e: &Easing, on: bool, name: &str) -> egui::Response {
     let (rect, resp) = ui.allocate_exact_size(THUMB, Sense::click());
     let p = ui.painter();
-    p.rect_filled(rect, T.rc(), if on { T.accent_dim } else if resp.hovered() { T.hover } else { T.field });
+    p.rect_filled(
+        rect,
+        T.rc(),
+        if on {
+            T.accent_dim
+        } else if resp.hovered() {
+            T.hover
+        } else {
+            T.field
+        },
+    );
     plot(p, rect.shrink(4.0), e, -0.35, 1.35, Stroke::new(1.5, if on { T.accent_text } else { T.tween }));
     a11y::control(ui, &resp, WidgetType::SelectableLabel, name, Some(on));
     resp.on_hover_text(name)
@@ -323,11 +343,17 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
 fn heading(app: &App, ed: &EaseEditor) -> String {
     match &ed.target {
         EaseTarget::Tween { layer, frame } => {
-            let k = app.s.timeline().layer(anicraft_engine::doc::LayerId(*layer)).and_then(|l| l.keyframe_at(*frame).map(|k| (l.name.clone(), k.start, k.end())));
+            let k = app
+                .s
+                .timeline()
+                .layer(anicraft_engine::doc::LayerId(*layer))
+                .and_then(|l| l.keyframe_at(*frame).map(|k| (l.name.clone(), k.start, k.end())));
             let (name, a, b) = k.unwrap_or_default();
             tr!("Tween on {layer}, frames {a}–{b}", layer = name, a = a + 1, b = b)
         }
-        EaseTarget::Motion { property, frame, .. } => tr!("Motion tween: {property} at frame {frame}", property = crate::i18n::t(property.label()), frame = frame + 1),
+        EaseTarget::Motion { property, frame, .. } => {
+            tr!("Motion tween: {property} at frame {frame}", property = crate::i18n::t(property.label()), frame = frame + 1)
+        }
         EaseTarget::Saved(n) => tr!("Saved ease “{name}”", name = n),
     }
 }
@@ -341,7 +367,10 @@ fn body(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
         if let Some(tw) = tw.filter(|t| t.kind == TweenKind::Classic) {
             let mut separate = !tw.groups.is_empty();
             ui.horizontal_wrapped(|ui| {
-                if crate::theme::checkbox(ui, &mut separate, tr!("Ease each property separately")).on_hover_text(tr!("Position, rotation, scale, colour and filters each with their own ease")).changed() {
+                if crate::theme::checkbox(ui, &mut separate, tr!("Ease each property separately"))
+                    .on_hover_text(tr!("Position, rotation, scale, colour and filters each with their own ease"))
+                    .changed()
+                {
                     app.run("ease.separate", json!({"separate": separate, "layer": layer, "frame": frame}));
                     ed.group = separate.then_some(EaseGroup::Position);
                     ed.selected = None;
@@ -377,7 +406,8 @@ fn body(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
         if let Easing::Classic(s) = ease {
             let mut v = *s;
             ui.label(text(Type::Label, tr!("Strength")));
-            let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut v).range(-100.0..=100.0).speed(1.0).max_decimals(0))).named(tr!("Classic ease strength"));
+            let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut v).range(-100.0..=100.0).speed(1.0).max_decimals(0)))
+                .named(tr!("Classic ease strength"));
             if r.changed() {
                 crate::panels::live(app, tr_noop!("Ease"), "ease.set", ed.with(json!({"easing": {"classic": v}})));
             }
@@ -429,7 +459,11 @@ fn body(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
             let name = ed.save_name.trim().to_string();
             let exists = app.s.doc.eases.iter().any(|e| e.name.eq_ignore_ascii_case(&name));
             let button = if exists { tr!("Replace") } else { tr!("Save") };
-            if ui.add_enabled(!name.is_empty(), egui::Button::new(button)).on_hover_text(tr!("Keep this ease in the document, with the presets, for any tween")).clicked() {
+            if ui
+                .add_enabled(!name.is_empty(), egui::Button::new(button))
+                .on_hover_text(tr!("Keep this ease in the document, with the presets, for any tween"))
+                .clicked()
+            {
                 app.run("ease.save", ed.with(json!({"name": name, "replace": exists})));
             }
             ui.separator();
@@ -446,7 +480,10 @@ fn body(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
             ed.selected = None;
         }
         if let EaseTarget::Saved(n) = ed.target.clone()
-            && ui.button(tr!("Delete Saved Ease")).on_hover_text(tr!("Tweens using it keep their curves ({undo} to undo)", undo = app.undo_key())).clicked()
+            && ui
+                .button(tr!("Delete Saved Ease"))
+                .on_hover_text(tr!("Tweens using it keep their curves ({undo} to undo)", undo = app.undo_key()))
+                .clicked()
         {
             app.run("ease.delete", json!({"name": n}));
         }
@@ -503,7 +540,14 @@ fn graph(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
         let filter = egui::EventFilter { horizontal_arrows: true, vertical_arrows: true, ..Default::default() };
         ui.memory_mut(|m| m.set_focus_lock_filter(resp.id, filter));
     }
-    a11y::surface(ui, &resp, &tr!("Ease curve, {count} points. [ and ] pick a point, the arrows move it, S makes it smooth or a corner, + adds one, Delete removes it", count = pts.len()));
+    a11y::surface(
+        ui,
+        &resp,
+        &tr!(
+            "Ease curve, {count} points. [ and ] pick a point, the arrows move it, S makes it smooth or a corner, + adds one, Delete removes it",
+            count = pts.len()
+        ),
+    );
     let (lo, hi) = match ed.drag {
         Some(Drag::Point { lo, hi, .. } | Drag::Handle { lo, hi, .. }) => (lo, hi),
         None => value_range(&curve, ease),
@@ -559,7 +603,13 @@ fn graph(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
         }
     }
     // ---- pointer ----
-    let near_point = |pt: Pos2| pts.iter().enumerate().filter(|(_, q)| v.at(q.at.x, q.at.y).distance(pt) <= GRAB).min_by(|a, b| v.at(a.1.at.x, a.1.at.y).distance(pt).total_cmp(&v.at(b.1.at.x, b.1.at.y).distance(pt))).map(|(i, _)| i);
+    let near_point = |pt: Pos2| {
+        pts.iter()
+            .enumerate()
+            .filter(|(_, q)| v.at(q.at.x, q.at.y).distance(pt) <= GRAB)
+            .min_by(|a, b| v.at(a.1.at.x, a.1.at.y).distance(pt).total_cmp(&v.at(b.1.at.x, b.1.at.y).distance(pt)))
+            .map(|(i, _)| i)
+    };
     let near_handle = |pt: Pos2| handles.iter().find(|(_, h)| h.distance(pt) <= GRAB).map(|(w, _)| *w);
     let near_curve = |pt: Pos2| {
         let t = v.time(pt.x);
@@ -635,7 +685,9 @@ fn graph(app: &mut App, ed: &mut EaseEditor, ui: &mut egui::Ui, ease: &Easing) {
         app.run("ease.delete_point", ed.with(json!({"index": i})));
         ed.selected = None;
     }
-    resp.on_hover_text_at_pointer(tr!("Click the curve to add a point. Drag a point or handle; double-click a point for smooth or corner, right-click to delete it."));
+    resp.on_hover_text_at_pointer(tr!(
+        "Click the curve to add a point. Drag a point or handle; double-click a point for smooth or corner, right-click to delete it."
+    ));
 }
 
 /// The graph's keys, while it has the keyboard (taken before the app's shortcuts, so Delete
@@ -658,7 +710,10 @@ pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
         let next = i.consume_key(Modifiers::NONE, Key::CloseBracket);
         let del = i.consume_key(Modifiers::NONE, Key::Delete) || i.consume_key(Modifiers::NONE, Key::Backspace);
         let smooth = i.consume_key(Modifiers::NONE, Key::S);
-        let add = i.consume_key(Modifiers::NONE, Key::Plus) || i.consume_key(Modifiers::NONE, Key::Equals) || i.consume_key(Modifiers::SHIFT, Key::Equals) || i.consume_key(Modifiers::NONE, Key::Insert);
+        let add = i.consume_key(Modifiers::NONE, Key::Plus)
+            || i.consume_key(Modifiers::NONE, Key::Equals)
+            || i.consume_key(Modifiers::SHIFT, Key::Equals)
+            || i.consume_key(Modifiers::NONE, Key::Insert);
         (prev, next, del, smooth, add, mv)
     });
     let Some(ed) = app.ease.as_mut() else { return };
@@ -686,7 +741,10 @@ pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
     if del && interior {
         ed.selected = None;
         app.run("ease.delete_point", with(json!({"index": i})));
-    } else if smooth && interior && let Some(q) = q {
+    } else if smooth
+        && interior
+        && let Some(q) = q
+    {
         app.run("ease.convert_point", with(json!({"index": i, "smooth": !q.smooth})));
     } else if add && let (Some(a), Some(b)) = (q, curve.points().get(i + 1)) {
         if let Some(r) = app.run("ease.add_point", with(json!({"t": 0.5 * (a.at.x + b.at.x)})))
@@ -694,7 +752,10 @@ pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
         {
             ed.selected = r["index"].as_u64().map(|i| i as usize);
         }
-    } else if (mv.0 != 0.0 || mv.1 != 0.0) && interior && let Some(q) = q {
+    } else if (mv.0 != 0.0 || mv.1 != 0.0)
+        && interior
+        && let Some(q) = q
+    {
         app.run("ease.move_point", with(json!({"index": i, "x": q.at.x + mv.0, "y": q.at.y + mv.1})));
     }
 }
@@ -710,7 +771,8 @@ mod tests {
     }
 
     fn frame(ctx: &egui::Context, app: &mut App, events: Vec<egui::Event>) {
-        let input = egui::RawInput { screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 940.0))), events, ..Default::default() };
+        let input =
+            egui::RawInput { screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 940.0))), events, ..Default::default() };
         let mut out = ctx.run_ui(input, |ui| {
             consume_keys(app, ui.ctx());
             show(app, ui.ctx());

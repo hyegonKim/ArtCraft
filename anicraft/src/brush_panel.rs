@@ -64,7 +64,8 @@ pub fn sync(app: &mut App) {
 
 /// Every brush the library shows: `(name to show, preset, built-in key)`.
 fn all(app: &App) -> Vec<(String, BrushPreset, Option<&'static str>)> {
-    let mut v: Vec<(String, BrushPreset, Option<&'static str>)> = BUILTIN.iter().filter_map(|(k, n)| builtin(k).map(|p| (crate::i18n::t(n).to_string(), p, Some(*k)))).collect();
+    let mut v: Vec<(String, BrushPreset, Option<&'static str>)> =
+        BUILTIN.iter().filter_map(|(k, n)| builtin(k).map(|p| (crate::i18n::t(n).to_string(), p, Some(*k)))).collect();
     v.extend(app.s.brushes.user().iter().map(|p| (p.name.clone(), p.clone(), None)));
     v
 }
@@ -127,7 +128,14 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
     }
     let mut open = true;
     let at = ctx.content_rect().right_top() + vec2(-620.0, 90.0);
-    let shown = egui::Window::new(tr!("Brush Library")).id(egui::Id::new("brush_library")).open(&mut open).default_pos(at).default_width(300.0).resizable(true).collapsible(false).show(ctx, |ui| panel(app, ui));
+    let shown = egui::Window::new(tr!("Brush Library"))
+        .id(egui::Id::new("brush_library"))
+        .open(&mut open)
+        .default_pos(at)
+        .default_width(300.0)
+        .resizable(true)
+        .collapsible(false)
+        .show(ctx, |ui| panel(app, ui));
     a11y::name_title_bar(&shown, tr!("Brush Library"));
     app.brush_lib.open &= open;
 }
@@ -135,7 +143,8 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
 fn panel(app: &mut App, ui: &mut egui::Ui) {
     let tool = target(app);
     let as_stroke = tool == Tool::PaintBrush;
-    let for_tool = if as_stroke { tr!("Click a brush to draw with it in the Paint Brush.") } else { tr!("Click a brush to paint with it in the Brush.") };
+    let for_tool =
+        if as_stroke { tr!("Click a brush to draw with it in the Paint Brush.") } else { tr!("Click a brush to paint with it in the Brush.") };
     ui.label(text(Type::Caption, for_tool));
     ui.add_space(4.0);
     let current = current_name(app, tool);
@@ -189,7 +198,9 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
             let color = if selected { T.on_active } else { T.text };
             ui.painter().text(name_at, egui::Align2::LEFT_CENTER, shown, crate::theme::font(Type::Body), color);
             a11y::control(ui, &resp, WidgetType::SelectableLabel, &tr!("{name} brush", name = shown), Some(selected));
-            let hint = key.map(|k| crate::i18n::t(builtin_hint(k)).to_string()).unwrap_or_else(|| tr!("Your brush. Right-click to rename, export or delete it.").to_string());
+            let hint = key
+                .map(|k| crate::i18n::t(builtin_hint(k)).to_string())
+                .unwrap_or_else(|| tr!("Your brush. Right-click to rename, export or delete it.").to_string());
             let resp = resp.on_hover_text(hint);
             if resp.clicked() {
                 picked = Some(p.clone());
@@ -225,10 +236,22 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
     ui.separator();
     // Save the brush in hand under a name.
     ui.horizontal(|ui| {
-        let r = ui.add(egui::TextEdit::singleline(&mut app.brush_lib.save_name).desired_width((ui.available_width() - 110.0).max(80.0)).hint_text(tr!("Name"))).named(tr!("Name for the brush"));
+        let r = ui
+            .add(
+                egui::TextEdit::singleline(&mut app.brush_lib.save_name)
+                    .desired_width((ui.available_width() - 110.0).max(80.0))
+                    .hint_text(tr!("Name")),
+            )
+            .named(tr!("Name for the brush"));
         let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         let name = app.brush_lib.save_name.trim().to_string();
-        if (ui.add_enabled(!name.is_empty(), egui::Button::new(tr!("Save Brush"))).on_hover_text(tr!("Saves the brush in hand as one of yours (one with that name is replaced)")).clicked() || enter) && !name.is_empty() {
+        if (ui
+            .add_enabled(!name.is_empty(), egui::Button::new(tr!("Save Brush")))
+            .on_hover_text(tr!("Saves the brush in hand as one of yours (one with that name is replaced)"))
+            .clicked()
+            || enter)
+            && !name.is_empty()
+        {
             let o = if tool == Tool::PaintBrush { app.paint_brush } else { app.brush };
             let mut params = o.preset(&name).params();
             params["name"] = json!(name);
@@ -240,7 +263,11 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
             app.invoke("brush.preset_import");
         }
         let any = !app.s.brushes.is_empty();
-        if ui.add_enabled(any, egui::Button::new(tr!("Export…"))).on_hover_text(tr!("Writes your brushes to a brush set file, to use on another computer")).clicked() {
+        if ui
+            .add_enabled(any, egui::Button::new(tr!("Export…")))
+            .on_hover_text(tr!("Writes your brushes to a brush set file, to use on another computer"))
+            .clicked()
+        {
             app.invoke("brush.preset_export");
         }
     });
@@ -263,7 +290,12 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
 
 /// The brush rows in Properties for the Brush and the Paint Brush (ADR 0068): which brush,
 /// its preview, and what pressure, speed and shaping do. `tool` says whose options.
-pub fn props(app: &mut App, ui: &mut egui::Ui, row: impl Fn(&mut egui::Ui, &str, &mut dyn FnMut(&mut egui::Ui)), row_prose: impl Fn(&mut egui::Ui, &str, &mut dyn FnMut(&mut egui::Ui))) {
+pub fn props(
+    app: &mut App,
+    ui: &mut egui::Ui,
+    row: impl Fn(&mut egui::Ui, &str, &mut dyn FnMut(&mut egui::Ui)),
+    row_prose: impl Fn(&mut egui::Ui, &str, &mut dyn FnMut(&mut egui::Ui)),
+) {
     let tool = target(app);
     let as_stroke = tool == Tool::PaintBrush;
     let current = current_name(app, tool);
@@ -271,7 +303,10 @@ pub fn props(app: &mut App, ui: &mut egui::Ui, row: impl Fn(&mut egui::Ui, &str,
     let mut picked: Option<BrushPreset> = None;
     let mut library = false;
     row_prose(ui, tr!("Brush"), &mut |ui| {
-        let shown = current.as_deref().map_or_else(|| tr!("Custom").to_string(), |c| items.iter().find(|(_, p, _)| p.name.eq_ignore_ascii_case(c)).map_or(c.to_string(), |(s, _, _)| s.clone()));
+        let shown = current.as_deref().map_or_else(
+            || tr!("Custom").to_string(),
+            |c| items.iter().find(|(_, p, _)| p.name.eq_ignore_ascii_case(c)).map_or(c.to_string(), |(s, _, _)| s.clone()),
+        );
         egui::ComboBox::from_id_salt(("brush_preset", slot(tool)))
             .width(130.0)
             .selected_text(shown)
@@ -316,7 +351,8 @@ pub fn props(app: &mut App, ui: &mut egui::Ui, row: impl Fn(&mut egui::Ui, &str,
     let o = crate::brushtool::options_mut(app);
     row_prose(ui, tr!("Pressure"), &mut |ui| {
         crate::theme::checkbox(ui, &mut o.pressure_size, tr!("Size")).on_hover_text(tr!("Pen pressure varies the size, from 10 % to the full size"));
-        crate::theme::checkbox(ui, &mut o.pressure_opacity, tr!("Opacity")).on_hover_text(tr!("Pen pressure sets the stroke's opacity (its average over the stroke)"));
+        crate::theme::checkbox(ui, &mut o.pressure_opacity, tr!("Opacity"))
+            .on_hover_text(tr!("Pen pressure sets the stroke's opacity (its average over the stroke)"));
     });
     row_prose(ui, tr!("Curve"), &mut |ui| {
         ui.add_enabled_ui(o.pressure_size || o.pressure_opacity, |ui| {
@@ -339,43 +375,66 @@ pub fn props(app: &mut App, ui: &mut egui::Ui, row: impl Fn(&mut egui::Ui, &str,
         });
     });
     row_prose(ui, tr!("Mouse"), &mut |ui| {
-        crate::theme::checkbox(ui, &mut o.velocity, tr!("Speed as pressure")).on_hover_text(tr!("Without a pen: drawing faster makes the stroke thinner, as a pen pressed lightly would"));
+        crate::theme::checkbox(ui, &mut o.velocity, tr!("Speed as pressure"))
+            .on_hover_text(tr!("Without a pen: drawing faster makes the stroke thinner, as a pen pressed lightly would"));
     });
     // Tilt (ADR 0093): shown once a pen has reported its tilt this session. Until then the
     // options would do nothing, so they stay out of the way (brushes keep their tilt settings).
     if tilt_seen {
         row_prose(ui, tr!("Tilt"), &mut |ui| {
             if !as_stroke {
-                crate::theme::checkbox(ui, &mut o.tilt_angle, tr!("Angle")).on_hover_text(tr!("The pen's tilt turns the tip: the way it leans adds to the brush's angle"));
+                crate::theme::checkbox(ui, &mut o.tilt_angle, tr!("Angle"))
+                    .on_hover_text(tr!("The pen's tilt turns the tip: the way it leans adds to the brush's angle"));
             }
-            crate::theme::checkbox(ui, &mut o.tilt_width, tr!("Width")).on_hover_text(tr!("A leaning pen paints wider, up to twice as wide lying flat"));
+            crate::theme::checkbox(ui, &mut o.tilt_width, tr!("Width"))
+                .on_hover_text(tr!("A leaning pen paints wider, up to twice as wide lying flat"));
         });
     }
     row(ui, tr!("Taper"), &mut |ui| {
-        ui.add(egui::DragValue::new(&mut o.taper_start).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0)).named(tr!("Taper at the start")).on_hover_text(tr!("How much of the stroke swells from a point at its start"));
-        ui.add(egui::DragValue::new(&mut o.taper_end).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0)).named(tr!("Taper at the end")).on_hover_text(tr!("How much of the stroke thins to a point at its end"));
+        ui.add(egui::DragValue::new(&mut o.taper_start).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0))
+            .named(tr!("Taper at the start"))
+            .on_hover_text(tr!("How much of the stroke swells from a point at its start"));
+        ui.add(egui::DragValue::new(&mut o.taper_end).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0))
+            .named(tr!("Taper at the end"))
+            .on_hover_text(tr!("How much of the stroke thins to a point at its end"));
     });
     if !as_stroke {
         row(ui, tr!("Spacing"), &mut |ui| {
             let mut dabs = o.spacing > 0.0;
-            if crate::theme::checkbox(ui, &mut dabs, "").named(tr!("Dabs")).on_hover_text(tr!("Stamp the tip as separate dabs along the stroke")).changed() {
+            if crate::theme::checkbox(ui, &mut dabs, "")
+                .named(tr!("Dabs"))
+                .on_hover_text(tr!("Stamp the tip as separate dabs along the stroke"))
+                .changed()
+            {
                 o.spacing = if dabs { 150.0 } else { 0.0 };
             }
             // A field of its own while off, so its range never turns a continuous stroke into dabs.
             let mut gap = if dabs { o.spacing } else { 150.0 };
-            if ui.add_enabled(dabs, egui::DragValue::new(&mut gap).suffix(" %").speed(1.0).range(5.0..=1000.0).max_decimals(0)).named(tr!("Dab spacing")).on_hover_text(tr!("The distance between dabs, as a part of the size")).changed() && dabs {
+            if ui
+                .add_enabled(dabs, egui::DragValue::new(&mut gap).suffix(" %").speed(1.0).range(5.0..=1000.0).max_decimals(0))
+                .named(tr!("Dab spacing"))
+                .on_hover_text(tr!("The distance between dabs, as a part of the size"))
+                .changed()
+                && dabs
+            {
                 o.spacing = gap;
             }
         });
         row(ui, tr!("Rough edge"), &mut |ui| {
-            ui.add(egui::DragValue::new(&mut o.jitter).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0)).named(tr!("Rough edge")).on_hover_text(tr!("Wears the edge in by up to this part of the size, like chalk. The same every time"));
+            ui.add(egui::DragValue::new(&mut o.jitter).suffix(" %").speed(0.5).range(0.0..=50.0).max_decimals(0))
+                .named(tr!("Rough edge"))
+                .on_hover_text(tr!("Wears the edge in by up to this part of the size, like chalk. The same every time"));
         });
         // Textured brushes (ADR 0093): still vector paint.
         row(ui, tr!("Texture"), &mut |ui| {
             ui.add(egui::DragValue::new(&mut o.texture).suffix(" %").speed(0.5).range(0.0..=100.0).max_decimals(0)).named(tr!("Texture")).on_hover_text(tr!("A paper grain shows through the paint, like charcoal on rough paper. The grain stays put on the stage, so strokes over each other share it"));
         });
         row(ui, tr!("Scatter"), &mut |ui| {
-            ui.add(egui::DragValue::new(&mut o.scatter).suffix(" %").speed(1.0).range(0.0..=200.0).max_decimals(0)).named(tr!("Scatter")).on_hover_text(tr!("Throws dabs either side of the stroke, up to this part of the size away, and varies their size: spatter and stipple"));
+            ui.add(egui::DragValue::new(&mut o.scatter).suffix(" %").speed(1.0).range(0.0..=200.0).max_decimals(0))
+                .named(tr!("Scatter"))
+                .on_hover_text(tr!(
+                    "Throws dabs either side of the stroke, up to this part of the size away, and varies their size: spatter and stipple"
+                ));
         });
     }
 }
@@ -388,9 +447,18 @@ pub fn curve_editor(ui: &mut egui::Ui, curve: &mut PressureCurve) -> egui::Respo
     let resp = resp.on_hover_text(tr!("Pen pressure (across) to the brush's size or opacity (up). Drag a point to move it, drag elsewhere to add one, double-click a point to remove it"));
     let inner = rect.shrink(5.0);
     let to_screen = |p: [f32; 2]| pos2(inner.left() + p[0] * inner.width(), inner.bottom() - p[1] * inner.height());
-    let to_curve = |s: egui::Pos2| [((s.x - inner.left()) / inner.width()).clamp(0.0, 1.0), ((inner.bottom() - s.y) / inner.height()).clamp(0.0, 1.0)];
+    let to_curve =
+        |s: egui::Pos2| [((s.x - inner.left()) / inner.width()).clamp(0.0, 1.0), ((inner.bottom() - s.y) / inner.height()).clamp(0.0, 1.0)];
     let id = resp.id.with("dragged");
-    let near = |c: &PressureCurve, at: egui::Pos2| c.points().iter().enumerate().map(|(i, p)| (i, to_screen(*p).distance(at))).filter(|(_, d)| *d <= 8.0).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(i, _)| i);
+    let near = |c: &PressureCurve, at: egui::Pos2| {
+        c.points()
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (i, to_screen(*p).distance(at)))
+            .filter(|(_, d)| *d <= 8.0)
+            .min_by(|a, b| a.1.total_cmp(&b.1))
+            .map(|(i, _)| i)
+    };
     if ui.is_enabled() {
         let pointer = resp.interact_pointer_pos().or(resp.hover_pos());
         if resp.drag_started()
@@ -445,4 +513,3 @@ pub fn curve_editor(ui: &mut egui::Ui, curve: &mut PressureCurve) -> egui::Respo
     }
     resp
 }
-

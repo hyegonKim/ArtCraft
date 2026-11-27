@@ -31,7 +31,8 @@ fn base(manifest: &str) -> String {
 
 // ----- eases ---------------------------------------------------------------------------------
 
-const EASES: &str = r#"{"id":"org.test.eases","name":"Test Eases","kind":"ease","eases":[{"id":"steps4","name":"Stepped 4"},{"id":"linear","name":" Straight "}]}"#;
+const EASES: &str =
+    r#"{"id":"org.test.eases","name":"Test Eases","kind":"ease","eases":[{"id":"steps4","name":"Stepped 4"},{"id":"linear","name":" Straight "}]}"#;
 
 /// An ease plug-in whose `ac_ease(index, t)` is `body` (locals `$i`, `$t`).
 fn ease_module(manifest: &str, body: &str) -> Vec<u8> {
@@ -110,7 +111,8 @@ fn ease_and_exporter_manifests_are_checked() {
     }
     let many: Vec<String> = (0..33).map(|i| format!(r#"{{"id":"e{i}","name":"E{i}"}}"#)).collect();
     assert!(anicraft_plugins::Manifest::parse(format!(r#"{{"id":"a","name":"A","kind":"ease","eases":[{}]}}"#, many.join(",")).as_bytes()).is_err());
-    let ok = anicraft_plugins::Manifest::parse(br#"{"id":"a","name":"A","kind":"exporter","format":{"name":" Text ","extension":".TXT"}}"#).expect("exporter");
+    let ok = anicraft_plugins::Manifest::parse(br#"{"id":"a","name":"A","kind":"exporter","format":{"name":" Text ","extension":".TXT"}}"#)
+        .expect("exporter");
     let f = ok.format.expect("format");
     assert_eq!((f.name.as_str(), f.extension.as_str()), ("Text", "txt"));
 }
@@ -187,7 +189,11 @@ fn an_exporter_reads_frames_and_returns_its_file() {
 fn hostile_exporters_end_in_an_error() {
     let small = Limits { fuel: 30_000_000, wall_time_ms: 5_000, ..Limits::exporter() };
     let cases: Vec<(&str, String, &str)> = vec![
-        ("failure", format!("(drop (call $call (i32.const 4200) (i32.const {}))) i64.const -1", LOG_REQ.len()), "could not export: no frames to write"),
+        (
+            "failure",
+            format!("(drop (call $call (i32.const 4200) (i32.const {}))) i64.const -1", LOG_REQ.len()),
+            "could not export: no frames to write",
+        ),
         ("huge output", "i64.const 0x7fffffff00000000".into(), "output size"),
         ("output outside memory", "(i64.or (i64.shl (i64.const 100000) (i64.const 32)) (i64.const 120000))".into(), "outside the module's memory"),
         ("endless loop", "(loop $l (br $l)) i64.const 0".into(), "instruction budget"),

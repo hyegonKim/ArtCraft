@@ -39,7 +39,16 @@ pub struct PublishState {
 
 impl Default for PublishState {
     fn default() -> Self {
-        PublishState { open: false, selected: PublishFormat::Html, output_edit: None, preset: None, preset_name: String::new(), confirm_delete: false, job: None, report: None }
+        PublishState {
+            open: false,
+            selected: PublishFormat::Html,
+            output_edit: None,
+            preset: None,
+            preset_name: String::new(),
+            confirm_delete: false,
+            job: None,
+            report: None,
+        }
     }
 }
 
@@ -162,11 +171,17 @@ fn begin(app: &mut App, params: &Value, threaded: bool) {
         return;
     }
     app.playing = false;
-    let formats = steps.iter().map(|s| (s.format, s.outputs.first().and_then(|o| o.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_default())).collect();
+    let formats = steps
+        .iter()
+        .map(|s| (s.format, s.outputs.first().and_then(|o| o.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()))
+        .collect();
     let control = Arc::new(Control::default());
     let (doc, path) = (app.s.doc.clone(), app.s.path.clone());
     let name = publish::base(path.as_deref()).map(|(_, n)| n).unwrap_or_default();
-    let runner = threaded.then(|| spawn(doc.clone(), path.clone(), steps.clone(), control.clone())).flatten().unwrap_or_else(|| Runner::Here(Box::new(Publisher::new(doc, path, steps, control.clone()))));
+    let runner = threaded
+        .then(|| spawn(doc.clone(), path.clone(), steps.clone(), control.clone()))
+        .flatten()
+        .unwrap_or_else(|| Runner::Here(Box::new(Publisher::new(doc, path, steps, control.clone()))));
     app.publish.report = None;
     app.publish.job = Some(Job { control, formats, running: None, done: Vec::new(), runner, name });
 }
@@ -257,9 +272,19 @@ fn finish(app: &mut App, job: Job) {
     if report.count(Status::Cancelled) > 0 {
         app.status_ok(trn!("Publish cancelled after {n} format", "Publish cancelled after {n} formats", ok));
     } else if failed > 0 {
-        app.status_err(trn!("Published {n} format; {failed} failed. The report says why.", "Published {n} formats; {failed} failed. The report says why.", ok, failed = failed));
+        app.status_err(trn!(
+            "Published {n} format; {failed} failed. The report says why.",
+            "Published {n} formats; {failed} failed. The report says why.",
+            ok,
+            failed = failed
+        ));
     } else if skipped > 0 {
-        app.status_ok(trn!("Published {n} format; {skipped} skipped (see the report)", "Published {n} formats; {skipped} skipped (see the report)", ok, skipped = skipped));
+        app.status_ok(trn!(
+            "Published {n} format; {skipped} skipped (see the report)",
+            "Published {n} formats; {skipped} skipped (see the report)",
+            ok,
+            skipped = skipped
+        ));
     } else {
         app.status_ok(trn!("Published {n} format ({files} files)", "Published {n} formats ({files} files)", ok, files = files.len()));
     }
@@ -287,7 +312,14 @@ fn settings_window(app: &mut App, ctx: &egui::Context) {
     }
     let mut open = true;
     let at = ctx.content_rect().center() - egui::vec2(330.0, 260.0);
-    let shown = egui::Window::new(tr!("Publish Settings")).id(egui::Id::new("publish_settings")).open(&mut open).default_pos(at).default_width(660.0).resizable(true).collapsible(false).show(ctx, |ui| settings(app, ui));
+    let shown = egui::Window::new(tr!("Publish Settings"))
+        .id(egui::Id::new("publish_settings"))
+        .open(&mut open)
+        .default_pos(at)
+        .default_width(660.0)
+        .resizable(true)
+        .collapsible(false)
+        .show(ctx, |ui| settings(app, ui));
     crate::a11y::name_title_bar(&shown, tr!("Publish Settings"));
     if !open {
         app.publish.open = false;
@@ -316,7 +348,13 @@ fn settings(app: &mut App, ui: &mut egui::Ui) {
                         ui.painter().rect_filled(r, T.rc(), if sel { T.accent_dim } else { T.hover });
                     }
                     let font = crate::theme::font(Type::Body);
-                    ui.painter().text(egui::pos2(r.left() + 8.0, r.center().y), egui::Align2::LEFT_CENTER, label(f), font, crate::theme::color(Type::Body));
+                    ui.painter().text(
+                        egui::pos2(r.left() + 8.0, r.center().y),
+                        egui::Align2::LEFT_CENTER,
+                        label(f),
+                        font,
+                        crate::theme::color(Type::Body),
+                    );
                     crate::a11y::control(ui, &resp, egui::WidgetType::SelectableLabel, label(f), Some(sel));
                     if resp.on_hover_text(about(f)).clicked() {
                         app.publish.selected = f;
@@ -346,7 +384,11 @@ fn output_row(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
     let name = base.as_ref().map_or_else(|_| tr!("Untitled").to_string(), |(_, n)| n.clone());
     let checked = publish::resolve(f, &value, &name);
     let resp = form_row(ui, FORM_LABEL_DIALOG, tr!("Output"), |ui| {
-        let edit = egui::TextEdit::singleline(&mut value).font(crate::theme::font(Type::Path)).desired_width(300.0).char_limit(anicraft_engine::doc::publish::MAX_OUTPUT_CHARS).hint_text(f.default_output());
+        let edit = egui::TextEdit::singleline(&mut value)
+            .font(crate::theme::font(Type::Path))
+            .desired_width(300.0)
+            .char_limit(anicraft_engine::doc::publish::MAX_OUTPUT_CHARS)
+            .hint_text(f.default_output());
         let r = ui.add(edit).named(&tr!("{format} output name", format = label(f)));
         if ui.button(tr!("Default")).on_hover_text(tr!("Use the format's usual name: {name}", name = f.default_output())).clicked() {
             value = f.default_output().to_string();
@@ -410,7 +452,10 @@ fn scale_row(app: &mut App, ui: &mut egui::Ui, f: PublishFormat, scale: f32) {
 fn plays_row(app: &mut App, ui: &mut egui::Ui, f: PublishFormat, plays: u32) {
     let mut forever = plays == 0;
     form_row(ui, FORM_LABEL_DIALOG, tr!("Playback"), |ui| {
-        if crate::theme::checkbox(ui, &mut forever, tr!("Loop forever")).on_hover_text(tr!("Off: it plays the number of times you set, then stops on the last frame")).changed() {
+        if crate::theme::checkbox(ui, &mut forever, tr!("Loop forever"))
+            .on_hover_text(tr!("Off: it plays the number of times you set, then stops on the last frame"))
+            .changed()
+        {
             set(app, f, "loop", json!(if forever { 0 } else { 1 }), false);
         }
         if !forever {
@@ -475,7 +520,14 @@ fn options(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
         PublishFormat::Html => {
             let mut title = p.html.title.clone();
             form_row(ui, FORM_LABEL_DIALOG, tr!("Page title"), |ui| {
-                let r = ui.add(egui::TextEdit::singleline(&mut title).desired_width(300.0).char_limit(anicraft_engine::doc::publish::MAX_TITLE_CHARS).hint_text(tr!("The file's name"))).named(tr!("Page title"));
+                let r = ui
+                    .add(
+                        egui::TextEdit::singleline(&mut title)
+                            .desired_width(300.0)
+                            .char_limit(anicraft_engine::doc::publish::MAX_TITLE_CHARS)
+                            .hint_text(tr!("The file's name")),
+                    )
+                    .named(tr!("Page title"));
                 if r.changed() {
                     set(app, f, "title", json!(title), true);
                 }
@@ -489,7 +541,11 @@ fn options(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
             check(app, ui, f, "loop", p.gif.looping, tr!("Loop"), tr!("Off: it plays once and stops on the last frame"));
         }
         PublishFormat::Apng | PublishFormat::Webp => {
-            let (range, scale, plays, background) = if f == PublishFormat::Apng { (p.apng.range, p.apng.scale, p.apng.plays, p.apng.background) } else { (p.webp.range, p.webp.scale, p.webp.plays, p.webp.background) };
+            let (range, scale, plays, background) = if f == PublishFormat::Apng {
+                (p.apng.range, p.apng.scale, p.apng.plays, p.apng.background)
+            } else {
+                (p.webp.range, p.webp.scale, p.webp.plays, p.webp.background)
+            };
             range_row(app, ui, f, range);
             scale_row(app, ui, f, scale);
             plays_row(app, ui, f, plays);
@@ -499,7 +555,11 @@ fn options(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
             range_row(app, ui, f, p.video.range);
             scale_row(app, ui, f, p.video.scale);
             check(app, ui, f, "audio", p.video.audio, tr!("Include sound"), tr!("The movie's sounds: Opus in WebM, AAC in MP4"));
-            form_note(ui, FORM_LABEL_DIALOG, text(Type::Caption, tr!("End the name in .webm (VP9) or .mp4 (H.264). AniCraft uses the ffmpeg on this computer.")));
+            form_note(
+                ui,
+                FORM_LABEL_DIALOG,
+                text(Type::Caption, tr!("End the name in .webm (VP9) or .mp4 (H.264). AniCraft uses the ffmpeg on this computer.")),
+            );
         }
         PublishFormat::Lottie => {
             range_row(app, ui, f, p.lottie.range);
@@ -511,7 +571,14 @@ fn options(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
             scale_row(app, ui, f, sh.scale);
             let (mut cols, mut pad) = (sh.columns, sh.padding);
             form_row(ui, FORM_LABEL_DIALOG, tr!("Columns"), |ui| {
-                let r = ui.add(egui::DragValue::new(&mut cols).range(0..=1000).speed(0.1).custom_formatter(|v, _| if v == 0.0 { tr!("Auto").to_string() } else { format!("{v}") })).named(tr!("Columns"));
+                let r = ui
+                    .add(
+                        egui::DragValue::new(&mut cols)
+                            .range(0..=1000)
+                            .speed(0.1)
+                            .custom_formatter(|v, _| if v == 0.0 { tr!("Auto").to_string() } else { format!("{v}") }),
+                    )
+                    .named(tr!("Columns"));
                 if r.changed() {
                     set(app, f, "columns", json!(cols), true);
                 }
@@ -536,27 +603,31 @@ fn options(app: &mut App, ui: &mut egui::Ui, f: PublishFormat) {
             range_row(app, ui, f, p.audio.range);
             let rates = [22_050u32, 44_100, 48_000, 96_000];
             form_row(ui, FORM_LABEL_DIALOG, tr!("Sample rate"), |ui| {
-                egui::ComboBox::from_id_salt("publish_rate").selected_text(text(Type::Data, format!("{} Hz", p.audio.rate))).show_ui(ui, |ui| {
-                    for r in rates {
-                        if ui.selectable_label(p.audio.rate == r, text(Type::Data, format!("{r} Hz"))).clicked() {
-                            set(app, f, "rate", json!(r), false);
+                egui::ComboBox::from_id_salt("publish_rate")
+                    .selected_text(text(Type::Data, format!("{} Hz", p.audio.rate)))
+                    .show_ui(ui, |ui| {
+                        for r in rates {
+                            if ui.selectable_label(p.audio.rate == r, text(Type::Data, format!("{r} Hz"))).clicked() {
+                                set(app, f, "rate", json!(r), false);
+                            }
                         }
-                    }
-                })
-                .response
-                .set_name(tr!("Sample rate"));
+                    })
+                    .response
+                    .set_name(tr!("Sample rate"));
             });
             form_row(ui, FORM_LABEL_DIALOG, tr!("Bit depth"), |ui| {
                 let name = |b: u32| if b == 32 { tr!("32-bit float").to_string() } else { tr!("{bits}-bit", bits = b) };
-                egui::ComboBox::from_id_salt("publish_bits").selected_text(name(p.audio.bits)).show_ui(ui, |ui| {
-                    for b in [16u32, 24, 32] {
-                        if ui.selectable_label(p.audio.bits == b, name(b)).clicked() {
-                            set(app, f, "bits", json!(b), false);
+                egui::ComboBox::from_id_salt("publish_bits")
+                    .selected_text(name(p.audio.bits))
+                    .show_ui(ui, |ui| {
+                        for b in [16u32, 24, 32] {
+                            if ui.selectable_label(p.audio.bits == b, name(b)).clicked() {
+                                set(app, f, "bits", json!(b), false);
+                            }
                         }
-                    }
-                })
-                .response
-                .set_name(tr!("Bit depth"));
+                    })
+                    .response
+                    .set_name(tr!("Bit depth"));
             });
             if !anicraft_engine::doc::sound::has_sounds(&app.s.doc) {
                 form_note(ui, FORM_LABEL_DIALOG, text(Type::Caption, tr!("The movie has no sounds yet, so Publish skips the audio.")));
@@ -581,9 +652,16 @@ fn footer(app: &mut App, ui: &mut egui::Ui) {
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let key = app.keymap.primary("file.publish").map(crate::platform::shortcut_label).unwrap_or_default();
             let busy = app.publish.running();
-            let button = egui::Button::new(text(Type::Body, tr!("Publish")).strong().color(T.on_fill)).fill(T.accent).min_size(egui::vec2(110.0, TARGET + 4.0));
+            let button = egui::Button::new(text(Type::Body, tr!("Publish")).strong().color(T.on_fill))
+                .fill(T.accent)
+                .min_size(egui::vec2(110.0, TARGET + 4.0));
             let tip = crate::a11y::with_key(&trn!("Publish the {n} format that is on", "Publish the {n} formats that are on", on), Some(&key));
-            if ui.add_enabled(on > 0 && !busy, button).on_hover_text(tip).on_disabled_hover_text(if busy { tr!("Publishing is running") } else { tr!("Turn a format on first") }).clicked() {
+            if ui
+                .add_enabled(on > 0 && !busy, button)
+                .on_hover_text(tip)
+                .on_disabled_hover_text(if busy { tr!("Publishing is running") } else { tr!("Turn a format on first") })
+                .clicked()
+            {
                 app.request("file.publish", json!({}));
             }
             ui.label(text(Type::Caption, trn!("{n} format on", "{n} formats on", on)));
@@ -621,14 +699,28 @@ fn presets_row(app: &mut App, ui: &mut egui::Ui) {
             app.publish.confirm_delete = false;
         }
         let name_ok = !app.publish.preset_name.trim().is_empty();
-        ui.add(egui::TextEdit::singleline(&mut app.publish.preset_name).desired_width(130.0).char_limit(crate::prefs::MAX_PRESET_NAME).hint_text(tr!("New preset name"))).set_name(tr!("New preset name"));
-        if ui.add_enabled(name_ok, egui::Button::new(tr!("Save Preset"))).on_hover_text(tr!("Keep these settings as a preset you can apply to any document")).clicked() {
+        ui.add(
+            egui::TextEdit::singleline(&mut app.publish.preset_name)
+                .desired_width(130.0)
+                .char_limit(crate::prefs::MAX_PRESET_NAME)
+                .hint_text(tr!("New preset name")),
+        )
+        .set_name(tr!("New preset name"));
+        if ui
+            .add_enabled(name_ok, egui::Button::new(tr!("Save Preset")))
+            .on_hover_text(tr!("Keep these settings as a preset you can apply to any document"))
+            .clicked()
+        {
             save_preset(app);
         }
         let current = app.publish.preset.clone().filter(|p| app.prefs.publish_presets.contains_key(p));
         if let Some(n) = current {
             if app.publish.confirm_delete {
-                if ui.add(egui::Button::new(text(Type::Body, tr!("Delete “{name}”", name = n)).color(T.on_fill)).fill(T.danger)).on_hover_text(tr!("Deleting a preset can't be undone")).clicked() {
+                if ui
+                    .add(egui::Button::new(text(Type::Body, tr!("Delete “{name}”", name = n)).color(T.on_fill)).fill(T.danger))
+                    .on_hover_text(tr!("Deleting a preset can't be undone"))
+                    .clicked()
+                {
                     delete_preset(app, &n);
                 }
                 if ui.button(tr!("Keep")).clicked() {
@@ -695,32 +787,43 @@ fn progress_window(app: &mut App, ctx: &egui::Context) {
     let mut open = true;
     let title = if running { tr!("Publishing") } else { tr!("Publish report") };
     let at = ctx.content_rect().center() - egui::vec2(220.0, 160.0);
-    let shown = egui::Window::new(title).id(egui::Id::new("publish_progress")).open(&mut open).default_pos(at).default_width(460.0).resizable(true).collapsible(false).show(ctx, |ui| {
-        if let Some(job) = &app.publish.job {
-            job_rows(ui, job);
-        } else if let Some(r) = &app.publish.report {
-            report_rows(ui, r);
-        }
-        ui.add_space(6.0);
-        ui.horizontal(|ui| {
-            if running {
-                let cancelling = app.publish.job.as_ref().is_some_and(|j| j.control.cancelled());
-                if ui.add_enabled(!cancelling, egui::Button::new(tr!("Cancel")).min_size(egui::vec2(96.0, TARGET))).on_hover_text(tr!("Stop after the frame being made; formats not started don't run")).clicked() {
-                    cancel(app);
-                }
-                if cancelling {
-                    ui.label(text(Type::Caption, tr!("Stopping…")));
-                }
-            } else {
-                if ui.add(egui::Button::new(tr!("Close")).min_size(egui::vec2(96.0, TARGET))).clicked() {
-                    app.publish.report = None;
-                }
-                if ui.button(tr!("Publish Settings…")).clicked() {
-                    open_settings_from_report(app);
-                }
+    let shown = egui::Window::new(title)
+        .id(egui::Id::new("publish_progress"))
+        .open(&mut open)
+        .default_pos(at)
+        .default_width(460.0)
+        .resizable(true)
+        .collapsible(false)
+        .show(ctx, |ui| {
+            if let Some(job) = &app.publish.job {
+                job_rows(ui, job);
+            } else if let Some(r) = &app.publish.report {
+                report_rows(ui, r);
             }
+            ui.add_space(6.0);
+            ui.horizontal(|ui| {
+                if running {
+                    let cancelling = app.publish.job.as_ref().is_some_and(|j| j.control.cancelled());
+                    if ui
+                        .add_enabled(!cancelling, egui::Button::new(tr!("Cancel")).min_size(egui::vec2(96.0, TARGET)))
+                        .on_hover_text(tr!("Stop after the frame being made; formats not started don't run"))
+                        .clicked()
+                    {
+                        cancel(app);
+                    }
+                    if cancelling {
+                        ui.label(text(Type::Caption, tr!("Stopping…")));
+                    }
+                } else {
+                    if ui.add(egui::Button::new(tr!("Close")).min_size(egui::vec2(96.0, TARGET))).clicked() {
+                        app.publish.report = None;
+                    }
+                    if ui.button(tr!("Publish Settings…")).clicked() {
+                        open_settings_from_report(app);
+                    }
+                }
+            });
         });
-    });
     crate::a11y::name_title_bar(&shown, title);
     if !open {
         if running {

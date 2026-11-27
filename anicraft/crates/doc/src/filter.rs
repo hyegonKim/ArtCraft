@@ -96,7 +96,8 @@ pub fn ramp_at(stops: &[GradientStop], t: f32) -> Rgba {
 /// the filter rests (`rest`: no glow, or a flat bevel). Animate pins that stop, so a gradient
 /// filter paints nothing away from the edges.
 fn sanitized_ramp(stops: &[GradientStop], rest: f32, fallback: fn() -> Vec<GradientStop>) -> Vec<GradientStop> {
-    let mut v: Vec<GradientStop> = stops.iter().filter(|s| s.offset.is_finite()).map(|s| stop(s.offset.clamp(0.0, 1.0), s.color.sanitized())).collect();
+    let mut v: Vec<GradientStop> =
+        stops.iter().filter(|s| s.offset.is_finite()).map(|s| stop(s.offset.clamp(0.0, 1.0), s.color.sanitized())).collect();
     if v.is_empty() {
         v = fallback();
     }
@@ -296,11 +297,61 @@ impl Filter {
     pub fn new(kind: &str) -> Option<Filter> {
         Some(match kind {
             "blur" => Filter::Blur { blur_x: five(), blur_y: five(), quality: one() },
-            "drop_shadow" => Filter::DropShadow { blur_x: five(), blur_y: five(), strength: full(), quality: one(), angle: angle(), distance: four(), color: black(), inner: false, knockout: false, hide_object: false },
-            "glow" => Filter::Glow { blur_x: five(), blur_y: five(), strength: full(), quality: one(), color: Rgba::hex(0xff0000), inner: false, knockout: false },
-            "bevel" => Filter::Bevel { blur_x: five(), blur_y: five(), strength: full(), quality: one(), angle: angle(), distance: five(), shadow_color: black(), highlight_color: white(), side: FilterSide::Inner, knockout: false },
-            "gradient_glow" => Filter::GradientGlow { blur_x: five(), blur_y: five(), strength: full(), quality: one(), angle: angle(), distance: five(), stops: default_glow_ramp(), side: FilterSide::Outer, knockout: false },
-            "gradient_bevel" => Filter::GradientBevel { blur_x: five(), blur_y: five(), strength: full(), quality: one(), angle: angle(), distance: five(), stops: default_bevel_ramp(), side: FilterSide::Inner, knockout: false },
+            "drop_shadow" => Filter::DropShadow {
+                blur_x: five(),
+                blur_y: five(),
+                strength: full(),
+                quality: one(),
+                angle: angle(),
+                distance: four(),
+                color: black(),
+                inner: false,
+                knockout: false,
+                hide_object: false,
+            },
+            "glow" => Filter::Glow {
+                blur_x: five(),
+                blur_y: five(),
+                strength: full(),
+                quality: one(),
+                color: Rgba::hex(0xff0000),
+                inner: false,
+                knockout: false,
+            },
+            "bevel" => Filter::Bevel {
+                blur_x: five(),
+                blur_y: five(),
+                strength: full(),
+                quality: one(),
+                angle: angle(),
+                distance: five(),
+                shadow_color: black(),
+                highlight_color: white(),
+                side: FilterSide::Inner,
+                knockout: false,
+            },
+            "gradient_glow" => Filter::GradientGlow {
+                blur_x: five(),
+                blur_y: five(),
+                strength: full(),
+                quality: one(),
+                angle: angle(),
+                distance: five(),
+                stops: default_glow_ramp(),
+                side: FilterSide::Outer,
+                knockout: false,
+            },
+            "gradient_bevel" => Filter::GradientBevel {
+                blur_x: five(),
+                blur_y: five(),
+                strength: full(),
+                quality: one(),
+                angle: angle(),
+                distance: five(),
+                stops: default_bevel_ramp(),
+                side: FilterSide::Inner,
+                knockout: false,
+            },
             "adjust_color" => Filter::AdjustColor { brightness: 0.0, contrast: 0.0, saturation: 0.0, hue: 0.0 },
             _ => return None,
         })
@@ -327,33 +378,43 @@ impl Filter {
         let distance = |v: f32| fin(v, 0.0).clamp(-1000.0, 1000.0);
         match self {
             Filter::Blur { blur_x, blur_y, quality } => Filter::Blur { blur_x: blur(*blur_x), blur_y: blur(*blur_y), quality: q(*quality) },
-            Filter::DropShadow { blur_x, blur_y, strength: s, quality, angle: a, distance: d, color, inner, knockout, hide_object } => Filter::DropShadow {
+            Filter::DropShadow { blur_x, blur_y, strength: s, quality, angle: a, distance: d, color, inner, knockout, hide_object } => {
+                Filter::DropShadow {
+                    blur_x: blur(*blur_x),
+                    blur_y: blur(*blur_y),
+                    strength: strength(*s),
+                    quality: q(*quality),
+                    angle: angle(*a),
+                    distance: distance(*d),
+                    color: color.sanitized(),
+                    inner: *inner,
+                    knockout: *knockout,
+                    hide_object: *hide_object,
+                }
+            }
+            Filter::Glow { blur_x, blur_y, strength: s, quality, color, inner, knockout } => Filter::Glow {
                 blur_x: blur(*blur_x),
                 blur_y: blur(*blur_y),
                 strength: strength(*s),
                 quality: q(*quality),
-                angle: angle(*a),
-                distance: distance(*d),
                 color: color.sanitized(),
                 inner: *inner,
                 knockout: *knockout,
-                hide_object: *hide_object,
             },
-            Filter::Glow { blur_x, blur_y, strength: s, quality, color, inner, knockout } => {
-                Filter::Glow { blur_x: blur(*blur_x), blur_y: blur(*blur_y), strength: strength(*s), quality: q(*quality), color: color.sanitized(), inner: *inner, knockout: *knockout }
+            Filter::Bevel { blur_x, blur_y, strength: s, quality, angle: a, distance: d, shadow_color, highlight_color, side, knockout } => {
+                Filter::Bevel {
+                    blur_x: blur(*blur_x),
+                    blur_y: blur(*blur_y),
+                    strength: strength(*s),
+                    quality: q(*quality),
+                    angle: angle(*a),
+                    distance: distance(*d),
+                    shadow_color: shadow_color.sanitized(),
+                    highlight_color: highlight_color.sanitized(),
+                    side: *side,
+                    knockout: *knockout,
+                }
             }
-            Filter::Bevel { blur_x, blur_y, strength: s, quality, angle: a, distance: d, shadow_color, highlight_color, side, knockout } => Filter::Bevel {
-                blur_x: blur(*blur_x),
-                blur_y: blur(*blur_y),
-                strength: strength(*s),
-                quality: q(*quality),
-                angle: angle(*a),
-                distance: distance(*d),
-                shadow_color: shadow_color.sanitized(),
-                highlight_color: highlight_color.sanitized(),
-                side: *side,
-                knockout: *knockout,
-            },
             Filter::GradientGlow { blur_x, blur_y, strength: s, quality, angle: a, distance: d, stops, side, knockout } => Filter::GradientGlow {
                 blur_x: blur(*blur_x),
                 blur_y: blur(*blur_y),
@@ -507,7 +568,9 @@ impl Filter {
         match self {
             Filter::Blur { .. } => &[BlurX, BlurY],
             Filter::Glow { .. } => &[BlurX, BlurY, Strength],
-            Filter::DropShadow { .. } | Filter::Bevel { .. } | Filter::GradientGlow { .. } | Filter::GradientBevel { .. } => &[BlurX, BlurY, Strength, Angle, Distance],
+            Filter::DropShadow { .. } | Filter::Bevel { .. } | Filter::GradientGlow { .. } | Filter::GradientBevel { .. } => {
+                &[BlurX, BlurY, Strength, Angle, Distance]
+            }
             Filter::AdjustColor { .. } => &[Brightness, Contrast, Saturation, Hue],
         }
     }
@@ -547,11 +610,44 @@ impl Filter {
         let field: Option<(&mut f32, f32)> = match (self, p) {
             (Filter::Blur { blur_x, .. }, P::BlurX) => Some((blur_x, 1.0)),
             (Filter::Blur { blur_y, .. }, P::BlurY) => Some((blur_y, 1.0)),
-            (Filter::DropShadow { blur_x, .. } | Filter::Glow { blur_x, .. } | Filter::Bevel { blur_x, .. } | Filter::GradientGlow { blur_x, .. } | Filter::GradientBevel { blur_x, .. }, P::BlurX) => Some((blur_x, 1.0)),
-            (Filter::DropShadow { blur_y, .. } | Filter::Glow { blur_y, .. } | Filter::Bevel { blur_y, .. } | Filter::GradientGlow { blur_y, .. } | Filter::GradientBevel { blur_y, .. }, P::BlurY) => Some((blur_y, 1.0)),
-            (Filter::DropShadow { strength, .. } | Filter::Glow { strength, .. } | Filter::Bevel { strength, .. } | Filter::GradientGlow { strength, .. } | Filter::GradientBevel { strength, .. }, P::Strength) => Some((strength, 100.0)),
-            (Filter::DropShadow { angle, .. } | Filter::Bevel { angle, .. } | Filter::GradientGlow { angle, .. } | Filter::GradientBevel { angle, .. }, P::Angle) => Some((angle, 1.0)),
-            (Filter::DropShadow { distance, .. } | Filter::Bevel { distance, .. } | Filter::GradientGlow { distance, .. } | Filter::GradientBevel { distance, .. }, P::Distance) => Some((distance, 1.0)),
+            (
+                Filter::DropShadow { blur_x, .. }
+                | Filter::Glow { blur_x, .. }
+                | Filter::Bevel { blur_x, .. }
+                | Filter::GradientGlow { blur_x, .. }
+                | Filter::GradientBevel { blur_x, .. },
+                P::BlurX,
+            ) => Some((blur_x, 1.0)),
+            (
+                Filter::DropShadow { blur_y, .. }
+                | Filter::Glow { blur_y, .. }
+                | Filter::Bevel { blur_y, .. }
+                | Filter::GradientGlow { blur_y, .. }
+                | Filter::GradientBevel { blur_y, .. },
+                P::BlurY,
+            ) => Some((blur_y, 1.0)),
+            (
+                Filter::DropShadow { strength, .. }
+                | Filter::Glow { strength, .. }
+                | Filter::Bevel { strength, .. }
+                | Filter::GradientGlow { strength, .. }
+                | Filter::GradientBevel { strength, .. },
+                P::Strength,
+            ) => Some((strength, 100.0)),
+            (
+                Filter::DropShadow { angle, .. }
+                | Filter::Bevel { angle, .. }
+                | Filter::GradientGlow { angle, .. }
+                | Filter::GradientBevel { angle, .. },
+                P::Angle,
+            ) => Some((angle, 1.0)),
+            (
+                Filter::DropShadow { distance, .. }
+                | Filter::Bevel { distance, .. }
+                | Filter::GradientGlow { distance, .. }
+                | Filter::GradientBevel { distance, .. },
+                P::Distance,
+            ) => Some((distance, 1.0)),
             (Filter::AdjustColor { brightness, .. }, P::Brightness) => Some((brightness, 1.0)),
             (Filter::AdjustColor { contrast, .. }, P::Contrast) => Some((contrast, 1.0)),
             (Filter::AdjustColor { saturation, .. }, P::Saturation) => Some((saturation, 1.0)),
@@ -655,14 +751,40 @@ impl Filter {
     pub fn lerp(&self, o: &Filter, t: f32) -> Option<Filter> {
         use anicraft_geom::lerp as l;
         Some(match (self, o) {
-            (Filter::Blur { blur_x, blur_y, quality }, Filter::Blur { blur_x: bx, blur_y: by, .. }) => Filter::Blur { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), quality: *quality },
-            (Filter::DropShadow { blur_x, blur_y, strength, quality, angle, distance, color, inner, knockout, hide_object }, Filter::DropShadow { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, color: c, .. }) => {
-                Filter::DropShadow { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), strength: l(*strength, *s, t), quality: *quality, angle: l(*angle, *an, t), distance: l(*distance, *d, t), color: color.lerp(*c, t), inner: *inner, knockout: *knockout, hide_object: *hide_object }
+            (Filter::Blur { blur_x, blur_y, quality }, Filter::Blur { blur_x: bx, blur_y: by, .. }) => {
+                Filter::Blur { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), quality: *quality }
             }
-            (Filter::Glow { blur_x, blur_y, strength, quality, color, inner, knockout }, Filter::Glow { blur_x: bx, blur_y: by, strength: s, color: c, .. }) => {
-                Filter::Glow { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), strength: l(*strength, *s, t), quality: *quality, color: color.lerp(*c, t), inner: *inner, knockout: *knockout }
-            }
-            (Filter::Bevel { blur_x, blur_y, strength, quality, angle, distance, shadow_color, highlight_color, side, knockout }, Filter::Bevel { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, shadow_color: sc, highlight_color: hc, .. }) => Filter::Bevel {
+            (
+                Filter::DropShadow { blur_x, blur_y, strength, quality, angle, distance, color, inner, knockout, hide_object },
+                Filter::DropShadow { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, color: c, .. },
+            ) => Filter::DropShadow {
+                blur_x: l(*blur_x, *bx, t),
+                blur_y: l(*blur_y, *by, t),
+                strength: l(*strength, *s, t),
+                quality: *quality,
+                angle: l(*angle, *an, t),
+                distance: l(*distance, *d, t),
+                color: color.lerp(*c, t),
+                inner: *inner,
+                knockout: *knockout,
+                hide_object: *hide_object,
+            },
+            (
+                Filter::Glow { blur_x, blur_y, strength, quality, color, inner, knockout },
+                Filter::Glow { blur_x: bx, blur_y: by, strength: s, color: c, .. },
+            ) => Filter::Glow {
+                blur_x: l(*blur_x, *bx, t),
+                blur_y: l(*blur_y, *by, t),
+                strength: l(*strength, *s, t),
+                quality: *quality,
+                color: color.lerp(*c, t),
+                inner: *inner,
+                knockout: *knockout,
+            },
+            (
+                Filter::Bevel { blur_x, blur_y, strength, quality, angle, distance, shadow_color, highlight_color, side, knockout },
+                Filter::Bevel { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, shadow_color: sc, highlight_color: hc, .. },
+            ) => Filter::Bevel {
                 blur_x: l(*blur_x, *bx, t),
                 blur_y: l(*blur_y, *by, t),
                 strength: l(*strength, *s, t),
@@ -674,13 +796,43 @@ impl Filter {
                 side: *side,
                 knockout: *knockout,
             },
-            (Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout }, Filter::GradientGlow { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, stops: st, .. }) => {
-                Filter::GradientGlow { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), strength: l(*strength, *s, t), quality: *quality, angle: l(*angle, *an, t), distance: l(*distance, *d, t), stops: ramp_lerp(stops, st, t), side: *side, knockout: *knockout }
-            }
-            (Filter::GradientBevel { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout }, Filter::GradientBevel { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, stops: st, .. }) => {
-                Filter::GradientBevel { blur_x: l(*blur_x, *bx, t), blur_y: l(*blur_y, *by, t), strength: l(*strength, *s, t), quality: *quality, angle: l(*angle, *an, t), distance: l(*distance, *d, t), stops: ramp_lerp(stops, st, t), side: *side, knockout: *knockout }
-            }
-            (Filter::AdjustColor { brightness, contrast, saturation, hue }, Filter::AdjustColor { brightness: b, contrast: c, saturation: s, hue: h }) => Filter::AdjustColor { brightness: l(*brightness, *b, t), contrast: l(*contrast, *c, t), saturation: l(*saturation, *s, t), hue: l(*hue, *h, t) },
+            (
+                Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout },
+                Filter::GradientGlow { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, stops: st, .. },
+            ) => Filter::GradientGlow {
+                blur_x: l(*blur_x, *bx, t),
+                blur_y: l(*blur_y, *by, t),
+                strength: l(*strength, *s, t),
+                quality: *quality,
+                angle: l(*angle, *an, t),
+                distance: l(*distance, *d, t),
+                stops: ramp_lerp(stops, st, t),
+                side: *side,
+                knockout: *knockout,
+            },
+            (
+                Filter::GradientBevel { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout },
+                Filter::GradientBevel { blur_x: bx, blur_y: by, strength: s, angle: an, distance: d, stops: st, .. },
+            ) => Filter::GradientBevel {
+                blur_x: l(*blur_x, *bx, t),
+                blur_y: l(*blur_y, *by, t),
+                strength: l(*strength, *s, t),
+                quality: *quality,
+                angle: l(*angle, *an, t),
+                distance: l(*distance, *d, t),
+                stops: ramp_lerp(stops, st, t),
+                side: *side,
+                knockout: *knockout,
+            },
+            (
+                Filter::AdjustColor { brightness, contrast, saturation, hue },
+                Filter::AdjustColor { brightness: b, contrast: c, saturation: s, hue: h },
+            ) => Filter::AdjustColor {
+                brightness: l(*brightness, *b, t),
+                contrast: l(*contrast, *c, t),
+                saturation: l(*saturation, *s, t),
+                hue: l(*hue, *h, t),
+            },
             _ => return None,
         })
     }
@@ -698,7 +850,10 @@ mod tests {
         assert!(Filter::new("sparkle").is_none());
         let wild = Filter::Blur { blur_x: f32::NAN, blur_y: 1e9, quality: 9 }.sanitized();
         assert_eq!(wild, Filter::Blur { blur_x: 0.0, blur_y: MAX_BLUR, quality: 3 });
-        assert_eq!(Filter::Glow { blur_x: 10.0, blur_y: 4.0, strength: 1.0, quality: 2, color: Rgba::WHITE, inner: false, knockout: false }.margin(), 11.0);
+        assert_eq!(
+            Filter::Glow { blur_x: 10.0, blur_y: 4.0, strength: 1.0, quality: 2, color: Rgba::WHITE, inner: false, knockout: false }.margin(),
+            11.0
+        );
         let json = serde_json::to_string(&Filter::new("adjust_color").unwrap()).unwrap();
         assert_eq!(json, r#"{"type":"adjust_color","brightness":0.0,"contrast":0.0,"saturation":0.0,"hue":0.0}"#);
     }
@@ -723,30 +878,99 @@ mod tests {
         let side: FilterSide = serde_json::from_str(r#""full""#).unwrap();
         assert_eq!(side, FilterSide::Full);
         // Every side reaches out by blur and distance (inner ones read that far).
-        let bevel = |side| Filter::Bevel { blur_x: 4.0, blur_y: 8.0, strength: 1.0, quality: 2, angle: 45.0, distance: -3.0, shadow_color: Rgba::BLACK, highlight_color: Rgba::WHITE, side, knockout: false };
+        let bevel = |side| Filter::Bevel {
+            blur_x: 4.0,
+            blur_y: 8.0,
+            strength: 1.0,
+            quality: 2,
+            angle: 45.0,
+            distance: -3.0,
+            shadow_color: Rgba::BLACK,
+            highlight_color: Rgba::WHITE,
+            side,
+            knockout: false,
+        };
         assert_eq!(bevel(FilterSide::Inner).margin(), 12.0);
         assert_eq!(bevel(FilterSide::Full).margin(), 12.0);
-        let Some(Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, knockout, .. }) = Filter::new("gradient_glow") else { panic!() };
-        assert_eq!(Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, knockout, side: FilterSide::Inner }.margin(), 8.5);
+        let Some(Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, knockout, .. }) = Filter::new("gradient_glow")
+        else {
+            panic!()
+        };
+        assert_eq!(
+            Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, knockout, side: FilterSide::Inner }.margin(),
+            8.5
+        );
     }
 
     #[test]
     fn ramps_keep_their_rest_stop_transparent_and_in_range() {
         let st = |offset: f32, c: u32, a: f32| GradientStop { offset, color: Rgba::hex(c).with_alpha(a) };
         // A glow ramp with an opaque start gets it pinned transparent; order and range fixed.
-        let Filter::GradientGlow { stops, .. } = (Filter::GradientGlow { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, stops: vec![st(2.0, 0xff0000, 1.0), st(0.0, 0x00ff00, 1.0), st(f32::NAN, 0, 1.0)], side: FilterSide::Outer, knockout: false }).sanitized() else { panic!() };
+        let Filter::GradientGlow { stops, .. } = (Filter::GradientGlow {
+            blur_x: 5.0,
+            blur_y: 5.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 5.0,
+            stops: vec![st(2.0, 0xff0000, 1.0), st(0.0, 0x00ff00, 1.0), st(f32::NAN, 0, 1.0)],
+            side: FilterSide::Outer,
+            knockout: false,
+        })
+        .sanitized() else {
+            panic!()
+        };
         assert_eq!(stops, vec![st(0.0, 0x00ff00, 0.0), st(1.0, 0xff0000, 1.0)]);
         // A bevel ramp without a middle gets one, of the ramp's colour there.
-        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, stops: vec![st(0.0, 0xffffff, 1.0), st(1.0, 0x000000, 1.0)], side: FilterSide::Inner, knockout: false }).sanitized() else { panic!() };
+        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel {
+            blur_x: 5.0,
+            blur_y: 5.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 5.0,
+            stops: vec![st(0.0, 0xffffff, 1.0), st(1.0, 0x000000, 1.0)],
+            side: FilterSide::Inner,
+            knockout: false,
+        })
+        .sanitized() else {
+            panic!()
+        };
         assert_eq!(stops.len(), 3);
         assert_eq!(stops[1].offset, 0.5);
         assert_eq!(stops[1].color.a, 0.0);
         assert!((stops[1].color.r - 0.5).abs() < 1e-6);
         // Empty ramps take the default; long ones stay within the limit, the pin included.
-        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, stops: vec![], side: FilterSide::Inner, knockout: false }).sanitized() else { panic!() };
+        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel {
+            blur_x: 5.0,
+            blur_y: 5.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 5.0,
+            stops: vec![],
+            side: FilterSide::Inner,
+            knockout: false,
+        })
+        .sanitized() else {
+            panic!()
+        };
         assert_eq!(stops, default_bevel_ramp());
         let many: Vec<GradientStop> = (0..40).map(|i| st(i as f32 / 41.0, 0x336699, 1.0)).collect();
-        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, stops: many, side: FilterSide::Inner, knockout: false }).sanitized() else { panic!() };
+        let Filter::GradientBevel { stops, .. } = (Filter::GradientBevel {
+            blur_x: 5.0,
+            blur_y: 5.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 5.0,
+            stops: many,
+            side: FilterSide::Inner,
+            knockout: false,
+        })
+        .sanitized() else {
+            panic!()
+        };
         assert_eq!(stops.len(), MAX_RAMP_STOPS);
         assert!(stops.iter().any(|s| s.offset == 0.5 && s.color.a == 0.0));
         assert!(stops.windows(2).all(|w| w[0].offset <= w[1].offset));
@@ -754,7 +978,18 @@ mod tests {
         // Stops crowding the rest point: the nearest is pinned, the others step aside, in
         // order, and sanitizing again changes nothing.
         let crowd = vec![st(0.0, 0xffffff, 1.0), st(0.4995, 0xff0000, 1.0), st(0.4998, 0x00ff00, 1.0), st(0.5, 0x0000ff, 1.0), st(1.0, 0, 1.0)];
-        let f = Filter::GradientBevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, stops: crowd, side: FilterSide::Inner, knockout: false }.sanitized();
+        let f = Filter::GradientBevel {
+            blur_x: 5.0,
+            blur_y: 5.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 5.0,
+            stops: crowd,
+            side: FilterSide::Inner,
+            knockout: false,
+        }
+        .sanitized();
         let Filter::GradientBevel { stops, .. } = &f else { panic!() };
         assert_eq!(stops.iter().filter(|s| (s.offset - 0.5).abs() < 1e-4).count(), 1, "{stops:?}");
         assert!(stops.iter().any(|s| s.offset == 0.5 && s.color == Rgba::hex(0x0000ff).with_alpha(0.0)));

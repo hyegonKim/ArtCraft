@@ -139,7 +139,8 @@ pub fn paint(skin: &mut Skin, segments: &[(BoneId, Vec2, Vec2)], shown: &[Vec2],
         }
         // Smoothing pulls toward the mean before this dab changed anything.
         let mean = if brush == Brush::Smooth {
-            let (sum, wsum) = near.iter().fold((0.0f32, 0.0f32), |(s, t), &(i, f)| (s + f * skin.points.get(i).map_or(0.0, |b| b.weight(bone)), t + f));
+            let (sum, wsum) =
+                near.iter().fold((0.0f32, 0.0f32), |(s, t), &(i, f)| (s + f * skin.points.get(i).map_or(0.0, |b| b.weight(bone)), t + f));
             if wsum > 0.0 { sum / wsum } else { 0.0 }
         } else {
             0.0
@@ -251,7 +252,13 @@ pub fn reshape(skin: &Skin, path: &Path, segments: &[(BoneId, Vec2, Vec2)]) -> V
                 let (mut k, mut d) = (j, 0.0f32);
                 for _ in 1..len {
                     let step = if forward {
-                        if k + 1 < e { k + 1 } else if closed { s } else { return None }
+                        if k + 1 < e {
+                            k + 1
+                        } else if closed {
+                            s
+                        } else {
+                            return None;
+                        }
                     } else if k > s {
                         k - 1
                     } else if closed {

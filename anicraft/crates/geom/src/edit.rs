@@ -247,7 +247,11 @@ impl Path {
         }
         self.to_cubic(cmd);
         self.to_cubic(cmd + 1);
-        let (Some(p0), Some(&PathCmd::CubicTo(a1, a2, m)), Some(&PathCmd::CubicTo(b1, b2, p3))) = (self.segment_start(cmd), self.cmds.get(cmd), self.cmds.get(cmd + 1)) else { return false };
+        let (Some(p0), Some(&PathCmd::CubicTo(a1, a2, m)), Some(&PathCmd::CubicTo(b1, b2, p3))) =
+            (self.segment_start(cmd), self.cmds.get(cmd), self.cmds.get(cmd + 1))
+        else {
+            return false;
+        };
         let Some(c) = merge_cubics([p0, a1, a2, m], [m, b1, b2, p3]) else { return false };
         if let Some(slot) = self.cmds.get_mut(cmd + 1) {
             *slot = PathCmd::CubicTo(c[1], c[2], c[3]);
@@ -426,7 +430,8 @@ pub(crate) fn merge_cubics(a: [Vec2; 4], b: [Vec2; 4]) -> Option<[Vec2; 4]> {
             x1 += f64::from(v2.dot(rest));
         }
         let det = c00 * c11 - c01 * c01;
-        let (mut l1, mut l2) = if det.abs() > 1e-12 { (((x0 * c11 - x1 * c01) / det) as f32, ((c00 * x1 - c01 * x0) / det) as f32) } else { (span / 3.0, span / 3.0) };
+        let (mut l1, mut l2) =
+            if det.abs() > 1e-12 { (((x0 * c11 - x1 * c01) / det) as f32, ((c00 * x1 - c01 * x0) / det) as f32) } else { (span / 3.0, span / 3.0) };
         // A handle pointing backwards (or too short to mean anything) is no fit: a third of
         // the way, as a straight segment would have.
         if !(l1.is_finite() && l2.is_finite()) || l1 < span * 1e-3 || l2 < span * 1e-3 {
@@ -604,7 +609,12 @@ mod tests {
             assert_eq!(q.point(1, ANCHOR), p.point(1, ANCHOR), "the outer anchors stay");
             assert_eq!(q.point(0, ANCHOR), p.point(0, ANCHOR));
             let (Some(a), Some(b)) = (q.point(1, C1), p.point(1, C1)) else { panic!("cubic") };
-            assert!(a.distance(b) < 0.01 && q.point(1, C2).unwrap().distance(p.point(1, C2).unwrap()) < 0.01, "t {t}: {:?} vs {:?}", q.cmds[1], p.cmds[1]);
+            assert!(
+                a.distance(b) < 0.01 && q.point(1, C2).unwrap().distance(p.point(1, C2).unwrap()) < 0.01,
+                "t {t}: {:?} vs {:?}",
+                q.cmds[1],
+                p.cmds[1]
+            );
             assert!(deviation(&q, &p) < 0.01 && deviation(&p, &q) < 0.01, "t {t}");
         }
     }
@@ -614,7 +624,11 @@ mod tests {
         // An S: up and over, then down and under; the merged curve keeps the S's ends and the
         // directions it leaves and arrives in, and stays near it.
         let mut p = Path::new();
-        p.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(0.0, -40.0), Vec2::new(50.0, -40.0), Vec2::new(50.0, 0.0)).cubic_to(Vec2::new(50.0, 40.0), Vec2::new(100.0, 40.0), Vec2::new(100.0, 0.0));
+        p.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(0.0, -40.0), Vec2::new(50.0, -40.0), Vec2::new(50.0, 0.0)).cubic_to(
+            Vec2::new(50.0, 40.0),
+            Vec2::new(100.0, 40.0),
+            Vec2::new(100.0, 0.0),
+        );
         let before = p.clone();
         assert!(p.merge_at(1));
         assert_eq!(p.anchors().iter().map(|a| a.1).collect::<Vec<_>>(), vec![Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0)]);
@@ -627,14 +641,25 @@ mod tests {
         l.move_to(Vec2::new(0.0, 0.0)).line_to(Vec2::new(10.0, 0.0)).line_to(Vec2::new(20.0, 0.0));
         assert!(l.merge_at(1));
         assert_eq!(l.cmds.len(), 2);
-        assert!((0..=10).all(|i| l.segment_point(1, i as f32 / 10.0).is_some_and(|q| q.y.abs() < 1e-5 && (0.0..=20.0).contains(&q.x))), "{:?}", l.cmds);
+        assert!(
+            (0..=10).all(|i| l.segment_point(1, i as f32 / 10.0).is_some_and(|q| q.y.abs() < 1e-5 && (0.0..=20.0).contains(&q.x))),
+            "{:?}",
+            l.cmds
+        );
         let mut c = Path::new();
-        c.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(0.0, 0.0), Vec2::new(10.0, 10.0), Vec2::new(10.0, 10.0)).cubic_to(Vec2::new(10.0, 10.0), Vec2::new(20.0, 0.0), Vec2::new(20.0, 0.0));
-        assert!(c.merge_at(1) && c.cmds.iter().all(|x| match x {
-            PathCmd::MoveTo(p) | PathCmd::LineTo(p) => p.is_finite(),
-            PathCmd::CubicTo(a, b, p) => a.is_finite() && b.is_finite() && p.is_finite(),
-            _ => true,
-        }));
+        c.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(0.0, 0.0), Vec2::new(10.0, 10.0), Vec2::new(10.0, 10.0)).cubic_to(
+            Vec2::new(10.0, 10.0),
+            Vec2::new(20.0, 0.0),
+            Vec2::new(20.0, 0.0),
+        );
+        assert!(
+            c.merge_at(1)
+                && c.cmds.iter().all(|x| match x {
+                    PathCmd::MoveTo(p) | PathCmd::LineTo(p) => p.is_finite(),
+                    PathCmd::CubicTo(a, b, p) => a.is_finite() && b.is_finite() && p.is_finite(),
+                    _ => true,
+                })
+        );
         // Only between two segments.
         assert!(!cubic_path().merge_at(0) && !cubic_path().merge_at(2) && !cubic_path().merge_at(9));
     }

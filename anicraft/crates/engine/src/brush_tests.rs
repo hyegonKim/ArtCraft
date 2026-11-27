@@ -173,7 +173,8 @@ fn paint_fills_leaves_lines() {
     let mut n = blank(false);
     run(&mut n, "draw.line", json!({"x0": 200, "y0": 50, "x1": 200, "y1": 250, "stroke": "#000000", "stroke_width": 4}));
     run(&mut n, "draw.brush", json!({"points": stroke(100.0, 150.0, 300.0, 150.0), "size": 30, "color": RED}));
-    let hidden = shapes(&n).iter().filter(|(sh, _)| sh.stroke.is_some()).all(|(sh, m)| !sh.path.bounds().transformed(m).contains(Vec2::new(200.0, 150.0)));
+    let hidden =
+        shapes(&n).iter().filter(|(sh, _)| sh.stroke.is_some()).all(|(sh, m)| !sh.path.bounds().transformed(m).contains(Vec2::new(200.0, 150.0)));
     assert!(hidden, "Paint Normal covers the line where it crosses it");
 }
 
@@ -261,7 +262,13 @@ fn tilt_turns_and_widens_the_tip_and_a_mouse_is_unaffected() {
         run(&mut s, "draw.brush", json!({"points": tilted(alt, 0.0), "size": 10, "smoothing": 0, "tilt_width": true}));
         bounds(&shapes(&s).remove(0).0).height()
     };
-    assert!((round(0.0) - 20.0).abs() < 0.5 && (round(45.0) - 15.0).abs() < 0.5 && (round(90.0) - 10.0).abs() < 0.5, "{} {} {}", round(0.0), round(45.0), round(90.0));
+    assert!(
+        (round(0.0) - 20.0).abs() < 0.5 && (round(45.0) - 15.0).abs() < 0.5 && (round(90.0) - 10.0).abs() < 0.5,
+        "{} {} {}",
+        round(0.0),
+        round(45.0),
+        round(90.0)
+    );
     // The Paint Brush: tilt widens its stroke's profile.
     let mut s = blank(true);
     run(&mut s, "draw.brush", json!({"points": tilted(0.0, 0.0), "size": 6, "as_stroke": true, "tilt_width": true, "pressure_size": false}));
@@ -291,7 +298,9 @@ fn textured_and_scattered_brushes_paint_vector_fills_that_merge() {
     run(&mut s, "draw.brush", json!({"points": stroke(100.0, 400.0, 400.0, 400.0), "preset": "spatter", "color": BLUE}));
     let json = crate::format::to_json(&s.doc).unwrap();
     assert_eq!(crate::format::from_json(&json).unwrap(), s.doc);
-    for p in [json!({"points": [[0, 0]], "texture": 101}), json!({"points": [[0, 0]], "scatter": -1}), json!({"points": [[0, 0]], "tilt_angle": "yes"})] {
+    for p in
+        [json!({"points": [[0, 0]], "texture": 101}), json!({"points": [[0, 0]], "scatter": -1}), json!({"points": [[0, 0]], "tilt_angle": "yes"})]
+    {
         assert!(s.execute("draw.brush", &p).is_err(), "{p}");
     }
     let _ = RED;

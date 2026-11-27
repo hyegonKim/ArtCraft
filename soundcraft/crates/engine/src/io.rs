@@ -25,8 +25,8 @@ pub use bundle::{BUNDLE_EXTENSION, open_session_bytes, session_bundle};
 pub use import::{DecodedImport, add_source, decode_import, import_audio_bytes, load_sampler_bytes, relink_videos};
 pub(crate) use import::{MAX_IMPORT_SAMPLES, at_rate, place_decoded};
 pub use interchange::{
-    InterchangeKind, decode_aaf_container, decode_omf_container, encode_aaf_container, encode_omf_container, export_interchange,
-    import_interchange, import_interchange_bytes,
+    InterchangeKind, decode_aaf_container, decode_omf_container, encode_aaf_container, encode_omf_container, export_interchange, import_interchange,
+    import_interchange_bytes,
 };
 pub use midi::{export_midi, import_midi_bytes};
 pub use record::{Recording, Take, add_recording, live_span, place_recording};
@@ -1119,7 +1119,7 @@ pub fn plan_takes(e: &Engine, unsaved_dir: &Path, input_channels: usize) -> Vec<
         .collect()
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod exclusive_tests {
     use super::*;
 

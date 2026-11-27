@@ -73,7 +73,19 @@ pub struct Variant {
     pub stub: Stub,
 }
 
-const BASE: Variant = Variant { name: "", compression: Compression::Deflate, folders: false, mimetype: false, backslashes: false, names: Names::Utf8Flag, descriptors: false, zip64: false, top: None, macosx: false, stub: Stub::None };
+const BASE: Variant = Variant {
+    name: "",
+    compression: Compression::Deflate,
+    folders: false,
+    mimetype: false,
+    backslashes: false,
+    names: Names::Utf8Flag,
+    descriptors: false,
+    zip64: false,
+    top: None,
+    macosx: false,
+    stub: Stub::None,
+};
 
 /// Every variant each corpus package is checked in.
 pub const VARIANTS: &[Variant] = &[
@@ -150,7 +162,8 @@ pub fn crc32(data: &[u8]) -> u32 {
 
 /// `s` in CP437, if every character is in it.
 pub fn cp437(s: &str) -> Option<Vec<u8>> {
-    const HIGH: &str = "ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u{a0}";
+    const HIGH: &str =
+        "ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u{a0}";
     s.chars().map(|c| if c.is_ascii() { Some(c as u8) } else { HIGH.chars().position(|h| h == c).map(|i| 0x80 + i as u8) }).collect()
 }
 

@@ -58,7 +58,8 @@ pub(crate) fn request_calls(manifest: &str, requests: &[&str], check: bool) -> (
     (data, body)
 }
 
-const STARS: &str =r#"{"id":"org.test.stars","name":"Test Stars","version":"1.0","kind":"command","params":{"count":{"type":"int","min":1,"max":5,"default":3}}}"#;
+const STARS: &str =
+    r#"{"id":"org.test.stars","name":"Test Stars","version":"1.0","kind":"command","params":{"count":{"type":"int","min":1,"max":5,"default":3}}}"#;
 const NUDGE: &str = r#"{"id":"org.test.nudge","name":"Nudge","kind":"command","selection":"required"}"#;
 
 fn stars() -> Vec<u8> {
@@ -117,14 +118,25 @@ fn a_failing_run_leaves_the_document_untouched() {
     let dir = temp("fail");
     let mut s = Session::default();
     // Draws, then fails.
-    let bad = plugin(r#"{"id":"org.test.bad","name":"Bad","kind":"command"}"#, &[r#"{"op":"command","id":"draw.rect","params":{"x":0,"y":0,"w":10,"h":10}}"#, r#"{"op":"log","message":"gave up"}"#], false, 5);
+    let bad = plugin(
+        r#"{"id":"org.test.bad","name":"Bad","kind":"command"}"#,
+        &[r#"{"op":"command","id":"draw.rect","params":{"x":0,"y":0,"w":10,"h":10}}"#, r#"{"op":"log","message":"gave up"}"#],
+        false,
+        5,
+    );
     install(&mut s, &dir, "bad.wasm", &bad);
     let (doc, steps, state) = (s.doc.clone(), s.history_len(), s.state);
     let e = s.execute("plugin.run", &json!({"id": "org.test.bad"})).unwrap_err().to_string();
     assert!(e.contains("code 5") && e.contains("gave up"), "{e}");
     assert!(s.doc == doc && s.history_len() == steps && s.state == state);
     // An endless loop: stopped by its budget, nothing changed, quickly.
-    let spin = plugin_then(r#"{"id":"org.test.spin","name":"Spin","kind":"command"}"#, &[r#"{"op":"command","id":"draw.rect","params":{"x":0,"y":0,"w":5,"h":5}}"#], true, "(loop $l (br $l))", 0);
+    let spin = plugin_then(
+        r#"{"id":"org.test.spin","name":"Spin","kind":"command"}"#,
+        &[r#"{"op":"command","id":"draw.rect","params":{"x":0,"y":0,"w":5,"h":5}}"#],
+        true,
+        "(loop $l (br $l))",
+        0,
+    );
     s.plugins.set_limits(anicraft_plugins::Limits { fuel: 50_000_000, ..Default::default() });
     install(&mut s, &dir, "spin.wasm", &spin);
     install(&mut s, &dir, "spin.wasm", &spin);
@@ -140,7 +152,8 @@ fn a_failing_run_leaves_the_document_untouched() {
 fn plugins_cannot_reach_files_history_the_clipboard_or_other_plugins() {
     let dir = temp("policy");
     let target = dir.join("stolen.anicraft");
-    let save = format!(r#"{{"op":"command","id":"file.save","params":{{"path":"{}","confirm":true}}}}"#, target.display().to_string().replace('\\', "/"));
+    let save =
+        format!(r#"{{"op":"command","id":"file.save","params":{{"path":"{}","confirm":true}}}}"#, target.display().to_string().replace('\\', "/"));
     let forbidden = [
         save.as_str(),
         r#"{"op":"command","id":"file.export_png","params":{"path":"x.png"}}"#,
@@ -186,12 +199,30 @@ fn every_command_namespace_has_a_plugin_policy() {
             "brush" => assert_eq!(verdict.is_ok(), c.id == "brush.preset_list", "{}", c.id),
             // Filters (ADR 0091): the document's lists yes (and listing and applying presets);
             // the clipboard, your presets and preset files no.
-            "filter" => assert_eq!(verdict.is_ok(), matches!(c.id, "filter.move" | "filter.enable" | "filter.remove" | "filter.preset_list" | "filter.preset_apply"), "{}", c.id),
+            "filter" => assert_eq!(
+                verdict.is_ok(),
+                matches!(c.id, "filter.move" | "filter.enable" | "filter.remove" | "filter.preset_list" | "filter.preset_apply"),
+                "{}",
+                c.id
+            ),
             // Swatches (ADR 0078): document data yes, swatch files no.
             "swatch" => assert_eq!(verdict.is_ok(), !matches!(c.id, "swatch.import" | "swatch.export"), "{}", c.id),
             // Rulers, grid and guides (ADR 0076): a scene's guides yes, how you see and snap no.
-            "view" => assert_eq!(verdict.is_ok(), matches!(c.id, "view.aids" | "view.guide_add" | "view.guide_move" | "view.guide_delete" | "view.guides_clear"), "{}", c.id),
-            _ => assert!(verdict.is_ok() || matches!(c.id, "edit.undo" | "edit.redo") || c.id.contains("copy") || c.id.contains("cut") || c.id.contains("paste"), "{} has no plug-in policy (add its namespace to plugin_may_call)", c.id),
+            "view" => assert_eq!(
+                verdict.is_ok(),
+                matches!(c.id, "view.aids" | "view.guide_add" | "view.guide_move" | "view.guide_delete" | "view.guides_clear"),
+                "{}",
+                c.id
+            ),
+            _ => assert!(
+                verdict.is_ok()
+                    || matches!(c.id, "edit.undo" | "edit.redo")
+                    || c.id.contains("copy")
+                    || c.id.contains("cut")
+                    || c.id.contains("paste"),
+                "{} has no plug-in policy (add its namespace to plugin_may_call)",
+                c.id
+            ),
         }
     }
     assert!(plugin_may_call("draw.rect").is_ok());
@@ -205,7 +236,12 @@ fn every_command_namespace_has_a_plugin_policy() {
 fn selection_plugins_need_a_selection_and_see_it() {
     let dir = temp("sel");
     let mut s = Session::default();
-    let nudge = plugin(NUDGE, &[r#"{"op":"elements","selected":true,"paths":true}"#, r#"{"op":"command","id":"element.translate","params":{"dx":5,"dy":0}}"#], true, 0);
+    let nudge = plugin(
+        NUDGE,
+        &[r#"{"op":"elements","selected":true,"paths":true}"#, r#"{"op":"command","id":"element.translate","params":{"dx":5,"dy":0}}"#],
+        true,
+        0,
+    );
     install(&mut s, &dir, "nudge.wasm", &nudge);
     let e = s.execute("plugin.run", &json!({"id": "org.test.nudge"})).unwrap_err().to_string();
     assert!(e.contains("select some artwork"), "{e}");

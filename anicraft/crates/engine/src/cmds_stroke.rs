@@ -52,7 +52,8 @@ fn set_style(s: &mut Session, p: &Value) -> Result<Value> {
     for id in &stroked {
         if let Some(st) = shape_mut(s, *id)?.stroke.as_mut() {
             // Each stroke keeps what the params leave out (and sizes a new pattern by its width).
-            let style = opt_stroke_style(p, &st.style, st.width)?.ok_or_else(|| EngineError::Param(format!("give a style to set ({STROKE_STYLE_PARAMS})")))?;
+            let style = opt_stroke_style(p, &st.style, st.width)?
+                .ok_or_else(|| EngineError::Param(format!("give a style to set ({STROKE_STYLE_PARAMS})")))?;
             st.style = style;
             last = Some(st.style.clone());
         }
@@ -85,7 +86,10 @@ mod tests {
         let id = line(&mut s);
         assert!(stroke(&s, id).unwrap().style.is_default(), "new strokes are round and solid");
         let v = s.execute("stroke.set_style", &json!({"cap": "none", "join": "miter", "miter": 6})).unwrap();
-        assert_eq!((v["cap"].as_str(), v["join"].as_str(), v["miter"].as_f64(), v["changed"].as_u64()), (Some("butt"), Some("miter"), Some(6.0), Some(1)));
+        assert_eq!(
+            (v["cap"].as_str(), v["join"].as_str(), v["miter"].as_f64(), v["changed"].as_u64()),
+            (Some("butt"), Some("miter"), Some(6.0), Some(1))
+        );
         // Dashed with no lengths: sized by the stroke (4 wide: 12 on, 8 off).
         let v = s.execute("stroke.set_style", &json!({"style": "dashed"})).unwrap();
         assert_eq!(v["dash"], json!([12.0, 8.0]));

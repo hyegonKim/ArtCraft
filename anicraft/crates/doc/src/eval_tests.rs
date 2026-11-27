@@ -81,11 +81,26 @@ fn nested_symbols_compose_transforms_and_cycles_terminate() {
             name: String::new(),
             transform: Affine::translate(1.0, 0.0),
             color: ColorEffect::default(),
-            kind: ElementKind::Symbol { symbol: sid, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+            kind: ElementKind::Symbol {
+                symbol: sid,
+                loop_mode: Default::default(),
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
         },
     );
     tl.layers.push(Arc::new(layer));
-    d.library.push(Arc::new(Symbol { id: sid, name: "loop".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: tl }));
+    d.library.push(Arc::new(Symbol {
+        id: sid,
+        name: "loop".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: tl,
+    }));
     push(
         layer0(&mut d),
         0,
@@ -94,7 +109,14 @@ fn nested_symbols_compose_transforms_and_cycles_terminate() {
             name: String::new(),
             transform: Affine::translate(100.0, 0.0),
             color: ColorEffect::Alpha(0.5),
-            kind: ElementKind::Symbol { symbol: sid, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+            kind: ElementKind::Symbol {
+                symbol: sid,
+                loop_mode: Default::default(),
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
         },
     );
     let dl = evaluate(&d, 0);
@@ -109,7 +131,9 @@ fn nested_symbols_compose_transforms_and_cycles_terminate() {
 /// Layers top to bottom: mask (id 1), masked (2), masked (3), plain (4).
 fn mask_doc() -> Document {
     let mut d = Document { scenes: vec![Arc::new(crate::Scene::new("Scene 1"))], ..Document::default() };
-    for (id, kind, parent) in [(1, LayerKind::Mask, None), (2, LayerKind::Normal, Some(1)), (3, LayerKind::Normal, Some(1)), (4, LayerKind::Normal, None)] {
+    for (id, kind, parent) in
+        [(1, LayerKind::Mask, None), (2, LayerKind::Normal, Some(1)), (3, LayerKind::Normal, Some(1)), (4, LayerKind::Normal, None)]
+    {
         let mut l = Layer::new(LayerId(id), format!("L{id}"));
         l.kind = kind;
         l.parent = parent.map(LayerId);
@@ -140,13 +164,28 @@ fn masks_inside_symbols_nest_in_the_instance_clip() {
     // The main timeline's masked layer holds an instance of a symbol that has its own mask.
     let mut d = mask_doc();
     let sid = SymbolId(99);
-    d.library.push(Arc::new(Symbol { id: sid, name: "masked inside".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: mask_doc().timeline(0).clone() }));
+    d.library.push(Arc::new(Symbol {
+        id: sid,
+        name: "masked inside".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: mask_doc().timeline(0).clone(),
+    }));
     let inst = Element {
         id: ElementId(60),
         name: String::new(),
         transform: Affine::IDENTITY,
         color: ColorEffect::default(),
-        kind: ElementKind::Symbol { symbol: sid, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol: sid,
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     };
     push(Arc::make_mut(&mut d.timeline_mut(0).layers[1]), 0, inst);
     let dl = evaluate(&d, 0);
@@ -255,7 +294,9 @@ fn shape_tweens_morph_between_different_shapes_and_classic_ones_hold() {
     assert_eq!(*path_at(&d, 0), Path::rect(0.0, 0.0, 100.0, 100.0));
     assert_eq!(*path_at(&d, 10), Path::ellipse(250.0, 50.0, 50.0, 50.0));
     // The kind survives a save (and older files without it read as classic).
-    let t: Tween = serde_json::from_str(&serde_json::to_string(&Tween { easing: Easing::Linear, kind: TweenKind::Shape, ..Default::default() }).unwrap()).unwrap();
+    let t: Tween =
+        serde_json::from_str(&serde_json::to_string(&Tween { easing: Easing::Linear, kind: TweenKind::Shape, ..Default::default() }).unwrap())
+            .unwrap();
     assert_eq!(t.kind, TweenKind::Shape);
     assert_eq!(serde_json::from_str::<Tween>(r#"{"easing":"Linear"}"#).unwrap().kind, TweenKind::Classic);
 }
@@ -272,7 +313,11 @@ fn motion_guides_steer_tweens_and_their_artwork_is_marked() {
     let mut line = Shape::filled(l, Paint::Solid(Rgba::BLACK)).with_stroke(Rgba::BLACK, 1.0);
     line.fill = None;
     g.keyframe_mut(0).unwrap().duration = 11;
-    push(&mut g, 0, Element { id: ElementId(5), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(line) });
+    push(
+        &mut g,
+        0,
+        Element { id: ElementId(5), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(line) },
+    );
     let mut moving = Layer::new(LayerId(2), "Box");
     moving.parent = Some(LayerId(1));
     let mut k0 = Keyframe::new(0, 10);
@@ -316,14 +361,29 @@ fn movie_clips_play_their_own_timeline_graphics_keep_step_buttons_hold_up() {
         })
         .collect();
     let mut d = Document::default();
-    d.library.push(Arc::new(Symbol { id: sid, name: "Clip".into(), kind: SymbolKind::MovieClip, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(st)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: sid,
+        name: "Clip".into(),
+        kind: SymbolKind::MovieClip,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(st)] },
+    }));
     // The same instance on two keyframes back to back (frames 0–4 and 5–11), moved on the second.
     let inst = |x: f32| Element {
         id: ElementId(60),
         name: String::new(),
         transform: Affine::translate(x, 0.0),
         color: ColorEffect::default(),
-        kind: ElementKind::Symbol { symbol: sid, loop_mode: crate::LoopMode::Loop, first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol: sid,
+            loop_mode: crate::LoopMode::Loop,
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     };
     let (mut k0, mut k1) = (Keyframe::new(0, 5), Keyframe::new(5, 7));
     k0.elements.push(Arc::new(inst(0.0)));
@@ -419,7 +479,13 @@ fn motion_tweens_survive_a_file_round_trip_and_old_files_have_none() {
 /// so element transforms count too).
 fn square_to_circle(hints: Vec<crate::ShapeHint>) -> Document {
     let mut d = Document::default();
-    let el = |id, x, path| Element { id: ElementId(id), name: String::new(), transform: Affine::translate(x, 0.0), color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(path, Paint::Solid(Rgba::BLACK))) };
+    let el = |id, x, path| Element {
+        id: ElementId(id),
+        name: String::new(),
+        transform: Affine::translate(x, 0.0),
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(path, Paint::Solid(Rgba::BLACK))),
+    };
     let mut k0 = Keyframe::new(0, 10);
     k0.elements.push(Arc::new(el(1, 0.0, Path::rect(0.0, 0.0, 100.0, 100.0))));
     k0.tween = Some(Tween { easing: Easing::Linear, kind: TweenKind::Shape, ..Default::default() });
@@ -544,7 +610,10 @@ fn classic_tweens_ease_each_property_group_its_own_way() {
 
 #[test]
 fn a_custom_ease_drives_a_classic_tween() {
-    let c = crate::CustomEase::from_flat(&[(0.0, 0.0), (0.2, 1.5), (0.4, 1.5), (0.5, 1.2), (0.6, 0.9), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| anicraft_geom::Vec2::new(x, y))).unwrap();
+    let c = crate::CustomEase::from_flat(
+        &[(0.0, 0.0), (0.2, 1.5), (0.4, 1.5), (0.5, 1.2), (0.6, 0.9), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| anicraft_geom::Vec2::new(x, y)),
+    )
+    .unwrap();
     let e = Easing::Custom(Arc::new(c.clone()));
     let d = tween_doc(e);
     for f in 0..10 {
@@ -560,8 +629,29 @@ fn instance_filters_tween_when_they_pair_up() {
     use crate::Filter;
     let mut d = Document::default();
     let sid = SymbolId(90);
-    d.library.push(Arc::new(Symbol { id: sid, name: "Clip".into(), kind: SymbolKind::MovieClip, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(Layer::new(LayerId(91), "x"))] } }));
-    let inst = |filters: Vec<Filter>| Element { id: ElementId(92), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Symbol { symbol: sid, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: filters.into_iter().map(Into::into).collect(), events: Vec::new() } };
+    d.library.push(Arc::new(Symbol {
+        id: sid,
+        name: "Clip".into(),
+        kind: SymbolKind::MovieClip,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(Layer::new(LayerId(91), "x"))] },
+    }));
+    let inst = |filters: Vec<Filter>| Element {
+        id: ElementId(92),
+        name: String::new(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Symbol {
+            symbol: sid,
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: filters.into_iter().map(Into::into).collect(),
+            events: Vec::new(),
+        },
+    };
     let blur = |b: f32| Filter::Blur { blur_x: b, blur_y: b, quality: 1 };
     let mut tw = Tween::new(Easing::Linear, TweenKind::Classic);
     tw.set_ease(crate::EaseGroup::Filters, Some(Easing::QuadIn));

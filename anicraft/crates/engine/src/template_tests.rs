@@ -116,8 +116,16 @@ fn save_as_template_keeps_the_document_and_a_picture_and_opens_as_new() {
     // Listed, with its picture; a default category when none is given.
     run(&mut s, "file.save_as_template", json!({"folder": folder, "name": "Blank"}));
     let list = run(&mut s, "file.templates", json!({"folder": folder}));
-    let user: Vec<(String, String, bool)> = list["user"].as_array().unwrap().iter().map(|t| (t["category"].as_str().unwrap().to_string(), t["name"].as_str().unwrap().to_string(), t["thumbnail"].is_string())).collect();
-    assert_eq!(user, [("Characters".to_string(), "Walk cycle".to_string(), true), (crate::cmds_template::DEFAULT_CATEGORY.to_string(), "Blank".to_string(), true)]);
+    let user: Vec<(String, String, bool)> = list["user"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| (t["category"].as_str().unwrap().to_string(), t["name"].as_str().unwrap().to_string(), t["thumbnail"].is_string()))
+        .collect();
+    assert_eq!(
+        user,
+        [("Characters".to_string(), "Walk cycle".to_string(), true), (crate::cmds_template::DEFAULT_CATEGORY.to_string(), "Blank".to_string(), true)]
+    );
     // Opened from the template: the same document, new and untitled.
     let mut other = Session::default();
     run(&mut other, "file.new_from_template", json!({"path": path.display().to_string()}));
@@ -131,7 +139,9 @@ fn save_as_template_keeps_the_document_and_a_picture_and_opens_as_new() {
     confirmed["confirm"] = json!(true);
     run(&mut s, "file.save_as_template", confirmed);
     // Names that can't be file names are refused before anything is written.
-    for (name, category) in [("", "x"), ("  ", "x"), ("a/b", "x"), ("a", "..\\up"), ("CON", "x"), ("ok", "lpt1"), (".hidden", "x"), ("x", "dot."), ("tab\there", "x")] {
+    for (name, category) in
+        [("", "x"), ("  ", "x"), ("a/b", "x"), ("a", "..\\up"), ("CON", "x"), ("ok", "lpt1"), (".hidden", "x"), ("x", "dot."), ("tab\there", "x")]
+    {
         let p = json!({"folder": folder, "name": name, "category": category});
         assert!(s.execute("file.save_as_template", &p).is_err(), "{p}");
     }

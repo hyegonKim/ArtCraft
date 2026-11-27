@@ -1,6 +1,6 @@
 # Command reference
 
-Everything you can do in AniCraft is a command: the menus, the shortcuts, the command palette (**Ctrl+K**, macOS **⌘K**), `anicraft-cli` and AI assistants over MCP all run the same 352 commands, listed here by menu. The id is what scripts and [working headless](../working-headless.md) use; the parameters are what a command takes as JSON. Commands that change the document are one undo step each. Your own shortcuts (**F1**) replace the defaults shown here; see the [shortcut reference](shortcuts.md).
+Everything you can do in AniCraft is a command: the menus, the shortcuts, the command palette (**Ctrl+K**, macOS **⌘K**), `anicraft-cli` and AI assistants over MCP all run the same 364 commands, listed here by menu. The id is what scripts and [working headless](../working-headless.md) use; the parameters are what a command takes as JSON. Commands that change the document are one undo step each. Your own shortcuts (**F1**) replace the defaults shown here; see the [shortcut reference](shortcuts.md).
 
 This page is generated from the command registry, so it always matches the version of AniCraft it came with.
 
@@ -42,6 +42,8 @@ This page is generated from the command registry, so it always matches the versi
   Parameters: `{path, from?, to? (movie frames: every scene in order), background? (default false: transparent), confirm?}`
 - **Export HTML Canvas…** `file.export_html` · File › Export
   Parameters: `{path (.html: one self-contained page), title? (default: the file name), sound? (default true: embed the movie's sounds), fit? (default true: scale to the browser window), confirm?}`
+- **Export XFL Package…** `file.export_xfl` · File › Export
+  Parameters: `{dir? (destination XFL package folder), path? (.fla archive or XFL package folder), name? (stem of the .xfl proxy file), confirm?}`
 - **Publish Settings…** `publish.settings_get` · **Ctrl+Shift+F12** (macOS **⇧⌘F12**)
   Parameters: `{} (the document's publish profile, and where each format would go)`
 - **Publish** `file.publish` · **Shift+F12** (macOS **⇧F12**)
@@ -161,7 +163,7 @@ This page is generated from the command registry, so it always matches the versi
 - **Mask** `layer.toggle_mask` · Modify › Timeline · changes the document
   Parameters: `{layer?}`
 - **Layer Properties** `layer.set_properties` · Modify › Timeline · changes the document
-  Parameters: `{layer?, name?, type?: normal|mask|masked|guide|guided, mask?: coverage|alpha|luminance (a mask layer's mask type), color?, outline?: bool (view as outlines), height?: 100|200|300, visible?, locked?, onion?} sets several at once, as one undo step; answers with the layer's properties`
+  Parameters: `{layer?, name?, type?: normal|mask|masked|guide|guided, mask?: coverage|alpha|luminance (a mask layer's mask type), parent_layer?: id | null, z_depth?: f32, color?, outline?: bool (view as outlines), height?: 100|200|300, visible?, locked?, onion?} sets several at once, as one undo step; answers with the layer's properties`
 - **Remove Camera** `camera.remove` · Modify › Timeline · changes the document
   Parameters: `{} (removes the camera layer and its moves; asks first when the camera is animated)`
 - **Add Warp Mesh** `warp.add` · Modify › Asset Warp · changes the document
@@ -240,6 +242,14 @@ This page is generated from the command registry, so it always matches the versi
   Parameters: `{path?: element id of a shape (default: the other selected element, a shape), x?, y? (pick the shape at this stage point instead), offset? (px along the path; default by the text's alignment: its start, middle or end), flip?: bool} sets the selected static text along a copy of the shape's outline (its first contour); the shape stays as it is (ADR 0070)`
 - **Release Text from Path** `text.release_path` · Modify › Text · changes the document
   Parameters: `{} the selected text on a path goes back to lines of text (ADR 0070)`
+- **Auto Blink** `puppet.auto_blink` · Modify › Puppet · changes the document
+  Parameters: `{layer?, interval?: frames (default 72), duration?: frames (default 3), jitter?: 0..0.8 (default 0.25), open_frame?: 0, closed_frame?: 1, seed?, from?, to?} stamps periodic blink keyframes on the layer`
+- **Breathe Cycle** `puppet.breathe` · Modify › Puppet · changes the document
+  Parameters: `{layer?, period?: frames (default 72), scale_x?: 1.03, scale_y?: 1.05, lift?: px (default 4), pivot?: [x, y], phase?: deg, from?, to?} stamps rhythmic chest/torso breathing keyframes around the pivot`
+- **Walk Cycle** `puppet.walk_cycle` · Modify › Puppet · changes the document
+  Parameters: `{cycle_frames?: 24, stride_length?: 48, step_height?: 22, hip_bob?: 6, arm_swing?: 28, torso_lean?: 3.5, speed?: 0, hip_layer?, left_leg?, right_leg?, left_arm?, right_arm?, from?, to?} generates procedural locomotion IK/transform keyframes`
+- **Auto Lip-Sync** `sound.auto_lip_sync` · Modify › Timeline · changes the document
+  Parameters: `{layer? (mouth layer with a graphic symbol; default: active layer), sound? (library sound id; default: scene stream/event sound), symbol? (graphic symbol id), from?, to?, mapping?: {neutral?, ah?, d?, ee?, f?, l?, m?, oh?, r?, s?, uh?, woo?} (0-based symbol frames)}`
 
 ## Commands
 
@@ -343,6 +353,8 @@ These commands have no menu item: the panels, the stage and the timeline use the
   Parameters: `{height: 100 | 200 | 300 (percent of a normal row), layer?} the layer's row height on the timeline`
 - **Mask Type** `layer.set_mask` · changes the document
   Parameters: `{mask: coverage|alpha|luminance, layer?} how a mask layer reveals the layers it masks: coverage (its fills' area, as in Animate), alpha (its artwork's opacity: gradients and faded shapes make soft edges) or luminance (its brightness: white shows, black hides; SVG's mask) (ADR 0070)`
+- **Parent Layer** `layer.set_parent` · changes the document
+  Parameters: `{parent: layer_id | null, layer?} links a layer's transform to another artwork layer (direct layer parenting, cycle-checked)`
 - **Get Layer Properties** `layer.properties`
   Parameters: `{layer?} the layer's name, type, mask type (mask layers), colour, outline, height (percent), visible, locked and onion`
 - **Camera** `camera.set` · changes the document
@@ -495,6 +507,8 @@ These commands have no menu item: the panels, the stage and the timeline use the
   Parameters: ``{dx, dy, snap?, from?: [x, y]} moves the selection, on every layer; with `snap` (a distance) one of its corners or ends, or its box's corners or centre (the nearest to `from`), then snaps within that distance by the snap engine's priority (ADR 0076): a point, guide, line or fill edge of the rest, the grid, a whole pixel``
 - **Transform** `element.set_transform` · changes the document
   Parameters: `{x?, y?, sx?, sy?, rotation? (degrees)}`
+- **3D Perspective** `element.set_perspective` · changes the document
+  Parameters: `{rot_x? (°), rot_y? (°), z? (px), fov? (5..160°), reset?: bool} sets 2.5D perspective rotation and Z translation on the selected elements at the playhead`
 - **Fill Colour** `element.set_fill` · changes the document
   Parameters: `{color: "#rrggbb" | null}`
 - **Stroke** `element.set_stroke` · changes the document
@@ -701,6 +715,16 @@ These commands have no menu item: the panels, the stage and the timeline use the
   Parameters: `{id, params?: {…} (see plugin.list; missing ones take their defaults)} one undo step`
 - **Remove Plug-in** `plugin.remove`
   Parameters: `{id, confirm? (when it deletes the plug-in's file from the plug-ins folder)}`
+- **Head-Turn Rig** `puppet.configure_head_turn` · changes the document
+  Parameters: `{id?, name?, pivot?: [x, y], frontal?, left_quarter?, right_quarter?, upward?, downward?, features?: [{name?, layer?, feature: nose|left_eye|right_eye|mouth|left_brow|right_brow|left_ear|right_ear|hair_front|hair_back|head_contour, weight?}]} creates or updates a 5-pose head-turn parallax rig`
+- **Pose Head Turn** `puppet.pose_head` · changes the document
+  Parameters: `{rig? (id, default: first puppet rig), yaw?: -1..1, pitch?: -1..1, pose?: frontal|left_quarter|right_quarter|upward|downward, frame?} evaluates feature parallax weights and keys the bound layers at the frame`
+- **Define Swap Set** `puppet.define_swap_set` · changes the document
+  Parameters: `{rig?, name, layer?, mode?: hold|latch, default_choice?: index, choices: [{name, key, frame?, symbol?}]} defines or updates a swap-set trigger group`
+- **Trigger Swap Set** `puppet.trigger_swap` · changes the document
+  Parameters: `{rig?, swap_set: name, layer?, frames?, events: [{frame, duration?, trigger}]} stamps SingleFrame symbol keyframes across the timeline using Hold or Latch semantics`
+- **Puppet Rig Info** `puppet.info`
+  Parameters: `{} -> {puppets: [...]} lists puppet rigs, head-turn poses, and swap sets in the document`
 - **Place Sound** `sound.place` · changes the document
   Parameters: `{sound, layer?, frame? (a blank keyframe is made there if the frame is empty), sync?: event|start|stop|stream, repeat?, loop?, effect?, envelope?, extend? (lengthen the layer's last span to the sound's length)}`
 - **Sound Settings** `sound.set` · changes the document

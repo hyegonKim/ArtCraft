@@ -52,8 +52,15 @@ pub fn previewing(app: &App) -> bool {
 /// Picking the Camera tool adds a camera when the scene has none (as Animate does), once per
 /// pick: undoing the add leaves the tool in hand without adding it again.
 pub fn on_tool_change(app: &mut App) {
-    if app.tool == Tool::Camera && app.last_tool != Tool::Camera && app.s.timeline().camera_layer().is_none() && app.run("camera.add", json!({})).is_some() {
-        app.status_ok(tr!("Added a camera. Drag on the stage to pan it, turn it with the round handle, zoom with the wheel. {undo} to undo.", undo = app.undo_key()));
+    if app.tool == Tool::Camera
+        && app.last_tool != Tool::Camera
+        && app.s.timeline().camera_layer().is_none()
+        && app.run("camera.add", json!({})).is_some()
+    {
+        app.status_ok(tr!(
+            "Added a camera. Drag on the stage to pan it, turn it with the round handle, zoom with the wheel. {undo} to undo.",
+            undo = app.undo_key()
+        ));
     }
     app.last_tool = app.tool;
 }

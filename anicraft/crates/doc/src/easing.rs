@@ -45,7 +45,17 @@ pub enum EaseFamily {
 }
 
 impl EaseFamily {
-    pub const ALL: [EaseFamily; 9] = [EaseFamily::Quad, EaseFamily::Cubic, EaseFamily::Quart, EaseFamily::Quint, EaseFamily::Sine, EaseFamily::Back, EaseFamily::Circ, EaseFamily::Bounce, EaseFamily::Elastic];
+    pub const ALL: [EaseFamily; 9] = [
+        EaseFamily::Quad,
+        EaseFamily::Cubic,
+        EaseFamily::Quart,
+        EaseFamily::Quint,
+        EaseFamily::Sine,
+        EaseFamily::Back,
+        EaseFamily::Circ,
+        EaseFamily::Bounce,
+        EaseFamily::Elastic,
+    ];
 
     /// The family's name as the ease menus show it.
     pub fn label(self) -> &'static str {
@@ -333,9 +343,10 @@ impl Easing {
         match self {
             Easing::Linear => Easing::LINEAR_LABEL.to_string(),
             Easing::Classic(s) => format!("Classic {s:+.0}"),
-            Easing::CubicBezier(a, b, c, d) => {
-                Easing::PRESETS.iter().find(|(_, e)| e == self).map_or_else(|| format!("Bezier({a:.2}, {b:.2}, {c:.2}, {d:.2})"), |(n, _)| (*n).to_string())
-            }
+            Easing::CubicBezier(a, b, c, d) => Easing::PRESETS
+                .iter()
+                .find(|(_, e)| e == self)
+                .map_or_else(|| format!("Bezier({a:.2}, {b:.2}, {c:.2}, {d:.2})"), |(n, _)| (*n).to_string()),
             Easing::Custom(_) => "Custom".to_string(),
             Easing::Sampled(s) => s.name().to_string(),
             other => other.family().map_or_else(|| "Custom".to_string(), |(f, d)| format!("{} {}", f.label(), d.label())),
@@ -473,7 +484,12 @@ fn slope(y: &dyn Fn(f64) -> f64, x: f64, lo: f64, hi: f64) -> f64 {
 /// end, so exact for cubic polynomials and for each parabola of Bounce), except Circ, whose
 /// quarter circle is two 45° arcs (within 4·10⁻⁶ of the circle).
 fn fit_in(f: EaseFamily) -> Vec<EasePoint> {
-    let pt = |x: f64, y: f64, i: (f64, f64), o: (f64, f64)| EasePoint { at: Vec2::new(x as f32, y as f32), h_in: Vec2::new(i.0 as f32, i.1 as f32), out: Vec2::new(o.0 as f32, o.1 as f32), smooth: false };
+    let pt = |x: f64, y: f64, i: (f64, f64), o: (f64, f64)| EasePoint {
+        at: Vec2::new(x as f32, y as f32),
+        h_in: Vec2::new(i.0 as f32, i.1 as f32),
+        out: Vec2::new(o.0 as f32, o.1 as f32),
+        smooth: false,
+    };
     if f == EaseFamily::Circ {
         // The circle about (0, 1) from (0, 0) to (1, 1); each arc's handles are k = 4/3·tan(φ/4)
         // long along the tangents.
@@ -535,7 +551,8 @@ fn fit_named(f: EaseFamily, d: EaseDir) -> CustomEase {
     // Points where the slope carries on are smooth (Bounce's floor hits are corners).
     let n = pts.len();
     for (i, p) in pts.iter_mut().enumerate() {
-        p.smooth = i > 0 && i + 1 < n && p.h_in.length() > 1e-9 && p.out.length() > 1e-9 && (p.h_in.normalized().dot(p.out.normalized()) + 1.0).abs() < 1e-3;
+        p.smooth =
+            i > 0 && i + 1 < n && p.h_in.length() > 1e-9 && p.out.length() > 1e-9 && (p.h_in.normalized().dot(p.out.normalized()) + 1.0).abs() < 1e-3;
     }
     CustomEase::new(pts)
 }
@@ -646,7 +663,10 @@ impl CustomEase {
 
     /// One segment with CSS-style handles.
     pub fn from_bezier(x1: f32, y1: f32, x2: f32, y2: f32) -> CustomEase {
-        CustomEase::new(vec![EasePoint { at: Vec2::ZERO, h_in: Vec2::ZERO, out: Vec2::new(x1, y1), smooth: false }, EasePoint { at: Vec2::new(1.0, 1.0), h_in: Vec2::new(x2 - 1.0, y2 - 1.0), out: Vec2::ZERO, smooth: false }])
+        CustomEase::new(vec![
+            EasePoint { at: Vec2::ZERO, h_in: Vec2::ZERO, out: Vec2::new(x1, y1), smooth: false },
+            EasePoint { at: Vec2::new(1.0, 1.0), h_in: Vec2::new(x2 - 1.0, y2 - 1.0), out: Vec2::ZERO, smooth: false },
+        ])
     }
 
     /// The curve of absolute points `[p0, c1, c2, p1, c3, c4, p2, …]` (3n + 1 of them, as XFL
@@ -753,7 +773,12 @@ impl CustomEase {
     /// is split in two): the new curve and the point's index. `None` at the ends, on an
     /// existing point, or when the curve is full.
     pub fn insert_at(&self, t: f32) -> Option<(CustomEase, usize)> {
-        if !t.is_finite() || t <= 1e-4 || t >= 1.0 - 1e-4 || self.points.len() >= MAX_EASE_POINTS || self.points.iter().any(|p| (p.at.x - t).abs() < 1e-4) {
+        if !t.is_finite()
+            || t <= 1e-4
+            || t >= 1.0 - 1e-4
+            || self.points.len() >= MAX_EASE_POINTS
+            || self.points.iter().any(|p| (p.at.x - t).abs() < 1e-4)
+        {
             return None;
         }
         let i = self.segment_at(t);

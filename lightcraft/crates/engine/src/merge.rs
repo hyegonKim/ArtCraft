@@ -339,13 +339,7 @@ fn frame_log2_luma(f: &Frame) -> Option<f64> {
         return None;
     }
     let step = (n / 4096).max(1);
-    let mut vals: Vec<f32> = f
-        .image
-        .data
-        .iter()
-        .step_by(step)
-        .map(|p| (0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]).max(1e-6))
-        .collect();
+    let mut vals: Vec<f32> = f.image.data.iter().step_by(step).map(|p| (0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]).max(1e-6)).collect();
     if vals.is_empty() {
         return None;
     }
@@ -358,7 +352,7 @@ fn combine_group_ghosts(ghosts: &[lightcraft_raster::Plane]) -> Option<lightcraf
     if ghosts.is_empty() {
         return None;
     }
-    let h = ghosts.first().map(|g| g.height.min(512).max(1)).unwrap_or(256);
+    let h = ghosts.first().map(|g| g.height.clamp(1, 512)).unwrap_or(256);
     let w_each = ghosts.first().map(|g| (g.width * h / g.height.max(1)).clamp(32, 512)).unwrap_or(256);
     let total_w = (w_each * ghosts.len()).clamp(32, 2048);
     let mut out = lightcraft_raster::Plane::new(total_w, h);
@@ -390,12 +384,7 @@ fn estimate_peak_ev(img: &Rgb32f) -> f64 {
         return 0.0;
     }
     let step = (img.data.len() / 16_384).max(1);
-    let mut peaks: Vec<f32> = img
-        .data
-        .iter()
-        .step_by(step)
-        .map(|p| p[0].max(p[1]).max(p[2]).max(1e-5))
-        .collect();
+    let mut peaks: Vec<f32> = img.data.iter().step_by(step).map(|p| p[0].max(p[1]).max(p[2]).max(1e-5)).collect();
     if peaks.is_empty() {
         return 0.0;
     }

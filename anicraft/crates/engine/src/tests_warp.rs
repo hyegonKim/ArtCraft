@@ -43,7 +43,8 @@ fn shape_at(s: &Session, id: u64, frame: u32) -> Shape {
 pub(crate) fn warped() -> (Session, u64, u64) {
     let d = Document { stage: Stage { width: 400, height: 300, ..Stage::default() }, ..Document::default() };
     let mut s = Session::new(d);
-    let rect = run(&mut s, "draw.rect", json!({"x": 100, "y": 100, "w": 200, "h": 80, "fill": "#3080ff", "object": true}))["element"].as_u64().unwrap();
+    let rect =
+        run(&mut s, "draw.rect", json!({"x": 100, "y": 100, "w": 200, "h": 80, "fill": "#3080ff", "object": true}))["element"].as_u64().unwrap();
     let bm = anicraft_doc::BitmapId(s.doc.alloc_id());
     let mut rgba = Vec::new();
     for y in 0..20u32 {
@@ -69,7 +70,10 @@ fn pins_bend_a_shape_and_the_rest_pose_is_the_drawing() {
     let drawn = shape_at(&s, rect, 0).path.clone();
     let before = render_frame(&s.doc, 0, 1.0).unwrap().data;
     let v = run(&mut s, "warp.add", json!({"element": rect}));
-    assert_eq!((v["created"].as_bool(), v["resolution"].as_u64(), v["columns"].as_u64(), v["rows"].as_u64()), (Some(true), Some(12), Some(12), Some(5)));
+    assert_eq!(
+        (v["created"].as_bool(), v["resolution"].as_u64(), v["columns"].as_u64(), v["rows"].as_u64()),
+        (Some(true), Some(12), Some(12), Some(5))
+    );
     let a = pin_add(&mut s, rect, 110.0, 140.0);
     let b = pin_add(&mut s, rect, 200.0, 140.0);
     let c = pin_add(&mut s, rect, 290.0, 140.0);
@@ -253,12 +257,22 @@ fn warp_measured() {
     }
     p.close();
     let mut w = anicraft_doc::warp::Warp::new(Arc::new(p), 48);
-    w.pins = (0..32).map(|i| anicraft_doc::warp::Pin { id: PinId(i), rest: Vec2::new(i as f32 * 18.0, 100.0), at: Vec2::new(i as f32 * 18.0, 100.0 + (i % 5) as f32 * 9.0) }).collect();
+    w.pins = (0..32)
+        .map(|i| anicraft_doc::warp::Pin {
+            id: PinId(i),
+            rest: Vec2::new(i as f32 * 18.0, 100.0),
+            at: Vec2::new(i as f32 * 18.0, 100.0 + (i % 5) as f32 * 9.0),
+        })
+        .collect();
     let t = std::time::Instant::now();
     let n = 20;
     let mut cmds = 0;
     for _ in 0..n {
         cmds += w.outline().cmds.len();
     }
-    eprintln!("warp: bend 1,200 anchors on 48×48 with 32 pins: {:.3} ms per frame ({} commands)", t.elapsed().as_secs_f64() * 1000.0 / f64::from(n), cmds / n as usize);
+    eprintln!(
+        "warp: bend 1,200 anchors on 48×48 with 32 pins: {:.3} ms per frame ({} commands)",
+        t.elapsed().as_secs_f64() * 1000.0 / f64::from(n),
+        cmds / n as usize
+    );
 }

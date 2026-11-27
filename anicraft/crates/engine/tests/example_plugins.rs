@@ -13,7 +13,11 @@ use std::time::Instant;
 fn folder() -> Option<PathBuf> {
     if let Ok(d) = std::env::var("ANICRAFT_EXAMPLE_PLUGINS") {
         let d = PathBuf::from(d);
-        assert!(d.join("text_export.wasm").is_file() && d.join("stepped_ease.wasm").is_file(), "ANICRAFT_EXAMPLE_PLUGINS={} has no built sample plug-ins", d.display());
+        assert!(
+            d.join("text_export.wasm").is_file() && d.join("stepped_ease.wasm").is_file(),
+            "ANICRAFT_EXAMPLE_PLUGINS={} has no built sample plug-ins",
+            d.display()
+        );
         return Some(d);
     }
     let d = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/plugins/dist");
@@ -39,7 +43,11 @@ fn the_text_exporter_writes_the_sample_movie() {
     let out = std::env::temp_dir().join(format!("anicraft-example-text-{}.txt", std::process::id()));
     let _ = std::fs::remove_file(&out);
     let t = Instant::now();
-    let v = run(&mut s, "file.export_plugin", json!({"format": "org.anicraft.text-export", "path": out.display().to_string(), "options": {"detail": "Paths"}}));
+    let v = run(
+        &mut s,
+        "file.export_plugin",
+        json!({"format": "org.anicraft.text-export", "path": out.display().to_string(), "options": {"detail": "Paths"}}),
+    );
     let ms = t.elapsed().as_secs_f64() * 1e3;
     let text = std::fs::read_to_string(&out).expect("written");
     let frames = s.doc.frame_count();
@@ -49,7 +57,11 @@ fn the_text_exporter_writes_the_sample_movie() {
     assert!(text.contains("\nframe 1 (scene 1): ") && text.contains("    M"), "shapes with their outlines");
     eprintln!("Plain Text Frames: {frames} frames, {} bytes, {} instructions, {ms:.0} ms", text.len(), v["fuel"]);
     // Every other frame, summary only.
-    let v = run(&mut s, "file.export_plugin", json!({"format": "org.anicraft.text-export", "path": out.display().to_string(), "options": {"detail": "Summary", "every": 2}, "confirm": true}));
+    let v = run(
+        &mut s,
+        "file.export_plugin",
+        json!({"format": "org.anicraft.text-export", "path": out.display().to_string(), "options": {"detail": "Summary", "every": 2}, "confirm": true}),
+    );
     assert_eq!(v["frames_read"].as_u64(), Some(u64::from(frames.div_ceil(2))));
     assert!(!std::fs::read_to_string(&out).expect("written").contains("element "));
     let _ = std::fs::remove_file(&out);

@@ -15,7 +15,8 @@ use std::sync::Arc;
 
 /// Layer colours offered next to the colour picker (sRGB): those new layers take in turn,
 /// then a few more, all bright enough to read as outlines on a dark or a light stage.
-pub const LAYER_COLORS: [u32; 12] = [0x4fa3ff, 0xff6b4a, 0x66bb6a, 0xffd54a, 0xba68c8, 0x4dd0e1, 0xff8a65, 0xf06292, 0xaed581, 0x9575cd, 0xe0e0e0, 0x8d6e63];
+pub const LAYER_COLORS: [u32; 12] =
+    [0x4fa3ff, 0xff6b4a, 0x66bb6a, 0xffd54a, 0xba68c8, 0x4dd0e1, 0xff8a65, 0xf06292, 0xaed581, 0x9575cd, 0xe0e0e0, 0x8d6e63];
 
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
@@ -29,8 +30,24 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             set_onion as crate::RunFn,
         ),
-        c("layer.set_color", "Layer Colour", "", None, "{color: \"#rrggbb\", layer?} the layer's colour: its outlines in outline mode and its bar on the timeline", true, set_color),
-        c("layer.set_height", "Layer Height", "", None, "{height: 100 | 200 | 300 (percent of a normal row), layer?} the layer's row height on the timeline", true, set_height),
+        c(
+            "layer.set_color",
+            "Layer Colour",
+            "",
+            None,
+            "{color: \"#rrggbb\", layer?} the layer's colour: its outlines in outline mode and its bar on the timeline",
+            true,
+            set_color,
+        ),
+        c(
+            "layer.set_height",
+            "Layer Height",
+            "",
+            None,
+            "{height: 100 | 200 | 300 (percent of a normal row), layer?} the layer's row height on the timeline",
+            true,
+            set_height,
+        ),
         c(
             "layer.set_mask",
             "Mask Type",
@@ -41,15 +58,32 @@ pub fn specs() -> Vec<CommandSpec> {
             set_mask,
         ),
         c(
+            "layer.set_parent",
+            "Parent Layer",
+            "",
+            None,
+            "{parent: layer_id | null, layer?} links a layer's transform to another artwork layer (direct layer parenting, cycle-checked)",
+            true,
+            set_parent,
+        ),
+        c(
             "layer.set_properties",
             "Layer Properties",
             "Modify/Timeline",
             None,
-            "{layer?, name?, type?: normal|mask|masked|guide|guided, mask?: coverage|alpha|luminance (a mask layer's mask type), color?, outline?: bool (view as outlines), height?: 100|200|300, visible?, locked?, onion?} sets several at once, as one undo step; answers with the layer's properties",
+            "{layer?, name?, type?: normal|mask|masked|guide|guided, mask?: coverage|alpha|luminance (a mask layer's mask type), parent_layer?: id | null, z_depth?: f32, color?, outline?: bool (view as outlines), height?: 100|200|300, visible?, locked?, onion?} sets several at once, as one undo step; answers with the layer's properties",
             true,
             set_properties,
         ),
-        c("layer.properties", "Get Layer Properties", "", None, "{layer?} the layer's name, type, mask type (mask layers), colour, outline, height (percent), visible, locked and onion", false, |s, p| properties(s, layer_id(s, p)?)),
+        c(
+            "layer.properties",
+            "Get Layer Properties",
+            "",
+            None,
+            "{layer?} the layer's name, type, mask type (mask layers), colour, outline, height (percent), visible, locked and onion",
+            false,
+            |s, p| properties(s, layer_id(s, p)?),
+        ),
     ]
 }
 
@@ -114,7 +148,9 @@ fn set_height(s: &mut Session, p: &Value) -> Result<Value> {
 
 /// `mask`: a mask type's key.
 fn mask_param(p: &Value) -> Result<Option<MaskMode>> {
-    opt_str(p, "mask")?.map(|k| MaskMode::from_key(k).ok_or_else(|| EngineError::Param(format!("'mask' is coverage, alpha or luminance, not '{k}'")))).transpose()
+    opt_str(p, "mask")?
+        .map(|k| MaskMode::from_key(k).ok_or_else(|| EngineError::Param(format!("'mask' is coverage, alpha or luminance, not '{k}'"))))
+        .transpose()
 }
 
 fn set_mask(s: &mut Session, p: &Value) -> Result<Value> {
@@ -126,6 +162,26 @@ fn set_mask(s: &mut Session, p: &Value) -> Result<Value> {
     }
     l.mask_mode = mode;
     Ok(json!({"layer": id.0, "mask": mode.key()}))
+}
+
+fn set_parent(s: &mut Session, p: &Value) -> Result<Value> {
+    let id = layer_id(s, p)?;
+    let target = match p.get("parent") {
+        None => return Err(EngineError::Param("param 'parent' (a layer id or null) is required".into())),
+        Some(Value::Null) => None,
+        Some(_) => Some(LayerId(opt_u64(p, "parent")?.ok_or_else(|| EngineError::Param("param 'parent' must be a non-negative integer".into()))?)),
+    };
+    if let Some(pid) = target
+        && !s.timeline().can_parent_layer(id, pid)
+    {
+        return Err(EngineError::State("cannot parent to that layer (must be another artwork layer without forming a cycle)".into()));
+    }
+    let tl = crate::editing::edited_mut(&mut s.doc, s.scene, &s.editing)?;
+    let l = tl.layer_mut(id).ok_or_else(|| EngineError::State(format!("no layer with id {}", id.0)))?;
+    l.parent_layer = target;
+    tl.repair_masks();
+    let now = s.timeline().layer(id).and_then(|l| l.parent_layer).map(|x| x.0);
+    Ok(json!({ "layer": id.0, "parent_layer": now }))
 }
 
 fn set_properties(s: &mut Session, p: &Value) -> Result<Value> {
@@ -140,6 +196,23 @@ fn set_properties(s: &mut Session, p: &Value) -> Result<Value> {
     let outline = opt_bool(p, "outline")?;
     let height = height_param(p)?;
     let mask = mask_param(p)?;
+    let z_depth = opt_f32(p, "z_depth")?;
+    if let Some(zd) = z_depth
+        && !(anicraft_doc::camera::MIN_DEPTH..=anicraft_doc::camera::MAX_DEPTH).contains(&zd)
+    {
+        return Err(EngineError::Param(format!(
+            "param 'z_depth' must be between {} and {}",
+            anicraft_doc::camera::MIN_DEPTH,
+            anicraft_doc::camera::MAX_DEPTH
+        )));
+    }
+    let parent_layer_edit: Option<Option<LayerId>> = match p.get("parent_layer") {
+        None => None,
+        Some(Value::Null) => Some(None),
+        Some(_) => Some(Some(LayerId(
+            opt_u64(p, "parent_layer")?.ok_or_else(|| EngineError::Param("param 'parent_layer' must be a non-negative integer".into()))?,
+        ))),
+    };
     let (visible, locked, onion) = (opt_bool(p, "visible")?, opt_bool(p, "locked")?, opt_bool(p, "onion")?);
     if let Some(ty) = ty {
         let now = crate::cmds_timeline::layer_type_json(s, id);
@@ -147,12 +220,23 @@ fn set_properties(s: &mut Session, p: &Value) -> Result<Value> {
             crate::cmds_timeline::set_type(s, id, ty)?;
         }
     }
+    if let Some(Some(pid)) = parent_layer_edit
+        && !s.timeline().can_parent_layer(id, pid)
+    {
+        return Err(EngineError::State("cannot parent to that layer (must be another artwork layer without forming a cycle)".into()));
+    }
     let l = s.layer_mut(Some(id))?;
     if let Some(m) = mask {
         if l.kind != LayerKind::Mask {
             return Err(EngineError::State("only a mask layer has a mask type".into()));
         }
         l.mask_mode = m;
+    }
+    if let Some(pl) = parent_layer_edit {
+        l.parent_layer = pl;
+    }
+    if let Some(zd) = z_depth {
+        l.depth = anicraft_doc::camera::clamp_depth(zd);
     }
     if let Some(n) = name {
         l.name = n;
@@ -181,7 +265,7 @@ fn set_properties(s: &mut Session, p: &Value) -> Result<Value> {
 fn properties(s: &Session, id: LayerId) -> Result<Value> {
     let l = s.timeline().layer(id).ok_or_else(|| EngineError::State(format!("no layer with id {}", id.0)))?;
     let ty = crate::cmds_timeline::layer_type_json(s, id).get("type").cloned().unwrap_or(Value::Null);
-    Ok(json!({
+    let mut out = json!({
         "layer": id.0,
         "name": l.name,
         "type": ty,
@@ -192,7 +276,18 @@ fn properties(s: &Session, id: LayerId) -> Result<Value> {
         "visible": l.visible,
         "locked": l.locked,
         "onion": l.onion,
-    }))
+    });
+    if let Some(o) = out.as_object_mut() {
+        if let Some(pid) = l.parent_layer {
+            o.insert("parent_layer".into(), json!(pid.0));
+        }
+        let zd = l.z_depth_at(s.frame);
+        if zd.abs() > f32::EPSILON {
+            o.insert("z_depth".into(), json!(zd));
+            o.insert("parallax_factor".into(), json!(l.parallax_factor_at(s.frame)));
+        }
+    }
+    Ok(out)
 }
 
 #[cfg(test)]

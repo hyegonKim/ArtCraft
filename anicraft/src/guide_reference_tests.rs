@@ -127,7 +127,8 @@ pub fn shortcuts_md() -> String {
         Some((_, sub)) => format!("{} › {}", sub.replace('/', " › "), a.label),
         None => a.label.to_string(),
     };
-    let mut rows: Vec<(&str, String, Vec<&str>)> = crate::keymap::actions().into_iter().filter(|a| !a.defaults.is_empty()).map(|a| (a.group, name(&a), a.defaults)).collect();
+    let mut rows: Vec<(&str, String, Vec<&str>)> =
+        crate::keymap::actions().into_iter().filter(|a| !a.defaults.is_empty()).map(|a| (a.group, name(&a), a.defaults)).collect();
     for (group, label, keys) in crate::dialogs::fixed_rows() {
         let label = if matches!(label, "Quit" | "Exit") { "Exit (Quit on macOS)".to_string() } else { label.to_string() };
         rows.push((group, label, keys));

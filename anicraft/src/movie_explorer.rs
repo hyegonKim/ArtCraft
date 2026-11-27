@@ -124,7 +124,10 @@ fn row_text(r: &Row) -> String {
             _ => crate::i18n::t(kind_name(r.kind)).to_string(),
         },
         NodeKind::Handler => {
-            let event = anicraft_engine::doc::actions::ButtonEvent::ALL.iter().find(|e| e.key() == r.name).map_or(r.name.as_str(), |e| crate::i18n::t(e.label()));
+            let event = anicraft_engine::doc::actions::ButtonEvent::ALL
+                .iter()
+                .find(|e| e.key() == r.name)
+                .map_or(r.name.as_str(), |e| crate::i18n::t(e.label()));
             tr!("On {event}: {actions}", event = event, actions = r.extra)
         }
         NodeKind::Instance(_) if !r.extra.is_empty() => tr!("{instance} ({symbol})", instance = r.extra, symbol = r.name),
@@ -175,7 +178,11 @@ pub fn panel(app: &mut App, ui: &mut egui::Ui) {
         // The search takes what the Show button (as wide as its translation) leaves.
         let menu_w_id = ui.id().with("explorer_show_w");
         let menu_w = ui.data(|d| d.get_temp::<f32>(menu_w_id)).unwrap_or(72.0) + ui.spacing().item_spacing.x;
-        let search = ui.add(egui::TextEdit::singleline(&mut app.explorer.filter).hint_text(tr!("Search")).desired_width((ui.available_width() - menu_w).max(crate::theme::MIN_FIELD)));
+        let search = ui.add(
+            egui::TextEdit::singleline(&mut app.explorer.filter)
+                .hint_text(tr!("Search"))
+                .desired_width((ui.available_width() - menu_w).max(crate::theme::MIN_FIELD)),
+        );
         search.set_name(tr!("Search the Movie Explorer"));
         if search.changed() {
             app.explorer.changed();
@@ -215,7 +222,14 @@ pub fn panel(app: &mut App, ui: &mut egui::Ui) {
     ui.add_space(4.0);
     let t = tree(app);
     if t.rows.is_empty() {
-        ui.label(text(Type::Caption, if app.explorer.filter.trim().is_empty() { tr!("Nothing to show: turn on more Show buttons.") } else { tr!("Nothing matches the search.") }));
+        ui.label(text(
+            Type::Caption,
+            if app.explorer.filter.trim().is_empty() {
+                tr!("Nothing to show: turn on more Show buttons.")
+            } else {
+                tr!("Nothing matches the search.")
+            },
+        ));
         return;
     }
     let summary = if t.truncated { trn!("The first {n} row", "The first {n} rows", t.rows.len()) } else { trn!("{n} row", "{n} rows", t.rows.len()) };
@@ -230,52 +244,61 @@ fn list(app: &mut App, ui: &mut egui::Ui, t: &Tree) {
     let mut go: Option<usize> = None;
     let room = (ui.available_height() - 8.0).clamp(140.0, 320.0);
     let filtering = !app.explorer.filter.trim().is_empty();
-    egui::ScrollArea::vertical().id_salt("explorer_rows").max_height(room).auto_shrink([false, true]).show_rows(ui, TARGET, t.rows.len(), |ui, range| {
-        for i in range {
-            let Some(r) = t.rows.get(i) else { continue };
-            let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), TARGET), Sense::click());
-            let on = app.explorer.selected.as_deref() == Some(r.key.as_str());
-            let p = ui.painter();
-            if on || resp.hovered() {
-                p.rect_filled(rect, T.rc(), if on { T.accent_dim } else { T.hover });
-            }
-            if on {
-                p.rect_filled(Rect::from_min_size(rect.left_top(), vec2(3.0, rect.height())), 0.0, T.accent);
-            }
-            let indent = 6.0 + r.depth.min(24) as f32 * 14.0;
-            let chevron = Rect::from_center_size(pos2(rect.left() + indent + 6.0, rect.center().y), vec2(12.0, 12.0));
-            let icon = Rect::from_center_size(pos2(rect.left() + indent + 22.0, rect.center().y), vec2(14.0, 14.0));
-            if r.children && !filtering {
-                icons::paint(p, chevron, if r.open { Icon::ChevronDown } else { Icon::ChevronRight }, T.icon);
-            }
-            marker(p, icon, r.kind, color(Type::Body));
-            let label = row_text(r);
-            let name_rect = Rect::from_min_max(pos2(icon.right() + 8.0, rect.top()), rect.max);
-            let g = p.layout_no_wrap(label.clone(), font(Type::Body), color(Type::Body));
-            p.with_clip_rect(name_rect.intersect(ui.clip_rect())).galley(pos2(name_rect.left(), rect.center().y - g.rect.height() / 2.0), g, color(Type::Body));
-            let kind = crate::i18n::t(kind_name(r.kind));
-            let name = match (r.children && !filtering, r.open) {
-                (true, true) => tr!("{kind}: {row}, open", kind = kind, row = label),
-                (true, false) => tr!("{kind}: {row}, closed", kind = kind, row = label),
-                _ => tr!("{kind}: {row}", kind = kind, row = label),
-            };
-            a11y::control(ui, &resp, WidgetType::SelectableLabel, &name, Some(on));
-            let resp = resp.on_hover_text(tr!("{row}\nDouble-click to go there", row = name));
-            if resp.clicked() {
-                let on_chevron = ui.input(|inp| inp.pointer.interact_pos()).is_some_and(|q| q.x < icon.left());
-                if on_chevron && r.children && !filtering {
-                    toggle = Some(r.key.clone());
+    egui::ScrollArea::vertical().id_salt("explorer_rows").max_height(room).auto_shrink([false, true]).show_rows(
+        ui,
+        TARGET,
+        t.rows.len(),
+        |ui, range| {
+            for i in range {
+                let Some(r) = t.rows.get(i) else { continue };
+                let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), TARGET), Sense::click());
+                let on = app.explorer.selected.as_deref() == Some(r.key.as_str());
+                let p = ui.painter();
+                if on || resp.hovered() {
+                    p.rect_filled(rect, T.rc(), if on { T.accent_dim } else { T.hover });
                 }
-                select = Some(r.key.clone());
+                if on {
+                    p.rect_filled(Rect::from_min_size(rect.left_top(), vec2(3.0, rect.height())), 0.0, T.accent);
+                }
+                let indent = 6.0 + r.depth.min(24) as f32 * 14.0;
+                let chevron = Rect::from_center_size(pos2(rect.left() + indent + 6.0, rect.center().y), vec2(12.0, 12.0));
+                let icon = Rect::from_center_size(pos2(rect.left() + indent + 22.0, rect.center().y), vec2(14.0, 14.0));
+                if r.children && !filtering {
+                    icons::paint(p, chevron, if r.open { Icon::ChevronDown } else { Icon::ChevronRight }, T.icon);
+                }
+                marker(p, icon, r.kind, color(Type::Body));
+                let label = row_text(r);
+                let name_rect = Rect::from_min_max(pos2(icon.right() + 8.0, rect.top()), rect.max);
+                let g = p.layout_no_wrap(label.clone(), font(Type::Body), color(Type::Body));
+                p.with_clip_rect(name_rect.intersect(ui.clip_rect())).galley(
+                    pos2(name_rect.left(), rect.center().y - g.rect.height() / 2.0),
+                    g,
+                    color(Type::Body),
+                );
+                let kind = crate::i18n::t(kind_name(r.kind));
+                let name = match (r.children && !filtering, r.open) {
+                    (true, true) => tr!("{kind}: {row}, open", kind = kind, row = label),
+                    (true, false) => tr!("{kind}: {row}, closed", kind = kind, row = label),
+                    _ => tr!("{kind}: {row}", kind = kind, row = label),
+                };
+                a11y::control(ui, &resp, WidgetType::SelectableLabel, &name, Some(on));
+                let resp = resp.on_hover_text(tr!("{row}\nDouble-click to go there", row = name));
+                if resp.clicked() {
+                    let on_chevron = ui.input(|inp| inp.pointer.interact_pos()).is_some_and(|q| q.x < icon.left());
+                    if on_chevron && r.children && !filtering {
+                        toggle = Some(r.key.clone());
+                    }
+                    select = Some(r.key.clone());
+                }
+                if resp.double_clicked() {
+                    go = Some(i);
+                }
+                if resp.has_focus() && ui.input(|inp| inp.key_pressed(Key::Enter)) {
+                    go = Some(i);
+                }
             }
-            if resp.double_clicked() {
-                go = Some(i);
-            }
-            if resp.has_focus() && ui.input(|inp| inp.key_pressed(Key::Enter)) {
-                go = Some(i);
-            }
-        }
-    });
+        },
+    );
     if let Some(k) = select {
         app.explorer.selected = Some(k);
     }

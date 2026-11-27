@@ -3,7 +3,10 @@
 //! frame rate, named layers ready to draw on, and guides on a locked guide layer (shown while
 //! editing, never in output). They open as new, untitled documents (`file.new_from_template`).
 
-use crate::{ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Stage, Stroke, Symbol, SymbolId, SymbolKind, Timeline};
+use crate::{
+    ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Stage, Stroke, Symbol,
+    SymbolId, SymbolKind, Timeline,
+};
 use anicraft_geom::{Affine, Path, Vec2};
 use std::sync::Arc;
 
@@ -19,12 +22,48 @@ pub struct Template {
 
 /// Every built-in template, in the order the start screen shows them.
 pub static TEMPLATES: [Template; 6] = [
-    Template { id: "banner-728x90", name: "Leaderboard banner", category: "Advertising", description: "A 728 × 90 web banner at 24 fps, 15 seconds long, with its safe area on a guide layer", build: banner_728x90 },
-    Template { id: "banner-300x250", name: "Rectangle banner", category: "Advertising", description: "A 300 × 250 web banner at 24 fps, 15 seconds long, with its safe area on a guide layer", build: banner_300x250 },
-    Template { id: "social-square", name: "Social square", category: "Social", description: "A 1080 × 1080 post at 30 fps, 15 seconds long, with a safe margin and thirds on a guide layer", build: social_square },
-    Template { id: "storyboard", name: "Storyboard 16:9", category: "Storyboard", description: "Six 2-second panels at 1920 × 1080, labelled Panel 1 to 6, with action- and title-safe areas", build: storyboard },
-    Template { id: "character-turnaround", name: "Character turnaround", category: "Character", description: "Front, three-quarter, side and back views side by side, on head-height guides eight heads tall", build: turnaround },
-    Template { id: "lip-sync", name: "Lip-sync mouth chart", category: "Character", description: "A Mouth graphic symbol with ten labelled mouth shapes to redraw, placed on a face guide", build: lip_sync },
+    Template {
+        id: "banner-728x90",
+        name: "Leaderboard banner",
+        category: "Advertising",
+        description: "A 728 × 90 web banner at 24 fps, 15 seconds long, with its safe area on a guide layer",
+        build: banner_728x90,
+    },
+    Template {
+        id: "banner-300x250",
+        name: "Rectangle banner",
+        category: "Advertising",
+        description: "A 300 × 250 web banner at 24 fps, 15 seconds long, with its safe area on a guide layer",
+        build: banner_300x250,
+    },
+    Template {
+        id: "social-square",
+        name: "Social square",
+        category: "Social",
+        description: "A 1080 × 1080 post at 30 fps, 15 seconds long, with a safe margin and thirds on a guide layer",
+        build: social_square,
+    },
+    Template {
+        id: "storyboard",
+        name: "Storyboard 16:9",
+        category: "Storyboard",
+        description: "Six 2-second panels at 1920 × 1080, labelled Panel 1 to 6, with action- and title-safe areas",
+        build: storyboard,
+    },
+    Template {
+        id: "character-turnaround",
+        name: "Character turnaround",
+        category: "Character",
+        description: "Front, three-quarter, side and back views side by side, on head-height guides eight heads tall",
+        build: turnaround,
+    },
+    Template {
+        id: "lip-sync",
+        name: "Lip-sync mouth chart",
+        category: "Character",
+        description: "A Mouth graphic symbol with ten labelled mouth shapes to redraw, placed on a face guide",
+        build: lip_sync,
+    },
 ];
 
 /// The built-in template with this id.
@@ -51,12 +90,36 @@ fn element(d: &mut Document, name: &str, transform: Affine, shape: Shape) -> Arc
 fn line(d: &mut Document, name: &str, a: (f32, f32), b: (f32, f32), color: u32, width: f32) -> Arc<Element> {
     let mut p = Path::new();
     p.move_to(Vec2::new(a.0, a.1)).line_to(Vec2::new(b.0, b.1));
-    element(d, name, Affine::IDENTITY, Shape { path: Arc::new(p), fill: None, stroke: Some(Stroke::new(Rgba::hex(color), width)), fill_rule: Default::default(), merge: false, warp: None })
+    element(
+        d,
+        name,
+        Affine::IDENTITY,
+        Shape {
+            path: Arc::new(p),
+            fill: None,
+            stroke: Some(Stroke::new(Rgba::hex(color), width)),
+            fill_rule: Default::default(),
+            merge: false,
+            warp: None,
+        },
+    )
 }
 
 /// A stroked rectangle outline, `(x, y, w, h)`.
 fn outline(d: &mut Document, name: &str, (x, y, w, h): (f32, f32, f32, f32), color: u32, width: f32) -> Arc<Element> {
-    element(d, name, Affine::IDENTITY, Shape { path: Arc::new(Path::rect(x, y, w, h)), fill: None, stroke: Some(Stroke::new(Rgba::hex(color), width)), fill_rule: Default::default(), merge: false, warp: None })
+    element(
+        d,
+        name,
+        Affine::IDENTITY,
+        Shape {
+            path: Arc::new(Path::rect(x, y, w, h)),
+            fill: None,
+            stroke: Some(Stroke::new(Rgba::hex(color), width)),
+            fill_rule: Default::default(),
+            merge: false,
+            warp: None,
+        },
+    )
 }
 
 /// A layer holding `elements` in one keyframe `frames` long.
@@ -85,7 +148,10 @@ fn banner(width: u32, height: u32) -> Document {
     let mut d = blank(width, height, 24.0);
     let (w, h) = (width as f32, height as f32);
     let m = (w.min(h) * 0.1).round();
-    let guides = vec![outline(&mut d, "Safe area", (m, m, w - 2.0 * m, h - 2.0 * m), GUIDE, 1.0), outline(&mut d, "Edge", (0.5, 0.5, w - 1.0, h - 1.0), GUIDE_SOFT, 1.0)];
+    let guides = vec![
+        outline(&mut d, "Safe area", (m, m, w - 2.0 * m, h - 2.0 * m), GUIDE, 1.0),
+        outline(&mut d, "Edge", (0.5, 0.5, w - 1.0, h - 1.0), GUIDE_SOFT, 1.0),
+    ];
     let mut layers = vec![layer(&mut d, "Safe area", LayerKind::Guide, GUIDE, FRAMES, guides)];
     layers.extend(drawing_layers(&mut d, &["Call to action", "Text", "Artwork"], FRAMES));
     let bg = element(&mut d, "background", Affine::IDENTITY, Shape::filled(Path::rect(0.0, 0.0, w, h), Paint::Solid(Rgba::hex(0xeef2f7))));
@@ -219,9 +285,29 @@ fn lip_sync() -> Document {
         keys.push(Arc::new(k));
     }
     inner.keyframes = keys;
-    d.library.push(Arc::new(Symbol { id: sym_id, name: "Mouth".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid: None, scale_grid_kept: None, timeline: Timeline { layers: vec![Arc::new(inner)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: sym_id,
+        name: "Mouth".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid: None,
+        scale_grid_kept: None,
+        timeline: Timeline { layers: vec![Arc::new(inner)] },
+    }));
     let (cx, cy) = (640.0, 340.0);
-    let face = element(&mut d, "Head", Affine::IDENTITY, Shape { path: Arc::new(Path::ellipse(cx, cy, 200.0, 250.0)), fill: None, stroke: Some(Stroke::new(Rgba::hex(GUIDE), 2.0)), fill_rule: Default::default(), merge: false, warp: None });
+    let face = element(
+        &mut d,
+        "Head",
+        Affine::IDENTITY,
+        Shape {
+            path: Arc::new(Path::ellipse(cx, cy, 200.0, 250.0)),
+            fill: None,
+            stroke: Some(Stroke::new(Rgba::hex(GUIDE), 2.0)),
+            fill_rule: Default::default(),
+            merge: false,
+            warp: None,
+        },
+    );
     let guides = vec![
         face,
         line(&mut d, "Eye line", (cx - 200.0, cy), (cx + 200.0, cy), GUIDE_SOFT, 1.0),
@@ -233,7 +319,14 @@ fn lip_sync() -> Document {
         name: "mouth".into(),
         transform: Affine::translate(cx, cy + 130.0),
         color: ColorEffect::default(),
-        kind: ElementKind::Symbol { symbol: sym_id, loop_mode: LoopMode::SingleFrame, first_frame: 0, blend: crate::BlendMode::Normal, filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol: sym_id,
+            loop_mode: LoopMode::SingleFrame,
+            first_frame: 0,
+            blend: crate::BlendMode::Normal,
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     });
     let layers = vec![
         layer(&mut d, "Face guide", LayerKind::Guide, GUIDE, FRAMES, guides),
@@ -319,11 +412,16 @@ mod tests {
     #[test]
     fn the_storyboard_and_mouth_chart_are_labelled() {
         let d = storyboard();
-        let panels = d.timeline(0).layers.iter().find(|l| l.name == "Panels").map(|l| l.keyframes.iter().map(|k| k.label.clone()).collect::<Vec<_>>());
+        let panels =
+            d.timeline(0).layers.iter().find(|l| l.name == "Panels").map(|l| l.keyframes.iter().map(|k| k.label.clone()).collect::<Vec<_>>());
         assert_eq!(panels.map(|p| p.len()), Some(6));
         assert_eq!(d.timeline(0).frame_count(), 6 * 48);
         let d = lip_sync();
-        let labels: Vec<String> = d.library.first().map(|s| s.timeline.layers.iter().flat_map(|l| l.keyframes.iter().map(|k| k.label.clone())).collect()).unwrap_or_default();
+        let labels: Vec<String> = d
+            .library
+            .first()
+            .map(|s| s.timeline.layers.iter().flat_map(|l| l.keyframes.iter().map(|k| k.label.clone())).collect())
+            .unwrap_or_default();
         assert_eq!(labels, MOUTHS.map(str::to_string).to_vec());
     }
 }

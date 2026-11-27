@@ -107,7 +107,10 @@ fn side_code(s: FilterSide) -> u32 {
 
 impl FilterPipelines {
     pub(crate) fn new(device: &wgpu::Device) -> FilterPipelines {
-        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("anicraft-filters"), source: wgpu::ShaderSource::Wgsl(include_str!("filters.wgsl").into()) });
+        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("anicraft-filters"),
+            source: wgpu::ShaderSource::Wgsl(include_str!("filters.wgsl").into()),
+        });
         let entry = |binding: u32, ty: wgpu::BufferBindingType| wgpu::BindGroupLayoutEntry {
             binding,
             visibility: wgpu::ShaderStages::COMPUTE,
@@ -117,11 +120,27 @@ impl FilterPipelines {
         let rw = wgpu::BufferBindingType::Storage { read_only: false };
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("anicraft-filters"),
-            entries: &[entry(0, wgpu::BufferBindingType::Uniform), entry(1, rw), entry(2, rw), entry(3, wgpu::BufferBindingType::Storage { read_only: true })],
+            entries: &[
+                entry(0, wgpu::BufferBindingType::Uniform),
+                entry(1, rw),
+                entry(2, rw),
+                entry(3, wgpu::BufferBindingType::Storage { read_only: true }),
+            ],
         });
-        let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("anicraft-filters"), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
+        let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("anicraft-filters"),
+            bind_group_layouts: &[Some(&layout)],
+            immediate_size: 0,
+        });
         let make = |name: &str| {
-            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor { label: Some(name), layout: Some(&pl), module: &module, entry_point: Some(name), compilation_options: Default::default(), cache: None })
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(name),
+                layout: Some(&pl),
+                module: &module,
+                entry_point: Some(name),
+                compilation_options: Default::default(),
+                cache: None,
+            })
         };
         FilterPipelines {
             box4: make("box4"),
@@ -164,7 +183,11 @@ pub(crate) fn passes(ops: &[FilterOp]) -> u64 {
 
 impl Recorder<'_> {
     fn dispatch(&self, enc: &mut wgpu::CommandEncoder, pipe: &wgpu::ComputePipeline, p: Params, ramp: &wgpu::Buffer, groups: (u32, u32)) {
-        let ubuf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("filter-params"), contents: bytemuck::cast_slice(&p.words), usage: wgpu::BufferUsages::UNIFORM });
+        let ubuf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("filter-params"),
+            contents: bytemuck::cast_slice(&p.words),
+            usage: wgpu::BufferUsages::UNIFORM,
+        });
         let bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("anicraft-filters"),
             layout: &self.pipes.layout,
@@ -222,7 +245,13 @@ impl Recorder<'_> {
     /// Records `ops`, in order.
     pub(crate) fn record(&self, enc: &mut wgpu::CommandEncoder, ops: &[FilterOp]) {
         let dummy = self.no_ramp;
-        let ramp_buffer = |r: &[Premul]| self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("filter-ramp"), contents: bytemuck::cast_slice(r), usage: wgpu::BufferUsages::STORAGE });
+        let ramp_buffer = |r: &[Premul]| {
+            self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("filter-ramp"),
+                contents: bytemuck::cast_slice(r),
+                usage: wgpu::BufferUsages::STORAGE,
+            })
+        };
         for op in ops {
             match op {
                 FilterOp::Blur(b) => self.blur(enc, true, 0, b),
@@ -240,7 +269,13 @@ impl Recorder<'_> {
                     let p = Params::new(self.w, self.h).offset(*dx, *dy).strength(*strength);
                     match paint {
                         BevelPaint::Colors { highlight, shadow } => {
-                            self.dispatch(enc, &self.pipes.bevel, p.io(0, 0, flags, side_code(*side)).colors(*highlight, *shadow), dummy, self.pixels());
+                            self.dispatch(
+                                enc,
+                                &self.pipes.bevel,
+                                p.io(0, 0, flags, side_code(*side)).colors(*highlight, *shadow),
+                                dummy,
+                                self.pixels(),
+                            );
                         }
                         BevelPaint::Ramp(r) => {
                             let ramp = ramp_buffer(r);

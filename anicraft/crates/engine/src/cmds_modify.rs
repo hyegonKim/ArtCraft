@@ -13,14 +13,36 @@ pub fn specs() -> Vec<CommandSpec> {
     vec![
         c("edit.cut", "Cut", "Edit", Some("Ctrl+X"), "{}", true, cut as crate::RunFn),
         c("edit.copy", "Copy", "Edit", Some("Ctrl+C"), "{} (the selection on every layer, each layer's artwork kept apart)", false, copy),
-        c("edit.paste", "Paste in Center", "Edit", Some("Ctrl+V"), "{x?, y?} (centre of the pasted artwork; default: offset 10 px). Artwork copied from one layer lands on the active layer; from several, back on those layers when they are all here, else on the active layer and the ones below it, creating missing ones", true, paste),
+        c(
+            "edit.paste",
+            "Paste in Center",
+            "Edit",
+            Some("Ctrl+V"),
+            "{x?, y?} (centre of the pasted artwork; default: offset 10 px). Artwork copied from one layer lands on the active layer; from several, back on those layers when they are all here, else on the active layer and the ones below it, creating missing ones",
+            true,
+            paste,
+        ),
         c("edit.paste_in_place", "Paste in Place", "Edit", Some("Ctrl+Shift+V"), "{} (layers as edit.paste)", true, paste_in_place),
-        c("modify.transform", "Transform", "", None, "{a, b, c, d, e, f} affine applied in stage space (free transform), to the selection on every layer", true, |s, p| s.each_layer(true, |s| transform(s, p))),
-        c("modify.rotate_cw", "Rotate 90° CW", "Modify/Transform", Some("Ctrl+Shift+9"), "{}", true, |s, _| about_center(s, Affine::rotate(std::f32::consts::FRAC_PI_2))),
-        c("modify.rotate_ccw", "Rotate 90° CCW", "Modify/Transform", Some("Ctrl+Shift+7"), "{}", true, |s, _| about_center(s, Affine::rotate(-std::f32::consts::FRAC_PI_2))),
+        c(
+            "modify.transform",
+            "Transform",
+            "",
+            None,
+            "{a, b, c, d, e, f} affine applied in stage space (free transform), to the selection on every layer",
+            true,
+            |s, p| s.each_layer(true, |s| transform(s, p)),
+        ),
+        c("modify.rotate_cw", "Rotate 90° CW", "Modify/Transform", Some("Ctrl+Shift+9"), "{}", true, |s, _| {
+            about_center(s, Affine::rotate(std::f32::consts::FRAC_PI_2))
+        }),
+        c("modify.rotate_ccw", "Rotate 90° CCW", "Modify/Transform", Some("Ctrl+Shift+7"), "{}", true, |s, _| {
+            about_center(s, Affine::rotate(-std::f32::consts::FRAC_PI_2))
+        }),
         c("modify.flip_h", "Flip Horizontal", "Modify/Transform", None, "{}", true, |s, _| about_center(s, Affine::scale(-1.0, 1.0))),
         c("modify.flip_v", "Flip Vertical", "Modify/Transform", None, "{}", true, |s, _| about_center(s, Affine::scale(1.0, -1.0))),
-        c("modify.remove_transform", "Remove Transform", "Modify/Transform", Some("Ctrl+Shift+Z"), "{}", true, |s, p| s.each_layer(true, |s| remove_transform(s, p))),
+        c("modify.remove_transform", "Remove Transform", "Modify/Transform", Some("Ctrl+Shift+Z"), "{}", true, |s, p| {
+            s.each_layer(true, |s| remove_transform(s, p))
+        }),
         c("align.left", "Left", "Modify/Align", Some("Ctrl+Alt+1"), "{to_stage?}", true, |s, p| align(s, p, Edge::Left)),
         c("align.hcenter", "Horizontal Center", "Modify/Align", Some("Ctrl+Alt+2"), "{to_stage?}", true, |s, p| align(s, p, Edge::HCenter)),
         c("align.right", "Right", "Modify/Align", Some("Ctrl+Alt+3"), "{to_stage?}", true, |s, p| align(s, p, Edge::Right)),
@@ -72,7 +94,10 @@ impl Clipboard {
 fn symbol_refs(e: &Element) -> Vec<SymbolId> {
     match &e.kind {
         ElementKind::Symbol { symbol, .. } => vec![*symbol],
-        ElementKind::Group { .. } => anicraft_doc::expand_groups(std::slice::from_ref(&Arc::new(e.clone()))).iter().filter_map(|m| if let ElementKind::Symbol { symbol, .. } = m.kind { Some(symbol) } else { None }).collect(),
+        ElementKind::Group { .. } => anicraft_doc::expand_groups(std::slice::from_ref(&Arc::new(e.clone())))
+            .iter()
+            .filter_map(|m| if let ElementKind::Symbol { symbol, .. } = m.kind { Some(symbol) } else { None })
+            .collect(),
         ElementKind::Shape(_) | ElementKind::Text(_) | ElementKind::Camera => Vec::new(),
     }
 }
@@ -196,7 +221,11 @@ fn layer_targets(s: &mut Session, src: &[(LayerId, String)]) -> Result<Vec<Layer
 /// Whether pasting the clipboard would put a symbol inside itself: inside an open symbol, an
 /// instance of it (or of one using it).
 pub(crate) fn clipboard_nests(s: &Session) -> bool {
-    s.clipboard.layers.iter().flat_map(|c| &c.elements).any(|e| matches!(e.kind, anicraft_doc::ElementKind::Symbol { symbol, .. } if crate::editing::would_nest(s, symbol)))
+    s.clipboard
+        .layers
+        .iter()
+        .flat_map(|c| &c.elements)
+        .any(|e| matches!(e.kind, anicraft_doc::ElementKind::Symbol { symbol, .. } if crate::editing::would_nest(s, symbol)))
 }
 
 fn paste_with(s: &mut Session, offset: Vec2) -> Result<Value> {
@@ -396,7 +425,8 @@ fn translate_each(s: &mut Session, moves: &[(Item, Vec2)]) -> Result<usize> {
     }
     let mut n = 0;
     for layer in layers {
-        let mine: Vec<(ElementId, Vec2)> = moves.iter().filter(|((l, _), d)| *l == layer && (d.x != 0.0 || d.y != 0.0)).map(|((_, id), d)| (*id, *d)).collect();
+        let mine: Vec<(ElementId, Vec2)> =
+            moves.iter().filter(|((l, _), d)| *l == layer && (d.x != 0.0 || d.y != 0.0)).map(|((_, id), d)| (*id, *d)).collect();
         if mine.is_empty() {
             continue; // untouched layers stay shared with the undo snapshot
         }

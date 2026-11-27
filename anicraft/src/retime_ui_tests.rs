@@ -68,7 +68,8 @@ struct Geometry {
 
 impl Geometry {
     fn of(ctx: &egui::Context) -> Geometry {
-        let (inner, lane, last, lo, hi) = ctx.data(|d| d.get_temp::<(Rect, Rect, f32, f32, f32)>(egui::Id::new("me_geometry"))).expect("the Motion Editor drew");
+        let (inner, lane, last, lo, hi) =
+            ctx.data(|d| d.get_temp::<(Rect, Rect, f32, f32, f32)>(egui::Id::new("me_geometry"))).expect("the Motion Editor drew");
         Geometry { inner, lane, last, lo, hi }
     }
     fn x(&self, f: u32) -> f32 {
@@ -84,7 +85,13 @@ impl Geometry {
 
 /// The frames (offsets) of property `p`'s keys on the active layer's first span.
 fn keys(app: &App, p: Property) -> Vec<(u32, f32)> {
-    app.s.active_layer().and_then(|l| l.keyframes.first()).and_then(|k| k.motion.as_ref()).and_then(|m| m.track(p)).map(|t| t.keys.iter().map(|k| (k.frame, k.value)).collect()).unwrap_or_default()
+    app.s
+        .active_layer()
+        .and_then(|l| l.keyframes.first())
+        .and_then(|k| k.motion.as_ref())
+        .and_then(|m| m.track(p))
+        .map(|t| t.keys.iter().map(|k| (k.frame, k.value)).collect())
+        .unwrap_or_default()
 }
 
 fn spans(app: &App) -> Vec<(u32, u32, bool)> {

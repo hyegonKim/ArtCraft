@@ -20,7 +20,13 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, params, mutates, run| CommandSpec { id, label, menu: "", shortcut: None, params, mutates, run };
     vec![
-        c("swatch.list", "Swatches", "{} the document's swatches, in the Swatches panel's order → {swatches: [{index, name, type, color | stops, ..}], count}", false, list as crate::RunFn),
+        c(
+            "swatch.list",
+            "Swatches",
+            "{} the document's swatches, in the Swatches panel's order → {swatches: [{index, name, type, color | stops, ..}], count}",
+            false,
+            list as crate::RunFn,
+        ),
         c(
             "swatch.add",
             "Add Swatch",
@@ -41,7 +47,13 @@ pub fn specs() -> Vec<CommandSpec> {
         ),
         c("swatch.clear", "Clear Swatches", "{} removes every swatch but black and white (Animate's Clear Colors; undoable)", true, clear),
         c("swatch.reset", "Default Swatches", "{} replaces the swatches with a new document's set (undoable)", true, reset),
-        c("swatch.import", "Import Swatches", "{path: a swatch file (.json, from swatch.export) or a GIMP palette (.gpl), replace?: bool (default false: added at the end)} → {imported, count}", true, import),
+        c(
+            "swatch.import",
+            "Import Swatches",
+            "{path: a swatch file (.json, from swatch.export) or a GIMP palette (.gpl), replace?: bool (default false: added at the end)} → {imported, count}",
+            true,
+            import,
+        ),
         c("swatch.export", "Export Swatches", "{path} writes the document's swatches to a swatch file (JSON) → {written, swatches}", false, export),
     ]
 }
@@ -60,8 +72,12 @@ fn stops_json(stops: &[GradientStop]) -> Value {
 pub fn swatch_json(s: &Swatch) -> Value {
     let mut v = match &s.paint {
         SwatchPaint::Solid { color } => json!({"type": "solid", "color": hex(*color)}),
-        SwatchPaint::Linear { stops, spread, linear_rgb } => json!({"type": "linear", "stops": stops_json(stops), "spread": spread.key(), "linear_rgb": linear_rgb}),
-        SwatchPaint::Radial { stops, spread, linear_rgb, focal } => json!({"type": "radial", "stops": stops_json(stops), "spread": spread.key(), "linear_rgb": linear_rgb, "focal": focal}),
+        SwatchPaint::Linear { stops, spread, linear_rgb } => {
+            json!({"type": "linear", "stops": stops_json(stops), "spread": spread.key(), "linear_rgb": linear_rgb})
+        }
+        SwatchPaint::Radial { stops, spread, linear_rgb, focal } => {
+            json!({"type": "radial", "stops": stops_json(stops), "spread": spread.key(), "linear_rgb": linear_rgb, "focal": focal})
+        }
     };
     if !s.name.is_empty()
         && let Some(o) = v.as_object_mut()
@@ -89,7 +105,11 @@ pub fn swatch_from_json(v: &Value) -> Result<Option<Swatch>> {
         (None, _, Some(_)) => "linear",
         (None, Some(_), None) => "solid",
     };
-    let need_stops = || stops.clone().ok_or_else(|| EngineError::Param(format!("a {kind} swatch needs 'stops' (2 to 15 like {{\"offset\": 0, \"color\": \"#ff0000\"}})")));
+    let need_stops = || {
+        stops
+            .clone()
+            .ok_or_else(|| EngineError::Param(format!("a {kind} swatch needs 'stops' (2 to 15 like {{\"offset\": 0, \"color\": \"#ff0000\"}})")))
+    };
     let paint = match kind {
         "solid" => SwatchPaint::Solid { color: color.ok_or_else(|| EngineError::Param("a solid swatch needs 'color' (like \"#ff8800\")".into()))? },
         "linear" => SwatchPaint::Linear { stops: need_stops()?, spread, linear_rgb },
@@ -103,7 +123,13 @@ pub fn swatch_from_json(v: &Value) -> Result<Option<Swatch>> {
 fn index_param(s: &Session, p: &Value, key: &str) -> Result<usize> {
     let n = s.doc.swatches.len();
     let i = opt_u64(p, key)?.ok_or_else(|| EngineError::Param(format!("param '{key}' is required (a swatch's index)")))?;
-    usize::try_from(i).ok().filter(|i| *i < n).ok_or_else(|| if n == 0 { EngineError::State("the document has no swatches".into()) } else { EngineError::Param(format!("param '{key}' must be a swatch index, 0 to {}", n - 1)) })
+    usize::try_from(i).ok().filter(|i| *i < n).ok_or_else(|| {
+        if n == 0 {
+            EngineError::State("the document has no swatches".into())
+        } else {
+            EngineError::Param(format!("param '{key}' must be a swatch index, 0 to {}", n - 1))
+        }
+    })
 }
 
 fn swatches_mut(s: &mut Session) -> &mut Vec<Swatch> {
@@ -130,7 +156,9 @@ fn list(s: &mut Session, _: &Value) -> Result<Value> {
 /// The swatch `swatch.add` makes from the current colours: the fill swatch, or the stroke.
 fn current(s: &Session, from: &str) -> Result<Swatch> {
     match from {
-        "fill" => SwatchPaint::from_paint(&s.style.fill_paint()).map(|p| Swatch { name: String::new(), paint: p }).ok_or_else(|| EngineError::State("a bitmap fill can't be a swatch (swatches hold colours and gradients)".into())),
+        "fill" => SwatchPaint::from_paint(&s.style.fill_paint())
+            .map(|p| Swatch { name: String::new(), paint: p })
+            .ok_or_else(|| EngineError::State("a bitmap fill can't be a swatch (swatches hold colours and gradients)".into())),
         "stroke" => Ok(Swatch::solid(s.style.stroke)),
         other => Err(EngineError::Param(format!("param 'from' must be fill or stroke, not '{other}'"))),
     }

@@ -367,7 +367,10 @@ pub fn dabs(line: &[(Vec2, f32)], step: f32) -> Vec<(Vec2, f32)> {
 /// [`dabs`] over centre-line points, each with the line's direction there.
 fn dab_points(line: &[Pt], step: f32) -> Vec<(Pt, Vec2)> {
     let total: f32 = line.windows(2).map(|w| if let [a, b] = w { a.at.distance(b.at) } else { 0.0 }).sum();
-    let dir0 = line.windows(2).find_map(|w| if let [a, b] = w { Some((b.at - a.at).normalized()).filter(|d| d.is_finite() && d.length() > 0.5) } else { None }).unwrap_or(Vec2::new(1.0, 0.0));
+    let dir0 = line
+        .windows(2)
+        .find_map(|w| if let [a, b] = w { Some((b.at - a.at).normalized()).filter(|d| d.is_finite() && d.length() > 0.5) } else { None })
+        .unwrap_or(Vec2::new(1.0, 0.0));
     let mut out: Vec<(Pt, Vec2)> = line.first().copied().map(|p| (p, dir0)).into_iter().collect();
     if !(step.is_finite() && step > 1e-3) {
         return out;
@@ -806,7 +809,10 @@ mod tests {
     #[test]
     fn crossing_strokes_leave_holes_and_ellipses_follow_the_angle() {
         // A loop that closes on itself leaves a hole in the middle.
-        let ring: Vec<Sample> = (0..=72).map(|i| i as f32 / 72.0 * std::f32::consts::TAU).map(|a| Sample::new(Vec2::new(100.0 * a.cos(), 100.0 * a.sin()), 1.0)).collect();
+        let ring: Vec<Sample> = (0..=72)
+            .map(|i| i as f32 / 72.0 * std::f32::consts::TAU)
+            .map(|a| Sample::new(Vec2::new(100.0 * a.cos(), 100.0 * a.sin()), 1.0))
+            .collect();
         let p = outline(&ring, &Tip::round(10.0), 0.5, 0.2);
         let loops = p.cmds.iter().filter(|c| matches!(c, PathCmd::MoveTo(_))).count();
         assert_eq!(loops, 2, "outer edge and hole");
@@ -825,7 +831,12 @@ mod tests {
         let cases = [((0.0, 0.0), 1.0, (10.0, 0.0), 3.0), ((0.0, 0.0), 2.0, (0.5, 0.5), 0.2), ((5.0, -3.0), 0.5, (-4.0, 6.0), 0.5)];
         for (a, ra, b, rb) in cases {
             for x in [(3.0, 4.0), (-2.0, 0.1), (12.0, -1.0), (0.2, 0.2), (5.0, 0.0)] {
-                let brute = |norm: fn(P) -> f64| (0..=4000).map(|i| i as f64 / 4000.0).map(|t| norm((x.0 - lerp(a, b, t).0, x.1 - lerp(a, b, t).1)) - (ra + (rb - ra) * t)).fold(f64::INFINITY, f64::min);
+                let brute = |norm: fn(P) -> f64| {
+                    (0..=4000)
+                        .map(|i| i as f64 / 4000.0)
+                        .map(|t| norm((x.0 - lerp(a, b, t).0, x.1 - lerp(a, b, t).1)) - (ra + (rb - ra) * t))
+                        .fold(f64::INFINITY, f64::min)
+                };
                 let r = round_dist(x, a, ra, b, rb);
                 let s = square_dist(x, a, ra, b, rb);
                 assert!((r - brute(|v| v.0.hypot(v.1))).abs() < 1e-3, "round {x:?}: {r}");
@@ -964,7 +975,11 @@ mod tests {
         let wide = Shaping { tilt: TiltResponse { angle: false, width: true }, ..Shaping::default() };
         let w = outline_shaped(&tilted_line(10, 100.0, |_| Tilt { altitude: 0.0, azimuth: 0.0 }), &Tip::round(10.0), &wide, 1.0, 0.1);
         assert!((w.tight().height() - 20.0).abs() < 0.5, "{:?}", w.tight());
-        assert_eq!(w, outline_shaped(&tilted_line(10, 100.0, |_| Tilt { altitude: 0.0, azimuth: 0.0 }), &Tip::round(10.0), &wide, 1.0, 0.1), "deterministic");
+        assert_eq!(
+            w,
+            outline_shaped(&tilted_line(10, 100.0, |_| Tilt { altitude: 0.0, azimuth: 0.0 }), &Tip::round(10.0), &wide, 1.0, 0.1),
+            "deterministic"
+        );
     }
 
     #[test]
@@ -997,9 +1012,26 @@ mod tests {
 
     #[test]
     fn hostile_input_is_empty_or_bounded() {
-        let wild = Shaping { taper_start: f32::NAN, taper_end: 1e9, spacing: -3.0, jitter: f32::INFINITY, texture: f32::NAN, scatter: 1e9, tilt: TiltResponse::default() };
-        assert_eq!(wild.sanitized(), Shaping { taper_start: 0.0, taper_end: 0.5, spacing: 0.0, jitter: 0.0, texture: 0.0, scatter: 2.0, tilt: TiltResponse::default() });
-        let _ = outline_shaped(&line(Vec2::ZERO, Vec2::new(10.0, 0.0), 3, |_| 1.0), &Tip::round(5.0), &Shaping { spacing: 1e-9, jitter: 0.5, ..wild }, 1.0, 1.0);
+        let wild = Shaping {
+            taper_start: f32::NAN,
+            taper_end: 1e9,
+            spacing: -3.0,
+            jitter: f32::INFINITY,
+            texture: f32::NAN,
+            scatter: 1e9,
+            tilt: TiltResponse::default(),
+        };
+        assert_eq!(
+            wild.sanitized(),
+            Shaping { taper_start: 0.0, taper_end: 0.5, spacing: 0.0, jitter: 0.0, texture: 0.0, scatter: 2.0, tilt: TiltResponse::default() }
+        );
+        let _ = outline_shaped(
+            &line(Vec2::ZERO, Vec2::new(10.0, 0.0), 3, |_| 1.0),
+            &Tip::round(5.0),
+            &Shaping { spacing: 1e-9, jitter: 0.5, ..wild },
+            1.0,
+            1.0,
+        );
         assert!(outline(&[], &Tip::round(10.0), 1.0, 1.0).is_empty());
         let nan = [Sample::new(Vec2::new(f32::NAN, 0.0), f32::NAN)];
         assert!(outline(&nan, &Tip::round(10.0), 1.0, 1.0).is_empty());

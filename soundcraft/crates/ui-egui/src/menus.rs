@@ -156,6 +156,9 @@ pub const AUDIOSUITE: &[(&str, &str)] = &[
     ("AudioSuite > Other > Shorten Silence", "shorten_silence"),
     ("AudioSuite > Other > Signal Generator", "signal_generator"),
     ("AudioSuite > Other > Stem Separation", "stem_separator"),
+    ("AudioSuite > Other > DeClicker", "declicker"),
+    ("AudioSuite > Other > DeClipper", "declipper"),
+    ("AudioSuite > Other > Remix Duration", "remix"),
     ("AudioSuite > Other > Time Compression Expansion", "time_stretch"),
 ];
 
@@ -235,6 +238,7 @@ fn display_menu_label(path: &str, fallback: &str) -> String {
             "pitch_shift" => "Pitch Shift",
             "time_stretch" => "Time Stretch",
             "speed_ramp" => "Speed Ramp",
+            "remix" => "Remix Duration",
             _ => fallback,
         };
         return label.to_string();
@@ -271,9 +275,14 @@ pub fn tree() -> Vec<MenuNode> {
     insert_path(&mut roots, "AudioSuite > Other > Delete Silence");
     insert_path(&mut roots, "AudioSuite > Other > Shorten Silence");
     insert_path(&mut roots, "AudioSuite > Other > Stem Separation");
+    insert_path(&mut roots, "AudioSuite > Other > DeClicker");
+    insert_path(&mut roots, "AudioSuite > Other > DeClipper");
+    insert_path(&mut roots, "AudioSuite > Other > Remix Duration");
     insert_path(&mut roots, "View > Waveforms > Spectral Frequency Display");
     insert_path(&mut roots, "File > Import > Final Cut Pro XML (.fcpxml)...");
     insert_path(&mut roots, "File > Export > Final Cut Pro XML (.fcpxml)...");
+    insert_path(&mut roots, "File > Import > Multitrack XML (.sesx)...");
+    insert_path(&mut roots, "File > Export > Multitrack XML (.sesx)...");
     insert_path(&mut roots, "Event > Time Operations > SMPTE Lock Position...");
     insert_path(&mut roots, "Event > Tempo Operations > Beat Map Scene Markers...");
     // Not in the observed catalog either; Pro Tools lists it right under Identify Sync Point.

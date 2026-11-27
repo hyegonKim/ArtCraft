@@ -1,8 +1,8 @@
 //! Paint shaders: solid colours and gradients evaluated per pixel through a 256-entry LUT.
 
 use anicraft_doc::{ColorTransform, GradientStop, MAX_FOCAL, Paint, Pixels, Rgba, Spread};
-use std::sync::Arc;
 use anicraft_geom::{Affine, Vec2};
+use std::sync::Arc;
 
 /// Premultiplied RGBA.
 pub type Premul = [f32; 4];
@@ -16,17 +16,41 @@ const LUT: usize = 256;
 
 pub enum Shader {
     Solid(Premul),
-    Linear { inv: Affine, start: Vec2, dir: Vec2, spread: Spread, lut: Box<[Premul; LUT]> },
+    Linear {
+        inv: Affine,
+        start: Vec2,
+        dir: Vec2,
+        spread: Spread,
+        lut: Box<[Premul; LUT]>,
+    },
     /// `inv` maps pixels into the gradient's own space (its matrix undone), where the ring is
     /// the circle of radius `1 / inv_radius` round `center` and the focal point sits `focal`
     /// of the radius along x.
-    Radial { inv: Affine, center: Vec2, inv_radius: f32, focal: f32, spread: Spread, lut: Box<[Premul; LUT]> },
+    Radial {
+        inv: Affine,
+        center: Vec2,
+        inv_radius: f32,
+        focal: f32,
+        spread: Spread,
+        lut: Box<[Premul; LUT]>,
+    },
     /// Samples of a bitmap: `inv` maps pixels back to the bitmap's own pixel grid. Bilinear
     /// when `smooth` (Allow Smoothing, ADR 0050), else the nearest pixel.
-    Bitmap { inv: Affine, pixels: Arc<Pixels>, repeat: bool, fx: ColorTransform, smooth: bool },
+    Bitmap {
+        inv: Affine,
+        pixels: Arc<Pixels>,
+        repeat: bool,
+        fx: ColorTransform,
+        smooth: bool,
+    },
     /// Premultiplied pixels already in surface space (a filtered group): `w` wide, its top-left
     /// at `(x0, y0)`; transparent outside.
-    Image { data: Arc<Vec<Premul>>, x0: i32, y0: i32, w: usize },
+    Image {
+        data: Arc<Vec<Premul>>,
+        x0: i32,
+        y0: i32,
+        w: usize,
+    },
 }
 
 fn sample_stops(stops: &[GradientStop], t: f32) -> Rgba {
@@ -59,7 +83,8 @@ fn from_linear(c: f32) -> f32 {
 /// The ramp's 256 colours. With `linear_rgb` the stops mix in linear light (Animate's Linear
 /// RGB, SVG's `color-interpolation: linearRGB`); the colours at the stops are the same.
 fn build_lut(stops: &[GradientStop], fx: &ColorTransform, linear_rgb: bool) -> Box<[Premul; LUT]> {
-    let mut sorted: Vec<GradientStop> = stops.iter().copied().filter(|s| s.offset.is_finite()).map(|s| GradientStop { color: s.color.sanitized(), ..s }).collect();
+    let mut sorted: Vec<GradientStop> =
+        stops.iter().copied().filter(|s| s.offset.is_finite()).map(|s| GradientStop { color: s.color.sanitized(), ..s }).collect();
     sorted.sort_by(|a, b| a.offset.total_cmp(&b.offset));
     if linear_rgb {
         for s in &mut sorted {
@@ -155,7 +180,9 @@ impl Shader {
         match self {
             Shader::Solid(c) => *c,
             Shader::Linear { inv, start, dir, spread, lut } => lookup(lut, *spread, (inv.apply(p) - *start).dot(*dir)),
-            Shader::Radial { inv, center, inv_radius, focal, spread, lut } => lookup(lut, *spread, focal_t((inv.apply(p) - *center) * *inv_radius, *focal)),
+            Shader::Radial { inv, center, inv_radius, focal, spread, lut } => {
+                lookup(lut, *spread, focal_t((inv.apply(p) - *center) * *inv_radius, *focal))
+            }
             Shader::Bitmap { inv, pixels, repeat, fx, smooth } => sample(pixels, inv.apply(p), *repeat, *smooth, fx),
             Shader::Image { data, x0, y0, w } => {
                 let (dx, dy) = (x - x0, y - y0);
@@ -211,7 +238,11 @@ mod tests {
 
     #[test]
     fn linear_gradient_endpoints() {
-        let paint = Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0), vec![GradientStop { offset: 0.0, color: Rgba::BLACK }, GradientStop { offset: 1.0, color: Rgba::WHITE }]);
+        let paint = Paint::linear(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(100.0, 0.0),
+            vec![GradientStop { offset: 0.0, color: Rgba::BLACK }, GradientStop { offset: 1.0, color: Rgba::WHITE }],
+        );
         let s = Shader::new(&paint, &Affine::IDENTITY, &ColorTransform::default(), None);
         assert!(s.at(0, 0)[0] < 0.02);
         assert!(s.at(99, 0)[0] > 0.98);
@@ -324,19 +355,43 @@ mod tests {
     fn bitmaps_sample_bilinear_once_or_tiled() {
         // 2×1: black, white.
         let px = Arc::new(Pixels { width: 2, height: 1, rgba: vec![0, 0, 0, 255, 255, 255, 255, 255] });
-        let once = Shader::new(&Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: false, matrix: Affine::IDENTITY }, &Affine::scale(10.0, 10.0), &ColorTransform::default(), Some(&px));
+        let once = Shader::new(
+            &Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: false, matrix: Affine::IDENTITY },
+            &Affine::scale(10.0, 10.0),
+            &ColorTransform::default(),
+            Some(&px),
+        );
         let r = |s: &Shader, x| s.at(x, 3)[0];
         assert!(r(&once, 0) < 0.01, "the black pixel");
         assert!(r(&once, 19) > 0.99, "the white pixel");
         assert!((r(&once, 9) - 0.45).abs() < 0.06, "blended across the seam: {}", r(&once, 9));
         assert_eq!(once.at(25, 3), [0.0; 4], "nothing past the edge");
-        let tiled = Shader::new(&Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: true, matrix: Affine::IDENTITY }, &Affine::scale(10.0, 10.0), &ColorTransform::default(), Some(&px));
+        let tiled = Shader::new(
+            &Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: true, matrix: Affine::IDENTITY },
+            &Affine::scale(10.0, 10.0),
+            &ColorTransform::default(),
+            Some(&px),
+        );
         assert!(r(&tiled, 25) < 0.2 && r(&tiled, 35) > 0.8, "tiles repeat");
         assert!(r(&tiled, 21) > 0.2, "and blend across the wrap-around seam");
         // Opacity applies, premultiplied; a missing image is grey, not a crash.
-        let half = Shader::new(&Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: false, matrix: Affine::IDENTITY }, &Affine::scale(10.0, 10.0), &ColorTransform::alpha(0.5), Some(&px));
+        let half = Shader::new(
+            &Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: false, matrix: Affine::IDENTITY },
+            &Affine::scale(10.0, 10.0),
+            &ColorTransform::alpha(0.5),
+            Some(&px),
+        );
         assert!((half.at(19, 3)[3] - 0.5).abs() < 1e-3 && (half.at(19, 3)[0] - 0.5).abs() < 1e-2);
-        assert!(Shader::new(&Paint::Bitmap { bitmap: anicraft_doc::BitmapId(9), repeat: false, matrix: Affine::IDENTITY }, &Affine::IDENTITY, &ColorTransform::default(), None).is_solid().is_some());
+        assert!(
+            Shader::new(
+                &Paint::Bitmap { bitmap: anicraft_doc::BitmapId(9), repeat: false, matrix: Affine::IDENTITY },
+                &Affine::IDENTITY,
+                &ColorTransform::default(),
+                None
+            )
+            .is_solid()
+            .is_some()
+        );
         // The fill's image matrix places the image inside the shape: here 10× larger, from x = 40.
         let placed = Paint::Bitmap { bitmap: anicraft_doc::BitmapId(1), repeat: false, matrix: Affine { m: [10.0, 0.0, 0.0, 10.0, 40.0, 0.0] } };
         let placed = Shader::new(&placed, &Affine::IDENTITY, &ColorTransform::default(), Some(&px));

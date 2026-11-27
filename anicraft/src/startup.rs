@@ -32,10 +32,10 @@ impl Attempt {
     pub fn label(&self) -> String {
         let name = match self.backend {
             WindowBackend::Auto => "wgpu (automatic)", // i18n-exempt: log text
-            WindowBackend::Vulkan => "wgpu Vulkan", // i18n-exempt: log text
-            WindowBackend::Dx12 => "wgpu DirectX 12", // i18n-exempt: log text
-            WindowBackend::Metal => "wgpu Metal", // i18n-exempt: log text
-            WindowBackend::OpenGl => "OpenGL", // i18n-exempt: log text
+            WindowBackend::Vulkan => "wgpu Vulkan",    // i18n-exempt: log text
+            WindowBackend::Dx12 => "wgpu DirectX 12",  // i18n-exempt: log text
+            WindowBackend::Metal => "wgpu Metal",      // i18n-exempt: log text
+            WindowBackend::OpenGl => "OpenGL",         // i18n-exempt: log text
         };
         if self.low_power && self.backend != WindowBackend::OpenGl { format!("{name}, low-power GPU") } else { name.to_string() }
     }
@@ -148,7 +148,8 @@ static REOPEN: Mutex<Option<Option<PathBuf>>> = Mutex::new(None);
 pub fn begin(dir: Option<PathBuf>) -> Vec<String> {
     let Some(dir) = dir else { return Vec::new() };
     let _ = std::fs::create_dir_all(&dir);
-    let died_in = std::fs::read_to_string(dir.join(MARKER_NAME)).ok().map(|s| s.trim().chars().take(200).collect::<String>()).filter(|s| !s.is_empty());
+    let died_in =
+        std::fs::read_to_string(dir.join(MARKER_NAME)).ok().map(|s| s.trim().chars().take(200).collect::<String>()).filter(|s| !s.is_empty());
     // This start uses up one of the record's starts.
     let lost = std::fs::read_to_string(dir.join(LOST_NAME)).ok().and_then(|t| lost_record(&t));
     match &lost {
@@ -172,7 +173,13 @@ pub fn begin(dir: Option<PathBuf>) -> Vec<String> {
         previous(info);
     }));
     let unix = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
-    line(&format!("AniCraft {} ({}), {} {}, started at {unix} (Unix time)", env!("CARGO_PKG_VERSION"), crate::app::RELEASE_STAGE, std::env::consts::OS, std::env::consts::ARCH));
+    line(&format!(
+        "AniCraft {} ({}), {} {}, started at {unix} (Unix time)",
+        env!("CARGO_PKG_VERSION"),
+        crate::app::RELEASE_STAGE,
+        std::env::consts::OS,
+        std::env::consts::ARCH
+    ));
     if let Some((l, left)) = &lost {
         line(&format!("a session lost its graphics device with {l}: trying it late ({left} more start(s) counting this one)"));
     }
@@ -305,11 +312,17 @@ pub fn give_up(why: &str) {
     line(&format!("no way to open the window worked; last: {why}"));
     let log = log_path().map_or_else(String::new, |p| p.display().to_string());
     let text = if log.is_empty() {
-        tr!("AniCraft couldn't open its window with this computer's graphics driver ({why}). Updating the graphics driver usually helps.", why = why).to_string()
+        tr!("AniCraft couldn't open its window with this computer's graphics driver ({why}). Updating the graphics driver usually helps.", why = why)
+            .to_string()
     } else {
         tr!("AniCraft couldn't open its window with this computer's graphics driver ({why}). Updating the graphics driver usually helps. If it doesn't, please attach this file to a bug report: {log}", why = why, log = log).to_string()
     };
-    let _ = rfd::MessageDialog::new().set_level(rfd::MessageLevel::Error).set_title(tr!("AniCraft couldn't start")).set_description(text).set_buttons(rfd::MessageButtons::Ok).show();
+    let _ = rfd::MessageDialog::new()
+        .set_level(rfd::MessageLevel::Error)
+        .set_title(tr!("AniCraft couldn't start"))
+        .set_description(text)
+        .set_buttons(rfd::MessageButtons::Ok)
+        .show();
 }
 
 #[cfg(test)]
@@ -333,7 +346,11 @@ mod tests {
         assert_eq!(labels(&plan(None, Vulkan, WINDOWS, &[])), ["wgpu Vulkan", "wgpu (automatic)", "wgpu DirectX 12, low-power GPU", "OpenGL"]);
         // The command line wins over Preferences; OpenGL isn't tried twice.
         assert_eq!(labels(&plan(Some(OpenGl), Dx12, WINDOWS, &[])), ["OpenGL", "wgpu (automatic)", "wgpu DirectX 12, low-power GPU"]);
-        assert_eq!(labels(&plan(Some(Auto), Dx12, WINDOWS, &[])), ["wgpu (automatic)", "wgpu DirectX 12, low-power GPU", "OpenGL"], "--renderer wgpu is automatic");
+        assert_eq!(
+            labels(&plan(Some(Auto), Dx12, WINDOWS, &[])),
+            ["wgpu (automatic)", "wgpu DirectX 12, low-power GPU", "OpenGL"],
+            "--renderer wgpu is automatic"
+        );
     }
 
     /// Each attempt sets the window up as it says: OpenGL through glow, the others through
@@ -350,7 +367,10 @@ mod tests {
             (o.renderer, wgpu)
         };
         assert_eq!(setup(Attempt { backend: OpenGl, low_power: false }).0, eframe::Renderer::Glow);
-        assert_eq!(setup(Attempt { backend: Dx12, low_power: true }), (eframe::Renderer::Wgpu, Some((wgpu::Backends::DX12, wgpu::PowerPreference::LowPower))));
+        assert_eq!(
+            setup(Attempt { backend: Dx12, low_power: true }),
+            (eframe::Renderer::Wgpu, Some((wgpu::Backends::DX12, wgpu::PowerPreference::LowPower)))
+        );
         assert_eq!(setup(Attempt { backend: Vulkan, low_power: false }).1.map(|w| w.0), Some(wgpu::Backends::VULKAN));
         assert_eq!(setup(Attempt { backend: Metal, low_power: false }).1.map(|w| w.0), Some(wgpu::Backends::METAL));
         assert_eq!(setup(Attempt { backend: Auto, low_power: false }).0, eframe::Renderer::Wgpu);
@@ -369,7 +389,10 @@ mod tests {
     /// #207: when the last start died inside a driver (nothing to catch), that way goes last.
     #[test]
     fn the_way_the_last_start_died_in_goes_last() {
-        assert_eq!(labels(&plan(None, Auto, WINDOWS, &["wgpu (automatic)".into()])), ["wgpu DirectX 12, low-power GPU", "OpenGL", "wgpu (automatic)"]);
+        assert_eq!(
+            labels(&plan(None, Auto, WINDOWS, &["wgpu (automatic)".into()])),
+            ["wgpu DirectX 12, low-power GPU", "OpenGL", "wgpu (automatic)"]
+        );
         assert_eq!(labels(&plan(None, Auto, WINDOWS, &["something else".into()])), ["wgpu (automatic)", "wgpu DirectX 12, low-power GPU", "OpenGL"]);
         assert_eq!(labels(&plan(None, Auto, &[], &[])), ["wgpu (automatic)"], "never nothing to try");
     }
@@ -403,7 +426,10 @@ mod tests {
         // Killed here (a driver crash): the marker stays, and the next start finds it.
         assert_eq!(begin(Some(dir.clone())), ["wgpu DirectX 12, low-power GPU"]);
         let previous = std::fs::read_to_string(dir.join(PREVIOUS_LOG_NAME)).unwrap();
-        assert!(previous.contains("opening the window with wgpu DirectX 12, low-power GPU (attempt 1 of 3)") && previous.contains("hello"), "{previous}");
+        assert!(
+            previous.contains("opening the window with wgpu DirectX 12, low-power GPU (attempt 1 of 3)") && previous.contains("hello"),
+            "{previous}"
+        );
         let now = std::fs::read_to_string(dir.join(LOG_NAME)).unwrap();
         assert!(now.contains("the previous start stopped while opening the window with wgpu DirectX 12"), "{now}");
         // This time the window comes up: the marker goes.

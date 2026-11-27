@@ -13,10 +13,13 @@
 //! (512 px tiles drawn in parallel, as the render service does, until finished); and how far
 //! the GPU-binned picture is from the oracle's.
 
-use anicraft_doc::{Bitmap, BitmapId, ColorEffect, ColorTransform, DisplayList, Document, Element, ElementId, ElementKind, Filter, FilterSide, Keyframe, Layer, LayerId, LayerKind, Paint, Pixels, Rgba, Shape, evaluate, sample};
+use anicraft_doc::{
+    Bitmap, BitmapId, ColorEffect, ColorTransform, DisplayList, Document, Element, ElementId, ElementKind, Filter, FilterSide, Keyframe, Layer,
+    LayerId, LayerKind, Paint, Pixels, Rgba, Shape, evaluate, sample,
+};
+use anicraft_geom::Affine;
 use anicraft_geom::{FillRule, Path};
 use anicraft_gpu::{Binning, GpuRenderer, compare_premul8};
-use anicraft_geom::Affine;
 use anicraft_render::{View, render};
 use rayon::prelude::*;
 use std::sync::Arc;
@@ -86,9 +89,26 @@ fn bitmap_layer(id: u64, n: u32, bitmaps: &[Arc<Bitmap>], frames: u32) -> Arc<La
     for i in 0..n {
         let b = &bitmaps[i as usize % bitmaps.len()];
         let (x, y) = ((i % 20) as f32 * 64.0, (i / 20) as f32 * 72.0);
-        let fill = Paint::Bitmap { bitmap: b.id, repeat: i % 3 == 0, matrix: Affine::translate(x, y).mul(&Affine::rotate(i as f32 * 0.1)).mul(&Affine::scale(0.4, 0.4)) };
-        let shape = Shape { merge: false, path: Arc::new(Path::ellipse(x + 40.0, y + 40.0, 60.0, 45.0)), fill: Some(fill), stroke: None, fill_rule: FillRule::NonZero, warp: None };
-        k.elements.push(Arc::new(Element { id: ElementId(id * 10_000 + u64::from(i)), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(shape) }));
+        let fill = Paint::Bitmap {
+            bitmap: b.id,
+            repeat: i % 3 == 0,
+            matrix: Affine::translate(x, y).mul(&Affine::rotate(i as f32 * 0.1)).mul(&Affine::scale(0.4, 0.4)),
+        };
+        let shape = Shape {
+            merge: false,
+            path: Arc::new(Path::ellipse(x + 40.0, y + 40.0, 60.0, 45.0)),
+            fill: Some(fill),
+            stroke: None,
+            fill_rule: FillRule::NonZero,
+            warp: None,
+        };
+        k.elements.push(Arc::new(Element {
+            id: ElementId(id * 10_000 + u64::from(i)),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: ColorEffect::default(),
+            kind: ElementKind::Shape(shape),
+        }));
     }
     let mut l = Layer::new(LayerId(id), "Bitmaps");
     l.keyframes = vec![Arc::new(k)];
@@ -115,13 +135,47 @@ fn filtered() -> Document {
         for k in &mut l.keyframes {
             for e in &mut Arc::make_mut(k).elements {
                 if let ElementKind::Symbol { filters, .. } = &mut Arc::make_mut(e).kind {
-                    *filters = Vec::from_iter(match i {
-                        0 => vec![
-                            Filter::DropShadow { blur_x: 8.0, blur_y: 8.0, strength: 0.8, quality: 2, angle: 45.0, distance: 10.0, color: Rgba::BLACK, inner: false, knockout: false, hide_object: false },
-                            Filter::Bevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 4.0, shadow_color: Rgba::BLACK, highlight_color: Rgba::WHITE, side: FilterSide::Inner, knockout: false },
-                        ],
-                        _ => vec![Filter::Glow { blur_x: 12.0, blur_y: 12.0, strength: 1.4, quality: 2, color: Rgba::new(1.0, 0.85, 0.2, 1.0), inner: false, knockout: false }],
-                    }.into_iter().map(anicraft_doc::FilterEntry::from));
+                    *filters = Vec::from_iter(
+                        match i {
+                            0 => vec![
+                                Filter::DropShadow {
+                                    blur_x: 8.0,
+                                    blur_y: 8.0,
+                                    strength: 0.8,
+                                    quality: 2,
+                                    angle: 45.0,
+                                    distance: 10.0,
+                                    color: Rgba::BLACK,
+                                    inner: false,
+                                    knockout: false,
+                                    hide_object: false,
+                                },
+                                Filter::Bevel {
+                                    blur_x: 5.0,
+                                    blur_y: 5.0,
+                                    strength: 1.0,
+                                    quality: 1,
+                                    angle: 45.0,
+                                    distance: 4.0,
+                                    shadow_color: Rgba::BLACK,
+                                    highlight_color: Rgba::WHITE,
+                                    side: FilterSide::Inner,
+                                    knockout: false,
+                                },
+                            ],
+                            _ => vec![Filter::Glow {
+                                blur_x: 12.0,
+                                blur_y: 12.0,
+                                strength: 1.4,
+                                quality: 2,
+                                color: Rgba::new(1.0, 0.85, 0.2, 1.0),
+                                inner: false,
+                                knockout: false,
+                            }],
+                        }
+                        .into_iter()
+                        .map(anicraft_doc::FilterEntry::from),
+                    );
                 }
             }
         }
@@ -131,9 +185,22 @@ fn filtered() -> Document {
         let mut layer = bitmap_layer(91_000, 0, std::slice::from_ref(&sky), frames);
         let l = Arc::make_mut(&mut layer);
         let fill = Paint::Bitmap { bitmap: sky.id, repeat: true, matrix: Affine::scale(5.0, 5.0) };
-        let shape = Shape { merge: false, path: Arc::new(Path::rect(0.0, 0.0, 1280.0, 300.0)), fill: Some(fill), stroke: None, fill_rule: FillRule::NonZero, warp: None };
+        let shape = Shape {
+            merge: false,
+            path: Arc::new(Path::rect(0.0, 0.0, 1280.0, 300.0)),
+            fill: Some(fill),
+            stroke: None,
+            fill_rule: FillRule::NonZero,
+            warp: None,
+        };
         if let Some(k) = l.keyframes.first_mut() {
-            Arc::make_mut(k).elements.push(Arc::new(Element { id: ElementId(91_001), name: "sky".into(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(shape) }));
+            Arc::make_mut(k).elements.push(Arc::new(Element {
+                id: ElementId(91_001),
+                name: "sky".into(),
+                transform: Affine::IDENTITY,
+                color: ColorEffect::default(),
+                kind: ElementKind::Shape(shape),
+            }));
         }
         doc.bitmaps.push(sky);
         doc.timeline_mut(0).layers.push(layer);
@@ -186,7 +253,9 @@ fn onion_list(doc: &Document, frame: u32, mode: Onion) -> DisplayList {
     dl.append(now);
     // Layer by layer, bottom first; within a layer, the parts in order (a stable sort).
     let mut order: Vec<usize> = (0..dl.items.len()).collect();
-    order.sort_by_key(|&i| (std::cmp::Reverse(dl.items.get(i).and_then(|it| rank.get(&it.layer)).copied().unwrap_or(0)), part_of.get(i).copied().unwrap_or(0)));
+    order.sort_by_key(|&i| {
+        (std::cmp::Reverse(dl.items.get(i).and_then(|it| rank.get(&it.layer)).copied().unwrap_or(0)), part_of.get(i).copied().unwrap_or(0))
+    });
     let mut items: Vec<Option<anicraft_doc::DisplayItem>> = std::mem::take(&mut dl.items).into_iter().map(Some).collect();
     dl.items = order.into_iter().filter_map(|i| items.get_mut(i).and_then(Option::take)).collect();
     dl
@@ -233,7 +302,9 @@ fn main() {
         ("onion ±5 tinted".into(), onion_doc.clone(), Onion::Tinted),
         ("onion ±5 outlines".into(), onion_doc, Onion::Outlines),
     ];
-    println!("Per scene and size: the CPU oracle, then the GPU stage with the tiles binned on the CPU, then as Binning::Auto bins them (on the GPU with --forced):");
+    println!(
+        "Per scene and size: the CPU oracle, then the GPU stage with the tiles binned on the CPU, then as Binning::Auto bins them (on the GPU with --forced):"
+    );
     println!("direct = the calling thread's time with render_texture (prepare + bin + upload/submit), waited = until the GPU has finished,");
     println!("tiled = 512 px stage tiles in parallel until finished. Parity: the GPU-binned picture against the oracle (mean / max / px).");
     println!(
@@ -257,7 +328,12 @@ fn main() {
             // The stage's tiles: 512 px of the same frame, drawn in parallel.
             let tiles: Vec<View> = (0..v.height.div_ceil(512))
                 .flat_map(|ty| (0..v.width.div_ceil(512)).map(move |tx| (tx, ty)))
-                .map(|(tx, ty)| View { transform: Affine::translate(-((tx * 512) as f32), -((ty * 512) as f32)).mul(&v.transform), width: 512.min(v.width - tx * 512), height: 512.min(v.height - ty * 512), background: v.background })
+                .map(|(tx, ty)| View {
+                    transform: Affine::translate(-((tx * 512) as f32), -((ty * 512) as f32)).mul(&v.transform),
+                    width: 512.min(v.width - tx * 512),
+                    height: 512.min(v.height - ty * 512),
+                    background: v.background,
+                })
                 .collect();
             let mut cols = Vec::new();
             let mut binned_on_gpu = false;
@@ -298,10 +374,14 @@ fn main() {
                     measured.push((name.clone(), v.width, "direct", direct));
                     measured.push((name.clone(), v.width, "tiled", tiled));
                 }
-                cols.push(format!("{direct:>7.2} {waited:>7.2} {tiled:>7.2} {:>19}", format!("{:.2} + {:.2} + {:.2}", sum[0] / n, sum[1] / n, sum[2] / n)));
+                cols.push(format!(
+                    "{direct:>7.2} {waited:>7.2} {tiled:>7.2} {:>19}",
+                    format!("{:.2} + {:.2} + {:.2}", sum[0] / n, sum[1] / n, sum[2] / n)
+                ));
             }
             let parity = match (gpu.render_texture_with(&dl0, &v, Binning::Gpu).and_then(|t| gpu.read_texture(&t)), render(&dl0, &v)) {
-                (Ok(g), Ok((c, _))) => compare_premul8(&g, &c.to_premul_rgba8()).map_or("size mismatch".into(), |d| format!("{:.4} / {} / {}", d.mean, d.max, d.differing)),
+                (Ok(g), Ok((c, _))) => compare_premul8(&g, &c.to_premul_rgba8())
+                    .map_or("size mismatch".into(), |d| format!("{:.4} / {} / {}", d.mean, d.max, d.differing)),
                 (Err(e), _) => format!("GPU: {e}"),
                 (_, Err(e)) => format!("CPU: {e}"),
             };
@@ -320,12 +400,20 @@ fn main() {
         let got = get(scene, w, what);
         let ok = got.is_some_and(|g| g <= limit);
         missed += usize::from(!ok);
-        println!("  {} {scene} at {w} px, {what}: {} (budget {limit} ms)", if ok { "ok  " } else { "MISS" }, got.map_or("not measured".into(), |g| format!("{g:.2} ms")));
+        println!(
+            "  {} {scene} at {w} px, {what}: {} (budget {limit} ms)",
+            if ok { "ok  " } else { "MISS" },
+            got.map_or("not measured".into(), |g| format!("{g:.2} ms"))
+        );
     }
     let ratio = get("onion ±5 outlines", 1920, "tiled").zip(get("onion ±5 tinted", 1920, "tiled")).map(|(o, t)| o / t);
     let ok = ratio.is_some_and(|r| r <= OUTLINE_RATIO);
     missed += usize::from(!ok);
-    println!("  {} onion outlines / tinted at 1920 px, tiled: {} (budget {OUTLINE_RATIO})", if ok { "ok  " } else { "MISS" }, ratio.map_or("not measured".into(), |r| format!("{r:.2}")));
+    println!(
+        "  {} onion outlines / tinted at 1920 px, tiled: {} (budget {OUTLINE_RATIO})",
+        if ok { "ok  " } else { "MISS" },
+        ratio.map_or("not measured".into(), |r| format!("{r:.2}"))
+    );
     if missed > 0 {
         println!("{missed} budget(s) missed");
         std::process::exit(1);

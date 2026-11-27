@@ -107,7 +107,12 @@ pub fn actions() -> Vec<Action> {
             defaults: c.shortcut.into_iter().chain(SHORTCUT_ALIASES.iter().filter(|(_, id)| *id == c.id).map(|(k, _)| *k)).collect(),
         })
         .collect();
-    v.extend(Tool::ALL.into_iter().map(|t| Action { id: tool_id(t), label: t.label(), group: tr_noop!("Tools"), defaults: t.shortcut().into_iter().collect() }));
+    v.extend(Tool::ALL.into_iter().map(|t| Action {
+        id: tool_id(t),
+        label: t.label(),
+        group: tr_noop!("Tools"),
+        defaults: t.shortcut().into_iter().collect(),
+    }));
     let mut views: Vec<&str> = Vec::new();
     for (_, id) in VIEW_SHORTCUTS {
         if !views.contains(id) {
@@ -243,13 +248,22 @@ impl Keymap {
 pub enum Refusal {
     Reserved(&'static str),
     /// Bound to another action; assign again with `steal` to move it.
-    Taken { id: &'static str, label: &'static str },
+    Taken {
+        id: &'static str,
+        label: &'static str,
+    },
     TooMany,
 }
 
 /// Overrides after giving `id` the key `chord` (replacing its key at `replace`, or adding one).
 /// With `steal`, a chord bound elsewhere moves here; otherwise that is refused.
-pub fn assign(overrides: &BTreeMap<String, Vec<String>>, id: &str, replace: Option<usize>, chord: &str, steal: bool) -> Result<BTreeMap<String, Vec<String>>, Refusal> {
+pub fn assign(
+    overrides: &BTreeMap<String, Vec<String>>,
+    id: &str,
+    replace: Option<usize>,
+    chord: &str,
+    steal: bool,
+) -> Result<BTreeMap<String, Vec<String>>, Refusal> {
     let map = Keymap::new(overrides);
     let c = normalize(chord).ok_or(Refusal::Reserved(tr_noop!("nothing (not a key)")))?;
     if let Some(why) = reserved(&c) {
@@ -277,9 +291,11 @@ pub fn assign(overrides: &BTreeMap<String, Vec<String>>, id: &str, replace: Opti
     }
     // A chord the action already had elsewhere in its list collapses into one.
     let mut seen = Vec::new();
-    mine.retain(|k| !seen.contains(k) && {
-        seen.push(k.clone());
-        true
+    mine.retain(|k| {
+        !seen.contains(k) && {
+            seen.push(k.clone());
+            true
+        }
     });
     set(&mut out, &map, id, mine);
     Ok(out)
@@ -304,7 +320,12 @@ pub fn reset(overrides: &BTreeMap<String, Vec<String>>, id: &str) -> BTreeMap<St
     out.remove(id);
     let map = Keymap::new(&out);
     if let Some(a) = map.actions.iter().find(|a| a.id == id) {
-        let free: Vec<String> = a.defaults.iter().filter_map(|k| normalize(k)).filter(|k| map.actions.iter().all(|o| o.id == id || !map.keys(o.id).contains(k))).collect();
+        let free: Vec<String> = a
+            .defaults
+            .iter()
+            .filter_map(|k| normalize(k))
+            .filter(|k| map.actions.iter().all(|o| o.id == id || !map.keys(o.id).contains(k)))
+            .collect();
         set(&mut out, &map, id, free);
     }
     out
@@ -312,7 +333,8 @@ pub fn reset(overrides: &BTreeMap<String, Vec<String>>, id: &str) -> BTreeMap<St
 
 /// Records `keys` for `id`, as an override only when they differ from the defaults.
 fn set(out: &mut BTreeMap<String, Vec<String>>, map: &Keymap, id: &str, keys: Vec<String>) {
-    let defaults: Vec<String> = map.actions.iter().find(|a| a.id == id).map(|a| a.defaults.iter().filter_map(|k| normalize(k)).collect()).unwrap_or_default();
+    let defaults: Vec<String> =
+        map.actions.iter().find(|a| a.id == id).map(|a| a.defaults.iter().filter_map(|k| normalize(k)).collect()).unwrap_or_default();
     if keys == defaults {
         out.remove(id);
     } else {

@@ -23,6 +23,8 @@ pub struct LayerPropsDialog {
     pub color: [u8; 3],
     /// A mask layer's mask type: `coverage`, `alpha` or `luminance`.
     pub mask: String,
+    /// Direct layer-to-layer transform parent (`None` when unparented).
+    pub parent_layer: Option<LayerId>,
     pub outline: bool,
     pub onion: bool,
     /// Rows: 1, 2 or 3 (100, 200, 300 %).
@@ -52,6 +54,7 @@ pub fn open(app: &mut App, layer: Option<LayerId>) {
         ty: p.get("type").and_then(Value::as_str).unwrap_or("normal").to_string(),
         color: [c.r(), c.g(), c.b()],
         mask: l.mask_mode.key().to_string(),
+        parent_layer: l.parent_layer,
         outline: l.outline,
         onion: l.onion,
         height: l.height(),
@@ -90,102 +93,137 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
     }
     let Some(d) = &mut app.layer_props else { return };
     // What each type needs: a mask or guide right above for masked and guided.
-    let (can_mask, can_guide, kind) = {
+    let (can_mask, can_guide, kind, parent_choices) = {
         let tl = app.s.timeline();
         let i = tl.layers.iter().position(|l| l.id == d.layer);
         let kind = i.and_then(|i| tl.layers.get(i)).map_or(LayerKind::Normal, |l| l.kind);
-        (i.and_then(|i| tl.mask_above(i)).is_some(), i.and_then(|i| tl.guide_above(i)).is_some(), kind)
+        let choices: Vec<(LayerId, String)> =
+            tl.layers.iter().filter(|cand| tl.can_parent_layer(d.layer, cand.id)).map(|cand| (cand.id, cand.name.clone())).collect();
+        (i.and_then(|i| tl.mask_above(i)).is_some(), i.and_then(|i| tl.guide_above(i)).is_some(), kind, choices)
     };
     let fixed = matches!(kind, LayerKind::Folder | LayerKind::Camera | LayerKind::Armature);
     let (mut submit, mut cancel) = (false, false);
-    egui::Window::new(tr!("Layer Properties")).id(egui::Id::new("layer_props")).collapsible(false).resizable(false).anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0]).show(ctx, |ui| {
-        ui.set_min_width(420.0);
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Name"), |ui| {
-            let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Layer name"));
-            if d.focus {
-                r.request_focus();
-                d.focus = false;
-            }
-            if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
-                submit = true;
-            }
-        });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Layer"), |ui| {
-            crate::theme::checkbox(ui, &mut d.visible, tr!("Show"));
-            crate::theme::checkbox(ui, &mut d.locked, tr!("Lock"));
-        });
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Type"), |ui| {
-            if fixed {
-                ui.label(text(Type::Body, type_label(&d.ty)));
-                return;
-            }
-            ui.vertical(|ui| {
-                for (k, name) in types() {
-                    let allowed = match k {
-                        "masked" => can_mask || d.ty == k,
-                        "guided" => can_guide || d.ty == k,
-                        _ => true,
-                    };
-                    let r = ui.add_enabled(allowed, egui::RadioButton::new(d.ty == k, name));
-                    let r = if allowed {
-                        r
-                    } else if k == "masked" {
-                        r.on_disabled_hover_text(tr!("Only a layer right under a mask layer can be masked"))
-                    } else {
-                        r.on_disabled_hover_text(tr!("Only a layer right under a motion guide can be guided"))
-                    };
-                    if r.clicked() {
-                        d.ty = k.to_string();
-                    }
+    egui::Window::new(tr!("Layer Properties"))
+        .id(egui::Id::new("layer_props"))
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0])
+        .show(ctx, |ui| {
+            ui.set_min_width(420.0);
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Name"), |ui| {
+                let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Layer name"));
+                if d.focus {
+                    r.request_focus();
+                    d.focus = false;
+                }
+                if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
+                    submit = true;
                 }
             });
-        });
-        if d.ty == "mask" {
-            form_row(ui, FORM_LABEL_DIALOG, tr!("Mask type"), |ui| {
-                ui.horizontal(|ui| {
-                    for (k, name, what) in mask_types() {
-                        if ui.radio(d.mask == k, name).on_hover_text(what).clicked() {
-                            d.mask = k.to_string();
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Layer"), |ui| {
+                crate::theme::checkbox(ui, &mut d.visible, tr!("Show"));
+                crate::theme::checkbox(ui, &mut d.locked, tr!("Lock"));
+            });
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Type"), |ui| {
+                if fixed {
+                    ui.label(text(Type::Body, type_label(&d.ty)));
+                    return;
+                }
+                ui.vertical(|ui| {
+                    for (k, name) in types() {
+                        let allowed = match k {
+                            "masked" => can_mask || d.ty == k,
+                            "guided" => can_guide || d.ty == k,
+                            _ => true,
+                        };
+                        let r = ui.add_enabled(allowed, egui::RadioButton::new(d.ty == k, name));
+                        let r = if allowed {
+                            r
+                        } else if k == "masked" {
+                            r.on_disabled_hover_text(tr!("Only a layer right under a mask layer can be masked"))
+                        } else {
+                            r.on_disabled_hover_text(tr!("Only a layer right under a motion guide can be guided"))
+                        };
+                        if r.clicked() {
+                            d.ty = k.to_string();
                         }
                     }
                 });
             });
-        }
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Outline colour"), |ui| {
-            crate::colour::button(ui, &mut d.color).named(tr!("Outline colour")).on_hover_text(tr!("The colour of the layer's outlines and of its bar on the timeline"));
-        });
-        if kind != LayerKind::Camera && kind != LayerKind::Folder {
-            form_row(ui, FORM_LABEL_DIALOG, tr!("Outlines"), |ui| {
-                crate::theme::checkbox(ui, &mut d.outline, tr!("View layer as outlines")).on_hover_text(tr!("Draw the layer's artwork as outlines in its colour, on the stage only (never in the movie or an export)"));
-            });
-            form_row(ui, FORM_LABEL_DIALOG, tr!("Onion skin"), |ui| {
-                crate::theme::checkbox(ui, &mut d.onion, tr!("Onion skin this layer")).on_hover_text(tr!("Show this layer's frames around the playhead while onion skin is on"));
-            });
-        }
-        form_row(ui, FORM_LABEL_DIALOG, tr!("Layer height"), |ui| {
-            egui::ComboBox::from_id_salt("layer_props_height")
-                .width(96.0)
-                .selected_text(text(Type::Data, format!("{} %", u32::from(d.height) * 100)))
-                .show_ui(ui, |ui| {
-                    for h in 1..=MAX_LAYER_HEIGHT {
-                        if ui.selectable_label(d.height == h, text(Type::Data, format!("{} %", u32::from(h) * 100))).clicked() {
-                            d.height = h;
+            if d.ty == "mask" {
+                form_row(ui, FORM_LABEL_DIALOG, tr!("Mask type"), |ui| {
+                    ui.horizontal(|ui| {
+                        for (k, name, what) in mask_types() {
+                            if ui.radio(d.mask == k, name).on_hover_text(what).clicked() {
+                                d.mask = k.to_string();
+                            }
                         }
-                    }
-                })
-                .response
-                .set_name(tr!("Layer height"));
-        });
-        ui.add_space(4.0);
-        ui.horizontal(|ui| {
-            if ui.button(tr!("OK")).clicked() {
-                submit = true;
+                    });
+                });
             }
-            if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(Key::Escape)) {
-                cancel = true;
+            if kind != LayerKind::Camera && kind != LayerKind::Folder && (!parent_choices.is_empty() || d.parent_layer.is_some()) {
+                let parent_name = d
+                    .parent_layer
+                    .and_then(|pid| parent_choices.iter().find(|(id, _)| *id == pid).map(|(_, n)| n.clone()))
+                    .unwrap_or_else(|| tr!("None").to_string());
+                form_row(ui, FORM_LABEL_DIALOG, tr!("Parent layer"), |ui| {
+                    egui::ComboBox::from_id_salt("layer_props_parent")
+                        .width(180.0)
+                        .selected_text(parent_name)
+                        .show_ui(ui, |ui| {
+                            if ui.selectable_label(d.parent_layer.is_none(), tr!("None")).clicked() {
+                                d.parent_layer = None;
+                            }
+                            for (pid, pname) in &parent_choices {
+                                if ui.selectable_label(d.parent_layer == Some(*pid), pname.as_str()).clicked() {
+                                    d.parent_layer = Some(*pid);
+                                }
+                            }
+                        })
+                        .response
+                        .set_name(tr!("Parent layer"));
+                });
             }
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Outline colour"), |ui| {
+                crate::colour::button(ui, &mut d.color)
+                    .named(tr!("Outline colour"))
+                    .on_hover_text(tr!("The colour of the layer's outlines and of its bar on the timeline"));
+            });
+            if kind != LayerKind::Camera && kind != LayerKind::Folder {
+                form_row(ui, FORM_LABEL_DIALOG, tr!("Outlines"), |ui| {
+                    crate::theme::checkbox(ui, &mut d.outline, tr!("View layer as outlines")).on_hover_text(tr!(
+                        "Draw the layer's artwork as outlines in its colour, on the stage only (never in the movie or an export)"
+                    ));
+                });
+                form_row(ui, FORM_LABEL_DIALOG, tr!("Onion skin"), |ui| {
+                    crate::theme::checkbox(ui, &mut d.onion, tr!("Onion skin this layer"))
+                        .on_hover_text(tr!("Show this layer's frames around the playhead while onion skin is on"));
+                });
+            }
+            form_row(ui, FORM_LABEL_DIALOG, tr!("Layer height"), |ui| {
+                egui::ComboBox::from_id_salt("layer_props_height")
+                    .width(96.0)
+                    .selected_text(text(Type::Data, format!("{} %", u32::from(d.height) * 100)))
+                    .show_ui(ui, |ui| {
+                        for h in 1..=MAX_LAYER_HEIGHT {
+                            if ui.selectable_label(d.height == h, text(Type::Data, format!("{} %", u32::from(h) * 100))).clicked() {
+                                d.height = h;
+                            }
+                        }
+                    })
+                    .response
+                    .set_name(tr!("Layer height"));
+            });
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                if ui.button(tr!("OK")).clicked() {
+                    submit = true;
+                }
+                if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(Key::Escape)) {
+                    cancel = true;
+                }
+            });
         });
-    });
     if submit {
         accept(app);
     } else if cancel {
@@ -208,6 +246,9 @@ pub fn changes(d: &LayerPropsDialog) -> Value {
         "height": u32::from(d.height) * 100,
     });
     let mut now = now;
+    if d.parent_layer.is_some() || d.was.get("parent_layer").is_some() {
+        now["parent_layer"] = json!(d.parent_layer.map(|p| p.0));
+    }
     // The mask type is a mask layer's (and only sent when it changes).
     if d.ty == "mask" {
         now["mask"] = json!(d.mask);

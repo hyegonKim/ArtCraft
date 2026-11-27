@@ -34,7 +34,15 @@ pub fn specs() -> Vec<CommandSpec> {
             set_width_point,
         ),
         c("stroke.delete_width_point", "Delete Width Point", "", None, "{id, index}", true, delete_width_point),
-        c("stroke.width_at", "Width at Point", "", None, "{x, y, id? (default: the topmost stroke there on the active layer), slop?}", false, width_at),
+        c(
+            "stroke.width_at",
+            "Width at Point",
+            "",
+            None,
+            "{x, y, id? (default: the topmost stroke there on the active layer), slop?}",
+            false,
+            width_at,
+        ),
     ]
 }
 
@@ -47,11 +55,17 @@ pub(crate) fn id_param(p: &Value) -> Result<Option<ElementId>> {
 
 /// The shape element `id` as it shows at the playhead on the active layer.
 pub(crate) fn visible_shape(s: &Session, id: ElementId) -> Result<std::sync::Arc<Element>> {
-    let el = s.visible_elements().into_iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
+    let el = s
+        .visible_elements()
+        .into_iter()
+        .find(|e| e.id == id)
+        .ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
     match &el.kind {
         ElementKind::Shape(sh) if sh.stroke.is_some() => Ok(el),
         ElementKind::Shape(_) => Err(EngineError::State("this shape has no stroke (give it one in Properties or with the Ink Bottle)".into())),
-        ElementKind::Symbol { .. } | ElementKind::Text(_) | ElementKind::Camera | ElementKind::Group { .. } => Err(EngineError::State("only shapes have strokes (break it apart with Ctrl+B to edit its lines)".into())),
+        ElementKind::Symbol { .. } | ElementKind::Text(_) | ElementKind::Camera | ElementKind::Group { .. } => {
+            Err(EngineError::State("only shapes have strokes (break it apart with Ctrl+B to edit its lines)".into()))
+        }
     }
 }
 
@@ -62,7 +76,9 @@ pub(crate) fn shape_mut(s: &mut Session, id: ElementId) -> Result<&mut Shape> {
     let el = kf.elements_mut_where(|e| e == id).into_iter().next().ok_or_else(|| EngineError::State(format!("no element {}", id.0)))?;
     match &mut el.kind {
         ElementKind::Shape(sh) => Ok(sh),
-        ElementKind::Symbol { .. } | ElementKind::Text(_) | ElementKind::Camera | ElementKind::Group { .. } => Err(EngineError::State("only shapes have strokes".into())),
+        ElementKind::Symbol { .. } | ElementKind::Text(_) | ElementKind::Camera | ElementKind::Group { .. } => {
+            Err(EngineError::State("only shapes have strokes".into()))
+        }
     }
 }
 
@@ -104,7 +120,9 @@ fn set_profile(s: &mut Session, p: &Value) -> Result<Value> {
             st.profile = profile.clone();
         }
     }
-    Ok(json!({"changed": stroked.len(), "profile": profile.as_ref().and_then(WidthProfile::preset).map_or(if profile.is_some() { "custom" } else { "uniform" }, |pr| pr.key())}))
+    Ok(
+        json!({"changed": stroked.len(), "profile": profile.as_ref().and_then(WidthProfile::preset).map_or(if profile.is_some() { "custom" } else { "uniform" }, |pr| pr.key())}),
+    )
 }
 
 fn set_width_point(s: &mut Session, p: &Value) -> Result<Value> {
@@ -155,7 +173,9 @@ fn set_width_point(s: &mut Session, p: &Value) -> Result<Value> {
         _ => None,
     };
     Ok(match at {
-        Some((i, q)) => json!({"index": i, "t": q.t, "left": q.left, "right": q.right, "points": st.profile.as_ref().map_or(0, |p| p.points().len())}),
+        Some((i, q)) => {
+            json!({"index": i, "t": q.t, "left": q.left, "right": q.right, "points": st.profile.as_ref().map_or(0, |p| p.points().len())})
+        }
         None => json!({"index": null, "points": 0}),
     })
 }
@@ -182,7 +202,9 @@ fn width_at(s: &mut Session, p: &Value) -> Result<Value> {
         let st = sh.stroke.as_ref()?;
         let (l, r) = st.profile.as_ref().map_or((1.0, 1.0), |pr| pr.at(t));
         let point = st.profile.as_ref().and_then(|pr| pr.points().iter().position(|q| (q.t - t).abs() < 0.01));
-        Some(json!({"element": el.id.0, "t": t, "distance": d, "side": if side > 0.0 { "left" } else { "right" }, "left": l, "right": r, "width": st.width, "point": point}))
+        Some(
+            json!({"element": el.id.0, "t": t, "distance": d, "side": if side > 0.0 { "left" } else { "right" }, "left": l, "right": r, "width": st.width, "point": point}),
+        )
     };
     if let Some(id) = id_param(p)? {
         let el = visible_shape(s, id)?;
@@ -245,7 +267,9 @@ mod tests {
         assert!(text.contains("\"profile\""));
         let back = crate::format::from_json(&text).unwrap();
         assert_eq!(back, s.doc);
-        for bad in [json!({"profile": "wobbly"}), json!({"profile": [[2, 1, 1]]}), json!({"profile": [[0.5, 99, 1]]}), json!({"profile": 5}), json!({})] {
+        for bad in
+            [json!({"profile": "wobbly"}), json!({"profile": [[2, 1, 1]]}), json!({"profile": [[0.5, 99, 1]]}), json!({"profile": 5}), json!({})]
+        {
             assert!(s.execute("stroke.set_profile", &bad).is_err(), "{bad}");
         }
     }
@@ -275,7 +299,13 @@ mod tests {
         // Deleting the last one leaves a uniform stroke.
         s.execute("stroke.delete_width_point", &json!({"id": id, "index": 0})).unwrap();
         assert!(profile(&s, id).is_none());
-        for bad in [json!({"id": id, "index": 5}), json!({"id": id}), json!({"id": id, "t": 2}), json!({"id": 999, "t": 0.5}), json!({"id": id, "t": 0.5, "left": -1})] {
+        for bad in [
+            json!({"id": id, "index": 5}),
+            json!({"id": id}),
+            json!({"id": id, "t": 2}),
+            json!({"id": 999, "t": 0.5}),
+            json!({"id": id, "t": 0.5, "left": -1}),
+        ] {
             assert!(s.execute("stroke.set_width_point", &bad).is_err(), "{bad}");
         }
         assert!(s.execute("stroke.delete_width_point", &json!({"id": id, "index": 0})).is_err());

@@ -387,10 +387,13 @@ fn break_apart_turns_a_drawing_object_into_raw_shapes() {
     let obj = el_id(&run(&mut s, "draw.rect", json!({"x": 50, "y": 50, "w": 100, "h": 100, "fill": "#ff0000", "stroke": null, "object": true})));
     let squiggle = el_id(&run(&mut s, "draw.freehand", json!({"points": [[300, 0], [320, 30], [340, 0], [360, 30]], "object": true})));
     let shapes = |s: &Session| -> Vec<(ElementId, bool)> {
-        s.visible_elements().iter().filter_map(|e| match &e.kind {
-            ElementKind::Shape(sh) => Some((e.id, sh.merge)),
-            _ => None,
-        }).collect()
+        s.visible_elements()
+            .iter()
+            .filter_map(|e| match &e.kind {
+                ElementKind::Shape(sh) => Some((e.id, sh.merge)),
+                _ => None,
+            })
+            .collect()
     };
     assert!(shapes(&s).iter().filter(|(id, _)| [obj, squiggle].contains(id)).all(|(_, m)| !m), "drawn as objects");
     let before = s.doc.clone();
@@ -506,7 +509,10 @@ fn every_command_survives_a_selection_on_two_layers() {
     let mut cmds = crate::commands();
     cmds.retain(|c| !c.id.starts_with("file."));
     for spec in cmds {
-        for p in [json!({}), json!({"dx": 3, "dy": 4, "x": 50, "y": 50, "name": "x", "alpha": 0.5, "filters": [], "mode": "multiply", "loop": "loop", "kind": "movie_clip", "color": "#123456", "profile": "bulge", "text": "t"})] {
+        for p in [
+            json!({}),
+            json!({"dx": 3, "dy": 4, "x": 50, "y": 50, "name": "x", "alpha": 0.5, "filters": [], "mode": "multiply", "loop": "loop", "kind": "movie_clip", "color": "#123456", "profile": "bulge", "text": "t"}),
+        ] {
             let (mut s, ..) = two_layers();
             let _ = s.execute(spec.id, &p);
             // Undo and redo always work, and the selection stays on visible, unlocked layers.

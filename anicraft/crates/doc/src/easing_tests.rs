@@ -8,7 +8,11 @@ fn all() -> Vec<Easing> {
 
 /// Three segments that overshoot both ways.
 fn wave() -> CustomEase {
-    CustomEase::from_flat(&[(0.0, 0.0), (0.1, 0.6), (0.2, 1.3), (0.3, 1.3), (0.4, 1.3), (0.5, -0.2), (0.6, 0.4), (0.7, 1.0), (0.9, 1.0), (1.0, 1.0)].map(|(x, y)| Vec2::new(x, y))).unwrap()
+    CustomEase::from_flat(
+        &[(0.0, 0.0), (0.1, 0.6), (0.2, 1.3), (0.3, 1.3), (0.4, 1.3), (0.5, -0.2), (0.6, 0.4), (0.7, 1.0), (0.9, 1.0), (1.0, 1.0)]
+            .map(|(x, y)| Vec2::new(x, y)),
+    )
+    .unwrap()
 }
 
 #[test]
@@ -102,7 +106,18 @@ fn hostile_input_is_clamped() {
 #[test]
 fn bezier_forms_draw_the_same_curves() {
     // Exact for these.
-    for e in [Easing::Linear, Easing::QuadIn, Easing::QuadOut, Easing::CubicIn, Easing::CubicOut, Easing::BackIn, Easing::BackOut, Easing::Classic(-60.0), Easing::Classic(100.0), Easing::CubicBezier(0.2, 1.4, 0.6, -0.3)] {
+    for e in [
+        Easing::Linear,
+        Easing::QuadIn,
+        Easing::QuadOut,
+        Easing::CubicIn,
+        Easing::CubicOut,
+        Easing::BackIn,
+        Easing::BackOut,
+        Easing::Classic(-60.0),
+        Easing::Classic(100.0),
+        Easing::CubicBezier(0.2, 1.4, 0.6, -0.3),
+    ] {
         let (a, b, c, d) = e.as_bezier().unwrap();
         let bez = Easing::CubicBezier(a, b, c, d);
         for i in 0..=20 {
@@ -127,7 +142,8 @@ fn every_preset_becomes_a_custom_curve_for_the_graph() {
     for e in all() {
         let c = e.to_custom();
         assert!(c.points().len() <= MAX_EASE_POINTS, "{e:?}");
-        let exact = matches!(e.family(), Some((EaseFamily::Quad | EaseFamily::Cubic | EaseFamily::Back | EaseFamily::Bounce, _))) || e.family().is_none();
+        let exact =
+            matches!(e.family(), Some((EaseFamily::Quad | EaseFamily::Cubic | EaseFamily::Back | EaseFamily::Bounce, _))) || e.family().is_none();
         let tol = if exact { 2e-4 } else { 5e-3 };
         let mut worst = 0.0f32;
         for i in 0..=500 {
@@ -257,7 +273,13 @@ fn x_stays_monotonic_after_any_edit() {
             2 => c.move_handle(i, Handle::In, to),
             3 => c.move_handle(i, Handle::Out, to),
             4 => c.set_smooth(i, rnd() > 0.5),
-            _ => if n > 6 { c.remove(i) } else { None },
+            _ => {
+                if n > 6 {
+                    c.remove(i)
+                } else {
+                    None
+                }
+            }
         };
         if let Some(d) = next {
             assert_forwards(&d);
@@ -282,14 +304,24 @@ fn hostile_curves_are_repaired() {
     assert_forwards(&c);
     assert_eq!(c.points()[2].at, Vec2::new(0.6, MAX_EASE_Y));
     // Thousands of points are thinned to the cap, and stay a valid curve.
-    let many: Vec<EasePoint> = (0..20_000).map(|i| EasePoint { at: Vec2::new(((i * 7919) % 20_000) as f32 / 20_000.0, (i as f32 * 0.37).sin()), out: Vec2::new(0.5, 0.0), h_in: Vec2::new(-0.5, 0.0), smooth: false }).collect();
+    let many: Vec<EasePoint> = (0..20_000)
+        .map(|i| EasePoint {
+            at: Vec2::new(((i * 7919) % 20_000) as f32 / 20_000.0, (i as f32 * 0.37).sin()),
+            out: Vec2::new(0.5, 0.0),
+            h_in: Vec2::new(-0.5, 0.0),
+            smooth: false,
+        })
+        .collect();
     let c = CustomEase::new(many);
     assert_eq!(c.points().len(), MAX_EASE_POINTS);
     assert_forwards(&c);
     // Too few points: the line.
     assert_eq!(CustomEase::new(vec![nan]), CustomEase::linear());
     // From a file, the same repairs.
-    let f: CustomEase = serde_json::from_str(r#"{"points": [{"at": {"x": 0.9, "y": 3.0}}, {"at": {"x": 0.1, "y": 0.0}, "out": {"x": -1.0, "y": 0.0}}, {"at": {"x": 0.5, "y": 0.5}}]}"#).unwrap();
+    let f: CustomEase = serde_json::from_str(
+        r#"{"points": [{"at": {"x": 0.9, "y": 3.0}}, {"at": {"x": 0.1, "y": 0.0}, "out": {"x": -1.0, "y": 0.0}}, {"at": {"x": 0.5, "y": 0.5}}]}"#,
+    )
+    .unwrap();
     assert_forwards(&f);
     let e: Easing = serde_json::from_str(r#"{"Custom": {"points": []}}"#).unwrap();
     assert_eq!(e, Easing::Custom(Arc::new(CustomEase::linear())));
@@ -342,17 +374,33 @@ fn a_sampled_ease_is_always_valid() {
 fn a_sampled_ease_round_trips_through_the_file_format_and_survives_bad_files() {
     let e = Easing::Sampled(Arc::new(steps()));
     let text = serde_json::to_string(&e).unwrap();
-    assert!(text.starts_with("{\"Sampled\":{\"name\":\"Stepped 4\",\"plugin\":\"org.anicraft.stepped-ease\",\"ease\":\"steps4\",\"values\":[0.0,"), "{text}");
+    assert!(
+        text.starts_with("{\"Sampled\":{\"name\":\"Stepped 4\",\"plugin\":\"org.anicraft.stepped-ease\",\"ease\":\"steps4\",\"values\":[0.0,"),
+        "{text}"
+    );
     assert_eq!(serde_json::from_str::<Easing>(&text).unwrap(), e);
     // A hand-edited table is made valid on load.
-    assert!(serde_json::from_str::<Easing>(r#"{"Sampled":{"values":[5,0.5,"x"]}}"#).is_err(), "a non-number value is a broken file, refused as any other");
+    assert!(
+        serde_json::from_str::<Easing>(r#"{"Sampled":{"values":[5,0.5,"x"]}}"#).is_err(),
+        "a non-number value is a broken file, refused as any other"
+    );
     let odd: Easing = serde_json::from_str(r#"{"Sampled":{"name":"Odd","values":[5,0.5,-20]}}"#).unwrap();
     assert_eq!(odd.sampled().unwrap().values(), &[0.0, 0.5, 1.0]);
 }
 
 #[test]
 fn a_sampled_ease_becomes_a_custom_curve_through_its_samples() {
-    let wave = SampledEase::new("Wave", "p", "w", (0..257).map(|i| { let t = i as f32 / 256.0; t + 0.2 * (t * std::f32::consts::TAU).sin() }).collect());
+    let wave = SampledEase::new(
+        "Wave",
+        "p",
+        "w",
+        (0..257)
+            .map(|i| {
+                let t = i as f32 / 256.0;
+                t + 0.2 * (t * std::f32::consts::TAU).sin()
+            })
+            .collect(),
+    );
     let c = wave.to_polyline();
     assert_eq!(c.points().len(), POLYLINE_POINTS);
     for i in 0..=100 {

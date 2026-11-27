@@ -79,7 +79,9 @@ pub struct SaveDialog {
 fn texture(ctx: &egui::Context, key: &str, png: &[u8]) -> Option<egui::TextureHandle> {
     let px = anicraft_engine::doc::decode_png(png)?;
     let (w, h) = (usize::try_from(px.width).ok()?, usize::try_from(px.height).ok()?);
-    (w > 0 && h > 0 && px.rgba.len() == w * h * 4).then(|| ctx.load_texture(format!("template-{key}"), egui::ColorImage::from_rgba_unmultiplied([w, h], &px.rgba), egui::TextureOptions::LINEAR))
+    (w > 0 && h > 0 && px.rgba.len() == w * h * 4).then(|| {
+        ctx.load_texture(format!("template-{key}"), egui::ColorImage::from_rgba_unmultiplied([w, h], &px.rgba), egui::TextureOptions::LINEAR)
+    })
 }
 
 /// A document's picture as a template shows it: its first frame, guides drawn.
@@ -130,7 +132,12 @@ fn tile(ui: &mut egui::Ui, tex: Option<egui::TextureHandle>, name: &str, note: &
             Some(tex) => {
                 let s = tex.size_vec2();
                 let fit = ((r.width() - 8.0) / s.x.max(1.0)).min((r.height() - 8.0) / s.y.max(1.0));
-                p.image(tex.id(), Rect::from_center_size(r.center(), s * fit), Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), egui::Color32::WHITE);
+                p.image(
+                    tex.id(),
+                    Rect::from_center_size(r.center(), s * fit),
+                    Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)),
+                    egui::Color32::WHITE,
+                );
             }
             None => icons::paint(p, Rect::from_center_size(r.center(), vec2(28.0, 28.0)), Icon::Image, T.text_faint),
         }
@@ -171,7 +178,11 @@ pub fn section(app: &mut App, ui: &mut egui::Ui, ctx: &egui::Context) -> Rect {
     ui.add_space(4.0);
     let user = app.templates.user.clone();
     if user.is_empty() {
-        let hint = if folder(app).is_some() { tr!("File › Save as Template keeps the open document here, with a picture, to start from again.") } else { tr!("Your own templates are kept in a folder on your computer: save them in the desktop app.") };
+        let hint = if folder(app).is_some() {
+            tr!("File › Save as Template keeps the open document here, with a picture, to start from again.")
+        } else {
+            tr!("Your own templates are kept in a folder on your computer: save them in the desktop app.")
+        };
         ui.label(text(Type::Caption, hint));
     } else {
         let folder = folder(app);
@@ -184,7 +195,11 @@ pub fn section(app: &mut App, ui: &mut egui::Ui, ctx: &egui::Context) -> Rect {
                         act = Some(("file.new_from_template", json!({"path": t.path.display().to_string()})));
                     }
                     if let Some(f) = &folder
-                        && ui.small_button(tr!("Delete")).named(&tr!("Delete template {name}", name = t.name)).on_hover_text(tr!("Delete this template and its picture (asks first)")).clicked()
+                        && ui
+                            .small_button(tr!("Delete"))
+                            .named(&tr!("Delete template {name}", name = t.name))
+                            .on_hover_text(tr!("Delete this template and its picture (asks first)"))
+                            .clicked()
                     {
                         act = Some(("file.delete_template", json!({"folder": f.display().to_string(), "category": t.category, "name": t.name})));
                     }
@@ -202,7 +217,10 @@ pub fn section(app: &mut App, ui: &mut egui::Ui, ctx: &egui::Context) -> Rect {
 /// category.
 pub fn open_save(app: &mut App) {
     if folder(app).is_none() {
-        app.status_err(crate::i18n::t(crate::platform::unavailable("file.save_as_template").unwrap_or(tr_noop!("There is no settings folder to keep templates in on this system"))));
+        app.status_err(crate::i18n::t(
+            crate::platform::unavailable("file.save_as_template")
+                .unwrap_or(tr_noop!("There is no settings folder to keep templates in on this system")),
+        ));
         return;
     }
     app.playing = false;
@@ -240,59 +258,77 @@ pub fn save_window(app: &mut App, ctx: &egui::Context) {
         d.picture = Some(picture_png(doc).and_then(|png| texture(ctx, "save-preview", &png)));
     }
     let (mut submit, mut cancel) = (false, false);
-    egui::Window::new(tr!("Save as Template")).id(egui::Id::new("save_template")).collapsible(false).resizable(false).anchor(Align2::CENTER_CENTER, [0.0, -60.0]).show(ctx, |ui| {
-        ui.set_min_width(420.0);
-        if let Some(Some(tex)) = &d.picture {
-            let s = tex.size_vec2();
-            let fit = (240.0 / s.x.max(1.0)).min(135.0 / s.y.max(1.0));
-            ui.vertical_centered(|ui| {
-                let r = ui.add(egui::Image::new((tex.id(), s * fit))).rect;
-                ui.painter().rect_stroke(r, crate::theme::SQUARE, Stroke::new(1.0, T.border), StrokeKind::Outside);
-            });
-            ui.add_space(6.0);
-        }
-        form_row(ui, FORM_LABEL_DOCK, tr!("Name"), |ui| {
-            let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Template name"));
-            if d.focus {
-                r.request_focus();
-                d.focus = false;
+    egui::Window::new(tr!("Save as Template"))
+        .id(egui::Id::new("save_template"))
+        .collapsible(false)
+        .resizable(false)
+        .anchor(Align2::CENTER_CENTER, [0.0, -60.0])
+        .show(ctx, |ui| {
+            ui.set_min_width(420.0);
+            if let Some(Some(tex)) = &d.picture {
+                let s = tex.size_vec2();
+                let fit = (240.0 / s.x.max(1.0)).min(135.0 / s.y.max(1.0));
+                ui.vertical_centered(|ui| {
+                    let r = ui.add(egui::Image::new((tex.id(), s * fit))).rect;
+                    ui.painter().rect_stroke(r, crate::theme::SQUARE, Stroke::new(1.0, T.border), StrokeKind::Outside);
+                });
+                ui.add_space(6.0);
             }
-            if r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                submit = true;
-            }
-        });
-        form_row(ui, FORM_LABEL_DOCK, tr!("Category"), |ui| {
-            ui.add(egui::TextEdit::singleline(&mut d.category).desired_width(f32::INFINITY)).named(tr!("Template category"));
-        });
-        ui.horizontal_wrapped(|ui| {
-            ui.add_space(FORM_LABEL_DOCK);
-            for c in &cats {
-                if ui.selectable_label(d.category.trim().eq_ignore_ascii_case(c), c.as_str()).on_hover_text(tr!("Save it in this category")).clicked() {
-                    d.category = c.clone();
+            form_row(ui, FORM_LABEL_DOCK, tr!("Name"), |ui| {
+                let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Template name"));
+                if d.focus {
+                    r.request_focus();
+                    d.focus = false;
                 }
-            }
+                if r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                    submit = true;
+                }
+            });
+            form_row(ui, FORM_LABEL_DOCK, tr!("Category"), |ui| {
+                ui.add(egui::TextEdit::singleline(&mut d.category).desired_width(f32::INFINITY)).named(tr!("Template category"));
+            });
+            ui.horizontal_wrapped(|ui| {
+                ui.add_space(FORM_LABEL_DOCK);
+                for c in &cats {
+                    if ui
+                        .selectable_label(d.category.trim().eq_ignore_ascii_case(c), c.as_str())
+                        .on_hover_text(tr!("Save it in this category"))
+                        .clicked()
+                    {
+                        d.category = c.clone();
+                    }
+                }
+            });
+            // Where it goes, and what it replaces.
+            let target = cmds_template::template_path(&folder, d.category.trim(), d.name.trim());
+            match &target {
+                Ok(p) if p.is_file() => ui.label(
+                    text(
+                        Type::Caption,
+                        tr!("A template called “{name}” is in this category already: saving asks to replace it.", name = d.name.trim()),
+                    )
+                    .color(T.accent_text),
+                ),
+                Ok(p) => ui.label(text(Type::Path, p.display().to_string()).color(T.text_dim)),
+                Err(e) => ui.label(text(Type::Caption, crate::i18n::t_dyn(&e.to_string()).into_owned()).color(T.error)),
+            };
+            ui.label(text(Type::Caption, tr!("The template keeps the document as it is now. The open document doesn't change.")));
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                if ui.add_enabled(target.is_ok(), egui::Button::new(tr!("Save Template"))).clicked() {
+                    submit = true;
+                }
+                if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                    cancel = true;
+                }
+            });
         });
-        // Where it goes, and what it replaces.
-        let target = cmds_template::template_path(&folder, d.category.trim(), d.name.trim());
-        match &target {
-            Ok(p) if p.is_file() => ui.label(text(Type::Caption, tr!("A template called “{name}” is in this category already: saving asks to replace it.", name = d.name.trim())).color(T.accent_text)),
-            Ok(p) => ui.label(text(Type::Path, p.display().to_string()).color(T.text_dim)),
-            Err(e) => ui.label(text(Type::Caption, crate::i18n::t_dyn(&e.to_string()).into_owned()).color(T.error)),
-        };
-        ui.label(text(Type::Caption, tr!("The template keeps the document as it is now. The open document doesn't change.")));
-        ui.add_space(4.0);
-        ui.horizontal(|ui| {
-            if ui.add_enabled(target.is_ok(), egui::Button::new(tr!("Save Template"))).clicked() {
-                submit = true;
-            }
-            if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
-                cancel = true;
-            }
-        });
-    });
     if submit {
         if let Some(d) = app.templates.save.take() {
-            app.request("file.save_as_template", json!({"folder": folder.display().to_string(), "name": d.name.trim(), "category": d.category.trim()}));
+            app.request(
+                "file.save_as_template",
+                json!({"folder": folder.display().to_string(), "name": d.name.trim(), "category": d.category.trim()}),
+            );
         }
     } else if cancel {
         app.templates.save = None;
@@ -304,7 +340,8 @@ pub fn announce(app: &mut App, id: &str, v: &serde_json::Value) {
     match id {
         "file.save_as_template" => {
             rescan(app);
-            let name = v["path"].as_str().map(PathBuf::from).and_then(|p| p.file_stem().map(|n| n.to_string_lossy().into_owned())).unwrap_or_default();
+            let name =
+                v["path"].as_str().map(PathBuf::from).and_then(|p| p.file_stem().map(|n| n.to_string_lossy().into_owned())).unwrap_or_default();
             app.status_ok(tr!("Saved the template “{name}”. File › New from Template starts a document from it.", name = name));
         }
         "file.delete_template" => {
@@ -317,14 +354,26 @@ pub fn announce(app: &mut App, id: &str, v: &serde_json::Value) {
 
 /// Sample user templates for screenshots (pictures made in memory, no folder touched).
 pub fn sample_user(app: &mut App) {
-    let samples = [(tr_noop!("Walk cycle"), tr_noop!("Characters"), anicraft_engine::doc::sample::demo()), (tr_noop!("Title card"), cmds_template::DEFAULT_CATEGORY, anicraft_engine::doc::templates::find("social-square").map_or_else(Default::default, |t| (t.build)()))];
+    let samples = [
+        (tr_noop!("Walk cycle"), tr_noop!("Characters"), anicraft_engine::doc::sample::demo()),
+        (
+            tr_noop!("Title card"),
+            cmds_template::DEFAULT_CATEGORY,
+            anicraft_engine::doc::templates::find("social-square").map_or_else(Default::default, |t| (t.build)()),
+        ),
+    ];
     app.templates.user.clear();
     for (name, category, doc) in samples {
         let path = PathBuf::from(format!("{category}/{name}.anicraft"));
         if let Some(png) = picture_png(&doc) {
             app.templates.seeded.insert(path.display().to_string(), png);
         }
-        app.templates.user.push(UserTemplate { name: crate::i18n::t(name).to_string(), category: crate::i18n::t(category).to_string(), path, thumbnail: None });
+        app.templates.user.push(UserTemplate {
+            name: crate::i18n::t(name).to_string(),
+            category: crate::i18n::t(category).to_string(),
+            path,
+            thumbnail: None,
+        });
     }
 }
 

@@ -103,7 +103,8 @@ impl Spring {
 
     /// Both values finite and within 0…1; `None` when they aren't numbers.
     pub fn sanitized(self) -> Option<Spring> {
-        (self.strength.is_finite() && self.damping.is_finite()).then(|| Spring { strength: self.strength.clamp(0.0, 1.0), damping: self.damping.clamp(0.0, 1.0) })
+        (self.strength.is_finite() && self.damping.is_finite())
+            .then(|| Spring { strength: self.strength.clamp(0.0, 1.0), damping: self.damping.clamp(0.0, 1.0) })
     }
 }
 
@@ -176,7 +177,13 @@ impl Bone {
     }
 
     fn is_sane(&self) -> bool {
-        self.parent != self.child && self.head.x.is_finite() && self.head.y.is_finite() && self.tail.x.is_finite() && self.tail.y.is_finite() && self.rest.is_finite() && self.rest.inverse().is_some()
+        self.parent != self.child
+            && self.head.x.is_finite()
+            && self.head.y.is_finite()
+            && self.tail.x.is_finite()
+            && self.tail.y.is_finite()
+            && self.rest.is_finite()
+            && self.rest.inverse().is_some()
     }
 }
 
@@ -570,7 +577,8 @@ pub struct BoneAt {
 /// what [`crate::evaluate_layer_elements`] gives on an armature layer).
 pub fn bones_at(arm: &Armature, elements: &[Arc<Element>], pose: &Pose) -> Vec<BoneAt> {
     // A shape armature's joint nodes are no elements: forward kinematics places them.
-    let world: HashMap<ElementId, Affine> = if arm.skin.is_some() { place(arm, elements, pose) } else { elements.iter().map(|e| (e.id, e.transform)).collect() };
+    let world: HashMap<ElementId, Affine> =
+        if arm.skin.is_some() { place(arm, elements, pose) } else { elements.iter().map(|e| (e.id, e.transform)).collect() };
     arm.bones
         .iter()
         .filter_map(|b| {

@@ -73,7 +73,8 @@ pub fn kind_of(path: &Path) -> DropKind {
 }
 
 /// The message for a file AniCraft can't take.
-pub const UNSUPPORTED: &str = "AniCraft opens .anicraft, .fla and .xfl documents, and imports SVG drawings, PNG and JPEG images, and WAV, Ogg and MP3 sounds";
+pub const UNSUPPORTED: &str =
+    "AniCraft opens .anicraft, .fla and .xfl documents, and imports SVG drawings, PNG and JPEG images, and WAV, Ogg and MP3 sounds";
 
 /// What dropping a file of `kind` on `target` does.
 pub fn route(kind: DropKind, target: DropTarget) -> DropAction {
@@ -107,7 +108,9 @@ fn paths(p: &Value) -> Result<Vec<PathBuf>> {
     let list: Vec<PathBuf> = match (p.get("paths"), opt_str(p, "path")?) {
         (Some(v), None) => {
             let a = v.as_array().ok_or_else(|| EngineError::Param("param 'paths' must be a list of file paths".into()))?;
-            a.iter().map(|x| x.as_str().map(PathBuf::from).ok_or_else(|| EngineError::Param("param 'paths' must be a list of file paths".into()))).collect::<Result<_>>()?
+            a.iter()
+                .map(|x| x.as_str().map(PathBuf::from).ok_or_else(|| EngineError::Param("param 'paths' must be a list of file paths".into())))
+                .collect::<Result<_>>()?
         }
         (None, Some(one)) => vec![PathBuf::from(one)],
         _ => return Err(EngineError::Param("name the files with 'paths' (or one with 'path')".into())),
@@ -213,7 +216,8 @@ fn drop(s: &mut Session, p: &Value) -> Result<Value> {
 
 /// A drop on a layer's frame in the timeline (ADR 0065).
 fn onto_timeline(s: &mut Session, p: &Value, files: &[PathBuf], x: f32, y: f32) -> Result<Value> {
-    let layer = anicraft_doc::LayerId(opt_u64(p, "layer")?.ok_or_else(|| EngineError::Param("a drop on the timeline names its 'layer' (an id)".into()))?);
+    let layer =
+        anicraft_doc::LayerId(opt_u64(p, "layer")?.ok_or_else(|| EngineError::Param("a drop on the timeline names its 'layer' (an id)".into()))?);
     let frame = opt_u32(p, "frame")?.ok_or_else(|| EngineError::Param("a drop on the timeline names its 'frame' (from 0)".into()))?;
     if frame > crate::MAX_FRAME {
         return Err(EngineError::Param(format!("'frame' must be at most {}", crate::MAX_FRAME)));
@@ -243,7 +247,9 @@ fn onto_timeline(s: &mut Session, p: &Value, files: &[PathBuf], x: f32, y: f32) 
         crate::cmds_timeline::insert_keyframe_at(s.layer_mut(Some(layer))?, frame, true)?;
     }
     let (mut elements, mut items) = (Vec::new(), Vec::new());
-    let placed_ids = |v: &Value| -> Vec<anicraft_doc::ElementId> { v["elements"].as_array().into_iter().flatten().filter_map(Value::as_u64).map(anicraft_doc::ElementId).collect() };
+    let placed_ids = |v: &Value| -> Vec<anicraft_doc::ElementId> {
+        v["elements"].as_array().into_iter().flatten().filter_map(Value::as_u64).map(anicraft_doc::ElementId).collect()
+    };
     for f in files {
         let path = f.display().to_string();
         let nothing = || EngineError::State(format!("{path} added nothing to the Library"));
@@ -278,5 +284,7 @@ fn onto_timeline(s: &mut Session, p: &Value, files: &[PathBuf], x: f32, y: f32) 
     if !elements.is_empty() {
         s.select_only(elements.iter().copied());
     }
-    Ok(json!({"elements": elements.iter().map(|e| e.0).collect::<Vec<_>>(), "items": items, "layers": 0, "files": files.len(), "layer": layer.0, "frame": frame, "keyframe_made": made}))
+    Ok(
+        json!({"elements": elements.iter().map(|e| e.0).collect::<Vec<_>>(), "items": items, "layers": 0, "files": files.len(), "layer": layer.0, "frame": frame, "keyframe_made": made}),
+    )
 }

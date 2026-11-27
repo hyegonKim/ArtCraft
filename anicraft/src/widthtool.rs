@@ -342,10 +342,14 @@ mod tests {
     const XF: Xf = Xf { origin: Pos2::ZERO, zoom: 1.0 };
 
     fn widths(app: &App) -> Vec<f32> {
-        app.s.visible_elements().iter().filter_map(|e| match &e.kind {
-            ElementKind::Shape(sh) => sh.stroke.as_ref().map(|st| st.profile.as_ref().map_or(1.0, |p| p.at(0.5).0)),
-            _ => None,
-        }).collect()
+        app.s
+            .visible_elements()
+            .iter()
+            .filter_map(|e| match &e.kind {
+                ElementKind::Shape(sh) => sh.stroke.as_ref().map(|st| st.profile.as_ref().map_or(1.0, |p| p.at(0.5).0)),
+                _ => None,
+            })
+            .collect()
     }
 
     /// #250: a Pencil squiggle in merge drawing, then a drag on it with the Width tool widens it.

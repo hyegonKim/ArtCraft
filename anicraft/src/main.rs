@@ -26,21 +26,14 @@ mod actions_panel;
 mod aids_dialog;
 mod app;
 mod autosave;
+mod bind_tool;
+mod bone_tool;
 mod brush_panel;
 mod brushtool;
+mod camera_tool;
 mod colour;
 mod colour_panel;
-mod envelope;
-mod find_panel;
-mod publish_panel;
-mod erasertool;
-mod bind_tool;
-mod warp_tool;
-mod bone_tool;
-mod camera_tool;
 mod convert_symbol;
-mod layer_depth;
-mod layer_props;
 mod desktop_ui;
 mod dialogs;
 mod dock;
@@ -48,22 +41,25 @@ mod dock_float;
 mod dock_ui;
 mod drop;
 mod ease_editor;
+mod envelope;
+mod erasertool;
+mod find_panel;
 mod gpu_stage;
 #[cfg(not(target_arch = "wasm32"))]
 mod gpu_watch;
 mod gradient_tool;
 mod icons;
 mod keymap;
+mod layer_depth;
+mod layer_props;
 mod library;
 mod menus;
-#[cfg(not(target_arch = "wasm32"))]
-mod updates;
 mod mixed;
 mod motion_editor;
-mod movie_explorer;
-mod panels;
 mod motion_path;
+mod movie_explorer;
 mod onion;
+mod panels;
 mod pathtools;
 mod platform;
 mod plugin_export_ui;
@@ -73,21 +69,25 @@ mod plugin_fixture_tests;
 mod plugin_ui_tests;
 mod plugins_ui;
 mod prefs;
+mod publish_panel;
 mod recent;
 mod rulers;
 mod scale_grid;
 mod shape_envelope;
-mod sound;
 mod shape_hints;
+mod sound;
 mod stage;
 mod stage_a11y;
-mod swatches_panel;
 mod start;
 mod startup;
+mod swatches_panel;
 mod templates;
 mod test_movie;
 mod theme;
 mod timeline;
+#[cfg(not(target_arch = "wasm32"))]
+mod updates;
+mod warp_tool;
 #[cfg(target_arch = "wasm32")]
 mod web;
 mod widthtool;
@@ -150,7 +150,9 @@ struct Look {
 #[cfg(not(target_arch = "wasm32"))]
 fn run(attempt: startup::Attempt, file: Option<&Path>, shot: Option<PathBuf>, open: Option<String>, look: Look) -> eframe::Result {
     let options = attempt.options(eframe::NativeOptions {
-        viewport: platform::viewport(egui::ViewportBuilder::default().with_title("AniCraft").with_inner_size([1600.0, 940.0]).with_min_inner_size([960.0, 600.0])),
+        viewport: platform::viewport(
+            egui::ViewportBuilder::default().with_title("AniCraft").with_inner_size([1600.0, 940.0]).with_min_inner_size([960.0, 600.0]),
+        ),
         ..Default::default()
     });
     // The embedded interface font joins the text library before anything lays text out:
@@ -249,7 +251,11 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<Args, String> {
                 Some(code) if i18n::known(&code) => out.look.lang = Some(code),
                 other => {
                     let offered: Vec<&str> = i18n::offered().into_iter().map(|(c, _)| c).collect();
-                    return Err(format!("--lang takes auto, pseudo or a language this build has ({}), not {}", offered.join(", "), other.as_deref().unwrap_or("nothing"))); // i18n-exempt: a console message
+                    return Err(format!(
+                        "--lang takes auto, pseudo or a language this build has ({}), not {}",
+                        offered.join(", "),
+                        other.as_deref().unwrap_or("nothing")
+                    )); // i18n-exempt: a console message
                 }
             },
             // Printed by the release packaging checks and for bug reports.
@@ -319,10 +325,16 @@ fn main() -> eframe::Result {
     let mut opening = true;
     while opening {
         opening = false;
-        let attempts = startup::plan(platform::forced_backend(renderer.as_deref()), prefs::Prefs::load().window_backend, &platform::window_attempts(platform::OS), &last);
+        let attempts = startup::plan(
+            platform::forced_backend(renderer.as_deref()),
+            prefs::Prefs::load().window_backend,
+            &platform::window_attempts(platform::OS),
+            &last,
+        );
         for (n, attempt) in attempts.iter().enumerate() {
             startup::trying(attempt, n + 1, attempts.len());
-            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(*attempt, file.as_deref(), shot.clone(), open.clone(), look.clone())));
+            let result =
+                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(*attempt, file.as_deref(), shot.clone(), open.clone(), look.clone())));
             why = match result {
                 Ok(Ok(())) => {
                     // The window's graphics device was lost mid-session (ADR 0092): it closed
@@ -377,13 +389,21 @@ mod args_tests {
     /// argument, spaces and all; it opens through `file.open`, as File › Open does.
     #[test]
     fn a_double_clicked_document_arrives_on_the_command_line_and_opens() {
-        for path in [r"C:\Users\Ana Lima\My Films\walk cycle.anicraft", "/home/ana/Films/old scene.fla", "/home/ana/Films/Scene/DOMDocument.xfl", "relative.anicraft"] {
+        for path in [
+            r"C:\Users\Ana Lima\My Films\walk cycle.anicraft",
+            "/home/ana/Films/old scene.fla",
+            "/home/ana/Films/Scene/DOMDocument.xfl",
+            "relative.anicraft",
+        ] {
             assert_eq!(parse(&[path]).file, Some(PathBuf::from(path)), "{path}");
         }
         // The process serial number older macOS added is not a file.
         assert_eq!(parse(&["-psn_0_1234567"]).file, None);
         let a = parse(&["walk.anicraft", "--screenshot", "shots/x.png", "--open", "testmovie"]);
-        assert_eq!((a.file, a.shot, a.open.as_deref()), (Some(PathBuf::from("walk.anicraft")), Some(PathBuf::from("shots/x.png")), Some("testmovie")));
+        assert_eq!(
+            (a.file, a.shot, a.open.as_deref()),
+            (Some(PathBuf::from("walk.anicraft")), Some(PathBuf::from("shots/x.png")), Some("testmovie"))
+        );
         assert!(parse_args(["--scale".to_string(), "lots".to_string()]).is_err());
         assert!(parse_args(["--screenshot".to_string()]).is_err());
         assert_eq!(parse(&["--screenshot", "a.png", "--shot-width", "1200"]).look.shot_width, Some(1200));
@@ -414,18 +434,18 @@ mod args_tests {
 }
 
 #[cfg(test)]
+mod architecture_tests;
+#[cfg(test)]
+mod dock_narrow_tests;
+#[cfg(test)]
 mod guide_reference_tests;
 #[cfg(test)]
 mod guidelines_tests;
 #[cfg(test)]
-mod dock_narrow_tests;
-#[cfg(test)]
-mod architecture_tests;
-#[cfg(test)]
 mod packaging_tests;
 #[cfg(test)]
-mod rulers_tests;
-#[cfg(test)]
 mod retime_ui_tests;
+#[cfg(test)]
+mod rulers_tests;
 #[cfg(test)]
 mod tilt_ui_tests;

@@ -141,6 +141,9 @@ pub(super) fn audiosuite_window(app: &mut SoundApp, ctx: &egui::Context) {
                     crate::widgets::FineSlider::new(&mut wide, -24.0..=24.0).text("Semitones").default_value(0.0).show(ui);
                     *v = wide as f32;
                 }
+                "remix" => {
+                    remix_controls(ui, &mut params);
+                }
                 "speed_ramp" => {
                     for (id, label, default, choices) in SPEED_RAMP_CHOICES {
                         let v = params.entry(id.to_string()).or_insert(default);
@@ -158,6 +161,9 @@ pub(super) fn audiosuite_window(app: &mut SoundApp, ctx: &egui::Context) {
             }
         }
         ui.ctx().memory_mut(|m| m.data.insert_temp(key, params.clone()));
+        if matches!(process.as_str(), "declicker" | "declipper" | "delete_silence" | "shorten_silence") {
+            diagnostics_scan_bar(app, ui);
+        }
         let hint = if soundcraft_dsp::is_generator(&process) {
             "Fills the selection on the selected tracks with a new clip."
         } else {
@@ -172,4 +178,36 @@ pub(super) fn audiosuite_window(app: &mut SoundApp, ctx: &egui::Context) {
     if !open {
         app.ui.audiosuite = None;
     }
+}
+
+fn remix_controls(ui: &mut egui::Ui, params: &mut std::collections::BTreeMap<String, f32>) {
+    for (id, label, min, max, def) in [
+        ("target_seconds", "Target Duration (s)", 1.0, 300.0, 15.0),
+        ("crossfade_ms", "Crossfade (ms)", 10.0, 250.0, 60.0),
+        ("min_segment_beats", "Min Segment (beats)", 1.0, 16.0, 4.0),
+    ] {
+        let v = params.entry(id.into()).or_insert(def as f32);
+        let mut wide = f64::from(*v);
+        crate::widgets::FineSlider::new(&mut wide, min..=max).text(crate::i18n::tr(label)).default_value(def).show(ui);
+        *v = wide as f32;
+    }
+}
+
+fn diagnostics_scan_bar(app: &mut SoundApp, ui: &mut egui::Ui) {
+    let scan_key = egui::Id::unique("as_diagnostics_scan_summary");
+    let cached: Option<String> = ui.ctx().memory(|m| m.data.get_temp(scan_key));
+    ui.horizontal_wrapped(|ui| {
+        if ui.button(crate::i18n::tr("Scan Diagnostics")).clicked()
+            && let Ok(res) = app.run("diagnostics.scan", json!({}))
+        {
+            let clicks = res["clicks"].as_u64().unwrap_or(0);
+            let clipped = res["clipped_peaks"].as_u64().unwrap_or(0);
+            let sil = res["silence_regions"].as_u64().unwrap_or(0);
+            let msg = format!("Clicks: {clicks} · Clipped: {clipped} · Silence: {sil}");
+            ui.ctx().memory_mut(|m| m.data.insert_temp(scan_key, msg));
+        }
+        if let Some(summary) = cached {
+            ui.label(egui::RichText::new(summary).small());
+        }
+    });
 }

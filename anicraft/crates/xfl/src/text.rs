@@ -50,7 +50,18 @@ pub struct Placed {
 
 fn run_style(attrs: Option<&X>, flags: &mut Flags) -> RunStyle {
     let Some(a) = attrs else {
-        return RunStyle { face: String::new(), size: 12.0, bold: false, italic: false, color: Rgba::BLACK, align: TextAlign::Left, letter_spacing: 0.0, line_spacing: 0.0, left_margin: 0.0, right_margin: 0.0 };
+        return RunStyle {
+            face: String::new(),
+            size: 12.0,
+            bold: false,
+            italic: false,
+            color: Rgba::BLACK,
+            align: TextAlign::Left,
+            letter_spacing: 0.0,
+            line_spacing: 0.0,
+            left_margin: 0.0,
+            right_margin: 0.0,
+        };
     };
     let num = |k: &str, lo: f32, hi: f32| a.f32(k).unwrap_or(0.0).clamp(lo, hi);
     let align = match a.attr("alignment") {
@@ -73,7 +84,11 @@ fn run_style(attrs: Option<&X>, flags: &mut Flags) -> RunStyle {
         size: a.f32("size").unwrap_or(12.0).clamp(1.0, 2000.0),
         bold: a.bool("bold").unwrap_or(false),
         italic: a.bool("italic").unwrap_or(false),
-        color: if a.attr("fillColor").is_some() { color(a, "fillColor", "alpha") } else { Rgba::BLACK.with_alpha(a.f32("alpha").unwrap_or(1.0).clamp(0.0, 1.0)) },
+        color: if a.attr("fillColor").is_some() {
+            color(a, "fillColor", "alpha")
+        } else {
+            Rgba::BLACK.with_alpha(a.f32("alpha").unwrap_or(1.0).clamp(0.0, 1.0))
+        },
         align,
         letter_spacing: num("letterSpacing", -1000.0, 1000.0),
         line_spacing: num("lineSpacing", -1000.0, 1000.0),
@@ -286,7 +301,14 @@ pub fn field(el: &X, fonts: &Fonts, faces: &mut HashMap<String, FaceMatch>, repo
 /// A dynamic or input field (ADR 0066): one block in the field's main style, its box from the
 /// field's `width` and `height` (or the text's size, for an auto-size field), its text laid out
 /// inside the gutter. Empty fields are kept (an empty input field is the usual kind).
-fn text_field(el: &X, fonts: &Fonts, faces: &mut HashMap<String, FaceMatch>, report: &mut Report, lines: &[Line], styles: &[RunStyle]) -> Option<Placed> {
+fn text_field(
+    el: &X,
+    fonts: &Fonts,
+    faces: &mut HashMap<String, FaceMatch>,
+    report: &mut Report,
+    lines: &[Line],
+    styles: &[RunStyle],
+) -> Option<Placed> {
     let kind = if el.name == "DOMInputText" { TextKind::Input } else { TextKind::Dynamic };
     report.run(if kind == TextKind::Input { "input text fields" } else { "dynamic text fields" });
     let all: Line = lines.iter().flatten().cloned().collect();
@@ -313,7 +335,15 @@ fn text_field(el: &X, fonts: &Fonts, faces: &mut HashMap<String, FaceMatch>, rep
     }
     let max_chars = el.f32("maxCharacters").filter(|n| n.is_finite() && *n > 0.0).map_or(0, |n| n.min(anicraft_doc::MAX_FIELD_CHARS as f32) as u32);
     // Animate's "show border" draws a black line round a white box.
-    let field = TextField { lines: line_type, selectable: el.bool("isSelectable").unwrap_or(true), border, background: border, max_chars, variable, ..TextField::new(kind) };
+    let field = TextField {
+        lines: line_type,
+        selectable: el.bool("isSelectable").unwrap_or(true),
+        border,
+        background: border,
+        max_chars,
+        variable,
+        ..TextField::new(kind)
+    };
     let auto = el.bool("autoExpand").unwrap_or(false);
     let width = el.f32("width").filter(|w| w.is_finite() && *w > 0.0).map(|w| w.min(100_000.0));
     let face = faces.entry(st.face.clone()).or_insert_with(|| fonts.find_face(&st.face)).clone();
@@ -330,7 +360,11 @@ fn text_field(el: &X, fonts: &Fonts, faces: &mut HashMap<String, FaceMatch>, rep
         },
         letter_spacing: st.letter_spacing,
         line_spacing: st.line_spacing,
-        width: wrap.or(if auto { None } else { width.map(|w| (w - 2.0 * GUTTER - st.left_margin - st.right_margin).max(1.0)).filter(|_| st.align != TextAlign::Left) }),
+        width: wrap.or(if auto {
+            None
+        } else {
+            width.map(|w| (w - 2.0 * GUTTER - st.left_margin - st.right_margin).max(1.0)).filter(|_| st.align != TextAlign::Left)
+        }),
     };
     let shown = field.shown(&text);
     let (outline, family, tw, th) = match fonts.layout(&shown, &style) {

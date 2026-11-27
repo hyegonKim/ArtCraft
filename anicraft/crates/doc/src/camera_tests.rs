@@ -1,12 +1,21 @@
 //! Evaluation through the camera layer (ADR 0027).
 
 use crate::camera::{Camera, DepthKey, FOCAL, MAX_DEPTH};
-use crate::{ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, MotionTween, Paint, Property, Rgba, Shape, Symbol, SymbolId, SymbolKind, Timeline, Tween, evaluate, evaluate_scene};
+use crate::{
+    ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, MotionTween, Paint, Property, Rgba, Shape, Symbol,
+    SymbolId, SymbolKind, Timeline, Tween, evaluate, evaluate_scene,
+};
 use anicraft_geom::{Affine, Path, Vec2};
 use std::sync::Arc;
 
 fn square(id: u64, x: f32) -> Arc<Element> {
-    Arc::new(Element { id: ElementId(id), name: String::new(), transform: Affine::translate(x, 0.0), color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, 0.0, 10.0, 10.0), Paint::Solid(Rgba::BLACK))) })
+    Arc::new(Element {
+        id: ElementId(id),
+        name: String::new(),
+        transform: Affine::translate(x, 0.0),
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, 0.0, 10.0, 10.0), Paint::Solid(Rgba::BLACK))),
+    })
 }
 
 fn art_layer(id: u64, el: Arc<Element>) -> Layer {
@@ -64,7 +73,11 @@ fn a_camera_zoom_doubles_sizes_about_its_centre_and_editing_keeps_stage_space() 
 #[test]
 fn camera_rotation_and_tint_apply_to_the_whole_view() {
     let mut d = one_square();
-    let cam = Camera { rotation: std::f32::consts::FRAC_PI_2, color: ColorEffect::Tint { color: Rgba::hex(0xff0000), amount: 0.5 }, ..Camera::rest(&d.stage) };
+    let cam = Camera {
+        rotation: std::f32::consts::FRAC_PI_2,
+        color: ColorEffect::Tint { color: Rgba::hex(0xff0000), amount: 0.5 },
+        ..Camera::rest(&d.stage)
+    };
     with_camera(&mut d, &[(0, 20, cam, false)]);
     let i = &evaluate(&d, 0).items[0];
     // Stage point (105, 50) is right of the centre; the camera turned clockwise, so it shows
@@ -140,7 +153,15 @@ fn the_camera_stays_on_top_alone_and_old_files_read_without_one() {
     // A symbol's camera layer is a normal layer.
     let mut sl = Layer::new(LayerId(80), "in symbol");
     sl.kind = LayerKind::Camera;
-    d.library.push(Arc::new(Symbol { id: SymbolId(81), name: "S".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(sl)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SymbolId(81),
+        name: "S".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(sl)] },
+    }));
     d.sanitize();
     assert_eq!(d.library[0].timeline.layers[0].kind, LayerKind::Normal);
     // Depth round-trips, is left out when 0, and an old file reads at 0; hostile depths clamp.

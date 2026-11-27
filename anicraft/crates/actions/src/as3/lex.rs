@@ -26,7 +26,9 @@ pub struct Token {
 
 /// Longest first, so the scan takes the longest punctuator that matches.
 const PUNCTS: [&str; 54] = [
-    ">>>=", "...", "===", "!==", ">>>", "<<=", ">>=", "&&=", "||=", "::", "..", "==", "!=", "<=", ">=", "&&", "||", "++", "--", "<<", ">>", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", ".<", "{", "}", "(", ")", "[", "]", ";", ",", "<", ">", "+", "-", "*", "/", "%", "&", "|", "^", "!", "~", "?", ":", "=", ".",
+    ">>>=", "...", "===", "!==", ">>>", "<<=", ">>=", "&&=", "||=", "::", "..", "==", "!=", "<=", ">=", "&&", "||", "++", "--", "<<", ">>", "+=",
+    "-=", "*=", "/=", "%=", "&=", "|=", "^=", ".<", "{", "}", "(", ")", "[", "]", ";", ",", "<", ">", "+", "-", "*", "/", "%", "&", "|", "^", "!",
+    "~", "?", ":", "=", ".",
 ];
 
 fn ident_start(c: char) -> bool {
@@ -167,7 +169,9 @@ impl Lexer<'_> {
         loop {
             let here = self.pos();
             match self.bump() {
-                None | Some('\n' | '\r' | '\u{2028}' | '\u{2029}') => return Err(Problem::at(start, "this string is never closed (its quote is missing on this line)")),
+                None | Some('\n' | '\r' | '\u{2028}' | '\u{2029}') => {
+                    return Err(Problem::at(start, "this string is never closed (its quote is missing on this line)"));
+                }
                 Some(c) if c == quote => return Ok(s),
                 Some('\\') => match self.bump() {
                     None => return Err(Problem::at(start, "this string is never closed")),

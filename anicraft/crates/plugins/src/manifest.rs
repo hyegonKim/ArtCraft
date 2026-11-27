@@ -197,7 +197,10 @@ impl Manifest {
                     return Err(Error::Manifest("the format's `name` must be 1-64 printable characters".into()));
                 }
                 if !(1..=16).contains(&f.extension.len()) || !f.extension.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit()) {
-                    return Err(Error::Manifest(format!("the format's `extension` {:?} must be 1-16 characters from a-z 0-9, without the dot", f.extension)));
+                    return Err(Error::Manifest(format!(
+                        "the format's `extension` {:?} must be 1-16 characters from a-z 0-9, without the dot",
+                        f.extension
+                    )));
                 }
             }
             (None, _) => {}
@@ -209,7 +212,9 @@ impl Manifest {
             return Ok(());
         }
         if self.eases.is_empty() || self.eases.len() > MAX_EASES {
-            return Err(Error::Manifest(format!("an ease plug-in declares 1-{MAX_EASES} `eases`: [{{\"id\": \"steps\", \"name\": \"Stepped\"}}, …]")));
+            return Err(Error::Manifest(format!(
+                "an ease plug-in declares 1-{MAX_EASES} `eases`: [{{\"id\": \"steps\", \"name\": \"Stepped\"}}, …]"
+            )));
         }
         if !self.params.is_empty() {
             return Err(Error::Manifest("an ease plug-in has no `params`: declare one ease per variant instead".into()));
@@ -238,7 +243,9 @@ impl Manifest {
                 ParamKind::Number { min, max, default } => format!("{k}: {min}..{max} = {default}"),
                 ParamKind::Int { min, max, default } => format!("{k}: int {min}..{max} = {default}"),
                 ParamKind::Bool { default } => format!("{k}: bool = {default}"),
-                ParamKind::Choice { options, default } => format!("{k}: {} = \"{default}\"", options.iter().map(|o| format!("\"{o}\"")).collect::<Vec<_>>().join("|")),
+                ParamKind::Choice { options, default } => {
+                    format!("{k}: {} = \"{default}\"", options.iter().map(|o| format!("\"{o}\"")).collect::<Vec<_>>().join("|"))
+                }
                 ParamKind::Color { default } => format!("{k}: color = \"{default}\""),
             })
             .collect();
@@ -345,7 +352,9 @@ fn param_spec(name: &str, v: &Value) -> std::result::Result<ParamSpec, String> {
     let num = |key: &str| -> std::result::Result<Option<f64>, String> {
         match obj.get(key) {
             None | Some(Value::Null) => Ok(None),
-            Some(v) => v.as_f64().filter(|f| f.is_finite() && f.abs() <= 1e12).map(Some).ok_or_else(|| bad(&format!("`{key}` must be a finite number"))),
+            Some(v) => {
+                v.as_f64().filter(|f| f.is_finite() && f.abs() <= 1e12).map(Some).ok_or_else(|| bad(&format!("`{key}` must be a finite number")))
+            }
         }
     };
     let kind = match obj.get("type").and_then(Value::as_str) {
@@ -365,7 +374,11 @@ fn param_spec(name: &str, v: &Value) -> std::result::Result<ParamSpec, String> {
         }
         Some("bool") => ParamKind::Bool { default: obj.get("default").and_then(Value::as_bool).unwrap_or(false) },
         Some("choice") => {
-            let options: Vec<String> = obj.get("options").and_then(Value::as_array).map(|a| a.iter().filter_map(|o| o.as_str().map(str::to_string)).collect()).unwrap_or_default();
+            let options: Vec<String> = obj
+                .get("options")
+                .and_then(Value::as_array)
+                .map(|a| a.iter().filter_map(|o| o.as_str().map(str::to_string)).collect())
+                .unwrap_or_default();
             if options.is_empty() || options.len() > 32 || options.iter().any(|o| !printable(o, 48)) {
                 return Err(bad("`options` must be 1-32 printable strings of up to 48 characters"));
             }
@@ -474,7 +487,9 @@ mod tests {
             assert!(Manifest::parse(b.as_bytes()).is_err(), "accepted {b}");
         }
         assert!(Manifest::parse(&[0xff, 0xfe]).is_err());
-        for bad in [r#"{"id":"a","name":"X","kind":"frame-script","entries":["a b"]}"#, r#"{"id":"a","name":"X","kind":"frame-script","entries":["a","a"]}"#] {
+        for bad in
+            [r#"{"id":"a","name":"X","kind":"frame-script","entries":["a b"]}"#, r#"{"id":"a","name":"X","kind":"frame-script","entries":["a","a"]}"#]
+        {
             assert!(Manifest::parse(bad.as_bytes()).is_err(), "accepted {bad}");
         }
         let fs = Manifest::parse(br#"{"id":"a","name":"X","kind":"frame-script"}"#).unwrap();

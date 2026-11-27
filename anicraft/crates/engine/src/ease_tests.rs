@@ -208,7 +208,11 @@ fn classic_tweens_ease_property_groups_separately() {
 #[test]
 fn eases_survive_the_file_round_trip() {
     let mut s = tweened();
-    run(&mut s, "timeline.set_easing", json!({"easing": {"custom": [[0, 0], [0.2, 1.4], [0.3, 1.4], [0.4, 1.4], [0.6, 0.8], [0.8, 1], [1, 1]]}, "frame": 0}));
+    run(
+        &mut s,
+        "timeline.set_easing",
+        json!({"easing": {"custom": [[0, 0], [0.2, 1.4], [0.3, 1.4], [0.4, 1.4], [0.6, 0.8], [0.8, 1], [1, 1]]}, "frame": 0}),
+    );
     run(&mut s, "timeline.set_easing", json!({"easing": "ElasticOut", "group": "rotation", "frame": 0}));
     run(&mut s, "ease.save", json!({"name": "Wave", "frame": 0}));
     run(&mut s, "ease.save", json!({"name": "Classic 40", "easing": {"classic": 40}}));
@@ -223,7 +227,8 @@ fn eases_survive_the_file_round_trip() {
     let old = text.replace("\"eases\":", "\"ignored_eases\":");
     assert!(format::from_json(&old).expect("older file").eases.is_empty());
     // A hostile curve in a file is repaired on load, never refused: reversed, out of range.
-    let bad = r#"{"Custom": {"points": [{"at": {"x": 2, "y": 99}}, {"at": {"x": 0.5, "y": -40}, "in": {"x": 5, "y": 0}}, {"at": {"x": -1, "y": 0}}]}}"#;
+    let bad =
+        r#"{"Custom": {"points": [{"at": {"x": 2, "y": 99}}, {"at": {"x": 0.5, "y": -40}, "in": {"x": 5, "y": 0}}, {"at": {"x": -1, "y": 0}}]}}"#;
     let e: Easing = serde_json::from_str(bad).unwrap();
     let c = e.custom().unwrap();
     assert_eq!((c.points().len(), c.points()[1].at.y, c.points()[1].h_in.x), (3, -anicraft_doc::MAX_EASE_Y, 0.0));

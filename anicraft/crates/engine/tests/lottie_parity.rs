@@ -12,7 +12,10 @@
 
 mod lottie_player;
 
-use anicraft_engine::doc::{ColorEffect, CustomEase, Document, Easing, Element, ElementId, ElementKind, Keyframe, LayerId, MotionTween, Paint, Property, PropertyKey, Rgba, Shape, Stroke, Track, Tween, TweenKind, sample};
+use anicraft_engine::doc::{
+    ColorEffect, CustomEase, Document, Easing, Element, ElementId, ElementKind, Keyframe, LayerId, MotionTween, Paint, Property, PropertyKey, Rgba,
+    Shape, Stroke, Track, Tween, TweenKind, sample,
+};
 use anicraft_engine::geom::{Affine, Path, Vec2};
 use anicraft_engine::render::lottie::{LottieKeys, STEPPED, to_lottie_keyed};
 use anicraft_engine::render::{View, render};
@@ -66,7 +69,14 @@ fn check(name: &str, doc: &Document, scale: f32) -> (usize, usize) {
             assert!(n <= m + pixels / 1000, "{name}, frame {f}: eased {n} vs frame by frame {m} pixels off; report {:?}", eased.report);
         }
     }
-    println!("LOTTIE {name}: {} frames, eased {} bytes, frame by frame {} bytes ({:.0} % smaller), report {:?}", last + 1, eased.json.len(), frames.json.len(), 100.0 * (1.0 - eased.json.len() as f64 / frames.json.len() as f64), eased.report);
+    println!(
+        "LOTTIE {name}: {} frames, eased {} bytes, frame by frame {} bytes ({:.0} % smaller), report {:?}",
+        last + 1,
+        eased.json.len(),
+        frames.json.len(),
+        100.0 * (1.0 - eased.json.len() as f64 / frames.json.len() as f64),
+        eased.report
+    );
     assert!(eased.json.len() <= frames.json.len(), "{name}: eased {} > frame by frame {}", eased.json.len(), frames.json.len());
     (eased.json.len(), frames.json.len())
 }
@@ -83,8 +93,22 @@ fn tweens_movie() -> Document {
     let mut doc = Document::default();
     doc.stage.width = 480;
     doc.stage.height = 360;
-    let custom = Easing::Custom(Arc::new(CustomEase::from_flat(&[(0.0, 0.0), (0.2, 1.4), (0.3, 1.4), (0.4, 1.4), (0.6, 0.5), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| Vec2::new(x, y))).unwrap()));
-    let eases = [Easing::Linear, Easing::Classic(-80.0), Easing::Classic(100.0), Easing::QuadInOut, Easing::BackOut, Easing::BounceOut, custom.clone(), Easing::ElasticOut, Easing::SineInOut, Easing::CubicBezier(0.2, 0.9, 0.3, 1.3)];
+    let custom = Easing::Custom(Arc::new(
+        CustomEase::from_flat(&[(0.0, 0.0), (0.2, 1.4), (0.3, 1.4), (0.4, 1.4), (0.6, 0.5), (0.8, 1.0), (1.0, 1.0)].map(|(x, y)| Vec2::new(x, y)))
+            .unwrap(),
+    ));
+    let eases = [
+        Easing::Linear,
+        Easing::Classic(-80.0),
+        Easing::Classic(100.0),
+        Easing::QuadInOut,
+        Easing::BackOut,
+        Easing::BounceOut,
+        custom.clone(),
+        Easing::ElasticOut,
+        Easing::SineInOut,
+        Easing::CubicBezier(0.2, 0.9, 0.3, 1.3),
+    ];
     let tl = doc.timeline_mut(0);
     tl.layers.clear();
     for (i, e) in eases.iter().enumerate() {
@@ -135,7 +159,8 @@ fn tweens_movie() -> Document {
     // A motion tween: x, y, rotation and scale keyed at different frames with their own eases.
     let mut l = anicraft_engine::doc::Layer::new(LayerId(42), "motion");
     let mut k0 = Keyframe::new(0, 48);
-    k0.elements = vec![shape_el(142, Affine::translate(60.0, 300.0), Shape::filled(Path::rect(-6.0, -6.0, 12.0, 12.0), Paint::Solid(Rgba::hex(0x00aa44))))];
+    k0.elements =
+        vec![shape_el(142, Affine::translate(60.0, 300.0), Shape::filled(Path::rect(-6.0, -6.0, 12.0, 12.0), Paint::Solid(Rgba::hex(0x00aa44))))];
     let key = |frame: u32, value: f32, ease: Easing| PropertyKey { frame, value, ease };
     let mut m = MotionTween::new(ElementId(142));
     m.tracks = vec![
@@ -196,7 +221,8 @@ fn corpus_doc(case: &str) -> Document {
 #[test]
 fn the_xfl_corpus_plays_as_evaluated() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../xfl/tests/corpus");
-    let mut cases: Vec<String> = std::fs::read_dir(&root).unwrap().flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect();
+    let mut cases: Vec<String> =
+        std::fs::read_dir(&root).unwrap().flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect();
     cases.sort();
     assert!(cases.len() >= 10);
     let (mut eased, mut frames) = (0, 0);
@@ -207,7 +233,6 @@ fn the_xfl_corpus_plays_as_evaluated() {
     }
     println!("LOTTIE corpus: eased {eased} bytes, frame by frame {frames} bytes");
 }
-
 
 #[test]
 #[ignore = "timing; run with --ignored --nocapture"]
@@ -225,7 +250,8 @@ fn zz_timing() {
         let l = Arc::make_mut(&mut long.timeline_mut(0).layers[0]);
         l.keyframes = vec![Arc::new(k0), Arc::new(k1)];
         let mut other = Tween::new(Easing::CubicBezier(0.3, 0.1, 0.2, 1.0), TweenKind::Classic);
-        other.groups = vec![(anicraft_engine::doc::EaseGroup::Rotation, Easing::BounceInOut), (anicraft_engine::doc::EaseGroup::Scale, Easing::BackInOut)];
+        other.groups =
+            vec![(anicraft_engine::doc::EaseGroup::Rotation, Easing::BounceInOut), (anicraft_engine::doc::EaseGroup::Scale, Easing::BackInOut)];
         let mut k = Keyframe::new(0, 1);
         k.tween = Some(other);
         let mut l2 = anicraft_engine::doc::Layer::new(LayerId(77), "eases");

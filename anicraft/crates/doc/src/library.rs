@@ -204,7 +204,13 @@ impl Document {
 
     /// `e`'s place as a path, `Characters/Hero/Ball` (`/` joins folder names).
     pub fn entry_path(&self, e: LibraryEntry) -> String {
-        let mut parts: Vec<&str> = self.parent_of(e).map(|p| self.folder_chain(p)).unwrap_or_default().into_iter().filter_map(|f| self.folder(f).map(|x| x.name.as_str())).collect();
+        let mut parts: Vec<&str> = self
+            .parent_of(e)
+            .map(|p| self.folder_chain(p))
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|f| self.folder(f).map(|x| x.name.as_str()))
+            .collect();
         parts.push(self.entry_name(e).unwrap_or(""));
         parts.join("/")
     }
@@ -389,7 +395,8 @@ impl Document {
         let src = self.library.get(at)?.clone();
         let new_id = SymbolId(self.alloc_id());
         let timeline = fresh_ids(&src.timeline, &mut || self.alloc_id());
-        let copy = Symbol { id: new_id, name, kind: src.kind, linkage: None, scale_grid_kept: src.scale_grid_kept, scale_grid: src.scale_grid, timeline };
+        let copy =
+            Symbol { id: new_id, name, kind: src.kind, linkage: None, scale_grid_kept: src.scale_grid_kept, scale_grid: src.scale_grid, timeline };
         self.library.insert(at + 1, Arc::new(copy));
         if let Some(f) = self.library_tree.placed.get(&LibraryItem::Symbol(id)).copied() {
             Arc::make_mut(&mut self.library_tree).placed.insert(LibraryItem::Symbol(new_id), f);
@@ -405,7 +412,11 @@ impl Document {
             let t = &d.library_tree;
             let mut ids = HashSet::new();
             t.folders.len() <= MAX_FOLDERS
-                && t.folders.iter().all(|f| ids.insert(f.id) && clean_name(&f.name).as_deref() == Ok(f.name.as_str()) && f.parent.is_none_or(|p| p != f.id && d.folder(p).is_some()))
+                && t.folders.iter().all(|f| {
+                    ids.insert(f.id)
+                        && clean_name(&f.name).as_deref() == Ok(f.name.as_str())
+                        && f.parent.is_none_or(|p| p != f.id && d.folder(p).is_some())
+                })
                 && t.folders.iter().all(|f| d.folder_chain(f.id).first().is_some_and(|top| d.folder(*top).is_some_and(|x| x.parent.is_none())))
                 && t.placed.iter().all(|(i, f)| d.has_item(*i) && d.folder(*f).is_some())
         };

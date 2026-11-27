@@ -8,6 +8,7 @@ pub use craft_scraft_format::*;
 
 pub mod fcpxml;
 pub mod mainstage;
+pub mod sesx;
 
 pub use fcpxml::{
     AudioRoleCategory, FcpxmlAudioImportSummary, beat_map_markers_to_tempo, export_fcpxml_audio, import_fcpxml_audio, is_fcpxml_document,
@@ -16,3 +17,4 @@ pub use fcpxml::{
 pub use mainstage::{
     ChannelStripConfig, Concert, LivePatchSwitcher, MacroControl, MacroMapping, MacroTarget, Patch, PatchId, PatchSet, PatchSetId, RoutedMidiNote,
 };
+pub use sesx::{SESX_VERSION, SesxFileRef, SesxImportSummary, export_sesx, import_sesx, is_sesx_document};

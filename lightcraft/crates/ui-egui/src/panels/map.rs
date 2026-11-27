@@ -16,34 +16,65 @@ use crate::widgets::{register, text_button};
 const CONTINENTS: &[&[(f64, f64)]] = &[
     // North America
     &[
-        (70.0, -165.0), (71.0, -130.0), (60.0, -65.0), (45.0, -60.0), (25.0, -80.0),
-        (18.0, -96.0), (8.0, -79.0), (16.0, -100.0), (32.0, -117.0), (48.0, -124.0),
-        (60.0, -148.0), (70.0, -165.0),
+        (70.0, -165.0),
+        (71.0, -130.0),
+        (60.0, -65.0),
+        (45.0, -60.0),
+        (25.0, -80.0),
+        (18.0, -96.0),
+        (8.0, -79.0),
+        (16.0, -100.0),
+        (32.0, -117.0),
+        (48.0, -124.0),
+        (60.0, -148.0),
+        (70.0, -165.0),
     ],
     // South America
-    &[
-        (11.0, -75.0), (6.0, -52.0), (-6.0, -35.0), (-23.0, -43.0), (-54.0, -68.0),
-        (-42.0, -74.0), (-18.0, -71.0), (-4.0, -81.0), (11.0, -75.0),
-    ],
+    &[(11.0, -75.0), (6.0, -52.0), (-6.0, -35.0), (-23.0, -43.0), (-54.0, -68.0), (-42.0, -74.0), (-18.0, -71.0), (-4.0, -81.0), (11.0, -75.0)],
     // Europe + Asia
     &[
-        (36.0, -9.0), (43.0, -9.0), (48.0, -4.0), (58.0, 6.0), (70.0, 28.0),
-        (72.0, 110.0), (66.0, 170.0), (52.0, 142.0), (35.0, 139.0), (35.0, 129.0),
-        (22.0, 114.0), (9.0, 105.0), (2.0, 103.0), (16.0, 96.0), (22.0, 88.0),
-        (8.0, 77.0), (24.0, 67.0), (25.0, 56.0), (13.0, 44.0), (30.0, 33.0),
-        (37.0, 26.0), (41.0, 14.0), (36.0, -5.0), (36.0, -9.0),
+        (36.0, -9.0),
+        (43.0, -9.0),
+        (48.0, -4.0),
+        (58.0, 6.0),
+        (70.0, 28.0),
+        (72.0, 110.0),
+        (66.0, 170.0),
+        (52.0, 142.0),
+        (35.0, 139.0),
+        (35.0, 129.0),
+        (22.0, 114.0),
+        (9.0, 105.0),
+        (2.0, 103.0),
+        (16.0, 96.0),
+        (22.0, 88.0),
+        (8.0, 77.0),
+        (24.0, 67.0),
+        (25.0, 56.0),
+        (13.0, 44.0),
+        (30.0, 33.0),
+        (37.0, 26.0),
+        (41.0, 14.0),
+        (36.0, -5.0),
+        (36.0, -9.0),
     ],
     // Africa
     &[
-        (35.0, -6.0), (37.0, 10.0), (31.0, 32.0), (12.0, 51.0), (-2.0, 41.0),
-        (-26.0, 33.0), (-34.0, 18.0), (-18.0, 12.0), (4.0, 9.0), (5.0, -8.0),
-        (15.0, -17.0), (35.0, -6.0),
+        (35.0, -6.0),
+        (37.0, 10.0),
+        (31.0, 32.0),
+        (12.0, 51.0),
+        (-2.0, 41.0),
+        (-26.0, 33.0),
+        (-34.0, 18.0),
+        (-18.0, 12.0),
+        (4.0, 9.0),
+        (5.0, -8.0),
+        (15.0, -17.0),
+        (35.0, -6.0),
     ],
     // Australia
-    &[
-        (-12.0, 131.0), (-11.0, 142.0), (-28.0, 153.0), (-38.0, 145.0),
-        (-34.0, 115.0), (-22.0, 114.0), (-12.0, 131.0),
-    ],
+    &[(-12.0, 131.0), (-11.0, 142.0), (-28.0, 153.0), (-38.0, 145.0), (-34.0, 115.0), (-22.0, 114.0), (-12.0, 131.0)],
 ];
 
 fn mercator_norm(lat: f64, lon: f64) -> (f64, f64) {
@@ -115,13 +146,9 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                 ui.label(egui::RichText::new(crate::i18n::tr("Map")).font(t.semibold(14.0)).color(t.text));
                 ui.add_space(6.0);
                 ui.label(
-                    egui::RichText::new(crate::i18n::tr_format!(
-                        "{tagged} of {total} geotagged",
-                        tagged = tagged.len(),
-                        total = visible.len()
-                    ))
-                    .color(t.text_dim)
-                    .size(12.0),
+                    egui::RichText::new(crate::i18n::tr_format!("{tagged} of {total} geotagged", tagged = tagged.len(), total = visible.len()))
+                        .color(t.text_dim)
+                        .size(12.0),
                 );
                 ui.add_space(10.0);
                 if text_button(ui, "mapZoomOut", "−", false).clicked() {
@@ -148,17 +175,11 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                         let ids: Vec<u64> = app.session.selected().iter().map(|p| p.0).collect();
                         let _ = app.run("photo.setGps", json!({"ids": ids, "lat": lat, "lon": lon}));
                     }
-                    if ui
-                        .add_enabled(!tagged.is_empty(), egui::Button::new(crate::i18n::tr("Look Up Places")))
-                        .clicked()
-                    {
+                    if ui.add_enabled(!tagged.is_empty(), egui::Button::new(crate::i18n::tr("Look Up Places"))).clicked() {
                         let ids: Vec<u64> = tagged.iter().map(|p| p.0.0).collect();
                         let _ = app.run("photo.geocode", json!({"ids": ids}));
                     }
-                    if app.services.pick_tracklog.is_some()
-                        && has_sel
-                        && ui.button(crate::i18n::tr("Tag from GPX…")).clicked()
-                    {
+                    if app.services.pick_tracklog.is_some() && has_sel && ui.button(crate::i18n::tr("Tag from GPX…")).clicked() {
                         let _ = app.run("photo.tagFromTracklog", json!({}));
                     }
                 });
@@ -293,11 +314,5 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
     // Coordinate readout pill in bottom-left
     let (clat, clon) = app.ui.map_center;
     let coord_txt = format!("{clat:+.4}°, {clon:+.4}°");
-    p.text(
-        pos2(rect.left() + 12.0, rect.bottom() - 10.0),
-        Align2::LEFT_BOTTOM,
-        coord_txt,
-        t.font(11.5),
-        Color32::from_white_alpha(180),
-    );
+    p.text(pos2(rect.left() + 12.0, rect.bottom() - 10.0), Align2::LEFT_BOTTOM, coord_txt, t.font(11.5), Color32::from_white_alpha(180));
 }

@@ -1,6 +1,6 @@
 # Gaps
 
-> **Last reviewed:** 2026-11-14 · **Last updated:** 2026-11-14 · **Change:** major (Auto Lip-Sync viseme engine + command + UI, XFL/`.fla` export round-trip, and built-in Korean `ko` UI localization added) · **Target:** the professional 2D vector & cutout animation workflow
+> **Last reviewed:** 2026-11-27 · **Last updated:** 2026-11-27 · **Change:** major (2.5D perspective `matrix3D` transforms, direct layer parenting + Z-depth parallax, and Puppet Rigging + procedural `AutoBlink` / `Breathe` / `WalkCycle` behaviors added) · **Target:** the professional 2D vector & cutout animation workflow
 
 ## Current Capability Summary
 
@@ -11,9 +11,11 @@
   - Classic Tweens (with orient-to-path and custom cubic-bezier easing), Shape Tweens (with lettered Shape Hints `a`–`z`), and Motion Tweens (with per-property curve editing in the Motion Editor).
   - **Onion Skinning (`어니언 스킨`)** with past/future range handles, filled or outline mode, anchor markers, Symbol Onion Skin, and **Edit Multiple Frames**.
   - Graphic (`Loop`, `Play once`, `Single frame` + `First frame` picker), Movie Clip (independent looping timeline + blend modes + 7 bitmap filters: Blur, Drop Shadow, Glow, Bevel, Gradient Glow, Gradient Bevel, Adjust Colour), and Button (`Up`/`Over`/`Down`/`Hit` states + event actions) symbols with 9-slice scaling grids.
-- **Rigging: Bone / IK Armatures & Asset Warp (`anicraft-doc`, `crates/engine/src/cmds_bones.rs`, `crates/engine/src/cmds_warp.rs`, `src/bone_tool.rs`)**:
+- **Rigging: Bone / IK Armatures, Layer Parenting, 2.5D Perspective & Puppet Behaviors (`anicraft-geom`, `anicraft-doc`, `crates/engine/src/cmds_puppet.rs`)**:
   - **Bone & Bind tools (`뼈대` / `바인드`)**: symbol and shape armatures, FABRIK/CCD inverse kinematics with joint angle constraints, pinned joints, per-vertex skin weights (`Shape Weights`), and spring-bone secondary physics (`Spring Bones`).
   - **Asset Warp (`에셋 워프`)**: Delaunay-triangulated deformation cages with pin handles (fixed, rotation, depth) and keyframeable warp poses on shapes and bitmaps.
+  - **2.5D Perspective (`element.set_perspective`, XFL `matrix3D`) & Layer Parenting (`layer.set_parent`)**: per-keyframe `rot_x_deg`, `rot_y_deg`, `z_offset`, and `fov_deg` projecting 3D-tilted shapes, symbols, text, and groups onto the 2D stage with XFL `matrix3D` import/export round-trip, plus cycle-safe direct layer parenting (`parent_layer`) and `z_depth` camera parallax.
+  - **Puppet Rigging & Procedural Behaviors (`puppet.*`)**: 5-pose head-turn parallax rigs (`Frontal`, `LeftQuarter`, `RightQuarter`, `Upward`, `Downward`), `Hold` & `Latch` swap-set keyframe triggers, and procedural `AutoBlink`, `Breathe`, and `WalkCycle` animation generators.
 - **Audio & Auto Lip-Sync (`anicraft-audio`, `crates/doc/src/lipsync.rs`, `crates/engine/src/cmds_sound.rs`, `src/envelope.rs`)**:
   - WAV, Ogg Vorbis, and MP3 import, Event/Start/Stop/Stream sync modes, timeline waveform rendering, custom stereo volume envelopes, and stereo WAV mixdown (`file.export_audio`).
   - **Auto Lip-Sync (`자동 립싱크`, `sound.auto_lip_sync`)**: deterministic acoustic viseme analysis (RMS energy, zero-crossing rate, 3-band spectral energy shares, onset slope, and 1-frame jitter smoothing) mapping speech audio to the 12-viseme chart (`neutral`, `ah`, `d`, `ee`, `f`, `l`, `m`, `oh`, `r`, `s`, `uh`, `woo`) and built-in labelled mouth charts (`templates::MOUTHS`), stamping `SingleFrame` Graphic symbol keyframes with full undo support and Properties / `Modify › Timeline` UI triggers.

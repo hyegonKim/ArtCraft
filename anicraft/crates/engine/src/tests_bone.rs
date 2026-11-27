@@ -28,12 +28,47 @@ pub(crate) fn three_bars() -> Session {
     let mut inner = Layer::new(LayerId(2), "bar");
     inner.keyframes[0] = Arc::new({
         let mut k = Keyframe::new(0, 1);
-        k.elements.push(Arc::new(Element { id: ElementId(3), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))) }));
+        k.elements.push(Arc::new(Element {
+            id: ElementId(3),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: ColorEffect::default(),
+            kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))),
+        }));
         k
     });
-    d.library.push(Arc::new(Symbol { id: bar, name: "Bar".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(inner)] } }));
-    let inst = |id: u64, x: f32| Arc::new(Element { id: ElementId(id), name: String::new(), transform: Affine::translate(x, 100.0), color: ColorEffect::default(), kind: ElementKind::Symbol { symbol: bar, loop_mode: LoopMode::Loop, first_frame: 0, blend: BlendMode::Normal, filters: Vec::new(), events: Vec::new() } });
-    let shape = Arc::new(Element { id: ElementId(SHAPE), name: String::new(), transform: Affine::translate(100.0, 250.0), color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, 0.0, 20.0, 20.0), Paint::Solid(Rgba::BLACK))) });
+    d.library.push(Arc::new(Symbol {
+        id: bar,
+        name: "Bar".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(inner)] },
+    }));
+    let inst = |id: u64, x: f32| {
+        Arc::new(Element {
+            id: ElementId(id),
+            name: String::new(),
+            transform: Affine::translate(x, 100.0),
+            color: ColorEffect::default(),
+            kind: ElementKind::Symbol {
+                symbol: bar,
+                loop_mode: LoopMode::Loop,
+                first_frame: 0,
+                blend: BlendMode::Normal,
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
+        })
+    };
+    let shape = Arc::new(Element {
+        id: ElementId(SHAPE),
+        name: String::new(),
+        transform: Affine::translate(100.0, 250.0),
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, 0.0, 20.0, 20.0), Paint::Solid(Rgba::BLACK))),
+    });
     let l = Arc::make_mut(&mut d.timeline_mut(0).layers[0]);
     l.keyframes = vec![Arc::new({
         let mut k = Keyframe::new(0, 20);
@@ -186,7 +221,12 @@ fn poses_key_frames_and_tween_with_easing() {
 fn artwork_edits_are_refused_on_the_armature_layer() {
     let (mut s, _, _) = rigged();
     s.select_only([ElementId(HAND)]);
-    for (id, p) in [("draw.rect", json!({"x": 0, "y": 0, "w": 5, "h": 5})), ("element.translate", json!({"dx": 5, "dy": 0})), ("edit.delete", json!({})), ("timeline.create_motion_tween", json!({}))] {
+    for (id, p) in [
+        ("draw.rect", json!({"x": 0, "y": 0, "w": 5, "h": 5})),
+        ("element.translate", json!({"dx": 5, "dy": 0})),
+        ("edit.delete", json!({})),
+        ("timeline.create_motion_tween", json!({})),
+    ] {
         let e = s.execute(id, &p).unwrap_err().to_string();
         assert!(e.contains("armature"), "{id}: {e}");
     }

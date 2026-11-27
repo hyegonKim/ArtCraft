@@ -103,13 +103,7 @@ pub(crate) fn histogram(app: &mut LightcraftApp, ui: &mut egui::Ui, id: PhotoId)
             let (a, z) = (x0 + (plot.right() - x0) * k as f32 / stops as f32, x0 + (plot.right() - x0) * (k + 1) as f32 / stops as f32);
             bar(a + 1.0, z - 1.0, Color32::from_rgb(c[0], c[1], c[2]));
             if stops <= 4 && (z - a) >= 24.0 {
-                p.text(
-                    pos2((a + z) / 2.0, plot.bottom() + 18.0),
-                    Align2::CENTER_CENTER,
-                    format!("+{}", k + 1),
-                    t.font(10.5),
-                    t.text_dim,
-                );
+                p.text(pos2((a + z) / 2.0, plot.bottom() + 18.0), Align2::CENTER_CENTER, format!("+{}", k + 1), t.font(10.5), t.text_dim);
             }
         }
         let y = plot.bottom() + 18.0;

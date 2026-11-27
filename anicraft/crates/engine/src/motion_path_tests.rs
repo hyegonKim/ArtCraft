@@ -335,7 +335,11 @@ fn editing_points_of_a_straight_motion_makes_its_path() {
     let mut still = Session::default();
     run(&mut still, "draw.rect", json!({"x": 0, "y": 0, "w": 10, "h": 10}));
     run(&mut still, "timeline.create_motion_tween", json!({}));
-    for (id, p) in [("motion.add_point", json!({"x": 5, "y": 5})), ("motion.delete_points", json!({"anchors": [1]})), ("motion.convert_point", json!({"anchor": 0, "smooth": true}))] {
+    for (id, p) in [
+        ("motion.add_point", json!({"x": 5, "y": 5})),
+        ("motion.delete_points", json!({"anchors": [1]})),
+        ("motion.convert_point", json!({"anchor": 0, "smooth": true})),
+    ] {
         assert!(still.execute(id, &p).is_err(), "{id}");
     }
 }

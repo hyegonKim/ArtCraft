@@ -37,16 +37,12 @@ fn aaf_and_omf_roundtrip_preserve_tracks_clips_gain_and_fades() {
         soundcraft_engine::edit::place_clip(s, tid, clip);
     }
 
-    let aaf_res = src_engine
-        .execute("file.export_aaf", &json!({"path": aaf_path.to_str().unwrap(), "embed_audio": true}))
-        .unwrap();
+    let aaf_res = src_engine.execute("file.export_aaf", &json!({"path": aaf_path.to_str().unwrap(), "embed_audio": true})).unwrap();
     assert_eq!(aaf_res["tracks"], 1);
     assert_eq!(aaf_res["clips"], 1);
     assert_eq!(aaf_res["embedded_media"], 1);
 
-    let omf_res = src_engine
-        .execute("file.export_omf", &json!({"path": omf_path.to_str().unwrap(), "embed_audio": true}))
-        .unwrap();
+    let omf_res = src_engine.execute("file.export_omf", &json!({"path": omf_path.to_str().unwrap(), "embed_audio": true})).unwrap();
     assert_eq!(omf_res["format"], "omf");
     assert_eq!(omf_res["clips"], 1);
 
@@ -65,9 +61,7 @@ fn aaf_and_omf_roundtrip_preserve_tracks_clips_gain_and_fades() {
 
     // Import OMF via `file.import_session_data` at an offset and verify placement.
     let mut dst_omf = Engine::default();
-    let imp_omf = dst_omf
-        .execute("file.import_session_data", &json!({"path": omf_path.to_str().unwrap(), "at": 480}))
-        .unwrap();
+    let imp_omf = dst_omf.execute("file.import_session_data", &json!({"path": omf_path.to_str().unwrap(), "at": 480})).unwrap();
     assert_eq!(imp_omf["clips"], 1);
     let c_omf = &dst_omf.session().track_by_name("DX 1").unwrap().clips()[0];
     assert_eq!(c_omf.start, 1_680);
@@ -95,19 +89,15 @@ fn audiosuite_crosstalk_leveling_and_stem_separation_split_tracks() {
     soundcraft_engine::edit::place_clip(e.session_mut(), tid, Clip::audio(cid, "MixClip", sid, 0, 0, n as i64));
 
     // 1. Separate Crosstalk
-    e.execute("audiosuite.process", &json!({"process": "separate_crosstalk", "clips": [cid.0], "params": {"suppression_db": 24.0}}))
-        .unwrap();
+    e.execute("audiosuite.process", &json!({"process": "separate_crosstalk", "clips": [cid.0], "params": {"suppression_db": 24.0}})).unwrap();
     let c1 = e.session().track(tid).unwrap().clips()[0].id;
 
     // 2. Audio Leveling
-    e.execute("audiosuite.process", &json!({"process": "audio_leveler", "clips": [c1.0], "params": {"target_db": -16.0, "amount": 90.0}}))
-        .unwrap();
+    e.execute("audiosuite.process", &json!({"process": "audio_leveler", "clips": [c1.0], "params": {"target_db": -16.0, "amount": 90.0}})).unwrap();
     let c2 = e.session().track(tid).unwrap().clips()[0].id;
 
     // 3. Stem Separation with multi-track split
-    let split = e
-        .execute("audiosuite.process", &json!({"process": "stem_separator", "clips": [c2.0], "params": {"split_to_tracks": 1.0}}))
-        .unwrap();
+    let split = e.execute("audiosuite.process", &json!({"process": "stem_separator", "clips": [c2.0], "params": {"split_to_tracks": 1.0}})).unwrap();
     assert_eq!(split["processed"], 1);
     assert_eq!(split["stem_tracks"].as_array().unwrap().len(), 3);
     assert!(e.session().tracks.iter().any(|t| t.name.contains("Vocals")));
@@ -137,9 +127,7 @@ fn clip_looping_supports_1000_iterations_and_crossfades() {
 
     // Undo and loop with 10 ms s-curve crossfade
     assert!(e.undo());
-    let xf = e
-        .execute("clip.loop", &json!({"clips": [cid.0], "count": 4, "crossfade_ms": 10.0, "crossfade_shape": "s-curve"}))
-        .unwrap();
+    let xf = e.execute("clip.loop", &json!({"clips": [cid.0], "count": 4, "crossfade_ms": 10.0, "crossfade_shape": "s-curve"})).unwrap();
     assert_eq!(xf["loops"], 3);
     let clips = e.session().track(tid).unwrap().clips();
     assert_eq!(clips.len(), 4);
@@ -157,9 +145,7 @@ fn live_midi_audition_queues_request_and_renders_instrument_while_stopped() {
     let r = e.execute("midi.new_clip", &json!({"track": tid.0})).unwrap();
     let cid = r["clip"].as_u64().unwrap();
 
-    let aud = e
-        .execute("midi.audition", &json!({"clip": cid, "pitch": 69, "velocity": 110, "duration_ms": 200}))
-        .unwrap();
+    let aud = e.execute("midi.audition", &json!({"clip": cid, "pitch": 69, "velocity": 110, "duration_ms": 200})).unwrap();
     assert_eq!(aud["pitch"], 69);
     assert_eq!(aud["track"], tid.0);
     assert!(e.transport_requests.iter().any(|req| matches!(

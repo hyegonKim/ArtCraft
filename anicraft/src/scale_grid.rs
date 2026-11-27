@@ -104,7 +104,11 @@ pub fn draw(app: &App, painter: &Painter, xf: Xf, canvas: Rect, hot: Option<Guid
     let Some((_, g)) = shown(app) else { return };
     for guide in Guide::ALL {
         let s = xf.to_screen(anicraft_engine::geom::Vec2::new(guide.at(&g), guide.at(&g)));
-        let ends = if guide.vertical() { [pos2(s.x, canvas.top()), pos2(s.x, canvas.bottom())] } else { [pos2(canvas.left(), s.y), pos2(canvas.right(), s.y)] };
+        let ends = if guide.vertical() {
+            [pos2(s.x, canvas.top()), pos2(s.x, canvas.bottom())]
+        } else {
+            [pos2(canvas.left(), s.y), pos2(canvas.right(), s.y)]
+        };
         let width = if hot == Some(guide) { 2.0 } else { 1.0 };
         painter.line_segment(ends, Stroke::new(width + 2.0, Color32::WHITE.gamma_multiply(0.7)));
         painter.extend(egui::Shape::dashed_line(&ends, Stroke::new(width, T.slice_guide), 6.0, 4.0));

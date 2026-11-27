@@ -13,7 +13,9 @@
 use crate::history::StateId;
 use crate::params::*;
 use crate::{CommandSpec, EngineError, Result, Selection, Session};
-use anicraft_doc::{ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, LoopMode, Symbol, SymbolId, SymbolKind, Timeline};
+use anicraft_doc::{
+    ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, LoopMode, Symbol, SymbolId, SymbolKind, Timeline,
+};
 use anicraft_geom::{Affine, Vec2};
 use serde_json::{Value, json};
 use std::hash::{Hash, Hasher};
@@ -31,7 +33,15 @@ pub fn specs() -> Vec<CommandSpec> {
             false,
             edit as crate::RunFn,
         ),
-        c("symbol.exit", "Edit Document", "Edit", None, "{all?: bool} closes the open symbol (default: one level; all: back to the scene), selecting the instance it was opened from", false, exit),
+        c(
+            "symbol.exit",
+            "Edit Document",
+            "Edit",
+            None,
+            "{all?: bool} closes the open symbol (default: one level; all: back to the scene), selecting the instance it was opened from",
+            false,
+            exit,
+        ),
     ]
 }
 
@@ -231,7 +241,15 @@ impl Session {
     }
 
     fn enter_level(&mut self, open: Opened, instance: Option<(LayerId, ElementId)>, transform: Affine, frame: u32) {
-        self.editing.push(EditLevel { open, instance, transform, layer: self.layer, frame: self.frame, selection: std::mem::take(&mut self.selection), back: None });
+        self.editing.push(EditLevel {
+            open,
+            instance,
+            transform,
+            layer: self.layer,
+            frame: self.frame,
+            selection: std::mem::take(&mut self.selection),
+            back: None,
+        });
         // The top layer inside, at the frame the instance shows.
         self.layer = self.timeline().layers.first().map_or(LayerId(0), |l| l.id);
         self.frame = frame.min(self.timeline().frame_count().saturating_sub(1));
@@ -277,7 +295,12 @@ impl Session {
     /// timeline at its playhead where its instance stands, over the timelines it sits in dimmed.
     pub fn stage_picture(&self) -> Arc<StagePicture> {
         let Some(view) = self.edit_view() else {
-            return Arc::new(StagePicture { doc: self.doc.clone(), frame: self.doc.scene_start(self.scene).saturating_add(self.frame), state: self.state, front: None });
+            return Arc::new(StagePicture {
+                doc: self.doc.clone(),
+                frame: self.doc.scene_start(self.scene).saturating_add(self.frame),
+                state: self.state,
+                front: None,
+            });
         };
         let mut h = std::collections::hash_map::DefaultHasher::new();
         (self.state, self.scene, self.frame).hash(&mut h);
@@ -371,14 +394,29 @@ fn hit_timeline(tl: &Timeline) -> Timeline {
 /// with colour effect `color` (a symbol added to `doc`, which is only drawn).
 fn placed(doc: &mut Document, timeline: Timeline, transform: Affine, frame: u32, color: ColorEffect) -> Arc<Layer> {
     let symbol = SymbolId(doc.alloc_id());
-    doc.library.push(Arc::new(Symbol { id: symbol, name: String::new(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline }));
+    doc.library.push(Arc::new(Symbol {
+        id: symbol,
+        name: String::new(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline,
+    }));
     let mut k = Keyframe::new(0, 1);
     k.elements.push(Arc::new(Element {
         id: ElementId(doc.alloc_id()),
         name: String::new(),
         transform,
         color,
-        kind: ElementKind::Symbol { symbol, loop_mode: LoopMode::SingleFrame, first_frame: frame, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol,
+            loop_mode: LoopMode::SingleFrame,
+            first_frame: frame,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     }));
     let mut layer = Layer::new(LayerId(doc.alloc_id()), "");
     layer.keyframes.push(Arc::new(k));
@@ -397,11 +435,24 @@ impl Session {
         let l = tl.layer_mut(layer).ok_or_else(|| EngineError::State("that drawing object's layer is gone".into()))?;
         let k = l.keyframe_index_at(frame).ok_or_else(|| EngineError::State("no keyframe here".into()))?;
         let kf = l.keyframe_mut(k).ok_or_else(|| EngineError::State("no keyframe here".into()))?;
-        let at = kf.elements.iter().position(|e| e.id == id).ok_or_else(|| EngineError::State("that drawing object is not on this keyframe".into()))?;
+        let at =
+            kf.elements.iter().position(|e| e.id == id).ok_or_else(|| EngineError::State("that drawing object is not on this keyframe".into()))?;
         let Some(el) = kf.elements.get(at).cloned() else { return Err(EngineError::State("that drawing object is not on this keyframe".into())) };
         let ElementKind::Shape(sh) = &el.kind else { return Err(EngineError::State("that is not a drawing object".into())) };
-        let shape = Element { id: inner, name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::None, kind: ElementKind::Shape(anicraft_doc::Shape { merge: true, ..sh.clone() }) };
-        let group = Element { id, name: el.name.clone(), transform: el.transform, color: el.color, kind: ElementKind::group(inner_layer, vec![Arc::new(shape)]) };
+        let shape = Element {
+            id: inner,
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: ColorEffect::None,
+            kind: ElementKind::Shape(anicraft_doc::Shape { merge: true, ..sh.clone() }),
+        };
+        let group = Element {
+            id,
+            name: el.name.clone(),
+            transform: el.transform,
+            color: el.color,
+            kind: ElementKind::group(inner_layer, vec![Arc::new(shape)]),
+        };
         if let Some(slot) = kf.elements.get_mut(at) {
             *slot = Arc::new(group);
         }
@@ -447,7 +498,13 @@ impl Session {
                     _ => None,
                 };
                 if let (ElementKind::Shape(sh), Some(color)) = (&only.kind, color) {
-                    let object = Element { id, name: group.name.clone(), transform: group.transform.mul(&only.transform), color, kind: ElementKind::Shape(anicraft_doc::Shape { merge: false, ..sh.clone() }) };
+                    let object = Element {
+                        id,
+                        name: group.name.clone(),
+                        transform: group.transform.mul(&only.transform),
+                        color,
+                        kind: ElementKind::Shape(anicraft_doc::Shape { merge: false, ..sh.clone() }),
+                    };
                     if let Some(slot) = kf.elements.get_mut(at) {
                         *slot = Arc::new(object);
                     }
@@ -563,7 +620,9 @@ pub(crate) fn edit(s: &mut Session, p: &Value) -> Result<Value> {
     }
     // A drawing object opens the same way (ADR 0080), as a group of its one raw shape.
     if matches!(&el.kind, ElementKind::Shape(sh) if !sh.merge && sh.warp.is_some()) {
-        return Err(EngineError::State("that drawing object is warped (Asset Warp): edit it with its pins, or remove its warp to edit its outline".into()));
+        return Err(EngineError::State(
+            "that drawing object is warped (Asset Warp): edit it with its pins, or remove its warp to edit its outline".into(),
+        ));
     }
     if matches!(&el.kind, ElementKind::Shape(sh) if !sh.merge) {
         if crate::cmds_group::open_groups(s) + 1 > anicraft_doc::MAX_GROUP_DEPTH {
@@ -578,7 +637,9 @@ pub(crate) fn edit(s: &mut Session, p: &Value) -> Result<Value> {
         }
         return Ok(editing_json(s));
     }
-    let ElementKind::Symbol { symbol, loop_mode, first_frame, .. } = el.kind else { return Err(EngineError::State("that is not a symbol instance, a group or a drawing object".into())) };
+    let ElementKind::Symbol { symbol, loop_mode, first_frame, .. } = el.kind else {
+        return Err(EngineError::State("that is not a symbol instance, a group or a drawing object".into()));
+    };
     let sym = s.doc.symbol(symbol).ok_or_else(|| EngineError::State("that instance's symbol is missing from the Library".into()))?;
     if s.editing.iter().any(|l| l.symbol() == Some(symbol)) {
         return Err(EngineError::State("that symbol is open already".into()));
@@ -610,7 +671,9 @@ pub(crate) fn editing_json(s: &Session) -> Value {
         .iter()
         .map(|l| match l.symbol() {
             Some(id) => json!({"symbol": id.0, "name": s.doc.symbol(id).map(|x| x.name.clone()), "instance": l.instance.map(|(_, e)| e.0)}),
-            None if l.open == Opened::Drawing => json!({"drawing": l.instance.map(|(_, e)| e.0), "name": "Drawing Object", "instance": l.instance.map(|(_, e)| e.0)}),
+            None if l.open == Opened::Drawing => {
+                json!({"drawing": l.instance.map(|(_, e)| e.0), "name": "Drawing Object", "instance": l.instance.map(|(_, e)| e.0)})
+            }
             None => json!({"group": l.instance.map(|(_, e)| e.0), "name": "Group", "instance": l.instance.map(|(_, e)| e.0)}),
         })
         .collect();

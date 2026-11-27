@@ -82,7 +82,10 @@ fn camera_removal(_: &Session, l: &Layer) -> Option<Confirmation> {
     let n = crate::cmds_camera::camera_moves(l);
     (n > 0).then(|| Confirmation {
         title: "Remove camera?".into(),
-        message: format!("The camera moves over {}. Removing it removes those moves, and the movie shows the stage as it is. You can undo this.", plural(n, "keyframe")),
+        message: format!(
+            "The camera moves over {}. Removing it removes those moves, and the movie shows the stage as it is. You can undo this.",
+            plural(n, "keyframe")
+        ),
         action: "Remove Camera".into(),
         irreversible: false,
     })
@@ -162,7 +165,9 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             let name = s.filter_presets.find(p.get("name").and_then(Value::as_str)?)?.name.clone();
             Some(Confirmation {
                 title: "Delete filter preset?".into(),
-                message: format!("The filter preset “{name}” will be deleted from your presets. Artwork that uses its filters keeps them. This cannot be undone."),
+                message: format!(
+                    "The filter preset “{name}” will be deleted from your presets. Artwork that uses its filters keeps them. This cannot be undone."
+                ),
                 action: "Delete Preset".into(),
                 irreversible: true,
             })
@@ -184,18 +189,21 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             let path = Path::new(p.get("path").and_then(Value::as_str)?);
             crate::vfs::exists(path).then(|| overwrite(path, "Exporting the brushes"))
         }
-        "file.new" | "file.new_sample" | "file.new_from_template" | "file.open" | "file.open_recent" | "file.recover" if s.is_dirty() => Some(Confirmation {
-            title: "Discard unsaved changes?".into(),
-            message: format!("“{}” has changes that are not saved. They will be lost, and its undo history is cleared.", doc_name(s)),
-            action: "Discard Changes".into(),
-            irreversible: true,
-        }),
+        "file.new" | "file.new_sample" | "file.new_from_template" | "file.open" | "file.open_recent" | "file.recover" if s.is_dirty() => {
+            Some(Confirmation {
+                title: "Discard unsaved changes?".into(),
+                message: format!("“{}” has changes that are not saved. They will be lost, and its undo history is cleared.", doc_name(s)),
+                action: "Discard Changes".into(),
+                irreversible: true,
+            })
+        }
         "file.save" | "file.save_as" => {
             let path = Path::new(p.get("path").and_then(Value::as_str)?);
             let same = s.path.as_deref() == Some(path);
             (!same && crate::vfs::exists(path)).then(|| overwrite(path, "Saving"))
         }
-        "file.export_png" | "file.export_gif" | "file.export_apng" | "file.export_webp" | "file.export_svg" | "file.export_video" | "file.export_lottie" | "file.export_html" | "file.export_audio" | "file.export_plugin" => {
+        "file.export_png" | "file.export_gif" | "file.export_apng" | "file.export_webp" | "file.export_svg" | "file.export_video"
+        | "file.export_lottie" | "file.export_html" | "file.export_audio" | "file.export_plugin" => {
             let path = Path::new(p.get("path").and_then(Value::as_str)?);
             crate::vfs::exists(path).then(|| overwrite(path, "Exporting"))
         }
@@ -264,7 +272,11 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             let used: usize = s.doc.timelines().map(|tl| crate::cmds_sound::uses_in(tl, id)).sum();
             (used > 0).then(|| Confirmation {
                 title: "Delete sound?".into(),
-                message: format!("“{}” plays on {}. It comes off them and out of the library. You can undo this.", snd.name, plural(used, "keyframe")),
+                message: format!(
+                    "“{}” plays on {}. It comes off them and out of the library. You can undo this.",
+                    snd.name,
+                    plural(used, "keyframe")
+                ),
                 action: "Delete Sound".into(),
                 irreversible: false,
             })
@@ -297,10 +309,20 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             };
             let mut parts = Vec::new();
             if inside > 0 {
-                parts.push(format!("{what} {} {}, deleted with {}.", if list.len() == 1 { "holds" } else { "hold" }, plural(inside, "item"), if list.len() == 1 { "it" } else { "them" }));
+                parts.push(format!(
+                    "{what} {} {}, deleted with {}.",
+                    if list.len() == 1 { "holds" } else { "hold" },
+                    plural(inside, "item"),
+                    if list.len() == 1 { "it" } else { "them" }
+                ));
             }
             if !used.is_empty() {
-                parts.push(format!("{} used {} in the movie; {} go too.", if used.len() == 1 { "One of them is".to_string() } else { format!("{} of them are", used.len()) }, plural(n_uses, "time"), if n_uses == 1 { "that use" } else { "those uses" }));
+                parts.push(format!(
+                    "{} used {} in the movie; {} go too.",
+                    if used.len() == 1 { "One of them is".to_string() } else { format!("{} of them are", used.len()) },
+                    plural(n_uses, "time"),
+                    if n_uses == 1 { "that use" } else { "those uses" }
+                ));
             }
             parts.push("You can undo this.".into());
             Some(Confirmation {
@@ -332,7 +354,12 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             let elements: usize = layers.iter().map(|(_, n)| n).sum();
             (elements > 0).then(|| Confirmation {
                 title: "Erase everything?".into(),
-                message: format!("Everything on the stage at frame {} goes: {} on {}. Locked and hidden layers are kept. You can undo this.", s.frame + 1, plural(elements, "element"), plural(layers.len(), "layer")),
+                message: format!(
+                    "Everything on the stage at frame {} goes: {} on {}. Locked and hidden layers are kept. You can undo this.",
+                    s.frame + 1,
+                    plural(elements, "element"),
+                    plural(layers.len(), "layer")
+                ),
                 action: "Erase Everything".into(),
                 irreversible: false,
             })
@@ -409,7 +436,9 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             (elements > 0).then(|| Confirmation {
                 title: if keys == 1 { "Clear keyframe?".into() } else { "Clear keyframes?".into() },
                 message: match lost.as_slice() {
-                    [(name, e)] if n == 1 => format!("The keyframe at frame {} on “{name}” holds {}. You can undo this.", f + 1, plural(*e, "element")),
+                    [(name, e)] if n == 1 => {
+                        format!("The keyframe at frame {} on “{name}” holds {}. You can undo this.", f + 1, plural(*e, "element"))
+                    }
                     _ => format!("The selected frames hold {} with {}. You can undo this.", plural(keys, "keyframe"), plural(elements, "element")),
                 },
                 action: if keys == 1 { "Clear Keyframe".into() } else { "Clear Keyframes".into() },
@@ -424,8 +453,14 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             (elements > 0).then(|| Confirmation {
                 title: if n == 1 { "Remove frame?".into() } else { "Remove frames?".into() },
                 message: match lost.as_slice() {
-                    [(name, e)] if n == 1 => format!("Frame {} is a one-frame keyframe on “{name}” with {}; removing it deletes that artwork. You can undo this.", f + 1, plural(*e, "element")),
-                    _ => format!("Removing these frames deletes {} with {}. You can undo this.", plural(keys, "keyframe"), plural(elements, "element")),
+                    [(name, e)] if n == 1 => format!(
+                        "Frame {} is a one-frame keyframe on “{name}” with {}; removing it deletes that artwork. You can undo this.",
+                        f + 1,
+                        plural(*e, "element")
+                    ),
+                    _ => {
+                        format!("Removing these frames deletes {} with {}. You can undo this.", plural(keys, "keyframe"), plural(elements, "element"))
+                    }
                 },
                 action: if n == 1 { "Remove Frame".into() } else { "Remove Frames".into() },
                 irreversible: false,
@@ -453,7 +488,11 @@ pub fn confirmation(s: &Session, id: &str, p: &Value) -> Option<Confirmation> {
             let file = plugin.source().filter(|_| s.plugins.owns_file(&plugin))?;
             Some(Confirmation {
                 title: "Remove plug-in?".into(),
-                message: format!("“{}” is uninstalled and its file is deleted from the plug-ins folder ({}). This cannot be undone.", plugin.manifest().name, file.display()),
+                message: format!(
+                    "“{}” is uninstalled and its file is deleted from the plug-ins folder ({}). This cannot be undone.",
+                    plugin.manifest().name,
+                    file.display()
+                ),
                 action: "Remove Plug-in".into(),
                 irreversible: true,
             })

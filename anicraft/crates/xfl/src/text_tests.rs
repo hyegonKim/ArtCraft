@@ -16,7 +16,9 @@ fn fonts() -> Option<(&'static Fonts, String)> {
 
 /// A document with these elements on its one frame.
 fn doc_with(elements: &str) -> String {
-    format!(r#"<DOMDocument width="550" height="400"><timelines><DOMTimeline name="Scene 1"><layers><DOMLayer name="Text"><frames><DOMFrame index="0"><elements>{elements}</elements></DOMFrame></frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>"#)
+    format!(
+        r#"<DOMDocument width="550" height="400"><timelines><DOMTimeline name="Scene 1"><layers><DOMLayer name="Text"><frames><DOMFrame index="0"><elements>{elements}</elements></DOMFrame></frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>"#
+    )
 }
 
 fn import_doc(xml: &str, fonts: &Fonts) -> (Document, Report) {
@@ -25,7 +27,11 @@ fn import_doc(xml: &str, fonts: &Fonts) -> (Document, Report) {
 }
 
 fn texts(doc: &Document) -> Vec<(Arc<Element>, Arc<TextBlock>)> {
-    doc.timeline(0).layers[0].keyframes[0].elements.iter().filter_map(|e| if let ElementKind::Text(t) = &e.kind { Some((e.clone(), t.clone())) } else { None }).collect()
+    doc.timeline(0).layers[0].keyframes[0]
+        .elements
+        .iter()
+        .filter_map(|e| if let ElementKind::Text(t) = &e.kind { Some((e.clone(), t.clone())) } else { None })
+        .collect()
 }
 
 fn run(chars: &str, attrs: &str) -> String {
@@ -64,7 +70,9 @@ fn static_text_keeps_its_style_matrix_and_lines() {
 fn fixed_width_fields_wrap_and_auto_size_ones_do_not() {
     let Some((fonts, family)) = fonts() else { return };
     let words = "one two three four five six seven eight nine ten";
-    let field = |extra: &str| format!(r#"<DOMStaticText {extra} width="90"><textRuns>{}</textRuns></DOMStaticText>"#, run(words, &format!(r#"face="{family}" size="14""#)));
+    let field = |extra: &str| {
+        format!(r#"<DOMStaticText {extra} width="90"><textRuns>{}</textRuns></DOMStaticText>"#, run(words, &format!(r#"face="{family}" size="14""#)))
+    };
     let (doc, _) = import_doc(&doc_with(&(field("") + &field(r#"autoExpand="true""#))), fonts);
     let t = texts(&doc);
     assert_eq!(t[0].1.width, Some(90.0), "fixed width");
@@ -81,7 +89,15 @@ fn runs_in_different_styles_become_blocks_stacked_line_by_line() {
     let body = format!(r##"face="{family}" size="12" fillColor="#445566""##);
     // A title line, two body lines (the second continues in a separate run of the same style),
     // then a line that mixes both styles: most of its characters are body text.
-    let runs = [run("Title&#xD;", &title), run("line one&#xD;line ", &body), run("two&#xD;", &body), run("Big", &title), run(" and mostly small", &body), run("&#xD;&#xD;", &body)].concat();
+    let runs = [
+        run("Title&#xD;", &title),
+        run("line one&#xD;line ", &body),
+        run("two&#xD;", &body),
+        run("Big", &title),
+        run(" and mostly small", &body),
+        run("&#xD;&#xD;", &body),
+    ]
+    .concat();
     let field = format!(r#"<DOMStaticText autoExpand="true"><matrix><Matrix tx="10" ty="20"/></matrix><textRuns>{runs}</textRuns></DOMStaticText>"#);
     let (doc, report) = import_doc(&doc_with(&field), fonts);
     let t = texts(&doc);
@@ -102,7 +118,8 @@ fn centred_auto_size_blocks_centre_on_each_other() {
     let Some((fonts, family)) = fonts() else { return };
     let a = format!(r#"face="{family}" size="40" alignment="center""#);
     let b = format!(r#"face="{family}" size="12" alignment="center""#);
-    let field = format!(r#"<DOMStaticText autoExpand="true"><textRuns>{}{}</textRuns></DOMStaticText>"#, run("WIDE HEADLINE&#xD;", &a), run("small", &b));
+    let field =
+        format!(r#"<DOMStaticText autoExpand="true"><textRuns>{}{}</textRuns></DOMStaticText>"#, run("WIDE HEADLINE&#xD;", &a), run("small", &b));
     let (doc, _) = import_doc(&doc_with(&field), fonts);
     let t = texts(&doc);
     let centre = |i: usize| t[i].0.transform.translation().x + t[i].1.box_width * 0.5;
@@ -153,11 +170,20 @@ fn dynamic_and_input_text_become_fields_with_their_names() {
     assert_eq!((f.lines, f.max_chars, f.variable.as_str()), (LineType::Password, 8, "_root.pw"));
     assert_eq!(t[1].1.text, "type here", "the value is kept; it is drawn as stars");
     let n = &t[2].1;
-    assert_eq!((n.text.as_str(), n.field.as_ref().map(|f| f.lines), n.box_height), ("", Some(LineType::Multiline), 60.0), "an empty input field is kept");
+    assert_eq!(
+        (n.text.as_str(), n.field.as_ref().map(|f| f.lines), n.box_height),
+        ("", Some(LineType::Multiline), 60.0),
+        "an empty input field is kept"
+    );
     assert_eq!(report.runs.get("dynamic text fields"), Some(&1));
     assert_eq!(report.runs.get("input text fields"), Some(&2));
     assert_eq!(report.kept.get("text field variables (ActionScript 1.0 and 2.0)"), Some(&1));
-    for (what, n) in [("justified text (drawn left-aligned)", 1), ("vertical text (drawn horizontal)", 1), ("first-line indents", 1), ("superscript and subscript (drawn on the line)", 1)] {
+    for (what, n) in [
+        ("justified text (drawn left-aligned)", 1),
+        ("vertical text (drawn horizontal)", 1),
+        ("first-line indents", 1),
+        ("superscript and subscript (drawn on the line)", 1),
+    ] {
         assert_eq!(report.skipped.get(what), Some(&n), "{what}: {report:?}");
     }
     assert!(report.missing_fonts.is_empty(), "no face asks for the default family");
@@ -174,8 +200,13 @@ fn without_fonts_text_is_reported_not_guessed() {
     assert!(texts(&doc).is_empty());
     assert_eq!(report.skipped.get("text fields (no fonts on this computer)"), Some(&1));
     // Empty fields and fields without runs make nothing and report nothing.
-    let (doc, report) = import_doc(&doc_with(r#"<DOMStaticText/><DOMStaticText><textRuns>
-      <DOMTextRun><characters>   </characters></DOMTextRun></textRuns></DOMStaticText>"#), &none);
+    let (doc, report) = import_doc(
+        &doc_with(
+            r#"<DOMStaticText/><DOMStaticText><textRuns>
+      <DOMTextRun><characters>   </characters></DOMTextRun></textRuns></DOMStaticText>"#,
+        ),
+        &none,
+    );
     assert!(texts(&doc).is_empty() && report.skipped.is_empty(), "{report:?}");
 }
 

@@ -19,7 +19,8 @@ fn corpus() -> PathBuf {
 }
 
 fn cases() -> Vec<String> {
-    let mut out: Vec<String> = std::fs::read_dir(corpus()).unwrap().flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect();
+    let mut out: Vec<String> =
+        std::fs::read_dir(corpus()).unwrap().flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect();
     out.sort();
     out
 }
@@ -127,7 +128,15 @@ fn damaged_parts_are_left_out_not_the_whole_document() {
 
     // A library symbol whose file is cut short (malformed XML), and one that lies about its size.
     for (how, damage) in [
-        ("malformed", &(|e: &mut pack::Raw| named(e, &|n| n.ends_with("Dot.xml")) && { e.body.truncate(e.body.len() / 2); true }) as &dyn Fn(&mut pack::Raw) -> bool),
+        (
+            "malformed",
+            &(|e: &mut pack::Raw| {
+                named(e, &|n| n.ends_with("Dot.xml")) && {
+                    e.body.truncate(e.body.len() / 2);
+                    true
+                }
+            }) as &dyn Fn(&mut pack::Raw) -> bool,
+        ),
         ("a lying size", &|e: &mut pack::Raw| named(e, &|n| n.ends_with("Dot.xml")) && e.size.replace(3).is_none()),
     ] {
         let (whole, got) = open("symbols", damage);
@@ -219,7 +228,13 @@ fn hostile_fla_archives_never_panic_and_fail_readably() {
         let files = pack::package(&corpus().join(&case));
         // As Animate writes it, ZIP64, and the new layouts (ADR 0086): a top folder, and a
         // self-extracting stub whose offsets count from the zip data.
-        let fuzzed = ["as Animate writes it (mimetype first, deflated)", "ZIP64", "inside a top folder, with __MACOSX beside it", "self-extracting, offsets from the zip data", "self-extracting ZIP64, offsets from the zip data"];
+        let fuzzed = [
+            "as Animate writes it (mimetype first, deflated)",
+            "ZIP64",
+            "inside a top folder, with __MACOSX beside it",
+            "self-extracting, offsets from the zip data",
+            "self-extracting ZIP64, offsets from the zip data",
+        ];
         for v in pack::VARIANTS.iter().filter(|v| fuzzed.contains(&v.name)) {
             let z = pack::pack(&files, v);
             let mut rng = Rng(0x9E37_79B9_7F4A_7C15 ^ (case.len() as u64) << 20 ^ z.len() as u64);
@@ -277,17 +292,23 @@ fn hostile_fla_archives_never_panic_and_fail_readably() {
             ("an absolute name", Box::new(move |e| e[last].name = b"/etc/x.xml".to_vec())),
             ("a drive name", Box::new(move |e| e[last].name = b"C:\\x.xml".to_vec())),
             ("a duplicate", Box::new(|e| e.push(e[1].clone()))),
-            ("a duplicate by separator", Box::new(|e| {
-                let mut d = e[1].clone();
-                d.name = d.name.iter().map(|&c| if c == b'/' { b'\\' } else { c }).collect();
-                e.push(d);
-            })),
-            ("overlapping entries", Box::new(|e| {
-                let mut d = e[1].clone();
-                d.name = b"other.xml".to_vec();
-                d.share = Some(1);
-                e.push(d);
-            })),
+            (
+                "a duplicate by separator",
+                Box::new(|e| {
+                    let mut d = e[1].clone();
+                    d.name = d.name.iter().map(|&c| if c == b'/' { b'\\' } else { c }).collect();
+                    e.push(d);
+                }),
+            ),
+            (
+                "overlapping entries",
+                Box::new(|e| {
+                    let mut d = e[1].clone();
+                    d.name = b"other.xml".to_vec();
+                    d.share = Some(1);
+                    e.push(d);
+                }),
+            ),
             ("a lying size", Box::new(move |e| e[doc].size = Some(3))),
             ("a lying checksum", Box::new(move |e| e[doc].crc = Some(1))),
             ("a ratio bomb", Box::new(move |e| e[doc].size = Some(200 << 20))),
@@ -320,7 +341,10 @@ fn big_fla() -> (Vec<u8>, usize) {
             let (x, y) = (rng.below(20_000), rng.below(20_000));
             edges.push_str(&format!("<Edge fillStyle1=\"1\" edges=\"!{x} {y}|{} {}|{} {}\"/>", x + 200, y + e, x + 100, y + 300));
         }
-        let xml = format!("<DOMSymbolItem name=\"Symbol {s}\"><timeline><DOMTimeline name=\"Symbol {s}\"><layers><DOMLayer name=\"L\"><frames><DOMFrame index=\"0\"><elements><DOMShape><fills><FillStyle index=\"1\"><SolidColor color=\"#{:06X}\"/></FillStyle></fills><edges>{edges}</edges></DOMShape></elements></DOMFrame></frames></DOMLayer></layers></DOMTimeline></timeline></DOMSymbolItem>", rng.next() & 0xffffff);
+        let xml = format!(
+            "<DOMSymbolItem name=\"Symbol {s}\"><timeline><DOMTimeline name=\"Symbol {s}\"><layers><DOMLayer name=\"L\"><frames><DOMFrame index=\"0\"><elements><DOMShape><fills><FillStyle index=\"1\"><SolidColor color=\"#{:06X}\"/></FillStyle></fills><edges>{edges}</edges></DOMShape></elements></DOMFrame></frames></DOMLayer></layers></DOMTimeline></timeline></DOMSymbolItem>",
+            rng.next() & 0xffffff
+        );
         files.insert(format!("LIBRARY/Symbols/Symbol {s}.xml"), xml.into_bytes());
         includes.push_str(&format!("<Include href=\"Symbols/Symbol {s}.xml\"/>"));
     }
@@ -329,10 +353,7 @@ fn big_fla() -> (Vec<u8>, usize) {
         let (w, h) = (1024u32, 512u32);
         let pixels: Vec<u8> = (0..w * h * 4).map(|_| rng.next() as u8).collect();
         let img = craft_image_codecs::Image::from_u8(w, h, craft_image_codecs::ChannelLayout::Rgba, pixels).unwrap();
-        let opts = craft_image_codecs::EncodeOptions {
-            png_compression: craft_image_codecs::PngCompression::Fast,
-            ..Default::default()
-        };
+        let opts = craft_image_codecs::EncodeOptions { png_compression: craft_image_codecs::PngCompression::Fast, ..Default::default() };
         let png = craft_image_codecs::encode(&img, craft_image_codecs::Format::Png, &opts).unwrap();
         files.insert(format!("LIBRARY/Images/noise {b}.png"), png);
         media.push_str(&format!("<DOMBitmapItem name=\"Images/noise {b}.png\" href=\"Images/noise {b}.png\"/>"));
@@ -341,7 +362,9 @@ fn big_fla() -> (Vec<u8>, usize) {
     for f in 0..240 {
         frames.push_str(&format!("<DOMFrame index=\"{f}\"><elements><DOMSymbolInstance libraryItemName=\"Symbol {}\"/><DOMBitmapInstance libraryItemName=\"Images/noise {}.png\"/></elements></DOMFrame>", f % 400, f % 24));
     }
-    let doc = format!("<DOMDocument width=\"1920\" height=\"1080\" frameRate=\"24\"><media>{media}</media><symbols>{includes}</symbols><timelines><DOMTimeline name=\"Scene 1\"><layers><DOMLayer name=\"Layer 1\"><frames>{frames}</frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>");
+    let doc = format!(
+        "<DOMDocument width=\"1920\" height=\"1080\" frameRate=\"24\"><media>{media}</media><symbols>{includes}</symbols><timelines><DOMTimeline name=\"Scene 1\"><layers><DOMLayer name=\"Layer 1\"><frames>{frames}</frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>"
+    );
     files.insert("DOMDocument.xml".into(), doc.into_bytes());
     let n = files.len();
     (pack::pack(&files, &pack::VARIANTS[2]), n)
@@ -369,6 +392,10 @@ fn measure_importing_a_50_mb_fla() {
     }
     eprintln!("{:.1} MB .fla, {files} files:", fla.len() as f64 / 1e6);
     for (open, read, bytes, import) in times {
-        eprintln!("  open {open:?}, read every entry {read:?} ({:.1} MB, {:.0} MB/s), import {import:?}", bytes as f64 / 1e6, bytes as f64 / 1e6 / read.as_secs_f64());
+        eprintln!(
+            "  open {open:?}, read every entry {read:?} ({:.1} MB, {:.0} MB/s), import {import:?}",
+            bytes as f64 / 1e6,
+            bytes as f64 / 1e6 / read.as_secs_f64()
+        );
     }
 }

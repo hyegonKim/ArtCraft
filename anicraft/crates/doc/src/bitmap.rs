@@ -61,7 +61,12 @@ fn is_yes(b: &bool) -> bool {
 
 impl PartialEq for Bitmap {
     fn eq(&self, o: &Bitmap) -> bool {
-        self.id == o.id && self.name == o.name && self.width == o.width && self.height == o.height && self.smoothing == o.smoothing && (Arc::ptr_eq(&self.png, &o.png) || self.png == o.png)
+        self.id == o.id
+            && self.name == o.name
+            && self.width == o.width
+            && self.height == o.height
+            && self.smoothing == o.smoothing
+            && (Arc::ptr_eq(&self.png, &o.png) || self.png == o.png)
     }
 }
 

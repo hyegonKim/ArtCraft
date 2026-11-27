@@ -1,7 +1,10 @@
 //! Armatures, poses and inverse kinematics (ADR 0043).
 
 use super::*;
-use crate::{BlendMode, ColorEffect, Document, Easing, ElementKind, Keyframe, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Symbol, SymbolId, SymbolKind, Timeline, Tween, evaluate, evaluate_layer_elements};
+use crate::{
+    BlendMode, ColorEffect, Document, Easing, ElementKind, Keyframe, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Symbol, SymbolId, SymbolKind,
+    Timeline, Tween, evaluate, evaluate_layer_elements,
+};
 use anicraft_geom::Path;
 use std::f32::consts::FRAC_PI_2;
 
@@ -13,7 +16,14 @@ const B2: BoneId = BoneId(21);
 const SEG: SymbolId = SymbolId(1);
 
 fn instance(id: ElementId, x: f32, y: f32) -> Arc<Element> {
-    let kind = ElementKind::Symbol { symbol: SEG, loop_mode: LoopMode::Loop, first_frame: 0, blend: BlendMode::Normal, filters: Vec::new(), events: Vec::new() };
+    let kind = ElementKind::Symbol {
+        symbol: SEG,
+        loop_mode: LoopMode::Loop,
+        first_frame: 0,
+        blend: BlendMode::Normal,
+        filters: Vec::new(),
+        events: Vec::new(),
+    };
     Arc::new(Element { id, name: String::new(), transform: Affine::translate(x, y), color: ColorEffect::default(), kind })
 }
 
@@ -171,9 +181,23 @@ fn every_export_sees_the_pose() {
     let mut d = Document::default();
     let mut seg = Layer::new(LayerId(2), "seg");
     let mut k = Keyframe::new(0, 1);
-    k.elements.push(Arc::new(Element { id: ElementId(3), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))) }));
+    k.elements.push(Arc::new(Element {
+        id: ElementId(3),
+        name: String::new(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))),
+    }));
     seg.keyframes = vec![Arc::new(k)];
-    d.library.push(Arc::new(Symbol { id: SEG, name: "Seg".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(seg)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SEG,
+        name: "Seg".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(seg)] },
+    }));
     d.timeline_mut(0).layers = vec![Arc::new(armature_layer(Easing::Linear))];
     d.sanitize();
     let dl = evaluate(&d, 10);
@@ -292,7 +316,10 @@ fn ik_slides_a_joint_only_where_turning_cant_reach_and_within_its_limits() {
     // Within reach: the same solve as without sliding (no slide at all).
     let (plain, _) = chain();
     let t = Vec2::new(300.0, 180.0);
-    let (a, b) = (solve(&arm, &els, &Pose::default(), B2, Vec2::new(100.0, 0.0), t).unwrap(), solve(&plain, &els, &Pose::default(), B2, Vec2::new(100.0, 0.0), t).unwrap());
+    let (a, b) = (
+        solve(&arm, &els, &Pose::default(), B2, Vec2::new(100.0, 0.0), t).unwrap(),
+        solve(&plain, &els, &Pose::default(), B2, Vec2::new(100.0, 0.0), t).unwrap(),
+    );
     assert_eq!(a.pose.slide(B2), Vec2::ZERO);
     assert_eq!(a.pose.angle(B1).to_bits(), b.pose.angle(B1).to_bits());
     // Out of reach: the elbow slides out to get there.

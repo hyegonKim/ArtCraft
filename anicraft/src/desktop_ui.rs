@@ -176,7 +176,19 @@ pub fn about(app: &App, ui: &mut egui::Ui, label_w: f32) -> Option<Act> {
         ui.label(text(Type::Body, mode));
     });
     if let Some((dir, why)) = &place.unwritable {
-        form_note(ui, label_w, text(Type::Caption, tr!("This copy is portable, but {path} can't be written ({error}), so your user folder is used instead.", path = dir.display(), error = why)).color(T.error));
+        form_note(
+            ui,
+            label_w,
+            text(
+                Type::Caption,
+                tr!(
+                    "This copy is portable, but {path} can't be written ({error}), so your user folder is used instead.",
+                    path = dir.display(),
+                    error = why
+                ),
+            )
+            .color(T.error),
+        );
     }
     for (name, dir) in crate::platform::places() {
         let Some(dir) = dir else { continue };
@@ -193,10 +205,19 @@ pub fn about(app: &App, ui: &mut egui::Ui, label_w: f32) -> Option<Act> {
         form_row(ui, label_w, tr!("Applications menu"), |ui| {
             ui.vertical(|ui| {
                 let (state, button) = match &d.entry {
-                    Entry::None => (tr!("Not added: this AppImage is not in your applications menu").to_string(), Some((tr!("Add to Menu"), Act::Add))),
-                    Entry::ThisCopy => (tr!("Added: the menu starts this AppImage and it opens your .anicraft, .fla and .xfl files").to_string(), Some((tr!("Remove"), Act::Remove))),
-                    Entry::Other(other, _) => (tr!("The menu starts another AppImage: {path}", path = other.display()), Some((tr!("Use This Copy"), Act::Add))),
-                    Entry::Foreign => (tr!("A menu entry of AniCraft's name that AniCraft didn't add is there; it is left as it is").to_string(), None),
+                    Entry::None => {
+                        (tr!("Not added: this AppImage is not in your applications menu").to_string(), Some((tr!("Add to Menu"), Act::Add)))
+                    }
+                    Entry::ThisCopy => (
+                        tr!("Added: the menu starts this AppImage and it opens your .anicraft, .fla and .xfl files").to_string(),
+                        Some((tr!("Remove"), Act::Remove)),
+                    ),
+                    Entry::Other(other, _) => {
+                        (tr!("The menu starts another AppImage: {path}", path = other.display()), Some((tr!("Use This Copy"), Act::Add)))
+                    }
+                    Entry::Foreign => {
+                        (tr!("A menu entry of AniCraft's name that AniCraft didn't add is there; it is left as it is").to_string(), None)
+                    }
                 };
                 ui.add(egui::Label::new(text(Type::Body, state)).wrap());
                 ui.horizontal(|ui| {
@@ -280,7 +301,12 @@ mod tests {
         let _ = std::fs::remove_dir_all(&d.data_home);
         let old = d.appimage.with_file_name("AniCraft-old.AppImage");
         std::fs::write(&old, b"").unwrap();
-        app.s.execute("desktop.integrate", &json!({"appimage": old.display().to_string(), "data_home": d.data_home.display().to_string(), "refresh": false})).unwrap();
+        app.s
+            .execute(
+                "desktop.integrate",
+                &json!({"appimage": old.display().to_string(), "data_home": d.data_home.display().to_string(), "refresh": false}),
+            )
+            .unwrap();
         // The old one is still there: the user chooses.
         start_with(&mut app, d.clone(), false);
         assert!(matches!(app.desktop.as_ref().map(|d| &d.entry), Some(Entry::Other(_, true))));
@@ -355,7 +381,12 @@ mod tests {
         frames(&ctx, &mut app, 2, vec![]);
         let other = d.appimage.with_file_name("AniCraft-other.AppImage");
         std::fs::write(&other, b"").unwrap();
-        app.s.execute("desktop.integrate", &json!({"appimage": other.display().to_string(), "data_home": d.data_home.display().to_string(), "refresh": false})).unwrap();
+        app.s
+            .execute(
+                "desktop.integrate",
+                &json!({"appimage": other.display().to_string(), "data_home": d.data_home.display().to_string(), "refresh": false}),
+            )
+            .unwrap();
         start_with(&mut app, d.clone(), false);
         assert!(matches!(app.desktop.as_ref().map(|d| &d.entry), Some(Entry::Other(_, true))));
         frames(&ctx, &mut app, 2, vec![]);

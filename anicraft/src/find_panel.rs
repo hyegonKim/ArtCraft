@@ -81,13 +81,19 @@ impl FindState {
                 p["match_case"] = json!(self.opts.match_case);
                 p["whole_word"] = json!(self.opts.whole_word);
                 p["regex"] = json!(self.opts.regex);
-                let places: Vec<&str> = [(w.text, "text"), (w.labels, "labels"), (w.layers, "layers"), (w.instances, "instances"), (w.scripts, "scripts")].into_iter().filter(|(on, _)| *on).map(|(_, k)| k).collect();
+                let places: Vec<&str> =
+                    [(w.text, "text"), (w.labels, "labels"), (w.layers, "layers"), (w.instances, "instances"), (w.scripts, "scripts")]
+                        .into_iter()
+                        .filter(|(on, _)| *on)
+                        .map(|(_, k)| k)
+                        .collect();
                 p["in"] = json!(places);
                 p["with"] = json!(self.with);
             }
             Kind::Color => {
                 p["color"] = json!(hex(self.color));
-                let places: Vec<&str> = [(w.fills, "fills"), (w.strokes, "strokes"), (w.text_color, "text")].into_iter().filter(|(on, _)| *on).map(|(_, k)| k).collect();
+                let places: Vec<&str> =
+                    [(w.fills, "fills"), (w.strokes, "strokes"), (w.text_color, "text")].into_iter().filter(|(on, _)| *on).map(|(_, k)| k).collect();
                 p["in"] = json!(places);
                 p["with"] = json!(hex(self.with_color));
             }
@@ -126,7 +132,10 @@ fn results(app: &mut App) -> Option<&Found> {
     }
     let key = (p.to_string(), app.s.state, app.s.scene);
     if app.find.results.as_ref().is_none_or(|r| r.key != key) {
-        let found = Query::from_params(&app.s, &p).map(|q| find::search(&app.s.doc, app.s.scene, &q)).map(|(h, t)| (Arc::new(h), t)).map_err(|e| crate::i18n::t_dyn(&e.to_string()).into_owned());
+        let found = Query::from_params(&app.s, &p)
+            .map(|q| find::search(&app.s.doc, app.s.scene, &q))
+            .map(|(h, t)| (Arc::new(h), t))
+            .map_err(|e| crate::i18n::t_dyn(&e.to_string()).into_owned());
         app.find.results = Some(Results { key, found });
     }
     app.find.results.as_ref().map(|r| &r.found)
@@ -243,7 +252,14 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
     }
     let mut open = app.find.open;
     let at = ctx.content_rect().right_top() + vec2(-720.0, 110.0);
-    let shown = egui::Window::new(tr!("Find and Replace")).id(egui::Id::new("find_replace")).open(&mut open).default_pos(at).default_width(400.0).resizable(true).collapsible(false).show(ctx, |ui| panel(app, ui));
+    let shown = egui::Window::new(tr!("Find and Replace"))
+        .id(egui::Id::new("find_replace"))
+        .open(&mut open)
+        .default_pos(at)
+        .default_width(400.0)
+        .resizable(true)
+        .collapsible(false)
+        .show(ctx, |ui| panel(app, ui));
     a11y::name_title_bar(&shown, tr!("Find and Replace"));
     app.find.open = open;
 }
@@ -262,7 +278,8 @@ fn query_rows(app: &mut App, ui: &mut egui::Ui) -> bool {
     match app.find.kind {
         Kind::Text => {
             row(ui, tr!("Find"), &mut |ui| {
-                let r = ui.add(egui::TextEdit::singleline(&mut app.find.text).desired_width(w).hint_text(tr!("Text to find"))).named(tr!("Text to find"));
+                let r =
+                    ui.add(egui::TextEdit::singleline(&mut app.find.text).desired_width(w).hint_text(tr!("Text to find"))).named(tr!("Text to find"));
                 if app.find.focus {
                     r.request_focus();
                     app.find.focus = false;
@@ -270,7 +287,12 @@ fn query_rows(app: &mut App, ui: &mut egui::Ui) -> bool {
                 enter |= r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
             });
             row(ui, tr!("Replace with"), &mut |ui| {
-                ui.add(egui::TextEdit::singleline(&mut app.find.with).desired_width(w).hint_text(if app.find.opts.regex { tr!("$1 puts back a group") } else { tr!("Replacement text") })).set_name(tr!("Replace with"));
+                ui.add(egui::TextEdit::singleline(&mut app.find.with).desired_width(w).hint_text(if app.find.opts.regex {
+                    tr!("$1 puts back a group")
+                } else {
+                    tr!("Replacement text")
+                }))
+                .set_name(tr!("Replace with"));
             });
         }
         Kind::Font => {
@@ -304,10 +326,16 @@ fn query_rows(app: &mut App, ui: &mut egui::Ui) -> bool {
 
 /// The fonts text in the document uses, A to Z.
 fn doc_fonts(doc: &anicraft_engine::doc::Document) -> Vec<String> {
-    let mut v: Vec<String> = doc.timelines().flat_map(|t| &t.layers).flat_map(|l| &l.keyframes).flat_map(|k| &k.elements).filter_map(|e| match &e.kind {
-        anicraft_engine::doc::ElementKind::Text(t) => Some(t.font.clone()),
-        _ => None,
-    }).collect();
+    let mut v: Vec<String> = doc
+        .timelines()
+        .flat_map(|t| &t.layers)
+        .flat_map(|l| &l.keyframes)
+        .flat_map(|k| &k.elements)
+        .filter_map(|e| match &e.kind {
+            anicraft_engine::doc::ElementKind::Text(t) => Some(t.font.clone()),
+            _ => None,
+        })
+        .collect();
     v.sort_unstable();
     v.dedup();
     v
@@ -315,18 +343,21 @@ fn doc_fonts(doc: &anicraft_engine::doc::Document) -> Vec<String> {
 
 fn font_combo(ui: &mut egui::Ui, id: &str, value: &mut String, options: &[String], name: &str, w: f32) {
     let shown = if value.is_empty() { tr!("Choose a font").to_string() } else { value.clone() };
-    egui::ComboBox::from_id_salt(id).width(w).selected_text(shown).show_ui(ui, |ui| {
-        if options.is_empty() {
-            ui.label(text(Type::Caption, tr!("No text uses a font yet")));
-        }
-        for f in options.iter().take(2_000) {
-            if ui.selectable_label(f == value, f.as_str()).clicked() {
-                value.clone_from(f);
+    egui::ComboBox::from_id_salt(id)
+        .width(w)
+        .selected_text(shown)
+        .show_ui(ui, |ui| {
+            if options.is_empty() {
+                ui.label(text(Type::Caption, tr!("No text uses a font yet")));
             }
-        }
-    })
-    .response
-    .set_name(name);
+            for f in options.iter().take(2_000) {
+                if ui.selectable_label(f == value, f.as_str()).clicked() {
+                    value.clone_from(f);
+                }
+            }
+        })
+        .response
+        .set_name(name);
 }
 
 /// The Library's items of `kind`: id and name (document text).
@@ -341,19 +372,23 @@ fn library_items(app: &App, kind: Kind) -> Vec<(u64, String)> {
 }
 
 fn item_combo(ui: &mut egui::Ui, id: &str, value: &mut Option<u64>, items: &[(u64, String)], name: &str, w: f32) {
-    let shown = value.and_then(|v| items.iter().find(|(i, _)| *i == v)).map_or_else(|| tr!("Choose from the Library").to_string(), |(_, n)| n.clone());
-    egui::ComboBox::from_id_salt(id).width(w).selected_text(shown).show_ui(ui, |ui| {
-        if items.is_empty() {
-            ui.label(text(Type::Caption, tr!("The Library has none")));
-        }
-        for (i, n) in items {
-            if ui.selectable_label(*value == Some(*i), n.as_str()).clicked() {
-                *value = Some(*i);
+    let shown =
+        value.and_then(|v| items.iter().find(|(i, _)| *i == v)).map_or_else(|| tr!("Choose from the Library").to_string(), |(_, n)| n.clone());
+    egui::ComboBox::from_id_salt(id)
+        .width(w)
+        .selected_text(shown)
+        .show_ui(ui, |ui| {
+            if items.is_empty() {
+                ui.label(text(Type::Caption, tr!("The Library has none")));
             }
-        }
-    })
-    .response
-    .set_name(name);
+            for (i, n) in items {
+                if ui.selectable_label(*value == Some(*i), n.as_str()).clicked() {
+                    *value = Some(*i);
+                }
+            }
+        })
+        .response
+        .set_name(name);
 }
 
 fn panel(app: &mut App, ui: &mut egui::Ui) {
@@ -361,24 +396,31 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         ui.label(text(Type::Label, tr!("Search for")));
         let before = app.find.kind;
-        egui::ComboBox::from_id_salt("find_kind").width(110.0).selected_text(crate::i18n::t(kind_label(app.find.kind))).show_ui(ui, |ui| {
-            for k in Kind::ALL {
-                ui.selectable_value(&mut app.find.kind, k, crate::i18n::t(kind_label(k)));
-            }
-        })
-        .response
-        .set_name(tr!("What to search for"));
+        egui::ComboBox::from_id_salt("find_kind")
+            .width(110.0)
+            .selected_text(crate::i18n::t(kind_label(app.find.kind)))
+            .show_ui(ui, |ui| {
+                for k in Kind::ALL {
+                    ui.selectable_value(&mut app.find.kind, k, crate::i18n::t(kind_label(k)));
+                }
+            })
+            .response
+            .set_name(tr!("What to search for"));
         if app.find.kind != before {
             app.find.current = None;
         }
         ui.label(text(Type::Label, tr!("in")));
         let scope = if app.find.document { tr!("The whole document") } else { tr!("This scene") };
-        egui::ComboBox::from_id_salt("find_scope").width(150.0).selected_text(scope).show_ui(ui, |ui| {
-            ui.selectable_value(&mut app.find.document, false, tr!("This scene")).on_hover_text(tr!("The current scene and every symbol in it"));
-            ui.selectable_value(&mut app.find.document, true, tr!("The whole document")).on_hover_text(tr!("Every scene, and every symbol in the Library"));
-        })
-        .response
-        .set_name(tr!("Where to search"));
+        egui::ComboBox::from_id_salt("find_scope")
+            .width(150.0)
+            .selected_text(scope)
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut app.find.document, false, tr!("This scene")).on_hover_text(tr!("The current scene and every symbol in it"));
+                ui.selectable_value(&mut app.find.document, true, tr!("The whole document"))
+                    .on_hover_text(tr!("Every scene, and every symbol in the Library"));
+            })
+            .response
+            .set_name(tr!("Where to search"));
     });
     ui.add_space(4.0);
     let enter = query_rows(app, ui);
@@ -388,7 +430,8 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
             ui.horizontal_wrapped(|ui| {
                 ui.checkbox(&mut app.find.opts.match_case, tr!("Match case"));
                 ui.checkbox(&mut app.find.opts.whole_word, tr!("Whole word"));
-                ui.checkbox(&mut app.find.opts.regex, tr!("Regular expression")).on_hover_text(tr!("A pattern such as h.llo or \\d+ (Rust regex syntax; runs in linear time)"));
+                ui.checkbox(&mut app.find.opts.regex, tr!("Regular expression"))
+                    .on_hover_text(tr!("A pattern such as h.llo or \\d+ (Rust regex syntax; runs in linear time)"));
             });
             ui.horizontal_wrapped(|ui| {
                 ui.label(text(Type::Label, tr!("Look in")));
@@ -423,10 +466,19 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
     let next = |k: &str| app.keymap.primary(k).map(crate::platform::shortcut_label).unwrap_or_default();
     let (next_key, prev_key) = (next("view.find_next"), next("view.find_prev"));
     ui.horizontal(|ui| {
-        if ui.add_enabled(any, egui::Button::new(tr!("Find Next"))).on_hover_text(a11y::with_key(tr!("Go to the next result"), Some(&next_key))).clicked() || (enter && any) {
+        if ui
+            .add_enabled(any, egui::Button::new(tr!("Find Next")))
+            .on_hover_text(a11y::with_key(tr!("Go to the next result"), Some(&next_key)))
+            .clicked()
+            || (enter && any)
+        {
             step(app, true);
         }
-        if ui.add_enabled(any, egui::Button::new(tr!("Find Previous"))).on_hover_text(a11y::with_key(tr!("Go to the previous result"), Some(&prev_key))).clicked() {
+        if ui
+            .add_enabled(any, egui::Button::new(tr!("Find Previous")))
+            .on_hover_text(a11y::with_key(tr!("Go to the previous result"), Some(&prev_key)))
+            .clicked()
+        {
             step(app, false);
         }
         if ui.add_enabled(any, egui::Button::new(tr!("Replace"))).on_hover_text(tr!("Replace the current result, then go to the next")).clicked() {
@@ -444,11 +496,14 @@ fn panel(app: &mut App, ui: &mut egui::Ui) {
         return;
     }
     if !app.find.ready() {
-        ui.label(text(Type::Caption, match app.find.kind {
-            Kind::Text => tr!("Type what to find: results show as you type."),
-            Kind::Font => tr!("Choose a font the document's text uses."),
-            _ => tr!("Choose a Library item."),
-        }));
+        ui.label(text(
+            Type::Caption,
+            match app.find.kind {
+                Kind::Text => tr!("Type what to find: results show as you type."),
+                Kind::Font => tr!("Choose a font the document's text uses."),
+                _ => tr!("Choose a Library item."),
+            },
+        ));
         return;
     }
     let summary = if list.is_empty() {
@@ -467,39 +522,54 @@ fn results_list(app: &mut App, ui: &mut egui::Ui, list: &[Hit]) {
     let mut clicked = None;
     let current = app.find.current;
     let kind = app.find.kind;
-    egui::ScrollArea::vertical().id_salt("find_results").max_height(260.0).min_scrolled_height(TARGET * 6.0).auto_shrink([false, true]).show_rows(ui, TARGET, list.len(), |ui, range| {
-        for i in range {
-            let Some(h) = list.get(i) else { continue };
-            let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), TARGET), Sense::click());
-            let p = ui.painter();
-            let on = current == Some(i);
-            if on || resp.hovered() {
-                p.rect_filled(r, T.rc(), if on { T.accent_dim } else { T.hover });
+    egui::ScrollArea::vertical().id_salt("find_results").max_height(260.0).min_scrolled_height(TARGET * 6.0).auto_shrink([false, true]).show_rows(
+        ui,
+        TARGET,
+        list.len(),
+        |ui, range| {
+            for i in range {
+                let Some(h) = list.get(i) else { continue };
+                let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), TARGET), Sense::click());
+                let p = ui.painter();
+                let on = current == Some(i);
+                if on || resp.hovered() {
+                    p.rect_filled(r, T.rc(), if on { T.accent_dim } else { T.hover });
+                }
+                if on {
+                    p.rect_filled(Rect::from_min_size(r.left_top(), vec2(3.0, r.height())), 0.0, T.accent);
+                }
+                // What was found (the text around a match), then where.
+                let what = match kind {
+                    Kind::Text => h.context.clone(),
+                    _ => h.found.clone(),
+                };
+                let field = crate::i18n::t(field_label(h.field));
+                let place = location(app, h);
+                let half = r.width() * 0.5;
+                let left = Rect::from_min_max(pos2(r.left() + 8.0, r.top()), pos2(r.left() + half, r.bottom()));
+                let right = Rect::from_min_max(pos2(r.left() + half + 6.0, r.top()), pos2(r.right() - 6.0, r.bottom()));
+                let g = p.layout_no_wrap(what.clone(), font(Type::Body), color(Type::Body));
+                p.with_clip_rect(left.intersect(ui.clip_rect())).galley(
+                    pos2(left.left(), r.center().y - g.rect.height() / 2.0),
+                    g,
+                    color(Type::Body),
+                );
+                let label = format!("{field} · {place}");
+                p.with_clip_rect(right.intersect(ui.clip_rect())).text(
+                    pos2(right.left(), r.center().y),
+                    Align2::LEFT_CENTER,
+                    &label,
+                    font(Type::Caption),
+                    color(Type::Caption),
+                );
+                let name = tr!("{what}, {field}, {place}", what = what, field = field, place = place);
+                a11y::control(ui, &resp, WidgetType::SelectableLabel, &name, Some(on));
+                if resp.on_hover_text(&name).clicked() {
+                    clicked = Some(i);
+                }
             }
-            if on {
-                p.rect_filled(Rect::from_min_size(r.left_top(), vec2(3.0, r.height())), 0.0, T.accent);
-            }
-            // What was found (the text around a match), then where.
-            let what = match kind {
-                Kind::Text => h.context.clone(),
-                _ => h.found.clone(),
-            };
-            let field = crate::i18n::t(field_label(h.field));
-            let place = location(app, h);
-            let half = r.width() * 0.5;
-            let left = Rect::from_min_max(pos2(r.left() + 8.0, r.top()), pos2(r.left() + half, r.bottom()));
-            let right = Rect::from_min_max(pos2(r.left() + half + 6.0, r.top()), pos2(r.right() - 6.0, r.bottom()));
-            let g = p.layout_no_wrap(what.clone(), font(Type::Body), color(Type::Body));
-            p.with_clip_rect(left.intersect(ui.clip_rect())).galley(pos2(left.left(), r.center().y - g.rect.height() / 2.0), g, color(Type::Body));
-            let label = format!("{field} · {place}");
-            p.with_clip_rect(right.intersect(ui.clip_rect())).text(pos2(right.left(), r.center().y), Align2::LEFT_CENTER, &label, font(Type::Caption), color(Type::Caption));
-            let name = tr!("{what}, {field}, {place}", what = what, field = field, place = place);
-            a11y::control(ui, &resp, WidgetType::SelectableLabel, &name, Some(on));
-            if resp.on_hover_text(&name).clicked() {
-                clicked = Some(i);
-            }
-        }
-    });
+        },
+    );
     if let Some(i) = clicked {
         go(app, i, list);
     }

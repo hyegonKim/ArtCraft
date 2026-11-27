@@ -361,7 +361,11 @@ impl Output for Device {
 
     #[cfg(not(sound_output))]
     fn open(&mut self, _: &Arc<Mutex<Shared>>, _: &Arc<AtomicBool>) -> Result<(Box<dyn Any>, u32), String> {
-        Err(if cfg!(target_arch = "wasm32") { tr!("the web version of AniCraft has no sound output yet").into() } else { tr!("this build of AniCraft has no sound output").into() })
+        Err(if cfg!(target_arch = "wasm32") {
+            tr!("the web version of AniCraft has no sound output yet").into()
+        } else {
+            tr!("this build of AniCraft has no sound output").into()
+        })
     }
 
     fn now(&self) -> f64 {
@@ -372,7 +376,13 @@ impl Output for Device {
 /// An output stream whose callback mixes from the player. The lock is held only while one
 /// buffer is mixed; the UI holds it only to change a few fields.
 #[cfg(sound_output)]
-fn build<T: cpal::SizedSample + cpal::FromSample<f32>>(device: &cpal::Device, config: cpal::StreamConfig, shared: &Arc<Mutex<Shared>>, failed: &Arc<AtomicBool>, base: web_time::Instant) -> Result<cpal::Stream, cpal::Error> {
+fn build<T: cpal::SizedSample + cpal::FromSample<f32>>(
+    device: &cpal::Device,
+    config: cpal::StreamConfig,
+    shared: &Arc<Mutex<Shared>>,
+    failed: &Arc<AtomicBool>,
+    base: web_time::Instant,
+) -> Result<cpal::Stream, cpal::Error> {
     use cpal::traits::DeviceTrait;
     let channels = usize::from(config.channels);
     let rate = f64::from(config.sample_rate);

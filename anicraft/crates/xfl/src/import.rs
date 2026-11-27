@@ -23,12 +23,14 @@
 
 use crate::edges::{self, Edge};
 use crate::xml::{self, Element as X};
-use anicraft_doc::{
-    Cap, Dash, Join, StrokeStyle, Bitmap, BitmapId, BlendMode, ColorEffect, ColorTransform, Filter, FilterEntry, FilterSide, Document, Easing, Element, ElementId, ElementKind, GradientStop, Keyframe, Layer, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Stage, Stroke, Symbol, SymbolId,
-    Scene, ShapeHint, SymbolKind, Timeline, Tween, TweenKind, CustomEase, EaseGroup, FrameScript, FrameSound, Language, Linkage, ScaleGrid, SoundSync, SourceScript, Spread, MAX_FOCAL,
-};
 use anicraft_doc::sound::{EnvelopePoint, SoundEffect, clean_points};
-use anicraft_geom::{Affine, FillRule, Path, Vec2};
+use anicraft_doc::{
+    Bitmap, BitmapId, BlendMode, Cap, ColorEffect, ColorTransform, CustomEase, Dash, Document, EaseGroup, Easing, Element, ElementId, ElementKind,
+    Filter, FilterEntry, FilterSide, FrameScript, FrameSound, GradientStop, Join, Keyframe, Language, Layer, LayerId, LayerKind, Linkage, LoopMode,
+    MAX_FOCAL, Paint, Rgba, ScaleGrid, Scene, Shape, ShapeHint, SoundSync, SourceScript, Spread, Stage, Stroke, StrokeStyle, Symbol, SymbolId,
+    SymbolKind, Timeline, Tween, TweenKind,
+};
+use anicraft_geom::{Affine, FillRule, Path, Perspective3D, Vec2};
 use anicraft_text::{FaceMatch, Fonts};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::Arc;
@@ -267,8 +269,15 @@ fn filter_side(el: &X, default: FilterSide) -> FilterSide {
 /// A gradient filter's ramp: its `GradientEntry` children (directly, or in a wrapper), with
 /// ratios 0..1 (or Flash's 0..255).
 fn ramp(el: &X) -> Vec<GradientStop> {
-    let entries = el.children.iter().flat_map(|c| if c.name == "GradientEntry" { std::slice::from_ref(c) } else { c.children.as_slice() }).filter(|g| g.name == "GradientEntry");
-    let raw: Vec<(f32, Rgba)> = entries.take(anicraft_doc::MAX_RAMP_STOPS).map(|g| (g.f32("ratio").filter(|r| r.is_finite()).unwrap_or(0.0), color(g, "color", "alpha"))).collect();
+    let entries = el
+        .children
+        .iter()
+        .flat_map(|c| if c.name == "GradientEntry" { std::slice::from_ref(c) } else { c.children.as_slice() })
+        .filter(|g| g.name == "GradientEntry");
+    let raw: Vec<(f32, Rgba)> = entries
+        .take(anicraft_doc::MAX_RAMP_STOPS)
+        .map(|g| (g.f32("ratio").filter(|r| r.is_finite()).unwrap_or(0.0), color(g, "color", "alpha")))
+        .collect();
     // One scale for the whole ramp: any ratio past 1 means bytes.
     let scale = if raw.iter().any(|(r, _)| *r > 1.0) { 1.0 / 255.0 } else { 1.0 };
     let mut stops: Vec<GradientStop> = raw.into_iter().map(|(r, c)| GradientStop { offset: (r * scale).clamp(0.0, 1.0), color: c }).collect();
@@ -282,9 +291,44 @@ pub(crate) fn color(el: &X, key: &str, alpha_key: &str) -> Rgba {
 }
 
 fn matrix(el: &X) -> Affine {
+    if let Some((aff, _)) = element_matrix3d(el)
+        && el.child("matrix").and_then(|m| m.child("Matrix")).is_none()
+    {
+        return aff;
+    }
     let Some(m) = el.child("matrix").and_then(|m| m.child("Matrix")) else { return Affine::IDENTITY };
-    let a = Affine { m: [m.f32("a").unwrap_or(1.0), m.f32("b").unwrap_or(0.0), m.f32("c").unwrap_or(0.0), m.f32("d").unwrap_or(1.0), m.f32("tx").unwrap_or(0.0), m.f32("ty").unwrap_or(0.0)] };
+    let a = Affine {
+        m: [
+            m.f32("a").unwrap_or(1.0),
+            m.f32("b").unwrap_or(0.0),
+            m.f32("c").unwrap_or(0.0),
+            m.f32("d").unwrap_or(1.0),
+            m.f32("tx").unwrap_or(0.0),
+            m.f32("ty").unwrap_or(0.0),
+        ],
+    };
     if a.is_finite() { a } else { Affine::IDENTITY }
+}
+
+fn transformation_point(el: &X) -> Vec2 {
+    el.child("transformationPoint")
+        .and_then(|tp| tp.child("Point"))
+        .map(|pt| Vec2::new(pt.f32("x").unwrap_or(0.0), pt.f32("y").unwrap_or(0.0)))
+        .filter(|v| v.is_finite())
+        .unwrap_or(Vec2::ZERO)
+}
+
+fn element_matrix3d(el: &X) -> Option<(Affine, Perspective3D)> {
+    let raw = el.attr("matrix3D").or_else(|| el.child("matrix3D").and_then(|c| c.attr("rawData").or(Some(c.text.as_str()))))?;
+    let pivot = transformation_point(el);
+    let (aff, mut persp) = Perspective3D::parse_matrix3d_attr(raw, pivot)?;
+    if let Some(fov) = el.f32("fov").or_else(|| el.f32("perspectiveAngle"))
+        && fov.is_finite()
+    {
+        persp.fov_deg = fov;
+        persp = persp.sanitized();
+    }
+    Some((aff, persp))
 }
 
 /// Half the side of the square XFL gradients are defined on, in pixels (16384 twips / 20).
@@ -297,7 +341,12 @@ fn paint(def: &X, bitmaps: &HashMap<String, BitmapId>, report: &mut Report) -> O
         "SolidColor" => Some(Paint::Solid(color(def, "color", "alpha"))),
         "LinearGradient" | "RadialGradient" => {
             let m = matrix(def);
-            let stops: Vec<GradientStop> = def.children.iter().filter(|c| c.name == "GradientEntry").map(|g| GradientStop { offset: g.f32("ratio").unwrap_or(0.0).clamp(0.0, 1.0), color: color(g, "color", "alpha") }).collect();
+            let stops: Vec<GradientStop> = def
+                .children
+                .iter()
+                .filter(|c| c.name == "GradientEntry")
+                .map(|g| GradientStop { offset: g.f32("ratio").unwrap_or(0.0).clamp(0.0, 1.0), color: color(g, "color", "alpha") })
+                .collect();
             if stops.is_empty() {
                 return None;
             }
@@ -305,7 +354,11 @@ fn paint(def: &X, bitmaps: &HashMap<String, BitmapId>, report: &mut Report) -> O
             let spread = def.attr("spreadMethod").and_then(|s| Spread::from_key(s.trim())).unwrap_or_default();
             let linear_rgb = def.attr("interpolationMethod").is_some_and(|s| s.trim() == "linearRGB");
             let frame = m.mul(&Affine::scale(GRADIENT_HALF, GRADIENT_HALF));
-            let mut p = if def.name == "LinearGradient" { Paint::linear(Vec2::new(-1.0, 0.0), Vec2::new(1.0, 0.0), stops) } else { Paint::radial(Vec2::ZERO, 1.0, stops) };
+            let mut p = if def.name == "LinearGradient" {
+                Paint::linear(Vec2::new(-1.0, 0.0), Vec2::new(1.0, 0.0), stops)
+            } else {
+                Paint::radial(Vec2::ZERO, 1.0, stops)
+            };
             match &mut p {
                 Paint::Linear { spread: s, linear_rgb: l, .. } => {
                     *s = spread;
@@ -389,26 +442,47 @@ impl<'a> Builder<'a> {
     fn shape(&mut self, el: &X, parent: &Affine, out: &mut Vec<Arc<Element>>, loose: bool) {
         let m = parent.mul(&matrix(el));
         let merge = loose && !el.bool("isDrawingObject").unwrap_or(false);
-        let fills: Vec<(u32, Option<Paint>)> = el.list("fills").iter().map(|f| (f.u32("index").unwrap_or(0), f.children.first().and_then(|d| paint(d, &self.bitmaps, &mut self.report)))).collect();
-        let strokes: Vec<(u32, Option<Stroke>)> = el.list("strokes").iter().map(|s| (s.u32("index").unwrap_or(0), s.children.first().and_then(|d| stroke(d, &self.bitmaps, &mut self.report)))).collect();
+        let fills: Vec<(u32, Option<Paint>)> = el
+            .list("fills")
+            .iter()
+            .map(|f| (f.u32("index").unwrap_or(0), f.children.first().and_then(|d| paint(d, &self.bitmaps, &mut self.report))))
+            .collect();
+        let strokes: Vec<(u32, Option<Stroke>)> = el
+            .list("strokes")
+            .iter()
+            .map(|s| (s.u32("index").unwrap_or(0), s.children.first().and_then(|d| stroke(d, &self.bitmaps, &mut self.report))))
+            .collect();
         let edges: Vec<Edge> = el
             .list("edges")
             .iter()
             .filter(|e| e.name == "Edge")
-            .map(|e| Edge { fill_left: e.u32("fillStyle0").unwrap_or(0), fill_right: e.u32("fillStyle1").unwrap_or(0), stroke: e.u32("strokeStyle").unwrap_or(0), segs: e.attr("edges").map(edges::parse).unwrap_or_default() })
+            .map(|e| Edge {
+                fill_left: e.u32("fillStyle0").unwrap_or(0),
+                fill_right: e.u32("fillStyle1").unwrap_or(0),
+                stroke: e.u32("strokeStyle").unwrap_or(0),
+                segs: e.attr("edges").map(edges::parse).unwrap_or_default(),
+            })
             .collect();
         for (index, p) in fills {
             let (Some(p), true) = (p, index > 0) else { continue };
             let path = edges::fill_path(&edges, index);
             if !path.is_empty() {
-                out.push(self.element(ElementKind::Shape(Shape { path: Arc::new(path), fill: Some(p), stroke: None, fill_rule: FillRule::EvenOdd, merge, warp: None }), m, ColorEffect::default()));
+                out.push(self.element(
+                    ElementKind::Shape(Shape { path: Arc::new(path), fill: Some(p), stroke: None, fill_rule: FillRule::EvenOdd, merge, warp: None }),
+                    m,
+                    ColorEffect::default(),
+                ));
             }
         }
         for (index, s) in strokes {
             let (Some(s), true) = (s, index > 0) else { continue };
             let path = edges::stroke_path(&edges, index);
             if !path.is_empty() {
-                out.push(self.element(ElementKind::Shape(Shape { path: Arc::new(path), fill: None, stroke: Some(s), fill_rule: FillRule::NonZero, merge, warp: None }), m, ColorEffect::default()));
+                out.push(self.element(
+                    ElementKind::Shape(Shape { path: Arc::new(path), fill: None, stroke: Some(s), fill_rule: FillRule::NonZero, merge, warp: None }),
+                    m,
+                    ColorEffect::default(),
+                ));
             }
         }
     }
@@ -420,23 +494,41 @@ impl<'a> Builder<'a> {
         if !(w > 0.0 && h > 0.0) {
             return;
         }
-        let path = if el.name == "DOMOvalObject" { Path::ellipse(x + w / 2.0, y + h / 2.0, w / 2.0, h / 2.0) } else { Path::rounded_rect(x, y, w, h, el.f32("topLeftRadius").unwrap_or(0.0).max(0.0)) };
+        let path = if el.name == "DOMOvalObject" {
+            Path::ellipse(x + w / 2.0, y + h / 2.0, w / 2.0, h / 2.0)
+        } else {
+            Path::rounded_rect(x, y, w, h, el.f32("topLeftRadius").unwrap_or(0.0).max(0.0))
+        };
         let fill = el.child("fill").and_then(|f| f.children.first()).and_then(|d| paint(d, &self.bitmaps, &mut self.report));
         let stroke = el.child("stroke").and_then(|s| s.children.first()).and_then(|d| stroke(d, &self.bitmaps, &mut self.report));
         if fill.is_some() || stroke.is_some() {
             let m = parent.mul(&matrix(el));
-            out.push(self.element(ElementKind::Shape(Shape { path: Arc::new(path), fill, stroke, fill_rule: FillRule::NonZero, merge: false, warp: None }), m, ColorEffect::default()));
+            out.push(self.element(
+                ElementKind::Shape(Shape { path: Arc::new(path), fill, stroke, fill_rule: FillRule::NonZero, merge: false, warp: None }),
+                m,
+                ColorEffect::default(),
+            ));
         }
     }
 
     /// A bitmap instance: a rectangle of the image's size showing it, as Import to Stage makes.
     fn bitmap_instance(&mut self, el: &X, parent: &Affine, out: &mut Vec<Arc<Element>>) {
-        let found = el.attr("libraryItemName").and_then(|n| self.bitmaps.get(n)).and_then(|&id| self.doc.bitmap(id).map(|b| (id, b.width as f32, b.height as f32)));
+        let found = el
+            .attr("libraryItemName")
+            .and_then(|n| self.bitmaps.get(n))
+            .and_then(|&id| self.doc.bitmap(id).map(|b| (id, b.width as f32, b.height as f32)));
         let Some((bitmap, w, h)) = found else {
             self.report.skip("instances of missing bitmaps");
             return;
         };
-        let shape = Shape { path: Arc::new(Path::rect(0.0, 0.0, w, h)), fill: Some(Paint::Bitmap { bitmap, repeat: false, matrix: Affine::IDENTITY }), stroke: None, fill_rule: FillRule::NonZero, merge: false, warp: None };
+        let shape = Shape {
+            path: Arc::new(Path::rect(0.0, 0.0, w, h)),
+            fill: Some(Paint::Bitmap { bitmap, repeat: false, matrix: Affine::IDENTITY }),
+            stroke: None,
+            fill_rule: FillRule::NonZero,
+            merge: false,
+            warp: None,
+        };
         out.push(self.element(ElementKind::Shape(shape), parent.mul(&matrix(el)), ColorEffect::default()));
     }
 
@@ -453,7 +545,14 @@ impl<'a> Builder<'a> {
         let size = |k: &str, natural: f32| el.f32(k).map(|t| t / TWIPS).filter(|v| v.is_finite() && *v > 0.0 && *v <= 100_000.0).unwrap_or(natural);
         let (fw, fh) = (size("frameRight", w), size("frameBottom", h));
         let fit = Affine::scale(fw / w, fh / h);
-        let shape = Shape { path: Arc::new(Path::rect(0.0, 0.0, w, h)), fill: Some(Paint::Bitmap { bitmap, repeat: false, matrix: Affine::IDENTITY }), stroke: None, fill_rule: FillRule::NonZero, merge: false, warp: None };
+        let shape = Shape {
+            path: Arc::new(Path::rect(0.0, 0.0, w, h)),
+            fill: Some(Paint::Bitmap { bitmap, repeat: false, matrix: Affine::IDENTITY }),
+            stroke: None,
+            fill_rule: FillRule::NonZero,
+            merge: false,
+            warp: None,
+        };
         out.push(self.element(ElementKind::Shape(shape), parent.mul(&matrix(el)).mul(&fit), ColorEffect::default()));
     }
 
@@ -481,8 +580,21 @@ impl<'a> Builder<'a> {
                     knockout: flag("knockout"),
                     hide_object: flag("hideObject"),
                 },
-                "GlowFilter" => Filter::Glow { blur_x: num("blurX", 5.0), blur_y: num("blurY", 5.0), strength: num("strength", 1.0), quality, color: color(f, "color", "alpha"), inner: flag("inner"), knockout: flag("knockout") },
-                "AdjustColorFilter" => Filter::AdjustColor { brightness: num("brightness", 0.0), contrast: num("contrast", 0.0), saturation: num("saturation", 0.0), hue: num("hue", 0.0) },
+                "GlowFilter" => Filter::Glow {
+                    blur_x: num("blurX", 5.0),
+                    blur_y: num("blurY", 5.0),
+                    strength: num("strength", 1.0),
+                    quality,
+                    color: color(f, "color", "alpha"),
+                    inner: flag("inner"),
+                    knockout: flag("knockout"),
+                },
+                "AdjustColorFilter" => Filter::AdjustColor {
+                    brightness: num("brightness", 0.0),
+                    contrast: num("contrast", 0.0),
+                    saturation: num("saturation", 0.0),
+                    hue: num("hue", 0.0),
+                },
                 "BevelFilter" => Filter::Bevel {
                     blur_x: num("blurX", 5.0),
                     blur_y: num("blurY", 5.0),
@@ -491,18 +603,43 @@ impl<'a> Builder<'a> {
                     angle: num("angle", 45.0),
                     distance: num("distance", 5.0),
                     shadow_color: color(f, "shadowColor", "shadowAlpha"),
-                    highlight_color: if f.attr("highlightColor").is_some() { color(f, "highlightColor", "highlightAlpha") } else { Rgba::WHITE.with_alpha(num("highlightAlpha", 1.0).clamp(0.0, 1.0)) },
+                    highlight_color: if f.attr("highlightColor").is_some() {
+                        color(f, "highlightColor", "highlightAlpha")
+                    } else {
+                        Rgba::WHITE.with_alpha(num("highlightAlpha", 1.0).clamp(0.0, 1.0))
+                    },
                     side: filter_side(f, FilterSide::Inner),
                     knockout: flag("knockout"),
                 },
                 "GradientGlowFilter" | "GradientBevelFilter" => {
                     let glow = f.name == "GradientGlowFilter";
-                    let (blur_x, blur_y, strength, angle, distance, knockout) = (num("blurX", 5.0), num("blurY", 5.0), num("strength", 1.0), num("angle", 45.0), num("distance", 5.0), flag("knockout"));
+                    let (blur_x, blur_y, strength, angle, distance, knockout) =
+                        (num("blurX", 5.0), num("blurY", 5.0), num("strength", 1.0), num("angle", 45.0), num("distance", 5.0), flag("knockout"));
                     let stops = ramp(f);
                     if glow {
-                        Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops: if stops.is_empty() { anicraft_doc::default_glow_ramp() } else { stops }, side: filter_side(f, FilterSide::Outer), knockout }
+                        Filter::GradientGlow {
+                            blur_x,
+                            blur_y,
+                            strength,
+                            quality,
+                            angle,
+                            distance,
+                            stops: if stops.is_empty() { anicraft_doc::default_glow_ramp() } else { stops },
+                            side: filter_side(f, FilterSide::Outer),
+                            knockout,
+                        }
                     } else {
-                        Filter::GradientBevel { blur_x, blur_y, strength, quality, angle, distance, stops: if stops.is_empty() { anicraft_doc::default_bevel_ramp() } else { stops }, side: filter_side(f, FilterSide::Inner), knockout }
+                        Filter::GradientBevel {
+                            blur_x,
+                            blur_y,
+                            strength,
+                            quality,
+                            angle,
+                            distance,
+                            stops: if stops.is_empty() { anicraft_doc::default_bevel_ramp() } else { stops },
+                            side: filter_side(f, FilterSide::Inner),
+                            knockout,
+                        }
                     }
                 }
                 _ => {
@@ -525,7 +662,13 @@ impl<'a> Builder<'a> {
         let m = parent.mul(&matrix(el));
         let name: String = el.attr("name").unwrap_or("").chars().take(256).collect();
         for (i, p) in crate::text::field(el, fonts, &mut self.faces, &mut self.report).into_iter().enumerate() {
-            let mut e = Element { id: ElementId(self.doc.alloc_id()), name: String::new(), transform: m.mul(&Affine::translate(p.offset.x, p.offset.y)), color: ColorEffect::default(), kind: ElementKind::Text(Arc::new(p.block)) };
+            let mut e = Element {
+                id: ElementId(self.doc.alloc_id()),
+                name: String::new(),
+                transform: m.mul(&Affine::translate(p.offset.x, p.offset.y)),
+                color: ColorEffect::default(),
+                kind: ElementKind::Text(Arc::new(p.block)),
+            };
             // A dynamic or input field's instance name goes on it (its first block for static
             // text, which keeps the name for a later conversion).
             if i == 0 {
@@ -585,7 +728,13 @@ impl<'a> Builder<'a> {
         // Blend modes by Animate's names; unknown ones stay Normal.
         let blend = el.attr("blendMode").and_then(BlendMode::from_key).unwrap_or_default();
         let filters = self.filters(el);
-        let mut e = Element { id: ElementId(self.doc.alloc_id()), name: String::new(), transform: m, color: fx, kind: ElementKind::Symbol { symbol, loop_mode, first_frame, blend, filters, events: Vec::new() } };
+        let mut e = Element {
+            id: ElementId(self.doc.alloc_id()),
+            name: String::new(),
+            transform: m,
+            color: fx,
+            kind: ElementKind::Symbol { symbol, loop_mode, first_frame, blend, filters, events: Vec::new() },
+        };
         // The instance name actions address it by (ADR 0024); one they couldn't is reported.
         if let Some(name) = el.attr("name").map(str::trim).filter(|n| !n.is_empty()) {
             if anicraft_doc::actions::valid_instance_name(name) {
@@ -602,11 +751,19 @@ impl<'a> Builder<'a> {
         out.push(Arc::new(e));
     }
 
-    fn elements(&mut self, list: &[X], parent: &Affine, out: &mut Vec<Arc<Element>>, depth: usize) {
+    fn elements(
+        &mut self,
+        list: &[X],
+        parent: &Affine,
+        out: &mut Vec<Arc<Element>>,
+        perspectives: &mut BTreeMap<ElementId, Perspective3D>,
+        depth: usize,
+    ) {
         if depth > 64 {
             return;
         }
         for el in list {
+            let before = out.len();
             match el.name.as_str() {
                 // Shapes loose on a frame, or in a group, are raw shapes (a group's merge only with
                 // each other, ADR 0073); drawing objects say so.
@@ -614,7 +771,8 @@ impl<'a> Builder<'a> {
                 // A group (ADR 0073): its members in its own space, placed by its matrix.
                 "DOMGroup" if depth < anicraft_doc::MAX_GROUP_DEPTH => {
                     let mut members = Vec::new();
-                    self.elements(el.list("members"), &Affine::IDENTITY, &mut members, depth + 1);
+                    let mut ignored_persp = BTreeMap::new();
+                    self.elements(el.list("members"), &Affine::IDENTITY, &mut members, &mut ignored_persp, depth + 1);
                     if !members.is_empty() {
                         let layer = LayerId(self.doc.alloc_id());
                         let g = self.element(ElementKind::group(layer, members), parent.mul(&matrix(el)), ColorEffect::default());
@@ -629,27 +787,52 @@ impl<'a> Builder<'a> {
                 "DOMVideoInstance" => self.video_instance(el, parent, out),
                 _ => self.report.skip("other elements"),
             }
+            if depth == 0
+                && let Some((_, persp)) = element_matrix3d(el)
+                && !persp.is_identity()
+            {
+                for added in &out[before..] {
+                    perspectives.insert(added.id, persp);
+                }
+            }
         }
     }
 
     fn timeline(&mut self, tl: &X) -> Timeline {
         let mut layers = Vec::new();
         // Layers by their position in the file's layer list: `parentLayerIndex` points at a
-        // layer's folder or mask. Links that don't fit AniCraft's rules are dropped by
-        // `repair_masks` below.
-        let mut by_index: Vec<LayerId> = Vec::new();
-        for l in tl.list("layers").iter().filter(|l| l.name == "DOMLayer").take(MAX_LAYERS) {
+        // layer's folder, mask, guide, or direct transform parent layer.
+        let dom_layers: Vec<&X> = tl.list("layers").iter().filter(|l| l.name == "DOMLayer").take(MAX_LAYERS).collect();
+        let mut by_index: Vec<(LayerId, LayerKind)> = Vec::with_capacity(dom_layers.len());
+        for l in &dom_layers {
             let kind = match l.attr("layerType") {
                 Some("folder") => LayerKind::Folder,
                 Some("guide") => LayerKind::Guide,
                 Some("mask") => LayerKind::Mask,
                 _ => LayerKind::Normal,
             };
-            let id = LayerId(self.doc.alloc_id());
-            by_index.push(id);
+            by_index.push((LayerId(self.doc.alloc_id()), kind));
+        }
+        let mut pending_parent_idx: Vec<Option<usize>> = Vec::with_capacity(dom_layers.len());
+        for (idx, l) in dom_layers.iter().enumerate() {
+            let (id, kind) = by_index[idx];
             let mut layer = Layer::new(id, l.attr("name").unwrap_or("Layer"));
             layer.kind = kind;
-            layer.parent = l.u32("parentLayerIndex").and_then(|i| by_index.get(i as usize).copied()).filter(|p| *p != id);
+            let raw_parent = l.u32("parentLayerIndex").map(|i| i as usize).filter(|&i| i != idx && i < by_index.len());
+            pending_parent_idx.push(raw_parent);
+            if let Some(pi) = raw_parent {
+                let (pid, pkind) = by_index[pi];
+                if matches!(pkind, LayerKind::Folder | LayerKind::Mask | LayerKind::Guide) {
+                    layer.parent = Some(pid);
+                } else {
+                    layer.parent_layer = Some(pid);
+                }
+            }
+            if let Some(zd) = l.f32("zDepth").or_else(|| l.f32("layerDepth"))
+                && zd.is_finite()
+            {
+                layer.depth = anicraft_doc::camera::clamp_depth(zd);
+            }
             if kind == LayerKind::Folder {
                 // A folder holds layers, never frames.
                 layer.keyframes.clear();
@@ -682,7 +865,9 @@ impl<'a> Builder<'a> {
                     Some(t @ ("motion" | "shape")) => {
                         let kind = if t == "shape" { TweenKind::Shape } else { TweenKind::Classic };
                         let orient = f.bool("motionTweenOrientToPath").unwrap_or(false);
-                        if kind == TweenKind::Classic && f.attr("motionTweenRotate").is_some_and(|r| matches!(r.trim(), "clockwise" | "counter-clockwise")) {
+                        if kind == TweenKind::Classic
+                            && f.attr("motionTweenRotate").is_some_and(|r| matches!(r.trim(), "clockwise" | "counter-clockwise"))
+                        {
                             self.report.skip("tween spins (turned the shortest way)");
                         }
                         let (easing, groups) = self.easing(f);
@@ -703,8 +888,10 @@ impl<'a> Builder<'a> {
                     k.sound = self.frame_sound(f, name);
                 }
                 let mut els = Vec::new();
-                self.elements(f.list("elements"), &Affine::IDENTITY, &mut els, 0);
+                let mut perspectives = BTreeMap::new();
+                self.elements(f.list("elements"), &Affine::IDENTITY, &mut els, &mut perspectives, 0);
                 k.elements = els;
+                k.perspectives = perspectives;
                 keys.push(Arc::new(k));
             }
             if !keys.is_empty() {
@@ -740,7 +927,11 @@ impl<'a> Builder<'a> {
         }
         // Compiling here also fills the script's cache for Test Movie (ADR 0013 tier 2).
         let what = format!("frame scripts in {}", self.language.label());
-        if script.runs() { self.report.run(&what) } else { self.report.keep(&what) }
+        if script.runs() {
+            self.report.run(&what)
+        } else {
+            self.report.keep(&what)
+        }
         Some(FrameScript::Source(Arc::new(script)))
     }
 
@@ -792,7 +983,13 @@ impl<'a> Builder<'a> {
     fn ease_curve(&mut self, c: &X) -> Option<Easing> {
         // Far more than a curve keeps (longer ones are thinned), and one more to tell.
         const MAX_READ: usize = anicraft_doc::MAX_EASE_POINTS * 3 * 16 + 1;
-        let pts: Vec<Vec2> = c.children.iter().filter(|p| p.name == "Point").take(MAX_READ + 1).map(|p| Vec2::new(p.f32("x").unwrap_or(0.0), p.f32("y").unwrap_or(0.0))).collect();
+        let pts: Vec<Vec2> = c
+            .children
+            .iter()
+            .filter(|p| p.name == "Point")
+            .take(MAX_READ + 1)
+            .map(|p| Vec2::new(p.f32("x").unwrap_or(0.0), p.f32("y").unwrap_or(0.0)))
+            .collect();
         if pts.len() > MAX_READ {
             self.report.skip("custom ease curves too long to read (drawn with the simple ease)");
             return None;
@@ -1284,7 +1481,19 @@ fn import_from<'a>(read: &'a Reader<'a>, fonts: Option<&'a Fonts>) -> Result<(Do
     if root.name != "DOMDocument" {
         return Err(XflError::NotXfl(format!("the root element is <{}>", root.name)));
     }
-    let mut b = Builder { doc: Document::default(), read, ids: HashMap::new(), pending: Vec::new(), language: Language::ActionScript3, bitmaps: HashMap::new(), sounds: HashMap::new(), videos: HashMap::new(), report: Report::default(), fonts, faces: HashMap::new() };
+    let mut b = Builder {
+        doc: Document::default(),
+        read,
+        ids: HashMap::new(),
+        pending: Vec::new(),
+        language: Language::ActionScript3,
+        bitmaps: HashMap::new(),
+        sounds: HashMap::new(),
+        videos: HashMap::new(),
+        report: Report::default(),
+        fonts,
+        faces: HashMap::new(),
+    };
     b.publish_settings()?;
     // Only symbols keep a script class yet.
     for _ in root.list("media").iter().filter(|m| m.attr("linkageClassName").is_some_and(|c| !c.trim().is_empty())) {
@@ -1308,7 +1517,8 @@ fn import_from<'a>(read: &'a Reader<'a>, fonts: Option<&'a Fonts>) -> Result<(Do
     // Every DOMTimeline is a scene, in order.
     let scenes: Vec<&X> = root.list("timelines").iter().filter(|t| t.name == "DOMTimeline").take(anicraft_doc::MAX_SCENES).collect();
     for (i, tl) in scenes.iter().enumerate() {
-        let name: String = tl.attr("name").filter(|n| !n.trim().is_empty()).map_or_else(|| format!("Scene {}", i + 1), |n| n.chars().take(256).collect());
+        let name: String =
+            tl.attr("name").filter(|n| !n.trim().is_empty()).map_or_else(|| format!("Scene {}", i + 1), |n| n.chars().take(256).collect());
         let timeline = b.timeline(tl);
         b.doc.scenes.push(Arc::new(Scene { name, timeline, guides: Vec::new() }));
     }
@@ -1345,7 +1555,9 @@ fn fla_from(data: &[u8], fonts: Option<&Fonts>) -> Result<(Document, Report), Xf
         return Err(XflError::NotXfl("the file is too large".into()));
     }
     if data.starts_with(&OLE_MAGIC) {
-        return Err(XflError::NotXfl("this .fla was saved by Flash CS4 or earlier, in a format AniCraft can't read: open it in Animate and save it again".into()));
+        return Err(XflError::NotXfl(
+            "this .fla was saved by Flash CS4 or earlier, in a format AniCraft can't read: open it in Animate and save it again".into(),
+        ));
     }
     let archive = crate::zip::Archive::open(data)?;
     let root = package_root(&archive)?;
@@ -1361,7 +1573,8 @@ fn package_root(archive: &crate::zip::Archive<'_>) -> Result<String, XflError> {
     if archive.names().any(|n| n == "DOMDocument.xml") {
         return Ok(String::new());
     }
-    let mut tops: Vec<&str> = archive.names().filter_map(|n| n.strip_suffix("/DOMDocument.xml")).filter(|top| !top.contains('/') && *top != "__MACOSX").collect();
+    let mut tops: Vec<&str> =
+        archive.names().filter_map(|n| n.strip_suffix("/DOMDocument.xml")).filter(|top| !top.contains('/') && *top != "__MACOSX").collect();
     tops.sort_unstable();
     match tops.as_slice() {
         [] => Ok(String::new()),
@@ -1369,7 +1582,11 @@ fn package_root(archive: &crate::zip::Archive<'_>) -> Result<String, XflError> {
         many => {
             let names: Vec<String> = many.iter().take(5).map(|t| t.chars().take(80).collect()).collect();
             let more = if many.len() > 5 { format!(" and {} more", many.len() - 5) } else { String::new() };
-            Err(XflError::NotXfl(format!("the archive holds {} Animate documents ({}{more}): unzip it and open one of them", many.len(), names.join(", "))))
+            Err(XflError::NotXfl(format!(
+                "the archive holds {} Animate documents ({}{more}): unzip it and open one of them",
+                many.len(),
+                names.join(", ")
+            )))
         }
     }
 }

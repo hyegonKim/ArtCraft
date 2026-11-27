@@ -40,7 +40,13 @@ fn rig() -> (Armature, Vec<Arc<Element>>) {
     };
     rebind(&mut arm);
     let shape = Shape { path, ..Shape::filled(Path::new(), Paint::Solid(Rgba::BLACK)) }.with_stroke(Rgba::BLACK, 3.0);
-    let el = Arc::new(Element { id: TAIL, name: String::new(), transform: Affine::translate(100.0, 100.0), color: ColorEffect::default(), kind: ElementKind::Shape(shape) });
+    let el = Arc::new(Element {
+        id: TAIL,
+        name: String::new(),
+        transform: Affine::translate(100.0, 100.0),
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(shape),
+    });
     (arm, vec![el])
 }
 
@@ -231,7 +237,8 @@ fn sanitize_repairs_hostile_skins() {
     let (mut arm, _) = rig();
     let skin = arm.skin.as_mut().unwrap();
     skin.points.truncate(3);
-    skin.points[0] = Binding { bones: vec![Influence(B1, f32::NAN), Influence(BoneId(99), 1.0), Influence(B2, 3.0), Influence(B2, 1.0)], manual: true };
+    skin.points[0] =
+        Binding { bones: vec![Influence(B1, f32::NAN), Influence(BoneId(99), 1.0), Influence(B2, 3.0), Influence(B2, 1.0)], manual: true };
     skin.points[1] = Binding { bones: vec![Influence(B1, -1.0)], manual: false };
     skin.points[2] = Binding { bones: vec![], manual: true };
     assert!(arm.sanitize());

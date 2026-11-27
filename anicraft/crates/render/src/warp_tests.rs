@@ -123,7 +123,8 @@ fn the_gpu_stage_gets_the_same_prepared_fill() {
     let s = warped(vec![pin(1, (16.0, 8.0), (20.0, 8.0)), pin(2, (2.0, 2.0), (2.0, 2.0))], 6);
     let dl = DisplayList { items: vec![item(&s, Affine::IDENTITY, true)], ..Default::default() };
     let view = View { transform: Affine::IDENTITY, width: 48, height: 24, background: None };
-    let (scene, _) = prepare_scene(&dl, &view).unwrap_or_else(|_| (Scene { fills: Vec::new(), clips: Vec::new(), groups: Vec::new(), layers: Vec::new() }, RenderStats::default()));
+    let (scene, _) = prepare_scene(&dl, &view)
+        .unwrap_or_else(|_| (Scene { fills: Vec::new(), clips: Vec::new(), groups: Vec::new(), layers: Vec::new() }, RenderStats::default()));
     assert_eq!(scene.fills.len(), 1);
     assert!(matches!(&scene.fills[0].shader, paint::Shader::Bitmap { smooth: false, repeat: false, .. }));
 }

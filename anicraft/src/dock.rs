@@ -35,7 +35,21 @@ pub enum Panel {
 
 impl Panel {
     /// In the Window menu's order.
-    pub const ALL: [Panel; 13] = [Panel::Actions, Panel::Align, Panel::Colour, Panel::History, Panel::LayerDepth, Panel::Library, Panel::MotionEditor, Panel::MovieExplorer, Panel::Output, Panel::Properties, Panel::Swatches, Panel::Timeline, Panel::Tools];
+    pub const ALL: [Panel; 13] = [
+        Panel::Actions,
+        Panel::Align,
+        Panel::Colour,
+        Panel::History,
+        Panel::LayerDepth,
+        Panel::Library,
+        Panel::MotionEditor,
+        Panel::MovieExplorer,
+        Panel::Output,
+        Panel::Properties,
+        Panel::Swatches,
+        Panel::Timeline,
+        Panel::Tools,
+    ];
 
     /// Its machine name, in the preferences (English, never translated).
     pub fn id(self) -> &'static str {
@@ -263,8 +277,15 @@ pub struct Home {
 /// Where a panel is now.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Place {
-    Docked { side: Side, group: usize, tab: usize },
-    Floating { window: usize, tab: usize },
+    Docked {
+        side: Side,
+        group: usize,
+        tab: usize,
+    },
+    Floating {
+        window: usize,
+        tab: usize,
+    },
     /// The tools' slim bar on a side of the editor.
     Bar(Side),
 }
@@ -703,7 +724,8 @@ fn default_home(p: Panel) -> Home {
 // ----- workspaces ---------------------------------------------------------------------------------
 
 /// The built-in workspaces: `(key, name)`. The name is English, translated where shown.
-pub const BUILT_IN: [(&str, &str); 3] = [("essentials", tr_noop!("Essentials")), ("animator", tr_noop!("Animator")), ("designer", tr_noop!("Designer"))];
+pub const BUILT_IN: [(&str, &str); 3] =
+    [("essentials", tr_noop!("Essentials")), ("animator", tr_noop!("Animator")), ("designer", tr_noop!("Designer"))];
 
 /// Most workspaces of your own kept, and the longest name one has.
 pub const MAX_SAVED: usize = 50;
@@ -716,20 +738,41 @@ pub fn built_in(key: &str) -> Option<Layout> {
         // Today's layout: Properties, Align, Library with the Movie Explorer, History on the
         // right; the timeline and the Motion Editor below the stage.
         "essentials" => Layout {
-            right: zone(vec![Group::of(&[Panel::Properties], 6.4), Group::of(&[Panel::Align], 1.3), Group::of(&[Panel::Library, Panel::MovieExplorer], 3.2), Group::of(&[Panel::History], 1.4)], None),
+            right: zone(
+                vec![
+                    Group::of(&[Panel::Properties], 6.4),
+                    Group::of(&[Panel::Align], 1.3),
+                    Group::of(&[Panel::Library, Panel::MovieExplorer], 3.2),
+                    Group::of(&[Panel::History], 1.4),
+                ],
+                None,
+            ),
             bottom: zone(vec![Group::of(&[Panel::Timeline, Panel::MotionEditor], 1.0)], None),
             ..Layout::default()
         },
         // Animation first: a tall timeline with the Output and History beside it, a slim right
         // dock.
         "animator" => Layout {
-            right: zone(vec![Group::of(&[Panel::Properties, Panel::Align], 5.0), Group::of(&[Panel::Library, Panel::MovieExplorer], 4.0)], Some(280.0)),
-            bottom: zone(vec![Group::of(&[Panel::Timeline, Panel::MotionEditor], 3.0), Group::of(&[Panel::Output, Panel::History], 1.0)], Some(440.0)),
+            right: zone(
+                vec![Group::of(&[Panel::Properties, Panel::Align], 5.0), Group::of(&[Panel::Library, Panel::MovieExplorer], 4.0)],
+                Some(280.0),
+            ),
+            bottom: zone(
+                vec![Group::of(&[Panel::Timeline, Panel::MotionEditor], 3.0), Group::of(&[Panel::Output, Panel::History], 1.0)],
+                Some(440.0),
+            ),
             ..Layout::default()
         },
         // Drawing first: a wide Properties with Colour, Swatches and Align, a short timeline.
         "designer" => Layout {
-            right: zone(vec![Group::of(&[Panel::Properties], 6.0), Group::of(&[Panel::Colour, Panel::Swatches, Panel::Align], 2.6), Group::of(&[Panel::Library, Panel::MovieExplorer, Panel::History], 3.6)], Some(400.0)),
+            right: zone(
+                vec![
+                    Group::of(&[Panel::Properties], 6.0),
+                    Group::of(&[Panel::Colour, Panel::Swatches, Panel::Align], 2.6),
+                    Group::of(&[Panel::Library, Panel::MovieExplorer, Panel::History], 3.6),
+                ],
+                Some(400.0),
+            ),
             bottom: zone(vec![Group::of(&[Panel::Timeline, Panel::MotionEditor], 1.0)], Some(200.0)),
             ..Layout::default()
         },
@@ -896,7 +939,11 @@ impl Workspaces {
 
     /// Holds what was read from the preferences file to sane bounds.
     pub fn tidy(&mut self) {
-        let mut saved: BTreeMap<String, Layout> = std::mem::take(&mut self.saved).into_iter().filter(|(k, _)| !k.trim().is_empty() && k.chars().count() <= MAX_NAME && built_in(k).is_none()).take(MAX_SAVED).collect();
+        let mut saved: BTreeMap<String, Layout> = std::mem::take(&mut self.saved)
+            .into_iter()
+            .filter(|(k, _)| !k.trim().is_empty() && k.chars().count() <= MAX_NAME && built_in(k).is_none())
+            .take(MAX_SAVED)
+            .collect();
         for l in saved.values_mut() {
             l.tidy();
         }
@@ -923,7 +970,10 @@ fn lenient_vec<'de, D: Deserializer<'de>, T: DeserializeOwned>(d: D) -> Result<V
 /// A map whose entries this build can't read are skipped.
 fn lenient_map<'de, D: Deserializer<'de>, K: DeserializeOwned + Ord, V: DeserializeOwned>(d: D) -> Result<BTreeMap<K, V>, D::Error> {
     let raw = serde_json::Map::<String, serde_json::Value>::deserialize(d)?;
-    Ok(raw.into_iter().filter_map(|(k, v)| Some((serde_json::from_value(serde_json::Value::String(k)).ok()?, serde_json::from_value(v).ok()?))).collect())
+    Ok(raw
+        .into_iter()
+        .filter_map(|(k, v)| Some((serde_json::from_value(serde_json::Value::String(k)).ok()?, serde_json::from_value(v).ok()?)))
+        .collect())
 }
 
 fn lenient_option<'de, D: Deserializer<'de>, T: DeserializeOwned>(d: D) -> Result<Option<T>, D::Error> {
@@ -952,7 +1002,10 @@ mod tests {
     fn essentials_is_todays_layout() {
         let l = essentials();
         let tabs = |z: &Zone| z.groups.iter().map(|g| g.tabs.clone()).collect::<Vec<_>>();
-        assert_eq!(tabs(&l.right), vec![vec![Panel::Properties], vec![Panel::Align], vec![Panel::Library, Panel::MovieExplorer], vec![Panel::History]]);
+        assert_eq!(
+            tabs(&l.right),
+            vec![vec![Panel::Properties], vec![Panel::Align], vec![Panel::Library, Panel::MovieExplorer], vec![Panel::History]]
+        );
         assert_eq!(tabs(&l.bottom), vec![vec![Panel::Timeline, Panel::MotionEditor]]);
         assert!(l.left.groups.is_empty() && l.top.groups.is_empty() && l.floating.is_empty());
         assert_eq!((l.right.size, l.bottom.size), (None, None), "sized from the window, as before");

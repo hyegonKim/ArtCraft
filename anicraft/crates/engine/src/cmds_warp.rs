@@ -39,10 +39,38 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             pin_add,
         ),
-        c("warp.pin_move", "Move Warp Pin", "", "{element?, pin, x?, y? (stage px: where the pin goes), dx?, dy? (stage px: by how much), frame?} → {element, pin, at}. Bends the artwork at the frame (keying it inside a tween); pins tween between keyframes", true, pin_move),
-        c("warp.pin_remove", "Remove Warp Pin", "", "{element?, pin} removes the pin from every keyframe that bends the same mesh; the artwork follows the pins that are left", true, pin_remove),
-        c("warp.remove", "Remove Warp", "Modify/Asset Warp", "{element?} takes the warp mesh and its pins off the artwork on every keyframe of its layer: it shows as drawn again", true, remove),
-        c("warp.info", "Warp Mesh", "", "{element?, frame?} → the artwork's warp at the frame: resolution, the mesh's columns, rows, vertices and triangles, whether it is bent, and its pins (id, where they show in stage px, and where they were placed on the artwork as drawn, in its own space)", false, info),
+        c(
+            "warp.pin_move",
+            "Move Warp Pin",
+            "",
+            "{element?, pin, x?, y? (stage px: where the pin goes), dx?, dy? (stage px: by how much), frame?} → {element, pin, at}. Bends the artwork at the frame (keying it inside a tween); pins tween between keyframes",
+            true,
+            pin_move,
+        ),
+        c(
+            "warp.pin_remove",
+            "Remove Warp Pin",
+            "",
+            "{element?, pin} removes the pin from every keyframe that bends the same mesh; the artwork follows the pins that are left",
+            true,
+            pin_remove,
+        ),
+        c(
+            "warp.remove",
+            "Remove Warp",
+            "Modify/Asset Warp",
+            "{element?} takes the warp mesh and its pins off the artwork on every keyframe of its layer: it shows as drawn again",
+            true,
+            remove,
+        ),
+        c(
+            "warp.info",
+            "Warp Mesh",
+            "",
+            "{element?, frame?} → the artwork's warp at the frame: resolution, the mesh's columns, rows, vertices and triangles, whether it is bent, and its pins (id, where they show in stage px, and where they were placed on the artwork as drawn, in its own space)",
+            false,
+            info,
+        ),
     ]
 }
 
@@ -95,7 +123,9 @@ fn current(sh: &Shape) -> Option<Warp> {
 
 fn check_artwork(path: &Path) -> Result<()> {
     if warp::anchor_count(path) > MAX_WARP_POINTS {
-        return Err(EngineError::State(format!("that artwork has more than {MAX_WARP_POINTS} points: simplify it first (Modify › Shape › Optimize)")));
+        return Err(EngineError::State(format!(
+            "that artwork has more than {MAX_WARP_POINTS} points: simplify it first (Modify › Shape › Optimize)"
+        )));
     }
     if Warp::new(Arc::new(path.clone()), MIN_RESOLUTION).grid().is_none() {
         return Err(EngineError::State("that artwork has no extent to warp".into()));
@@ -129,14 +159,25 @@ fn edit_at<T>(s: &mut Session, layer: LayerId, frame: u32, id: ElementId, edit: 
 
 /// Runs `f` on every other keyframe of `layer` (not the one starting at `skip`) whose element
 /// `id` is warped on the same mesh as `rest` (it shows its warp), then bends it again.
-fn each_other(s: &mut Session, layer: LayerId, skip: Option<u32>, id: ElementId, rest: &Arc<Path>, resolution: u32, mut f: impl FnMut(&mut Warp, &mut Shape)) -> Result<usize> {
+fn each_other(
+    s: &mut Session,
+    layer: LayerId,
+    skip: Option<u32>,
+    id: ElementId,
+    rest: &Arc<Path>,
+    resolution: u32,
+    mut f: impl FnMut(&mut Warp, &mut Shape),
+) -> Result<usize> {
     let l = s.layer_mut(Some(layer))?;
     let mut n = 0;
     for k in &mut l.keyframes {
         if Some(k.start) == skip {
             continue;
         }
-        let same = |e: &Arc<Element>| e.id == id && matches!(&e.kind, ElementKind::Shape(sh) if sh.live_warp().is_some_and(|w| anicraft_doc::arc_eq(&w.rest, rest) && w.resolution == resolution));
+        let same = |e: &Arc<Element>| {
+            e.id == id
+                && matches!(&e.kind, ElementKind::Shape(sh) if sh.live_warp().is_some_and(|w| anicraft_doc::arc_eq(&w.rest, rest) && w.resolution == resolution))
+        };
         if !k.elements.iter().any(same) {
             continue;
         }
@@ -162,7 +203,9 @@ fn key_start(s: &Session, layer: LayerId, frame: u32) -> Option<u32> {
 
 fn resolution_param(p: &Value) -> Result<Option<u32>> {
     match opt_u32(p, "resolution")? {
-        Some(r) if !(MIN_RESOLUTION..=MAX_RESOLUTION).contains(&r) => Err(EngineError::Param(format!("param 'resolution' must be {MIN_RESOLUTION}…{MAX_RESOLUTION}"))),
+        Some(r) if !(MIN_RESOLUTION..=MAX_RESOLUTION).contains(&r) => {
+            Err(EngineError::Param(format!("param 'resolution' must be {MIN_RESOLUTION}…{MAX_RESOLUTION}")))
+        }
         r => Ok(r),
     }
 }
@@ -172,10 +215,13 @@ fn resolution_param(p: &Value) -> Result<Option<u32>> {
 fn ensure(s: &mut Session, layer: LayerId, id: ElementId, resolution: Option<u32>) -> Result<(bool, Warp)> {
     let frame = s.frame;
     // The artwork as it is on the keyframe at the playhead (before any keying), to find copies.
-    let before: Option<Arc<Path>> = s.timeline().layer(layer).and_then(|l| l.keyframe_at(frame)).and_then(|k| k.elements.iter().find(|e| e.id == id)).and_then(|e| match &e.kind {
-        ElementKind::Shape(sh) => Some(sh.path.clone()),
-        _ => None,
-    });
+    let before: Option<Arc<Path>> =
+        s.timeline().layer(layer).and_then(|l| l.keyframe_at(frame)).and_then(|k| k.elements.iter().find(|e| e.id == id)).and_then(|e| {
+            match &e.kind {
+                ElementKind::Shape(sh) => Some(sh.path.clone()),
+                _ => None,
+            }
+        });
     let (created, w, old) = edit_at(s, layer, frame, id, |sh, _| {
         let old = sh.live_warp().map(|w| (w.rest.clone(), w.resolution));
         let (created, mut w) = match current(sh) {
@@ -208,7 +254,10 @@ fn ensure(s: &mut Session, layer: LayerId, id: ElementId, resolution: Option<u32
                 if Some(k.start) == skip {
                     continue;
                 }
-                let same = |e: &Arc<Element>| e.id == id && matches!(&e.kind, ElementKind::Shape(sh) if sh.warp.is_none() && (Arc::ptr_eq(&sh.path, &path) || *sh.path == *path));
+                let same = |e: &Arc<Element>| {
+                    e.id == id
+                        && matches!(&e.kind, ElementKind::Shape(sh) if sh.warp.is_none() && (Arc::ptr_eq(&sh.path, &path) || *sh.path == *path))
+                };
                 if k.elements.iter().any(same) {
                     for e in Arc::make_mut(k).elements.iter_mut().filter(|e| same(e)) {
                         if let ElementKind::Shape(sh) = &mut Arc::make_mut(e).kind {

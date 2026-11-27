@@ -30,7 +30,10 @@ use crate::stroke::stroke_outline;
 use anicraft_doc::actions::as3::Decls;
 use anicraft_doc::actions::{Action, FrameRef, Seg, Target};
 use anicraft_doc::player::TimelineRef;
-use anicraft_doc::{ColorTransform, Document, Element, ElementKind, FIELD_GUTTER, FrameScript, Join, Layer, LayerKind, MAX_FIELD_CHARS, MaskMode, Paint, Rgba, SoundFormat, SoundSync, SymbolId, SymbolKind, TextAlign, Timeline, base64_encode, evaluate_shown, guide_walk, instance_start};
+use anicraft_doc::{
+    ColorTransform, Document, Element, ElementKind, FIELD_GUTTER, FrameScript, Join, Layer, LayerKind, MAX_FIELD_CHARS, MaskMode, Paint, Rgba,
+    SoundFormat, SoundSync, SymbolId, SymbolKind, TextAlign, Timeline, base64_encode, evaluate_shown, guide_walk, instance_start,
+};
 use anicraft_geom::{Affine, FillRule, Path, PathCmd};
 use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
@@ -104,7 +107,8 @@ const KEPT_SCRIPTS: &str = "kept frame scripts outside the ActionScript subset (
 const NINE_SLICE: &str = "9-slice scaling (scaled as a whole)";
 const OUTSIDE_CALLS: &str = "script calls that reach outside the movie (ignored)";
 const WARPED_BITMAPS: &str = "warped bitmaps (the image shows unbent inside its bent outline; warped shapes come across)";
-const FIELD_FONTS: &str = "text fields (their authored text keeps its outlines; text a script or the viewer changes is drawn with the browser's fonts)";
+const FIELD_FONTS: &str =
+    "text fields (their authored text keeps its outlines; text a script or the viewer changes is drawn with the browser's fonts)";
 
 /// A number rounded to `1/scale`, written as an integer when it is one.
 fn num(v: f32, scale: f64) -> Value {
@@ -170,7 +174,9 @@ fn filter_json(f: &anicraft_doc::Filter) -> Value {
         FilterSide::Outer => "outer",
         FilterSide::Full => "full",
     };
-    let ramp = |stops: &[GradientStop]| Value::Array(stops.iter().map(|s| json!([exact(s.offset), exact(s.color.r), exact(s.color.g), exact(s.color.b), exact(s.color.a)])).collect());
+    let ramp = |stops: &[GradientStop]| {
+        Value::Array(stops.iter().map(|s| json!([exact(s.offset), exact(s.color.r), exact(s.color.g), exact(s.color.b), exact(s.color.a)])).collect())
+    };
     match f.sanitized() {
         Filter::Blur { blur_x, blur_y, quality } => json!({"k": "blur", "x": exact(blur_x), "y": exact(blur_y), "q": quality}),
         Filter::DropShadow { blur_x, blur_y, strength, quality, angle, distance, color, inner, knockout, hide_object } => json!({
@@ -209,7 +215,12 @@ fn color(c: Rgba) -> Vec<Value> {
 /// copies of the ramp lie each side of it, and the stops of them all laid end to end (the
 /// ramp is `2·copies + 1` times as long; `outward`, for a radial ramp, which has no inside of
 /// its centre: the ramp first, then all the copies). Linear-light mixing is sampled into stops.
-fn spread_stops(s: &[anicraft_doc::GradientStop], spread: anicraft_doc::Spread, linear_rgb: bool, outward: bool) -> (usize, Vec<anicraft_doc::GradientStop>) {
+fn spread_stops(
+    s: &[anicraft_doc::GradientStop],
+    spread: anicraft_doc::Spread,
+    linear_rgb: bool,
+    outward: bool,
+) -> (usize, Vec<anicraft_doc::GradientStop>) {
     use anicraft_doc::{GradientStop, Spread};
     let mut base: Vec<GradientStop> = s.iter().filter(|g| g.offset.is_finite()).copied().collect();
     base.sort_by(|a, b| a.offset.total_cmp(&b.offset));
@@ -224,7 +235,10 @@ fn spread_stops(s: &[anicraft_doc::GradientStop], spread: anicraft_doc::Spread, 
                 for k in 0..16 {
                     let t = k as f32 / 16.0;
                     let m = |x: f32, y: f32| enc(lin(x) + (lin(y) - lin(x)) * t);
-                    out.push(GradientStop { offset: a.offset + (b.offset - a.offset) * t, color: Rgba::new(m(ca.r, cb.r), m(ca.g, cb.g), m(ca.b, cb.b), ca.a + (cb.a - ca.a) * t) });
+                    out.push(GradientStop {
+                        offset: a.offset + (b.offset - a.offset) * t,
+                        color: Rgba::new(m(ca.r, cb.r), m(ca.g, cb.g), m(ca.b, cb.b), ca.a + (cb.a - ca.a) * t),
+                    });
                 }
             }
         }
@@ -246,7 +260,8 @@ fn spread_stops(s: &[anicraft_doc::GradientStop], spread: anicraft_doc::Spread, 
         // itself: copy 0 outward, else the middle one).
         let from_ramp = if outward { k } else { k + copies };
         let backwards = spread == Spread::Reflect && from_ramp % 2 == 1;
-        let ramp: Vec<GradientStop> = if backwards { base.iter().rev().map(|g| GradientStop { offset: 1.0 - g.offset, color: g.color }).collect() } else { base.clone() };
+        let ramp: Vec<GradientStop> =
+            if backwards { base.iter().rev().map(|g| GradientStop { offset: 1.0 - g.offset, color: g.color }).collect() } else { base.clone() };
         for g in ramp {
             out.push(GradientStop { offset: (k as f32 + g.offset.clamp(0.0, 1.0)) / n as f32, color: g.color });
         }
@@ -354,10 +369,13 @@ fn action(a: &Action) -> Value {
             o.insert("msg".into(), json!(message));
         }
         Action::GotoAndPlay { frame, scene, .. } | Action::GotoAndStop { frame, scene, .. } => {
-            o.insert("f".into(), match frame {
-                FrameRef::Number(n) => json!(n),
-                FrameRef::Label(l) => json!(l),
-            });
+            o.insert(
+                "f".into(),
+                match frame {
+                    FrameRef::Number(n) => json!(n),
+                    FrameRef::Label(l) => json!(l),
+                },
+            );
             if let Some(s) = scene {
                 o.insert("s".into(), json!(s));
             }
@@ -378,7 +396,6 @@ fn action(a: &Action) -> Value {
 fn actions(list: &[Action]) -> Value {
     Value::Array(list.iter().map(action).collect())
 }
-
 
 /// Whether timeline layer `index` takes part in playback (what the player walks and draws):
 /// shown, not a folder or guide, not in a hidden folder.
@@ -498,7 +515,15 @@ impl<'a> Bake<'a> {
     /// A shape item: `p` path, `f` paint, `s` stroke `[r, g, b, a, width]`, `k` its style when
     /// not round and solid (`c` cap, `j` join, `ml` miter limit, `d` dash lengths and `o` their
     /// offset, in local units like the width), `eo` even-odd, `m` transform, `c` colour effect.
-    fn shape(&mut self, path: &Arc<Path>, m: &Affine, fx: &ColorTransform, fill: Option<&Paint>, stroke: Option<&anicraft_doc::Stroke>, rule: FillRule) -> Value {
+    fn shape(
+        &mut self,
+        path: &Arc<Path>,
+        m: &Affine,
+        fx: &ColorTransform,
+        fill: Option<&Paint>,
+        stroke: Option<&anicraft_doc::Stroke>,
+        rule: FillRule,
+    ) -> Value {
         let mut o = Map::new();
         o.insert("p".into(), json!(self.path(path)));
         if let Some(p) = fill {
@@ -717,7 +742,8 @@ impl<'a> Bake<'a> {
     fn timeline(&mut self, tl: &Timeline, scene: bool, decls: Option<&Decls>) -> Value {
         let n = tl.frame_count();
         // One clip slot per visible mask layer, top first (as the evaluator numbers them).
-        let slots: HashMap<u64, usize> = tl.layers.iter().filter(|l| l.kind == LayerKind::Mask && l.visible).enumerate().map(|(i, l)| (l.id.0, i)).collect();
+        let slots: HashMap<u64, usize> =
+            tl.layers.iter().filter(|l| l.kind == LayerKind::Mask && l.visible).enumerate().map(|(i, l)| (l.id.0, i)).collect();
         let playing: Vec<usize> = (0..tl.layers.len()).filter(|&i| plays(tl, i)).collect();
         let stage = self.doc.stage;
         let mut runs: Vec<(usize, u32)> = Vec::new();
@@ -834,7 +860,11 @@ impl<'a> Bake<'a> {
                     let env: Vec<Value> = match self.doc.sound(fs.sound) {
                         Some(s) if !fs.effect.is_none() => {
                             let heard = fs.heard_seconds(s, k.duration, n.saturating_sub(k.start), stage.fps);
-                            fs.effect.points(heard).iter().map(|p| json!([num(p.at as f32, 10_000.0), num(p.left, 10_000.0), num(p.right, 10_000.0)])).collect()
+                            fs.effect
+                                .points(heard)
+                                .iter()
+                                .map(|p| json!([num(p.at as f32, 10_000.0), num(p.left, 10_000.0), num(p.right, 10_000.0)]))
+                                .collect()
                         }
                         _ => Vec::new(),
                     };

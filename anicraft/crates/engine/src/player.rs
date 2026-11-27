@@ -11,8 +11,8 @@
 
 use anicraft_doc::actions::as3::Problem;
 use anicraft_doc::actions::{Action, CompileResult, FrameScript, MAX_ACTIONS, PluginScript, check_actions};
-use anicraft_doc::player::{Event, Node, NodeKind, PlayerState, ScriptContext, ScriptHost, ScriptRun, Step, TimelineRef};
 use anicraft_doc::field::{CaretLine, FieldLook};
+use anicraft_doc::player::{Event, Node, NodeKind, PlayerState, ScriptContext, ScriptHost, ScriptRun, Step, TimelineRef};
 use anicraft_doc::{Document, LayerKind, SymbolKind, TextBlock, Timeline, player};
 use anicraft_geom::Vec2;
 use anicraft_plugins::{Host, Kind, Limits, Registry};
@@ -169,7 +169,8 @@ pub fn state_view(doc: &Document, st: &PlayerState, nodes: &[Node], here: Option
         .take(MAX_VIEW_CLIPS)
         .map(|(i, n)| json!({"path": path_name(nodes, i), "name": n.name, "frame": n.frame, "frames": n.frames, "playing": st.clips.get(&n.path).is_some_and(|c| c.playing)}))
         .collect();
-    let path_of = |p: &Option<Vec<anicraft_doc::ElementId>>| p.as_ref().and_then(|p| nodes.iter().position(|n| &n.path == p)).map(|i| path_name(nodes, i));
+    let path_of =
+        |p: &Option<Vec<anicraft_doc::ElementId>>| p.as_ref().and_then(|p| nodes.iter().position(|n| &n.path == p)).map(|i| path_name(nodes, i));
     let mut v = json!({
         "scene": st.scene,
         "scene_name": doc.scenes.get(st.scene).map(|s| s.name.clone()),
@@ -286,9 +287,12 @@ pub fn parse_key(v: &Value) -> Result<u32, String> {
             let one = t.chars().count() == 1 && t.chars().all(|c| c.is_ascii_alphanumeric());
             if one {
                 let c = t.to_ascii_uppercase();
-                return anicraft_doc::actions::as3::ir::key_code(&c).or_else(|| anicraft_doc::actions::as3::ir::key_code(&format!("NUMBER_{c}"))).ok_or_else(|| format!("unknown key '{t}'"));
+                return anicraft_doc::actions::as3::ir::key_code(&c)
+                    .or_else(|| anicraft_doc::actions::as3::ir::key_code(&format!("NUMBER_{c}")))
+                    .ok_or_else(|| format!("unknown key '{t}'"));
             }
-            anicraft_doc::actions::as3::ir::key_code(&t.to_ascii_uppercase()).ok_or_else(|| format!("unknown key '{t}' (a key code, a letter, or a Keyboard name such as LEFT or SPACE)"))
+            anicraft_doc::actions::as3::ir::key_code(&t.to_ascii_uppercase())
+                .ok_or_else(|| format!("unknown key '{t}' (a key code, a letter, or a Keyboard name such as LEFT or SPACE)"))
         }
         _ => Err("a key event needs a \"key\": a key code, a letter, or a Keyboard name such as LEFT".into()),
     }
@@ -302,7 +306,10 @@ pub const MAX_TYPED: usize = 10_000;
 /// is a press and a release), or typing into the focused text field (ADR 0066):
 /// `{type: text, text}` (each character typed in turn) and `{type: select_all}`.
 pub fn parse_events(v: &Value) -> Result<Vec<Event>, String> {
-    let kind = v.get("type").and_then(Value::as_str).ok_or("an event needs a \"type\": move, down, up, click, leave, key_down, key_up, key, text or select_all")?;
+    let kind = v
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or("an event needs a \"type\": move, down, up, click, leave, key_down, key_up, key, text or select_all")?;
     if kind == "text" {
         let t = v.get("text").and_then(Value::as_str).ok_or("a text event needs a \"text\" to type")?;
         if t.chars().count() > MAX_TYPED {
@@ -321,7 +328,13 @@ pub fn parse_events(v: &Value) -> Result<Vec<Event>, String> {
             _ => vec![Event::KeyDown(k), Event::KeyUp(k)],
         });
     }
-    let num = |k: &str| -> Result<f32, String> { v.get(k).and_then(Value::as_f64).filter(|f| f.is_finite() && f.abs() <= 1e7).map(|f| f as f32).ok_or(format!("a {kind} event needs a finite \"{k}\"")) };
+    let num = |k: &str| -> Result<f32, String> {
+        v.get(k)
+            .and_then(Value::as_f64)
+            .filter(|f| f.is_finite() && f.abs() <= 1e7)
+            .map(|f| f as f32)
+            .ok_or(format!("a {kind} event needs a finite \"{k}\""))
+    };
     Ok(match kind {
         "leave" => vec![Event::Leave],
         "move" => vec![Event::Move(Vec2::new(num("x")?, num("y")?))],
@@ -384,7 +397,12 @@ pub fn kept_scripts(doc: &Document) -> Vec<KeptScript<'_>> {
                     Ok(c) if runs => decls.problems(c),
                     _ => Vec::new(),
                 };
-                out.push(KeptScript { place: format!("{name} › {}, frame {}", layer.name, u64::from(k.start) + 1), plays: runs && layer_plays(tl, index), compiled: src.compiled(), links });
+                out.push(KeptScript {
+                    place: format!("{name} › {}, frame {}", layer.name, u64::from(k.start) + 1),
+                    plays: runs && layer_plays(tl, index),
+                    compiled: src.compiled(),
+                    links,
+                });
             }
         }
     }
@@ -397,7 +415,10 @@ pub fn script_summary(doc: &Document) -> Vec<String> {
     let mut lines = Vec::new();
     for k in kept_scripts(doc) {
         match (k.plays, k.compiled) {
-            (false, _) => lines.push(format!("Frame script not run: {}: graphic and button timelines, guide layers and hidden layers don't run frame scripts", k.place)),
+            (false, _) => lines.push(format!(
+                "Frame script not run: {}: graphic and button timelines, guide layers and hidden layers don't run frame scripts",
+                k.place
+            )),
             (true, Ok(c)) if k.links.is_empty() => {
                 lines.push(format!("Frame script runs: {}", k.place));
                 lines.extend(c.notes.iter().map(|n| format!("Frame script at {}: {n}", k.place)));

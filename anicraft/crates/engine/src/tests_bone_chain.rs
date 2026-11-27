@@ -34,7 +34,12 @@ fn drawn_by_hand() -> (Session, u64, u64) {
 fn a_bone_from_an_instance_on_a_chain_starts_at_its_joint() {
     let (mut s, _, _) = drawn_by_hand();
     let bs = bones(&mut s);
-    assert!(pt(&bs[1]["head"]).distance(pt(&bs[0]["tail"])) < 1e-3, "the second bone starts where the first ends: {} vs {}", bs[1]["head"], bs[0]["tail"]);
+    assert!(
+        pt(&bs[1]["head"]).distance(pt(&bs[0]["tail"])) < 1e-3,
+        "the second bone starts where the first ends: {} vs {}",
+        bs[1]["head"],
+        bs[0]["tail"]
+    );
     // A root's bones still start where they were drawn (a torso's shoulders and hips).
     let mut s = three_bars();
     run(&mut s, "bone.add", json!({"from": ROOT, "to": ARM, "head": [150, 100]}));

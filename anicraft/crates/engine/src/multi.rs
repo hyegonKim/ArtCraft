@@ -32,14 +32,70 @@ use std::collections::{BTreeMap, HashSet};
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("frames.edit_multiple", "Move on Multiple Frames", "", None, "{first, last, dx, dy, items?: [[layer, frame, id], ..], merge?: bool} moves artwork on every keyframe within frames first..=last (0-based) on visible, unlocked layers, as Edit Multiple Frames does: the items given (a keyframe's first frame and an element id), or all of them; a motion tween's path and X/Y keys move with its object; raw shapes merge again where they land unless merge is false; one undo step; answers the items after the move", true, move_cmd as crate::RunFn),
-        c("frames.transform", "Transform on Multiple Frames", "", None, "{first, last, items?, merge?, a, b, c, d, e, f} (an affine in stage space) | {rotate? (degrees), scale_x?, scale_y?, skew_x?, skew_y? (degrees), pivot?: [x, y] (default: the centre of every item's bounds together)} transforms the items on each keyframe about one shared pivot, as Free Transform does with Edit Multiple Frames on; one undo step", true, transform_cmd),
-        c("frames.align", "Align on Multiple Frames", "", None, "{first, last, edge: left|hcenter|right|top|vcenter|bottom, items?, to_stage? (default: one item aligns to the stage), merge?} lines the items up with the edge of their bounds together (or the stage's), each on its own keyframe", true, align_cmd),
-        c("frames.delete", "Clear on Multiple Frames", "", None, "{first, last, items?} deletes the items (default: everything shown) from their keyframes", true, delete_cmd),
-        c("frames.copy", "Copy on Multiple Frames", "", None, "{first, last, items?} copies the items (default: everything shown), remembering each one's keyframe: Paste on Multiple Frames puts them back keyframe by keyframe, Paste puts them all on the current frame", false, copy_cmd),
+        c(
+            "frames.edit_multiple",
+            "Move on Multiple Frames",
+            "",
+            None,
+            "{first, last, dx, dy, items?: [[layer, frame, id], ..], merge?: bool} moves artwork on every keyframe within frames first..=last (0-based) on visible, unlocked layers, as Edit Multiple Frames does: the items given (a keyframe's first frame and an element id), or all of them; a motion tween's path and X/Y keys move with its object; raw shapes merge again where they land unless merge is false; one undo step; answers the items after the move",
+            true,
+            move_cmd as crate::RunFn,
+        ),
+        c(
+            "frames.transform",
+            "Transform on Multiple Frames",
+            "",
+            None,
+            "{first, last, items?, merge?, a, b, c, d, e, f} (an affine in stage space) | {rotate? (degrees), scale_x?, scale_y?, skew_x?, skew_y? (degrees), pivot?: [x, y] (default: the centre of every item's bounds together)} transforms the items on each keyframe about one shared pivot, as Free Transform does with Edit Multiple Frames on; one undo step",
+            true,
+            transform_cmd,
+        ),
+        c(
+            "frames.align",
+            "Align on Multiple Frames",
+            "",
+            None,
+            "{first, last, edge: left|hcenter|right|top|vcenter|bottom, items?, to_stage? (default: one item aligns to the stage), merge?} lines the items up with the edge of their bounds together (or the stage's), each on its own keyframe",
+            true,
+            align_cmd,
+        ),
+        c(
+            "frames.delete",
+            "Clear on Multiple Frames",
+            "",
+            None,
+            "{first, last, items?} deletes the items (default: everything shown) from their keyframes",
+            true,
+            delete_cmd,
+        ),
+        c(
+            "frames.copy",
+            "Copy on Multiple Frames",
+            "",
+            None,
+            "{first, last, items?} copies the items (default: everything shown), remembering each one's keyframe: Paste on Multiple Frames puts them back keyframe by keyframe, Paste puts them all on the current frame",
+            false,
+            copy_cmd,
+        ),
         c("frames.cut", "Cut on Multiple Frames", "", None, "{first, last, items?} frames.copy, then frames.delete", true, cut_cmd),
-        c("frames.paste", "Paste in Place on Multiple Frames", "", None, "{first, last, layer?} pastes in place onto the keyframes within the markers: artwork copied from several keyframes onto the keyframe covering the frame each came from (on the layers it came from when it came from several, else on `layer` or the active layer); artwork copied on one frame onto every keyframe of the layer; raw shapes merge where they land", true, paste_cmd),
-        c("frames.merge", "Merge on Multiple Frames", "", None, "{first, last, items} the raw shapes among the items merge again with what they touch on their keyframes (the end of a drag made with merge: false); answers the items after the merge", true, merge_cmd),
+        c(
+            "frames.paste",
+            "Paste in Place on Multiple Frames",
+            "",
+            None,
+            "{first, last, layer?} pastes in place onto the keyframes within the markers: artwork copied from several keyframes onto the keyframe covering the frame each came from (on the layers it came from when it came from several, else on `layer` or the active layer); artwork copied on one frame onto every keyframe of the layer; raw shapes merge where they land",
+            true,
+            paste_cmd,
+        ),
+        c(
+            "frames.merge",
+            "Merge on Multiple Frames",
+            "",
+            None,
+            "{first, last, items} the raw shapes among the items merge again with what they touch on their keyframes (the end of a drag made with merge: false); answers the items after the merge",
+            true,
+            merge_cmd,
+        ),
     ]
 }
 
@@ -156,7 +212,9 @@ fn apply_each(s: &mut Session, moves: &[(FrameItem, Affine)]) -> Result<usize> {
             && let Some((_, m)) = list.iter().find(|(id, _)| *id == mt.target)
         {
             if !translation_only(m) {
-                return Err(EngineError::State("a motion tween's object can only be moved on several frames at once; scale, rotate or skew it on its own keyframe".into()));
+                return Err(EngineError::State(
+                    "a motion tween's object can only be moved on several frames at once; scale, rotate or skew it on its own keyframe".into(),
+                ));
             }
             let d = m.translation();
             if d != Vec2::ZERO && !mt.translate(d) {
@@ -207,7 +265,9 @@ fn remerge(s: &mut Session, items: &[FrameItem]) -> Result<Vec<FrameItem>> {
     let mut out: Vec<FrameItem> = Vec::with_capacity(items.len());
     for it in items {
         match merged.get_mut(&(it.layer, it.frame)) {
-            Some((gone, fresh)) if gone.contains(&it.element) => out.extend(std::mem::take(fresh).into_iter().map(|element| FrameItem { element, ..*it })),
+            Some((gone, fresh)) if gone.contains(&it.element) => {
+                out.extend(std::mem::take(fresh).into_iter().map(|element| FrameItem { element, ..*it }))
+            }
             _ => out.push(*it),
         }
     }
@@ -263,7 +323,13 @@ fn transform_param(p: &Value, bounds: Rect) -> Result<Affine> {
         Some(v) => {
             let bad = || EngineError::Param("param 'pivot' must be [x, y]".into());
             let a = v.as_array().filter(|a| a.len() == 2).ok_or_else(bad)?;
-            let n = |i: usize| a.get(i).and_then(Value::as_f64).map(|x| x as f32).filter(|x| x.is_finite() && x.abs() <= crate::cmds_draw::MAX_EXTENT).ok_or_else(bad);
+            let n = |i: usize| {
+                a.get(i)
+                    .and_then(Value::as_f64)
+                    .map(|x| x as f32)
+                    .filter(|x| x.is_finite() && x.abs() <= crate::cmds_draw::MAX_EXTENT)
+                    .ok_or_else(bad)
+            };
             Vec2::new(n(0)?, n(1)?)
         }
         None => bounds.center(),
@@ -298,7 +364,11 @@ fn align_cmd(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(EngineError::State("nothing to align on the frames between the markers".into()));
     }
     let to_stage = opt_bool(p, "to_stage")?.unwrap_or(chosen.len() == 1);
-    let target = if to_stage { Rect::new(0.0, 0.0, s.doc.stage.width as f32, s.doc.stage.height as f32) } else { chosen.iter().fold(Rect::EMPTY, |r, (_, b)| r.union(b)) };
+    let target = if to_stage {
+        Rect::new(0.0, 0.0, s.doc.stage.width as f32, s.doc.stage.height as f32)
+    } else {
+        chosen.iter().fold(Rect::EMPTY, |r, (_, b)| r.union(b))
+    };
     let d = |b: &Rect| -> Result<Vec2> {
         Ok(match edge {
             "left" => Vec2::new(target.min.x - b.min.x, 0.0),
@@ -443,7 +513,11 @@ fn paste_cmd(s: &mut Session, p: &Value) -> Result<Value> {
         }
     }
     if plan.is_empty() {
-        let why = if tl.layer(active).is_some_and(|_| shown_keyframes(tl, active, first, last).is_empty()) { "the layer has no keyframe Edit Multiple Frames can paste onto between the markers (it must be visible, unlocked and hold artwork)" } else { "none of the copied keyframes is between the markers" };
+        let why = if tl.layer(active).is_some_and(|_| shown_keyframes(tl, active, first, last).is_empty()) {
+            "the layer has no keyframe Edit Multiple Frames can paste onto between the markers (it must be visible, unlocked and hold artwork)"
+        } else {
+            "none of the copied keyframes is between the markers"
+        };
         return Err(EngineError::State(why.into()));
     }
     import_symbols(s, &clip.symbols);

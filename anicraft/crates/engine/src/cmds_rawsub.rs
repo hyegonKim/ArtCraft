@@ -43,7 +43,15 @@ pub fn specs() -> Vec<CommandSpec> {
             false,
             subselect_rect,
         ),
-        c("raw.points", "Raw Points", "", None, "{ids?: [..]} the anchors of raw shapes (default: the selection), once per position, and the handles of their curved segments", false, points_cmd),
+        c(
+            "raw.points",
+            "Raw Points",
+            "",
+            None,
+            "{ids?: [..]} the anchors of raw shapes (default: the selection), once per position, and the handles of their curved segments",
+            false,
+            points_cmd,
+        ),
         c(
             "raw.move_handle",
             "Move Handle",
@@ -434,13 +442,16 @@ fn move_handle(s: &mut Session, p: &Value) -> Result<Value> {
     let d = Vec2::new(f32_req(p, "dx")?, f32_req(p, "dy")?);
     let merge_after = opt_bool(p, "merge")?.unwrap_or(true);
     let els = s.visible_elements();
-    let el = els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
+    let el =
+        els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
     let ElementKind::Shape(sh) = &el.kind else { return Err(EngineError::State("only shapes have handles".into())) };
     let path = explicit(&sh.path);
     if !matches!(path.cmds.get(cmd), Some(PathCmd::CubicTo(..) | PathCmd::QuadTo(..))) {
         return Err(EngineError::Param(format!("segment {cmd} of this shape is not a curve (it has no handles)")));
     }
-    let old: Cubic = rawgeom::segment_cubic(&path, cmd).map(|c| rawgeom::transform(&c, &el.transform)).ok_or_else(|| EngineError::Param(format!("no segment {cmd} on this shape")))?;
+    let old: Cubic = rawgeom::segment_cubic(&path, cmd)
+        .map(|c| rawgeom::transform(&c, &el.transform))
+        .ok_or_else(|| EngineError::Param(format!("no segment {cmd} on this shape")))?;
     let mut new = old;
     if let Some(h) = new.get_mut(slot) {
         *h = *h + d;

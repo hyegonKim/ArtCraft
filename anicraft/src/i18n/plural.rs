@@ -83,10 +83,18 @@ pub fn category(code: &str, n: u64) -> Category {
     match rule(code) {
         Rule::None => Other,
         Rule::OneIsOne => {
-            if n == 1 { One } else { Other }
+            if n == 1 {
+                One
+            } else {
+                Other
+            }
         }
         Rule::OneIsZeroOrOne => {
-            if n <= 1 { One } else { Other }
+            if n <= 1 {
+                One
+            } else {
+                Other
+            }
         }
         Rule::EastSlavic => {
             if m10 == 1 && m100 != 11 {
@@ -205,7 +213,10 @@ mod tests {
     fn form_lists_are_exactly_the_categories_whole_numbers_reach() {
         // The craft-i18n checker counts forms the same way; a mismatch would make every plural
         // row of that language fall back to English.
-        for code in ["en", "de", "fr", "pt-br", "pt-pt", "es", "ja", "zh-hans", "ru", "uk", "sr", "sr-latn", "hr", "bs", "pl", "cs", "sk", "lt", "lv", "ro", "sl", "he", "ar", "hi", "xx"] {
+        for code in [
+            "en", "de", "fr", "pt-br", "pt-pt", "es", "ja", "zh-hans", "ru", "uk", "sr", "sr-latn", "hr", "bs", "pl", "cs", "sk", "lt", "lv", "ro",
+            "sl", "he", "ar", "hi", "xx",
+        ] {
             assert_eq!(reached(code), forms(code).to_vec(), "{code}");
         }
         // The counts craft-i18n's docs name: 1 Japanese, 2 French, 3 Russian, 6 Arabic.

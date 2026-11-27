@@ -401,7 +401,11 @@ mod tests {
         assert!((area(&q, FillRule::NonZero) - full / 4.0).abs() < 1.0);
         // A wavy cubic crossing the line three times.
         let mut wave = Path::new();
-        wave.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(3.0, 20.0), Vec2::new(6.0, -20.0), Vec2::new(10.0, 5.0)).line_to(Vec2::new(10.0, 10.0)).line_to(Vec2::new(0.0, 10.0)).close();
+        wave.move_to(Vec2::new(0.0, 0.0))
+            .cubic_to(Vec2::new(3.0, 20.0), Vec2::new(6.0, -20.0), Vec2::new(10.0, 5.0))
+            .line_to(Vec2::new(10.0, 10.0))
+            .line_to(Vec2::new(0.0, 10.0))
+            .close();
         let cut = clip_convex(&wave, &square(-5.0, 2.0, 20.0));
         let expect = {
             // Sample the original, keeping points with y ≥ 2 inside the square.

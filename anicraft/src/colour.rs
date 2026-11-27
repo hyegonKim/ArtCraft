@@ -55,11 +55,7 @@ const SIDE: [[u8; 3]; ROWS] = [
 
 /// `#rrggbb`, or `#rrggbbaa` when `alpha` and it isn't opaque.
 pub fn to_hex(c: [u8; 4], alpha: bool) -> String {
-    if alpha && c[3] != 255 {
-        format!("#{:02x}{:02x}{:02x}{:02x}", c[0], c[1], c[2], c[3])
-    } else {
-        format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2])
-    }
+    if alpha && c[3] != 255 { format!("#{:02x}{:02x}{:02x}{:02x}", c[0], c[1], c[2], c[3]) } else { format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2]) }
 }
 
 /// Reads `rgb`, `rrggbb` or (with `alpha`) `rgba`, `rrggbbaa`, with or without one `#`, and
@@ -232,7 +228,8 @@ pub(crate) fn picker(ui: &mut egui::Ui, popup: Id, c: &mut [u8; 4], alpha: bool,
         }
         if alpha {
             let mut pct = f32::from(c[3]) / 255.0 * 100.0;
-            let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut pct).range(0.0..=100.0).suffix(" %").max_decimals(0))).named(tr!("Alpha"));
+            let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut pct).range(0.0..=100.0).suffix(" %").max_decimals(0)))
+                .named(tr!("Alpha"));
             if r.on_hover_text(tr!("Alpha: 0 % is clear, 100 % opaque")).changed() {
                 c[3] = (pct.clamp(0.0, 100.0) / 100.0 * 255.0).round() as u8;
                 changed = true;
@@ -248,7 +245,11 @@ fn hex_field(ui: &mut egui::Ui, popup: Id, c: &[u8; 4], alpha: bool) -> Option<[
     let current = to_hex(*c, alpha);
     let mut s: String = ui.data(|d| d.get_temp(buf_id)).unwrap_or_else(|| current.clone());
     let r = with_type(ui, Type::Data, |ui| ui.add(egui::TextEdit::singleline(&mut s).desired_width(if alpha { 86.0 } else { 66.0 }).char_limit(10)));
-    let r = r.named(tr!("Hex colour")).on_hover_text(if alpha { tr!("Hex colour: #rrggbb, or #rrggbbaa with alpha") } else { tr!("Hex colour: #rrggbb") });
+    let r = r.named(tr!("Hex colour")).on_hover_text(if alpha {
+        tr!("Hex colour: #rrggbb, or #rrggbbaa with alpha")
+    } else {
+        tr!("Hex colour: #rrggbb")
+    });
     let mut out = None;
     if r.has_focus() || r.lost_focus() {
         if r.changed()
@@ -323,10 +324,22 @@ fn swatches(ui: &mut egui::Ui, current: [u8; 3]) -> Option<[u8; 3]> {
         painter.rect_filled(r.shrink(0.5), 0.0, c32([c[0], c[1], c[2], 255]));
     }
     if !doc.is_empty() {
-        painter.text(pos2(o.x, dy - CELL * 0.5), egui::Align2::LEFT_CENTER, tr!("Document swatches (Window › Swatches)"), crate::theme::font(Type::Caption), T.text_faint);
+        painter.text(
+            pos2(o.x, dy - CELL * 0.5),
+            egui::Align2::LEFT_CENTER,
+            tr!("Document swatches (Window › Swatches)"),
+            crate::theme::font(Type::Caption),
+            T.text_faint,
+        );
     }
     if recent.is_empty() {
-        painter.text(pos2(o.x, ry + CELL * 0.5), egui::Align2::LEFT_CENTER, tr!("Colours you mix or type show here"), crate::theme::font(Type::Caption), T.text_faint);
+        painter.text(
+            pos2(o.x, ry + CELL * 0.5),
+            egui::Align2::LEFT_CENTER,
+            tr!("Colours you mix or type show here"),
+            crate::theme::font(Type::Caption),
+            T.text_faint,
+        );
     }
     let hit = |p: Pos2| cells.iter().find(|(r, _)| r.contains(p)).copied();
     if let Some((r, _)) = cells.iter().find(|(_, c)| *c == current) {
@@ -345,7 +358,13 @@ fn swatches(ui: &mut egui::Ui, current: [u8; 3]) -> Option<[u8; 3]> {
         resp.clone().on_hover_text(text(Type::Data, tip));
     }
     // One control for the whole grid (a click picks the cell under the pointer).
-    crate::a11y::control(ui, &resp, egui::WidgetType::Button, if doc.is_empty() { tr!("Colour swatches") } else { tr!("Colour swatches and the document's swatches") }, None);
+    crate::a11y::control(
+        ui,
+        &resp,
+        egui::WidgetType::Button,
+        if doc.is_empty() { tr!("Colour swatches") } else { tr!("Colour swatches and the document's swatches") },
+        None,
+    );
     if resp.clicked() { resp.interact_pointer_pos().and_then(hit).map(|(_, c)| c) } else { None }
 }
 

@@ -56,7 +56,13 @@ fn text_attaches_to_a_selected_shape_and_sits_on_it() {
     assert!((path.min.x - 100.0).abs() < 1e-3 && (path.max.x - 500.0).abs() < 1e-3);
     // The box holds the path and the glyphs from the origin.
     let local = t.outline.bounds().union(&on.path.bounds());
-    assert!(local.min.x.abs() < 1e-3 && local.min.y.abs() < 1e-3 && (local.width() - t.box_width).abs() < 1e-3 && (local.height() - t.box_height).abs() < 1e-3, "{local:?}");
+    assert!(
+        local.min.x.abs() < 1e-3
+            && local.min.y.abs() < 1e-3
+            && (local.width() - t.box_width).abs() < 1e-3
+            && (local.height() - t.box_height).abs() < 1e-3,
+        "{local:?}"
+    );
     // The shape is left as it is, and only the text is selected.
     assert!(s.visible_elements().iter().any(|e| e.id == line));
     assert_eq!(s.selection.on(s.layer), vec![text]);

@@ -10,7 +10,9 @@
 //! shape groups do. A stroke under a stretched or skewed group would need Lottie's stretched
 //! pen, which the oracle doesn't draw: it fails the test rather than being drawn wrongly.
 
-use anicraft_engine::doc::{Cap, ColorTransform, Dash, DisplayItem, DisplayList, ElementId, GradientStop, Join, LayerId, MaskMode, Paint, Rgba, Stroke, StrokeStyle};
+use anicraft_engine::doc::{
+    Cap, ColorTransform, Dash, DisplayItem, DisplayList, ElementId, GradientStop, Join, LayerId, MaskMode, Paint, Rgba, Stroke, StrokeStyle,
+};
 use anicraft_engine::geom::{Affine, FillRule, Path, PathCmd, Vec2};
 use serde_json::Value;
 use std::sync::Arc;
@@ -197,11 +199,23 @@ fn group(g: &Value, t: f64, fade: f64, out: &mut Vec<DisplayItem>) {
             }
             "st" => {
                 let d = m.decompose();
-                assert!((d.sx.abs() - d.sy.abs()).abs() <= 1e-3 * d.sx.abs().max(1e-3) && d.skew.abs() < 1e-3, "a stroke under a stretched group: {:?}", m);
+                assert!(
+                    (d.sx.abs() - d.sy.abs()).abs() <= 1e-3 * d.sx.abs().max(1e-3) && d.skew.abs() < 1e-3,
+                    "a stroke under a stretched group: {:?}",
+                    m
+                );
                 let c = prop(&x["c"], t);
                 let o = prop(&x["o"], t)[0] / 100.0;
-                let cap = match x["lc"].as_u64() { Some(1) => Cap::Butt, Some(3) => Cap::Square, _ => Cap::Round };
-                let join = match x["lj"].as_u64() { Some(1) => Join::Miter, Some(3) => Join::Bevel, _ => Join::Round };
+                let cap = match x["lc"].as_u64() {
+                    Some(1) => Cap::Butt,
+                    Some(3) => Cap::Square,
+                    _ => Cap::Round,
+                };
+                let join = match x["lj"].as_u64() {
+                    Some(1) => Join::Miter,
+                    Some(3) => Join::Bevel,
+                    _ => Join::Round,
+                };
                 let dash = x.get("d").and_then(Value::as_array).map(|d| {
                     let lengths: Vec<f32> = d.iter().filter(|e| e["n"] != "o").map(|e| prop(&e["v"], t)[0] as f32).collect();
                     let offset = d.iter().find(|e| e["n"] == "o").map_or(0.0, |e| prop(&e["v"], t)[0] as f32);

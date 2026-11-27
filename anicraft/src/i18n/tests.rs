@@ -43,7 +43,10 @@ fn shell_sources() -> Vec<(String, String)> {
 /// A file without its `#[cfg(test)] mod … {` block at the end (tests aren't interface).
 fn without_tests(src: &str) -> String {
     let lines: Vec<&str> = src.lines().collect();
-    let cut = lines.windows(2).position(|w| w.first().is_some_and(|l| l.trim() == "#[cfg(test)]") && w.get(1).is_some_and(|l| l.trim_start().starts_with("mod ") && l.trim_end().ends_with('{')));
+    let cut = lines.windows(2).position(|w| {
+        w.first().is_some_and(|l| l.trim() == "#[cfg(test)]")
+            && w.get(1).is_some_and(|l| l.trim_start().starts_with("mod ") && l.trim_end().ends_with('{'))
+    });
     match cut {
         Some(n) => lines.get(..n).unwrap_or_default().join("\n"),
         None => src.to_string(),
@@ -53,10 +56,38 @@ fn without_tests(src: &str) -> String {
 /// Code before a literal, on its line, that makes it something other than interface text:
 /// logs and console output, ids and keys, commands and their parameters, attributes.
 const NOT_UI: &[&str] = &[
-    "eprintln!(", "println!(", "print!(", "panic!(", "assert", "unreachable!(", "Id::new(", "id_salt(", "persistent_id(", "json!(", "execute(", "perform(", "invoke(", ".run(", "find_command(", "#[", "env!(", "include_str!(", "include_bytes!(", "concat!(", "var(",
-    "contains(", "starts_with(", "ends_with(", "strip_prefix(", "strip_suffix(", "matches!(", "== ", "!= ",
+    "eprintln!(",
+    "println!(",
+    "print!(",
+    "panic!(",
+    "assert",
+    "unreachable!(",
+    "Id::new(",
+    "id_salt(",
+    "persistent_id(",
+    "json!(",
+    "execute(",
+    "perform(",
+    "invoke(",
+    ".run(",
+    "find_command(",
+    "#[",
+    "env!(",
+    "include_str!(",
+    "include_bytes!(",
+    "concat!(",
+    "var(",
+    "contains(",
+    "starts_with(",
+    "ends_with(",
+    "strip_prefix(",
+    "strip_suffix(",
+    "matches!(",
+    "== ",
+    "!= ",
     // The start-up log (`startup::line`): English, like console messages, for bug reports.
-    "line(&", "write(&format!(",
+    "line(&",
+    "write(&format!(",
 ];
 
 /// Whether a prose literal outside the macros is allowed: not interface text by its context,
@@ -244,13 +275,18 @@ fn extract() {
     let only = std::env::var("ANICRAFT_I18N_LOCALE").ok().map(|l| l.to_ascii_lowercase());
     let mut missing_in: Option<Catalog> = None;
     if let Some(locales) = &checkout {
-        let mut codes: Vec<String> = std::fs::read_dir(locales).map(|r| r.flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect()).unwrap_or_default();
+        let mut codes: Vec<String> = std::fs::read_dir(locales)
+            .map(|r| r.flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect())
+            .unwrap_or_default();
         codes.sort();
         println!("locale     translated        stale  (of {} AniCraft strings; READY = offered once it has anicraft.tsv)", keys.len());
         for code in &codes {
             let (cat, own) = disk_catalog(locales, code);
             let n = keys.iter().filter(|k| translated(&cat, k)).count();
-            let stale = own.iter().filter(|r| !r.context.starts_with('@') && !keys.contains(&Key::Text { context: r.context.clone(), source: r.source.clone() })).count();
+            let stale = own
+                .iter()
+                .filter(|r| !r.context.starts_with('@') && !keys.contains(&Key::Text { context: r.context.clone(), source: r.source.clone() }))
+                .count();
             let ready = if super::ready(code, READY) { "READY" } else { "" };
             println!("{code:<10} {n:>5} ({:>3} %)  {stale:>8}  {ready}", n * 100 / keys.len().max(1));
             if only.as_deref() == Some(code.as_str()) {
@@ -288,10 +324,18 @@ const DE_COMMON: &str = "@id\tlanguage.name\tDeutsch\n\tSave\tSpeichern\n\tOpen\
 const DE_APP: &str = "\tOpen\tDatei öffnen\n\tSaved {path}\t{path} gespeichert\n@id\tedit.undo\tRückgängig\n";
 const PT_COMMON: &str = "@id\tlanguage.name\tPortuguês\n\tSave\tGuardar\n\tOpen\tAbrir\n";
 const PT_BR_APP: &str = "@id\tlanguage.name\tPortuguês (Brasil)\n\tSave\tSalvar\n@plural\t{n} frame|{n} frames\t{n} quadro|{n} quadros\n";
-const RU_APP: &str = "@id\tlanguage.name\tРусский\n@plural\t{n} frame|{n} frames\t{n} кадр|{n} кадра|{n} кадров\n@plural\t{n} layer|{n} layers\t{n} слой|{n} слоя\n";
+const RU_APP: &str =
+    "@id\tlanguage.name\tРусский\n@plural\t{n} frame|{n} frames\t{n} кадр|{n} кадра|{n} кадров\n@plural\t{n} layer|{n} layers\t{n} слой|{n} слоя\n";
 
 fn fixture() -> Languages {
-    let embedded = [("de", DE_COMMON, DE_APP), ("pt", PT_COMMON, ""), ("pt-BR", "", PT_BR_APP), ("ru", "", RU_APP), ("ar", "\tSave\tحفظ\n", "\tOpen\tفتح\n"), ("fr", "\tSave\tEnregistrer\n", "")];
+    let embedded = [
+        ("de", DE_COMMON, DE_APP),
+        ("pt", PT_COMMON, ""),
+        ("pt-BR", "", PT_BR_APP),
+        ("ru", "", RU_APP),
+        ("ar", "\tSave\tحفظ\n", "\tOpen\tفتح\n"),
+        ("fr", "\tSave\tEnregistrer\n", ""),
+    ];
     let (l, problems) = Languages::new(&embedded, READY);
     assert!(problems.is_empty(), "{problems:?}");
     l
@@ -473,7 +517,9 @@ fn strings_in(v: &serde_json::Value, out: &mut BTreeSet<String>) {
         serde_json::Value::Object(o) => {
             for (k, x) in o {
                 match x {
-                    serde_json::Value::String(s) if matches!(k.as_str(), "name" | "text" | "label") && s.chars().filter(char::is_ascii_alphabetic).count() >= 3 => {
+                    serde_json::Value::String(s)
+                        if matches!(k.as_str(), "name" | "text" | "label") && s.chars().filter(char::is_ascii_alphabetic).count() >= 3 =>
+                    {
                         out.insert(s.clone());
                     }
                     _ => strings_in(x, out),
@@ -626,7 +672,36 @@ fn every_control_can_be_used_in_the_pseudo_locale() {
             a.run("element.set_color_effect", serde_json::json!({"style": style}));
         }));
     }
-    for panel in ["sound", "camera", "springbones", "shapebones", "shapeweights", "warp", "motion", "motionpins", "actions", "script", "prefs", "envelope", "onionmenu", "editmultiple", "edittransform", "onionsymbol", "find", "explorer", "publish", "publishreport", "publishanim", "start", "testmovie", "testmovieinside", "templates", "savetemplate", "brushlibrary", "brushcurve"] {
+    for panel in [
+        "sound",
+        "camera",
+        "springbones",
+        "shapebones",
+        "shapeweights",
+        "warp",
+        "motion",
+        "motionpins",
+        "actions",
+        "script",
+        "prefs",
+        "envelope",
+        "onionmenu",
+        "editmultiple",
+        "edittransform",
+        "onionsymbol",
+        "find",
+        "explorer",
+        "publish",
+        "publishreport",
+        "publishanim",
+        "start",
+        "testmovie",
+        "testmovieinside",
+        "templates",
+        "savetemplate",
+        "brushlibrary",
+        "brushcurve",
+    ] {
         found.extend(click_everything(panel, |a, _| a.open_panel(Some(panel))));
     }
     // Test Movie in a window of its own (ADR 0062; egui stands in for the window system here).
@@ -634,7 +709,14 @@ fn every_control_can_be_used_in_the_pseudo_locale() {
         ctx.set_embed_viewports(false);
         a.open_panel(Some("testmovie"));
     }));
-    for tool in [crate::app::Tool::Brush, crate::app::Tool::PaintBrush, crate::app::Tool::Eraser, crate::app::Tool::PaintBucket, crate::app::Tool::Pencil, crate::app::Tool::Width] {
+    for tool in [
+        crate::app::Tool::Brush,
+        crate::app::Tool::PaintBrush,
+        crate::app::Tool::Eraser,
+        crate::app::Tool::PaintBucket,
+        crate::app::Tool::Pencil,
+        crate::app::Tool::Width,
+    ] {
         found.extend(click_everything(&format!("{tool:?}"), |a, _| a.tool = tool));
     }
     assert!(found.is_empty(), "{} things in plain English after using the controls:\n{}", found.len(), found.join("\n"));
@@ -656,11 +738,41 @@ fn status_lines_for_every_result_are_translated() {
     });
     let bare = json!({});
     let ids = [
-        "file.new", "file.open", "file.recover", "file.discard_recovery", "file.save", "file.save_as", "file.import", "file.import_to_library",
-        "file.export_audio", "file.export_sprite_sheet", "file.export_html", "file.export_lottie", "file.export_png", "file.export_gif", "file.export_apng", "file.export_webp", "file.export_xfl",
-        "sound.delete", "sound.auto_lip_sync", "edit.undo", "edit.redo", "edit.delete", "layer.delete", "draw.erase_all", "scene.delete", "scene.new",
-        "timeline.clear_keyframe", "timeline.copy_frames", "timeline.cut_frames", "timeline.paste_frames", "timeline.remove_frame",
-        "plugin.run", "plugin.install", "plugin.remove", "plugin.reload",
+        "file.new",
+        "file.open",
+        "file.recover",
+        "file.discard_recovery",
+        "file.save",
+        "file.save_as",
+        "file.import",
+        "file.import_to_library",
+        "file.export_audio",
+        "file.export_sprite_sheet",
+        "file.export_html",
+        "file.export_lottie",
+        "file.export_png",
+        "file.export_gif",
+        "file.export_apng",
+        "file.export_webp",
+        "file.export_xfl",
+        "sound.delete",
+        "sound.auto_lip_sync",
+        "edit.undo",
+        "edit.redo",
+        "edit.delete",
+        "layer.delete",
+        "draw.erase_all",
+        "scene.delete",
+        "scene.new",
+        "timeline.clear_keyframe",
+        "timeline.copy_frames",
+        "timeline.cut_frames",
+        "timeline.paste_frames",
+        "timeline.remove_frame",
+        "plugin.run",
+        "plugin.install",
+        "plugin.remove",
+        "plugin.reload",
     ];
     let mut plain = Vec::new();
     for id in ids {
@@ -691,9 +803,15 @@ fn edit_multiple_frames_status_lines_are_translated() {
             _ => {}
         }
     }
-    assert!(plain.is_empty(), "status lines in plain English:
-{}", plain.join("
-"));
+    assert!(
+        plain.is_empty(),
+        "status lines in plain English:
+{}",
+        plain.join(
+            "
+"
+        )
+    );
 }
 
 #[test]
@@ -789,7 +907,21 @@ fn screen_reader_names_are_translated_too() {
     // the source guideline can't see: ones passed through variables or built at run time).
     use crate::app::Tool;
     let mut found = untranslated_names("default", |_, _| {});
-    for tool in [Tool::Rect, Tool::Star, Tool::Text, Tool::Pencil, Tool::Brush, Tool::Eraser, Tool::PaintBucket, Tool::Eyedropper, Tool::Pen, Tool::Camera, Tool::Bone, Tool::Bind, Tool::Warp] {
+    for tool in [
+        Tool::Rect,
+        Tool::Star,
+        Tool::Text,
+        Tool::Pencil,
+        Tool::Brush,
+        Tool::Eraser,
+        Tool::PaintBucket,
+        Tool::Eyedropper,
+        Tool::Pen,
+        Tool::Camera,
+        Tool::Bone,
+        Tool::Bind,
+        Tool::Warp,
+    ] {
         found.extend(untranslated_names(&format!("{tool:?} tool"), |a, _| a.tool = tool));
     }
     // Selections and states that change what Properties, the timeline and the dialogs show.
@@ -822,7 +954,40 @@ fn screen_reader_names_are_translated_too() {
     found.extend(untranslated_names("library item", |a, _| {
         a.library_sel = a.s.doc.library.first().map(|s| crate::app::LibraryItem::Symbol(s.id));
     }));
-    for panel in ["start", "drop", "droplibrary", "select", "motion", "motionspan", "motionpath", "motionedit", "camera", "sound", "prefs", "shortcuts", "palette", "about", "files", "licenses", "confirm", "recovery", "frames", "filters", "plugins", "actions", "script", "scriptproblems", "testmovie", "testmovieinside", "testscript", "exporthtml", "envelope", "templates", "savetemplate", "droptimeline"] {
+    for panel in [
+        "start",
+        "drop",
+        "droplibrary",
+        "select",
+        "motion",
+        "motionspan",
+        "motionpath",
+        "motionedit",
+        "camera",
+        "sound",
+        "prefs",
+        "shortcuts",
+        "palette",
+        "about",
+        "files",
+        "licenses",
+        "confirm",
+        "recovery",
+        "frames",
+        "filters",
+        "plugins",
+        "actions",
+        "script",
+        "scriptproblems",
+        "testmovie",
+        "testmovieinside",
+        "testscript",
+        "exporthtml",
+        "envelope",
+        "templates",
+        "savetemplate",
+        "droptimeline",
+    ] {
         found.extend(untranslated_names(panel, |a, _| a.open_panel(Some(panel))));
     }
     assert!(found.is_empty(), "{} screen-reader names not translated in the pseudo-locale:\n{}", found.len(), found.join("\n"));

@@ -41,10 +41,13 @@ fn area_of(path: &anicraft_geom::Path, m: &Affine) -> f64 {
         .iter()
         .map(|pl| {
             let n = pl.points.len();
-            (0..n).map(|i| {
-                let (a, b) = (pl.points[i], pl.points[(i + 1) % n]);
-                f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)
-            }).sum::<f64>() * 0.5
+            (0..n)
+                .map(|i| {
+                    let (a, b) = (pl.points[i], pl.points[(i + 1) % n]);
+                    f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)
+                })
+                .sum::<f64>()
+                * 0.5
         })
         .sum::<f64>()
         .abs()
@@ -70,7 +73,11 @@ fn polystar_polygon_and_star_areas() {
             let want = f64::from(n) / 2.0 * 2500.0 * (std::f64::consts::TAU / f64::from(n)).sin();
             assert!((fill_area(&s) - want).abs() < want * 1e-4, "polygon {n} object {object}: {} vs {want}", fill_area(&s));
             let mut t = blank(object);
-            let v = run(&mut t, "draw.star", json!({"cx": 100, "cy": 100, "outer": 50, "sides": n, "point_size": 1.0, "stroke": null, "fill": "#336699"}));
+            let v = run(
+                &mut t,
+                "draw.star",
+                json!({"cx": 100, "cy": 100, "outer": 50, "sides": n, "point_size": 1.0, "stroke": null, "fill": "#336699"}),
+            );
             assert_eq!(v["kind"], "star");
             assert!((fill_area(&t) - want).abs() < want * 1e-4, "star {n} at size 1");
         }
@@ -139,15 +146,21 @@ fn two_squares() -> Session {
 }
 
 fn brush(s: &mut Session, mode: &str, from: [f32; 2], to: [f32; 2]) -> Value {
-    let pts: Vec<[f32; 2]> = (0..=40).map(|i| {
-        let t = i as f32 / 40.0;
-        [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]
-    }).collect();
+    let pts: Vec<[f32; 2]> = (0..=40)
+        .map(|i| {
+            let t = i as f32 / 40.0;
+            [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]
+        })
+        .collect();
     run(s, "draw.brush", json!({"points": pts, "size": 20, "smoothing": 0, "mode": mode, "color": "#ff0000"}))
 }
 
 fn blue_id(s: &Session) -> u64 {
-    s.visible_elements().iter().find(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.fill == Some(Paint::Solid(Rgba::hex(0x0000ff))))).map(|e| e.id.0).expect("the blue square")
+    s.visible_elements()
+        .iter()
+        .find(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.fill == Some(Paint::Solid(Rgba::hex(0x0000ff)))))
+        .map(|e| e.id.0)
+        .expect("the blue square")
 }
 
 /// Paint Selection: a stroke across both squares paints only the selected one, exactly over

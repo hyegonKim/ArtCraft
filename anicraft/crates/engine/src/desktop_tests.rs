@@ -87,7 +87,9 @@ fn install_writes_the_entry_mime_types_and_icons_and_is_idempotent() {
     let mut stray = Vec::new();
     for rel in owned_files() {
         let dir = data.join(rel).parent().unwrap().to_path_buf();
-        stray.extend(std::fs::read_dir(dir).unwrap().flatten().filter(|e| e.file_name().to_string_lossy().ends_with(".anicraft-tmp")).map(|e| e.path()));
+        stray.extend(
+            std::fs::read_dir(dir).unwrap().flatten().filter(|e| e.file_name().to_string_lossy().ends_with(".anicraft-tmp")).map(|e| e.path()),
+        );
     }
     assert!(stray.is_empty(), "{stray:?}");
     let _ = std::fs::remove_dir_all(root);
@@ -153,7 +155,9 @@ fn the_commands_add_report_and_remove() {
     assert!(!s.is_dirty(), "the document is untouched");
     let r = s.execute("desktop.remove", &json!({"data_home": d, "refresh": false})).unwrap();
     assert_eq!(r["removed"].as_array().map(Vec::len), Some(owned_files().len()));
-    for bad in [json!({}), json!({"appimage": a}), json!({"data_home": ""}), json!({"appimage": "", "data_home": d}), json!({"appimage": 3, "data_home": d})] {
+    for bad in
+        [json!({}), json!({"appimage": a}), json!({"data_home": ""}), json!({"appimage": "", "data_home": d}), json!({"appimage": 3, "data_home": d})]
+    {
         assert!(s.execute("desktop.integrate", &bad).is_err(), "{bad}");
     }
     assert!(crate::cmds_plugin::plugin_may_call("desktop.integrate").is_err());

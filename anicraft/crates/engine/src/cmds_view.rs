@@ -14,9 +14,33 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("view.rulers", "Rulers", "View", Some("Ctrl+Alt+Shift+R"), "{on?: bool} (default: toggle) rulers along the stage's top and left edges, in stage pixels from its top-left corner; drag from one to make a guide", false, (|s, p| toggle(s, p, |a| &mut a.rulers)) as crate::RunFn),
-        c("view.grid_show", "Show Grid", "View/Grid", Some("Ctrl+'"), "{on?: bool} (default: toggle) the grid on the stage (never in pictures or exports)", false, |s, p| toggle(s, p, |a| &mut a.show_grid)),
-        c("view.grid_snap", "Snap to Grid", "View/Grid", Some("Ctrl+Shift+'"), "{on?: bool} (default: toggle) points being drawn, dragged or moved snap to the grid's lines (shown or not)", false, |s, p| toggle(s, p, |a| &mut a.snap_grid)),
+        c(
+            "view.rulers",
+            "Rulers",
+            "View",
+            Some("Ctrl+Alt+Shift+R"),
+            "{on?: bool} (default: toggle) rulers along the stage's top and left edges, in stage pixels from its top-left corner; drag from one to make a guide",
+            false,
+            (|s, p| toggle(s, p, |a| &mut a.rulers)) as crate::RunFn,
+        ),
+        c(
+            "view.grid_show",
+            "Show Grid",
+            "View/Grid",
+            Some("Ctrl+'"),
+            "{on?: bool} (default: toggle) the grid on the stage (never in pictures or exports)",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.show_grid),
+        ),
+        c(
+            "view.grid_snap",
+            "Snap to Grid",
+            "View/Grid",
+            Some("Ctrl+Shift+'"),
+            "{on?: bool} (default: toggle) points being drawn, dragged or moved snap to the grid's lines (shown or not)",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.snap_grid),
+        ),
         c(
             "view.grid_set",
             "Edit Grid…",
@@ -26,9 +50,33 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             grid_set,
         ),
-        c("view.guides_show", "Show Guides", "View/Guides", Some("Ctrl+;"), "{on?: bool} (default: toggle) this scene's guides on the stage (never in pictures or exports)", false, |s, p| toggle(s, p, |a| &mut a.show_guides)),
-        c("view.guides_lock", "Lock Guides", "View/Guides", Some("Ctrl+Alt+;"), "{on?: bool} (default: toggle) locked guides can't be dragged, moved or deleted one by one (new ones can still be added, and Clear Guides clears them)", false, |s, p| toggle(s, p, |a| &mut a.lock_guides)),
-        c("view.guides_snap", "Snap to Guides", "View/Guides", Some("Ctrl+Shift+;"), "{on?: bool} (default: toggle) points being drawn, dragged or moved snap to the guides", false, |s, p| toggle(s, p, |a| &mut a.snap_guides)),
+        c(
+            "view.guides_show",
+            "Show Guides",
+            "View/Guides",
+            Some("Ctrl+;"),
+            "{on?: bool} (default: toggle) this scene's guides on the stage (never in pictures or exports)",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.show_guides),
+        ),
+        c(
+            "view.guides_lock",
+            "Lock Guides",
+            "View/Guides",
+            Some("Ctrl+Alt+;"),
+            "{on?: bool} (default: toggle) locked guides can't be dragged, moved or deleted one by one (new ones can still be added, and Clear Guides clears them)",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.lock_guides),
+        ),
+        c(
+            "view.guides_snap",
+            "Snap to Guides",
+            "View/Guides",
+            Some("Ctrl+Shift+;"),
+            "{on?: bool} (default: toggle) points being drawn, dragged or moved snap to the guides",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.snap_guides),
+        ),
         c(
             "view.guides_set",
             "Edit Guides…",
@@ -38,12 +86,52 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             guides_set,
         ),
-        c("view.guide_add", "Add Guide…", "View/Guides", None, "{axis: \"horizontal\"|\"vertical\", at} adds a guide to this scene at `at` stage pixels (y for a horizontal guide, x for a vertical one); returns {index, guides}", true, guide_add),
-        c("view.guide_move", "Move Guide", "", None, "{index, at} moves this scene's guide `index` (as view.aids lists them) to `at`; refused while guides are locked", true, guide_move),
-        c("view.guide_delete", "Delete Guide", "", None, "{index} removes this scene's guide `index`; refused while guides are locked", true, guide_delete),
+        c(
+            "view.guide_add",
+            "Add Guide…",
+            "View/Guides",
+            None,
+            "{axis: \"horizontal\"|\"vertical\", at} adds a guide to this scene at `at` stage pixels (y for a horizontal guide, x for a vertical one); returns {index, guides}",
+            true,
+            guide_add,
+        ),
+        c(
+            "view.guide_move",
+            "Move Guide",
+            "",
+            None,
+            "{index, at} moves this scene's guide `index` (as view.aids lists them) to `at`; refused while guides are locked",
+            true,
+            guide_move,
+        ),
+        c(
+            "view.guide_delete",
+            "Delete Guide",
+            "",
+            None,
+            "{index} removes this scene's guide `index`; refused while guides are locked",
+            true,
+            guide_delete,
+        ),
         c("view.guides_clear", "Clear Guides", "View/Guides", None, "{} removes every guide from this scene (undoable)", true, guides_clear),
-        c("view.snap_pixels", "Snap to Pixels", "View/Snapping", None, "{on?: bool} (default: toggle) points being drawn, dragged or moved go to whole stage pixels where nothing else snaps them", false, |s, p| toggle(s, p, |a| &mut a.snap_pixels)),
-        c("view.aids", "Rulers, Grid and Guides", "", None, "{} whether the rulers, grid and guides show and snap, the grid's and guides' settings, and this scene's guides [{axis, at}, ..]", false, |s, _| Ok(aids_json(s))),
+        c(
+            "view.snap_pixels",
+            "Snap to Pixels",
+            "View/Snapping",
+            None,
+            "{on?: bool} (default: toggle) points being drawn, dragged or moved go to whole stage pixels where nothing else snaps them",
+            false,
+            |s, p| toggle(s, p, |a| &mut a.snap_pixels),
+        ),
+        c(
+            "view.aids",
+            "Rulers, Grid and Guides",
+            "",
+            None,
+            "{} whether the rulers, grid and guides show and snap, the grid's and guides' settings, and this scene's guides [{axis, at}, ..]",
+            false,
+            |s, _| Ok(aids_json(s)),
+        ),
     ]
 }
 
@@ -78,7 +166,9 @@ fn guides_json(s: &Session) -> Value {
 fn accuracy(p: &Value, grid: bool) -> Result<Option<Accuracy>> {
     let Some(k) = opt_str(p, "accuracy")? else { return Ok(None) };
     match Accuracy::parse(k) {
-        Some(Accuracy::Always) if !grid => Err(EngineError::Param("guides snap 'close', 'normal' or 'distant' (only the grid can 'always' snap)".into())),
+        Some(Accuracy::Always) if !grid => {
+            Err(EngineError::Param("guides snap 'close', 'normal' or 'distant' (only the grid can 'always' snap)".into()))
+        }
         Some(a) => Ok(Some(a)),
         None => Err(EngineError::Param(format!("unknown accuracy '{k}' (close, normal, distant{})", if grid { " or always" } else { "" }))),
     }
@@ -86,7 +176,9 @@ fn accuracy(p: &Value, grid: bool) -> Result<Option<Accuracy>> {
 
 fn spacing(p: &Value, key: &str) -> Result<Option<f32>> {
     match opt_f32(p, key)? {
-        Some(v) if !(GRID_MIN..=GRID_MAX).contains(&v) => Err(EngineError::Param(format!("'{key}' must be between {GRID_MIN} and {GRID_MAX} pixels"))),
+        Some(v) if !(GRID_MIN..=GRID_MAX).contains(&v) => {
+            Err(EngineError::Param(format!("'{key}' must be between {GRID_MIN} and {GRID_MAX} pixels")))
+        }
         v => Ok(v),
     }
 }
@@ -147,7 +239,9 @@ fn position(p: &Value) -> Result<f32> {
 fn index(s: &Session, p: &Value) -> Result<usize> {
     let n = s.guides().len();
     let i = opt_u64(p, "index")?.ok_or_else(|| EngineError::Param("missing param 'index'".into()))?;
-    usize::try_from(i).ok().filter(|i| *i < n).ok_or_else(|| EngineError::Param(if n == 0 { "this scene has no guides".into() } else { format!("no guide {i} (this scene has {n}: 0 to {})", n - 1) }))
+    usize::try_from(i).ok().filter(|i| *i < n).ok_or_else(|| {
+        EngineError::Param(if n == 0 { "this scene has no guides".into() } else { format!("no guide {i} (this scene has {n}: 0 to {})", n - 1) })
+    })
 }
 
 fn unlocked(s: &Session) -> Result<()> {

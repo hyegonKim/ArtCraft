@@ -63,7 +63,11 @@ fn shown(app: &App) -> Vec<Shown> {
 
 /// The unlocked pin under screen point `p`, topmost first.
 fn pin_at(app: &App, xf: Xf, p: Pos2) -> Option<(ElementId, PinId)> {
-    shown(app).into_iter().rev().filter(|s| !s.locked).find_map(|s| s.pins.iter().find(|(_, at)| xf.to_screen(*at).distance(p) <= GRAB).map(|(id, _)| (s.element, *id)))
+    shown(app)
+        .into_iter()
+        .rev()
+        .filter(|s| !s.locked)
+        .find_map(|s| s.pins.iter().find(|(_, at)| xf.to_screen(*at).distance(p) <= GRAB).map(|(id, _)| (s.element, *id)))
 }
 
 /// The topmost shape or bitmap under stage point `sp` on an unlocked normal layer.
@@ -78,7 +82,8 @@ fn artwork_at(app: &App, sp: Vec2) -> Option<(LayerId, ElementId)> {
         if item.clip.is_some_and(|c| !dl.clip_contains(c, sp)) || !item.path.contains(sp, &item.transform, item.fill_rule) {
             continue;
         }
-        let shape = evaluate_layer_elements(layer, app.s.frame).is_some_and(|(_, els)| els.iter().any(|e| e.id == item.element && matches!(e.kind, ElementKind::Shape(_))));
+        let shape = evaluate_layer_elements(layer, app.s.frame)
+            .is_some_and(|(_, els)| els.iter().any(|e| e.id == item.element && matches!(e.kind, ElementKind::Shape(_))));
         if shape {
             return Some((layer.id, item.element));
         }

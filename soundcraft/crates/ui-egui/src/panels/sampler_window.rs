@@ -8,14 +8,9 @@ use crate::theme::{Tokens, mono, regular};
 use egui::{Align2, Color32, CursorIcon, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 use serde_json::json;
 use soundcraft_model::{Insert, TrackId};
-use std::ffi::OsStr;
-use std::path::Path;
 
 /// The built-in Sampler's plugin id.
 pub const SAMPLER: &str = "sampler";
-
-/// File extensions a sample can come from (what the audio decoder reads).
-const AUDIO_EXTS: &[&str] = &["wav", "wave", "bwf", "aif", "aiff", "aifc", "flac", "mp3", "ogg", "oga", "m4a", "aac", "mp4", "caf"];
 
 /// Markers on the sample strip: the parameter each one sets, and whether it needs a loop.
 const MARKERS: [(&str, bool); 3] = [("start", false), ("loop_start", true), ("loop_end", true)];

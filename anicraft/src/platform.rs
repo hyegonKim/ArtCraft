@@ -106,7 +106,9 @@ pub fn system_look() -> SystemLook {
 pub fn system_dark_mode() -> Option<bool> {
     #[cfg(windows)]
     {
-        let key = winreg::RegKey::predef(winreg::enums::HKEY_CURRENT_USER).open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize").ok()?; // i18n-exempt: a registry path
+        let key = winreg::RegKey::predef(winreg::enums::HKEY_CURRENT_USER)
+            .open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize")
+            .ok()?; // i18n-exempt: a registry path
         let light: u32 = key.get_value("AppsUseLightTheme").ok()?; // i18n-exempt: a registry value name
         Some(light == 0)
     }
@@ -146,7 +148,11 @@ fn scheme_from_portal(v: u32) -> Option<bool> {
 /// the portal setting.
 #[cfg(not(any(windows, target_os = "macos", target_arch = "wasm32")))]
 fn gnome_color_scheme() -> Option<bool> {
-    let out = std::process::Command::new("gsettings").args(["get", "org.gnome.desktop.interface", "color-scheme"]).output().ok().filter(|o| o.status.success())?; // i18n-exempt: a command line
+    let out = std::process::Command::new("gsettings")
+        .args(["get", "org.gnome.desktop.interface", "color-scheme"])
+        .output()
+        .ok()
+        .filter(|o| o.status.success())?; // i18n-exempt: a command line
     match String::from_utf8_lossy(&out.stdout).trim().trim_matches('\'') {
         "prefer-dark" => Some(true),
         "prefer-light" => Some(false),
@@ -164,7 +170,20 @@ fn portal_contrast() -> Option<bool> {
 #[cfg(not(any(windows, target_os = "macos", target_arch = "wasm32")))]
 fn portal_appearance(key: &str) -> Option<u32> {
     let out = std::process::Command::new("gdbus") // i18n-exempt: a command line
-        .args(["call", "--session", "--timeout", "1", "--dest", "org.freedesktop.portal.Desktop", "--object-path", "/org/freedesktop/portal/desktop", "--method", "org.freedesktop.portal.Settings.ReadOne", "org.freedesktop.appearance", key]) // i18n-exempt: a command line
+        .args([
+            "call",
+            "--session",
+            "--timeout",
+            "1",
+            "--dest",
+            "org.freedesktop.portal.Desktop",
+            "--object-path",
+            "/org/freedesktop/portal/desktop",
+            "--method",
+            "org.freedesktop.portal.Settings.ReadOne",
+            "org.freedesktop.appearance",
+            key,
+        ]) // i18n-exempt: a command line
         .output()
         .ok()
         .filter(|o| o.status.success())?;
@@ -174,7 +193,11 @@ fn portal_appearance(key: &str) -> Option<u32> {
 /// GNOME's own switch, for desktops without the portal setting.
 #[cfg(not(any(windows, target_os = "macos", target_arch = "wasm32")))]
 fn gnome_high_contrast() -> Option<bool> {
-    let out = std::process::Command::new("gsettings").args(["get", "org.gnome.desktop.a11y.interface", "high-contrast"]).output().ok().filter(|o| o.status.success())?; // i18n-exempt: a command line
+    let out = std::process::Command::new("gsettings")
+        .args(["get", "org.gnome.desktop.a11y.interface", "high-contrast"])
+        .output()
+        .ok()
+        .filter(|o| o.status.success())?; // i18n-exempt: a command line
     match String::from_utf8_lossy(&out.stdout).trim() {
         "true" => Some(true),
         "false" => Some(false),
@@ -397,7 +420,13 @@ pub fn places() -> Vec<(&'static str, Option<PathBuf>)> {
         return Vec::new();
     }
     #[cfg_attr(target_arch = "wasm32", allow(unused_mut))]
-    let mut v = vec![(tr_noop!("Preferences"), config_dir()), (tr_noop!("Autosave"), recovery_dir()), (tr_noop!("Logs"), log_dir()), (tr_noop!("Plug-ins"), plugins_dir()), (tr_noop!("Templates"), templates_dir())];
+    let mut v = vec![
+        (tr_noop!("Preferences"), config_dir()),
+        (tr_noop!("Autosave"), recovery_dir()),
+        (tr_noop!("Logs"), log_dir()),
+        (tr_noop!("Plug-ins"), plugins_dir()),
+        (tr_noop!("Templates"), templates_dir()),
+    ];
     #[cfg(not(target_arch = "wasm32"))]
     v.push((tr_noop!("User guide"), Some(guide_dir())));
     v
@@ -511,10 +540,18 @@ pub fn unavailable(cmd: &str) -> Option<&'static str> {
         return None;
     }
     match cmd {
-        "file.export_video" => Some(tr_noop!("Video export runs ffmpeg, which a web browser can't start: use the desktop app, or export an animated GIF or a PNG sequence")),
-        "plugin.install" | "plugin.remove" | "plugin.reload" => Some(tr_noop!("Plug-ins are installed into a folder on your computer: use the desktop app")),
-        "desktop.integrate" | "desktop.remove" | "desktop.status" => Some(tr_noop!("The applications menu belongs to an AppImage on Linux: use the desktop app")),
-        "file.save_as_template" => Some(tr_noop!("Your templates are kept in a folder on your computer: use the desktop app (the built-in templates work here)")),
+        "file.export_video" => Some(tr_noop!(
+            "Video export runs ffmpeg, which a web browser can't start: use the desktop app, or export an animated GIF or a PNG sequence"
+        )),
+        "plugin.install" | "plugin.remove" | "plugin.reload" => {
+            Some(tr_noop!("Plug-ins are installed into a folder on your computer: use the desktop app"))
+        }
+        "desktop.integrate" | "desktop.remove" | "desktop.status" => {
+            Some(tr_noop!("The applications menu belongs to an AppImage on Linux: use the desktop app"))
+        }
+        "file.save_as_template" => {
+            Some(tr_noop!("Your templates are kept in a folder on your computer: use the desktop app (the built-in templates work here)"))
+        }
         _ => None,
     }
 }
@@ -839,7 +876,10 @@ pub fn filters(cmd: &str) -> (&'static str, &'static [&'static str]) {
 
 /// Commands that read a file the user picks (the others write one, or a folder of them).
 pub fn reads_file(cmd: &str) -> bool {
-    matches!(cmd, "file.open" | "plugin.install" | "file.import" | "file.import_to_library" | "brush.preset_import" | "filter.preset_import" | "swatch.import")
+    matches!(
+        cmd,
+        "file.open" | "plugin.install" | "file.import" | "file.import_to_library" | "brush.preset_import" | "filter.preset_import" | "swatch.import"
+    )
 }
 
 /// Shows the platform's own dialog (Windows common dialog, macOS panel, Linux XDG portal), with
@@ -920,11 +960,11 @@ pub fn cjk_fallback_font() -> Option<&'static (String, std::sync::Arc<egui::Font
             {
                 // i18n-exempt: system font file paths
                 let candidates = [
-                    r"C:\Windows\Fonts\malgun.ttf", // i18n-exempt: font file path
-                    r"C:\Windows\Fonts\gulim.ttc", // i18n-exempt: font file path
-                    "/System/Library/Fonts/AppleSDGothicNeo.ttc", // i18n-exempt: font file path
+                    r"C:\Windows\Fonts\malgun.ttf",                           // i18n-exempt: font file path
+                    r"C:\Windows\Fonts\gulim.ttc",                            // i18n-exempt: font file path
+                    "/System/Library/Fonts/AppleSDGothicNeo.ttc",             // i18n-exempt: font file path
                     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", // i18n-exempt: font file path
-                    "/usr/share/fonts/truetype/nanum/NanumGothic.ttf", // i18n-exempt: font file path
+                    "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",        // i18n-exempt: font file path
                 ];
                 for path in candidates {
                     if let Ok(bytes) = std::fs::read(path)
@@ -1038,8 +1078,13 @@ mod tests {
     #[test]
     fn portal_replies_parse() {
         assert_eq!(parse_portal_uint("(<<uint32 1>>,)"), Some(1));
-        assert_eq!(parse_portal_uint("(<uint32 0>,)
-"), Some(0));
+        assert_eq!(
+            parse_portal_uint(
+                "(<uint32 0>,)
+"
+            ),
+            Some(0)
+        );
         assert_eq!(parse_portal_uint("Error: no such key"), None);
         // color-scheme: 1 dark, 2 light, 0 (no preference) and anything else say nothing.
         assert_eq!([0, 1, 2, 7].map(scheme_from_portal), [None, Some(true), Some(false), None]);
@@ -1089,18 +1134,31 @@ mod tests {
         assert_eq!(portable_root_for(Os::Windows, Path::new("D:/Tools/AniCraft/anicraft.exe"), None, &none), None, "an installed copy has no marker");
         // Linux tar.gz: the marker at the top, above bin/.
         let tar = files(&["/home/a b/anicraft-0.1.0-linux-x86_64/anicraft-portable"]);
-        assert_eq!(portable_root_for(Os::Linux, Path::new("/home/a b/anicraft-0.1.0-linux-x86_64/bin/anicraft"), None, &tar), Some(PathBuf::from("/home/a b/anicraft-0.1.0-linux-x86_64")));
+        assert_eq!(
+            portable_root_for(Os::Linux, Path::new("/home/a b/anicraft-0.1.0-linux-x86_64/bin/anicraft"), None, &tar),
+            Some(PathBuf::from("/home/a b/anicraft-0.1.0-linux-x86_64"))
+        );
         // A package's /usr/bin/anicraft is never portable (no marker in /usr or /usr/bin).
         assert_eq!(portable_root_for(Os::Linux, Path::new("/usr/bin/anicraft"), None, &tar), None);
         // macOS: next to AniCraft.app, not inside it.
         let mac = files(&["/Volumes/Stick/anicraft-portable"]);
-        assert_eq!(portable_root_for(Os::Mac, Path::new("/Volumes/Stick/AniCraft.app/Contents/MacOS/anicraft"), None, &mac), Some(PathBuf::from("/Volumes/Stick")));
+        assert_eq!(
+            portable_root_for(Os::Mac, Path::new("/Volumes/Stick/AniCraft.app/Contents/MacOS/anicraft"), None, &mac),
+            Some(PathBuf::from("/Volumes/Stick"))
+        );
         let inside = files(&["/Volumes/Stick/AniCraft.app/Contents/MacOS/anicraft-portable"]);
-        assert_eq!(portable_root_for(Os::Mac, Path::new("/Volumes/Stick/AniCraft.app/Contents/MacOS/anicraft"), None, &inside), None, "never inside the signed bundle");
+        assert_eq!(
+            portable_root_for(Os::Mac, Path::new("/Volumes/Stick/AniCraft.app/Contents/MacOS/anicraft"), None, &inside),
+            None,
+            "never inside the signed bundle"
+        );
         // AppImage: next to the .AppImage file; the mounted image doesn't count.
         let img = files(&["/home/ana/Apps/anicraft-portable", "/tmp/.mount_AniCrXYZ/usr/bin/anicraft-portable"]);
         let exe = Path::new("/tmp/.mount_AniCrXYZ/usr/bin/anicraft");
-        assert_eq!(portable_root_for(Os::Linux, exe, Some(Path::new("/home/ana/Apps/AniCraft.AppImage")), &img), Some(PathBuf::from("/home/ana/Apps")));
+        assert_eq!(
+            portable_root_for(Os::Linux, exe, Some(Path::new("/home/ana/Apps/AniCraft.AppImage")), &img),
+            Some(PathBuf::from("/home/ana/Apps"))
+        );
         assert_eq!(portable_root_for(Os::Linux, exe, Some(Path::new("/elsewhere/AniCraft.AppImage")), &img), None);
         assert_eq!(portable_root_for(Os::Web, Path::new("/x/anicraft"), None, &files(&["/x/anicraft-portable"])), None);
     }
@@ -1130,10 +1188,12 @@ mod tests {
 
     #[test]
     fn the_desktop_data_folder_follows_xdg() {
-        let with = |xdg: Option<&'static str>| move |k: &str| match k {
-            "XDG_DATA_HOME" => xdg.map(PathBuf::from),
-            "HOME" => Some(PathBuf::from("/home/a b")),
-            _ => None,
+        let with = |xdg: Option<&'static str>| {
+            move |k: &str| match k {
+                "XDG_DATA_HOME" => xdg.map(PathBuf::from),
+                "HOME" => Some(PathBuf::from("/home/a b")),
+                _ => None,
+            }
         };
         assert_eq!(data_home_for(&with(Some("/data/me"))), Some(PathBuf::from("/data/me")));
         assert_eq!(data_home_for(&with(None)), Some(PathBuf::from("/home/a b/.local/share")));

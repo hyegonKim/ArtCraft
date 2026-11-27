@@ -44,7 +44,10 @@ impl ColourTarget {
 pub fn target_toggle(app: &mut App, ui: &mut egui::Ui) {
     ui.horizontal_wrapped(|ui| {
         ui.label(tr!("Swatches set the"));
-        for (t, label, tip) in [(ColourTarget::Stroke, tr!("Stroke"), tr!("Swatch clicks set the stroke colour (gradients still go to the fill)")), (ColourTarget::Fill, tr!("Fill"), tr!("Swatch clicks set the fill: a colour or a gradient"))] {
+        for (t, label, tip) in [
+            (ColourTarget::Stroke, tr!("Stroke"), tr!("Swatch clicks set the stroke colour (gradients still go to the fill)")),
+            (ColourTarget::Fill, tr!("Fill"), tr!("Swatch clicks set the fill: a colour or a gradient")),
+        ] {
             if ui.selectable_label(app.colour_target == t, label).on_hover_text(tip).clicked() {
                 app.colour_target = t;
             }
@@ -197,7 +200,11 @@ pub fn panel(app: &mut App, ui: &mut egui::Ui) {
         let more = bar_button(ui, tr!("Swatch options: import, export, defaults"), Icon::Ellipsis, true);
         egui::Popup::menu(&more).id(Id::new("anicraft.swatches.menu")).show(|ui| menu(app, ui));
     });
-    let caption = if n == 0 { tr!("No swatches. Add the current colour with +, or load the defaults from the menu.") } else { tr!("Click to apply; drag to move; right-click for more.") };
+    let caption = if n == 0 {
+        tr!("No swatches. Add the current colour with +, or load the defaults from the menu.")
+    } else {
+        tr!("Click to apply; drag to move; right-click for more.")
+    };
     ui.label(text(Type::Caption, caption));
 }
 
@@ -217,7 +224,11 @@ fn menu(app: &mut App, ui: &mut egui::Ui) {
     if ui.button(tr!("Import Swatches…")).on_hover_text(tr!("Add the swatches in a swatch file (.json) or a GIMP palette (.gpl)")).clicked() {
         app.invoke("swatch.import");
     }
-    if ui.add_enabled(!app.s.doc.swatches.is_empty(), egui::Button::new(tr!("Export Swatches…"))).on_hover_text(tr!("Save these swatches as a swatch file (.json) for other documents")).clicked() {
+    if ui
+        .add_enabled(!app.s.doc.swatches.is_empty(), egui::Button::new(tr!("Export Swatches…")))
+        .on_hover_text(tr!("Save these swatches as a swatch file (.json) for other documents"))
+        .clicked()
+    {
         app.invoke("swatch.export");
     }
     ui.separator();
@@ -247,7 +258,9 @@ fn grid(app: &mut App, ui: &mut egui::Ui) {
     let rows = n.div_ceil(cols).max(1);
     let size = vec2(cols as f32 * (CELL + GAP) - GAP, rows as f32 * (CELL + GAP) - GAP);
     let (area, _) = ui.allocate_exact_size(size, Sense::hover());
-    let cell_rect = |i: usize| Rect::from_min_size(pos2(area.left() + (i % cols) as f32 * (CELL + GAP), area.top() + (i / cols) as f32 * (CELL + GAP)), vec2(CELL, CELL));
+    let cell_rect = |i: usize| {
+        Rect::from_min_size(pos2(area.left() + (i % cols) as f32 * (CELL + GAP), area.top() + (i / cols) as f32 * (CELL + GAP)), vec2(CELL, CELL))
+    };
     let drag_id = Id::new("anicraft.swatches.drag");
     let mut dragging: Option<usize> = ui.data(|d| d.get_temp(drag_id));
     let pointer = ui.ctx().pointer_interact_pos();
@@ -277,7 +290,14 @@ fn grid(app: &mut App, ui: &mut egui::Ui) {
         if resp.has_focus() {
             p.rect_stroke(r.expand(3.0), 2.0, Stroke::new(1.0, T.text), StrokeKind::Outside);
             // The keyboard: Enter applies (a click), Delete removes, Alt+arrows move it.
-            let (del, left, right, alt) = ui.input(|inp| (inp.key_pressed(Key::Delete) || inp.key_pressed(Key::Backspace), inp.key_pressed(Key::ArrowLeft), inp.key_pressed(Key::ArrowRight), inp.modifiers.alt));
+            let (del, left, right, alt) = ui.input(|inp| {
+                (
+                    inp.key_pressed(Key::Delete) || inp.key_pressed(Key::Backspace),
+                    inp.key_pressed(Key::ArrowLeft),
+                    inp.key_pressed(Key::ArrowRight),
+                    inp.modifiers.alt,
+                )
+            });
             if del {
                 act = Some(Act::Remove(i));
             } else if alt && left && i > 0 {
@@ -381,7 +401,14 @@ fn name_field(app: &mut App, ui: &mut egui::Ui, i: usize, current: &str) {
     let mut s: String = ui.data(|d| d.get_temp(buf_id)).unwrap_or_else(|| current.to_string());
     ui.horizontal(|ui| {
         ui.label(tr!("Name"));
-        let r = ui.add(egui::TextEdit::singleline(&mut s).desired_width(crate::theme::fit(ui, 140.0)).char_limit(anicraft_engine::doc::swatch::MAX_SWATCH_NAME).hint_text(tr!("no name"))).named(tr!("Swatch name"));
+        let r = ui
+            .add(
+                egui::TextEdit::singleline(&mut s)
+                    .desired_width(crate::theme::fit(ui, 140.0))
+                    .char_limit(anicraft_engine::doc::swatch::MAX_SWATCH_NAME)
+                    .hint_text(tr!("no name")),
+            )
+            .named(tr!("Swatch name"));
         if r.lost_focus() {
             if s.trim() != current {
                 app.run("swatch.rename", json!({"index": i, "name": s}));

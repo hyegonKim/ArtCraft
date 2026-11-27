@@ -358,7 +358,7 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
         general_cursor(app, ui, &resp, img_rect, main_area);
     }
     if !navigating {
-        let tv = ToolView { right, map: &map, frame: &frame, d: &d, id, split, native, aspect };
+        let tv = ToolView { right, map: &map, frame: &frame, d: &d, id, split };
         tool_interaction(app, ui, &resp, &tv, &Views { img_rect, target_rect, before_img, before_target, areas: &areas, main_area, canvas });
     }
     // Space held over a tool: the view's hand takes the pointer from it (#1895)
@@ -380,15 +380,19 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
         status_pill(ui, app, &photo, [canvas, over], nav, failed);
     }
     if !fullscreen {
-        photo.preview_only.as_deref().inspect(|why| preview_only_pill(ui, canvas, why));
-        if photo.is_video() {
-            video_trim_hud(app, ui, canvas, &photo);
-        }
-        if app.session.tether.active {
-            tether_hud(app, ui, canvas);
-        }
+        non_fullscreen_huds(app, ui, canvas, &photo);
     }
     loupe_context_menu(app, &resp, id);
+}
+
+fn non_fullscreen_huds(app: &mut LightcraftApp, ui: &mut egui::Ui, canvas: Rect, photo: &lightcraft_catalog::Photo) {
+    photo.preview_only.as_deref().inspect(|why| preview_only_pill(ui, canvas, why));
+    if photo.is_video() {
+        video_trim_hud(app, ui, canvas, photo);
+    }
+    if app.session.tether.active {
+        tether_hud(app, ui, canvas);
+    }
 }
 
 fn video_trim_hud(app: &mut LightcraftApp, ui: &mut egui::Ui, canvas: Rect, photo: &lightcraft_catalog::Photo) {
@@ -418,10 +422,7 @@ fn video_trim_hud(app: &mut LightcraftApp, ui: &mut egui::Ui, canvas: Rect, phot
                 ui.label(egui::RichText::new(crate::i18n::tr("Poster")).color(t.text_dim).size(11.0));
                 let r_pos = ui.add(egui::DragValue::new(&mut poster_sec).speed(0.1).range(in_sec..=out_sec).suffix("s").fixed_decimals(1));
                 if r_in.changed() || r_out.changed() || r_pos.changed() {
-                    let _ = app.run(
-                        "video.trim",
-                        json!({"id": photo.id.0, "inSec": in_sec, "outSec": out_sec, "posterSec": poster_sec}),
-                    );
+                    let _ = app.run("video.trim", json!({"id": photo.id.0, "inSec": in_sec, "outSec": out_sec, "posterSec": poster_sec}));
                 }
                 if (photo.meta.video_in.is_some() || photo.meta.video_out.is_some() || photo.meta.video_poster.is_some())
                     && ui.small_button(crate::i18n::tr("Reset")).clicked()
@@ -450,9 +451,7 @@ fn tether_hud(app: &mut LightcraftApp, ui: &mut egui::Ui, canvas: Rect) {
         .show(&mut child, |ui| {
             ui.horizontal_centered(|ui| {
                 ui.label(
-                    egui::RichText::new(crate::i18n::tr_format!("Tether · {name} ({shots})", name = name, shots = shots))
-                        .color(t.text)
-                        .size(11.5),
+                    egui::RichText::new(crate::i18n::tr_format!("Tether · {name} ({shots})", name = name, shots = shots)).color(t.text).size(11.5),
                 );
                 if ui.small_button(crate::i18n::tr("Capture")).clicked() {
                     let _ = app.run("tether.capture", json!({}));
@@ -1035,8 +1034,6 @@ struct ToolView<'a> {
     d: &'a DevelopSettings,
     id: PhotoId,
     split: bool,
-    native: [usize; 2],
-    aspect: f32,
 }
 
 /// Route the pointer to the right panel's tool on the photo, or to the general interactions.
@@ -1059,7 +1056,7 @@ fn tool_interaction(app: &mut LightcraftApp, ui: &mut egui::Ui, resp: &egui::Res
                 (true, Some(before), Some(q)) if before.contains(q) => (CanvasMap::new(tv.frame, v.before_img), v.before_img, *before),
                 _ => (CanvasMap::new(tv.frame, v.img_rect), v.img_rect, v.main_area),
             };
-            general_interaction(app, ui, resp, &map, img, pane, tv.native, tv.aspect)
+            general_interaction(app, ui, resp, &map, img, pane)
         }
     }
 }
@@ -1312,16 +1309,7 @@ fn general_cursor(app: &LightcraftApp, ui: &egui::Ui, resp: &egui::Response, img
     ui.ctx().set_cursor_icon(cursor);
 }
 
-fn general_interaction(
-    app: &mut LightcraftApp,
-    ui: &mut egui::Ui,
-    resp: &egui::Response,
-    map: &CanvasMap,
-    img: Rect,
-    canvas: Rect,
-    native: [usize; 2],
-    aspect: f32,
-) {
+fn general_interaction(app: &mut LightcraftApp, ui: &mut egui::Ui, resp: &egui::Response, map: &CanvasMap, img: Rect, canvas: Rect) {
     if app.ui.tool == "wbPicker" {
         if resp.clicked()
             && let Some(q) = resp.interact_pointer_pos()
@@ -1353,7 +1341,6 @@ fn general_interaction(
         return;
     }
     click_zoom_and_pan(app, resp, img, canvas);
-    let _ = (native, aspect);
 }
 
 /// The photo `img` reaches past its pane `canvas`: a drag pans it.

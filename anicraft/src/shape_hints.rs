@@ -84,6 +84,9 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) -> bool {
 pub fn add(app: &mut App) {
     if let Some(v) = app.run("tween.add_hint", json!({})) {
         let letter = v["hint"].as_str().unwrap_or("a").to_string();
-        app.status_ok(tr!("Added shape hint {letter}: drag it onto an edge here, then onto the matching edge on the tween's last keyframe.", letter = letter));
+        app.status_ok(tr!(
+            "Added shape hint {letter}: drag it onto an edge here, then onto the matching edge on the tween's last keyframe.",
+            letter = letter
+        ));
     }
 }

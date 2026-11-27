@@ -1212,11 +1212,7 @@ pub fn separate_stems(ch: &[Vec<f32>], sample_rate: f32) -> SeparatedStems {
     let n_ch = ch.len();
     let len = max_len(ch).min(MAX_OFFLINE_SAMPLES);
     if n_ch == 0 || len == 0 {
-        return SeparatedStems {
-            vocals: vec![Vec::new(); n_ch],
-            accompaniment: vec![Vec::new(); n_ch],
-            ambience: vec![Vec::new(); n_ch],
-        };
+        return SeparatedStems { vocals: vec![Vec::new(); n_ch], accompaniment: vec![Vec::new(); n_ch], ambience: vec![Vec::new(); n_ch] };
     }
     const N_FFT: usize = 1024;
     const HOP: usize = 256;
@@ -1267,7 +1263,8 @@ pub fn separate_stems(ch: &[Vec<f32>], sample_rate: f32) -> SeparatedStems {
                 if let Some(slot) = vf.get_mut(b) {
                     *slot = vc;
                 }
-                if b > 0 && b < N_FFT / 2
+                if b > 0
+                    && b < N_FFT / 2
                     && let Some(conj_slot) = vf.get_mut(N_FFT - b)
                 {
                     *conj_slot = vc.conj();
@@ -1277,7 +1274,8 @@ pub fn separate_stems(ch: &[Vec<f32>], sample_rate: f32) -> SeparatedStems {
                 if let Some(slot) = af.get_mut(b) {
                     *slot = ac;
                 }
-                if b > 0 && b < N_FFT / 2
+                if b > 0
+                    && b < N_FFT / 2
                     && let Some(conj_slot) = af.get_mut(N_FFT - b)
                 {
                     *conj_slot = ac.conj();
@@ -1422,10 +1420,10 @@ mod tests {
         }
         let orig = vec![mix_l, mix_r];
         let stems = separate_stems(&orig, sr);
-        for c in 0..2 {
-            for i in 0..n {
+        for (c, orig_ch) in orig.iter().enumerate() {
+            for (i, &orig_val) in orig_ch.iter().enumerate() {
                 let sum = stems.vocals[c][i] + stems.accompaniment[c][i] + stems.ambience[c][i];
-                assert!((sum - orig[c][i]).abs() < 1e-5, "stem sum mismatch at ch={c} i={i}: {sum} vs {}", orig[c][i]);
+                assert!((sum - orig_val).abs() < 1e-5, "stem sum mismatch at ch={c} i={i}: {sum} vs {orig_val}");
             }
         }
         let voc_energy: f32 = stems.vocals[0][512..n - 512].iter().map(|x| x * x).sum();

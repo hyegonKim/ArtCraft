@@ -21,7 +21,10 @@ use crate::actions::{Action, ButtonEvent, EventHandler, FrameRef, FrameScript, P
 use crate::eval::{Play, evaluate_shown, evaluate_symbol, guide_walk};
 use crate::field::{Changed, Edit, Editor, FieldLook, FieldState, chars, fit, scroll_to_caret};
 use crate::sound::Started;
-use crate::{BlendMode, ColorTransform, DisplayList, Document, Element, ElementId, ElementKind, FIELD_GUTTER, Group, LayerKind, MAX_SYMBOL_DEPTH, Rgba, SoundSync, SymbolId, SymbolKind, TextBlock, TextField, TextKind, Timeline};
+use crate::{
+    BlendMode, ColorTransform, DisplayList, Document, Element, ElementId, ElementKind, FIELD_GUTTER, Group, LayerKind, MAX_SYMBOL_DEPTH, Rgba,
+    SoundSync, SymbolId, SymbolKind, TextBlock, TextField, TextKind, Timeline,
+};
 use anicraft_geom::{Affine, Vec2};
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::Arc;
@@ -454,7 +457,23 @@ pub fn input(doc: &Document, state: &PlayerState, events: &[Event], host: &mut d
 /// drawing order (parents before their contents).
 pub fn tree(doc: &Document, st: &PlayerState) -> Vec<Node> {
     let tl = doc.timeline(st.scene);
-    let mut out = vec![Node { path: Vec::new(), parent: None, owner: 0, name: String::new(), symbol: None, kind: NodeKind::Root, frame: st.root.frame, frames: tl.frame_count(), xf: Affine::IDENTITY, local: Affine::IDENTITY, alpha: 1.0, hittable: true, events: Vec::new(), gain: 1.0, text: None }];
+    let mut out = vec![Node {
+        path: Vec::new(),
+        parent: None,
+        owner: 0,
+        name: String::new(),
+        symbol: None,
+        kind: NodeKind::Root,
+        frame: st.root.frame,
+        frames: tl.frame_count(),
+        xf: Affine::IDENTITY,
+        local: Affine::IDENTITY,
+        alpha: 1.0,
+        hittable: true,
+        events: Vec::new(),
+        gain: 1.0,
+        text: None,
+    }];
     // The main timeline is seen through its camera (ADR 0027): instances are where the pointer
     // sees them.
     let camera = tl.camera_at(st.root.frame, &doc.stage);
@@ -554,7 +573,19 @@ fn plays(tl: &Timeline, index: usize) -> bool {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn walk(doc: &Document, st: &PlayerState, tl: &Timeline, frame: u32, parent: usize, owner: usize, xf: Affine, depth: usize, hittable: bool, camera: Option<crate::Camera>, out: &mut Vec<Node>) {
+fn walk(
+    doc: &Document,
+    st: &PlayerState,
+    tl: &Timeline,
+    frame: u32,
+    parent: usize,
+    owner: usize,
+    xf: Affine,
+    depth: usize,
+    hittable: bool,
+    camera: Option<crate::Camera>,
+    out: &mut Vec<Node>,
+) {
     if depth > MAX_SYMBOL_DEPTH {
         return;
     }
@@ -597,7 +628,23 @@ fn walk(doc: &Document, st: &PlayerState, tl: &Timeline, frame: u32, parent: usi
                 let shown = ov.is_none_or(Overrides::shown);
                 let set = ov.map(|o| o.apply(el));
                 let e: &Element = set.as_ref().unwrap_or(el);
-                out.push(Node { path, parent: Some(parent), owner, name: e.name.clone(), symbol: None, kind: NodeKind::Text, frame: 0, frames: 0, xf: layer_xf.mul(&e.transform), local: el.transform, alpha: el.color.alpha(), hittable: hit && shown, events: Vec::new(), gain, text: Some(t.clone()) });
+                out.push(Node {
+                    path,
+                    parent: Some(parent),
+                    owner,
+                    name: e.name.clone(),
+                    symbol: None,
+                    kind: NodeKind::Text,
+                    frame: 0,
+                    frames: 0,
+                    xf: layer_xf.mul(&e.transform),
+                    local: el.transform,
+                    alpha: el.color.alpha(),
+                    hittable: hit && shown,
+                    events: Vec::new(),
+                    gain,
+                    text: Some(t.clone()),
+                });
                 continue;
             }
             let ElementKind::Symbol { symbol, loop_mode, first_frame, events, .. } = &el.kind else { continue };
@@ -616,7 +663,23 @@ fn walk(doc: &Document, st: &PlayerState, tl: &Timeline, frame: u32, parent: usi
             };
             let idx = out.len();
             let node_xf = layer_xf.mul(&e.transform);
-            out.push(Node { path, parent: Some(parent), owner, name: e.name.clone(), symbol: Some(*symbol), kind, frame: local, frames: len, xf: node_xf, local: el.transform, alpha: el.color.alpha(), hittable: hit && shown, events: events.clone(), gain, text: None });
+            out.push(Node {
+                path,
+                parent: Some(parent),
+                owner,
+                name: e.name.clone(),
+                symbol: Some(*symbol),
+                kind,
+                frame: local,
+                frames: len,
+                xf: node_xf,
+                local: el.transform,
+                alpha: el.color.alpha(),
+                hittable: hit && shown,
+                events: events.clone(),
+                gain,
+                text: None,
+            });
             // Names inside a movie clip (or a button's states) are its own; a graphic's
             // contents belong to the timeline the graphic is on.
             let inner_owner = if kind == NodeKind::Graphic { owner } else { idx };
@@ -627,7 +690,8 @@ fn walk(doc: &Document, st: &PlayerState, tl: &Timeline, frame: u32, parent: usi
 
 fn hit_in(doc: &Document, st: &PlayerState, nodes: &[Node], p: Vec2) -> Option<InstancePath> {
     for n in nodes.iter().rev() {
-        let interactive = n.kind == NodeKind::Button || (n.kind == NodeKind::MovieClip && (!n.events.is_empty() || st.listeners.contains_key(&n.path)));
+        let interactive =
+            n.kind == NodeKind::Button || (n.kind == NodeKind::MovieClip && (!n.events.is_empty() || st.listeners.contains_key(&n.path)));
         if !n.hittable || !interactive {
             continue;
         }
@@ -688,7 +752,23 @@ struct Run<'a, 'h> {
 
 impl<'a, 'h> Run<'a, 'h> {
     fn new(doc: &'a Document, st: PlayerState, host: &'h mut dyn ScriptHost) -> Self {
-        Run { doc, st, host, nodes: Vec::new(), dirty: true, pending: VecDeque::new(), actions: 0, enters: 0, halted: false, output: Vec::new(), dropped: 0, sounds: Vec::new(), graphics: BTreeMap::new(), decls: BTreeMap::new(), fuel: MAX_FUEL_PER_STEP }
+        Run {
+            doc,
+            st,
+            host,
+            nodes: Vec::new(),
+            dirty: true,
+            pending: VecDeque::new(),
+            actions: 0,
+            enters: 0,
+            halted: false,
+            output: Vec::new(),
+            dropped: 0,
+            sounds: Vec::new(),
+            graphics: BTreeMap::new(),
+            decls: BTreeMap::new(),
+            fuel: MAX_FUEL_PER_STEP,
+        }
     }
 
     fn remember_graphics(&mut self) {
@@ -892,7 +972,14 @@ impl<'a, 'h> Run<'a, 'h> {
         let frame = self.nodes.get(i).map_or(0, |n| n.frame);
         let gain = self.nodes.get(i).map_or(1.0, |n| n.gain);
         self.sounds_at(tl, frame, gain);
-        let scripts: Vec<&'a FrameScript> = tl.layers.iter().enumerate().filter(|(ix, _)| plays(tl, *ix)).filter_map(|(_, l)| l.keyframe_starting_at(frame).and_then(|k| l.keyframes.get(k))).filter_map(|k| k.script.as_ref()).collect();
+        let scripts: Vec<&'a FrameScript> = tl
+            .layers
+            .iter()
+            .enumerate()
+            .filter(|(ix, _)| plays(tl, *ix))
+            .filter_map(|(_, l)| l.keyframe_starting_at(frame).and_then(|k| l.keyframes.get(k)))
+            .filter_map(|k| k.script.as_ref())
+            .collect();
         for script in scripts {
             match script {
                 FrameScript::Actions(list) => self.run_list(path, list, false),
@@ -966,7 +1053,14 @@ impl<'a, 'h> Run<'a, 'h> {
     }
 
     /// Runs code on timeline `owner` with this step's fuel; writes why it stopped early.
-    fn run_code(&mut self, owner: &[ElementId], decls: Arc<Decls>, ev: Option<EventInfo>, where_: &str, go: impl FnOnce(&mut dyn World, u64) -> (u64, Result<(), Stop>)) {
+    fn run_code(
+        &mut self,
+        owner: &[ElementId],
+        decls: Arc<Decls>,
+        ev: Option<EventInfo>,
+        where_: &str,
+        go: impl FnOnce(&mut dyn World, u64) -> (u64, Result<(), Stop>),
+    ) {
         if self.halted {
             return;
         }
@@ -1016,7 +1110,12 @@ impl<'a, 'h> Run<'a, 'h> {
     /// Every enter-frame listener, in the order they were added.
     fn enter_frame(&mut self) {
         self.refresh();
-        let mut all: Vec<(Option<InstancePath>, Listening)> = self.st.listeners.iter().flat_map(|(p, list)| list.iter().filter(|l| l.event == ListenEvent::EnterFrame).map(|l| (Some(p.clone()), l.clone()))).collect();
+        let mut all: Vec<(Option<InstancePath>, Listening)> = self
+            .st
+            .listeners
+            .iter()
+            .flat_map(|(p, list)| list.iter().filter(|l| l.event == ListenEvent::EnterFrame).map(|l| (Some(p.clone()), l.clone())))
+            .collect();
         all.extend(self.st.stage.iter().filter(|l| l.event == ListenEvent::EnterFrame).map(|l| (None, l.clone())));
         all.sort_by_key(|(_, l)| l.seq);
         for (at, l) in all {
@@ -1174,7 +1273,11 @@ impl<'a, 'h> Run<'a, 'h> {
             _ => matches!(node.kind, NodeKind::Button | NodeKind::MovieClip),
         };
         if !ok {
-            let why = if node.kind == NodeKind::Root { "the main timeline doesn't get pointer events here".to_string() } else { format!("“{}” is {}; only buttons and movie clips get pointer events", node.name, kind_name(node.kind)) };
+            let why = if node.kind == NodeKind::Root {
+                "the main timeline doesn't get pointer events here".to_string()
+            } else {
+                format!("“{}” is {}; only buttons and movie clips get pointer events", node.name, kind_name(node.kind))
+            };
             return self.out(format!("{what}: {why}"));
         }
         let (path, name) = (node.path.clone(), node.name.clone());
@@ -1208,7 +1311,13 @@ impl<'a, 'h> Run<'a, 'h> {
                     Some(n) if n.kind != NodeKind::Root => n.owner,
                     _ => return Err("the main timeline has no parent".into()),
                 },
-                Seg::Child(name) => self.nodes.iter().enumerate().find(|(i, n)| *i != cur && n.owner == cur && n.name == name).map(|(i, _)| i).ok_or_else(|| format!("no instance named “{name}” here"))?,
+                Seg::Child(name) => self
+                    .nodes
+                    .iter()
+                    .enumerate()
+                    .find(|(i, n)| *i != cur && n.owner == cur && n.name == name)
+                    .map(|(i, _)| i)
+                    .ok_or_else(|| format!("no instance named “{name}” here"))?,
             };
         }
         Ok(cur)
@@ -1248,7 +1357,12 @@ impl<'a, 'h> Run<'a, 'h> {
                 };
                 let Some(node) = self.nodes.get(i) else { return };
                 if !matches!(node.kind, NodeKind::Root | NodeKind::MovieClip) {
-                    return self.out(format!("{}: “{}” is {}; only movie clips and the main timeline have a playhead", a.describe(), node.name, kind_name(node.kind)));
+                    return self.out(format!(
+                        "{}: “{}” is {}; only movie clips and the main timeline have a playhead",
+                        a.describe(),
+                        node.name,
+                        kind_name(node.kind)
+                    ));
                 }
                 let (path, frame, frames) = (node.path.clone(), node.frame, node.frames.max(1));
                 match a {
@@ -1280,7 +1394,13 @@ impl<'a, 'h> Run<'a, 'h> {
         let tl_of = |s: usize| self.doc.timeline(s);
         let (scene_ix, tl) = if path.is_empty() {
             let s = match scene {
-                Some(name) => self.doc.scenes.iter().position(|x| x.name == name).or_else(|| self.doc.scenes.iter().position(|x| x.name.eq_ignore_ascii_case(name))).ok_or_else(|| format!("no scene named “{name}”"))?,
+                Some(name) => self
+                    .doc
+                    .scenes
+                    .iter()
+                    .position(|x| x.name == name)
+                    .or_else(|| self.doc.scenes.iter().position(|x| x.name.eq_ignore_ascii_case(name)))
+                    .ok_or_else(|| format!("no scene named “{name}”"))?,
                 None => self.st.scene,
             };
             (Some(s), tl_of(s))
@@ -1298,7 +1418,8 @@ impl<'a, 'h> Run<'a, 'h> {
                     return Ok((scene_ix, f));
                 }
                 // The main timeline: a label in another scene, when no scene was named.
-                if path.is_empty() && scene.is_none()
+                if path.is_empty()
+                    && scene.is_none()
                     && let Some((s, f)) = self.doc.scenes.iter().enumerate().find_map(|(s, x)| find_label(&x.timeline, l).map(|f| (s, f)))
                 {
                     return Ok((Some(s), f));
@@ -1489,7 +1610,12 @@ impl<'a, 'h> Run<'a, 'h> {
             return;
         }
         if code == TAB {
-            let inputs: Vec<InstancePath> = self.nodes.iter().filter(|n| n.hittable && n.field().is_some_and(|(_, f)| f.kind == TextKind::Input)).map(|n| n.path.clone()).collect();
+            let inputs: Vec<InstancePath> = self
+                .nodes
+                .iter()
+                .filter(|n| n.hittable && n.field().is_some_and(|(_, f)| f.kind == TextKind::Input))
+                .map(|n| n.path.clone())
+                .collect();
             let at = inputs.iter().position(|p| Some(p) == self.st.focus.as_ref());
             let n = inputs.len();
             if n > 0 {
@@ -1538,7 +1664,8 @@ impl<'a, 'h> Run<'a, 'h> {
         let handler = n.events.iter().find(|h| h.event == event).map(|h| h.actions.clone());
         let owner_path = self.nodes.get(n.owner).map(|o| o.path.clone());
         let le = ListenEvent::from_mouse(event);
-        let listeners: Vec<Listening> = self.st.listeners.get(path).map(|l| l.iter().filter(|l| l.event == le).cloned().collect()).unwrap_or_default();
+        let listeners: Vec<Listening> =
+            self.st.listeners.get(path).map(|l| l.iter().filter(|l| l.event == le).cloned().collect()).unwrap_or_default();
         if handler.is_none() && listeners.is_empty() {
             return;
         }

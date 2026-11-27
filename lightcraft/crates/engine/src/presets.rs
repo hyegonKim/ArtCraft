@@ -508,7 +508,99 @@ pub fn builtin() -> Vec<Preset> {
             "Sepia Tone",
             json!({"treatment": "bw", "grading": {"shadows": {"hue": 32.0, "sat": 22.0, "lum": 0.0}, "highlights": {"hue": 42.0, "sat": 18.0, "lum": 0.0}}, "curve": {"shadows": 10.0}}),
         ),
+        // ---- Adaptive (semantic mask-driven local adjustments)
+        p("Adaptive", "adaptive-subject-pop", "Adaptive: Subject Pop", adaptive_preset_settings("subject_pop")),
+        p("Adaptive", "adaptive-dramatic-sky", "Adaptive: Dramatic Sky", adaptive_preset_settings("dramatic_sky")),
+        p("Adaptive", "adaptive-warm-portrait", "Adaptive: Warm Portrait", adaptive_preset_settings("warm_portrait")),
+        p("Adaptive", "adaptive-crisp-architecture", "Adaptive: Crisp Architecture", adaptive_preset_settings("crisp_architecture")),
     ]
+}
+
+/// Calibrated semantic-mask settings JSON for one of the four built-in Adaptive Presets.
+pub fn adaptive_preset_settings(kind: &str) -> serde_json::Value {
+    let (mask_name, shape_kind, adjust) = match kind {
+        "dramatic_sky" => (
+            "Dramatic Sky",
+            "sky",
+            json!({
+                "exposure": -0.45,
+                "contrast": 28.0,
+                "highlights": -45.0,
+                "shadows": -10.0,
+                "whites": 8.0,
+                "blacks": -18.0,
+                "clarity": 25.0,
+                "dehaze": 30.0,
+                "temp": -6.0,
+                "saturation": 14.0,
+                "amount": 100.0
+            }),
+        ),
+        "warm_portrait" => (
+            "Warm Portrait",
+            "subject",
+            json!({
+                "exposure": 0.25,
+                "contrast": -6.0,
+                "highlights": -20.0,
+                "shadows": 24.0,
+                "temp": 12.0,
+                "tint": 4.0,
+                "texture": -18.0,
+                "clarity": -10.0,
+                "saturation": 6.0,
+                "amount": 100.0
+            }),
+        ),
+        "crisp_architecture" => (
+            "Crisp Architecture",
+            "background",
+            json!({
+                "exposure": -0.15,
+                "contrast": 24.0,
+                "highlights": -30.0,
+                "shadows": 18.0,
+                "whites": 15.0,
+                "blacks": -15.0,
+                "texture": 24.0,
+                "clarity": 32.0,
+                "dehaze": 14.0,
+                "sharpness": 25.0,
+                "amount": 100.0
+            }),
+        ),
+        _ => (
+            "Subject Pop",
+            "subject",
+            json!({
+                "exposure": 0.35,
+                "contrast": 18.0,
+                "highlights": -15.0,
+                "shadows": 20.0,
+                "whites": 12.0,
+                "texture": 15.0,
+                "clarity": 22.0,
+                "saturation": 8.0,
+                "sharpness": 15.0,
+                "amount": 100.0
+            }),
+        ),
+    };
+    json!({
+        "masks": [{
+            "id": 1,
+            "name": mask_name,
+            "visible": true,
+            "invert": false,
+            "on_photo": true,
+            "components": [{
+                "op": "add",
+                "invert": false,
+                "shape": { "kind": shape_kind }
+            }],
+            "adjust": adjust
+        }]
+    })
 }
 
 #[derive(Clone, Debug, Serialize)]

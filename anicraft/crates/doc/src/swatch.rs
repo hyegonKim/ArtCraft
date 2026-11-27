@@ -56,8 +56,12 @@ impl SwatchPaint {
     pub fn from_paint(p: &Paint) -> Option<SwatchPaint> {
         match p {
             Paint::Solid(c) => Some(SwatchPaint::Solid { color: *c }),
-            Paint::Linear { stops, spread, linear_rgb, .. } => Some(SwatchPaint::Linear { stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb }),
-            Paint::Radial { stops, spread, linear_rgb, focal, .. } => Some(SwatchPaint::Radial { stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb, focal: *focal }),
+            Paint::Linear { stops, spread, linear_rgb, .. } => {
+                Some(SwatchPaint::Linear { stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb })
+            }
+            Paint::Radial { stops, spread, linear_rgb, focal, .. } => {
+                Some(SwatchPaint::Radial { stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb, focal: *focal })
+            }
             Paint::Bitmap { .. } => None,
         }
     }
@@ -97,14 +101,25 @@ impl SwatchPaint {
             if s.len() < 2 {
                 return None;
             }
-            let mut v: Vec<GradientStop> = s.iter().take(MAX_GRADIENT_STOPS).map(|g| GradientStop { offset: if g.offset.is_finite() { g.offset.clamp(0.0, 1.0) } else { 0.0 }, color: g.color.sanitized() }).collect();
+            let mut v: Vec<GradientStop> = s
+                .iter()
+                .take(MAX_GRADIENT_STOPS)
+                .map(|g| GradientStop { offset: if g.offset.is_finite() { g.offset.clamp(0.0, 1.0) } else { 0.0 }, color: g.color.sanitized() })
+                .collect();
             v.sort_by(|a, b| a.offset.total_cmp(&b.offset));
             Some(v)
         };
         Some(match self {
             SwatchPaint::Solid { color } => SwatchPaint::Solid { color: color.sanitized() },
-            SwatchPaint::Linear { stops: s, spread, linear_rgb } => SwatchPaint::Linear { stops: stops(s)?, spread: *spread, linear_rgb: *linear_rgb },
-            SwatchPaint::Radial { stops: s, spread, linear_rgb, focal } => SwatchPaint::Radial { stops: stops(s)?, spread: *spread, linear_rgb: *linear_rgb, focal: if focal.is_finite() { focal.clamp(-MAX_FOCAL, MAX_FOCAL) } else { 0.0 } },
+            SwatchPaint::Linear { stops: s, spread, linear_rgb } => {
+                SwatchPaint::Linear { stops: stops(s)?, spread: *spread, linear_rgb: *linear_rgb }
+            }
+            SwatchPaint::Radial { stops: s, spread, linear_rgb, focal } => SwatchPaint::Radial {
+                stops: stops(s)?,
+                spread: *spread,
+                linear_rgb: *linear_rgb,
+                focal: if focal.is_finite() { focal.clamp(-MAX_FOCAL, MAX_FOCAL) } else { 0.0 },
+            },
         })
     }
 }
@@ -144,7 +159,17 @@ pub fn default_set() -> Vec<Swatch> {
         Swatch::new("Red ball", radial(vec![stop(0.0, 0xff8080), stop(1.0, 0x990000)])),
         Swatch::new("Green ball", radial(vec![stop(0.0, 0x80ff80), stop(1.0, 0x006600)])),
         Swatch::new("Blue ball", radial(vec![stop(0.0, 0x80b0ff), stop(1.0, 0x000099)])),
-        Swatch::new("Spectrum", linear(vec![stop(0.0, 0xff0000), stop(0.2, 0xffff00), stop(0.4, 0x00ff00), stop(0.6, 0x00ffff), stop(0.8, 0x0000ff), stop(1.0, 0xff00ff)])),
+        Swatch::new(
+            "Spectrum",
+            linear(vec![
+                stop(0.0, 0xff0000),
+                stop(0.2, 0xffff00),
+                stop(0.4, 0x00ff00),
+                stop(0.6, 0x00ffff),
+                stop(0.8, 0x0000ff),
+                stop(1.0, 0xff00ff),
+            ]),
+        ),
         Swatch::new("Gold", linear(vec![stop(0.0, 0xfff2a8), stop(0.5, 0xd4a017), stop(1.0, 0x7a5200)])),
     ]);
     v
@@ -223,14 +248,28 @@ mod tests {
 
     #[test]
     fn swatches_are_repaired() {
-        let bad = Swatch { name: "  a\nb  ".into(), paint: SwatchPaint::Radial { stops: vec![GradientStop { offset: 2.0, color: Rgba::new(f32::NAN, 9.0, -1.0, 1.0) }, GradientStop { offset: -1.0, color: Rgba::WHITE }], spread: Spread::Pad, linear_rgb: false, focal: 5.0 } };
+        let bad = Swatch {
+            name: "  a\nb  ".into(),
+            paint: SwatchPaint::Radial {
+                stops: vec![
+                    GradientStop { offset: 2.0, color: Rgba::new(f32::NAN, 9.0, -1.0, 1.0) },
+                    GradientStop { offset: -1.0, color: Rgba::WHITE },
+                ],
+                spread: Spread::Pad,
+                linear_rgb: false,
+                focal: 5.0,
+            },
+        };
         let s = bad.sanitized().unwrap();
         assert_eq!(s.name, "ab");
         let SwatchPaint::Radial { stops, focal, .. } = &s.paint else { panic!() };
         assert_eq!((stops[0].offset, stops[1].offset), (0.0, 1.0), "in order and in range");
         assert_eq!(stops[1].color, Rgba::new(0.0, 1.0, 0.0, 1.0));
         assert_eq!(*focal, MAX_FOCAL);
-        let one = Swatch { name: String::new(), paint: SwatchPaint::Linear { stops: vec![GradientStop { offset: 0.0, color: Rgba::BLACK }], spread: Spread::Pad, linear_rgb: false } };
+        let one = Swatch {
+            name: String::new(),
+            paint: SwatchPaint::Linear { stops: vec![GradientStop { offset: 0.0, color: Rgba::BLACK }], spread: Spread::Pad, linear_rgb: false },
+        };
         assert!(one.sanitized().is_none(), "a gradient needs two stops");
         assert_eq!(clean_name(&"x".repeat(500)).chars().count(), MAX_SWATCH_NAME);
     }

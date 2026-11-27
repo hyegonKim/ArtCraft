@@ -7,7 +7,10 @@
 
 use super::*;
 use crate::binning::{self as bn, Binned, PAINT_VEC4S, TILE, piece_cover, solid_of};
-use anicraft_doc::{BlendMode, ColorEffect, ColorTransform, DisplayItem, ElementId, ElementKind, GradientStop, Group, LayerId, LayerKind, MaskMode, Paint, Rgba, Stroke, sample};
+use anicraft_doc::{
+    BlendMode, ColorEffect, ColorTransform, DisplayItem, ElementId, ElementKind, GradientStop, Group, LayerId, LayerKind, MaskMode, Paint, Rgba,
+    Stroke, sample,
+};
 use anicraft_geom::{Affine, FillRule, Path, Vec2};
 use anicraft_render::{paint::Premul, render};
 use std::sync::OnceLock;
@@ -74,7 +77,11 @@ fn scenes() -> Vec<(&'static str, DisplayList, View)> {
     let blue = Rgba::new(0.1, 0.2, 0.9, 0.6);
     let mut out = Vec::new();
     // Fractional rectangle edges across tile boundaries and render bands.
-    out.push(("rects", list(vec![item(Path::rect(3.25, 20.5, 40.0, 61.75), Paint::Solid(red)), item(Path::rect(-30.0, 7.3, 64.6, 15.1), Paint::Solid(blue))]), view(96, 100, Some(Rgba::WHITE))));
+    out.push((
+        "rects",
+        list(vec![item(Path::rect(3.25, 20.5, 40.0, 61.75), Paint::Solid(red)), item(Path::rect(-30.0, 7.3, 64.6, 15.1), Paint::Solid(blue))]),
+        view(96, 100, Some(Rgba::WHITE)),
+    ));
     // A circle (curves flattened by the oracle), on transparent.
     out.push(("circle", list(vec![item(Path::ellipse(50.0, 50.0, 40.0, 40.0), Paint::Solid(Rgba::BLACK))]), view(100, 100, None)));
     // Even-odd and non-zero holes from the same rings.
@@ -90,9 +97,15 @@ fn scenes() -> Vec<(&'static str, DisplayList, View)> {
     star.fill_rule = FillRule::EvenOdd;
     out.push(("star", list(vec![star]), view(80, 80, Some(Rgba::WHITE))));
     // Gradients under rotation and scale.
-    let mut lin = item(Path::rect(0.0, 0.0, 100.0, 60.0), Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0), stops(&[(0.0, red), (0.5, Rgba::WHITE), (1.0, blue)])));
+    let mut lin = item(
+        Path::rect(0.0, 0.0, 100.0, 60.0),
+        Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0), stops(&[(0.0, red), (0.5, Rgba::WHITE), (1.0, blue)])),
+    );
     lin.transform = Affine::translate(70.0, 10.0).mul(&Affine::rotate(0.4)).mul(&Affine::scale(1.2, 0.8));
-    let rad = item(Path::ellipse(60.0, 90.0, 50.0, 30.0), Paint::radial(Vec2::new(60.0, 90.0), 50.0, stops(&[(0.0, Rgba::WHITE), (1.0, Rgba::new(0.0, 0.0, 0.0, 0.3))])));
+    let rad = item(
+        Path::ellipse(60.0, 90.0, 50.0, 30.0),
+        Paint::radial(Vec2::new(60.0, 90.0), 50.0, stops(&[(0.0, Rgba::WHITE), (1.0, Rgba::new(0.0, 0.0, 0.0, 0.3))])),
+    );
     out.push(("gradients", list(vec![lin, rad]), view(180, 130, Some(Rgba::new(0.9, 0.9, 0.85, 1.0)))));
     // Gradient options (ADR 0074): reflect and repeat, linear light, a focal point on a turned
     // ellipse that repeats.
@@ -106,14 +119,19 @@ fn scenes() -> Vec<(&'static str, DisplayList, View)> {
     if let Paint::Linear { spread, .. } = &mut rep {
         *spread = anicraft_doc::Spread::Repeat;
     }
-    let mut foc = Paint::radial(Vec2::ZERO, 1.0, three).with_frame(&Affine::translate(140.0, 60.0).mul(&Affine::rotate(0.6)).mul(&Affine::scale(40.0, 20.0)), None);
+    let mut foc = Paint::radial(Vec2::ZERO, 1.0, three)
+        .with_frame(&Affine::translate(140.0, 60.0).mul(&Affine::rotate(0.6)).mul(&Affine::scale(40.0, 20.0)), None);
     if let Paint::Radial { focal, spread, .. } = &mut foc {
         *focal = 0.6;
         *spread = anicraft_doc::Spread::Repeat;
     }
     let mut rep_item = item(Path::rect(0.0, 60.0, 90.0, 50.0), rep);
     rep_item.transform = Affine::translate(5.0, 0.0);
-    out.push(("gradient options", list(vec![item(Path::rect(0.0, 0.0, 90.0, 55.0), refl), rep_item, item(Path::ellipse(140.0, 60.0, 60.0, 50.0), foc)]), view(210, 120, Some(Rgba::WHITE))));
+    out.push((
+        "gradient options",
+        list(vec![item(Path::rect(0.0, 0.0, 90.0, 55.0), refl), rep_item, item(Path::ellipse(140.0, 60.0, 60.0, 50.0), foc)]),
+        view(210, 120, Some(Rgba::WHITE)),
+    ));
     // Strokes: wide, thin (sub-pixel, faded), on open and closed paths.
     let mut wide = item(Path::line(Vec2::new(10.0, 20.0), Vec2::new(150.0, 70.0)), Paint::Solid(red));
     wide.fill = None;
@@ -139,10 +157,19 @@ fn scenes() -> Vec<(&'static str, DisplayList, View)> {
     zig.fill = None;
     zig.stroke = Some(Stroke::new(Rgba::BLACK, 10.0).with_style(StrokeStyle { cap: Cap::Square, join: Join::Miter, miter_limit: 4.0, dash: None }));
     let mut dashed = item(Path::ellipse(90.0, 50.0, 55.0, 30.0), Paint::Solid(Rgba::new(1.0, 0.9, 0.2, 1.0)));
-    dashed.stroke = Some(Stroke::new(Rgba::new(0.1, 0.1, 0.4, 1.0), 4.0).with_style(StrokeStyle { cap: Cap::Butt, join: Join::Bevel, dash: Dash::dashed(9.0, 5.0), ..StrokeStyle::default() }));
+    dashed.stroke = Some(Stroke::new(Rgba::new(0.1, 0.1, 0.4, 1.0), 4.0).with_style(StrokeStyle {
+        cap: Cap::Butt,
+        join: Join::Bevel,
+        dash: Dash::dashed(9.0, 5.0),
+        ..StrokeStyle::default()
+    }));
     let mut dots = item(Path::line(Vec2::new(10.0, 92.0), Vec2::new(150.0, 92.0)), Paint::Solid(red));
     dots.fill = None;
-    dots.stroke = Some(Stroke::new(red, 5.0).with_profile(anicraft_doc::ProfilePreset::TaperEnd.profile()).with_style(StrokeStyle { dash: Dash::dotted(3.0), ..StrokeStyle::default() }));
+    dots.stroke = Some(
+        Stroke::new(red, 5.0)
+            .with_profile(anicraft_doc::ProfilePreset::TaperEnd.profile())
+            .with_style(StrokeStyle { dash: Dash::dotted(3.0), ..StrokeStyle::default() }),
+    );
     out.push(("styled strokes", list(vec![dashed, zig, dots]), view(160, 100, Some(Rgba::WHITE))));
     // Larger than the surface on every side; colour effects (onion-skin style tint and alpha).
     let mut huge = item(Path::ellipse(50.0, 40.0, 300.0, 200.0), Paint::Solid(red));
@@ -192,7 +219,12 @@ fn composited_scenes() -> Vec<(&'static str, DisplayList, View)> {
     // A mask: a gradient seen through a circle, an unclipped shape over it, and one under it.
     let dl = DisplayList {
         clip_modes: Vec::new(),
-        items: vec![item(Path::rect(70.0, 0.0, 50.0, 100.0), Paint::Solid(green)), clipped(item(Path::rect(0.0, 0.0, 120.0, 100.0), grad()), 0), mask(Path::ellipse(50.0, 50.0, 37.3, 33.1), 0), item(Path::rect(10.0, 60.0, 30.0, 30.0), Paint::Solid(blue))],
+        items: vec![
+            item(Path::rect(70.0, 0.0, 50.0, 100.0), Paint::Solid(green)),
+            clipped(item(Path::rect(0.0, 0.0, 120.0, 100.0), grad()), 0),
+            mask(Path::ellipse(50.0, 50.0, 37.3, 33.1), 0),
+            item(Path::rect(10.0, 60.0, 30.0, 30.0), Paint::Solid(blue)),
+        ],
         clip_parents: vec![None],
         groups: Vec::new(),
     };
@@ -213,7 +245,11 @@ fn composited_scenes() -> Vec<(&'static str, DisplayList, View)> {
     }
     let mut items = stripes;
     items.extend([eo, mask(Path::ellipse(95.0, 20.0, 30.0, 18.0), 0), star]);
-    out.push(("nested masks", DisplayList { clip_modes: Vec::new(), items, clip_parents: vec![None, Some(0)], groups: Vec::new() }, view(130, 110, Some(Rgba::new(0.95, 0.95, 0.9, 1.0)))));
+    out.push((
+        "nested masks",
+        DisplayList { clip_modes: Vec::new(), items, clip_parents: vec![None, Some(0)], groups: Vec::new() },
+        view(130, 110, Some(Rgba::new(0.95, 0.95, 0.9, 1.0))),
+    ));
     // Group alpha: overlapping shapes fade as one; nested groups multiply; a group spans tiles
     // and the render bands; a top-level shape between two groups.
     let dl = DisplayList {
@@ -228,14 +264,22 @@ fn composited_scenes() -> Vec<(&'static str, DisplayList, View)> {
             in_group(item(Path::ellipse(30.0, 85.0, 25.0, 20.0), Paint::Solid(red)), 3),
         ],
         clip_parents: Vec::new(),
-        groups: vec![group(None, 0.5, BlendMode::Normal), group(Some(0), 0.7, BlendMode::Layer), group(Some(1), 0.4, BlendMode::Normal), group(None, 0.35, BlendMode::Normal)],
+        groups: vec![
+            group(None, 0.5, BlendMode::Normal),
+            group(Some(0), 0.7, BlendMode::Layer),
+            group(Some(1), 0.4, BlendMode::Normal),
+            group(None, 0.35, BlendMode::Normal),
+        ],
     };
     out.push(("group alpha", dl, view(140, 110, Some(Rgba::WHITE))));
     // Every blend mode, over a striped, partly transparent backdrop, at full and part alpha.
     let mut items = Vec::new();
     let mut groups = Vec::new();
     for k in 0..4 {
-        items.push(item(Path::rect(0.0, k as f32 * 24.0, 14.0 * 24.0, 12.0), Paint::Solid(Rgba::new(0.2 + 0.2 * k as f32, 0.8 - 0.15 * k as f32, 0.4, 0.5 + 0.15 * k as f32))));
+        items.push(item(
+            Path::rect(0.0, k as f32 * 24.0, 14.0 * 24.0, 12.0),
+            Paint::Solid(Rgba::new(0.2 + 0.2 * k as f32, 0.8 - 0.15 * k as f32, 0.4, 0.5 + 0.15 * k as f32)),
+        ));
     }
     for (i, &m) in BlendMode::ALL.iter().enumerate() {
         let g = groups.len() as u32;
@@ -244,7 +288,11 @@ fn composited_scenes() -> Vec<(&'static str, DisplayList, View)> {
         items.push(in_group(item(Path::ellipse(x + 12.0, 30.0, 11.0, 28.0), grad()), g));
         items.push(in_group(item(Path::rect(x + 2.0, 60.0, 20.0, 30.0), Paint::Solid(Rgba::new(0.9, 0.5, 0.2, 0.7))), g));
     }
-    out.push(("blend modes", DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups }, view(14 * 24, 96, Some(Rgba::new(0.3, 0.3, 0.5, 0.8)))));
+    out.push((
+        "blend modes",
+        DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups },
+        view(14 * 24, 96, Some(Rgba::new(0.3, 0.3, 0.5, 0.8))),
+    ));
     // Masks inside groups and groups inside masks, with a blend mode, on transparent.
     let dl = DisplayList {
         clip_modes: Vec::new(),
@@ -277,7 +325,11 @@ fn composited_scenes() -> Vec<(&'static str, DisplayList, View)> {
     out.push(("malformed links", dl, view(50, 50, Some(Rgba::WHITE))));
     // Soft masks (ADR 0070): an alpha gradient fading a shape out, a luminance mask with a
     // stroke and overlapping faded art, and a soft mask inside a coverage one.
-    let fade = Paint::linear(Vec2::new(10.0, 0.0), Vec2::new(110.0, 0.0), stops(&[(0.0, Rgba::new(1.0, 1.0, 1.0, 0.0)), (1.0, Rgba::new(0.2, 0.9, 0.4, 1.0))]));
+    let fade = Paint::linear(
+        Vec2::new(10.0, 0.0),
+        Vec2::new(110.0, 0.0),
+        stops(&[(0.0, Rgba::new(1.0, 1.0, 1.0, 0.0)), (1.0, Rgba::new(0.2, 0.9, 0.4, 1.0))]),
+    );
     let soft_art = |path: Path, paint: Paint, clip: u32| {
         let mut m = item(path, paint);
         m.masks = Some(clip);
@@ -454,7 +506,14 @@ fn close_group(s: Premul, below: Premul, alpha: f32, m: u32) -> Premul {
             return [below[0] * k, below[1] * k, below[2] * k, ba * k];
         }
         let un = |c: f32, a: f32| if a > 1e-6 { (c / a).clamp(0.0, 1.0) } else { 0.0 };
-        let hard = |cb: f32, cs: f32| if cs <= 0.5 { cb * 2.0 * cs } else { let t = 2.0 * cs - 1.0; cb + t - cb * t };
+        let hard = |cb: f32, cs: f32| {
+            if cs <= 0.5 {
+                cb * 2.0 * cs
+            } else {
+                let t = 2.0 * cs - 1.0;
+                cb + t - cb * t
+            }
+        };
         let f = |cb: f32, cs: f32| match m {
             1 => cb * cs,
             2 => cb + cs - cb * cs,
@@ -500,7 +559,12 @@ fn f32_diff(a: &[Premul], b: &[Premul]) -> (f64, f32) {
 /// deep, so every transform the camera adds reaches the GPU's fills.
 fn camera_sample() -> anicraft_doc::Document {
     let mut doc = sample::demo();
-    let cam = anicraft_doc::Camera { center: Vec2::new(700.0, 380.0), zoom: 1.6, rotation: -0.15, color: anicraft_doc::ColorEffect::Tint { color: Rgba::hex(0x3366ff), amount: 0.3 } };
+    let cam = anicraft_doc::Camera {
+        center: Vec2::new(700.0, 380.0),
+        zoom: 1.6,
+        rotation: -0.15,
+        color: anicraft_doc::ColorEffect::Tint { color: Rgba::hex(0x3366ff), amount: 0.3 },
+    };
     let mut layer = anicraft_doc::Layer::new(LayerId(9_000), "Camera");
     layer.kind = anicraft_doc::LayerKind::Camera;
     let mut k = anicraft_doc::Keyframe::new(0, doc.frame_count());
@@ -551,13 +615,35 @@ fn nine_slice_sample() -> anicraft_doc::Document {
     let mut d = anicraft_doc::Document { stage: anicraft_doc::Stage { width: 320, height: 200, ..Default::default() }, ..Default::default() };
     let mut shape = Shape::filled(Path::rounded_rect(0.0, 0.0, 60.0, 30.0, 8.0), Paint::Solid(Rgba::hex(0x2a9d8f)));
     shape.stroke = Some(Stroke::new(Rgba::hex(0x264653), 2.0));
-    let el = |id, transform, kind| std::sync::Arc::new(Element { id: ElementId(id), name: String::new(), transform, color: ColorEffect::default(), kind });
+    let el =
+        |id, transform, kind| std::sync::Arc::new(Element { id: ElementId(id), name: String::new(), transform, color: ColorEffect::default(), kind });
     let mut k = Keyframe::new(0, 1);
     k.elements.push(el(2, Affine::IDENTITY, ElementKind::Shape(shape)));
     let mut l = Layer::new(LayerId(3), "art");
     l.keyframes = vec![std::sync::Arc::new(k)];
-    d.library.push(std::sync::Arc::new(Symbol { id: SymbolId(4), name: "Panel".into(), kind: SymbolKind::MovieClip, linkage: None, scale_grid_kept: None, scale_grid: Some(ScaleGrid { left: 8.0, right: 52.0, top: 8.0, bottom: 22.0 }), timeline: Timeline { layers: vec![std::sync::Arc::new(l)] } }));
-    let inst = |id, xf| el(id, xf, ElementKind::Symbol { symbol: SymbolId(4), loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() });
+    d.library.push(std::sync::Arc::new(Symbol {
+        id: SymbolId(4),
+        name: "Panel".into(),
+        kind: SymbolKind::MovieClip,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: Some(ScaleGrid { left: 8.0, right: 52.0, top: 8.0, bottom: 22.0 }),
+        timeline: Timeline { layers: vec![std::sync::Arc::new(l)] },
+    }));
+    let inst = |id, xf| {
+        el(
+            id,
+            xf,
+            ElementKind::Symbol {
+                symbol: SymbolId(4),
+                loop_mode: Default::default(),
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
+        )
+    };
     let mut k = Keyframe::new(0, 1);
     k.elements.push(inst(5, Affine::translate(10.0, 10.0).mul(&Affine::scale(4.5, 1.2))));
     k.elements.push(inst(6, Affine::translate(30.0, 70.0).mul(&Affine::scale(2.0, 3.5))));
@@ -723,7 +809,12 @@ fn degenerate_geometry_bins_without_trouble() {
     // A fill naming a layer that isn't there draws nothing.
     let mut lost = fill(None, None);
     lost.layer = Some(3);
-    let scene = anicraft_render::Scene { fills: vec![fill(None, None), fill(Some(7), Some(9)), lost], clips: Vec::new(), groups: Vec::new(), layers: Vec::new() };
+    let scene = anicraft_render::Scene {
+        fills: vec![fill(None, None), fill(Some(7), Some(9)), lost],
+        clips: Vec::new(),
+        groups: Vec::new(),
+        layers: Vec::new(),
+    };
     let b = binning::bin(&scene, 32, 32).unwrap();
     assert!(b.geo.iter().flatten().all(|v| v.is_finite()));
 }
@@ -769,7 +860,11 @@ fn shaders_take_no_signed_remainder() {
 fn gpu() -> Option<&'static GpuRenderer> {
     static GPU: OnceLock<Option<GpuRenderer>> = OnceLock::new();
     GPU.get_or_init(|| {
-        let card = if std::env::var("ANICRAFT_TEST_GPU").is_ok_and(|v| v == "software") { Err(GpuError::Unavailable("software asked for".into())) } else { GpuRenderer::new() };
+        let card = if std::env::var("ANICRAFT_TEST_GPU").is_ok_and(|v| v == "software") {
+            Err(GpuError::Unavailable("software asked for".into()))
+        } else {
+            GpuRenderer::new()
+        };
         match card.or_else(|e| GpuRenderer::software().map_err(|s| format!("{e}; software: {s}"))) {
             Ok(g) => {
                 eprintln!("GPU parity tests on {}", g.adapter);
@@ -831,7 +926,15 @@ fn gpu_matches_the_oracle_on_the_sample_scene() {
     let doc = sample::demo();
     let cam = camera_sample();
     let frames = doc.frame_count();
-    for (d, f, s) in [(&doc, 0u32, 1.0f32), (&doc, 7, 0.5), (&doc, 13, 0.37), (&doc, frames / 2, 1.5), (&doc, frames.saturating_sub(1), 0.25), (&cam, 0, 1.0), (&cam, 20, 0.5)] {
+    for (d, f, s) in [
+        (&doc, 0u32, 1.0f32),
+        (&doc, 7, 0.5),
+        (&doc, 13, 0.37),
+        (&doc, frames / 2, 1.5),
+        (&doc, frames.saturating_sub(1), 0.25),
+        (&cam, 0, 1.0),
+        (&cam, 20, 0.5),
+    ] {
         assert_parity(g, &format!("frame {f} at {s}"), &anicraft_doc::evaluate(d, f), &View::stage(d, s));
     }
 }
@@ -842,7 +945,15 @@ fn gpu_matches_the_oracle_on_many_shapes_and_tiles() {
     let doc = sample::stress(6, 300, 24);
     let dl = anicraft_doc::evaluate(&doc, 5);
     // A whole frame and an offset, zoomed tile like the stage asks for.
-    for v in [View::stage(&doc, 0.5), View { transform: Affine::translate(-512.0, -256.0).mul(&Affine::scale(1.7, 1.7)), width: 512, height: 512, background: Some(doc.stage.background) }] {
+    for v in [
+        View::stage(&doc, 0.5),
+        View {
+            transform: Affine::translate(-512.0, -256.0).mul(&Affine::scale(1.7, 1.7)),
+            width: 512,
+            height: 512,
+            background: Some(doc.stage.background),
+        },
+    ] {
         assert_parity(g, "stress", &dl, &v);
     }
 }
@@ -917,7 +1028,16 @@ fn gpu_renders_from_many_threads_at_once() {
     let v = View::stage(&doc, 0.25);
     let first = g.render(&dl, &v, Output::Premul8).unwrap().premul8;
     use rayon::prelude::*;
-    let all: Vec<Vec<u8>> = (0..8).into_par_iter().map(|i| if i % 2 == 0 { g.render(&dl, &v, Output::Premul8).unwrap().premul8 } else { g.read_texture(&g.render_texture(&dl, &v).unwrap()).unwrap() }).collect();
+    let all: Vec<Vec<u8>> = (0..8)
+        .into_par_iter()
+        .map(|i| {
+            if i % 2 == 0 {
+                g.render(&dl, &v, Output::Premul8).unwrap().premul8
+            } else {
+                g.read_texture(&g.render_texture(&dl, &v).unwrap()).unwrap()
+            }
+        })
+        .collect();
     assert!(all.iter().all(|a| *a == first), "deterministic under concurrency");
 }
 
@@ -952,7 +1072,11 @@ fn bitmap_scenes() -> Vec<(&'static str, DisplayList, View)> {
     let mut out = vec![
         ("bitmap placed once", list(vec![bitmap_item(Path::rect(2.0, 3.0, 90.0, 70.0), &a, false, turned)]), view(100, 80, white)),
         ("bitmap repeated", list(vec![bitmap_item(Path::ellipse(50.0, 40.0, 45.0, 35.0), &a, true, turned)]), view(100, 80, None)),
-        ("bitmap magnified, mirrored", list(vec![bitmap_item(Path::rect(0.0, 0.0, 64.0, 48.0), &c, false, Affine { m: [-1.7, 0.0, 0.0, 1.6, 66.0, -1.3] })]), view(64, 48, white)),
+        (
+            "bitmap magnified, mirrored",
+            list(vec![bitmap_item(Path::rect(0.0, 0.0, 64.0, 48.0), &c, false, Affine { m: [-1.7, 0.0, 0.0, 1.6, 66.0, -1.3] })]),
+            view(64, 48, white),
+        ),
         ("one-pixel bitmap", list(vec![bitmap_item(Path::rect(5.5, 5.5, 20.0, 20.0), &b, true, Affine::scale(7.0, 7.0))]), view(32, 32, white)),
     ];
     // Colour effects: tint and alpha per tap, and a NaN multiplier (a channel of 0, as the oracle
@@ -968,11 +1092,26 @@ fn bitmap_scenes() -> Vec<(&'static str, DisplayList, View)> {
     // A short (malformed) buffer: transparent past its end; an empty image draws nothing.
     let short = Arc::new(anicraft_doc::Pixels { width: 4, height: 4, rgba: vec![200; 20] });
     let empty = Arc::new(anicraft_doc::Pixels { width: 0, height: 3, rgba: Vec::new() });
-    out.push(("malformed bitmaps", list(vec![bitmap_item(Path::rect(0.0, 0.0, 30.0, 30.0), &short, false, Affine::scale(7.0, 7.0)), bitmap_item(Path::rect(10.0, 0.0, 10.0, 30.0), &empty, true, Affine::IDENTITY)]), view(32, 32, white)));
+    out.push((
+        "malformed bitmaps",
+        list(vec![
+            bitmap_item(Path::rect(0.0, 0.0, 30.0, 30.0), &short, false, Affine::scale(7.0, 7.0)),
+            bitmap_item(Path::rect(10.0, 0.0, 10.0, 30.0), &empty, true, Affine::IDENTITY),
+        ]),
+        view(32, 32, white),
+    ));
     // Inside a mask and a faded group, over a gradient.
-    let grad = item(Path::rect(0.0, 0.0, 80.0, 60.0), Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(80.0, 60.0), stops(&[(0.0, Rgba::BLACK), (1.0, Rgba::new(1.0, 0.8, 0.0, 1.0))])));
+    let grad = item(
+        Path::rect(0.0, 0.0, 80.0, 60.0),
+        Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(80.0, 60.0), stops(&[(0.0, Rgba::BLACK), (1.0, Rgba::new(1.0, 0.8, 0.0, 1.0))])),
+    );
     let inside = in_group(clipped(bitmap_item(Path::rect(4.0, 4.0, 72.0, 52.0), &a, true, turned), 0), 0);
-    let dl = DisplayList { clip_modes: Vec::new(), items: vec![grad, inside, mask(Path::ellipse(40.0, 30.0, 30.0, 22.0), 0)], clip_parents: vec![None], groups: vec![group(None, 0.7, BlendMode::Multiply)] };
+    let dl = DisplayList {
+        clip_modes: Vec::new(),
+        items: vec![grad, inside, mask(Path::ellipse(40.0, 30.0, 30.0, 22.0), 0)],
+        clip_parents: vec![None],
+        groups: vec![group(None, 0.7, BlendMode::Multiply)],
+    };
     out.push(("bitmap masked and multiplied", dl, view(80, 60, white)));
     // Without smoothing (ADR 0050): the nearest pixel, magnified, turned and repeated.
     let mut hard = bitmap_item(Path::rect(2.0, 3.0, 90.0, 70.0), &a, false, turned);
@@ -1010,7 +1149,11 @@ fn gpu_matches_the_oracle_on_bitmap_fills() {
     assert!(held.1 <= IMAGE_BUDGET + 4 * 31 * 17);
     // Sixteen images in one picture draw on the GPU; a seventeenth is the CPU's.
     let many: Vec<Arc<anicraft_doc::Pixels>> = (0..17).map(|i| pixels(3, 2, 100 + i)).collect();
-    let items = |n: usize| list(many.iter().take(n).enumerate().map(|(i, p)| bitmap_item(Path::rect(i as f32 * 4.0, 0.0, 4.0, 8.0), p, true, Affine::IDENTITY)).collect());
+    let items = |n: usize| {
+        list(
+            many.iter().take(n).enumerate().map(|(i, p)| bitmap_item(Path::rect(i as f32 * 4.0, 0.0, 4.0, 8.0), p, true, Affine::IDENTITY)).collect(),
+        )
+    };
     assert_parity(g, "sixteen bitmaps", &items(16), &view(72, 8, Some(Rgba::WHITE)));
     assert!(matches!(g.render(&items(17), &view(72, 8, None), Output::Premul8), Err(GpuError::NeedsFull(NeedsFull::Bitmaps))));
 }
@@ -1025,8 +1168,30 @@ fn filters_to_test() -> Vec<(&'static str, anicraft_doc::Filter)> {
     use anicraft_doc::{Filter as F, FilterSide as S};
     let ramp = stops(&[(0.0, Rgba::new(1.0, 1.0, 1.0, 0.0)), (0.4, Rgba::new(0.0, 1.0, 0.3, 0.8)), (1.0, Rgba::new(0.1, 0.0, 1.0, 1.0))]);
     let bevel_ramp = stops(&[(0.0, Rgba::new(1.0, 1.0, 0.8, 1.0)), (0.5, Rgba::new(0.0, 0.0, 0.0, 0.0)), (1.0, Rgba::new(0.2, 0.0, 0.3, 1.0))]);
-    let shadow = |inner, knockout, hide_object| F::DropShadow { blur_x: 5.0, blur_y: 8.0, strength: 1.3, quality: 2, angle: 35.0, distance: 6.0, color: Rgba::new(0.1, 0.0, 0.2, 0.8), inner, knockout, hide_object };
-    let bevel = |side, knockout| F::Bevel { blur_x: 4.0, blur_y: 4.0, strength: 1.5, quality: 1, angle: 45.0, distance: 3.0, shadow_color: Rgba::new(0.0, 0.0, 0.0, 0.9), highlight_color: Rgba::WHITE, side, knockout };
+    let shadow = |inner, knockout, hide_object| F::DropShadow {
+        blur_x: 5.0,
+        blur_y: 8.0,
+        strength: 1.3,
+        quality: 2,
+        angle: 35.0,
+        distance: 6.0,
+        color: Rgba::new(0.1, 0.0, 0.2, 0.8),
+        inner,
+        knockout,
+        hide_object,
+    };
+    let bevel = |side, knockout| F::Bevel {
+        blur_x: 4.0,
+        blur_y: 4.0,
+        strength: 1.5,
+        quality: 1,
+        angle: 45.0,
+        distance: 3.0,
+        shadow_color: Rgba::new(0.0, 0.0, 0.0, 0.9),
+        highlight_color: Rgba::WHITE,
+        side,
+        knockout,
+    };
     vec![
         ("blur", F::Blur { blur_x: 7.0, blur_y: 4.0, quality: 3 }),
         ("blur, odd and one-sided", F::Blur { blur_x: 5.0, blur_y: 0.0, quality: 1 }),
@@ -1035,14 +1200,59 @@ fn filters_to_test() -> Vec<(&'static str, anicraft_doc::Filter)> {
         ("drop shadow, hide object", shadow(false, false, true)),
         ("inner shadow", shadow(true, false, false)),
         ("inner shadow, knockout", shadow(true, true, false)),
-        ("glow", F::Glow { blur_x: 10.0, blur_y: 10.0, strength: 2.0, quality: 2, color: Rgba::new(1.0, 0.8, 0.0, 1.0), inner: false, knockout: false }),
-        ("inner glow, knockout", F::Glow { blur_x: 6.0, blur_y: 9.0, strength: 1.0, quality: 3, color: Rgba::new(0.0, 1.0, 1.0, 0.7), inner: true, knockout: true }),
+        (
+            "glow",
+            F::Glow { blur_x: 10.0, blur_y: 10.0, strength: 2.0, quality: 2, color: Rgba::new(1.0, 0.8, 0.0, 1.0), inner: false, knockout: false },
+        ),
+        (
+            "inner glow, knockout",
+            F::Glow { blur_x: 6.0, blur_y: 9.0, strength: 1.0, quality: 3, color: Rgba::new(0.0, 1.0, 1.0, 0.7), inner: true, knockout: true },
+        ),
         ("bevel, inner", bevel(S::Inner, false)),
         ("bevel, outer", bevel(S::Outer, false)),
         ("bevel, full, knockout", bevel(S::Full, true)),
-        ("gradient bevel", F::GradientBevel { blur_x: 5.0, blur_y: 3.0, strength: 1.0, quality: 2, angle: 120.0, distance: 4.0, stops: bevel_ramp, side: S::Full, knockout: false }),
-        ("gradient glow, outer", F::GradientGlow { blur_x: 8.0, blur_y: 6.0, strength: 1.2, quality: 2, angle: 0.0, distance: 3.0, stops: ramp.clone(), side: S::Outer, knockout: false }),
-        ("gradient glow, full, knockout", F::GradientGlow { blur_x: 4.0, blur_y: 4.0, strength: 1.0, quality: 1, angle: 210.0, distance: 2.0, stops: ramp, side: S::Full, knockout: true }),
+        (
+            "gradient bevel",
+            F::GradientBevel {
+                blur_x: 5.0,
+                blur_y: 3.0,
+                strength: 1.0,
+                quality: 2,
+                angle: 120.0,
+                distance: 4.0,
+                stops: bevel_ramp,
+                side: S::Full,
+                knockout: false,
+            },
+        ),
+        (
+            "gradient glow, outer",
+            F::GradientGlow {
+                blur_x: 8.0,
+                blur_y: 6.0,
+                strength: 1.2,
+                quality: 2,
+                angle: 0.0,
+                distance: 3.0,
+                stops: ramp.clone(),
+                side: S::Outer,
+                knockout: false,
+            },
+        ),
+        (
+            "gradient glow, full, knockout",
+            F::GradientGlow {
+                blur_x: 4.0,
+                blur_y: 4.0,
+                strength: 1.0,
+                quality: 1,
+                angle: 210.0,
+                distance: 2.0,
+                stops: ramp,
+                side: S::Full,
+                knockout: true,
+            },
+        ),
         ("adjust colour", F::AdjustColor { brightness: -20.0, contrast: 35.0, saturation: 60.0, hue: -70.0 }),
     ]
     .into_iter()
@@ -1060,14 +1270,25 @@ fn symbol_items(g: u32) -> Vec<DisplayItem> {
 #[test]
 fn gpu_matches_the_oracle_on_every_filter() {
     let Some(g) = gpu() else { return };
-    let backdrop = item(Path::rect(0.0, 0.0, 70.0, 60.0), Paint::linear(Vec2::new(0.0, 0.0), Vec2::new(70.0, 0.0), stops(&[(0.0, Rgba::new(0.9, 0.9, 0.8, 1.0)), (1.0, Rgba::new(0.2, 0.4, 0.5, 1.0))])));
+    let backdrop = item(
+        Path::rect(0.0, 0.0, 70.0, 60.0),
+        Paint::linear(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(70.0, 0.0),
+            stops(&[(0.0, Rgba::new(0.9, 0.9, 0.8, 1.0)), (1.0, Rgba::new(0.2, 0.4, 0.5, 1.0))]),
+        ),
+    );
     let mut worst: f64 = 0.0;
     for (name, f) in filters_to_test() {
         let mut items = vec![backdrop.clone()];
         items.extend(symbol_items(0));
         let dl = DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![filtered_group(vec![f])] };
         // At 1:1; zoomed, so sizes scale; and panned so the layer reaches past the surface.
-        for v in [view(70, 60, Some(Rgba::WHITE)), View { transform: Affine::scale(1.5, 1.5), width: 105, height: 90, background: None }, View { transform: Affine::translate(-20.0, -15.0), width: 40, height: 33, background: Some(Rgba::WHITE) }] {
+        for v in [
+            view(70, 60, Some(Rgba::WHITE)),
+            View { transform: Affine::scale(1.5, 1.5), width: 105, height: 90, background: None },
+            View { transform: Affine::translate(-20.0, -15.0), width: 40, height: 33, background: Some(Rgba::WHITE) },
+        ] {
             let d = assert_parity(g, name, &dl, &v);
             worst = worst.max(d.mean);
         }
@@ -1080,17 +1301,30 @@ fn gpu_matches_the_oracle_on_filtered_symbols_in_context() {
     let Some(g) = gpu() else { return };
     use anicraft_doc::Filter as F;
     let blur = F::Blur { blur_x: 4.0, blur_y: 4.0, quality: 2 };
-    let shadow = F::DropShadow { blur_x: 4.0, blur_y: 4.0, strength: 1.0, quality: 1, angle: 45.0, distance: 5.0, color: Rgba::BLACK, inner: false, knockout: false, hide_object: false };
+    let shadow = F::DropShadow {
+        blur_x: 4.0,
+        blur_y: 4.0,
+        strength: 1.0,
+        quality: 1,
+        angle: 45.0,
+        distance: 5.0,
+        color: Rgba::BLACK,
+        inner: false,
+        knockout: false,
+        hide_object: false,
+    };
     let glow = F::Glow { blur_x: 6.0, blur_y: 6.0, strength: 1.5, quality: 1, color: Rgba::new(1.0, 0.9, 0.0, 1.0), inner: false, knockout: false };
     let white = Some(Rgba::WHITE);
     let bg = item(Path::rect(0.0, 0.0, 80.0, 64.0), Paint::Solid(Rgba::new(0.3, 0.6, 0.4, 1.0)));
     let mut scenes: Vec<(&str, DisplayList)> = Vec::new();
     // Several filters in a row, at part opacity, multiplied.
-    let mut grp = filtered_group(vec![shadow.clone(), glow.clone(), F::AdjustColor { brightness: 10.0, contrast: 0.0, saturation: -40.0, hue: 25.0 }]);
+    let mut grp =
+        filtered_group(vec![shadow.clone(), glow.clone(), F::AdjustColor { brightness: 10.0, contrast: 0.0, saturation: -40.0, hue: 25.0 }]);
     (grp.alpha, grp.blend) = (0.7, BlendMode::Multiply);
     let mut items = vec![bg.clone()];
     items.extend(symbol_items(0));
-    scenes.push(("filters in a row, faded and multiplied", DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![grp] }));
+    scenes
+        .push(("filters in a row, faded and multiplied", DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![grp] }));
     // A filtered symbol inside a filtered symbol, inside a faded one.
     let mut outer = filtered_group(vec![shadow.clone()]);
     outer.parent = Some(0);
@@ -1098,7 +1332,10 @@ fn gpu_matches_the_oracle_on_filtered_symbols_in_context() {
     inner.parent = Some(1);
     let mut items = vec![bg.clone(), in_group(item(Path::rect(4.0, 40.0, 30.0, 16.0), Paint::Solid(Rgba::new(0.9, 0.6, 0.0, 1.0))), 1)];
     items.extend(symbol_items(2));
-    scenes.push(("nested filtered symbols", DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![group(None, 0.8, BlendMode::Normal), outer, inner] }));
+    scenes.push((
+        "nested filtered symbols",
+        DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![group(None, 0.8, BlendMode::Normal), outer, inner] },
+    ));
     // Masked from outside (after filtering) and inside (before).
     let mut clipped_grp = filtered_group(vec![glow.clone()]);
     clipped_grp.clip = Some(0);
@@ -1109,13 +1346,22 @@ fn gpu_matches_the_oracle_on_filtered_symbols_in_context() {
     let mut items = vec![bg.clone()];
     items.extend(symbol_items(0).into_iter().map(|i| clipped(i, 0)));
     items.push(in_group(mask(Path::rect(20.0, 10.0, 16.0, 40.0), 0), 0));
-    scenes.push(("masked inside the symbol", DisplayList { clip_modes: Vec::new(), items, clip_parents: vec![None], groups: vec![filtered_group(vec![shadow.clone()])] }));
+    scenes.push((
+        "masked inside the symbol",
+        DisplayList { clip_modes: Vec::new(), items, clip_parents: vec![None], groups: vec![filtered_group(vec![shadow.clone()])] },
+    ));
     // A bitmap inside a filtered symbol.
     let px = pixels(9, 7, 4);
     let items = vec![bg.clone(), in_group(bitmap_item(Path::ellipse(40.0, 32.0, 26.0, 20.0), &px, true, Affine::scale(4.0, 4.0)), 0)];
-    scenes.push(("filtered bitmap", DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![filtered_group(vec![blur, glow])] }));
+    scenes.push((
+        "filtered bitmap",
+        DisplayList { clip_modes: Vec::new(), items, clip_parents: Vec::new(), groups: vec![filtered_group(vec![blur, glow])] },
+    ));
     for (name, dl) in scenes {
-        for v in [view(80, 64, white), View { transform: Affine::translate(-37.0, -5.0).mul(&Affine::scale(1.3, 1.3)), width: 48, height: 48, background: white }] {
+        for v in [
+            view(80, 64, white),
+            View { transform: Affine::translate(-37.0, -5.0).mul(&Affine::scale(1.3, 1.3)), width: 48, height: 48, background: white },
+        ] {
             let d = assert_parity(g, name, &dl, &v);
             eprintln!("{name}: mean {:.5} / max {} / {} of {} px differ", d.mean, d.max, d.differing, d.pixels);
         }
@@ -1136,16 +1382,66 @@ fn filtered_sample() -> anicraft_doc::Document {
         for k in &mut l.keyframes {
             for e in &mut Arc::make_mut(k).elements {
                 if let ElementKind::Symbol { filters, .. } = &mut Arc::make_mut(e).kind {
-                    *filters = Vec::from_iter(match i {
-                        0 => vec![F::DropShadow { blur_x: 8.0, blur_y: 8.0, strength: 0.8, quality: 2, angle: 45.0, distance: 10.0, color: Rgba::BLACK, inner: false, knockout: false, hide_object: false }, F::Bevel { blur_x: 5.0, blur_y: 5.0, strength: 1.0, quality: 1, angle: 45.0, distance: 4.0, shadow_color: Rgba::BLACK, highlight_color: Rgba::WHITE, side: anicraft_doc::FilterSide::Inner, knockout: false }],
-                        _ => vec![F::Glow { blur_x: 12.0, blur_y: 12.0, strength: 1.4, quality: 2, color: Rgba::new(1.0, 0.85, 0.2, 1.0), inner: false, knockout: false }],
-                    }.into_iter().map(anicraft_doc::FilterEntry::from));
+                    *filters = Vec::from_iter(
+                        match i {
+                            0 => vec![
+                                F::DropShadow {
+                                    blur_x: 8.0,
+                                    blur_y: 8.0,
+                                    strength: 0.8,
+                                    quality: 2,
+                                    angle: 45.0,
+                                    distance: 10.0,
+                                    color: Rgba::BLACK,
+                                    inner: false,
+                                    knockout: false,
+                                    hide_object: false,
+                                },
+                                F::Bevel {
+                                    blur_x: 5.0,
+                                    blur_y: 5.0,
+                                    strength: 1.0,
+                                    quality: 1,
+                                    angle: 45.0,
+                                    distance: 4.0,
+                                    shadow_color: Rgba::BLACK,
+                                    highlight_color: Rgba::WHITE,
+                                    side: anicraft_doc::FilterSide::Inner,
+                                    knockout: false,
+                                },
+                            ],
+                            _ => vec![F::Glow {
+                                blur_x: 12.0,
+                                blur_y: 12.0,
+                                strength: 1.4,
+                                quality: 2,
+                                color: Rgba::new(1.0, 0.85, 0.2, 1.0),
+                                inner: false,
+                                knockout: false,
+                            }],
+                        }
+                        .into_iter()
+                        .map(anicraft_doc::FilterEntry::from),
+                    );
                 }
             }
         }
     }
-    let shape = anicraft_doc::Shape { path: Arc::new(Path::rect(0.0, 0.0, 1280.0, 300.0)), merge: false, fill: Some(Paint::Bitmap { bitmap: anicraft_doc::BitmapId(77), repeat: true, matrix: Affine::scale(5.0, 5.0) }), stroke: None, fill_rule: FillRule::NonZero, warp: None };
-    let sky = anicraft_doc::Element { id: ElementId(9_100), name: "sky".into(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(shape) };
+    let shape = anicraft_doc::Shape {
+        path: Arc::new(Path::rect(0.0, 0.0, 1280.0, 300.0)),
+        merge: false,
+        fill: Some(Paint::Bitmap { bitmap: anicraft_doc::BitmapId(77), repeat: true, matrix: Affine::scale(5.0, 5.0) }),
+        stroke: None,
+        fill_rule: FillRule::NonZero,
+        warp: None,
+    };
+    let sky = anicraft_doc::Element {
+        id: ElementId(9_100),
+        name: "sky".into(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(shape),
+    };
     let frames = doc.frame_count();
     let mut k = anicraft_doc::Keyframe::new(0, frames);
     k.elements.push(Arc::new(sky));
@@ -1166,11 +1462,15 @@ fn gpu_matches_the_oracle_on_the_filtered_sample() {
         let d = assert_parity(g, "filtered sample", &dl, &View::stage(&doc, s));
         eprintln!("filtered sample {f} at {s}: mean {:.5} / max {} / {} of {} px differ", d.mean, d.max, d.differing, d.pixels);
         // And a stage tile as the stage asks for it (512 px, zoomed and panned).
-        let tile = View { transform: Affine::translate(-300.0, -200.0).mul(&Affine::scale(s * 1.4, s * 1.4)), width: 512, height: 512, background: Some(doc.stage.background) };
+        let tile = View {
+            transform: Affine::translate(-300.0, -200.0).mul(&Affine::scale(s * 1.4, s * 1.4)),
+            width: 512,
+            height: 512,
+            background: Some(doc.stage.background),
+        };
         assert_parity(g, "filtered sample tile", &dl, &tile);
     }
 }
-
 
 // ----- binning on the GPU (ADR 0048) ----------------------------------------------------------
 
@@ -1178,7 +1478,8 @@ fn gpu_matches_the_oracle_on_the_filtered_sample() {
 /// frames at awkward scales and offsets, and onion-skin style outlines over them.
 fn gpu_binned_scenes() -> Vec<(String, DisplayList, View)> {
     let plain = |dl: &DisplayList| dl.items.iter().all(|i| i.clip.is_none() && i.group.is_none());
-    let mut out: Vec<(String, DisplayList, View)> = scenes().into_iter().filter(|(_, dl, _)| plain(dl)).map(|(n, dl, v)| (n.to_string(), dl, v)).collect();
+    let mut out: Vec<(String, DisplayList, View)> =
+        scenes().into_iter().filter(|(_, dl, _)| plain(dl)).map(|(n, dl, v)| (n.to_string(), dl, v)).collect();
     let demo = sample::demo();
     out.push(("sample".into(), anicraft_doc::evaluate(&demo, 13), View::stage(&demo, 0.37)));
     let doc = sample::stress(20, 100, 48);

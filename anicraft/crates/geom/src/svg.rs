@@ -260,7 +260,17 @@ mod tests {
     #[test]
     fn relative_and_shorthand_commands() {
         let p = parse_path_data("m10 10 h5 v5 H10 z m 1,1 l2-2").unwrap();
-        assert_eq!(ends(&p), vec![Vec2::new(10.0, 10.0), Vec2::new(15.0, 10.0), Vec2::new(15.0, 15.0), Vec2::new(10.0, 15.0), Vec2::new(11.0, 11.0), Vec2::new(13.0, 9.0)]);
+        assert_eq!(
+            ends(&p),
+            vec![
+                Vec2::new(10.0, 10.0),
+                Vec2::new(15.0, 10.0),
+                Vec2::new(15.0, 15.0),
+                Vec2::new(10.0, 15.0),
+                Vec2::new(11.0, 11.0),
+                Vec2::new(13.0, 9.0)
+            ]
+        );
         assert!(matches!(p.cmds[4], PathCmd::Close));
         // Implicit lineto after moveto, packed negative numbers.
         let q = parse_path_data("M0 0 10 0-5.5.5").unwrap();

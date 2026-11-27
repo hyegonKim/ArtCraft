@@ -65,6 +65,8 @@ pub fn open_path(app: &mut SoundApp, path: &std::path::Path) {
         app.run("file.import_omf", json!({"path": p}))
     } else if lower.ends_with(".fcpxml") {
         app.run("file.import_fcpxml", json!({"path": p}))
+    } else if lower.ends_with(".sesx") {
+        app.run("file.import_sesx", json!({"path": p}))
     } else if lower.ends_with(".mid") || lower.ends_with(".midi") || lower.ends_with(".smf") {
         app.run("file.import_midi", json!({"path": p}))
     } else {
@@ -137,6 +139,7 @@ pub(super) fn path_dialog(id: &str, home: &str, name: &str) -> Option<Dialog> {
         "file.export_midi" => ".mid",
         "file.export_sibelius" => ".musicxml",
         "file.export_fcpxml" => ".fcpxml",
+        "file.export_sesx" => ".sesx",
         "file.print_score" => ".svg",
         "file.export_clip_groups" => ".scgrp",
         "file.export_session_text" => ".txt",

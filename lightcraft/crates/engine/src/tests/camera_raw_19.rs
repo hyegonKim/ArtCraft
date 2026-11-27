@@ -33,11 +33,7 @@ fn dummy_manifest() -> DenoiserManifest {
 }
 
 fn encode_png_rgba(rgba: &Rgba8) -> Vec<u8> {
-    lightcraft_codecs::encode_png(
-        &lightcraft_codecs::EncodeImage::rgba8(rgba),
-        &lightcraft_codecs::EncodeMeta::default(),
-    )
-    .unwrap()
+    lightcraft_codecs::encode_png(&lightcraft_codecs::EncodeImage::rgba8(rgba), &lightcraft_codecs::EncodeMeta::default()).unwrap()
 }
 
 #[test]
@@ -172,15 +168,8 @@ fn non_raw_denoise_product_and_eligibility() {
     let img_path = dir.join("noisy.png");
     std::fs::write(&img_path, &png_bytes).unwrap();
 
-    let mut photo = Photo::new(
-        PhotoId(77),
-        Source::File { path: img_path.to_string_lossy().into_owned() },
-        "noisy.png",
-        "PNG",
-        48,
-        36,
-        "2026-11-14T10:00:00",
-    );
+    let mut photo =
+        Photo::new(PhotoId(77), Source::File { path: img_path.to_string_lossy().into_owned() }, "noisy.png", "PNG", 48, 36, "2026-11-14T10:00:00");
     photo.kind = MediaKind::Image;
     assert!(crate::denoise::eligible(&photo), "rendered image on disk is eligible for Non-Raw Denoise");
 
@@ -229,23 +218,13 @@ fn hdr_panorama_merge_brackets_and_headroom() {
     }
     assert_eq!(ids.len(), 4);
 
-    let info = s
-        .execute(
-            "merge.hdrPanorama",
-            &json!({"ids": ids, "bracket": 2, "preview": true, "deghost": "medium", "showOverlay": true}),
-        )
-        .unwrap();
+    let info = s.execute("merge.hdrPanorama", &json!({"ids": ids, "bracket": 2, "preview": true, "deghost": "medium", "showOverlay": true})).unwrap();
     assert_eq!(info["bracket"], 2);
     assert_eq!(info["bracketGroups"], 2);
     assert!(info["recommendedHeadroomEv"].as_f64().unwrap() >= 1.0);
     assert!(info["previewSize"][0].as_u64().unwrap() > 0);
 
-    let merged = s
-        .execute(
-            "merge.hdrPanorama",
-            &json!({"ids": ids, "bracket": 2, "hdrOutput": true}),
-        )
-        .unwrap();
+    let merged = s.execute("merge.hdrPanorama", &json!({"ids": ids, "bracket": 2, "hdrOutput": true})).unwrap();
     let new_id = lightcraft_catalog::PhotoId(merged["id"].as_u64().unwrap());
     let dev = s.develop_of(new_id).unwrap();
     assert!(dev.hdr.enabled, "hdrOutput enables HDR mode on merged HDR Panorama");
@@ -326,15 +305,7 @@ fn tether_hot_folder_and_video_trim() {
     assert_eq!(s.execute("tether.status", &json!({})).unwrap()["active"], false);
 
     // Video trim metadata & undo/redo:
-    let mut vid = Photo::new(
-        PhotoId(999),
-        Source::Demo { scene: 0 },
-        "clip.mp4",
-        "MP4",
-        1920,
-        1080,
-        "2026-11-14T11:00:00",
-    );
+    let mut vid = Photo::new(PhotoId(999), Source::Demo { scene: 0 }, "clip.mp4", "MP4", 1920, 1080, "2026-11-14T11:00:00");
     vid.kind = MediaKind::Video;
     vid.duration = Some(24.5);
     s.commit("Add Video", Op::AddPhoto { photo: Box::new(vid) }).unwrap();

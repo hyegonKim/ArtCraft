@@ -160,8 +160,12 @@ fn detail(doc: &Document, e: LibraryEntry) -> String {
             let frames = trn!("{n} frame", "{n} frames", n);
             tr!("{kind} · {frames}", kind = crate::panels::symbol_kind_label(s.kind), frames = frames)
         }),
-        LibraryEntry::Item(LibraryItem::Bitmap(id)) => doc.bitmap(id).map_or_else(String::new, |b| tr!("Bitmap · {width}×{height}", width = b.width, height = b.height)),
-        LibraryEntry::Item(LibraryItem::Sound(id)) => doc.sound(id).map_or_else(String::new, |x| tr!("Sound · {seconds} s", seconds = format!("{:.1}", x.seconds()))),
+        LibraryEntry::Item(LibraryItem::Bitmap(id)) => {
+            doc.bitmap(id).map_or_else(String::new, |b| tr!("Bitmap · {width}×{height}", width = b.width, height = b.height))
+        }
+        LibraryEntry::Item(LibraryItem::Sound(id)) => {
+            doc.sound(id).map_or_else(String::new, |x| tr!("Sound · {seconds} s", seconds = format!("{:.1}", x.seconds())))
+        }
     }
 }
 
@@ -203,7 +207,14 @@ fn rows(doc: &Document, v: &LibraryView, uses: &HashMap<LibraryItem, usize>) -> 
             LibraryEntry::Folder(f) => (!query.is_empty() && leads.contains(&f)) || (query.is_empty() && v.expanded.contains(&f)),
             LibraryEntry::Item(_) => false,
         };
-        out.push(Row { entry: e, depth, name: doc.entry_name(e).unwrap_or("").to_string(), detail: detail(doc, e), uses: matches!(e, LibraryEntry::Item(_)).then(|| count(e)), open });
+        out.push(Row {
+            entry: e,
+            depth,
+            name: doc.entry_name(e).unwrap_or("").to_string(),
+            detail: detail(doc, e),
+            uses: matches!(e, LibraryEntry::Item(_)).then(|| count(e)),
+            open,
+        });
         if let LibraryEntry::Folder(f) = e
             && open
             && depth + 1 < MAX_FOLDER_DEPTH
@@ -235,14 +246,21 @@ fn level(doc: &Document, v: &LibraryView, parent: Option<FolderId>, count: &dyn 
 /// F2 renames the selected row and Delete deletes the selection, while the list has the
 /// keyboard (it was clicked last). Called before the global shortcuts.
 pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
-    let clicked_elsewhere = ctx.input(|i| i.pointer.any_pressed() && i.pointer.interact_pos().is_some_and(|p| !app.library.list_rect.is_some_and(|r| r.contains(p))));
+    let clicked_elsewhere =
+        ctx.input(|i| i.pointer.any_pressed() && i.pointer.interact_pos().is_some_and(|p| !app.library.list_rect.is_some_and(|r| r.contains(p))));
     if clicked_elsewhere {
         app.library.keys = false;
     }
     if !app.library.keys || app.library.renaming.is_some() {
         return;
     }
-    let (rename, delete, place) = ctx.input_mut(|i| (i.consume_key(Modifiers::NONE, Key::F2), i.consume_key(Modifiers::NONE, Key::Delete) || i.consume_key(Modifiers::NONE, Key::Backspace), i.consume_key(Modifiers::NONE, Key::Enter)));
+    let (rename, delete, place) = ctx.input_mut(|i| {
+        (
+            i.consume_key(Modifiers::NONE, Key::F2),
+            i.consume_key(Modifiers::NONE, Key::Delete) || i.consume_key(Modifiers::NONE, Key::Backspace),
+            i.consume_key(Modifiers::NONE, Key::Enter),
+        )
+    });
     if rename && let [one] = app.library.sel.as_slice() {
         let e = *one;
         start_rename(app, e);
@@ -261,10 +279,14 @@ pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
 
 /// The selected rows' items (folders left out), in selection order.
 fn selected_items(app: &App) -> Vec<LibraryItem> {
-    app.library.sel.iter().filter_map(|e| match e {
-        LibraryEntry::Item(i) if app.s.doc.has_item(*i) => Some(*i),
-        _ => None,
-    }).collect()
+    app.library
+        .sel
+        .iter()
+        .filter_map(|e| match e {
+            LibraryEntry::Item(i) if app.s.doc.has_item(*i) => Some(*i),
+            _ => None,
+        })
+        .collect()
 }
 
 fn start_rename(app: &mut App, e: LibraryEntry) {
@@ -306,10 +328,12 @@ fn place(app: &mut App, item: LibraryItem) {
 /// What the Library rows being dragged hold that can be placed (folders left out).
 fn dragged_items(app: &App, ctx: &egui::Context) -> Vec<LibraryItem> {
     egui::DragAndDrop::payload::<Vec<LibraryEntry>>(ctx).map_or_else(Vec::new, |p| {
-        p.iter().filter_map(|e| match e {
-            LibraryEntry::Item(i) if app.s.doc.has_item(*i) => Some(*i),
-            _ => None,
-        }).collect()
+        p.iter()
+            .filter_map(|e| match e {
+                LibraryEntry::Item(i) if app.s.doc.has_item(*i) => Some(*i),
+                _ => None,
+            })
+            .collect()
     })
 }
 
@@ -344,7 +368,8 @@ pub fn stage_drop(app: &mut App, ui: &egui::Ui, resp: &egui::Response, to_stage:
     }
     let layer = app.s.active_layer().map(|l| l.name.clone()).unwrap_or_default();
     let frame = app.s.frame + 1;
-    let hint = if only_sounds { tr!("Put on {layer} at frame {frame}", layer = layer, frame = frame) } else { tr!("Place on {layer}", layer = layer) };
+    let hint =
+        if only_sounds { tr!("Put on {layer} at frame {frame}", layer = layer, frame = frame) } else { tr!("Place on {layer}", layer = layer) };
     let galley = painter.layout_no_wrap(hint, font(Type::Caption), color(Type::Body));
     let at = p + vec2(14.0, 10.0);
     painter.rect_filled(Rect::from_min_size(at, galley.size()).expand(4.0), T.rc(), T.panel);
@@ -387,7 +412,8 @@ fn new_folder(app: &mut App) {
 
 /// Moves `what` into `to` (`None`: the top level), opening the folder so they stay in view.
 fn move_into(app: &mut App, what: &[LibraryEntry], to: Option<FolderId>) {
-    let items: Vec<serde_json::Value> = what.iter().filter(|e| app.s.doc.parent_of(**e) != to && **e != to.map_or(**e, LibraryEntry::Folder)).map(|e| entry_json(*e)).collect();
+    let items: Vec<serde_json::Value> =
+        what.iter().filter(|e| app.s.doc.parent_of(**e) != to && **e != to.map_or(**e, LibraryEntry::Folder)).map(|e| entry_json(*e)).collect();
     if items.is_empty() {
         return;
     }
@@ -407,7 +433,14 @@ pub fn panel(app: &mut App, ui: &mut egui::Ui) {
     }
     if doc.library_items().next().is_none() && doc.library_tree.folders.is_empty() {
         let key = |id: &str| app.keymap.primary(id).map(crate::platform::shortcut_label).unwrap_or_default();
-        ui.label(text(Type::Caption, tr!("No symbols, images or sounds yet. Select artwork and press {convert} to make a symbol, or import an image or a sound with {import}.", convert = key("modify.convert_to_symbol"), import = key("file.import"))));
+        ui.label(text(
+            Type::Caption,
+            tr!(
+                "No symbols, images or sounds yet. Select artwork and press {convert} to make a symbol, or import an image or a sound with {import}.",
+                convert = key("modify.convert_to_symbol"),
+                import = key("file.import")
+            ),
+        ));
         if ui.button(tr!("New Folder")).clicked() {
             new_folder(app);
         }
@@ -454,7 +487,11 @@ fn toolbar(app: &mut App, ui: &mut egui::Ui) {
             })
             .response
             .set_name(tr!("Sort by"));
-        let (icon, tip) = if app.library.descending { (Icon::ChevronDown, tr!("Descending: click for ascending")) } else { (Icon::ChevronUp, tr!("Ascending: click for descending")) };
+        let (icon, tip) = if app.library.descending {
+            (Icon::ChevronDown, tr!("Descending: click for ascending"))
+        } else {
+            (Icon::ChevronUp, tr!("Ascending: click for descending"))
+        };
         if crate::timeline::icon_button(ui, tip, None, icon).clicked() {
             app.library.descending = !app.library.descending;
         }
@@ -536,7 +573,13 @@ fn list_ui(app: &mut App, ui: &mut egui::Ui, list: &[Row], unused: &HashSet<Libr
             let uses_text = row.uses.map(|n| n.to_string()).unwrap_or_default();
             let is_unused = matches!(row.entry, LibraryEntry::Item(i) if unused.contains(&i));
             if let Some(n) = row.uses {
-                p.text(r.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, &uses_text, font(Type::Data), if n == 0 { T.text_faint } else { color(Type::Caption) });
+                p.text(
+                    r.right_center() - vec2(8.0, 0.0),
+                    Align2::RIGHT_CENTER,
+                    &uses_text,
+                    font(Type::Data),
+                    if n == 0 { T.text_faint } else { color(Type::Caption) },
+                );
             }
             // Renaming: a field over the name; Enter or clicking away keeps it, Esc doesn't.
             let editing = app.library.renaming.as_ref().is_some_and(|(e, _, _)| *e == row.entry);
@@ -573,7 +616,11 @@ fn list_ui(app: &mut App, ui: &mut egui::Ui, list: &[Row], unused: &HashSet<Libr
                 Some(n) => trn!("used {n} time", "used {n} times", n),
                 None => String::new(),
             };
-            let name = if used_note.is_empty() { format!("{} · {}", row.name, row.detail) } else { format!("{} · {} · {}", row.name, row.detail, used_note) };
+            let name = if used_note.is_empty() {
+                format!("{} · {}", row.name, row.detail)
+            } else {
+                format!("{} · {} · {}", row.name, row.detail, used_note)
+            };
             a11y::control(ui, &resp, WidgetType::SelectableLabel, &name, Some(selected));
             let resp = resp.on_hover_text(&name);
             // Dragging rows: the selection if the row is in it, else just the row.
@@ -730,7 +777,8 @@ fn row_menu(app: &mut App, ui: &mut egui::Ui, e: LibraryEntry) {
         ui.close();
         new_folder(app);
     }
-    let folders: Vec<(FolderId, String)> = app.s.doc.library_tree.folders.iter().map(|f| (f.id, app.s.doc.entry_path(LibraryEntry::Folder(f.id)))).collect();
+    let folders: Vec<(FolderId, String)> =
+        app.s.doc.library_tree.folders.iter().map(|f| (f.id, app.s.doc.entry_path(LibraryEntry::Folder(f.id)))).collect();
     ui.menu_button(tr!("Move to"), |ui| {
         let what = app.library.sel.clone();
         if ui.button(tr!("Library (top level)")).clicked() {
@@ -773,10 +821,18 @@ fn actions_row(app: &mut App, ui: &mut egui::Ui) {
             items.push(i);
         }
         if !items.is_empty() && items.iter().all(|i| matches!(i, LibraryItem::Sound(_))) {
-            if ui.button(tr!("Place on timeline")).on_hover_text(tr!("Puts it on the active layer's keyframe at the playhead (Enter, or drag it onto the stage)")).clicked() {
+            if ui
+                .button(tr!("Place on timeline"))
+                .on_hover_text(tr!("Puts it on the active layer's keyframe at the playhead (Enter, or drag it onto the stage)"))
+                .clicked()
+            {
                 place_items(app, &items, None);
             }
-        } else if ui.add_enabled(!items.is_empty(), egui::Button::new(tr!("Place on stage"))).on_hover_text(tr!("Adds it at the centre of the view, on the active layer (Enter, or drag it onto the stage)")).clicked() {
+        } else if ui
+            .add_enabled(!items.is_empty(), egui::Button::new(tr!("Place on stage")))
+            .on_hover_text(tr!("Adds it at the centre of the view, on the active layer (Enter, or drag it onto the stage)"))
+            .clicked()
+        {
             place_items(app, &items, None);
         }
     });
@@ -806,7 +862,13 @@ fn properties(app: &mut App, ui: &mut egui::Ui) {
             // The class scripts create it by (ADR 0013 tier 1: kept, not run).
             let (class, base) = linkage.map_or((String::new(), String::new()), |l| (l.class, l.base));
             crate::theme::form_row(ui, crate::theme::FORM_LABEL_DOCK, tr!("Class"), |ui| {
-                if let Some(v) = crate::actions_panel::class_field(ui, "lib_symclass", &class, tr!("Linkage class"), tr!("The class scripts create this symbol by (its linkage). Kept with the document; scripts don't run yet")) {
+                if let Some(v) = crate::actions_panel::class_field(
+                    ui,
+                    "lib_symclass",
+                    &class,
+                    tr!("Linkage class"),
+                    tr!("The class scripts create this symbol by (its linkage). Kept with the document; scripts don't run yet"),
+                ) {
                     let base = if v.is_empty() { String::new() } else { base.clone() };
                     app.run("script.set_class", json!({"symbol": id.0, "class": v, "base": base}));
                 }
@@ -816,7 +878,10 @@ fn properties(app: &mut App, ui: &mut egui::Ui) {
         }
         LibraryItem::Bitmap(id) => {
             let Some(mut on) = app.s.doc.bitmap(id).map(|b| b.smoothing) else { return };
-            if crate::theme::checkbox(ui, &mut on, tr!("Allow smoothing")).on_hover_text(tr!("Smooth when scaled or turned; off keeps hard pixel edges, for pixel art")).changed() {
+            if crate::theme::checkbox(ui, &mut on, tr!("Allow smoothing"))
+                .on_hover_text(tr!("Smooth when scaled or turned; off keeps hard pixel edges, for pixel art"))
+                .changed()
+            {
                 app.run("library.set_smoothing", json!({"bitmap": id.0, "on": on}));
             }
         }
@@ -892,7 +957,9 @@ fn picture(ctx: &egui::Context, doc: &Document, item: LibraryItem, area: Rect) -
             }
             let s = ((w as f32 - 4.0) / b.width().max(1e-3)).min((h as f32 - 4.0) / b.height().max(1e-3)).min(4.0 * ppp);
             let c = b.center();
-            let transform = anicraft_engine::geom::Affine::translate(w as f32 / 2.0, h as f32 / 2.0).mul(&anicraft_engine::geom::Affine::scale(s, s)).mul(&anicraft_engine::geom::Affine::translate(-c.x, -c.y));
+            let transform = anicraft_engine::geom::Affine::translate(w as f32 / 2.0, h as f32 / 2.0)
+                .mul(&anicraft_engine::geom::Affine::scale(s, s))
+                .mul(&anicraft_engine::geom::Affine::translate(-c.x, -c.y));
             let view = anicraft_engine::render::View { transform, width: w, height: h, background: None };
             let (px, _) = anicraft_engine::render::render(&dl, &view).ok()?;
             let image = egui::ColorImage::from_rgba_premultiplied([w as usize, h as usize], &px.to_premul_rgba8());
@@ -931,7 +998,14 @@ fn symbol_frame(doc: &Document, id: anicraft_engine::doc::SymbolId) -> anicraft_
             name: String::new(),
             transform: Default::default(),
             color: Default::default(),
-            kind: ElementKind::Symbol { symbol: id, loop_mode: LoopMode::SingleFrame, first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+            kind: ElementKind::Symbol {
+                symbol: id,
+                loop_mode: LoopMode::SingleFrame,
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
         })];
     }
     let mut scene = Scene::new("");
@@ -1009,7 +1083,11 @@ mod tests {
 
     fn app() -> (egui::Context, App) {
         let ctx = egui::Context::default();
-        let app = App::with_context(&ctx, anicraft_engine::Session::new(anicraft_engine::doc::sample::demo()), Some(std::path::PathBuf::from("unused.png")));
+        let app = App::with_context(
+            &ctx,
+            anicraft_engine::Session::new(anicraft_engine::doc::sample::demo()),
+            Some(std::path::PathBuf::from("unused.png")),
+        );
         (ctx, app)
     }
 
@@ -1019,7 +1097,15 @@ mod tests {
     }
 
     fn instances(app: &App, symbol: u64) -> Vec<anicraft_engine::geom::Vec2> {
-        app.s.timeline().layers.iter().filter_map(|l| l.keyframe_at(app.s.frame)).flat_map(|k| &k.elements).filter(|e| matches!(e.kind, anicraft_engine::doc::ElementKind::Symbol { symbol: x, .. } if x.0 == symbol)).map(|e| e.transform.apply(anicraft_engine::geom::Vec2::ZERO)).collect()
+        app.s
+            .timeline()
+            .layers
+            .iter()
+            .filter_map(|l| l.keyframe_at(app.s.frame))
+            .flat_map(|k| &k.elements)
+            .filter(|e| matches!(e.kind, anicraft_engine::doc::ElementKind::Symbol { symbol: x, .. } if x.0 == symbol))
+            .map(|e| e.transform.apply(anicraft_engine::geom::Vec2::ZERO))
+            .collect()
     }
 
     #[test]

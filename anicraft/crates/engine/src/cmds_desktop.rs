@@ -32,8 +32,18 @@ pub fn specs() -> Vec<CommandSpec> {
             "{appimage: absolute path to the .AppImage, data_home: absolute path (the user's $XDG_DATA_HOME, e.g. ~/.local/share), refresh? (default true: run update-mime-database and update-desktop-database)} writes the launcher, icons and file types there; again only rewrites what changed",
             integrate as crate::RunFn,
         ),
-        c("desktop.remove", "Remove from Applications Menu", "{data_home, refresh? (default true)} deletes the launcher, icons and file types desktop.integrate wrote; nothing when the entry there isn't AniCraft's", remove),
-        c("desktop.status", "Applications Menu Status", "{data_home, appimage? (to say whether the entry starts this copy)} whether AniCraft is in the applications menu, and which AppImage it starts", status),
+        c(
+            "desktop.remove",
+            "Remove from Applications Menu",
+            "{data_home, refresh? (default true)} deletes the launcher, icons and file types desktop.integrate wrote; nothing when the entry there isn't AniCraft's",
+            remove,
+        ),
+        c(
+            "desktop.status",
+            "Applications Menu Status",
+            "{data_home, appimage? (to say whether the entry starts this copy)} whether AniCraft is in the applications menu, and which AppImage it starts",
+            status,
+        ),
     ]
 }
 
@@ -132,7 +142,9 @@ pub fn exec_argument(path: &str) -> String {
 /// `TryExec` (so the entry hides itself if the file is moved or deleted) and the marker key.
 pub fn desktop_entry(appimage: &Path) -> Result<String> {
     let text = entry_text(appimage, "AppImage")?;
-    let mut out = String::from("# Added by AniCraft for the AppImage named in X-AniCraft-AppImage.\n# AniCraft's Preferences › About › Remove takes it away again.\n");
+    let mut out = String::from(
+        "# Added by AniCraft for the AppImage named in X-AniCraft-AppImage.\n# AniCraft's Preferences › About › Remove takes it away again.\n",
+    );
     for line in DESKTOP_TEMPLATE.lines() {
         let line = line.trim_end_matches('\r');
         if line.starts_with("Exec=") {
@@ -167,7 +179,8 @@ fn check_data_home(data_home: &Path) -> Result<()> {
 
 /// Every file desktop integration owns under `data_home`, relative to it.
 pub fn owned_files() -> Vec<PathBuf> {
-    let mut v = vec![PathBuf::from("applications").join(format!("{APP_ID}.desktop")), PathBuf::from("mime").join("packages").join(format!("{APP_ID}.xml"))];
+    let mut v =
+        vec![PathBuf::from("applications").join(format!("{APP_ID}.desktop")), PathBuf::from("mime").join("packages").join(format!("{APP_ID}.xml"))];
     v.extend(ICONS.iter().map(|(size, ext, _)| PathBuf::from("icons").join("hicolor").join(size).join("apps").join(format!("{APP_ID}.{ext}"))));
     v
 }

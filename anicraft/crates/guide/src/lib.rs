@@ -138,8 +138,12 @@ fn events(markdown: &str) -> Vec<Event<'_>> {
     let mut out: Vec<Event> = Parser::new_ext(markdown, options())
         .map(|e| match e {
             Event::Html(h) | Event::InlineHtml(h) => Event::Text(h),
-            Event::Start(Tag::Link { link_type, dest_url, title, id }) => Event::Start(Tag::Link { link_type, dest_url: CowStr::from(rewrite_link(&dest_url)), title, id }),
-            Event::Start(Tag::Image { link_type, dest_url, title, id }) => Event::Start(Tag::Image { link_type, dest_url: CowStr::from(rewrite_link(&dest_url)), title, id }),
+            Event::Start(Tag::Link { link_type, dest_url, title, id }) => {
+                Event::Start(Tag::Link { link_type, dest_url: CowStr::from(rewrite_link(&dest_url)), title, id })
+            }
+            Event::Start(Tag::Image { link_type, dest_url, title, id }) => {
+                Event::Start(Tag::Image { link_type, dest_url: CowStr::from(rewrite_link(&dest_url)), title, id })
+            }
             other => other,
         })
         .collect();
@@ -224,7 +228,9 @@ pub fn render_page(pages: &[Page], at: usize) -> String {
         toc.push_str(&format!("<li><a href=\"{root}{}\"{current}>{}</a></li>\n", html_path(p.file), escape(&self::title(p.markdown))));
     }
     let link = |p: Option<&Page>, rel: &str, word: &str| {
-        p.map_or_else(String::new, |p| format!("<a rel=\"{rel}\" href=\"{root}{}\">{word}: {}</a>", html_path(p.file), escape(&self::title(p.markdown))))
+        p.map_or_else(String::new, |p| {
+            format!("<a rel=\"{rel}\" href=\"{root}{}\">{word}: {}</a>", html_path(p.file), escape(&self::title(p.markdown)))
+        })
     };
     let prev = link(at.checked_sub(1).and_then(|i| pages.get(i)), "prev", "Previous");
     let next = link(pages.get(at + 1), "next", "Next");
@@ -242,7 +248,9 @@ pub fn render_page(pages: &[Page], at: usize) -> String {
 
 /// The whole book: one HTML page per chapter, the stylesheet and the pictures.
 pub fn site() -> Vec<SiteFile> {
-    let mut out: Vec<SiteFile> = (0..PAGES.len()).filter_map(|i| PAGES.get(i).map(|p| SiteFile { path: html_path(p.file), bytes: render_page(PAGES, i).into_bytes() })).collect();
+    let mut out: Vec<SiteFile> = (0..PAGES.len())
+        .filter_map(|i| PAGES.get(i).map(|p| SiteFile { path: html_path(p.file), bytes: render_page(PAGES, i).into_bytes() }))
+        .collect();
     out.push(SiteFile { path: STYLESHEET.to_string(), bytes: STYLE.as_bytes().to_vec() });
     out.extend(IMAGES.iter().map(|(path, bytes)| SiteFile { path: (*path).to_string(), bytes: bytes.to_vec() }));
     out

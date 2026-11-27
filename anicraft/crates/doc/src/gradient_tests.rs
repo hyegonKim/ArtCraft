@@ -12,7 +12,9 @@ fn near(a: &Affine, b: &Affine) -> bool {
 
 #[test]
 fn spread_maps_positions_onto_the_ramp() {
-    for (t, pad, reflect, repeat) in [(-0.25, 0.0, 0.25, 0.75), (0.0, 0.0, 0.0, 0.0), (0.4, 0.4, 0.4, 0.4), (1.25, 1.0, 0.75, 0.25), (2.5, 1.0, 0.5, 0.5), (-1.5, 0.0, 0.5, 0.5)] {
+    for (t, pad, reflect, repeat) in
+        [(-0.25, 0.0, 0.25, 0.75), (0.0, 0.0, 0.0, 0.0), (0.4, 0.4, 0.4, 0.4), (1.25, 1.0, 0.75, 0.25), (2.5, 1.0, 0.5, 0.5), (-1.5, 0.0, 0.5, 0.5)]
+    {
         assert!((Spread::Pad.apply(t) - pad).abs() < 1e-6, "pad {t}");
         assert!((Spread::Reflect.apply(t) - reflect).abs() < 1e-6, "reflect {t}");
         assert!((Spread::Repeat.apply(t) - repeat).abs() < 1e-6, "repeat {t}");
@@ -45,7 +47,13 @@ fn frames_round_trip_for_every_fill_kind() {
         Paint::Radial { center, radius, matrix, .. } => {
             assert!(center.distance(Vec2::new(50.0, 40.0)) < 1e-4);
             assert!((radius - 30.0).abs() < 1e-4);
-            assert!(near(&matrix.mul(&Affine::translate(center.x, center.y)), &Affine::translate(center.x, center.y).mul(&Affine { m: [matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], 0.0, 0.0] })), "the matrix turns about the centre");
+            assert!(
+                near(
+                    &matrix.mul(&Affine::translate(center.x, center.y)),
+                    &Affine::translate(center.x, center.y).mul(&Affine { m: [matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], 0.0, 0.0] })
+                ),
+                "the matrix turns about the centre"
+            );
         }
         other => panic!("{other:?}"),
     }
@@ -56,10 +64,13 @@ fn frames_round_trip_for_every_fill_kind() {
     assert!(f.apply(Vec2::new(-1.0, -1.0)).distance(Vec2::new(3.0, 4.0)) < 1e-4, "top-left of the image");
     assert!(f.apply(Vec2::new(1.0, 1.0)).distance(Vec2::new(23.0, 16.0)) < 1e-4, "bottom-right");
     assert_eq!(bmp.frame(None), None, "a bitmap needs its size");
-    assert!(near(&match bmp.with_frame(&f, Some((10.0, 6.0))) {
-        Paint::Bitmap { matrix, .. } => matrix,
-        _ => Affine::IDENTITY,
-    }, &Affine::translate(3.0, 4.0).mul(&Affine::scale(2.0, 2.0))));
+    assert!(near(
+        &match bmp.with_frame(&f, Some((10.0, 6.0))) {
+            Paint::Bitmap { matrix, .. } => matrix,
+            _ => Affine::IDENTITY,
+        },
+        &Affine::translate(3.0, 4.0).mul(&Affine::scale(2.0, 2.0))
+    ));
     // Solid colours have no frame; a frame that isn't finite changes nothing.
     assert_eq!(Paint::Solid(Rgba::WHITE).frame(None), None);
     assert_eq!(rad.with_frame(&Affine { m: [f32::NAN, 0.0, 0.0, 1.0, 0.0, 0.0] }, None), rad);

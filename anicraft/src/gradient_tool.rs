@@ -86,7 +86,13 @@ fn handles(t: &Target) -> Vec<(Grip, Vec2)> {
     let ring = |a: f32| Vec2::new(a.cos(), a.sin());
     match t.kind {
         Kind::Linear => vec![(Grip::Move, Vec2::ZERO), (Grip::Width, Vec2::new(1.0, 0.0)), (Grip::Rotate, Vec2::new(1.0, -1.0))],
-        Kind::Radial => vec![(Grip::Move, Vec2::ZERO), (Grip::Focal, Vec2::new(t.focal, 0.0)), (Grip::Width, Vec2::new(1.0, 0.0)), (Grip::Size, ring(SIZE_AT)), (Grip::Rotate, ring(TURN_AT))],
+        Kind::Radial => vec![
+            (Grip::Move, Vec2::ZERO),
+            (Grip::Focal, Vec2::new(t.focal, 0.0)),
+            (Grip::Width, Vec2::new(1.0, 0.0)),
+            (Grip::Size, ring(SIZE_AT)),
+            (Grip::Rotate, ring(TURN_AT)),
+        ],
         Kind::Bitmap => vec![
             (Grip::Move, Vec2::ZERO),
             (Grip::Width, Vec2::new(-1.0, 0.0)),
@@ -236,7 +242,9 @@ pub fn draw_overlay(app: &App, painter: &egui::Painter, xf: Xf, hover: Option<Po
             painter.add(egui::Shape::dashed_line(&[to_px(Vec2::new(-1.0, 0.0)), to_px(Vec2::new(1.0, 0.0))], faint, 4.0, 3.0));
         }
         Kind::Radial => {
-            let ring: Vec<Pos2> = (0..96).map(|k| to_px(Vec2::new((k as f32 / 96.0 * std::f32::consts::TAU).cos(), (k as f32 / 96.0 * std::f32::consts::TAU).sin()))).collect();
+            let ring: Vec<Pos2> = (0..96)
+                .map(|k| to_px(Vec2::new((k as f32 / 96.0 * std::f32::consts::TAU).cos(), (k as f32 / 96.0 * std::f32::consts::TAU).sin())))
+                .collect();
             painter.add(egui::Shape::closed_line(ring, line));
             painter.add(egui::Shape::dashed_line(&[to_px(Vec2::ZERO), to_px(Vec2::new(1.0, 0.0))], faint, 4.0, 3.0));
         }
@@ -310,7 +318,10 @@ mod tests {
         assert!(target(&app).is_none());
         let png = anicraft_engine::render::encode_png(4, 2, &[200; 32]).unwrap_or_default();
         let id = app.s.doc.alloc_id();
-        app.s.doc.bitmaps.push(std::sync::Arc::new(anicraft_engine::doc::Bitmap::from_png(anicraft_engine::doc::BitmapId(id), "tile.png", png).unwrap()));
+        app.s
+            .doc
+            .bitmaps
+            .push(std::sync::Arc::new(anicraft_engine::doc::Bitmap::from_png(anicraft_engine::doc::BitmapId(id), "tile.png", png).unwrap()));
         for (kind, extra) in [("linear", json!({})), ("radial", json!({"focal": 0.3})), ("bitmap", json!({"bitmap": id}))] {
             let mut p = json!({"type": kind});
             if let (Some(o), Some(e)) = (p.as_object_mut(), extra.as_object()) {

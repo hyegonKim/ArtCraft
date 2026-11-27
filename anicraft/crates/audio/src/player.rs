@@ -25,7 +25,9 @@ enum Mode {
     Idle,
     Playing,
     /// A short snippet while scrubbing, ending at `until`.
-    Snippet { until: u64 },
+    Snippet {
+        until: u64,
+    },
 }
 
 pub struct Player {
@@ -139,13 +141,14 @@ impl Player {
             return;
         }
         let (pos, origin, now) = (self.pos, self.opts.origin, self.tail_pos);
-        let carried = self.voices.iter().filter(|v| v.kind == VoiceKind::Event && v.gain != 0.0 && v.at >= origin && v.at < pos && v.end > pos).map(|v| {
-            let mut t = v.clone();
-            t.at = now;
-            t.end = now.saturating_add(v.end - pos);
-            t.skip = v.skip.saturating_add(pos - v.at);
-            t
-        });
+        let carried =
+            self.voices.iter().filter(|v| v.kind == VoiceKind::Event && v.gain != 0.0 && v.at >= origin && v.at < pos && v.end > pos).map(|v| {
+                let mut t = v.clone();
+                t.at = now;
+                t.end = now.saturating_add(v.end - pos);
+                t.skip = v.skip.saturating_add(pos - v.at);
+                t
+            });
         self.tails.extend(carried);
         let over = self.tails.len().saturating_sub(MAX_TAILS);
         self.tails.drain(..over);
@@ -443,14 +446,24 @@ mod tests {
         let gains = [0.0, 1.0, -1.0, 0.5, 1e30, -1e30, f32::NAN, f32::INFINITY, f32::NEG_INFINITY, f32::MIN_POSITIVE];
         for round in 0..300 {
             let rate = [8000, 1, 44_100, 48_000, 192_000][round % 5];
-            let pcm = Arc::new(Pcm::new([8000, 22_050, 48_000][round % 3], 1 + (round % 2) as u16, (0..64).map(|i| ((i as f32) * 0.37).sin() * 4.0).collect()).unwrap());
+            let pcm = Arc::new(
+                Pcm::new([8000, 22_050, 48_000][round % 3], 1 + (round % 2) as u16, (0..64).map(|i| ((i as f32) * 0.37).sin() * 4.0).collect())
+                    .unwrap(),
+            );
             let mut voices = Vec::new();
             for _ in 0..1 + next() % 4 {
                 let pick = |n: u64| odd[(n % odd.len() as u64) as usize];
-                let mut v = Voice::new(pcm.clone(), if next() % 2 == 0 { VoiceKind::Event } else { VoiceKind::Stream }, pick(next()) % 5000, pick(next()));
+                let mut v =
+                    Voice::new(pcm.clone(), if next() % 2 == 0 { VoiceKind::Event } else { VoiceKind::Stream }, pick(next()) % 5000, pick(next()));
                 v.skip = pick(next());
                 v.gain = gains[(next() % gains.len() as u64) as usize];
-                let points = (0..next() % 20).map(|_| EnvPoint { at: pick(next()), left: gains[(next() % gains.len() as u64) as usize], right: gains[(next() % gains.len() as u64) as usize] }).collect();
+                let points = (0..next() % 20)
+                    .map(|_| EnvPoint {
+                        at: pick(next()),
+                        left: gains[(next() % gains.len() as u64) as usize],
+                        right: gains[(next() % gains.len() as u64) as usize],
+                    })
+                    .collect();
                 v.envelope = Envelope::new(points).map(Arc::new);
                 voices.push(v);
             }

@@ -355,7 +355,12 @@ mod tests {
         assert!(CurveWalk::new(&q).is_none());
         // Only the first subpath is walked; a closing edge is walked too.
         let mut c = Path::new();
-        c.move_to(Vec2::new(0.0, 0.0)).line_to(Vec2::new(10.0, 0.0)).line_to(Vec2::new(10.0, 10.0)).close().move_to(Vec2::new(50.0, 50.0)).line_to(Vec2::new(60.0, 50.0));
+        c.move_to(Vec2::new(0.0, 0.0))
+            .line_to(Vec2::new(10.0, 0.0))
+            .line_to(Vec2::new(10.0, 10.0))
+            .close()
+            .move_to(Vec2::new(50.0, 50.0))
+            .line_to(Vec2::new(60.0, 50.0));
         let w = CurveWalk::new(&c).unwrap();
         assert!((w.length() - (20.0 + 200f32.sqrt())).abs() < 1e-2);
         assert!(w.at(f32::NAN).distance(Vec2::ZERO) < 1e-6);

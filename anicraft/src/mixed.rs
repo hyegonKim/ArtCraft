@@ -59,14 +59,17 @@ fn color_mixed(all: &[Arc<Element>]) -> ColorMixed {
             m.brightness = differ_f32(seen.iter().map(|f| if let ColorEffect::Brightness(b) = f { *b } else { 0.0 }));
         }
         anicraft_engine::doc::ColorStyle::Tint => {
-            let tints: Vec<_> = seen.iter().filter_map(|f| if let ColorEffect::Tint { color, amount } = f { Some((*color, *amount)) } else { None }).collect();
+            let tints: Vec<_> =
+                seen.iter().filter_map(|f| if let ColorEffect::Tint { color, amount } = f { Some((*color, *amount)) } else { None }).collect();
             m.tint = differ(tints.iter().map(|t| t.0.to_hex()));
             m.tint_amount = differ_f32(tints.iter().map(|t| t.1));
         }
         anicraft_engine::doc::ColorStyle::Advanced => {
             let ts: Vec<_> = seen.iter().map(ColorEffect::transform).collect();
             for (i, slot) in m.advanced.iter_mut().enumerate() {
-                *slot = differ_f32(ts.iter().map(|t| if i < 4 { t.mul.get(i).copied().unwrap_or(1.0) } else { t.add.get(i - 4).copied().unwrap_or(0.0) }));
+                *slot = differ_f32(
+                    ts.iter().map(|t| if i < 4 { t.mul.get(i).copied().unwrap_or(1.0) } else { t.add.get(i - 4).copied().unwrap_or(0.0) }),
+                );
             }
         }
     }
@@ -190,8 +193,16 @@ mod tests {
         let g = id(&run(&mut s, "library.place", json!({"symbol": star, "x": 300, "y": 100})));
         run(&mut s, "symbol.set_kind", json!({"symbol": ball, "kind": "movie_clip"}));
         run(&mut s, "symbol.set_kind", json!({"symbol": star, "kind": "graphic"}));
-        let r1 = id(&run(&mut s, "draw.rect", json!({"x": 10, "y": 300, "w": 20, "h": 20, "fill": "#ff0000", "stroke": "#000000", "stroke_width": 2, "object": true})));
-        let r2 = id(&run(&mut s, "draw.rect", json!({"x": 60, "y": 300, "w": 20, "h": 20, "fill": "#ff0000", "stroke": "#000000", "stroke_width": 2, "object": true})));
+        let r1 = id(&run(
+            &mut s,
+            "draw.rect",
+            json!({"x": 10, "y": 300, "w": 20, "h": 20, "fill": "#ff0000", "stroke": "#000000", "stroke_width": 2, "object": true}),
+        ));
+        let r2 = id(&run(
+            &mut s,
+            "draw.rect",
+            json!({"x": 60, "y": 300, "w": 20, "h": 20, "fill": "#ff0000", "stroke": "#000000", "stroke_width": 2, "object": true}),
+        ));
         (s, [a, b, g], [r1, r2])
     }
 

@@ -161,11 +161,7 @@ fn notes_move(e: &mut Engine, p: &Value) -> Result<Value> {
 }
 
 fn audition(e: &mut Engine, p: &Value) -> Result<Value> {
-    let pitch = p
-        .get("pitch")
-        .and_then(Value::as_i64)
-        .ok_or_else(|| bad("midi.audition", "`pitch` required"))?
-        .clamp(0, 127) as u8;
+    let pitch = p.get("pitch").and_then(Value::as_i64).ok_or_else(|| bad("midi.audition", "`pitch` required"))?.clamp(0, 127) as u8;
     let velocity = i64_or(p, "velocity", 100).clamp(0, 127) as u8;
     let duration_ms = i64_or(p, "duration_ms", 250).clamp(0, 10_000) as u32;
     let track = if p.get("track").is_some() {

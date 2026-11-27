@@ -88,7 +88,10 @@ fn whole(at: f32) -> f32 {
 /// The rulers' input: a drag from the top ruler makes a horizontal guide, from the left one a
 /// vertical guide, where it is let go over the stage.
 pub fn input(app: &mut App, ui: &mut egui::Ui, bars: &Bars, geo: Geo, paused: bool) {
-    for (rect, axis, name, id) in [(bars.top, GuideAxis::Horizontal, tr!("Horizontal ruler"), "ruler_top"), (bars.left, GuideAxis::Vertical, tr!("Vertical ruler"), "ruler_left")] {
+    for (rect, axis, name, id) in [
+        (bars.top, GuideAxis::Horizontal, tr!("Horizontal ruler"), "ruler_top"),
+        (bars.left, GuideAxis::Vertical, tr!("Vertical ruler"), "ruler_left"),
+    ] {
         let Some(rect) = rect else { continue };
         let resp = ui.interact(rect, ui.id().with(id), Sense::drag()).named(name);
         let resp = resp.on_hover_text(tr!("Drag onto the stage to add a guide (View › Guides › Edit Guides adds one by position)"));
@@ -121,7 +124,10 @@ pub fn add_guide(app: &mut App, axis: GuideAxis, at: Option<f32>) {
         if !app.s.aids.show_guides {
             app.run("view.guides_show", json!({"on": true}));
         }
-        app.status_ok(tr!("Added a guide. Drag it with the Selection tool to move it, or back onto a ruler to delete it. {undo} to undo.", undo = app.undo_key()));
+        app.status_ok(tr!(
+            "Added a guide. Drag it with the Selection tool to move it, or back onto a ruler to delete it. {undo} to undo.",
+            undo = app.undo_key()
+        ));
     }
 }
 
@@ -278,7 +284,8 @@ pub fn paint_guides(app: &App, painter: &Painter, geo: Geo, ppp: f32) {
 
 /// The step between labelled ticks: the first that leaves room for a number on screen.
 fn major_step(zoom: f32) -> f32 {
-    const STEPS: [f32; 17] = [1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0, 200.0, 250.0, 500.0, 1_000.0, 2_000.0, 2_500.0, 5_000.0, 10_000.0, 20_000.0];
+    const STEPS: [f32; 17] =
+        [1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0, 200.0, 250.0, 500.0, 1_000.0, 2_000.0, 2_500.0, 5_000.0, 10_000.0, 20_000.0];
     STEPS.into_iter().find(|s| s * zoom >= 56.0).unwrap_or(50_000.0)
 }
 
@@ -309,8 +316,15 @@ pub fn paint(ui: &egui::Ui, bars: &Bars, geo: Geo, pointer: Option<Pos2>) {
                 let s = o + v * geo.zoom;
                 let at_major = (k / n).fract() == 0.0;
                 let half = n >= 2.0 && ((k * 2.0) / n).fract() == 0.0;
-                let len = if at_major { RULER * 0.7 } else if half { RULER * 0.4 } else { RULER * 0.22 };
-                let (a, b) = if horizontal { (pos2(s, rect.max.y - len), pos2(s, rect.max.y)) } else { (pos2(rect.max.x - len, s), pos2(rect.max.x, s)) };
+                let len = if at_major {
+                    RULER * 0.7
+                } else if half {
+                    RULER * 0.4
+                } else {
+                    RULER * 0.22
+                };
+                let (a, b) =
+                    if horizontal { (pos2(s, rect.max.y - len), pos2(s, rect.max.y)) } else { (pos2(rect.max.x - len, s), pos2(rect.max.x, s)) };
                 p.line_segment([a, b], Stroke::new(1.0, T.text_faint));
                 if at_major {
                     let label = format!("{}", v.round() as i64);
@@ -327,7 +341,11 @@ pub fn paint(ui: &egui::Ui, bars: &Bars, geo: Geo, pointer: Option<Pos2>) {
             }
         }
         // The edge against the stage.
-        let edge = if horizontal { [pos2(rect.min.x, rect.max.y - 0.5), pos2(rect.max.x, rect.max.y - 0.5)] } else { [pos2(rect.max.x - 0.5, rect.min.y), pos2(rect.max.x - 0.5, rect.max.y)] };
+        let edge = if horizontal {
+            [pos2(rect.min.x, rect.max.y - 0.5), pos2(rect.max.x, rect.max.y - 0.5)]
+        } else {
+            [pos2(rect.max.x - 0.5, rect.min.y), pos2(rect.max.x - 0.5, rect.max.y)]
+        };
         p.line_segment(edge, Stroke::new(1.0, T.border));
         // Where the pointer is.
         if let Some(q) = pointer.filter(|q| geo.canvas.contains(*q) || rect.contains(*q)) {
@@ -349,7 +367,8 @@ mod tests {
     }
 
     /// A 1280 × 720 stage at 50 %, its corner at (100, 50) on screen.
-    const GEO: Geo = Geo { canvas: Rect { min: Pos2 { x: 18.0, y: 18.0 }, max: Pos2 { x: 1000.0, y: 700.0 } }, origin: Pos2 { x: 100.0, y: 50.0 }, zoom: 0.5 };
+    const GEO: Geo =
+        Geo { canvas: Rect { min: Pos2 { x: 18.0, y: 18.0 }, max: Pos2 { x: 1000.0, y: 700.0 } }, origin: Pos2 { x: 100.0, y: 50.0 }, zoom: 0.5 };
 
     #[test]
     fn rulers_take_the_top_and_left_edges_only_while_shown() {

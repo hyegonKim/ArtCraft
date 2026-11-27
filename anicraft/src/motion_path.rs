@@ -81,10 +81,16 @@ impl Shown {
         let (Some(first), Some(last)) = (self.pins.first(), self.pins.last()) else { return Some(tr!("The object doesn't move yet").into()) };
         let f = self.offset;
         if !(first.frame < f && f < last.frame) {
-            return Some(tr!("Move the playhead between frames {first} and {last}, where the object moves along the path", first = self.start + first.frame + 1, last = self.start + last.frame + 1));
+            return Some(tr!(
+                "Move the playhead between frames {first} and {last}, where the object moves along the path",
+                first = self.start + first.frame + 1,
+                last = self.start + last.frame + 1
+            ));
         }
         let a = a as u32;
-        self.pins.iter().find(|p| p.frame != f && p.anchor != a && (p.frame < f) != (p.anchor < a)).map(|p| tr!("Point {anchor} is pinned to frame {frame}: pins keep the path's order", anchor = p.anchor, frame = self.start + p.frame + 1))
+        self.pins.iter().find(|p| p.frame != f && p.anchor != a && (p.frame < f) != (p.anchor < a)).map(|p| {
+            tr!("Point {anchor} is pinned to frame {frame}: pins keep the path's order", anchor = p.anchor, frame = self.start + p.frame + 1)
+        })
     }
 }
 
@@ -106,7 +112,12 @@ pub fn shown(app: &App) -> Option<Shown> {
     let base = Props::of(target);
     let path = m.path.clone().or_else(|| m.path_from_tracks(&base))?;
     let dots = m.positions(&base, k.duration);
-    let mut keys: Vec<u32> = [anicraft_engine::doc::Property::X, anicraft_engine::doc::Property::Y].into_iter().filter_map(|p| m.track(p)).flat_map(|t| t.keys.iter().map(|k| k.frame)).filter(|f| *f < k.duration).collect();
+    let mut keys: Vec<u32> = [anicraft_engine::doc::Property::X, anicraft_engine::doc::Property::Y]
+        .into_iter()
+        .filter_map(|p| m.track(p))
+        .flat_map(|t| t.keys.iter().map(|k| k.frame))
+        .filter(|f| *f < k.duration)
+        .collect();
     keys.sort_unstable();
     keys.dedup();
     let pins = m.pinned_anchors(&base);
@@ -121,7 +132,11 @@ fn grabbable_anchors(path: &Path, pins: &[Pin], tool: Tool) -> Vec<(usize, Vec2)
         Tool::Subselect | Tool::Pen => all,
         _ => {
             let n = all.len();
-            all.into_iter().enumerate().filter(|(i, _)| *i == 0 || *i + 1 == n || pins.iter().any(|p| p.anchor as usize == *i)).map(|(_, a)| a).collect()
+            all.into_iter()
+                .enumerate()
+                .filter(|(i, _)| *i == 0 || *i + 1 == n || pins.iter().any(|p| p.anchor as usize == *i))
+                .map(|(_, a)| a)
+                .collect()
         }
     }
 }
@@ -199,9 +214,7 @@ pub fn dragged(start: &Path, grab: Grab, d: Vec2, alt: bool) -> Path {
             let other = if slot == C2 { (cmd + 1, C1) } else { (anchor, C2) };
             let (Some(a), new) = (start.point(anchor, ANCHOR), h + d) else { return p };
             p.set_point(cmd, slot, new);
-            if !alt
-                && let Some(o) = start.point(other.0, other.1).filter(|_| matches!(start.cmds.get(other.0), Some(PathCmd::CubicTo(..))))
-            {
+            if !alt && let Some(o) = start.point(other.0, other.1).filter(|_| matches!(start.cmds.get(other.0), Some(PathCmd::CubicTo(..)))) {
                 let (u, v) = (h - a, o - a);
                 let smooth = u.length() > 1e-3 && v.length() > 1e-3 && u.normalized().dot(v.normalized()) < -0.999;
                 let dir = (new - a).normalized();
@@ -314,9 +327,19 @@ pub fn delete_selected(app: &mut App) {
         let n = v["deleted"].as_u64().unwrap_or(0);
         let undo = app.undo_key();
         app.status_ok(if v["kept_ends"].as_bool() == Some(true) {
-            trn!("Deleted {n} point from the motion path; its ends stay, as they are where the motion starts and ends. {undo} to undo.", "Deleted {n} points from the motion path; its ends stay, as they are where the motion starts and ends. {undo} to undo.", n, undo = undo)
+            trn!(
+                "Deleted {n} point from the motion path; its ends stay, as they are where the motion starts and ends. {undo} to undo.",
+                "Deleted {n} points from the motion path; its ends stay, as they are where the motion starts and ends. {undo} to undo.",
+                n,
+                undo = undo
+            )
         } else {
-            trn!("Deleted {n} point from the motion path. {undo} to undo.", "Deleted {n} points from the motion path. {undo} to undo.", n, undo = undo)
+            trn!(
+                "Deleted {n} point from the motion path. {undo} to undo.",
+                "Deleted {n} points from the motion path. {undo} to undo.",
+                n,
+                undo = undo
+            )
         });
         app.motion_anchors.clear();
     }
@@ -326,7 +349,12 @@ pub fn delete_selected(app: &mut App) {
 pub fn pin_anchor(app: &mut App, a: usize) {
     if let Some(v) = app.run("motion.pin_point", json!({"anchor": a})) {
         let frame = v["frame"].as_u64().unwrap_or(0) + 1;
-        app.status_ok(tr!("Pinned point {anchor} to frame {frame}: the object passes it then. {undo} to undo.", anchor = a, frame = frame, undo = app.undo_key()));
+        app.status_ok(tr!(
+            "Pinned point {anchor} to frame {frame}: the object passes it then. {undo} to undo.",
+            anchor = a,
+            frame = frame,
+            undo = app.undo_key()
+        ));
     }
 }
 
@@ -334,7 +362,12 @@ pub fn pin_anchor(app: &mut App, a: usize) {
 pub fn unpin_anchor(app: &mut App, a: usize) {
     if let Some(v) = app.run("motion.unpin_point", json!({"anchor": a})) {
         let frame = v["frame"].as_u64().unwrap_or(0) + 1;
-        app.status_ok(tr!("Unpinned point {anchor} from frame {frame}: it shapes the path only. {undo} to undo.", anchor = a, frame = frame, undo = app.undo_key()));
+        app.status_ok(tr!(
+            "Unpinned point {anchor} from frame {frame}: it shapes the path only. {undo} to undo.",
+            anchor = a,
+            frame = frame,
+            undo = app.undo_key()
+        ));
     }
 }
 
@@ -427,10 +460,15 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) -> bool {
         let frame = shown.start + shown.offset + 1;
         match shown.pin(a) {
             Some(p) if shown.is_end(a) => {
-                ui.add_enabled(false, egui::Button::new(tr!("Pinned to Frame {frame}", frame = shown.start + p.frame + 1))).on_disabled_hover_text(tr!("The ends of a motion path are always pinned, to the first and last position keys"));
+                ui.add_enabled(false, egui::Button::new(tr!("Pinned to Frame {frame}", frame = shown.start + p.frame + 1)))
+                    .on_disabled_hover_text(tr!("The ends of a motion path are always pinned, to the first and last position keys"));
             }
             Some(p) => {
-                if ui.button(tr!("Unpin from Frame {frame}", frame = shown.start + p.frame + 1)).on_hover_text(tr!("The point shapes the path only; its frame's X and Y keyframes go")).clicked() {
+                if ui
+                    .button(tr!("Unpin from Frame {frame}", frame = shown.start + p.frame + 1))
+                    .on_hover_text(tr!("The point shapes the path only; its frame's X and Y keyframes go"))
+                    .clicked()
+                {
                     unpin_anchor(app, a);
                     ui.close();
                 }
@@ -453,7 +491,11 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) -> bool {
     let deletable = anchors.iter().any(|a| !is_end(*a, n));
     let label = if anchors.len() > 1 { tr!("Delete Points") } else { tr!("Delete Point") };
     let resp = ui.add_enabled(deletable, egui::Button::new(label));
-    let resp = if deletable { resp } else { resp.on_disabled_hover_text(tr!("The ends of a motion path are where the motion starts and ends: drag them to move them")) };
+    let resp = if deletable {
+        resp
+    } else {
+        resp.on_disabled_hover_text(tr!("The ends of a motion path are where the motion starts and ends: drag them to move them"))
+    };
     if resp.clicked() {
         delete_selected(app);
         ui.close();
@@ -513,7 +555,8 @@ fn pinned_anchor(painter: &Painter, c: Pos2, filled: bool, frame: u32) {
 /// over; a segment there (or the whole path, being moved) draws wider.
 pub fn draw(app: &App, painter: &Painter, shown: &Shown, xf: Xf, hot: Option<Grab>) {
     let to_px = Affine::translate(xf.origin.x, xf.origin.y).mul(&Affine::scale(xf.zoom, xf.zoom));
-    let wide = matches!(hot, Some(Grab::Segment(..))) || matches!(app.drag, Drag::MotionPath { grab: Grab::Segment(..), .. } | Drag::MotionMove { .. });
+    let wide =
+        matches!(hot, Some(Grab::Segment(..))) || matches!(app.drag, Drag::MotionPath { grab: Grab::Segment(..), .. } | Drag::MotionMove { .. });
     for pl in shown.path.flatten(&to_px, 0.35) {
         let pts: Vec<Pos2> = pl.points.iter().map(|p| pos2(p.x, p.y)).collect();
         painter.add(egui::Shape::line(pts.clone(), Stroke::new(if wide { 4.5 } else { 3.0 }, T.ink)));
@@ -560,7 +603,11 @@ mod tests {
 
     fn s_curve() -> Path {
         let mut p = Path::new();
-        p.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(30.0, 0.0), Vec2::new(70.0, 50.0), Vec2::new(100.0, 50.0)).cubic_to(Vec2::new(130.0, 50.0), Vec2::new(170.0, 0.0), Vec2::new(200.0, 0.0));
+        p.move_to(Vec2::new(0.0, 0.0)).cubic_to(Vec2::new(30.0, 0.0), Vec2::new(70.0, 50.0), Vec2::new(100.0, 50.0)).cubic_to(
+            Vec2::new(130.0, 50.0),
+            Vec2::new(170.0, 0.0),
+            Vec2::new(200.0, 0.0),
+        );
         p
     }
 

@@ -14,6 +14,7 @@
 //! Audio is planar `f32`: `io[channel][frame]`.
 
 pub mod biquad;
+pub mod diagnostics;
 pub mod meter;
 pub mod offline;
 mod osc;
@@ -21,12 +22,18 @@ pub mod pan;
 mod params;
 pub mod pitch_detect;
 pub mod plugins;
+pub mod remix;
 pub mod spectrum;
 mod util;
 
+pub use diagnostics::{
+    ClickRegion, ClippedRegion, SilenceRegion, SilenceScanOptions, delete_silence_regions, detect_clicks, detect_clipped_regions, repair_clicks,
+    repair_clipping, scan_silence_regions,
+};
 pub use offline::{FadeShape, LoudnessPreset};
 pub use osc::Waveform;
 pub use plugins::eq::{eq1_response, eq7_response};
+pub use remix::{BeatGrid, RemixOptions, RemixResult, SeamEdit, compute_seam_matrix, detect_beats, remix_to_duration};
 
 use std::sync::Arc;
 

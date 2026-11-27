@@ -50,7 +50,12 @@ impl PressureCurve {
     /// merged when closer than 0.02 in input, at most [`MAX_CURVE_POINTS`], and given ends at
     /// input 0 and 1 (holding the nearest point's output). No points: linear.
     pub fn new(points: &[[f32; 2]]) -> PressureCurve {
-        let mut v: Vec<[f32; 2]> = points.iter().take(MAX_CURVE_POINTS * 8).filter(|p| p[0].is_finite() && p[1].is_finite()).map(|p| [p[0].clamp(0.0, 1.0), p[1].clamp(0.0, 1.0)]).collect();
+        let mut v: Vec<[f32; 2]> = points
+            .iter()
+            .take(MAX_CURVE_POINTS * 8)
+            .filter(|p| p[0].is_finite() && p[1].is_finite())
+            .map(|p| [p[0].clamp(0.0, 1.0), p[1].clamp(0.0, 1.0)])
+            .collect();
         if v.is_empty() {
             return PressureCurve::LINEAR;
         }
@@ -129,7 +134,8 @@ impl PressureCurve {
 
     /// Without interior point `i` (the ends stay).
     pub fn without_point(&self, i: usize) -> PressureCurve {
-        let v: Vec<[f32; 2]> = self.points().iter().enumerate().filter(|(j, _)| *j != i || *j == 0 || *j + 1 == usize::from(self.n)).map(|(_, p)| *p).collect();
+        let v: Vec<[f32; 2]> =
+            self.points().iter().enumerate().filter(|(j, _)| *j != i || *j == 0 || *j + 1 == usize::from(self.n)).map(|(_, p)| *p).collect();
         PressureCurve::new(&v)
     }
 

@@ -429,7 +429,13 @@ fn raw_delete(app: &mut App) {
     let (n, kept) = (v["deleted"].as_u64().unwrap_or(0) as usize, v["kept"].as_u64().unwrap_or(0) as usize);
     let undo = app.undo_key();
     app.status_ok(if kept > 0 {
-        trn!("Deleted {n} point; kept {kept} where three or more lines meet. {undo} to undo.", "Deleted {n} points; kept {kept} where three or more lines meet. {undo} to undo.", n, kept = kept, undo = undo)
+        trn!(
+            "Deleted {n} point; kept {kept} where three or more lines meet. {undo} to undo.",
+            "Deleted {n} points; kept {kept} where three or more lines meet. {undo} to undo.",
+            n,
+            kept = kept,
+            undo = undo
+        )
     } else {
         trn!("Deleted {n} point. {undo} to undo.", "Deleted {n} points. {undo} to undo.", n, undo = undo)
     });
@@ -457,17 +463,29 @@ pub fn point_menu(app: &mut App, ui: &mut egui::Ui) -> bool {
         return false;
     }
     if ui.button(tr!("Make Smooth")).clicked() {
-        if raw { raw_convert(app, true) } else { convert_points(app, true) }
+        if raw {
+            raw_convert(app, true)
+        } else {
+            convert_points(app, true)
+        }
         ui.close();
     }
     if ui.button(tr!("Make Corner")).clicked() {
-        if raw { raw_convert(app, false) } else { convert_points(app, false) }
+        if raw {
+            raw_convert(app, false)
+        } else {
+            convert_points(app, false)
+        }
         ui.close();
     }
     ui.separator();
     let label = if raw { trn!("Delete Point", "Delete Points", app.raw_anchors.len()) } else { tr!("Delete Point").to_string() };
     if ui.button(label).clicked() {
-        if raw { raw_delete(app) } else { delete_points(app) }
+        if raw {
+            raw_delete(app)
+        } else {
+            delete_points(app)
+        }
         ui.close();
     }
     true
@@ -533,7 +551,8 @@ fn raw_upkeep(app: &mut App) {
         let mut out: Vec<Vec2> = Vec::with_capacity(list.len());
         for q in list.iter() {
             // A merge may have met it with a point nearby (at most `SNAP` away, ADR 0041).
-            if let Some(p) = pts.anchors.iter().copied().filter(|p| p.distance(*q) <= 2.5 * SNAP).min_by(|a, b| a.distance(*q).total_cmp(&b.distance(*q)))
+            if let Some(p) =
+                pts.anchors.iter().copied().filter(|p| p.distance(*q) <= 2.5 * SNAP).min_by(|a, b| a.distance(*q).total_cmp(&b.distance(*q)))
                 && !out.contains(&p)
             {
                 out.push(p);
@@ -600,7 +619,9 @@ fn raw_drag_start(app: &mut App, press: Pos2, shift: bool, xf: Xf) -> Option<Dra
         return Some(Drag::RawPoint { at: pos2(q.x, q.y), off: pos2(q.x, q.y) - pos2(sp.x, sp.y) });
     }
     // A raw line or fill: everything connected to it moves (Animate's Subselection drag).
-    let on_shown = app.s.hit_test(sp, 3.0 * xf.unit()).is_some_and(|(l, id)| l == app.s.layer && app.s.selection.contains(l, id) && app.s.visible_elements().iter().any(|e| e.id == id && is_raw(e)));
+    let on_shown = app.s.hit_test(sp, 3.0 * xf.unit()).is_some_and(|(l, id)| {
+        l == app.s.layer && app.s.selection.contains(l, id) && app.s.visible_elements().iter().any(|e| e.id == id && is_raw(e))
+    });
     if !on_shown && !raw_show_at(app, sp, shift, xf) {
         return None;
     }
@@ -730,7 +751,12 @@ pub fn consume_keys(app: &mut App, ctx: &egui::Context) {
 fn arrow_nudge(ctx: &egui::Context, zoom: f32) -> Option<Vec2> {
     let mut d = Vec2::ZERO;
     ctx.input_mut(|i| {
-        for (k, v) in [(Key::ArrowLeft, Vec2::new(-1.0, 0.0)), (Key::ArrowRight, Vec2::new(1.0, 0.0)), (Key::ArrowUp, Vec2::new(0.0, -1.0)), (Key::ArrowDown, Vec2::new(0.0, 1.0))] {
+        for (k, v) in [
+            (Key::ArrowLeft, Vec2::new(-1.0, 0.0)),
+            (Key::ArrowRight, Vec2::new(1.0, 0.0)),
+            (Key::ArrowUp, Vec2::new(0.0, -1.0)),
+            (Key::ArrowDown, Vec2::new(0.0, 1.0)),
+        ] {
             // Shift first: a plain chord also matches a press with Shift held.
             for (m, step) in [(Modifiers::SHIFT, 10.0), (Modifiers::NONE, 1.0)] {
                 while i.consume_key(m, k) {

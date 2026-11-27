@@ -16,18 +16,78 @@ use serde_json::{Value, json};
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, params, mutates, run| CommandSpec { id, label, menu: "", shortcut: None, params, mutates, run };
     vec![
-        c("filter.move", "Move Filter", "{from, to} moves the filter at index `from` (0 is the first, applied first) to index `to` in the selected movie clip and button instances' lists; the order changes how they draw", true, (|s, p| s.each_layer(false, |s| move_filter(s, p))) as crate::RunFn),
-        c("filter.enable", "Enable Filter", "{enabled: bool, index? (default: every filter)} switches a filter on or off; a filter switched off keeps its settings and draws nothing", true, |s, p| s.each_layer(false, |s| enable(s, p))),
-        c("filter.remove", "Remove Filter", "{index? (default: every filter)} removes a filter from the selected movie clip and button instances", true, |s, p| s.each_layer(false, |s| remove(s, p))),
-        c("filter.copy", "Copy Filters", "{index? (default: every filter)} copies the selected instance's filters (one, or all), for Paste Filters", false, copy),
-        c("filter.paste", "Paste Filters", "{replace? (default false: added after the instances' own)} pastes the copied filters onto the selected movie clip and button instances", true, |s, p| s.each_layer(false, |s| paste(s, p))),
+        c(
+            "filter.move",
+            "Move Filter",
+            "{from, to} moves the filter at index `from` (0 is the first, applied first) to index `to` in the selected movie clip and button instances' lists; the order changes how they draw",
+            true,
+            (|s, p| s.each_layer(false, |s| move_filter(s, p))) as crate::RunFn,
+        ),
+        c(
+            "filter.enable",
+            "Enable Filter",
+            "{enabled: bool, index? (default: every filter)} switches a filter on or off; a filter switched off keeps its settings and draws nothing",
+            true,
+            |s, p| s.each_layer(false, |s| enable(s, p)),
+        ),
+        c(
+            "filter.remove",
+            "Remove Filter",
+            "{index? (default: every filter)} removes a filter from the selected movie clip and button instances",
+            true,
+            |s, p| s.each_layer(false, |s| remove(s, p)),
+        ),
+        c(
+            "filter.copy",
+            "Copy Filters",
+            "{index? (default: every filter)} copies the selected instance's filters (one, or all), for Paste Filters",
+            false,
+            copy,
+        ),
+        c(
+            "filter.paste",
+            "Paste Filters",
+            "{replace? (default false: added after the instances' own)} pastes the copied filters onto the selected movie clip and button instances",
+            true,
+            |s, p| s.each_layer(false, |s| paste(s, p)),
+        ),
         c("filter.preset_list", "Filter Presets", "{} your filter presets, each a name and its filters", false, preset_list),
-        c("filter.preset_save", "Save Filter Preset", "{name, filters? (a list as element.set_filters takes; default: the selected instance's)} saves a filter preset of your own (kept in your preferences; a name you have already is replaced, after asking)", false, preset_save),
-        c("filter.preset_apply", "Apply Filter Preset", "{name} gives the selected movie clip and button instances the preset's filters, replacing theirs (as Animate does)", true, |s, p| s.each_layer(false, |s| preset_apply(s, p))),
+        c(
+            "filter.preset_save",
+            "Save Filter Preset",
+            "{name, filters? (a list as element.set_filters takes; default: the selected instance's)} saves a filter preset of your own (kept in your preferences; a name you have already is replaced, after asking)",
+            false,
+            preset_save,
+        ),
+        c(
+            "filter.preset_apply",
+            "Apply Filter Preset",
+            "{name} gives the selected movie clip and button instances the preset's filters, replacing theirs (as Animate does)",
+            true,
+            |s, p| s.each_layer(false, |s| preset_apply(s, p)),
+        ),
         c("filter.preset_rename", "Rename Filter Preset", "{name, to}", false, preset_rename),
-        c("filter.preset_delete", "Delete Filter Preset", "{name} deletes a filter preset (asks first: it can't be undone; artwork that used it keeps its filters)", false, preset_delete),
-        c("filter.preset_export", "Export Filter Presets", "{path, names? (default: all)} writes your filter presets to a small JSON file", false, preset_export),
-        c("filter.preset_import", "Import Filter Presets", "{path} adds the presets in a filter preset file to yours (a name you have already gets a number)", false, preset_import),
+        c(
+            "filter.preset_delete",
+            "Delete Filter Preset",
+            "{name} deletes a filter preset (asks first: it can't be undone; artwork that used it keeps its filters)",
+            false,
+            preset_delete,
+        ),
+        c(
+            "filter.preset_export",
+            "Export Filter Presets",
+            "{path, names? (default: all)} writes your filter presets to a small JSON file",
+            false,
+            preset_export,
+        ),
+        c(
+            "filter.preset_import",
+            "Import Filter Presets",
+            "{path} adds the presets in a filter preset file to yours (a name you have already gets a number)",
+            false,
+            preset_import,
+        ),
     ]
 }
 
@@ -236,7 +296,11 @@ fn preset_save(s: &mut Session, p: &Value) -> Result<Value> {
 
 fn preset_apply(s: &mut Session, p: &Value) -> Result<Value> {
     let name = str_req(p, "name")?;
-    let preset = s.filter_presets.find(name).cloned().ok_or_else(|| EngineError::Param(format!("you have no filter preset named '{}'", name.chars().take(64).collect::<String>())))?;
+    let preset = s
+        .filter_presets
+        .find(name)
+        .cloned()
+        .ok_or_else(|| EngineError::Param(format!("you have no filter preset named '{}'", name.chars().take(64).collect::<String>())))?;
     let set = put(s, &preset.filters, true)?;
     Ok(json!({"name": preset.name, "filters": preset.filters.len(), "set": set}))
 }
@@ -261,7 +325,10 @@ fn preset_export(s: &mut Session, p: &Value) -> Result<Value> {
             .take(MAX_PRESETS * 2)
             .map(|n| {
                 let n = n.as_str().ok_or_else(bad)?;
-                s.filter_presets.find(n).cloned().ok_or_else(|| EngineError::Param(format!("you have no filter preset named '{}'", n.chars().take(64).collect::<String>())))
+                s.filter_presets
+                    .find(n)
+                    .cloned()
+                    .ok_or_else(|| EngineError::Param(format!("you have no filter preset named '{}'", n.chars().take(64).collect::<String>())))
             })
             .collect::<Result<_>>()?,
         Some(_) => return Err(bad()),

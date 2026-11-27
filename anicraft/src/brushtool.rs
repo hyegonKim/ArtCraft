@@ -8,8 +8,8 @@
 use crate::app::{App, Drag, Tool};
 use crate::pathtools::Xf;
 use crate::theme::{T, to_color32};
-use anicraft_engine::cmds_brush::PaintMode;
 use anicraft_engine::brush_library::{BrushPreset, Shape};
+use anicraft_engine::cmds_brush::PaintMode;
 use anicraft_engine::geom::brush::{TipShape, size_factor};
 use anicraft_engine::geom::pressure::PressureCurve;
 use anicraft_engine::geom::{Affine, Vec2};
@@ -133,7 +133,8 @@ impl BrushOptions {
 
     /// The tip mapped onto the stage, for previews: unit circle or square → the tip at `at`.
     pub fn tip_to_stage(&self, at: Vec2, factor: f32) -> Affine {
-        let tip = anicraft_engine::geom::brush::Tip { shape: self.shape, size: self.size * factor, angle: self.angle, roundness: self.roundness / 100.0 };
+        let tip =
+            anicraft_engine::geom::brush::Tip { shape: self.shape, size: self.size * factor, angle: self.angle, roundness: self.roundness / 100.0 };
         Affine::translate(at.x, at.y).mul(&tip.to_stage())
     }
 
@@ -149,7 +150,17 @@ impl BrushOptions {
 /// `[` and `]`: the next size down or up (steps of 1 below 10, 5 below 50, 10 below 200, then
 /// 50), as in paint programs.
 pub fn step_size(size: f32, larger: bool) -> f32 {
-    let step = |s: f32| if s < 10.0 { 1.0 } else if s < 50.0 { 5.0 } else if s < 200.0 { 10.0 } else { 50.0 };
+    let step = |s: f32| {
+        if s < 10.0 {
+            1.0
+        } else if s < 50.0 {
+            5.0
+        } else if s < 200.0 {
+            10.0
+        } else {
+            50.0
+        }
+    };
     let next = if larger { size + step(size) } else { size - step(size - 0.01) };
     // Land on the step grid, so sizes stay round numbers.
     let g = step(if larger { size } else { size - 0.01 });
@@ -306,7 +317,8 @@ pub fn commit(app: &mut App, xf: Xf) {
         && v["elements"].as_array().is_some_and(Vec::is_empty)
     {
         match o.mode {
-            PaintMode::Selection => app.status_ok(tr!("Nothing painted: Paint Selection paints only inside the selected fills. Select them with the Selection tool first.")),
+            PaintMode::Selection => app
+                .status_ok(tr!("Nothing painted: Paint Selection paints only inside the selected fills. Select them with the Selection tool first.")),
             PaintMode::Inside => app.status_ok(tr!("Nothing painted: Paint Inside paints only inside the fill where the stroke starts.")),
             _ => app.status_ok(tr!("Nothing to paint behind there: Paint Behind only paints empty areas.")),
         }
@@ -352,7 +364,11 @@ pub fn draw_overlay(app: &App, painter: &egui::Painter, xf: Xf, hover: Option<Po
     }
     // The Paint Brush draws a round line in the stroke colour (the tip's shape is the Brush's).
     let o = options(app);
-    let (paint, tip) = if app.tool == Tool::PaintBrush { (app.s.style.stroke, BrushOptions { shape: TipShape::Round, roundness: 100.0, ..*o }) } else { (app.s.style.fill, *o) };
+    let (paint, tip) = if app.tool == Tool::PaintBrush {
+        (app.s.style.stroke, BrushOptions { shape: TipShape::Round, roundness: 100.0, ..*o })
+    } else {
+        (app.s.style.fill, *o)
+    };
     if app.drag == Drag::Brush {
         // Opaque, so overlapping pieces don't darken each other.
         let color = to_color32(anicraft_engine::doc::Rgba { a: 1.0, ..paint });
@@ -445,8 +461,8 @@ mod tests {
 
     #[test]
     fn hull_of_two_tips() {
-
-        let h = hull(vec![Pos2::new(0.0, 0.0), Pos2::new(1.0, 0.0), Pos2::new(0.5, 0.2), Pos2::new(1.0, 1.0), Pos2::new(0.0, 1.0), Pos2::new(0.0, 0.0)]);
+        let h =
+            hull(vec![Pos2::new(0.0, 0.0), Pos2::new(1.0, 0.0), Pos2::new(0.5, 0.2), Pos2::new(1.0, 1.0), Pos2::new(0.0, 1.0), Pos2::new(0.0, 0.0)]);
         assert_eq!(h.len(), 4, "{h:?}");
     }
 }

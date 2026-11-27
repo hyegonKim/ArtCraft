@@ -335,7 +335,15 @@ impl PublishProfile {
             }
         }
         clip(&mut self.html.title, MAX_TITLE_CHARS);
-        for s in [&mut self.gif.scale, &mut self.apng.scale, &mut self.webp.scale, &mut self.video.scale, &mut self.sprite_sheet.scale, &mut self.png_sequence.scale, &mut self.png.scale] {
+        for s in [
+            &mut self.gif.scale,
+            &mut self.apng.scale,
+            &mut self.webp.scale,
+            &mut self.video.scale,
+            &mut self.sprite_sheet.scale,
+            &mut self.png_sequence.scale,
+            &mut self.png.scale,
+        ] {
             *s = clean_scale(*s);
         }
         self.sprite_sheet.padding = self.sprite_sheet.padding.min(256);
@@ -346,7 +354,16 @@ impl PublishProfile {
         if !matches!(self.audio.bits, 16 | 24 | 32) {
             self.audio.bits = 16;
         }
-        for r in [&mut self.gif.range, &mut self.apng.range, &mut self.webp.range, &mut self.video.range, &mut self.lottie.range, &mut self.sprite_sheet.range, &mut self.png_sequence.range, &mut self.audio.range] {
+        for r in [
+            &mut self.gif.range,
+            &mut self.apng.range,
+            &mut self.webp.range,
+            &mut self.video.range,
+            &mut self.lottie.range,
+            &mut self.sprite_sheet.range,
+            &mut self.png_sequence.range,
+            &mut self.audio.range,
+        ] {
             if let (Some(a), Some(b)) = (r.from, r.to)
                 && b < a
             {
@@ -391,7 +408,11 @@ mod tests {
         assert!(partial.gif.enabled && partial.html.enabled);
         assert_eq!(partial.gif.output, "{name}.gif");
         assert_eq!(partial.gif.scale, 1.0);
-        assert_eq!((partial.apng.plays, partial.webp.background, partial.webp.enabled), (0, false, false), "formats newer than the file get their defaults");
+        assert_eq!(
+            (partial.apng.plays, partial.webp.background, partial.webp.enabled),
+            (0, false, false),
+            "formats newer than the file get their defaults"
+        );
         let mut q = PublishProfile::default();
         q.apng.plays = 3;
         q.webp.background = true;

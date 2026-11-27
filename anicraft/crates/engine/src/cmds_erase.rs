@@ -16,9 +16,25 @@ use serde_json::{Value, json};
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("draw.erase", "Eraser", "", None, "{points: [[x, y] or [x, y, pressure], ..] (one point erases a dab), size? (stage units, default 10), shape?: round|square, angle?, roundness?, mode?: normal|fills|lines|selected_fills|inside (Erase Normal takes fills and lines, Erase Fills leaves lines, Erase Lines leaves fills, Erase Selected Fills only the selected fills, Erase Inside only the fill the stroke starts on), unit? (stage units per screen point)} erases from the raw shapes on the active layer; drawing objects, symbols and text are kept", true, erase as crate::RunFn),
+        c(
+            "draw.erase",
+            "Eraser",
+            "",
+            None,
+            "{points: [[x, y] or [x, y, pressure], ..] (one point erases a dab), size? (stage units, default 10), shape?: round|square, angle?, roundness?, mode?: normal|fills|lines|selected_fills|inside (Erase Normal takes fills and lines, Erase Fills leaves lines, Erase Lines leaves fills, Erase Selected Fills only the selected fills, Erase Inside only the fill the stroke starts on), unit? (stage units per screen point)} erases from the raw shapes on the active layer; drawing objects, symbols and text are kept",
+            true,
+            erase as crate::RunFn,
+        ),
         c("draw.faucet", "Faucet", "", None, "{x, y, slop?} deletes the whole raw fill or stroke under the point on the active layer", true, faucet),
-        c("draw.erase_all", "Erase Everything", "", None, "{} clears every visible, unlocked layer at the playhead (asks first; undoable)", true, erase_all),
+        c(
+            "draw.erase_all",
+            "Erase Everything",
+            "",
+            None,
+            "{} clears every visible, unlocked layer at the playhead (asks first; undoable)",
+            true,
+            erase_all,
+        ),
     ]
 }
 
@@ -73,7 +89,8 @@ fn erase(s: &mut Session, p: &Value) -> Result<Value> {
     let tip = tip(p)?;
     let unit = ranged(p, "unit", 0.001..=1000.0, 1.0)?;
     let mode_key = opt_str(p, "mode")?.unwrap_or("normal");
-    let mode = EraseMode::from_key(mode_key).ok_or_else(|| EngineError::Param(format!("unknown erase mode '{mode_key}' (normal, fills, lines, selected_fills or inside)")))?;
+    let mode = EraseMode::from_key(mode_key)
+        .ok_or_else(|| EngineError::Param(format!("unknown erase mode '{mode_key}' (normal, fills, lines, selected_fills or inside)")))?;
     let start = pts.first().map_or(Vec2::ZERO, |x| x.at);
     // The eraser follows the hand (a third of a screen point), fitted as finely as the brush.
     let path = outline(&pts, &tip, unit * 0.3, (unit * 0.35).min(tip.size * 0.01));
@@ -101,7 +118,9 @@ pub(crate) fn erase_with(s: &mut Session, eraser: &Path, mode: EraseMode, start:
         };
         Ok(json!({"erased": false, "mode": mode.key(), "elements": [], "reason": why, "kept": {"symbols": kept.0, "objects": kept.1}}))
     };
-    let touching: Vec<usize> = (0..els.len()).filter(|&i| els.get(i).and_then(|e| mergeable(e).map(|sh| !reach(sh, &e.transform).intersect(&area).is_empty())).unwrap_or(false)).collect();
+    let touching: Vec<usize> = (0..els.len())
+        .filter(|&i| els.get(i).and_then(|e| mergeable(e).map(|sh| !reach(sh, &e.transform).intersect(&area).is_empty())).unwrap_or(false))
+        .collect();
     let el = |i: &usize| els.get(*i).map(|e| e.as_ref());
     let is_fill = |i: &usize| el(i).and_then(mergeable).is_some_and(|sh| sh.fill.is_some());
     let fills: Vec<usize> = touching.iter().copied().filter(is_fill).collect();
@@ -112,10 +131,16 @@ pub(crate) fn erase_with(s: &mut Session, eraser: &Path, mode: EraseMode, start:
         EraseMode::Fills => (fills.clone(), touching.clone()),
         // Only the lines take part, so the fills stay exactly as they are.
         EraseMode::Lines => (lines.clone(), lines.clone()),
-        EraseMode::SelectedFills => (fills.iter().copied().filter(|i| el(i).is_some_and(|e| s.selection.contains(s.layer, e.id))).collect(), touching.clone()),
+        EraseMode::SelectedFills => {
+            (fills.iter().copied().filter(|i| el(i).is_some_and(|e| s.selection.contains(s.layer, e.id))).collect(), touching.clone())
+        }
         EraseMode::Inside => {
             // The topmost raw fill under the start of the stroke.
-            let at = fills.iter().rev().copied().find(|i| el(i).is_some_and(|e| mergeable(e).is_some_and(|sh| sh.path.contains(start, &e.transform, sh.fill_rule))));
+            let at = fills
+                .iter()
+                .rev()
+                .copied()
+                .find(|i| el(i).is_some_and(|e| mergeable(e).is_some_and(|sh| sh.path.contains(start, &e.transform, sh.fill_rule))));
             (at.into_iter().collect(), touching.clone())
         }
     };
@@ -134,7 +159,13 @@ pub(crate) fn erase_with(s: &mut Session, eraser: &Path, mode: EraseMode, start:
     let here = s.layer;
     let selected = s.selection.clone();
     let shape = |i: &usize| el(i).map(|e| Part::Shape(e, selected.contains(here, e.id)));
-    let parts: Vec<Part> = targets.iter().filter_map(shape).chain(std::iter::once(Part::Eraser(eraser))).chain(rest_fills.iter().filter_map(shape)).chain(rest_lines.iter().filter_map(shape)).collect();
+    let parts: Vec<Part> = targets
+        .iter()
+        .filter_map(shape)
+        .chain(std::iter::once(Part::Eraser(eraser)))
+        .chain(rest_fills.iter().filter_map(shape))
+        .chain(rest_lines.iter().filter_map(shape))
+        .collect();
     let Some((out, picked)) = merge::remerge(s, &parts) else {
         s.doc = before;
         return Err(EngineError::State("there is too much artwork under the eraser to erase at once; erase a smaller area".into()));
@@ -153,7 +184,9 @@ pub(crate) fn erase_with(s: &mut Session, eraser: &Path, mode: EraseMode, start:
     // What stays selected: the rest of the selection, and what is left of selected shapes.
     s.selection.retain(|l, id| l != here || !gone.contains(&id));
     s.selection.extend_on(here, picked);
-    Ok(json!({"erased": true, "mode": mode.key(), "elements": ids, "area_erased": (was.0 - now.0).max(0.0), "length_erased": (was.1 - now.1).max(0.0), "kept": {"symbols": kept.0, "objects": kept.1}}))
+    Ok(
+        json!({"erased": true, "mode": mode.key(), "elements": ids, "area_erased": (was.0 - now.0).max(0.0), "length_erased": (was.1 - now.1).max(0.0), "kept": {"symbols": kept.0, "objects": kept.1}}),
+    )
 }
 
 /// How many symbol instances, and how many other elements that are not raw shapes (drawing
@@ -258,17 +291,34 @@ const GAUSS: [(f64, f64); 5] = [
 
 fn signed_area(path: &Path, m: &Affine) -> f64 {
     // ½ ∮ (x dy − y dx): a degree-5 polynomial per cubic, which these nodes integrate exactly.
-    cubics(path, m).iter().map(|c| GAUSS.iter().map(|&(t, w)| {
-        let ((x, y), (dx, dy)) = point_and_tangent(c, t);
-        w * (x * dy - y * dx)
-    }).sum::<f64>()).sum::<f64>() * 0.5
+    cubics(path, m)
+        .iter()
+        .map(|c| {
+            GAUSS
+                .iter()
+                .map(|&(t, w)| {
+                    let ((x, y), (dx, dy)) = point_and_tangent(c, t);
+                    w * (x * dy - y * dx)
+                })
+                .sum::<f64>()
+        })
+        .sum::<f64>()
+        * 0.5
 }
 
 fn path_length(path: &Path, m: &Affine) -> f64 {
-    cubics(path, m).iter().map(|c| GAUSS.iter().map(|&(t, w)| {
-        let (_, (dx, dy)) = point_and_tangent(c, t);
-        w * (dx * dx + dy * dy).sqrt()
-    }).sum::<f64>()).sum()
+    cubics(path, m)
+        .iter()
+        .map(|c| {
+            GAUSS
+                .iter()
+                .map(|&(t, w)| {
+                    let (_, (dx, dy)) = point_and_tangent(c, t);
+                    w * (dx * dx + dy * dy).sqrt()
+                })
+                .sum::<f64>()
+        })
+        .sum()
 }
 
 /// `draw.faucet`: Animate's Faucet deletes a whole fill or stroke with one click.
@@ -281,7 +331,8 @@ fn faucet(s: &mut Session, p: &Value) -> Result<Value> {
         ElementKind::Shape(sh) => {
             let hw = sh.stroke.as_ref().map_or(0.0, |st| st.reach() * e.transform.mean_scale());
             let near = sh.path.bounds().transformed(&e.transform).inflate(hw + slop).contains(at);
-            near && ((sh.fill.is_some() && sh.path.contains(at, &e.transform, sh.fill_rule)) || (sh.stroke.is_some() && sh.path.distance_to_edge(at, &e.transform) <= hw + slop))
+            near && ((sh.fill.is_some() && sh.path.contains(at, &e.transform, sh.fill_rule))
+                || (sh.stroke.is_some() && sh.path.distance_to_edge(at, &e.transform) <= hw + slop))
         }
         ElementKind::Symbol { .. } | ElementKind::Text(_) | ElementKind::Group { .. } => s.element_bounds(e.id).contains(at),
         ElementKind::Camera => false,
@@ -290,7 +341,9 @@ fn faucet(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(EngineError::State("click a fill or a line on this layer to delete it".into()));
     };
     if mergeable(hit).is_none() {
-        return Err(EngineError::State("the faucet deletes raw fills and lines; drawing objects, symbols and text are kept (select one and press Delete)".into()));
+        return Err(EngineError::State(
+            "the faucet deletes raw fills and lines; drawing objects, symbols and text are kept (select one and press Delete)".into(),
+        ));
     }
     let (id, line) = (hit.id, matches!(&hit.kind, ElementKind::Shape(sh) if sh.fill.is_none()));
     let kf = s.editable_keyframe()?;

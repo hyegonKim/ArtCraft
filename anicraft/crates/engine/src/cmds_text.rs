@@ -11,7 +11,10 @@
 
 use crate::params::*;
 use crate::{CommandSpec, EngineError, Result, Session};
-use anicraft_doc::{ColorEffect, Element, ElementId, ElementKind, FIELD_GUTTER, LineType, MAX_FIELD_CHARS, MAX_FIELD_NAME, MAX_PATH_OFFSET, Rgba, TextAlign, TextBlock, TextField, TextKind, TextPath};
+use anicraft_doc::{
+    ColorEffect, Element, ElementId, ElementKind, FIELD_GUTTER, LineType, MAX_FIELD_CHARS, MAX_FIELD_NAME, MAX_PATH_OFFSET, Rgba, TextAlign,
+    TextBlock, TextField, TextKind, TextPath,
+};
 use anicraft_geom::{Affine, Path, Vec2};
 use anicraft_text::{Align, Fonts};
 use serde_json::{Value, json};
@@ -32,16 +35,40 @@ pub struct TextStyle {
 
 impl Default for TextStyle {
     fn default() -> Self {
-        TextStyle { font: String::new(), size: 32.0, bold: false, italic: false, color: Rgba::BLACK, align: TextAlign::Left, letter_spacing: 0.0, line_spacing: 0.0 }
+        TextStyle {
+            font: String::new(),
+            size: 32.0,
+            bold: false,
+            italic: false,
+            color: Rgba::BLACK,
+            align: TextAlign::Left,
+            letter_spacing: 0.0,
+            line_spacing: 0.0,
+        }
     }
 }
-
 
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("text.create", "New Text", "", None, "{text (may be empty for an input field), type?: static|dynamic|input, x?, y? (top-left; default: centred), font?, size?, bold?, italic?, color?, align?, letter_spacing?, line_spacing?, width?}", true, create as crate::RunFn),
-        c("text.edit", "Edit Text", "", None, "{text?, font?, size? (px), bold?, italic?, color?, align?: left|center|right, letter_spacing?, line_spacing?, width? (px, wraps; null: one line per paragraph)} on the selected text", true, |s, p| s.each_layer(false, |s| edit(s, p))),
+        c(
+            "text.create",
+            "New Text",
+            "",
+            None,
+            "{text (may be empty for an input field), type?: static|dynamic|input, x?, y? (top-left; default: centred), font?, size?, bold?, italic?, color?, align?, letter_spacing?, line_spacing?, width?}",
+            true,
+            create as crate::RunFn,
+        ),
+        c(
+            "text.edit",
+            "Edit Text",
+            "",
+            None,
+            "{text?, font?, size? (px), bold?, italic?, color?, align?: left|center|right, letter_spacing?, line_spacing?, width? (px, wraps; null: one line per paragraph)} on the selected text",
+            true,
+            |s, p| s.each_layer(false, |s| edit(s, p)),
+        ),
         c("text.fonts", "Fonts", "", None, "{}", false, fonts),
         c(
             "text.attach_path",
@@ -52,9 +79,33 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             attach_path as crate::RunFn,
         ),
-        c("text.path", "Text on Path", "", None, "{offset? (px along the path), flip?: bool (along the path backwards, on its other side), release?: bool (back to lines of text where it starts)} on the selected text on a path (ADR 0070)", true, |s, p| s.each_layer(false, |s| set_path(s, p))),
-        c("text.release_path", "Release Text from Path", "Modify/Text", None, "{} the selected text on a path goes back to lines of text (ADR 0070)", true, |s, _| s.each_layer(false, |s| set_path(s, &json!({"release": true})))),
-        c("text.field", "Text Type", "", None, "{type?: static|dynamic|input, lines?: single|multiline|multiline_no_wrap|password (input only), width?, height? (the field's box, px), selectable?, border?, background?, border_color?, background_color?, max_chars? (input; 0: no limit), variable? (kept, not run)} on the selected text; dynamic and input fields are named with instance.set_name and scripted in Test Movie and the HTML export (ADR 0066)", true, |s, p| s.each_layer(false, |s| set_field(s, p))),
+        c(
+            "text.path",
+            "Text on Path",
+            "",
+            None,
+            "{offset? (px along the path), flip?: bool (along the path backwards, on its other side), release?: bool (back to lines of text where it starts)} on the selected text on a path (ADR 0070)",
+            true,
+            |s, p| s.each_layer(false, |s| set_path(s, p)),
+        ),
+        c(
+            "text.release_path",
+            "Release Text from Path",
+            "Modify/Text",
+            None,
+            "{} the selected text on a path goes back to lines of text (ADR 0070)",
+            true,
+            |s, _| s.each_layer(false, |s| set_path(s, &json!({"release": true}))),
+        ),
+        c(
+            "text.field",
+            "Text Type",
+            "",
+            None,
+            "{type?: static|dynamic|input, lines?: single|multiline|multiline_no_wrap|password (input only), width?, height? (the field's box, px), selectable?, border?, background?, border_color?, background_color?, max_chars? (input; 0: no limit), variable? (kept, not run)} on the selected text; dynamic and input fields are named with instance.set_name and scripted in Test Movie and the HTML export (ADR 0066)",
+            true,
+            |s, p| s.each_layer(false, |s| set_field(s, p)),
+        ),
     ]
 }
 
@@ -125,7 +176,8 @@ pub(crate) fn lay_out(text: &str, style: &TextStyle, width: Option<f32>) -> Resu
             },
         )
         .map_err(|e| EngineError::State(format!("can't lay out text: {e}")))?;
-    let note = (!style.font.trim().is_empty() && !layout.family.eq_ignore_ascii_case(style.font.trim())).then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), layout.family));
+    let note = (!style.font.trim().is_empty() && !layout.family.eq_ignore_ascii_case(style.font.trim()))
+        .then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), layout.family));
     let block = TextBlock {
         text: text.to_string(),
         font: layout.family,
@@ -149,7 +201,13 @@ pub(crate) fn lay_out(text: &str, style: &TextStyle, width: Option<f32>) -> Resu
 /// A field's text laid out (ADR 0066): `shown` in the block's style, wrapped at the box less its
 /// gutters when it is multiline, aligned in the box, with the outline moved into the gutter.
 /// The carets are from the text's left edge (the alignment applied, not the gutter).
-pub fn field_layout(fonts: &Fonts, style: &TextStyle, field: &TextField, box_width: f32, shown: &str) -> std::result::Result<anicraft_text::Layout, anicraft_text::TextError> {
+pub fn field_layout(
+    fonts: &Fonts,
+    style: &TextStyle,
+    field: &TextField,
+    box_width: f32,
+    shown: &str,
+) -> std::result::Result<anicraft_text::Layout, anicraft_text::TextError> {
     let wrap = field.wrap_width(box_width);
     let mut l = fonts.layout(
         shown,
@@ -188,11 +246,18 @@ pub fn field_layout(fonts: &Fonts, style: &TextStyle, field: &TextField, box_wid
 }
 
 /// A field block for `text`: laid out in its box (`box_width` × `box_height`).
-pub(crate) fn lay_out_field(text: &str, style: &TextStyle, field: &TextField, box_width: f32, box_height: f32) -> Result<(TextBlock, Option<String>)> {
+pub(crate) fn lay_out_field(
+    text: &str,
+    style: &TextStyle,
+    field: &TextField,
+    box_width: f32,
+    box_height: f32,
+) -> Result<(TextBlock, Option<String>)> {
     let fonts = Fonts::get();
     let text: String = text.chars().take(MAX_FIELD_CHARS).collect();
     let l = field_layout(fonts, style, field, box_width, &field.shown(&text)).map_err(|e| EngineError::State(format!("can't lay out text: {e}")))?;
-    let note = (!style.font.trim().is_empty() && !l.family.eq_ignore_ascii_case(style.font.trim())).then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), l.family));
+    let note = (!style.font.trim().is_empty() && !l.family.eq_ignore_ascii_case(style.font.trim()))
+        .then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), l.family));
     let block = TextBlock {
         text,
         font: l.family,
@@ -221,16 +286,30 @@ pub(crate) fn lay_out_on_path(text: &str, style: &TextStyle, on: &TextPath) -> R
     let fonts = Fonts::get();
     let line: String = text.chars().map(|c| if c == '\n' || c == '\r' { ' ' } else { c }).collect();
     let layout = fonts
-        .layout_glyphs(&line, &anicraft_text::Style { family: style.font.clone(), size: style.size, bold: style.bold, italic: style.italic, align: Align::Left, letter_spacing: style.letter_spacing, line_spacing: 0.0, width: None })
+        .layout_glyphs(
+            &line,
+            &anicraft_text::Style {
+                family: style.font.clone(),
+                size: style.size,
+                bold: style.bold,
+                italic: style.italic,
+                align: Align::Left,
+                letter_spacing: style.letter_spacing,
+                line_spacing: 0.0,
+                width: None,
+            },
+        )
         .map_err(|e| EngineError::State(format!("can't lay out text: {e}")))?;
-    let note = (!style.font.trim().is_empty() && !layout.family.eq_ignore_ascii_case(style.font.trim())).then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), layout.family));
+    let note = (!style.font.trim().is_empty() && !layout.family.eq_ignore_ascii_case(style.font.trim()))
+        .then(|| format!("“{}” isn't installed on this computer; used {}", style.font.trim(), layout.family));
     let align = match style.align {
         TextAlign::Left => Align::Left,
         TextAlign::Center => Align::Center,
         TextAlign::Right => Align::Right,
     };
     let offset = if on.offset.is_finite() { on.offset.clamp(-MAX_PATH_OFFSET, MAX_PATH_OFFSET) } else { 0.0 };
-    let set = anicraft_text::on_path_boxed(&layout.glyphs, &on.path, anicraft_text::PathPlacement { offset, flip: on.flip, align }).ok_or_else(|| EngineError::State("the path has no length to set text along".into()))?;
+    let set = anicraft_text::on_path_boxed(&layout.glyphs, &on.path, anicraft_text::PathPlacement { offset, flip: on.flip, align })
+        .ok_or_else(|| EngineError::State("the path has no length to set text along".into()))?;
     let shift = set.shift;
     let block = TextBlock {
         text: text.to_string(),
@@ -288,12 +367,19 @@ fn attach_path(s: &mut Session, p: &Value) -> Result<Value> {
     // The shape: by id or by point, on any layer of what is being edited; else the selection's.
     let wanted = match (by_id, at) {
         (Some(id), _) => Some(id),
-        (None, Some(pt)) => Some(s.hit_test(pt, 2.0).map(|(_, e)| e).ok_or_else(|| EngineError::State("there is no shape there to set the text along".into()))?),
+        (None, Some(pt)) => {
+            Some(s.hit_test(pt, 2.0).map(|(_, e)| e).ok_or_else(|| EngineError::State("there is no shape there to set the text along".into()))?)
+        }
         (None, None) => None,
     };
-    let texts: Vec<ElementId> = s.selected_elements_mut()?.iter().filter(|e| matches!(&e.kind, ElementKind::Text(t) if t.field.is_none())).map(|e| e.id).collect();
+    let texts: Vec<ElementId> =
+        s.selected_elements_mut()?.iter().filter(|e| matches!(&e.kind, ElementKind::Text(t) if t.field.is_none())).map(|e| e.id).collect();
     let [text_id] = texts.as_slice() else {
-        return Err(EngineError::State(if texts.is_empty() { "select a static text block to set along a path".into() } else { "select one text block to set along a path".into() }));
+        return Err(EngineError::State(if texts.is_empty() {
+            "select a static text block to set along a path".into()
+        } else {
+            "select one text block to set along a path".into()
+        }));
     };
     // The shapes on the timeline being edited at this frame (in its space, as the text is):
     // the one asked for, or the selected one.
@@ -318,8 +404,12 @@ fn attach_path(s: &mut Session, p: &Value) -> Result<Value> {
         _ => return Err(EngineError::State("select the text and one shape (or pick the shape)".into())),
     };
     // Its first contour, in the timeline's space (the text takes the path's place).
-    let first: Path = Path { cmds: path.cmds.iter().enumerate().take_while(|(i, c)| *i == 0 || !matches!(c, anicraft_geom::PathCmd::MoveTo(_))).map(|(_, c)| *c).collect() };
-    let length = anicraft_geom::walk::CurveWalk::new(&first).map(|w| w.length()).ok_or_else(|| EngineError::State("the shape's outline has no length to set text along".into()))?;
+    let first: Path = Path {
+        cmds: path.cmds.iter().enumerate().take_while(|(i, c)| *i == 0 || !matches!(c, anicraft_geom::PathCmd::MoveTo(_))).map(|(_, c)| *c).collect(),
+    };
+    let length = anicraft_geom::walk::CurveWalk::new(&first)
+        .map(|w| w.length())
+        .ok_or_else(|| EngineError::State("the shape's outline has no length to set text along".into()))?;
     let mut out = Value::Null;
     for e in s.selected_elements_mut()? {
         if e.id != *text_id {
@@ -382,12 +472,18 @@ fn field_box(t: &TextBlock) -> (f32, f32) {
 }
 
 fn kind_param(p: &Value) -> Result<Option<TextKind>> {
-    opt_str(p, "type")?.map(|k| TextKind::from_key(k).ok_or_else(|| EngineError::Param(format!("'type' is static, dynamic or input, not '{k}'")))).transpose()
+    opt_str(p, "type")?
+        .map(|k| TextKind::from_key(k).ok_or_else(|| EngineError::Param(format!("'type' is static, dynamic or input, not '{k}'"))))
+        .transpose()
 }
 
 fn set_field(s: &mut Session, p: &Value) -> Result<Value> {
     let kind = kind_param(p)?;
-    let lines = opt_str(p, "lines")?.map(|k| LineType::from_key(k).ok_or_else(|| EngineError::Param(format!("'lines' is single, multiline, multiline_no_wrap or password, not '{k}'")))).transpose()?;
+    let lines = opt_str(p, "lines")?
+        .map(|k| {
+            LineType::from_key(k).ok_or_else(|| EngineError::Param(format!("'lines' is single, multiline, multiline_no_wrap or password, not '{k}'")))
+        })
+        .transpose()?;
     let size = |key: &str| -> Result<Option<f32>> {
         match opt_f32(p, key)? {
             Some(v) if (1.0..=100_000.0).contains(&v) => Ok(Some(v)),
@@ -469,7 +565,16 @@ fn set_field(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 pub(crate) fn style_of(t: &TextBlock) -> TextStyle {
-    TextStyle { font: t.font.clone(), size: t.size, bold: t.bold, italic: t.italic, color: t.color, align: t.align, letter_spacing: t.letter_spacing, line_spacing: t.line_spacing }
+    TextStyle {
+        font: t.font.clone(),
+        size: t.size,
+        bold: t.bold,
+        italic: t.italic,
+        color: t.color,
+        align: t.align,
+        letter_spacing: t.letter_spacing,
+        line_spacing: t.line_spacing,
+    }
 }
 
 fn create(s: &mut Session, p: &Value) -> Result<Value> {
@@ -486,7 +591,16 @@ fn create(s: &mut Session, p: &Value) -> Result<Value> {
         (block, note)
     } else {
         let (bw, bh) = field_box(&block);
-        let f = TextField { lines: if width.is_some() { LineType::Multiline } else if text.contains('\n') { LineType::MultilineNoWrap } else { LineType::Single }, ..TextField::new(kind) };
+        let f = TextField {
+            lines: if width.is_some() {
+                LineType::Multiline
+            } else if text.contains('\n') {
+                LineType::MultilineNoWrap
+            } else {
+                LineType::Single
+            },
+            ..TextField::new(kind)
+        };
         lay_out_field(&text, &style, &f, bw, bh)?
     };
     let x = opt_f32(p, "x")?.unwrap_or((s.doc.stage.width as f32 - block.box_width) * 0.5);
@@ -494,7 +608,13 @@ fn create(s: &mut Session, p: &Value) -> Result<Value> {
     let id = ElementId(s.doc.alloc_id());
     let out = json!({"element": id.0, "font": block.font, "width": block.box_width, "height": block.box_height, "note": note});
     s.text_style = TextStyle { font: block.font.clone(), ..style };
-    let el = Element { id, name: String::new(), transform: Affine::translate(x, y), color: ColorEffect::default(), kind: ElementKind::Text(Arc::new(block)) };
+    let el = Element {
+        id,
+        name: String::new(),
+        transform: Affine::translate(x, y),
+        color: ColorEffect::default(),
+        kind: ElementKind::Text(Arc::new(block)),
+    };
     s.editable_keyframe()?.elements.push(Arc::new(el));
     s.select_only([id]);
     Ok(out)
@@ -513,7 +633,8 @@ fn edit(s: &mut Session, p: &Value) -> Result<Value> {
         if text.trim().is_empty() && t.field.is_none() {
             return Err(EngineError::Param("'text' is empty (delete the text instead)".into()));
         }
-        let width = if t.field.is_some() { width_param(p, Some(t.box_width))?.or(Some(t.box_width)).map(|w| w.max(1.0)) } else { width_param(p, t.width)? };
+        let width =
+            if t.field.is_some() { width_param(p, Some(t.box_width))?.or(Some(t.box_width)).map(|w| w.max(1.0)) } else { width_param(p, t.width)? };
         let (block, note, shift) = relay(t, &text, &style, width)?;
         notes.extend(note);
         last_style = Some(TextStyle { font: block.font.clone(), ..style });
@@ -539,5 +660,12 @@ fn fonts(_: &mut Session, _: &Value) -> Result<Value> {
 /// A text block as a plain shape with the same outlines (Break Apart).
 pub(crate) fn to_shape(t: &TextBlock) -> anicraft_doc::Shape {
     let path: Arc<Path> = t.outline.clone();
-    anicraft_doc::Shape { path, fill: Some(anicraft_doc::Paint::Solid(t.color)), stroke: None, fill_rule: anicraft_geom::FillRule::NonZero, merge: false, warp: None }
+    anicraft_doc::Shape {
+        path,
+        fill: Some(anicraft_doc::Paint::Solid(t.color)),
+        stroke: None,
+        fill_rule: anicraft_geom::FillRule::NonZero,
+        merge: false,
+        warp: None,
+    }
 }

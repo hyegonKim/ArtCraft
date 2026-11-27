@@ -190,7 +190,10 @@ fn round_solid_strokes_take_the_old_paths_exactly() {
     let pl = Polyline { points: vec![Vec2::new(0.0, 0.0), Vec2::new(10.0, 0.0), Vec2::new(10.0, 10.0)], closed: false };
     assert_eq!(styled_polygons(std::slice::from_ref(&pl), 2.0, &Outline::ROUND, None, None, false), stroke_polygons(std::slice::from_ref(&pl), 2.0));
     let taper = anicraft_doc::ProfilePreset::TaperEnd.profile().unwrap();
-    assert_eq!(styled_polygons(std::slice::from_ref(&pl), 2.0, &Outline::ROUND, Some(&taper), None, false), variable_polygons(&[pl], 2.0, &taper, None, false));
+    assert_eq!(
+        styled_polygons(std::slice::from_ref(&pl), 2.0, &Outline::ROUND, Some(&taper), None, false),
+        variable_polygons(&[pl], 2.0, &taper, None, false)
+    );
 }
 
 #[test]
@@ -198,13 +201,19 @@ fn styled_degenerate_inputs_are_safe() {
     let pattern = [1.0, 1.0];
     for o in [outline(Cap::Square, Join::Miter), Outline { dash: Some((&pattern, 0.0)), ..outline(Cap::Butt, Join::Bevel) }] {
         assert!(styled_polygons(&[], 1.0, &o, None, None, false).is_empty());
-        for pts in [vec![Vec2::ZERO; 3], vec![Vec2::ZERO, Vec2::new(f32::NAN, 1.0), Vec2::new(5.0, 0.0), Vec2::new(5.0, 0.0), Vec2::ZERO], vec![Vec2::ZERO, Vec2::new(1e30, 0.0), Vec2::new(-1e30, 0.0)]] {
+        for pts in [
+            vec![Vec2::ZERO; 3],
+            vec![Vec2::ZERO, Vec2::new(f32::NAN, 1.0), Vec2::new(5.0, 0.0), Vec2::new(5.0, 0.0), Vec2::ZERO],
+            vec![Vec2::ZERO, Vec2::new(1e30, 0.0), Vec2::new(-1e30, 0.0)],
+        ] {
             for closed in [false, true] {
                 let polys = styled_polygons(&[Polyline { points: pts.clone(), closed }], 1.0, &o, None, None, false);
                 assert!(polys.iter().flatten().all(|q| q.is_finite()));
             }
         }
-        assert!(styled_polygons(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(5.0, 0.0)], closed: false }], f32::NAN, &o, None, None, false).is_empty());
+        assert!(
+            styled_polygons(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(5.0, 0.0)], closed: false }], f32::NAN, &o, None, None, false).is_empty()
+        );
     }
     // A U-turn with a miter join: bevelled, never a point at infinity.
     let polys = styled(&[(0.0, 0.0), (10.0, 0.0), (0.0, 0.0)], false, 1.0, &outline(Cap::Butt, Join::Miter));
@@ -214,7 +223,11 @@ fn styled_degenerate_inputs_are_safe() {
 #[test]
 fn fine_patterns_draw_solid_and_lighter_on_raster() {
     // A 0.2-unit pattern at 1:1 is finer than a pixel: solid, at the share that is on.
-    let st = anicraft_doc::Stroke::new(anicraft_doc::Rgba::BLACK, 4.0).with_style(anicraft_doc::StrokeStyle { cap: Cap::Butt, dash: anicraft_doc::Dash::dashed(0.05, 0.15), ..Default::default() });
+    let st = anicraft_doc::Stroke::new(anicraft_doc::Rgba::BLACK, 4.0).with_style(anicraft_doc::StrokeStyle {
+        cap: Cap::Butt,
+        dash: anicraft_doc::Dash::dashed(0.05, 0.15),
+        ..Default::default()
+    });
     let lines = [Polyline { points: vec![Vec2::ZERO, Vec2::new(50.0, 0.0)], closed: false }];
     let (polys, alpha) = stroke_geometry(&lines, &st, &Affine::IDENTITY, true).unwrap();
     assert_eq!(polys.len(), 1);
@@ -223,6 +236,8 @@ fn fine_patterns_draw_solid_and_lighter_on_raster() {
     let (exact, a) = stroke_geometry(&lines, &st, &Affine::IDENTITY, false).unwrap();
     assert_eq!((exact.len(), a), (250, 1.0));
     // Zoomed in 10×, the pattern is two pixels: real dashes, and their lengths scale.
-    let (zoomed, a) = stroke_geometry(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(500.0, 0.0)], closed: false }], &st, &Affine::scale(10.0, 10.0), true).unwrap();
+    let (zoomed, a) =
+        stroke_geometry(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(500.0, 0.0)], closed: false }], &st, &Affine::scale(10.0, 10.0), true)
+            .unwrap();
     assert_eq!((zoomed.len(), a), (250, 1.0));
 }

@@ -61,7 +61,12 @@ fn a_sliding_joint_poses_within_its_limits() {
     assert_eq!(bone_at(&mut s, 0, b2)["slide_x"], Value::Null);
     // Free sliding, and the refusals.
     assert_eq!(run(&mut s, "bone.set_translation", json!({"bone": b2, "axis": "y", "enabled": true}))["constrain"], false);
-    for p in [json!({"bone": b2, "axis": "z", "enabled": true}), json!({"bone": b2, "axis": "x", "min": 10, "max": -10}), json!({"bone": b2, "axis": "x", "min": -1e9}), json!({"bone": b2, "axis": "x"})] {
+    for p in [
+        json!({"bone": b2, "axis": "z", "enabled": true}),
+        json!({"bone": b2, "axis": "x", "min": 10, "max": -10}),
+        json!({"bone": b2, "axis": "x", "min": -1e9}),
+        json!({"bone": b2, "axis": "x"}),
+    ] {
         assert!(s.execute("bone.set_translation", &p).is_err(), "{p}");
     }
 }
@@ -126,7 +131,8 @@ fn damping_one_hundred_is_no_spring_and_spring_values_are_checked() {
     }
     let v = run(&mut s, "bone.info", json!({}));
     assert_eq!(v["armatures"][0]["bones"][0]["spring"], json!({"strength": 40.0, "damping": 100.0}));
-    for p in [json!({"bone": b1, "strength": 101}), json!({"bone": b1, "damping": -1}), json!({"bone": b1}), json!({"bone": 999_999, "strength": 5})] {
+    for p in [json!({"bone": b1, "strength": 101}), json!({"bone": b1, "damping": -1}), json!({"bone": b1}), json!({"bone": 999_999, "strength": 5})]
+    {
         assert!(s.execute("bone.set_spring", &p).is_err(), "{p}");
     }
     // Strength and damping both 0: no spring left in the file.

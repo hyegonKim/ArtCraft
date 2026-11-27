@@ -232,7 +232,11 @@ impl Grid {
         for &t1 in out.iter().chain(std::iter::once(&1.0)) {
             let mid = a + d * ((t0 + t1) * 0.5);
             let (i, j) = self.cell(mid);
-            let (p, q) = if Grid::falling(i, j) { (Vec2::new(self.x(i), self.y(j)), Vec2::new(self.x(i + 1), self.y(j + 1))) } else { (Vec2::new(self.x(i + 1), self.y(j)), Vec2::new(self.x(i), self.y(j + 1))) };
+            let (p, q) = if Grid::falling(i, j) {
+                (Vec2::new(self.x(i), self.y(j)), Vec2::new(self.x(i + 1), self.y(j + 1)))
+            } else {
+                (Vec2::new(self.x(i + 1), self.y(j)), Vec2::new(self.x(i), self.y(j + 1)))
+            };
             let e = q - p;
             let den = d.cross(e);
             if den.abs() > 1e-12 {
@@ -576,7 +580,8 @@ fn bend(rest: &Path, b: &Bent) -> Path {
                 let mut rest_c = [cur, c1, c2, p];
                 for k in 0..n {
                     let left = n - k;
-                    let (piece, tail) = if left > 1 { split_cubic(rest_c[0], rest_c[1], rest_c[2], rest_c[3], 1.0 / left as f32) } else { (rest_c, rest_c) };
+                    let (piece, tail) =
+                        if left > 1 { split_cubic(rest_c[0], rest_c[1], rest_c[2], rest_c[3], 1.0 / left as f32) } else { (rest_c, rest_c) };
                     let (q, tri) = b.map(piece[3]);
                     out.push(PathCmd::CubicTo(b.through(cur_tri, piece[1]), b.through(tri, piece[2]), q));
                     cur_tri = tri;

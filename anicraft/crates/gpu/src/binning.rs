@@ -250,7 +250,9 @@ pub fn bin_with(scene: &Scene, width: u32, height: u32, gpu: Option<&crate::gpu_
     let tiles_y = height.div_ceil(TILE);
     // On the GPU when asked and the scene can take it (no fill in a mask or a group, for now):
     // then the fills alone are the ops (no mask artwork draws).
-    let plan = gpu.filter(|_| scene.fills.iter().all(|f| f.clip.is_none() && f.group.is_none())).and_then(|lim| crate::gpu_binning::plan(&scene.fills, tiles_x, tiles_y, lim));
+    let plan = gpu
+        .filter(|_| scene.fills.iter().all(|f| f.clip.is_none() && f.group.is_none()))
+        .and_then(|lim| crate::gpu_binning::plan(&scene.fills, tiles_x, tiles_y, lim));
     let lists = match &plan {
         Some(p) => {
             ops.truncate(nf);
@@ -301,7 +303,9 @@ pub fn bin_with(scene: &Scene, width: u32, height: u32, gpu: Option<&crate::gpu_
         let layer = f.layer.and_then(|l| Some((layer_at.get(l as usize).copied().flatten()?, scene.layers.get(l as usize)?.bounds)));
         let (kind, rec) = match (&f.shader, layer) {
             // A layer's pixels at `at`, `w × h`, its top-left at (x0, y0) in surface pixels.
-            (_, Some((at, b))) => (IMAGE, [[u(at), u(b.width() as u32), u(b.height() as u32), 0.0], [u(b.x0 as u32), u(b.y0 as u32), 0.0, 0.0], [0.0; 4], [0.0; 4]]),
+            (_, Some((at, b))) => {
+                (IMAGE, [[u(at), u(b.width() as u32), u(b.height() as u32), 0.0], [u(b.x0 as u32), u(b.y0 as u32), 0.0, 0.0], [0.0; 4], [0.0; 4]])
+            }
             (_, None) if f.layer.is_some() => (SOLID, [[0.0; 4]; 4]),
             (Shader::Solid(c), _) => (SOLID, [*c, [0.0; 4], [0.0; 4], [0.0; 4]]),
             // A gradient's first vec4 holds what its colour slot doesn't need: the spread
@@ -314,7 +318,15 @@ pub fn bin_with(scene: &Scene, width: u32, height: u32, gpu: Option<&crate::gpu_
             (Shader::Radial { inv, center, inv_radius, focal, spread, lut }, _) => {
                 ramps.extend_from_slice(&lut[..]);
                 let m = inv.m;
-                (RADIAL, [[spread_code(*spread), *focal, 0.0, 0.0], [m[0], m[1], m[2], m[3]], [m[4], m[5], center.x, center.y], [0.0, 0.0, *inv_radius, 0.0]])
+                (
+                    RADIAL,
+                    [
+                        [spread_code(*spread), *focal, 0.0, 0.0],
+                        [m[0], m[1], m[2], m[3]],
+                        [m[4], m[5], center.x, center.y],
+                        [0.0, 0.0, *inv_radius, 0.0],
+                    ],
+                )
             }
             // The oracle's sample of a bitmap (crates/render/src/paint.rs › sample).
             (Shader::Bitmap { inv, pixels, repeat, fx, smooth }, _) => {
@@ -335,7 +347,15 @@ pub fn bin_with(scene: &Scene, width: u32, height: u32, gpu: Option<&crate::gpu_
                     let fx = fx.sanitized();
                     ramps.extend_from_slice(&[fx.mul, fx.add]);
                     // Bit 0: repeat; bit 1: the nearest pixel instead of bilinear (no smoothing).
-                    (BITMAP, [[u(slot as u32), u(u32::from(*repeat) | (u32::from(!*smooth) << 1)), u(pixels.width), u(pixels.height)], [m[0], m[1], m[2], m[3]], [m[4], m[5], 0.0, 0.0], [0.0; 4]])
+                    (
+                        BITMAP,
+                        [
+                            [u(slot as u32), u(u32::from(*repeat) | (u32::from(!*smooth) << 1)), u(pixels.width), u(pixels.height)],
+                            [m[0], m[1], m[2], m[3]],
+                            [m[4], m[5], 0.0, 0.0],
+                            [0.0; 4],
+                        ],
+                    )
                 }
             }
             // `prepare_scene` never hands these over; draw nothing rather than guess.
@@ -588,7 +608,9 @@ fn bin_fill(f: &Fill, op: u32, tiles_x: u32, tiles_y: u32, out: &mut Local, (pie
     pieces.clear();
     if f.hairline {
         for poly in &f.polys {
-            for_segments(poly, |a, b| hairline_tiles(a, b, &range, HAIRLINE_MARGIN, |row, col| pieces.push(Piece { row, col, seg: [a.x, a.y, b.x, b.y] })));
+            for_segments(poly, |a, b| {
+                hairline_tiles(a, b, &range, HAIRLINE_MARGIN, |row, col| pieces.push(Piece { row, col, seg: [a.x, a.y, b.x, b.y] }))
+            });
         }
     } else {
         for poly in &f.polys {
@@ -682,8 +704,7 @@ pub(crate) fn top_crossing(seg: &[f32; 4], row_y0: f32) -> i32 {
 }
 
 /// A fill's tile range, in pixels and tiles.
-#[derive(Clone, Copy)]
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct Range {
     pub(crate) tx0: u32,
     pub(crate) ty0: u32,

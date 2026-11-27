@@ -35,16 +35,7 @@ impl Affine {
     pub fn then_apply_to(&self, other: &Affine) -> Affine {
         let [a, b, c, d, e, f] = self.m;
         let [a2, b2, c2, d2, e2, f2] = other.m;
-        Affine {
-            m: [
-                a * a2 + c * b2,
-                b * a2 + d * b2,
-                a * c2 + c * d2,
-                b * c2 + d * d2,
-                a * e2 + c * f2 + e,
-                b * e2 + d * f2 + f,
-            ],
-        }
+        Affine { m: [a * a2 + c * b2, b * a2 + d * b2, a * c2 + c * d2, b * c2 + d * d2, a * e2 + c * f2 + e, b * e2 + d * f2 + f] }
     }
 
     /// Composition in reading order: `a.mul(b)` applies `b` first, then `a`.

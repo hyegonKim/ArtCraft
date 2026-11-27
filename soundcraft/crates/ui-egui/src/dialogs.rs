@@ -32,25 +32,84 @@ pub mod spot;
 #[derive(Debug, Clone)]
 pub enum Dialog {
     NewTracks(new_tracks::NewTracks),
-    NewSession { name: String, sample_rate: u32, demo: bool },
-    Bounce { path: String, format: EncodeFormat, bit_depth: String, normalize: bool, dither: bool },
-    RenameTrack { id: TrackId, name: String },
-    RenameClip { id: ClipId, name: String },
-    RenameMarker { id: soundcraft_model::MarkerId, name: String },
-    ClearClips { clips: Vec<ClipId>, sources: Vec<SourceId>, message: String },
-    PathPrompt { cmd: String, title: String, path: String, key: String },
-    Number { cmd: String, title: String, key: String, value: f64, suffix: String },
-    TempoChange { at: Samples, bpm: f64 }, // from double-clicking the tempo ruler
+    NewSession {
+        name: String,
+        sample_rate: u32,
+        demo: bool,
+    },
+    Bounce {
+        path: String,
+        format: EncodeFormat,
+        bit_depth: String,
+        normalize: bool,
+        dither: bool,
+    },
+    RenameTrack {
+        id: TrackId,
+        name: String,
+    },
+    RenameClip {
+        id: ClipId,
+        name: String,
+    },
+    RenameMarker {
+        id: soundcraft_model::MarkerId,
+        name: String,
+    },
+    ClearClips {
+        clips: Vec<ClipId>,
+        sources: Vec<SourceId>,
+        message: String,
+    },
+    PathPrompt {
+        cmd: String,
+        title: String,
+        path: String,
+        key: String,
+    },
+    Number {
+        cmd: String,
+        title: String,
+        key: String,
+        value: f64,
+        suffix: String,
+    },
+    TempoChange {
+        at: Samples,
+        bpm: f64,
+    }, // from double-clicking the tempo ruler
     Spot(crate::spot::Spot),
-    Fades { shape: String },
-    StripSilence { threshold: f64, min_ms: f64, pre_ms: f64, post_ms: f64 },
+    Fades {
+        shape: String,
+    },
+    StripSilence {
+        threshold: f64,
+        min_ms: f64,
+        pre_ms: f64,
+        post_ms: f64,
+    },
     // Strip Silence › Rename: `strip` holds the Strip Silence values to return to.
-    StripSilenceRename { strip: [f64; 4], names: StripNames },
+    StripSilenceRename {
+        strip: [f64; 4],
+        names: StripNames,
+    },
     // Clip List › Auto Rename: the names that editing gives the clips it separates from `clips`.
-    AutoRename { clips: Vec<ClipId>, names: StripNames },
+    AutoRename {
+        clips: Vec<ClipId>,
+        names: StripNames,
+    },
     // `id: None` creates (Track › Group…); `id: Some` modifies that group (Groups list › Modify Group…).
-    Group { id: Option<GroupId>, name: String, edit: bool, mix: bool, members: Vec<(u64, String, bool)> },
-    Session { frame_rate: String, bit_depth: String },
+    Group {
+        id: Option<GroupId>,
+        name: String,
+        edit: bool,
+        mix: bool,
+        members: Vec<(u64, String, bool)>,
+    },
+    Session {
+        frame_rate: String,
+        bit_depth: String,
+    },
     // Clip › Loop…: `length` is typed in `format`, measured from `start` (the first selected clip's).
     // `filled` is the text the field opened with and the exact length it stands for.
     Loop {
@@ -64,8 +123,15 @@ pub enum Dialog {
         crossfade_ms: f64,
         crossfade_shape: String,
     },
-    ScoreSetup { title: String, composer: String, bars_per_system: u32, show_track_names: bool },
-    SaveChanges { then: (String, Value) },
+    ScoreSetup {
+        title: String,
+        composer: String,
+        bars_per_system: u32,
+        show_track_names: bool,
+    },
+    SaveChanges {
+        then: (String, Value),
+    },
 }
 
 /// The Clip Looping dialog's choice of how far a clip is looped.
@@ -585,7 +651,7 @@ pub fn show(app: &mut SoundApp, ctx: &egui::Context) {
                                 ui.selectable_value(format, f, f.container().name());
                             }
                         });
-                        egui::ComboBox::from_label("Bit Depth").selected_text(format!("{bit_depth}-bit")).show_ui(ui, |ui| {
+                        craft_ui::ComboBox::from_label("Bit Depth").selected_text(format!("{bit_depth}-bit")).show_ui(ui, |ui| {
                             for b in ["16", "24", "32f"] {
                                 ui.selectable_value(bit_depth, b.to_string(), format!("{b}-bit"));
                             }
@@ -759,7 +825,7 @@ pub fn show(app: &mut SoundApp, ctx: &egui::Context) {
                     ui.horizontal(|ui| {
                         crate::widgets::checkbox(ui, crossfade, crate::i18n::tr("Enable Crossfade"));
                         ui.add_enabled(*crossfade, egui::DragValue::new(crossfade_ms).range(0.5..=2000.0).speed(1.0).suffix(" ms"));
-                        egui::ComboBox::from_id_salt("loop_xfade_shape")
+                        craft_ui::ComboBox::from_id_salt("loop_xfade_shape")
                             .selected_text(crossfade_shape.as_str())
                             .show_ui(ui, |ui| {
                                 for sh in ["equal power", "linear", "s-curve", "exponential", "logarithmic"] {

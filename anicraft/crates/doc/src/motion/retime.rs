@@ -71,7 +71,8 @@ impl MotionTween {
         if by == 0 {
             return (0, sel);
         }
-        let pinned: Vec<u32> = self.live_pins().iter().map(|q| q.frame).filter(|f| sel.contains(&(Property::X, *f)) && sel.contains(&(Property::Y, *f))).collect();
+        let pinned: Vec<u32> =
+            self.live_pins().iter().map(|q| q.frame).filter(|f| sel.contains(&(Property::X, *f)) && sel.contains(&(Property::Y, *f))).collect();
         for t in &mut self.tracks {
             let p = t.property;
             for k in &mut t.keys {
@@ -249,7 +250,8 @@ mod tests {
     fn tween(tracks: &[(Property, &[(u32, f32)])]) -> MotionTween {
         let mut m = MotionTween::new(ElementId(1));
         for (p, keys) in tracks {
-            m.tracks.push(Track { property: *p, keys: keys.iter().map(|&(frame, value)| PropertyKey { frame, value, ease: Easing::Linear }).collect() });
+            m.tracks
+                .push(Track { property: *p, keys: keys.iter().map(|&(frame, value)| PropertyKey { frame, value, ease: Easing::Linear }).collect() });
         }
         m
     }
@@ -341,7 +343,8 @@ mod tests {
         assert_eq!(frames(&m, Property::X), vec![0, 10, 20, 40]);
         // Values at the keys are kept, and between them the curve is the same, stretched.
         for f in 0..=20 {
-            let (a, b) = (before.track(Property::X).and_then(|t| t.value_at(f as f32)), m.track(Property::X).and_then(|t| t.value_at(2.0 * f as f32)));
+            let (a, b) =
+                (before.track(Property::X).and_then(|t| t.value_at(f as f32)), m.track(Property::X).and_then(|t| t.value_at(2.0 * f as f32)));
             assert_eq!(a, b, "frame {f}");
         }
         // And back: a round trip.

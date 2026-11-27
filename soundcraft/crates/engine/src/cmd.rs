@@ -13,6 +13,7 @@ mod clap;
 mod clip;
 mod clip_list;
 mod clip_more;
+mod diagnostics;
 mod edit;
 mod edit_more;
 mod event;
@@ -162,6 +163,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(video::specs());
         v.extend(zoom_toggle::specs());
         v.extend(strip_silence::specs());
+        v.extend(diagnostics::specs());
         #[cfg(test)]
         v.extend(panic_probe::specs());
         v

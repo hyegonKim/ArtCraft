@@ -137,14 +137,9 @@ pub fn default_mapping_for_symbol(sym: &crate::Symbol) -> [u32; 12] {
         .collect();
     let mut table = [0u32; 12];
     for (idx, v) in Viseme::ALL.into_iter().enumerate() {
-        let by_label = v.label_aliases().iter().find_map(|alias| {
-            labelled.iter().find(|(lbl, _)| lbl == alias).map(|(_, f)| *f)
-        });
-        let fallback = if cap >= 12 || v == Viseme::Neutral || cap == 1 {
-            v.default_frame().min(cap - 1)
-        } else {
-            1 + ((v.default_frame() - 1) % (cap - 1))
-        };
+        let by_label = v.label_aliases().iter().find_map(|alias| labelled.iter().find(|(lbl, _)| lbl == alias).map(|(_, f)| *f));
+        let fallback =
+            if cap >= 12 || v == Viseme::Neutral || cap == 1 { v.default_frame().min(cap - 1) } else { 1 + ((v.default_frame() - 1) % (cap - 1)) };
         if let Some(slot) = table.get_mut(idx) {
             *slot = by_label.unwrap_or(fallback);
         }
@@ -219,13 +214,7 @@ fn extract_window(pcm: &Pcm, start_sample: usize, end_sample: usize) -> FrameFea
     let rms = (sum_sq / n).sqrt() as f32;
     let zcr = if s1 - s0 > 1 { crossings as f32 / (s1 - s0 - 1) as f32 } else { 0.0 };
     let band_sum = (low_e + mid_e + high_e).max(1.0e-12);
-    FrameFeatures {
-        rms,
-        zcr,
-        low_share: (low_e / band_sum) as f32,
-        mid_share: (mid_e / band_sum) as f32,
-        high_share: (high_e / band_sum) as f32,
-    }
+    FrameFeatures { rms, zcr, low_share: (low_e / band_sum) as f32, mid_share: (mid_e / band_sum) as f32, high_share: (high_e / band_sum) as f32 }
 }
 
 fn classify_frame(feat: FrameFeatures, norm_rms: f32, prev_norm: f32, next_norm: f32) -> Viseme {
@@ -244,10 +233,7 @@ fn classify_frame(feat: FrameFeatures, norm_rms: f32, prev_norm: f32, next_norm:
         return Viseme::S;
     }
     // Labiodental fricatives ('f', 'v'): airy broadband friction without strong vowel voicing.
-    if norm_rms < 0.55
-        && feat.low_share < 0.14
-        && ((feat.zcr > 0.20 && feat.high_share > 0.24) || feat.high_share > 0.34)
-    {
+    if norm_rms < 0.55 && feat.low_share < 0.14 && ((feat.zcr > 0.20 && feat.high_share > 0.24) || feat.high_share > 0.34) {
         return Viseme::F;
     }
     // Alveolar stop/tap onset ('d', 't', 'n'): crisp transient burst with mid/high content.
@@ -267,11 +253,7 @@ fn classify_frame(feat: FrameFeatures, norm_rms: f32, prev_norm: f32, next_norm:
         return if feat.high_share > 0.12 || feat.zcr > 0.12 { Viseme::Ee } else { Viseme::L };
     }
     // Mid-central / rhotic vowels ('r', 'uh').
-    if feat.mid_share > 0.30 {
-        Viseme::R
-    } else {
-        Viseme::Uh
-    }
+    if feat.mid_share > 0.30 { Viseme::R } else { Viseme::Uh }
 }
 
 /// Analyses `frame_count` movie frames starting at `start_frame` (at `fps` frames per second)
@@ -318,10 +300,12 @@ pub fn analyze_visemes(pcm: &Pcm, fps: f32, start_frame: u32, frame_count: u32) 
         let (Some(&prev), Some(&cur), Some(&next)) = (raw.get(i - 1), raw.get(i), raw.get(i + 1)) else {
             continue;
         };
-        if prev == next && cur != prev && !matches!(cur, Viseme::M | Viseme::D | Viseme::S | Viseme::F) {
-            if let Some(slot) = smoothed.get_mut(i) {
-                *slot = prev;
-            }
+        if prev == next
+            && cur != prev
+            && !matches!(cur, Viseme::M | Viseme::D | Viseme::S | Viseme::F)
+            && let Some(slot) = smoothed.get_mut(i)
+        {
+            *slot = prev;
         }
     }
     smoothed
@@ -355,11 +339,7 @@ mod tests {
         let samples: Vec<f32> = (0..total)
             .map(|i| {
                 let t = i as f32 / rate as f32;
-                freqs
-                    .iter()
-                    .map(|&(hz, amp)| amp * (2.0 * std::f32::consts::PI * hz * t).sin())
-                    .sum::<f32>()
-                    .clamp(-1.0, 1.0)
+                freqs.iter().map(|&(hz, amp)| amp * (2.0 * std::f32::consts::PI * hz * t).sin()).sum::<f32>().clamp(-1.0, 1.0)
             })
             .collect();
         Pcm::new(rate, 1, samples).unwrap()
@@ -387,10 +367,7 @@ mod tests {
         // Frames 6..9: loud open vowel (650 Hz + 1250 Hz) -> Ah
         for i in 0..(frame_len * 3) {
             let t = i as f32 / rate as f32;
-            samples.push(
-                0.55 * (2.0 * std::f32::consts::PI * 650.0 * t).sin()
-                    + 0.40 * (2.0 * std::f32::consts::PI * 1250.0 * t).sin(),
-            );
+            samples.push(0.55 * (2.0 * std::f32::consts::PI * 650.0 * t).sin() + 0.40 * (2.0 * std::f32::consts::PI * 1250.0 * t).sin());
         }
         // Frames 9..12: rounded low back vowel (260 Hz) -> Woo / Oh
         for i in 0..(frame_len * 3) {

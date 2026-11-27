@@ -622,7 +622,8 @@ pub struct Caches {
     pub(crate) dialog_count_scans: usize,
     smart_problems: Option<(u64, std::sync::Arc<std::collections::HashMap<lightcraft_catalog::AlbumId, Vec<lightcraft_catalog::rules::Problem>>>)>,
     pub(crate) smart_problem_scans: usize,
-    album_counts: Option<(String, lightcraft_catalog::tally::AlbumTally, std::sync::Arc<std::collections::HashMap<lightcraft_catalog::AlbumId, usize>>)>,
+    album_counts:
+        Option<(String, lightcraft_catalog::tally::AlbumTally, std::sync::Arc<std::collections::HashMap<lightcraft_catalog::AlbumId, usize>>)>,
     pub(crate) album_count_scans: usize,
     pub last_input: f64,
     pub last_move: f64,

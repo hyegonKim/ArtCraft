@@ -89,16 +89,32 @@ pub fn specs() -> Vec<CommandSpec> {
                 crate::io::import_video_bytes(e, &path, bytes, at)
             }
         ),
-        cmd!("file.import_aaf", "AAF...", ["File", "Import"], None, "{path, at?} — imports tracks, clips, fades and embedded audio from an AAF container", always, |e, p| {
-            let path = str_param(p, "path").ok_or_else(|| bad("file.import_aaf", "`path` required"))?.to_string();
-            let at = position_param(e, "file.import_aaf", p, "at")?.unwrap_or(0).max(0);
-            crate::io::import_interchange(e, &path, crate::io::InterchangeKind::Aaf, at)
-        }),
-        cmd!("file.import_omf", "OMF...", ["File", "Import"], None, "{path, at?} — imports tracks, clips, fades and embedded audio from an OMF 2.x container", always, |e, p| {
-            let path = str_param(p, "path").ok_or_else(|| bad("file.import_omf", "`path` required"))?.to_string();
-            let at = position_param(e, "file.import_omf", p, "at")?.unwrap_or(0).max(0);
-            crate::io::import_interchange(e, &path, crate::io::InterchangeKind::Omf, at)
-        }),
+        cmd!(
+            "file.import_aaf",
+            "AAF...",
+            ["File", "Import"],
+            None,
+            "{path, at?} — imports tracks, clips, fades and embedded audio from an AAF container",
+            always,
+            |e, p| {
+                let path = str_param(p, "path").ok_or_else(|| bad("file.import_aaf", "`path` required"))?.to_string();
+                let at = position_param(e, "file.import_aaf", p, "at")?.unwrap_or(0).max(0);
+                crate::io::import_interchange(e, &path, crate::io::InterchangeKind::Aaf, at)
+            }
+        ),
+        cmd!(
+            "file.import_omf",
+            "OMF...",
+            ["File", "Import"],
+            None,
+            "{path, at?} — imports tracks, clips, fades and embedded audio from an OMF 2.x container",
+            always,
+            |e, p| {
+                let path = str_param(p, "path").ok_or_else(|| bad("file.import_omf", "`path` required"))?.to_string();
+                let at = position_param(e, "file.import_omf", p, "at")?.unwrap_or(0).max(0);
+                crate::io::import_interchange(e, &path, crate::io::InterchangeKind::Omf, at)
+            }
+        ),
         cmd!(noundo "file.bounce_mix", "Bounce Mix...", ["File"], Some("Cmd+Alt+B"), "{path, format?: wav|aiff|flac, bit_depth?: 16|24|32f, start?, end?, source?: main|bus name, normalize?: false, dither?: true, fold_down?: stereo}", always, bounce),
         cmd!(noundo "file.bounce_stems", "Bounce Stems...", [], None, "{dir, format?: wav|aiff|flac, bit_depth?: 16|24|32f, start?, end?, dither?: true, fold_down?: stereo}", has_tracks, |e, p| {
             let dir = str_param(p, "dir").ok_or_else(|| bad("file.bounce_stems", "`dir` required"))?.to_string();
@@ -256,6 +272,24 @@ pub fn specs() -> Vec<CommandSpec> {
                 Ok(json!({"path": path, "bytes": xml.len()}))
             }
         ),
+        cmd!(
+            "file.import_sesx",
+            "Multitrack XML (.sesx)...",
+            ["File", "Import"],
+            None,
+            "{path} — imports multitrack XML (.sesx v1.9) tracks, clips, auto-crossfades, fades, mixer volume/pan/mute/solo, referenced audio files, and markers",
+            always,
+            import_sesx_cmd
+        ),
+        cmd!(
+            noundo "file.export_sesx",
+            "Multitrack XML (.sesx)...",
+            ["File", "Export"],
+            None,
+            "{path, replace?: false} — exports multitrack session tracks, clips, fades, mixer volume/pan/mute/solo, files, and markers as .sesx v1.9 XML",
+            always,
+            export_sesx_cmd
+        ),
         cmd!(query "file.get_info", "Get Info...", ["File"], None, "{}", always, |e, _| Ok(crate::inspect::session(e, false))),
         cmd!(noundo "app.quit", "Quit", [], Some("Cmd+Q"), "{}", always, |_, _| Ok(json!({"quit": true}))),
     ]
@@ -412,13 +446,7 @@ fn write_score(e: &mut Engine, p: &Value, id: &str, svg: bool) -> Result<Value> 
     Ok(json!({"path": path, "parts": parts.len(), "measures": measures}))
 }
 
-fn export_interchange_cmd(
-    e: &Engine,
-    p: &Value,
-    id: &str,
-    fixed: Option<crate::io::InterchangeKind>,
-    selected_default: bool,
-) -> Result<Value> {
+fn export_interchange_cmd(e: &Engine, p: &Value, id: &str, fixed: Option<crate::io::InterchangeKind>, selected_default: bool) -> Result<Value> {
     let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
     let kind = fixed.unwrap_or_else(|| crate::io::InterchangeKind::from_path_or_param(&path, str_param(p, "format")));
     let only = if p.get("tracks").is_some() || p.get("track").is_some() {
@@ -430,6 +458,72 @@ fn export_interchange_cmd(
     };
     let embed = bool_or(p, "embed_audio", true);
     crate::io::export_interchange(e, &path, kind, only.as_deref(), embed)
+}
+
+fn import_sesx_cmd(e: &mut Engine, p: &Value) -> Result<Value> {
+    let id = "file.import_sesx";
+    let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
+    let bytes = crate::io::read_file(&path)?;
+    let xml = String::from_utf8(bytes).map_err(|err| bad(id, format!("{path} is not valid UTF-8 XML: {err}")))?;
+    let summary = soundcraft_model::sesx::import_sesx(e.session_mut(), &xml).map_err(|err| bad(id, err.to_string()))?;
+    let loaded = load_sesx_audio_files(e, &path, &summary.files);
+    Ok(json!({
+        "version": summary.version,
+        "sample_rate": summary.sample_rate,
+        "bit_depth": summary.bit_depth,
+        "tracks": summary.tracks.iter().map(|t| t.0).collect::<Vec<_>>(),
+        "clips": summary.clip_count,
+        "markers": summary.marker_count,
+        "files_referenced": summary.files.len(),
+        "files_loaded": loaded,
+    }))
+}
+
+fn export_sesx_cmd(e: &mut Engine, p: &Value) -> Result<Value> {
+    let id = "file.export_sesx";
+    let path = str_param(p, "path").ok_or_else(|| bad(id, "`path` required"))?.to_string();
+    refuse_replacing(e, id, std::path::Path::new(&path), p)?;
+    let xml = soundcraft_model::sesx::export_sesx(e.session());
+    crate::io::write_file(&path, xml.as_bytes())?;
+    Ok(json!({"path": path, "bytes": xml.len()}))
+}
+
+fn load_sesx_audio_files(e: &mut Engine, sesx_path: &str, files: &[soundcraft_model::SesxFileRef]) -> usize {
+    let base_dir = std::path::Path::new(sesx_path).parent();
+    let sr = e.session().sample_rate.hz();
+    let mut loaded = 0_usize;
+    for f in files {
+        let mut candidates: Vec<std::path::PathBuf> = Vec::new();
+        if !f.relative_path.is_empty()
+            && let Some(dir) = base_dir
+        {
+            candidates.push(dir.join(&f.relative_path));
+        }
+        if !f.absolute_path.is_empty() {
+            candidates.push(std::path::PathBuf::from(&f.absolute_path));
+        }
+        for cand in candidates {
+            let Some(cand_str) = cand.to_str() else { continue };
+            let Ok(bytes) = crate::io::read_file(cand_str) else { continue };
+            let ext = cand.extension().and_then(std::ffi::OsStr::to_str).map(str::to_ascii_lowercase);
+            let Ok((_, buf)) = craft_audio::decode(&bytes, ext.as_deref()) else { continue };
+            let Ok(converted) = crate::io::at_rate(buf, sr, crate::io::MAX_IMPORT_SAMPLES) else { continue };
+            if converted.frames() == 0 {
+                continue;
+            }
+            let audio = std::sync::Arc::new(soundcraft_model::SourceAudio::new(converted));
+            let s = e.session_mut();
+            if let Some(src) = s.sources.iter_mut().find(|src| src.id == f.source_id) {
+                src.frames = audio.frames() as u64;
+                src.channels = audio.buffer.num_channels();
+                src.sample_rate = sr;
+            }
+            s.pool.insert(f.source_id, audio);
+            loaded += 1;
+            break;
+        }
+    }
+    loaded
 }
 
 #[cfg(test)]

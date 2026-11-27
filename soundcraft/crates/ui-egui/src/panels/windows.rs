@@ -343,7 +343,10 @@ fn midi_keyboard(app: &mut SoundApp, ctx: &egui::Context) {
                 let _ = app.run("midi.audition", json!({"pitch": p, "velocity": 100, "duration_ms": 350}));
             }
         }
-        ui.label(egui::RichText::new("Click keys or press A–K to audition live on the instrument track (and step-enter into a selected MIDI clip).").small());
+        ui.label(
+            egui::RichText::new("Click keys or press A–K to audition live on the instrument track (and step-enter into a selected MIDI clip).")
+                .small(),
+        );
     });
     app.ui.show_midi_keyboard = open;
 }

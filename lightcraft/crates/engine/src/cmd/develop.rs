@@ -816,30 +816,38 @@ pub fn specs() -> Vec<CommandSpec> {
             }
             Ok(json!({"favorite": want}))
         }),
-        cmd!("develop.curve", "Set Point Curve", [], None, "{channel: master|red|green|blue|hdr|sdr, points: [[x,y],...] in 0..1}", has_active, |s, p| {
-            let ch = str_param(p, "channel").unwrap_or("master").to_string();
-            let mut pts: Vec<Point> = p
-                .get("points")
-                .and_then(Value::as_array)
-                .ok_or_else(|| bad("develop.curve", "missing points"))?
-                .iter()
-                .filter_map(|q| Some(Point::new(q.get(0)?.as_f64()?.clamp(0.0, 1.0), q.get(1)?.as_f64()?.clamp(0.0, 1.0))))
-                .collect();
-            // stored in the order the curve runs, as the editor draws and drags them
-            pts.sort_by(|a, b| a.x.total_cmp(&b.x));
-            edit(s, "develop.curve", "Tone Curve", |d| {
-                match ch.as_str() {
-                    "master" | "rgb" => d.curve.master = pts,
-                    "red" => d.curve.red = pts,
-                    "green" => d.curve.green = pts,
-                    "blue" => d.curve.blue = pts,
-                    "hdr" => d.curve.hdr_master = pts,
-                    "sdr" => d.curve.sdr_master = pts,
-                    other => return Err(bad("develop.curve", format!("unknown channel `{other}`"))),
-                }
-                Ok(())
-            })
-        }),
+        cmd!(
+            "develop.curve",
+            "Set Point Curve",
+            [],
+            None,
+            "{channel: master|red|green|blue|hdr|sdr, points: [[x,y],...] in 0..1}",
+            has_active,
+            |s, p| {
+                let ch = str_param(p, "channel").unwrap_or("master").to_string();
+                let mut pts: Vec<Point> = p
+                    .get("points")
+                    .and_then(Value::as_array)
+                    .ok_or_else(|| bad("develop.curve", "missing points"))?
+                    .iter()
+                    .filter_map(|q| Some(Point::new(q.get(0)?.as_f64()?.clamp(0.0, 1.0), q.get(1)?.as_f64()?.clamp(0.0, 1.0))))
+                    .collect();
+                // stored in the order the curve runs, as the editor draws and drags them
+                pts.sort_by(|a, b| a.x.total_cmp(&b.x));
+                edit(s, "develop.curve", "Tone Curve", |d| {
+                    match ch.as_str() {
+                        "master" | "rgb" => d.curve.master = pts,
+                        "red" => d.curve.red = pts,
+                        "green" => d.curve.green = pts,
+                        "blue" => d.curve.blue = pts,
+                        "hdr" => d.curve.hdr_master = pts,
+                        "sdr" => d.curve.sdr_master = pts,
+                        other => return Err(bad("develop.curve", format!("unknown channel `{other}`"))),
+                    }
+                    Ok(())
+                })
+            }
+        ),
         // ---- crop & rotate
         cmd!("crop.set", "Set Crop", [], None, "{rect?: [x0,y0,x1,y1] normalized in the straightened frame, angle?: degrees}", has_active, |s, p| {
             let id = active(s, "crop.set")?;
@@ -1352,6 +1360,18 @@ pub fn specs() -> Vec<CommandSpec> {
             s.commit(&format!("Preset: {}", preset.name), Op::Batch { ops })?;
             ok()
         }),
+        CommandSpec {
+            explicit_targets: true,
+            ..cmd!(
+                "develop.applyAdaptivePreset",
+                "Apply Adaptive Preset",
+                ["Photo"],
+                None,
+                "{preset: 'Adaptive: Subject Pop' | 'Adaptive: Dramatic Sky' | 'Adaptive: Warm Portrait' | 'Adaptive: Crisp Architecture', amount?: 0..200 (default 100), replace?: false, ids?} — generates the semantic mask (Subject/Sky/Background) and attaches calibrated local adjustments",
+                has_selection,
+                apply_adaptive_preset_cmd
+            )
+        },
         cmd!("preset.create", "Create Preset", ["Photo"], None, "{name, group?, groups?: [settingsGroup]}", has_active, |s, p| {
             let c = "preset.create";
             let id = active(s, c)?;
@@ -1571,6 +1591,114 @@ fn has_history_after(s: &Session) -> std::result::Result<(), String> {
     } else {
         Err("at the latest History step".into())
     }
+}
+
+fn resolve_adaptive_preset_key(raw: &str) -> Option<(&'static str, &'static str, &'static str)> {
+    let norm: String = raw.trim().to_ascii_lowercase().chars().filter(|c| c.is_ascii_alphanumeric()).collect();
+    match norm.as_str() {
+        "subjectpop" | "adaptivesubjectpop" | "lcadaptivesubjectpop" => Some(("subject_pop", "Adaptive: Subject Pop", "subject")),
+        "dramaticsky" | "adaptivedramaticsky" | "lcadaptivedramaticsky" => Some(("dramatic_sky", "Adaptive: Dramatic Sky", "sky")),
+        "warmportrait" | "adaptivewarmportrait" | "lcadaptivewarmportrait" => Some(("warm_portrait", "Adaptive: Warm Portrait", "subject")),
+        "crisparchitecture" | "adaptivecrisparchitecture" | "lcadaptivecrisparchitecture" => {
+            Some(("crisp_architecture", "Adaptive: Crisp Architecture", "background"))
+        }
+        _ => None,
+    }
+}
+
+fn apply_adaptive_preset_cmd(s: &mut Session, p: &Value) -> Result<Value> {
+    const C: &str = "develop.applyAdaptivePreset";
+    let raw_name = str_param(p, "preset").or_else(|| str_param(p, "name")).ok_or_else(|| {
+        bad(C, "missing `preset` (e.g. `Adaptive: Subject Pop`, `Adaptive: Dramatic Sky`, `Adaptive: Warm Portrait`, `Adaptive: Crisp Architecture`)")
+    })?;
+    let (key, display_name, mask_kind) = resolve_adaptive_preset_key(raw_name).ok_or_else(|| {
+        bad(
+            C,
+            format!(
+                "unknown adaptive preset `{raw_name}` (expected Adaptive: Subject Pop, Adaptive: Dramatic Sky, Adaptive: Warm Portrait, or Adaptive: Crisp Architecture)"
+            ),
+        )
+    })?;
+
+    let amount_pct = f64_or(p, "amount", 100.0).clamp(0.0, 200.0);
+    let scale = amount_pct / 100.0;
+    let replace = bool_or(p, "replace", false);
+    let ids = s.targets(&json!({"ids": p.get("ids"), "id": p.get("id")}))?;
+    if ids.is_empty() {
+        return Err(bad(C, "no photos selected"));
+    }
+
+    let template = crate::presets::adaptive_preset_settings(key);
+    let template_mask: lightcraft_develop::Mask = template
+        .get("masks")
+        .and_then(Value::as_array)
+        .and_then(|a| a.first())
+        .and_then(|m| serde_json::from_value(m.clone()).ok())
+        .ok_or_else(|| bad(C, "internal adaptive mask template invalid"))?;
+
+    let active_photo = s.active();
+    let mut active_mask_out: Option<u32> = None;
+    let mut ops = Vec::new();
+    let mut mask_ids = Vec::new();
+
+    for id in ids {
+        let Some(cur) = s.develop_of(id) else { continue };
+        let mut next = (*cur).clone();
+        if replace {
+            next.masks.clear();
+        }
+        let mut mask = template_mask.clone();
+        scale_local_adjustments(&mut mask.adjust, scale);
+
+        let chosen_id = if let Some(existing) = next.masks.iter_mut().find(|m| m.name == mask.name) {
+            mask.id = existing.id;
+            *existing = mask;
+            existing.id
+        } else {
+            let mid = next.next_mask_id();
+            mask.id = mid;
+            next.masks.push(mask);
+            mid
+        };
+        mask_ids.push(chosen_id);
+        if Some(id) == active_photo {
+            active_mask_out = Some(chosen_id);
+        }
+        ops.extend(s.develop_op(id, next, display_name));
+    }
+
+    let changed = ops.len();
+    if changed > 0 {
+        s.commit(display_name, Op::Batch { ops })?;
+        if let Some(mid) = active_mask_out {
+            s.active_mask = Some(mid);
+        }
+    }
+
+    Ok(json!({
+        "changed": changed,
+        "preset": display_name,
+        "maskKind": mask_kind,
+        "amount": amount_pct,
+        "maskIds": mask_ids,
+    }))
+}
+
+fn scale_local_adjustments(adj: &mut lightcraft_develop::LocalAdjustments, scale: f64) {
+    adj.temp = (adj.temp * scale).clamp(-100.0, 100.0);
+    adj.tint = (adj.tint * scale).clamp(-100.0, 100.0);
+    adj.exposure = (adj.exposure * scale).clamp(-4.0, 4.0);
+    adj.contrast = (adj.contrast * scale).clamp(-100.0, 100.0);
+    adj.highlights = (adj.highlights * scale).clamp(-100.0, 100.0);
+    adj.shadows = (adj.shadows * scale).clamp(-100.0, 100.0);
+    adj.whites = (adj.whites * scale).clamp(-100.0, 100.0);
+    adj.blacks = (adj.blacks * scale).clamp(-100.0, 100.0);
+    adj.texture = (adj.texture * scale).clamp(-100.0, 100.0);
+    adj.clarity = (adj.clarity * scale).clamp(-100.0, 100.0);
+    adj.dehaze = (adj.dehaze * scale).clamp(-100.0, 100.0);
+    adj.saturation = (adj.saturation * scale).clamp(-100.0, 100.0);
+    adj.sharpness = (adj.sharpness * scale).clamp(-100.0, 100.0);
+    adj.amount = 100.0;
 }
 
 #[cfg(test)]

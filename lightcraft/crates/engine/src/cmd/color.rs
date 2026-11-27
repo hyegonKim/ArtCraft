@@ -352,14 +352,14 @@ pub fn specs() -> Vec<CommandSpec> {
                         return Err(bad(C, "no such sample"));
                     }
                     if let Some(slot) = d.point_colors.get_mut(idx) {
-                        *slot = sw.sample.clone();
+                        *slot = sw.sample;
                     }
                     idx
                 } else {
                     if d.point_colors.len() >= MAX_POINT_COLORS {
                         return Err(bad(C, format!("at most {MAX_POINT_COLORS} point colours")));
                     }
-                    d.point_colors.push(sw.sample.clone());
+                    d.point_colors.push(sw.sample);
                     d.point_colors.len() - 1
                 };
                 s.set_develop(photo_id, d, &format!("Point Color Swatch ({})", sw.name))?;

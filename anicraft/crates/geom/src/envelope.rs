@@ -41,7 +41,9 @@ pub const CORNERS: [usize; 4] = [0, 3, 15, 12];
 /// sides bend the inside smoothly, and a rest boundary gives the rest mesh.
 pub fn coons_interior(m: &mut Mesh) {
     let p = |r: usize, c: usize| m[4 * r + c];
-    let blend = |a: Vec2, b: Vec2, c: Vec2, d: Vec2, e: Vec2, f: Vec2, g: Vec2, h: Vec2| (a * -4.0 + (b + c) * 6.0 - (d + e) * 2.0 + (f + g) * 3.0 - h) * (1.0 / 9.0);
+    let blend = |a: Vec2, b: Vec2, c: Vec2, d: Vec2, e: Vec2, f: Vec2, g: Vec2, h: Vec2| {
+        (a * -4.0 + (b + c) * 6.0 - (d + e) * 2.0 + (f + g) * 3.0 - h) * (1.0 / 9.0)
+    };
     let p11 = blend(p(0, 0), p(0, 1), p(1, 0), p(0, 3), p(3, 0), p(3, 1), p(1, 3), p(3, 3));
     let p12 = blend(p(0, 3), p(0, 2), p(1, 3), p(0, 0), p(3, 3), p(3, 2), p(1, 0), p(3, 0));
     let p21 = blend(p(3, 0), p(3, 1), p(2, 0), p(3, 3), p(0, 0), p(0, 1), p(2, 3), p(0, 3));
@@ -90,7 +92,13 @@ fn split(c: &[Vec2; 4]) -> ([Vec2; 4], [Vec2; 4]) {
 
 /// Whether every mesh point is finite and the rest rectangle has an area.
 pub fn valid(mesh: &Mesh, rest: &Rect) -> bool {
-    mesh.iter().all(|p| p.x.is_finite() && p.y.is_finite()) && rest.width() > 1e-6 && rest.height() > 1e-6 && rest.min.x.is_finite() && rest.min.y.is_finite() && rest.max.x.is_finite() && rest.max.y.is_finite()
+    mesh.iter().all(|p| p.x.is_finite() && p.y.is_finite())
+        && rest.width() > 1e-6
+        && rest.height() > 1e-6
+        && rest.min.x.is_finite()
+        && rest.min.y.is_finite()
+        && rest.max.x.is_finite()
+        && rest.max.y.is_finite()
 }
 
 /// `path` bent by the patch (both in the same space), within `tol`. `None` when the bent path

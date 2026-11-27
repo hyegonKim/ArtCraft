@@ -140,7 +140,8 @@ pub enum Property {
 }
 
 impl Property {
-    pub const ALL: [Property; 7] = [Property::X, Property::Y, Property::Alpha, Property::Visible, Property::Rotation, Property::ScaleX, Property::ScaleY];
+    pub const ALL: [Property; 7] =
+        [Property::X, Property::Y, Property::Alpha, Property::Visible, Property::Rotation, Property::ScaleX, Property::ScaleY];
 
     pub fn key(self) -> &'static str {
         match self {
@@ -317,7 +318,9 @@ impl Action {
             Action::GotoAndPlay { frame, scene, .. } | Action::GotoAndStop { frame, scene, .. } => {
                 match frame {
                     FrameRef::Number(n) if *n > MAX_FRAME => return Err(format!("frame {n} is past the last frame ({MAX_FRAME})")),
-                    FrameRef::Label(l) if !printable(l, MAX_LABEL_CHARS) => return Err(format!("a frame label must be 1-{MAX_LABEL_CHARS} printable characters")),
+                    FrameRef::Label(l) if !printable(l, MAX_LABEL_CHARS) => {
+                        return Err(format!("a frame label must be 1-{MAX_LABEL_CHARS} printable characters"));
+                    }
                     _ => {}
                 }
                 if let Some(s) = scene
@@ -326,7 +329,9 @@ impl Action {
                     return Err(format!("a scene name must be 1-{MAX_LABEL_CHARS} printable characters"));
                 }
             }
-            Action::Trace { message } if message.chars().count() > MAX_TRACE_CHARS => return Err(format!("a trace message is at most {MAX_TRACE_CHARS} characters")),
+            Action::Trace { message } if message.chars().count() > MAX_TRACE_CHARS => {
+                return Err(format!("a trace message is at most {MAX_TRACE_CHARS} characters"));
+            }
             Action::SetProperty { value, .. } if !value.is_finite() => return Err("the value must be a finite number".into()),
             _ => {}
         }
@@ -600,7 +605,9 @@ impl SourceScript {
     pub fn compiled(&self) -> &CompileResult {
         self.compiled.0.get_or_init(|| match self.language {
             Language::ActionScript3 => as3::compile(&self.text),
-            Language::ActionScript1or2 => Err(vec![as3::Problem::whole("ActionScript 1.0 and 2.0 don't run; AniCraft runs a subset of ActionScript 3.0")]),
+            Language::ActionScript1or2 => {
+                Err(vec![as3::Problem::whole("ActionScript 1.0 and 2.0 don't run; AniCraft runs a subset of ActionScript 3.0")])
+            }
             Language::Other => Err(vec![as3::Problem::whole("scripts in other languages don't run; AniCraft runs a subset of ActionScript 3.0")]),
         })
     }
@@ -700,7 +707,10 @@ pub fn valid_class_name(s: &str) -> bool {
 pub fn valid_instance_name(s: &str) -> bool {
     let mut b = s.bytes();
     let first_ok = b.next().is_some_and(|c| c.is_ascii_alphabetic() || c == b'_' || c == b'$');
-    first_ok && s.len() <= MAX_NAME_CHARS && b.all(|c| c.is_ascii_alphanumeric() || c == b'_' || c == b'$') && !matches!(s, "this" | "root" | "parent" | "_root" | "_parent")
+    first_ok
+        && s.len() <= MAX_NAME_CHARS
+        && b.all(|c| c.is_ascii_alphanumeric() || c == b'_' || c == b'$')
+        && !matches!(s, "this" | "root" | "parent" | "_root" | "_parent")
 }
 
 /// A plug-in id: `[A-Za-z0-9._-]{1,64}` (the plug-in manifest's rule).
@@ -781,7 +791,10 @@ mod tests {
         let mut many: Vec<Action> = (0..1000).map(|_| Action::NextScene).collect();
         sanitize_actions(&mut many);
         assert_eq!(many.len(), MAX_ACTIONS);
-        let mut hs = vec![EventHandler { event: ButtonEvent::Click, actions: vec![] }, EventHandler { event: ButtonEvent::Click, actions: vec![Action::NextScene] }];
+        let mut hs = vec![
+            EventHandler { event: ButtonEvent::Click, actions: vec![] },
+            EventHandler { event: ButtonEvent::Click, actions: vec![Action::NextScene] },
+        ];
         sanitize_handlers(&mut hs);
         assert_eq!(hs.len(), 1);
     }
@@ -794,7 +807,10 @@ mod tests {
         assert!(matches!(&s, FrameScript::Plugin(p) if p.entry == "main"));
         let mut bad = FrameScript::Plugin(PluginScript { id: "no spaces".into(), entry: "main".into() });
         assert!(!bad.sanitize());
-        let a = FrameScript::Actions(vec![Action::Stop { target: Target::this() }, Action::GotoAndPlay { target: Target::new("hero"), frame: FrameRef::Number(4), scene: None }]);
+        let a = FrameScript::Actions(vec![
+            Action::Stop { target: Target::this() },
+            Action::GotoAndPlay { target: Target::new("hero"), frame: FrameRef::Number(4), scene: None },
+        ]);
         assert_eq!(a.describe(), "Stop; Go to frame 5 and play (hero)");
     }
 

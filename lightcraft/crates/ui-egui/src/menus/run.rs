@@ -1472,46 +1472,47 @@ fn ui_commands_11(app: &mut LightcraftApp, ctx: &egui::Context, id: &str, p: &Va
             Ok(Value::Null)
         }
         "file.exportMaskEffects" => file_export_mask_effects_command(app, ctx, id, p),
-        "file.exportPresets" => {
-            let group = p.get("group").and_then(Value::as_str).map(str::to_string);
-            let want_xmp = p.get("format").and_then(Value::as_str).is_some_and(|f| f.eq_ignore_ascii_case("xmp"));
-            let path = match p.get("path").and_then(Value::as_str) {
-                Some(x) => Some(x.to_string()),
-                None => {
-                    let stem = p.get("name").and_then(Value::as_str).or(group.as_deref()).unwrap_or("LightCraft Presets");
-                    let (ext, exts): (&'static str, &'static [&'static str]) =
-                        if want_xmp { ("xmp", &["xmp"]) } else { ("lcpreset", &["lcpreset"]) };
-                    let name = format!("{stem}.{ext}");
-                    let filter = if want_xmp { crate::i18n::tr("XMP Preset") } else { crate::i18n::tr("LightCraft Preset") };
-                    let req = PickRequest::save(crate::i18n::tr("Export Presets"), filter, exts, name.clone());
-                    match crate::pick::ask(app, id, p, "path", req, |s| s.save_preset_file.as_mut().map(|f| f(&name).into_iter().collect())) {
-                        Picked::Now(v) => v.into_iter().next(),
-                        Picked::Later => return Some(Ok(Value::Null)),
-                        Picked::Unavailable => return Some(Err("no file dialog on this platform".into())),
-                    }
-                }
-            };
-            let Some(path) = path else { return Some(Ok(Value::Null)) };
-            let mut params = json!({"path": path});
-            if let Some(g) = group {
-                params["group"] = json!(g);
-            }
-            if let Some(ids) = p.get("ids") {
-                params["ids"] = ids.clone();
-            }
-            if want_xmp {
-                params["format"] = json!("xmp");
-            }
-            let r = app.session.execute("preset.export", &params).map_err(|e| e.to_string());
-            if let Ok(v) = &r {
-                app.toast(ctx, crate::i18n::tr_format!("Exported {} preset{}", v["count"], if v["count"] == 1 { "" } else { "s" }));
-            }
-            r
-        }
+        "file.exportPresets" => file_export_presets_command(app, ctx, id, p),
         "file.importCurvePresets" => file_import_curve_presets_command(app, ctx, id, p),
         _ => return None,
     };
     Some(r)
+}
+
+fn file_export_presets_command(app: &mut LightcraftApp, ctx: &egui::Context, id: &str, p: &Value) -> Result<Value, String> {
+    let group = p.get("group").and_then(Value::as_str).map(str::to_string);
+    let want_xmp = p.get("format").and_then(Value::as_str).is_some_and(|f| f.eq_ignore_ascii_case("xmp"));
+    let path = match p.get("path").and_then(Value::as_str) {
+        Some(x) => Some(x.to_string()),
+        None => {
+            let stem = p.get("name").and_then(Value::as_str).or(group.as_deref()).unwrap_or("LightCraft Presets");
+            let (ext, exts): (&'static str, &'static [&'static str]) = if want_xmp { ("xmp", &["xmp"]) } else { ("lcpreset", &["lcpreset"]) };
+            let name = format!("{stem}.{ext}");
+            let filter = if want_xmp { crate::i18n::tr("XMP Preset") } else { crate::i18n::tr("LightCraft Preset") };
+            let req = PickRequest::save(crate::i18n::tr("Export Presets"), filter, exts, name.clone());
+            match crate::pick::ask(app, id, p, "path", req, |s| s.save_preset_file.as_mut().map(|f| f(&name).into_iter().collect())) {
+                Picked::Now(v) => v.into_iter().next(),
+                Picked::Later => return Ok(Value::Null),
+                Picked::Unavailable => return Err("no file dialog on this platform".into()),
+            }
+        }
+    };
+    let Some(path) = path else { return Ok(Value::Null) };
+    let mut params = json!({"path": path});
+    if let Some(g) = group {
+        params["group"] = json!(g);
+    }
+    if let Some(ids) = p.get("ids") {
+        params["ids"] = ids.clone();
+    }
+    if want_xmp {
+        params["format"] = json!("xmp");
+    }
+    let r = app.session.execute("preset.export", &params).map_err(|e| e.to_string());
+    if let Ok(v) = &r {
+        app.toast(ctx, crate::i18n::tr_format!("Exported {} preset{}", v["count"], if v["count"] == 1 { "" } else { "s" }));
+    }
+    r
 }
 
 /// Part 12 of 12 of the UI commands; `None` means the id is not one of this part's.

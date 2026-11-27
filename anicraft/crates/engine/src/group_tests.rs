@@ -154,10 +154,15 @@ fn raw_shapes_in_a_group_merge_only_with_each_other() {
     run(&mut s, "modify.ungroup", json!({}));
     let raw = top(&s);
     assert!(raw.iter().all(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.merge)), "all raw");
-    let red: f64 = raw.iter().filter_map(|e| match &e.kind {
-        ElementKind::Shape(sh) if sh.fill == Some(anicraft_doc::Paint::Solid(anicraft_doc::Rgba::hex(0xff0000))) => Some(even_odd_area(&sh.path, &e.transform)),
-        _ => None,
-    }).sum();
+    let red: f64 = raw
+        .iter()
+        .filter_map(|e| match &e.kind {
+            ElementKind::Shape(sh) if sh.fill == Some(anicraft_doc::Paint::Solid(anicraft_doc::Rgba::hex(0xff0000))) => {
+                Some(even_odd_area(&sh.path, &e.transform))
+            }
+            _ => None,
+        })
+        .sum();
     // Red (150 × 100) on top of blue: all of it shows.
     assert!((red - 15_000.0).abs() < 2.0, "{red}");
 }
@@ -223,10 +228,15 @@ fn areas(s: &Session) -> Vec<f64> {
         .iter()
         .map(|e| match &e.kind {
             ElementKind::Shape(sh) => even_odd_area(&sh.path, &e.transform),
-            ElementKind::Group { .. } => e.kind.group_members().iter().filter_map(|m| match &m.kind {
-                ElementKind::Shape(sh) if sh.fill.is_some() => Some(even_odd_area(&sh.path, &e.transform.mul(&m.transform))),
-                _ => None,
-            }).sum(),
+            ElementKind::Group { .. } => e
+                .kind
+                .group_members()
+                .iter()
+                .filter_map(|m| match &m.kind {
+                    ElementKind::Shape(sh) if sh.fill.is_some() => Some(even_odd_area(&sh.path, &e.transform.mul(&m.transform))),
+                    _ => None,
+                })
+                .sum(),
             _ => 0.0,
         })
         .collect()
@@ -247,7 +257,9 @@ fn combine_objects_areas_are_exact() {
     squares(&mut s);
     run(&mut s, "modify.intersect", json!({}));
     assert!(near(&areas(&s), &[2_500.0]), "{:?}", areas(&s));
-    assert!(matches!(&top(&s)[0].kind, ElementKind::Shape(sh) if sh.fill == Some(anicraft_doc::Paint::Solid(anicraft_doc::Rgba::hex(0x0000ff))) && !sh.merge));
+    assert!(
+        matches!(&top(&s)[0].kind, ElementKind::Shape(sh) if sh.fill == Some(anicraft_doc::Paint::Solid(anicraft_doc::Rgba::hex(0x0000ff))) && !sh.merge)
+    );
     // Punch: the bottom square less the top one, which goes.
     let mut s = Session::new(anicraft_doc::Document::default());
     squares(&mut s);
@@ -323,7 +335,11 @@ fn ctrl_drag_pulls_a_sharp_corner_out_of_a_line() {
     let fill = top(&s).into_iter().find(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.fill.is_some())).unwrap_or_else(|| panic!("fill"));
     let ElementKind::Shape(sh) = &fill.kind else { panic!("shape") };
     assert!((even_odd_area(&sh.path, &fill.transform) - 12_000.0).abs() < 0.5);
-    assert!(sh.path.cmds.iter().all(|c| !matches!(c, anicraft_geom::PathCmd::CubicTo(..) | anicraft_geom::PathCmd::QuadTo(..))), "straight lines, no curve: {:?}", sh.path.cmds);
+    assert!(
+        sh.path.cmds.iter().all(|c| !matches!(c, anicraft_geom::PathCmd::CubicTo(..) | anicraft_geom::PathCmd::QuadTo(..))),
+        "straight lines, no curve: {:?}",
+        sh.path.cmds
+    );
     assert!(s.history_len() >= 2);
     run(&mut s, "edit.undo", json!({}));
     let fill = top(&s).into_iter().find(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.fill.is_some())).unwrap_or_else(|| panic!("fill"));

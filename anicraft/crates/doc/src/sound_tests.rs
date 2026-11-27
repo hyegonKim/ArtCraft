@@ -2,8 +2,8 @@
 
 use super::*;
 use crate::{Element, ElementId, Keyframe, Layer, LayerId, LayerKind, Scene, Symbol};
-use anicraft_audio::{MixOptions, mix};
 use anicraft_audio::mix::lerp;
+use anicraft_audio::{MixOptions, mix};
 
 /// A sound of `n` frames at 8 kHz whose sample `i` is `i / 1000`.
 fn ramp_sound(id: u64, n: usize) -> Sound {
@@ -140,7 +140,8 @@ fn fades_follow_repeats_spans_and_loops() {
     let v = voices(&d, 8000);
     assert_eq!((v[0].at, v[0].end, v[0].envelope.as_ref().unwrap().gain(1000)), (1000, 3000, (0.5, 0.5)));
     // An event loop fades over the rest of the movie.
-    let d = doc_with(&[(2, 6, Some(FrameSound { looping: true, ..effect(SoundSync::Event, SoundEffect::FadeOut).unwrap() }))], vec![ramp_sound(7, 1000)]);
+    let d =
+        doc_with(&[(2, 6, Some(FrameSound { looping: true, ..effect(SoundSync::Event, SoundEffect::FadeOut).unwrap() }))], vec![ramp_sound(7, 1000)]);
     let v = voices(&d, 8000);
     assert_eq!((v[0].at, v[0].end, v[0].envelope.as_ref().unwrap().points()[1].at), (2000, 8000, 6000));
 }
@@ -163,7 +164,10 @@ fn custom_points_are_seconds_from_the_sound_s_start() {
 
 #[test]
 fn layer_volume_scales_and_mute_silences_without_changing_what_plays() {
-    let mut d = doc_with(&[(0, 1, with(SoundSync::Event, 1, true)), (1, 1, with(SoundSync::Start, 1, false)), (4, 2, with(SoundSync::Stop, 1, false))], vec![ramp_sound(7, 2500)]);
+    let mut d = doc_with(
+        &[(0, 1, with(SoundSync::Event, 1, true)), (1, 1, with(SoundSync::Start, 1, false)), (4, 2, with(SoundSync::Stop, 1, false))],
+        vec![ramp_sound(7, 2500)],
+    );
     let loud = heard(&voices(&d, 8000), 6000);
     Arc::make_mut(&mut d.timeline_mut(0).layers[0]).volume = 0.5;
     let v = voices(&d, 8000);
@@ -186,7 +190,13 @@ fn layer_volume_scales_and_mute_silences_without_changing_what_plays() {
 /// A document whose main timeline shows, on one layer, `instances` of a symbol (`kind`,
 /// `len` frames, a sound on keyframe `sound_at` of its only layer): each instance is
 /// `(start, duration, loop mode, first frame, element id)` on the main timeline.
-fn nested(kind: SymbolKind, len: u32, inner: &[(u32, u32, Option<FrameSound>)], instances: &[(u32, u32, LoopMode, u32, u64)], sound_len: usize) -> Document {
+fn nested(
+    kind: SymbolKind,
+    len: u32,
+    inner: &[(u32, u32, Option<FrameSound>)],
+    instances: &[(u32, u32, LoopMode, u32, u64)],
+    sound_len: usize,
+) -> Document {
     let mut d = Document::default();
     d.stage.fps = 8.0;
     let mut il = Layer::new(LayerId(10), "inner");
@@ -194,7 +204,15 @@ fn nested(kind: SymbolKind, len: u32, inner: &[(u32, u32, Option<FrameSound>)], 
     // Pad the symbol's timeline to `len` frames with a second, silent layer.
     let mut pad = Layer::new(LayerId(11), "pad");
     pad.keyframes = vec![Arc::new(Keyframe::new(0, len))];
-    d.library.push(Arc::new(Symbol { linkage: None, scale_grid_kept: None, scale_grid: None, id: SymbolId(50), name: "S".into(), kind, timeline: Timeline { layers: vec![Arc::new(il), Arc::new(pad)] } }));
+    d.library.push(Arc::new(Symbol {
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        id: SymbolId(50),
+        name: "S".into(),
+        kind,
+        timeline: Timeline { layers: vec![Arc::new(il), Arc::new(pad)] },
+    }));
     let mut l = Layer::new(LayerId(1), "outer");
     l.keyframes = instances
         .iter()
@@ -205,7 +223,14 @@ fn nested(kind: SymbolKind, len: u32, inner: &[(u32, u32, Option<FrameSound>)], 
                 name: String::new(),
                 transform: Default::default(),
                 color: Default::default(),
-                kind: ElementKind::Symbol { symbol: SymbolId(50), loop_mode, first_frame, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+                kind: ElementKind::Symbol {
+                    symbol: SymbolId(50),
+                    loop_mode,
+                    first_frame,
+                    blend: Default::default(),
+                    filters: Vec::new(),
+                    events: Vec::new(),
+                },
             }));
             Arc::new(k)
         })
@@ -268,7 +293,13 @@ fn a_movie_clip_plays_its_sounds_on_a_loop_from_when_it_appeared() {
     let d = nested(SymbolKind::MovieClip, 3, &[(0, 1, ev)], &[(1, 4, LoopMode::Loop, 0, 90), (5, 3, LoopMode::Loop, 0, 91)], 100);
     assert_eq!(spans(&voices(&d, 8000)).iter().map(|s| s.1).collect::<Vec<_>>(), vec![1000, 4000, 5000]);
     // A stream in the clip carries on across the keyframes, sample-exactly.
-    let d = nested(SymbolKind::MovieClip, 8, &[(0, 8, with(SoundSync::Stream, 1, false))], &[(1, 3, LoopMode::Loop, 0, 90), (4, 4, LoopMode::Loop, 0, 90)], 8000);
+    let d = nested(
+        SymbolKind::MovieClip,
+        8,
+        &[(0, 8, with(SoundSync::Stream, 1, false))],
+        &[(1, 3, LoopMode::Loop, 0, 90), (4, 4, LoopMode::Loop, 0, 90)],
+        8000,
+    );
     let v = voices(&d, 8000);
     assert_eq!(spans(&v), vec![(VoiceKind::Stream, 1000, 4000), (VoiceKind::Stream, 4000, 8000)]);
     let out = heard(&v, 8000);
@@ -336,7 +367,10 @@ fn stream_sounds_end_with_their_span_and_loop_inside_it() {
 
 #[test]
 fn start_skips_a_playing_sound_and_stop_cuts_it() {
-    let d = doc_with(&[(0, 1, with(SoundSync::Event, 1, true)), (1, 1, with(SoundSync::Start, 1, false)), (4, 2, with(SoundSync::Stop, 1, false))], vec![ramp_sound(7, 2500)]);
+    let d = doc_with(
+        &[(0, 1, with(SoundSync::Event, 1, true)), (1, 1, with(SoundSync::Start, 1, false)), (4, 2, with(SoundSync::Stop, 1, false))],
+        vec![ramp_sound(7, 2500)],
+    );
     assert_eq!(spans(&voices(&d, 8000)), vec![(VoiceKind::Event, 0, 4000)], "the loop is cut at frame 4; Start was skipped");
     // Start plays when nothing is playing.
     let d = doc_with(&[(0, 4, with(SoundSync::Start, 1, false))], vec![ramp_sound(7, 2500)]);

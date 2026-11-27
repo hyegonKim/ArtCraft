@@ -184,6 +184,7 @@ impl Building {
 
 /// Tests: hold `id` of `jobs` as a build rendering it would, until the returned value is dropped.
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn hold_building(id: u64, jobs: &[RenderJob]) -> Option<Box<dyn std::any::Any>> {
     Building::take(id, jobs).map(|b| Box::new(b) as Box<dyn std::any::Any>)
 }
@@ -385,6 +386,7 @@ pub(crate) mod test_gate {
     }
 
     /// Have the next build started on this thread fail to start its worker.
+    #[allow(dead_code)]
     pub(crate) fn fail_next_spawn() {
         FAIL_SPAWN.with(|f| f.set(true));
     }

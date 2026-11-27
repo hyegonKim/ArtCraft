@@ -242,14 +242,10 @@ fn riff_chunk<'a>(riff: &'a [u8], id: &[u8; 4]) -> Option<&'a [u8]> {
 /// Compresses `px` (`w` × `h` RGBA8) as one frame's data.
 fn compress(kind: Kind, px: &[u8], w: u32, h: u32) -> Result<Vec<u8>> {
     let fail = |e: String| EngineError::Format(format!("{} frame: {e}", kind.name()));
-    let img = craft_image_codecs::Image::from_u8(w, h, craft_image_codecs::ChannelLayout::Rgba, px.to_vec())
-        .map_err(|e| fail(e.to_string()))?;
+    let img = craft_image_codecs::Image::from_u8(w, h, craft_image_codecs::ChannelLayout::Rgba, px.to_vec()).map_err(|e| fail(e.to_string()))?;
     match kind {
         Kind::Apng => {
-            let opts = craft_image_codecs::EncodeOptions {
-                png_compression: craft_image_codecs::PngCompression::Best,
-                ..Default::default()
-            };
+            let opts = craft_image_codecs::EncodeOptions { png_compression: craft_image_codecs::PngCompression::Best, ..Default::default() };
             let buf = craft_image_codecs::encode(&img, craft_image_codecs::Format::Png, &opts).map_err(|e| fail(e.to_string()))?;
             idat(&buf)
         }
@@ -275,7 +271,8 @@ fn still(kind: Kind) -> Result<Encoded> {
 // ----- the files ---------------------------------------------------------------------------
 
 fn png_chunk(out: &mut Vec<u8>, id: &[u8; 4], data: &[u8]) -> Result<()> {
-    let len = u32::try_from(data.len()).ok().filter(|l| *l < 1 << 31).ok_or_else(|| EngineError::Format("an animated PNG frame is too large".into()))?;
+    let len =
+        u32::try_from(data.len()).ok().filter(|l| *l < 1 << 31).ok_or_else(|| EngineError::Format("an animated PNG frame is too large".into()))?;
     out.extend_from_slice(&len.to_be_bytes());
     let from = out.len();
     out.extend_from_slice(id);
@@ -372,11 +369,11 @@ pub(crate) fn plays(p: &Value) -> Result<u32> {
     match p.get("loop") {
         None | Some(Value::Null) | Some(Value::Bool(true)) => Ok(0),
         Some(Value::Bool(false)) => Ok(1),
-        Some(v) => v
-            .as_u64()
-            .and_then(|n| u32::try_from(n).ok())
-            .filter(|n| *n <= MAX_PLAYS)
-            .ok_or_else(|| EngineError::Param(format!("param 'loop' must be true (forever), false (once) or how many times it plays (0 is forever, at most {MAX_PLAYS})"))),
+        Some(v) => v.as_u64().and_then(|n| u32::try_from(n).ok()).filter(|n| *n <= MAX_PLAYS).ok_or_else(|| {
+            EngineError::Param(format!(
+                "param 'loop' must be true (forever), false (once) or how many times it plays (0 is forever, at most {MAX_PLAYS})"
+            ))
+        }),
     }
 }
 

@@ -116,7 +116,9 @@ fn stage_layers_frames_and_tweens() {
     assert!(report.skipped.keys().all(|k| !k.contains("script")), "{report:?}");
     assert_eq!(ball.keyframes[1].script.as_ref().and_then(|s| s.source()).map(|s| s.text.as_str()), Some("stop();"));
     let inner = &doc.library[0].timeline.layers[0].keyframes[0];
-    assert!(matches!(inner.script.as_ref().and_then(|s| s.source()), Some(s) if s.text == "gotoAndPlay(2);" && s.language == anicraft_doc::Language::ActionScript3));
+    assert!(
+        matches!(inner.script.as_ref().and_then(|s| s.source()), Some(s) if s.text == "gotoAndPlay(2);" && s.language == anicraft_doc::Language::ActionScript3)
+    );
     assert!(report.summary().contains("Runs in Test Movie: 2 frame scripts in ActionScript 3.0."), "{}", report.summary());
     // Every scene comes across, in order.
     assert_eq!(doc.scenes.iter().map(|s| s.name.as_str()).collect::<Vec<_>>(), ["Scene 1", "Scene 2"]);
@@ -169,14 +171,20 @@ fn symbols_instances_and_the_tween_between_them() {
     assert!(matches!(filters[0], anicraft_doc::Filter::DropShadow { distance, inner: false, .. } if distance == 8.0));
     assert!(matches!(filters[1], anicraft_doc::Filter::Blur { blur_x, quality: 2, .. } if blur_x == 10.0));
     use anicraft_doc::{Filter, FilterSide};
-    let Filter::Bevel { blur_x, blur_y, distance, angle, highlight_color, shadow_color, side, knockout, strength, .. } = filters[2] else { panic!("{:?}", filters[2]) };
+    let Filter::Bevel { blur_x, blur_y, distance, angle, highlight_color, shadow_color, side, knockout, strength, .. } = filters[2] else {
+        panic!("{:?}", filters[2])
+    };
     assert_eq!((blur_x, blur_y, distance, angle, side, knockout, strength), (4.0, 6.0, 3.0, 135.0, FilterSide::Full, true, 1.0));
     assert_eq!((highlight_color, shadow_color), (Rgba::hex(0xffff00).with_alpha(0.75), Rgba::BLACK.with_alpha(0.5)));
     // Ramps: ratios 0..1 or 0..255; the glow's start pinned transparent, the bevel given a
     // transparent middle (as Animate's panel keeps them).
     let Filter::GradientGlow { stops, side: FilterSide::Inner, strength, .. } = &filters[3] else { panic!("{:?}", filters[3]) };
     assert_eq!(*strength, 2.0);
-    assert_eq!(stops.iter().map(|s| (s.offset, s.color.a)).collect::<Vec<_>>(), vec![(0.0, 0.0), (1.0 / 255.0, 1.0), (128.0 / 255.0, 1.0), (1.0, 1.0)], "one byte scale for every ratio");
+    assert_eq!(
+        stops.iter().map(|s| (s.offset, s.color.a)).collect::<Vec<_>>(),
+        vec![(0.0, 0.0), (1.0 / 255.0, 1.0), (128.0 / 255.0, 1.0), (1.0, 1.0)],
+        "one byte scale for every ratio"
+    );
     let Filter::GradientBevel { stops, side: FilterSide::Inner, quality: 3, .. } = &filters[4] else { panic!("{:?}", filters[4]) };
     assert_eq!(stops.len(), 3);
     assert_eq!((stops[1].offset, stops[1].color.a), (0.5, 0.0));
@@ -206,7 +214,13 @@ fn shapes_become_fills_and_strokes() {
 
 #[test]
 fn a_fla_archive_imports_the_same() {
-    let z = crate::zip::pack::write(&[crate::zip::pack::Raw::new("DOMDocument.xml", DOC.as_bytes(), true), crate::zip::pack::Raw::new("LIBRARY/Characters/Ball.xml", BALL.as_bytes(), true)], false);
+    let z = crate::zip::pack::write(
+        &[
+            crate::zip::pack::Raw::new("DOMDocument.xml", DOC.as_bytes(), true),
+            crate::zip::pack::Raw::new("LIBRARY/Characters/Ball.xml", BALL.as_bytes(), true),
+        ],
+        false,
+    );
     let dir = std::env::temp_dir().join(format!("anicraft-xfl-test-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let fla = dir.join("scene.fla");
@@ -237,7 +251,9 @@ fn hostile_packages_fail_cleanly() {
 #[test]
 fn shape_tweens_come_across_as_shape_tweens() {
     let shape = |edges: &str| {
-        format!(r##"<DOMShape><fills><FillStyle index="1"><SolidColor color="#3366FF"/></FillStyle></fills><edges><Edge fillStyle1="1" edges="{edges}"/></edges></DOMShape>"##)
+        format!(
+            r##"<DOMShape><fills><FillStyle index="1"><SolidColor color="#3366FF"/></FillStyle></fills><edges><Edge fillStyle1="1" edges="{edges}"/></edges></DOMShape>"##
+        )
     };
     let doc = format!(
         r#"<DOMDocument width="400" height="200"><timelines><DOMTimeline name="Scene 1"><layers><DOMLayer name="Morph"><frames>
@@ -314,7 +330,10 @@ fn bitmaps_come_across_when_their_image_is_png_or_jpeg() {
     assert_eq!(els[0].transform.m, [10.0, 0.0, 0.0, 10.0, 5.0, 6.0]);
     // A bitmap fill keeps its matrix, in pixels (twips scale removed), and repeats.
     let ElementKind::Shape(fill) = &els[2].kind else { panic!() };
-    assert_eq!(fill.fill, Some(Paint::Bitmap { bitmap: photo, repeat: true, matrix: anicraft_geom::Affine { m: [2.0, 0.0, 0.0, 2.0, 100.0, 50.0] } }));
+    assert_eq!(
+        fill.fill,
+        Some(Paint::Bitmap { bitmap: photo, repeat: true, matrix: anicraft_geom::Affine { m: [2.0, 0.0, 0.0, 2.0, 100.0, 50.0] } })
+    );
     // The renderer gets the pixels with the items.
     let list = evaluate(&doc, 0);
     assert_eq!(list.items.iter().filter(|i| i.image.is_some()).count(), 3);
@@ -333,7 +352,9 @@ fn bitmaps_come_across_when_their_image_is_png_or_jpeg() {
 /// with `first` and `second` inside the two frames.
 fn hinted_doc(first: &str, second: &str) -> &'static str {
     let shape = |edges: &str| {
-        format!(r##"<DOMShape><fills><FillStyle index="1"><SolidColor color="#3366FF"/></FillStyle></fills><edges><Edge fillStyle1="1" edges="{edges}"/></edges></DOMShape>"##)
+        format!(
+            r##"<DOMShape><fills><FillStyle index="1"><SolidColor color="#3366FF"/></FillStyle></fills><edges><Edge fillStyle1="1" edges="{edges}"/></edges></DOMShape>"##
+        )
     };
     let doc = format!(
         r#"<DOMDocument width="400" height="200"><timelines><DOMTimeline name="Scene 1"><layers><DOMLayer name="Morph"><frames>
@@ -351,7 +372,10 @@ fn shape_hints_come_across_in_either_form() {
     use anicraft_geom::{PathCmd, Vec2};
     let both_in_one = hinted_doc(r#"<shapeHints><ShapeHint index="0" startPoint="0, 0" endPoint="300, 50"/></shapeHints>"#, "");
     // One list per keyframe, matched by letter; the second point a pixel off the edge snaps on.
-    let per_key = hinted_doc(r#"<shapeHints><ShapeHint name="a" x="0" y="0"/></shapeHints>"#, r#"<shapeHints><ShapeHint name="a" x="299" y="50.5"/></shapeHints>"#);
+    let per_key = hinted_doc(
+        r#"<shapeHints><ShapeHint name="a" x="0" y="0"/></shapeHints>"#,
+        r#"<shapeHints><ShapeHint name="a" x="299" y="50.5"/></shapeHints>"#,
+    );
     for doc in [both_in_one, per_key] {
         let (d, report) = import(&HashMap::from([("DOMDocument.xml", doc)])).unwrap();
         assert!(report.skipped.keys().all(|s| !s.contains("hint")), "{:?}", report.skipped);
@@ -364,7 +388,8 @@ fn shape_hints_come_across_in_either_form() {
         let dl = evaluate(&d, 5);
         let want = Vec2::new(0.0, 0.0).lerp(k.hints[0].end, 0.5);
         let it = &dl.items[0];
-        let hit = it.path.cmds.iter().any(|c| matches!(*c, PathCmd::MoveTo(a) | PathCmd::CubicTo(_, _, a) if it.transform.apply(a).distance(want) < 0.05));
+        let hit =
+            it.path.cmds.iter().any(|c| matches!(*c, PathCmd::MoveTo(a) | PathCmd::CubicTo(_, _, a) if it.transform.apply(a).distance(want) < 0.05));
         assert!(hit, "{want:?} {:?}", it.path.cmds);
     }
 }
@@ -386,19 +411,41 @@ fn odd_shape_hints_are_reported_not_fatal() {
 
 #[test]
 fn eases_names_and_loop_modes_the_corpus_found_missing() {
-    let frame = |attrs: &str, inner: &str| format!(r#"<DOMFrame index="0" duration="4" tweenType="motion" {attrs}>{inner}<elements><DOMSymbolInstance libraryItemName="Clip" name="my clip" loop="loop reverse"/></elements></DOMFrame><DOMFrame index="4"><elements/></DOMFrame>"#);
+    let frame = |attrs: &str, inner: &str| {
+        format!(
+            r#"<DOMFrame index="0" duration="4" tweenType="motion" {attrs}>{inner}<elements><DOMSymbolInstance libraryItemName="Clip" name="my clip" loop="loop reverse"/></elements></DOMFrame><DOMFrame index="4"><elements/></DOMFrame>"#
+        )
+    };
     let pts = |p: &[(f32, f32)]| p.iter().map(|(x, y)| format!(r#"<Point x="{x}" y="{y}"/>"#)).collect::<String>();
     let layers = [
         // Seven points: a curve of two segments, exactly.
-        frame(r#"hasCustomEase="true" acceleration="30""#, &format!(r#"<tweens><CustomEase target="all">{}</CustomEase></tweens>"#, pts(&[(0.0, 0.0), (0.2, 0.0), (0.3, 0.5), (0.5, 0.5), (0.7, 0.5), (0.8, 1.0), (1.0, 1.0)]))),
+        frame(
+            r#"hasCustomEase="true" acceleration="30""#,
+            &format!(
+                r#"<tweens><CustomEase target="all">{}</CustomEase></tweens>"#,
+                pts(&[(0.0, 0.0), (0.2, 0.0), (0.3, 0.5), (0.5, 0.5), (0.7, 0.5), (0.8, 1.0), (1.0, 1.0)])
+            ),
+        ),
         // One curve per property: each its own; the slider eases the rest.
-        frame(r#"hasCustomEase="true" useSingleEaseCurve="false" acceleration="-50""#, &format!(r#"<tweens><CustomEase target="position">{0}</CustomEase><CustomEase target="rotation">{1}</CustomEase><CustomEase target="sparkle">{0}</CustomEase></tweens>"#, pts(&[(0.0, 0.0), (0.5, 0.0), (0.5, 1.0), (1.0, 1.0)]), pts(&[(0.0, 0.0), (0.1, 0.4), (0.2, 1.2), (0.4, 1.2), (0.6, 1.2), (0.9, 1.0), (1.0, 1.0)]))),
+        frame(
+            r#"hasCustomEase="true" useSingleEaseCurve="false" acceleration="-50""#,
+            &format!(
+                r#"<tweens><CustomEase target="position">{0}</CustomEase><CustomEase target="rotation">{1}</CustomEase><CustomEase target="sparkle">{0}</CustomEase></tweens>"#,
+                pts(&[(0.0, 0.0), (0.5, 0.0), (0.5, 1.0), (1.0, 1.0)]),
+                pts(&[(0.0, 0.0), (0.1, 0.4), (0.2, 1.2), (0.4, 1.2), (0.6, 1.2), (0.9, 1.0), (1.0, 1.0)])
+            ),
+        ),
         // Said to have a custom ease, with none there; and a broken point list.
         frame(r#"hasCustomEase="true""#, ""),
-        frame(r#"hasCustomEase="true" acceleration="10""#, &format!(r#"<tweens><CustomEase target="all">{}</CustomEase></tweens>"#, pts(&[(0.0, 0.0), (0.5, 0.0), (1.0, 1.0)]))),
+        frame(
+            r#"hasCustomEase="true" acceleration="10""#,
+            &format!(r#"<tweens><CustomEase target="all">{}</CustomEase></tweens>"#, pts(&[(0.0, 0.0), (0.5, 0.0), (1.0, 1.0)])),
+        ),
     ];
     let layers: String = layers.iter().map(|f| format!(r#"<DOMLayer name="L"><frames>{f}</frames></DOMLayer>"#)).collect();
-    let doc = format!(r#"<DOMDocument><symbols><Include href="Clip.xml"/></symbols><timelines><DOMTimeline name="Scene 1"><layers>{layers}</layers></DOMTimeline></timelines></DOMDocument>"#);
+    let doc = format!(
+        r#"<DOMDocument><symbols><Include href="Clip.xml"/></symbols><timelines><DOMTimeline name="Scene 1"><layers>{layers}</layers></DOMTimeline></timelines></DOMDocument>"#
+    );
     let doc: &'static str = Box::leak(doc.into_boxed_str());
     let clip = r#"<DOMSymbolItem name="Clip"><timeline><DOMTimeline name="Clip"/></timeline></DOMSymbolItem>"#;
     let (d, report) = import(&HashMap::from([("DOMDocument.xml", doc), ("LIBRARY/Clip.xml", clip)])).unwrap();
@@ -436,14 +483,19 @@ fn scripts_linkage_and_the_document_class_are_kept_not_run() {
 trace(n);]]></script></Actionscript><elements><DOMSymbolInstance libraryItemName="Hero"><Actionscript><script><![CDATA[on (release) { play(); }]]></script></Actionscript></DOMSymbolInstance></elements></DOMFrame>
         <DOMFrame index="1"><Actionscript><script><![CDATA[   ]]></script></Actionscript><elements/></DOMFrame>
       </frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>"#;
-    let sym = |name: &str, attrs: &str| format!(r#"<DOMSymbolItem name="{name}" {attrs}><timeline><DOMTimeline name="{name}"/></timeline></DOMSymbolItem>"#);
+    let sym = |name: &str, attrs: &str| {
+        format!(r#"<DOMSymbolItem name="{name}" {attrs}><timeline><DOMTimeline name="{name}"/></timeline></DOMSymbolItem>"#)
+    };
     let leak = |s: String| -> &'static str { Box::leak(s.into_boxed_str()) };
     let settings = r#"<flash_profiles><flash_profile name="Old" current="false"><PublishFlashProperties><ActionScriptVersion>3</ActionScriptVersion><DocumentClass>Nope</DocumentClass></PublishFlashProperties></flash_profile>
       <flash_profile name="Default" current="true"><PublishFlashProperties><ActionScriptVersion>2</ActionScriptVersion><DocumentClass> com.example.Main </DocumentClass></PublishFlashProperties></flash_profile></flash_profiles>"#;
     let files = HashMap::from([
         ("DOMDocument.xml", doc),
         ("PublishSettings.xml", settings),
-        ("LIBRARY/Hero.xml", leak(sym("Hero", r#"linkageExportForAS="true" linkageClassName="com.example.Hero" linkageBaseClass="flash.display.MovieClip""#))),
+        (
+            "LIBRARY/Hero.xml",
+            leak(sym("Hero", r#"linkageExportForAS="true" linkageClassName="com.example.Hero" linkageBaseClass="flash.display.MovieClip""#)),
+        ),
         ("LIBRARY/Old.xml", leak(sym("Old", r#"linkageExportForAS="true" linkageIdentifier="oldClip""#))),
         ("LIBRARY/Bad.xml", leak(sym("Bad", r#"linkageExportForAS="true" linkageClassName="not a class""#))),
         ("LIBRARY/Off.xml", leak(sym("Off", r#"linkageExportForAS="false" linkageClassName="Off""#))),
@@ -509,13 +561,17 @@ fn stroke_caps_joints_dashes_and_dots_come_across() {
         let st = crate::import::stroke(&el, &HashMap::new(), &mut report).unwrap();
         (st, report)
     };
-    let (st, report) = read(r##"<SolidStroke weight="4" caps="none" joints="miter" miterLimit="7"><fill><SolidColor color="#112233"/></fill></SolidStroke>"##);
+    let (st, report) =
+        read(r##"<SolidStroke weight="4" caps="none" joints="miter" miterLimit="7"><fill><SolidColor color="#112233"/></fill></SolidStroke>"##);
     assert_eq!((st.width, st.color), (4.0, Rgba::hex(0x112233)));
     assert_eq!(st.style, StrokeStyle { cap: Cap::Butt, join: Join::Miter, miter_limit: 7.0, dash: None });
     assert!(report.skipped.is_empty());
     // Round caps and joints and a miter limit of 3 are the format's defaults.
     assert_eq!(read(r#"<SolidStroke weight="1"/>"#).0.style, StrokeStyle::default());
-    assert_eq!(read(r#"<SolidStroke caps="square" joints="bevel" miterLimit="1e9"/>"#).0.style, StrokeStyle { cap: Cap::Square, join: Join::Bevel, miter_limit: 100.0, dash: None });
+    assert_eq!(
+        read(r#"<SolidStroke caps="square" joints="bevel" miterLimit="1e9"/>"#).0.style,
+        StrokeStyle { cap: Cap::Square, join: Join::Bevel, miter_limit: 100.0, dash: None }
+    );
     let (dashed, _) = read(r#"<DashedStroke weight="2" dash1="8" dash2="2.5" caps="square"/>"#);
     assert_eq!(dashed.style, StrokeStyle { cap: Cap::Square, dash: Dash::dashed(8.0, 2.5), ..StrokeStyle::default() });
     // No gap draws solid.
@@ -612,7 +668,8 @@ fn hostile_sound_files_are_bounded_and_named() {
     let doc = r#"<DOMDocument><media><DOMSoundItem name="s.wav" href="s.wav" sampleCount="99999999999999" format="44kHz 16bit Stereo"/></media>
       <timelines><DOMTimeline name="Scene 1"><layers><DOMLayer name="L"><frames><DOMFrame index="0" soundName="s.wav" soundLoop="4294967295"/></frames></DOMLayer></layers></DOMTimeline></timelines></DOMDocument>"#;
     let open = |wav: Vec<u8>| {
-        let files: HashMap<String, Vec<u8>> = HashMap::from([("DOMDocument.xml".to_string(), doc.as_bytes().to_vec()), ("LIBRARY/s.wav".to_string(), wav)]);
+        let files: HashMap<String, Vec<u8>> =
+            HashMap::from([("DOMDocument.xml".to_string(), doc.as_bytes().to_vec()), ("LIBRARY/s.wav".to_string(), wav)]);
         let read = |p: &str| -> Result<Option<Vec<u8>>, XflError> { Ok(files.get(p).cloned()) };
         import_with(&read).unwrap()
     };

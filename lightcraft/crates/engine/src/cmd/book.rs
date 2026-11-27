@@ -146,53 +146,42 @@ pub fn specs() -> Vec<CommandSpec> {
                 Ok(book_json(s))
             }
         ),
-        cmd!(
-            "book.setPage",
-            "Edit Book Page",
-            [],
-            None,
-            "{index: usize, layout?, photos?: [id,…], caption?}",
-            always,
-            |s, p| {
-                const C: &str = "book.setPage";
-                let idx = index_req(p, "index", C)?;
-                if idx >= s.book.pages.len() {
-                    return Err(bad(C, "no such book page"));
-                }
-                let new_layout = match str_param(p, "layout") {
-                    Some(l) => Some(parse_layout(l, C)?),
-                    None => None,
-                };
-                let new_photos = match p.get("photos") {
-                    None => None,
-                    Some(Value::Array(arr)) => {
-                        let valid: Vec<PhotoId> = arr
-                            .iter()
-                            .filter_map(|v| v.as_u64().map(PhotoId))
-                            .filter(|id| s.catalog.photo(*id).is_some())
-                            .collect();
-                        Some(valid)
-                    }
-                    Some(_) => return Err(bad(C, "`photos` must be a list of photo ids")),
-                };
-                if let Some(page) = s.book.pages.get_mut(idx) {
-                    if let Some(l) = new_layout {
-                        page.layout = l;
-                    }
-                    if let Some(mut ph) = new_photos {
-                        ph.truncate(page.layout.slots());
-                        page.photos = ph;
-                    } else {
-                        page.photos.truncate(page.layout.slots());
-                    }
-                    if let Some(cap) = str_param(p, "caption") {
-                        page.caption = cap.to_string();
-                    }
-                }
-                s.save_prefs()?;
-                Ok(book_json(s))
+        cmd!("book.setPage", "Edit Book Page", [], None, "{index: usize, layout?, photos?: [id,…], caption?}", always, |s, p| {
+            const C: &str = "book.setPage";
+            let idx = index_req(p, "index", C)?;
+            if idx >= s.book.pages.len() {
+                return Err(bad(C, "no such book page"));
             }
-        ),
+            let new_layout = match str_param(p, "layout") {
+                Some(l) => Some(parse_layout(l, C)?),
+                None => None,
+            };
+            let new_photos = match p.get("photos") {
+                None => None,
+                Some(Value::Array(arr)) => {
+                    let valid: Vec<PhotoId> =
+                        arr.iter().filter_map(|v| v.as_u64().map(PhotoId)).filter(|id| s.catalog.photo(*id).is_some()).collect();
+                    Some(valid)
+                }
+                Some(_) => return Err(bad(C, "`photos` must be a list of photo ids")),
+            };
+            if let Some(page) = s.book.pages.get_mut(idx) {
+                if let Some(l) = new_layout {
+                    page.layout = l;
+                }
+                if let Some(mut ph) = new_photos {
+                    ph.truncate(page.layout.slots());
+                    page.photos = ph;
+                } else {
+                    page.photos.truncate(page.layout.slots());
+                }
+                if let Some(cap) = str_param(p, "caption") {
+                    page.caption = cap.to_string();
+                }
+            }
+            s.save_prefs()?;
+            Ok(book_json(s))
+        }),
         cmd!("book.removePage", "Remove Book Page", [], None, "{index: usize}", always, |s, p| {
             const C: &str = "book.removePage";
             let idx = index_req(p, "index", C)?;

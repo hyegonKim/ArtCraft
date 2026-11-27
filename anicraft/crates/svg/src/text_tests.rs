@@ -32,7 +32,10 @@ fn ink(e: &ImportedElement, t: &TextBlock) -> Rect {
 #[test]
 fn text_sits_on_its_baseline_in_its_style() {
     let Some(fonts) = fonts() else { return };
-    let (t, report) = texts(r##"<svg width="300" height="100"><text id="title" x="10" y="50" font-family="'Zz No Such Face', sans-serif" font-size="24" font-weight="700" fill="#f00" fill-opacity="0.5" letter-spacing="2">Hello</text></svg>"##, fonts);
+    let (t, report) = texts(
+        r##"<svg width="300" height="100"><text id="title" x="10" y="50" font-family="'Zz No Such Face', sans-serif" font-size="24" font-weight="700" fill="#f00" fill-opacity="0.5" letter-spacing="2">Hello</text></svg>"##,
+        fonts,
+    );
     assert_eq!(t.len(), 1);
     let (e, b) = &t[0];
     assert_eq!((e.name.as_str(), b.text.as_str(), b.size, b.bold, b.italic, b.letter_spacing), ("title", "Hello", 24.0, true, false, 2.0));
@@ -103,7 +106,11 @@ fn missing_fonts_and_unsupported_text_are_reported() {
     assert!(fonts.families().contains(report.fallback_font.as_ref().unwrap()));
     assert!(report.summary().contains("Fonts not on this computer, drawn in"), "{}", report.summary());
     assert_eq!(report.skipped.get("strokes on text (left out)"), Some(&3), "once per block");
-    for k in ["underlined or struck-through text (lines left out)", "text on a path whose path is missing (drawn on a line)", "outlined text without a fill (left out)"] {
+    for k in [
+        "underlined or struck-through text (lines left out)",
+        "text on a path whose path is missing (drawn on a line)",
+        "outlined text without a fill (left out)",
+    ] {
         assert_eq!(report.skipped.get(k), Some(&1), "{k}: {report:?}");
     }
 }

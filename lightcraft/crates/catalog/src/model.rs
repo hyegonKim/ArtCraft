@@ -210,6 +210,8 @@ pub struct Meta {
     pub usage_terms: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub copyright_url: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub credit: String,
     pub creator: String,
     pub keywords: Vec<String>,
     /// Face/pet/focus regions read from XMP (MWG-RS), on the upright (EXIF-oriented) photo.

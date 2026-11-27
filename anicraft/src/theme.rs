@@ -537,7 +537,9 @@ pub fn install_fonts(ctx: &egui::Context, ui_font: Option<&UserFont>, data_font:
     use egui::{FontData, FontDefinitions, FontFamily};
     use std::sync::Arc;
     let mut defs = FontDefinitions::default();
-    for (bytes, name, family) in [(craft_fonts::UI_FONT, "craft-inter", FontFamily::Proportional), (craft_fonts::MONO_FONT, "craft-jetbrains-mono", FontFamily::Monospace)] {
+    for (bytes, name, family) in
+        [(craft_fonts::UI_FONT, "craft-inter", FontFamily::Proportional), (craft_fonts::MONO_FONT, "craft-jetbrains-mono", FontFamily::Monospace)]
+    {
         if let Some(b) = bytes {
             defs.font_data.insert(name.to_owned(), Arc::new(FontData::from_static(b)));
             defs.families.entry(family).or_default().insert(0, name.to_owned());
@@ -749,7 +751,14 @@ pub fn section<R>(ui: &mut egui::Ui, id: &str, style: Section, title: &str, deta
 }
 
 /// [`section`], also returning its header (a panel's keyboard anchor, `a11y::anchor`).
-pub fn section_with_header<R>(ui: &mut egui::Ui, id: &str, style: Section, title: &str, detail: Option<&str>, add: impl FnOnce(&mut egui::Ui) -> R) -> (egui::Response, Option<R>) {
+pub fn section_with_header<R>(
+    ui: &mut egui::Ui,
+    id: &str,
+    style: Section,
+    title: &str,
+    detail: Option<&str>,
+    add: impl FnOnce(&mut egui::Ui) -> R,
+) -> (egui::Response, Option<R>) {
     use egui::{Sense, StrokeKind, pos2, vec2};
     let key = ui.make_persistent_id(("section", id));
     let mut open = ui.data_mut(|d| *d.get_temp_mut_or(key, true));
@@ -834,7 +843,13 @@ pub fn to_rgba(c: Color32) -> anicraft_engine::doc::Rgba {
 
 /// The heat map of a bone's weights (ADR 0090), the same in every palette because it is drawn
 /// over artwork: blue (none) through cyan, green and yellow to red (all of the point).
-pub const HEAT: [Color32; 5] = [Color32::from_rgb(0x2b, 0x4c, 0xd9), Color32::from_rgb(0x1f, 0xb5, 0xd6), Color32::from_rgb(0x2f, 0xc2, 0x5a), Color32::from_rgb(0xf2, 0xd0, 0x2a), Color32::from_rgb(0xe8, 0x3a, 0x2a)];
+pub const HEAT: [Color32; 5] = [
+    Color32::from_rgb(0x2b, 0x4c, 0xd9),
+    Color32::from_rgb(0x1f, 0xb5, 0xd6),
+    Color32::from_rgb(0x2f, 0xc2, 0x5a),
+    Color32::from_rgb(0xf2, 0xd0, 0x2a),
+    Color32::from_rgb(0xe8, 0x3a, 0x2a),
+];
 
 /// The colour of weight `w` (0…1) on [`HEAT`], blended between its stops.
 pub fn heat(w: f32) -> Color32 {
@@ -849,7 +864,12 @@ pub fn heat(w: f32) -> Color32 {
 
 pub fn to_color32(c: anicraft_engine::doc::Rgba) -> Color32 {
     let c = c.sanitized();
-    Color32::from_rgba_unmultiplied((c.r * 255.0).round() as u8, (c.g * 255.0).round() as u8, (c.b * 255.0).round() as u8, (c.a * 255.0).round() as u8)
+    Color32::from_rgba_unmultiplied(
+        (c.r * 255.0).round() as u8,
+        (c.g * 255.0).round() as u8,
+        (c.b * 255.0).round() as u8,
+        (c.a * 255.0).round() as u8,
+    )
 }
 
 /// Where a dragged panel tab would dock (ADR 0075): the accent, light enough to see the

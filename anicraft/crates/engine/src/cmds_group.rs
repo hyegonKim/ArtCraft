@@ -113,7 +113,8 @@ fn ungroup(s: &mut Session, _: &Value) -> Result<Value> {
     if !kf.elements.iter().any(|e| sel.contains(&e.id) && matches!(e.kind, ElementKind::Group { .. })) {
         return Err(EngineError::State("select a group to ungroup".into()));
     }
-    let taken: HashSet<ElementId> = kf.elements.iter().filter(|e| !(sel.contains(&e.id) && matches!(e.kind, ElementKind::Group { .. }))).map(|e| e.id).collect();
+    let taken: HashSet<ElementId> =
+        kf.elements.iter().filter(|e| !(sel.contains(&e.id) && matches!(e.kind, ElementKind::Group { .. }))).map(|e| e.id).collect();
     let old = std::mem::take(&mut kf.elements);
     let mut out = Vec::with_capacity(old.len());
     let mut members: Vec<(ElementId, bool)> = Vec::new();
@@ -218,7 +219,13 @@ fn area(path: &Path, rule: FillRule) -> Option<Path> {
 
 /// A drawing object of `path` (keyframe space), its local origin at the centre of its bounds as the
 /// drawing tools place shapes.
-fn object(doc: &mut anicraft_doc::Document, path: &Path, fill: Option<anicraft_doc::Paint>, stroke: Option<anicraft_doc::Stroke>, color: ColorEffect) -> Element {
+fn object(
+    doc: &mut anicraft_doc::Document,
+    path: &Path,
+    fill: Option<anicraft_doc::Paint>,
+    stroke: Option<anicraft_doc::Stroke>,
+    color: ColorEffect,
+) -> Element {
     let c = path.bounds().center();
     let to_local = Affine::translate(-c.x, -c.y);
     Element {
@@ -226,7 +233,14 @@ fn object(doc: &mut anicraft_doc::Document, path: &Path, fill: Option<anicraft_d
         name: String::new(),
         transform: Affine::translate(c.x, c.y),
         color,
-        kind: ElementKind::Shape(Shape { path: Arc::new(path.transformed(&to_local)), fill: fill.map(|f| f.transformed(&to_local)), stroke, fill_rule: FillRule::NonZero, merge: false, warp: None }),
+        kind: ElementKind::Shape(Shape {
+            path: Arc::new(path.transformed(&to_local)),
+            fill: fill.map(|f| f.transformed(&to_local)),
+            stroke,
+            fill_rule: FillRule::NonZero,
+            merge: false,
+            warp: None,
+        }),
     }
 }
 
@@ -252,14 +266,23 @@ fn result_of(s: &mut Session, pieces: Vec<Arc<Element>>) -> Option<Element> {
                 pieces.iter().all(|p| matches!(&p.kind, ElementKind::Shape(sh) if sh.stroke.is_none() && p.color == *c0 && sh.fill.as_ref().is_some_and(|f| crate::merge::same_paint(&f.transformed(&p.transform), f0))))
             });
             if let (true, Some((fill, color))) = (same, first) {
-                let outline: Vec<Path> = pieces.iter().filter_map(|p| match &p.kind {
-                    ElementKind::Shape(sh) => Some(sh.path.transformed(&p.transform)),
-                    _ => None,
-                }).collect();
+                let outline: Vec<Path> = pieces
+                    .iter()
+                    .filter_map(|p| match &p.kind {
+                        ElementKind::Shape(sh) => Some(sh.path.transformed(&p.transform)),
+                        _ => None,
+                    })
+                    .collect();
                 return Some(object(&mut s.doc, &joined(outline.iter()), Some(fill), None, color));
             }
             let layer = LayerId(s.doc.alloc_id());
-            Some(Element { id: ElementId(s.doc.alloc_id()), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::None, kind: ElementKind::group(layer, pieces) })
+            Some(Element {
+                id: ElementId(s.doc.alloc_id()),
+                name: String::new(),
+                transform: Affine::IDENTITY,
+                color: ColorEffect::None,
+                kind: ElementKind::group(layer, pieces),
+            })
         }
     }
 }
@@ -277,7 +300,11 @@ fn combine(s: &mut Session, op: Op) -> Result<Value> {
     for (i, e) in els.iter().enumerate().filter(|(_, e)| sel.contains(&e.id)) {
         match &e.kind {
             ElementKind::Shape(_) => shapes.push((i, e.clone())),
-            _ => return Err(EngineError::State("Combine Objects works on shapes and drawing objects: break symbols, text and groups apart first (Ctrl+B)".into())),
+            _ => {
+                return Err(EngineError::State(
+                    "Combine Objects works on shapes and drawing objects: break symbols, text and groups apart first (Ctrl+B)".into(),
+                ));
+            }
         }
     }
     if shapes.len() < 2 {
@@ -305,7 +332,8 @@ fn combine(s: &mut Session, op: Op) -> Result<Value> {
             for (_, e) in rest {
                 let sh = shape(e).filter(|sh| sh.fill.is_some()).ok_or_else(|| EngineError::State("Intersect needs shapes with fills".into()))?;
                 let cutter = area(&sh.path.transformed(&e.transform), sh.fill_rule).ok_or_else(|| EngineError::State(TOO_LARGE.into()))?;
-                let m = planar::merge_cut(&[Item { path: &region, fill: Some(0), fill_rule: FillRule::EvenOdd, stroke: None }], &cutter).ok_or_else(|| EngineError::State(TOO_LARGE.into()))?;
+                let m = planar::merge_cut(&[Item { path: &region, fill: Some(0), fill_rule: FillRule::EvenOdd, stroke: None }], &cutter)
+                    .ok_or_else(|| EngineError::State(TOO_LARGE.into()))?;
                 region = joined(m.fills.iter().filter(|p| p.inside).map(|p| &p.path));
             }
             if region.cmds.is_empty() {
@@ -321,7 +349,9 @@ fn combine(s: &mut Session, op: Op) -> Result<Value> {
         }
         Op::Punch | Op::Crop => {
             let (top, lower) = shapes.split_last().ok_or_else(|| EngineError::State("select two or more shapes to combine".into()))?;
-            let tsh = shape(&top.1).filter(|sh| sh.fill.is_some()).ok_or_else(|| EngineError::State("the topmost shape cuts with its fill: give it one".into()))?;
+            let tsh = shape(&top.1)
+                .filter(|sh| sh.fill.is_some())
+                .ok_or_else(|| EngineError::State("the topmost shape cuts with its fill: give it one".into()))?;
             let cutter = area(&tsh.path.transformed(&top.1.transform), tsh.fill_rule).ok_or_else(|| EngineError::State(TOO_LARGE.into()))?;
             results.push((top.0, None));
             for (i, e) in lower {
@@ -361,8 +391,17 @@ fn combine(s: &mut Session, op: Op) -> Result<Value> {
 #[cfg(test)]
 pub(crate) fn even_odd_area(path: &Path, m: &Affine) -> f64 {
     let loops: Vec<Vec<anicraft_geom::Vec2>> = path.flatten(m, 0.005).into_iter().map(|l| l.points).filter(|p| p.len() > 2).collect();
-    let signed = |pts: &[anicraft_geom::Vec2]| -> f64 { pts.iter().zip(pts.iter().cycle().skip(1)).map(|(a, b)| f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)).sum::<f64>() * 0.5 };
-    let holds = |pts: &[anicraft_geom::Vec2], p: anicraft_geom::Vec2| pts.iter().zip(pts.iter().cycle().skip(1)).filter(|(a, b)| (a.y > p.y) != (b.y > p.y) && p.x < a.x + (p.y - a.y) / (b.y - a.y) * (b.x - a.x)).count() % 2 == 1;
+    let signed = |pts: &[anicraft_geom::Vec2]| -> f64 {
+        pts.iter().zip(pts.iter().cycle().skip(1)).map(|(a, b)| f64::from(a.x) * f64::from(b.y) - f64::from(b.x) * f64::from(a.y)).sum::<f64>() * 0.5
+    };
+    let holds = |pts: &[anicraft_geom::Vec2], p: anicraft_geom::Vec2| {
+        pts.iter()
+            .zip(pts.iter().cycle().skip(1))
+            .filter(|(a, b)| (a.y > p.y) != (b.y > p.y) && p.x < a.x + (p.y - a.y) / (b.y - a.y) * (b.x - a.x))
+            .count()
+            % 2
+            == 1
+    };
     let mut total = 0.0;
     for (i, l) in loops.iter().enumerate() {
         // A point just inside the loop's first edge would do; its middle vertex is near enough for

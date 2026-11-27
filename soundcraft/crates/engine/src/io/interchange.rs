@@ -18,9 +18,7 @@ use std::path::{Path, PathBuf};
 /// Microsoft Compound File Binary (CFB) 8-byte header magic.
 const CFB_MAGIC: [u8; 8] = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1];
 /// AAF v1.1 Structured Storage Root CLSID (`AAFB` little-endian signature).
-const AAF_ROOT_CLSID: [u8; 16] = [
-    0x42, 0x46, 0x41, 0x41, 0x0D, 0x00, 0x4D, 0x4F, 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0xFF,
-];
+const AAF_ROOT_CLSID: [u8; 16] = [0x42, 0x46, 0x41, 0x41, 0x0D, 0x00, 0x4D, 0x4F, 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0xFF];
 const CFB_SECTOR_SIZE: usize = 512;
 const CFB_ENDOFCHAIN: u32 = 0xFFFF_FFFE;
 const CFB_FREESECT: u32 = 0xFFFF_FFFF;
@@ -99,11 +97,7 @@ impl InterchangeKind {
                 return Self::Aaf;
             }
         }
-        if Path::new(path).extension().and_then(|e| e.to_str()).is_some_and(|e| e.eq_ignore_ascii_case("omf")) {
-            Self::Omf
-        } else {
-            Self::Aaf
-        }
+        if Path::new(path).extension().and_then(|e| e.to_str()).is_some_and(|e| e.eq_ignore_ascii_case("omf")) { Self::Omf } else { Self::Aaf }
     }
 }
 
@@ -191,16 +185,7 @@ fn collect_interchange(
 
 // ─── CFB v3 Writer & Reader for AAF ─────────────────────────────────────────────────────────────
 
-fn write_dir_entry(
-    slot: &mut [u8],
-    name: &str,
-    obj_type: u8,
-    left: u32,
-    right: u32,
-    child: u32,
-    start_sec: u32,
-    size: u64,
-) {
+fn write_dir_entry(slot: &mut [u8], name: &str, obj_type: u8, links: [u32; 3], start_sec: u32, size: u64) {
     slot.fill(0);
     let mut utf16: Vec<u16> = name.encode_utf16().take(31).collect();
     utf16.push(0);
@@ -214,9 +199,9 @@ fn write_dir_entry(
     slot[64..66].copy_from_slice(&name_bytes.to_le_bytes());
     slot[66] = obj_type;
     slot[67] = 1; // black node
-    slot[68..72].copy_from_slice(&left.to_le_bytes());
-    slot[72..76].copy_from_slice(&right.to_le_bytes());
-    slot[76..80].copy_from_slice(&child.to_le_bytes());
+    slot[68..72].copy_from_slice(&links[0].to_le_bytes());
+    slot[72..76].copy_from_slice(&links[1].to_le_bytes());
+    slot[76..80].copy_from_slice(&links[2].to_le_bytes());
     if obj_type == 5 {
         slot[80..96].copy_from_slice(&AAF_ROOT_CLSID);
     }
@@ -256,8 +241,8 @@ pub fn encode_aaf_container(streams: &[(String, Vec<u8>)]) -> Result<Vec<u8>> {
     let total_secs = payload_secs + fat_secs;
 
     let mut fat = vec![CFB_FREESECT; fat_secs * 128];
-    for s in 0..dir_sectors {
-        fat[s] = if s + 1 < dir_sectors { (s + 1) as u32 } else { CFB_ENDOFCHAIN };
+    for (s, slot) in fat.iter_mut().enumerate().take(dir_sectors) {
+        *slot = if s + 1 < dir_sectors { (s + 1) as u32 } else { CFB_ENDOFCHAIN };
     }
     for &(start, count) in &stream_spans {
         if count > 0 {
@@ -286,7 +271,7 @@ pub fn encode_aaf_container(streams: &[(String, Vec<u8>)]) -> Result<Vec<u8>> {
     out[56..60].copy_from_slice(&0u32.to_le_bytes());
     out[60..64].copy_from_slice(&CFB_ENDOFCHAIN.to_le_bytes());
     out[68..72].copy_from_slice(&CFB_ENDOFCHAIN.to_le_bytes());
-    for slot in out[76..512].chunks_exact_mut(4) {
+    for slot in out[76..512].as_chunks_mut::<4>().0 {
         slot.copy_from_slice(&CFB_FREESECT.to_le_bytes());
     }
     for f in 0..fat_secs {
@@ -296,21 +281,12 @@ pub fn encode_aaf_container(streams: &[(String, Vec<u8>)]) -> Result<Vec<u8>> {
 
     // Write Directory sectors (starting at sector 0 -> byte offset 512)
     let root_child = if streams.is_empty() { CFB_FREESECT } else { 1 };
-    write_dir_entry(&mut out[512..640], "Root Entry", 5, CFB_FREESECT, CFB_FREESECT, root_child, CFB_ENDOFCHAIN, 0);
+    write_dir_entry(&mut out[512..640], "Root Entry", 5, [CFB_FREESECT, CFB_FREESECT, root_child], CFB_ENDOFCHAIN, 0);
     for (idx, ((name, data), &(start_sec, _))) in streams.iter().zip(&stream_spans).enumerate() {
         let entry_id = idx + 1;
         let right_sib = if idx + 1 < streams.len() { (entry_id + 1) as u32 } else { CFB_FREESECT };
         let byte_off = 512 + entry_id * 128;
-        write_dir_entry(
-            &mut out[byte_off..byte_off + 128],
-            name,
-            2,
-            CFB_FREESECT,
-            right_sib,
-            CFB_FREESECT,
-            start_sec,
-            data.len() as u64,
-        );
+        write_dir_entry(&mut out[byte_off..byte_off + 128], name, 2, [CFB_FREESECT, right_sib, CFB_FREESECT], start_sec, data.len() as u64);
         if start_sec != CFB_ENDOFCHAIN {
             let data_off = (1 + start_sec as usize) * CFB_SECTOR_SIZE;
             out[data_off..data_off + data.len()].copy_from_slice(data);
@@ -344,10 +320,12 @@ fn read_cfb_chain(bytes: &[u8], sec_size: usize, fat: &[u32], start: u32, max_by
         if steps > fat.len() || out.len() >= max_bytes {
             break;
         }
-        let off = (cur as usize).checked_add(1).and_then(|s| s.checked_mul(sec_size))
+        let off = (cur as usize)
+            .checked_add(1)
+            .and_then(|s| s.checked_mul(sec_size))
             .ok_or_else(|| EngineError::Io("AAF CFB sector offset overflow".into()))?;
-        let slice = bytes.get(off..off.saturating_add(sec_size).min(bytes.len()))
-            .ok_or_else(|| EngineError::Io("AAF CFB truncated sector".into()))?;
+        let slice =
+            bytes.get(off..off.saturating_add(sec_size).min(bytes.len())).ok_or_else(|| EngineError::Io("AAF CFB truncated sector".into()))?;
         let take = slice.len().min(max_bytes - out.len());
         out.extend_from_slice(&slice[..take]);
         cur = fat.get(cur as usize).copied().unwrap_or(CFB_ENDOFCHAIN);
@@ -375,8 +353,8 @@ pub fn decode_aaf_container(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
     let first_minifat_sec = read_u32_le(bytes, 60).unwrap_or(CFB_ENDOFCHAIN);
 
     let mut difat = Vec::new();
-    for slot in bytes[76..512].chunks_exact(4) {
-        let sec = u32::from_le_bytes([slot[0], slot[1], slot[2], slot[3]]);
+    for &slot in bytes[76..512].as_chunks::<4>().0 {
+        let sec = u32::from_le_bytes(slot);
         if sec != CFB_FREESECT && sec != CFB_ENDOFCHAIN {
             difat.push(sec);
         }
@@ -385,14 +363,14 @@ pub fn decode_aaf_container(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
     for sec in difat {
         let off = (sec as usize + 1).saturating_mul(sec_size);
         let Some(block) = bytes.get(off..off.saturating_add(sec_size)) else { break };
-        for chunk in block.chunks_exact(4) {
-            fat.push(u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]));
+        for &chunk in block.as_chunks::<4>().0 {
+            fat.push(u32::from_le_bytes(chunk));
         }
     }
     let dir_bytes = read_cfb_chain(bytes, sec_size, &fat, first_dir_sec, 16 << 20)?;
     let mini_fat: Vec<u32> = if first_minifat_sec != CFB_ENDOFCHAIN && first_minifat_sec != CFB_FREESECT {
         let raw = read_cfb_chain(bytes, sec_size, &fat, first_minifat_sec, 4 << 20)?;
-        raw.chunks_exact(4).map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]])).collect()
+        raw.as_chunks::<4>().0.iter().map(|&c| u32::from_le_bytes(c)).collect()
     } else {
         Vec::new()
     };
@@ -412,7 +390,7 @@ pub fn decode_aaf_container(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
     };
 
     let mut out = Vec::new();
-    for entry in dir_bytes.chunks_exact(128).skip(1) {
+    for entry in dir_bytes.as_chunks::<128>().0.iter().skip(1) {
         let obj_type = entry[66];
         if obj_type != 2 {
             continue;
@@ -421,10 +399,7 @@ pub fn decode_aaf_container(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>> {
         if !(2..=64).contains(&name_bytes) {
             continue;
         }
-        let units: Vec<u16> = entry[..name_bytes.saturating_sub(2)]
-            .chunks_exact(2)
-            .map(|c| u16::from_le_bytes([c[0], c[1]]))
-            .collect();
+        let units: Vec<u16> = entry[..name_bytes.saturating_sub(2)].as_chunks::<2>().0.iter().map(|&c| u16::from_le_bytes(c)).collect();
         let name = String::from_utf16_lossy(&units);
         let start_sec = read_u32_le(entry, 116).unwrap_or(CFB_ENDOFCHAIN);
         let size = if sec_size == 4096 {
@@ -552,13 +527,7 @@ fn scan_embedded_audio_chunks(bytes: &[u8]) -> Vec<(String, Vec<u8>)> {
 // ─── Public Export & Import Entry Points ────────────────────────────────────────────────────────
 
 /// Exports the session (or `only_tracks`) to an `.aaf` or `.omf` file via checked engine I/O.
-pub fn export_interchange(
-    e: &Engine,
-    path: &str,
-    kind: InterchangeKind,
-    only_tracks: Option<&[TrackId]>,
-    embed_audio: bool,
-) -> Result<Value> {
+pub fn export_interchange(e: &Engine, path: &str, kind: InterchangeKind, only_tracks: Option<&[TrackId]>, embed_audio: bool) -> Result<Value> {
     let out_path = with_default_ext(path, kind.ext());
     crate::file_access::check_write(&out_path).map_err(EngineError::Io)?;
     let (doc, mut streams) = collect_interchange(e.session(), only_tracks, embed_audio, kind)?;
@@ -589,11 +558,7 @@ pub fn export_interchange(
 }
 
 fn scale_samples(v: Samples, from_sr: u32, to_sr: u32) -> Samples {
-    if from_sr == 0 || from_sr == to_sr {
-        v
-    } else {
-        ((v as f64) * f64::from(to_sr) / f64::from(from_sr)).round() as Samples
-    }
+    if from_sr == 0 || from_sr == to_sr { v } else { ((v as f64) * f64::from(to_sr) / f64::from(from_sr)).round() as Samples }
 }
 
 fn apply_interchange_doc(
@@ -702,13 +667,7 @@ pub fn import_interchange(e: &mut Engine, path: &str, kind: InterchangeKind, at:
 }
 
 /// Imports AAF or OMF container bytes directly into `e`.
-pub fn import_interchange_bytes(
-    e: &mut Engine,
-    bytes: &[u8],
-    kind: InterchangeKind,
-    base_dir: Option<&Path>,
-    at: Samples,
-) -> Result<Value> {
+pub fn import_interchange_bytes(e: &mut Engine, bytes: &[u8], kind: InterchangeKind, base_dir: Option<&Path>, at: Samples) -> Result<Value> {
     let streams = match kind {
         InterchangeKind::Aaf => decode_aaf_container(bytes)?,
         InterchangeKind::Omf => decode_omf_container(bytes)?,

@@ -211,9 +211,7 @@ pub(crate) fn make_product(spec: &JobSpec, progress: Option<&Progress>) -> Resul
                 let cam_rgb = raw.develop(lightcraft_raw::Method::Ahd).map_err(|e| MakeError::Failed(e.to_string()))?;
                 DecodedInput::Rgb(cam_rgb)
             } else {
-                return Err(MakeError::Unsupported(
-                    "only Bayer raw files, linear DNGs and rendered RGB images can be denoised".into(),
-                ));
+                return Err(MakeError::Unsupported("only Bayer raw files, linear DNGs and rendered RGB images can be denoised".into()));
             }
         }
     };

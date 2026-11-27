@@ -73,7 +73,12 @@ fn moving_the_object_at_a_middle_frame_pins_an_anchor_there() {
     assert!(pos(&mut s, 0).distance(Vec2::new(5.0, 5.0)) < 1e-3 && pos(&mut s, 23).distance(Vec2::new(105.0, 5.0)) < 1e-3, "the ends stay");
     // motion.info reports every anchor tied to a frame, ends included.
     let info = run(&mut s, "motion.info", json!({}));
-    let pins: Vec<(u64, u64, bool)> = info["pins"].as_array().unwrap().iter().map(|p| (p["anchor"].as_u64().unwrap(), p["frame"].as_u64().unwrap(), p["end"].as_bool().unwrap())).collect();
+    let pins: Vec<(u64, u64, bool)> = info["pins"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| (p["anchor"].as_u64().unwrap(), p["frame"].as_u64().unwrap(), p["end"].as_bool().unwrap()))
+        .collect();
     assert_eq!(pins, vec![(0, 0, true), (1, 9, false), (2, 23, true)]);
     // A later frame pins a later anchor; the first pin holds.
     s.set_frame(16);

@@ -1,9 +1,9 @@
 //! Painted weights and reshaping (ADR 0090).
 
 use super::*;
+use crate::ElementId;
 use crate::armature::{Armature, Bone, Pose};
 use crate::skin::{deform, rebind, rest_segments};
-use crate::ElementId;
 use anicraft_geom::Affine;
 
 const SHAPE: ElementId = ElementId(10);
@@ -36,7 +36,10 @@ fn skin(arm: &Armature) -> &Skin {
 }
 
 fn sums_to_one(b: &Binding) -> bool {
-    b.bones.is_empty() || ((b.bones.iter().map(|i| i.1).sum::<f32>() - 1.0).abs() < 1e-5 && b.bones.len() <= crate::skin::MAX_INFLUENCES && b.bones.iter().all(|i| i.1 > 0.0))
+    b.bones.is_empty()
+        || ((b.bones.iter().map(|i| i.1).sum::<f32>() - 1.0).abs() < 1e-5
+            && b.bones.len() <= crate::skin::MAX_INFLUENCES
+            && b.bones.iter().all(|i| i.1 > 0.0))
 }
 
 fn paint_on(arm: &mut Armature, bone: BoneId, dabs: &[Vec2], radius: f32, strength: f32, brush: Brush) -> usize {
@@ -251,7 +254,10 @@ fn painting_a_large_shape_is_fast() {
     for i in 1..20_000 {
         p.line_to(Vec2::new(i as f32 * 0.1, (i % 7) as f32));
     }
-    let bones = vec![Bone::new(B1, SHAPE, ElementId(30), Vec2::new(0.0, 0.0), Vec2::new(1000.0, 0.0), Affine::IDENTITY), Bone::new(B2, ElementId(30), ElementId(31), Vec2::new(1000.0, 0.0), Vec2::new(2000.0, 0.0), Affine::IDENTITY)];
+    let bones = vec![
+        Bone::new(B1, SHAPE, ElementId(30), Vec2::new(0.0, 0.0), Vec2::new(1000.0, 0.0), Affine::IDENTITY),
+        Bone::new(B2, ElementId(30), ElementId(31), Vec2::new(1000.0, 0.0), Vec2::new(2000.0, 0.0), Affine::IDENTITY),
+    ];
     let mut arm = Armature { bones, skin: Some(Skin::new(SHAPE, Arc::new(p))), ..Default::default() };
     rebind(&mut arm);
     let dabs: Vec<Vec2> = (0..32).map(|i| Vec2::new(900.0 + 10.0 * i as f32, 3.0)).collect();

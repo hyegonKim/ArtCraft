@@ -114,7 +114,10 @@ fn the_movie_request_describes_the_range_and_bad_requests_are_answers() {
             None => {
                 let m = &d["result"];
                 assert_eq!((m["from"].as_u64(), m["to"].as_u64(), m["frames"].as_u64(), m["name"].as_str()), (Some(0), Some(4), Some(5), Some("a")));
-                assert_eq!((m["width"].as_f64(), m["total_frames"].as_u64()), (Some(f64::from(s.doc.stage.width)), Some(u64::from(s.doc.frame_count()))));
+                assert_eq!(
+                    (m["width"].as_f64(), m["total_frames"].as_u64()),
+                    (Some(f64::from(s.doc.stage.width)), Some(u64::from(s.doc.frame_count())))
+                );
                 assert!(m["background"].as_str().is_some_and(|b| b.len() == 9));
             }
             Some(want) => assert!(d["ok"] == false && d["error"].as_str().is_some_and(|e| e.contains(want)), "{req}: {d}"),
@@ -149,7 +152,8 @@ fn progress_counts_frames_read_and_cancel_stops_before_anything_is_written() {
     let refs: Vec<&str> = reqs.iter().map(String::as_str).chain([r#"{"op":"frame","index":1}"#]).collect();
     install(&mut s, &dir, "dump.wasm", &exporter(&refs));
     let out = dir.join("p.dump");
-    let (plugin, job) = plugin_export::plan(&s, &json!({"format": "org.test.dump", "path": out.display().to_string(), "from": 0, "to": 9})).expect("plan");
+    let (plugin, job) =
+        plugin_export::plan(&s, &json!({"format": "org.test.dump", "path": out.display().to_string(), "from": 0, "to": 9})).expect("plan");
     let control = Control::default();
     let v = plugin_export::run(&plugin, &s.doc, &job, Some(&control)).expect("exports");
     // Frame 1 twice counts once.
@@ -170,7 +174,10 @@ fn a_plugin_ease_drives_a_tween_and_the_document_keeps_its_curve() {
     let mut s = tweened();
     install(&mut s, &dir, "steps.wasm", &ease_plugin());
     let l = run(&mut s, "ease.list", json!({}));
-    assert_eq!(l["plugins"], json!([{"name": "Stepped 4", "plugin": "org.test.steps", "plugin_name": "Test Steps", "ease": "steps4", "easing": {"plugin": "org.test.steps", "ease": "steps4"}}]));
+    assert_eq!(
+        l["plugins"],
+        json!([{"name": "Stepped 4", "plugin": "org.test.steps", "plugin_name": "Test Steps", "ease": "steps4", "easing": {"plugin": "org.test.steps", "ease": "steps4"}}])
+    );
     let v = run(&mut s, "timeline.set_easing", json!({"frame": 0, "easing": {"plugin": "org.test.steps", "ease": "steps4"}}));
     assert_eq!(v["easing"], "Stepped 4");
     // Four steps of 25 over ten frames: frames 0-2 at 0, 3-4 at 25, 5-7 at 50, 8-9 at 75.
@@ -181,7 +188,12 @@ fn a_plugin_ease_drives_a_tween_and_the_document_keeps_its_curve() {
     assert_eq!(info["easing"]["sampled"]["values"].as_array().map(Vec::len), Some(257));
     // By name, any case; unknown eases and plug-ins are errors.
     run(&mut s, "ease.set", json!({"frame": 0, "easing": {"plugin": "org.test.steps", "ease": "stepped 4"}}));
-    assert!(s.execute("ease.set", &json!({"frame": 0, "easing": {"plugin": "org.test.steps", "ease": "smooth"}})).expect_err("no such ease").to_string().contains("steps4"));
+    assert!(
+        s.execute("ease.set", &json!({"frame": 0, "easing": {"plugin": "org.test.steps", "ease": "smooth"}}))
+            .expect_err("no such ease")
+            .to_string()
+            .contains("steps4")
+    );
     assert!(s.execute("ease.set", &json!({"frame": 0, "easing": {"plugin": "org.none", "ease": "x"}})).is_err());
     // The file keeps the table: the plug-in removed, the movie plays the same, and again
     // after a save and load.

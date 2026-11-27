@@ -78,9 +78,16 @@ pub fn resolve(f: &Filter, scale: f32) -> FilterOp {
             let blur = BoxBlur::new(blur_x * scale, blur_y * scale, quality);
             FilterOp::Shadow { blur, dx, dy, strength, color: color.sanitized(), inner, knockout: knockout || (hide_object && inner), hide_object }
         }
-        Filter::Glow { blur_x, blur_y, strength, quality, color, inner, knockout } => {
-            FilterOp::Shadow { blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality), dx: 0, dy: 0, strength, color: color.sanitized(), inner, knockout, hide_object: false }
-        }
+        Filter::Glow { blur_x, blur_y, strength, quality, color, inner, knockout } => FilterOp::Shadow {
+            blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality),
+            dx: 0,
+            dy: 0,
+            strength,
+            color: color.sanitized(),
+            inner,
+            knockout,
+            hide_object: false,
+        },
         Filter::Bevel { blur_x, blur_y, strength, quality, angle, distance, shadow_color, highlight_color, side, knockout } => {
             let (dx, dy) = offset(angle, distance * scale);
             let paint = BevelPaint::Colors { highlight: premultiply(highlight_color), shadow: premultiply(shadow_color) };
@@ -88,11 +95,27 @@ pub fn resolve(f: &Filter, scale: f32) -> FilterOp {
         }
         Filter::GradientBevel { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout } => {
             let (dx, dy) = offset(angle, distance * scale);
-            FilterOp::Bevel { blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality), dx, dy, strength, paint: BevelPaint::Ramp(ramp_lut(&stops)), side, knockout }
+            FilterOp::Bevel {
+                blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality),
+                dx,
+                dy,
+                strength,
+                paint: BevelPaint::Ramp(ramp_lut(&stops)),
+                side,
+                knockout,
+            }
         }
         Filter::GradientGlow { blur_x, blur_y, strength, quality, angle, distance, stops, side, knockout } => {
             let (dx, dy) = offset(angle, distance * scale);
-            FilterOp::GradientGlow { blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality), dx, dy, strength, ramp: ramp_lut(&stops), side, knockout }
+            FilterOp::GradientGlow {
+                blur: BoxBlur::new(blur_x * scale, blur_y * scale, quality),
+                dx,
+                dy,
+                strength,
+                ramp: ramp_lut(&stops),
+                side,
+                knockout,
+            }
         }
         Filter::AdjustColor { brightness, contrast, saturation, hue } => FilterOp::AdjustColor(color_matrix(brightness, contrast, saturation, hue)),
     }
@@ -107,7 +130,9 @@ pub fn apply(buf: &mut [Premul], w: usize, h: usize, filters: &[Filter], scale: 
     for f in filters {
         match resolve(f, scale) {
             FilterOp::Blur(b) => blur_channels(buf, w, h, b),
-            FilterOp::Shadow { blur, dx, dy, strength, color, inner, knockout, hide_object } => shadow(buf, w, h, Shadow { blur, strength, dx, dy, color, inner, knockout, hide_object }),
+            FilterOp::Shadow { blur, dx, dy, strength, color, inner, knockout, hide_object } => {
+                shadow(buf, w, h, Shadow { blur, strength, dx, dy, color, inner, knockout, hide_object })
+            }
             FilterOp::Bevel { blur, dx, dy, strength, paint, side, knockout } => {
                 let field = bevel_field(buf, w, h, blur, dx, dy);
                 let effect: Vec<Premul> = match &paint {
@@ -173,7 +198,9 @@ fn alpha_at(buf: &[Premul], w: usize, h: usize, x: i64, y: i64) -> f32 {
 fn bevel_field(buf: &[Premul], w: usize, h: usize, blur: BoxBlur, dx: i64, dy: i64) -> Vec<f32> {
     let mut b: Vec<[f32; 1]> = buf.iter().map(|p| [p[3]]).collect();
     blur_channels(&mut b, w, h, blur);
-    let at = |x: i64, y: i64| if x >= 0 && y >= 0 && (x as usize) < w && (y as usize) < h { b.get(y as usize * w + x as usize).map_or(0.0, |v| v[0]) } else { 0.0 };
+    let at = |x: i64, y: i64| {
+        if x >= 0 && y >= 0 && (x as usize) < w && (y as usize) < h { b.get(y as usize * w + x as usize).map_or(0.0, |v| v[0]) } else { 0.0 }
+    };
     let mut out = Vec::with_capacity(w * h);
     for y in 0..h as i64 {
         for x in 0..w as i64 {
@@ -244,7 +271,13 @@ fn box_pass<const C: usize>(buf: &mut [[f32; C]], w: usize, h: usize, n: usize, 
         }
         for i in 0..len {
             if let Some(out) = buf.get_mut(idx(line, i)) {
-                let ends = |c: usize| if even { 0.5 * (i.checked_sub(lo).and_then(|j| tmp.get(j)).map_or(0.0, |v| v[c]) + tmp.get(i + hi).map_or(0.0, |v| v[c])) } else { 0.0 };
+                let ends = |c: usize| {
+                    if even {
+                        0.5 * (i.checked_sub(lo).and_then(|j| tmp.get(j)).map_or(0.0, |v| v[c]) + tmp.get(i + hi).map_or(0.0, |v| v[c]))
+                    } else {
+                        0.0
+                    }
+                };
                 for c in 0..C {
                     out[c] = (sum[c] - ends(c)) * inv;
                 }
@@ -290,7 +323,11 @@ fn shadow(buf: &mut [Premul], w: usize, h: usize, s: Shadow) {
     for y in 0..h as i64 {
         for x in 0..w as i64 {
             let (sx, sy) = (x - s.dx, y - s.dy);
-            let a = if sx >= 0 && sy >= 0 && (sx as usize) < w && (sy as usize) < h { buf.get(sy as usize * w + sx as usize).map_or(0.0, |p| p[3]) } else { 0.0 };
+            let a = if sx >= 0 && sy >= 0 && (sx as usize) < w && (sy as usize) < h {
+                buf.get(sy as usize * w + sx as usize).map_or(0.0, |p| p[3])
+            } else {
+                0.0
+            };
             if let Some(c) = cov.get_mut(y as usize * w + x as usize) {
                 c[0] = if s.inner { 1.0 - a } else { a };
             }
@@ -305,7 +342,11 @@ fn shadow(buf: &mut [Premul], w: usize, h: usize, s: Shadow) {
         *p = if s.inner {
             // Inside the artwork, over it.
             let a = sa * ba;
-            if s.knockout { [c.r * a, c.g * a, c.b * a, a] } else { [c.r * a + src[0] * (1.0 - sa), c.g * a + src[1] * (1.0 - sa), c.b * a + src[2] * (1.0 - sa), ba] }
+            if s.knockout {
+                [c.r * a, c.g * a, c.b * a, a]
+            } else {
+                [c.r * a + src[0] * (1.0 - sa), c.g * a + src[1] * (1.0 - sa), c.b * a + src[2] * (1.0 - sa), ba]
+            }
         } else if s.hide_object {
             [c.r * sa, c.g * sa, c.b * sa, sa]
         } else if s.knockout {
@@ -353,7 +394,15 @@ pub fn color_matrix(brightness: f32, contrast: f32, saturation: f32, hue: f32) -
     let s = if saturation < 0.0 { 1.0 + saturation / 100.0 } else { 1.0 + saturation / 100.0 * 2.0 };
     let (lr, lg, lb) = (0.3086, 0.6094, 0.0820);
     let k = 1.0 - s;
-    m = mul(&[[k * lr + s, k * lg, k * lb, 0.0, 0.0], [k * lr, k * lg + s, k * lb, 0.0, 0.0], [k * lr, k * lg, k * lb + s, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 0.0]], &m);
+    m = mul(
+        &[
+            [k * lr + s, k * lg, k * lb, 0.0, 0.0],
+            [k * lr, k * lg + s, k * lb, 0.0, 0.0],
+            [k * lr, k * lg, k * lb + s, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0, 0.0],
+        ],
+        &m,
+    );
     // Hue: rotation about the grey axis, keeping luminance.
     if hue != 0.0 {
         let (sin, cos) = hue.to_radians().sin_cos();
@@ -407,7 +456,18 @@ mod tests {
     fn drop_shadows_sit_under_and_offset() {
         let (w, h) = (40, 40);
         let mut b = square(w, h, 10, 20);
-        let ds = Filter::DropShadow { blur_x: 0.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 5.0, color: Rgba::BLACK, inner: false, knockout: false, hide_object: false };
+        let ds = Filter::DropShadow {
+            blur_x: 0.0,
+            blur_y: 0.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 0.0,
+            distance: 5.0,
+            color: Rgba::BLACK,
+            inner: false,
+            knockout: false,
+            hide_object: false,
+        };
         apply(&mut b, w, h, std::slice::from_ref(&ds), 1.0);
         assert_eq!(b[15 * w + 22], [0.0, 0.0, 0.0, 1.0], "shadow to the right");
         assert_eq!(b[15 * w + 15], [1.0, 0.0, 0.0, 1.0], "artwork on top");
@@ -415,19 +475,53 @@ mod tests {
         // Knockout: only the shadow outside the artwork; hide object: the whole shadow.
         let mut k = square(w, h, 10, 20);
         let Filter::DropShadow { .. } = ds else { panic!() };
-        apply(&mut k, w, h, &[Filter::DropShadow { knockout: true, blur_x: 0.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 5.0, color: Rgba::BLACK, inner: false, hide_object: false }], 1.0);
+        apply(
+            &mut k,
+            w,
+            h,
+            &[Filter::DropShadow {
+                knockout: true,
+                blur_x: 0.0,
+                blur_y: 0.0,
+                strength: 1.0,
+                quality: 1,
+                angle: 0.0,
+                distance: 5.0,
+                color: Rgba::BLACK,
+                inner: false,
+                hide_object: false,
+            }],
+            1.0,
+        );
         assert_eq!(k[15 * w + 15][3], 0.0);
         assert_eq!(k[15 * w + 22][3], 1.0);
         // Inner glow: inside the edge only.
         let mut g = square(w, h, 10, 30);
-        apply(&mut g, w, h, &[Filter::Glow { blur_x: 6.0, blur_y: 6.0, strength: 1.0, quality: 2, color: Rgba::WHITE, inner: true, knockout: false }], 1.0);
+        apply(
+            &mut g,
+            w,
+            h,
+            &[Filter::Glow { blur_x: 6.0, blur_y: 6.0, strength: 1.0, quality: 2, color: Rgba::WHITE, inner: true, knockout: false }],
+            1.0,
+        );
         assert!(g[20 * w + 11][1] > 0.2, "near the edge glows: {:?}", g[20 * w + 11]);
         assert!(g[20 * w + 20][1] < 0.01, "the middle doesn't");
         assert_eq!(g[20 * w + 5][3], 0.0, "nothing outside");
     }
 
     fn bevel(side: FilterSide, knockout: bool) -> Filter {
-        Filter::Bevel { blur_x: 3.0, blur_y: 3.0, strength: 1.0, quality: 1, angle: 45.0, distance: 3.0, shadow_color: Rgba::BLACK, highlight_color: Rgba::WHITE, side, knockout }
+        Filter::Bevel {
+            blur_x: 3.0,
+            blur_y: 3.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 45.0,
+            distance: 3.0,
+            shadow_color: Rgba::BLACK,
+            highlight_color: Rgba::WHITE,
+            side,
+            knockout,
+        }
     }
 
     /// Red square `x0..x1` on a 40 × 40 buffer, through `f`.
@@ -456,7 +550,18 @@ mod tests {
             assert!((lit - dark).abs() < 1e-5, "({x}, {y}): {p:?} vs {q:?}");
         }
         // Even blur widths stay centred: the same symmetry.
-        let even = filtered(&Filter::Bevel { blur_x: 4.0, blur_y: 6.0, strength: 1.0, quality: 2, angle: 45.0, distance: 3.0, shadow_color: Rgba::BLACK, highlight_color: Rgba::WHITE, side: FilterSide::Full, knockout: true });
+        let even = filtered(&Filter::Bevel {
+            blur_x: 4.0,
+            blur_y: 6.0,
+            strength: 1.0,
+            quality: 2,
+            angle: 45.0,
+            distance: 3.0,
+            shadow_color: Rgba::BLACK,
+            highlight_color: Rgba::WHITE,
+            side: FilterSide::Full,
+            knockout: true,
+        });
         for (x, y) in [(13, 13), (11, 20), (20, 10), (12, 27), (9, 9)] {
             let (p, q) = (even[y * w + x], even[(39 - y) * w + (39 - x)]);
             assert!((p[3] - q[3]).abs() < 1e-5, "even blur, ({x}, {y}): {p:?} vs {q:?}");
@@ -473,7 +578,10 @@ mod tests {
         assert_eq!(outer[20 * w + 20], [1.0, 0.0, 0.0, 1.0], "the artwork is on top");
         let out_tl = outer[11 * w + 11];
         let out_br = outer[28 * w + 28];
-        assert!(out_tl[3] > 0.2 && (out_tl[0] - out_tl[3]).abs() < 1e-5 && (out_tl[1] - out_tl[3]).abs() < 1e-5, "white outside the lit edge: {out_tl:?}");
+        assert!(
+            out_tl[3] > 0.2 && (out_tl[0] - out_tl[3]).abs() < 1e-5 && (out_tl[1] - out_tl[3]).abs() < 1e-5,
+            "white outside the lit edge: {out_tl:?}"
+        );
         assert!(out_br[3] > 0.2 && out_br[0] < 1e-5, "black outside the shaded edge: {out_br:?}");
         assert!((out_tl[3] - out_br[3]).abs() < 1e-5, "symmetric: {out_tl:?} {out_br:?}");
         assert_eq!(outer[13 * w + 13], [1.0, 0.0, 0.0, 1.0], "inside untouched");
@@ -487,8 +595,21 @@ mod tests {
         let ko_in = filtered(&bevel(FilterSide::Inner, true));
         assert_eq!(ko_in[11 * w + 11][3], 0.0, "inner knockout has nothing outside");
         // Strength 0 changes nothing.
-        let Filter::Bevel { blur_x, blur_y, quality, angle, distance, shadow_color, highlight_color, .. } = bevel(FilterSide::Full, false) else { panic!() };
-        let none = filtered(&Filter::Bevel { strength: 0.0, blur_x, blur_y, quality, angle, distance, shadow_color, highlight_color, side: FilterSide::Full, knockout: false });
+        let Filter::Bevel { blur_x, blur_y, quality, angle, distance, shadow_color, highlight_color, .. } = bevel(FilterSide::Full, false) else {
+            panic!()
+        };
+        let none = filtered(&Filter::Bevel {
+            strength: 0.0,
+            blur_x,
+            blur_y,
+            quality,
+            angle,
+            distance,
+            shadow_color,
+            highlight_color,
+            side: FilterSide::Full,
+            knockout: false,
+        });
         assert_eq!(none, square(40, 40, 12, 28));
     }
 
@@ -498,7 +619,9 @@ mod tests {
         let st = |offset: f32, c: u32, a: f32| GradientStop { offset, color: Rgba::hex(c).with_alpha(a) };
         // A hard-edged glow (no blur) at full strength takes the ramp's end colour; past its
         // reach, the transparent start.
-        let glow = |side, knockout, stops: Vec<GradientStop>| Filter::GradientGlow { blur_x: 0.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 4.0, stops, side, knockout }.sanitized();
+        let glow = |side, knockout, stops: Vec<GradientStop>| {
+            Filter::GradientGlow { blur_x: 0.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 4.0, stops, side, knockout }.sanitized()
+        };
         let ramp = vec![st(0.0, 0xffffff, 0.0), st(1.0, 0x0000ff, 1.0)];
         let g = filtered(&glow(FilterSide::Outer, false, ramp.clone()));
         assert_eq!(g[20 * w + 30], [0.0, 0.0, 1.0, 1.0], "blue glow, offset right");
@@ -506,7 +629,17 @@ mod tests {
         assert_eq!(g[20 * w + 20], [1.0, 0.0, 0.0, 1.0]);
         // Blurred, the ramp's middle shows where the glow is half: here green.
         let mid = vec![st(0.0, 0xffffff, 0.0), st(0.5, 0x00ff00, 1.0), st(1.0, 0x0000ff, 1.0)];
-        let soft = filtered(&Filter::GradientGlow { blur_x: 9.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 0.0, stops: mid, side: FilterSide::Outer, knockout: false });
+        let soft = filtered(&Filter::GradientGlow {
+            blur_x: 9.0,
+            blur_y: 0.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 0.0,
+            distance: 0.0,
+            stops: mid,
+            side: FilterSide::Outer,
+            knockout: false,
+        });
         let edge = soft[20 * w + 28]; // just outside the right edge: 4 of 9 covered
         assert!(edge[1] > edge[2] && edge[1] > 0.4, "{edge:?}");
         // Inner gradient glow: the ramp's end inside the left edge (the transparency moved
@@ -517,7 +650,17 @@ mod tests {
         assert_eq!(gi[20 * w + 5][3], 0.0);
         // Gradient bevel: the highlight end on the lit edge, the shadow end on the other,
         // the transparent middle in the flat.
-        let gb = Filter::GradientBevel { blur_x: 0.0, blur_y: 0.0, strength: 1.0, quality: 1, angle: 0.0, distance: 3.0, stops: vec![st(0.0, 0x00ff00, 1.0), st(0.5, 0, 0.0), st(1.0, 0x0000ff, 1.0)], side: FilterSide::Full, knockout: true };
+        let gb = Filter::GradientBevel {
+            blur_x: 0.0,
+            blur_y: 0.0,
+            strength: 1.0,
+            quality: 1,
+            angle: 0.0,
+            distance: 3.0,
+            stops: vec![st(0.0, 0x00ff00, 1.0), st(0.5, 0, 0.0), st(1.0, 0x0000ff, 1.0)],
+            side: FilterSide::Full,
+            knockout: true,
+        };
         let b = filtered(&gb);
         assert_eq!(b[20 * w + 13], [0.0, 1.0, 0.0, 1.0], "lit left edge (light from the left)");
         assert_eq!(b[20 * w + 26], [0.0, 0.0, 1.0, 1.0], "shaded right edge");

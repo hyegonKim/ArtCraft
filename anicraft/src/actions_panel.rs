@@ -68,7 +68,11 @@ fn selected_instance(app: &App) -> Option<(Element, SymbolKind)> {
 pub fn panel(app: &mut App, ui: &mut egui::Ui) {
     let inst = selected_instance(app);
     ui.horizontal_wrapped(|ui| {
-        if ui.selectable_label(app.actions.tab == Tab::Frame, tr!("Frame")).on_hover_text(tr!("What runs when the playhead enters a keyframe")).clicked() {
+        if ui
+            .selectable_label(app.actions.tab == Tab::Frame, tr!("Frame"))
+            .on_hover_text(tr!("What runs when the playhead enters a keyframe"))
+            .clicked()
+        {
             app.actions.tab = Tab::Frame;
         }
         let label = match &inst {
@@ -80,7 +84,9 @@ pub fn panel(app: &mut App, ui: &mut egui::Ui) {
             },
             None => tr!("Instance").to_string(),
         };
-        let r = ui.add_enabled(inst.is_some(), egui::Button::selectable(app.actions.tab == Tab::Instance, label)).on_hover_text(tr!("What the selected button or movie clip does on clicks and the pointer"));
+        let r = ui
+            .add_enabled(inst.is_some(), egui::Button::selectable(app.actions.tab == Tab::Instance, label))
+            .on_hover_text(tr!("What the selected button or movie clip does on clicks and the pointer"));
         let r = r.on_disabled_hover_text(tr!("Select one button or movie clip instance on the stage"));
         if r.clicked() {
             app.actions.tab = Tab::Instance;
@@ -169,20 +175,24 @@ fn frame_tab(app: &mut App, ui: &mut egui::Ui) {
     if app.actions.symbol.is_some_and(|id| !symbols.iter().any(|(c, _, _)| *c == id)) {
         app.actions.symbol = None;
     }
-    let current = app.actions.symbol.and_then(|id| symbols.iter().find(|(c, _, _)| *c == id)).map_or(scene_name.clone(), |(_, n, k)| kind_name(n, *k));
+    let current =
+        app.actions.symbol.and_then(|id| symbols.iter().find(|(c, _, _)| *c == id)).map_or(scene_name.clone(), |(_, n, k)| kind_name(n, *k));
     form_row(ui, FORM_LABEL_DOCK, tr!("Timeline"), |ui| {
-        egui::ComboBox::from_id_salt("act_timeline").width(crate::theme::fit(ui, 220.0)).selected_text(current).show_ui(ui, |ui| {
-            if ui.selectable_label(app.actions.symbol.is_none(), tr!("{name} (main timeline)", name = scene_name)).clicked() {
-                app.actions.symbol = None;
-            }
-            for (id, n, k) in &symbols {
-                if ui.selectable_label(app.actions.symbol == Some(*id), kind_name(n, *k)).clicked() {
-                    app.actions = State { tab: Tab::Frame, symbol: Some(*id), ..State::default() };
+        egui::ComboBox::from_id_salt("act_timeline")
+            .width(crate::theme::fit(ui, 220.0))
+            .selected_text(current)
+            .show_ui(ui, |ui| {
+                if ui.selectable_label(app.actions.symbol.is_none(), tr!("{name} (main timeline)", name = scene_name)).clicked() {
+                    app.actions.symbol = None;
                 }
-            }
-        })
-        .response
-        .set_name(tr!("Timeline"));
+                for (id, n, k) in &symbols {
+                    if ui.selectable_label(app.actions.symbol == Some(*id), kind_name(n, *k)).clicked() {
+                        app.actions = State { tab: Tab::Frame, symbol: Some(*id), ..State::default() };
+                    }
+                }
+            })
+            .response
+            .set_name(tr!("Timeline"));
     });
     let Some(t) = frame_target(app, ui, &doc) else { return };
     let source = t.script.as_ref().and_then(FrameScript::source).cloned();
@@ -194,7 +204,10 @@ fn frame_tab(app: &mut App, ui: &mut egui::Ui) {
     };
     if !t.runs {
         // Graphics, buttons and guides never run frame scripts; a kept one is still shown.
-        ui.label(text(Type::Caption, tr!("Frames here don't run (graphic and button timelines, guide layers); the script is kept with the document.")));
+        ui.label(text(
+            Type::Caption,
+            tr!("Frames here don't run (graphic and button timelines, guide layers); the script is kept with the document."),
+        ));
         script_view(app, ui, &t, source.as_ref());
         return;
     }
@@ -203,7 +216,13 @@ fn frame_tab(app: &mut App, ui: &mut egui::Ui) {
         for (k, label, hint) in [
             (Holds::Actions, tr!("Actions"), tr!("A list of actions, in order")),
             (Holds::Plugin, tr!("Plug-in"), tr!("An entry point of a frame-script plug-in (WebAssembly)")),
-            (Holds::Script, tr!("Script"), tr!("Code in a scripting language (such as an Animate document's ActionScript), kept with the document. ActionScript 3.0 runs when it uses only timeline control, mouse listeners, trace and instance properties")),
+            (
+                Holds::Script,
+                tr!("Script"),
+                tr!(
+                    "Code in a scripting language (such as an Animate document's ActionScript), kept with the document. ActionScript 3.0 runs when it uses only timeline control, mouse listeners, trace and instance properties"
+                ),
+            ),
         ] {
             if ui.selectable_label(kind == k, label).on_hover_text(hint).clicked() && kind != k {
                 to = Some(k);
@@ -221,7 +240,10 @@ fn frame_tab(app: &mut App, ui: &mut egui::Ui) {
             let list = t.script.as_ref().map(|s| s.actions().to_vec()).unwrap_or_default();
             let cx = Choices::new(&doc, &t.timeline, t.main);
             if list.is_empty() {
-                ui.label(text(Type::Caption, tr!("No actions yet. Add one: Stop on a frame holds the movie there; a button's Click can then go on.")));
+                ui.label(text(
+                    Type::Caption,
+                    tr!("No actions yet. Add one: Stop on a frame holds the movie there; a button's Click can then go on."),
+                ));
             }
             if let Some((new, live)) = edit_list(ui, "frame", &list, &cx) {
                 let mut p = t.base.clone();
@@ -247,7 +269,8 @@ fn switch_kind(app: &mut App, t: &FrameTarget, from: Holds, to: Holds) {
             }
         }
         Holds::Plugin => {
-            if let Some((id, entry)) = frame_scripts(app).first().map(|(id, _, e)| (id.clone(), e.first().cloned().unwrap_or_else(|| "main".into()))) {
+            if let Some((id, entry)) = frame_scripts(app).first().map(|(id, _, e)| (id.clone(), e.first().cloned().unwrap_or_else(|| "main".into())))
+            {
                 set_frame(app, &t.base, json!({"plugin": id, "entry": entry}));
                 app.status_ok(tr!("Frame script set — {undo} to undo", undo = app.undo_key()));
             } else {
@@ -342,15 +365,18 @@ fn script_view(app: &mut App, ui: &mut egui::Ui, t: &FrameTarget, src: Option<&S
     let mut pick = None;
     form_row(ui, FORM_LABEL_DOCK, tr!("Language"), |ui| {
         ui.add_enabled_ui(src.is_some(), |ui| {
-            egui::ComboBox::from_id_salt("act_language").width(crate::theme::fit(ui, 180.0)).selected_text(crate::i18n::t(language.label())).show_ui(ui, |ui| {
-                for l in Language::ALL {
-                    if ui.selectable_label(l == language, crate::i18n::t(l.label())).clicked() && l != language {
-                        pick = Some(l);
+            egui::ComboBox::from_id_salt("act_language")
+                .width(crate::theme::fit(ui, 180.0))
+                .selected_text(crate::i18n::t(language.label()))
+                .show_ui(ui, |ui| {
+                    for l in Language::ALL {
+                        if ui.selectable_label(l == language, crate::i18n::t(l.label())).clicked() && l != language {
+                            pick = Some(l);
+                        }
                     }
-                }
-            })
-            .response
-            .set_name(tr!("Script language"));
+                })
+                .response
+                .set_name(tr!("Script language"));
         });
         if let Some(s) = src {
             ui.label(text(Type::Data, trn!("{n} line", "{n} lines", s.lines())).color(T.text_dim));
@@ -370,7 +396,11 @@ fn script_view(app: &mut App, ui: &mut egui::Ui, t: &FrameTarget, src: Option<&S
     // Names it takes from other frames of its timeline that aren't there (ADR 0052).
     let links = match src.map(|s| s.compiled()) {
         Some(Ok(c)) if t.runs => {
-            let which = t.base.get("symbol").and_then(Value::as_u64).map_or(anicraft_engine::doc::player::TimelineRef::Root, |id| anicraft_engine::doc::player::TimelineRef::Symbol(SymbolId(id)));
+            let which = t
+                .base
+                .get("symbol")
+                .and_then(Value::as_u64)
+                .map_or(anicraft_engine::doc::player::TimelineRef::Root, |id| anicraft_engine::doc::player::TimelineRef::Symbol(SymbolId(id)));
             anicraft_engine::doc::player::link_problems(&app.s.doc, which, c)
         }
         _ => Vec::new(),
@@ -426,7 +456,10 @@ fn script_view(app: &mut App, ui: &mut egui::Ui, t: &FrameTarget, src: Option<&S
     }
     match src.map(SourceScript::runs) {
         None => {
-            ui.label(text(Type::Caption, tr!("Kept with the document as written. ActionScript 3.0 that controls the timeline runs in Test Movie and the HTML canvas export.")));
+            ui.label(text(
+                Type::Caption,
+                tr!("Kept with the document as written. ActionScript 3.0 that controls the timeline runs in Test Movie and the HTML canvas export."),
+            ));
         }
         Some(false) => {
             ui.label(text(Type::Caption, tr!("A script runs only when all of it is in the ActionScript 3.0 subset AniCraft runs: timeline control (stop, play, go to a frame or label), mouse listeners, trace, and setting x, y, alpha, visible, rotation and scale on named instances. Until then it is kept as written and doesn't run.")));
@@ -457,61 +490,101 @@ fn frame_target(app: &mut App, ui: &mut egui::Ui, doc: &Document) -> Option<Fram
             }
             let Some(k) = layer.keyframe_at(frame) else {
                 let key = app.keymap.primary("timeline.insert_blank_keyframe").map(crate::platform::shortcut_label).unwrap_or_default();
-                ui.label(text(Type::Caption, tr!("Frame {frame} is empty on this layer. Add a blank keyframe ({key}) to give it actions.", frame = frame + 1, key = key)));
+                ui.label(text(
+                    Type::Caption,
+                    tr!("Frame {frame} is empty on this layer. Add a blank keyframe ({key}) to give it actions.", frame = frame + 1, key = key),
+                ));
                 return None;
             };
             if k.start != frame {
                 let key = app.keymap.primary("timeline.insert_keyframe").map(crate::platform::shortcut_label).unwrap_or_default();
-                ui.label(text(Type::Caption, tr!("These run when the playhead enters frame {keyframe} (the keyframe). For frame {frame}, add a keyframe there ({key}).", keyframe = k.start + 1, frame = frame + 1, key = key)));
+                ui.label(text(
+                    Type::Caption,
+                    tr!(
+                        "These run when the playhead enters frame {keyframe} (the keyframe). For frame {frame}, add a keyframe there ({key}).",
+                        keyframe = k.start + 1,
+                        frame = frame + 1,
+                        key = key
+                    ),
+                ));
             }
             let runs = layer.kind != LayerKind::Guide;
-            Some(FrameTarget { base: json!({"layer": layer.id.0, "frame": k.start}), script: k.script.clone(), timeline: tl.clone(), main: true, runs, at: (None, layer.id, k.start) })
+            Some(FrameTarget {
+                base: json!({"layer": layer.id.0, "frame": k.start}),
+                script: k.script.clone(),
+                timeline: tl.clone(),
+                main: true,
+                runs,
+                at: (None, layer.id, k.start),
+            })
         }
         Some(sid) => {
             let sym = doc.symbol(sid)?;
             let clip = sym.kind == SymbolKind::MovieClip;
             // A movie clip's layers that run; on other symbols, the layers that keep a script.
-            let offered = |l: &anicraft_engine::doc::Layer| if clip { !matches!(l.kind, LayerKind::Folder | LayerKind::Guide) } else { l.keyframes.iter().any(|k| is_kept(k)) };
+            let offered = |l: &anicraft_engine::doc::Layer| {
+                if clip { !matches!(l.kind, LayerKind::Folder | LayerKind::Guide) } else { l.keyframes.iter().any(|k| is_kept(k)) }
+            };
             let layers: Vec<(LayerId, String)> = sym.timeline.layers.iter().filter(|l| offered(l)).map(|l| (l.id, l.name.clone())).collect();
             let lid = app.actions.layer.filter(|l| layers.iter().any(|(x, _)| x == l)).or_else(|| layers.first().map(|(l, _)| *l))?;
             app.actions.layer = Some(lid);
             let layer = sym.timeline.layer(lid)?;
             form_row(ui, FORM_LABEL_DOCK, tr!("Layer"), |ui| {
-                egui::ComboBox::from_id_salt("act_layer").width(crate::theme::fit(ui, 180.0)).selected_text(layer.name.as_str()).show_ui(ui, |ui| {
-                    for (id, n) in &layers {
-                        if ui.selectable_label(*id == lid, n.as_str()).clicked() {
-                            app.actions.layer = Some(*id);
-                        }
-                    }
-                })
-                .response
-                .set_name(tr!("Layer"));
-            });
-            let k = layer.keyframe_at(app.actions.frame).or_else(|| layer.keyframes.first().map(|k| &**k))?;
-            app.actions.frame = k.start;
-            let shown = |k: &anicraft_engine::doc::Keyframe| if k.label.is_empty() { format!("{}", k.start + 1) } else { format!("{} “{}”", k.start + 1, k.label) };
-            form_row(ui, FORM_LABEL_DOCK, tr!("Keyframe"), |ui| {
-                with_type(ui, Type::Data, |ui| {
-                    egui::ComboBox::from_id_salt("act_key").width(crate::theme::fit(ui, 180.0)).selected_text(shown(k)).show_ui(ui, |ui| {
-                        for kk in &layer.keyframes {
-                            let mark = if kk.script.is_some() { " ·a" } else { "" };
-                            if ui.selectable_label(kk.start == k.start, format!("{}{mark}", shown(kk))).clicked() {
-                                app.actions.frame = kk.start;
+                egui::ComboBox::from_id_salt("act_layer")
+                    .width(crate::theme::fit(ui, 180.0))
+                    .selected_text(layer.name.as_str())
+                    .show_ui(ui, |ui| {
+                        for (id, n) in &layers {
+                            if ui.selectable_label(*id == lid, n.as_str()).clicked() {
+                                app.actions.layer = Some(*id);
                             }
                         }
                     })
                     .response
-                    .set_name(tr!("Keyframe"));
+                    .set_name(tr!("Layer"));
+            });
+            let k = layer.keyframe_at(app.actions.frame).or_else(|| layer.keyframes.first().map(|k| &**k))?;
+            app.actions.frame = k.start;
+            let shown = |k: &anicraft_engine::doc::Keyframe| {
+                if k.label.is_empty() { format!("{}", k.start + 1) } else { format!("{} “{}”", k.start + 1, k.label) }
+            };
+            form_row(ui, FORM_LABEL_DOCK, tr!("Keyframe"), |ui| {
+                with_type(ui, Type::Data, |ui| {
+                    egui::ComboBox::from_id_salt("act_key")
+                        .width(crate::theme::fit(ui, 180.0))
+                        .selected_text(shown(k))
+                        .show_ui(ui, |ui| {
+                            for kk in &layer.keyframes {
+                                let mark = if kk.script.is_some() { " ·a" } else { "" };
+                                if ui.selectable_label(kk.start == k.start, format!("{}{mark}", shown(kk))).clicked() {
+                                    app.actions.frame = kk.start;
+                                }
+                            }
+                        })
+                        .response
+                        .set_name(tr!("Keyframe"));
                 });
             });
-            Some(FrameTarget { base: json!({"symbol": sid.0, "layer": lid.0, "frame": k.start}), script: k.script.clone(), timeline: sym.timeline.clone(), main: false, runs: clip, at: (Some(sid), lid, k.start) })
+            Some(FrameTarget {
+                base: json!({"symbol": sid.0, "layer": lid.0, "frame": k.start}),
+                script: k.script.clone(),
+                timeline: sym.timeline.clone(),
+                main: false,
+                runs: clip,
+                at: (Some(sid), lid, k.start),
+            })
         }
     }
 }
 
 /// Installed frame-script plug-ins: `(id, name, entries)`.
 fn frame_scripts(app: &App) -> Vec<(String, String, Vec<String>)> {
-    app.s.plugins.list().filter(|p| p.manifest().kind == Kind::FrameScript).map(|p| (p.id().to_string(), p.manifest().name.clone(), p.manifest().entries.clone())).collect()
+    app.s
+        .plugins
+        .list()
+        .filter(|p| p.manifest().kind == Kind::FrameScript)
+        .map(|p| (p.id().to_string(), p.manifest().name.clone(), p.manifest().entries.clone()))
+        .collect()
 }
 
 fn plugin_rows(app: &mut App, ui: &mut egui::Ui, base: &Value, id: &str, entry: &str) {
@@ -520,28 +593,34 @@ fn plugin_rows(app: &mut App, ui: &mut egui::Ui, base: &Value, id: &str, entry: 
     let shown = installed.map_or_else(|| id.to_string(), |(_, n, _)| n.clone());
     let mut pick: Option<(String, String)> = None;
     form_row(ui, FORM_LABEL_DOCK, tr!("Plug-in"), |ui| {
-        egui::ComboBox::from_id_salt("act_plugin").width(crate::theme::fit(ui, 220.0)).selected_text(shown).show_ui(ui, |ui| {
-            for (pid, name, entries) in &all {
-                if ui.selectable_label(pid == id, name.as_str()).on_hover_text(pid.as_str()).clicked() {
-                    pick = Some((pid.clone(), entries.first().cloned().unwrap_or_else(|| "main".into())));
-                }
-            }
-        })
-        .response
-        .set_name(tr!("Plug-in"));
-    });
-    let entries = installed.map(|(_, _, e)| e.clone()).unwrap_or_default();
-    form_row(ui, FORM_LABEL_DOCK, tr!("Entry"), |ui| {
-        with_type(ui, Type::Data, |ui| {
-            egui::ComboBox::from_id_salt("act_entry").width(crate::theme::fit(ui, 160.0)).selected_text(entry).show_ui(ui, |ui| {
-                for e in &entries {
-                    if ui.selectable_label(e == entry, e.as_str()).clicked() {
-                        pick = Some((id.to_string(), e.clone()));
+        egui::ComboBox::from_id_salt("act_plugin")
+            .width(crate::theme::fit(ui, 220.0))
+            .selected_text(shown)
+            .show_ui(ui, |ui| {
+                for (pid, name, entries) in &all {
+                    if ui.selectable_label(pid == id, name.as_str()).on_hover_text(pid.as_str()).clicked() {
+                        pick = Some((pid.clone(), entries.first().cloned().unwrap_or_else(|| "main".into())));
                     }
                 }
             })
             .response
-            .set_name(tr!("Entry point"));
+            .set_name(tr!("Plug-in"));
+    });
+    let entries = installed.map(|(_, _, e)| e.clone()).unwrap_or_default();
+    form_row(ui, FORM_LABEL_DOCK, tr!("Entry"), |ui| {
+        with_type(ui, Type::Data, |ui| {
+            egui::ComboBox::from_id_salt("act_entry")
+                .width(crate::theme::fit(ui, 160.0))
+                .selected_text(entry)
+                .show_ui(ui, |ui| {
+                    for e in &entries {
+                        if ui.selectable_label(e == entry, e.as_str()).clicked() {
+                            pick = Some((id.to_string(), e.clone()));
+                        }
+                    }
+                })
+                .response
+                .set_name(tr!("Entry point"));
         });
     });
     if installed.is_none() {
@@ -573,7 +652,11 @@ fn instance_tab(app: &mut App, ui: &mut egui::Ui, e: &Element) {
     let doc = app.s.doc.clone();
     let mut name = e.name.clone();
     form_row(ui, FORM_LABEL_DOCK, tr!("Name"), |ui| {
-        if ui.add(egui::TextEdit::singleline(&mut name).desired_width(crate::theme::fit(ui, 200.0)).hint_text(tr!("instance name"))).named(tr!("Instance name")).changed() {
+        if ui
+            .add(egui::TextEdit::singleline(&mut name).desired_width(crate::theme::fit(ui, 200.0)).hint_text(tr!("instance name")))
+            .named(tr!("Instance name"))
+            .changed()
+        {
             run(app, true, tr_noop!("Instance name"), "instance.set_name", json!({"element": e.id.0, "name": name}));
         }
     });
@@ -800,28 +883,34 @@ fn fields(ui: &mut egui::Ui, a: &mut Action, cx: &Choices<'_>) -> Option<bool> {
     if let Some(t) = a.target_mut() {
         form_row(ui, FORM_LABEL_DOCK, tr!("Target"), |ui| {
             let shown = t.to_string();
-            egui::ComboBox::from_id_salt("target").width(crate::theme::fit(ui, 200.0)).selected_text(shown.clone()).show_ui(ui, |ui| {
-                let mut opts: Vec<(String, String)> = vec![("".into(), "this".into())];
-                if !main_here {
-                    opts.push(("parent".into(), "parent".into()));
-                    opts.push(("root".into(), tr!("{name} (main timeline)", name = "root")));
-                }
-                for (p, k) in &cx.targets {
-                    opts.push((p.clone(), if *k == SymbolKind::Button { tr!("{path} · button", path = p) } else { tr!("{path} · movie clip", path = p) }));
-                }
-                if !opts.iter().any(|(p, _)| Target::new(p.clone()).to_string() == shown) {
-                    opts.push((shown.clone(), shown.clone()));
-                }
-                for (p, label) in opts {
-                    let on = Target::new(p.clone()).to_string() == shown;
-                    if ui.selectable_label(on, label).clicked() && !on {
-                        *t = Target::new(p);
-                        changed = Some(false);
+            egui::ComboBox::from_id_salt("target")
+                .width(crate::theme::fit(ui, 200.0))
+                .selected_text(shown.clone())
+                .show_ui(ui, |ui| {
+                    let mut opts: Vec<(String, String)> = vec![("".into(), "this".into())];
+                    if !main_here {
+                        opts.push(("parent".into(), "parent".into()));
+                        opts.push(("root".into(), tr!("{name} (main timeline)", name = "root")));
                     }
-                }
-            })
-            .response
-            .set_name(tr!("Target"));
+                    for (p, k) in &cx.targets {
+                        opts.push((
+                            p.clone(),
+                            if *k == SymbolKind::Button { tr!("{path} · button", path = p) } else { tr!("{path} · movie clip", path = p) },
+                        ));
+                    }
+                    if !opts.iter().any(|(p, _)| Target::new(p.clone()).to_string() == shown) {
+                        opts.push((shown.clone(), shown.clone()));
+                    }
+                    for (p, label) in opts {
+                        let on = Target::new(p.clone()).to_string() == shown;
+                        if ui.selectable_label(on, label).clicked() && !on {
+                            *t = Target::new(p);
+                            changed = Some(false);
+                        }
+                    }
+                })
+                .response
+                .set_name(tr!("Target"));
         });
     }
     let target = a.target().cloned().unwrap_or_default();
@@ -835,7 +924,9 @@ fn fields(ui: &mut egui::Ui, a: &mut Action, cx: &Choices<'_>) -> Option<bool> {
                     *frame = FrameRef::Number(0);
                     changed = Some(false);
                 }
-                if ui.selectable_label(is_label, tr!("Label")).on_hover_text(tr!("Frame labels survive frames being added or moved")).clicked() && !is_label {
+                if ui.selectable_label(is_label, tr!("Label")).on_hover_text(tr!("Frame labels survive frames being added or moved")).clicked()
+                    && !is_label
+                {
                     *frame = FrameRef::Label(labels.first().cloned().unwrap_or_else(|| "label".into()));
                     changed = Some(false);
                 }
@@ -843,71 +934,87 @@ fn fields(ui: &mut egui::Ui, a: &mut Action, cx: &Choices<'_>) -> Option<bool> {
                     FrameRef::Number(n) => {
                         let max = resolved.map_or(anicraft_engine::MAX_FRAME, |(tl, _)| tl.frame_count());
                         let mut shown = *n + 1;
-                        if with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut shown).range(1..=max.max(1)).speed(0.2))).named(tr!("Frame number")).changed() {
+                        if with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut shown).range(1..=max.max(1)).speed(0.2)))
+                            .named(tr!("Frame number"))
+                            .changed()
+                        {
                             *n = shown.saturating_sub(1);
                             changed = Some(true);
                         }
                     }
                     FrameRef::Label(l) => {
-                        egui::ComboBox::from_id_salt("label").width(crate::theme::fit(ui, 140.0)).selected_text(l.as_str()).show_ui(ui, |ui| {
-                            if labels.is_empty() {
-                                ui.label(text(Type::Caption, tr!("No frame labels yet: name a keyframe in Properties › Label")));
-                            }
-                            for x in &labels {
-                                if ui.selectable_label(x == l, x.as_str()).clicked() && x != l {
-                                    *l = x.clone();
-                                    changed = Some(false);
+                        egui::ComboBox::from_id_salt("label")
+                            .width(crate::theme::fit(ui, 140.0))
+                            .selected_text(l.as_str())
+                            .show_ui(ui, |ui| {
+                                if labels.is_empty() {
+                                    ui.label(text(Type::Caption, tr!("No frame labels yet: name a keyframe in Properties › Label")));
                                 }
-                            }
-                        })
-                        .response
-                        .set_name(tr!("Frame label"));
+                                for x in &labels {
+                                    if ui.selectable_label(x == l, x.as_str()).clicked() && x != l {
+                                        *l = x.clone();
+                                        changed = Some(false);
+                                    }
+                                }
+                            })
+                            .response
+                            .set_name(tr!("Frame label"));
                     }
                 }
             });
             if resolved.is_some_and(|(_, main)| main) && cx.doc.scenes.len() > 1 {
                 form_row(ui, FORM_LABEL_DOCK, tr!("Scene"), |ui| {
                     let shown = scene.clone().unwrap_or_else(|| tr!("This scene").into());
-                    egui::ComboBox::from_id_salt("scene").width(crate::theme::fit(ui, 160.0)).selected_text(shown).show_ui(ui, |ui| {
-                        if ui.selectable_label(scene.is_none(), tr!("This scene")).clicked() && scene.is_some() {
-                            *scene = None;
-                            changed = Some(false);
-                        }
-                        for s in &cx.doc.scenes {
-                            if ui.selectable_label(scene.as_deref() == Some(s.name.as_str()), s.name.as_str()).clicked() {
-                                *scene = Some(s.name.clone());
+                    egui::ComboBox::from_id_salt("scene")
+                        .width(crate::theme::fit(ui, 160.0))
+                        .selected_text(shown)
+                        .show_ui(ui, |ui| {
+                            if ui.selectable_label(scene.is_none(), tr!("This scene")).clicked() && scene.is_some() {
+                                *scene = None;
                                 changed = Some(false);
                             }
-                        }
-                    })
-                    .response
-                    .set_name(tr!("Scene"));
+                            for s in &cx.doc.scenes {
+                                if ui.selectable_label(scene.as_deref() == Some(s.name.as_str()), s.name.as_str()).clicked() {
+                                    *scene = Some(s.name.clone());
+                                    changed = Some(false);
+                                }
+                            }
+                        })
+                        .response
+                        .set_name(tr!("Scene"));
                 });
             }
         }
         Action::Trace { message } => {
             form_row(ui, FORM_LABEL_DOCK, tr!("Message"), |ui| {
-                if ui.add(egui::TextEdit::singleline(message).desired_width(crate::theme::fit(ui, 220.0)).hint_text(tr!("written to Output"))).named(tr!("Trace message")).changed() {
+                if ui
+                    .add(egui::TextEdit::singleline(message).desired_width(crate::theme::fit(ui, 220.0)).hint_text(tr!("written to Output")))
+                    .named(tr!("Trace message"))
+                    .changed()
+                {
                     changed = Some(true);
                 }
             });
         }
         Action::SetProperty { property, value, .. } => {
             form_row(ui, FORM_LABEL_DOCK, tr!("Property"), |ui| {
-                egui::ComboBox::from_id_salt("prop").width(crate::theme::fit(ui, 110.0)).selected_text(crate::i18n::t(property.label())).show_ui(ui, |ui| {
-                    for p in Property::ALL {
-                        if ui.selectable_label(*property == p, crate::i18n::t(p.label())).clicked() && *property != p {
-                            *property = p;
-                            *value = match p {
-                                Property::Alpha | Property::Visible | Property::ScaleX | Property::ScaleY => 1.0,
-                                _ => 0.0,
-                            };
-                            changed = Some(false);
+                egui::ComboBox::from_id_salt("prop")
+                    .width(crate::theme::fit(ui, 110.0))
+                    .selected_text(crate::i18n::t(property.label()))
+                    .show_ui(ui, |ui| {
+                        for p in Property::ALL {
+                            if ui.selectable_label(*property == p, crate::i18n::t(p.label())).clicked() && *property != p {
+                                *property = p;
+                                *value = match p {
+                                    Property::Alpha | Property::Visible | Property::ScaleX | Property::ScaleY => 1.0,
+                                    _ => 0.0,
+                                };
+                                changed = Some(false);
+                            }
                         }
-                    }
-                })
-                .response
-                .set_name(tr!("Property"));
+                    })
+                    .response
+                    .set_name(tr!("Property"));
                 match property {
                     Property::Visible => {
                         let mut on = *value != 0.0;
@@ -918,7 +1025,12 @@ fn fields(ui: &mut egui::Ui, a: &mut Action, cx: &Choices<'_>) -> Option<bool> {
                     }
                     Property::Alpha => {
                         let mut pct = *value * 100.0;
-                        if with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut pct).range(0.0..=100.0).suffix(" %").speed(0.5).max_decimals(0))).named(tr!("Alpha")).changed() {
+                        if with_type(ui, Type::Data, |ui| {
+                            ui.add(egui::DragValue::new(&mut pct).range(0.0..=100.0).suffix(" %").speed(0.5).max_decimals(0))
+                        })
+                        .named(tr!("Alpha"))
+                        .changed()
+                        {
                             *value = pct / 100.0;
                             changed = Some(true);
                         }
@@ -930,7 +1042,12 @@ fn fields(ui: &mut egui::Ui, a: &mut Action, cx: &Choices<'_>) -> Option<bool> {
                             Property::X | Property::Y => " px",
                             _ => " ×",
                         };
-                        if with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(value).range(lo..=hi).suffix(suffix).speed(0.5).max_decimals(2))).named(crate::i18n::t(p.label())).changed() {
+                        if with_type(ui, Type::Data, |ui| {
+                            ui.add(egui::DragValue::new(value).range(lo..=hi).suffix(suffix).speed(0.5).max_decimals(2))
+                        })
+                        .named(crate::i18n::t(p.label()))
+                        .changed()
+                        {
                             changed = Some(true);
                         }
                     }

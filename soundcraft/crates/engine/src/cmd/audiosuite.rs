@@ -62,6 +62,7 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
                 | "stem_separation"
                 | "audio_leveling"
                 | "crosstalk_remover"
+                | "remix"
         );
     if !known && soundcraft_mix::is_third_party(&name) {
         return Err(bad("audiosuite.process", format!("`{name}` is a hosted plugin; AudioSuite runs built-in plugins only (engine.plugins)")));
@@ -187,6 +188,7 @@ fn process(e: &mut Engine, p: &Value) -> Result<Value> {
                 apply("separate_crosstalk", &params, &mut audio, srf)?;
                 audio
             }
+            "remix" => run_remix_offline(&audio, srf, &params),
             plugin => {
                 apply(plugin, &params, &mut audio, srf)?;
                 audio
@@ -279,6 +281,18 @@ fn short(n: &str) -> String {
     s.chars().take(8).collect()
 }
 
+fn run_remix_offline(audio: &[Vec<f32>], srf: f32, params: &[(String, f32)]) -> Vec<Vec<f32>> {
+    let get = |k: &str, d: f32| params.iter().find(|(n, _)| n == k).map_or(d, |(_, v)| *v);
+    let target_sec = f64::from(get("target_seconds", 15.0).clamp(0.25, 3600.0));
+    let opts = soundcraft_dsp::RemixOptions {
+        crossfade_ms: get("crossfade_ms", 60.0).clamp(5.0, 500.0),
+        min_segment_beats: get("min_segment_beats", 4.0).clamp(1.0, 16.0) as usize,
+        preserve_intro_beats: 2,
+        preserve_outro_beats: 2,
+    };
+    soundcraft_dsp::remix_to_duration(audio, srf, target_sec, &opts).channels
+}
+
 fn stem_gain_or_mute(db: f32) -> f32 {
     if db <= -47.9 { 0.0 } else { soundcraft_dsp::db_to_gain(db.clamp(-48.0, 12.0)) }
 }
@@ -315,9 +329,7 @@ fn mix_separated_stems(audio: &[Vec<f32>], srf: f32, params: &[(String, f32)]) -
 fn split_stems_to_tracks(e: &mut Engine, src_track: TrackId, clip: &Clip, audio: &[Vec<f32>], sr_hz: u32, srf: f32) -> Vec<u64> {
     let stems = soundcraft_dsp::offline::separate_stems(audio, srf);
     let s = e.session_mut();
-    let (base_name, fmt) = s
-        .track(src_track)
-        .map_or_else(|| (clip.name.clone(), ChannelFormat::Stereo), |t| (t.name.clone(), t.format));
+    let (base_name, fmt) = s.track(src_track).map_or_else(|| (clip.name.clone(), ChannelFormat::Stereo), |t| (t.name.clone(), t.format));
     let mut created = Vec::with_capacity(3);
     for (suffix, ch_buf) in [("Vocals", stems.vocals), ("Accompaniment", stems.accompaniment), ("Ambience", stems.ambience)] {
         let frames = ch_buf.first().map_or(0, Vec::len);

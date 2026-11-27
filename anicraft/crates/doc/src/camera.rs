@@ -102,7 +102,10 @@ impl Camera {
     pub fn stage_view(&self, stage: &Stage) -> Affine {
         let mid = stage_center(stage);
         let c = self.center;
-        let m = Affine::translate(mid.x, mid.y).mul(&Affine::scale(self.zoom, self.zoom)).mul(&Affine::rotate(-self.rotation)).mul(&Affine::translate(-c.x, -c.y));
+        let m = Affine::translate(mid.x, mid.y)
+            .mul(&Affine::scale(self.zoom, self.zoom))
+            .mul(&Affine::rotate(-self.rotation))
+            .mul(&Affine::translate(-c.x, -c.y));
         if m.is_finite() { m } else { Affine::IDENTITY }
     }
 
@@ -125,7 +128,11 @@ impl Camera {
         let mid = stage_center(stage);
         let size = (FOCAL + depth) / dist;
         let pan = (self.center - mid) * (FOCAL / dist);
-        let m = Affine::translate(mid.x, mid.y).mul(&Affine::rotate(-self.rotation)).mul(&Affine::translate(-pan.x, -pan.y)).mul(&Affine::scale(size, size)).mul(&Affine::translate(-mid.x, -mid.y));
+        let m = Affine::translate(mid.x, mid.y)
+            .mul(&Affine::rotate(-self.rotation))
+            .mul(&Affine::translate(-pan.x, -pan.y))
+            .mul(&Affine::scale(size, size))
+            .mul(&Affine::translate(-mid.x, -mid.y));
         Some(if m.is_finite() { m } else { Affine::IDENTITY })
     }
 
@@ -211,7 +218,9 @@ impl Layer {
     /// Whether the depth keys are sorted, one per frame, in range and not too many.
     pub fn depth_keys_clean(&self) -> bool {
         let keys = &self.depth_keys;
-        keys.len() <= MAX_DEPTH_KEYS && keys.windows(2).all(|w| w[0].frame < w[1].frame) && keys.iter().all(|k| clamp_depth(k.depth).to_bits() == k.depth.to_bits())
+        keys.len() <= MAX_DEPTH_KEYS
+            && keys.windows(2).all(|w| w[0].frame < w[1].frame)
+            && keys.iter().all(|k| clamp_depth(k.depth).to_bits() == k.depth.to_bits())
     }
 
     /// Keeps the depth keys sorted, one per frame, finite and in range, and at most

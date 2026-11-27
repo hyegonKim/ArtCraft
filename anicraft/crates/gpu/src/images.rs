@@ -39,7 +39,13 @@ impl Images {
     }
 
     /// Texture views for `want` (in order), uploading what isn't cached yet.
-    pub(crate) fn views(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, max_edge: u32, want: &[Arc<Pixels>]) -> Result<Vec<wgpu::TextureView>, GpuError> {
+    pub(crate) fn views(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        max_edge: u32,
+        want: &[Arc<Pixels>],
+    ) -> Result<Vec<wgpu::TextureView>, GpuError> {
         self.clock += 1;
         let now = self.clock;
         let mut out = Vec::with_capacity(want.len());

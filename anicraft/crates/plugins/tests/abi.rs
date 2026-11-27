@@ -149,20 +149,77 @@ fn modules_are_validated_at_load() {
     let cases: Vec<(&str, Vec<u8>, &str)> = vec![
         ("not wasm", b"MZ\x90\x00 definitely not wasm".to_vec(), "\\0asm"),
         ("truncated", ok[..ok.len() / 2].to_vec(), "valid"),
-        ("wasi import", wat(&format!(r#"(module (import "wasi_snapshot_preview1" "fd_write" (func (param i32 i32 i32 i32) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#)), "wasi_snapshot_preview1.fd_write"),
-        ("unknown anicraft import", wat(&format!(r#"(module (import "anicraft" "open_file" (func (param i32) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#)), "anicraft.open_file"),
-        ("wrong import type", wat(&format!(r#"(module (import "anicraft" "call" (func (param i64) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#)), "must be a function"),
+        (
+            "wasi import",
+            wat(&format!(
+                r#"(module (import "wasi_snapshot_preview1" "fd_write" (func (param i32 i32 i32 i32) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#
+            )),
+            "wasi_snapshot_preview1.fd_write",
+        ),
+        (
+            "unknown anicraft import",
+            wat(&format!(
+                r#"(module (import "anicraft" "open_file" (func (param i32) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#
+            )),
+            "anicraft.open_file",
+        ),
+        (
+            "wrong import type",
+            wat(&format!(
+                r#"(module (import "anicraft" "call" (func (param i64) (result i32))) {base_exports} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#
+            )),
+            "must be a function",
+        ),
         ("imported memory", wat(r#"(module (import "anicraft" "memory" (memory 1)))"#), "anicraft.memory"),
         ("missing ac_run", wat(&format!("(module {base_exports})")), "ac_run"),
         ("wrong ac_run type", wat(&format!(r#"(module {base_exports} (func (export "ac_run") (result i32) i32.const 0))"#)), "ac_run"),
         ("no memory export", wat(r#"(module (func (export "ac_abi_version") (result i32) i32.const 1))"#), "memory"),
-        ("abi 2", wat(&format!(r#"(module {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#, base_exports.replace("(result i32) i32.const 1)", "(result i32) i32.const 2)"))), "returned 2"),
-        ("manifest outside memory", wat(r#"(module (memory (export "memory") 1) (func (export "ac_abi_version") (result i32) i32.const 1) (func (export "ac_manifest") (result i64) (i64.or (i64.shl (i64.const 100) (i64.const 32)) (i64.const 65500))) (func (export "ac_alloc") (param i32) (result i32) i32.const 0) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#), "outside"),
-        ("huge manifest", wat(r#"(module (memory (export "memory") 1) (func (export "ac_abi_version") (result i32) i32.const 1) (func (export "ac_manifest") (result i64) i64.const 0x7fffffff00000000) (func (export "ac_alloc") (param i32) (result i32) i32.const 0) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#), "limit"),
+        (
+            "abi 2",
+            wat(&format!(
+                r#"(module {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#,
+                base_exports.replace("(result i32) i32.const 1)", "(result i32) i32.const 2)")
+            )),
+            "returned 2",
+        ),
+        (
+            "manifest outside memory",
+            wat(
+                r#"(module (memory (export "memory") 1) (func (export "ac_abi_version") (result i32) i32.const 1) (func (export "ac_manifest") (result i64) (i64.or (i64.shl (i64.const 100) (i64.const 32)) (i64.const 65500))) (func (export "ac_alloc") (param i32) (result i32) i32.const 0) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#,
+            ),
+            "outside",
+        ),
+        (
+            "huge manifest",
+            wat(
+                r#"(module (memory (export "memory") 1) (func (export "ac_abi_version") (result i32) i32.const 1) (func (export "ac_manifest") (result i64) i64.const 0x7fffffff00000000) (func (export "ac_alloc") (param i32) (result i32) i32.const 0) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#,
+            ),
+            "limit",
+        ),
         ("bad manifest", module_with(r#"{"id":"bad id","name":"X","kind":"command"}"#, &[], "i32.const 0", ""), "invalid id"),
-        ("memory over the cap", wat(&format!(r#"(module {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#, base_exports.replace("(memory (export \"memory\") 1)", "(memory (export \"memory\") 5000)"))), "start"),
-        ("endless start function", wat(&format!(r#"(module {base_exports} (func $s (loop $l (br $l))) (start $s) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#)), "instruction budget"),
-        ("host call while loading", wat(&format!(r#"(module (import "anicraft" "call" (func $c (param i32 i32) (result i32))) {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#, base_exports.replace("(result i32) i32.const 1)", "(result i32) (drop (call $c (i32.const 0) (i32.const 0))) i32.const 1)"))), "only while"),
+        (
+            "memory over the cap",
+            wat(&format!(
+                r#"(module {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#,
+                base_exports.replace("(memory (export \"memory\") 1)", "(memory (export \"memory\") 5000)")
+            )),
+            "start",
+        ),
+        (
+            "endless start function",
+            wat(&format!(
+                r#"(module {base_exports} (func $s (loop $l (br $l))) (start $s) (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#
+            )),
+            "instruction budget",
+        ),
+        (
+            "host call while loading",
+            wat(&format!(
+                r#"(module (import "anicraft" "call" (func $c (param i32 i32) (result i32))) {} (func (export "ac_run") (param i32 i32) (result i32) i32.const 0))"#,
+                base_exports.replace("(result i32) i32.const 1)", "(result i32) (drop (call $c (i32.const 0) (i32.const 0))) i32.const 1)")
+            )),
+            "only while",
+        ),
     ];
     for (name, bytes, want) in cases {
         let t = Instant::now();
@@ -173,7 +230,6 @@ fn modules_are_validated_at_load() {
     let big = vec![0u8; 1 << 10];
     assert!(Plugin::load(&big, Limits { max_module_bytes: 100, ..Limits::default() }).is_err());
 }
-
 
 #[test]
 fn an_endless_loop_runs_out_of_fuel() {
@@ -234,7 +290,8 @@ fn traps_and_bad_pointers_end_the_run() {
         assert!(matches!(r, Err(Error::Trap(_)) | Err(Error::Abi(_))), "{name}: {r:?}");
     }
     // A negative capacity copies nothing.
-    let (r, _, _) = run(&module(&[(0, "{}")], "(drop (call $call (i32.const 0) (i32.const 2))) (call $response (i32.const 0) (i32.const -5))"), small());
+    let (r, _, _) =
+        run(&module(&[(0, "{}")], "(drop (call $call (i32.const 0) (i32.const 2))) (call $response (i32.const 0) (i32.const -5))"), small());
     r.unwrap();
 }
 
@@ -247,7 +304,10 @@ fn a_flood_of_host_calls_is_cut_off_and_the_log_stays_bounded() {
     let r = p.run(&mut Rec::default(), &Map::new());
     assert!(matches!(r, Err(Error::Limit(ref m)) if m.contains("host-call")), "{r:?}");
     // A run within the call budget keeps at most 50 lines and counts the rest.
-    let body = format!("(local.set $n (i32.const 0)) (loop $l (drop (call $call (i32.const 4096) (i32.const {}))) (local.set $n (i32.add (local.get $n) (i32.const 1))) (br_if $l (i32.lt_u (local.get $n) (i32.const 400)))) i32.const 0", log.len());
+    let body = format!(
+        "(local.set $n (i32.const 0)) (loop $l (drop (call $call (i32.const 4096) (i32.const {}))) (local.set $n (i32.add (local.get $n) (i32.const 1))) (br_if $l (i32.lt_u (local.get $n) (i32.const 400)))) i32.const 0",
+        log.len()
+    );
     let p = Plugin::load(&module(&[(4096, log)], &body), Limits { max_log_lines: 50, ..small() }).unwrap();
     let rep = p.run(&mut Rec::default(), &Map::new()).unwrap();
     assert_eq!((rep.log.len(), rep.log_dropped), (50, 350));
@@ -272,7 +332,10 @@ fn oversized_responses_become_errors() {
         }
     }
     let req = r#"{"op":"big"}"#;
-    let body = format!("(local.set $n (call $call (i32.const 4096) (i32.const {}))) (drop (call $response (i32.const 16384) (i32.const 64))) (if (i32.ne (i32.load8_u (i32.const 16390)) (i32.const 102)) (then (return (i32.const 1)))) (local.get $n) (i32.const 1000) i32.gt_u", req.len());
+    let body = format!(
+        "(local.set $n (call $call (i32.const 4096) (i32.const {}))) (drop (call $response (i32.const 16384) (i32.const 64))) (if (i32.ne (i32.load8_u (i32.const 16390)) (i32.const 102)) (then (return (i32.const 1)))) (local.get $n) (i32.const 1000) i32.gt_u",
+        req.len()
+    );
     let p = Plugin::load(&module(&[(4096, req)], &body), Limits { max_response_bytes: 10_000, ..Limits::default() }).unwrap();
     // Returns 0: the answer was a short error, not 100 kB.
     p.run(&mut Big, &Map::new()).unwrap();

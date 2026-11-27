@@ -46,7 +46,16 @@ fn rgb(c: [u8; 3]) -> Rgba {
 
 /// The settings a session starts with: off, with the saved options and colours.
 pub fn from_prefs(p: &OnionPrefs) -> OnionSkin {
-    let mut o = OnionSkin { ghosts: false, edit_multiple: false, markers: Markers::Relative { before: p.before, after: p.after }, tint: p.tint, fade: p.fade, outlines: p.outlines, keyframes_only: p.keyframes_only, ..OnionSkin::default() };
+    let mut o = OnionSkin {
+        ghosts: false,
+        edit_multiple: false,
+        markers: Markers::Relative { before: p.before, after: p.after },
+        tint: p.tint,
+        fade: p.fade,
+        outlines: p.outlines,
+        keyframes_only: p.keyframes_only,
+        ..OnionSkin::default()
+    };
     if p.all {
         o.all();
     }
@@ -122,7 +131,11 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) {
         toggle_ghosts(app);
     }
     let mut multi = o.edit_multiple;
-    if ui.checkbox(&mut multi, tr!("Edit Multiple Frames")).on_hover_text(tr!("Show the keyframes between the markers at full strength, and select and move their artwork together")).changed() {
+    if ui
+        .checkbox(&mut multi, tr!("Edit Multiple Frames"))
+        .on_hover_text(tr!("Show the keyframes between the markers at full strength, and select and move their artwork together"))
+        .changed()
+    {
         toggle_edit_multiple(app);
     }
     let mut outlines = o.outlines;
@@ -136,18 +149,30 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) {
     ui.separator();
     ui.label(text(Type::Caption, tr!("Markers")));
     let mut always = app.prefs.onion.always_markers;
-    if ui.checkbox(&mut always, tr!("Always Show Markers")).on_hover_text(tr!("Show the markers on the frame ruler even when onion skin is off")).changed() {
+    if ui
+        .checkbox(&mut always, tr!("Always Show Markers"))
+        .on_hover_text(tr!("Show the markers on the frame ruler even when onion skin is off"))
+        .changed()
+    {
         change(app, &ctx, |_, p| p.always_markers = always);
     }
     let mut anchored = o.anchored();
-    if ui.checkbox(&mut anchored, tr!("Anchor Markers")).on_hover_text(tr!("Keep the markers on their frames instead of moving them with the playhead")).changed() {
+    if ui
+        .checkbox(&mut anchored, tr!("Anchor Markers"))
+        .on_hover_text(tr!("Keep the markers on their frames instead of moving them with the playhead"))
+        .changed()
+    {
         let (f, n) = (app.s.frame, app.s.frame_count());
         change(app, &ctx, |o, _| o.set_anchored(anchored, f, n));
     }
     ui.horizontal(|ui| {
         for n in PRESETS {
             let on = o.markers == Markers::Relative { before: n, after: n };
-            if ui.selectable_label(on, tr!("Onion {n}", n = n)).on_hover_text(trn!("{n} frame before and after the playhead", "{n} frames before and after the playhead", n as usize)).clicked() {
+            if ui
+                .selectable_label(on, tr!("Onion {n}", n = n))
+                .on_hover_text(trn!("{n} frame before and after the playhead", "{n} frames before and after the playhead", n as usize))
+                .clicked()
+            {
                 change(app, &ctx, |o, _| o.preset(n));
             }
         }
@@ -158,7 +183,11 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) {
     ui.separator();
     ui.label(text(Type::Caption, tr!("Colour")));
     let mut tint = o.tint;
-    if ui.checkbox(&mut tint, tr!("Tint")).on_hover_text(tr!("Tint frames before the playhead and after it in their colours; off, they keep their own colours")).changed() {
+    if ui
+        .checkbox(&mut tint, tr!("Tint"))
+        .on_hover_text(tr!("Tint frames before the playhead and after it in their colours; off, they keep their own colours"))
+        .changed()
+    {
         change(app, &ctx, |o, _| o.tint = tint);
     }
     let mut fade = o.fade;
@@ -171,7 +200,11 @@ pub fn menu(app: &mut App, ui: &mut egui::Ui) {
             ui.label(text(Type::Body, if past { tr!("Before") } else { tr!("After") }));
             let [r0, g0, b0, _] = to_color32(if past { o.past } else { o.future }).to_srgba_unmultiplied();
             let mut px = [r0, g0, b0];
-            let r = crate::colour::button(ui, &mut px).named(name).on_hover_text(if past { tr!("Colour of the frames before the playhead") } else { tr!("Colour of the frames after the playhead") });
+            let r = crate::colour::button(ui, &mut px).named(name).on_hover_text(if past {
+                tr!("Colour of the frames before the playhead")
+            } else {
+                tr!("Colour of the frames after the playhead")
+            });
             if r.changed() {
                 let [cr, cg, cb] = px;
                 change(app, &ctx, |o, p| {
@@ -206,7 +239,9 @@ fn a11y_key(name: &str, key: &str) -> String {
 /// The timeline's onion buttons: Onion Skin, Edit Multiple Frames and the onion menu.
 pub fn buttons(app: &mut App, ui: &mut egui::Ui) {
     let key = app.keymap.primary("view.onion").map(str::to_string);
-    if crate::timeline::icon_button(ui, &crate::a11y::with_key(tr!("Onion skin"), key.as_deref()), Some(app.onion.ghosts), crate::icons::Icon::Onion).clicked() {
+    if crate::timeline::icon_button(ui, &crate::a11y::with_key(tr!("Onion skin"), key.as_deref()), Some(app.onion.ghosts), crate::icons::Icon::Onion)
+        .clicked()
+    {
         toggle_ghosts(app);
     }
     if crate::timeline::icon_button(ui, tr!("Edit Multiple Frames"), Some(app.onion.edit_multiple), crate::icons::Icon::EditMultiple).clicked() {
@@ -215,7 +250,12 @@ pub fn buttons(app: &mut App, ui: &mut egui::Ui) {
     let (rect, resp) = ui.allocate_exact_size(vec2(16.0, crate::theme::TARGET), Sense::click());
     let hot = resp.hovered() || egui::Popup::is_id_open(ui.ctx(), egui::Id::new(MENU_ID));
     ui.painter().rect_filled(rect, T.rc(), if hot { T.header } else { Color32::TRANSPARENT });
-    crate::icons::paint(ui.painter(), Rect::from_center_size(rect.center(), vec2(12.0, 12.0)), crate::icons::Icon::ChevronDown, if hot { T.icon_hot } else { T.icon });
+    crate::icons::paint(
+        ui.painter(),
+        Rect::from_center_size(rect.center(), vec2(12.0, 12.0)),
+        crate::icons::Icon::ChevronDown,
+        if hot { T.icon_hot } else { T.icon },
+    );
     crate::a11y::control(ui, &resp, egui::WidgetType::Button, tr!("Onion skin options"), None);
     let resp = resp.on_hover_text(tr!("Onion skin options: markers, outlines, colours"));
     if std::mem::take(&mut app.onion_ui.open_menu) {
@@ -254,7 +294,11 @@ pub fn ruler(app: &mut App, ui: &mut egui::Ui, ruler: Rect, cell_w: f32, x_of: i
         painter.rect_filled(Rect::from_min_max(pos2(x_of(first), ruler.top()), pos2(x_of(p), ruler.bottom())), 0.0, past.gamma_multiply(0.22 * dim));
     }
     if last > p {
-        painter.rect_filled(Rect::from_min_max(pos2(x_of(p + 1), ruler.top()), pos2(x_of(last + 1), ruler.bottom())), 0.0, future.gamma_multiply(0.22 * dim));
+        painter.rect_filled(
+            Rect::from_min_max(pos2(x_of(p + 1), ruler.top()), pos2(x_of(last + 1), ruler.bottom())),
+            0.0,
+            future.gamma_multiply(0.22 * dim),
+        );
     }
     let frames = app.s.frame_count();
     let anchored = app.onion.anchored();
@@ -298,7 +342,11 @@ pub fn ruler(app: &mut App, ui: &mut egui::Ui, ruler: Rect, cell_w: f32, x_of: i
             let ctx = ui.ctx().clone();
             change(app, &ctx, |_, _| {});
         }
-        let tip = if anchored { tr!("Drag to choose the frames onion skin shows (anchored: they stay when the playhead moves)") } else { tr!("Drag to choose how many frames onion skin shows before and after the playhead") };
+        let tip = if anchored {
+            tr!("Drag to choose the frames onion skin shows (anchored: they stay when the playhead moves)")
+        } else {
+            tr!("Drag to choose how many frames onion skin shows before and after the playhead")
+        };
         resp.on_hover_text(tip);
     }
 }
@@ -309,7 +357,14 @@ pub fn ruler(app: &mut App, ui: &mut egui::Ui, ruler: Rect, cell_w: f32, x_of: i
 /// playhead and markers).
 pub fn items(app: &mut App) -> Shown {
     let (first, last) = range(app);
-    let key = (app.s.state, app.s.scene, (app.s.editing.len(), app.s.editing_symbol().map(|s| s.0), app.s.editing.last().and_then(|l| l.instance).map(|(_, e)| e.0)), app.s.frame, first, last);
+    let key = (
+        app.s.state,
+        app.s.scene,
+        (app.s.editing.len(), app.s.editing_symbol().map(|s| s.0), app.s.editing.last().and_then(|l| l.instance).map(|(_, e)| e.0)),
+        app.s.frame,
+        first,
+        last,
+    );
     if let Some((k, v)) = &app.onion_ui.cache
         && *k == key
     {
@@ -335,7 +390,11 @@ fn parse_items(v: &serde_json::Value) -> Option<Vec<FrameItem>> {
         list.iter()
             .filter_map(|t| {
                 let n = |i: usize| t.get(i).and_then(serde_json::Value::as_u64);
-                Some(FrameItem { layer: anicraft_engine::doc::LayerId(n(0)?), frame: u32::try_from(n(1)?).ok()?, element: anicraft_engine::doc::ElementId(n(2)?) })
+                Some(FrameItem {
+                    layer: anicraft_engine::doc::LayerId(n(0)?),
+                    frame: u32::try_from(n(1)?).ok()?,
+                    element: anicraft_engine::doc::ElementId(n(2)?),
+                })
             })
             .collect(),
     )
@@ -386,7 +445,8 @@ pub fn drag_end(app: &mut App) {
 /// Whether `it` is a raw (merge-drawing) shape.
 fn is_raw(app: &App, it: &FrameItem) -> bool {
     let k = app.s.timeline().layer(it.layer).and_then(|l| l.keyframe_starting_at(it.frame).and_then(|i| l.keyframes.get(i)));
-    k.and_then(|k| k.elements.iter().find(|e| e.id == it.element)).is_some_and(|e| matches!(&e.kind, anicraft_engine::doc::ElementKind::Shape(sh) if sh.merge))
+    k.and_then(|k| k.elements.iter().find(|e| e.id == it.element))
+        .is_some_and(|e| matches!(&e.kind, anicraft_engine::doc::ElementKind::Shape(sh) if sh.merge))
 }
 
 /// The selection's bounds on every keyframe together (the Free Transform box), in stage space.
@@ -414,27 +474,47 @@ pub fn invoke(app: &mut App, id: &str) -> bool {
         "edit.delete" if has_sel => {
             if let Some(v) = run_on(app, "frames.delete", json!({}), true) {
                 let n = v["deleted"].as_u64().unwrap_or(0) as usize;
-                app.status_ok(trn!("Deleted {n} element on the frames between the markers. {undo} to undo.", "Deleted {n} elements on the frames between the markers. {undo} to undo.", n, undo = undo));
+                app.status_ok(trn!(
+                    "Deleted {n} element on the frames between the markers. {undo} to undo.",
+                    "Deleted {n} elements on the frames between the markers. {undo} to undo.",
+                    n,
+                    undo = undo
+                ));
             }
         }
         "edit.copy" if has_sel => {
             if let Some(v) = run_on(app, "frames.copy", json!({}), true) {
                 let n = v["copied"].as_u64().unwrap_or(0) as usize;
                 let key = crate::platform::shortcut_label(app.keymap.primary("edit.paste_in_place").unwrap_or("Ctrl+Shift+V"));
-                app.status_ok(trn!("Copied {n} element. Paste in Place ({key}) puts it back on its keyframe.", "Copied {n} elements. Paste in Place ({key}) puts each back on its keyframe.", n, key = key));
+                app.status_ok(trn!(
+                    "Copied {n} element. Paste in Place ({key}) puts it back on its keyframe.",
+                    "Copied {n} elements. Paste in Place ({key}) puts each back on its keyframe.",
+                    n,
+                    key = key
+                ));
             }
         }
         "edit.cut" if has_sel => {
             if let Some(v) = run_on(app, "frames.cut", json!({}), true) {
                 let n = v["cut"].as_u64().unwrap_or(0) as usize;
-                app.status_ok(trn!("Cut {n} element from the frames between the markers. {undo} to undo.", "Cut {n} elements from the frames between the markers. {undo} to undo.", n, undo = undo));
+                app.status_ok(trn!(
+                    "Cut {n} element from the frames between the markers. {undo} to undo.",
+                    "Cut {n} elements from the frames between the markers. {undo} to undo.",
+                    n,
+                    undo = undo
+                ));
             }
         }
         // Paste in Place: onto the keyframes between the markers.
         "edit.paste_in_place" if !app.s.clipboard.is_empty() => {
             if let Some(v) = run_on(app, "frames.paste", json!({}), false) {
                 let n = v["keyframes"].as_u64().unwrap_or(0) as usize;
-                app.status_ok(trn!("Pasted in place onto {n} keyframe. {undo} to undo.", "Pasted in place onto {n} keyframes. {undo} to undo.", n, undo = undo));
+                app.status_ok(trn!(
+                    "Pasted in place onto {n} keyframe. {undo} to undo.",
+                    "Pasted in place onto {n} keyframes. {undo} to undo.",
+                    n,
+                    undo = undo
+                ));
             }
         }
         // Paste: onto the current frame, as without Edit Multiple Frames; what lands is selected.
@@ -470,7 +550,14 @@ pub fn invoke(app: &mut App, id: &str) -> bool {
 /// its layer's keyframe there), and lets go of the playhead's selection.
 fn adopt_selection(app: &mut App) {
     let frame = app.s.frame;
-    let picked: Vec<FrameItem> = app.s.selected_elements().iter().filter_map(|(l, e)| app.s.timeline().layer(*l).and_then(|x| x.keyframe_at(frame)).map(|k| FrameItem { layer: *l, frame: k.start, element: e.id })).collect();
+    let picked: Vec<FrameItem> = app
+        .s
+        .selected_elements()
+        .iter()
+        .filter_map(|(l, e)| {
+            app.s.timeline().layer(*l).and_then(|x| x.keyframe_at(frame)).map(|k| FrameItem { layer: *l, frame: k.start, element: e.id })
+        })
+        .collect();
     app.s.selection.clear();
     app.onion_ui.sel = picked;
 }
@@ -483,7 +570,13 @@ pub fn enabled(app: &App, id: &str) -> Option<bool> {
     let sel = !app.onion_ui.sel.is_empty();
     match id {
         "edit.delete" | "edit.cut" | "edit.copy" => Some(sel),
-        "edit.duplicate" | "modify.convert_to_symbol" | "modify.break_apart" | "arrange.bring_to_front" | "arrange.send_to_back" | "align.distribute_h" | "align.distribute_v" => Some(false),
+        "edit.duplicate"
+        | "modify.convert_to_symbol"
+        | "modify.break_apart"
+        | "arrange.bring_to_front"
+        | "arrange.send_to_back"
+        | "align.distribute_h"
+        | "align.distribute_v" => Some(false),
         _ => None,
     }
 }
@@ -491,7 +584,11 @@ pub fn enabled(app: &App, id: &str) -> Option<bool> {
 /// The stage's right-click menu with Edit Multiple Frames on.
 pub fn context_menu(app: &mut App, ui: &mut egui::Ui) {
     let selected = !app.onion_ui.sel.is_empty();
-    let ids: &[&str] = if selected { &["edit.cut", "edit.copy", "edit.paste", "edit.paste_in_place", "edit.delete"] } else { &["edit.paste", "edit.paste_in_place", "edit.select_all"] };
+    let ids: &[&str] = if selected {
+        &["edit.cut", "edit.copy", "edit.paste", "edit.paste_in_place", "edit.delete"]
+    } else {
+        &["edit.paste", "edit.paste_in_place", "edit.select_all"]
+    };
     for id in ids {
         crate::menus::cmd_item(app, ui, id);
     }
@@ -561,7 +658,8 @@ pub fn click(app: &mut App, sp: Pos2, shift: bool, zoom: f32) {
 /// A marquee let go: what lies wholly inside it, on every keyframe shown.
 pub fn marquee(app: &mut App, a: Pos2, b: Pos2, shift: bool) {
     let r = GRect::from_points(Vec2::new(a.x, a.y), Vec2::new(b.x, b.y));
-    let inside: Vec<FrameItem> = items(app).iter().filter(|(_, bb)| !bb.is_empty() && r.contains(bb.min) && r.contains(bb.max)).map(|(it, _)| *it).collect();
+    let inside: Vec<FrameItem> =
+        items(app).iter().filter(|(_, bb)| !bb.is_empty() && r.contains(bb.min) && r.contains(bb.max)).map(|(it, _)| *it).collect();
     if !shift {
         app.onion_ui.sel.clear();
     }
@@ -710,7 +808,10 @@ mod tests {
         let p = a.prefs.onion.clone();
         assert_eq!((p.before, p.after, p.all, p.outlines, p.keyframes_only, p.fade, p.past), (5, 5, false, true, true, false, Some([1, 2, 3])));
         let back = from_prefs(&p);
-        assert_eq!((back.markers, back.outlines, back.keyframes_only, back.fade, back.ghosts), (Markers::Relative { before: 5, after: 5 }, true, true, false, false));
+        assert_eq!(
+            (back.markers, back.outlines, back.keyframes_only, back.fade, back.ghosts),
+            (Markers::Relative { before: 5, after: 5 }, true, true, false, false)
+        );
         assert_eq!(srgb_of(back.past), [1, 2, 3]);
         change(&mut a, &ctx, |o, _| o.all());
         assert!(a.prefs.onion.all && from_prefs(&a.prefs.onion).is_all());
@@ -762,8 +863,12 @@ mod tests {
         let steps = a.s.history_len();
         a.s.begin_gesture("Free Transform");
         // A drag in two steps: twice as big about the box's centre, sent as changes.
-        let half = anicraft_engine::geom::Affine::translate(cx, cy).mul(&anicraft_engine::geom::Affine::scale(1.5, 1.5)).mul(&anicraft_engine::geom::Affine::translate(-cx, -cy));
-        let rest = anicraft_engine::geom::Affine::translate(cx, cy).mul(&anicraft_engine::geom::Affine::scale(2.0 / 1.5, 2.0 / 1.5)).mul(&anicraft_engine::geom::Affine::translate(-cx, -cy));
+        let half = anicraft_engine::geom::Affine::translate(cx, cy)
+            .mul(&anicraft_engine::geom::Affine::scale(1.5, 1.5))
+            .mul(&anicraft_engine::geom::Affine::translate(-cx, -cy));
+        let rest = anicraft_engine::geom::Affine::translate(cx, cy)
+            .mul(&anicraft_engine::geom::Affine::scale(2.0 / 1.5, 2.0 / 1.5))
+            .mul(&anicraft_engine::geom::Affine::translate(-cx, -cy));
         assert!(transform_by(&mut a, &half) && transform_by(&mut a, &rest));
         drag_end(&mut a);
         assert_eq!(a.s.history_len(), steps + 1, "one undo step");

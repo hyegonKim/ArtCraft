@@ -238,11 +238,7 @@ pub fn effective(s: &DevelopSettings) -> Cow<'_, DevelopSettings> {
 /// key luminance and colour distribution on a fixed strided grid so thumbnails, previews and full
 /// exports derive identical scene-adapted tone and colour response, scaled by `profile.amount`.
 /// Every non-adaptive profile delegates directly to [`effective`].
-pub fn effective_for_image<'a>(
-    s: &'a DevelopSettings,
-    src: &lightcraft_raster::Rgb32f,
-    info: &crate::SourceInfo,
-) -> Cow<'a, DevelopSettings> {
+pub fn effective_for_image<'a>(s: &'a DevelopSettings, src: &lightcraft_raster::Rgb32f, info: &crate::SourceInfo) -> Cow<'a, DevelopSettings> {
     let id = s.profile.id.as_str();
     if id != "lc.adaptive" && id != "lc.adaptive.mono" {
         return effective(s);

@@ -115,18 +115,12 @@ impl NewTracks {
             ui.push_id(idx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label("Create");
-                    let mut count_out =
-                        egui::TextEdit::singleline(&mut row.count_text).desired_width(40.0).show(ui);
-                    let count_resp = crate::widgets::named_text_field(
-                        count_out.response.response.clone(),
-                        "Number of tracks",
-                    );
+                    let mut count_out = egui::TextEdit::singleline(&mut row.count_text).desired_width(40.0).show(ui);
+                    let count_resp = crate::widgets::named_text_field(count_out.response.response.clone(), "Number of tracks");
                     if idx == 0 && !self.focused_initial {
                         count_out.response.request_focus();
-                        let all = egui::text::CCursorRange::two(
-                            egui::text::CCursor::new(0),
-                            egui::text::CCursor::new(row.count_text.chars().count()),
-                        );
+                        let all =
+                            egui::text::CCursorRange::two(egui::text::CCursor::new(0), egui::text::CCursor::new(row.count_text.chars().count()));
                         count_out.state.cursor.set_char_range(Some(all));
                         count_out.state.store(ui.ctx(), count_out.response.id);
                         self.focused_initial = true;
@@ -135,8 +129,7 @@ impl NewTracks {
                         self.active = idx;
                     }
                     if count_out.response.changed() {
-                        let digits: String =
-                            row.count_text.chars().filter(|c| c.is_ascii_digit()).collect();
+                        let digits: String = row.count_text.chars().filter(|c| c.is_ascii_digit()).collect();
                         if let Ok(parsed) = digits.parse::<u32>() {
                             let clamped = parsed.clamp(1, 128);
                             row.count = clamped;
@@ -154,59 +147,47 @@ impl NewTracks {
                     }
 
                     if row.has_format() {
-                        let fmt = craft_ui::ComboBox::from_id_salt(("nt_fmt", idx))
-                            .selected_text(row.format.as_str())
-                            .show_ui(ui, |ui| {
-                                for f in ChannelFormat::ALL {
-                                    if ui.selectable_label(row.format == f.label(), f.label()).clicked()
-                                    {
-                                        row.format = f.label().to_string();
-                                        self.active = idx;
-                                    }
-                                }
-                            });
-                        fmt.response.accessible_name("Channel format");
-                    }
-
-                    let kind_label =
-                        TrackKind::from_id(&row.kind).map_or("Audio Track", TrackKind::label);
-                    let kind_combo = craft_ui::ComboBox::from_id_salt(("nt_kind", idx))
-                        .selected_text(kind_label)
-                        .show_ui(ui, |ui| {
-                            for k in TrackKind::ALL {
-                                if ui.selectable_label(row.kind == k.id(), k.label()).clicked() {
-                                    set_new_track_kind(&mut row.kind, &mut row.name, k);
+                        let fmt = craft_ui::ComboBox::from_id_salt(("nt_fmt", idx)).selected_text(row.format.as_str()).show_ui(ui, |ui| {
+                            for f in ChannelFormat::ALL {
+                                if ui.selectable_label(row.format == f.label(), f.label()).clicked() {
+                                    row.format = f.label().to_string();
                                     self.active = idx;
                                 }
                             }
                         });
+                        fmt.response.accessible_name("Channel format");
+                    }
+
+                    let kind_label = TrackKind::from_id(&row.kind).map_or("Audio Track", TrackKind::label);
+                    let kind_combo = craft_ui::ComboBox::from_id_salt(("nt_kind", idx)).selected_text(kind_label).show_ui(ui, |ui| {
+                        for k in TrackKind::ALL {
+                            if ui.selectable_label(row.kind == k.id(), k.label()).clicked() {
+                                set_new_track_kind(&mut row.kind, &mut row.name, k);
+                                self.active = idx;
+                            }
+                        }
+                    });
                     kind_combo.response.accessible_name("Track kind");
 
                     if row.has_timebase() {
                         ui.label("in");
                         let tb_text = if row.timebase == "ticks" { "Ticks" } else { "Samples" };
-                        let tb = craft_ui::ComboBox::from_id_salt(("nt_tb", idx))
-                            .selected_text(tb_text)
-                            .show_ui(ui, |ui| {
-                                if ui.selectable_label(row.timebase == "samples", "Samples").clicked() {
-                                    row.timebase = "samples".to_string();
-                                    self.active = idx;
-                                }
-                                if ui.selectable_label(row.timebase == "ticks", "Ticks").clicked() {
-                                    row.timebase = "ticks".to_string();
-                                    self.active = idx;
-                                }
-                            });
+                        let tb = craft_ui::ComboBox::from_id_salt(("nt_tb", idx)).selected_text(tb_text).show_ui(ui, |ui| {
+                            if ui.selectable_label(row.timebase == "samples", "Samples").clicked() {
+                                row.timebase = "samples".to_string();
+                                self.active = idx;
+                            }
+                            if ui.selectable_label(row.timebase == "ticks", "Ticks").clicked() {
+                                row.timebase = "ticks".to_string();
+                                self.active = idx;
+                            }
+                        });
                         tb.response.accessible_name("Timebase");
                     }
 
                     ui.label("Name");
                     let name_resp = crate::widgets::named_text_field(
-                        ui.add(
-                            egui::TextEdit::singleline(&mut row.name)
-                                .desired_width(240.0)
-                                .min_size(egui::vec2(220.0, 0.0)),
-                        ),
+                        ui.add(egui::TextEdit::singleline(&mut row.name).desired_width(240.0).min_size(egui::vec2(220.0, 0.0))),
                         "Name",
                     );
                     if name_resp.gained_focus() || name_resp.clicked() {
@@ -276,15 +257,10 @@ impl NewTracks {
                 let egui::Event::Key { key, pressed: true, modifiers, .. } = e else {
                     return true;
                 };
-                if !matches!(key, Key::ArrowUp | Key::ArrowDown | Key::ArrowLeft | Key::ArrowRight)
-                {
+                if !matches!(key, Key::ArrowUp | Key::ArrowDown | Key::ArrowLeft | Key::ArrowRight) {
                     return true;
                 }
-                let primary = if mac {
-                    modifiers.mac_cmd || modifiers.command
-                } else {
-                    modifiers.ctrl || modifiers.command
-                };
+                let primary = if mac { modifiers.mac_cmd || modifiers.command } else { modifiers.ctrl || modifiers.command };
                 let bare_up_down = matches!(key, Key::ArrowUp | Key::ArrowDown)
                     && !modifiers.command
                     && !modifiers.mac_cmd
@@ -335,11 +311,7 @@ impl NewTracks {
                 if row.has_timebase() {
                     match key {
                         Key::ArrowDown | Key::ArrowUp => {
-                            row.timebase = if row.timebase == "ticks" {
-                                "samples".to_string()
-                            } else {
-                                "ticks".to_string()
-                            };
+                            row.timebase = if row.timebase == "ticks" { "samples".to_string() } else { "ticks".to_string() };
                         }
                         _ => {}
                     }
@@ -352,11 +324,7 @@ impl NewTracks {
                     let all = ChannelFormat::ALL;
                     if !all.is_empty() {
                         let cur = all.iter().position(|f| f.label() == row.format).unwrap_or(0);
-                        let next = if key == Key::ArrowRight {
-                            (cur + 1) % all.len()
-                        } else {
-                            (cur + all.len() - 1) % all.len()
-                        };
+                        let next = if key == Key::ArrowRight { (cur + 1) % all.len() } else { (cur + all.len() - 1) % all.len() };
                         if let Some(fmt) = all.get(next) {
                             row.format = fmt.label().to_string();
                         }
@@ -366,11 +334,7 @@ impl NewTracks {
                     let all = TrackKind::ALL;
                     if !all.is_empty() {
                         let cur = all.iter().position(|k| k.id() == row.kind).unwrap_or(0);
-                        let next = if key == Key::ArrowDown {
-                            (cur + 1) % all.len()
-                        } else {
-                            (cur + all.len() - 1) % all.len()
-                        };
+                        let next = if key == Key::ArrowDown { (cur + 1) % all.len() } else { (cur + all.len() - 1) % all.len() };
                         if let Some(k) = all.get(next) {
                             set_new_track_kind(&mut row.kind, &mut row.name, *k);
                         }

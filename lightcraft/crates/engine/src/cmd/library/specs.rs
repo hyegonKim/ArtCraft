@@ -744,6 +744,7 @@ pub fn specs() -> Vec<CommandSpec> {
                         ("copyright", &mut m.copyright),
                         ("usageTerms", &mut m.usage_terms),
                         ("copyrightUrl", &mut m.copyright_url),
+                        ("credit", &mut m.credit),
                         ("creator", &mut m.creator),
                         ("location", &mut m.location),
                         ("city", &mut m.city),

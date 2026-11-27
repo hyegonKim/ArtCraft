@@ -161,7 +161,18 @@ pub fn builtin(key: &str) -> Option<BrushPreset> {
         "marker" => BrushPreset { size: 16.0, shape: Shape::Square, angle: 30.0, roundness: 45.0, smoothing: 40.0, pressure_size: false, ..d },
         "chalk" => BrushPreset { size: 20.0, roundness: 80.0, angle: 20.0, smoothing: 40.0, jitter: 18.0, ..d },
         "dotted" => BrushPreset { size: 8.0, smoothing: 60.0, pressure_size: false, spacing: 220.0, ..d },
-        "charcoal" => BrushPreset { size: 24.0, roundness: 60.0, angle: 30.0, smoothing: 45.0, curve: PressureCurve::SOFT, jitter: 8.0, texture: 35.0, tilt_angle: true, tilt_width: true, ..d },
+        "charcoal" => BrushPreset {
+            size: 24.0,
+            roundness: 60.0,
+            angle: 30.0,
+            smoothing: 45.0,
+            curve: PressureCurve::SOFT,
+            jitter: 8.0,
+            texture: 35.0,
+            tilt_angle: true,
+            tilt_width: true,
+            ..d
+        },
         "spatter" => BrushPreset { size: 7.0, smoothing: 50.0, spacing: 60.0, scatter: 140.0, ..d },
         _ => d,
     })
@@ -277,7 +288,9 @@ pub fn curve_param(p: &Value, key: &str) -> Result<Option<PressureCurve>> {
                 .iter()
                 .map(|v| {
                     let xy = v.as_array().filter(|a| a.len() == 2).ok_or_else(bad)?;
-                    let n = |i: usize| xy.get(i).and_then(Value::as_f64).map(|f| f as f32).filter(|f| f.is_finite() && (-1e-3..=1.001).contains(f)).ok_or_else(bad);
+                    let n = |i: usize| {
+                        xy.get(i).and_then(Value::as_f64).map(|f| f as f32).filter(|f| f.is_finite() && (-1e-3..=1.001).contains(f)).ok_or_else(bad)
+                    };
                     Ok([n(0)?, n(1)?])
                 })
                 .collect::<Result<Vec<[f32; 2]>>>()?;
@@ -425,7 +438,11 @@ impl BrushLibrary {
 
     /// A brush set file holding `presets`.
     pub fn file_json(presets: &[BrushPreset]) -> String {
-        let f = BrushFile { format: FILE_FORMAT.into(), version: FILE_VERSION, brushes: presets.iter().filter_map(|p| serde_json::to_value(p).ok()).collect() };
+        let f = BrushFile {
+            format: FILE_FORMAT.into(),
+            version: FILE_VERSION,
+            brushes: presets.iter().filter_map(|p| serde_json::to_value(p).ok()).collect(),
+        };
         serde_json::to_string_pretty(&f).unwrap_or_default()
     }
 
@@ -438,7 +455,13 @@ impl BrushLibrary {
         if f.version > FILE_VERSION {
             return Err(EngineError::Param(format!("this brush set is version {}, newer than this AniCraft reads ({FILE_VERSION})", f.version)));
         }
-        Ok(f.brushes.into_iter().take(MAX_USER_PRESETS * 4).filter_map(|v| serde_json::from_value::<BrushPreset>(v).ok()).map(BrushPreset::sanitized).filter(|p| !p.name.is_empty()).collect())
+        Ok(f.brushes
+            .into_iter()
+            .take(MAX_USER_PRESETS * 4)
+            .filter_map(|v| serde_json::from_value::<BrushPreset>(v).ok())
+            .map(BrushPreset::sanitized)
+            .filter(|p| !p.name.is_empty())
+            .collect())
     }
 }
 
@@ -480,7 +503,8 @@ mod tests {
 
     #[test]
     fn brush_set_files_round_trip_and_reject_junk() {
-        let mine = vec![BrushPreset { name: "A".into(), curve: PressureCurve::SOFT, jitter: 12.0, ..BrushPreset::default() }, builtin("dotted").unwrap()];
+        let mine =
+            vec![BrushPreset { name: "A".into(), curve: PressureCurve::SOFT, jitter: 12.0, ..BrushPreset::default() }, builtin("dotted").unwrap()];
         let text = BrushLibrary::file_json(&mine);
         assert_eq!(BrushLibrary::parse_file(&text).unwrap(), mine);
         assert!(BrushLibrary::parse_file("{}").is_err());
@@ -505,7 +529,14 @@ mod tests {
         assert_eq!((q.size, q.curve, q.taper_end, q.roundness), (30.0, PressureCurve::FIRM, 20.0, 15.0));
         let q = p.with_params(&serde_json::json!({"curve": [[0, 0.2], [1, 0.8]]})).unwrap();
         assert_eq!(q.curve.map(0.0), 0.2);
-        for bad in [serde_json::json!({"curve": "wobbly"}), serde_json::json!({"curve": [[0, 2]]}), serde_json::json!({"curve": []}), serde_json::json!({"spacing": 2}), serde_json::json!({"jitter": 60}), serde_json::json!({"shape": "star"})] {
+        for bad in [
+            serde_json::json!({"curve": "wobbly"}),
+            serde_json::json!({"curve": [[0, 2]]}),
+            serde_json::json!({"curve": []}),
+            serde_json::json!({"spacing": 2}),
+            serde_json::json!({"jitter": 60}),
+            serde_json::json!({"shape": "star"}),
+        ] {
             assert!(p.with_params(&bad).is_err(), "{bad}");
         }
         // The params name every setting and read back as the same preset.

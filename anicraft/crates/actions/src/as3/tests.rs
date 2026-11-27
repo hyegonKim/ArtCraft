@@ -129,10 +129,41 @@ fn lines(src: &str) -> Vec<String> {
 
 #[test]
 fn timeline_calls_run_as_actions() {
-    let a = lines("stop();\nplay()\nthis.nextFrame();\nprevFrame();\nnextScene(); prevScene();\ngotoAndStop(1); gotoAndPlay(\"run\"); gotoAndPlay(12, \"Scene 2\"); gotoAndStop('end', null); gotoAndStop(2 + 3);");
-    assert_eq!(a, ["This Stop", "This Play", "This Next frame", "This Previous frame", "This Next scene", "This Previous scene", "This Go to frame 1 and stop", "This Go to “run” and play", "This Go to frame 12 in “Scene 2” and play", "This Go to “end” and stop", "This Go to frame 5 and stop"]);
-    let a = lines("hero_mc.gotoAndStop(\"run\");\nthis.hero_mc.arm_mc.play();\nMovieClip(parent).stop();\nMovieClip(this.parent.parent).nextFrame();\nMovieClip(root).menu.play();\n(root as MovieClip).stop();\nhero_mc.root.stop();\nObject(parent).door.prevFrame();");
-    assert_eq!(a, ["This Go to “run” and stop (hero_mc)", "This Play (hero_mc.arm_mc)", "This Stop (parent)", "This Next frame (parent.parent)", "This Play (root.menu)", "This Stop (root)", "This Stop (root)", "This Previous frame (parent.door)"]);
+    let a = lines(
+        "stop();\nplay()\nthis.nextFrame();\nprevFrame();\nnextScene(); prevScene();\ngotoAndStop(1); gotoAndPlay(\"run\"); gotoAndPlay(12, \"Scene 2\"); gotoAndStop('end', null); gotoAndStop(2 + 3);",
+    );
+    assert_eq!(
+        a,
+        [
+            "This Stop",
+            "This Play",
+            "This Next frame",
+            "This Previous frame",
+            "This Next scene",
+            "This Previous scene",
+            "This Go to frame 1 and stop",
+            "This Go to “run” and play",
+            "This Go to frame 12 in “Scene 2” and play",
+            "This Go to “end” and stop",
+            "This Go to frame 5 and stop"
+        ]
+    );
+    let a = lines(
+        "hero_mc.gotoAndStop(\"run\");\nthis.hero_mc.arm_mc.play();\nMovieClip(parent).stop();\nMovieClip(this.parent.parent).nextFrame();\nMovieClip(root).menu.play();\n(root as MovieClip).stop();\nhero_mc.root.stop();\nObject(parent).door.prevFrame();",
+    );
+    assert_eq!(
+        a,
+        [
+            "This Go to “run” and stop (hero_mc)",
+            "This Play (hero_mc.arm_mc)",
+            "This Stop (parent)",
+            "This Next frame (parent.parent)",
+            "This Play (root.menu)",
+            "This Stop (root)",
+            "This Stop (root)",
+            "This Previous frame (parent.door)"
+        ]
+    );
 }
 
 #[test]
@@ -202,7 +233,9 @@ fn functions_take_parameters_return_values_and_recurse() {
 
 #[test]
 fn properties_are_read_and_set() {
-    let (log, r, m) = exec("hero.x = 10; hero.x += 5; hero.alpha = .5; trace(hero.x, hero.alpha, hero.name, currentFrame, this.currentFrame, hero.visible);\ngotoAndStop(4); trace(currentFrame);\nhero.rotation = hero.x * 2;");
+    let (log, r, m) = exec(
+        "hero.x = 10; hero.x += 5; hero.alpha = .5; trace(hero.x, hero.alpha, hero.name, currentFrame, this.currentFrame, hero.visible);\ngotoAndStop(4); trace(currentFrame);\nhero.rotation = hero.x * 2;",
+    );
     assert_eq!(r, Ok(()));
     assert_eq!(log, ["15 0.5 hero 1 1 true", "This Go to frame 4 and stop", "4"]);
     assert_eq!(m.props.get(&("hero".into(), "rotation")), Some(&30.0));
@@ -214,13 +247,24 @@ fn properties_are_read_and_set() {
 
 #[test]
 fn listeners_name_their_events_and_functions() {
-    let c = ok("import flash.events.*;\nbtn.addEventListener(MouseEvent.CLICK, go);\naddEventListener(Event.ENTER_FRAME, tick);\nstage.addEventListener(KeyboardEvent.KEY_DOWN, function (e:KeyboardEvent):void { if (e.keyCode == Keyboard.LEFT) trace(\"left\"); });\nbtn.removeEventListener(MouseEvent.CLICK, go);\nfunction go(e:MouseEvent):void { MovieClip(e.currentTarget).gotoAndStop(2); trace(e.target.name); }\nfunction tick(e:Event):void {}\nhero.addEventListener(\"mouseOver\", go, false, 0, true);");
+    let c = ok(
+        "import flash.events.*;\nbtn.addEventListener(MouseEvent.CLICK, go);\naddEventListener(Event.ENTER_FRAME, tick);\nstage.addEventListener(KeyboardEvent.KEY_DOWN, function (e:KeyboardEvent):void { if (e.keyCode == Keyboard.LEFT) trace(\"left\"); });\nbtn.removeEventListener(MouseEvent.CLICK, go);\nfunction go(e:MouseEvent):void { MovieClip(e.currentTarget).gotoAndStop(2); trace(e.target.name); }\nfunction tick(e:Event):void {}\nhero.addEventListener(\"mouseOver\", go, false, 0, true);",
+    );
     assert_eq!(c.inner.len(), 1);
     assert_eq!(c.functions.iter().map(|f| f.name.as_str()).collect::<Vec<_>>(), ["go", "tick"]);
     let mut m = Mock { decls: Decls::build([&c]), ..Mock::default() };
     let (_, r) = run::run_script(&mut m, &c.body, &c.inner, run::FUEL_PER_RUN);
     assert_eq!(r, Ok(()));
-    assert_eq!(m.log, ["listen click btn go", "listen enter_frame this tick", "listen key_down stage function at line 4, column 48", "unlisten click btn go", "listen over hero go"]);
+    assert_eq!(
+        m.log,
+        [
+            "listen click btn go",
+            "listen enter_frame this tick",
+            "listen key_down stage function at line 4, column 48",
+            "unlisten click btn go",
+            "listen over hero go"
+        ]
+    );
     // The listener functions: the event's key code, target and current target.
     m.log.clear();
     m.key = Some(37.0);
@@ -238,7 +282,10 @@ fn listeners_name_their_events_and_functions() {
 fn names_from_other_frames_link_through_the_timeline() {
     let frame1 = ok("var score:int = 0;\nfunction addPoints(n:int):void { score += n; }\nfunction shout():String { return \"score \" + score; }");
     let frame5 = ok("addPoints(3);\nscore = score * 2;\ntrace(shout(), lives);");
-    assert_eq!(frame5.free.iter().map(|f| (f.name.as_str(), f.call)).collect::<Vec<_>>(), [("addPoints", true), ("score", false), ("shout", true), ("lives", false)]);
+    assert_eq!(
+        frame5.free.iter().map(|f| (f.name.as_str(), f.call)).collect::<Vec<_>>(),
+        [("addPoints", true), ("score", false), ("shout", true), ("lives", false)]
+    );
     let d = Decls::build([&frame1, &frame5]);
     let p = d.problems(&frame5);
     assert_eq!(p.len(), 1, "{p:?}");
@@ -284,7 +331,9 @@ fn random_comes_from_the_world() {
 
 #[test]
 fn calls_outside_the_movie_are_ignored_and_noted() {
-    let c = ok("navigateToURL(new URLRequest(\"https://example.com\"), \"_blank\");\nflash.net.navigateToURL(x);\nExternalInterface.call(\"f\");\nfscommand(\"quit\");\nbtn.buttonMode = true;\nstop();");
+    let c = ok(
+        "navigateToURL(new URLRequest(\"https://example.com\"), \"_blank\");\nflash.net.navigateToURL(x);\nExternalInterface.call(\"f\");\nfscommand(\"quit\");\nbtn.buttonMode = true;\nstop();",
+    );
     assert_eq!(c.body.len(), 1);
     let lines: Vec<u32> = c.notes.iter().map(|n| n.line).collect();
     assert_eq!(lines, [1, 2, 3, 4, 5]);
@@ -371,10 +420,37 @@ fn every_problem_is_listed_and_nothing_half_runs() {
 
 #[test]
 fn number_text_matches_actionscript() {
-    for (n, s) in [(0.0, "0"), (-0.0, "0"), (5.0, "5"), (-3.25, "-3.25"), (0.1 + 0.2, "0.30000000000000004"), (1e21, "1e+21"), (1.5e-7, "1.5e-7"), (123456789012.0, "123456789012"), (f64::NAN, "NaN"), (f64::NEG_INFINITY, "-Infinity"), (0.000001, "0.000001")] {
+    for (n, s) in [
+        (0.0, "0"),
+        (-0.0, "0"),
+        (5.0, "5"),
+        (-3.25, "-3.25"),
+        (0.1 + 0.2, "0.30000000000000004"),
+        (1e21, "1e+21"),
+        (1.5e-7, "1.5e-7"),
+        (123456789012.0, "123456789012"),
+        (f64::NAN, "NaN"),
+        (f64::NEG_INFINITY, "-Infinity"),
+        (0.000001, "0.000001"),
+    ] {
         assert_eq!(number_text(n), s, "{n}");
     }
-    for (s, n) in [("", 0.0), ("  12 ", 12.0), ("1e3", 1000.0), (".5", 0.5), ("5.", 5.0), ("-0x10", f64::NAN), ("0x10", 16.0), ("0b101", 5.0), ("+Infinity", f64::INFINITY), ("inf", f64::NAN), ("1_0", f64::NAN), ("\u{a0}7\u{feff}", 7.0), ("1e", f64::NAN), ("-", f64::NAN)] {
+    for (s, n) in [
+        ("", 0.0),
+        ("  12 ", 12.0),
+        ("1e3", 1000.0),
+        (".5", 0.5),
+        ("5.", 5.0),
+        ("-0x10", f64::NAN),
+        ("0x10", 16.0),
+        ("0b101", 5.0),
+        ("+Infinity", f64::INFINITY),
+        ("inf", f64::NAN),
+        ("1_0", f64::NAN),
+        ("\u{a0}7\u{feff}", 7.0),
+        ("1e", f64::NAN),
+        ("-", f64::NAN),
+    ] {
         let v = string_number(s);
         assert!(v == n || (v.is_nan() && n.is_nan()), "{s:?}: {v}");
     }
@@ -384,7 +460,9 @@ fn number_text_matches_actionscript() {
 
 #[test]
 fn the_ir_reads_and_writes_as_json() {
-    let c = ok("var n:Number = NaN; var s:String = \"a\"; if (n != n) trace(s + 1, -Infinity); function f(e:MouseEvent = null):void {} btn.addEventListener(MouseEvent.CLICK, f);");
+    let c = ok(
+        "var n:Number = NaN; var s:String = \"a\"; if (n != n) trace(s + 1, -Infinity); function f(e:MouseEvent = null):void {} btn.addEventListener(MouseEvent.CLICK, f);",
+    );
     let v = serde_json::to_value(&c).unwrap();
     let back: Compiled = serde_json::from_value(v.clone()).unwrap();
     assert_eq!(back, c);
@@ -455,7 +533,86 @@ impl Rng {
 #[test]
 fn hostile_input_never_panics_and_ends_quickly() {
     const PIECES: [&str; 80] = [
-        "stop", "play", "gotoAndStop", "(", ")", "{", "}", "[", "]", ";", ",", ".", "\n", " ", "\"a", "\"", "'", "\\", "/*", "*/", "//", "1", "0x", "1e", ".5", "e", "function", "f", "e:MouseEvent", ":void", "addEventListener", "MouseEvent.CLICK", "=", "+", "-", "!", "?", ":", "if", "else", "var", "for", "new", "this", "parent", "root", "MovieClip", "as", "trace", "x", "alpha", "é", "\u{0}", "\r", "\t", "<", ">", "...", "::", "..", ".<", "return", "import", "@", "while", "do", "break", "continue", "int", "n", "++", "+=", "==", "&&", "||", "Math.random()", "e.keyCode", "stage", "Event.ENTER_FRAME", "removeEventListener",
+        "stop",
+        "play",
+        "gotoAndStop",
+        "(",
+        ")",
+        "{",
+        "}",
+        "[",
+        "]",
+        ";",
+        ",",
+        ".",
+        "\n",
+        " ",
+        "\"a",
+        "\"",
+        "'",
+        "\\",
+        "/*",
+        "*/",
+        "//",
+        "1",
+        "0x",
+        "1e",
+        ".5",
+        "e",
+        "function",
+        "f",
+        "e:MouseEvent",
+        ":void",
+        "addEventListener",
+        "MouseEvent.CLICK",
+        "=",
+        "+",
+        "-",
+        "!",
+        "?",
+        ":",
+        "if",
+        "else",
+        "var",
+        "for",
+        "new",
+        "this",
+        "parent",
+        "root",
+        "MovieClip",
+        "as",
+        "trace",
+        "x",
+        "alpha",
+        "é",
+        "\u{0}",
+        "\r",
+        "\t",
+        "<",
+        ">",
+        "...",
+        "::",
+        "..",
+        ".<",
+        "return",
+        "import",
+        "@",
+        "while",
+        "do",
+        "break",
+        "continue",
+        "int",
+        "n",
+        "++",
+        "+=",
+        "==",
+        "&&",
+        "||",
+        "Math.random()",
+        "e.keyCode",
+        "stage",
+        "Event.ENTER_FRAME",
+        "removeEventListener",
     ];
     let mut rng = Rng(0x9e37_79b9_7f4a_7c15);
     let t0 = std::time::Instant::now();

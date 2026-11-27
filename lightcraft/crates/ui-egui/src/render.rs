@@ -804,10 +804,7 @@ impl Renderer {
         self.pending.insert(slot, (job.key, priority));
         job.request_id = lightcraft_preview::next_tick();
         let look = job.small.as_ref().map(|j| (geometry_look(&j.settings), j.request.apply_crop));
-        self.requests.insert(
-            slot,
-            Requested { look, id: job.request_id, source },
-        );
+        self.requests.insert(slot, Requested { look, id: job.request_id, source });
         let key = job.key;
         let display = self.display.clone();
         let background = matches!(slot, Slot::QuickAhead(_));

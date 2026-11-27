@@ -108,7 +108,9 @@ fn hairline_pieces(a: anicraft_geom::Vec2, b: anicraft_geom::Vec2, r: &Range) ->
         return 0;
     }
     let (t, m) = (TILE as f32, HAIRLINE_MARGIN + 1.0);
-    let span = |lo: f32, hi: f32, base: f32, n: i32| (((hi + m - base) / t).floor().min((n - 1) as f32) - ((lo - m - base) / t).floor().max(0.0) + 1.0).max(0.0);
+    let span = |lo: f32, hi: f32, base: f32, n: i32| {
+        (((hi + m - base) / t).floor().min((n - 1) as f32) - ((lo - m - base) / t).floor().max(0.0) + 1.0).max(0.0)
+    };
     let rows = span(a.y.min(b.y), a.y.max(b.y), r.ylo, r.nrows);
     let cols = span(a.x.min(b.x), a.x.max(b.x), r.xlo, r.ncols);
     if rows * cols <= 16.0 {
@@ -311,21 +313,58 @@ pub(crate) struct Pipelines {
 
 impl Pipelines {
     pub(crate) fn new(device: &wgpu::Device) -> Pipelines {
-        let entry = |binding: u32, ty: wgpu::BufferBindingType| wgpu::BindGroupLayoutEntry { binding, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty, has_dynamic_offset: false, min_binding_size: None }, count: None };
+        let entry = |binding: u32, ty: wgpu::BufferBindingType| wgpu::BindGroupLayoutEntry {
+            binding,
+            visibility: wgpu::ShaderStages::COMPUTE,
+            ty: wgpu::BindingType::Buffer { ty, has_dynamic_offset: false, min_binding_size: None },
+            count: None,
+        };
         let rw = wgpu::BufferBindingType::Storage { read_only: false };
-        let bin_entries = [entry(0, wgpu::BufferBindingType::Uniform), entry(1, wgpu::BufferBindingType::Storage { read_only: true }), entry(2, rw), entry(3, rw), entry(4, rw)];
-        let ([count, scatter, tiles], layout) = pipelines(device, "anicraft-bin", include_str!("bin.wgsl"), &bin_entries, ["count", "scatter", "tiles"]);
-        let ([scan_blocks, scan_add], scan_layout) = pipelines(device, "anicraft-scan", include_str!("scan.wgsl"), &[entry(0, wgpu::BufferBindingType::Uniform), entry(1, rw)], ["scan_blocks", "scan_add"]);
+        let bin_entries = [
+            entry(0, wgpu::BufferBindingType::Uniform),
+            entry(1, wgpu::BufferBindingType::Storage { read_only: true }),
+            entry(2, rw),
+            entry(3, rw),
+            entry(4, rw),
+        ];
+        let ([count, scatter, tiles], layout) =
+            pipelines(device, "anicraft-bin", include_str!("bin.wgsl"), &bin_entries, ["count", "scatter", "tiles"]);
+        let ([scan_blocks, scan_add], scan_layout) = pipelines(
+            device,
+            "anicraft-scan",
+            include_str!("scan.wgsl"),
+            &[entry(0, wgpu::BufferBindingType::Uniform), entry(1, rw)],
+            ["scan_blocks", "scan_add"],
+        );
         Pipelines { count, scatter, tiles, layout, scan_blocks, scan_add, scan_layout }
     }
 }
 
 /// One shader's entry points as pipelines sharing one bind group layout.
-fn pipelines<const N: usize>(device: &wgpu::Device, label: &str, src: &str, entries: &[wgpu::BindGroupLayoutEntry], points: [&str; N]) -> ([wgpu::ComputePipeline; N], wgpu::BindGroupLayout) {
+fn pipelines<const N: usize>(
+    device: &wgpu::Device,
+    label: &str,
+    src: &str,
+    entries: &[wgpu::BindGroupLayoutEntry],
+    points: [&str; N],
+) -> ([wgpu::ComputePipeline; N], wgpu::BindGroupLayout) {
     let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some(label), source: wgpu::ShaderSource::Wgsl(src.into()) });
     let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label: Some(label), entries });
-    let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some(label), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
-    let pipes = points.map(|p| device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor { label: Some(p), layout: Some(&pl), module: &module, entry_point: Some(p), compilation_options: Default::default(), cache: None }));
+    let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some(label),
+        bind_group_layouts: &[Some(&layout)],
+        immediate_size: 0,
+    });
+    let pipes = points.map(|p| {
+        device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some(p),
+            layout: Some(&pl),
+            module: &module,
+            entry_point: Some(p),
+            compilation_options: Default::default(),
+            cache: None,
+        })
+    });
     (pipes, layout)
 }
 
@@ -340,17 +379,38 @@ fn groups(n: u32, width: u32) -> (u32, u32) {
 /// the tile headers at 0 and `op_heads` at `ops_at`. Only those are uploaded (through `queue`,
 /// ahead of `enc`'s submission): the entries' room starts zeroed on the GPU.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn record(device: &wgpu::Device, queue: &wgpu::Queue, pipes: &Pipelines, enc: &mut wgpu::CommandEncoder, plan: &Plan, tiles_x: u32, tiles_y: u32, entries_at: u32, ops_at: u32, op_heads: &[u32]) -> Result<(wgpu::Buffer, wgpu::Buffer), String> {
+pub(crate) fn record(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    pipes: &Pipelines,
+    enc: &mut wgpu::CommandEncoder,
+    plan: &Plan,
+    tiles_x: u32,
+    tiles_y: u32,
+    entries_at: u32,
+    ops_at: u32,
+    op_heads: &[u32],
+) -> Result<(wgpu::Buffer, wgpu::Buffer), String> {
     use wgpu::util::DeviceExt;
     let index_len = (ops_at as usize + op_heads.len()).max(4);
-    let index = device.create_buffer(&wgpu::BufferDescriptor { label: Some("index"), size: 4 * index_len as u64, usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false });
+    let index = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("index"),
+        size: 4 * index_len as u64,
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    });
     if !plan.headers.is_empty() && plan.headers.len() <= index_len {
         queue.write_buffer(&index, 0, bytemuck::cast_slice(&plan.headers));
     }
     if !op_heads.is_empty() && ops_at as usize + op_heads.len() <= index_len {
         queue.write_buffer(&index, 4 * u64::from(ops_at), bytemuck::cast_slice(op_heads));
     }
-    let geo = device.create_buffer(&wgpu::BufferDescriptor { label: Some("geo"), size: 16 * u64::from(plan.piece_cap.max(1)), usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC, mapped_at_creation: false });
+    let geo = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("geo"),
+        size: 16 * u64::from(plan.piece_cap.max(1)),
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+        mapped_at_creation: false,
+    });
     if plan.op_rows == 0 {
         return Ok((index, geo));
     }
@@ -369,12 +429,25 @@ pub(crate) fn record(device: &wgpu::Device, queue: &wgpu::Queue, pipes: &Pipelin
         sums += blocks;
     }
     let work_len = (sums + 2) as u64;
-    let work = device.create_buffer(&wgpu::BufferDescriptor { label: Some("bin-work"), size: 4 * work_len, usage: wgpu::BufferUsages::STORAGE, mapped_at_creation: false });
-    let input = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("bin-input"), contents: bytemuck::cast_slice(&plan.input), usage: wgpu::BufferUsages::STORAGE });
+    let work = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("bin-work"),
+        size: 4 * work_len,
+        usage: wgpu::BufferUsages::STORAGE,
+        mapped_at_creation: false,
+    });
+    let input = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("bin-input"),
+        contents: bytemuck::cast_slice(&plan.input),
+        usage: wgpu::BufferUsages::STORAGE,
+    });
     let tiles = tiles_x * tiles_y;
     let a = plan.at;
     let params: [u32; 16] = [tiles_x, tiles_y, plan.op_rows, tiles, n, plan.piece_cap, entries_at, 0, a[0], a[1], a[2], a[3], a[4], a[5], 0, 0];
-    let ubuf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("bin-params"), contents: bytemuck::cast_slice(&params), usage: wgpu::BufferUsages::UNIFORM });
+    let ubuf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("bin-params"),
+        contents: bytemuck::cast_slice(&params),
+        usage: wgpu::BufferUsages::UNIFORM,
+    });
     let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("anicraft-bin"),
         layout: &pipes.layout,
@@ -389,11 +462,18 @@ pub(crate) fn record(device: &wgpu::Device, queue: &wgpu::Queue, pipes: &Pipelin
     let scans: Vec<(wgpu::BindGroup, u32)> = levels
         .iter()
         .map(|l| {
-            let u = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("scan-params"), contents: bytemuck::cast_slice(l), usage: wgpu::BufferUsages::UNIFORM });
+            let u = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("scan-params"),
+                contents: bytemuck::cast_slice(l),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
             let b = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("anicraft-scan"),
                 layout: &pipes.scan_layout,
-                entries: &[wgpu::BindGroupEntry { binding: 0, resource: u.as_entire_binding() }, wgpu::BindGroupEntry { binding: 1, resource: work.as_entire_binding() }],
+                entries: &[
+                    wgpu::BindGroupEntry { binding: 0, resource: u.as_entire_binding() },
+                    wgpu::BindGroupEntry { binding: 1, resource: work.as_entire_binding() },
+                ],
             });
             (b, l[3].div_ceil(SCAN_BLOCK))
         })

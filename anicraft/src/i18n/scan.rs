@@ -266,7 +266,28 @@ pub fn keys(src: &str) -> Vec<Key> {
 /// Key names and combinations: data, not prose (ADR 0005), and shown through
 /// `platform::shortcut_label`.
 fn is_key_name(s: &str) -> bool {
-    const KEYS: [&str; 20] = ["Enter", "Escape", "Esc", "Space", "Tab", "Delete", "Backspace", "Home", "End", "PageUp", "PageDown", "Insert", "Up", "Down", "Left", "Right", "Shift", "Ctrl", "Alt", "Cmd"];
+    const KEYS: [&str; 20] = [
+        "Enter",
+        "Escape",
+        "Esc",
+        "Space",
+        "Tab",
+        "Delete",
+        "Backspace",
+        "Home",
+        "End",
+        "PageUp",
+        "PageDown",
+        "Insert",
+        "Up",
+        "Down",
+        "Left",
+        "Right",
+        "Shift",
+        "Ctrl",
+        "Alt",
+        "Cmd",
+    ];
     KEYS.contains(&s) || ["Ctrl+", "Shift+", "Alt+", "Cmd+", "Option+"].iter().any(|m| s.contains(m))
 }
 
@@ -320,7 +341,22 @@ let f = include_str!("../NOTICE"); let g = crate::i18n::tr!("Path");
 "####;
         let lits = literals(src);
         let values: Vec<&str> = lits.iter().map(|l| l.value.as_str()).collect();
-        assert_eq!(values, ["Save", "raw \"quoted\"", "bytes", "{n} frame", "{n} frames", "menu", "Open", "a \"quote\" and … and continued", "Graphite", "../NOTICE", "Path"]);
+        assert_eq!(
+            values,
+            [
+                "Save",
+                "raw \"quoted\"",
+                "bytes",
+                "{n} frame",
+                "{n} frames",
+                "menu",
+                "Open",
+                "a \"quote\" and … and continued",
+                "Graphite",
+                "../NOTICE",
+                "Path"
+            ]
+        );
         assert!(lits.get(2).is_some_and(|l| l.bytes));
         assert_eq!(lits.first().map(|l| l.line), Some(4));
         assert_eq!(lits.get(4).map(|l| l.line), Some(9));
@@ -349,7 +385,23 @@ let f = include_str!("../NOTICE"); let g = crate::i18n::tr!("Path");
         for s in ["Save", "Add", "Save As…", "Could not open {name}: {e}", "Zoom in", "Export…"] {
             assert!(is_prose(s), "{s}");
         }
-        for s in ["edit.undo", "prefs_ui_font", "Ctrl+K", "Enter", "{}", "{n} %", "F1", "file.anicraft", "Insert/Timeline", "x", "OK", "wgpu", "#ff0000", " pt", "{s} fps"] {
+        for s in [
+            "edit.undo",
+            "prefs_ui_font",
+            "Ctrl+K",
+            "Enter",
+            "{}",
+            "{n} %",
+            "F1",
+            "file.anicraft",
+            "Insert/Timeline",
+            "x",
+            "OK",
+            "wgpu",
+            "#ff0000",
+            " pt",
+            "{s} fps",
+        ] {
             assert!(!is_prose(s), "{s}");
         }
     }

@@ -1,12 +1,12 @@
 //! Modal and floating dialogs: destructive-action confirmation (ADR 0004), the unsaved-changes
 //! guard on close, the command palette (Ctrl+K) and the keyboard-shortcut sheet (F1).
 
+use crate::a11y::{self, Named};
 use crate::app::{App, Tool};
 use crate::prefs::{FontChoice, RenderMode, StageRenderer};
 use crate::theme::{T, Type, text, with_type};
 use anicraft_engine::confirm::Confirmation;
 use anicraft_engine::{CommandSpec, commands};
-use crate::a11y::{self, Named};
 use egui::Key;
 use serde_json::{Value, json};
 
@@ -121,7 +121,14 @@ fn close_modal(app: &mut App, ctx: &egui::Context) {
                 choice = Some(Choice::Discard);
             }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.add(egui::Button::new(text(Type::Body, tr!("Save")).strong().color(T.on_fill)).fill(T.accent).min_size(egui::vec2(96.0, crate::theme::TARGET + 4.0))).clicked() {
+                if ui
+                    .add(
+                        egui::Button::new(text(Type::Body, tr!("Save")).strong().color(T.on_fill))
+                            .fill(T.accent)
+                            .min_size(egui::vec2(96.0, crate::theme::TARGET + 4.0)),
+                    )
+                    .clicked()
+                {
                     choice = Some(Choice::Save);
                 }
                 if ui.add(egui::Button::new(tr!("Cancel")).min_size(egui::vec2(96.0, crate::theme::TARGET + 4.0))).clicked() {
@@ -201,7 +208,28 @@ impl Entry {
 
 /// Commands the palette can run without extra input (everything optional, or prompted).
 fn runnable(c: &CommandSpec) -> bool {
-    if matches!(c.id, "file.open" | "file.recovery_list" | "file.save_as" | "file.import" | "file.export_png" | "file.export_gif" | "file.export_apng" | "file.export_webp" | "file.export_svg" | "file.export_sprite_sheet" | "file.export_video" | "file.export_lottie" | "file.export_html" | "file.export_png_sequence" | "file.export_xfl" | "modify.convert_to_symbol" | "layer.rename" | "scene.rename" | "plugin.install") {
+    if matches!(
+        c.id,
+        "file.open"
+            | "file.recovery_list"
+            | "file.save_as"
+            | "file.import"
+            | "file.export_png"
+            | "file.export_gif"
+            | "file.export_apng"
+            | "file.export_webp"
+            | "file.export_svg"
+            | "file.export_sprite_sheet"
+            | "file.export_video"
+            | "file.export_lottie"
+            | "file.export_html"
+            | "file.export_png_sequence"
+            | "file.export_xfl"
+            | "modify.convert_to_symbol"
+            | "layer.rename"
+            | "scene.rename"
+            | "plugin.install"
+    ) {
         return true;
     }
     let inner = c.params.trim().trim_start_matches('{').trim_end_matches('}');
@@ -245,15 +273,19 @@ fn palette(app: &mut App, ctx: &egui::Context) {
     let km = &app.keymap;
     let Some(p) = &mut app.palette else { return };
     let mut all = entries();
-    all.extend(app.s.plugins.list().filter(|p| crate::plugins_ui::is_command(p)).map(|p| Entry::Plugin(p.id().to_string(), crate::plugins_ui::label(p))));
+    all.extend(
+        app.s.plugins.list().filter(|p| crate::plugins_ui::is_command(p)).map(|p| Entry::Plugin(p.id().to_string(), crate::plugins_ui::label(p))),
+    );
     // Found by its name in the interface language or in English, whichever matches better.
-    let mut matches: Vec<(i32, Entry, String)> =
-        all.into_iter().filter_map(|e| {
+    let mut matches: Vec<(i32, Entry, String)> = all
+        .into_iter()
+        .filter_map(|e| {
             let key = e.shortcut(km);
             let local = fuzzy(&p.query, &format!("{} {key}", e.title(true)));
             let english = if crate::i18n::code() == crate::i18n::ENGLISH { None } else { fuzzy(&p.query, &format!("{} {key}", e.title(false))) };
             local.max(english).map(|s| (s, e, key))
-        }).collect();
+        })
+        .collect();
     matches.sort_by_key(|m| std::cmp::Reverse(m.0));
     matches.truncate(14);
     p.selected = p.selected.min(matches.len().saturating_sub(1));
@@ -277,7 +309,14 @@ fn palette(app: &mut App, ctx: &egui::Context) {
     egui::Area::new(egui::Id::new("palette")).order(egui::Order::Foreground).anchor(egui::Align2::CENTER_TOP, [0.0, 70.0]).show(ctx, |ui| {
         egui::Frame::popup(ui.style()).fill(T.panel_alt).inner_margin(egui::Margin::same(10)).show(ui, |ui| {
             ui.set_width(560.0);
-            let r = ui.add(egui::TextEdit::singleline(&mut p.query).hint_text(tr!("Type a command, tool or setting…")).desired_width(f32::INFINITY).font(egui::TextStyle::Heading)).named(tr!("Command palette"));
+            let r = ui
+                .add(
+                    egui::TextEdit::singleline(&mut p.query)
+                        .hint_text(tr!("Type a command, tool or setting…"))
+                        .desired_width(f32::INFINITY)
+                        .font(egui::TextStyle::Heading),
+                )
+                .named(tr!("Command palette"));
             r.request_focus();
             if r.changed() {
                 p.selected = 0;
@@ -333,33 +372,37 @@ fn font_picker(ui: &mut egui::Ui, id: &str, name: &str, current: &FontChoice, fa
         FontChoice::Bundled => tr!("Default ({font})", font = bundled),
         FontChoice::System(name) => name.clone(),
     };
-    egui::ComboBox::from_id_salt(id).width(260.0).selected_text(text(Type::Body, shown)).show_ui(ui, |ui| {
-        if ui.selectable_label(*current == FontChoice::Bundled, text(Type::Body, tr!("Default (bundled: {font})", font = bundled))).clicked() {
-            picked = Some(FontChoice::Bundled);
-        }
-        ui.separator();
-        match families {
-            None => {
-                ui.label(text(Type::Caption, tr!("Scanning installed fonts…")));
+    egui::ComboBox::from_id_salt(id)
+        .width(260.0)
+        .selected_text(text(Type::Body, shown))
+        .show_ui(ui, |ui| {
+            if ui.selectable_label(*current == FontChoice::Bundled, text(Type::Body, tr!("Default (bundled: {font})", font = bundled))).clicked() {
+                picked = Some(FontChoice::Bundled);
             }
-            Some(list) => {
-                let mut filter: String = ui.ctx().data_mut(|d| d.get_temp(filter_id).unwrap_or_default());
-                ui.add(egui::TextEdit::singleline(&mut filter).hint_text(tr!("Filter fonts…")).desired_width(240.0)).set_name(tr!("Filter fonts"));
-                let f = filter.to_lowercase();
-                egui::ScrollArea::vertical().max_height(320.0).show(ui, |ui| {
-                    for fam in list.iter().filter(|n| f.is_empty() || n.to_lowercase().contains(&f)) {
-                        let on = matches!(current, FontChoice::System(n) if n == fam);
-                        if ui.selectable_label(on, text(Type::Body, fam.as_str())).clicked() {
-                            picked = Some(FontChoice::System(fam.clone()));
+            ui.separator();
+            match families {
+                None => {
+                    ui.label(text(Type::Caption, tr!("Scanning installed fonts…")));
+                }
+                Some(list) => {
+                    let mut filter: String = ui.ctx().data_mut(|d| d.get_temp(filter_id).unwrap_or_default());
+                    ui.add(egui::TextEdit::singleline(&mut filter).hint_text(tr!("Filter fonts…")).desired_width(240.0))
+                        .set_name(tr!("Filter fonts"));
+                    let f = filter.to_lowercase();
+                    egui::ScrollArea::vertical().max_height(320.0).show(ui, |ui| {
+                        for fam in list.iter().filter(|n| f.is_empty() || n.to_lowercase().contains(&f)) {
+                            let on = matches!(current, FontChoice::System(n) if n == fam);
+                            if ui.selectable_label(on, text(Type::Body, fam.as_str())).clicked() {
+                                picked = Some(FontChoice::System(fam.clone()));
+                            }
                         }
-                    }
-                });
-                ui.ctx().data_mut(|d| d.insert_temp(filter_id, filter));
+                    });
+                    ui.ctx().data_mut(|d| d.insert_temp(filter_id, filter));
+                }
             }
-        }
-    })
-    .response
-    .set_name(name);
+        })
+        .response
+        .set_name(name);
     picked
 }
 
@@ -758,7 +801,7 @@ pub(crate) fn fixed_rows() -> Vec<(&'static str, &'static str, Vec<&'static str>
         (view, tr_noop!("Actual size (100%)"), vec!["Ctrl+1"]),
         (view, tr_noop!("Zoom at the cursor"), vec!["Ctrl+Wheel"]),
         (view, tr_noop!("Pan with any tool"), vec!["Space+Drag", "Middle-drag"]), // i18n-exempt: keys, see fixed_key
-        (editing, tr_noop!("Nudge selection 1 px"), vec!["Arrow keys"]), // i18n-exempt: keys, see fixed_key
+        (editing, tr_noop!("Nudge selection 1 px"), vec!["Arrow keys"]),          // i18n-exempt: keys, see fixed_key
         (editing, tr_noop!("Nudge selection 10 px"), vec!["Shift+Arrow keys"]),
         (editing, tr_noop!("Add to / remove from selection"), vec!["Shift+Click"]),
         (editing, tr_noop!("Constrain shape / 45° line"), vec!["Shift+Drag"]),
@@ -863,8 +906,13 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                     st.notice = Some((tr!("{key} is already used by {action}.", key = key(&chord), action = crate::i18n::t_cmd(id, label)), true));
                     st.steal = Some((cap, chord, id));
                 }
-                Err(crate::keymap::Refusal::Reserved(why)) => st.notice = Some((tr!("{key} is kept for {purpose}; choose another key.", key = key(&chord), purpose = crate::i18n::t(why)), true)),
-                Err(crate::keymap::Refusal::TooMany) => st.notice = Some((trn!("An action can have up to {n} key.", "An action can have up to {n} keys.", crate::keymap::MAX_KEYS), true)),
+                Err(crate::keymap::Refusal::Reserved(why)) => {
+                    st.notice =
+                        Some((tr!("{key} is kept for {purpose}; choose another key.", key = key(&chord), purpose = crate::i18n::t(why)), true))
+                }
+                Err(crate::keymap::Refusal::TooMany) => {
+                    st.notice = Some((trn!("An action can have up to {n} key.", "An action can have up to {n} keys.", crate::keymap::MAX_KEYS), true))
+                }
             }
         }
     }
@@ -884,18 +932,28 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
         .default_height(600.0)
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut st.filter).hint_text(tr!("Filter by name or key…")).desired_width(ui.available_width() - 120.0)).set_name(tr!("Filter shortcuts"));
-                let reset_all = ui.add_enabled(changed > 0, egui::Button::new(tr!("Reset all…"))).on_hover_text(tr!("Put every shortcut back to the defaults"));
+                ui.add(
+                    egui::TextEdit::singleline(&mut st.filter).hint_text(tr!("Filter by name or key…")).desired_width(ui.available_width() - 120.0),
+                )
+                .set_name(tr!("Filter shortcuts"));
+                let reset_all =
+                    ui.add_enabled(changed > 0, egui::Button::new(tr!("Reset all…"))).on_hover_text(tr!("Put every shortcut back to the defaults"));
                 if reset_all.clicked() {
                     st.confirm_reset_all = true;
                 }
             });
             // One message line: what is happening, what just happened, or what needs a decision.
             if let Some(cap) = capture {
-                ui.label(text(Type::Label, tr!("Press the new keys for {action}. Esc cancels.", action = action_label(&app.keymap, cap.id))).color(T.accent_text));
+                ui.label(
+                    text(Type::Label, tr!("Press the new keys for {action}. Esc cancels.", action = action_label(&app.keymap, cap.id)))
+                        .color(T.accent_text),
+                );
             } else if st.confirm_reset_all {
                 ui.horizontal(|ui| {
-                    ui.label(text(Type::Label, trn!("Reset {n} changed shortcut to the defaults?", "Reset {n} changed shortcuts to the defaults?", changed)));
+                    ui.label(text(
+                        Type::Label,
+                        trn!("Reset {n} changed shortcut to the defaults?", "Reset {n} changed shortcuts to the defaults?", changed),
+                    ));
                     if ui.add(danger_button(tr!("Reset all"))).clicked() {
                         acts.push(SheetAct::ResetAll);
                     }
@@ -916,7 +974,10 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                     }
                 });
             } else {
-                ui.label(text(Type::Caption, tr!("Click a key to change it or + to add one; right-click a key to remove it. Changes save as you go.")));
+                ui.label(text(
+                    Type::Caption,
+                    tr!("Click a key to change it or + to add one; right-click a key to remove it. Changes save as you go."),
+                ));
             }
             ui.add_space(4.0);
 
@@ -932,9 +993,14 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                         .actions
                         .iter()
                         .filter(|a| a.group == group || (group == "Other" && !GROUP_ORDER.contains(&a.group)))
-                        .filter(|a| hit(a.label) || hit(action_name(a)) || named(group) || app.keymap.keys(a.id).iter().any(|k| hit(k) || hit(&key(k))))
+                        .filter(|a| {
+                            hit(a.label) || hit(action_name(a)) || named(group) || app.keymap.keys(a.id).iter().any(|k| hit(k) || hit(&key(k)))
+                        })
                         .collect();
-                    let fixed: Vec<_> = fixed.iter().filter(|(g, l, ks)| *g == group && (named(l) || named(g) || ks.iter().any(|k| hit(k) || hit(&fixed_key(k))))).collect();
+                    let fixed: Vec<_> = fixed
+                        .iter()
+                        .filter(|(g, l, ks)| *g == group && (named(l) || named(g) || ks.iter().any(|k| hit(k) || hit(&fixed_key(k)))))
+                        .collect();
                     if actions.is_empty() && fixed.is_empty() {
                         continue;
                     }
@@ -964,7 +1030,10 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                                         } else {
                                             egui::Button::new(text(Type::Key, key(k)).color(T.text))
                                         };
-                                        let r = ui.add(chip).named(&tr!("{action} shortcut {key}", action = name, key = key(k))).on_hover_text(tr!("Click to change · right-click to remove"));
+                                        let r = ui
+                                            .add(chip)
+                                            .named(&tr!("{action} shortcut {key}", action = name, key = key(k)))
+                                            .on_hover_text(tr!("Click to change · right-click to remove"));
                                         if r.clicked() {
                                             acts.push(SheetAct::Capture(KeyCapture { id: a.id, replace: Some(i) }));
                                         }
@@ -987,7 +1056,12 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                                         } else {
                                             (tr!("Add another shortcut"), tr!("Add another shortcut for {action}", action = name))
                                         };
-                                        if ui.add(egui::Button::new("+").min_size(egui::vec2(crate::theme::TARGET, crate::theme::TARGET))).named(&a11y_name).on_hover_text(tip).clicked() {
+                                        if ui
+                                            .add(egui::Button::new("+").min_size(egui::vec2(crate::theme::TARGET, crate::theme::TARGET)))
+                                            .named(&a11y_name)
+                                            .on_hover_text(tip)
+                                            .clicked()
+                                        {
                                             acts.push(SheetAct::Capture(KeyCapture { id: a.id, replace: None }));
                                         }
                                     }
@@ -996,8 +1070,17 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                                     // An empty cell (an empty label would be an empty, clickable node for screen readers).
                                     ui.allocate_space(egui::Vec2::ZERO);
                                 } else {
-                                    let defaults = if a.defaults.is_empty() { tr!("none").to_string() } else { a.defaults.iter().map(|k| key(k)).collect::<Vec<_>>().join(" · ") };
-                                    if ui.button(tr!("Reset")).named(&tr!("Reset {action}", action = name)).on_hover_text(tr!("Back to the default ({keys})", keys = defaults)).clicked() {
+                                    let defaults = if a.defaults.is_empty() {
+                                        tr!("none").to_string()
+                                    } else {
+                                        a.defaults.iter().map(|k| key(k)).collect::<Vec<_>>().join(" · ")
+                                    };
+                                    if ui
+                                        .button(tr!("Reset"))
+                                        .named(&tr!("Reset {action}", action = name))
+                                        .on_hover_text(tr!("Back to the default ({keys})", keys = defaults))
+                                        .clicked()
+                                    {
                                         acts.push(SheetAct::Reset(a.id));
                                     }
                                 }
@@ -1038,7 +1121,15 @@ fn shortcut_sheet(app: &mut App, ctx: &egui::Context) {
                 match crate::keymap::assign(&p.shortcuts, cap.id, cap.replace, &chord, true) {
                     Ok(o) => {
                         p.shortcuts = o;
-                        st.notice = Some((tr!("{action}: {key} (removed from {other})", action = action_label(&app.keymap, cap.id), key = key(&chord), other = action_label(&app.keymap, from)), false));
+                        st.notice = Some((
+                            tr!(
+                                "{action}: {key} (removed from {other})",
+                                action = action_label(&app.keymap, cap.id),
+                                key = key(&chord),
+                                other = action_label(&app.keymap, from)
+                            ),
+                            false,
+                        ));
                     }
                     Err(_) => st.notice = Some((tr!("{key} could not be moved.", key = key(&chord)), true)),
                 }

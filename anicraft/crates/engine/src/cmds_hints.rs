@@ -8,18 +8,44 @@
 use crate::cmds_timeline::target;
 use crate::params::*;
 use crate::{CommandSpec, EngineError, Result, Session};
-use anicraft_doc::{HintSide, Keyframe, Layer, LayerId, MAX_SHAPE_HINTS, ShapeHint, hint_index, hint_letter, nearest_outline, placed_on, shapes_centre};
+use anicraft_doc::{
+    HintSide, Keyframe, Layer, LayerId, MAX_SHAPE_HINTS, ShapeHint, hint_index, hint_letter, nearest_outline, placed_on, shapes_centre,
+};
 use anicraft_geom::Vec2;
 use serde_json::{Value, json};
 
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("tween.add_hint", "Add Shape Hint", "Modify/Shape", Some("Ctrl+Shift+H"), "{layer?, frame? (in the shape tween, or the keyframe it ends on)} → the new hint's letter; it starts at the shapes' centre, unplaced", true, add_hint as crate::RunFn),
-        c("tween.move_hint", "Move Shape Hint", "", None, "{hint: a..z, x, y, side?: start|end (default: the side the frame shows), layer?, frame?} (snaps to the nearest shape edge on that keyframe)", true, move_hint),
+        c(
+            "tween.add_hint",
+            "Add Shape Hint",
+            "Modify/Shape",
+            Some("Ctrl+Shift+H"),
+            "{layer?, frame? (in the shape tween, or the keyframe it ends on)} → the new hint's letter; it starts at the shapes' centre, unplaced",
+            true,
+            add_hint as crate::RunFn,
+        ),
+        c(
+            "tween.move_hint",
+            "Move Shape Hint",
+            "",
+            None,
+            "{hint: a..z, x, y, side?: start|end (default: the side the frame shows), layer?, frame?} (snaps to the nearest shape edge on that keyframe)",
+            true,
+            move_hint,
+        ),
         c("tween.remove_hint", "Remove Shape Hint", "", None, "{hint: a..z, layer?, frame?} (later letters move down one)", true, remove_hint),
         c("tween.clear_hints", "Remove All Hints", "Modify/Shape", None, "{layer?, frame?}", true, clear_hints),
-        c("tween.hints", "Shape Hints", "", None, "{layer?, frame?} → the shape tween's hints: letter, start and end points, and whether each is on an edge", false, list_hints),
+        c(
+            "tween.hints",
+            "Shape Hints",
+            "",
+            None,
+            "{layer?, frame?} → the shape tween's hints: letter, start and end points, and whether each is on an edge",
+            false,
+            list_hints,
+        ),
     ]
 }
 
@@ -29,7 +55,9 @@ fn find(s: &Session, p: &Value) -> Result<(LayerId, usize, HintSide)> {
     let lid = lid.unwrap_or(s.layer);
     let tl = s.timeline();
     let layer = tl.layer(lid).ok_or_else(|| EngineError::State(format!("no layer with id {}", lid.0)))?;
-    let (i, side) = layer.hint_tween_at(frame).ok_or_else(|| EngineError::State(format!("frame {} is not in a shape tween; select the span and use Insert › Create Shape Tween", frame + 1)))?;
+    let (i, side) = layer.hint_tween_at(frame).ok_or_else(|| {
+        EngineError::State(format!("frame {} is not in a shape tween; select the span and use Insert › Create Shape Tween", frame + 1))
+    })?;
     Ok((lid, i, side))
 }
 
@@ -54,7 +82,9 @@ fn keyframe_mut(layer: &mut Layer, i: usize) -> Result<&mut Keyframe> {
 fn hint_param(p: &Value, count: usize) -> Result<usize> {
     let i = match p.get("hint") {
         Some(Value::String(l)) => hint_index(l).ok_or_else(|| EngineError::Param("param 'hint' must be a letter a to z".into()))?,
-        Some(v) => v.as_u64().and_then(|n| usize::try_from(n).ok()).ok_or_else(|| EngineError::Param("param 'hint' must be a letter a to z".into()))?,
+        Some(v) => {
+            v.as_u64().and_then(|n| usize::try_from(n).ok()).ok_or_else(|| EngineError::Param("param 'hint' must be a letter a to z".into()))?
+        }
         None => return Err(EngineError::Param("param 'hint' is required (a letter a to z)".into())),
     };
     if i >= count {
@@ -74,7 +104,8 @@ fn add_hint(s: &mut Session, p: &Value) -> Result<Value> {
     let (layer, i, _) = find_mut(s, p)?;
     let start = layer.hint_keyframe(i, HintSide::Start).and_then(|k| shapes_centre(&k.elements));
     let end = layer.hint_keyframe(i, HintSide::End).and_then(|k| shapes_centre(&k.elements));
-    let start = start.ok_or_else(|| EngineError::State("there is no shape on the first keyframe to hint; shape hints work on drawn shapes".into()))?;
+    let start =
+        start.ok_or_else(|| EngineError::State("there is no shape on the first keyframe to hint; shape hints work on drawn shapes".into()))?;
     let end = end.unwrap_or(start);
     let k = keyframe_mut(layer, i)?;
     if k.hints.len() >= MAX_SHAPE_HINTS {
@@ -97,7 +128,8 @@ fn move_hint(s: &mut Session, p: &Value) -> Result<Value> {
     let h = hint_param(p, count)?;
     let els = layer.hint_keyframe(i, side).map(|k| k.elements.clone()).unwrap_or_default();
     // Hints live on edges: the point snaps to the nearest one.
-    let (_, at, _) = nearest_outline(&els, Vec2::new(x, y)).ok_or_else(|| EngineError::State("there is no shape on that keyframe to put the hint on".into()))?;
+    let (_, at, _) =
+        nearest_outline(&els, Vec2::new(x, y)).ok_or_else(|| EngineError::State("there is no shape on that keyframe to put the hint on".into()))?;
     let k = keyframe_mut(layer, i)?;
     let hint = k.hints.get_mut(h).ok_or_else(|| EngineError::State("the hint went away".into()))?;
     *hint.at_mut(side) = at;
@@ -126,7 +158,9 @@ fn clear_hints(s: &mut Session, p: &Value) -> Result<Value> {
 fn list_hints(s: &mut Session, p: &Value) -> Result<Value> {
     let (lid, i, side) = find(s, p)?;
     let layer = s.timeline().layer(lid).ok_or_else(|| EngineError::State("no such layer".into()))?;
-    let (Some(a), Some(b)) = (layer.hint_keyframe(i, HintSide::Start), layer.hint_keyframe(i, HintSide::End)) else { return Err(EngineError::State("the keyframe went away".into())) };
+    let (Some(a), Some(b)) = (layer.hint_keyframe(i, HintSide::Start), layer.hint_keyframe(i, HintSide::End)) else {
+        return Err(EngineError::State("the keyframe went away".into()));
+    };
     let hints: Vec<Value> = a
         .hints
         .iter()

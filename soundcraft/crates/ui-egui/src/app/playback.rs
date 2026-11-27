@@ -333,109 +333,109 @@ impl SoundApp {
         }
     }
 
+    fn apply_transport_request(&mut self, r: TransportRequest) {
+        match r {
+            TransportRequest::ResetSession => {
+                if let Some(p) = &self.player {
+                    p.stop();
+                    p.set_recording(false);
+                    p.set_speed(1.0);
+                    p.locate(self.engine.transport.position);
+                }
+                self.sim = None;
+                // The old capture belongs to the replaced document, never to the new one.
+                self.recorder = None;
+                self.recorder_failed = false;
+                self.punch = None;
+                self.gesture = None;
+                self.touched.clear();
+                self.touched_sends.clear();
+                self.last_write_at = i64::MIN;
+                self.edit_layout.follow_hold = false;
+                self.meters.clear();
+                self.main_meter = MeterDisplay::default();
+            }
+            TransportRequest::Play => {
+                if !self.is_playing() {
+                    self.play_from_selection();
+                }
+            }
+            TransportRequest::PlayFrom(at) => {
+                if self.is_playing() {
+                    // Playing on from `at` drops the end and loop of the earlier selection.
+                    if let Some(p) = &self.player {
+                        p.play(at, None, None);
+                    }
+                    if let Some(sim) = &mut self.sim {
+                        *sim = (at, None, None);
+                    }
+                    self.last_write_at = i64::MIN;
+                    self.engine.transport.position = at;
+                } else {
+                    self.start_play(at, None, None);
+                }
+            }
+            TransportRequest::Stop | TransportRequest::Pause => self.stop_play(),
+            TransportRequest::TogglePlay => {
+                if self.is_playing() {
+                    self.stop_play();
+                } else {
+                    self.play_from_selection();
+                }
+            }
+            TransportRequest::Record => {
+                if self.engine.transport.recording {
+                    self.stop_play();
+                } else {
+                    self.start_recording();
+                }
+            }
+            TransportRequest::Locate(at) => {
+                if self.is_playing() {
+                    if let Some(p) = &self.player {
+                        p.locate(at);
+                    }
+                    if let Some(sim) = &mut self.sim {
+                        sim.0 = at;
+                    }
+                    self.last_write_at = i64::MIN;
+                }
+                self.engine.transport.position = at;
+            }
+            TransportRequest::PlaySelection => {
+                let sel = self.engine.session().edit.selection;
+                self.start_play(sel.start, Some(sel.end.max(sel.start + 1)), None);
+            }
+            TransportRequest::HalfSpeed => {
+                if let Some(p) = &self.player {
+                    p.set_speed(0.5);
+                }
+                self.play_from_selection();
+            }
+            TransportRequest::Scrub(at) => self.engine.transport.position = at,
+            TransportRequest::AllNotesOff => {
+                if let Some(p) = &self.player {
+                    p.all_notes_off();
+                }
+            }
+            TransportRequest::MidiAudition { track, pitch, velocity, duration_ms } => {
+                if let Some(p) = &self.player {
+                    p.update_session(self.engine.session_arc());
+                    let sr = self.engine.session().sample_rate.as_f64();
+                    let gate_frames = if velocity > 0 && duration_ms > 0 { ((f64::from(duration_ms) * 0.001 * sr).round() as u32).max(1) } else { 0 };
+                    let msg = if velocity > 0 { [0x90, pitch & 0x7F, velocity & 0x7F] } else { [0x80, pitch & 0x7F, 0] };
+                    p.send_midi(track, msg, gate_frames);
+                }
+            }
+        }
+    }
+
     /// Apply engine transport requests to the player and recorder, read back the position and refresh meters. A reset
     /// request also clears per-document capture, edit-gesture and meter state.
     pub(crate) fn handle_transport(&mut self, dt: f32) {
         let reqs: Vec<TransportRequest> = std::mem::take(&mut self.engine.transport_requests);
         for r in reqs {
-            match r {
-                TransportRequest::ResetSession => {
-                    if let Some(p) = &self.player {
-                        p.stop();
-                        p.set_recording(false);
-                        p.set_speed(1.0);
-                        p.locate(self.engine.transport.position);
-                    }
-                    self.sim = None;
-                    // The old capture belongs to the replaced document, never to the new one.
-                    self.recorder = None;
-                    self.recorder_failed = false;
-                    self.punch = None;
-                    self.gesture = None;
-                    self.touched.clear();
-                    self.touched_sends.clear();
-                    self.last_write_at = i64::MIN;
-                    self.edit_layout.follow_hold = false;
-                    self.meters.clear();
-                    self.main_meter = MeterDisplay::default();
-                }
-                TransportRequest::Play => {
-                    if !self.is_playing() {
-                        self.play_from_selection();
-                    }
-                }
-                TransportRequest::PlayFrom(at) => {
-                    if self.is_playing() {
-                        // Playing on from `at` drops the end and loop of the earlier selection.
-                        if let Some(p) = &self.player {
-                            p.play(at, None, None);
-                        }
-                        if let Some(sim) = &mut self.sim {
-                            *sim = (at, None, None);
-                        }
-                        self.last_write_at = i64::MIN;
-                        self.engine.transport.position = at;
-                    } else {
-                        self.start_play(at, None, None);
-                    }
-                }
-                TransportRequest::Stop | TransportRequest::Pause => self.stop_play(),
-                TransportRequest::TogglePlay => {
-                    if self.is_playing() {
-                        self.stop_play();
-                    } else {
-                        self.play_from_selection();
-                    }
-                }
-                TransportRequest::Record => {
-                    if self.engine.transport.recording {
-                        self.stop_play();
-                    } else {
-                        self.start_recording();
-                    }
-                }
-                TransportRequest::Locate(at) => {
-                    if self.is_playing() {
-                        if let Some(p) = &self.player {
-                            p.locate(at);
-                        }
-                        if let Some(sim) = &mut self.sim {
-                            sim.0 = at;
-                        }
-                        self.last_write_at = i64::MIN;
-                    }
-                    self.engine.transport.position = at;
-                }
-                TransportRequest::PlaySelection => {
-                    let sel = self.engine.session().edit.selection;
-                    self.start_play(sel.start, Some(sel.end.max(sel.start + 1)), None);
-                }
-                TransportRequest::HalfSpeed => {
-                    if let Some(p) = &self.player {
-                        p.set_speed(0.5);
-                    }
-                    self.play_from_selection();
-                }
-                TransportRequest::Scrub(at) => self.engine.transport.position = at,
-                TransportRequest::AllNotesOff => {
-                    if let Some(p) = &self.player {
-                        p.all_notes_off();
-                    }
-                }
-                TransportRequest::MidiAudition { track, pitch, velocity, duration_ms } => {
-                    if let Some(p) = &self.player {
-                        p.update_session(self.engine.session_arc());
-                        let sr = self.engine.session().sample_rate.as_f64();
-                        let gate_frames = if velocity > 0 && duration_ms > 0 {
-                            ((f64::from(duration_ms) * 0.001 * sr).round() as u32).max(1)
-                        } else {
-                            0
-                        };
-                        let msg = if velocity > 0 { [0x90, pitch & 0x7F, velocity & 0x7F] } else { [0x80, pitch & 0x7F, 0] };
-                        p.send_midi(track, msg, gate_frames);
-                    }
-                }
-            }
+            self.apply_transport_request(r);
         }
         // Read back the position.
         if let Some(p) = &self.player {

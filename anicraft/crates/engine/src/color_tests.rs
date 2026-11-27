@@ -48,7 +48,11 @@ fn every_style_is_set_and_reported() {
     let v = run(&mut s, "element.set_color_effect", json!({"alpha": 40}));
     assert_eq!(v, json!({"style": "alpha", "alpha": 40.0}));
     run(&mut s, "element.set_color_effect", json!({"red_multiplier": -100, "red_offset": 255, "alpha_offset": -10.5}));
-    assert_eq!(effect(&s), ColorEffect::Advanced(ColorTransform { mul: [-1.0, 1.0, 1.0, 0.4], add: [1.0, 0.0, 0.0, -10.5 / 255.0] }), "Advanced starts from the alpha it had");
+    assert_eq!(
+        effect(&s),
+        ColorEffect::Advanced(ColorTransform { mul: [-1.0, 1.0, 1.0, 0.4], add: [1.0, 0.0, 0.0, -10.5 / 255.0] }),
+        "Advanced starts from the alpha it had"
+    );
     let v = run(&mut s, "element.set_color_effect", json!({"style": "none"}));
     assert_eq!(v, json!({"style": "none"}));
     assert_eq!(effect(&s), ColorEffect::None);
@@ -98,7 +102,11 @@ fn renders_follow_the_arithmetic() {
     assert!(near(pixel(&s, 0), [153, 179, 204, 255]), "{:?}", pixel(&s, 0));
     run(&mut s, "element.set_color_effect", json!({"tint": "#ff0000", "tint_amount": 50}));
     assert!(near(pixel(&s, 0), [153, 51, 77, 255]), "{:?}", pixel(&s, 0));
-    run(&mut s, "element.set_color_effect", json!({"style": "advanced", "red_multiplier": -100, "red_offset": 255, "green_multiplier": 50, "blue_offset": -100}));
+    run(
+        &mut s,
+        "element.set_color_effect",
+        json!({"style": "advanced", "red_multiplier": -100, "red_offset": 255, "green_multiplier": 50, "blue_offset": -100}),
+    );
     // The tint carried over into Advanced (×50 %, +127.5 red), then these channels changed.
     let fx = effect(&s).transform();
     assert_eq!((fx.mul[0], fx.add[0], fx.mul[1], fx.add[2]), (-1.0, 1.0, 0.5, -100.0 / 255.0));
@@ -117,7 +125,11 @@ fn a_change_on_a_mixed_selection_sets_only_that_value() {
     run(&mut s, "element.select", json!({"ids": [a, b]}));
     run(&mut s, "element.set_color_effect", json!({"tint_amount": 80}));
     let fx: Vec<ColorEffect> = s.visible_elements().iter().map(|e| e.color).collect();
-    assert_eq!(fx, [ColorEffect::Tint { color: Rgba::hex(0xff0000), amount: 0.8 }, ColorEffect::Tint { color: Rgba::hex(0x0000ff), amount: 0.8 }], "each keeps its colour");
+    assert_eq!(
+        fx,
+        [ColorEffect::Tint { color: Rgba::hex(0xff0000), amount: 0.8 }, ColorEffect::Tint { color: Rgba::hex(0x0000ff), amount: 0.8 }],
+        "each keeps its colour"
+    );
     // One undo step puts both back.
     s.undo().unwrap();
     assert_eq!(s.visible_elements()[1].color, ColorEffect::Tint { color: Rgba::hex(0x0000ff), amount: 0.1 });
@@ -217,7 +229,11 @@ fn a_motion_tween_has_one_colour_effect_style() {
     // target's own.
     run(&mut s, "motion.set_key", json!({"property": "tint", "frame": 10, "value": 50}));
     s.set_frame(10);
-    assert_eq!(effect(&s).transform(), ColorTransform::alpha(0.0).concat(&ColorTransform::tint(Rgba::hex(0x00ff00), 0.5)), "the tint keys start from the target's own colour");
+    assert_eq!(
+        effect(&s).transform(),
+        ColorTransform::alpha(0.0).concat(&ColorTransform::tint(Rgba::hex(0x00ff00), 0.5)),
+        "the tint keys start from the target's own colour"
+    );
 }
 
 fn layer_motion_has(s: &Session, p: Property) -> bool {
@@ -227,7 +243,15 @@ fn layer_motion_has(s: &Session, p: Property) -> bool {
 #[test]
 fn files_keep_every_style() {
     let mut s = Session::default();
-    for (i, p) in [json!({"brightness": -30}), json!({"tint": "#123456", "tint_amount": 0}), json!({"style": "advanced", "blue_multiplier": -40, "green_offset": 12}), json!({"alpha": 100})].into_iter().enumerate() {
+    for (i, p) in [
+        json!({"brightness": -30}),
+        json!({"tint": "#123456", "tint_amount": 0}),
+        json!({"style": "advanced", "blue_multiplier": -40, "green_offset": 12}),
+        json!({"alpha": 100}),
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let id = run(&mut s, "draw.rect", json!({"x": i * 20, "y": 0, "w": 10, "h": 10, "object": true}))["element"].as_u64().unwrap();
         run(&mut s, "element.select", json!({"ids": [id]}));
         run(&mut s, "element.set_color_effect", p);

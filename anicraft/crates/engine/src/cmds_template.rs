@@ -47,7 +47,15 @@ pub fn specs() -> Vec<CommandSpec> {
             mutates: false,
             run: save_as_template,
         },
-        CommandSpec { id: "file.delete_template", label: "Delete Template", menu: "", shortcut: None, params: "{folder, name, category?, confirm}: removes a user template and its picture (cannot be undone)", mutates: false, run: delete_template },
+        CommandSpec {
+            id: "file.delete_template",
+            label: "Delete Template",
+            menu: "",
+            shortcut: None,
+            params: "{folder, name, category?, confirm}: removes a user template and its picture (cannot be undone)",
+            mutates: false,
+            run: delete_template,
+        },
     ]
 }
 
@@ -68,7 +76,8 @@ fn clean_name(raw: &str, what: &str) -> Result<String> {
     }
     // Names Windows keeps for devices, with or without an extension.
     let stem = name.split('.').next().unwrap_or(name).trim().to_ascii_uppercase();
-    let reserved = matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL") || ((stem.starts_with("COM") || stem.starts_with("LPT")) && stem.len() == 4 && stem.ends_with(|c: char| c.is_ascii_digit()));
+    let reserved = matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
+        || ((stem.starts_with("COM") || stem.starts_with("LPT")) && stem.len() == 4 && stem.ends_with(|c: char| c.is_ascii_digit()));
     if reserved {
         return Err(EngineError::Param(format!("“{name}” is a name the system keeps for itself: pick another {what} name")));
     }

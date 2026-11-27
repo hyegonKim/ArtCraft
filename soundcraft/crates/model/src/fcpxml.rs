@@ -22,10 +22,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::fmt::Write as _;
 
 use crate::FileFormat;
-use soundcraft_time::{
-    BarBeat, FrameRate, MAX_POSITION, SampleRate, Samples, TICKS_PER_QUARTER, TempoEvent,
-    to_samples,
-};
+use soundcraft_time::{BarBeat, FrameRate, MAX_POSITION, SampleRate, Samples, TICKS_PER_QUARTER, TempoEvent, to_samples};
 
 use crate::{
     AutoParam, BusId, ChannelFormat, Clip, Fade, FadeShape, MarkerId, MarkerKind, Route, Session, SessionError, Source, SourceId, TrackId, TrackKind,

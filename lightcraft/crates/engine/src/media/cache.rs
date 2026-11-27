@@ -234,6 +234,7 @@ impl MediaCache {
 
     /// A decoded source with what the decoder reported about it (tests: photos of another as-shot white).
     #[cfg(test)]
+    #[allow(dead_code)]
     pub(crate) fn insert_with_info(&mut self, id: PhotoId, level: SourceLevel, img: Arc<Rgb32f>, info: lightcraft_pipeline::SourceInfo) {
         self.insert_source(id, level, DecodedSource::new(img, Some(info)));
     }

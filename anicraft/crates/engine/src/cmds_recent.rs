@@ -53,7 +53,11 @@ pub fn exists(path: &Path) -> bool {
 /// A short, stable key for a path (64-bit FNV-1a of its normalised text, as hex): the name its
 /// thumbnail is kept under.
 pub fn thumb_key(path: &Path) -> String {
-    let text = if cfg!(any(windows, target_os = "macos")) { path.to_string_lossy().replace('\\', "/").to_lowercase() } else { path.to_string_lossy().into_owned() };
+    let text = if cfg!(any(windows, target_os = "macos")) {
+        path.to_string_lossy().replace('\\', "/").to_lowercase()
+    } else {
+        path.to_string_lossy().into_owned()
+    };
     let mut h: u64 = 0xcbf2_9ce4_8422_2325;
     for b in text.bytes() {
         h ^= u64::from(b);
@@ -204,7 +208,15 @@ pub fn specs() -> Vec<CommandSpec> {
             mutates: false,
             run: pin,
         },
-        CommandSpec { id: "prefs.recent_remove", label: "Remove from Recent Files", menu: "", shortcut: None, params: "{index? | path?}", mutates: false, run: remove },
+        CommandSpec {
+            id: "prefs.recent_remove",
+            label: "Remove from Recent Files",
+            menu: "",
+            shortcut: None,
+            params: "{index? | path?}",
+            mutates: false,
+            run: remove,
+        },
         CommandSpec {
             id: "prefs.recent_clear",
             label: "Clear Recent Files",
@@ -220,7 +232,11 @@ pub fn specs() -> Vec<CommandSpec> {
 /// The entry `index` or `path` names.
 fn which(s: &Session, p: &Value) -> Result<PathBuf> {
     match (opt_u64(p, "index")?, opt_str(p, "path")?) {
-        (Some(i), None) => usize::try_from(i).ok().and_then(|i| s.recent.entries().get(i)).map(|e| e.path.clone()).ok_or_else(|| EngineError::Param(format!("no recent file {i}; file.recent_list has {}", s.recent.len()))),
+        (Some(i), None) => usize::try_from(i)
+            .ok()
+            .and_then(|i| s.recent.entries().get(i))
+            .map(|e| e.path.clone())
+            .ok_or_else(|| EngineError::Param(format!("no recent file {i}; file.recent_list has {}", s.recent.len()))),
         (None, Some(path)) if !path.trim().is_empty() => Ok(PathBuf::from(path)),
         (None, Some(_)) => Err(EngineError::Param("param 'path' must name a file".into())),
         _ => Err(EngineError::Param("name the file with 'index' or 'path' (one of them)".into())),

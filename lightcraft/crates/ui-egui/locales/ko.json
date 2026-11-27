@@ -576,5 +576,15 @@
   "Untitled Book": "제목 없는 책",
   "Untitled Shoot": "제목 없는 촬영",
   "Use Selected Photos": "선택한 사진 사용",
-  "Watch Folder": "감시 폴더"
+  "Watch Folder": "감시 폴더",
+  "Adaptive Presets": "적응형 프리셋",
+  "Adaptive: Subject Pop": "적응형: 피사체 강조",
+  "Adaptive: Dramatic Sky": "적응형: 드라마틱 하늘",
+  "Adaptive: Warm Portrait": "적응형: 따뜻한 인물",
+  "Adaptive: Crisp Architecture": "적응형: 선명한 건축물",
+  "Apply Adaptive Preset": "적응형 프리셋 적용",
+  "Batch Rename": "일괄 이름 바꾸기",
+  "Contact Sheet": "밀착 인화지",
+  "Apply Metadata Template": "메타데이터 템플릿 적용",
+  "Credit": "크레딧"
 }

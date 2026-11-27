@@ -157,6 +157,10 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
             ui.data_mut(|d| d.remove::<AppliedPreset>(amt_id));
         }
         let active = app.session.active();
+        if active.is_some() {
+            adaptive_quick_bar(app, ui);
+            divider(ui);
+        }
         let marked = AppliedByPhoto::of(ui.ctx(), &app.session, active);
         let thumbs = app.ui.preset_thumbs && active.is_some();
         let row_h = if thumbs { 54.0 } else { 26.0 };
@@ -326,6 +330,23 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
         } else {
             ui.data_mut(|d| d.remove::<(lightcraft_catalog::PhotoId, Preset, String)>(last_hover_id));
         }
+    });
+}
+
+fn adaptive_quick_bar(app: &mut LightcraftApp, ui: &mut egui::Ui) {
+    let t = Tokens::get(ui.ctx());
+    egui::Frame::NONE.inner_margin(egui::Margin::symmetric(16, 8)).show(ui, |ui| {
+        ui.label(egui::RichText::new(crate::i18n::tr("Adaptive Presets")).font(t.semibold(12.0)).color(t.text_label));
+        ui.add_space(4.0);
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing = vec2(6.0, 4.0);
+            for label in ["Adaptive: Subject Pop", "Adaptive: Dramatic Sky", "Adaptive: Warm Portrait", "Adaptive: Crisp Architecture"] {
+                let translated = crate::i18n::tr(label);
+                if ui.small_button(translated).clicked() && app.run("develop.applyAdaptivePreset", json!({"preset": label})).is_ok() {
+                    app.toast(ui.ctx(), crate::i18n::tr_format!("Preset: {name}", name = translated));
+                }
+            }
+        });
     });
 }
 

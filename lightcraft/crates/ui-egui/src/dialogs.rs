@@ -2168,7 +2168,9 @@ fn dialog_content(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, body_m
                 ui.add(egui::TextEdit::singleline(watch_dir).desired_width(f32::INFINITY));
             });
             field(ui, "Destination Folder", |ui| {
-                ui.add(egui::TextEdit::singleline(destination_dir).hint_text(crate::i18n::tr("Optional copy destination")).desired_width(f32::INFINITY));
+                ui.add(
+                    egui::TextEdit::singleline(destination_dir).hint_text(crate::i18n::tr("Optional copy destination")).desired_width(f32::INFINITY),
+                );
             });
             field(ui, "File Prefix", |ui| {
                 ui.add(egui::TextEdit::singleline(naming_prefix).desired_width(140.0));

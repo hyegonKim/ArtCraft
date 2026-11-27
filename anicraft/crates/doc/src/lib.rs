@@ -4,54 +4,72 @@
 //! a flat [`DisplayList`], which renderers draw. Nothing here mutates during playback.
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
-pub use anicraft_audio as audio;
 pub use anicraft_actions as actions;
+pub use anicraft_audio as audio;
 
 pub mod aids;
 pub mod armature;
-pub mod spring;
-pub mod skin;
-pub mod weights;
-pub mod warp;
 mod bitmap;
-mod color_effect;
 pub mod camera;
-mod filter;
+mod color_effect;
 mod easing;
 mod eval;
 pub mod field;
+mod filter;
 mod hints;
-pub mod nine_slice;
 pub mod library;
+pub mod lipsync;
 pub mod motion;
+pub mod nine_slice;
 pub mod path_table;
-pub mod width;
-pub mod stroke_style;
 pub mod player;
 pub mod publish;
+pub mod puppet;
 pub mod sample;
-pub mod templates;
-pub mod lipsync;
+pub mod skin;
 pub mod sound;
+pub mod spring;
+pub mod stroke_style;
 pub mod swatch;
+pub mod templates;
+pub mod warp;
+pub mod weights;
+pub mod width;
 
-pub use filter::{FILTER_PARAMS, Filter, FilterEntry, FilterParam, FilterProp, FilterSide, MAX_FILTER_SLOTS, active as active_filters, any_active as any_active_filter, pairs_up as filters_pair_up, MAX_BLUR, MAX_QUALITY, MAX_RAMP_STOPS, REST_SNAP, default_bevel_ramp, default_glow_ramp, pinned_stop, ramp_at};
+pub use actions::{Action, ButtonEvent, EventHandler, FrameScript, Language, PluginScript, SourceScript};
+pub use aids::{Aids, GUIDE_REACH, Grid, Guide, GuideAxis, MAX_GUIDES};
+pub use anicraft_geom::Perspective3D;
+pub use armature::{Armature, Bone, BoneId, JointAngle, Limits, Pose};
 pub use bitmap::{Bitmap, BitmapId, ImageError, MAX_BITMAP_EDGE, Pixels, base64_decode, base64_encode, decode_png, image_to_png};
-pub use easing::{CustomEase, EaseDir, EaseFamily, EasePoint, Easing, Handle, MAX_EASE_NAME, MAX_EASE_POINTS, MAX_EASE_SAMPLES, MAX_EASE_Y, MAX_SAVED_EASES, SampledEase, SavedEase, ease_name};
+pub use camera::{Camera, DepthKey};
 pub use color_effect::{ADVANCED_ADD, ADVANCED_MUL, ColorEffect, ColorStyle, ColorTransform};
+pub use easing::{
+    CustomEase, EaseDir, EaseFamily, EasePoint, Easing, Handle, MAX_EASE_NAME, MAX_EASE_POINTS, MAX_EASE_SAMPLES, MAX_EASE_Y, MAX_SAVED_EASES,
+    SampledEase, SavedEase, ease_name,
+};
+pub use eval::{
+    DisplayItem, DisplayList, Group, MAX_SYMBOL_DEPTH, evaluate, evaluate_guided, evaluate_layer_elements, evaluate_player, evaluate_scene,
+    evaluate_scene_camera, evaluate_shown, evaluate_timeline, evaluate_timeline_at, guide_walk, instance_start,
+};
+pub use filter::{
+    FILTER_PARAMS, Filter, FilterEntry, FilterParam, FilterProp, FilterSide, MAX_BLUR, MAX_FILTER_SLOTS, MAX_QUALITY, MAX_RAMP_STOPS, REST_SNAP,
+    active as active_filters, any_active as any_active_filter, default_bevel_ramp, default_glow_ramp, pairs_up as filters_pair_up, pinned_stop,
+    ramp_at,
+};
 pub use hints::{HINT_TOLERANCE, HintSide, MAX_SHAPE_HINTS, ShapeHint, hint_index, hint_letter, nearest_outline, placed_on, shapes_centre};
 pub use library::{FolderId, LibraryEntry, LibraryFolder, LibraryItem, LibraryTree, NameError};
-pub use motion::{KeyRef, MotionTween, OnPath, PROPERTIES, Pin, PinError, Property, PropertyKey, Props, Track, filter_properties, motion_path, own_value};
-pub use sound::{EnvelopePoint, FrameSound, Sound, SoundEffect, SoundFormat, SoundId, SoundSync};
-pub use width::{MAX_WIDTH_FACTOR, MAX_WIDTH_POINTS, ProfilePreset, WidthPoint, WidthProfile};
-pub use stroke_style::{Cap, Dash, DashKind, Join, StrokeStyle};
-pub use camera::{Camera, DepthKey};
-pub use swatch::{MAX_SWATCHES, Swatch, SwatchPaint};
-pub use aids::{Aids, GUIDE_REACH, Grid, Guide, GuideAxis, MAX_GUIDES};
+pub use motion::{
+    KeyRef, MotionTween, OnPath, PROPERTIES, Pin, PinError, Property, PropertyKey, Props, Track, filter_properties, motion_path, own_value,
+};
 pub use nine_slice::symbol_box;
-pub use armature::{Armature, Bone, BoneId, JointAngle, Limits, Pose};
-pub use eval::{DisplayItem, DisplayList, Group, MAX_SYMBOL_DEPTH, evaluate, evaluate_guided, evaluate_layer_elements, evaluate_shown, evaluate_player, evaluate_scene, evaluate_scene_camera, evaluate_timeline, evaluate_timeline_at, guide_walk, instance_start};
-pub use actions::{Action, ButtonEvent, EventHandler, FrameScript, Language, PluginScript, SourceScript};
+pub use puppet::{
+    AutoBlinkConfig, BreatheConfig, FacialFeature, FeatureParallax, HeadPose, HeadTurnRig, PuppetRig, SwapChoice, SwapSet, TriggerEvent, TriggerMode,
+    WalkCycleConfig, WalkRigLayers,
+};
+pub use sound::{EnvelopePoint, FrameSound, Sound, SoundEffect, SoundFormat, SoundId, SoundSync};
+pub use stroke_style::{Cap, Dash, DashKind, Join, StrokeStyle};
+pub use swatch::{MAX_SWATCHES, Swatch, SwatchPaint};
+pub use width::{MAX_WIDTH_FACTOR, MAX_WIDTH_POINTS, ProfilePreset, WidthPoint, WidthProfile};
 
 use anicraft_geom::{Affine, FillRule, Path, Rect, Vec2};
 use serde::{Deserialize, Serialize};
@@ -272,7 +290,9 @@ impl Paint {
     pub fn transformed(&self, m: &Affine) -> Paint {
         match self {
             Paint::Solid(_) => self.clone(),
-            Paint::Linear { start, end, stops, spread, linear_rgb } => Paint::Linear { start: m.apply(*start), end: m.apply(*end), stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb },
+            Paint::Linear { start, end, stops, spread, linear_rgb } => {
+                Paint::Linear { start: m.apply(*start), end: m.apply(*end), stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb }
+            }
             Paint::Radial { .. } => match self.frame(None) {
                 Some(f) => self.with_frame(&m.mul(&f), None),
                 None => self.clone(),
@@ -298,7 +318,9 @@ impl Paint {
                 let h = (*end - *start) * 0.5;
                 Some(Affine { m: [h.x, h.y, -h.y, h.x, mid.x, mid.y] })
             }
-            Paint::Radial { center, radius, matrix, .. } => Some(matrix.mul(&Affine::translate(center.x, center.y)).mul(&Affine::scale(*radius, *radius))),
+            Paint::Radial { center, radius, matrix, .. } => {
+                Some(matrix.mul(&Affine::translate(center.x, center.y)).mul(&Affine::scale(*radius, *radius)))
+            }
             Paint::Bitmap { matrix, .. } => {
                 let (w, h) = image?;
                 Some(matrix.mul(&Affine::translate(w * 0.5, h * 0.5)).mul(&Affine::scale(w * 0.5, h * 0.5)))
@@ -317,7 +339,13 @@ impl Paint {
         }
         match self {
             Paint::Solid(_) => self.clone(),
-            Paint::Linear { stops, spread, linear_rgb, .. } => Paint::Linear { start: f.apply(Vec2::new(-1.0, 0.0)), end: f.apply(Vec2::new(1.0, 0.0)), stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb },
+            Paint::Linear { stops, spread, linear_rgb, .. } => Paint::Linear {
+                start: f.apply(Vec2::new(-1.0, 0.0)),
+                end: f.apply(Vec2::new(1.0, 0.0)),
+                stops: stops.clone(),
+                spread: *spread,
+                linear_rgb: *linear_rgb,
+            },
             Paint::Radial { stops, spread, linear_rgb, focal, .. } => {
                 let center = f.apply(Vec2::ZERO);
                 let [a, b, c, d, ..] = f.m;
@@ -326,14 +354,22 @@ impl Paint {
                     // The linear part with the x axis's length taken out, about the centre.
                     let l = Affine { m: [a / radius, b / radius, c / radius, d / radius, 0.0, 0.0] };
                     let plain = (l.m[0] - 1.0).abs() < 1e-6 && l.m[1].abs() < 1e-6 && l.m[2].abs() < 1e-6 && (l.m[3] - 1.0).abs() < 1e-6;
-                    if plain { (Affine::IDENTITY, radius) } else { (Affine::translate(center.x, center.y).mul(&l).mul(&Affine::translate(-center.x, -center.y)), radius) }
+                    if plain {
+                        (Affine::IDENTITY, radius)
+                    } else {
+                        (Affine::translate(center.x, center.y).mul(&l).mul(&Affine::translate(-center.x, -center.y)), radius)
+                    }
                 } else {
                     (Affine::IDENTITY, 0.0)
                 };
                 Paint::Radial { center, radius, stops: stops.clone(), spread: *spread, linear_rgb: *linear_rgb, focal: *focal, matrix }
             }
             Paint::Bitmap { bitmap, repeat, .. } => match image {
-                Some((w, h)) if w > 0.0 && h > 0.0 => Paint::Bitmap { bitmap: *bitmap, repeat: *repeat, matrix: f.mul(&Affine::scale(2.0 / w, 2.0 / h)).mul(&Affine::translate(-w * 0.5, -h * 0.5)) },
+                Some((w, h)) if w > 0.0 && h > 0.0 => Paint::Bitmap {
+                    bitmap: *bitmap,
+                    repeat: *repeat,
+                    matrix: f.mul(&Affine::scale(2.0 / w, 2.0 / h)).mul(&Affine::translate(-w * 0.5, -h * 0.5)),
+                },
                 _ => self.clone(),
             },
         }
@@ -365,30 +401,37 @@ impl Paint {
     pub fn lerp(&self, o: &Paint, t: f32) -> Paint {
         let lerp_stops = |a: &[GradientStop], b: &[GradientStop]| -> Option<Vec<GradientStop>> {
             (a.len() == b.len()).then(|| {
-                a.iter().zip(b).map(|(x, y)| GradientStop { offset: anicraft_geom::lerp(x.offset, y.offset, t), color: x.color.lerp(y.color, t) }).collect()
+                a.iter()
+                    .zip(b)
+                    .map(|(x, y)| GradientStop { offset: anicraft_geom::lerp(x.offset, y.offset, t), color: x.color.lerp(y.color, t) })
+                    .collect()
             })
         };
         match (self, o) {
             (Paint::Solid(a), Paint::Solid(b)) => Paint::Solid(a.lerp(*b, t)),
-            (Paint::Linear { start: s0, end: e0, stops: a, spread, linear_rgb }, Paint::Linear { start: s1, end: e1, stops: b, .. }) => match lerp_stops(a, b) {
-                Some(stops) => Paint::Linear { start: s0.lerp(*s1, t), end: e0.lerp(*e1, t), stops, spread: *spread, linear_rgb: *linear_rgb },
-                None => self.clone(),
-            },
-            (Paint::Radial { stops: a, .. }, Paint::Radial { stops: b, focal: f1, .. }) => match (lerp_stops(a, b), self.frame(None), o.frame(None)) {
-                (Some(stops), Some(fa), Some(fb)) => {
-                    let mut m = [0.0; 6];
-                    for (k, v) in m.iter_mut().enumerate() {
-                        *v = anicraft_geom::lerp(fa.m[k], fb.m[k], t);
-                    }
-                    let mut p = self.with_frame(&Affine { m }, None);
-                    if let Paint::Radial { stops: s, focal, .. } = &mut p {
-                        *s = stops;
-                        *focal = anicraft_geom::lerp(*focal, *f1, t);
-                    }
-                    p
+            (Paint::Linear { start: s0, end: e0, stops: a, spread, linear_rgb }, Paint::Linear { start: s1, end: e1, stops: b, .. }) => {
+                match lerp_stops(a, b) {
+                    Some(stops) => Paint::Linear { start: s0.lerp(*s1, t), end: e0.lerp(*e1, t), stops, spread: *spread, linear_rgb: *linear_rgb },
+                    None => self.clone(),
                 }
-                _ => self.clone(),
-            },
+            }
+            (Paint::Radial { stops: a, .. }, Paint::Radial { stops: b, focal: f1, .. }) => {
+                match (lerp_stops(a, b), self.frame(None), o.frame(None)) {
+                    (Some(stops), Some(fa), Some(fb)) => {
+                        let mut m = [0.0; 6];
+                        for (k, v) in m.iter_mut().enumerate() {
+                            *v = anicraft_geom::lerp(fa.m[k], fb.m[k], t);
+                        }
+                        let mut p = self.with_frame(&Affine { m }, None);
+                        if let Paint::Radial { stops: s, focal, .. } = &mut p {
+                            *s = stops;
+                            *focal = anicraft_geom::lerp(*focal, *f1, t);
+                        }
+                        p
+                    }
+                    _ => self.clone(),
+                }
+            }
             _ => self.clone(),
         }
     }
@@ -603,7 +646,9 @@ impl ElementKind {
     /// first (back to front). Empty for anything else.
     pub fn group_members(&self) -> Vec<Arc<Element>> {
         match self {
-            ElementKind::Group { members } => members.layers.iter().rev().filter_map(|l| l.keyframe_at(0)).flat_map(|k| k.elements.iter().cloned()).collect(),
+            ElementKind::Group { members } => {
+                members.layers.iter().rev().filter_map(|l| l.keyframe_at(0)).flat_map(|k| k.elements.iter().cloned()).collect()
+            }
             _ => Vec::new(),
         }
     }
@@ -718,7 +763,22 @@ impl BlendMode {
         match self {
             BlendMode::HardLight => "Hard Light",
             m => {
-                const L: [&str; 14] = ["Normal", "Layer", "Darken", "Multiply", "Lighten", "Screen", "Overlay", "Hard Light", "Add", "Subtract", "Difference", "Invert", "Alpha", "Erase"];
+                const L: [&str; 14] = [
+                    "Normal",
+                    "Layer",
+                    "Darken",
+                    "Multiply",
+                    "Lighten",
+                    "Screen",
+                    "Overlay",
+                    "Hard Light",
+                    "Add",
+                    "Subtract",
+                    "Difference",
+                    "Invert",
+                    "Alpha",
+                    "Erase",
+                ];
                 L.get(BlendMode::ALL.iter().position(|x| *x == m).unwrap_or(0)).copied().unwrap_or("Normal")
             }
         }
@@ -913,7 +973,17 @@ fn white() -> Rgba {
 impl TextField {
     /// A single-line field of `kind`.
     pub fn new(kind: TextKind) -> TextField {
-        TextField { kind, lines: LineType::Single, selectable: true, border: false, border_color: Rgba::BLACK, background: false, background_color: Rgba::WHITE, max_chars: 0, variable: String::new() }
+        TextField {
+            kind,
+            lines: LineType::Single,
+            selectable: true,
+            border: false,
+            border_color: Rgba::BLACK,
+            background: false,
+            background_color: Rgba::WHITE,
+            max_chars: 0,
+            variable: String::new(),
+        }
     }
 
     /// The width text wraps at in a box `box_width` wide, if its lines wrap.
@@ -933,7 +1003,11 @@ impl TextField {
 
     /// Values in range: names cut to length, at most [`MAX_FIELD_CHARS`] typed.
     pub fn sanitized(&self) -> TextField {
-        TextField { max_chars: self.max_chars.min(MAX_FIELD_CHARS as u32), variable: self.variable.chars().take(MAX_FIELD_NAME).collect(), ..self.clone() }
+        TextField {
+            max_chars: self.max_chars.min(MAX_FIELD_CHARS as u32),
+            variable: self.variable.chars().take(MAX_FIELD_NAME).collect(),
+            ..self.clone()
+        }
     }
 }
 
@@ -958,6 +1032,15 @@ impl Element {
     /// Bounds in the parent's space.
     pub fn bounds(&self, doc: &Document) -> Rect {
         element_bounds(doc, self, &self.transform, 0)
+    }
+    /// Bounds in the parent's space after applying a 2.5D perspective tilt/offset.
+    pub fn bounds_with_perspective(&self, doc: &Document, persp: &Perspective3D) -> Rect {
+        let b = self.bounds(doc);
+        if b.is_empty() || persp.is_identity() {
+            return b;
+        }
+        let pivot = if self.transform == Affine::IDENTITY { b.center() } else { self.transform.translation() };
+        persp.project_bounds(&b, pivot)
     }
 }
 
@@ -1137,17 +1220,55 @@ pub struct Keyframe {
     /// On an armature layer: the joint angles this keyframe poses the armature with (ADR 0043).
     #[serde(default, skip_serializing_if = "Pose::is_empty")]
     pub pose: Pose,
+    /// Per-element 2.5D perspective transforms (`3D Rotation` / `3D Translation`) on this keyframe.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub perspectives: std::collections::BTreeMap<ElementId, Perspective3D>,
 }
 
 impl PartialEq for Keyframe {
     fn eq(&self, o: &Keyframe) -> bool {
-        self.start == o.start && self.duration == o.duration && self.tween == o.tween && self.motion == o.motion && self.hints == o.hints && self.label == o.label && self.sound == o.sound && self.script == o.script && self.pose == o.pose && arcs_eq(&self.elements, &o.elements)
+        self.start == o.start
+            && self.duration == o.duration
+            && self.tween == o.tween
+            && self.motion == o.motion
+            && self.hints == o.hints
+            && self.label == o.label
+            && self.sound == o.sound
+            && self.script == o.script
+            && self.pose == o.pose
+            && self.perspectives == o.perspectives
+            && arcs_eq(&self.elements, &o.elements)
     }
 }
 
 impl Keyframe {
     pub fn new(start: u32, duration: u32) -> Self {
-        Keyframe { start, duration: duration.max(1), elements: Vec::new(), tween: None, motion: None, hints: Vec::new(), label: String::new(), sound: None, script: None, pose: Pose::default() }
+        Keyframe {
+            start,
+            duration: duration.max(1),
+            elements: Vec::new(),
+            tween: None,
+            motion: None,
+            hints: Vec::new(),
+            label: String::new(),
+            sound: None,
+            script: None,
+            pose: Pose::default(),
+            perspectives: std::collections::BTreeMap::new(),
+        }
+    }
+    /// Returns the 2.5D perspective parameters of element `id` on this keyframe (identity if unset).
+    pub fn perspective_of(&self, id: ElementId) -> Perspective3D {
+        self.perspectives.get(&id).copied().unwrap_or(Perspective3D::IDENTITY)
+    }
+    /// Sets or clears (when identity) the 2.5D perspective parameters of element `id`.
+    pub fn set_perspective(&mut self, id: ElementId, persp: Perspective3D) {
+        let p = persp.sanitized();
+        if p.is_identity() {
+            self.perspectives.remove(&id);
+        } else {
+            self.perspectives.insert(id, p);
+        }
     }
     /// Mutable access to the elements whose ids satisfy `pick`, cloning only those.
     pub fn elements_mut_where(&mut self, mut pick: impl FnMut(ElementId) -> bool) -> Vec<&mut Element> {
@@ -1196,6 +1317,10 @@ pub struct Layer {
     /// keeps it so); any other link is dropped.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<LayerId>,
+    /// Direct layer-to-layer transform parenting: this layer inherits the motion delta of
+    /// `parent_layer` relative to its rest keyframe, bounded by [`MAX_LAYER_DEPTH`] with no cycles.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_layer: Option<LayerId>,
     #[serde(default = "yes")]
     pub visible: bool,
     #[serde(default)]
@@ -1318,6 +1443,7 @@ impl PartialEq for Layer {
             && self.name == o.name
             && self.kind == o.kind
             && self.parent == o.parent
+            && self.parent_layer == o.parent_layer
             && self.visible == o.visible
             && self.locked == o.locked
             && self.outline == o.outline
@@ -1352,6 +1478,7 @@ impl Layer {
             name: name.into(),
             kind: LayerKind::Normal,
             parent: None,
+            parent_layer: None,
             visible: true,
             locked: false,
             outline: false,
@@ -1407,6 +1534,44 @@ impl Layer {
     /// One past the last frame with content.
     pub fn end_frame(&self) -> u32 {
         self.keyframes.last().map_or(0, |k| k.end())
+    }
+    /// Base Z-depth in pixels behind the stage plane.
+    pub fn z_depth(&self) -> f32 {
+        camera::clamp_depth(self.depth)
+    }
+    /// Evaluated Z-depth at `frame` in pixels behind the stage plane.
+    pub fn z_depth_at(&self, frame: u32) -> f32 {
+        self.depth_at(frame)
+    }
+    /// Camera parallax translation factor (`FOCAL / (FOCAL + z_depth)`) at `frame`.
+    pub fn parallax_factor_at(&self, frame: u32) -> f32 {
+        camera::parallax(self.depth_at(frame))
+    }
+    /// Evaluates element `id`'s 2.5D perspective at `frame`, interpolating across classic tweens.
+    pub fn perspective_at(&self, frame: u32, id: ElementId) -> Perspective3D {
+        let Some(idx) = self.keyframe_index_at(frame) else {
+            return Perspective3D::IDENTITY;
+        };
+        let Some(kf) = self.keyframes.get(idx) else {
+            return Perspective3D::IDENTITY;
+        };
+        let pa = kf.perspective_of(id);
+        let Some(tween) = &kf.tween else {
+            return pa;
+        };
+        let Some(next) = self.keyframes.get(idx + 1) else {
+            return pa;
+        };
+        if next.start != kf.end() || frame == kf.start {
+            return pa;
+        }
+        let pb = next.perspective_of(id);
+        if pa == pb {
+            return pa;
+        }
+        let t = (frame - kf.start) as f32 / kf.duration.max(1) as f32;
+        let eased = tween.ease(EaseGroup::Rotation).apply(t);
+        pa.lerp(&pb, eased)
     }
     /// Restores invariants after edits: sorted, durations ≥ 1, no overlaps. Touches (and so
     /// un-shares) only keyframes whose duration actually changes.
@@ -1592,6 +1757,70 @@ impl Timeline {
                 Arc::make_mut(l).parent = cand;
             }
         }
+        for i in 0..self.layers.len() {
+            let Some(l) = self.layers.get(i) else { continue };
+            let Some(pl) = l.parent_layer else { continue };
+            if !self.can_parent_layer(l.id, pl)
+                && let Some(l) = self.layers.get_mut(i)
+            {
+                Arc::make_mut(l).parent_layer = None;
+            }
+        }
+    }
+
+    /// Whether `child` may take `parent` as its direct transform `parent_layer` without cycles
+    /// or exceeding [`MAX_LAYER_DEPTH`].
+    pub fn can_parent_layer(&self, child: LayerId, parent: LayerId) -> bool {
+        if child == parent {
+            return false;
+        }
+        let Some(c_layer) = self.layer(child) else { return false };
+        if matches!(c_layer.kind, LayerKind::Folder | LayerKind::Camera) {
+            return false;
+        }
+        let Some(p_layer) = self.layer(parent) else { return false };
+        if matches!(p_layer.kind, LayerKind::Folder | LayerKind::Camera) {
+            return false;
+        }
+        let mut cur = Some(parent);
+        for _ in 0..MAX_LAYER_DEPTH {
+            let Some(id) = cur else { return true };
+            if id == child {
+                return false;
+            }
+            let Some(next_l) = self.layer(id) else { return false };
+            cur = next_l.parent_layer;
+        }
+        cur.is_none()
+    }
+
+    /// Evaluates the cumulative delta `Affine` transform inherited by `id` through its
+    /// `parent_layer` hierarchy at `frame`.
+    pub fn parent_layer_transform(&self, id: LayerId, frame: u32, fps: f32) -> Affine {
+        let mut chain: Vec<LayerId> = Vec::new();
+        let mut cur = self.layer(id).and_then(|l| l.parent_layer);
+        while let Some(pid) = cur {
+            if chain.len() >= MAX_LAYER_DEPTH || pid == id || chain.contains(&pid) {
+                break;
+            }
+            chain.push(pid);
+            cur = self.layer(pid).and_then(|l| l.parent_layer);
+        }
+        if chain.is_empty() {
+            return Affine::IDENTITY;
+        }
+        let mut acc = Affine::IDENTITY;
+        for pid in chain {
+            let Some(pl) = self.layer(pid) else { continue };
+            let rest_xf = pl.keyframes.first().and_then(|k| k.elements.first()).map_or(Affine::IDENTITY, |e| e.transform);
+            let walk = pl.parent.and_then(|g| self.layer(g)).filter(|g| g.kind == LayerKind::Guide).and_then(|g| guide_walk(g, frame));
+            let now_xf = evaluate_shown(pl, frame, walk.as_ref(), fps).and_then(|(_, els)| els.first().map(|e| e.transform)).unwrap_or(rest_xf);
+            let delta = rest_xf.inverse().map_or(Affine::IDENTITY, |inv| now_xf.mul(&inv));
+            if delta.is_finite() {
+                acc = delta.mul(&acc);
+            }
+        }
+        acc
     }
 
     /// Whether the layer at `i` may name `p` as its parent. (Layers above `i` are already
@@ -1696,7 +1925,11 @@ pub struct Linkage {
 impl Linkage {
     pub fn check(&self) -> Result<(), String> {
         if !actions::valid_class_name(&self.class) {
-            return Err(format!("“{}” isn't a class name: letters, digits, _ and $ joined by dots, at most {} characters", self.class, actions::MAX_CLASS_CHARS));
+            return Err(format!(
+                "“{}” isn't a class name: letters, digits, _ and $ joined by dots, at most {} characters",
+                self.class,
+                actions::MAX_CLASS_CHARS
+            ));
         }
         if !self.base.is_empty() && !actions::valid_class_name(&self.base) {
             return Err(format!("“{}” isn't a class name", self.base));
@@ -1781,6 +2014,9 @@ pub struct Document {
     /// Eases the artist saved by name (ADR 0081), offered with the presets.
     #[serde(default, skip_serializing_if = "eases_is_empty")]
     pub eases: Arc<Vec<SavedEase>>,
+    /// Character puppet rigs (head-turn 5-pose parallax and swap sets).
+    #[serde(default, skip_serializing_if = "puppets_is_empty")]
+    pub puppets: Arc<Vec<puppet::PuppetRig>>,
     /// Next free id for layers, elements and symbols.
     pub next_id: u64,
 }
@@ -1820,6 +2056,8 @@ struct DocumentFile {
     aids: Arc<Aids>,
     #[serde(default)]
     eases: Arc<Vec<SavedEase>>,
+    #[serde(default)]
+    puppets: Arc<Vec<puppet::PuppetRig>>,
     #[serde(default = "first_id")]
     next_id: u64,
 }
@@ -1830,7 +2068,21 @@ impl From<DocumentFile> for Document {
         if let Some(tl) = f.timeline {
             scenes.insert(0, Arc::new(Scene { name: "Scene 1".into(), timeline: tl, guides: Vec::new() }));
         }
-        Document { stage: f.stage, scenes, library: f.library, bitmaps: f.bitmaps, sounds: f.sounds, library_tree: f.library_tree, document_class: f.document_class, publish: f.publish, aids: f.aids, swatches: f.swatches, eases: f.eases, next_id: f.next_id }
+        Document {
+            stage: f.stage,
+            scenes,
+            library: f.library,
+            bitmaps: f.bitmaps,
+            sounds: f.sounds,
+            library_tree: f.library_tree,
+            document_class: f.document_class,
+            publish: f.publish,
+            aids: f.aids,
+            swatches: f.swatches,
+            eases: f.eases,
+            puppets: f.puppets,
+            next_id: f.next_id,
+        }
     }
 }
 
@@ -1846,6 +2098,10 @@ fn eases_is_empty(e: &Arc<Vec<SavedEase>>) -> bool {
     e.is_empty()
 }
 
+fn puppets_is_empty(p: &Arc<Vec<puppet::PuppetRig>>) -> bool {
+    p.is_empty()
+}
+
 fn aids_is_default(a: &Arc<Aids>) -> bool {
     a.is_default()
 }
@@ -1859,13 +2115,39 @@ static NO_TIMELINE: Timeline = Timeline { layers: Vec::new() };
 
 impl PartialEq for Document {
     fn eq(&self, o: &Document) -> bool {
-        self.stage == o.stage && self.next_id == o.next_id && self.document_class == o.document_class && arcs_eq(&self.scenes, &o.scenes) && arcs_eq(&self.library, &o.library) && arcs_eq(&self.bitmaps, &o.bitmaps) && arcs_eq(&self.sounds, &o.sounds) && arc_eq(&self.library_tree, &o.library_tree) && arc_eq(&self.publish, &o.publish) && arc_eq(&self.aids, &o.aids) && arc_eq(&self.swatches, &o.swatches) && arc_eq(&self.eases, &o.eases)
+        self.stage == o.stage
+            && self.next_id == o.next_id
+            && self.document_class == o.document_class
+            && arcs_eq(&self.scenes, &o.scenes)
+            && arcs_eq(&self.library, &o.library)
+            && arcs_eq(&self.bitmaps, &o.bitmaps)
+            && arcs_eq(&self.sounds, &o.sounds)
+            && arc_eq(&self.library_tree, &o.library_tree)
+            && arc_eq(&self.publish, &o.publish)
+            && arc_eq(&self.aids, &o.aids)
+            && arc_eq(&self.swatches, &o.swatches)
+            && arc_eq(&self.eases, &o.eases)
+            && arc_eq(&self.puppets, &o.puppets)
     }
 }
 
 impl Default for Document {
     fn default() -> Self {
-        let mut d = Document { stage: Stage::default(), scenes: vec![Arc::new(Scene::new("Scene 1"))], library: Vec::new(), bitmaps: Vec::new(), sounds: Vec::new(), library_tree: Arc::default(), document_class: String::new(), publish: Arc::default(), aids: Arc::default(), swatches: default_swatches(), eases: Arc::default(), next_id: 1 };
+        let mut d = Document {
+            stage: Stage::default(),
+            scenes: vec![Arc::new(Scene::new("Scene 1"))],
+            library: Vec::new(),
+            bitmaps: Vec::new(),
+            sounds: Vec::new(),
+            library_tree: Arc::default(),
+            document_class: String::new(),
+            publish: Arc::default(),
+            aids: Arc::default(),
+            swatches: default_swatches(),
+            eases: Arc::default(),
+            puppets: Arc::default(),
+            next_id: 1,
+        };
         let id = LayerId(d.alloc_id());
         d.timeline_mut(0).layers.push(Arc::new(Layer::new(id, "Layer 1")));
         d
@@ -2042,6 +2324,13 @@ impl Document {
         for s in &self.sounds {
             max_id = max_id.max(s.id.0);
         }
+        let clean_puppets: Vec<puppet::PuppetRig> = self.puppets.iter().take(puppet::MAX_PUPPET_RIGS).map(puppet::PuppetRig::sanitized).collect();
+        for p in &clean_puppets {
+            max_id = max_id.max(p.id);
+        }
+        if clean_puppets != *self.puppets {
+            self.puppets = Arc::new(clean_puppets);
+        }
         self.sanitize_library_tree(&mut max_id);
         self.next_id = self.next_id.max(max_id.saturating_add(1));
     }
@@ -2088,7 +2377,8 @@ fn sanitize_groups(layer: &mut Arc<Layer>, depth: usize, max_id: &mut u64) {
             for gl in &mut members.layers {
                 *max_id = (*max_id).max(gl.id.0);
                 let bad_kind = matches!(gl.kind, LayerKind::Camera | LayerKind::Armature | LayerKind::Folder);
-                let bad_frames = gl.keyframes.len() != 1 || gl.keyframes.first().is_some_and(|k| k.start != 0 || k.duration != 1 || k.tween.is_some() || k.motion.is_some());
+                let bad_frames = gl.keyframes.len() != 1
+                    || gl.keyframes.first().is_some_and(|k| k.start != 0 || k.duration != 1 || k.tween.is_some() || k.motion.is_some());
                 if bad_kind || bad_frames {
                     let g = Arc::make_mut(gl);
                     if bad_kind {
@@ -2156,6 +2446,27 @@ fn sanitize_depth(layer: &mut Arc<Layer>) {
     if !layer.depth_keys_clean() {
         Arc::make_mut(layer).sanitize_depth_keys();
     }
+    let bad_persp = layer
+        .keyframes
+        .iter()
+        .any(|k| k.perspectives.iter().any(|(&eid, p)| !k.elements.iter().any(|e| e.id == eid) || p.is_identity() || *p != p.sanitized()));
+    if bad_persp {
+        for k in &mut Arc::make_mut(layer).keyframes {
+            let needs = k.perspectives.iter().any(|(&eid, p)| !k.elements.iter().any(|e| e.id == eid) || p.is_identity() || *p != p.sanitized());
+            if needs {
+                let k = Arc::make_mut(k);
+                let valid_ids: std::collections::HashSet<ElementId> = k.elements.iter().map(|e| e.id).collect();
+                let cleaned: std::collections::BTreeMap<ElementId, Perspective3D> = k
+                    .perspectives
+                    .iter()
+                    .filter(|(eid, _)| valid_ids.contains(eid))
+                    .map(|(&eid, p)| (eid, p.sanitized()))
+                    .filter(|(_, p)| !p.is_identity())
+                    .collect();
+                k.perspectives = cleaned;
+            }
+        }
+    }
 }
 
 /// Repairs a loaded layer's armature (ADR 0043): only an armature layer has one, its bones are
@@ -2194,7 +2505,11 @@ fn sanitize_scripts(layer: &mut Arc<Layer>) {
     let bad_script = |k: &Keyframe| k.script.as_ref().is_some_and(FrameScript::needs_repair);
     let bad_events = |e: &Element| match &e.kind {
         ElementKind::Symbol { events, .. } => {
-            events.len() > actions::MAX_HANDLERS || events.iter().enumerate().any(|(i, h)| events.iter().take(i).any(|o| o.event == h.event) || actions::check_actions(&h.actions).is_err())
+            events.len() > actions::MAX_HANDLERS
+                || events
+                    .iter()
+                    .enumerate()
+                    .any(|(i, h)| events.iter().take(i).any(|o| o.event == h.event) || actions::check_actions(&h.actions).is_err())
         }
         _ => false,
     };

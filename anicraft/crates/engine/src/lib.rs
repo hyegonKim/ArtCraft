@@ -6,79 +6,82 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 mod anim;
+pub mod brush_library;
 mod cmds_actions;
 mod cmds_bone;
-mod cmds_warp;
 pub mod cmds_brush;
 mod cmds_camera;
+pub mod cmds_desktop;
 mod cmds_draw;
-pub mod cmds_filter;
+pub mod cmds_drop;
 pub mod cmds_ease;
 pub mod cmds_envelope;
-pub mod cmds_drop;
 pub mod cmds_erase;
 mod cmds_file;
+pub mod cmds_filter;
 mod cmds_frames;
 mod cmds_group;
-mod cmds_modify;
-mod cmds_motion;
-mod cmds_retime;
 mod cmds_hints;
 mod cmds_layer;
 pub mod cmds_library;
+mod cmds_modify;
+mod cmds_motion;
 pub mod cmds_paint;
 mod cmds_path;
-pub mod cmds_raw;
-pub mod cmds_rawsub;
-mod cmds_rawpoints;
-pub mod brush_library;
-pub mod filter_library;
-pub mod cmds_recent;
-pub mod cmds_desktop;
-pub mod cmds_template;
-mod cmds_recovery;
-mod cmds_script;
 pub mod cmds_plugin;
+pub mod cmds_puppet;
+pub mod cmds_raw;
+mod cmds_rawpoints;
+pub mod cmds_rawsub;
+pub mod cmds_recent;
+mod cmds_recovery;
+mod cmds_retime;
 mod cmds_scene;
+mod cmds_script;
 pub mod cmds_sound;
+mod cmds_stroke;
+pub mod cmds_swatch;
+pub mod cmds_template;
 pub mod cmds_text;
 mod cmds_timeline;
 mod cmds_view;
+mod cmds_warp;
 mod cmds_width;
-mod cmds_stroke;
-pub mod cmds_swatch;
 pub mod confirm;
 pub mod editing;
 pub mod explorer;
+pub mod filter_library;
 pub mod find;
 pub mod format;
 pub mod history;
 mod merge;
 pub mod multi;
 pub mod onion;
+pub mod params;
+pub mod player;
+pub mod plugin_export;
+pub mod publish;
 pub mod recovery;
 pub mod render_service;
 pub mod selection;
 pub mod snap;
-pub mod params;
-pub mod plugin_export;
-pub mod player;
-pub mod publish;
 pub mod vfs;
 
-use anicraft_doc::{DisplayList, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, evaluate_layer_elements, evaluate_scene};
+use anicraft_doc::{
+    DisplayList, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, LayerKind, evaluate_layer_elements, evaluate_scene,
+};
 use anicraft_geom::{Affine, Rect, Vec2};
-use serde_json::{Value, json};
 use history::History;
+use serde_json::{Value, json};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::sync::Arc;
 
 pub use anicraft_doc as doc;
-pub use anicraft_plugins as plugins;
-pub use anicraft_text as text;
 pub use anicraft_geom as geom;
+pub use anicraft_plugins as plugins;
 pub use anicraft_render as render;
+pub use anicraft_text as text;
 /// Whether a path is an Animate document (`.fla`, `.xfl`, or an XFL folder) that `file.open`
 /// imports.
 pub use cmds_file::is_animate;
@@ -177,6 +180,7 @@ pub fn commands() -> Vec<CommandSpec> {
     v.extend(cmds_width::specs());
     v.extend(cmds_stroke::specs());
     v.extend(cmds_plugin::specs());
+    v.extend(cmds_puppet::specs());
     v.extend(cmds_sound::specs());
     v.extend(cmds_actions::specs());
     v.extend(cmds_script::specs());
@@ -198,15 +202,16 @@ pub fn find_command(id: &str) -> Option<CommandSpec> {
     commands().into_iter().find(|c| c.id == id)
 }
 
+pub use cmds_layer::LAYER_COLORS;
 pub use history::{Snapshot, StateId};
 pub use selection::Selection;
 pub use snap::{Accuracy, SnapTo, ViewAids};
-pub use cmds_layer::LAYER_COLORS;
 
 /// The command namespaces that change a timeline's layers and frames, refused while a group is
 /// open for editing (ADR 0073): a group is one layer and one frame. A name ending in `.` is a
 /// namespace, any other one command.
-const GROUP_REFUSES: &[&str] = &["timeline.", "layer.", "camera.", "bone.", "motion.", "tween.", "frames.", "sound.place", "script.set", "script.clear"];
+const GROUP_REFUSES: &[&str] =
+    &["timeline.", "layer.", "camera.", "bone.", "puppet.", "motion.", "tween.", "frames.", "sound.place", "script.set", "script.clear"];
 
 /// Last addressable frame (0-based); about 70 minutes at 24 fps.
 pub const MAX_FRAME: u32 = 100_000;
@@ -264,7 +269,20 @@ pub struct ToolStyle {
 
 impl Default for ToolStyle {
     fn default() -> Self {
-        ToolStyle { fill: anicraft_doc::Rgba::hex(0x3d8bfd), fill_paint: None, lock_fill: false, stroke: anicraft_doc::Rgba::hex(0x1b2a4a), stroke_width: 2.0, use_fill: true, use_stroke: true, stroke_profile: anicraft_doc::ProfilePreset::Uniform, custom_profile: None, line: anicraft_doc::StrokeStyle::default(), object_drawing: true, snap_objects: true }
+        ToolStyle {
+            fill: anicraft_doc::Rgba::hex(0x3d8bfd),
+            fill_paint: None,
+            lock_fill: false,
+            stroke: anicraft_doc::Rgba::hex(0x1b2a4a),
+            stroke_width: 2.0,
+            use_fill: true,
+            use_stroke: true,
+            stroke_profile: anicraft_doc::ProfilePreset::Uniform,
+            custom_profile: None,
+            line: anicraft_doc::StrokeStyle::default(),
+            object_drawing: true,
+            snap_objects: true,
+        }
     }
 }
 
@@ -752,14 +770,34 @@ impl Session {
         if g.doc == self.doc && g.selection == self.selection {
             return;
         }
-        let back = Snapshot { label: String::new(), doc: g.doc.clone(), state: g.state, scene: g.scene, editing: g.editing.clone(), frame: g.frame, layer: g.layer, selection: g.selection.clone(), bytes: 0 };
+        let back = Snapshot {
+            label: String::new(),
+            doc: g.doc.clone(),
+            state: g.state,
+            scene: g.scene,
+            editing: g.editing.clone(),
+            frame: g.frame,
+            layer: g.layer,
+            selection: g.selection.clone(),
+            bytes: 0,
+        };
         self.restore(back);
         self.revision += 1;
         self.fix_selection();
     }
 
     fn snapshot(&self, label: &str) -> Snapshot {
-        Snapshot { label: label.to_string(), doc: self.doc.clone(), state: self.state, scene: self.scene, editing: self.editing.clone(), frame: self.frame, layer: self.layer, selection: self.selection.clone(), bytes: 0 }
+        Snapshot {
+            label: label.to_string(),
+            doc: self.doc.clone(),
+            state: self.state,
+            scene: self.scene,
+            editing: self.editing.clone(),
+            frame: self.frame,
+            layer: self.layer,
+            selection: self.selection.clone(),
+            bytes: 0,
+        }
     }
 
     fn restore(&mut self, s: Snapshot) {
@@ -851,7 +889,11 @@ impl Session {
             return dl.clone();
         }
         // An open symbol (ADR 0045) or group (ADR 0073) is edited in its own space.
-        let dl = Arc::new(if open.is_some() { anicraft_doc::evaluate_timeline(&self.doc, self.timeline(), self.frame) } else { evaluate_scene(&self.doc, self.scene, self.frame) });
+        let dl = Arc::new(if open.is_some() {
+            anicraft_doc::evaluate_timeline(&self.doc, self.timeline(), self.frame)
+        } else {
+            evaluate_scene(&self.doc, self.scene, self.frame)
+        });
         self.dl_cache.replace(Some((self.state, self.scene, self.frame, open, dl.clone())));
         dl
     }
@@ -917,7 +959,9 @@ impl Session {
 
     pub(crate) fn layer_mut(&mut self, id: Option<LayerId>) -> Result<&mut Layer> {
         let id = id.unwrap_or(self.layer);
-        crate::editing::edited_mut(&mut self.doc, self.scene, &self.editing)?.layer_mut(id).ok_or_else(|| EngineError::State(format!("no layer with id {}", id.0)))
+        crate::editing::edited_mut(&mut self.doc, self.scene, &self.editing)?
+            .layer_mut(id)
+            .ok_or_else(|| EngineError::State(format!("no layer with id {}", id.0)))
     }
 
     /// The keyframe on the active layer that edits at the playhead should change. Creates a
@@ -937,10 +981,24 @@ impl Session {
                 return Err(EngineError::State(format!("'{}' is a folder; pick a layer inside it to draw on", l.name)));
             }
             if (l.kind == LayerKind::Camera) != (what == KeyEdit::Camera) {
-                return Err(EngineError::State(if what == KeyEdit::Camera { "that is not the camera layer".into() } else { format!("'{}' is the camera layer: it holds the camera, not artwork. Pick another layer to draw on, or move the camera with the Camera tool", l.name) }));
+                return Err(EngineError::State(if what == KeyEdit::Camera {
+                    "that is not the camera layer".into()
+                } else {
+                    format!(
+                        "'{}' is the camera layer: it holds the camera, not artwork. Pick another layer to draw on, or move the camera with the Camera tool",
+                        l.name
+                    )
+                }));
             }
             if (l.kind == LayerKind::Armature) != (what == KeyEdit::Pose) {
-                return Err(EngineError::State(if what == KeyEdit::Pose { "that is not an armature layer".into() } else { format!("'{}' is an armature layer: it holds the armature's instances, posed by their bones. Drag a bone (or an instance) to pose it, drag the root instance to move it all, or pick another layer to draw on", l.name) }));
+                return Err(EngineError::State(if what == KeyEdit::Pose {
+                    "that is not an armature layer".into()
+                } else {
+                    format!(
+                        "'{}' is an armature layer: it holds the armature's instances, posed by their bones. Drag a bone (or an instance) to pose it, drag the root instance to move it all, or pick another layer to draw on",
+                        l.name
+                    )
+                }));
             }
             if tl.locked_by_folder(l.id) {
                 return Err(EngineError::State(format!("layer '{}' is in a locked folder", l.name)));
@@ -948,7 +1006,9 @@ impl Session {
         }
         // Through the fields, not `layer_mut`, so `motion_edit` can be set below.
         let (scene, active) = (self.scene, self.layer);
-        let layer = crate::editing::edited_mut(&mut self.doc, scene, &self.editing)?.layer_mut(active).ok_or_else(|| EngineError::State(format!("no layer with id {}", active.0)))?;
+        let layer = crate::editing::edited_mut(&mut self.doc, scene, &self.editing)?
+            .layer_mut(active)
+            .ok_or_else(|| EngineError::State(format!("no layer with id {}", active.0)))?;
         if layer.locked {
             return Err(EngineError::State(format!("layer '{}' is locked", layer.name)));
         }
@@ -1021,8 +1081,20 @@ impl Session {
                 })
             })
             .collect();
-        let symbols: Vec<Value> = self.doc.library.iter().map(|s| json!({"id": s.id.0, "name": s.name, "kind": format!("{:?}", s.kind), "frames": s.timeline.frame_count()})).collect();
-        let sounds: Vec<Value> = self.doc.sounds.iter().map(|x| json!({"id": x.id.0, "name": x.name, "format": x.format.label(), "rate": x.rate, "channels": x.channels, "seconds": x.seconds()})).collect();
+        let symbols: Vec<Value> = self
+            .doc
+            .library
+            .iter()
+            .map(|s| json!({"id": s.id.0, "name": s.name, "kind": format!("{:?}", s.kind), "frames": s.timeline.frame_count()}))
+            .collect();
+        let sounds: Vec<Value> = self
+            .doc
+            .sounds
+            .iter()
+            .map(
+                |x| json!({"id": x.id.0, "name": x.name, "format": x.format.label(), "rate": x.rate, "channels": x.channels, "seconds": x.seconds()}),
+            )
+            .collect();
         json!({
             "stage": {"width": self.doc.stage.width, "height": self.doc.stage.height, "fps": self.doc.stage.fps, "background": self.doc.stage.background.to_hex()},
             "frames": self.frame_count(),
@@ -1086,11 +1158,15 @@ pub fn element_label(doc: &Document, e: &Element) -> String {
     let kind = match &e.kind {
         ElementKind::Shape(_) => "Shape".to_string(),
         ElementKind::Symbol { symbol, .. } => match doc.symbol(*symbol) {
-            Some(s) => format!("{}: {}", match s.kind {
-                anicraft_doc::SymbolKind::Graphic => "Graphic",
-                anicraft_doc::SymbolKind::MovieClip => "Movie clip",
-                anicraft_doc::SymbolKind::Button => "Button",
-            }, s.name),
+            Some(s) => format!(
+                "{}: {}",
+                match s.kind {
+                    anicraft_doc::SymbolKind::Graphic => "Graphic",
+                    anicraft_doc::SymbolKind::MovieClip => "Movie clip",
+                    anicraft_doc::SymbolKind::Button => "Button",
+                },
+                s.name
+            ),
             None => "Graphic: missing".to_string(),
         },
         ElementKind::Camera => "Camera".to_string(),
@@ -1114,63 +1190,19 @@ pub fn element_label(doc: &Document, e: &Element) -> String {
 mod tests;
 
 #[cfg(test)]
-mod motion_tests;
-#[cfg(test)]
-mod retime_tests;
-#[cfg(test)]
-mod ease_tests;
-#[cfg(test)]
-mod color_tests;
-#[cfg(test)]
-mod motion_path_tests;
-#[cfg(test)]
-mod motion_pin_tests;
-#[cfg(test)]
-mod plugin_tests;
-#[cfg(test)]
-mod plugin_kinds_tests;
-#[cfg(test)]
-mod tests_sound;
-#[cfg(test)]
-mod hint_tests;
-#[cfg(test)]
-mod tests_actions;
-#[cfg(test)]
-mod tests_script;
-#[cfg(test)]
-mod tests_camera;
-#[cfg(test)]
-mod tests_bone;
-#[cfg(test)]
-mod tests_bone_spring;
-#[cfg(test)]
-mod tests_shape_bone;
-#[cfg(test)]
-mod tests_shape_weights;
-#[cfg(test)]
-mod tests_warp;
-#[cfg(test)]
-mod tests_filter;
-#[cfg(test)]
-mod tests_filter_tracks;
-#[cfg(test)]
-mod desktop_tests;
-#[cfg(test)]
-mod merge_tests;
-#[cfg(test)]
-mod raw_tests;
-#[cfg(test)]
-mod rawsub_tests;
-#[cfg(test)]
-mod rawpoints_tests;
-#[cfg(test)]
-mod editing_tests;
+mod brush_library_tests;
 #[cfg(test)]
 mod brush_tests;
 #[cfg(test)]
-mod brush_library_tests;
+mod color_tests;
 #[cfg(test)]
-mod web_tests;
+mod desktop_tests;
+#[cfg(test)]
+mod drop_tests;
+#[cfg(test)]
+mod ease_tests;
+#[cfg(test)]
+mod editing_tests;
 #[cfg(test)]
 mod erase_tests;
 #[cfg(test)]
@@ -1178,26 +1210,70 @@ mod eyedropper_tests;
 #[cfg(test)]
 mod gradient_tests;
 #[cfg(test)]
-mod selection_tests;
+mod group_tests;
+#[cfg(test)]
+mod hint_tests;
+#[cfg(test)]
+mod merge_tests;
+#[cfg(test)]
+mod motion_path_tests;
+#[cfg(test)]
+mod motion_pin_tests;
+#[cfg(test)]
+mod motion_tests;
+#[cfg(test)]
+mod parity_tests;
+#[cfg(test)]
+mod path_text_tests;
+#[cfg(test)]
+mod plugin_kinds_tests;
+#[cfg(test)]
+mod plugin_tests;
+#[cfg(test)]
+mod raw_tests;
+#[cfg(test)]
+mod rawpoints_tests;
+#[cfg(test)]
+mod rawsub_tests;
+#[cfg(test)]
+mod retime_tests;
 #[cfg(test)]
 mod scale_grid_tests;
 #[cfg(test)]
-mod drop_tests;
+mod selection_tests;
+#[cfg(test)]
+mod swatch_tests;
 #[cfg(test)]
 mod template_tests;
+#[cfg(test)]
+mod tests_actions;
+#[cfg(test)]
+mod tests_bone;
+#[cfg(test)]
+mod tests_bone_chain;
+#[cfg(test)]
+mod tests_bone_spring;
+#[cfg(test)]
+mod tests_camera;
+#[cfg(test)]
+mod tests_filter;
+#[cfg(test)]
+mod tests_filter_tracks;
+#[cfg(test)]
+mod tests_script;
+#[cfg(test)]
+mod tests_shape_bone;
+#[cfg(test)]
+mod tests_shape_weights;
+#[cfg(test)]
+mod tests_sound;
+#[cfg(test)]
+mod tests_warp;
 #[cfg(test)]
 mod timeline_drop_tests;
 #[cfg(test)]
 mod timeline_key_tests;
 #[cfg(test)]
-mod tests_bone_chain;
-#[cfg(test)]
 mod view_tests;
 #[cfg(test)]
-mod path_text_tests;
-#[cfg(test)]
-mod group_tests;
-#[cfg(test)]
-mod swatch_tests;
-#[cfg(test)]
-mod parity_tests;
+mod web_tests;

@@ -16,10 +16,10 @@ use crate::prefs::Prefs;
 use crate::theme::{T, Type, text};
 #[cfg(target_arch = "wasm32")]
 use crate::web::BrowserSaver as Autosaver;
+use anicraft_engine::StateId;
 use anicraft_engine::recovery::{self, Entry, Outcome};
 #[cfg(not(target_arch = "wasm32"))]
 use anicraft_engine::recovery::{Autosaver, SessionLock};
-use anicraft_engine::StateId;
 use serde_json::json;
 use std::path::PathBuf;
 
@@ -80,7 +80,9 @@ impl Recovery {
             if shot_mode && !crate::platform::recovery_dir_overridden() {
                 return (r, None);
             }
-            let Some(dir) = crate::platform::recovery_dir() else { return (r, Some(tr!("Autosave is off: this system has no settings folder").into())) };
+            let Some(dir) = crate::platform::recovery_dir() else {
+                return (r, Some(tr!("Autosave is off: this system has no settings folder").into()));
+            };
             recovery::prune(&dir);
             r.found = recovery::scan(&dir, None);
             r.show = !r.found.is_empty();
@@ -214,7 +216,11 @@ fn restore(app: &mut App, id: String) {
             app.recovery.discarded(&id);
             return;
         };
-        let name = meta.original.as_deref().and_then(std::path::Path::file_name).map_or_else(|| "Untitled.anicraft".to_string(), |n| n.to_string_lossy().into_owned()); // i18n-exempt: a file name
+        let name = meta
+            .original
+            .as_deref()
+            .and_then(std::path::Path::file_name)
+            .map_or_else(|| "Untitled.anicraft".to_string(), |n| n.to_string_lossy().into_owned()); // i18n-exempt: a file name
         let path = std::path::Path::new(RESTORED_DIR).join(&id).join(&name);
         match anicraft_engine::vfs::put(&path, json.into_bytes()) {
             Ok(()) => app.request("file.open", json!({"path": path.display().to_string(), "unsaved": true, "untitled": meta.original.is_none()})),
@@ -330,10 +336,21 @@ pub fn sample_entries() -> Vec<Entry> {
     let entry = |session: &str, name: &str, original: Option<&str>, age: u64, frames: u32, scenes: usize| Entry {
         session: session.into(),
         document: PathBuf::new(),
-        meta: recovery::RecoveryMeta { name: name.into(), original: original.map(PathBuf::from), saved_at: now.saturating_sub(age), frames, scenes, ..Default::default() },
+        meta: recovery::RecoveryMeta {
+            name: name.into(),
+            original: original.map(PathBuf::from),
+            saved_at: now.saturating_sub(age),
+            frames,
+            scenes,
+            ..Default::default()
+        },
         bytes: 0,
     };
-    let walk = if crate::platform::OS == crate::platform::Os::Windows { "C:\\Users\\you\\Documents\\walk-cycle.anicraft" } else { "/home/you/Documents/walk-cycle.anicraft" };
+    let walk = if crate::platform::OS == crate::platform::Os::Windows {
+        "C:\\Users\\you\\Documents\\walk-cycle.anicraft"
+    } else {
+        "/home/you/Documents/walk-cycle.anicraft"
+    };
     // i18n-exempt: document names, as the engine records them
     vec![entry("sample-1", "walk-cycle.anicraft", Some(walk), 240, 48, 2), entry("sample-2", "Untitled", None, 3 * 3600, 120, 1)]
 }
@@ -385,7 +402,13 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
                             ui.label(text(Type::Body, e.meta.name.clone()).strong());
                             let when = ago(now.saturating_sub(e.meta.saved_at));
                             let detail = if e.meta.scenes > 1 {
-                                trn!("Autosaved {when} · {n} frame · {scenes} scenes", "Autosaved {when} · {n} frames · {scenes} scenes", e.meta.frames, when = when, scenes = e.meta.scenes)
+                                trn!(
+                                    "Autosaved {when} · {n} frame · {scenes} scenes",
+                                    "Autosaved {when} · {n} frames · {scenes} scenes",
+                                    e.meta.frames,
+                                    when = when,
+                                    scenes = e.meta.scenes
+                                )
                             } else {
                                 trn!("Autosaved {when} · {n} frame", "Autosaved {when} · {n} frames", e.meta.frames, when = when)
                             };
@@ -399,12 +422,19 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
                                 }
                             }
                             if e.original_is_newer() {
-                                ui.label(text(Type::Caption, tr!("The file was saved after this copy, so it opens as a new document and Save asks for a name.")).color(T.error));
+                                ui.label(
+                                    text(
+                                        Type::Caption,
+                                        tr!("The file was saved after this copy, so it opens as a new document and Save asks for a name."),
+                                    )
+                                    .color(T.error),
+                                );
                             }
                         });
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             if confirm.as_deref() == Some(e.session.as_str()) {
-                                let discard = egui::Button::new(text(Type::Body, tr!("Discard")).color(T.on_fill).strong()).fill(T.danger).min_size(btn);
+                                let discard =
+                                    egui::Button::new(text(Type::Body, tr!("Discard")).color(T.on_fill).strong()).fill(T.danger).min_size(btn);
                                 if ui.add(discard).clicked() {
                                     act = Some(Act::Discard(e.session.clone()));
                                 }
@@ -412,11 +442,22 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
                                     act = Some(Act::KeepIt);
                                 }
                             } else {
-                                let restore = egui::Button::new(text(Type::Body, tr!("Restore")).color(T.on_fill).strong()).fill(T.accent).min_size(btn);
-                                if ui.add(restore).named(&tr!("Restore {name}", name = e.meta.name)).on_hover_text(tr!("Open it as unsaved work")).clicked() {
+                                let restore =
+                                    egui::Button::new(text(Type::Body, tr!("Restore")).color(T.on_fill).strong()).fill(T.accent).min_size(btn);
+                                if ui
+                                    .add(restore)
+                                    .named(&tr!("Restore {name}", name = e.meta.name))
+                                    .on_hover_text(tr!("Open it as unsaved work"))
+                                    .clicked()
+                                {
                                     act = Some(Act::Restore(e.session.clone()));
                                 }
-                                if ui.add(egui::Button::new(tr!("Discard…")).min_size(btn)).named(&tr!("Discard {name}…", name = e.meta.name)).on_hover_text(tr!("Delete this autosaved copy")).clicked() {
+                                if ui
+                                    .add(egui::Button::new(tr!("Discard…")).min_size(btn))
+                                    .named(&tr!("Discard {name}…", name = e.meta.name))
+                                    .on_hover_text(tr!("Delete this autosaved copy"))
+                                    .clicked()
+                                {
                                     act = Some(Act::AskDiscard(e.session.clone()));
                                 }
                             }

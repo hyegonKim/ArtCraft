@@ -211,8 +211,7 @@ impl MixEngine {
 
     /// True while queued live MIDI, held notes, or synth release tails are still active.
     pub fn has_active_midi(&self) -> bool {
-        !self.live_midi.is_empty()
-            || self.strips.values().any(|st| !st.live_midi.is_empty() || !st.held.is_empty() || st.audition_tail > 0)
+        !self.live_midi.is_empty() || self.strips.values().any(|st| !st.live_midi.is_empty() || !st.held.is_empty() || st.audition_tail > 0)
     }
 
     /// Realtime mode: third-party plugins are created by the host and handed over with
@@ -447,8 +446,7 @@ impl MixEngine {
         self.last_end = if self.monitor_only { pos } else { pos.saturating_add(frames as i64) };
         self.ensure_synced(s);
         let tail = (self.sample_rate as usize).saturating_mul(2).max(4096);
-        let queued: Vec<(Option<TrackId>, [u8; 3])> = self.live_midi.drain(..).collect();
-        for (hint, msg) in queued {
+        for (hint, msg) in self.live_midi.drain(..) {
             if let Some(tid) = resolve_midi_target_track(s, hint)
                 && let Some(st) = self.strips.get_mut(&tid)
             {

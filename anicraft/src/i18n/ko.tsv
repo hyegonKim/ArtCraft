@@ -71,6 +71,32 @@
 	Auto Lip-Sync	자동 립싱크
 	Lip-sync	립싱크
 	Match mouth poses on this layer to scene speech audio	이 레이어의 입 모양 포즈를 장면 음성 오디오에 맞춥니다
+	Puppet	퍼핏
+	Head-Turn Rig	고개 회전 리그
+	Pose Head Turn	고개 회전 포즈 적용
+	Define Swap Set	스왑 세트 정의
+	Trigger Swap Set	스왑 세트 트리거
+	Auto Blink	자동 눈 깜빡임
+	Breathe	호흡
+	Breathe Cycle	호흡 사이클
+	Walk Cycle	걷기 사이클
+	Puppet Rig Info	퍼핏 리그 정보
+	3D Perspective	3D 원근
+	3D Tilt	3D 기울기
+	3D Depth	3D 깊이
+	3D rotation X	3D X축 회전
+	3D rotation Y	3D Y축 회전
+	3D Z offset	3D Z축 오프셋
+	3D field of view	3D 시야각
+	Reset 3D perspective	3D 원근 초기화
+	Clear 3D rotation and Z offset on this keyframe	이 키프레임의 3D 회전과 Z 오프셋을 초기화합니다
+	Parent	상위 레이어
+	Parent Layer	상위 레이어
+	Parent layer	상위 레이어
+	Follow another layer's movement, rotation and scale	다른 레이어의 이동, 회전 및 크기 변화를 따릅니다
+	Stamp periodic eye-blink keyframes on this layer	이 레이어에 주기적인 눈 깜빡임 키프레임을 생성합니다
+	Stamp rhythmic breathing scale keyframes on this layer	이 레이어에 리드미컬한 호흡 크기 키프레임을 생성합니다
+	Generate procedural walk-cycle locomotion keyframes	절차적 걷기 사이클 동작 키프레임을 생성합니다
 	Insert Frame	프레임 삽입
 	Remove Frames	프레임 제거
 	Insert Keyframe	키프레임 삽입
@@ -314,6 +340,7 @@
 @plural	Exported {path} ({n} frame, {kb} KB).|Exported {path} ({n} frames, {kb} KB).	{path} 내보내기 완료 ({n}프레임, {kb} KB).
 @plural	Exported {path} ({n} frame, {layers} layers).|Exported {path} ({n} frames, {layers} layers).	{path} 내보내기 완료 ({n}프레임, 레이어 {layers}개).
 @plural	Auto lip-synced {n} mouth keyframe — {undo} to undo|Auto lip-synced {n} mouth keyframes — {undo} to undo	입 모양 키프레임 {n}개 자동 립싱크 완료 — {undo} 키로 실행 취소
+@plural	Generated {n} puppet keyframe — {undo} to undo|Generated {n} puppet keyframes — {undo} to undo	퍼핏 키프레임 {n}개 생성 완료 — {undo} 키로 실행 취소
 @plural	Deleted {n} element — {undo} to undo|Deleted {n} elements — {undo} to undo	요소 {n}개 삭제됨 — {undo} 키로 실행 취소
 @plural	Copied {n} frame|Copied {n} frames	프레임 {n}개 복사됨
 @plural	Cut {n} frame — {undo} to undo|Cut {n} frames — {undo} to undo	프레임 {n}개 잘라냄 — {undo} 키로 실행 취소

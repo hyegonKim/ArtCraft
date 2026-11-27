@@ -5,7 +5,13 @@ use anicraft_geom::Path;
 use std::sync::Arc;
 
 fn rect(id: u64, x: f32, y: f32, w: f32, h: f32) -> Arc<Element> {
-    Arc::new(Element { id: ElementId(id), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(x, y, w, h), Paint::Solid(Rgba::BLACK))) })
+    Arc::new(Element {
+        id: ElementId(id),
+        name: String::new(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(Path::rect(x, y, w, h), Paint::Solid(Rgba::BLACK))),
+    })
 }
 
 fn inst(id: u64, symbol: u64, name: &str, x: f32, y: f32, events: Vec<EventHandler>) -> Arc<Element> {
@@ -14,7 +20,14 @@ fn inst(id: u64, symbol: u64, name: &str, x: f32, y: f32, events: Vec<EventHandl
         name: name.into(),
         transform: Affine::translate(x, y),
         color: ColorEffect::default(),
-        kind: ElementKind::Symbol { symbol: SymbolId(symbol), loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events },
+        kind: ElementKind::Symbol {
+            symbol: SymbolId(symbol),
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events,
+        },
     })
 }
 
@@ -33,7 +46,15 @@ fn layer(id: u64, keys: Vec<Arc<Keyframe>>) -> Arc<Layer> {
 }
 
 fn symbol(id: u64, kind: SymbolKind, layers: Vec<Arc<Layer>>) -> Arc<Symbol> {
-    Arc::new(Symbol { id: SymbolId(id), name: format!("S{id}"), kind, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers } })
+    Arc::new(Symbol {
+        id: SymbolId(id),
+        name: format!("S{id}"),
+        kind,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers },
+    })
 }
 
 fn doc(root: Vec<Arc<Layer>>, library: Vec<Arc<Symbol>>) -> Document {
@@ -62,7 +83,13 @@ fn run(d: &Document, steps: usize) -> Step {
 
 #[test]
 fn a_stop_action_holds_the_playhead_on_its_frame() {
-    let d = doc(vec![layer(1, vec![kf(0, 3, vec![], vec![], ""), kf(3, 7, vec![], vec![stop()], "")]), layer(2, vec![kf(0, 10, vec![rect(5, 0.0, 0.0, 10.0, 10.0)], vec![], "")])], vec![]);
+    let d = doc(
+        vec![
+            layer(1, vec![kf(0, 3, vec![], vec![], ""), kf(3, 7, vec![], vec![stop()], "")]),
+            layer(2, vec![kf(0, 10, vec![rect(5, 0.0, 0.0, 10.0, 10.0)], vec![], "")]),
+        ],
+        vec![],
+    );
     let s = start(&d, &mut NoScripts);
     assert_eq!((s.state.root.frame, s.state.root.playing), (0, true));
     let s = run(&d, 6);
@@ -84,10 +111,36 @@ fn goto_a_label_jumps_and_unknown_labels_are_reported() {
 /// Root (10 frames) → `hero` (movie clip, 6 frames, "run" at 3) → `arm` (movie clip, 4 frames;
 /// its frame 2 stops the main timeline through `parent.parent`).
 fn nested() -> Document {
-    let arm = symbol(200, SymbolKind::MovieClip, vec![layer(21, vec![kf(0, 2, vec![rect(22, 0.0, 0.0, 5.0, 5.0)], vec![], ""), kf(2, 2, vec![rect(22, 0.0, 0.0, 5.0, 5.0)], vec![Action::Stop { target: Target::new("parent.parent") }], "")])]);
-    let hero = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![kf(0, 3, vec![inst(12, 200, "arm", 5.0, 0.0, vec![])], vec![], ""), kf(3, 3, vec![inst(12, 200, "arm", 5.0, 0.0, vec![])], vec![], "run")])]);
+    let arm = symbol(
+        200,
+        SymbolKind::MovieClip,
+        vec![layer(
+            21,
+            vec![
+                kf(0, 2, vec![rect(22, 0.0, 0.0, 5.0, 5.0)], vec![], ""),
+                kf(2, 2, vec![rect(22, 0.0, 0.0, 5.0, 5.0)], vec![Action::Stop { target: Target::new("parent.parent") }], ""),
+            ],
+        )],
+    );
+    let hero = symbol(
+        100,
+        SymbolKind::MovieClip,
+        vec![layer(
+            11,
+            vec![
+                kf(0, 3, vec![inst(12, 200, "arm", 5.0, 0.0, vec![])], vec![], ""),
+                kf(3, 3, vec![inst(12, 200, "arm", 5.0, 0.0, vec![])], vec![], "run"),
+            ],
+        )],
+    );
     let root_actions = vec![goto_stop("hero", FrameRef::Label("run".into())), goto_stop("hero.arm", FrameRef::Number(2))];
-    doc(vec![layer(1, vec![kf(0, 1, vec![], root_actions, ""), kf(1, 9, vec![], vec![], "")]), layer(2, vec![kf(0, 10, vec![inst(3, 100, "hero", 50.0, 50.0, vec![])], vec![], "")])], vec![hero, arm])
+    doc(
+        vec![
+            layer(1, vec![kf(0, 1, vec![], root_actions, ""), kf(1, 9, vec![], vec![], "")]),
+            layer(2, vec![kf(0, 10, vec![inst(3, 100, "hero", 50.0, 50.0, vec![])], vec![], "")]),
+        ],
+        vec![hero, arm],
+    )
 }
 
 #[test]
@@ -115,7 +168,17 @@ impl PlayerState {
 fn movie_clips_play_on_their_own_and_restart_when_they_reappear() {
     // hero is on the stage for frames 0-4, gone at 5, back at 6.
     let hero = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![kf(0, 4, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], "")])]);
-    let d = doc(vec![layer(1, vec![kf(0, 5, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], ""), kf(5, 1, vec![], vec![], ""), kf(6, 4, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], "")])], vec![hero]);
+    let d = doc(
+        vec![layer(
+            1,
+            vec![
+                kf(0, 5, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], ""),
+                kf(5, 1, vec![], vec![], ""),
+                kf(6, 4, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], ""),
+            ],
+        )],
+        vec![hero],
+    );
     let frame = |s: &Step| s.state.clips.get(&vec![ElementId(3)]).map(|c| c.frame);
     assert_eq!(frame(&run(&d, 3)), Some(3));
     assert_eq!(frame(&run(&d, 4)), Some(0), "loops round its 4 frames");
@@ -127,13 +190,31 @@ fn movie_clips_play_on_their_own_and_restart_when_they_reappear() {
 /// frame 5 and stops; Over and Out trace.
 fn button_doc() -> Document {
     let art = |id| vec![rect(id, 0.0, 0.0, 10.0, 10.0)];
-    let b = symbol(300, SymbolKind::Button, vec![layer(31, vec![kf(0, 1, art(32), vec![], ""), kf(1, 1, art(32), vec![], ""), kf(2, 1, art(32), vec![], ""), kf(3, 1, vec![rect(33, 0.0, 0.0, 100.0, 100.0)], vec![], "")])]);
+    let b = symbol(
+        300,
+        SymbolKind::Button,
+        vec![layer(
+            31,
+            vec![
+                kf(0, 1, art(32), vec![], ""),
+                kf(1, 1, art(32), vec![], ""),
+                kf(2, 1, art(32), vec![], ""),
+                kf(3, 1, vec![rect(33, 0.0, 0.0, 100.0, 100.0)], vec![], ""),
+            ],
+        )],
+    );
     let events = vec![
         EventHandler { event: ButtonEvent::Click, actions: vec![goto_stop("", FrameRef::Number(4))] },
         EventHandler { event: ButtonEvent::Over, actions: vec![Action::Trace { message: "over".into() }] },
         EventHandler { event: ButtonEvent::Out, actions: vec![Action::Trace { message: "out".into() }] },
     ];
-    doc(vec![layer(1, vec![kf(0, 10, vec![], vec![stop()], "")]), layer(2, vec![kf(0, 10, vec![inst(3, 300, "go", 100.0, 100.0, events)], vec![], "")])], vec![b])
+    doc(
+        vec![
+            layer(1, vec![kf(0, 10, vec![], vec![stop()], "")]),
+            layer(2, vec![kf(0, 10, vec![inst(3, 300, "go", 100.0, 100.0, events)], vec![], "")]),
+        ],
+        vec![b],
+    )
 }
 
 #[test]
@@ -167,7 +248,19 @@ fn buttons_follow_the_pointer_through_their_hit_area_and_route_clicks() {
 fn script_set_properties_change_what_the_player_draws() {
     let hero = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![kf(0, 1, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], "")])]);
     let set = |p, v| Action::SetProperty { target: Target::new("hero"), property: p, value: v };
-    let d = doc(vec![layer(1, vec![kf(0, 1, vec![], vec![set(Property::X, 300.0), set(Property::Alpha, 0.5)], ""), kf(1, 1, vec![], vec![set(Property::Visible, 0.0)], "")]), layer(2, vec![kf(0, 2, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], "")])], vec![hero]);
+    let d = doc(
+        vec![
+            layer(
+                1,
+                vec![
+                    kf(0, 1, vec![], vec![set(Property::X, 300.0), set(Property::Alpha, 0.5)], ""),
+                    kf(1, 1, vec![], vec![set(Property::Visible, 0.0)], ""),
+                ],
+            ),
+            layer(2, vec![kf(0, 2, vec![inst(3, 100, "hero", 0.0, 0.0, vec![])], vec![], "")]),
+        ],
+        vec![hero],
+    );
     let s = start(&d, &mut NoScripts);
     let dl = evaluate_player(&d, &s.state);
     assert_eq!(dl.items.len(), 1);
@@ -229,7 +322,13 @@ fn the_same_inputs_give_the_same_movie() {
 
 #[test]
 fn go_to_loops_end_in_a_message_not_a_hang() {
-    let d = doc(vec![layer(1, vec![kf(0, 1, vec![], vec![goto_stop("", FrameRef::Number(1))], ""), kf(1, 1, vec![], vec![goto_stop("", FrameRef::Number(0))], "")])], vec![]);
+    let d = doc(
+        vec![layer(
+            1,
+            vec![kf(0, 1, vec![], vec![goto_stop("", FrameRef::Number(1))], ""), kf(1, 1, vec![], vec![goto_stop("", FrameRef::Number(0))], "")],
+        )],
+        vec![],
+    );
     let s = start(&d, &mut NoScripts);
     assert!(s.output.iter().any(|l| l.starts_with("Stopped running actions this frame")), "{:?}", s.output);
     let s = step(&d, &s.state, &[], &mut NoScripts);
@@ -245,7 +344,12 @@ fn go_to_loops_end_in_a_message_not_a_hang() {
 #[test]
 fn bad_targets_and_graphics_are_reported() {
     let g = symbol(100, SymbolKind::Graphic, vec![layer(11, vec![kf(0, 1, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], "")])]);
-    let acts = vec![Action::Stop { target: Target::new("nobody") }, Action::Play { target: Target::new("g") }, Action::Stop { target: Target::new("parent") }, Action::GotoAndStop { target: Target::this(), frame: FrameRef::Number(0), scene: Some("Nope".into()) }];
+    let acts = vec![
+        Action::Stop { target: Target::new("nobody") },
+        Action::Play { target: Target::new("g") },
+        Action::Stop { target: Target::new("parent") },
+        Action::GotoAndStop { target: Target::this(), frame: FrameRef::Number(0), scene: Some("Nope".into()) },
+    ];
     let d = doc(vec![layer(1, vec![kf(0, 2, vec![inst(3, 100, "g", 0.0, 0.0, vec![])], acts, "")])], vec![g]);
     let s = start(&d, &mut NoScripts);
     assert_eq!(s.output.len(), 4, "{:?}", s.output);
@@ -279,10 +383,14 @@ fn plug_in_frame_scripts_run_through_the_host() {
 fn input_between_frames_moves_no_playhead() {
     let d = button_doc();
     let s = start(&d, &mut NoScripts);
-    let s = input(&d, &s.state, &[Event::Move(Vec2::new(150.0, 150.0)), Event::Down(Vec2::new(150.0, 150.0)), Event::Up(Vec2::new(150.0, 150.0))], &mut NoScripts);
+    let s = input(
+        &d,
+        &s.state,
+        &[Event::Move(Vec2::new(150.0, 150.0)), Event::Down(Vec2::new(150.0, 150.0)), Event::Up(Vec2::new(150.0, 150.0))],
+        &mut NoScripts,
+    );
     assert_eq!((s.state.root.frame, s.state.tick), (4, 0), "the click ran, no frame advanced");
 }
-
 
 #[test]
 fn the_player_sees_through_the_camera_and_buttons_are_hit_where_they_show() {
@@ -319,8 +427,10 @@ fn entered_keyframes_start_their_sounds_in_clips_and_graphics_with_layer_volumes
     use crate::SoundSync::{Event, Stop};
     // A 3-frame movie clip with a sound on its frame 1 (index 1); a 2-frame graphic with one on
     // its frame 0; the main timeline has its own on frame 0 and a stop at 2.
-    let clip = symbol(20, SymbolKind::MovieClip, vec![layer(21, vec![kf(0, 1, vec![], vec![], ""), with_sound(kf(1, 2, vec![], vec![], ""), 2, Event)])]);
-    let graphic = symbol(30, SymbolKind::Graphic, vec![layer(31, vec![with_sound(kf(0, 1, vec![], vec![], ""), 3, Event), kf(1, 1, vec![], vec![], "")])]);
+    let clip =
+        symbol(20, SymbolKind::MovieClip, vec![layer(21, vec![kf(0, 1, vec![], vec![], ""), with_sound(kf(1, 2, vec![], vec![], ""), 2, Event)])]);
+    let graphic =
+        symbol(30, SymbolKind::Graphic, vec![layer(31, vec![with_sound(kf(0, 1, vec![], vec![], ""), 3, Event), kf(1, 1, vec![], vec![], "")])]);
     let mut holder = (*layer(2, vec![kf(0, 6, vec![inst(40, 20, "c", 0.0, 0.0, vec![]), inst(41, 30, "g", 0.0, 0.0, vec![])], vec![], "")])).clone();
     holder.volume = 0.5;
     let root = layer(1, vec![with_sound(kf(0, 1, vec![], vec![], ""), 1, Event), with_sound(kf(1, 5, vec![], vec![], ""), 1, Stop)]);
@@ -350,9 +460,26 @@ fn sounding_button() -> Document {
     use crate::SoundSync::{Event, Stream};
     let mut d = button_doc();
     let art = |id| vec![rect(id, 0.0, 0.0, 10.0, 10.0)];
-    let mut sounds = (*layer(34, vec![with_sound(kf(0, 1, vec![], vec![], ""), 10, Event), with_sound(kf(1, 1, vec![], vec![], ""), 11, Stream), with_sound(kf(2, 1, vec![], vec![], ""), 12, Event), with_sound(kf(3, 1, vec![], vec![], ""), 13, Event)])).clone();
+    let mut sounds = (*layer(
+        34,
+        vec![
+            with_sound(kf(0, 1, vec![], vec![], ""), 10, Event),
+            with_sound(kf(1, 1, vec![], vec![], ""), 11, Stream),
+            with_sound(kf(2, 1, vec![], vec![], ""), 12, Event),
+            with_sound(kf(3, 1, vec![], vec![], ""), 13, Event),
+        ],
+    ))
+    .clone();
     sounds.volume = 0.5;
-    let states = layer(31, vec![kf(0, 1, art(32), vec![], ""), kf(1, 1, art(32), vec![], ""), kf(2, 1, art(32), vec![], ""), kf(3, 1, vec![rect(33, 0.0, 0.0, 100.0, 100.0)], vec![], "")]);
+    let states = layer(
+        31,
+        vec![
+            kf(0, 1, art(32), vec![], ""),
+            kf(1, 1, art(32), vec![], ""),
+            kf(2, 1, art(32), vec![], ""),
+            kf(3, 1, vec![rect(33, 0.0, 0.0, 100.0, 100.0)], vec![], ""),
+        ],
+    );
     d.library = vec![symbol(300, SymbolKind::Button, vec![Arc::new(sounds), states])];
     Arc::make_mut(&mut d.timeline_mut(0).layers[1]).volume = 0.5;
     let tone: Vec<f32> = (0..800).map(|i| (i as f32 * 0.1).sin() * 0.5).collect();
@@ -389,7 +516,12 @@ fn a_button_plays_the_sound_of_the_state_it_enters() {
     let s = input(&d, &s.state, &[Event::Down(at(150.0, 150.0))], &mut NoScripts);
     assert_eq!(started(&s), vec![(11, 0.25), (12, 0.25)]);
     // Dragged off while pressed, back on and released off: nothing (no state with a sound).
-    let s = input(&d, &s.state, &[Event::Move(at(400.0, 400.0)), Event::Move(at(150.0, 150.0)), Event::Move(at(400.0, 400.0)), Event::Up(at(400.0, 400.0))], &mut NoScripts);
+    let s = input(
+        &d,
+        &s.state,
+        &[Event::Move(at(400.0, 400.0)), Event::Move(at(150.0, 150.0)), Event::Move(at(400.0, 400.0)), Event::Up(at(400.0, 400.0))],
+        &mut NoScripts,
+    );
     assert!(s.sounds.is_empty(), "{:?}", started(&s));
 }
 
@@ -397,11 +529,18 @@ fn a_button_plays_the_sound_of_the_state_it_enters() {
 fn button_sounds_follow_the_frames_a_button_has_and_stay_out_of_the_soundtrack() {
     // A two-frame button (Up and Over): pressing it shows Over still, and plays nothing.
     let mut d = sounding_button();
-    let short = Timeline { layers: d.library[0].timeline.layers.iter().map(|l| {
-        let mut l = (**l).clone();
-        l.keyframes.truncate(2);
-        Arc::new(l)
-    }).collect() };
+    let short = Timeline {
+        layers: d.library[0]
+            .timeline
+            .layers
+            .iter()
+            .map(|l| {
+                let mut l = (**l).clone();
+                l.keyframes.truncate(2);
+                Arc::new(l)
+            })
+            .collect(),
+    };
     Arc::make_mut(&mut d.library[0]).timeline = short;
     let s = start(&d, &mut NoScripts);
     // Its Up frame is its hit area (10 × 10 at 100, 100).
@@ -478,7 +617,10 @@ fn actionscript_and_hand_made_actions_play_the_same_movie() {
     {
         let tl = script.timeline_mut(0);
         let l0 = Arc::make_mut(&mut tl.layers[0]);
-        l0.keyframes[0] = as3(l0.keyframes[0].clone(), "import flash.events.MouseEvent;\nstop();\ngo.addEventListener(MouseEvent.CLICK, onGo);\ngo.addEventListener(MouseEvent.ROLL_OVER, function (e:MouseEvent):void { trace(\"over\"); });\ngo.addEventListener(MouseEvent.ROLL_OUT, function (e:MouseEvent):void { trace(\"o\" + \"ut\"); });\nfunction onGo(e:MouseEvent):void {\n  gotoAndStop(5);\n}\n");
+        l0.keyframes[0] = as3(
+            l0.keyframes[0].clone(),
+            "import flash.events.MouseEvent;\nstop();\ngo.addEventListener(MouseEvent.CLICK, onGo);\ngo.addEventListener(MouseEvent.ROLL_OVER, function (e:MouseEvent):void { trace(\"over\"); });\ngo.addEventListener(MouseEvent.ROLL_OUT, function (e:MouseEvent):void { trace(\"o\" + \"ut\"); });\nfunction onGo(e:MouseEvent):void {\n  gotoAndStop(5);\n}\n",
+        );
         let l1 = Arc::make_mut(&mut tl.layers[1]);
         let k = Arc::make_mut(&mut l1.keyframes[0]);
         if let ElementKind::Symbol { events, .. } = &mut Arc::make_mut(&mut k.elements[0]).kind {
@@ -486,7 +628,15 @@ fn actionscript_and_hand_made_actions_play_the_same_movie() {
         }
     }
     let at = |x, y| Vec2::new(x, y);
-    let events = vec![vec![], vec![Event::Move(at(180.0, 180.0))], vec![Event::Down(at(180.0, 180.0))], vec![Event::Up(at(181.0, 181.0))], vec![Event::Move(at(300.0, 300.0))], vec![], vec![Event::Move(at(150.0, 150.0)), Event::Leave]];
+    let events = vec![
+        vec![],
+        vec![Event::Move(at(180.0, 180.0))],
+        vec![Event::Down(at(180.0, 180.0))],
+        vec![Event::Up(at(181.0, 181.0))],
+        vec![Event::Move(at(300.0, 300.0))],
+        vec![],
+        vec![Event::Move(at(150.0, 150.0)), Event::Leave],
+    ];
     same_movie(&hand, &script, &events);
     let s = start(&script, &mut NoScripts);
     assert_eq!(s.state.listeners.get(&vec![ElementId(3)]).map(Vec::len), Some(3), "three listeners on the button");
@@ -500,7 +650,8 @@ fn a_script_outside_the_subset_does_not_run_at_all() {
     assert_eq!(s.state.root.frame, 3);
     // In ActionScript 1.0 & 2.0 nothing runs either.
     let mut d2 = doc(vec![layer(1, vec![kf(0, 10, vec![], vec![], "")])], vec![]);
-    Arc::make_mut(&mut Arc::make_mut(&mut d2.timeline_mut(0).layers[0]).keyframes[0]).script = Some(FrameScript::Source(Arc::new(crate::actions::SourceScript::new(crate::actions::Language::ActionScript1or2, "stop();"))));
+    Arc::make_mut(&mut Arc::make_mut(&mut d2.timeline_mut(0).layers[0]).keyframes[0]).script =
+        Some(FrameScript::Source(Arc::new(crate::actions::SourceScript::new(crate::actions::Language::ActionScript1or2, "stop();"))));
     assert!(run(&d2, 2).state.root.playing);
 }
 
@@ -511,7 +662,13 @@ fn listeners_live_with_their_instance_and_are_added_once() {
     // time it enters frame 1.
     let pad = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![kf(0, 1, vec![rect(12, 0.0, 0.0, 20.0, 20.0)], vec![], "")])]);
     let script = "pad.addEventListener(MouseEvent.CLICK, hit);\nfunction hit(e:MouseEvent):void { trace(\"hit\"); }\nghost.addEventListener(MouseEvent.CLICK, hit);";
-    let d = doc(vec![layer(1, vec![as3(kf(0, 8, vec![], vec![], ""), script)]), layer(2, vec![kf(0, 5, vec![inst(3, 100, "pad", 10.0, 10.0, vec![])], vec![], ""), kf(5, 3, vec![], vec![], "")])], vec![pad]);
+    let d = doc(
+        vec![
+            layer(1, vec![as3(kf(0, 8, vec![], vec![], ""), script)]),
+            layer(2, vec![kf(0, 5, vec![inst(3, 100, "pad", 10.0, 10.0, vec![])], vec![], ""), kf(5, 3, vec![], vec![], "")]),
+        ],
+        vec![pad],
+    );
     let path = vec![ElementId(3)];
     let s = start(&d, &mut NoScripts);
     assert_eq!(s.output, ["Listen for click (ghost): no instance named “ghost” here"]);
@@ -532,7 +689,8 @@ fn listeners_live_with_their_instance_and_are_added_once() {
 fn next_scene_in_a_movie_clip_script_stays_in_its_clip() {
     // A clip's own script calling nextScene(): in ActionScript the clip has one scene, so the
     // main timeline stays (hand-made Next scene actions do move it, as before).
-    let clip = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![as3(kf(0, 2, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], ""), "nextScene();")])]);
+    let clip =
+        symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![as3(kf(0, 2, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], ""), "nextScene();")])]);
     let mut d = doc(vec![layer(1, vec![kf(0, 4, vec![inst(3, 100, "c", 0.0, 0.0, vec![])], vec![], "")])], vec![clip]);
     d.scenes.push(Arc::new(crate::Scene::new("Two")));
     let s = start(&d, &mut NoScripts);
@@ -568,7 +726,16 @@ fn outputs(d: &Document, steps: usize) -> Vec<String> {
 
 #[test]
 fn timeline_variables_and_functions_live_across_frames() {
-    let d = scripted(4, &[(0, "var score:int = 10;\nfunction bump(k:int):int { score += k; return score; }\ntrace(\"start \" + score + \" \" + level);"), (2, "trace(bump(5), bump(1.9), level);\nlevel = \"two\";"), (3, "trace(level);\nvar level:String = \"one\"; trace(level); stop();")], vec![], vec![]);
+    let d = scripted(
+        4,
+        &[
+            (0, "var score:int = 10;\nfunction bump(k:int):int { score += k; return score; }\ntrace(\"start \" + score + \" \" + level);"),
+            (2, "trace(bump(5), bump(1.9), level);\nlevel = \"two\";"),
+            (3, "trace(level);\nvar level:String = \"one\"; trace(level); stop();"),
+        ],
+        vec![],
+        vec![],
+    );
     // `level` is declared on frame 4 but is the timeline's from the start (null until set).
     assert_eq!(outputs(&d, 5), ["start 10 null", "15 16 null", "two", "one"]);
     let s = run(&d, 5);
@@ -576,16 +743,35 @@ fn timeline_variables_and_functions_live_across_frames() {
     // A script that uses a name no frame declares doesn't run at all.
     let d = scripted(3, &[(0, "trace(\"one\");"), (1, "trace(\"two\"); trace(nobody);")], vec![], vec![]);
     assert_eq!(outputs(&d, 2), ["one"]);
-    assert_eq!(link_problems(&d, TimelineRef::Root, d.scenes[0].timeline.layers[0].keyframes[1].script.as_ref().and_then(FrameScript::source).unwrap().compiled().as_ref().unwrap())[0].message, "`nobody` isn't a variable of this timeline (declare it with `var` in one of its frame scripts)");
+    assert_eq!(
+        link_problems(
+            &d,
+            TimelineRef::Root,
+            d.scenes[0].timeline.layers[0].keyframes[1].script.as_ref().and_then(FrameScript::source).unwrap().compiled().as_ref().unwrap()
+        )[0]
+        .message,
+        "`nobody` isn't a variable of this timeline (declare it with `var` in one of its frame scripts)"
+    );
 }
 
 #[test]
 fn each_movie_clip_instance_keeps_its_own_variables() {
     // A two-frame clip counts its loops; two instances count apart, and one that leaves the
     // stage and comes back starts again.
-    let clip = symbol(100, SymbolKind::MovieClip, vec![layer(11, vec![as3(kf(0, 2, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], ""), "var n:int; n++; trace(name + \" \" + n);")])]);
+    let clip = symbol(
+        100,
+        SymbolKind::MovieClip,
+        vec![layer(11, vec![as3(kf(0, 2, vec![rect(12, 0.0, 0.0, 5.0, 5.0)], vec![], ""), "var n:int; n++; trace(name + \" \" + n);")])],
+    );
     let a = layer(2, vec![kf(0, 8, vec![inst(3, 100, "a", 0.0, 0.0, vec![])], vec![], "")]);
-    let b = layer(3, vec![kf(0, 3, vec![inst(4, 100, "b", 50.0, 0.0, vec![])], vec![], ""), kf(3, 2, vec![], vec![], ""), kf(5, 3, vec![inst(5, 100, "b", 50.0, 0.0, vec![])], vec![], "")]);
+    let b = layer(
+        3,
+        vec![
+            kf(0, 3, vec![inst(4, 100, "b", 50.0, 0.0, vec![])], vec![], ""),
+            kf(3, 2, vec![], vec![], ""),
+            kf(5, 3, vec![inst(5, 100, "b", 50.0, 0.0, vec![])], vec![], ""),
+        ],
+    );
     let d = scripted(8, &[(0, "")], vec![a, b], vec![clip]);
     let out = outputs(&d, 6);
     assert_eq!(out, ["a 1", "b 1", "a 2", "b 2", "a 3", "b 1", "a 4"], "{out:?}");
@@ -668,7 +854,11 @@ fn an_endless_loop_stops_its_script_and_the_movie_plays_on() {
     let d = scripted(2, &[(0, &src)], vec![], vec![]);
     let s = step(&d, &start(&d, &mut NoScripts).state, &[], &mut NoScripts);
     assert_eq!(s.output.iter().filter(|l| l.ends_with("(an endless loop?)")).count(), 10, "{:?}", s.output);
-    assert!(s.output.last().is_some_and(|l| l.starts_with("Stopped running actions this frame: scripts ran more than 1000000 steps")), "{:?}", s.output);
+    assert!(
+        s.output.last().is_some_and(|l| l.starts_with("Stopped running actions this frame: scripts ran more than 1000000 steps")),
+        "{:?}",
+        s.output
+    );
 }
 
 #[test]
@@ -677,7 +867,10 @@ fn listeners_know_their_target_and_current_target() {
     {
         let tl = d.timeline_mut(0);
         let l0 = Arc::make_mut(&mut tl.layers[0]);
-        l0.keyframes[0] = as3(l0.keyframes[0].clone(), "stop();\ngo.addEventListener(MouseEvent.CLICK, clicked);\nfunction clicked(e:MouseEvent):void { trace(e.target.name, e.currentTarget == go, e.target != stage, e.currentTarget.x); report(e); }\nfunction report(ev:MouseEvent):void { trace(\"from \" + ev.currentTarget.name); }");
+        l0.keyframes[0] = as3(
+            l0.keyframes[0].clone(),
+            "stop();\ngo.addEventListener(MouseEvent.CLICK, clicked);\nfunction clicked(e:MouseEvent):void { trace(e.target.name, e.currentTarget == go, e.target != stage, e.currentTarget.x); report(e); }\nfunction report(ev:MouseEvent):void { trace(\"from \" + ev.currentTarget.name); }",
+        );
         let k = Arc::make_mut(&mut Arc::make_mut(&mut tl.layers[1]).keyframes[0]);
         if let ElementKind::Symbol { events, .. } = &mut Arc::make_mut(&mut k.elements[0]).kind {
             events.clear();
@@ -690,7 +883,8 @@ fn listeners_know_their_target_and_current_target() {
 
 #[test]
 fn scripted_play_is_deterministic() {
-    let src = "var n:Number = 0;\naddEventListener(Event.ENTER_FRAME, function (e:Event):void { n += Math.random(); if (n > 2) { trace(n); n = 0; } });";
+    let src =
+        "var n:Number = 0;\naddEventListener(Event.ENTER_FRAME, function (e:Event):void { n += Math.random(); if (n > 2) { trace(n); n = 0; } });";
     let d = scripted(4, &[(0, src)], vec![], vec![]);
     let play = || {
         let mut s = start_seeded(&d, 3, &mut NoScripts);
@@ -722,12 +916,38 @@ impl ScriptHost for Mono {
 }
 
 fn field(id: u64, name: &str, text: &str, kind: TextKind, x: f32, y: f32) -> Arc<Element> {
-    let block = TextBlock { text: text.into(), font: "Mono".into(), size: 10.0, bold: false, italic: false, color: Rgba::BLACK, align: crate::TextAlign::Left, letter_spacing: 0.0, line_spacing: 0.0, width: None, outline: Arc::new(Path::rect(2.0, 2.0, 8.0, 8.0)), box_width: 104.0, box_height: 14.0, field: Some(TextField { border: true, ..TextField::new(kind) }), on_path: None };
-    Arc::new(Element { id: ElementId(id), name: name.into(), transform: Affine::translate(x, y), color: ColorEffect::default(), kind: ElementKind::Text(Arc::new(block)) })
+    let block = TextBlock {
+        text: text.into(),
+        font: "Mono".into(),
+        size: 10.0,
+        bold: false,
+        italic: false,
+        color: Rgba::BLACK,
+        align: crate::TextAlign::Left,
+        letter_spacing: 0.0,
+        line_spacing: 0.0,
+        width: None,
+        outline: Arc::new(Path::rect(2.0, 2.0, 8.0, 8.0)),
+        box_width: 104.0,
+        box_height: 14.0,
+        field: Some(TextField { border: true, ..TextField::new(kind) }),
+        on_path: None,
+    };
+    Arc::new(Element {
+        id: ElementId(id),
+        name: name.into(),
+        transform: Affine::translate(x, y),
+        color: ColorEffect::default(),
+        kind: ElementKind::Text(Arc::new(block)),
+    })
 }
 
 fn field_doc(script: &str) -> Document {
-    let fields = vec![field(5, "score_txt", "0", TextKind::Dynamic, 10.0, 10.0), field(6, "name_txt", "", TextKind::Input, 10.0, 50.0), field(7, "", "", TextKind::Input, 10.0, 90.0)];
+    let fields = vec![
+        field(5, "score_txt", "0", TextKind::Dynamic, 10.0, 10.0),
+        field(6, "name_txt", "", TextKind::Input, 10.0, 50.0),
+        field(7, "", "", TextKind::Input, 10.0, 90.0),
+    ];
     doc(vec![layer(1, vec![as3(kf(0, 1, fields, vec![], ""), script)])], vec![])
 }
 
@@ -737,7 +957,9 @@ fn text_of(st: &PlayerState, id: u64) -> Option<String> {
 
 #[test]
 fn scripts_set_and_read_dynamic_text() {
-    let d = field_doc("stop();\nvar n:int = 0;\nscore_txt.text = \"Score: \" + n;\nscore_txt.appendText(\"!\");\ntrace(score_txt.text, score_txt.length, name_txt.text == \"\");\nscore_txt.x = 20;\nghost_txt.text = \"x\";");
+    let d = field_doc(
+        "stop();\nvar n:int = 0;\nscore_txt.text = \"Score: \" + n;\nscore_txt.appendText(\"!\");\ntrace(score_txt.text, score_txt.length, name_txt.text == \"\");\nscore_txt.x = 20;\nghost_txt.text = \"x\";",
+    );
     let s = start(&d, &mut Mono);
     assert_eq!(text_of(&s.state, 5).as_deref(), Some("Score: 0!"));
     assert!(s.output.contains(&"Score: 0! 9 true".to_string()), "{:?}", s.output);
@@ -757,7 +979,9 @@ fn scripts_set_and_read_dynamic_text() {
 
 #[test]
 fn the_viewer_types_into_input_fields_and_scripts_read_it() {
-    let d = field_doc("stop();\nstage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);\nfunction onKey(e:KeyboardEvent):void {\n  if (e.keyCode == Keyboard.ENTER) { score_txt.text = \"Hello, \" + name_txt.text; }\n}");
+    let d = field_doc(
+        "stop();\nstage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);\nfunction onKey(e:KeyboardEvent):void {\n  if (e.keyCode == Keyboard.ENTER) { score_txt.text = \"Hello, \" + name_txt.text; }\n}",
+    );
     let mut h = Mono;
     let s = start(&d, &mut h);
     // A click in the input field gives it the keyboard; typing goes in, editing keys edit.
@@ -768,11 +992,22 @@ fn the_viewer_types_into_input_fields_and_scripts_read_it() {
     assert_eq!(s.state.focus, Some(vec![ElementId(6)]));
     assert_eq!(text_of(&s.state, 6).as_deref(), Some("Aad!"));
     // Shift+Home selects; typing replaces it; Enter reaches the stage's key listener too.
-    let s = input(&d, &s.state, &[Event::KeyDown(16), Event::KeyDown(36), Event::KeyUp(16), Event::Char('B'), Event::Char('o'), Event::KeyDown(13)], &mut h);
+    let s = input(
+        &d,
+        &s.state,
+        &[Event::KeyDown(16), Event::KeyDown(36), Event::KeyUp(16), Event::Char('B'), Event::Char('o'), Event::KeyDown(13)],
+        &mut h,
+    );
     assert_eq!(text_of(&s.state, 6).as_deref(), Some("Bo"));
     assert_eq!(text_of(&s.state, 5).as_deref(), Some("Hello, Bo"));
     // The focused field draws its caret; a click elsewhere takes the keyboard away.
-    let caret = |st: &PlayerState| evaluate_player(&d, st).items.iter().filter(|i| i.fill.is_some() && i.masks.is_none() && i.path.bounds().width() <= 1.01 && i.path.bounds().height() > 5.0).count();
+    let caret = |st: &PlayerState| {
+        evaluate_player(&d, st)
+            .items
+            .iter()
+            .filter(|i| i.fill.is_some() && i.masks.is_none() && i.path.bounds().width() <= 1.01 && i.path.bounds().height() > 5.0)
+            .count()
+    };
     assert_eq!(caret(&s.state), 1);
     let s = input(&d, &s.state, &[Event::Down(Vec2::new(300.0, 300.0)), Event::Up(Vec2::new(300.0, 300.0)), Event::Char('z')], &mut h);
     assert_eq!(s.state.focus, None);
@@ -805,7 +1040,11 @@ fn fields_draw_their_box_and_the_authored_text_everywhere() {
 #[test]
 fn typing_is_deterministic() {
     let d = field_doc("stop();");
-    let ev: Vec<Event> = [Event::Down(Vec2::new(30.0, 55.0)), Event::Up(Vec2::new(30.0, 55.0))].into_iter().chain("deterministic".chars().map(Event::Char)).chain([Event::KeyDown(16), Event::KeyDown(37), Event::KeyDown(37), Event::Char('X')]).collect();
+    let ev: Vec<Event> = [Event::Down(Vec2::new(30.0, 55.0)), Event::Up(Vec2::new(30.0, 55.0))]
+        .into_iter()
+        .chain("deterministic".chars().map(Event::Char))
+        .chain([Event::KeyDown(16), Event::KeyDown(37), Event::KeyDown(37), Event::Char('X')])
+        .collect();
     let a = step(&d, &start(&d, &mut Mono).state, &ev, &mut Mono);
     let b = step(&d, &start(&d, &mut Mono).state, &ev, &mut Mono);
     assert_eq!(a, b);

@@ -7,10 +7,9 @@
 use anicraft_doc::sound::SoundEffect;
 use anicraft_doc::stroke_style::Dash;
 use anicraft_doc::{
-    BitmapId, Cap, ColorEffect, Document, Easing, Element, ElementKind, Filter, FilterEntry,
-    FilterSide, FrameScript, GradientStop, Join, Keyframe, Language, Layer, LayerKind, LibraryItem,
-    LoopMode, Paint, Shape, SoundFormat, SoundId, SoundSync, Spread, Stroke, Symbol,
-    SymbolId, SymbolKind, TextAlign, TextBlock, TextKind, Timeline, Tween, TweenKind,
+    BitmapId, Cap, ColorEffect, Document, Easing, Element, ElementId, ElementKind, Filter, FilterEntry, FilterSide, FrameScript, GradientStop, Join,
+    Keyframe, Language, Layer, LayerKind, LibraryItem, LoopMode, Paint, Perspective3D, Shape, SoundFormat, SoundId, SoundSync, Spread, Stroke,
+    Symbol, SymbolId, SymbolKind, TextAlign, TextBlock, TextKind, Timeline, Tween, TweenKind,
 };
 use anicraft_geom::{Affine, Path, PathCmd, Vec2};
 use std::collections::{BTreeMap, HashMap};
@@ -83,11 +82,7 @@ fn folder_prefix(doc: &Document, item: LibraryItem) -> String {
         cur = f.parent;
     }
     parts.reverse();
-    if parts.is_empty() {
-        String::new()
-    } else {
-        format!("{}/", parts.join("/"))
-    }
+    if parts.is_empty() { String::new() } else { format!("{}/", parts.join("/")) }
 }
 
 fn folder_full_path(doc: &Document, folder_id: anicraft_doc::FolderId) -> String {
@@ -112,10 +107,7 @@ fn write_matrix(xml: &mut String, indent: &str, m: &Affine) {
         return;
     }
     let [a, b, c, d, tx, ty] = m.m;
-    let _ = writeln!(
-        xml,
-        "{indent}<matrix><Matrix a=\"{a:.6}\" b=\"{b:.6}\" c=\"{c:.6}\" d=\"{d:.6}\" tx=\"{tx:.4}\" ty=\"{ty:.4}\"/></matrix>"
-    );
+    let _ = writeln!(xml, "{indent}<matrix><Matrix a=\"{a:.6}\" b=\"{b:.6}\" c=\"{c:.6}\" d=\"{d:.6}\" tx=\"{tx:.4}\" ty=\"{ty:.4}\"/></matrix>");
 }
 
 fn split_cubic(p0: Vec2, p1: Vec2, p2: Vec2, p3: Vec2) -> ([Vec2; 4], [Vec2; 4]) {
@@ -249,13 +241,8 @@ impl<'a> Exporter<'a> {
     fn write_stops(xml: &mut String, indent: &str, stops: &[GradientStop]) {
         for stop in stops {
             let c = stop.color.sanitized();
-            let _ = writeln!(
-                xml,
-                "{indent}<GradientEntry color=\"{}\" alpha=\"{:.4}\" ratio=\"{:.4}\"/>",
-                c.to_hex(),
-                c.a,
-                stop.offset.clamp(0.0, 1.0)
-            );
+            let _ =
+                writeln!(xml, "{indent}<GradientEntry color=\"{}\" alpha=\"{:.4}\" ratio=\"{:.4}\"/>", c.to_hex(), c.a, stop.offset.clamp(0.0, 1.0));
         }
     }
 
@@ -333,16 +320,13 @@ impl<'a> Exporter<'a> {
             None => ("SolidStroke", String::new()),
         };
         let c = stroke.color.sanitized();
-        let _ = writeln!(
-            xml,
-            "{indent}<{tag} scaleMode=\"normal\" weight=\"{:.3}\"{caps}{joints}{miter}{dash_attrs}>",
-            stroke.width.clamp(0.05, 1000.0)
-        );
+        let _ =
+            writeln!(xml, "{indent}<{tag} scaleMode=\"normal\" weight=\"{:.3}\"{caps}{joints}{miter}{dash_attrs}>", stroke.width.clamp(0.05, 1000.0));
         let _ = writeln!(xml, "{indent}  <fill><SolidColor color=\"{}\" alpha=\"{:.4}\"/></fill>", c.to_hex(), c.a);
         let _ = writeln!(xml, "{indent}</{tag}>");
     }
 
-    fn write_shape(&mut self, xml: &mut String, indent: &str, el: &Element, sh: &Shape, in_group: bool) {
+    fn write_shape(&mut self, xml: &mut String, indent: &str, el: &Element, sh: &Shape, in_group: bool, persp: Option<&Perspective3D>) {
         if sh.warp.is_some() {
             self.report.note("asset warp meshes (exported as deformed outlines)");
         }
@@ -352,7 +336,18 @@ impl<'a> Exporter<'a> {
             return;
         }
         let drawing_obj = if !in_group && !sh.merge { " isDrawingObject=\"true\"" } else { "" };
-        let _ = writeln!(xml, "{indent}<DOMShape{drawing_obj}>");
+        let m3d_attr = persp
+            .filter(|p| !p.is_identity())
+            .map(|p| {
+                let fov = if (p.fov_deg - anicraft_geom::perspective::DEFAULT_FOV_DEG).abs() > 1e-3 {
+                    format!(" fov=\"{:.2}\"", p.fov_deg)
+                } else {
+                    String::new()
+                };
+                format!(" matrix3D=\"{}\"{fov}", p.format_matrix3d_attr(&el.transform, Vec2::ZERO))
+            })
+            .unwrap_or_default();
+        let _ = writeln!(xml, "{indent}<DOMShape{drawing_obj}{m3d_attr}>");
         write_matrix(xml, &format!("{indent}  "), &el.transform);
         if let Some(fill) = &sh.fill {
             let _ = writeln!(xml, "{indent}  <fills><FillStyle index=\"1\">");
@@ -385,11 +380,7 @@ impl<'a> Exporter<'a> {
                 let _ = writeln!(xml, "{indent}<color><Color brightness=\"{b:.4}\"/></color>");
             }
             ColorEffect::Tint { color, amount } => {
-                let _ = writeln!(
-                    xml,
-                    "{indent}<color><Color tintMultiplier=\"{amount:.4}\" tintColor=\"{}\"/></color>",
-                    color.to_hex()
-                );
+                let _ = writeln!(xml, "{indent}<color><Color tintMultiplier=\"{amount:.4}\" tintColor=\"{}\"/></color>", color.to_hex());
             }
             ColorEffect::Advanced(t) => {
                 let [rm, gm, bm, am] = t.mul;
@@ -471,7 +462,7 @@ impl<'a> Exporter<'a> {
         let _ = writeln!(xml, "{indent}</filters>");
     }
 
-    fn write_text(&mut self, xml: &mut String, indent: &str, el: &Element, tb: &TextBlock) {
+    fn write_text(&mut self, xml: &mut String, indent: &str, el: &Element, tb: &TextBlock, persp: Option<&Perspective3D>) {
         if tb.on_path.is_some() {
             self.report.note("text on a path (exported as outlined vector shape)");
             let sh = Shape {
@@ -482,7 +473,7 @@ impl<'a> Exporter<'a> {
                 merge: false,
                 warp: None,
             };
-            self.write_shape(xml, indent, el, &sh, false);
+            self.write_shape(xml, indent, el, &sh, false, persp);
             return;
         }
         let tag = match tb.kind() {
@@ -491,6 +482,17 @@ impl<'a> Exporter<'a> {
             TextKind::Input => "DOMInputText",
         };
         let name_attr = if el.name.is_empty() { String::new() } else { format!(" name=\"{}\"", xml_escape(&el.name)) };
+        let m3d_attr = persp
+            .filter(|p| !p.is_identity())
+            .map(|p| {
+                let fov = if (p.fov_deg - anicraft_geom::perspective::DEFAULT_FOV_DEG).abs() > 1e-3 {
+                    format!(" fov=\"{:.2}\"", p.fov_deg)
+                } else {
+                    String::new()
+                };
+                format!(" matrix3D=\"{}\"{fov}", p.format_matrix3d_attr(&el.transform, Vec2::ZERO))
+            })
+            .unwrap_or_default();
         let w = tb.width.unwrap_or(tb.box_width).max(4.0);
         let h = tb.box_height.max(4.0);
         let align = match tb.align {
@@ -499,7 +501,7 @@ impl<'a> Exporter<'a> {
             TextAlign::Right => "right",
         };
         let c = tb.color.sanitized();
-        let _ = writeln!(xml, "{indent}<{tag}{name_attr} width=\"{w:.2}\" height=\"{h:.2}\">");
+        let _ = writeln!(xml, "{indent}<{tag}{name_attr}{m3d_attr} width=\"{w:.2}\" height=\"{h:.2}\">");
         write_matrix(xml, &format!("{indent}  "), &el.transform);
         let _ = writeln!(xml, "{indent}  <textRuns><DOMTextRun>");
         let _ = writeln!(xml, "{indent}    <characters>{}</characters>", xml_escape(&tb.text));
@@ -519,13 +521,22 @@ impl<'a> Exporter<'a> {
         let _ = writeln!(xml, "{indent}</{tag}>");
     }
 
-    fn write_elements(&mut self, xml: &mut String, indent: &str, els: &[std::sync::Arc<Element>], in_group: bool, depth: usize) {
+    fn write_elements(
+        &mut self,
+        xml: &mut String,
+        indent: &str,
+        els: &[std::sync::Arc<Element>],
+        perspectives: &BTreeMap<ElementId, Perspective3D>,
+        in_group: bool,
+        depth: usize,
+    ) {
         if depth > anicraft_doc::MAX_GROUP_DEPTH {
             return;
         }
         for el in els {
+            let persp = if depth == 0 { perspectives.get(&el.id) } else { None };
             match &el.kind {
-                ElementKind::Shape(sh) => self.write_shape(xml, indent, el, sh, in_group),
+                ElementKind::Shape(sh) => self.write_shape(xml, indent, el, sh, in_group, persp),
                 ElementKind::Symbol { symbol, loop_mode, first_frame, blend, filters, events } => {
                     if !events.is_empty() {
                         self.report.note("instance button/clip pointer actions");
@@ -539,9 +550,20 @@ impl<'a> Exporter<'a> {
                     };
                     let first_attr = if *first_frame > 0 { format!(" firstFrame=\"{first_frame}\"") } else { String::new() };
                     let blend_attr = if blend.is_normal() { String::new() } else { format!(" blendMode=\"{}\"", blend.key()) };
+                    let m3d_attr = persp
+                        .filter(|p| !p.is_identity())
+                        .map(|p| {
+                            let fov = if (p.fov_deg - anicraft_geom::perspective::DEFAULT_FOV_DEG).abs() > 1e-3 {
+                                format!(" fov=\"{:.2}\"", p.fov_deg)
+                            } else {
+                                String::new()
+                            };
+                            format!(" matrix3D=\"{}\"{fov}", p.format_matrix3d_attr(&el.transform, Vec2::ZERO))
+                        })
+                        .unwrap_or_default();
                     let _ = writeln!(
                         xml,
-                        "{indent}<DOMSymbolInstance libraryItemName=\"{}\"{name_attr} loop=\"{loop_str}\"{first_attr}{blend_attr}>",
+                        "{indent}<DOMSymbolInstance libraryItemName=\"{}\"{name_attr} loop=\"{loop_str}\"{first_attr}{blend_attr}{m3d_attr}>",
                         xml_escape(&sym_name)
                     );
                     write_matrix(xml, &format!("{indent}  "), &el.transform);
@@ -549,15 +571,20 @@ impl<'a> Exporter<'a> {
                     Self::write_filters(xml, &format!("{indent}  "), filters);
                     let _ = writeln!(xml, "{indent}</DOMSymbolInstance>");
                 }
-                ElementKind::Text(tb) => self.write_text(xml, indent, el, tb),
+                ElementKind::Text(tb) => self.write_text(xml, indent, el, tb, persp),
                 ElementKind::Camera => {}
                 ElementKind::Group { .. } => {
                     let members = el.kind.group_members();
                     if !members.is_empty() {
-                        let _ = writeln!(xml, "{indent}<DOMGroup>");
+                        let m3d_attr = persp
+                            .filter(|p| !p.is_identity())
+                            .map(|p| format!(" matrix3D=\"{}\"", p.format_matrix3d_attr(&el.transform, Vec2::ZERO)))
+                            .unwrap_or_default();
+                        let _ = writeln!(xml, "{indent}<DOMGroup{m3d_attr}>");
                         write_matrix(xml, &format!("{indent}  "), &el.transform);
                         let _ = writeln!(xml, "{indent}  <members>");
-                        self.write_elements(xml, &format!("{indent}    "), &members, true, depth + 1);
+                        let empty_persp = BTreeMap::new();
+                        self.write_elements(xml, &format!("{indent}    "), &members, &empty_persp, true, depth + 1);
                         let _ = writeln!(xml, "{indent}  </members>");
                         let _ = writeln!(xml, "{indent}</DOMGroup>");
                     }
@@ -700,7 +727,7 @@ impl<'a> Exporter<'a> {
             let _ = writeln!(xml, "{indent}  </SoundEnvelope>");
         }
         let _ = writeln!(xml, "{indent}  <elements>");
-        self.write_elements(xml, &format!("{indent}    "), &kf.elements, false, 0);
+        self.write_elements(xml, &format!("{indent}    "), &kf.elements, &kf.perspectives, false, 0);
         let _ = writeln!(xml, "{indent}  </elements>");
         let _ = writeln!(xml, "{indent}</DOMFrame>");
     }
@@ -720,17 +747,19 @@ impl<'a> Exporter<'a> {
             LayerKind::Normal | LayerKind::Armature | LayerKind::Camera => "",
         };
         let parent_attr = layer
-            .parent
+            .parent_layer
+            .or(layer.parent)
             .and_then(|pid| index_by_id.get(&pid))
             .map(|idx| format!(" parentLayerIndex=\"{idx}\""))
             .unwrap_or_default();
+        let z_attr = if layer.depth.abs() > 1e-4 { format!(" zDepth=\"{:.2}\"", layer.depth) } else { String::new() };
         let vis = if layer.visible { "" } else { " visible=\"false\"" };
         let lock = if layer.locked { " locked=\"true\"" } else { "" };
         let outl = if layer.outline { " outline=\"true\"" } else { "" };
         let h_mult = if layer.height_rows > 1 { format!(" heightMultiplier=\"{}\"", layer.height_rows) } else { String::new() };
         let _ = writeln!(
             xml,
-            "{indent}<DOMLayer name=\"{}\" color=\"{}\"{ltype}{parent_attr}{vis}{lock}{outl}{h_mult}>",
+            "{indent}<DOMLayer name=\"{}\" color=\"{}\"{ltype}{parent_attr}{z_attr}{vis}{lock}{outl}{h_mult}>",
             xml_escape(&layer.name),
             layer.color.to_hex()
         );
@@ -827,22 +856,13 @@ impl<'a> Exporter<'a> {
             for bmp in &self.doc.bitmaps {
                 if let Some((full, href)) = self.bitmap_names.get(&bmp.id) {
                     let smooth = if bmp.smoothing { "true" } else { "false" };
-                    let _ = writeln!(
-                        xml,
-                        "    <DOMBitmapItem name=\"{}\" href=\"{}\" allowSmoothing=\"{smooth}\"/>",
-                        xml_escape(full),
-                        xml_escape(href)
-                    );
+                    let _ =
+                        writeln!(xml, "    <DOMBitmapItem name=\"{}\" href=\"{}\" allowSmoothing=\"{smooth}\"/>", xml_escape(full), xml_escape(href));
                 }
             }
             for snd in &self.doc.sounds {
                 if let Some((full, href)) = self.sound_names.get(&snd.id) {
-                    let _ = writeln!(
-                        xml,
-                        "    <DOMSoundItem name=\"{}\" href=\"{}\"/>",
-                        xml_escape(full),
-                        xml_escape(href)
-                    );
+                    let _ = writeln!(xml, "    <DOMSoundItem name=\"{}\" href=\"{}\"/>", xml_escape(full), xml_escape(href));
                 }
             }
             let _ = writeln!(xml, "  </media>");
@@ -933,11 +953,7 @@ fn pack_zip(files: &[(String, Vec<u8>)]) -> Vec<u8> {
             continue;
         }
         let deflated = miniz_oxide::deflate::compress_to_vec(raw, 6);
-        let (method, payload): (u16, &[u8]) = if deflated.len() < raw.len() {
-            (8, &deflated)
-        } else {
-            (0, raw.as_slice())
-        };
+        let (method, payload): (u16, &[u8]) = if deflated.len() < raw.len() { (8, &deflated) } else { (0, raw.as_slice()) };
         let crc = crate::zip::crc32(raw);
         let local_offset = out.len() as u32;
 
@@ -997,10 +1013,7 @@ pub fn export_fla(doc: &Document, stem: &str) -> (Vec<u8>, ExportReport) {
 
 /// Writes an XFL package directly to disk at `dir`.
 pub fn export_path(doc: &Document, dir: &std::path::Path, stem: Option<&str>) -> Result<ExportReport, XflError> {
-    let default_stem = dir
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("movie");
+    let default_stem = dir.file_stem().and_then(|s| s.to_str()).unwrap_or("movie");
     let (files, report) = export_package(doc, stem.unwrap_or(default_stem));
     std::fs::create_dir_all(dir)?;
     for (rel, bytes) in files {
@@ -1053,8 +1066,8 @@ mod export_tests {
 
     #[test]
     fn gradients_cubics_symbols_and_sounds_round_trip() {
-        let mut doc = Document::default();
-        doc.stage = anicraft_doc::Stage { width: 640, height: 360, fps: 24.0, background: Rgba::hex(0x102030) };
+        let mut doc =
+            Document { stage: anicraft_doc::Stage { width: 640, height: 360, fps: 24.0, background: Rgba::hex(0x102030) }, ..Document::default() };
 
         // Add a WAV sound
         let wav_bytes = anicraft_doc::audio::wav::encode(24_000, 1, &[0.0, 0.4, -0.4, 0.1], anicraft_doc::audio::wav::Bits::Int16);
@@ -1076,10 +1089,7 @@ mod export_tests {
         let grad = Paint::linear(
             Vec2::new(0.0, 0.0),
             Vec2::new(90.0, 50.0),
-            vec![
-                GradientStop { offset: 0.0, color: Rgba::hex(0xff3366) },
-                GradientStop { offset: 1.0, color: Rgba::hex(0x33ccff) },
-            ],
+            vec![GradientStop { offset: 0.0, color: Rgba::hex(0xff3366) }, GradientStop { offset: 1.0, color: Rgba::hex(0x33ccff) }],
         );
         sym_layer.keyframe_mut(0).unwrap().elements.push(Arc::new(Element {
             id: anicraft_doc::ElementId(doc.alloc_id()),

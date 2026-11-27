@@ -9,13 +9,14 @@ pub mod brush;
 pub mod clip;
 pub mod edit;
 pub mod envelope;
+mod fit;
 pub mod morph;
+mod path;
+pub mod perspective;
 pub mod planar;
 pub mod pressure;
 pub mod raw;
 pub mod slice;
-mod fit;
-mod path;
 pub mod svg;
 pub mod trace;
 pub mod walk;
@@ -23,6 +24,7 @@ pub mod walk;
 pub use affine::{Affine, Decomposed};
 pub use fit::fit_curve;
 pub use path::{FillRule, POLYSTAR_MAX_SIDES, Path, PathCmd, Polyline, polystar_corners, segment_distance, star_inner_radius};
+pub use perspective::Perspective3D;
 
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, Neg, Sub};
@@ -102,10 +104,7 @@ pub struct Rect {
 
 impl Rect {
     /// The empty rectangle: union identity.
-    pub const EMPTY: Rect = Rect {
-        min: Vec2 { x: f32::INFINITY, y: f32::INFINITY },
-        max: Vec2 { x: f32::NEG_INFINITY, y: f32::NEG_INFINITY },
-    };
+    pub const EMPTY: Rect = Rect { min: Vec2 { x: f32::INFINITY, y: f32::INFINITY }, max: Vec2 { x: f32::NEG_INFINITY, y: f32::NEG_INFINITY } };
 
     pub fn new(x0: f32, y0: f32, x1: f32, y1: f32) -> Self {
         Rect { min: Vec2::new(x0.min(x1), y0.min(y1)), max: Vec2::new(x0.max(x1), y0.max(y1)) }
@@ -132,16 +131,10 @@ impl Rect {
         self.max.y = self.max.y.max(p.y);
     }
     pub fn union(&self, o: &Rect) -> Rect {
-        Rect {
-            min: Vec2::new(self.min.x.min(o.min.x), self.min.y.min(o.min.y)),
-            max: Vec2::new(self.max.x.max(o.max.x), self.max.y.max(o.max.y)),
-        }
+        Rect { min: Vec2::new(self.min.x.min(o.min.x), self.min.y.min(o.min.y)), max: Vec2::new(self.max.x.max(o.max.x), self.max.y.max(o.max.y)) }
     }
     pub fn intersect(&self, o: &Rect) -> Rect {
-        Rect {
-            min: Vec2::new(self.min.x.max(o.min.x), self.min.y.max(o.min.y)),
-            max: Vec2::new(self.max.x.min(o.max.x), self.max.y.min(o.max.y)),
-        }
+        Rect { min: Vec2::new(self.min.x.max(o.min.x), self.min.y.max(o.min.y)), max: Vec2::new(self.max.x.min(o.max.x), self.max.y.min(o.max.y)) }
     }
     pub fn inflate(&self, d: f32) -> Rect {
         Rect { min: self.min - Vec2::new(d, d), max: self.max + Vec2::new(d, d) }

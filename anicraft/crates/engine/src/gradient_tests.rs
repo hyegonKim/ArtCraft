@@ -133,7 +133,12 @@ fn transform_fill_moves_turns_scales_and_skews_analytically() {
     let f0 = stage_frame(&s, a);
     // Scale along the gradient (its own x), then turn 90° about its centre, then move.
     run(&mut s, "paint.transform_fill", json!({"scale_x": 0.5, "rotate": 90, "move": [5, -5]}));
-    let want = Affine::translate(5.0, -5.0).mul(&Affine::translate(150.0, 150.0)).mul(&Affine::rotate(std::f32::consts::FRAC_PI_2)).mul(&Affine::translate(-150.0, -150.0)).mul(&f0).mul(&Affine::scale(0.5, 1.0));
+    let want = Affine::translate(5.0, -5.0)
+        .mul(&Affine::translate(150.0, 150.0))
+        .mul(&Affine::rotate(std::f32::consts::FRAC_PI_2))
+        .mul(&Affine::translate(-150.0, -150.0))
+        .mul(&f0)
+        .mul(&Affine::scale(0.5, 1.0));
     let got = stage_frame(&s, a);
     // A linear gradient keeps only its axis: compare the ends.
     for x in [-1.0, 1.0] {
@@ -183,7 +188,12 @@ fn transform_fill_turns_bitmap_fills_and_refuses_what_it_cannot_do() {
     run(&mut s, "paint.transform_fill", json!({"scale": 3, "skew_y": 20, "rotate": -45}));
     assert_eq!(s.history_len(), steps + 1, "one step");
     let c = f0.apply(Vec2::ZERO);
-    let want = Affine::translate(c.x, c.y).mul(&Affine::rotate(-std::f32::consts::FRAC_PI_4)).mul(&Affine::translate(-c.x, -c.y)).mul(&f0).mul(&Affine::scale(3.0, 3.0)).mul(&Affine { m: [1.0, 20f32.to_radians().tan(), 0.0, 1.0, 0.0, 0.0] });
+    let want = Affine::translate(c.x, c.y)
+        .mul(&Affine::rotate(-std::f32::consts::FRAC_PI_4))
+        .mul(&Affine::translate(-c.x, -c.y))
+        .mul(&f0)
+        .mul(&Affine::scale(3.0, 3.0))
+        .mul(&Affine { m: [1.0, 20f32.to_radians().tan(), 0.0, 1.0, 0.0, 0.0] });
     assert!(near(&frame(&s), &want), "{:?} vs {want:?}", frame(&s));
     // Nothing to flatten a fill to, nor a solid fill to transform.
     let before = s.doc.clone();

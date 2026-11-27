@@ -36,12 +36,18 @@ pub enum State {
     Off,
     Starting,
     /// Drawing, on this adapter; `direct` when straight into the window's textures.
-    Running { adapter: String, direct: bool },
+    Running {
+        adapter: String,
+        direct: bool,
+    },
     /// Could not start; the CPU draws. The reason, for Preferences.
     Failed(String),
     /// Stopped working mid-session (ADR 0092); the CPU draws. Why, and when the GPU is tried
     /// again (app time, seconds; `None`: not again this session).
-    Stopped { why: String, retry_at: Option<f64> },
+    Stopped {
+        why: String,
+        retry_at: Option<f64>,
+    },
 }
 
 /// What happened to the GPU stage this frame, for the status bar.
@@ -187,8 +193,13 @@ impl GpuStage {
 /// The status bar's words for a notice.
 pub fn notice_text(n: &Notice) -> String {
     match n {
-        Notice::Stopped { retry_in: Some(s) } => tr!("The graphics card stopped drawing the stage, so the CPU draws it now; AniCraft tries the graphics card again in {seconds} s.", seconds = s.round() as u32),
-        Notice::Stopped { retry_in: None } => tr!("The graphics card stopped drawing the stage, so the CPU draws it for the rest of this session.").into(),
+        Notice::Stopped { retry_in: Some(s) } => tr!(
+            "The graphics card stopped drawing the stage, so the CPU draws it now; AniCraft tries the graphics card again in {seconds} s.",
+            seconds = s.round() as u32
+        ),
+        Notice::Stopped { retry_in: None } => {
+            tr!("The graphics card stopped drawing the stage, so the CPU draws it for the rest of this session.").into()
+        }
         Notice::Back => tr!("The graphics card draws the stage again.").into(),
     }
 }
@@ -415,7 +426,7 @@ mod imp {
     fn retry_line(retry_at: Option<f64>, now: f64) -> String {
         match retry_at {
             Some(t) => format!("trying the GPU again in {:.0} s", t - now), // i18n-exempt: log text
-            None => "not trying the GPU again this session".into(), // i18n-exempt: log text
+            None => "not trying the GPU again this session".into(),         // i18n-exempt: log text
         }
     }
 
@@ -555,7 +566,11 @@ mod imp {
             START_FAILS.store(true, Ordering::SeqCst);
             assert!(settle(&mut m, &svc, &ctx, 22.0, (1024, 600)).is_empty());
             assert_eq!(STARTS.load(Ordering::SeqCst), 3, "the resize brought it forward");
-            assert!(matches!(&m.state, State::Stopped { retry_at: Some(t), .. } if (*t - (22.0 + super::super::RETRY_SECS[2])).abs() < 1e-9), "{:?}", m.state);
+            assert!(
+                matches!(&m.state, State::Stopped { retry_at: Some(t), .. } if (*t - (22.0 + super::super::RETRY_SECS[2])).abs() < 1e-9),
+                "{:?}",
+                m.state
+            );
             assert!(!svc.has_rasterizer());
         }
 

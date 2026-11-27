@@ -42,7 +42,14 @@ fn add_sound(s: &mut Session, name: &str) -> u64 {
 
 /// Element `id` on the timeline being edited.
 fn element(s: &Session, id: u64) -> Element {
-    s.timeline().layers.iter().flat_map(|l| &l.keyframes).flat_map(|k| &k.elements).find(|e| e.id.0 == id).map(|e| (**e).clone()).unwrap_or_else(|| panic!("no element {id}"))
+    s.timeline()
+        .layers
+        .iter()
+        .flat_map(|l| &l.keyframes)
+        .flat_map(|k| &k.elements)
+        .find(|e| e.id.0 == id)
+        .map(|e| (**e).clone())
+        .unwrap_or_else(|| panic!("no element {id}"))
 }
 
 fn shape(e: &Element) -> &anicraft_doc::Shape {
@@ -62,7 +69,11 @@ fn a_drop_places_symbols_bitmaps_and_a_sound_in_one_undo_step() {
     let layer = s.layer;
     let before = s.doc.clone();
     let steps = s.history.undo_len();
-    let v = run(&mut s, "library.place", json!({"items": [{"symbol": ball}, {"symbol": star}, {"bitmap": bitmap.0}, {"sound": sound}], "x": 200, "y": 120}));
+    let v = run(
+        &mut s,
+        "library.place",
+        json!({"items": [{"symbol": ball}, {"symbol": star}, {"bitmap": bitmap.0}, {"sound": sound}], "x": 200, "y": 120}),
+    );
     assert_eq!(s.history.undo_len(), steps + 1, "one undo step");
     let ids: Vec<u64> = v["elements"].as_array().unwrap().iter().map(|x| x.as_u64().unwrap()).collect();
     assert_eq!(ids.len(), 3);
@@ -134,7 +145,18 @@ fn placing_inside_a_symbol_open_for_editing_uses_its_space() {
     let (ball, star) = (sym(&s, "Ball"), sym(&s, "Star"));
     run(&mut s, "symbol.edit", json!({"symbol": ball}));
     let el = run(&mut s, "library.place", json!({"symbol": star, "x": 5, "y": -7}))["element"].as_u64().unwrap();
-    let inside = s.doc.symbol(SymbolId(ball)).unwrap().timeline.layers.iter().flat_map(|l| &l.keyframes).flat_map(|k| &k.elements).find(|e| e.id.0 == el).cloned().expect("in the open symbol");
+    let inside = s
+        .doc
+        .symbol(SymbolId(ball))
+        .unwrap()
+        .timeline
+        .layers
+        .iter()
+        .flat_map(|l| &l.keyframes)
+        .flat_map(|k| &k.elements)
+        .find(|e| e.id.0 == el)
+        .cloned()
+        .expect("in the open symbol");
     assert_eq!(inside.transform.apply(Vec2::ZERO), Vec2::new(5.0, -7.0));
     assert!(err(&mut s, "library.place", json!({"items": [{"symbol": star}, {"symbol": ball}]})).contains("inside itself"));
 }

@@ -2,8 +2,8 @@
 //! instance names, the file round trip, frame scripts on the plug-in host (with their fuel
 //! limit), and headless Test Movie.
 
-use crate::plugin_tests::{plugin, plugin_then};
 use crate::player::{Movie, ScriptRunner};
+use crate::plugin_tests::{plugin, plugin_then};
 use crate::{Session, format};
 use anicraft_doc::actions::{Action, FrameScript};
 use anicraft_doc::{ElementKind, SymbolKind, sample};
@@ -25,7 +25,9 @@ fn with_instance(kind: &str) -> (Session, u64) {
 fn frame_actions_are_set_listed_cleared_and_undone_as_commands() {
     let mut s = Session::new(sample::interactive());
     let actions_layer = s.doc.timeline(0).layers[0].id.0;
-    let v = s.execute("actions.set", &json!({"layer": actions_layer, "frame": 5, "actions": [{"op": "stop"}, {"op": "trace", "message": "hi"}]})).unwrap();
+    let v = s
+        .execute("actions.set", &json!({"layer": actions_layer, "frame": 5, "actions": [{"op": "stop"}, {"op": "trace", "message": "hi"}]}))
+        .unwrap();
     assert_eq!(v["keyframe"], 1, "goes on the keyframe covering the frame");
     assert_eq!(v["summary"], "Stop; Trace “hi”");
     let list = s.execute("actions.list", &json!({})).unwrap();
@@ -37,7 +39,13 @@ fn frame_actions_are_set_listed_cleared_and_undone_as_commands() {
     s.undo().unwrap();
     assert!(s.doc.timeline(0).layers[0].keyframes[1].script.as_ref().is_some_and(|x| matches!(x, FrameScript::Actions(a) if a.len() == 1)));
     // Bad lists are refused whole.
-    for bad in [json!({"actions": [{"op": "explode"}]}), json!({"actions": [{"op": "stop", "target": "a b"}]}), json!({"actions": "stop"}), json!({}), json!({"plugin": "bad id!"})] {
+    for bad in [
+        json!({"actions": [{"op": "explode"}]}),
+        json!({"actions": [{"op": "stop", "target": "a b"}]}),
+        json!({"actions": "stop"}),
+        json!({}),
+        json!({"plugin": "bad id!"}),
+    ] {
         assert!(s.execute("actions.set", &bad).is_err(), "accepted {bad}");
     }
     s.execute("actions.clear", &json!({"layer": actions_layer, "frame": 0})).unwrap();
@@ -94,7 +102,11 @@ fn actions_and_handlers_survive_the_file_and_older_files_still_open() {
     let d = sample::interactive();
     let text = format::to_json(&d).unwrap();
     let mut v: Value = serde_json::from_str(&text).unwrap();
-    assert_eq!(v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"], json!({"actions": [{"op": "stop"}]}), "compact actions");
+    assert_eq!(
+        v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"],
+        json!({"actions": [{"op": "stop"}]}),
+        "compact actions"
+    );
     assert_eq!(v["document"]["scenes"][0]["timeline"]["layers"][1]["keyframes"][0]["elements"][1]["kind"]["Symbol"]["events"][0]["event"], "click");
     let back = format::from_json(&text).unwrap();
     assert_eq!(back, d);
@@ -103,7 +115,8 @@ fn actions_and_handlers_survive_the_file_and_older_files_still_open() {
     let d2 = format::from_json(&file(&v)).unwrap();
     assert!(d2.timeline(0).layers[0].keyframes[0].script.is_none());
     // Hostile scripts are repaired on load, not trusted.
-    v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"] = json!({"actions": [{"op": "stop", "target": "no such..path"}, {"op": "set_property", "property": "alpha", "value": 1e300}]});
+    v["document"]["scenes"][0]["timeline"]["layers"][0]["keyframes"][0]["script"] =
+        json!({"actions": [{"op": "stop", "target": "no such..path"}, {"op": "set_property", "property": "alpha", "value": 1e300}]});
     let d3 = format::from_json(&file(&v)).unwrap();
     let a = d3.timeline(0).layers[0].keyframes[0].script.as_ref().unwrap().actions().to_vec();
     assert!(matches!(a.as_slice(), [Action::SetProperty { value, .. }] if *value == 1.0), "{a:?}");
@@ -147,7 +160,8 @@ fn play(s: &Session, steps: u32) -> (Movie, u64) {
 
 #[test]
 fn frame_scripts_read_the_player_and_emit_actions() {
-    let module = plugin(SCRIPT, &[r#"{"op":"player"}"#, r#"{"op":"log","message":"stopping"}"#, r#"{"op":"action","action":{"op":"stop"}}"#], true, 0);
+    let module =
+        plugin(SCRIPT, &[r#"{"op":"player"}"#, r#"{"op":"log","message":"stopping"}"#, r#"{"op":"action","action":{"op":"stop"}}"#], true, 0);
     let s = scripted(&module, "main");
     let (m, fuel) = play(&s, 6);
     assert_eq!((m.state.root.frame, m.state.root.playing), (1, false), "the script's stop held frame 2");

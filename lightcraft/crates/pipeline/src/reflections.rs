@@ -46,21 +46,9 @@ pub fn apply(img: &mut Rgb32f, s: &DevelopSettings, px_per_long: f64) {
     if !renders(s) || img.width == 0 || img.height == 0 {
         return;
     }
-    let scale = if px_per_long.is_finite() && px_per_long > 0.0 {
-        px_per_long as f32
-    } else {
-        img.width.max(img.height) as f32
-    };
-    let eye_amt = if s.reflections.eyeglass.is_finite() {
-        (s.reflections.eyeglass / 100.0).clamp(0.0, 1.0) as f32
-    } else {
-        0.0
-    };
-    let win_amt = if s.reflections.window.is_finite() {
-        (s.reflections.window / 100.0).clamp(0.0, 1.0) as f32
-    } else {
-        0.0
-    };
+    let scale = if px_per_long.is_finite() && px_per_long > 0.0 { px_per_long as f32 } else { img.width.max(img.height) as f32 };
+    let eye_amt = if s.reflections.eyeglass.is_finite() { (s.reflections.eyeglass / 100.0).clamp(0.0, 1.0) as f32 } else { 0.0 };
+    let win_amt = if s.reflections.window.is_finite() { (s.reflections.window / 100.0).clamp(0.0, 1.0) as f32 } else { 0.0 };
 
     if eye_amt > 0.0 {
         apply_eyeglass(img, eye_amt, scale);
@@ -182,11 +170,7 @@ fn apply_eyeglass(img: &mut Rgb32f, amount: f32, px_per_long: f32) {
             let f = fine.data[idx];
             let m = mid.data[idx];
             let sur = surround.data[idx];
-            let bg = [
-                sur[0] * 0.65 + wide.data[idx][0] * 0.35,
-                sur[1] * 0.65 + wide.data[idx][1] * 0.35,
-                sur[2] * 0.65 + wide.data[idx][2] * 0.35,
-            ];
+            let bg = [sur[0] * 0.65 + wide.data[idx][0] * 0.35, sur[1] * 0.65 + wide.data[idx][1] * 0.35, sur[2] * 0.65 + wide.data[idx][2] * 0.35];
 
             let y_c = luminance_2020(c).max(1e-5);
             let y_f = luminance_2020(f).max(1e-5);
@@ -257,15 +241,7 @@ fn apply_window(img: &mut Rgb32f, amount: f32, px_per_long: f32) {
     let eroded_rgb = erode_rgb(img, erode_r);
     let veil_rgb = gaussian(&eroded_rgb, sigma_veil);
 
-    let dark_plane = Plane {
-        width: w,
-        height: h,
-        data: img
-            .data
-            .iter()
-            .map(|c| c[0].min(c[1]).min(c[2]).max(0.0))
-            .collect(),
-    };
+    let dark_plane = Plane { width: w, height: h, data: img.data.iter().map(|c| c[0].min(c[1]).min(c[2]).max(0.0)).collect() };
     let eroded_dark = erode_plane(&dark_plane, erode_r);
     let smooth_dark = gaussian(&eroded_dark, sigma_veil);
 
@@ -287,11 +263,7 @@ fn apply_window(img: &mut Rgb32f, amount: f32, px_per_long: f32) {
                 (v[1] * 0.72 + d_veil * 0.28) * 0.82 * amount,
                 (v[2] * 0.72 + d_veil * 0.28) * 0.82 * amount,
             ];
-            let sub = [
-                sheet[0].min(c[0] * 0.88),
-                sheet[1].min(c[1] * 0.88),
-                sheet[2].min(c[2] * 0.88),
-            ];
+            let sub = [sheet[0].min(c[0] * 0.88), sheet[1].min(c[1] * 0.88), sheet[2].min(c[2] * 0.88)];
 
             // Restore transmission gain moderately so subtracting the reflection sheet preserves midtone brightness:
             let removed_y = luminance_2020(sub);
@@ -299,11 +271,7 @@ fn apply_window(img: &mut Rgb32f, amount: f32, px_per_long: f32) {
             let highlight_tame = 1.0 / (1.0 + 0.22 * amount * (y_c - 0.85).max(0.0));
             let g = trans_gain * highlight_tame;
 
-            *px = [
-                ((c[0] - sub[0]).max(0.0) * g).max(0.0),
-                ((c[1] - sub[1]).max(0.0) * g).max(0.0),
-                ((c[2] - sub[2]).max(0.0) * g).max(0.0),
-            ];
+            *px = [((c[0] - sub[0]).max(0.0) * g).max(0.0), ((c[1] - sub[1]).max(0.0) * g).max(0.0), ((c[2] - sub[2]).max(0.0) * g).max(0.0)];
         }
     });
     let _ = h;
@@ -328,11 +296,7 @@ mod tests {
     fn eyeglass_reflection_suppresses_glare_and_ar_green_tint() {
         let mut img = Rgb32f::from_fn(64, 64, |x, y| {
             // Neutral skin/eye background around 0.18 with a bright green-tinted AR reflection patch in the centre
-            if (26..38).contains(&x) && (26..38).contains(&y) {
-                [0.42, 0.68, 0.46]
-            } else {
-                [0.20, 0.18, 0.16]
-            }
+            if (26..38).contains(&x) && (26..38).contains(&y) { [0.42, 0.68, 0.46] } else { [0.20, 0.18, 0.16] }
         });
         let before_center = img.data[32 * 64 + 32];
         let before_corner = img.data[4 * 64 + 4];

@@ -36,18 +36,90 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             add_in_shape,
         ),
-        c("bone.bind", "Bind Points", "{bone, points?: [point index…] (default every point; see bone.info with points), mode?: \"only\" (the points follow just this bone; default) | \"add\" (they share it with the bones they follow) | \"remove\" | \"auto\" (back to automatic binding)} → {bone, changed, bound (how many points the bone moves)}. A shape armature's binding: which points of the shape follow which bone", true, bind),
-        c("bone.paint_weights", "Paint Weights", "{bone, at: [[x, y]…] (dab centres, stage px, at most 4096), radius? (px, 1–2000, default 20), strength? (0–100 at the centre, default 25), mode?: \"add\" (default) | \"subtract\" | \"smooth\", frame?} → {bone, changed, bound}. The Bind tool's brush: raises, lowers or evens out how much the bone moves the shape's points within the radius of each dab (a smooth falloff to the rim); each point's weights stay normalised (its other bones share what is left) and the points become hand-bound. A drag sends many in one gesture: one undo step", true, paint_weights),
-        c("bone.set_weight", "Set Point Weight", "{bone, points: [point index…] (see bone.info with points), weight (0–100: the bone's share of each point)} sets exactly how much the bone moves the points; their other bones share the rest in proportion (a point that followed only this bone gives the rest to its nearest other bones). Hand-bound", true, set_weight),
-        c("bone.remove", "Remove Bone", "{bone} removes it and the bones below it; the instances they moved go to a layer of their own as they look at the playhead (with the last bone, the whole armature does); asks first when the armature has more than one pose", true, remove),
-        c("bone.set_limits", "Joint Limits", "{bone, constrain?: bool (false: turns freely), min?, max? (°, −360…360, from where it was drawn)} limits how far the joint turns, in every pose", true, set_limits),
-        c("bone.set_translation", "Joint Translation", "{bone, axis: \"x\" | \"y\" (along the axes of what the bone starts on, as it is turned), enabled?: bool (false: the joint doesn't slide that way), constrain?: bool (false: slides freely), min?, max? (px, ±10,000, from where it was drawn)} lets the joint slide, in every pose; posing (bone.solve, the Selection tool) slides it only where turning can't reach", true, set_translation),
-        c("bone.set_spring", "Bone Spring", "{bone, strength? (0–100: 0 is no spring; stiffer swings faster and lags less), damping? (0–100: how quickly the swing dies down; 100 absorbs it all)} secondary motion: the bone lags behind and swings past its pose as the bones it hangs from move, then settles. Evaluated, never stored: the keyed poses don't change", true, set_spring),
-        c("bone.enable_springs", "Enable Springs", "{enabled: bool, layer? (the armature layer) | bone?} turns the armature's springs on or off (off: it plays its keyed poses exactly, as while posing)", true, enable_springs),
-        c("bone.pin", "Pin Bone", "{bone, pinned: bool} a pinned bone (and the bones it hangs from) stays put while dragging bones below it", true, pin),
-        c("bone.pose", "Pose Bone", "{bone?, angle? (°, the joint angle: 0 as drawn), rotate_by? (°), slide_x?, slide_y? (px: how far the joint slides, within its translation limits), dx?, dy? (moves the whole armature), layer? (the armature layer, when no bone is given), frame?} keys the pose at the frame", true, pose),
-        c("bone.solve", "Drag Bone", "{bone, x, y (stage px: where the bone's end goes), local?: [x, y] (the point dragged, in the bone's instance's space; default its end), frame?} → {reached, error (px), chain}; inverse kinematics turns the bone and the bones above it (limits respected, pinned bones kept)", true, solve),
-        c("bone.info", "Armatures", "{frame?, layer?, points?: bool} → every armature on the scene at the frame: its bones with joint and end (stage px, as keyed), joint angle and limits (°), slide and translation limits (px), spring (0–100) and its swing at the frame (°, what the spring adds to the angle), pinned; whether springs are on; a shape armature's shape, how many points each bone moves, and with points the shape's points (stage px) and the bones each follows", false, info),
+        c(
+            "bone.bind",
+            "Bind Points",
+            "{bone, points?: [point index…] (default every point; see bone.info with points), mode?: \"only\" (the points follow just this bone; default) | \"add\" (they share it with the bones they follow) | \"remove\" | \"auto\" (back to automatic binding)} → {bone, changed, bound (how many points the bone moves)}. A shape armature's binding: which points of the shape follow which bone",
+            true,
+            bind,
+        ),
+        c(
+            "bone.paint_weights",
+            "Paint Weights",
+            "{bone, at: [[x, y]…] (dab centres, stage px, at most 4096), radius? (px, 1–2000, default 20), strength? (0–100 at the centre, default 25), mode?: \"add\" (default) | \"subtract\" | \"smooth\", frame?} → {bone, changed, bound}. The Bind tool's brush: raises, lowers or evens out how much the bone moves the shape's points within the radius of each dab (a smooth falloff to the rim); each point's weights stay normalised (its other bones share what is left) and the points become hand-bound. A drag sends many in one gesture: one undo step",
+            true,
+            paint_weights,
+        ),
+        c(
+            "bone.set_weight",
+            "Set Point Weight",
+            "{bone, points: [point index…] (see bone.info with points), weight (0–100: the bone's share of each point)} sets exactly how much the bone moves the points; their other bones share the rest in proportion (a point that followed only this bone gives the rest to its nearest other bones). Hand-bound",
+            true,
+            set_weight,
+        ),
+        c(
+            "bone.remove",
+            "Remove Bone",
+            "{bone} removes it and the bones below it; the instances they moved go to a layer of their own as they look at the playhead (with the last bone, the whole armature does); asks first when the armature has more than one pose",
+            true,
+            remove,
+        ),
+        c(
+            "bone.set_limits",
+            "Joint Limits",
+            "{bone, constrain?: bool (false: turns freely), min?, max? (°, −360…360, from where it was drawn)} limits how far the joint turns, in every pose",
+            true,
+            set_limits,
+        ),
+        c(
+            "bone.set_translation",
+            "Joint Translation",
+            "{bone, axis: \"x\" | \"y\" (along the axes of what the bone starts on, as it is turned), enabled?: bool (false: the joint doesn't slide that way), constrain?: bool (false: slides freely), min?, max? (px, ±10,000, from where it was drawn)} lets the joint slide, in every pose; posing (bone.solve, the Selection tool) slides it only where turning can't reach",
+            true,
+            set_translation,
+        ),
+        c(
+            "bone.set_spring",
+            "Bone Spring",
+            "{bone, strength? (0–100: 0 is no spring; stiffer swings faster and lags less), damping? (0–100: how quickly the swing dies down; 100 absorbs it all)} secondary motion: the bone lags behind and swings past its pose as the bones it hangs from move, then settles. Evaluated, never stored: the keyed poses don't change",
+            true,
+            set_spring,
+        ),
+        c(
+            "bone.enable_springs",
+            "Enable Springs",
+            "{enabled: bool, layer? (the armature layer) | bone?} turns the armature's springs on or off (off: it plays its keyed poses exactly, as while posing)",
+            true,
+            enable_springs,
+        ),
+        c(
+            "bone.pin",
+            "Pin Bone",
+            "{bone, pinned: bool} a pinned bone (and the bones it hangs from) stays put while dragging bones below it",
+            true,
+            pin,
+        ),
+        c(
+            "bone.pose",
+            "Pose Bone",
+            "{bone?, angle? (°, the joint angle: 0 as drawn), rotate_by? (°), slide_x?, slide_y? (px: how far the joint slides, within its translation limits), dx?, dy? (moves the whole armature), layer? (the armature layer, when no bone is given), frame?} keys the pose at the frame",
+            true,
+            pose,
+        ),
+        c(
+            "bone.solve",
+            "Drag Bone",
+            "{bone, x, y (stage px: where the bone's end goes), local?: [x, y] (the point dragged, in the bone's instance's space; default its end), frame?} → {reached, error (px), chain}; inverse kinematics turns the bone and the bones above it (limits respected, pinned bones kept)",
+            true,
+            solve,
+        ),
+        c(
+            "bone.info",
+            "Armatures",
+            "{frame?, layer?, points?: bool} → every armature on the scene at the frame: its bones with joint and end (stage px, as keyed), joint angle and limits (°), slide and translation limits (px), spring (0–100) and its swing at the frame (°, what the spring adds to the angle), pinned; whether springs are on; a shape armature's shape, how many points each bone moves, and with points the shape's points (stage px) and the bones each follows",
+            false,
+            info,
+        ),
     ]
 }
 
@@ -71,8 +143,7 @@ fn find_instance(s: &Session, id: ElementId) -> Option<Found> {
 
 /// The armature layer holding bone `id`, and its armature.
 fn find_bone(s: &Session, id: BoneId) -> Result<(LayerId, Arc<Armature>)> {
-    s
-        .timeline()
+    s.timeline()
         .layers
         .iter()
         .filter(|l| l.kind == LayerKind::Armature)
@@ -92,7 +163,9 @@ fn opt_point(p: &Value, key: &str) -> Result<Option<Vec2>> {
     match p.get(key) {
         None | Some(Value::Null) => Ok(None),
         Some(Value::Array(a)) if a.len() == 2 => {
-            let n = |i: usize| a.get(i).and_then(Value::as_f64).filter(|v| v.is_finite() && v.abs() <= f64::from(MAX_COORD)).map(|v| v as f32).ok_or_else(bad);
+            let n = |i: usize| {
+                a.get(i).and_then(Value::as_f64).filter(|v| v.is_finite() && v.abs() <= f64::from(MAX_COORD)).map(|v| v as f32).ok_or_else(bad)
+            };
             Ok(Some(Vec2::new(n(0)?, n(1)?)))
         }
         Some(_) => Err(bad()),
@@ -176,7 +249,9 @@ fn add(s: &mut Session, p: &Value) -> Result<Value> {
     let t = find_instance(s, to).ok_or_else(|| missing(to))?;
     for x in [&f, &t] {
         if !matches!(x.el.kind, ElementKind::Symbol { .. }) {
-            return Err(EngineError::State("bones join symbol instances: convert the artwork to a symbol first (Modify › Convert to Symbol, F8)".into()));
+            return Err(EngineError::State(
+                "bones join symbol instances: convert the artwork to a symbol first (Modify › Convert to Symbol, F8)".into(),
+            ));
         }
         if !matches!(x.kind, LayerKind::Normal | LayerKind::Armature) {
             return Err(EngineError::State("bones join instances on normal layers (not on guide or mask layers)".into()));
@@ -187,8 +262,12 @@ fn add(s: &mut Session, p: &Value) -> Result<Value> {
     let arm_of = |x: &Found| (x.kind == LayerKind::Armature).then(|| tl.layer(x.layer).and_then(|l| l.armature.clone()).unwrap_or_default());
     let (fa, ta) = (arm_of(&f), arm_of(&t));
     match (&fa, &ta) {
-        (_, Some(a)) if f.layer == t.layer && a.bone_into(to).is_some() => return Err(EngineError::State("that instance already hangs from a bone; each instance has one bone into it".into())),
-        (_, Some(_)) if f.layer == t.layer => return Err(EngineError::State("that instance is the armature's root: drag from the root to the other instances instead".into())),
+        (_, Some(a)) if f.layer == t.layer && a.bone_into(to).is_some() => {
+            return Err(EngineError::State("that instance already hangs from a bone; each instance has one bone into it".into()));
+        }
+        (_, Some(_)) if f.layer == t.layer => {
+            return Err(EngineError::State("that instance is the armature's root: drag from the root to the other instances instead".into()));
+        }
         (None, Some(_)) => return Err(EngineError::State("start the bone on the armature: drag from one of its instances to the new one".into())),
         (Some(_), Some(_)) => return Err(EngineError::State("those instances are in different armatures".into())),
         _ => {}
@@ -255,14 +334,21 @@ fn remove(s: &mut Session, p: &Value) -> Result<Value> {
     // A shape armature's bones move no instances: only without bones does its shape go.
     let skinned = arm.skin.is_some();
     skin::rebind(&mut left);
-    let freed: Vec<ElementId> = if dissolve { arm.members() } else if skinned { Vec::new() } else { arm.bones.iter().filter(|b| gone.contains(&b.id)).map(|b| b.child).collect() };
+    let freed: Vec<ElementId> = if dissolve {
+        arm.members()
+    } else if skinned {
+        Vec::new()
+    } else {
+        arm.bones.iter().filter(|b| gone.contains(&b.id)).map(|b| b.child).collect()
+    };
     let tl = s.timeline();
     let index = tl.layers.iter().position(|l| l.id == lid).ok_or_else(|| EngineError::State("the armature layer went away".into()))?;
     let layer = tl.layer(lid).ok_or_else(|| EngineError::State("the armature layer went away".into()))?;
     let (start, end) = (layer.keyframes.first().map_or(0, |k| k.start), layer.end_frame());
     // The freed instances as they look at the playhead (or at the armature's first frame).
     let at = s.frame.clamp(start, end.saturating_sub(1).max(start));
-    let shown: Vec<Arc<Element>> = evaluate_layer_elements(layer, at).map(|(_, e)| e.iter().filter(|e| freed.contains(&e.id)).cloned().collect()).unwrap_or_default();
+    let shown: Vec<Arc<Element>> =
+        evaluate_layer_elements(layer, at).map(|(_, e)| e.iter().filter(|e| freed.contains(&e.id)).cloned().collect()).unwrap_or_default();
     let folder = layer.parent.filter(|p| tl.layer(*p).is_some_and(|x| x.kind == LayerKind::Folder));
     let new_id = LayerId(s.doc.alloc_id());
     let mut freed_layer = Layer::new(new_id, fresh_name(s, "Layer "));
@@ -291,7 +377,9 @@ fn remove(s: &mut Session, p: &Value) -> Result<Value> {
     s.layer = if dissolve { new_id } else { lid };
     s.selection.clear();
     let layer = if dissolve || !skinned { new_id } else { lid };
-    Ok(json!({"removed": gone.iter().map(|b| b.0).collect::<Vec<_>>(), "freed": freed.iter().map(|e| e.0).collect::<Vec<_>>(), "layer": layer.0, "armature_removed": dissolve}))
+    Ok(
+        json!({"removed": gone.iter().map(|b| b.0).collect::<Vec<_>>(), "freed": freed.iter().map(|e| e.0).collect::<Vec<_>>(), "layer": layer.0, "armature_removed": dissolve}),
+    )
 }
 
 fn set_limits(s: &mut Session, p: &Value) -> Result<Value> {
@@ -397,7 +485,9 @@ fn set_translation(s: &mut Session, p: &Value) -> Result<Value> {
     }
     l.armature = Some(Arc::new(arm));
     rebake(l);
-    Ok(json!({"bone": id.0, "axis": axis, "enabled": limits.is_some(), "constrain": limits.is_some_and(|l| l != FREE), "min": limits.map(|l| l.min), "max": limits.map(|l| l.max)}))
+    Ok(
+        json!({"bone": id.0, "axis": axis, "enabled": limits.is_some(), "constrain": limits.is_some_and(|l| l != FREE), "min": limits.map(|l| l.min), "max": limits.map(|l| l.max)}),
+    )
 }
 
 fn set_spring(s: &mut Session, p: &Value) -> Result<Value> {
@@ -433,7 +523,12 @@ fn enable_springs(s: &mut Session, p: &Value) -> Result<Value> {
     };
     unlocked(s, lid)?;
     let l = s.layer_mut(Some(lid))?;
-    let mut arm = l.armature.as_deref().cloned().filter(|_| l.kind == LayerKind::Armature).ok_or_else(|| EngineError::State("that is not an armature layer".into()))?;
+    let mut arm = l
+        .armature
+        .as_deref()
+        .cloned()
+        .filter(|_| l.kind == LayerKind::Armature)
+        .ok_or_else(|| EngineError::State("that is not an armature layer".into()))?;
     arm.springs_off = !enabled;
     l.armature = Some(Arc::new(arm));
     Ok(json!({"layer": lid.0, "springs": enabled}))
@@ -546,7 +641,8 @@ fn solve(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let tail = arm.bone(id).map_or(Vec2::new(0.0, 0.0), |b| b.tail);
     edit_pose(s, lid, frame, |arm, kf| {
-        let r = armature::solve(arm, &kf.elements, &kf.pose, id, local.unwrap_or(tail), target).ok_or_else(|| EngineError::State("the bone's instances aren't on this frame".into()))?;
+        let r = armature::solve(arm, &kf.elements, &kf.pose, id, local.unwrap_or(tail), target)
+            .ok_or_else(|| EngineError::State("the bone's instances aren't on this frame".into()))?;
         kf.pose = r.pose;
         Ok(json!({"bone": id.0, "reached": r.error <= 0.5, "error": r.error, "chain": r.chain}))
     })
@@ -619,7 +715,8 @@ fn add_in_shape(s: &mut Session, p: &Value) -> Result<Value> {
             if shape.is_some_and(|x| x != sh) {
                 return Err(EngineError::Param("that bone is in another shape".into()));
             }
-            let f = find_instance(s, sh).ok_or_else(|| EngineError::State(format!("the armature's shape isn't on the stage at frame {}", frame + 1)))?;
+            let f =
+                find_instance(s, sh).ok_or_else(|| EngineError::State(format!("the armature's shape isn't on the stage at frame {}", frame + 1)))?;
             let node = arm.bone(b).map(|x| x.child).ok_or_else(|| EngineError::State("no such bone".into()))?;
             let end = s.timeline().layer(lid).and_then(|l| {
                 let (_, els) = evaluate_layer_elements(l, frame)?;
@@ -630,28 +727,40 @@ fn add_in_shape(s: &mut Session, p: &Value) -> Result<Value> {
             (Some((lid, arm)), f, node, head)
         }
         (None, Some(sh)) => {
-            let f = find_instance(s, sh).ok_or_else(|| EngineError::State(format!("no shape with id {} on the stage at frame {}", sh.0, frame + 1)))?;
+            let f =
+                find_instance(s, sh).ok_or_else(|| EngineError::State(format!("no shape with id {} on the stage at frame {}", sh.0, frame + 1)))?;
             let ElementKind::Shape(shp) = &f.el.kind else {
-                return Err(EngineError::State("bones inside a shape need a shape: for symbol instances, drag from one to another (bone.add)".into()));
+                return Err(EngineError::State(
+                    "bones inside a shape need a shape: for symbol instances, drag from one to another (bone.add)".into(),
+                ));
             };
-            let head = head.ok_or_else(|| EngineError::Param("param 'head' ([x, y], stage px: where the bone starts, inside the shape) is required".into()))?;
+            let head = head
+                .ok_or_else(|| EngineError::Param("param 'head' ([x, y], stage px: where the bone starts, inside the shape) is required".into()))?;
             let existing = match f.kind {
                 LayerKind::Normal => None,
                 LayerKind::Armature => {
-                    let arm = s.timeline().layer(f.layer).and_then(|l| l.armature.clone()).filter(|a| a.skin_shape() == Some(sh)).ok_or_else(|| EngineError::State("that shape isn't the armature's".into()))?;
+                    let arm = s
+                        .timeline()
+                        .layer(f.layer)
+                        .and_then(|l| l.armature.clone())
+                        .filter(|a| a.skin_shape() == Some(sh))
+                        .ok_or_else(|| EngineError::State("that shape isn't the armature's".into()))?;
                     Some((f.layer, arm))
                 }
                 _ => return Err(EngineError::State("bones go inside shapes on normal layers (not on guide or mask layers)".into())),
             };
             // A bone starts inside the shape (on its fill, or on its line).
             let reach = shp.stroke.as_ref().map_or(0.0, |k| k.width * 0.5 * f.el.transform.mean_scale()) + 2.0;
-            let inside = (shp.fill.is_some() && shp.path.contains(head, &f.el.transform, shp.fill_rule)) || shp.path.distance_to_edge(head, &f.el.transform) <= reach;
+            let inside = (shp.fill.is_some() && shp.path.contains(head, &f.el.transform, shp.fill_rule))
+                || shp.path.distance_to_edge(head, &f.el.transform) <= reach;
             if !inside {
                 return Err(EngineError::State("start the bone inside the shape".into()));
             }
             (existing, f, sh, head)
         }
-        (None, None) => return Err(EngineError::Param("give 'shape' (the shape's id, for the first bone) or 'parent' (a bone to continue from)".into())),
+        (None, None) => {
+            return Err(EngineError::Param("give 'shape' (the shape's id, for the first bone) or 'parent' (a bone to continue from)".into()));
+        }
     };
     unlocked(s, found.layer)?;
     if head.distance(tail) < 1.0 {
@@ -678,7 +787,9 @@ fn add_in_shape(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(EngineError::State(format!("an armature has at most {MAX_BONES} bones")));
     }
     if existing.is_none() && skin::anchors(&shp.path).len() > MAX_SKIN_POINTS {
-        return Err(EngineError::State(format!("bones go inside shapes of at most {MAX_SKIN_POINTS} points: simplify it first (Modify › Shape › Optimize)")));
+        return Err(EngineError::State(format!(
+            "bones go inside shapes of at most {MAX_SKIN_POINTS} points: simplify it first (Modify › Shape › Optimize)"
+        )));
     }
     let id = BoneId(s.doc.alloc_id());
     let child = ElementId(s.doc.alloc_id());
@@ -707,7 +818,12 @@ fn add_in_shape(s: &mut Session, p: &Value) -> Result<Value> {
     };
     s.layer = lid;
     s.selection.clear();
-    let bound = s.timeline().layer(lid).and_then(|l| l.armature.as_ref()).and_then(|a| a.skin.as_ref()).map_or(0, |k| k.points.iter().filter(|b| b.weight(id) > 0.0).count());
+    let bound = s
+        .timeline()
+        .layer(lid)
+        .and_then(|l| l.armature.as_ref())
+        .and_then(|a| a.skin.as_ref())
+        .map_or(0, |k| k.points.iter().filter(|b| b.weight(id) > 0.0).count());
     Ok(json!({"bone": id.0, "layer": lid.0, "created": created, "points": bound}))
 }
 
@@ -719,11 +835,17 @@ fn bind(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let (lid, arm) = find_bone(s, id)?;
     unlocked(s, lid)?;
-    let n = arm.skin.as_ref().map(|k| k.points.len()).ok_or_else(|| EngineError::State("that bone joins symbol instances: only bones inside a shape bind its points".into()))?;
+    let n = arm
+        .skin
+        .as_ref()
+        .map(|k| k.points.len())
+        .ok_or_else(|| EngineError::State("that bone joins symbol instances: only bones inside a shape bind its points".into()))?;
     let bad = || EngineError::Param(format!("param 'points' must be a list of point indices below {n} (see bone.info with points)"));
     let points: Vec<usize> = match p.get("points") {
         None | Some(Value::Null) => (0..n).collect(),
-        Some(Value::Array(a)) if a.len() <= MAX_SKIN_POINTS => a.iter().map(|v| v.as_u64().and_then(|i| usize::try_from(i).ok()).filter(|i| *i < n).ok_or_else(bad)).collect::<Result<_>>()?,
+        Some(Value::Array(a)) if a.len() <= MAX_SKIN_POINTS => {
+            a.iter().map(|v| v.as_u64().and_then(|i| usize::try_from(i).ok()).filter(|i| *i < n).ok_or_else(bad)).collect::<Result<_>>()?
+        }
         Some(_) => return Err(bad()),
     };
     let mut arm = (*arm).clone();
@@ -767,7 +889,9 @@ fn bind(s: &mut Session, p: &Value) -> Result<Value> {
 fn point_list(p: &Value, key: &str, n: usize) -> Result<Vec<usize>> {
     let bad = || EngineError::Param(format!("param '{key}' must be a list of point indices below {n} (see bone.info with points)"));
     match p.get(key) {
-        Some(Value::Array(a)) if a.len() <= MAX_SKIN_POINTS => a.iter().map(|v| v.as_u64().and_then(|i| usize::try_from(i).ok()).filter(|i| *i < n).ok_or_else(bad)).collect(),
+        Some(Value::Array(a)) if a.len() <= MAX_SKIN_POINTS => {
+            a.iter().map(|v| v.as_u64().and_then(|i| usize::try_from(i).ok()).filter(|i| *i < n).ok_or_else(bad)).collect()
+        }
         _ => Err(bad()),
     }
 }
@@ -795,7 +919,9 @@ fn paint_weights(s: &mut Session, p: &Value) -> Result<Value> {
         .iter()
         .map(|v| {
             let a = v.as_array().filter(|a| a.len() == 2).ok_or_else(bad)?;
-            let n = |i: usize| a.get(i).and_then(Value::as_f64).filter(|v| v.is_finite() && v.abs() <= f64::from(MAX_COORD)).map(|v| v as f32).ok_or_else(bad);
+            let n = |i: usize| {
+                a.get(i).and_then(Value::as_f64).filter(|v| v.is_finite() && v.abs() <= f64::from(MAX_COORD)).map(|v| v as f32).ok_or_else(bad)
+            };
             Ok(Vec2::new(n(0)?, n(1)?))
         })
         .collect::<Result<_>>()?;
@@ -814,7 +940,8 @@ fn paint_weights(s: &mut Session, p: &Value) -> Result<Value> {
     let frame = opt_u32(p, "frame")?.unwrap_or(s.frame).min(MAX_FRAME);
     let (lid, arm) = shape_bone(s, id)?;
     // The points where the stage shows them at the frame: the brush paints what the artist sees.
-    let shown = s.timeline().layer(lid).and_then(|l| evaluate_layer_elements(l, frame)).map(|(_, els)| skin::points_shown(&arm, &els)).unwrap_or_default();
+    let shown =
+        s.timeline().layer(lid).and_then(|l| evaluate_layer_elements(l, frame)).map(|(_, els)| skin::points_shown(&arm, &els)).unwrap_or_default();
     if shown.is_empty() {
         return Err(EngineError::State(format!("the bone's shape isn't on the stage at frame {}", frame + 1)));
     }
@@ -855,7 +982,10 @@ fn set_weight(s: &mut Session, p: &Value) -> Result<Value> {
             changed += 1;
         }
     }
-    let shares: Vec<Value> = points.iter().map(|&i| json!(k.points.get(i).map(|b| b.bones.iter().map(|x| json!([x.0.0, x.1 * 100.0])).collect::<Vec<_>>()).unwrap_or_default())).collect();
+    let shares: Vec<Value> = points
+        .iter()
+        .map(|&i| json!(k.points.get(i).map(|b| b.bones.iter().map(|x| json!([x.0.0, x.1 * 100.0])).collect::<Vec<_>>()).unwrap_or_default()))
+        .collect();
     let bound = bound_count(&arm, id);
     let l = s.layer_mut(Some(lid))?;
     l.armature = Some(Arc::new(arm));
@@ -883,10 +1013,13 @@ pub(crate) fn reshape<T>(s: &mut Session, id: ElementId, edit: impl FnOnce(&mut 
     let k = arm.skin.as_ref().filter(|k| k.shape == id).ok_or_else(|| EngineError::State("that shape isn't the armature's".into()))?;
     let pose = armature::pose_at(l, frame).ok_or_else(|| EngineError::State(format!("the armature isn't on frame {}", frame + 1)))?;
     if skin::matrices(&arm, &pose).values().any(|m| *m != Affine::IDENTITY) {
-        return Err(EngineError::State("reshape a shape with bones at its rest pose: go to a frame where every bone is as drawn (angle 0, no slide), or pose them back".into()));
+        return Err(EngineError::State(
+            "reshape a shape with bones at its rest pose: go to a frame where every bone is as drawn (angle 0, no slide), or pose them back".into(),
+        ));
     }
     let (_, els) = evaluate_layer_elements(l, frame).ok_or_else(|| EngineError::State(format!("the armature isn't on frame {}", frame + 1)))?;
-    let el = els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
+    let el =
+        els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
     let ElementKind::Shape(shape) = &el.kind else { return Err(EngineError::State("that isn't a shape".into())) };
     let mut shape = shape.clone();
     shape.path = k.rest.clone();

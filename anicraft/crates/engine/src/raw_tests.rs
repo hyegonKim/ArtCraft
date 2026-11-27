@@ -114,7 +114,11 @@ fn a_straight_segment_stays_straight_until_it_is_dragged() {
     let mut s = rect_session();
     run(&mut s, "path.bend_segment", json!({"x": 50, "y": 0, "dx": 0, "dy": -30}));
     // The other three sides are still lines.
-    let lines = raw(&s).iter().filter(|e| !is_fill(e)).filter(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.path.cmds.iter().all(|c| !matches!(c, anicraft_geom::PathCmd::CubicTo(..))))).count();
+    let lines = raw(&s)
+        .iter()
+        .filter(|e| !is_fill(e))
+        .filter(|e| matches!(&e.kind, ElementKind::Shape(sh) if sh.path.cmds.iter().all(|c| !matches!(c, anicraft_geom::PathCmd::CubicTo(..)))))
+        .count();
     assert_eq!(lines, 3);
 }
 
@@ -145,7 +149,10 @@ fn bending_an_object_bends_only_it() {
     assert_eq!(r["changed"].as_array().map(Vec::len), Some(1), "objects don't share edges");
     // The closing edge of an object's outline can be bent too.
     let areas: Vec<f32> = s.visible_elements().iter().map(|e| area(e)).collect();
-    assert!(areas.iter().any(|a| (a - 8000.0).abs() < 0.5) && areas.iter().any(|a| (a - (8000.0 + 80.0 * (40.0 / 0.75) / 4.0)).abs() < 2.0), "{areas:?}");
+    assert!(
+        areas.iter().any(|a| (a - 8000.0).abs() < 0.5) && areas.iter().any(|a| (a - (8000.0 + 80.0 * (40.0 / 0.75) / 4.0)).abs() < 2.0),
+        "{areas:?}"
+    );
 }
 
 // ----- shared points ------------------------------------------------------------------------------

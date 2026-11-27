@@ -1,7 +1,10 @@
 //! 9-slice scaling (ADR 0055) in the renderer and the exports that draw evaluated frames: the
 //! CPU oracle, SVG and Lottie all see the sliced outline, baked, with strokes at their width.
 
-use anicraft_doc::{ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, Paint, Rgba, ScaleGrid, Shape, Stage, Stroke, Symbol, SymbolId, SymbolKind, Timeline, evaluate};
+use anicraft_doc::{
+    ColorEffect, Document, Element, ElementId, ElementKind, Keyframe, Layer, LayerId, Paint, Rgba, ScaleGrid, Shape, Stage, Stroke, Symbol, SymbolId,
+    SymbolKind, Timeline, evaluate,
+};
 use anicraft_geom::{Affine, Path};
 use std::sync::Arc;
 
@@ -12,17 +15,38 @@ fn panel(sx: f32, sy: f32, guides: bool) -> Document {
     let mut shape = Shape::filled(Path::rounded_rect(0.0, 0.0, 100.0, 40.0, 10.0), Paint::Solid(Rgba::hex(0x2A9D8F)));
     shape.stroke = Some(Stroke::new(Rgba::hex(0x264653), 2.0));
     let mut k = Keyframe::new(0, 1);
-    k.elements.push(Arc::new(Element { id: ElementId(2), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(shape) }));
+    k.elements.push(Arc::new(Element {
+        id: ElementId(2),
+        name: String::new(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(shape),
+    }));
     let mut l = Layer::new(LayerId(3), "art");
     l.keyframes = vec![Arc::new(k)];
     let grid = guides.then_some(ScaleGrid { left: 10.0, right: 90.0, top: 10.0, bottom: 30.0 });
-    d.library.push(Arc::new(Symbol { id: SymbolId(4), name: "Panel".into(), kind: SymbolKind::MovieClip, linkage: None, scale_grid_kept: None, scale_grid: grid, timeline: Timeline { layers: vec![Arc::new(l)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SymbolId(4),
+        name: "Panel".into(),
+        kind: SymbolKind::MovieClip,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: grid,
+        timeline: Timeline { layers: vec![Arc::new(l)] },
+    }));
     let inst = Element {
         id: ElementId(5),
         name: String::new(),
         transform: Affine::translate(20.0, 20.0).mul(&Affine::scale(sx, sy)),
         color: ColorEffect::default(),
-        kind: ElementKind::Symbol { symbol: SymbolId(4), loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol: SymbolId(4),
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     };
     let mut k = Keyframe::new(0, 1);
     k.elements.push(Arc::new(inst));

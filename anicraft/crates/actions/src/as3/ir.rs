@@ -198,7 +198,11 @@ impl<'de> Deserialize<'de> for Value {
 
 /// White space and line terminators as ECMAScript trims them from numbers in text.
 fn js_space(c: char) -> bool {
-    matches!(c, '\t' | '\n' | '\u{b}' | '\u{c}' | '\r' | ' ' | '\u{a0}' | '\u{1680}' | '\u{2000}'..='\u{200a}' | '\u{2028}' | '\u{2029}' | '\u{202f}' | '\u{205f}' | '\u{3000}' | '\u{feff}')
+    matches!(
+        c,
+        '\t' | '\n' | '\u{b}' | '\u{c}' | '\r' | ' ' | '\u{a0}' | '\u{1680}' | '\u{2000}'
+            ..='\u{200a}' | '\u{2028}' | '\u{2029}' | '\u{202f}' | '\u{205f}' | '\u{3000}' | '\u{feff}'
+    )
 }
 
 /// A number written as text (StringToNumber, ECMA-262 §9.3.1 as browsers read it: decimal,
@@ -541,31 +545,78 @@ pub enum LValue {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "e", rename_all = "snake_case")]
 pub enum Expr {
-    Lit { v: Value },
-    Local { i: u16 },
-    Var { n: String },
-    Get { at: Place, p: Prop },
+    Lit {
+        v: Value,
+    },
+    Local {
+        i: u16,
+    },
+    Var {
+        n: String,
+    },
+    Get {
+        at: Place,
+        p: Prop,
+    },
     /// The keyboard event's `keyCode`.
     Key,
     /// The event a listener handles, passed on to a function's event parameter.
     Event,
-    Un { op: UnOp, x: Box<Expr> },
-    Bin { op: BinOp, a: Box<Expr>, b: Box<Expr> },
+    Un {
+        op: UnOp,
+        x: Box<Expr>,
+    },
+    Bin {
+        op: BinOp,
+        a: Box<Expr>,
+        b: Box<Expr>,
+    },
     /// `a && b`, `a || b` (the operand's value, as ECMAScript gives it).
-    And { a: Box<Expr>, b: Box<Expr> },
-    Or { a: Box<Expr>, b: Box<Expr> },
-    Cond { c: Box<Expr>, a: Box<Expr>, b: Box<Expr> },
-    Math { f: MathFn, args: Vec<Expr> },
+    And {
+        a: Box<Expr>,
+        b: Box<Expr>,
+    },
+    Or {
+        a: Box<Expr>,
+        b: Box<Expr>,
+    },
+    Cond {
+        c: Box<Expr>,
+        a: Box<Expr>,
+        b: Box<Expr>,
+    },
+    Math {
+        f: MathFn,
+        args: Vec<Expr>,
+    },
     /// A call to a function of the timeline, by name.
-    Call { f: String, args: Vec<Expr> },
+    Call {
+        f: String,
+        args: Vec<Expr>,
+    },
     /// Whether two names are the same instance (`e.currentTarget == btn_a`); `ne` negates.
-    Same { a: Place, b: Place, ne: bool },
+    Same {
+        a: Place,
+        b: Place,
+        ne: bool,
+    },
     /// `to = v` or `to op= v`; its value is what was written.
-    Set { to: LValue, op: Option<BinOp>, v: Box<Expr> },
+    Set {
+        to: LValue,
+        op: Option<BinOp>,
+        v: Box<Expr>,
+    },
     /// `++` / `--` (`d` is +1 or -1); `post`: the value before.
-    Step { to: LValue, d: i8, post: bool },
+    Step {
+        to: LValue,
+        d: i8,
+        post: bool,
+    },
     /// `int(x)`, `Number(x)`, `String(x)`, `Boolean(x)`, `uint(x)`.
-    Cast { t: Ty, x: Box<Expr> },
+    Cast {
+        t: Ty,
+        x: Box<Expr>,
+    },
 }
 
 impl Expr {
@@ -708,8 +759,14 @@ pub struct Stmt {
 #[serde(tag = "s", rename_all = "snake_case")]
 pub enum S {
     /// An expression for its effect.
-    Do { x: Expr },
-    If { c: Expr, a: Vec<Stmt>, b: Vec<Stmt> },
+    Do {
+        x: Expr,
+    },
+    If {
+        c: Expr,
+        a: Vec<Stmt>,
+        b: Vec<Stmt>,
+    },
     /// `while (c)`, `for (; c; next)` (`first`: the condition is tested before the body) and
     /// `do … while (c)`.
     Loop {
@@ -720,12 +777,25 @@ pub enum S {
     },
     Break,
     Continue,
-    Return { v: Option<Expr> },
+    Return {
+        v: Option<Expr>,
+    },
     /// A timeline method on an instance; `args` are the frame and the scene, when it takes them.
-    Act { at: Place, m: Method, args: Vec<Expr> },
-    Trace { args: Vec<Expr> },
+    Act {
+        at: Place,
+        m: Method,
+        args: Vec<Expr>,
+    },
+    Trace {
+        args: Vec<Expr>,
+    },
     /// `addEventListener` (`add`) or `removeEventListener`.
-    Listen { at: Place, ev: ListenEvent, f: FuncRef, add: bool },
+    Listen {
+        at: Place,
+        ev: ListenEvent,
+        f: FuncRef,
+        add: bool,
+    },
 }
 
 /// A parameter.

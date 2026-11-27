@@ -34,7 +34,13 @@ fn path(s: &Session, symbol: u64) -> String {
 
 /// Instances of `symbol` on every timeline.
 fn instances(s: &Session, symbol: u64) -> usize {
-    s.doc.timelines().flat_map(|t| &t.layers).flat_map(|l| &l.keyframes).flat_map(|k| &k.elements).filter(|e| matches!(e.kind, ElementKind::Symbol { symbol: x, .. } if x.0 == symbol)).count()
+    s.doc
+        .timelines()
+        .flat_map(|t| &t.layers)
+        .flat_map(|l| &l.keyframes)
+        .flat_map(|k| &k.elements)
+        .filter(|e| matches!(e.kind, ElementKind::Symbol { symbol: x, .. } if x.0 == symbol))
+        .count()
 }
 
 #[test]
@@ -144,7 +150,10 @@ fn swap_symbol_keeps_everything_but_the_symbol() {
     let after = find(&s);
     assert_eq!((after.transform, after.color, &after.name), (before.transform, before.color, &before.name));
     match (&before.kind, &after.kind) {
-        (ElementKind::Symbol { symbol: a, loop_mode: la, filters: fa, blend: ba, .. }, ElementKind::Symbol { symbol: b, loop_mode: lb, filters: fb, blend: bb, .. }) => {
+        (
+            ElementKind::Symbol { symbol: a, loop_mode: la, filters: fa, blend: ba, .. },
+            ElementKind::Symbol { symbol: b, loop_mode: lb, filters: fb, blend: bb, .. },
+        ) => {
             assert_eq!((a.0, b.0), (ball, star));
             assert_eq!((la, fa, ba), (lb, fb, bb));
         }
@@ -251,7 +260,10 @@ fn the_listing_has_paths_kinds_and_uses() {
     let v = run(&mut s, "library.items", json!({}));
     assert_eq!(v["folders"], json!([{"folder": f, "name": "Characters", "parent": null, "path": "Characters"}]));
     let b = v["items"].as_array().unwrap().iter().find(|i| i["symbol"] == ball).unwrap();
-    assert_eq!((b["path"].as_str(), b["folder"].as_u64(), b["kind"].as_str(), b["unused"].as_bool()), (Some("Characters/Ball"), Some(f), Some("graphic"), Some(false)));
+    assert_eq!(
+        (b["path"].as_str(), b["folder"].as_u64(), b["kind"].as_str(), b["unused"].as_bool()),
+        (Some("Characters/Ball"), Some(f), Some("graphic"), Some(false))
+    );
     assert!(b["uses"].as_u64().unwrap() > 0);
     assert_eq!(v["unused"], 0);
 }
@@ -311,7 +323,12 @@ fn library_counts_stay_quick_on_a_large_document() {
     let t = std::time::Instant::now();
     let listed = run(&mut s, "library.items", json!({}));
     let listing = t.elapsed();
-    println!("library of {} items, {} folders: use counts {counted:?}, unused {reach:?} ({} unused), library.items {listing:?}", s.doc.library.len(), folders.len(), unused.len());
+    println!(
+        "library of {} items, {} folders: use counts {counted:?}, unused {reach:?} ({} unused), library.items {listing:?}",
+        s.doc.library.len(),
+        folders.len(),
+        unused.len()
+    );
     assert_eq!(listed["items"].as_array().map(Vec::len), Some(1000));
     assert_eq!(unused.len(), 999);
     assert!(uses.values().sum::<usize>() >= 1);

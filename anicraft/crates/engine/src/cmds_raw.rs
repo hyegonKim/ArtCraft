@@ -50,8 +50,24 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             select_rect,
         ),
-        c("raw.merge", "Merge Shapes", "", None, "{ids?: [..]} the raw shapes (default: the selection) merge again with the raw shapes they touch, in place", true, merge_cmd),
-        c("raw.hit", "Selection Tool Target", "", None, "{x, y, slop?, point_slop?} what a Selection-tool drag from (x, y) takes: a point, a segment to bend, a fill, or an object", false, hit),
+        c(
+            "raw.merge",
+            "Merge Shapes",
+            "",
+            None,
+            "{ids?: [..]} the raw shapes (default: the selection) merge again with the raw shapes they touch, in place",
+            true,
+            merge_cmd,
+        ),
+        c(
+            "raw.hit",
+            "Selection Tool Target",
+            "",
+            None,
+            "{x, y, slop?, point_slop?} what a Selection-tool drag from (x, y) takes: a point, a segment to bend, a fill, or an object",
+            false,
+            hit,
+        ),
     ]
 }
 
@@ -172,7 +188,11 @@ pub(crate) fn check_extent(path: &Path) -> Result<()> {
     if b.is_empty() {
         return Ok(());
     }
-    if !(b.min.is_finite() && b.max.is_finite()) || b.width() > MAX_EXTENT || b.height() > MAX_EXTENT || b.min.x.abs().max(b.min.y.abs()).max(b.max.x.abs()).max(b.max.y.abs()) > MAX_EXTENT {
+    if !(b.min.is_finite() && b.max.is_finite())
+        || b.width() > MAX_EXTENT
+        || b.height() > MAX_EXTENT
+        || b.min.x.abs().max(b.min.y.abs()).max(b.max.x.abs()).max(b.max.y.abs()) > MAX_EXTENT
+    {
         return Err(EngineError::Param("that would make the shape too large".into()));
     }
     Ok(())
@@ -194,13 +214,17 @@ fn bend_segment(s: &mut Session, p: &Value) -> Result<Value> {
         }
     };
     let els = s.visible_elements();
-    let el = els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
+    let el =
+        els.iter().find(|e| e.id == id).ok_or_else(|| EngineError::State(format!("element {} is not on the active layer at this frame", id.0)))?;
     let ElementKind::Shape(sh) = &el.kind else { return Err(EngineError::State("only shapes have segments to bend".into())) };
     let m = el.transform;
     let mut path = (*sh.path).clone();
     path.close_explicitly();
     let (cmd, t) = match opt_u64(p, "cmd")? {
-        Some(c) => (usize::try_from(c).unwrap_or(usize::MAX), opt_f32(p, "t")?.ok_or_else(|| EngineError::Param("param 't' is required with 'cmd'".into()))?.clamp(0.0, 1.0)),
+        Some(c) => (
+            usize::try_from(c).unwrap_or(usize::MAX),
+            opt_f32(p, "t")?.ok_or_else(|| EngineError::Param("param 't' is required with 'cmd'".into()))?.clamp(0.0, 1.0),
+        ),
         None => {
             let (cmd, t, dist) = path.nearest_segment(at, &m).ok_or_else(|| EngineError::State("the shape has no segments".into()))?;
             if dist > slop {
@@ -209,7 +233,9 @@ fn bend_segment(s: &mut Session, p: &Value) -> Result<Value> {
             (cmd, t)
         }
     };
-    let old = rawgeom::segment_cubic(&path, cmd).map(|c| rawgeom::transform(&c, &m)).ok_or_else(|| EngineError::Param(format!("no segment {cmd} on this shape")))?;
+    let old = rawgeom::segment_cubic(&path, cmd)
+        .map(|c| rawgeom::transform(&c, &m))
+        .ok_or_else(|| EngineError::Param(format!("no segment {cmd} on this shape")))?;
     let new = rawgeom::bend(&old, t, d).ok_or_else(|| EngineError::Param("cannot bend that segment".into()))?;
     let raw = mergeable(el).is_some();
     let changed = edit_edge(s, id, cmd, &old, &new, raw)?;
@@ -217,7 +243,9 @@ fn bend_segment(s: &mut Session, p: &Value) -> Result<Value> {
     if raw && merge_after {
         remerge_in_place(s, &changed)?;
     }
-    Ok(json!({"id": id.0, "cmd": cmd, "t": t, "x": point.x, "y": point.y, "changed": changed.iter().map(|e| e.0).collect::<Vec<_>>(), "merged": raw && merge_after}))
+    Ok(
+        json!({"id": id.0, "cmd": cmd, "t": t, "x": point.x, "y": point.y, "changed": changed.iter().map(|e| e.0).collect::<Vec<_>>(), "merged": raw && merge_after}),
+    )
 }
 
 /// Replaces segment `cmd` of shape `id` (stage space: `old`) with `new` (same ends). When `raw`,
@@ -283,7 +311,9 @@ pub(crate) fn follow_edge(s: &mut Session, only: Option<ElementId>, old: &Cubic,
         }
         let (Some(inv), ElementKind::Shape(x)) = (e.transform.inverse(), &e.kind) else { continue };
         let mut edited = (*x.path).clone();
-        if rawgeom::follow(&mut edited, &rawgeom::transform(old, &inv), &rawgeom::transform(new, &inv), SNAP / e.transform.mean_scale().max(1e-6)) == 0 {
+        if rawgeom::follow(&mut edited, &rawgeom::transform(old, &inv), &rawgeom::transform(new, &inv), SNAP / e.transform.mean_scale().max(1e-6))
+            == 0
+        {
             continue;
         }
         check_extent(&edited)?;
@@ -373,7 +403,12 @@ fn move_point(s: &mut Session, p: &Value) -> Result<Value> {
             activate_layer_at(s, from, slop);
             // The nearest corner or end of a raw shape, then everything that shares it.
             let els = s.visible_elements();
-            let at = els.iter().flat_map(|e| stage_anchors(e)).map(|(_, q)| q).filter(|q| q.distance(from) <= slop).min_by(|a, b| a.distance(from).total_cmp(&b.distance(from)));
+            let at = els
+                .iter()
+                .flat_map(|e| stage_anchors(e))
+                .map(|(_, q)| q)
+                .filter(|q| q.distance(from) <= slop)
+                .min_by(|a, b| a.distance(from).total_cmp(&b.distance(from)));
             let at = at.ok_or_else(|| EngineError::State("no corner or end of a raw shape there".into()))?;
             let mut points = shared_points(s, at)?;
             // Other selected anchors (the Subselection tool) move by as much.
@@ -453,7 +488,12 @@ struct Targets {
 
 /// The shapes' anchors and segments, leaving out the anchors `skip_point(id, cmd)` and the
 /// segments `skip_seg(id, cmd)` says move along.
-fn targets(els: &[Arc<Element>], skip_el: impl Fn(ElementId) -> bool, skip_point: impl Fn(ElementId, usize) -> bool, skip_seg: impl Fn(ElementId, usize) -> bool) -> Targets {
+fn targets(
+    els: &[Arc<Element>],
+    skip_el: impl Fn(ElementId) -> bool,
+    skip_point: impl Fn(ElementId, usize) -> bool,
+    skip_seg: impl Fn(ElementId, usize) -> bool,
+) -> Targets {
     let mut t = Targets::default();
     for e in els.iter().filter(|e| !skip_el(e.id)) {
         let ElementKind::Shape(sh) = &e.kind else { continue };
@@ -486,7 +526,10 @@ impl ObjectTargets for Targets {
     /// The nearest point on a segment within `radius` of `p`.
     fn nearest_line(&self, p: Vec2, radius: f32) -> Option<(Vec2, f32)> {
         let near = |c: &Cubic| {
-            let (lo, hi) = c.iter().fold((Vec2::new(f32::INFINITY, f32::INFINITY), Vec2::new(f32::NEG_INFINITY, f32::NEG_INFINITY)), |(lo, hi), q| (Vec2::new(lo.x.min(q.x), lo.y.min(q.y)), Vec2::new(hi.x.max(q.x), hi.y.max(q.y))));
+            let (lo, hi) =
+                c.iter().fold((Vec2::new(f32::INFINITY, f32::INFINITY), Vec2::new(f32::NEG_INFINITY, f32::NEG_INFINITY)), |(lo, hi), q| {
+                    (Vec2::new(lo.x.min(q.x), lo.y.min(q.y)), Vec2::new(hi.x.max(q.x), hi.y.max(q.y)))
+                });
             p.x >= lo.x - radius && p.x <= hi.x + radius && p.y >= lo.y - radius && p.y <= hi.y + radius
         };
         self.segs
@@ -544,7 +587,9 @@ pub(crate) fn snap_drawn(s: &Session, p: Vec2, radius: f32, moving: bool) -> Opt
         let mut path = (*item.path).clone();
         path.close_explicitly();
         t.points.extend(path.editable_anchors().into_iter().map(|(_, q)| item.transform.apply(q)));
-        t.segs.extend((0..path.cmds.len().min(MAX_TARGETS)).filter_map(|k| rawgeom::segment_cubic(&path, k)).map(|c| rawgeom::transform(&c, &item.transform)));
+        t.segs.extend(
+            (0..path.cmds.len().min(MAX_TARGETS)).filter_map(|k| rawgeom::segment_cubic(&path, k)).map(|c| rawgeom::transform(&c, &item.transform)),
+        );
     }
     resolve(s, p, radius, Some(&t))
 }
@@ -580,7 +625,8 @@ pub(crate) fn snap_selection(s: &Session, radius: f32, from: Option<Vec2>) -> Op
     }
     // What stays put on the layers the selection is on (ADR 0044).
     let t = s.style.snap_objects.then(|| {
-        let rest: Vec<Arc<Element>> = s.selected_layers().into_iter().flat_map(|l| s.elements_on(l).into_iter().filter(move |e| !s.selection.contains(l, e.id))).collect();
+        let rest: Vec<Arc<Element>> =
+            s.selected_layers().into_iter().flat_map(|l| s.elements_on(l).into_iter().filter(move |e| !s.selection.contains(l, e.id))).collect();
         targets(&rest, |_| false, |_, _| false, |_, _| false)
     });
     let t = t.as_ref().map(|t| t as &dyn ObjectTargets);
@@ -672,7 +718,8 @@ fn marquee_layer(s: &mut Session, r: &Rect, mut picked: Vec<ElementId>, partial:
         let existing = kf.elements.clone();
         let idx: Vec<usize> = existing.iter().enumerate().filter(|(_, e)| partial.contains(&e.id)).map(|(i, _)| i).collect();
         // Parts already selected (an earlier marquee, with Shift) stay selected, cut or not.
-        let parts: Vec<Part> = idx.iter().filter_map(|&i| existing.get(i)).map(|e| Part::Shape(e.as_ref(), s.selection.contains(here, e.id))).collect();
+        let parts: Vec<Part> =
+            idx.iter().filter_map(|&i| existing.get(i)).map(|e| Part::Shape(e.as_ref(), s.selection.contains(here, e.id))).collect();
         let cutter = Path::rect(r.min.x, r.min.y, r.width(), r.height());
         match merge::remerge_with(s, &parts, Some(&cutter)) {
             Some(rm) if !rm.inside.is_empty() => {
@@ -723,13 +770,23 @@ pub(crate) fn remerge_in_place(s: &mut Session, ids: &[ElementId]) -> Result<()>
     }
     let kf = s.editable_keyframe()?;
     let existing = kf.elements.clone();
-    let area = existing.iter().filter(|e| ids.contains(&e.id)).filter_map(|e| mergeable(e).map(|sh| reach(sh, &e.transform))).fold(Rect::EMPTY, |r, b| r.union(&b));
+    let area = existing
+        .iter()
+        .filter(|e| ids.contains(&e.id))
+        .filter_map(|e| mergeable(e).map(|sh| reach(sh, &e.transform)))
+        .fold(Rect::EMPTY, |r, b| r.union(&b));
     if area.is_empty() {
         return Ok(());
     }
-    let touching: Vec<usize> = existing.iter().enumerate().filter(|(_, e)| mergeable(e).is_some_and(|sh| !reach(sh, &e.transform).intersect(&area).is_empty())).map(|(i, _)| i).collect();
+    let touching: Vec<usize> = existing
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| mergeable(e).is_some_and(|sh| !reach(sh, &e.transform).intersect(&area).is_empty()))
+        .map(|(i, _)| i)
+        .collect();
     let here = s.layer;
-    let parts: Vec<Part> = touching.iter().filter_map(|&i| existing.get(i)).map(|e| Part::Shape(e.as_ref(), s.selection.contains(here, e.id))).collect();
+    let parts: Vec<Part> =
+        touching.iter().filter_map(|&i| existing.get(i)).map(|e| Part::Shape(e.as_ref(), s.selection.contains(here, e.id))).collect();
     // Too much to merge at once: the shapes stay as edited.
     let Some((out, picked)) = merge::remerge(s, &parts) else { return Ok(()) };
     let gone: Vec<ElementId> = touching.iter().filter_map(|&i| existing.get(i)).map(|e| e.id).collect();

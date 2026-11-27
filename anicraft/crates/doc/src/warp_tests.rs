@@ -92,7 +92,11 @@ fn deformation_is_as_rigid_as_possible() {
     };
     let mut w = Warp::new(Arc::new(Path::rect(0.0, 0.0, 200.0, 100.0)), 10);
     let turn = Affine::translate(100.0, 50.0).mul(&Affine::rotate(0.6)).mul(&Affine::translate(-100.0, -50.0));
-    w.pins = [(20.0, 20.0), (180.0, 30.0), (100.0, 90.0)].iter().enumerate().map(|(i, &(x, y))| Pin { id: PinId(i as u64), rest: Vec2::new(x, y), at: turn.apply(Vec2::new(x, y)) }).collect();
+    w.pins = [(20.0, 20.0), (180.0, 30.0), (100.0, 90.0)]
+        .iter()
+        .enumerate()
+        .map(|(i, &(x, y))| Pin { id: PinId(i as u64), rest: Vec2::new(x, y), at: turn.apply(Vec2::new(x, y)) })
+        .collect();
     assert!(distortion(&w) < 1e-3, "a turn is rigid: {}", distortion(&w));
     // A bend: one end of a strip turned down by 30°.
     w.pins = vec![pin(1, (10.0, 50.0), (10.0, 50.0)), pin(2, (100.0, 50.0), (100.0, 50.0)), pin(3, (190.0, 50.0), (178.0, 95.0))];
@@ -132,10 +136,12 @@ fn curves_split_and_stay_close_to_the_true_deformation() {
     assert!(bent.cmds.len() > blob().cmds.len());
     // Points of the bent outline lie near where the exact MLS deformation puts the drawn curve.
     let pins: Vec<(Vec2, Vec2)> = w.pins.iter().map(|p| (p.rest, p.at)).collect();
-    let truth: Vec<Vec2> = (0..400).map(|i| {
-        let a = i as f32 / 400.0 * std::f32::consts::TAU;
-        mls_rigid(&pins, Vec2::new(100.0 + 100.0 * a.cos(), 50.0 + 50.0 * a.sin()))
-    }).collect();
+    let truth: Vec<Vec2> = (0..400)
+        .map(|i| {
+            let a = i as f32 / 400.0 * std::f32::consts::TAU;
+            mls_rigid(&pins, Vec2::new(100.0 + 100.0 * a.cos(), 50.0 + 50.0 * a.sin()))
+        })
+        .collect();
     for p in anchors(&bent) {
         let d = truth.iter().map(|t| t.distance(p)).fold(f32::MAX, f32::min);
         assert!(d < 2.0, "{p:?} is {d} from the true curve");
@@ -164,7 +170,12 @@ fn deterministic_and_bounded() {
     let m = w.mesh().unwrap_or_else(unreachable_mesh);
     assert!(m.rest.len() <= ((MAX_RESOLUTION + 1) * (MAX_RESOLUTION + 1)) as usize);
     // Tiny, flat and enormous artwork never fails.
-    for p in [Path::line(Vec2::new(0.0, 0.0), Vec2::new(0.0, 0.0)), Path::line(Vec2::new(0.0, 5.0), Vec2::new(300.0, 5.0)), Path::rect(0.0, 0.0, 1e7, 1.0), Path::default()] {
+    for p in [
+        Path::line(Vec2::new(0.0, 0.0), Vec2::new(0.0, 0.0)),
+        Path::line(Vec2::new(0.0, 5.0), Vec2::new(300.0, 5.0)),
+        Path::rect(0.0, 0.0, 1e7, 1.0),
+        Path::default(),
+    ] {
         let mut w = Warp::new(Arc::new(p), 12);
         w.pins = vec![pin(1, (0.0, 5.0), (40.0, 9.0)), pin(2, (100.0, 5.0), (100.0, 5.0))];
         let out = w.outline();
@@ -186,7 +197,15 @@ fn warped_layer(at_end: (f32, f32), easing: Easing) -> (Layer, Warp) {
     let mut w = Warp::new(shape.path.clone(), 8);
     w.pins = vec![pin(1, (10.0, 50.0), (10.0, 50.0)), pin(2, (190.0, 50.0), (190.0, 50.0))];
     shape.set_warp(w.clone());
-    let el = |s: Shape| Arc::new(Element { id: ElementId(5), name: String::new(), transform: Affine::IDENTITY, color: Default::default(), kind: ElementKind::Shape(s) });
+    let el = |s: Shape| {
+        Arc::new(Element {
+            id: ElementId(5),
+            name: String::new(),
+            transform: Affine::IDENTITY,
+            color: Default::default(),
+            kind: ElementKind::Shape(s),
+        })
+    };
     let mut end = shape.clone();
     let mut w2 = w.clone();
     if let Some(p) = w2.pins.get_mut(1) {

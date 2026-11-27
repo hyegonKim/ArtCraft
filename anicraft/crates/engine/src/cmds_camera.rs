@@ -17,8 +17,24 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("camera.add", "Add Camera", "Insert/Timeline", None, "{} (a camera layer on top of the scene, at rest: it sees the stage as it is; nothing happens if there is one)", true, add as crate::RunFn),
-        c("camera.remove", "Remove Camera", "Modify/Timeline", None, "{} (removes the camera layer and its moves; asks first when the camera is animated)", true, remove),
+        c(
+            "camera.add",
+            "Add Camera",
+            "Insert/Timeline",
+            None,
+            "{} (a camera layer on top of the scene, at rest: it sees the stage as it is; nothing happens if there is one)",
+            true,
+            add as crate::RunFn,
+        ),
+        c(
+            "camera.remove",
+            "Remove Camera",
+            "Modify/Timeline",
+            None,
+            "{} (removes the camera layer and its moves; asks first when the camera is animated)",
+            true,
+            remove,
+        ),
         c(
             "camera.set",
             "Camera",
@@ -28,7 +44,15 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             set,
         ),
-        c("camera.info", "Camera Info", "", None, "{frame?} → the camera at the frame (x, y, zoom %, rotation °, tint) and its frame on the stage", false, info),
+        c(
+            "camera.info",
+            "Camera Info",
+            "",
+            None,
+            "{frame?} → the camera at the frame (x, y, zoom %, rotation °, tint) and its frame on the stage",
+            false,
+            info,
+        ),
         c(
             "layer.set_depth",
             "Layer Depth",
@@ -38,9 +62,33 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             set_depth,
         ),
-        c("layer.remove_depth_key", "Remove Depth Key", "", None, "{layer?, frame? (default: the playhead)} removes the layer's depth key at the frame; removing the last one leaves the depth it had there", true, remove_depth_key),
-        c("layer.set_attached", "Attach Layer to Camera", "", None, "{attached?: bool (default: toggles), layer?} an attached layer stays where it is on screen while the camera moves (titles, HUDs); its depth plays no part (ADR 0082)", true, set_attached),
-        c("layer.depths", "Layer Depths", "", None, "{frame?} → {camera: bool, layers: [{layer, name, depth, keyed, key_here, attached}]} the layers that can have a depth, nearest first (ties in timeline order), at the frame", false, depths),
+        c(
+            "layer.remove_depth_key",
+            "Remove Depth Key",
+            "",
+            None,
+            "{layer?, frame? (default: the playhead)} removes the layer's depth key at the frame; removing the last one leaves the depth it had there",
+            true,
+            remove_depth_key,
+        ),
+        c(
+            "layer.set_attached",
+            "Attach Layer to Camera",
+            "",
+            None,
+            "{attached?: bool (default: toggles), layer?} an attached layer stays where it is on screen while the camera moves (titles, HUDs); its depth plays no part (ADR 0082)",
+            true,
+            set_attached,
+        ),
+        c(
+            "layer.depths",
+            "Layer Depths",
+            "",
+            None,
+            "{frame?} → {camera: bool, layers: [{layer, name, depth, keyed, key_here, attached}]} the layers that can have a depth, nearest first (ties in timeline order), at the frame",
+            false,
+            depths,
+        ),
     ]
 }
 
@@ -110,11 +158,14 @@ pub(crate) fn camera_moves(l: &Layer) -> usize {
 pub(crate) fn keys_fit<'a>(kind: LayerKind, mut keys: impl Iterator<Item = &'a Keyframe>) -> Result<()> {
     let camera = kind == LayerKind::Camera;
     if keys.any(|k| k.elements.iter().any(|e| matches!(e.kind, ElementKind::Camera) != camera)) {
-        return Err(EngineError::State(if camera { "the camera layer holds only the camera; put artwork on another layer".into() } else { "camera keyframes belong on the camera layer".into() }));
+        return Err(EngineError::State(if camera {
+            "the camera layer holds only the camera; put artwork on another layer".into()
+        } else {
+            "camera keyframes belong on the camera layer".into()
+        }));
     }
     Ok(())
 }
-
 
 fn set(s: &mut Session, p: &Value) -> Result<Value> {
     let id = camera_layer(s).ok_or_else(no_camera)?;
@@ -212,7 +263,9 @@ fn info(s: &mut Session, p: &Value) -> Result<Value> {
 fn depth_layer<'a>(s: &'a mut Session, p: &Value) -> Result<&'a mut Layer> {
     // Depth belongs to a scene's own layers; artwork inside a symbol moves with its instance.
     if !s.editing.is_empty() {
-        return Err(EngineError::State("layer depth belongs to a scene's layers: close the symbol you are editing first (Edit › Edit Document)".into()));
+        return Err(EngineError::State(
+            "layer depth belongs to a scene's layers: close the symbol you are editing first (Edit › Edit Document)".into(),
+        ));
     }
     let lid = opt_u64(p, "layer")?.map(LayerId);
     let layer = s.layer_mut(lid)?;
@@ -228,7 +281,10 @@ fn has_depth_kind(kind: LayerKind) -> bool {
 }
 
 fn set_depth(s: &mut Session, p: &Value) -> Result<Value> {
-    let depth = f32_req(p, "depth")?;
+    let depth = match opt_f32(p, "depth")? {
+        Some(d) => d,
+        None => f32_req(p, "z_depth")?,
+    };
     if !(camera::MIN_DEPTH..=camera::MAX_DEPTH).contains(&depth) {
         return Err(EngineError::Param(format!("param 'depth' must be between {} and {}", camera::MIN_DEPTH, camera::MAX_DEPTH)));
     }
@@ -254,13 +310,23 @@ fn set_depth(s: &mut Session, p: &Value) -> Result<Value> {
         layer.depth_keys.clear();
         layer.depth = depth;
     }
-    Ok(json!({"layer": layer.id.0, "depth": depth, "keyed": keyed, "keys": layer.depth_keys.len()}))
+    Ok(json!({
+        "layer": layer.id.0,
+        "depth": depth,
+        "z_depth": depth,
+        "parallax_factor": camera::parallax(depth),
+        "keyed": keyed,
+        "keys": layer.depth_keys.len(),
+    }))
 }
 
 fn remove_depth_key(s: &mut Session, p: &Value) -> Result<Value> {
     let frame = opt_u32(p, "frame")?.unwrap_or(s.frame);
     let layer = depth_layer(s, p)?;
-    let i = layer.depth_keys.binary_search_by_key(&frame, |k| k.frame).map_err(|_| EngineError::State(format!("'{}' has no depth key on frame {}", layer.name, frame.saturating_add(1))))?;
+    let i = layer
+        .depth_keys
+        .binary_search_by_key(&frame, |k| k.frame)
+        .map_err(|_| EngineError::State(format!("'{}' has no depth key on frame {}", layer.name, frame.saturating_add(1))))?;
     let here = layer.depth_at(frame);
     layer.depth_keys.remove(i);
     if layer.depth_keys.is_empty() {
@@ -286,7 +352,17 @@ fn depths(s: &mut Session, p: &Value) -> Result<Value> {
         .iter()
         .map(|(_, l)| {
             let key_here = l.depth_keys.iter().any(|k| k.frame == frame);
-            json!({"layer": l.id.0, "name": l.name, "depth": l.depth_at(frame), "keyed": !l.depth_keys.is_empty(), "key_here": key_here, "attached": l.attached})
+            let d = l.depth_at(frame);
+            json!({
+                "layer": l.id.0,
+                "name": l.name,
+                "depth": d,
+                "z_depth": d,
+                "parallax_factor": camera::parallax(d),
+                "keyed": !l.depth_keys.is_empty(),
+                "key_here": key_here,
+                "attached": l.attached,
+            })
         })
         .collect();
     Ok(json!({"camera": tl.camera_layer().is_some(), "layers": layers}))

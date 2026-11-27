@@ -173,10 +173,12 @@ fn joining_two_tweens_of_one_object_keeps_every_frame() {
     s.set_frame(20);
     run(&mut s, "modify.rotate_cw", json!({}));
     let before: Vec<(f32, f32)> = (0..24).map(|f| pos(&mut s, f)).collect();
-    let turned: Vec<f32> = (0..24).map(|f| {
-        s.set_frame(f);
-        s.visible_elements().first().map_or(0.0, |e| e.transform.decompose().rotation)
-    }).collect();
+    let turned: Vec<f32> = (0..24)
+        .map(|f| {
+            s.set_frame(f);
+            s.visible_elements().first().map_or(0.0, |e| e.transform.decompose().rotation)
+        })
+        .collect();
     run(&mut s, "motion.join", json!({"frame": 3}));
     assert_eq!(spans(&s), vec![(0, 24, true)]);
     for f in 0..24u32 {

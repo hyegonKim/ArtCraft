@@ -14,7 +14,9 @@
 
 use crate::params::*;
 use crate::{CommandSpec, EngineError, Result, Selection, Session};
-use anicraft_doc::{BitmapId, Document, ElementId, ElementKind, FrameScript, LayerId, Paint, Rgba, SoundId, SourceScript, Symbol, SymbolId, Timeline};
+use anicraft_doc::{
+    BitmapId, Document, ElementId, ElementKind, FrameScript, LayerId, Paint, Rgba, SoundId, SourceScript, Symbol, SymbolId, Timeline,
+};
 use regex::{Regex, RegexBuilder};
 use serde_json::{Value, json};
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -142,7 +144,20 @@ pub enum Field {
 }
 
 impl Field {
-    pub const ALL: [Field; 12] = [Field::Text, Field::Label, Field::LayerName, Field::InstanceName, Field::Script, Field::Font, Field::Fill, Field::Stroke, Field::TextColor, Field::Instance, Field::Sound, Field::Bitmap];
+    pub const ALL: [Field; 12] = [
+        Field::Text,
+        Field::Label,
+        Field::LayerName,
+        Field::InstanceName,
+        Field::Script,
+        Field::Font,
+        Field::Fill,
+        Field::Stroke,
+        Field::TextColor,
+        Field::Instance,
+        Field::Sound,
+        Field::Bitmap,
+    ];
 
     pub fn key(self) -> &'static str {
         match self {
@@ -188,7 +203,10 @@ impl Default for Within {
 /// What a query matches.
 #[derive(Clone, Debug)]
 pub enum Needle {
-    Text { re: Regex, expand: bool },
+    Text {
+        re: Regex,
+        expand: bool,
+    },
     /// A family name, lower-cased and trimmed.
     Font(String),
     Color([u8; 3]),
@@ -229,11 +247,13 @@ pub fn text_needle(text: &str, o: TextOptions) -> Result<Needle> {
         .dfa_size_limit(REGEX_LIMIT)
         .nest_limit(64)
         .build()
-        .map_err(|e| EngineError::Param(match e {
+        .map_err(|e| {
+        EngineError::Param(match e {
             regex::Error::CompiledTooBig(_) => "that pattern is too large; make it simpler".to_string(),
             regex::Error::Syntax(s) => format!("that isn't a pattern: {}", s.lines().last().unwrap_or("").trim()),
             _ => "that isn't a pattern".to_string(),
-        }))?;
+        })
+    })?;
     Ok(Needle::Text { re, expand: o.regex })
 }
 
@@ -255,10 +275,15 @@ impl Query {
     /// The query in `p` (`find.search`'s params), checked against the document.
     pub fn from_params(s: &Session, p: &Value) -> Result<Query> {
         let kind = str_req(p, "kind")?;
-        let kind = Kind::from_key(kind).ok_or_else(|| EngineError::Param(format!("unknown kind '{kind}' (text, font, color, symbol, sound or bitmap)")))?;
+        let kind =
+            Kind::from_key(kind).ok_or_else(|| EngineError::Param(format!("unknown kind '{kind}' (text, font, color, symbol, sound or bitmap)")))?;
         let needle = match kind {
             Kind::Text => {
-                let o = TextOptions { match_case: opt_bool(p, "match_case")?.unwrap_or(false), whole_word: opt_bool(p, "whole_word")?.unwrap_or(false), regex: opt_bool(p, "regex")?.unwrap_or(false) };
+                let o = TextOptions {
+                    match_case: opt_bool(p, "match_case")?.unwrap_or(false),
+                    whole_word: opt_bool(p, "whole_word")?.unwrap_or(false),
+                    regex: opt_bool(p, "regex")?.unwrap_or(false),
+                };
                 text_needle(str_req(p, "text")?, o)?
             }
             Kind::Font => {
@@ -268,7 +293,9 @@ impl Query {
                 }
                 Needle::Font(f)
             }
-            Kind::Color => Needle::Color(rgb8(opt_color(p, "color")?.ok_or_else(|| EngineError::Param("param 'color' is required: #rrggbb".into()))?)),
+            Kind::Color => {
+                Needle::Color(rgb8(opt_color(p, "color")?.ok_or_else(|| EngineError::Param("param 'color' is required: #rrggbb".into()))?))
+            }
             Kind::Symbol => {
                 let id = SymbolId(opt_id(p, "symbol")?);
                 s.doc.symbol(id).ok_or_else(|| EngineError::State(format!("no symbol with id {}", id.0)))?;
@@ -288,7 +315,16 @@ impl Query {
         let within = match p.get("in") {
             None | Some(Value::Null) => Within::default(),
             Some(Value::Array(list)) => {
-                let mut w = Within { text: false, labels: false, layers: false, instances: false, scripts: false, fills: false, strokes: false, text_color: false };
+                let mut w = Within {
+                    text: false,
+                    labels: false,
+                    layers: false,
+                    instances: false,
+                    scripts: false,
+                    fills: false,
+                    strokes: false,
+                    text_color: false,
+                };
                 for v in list.iter().take(16) {
                     match (kind, v.as_str()) {
                         (Kind::Text, Some("text")) => w.text = true,
@@ -299,7 +335,9 @@ impl Query {
                         (Kind::Color, Some("fills")) => w.fills = true,
                         (Kind::Color, Some("strokes")) => w.strokes = true,
                         (Kind::Color, Some("text")) => w.text_color = true,
-                        (_, other) => return Err(EngineError::Param(format!("'in' can't hold {}", other.map_or_else(|| v.to_string(), |o| format!("'{o}'"))))),
+                        (_, other) => {
+                            return Err(EngineError::Param(format!("'in' can't hold {}", other.map_or_else(|| v.to_string(), |o| format!("'{o}'")))));
+                        }
                     }
                 }
                 w
@@ -377,7 +415,14 @@ impl Hit {
         };
         let field = opt_str(v, "field")?.and_then(Field::from_key).ok_or_else(bad)?;
         let layer = LayerId(opt_u64(v, "layer")?.ok_or_else(bad)?);
-        Ok(Target { at, layer, frame: opt_u32(v, "frame")?, element: opt_u64(v, "element")?.map(ElementId), field, start: opt_u64(v, "start")?.and_then(|n| usize::try_from(n).ok()).unwrap_or(0) })
+        Ok(Target {
+            at,
+            layer,
+            frame: opt_u32(v, "frame")?,
+            element: opt_u64(v, "element")?.map(ElementId),
+            field,
+            start: opt_u64(v, "start")?.and_then(|n| usize::try_from(n).ok()).unwrap_or(0),
+        })
     }
 }
 
@@ -394,7 +439,12 @@ struct Target {
 
 impl Target {
     fn is(&self, h: &Hit) -> bool {
-        self.at == h.at && self.layer == h.layer && self.frame == h.frame && self.element == h.element && self.field == h.field && (!matches!(h.field, Field::Text | Field::Label | Field::LayerName | Field::InstanceName | Field::Script) || self.start == h.start)
+        self.at == h.at
+            && self.layer == h.layer
+            && self.frame == h.frame
+            && self.element == h.element
+            && self.field == h.field
+            && (!matches!(h.field, Field::Text | Field::Label | Field::LayerName | Field::InstanceName | Field::Script) || self.start == h.start)
     }
 }
 
@@ -452,7 +502,9 @@ pub fn timelines(doc: &Document, scene: usize, scope: Scope) -> Vec<Where> {
             let mut used = Vec::new();
             used_symbols(doc.timeline(scene), |s| used.push(s));
             let inside = reachable(doc, used);
-            std::iter::once(Where::Scene(scene.min(doc.scenes.len().saturating_sub(1)))).chain(doc.library.iter().filter(|s| inside.contains(&s.id)).map(|s| Where::Symbol(s.id))).collect()
+            std::iter::once(Where::Scene(scene.min(doc.scenes.len().saturating_sub(1))))
+                .chain(doc.library.iter().filter(|s| inside.contains(&s.id)).map(|s| Where::Symbol(s.id)))
+                .collect()
         }
     }
 }
@@ -520,7 +572,17 @@ impl Found<'_> {
             if self.full() {
                 return;
             }
-            self.hits.push(Hit { at: place.0, layer: place.1, frame: place.2, element: place.3, field, start: ca, end: cb, found: clip(text.get(a..b).unwrap_or(""), 4 * CONTEXT), context: context(text, a, b) });
+            self.hits.push(Hit {
+                at: place.0,
+                layer: place.1,
+                frame: place.2,
+                element: place.3,
+                field,
+                start: ca,
+                end: cb,
+                found: clip(text.get(a..b).unwrap_or(""), 4 * CONTEXT),
+                context: context(text, a, b),
+            });
         }
     }
 
@@ -536,7 +598,17 @@ impl Found<'_> {
             }
             for k in &l.keyframes {
                 let f = Some(k.start);
-                let place = |e: Option<ElementId>| Hit { at, layer: l.id, frame: f, element: e, field: Field::Text, start: 0, end: 0, found: String::new(), context: String::new() };
+                let place = |e: Option<ElementId>| Hit {
+                    at,
+                    layer: l.id,
+                    frame: f,
+                    element: e,
+                    field: Field::Text,
+                    start: 0,
+                    end: 0,
+                    found: String::new(),
+                    context: String::new(),
+                };
                 match &q.needle {
                     Needle::Text { .. } => {
                         if w.labels {
@@ -570,7 +642,9 @@ impl Found<'_> {
                                 self.text(place, Field::Text, &t.text);
                             }
                         }
-                        (Needle::Font(f), ElementKind::Text(t)) if font_key(&t.font) == *f => self.push(Hit { field: Field::Font, found: t.font.clone(), ..hit_at(place) }),
+                        (Needle::Font(f), ElementKind::Text(t)) if font_key(&t.font) == *f => {
+                            self.push(Hit { field: Field::Font, found: t.font.clone(), ..hit_at(place) })
+                        }
                         (Needle::Color(c), ElementKind::Shape(sh)) => {
                             if w.fills && sh.fill.as_ref().is_some_and(|p| paint_has(p, *c)) {
                                 self.push(Hit { field: Field::Fill, found: hex(*c), ..hit_at(place) });
@@ -579,7 +653,9 @@ impl Found<'_> {
                                 self.push(Hit { field: Field::Stroke, found: hex(*c), ..hit_at(place) });
                             }
                         }
-                        (Needle::Color(c), ElementKind::Text(t)) if w.text_color && rgb8(t.color) == *c => self.push(Hit { field: Field::TextColor, found: hex(*c), ..hit_at(place) }),
+                        (Needle::Color(c), ElementKind::Text(t)) if w.text_color && rgb8(t.color) == *c => {
+                            self.push(Hit { field: Field::TextColor, found: hex(*c), ..hit_at(place) })
+                        }
                         (Needle::Symbol(id), ElementKind::Symbol { symbol, .. }) if symbol == id => {
                             let found = self.doc.symbol(*id).map(|x| x.name.clone()).unwrap_or_default();
                             self.push(Hit { field: Field::Instance, found, ..hit_at(place) });
@@ -597,7 +673,17 @@ impl Found<'_> {
 }
 
 fn hit_at(place: (Where, LayerId, Option<u32>, Option<ElementId>)) -> Hit {
-    Hit { at: place.0, layer: place.1, frame: place.2, element: place.3, field: Field::Text, start: 0, end: 0, found: String::new(), context: String::new() }
+    Hit {
+        at: place.0,
+        layer: place.1,
+        frame: place.2,
+        element: place.3,
+        field: Field::Text,
+        start: 0,
+        end: 0,
+        found: String::new(),
+        context: String::new(),
+    }
 }
 
 fn hex(c: [u8; 3]) -> String {
@@ -663,7 +749,11 @@ impl With {
                 With::Text(t.to_string())
             }
             Kind::Font => {
-                let f = v.as_str().map(str::trim).filter(|f| !f.is_empty() && f.chars().count() <= 256).ok_or_else(|| EngineError::Param("'with' must be a font family".into()))?;
+                let f = v
+                    .as_str()
+                    .map(str::trim)
+                    .filter(|f| !f.is_empty() && f.chars().count() <= 256)
+                    .ok_or_else(|| EngineError::Param("'with' must be a font family".into()))?;
                 With::Font(f.to_string())
             }
             Kind::Color => With::Color(opt_color(p, "with")?.ok_or_else(|| EngineError::Param("'with' must be a colour: #rrggbb".into()))?),
@@ -777,7 +867,8 @@ fn replace_cmd(s: &mut Session, p: &Value) -> Result<Value> {
         With::Symbol(to) => reachable(&s.doc, [to]),
         _ => HashSet::new(),
     };
-    let sizes: HashMap<BitmapId, (String, f32, f32)> = s.doc.bitmaps.iter().map(|b| (b.id, (b.name.clone(), b.width as f32, b.height as f32))).collect();
+    let sizes: HashMap<BitmapId, (String, f32, f32)> =
+        s.doc.bitmaps.iter().map(|b| (b.id, (b.name.clone(), b.width as f32, b.height as f32))).collect();
     let mut tally = Tally::default();
     let mut by_tl: Vec<(Where, Vec<Hit>)> = Vec::new();
     for h in hits {
@@ -806,7 +897,15 @@ fn replace_cmd(s: &mut Session, p: &Value) -> Result<Value> {
 
 /// Replaces `hits` (all on `tl`) in place, un-sharing only the layers, keyframes and elements
 /// they are on. `only`: the one text match to replace (Replace), by its first character.
-fn apply(tl: &mut Timeline, hits: &[Hit], q: &Query, with: &With, only: Option<usize>, sizes: &HashMap<BitmapId, (String, f32, f32)>, t: &mut Tally) -> Result<()> {
+fn apply(
+    tl: &mut Timeline,
+    hits: &[Hit],
+    q: &Query,
+    with: &With,
+    only: Option<usize>,
+    sizes: &HashMap<BitmapId, (String, f32, f32)>,
+    t: &mut Tally,
+) -> Result<()> {
     let layers: HashSet<LayerId> = hits.iter().map(|h| h.layer).collect();
     let (re, expand) = match &q.needle {
         Needle::Text { re, expand } => (Some(re), *expand),
@@ -876,7 +975,15 @@ fn apply(tl: &mut Timeline, hits: &[Hit], q: &Query, with: &With, only: Option<u
 }
 
 /// Replaces field `f` of element `e`.
-fn apply_element(e: &mut anicraft_doc::Element, f: Field, q: &Query, with: &With, new_text: &dyn Fn(&str) -> Option<String>, sizes: &HashMap<BitmapId, (String, f32, f32)>, t: &mut Tally) -> Result<()> {
+fn apply_element(
+    e: &mut anicraft_doc::Element,
+    f: Field,
+    q: &Query,
+    with: &With,
+    new_text: &dyn Fn(&str) -> Option<String>,
+    sizes: &HashMap<BitmapId, (String, f32, f32)>,
+    t: &mut Tally,
+) -> Result<()> {
     match (f, &mut e.kind, with) {
         (Field::InstanceName, _, _) => {
             if let Some(n) = new_text(&e.name) {
@@ -969,7 +1076,11 @@ impl Step {
 
 /// Where a scene or symbol timeline holding layer `id` is.
 pub fn locate_layer(doc: &Document, id: LayerId) -> Option<Where> {
-    doc.scenes.iter().position(|s| s.timeline.layer(id).is_some()).map(Where::Scene).or_else(|| doc.library.iter().find(|s| s.timeline.layer(id).is_some()).map(|s| Where::Symbol(s.id)))
+    doc.scenes
+        .iter()
+        .position(|s| s.timeline.layer(id).is_some())
+        .map(Where::Scene)
+        .or_else(|| doc.library.iter().find(|s| s.timeline.layer(id).is_some()).map(|s| Where::Symbol(s.id)))
 }
 
 /// The shortest chain of instances from scene `scene`'s timeline to symbol `target` (each opened
@@ -1011,7 +1122,13 @@ fn steps_of(p: &Value) -> Result<Option<Vec<Step>>> {
     }
     let bad = || EngineError::Param("each step of 'path' is {layer, frame, element}".into());
     list.iter()
-        .map(|v| Ok(Step { layer: LayerId(opt_u64(v, "layer")?.ok_or_else(bad)?), frame: opt_u32(v, "frame")?.ok_or_else(bad)?, element: ElementId(opt_u64(v, "element")?.ok_or_else(bad)?) }))
+        .map(|v| {
+            Ok(Step {
+                layer: LayerId(opt_u64(v, "layer")?.ok_or_else(bad)?),
+                frame: opt_u32(v, "frame")?.ok_or_else(bad)?,
+                element: ElementId(opt_u64(v, "element")?.ok_or_else(bad)?),
+            })
+        })
         .collect::<Result<Vec<_>>>()
         .map(Some)
 }
@@ -1038,7 +1155,9 @@ fn goto_cmd(s: &mut Session, p: &Value) -> Result<Value> {
     let frame = opt_u32(p, "frame")?;
     let element = opt_u64(p, "element")?.map(ElementId);
     let scene = match opt_u64(p, "scene")? {
-        Some(i) => Some(usize::try_from(i).ok().filter(|i| *i < s.doc.scenes.len()).ok_or_else(|| EngineError::State(format!("there is no scene {i}")))?),
+        Some(i) => {
+            Some(usize::try_from(i).ok().filter(|i| *i < s.doc.scenes.len()).ok_or_else(|| EngineError::State(format!("there is no scene {i}")))?)
+        }
         None => None,
     };
     let symbol = opt_u64(p, "symbol")?.map(SymbolId);

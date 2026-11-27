@@ -202,7 +202,9 @@ pub fn variable_polygons(lines: &[Polyline], hw: f32, profile: &WidthProfile, to
         if !closed {
             // Caps: half a disc across the end's cross-section (from its left edge to its
             // right), so a one-sided width stays on its side.
-            let cap = |at: Vec2, nrm: Vec2, (l, r): (f32, f32), sweep: f32| fan(at + nrm * ((l - r) * 0.5), angle(nrm), sweep, (l + r) * 0.5, (l + r) * 0.5);
+            let cap = |at: Vec2, nrm: Vec2, (l, r): (f32, f32), sweep: f32| {
+                fan(at + nrm * ((l - r) * 0.5), angle(nrm), sweep, (l + r) * 0.5, (l + r) * 0.5)
+            };
             // (Turning the left normal by −90° on screen points backwards.)
             out.extend(cap(p(0), left_normal(dir(0)), w(0), -std::f32::consts::PI));
             out.extend(cap(p(n - 1), left_normal(dir(n - 2)), w(n - 1), std::f32::consts::PI));
@@ -225,7 +227,8 @@ pub struct Outline<'a> {
 
 impl Outline<'_> {
     /// Round caps and joins, solid: the stroke every shape had before styles.
-    pub const ROUND: Outline<'static> = Outline { cap: Cap::Round, join: Join::Round, miter_limit: anicraft_doc::stroke_style::DEFAULT_MITER_LIMIT, dash: None };
+    pub const ROUND: Outline<'static> =
+        Outline { cap: Cap::Round, join: Join::Round, miter_limit: anicraft_doc::stroke_style::DEFAULT_MITER_LIMIT, dash: None };
 
     fn is_round(&self) -> bool {
         self.cap == Cap::Round && self.join == Join::Round && self.dash.is_none()
@@ -244,7 +247,14 @@ const MAX_DASHES: usize = 200_000;
 /// along the flattened lines in output units and restart at every subpath, as in SVG; each
 /// dash is an open piece with the stroke's caps, its widths those of its place on the whole
 /// subpath. A zero-length dash is a dot: its caps alone.
-pub fn styled_polygons(lines: &[Polyline], hw: f32, outline: &Outline, profile: Option<&WidthProfile>, to_local: Option<&Affine>, flip: bool) -> Vec<Vec<Vec2>> {
+pub fn styled_polygons(
+    lines: &[Polyline],
+    hw: f32,
+    outline: &Outline,
+    profile: Option<&WidthProfile>,
+    to_local: Option<&Affine>,
+    flip: bool,
+) -> Vec<Vec<Vec2>> {
     if outline.is_round() {
         return match profile {
             Some(pr) => variable_polygons(lines, hw, pr, to_local, flip),
@@ -653,10 +663,23 @@ pub fn outline_variable_strokes(dl: &DisplayList) -> std::borrow::Cow<'_, Displa
         }
         let outline = stroke_outline(&it.path, &it.transform, st, crate::TOLERANCE);
         if !outline.is_empty() {
-            items.push(DisplayItem { path: std::sync::Arc::new(outline), transform: Affine::IDENTITY, fill: Some(anicraft_doc::Paint::Solid(st.color)), stroke: None, fill_rule: anicraft_geom::FillRule::NonZero, image: None, ..it.clone() });
+            items.push(DisplayItem {
+                path: std::sync::Arc::new(outline),
+                transform: Affine::IDENTITY,
+                fill: Some(anicraft_doc::Paint::Solid(st.color)),
+                stroke: None,
+                fill_rule: anicraft_geom::FillRule::NonZero,
+                image: None,
+                ..it.clone()
+            });
         }
     }
-    std::borrow::Cow::Owned(DisplayList { clip_modes: dl.clip_modes.clone(), items, clip_parents: dl.clip_parents.clone(), groups: dl.groups.clone() })
+    std::borrow::Cow::Owned(DisplayList {
+        clip_modes: dl.clip_modes.clone(),
+        items,
+        clip_parents: dl.clip_parents.clone(),
+        groups: dl.groups.clone(),
+    })
 }
 
 #[cfg(test)]
@@ -710,8 +733,16 @@ mod tests {
         assert!(flipped.iter().flatten().all(|q| q.y > -1e-3));
         // Degenerate input is safe.
         assert!(variable_polygons(&[], 1.0, &one, None, false).is_empty());
-        assert!(variable_polygons(&[Polyline { points: vec![Vec2::ZERO; 3], closed: true }], 1.0, &one, None, false).iter().flatten().all(|q| q.is_finite()));
-        assert!(variable_polygons(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(f32::INFINITY, 0.0)], closed: false }], f32::NAN, &one, None, false).is_empty());
+        assert!(
+            variable_polygons(&[Polyline { points: vec![Vec2::ZERO; 3], closed: true }], 1.0, &one, None, false)
+                .iter()
+                .flatten()
+                .all(|q| q.is_finite())
+        );
+        assert!(
+            variable_polygons(&[Polyline { points: vec![Vec2::ZERO, Vec2::new(f32::INFINITY, 0.0)], closed: false }], f32::NAN, &one, None, false)
+                .is_empty()
+        );
     }
 
     #[test]

@@ -164,4 +164,3 @@ fn hint_commands_survive_hostile_params_on_a_shape_tween() {
         let _ = anicraft_render::render_frame(&s.doc, f, 0.1);
     }
 }
-

@@ -292,7 +292,10 @@ fn an_end_near_a_line_goes_onto_it_and_the_line_stays_straight() {
     // The long line is cut where the other meets it (a T), and every piece stays on y = 0.
     let flat: Vec<&Piece> = m.strokes.iter().filter(|s| ends(&s.path).iter().all(|p| p.y.abs() < 1e-4)).collect();
     assert_eq!(flat.len(), 2, "{m:?}");
-    assert!(m.strokes.iter().any(|s| ends(&s.path).iter().any(|p| p.distance(Vec2::new(40.0, 0.0)) < 1e-4) && ends(&s.path).iter().any(|p| p.y > 59.0)), "the end moved onto the line: {m:?}");
+    assert!(
+        m.strokes.iter().any(|s| ends(&s.path).iter().any(|p| p.distance(Vec2::new(40.0, 0.0)) < 1e-4) && ends(&s.path).iter().any(|p| p.y > 59.0)),
+        "the end moved onto the line: {m:?}"
+    );
 }
 
 #[test]
@@ -309,7 +312,9 @@ fn a_cutter_splits_fills_and_strokes_and_the_parts_add_up() {
     assert!(m.fills.iter().all(|p| p.style == 1));
     // Nothing of the marquee comes out: only the rectangle's own sides, cut where it crosses
     // them (the top and the right side are cut there).
-    let len = |p: &Path| p.flatten(&crate::Affine::IDENTITY, 0.01).iter().map(|pl| pl.points.windows(2).map(|w| w[0].distance(w[1])).sum::<f32>()).sum::<f32>();
+    let len = |p: &Path| {
+        p.flatten(&crate::Affine::IDENTITY, 0.01).iter().map(|pl| pl.points.windows(2).map(|w| w[0].distance(w[1])).sum::<f32>()).sum::<f32>()
+    };
     let total: f32 = m.strokes.iter().map(|s| len(&s.path)).sum();
     assert!(near(total, 360.0, 0.05), "{total}");
     let inner: f32 = m.strokes.iter().filter(|s| s.inside).map(|s| len(&s.path)).sum();

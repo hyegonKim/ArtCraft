@@ -402,7 +402,9 @@ pub fn parse_svg(src: &str) -> Vec<Path> {
             "path" => attr(tag, "d").and_then(|d| parse_path_data(d).ok()),
             "circle" => Some(Path::ellipse(num(tag, "cx"), num(tag, "cy"), num(tag, "r"), num(tag, "r"))),
             "ellipse" => Some(Path::ellipse(num(tag, "cx"), num(tag, "cy"), num(tag, "rx"), num(tag, "ry"))),
-            "rect" => Some(Path::rounded_rect(num(tag, "x"), num(tag, "y"), num(tag, "width"), num(tag, "height"), num(tag, "rx").max(num(tag, "ry")))),
+            "rect" => {
+                Some(Path::rounded_rect(num(tag, "x"), num(tag, "y"), num(tag, "width"), num(tag, "height"), num(tag, "rx").max(num(tag, "ry"))))
+            }
             "line" => Some(Path::line(Vec2::new(num(tag, "x1"), num(tag, "y1")), Vec2::new(num(tag, "x2"), num(tag, "y2")))),
             "polyline" => points(tag, false),
             "polygon" => points(tag, true),
@@ -430,11 +432,7 @@ pub fn paint(p: &egui::Painter, rect: Rect, icon: Icon, color: Color32) {
     let s = rect.width().min(rect.height()) / 24.0;
     let snap = |v: f32| (v * ppp).round() / ppp;
     let (ox, oy) = (snap(rect.center().x - 12.0 * s), snap(rect.center().y - 12.0 * s));
-    let m = if flip {
-        Affine::translate(ox + 24.0 * s, oy).mul(&Affine::scale(-s, s))
-    } else {
-        Affine::translate(ox, oy).mul(&Affine::scale(s, s))
-    };
+    let m = if flip { Affine::translate(ox + 24.0 * s, oy).mul(&Affine::scale(-s, s)) } else { Affine::translate(ox, oy).mul(&Affine::scale(s, s)) };
     // Lucide draws 2-unit strokes on its 24 grid; a touch lighter reads better at UI sizes.
     let w = ((1.75 * s * ppp).round().max(1.0)) / ppp;
     let stroke = Stroke::new(w, color);

@@ -49,7 +49,11 @@ fn templates_resolve_inside_the_documents_folder() {
 #[test]
 fn settings_round_trip_through_the_file_and_older_files_get_defaults() {
     let (mut s, dir) = saved("roundtrip");
-    let v = run(&mut s, "publish.settings_set", json!({"format": "gif", "enabled": true, "output": "web/{name}.gif", "scale": 0.5, "loop": false, "from": 2, "to": 9}));
+    let v = run(
+        &mut s,
+        "publish.settings_set",
+        json!({"format": "gif", "enabled": true, "output": "web/{name}.gif", "scale": 0.5, "loop": false, "from": 2, "to": 9}),
+    );
     let gif = v["formats"].as_array().unwrap().iter().find(|f| f["format"] == "gif").unwrap();
     assert_eq!(gif["path"], json!(dir.join("web").join("walk.gif").display().to_string()));
     run(&mut s, "publish.settings_set", json!({"format": "html", "title": "Walk cycle", "sound": false}));
@@ -123,9 +127,16 @@ fn the_plan_runs_each_exporter_with_its_options() {
     assert_eq!(order, [PublishFormat::Html, PublishFormat::Gif, PublishFormat::SpriteSheet, PublishFormat::Svg], "in Publish's order");
     let gif = &steps[1];
     assert_eq!(gif.command, "file.export_gif");
-    assert_eq!((gif.params["scale"].as_f64(), gif.params["loop"].as_bool(), gif.params["from"].as_u64(), gif.params["to"].as_u64(), gif.frames), (Some(0.25), Some(false), Some(1), Some(4), 4));
+    assert_eq!(
+        (gif.params["scale"].as_f64(), gif.params["loop"].as_bool(), gif.params["from"].as_u64(), gif.params["to"].as_u64(), gif.frames),
+        (Some(0.25), Some(false), Some(1), Some(4), 4)
+    );
     assert_eq!(gif.params["path"], json!(Path::new("art").join("walk.gif").display().to_string()));
-    assert_eq!(steps[2].outputs, vec![Path::new("art").join("walk_sheet.png"), Path::new("art").join("walk_sheet.json")], "the sheet and its frame map");
+    assert_eq!(
+        steps[2].outputs,
+        vec![Path::new("art").join("walk_sheet.png"), Path::new("art").join("walk_sheet.json")],
+        "the sheet and its frame map"
+    );
     assert_eq!(steps[2].params["columns"], 2);
     assert_eq!((steps[3].scene, steps[3].params["frame"].as_u64()), (0, Some(5)));
     // Only some formats, when asked.
@@ -163,7 +174,10 @@ fn publish_writes_every_format_and_reports_once() {
     }
     assert_eq!(status("audio"), "skipped", "the demo has no sounds");
     assert_eq!(status("video"), Value::Null, "off formats don't run");
-    assert_eq!((v["published"].as_u64(), v["skipped"].as_u64(), v["failed"].as_u64(), v["cancelled"].as_bool()), (Some(7), Some(1), Some(0), Some(false)));
+    assert_eq!(
+        (v["published"].as_u64(), v["skipped"].as_u64(), v["failed"].as_u64(), v["cancelled"].as_bool()),
+        (Some(7), Some(1), Some(0), Some(false))
+    );
     let report = v["report"].as_str().unwrap();
     assert!(report.contains("Audio skipped: the movie has no sounds."), "{report}");
     // The files are there, made with each format's options.
@@ -211,7 +225,11 @@ fn one_failing_format_doesnt_stop_the_others() {
 #[test]
 fn cancel_stops_cleanly() {
     let (mut s, dir) = saved("cancel");
-    for p in [json!({"format": "gif", "enabled": true, "scale": 0.1}), json!({"format": "svg", "enabled": true}), json!({"format": "png_sequence", "enabled": true, "scale": 0.1})] {
+    for p in [
+        json!({"format": "gif", "enabled": true, "scale": 0.1}),
+        json!({"format": "svg", "enabled": true}),
+        json!({"format": "png_sequence", "enabled": true, "scale": 0.1}),
+    ] {
         run(&mut s, "publish.settings_set", p);
     }
     // Cancelled after the first format: the rest never run.
@@ -236,7 +254,10 @@ fn cancel_stops_cleanly() {
     assert!(!gif.exists());
     let seq = dir.join("seq");
     assert!(matches!(s.execute("file.export_png_sequence", &json!({"dir": seq.display().to_string(), "scale": 0.1})), Err(EngineError::Cancelled)));
-    assert!(matches!(s.execute("file.export_sprite_sheet", &json!({"path": dir.join("s.png").display().to_string(), "scale": 0.1})), Err(EngineError::Cancelled)));
+    assert!(matches!(
+        s.execute("file.export_sprite_sheet", &json!({"path": dir.join("s.png").display().to_string(), "scale": 0.1})),
+        Err(EngineError::Cancelled)
+    ));
     assert!(!dir.join("s.png").exists());
     // Progress counts frames made.
     let watch = Arc::new(Control::default());
@@ -267,7 +288,11 @@ fn in_a_browser_every_file_comes_back_and_several_make_one_zip() {
         vfs::use_memory();
         // Untitled: the browser has no folders, so it publishes as "Untitled".
         let mut s = Session::new(sample::demo());
-        for p in [json!({"format": "gif", "enabled": true, "scale": 0.1, "to": 2}), json!({"format": "video", "enabled": true}), json!({"format": "svg", "enabled": true, "output": "img/{name}.svg"})] {
+        for p in [
+            json!({"format": "gif", "enabled": true, "scale": 0.1, "to": 2}),
+            json!({"format": "video", "enabled": true}),
+            json!({"format": "svg", "enabled": true, "output": "img/{name}.svg"}),
+        ] {
             run(&mut s, "publish.settings_set", p);
         }
         let v = run(&mut s, "file.publish", json!({}));
@@ -296,7 +321,6 @@ fn in_a_browser_every_file_comes_back_and_several_make_one_zip() {
     .join()
     .unwrap();
 }
-
 
 #[test]
 fn plugins_may_read_but_not_change_or_run_publishing() {

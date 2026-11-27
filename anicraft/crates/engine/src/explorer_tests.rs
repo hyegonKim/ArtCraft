@@ -68,8 +68,21 @@ fn instances_open_into_their_symbols_layers_however_deep() {
     assert_eq!(s.editing.iter().map(|l| l.symbol().unwrap_or(SymbolId(0))).collect::<Vec<_>>(), [outer, inner], "{v}");
     assert_eq!(s.selection.id_list(), [deep.go.element.unwrap().0]);
     // Under the Library's Outer: its own layers, then Inner inside it.
-    let defs: Vec<(usize, String)> = t.rows.iter().skip_while(|r| r.kind != NodeKind::Definitions).map(|r| (r.depth, r.name.clone())).take(8).collect();
-    assert_eq!(defs, [(0, String::new()), (1, "Outer".into()), (2, "Outer art".into()), (3, String::new()), (4, "Inner".into()), (5, "Inner art".into()), (6, String::new()), (7, "Hello inside".into())]);
+    let defs: Vec<(usize, String)> =
+        t.rows.iter().skip_while(|r| r.kind != NodeKind::Definitions).map(|r| (r.depth, r.name.clone())).take(8).collect();
+    assert_eq!(
+        defs,
+        [
+            (0, String::new()),
+            (1, "Outer".into()),
+            (2, "Outer art".into()),
+            (3, String::new()),
+            (4, "Inner".into()),
+            (5, "Inner art".into()),
+            (6, String::new()),
+            (7, "Hello inside".into())
+        ]
+    );
     // Keys are unique, so open rows can be remembered.
     let mut keys: Vec<&str> = t.rows.iter().map(|r| r.key.as_str()).collect();
     keys.sort_unstable();
@@ -95,7 +108,10 @@ fn show_filters_hide_kinds_and_frames_off_lists_items_straight_under_the_scene()
     assert!(!no_symbols.rows.iter().any(|r| r.name == "Hello inside"));
     let flat = tree(&s.doc, 0, &Options { show: Show { frames: false, ..Show::default() }, definitions: false, scope: Scope::Scene, ..all() });
     let names: Vec<(usize, &str)> = flat.rows.iter().map(|r| (r.depth, r.name.as_str())).collect();
-    assert_eq!(names, [(0, "Scene 1"), (1, "stop(); // say hello"), (1, "Hello world"), (1, "Outer"), (2, "Inner"), (3, "Hello inside"), (1, "hello hello again")]);
+    assert_eq!(
+        names,
+        [(0, "Scene 1"), (1, "stop(); // say hello"), (1, "Hello world"), (1, "Outer"), (2, "Inner"), (3, "Hello inside"), (1, "hello hello again")]
+    );
     let no_scripts = tree(&s.doc, 0, &Options { show: Show { scripts: false, ..Show::default() }, ..all() });
     assert!(no_scripts.rows.iter().all(|r| r.kind != NodeKind::Script && r.name != "Actions" || !r.children));
 }
@@ -163,7 +179,12 @@ fn the_command_pages_rows_with_where_each_goes() {
     let r = &v["rows"][1];
     assert_eq!((r["kind"].as_str(), r["depth"].as_u64(), r["name"].as_str()), (Some("script"), Some(3), Some("stop(); // say hello")));
     assert_eq!(r["go"]["frame"], 0);
-    let v = s.execute("explorer.tree", &json!({"all": true, "show": {"text": false, "scripts": false, "media": false, "frames": false}, "definitions": false})).unwrap();
+    let v = s
+        .execute(
+            "explorer.tree",
+            &json!({"all": true, "show": {"text": false, "scripts": false, "media": false, "frames": false}, "definitions": false}),
+        )
+        .unwrap();
     let kinds: Vec<&str> = v["rows"].as_array().unwrap().iter().map(|r| r["kind"].as_str().unwrap()).collect();
     assert_eq!(kinds, ["scene", "instance", "instance", "scene"]);
     assert_eq!(v["rows"][1]["type"], "movie_clip");
@@ -176,11 +197,13 @@ fn a_large_movie_makes_its_tree_quickly() {
     // 100 layers × 120 keyframes, each with a text and an instance of a symbol of 3 layers.
     let mut b = Build::new();
     let sym = b.symbol("Prop", SymbolKind::MovieClip);
-    let inner: Vec<_> = (0..3).map(|i| {
-        let r = b.rect(Paint::Solid(Rgba::BLACK), None);
-        let t = b.text("label", Rgba::BLACK);
-        b.layer(&format!("p{i}"), vec![(0, 1, "", vec![r, t])])
-    }).collect();
+    let inner: Vec<_> = (0..3)
+        .map(|i| {
+            let r = b.rect(Paint::Solid(Rgba::BLACK), None);
+            let t = b.text("label", Rgba::BLACK);
+            b.layer(&format!("p{i}"), vec![(0, 1, "", vec![r, t])])
+        })
+        .collect();
     b.fill(sym, inner);
     let mut layers = Vec::new();
     for li in 0..100 {
@@ -198,7 +221,12 @@ fn a_large_movie_makes_its_tree_quickly() {
     let t0 = std::time::Instant::now();
     let found = tree(&doc, 0, &Options { filter: "t 99 119".into(), ..Options::default() });
     let filtered = t0.elapsed();
-    println!("Movie Explorer on 24,000 elements: everything open {every:?} ({} rows), top rows {closed:?} ({} rows), filtered {filtered:?} ({} rows)", open.rows.len(), top.rows.len(), found.rows.len());
+    println!(
+        "Movie Explorer on 24,000 elements: everything open {every:?} ({} rows), top rows {closed:?} ({} rows), filtered {filtered:?} ({} rows)",
+        open.rows.len(),
+        top.rows.len(),
+        found.rows.len()
+    );
     assert!(open.rows.len() > 100_000 && !open.truncated);
     assert_eq!(found.rows.iter().filter(|r| r.kind == NodeKind::Text).count(), 1);
     assert!(every.as_secs_f64() < 3.0 && closed.as_secs_f64() < 0.5);

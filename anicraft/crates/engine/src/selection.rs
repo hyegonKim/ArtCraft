@@ -192,7 +192,9 @@ impl Session {
     pub fn selectable(&self, layer: LayerId) -> bool {
         let tl = self.timeline();
         let Some(i) = tl.layers.iter().position(|l| l.id == layer) else { return false };
-        tl.layers.get(i).is_some_and(|l| l.visible && !l.locked && l.kind != LayerKind::Folder) && !tl.locked_by_folder(layer) && !tl.hidden_by_folder(i)
+        tl.layers.get(i).is_some_and(|l| l.visible && !l.locked && l.kind != LayerKind::Folder)
+            && !tl.locked_by_folder(layer)
+            && !tl.hidden_by_folder(i)
     }
 
     /// Whether a marquee or Select All gathers artwork from `layer`: a selectable layer with

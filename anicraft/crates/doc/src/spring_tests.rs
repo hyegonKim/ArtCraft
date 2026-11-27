@@ -2,7 +2,10 @@
 
 use super::*;
 use crate::armature::{Bone, BoneId, Limits, Spring};
-use crate::{BlendMode, ColorEffect, Document, Element, ElementKind, Keyframe, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Symbol, SymbolId, SymbolKind, Timeline, Tween, evaluate};
+use crate::{
+    BlendMode, ColorEffect, Document, Element, ElementKind, Keyframe, LayerId, LayerKind, LoopMode, Paint, Rgba, Shape, Symbol, SymbolId, SymbolKind,
+    Timeline, Tween, evaluate,
+};
 use anicraft_geom::Path;
 use std::sync::Arc;
 
@@ -14,7 +17,14 @@ const B2: BoneId = BoneId(21);
 const SEG: SymbolId = SymbolId(1);
 
 fn instance(id: ElementId, x: f32, y: f32) -> Arc<Element> {
-    let kind = ElementKind::Symbol { symbol: SEG, loop_mode: LoopMode::Loop, first_frame: 0, blend: BlendMode::Normal, filters: Vec::new(), events: Vec::new() };
+    let kind = ElementKind::Symbol {
+        symbol: SEG,
+        loop_mode: LoopMode::Loop,
+        first_frame: 0,
+        blend: BlendMode::Normal,
+        filters: Vec::new(),
+        events: Vec::new(),
+    };
     Arc::new(Element { id, name: String::new(), transform: Affine::translate(x, y), color: ColorEffect::default(), kind })
 }
 
@@ -58,7 +68,12 @@ fn a_spring_swings_the_tail_behind_the_motion_and_back() {
     let swing: Vec<f32> = (10..60).map(|f| sprung_pose(&l, f, 24.0).unwrap().angle(B1)).collect();
     assert!(swing.iter().any(|a| *a > 0.05), "overshoots: {swing:?}");
     let late = sprung_pose(&l, 110, 24.0).unwrap();
-    assert!(late.angle(B1).abs() < 0.01 && late.angle(B2).abs() < 0.01, "settling: {}° {}°", late.angle(B1).to_degrees(), late.angle(B2).to_degrees());
+    assert!(
+        late.angle(B1).abs() < 0.01 && late.angle(B2).abs() < 0.01,
+        "settling: {}° {}°",
+        late.angle(B1).to_degrees(),
+        late.angle(B2).to_degrees()
+    );
     // The keyed pose is untouched: springs are evaluated, never stored.
     assert_eq!(crate::armature::pose_at(&l, 5).unwrap().angle(B1), 0.0);
 }
@@ -68,7 +83,10 @@ fn the_spring_settles_to_the_keyed_pose_exactly() {
     let l = tail(Some(BOUNCY));
     // A window's length after the body stopped, the shown pose is the keyed one bit for bit.
     let after = 10 + (24.0 * SPRING_SECONDS) as u32 + 3;
-    assert_eq!(bits(&sprung_pose(&l, after, 24.0).unwrap()), bits(&crate::armature::pose_at(&l, after).unwrap().allowed(l.armature.as_deref().unwrap())));
+    assert_eq!(
+        bits(&sprung_pose(&l, after, 24.0).unwrap()),
+        bits(&crate::armature::pose_at(&l, after).unwrap().allowed(l.armature.as_deref().unwrap()))
+    );
     // Before anything moves nothing swings.
     assert_eq!(sprung_pose(&l, 0, 24.0).unwrap().angle(B1), 0.0);
 }
@@ -162,9 +180,23 @@ fn every_export_sees_the_spring() {
     let mut d = Document::default();
     let mut seg = Layer::new(LayerId(2), "seg");
     let mut k = Keyframe::new(0, 1);
-    k.elements.push(Arc::new(Element { id: ElementId(3), name: String::new(), transform: Affine::IDENTITY, color: ColorEffect::default(), kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))) }));
+    k.elements.push(Arc::new(Element {
+        id: ElementId(3),
+        name: String::new(),
+        transform: Affine::IDENTITY,
+        color: ColorEffect::default(),
+        kind: ElementKind::Shape(Shape::filled(Path::rect(0.0, -5.0, 100.0, 10.0), Paint::Solid(Rgba::BLACK))),
+    }));
     seg.keyframes = vec![Arc::new(k)];
-    d.library.push(Arc::new(Symbol { id: SEG, name: "Seg".into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(seg)] } }));
+    d.library.push(Arc::new(Symbol {
+        id: SEG,
+        name: "Seg".into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(seg)] },
+    }));
     d.timeline_mut(0).layers = vec![Arc::new(tail(Some(BOUNCY)))];
     d.sanitize();
     let hand = |d: &Document, f: u32| evaluate(d, f).items.iter().find(|i| i.element == HAND).map(|i| i.transform.translation()).unwrap();
@@ -177,7 +209,10 @@ fn every_export_sees_the_spring() {
     assert!(json.contains("\"spring\""));
     let back: Document = serde_json::from_str(&json).unwrap();
     assert_eq!(back, d);
-    assert!(!serde_json::to_string(&still.timeline(0).layers[0].keyframes[0]).unwrap().contains("\"x\""), "poses without slides are written as before");
+    assert!(
+        !serde_json::to_string(&still.timeline(0).layers[0].keyframes[0]).unwrap().contains("\"x\""),
+        "poses without slides are written as before"
+    );
 }
 /// The cost of one frame with springs: the whole window is followed again for every frame.
 #[test]

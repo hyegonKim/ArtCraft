@@ -104,11 +104,7 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                 let page_idx = app.ui.book_page.saturating_sub(usize::from(book.include_cover));
                 if let Some(page) = book.pages.get(page_idx) {
                     ui.separator();
-                    ui.label(
-                        egui::RichText::new(crate::i18n::tr_format!("Page {}", page_idx + 1))
-                            .font(t.semibold(13.0))
-                            .color(t.text),
-                    );
+                    ui.label(egui::RichText::new(crate::i18n::tr_format!("Page {}", page_idx + 1)).font(t.semibold(13.0)).color(t.text));
                     ui.add_space(4.0);
                     ui.label(egui::RichText::new(crate::i18n::tr("Page Layout")).color(t.text_dim).size(11.5));
                     let lay_btn = dropdown(ui, "bookPageLayout", crate::i18n::tr(page.layout.label()), t.font(12.0), t.text_label);
@@ -121,9 +117,7 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                         }
                     });
                     ui.add_space(4.0);
-                    if !app.session.selected().is_empty()
-                        && ui.button(crate::i18n::tr("Use Selected Photos")).clicked()
-                    {
+                    if !app.session.selected().is_empty() && ui.button(crate::i18n::tr("Use Selected Photos")).clicked() {
                         let ids: Vec<u64> = app.session.selected().iter().map(|p| p.0).collect();
                         let _ = app.run("book.setPage", json!({"index": page_idx, "photos": ids}));
                     }
@@ -199,22 +193,10 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
             fg,
         );
         if !book.subtitle.is_empty() {
-            p.text(
-                pos2(page_rect.center().x, page_rect.top() + page_rect.height() * 0.82),
-                Align2::CENTER_CENTER,
-                &book.subtitle,
-                t.font(13.0),
-                fg,
-            );
+            p.text(pos2(page_rect.center().x, page_rect.top() + page_rect.height() * 0.82), Align2::CENTER_CENTER, &book.subtitle, t.font(13.0), fg);
         }
         if !book.author.is_empty() {
-            p.text(
-                pos2(page_rect.center().x, page_rect.top() + page_rect.height() * 0.90),
-                Align2::CENTER_CENTER,
-                &book.author,
-                t.font(11.5),
-                fg,
-            );
+            p.text(pos2(page_rect.center().x, page_rect.top() + page_rect.height() * 0.90), Align2::CENTER_CENTER, &book.author, t.font(11.5), fg);
         }
     } else {
         let page_idx = app.ui.book_page.saturating_sub(usize::from(book.include_cover));
@@ -228,22 +210,10 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                 }
             }
             if !page.caption.is_empty() {
-                p.text(
-                    pos2(page_rect.center().x, page_rect.bottom() - 18.0),
-                    Align2::CENTER_CENTER,
-                    &page.caption,
-                    t.font(11.5),
-                    fg,
-                );
+                p.text(pos2(page_rect.center().x, page_rect.bottom() - 18.0), Align2::CENTER_CENTER, &page.caption, t.font(11.5), fg);
             }
             if book.page_numbers {
-                p.text(
-                    pos2(page_rect.center().x, page_rect.bottom() - 6.0),
-                    Align2::CENTER_BOTTOM,
-                    format!("{}", page_idx + 1),
-                    t.font(10.0),
-                    fg,
-                );
+                p.text(pos2(page_rect.center().x, page_rect.bottom() - 6.0), Align2::CENTER_BOTTOM, format!("{}", page_idx + 1), t.font(10.0), fg);
             }
         }
     }

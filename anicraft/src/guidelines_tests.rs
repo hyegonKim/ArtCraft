@@ -113,7 +113,8 @@ fn palette_failures(name: &str, t: &crate::theme::Tokens) -> Vec<String> {
     need("on_fill on accent", t.on_fill, t.accent, 4.5);
     need("on_fill on danger", t.on_fill, t.danger, 4.5);
     // Marks on timeline blocks and the playhead's number; the blocks against the grid.
-    for (b, bg) in [("span", t.span), ("tween", t.tween), ("tween_shape", t.tween_shape), ("tween_motion", t.tween_motion), ("playhead", t.playhead)] {
+    for (b, bg) in [("span", t.span), ("tween", t.tween), ("tween_shape", t.tween_shape), ("tween_motion", t.tween_motion), ("playhead", t.playhead)]
+    {
         need(&format!("ink on {b}"), t.ink, bg, 4.5);
         need(&format!("{b} on panel"), bg, t.panel, 3.0);
     }
@@ -174,7 +175,10 @@ fn palette_meets_contrast_and_target_minimums() {
         assert_eq!(t.dark, lum(t.text) > lum(t.panel), "{name}: `dark` says which way text goes");
     }
     let lum = |c: egui::Color32| contrast(c, egui::Color32::BLACK);
-    assert!(lum(LIGHT.field) >= lum(LIGHT.panel_alt) && lum(LIGHT.panel_alt) > lum(LIGHT.panel) && lum(LIGHT.panel) > lum(LIGHT.chrome), "light surfaces step down from fields to the frame");
+    assert!(
+        lum(LIGHT.field) >= lum(LIGHT.panel_alt) && lum(LIGHT.panel_alt) > lum(LIGHT.panel) && lum(LIGHT.panel) > lum(LIGHT.chrome),
+        "light surfaces step down from fields to the frame"
+    );
     const { assert!(LIGHT.control_hairline && !GRAPHITE.control_hairline, "light controls carry a hairline") };
     // Every palette the preferences offer is checked, once each.
     assert!(Palette::ALL.iter().all(|(p, _, _)| matches!(p, Palette::Graphite | Palette::HighContrast | Palette::Light)));

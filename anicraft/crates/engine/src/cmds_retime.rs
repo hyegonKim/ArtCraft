@@ -14,10 +14,42 @@ use std::sync::Arc;
 pub fn specs() -> Vec<CommandSpec> {
     let c = |id, label, menu, shortcut, params, mutates, run| CommandSpec { id, label, menu, shortcut, params, mutates, run };
     vec![
-        c("motion.move_keys", "Move Property Keyframes", "", None, "{keys: [{property, frame}, ..] (frames as motion.info lists them), by (frames; negative = earlier), layer?, frame? (in the span; default: the first key's)}: values and eases travel with their keys; no key moves outside the span or onto or past a key of its property that isn't moving (the move stops there); a pinned path point's X and Y keys move together → {by, keys}", true, move_keys as crate::RunFn),
-        c("timeline.resize_span", "Span Length", "", None, "{frames (the new length), layer?, frame?, scale_keys?: false (keep a motion tween's keys where they are; default: they stretch in proportion, as dragging the span's end in Animate)}: later frames move with the end, as with F5 / Shift+F5 → {start, frames, scaled}", true, resize_span),
-        c("motion.split", "Split Motion", "Modify/Timeline", None, "{layer?, frame?}: the motion tween becomes two at the frame, each moving as before → {first, second}", true, split),
-        c("motion.join", "Join Motion", "Modify/Timeline", None, "{layer?, frame?, to? (the last frame of the spans to join; default: the span after the one at the frame)}: adjacent motion tweens of one object become one, keeping every frame as it was → {start, frames, joined}", true, join),
+        c(
+            "motion.move_keys",
+            "Move Property Keyframes",
+            "",
+            None,
+            "{keys: [{property, frame}, ..] (frames as motion.info lists them), by (frames; negative = earlier), layer?, frame? (in the span; default: the first key's)}: values and eases travel with their keys; no key moves outside the span or onto or past a key of its property that isn't moving (the move stops there); a pinned path point's X and Y keys move together → {by, keys}",
+            true,
+            move_keys as crate::RunFn,
+        ),
+        c(
+            "timeline.resize_span",
+            "Span Length",
+            "",
+            None,
+            "{frames (the new length), layer?, frame?, scale_keys?: false (keep a motion tween's keys where they are; default: they stretch in proportion, as dragging the span's end in Animate)}: later frames move with the end, as with F5 / Shift+F5 → {start, frames, scaled}",
+            true,
+            resize_span,
+        ),
+        c(
+            "motion.split",
+            "Split Motion",
+            "Modify/Timeline",
+            None,
+            "{layer?, frame?}: the motion tween becomes two at the frame, each moving as before → {first, second}",
+            true,
+            split,
+        ),
+        c(
+            "motion.join",
+            "Join Motion",
+            "Modify/Timeline",
+            None,
+            "{layer?, frame?, to? (the last frame of the spans to join; default: the span after the one at the frame)}: adjacent motion tweens of one object become one, keeping every frame as it was → {start, frames, joined}",
+            true,
+            join,
+        ),
     ]
 }
 
@@ -25,7 +57,8 @@ pub fn specs() -> Vec<CommandSpec> {
 const MAX_MOVED: usize = 100_000;
 
 fn keys_param(p: &Value) -> Result<Vec<(Property, u32)>> {
-    let list = p.get("keys").and_then(Value::as_array).ok_or_else(|| EngineError::Param("param 'keys' is required: a list of {property, frame}".into()))?;
+    let list =
+        p.get("keys").and_then(Value::as_array).ok_or_else(|| EngineError::Param("param 'keys' is required: a list of {property, frame}".into()))?;
     if list.is_empty() {
         return Err(EngineError::Param("param 'keys' lists no key".into()));
     }
@@ -85,7 +118,8 @@ fn resize_span(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(EngineError::State("a folder holds layers, not frames; pick a layer inside it".into()));
     }
     let i = layer.keyframe_index_at(frame).ok_or_else(|| EngineError::State(format!("frame {} is empty on this layer", frame + 1)))?;
-    let (start, old, end) = layer.keyframes.get(i).map(|k| (k.start, k.duration, k.end())).ok_or_else(|| EngineError::State("keyframe vanished".into()))?;
+    let (start, old, end) =
+        layer.keyframes.get(i).map(|k| (k.start, k.duration, k.end())).ok_or_else(|| EngineError::State("keyframe vanished".into()))?;
     let grow = i64::from(frames) - i64::from(old);
     if grow > 0 && i64::from(layer.end_frame()) + grow > i64::from(MAX_FRAME) + 1 {
         return Err(EngineError::State("the timeline is at its maximum length".into()));
@@ -133,7 +167,12 @@ fn join(s: &mut Session, p: &Value) -> Result<Value> {
     let to = opt_u32(p, "to")?;
     let layer = s.layer_mut(lid)?;
     let i = layer.keyframe_index_at(frame).ok_or_else(|| EngineError::State(format!("frame {} is empty on this layer", frame + 1)))?;
-    let (start, end) = layer.keyframes.get(i).filter(|k| k.motion.is_some()).map(|k| (k.start, k.end())).ok_or_else(|| EngineError::State(format!("frame {} is not in a motion tween", frame + 1)))?;
+    let (start, end) = layer
+        .keyframes
+        .get(i)
+        .filter(|k| k.motion.is_some())
+        .map(|k| (k.start, k.end()))
+        .ok_or_else(|| EngineError::State(format!("frame {} is not in a motion tween", frame + 1)))?;
     let to = to.unwrap_or(end);
     if to < end {
         return Err(EngineError::State("there is only one motion tween in those frames: Join Motion joins it with the ones after it".into()));
@@ -176,11 +215,16 @@ fn join_pair(a: &Keyframe, b: &Keyframe) -> Result<Keyframe> {
     if ta.kind != tb.kind {
         return Err(EngineError::State(format!("the tween at frame {shown} animates another object: Join Motion joins the tweens of one object")));
     }
-    let others = |k: &Keyframe, t: usize| -> Vec<Element> { k.elements.iter().enumerate().filter(|(j, _)| *j != t).map(|(_, e)| (**e).clone()).collect() };
+    let others =
+        |k: &Keyframe, t: usize| -> Vec<Element> { k.elements.iter().enumerate().filter(|(j, _)| *j != t).map(|(_, e)| (**e).clone()).collect() };
     if others(a, ia) != others(b, ib) {
-        return Err(EngineError::State(format!("the span at frame {shown} holds other artwork than the tween before it: Join Motion joins spans that differ only in the tweened object")));
+        return Err(EngineError::State(format!(
+            "the span at frame {shown} holds other artwork than the tween before it: Join Motion joins spans that differ only in the tweened object"
+        )));
     }
-    let m = ma.join(ta, a.duration, mb, tb).ok_or_else(|| EngineError::State("Join Motion can't join tweens with motion paths yet (unless one was split from the other): remove a path first".into()))?;
+    let m = ma.join(ta, a.duration, mb, tb).ok_or_else(|| {
+        EngineError::State("Join Motion can't join tweens with motion paths yet (unless one was split from the other): remove a path first".into())
+    })?;
     let mut k = a.clone();
     k.duration = a.duration.saturating_add(b.duration);
     k.motion = Some(m);

@@ -7,7 +7,10 @@
 //! slice by slice, so the deadline is checked while a module computes.
 
 use serde_json::{Map, Value};
-use wasmi::{Caller, Config, EnforcedLimits, Engine, Extern, ExternType, Instance, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder, TypedFunc, TypedResumableCall, Val, WasmParams, WasmResults};
+use wasmi::{
+    Caller, Config, EnforcedLimits, Engine, Extern, ExternType, Instance, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder, TypedFunc,
+    TypedResumableCall, Val, WasmParams, WasmResults,
+};
 
 use crate::manifest::{Kind, MAX_MANIFEST_BYTES, Manifest};
 use crate::{Error, Host, Result};
@@ -241,7 +244,11 @@ fn host_call(caller: Caller<'_, Ctx>, ptr: i32, len: i32) -> std::result::Result
         return Err(wasmi::Error::new(format!("request of {l} bytes is over the {} byte limit", caller.data().max_request)));
     }
     let memory = caller_memory(&caller)?;
-    let bytes = memory.data(&caller).get(p..p.saturating_add(l)).ok_or_else(|| wasmi::Error::new("anicraft.call: the request points outside memory"))?.to_vec();
+    let bytes = memory
+        .data(&caller)
+        .get(p..p.saturating_add(l))
+        .ok_or_else(|| wasmi::Error::new("anicraft.call: the request points outside memory"))?
+        .to_vec();
     caller.data_mut().pending = Some(bytes);
     Err(wasmi::Error::host(HostCall))
 }
@@ -282,7 +289,9 @@ impl Plugin {
                 )));
             };
             let ok = match imp.ty() {
-                ExternType::Func(f) => f.params().len() == *np && f.results().len() == *nr && f.params().iter().chain(f.results()).all(|t| *t == wasmi::ValType::I32),
+                ExternType::Func(f) => {
+                    f.params().len() == *np && f.results().len() == *nr && f.params().iter().chain(f.results()).all(|t| *t == wasmi::ValType::I32)
+                }
                 _ => false,
             };
             if !ok {
@@ -340,7 +349,13 @@ impl Plugin {
                 if v.abs() > MAX_EASE_VALUE {
                     return Err(bad(format!("gave {v:.3}, outside −{MAX_EASE_VALUE}..{MAX_EASE_VALUE}")));
                 }
-                let end = if k == 0 { Some(0.0) } else if k == EASE_SAMPLES - 1 { Some(1.0) } else { None };
+                let end = if k == 0 {
+                    Some(0.0)
+                } else if k == EASE_SAMPLES - 1 {
+                    Some(1.0)
+                } else {
+                    None
+                };
                 if let Some(e) = end
                     && (v - e).abs() > EASE_END_TOLERANCE
                 {
@@ -381,7 +396,8 @@ impl Plugin {
     }
 
     fn instantiate(&self, fuel: u64) -> Result<Live> {
-        let limits = StoreLimitsBuilder::new().memory_size(self.limits.max_memory_bytes).memories(1).tables(4).table_elements(100_000).instances(1).build();
+        let limits =
+            StoreLimitsBuilder::new().memory_size(self.limits.max_memory_bytes).memories(1).tables(4).table_elements(100_000).instances(1).build();
         let ctx = Ctx { limits, max_request: self.limits.max_request_bytes, pending: None, response: Vec::new() };
         let mut store = Store::new(&self.engine, ctx);
         store.limiter(|c| &mut c.limits);
@@ -401,7 +417,16 @@ impl Plugin {
     /// Calls `f` with at most `fuel` instructions, in slices, checking the deadline between
     /// them and answering host calls through `host` (`None`: host calls are an error).
     #[allow(clippy::too_many_arguments)]
-    fn call<P: WasmParams, R: WasmResults>(&self, live: &mut Live, f: &TypedFunc<P, R>, params: P, fuel: u64, deadline: &Deadline, host: &mut Option<(&mut dyn Host, &mut RunReport)>, limits: &Limits) -> Result<R> {
+    fn call<P: WasmParams, R: WasmResults>(
+        &self,
+        live: &mut Live,
+        f: &TypedFunc<P, R>,
+        params: P,
+        fuel: u64,
+        deadline: &Deadline,
+        host: &mut Option<(&mut dyn Host, &mut RunReport)>,
+        limits: &Limits,
+    ) -> Result<R> {
         let mut left = fuel;
         let give = left.min(FUEL_SLICE);
         left -= give;
@@ -419,7 +444,7 @@ impl Plugin {
                     }
                     deadline.check()?;
                     cancelled(host)?;
-                    let request =live.store.data_mut().pending.take().unwrap_or_default();
+                    let request = live.store.data_mut().pending.take().unwrap_or_default();
                     let response = match host {
                         Some((h, report)) => self.answer(&mut **h, report, &request, limits)?,
                         None => return Err(Error::Abi("host calls are allowed only while the plug-in runs (not while loading)".into())),
@@ -481,7 +506,11 @@ impl Plugin {
             Err(e) => envelope(false, &Value::String(e.clone())),
         };
         if bytes.len() > limits.max_response_bytes {
-            let msg = format!("the response is {} bytes, over the {} byte limit; ask for less (e.g. without paths)", bytes.len(), limits.max_response_bytes);
+            let msg = format!(
+                "the response is {} bytes, over the {} byte limit; ask for less (e.g. without paths)",
+                bytes.len(),
+                limits.max_response_bytes
+            );
             return Ok(envelope(false, &Value::String(msg)));
         }
         Ok(bytes)
@@ -511,7 +540,11 @@ impl Plugin {
             return Err(Error::Failed("ac_alloc returned 0 (out of memory)".into()));
         }
         let (p, l) = (ptr as usize, text.len());
-        live.memory.data_mut(&mut live.store).get_mut(p..p.saturating_add(l)).ok_or_else(|| Error::Abi("ac_alloc returned a block outside memory".into()))?.copy_from_slice(&text);
+        live.memory
+            .data_mut(&mut live.store)
+            .get_mut(p..p.saturating_add(l))
+            .ok_or_else(|| Error::Abi("ac_alloc returned a block outside memory".into()))?
+            .copy_from_slice(&text);
         live.used = 0;
         let rc = {
             let mut h: Option<(&mut dyn Host, &mut RunReport)> = Some((host, &mut report));
@@ -551,7 +584,11 @@ impl Plugin {
             return Err(Error::Failed("ac_alloc returned 0 (out of memory)".into()));
         }
         let (p, l) = (ptr as usize, text.len());
-        live.memory.data_mut(&mut live.store).get_mut(p..p.saturating_add(l)).ok_or_else(|| Error::Abi("ac_alloc returned a block outside memory".into()))?.copy_from_slice(&text);
+        live.memory
+            .data_mut(&mut live.store)
+            .get_mut(p..p.saturating_add(l))
+            .ok_or_else(|| Error::Abi("ac_alloc returned a block outside memory".into()))?
+            .copy_from_slice(&text);
         live.used = 0;
         let packed = {
             let mut h: Option<(&mut dyn Host, &mut RunReport)> = Some((host, &mut report));
@@ -565,7 +602,11 @@ impl Plugin {
         }
         let (ptr, len) = ((packed as u64 & 0xffff_ffff) as u32, ((packed as u64) >> 32) as u32);
         if len as usize > limits.max_output_bytes {
-            return Err(Error::Limit(format!("output size: it returned {} MiB and an export may be at most {} MiB", (len as usize) >> 20, limits.max_output_bytes >> 20)));
+            return Err(Error::Limit(format!(
+                "output size: it returned {} MiB and an export may be at most {} MiB",
+                (len as usize) >> 20,
+                limits.max_output_bytes >> 20
+            )));
         }
         let bytes = live.bytes(ptr, len, "the exported file")?.to_vec();
         Ok((bytes, report))

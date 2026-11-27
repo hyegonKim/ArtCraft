@@ -114,7 +114,10 @@ fn add_point(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let (_, q) = best.ok_or_else(|| EngineError::State("no line or fill edge of a merged drawing there".into()))?;
     let kf = s.editable_keyframe()?;
-    if near(kf, q).iter().any(|(_, _, subs)| subs.iter().flat_map(|sb| &sb.segs).any(|g| g.c[0].distance(q) <= 2.0 * SNAP || g.c[3].distance(q) <= 2.0 * SNAP)) {
+    if near(kf, q)
+        .iter()
+        .any(|(_, _, subs)| subs.iter().flat_map(|sb| &sb.segs).any(|g| g.c[0].distance(q) <= 2.0 * SNAP || g.c[3].distance(q) <= 2.0 * SNAP))
+    {
         return Err(EngineError::State("there is a point there already".into()));
     }
     let mut changed = Vec::new();
@@ -194,7 +197,11 @@ fn delete_points(s: &mut Session, p: &Value) -> Result<Value> {
         deleted += usize::from(any);
     }
     if deleted == 0 {
-        return Err(EngineError::State(if kept > 0 { "a point where three or more lines meet can't be deleted; delete a line there instead".into() } else { "no point of a merged drawing there".into() }));
+        return Err(EngineError::State(if kept > 0 {
+            "a point where three or more lines meet can't be deleted; delete a line there instead".into()
+        } else {
+            "no point of a merged drawing there".into()
+        }));
     }
     let here = s.layer;
     s.selection.retain(|l, id| l != here || !removed.contains(&id));

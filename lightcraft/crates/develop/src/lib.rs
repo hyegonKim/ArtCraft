@@ -89,10 +89,7 @@ impl DevelopSettings {
             }
         }
         let c = &mut self.curve;
-        for p in [&mut c.master, &mut c.hdr_master, &mut c.sdr_master, &mut c.red, &mut c.green, &mut c.blue]
-            .into_iter()
-            .flatten()
-        {
+        for p in [&mut c.master, &mut c.hdr_master, &mut c.sdr_master, &mut c.red, &mut c.green, &mut c.blue].into_iter().flatten() {
             *p = lightcraft_geom::Point::new(p.x.clamp(0.0, 1.0), p.y.clamp(0.0, 1.0));
         }
         let g = &mut self.crop.geometry;

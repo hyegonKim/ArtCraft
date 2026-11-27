@@ -7,7 +7,14 @@ fn instance(d: &mut Document, symbol: SymbolId) -> Arc<Element> {
         name: String::new(),
         transform: Default::default(),
         color: Default::default(),
-        kind: ElementKind::Symbol { symbol, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() },
+        kind: ElementKind::Symbol {
+            symbol,
+            loop_mode: Default::default(),
+            first_frame: 0,
+            blend: Default::default(),
+            filters: Vec::new(),
+            events: Vec::new(),
+        },
     })
 }
 
@@ -19,7 +26,15 @@ fn add_symbol(d: &mut Document, name: &str, inside: &[SymbolId]) -> SymbolId {
     if let Some(k) = layer.keyframe_mut(0) {
         k.elements = els;
     }
-    d.library.push(Arc::new(Symbol { id, name: name.into(), kind: SymbolKind::Graphic, linkage: None, scale_grid_kept: None, scale_grid: None, timeline: Timeline { layers: vec![Arc::new(layer)] } }));
+    d.library.push(Arc::new(Symbol {
+        id,
+        name: name.into(),
+        kind: SymbolKind::Graphic,
+        linkage: None,
+        scale_grid_kept: None,
+        scale_grid: None,
+        timeline: Timeline { layers: vec![Arc::new(layer)] },
+    }));
     id
 }
 
@@ -133,7 +148,20 @@ fn uses_count_every_keyframe_and_unused_follows_reachability() {
     let b = add_symbol(&mut d, "B", &[a]);
     if let Some(s) = d.library.iter_mut().find(|s| s.id == a) {
         let layer = Arc::make_mut(&mut Arc::make_mut(s).timeline.layers[0]);
-        let e = Arc::new(Element { id: ElementId(5_000_000), name: String::new(), transform: Default::default(), color: Default::default(), kind: ElementKind::Symbol { symbol: b, loop_mode: Default::default(), first_frame: 0, blend: Default::default(), filters: Vec::new(), events: Vec::new() } });
+        let e = Arc::new(Element {
+            id: ElementId(5_000_000),
+            name: String::new(),
+            transform: Default::default(),
+            color: Default::default(),
+            kind: ElementKind::Symbol {
+                symbol: b,
+                loop_mode: Default::default(),
+                first_frame: 0,
+                blend: Default::default(),
+                filters: Vec::new(),
+                events: Vec::new(),
+            },
+        });
         layer.keyframe_mut(0).unwrap().elements.push(e);
     }
     assert_eq!(d.unused_items(), vec![LibraryItem::Symbol(a), LibraryItem::Symbol(b)]);
@@ -156,7 +184,13 @@ fn a_duplicate_has_fresh_ids_and_keeps_its_folder() {
     assert_eq!(b.kind, a.kind);
     assert!(b.linkage.is_none(), "a class names one symbol");
     assert_eq!(d.parent_of(LibraryEntry::Item(LibraryItem::Symbol(copy))), Some(f));
-    let ids = |s: &Symbol| -> HashSet<u64> { s.timeline.layers.iter().flat_map(|l| std::iter::once(l.id.0).chain(l.keyframes.iter().flat_map(|k| k.elements.iter().map(|e| e.id.0)))).collect() };
+    let ids = |s: &Symbol| -> HashSet<u64> {
+        s.timeline
+            .layers
+            .iter()
+            .flat_map(|l| std::iter::once(l.id.0).chain(l.keyframes.iter().flat_map(|k| k.elements.iter().map(|e| e.id.0))))
+            .collect()
+    };
     assert!(ids(a).is_disjoint(&ids(b)));
     assert_eq!(ids(a).len(), ids(b).len());
     // Same artwork: only ids differ, and an element keeps one id across its keyframes.

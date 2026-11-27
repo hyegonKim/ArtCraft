@@ -57,7 +57,10 @@ pub const BUILT_IN: &[(&str, &str, &str, &[&str], &str)] = &[
 
 /// Every export format, built-in first, then the installed exporter plug-ins by id.
 pub fn formats(s: &Session) -> Vec<Value> {
-    let mut out: Vec<Value> = BUILT_IN.iter().map(|(id, cmd, name, ext, target)| json!({"id": id, "name": name, "extensions": ext, "command": cmd, "target": target, "plugin": false})).collect();
+    let mut out: Vec<Value> = BUILT_IN
+        .iter()
+        .map(|(id, cmd, name, ext, target)| json!({"id": id, "name": name, "extensions": ext, "command": cmd, "target": target, "plugin": false}))
+        .collect();
     for p in exporters(s) {
         let m = p.manifest();
         let ext = m.format.as_ref().map_or("", |f| f.extension.as_str());
@@ -95,7 +98,11 @@ pub fn plan(s: &Session, p: &Value) -> Result<(Arc<Plugin>, Job)> {
     let id = str_req(p, "format")?;
     let plugin = s.plugins.get(id).ok_or_else(|| {
         let ids: Vec<String> = exporters(s).iter().map(|p| p.id().to_string()).collect();
-        EngineError::State(if ids.is_empty() { format!("no exporter plug-in “{id}” is installed (see file.export_formats)") } else { format!("no exporter plug-in “{id}” is installed (installed: {})", ids.join(", ")) })
+        EngineError::State(if ids.is_empty() {
+            format!("no exporter plug-in “{id}” is installed (see file.export_formats)")
+        } else {
+            format!("no exporter plug-in “{id}” is installed (installed: {})", ids.join(", "))
+        })
     })?;
     if plugin.manifest().kind != Kind::Exporter {
         return Err(EngineError::State(format!("{} is not an exporter plug-in", plugin.manifest().name)));
@@ -181,7 +188,9 @@ impl Host for FrameHost<'_> {
                 }
                 Ok(frame_json(self.doc, self.from + i as u32, i))
             }
-            "command" | "document" | "elements" => Err("an exporter reads the movie's frames (movie, frame); it can't read or change the document".into()),
+            "command" | "document" | "elements" => {
+                Err("an exporter reads the movie's frames (movie, frame); it can't read or change the document".into())
+            }
             _ => Err(format!("unknown op '{op}' (an exporter has movie, frame and log)")),
         }
     }
@@ -195,7 +204,12 @@ impl FrameHost<'_> {
     fn movie(&self) -> Value {
         let d = self.doc;
         let st = &d.stage;
-        let scenes: Vec<Value> = d.scenes.iter().enumerate().map(|(i, sc)| json!({"name": sc.name, "start": d.scene_start(i), "frames": d.timeline(i).frame_count()})).collect();
+        let scenes: Vec<Value> = d
+            .scenes
+            .iter()
+            .enumerate()
+            .map(|(i, sc)| json!({"name": sc.name, "start": d.scene_start(i), "frames": d.timeline(i).frame_count()}))
+            .collect();
         json!({
             "abi": anicraft_plugins::ABI_VERSION,
             "name": self.name,
@@ -224,8 +238,12 @@ fn stops_json(stops: &[anicraft_doc::GradientStop]) -> Value {
 fn paint_json(p: &Paint) -> Value {
     match p {
         Paint::Solid(c) => json!({"type": "solid", "color": rgba_hex(*c)}),
-        Paint::Linear { start, end, stops, spread, linear_rgb } => json!({"type": "linear", "start": [start.x, start.y], "end": [end.x, end.y], "stops": stops_json(stops), "spread": format!("{spread:?}").to_lowercase(), "linear_rgb": linear_rgb}),
-        Paint::Radial { center, radius, stops, spread, linear_rgb, focal, matrix } => json!({"type": "radial", "center": [center.x, center.y], "radius": radius, "focal": focal, "matrix": matrix.m, "stops": stops_json(stops), "spread": format!("{spread:?}").to_lowercase(), "linear_rgb": linear_rgb}),
+        Paint::Linear { start, end, stops, spread, linear_rgb } => {
+            json!({"type": "linear", "start": [start.x, start.y], "end": [end.x, end.y], "stops": stops_json(stops), "spread": format!("{spread:?}").to_lowercase(), "linear_rgb": linear_rgb})
+        }
+        Paint::Radial { center, radius, stops, spread, linear_rgb, focal, matrix } => {
+            json!({"type": "radial", "center": [center.x, center.y], "radius": radius, "focal": focal, "matrix": matrix.m, "stops": stops_json(stops), "spread": format!("{spread:?}").to_lowercase(), "linear_rgb": linear_rgb})
+        }
         Paint::Bitmap { bitmap, repeat, matrix } => json!({"type": "bitmap", "bitmap": bitmap.0, "repeat": repeat, "matrix": matrix.m}),
     }
 }

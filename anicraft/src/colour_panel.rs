@@ -183,7 +183,11 @@ pub fn fill_picker(ui: &mut egui::Ui, popup: Id, paint: Option<&Paint>, bitmaps:
         for (key, label, tip) in kinds() {
             let usable = key != "bitmap" || !bitmaps.is_empty();
             let r = ui.add_enabled(usable, egui::Button::selectable(pick == key, label)).named(&tr!("Fill type: {kind}", kind = tip));
-            let r = if usable { r.on_hover_text(tip) } else { r.on_disabled_hover_text(tr!("Import an image into the Library first (File › Import › Import to Library), then fill with it.")) };
+            let r = if usable {
+                r.on_hover_text(tip)
+            } else {
+                r.on_disabled_hover_text(tr!("Import an image into the Library first (File › Import › Import to Library), then fill with it."))
+            };
             if r.clicked() {
                 pick = key;
             }
@@ -200,9 +204,17 @@ pub fn fill_picker(ui: &mut egui::Ui, popup: Id, paint: Option<&Paint>, bitmaps:
             "solid" => match paint {
                 // A fill again: the colour it shows.
                 None => FillEdit::None(false),
-                Some(p) => FillEdit::Set { label: tr_noop!("Fill"), live: false, params: json!({"type": "solid", "color": hex(p.primary_color().with_alpha(1.0))}) },
+                Some(p) => FillEdit::Set {
+                    label: tr_noop!("Fill"),
+                    live: false,
+                    params: json!({"type": "solid", "color": hex(p.primary_color().with_alpha(1.0))}),
+                },
             },
-            "bitmap" => FillEdit::Set { label: tr_noop!("Fill"), live: false, params: json!({"type": "bitmap", "bitmap": bitmaps.first().map_or(0, |b| b.0)}) },
+            "bitmap" => FillEdit::Set {
+                label: tr_noop!("Fill"),
+                live: false,
+                params: json!({"type": "bitmap", "bitmap": bitmaps.first().map_or(0, |b| b.0)}),
+            },
             other => FillEdit::Set { label: tr_noop!("Fill"), live: false, params: json!({"type": other}) },
         });
     }
@@ -258,7 +270,13 @@ fn gradient_swatches(ui: &mut egui::Ui, paint: Option<&Paint>) -> Option<FillEdi
                 let (r, resp) = ui.allocate_exact_size(vec2(CELL, CELL), Sense::click());
                 crate::swatches_panel::preview(ui.painter(), r, &sw.paint);
                 let on = paint.is_some_and(|p| crate::swatches_panel::matches(&sw.paint, p));
-                let edge = if on { Stroke::new(2.0, T.accent) } else if resp.hovered() { Stroke::new(1.5, T.selection) } else { Stroke::new(1.0, T.border) };
+                let edge = if on {
+                    Stroke::new(2.0, T.accent)
+                } else if resp.hovered() {
+                    Stroke::new(1.5, T.selection)
+                } else {
+                    Stroke::new(1.0, T.border)
+                };
                 ui.painter().rect_stroke(r, 0.0, edge, StrokeKind::Outside);
                 let name = crate::swatches_panel::describe(&sw.paint, &sw.name);
                 a11y::control(ui, &resp, WidgetType::Button, &tr!("Gradient swatch: {name}", name = name.as_str()), Some(on));
@@ -293,7 +311,10 @@ fn gradient(ui: &mut egui::Ui, popup: Id, stops: &[GradientStop], spread: Spread
     }
     ui.horizontal(|ui| {
         let mut lin = linear_rgb;
-        if crate::theme::checkbox(ui, &mut lin, tr!("Linear RGB")).on_hover_text(tr!("Mix the colours in linear light: brighter, more even blends")).changed() {
+        if crate::theme::checkbox(ui, &mut lin, tr!("Linear RGB"))
+            .on_hover_text(tr!("Mix the colours in linear light: brighter, more even blends"))
+            .changed()
+        {
             out = set(tr_noop!("Linear RGB"), false, json!({"linear_rgb": lin}));
         }
         if let Some(f) = focal {
@@ -302,7 +323,12 @@ fn gradient(ui: &mut egui::Ui, popup: Id, stops: &[GradientStop], spread: Spread
             let mut pct = f * 100.0;
             let lim = MAX_FOCAL * 100.0;
             let r = with_type(ui, Type::Data, |ui| ui.add(egui::DragValue::new(&mut pct).suffix(" %").speed(0.5).range(-lim..=lim).max_decimals(0)));
-            if r.named(tr!("Focal point")).on_hover_text(tr!("Where the ramp starts, from the centre along the gradient's axis (drag the triangle with the Gradient Transform tool)")).changed() {
+            if r.named(tr!("Focal point"))
+                .on_hover_text(tr!(
+                    "Where the ramp starts, from the centre along the gradient's axis (drag the triangle with the Gradient Transform tool)"
+                ))
+                .changed()
+            {
                 out = set(tr_noop!("Focal point"), true, json!({"focal": (pct / 100.0).clamp(-MAX_FOCAL, MAX_FOCAL)}));
             }
         }
@@ -332,7 +358,11 @@ fn move_stop(stops: &mut [GradientStop], i: usize, offset: f32) {
 
 /// The middle of the widest gap between stops: where the keyboard adds one.
 fn widest_gap(stops: &[GradientStop]) -> f32 {
-    stops.windows(2).filter_map(|w| if let [a, b] = w { Some((b.offset - a.offset, (a.offset + b.offset) / 2.0)) } else { None }).max_by(|a, b| a.0.total_cmp(&b.0)).map_or(0.5, |g| g.1)
+    stops
+        .windows(2)
+        .filter_map(|w| if let [a, b] = w { Some((b.offset - a.offset, (a.offset + b.offset) / 2.0)) } else { None })
+        .max_by(|a, b| a.0.total_cmp(&b.0))
+        .map_or(0.5, |g| g.1)
 }
 
 /// Adds a stop at `t` in the colour the ramp has there; its index, or `None` when the gradient
@@ -405,7 +435,13 @@ fn stop_bar(ui: &mut egui::Ui, popup: Id, stops: &mut Vec<GradientStop>) -> Opti
         let hit = Rect::from_center_size(pos2(x, track.center().y), vec2(12.0, 14.0));
         let r = ui.interact(hit, popup.with(("fill_stop_marker", i)), Sense::click_and_drag());
         let at = format!("{:.0}", off * 100.0);
-        a11y::control(ui, &r, WidgetType::Button, &tr!("Colour stop {stop} of {count} at {at}%", stop = i + 1, count = count, at = at), Some(i == sel));
+        a11y::control(
+            ui,
+            &r,
+            WidgetType::Button,
+            &tr!("Colour stop {stop} of {count} at {at}%", stop = i + 1, count = count, at = at),
+            Some(i == sel),
+        );
         if r.clicked() || r.drag_started() || r.gained_focus() {
             sel = i;
         }
@@ -427,9 +463,22 @@ fn stop_bar(ui: &mut egui::Ui, popup: Id, stops: &mut Vec<GradientStop>) -> Opti
         }
         // The keyboard: arrows move the focused stop (Shift: by 10 %), Delete removes it.
         if r.has_focus() {
-            let (left, right, shift, del) = ui.input(|inp| (inp.key_pressed(Key::ArrowLeft), inp.key_pressed(Key::ArrowRight), inp.modifiers.shift, inp.key_pressed(Key::Delete) || inp.key_pressed(Key::Backspace)));
+            let (left, right, shift, del) = ui.input(|inp| {
+                (
+                    inp.key_pressed(Key::ArrowLeft),
+                    inp.key_pressed(Key::ArrowRight),
+                    inp.modifiers.shift,
+                    inp.key_pressed(Key::Delete) || inp.key_pressed(Key::Backspace),
+                )
+            });
             let step = if shift { 0.1 } else { 0.01 };
-            let d = if right { step } else if left { -step } else { 0.0 };
+            let d = if right {
+                step
+            } else if left {
+                -step
+            } else {
+                0.0
+            };
             if d != 0.0 {
                 move_stop(stops, i, off + d);
                 changed = Some((tr_noop!("Move colour stop"), true));
@@ -443,8 +492,15 @@ fn stop_bar(ui: &mut egui::Ui, popup: Id, stops: &mut Vec<GradientStop>) -> Opti
         let Some(st) = stops.get(i) else { continue };
         let torn = tearing == Some(i);
         let tip = pos2(x, track.top());
-        let body = [tip, pos2(x + 6.0, track.top() + 6.0), pos2(x + 6.0, track.bottom()), pos2(x - 6.0, track.bottom()), pos2(x - 6.0, track.top() + 6.0)];
-        let edge = if i == sel { T.accent } else if r.hovered() { T.text } else { T.control_edge };
+        let body =
+            [tip, pos2(x + 6.0, track.top() + 6.0), pos2(x + 6.0, track.bottom()), pos2(x - 6.0, track.bottom()), pos2(x - 6.0, track.top() + 6.0)];
+        let edge = if i == sel {
+            T.accent
+        } else if r.hovered() {
+            T.text
+        } else {
+            T.control_edge
+        };
         let fill = to_color32(st.color.with_alpha(if torn { 0.3 } else { 1.0 }));
         ui.painter().add(egui::Shape::convex_polygon(body.to_vec(), fill, Stroke::new(if i == sel { 2.0 } else { 1.0 }, edge)));
     }
@@ -481,7 +537,12 @@ fn stop_bar(ui: &mut egui::Ui, popup: Id, stops: &mut Vec<GradientStop>) -> Opti
                 st.offset = (pct / 100.0).clamp(0.0, 1.0);
                 changed = Some((tr_noop!("Move colour stop"), true));
             }
-            if ui.add_enabled(n > 2, egui::Button::new(tr!("Remove")).small()).named(tr!("Remove colour stop")).on_hover_text(tr!("Remove this colour stop (or drag it off the bar)")).clicked() {
+            if ui
+                .add_enabled(n > 2, egui::Button::new(tr!("Remove")).small())
+                .named(tr!("Remove colour stop"))
+                .on_hover_text(tr!("Remove this colour stop (or drag it off the bar)"))
+                .clicked()
+            {
                 remove = Some(sel);
             }
         });
@@ -568,7 +629,13 @@ mod tests {
         if let Paint::Radial { focal, .. } = &mut radial {
             *focal = 0.4;
         }
-        for p in [None, Some(Paint::Solid(Rgba::hex(0x3d8bfd))), Some(Paint::linear(Vec2::ZERO, Vec2::new(10.0, 0.0), two)), Some(radial), Some(Paint::Bitmap { bitmap: anicraft_engine::doc::BitmapId(7), repeat: true, matrix: anicraft_engine::geom::Affine::IDENTITY })] {
+        for p in [
+            None,
+            Some(Paint::Solid(Rgba::hex(0x3d8bfd))),
+            Some(Paint::linear(Vec2::ZERO, Vec2::new(10.0, 0.0), two)),
+            Some(radial),
+            Some(Paint::Bitmap { bitmap: anicraft_engine::doc::BitmapId(7), repeat: true, matrix: anicraft_engine::geom::Affine::IDENTITY }),
+        ] {
             assert_eq!(picker_once(p.as_ref(), &bitmaps), None, "{p:?}");
         }
     }

@@ -8,7 +8,10 @@ use crate::{CommandSpec, EngineError, MAX_FRAME, Result, Session};
 use anicraft_doc::audio::{Voice, mix, wav};
 use anicraft_doc::lipsync::{MAX_LIPSYNC_FRAMES, Viseme, analyze_runs, default_mapping_for_symbol};
 use anicraft_doc::sound::{self, MAX_ENVELOPE_POINTS, MAX_ENVELOPE_SECONDS, MAX_REPEAT, clean_points, frame_start};
-use anicraft_doc::{Element, ElementId, ElementKind, EnvelopePoint, FrameSound, Keyframe, LayerKind, LoopMode, Sound, SoundEffect, SoundId, SoundSync, SymbolId, SymbolKind, Timeline};
+use anicraft_doc::{
+    Element, ElementId, ElementKind, EnvelopePoint, FrameSound, Keyframe, LayerKind, LoopMode, Sound, SoundEffect, SoundId, SoundSync, SymbolId,
+    SymbolKind, Timeline,
+};
 use serde_json::{Value, json};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -52,8 +55,24 @@ pub fn specs() -> Vec<CommandSpec> {
             true,
             set,
         ),
-        c("layer.toggle_mute", "Mute/Unmute Layer", "", None, "{layer?} (its sounds, and those in the symbols on it, go silent in playback and every export)", true, toggle_mute),
-        c("layer.set_volume", "Layer Volume", "", None, "{volume? (0–1: the layer's sounds and those in the symbols on it), muted?, layer?}", true, set_volume),
+        c(
+            "layer.toggle_mute",
+            "Mute/Unmute Layer",
+            "",
+            None,
+            "{layer?} (its sounds, and those in the symbols on it, go silent in playback and every export)",
+            true,
+            toggle_mute,
+        ),
+        c(
+            "layer.set_volume",
+            "Layer Volume",
+            "",
+            None,
+            "{volume? (0–1: the layer's sounds and those in the symbols on it), muted?, layer?}",
+            true,
+            set_volume,
+        ),
         c("sound.remove", "Remove Sound", "", None, "{layer?, frame?}", true, |s, p| set(s, &with_null_sound(p))),
         c("sound.delete", "Delete Sound", "", None, "{sound} (from the library and every keyframe that uses it)", true, delete),
         c("sound.rename", "Rename Sound", "", None, "{sound, name}", true, rename),
@@ -120,7 +139,8 @@ pub(crate) fn import_to_library(s: &mut Session, p: &Value) -> Result<Value> {
     if matches!(ext.as_deref(), Some("png" | "jpg" | "jpeg")) {
         let bytes = crate::vfs::read(&path)?;
         let id = anicraft_doc::BitmapId(s.doc.alloc_id());
-        let bitmap = anicraft_doc::Bitmap::from_image(id, file_name(&path, "image"), bytes).map_err(|e| EngineError::Format(format!("{}: {e}", path.display())))?;
+        let bitmap = anicraft_doc::Bitmap::from_image(id, file_name(&path, "image"), bytes)
+            .map_err(|e| EngineError::Format(format!("{}: {e}", path.display())))?;
         let (w, h) = (bitmap.width, bitmap.height);
         s.doc.bitmaps.push(Arc::new(bitmap));
         return Ok(json!({"bitmap": id.0, "width": w, "height": h}));
@@ -129,7 +149,9 @@ pub(crate) fn import_to_library(s: &mut Session, p: &Value) -> Result<Value> {
         // A drawing becomes a graphic symbol holding its shapes (ADR 0065).
         return crate::cmds_file::import_svg_symbol(s, &path, opt_str(p, "name")?);
     }
-    Err(EngineError::Param("Import to Library reads WAV, Ogg Vorbis and MP3 sounds, PNG and JPEG images, and SVG drawings (as a graphic symbol)".into()))
+    Err(EngineError::Param(
+        "Import to Library reads WAV, Ogg Vorbis and MP3 sounds, PNG and JPEG images, and SVG drawings (as a graphic symbol)".into(),
+    ))
 }
 
 /// Import to Stage with a sound: into the library, and onto a new layer named after the file,
@@ -149,7 +171,11 @@ pub(crate) fn import_to_stage(s: &mut Session, path: &Path) -> Result<Value> {
 /// Custom envelope points from `[{at, left, right}…]` (or `[[at, left, right]…]`): seconds
 /// from the sound's start, volumes `0..=1`.
 fn envelope_param(v: &Value) -> Result<Vec<EnvelopePoint>> {
-    let bad = || EngineError::Param(format!("param 'envelope' must be 1 to {MAX_ENVELOPE_POINTS} points [{{at (seconds, 0–{MAX_ENVELOPE_SECONDS}), left (0–1), right (0–1)}}…]"));
+    let bad = || {
+        EngineError::Param(format!(
+            "param 'envelope' must be 1 to {MAX_ENVELOPE_POINTS} points [{{at (seconds, 0–{MAX_ENVELOPE_SECONDS}), left (0–1), right (0–1)}}…]"
+        ))
+    };
     let list = v.as_array().filter(|a| (1..=MAX_ENVELOPE_POINTS).contains(&a.len())).ok_or_else(bad)?;
     let mut out = Vec::with_capacity(list.len());
     for item in list {
@@ -168,14 +194,20 @@ fn envelope_param(v: &Value) -> Result<Vec<EnvelopePoint>> {
 fn apply_settings(p: &Value, fs: FrameSound, heard: &dyn Fn(&FrameSound) -> f64) -> Result<FrameSound> {
     let mut fs = apply_timing(p, fs)?;
     if let Some(e) = opt_str(p, "effect")? {
-        let want = SoundEffect::from_key(e).ok_or_else(|| EngineError::Param("param 'effect' must be none, left_channel, right_channel, fade_left_to_right, fade_right_to_left, fade_in, fade_out or custom".into()))?;
+        let want = SoundEffect::from_key(e).ok_or_else(|| {
+            EngineError::Param(
+                "param 'effect' must be none, left_channel, right_channel, fade_left_to_right, fade_right_to_left, fade_in, fade_out or custom"
+                    .into(),
+            )
+        })?;
         fs.effect = match want {
             // Custom keeps the points it has, or starts from the effect chosen before (full
             // volume: a point at each end, to drag).
             SoundEffect::Custom(_) if matches!(fs.effect, SoundEffect::Custom(_)) => fs.effect,
             SoundEffect::Custom(_) => {
                 let t = heard(&fs);
-                let pts = if fs.effect.is_none() { vec![EnvelopePoint::new(0.0, 1.0, 1.0), EnvelopePoint::new(t, 1.0, 1.0)] } else { fs.effect.points(t) };
+                let pts =
+                    if fs.effect.is_none() { vec![EnvelopePoint::new(0.0, 1.0, 1.0), EnvelopePoint::new(t, 1.0, 1.0)] } else { fs.effect.points(t) };
                 SoundEffect::Custom(clean_points(&pts))
             }
             preset => preset,
@@ -254,7 +286,10 @@ fn set(s: &mut Session, p: &Value) -> Result<Value> {
     let (lid, frame) = target(s, p)?;
     let fps = s.doc.stage.fps;
     let tl = s.timeline();
-    let place = tl.layer(lid.unwrap_or(s.layer)).and_then(|l| l.keyframe_at(frame)).map(|k| (k.duration, s.doc.frame_count().saturating_sub(s.doc.scene_start(s.scene).saturating_add(k.start))));
+    let place = tl
+        .layer(lid.unwrap_or(s.layer))
+        .and_then(|l| l.keyframe_at(frame))
+        .map(|k| (k.duration, s.doc.frame_count().saturating_sub(s.doc.scene_start(s.scene).saturating_add(k.start))));
     let sounds = s.doc.sounds.clone();
     let heard = move |fs: &FrameSound| match (sounds.iter().find(|x| x.id == fs.sound), place) {
         (Some(x), Some((span, rest))) => fs.heard_seconds(x, span, rest, fps),
@@ -366,7 +401,8 @@ fn rename(s: &mut Session, p: &Value) -> Result<Value> {
 pub(crate) fn write_mix(path: &Path, voices: &[Voice], rate: u32, from: u64, to: u64, bits: wav::Bits) -> Result<u64> {
     use std::io::Write;
     let frames = to.saturating_sub(from);
-    let header = wav::header(rate, 2, bits, frames).ok_or_else(|| EngineError::Param("that much audio does not fit in a WAV file (4 GB); lower 'rate' or the frame range".into()))?;
+    let header = wav::header(rate, 2, bits, frames)
+        .ok_or_else(|| EngineError::Param("that much audio does not fit in a WAV file (4 GB); lower 'rate' or the frame range".into()))?;
     let tmp = path.with_extension("wav.tmp");
     let result = (|| -> Result<u64> {
         let mut f = crate::vfs::Writer::create(&tmp)?;
@@ -385,11 +421,14 @@ pub(crate) fn write_mix(path: &Path, voices: &[Voice], rate: u32, from: u64, to:
             at += n as u64;
         }
         f.finish()?;
-        Ok(header.len() as u64 + frames * 2 * u64::from(match bits {
-            wav::Bits::Int16 => 2u8,
-            wav::Bits::Int24 => 3,
-            wav::Bits::Float32 => 4,
-        }))
+        Ok(header.len() as u64
+            + frames
+                * 2
+                * u64::from(match bits {
+                    wav::Bits::Int16 => 2u8,
+                    wav::Bits::Int24 => 3,
+                    wav::Bits::Float32 => 4,
+                }))
     })();
     match result {
         Ok(n) => {
@@ -463,7 +502,9 @@ fn export_audio(s: &mut Session, p: &Value) -> Result<Value> {
     }
     let (voices, a, b) = soundtrack(s, first, to, rate);
     let bytes = write_mix(&path, &voices, rate, a, b, bits)?;
-    Ok(json!({"written": path.display().to_string(), "bytes": bytes, "rate": rate, "seconds": (b - a) as f64 / f64::from(rate), "frames": to - first + 1, "sounds": voices.len()}))
+    Ok(
+        json!({"written": path.display().to_string(), "bytes": bytes, "rate": rate, "seconds": (b - a) as f64 / f64::from(rate), "frames": to - first + 1, "sounds": voices.len()}),
+    )
 }
 
 fn resolve_lipsync_sound(s: &Session, p: &Value) -> Result<(SoundId, u32)> {
@@ -493,19 +534,14 @@ fn resolve_lipsync_sound(s: &Session, p: &Value) -> Result<(SoundId, u32)> {
         .filter_map(|k| k.sound.as_ref().map(|fs| (fs.sound, k.start, fs.sync == SoundSync::Stream)))
         .max_by_key(|&(_, _, is_stream)| u8::from(is_stream))
         .map(|(id, start, _)| (id, start))
+        && s.doc.sound(id).is_some()
     {
-        if s.doc.sound(id).is_some() {
-            return Ok((id, start));
-        }
+        return Ok((id, start));
     }
     if sound_layer.is_some() {
         return Err(EngineError::State("that layer has no sound placed on its keyframes".into()));
     }
-    let first = s
-        .doc
-        .sounds
-        .first()
-        .ok_or_else(|| EngineError::State("import a sound first so Auto Lip-Sync has speech to match".into()))?;
+    let first = s.doc.sounds.first().ok_or_else(|| EngineError::State("import a sound first so Auto Lip-Sync has speech to match".into()))?;
     Ok((first.id, 0))
 }
 
@@ -519,10 +555,7 @@ fn resolve_lipsync_symbol(s: &Session, p: &Value, lid: anicraft_doc::LayerId) ->
         let frames = graphic_frames(id).ok_or_else(|| EngineError::State(format!("symbol {raw} is not a graphic symbol in the library")))?;
         return Ok((id, frames));
     }
-    let layer = s
-        .timeline()
-        .layer(lid)
-        .ok_or_else(|| EngineError::State(format!("no layer with id {}", lid.0)))?;
+    let layer = s.timeline().layer(lid).ok_or_else(|| EngineError::State(format!("no layer with id {}", lid.0)))?;
     // Prefer a selected graphic symbol instance on the layer, then at the playhead, then any keyframe.
     let find_in = |els: &[Arc<Element>], only_sel: bool| -> Option<(SymbolId, u32)> {
         els.iter().find_map(|e| {
@@ -535,10 +568,10 @@ fn resolve_lipsync_symbol(s: &Session, p: &Value, lid: anicraft_doc::LayerId) ->
             }
         })
     };
-    if let Some(k) = layer.keyframe_at(s.frame) {
-        if let Some(hit) = find_in(&k.elements, true).or_else(|| find_in(&k.elements, false)) {
-            return Ok(hit);
-        }
+    if let Some(k) = layer.keyframe_at(s.frame)
+        && let Some(hit) = find_in(&k.elements, true).or_else(|| find_in(&k.elements, false))
+    {
+        return Ok(hit);
     }
     for k in &layer.keyframes {
         if let Some(hit) = find_in(&k.elements, false) {
@@ -576,31 +609,19 @@ fn viseme_mapping(p: &Value, sym: &anicraft_doc::Symbol) -> Result<[u32; 12]> {
 fn auto_lip_sync(s: &mut Session, p: &Value) -> Result<Value> {
     let lid = opt_u64(p, "layer")?.map_or(s.layer, anicraft_doc::LayerId);
     {
-        let layer = s
-            .timeline()
-            .layer(lid)
-            .ok_or_else(|| EngineError::State(format!("no layer with id {}", lid.0)))?;
+        let layer = s.timeline().layer(lid).ok_or_else(|| EngineError::State(format!("no layer with id {}", lid.0)))?;
         if matches!(layer.kind, LayerKind::Folder | LayerKind::Camera | LayerKind::Mask) {
             return Err(EngineError::State(format!("'{}' cannot hold lip-sync mouth keyframes", layer.name)));
         }
     }
     let (sound_id, sound_start) = resolve_lipsync_sound(s, p)?;
     let (symbol_id, _sym_frames) = resolve_lipsync_symbol(s, p, lid)?;
-    let sym = s
-        .doc
-        .symbol(symbol_id)
-        .ok_or_else(|| EngineError::State("mouth symbol missing".into()))?;
+    let sym = s.doc.symbol(symbol_id).ok_or_else(|| EngineError::State("mouth symbol missing".into()))?;
     let mapping = viseme_mapping(p, sym)?;
 
     let fps = s.doc.stage.fps;
-    let snd = s
-        .doc
-        .sound(sound_id)
-        .cloned()
-        .ok_or_else(|| EngineError::State("the sound vanished".into()))?;
-    let decoded = snd
-        .decoded()
-        .ok_or_else(|| EngineError::Format(format!("'{}' could not be decoded for lip-sync", snd.name)))?;
+    let snd = s.doc.sound(sound_id).cloned().ok_or_else(|| EngineError::State("the sound vanished".into()))?;
+    let decoded = snd.decoded().ok_or_else(|| EngineError::Format(format!("'{}' could not be decoded for lip-sync", snd.name)))?;
 
     let natural_span = snd.movie_frames(fps).max(1);
     let from = opt_u32(p, "from")?.unwrap_or(sound_start).min(MAX_FRAME);
@@ -629,10 +650,7 @@ fn auto_lip_sync(s: &mut Session, p: &Value) -> Result<Value> {
 
     // Grab base elements on the target layer to stamp across each viseme keyframe.
     let base_elements: Vec<Arc<Element>> = {
-        let layer = s
-            .timeline()
-            .layer(lid)
-            .ok_or_else(|| EngineError::State("target layer missing".into()))?;
+        let layer = s.timeline().layer(lid).ok_or_else(|| EngineError::State("target layer missing".into()))?;
         let existing = layer
             .keyframe_at(from)
             .filter(|k| k.elements.iter().any(|e| matches!(e.kind, ElementKind::Symbol { symbol, .. } if symbol == symbol_id)))
@@ -687,12 +705,8 @@ fn auto_lip_sync(s: &mut Session, p: &Value) -> Result<Value> {
     {
         let layer = s.layer_mut(Some(lid))?;
         // Preserve any keyframe sound that was sitting inside `from..=to` if the sound lives on the same layer.
-        let mut preserved_sounds: Vec<(u32, FrameSound)> = layer
-            .keyframes
-            .iter()
-            .filter(|k| k.start >= from && k.start <= to)
-            .filter_map(|k| k.sound.clone().map(|fs| (k.start, fs)))
-            .collect();
+        let mut preserved_sounds: Vec<(u32, FrameSound)> =
+            layer.keyframes.iter().filter(|k| k.start >= from && k.start <= to).filter_map(|k| k.sound.clone().map(|fs| (k.start, fs))).collect();
         layer.keyframes.retain(|k| k.end() <= from || k.start > to);
         // Trim any earlier keyframe that reached past `from`, or pad gap up to `from`.
         if let Some(prev_idx) = layer.keyframes.iter().rposition(|k| k.start < from)
@@ -702,10 +716,7 @@ fn auto_lip_sync(s: &mut Session, p: &Value) -> Result<Value> {
             prev.duration = from - prev.start;
         }
         for (s_at, fs) in preserved_sounds.drain(..) {
-            if let Some(target_kf) = generated
-                .iter_mut()
-                .find(|k| s_at >= k.start && s_at < k.end())
-            {
+            if let Some(target_kf) = generated.iter_mut().find(|k| s_at >= k.start && s_at < k.end()) {
                 Arc::make_mut(target_kf).sound.get_or_insert(fs);
             }
         }
@@ -781,7 +792,10 @@ mod lipsync_tests {
         let after_layer = s.timeline().layer(mouth_layer).unwrap();
         assert_eq!(after_layer.keyframes.len(), kf_count);
         for kf in &after_layer.keyframes {
-            let has_single = kf.elements.iter().any(|e| matches!(e.kind, ElementKind::Symbol { symbol, loop_mode: LoopMode::SingleFrame, .. } if symbol.0 == sym_id));
+            let has_single = kf
+                .elements
+                .iter()
+                .any(|e| matches!(e.kind, ElementKind::Symbol { symbol, loop_mode: LoopMode::SingleFrame, .. } if symbol.0 == sym_id));
             assert!(has_single);
         }
 

@@ -820,11 +820,7 @@ fn strip_silence(e: &mut Engine, p: &Value) -> Result<Value> {
         None => crate::io::StripMode::Strip,
         Some(Value::String(m)) if matches!(m.as_str(), "delete" | "delete_silence" | "shorten" | "shorten_silence") => {
             let shorten_ms = p.get("shorten_ms").and_then(Value::as_f64).filter(|x| x.is_finite()).unwrap_or(100.0);
-            let keep = if m.starts_with("shorten") {
-                e.session().sample_rate.samples(shorten_ms.clamp(0.0, 10_000.0) / 1000.0)
-            } else {
-                0
-            };
+            let keep = if m.starts_with("shorten") { e.session().sample_rate.samples(shorten_ms.clamp(0.0, 10_000.0) / 1000.0) } else { 0 };
             return close_silence(e, p, (tracks.as_slice(), r, thr, min_len, (pre, post)), keep);
         }
         Some(Value::String(m)) => crate::io::StripMode::from_id(m).ok_or_else(|| bad("edit.strip_silence", format!("unknown mode `{m}`")))?,

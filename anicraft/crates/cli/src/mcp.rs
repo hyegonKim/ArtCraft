@@ -150,7 +150,14 @@ fn call_tool(s: &mut Session, name: &str, args: &Value) -> Result<Value, String>
                 Some(v) => v.as_u64().and_then(|f| u32::try_from(f).ok()).ok_or("\"frame\" must be a whole number from 0")?,
             };
             if frame >= s.frame_count() {
-                return Ok(text_result(&Value::String(format!("frame {frame} is past the end: the scene has {} frames (0 to {})", s.frame_count(), s.frame_count().saturating_sub(1))), true));
+                return Ok(text_result(
+                    &Value::String(format!(
+                        "frame {frame} is past the end: the scene has {} frames (0 to {})",
+                        s.frame_count(),
+                        s.frame_count().saturating_sub(1)
+                    )),
+                    true,
+                ));
             }
             let stage = s.doc.stage;
             let largest = stage.width.max(stage.height).max(1) as f32;
@@ -251,14 +258,20 @@ mod tests {
     #[test]
     fn handshake_lists_tools_and_ignores_notifications() {
         let mut s = Session::default();
-        let init = call(&mut s, 1, "initialize", json!({"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}}));
+        let init =
+            call(&mut s, 1, "initialize", json!({"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}}));
         assert_eq!(init["result"]["protocolVersion"], "2025-03-26", "a version we speak is echoed");
         assert_eq!(init["result"]["serverInfo"]["name"], "anicraft");
         let newer = call(&mut s, 2, "initialize", json!({"protocolVersion": "2099-01-01"}));
         assert_eq!(newer["result"]["protocolVersion"], PROTOCOLS[0], "otherwise our newest");
         assert!(handle(&mut s, r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#).is_none());
         assert_eq!(call(&mut s, 3, "ping", json!({}))["result"], json!({}));
-        let names: Vec<String> = call(&mut s, 4, "tools/list", json!({}))["result"]["tools"].as_array().unwrap().iter().map(|t| t["name"].as_str().unwrap().to_string()).collect();
+        let names: Vec<String> = call(&mut s, 4, "tools/list", json!({}))["result"]["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|t| t["name"].as_str().unwrap().to_string())
+            .collect();
         assert_eq!(names, ["anicraft_commands", "anicraft_run", "anicraft_run_script", "anicraft_document", "anicraft_render"]);
         // Protocol errors carry JSON-RPC codes.
         assert_eq!(call(&mut s, 5, "nope", json!({}))["error"]["code"], -32601);
@@ -279,11 +292,15 @@ mod tests {
         assert_eq!(bad["isError"], true);
         assert!(bad["content"][0]["text"].as_str().unwrap().starts_with("draw.rect:"));
         // Scripts run in order and stop at the first failure.
-        let script = tool(&mut s, "anicraft_run_script", json!({"steps": [
-            {"command": "draw.ellipse", "params": {"x": 100, "y": 10, "w": 30, "h": 30}},
-            {"command": "no.such"},
-            {"command": "draw.ellipse", "params": {"x": 200, "y": 10, "w": 30, "h": 30}}
-        ]}));
+        let script = tool(
+            &mut s,
+            "anicraft_run_script",
+            json!({"steps": [
+                {"command": "draw.ellipse", "params": {"x": 100, "y": 10, "w": 30, "h": 30}},
+                {"command": "no.such"},
+                {"command": "draw.ellipse", "params": {"x": 200, "y": 10, "w": 30, "h": 30}}
+            ]}),
+        );
         assert_eq!(script["isError"], true);
         assert_eq!(text(&script)["failed_step"], 2);
         assert_eq!(s.visible_elements().len(), 2, "the step before the failure stays done");

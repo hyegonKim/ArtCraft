@@ -103,7 +103,52 @@ pub enum S {
 
 /// Words that can't name a variable or function (ActionScript 3.0's reserved words).
 const RESERVED: [&str; 46] = [
-    "as", "break", "case", "catch", "class", "const", "continue", "default", "delete", "do", "else", "extends", "false", "finally", "for", "function", "if", "implements", "import", "in", "instanceof", "interface", "internal", "is", "native", "new", "null", "package", "private", "protected", "public", "return", "super", "switch", "this", "throw", "to", "true", "try", "typeof", "use", "var", "void", "while", "with", "include",
+    "as",
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "implements",
+    "import",
+    "in",
+    "instanceof",
+    "interface",
+    "internal",
+    "is",
+    "native",
+    "new",
+    "null",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "to",
+    "true",
+    "try",
+    "typeof",
+    "use",
+    "var",
+    "void",
+    "while",
+    "with",
+    "include",
 ];
 
 /// Attribute words that may stand before a declaration in a frame script.
@@ -210,11 +255,7 @@ impl<'a> Parser<'a> {
 
     /// The end of a statement: `;`, or a line break, `}` or the end (semicolon insertion).
     fn end(&mut self) -> R<()> {
-        if self.eat(";") || self.is("}") || matches!(self.tok(), Tok::Eof) || self.nl() {
-            Ok(())
-        } else {
-            Err(self.unexpected("`;` or a new line"))
-        }
+        if self.eat(";") || self.is("}") || matches!(self.tok(), Tok::Eof) || self.nl() { Ok(()) } else { Err(self.unexpected("`;` or a new line")) }
     }
 
     /// Skips a balanced `( … )`, `[ … ]` or `{ … }` starting at the current token.
@@ -235,7 +276,10 @@ impl<'a> Parser<'a> {
                 }
                 Tok::Punct(p @ (")" | "]" | "}")) => {
                     if stack.pop() != Some(*p) {
-                        return Err(Problem::at(self.toks.get(self.i.saturating_sub(1)).map_or(start, |t| t.pos), format!("`{p}` doesn't match an opening bracket")));
+                        return Err(Problem::at(
+                            self.toks.get(self.i.saturating_sub(1)).map_or(start, |t| t.pos),
+                            format!("`{p}` doesn't match an opening bracket"),
+                        ));
                     }
                     if stack.is_empty() {
                         return Ok(());
@@ -638,7 +682,10 @@ impl<'a> Parser<'a> {
             chain += 1;
             self.depth += 1;
             if self.depth > MAX_DEPTH {
-                break Err(Problem::at(self.pos(), format!("this expression has too many operators in a row (code nests at most {MAX_DEPTH} levels deep)")));
+                break Err(Problem::at(
+                    self.pos(),
+                    format!("this expression has too many operators in a row (code nests at most {MAX_DEPTH} levels deep)"),
+                ));
             }
             self.i += 1;
             // The right side of `as` and `is` is a type.

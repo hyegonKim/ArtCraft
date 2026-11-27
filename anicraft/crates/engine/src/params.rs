@@ -4,8 +4,8 @@
 use crate::{EngineError, Result};
 use anicraft_doc::{CustomEase, Document, EasePoint, Easing, ProfilePreset, Rgba, SampledEase, WidthPoint, WidthProfile};
 use anicraft_geom::Vec2;
-use std::sync::Arc;
 use serde_json::{Value, json};
+use std::sync::Arc;
 
 fn bad(key: &str, want: &str) -> EngineError {
     EngineError::Param(format!("param '{key}' must be {want}"))
@@ -109,9 +109,14 @@ pub fn opt_easing(p: &Value, key: &str) -> Result<Option<Easing>> {
         return custom_ease(c).map(|c| Some(Easing::Custom(Arc::new(c)))).ok_or_else(|| bad(key, "{\"custom\": {\"points\": [{\"at\": {\"x\", \"y\"}, \"in\": {..}, \"out\": {..}, \"smooth\"}, ..]}} or {\"custom\": [[x, y], ..]} (3n + 1 points)"));
     }
     if let Some(t) = v.get("sampled") {
-        return sampled_ease(t).map(|t| Some(Easing::Sampled(Arc::new(t)))).ok_or_else(|| bad(key, "{\"sampled\": {\"name\", \"plugin\", \"ease\", \"values\": [0, …, 1]}} (as ease.info gives a plug-in's ease)"));
+        return sampled_ease(t)
+            .map(|t| Some(Easing::Sampled(Arc::new(t))))
+            .ok_or_else(|| bad(key, "{\"sampled\": {\"name\", \"plugin\", \"ease\", \"values\": [0, …, 1]}} (as ease.info gives a plug-in's ease)"));
     }
-    Err(bad(key, "an easing name, {\"classic\": n}, {\"bezier\": [x1, y1, x2, y2]}, {\"custom\": …}, {\"saved\": name} or {\"plugin\": id, \"ease\": id}"))
+    Err(bad(
+        key,
+        "an easing name, {\"classic\": n}, {\"bezier\": [x1, y1, x2, y2]}, {\"custom\": …}, {\"saved\": name} or {\"plugin\": id, \"ease\": id}",
+    ))
 }
 
 /// Most values read from a sampled ease param before it is thinned to the cap.
@@ -134,10 +139,13 @@ const MAX_EASE_PARAM: usize = 16_384;
 fn custom_ease(v: &Value) -> Option<CustomEase> {
     match v {
         Value::Array(flat) if flat.len() <= MAX_EASE_PARAM * 3 => {
-            let pts: Option<Vec<Vec2>> = flat.iter().map(|q| match q.as_array().map(Vec::as_slice) {
-                Some([x, y]) => Some(Vec2::new(x.as_f64()? as f32, y.as_f64()? as f32)),
-                _ => None,
-            }).collect();
+            let pts: Option<Vec<Vec2>> = flat
+                .iter()
+                .map(|q| match q.as_array().map(Vec::as_slice) {
+                    Some([x, y]) => Some(Vec2::new(x.as_f64()? as f32, y.as_f64()? as f32)),
+                    _ => None,
+                })
+                .collect();
             CustomEase::from_flat(&pts?)
         }
         Value::Object(o) => {
@@ -171,7 +179,11 @@ pub fn opt_easing_in(s: &crate::Session, p: &Value, key: &str) -> Result<Option<
 /// Ease `ease` (its id, or its name in any case) of the installed ease plug-in `plugin`, as the
 /// sampled curve a tween keeps.
 pub fn plugin_ease(s: &crate::Session, plugin: &str, ease: &str) -> Result<Easing> {
-    let p = s.plugins.get(plugin).filter(|p| p.manifest().kind == anicraft_plugins::Kind::Ease).ok_or_else(|| EngineError::State(format!("no ease plug-in “{plugin}” is installed (see ease.list)")))?;
+    let p = s
+        .plugins
+        .get(plugin)
+        .filter(|p| p.manifest().kind == anicraft_plugins::Kind::Ease)
+        .ok_or_else(|| EngineError::State(format!("no ease plug-in “{plugin}” is installed (see ease.list)")))?;
     let want = ease.trim().to_lowercase();
     let c = p.eases().iter().find(|c| c.id == ease || c.name.to_lowercase() == want).ok_or_else(|| {
         let ids: Vec<&str> = p.eases().iter().map(|c| c.id.as_str()).collect();
@@ -185,7 +197,11 @@ pub fn saved_ease(doc: &Document, name: &str) -> Result<Easing> {
     let want = name.trim().to_lowercase();
     doc.eases.iter().find(|e| e.name.to_lowercase() == want).map(|e| e.ease.clone()).ok_or_else(|| {
         let names: Vec<&str> = doc.eases.iter().map(|e| e.name.as_str()).take(20).collect();
-        EngineError::State(if names.is_empty() { format!("no ease is saved as '{name}' (save one with ease.save)") } else { format!("no ease is saved as '{name}' (saved: {})", names.join(", ")) })
+        EngineError::State(if names.is_empty() {
+            format!("no ease is saved as '{name}' (save one with ease.save)")
+        } else {
+            format!("no ease is saved as '{name}' (saved: {})", names.join(", "))
+        })
     })
 }
 
@@ -222,7 +238,10 @@ pub fn opt_profile(p: &Value, key: &str) -> Result<Option<Option<WidthProfile>>>
                     _ => (None, None, None),
                 };
                 let (Some(t), Some(l), Some(r)) = (t, l, r) else { return Err(bad(key, want)) };
-                if !(0.0..=1.0).contains(&t) || !(0.0..=anicraft_doc::MAX_WIDTH_FACTOR).contains(&l) || !(0.0..=anicraft_doc::MAX_WIDTH_FACTOR).contains(&r) {
+                if !(0.0..=1.0).contains(&t)
+                    || !(0.0..=anicraft_doc::MAX_WIDTH_FACTOR).contains(&l)
+                    || !(0.0..=anicraft_doc::MAX_WIDTH_FACTOR).contains(&r)
+                {
                     return Err(bad(key, &format!("width points with t in 0..=1 and widths in 0..={}", anicraft_doc::MAX_WIDTH_FACTOR)));
                 }
                 pts.push(WidthPoint::new(t, l, r));

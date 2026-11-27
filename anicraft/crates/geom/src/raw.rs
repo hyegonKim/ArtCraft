@@ -399,22 +399,20 @@ pub fn delete_anchor(subs: &mut [Sub], at: Vec2, edges: &[Seg], joined: Option<&
                     }
                     _ => false,
                 },
-                Vertex::End => {
-                    match (s.segs.last().and_then(|g| which(&g.reversed())), edges.len()) {
-                        (Some(a), 2) => match (toward(a), s.segs.last_mut()) {
-                            (Some(n), Some(last)) => {
-                                *last = n;
-                                true
-                            }
-                            _ => false,
-                        },
-                        (Some(_), 1) => {
-                            s.segs.pop();
+                Vertex::End => match (s.segs.last().and_then(|g| which(&g.reversed())), edges.len()) {
+                    (Some(a), 2) => match (toward(a), s.segs.last_mut()) {
+                        (Some(n), Some(last)) => {
+                            *last = n;
                             true
                         }
                         _ => false,
+                    },
+                    (Some(_), 1) => {
+                        s.segs.pop();
+                        true
                     }
-                }
+                    _ => false,
+                },
             };
             if !done {
                 break;
@@ -459,7 +457,8 @@ fn vertex_at(s: &mut Sub, at: Vec2, tol: f32) -> Option<Vertex> {
 /// `filled`) a closed outline with no area.
 pub fn tidy(subs: &mut Vec<Sub>, filled: bool) {
     subs.retain(|s| {
-        let pts: Vec<Vec2> = s.segs.iter().flat_map(|g| (0..8).map(move |i| cubic_point(&g.c, i as f32 / 8.0))).chain(s.segs.last().map(|g| g.c[3])).collect();
+        let pts: Vec<Vec2> =
+            s.segs.iter().flat_map(|g| (0..8).map(move |i| cubic_point(&g.c, i as f32 / 8.0))).chain(s.segs.last().map(|g| g.c[3])).collect();
         let length: f32 = pts.windows(2).map(|w| w.first().zip(w.get(1)).map_or(0.0, |(a, b)| a.distance(*b))).sum();
         if s.segs.is_empty() || length <= 1e-3 {
             return false;
@@ -586,7 +585,8 @@ mod tests {
         let (a, b) = (sub(&arc.c, 0.0, 0.35), sub(&arc.c, 0.35, 1.0));
         let at = a[3];
         // A fill under the arc and the arc's own stroke, both with the point.
-        let fill = vec![Sub { segs: vec![Seg { c: a, line: false }, Seg { c: b, line: false }, Seg::line(v(100.0, 0.0), v(0.0, 0.0))], closed: true }];
+        let fill =
+            vec![Sub { segs: vec![Seg { c: a, line: false }, Seg { c: b, line: false }, Seg::line(v(100.0, 0.0), v(0.0, 0.0))], closed: true }];
         let stroke = vec![Sub { segs: vec![Seg { c: b, line: false }.reversed(), Seg { c: a, line: false }.reversed()], closed: false }];
         let mut shapes = vec![fill, stroke];
         assert_eq!(delete(&mut shapes, at), 2);

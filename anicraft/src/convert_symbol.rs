@@ -69,68 +69,81 @@ pub fn window(app: &mut App, ctx: &egui::Context) {
     folders.sort_by_key(|(_, p)| p.to_lowercase());
     let (mut submit, mut cancel) = (false, false);
     let title = tr!("Convert to Symbol");
-    egui::Window::new(title).id(egui::Id::new("convert_symbol")).collapsible(false).resizable(false).anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0]).show(ctx, |ui| {
-        ui.set_min_width(380.0);
-        form_row(ui, FORM_LABEL_DOCK, tr!("Name"), |ui| {
-            let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Symbol name"));
-            if d.focus {
-                r.request_focus();
-                d.focus = false;
-            }
-            if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
-                submit = true;
-            }
-        });
-        form_row(ui, FORM_LABEL_DOCK, tr!("Type"), |ui| {
-            egui::ComboBox::from_id_salt("convert_kind")
-                .width(200.0)
-                .selected_text(crate::panels::symbol_kind_label(d.kind))
-                .show_ui(ui, |ui| {
-                    for k in [SymbolKind::Graphic, SymbolKind::MovieClip, SymbolKind::Button] {
-                        if ui.selectable_label(d.kind == k, crate::panels::symbol_kind_label(k)).clicked() {
-                            d.kind = k;
-                        }
-                    }
-                })
-                .response
-                .set_name(tr!("Symbol type"));
-        });
-        form_row(ui, FORM_LABEL_DOCK, tr!("Folder"), |ui| {
-            egui::ComboBox::from_id_salt("convert_folder")
-                .width(200.0)
-                .selected_text(folder_label(doc, d.folder))
-                .show_ui(ui, |ui| {
-                    egui::ScrollArea::vertical().max_height(240.0).show(ui, |ui| {
-                        if ui.selectable_label(d.folder.is_none(), tr!("Library (top level)")).clicked() {
-                            d.folder = None;
-                        }
-                        for (f, path) in &folders {
-                            if ui.selectable_label(d.folder == Some(*f), path.as_str()).clicked() {
-                                d.folder = Some(*f);
+    egui::Window::new(title)
+        .id(egui::Id::new("convert_symbol"))
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, -80.0])
+        .show(ctx, |ui| {
+            ui.set_min_width(380.0);
+            form_row(ui, FORM_LABEL_DOCK, tr!("Name"), |ui| {
+                let r = ui.add(egui::TextEdit::singleline(&mut d.name).desired_width(f32::INFINITY)).named(tr!("Symbol name"));
+                if d.focus {
+                    r.request_focus();
+                    d.focus = false;
+                }
+                if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
+                    submit = true;
+                }
+            });
+            form_row(ui, FORM_LABEL_DOCK, tr!("Type"), |ui| {
+                egui::ComboBox::from_id_salt("convert_kind")
+                    .width(200.0)
+                    .selected_text(crate::panels::symbol_kind_label(d.kind))
+                    .show_ui(ui, |ui| {
+                        for k in [SymbolKind::Graphic, SymbolKind::MovieClip, SymbolKind::Button] {
+                            if ui.selectable_label(d.kind == k, crate::panels::symbol_kind_label(k)).clicked() {
+                                d.kind = k;
                             }
                         }
-                    });
-                })
-                .response
-                .on_hover_text(tr!("The Library folder the new symbol goes into (the next conversion offers it again)"))
-                .set_name(tr!("Library folder"));
-        });
-        // A name the folder already has gets a number, as the engine gives it.
-        let wanted = d.name.trim();
-        if !wanted.is_empty() && doc.name_taken(d.folder, wanted, None) {
-            let becomes = doc.unique_name(d.folder, wanted);
-            ui.label(text(Type::Caption, tr!("{folder} already has “{name}”; the new symbol will be “{becomes}”.", folder = folder_label(doc, d.folder), name = wanted, becomes = becomes)));
-        }
-        ui.add_space(4.0);
-        ui.horizontal(|ui| {
-            if ui.button(tr!("OK")).clicked() {
-                submit = true;
+                    })
+                    .response
+                    .set_name(tr!("Symbol type"));
+            });
+            form_row(ui, FORM_LABEL_DOCK, tr!("Folder"), |ui| {
+                egui::ComboBox::from_id_salt("convert_folder")
+                    .width(200.0)
+                    .selected_text(folder_label(doc, d.folder))
+                    .show_ui(ui, |ui| {
+                        egui::ScrollArea::vertical().max_height(240.0).show(ui, |ui| {
+                            if ui.selectable_label(d.folder.is_none(), tr!("Library (top level)")).clicked() {
+                                d.folder = None;
+                            }
+                            for (f, path) in &folders {
+                                if ui.selectable_label(d.folder == Some(*f), path.as_str()).clicked() {
+                                    d.folder = Some(*f);
+                                }
+                            }
+                        });
+                    })
+                    .response
+                    .on_hover_text(tr!("The Library folder the new symbol goes into (the next conversion offers it again)"))
+                    .set_name(tr!("Library folder"));
+            });
+            // A name the folder already has gets a number, as the engine gives it.
+            let wanted = d.name.trim();
+            if !wanted.is_empty() && doc.name_taken(d.folder, wanted, None) {
+                let becomes = doc.unique_name(d.folder, wanted);
+                ui.label(text(
+                    Type::Caption,
+                    tr!(
+                        "{folder} already has “{name}”; the new symbol will be “{becomes}”.",
+                        folder = folder_label(doc, d.folder),
+                        name = wanted,
+                        becomes = becomes
+                    ),
+                ));
             }
-            if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(Key::Escape)) {
-                cancel = true;
-            }
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                if ui.button(tr!("OK")).clicked() {
+                    submit = true;
+                }
+                if ui.button(tr!("Cancel")).clicked() || ui.input(|i| i.key_pressed(Key::Escape)) {
+                    cancel = true;
+                }
+            });
         });
-    });
     if submit {
         accept(app);
     } else if cancel {

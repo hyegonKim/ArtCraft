@@ -149,7 +149,14 @@ fn use_references_and_reported_leftovers() {
     assert_eq!(first.transform.apply(Vec2::new(0.0, 0.0)), Vec2::new(10.0, 20.0));
     assert_eq!(solid(first), Rgba::hex(0x123456));
     assert_eq!(i.shapes.len(), 4, "the dot, the symbol's two rects and the plain rect");
-    for k in ["text (no fonts on this computer)", "images", "references to missing elements", "filters", "references to missing clip paths (drawn unclipped)", "style sheets (inline styles are read)"] {
+    for k in [
+        "text (no fonts on this computer)",
+        "images",
+        "references to missing elements",
+        "filters",
+        "references to missing clip paths (drawn unclipped)",
+        "style sheets (inline styles are read)",
+    ] {
         assert_eq!(i.report.skipped.get(k), Some(&1), "{k}: {:?}", i.report);
     }
     assert!(i.report.summary().starts_with("Imported. Not yet supported: "));
@@ -169,7 +176,15 @@ fn stroke_caps_joins_and_dashes() {
       <line id="plain" x1="0" y1="0" x2="100" y2="0" stroke="#000"/>
     </svg>"##);
     let st = |name: &str| i.shapes.iter().find(|s| s.name == name).and_then(|s| s.shape.stroke.clone()).map(|s| s.style).unwrap();
-    assert_eq!(st("inherits"), StrokeStyle { cap: Cap::Round, join: Join::Bevel, miter_limit: 4.0, dash: Some(Dash::Dashed { lengths: vec![6.0, 3.0].into(), offset: 2.0 }) });
+    assert_eq!(
+        st("inherits"),
+        StrokeStyle {
+            cap: Cap::Round,
+            join: Join::Bevel,
+            miter_limit: 4.0,
+            dash: Some(Dash::Dashed { lengths: vec![6.0, 3.0].into(), offset: 2.0 })
+        }
+    );
     // style= wins; an odd list repeats; units convert; the offset is inherited.
     let own = st("own");
     assert_eq!((own.cap, own.join, own.miter_limit), (Cap::Square, Join::Miter, 8.0));
