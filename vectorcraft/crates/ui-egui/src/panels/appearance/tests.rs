@@ -353,6 +353,23 @@ fn click_text(app: &mut VectorcraftApp, ctx: &egui::Context, label: &str) {
     }
 }
 
+/// Clicks the text `label` drawn in the row labelled `row`: where several dropdowns show the
+/// same value (Bevel and Substance Preset both show "None"), the one in that row.
+fn click_text_in_row(app: &mut VectorcraftApp, ctx: &egui::Context, row: &str, label: &str) {
+    let shown = panel_frame(app, ctx, vec![]);
+    let row_rect = shown.iter().find(|(s, _)| s == row).unwrap_or_else(|| panic!("no row {row:?} in {shown:?}")).1;
+    let at = shown
+        .iter()
+        .find(|(s, r)| s == label && r.center().x > row_rect.max.x && (r.center().y - row_rect.center().y).abs() < row_rect.height())
+        .unwrap_or_else(|| panic!("no {label:?} in the {row:?} row of {shown:?}"))
+        .1
+        .center();
+    let button = |pressed| egui::Event::PointerButton { pos: at, button: egui::PointerButton::Primary, pressed, modifiers: Default::default() };
+    for events in [vec![egui::Event::PointerMoved(at)], vec![button(true)], vec![button(false)]] {
+        panel_frame(app, ctx, events);
+    }
+}
+
 fn shown_texts(app: &mut VectorcraftApp, ctx: &egui::Context) -> Vec<String> {
     panel_frame(app, ctx, vec![]).into_iter().map(|(s, _)| s).collect()
 }
@@ -485,21 +502,25 @@ fn the_effect_editor_lists_a_loaded_glass_texture() {
 /// step.
 #[test]
 fn the_effect_editor_picks_choices_their_own_dialogs_list() {
-    for (effect, key, shown, pick, value) in [
-        ("threeD.revolve", "edge", "Left", "Right", "right"),
-        ("threeD.extrude", "bevel", "None", "Rounded", "rounded"),
-        ("warp.arc", "orientation", "Horizontal", "Vertical", "vertical"),
-        ("rasterize", "colorModel", "RGB", "Grayscale", "grayscale"),
-        ("rasterize", "background", "Transparent", "White", "white"),
-        ("rasterize", "antiAlias", "Art Optimized", "Type Optimized", "type"),
-        ("adjust.levels", "channel", "RGB", "Red", "red"),
-        ("adjust.curves", "channel", "RGB", "Blue", "blue"),
+    // `row`: the row whose dropdown to open, where another one shows the same value.
+    for (effect, key, row, shown, pick, value) in [
+        ("threeD.revolve", "edge", None, "Left", "Right", "right"),
+        ("threeD.extrude", "bevel", Some("Bevel"), "None", "Rounded", "rounded"),
+        ("warp.arc", "orientation", None, "Horizontal", "Vertical", "vertical"),
+        ("rasterize", "colorModel", None, "RGB", "Grayscale", "grayscale"),
+        ("rasterize", "background", None, "Transparent", "White", "white"),
+        ("rasterize", "antiAlias", None, "Art Optimized", "Type Optimized", "type"),
+        ("adjust.levels", "channel", None, "RGB", "Red", "red"),
+        ("adjust.curves", "channel", None, "RGB", "Blue", "blue"),
     ] {
         let (mut app, ctx, id) = editing(effect);
         let texts = shown_texts(&mut app, &ctx);
         assert!(texts.iter().any(|s| s == shown), "{effect} {key}: {texts:?}");
         let undo = app.session.doc().unwrap().history.undo.len();
-        click_text(&mut app, &ctx, shown);
+        match row {
+            Some(row) => click_text_in_row(&mut app, &ctx, row, shown),
+            None => click_text(&mut app, &ctx, shown),
+        }
         click_text(&mut app, &ctx, pick);
         let st = app.session.doc().unwrap();
         assert_eq!(st.doc.node(id).unwrap().appearance.effects[0].params[key], json!(value), "{effect} {key}");
