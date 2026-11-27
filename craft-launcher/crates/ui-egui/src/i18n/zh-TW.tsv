@@ -443,3 +443,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	找不到支援此檔案格式的 Craft 應用程式。
 	Open in {name}	在 {name} 中開啟
 	Install {name}	安裝 {name}
+
+	Creative Workspace Hub	創意工作區中心
+	Files · Fonts · Libraries · Plugins	檔案 · 字型 · 資料庫 · 外掛程式
+	Files	檔案
+	Fonts	字型
+	Libraries	資料庫
+	Plugins	外掛程式
+	Project folder scanner	專案資料夾掃描器
+	Folder to scan	要掃描的資料夾
+	Choose folder…	選擇資料夾…
+	Scan folder	掃描資料夾
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	掃描資料夾以列出最多 50 個創意專案檔案，並在對應的 Craft 應用程式中開啟。
+	No creative project files found in this folder.	此資料夾中找不到支援的創意專案檔案。
+	Found {count} creative files	找到 {count} 個創意檔案
+	All Fonts	所有字型
+	Variable	可變字型
+	CJK & World	中日韓與多語系
+	Monospace	等寬字型
+	Font specimen preview	字型樣本預覽
+	Specimen text	樣本文字
+	Preview size	預覽大小
+	Latin pangram	英文測試句
+	Korean pangram	韓文測試句
+	Bundled	內建
+	System	系統
+	Font families	字型家族
+	Creative Library inspector	創意資料庫檢視器
+	Library or swatch file (.cclibs, .ase, .aco)	資料庫或色票檔案 (.cclibs, .ase, .aco)
+	Inspect library	檢視資料庫
+	Starter library handoff	初始色票資料庫傳遞
+	Library name	資料庫名稱
+	Create & Open in {name}	建立並在 {name} 中開啟
+	Preview starter swatches	預覽初始色票
+	{count} swatches	{count} 個色票
+	MCP gateway & agent config	MCP 閘道與代理設定
+	Copy MCP JSON	複製 MCP JSON
+	Copy VS Code MCP	複製 VS Code MCP
+	Copy Codex TOML	複製 Codex TOML
+	MCP configuration copied to clipboard.	已將 MCP 設定複製到剪貼簿。
+	Suite extensions & plug-in formats	套件擴充功能與外掛程式格式

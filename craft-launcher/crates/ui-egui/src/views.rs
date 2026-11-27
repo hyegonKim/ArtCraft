@@ -189,6 +189,9 @@ impl LauncherUi {
                 if widgets::nav_icon(ui, widgets::Glyph::OpenFile, tl!("Open File in Craft App…"), h, false).clicked() {
                     self.dialog = Some(Dialog::FileRouter { path: String::new() });
                 }
+                if widgets::nav_icon(ui, widgets::Glyph::CreativeHub, tl!("Creative Workspace Hub"), h, false).clicked() {
+                    self.open_creative_hub(artcraft_launcher_core::HubTab::Files);
+                }
                 // The controls reserve their actual widths before the secondary text gets space.
                 ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
                     if ui.available_width() >= 17.0 + widgets::hud_galley(ui, tl!("Craft App Suite"), t.muted).size().x {

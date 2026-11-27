@@ -696,3 +696,44 @@ mailcraft	A desktop app, a browser app, a CLI and an MCP server, all running the
 	No matching Craft app for this file format.	이 파일 형식과 일치하는 Craft 앱이 없습니다.
 	Open in {name}	{name}에서 열기
 	Install {name}	{name} 설치
+
+# Creative Workspace Hub (Files · Fonts · Libraries · Plugins)
+	Creative Workspace Hub	크리에이티브 워크스페이스 허브
+	Files · Fonts · Libraries · Plugins	파일 · 글꼴 · 라이브러리 · 플러그인
+	Files	파일
+	Fonts	글꼴
+	Libraries	라이브러리
+	Plugins	플러그인
+	Project folder scanner	프로젝트 폴더 스캐너
+	Folder to scan	스캔할 폴더
+	Choose folder…	폴더 선택…
+	Scan folder	폴더 스캔
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	폴더를 스캔하여 최대 50개의 작업 파일을 표시하고 알맞은 Craft 앱에서 바로 엽니다.
+	No creative project files found in this folder.	이 폴더에서 지원하는 작업 파일을 찾지 못했습니다.
+	Found {count} creative files	작업 파일 {count}개 발견
+	All Fonts	모든 글꼴
+	Variable	가변 글꼴
+	CJK & World	한중일 및 다국어
+	Monospace	고정폭
+	Font specimen preview	글꼴 견본 미리보기
+	Specimen text	견본 문구
+	Preview size	미리보기 크기
+	Latin pangram	영문 팬그램
+	Korean pangram	한국어 팬그램
+	Bundled	내장 글꼴
+	System	시스템 글꼴
+	Font families	글꼴 패밀리
+	Creative Library inspector	크리에이티브 라이브러리 검사기
+	Library or swatch file (.cclibs, .ase, .aco)	라이브러리 또는 스와치 파일 (.cclibs, .ase, .aco)
+	Inspect library	라이브러리 검사
+	Starter library handoff	스타터 라이브러리 전달
+	Library name	라이브러리 이름
+	Create & Open in {name}	생성 후 {name}에서 열기
+	Preview starter swatches	스타터 스와치 미리보기
+	{count} swatches	스와치 {count}개
+	MCP gateway & agent config	MCP 게이트웨이 및 에이전트 설정
+	Copy MCP JSON	MCP JSON 복사
+	Copy VS Code MCP	VS Code MCP 복사
+	Copy Codex TOML	Codex TOML 복사
+	MCP configuration copied to clipboard.	MCP 설정이 클립보드에 복사되었습니다.
+	Suite extensions & plug-in formats	스위트 확장 기능 및 플러그인 포맷

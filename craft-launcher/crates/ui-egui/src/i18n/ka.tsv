@@ -483,3 +483,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	ამ ფაილის ფორმატისთვის შესაბამისი Craft აპლიკაცია ვერ მოიძებნა.
 	Open in {name}	{name}-ში გახსნა
 	Install {name}	{name}-ის ინსტალაცია
+
+	Creative Workspace Hub	შემოქმედებითი სამუშაო ცენტრი
+	Files · Fonts · Libraries · Plugins	ფაილები · შრიფტები · ბიბლიოთეკები · მოდულები
+	Files	ფაილები
+	Fonts	შრიფტები
+	Libraries	ბიბლიოთეკები
+	Plugins	მოდულები
+	Project folder scanner	პროექტების საქაღალდის სკანერი
+	Folder to scan	სასკანირებელი საქაღალდე
+	Choose folder…	საქაღალდის არჩევა…
+	Scan folder	საქაღალდის სკანირება
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	დაასკანირეთ საქაღალდე 50-მდე შემოქმედებითი ფაილის სანახავად და შესაბამის Craft აპლიკაციაში გასახსნელად.
+	No creative project files found in this folder.	ამ საქაღალდეში მხარდაჭერილი პროექტის ფაილები ვერ მოიძებნა.
+	Found {count} creative files	ნაპოვნია {count} შემოქმედებითი ფაილი
+	All Fonts	ყველა შრიფტი
+	Variable	ცვლადი
+	CJK & World	CJK და მსოფლიო ენები
+	Monospace	მონოსიგანის
+	Font specimen preview	შრიფტის ნიმუშის ნახვა
+	Specimen text	ნიმუშის ტექსტი
+	Preview size	წინასწარი ნახვის ზომა
+	Latin pangram	ლათინური პანგრამა
+	Korean pangram	კორეული პანგრამა
+	Bundled	ჩაშენებული
+	System	სისტემური
+	Font families	შრიფტების ოჯახები
+	Creative Library inspector	შემოქმედებითი ბიბლიოთეკის ინსპექტორი
+	Library or swatch file (.cclibs, .ase, .aco)	ბიბლიოთეკის ან ფერთა ნიმუშის ფაილი (.cclibs, .ase, .aco)
+	Inspect library	ბიბლიოთეკის შემოწმება
+	Starter library handoff	საწყისი ბიბლიოთეკის გადაცემა
+	Library name	ბიბლიოთეკის სახელი
+	Create & Open in {name}	შექმნა და {name}-ში გახსნა
+	Preview starter swatches	საწყისი ფერების ნახვა
+	{count} swatches	{count} ფერის ნიმუში
+	MCP gateway & agent config	MCP კარიბჭე და აგენტის კონფიგურაცია
+	Copy MCP JSON	MCP JSON-ის კოპირება
+	Copy VS Code MCP	VS Code MCP-ის კოპირება
+	Copy Codex TOML	Codex TOML-ის კოპირება
+	MCP configuration copied to clipboard.	MCP კონფიგურაცია დაკოპირდა გაცვლის ბუფერში.
+	Suite extensions & plug-in formats	ნაკრების გაფართოებები და მოდულების ფორმატები

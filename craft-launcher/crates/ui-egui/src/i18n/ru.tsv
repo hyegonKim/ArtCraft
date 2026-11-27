@@ -460,3 +460,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Для этого формата файла нет подходящего приложения Craft.
 	Open in {name}	Открыть в {name}
 	Install {name}	Установить {name}
+
+	Creative Workspace Hub	Творческий центр рабочей среды
+	Files · Fonts · Libraries · Plugins	Файлы · Шрифты · Библиотеки · Плагины
+	Files	Файлы
+	Fonts	Шрифты
+	Libraries	Библиотеки
+	Plugins	Плагины
+	Project folder scanner	Сканер папки проектов
+	Folder to scan	Папка для сканирования
+	Choose folder…	Выбрать папку…
+	Scan folder	Сканировать папку
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Просканируйте папку, чтобы показать до 50 файлов проектов и открыть их в нужном приложении Craft.
+	No creative project files found in this folder.	В этой папке не найдено поддерживаемых файлов проектов.
+	Found {count} creative files	Найдено файлов проектов: {count}
+	All Fonts	Все шрифты
+	Variable	Вариативные
+	CJK & World	CJK и языки мира
+	Monospace	Моноширинные
+	Font specimen preview	Образец шрифта
+	Specimen text	Текст образца
+	Preview size	Размер образца
+	Latin pangram	Латинская панграмма
+	Korean pangram	Корейская панграмма
+	Bundled	Встроенный
+	System	Системный
+	Font families	Семейства шрифтов
+	Creative Library inspector	Инспектор библиотек ресурсов
+	Library or swatch file (.cclibs, .ase, .aco)	Файл библиотеки или образцов (.cclibs, .ase, .aco)
+	Inspect library	Проверить библиотеку
+	Starter library handoff	Стартовая библиотека образцов
+	Library name	Название библиотеки
+	Create & Open in {name}	Создать и открыть в {name}
+	Preview starter swatches	Показать стартовые образцы
+	{count} swatches	Образцов: {count}
+	MCP gateway & agent config	Шлюз MCP и настройка агентов
+	Copy MCP JSON	Копировать MCP JSON
+	Copy VS Code MCP	Копировать MCP для VS Code
+	Copy Codex TOML	Копировать TOML для Codex
+	MCP configuration copied to clipboard.	Конфигурация MCP скопирована в буфер обмена.
+	Suite extensions & plug-in formats	Расширения и форматы плагинов пакета

@@ -465,3 +465,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Ehhez a fájlformátumhoz nem található megfelelő Craft alkalmazás.
 	Open in {name}	Megnyitás itt: {name}
 	Install {name}	{name} telepítése
+
+	Creative Workspace Hub	Kreatív munkaterület-központ
+	Files · Fonts · Libraries · Plugins	Fájlok · Betűtípusok · Könyvtárak · Bővítmények
+	Files	Fájlok
+	Fonts	Betűtípusok
+	Libraries	Könyvtárak
+	Plugins	Bővítmények
+	Project folder scanner	Projektmappa-kereső
+	Folder to scan	Vizsgálandó mappa
+	Choose folder…	Mappa kiválasztása…
+	Scan folder	Mappa vizsgálata
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Vizsgáljon meg egy mappát legfeljebb 50 kreatív projektfájl listázásához és a megfelelő Craft alkalmazásban való megnyitásához.
+	No creative project files found in this folder.	Nem található támogatott kreatív projektfájl ebben a mappában.
+	Found {count} creative files	{count} kreatív fájl található
+	All Fonts	Összes betűtípus
+	Variable	Variábilis
+	CJK & World	CJK és világnyelvek
+	Monospace	Fix szélességű
+	Font specimen preview	Betűminta előnézete
+	Specimen text	Mintaszöveg
+	Preview size	Előnézeti méret
+	Latin pangram	Latin pangramma
+	Korean pangram	Koreai pangramma
+	Bundled	Beépített
+	System	Rendszer
+	Font families	Betűcsaládok
+	Creative Library inspector	Kreatív könyvtárvizsgáló
+	Library or swatch file (.cclibs, .ase, .aco)	Könyvtár- vagy színmintafájl (.cclibs, .ase, .aco)
+	Inspect library	Könyvtár vizsgálata
+	Starter library handoff	Kezdő színmintakönyvtár átadása
+	Library name	Könyvtár neve
+	Create & Open in {name}	Létrehozás és megnyitás itt: {name}
+	Preview starter swatches	Kezdő színminták előnézete
+	{count} swatches	{count} színminta
+	MCP gateway & agent config	MCP-átjáró és ügynökbeállítások
+	Copy MCP JSON	MCP JSON másolása
+	Copy VS Code MCP	VS Code MCP másolása
+	Copy Codex TOML	Codex TOML másolása
+	MCP configuration copied to clipboard.	MCP-beállítások a vágólapra másolva.
+	Suite extensions & plug-in formats	Csomagbővítmények és beépülőformátumok

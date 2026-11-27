@@ -466,3 +466,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Brak aplikacji Craft obsługującej ten format pliku.
 	Open in {name}	Otwórz w {name}
 	Install {name}	Zainstaluj {name}
+
+	Creative Workspace Hub	Centrum przestrzeni twórczej
+	Files · Fonts · Libraries · Plugins	Pliki · Czcionki · Biblioteki · Wtyczki
+	Files	Pliki
+	Fonts	Czcionki
+	Libraries	Biblioteki
+	Plugins	Wtyczki
+	Project folder scanner	Skaner folderu projektów
+	Folder to scan	Folder do przeskanowania
+	Choose folder…	Wybierz folder…
+	Scan folder	Skanuj folder
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Przeskanuj folder, aby wyświetlić do 50 plików projektów i otworzyć je w odpowiedniej aplikacji Craft.
+	No creative project files found in this folder.	W tym folderze nie znaleziono obsługiwanych plików projektów.
+	Found {count} creative files	Znaleziono plików projektów: {count}
+	All Fonts	Wszystkie czcionki
+	Variable	Zmienne
+	CJK & World	CJK i języki świata
+	Monospace	Stała szerokość
+	Font specimen preview	Podgląd wzorca czcionki
+	Specimen text	Tekst próbny
+	Preview size	Rozmiar podglądu
+	Latin pangram	Pangram łaciński
+	Korean pangram	Pangram koreański
+	Bundled	Wbudowana
+	System	Systemowa
+	Font families	Rodziny czcionek
+	Creative Library inspector	Inspektor biblioteki zasobów
+	Library or swatch file (.cclibs, .ase, .aco)	Plik biblioteki lub próbek (.cclibs, .ase, .aco)
+	Inspect library	Zbadaj bibliotekę
+	Starter library handoff	Biblioteka startowa próbek
+	Library name	Nazwa biblioteki
+	Create & Open in {name}	Utwórz i otwórz w {name}
+	Preview starter swatches	Podgląd próbek startowych
+	{count} swatches	Próbek: {count}
+	MCP gateway & agent config	Brama MCP i konfiguracja agentów
+	Copy MCP JSON	Kopiuj MCP JSON
+	Copy VS Code MCP	Kopiuj MCP dla VS Code
+	Copy Codex TOML	Kopiuj TOML dla Codex
+	MCP configuration copied to clipboard.	Skopiowano konfigurację MCP do schowka.
+	Suite extensions & plug-in formats	Rozszerzenia pakietu i formaty wtyczek

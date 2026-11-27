@@ -685,6 +685,8 @@ pub enum Glyph {
     Grip,
     /// Folder / file glyph for opening a file in its matching Craft app.
     OpenFile,
+    /// Four-cell workspace bento grid for the Creative Workspace Hub.
+    CreativeHub,
 }
 
 /// Paints one of the launcher's symbols with the painter, centred in `rect`.
@@ -781,6 +783,30 @@ fn glyph_shapes(rect: Rect, glyph: Glyph, color: Color32) -> Vec<egui::Shape> {
                     stroke,
                 ),
                 egui::Shape::line_segment([m + vec2(-6.0, -1.0), m + vec2(6.0, -1.0)], stroke),
+            ]
+        }
+        Glyph::CreativeHub => {
+            let stroke = Stroke::new(1.3, color);
+            vec![
+                egui::Shape::rect_stroke(
+                    Rect::from_min_max(m + vec2(-5.4, -5.4), m + vec2(-0.8, -0.8)),
+                    CornerRadius::ZERO,
+                    stroke,
+                    egui::StrokeKind::Inside,
+                ),
+                egui::Shape::rect_filled(Rect::from_min_max(m + vec2(0.8, -5.8), m + vec2(5.8, -0.8)), CornerRadius::ZERO, color),
+                egui::Shape::rect_stroke(
+                    Rect::from_min_max(m + vec2(-5.4, 0.8), m + vec2(-0.8, 5.4)),
+                    CornerRadius::ZERO,
+                    stroke,
+                    egui::StrokeKind::Inside,
+                ),
+                egui::Shape::rect_stroke(
+                    Rect::from_min_max(m + vec2(0.8, 0.8), m + vec2(5.4, 5.4)),
+                    CornerRadius::ZERO,
+                    stroke,
+                    egui::StrokeKind::Inside,
+                ),
             ]
         }
     }
@@ -939,7 +965,7 @@ mod tests {
     /// the tool-button and header-cell sizes, or a click target would draw outside its hit rect.
     #[test]
     fn every_painter_glyph_stays_inside_its_control() {
-        for glyph in [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile] {
+        for glyph in [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile, Glyph::CreativeHub] {
             for side in [20.0, crate::theme::CONTROL_H, 48.0] {
                 let rect = Rect::from_min_size(egui::pos2(100.0, 200.0), egui::vec2(side, side));
                 let shapes = glyph_shapes(rect, glyph, Color32::WHITE);
@@ -1046,17 +1072,18 @@ mod tests {
     #[test]
     fn each_glyph_has_its_own_shapes() {
         let rect = Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(crate::theme::CONTROL_H, crate::theme::CONTROL_H));
-        let bounds: Vec<[u32; 4]> = [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile]
-            .into_iter()
-            .map(|glyph| {
-                let union = glyph_shapes(rect, glyph, Color32::WHITE)
-                    .into_iter()
-                    .map(|shape| shape.visual_bounding_rect())
-                    .reduce(|a, b| a.union(b))
-                    .expect("every glyph draws at least one shape");
-                [union.min.x.to_bits(), union.min.y.to_bits(), union.max.x.to_bits(), union.max.y.to_bits()]
-            })
-            .collect();
+        let bounds: Vec<[u32; 4]> =
+            [Glyph::Pause, Glyph::Close, Glyph::Settings, Glyph::Refresh, Glyph::Grip, Glyph::Lock, Glyph::OpenFile, Glyph::CreativeHub]
+                .into_iter()
+                .map(|glyph| {
+                    let union = glyph_shapes(rect, glyph, Color32::WHITE)
+                        .into_iter()
+                        .map(|shape| shape.visual_bounding_rect())
+                        .reduce(|a, b| a.union(b))
+                        .expect("every glyph draws at least one shape");
+                    [union.min.x.to_bits(), union.min.y.to_bits(), union.max.x.to_bits(), union.max.y.to_bits()]
+                })
+                .collect();
         for (i, a) in bounds.iter().enumerate() {
             for b in &bounds[i + 1..] {
                 assert_ne!(a, b, "two glyphs share one bounding box");

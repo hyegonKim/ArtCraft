@@ -9,10 +9,12 @@
 pub mod args;
 pub mod catalog;
 pub mod counterpart;
+pub mod creative_hub;
 pub mod details;
 pub mod distro;
 pub mod feed;
 pub mod hosted_catalog;
+pub mod mcp_config;
 pub mod platform;
 pub mod protocol;
 pub mod release;
@@ -22,6 +24,7 @@ pub mod version;
 
 pub use catalog::{CraftApp, SUITE};
 pub use counterpart::CreativeCategory;
+pub use creative_hub::HubTab;
 pub use platform::{Arch, Os, PackageKind, Platform};
 pub use release::{Asset, Release};
 pub use status::{AppStatus, InstallSource, Installed, Latest};

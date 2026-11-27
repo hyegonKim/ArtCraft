@@ -21,6 +21,7 @@ mod bar;
 mod card_parts;
 #[cfg(not(target_arch = "wasm32"))]
 mod cjk_font;
+pub mod creative_hub;
 mod details;
 mod dialogs;
 pub mod i18n;
@@ -39,6 +40,8 @@ mod views;
 mod widgets;
 
 pub use app::{Host, LauncherUi, TitleBar};
+pub use artcraft_launcher_core::HubTab;
+pub use creative_hub::{ScannedCreativeFile, scan_creative_files_in_dir};
 pub use i18n::{
     Lang, LangInfo, current, detect_system_lang_in_background, fmt, has, lang_from_tag, message, msg, set_current, set_system_locales, system_lang,
     t, t_id, tn, tr, tr_ctx, tr_id, trn,

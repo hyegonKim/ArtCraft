@@ -23,7 +23,7 @@ impl LauncherUi {
         // An area is laid out in the size it had last frame, so dialogs can't share one id: the
         // uninstall prompt would open as tall as Settings and never shrink (#88).
         // The large dialogs run their header to the card's edges; the small prompts keep a margin.
-        let large = matches!(dialog, Dialog::Settings | Dialog::Notes(_));
+        let large = matches!(dialog, Dialog::Settings | Dialog::Notes(_) | Dialog::CreativeHub { .. });
         let modal = egui::Modal::new(egui::Id::unique("dialog").with(dialog.key())).frame(if large {
             crate::sheet::frame(&t)
         } else {
@@ -41,6 +41,7 @@ impl LauncherUi {
             Dialog::Versions(id) => modal.show(ctx, |ui| close = self.version_dialog(ui, id)),
             Dialog::LaunchFlags { app, flags } => modal.show(ctx, |ui| close = self.launch_flags_dialog(ui, app, flags)),
             Dialog::FileRouter { path } => modal.show(ctx, |ui| close = self.file_router_dialog(ui, path, host)),
+            Dialog::CreativeHub { tab, state } => modal.show(ctx, |ui| close = self.creative_hub_dialog(ui, tab, state, host)),
         };
         if self.dialog.as_ref().is_some_and(|active| active.key() != dialog.key()) {
             // A control inside a dialog opened a different one; don't restore the old dialog.

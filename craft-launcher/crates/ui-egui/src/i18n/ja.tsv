@@ -467,3 +467,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	このファイル形式に対応する Craft アプリはありません。
 	Open in {name}	{name} で開く
 	Install {name}	{name} をインストール
+
+	Creative Workspace Hub	クリエイティブ ワークスペース ハブ
+	Files · Fonts · Libraries · Plugins	ファイル · フォント · ライブラリ · プラグイン
+	Files	ファイル
+	Fonts	フォント
+	Libraries	ライブラリ
+	Plugins	プラグイン
+	Project folder scanner	プロジェクトフォルダースキャナー
+	Folder to scan	スキャンするフォルダー
+	Choose folder…	フォルダーを選択…
+	Scan folder	フォルダーをスキャン
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	フォルダーをスキャンして最大50件の制作ファイルを一覧表示し、対応する Craft アプリで開きます。
+	No creative project files found in this folder.	このフォルダーに対応する制作ファイルは見つかりませんでした。
+	Found {count} creative files	{count} 件の制作ファイルが見つかりました
+	All Fonts	すべてのフォント
+	Variable	バリアブル
+	CJK & World	CJK・多言語
+	Monospace	等幅フォント
+	Font specimen preview	フォント見本プレビュー
+	Specimen text	サンプル文字列
+	Preview size	プレビューサイズ
+	Latin pangram	欧文パングラム
+	Korean pangram	韓国語パングラム
+	Bundled	同梱
+	System	システム
+	Font families	フォントファミリー
+	Creative Library inspector	クリエイティブ ライブラリ インスペクター
+	Library or swatch file (.cclibs, .ase, .aco)	ライブラリまたはスウォッチファイル (.cclibs, .ase, .aco)
+	Inspect library	ライブラリを検査
+	Starter library handoff	スターターライブラリの連携
+	Library name	ライブラリ名
+	Create & Open in {name}	作成して {name} で開く
+	Preview starter swatches	スタータースウォッチを表示
+	{count} swatches	{count} 個のスウォッチ
+	MCP gateway & agent config	MCP ゲートウェイとエージェント設定
+	Copy MCP JSON	MCP JSON をコピー
+	Copy VS Code MCP	VS Code MCP をコピー
+	Copy Codex TOML	Codex TOML をコピー
+	MCP configuration copied to clipboard.	MCP 設定をクリップボードにコピーしました。
+	Suite extensions & plug-in formats	スイート拡張機能とプラグイン形式

@@ -452,3 +452,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Nenhum aplicativo Craft corresponde a este formato de arquivo.
 	Open in {name}	Abrir no {name}
 	Install {name}	Instalar {name}
+
+	Creative Workspace Hub	Central de Espaço Criativo
+	Files · Fonts · Libraries · Plugins	Arquivos · Fontes · Bibliotecas · Plug-ins
+	Files	Arquivos
+	Fonts	Fontes
+	Libraries	Bibliotecas
+	Plugins	Plug-ins
+	Project folder scanner	Verificador de pasta de projetos
+	Folder to scan	Pasta para verificar
+	Choose folder…	Escolher pasta…
+	Scan folder	Verificar pasta
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Verifique uma pasta para listar até 50 arquivos criativos e abri-los no aplicativo Craft correspondente.
+	No creative project files found in this folder.	Nenhum arquivo de projeto criativo encontrado nesta pasta.
+	Found {count} creative files	{count} arquivos criativos encontrados
+	All Fonts	Todas as fontes
+	Variable	Variáveis
+	CJK & World	CJK e idiomas globais
+	Monospace	Monoespaçadas
+	Font specimen preview	Visualização de amostra de fonte
+	Specimen text	Texto de amostra
+	Preview size	Tamanho da visualização
+	Latin pangram	Pangrama latino
+	Korean pangram	Pangrama coreano
+	Bundled	Integrada
+	System	Sistema
+	Font families	Famílias de fontes
+	Creative Library inspector	Inspetor de Biblioteca Criativa
+	Library or swatch file (.cclibs, .ase, .aco)	Arquivo de biblioteca ou amostras (.cclibs, .ase, .aco)
+	Inspect library	Inspecionar biblioteca
+	Starter library handoff	Biblioteca inicial de amostras
+	Library name	Nome da biblioteca
+	Create & Open in {name}	Criar e abrir no {name}
+	Preview starter swatches	Visualizar amostras iniciais
+	{count} swatches	{count} amostras
+	MCP gateway & agent config	Gateway MCP e configuração de agentes
+	Copy MCP JSON	Copiar JSON MCP
+	Copy VS Code MCP	Copiar MCP do VS Code
+	Copy Codex TOML	Copiar TOML do Codex
+	MCP configuration copied to clipboard.	Configuração MCP copiada para a área de transferência.
+	Suite extensions & plug-in formats	Extensões da suíte e formatos de plug-in

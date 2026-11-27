@@ -462,3 +462,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Aucune application Craft ne correspond à ce format de fichier.
 	Open in {name}	Ouvrir dans {name}
 	Install {name}	Installer {name}
+
+	Creative Workspace Hub	Espace créatif
+	Files · Fonts · Libraries · Plugins	Fichiers · Polices · Bibliothèques · Modules
+	Files	Fichiers
+	Fonts	Polices
+	Libraries	Bibliothèques
+	Plugins	Modules
+	Project folder scanner	Analyseur de dossier de projets
+	Folder to scan	Dossier à analyser
+	Choose folder…	Choisir un dossier…
+	Scan folder	Analyser le dossier
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Analysez un dossier pour afficher jusqu'à 50 fichiers créatifs et les ouvrir dans leur application Craft.
+	No creative project files found in this folder.	Aucun fichier de projet créatif trouvé dans ce dossier.
+	Found {count} creative files	{count} fichiers créatifs trouvés
+	All Fonts	Toutes les polices
+	Variable	Variables
+	CJK & World	CJK et langues du monde
+	Monospace	Chasse fixe
+	Font specimen preview	Aperçu de spécimen de police
+	Specimen text	Texte d'exemple
+	Preview size	Taille d'aperçu
+	Latin pangram	Pangramme latin
+	Korean pangram	Pangramme coréen
+	Bundled	Intégrée
+	System	Système
+	Font families	Familles de polices
+	Creative Library inspector	Inspecteur de bibliothèque créative
+	Library or swatch file (.cclibs, .ase, .aco)	Fichier de bibliothèque ou de nuancier (.cclibs, .ase, .aco)
+	Inspect library	Inspecter la bibliothèque
+	Starter library handoff	Bibliothèque de départ
+	Library name	Nom de la bibliothèque
+	Create & Open in {name}	Créer et ouvrir dans {name}
+	Preview starter swatches	Aperçu du nuancier de départ
+	{count} swatches	{count} nuances
+	MCP gateway & agent config	Passerelle MCP et configuration d'agents
+	Copy MCP JSON	Copier le JSON MCP
+	Copy VS Code MCP	Copier MCP pour VS Code
+	Copy Codex TOML	Copier le TOML Codex
+	MCP configuration copied to clipboard.	Configuration MCP copiée dans le presse-papiers.
+	Suite extensions & plug-in formats	Extensions et formats de modules de la suite

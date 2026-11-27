@@ -432,3 +432,43 @@ anicraft	Classic tweens with eight easing presets and custom ease curves, plus s
 	No matching Craft app for this file format.	Tomuto formátu souboru neodpovídá žádná aplikace Craft.
 	Open in {name}	Otevřít v {name}
 	Install {name}	Nainstalovat {name}
+
+	Creative Workspace Hub	Kreativní pracovní centrum
+	Files · Fonts · Libraries · Plugins	Soubory · Písma · Knihovny · Pluginy
+	Files	Soubory
+	Fonts	Písma
+	Libraries	Knihovny
+	Plugins	Pluginy
+	Project folder scanner	Skener složky projektů
+	Folder to scan	Složka ke skenování
+	Choose folder…	Vybrat složku…
+	Scan folder	Prohledat složku
+	Scan a folder to list up to 50 creative project files and open them in their Craft app.	Prohledejte složku, zobrazte až 50 kreativních souborů a otevřete je v příslušné aplikaci Craft.
+	No creative project files found in this folder.	V této složce nebyly nalezeny žádné podporované soubory projektů.
+	Found {count} creative files	Nalezeno kreativních souborů: {count}
+	All Fonts	Všechna písma
+	Variable	Variabilní
+	CJK & World	CJK a světová písma
+	Monospace	Neproporcionální
+	Font specimen preview	Náhled vzorku písma
+	Specimen text	Ukázkový text
+	Preview size	Velikost náhledu
+	Latin pangram	Latinský pangram
+	Korean pangram	Korejský pangram
+	Bundled	Vestavěné
+	System	Systémové
+	Font families	Rodiny písem
+	Creative Library inspector	Inspektor kreativní knihovny
+	Library or swatch file (.cclibs, .ase, .aco)	Soubor knihovny nebo vzorníku (.cclibs, .ase, .aco)
+	Inspect library	Prozkoumat knihovnu
+	Starter library handoff	Výchozí knihovna vzorníku
+	Library name	Název knihovny
+	Create & Open in {name}	Vytvořit a otevřít v {name}
+	Preview starter swatches	Zobrazit výchozí vzorník
+	{count} swatches	Vzorků: {count}
+	MCP gateway & agent config	Brána MCP a nastavení agentů
+	Copy MCP JSON	Kopírovat MCP JSON
+	Copy VS Code MCP	Kopírovat MCP pro VS Code
+	Copy Codex TOML	Kopírovat TOML pro Codex
+	MCP configuration copied to clipboard.	Konfigurace MCP byla zkopírována do schránky.
+	Suite extensions & plug-in formats	Rozšíření sady a formáty pluginů

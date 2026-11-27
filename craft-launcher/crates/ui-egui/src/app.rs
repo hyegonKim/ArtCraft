@@ -127,6 +127,7 @@ pub(crate) enum Dialog {
     Versions(String),
     LaunchFlags { app: String, flags: String },
     FileRouter { path: String },
+    CreativeHub { tab: artcraft_launcher_core::HubTab, state: Box<crate::creative_hub::CreativeHubState> },
 }
 
 impl Dialog {
@@ -144,6 +145,7 @@ impl Dialog {
             Dialog::Versions(id) => ("versions", id),
             Dialog::LaunchFlags { app, .. } => ("launch-flags", app),
             Dialog::FileRouter { .. } => ("file-router", ""),
+            Dialog::CreativeHub { .. } => ("creative-hub", ""),
         }
     }
 }
@@ -1056,6 +1058,19 @@ impl LauncherUi {
         self.dialog = Some(Dialog::FileRouter { path: String::new() });
     }
 
+    /// Opens the 4-tab Creative Workspace Hub modal dialog (`Files · Fonts · Libraries · Plugins`).
+    pub fn open_creative_hub(&mut self, tab: artcraft_launcher_core::HubTab) {
+        self.dialog = Some(Dialog::CreativeHub { tab, state: Box::default() });
+    }
+
+    /// Active tab of the Creative Workspace Hub when open, for inspection in tests.
+    pub fn creative_hub_tab(&self) -> Option<artcraft_launcher_core::HubTab> {
+        match &self.dialog {
+            Some(Dialog::CreativeHub { tab, .. }) => Some(*tab),
+            _ => None,
+        }
+    }
+
     /// Routes a file path or extension to its matching Craft Suite app and triggers the appropriate
     /// action: launches the app with the file when installed, starts installation when managed, or
     /// opens its details page on web builds.
@@ -1448,6 +1463,8 @@ mod tests {
         panic!("the picker click must select Simplified Chinese");
     }
 
+    static UI_HARNESS_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
     /// Selecting Simplified Chinese must keep the selection frame itself in English: its face is
     /// installed at the next pass's font gate, and drawing the chosen language before then asks
     /// the bundled (CJK-free) fonts for Chinese glyphs. The old `effective_lang` selector sets the
@@ -1456,6 +1473,7 @@ mod tests {
     fn selecting_chinese_keeps_the_selection_frame_english_until_the_font_gate() {
         use crate::i18n::Lang;
         use egui_kittest::kittest::Queryable;
+        let _serial = UI_HARNESS_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
 
         // Available: the system "has" a Chinese face. The seam's face is the real bundled Inter,
         // which has no CJK glyphs, so the gate can install a face without faking coverage.
@@ -1494,6 +1512,7 @@ mod tests {
             }
             h.get_by_label_contains("No font for this language was found");
         }
+        crate::i18n::set_current(Lang::EN);
     }
 
     /// The strict policy the regression relies on really rejects CJK text without its face.
@@ -1586,6 +1605,8 @@ mod tests {
     #[test]
     fn toolbar_category_chips_and_header_file_router_dialog_work_interactively() {
         use egui_kittest::kittest::Queryable;
+        let _serial = UI_HARNESS_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        crate::i18n::set_current(crate::i18n::Lang::EN);
         struct FileHost(Option<String>);
         impl Host for FileHost {
             fn pick_file(&mut self, _initial: Option<&str>) -> Option<String> {
@@ -1651,5 +1672,116 @@ mod tests {
             "expected TextureCraft launch with routed file, got {:?}",
             sent.borrow()
         );
+    }
+
+    #[test]
+    fn creative_workspace_hub_four_tabs_work_interactively() {
+        use artcraft_launcher_core::HubTab;
+        use egui_kittest::kittest::Queryable;
+        let _serial = UI_HARNESS_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        crate::i18n::set_current(crate::i18n::Lang::EN);
+
+        let temp_dir = std::env::temp_dir().join(format!("artcraft-hub-ui-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&temp_dir);
+        std::fs::create_dir_all(&temp_dir).expect("create temp hub dir");
+        let film_proj = temp_dir.join("trailer.prproj");
+        std::fs::write(&film_proj, b"<PremiereData/>").expect("write prproj");
+        let ase_file = temp_dir.join("test-palette.ase");
+        let ase_bytes = artcraft_launcher_core::creative_hub::build_starter_ase("Test ASE", &[("Cobalt", [0x2F, 0x7B, 0xF5])]);
+        std::fs::write(&ase_file, &ase_bytes).expect("write ase");
+
+        struct HubHost {
+            folder: Option<String>,
+            file: Option<String>,
+        }
+        impl Host for HubHost {
+            fn pick_folder(&mut self, _initial: Option<&str>) -> Option<String> {
+                self.folder.take()
+            }
+            fn pick_file(&mut self, _initial: Option<&str>) -> Option<String> {
+                self.file.take()
+            }
+        }
+
+        let sent = Rc::new(RefCell::new(Vec::new()));
+        let mut backend = Some(Recorder { sent: sent.clone() });
+        let settings = Settings { language: "en".into(), notify: false, ..Settings::default() };
+        let mut host = HubHost { folder: Some(temp_dir.to_string_lossy().into_owned()), file: Some(ase_file.to_string_lossy().into_owned()) };
+
+        let mut h = Harness::builder().with_size(egui::vec2(1180.0, 900.0)).with_theme(egui::Theme::Dark).build_ui_state(
+            move |ui, state: &mut Option<LauncherUi>| {
+                if state.is_none()
+                    && let Some(b) = backend.take()
+                {
+                    let mut l = LauncherUi::new(ui.ctx(), Box::new(b), settings.clone());
+                    l.caps.manage_apps = true;
+                    for (id, app_name) in [("filmcraft", "FilmCraft"), ("photocraft", "PhotoCraft")] {
+                        l.handle(Event::Detected {
+                            app: id.into(),
+                            installed: Some(artcraft_launcher_core::Installed {
+                                version: artcraft_launcher_core::version::parse("0.5.0"),
+                                source: artcraft_launcher_core::InstallSource::Launcher,
+                                location: format!("/Applications/{app_name}.app"),
+                                package: None,
+                                externally_managed: false,
+                                origin: None,
+                                installation: None,
+                            }),
+                        });
+                    }
+                    *state = Some(l);
+                }
+                if let Some(l) = state.as_mut() {
+                    l.logic(&ui.ctx().clone(), &mut host);
+                    l.ui(ui, &mut host);
+                }
+            },
+            None,
+        );
+        h.run_steps(6);
+
+        // 1. Open Creative Workspace Hub from header icon (starts on Files tab).
+        h.get_by_label("Creative Workspace Hub").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().creative_hub_tab(), Some(HubTab::Files));
+
+        // Scan temp folder via "Choose folder…" -> discovers `trailer.prproj` & `test-palette.ase`.
+        h.get_by_label("Choose folder…").click();
+        h.run_steps(2);
+        h.get_by_label("Found 2 creative files");
+
+        // 2. Switch to Fonts tab -> test Korean pangram preset & filter chips.
+        h.get_by_label("Fonts").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().creative_hub_tab(), Some(HubTab::Fonts));
+        h.get_by_label("Korean pangram").click();
+        h.run_steps(3);
+        h.get_by_role_and_label(egui::accesskit::Role::Button, "Monospace").click();
+        h.run_steps(2);
+
+        // 3. Switch to Libraries tab -> browse & inspect `.ase`, then preview starter swatches.
+        h.get_by_label("Libraries").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().creative_hub_tab(), Some(HubTab::Libraries));
+        h.get_by_label("Browse…").click();
+        h.run_steps(2);
+        h.get_by_label("Test ASE");
+        h.get_by_label("1 swatches");
+
+        // 4. Switch to Plugins tab -> copy MCP JSON & launch PhotoCraft.
+        h.get_by_label("Plugins").click();
+        h.run_steps(2);
+        assert_eq!(h.state().as_ref().unwrap().creative_hub_tab(), Some(HubTab::Plugins));
+        h.get_by_label("Copy MCP JSON").click();
+        h.run_steps(2);
+        h.get_by_label("Open in PhotoCraft").click();
+        h.run_steps(2);
+        assert!(
+            sent.borrow().contains(&Command::Launch { app: "photocraft".into(), args: Vec::new() }),
+            "expected PhotoCraft quick launch from Plugins tab, got {:?}",
+            sent.borrow()
+        );
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }
