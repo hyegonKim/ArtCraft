@@ -22,6 +22,8 @@
 
 mod apply;
 pub mod manifest;
+#[allow(dead_code, clippy::cognitive_complexity, clippy::too_many_arguments)]
+pub mod native_vm;
 pub mod registry;
 mod runtime;
 

@@ -58,8 +58,10 @@ pub const MAX_PROFILE_STORE: u64 = 256 << 20;
 const PROFILE_EXT: &str = "icc";
 /// The most stored plug-in bytes read at startup, all files together (the rest are skipped).
 pub const MAX_PLUGIN_STORE: u64 = 512 << 20;
-/// The extension of a stored plug-in.
+/// The default extension of a stored WebAssembly plug-in.
 const PLUGIN_EXT: &str = "wasm";
+/// Extensions recognized in the plug-in store (`.wasm`, `.aip`, `.bundle`).
+const PLUGIN_EXTS: &[&str] = &["wasm", "aip", "bundle"];
 /// The file in the plug-in folder that lists the plug-ins the user disabled.
 pub const DISABLED_FILE: &str = "disabled.json";
 /// The file in the plug-in folder that a window locks while it reads and writes [`DISABLED_FILE`].
@@ -152,15 +154,28 @@ pub(crate) fn plugin_store_key(dir: &Path) -> PathBuf {
 /// The regular files of `dir` with the extension `ext` (any case), by file name, at most
 /// [`MAX_STORE_FILES`]; none when the folder can't be read.
 fn list_files(dir: &Path, ext: &str) -> Vec<PathBuf> {
+    list_files_any(dir, &[ext])
+}
+
+fn list_files_any(dir: &Path, exts: &[&str]) -> Vec<PathBuf> {
     let Ok(entries) = std::fs::read_dir(dir) else { return vec![] };
     let mut files: Vec<PathBuf> = entries
         .filter_map(Result::ok)
         .map(|e| e.path())
-        .filter(|p| p.extension().is_some_and(|e| e.eq_ignore_ascii_case(ext)) && p.is_file())
+        .filter(|p| p.extension().is_some_and(|e| exts.iter().any(|want| e.eq_ignore_ascii_case(want))) && p.is_file())
         .collect();
     files.sort_by_key(|p| p.file_name().map(|n| n.to_string_lossy().to_lowercase()));
     files.truncate(MAX_STORE_FILES);
     files
+}
+
+fn find_stored_plugin_path(dir: &Path, id: &str) -> Option<PathBuf> {
+    let stem = file_stem(id);
+    PLUGIN_EXTS.iter().map(|ext| dir.join(format!("{stem}.{ext}"))).find(|p| p.exists())
+}
+
+fn infer_plugin_ext(bytes: &[u8]) -> &'static str {
+    if vectorcraft_plugins::is_native_plugin_bytes(bytes) { "aip" } else { PLUGIN_EXT }
 }
 
 /// The content of `path` when it is at most `max` bytes; the file is never read past `max`.
@@ -427,7 +442,7 @@ impl Session {
         let limits = vectorcraft_plugins::Limits::default();
         let mut left = MAX_PLUGIN_STORE;
         let mut asks_nothing = BTreeSet::new();
-        for path in list_files(&dir, PLUGIN_EXT) {
+        for path in list_files_any(&dir, PLUGIN_EXTS) {
             if left == 0 {
                 log::warn!("skipping the other stored plug-ins: they hold more than {MAX_PLUGIN_STORE} bytes together");
                 break;
@@ -440,9 +455,10 @@ impl Session {
                 continue;
             }
             let token = safe_mode::loading(&item);
+            let hint = path.file_name().and_then(|n| n.to_str());
             let loaded = read_capped(&path, (limits.max_module_bytes as u64).min(left)).and_then(|bytes| {
                 left -= bytes.len() as u64;
-                vectorcraft_plugins::Plugin::load(&bytes, limits.clone()).map_err(|e| e.to_string())
+                vectorcraft_plugins::Plugin::load_with_hint(&bytes, hint, limits.clone()).map_err(|e| e.to_string())
             });
             safe_mode::loaded(token);
             match loaded {
@@ -583,17 +599,31 @@ impl Session {
     /// Write the module `bytes` of the plug-in `id` to the store → whether they went there (`false`
     /// without a folder).
     pub(crate) fn store_plugin(&self, id: &str, bytes: &[u8]) -> bool {
-        self.plugin_dir.as_deref().is_some_and(|dir| put(dir, &format!("{}.{PLUGIN_EXT}", file_stem(id)), bytes))
+        self.store_plugin_ext(id, infer_plugin_ext(bytes), bytes)
+    }
+
+    /// Write the module `bytes` of the plug-in `id` to the store under extension `ext` (`"wasm"`,
+    /// `"aip"`, or `"bundle"`), removing any stale sibling extension for the same id.
+    pub(crate) fn store_plugin_ext(&self, id: &str, ext: &str, bytes: &[u8]) -> bool {
+        let Some(dir) = self.plugin_dir.as_deref() else { return false };
+        let clean_ext = PLUGIN_EXTS.iter().copied().find(|e| e.eq_ignore_ascii_case(ext)).unwrap_or(PLUGIN_EXT);
+        let stem = file_stem(id);
+        let written = put(dir, &format!("{stem}.{clean_ext}"), bytes);
+        if written {
+            for &other in PLUGIN_EXTS.iter().filter(|&&other| other != clean_ext) {
+                take(dir, &format!("{stem}.{other}"));
+            }
+        }
+        written
     }
 
     /// The module the store holds for the plug-in `id`: `None` without a folder or such a file, and
     /// an error, with a log record, when the file can't be read or is larger than the module limit.
     pub(crate) fn stored_plugin_bytes(&self, id: &str) -> Result<Option<Vec<u8>>, String> {
         let Some(dir) = self.plugin_dir.as_deref() else { return Ok(None) };
-        let path = dir.join(format!("{}.{PLUGIN_EXT}", file_stem(id)));
-        if !path.exists() {
+        let Some(path) = find_stored_plugin_path(dir, id) else {
             return Ok(None);
-        }
+        };
         let max = vectorcraft_plugins::Limits::default().max_module_bytes as u64;
         read_capped(&path, max).map(Some).inspect_err(|e| log::warn!("can't read the stored plug-in {}: {e}", path.display()))
     }
@@ -620,7 +650,9 @@ impl Session {
     /// The file the plug-in `id` is stored in, spelled as [`Session::load_stored_plugins`] names it
     /// (`None` without a plug-in folder).
     pub(crate) fn stored_plugin_file(&self, id: &str) -> Option<String> {
-        self.plugin_dir.as_ref().map(|dir| dir.join(format!("{}.{PLUGIN_EXT}", file_stem(id))).display().to_string())
+        self.plugin_dir
+            .as_ref()
+            .map(|dir| find_stored_plugin_path(dir, id).unwrap_or_else(|| dir.join(format!("{}.{PLUGIN_EXT}", file_stem(id)))).display().to_string())
     }
 
     /// Record in the store what the user granted plug-in `id` (`None`: nothing), leaving the store's
@@ -726,7 +758,10 @@ impl Session {
 
     /// Remove the plug-in `id` from the store → whether its file is gone (`false` without a folder).
     pub(crate) fn unstore_plugin(&self, id: &str) -> bool {
-        self.plugin_dir.as_deref().is_some_and(|dir| take(dir, &format!("{}.{PLUGIN_EXT}", file_stem(id))))
+        self.plugin_dir.as_deref().is_some_and(|dir| {
+            let stem = file_stem(id);
+            PLUGIN_EXTS.iter().all(|ext| take(dir, &format!("{stem}.{ext}")))
+        })
     }
 
     /// Keep the settings and cache of plug-in `id` in the attached plug-in store from now on; without

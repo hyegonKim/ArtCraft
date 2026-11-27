@@ -1,0 +1,14 @@
+[package]
+name = "craft-native-plugin-host"
+description = "Memory-safe, zero-JIT cross-platform C++ binary plugin loader, x86_64/AArch64 VM, and Adobe .8bf/.prm/.aex/.aip host SDK runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }

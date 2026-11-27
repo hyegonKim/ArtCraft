@@ -1,4 +1,5 @@
-//! `plugin.*` commands: sandboxed WebAssembly filter plug-ins (`photocraft-plugins`).
+//! `plugin.*` commands: sandboxed WebAssembly (`.wasm`) and native Photoshop (`.8bf` / `.plugin`)
+//! filter plug-ins (`photocraft-plugins`).
 //!
 //! Plug-ins are installed per process (`plugin.install`, or the Plug-ins preference folder),
 //! listed with `plugin.list` and run with `plugin.run` on the active pixel layer, a targeted
@@ -33,11 +34,18 @@ fn always(_: &Session) -> std::result::Result<(), String> {
 /// JSON description of an installed plug-in.
 pub fn describe(p: &Plugin) -> Value {
     let m = p.manifest();
-    json!({
-        "id": m.id, "name": m.name, "version": m.version, "kind": m.kind, "author": m.author, "description": m.description,
+    let format = if p.is_native_8bf() { "8bf" } else { "wasm" };
+    let mut out = json!({
+        "id": m.id, "name": m.name, "version": m.version, "kind": m.kind, "format": format,
+        "author": m.author, "description": m.description,
         "params": m.params_notation(), "paramsSchema": serde_json::to_value(m).ok().and_then(|v| v.get("params").cloned()),
         "overlap": m.overlap, "area": m.area, "size": p.size(), "source": p.source(),
-    })
+    });
+    if let (Some(obj), Some(desc)) = (out.as_object_mut(), p.native_descriptor()) {
+        obj.insert("arch".into(), json!(desc.arch));
+        obj.insert("guestOs".into(), json!(desc.guest_os));
+    }
+    out
 }
 
 /// The plug-in's own parameters from command params: `params` if given, else the top-level keys
@@ -195,12 +203,13 @@ fn install(_s: &mut Session, p: &Value) -> Result<Value> {
             return Err(bad(CMD, "`data` is larger than the module limit"));
         }
         let bytes = b64_decode(data).ok_or_else(|| bad(CMD, "`data` is not valid base64"))?;
-        Plugin::load(&bytes, photocraft_plugins::Limits::default()).map_err(err)?
+        let hint = p.get("filename").or_else(|| p.get("name")).and_then(Value::as_str);
+        Plugin::load_with_hint(&bytes, hint, photocraft_plugins::Limits::default()).map_err(err)?
     } else if let Some(path) = p.get("path") {
         let path = path.as_str().filter(|s| !s.is_empty()).ok_or_else(|| bad(CMD, "`path` must be a file path"))?;
         load_path(path)?
     } else {
-        return Err(bad(CMD, "give `path` (a .wasm file) or `data` (the module as base64)"));
+        return Err(bad(CMD, "give `path` (a .wasm, .8bf or .plugin file) or `data` (the module as base64)"));
     };
     let replace = p.get("replace").and_then(Value::as_bool).unwrap_or(true);
     if !replace && registry::get(plugin.id()).is_some() {
@@ -287,7 +296,7 @@ pub fn specs() -> Vec<CommandSpec> {
             label: "Install Plug-in…",
             menu: &["Filter", "Plug-ins"],
             shortcut: None,
-            params: r##"{"path":text,"data":json,"replace":bool=true} (path: a .wasm file, native only; data: the module as base64)"##,
+            params: r##"{"path":text,"data":json,"replace":bool=true} (path: a .wasm, .8bf or .plugin file, native only; data: the module as base64)"##,
             enabled: always,
             run: install,
             journal: false,
@@ -310,7 +319,7 @@ pub fn specs() -> Vec<CommandSpec> {
             label: "Reload Plug-ins",
             menu: &[],
             shortcut: None,
-            params: r##"{"path":text} (a folder of .wasm plug-ins; default: the Plug-ins preference folder)"##,
+            params: r##"{"path":text} (a folder of .wasm, .8bf or .plugin plug-ins; default: the Plug-ins preference folder)"##,
             enabled: always,
             run: reload,
             journal: false,

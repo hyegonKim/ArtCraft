@@ -192,8 +192,8 @@ fn pick_open(app: &mut VectorcraftApp, pick: &FilePick) -> Result<String, String
 }
 
 /// Object › Plug-ins › Install Plug-in…: installs the module `p` gives (`path`, or `dataBase64`
-/// with `name`), else a picked `.wasm` (the web's file picker hands the file to [`open_bytes`],
-/// which installs it) → [`install_module`]'s result.
+/// with `name`), else a picked `.wasm`, `.aip`, or `.bundle` plug-in (the web's file picker hands
+/// the file to [`open_bytes`], which installs it) → [`install_module`]'s result.
 pub fn install_plugin(app: &mut VectorcraftApp, p: &Value) -> Result<Value, String> {
     let given = |k: &str| p.get(k).and_then(Value::as_str).is_some_and(|v| !v.is_empty());
     if given("path") || given("dataBase64") {
@@ -202,8 +202,8 @@ pub fn install_plugin(app: &mut VectorcraftApp, p: &Value) -> Result<Value, Stri
     if app.services.open_async.is_some() {
         return open_dialog(app).map(|_| Value::Null);
     }
-    let path =
-        pick_open(app, &FilePick { filters: vec![FilePick::filter("Plug-ins", vectorcraft_engine::cmd::plugin::EXTS)], ..Default::default() })?;
+    let filters = vec![FilePick::filter("Plug-ins", &["wasm", "aip", "bundle"])];
+    let path = pick_open(app, &FilePick { filters, ..Default::default() })?;
     install_module(app, json!({ "path": path }))
 }
 

@@ -41,6 +41,8 @@ pub mod export;
 pub mod host;
 pub mod import;
 pub mod manifest;
+#[allow(dead_code)]
+pub mod native_vm;
 pub mod objects;
 pub mod painted;
 pub mod permissions;
@@ -53,7 +55,8 @@ pub mod wat;
 pub use dialog::ParamUi;
 pub use host::{LogLevel, LogLine, Report};
 pub use manifest::{Budget, Command, InputKind, Kind, Manifest, Param, ParamSpec};
-pub use runtime::{ABI_VERSION, HEAVY_FUEL, HEAVY_WALL_TIME_MS, Limits, Plugin, heavy_terms};
+pub use registry::{PLUGIN_EXTENSIONS, is_plugin_extension};
+pub use runtime::{ABI_VERSION, HEAVY_FUEL, HEAVY_WALL_TIME_MS, Limits, Plugin, heavy_terms, is_native_plugin_bytes};
 #[doc(hidden)]
 pub use runtime::{BYTES_COPIED_PER_FUEL, FUEL_SLICE};
 

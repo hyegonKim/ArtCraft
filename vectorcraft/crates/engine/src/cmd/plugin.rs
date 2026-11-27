@@ -584,11 +584,11 @@ pub(crate) fn admit_effects_for(cmd: &str, fx: &[Effect], n: &Node) -> std::resu
 /// Largest base64 payload `plugin.install` accepts (the module limit, encoded).
 const MAX_DATA_CHARS: usize = (32 << 20) / 3 * 4 + 4;
 
-/// The `.wasm` extension plug-in files have (File › Open installs them).
-pub const EXTS: &[&str] = &["wasm"];
+/// The `.wasm`, `.aip`, and `.bundle` extensions plug-in files have (File › Open installs them).
+pub const EXTS: &[&str] = &["wasm", "aip", "bundle"];
 
 /// The plug-in module command `c`'s params give, loaded and checked, and its bytes: `path` (a
-/// `.wasm` file) or `dataBase64` (the module, with `name` shown as its source).
+/// `.wasm`, `.aip`, or `.bundle` file) or `dataBase64` (the module, with `name` shown as its source).
 fn load_given(c: &str, p: &Value) -> Result<(Plugin, Vec<u8>)> {
     match (str_param(p, "path").filter(|s| !s.is_empty()), str_param(p, "dataBase64")) {
         (_, Some(data)) => {
@@ -596,8 +596,9 @@ fn load_given(c: &str, p: &Value) -> Result<(Plugin, Vec<u8>)> {
                 return Err(bad(c, "`dataBase64` is larger than the module limit"));
             }
             let bytes = vectorcraft_format::base64_decode(data).ok_or_else(|| bad(c, "`dataBase64` is not valid base64"))?;
-            let plugin = Plugin::load(&bytes, vectorcraft_plugins::Limits::default()).map_err(err)?;
-            let plugin = match str_param(p, "name") {
+            let hint = str_param(p, "name");
+            let plugin = Plugin::load_with_hint(&bytes, hint, vectorcraft_plugins::Limits::default()).map_err(err)?;
+            let plugin = match hint {
                 Some(name) => plugin.with_source(name),
                 None => plugin,
             };
@@ -856,7 +857,7 @@ fn install(s: &mut Session, p: &Value) -> Result<Value> {
     // module back, so the store is read again to tell which module it holds. A stored module that
     // can't be read back isn't replaced by one that needs a grant.
     let previous = s.stored_plugin_bytes(&id);
-    let mut stored = (previous.is_ok() || !asks) && s.store_plugin(&id, &bytes);
+    let mut stored = (previous.is_ok() || !asks) && s.store_plugin_ext(&id, installed.file_extension(), &bytes);
     let holds_new = |s: &Session| s.stored_plugin_bytes(&id).is_ok_and(|held| held.as_deref() == Some(&bytes[..]));
     if asks {
         if stored && !s.store_grant(&id, Some(g)) {
@@ -919,13 +920,23 @@ fn inspect(s: &mut Session, p: &Value) -> Result<Value> {
     })
 }
 
-/// The plug-in in the `.wasm` file `path`, and its module.
+/// The plug-in in the `.wasm`, `.aip`, or `.bundle` file `path`, and its module.
 #[cfg(not(target_arch = "wasm32"))]
 fn load_path(path: &str) -> Result<(Plugin, Vec<u8>)> {
     crate::file_access::check_read(path).map_err(EngineError::Other)?;
+    let raw_path = std::path::Path::new(path);
+    let target = match registry::resolve_bundle_executable(raw_path) {
+        Some(exec) => {
+            if let Some(exec_str) = exec.to_str() {
+                crate::file_access::check_read(exec_str).map_err(EngineError::Other)?;
+            }
+            exec
+        }
+        None => raw_path.to_path_buf(),
+    };
     let limits = vectorcraft_plugins::Limits::default();
-    let bytes = crate::store::read_capped(std::path::Path::new(path), limits.max_module_bytes as u64).map_err(EngineError::Other)?;
-    Ok((Plugin::load(&bytes, limits).map_err(err)?.with_source(path), bytes))
+    let bytes = crate::store::read_capped(&target, limits.max_module_bytes as u64).map_err(EngineError::Other)?;
+    Ok((Plugin::load_with_hint(&bytes, Some(path), limits).map_err(err)?.with_source(path), bytes))
 }
 
 #[cfg(target_arch = "wasm32")]

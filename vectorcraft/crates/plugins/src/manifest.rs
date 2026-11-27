@@ -399,7 +399,7 @@ impl Manifest {
 
     /// Checks what the module declared: its id, name and text lengths, its extensions, a budget its
     /// kind may have (only a filter may be heavy), and each parameter and its dialog layout.
-    fn validate(&self) -> Result<()> {
+    pub(crate) fn validate(&self) -> Result<()> {
         if !valid_id(&self.id) {
             return Err(Error::Manifest(format!("invalid id {:?}: use 1-64 characters from A-Z a-z 0-9 . _ -", self.id)));
         }

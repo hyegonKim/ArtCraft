@@ -3811,6 +3811,7 @@ file-filter	SVG Compressed	압축된 SVG
 file-filter	PDF-compatible .ai	PDF 호환 .ai
 file-filter	VectorCraft Template	VectorCraft 템플릿
 file-filter	Templates	템플릿
+file-filter	Plug-ins	플러그인
 	Focal Fill	초점 칠
 	Focal Stroke	초점 선
 	Fractional Widths	소수 너비

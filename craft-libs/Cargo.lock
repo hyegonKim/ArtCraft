@@ -2075,6 +2075,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "craft-native-plugin-host"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "craft-odf"
 version = "0.1.0"
 dependencies = [

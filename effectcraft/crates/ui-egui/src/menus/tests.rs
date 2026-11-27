@@ -714,10 +714,10 @@ fn effect_plugin_install_dialog_router() {
     // The bundle menu entry: a folder picker.
     assert_eq!(invoke(&mut app, &ctx, "effect.plugins.install", json!({"bundle": true})).unwrap(), json!({"dialog": "effect.plugins.install"}));
     assert_eq!(pending.lock().unwrap().pop().unwrap(), crate::FileDialog::Folder, "the bundle asks for a folder");
-    // The plain command: a `.wasm` file picker.
+    // The plain command: an effect plug-in file picker (.wasm, .aex, .prm, .plugin).
     assert_eq!(invoke(&mut app, &ctx, "effect.plugins.install", json!({})).unwrap(), json!({"dialog": "effect.plugins.install"}));
     let crate::FileDialog::Open { exts, many } = pending.lock().unwrap().pop().unwrap() else { panic!("not an open dialog") };
-    assert_eq!(exts, vec!["wasm".to_string()], "{exts:?}");
+    assert_eq!(exts, vec!["wasm".to_string(), "aex".to_string(), "prm".to_string(), "plugin".to_string()], "{exts:?}");
     assert!(!many);
     // `path` given inline overrides the bundle ask: the command runs directly, opening no dialog
     // (this session has no plug-in loader, so it errors — but nothing was asked).

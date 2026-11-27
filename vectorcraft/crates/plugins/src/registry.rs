@@ -178,22 +178,53 @@ pub fn intern(s: &str) -> &'static str {
     v
 }
 
-/// Reads a `.wasm` file (refusing anything that isn't a regular file or exceeds the module limit)
-/// and loads it.
+/// File extensions recognized as loadable VectorCraft plug-in modules (`.wasm`, `.aip`, `.bundle`).
+pub const PLUGIN_EXTENSIONS: &[&str] = &["wasm", "aip", "bundle"];
+
+/// Whether `ext` is one of [`PLUGIN_EXTENSIONS`] (case-insensitive).
+pub fn is_plugin_extension(ext: &std::ffi::OsStr) -> bool {
+    PLUGIN_EXTENSIONS.iter().any(|allowed| ext.eq_ignore_ascii_case(allowed))
+}
+
+/// Resolves a macOS CFBundle directory (`Foo.aip/Contents/MacOS/Foo` or `Foo.bundle/Contents/MacOS/...`)
+/// to its inner Mach-O executable file when `path` is a bundle directory on disk.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn resolve_bundle_executable(path: &std::path::Path) -> Option<std::path::PathBuf> {
+    let ext = path.extension()?;
+    if !(ext.eq_ignore_ascii_case("aip") || ext.eq_ignore_ascii_case("bundle")) || !path.is_dir() {
+        return None;
+    }
+    let macos_dir = path.join("Contents").join("MacOS");
+    if let Some(stem) = path.file_stem() {
+        let direct = macos_dir.join(stem);
+        if direct.is_file() {
+            return Some(direct);
+        }
+    }
+    let mut entries: Vec<std::path::PathBuf> =
+        std::fs::read_dir(macos_dir).ok()?.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.is_file()).collect();
+    entries.sort();
+    entries.into_iter().next()
+}
+
+/// Reads a `.wasm`, `.aip`, or `.bundle` plug-in (refusing anything that isn't a regular file or
+/// bundle executable, or exceeds the module limit) and loads it.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn load_file(path: &std::path::Path, limits: Limits) -> Result<Plugin> {
     use std::io::Read;
-    let meta = std::fs::metadata(path).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
+    let target = resolve_bundle_executable(path).unwrap_or_else(|| path.to_path_buf());
+    let meta = std::fs::metadata(&target).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
     if !meta.is_file() {
         return Err(Error::Io(format!("{} is not a file", path.display())));
     }
     if meta.len() > limits.max_module_bytes as u64 {
         return Err(Error::Module(format!("{} is {} bytes (limit {})", path.display(), meta.len(), limits.max_module_bytes)));
     }
-    let f = std::fs::File::open(path).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
+    let f = std::fs::File::open(&target).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
     let mut bytes = Vec::new();
     f.take(limits.max_module_bytes as u64 + 1).read_to_end(&mut bytes).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
-    Ok(Plugin::load(&bytes, limits)?.with_source(path.display().to_string()))
+    let hint = path.file_name().and_then(|n| n.to_str());
+    Ok(Plugin::load_with_hint(&bytes, hint, limits)?.with_source(path.display().to_string()))
 }
 
 /// What [`load_folder`] reports for a plug-in the user disabled.
@@ -239,7 +270,7 @@ pub fn load_folder_where(
     safe_mode::check()?;
     let rd = std::fs::read_dir(dir).map_err(|e| Error::Io(format!("{}: {e}", dir.display())))?;
     let mut files: Vec<std::path::PathBuf> =
-        rd.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm"))).collect();
+        rd.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(is_plugin_extension)).collect();
     files.sort();
     files.truncate(1000);
     let mut report = FolderReport::default();

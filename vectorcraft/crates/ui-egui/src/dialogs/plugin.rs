@@ -1,4 +1,4 @@
-//! WebAssembly plug-ins in the menus and their generated dialogs.
+//! Sandboxed `.wasm` and compiled C++ `.aip` / `.bundle` plug-ins in the menus and their generated dialogs.
 //!
 //! Object › Plug-ins lists the installed object filters (`plugin.dialog {id}`), then Install
 //! Plug-in… and Reload Plug-ins; Effect › Plug-ins lists the live-effect plug-ins, which open the

@@ -58,7 +58,9 @@ fn install_plugin_path_is_chosen_with_browse() {
     h.get_by_label("Browse…").click();
     h.run_steps(4);
     match asked.borrow().as_slice() {
-        [FileDialogRequest::Open { multiple: false, extensions: Some(e), .. }] => assert_eq!(e, &["wasm".to_string()]),
+        [FileDialogRequest::Open { multiple: false, extensions: Some(e), .. }] => {
+            assert_eq!(e, &["wasm".to_string(), "8bf".to_string(), "plugin".to_string()]);
+        }
         other => panic!("unexpected requests {other:?}"),
     }
     assert_eq!(field(&h, "path"), Some(json!("/tmp/blur.wasm")));

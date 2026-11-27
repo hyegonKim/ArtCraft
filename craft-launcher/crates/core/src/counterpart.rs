@@ -793,6 +793,7 @@ pub const CRAFT_SUITE_COUNTERPARTS: [CounterpartSpec; 16] = [
             "ase",
             "psd",
             "psb",
+            "8bf",
         ],
     },
     CounterpartSpec {
@@ -814,6 +815,7 @@ pub const CRAFT_SUITE_COUNTERPARTS: [CounterpartSpec; 16] = [
             "ai",
             "eps",
             "svg",
+            "aip",
         ],
     },
     CounterpartSpec {
@@ -836,6 +838,8 @@ pub const CRAFT_SUITE_COUNTERPARTS: [CounterpartSpec; 16] = [
             "frame io",
             "prproj",
             "fcpxml",
+            "prm",
+            "aex",
         ],
     },
     CounterpartSpec {
@@ -859,6 +863,7 @@ pub const CRAFT_SUITE_COUNTERPARTS: [CounterpartSpec; 16] = [
             "dng",
             "cr3",
             "lrcat",
+            "8bf",
         ],
     },
     CounterpartSpec {
@@ -890,6 +895,8 @@ pub const CRAFT_SUITE_COUNTERPARTS: [CounterpartSpec; 16] = [
             "frame io",
             "aep",
             "motn",
+            "aex",
+            "prm",
         ],
     },
     CounterpartSpec {
@@ -1149,25 +1156,32 @@ pub fn app_in_category(app_id: &str, category: CreativeCategory) -> bool {
     category == CreativeCategory::All || categories_for_app(app_id).contains(&category)
 }
 
-/// Route a file extension (`".psd"`, `"PSD"`, `"cclibs"`, ...) to the canonical Craft Suite `app_id`.
-pub fn route_file_extension(ext: &str) -> Option<&'static str> {
+fn normalize_ext_token(ext: &str) -> String {
     let trimmed = ext.trim().trim_matches(['"', '\'']);
     let token = match trimmed.rsplit_once('.') {
         Some((_, suffix)) => suffix,
         None => trimmed,
     };
-    let lower = token.trim().to_ascii_lowercase();
+    token.trim().to_ascii_lowercase()
+}
+
+/// Route a file extension (`".psd"`, `"PSD"`, `".8bf"`, `".aip"`, `".prm"`, `".aex"`, ...) to the
+/// primary canonical Craft Suite `app_id`.
+pub fn route_file_extension(ext: &str) -> Option<&'static str> {
+    let lower = normalize_ext_token(ext);
     match lower.as_str() {
-        // PhotoCraft: raster documents, layered files, swatches, and Creative Cloud Libraries
-        "psd" | "psb" | "pcraft" | "ase" | "aco" | "cclibs" | "cclib" | "ora" | "kra" | "xcf" | "pdn" | "abr" | "asl" | "atn" => Some("photocraft"),
+        // PhotoCraft: raster documents, layered files, swatches, C++ .8bf filter plug-ins, and CC Libraries
+        "psd" | "psb" | "pcraft" | "ase" | "aco" | "cclibs" | "cclib" | "ora" | "kra" | "xcf" | "pdn" | "abr" | "asl" | "atn" | "8bf" => {
+            Some("photocraft")
+        }
         // LightCraft: camera raw and photo catalogs
         "raw" | "cr3" | "cr2" | "dng" | "lrcat" | "nef" | "arw" | "raf" | "orf" | "rw2" | "pef" | "xmp" => Some("lightcraft"),
-        // VectorCraft: vector illustration and artwork
-        "ai" | "eps" | "svg" | "svgz" | "vcraft" => Some("vectorcraft"),
-        // FilmCraft: non-linear video editing timelines and interchange
-        "fcproj" | "prproj" | "fcpxml" | "mp4" | "mov" | "mxf" | "mkv" => Some("filmcraft"),
-        // EffectCraft: motion graphics and compositing
-        "ecproj" | "aep" | "aepx" | "motn" => Some("effectcraft"),
+        // VectorCraft: vector illustration, artwork, and C++ .aip SweetPea/PICA plug-ins
+        "ai" | "eps" | "svg" | "svgz" | "vcraft" | "aip" => Some("vectorcraft"),
+        // FilmCraft: non-linear video editing timelines, interchange, and C++ .prm plug-ins
+        "fcproj" | "prproj" | "fcpxml" | "mp4" | "mov" | "mxf" | "mkv" | "prm" => Some("filmcraft"),
+        // EffectCraft: motion graphics, compositing, and C++ .aex plug-ins
+        "ecproj" | "aep" | "aepx" | "motn" | "aex" => Some("effectcraft"),
         // DesignCraft: page layout, editorial stories, and publishing
         "indd" | "indt" | "idml" | "icml" | "designcraft" | "dcdoc" => Some("designcraft"),
         // PdfCraft: PDF documents and forms
@@ -1196,11 +1210,32 @@ pub fn route_file_extension(ext: &str) -> Option<&'static str> {
     }
 }
 
-/// Route a filesystem path (or bare `".ext"` / `"filename.ext"`) to its target [`crate::CraftApp`].
+/// Secondary Craft Suite host `app_id`s that also load a shared third-party C++ plug-in extension
+/// (`.8bf` -> `lightcraft`, `.prm` -> `effectcraft`, `.aex` -> `filmcraft`).
+pub fn route_secondary_file_extensions(ext: &str) -> &'static [&'static str] {
+    match normalize_ext_token(ext).as_str() {
+        "8bf" => &["lightcraft"],
+        "prm" => &["effectcraft"],
+        "aex" => &["filmcraft"],
+        _ => &[],
+    }
+}
+
+/// Route a filesystem path (or bare `".ext"` / `"filename.ext"`) to its primary target [`crate::CraftApp`].
 pub fn route_file_path(path: &Path) -> Option<&'static crate::CraftApp> {
     let ext = path.extension().and_then(|e| e.to_str()).or_else(|| path.file_name().and_then(|n| n.to_str()).and_then(|s| s.strip_prefix('.')));
     let app_id = route_file_extension(ext?)?;
     crate::CraftApp::by_id(app_id)
+}
+
+/// Secondary [`crate::CraftApp`] hosts for a filesystem path when the file format is shared across
+/// Craft hosts (such as `.8bf`, `.prm`, and `.aex` C++ binary plug-ins).
+pub fn route_secondary_file_paths(path: &Path) -> Vec<&'static crate::CraftApp> {
+    let Some(ext) = path.extension().and_then(|e| e.to_str()).or_else(|| path.file_name().and_then(|n| n.to_str()).and_then(|s| s.strip_prefix('.')))
+    else {
+        return Vec::new();
+    };
+    route_secondary_file_extensions(ext).iter().copied().filter_map(crate::CraftApp::by_id).collect()
 }
 
 #[cfg(test)]
@@ -1431,6 +1466,32 @@ mod tests {
         }
         assert_eq!(route_file_extension("unknown_ext_xyz"), None);
         assert!(route_file_path(Path::new("/tmp/README")).is_none());
+    }
+
+    #[test]
+    fn binary_cpp_plugin_extensions_route_to_primary_and_secondary_craft_hosts() {
+        let plugin_cases: &[(&str, &str, &[&str])] = &[
+            (".8bf", "photocraft", &["lightcraft"]),
+            (".prm", "filmcraft", &["effectcraft"]),
+            (".aex", "effectcraft", &["filmcraft"]),
+            (".aip", "vectorcraft", &[]),
+        ];
+        for &(ext, primary, expected_secondary) in plugin_cases {
+            assert_eq!(route_file_extension(ext), Some(primary), "primary {ext}");
+            assert_eq!(route_file_extension(&ext.to_ascii_uppercase()), Some(primary), "upper {ext}");
+            assert_eq!(route_secondary_file_extensions(ext), expected_secondary, "secondary {ext}");
+
+            let p = Path::new("/plugins").join(format!("SamplePlugin{ext}"));
+            assert_eq!(route_file_path(&p).map(|a| a.id), Some(primary));
+            let sec_ids: Vec<&str> = route_secondary_file_paths(&p).into_iter().map(|a| a.id).collect();
+            assert_eq!(sec_ids, expected_secondary);
+
+            let needle = ext.trim_start_matches('.');
+            assert!(CounterpartSpec::by_app_id(primary).unwrap().matches_query(needle), "{primary} search term {needle}");
+            for &sec in expected_secondary {
+                assert!(CounterpartSpec::by_app_id(sec).unwrap().matches_query(needle), "{sec} search term {needle}");
+            }
+        }
     }
 
     #[test]

@@ -1,4 +1,5 @@
-//! The wasmi host: loading, instantiating and calling a plug-in under resource limits.
+//! The plug-in host: loading, instantiating and calling WebAssembly (`.wasm`) and native
+//! Photoshop `.8bf` / Mach-O (`.plugin`) filter plug-ins under resource limits.
 
 use std::sync::{Arc, Mutex};
 
@@ -7,7 +8,8 @@ use wasmi::{
     WasmResults,
 };
 
-use crate::manifest::Manifest;
+use crate::manifest::{Area, Kind, Manifest, printable_name, trim_name};
+use crate::native_vm::{Filter8bfHost, PluginDescriptor, PluginFormat, PluginHostError};
 use crate::{Error, Result};
 
 /// The plug-in ABI version this host implements (`pc_abi_version` must return it).
@@ -66,20 +68,34 @@ impl Limits {
     }
 }
 
+enum Backend {
+    Wasm { engine: Engine, module: Module },
+    Native8bf(Box<Filter8bfHost>),
+}
+
 /// A loaded, validated plug-in. Cheap to share (`Arc`) and safe to run from several threads:
-/// every run gets its own store and instance.
+/// every run gets its own store / VM instance.
 pub struct Plugin {
     manifest: Manifest,
-    engine: Engine,
-    module: Module,
+    backend: Backend,
     limits: Limits,
     size: usize,
     source: Option<String>,
 }
 
+const _: () = {
+    const fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<Plugin>();
+};
+
 impl std::fmt::Debug for Plugin {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Plugin").field("manifest", &self.manifest).field("size", &self.size).field("source", &self.source).finish()
+        f.debug_struct("Plugin")
+            .field("manifest", &self.manifest)
+            .field("native_8bf", &self.is_native_8bf())
+            .field("size", &self.size)
+            .field("source", &self.source)
+            .finish()
     }
 }
 
@@ -106,7 +122,7 @@ impl Deadline {
         // generic cancellation error, even when results are collected in a different order.
         self.abort.lock().unwrap_or_else(std::sync::PoisonError::into_inner).get_or_insert(error);
     }
-    fn check(&self) -> Result<()> {
+    pub(crate) fn check(&self) -> Result<()> {
         if let Some(error) = self.abort.lock().unwrap_or_else(std::sync::PoisonError::into_inner).clone() {
             return Err(error);
         }
@@ -129,6 +145,24 @@ pub(crate) struct Live {
 
 fn wasm_err(e: wasmi::Error) -> Error {
     if e.as_trap_code() == Some(wasmi::TrapCode::OutOfFuel) { Error::Limit("instruction budget".into()) } else { Error::Trap(e.to_string()) }
+}
+
+pub(crate) fn native_err(e: PluginHostError) -> Error {
+    match e {
+        PluginHostError::InvalidBinary(m) | PluginHostError::UnsupportedArch(m) => Error::Module(m),
+        PluginHostError::MissingEntrypoint(m) | PluginHostError::Abi(m) => Error::Abi(m),
+        PluginHostError::MemoryFault(m) | PluginHostError::CpuTrap(m) => Error::Trap(m),
+        PluginHostError::Limit(m) => {
+            if m.contains("instruction budget") {
+                Error::Limit("instruction budget".into())
+            } else if m.contains("binary size") {
+                Error::Module(m)
+            } else {
+                Error::Limit(m)
+            }
+        }
+        PluginHostError::PluginError(code) => Error::Failed(format!(".8bf filter returned error code {code}")),
+    }
 }
 
 /// Reads an unsigned LEB128 `u32` at the start of `bytes`: the value and its length.
@@ -187,19 +221,119 @@ fn format_hint(bytes: &[u8]) -> Option<&'static str> {
     None
 }
 
+fn clean_file_stem(file_hint: Option<&str>) -> Option<&str> {
+    let raw = file_hint?.trim();
+    if raw.is_empty() {
+        return None;
+    }
+    let fname = raw.rsplit(['/', '\\']).next().unwrap_or(raw);
+    let stem = fname.rsplit_once('.').map_or(fname, |(s, _)| s).trim();
+    (!stem.is_empty()).then_some(stem)
+}
+
+fn normalize_id_slug(s: &str) -> String {
+    let mut out = String::new();
+    let mut prev_sep = true;
+    for ch in s.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            prev_sep = false;
+        } else if matches!(ch, '.' | '-') && !prev_sep {
+            out.push(ch);
+            prev_sep = true;
+        } else if !prev_sep {
+            out.push('_');
+            prev_sep = true;
+        }
+    }
+    while out.ends_with(['_', '.', '-']) {
+        out.pop();
+    }
+    out
+}
+
+fn synthesize_8bf_manifest(desc: &PluginDescriptor, file_hint: Option<&str>) -> Result<Manifest> {
+    let stem = clean_file_stem(file_hint);
+    let ep_fallback = (!matches!(desc.entrypoint_symbol.as_str(), "" | "PluginMain" | "_PluginMain")).then_some(desc.entrypoint_symbol.as_str());
+    let slug = [&desc.pipl.match_name[..], &desc.pipl.name[..]]
+        .into_iter()
+        .chain(stem)
+        .chain(ep_fallback)
+        .map(normalize_id_slug)
+        .find(|s| !s.is_empty())
+        .unwrap_or_else(|| "filter".to_string());
+
+    let mut id = format!("adobe.8bf.{slug}");
+    if id.len() > 64 {
+        id.truncate(64);
+        while id.ends_with(['_', '.', '-']) {
+            id.pop();
+        }
+    }
+    if !crate::manifest::valid_id(&id) {
+        id = "adobe.8bf.filter".to_string();
+    }
+
+    let raw_name = if !desc.pipl.name.is_empty() {
+        desc.pipl.name.as_str()
+    } else if let Some(st) = stem {
+        st
+    } else if !desc.entrypoint_symbol.is_empty() {
+        desc.entrypoint_symbol.as_str()
+    } else {
+        "Photoshop .8bf Filter"
+    };
+    let trimmed: String = trim_name(raw_name).chars().take(64).collect();
+    let final_trimmed = trim_name(&trimmed);
+    let name = if printable_name(final_trimmed) { final_trimmed.to_owned() } else { "Photoshop .8bf Filter".to_owned() };
+
+    let version = if desc.pipl.version_major != 0 || desc.pipl.version_minor != 0 {
+        format!("{}.{}.0", desc.pipl.version_major, desc.pipl.version_minor)
+    } else {
+        "1.0.0".to_string()
+    };
+
+    let mut description = if !desc.pipl.category.is_empty() {
+        format!("{} ({:?} {:?} .8bf filter)", desc.pipl.category, desc.guest_os, desc.arch)
+    } else {
+        format!("Native {:?} {:?} .8bf filter", desc.guest_os, desc.arch)
+    };
+    if description.len() > 256 {
+        description = description.chars().take(256).collect();
+    }
+    let author: String = desc.pipl.category.chars().take(64).collect();
+
+    let man = Manifest { id, name, version, kind: Kind::Filter, description, author, params: Vec::new(), overlap: 0, area: Area::Canvas };
+    man.validate()?;
+    Ok(man)
+}
+
 impl Plugin {
-    /// Validates and loads a module: checks the ABI version and reads the manifest.
+    /// Validates and loads a plug-in module (`.wasm` or 64-bit native `.8bf` / Mach-O `.plugin`).
     pub fn load(bytes: &[u8], limits: Limits) -> Result<Plugin> {
+        Self::load_with_hint(bytes, None, limits)
+    }
+
+    /// Validates and loads a plug-in module with an optional filename hint (`"Solarize.8bf"`,
+    /// `"SwapRB.plugin"`, `"invert.wasm"`).
+    pub fn load_with_hint(bytes: &[u8], file_hint: Option<&str>, limits: Limits) -> Result<Plugin> {
         if bytes.len() > limits.max_module_bytes {
             return Err(Error::Module(format!("module is {} bytes (limit {})", bytes.len(), limits.max_module_bytes)));
         }
-        if !bytes.starts_with(b"\0asm") {
-            let msg = "not a WebAssembly binary (missing \\0asm header)";
-            return Err(Error::Module(match format_hint(bytes) {
-                Some(hint) => format!("{msg}; this file looks like {hint} - PhotoCraft plug-ins are WebAssembly modules (.wasm)"),
-                None => msg.to_string(),
-            }));
+        if bytes.starts_with(b"\0asm") {
+            return Self::load_wasm(bytes, limits);
         }
+        if crate::native_vm::pe::is_pe_binary(bytes) || crate::native_vm::macho::is_macho_or_fat(bytes) {
+            return Self::load_native_8bf(bytes, file_hint, limits);
+        }
+        let msg = "not a WebAssembly binary (missing \\0asm header)";
+        Err(Error::Module(match format_hint(bytes) {
+            Some(hint) => format!("{msg}; this file looks like {hint} - PhotoCraft plug-ins are WebAssembly modules (.wasm)"),
+            None => msg.to_string(),
+        }))
+    }
+
+    fn load_wasm(bytes: &[u8], limits: Limits) -> Result<Plugin> {
         check_code_section(bytes)?;
         let mut config = Config::default();
         config.consume_fuel(true).enforced_limits(EnforcedLimits::strict()).set_max_recursion_depth(limits.max_recursion_depth.max(16));
@@ -212,7 +346,7 @@ impl Plugin {
                 imp.name()
             )));
         }
-        let mut p = Plugin { manifest: placeholder_manifest(), engine, module, limits, size: bytes.len(), source: None };
+        let mut p = Plugin { manifest: placeholder_manifest(), backend: Backend::Wasm { engine, module }, limits, size: bytes.len(), source: None };
         let deadline = Deadline::new(&p.limits);
         let mut live = p.instantiate(&deadline)?;
         let version: TypedFunc<(), i32> = live.func("pc_abi_version")?;
@@ -232,6 +366,47 @@ impl Plugin {
         live.func::<i32, i32>("pc_alloc")?;
         live.func::<FilterArgs, i32>("pc_filter")?;
         Ok(p)
+    }
+
+    fn load_native_8bf(bytes: &[u8], file_hint: Option<&str>, limits: Limits) -> Result<Plugin> {
+        if let Some(h) = file_hint {
+            let lower = h.trim().to_ascii_lowercase();
+            if lower.ends_with(".8bt") || lower.ends_with(".aex") || lower.ends_with(".prm") || lower.ends_with(".aip") {
+                return Err(Error::Module("unsupported native plug-in extension (expected a Photoshop .8bf/.plugin filter or .wasm module)".into()));
+            }
+        }
+        let vm_limits = crate::native_vm::Limits {
+            max_binary_bytes: limits.max_module_bytes,
+            max_memory_bytes: limits.max_memory_bytes,
+            instruction_budget: limits.fuel_base,
+            max_call_depth: limits.max_recursion_depth.clamp(16, 512),
+        };
+        let host = Filter8bfHost::from_bytes(bytes.to_vec(), file_hint, vm_limits).map_err(native_err)?;
+        if matches!(host.descriptor().pipl.format_hint, Some(PluginFormat::AfterEffectsAex | PluginFormat::PremierePrm | PluginFormat::IllustratorAip)) {
+            return Err(Error::Abi(format!("plug-in kind {:?} is not a Photoshop .8bf filter", host.descriptor().pipl.kind_4cc)));
+        }
+        let manifest = synthesize_8bf_manifest(host.descriptor(), file_hint)?;
+        Ok(Plugin { manifest, backend: Backend::Native8bf(Box::new(host)), limits, size: bytes.len(), source: None })
+    }
+
+    /// Returns `true` when this plug-in is a native C++ `.8bf` / Mach-O `.plugin` filter running in `native_vm`.
+    pub fn is_native_8bf(&self) -> bool {
+        matches!(self.backend, Backend::Native8bf(_))
+    }
+
+    /// Static binary descriptor (`PiPL`, guest OS, CPU ISA, entrypoint) when backed by `native_vm`.
+    pub fn native_descriptor(&self) -> Option<&PluginDescriptor> {
+        match &self.backend {
+            Backend::Native8bf(host) => Some(host.descriptor()),
+            Backend::Wasm { .. } => None,
+        }
+    }
+
+    pub(crate) fn native_8bf_host(&self) -> Option<&Filter8bfHost> {
+        match &self.backend {
+            Backend::Native8bf(host) => Some(host),
+            Backend::Wasm { .. } => None,
+        }
     }
 
     pub fn manifest(&self) -> &Manifest {
@@ -258,14 +433,17 @@ impl Plugin {
 
     pub(crate) fn instantiate(&self, deadline: &Deadline) -> Result<Live> {
         deadline.check()?;
+        let Backend::Wasm { engine, module } = &self.backend else {
+            return Err(Error::Abi("native .8bf plug-ins do not instantiate a wasmi store".into()));
+        };
         let limits = StoreLimitsBuilder::new().memory_size(self.limits.max_memory_bytes).memories(1).tables(4).table_elements(100_000).instances(1).build();
-        let mut store = Store::new(&self.engine, limits);
+        let mut store = Store::new(engine, limits);
         store.limiter(|l| l);
         // The start function (if any) runs on this fuel. It cannot be interrupted to check the
         // deadline the way a call can, so it gets no more than one slice, however much a call may use.
         store.set_fuel(self.limits.fuel_base.min(FUEL_SLICE)).map_err(wasm_err)?;
-        let linker = Linker::<StoreLimits>::new(&self.engine);
-        let instance = linker.instantiate_and_start(&mut store, &self.module).map_err(wasm_err)?;
+        let linker = Linker::<StoreLimits>::new(engine);
+        let instance = linker.instantiate_and_start(&mut store, module).map_err(wasm_err)?;
         let memory = instance.get_memory(&store, "memory").ok_or_else(|| Error::Abi("the module must export its linear memory as `memory`".into()))?;
         Ok(Live { store, instance, memory })
     }

@@ -23,10 +23,11 @@ pub fn insert_menu_items(app: &PhotocraftApp, items: &mut Vec<MenuItem>) {
         .iter()
         .map(|p| {
             let m = p.manifest();
+            let badge = if p.is_native_8bf() && !m.name.contains("[8BF]") { " [8BF]" } else { "" };
             let dots = if m.params.is_empty() || m.name.ends_with('…') { "" } else { "…" };
             MenuItem {
                 id: format!("{PREFIX}{}", m.id),
-                label: format!("{}{dots}", m.name),
+                label: format!("{}{badge}{dots}", m.name),
                 path: path.clone(),
                 shortcut: None,
                 enabled,
@@ -115,5 +116,50 @@ mod tests {
         assert_eq!(me.path, ["Filter", "Plug-ins"], "plug-in row sits where the menu renderer looks for it");
         let install = items.iter().find(|i| i.id == "plugin.install").expect("Install Plug-in… listed");
         assert_eq!(me.path, install.path, "same submenu as Install Plug-in…");
+    }
+
+    #[test]
+    fn native_8bf_plugins_show_8bf_badge_in_filter_menu() {
+        let mut mo = vec![0u8; 0x1000];
+        mo[0..4].copy_from_slice(&0xFEED_FACFu32.to_le_bytes());
+        mo[4..8].copy_from_slice(&0x0100_000Cu32.to_le_bytes());
+        mo[12..16].copy_from_slice(&0x08u32.to_le_bytes());
+        mo[16..20].copy_from_slice(&2u32.to_le_bytes());
+        mo[20..24].copy_from_slice(&176u32.to_le_bytes());
+        mo[32..36].copy_from_slice(&0x19u32.to_le_bytes());
+        mo[36..40].copy_from_slice(&152u32.to_le_bytes());
+        mo[40..46].copy_from_slice(b"__TEXT");
+        mo[56..64].copy_from_slice(&0x0000_0001_0000_0000u64.to_le_bytes());
+        mo[64..72].copy_from_slice(&0x1000u64.to_le_bytes());
+        mo[80..88].copy_from_slice(&0x0800u64.to_le_bytes());
+        mo[96..100].copy_from_slice(&1u32.to_le_bytes());
+        mo[104..110].copy_from_slice(b"__text");
+        mo[120..126].copy_from_slice(b"__TEXT");
+        mo[136..144].copy_from_slice(&0x0000_0001_0000_0400u64.to_le_bytes());
+        mo[144..152].copy_from_slice(&8u64.to_le_bytes());
+        mo[152..156].copy_from_slice(&0x0400u32.to_le_bytes());
+        mo[184..188].copy_from_slice(&0x02u32.to_le_bytes());
+        mo[188..192].copy_from_slice(&24u32.to_le_bytes());
+        mo[192..196].copy_from_slice(&0x0800u32.to_le_bytes());
+        mo[196..200].copy_from_slice(&1u32.to_le_bytes());
+        mo[200..204].copy_from_slice(&0x0820u32.to_le_bytes());
+        mo[204..208].copy_from_slice(&0x0100u32.to_le_bytes());
+        mo[0x0400..0x0404].copy_from_slice(&0x7900_007Fu32.to_le_bytes()); // strh wzr, [x3]
+        mo[0x0404..0x0408].copy_from_slice(&0xD65F_03C0u32.to_le_bytes()); // ret
+        mo[0x0821..0x082C].copy_from_slice(b"_PluginMain");
+        mo[0x0800..0x0804].copy_from_slice(&1u32.to_le_bytes());
+        mo[0x0804] = 0x0F;
+        mo[0x0805] = 1;
+        mo[0x0808..0x0810].copy_from_slice(&0x0000_0001_0000_0400u64.to_le_bytes());
+
+        let plugin = photocraft_plugins::Plugin::load_with_hint(&mo, Some("SolarizeMenu.8bf"), photocraft_plugins::Limits::default()).unwrap();
+        let pid = plugin.id().to_string();
+        photocraft_plugins::registry::install(plugin);
+
+        let app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());
+        let items = crate::menus::menu_items(&app);
+        let me = items.iter().find(|i| i.id == format!("plugin.filter.{pid}")).expect("native .8bf listed");
+        assert_eq!(me.label, "SolarizeMenu [8BF]");
+        photocraft_plugins::registry::remove(&pid);
     }
 }

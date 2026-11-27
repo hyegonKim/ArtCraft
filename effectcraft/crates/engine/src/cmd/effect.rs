@@ -32,8 +32,12 @@ fn plugins_list(s: &mut Session, _: &Value) -> Result<Value> {
     Ok(json!({"api": plugin::PLUGIN_API_VERSION, "wasm": s.plugin_loader.is_some(), "helpers": s.helpers.is_some(), "plugins": list}))
 }
 
-/// `effect.plugins.load`: load WebAssembly effect plug-ins (a file, or every `.wasm` in a
-/// folder) through the host's loader ([`Session::plugin_loader`]).
+fn is_supported_plugin_ext(ext: &std::ffi::OsStr) -> bool {
+    ext.eq_ignore_ascii_case("wasm") || ext.eq_ignore_ascii_case("aex") || ext.eq_ignore_ascii_case("prm") || ext.eq_ignore_ascii_case("plugin")
+}
+
+/// `effect.plugins.load`: load WebAssembly or C++ `.aex`/`.prm`/`.plugin` effect plug-ins (a file,
+/// or every supported plug-in in a folder) through the host's loader ([`Session::plugin_loader`]).
 fn plugins_load(s: &mut Session, p: &Value) -> Result<Value> {
     let c = "effect.plugins.load";
     let loader = s.plugin_loader.ok_or_else(|| EngineError::Other("WebAssembly effect plug-ins are not available in this build".into()))?;
@@ -44,7 +48,7 @@ fn plugins_load(s: &mut Session, p: &Value) -> Result<Value> {
                 .map_err(|e| bad(c, format!("cannot list {dir}: {e}")))?
                 .flatten()
                 .map(|e| e.path())
-                .filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm")))
+                .filter(|p| p.is_file() && p.extension().is_some_and(is_supported_plugin_ext))
                 .map(|p| p.to_string_lossy().to_string())
                 .collect();
             v.sort();
@@ -133,13 +137,13 @@ fn plugins_install(s: &mut Session, p: &Value) -> Result<Value> {
             }
             continue;
         }
-        let is_wasm = src.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm"));
+        let is_plugin_bin = src.extension().is_some_and(is_supported_plugin_ext);
         let is_panel = src.extension().is_some_and(|x| x.eq_ignore_ascii_case("jsx"));
         if single {
-            if !is_wasm {
-                return Err(bad(c, "an effect plug-in install is a `.wasm` file"));
+            if !is_plugin_bin {
+                return Err(bad(c, "an effect plug-in install is a `.wasm`, `.aex`, `.prm`, or `.plugin` file"));
             }
-        } else if !is_wasm && !is_panel {
+        } else if !is_plugin_bin && !is_panel {
             continue; // a bundle may carry readmes, manifests and source: skip them
         }
         let body: std::result::Result<(), String> = (|| {

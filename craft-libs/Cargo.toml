@@ -38,6 +38,7 @@ craft-aaf = { path = "crates/aaf" }
 craft-atomic = { path = "crates/atomic" }
 craft-captions = { path = "crates/captions" }
 craft-cclibs = { path = "crates/cclibs" }
+craft-native-plugin-host = { path = "crates/native-plugin-host" }
 craft-cfb = { path = "crates/cfb" }
 craft-codepage = { path = "crates/codepage" }
 craft-cms = { path = "crates/cms" }

@@ -4,8 +4,8 @@
 //! - [`FontCategoryFilter`] and [`BundledFontSpec`]: font specimen metadata and filtering.
 //! - `.ase` (Adobe Swatch Exchange), `.aco` (Adobe Color Swatch v1/v2), and `.cclibs` (Creative
 //!   Cloud Library JSON & ZIP container) header/swatch parsers plus starter handoff builders.
-//! - [`SuitePluginSpec`]: Craft App Suite extension formats (`.drfx`/`.ograf`, `.atn`, WASM,
-//!   CLAP, UXP/MCP) and integration metadata.
+//! - [`SuitePluginSpec`]: Craft App Suite extension formats (`.8bf`, `.aip`, `.prm`, `.aex`,
+//!   `.drfx`/`.ograf`, `.atn`, WASM, CLAP, UXP/MCP) and Zero-JIT C++ Binary VM metadata.
 //!
 //! Pure data and byte parsing only (no filesystem or process I/O), so both desktop and
 //! `wasm32-unknown-unknown` targets share it unchanged.
@@ -744,31 +744,31 @@ pub struct SuitePluginSpec {
 pub const SUITE_PLUGINS: [SuitePluginSpec; 13] = [
     SuitePluginSpec {
         app_id: "photocraft",
-        formats: &[".atn", ".abr", ".asl", "WASM", "UXP / MCP"],
-        runtime: "Sandboxed WASM Filter Host + MCP Server",
+        formats: &[".8bf", ".atn", ".abr", ".asl", "WASM", "UXP / MCP"],
+        runtime: "Cross-Platform Zero-JIT C++ .8bf Plug-in VM (x86_64/AArch64 PE32+ & Mach-O) + WASM + MCP",
         mcp_enabled: true,
-        summary: "Actions (.atn), brushes (.abr), layer styles (.asl), live WASM image filters, and MCP canvas commands.",
+        summary: "Runs compiled C++ Photoshop .8bf filters (PE32+ & Mach-O on iOS, Android, macOS, Linux, Windows, Web), .atn/.abr/.asl, WASM filters, and MCP.",
     },
     SuitePluginSpec {
         app_id: "vectorcraft",
-        formats: &[".svg", ".ase", "WASM", "MCP"],
-        runtime: "Vector Path Effect Host + MCP Server",
+        formats: &[".aip", ".svg", ".ase", "WASM", "MCP"],
+        runtime: "Cross-Platform Zero-JIT C++ .aip Plug-in VM (x86_64/AArch64 PE32+ & Mach-O) + WASM + MCP",
         mcp_enabled: true,
-        summary: "Live vector path effects, symbol libraries, swatch exchange, and agent-driven Bézier editing over MCP.",
+        summary: "Runs compiled C++ Illustrator .aip SweetPea/PICA plug-ins (PE32+ & Mach-O on iOS, Android, macOS, Linux, Windows, Web), WASM path effects, and MCP.",
     },
     SuitePluginSpec {
         app_id: "filmcraft",
-        formats: &[".drfx", ".ograf", ".cube", ".3dl", "WASM / MCP"],
-        runtime: "Motion Graphics Template & LUT Engine + MCP",
+        formats: &[".prm", ".aex", ".drfx", ".ograf", ".cube", ".3dl", "WASM / MCP"],
+        runtime: "Cross-Platform Zero-JIT C++ .prm/.aex Plug-in VM (x86_64/AArch64 PE32+ & Mach-O) + LUT/Template + MCP",
         mcp_enabled: true,
-        summary: "Open graphics templates (.drfx / .ograf), 3D LUTs (.cube / .3dl), timeline effects, and MCP editing.",
+        summary: "Runs compiled C++ Premiere .prm & After Effects .aex effects (PE32+ & Mach-O on iOS, Android, macOS, Linux, Windows, Web), .drfx/.ograf, 3D LUTs, and MCP.",
     },
     SuitePluginSpec {
         app_id: "effectcraft",
-        formats: &[".drfx", ".ograf", "JS Expr", "WASM", "MCP"],
-        runtime: "3D Compositor Plug-in & Expression Engine + MCP",
+        formats: &[".aex", ".prm", ".drfx", ".ograf", "JS Expr", "WASM", "MCP"],
+        runtime: "Cross-Platform Zero-JIT C++ .aex/.prm Plug-in VM (x86_64/AArch64 PE32+ & Mach-O) + Compositor + MCP",
         mcp_enabled: true,
-        summary: "Motion templates (.drfx / .ograf), inline expressions, particle/shader WASM effects, and MCP automation.",
+        summary: "Runs compiled C++ After Effects .aex & Premiere .prm effects (PE32+ & Mach-O on iOS, Android, macOS, Linux, Windows, Web), .drfx/.ograf, expressions, WASM, and MCP.",
     },
     SuitePluginSpec {
         app_id: "designcraft",
@@ -929,5 +929,28 @@ mod tests {
             assert!(!spec.formats.is_empty(), "{}", spec.app_id);
             assert!(!spec.summary.is_empty(), "{}", spec.app_id);
         }
+    }
+
+    #[test]
+    fn suite_plugins_advertise_zero_jit_cpp_binary_plugin_formats_and_vm() {
+        let find = |id: &str| SUITE_PLUGINS.iter().find(|s| s.app_id == id).unwrap_or_else(|| panic!("missing {id}"));
+
+        let pc = find("photocraft");
+        assert!(pc.formats.contains(&".8bf"));
+        assert!(pc.runtime.contains("Zero-JIT") && pc.runtime.contains("x86_64/AArch64"));
+        assert!(pc.summary.contains("iOS, Android, macOS, Linux, Windows, Web"));
+
+        let vc = find("vectorcraft");
+        assert!(vc.formats.contains(&".aip"));
+        assert!(vc.runtime.contains("Zero-JIT") && vc.runtime.contains("PE32+ & Mach-O"));
+        assert!(vc.summary.contains(".aip"));
+
+        let fc = find("filmcraft");
+        assert!(fc.formats.contains(&".prm") && fc.formats.contains(&".aex"));
+        assert!(fc.runtime.contains("Zero-JIT"));
+
+        let ec = find("effectcraft");
+        assert!(ec.formats.contains(&".aex") && ec.formats.contains(&".prm"));
+        assert!(ec.runtime.contains("Zero-JIT"));
     }
 }

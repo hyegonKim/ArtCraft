@@ -4110,7 +4110,9 @@ fn message_literals_in(names: &[&str]) -> std::collections::BTreeSet<String> {
             let path = entry.path();
             let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
             if path.is_dir() {
-                if name != "tests" {
+                // `native_vm` is the embedded zero-JIT binary VM runtime (analogous to `wasmi`);
+                // user-facing plug-in errors wrap its details in translated `Error::*` templates.
+                if name != "tests" && !(d == crates.join("plugins").join("src") && name == "native_vm") {
                     stack.push(path);
                 }
             } else if name.ends_with(".rs")

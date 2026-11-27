@@ -518,7 +518,7 @@ impl LauncherUi {
                 ui.add(
                     egui::TextEdit::singleline(&mut state.file_path)
                         .id_salt("hub_file_router_path")
-                        .hint_text(".psd, .ai, .prproj, .indd, .pdf, .glb, .cclibs…")
+                        .hint_text(".psd, .ai, .prproj, .aep, .8bf, .aip, .prm, .aex, .pdf, .glb, .cclibs…")
                         .desired_width(field_w),
                 )
                 .labelled_by(label.id);
@@ -565,6 +565,15 @@ impl LauncherUi {
                                 } else if widgets::button(ui, tl!("App details"), Kind::Primary, 0.0).clicked() {
                                     self.detail = Some(app.id.to_string());
                                     close_dialog = true;
+                                }
+                                for sec_app in artcraft_launcher_core::counterpart::route_secondary_file_paths(Path::new(&trimmed)) {
+                                    if self.caps.manage_apps && self.is_installed(sec_app.id) {
+                                        let btn = fmt(tl!("Open in {name}"), &[("name", sec_app.name)]);
+                                        if widgets::button(ui, &btn, Kind::Secondary, 0.0).clicked() {
+                                            self.launch_app_with_file(sec_app.id, &trimmed);
+                                            close_dialog = true;
+                                        }
+                                    }
                                 }
                             });
                         });

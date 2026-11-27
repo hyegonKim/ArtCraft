@@ -1,4 +1,4 @@
-//! Running a filter plug-in over a surface, band by band.
+//! Running a filter plug-in over a surface, band by band (WebAssembly) or full-canvas (native `.8bf`).
 
 use photocraft_color::{ColorMode, PixelFormat, SampleType};
 use photocraft_geom::{Rect, TILE_SIZE, TileCoord};
@@ -6,7 +6,8 @@ use photocraft_raster::Surface;
 use serde_json::{Value, json};
 
 use crate::manifest::Area;
-use crate::runtime::{Deadline, Plugin};
+use crate::native_vm::{Filter8bfHost, ImageBuffer8bf, PixelDepth8bf};
+use crate::runtime::{Deadline, Plugin, native_err};
 use crate::{Error, Result};
 
 /// The `format` argument of `pc_filter`: bits 0–7 the source bit depth (8, 16 or 32), bit 8 set
@@ -73,6 +74,64 @@ fn read_clamped(s: &Surface, rect: Rect, extent: Rect) -> Vec<f32> {
 /// Most bands one run is split into.
 const MAX_BANDS: u64 = 1 << 16;
 
+fn pack_rgba_for_8bf(orig: &[f32], channels: usize, pixels: usize) -> Vec<f32> {
+    if channels == 4 {
+        return orig.to_vec();
+    }
+    let mut rgba = Vec::with_capacity(pixels * 4);
+    for px in orig.chunks_exact(channels.max(1)) {
+        match channels {
+            1 => rgba.extend_from_slice(&[px[0], px[0], px[0], 1.0]),
+            2 => rgba.extend_from_slice(&[px[0], px[0], px[0], px[1]]),
+            3 => rgba.extend_from_slice(&[px[0], px[1], px[2], 1.0]),
+            _ => rgba.extend_from_slice(&[
+                px.first().copied().unwrap_or(0.0),
+                px.get(1).copied().unwrap_or(0.0),
+                px.get(2).copied().unwrap_or(0.0),
+                px.get(3).copied().unwrap_or(1.0),
+            ]),
+        }
+    }
+    rgba
+}
+
+fn unpack_rgba_from_8bf(rgba: &[f32], orig: &[f32], channels: usize, pixels: usize) -> Vec<f32> {
+    if channels == 4 {
+        return rgba.to_vec();
+    }
+    let mut out = vec![0.0f32; pixels * channels];
+    for (idx, rgba_px) in rgba.as_chunks::<4>().0.iter().enumerate() {
+        let base = idx * channels;
+        match channels {
+            1 => {
+                if let Some(d) = out.get_mut(base) {
+                    *d = rgba_px[0];
+                }
+            }
+            2 => {
+                if let Some(d) = out.get_mut(base..base + 2) {
+                    d[0] = rgba_px[0];
+                    d[1] = rgba_px[3];
+                }
+            }
+            3 => {
+                if let Some(d) = out.get_mut(base..base + 3) {
+                    d.copy_from_slice(&rgba_px[..3]);
+                }
+            }
+            _ => {
+                for ch in 0..channels {
+                    let v = rgba_px.get(ch).copied().unwrap_or_else(|| orig.get(base + ch).copied().unwrap_or(0.0));
+                    if let Some(d) = out.get_mut(base + ch) {
+                        *d = v;
+                    }
+                }
+            }
+        }
+    }
+    out
+}
+
 impl Plugin {
     /// The rectangle a run writes: the layer's content (grown by the plug-in's overlap) or the
     /// canvas, limited to the selection's bounds.
@@ -100,10 +159,13 @@ impl Plugin {
         if area.is_empty() {
             return Ok(out);
         }
+        let extent = canvas.union(&surface.content_bounds());
+        if let Some(host) = self.native_8bf_host() {
+            return self.apply_native_8bf(host, surface, area, extent, selection);
+        }
         let fmt = surface.format();
         let n = fmt.channels();
         let ov = self.manifest().overlap as i32;
-        let extent = canvas.union(&surface.content_bounds());
         // Bands are tile-aligned blocks, one tile row tall and as many tiles wide as fit in
         // `band_bytes`, so each worker can encode its own tiles and the merge is a tile copy.
         let tile_bytes = (TILE_SIZE as usize).pow(2) * n * 4;
@@ -160,6 +222,76 @@ impl Plugin {
                 }
             }
         }
+        out.prune();
+        Ok(out)
+    }
+
+    fn apply_native_8bf(&self, host: &Filter8bfHost, surface: &Surface, area: Rect, extent: Rect, selection: Option<&Surface>) -> Result<Surface> {
+        let deadline = Deadline::new(self.limits());
+        deadline.check()?;
+        let fmt = surface.format();
+        let n = fmt.channels();
+        let (w, h) = (area.width(), area.height());
+        let pixels = (w as usize).checked_mul(h as usize).ok_or_else(|| Error::Limit("memory budget (image dimensions overflow)".into()))?;
+        let depth = match fmt.sample {
+            SampleType::U8 => PixelDepth8bf::U8,
+            SampleType::U16 => PixelDepth8bf::U16,
+            SampleType::F32 => PixelDepth8bf::F32,
+        };
+        let staging_bytes = pixels
+            .checked_mul(4)
+            .and_then(|s| s.checked_mul(depth.bytes_per_sample()))
+            .and_then(|b| b.checked_mul(2))
+            .ok_or_else(|| Error::Limit("memory budget (staging buffer overflow)".into()))?;
+        if staging_bytes > self.limits().max_memory_bytes / 2 {
+            return Err(Error::Limit("memory budget (image does not fit in the plug-in's memory)".into()));
+        }
+
+        let orig = read_clamped(surface, area, extent);
+        let rgba_in = pack_rgba_for_8bf(&orig, n, pixels);
+        let img_buf = ImageBuffer8bf::from_rgba_f32(w, h, rgba_in, depth).map_err(native_err)?;
+        let exec_limits = crate::native_vm::Limits {
+            max_binary_bytes: self.limits().max_module_bytes,
+            max_memory_bytes: self.limits().max_memory_bytes,
+            instruction_budget: self.limits().fuel_base.saturating_add((pixels as u64).saturating_mul(4).saturating_mul(self.limits().fuel_per_sample)),
+            max_call_depth: self.limits().max_recursion_depth.clamp(16, 512),
+        };
+        let run = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| host.execute_with_limits(&img_buf, exec_limits)));
+        let filtered_rgba = run.map_err(|_| Error::Trap("the runtime panicked".into()))?.map_err(native_err)?;
+        deadline.check()?;
+
+        let filtered = unpack_rgba_from_8bf(&filtered_rgba.samples, &orig, n, pixels);
+        let (bw, bh) = (w as usize, h as usize);
+        let mut blended = vec![0.0f32; bw * bh * n];
+        let sel_row = selection.map(|s| s.format().channels());
+        let mut sel = Vec::new();
+        let int_depth = fmt.sample != SampleType::F32;
+        for row in 0..bh {
+            if let (Some(s), Some(sn)) = (selection, sel_row) {
+                let r = Rect::new(area.x0, area.y0 + row as i32, area.x1, area.y0 + row as i32 + 1);
+                sel = s.read_region(r).chunks_exact(sn.max(1)).map(|p| p.first().copied().unwrap_or(0.0).clamp(0.0, 1.0)).collect();
+            }
+            for col in 0..bw {
+                let idx = (row * bw + col) * n;
+                let k = if selection.is_some() { sel.get(col).copied().unwrap_or(0.0) } else { 1.0 };
+                for ch in 0..n {
+                    let o = orig.get(idx + ch).copied().unwrap_or(0.0);
+                    let mut v = filtered.get(idx + ch).copied().unwrap_or(o);
+                    if !v.is_finite() {
+                        v = o;
+                    }
+                    if int_depth || (fmt.alpha && ch == n - 1) {
+                        v = v.clamp(0.0, 1.0);
+                    }
+                    if let Some(d) = blended.get_mut(idx + ch) {
+                        *d = o * (1.0 - k) + v * k;
+                    }
+                }
+            }
+        }
+
+        let mut out = surface.clone();
+        out.write_region(area, &blended);
         out.prune();
         Ok(out)
     }

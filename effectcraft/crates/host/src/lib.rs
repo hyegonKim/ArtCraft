@@ -106,9 +106,9 @@ pub fn session() -> Session {
         importer: Some(Arc::new(MediaImporter)),
         expr: Some(Arc::new(effectcraft_expr::Expressions)),
         expr_check: Some(effectcraft_expr::check_syntax),
-        plugin_loader: effectcraft_plugin::wasm_available().then_some(effectcraft_plugin::loader as effectcraft_engine::PluginLoader),
+        plugin_loader: Some(effectcraft_plugin::plugin_loader()),
         helpers: helper_hooks(),
-        plugin_previewer: effectcraft_plugin::wasm_available().then_some(effectcraft_plugin::preview as effectcraft_engine::PluginPreviewer),
+        plugin_previewer: Some(effectcraft_plugin::plugin_previewer()),
         plugins_dir: config_dir().map(|d| d.join("Plug-ins")),
         ..Default::default()
     };

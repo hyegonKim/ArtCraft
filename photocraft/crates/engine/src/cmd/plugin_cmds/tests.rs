@@ -373,3 +373,89 @@ fn bitmap_documents_refuse_plugin_filters_but_keep_plugin_management() {
     assert!(list["plugins"].as_array().unwrap().iter().any(|p| p["id"] == id));
     s.execute("plugin.remove", json!({"id": id})).unwrap();
 }
+
+#[test]
+fn native_8bf_plugin_installs_runs_and_records_as_smart_filter() {
+    // Minimal 64-bit PE32+ x86_64 `.8bf` filter inverting RGB in `outData` (`[rdx + 0x64]`) on `selector == 3`.
+    let mut img = vec![0u8; 0x2000];
+    img[0..2].copy_from_slice(b"MZ");
+    img[0x3C..0x40].copy_from_slice(&0x80u32.to_le_bytes());
+    let pe = 0x80usize;
+    img[pe..pe + 4].copy_from_slice(b"PE\0\0");
+    img[pe + 4..pe + 6].copy_from_slice(&0x8664u16.to_le_bytes());
+    img[pe + 6..pe + 8].copy_from_slice(&2u16.to_le_bytes());
+    img[pe + 20..pe + 22].copy_from_slice(&0xF0u16.to_le_bytes());
+    img[pe + 22..pe + 24].copy_from_slice(&0x2022u16.to_le_bytes());
+    let opt = pe + 24;
+    img[opt..opt + 2].copy_from_slice(&0x020Bu16.to_le_bytes());
+    img[opt + 24..opt + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
+    img[opt + 32..opt + 36].copy_from_slice(&0x1000u32.to_le_bytes());
+    img[opt + 36..opt + 40].copy_from_slice(&0x0400u32.to_le_bytes());
+    img[opt + 56..opt + 60].copy_from_slice(&0x3000u32.to_le_bytes());
+    img[opt + 60..opt + 64].copy_from_slice(&0x0400u32.to_le_bytes());
+    img[opt + 108..opt + 112].copy_from_slice(&16u32.to_le_bytes());
+    let dd = opt + 112;
+    img[dd..dd + 4].copy_from_slice(&0x2000u32.to_le_bytes());
+    img[dd + 4..dd + 8].copy_from_slice(&0x200u32.to_le_bytes());
+    let sh = opt + 0xF0;
+    img[sh..sh + 5].copy_from_slice(b".text");
+    img[sh + 8..sh + 12].copy_from_slice(&0x1000u32.to_le_bytes());
+    img[sh + 12..sh + 16].copy_from_slice(&0x1000u32.to_le_bytes());
+    img[sh + 16..sh + 20].copy_from_slice(&0x0400u32.to_le_bytes());
+    img[sh + 20..sh + 24].copy_from_slice(&0x0400u32.to_le_bytes());
+    let sh2 = sh + 40;
+    img[sh2..sh2 + 6].copy_from_slice(b".edata");
+    img[sh2 + 8..sh2 + 12].copy_from_slice(&0x1000u32.to_le_bytes());
+    img[sh2 + 12..sh2 + 16].copy_from_slice(&0x2000u32.to_le_bytes());
+    img[sh2 + 16..sh2 + 20].copy_from_slice(&0x0400u32.to_le_bytes());
+    img[sh2 + 20..sh2 + 24].copy_from_slice(&0x0800u32.to_le_bytes());
+    let code: &[u8] = &[
+        0x66, 0x41, 0xC7, 0x01, 0x00, 0x00, 0x66, 0x83, 0xF9, 0x03, 0x75, 0x37, 0x48, 0x8B, 0x42, 0x58, 0x4C, 0x8B, 0x52, 0x64, 0x44, 0x0F, 0xBF, 0x5A, 0x50,
+        0x44, 0x8B, 0x42, 0x6C, 0x45, 0x0F, 0xAF, 0xC3, 0x31, 0xC9, 0x41, 0x39, 0xC8, 0x7E, 0x16, 0x8B, 0x3C, 0x08, 0x81, 0xF7, 0xFF, 0xFF, 0xFF, 0x00, 0x41,
+        0x89, 0x3C, 0x0A, 0x83, 0xC1, 0x04, 0xEB, 0xEA, 0x48, 0xC7, 0x42, 0x40, 0x00, 0x00, 0x00, 0x00, 0x48, 0xC7, 0x42, 0x4C, 0x00, 0x00, 0x00, 0x00, 0xC3,
+    ];
+    img[0x0400..0x0400 + code.len()].copy_from_slice(code);
+    let eo = 0x0800usize;
+    img[eo + 16..eo + 20].copy_from_slice(&1u32.to_le_bytes());
+    img[eo + 20..eo + 24].copy_from_slice(&1u32.to_le_bytes());
+    img[eo + 24..eo + 28].copy_from_slice(&1u32.to_le_bytes());
+    img[eo + 28..eo + 32].copy_from_slice(&0x2040u32.to_le_bytes());
+    img[eo + 32..eo + 36].copy_from_slice(&0x2044u32.to_le_bytes());
+    img[eo + 36..eo + 40].copy_from_slice(&0x2048u32.to_le_bytes());
+    img[eo + 0x40..eo + 0x44].copy_from_slice(&0x1000u32.to_le_bytes());
+    img[eo + 0x44..eo + 0x48].copy_from_slice(&0x2050u32.to_le_bytes());
+    img[eo + 0x50..eo + 0x5A].copy_from_slice(b"PluginMain");
+
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("EngineInvert.8bf");
+    std::fs::write(&path, &img).unwrap();
+
+    let r = Session::new().execute("plugin.install", json!({"path": path.to_str().unwrap()})).unwrap();
+    let id = "adobe.8bf.engineinvert";
+    assert_eq!(r["id"], id);
+    assert_eq!(r["format"], "8bf");
+    assert_eq!(r["arch"], "x86_64");
+    assert_eq!(r["source"], path.to_str().unwrap());
+
+    // Run on an 8-bit pixel layer and verify undo:
+    let mut s = doc(8);
+    let before = pixels(&s);
+    s.execute("plugin.run", json!({"id": id})).unwrap();
+    let after = pixels(&s);
+    assert_ne!(after, before);
+    assert!((after[0] - (1.0 - before[0])).abs() < 0.02);
+    assert!((after[3] - before[3]).abs() < 0.02);
+    s.execute("edit.undo", json!({})).unwrap();
+    assert_eq!(pixels(&s), before);
+
+    // Smart Object non-destructive Smart Filter execution:
+    let mut sm_s = doc(8);
+    sm_s.execute("layer.smartObjects.convertToSmartObject", json!({})).unwrap();
+    sm_s.execute("plugin.run", json!({"id": id})).unwrap();
+    let d = sm_s.active().unwrap();
+    let LayerContent::Smart(sm) = &d.doc.layer(d.active_layer.unwrap()).unwrap().content else { panic!("not smart object") };
+    assert_eq!(sm.smart_filters.len(), 1);
+    assert_eq!(sm.smart_filters[0].params["id"], id);
+
+    Session::new().execute("plugin.remove", json!({"id": id})).unwrap();
+}

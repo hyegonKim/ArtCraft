@@ -54,6 +54,37 @@ pub fn revision() -> u64 {
     REVISION.load(Ordering::Relaxed)
 }
 
+/// Whether `ext` is a supported PhotoCraft plug-in extension (`.wasm`, `.8bf`, `.plugin`).
+pub fn is_plugin_extension(ext: &std::ffi::OsStr) -> bool {
+    ext.eq_ignore_ascii_case("wasm") || ext.eq_ignore_ascii_case("8bf") || ext.eq_ignore_ascii_case("plugin")
+}
+
+/// Standard host directories where third-party Photoshop `.8bf` / `.plugin` filters may live.
+/// Returned in priority order and filtered to directories currently present on disk; never
+/// auto-loaded unless explicitly scanned by the caller.
+pub fn system_8bf_search_paths() -> Vec<std::path::PathBuf> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        Vec::new()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let candidates: &[&str] = &[
+            r"C:\Program Files\Common Files\Adobe\Plug-Ins\CC",
+            r"C:\Program Files\Adobe\Adobe Photoshop 2027\Plug-ins",
+            r"C:\Program Files\Adobe\Adobe Photoshop 2027\Required\Plug-ins\Filters",
+            r"C:\Program Files\Adobe\Adobe Photoshop 2026\Plug-ins",
+            r"C:\Program Files\Adobe\Adobe Photoshop 2025\Plug-ins",
+            r"C:\Program Files\Adobe\Adobe Photoshop 2024\Plug-ins",
+            "/Library/Application Support/Adobe/Plug-Ins/CC",
+            "/Applications/Adobe Photoshop 2027/Plug-ins",
+            "/Applications/Adobe Photoshop 2026/Plug-ins",
+            "/Applications/Adobe Photoshop 2025/Plug-ins",
+        ];
+        candidates.iter().map(std::path::PathBuf::from).filter(|p| p.is_dir()).collect()
+    }
+}
+
 /// Opens `path` for reading without waiting on a FIFO or device that has no writer.
 #[cfg(unix)]
 fn open_regular(path: &std::path::Path) -> std::io::Result<std::fs::File> {
@@ -63,19 +94,42 @@ fn open_regular(path: &std::path::Path) -> std::io::Result<std::fs::File> {
     std::fs::OpenOptions::new().read(true).custom_flags(rustix::fs::OFlags::NONBLOCK.bits() as i32).open(path)
 }
 
-#[cfg(not(unix))]
+#[cfg(all(not(unix), not(target_arch = "wasm32")))]
 fn open_regular(path: &std::path::Path) -> std::io::Result<std::fs::File> {
     std::fs::File::open(path)
 }
 
-/// Reads a `.wasm` file (refusing anything that isn't a regular file or exceeds the module limit)
-/// and loads it.
+/// Resolves `Foo.plugin/Contents/MacOS/<binary>` when `path` is a macOS `.plugin` or `.bundle` directory.
+#[cfg(not(target_arch = "wasm32"))]
+fn resolve_macos_bundle_binary(path: &std::path::Path) -> Option<std::path::PathBuf> {
+    let ext = path.extension()?;
+    if !ext.eq_ignore_ascii_case("plugin") && !ext.eq_ignore_ascii_case("bundle") {
+        return None;
+    }
+    let macos_dir = path.join("Contents").join("MacOS");
+    if !macos_dir.is_dir() {
+        return None;
+    }
+    if let Some(stem) = path.file_stem() {
+        let direct = macos_dir.join(stem);
+        if direct.is_file() {
+            return Some(direct);
+        }
+    }
+    let mut entries: Vec<std::path::PathBuf> = std::fs::read_dir(&macos_dir).ok()?.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.is_file()).collect();
+    entries.sort();
+    entries.into_iter().next()
+}
+
+/// Reads a `.wasm`, `.8bf`, or `.plugin` file (or macOS `.plugin/Contents/MacOS/<binary>` bundle,
+/// refusing anything that isn't a regular file or exceeds the module limit) and loads it.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn load_file(path: &std::path::Path, limits: Limits) -> Result<Plugin> {
     use std::io::Read;
+    let target = if path.is_dir() { resolve_macos_bundle_binary(path).unwrap_or_else(|| path.to_path_buf()) } else { path.to_path_buf() };
     // Open first, without blocking on a FIFO, and judge the file that was opened: a name checked
     // and then opened again can be swapped for a special file in between.
-    let f = open_regular(path).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
+    let f = open_regular(&target).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
     let meta = f.metadata().map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
     if !meta.is_file() {
         return Err(Error::Io(format!("{} is not a file", path.display())));
@@ -85,7 +139,8 @@ pub fn load_file(path: &std::path::Path, limits: Limits) -> Result<Plugin> {
     }
     let mut bytes = Vec::new();
     f.take(limits.max_module_bytes as u64 + 1).read_to_end(&mut bytes).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
-    Ok(Plugin::load(&bytes, limits)?.with_source(path.display().to_string()))
+    let hint = path.file_name().and_then(|n| n.to_str());
+    Ok(Plugin::load_with_hint(&bytes, hint, limits)?.with_source(path.display().to_string()))
 }
 
 /// What [`load_folder`] did.
@@ -93,17 +148,16 @@ pub fn load_file(path: &std::path::Path, limits: Limits) -> Result<Plugin> {
 pub struct FolderReport {
     /// Ids of the plug-ins installed.
     pub loaded: Vec<String>,
-    /// `(file, error)` for each `.wasm` that failed to load.
+    /// `(file, error)` for each plug-in file that failed to load.
     pub failed: Vec<(String, String)>,
 }
 
-/// Installs every `*.wasm` directly in `dir` (not recursive), in file-name order. A bad module is
-/// reported and skipped; the others still load.
+/// Installs every `*.wasm`, `*.8bf`, and `*.plugin` directly in `dir` (including macOS `.plugin`
+/// bundles), in file-name order. A bad module is reported and skipped; the others still load.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn load_folder(dir: &std::path::Path) -> Result<FolderReport> {
     let rd = std::fs::read_dir(dir).map_err(|e| Error::Io(format!("{}: {e}", dir.display())))?;
-    let mut files: Vec<std::path::PathBuf> =
-        rd.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("wasm"))).collect();
+    let mut files: Vec<std::path::PathBuf> = rd.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(is_plugin_extension)).collect();
     files.sort();
     files.truncate(1000);
     let mut report = FolderReport::default();
